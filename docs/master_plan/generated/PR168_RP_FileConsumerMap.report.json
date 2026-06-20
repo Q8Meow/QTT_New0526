@@ -1,0 +1,1166 @@
+{
+  "authority_boundary_codes": [
+    "NO_LIVE_ORDER_AUTHORITY",
+    "NO_SOURCE_TRUTH_AUTHORITY",
+    "NO_CONNECTOR_TRUTH_OR_BINDING",
+    "NO_PRIVATE_STATE_OR_CASH",
+    "NO_QUANTUM_BACKEND_EXECUTION",
+    "NO_LLM_HOT_PATH_AUTHORITY",
+    "NO_QTT_DIGEST_AUTHORITY",
+    "NO_ATOMICROWS_DIGEST_AUTHORITY"
+  ],
+  "connector_semantic_binding_created": false,
+  "connector_truth_authority": false,
+  "consumer": "PR168-RANK",
+  "downstream_route": "PR168_RP_FileConsumerMap.report.json",
+  "generated_digest_authority_created": false,
+  "live_authority": false,
+  "llm_hot_path_authority": false,
+  "no_orphan_status": "CONNECTED_TO_DECLARED_CONSUMER",
+  "order_authority": false,
+  "owning_agent": "Replay Paper Recompute Agent",
+  "pr_id": "PR168-RP",
+  "private_state_read_count": 0,
+  "producer": "PR168_RP_FORMULA_BASED_REPLAY_PAPER_RECOMPUTE",
+  "quantum_advantage_claim_count": 0,
+  "quantum_backend_execution_count": 0,
+  "record_count": 123,
+  "records": [
+    {
+      "artifact_ref": "PR168_RP_ReadReceipt.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_ReadReceipt.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_InputConsumption.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_InputConsumption.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_StrictInputConsumptionLedger.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_StrictInputConsumptionLedger.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_PR168GFPTruthOverlayConsumption.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_PR168GFPTruthOverlayConsumption.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_PR165D2AgentArtifactDiscovery.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_PR165D2AgentArtifactDiscovery.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_FormulaExecutionUniverse.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_FormulaExecutionUniverse.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_InputAvailabilityMatrix.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_InputAvailabilityMatrix.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_ReplayInputAvailability.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_ReplayInputAvailability.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_PaperInputAvailability.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_PaperInputAvailability.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_MissingDefaultResolutionQueue.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_MissingDefaultResolutionQueue.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_MissingValueCandidateFillQueue.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_MissingValueCandidateFillQueue.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_ExternalScoutingCandidateLedger.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_ExternalScoutingCandidateLedger.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_ComputedReplayResults.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_ComputedReplayResults.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_ComputedPaperResults.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_ComputedPaperResults.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_ReplayPaperComparison.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_ReplayPaperComparison.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_ComputedPnLEvidence.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_ComputedPnLEvidence.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_PreTradeSimulationCandidates.report.json",
+      "consumer": "Execution Simulation Agent",
+      "downstream_route": "PR168_RP_PreTradeSimulationCandidates.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_OrderPolicyCandidateRanking.report.json",
+      "consumer": "Execution Simulation Agent",
+      "downstream_route": "PR168_RP_OrderPolicyCandidateRanking.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_NoTradeCandidateComparison.report.json",
+      "consumer": "Execution Simulation Agent",
+      "downstream_route": "PR168_RP_NoTradeCandidateComparison.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_ScenarioLadderResults.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_ScenarioLadderResults.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_LatencyBudgetResults.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_LatencyBudgetResults.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_LivePreTradeDecisionGateSeed.report.json",
+      "consumer": "Execution Simulation Agent",
+      "downstream_route": "PR168_RP_LivePreTradeDecisionGateSeed.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_HotPathPrecomputeCandidateSeed.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_HotPathPrecomputeCandidateSeed.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_LiveExcludedHeavyComputationLedger.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_LiveExcludedHeavyComputationLedger.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_EdgeAttribution.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_EdgeAttribution.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_AlphaSourceDecomposition.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_AlphaSourceDecomposition.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_EdgeCaptureMechanismIndex.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_EdgeCaptureMechanismIndex.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_ExecutionAdjustedEdge.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_ExecutionAdjustedEdge.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_ExecutionAdjustedRankingSeed.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_ExecutionAdjustedRankingSeed.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_TCADecomposition.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_TCADecomposition.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_ImplementationShortfall.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_ImplementationShortfall.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_ExecutionCostAttribution.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_ExecutionCostAttribution.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_TCACostDominanceFailureReasons.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_TCACostDominanceFailureReasons.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_FillQueueLatencyResults.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_FillQueueLatencyResults.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_OrderBookDepthSweep.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_OrderBookDepthSweep.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_PredictionMarketMicrostructureFeatures.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_PredictionMarketMicrostructureFeatures.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_OrderTypeSizingPriceCandidateRepair.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_OrderTypeSizingPriceCandidateRepair.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_CapacityCrowdingResults.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_CapacityCrowdingResults.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_CapacityScalingCurveSeed.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_CapacityScalingCurveSeed.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_SizeReductionRecoveryCandidates.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_SizeReductionRecoveryCandidates.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_ProbabilityCalibration.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_ProbabilityCalibration.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_CalibrationRepairQueue.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_CalibrationRepairQueue.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_OverfitFDRResults.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_OverfitFDRResults.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_MultipleTestingFamilyLedger.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_MultipleTestingFamilyLedger.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_RepairAttemptMultiplicityLedger.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_RepairAttemptMultiplicityLedger.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_LowerConfidenceBoundResults.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_LowerConfidenceBoundResults.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_PortfolioMarginalUtilityResults.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_PortfolioMarginalUtilityResults.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_RiskDiversificationResults.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_RiskDiversificationResults.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_ClusterCommonDriverExposure.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_ClusterCommonDriverExposure.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_PortfolioRepairCandidateQueue.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_PortfolioRepairCandidateQueue.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_RegimeConditionedMemorySeed.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_RegimeConditionedMemorySeed.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_ScenarioOutcomeSeed.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_ScenarioOutcomeSeed.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_ConditionScopedNegativeMemorySeed.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_ConditionScopedNegativeMemorySeed.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_ConditionScopedPositiveRepairMemorySeed.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_ConditionScopedPositiveRepairMemorySeed.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_PreTradeRegimeMemorySeed.report.json",
+      "consumer": "Execution Simulation Agent",
+      "downstream_route": "PR168_RP_PreTradeRegimeMemorySeed.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_ChampionChallengerEligibility.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_ChampionChallengerEligibility.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_ChampionChallengerReasonCodes.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_ChampionChallengerReasonCodes.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_RepairedCandidateChampionChallengerEligibility.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_RepairedCandidateChampionChallengerEligibility.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_PreTradeChampionChallengerEligibility.report.json",
+      "consumer": "Execution Simulation Agent",
+      "downstream_route": "PR168_RP_PreTradeChampionChallengerEligibility.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_QuantumObjectiveRecompute.report.json",
+      "consumer": "Quantum Repair Agent",
+      "downstream_route": "PR168_RP_QuantumObjectiveRecompute.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_QuantumStructuralReadiness.report.json",
+      "consumer": "Quantum Repair Agent",
+      "downstream_route": "PR168_RP_QuantumStructuralReadiness.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_QuantumCoefficientMapInputGaps.report.json",
+      "consumer": "Quantum Repair Agent",
+      "downstream_route": "PR168_RP_QuantumCoefficientMapInputGaps.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_ClassicalFallbackResults.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_ClassicalFallbackResults.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_StrongestClassicalComparatorMap.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_StrongestClassicalComparatorMap.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_QKUCombinationQUBOObjectiveSeed.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_QKUCombinationQUBOObjectiveSeed.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_OrderPolicySelectionQUBOSeed.report.json",
+      "consumer": "Execution Simulation Agent",
+      "downstream_route": "PR168_RP_OrderPolicySelectionQUBOSeed.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_QKUCombinationCandidateResults.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_QKUCombinationCandidateResults.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_QKUCombinationNegativeRecoveryResults.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_QKUCombinationNegativeRecoveryResults.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_MarginalUtilitySelectionResults.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_MarginalUtilitySelectionResults.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_ParetoFrontierRankingSeed.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_ParetoFrontierRankingSeed.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_OrderPolicyCombinationSelectionResults.report.json",
+      "consumer": "Execution Simulation Agent",
+      "downstream_route": "PR168_RP_OrderPolicyCombinationSelectionResults.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_ComputedPositiveEdgeCandidates.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_ComputedPositiveEdgeCandidates.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_RepairedPositiveCandidateEvidence.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_RepairedPositiveCandidateEvidence.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_ComputedNegativeEdgeCandidates.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_ComputedNegativeEdgeCandidates.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_ComputedNeutralOrZeroEdgeCandidates.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_ComputedNeutralOrZeroEdgeCandidates.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_NegativeCandidateReasonCodes.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_NegativeCandidateReasonCodes.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_NegativeToPositiveRecoveryAttempts.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_NegativeToPositiveRecoveryAttempts.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_NegativeRecoveryCandidateFactory.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_NegativeRecoveryCandidateFactory.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_TrueNegativeAfterRecoveryExhaustion.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_TrueNegativeAfterRecoveryExhaustion.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_OldPositiveTruthCorrection.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_OldPositiveTruthCorrection.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_OldNegativeTruthCorrection.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_OldNegativeTruthCorrection.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_ActionableInputGapQueue.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_ActionableInputGapQueue.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_AgentDutySourceGapQueue.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_AgentDutySourceGapQueue.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_TargetedFormulaExpansionQueue.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_TargetedFormulaExpansionQueue.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_ConnectorCandidateRouteMap.report.json",
+      "consumer": "Connector Candidate Routing Agent",
+      "downstream_route": "PR168_RP_ConnectorCandidateRouteMap.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_ConnectorSemanticBindingNonCreationAudit.report.json",
+      "consumer": "Connector Candidate Routing Agent",
+      "downstream_route": "PR168_RP_ConnectorSemanticBindingNonCreationAudit.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_To_PR168_RANK_ComputedRanking.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_To_PR168_RANK_ComputedRanking.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_To_PR168_RANK_PreTradeRankingSeed.report.json",
+      "consumer": "Execution Simulation Agent",
+      "downstream_route": "PR168_RP_To_PR168_RANK_PreTradeRankingSeed.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_To_PR166_QC_R2_RedoWithComputedEvidence.report.json",
+      "consumer": "Quantum Repair Agent",
+      "downstream_route": "PR168_RP_To_PR166_QC_R2_RedoWithComputedEvidence.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_To_PR162E_Q_QuantumMapperGaps.report.json",
+      "consumer": "Quantum Repair Agent",
+      "downstream_route": "PR168_RP_To_PR162E_Q_QuantumMapperGaps.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_To_PR162E_PR162F_FormulaPluginIntakeGaps.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_To_PR162E_PR162F_FormulaPluginIntakeGaps.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_To_RuntimeFormulaAllowlistHotPathCacheSeed.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_To_RuntimeFormulaAllowlistHotPathCacheSeed.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_To_ExecutionRouterLiveGateFutureHandoff.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_To_ExecutionRouterLiveGateFutureHandoff.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_To_OwnerDashboardComputedTruth.report.json",
+      "consumer": "Governance Agent",
+      "downstream_route": "PR168_RP_To_OwnerDashboardComputedTruth.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_RouteTriage.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_RouteTriage.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_CommandActionMatrix.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_CommandActionMatrix.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_DAGUpstreamDownstreamOrchestration.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_DAGUpstreamDownstreamOrchestration.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_FullMasterPlanSectionCrosswalk.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_FullMasterPlanSectionCrosswalk.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_MarketSpecificSectionIndexes.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_MarketSpecificSectionIndexes.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_Stage1PredictionMarketActivationIndex.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_Stage1PredictionMarketActivationIndex.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_FutureMarketDormancyIndex.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_FutureMarketDormancyIndex.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_ReportConsumerCrosswalk.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_ReportConsumerCrosswalk.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_ArtifactConsumerDAG.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_ArtifactConsumerDAG.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_MetricConsumerDAG.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_MetricConsumerDAG.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_AgentDutyDAG.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_AgentDutyDAG.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_PRDependencyDAG.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_PRDependencyDAG.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_ArtifactInformationValueDAG.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_ArtifactInformationValueDAG.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_ConnectorCandidateRouteDAG.report.json",
+      "consumer": "Connector Candidate Routing Agent",
+      "downstream_route": "PR168_RP_ConnectorCandidateRouteDAG.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_PreTradeDecisionDAG.report.json",
+      "consumer": "Execution Simulation Agent",
+      "downstream_route": "PR168_RP_PreTradeDecisionDAG.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_OrderPolicyConsumerDAG.report.json",
+      "consumer": "Execution Simulation Agent",
+      "downstream_route": "PR168_RP_OrderPolicyConsumerDAG.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_LiveCandidateHandoffDAG.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_LiveCandidateHandoffDAG.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_ArtifactMap.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_ArtifactMap.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_FileConsumerMap.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_FileConsumerMap.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_ValueLineageMap.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_ValueLineageMap.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_MetricConsumerMap.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_MetricConsumerMap.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_QKUFormulaComputationLineage.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_QKUFormulaComputationLineage.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_AgentDutyOrchestrationCrosswalk.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_AgentDutyOrchestrationCrosswalk.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_AgentWorkOrders.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_AgentWorkOrders.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_NoOrphanProof.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_NoOrphanProof.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_AuthorityBoundaryAudit.report.json",
+      "consumer": "Governance Agent",
+      "downstream_route": "PR168_RP_AuthorityBoundaryAudit.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_ValidationScopeRegistryIntegration.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_ValidationScopeRegistryIntegration.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_WindowsLinuxCompatibilityAudit.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_WindowsLinuxCompatibilityAudit.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    },
+    {
+      "artifact_ref": "PR168_RP_FinalSummary.report.json",
+      "consumer": "PR168-RANK",
+      "downstream_route": "PR168_RP_FinalSummary.report.json",
+      "no_orphan_status": "CONNECTED_TO_REPORT_CONSUMER",
+      "owning_agent": "Replay Paper Recompute Agent",
+      "producer": "PR168_RP_REPORT_WRITER",
+      "upstream_source": "PR168_RP_BUILD_KERNEL"
+    }
+  ],
+  "report_type": "PR168_RP_FILECONSUMERMAP.REPORT",
+  "runtime_cash_receipt_count": 0,
+  "source_truth_authority": false,
+  "summary": {
+    "authority_created_count": 0,
+    "baseline_counts": {
+      "atomicrows_count": 4183,
+      "current_candidate_packet_v1_count": 6502,
+      "formula_assignment_rows": 20387,
+      "historical_master_qku_count": 9360,
+      "required_formula_sets": 5,
+      "selected_formula_count": 35
+    },
+    "computed_negative_count": 10515,
+    "computed_neutral_count": 0,
+    "computed_positive_count": 0,
+    "computed_row_count": 10515,
+    "input_gap_count": 9872,
+    "negative_recovery_attempt_count": 10515,
+    "pretrade_candidate_count": 73605,
+    "record_count": 123,
+    "report": "PR168_RP_FileConsumerMap.report.json",
+    "sharded_flag": false,
+    "status_counts": {
+      "COMPUTED_NEGATIVE_EDGE": 10515,
+      "FORMULA_ASSIGNED_INPUTS_MISSING": 9872
+    }
+  },
+  "upstream_source": "PR168-GFP truth overlay plus repo replay-paper evidence candidates"
+}

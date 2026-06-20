@@ -30,6 +30,7 @@ from src.qtt.stage1_prediction_markets.qtt_owner_global_override_directive_curre
 
 
 PR168_BRANCH = registry.PR168_GFP_BRANCH
+PR168_RP_BRANCH = registry.PR168_RP_BRANCH
 FIXTURE_BRANCH = registry.VALIDATION_FIXTURE_BRANCH
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
@@ -54,6 +55,27 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 )
 def test_pr168_allowed_paths_pass_on_real_branch(path: str) -> None:
     assert registry.is_pr_scoped_changed_path_allowed(PR168_BRANCH, path)
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        "docs/master_plan/generated/PR168_RP_FinalSummary.report.json",
+        "docs/master_plan/generated/pr168_rp_shards/PR168_RP_ComputedReplayResults.part_0001_of_0001.report.json",
+        "tools/build_pr168_rp_formula_based_replay_paper_recompute.py",
+        "tools/pr168_rp_compute_kernel.py",
+        "tools/validate_pr168_rp_formula_execution.py",
+        "tools/qtt_authority_reason_code_registry.py",
+        "tools/validate_qtt_authority_reason_code_registry.py",
+        "tests/tools/test_qtt_authority_reason_code_registry.py",
+        "tests/fail_closed/test_run_validation_gates.py",
+        "tests/pr168_rp/test_formula_execution.py",
+        "tools/run_validation_gates.py",
+    ],
+)
+def test_pr168_rp_allowed_paths_pass_on_real_branch(path: str) -> None:
+    assert registry.is_pr_scoped_changed_path_allowed(PR168_RP_BRANCH, path)
+    assert registry.is_pr_scoped_changed_path_allowed(FIXTURE_BRANCH, path)
 
 
 def test_pr168_allowed_paths_pass_on_validation_fixture_branch_only_when_registered() -> None:
@@ -88,7 +110,20 @@ def test_pr168_allowed_paths_pass_on_validation_fixture_branch_only_when_registe
 )
 def test_pr168_disallowed_and_forbidden_paths_fail(path: str) -> None:
     assert not registry.is_pr_scoped_changed_path_allowed(PR168_BRANCH, path)
+    assert not registry.is_pr_scoped_changed_path_allowed(PR168_RP_BRANCH, path)
     assert not registry.is_pr_scoped_changed_path_allowed(FIXTURE_BRANCH, path)
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        "docs/master_plan/generated/PR168_GFP_QKUBaselineCountReconcile.report.json",
+        "tools/build_pr168_gfp_global_formula_discovery_real_computation.py",
+        "src/qtt/stage1_prediction_markets/pr168_gfp_real_computation/pnl.py",
+    ],
+)
+def test_pr168_rp_rejects_gfp_scope_paths(path: str) -> None:
+    assert not registry.is_pr_scoped_changed_path_allowed(PR168_RP_BRANCH, path)
 
 
 def test_pr167_production_builder_still_rejects_pr168_branch(monkeypatch: pytest.MonkeyPatch) -> None:
