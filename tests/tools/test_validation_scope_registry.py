@@ -86,6 +86,7 @@ def test_pr168_rp_allowed_paths_pass_on_real_branch(path: str) -> None:
 @pytest.mark.parametrize(
     "path",
     [
+        "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
         "docs/master_plan/generated/PR168_RANK_FinalSummary.report.json",
         "docs/master_plan/generated/pr168_rank_shards/PR168_RANK_EvidenceBackedRanking.part_0001_of_0001.report.json",
         "tools/build_pr168_rank_evidence_backed_ranking.py",
@@ -93,6 +94,7 @@ def test_pr168_rp_allowed_paths_pass_on_real_branch(path: str) -> None:
         "tools/validate_pr168_rank_input_consumption.py",
         "tools/qtt_authority_reason_code_registry.py",
         "tests/pr168_rank/test_input_consumption.py",
+        "tests/tools/test_validate_idempotence_runtime_containment.py",
         "tools/run_validation_gates.py",
     ],
 )

@@ -70,6 +70,7 @@ _PR168_RP_ALLOWED_PATTERNS = (
 
 _PR168_RANK_ALLOWED_EXACT_PATHS = frozenset(
     {
+        "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
         "tools/validation_scope_registry.py",
         "tools/validate_validation_scope_registry.py",
         "tests/tools/test_validation_scope_registry.py",
@@ -79,6 +80,7 @@ _PR168_RANK_ALLOWED_EXACT_PATHS = frozenset(
         "tools/validation_inventory.py",
         "tests/tools/test_validation_inventory.py",
         "tests/tools/test_changed_area_validation_router.py",
+        "tests/tools/test_validate_idempotence_runtime_containment.py",
         "tests/fail_closed/test_run_validation_gates.py",
         "tools/run_validation_gates.py",
         "tools/build_pr168_rank_evidence_backed_ranking.py",
