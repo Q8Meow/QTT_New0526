@@ -20,7 +20,7 @@ def test_pr106_acceptance_gate_is_ordered_after_retrieval_and_preserves_fresh_tm
             if Path(command[1]).name == "run_pytest_fresh_basetemp.py"
         )
         basetemp = Path(pytest_command[pytest_command.index("--basetemp") + 1])
-        assert basetemp.parent == repo_root / ".tmp"
+        assert not basetemp.is_relative_to(repo_root)
         assert basetemp.name.startswith("run_validation_gates_pytest_")
         seen_basetemps.append(basetemp)
         return 0

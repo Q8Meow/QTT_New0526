@@ -127,8 +127,8 @@ def test_inventory_has_pr167_open_trade_simulator_entry():
 
 
 def test_inventory_knows_every_pytest_shard_phase_job():
-    for phase in runner.PYTEST_SHARD_PHASES:
-        assert inventory.phase_job_id(phase) == phase.replace("-", "_")
+    for phase in runner.ORDERED_PHASES:
+        assert inventory.phase_job_id(phase) == inventory.VALIDATION_MATRIX_JOB_ID
 
     phase_jobs = {
         inventory.phase_job_id(phase)
@@ -139,16 +139,7 @@ def test_inventory_knows_every_pytest_shard_phase_job():
             runner.POST_VALIDATION_PHASE,
         )
     }
-    assert {
-        "pytest_shard_1",
-        "pytest_shard_2",
-        "pytest_shard_3",
-        "pytest_shard_4",
-        "pytest_shard_5",
-        "pytest_shard_6",
-        "pytest_shard_7",
-        "pytest_shard_8",
-    }.issubset(phase_jobs)
+    assert phase_jobs == {inventory.VALIDATION_MATRIX_JOB_ID}
 
 
 def test_inventory_path_globs_are_posix():

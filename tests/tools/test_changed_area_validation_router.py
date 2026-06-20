@@ -143,7 +143,7 @@ def test_pr166_sm2_split_pytest_groups_preserve_directory_routing():
 
     assert len(expected_ids) == len(runner.PR166_SM2_PYTEST_FILE_GROUPS)
     assert expected_ids.issubset(set(result.required_validators))
-    assert "pytest_shard_5" in result.required_jobs
+    assert inventory.VALIDATION_MATRIX_JOB_ID in result.required_jobs
     assert result.fail_closed_reasons == ()
 
 
@@ -163,21 +163,13 @@ def test_pr166_sf_r2_split_pytest_groups_preserve_directory_routing():
 
     assert len(expected_ids) == len(runner.PR166_SF_R2_PYTEST_FILE_GROUPS)
     assert expected_ids.issubset(set(result.required_validators))
-    assert "pytest_shard_4" in result.required_jobs
-    assert "pytest_shard_6" in result.required_jobs
+    assert inventory.VALIDATION_MATRIX_JOB_ID in result.required_jobs
     assert result.fail_closed_reasons == ()
 
 
 def test_router_policy_report_knows_all_eight_pytest_shard_jobs():
     report = build_routing_policy_report()
-    expected_jobs = sorted(
-        {
-            "fast_preflight",
-            "deterministic_validators",
-            *(phase.replace("-", "_") for phase in runner.PYTEST_SHARD_PHASES),
-            "post_validation_checks",
-        }
-    )
+    expected_jobs = [inventory.VALIDATION_MATRIX_JOB_ID]
 
     assert report["required_jobs_for_reduced_pr_mode"] == expected_jobs
     assert report["required_jobs_for_full_mode"] == expected_jobs

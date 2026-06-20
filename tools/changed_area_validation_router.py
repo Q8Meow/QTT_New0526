@@ -23,6 +23,7 @@ from tools.validation_inventory import (
     ValidatorInventoryEntry,
     entries_matching_path,
     inventory_by_id,
+    phase_job_id,
     phase_job_ids_for_validators,
     validation_inventory,
 )
@@ -393,12 +394,7 @@ def build_router_result(router_input: RouterInput) -> RouterResult:
 
 def build_routing_policy_report() -> dict[str, object]:
     full_validation_jobs = sorted(
-        {
-            "fast_preflight",
-            "deterministic_validators",
-            *(phase.replace("-", "_") for phase in runner.PYTEST_SHARD_PHASES),
-            "post_validation_checks",
-        }
+        {phase_job_id(phase) for phase in runner.ORDERED_PHASES}
     )
     return {
         "routing_policy_version": ROUTING_POLICY_VERSION,

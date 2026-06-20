@@ -332,6 +332,22 @@ def test_helper_fails_if_qtt_integrity_authority_text_is_created(
     )
 
 
+def test_helper_cli_fails_closed_without_git_status(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    root = _prepared_repo(tmp_path)
+    monkeypatch.setattr(helper, "write_report_file", lambda _root: _report())
+    monkeypatch.setattr(helper, "validate_repository_artifacts", lambda _root, **_kwargs: [])
+
+    assert helper.main(["--repo-root", str(root)]) == 1
+
+    output = capsys.readouterr().out
+    assert helper.FAILURE_MARKER in output
+    assert "PR152_CURRENTIZATION_GIT_STATUS_UNAVAILABLE" in output
+
+
 def test_helper_cli_can_be_called_by_future_pr_finalization(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,

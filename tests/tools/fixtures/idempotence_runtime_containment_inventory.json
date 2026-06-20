@@ -454,57 +454,57 @@
       "aggregation_required": true,
       "classification": "PYTEST_SHARD_DEFAULT_CI",
       "phase": "pytest-shard-1",
-      "workflow_job_id": "pytest_shard_1",
-      "workflow_name": "Pytest Shard 1"
+      "workflow_job_id": "validation_shards",
+      "workflow_name": "Validation Shard"
     },
     {
       "aggregation_required": true,
       "classification": "PYTEST_SHARD_DEFAULT_CI",
       "phase": "pytest-shard-2",
-      "workflow_job_id": "pytest_shard_2",
-      "workflow_name": "Pytest Shard 2"
+      "workflow_job_id": "validation_shards",
+      "workflow_name": "Validation Shard"
     },
     {
       "aggregation_required": true,
       "classification": "PYTEST_SHARD_DEFAULT_CI",
       "phase": "pytest-shard-3",
-      "workflow_job_id": "pytest_shard_3",
-      "workflow_name": "Pytest Shard 3"
+      "workflow_job_id": "validation_shards",
+      "workflow_name": "Validation Shard"
     },
     {
       "aggregation_required": true,
       "classification": "PYTEST_SHARD_DEFAULT_CI",
       "phase": "pytest-shard-4",
-      "workflow_job_id": "pytest_shard_4",
-      "workflow_name": "Pytest Shard 4"
+      "workflow_job_id": "validation_shards",
+      "workflow_name": "Validation Shard"
     },
     {
       "aggregation_required": true,
       "classification": "PYTEST_SHARD_DEFAULT_CI",
       "phase": "pytest-shard-5",
-      "workflow_job_id": "pytest_shard_5",
-      "workflow_name": "Pytest Shard 5"
+      "workflow_job_id": "validation_shards",
+      "workflow_name": "Validation Shard"
     },
     {
       "aggregation_required": true,
       "classification": "PYTEST_SHARD_DEFAULT_CI",
       "phase": "pytest-shard-6",
-      "workflow_job_id": "pytest_shard_6",
-      "workflow_name": "Pytest Shard 6"
+      "workflow_job_id": "validation_shards",
+      "workflow_name": "Validation Shard"
     },
     {
       "aggregation_required": true,
       "classification": "PYTEST_SHARD_DEFAULT_CI",
       "phase": "pytest-shard-7",
-      "workflow_job_id": "pytest_shard_7",
-      "workflow_name": "Pytest Shard 7"
+      "workflow_job_id": "validation_shards",
+      "workflow_name": "Validation Shard"
     },
     {
       "aggregation_required": true,
       "classification": "PYTEST_SHARD_DEFAULT_CI",
       "phase": "pytest-shard-8",
-      "workflow_job_id": "pytest_shard_8",
-      "workflow_name": "Pytest Shard 8"
+      "workflow_job_id": "validation_shards",
+      "workflow_name": "Validation Shard"
     }
   ],
   "runtime_artifact_policy": [
@@ -564,59 +564,9 @@
   "schema_version": 1,
   "workflow_jobs": [
     {
-      "classification": "LIGHTWEIGHT_SAFE_DEFAULT_CI",
-      "job_id": "fast_preflight",
-      "name": "Fast Preflight"
-    },
-    {
-      "classification": "LIGHTWEIGHT_SAFE_DEFAULT_CI",
-      "job_id": "deterministic_validators",
-      "name": "Deterministic Validators"
-    },
-    {
       "classification": "PYTEST_SHARD_DEFAULT_CI",
-      "job_id": "pytest_shard_1",
-      "name": "Pytest Shard 1"
-    },
-    {
-      "classification": "PYTEST_SHARD_DEFAULT_CI",
-      "job_id": "pytest_shard_2",
-      "name": "Pytest Shard 2"
-    },
-    {
-      "classification": "PYTEST_SHARD_DEFAULT_CI",
-      "job_id": "pytest_shard_3",
-      "name": "Pytest Shard 3"
-    },
-    {
-      "classification": "PYTEST_SHARD_DEFAULT_CI",
-      "job_id": "pytest_shard_4",
-      "name": "Pytest Shard 4"
-    },
-    {
-      "classification": "PYTEST_SHARD_DEFAULT_CI",
-      "job_id": "pytest_shard_5",
-      "name": "Pytest Shard 5"
-    },
-    {
-      "classification": "PYTEST_SHARD_DEFAULT_CI",
-      "job_id": "pytest_shard_6",
-      "name": "Pytest Shard 6"
-    },
-    {
-      "classification": "PYTEST_SHARD_DEFAULT_CI",
-      "job_id": "pytest_shard_7",
-      "name": "Pytest Shard 7"
-    },
-    {
-      "classification": "PYTEST_SHARD_DEFAULT_CI",
-      "job_id": "pytest_shard_8",
-      "name": "Pytest Shard 8"
-    },
-    {
-      "classification": "LIGHTWEIGHT_SAFE_DEFAULT_CI",
-      "job_id": "post_validation_checks",
-      "name": "Post Validation Checks"
+      "job_id": "validation_shards",
+      "name": "Validation Shard"
     },
     {
       "classification": "LIGHTWEIGHT_SAFE_DEFAULT_CI",

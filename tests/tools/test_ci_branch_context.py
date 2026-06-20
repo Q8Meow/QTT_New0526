@@ -4122,6 +4122,37 @@ def test_pull_request_detached_head_simulation_prefers_head_ref(monkeypatch):
     )
 
 
+def test_pr152_helper_cli_repair_branch_allows_validation_execution_gates_only():
+    branch = context.PR152_HELPER_CLI_TEMP_REPO_GIT_STATUS_REPAIR_BRANCH
+
+    assert context.is_validation_execution_branch(branch)
+    assert not context.is_validation_infrastructure_branch(branch)
+    assert context.is_downstream_or_main_validation_branch(
+        branch,
+        after_pr=166,
+        allow_repair=False,
+    )
+    for gate_id in context.BRANCH_CONTEXT_GATE_POLICIES:
+        assert context.is_branch_allowed_for_upstream_pr_gate(branch, gate_id)
+        assert context.is_pull_request_detached_head_context_allowed_for_upstream_pr_gate(
+            branch,
+            gate_id,
+        )
+
+    copycat = f"{branch}-copy"
+    assert not context.is_validation_execution_branch(copycat)
+    for gate_id in context.BRANCH_CONTEXT_GATE_POLICIES:
+        assert not context.is_branch_allowed_for_upstream_pr_gate(
+            copycat,
+            gate_id,
+            ancestry_present=True,
+        )
+        assert not context.is_pull_request_detached_head_context_allowed_for_upstream_pr_gate(
+            copycat,
+            gate_id,
+        )
+
+
 def test_pr165_d3_quantum_selection_branch_context_allowance_is_narrow():
     branch = context.PR165_D3_BRANCH
     assert context.is_explicit_downstream_repair_changed_path(

@@ -156,7 +156,7 @@ def test_missing_shard_8_fails():
 
 def test_failed_or_cancelled_shard_not_aggregated_fails():
     inventory = _inventory()
-    workflow_text = WORKFLOW_TEXT.replace("      - pytest_shard_8\n", "")
+    workflow_text = WORKFLOW_TEXT.replace("          - phase: pytest-shard-8\n", "")
 
     failures = _validate(inventory, workflow_text=workflow_text)
 

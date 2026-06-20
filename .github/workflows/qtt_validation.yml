@@ -20,10 +20,36 @@ env:
   QTT_FORCE_FULL_VALIDATION: ${{ github.event_name == 'workflow_dispatch' && inputs.full_validation && '1' || '0' }}
 
 jobs:
-  fast_preflight:
-    name: Fast Preflight
+  validation_shards:
+    name: Validation Shard (${{ matrix.group }})
     runs-on: ubuntu-latest
     timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - phase: fast-preflight
+            group: fast-preflight
+          - phase: deterministic-validators
+            group: tools-generated-artifacts
+          - phase: pytest-shard-1
+            group: tools-core
+          - phase: pytest-shard-2
+            group: tools-authority-boundary
+          - phase: pytest-shard-3
+            group: pr168-rp-core
+          - phase: pytest-shard-4
+            group: pr168-rp-evidence
+          - phase: pytest-shard-5
+            group: pr168-rp-quantum
+          - phase: pytest-shard-6
+            group: pr168-rp-dag-no-orphan
+          - phase: pytest-shard-7
+            group: repo-wide-integrity-a
+          - phase: pytest-shard-8
+            group: repo-wide-integrity-b
+          - phase: post-validation
+            group: repo-wide-integrity
 
     steps:
       - name: Check out repository
@@ -48,306 +74,18 @@ jobs:
         run: &install_pytest |
           python -m pip install pytest
 
-      - name: Run fast preflight
-        run: python -B tools/run_validation_gates.py --phase fast-preflight --timing-report .tmp/qtt-validation-timing/fast-preflight.json --router-report .tmp/qtt-validation-router/fast-preflight.json
-
-  deterministic_validators:
-    name: Deterministic Validators
-    runs-on: ubuntu-latest
-    needs:
-      - fast_preflight
-    timeout-minutes: 90
-
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
-        with: *checkout_full
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.14'
-
-      - name: Restore pip download cache
-        uses: actions/cache@v4
-        with: *pip_cache
-
-      - name: Install test dependency
-        run: *install_pytest
-
-      - name: Run deterministic validators
-        run: python -B tools/run_validation_gates.py --phase deterministic-validators --timing-report .tmp/qtt-validation-timing/deterministic-validators.json --router-report .tmp/qtt-validation-router/deterministic-validators.json
-
-  pytest_shard_1:
-    name: Pytest Shard 1
-    runs-on: ubuntu-latest
-    needs:
-      - fast_preflight
-    timeout-minutes: 90
-
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
-        with: *checkout_full
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.14'
-
-      - name: Restore pip download cache
-        uses: actions/cache@v4
-        with: *pip_cache
-
-      - name: Install test dependency
-        run: *install_pytest
-
-      - name: Run pytest shard 1
-        run: python -B tools/run_validation_gates.py --phase pytest-shard-1 --timing-report .tmp/qtt-validation-timing/pytest-shard-1.json --router-report .tmp/qtt-validation-router/pytest-shard-1.json
-
-  pytest_shard_2:
-    name: Pytest Shard 2
-    runs-on: ubuntu-latest
-    needs:
-      - fast_preflight
-    timeout-minutes: 90
-
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
-        with: *checkout_full
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.14'
-
-      - name: Restore pip download cache
-        uses: actions/cache@v4
-        with: *pip_cache
-
-      - name: Install test dependency
-        run: *install_pytest
-
-      - name: Run pytest shard 2
-        run: python -B tools/run_validation_gates.py --phase pytest-shard-2 --timing-report .tmp/qtt-validation-timing/pytest-shard-2.json --router-report .tmp/qtt-validation-router/pytest-shard-2.json
-
-  pytest_shard_3:
-    name: Pytest Shard 3
-    runs-on: ubuntu-latest
-    needs:
-      - fast_preflight
-    timeout-minutes: 90
-
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
-        with: *checkout_full
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.14'
-
-      - name: Restore pip download cache
-        uses: actions/cache@v4
-        with: *pip_cache
-
-      - name: Install test dependency
-        run: *install_pytest
-
-      - name: Run pytest shard 3
-        run: python -B tools/run_validation_gates.py --phase pytest-shard-3 --timing-report .tmp/qtt-validation-timing/pytest-shard-3.json --router-report .tmp/qtt-validation-router/pytest-shard-3.json
-
-  pytest_shard_4:
-    name: Pytest Shard 4
-    runs-on: ubuntu-latest
-    needs:
-      - fast_preflight
-    timeout-minutes: 90
-
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
-        with: *checkout_full
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.14'
-
-      - name: Restore pip download cache
-        uses: actions/cache@v4
-        with: *pip_cache
-
-      - name: Install test dependency
-        run: *install_pytest
-
-      - name: Run pytest shard 4
-        run: python -B tools/run_validation_gates.py --phase pytest-shard-4 --timing-report .tmp/qtt-validation-timing/pytest-shard-4.json --router-report .tmp/qtt-validation-router/pytest-shard-4.json
-
-  pytest_shard_5:
-    name: Pytest Shard 5
-    runs-on: ubuntu-latest
-    needs:
-      - fast_preflight
-    timeout-minutes: 90
-
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
-        with: *checkout_full
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.14'
-
-      - name: Restore pip download cache
-        uses: actions/cache@v4
-        with: *pip_cache
-
-      - name: Install test dependency
-        run: *install_pytest
-
-      - name: Run pytest shard 5
-        run: python -B tools/run_validation_gates.py --phase pytest-shard-5 --timing-report .tmp/qtt-validation-timing/pytest-shard-5.json --router-report .tmp/qtt-validation-router/pytest-shard-5.json
-
-  pytest_shard_6:
-    name: Pytest Shard 6
-    runs-on: ubuntu-latest
-    needs:
-      - fast_preflight
-    timeout-minutes: 90
-
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
-        with: *checkout_full
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.14'
-
-      - name: Restore pip download cache
-        uses: actions/cache@v4
-        with: *pip_cache
-
-      - name: Install test dependency
-        run: *install_pytest
-
-      - name: Run pytest shard 6
-        run: python -B tools/run_validation_gates.py --phase pytest-shard-6 --timing-report .tmp/qtt-validation-timing/pytest-shard-6.json --router-report .tmp/qtt-validation-router/pytest-shard-6.json
-
-  pytest_shard_7:
-    name: Pytest Shard 7
-    runs-on: ubuntu-latest
-    needs:
-      - fast_preflight
-    timeout-minutes: 90
-
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
-        with: *checkout_full
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.14'
-
-      - name: Restore pip download cache
-        uses: actions/cache@v4
-        with: *pip_cache
-
-      - name: Install test dependency
-        run: *install_pytest
-
-      - name: Run pytest shard 7
-        run: python -B tools/run_validation_gates.py --phase pytest-shard-7 --timing-report .tmp/qtt-validation-timing/pytest-shard-7.json --router-report .tmp/qtt-validation-router/pytest-shard-7.json
-
-  pytest_shard_8:
-    name: Pytest Shard 8
-    runs-on: ubuntu-latest
-    needs:
-      - fast_preflight
-    timeout-minutes: 90
-
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
-        with: *checkout_full
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.14'
-
-      - name: Restore pip download cache
-        uses: actions/cache@v4
-        with: *pip_cache
-
-      - name: Install test dependency
-        run: *install_pytest
-
-      - name: Run pytest shard 8
-        run: python -B tools/run_validation_gates.py --phase pytest-shard-8 --timing-report .tmp/qtt-validation-timing/pytest-shard-8.json --router-report .tmp/qtt-validation-router/pytest-shard-8.json
-
-  post_validation_checks:
-    name: Post Validation Checks
-    runs-on: ubuntu-latest
-    needs:
-      - deterministic_validators
-      - pytest_shard_1
-      - pytest_shard_2
-      - pytest_shard_3
-      - pytest_shard_4
-      - pytest_shard_5
-      - pytest_shard_6
-      - pytest_shard_7
-      - pytest_shard_8
-    timeout-minutes: 90
-
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
-        with: *checkout_full
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.14'
-
-      - name: Restore pip download cache
-        uses: actions/cache@v4
-        with: *pip_cache
-
-      - name: Install test dependency
-        run: *install_pytest
-
-      - name: Verify AtomicRows bundle materialized and SHA absent
-        # Enforced by the post-validation runner phase:
-        # test -f docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl
-        # test ! -e docs/master_plan/atomic_rows/AtomicRows.bundle.sha256
-        # expected 4183 AtomicRows rows
-        run: python -B tools/run_validation_gates.py --phase post-validation --timing-report .tmp/qtt-validation-timing/post-validation.json --router-report .tmp/qtt-validation-router/post-validation.json
+      - name: Run validation shard
+        run: >
+          python -B tools/run_validation_gates.py
+          --phase ${{ matrix.phase }}
+          --timing-report .tmp/qtt-validation-timing/${{ matrix.phase }}.json
+          --router-report .tmp/qtt-validation-router/${{ matrix.phase }}.json
 
   validation:
     name: Validation Gates
     runs-on: ubuntu-latest
     needs:
-      - fast_preflight
-      - deterministic_validators
-      - pytest_shard_1
-      - pytest_shard_2
-      - pytest_shard_3
-      - pytest_shard_4
-      - pytest_shard_5
-      - pytest_shard_6
-      - pytest_shard_7
-      - pytest_shard_8
-      - post_validation_checks
+      - validation_shards
     if: ${{ always() }}
     timeout-minutes: 90
 
@@ -360,6 +98,20 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.14'
+
+      - name: Verify AtomicRows bundle materialized and SHA absent
+        run: |
+          test -f docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl
+          test ! -e docs/master_plan/atomic_rows/AtomicRows.bundle.sha256
+          python - <<'PY'
+          from pathlib import Path
+
+          rows = Path("docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl").read_text(
+              encoding="utf-8"
+          ).splitlines()
+          if len(rows) != 4183:
+              raise SystemExit(f"expected 4183 AtomicRows rows, got {len(rows)}")
+          PY
 
       - name: Report changed-area validation scope
         run: python -B tools/changed_area_validation_router.py --repo-root . --report-out .tmp/qtt-validation-router/validation-gates.json

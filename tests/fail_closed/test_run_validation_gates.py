@@ -280,7 +280,7 @@ def _expected_commands(
 ) -> list[list[str]]:
     validation_dir = runner._default_validation_dir()
     if pytest_basetemp is None:
-        pytest_basetemp = validation_dir / "run_validation_gates_pytest"
+        pytest_basetemp = runner._default_pytest_basetemp()
     section_manifest = validation_dir / "SectionManifest.json"
     traceability_report = validation_dir / "TraceabilityReport.json"
     first_pr_scope_report = validation_dir / "FirstPrScopeReport.json"
@@ -11025,7 +11025,7 @@ def test_runner_creates_tmp_parent_before_running_commands(monkeypatch, capsys):
         assert seen
         pytest_basetemp = _pytest_basetemp_from_commands(seen)
         assert tmp_parent.is_dir()
-        assert pytest_basetemp.parent == tmp_parent
+        assert not pytest_basetemp.is_relative_to(repo_root)
         assert pytest_basetemp.name.startswith("run_validation_gates_pytest_")
         assert capsys.readouterr().out.splitlines()[-1] == runner.SUCCESS_MARKER
     finally:
@@ -11038,7 +11038,6 @@ def test_runner_uses_unique_pytest_basetemp_for_each_main_run(monkeypatch):
     repo_root = (Path(".tmp") / "test_run_validation_gates_unique_repo_root").resolve()
     shutil.rmtree(repo_root, ignore_errors=True)
     repo_root.mkdir(parents=True)
-    tmp_parent = repo_root / ".tmp"
     pytest_basetemps: list[Path] = []
 
     def fake_run_commands(
@@ -11047,7 +11046,7 @@ def test_runner_uses_unique_pytest_basetemp_for_each_main_run(monkeypatch):
         **kwargs,
     ) -> int:
         pytest_basetemp = _pytest_basetemp_from_commands(commands)
-        assert pytest_basetemp.parent == tmp_parent
+        assert not pytest_basetemp.is_relative_to(repo_root)
         assert pytest_basetemp.name.startswith("run_validation_gates_pytest_")
         assert pytest_basetemp.is_dir()
         pytest_basetemps.append(pytest_basetemp)
@@ -11135,71 +11134,49 @@ def test_github_workflow_preserves_required_validation_check_identity():
 
 
 def test_github_workflow_splits_validation_into_parallel_phase_jobs():
-    workflow = (
-        _workflow_text()
-    )
-    phase_jobs = (
-        "fast_preflight",
-        "deterministic_validators",
-        *(phase.replace("-", "_") for phase in runner.PYTEST_SHARD_PHASES),
-        "post_validation_checks",
-    )
+    workflow = _workflow_text()
+    shard_block = _workflow_job_block(workflow, "validation_shards")
 
-    for job_id in phase_jobs:
-        block = _workflow_job_block(workflow, job_id)
-        assert "    timeout-minutes: 90\n" in block
-        assert "          python-version: '3.14'\n" in block
-        assert "      - name: Restore pip download cache\n" in block
-        assert "        uses: actions/cache@v4\n" in block
-        assert "cache-dependency-path" not in block
-        assert "          cache: pip\n" not in block
-    fast_preflight_block = _workflow_job_block(
-        workflow,
-        "fast_preflight",
-    )
-    assert "        with: &pip_cache\n" in fast_preflight_block
-    assert "          path: ~/.cache/pip\n" in fast_preflight_block
+    assert "    timeout-minutes: 90\n" in shard_block
+    assert "    strategy:\n" in shard_block
+    assert "      fail-fast: false\n" in shard_block
+    assert "          python-version: '3.14'\n" in shard_block
+    assert "      - name: Restore pip download cache\n" in shard_block
+    assert "        uses: actions/cache@v4\n" in shard_block
+    assert "cache-dependency-path" not in shard_block
+    assert "          cache: pip\n" not in shard_block
+    assert "        with: &pip_cache\n" in shard_block
+    assert "          path: ~/.cache/pip\n" in shard_block
     assert (
         "          key: ${{ runner.os }}-python-3.14-pip-pytest-"
         "${{ hashFiles('.github/workflows/qtt_validation.yml') }}\n"
-    ) in fast_preflight_block
-    assert "            ${{ runner.os }}-python-3.14-pip-pytest-\n" in fast_preflight_block
-    assert "        run: &install_pytest |\n" in fast_preflight_block
-    assert "          python -m pip install pytest\n" in fast_preflight_block
-    for job_id in phase_jobs[1:]:
-        block = _workflow_job_block(workflow, job_id)
-        assert "        with: *pip_cache\n" in block
-        assert "        run: *install_pytest\n" in block
+    ) in shard_block
+    assert "            ${{ runner.os }}-python-3.14-pip-pytest-\n" in shard_block
+    assert "        run: &install_pytest |\n" in shard_block
+    assert "          python -m pip install pytest\n" in shard_block
     for phase in runner.ORDERED_PHASES:
-        assert f"tools/run_validation_gates.py --phase {phase}" in workflow
+        assert f"          - phase: {phase}\n" in shard_block
+    assert "--phase ${{ matrix.phase }}" in shard_block
+    assert "--timing-report .tmp/qtt-validation-timing/${{ matrix.phase }}.json" in shard_block
     assert "Run canonical validation gates" not in workflow
 
 
-def test_github_workflow_aggregate_depends_on_every_required_phase_job():
+def test_github_workflow_aggregate_depends_on_validation_shard_matrix():
     workflow = _workflow_text()
     validation_block = _workflow_job_block(workflow, "validation")
 
-    for job_id in (
-        "fast_preflight",
-        "deterministic_validators",
-        *(phase.replace("-", "_") for phase in runner.PYTEST_SHARD_PHASES),
-        "post_validation_checks",
-    ):
-        assert f"      - {job_id}\n" in validation_block
+    assert "      - validation_shards\n" in validation_block
     assert "    if: ${{ always() }}\n" in validation_block
     assert 'if result != "success":' in validation_block
     assert "raise SystemExit(1)" in validation_block
 
 
-def test_github_workflow_post_validation_waits_for_validators_and_pytest_shards():
+def test_github_workflow_matrix_contains_post_validation_phase():
     workflow = _workflow_text()
-    post_block = _workflow_job_block(workflow, "post_validation_checks")
+    shard_block = _workflow_job_block(workflow, "validation_shards")
 
-    for job_id in (
-        "deterministic_validators",
-        *(phase.replace("-", "_") for phase in runner.PYTEST_SHARD_PHASES),
-    ):
-        assert f"      - {job_id}\n" in post_block
+    assert "          - phase: post-validation\n" in shard_block
+    assert "            group: repo-wide-integrity\n" in shard_block
 
 
 def test_nested_validator_contract_scan_blocks_hidden_full_rerun():

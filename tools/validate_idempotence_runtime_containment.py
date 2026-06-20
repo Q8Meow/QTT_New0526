@@ -57,17 +57,7 @@ CLASSIFICATION_ENUMS = frozenset(
 )
 REQUIRED_PYTEST_SHARDS = tuple(f"pytest-shard-{index}" for index in range(1, 9))
 REQUIRED_WORKFLOW_JOB_IDS = (
-    "fast_preflight",
-    "deterministic_validators",
-    "pytest_shard_1",
-    "pytest_shard_2",
-    "pytest_shard_3",
-    "pytest_shard_4",
-    "pytest_shard_5",
-    "pytest_shard_6",
-    "pytest_shard_7",
-    "pytest_shard_8",
-    "post_validation_checks",
+    "validation_shards",
     "validation",
 )
 RUNTIME_POLICY_CLASSES = frozenset(
@@ -562,22 +552,20 @@ def _validate_workflow(
             failures.append(_failure("UNCLASSIFIED_WORKFLOW_JOB", job=job_id))
     blocks = _job_blocks(workflow_text)
     validation_block = blocks.get("validation", "")
-    post_block = blocks.get("post_validation_checks", "")
+    shard_block = blocks.get("validation_shards", "")
     validation_needs = set(_parse_needs(validation_block))
-    post_needs = set(_parse_needs(post_block))
-    shard_jobs = {f"pytest_shard_{index}" for index in range(1, 9)}
-    for shard_job in sorted(shard_jobs):
-        if shard_job not in validation_needs:
-            failures.append(_failure("SHARD_NOT_AGGREGATED", shard=shard_job))
-        if shard_job not in post_needs:
-            failures.append(_failure("SHARD_NOT_AGGREGATED", shard=shard_job))
-    for job_id in (
-        "fast_preflight",
-        "deterministic_validators",
-        "post_validation_checks",
+    if "validation_shards" not in validation_needs:
+        failures.append(_failure("SHARD_NOT_AGGREGATED", shard="validation_shards"))
+    if "fail-fast: false" not in shard_block:
+        failures.append(_failure("WORKFLOW_MATRIX_FAIL_FAST_NOT_FALSE", job="validation_shards"))
+    for phase in (
+        "fast-preflight",
+        "deterministic-validators",
+        *REQUIRED_PYTEST_SHARDS,
+        "post-validation",
     ):
-        if job_id not in validation_needs:
-            failures.append(_failure("WORKFLOW_JOB_NOT_AGGREGATED", job=job_id))
+        if f"- phase: {phase}" not in shard_block:
+            failures.append(_failure("SHARD_NOT_AGGREGATED", shard=phase))
     if "if: ${{ always() }}" not in validation_block:
         failures.append(_failure("WORKFLOW_AGGREGATION_NOT_FAIL_CLOSED", job="validation"))
     if "toJSON(needs)" not in validation_block:
