@@ -967,6 +967,67 @@ def _expected_commands(
         ],
         [
             python_executable,
+            str(Path("tools") / "build_pr168_rank_evidence_backed_ranking.py"),
+        ],
+        *[
+            [
+                python_executable,
+                str(Path("tools") / f"validate_pr168_rank_{name}.py"),
+            ]
+            for name in (
+                "input_consumption",
+                "no_fake_ranking",
+                "score_math",
+                "binary_prediction_market_pnl",
+                "candidate_stack_generation",
+                "mode_policy_matrix",
+                "pretrade_order_simulation",
+                "order_decision_tournament",
+                "tca_decomposition",
+                "champion_challenger",
+                "no_trade_dominance",
+                "overfit_fdr",
+                "regime_ranking",
+                "portfolio_ranking",
+                "capacity_crowding",
+                "quantum_structural_ranking",
+                "quantum_combinatorial_selection",
+                "latency_hot_path_seed",
+                "agent_work_orders",
+                "downstream_orchestration",
+                "dag_orchestration",
+                "no_orphan",
+                "authority_boundaries",
+                "validation_scope_registry_integration",
+                "centralized_systems_coverage",
+                "edge_capture_attribution",
+                "negative_recovery_tournament",
+                "threshold_surfaces",
+                "maker_taker_tradeoff",
+                "size_price_time_sensitivity",
+                "scenario_stress_surface",
+                "materialized_artifacts_not_blueprints",
+                "scalar_value_no_orphan",
+                "terminal_artifact_lifecycle",
+                "connector_candidate_routing",
+                "two_speed_decision_surface",
+                "future_expansion_registries",
+                "market_adapter_registry_seed",
+                "venue_cost_model_registry_seed",
+                "contract_payoff_model_registry_seed",
+                "formula_algorithm_plugin_registry_seed",
+                "quantum_objective_registry_seed",
+                "order_policy_registry_seed",
+                "agent_capability_registry_seed",
+                "connector_readiness_registry_seed",
+                "runtime_allowlist_seed_registry",
+                "hot_path_decision_surface_registry",
+                "registry_seed_no_orphan",
+                "registry_anti_scatter",
+            )
+        ],
+        [
+            python_executable,
             str(
                 Path("tools")
                 / "validate_pr165_d2_score_refreshed_scenario_selection_v2.py"
@@ -2769,6 +2830,7 @@ def test_runner_splits_pytest_shard_2_longest_group_deterministically():
         ("tests/atomicrows",),
         ("tests/pr168_gfp",),
         ("tests/pr168_rp",),
+        ("tests/pr168_rank",),
     ]
     assert all(command.reason for command in commands)
     assert ("tests/stage1_prediction_markets",) not in [
