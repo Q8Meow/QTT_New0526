@@ -134,6 +134,9 @@ PR160_MAIN_PUSH_BRANCH_CONTEXT_REPAIR_BRANCH = (
 PR166_SM2_BOUNDED_IDEMPOTENCE_CI_REPAIR_BRANCH = (
     "repair/main-pr166-sm2-bounded-idempotence-ci"
 )
+PR152_HELPER_CLI_TEMP_REPO_GIT_STATUS_REPAIR_BRANCH = (
+    "repair-pr152-helper-cli-temp-repo-git-status"
+)
 IDEMPOTENCE_RUNTIME_CONTAINMENT_HARDENING_BRANCH = (
     "hardening/all-idempotence-runtime-containment-audit"
 )
@@ -163,6 +166,7 @@ IDEMPOTENCE_RUNTIME_CONTAINMENT_HARDENING_CHANGED_PATHS = frozenset(
 )
 EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_PR_NUMBERS = {
     "repair-pr153r-redo-report-determinism": 153,
+    PR152_HELPER_CLI_TEMP_REPO_GIT_STATUS_REPAIR_BRANCH: 152,
     "repair/pr153s-source-value-capture-closure-classifier": 153,
     "pr154-atomicrows-parameter-default-value-materialization-gate": 154,
     "repair/pr154-post-merge-pytest-context-hygiene": 154,
@@ -1859,6 +1863,24 @@ PR159S_ALLOWED_CHANGED_PATHS = frozenset(
     }
 )
 EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_CHANGED_PATHS = {
+    PR152_HELPER_CLI_TEMP_REPO_GIT_STATUS_REPAIR_BRANCH: frozenset(
+        {
+            ".github/workflows/qtt_validation.yml",
+            "tests/fail_closed/test_run_validation_gates.py",
+            "tests/source_evidence/test_pr123_pr106_preserves_run_validation_gates_fresh_tempdir.py",
+            "tests/tools/fixtures/idempotence_runtime_containment_inventory.json",
+            "tests/tools/test_changed_area_validation_router.py",
+            "tests/tools/test_currentize_pr152_after_generated_artifacts.py",
+            "tests/tools/test_validate_idempotence_runtime_containment.py",
+            "tests/tools/test_validation_inventory.py",
+            "tools/changed_area_validation_router.py",
+            "tools/ci_branch_context.py",
+            "tools/currentize_pr152_after_generated_artifacts.py",
+            "tools/run_validation_gates.py",
+            "tools/validate_idempotence_runtime_containment.py",
+            "tools/validation_inventory.py",
+        }
+    ),
     PR166_SM2_BOUNDED_IDEMPOTENCE_CI_REPAIR_BRANCH: (
         PR166_SM2_BOUNDED_IDEMPOTENCE_CI_REPAIR_CHANGED_PATHS
     ),

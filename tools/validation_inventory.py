@@ -78,12 +78,8 @@ GENERATED_REPORT_GLOBS = (
     "docs/roadmap/generated/*.json",
     "docs/roadmap/generated/**/*.json",
 )
-PHASE_JOB_IDS = {
-    runner.FAST_PREFLIGHT_PHASE: "fast_preflight",
-    runner.DETERMINISTIC_VALIDATORS_PHASE: "deterministic_validators",
-    **{phase: phase.replace("-", "_") for phase in runner.PYTEST_SHARD_PHASES},
-    runner.POST_VALIDATION_PHASE: "post_validation_checks",
-}
+VALIDATION_MATRIX_JOB_ID = "validation_shards"
+PHASE_JOB_IDS = {phase: VALIDATION_MATRIX_JOB_ID for phase in runner.ORDERED_PHASES}
 
 
 @dataclass(frozen=True)

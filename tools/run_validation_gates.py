@@ -25,6 +25,7 @@ PYTEST_FRESH_BASETEMP_SCRIPT = "run_pytest_fresh_basetemp.py"
 PHASE_SUCCESS_MARKER_PREFIX = "QTT_VALIDATION_PHASE_OK"
 TIMING_SCHEMA_VERSION = 1
 SLOWEST_ENTRY_LIMIT = 20
+PYTEST_BASETEMP_PARENT = "qtt_run_validation_gates_pytest"
 PYTEST_DURATIONS_ARG = "--durations=50"
 PYTEST_SHARD_TARGET_SECONDS = 20 * 60
 PYTEST_SHARD_WARNING_SECONDS = 25 * 60
@@ -1232,6 +1233,14 @@ def _default_validation_dir() -> pathlib.Path:
     return pathlib.Path(tempfile.gettempdir()) / "qtt_validation_gates"
 
 
+def _default_pytest_basetemp() -> pathlib.Path:
+    return (
+        pathlib.Path(tempfile.gettempdir())
+        / PYTEST_BASETEMP_PARENT
+        / f"run_validation_gates_pytest_{os.getpid()}"
+    )
+
+
 def _repo_root() -> pathlib.Path:
     return REPO_ROOT
 
@@ -2165,7 +2174,7 @@ def build_validation_commands(
         else pathlib.Path(validation_dir)
     )
     pytest_basetemp = (
-        validation_dir / "run_validation_gates_pytest"
+        _default_pytest_basetemp()
         if pytest_basetemp is None
         else pathlib.Path(pytest_basetemp)
     )
@@ -4674,7 +4683,7 @@ def build_pytest_shard_commands(
     if phase not in PYTEST_SHARD_COMMANDS:
         raise ValueError(f"unknown pytest shard phase: {phase}")
     basetemp = (
-        _default_validation_dir() / "run_validation_gates_pytest"
+        _default_pytest_basetemp()
         if pytest_basetemp is None
         else pathlib.Path(pytest_basetemp)
     )
@@ -5265,7 +5274,6 @@ def main(argv: Sequence[str] | None = None) -> int:
                 installed_pr152_cache_env = True
             with tempfile.TemporaryDirectory(
                 prefix="run_validation_gates_pytest_",
-                dir=tmp_parent,
             ) as pytest_temp_dir:
                 commands = build_phase_commands(
                     args.phase,

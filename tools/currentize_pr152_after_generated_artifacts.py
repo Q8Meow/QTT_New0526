@@ -106,6 +106,9 @@ def _git_status_changed_paths(repo_root: Path) -> list[str]:
     return _stable_paths(paths)
 
 
+_DEFAULT_GIT_STATUS_CHANGED_PATHS = _git_status_changed_paths
+
+
 def _git_untracked_paths(repo_root: Path) -> list[str]:
     completed = subprocess.run(
         ["git", "ls-files", "--others", "--exclude-standard", "-z"],
@@ -327,12 +330,13 @@ def currentize_pr152_after_generated_artifacts(
     root = repo_root.resolve()
     write_report = write_report or write_report_file
     validate_artifacts = validate_artifacts or validate_repository_artifacts
-    default_changed_paths = changed_paths is None
-    changed_paths = changed_paths or _git_status_changed_paths
-    untracked_paths = (
-        untracked_paths
-        or (_git_untracked_paths if default_changed_paths else lambda _root: [])
-    )
+    if changed_paths is None:
+        changed_paths = _git_status_changed_paths
+    default_git_status_adapter = changed_paths is _DEFAULT_GIT_STATUS_CHANGED_PATHS
+    if untracked_paths is None:
+        untracked_paths = (
+            _git_untracked_paths if default_git_status_adapter else lambda _root: []
+        )
 
     protected_before = _file_snapshots(root, _PROTECTED_PATHS)
     failures: list[str] = []
