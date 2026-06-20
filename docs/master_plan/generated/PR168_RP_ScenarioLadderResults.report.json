@@ -1,0 +1,845 @@
+{
+  "authority_boundary_codes": [
+    "NO_LIVE_ORDER_AUTHORITY",
+    "NO_SOURCE_TRUTH_AUTHORITY",
+    "NO_CONNECTOR_TRUTH_OR_BINDING",
+    "NO_PRIVATE_STATE_OR_CASH",
+    "NO_QUANTUM_BACKEND_EXECUTION",
+    "NO_LLM_HOT_PATH_AUTHORITY",
+    "NO_QTT_DIGEST_AUTHORITY",
+    "NO_ATOMICROWS_DIGEST_AUTHORITY"
+  ],
+  "connector_semantic_binding_created": false,
+  "connector_truth_authority": false,
+  "consumer": "PR168-RANK",
+  "downstream_route": "PR168_RP_ScenarioLadderResults.report.json",
+  "generated_digest_authority_created": false,
+  "live_authority": false,
+  "llm_hot_path_authority": false,
+  "no_orphan_status": "CONNECTED_TO_DECLARED_CONSUMER",
+  "order_authority": false,
+  "owning_agent": "Replay Paper Recompute Agent",
+  "pr_id": "PR168-RP",
+  "private_state_read_count": 0,
+  "producer": "PR168_RP_FORMULA_BASED_REPLAY_PAPER_RECOMPUTE",
+  "quantum_advantage_claim_count": 0,
+  "quantum_backend_execution_count": 0,
+  "record_count": 10515,
+  "records": [
+    {
+      "canonical_row_key": "QKU::QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000001",
+      "consumer": "PR168_RANK",
+      "downstream_route": "PR168_RP_ScenarioFailureRepairQueue.report.json",
+      "no_orphan_status": "CONNECTED_TO_SCENARIO_CONSUMER",
+      "owning_agent": "Risk Manager Agent",
+      "producer": "PR168_RP_SCENARIO_LADDER",
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000001",
+      "scenario_cases": [
+        {
+          "expected_net_pnl": -0.1965991908,
+          "expected_shortfall_cvar": 1.53621031,
+          "failure_reason_code": "MISSING_DEFAULT_THRESHOLD",
+          "lower_confidence_bound_edge": -1.556935,
+          "no_trade_comparison_margin": -0.1965991908,
+          "scenario_name": "base_case",
+          "scenario_pass": false,
+          "worst_case_loss": 2.0229895008
+        },
+        {
+          "expected_net_pnl": -0.4575120922,
+          "expected_shortfall_cvar": 1.53621031,
+          "failure_reason_code": "MISSING_DEFAULT_THRESHOLD",
+          "lower_confidence_bound_edge": -1.556935,
+          "no_trade_comparison_margin": -0.4575120922,
+          "scenario_name": "best_case",
+          "scenario_pass": false,
+          "worst_case_loss": 2.2839024022
+        },
+        {
+          "expected_net_pnl": -0.5879685429,
+          "expected_shortfall_cvar": 1.53621031,
+          "failure_reason_code": "MISSING_DEFAULT_THRESHOLD",
+          "lower_confidence_bound_edge": -1.556935,
+          "no_trade_comparison_margin": -0.5879685429,
+          "scenario_name": "worst_case",
+          "scenario_pass": false,
+          "worst_case_loss": 2.4143588529
+        },
+        {
+          "expected_net_pnl": -0.7184249937,
+          "expected_shortfall_cvar": 1.53621031,
+          "failure_reason_code": "MISSING_DEFAULT_THRESHOLD",
+          "lower_confidence_bound_edge": -1.556935,
+          "no_trade_comparison_margin": -0.7184249937,
+          "scenario_name": "spread_widening_case",
+          "scenario_pass": false,
+          "worst_case_loss": 2.5448153037
+        },
+        {
+          "expected_net_pnl": -0.8488814444,
+          "expected_shortfall_cvar": 1.53621031,
+          "failure_reason_code": "MISSING_DEFAULT_THRESHOLD",
+          "lower_confidence_bound_edge": -1.556935,
+          "no_trade_comparison_margin": -0.8488814444,
+          "scenario_name": "partial_fill_case",
+          "scenario_pass": false,
+          "worst_case_loss": 2.6752717544
+        },
+        {
+          "expected_net_pnl": -0.9793378951,
+          "expected_shortfall_cvar": 1.53621031,
+          "failure_reason_code": "MISSING_DEFAULT_THRESHOLD",
+          "lower_confidence_bound_edge": -1.556935,
+          "no_trade_comparison_margin": -0.9793378951,
+          "scenario_name": "no_fill_case",
+          "scenario_pass": false,
+          "worst_case_loss": 2.8057282051
+        },
+        {
+          "expected_net_pnl": -1.1097943458,
+          "expected_shortfall_cvar": 1.53621031,
+          "failure_reason_code": "MISSING_DEFAULT_THRESHOLD",
+          "lower_confidence_bound_edge": -1.556935,
+          "no_trade_comparison_margin": -1.1097943458,
+          "scenario_name": "latency_stale_book_case",
+          "scenario_pass": false,
+          "worst_case_loss": 2.9361846558
+        },
+        {
+          "expected_net_pnl": -1.2402507965,
+          "expected_shortfall_cvar": 1.53621031,
+          "failure_reason_code": "MISSING_DEFAULT_THRESHOLD",
+          "lower_confidence_bound_edge": -1.556935,
+          "no_trade_comparison_margin": -1.2402507965,
+          "scenario_name": "adverse_selection_case",
+          "scenario_pass": false,
+          "worst_case_loss": 3.0666411065
+        },
+        {
+          "expected_net_pnl": -1.3707072472,
+          "expected_shortfall_cvar": 1.53621031,
+          "failure_reason_code": "MISSING_DEFAULT_THRESHOLD",
+          "lower_confidence_bound_edge": -1.556935,
+          "no_trade_comparison_margin": -1.3707072472,
+          "scenario_name": "liquidity_disappears_case",
+          "scenario_pass": false,
+          "worst_case_loss": 3.1970975572
+        },
+        {
+          "expected_net_pnl": -1.5011636979,
+          "expected_shortfall_cvar": 1.53621031,
+          "failure_reason_code": "MISSING_DEFAULT_THRESHOLD",
+          "lower_confidence_bound_edge": -1.556935,
+          "no_trade_comparison_margin": -1.5011636979,
+          "scenario_name": "news_shock_case",
+          "scenario_pass": false,
+          "worst_case_loss": 3.3275540079
+        },
+        {
+          "expected_net_pnl": -1.6316201487,
+          "expected_shortfall_cvar": 1.53621031,
+          "failure_reason_code": "MISSING_DEFAULT_THRESHOLD",
+          "lower_confidence_bound_edge": -1.556935,
+          "no_trade_comparison_margin": -1.6316201487,
+          "scenario_name": "probability_reversion_case",
+          "scenario_pass": false,
+          "worst_case_loss": 3.4580104587
+        },
+        {
+          "expected_net_pnl": -1.7620765994,
+          "expected_shortfall_cvar": 1.53621031,
+          "failure_reason_code": "MISSING_DEFAULT_THRESHOLD",
+          "lower_confidence_bound_edge": -1.556935,
+          "no_trade_comparison_margin": -1.7620765994,
+          "scenario_name": "correlated_event_loss_case",
+          "scenario_pass": false,
+          "worst_case_loss": 3.5884669094
+        },
+        {
+          "expected_net_pnl": -1.8925330501,
+          "expected_shortfall_cvar": 1.53621031,
+          "failure_reason_code": "MISSING_DEFAULT_THRESHOLD",
+          "lower_confidence_bound_edge": -1.556935,
+          "no_trade_comparison_margin": -1.8925330501,
+          "scenario_name": "settlement_delay_case",
+          "scenario_pass": false,
+          "worst_case_loss": 3.7189233601
+        },
+        {
+          "expected_net_pnl": -2.0229895008,
+          "expected_shortfall_cvar": 1.53621031,
+          "failure_reason_code": "MISSING_DEFAULT_THRESHOLD",
+          "lower_confidence_bound_edge": -1.556935,
+          "no_trade_comparison_margin": -2.0229895008,
+          "scenario_name": "fee_model_error_case",
+          "scenario_pass": false,
+          "worst_case_loss": 3.8493798108
+        }
+      ],
+      "scenario_ladder_pass": false,
+      "scenario_ladder_ref": "PR168_RP_SCENARIO::PR168_RP_RESULT::00001",
+      "upstream_source": "PR168_RP_RESULT::00001"
+    },
+    {
+      "canonical_row_key": "QKU::QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000002",
+      "consumer": "PR168_RANK",
+      "downstream_route": "PR168_RP_ScenarioFailureRepairQueue.report.json",
+      "no_orphan_status": "CONNECTED_TO_SCENARIO_CONSUMER",
+      "owning_agent": "Risk Manager Agent",
+      "producer": "PR168_RP_SCENARIO_LADDER",
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000002",
+      "scenario_cases": [
+        {
+          "expected_net_pnl": -0.2380957888,
+          "expected_shortfall_cvar": 1.10122791,
+          "failure_reason_code": "MISSING_DEFAULT_THRESHOLD",
+          "lower_confidence_bound_edge": -1.570752,
+          "no_trade_comparison_margin": -0.2380957888,
+          "scenario_name": "base_case",
+          "scenario_pass": false,
+          "worst_case_loss": 1.6406306988
+        },
+        {
+          "expected_net_pnl": -0.4384579188,
+          "expected_shortfall_cvar": 1.10122791,
+          "failure_reason_code": "MISSING_DEFAULT_THRESHOLD",
+          "lower_confidence_bound_edge": -1.570752,
+          "no_trade_comparison_margin": -0.4384579188,
+          "scenario_name": "best_case",
+          "scenario_pass": false,
+          "worst_case_loss": 1.8409928288
+        },
+        {
+          "expected_net_pnl": -0.5386389838,
+          "expected_shortfall_cvar": 1.10122791,
+          "failure_reason_code": "MISSING_DEFAULT_THRESHOLD",
+          "lower_confidence_bound_edge": -1.570752,
+          "no_trade_comparison_margin": -0.5386389838,
+          "scenario_name": "worst_case",
+          "scenario_pass": false,
+          "worst_case_loss": 1.9411738938
+        },
+        {
+          "expected_net_pnl": -0.6388200488,
+          "expected_shortfall_cvar": 1.10122791,
+          "failure_reason_code": "MISSING_DEFAULT_THRESHOLD",
+          "lower_confidence_bound_edge": -1.570752,
+          "no_trade_comparison_margin": -0.6388200488,
+          "scenario_name": "spread_widening_case",
+          "scenario_pass": false,
+          "worst_case_loss": 2.0413549588
+        },
+        {
+          "expected_net_pnl": -0.7390011138,
+          "expected_shortfall_cvar": 1.10122791,
+          "failure_reason_code": "MISSING_DEFAULT_THRESHOLD",
+          "lower_confidence_bound_edge": -1.570752,
+          "no_trade_comparison_margin": -0.7390011138,
+          "scenario_name": "partial_fill_case",
+          "scenario_pass": false,
+          "worst_case_loss": 2.1415360238
+        },
+        {
+          "expected_net_pnl": -0.8391821788,
+          "expected_shortfall_cvar": 1.10122791,
+          "failure_reason_code": "MISSING_DEFAULT_THRESHOLD",
+          "lower_confidence_bound_edge": -1.570752,
+          "no_trade_comparison_margin": -0.8391821788,
+          "scenario_name": "no_fill_case",
+          "scenario_pass": false,
+          "worst_case_loss": 2.2417170888
+        },
+        {
+          "expected_net_pnl": -0.9393632438,
+          "expected_shortfall_cvar": 1.10122791,
+          "failure_reason_code": "MISSING_DEFAULT_THRESHOLD",
+          "lower_confidence_bound_edge": -1.570752,
+          "no_trade_comparison_margin": -0.9393632438,
+          "scenario_name": "latency_stale_book_case",
+          "scenario_pass": false,
+          "worst_case_loss": 2.3418981538
+        },
+        {
+          "expected_net_pnl": -1.0395443088,
+          "expected_shortfall_cvar": 1.10122791,
+          "failure_reason_code": "MISSING_DEFAULT_THRESHOLD",
+          "lower_confidence_bound_edge": -1.570752,
+          "no_trade_comparison_margin": -1.0395443088,
+          "scenario_name": "adverse_selection_case",
+          "scenario_pass": false,
+          "worst_case_loss": 2.4420792188
+        },
+        {
+          "expected_net_pnl": -1.1397253738,
+          "expected_shortfall_cvar": 1.10122791,
+          "failure_reason_code": "MISSING_DEFAULT_THRESHOLD",
+          "lower_confidence_bound_edge": -1.570752,
+          "no_trade_comparison_margin": -1.1397253738,
+          "scenario_name": "liquidity_disappears_case",
+          "scenario_pass": false,
+          "worst_case_loss": 2.5422602838
+        },
+        {
+          "expected_net_pnl": -1.2399064388,
+          "expected_shortfall_cvar": 1.10122791,
+          "failure_reason_code": "MISSING_DEFAULT_THRESHOLD",
+          "lower_confidence_bound_edge": -1.570752,
+          "no_trade_comparison_margin": -1.2399064388,
+          "scenario_name": "news_shock_case",
+          "scenario_pass": false,
+          "worst_case_loss": 2.6424413488
+        },
+        {
+          "expected_net_pnl": -1.3400875038,
+          "expected_shortfall_cvar": 1.10122791,
+          "failure_reason_code": "MISSING_DEFAULT_THRESHOLD",
+          "lower_confidence_bound_edge": -1.570752,
+          "no_trade_comparison_margin": -1.3400875038,
+          "scenario_name": "probability_reversion_case",
+          "scenario_pass": false,
+          "worst_case_loss": 2.7426224138
+        },
+        {
+          "expected_net_pnl": -1.4402685688,
+          "expected_shortfall_cvar": 1.10122791,
+          "failure_reason_code": "MISSING_DEFAULT_THRESHOLD",
+          "lower_confidence_bound_edge": -1.570752,
+          "no_trade_comparison_margin": -1.4402685688,
+          "scenario_name": "correlated_event_loss_case",
+          "scenario_pass": false,
+          "worst_case_loss": 2.8428034788
+        },
+        {
+          "expected_net_pnl": -1.5404496338,
+          "expected_shortfall_cvar": 1.10122791,
+          "failure_reason_code": "MISSING_DEFAULT_THRESHOLD",
+          "lower_confidence_bound_edge": -1.570752,
+          "no_trade_comparison_margin": -1.5404496338,
+          "scenario_name": "settlement_delay_case",
+          "scenario_pass": false,
+          "worst_case_loss": 2.9429845438
+        },
+        {
+          "expected_net_pnl": -1.6406306988,
+          "expected_shortfall_cvar": 1.10122791,
+          "failure_reason_code": "MISSING_DEFAULT_THRESHOLD",
+          "lower_confidence_bound_edge": -1.570752,
+          "no_trade_comparison_margin": -1.6406306988,
+          "scenario_name": "fee_model_error_case",
+          "scenario_pass": false,
+          "worst_case_loss": 3.0431656088
+        }
+      ],
+      "scenario_ladder_pass": false,
+      "scenario_ladder_ref": "PR168_RP_SCENARIO::PR168_RP_RESULT::00002",
+      "upstream_source": "PR168_RP_RESULT::00002"
+    },
+    {
+      "canonical_row_key": "QKU::QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000003",
+      "consumer": "PR168_RANK",
+      "downstream_route": "PR168_RP_ScenarioFailureRepairQueue.report.json",
+      "no_orphan_status": "CONNECTED_TO_SCENARIO_CONSUMER",
+      "owning_agent": "Risk Manager Agent",
+      "producer": "PR168_RP_SCENARIO_LADDER",
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000003",
+      "scenario_cases": [
+        {
+          "expected_net_pnl": -0.4015288511,
+          "expected_shortfall_cvar": 0.3212428,
+          "failure_reason_code": "MISSING_DEFAULT_THRESHOLD",
+          "lower_confidence_bound_edge": -1.603224,
+          "no_trade_comparison_margin": -0.4015288511,
+          "scenario_name": "base_case",
+          "scenario_pass": false,
+          "worst_case_loss": 1.0818086511
+        },
+        {
+          "expected_net_pnl": -0.4987116797,
+          "expected_shortfall_cvar": 0.3212428,
+          "failure_reason_code": "MISSING_DEFAULT_THRESHOLD",
+          "lower_confidence_bound_edge": -1.603224,
+          "no_trade_comparison_margin": -0.4987116797,
+          "scenario_name": "best_case",
+          "scenario_pass": false,
+          "worst_case_loss": 1.1789914797
+        },
+        {
+          "expected_net_pnl": -0.547303094,
+          "expected_shortfall_cvar": 0.3212428,
+          "failure_reason_code": "MISSING_DEFAULT_THRESHOLD",
+          "lower_confidence_bound_edge": -1.603224,
+          "no_trade_comparison_margin": -0.547303094,
+          "scenario_name": "worst_case",
+          "scenario_pass": false,
+          "worst_case_loss": 1.227582894
+        },
+        {
+          "expected_net_pnl": -0.5958945082,
+          "expected_shortfall_cvar": 0.3212428,
+          "failure_reason_code": "MISSING_DEFAULT_THRESHOLD",
+          "lower_confidence_bound_edge": -1.603224,
+          "no_trade_comparison_margin": -0.5958945082,
+          "scenario_name": "spread_widening_case",
+          "scenario_pass": false,
+          "worst_case_loss": 1.2761743082
+        },
+        {
+          "expected_net_pnl": -0.6444859225,
+          "expected_shortfall_cvar": 0.3212428,
+          "failure_reason_code": "MISSING_DEFAULT_THRESHOLD",
+          "lower_confidence_bound_edge": -1.603224,
+          "no_trade_comparison_margin": -0.6444859225,
+          "scenario_name": "partial_fill_case",
+          "scenario_pass": false,
+          "worst_case_loss": 1.3247657225
+        },
+        {
+          "expected_net_pnl": -0.6930773368,
+          "expected_shortfall_cvar": 0.3212428,
+          "failure_reason_code": "MISSING_DEFAULT_THRESHOLD",
+          "lower_confidence_bound_edge": -1.603224,
+          "no_trade_comparison_margin": -0.6930773368,
+          "scenario_name": "no_fill_case",
+          "scenario_pass": false,
+          "worst_case_loss": 1.3733571368
+        },
+        {
+          "expected_net_pnl": -0.7416687511,
+          "expected_shortfall_cvar": 0.3212428,
+          "failure_reason_code": "MISSING_DEFAULT_THRESHOLD",
+          "lower_confidence_bound_edge": -1.603224,
+          "no_trade_comparison_margin": -0.7416687511,
+          "scenario_name": "latency_stale_book_case",
+          "scenario_pass": false,
+          "worst_case_loss": 1.4219485511
+        },
+        {
+          "expected_net_pnl": -0.7902601654,
+          "expected_shortfall_cvar": 0.3212428,
+          "failure_reason_code": "MISSING_DEFAULT_THRESHOLD",
+          "lower_confidence_bound_edge": -1.603224,
+          "no_trade_comparison_margin": -0.7902601654,
+          "scenario_name": "adverse_selection_case",
+          "scenario_pass": false,
+          "worst_case_loss": 1.4705399654
+        },
+        {
+          "expected_net_pnl": -0.8388515797,
+          "expected_shortfall_cvar": 0.3212428,
+          "failure_reason_code": "MISSING_DEFAULT_THRESHOLD",
+          "lower_confidence_bound_edge": -1.603224,
+          "no_trade_comparison_margin": -0.8388515797,
+          "scenario_name": "liquidity_disappears_case",
+          "scenario_pass": false,
+          "worst_case_loss": 1.5191313797
+        },
+        {
+          "expected_net_pnl": -0.887442994,
+          "expected_shortfall_cvar": 0.3212428,
+          "failure_reason_code": "MISSING_DEFAULT_THRESHOLD",
+          "lower_confidence_bound_edge": -1.603224,
+          "no_trade_comparison_margin": -0.887442994,
+          "scenario_name": "news_shock_case",
+          "scenario_pass": false,
+          "worst_case_loss": 1.567722794
+        },
+        {
+          "expected_net_pnl": -0.9360344082,
+          "expected_shortfall_cvar": 0.3212428,
+          "failure_reason_code": "MISSING_DEFAULT_THRESHOLD",
+          "lower_confidence_bound_edge": -1.603224,
+          "no_trade_comparison_margin": -0.9360344082,
+          "scenario_name": "probability_reversion_case",
+          "scenario_pass": false,
+          "worst_case_loss": 1.6163142082
+        },
+        {
+          "expected_net_pnl": -0.9846258225,
+          "expected_shortfall_cvar": 0.3212428,
+          "failure_reason_code": "MISSING_DEFAULT_THRESHOLD",
+          "lower_confidence_bound_edge": -1.603224,
+          "no_trade_comparison_margin": -0.9846258225,
+          "scenario_name": "correlated_event_loss_case",
+          "scenario_pass": false,
+          "worst_case_loss": 1.6649056225
+        },
+        {
+          "expected_net_pnl": -1.0332172368,
+          "expected_shortfall_cvar": 0.3212428,
+          "failure_reason_code": "MISSING_DEFAULT_THRESHOLD",
+          "lower_confidence_bound_edge": -1.603224,
+          "no_trade_comparison_margin": -1.0332172368,
+          "scenario_name": "settlement_delay_case",
+          "scenario_pass": false,
+          "worst_case_loss": 1.7134970368
+        },
+        {
+          "expected_net_pnl": -1.0818086511,
+          "expected_shortfall_cvar": 0.3212428,
+          "failure_reason_code": "MISSING_DEFAULT_THRESHOLD",
+          "lower_confidence_bound_edge": -1.603224,
+          "no_trade_comparison_margin": -1.0818086511,
+          "scenario_name": "fee_model_error_case",
+          "scenario_pass": false,
+          "worst_case_loss": 1.7620884511
+        }
+      ],
+      "scenario_ladder_pass": false,
+      "scenario_ladder_ref": "PR168_RP_SCENARIO::PR168_RP_RESULT::00003",
+      "upstream_source": "PR168_RP_RESULT::00003"
+    },
+    {
+      "canonical_row_key": "QKU::QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000004",
+      "consumer": "PR168_RANK",
+      "downstream_route": "PR168_RP_ScenarioFailureRepairQueue.report.json",
+      "no_orphan_status": "CONNECTED_TO_SCENARIO_CONSUMER",
+      "owning_agent": "Risk Manager Agent",
+      "producer": "PR168_RP_SCENARIO_LADDER",
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000004",
+      "scenario_cases": [
+        {
+          "expected_net_pnl": -0.3904372706,
+          "expected_shortfall_cvar": 0.31691114,
+          "failure_reason_code": "MISSING_DEFAULT_THRESHOLD",
+          "lower_confidence_bound_edge": -1.392077,
+          "no_trade_comparison_margin": -0.3904372706,
+          "scenario_name": "base_case",
+          "scenario_pass": false,
+          "worst_case_loss": 1.0040324106
+        },
+        {
+          "expected_net_pnl": -0.4780937192,
+          "expected_shortfall_cvar": 0.31691114,
+          "failure_reason_code": "MISSING_DEFAULT_THRESHOLD",
+          "lower_confidence_bound_edge": -1.392077,
+          "no_trade_comparison_margin": -0.4780937192,
+          "scenario_name": "best_case",
+          "scenario_pass": false,
+          "worst_case_loss": 1.0916888592
+        },
+        {
+          "expected_net_pnl": -0.5219219435,
+          "expected_shortfall_cvar": 0.31691114,
+          "failure_reason_code": "MISSING_DEFAULT_THRESHOLD",
+          "lower_confidence_bound_edge": -1.392077,
+          "no_trade_comparison_margin": -0.5219219435,
+          "scenario_name": "worst_case",
+          "scenario_pass": false,
+          "worst_case_loss": 1.1355170835
+        },
+        {
+          "expected_net_pnl": -0.5657501677,
+          "expected_shortfall_cvar": 0.31691114,
+          "failure_reason_code": "MISSING_DEFAULT_THRESHOLD",
+          "lower_confidence_bound_edge": -1.392077,
+          "no_trade_comparison_margin": -0.5657501677,
+          "scenario_name": "spread_widening_case",
+          "scenario_pass": false,
+          "worst_case_loss": 1.1793453077
+        },
+        {
+          "expected_net_pnl": -0.609578392,
+          "expected_shortfall_cvar": 0.31691114,
+          "failure_reason_code": "MISSING_DEFAULT_THRESHOLD",
+          "lower_confidence_bound_edge": -1.392077,
+          "no_trade_comparison_margin": -0.609578392,
+          "scenario_name": "partial_fill_case",
+          "scenario_pass": false,
+          "worst_case_loss": 1.223173532
+        },
+        {
+          "expected_net_pnl": -0.6534066163,
+          "expected_shortfall_cvar": 0.31691114,
+          "failure_reason_code": "MISSING_DEFAULT_THRESHOLD",
+          "lower_confidence_bound_edge": -1.392077,
+          "no_trade_comparison_margin": -0.6534066163,
+          "scenario_name": "no_fill_case",
+          "scenario_pass": false,
+          "worst_case_loss": 1.2670017563
+        },
+        {
+          "expected_net_pnl": -0.6972348406,
+          "expected_shortfall_cvar": 0.31691114,
+          "failure_reason_code": "MISSING_DEFAULT_THRESHOLD",
+          "lower_confidence_bound_edge": -1.392077,
+          "no_trade_comparison_margin": -0.6972348406,
+          "scenario_name": "latency_stale_book_case",
+          "scenario_pass": false,
+          "worst_case_loss": 1.3108299806
+        },
+        {
+          "expected_net_pnl": -0.7410630649,
+          "expected_shortfall_cvar": 0.31691114,
+          "failure_reason_code": "MISSING_DEFAULT_THRESHOLD",
+          "lower_confidence_bound_edge": -1.392077,
+          "no_trade_comparison_margin": -0.7410630649,
+          "scenario_name": "adverse_selection_case",
+          "scenario_pass": false,
+          "worst_case_loss": 1.3546582049
+        },
+        {
+          "expected_net_pnl": -0.7848912892,
+          "expected_shortfall_cvar": 0.31691114,
+          "failure_reason_code": "MISSING_DEFAULT_THRESHOLD",
+          "lower_confidence_bound_edge": -1.392077,
+          "no_trade_comparison_margin": -0.7848912892,
+          "scenario_name": "liquidity_disappears_case",
+          "scenario_pass": false,
+          "worst_case_loss": 1.3984864292
+        },
+        {
+          "expected_net_pnl": -0.8287195135,
+          "expected_shortfall_cvar": 0.31691114,
+          "failure_reason_code": "MISSING_DEFAULT_THRESHOLD",
+          "lower_confidence_bound_edge": -1.392077,
+          "no_trade_comparison_margin": -0.8287195135,
+          "scenario_name": "news_shock_case",
+          "scenario_pass": false,
+          "worst_case_loss": 1.4423146535
+        },
+        {
+          "expected_net_pnl": -0.8725477377,
+          "expected_shortfall_cvar": 0.31691114,
+          "failure_reason_code": "MISSING_DEFAULT_THRESHOLD",
+          "lower_confidence_bound_edge": -1.392077,
+          "no_trade_comparison_margin": -0.8725477377,
+          "scenario_name": "probability_reversion_case",
+          "scenario_pass": false,
+          "worst_case_loss": 1.4861428777
+        },
+        {
+          "expected_net_pnl": -0.916375962,
+          "expected_shortfall_cvar": 0.31691114,
+          "failure_reason_code": "MISSING_DEFAULT_THRESHOLD",
+          "lower_confidence_bound_edge": -1.392077,
+          "no_trade_comparison_margin": -0.916375962,
+          "scenario_name": "correlated_event_loss_case",
+          "scenario_pass": false,
+          "worst_case_loss": 1.529971102
+        },
+        {
+          "expected_net_pnl": -0.9602041863,
+          "expected_shortfall_cvar": 0.31691114,
+          "failure_reason_code": "MISSING_DEFAULT_THRESHOLD",
+          "lower_confidence_bound_edge": -1.392077,
+          "no_trade_comparison_margin": -0.9602041863,
+          "scenario_name": "settlement_delay_case",
+          "scenario_pass": false,
+          "worst_case_loss": 1.5737993263
+        },
+        {
+          "expected_net_pnl": -1.0040324106,
+          "expected_shortfall_cvar": 0.31691114,
+          "failure_reason_code": "MISSING_DEFAULT_THRESHOLD",
+          "lower_confidence_bound_edge": -1.392077,
+          "no_trade_comparison_margin": -1.0040324106,
+          "scenario_name": "fee_model_error_case",
+          "scenario_pass": false,
+          "worst_case_loss": 1.6176275506
+        }
+      ],
+      "scenario_ladder_pass": false,
+      "scenario_ladder_ref": "PR168_RP_SCENARIO::PR168_RP_RESULT::00004",
+      "upstream_source": "PR168_RP_RESULT::00004"
+    },
+    {
+      "canonical_row_key": "QKU::QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000005",
+      "consumer": "PR168_RANK",
+      "downstream_route": "PR168_RP_ScenarioFailureRepairQueue.report.json",
+      "no_orphan_status": "CONNECTED_TO_SCENARIO_CONSUMER",
+      "owning_agent": "Risk Manager Agent",
+      "producer": "PR168_RP_SCENARIO_LADDER",
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000005",
+      "scenario_cases": [
+        {
+          "expected_net_pnl": -0.3631875685,
+          "expected_shortfall_cvar": 0.68578602,
+          "failure_reason_code": "MISSING_DEFAULT_THRESHOLD",
+          "lower_confidence_bound_edge": -1.420286,
+          "no_trade_comparison_margin": -0.3631875685,
+          "scenario_name": "base_case",
+          "scenario_pass": false,
+          "worst_case_loss": 1.1941195885
+        },
+        {
+          "expected_net_pnl": -0.4818921428,
+          "expected_shortfall_cvar": 0.68578602,
+          "failure_reason_code": "MISSING_DEFAULT_THRESHOLD",
+          "lower_confidence_bound_edge": -1.420286,
+          "no_trade_comparison_margin": -0.4818921428,
+          "scenario_name": "best_case",
+          "scenario_pass": false,
+          "worst_case_loss": 1.3128241628
+        },
+        {
+          "expected_net_pnl": -0.5412444299,
+          "expected_shortfall_cvar": 0.68578602,
+          "failure_reason_code": "MISSING_DEFAULT_THRESHOLD",
+          "lower_confidence_bound_edge": -1.420286,
+          "no_trade_comparison_margin": -0.5412444299,
+          "scenario_name": "worst_case",
+          "scenario_pass": false,
+          "worst_case_loss": 1.3721764499
+        },
+        {
+          "expected_net_pnl": -0.6005967171,
+          "expected_shortfall_cvar": 0.68578602,
+          "failure_reason_code": "MISSING_DEFAULT_THRESHOLD",
+          "lower_confidence_bound_edge": -1.420286,
+          "no_trade_comparison_margin": -0.6005967171,
+          "scenario_name": "spread_widening_case",
+          "scenario_pass": false,
+          "worst_case_loss": 1.4315287371
+        },
+        {
+          "expected_net_pnl": -0.6599490042,
+          "expected_shortfall_cvar": 0.68578602,
+          "failure_reason_code": "MISSING_DEFAULT_THRESHOLD",
+          "lower_confidence_bound_edge": -1.420286,
+          "no_trade_comparison_margin": -0.6599490042,
+          "scenario_name": "partial_fill_case",
+          "scenario_pass": false,
+          "worst_case_loss": 1.4908810242
+        },
+        {
+          "expected_net_pnl": -0.7193012914,
+          "expected_shortfall_cvar": 0.68578602,
+          "failure_reason_code": "MISSING_DEFAULT_THRESHOLD",
+          "lower_confidence_bound_edge": -1.420286,
+          "no_trade_comparison_margin": -0.7193012914,
+          "scenario_name": "no_fill_case",
+          "scenario_pass": false,
+          "worst_case_loss": 1.5502333114
+        },
+        {
+          "expected_net_pnl": -0.7786535785,
+          "expected_shortfall_cvar": 0.68578602,
+          "failure_reason_code": "MISSING_DEFAULT_THRESHOLD",
+          "lower_confidence_bound_edge": -1.420286,
+          "no_trade_comparison_margin": -0.7786535785,
+          "scenario_name": "latency_stale_book_case",
+          "scenario_pass": false,
+          "worst_case_loss": 1.6095855985
+        },
+        {
+          "expected_net_pnl": -0.8380058656,
+          "expected_shortfall_cvar": 0.68578602,
+          "failure_reason_code": "MISSING_DEFAULT_THRESHOLD",
+          "lower_confidence_bound_edge": -1.420286,
+          "no_trade_comparison_margin": -0.8380058656,
+          "scenario_name": "adverse_selection_case",
+          "scenario_pass": false,
+          "worst_case_loss": 1.6689378856
+        },
+        {
+          "expected_net_pnl": -0.8973581528,
+          "expected_shortfall_cvar": 0.68578602,
+          "failure_reason_code": "MISSING_DEFAULT_THRESHOLD",
+          "lower_confidence_bound_edge": -1.420286,
+          "no_trade_comparison_margin": -0.8973581528,
+          "scenario_name": "liquidity_disappears_case",
+          "scenario_pass": false,
+          "worst_case_loss": 1.7282901728
+        },
+        {
+          "expected_net_pnl": -0.9567104399,
+          "expected_shortfall_cvar": 0.68578602,
+          "failure_reason_code": "MISSING_DEFAULT_THRESHOLD",
+          "lower_confidence_bound_edge": -1.420286,
+          "no_trade_comparison_margin": -0.9567104399,
+          "scenario_name": "news_shock_case",
+          "scenario_pass": false,
+          "worst_case_loss": 1.7876424599
+        },
+        {
+          "expected_net_pnl": -1.0160627271,
+          "expected_shortfall_cvar": 0.68578602,
+          "failure_reason_code": "MISSING_DEFAULT_THRESHOLD",
+          "lower_confidence_bound_edge": -1.420286,
+          "no_trade_comparison_margin": -1.0160627271,
+          "scenario_name": "probability_reversion_case",
+          "scenario_pass": false,
+          "worst_case_loss": 1.8469947471
+        },
+        {
+          "expected_net_pnl": -1.0754150142,
+          "expected_shortfall_cvar": 0.68578602,
+          "failure_reason_code": "MISSING_DEFAULT_THRESHOLD",
+          "lower_confidence_bound_edge": -1.420286,
+          "no_trade_comparison_margin": -1.0754150142,
+          "scenario_name": "correlated_event_loss_case",
+          "scenario_pass": false,
+          "worst_case_loss": 1.9063470342
+        },
+        {
+          "expected_net_pnl": -1.1347673014,
+          "expected_shortfall_cvar": 0.68578602,
+          "failure_reason_code": "MISSING_DEFAULT_THRESHOLD",
+          "lower_confidence_bound_edge": -1.420286,
+          "no_trade_comparison_margin": -1.1347673014,
+          "scenario_name": "settlement_delay_case",
+          "scenario_pass": false,
+          "worst_case_loss": 1.9656993214
+        },
+        {
+          "expected_net_pnl": -1.1941195885,
+          "expected_shortfall_cvar": 0.68578602,
+          "failure_reason_code": "MISSING_DEFAULT_THRESHOLD",
+          "lower_confidence_bound_edge": -1.420286,
+          "no_trade_comparison_margin": -1.1941195885,
+          "scenario_name": "fee_model_error_case",
+          "scenario_pass": false,
+          "worst_case_loss": 2.0250516085
+        }
+      ],
+      "scenario_ladder_pass": false,
+      "scenario_ladder_ref": "PR168_RP_SCENARIO::PR168_RP_RESULT::00005",
+      "upstream_source": "PR168_RP_RESULT::00005"
+    }
+  ],
+  "report_type": "PR168_RP_SCENARIOLADDERRESULTS.REPORT",
+  "runtime_cash_receipt_count": 0,
+  "source_truth_authority": false,
+  "summary": {
+    "authority_created_count": 0,
+    "baseline_counts": {
+      "atomicrows_count": 4183,
+      "current_candidate_packet_v1_count": 6502,
+      "formula_assignment_rows": 20387,
+      "historical_master_qku_count": 9360,
+      "required_formula_sets": 5,
+      "selected_formula_count": 35
+    },
+    "computed_negative_count": 10515,
+    "computed_neutral_count": 0,
+    "computed_positive_count": 0,
+    "computed_row_count": 10515,
+    "input_gap_count": 9872,
+    "negative_recovery_attempt_count": 10515,
+    "pretrade_candidate_count": 73605,
+    "preview_record_count": 5,
+    "record_count": 10515,
+    "records_omitted_for_sharding_flag": true,
+    "report": "PR168_RP_ScenarioLadderResults.report.json",
+    "shard_count": 11,
+    "shard_files": [
+      "docs/master_plan/generated/pr168_rp_shards/PR168_RP_ScenarioLadderResults.report.part_0001_of_0011.report.json",
+      "docs/master_plan/generated/pr168_rp_shards/PR168_RP_ScenarioLadderResults.report.part_0002_of_0011.report.json",
+      "docs/master_plan/generated/pr168_rp_shards/PR168_RP_ScenarioLadderResults.report.part_0003_of_0011.report.json",
+      "docs/master_plan/generated/pr168_rp_shards/PR168_RP_ScenarioLadderResults.report.part_0004_of_0011.report.json",
+      "docs/master_plan/generated/pr168_rp_shards/PR168_RP_ScenarioLadderResults.report.part_0005_of_0011.report.json",
+      "docs/master_plan/generated/pr168_rp_shards/PR168_RP_ScenarioLadderResults.report.part_0006_of_0011.report.json",
+      "docs/master_plan/generated/pr168_rp_shards/PR168_RP_ScenarioLadderResults.report.part_0007_of_0011.report.json",
+      "docs/master_plan/generated/pr168_rp_shards/PR168_RP_ScenarioLadderResults.report.part_0008_of_0011.report.json",
+      "docs/master_plan/generated/pr168_rp_shards/PR168_RP_ScenarioLadderResults.report.part_0009_of_0011.report.json",
+      "docs/master_plan/generated/pr168_rp_shards/PR168_RP_ScenarioLadderResults.report.part_0010_of_0011.report.json",
+      "docs/master_plan/generated/pr168_rp_shards/PR168_RP_ScenarioLadderResults.report.part_0011_of_0011.report.json"
+    ],
+    "sharded_flag": true,
+    "status_counts": {
+      "COMPUTED_NEGATIVE_EDGE": 10515,
+      "FORMULA_ASSIGNED_INPUTS_MISSING": 9872
+    }
+  },
+  "upstream_source": "PR168-GFP truth overlay plus repo replay-paper evidence candidates"
+}

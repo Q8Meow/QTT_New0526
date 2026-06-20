@@ -1,0 +1,72 @@
+{
+  "authority_boundary_codes": [
+    "NO_LIVE_ORDER_AUTHORITY",
+    "NO_SOURCE_TRUTH_AUTHORITY",
+    "NO_CONNECTOR_TRUTH_OR_BINDING",
+    "NO_PRIVATE_STATE_OR_CASH",
+    "NO_QUANTUM_BACKEND_EXECUTION",
+    "NO_LLM_HOT_PATH_AUTHORITY",
+    "NO_QTT_DIGEST_AUTHORITY",
+    "NO_ATOMICROWS_DIGEST_AUTHORITY"
+  ],
+  "connector_semantic_binding_created": false,
+  "connector_truth_authority": false,
+  "consumer": "PR168-RANK",
+  "downstream_route": "PR168_RP_FutureMarketDormancyIndex.report.json",
+  "generated_digest_authority_created": false,
+  "live_authority": false,
+  "llm_hot_path_authority": false,
+  "no_orphan_status": "CONNECTED_TO_DECLARED_CONSUMER",
+  "order_authority": false,
+  "owning_agent": "Replay Paper Recompute Agent",
+  "pr_id": "PR168-RP",
+  "private_state_read_count": 0,
+  "producer": "PR168_RP_FORMULA_BASED_REPLAY_PAPER_RECOMPUTE",
+  "quantum_advantage_claim_count": 0,
+  "quantum_backend_execution_count": 0,
+  "record_count": 1,
+  "records": [
+    {
+      "consumer": "Future Market Agent",
+      "dormant": true,
+      "downstream_route": "PR168_RP_FutureMarketDormancyIndex.report.json",
+      "index_id": "future_equities_options_futures_crypto_fx_rates_commodities_dormant_index",
+      "live_authority": false,
+      "no_orphan_status": "CONNECTED_TO_FUTURE_MARKET_CONSUMER",
+      "owning_agent": "Governance Agent",
+      "producer": "PR168_RP_MARKET_INDEXER",
+      "reactivation_route": "FUTURE_MARKET_SCOPE_PR_REQUIRED",
+      "row_count": 0,
+      "upstream_source": "PR168_RP_MarketSpecificSectionIndexes.report.json"
+    }
+  ],
+  "report_type": "PR168_RP_FUTUREMARKETDORMANCYINDEX.REPORT",
+  "runtime_cash_receipt_count": 0,
+  "source_truth_authority": false,
+  "summary": {
+    "authority_created_count": 0,
+    "baseline_counts": {
+      "atomicrows_count": 4183,
+      "current_candidate_packet_v1_count": 6502,
+      "formula_assignment_rows": 20387,
+      "historical_master_qku_count": 9360,
+      "required_formula_sets": 5,
+      "selected_formula_count": 35
+    },
+    "computed_negative_count": 10515,
+    "computed_neutral_count": 0,
+    "computed_positive_count": 0,
+    "computed_row_count": 10515,
+    "input_gap_count": 9872,
+    "negative_recovery_attempt_count": 10515,
+    "pretrade_candidate_count": 73605,
+    "record_count": 1,
+    "report": "PR168_RP_FutureMarketDormancyIndex.report.json",
+    "sharded_flag": false,
+    "status_counts": {
+      "COMPUTED_NEGATIVE_EDGE": 10515,
+      "FORMULA_ASSIGNED_INPUTS_MISSING": 9872
+    }
+  },
+  "upstream_source": "PR168-GFP truth overlay plus repo replay-paper evidence candidates"
+}

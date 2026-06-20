@@ -410,6 +410,12 @@ PYTEST_SHARD_COMMANDS: dict[str, tuple[PytestShardCommand, ...]] = {
             runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
             historical_runtime_seconds=2.0,
         ),
+        PytestShardCommand(
+            paths=("tests/pr168_rp",),
+            reason="PR168-RP replay/paper recompute and pretrade focused tests",
+            runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
+            historical_runtime_seconds=65.0,
+        ),
     ),
     "pytest-shard-3": (
         PytestShardCommand(
@@ -2910,6 +2916,153 @@ def build_validation_commands(
                 "tools",
                 "validate_pr168_gfp_authority_boundaries.py",
             ),
+        ],
+        [
+            sys.executable,
+            _path(
+                "tools",
+                "build_pr168_rp_formula_based_replay_paper_recompute.py",
+            ),
+        ],
+        [
+            sys.executable,
+            _path("tools", "validate_qtt_authority_reason_code_registry.py"),
+        ],
+        [
+            sys.executable,
+            _path("tools", "validate_pr168_rp_formula_execution.py"),
+        ],
+        [
+            sys.executable,
+            _path("tools", "validate_pr168_rp_replay_paper_results.py"),
+        ],
+        [
+            sys.executable,
+            _path("tools", "validate_pr168_rp_no_fake_computed_labels.py"),
+        ],
+        [
+            sys.executable,
+            _path("tools", "validate_pr168_rp_tca_pnl_math.py"),
+        ],
+        [
+            sys.executable,
+            _path("tools", "validate_pr168_rp_microstructure_fill_model.py"),
+        ],
+        [
+            sys.executable,
+            _path("tools", "validate_pr168_rp_pretrade_simulation_kernel.py"),
+        ],
+        [
+            sys.executable,
+            _path("tools", "validate_pr168_rp_order_policy_candidate_ranking.py"),
+        ],
+        [
+            sys.executable,
+            _path("tools", "validate_pr168_rp_no_trade_candidate.py"),
+        ],
+        [
+            sys.executable,
+            _path("tools", "validate_pr168_rp_scenario_ladder.py"),
+        ],
+        [
+            sys.executable,
+            _path("tools", "validate_pr168_rp_latency_budget.py"),
+        ],
+        [
+            sys.executable,
+            _path("tools", "validate_pr168_rp_live_candidate_handoff_no_order_authority.py"),
+        ],
+        [
+            sys.executable,
+            _path("tools", "validate_pr168_rp_probability_calibration.py"),
+        ],
+        [
+            sys.executable,
+            _path("tools", "validate_pr168_rp_overfit_fdr.py"),
+        ],
+        [
+            sys.executable,
+            _path("tools", "validate_pr168_rp_quantum_objective_recompute.py"),
+        ],
+        [
+            sys.executable,
+            _path("tools", "validate_pr168_rp_quantum_structural_readiness.py"),
+        ],
+        [
+            sys.executable,
+            _path("tools", "validate_pr168_rp_portfolio_marginal_utility.py"),
+        ],
+        [
+            sys.executable,
+            _path("tools", "validate_pr168_rp_capacity_crowding.py"),
+        ],
+        [
+            sys.executable,
+            _path("tools", "validate_pr168_rp_regime_memory.py"),
+        ],
+        [
+            sys.executable,
+            _path("tools", "validate_pr168_rp_champion_challenger.py"),
+        ],
+        [
+            sys.executable,
+            _path("tools", "validate_pr168_rp_combination_selection.py"),
+        ],
+        [
+            sys.executable,
+            _path("tools", "validate_pr168_rp_negative_recovery.py"),
+        ],
+        [
+            sys.executable,
+            _path("tools", "validate_pr168_rp_edge_attribution.py"),
+        ],
+        [
+            sys.executable,
+            _path("tools", "validate_pr168_rp_agent_duty_orchestration.py"),
+        ],
+        [
+            sys.executable,
+            _path("tools", "validate_pr168_rp_connector_candidate_routing.py"),
+        ],
+        [
+            sys.executable,
+            _path("tools", "validate_pr168_rp_strict_input_consumption.py"),
+        ],
+        [
+            sys.executable,
+            _path("tools", "validate_pr168_rp_no_orphan_lineage.py"),
+        ],
+        [
+            sys.executable,
+            _path("tools", "validate_pr168_rp_artifact_information_value_dag.py"),
+        ],
+        [
+            sys.executable,
+            _path("tools", "validate_pr168_rp_authority_boundaries.py"),
+        ],
+        [
+            sys.executable,
+            _path("tools", "validate_pr168_rp_report_compactness.py"),
+        ],
+        [
+            sys.executable,
+            _path("tools", "validate_pr168_rp_validation_scope_registry_integration.py"),
+        ],
+        [
+            sys.executable,
+            _path("tools", "validate_pr168_rp_windows_linux_compatibility.py"),
+        ],
+        [
+            sys.executable,
+            _path("tools", "validate_pr168_rp_no_metadata_only_pass.py"),
+        ],
+        [
+            sys.executable,
+            _path("tools", "validate_pr168_rp_no_forced_negative_to_positive.py"),
+        ],
+        [
+            sys.executable,
+            _path("tools", "validate_pr168_rp_no_scattered_authority_wording.py"),
         ],
         [
             sys.executable,

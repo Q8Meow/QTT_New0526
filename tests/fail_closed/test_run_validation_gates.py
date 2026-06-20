@@ -921,6 +921,50 @@ def _expected_commands(
             python_executable,
             str(Path("tools") / "validate_pr168_gfp_authority_boundaries.py"),
         ],
+        *[
+            [
+                python_executable,
+                str(Path("tools") / script_name),
+            ]
+            for script_name in (
+                "build_pr168_rp_formula_based_replay_paper_recompute.py",
+                "validate_qtt_authority_reason_code_registry.py",
+                "validate_pr168_rp_formula_execution.py",
+                "validate_pr168_rp_replay_paper_results.py",
+                "validate_pr168_rp_no_fake_computed_labels.py",
+                "validate_pr168_rp_tca_pnl_math.py",
+                "validate_pr168_rp_microstructure_fill_model.py",
+                "validate_pr168_rp_pretrade_simulation_kernel.py",
+                "validate_pr168_rp_order_policy_candidate_ranking.py",
+                "validate_pr168_rp_no_trade_candidate.py",
+                "validate_pr168_rp_scenario_ladder.py",
+                "validate_pr168_rp_latency_budget.py",
+                "validate_pr168_rp_live_candidate_handoff_no_order_authority.py",
+                "validate_pr168_rp_probability_calibration.py",
+                "validate_pr168_rp_overfit_fdr.py",
+                "validate_pr168_rp_quantum_objective_recompute.py",
+                "validate_pr168_rp_quantum_structural_readiness.py",
+                "validate_pr168_rp_portfolio_marginal_utility.py",
+                "validate_pr168_rp_capacity_crowding.py",
+                "validate_pr168_rp_regime_memory.py",
+                "validate_pr168_rp_champion_challenger.py",
+                "validate_pr168_rp_combination_selection.py",
+                "validate_pr168_rp_negative_recovery.py",
+                "validate_pr168_rp_edge_attribution.py",
+                "validate_pr168_rp_agent_duty_orchestration.py",
+                "validate_pr168_rp_connector_candidate_routing.py",
+                "validate_pr168_rp_strict_input_consumption.py",
+                "validate_pr168_rp_no_orphan_lineage.py",
+                "validate_pr168_rp_artifact_information_value_dag.py",
+                "validate_pr168_rp_authority_boundaries.py",
+                "validate_pr168_rp_report_compactness.py",
+                "validate_pr168_rp_validation_scope_registry_integration.py",
+                "validate_pr168_rp_windows_linux_compatibility.py",
+                "validate_pr168_rp_no_metadata_only_pass.py",
+                "validate_pr168_rp_no_forced_negative_to_positive.py",
+                "validate_pr168_rp_no_scattered_authority_wording.py",
+            )
+        ],
         [
             python_executable,
             str(
@@ -2724,6 +2768,7 @@ def test_runner_splits_pytest_shard_2_longest_group_deterministically():
         ),
         ("tests/atomicrows",),
         ("tests/pr168_gfp",),
+        ("tests/pr168_rp",),
     ]
     assert all(command.reason for command in commands)
     assert ("tests/stage1_prediction_markets",) not in [

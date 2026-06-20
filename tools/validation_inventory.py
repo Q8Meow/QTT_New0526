@@ -43,6 +43,8 @@ VALIDATION_INFRASTRUCTURE_GLOBS = (
     "tools/ci_branch_context.py",
     "tools/validation_scope_registry.py",
     "tools/validate_validation_scope_registry.py",
+    "tools/qtt_authority_reason_code_registry.py",
+    "tools/validate_qtt_authority_reason_code_registry.py",
     "tools/validation_inventory.py",
     "tools/validate_validation_inventory.py",
     "tools/validate_idempotence_runtime_containment.py",
@@ -59,6 +61,7 @@ VALIDATION_INFRASTRUCTURE_GLOBS = (
     "tests/tools/test_cross_platform_path_invariant.py",
     "tests/tools/test_ci_branch_context.py",
     "tests/tools/test_validation_scope_registry.py",
+    "tests/tools/test_qtt_authority_reason_code_registry.py",
     "tests/fail_closed/test_run_validation_gates.py",
     "docs/master_plan/generated/PR208_*.report.json",
 )
@@ -217,6 +220,8 @@ def _owner_pr_or_feature(stem: str) -> str:
     token = _pr_token(stem)
     if token is not None:
         return _pr_tag_from_token(token)
+    if "qtt_authority_reason_code_registry" in stem:
+        return "PR168-RP"
     if "atomicrows" in stem:
         return "AtomicRows"
     if "source_evidence" in stem:
@@ -236,6 +241,11 @@ def _owner_pr_or_feature(stem: str) -> str:
 
 def _owner_domain(stem: str, command: Sequence[str]) -> str:
     haystack = " ".join(command).lower()
+    if (
+        "qtt_authority_reason_code_registry" in stem
+        or "qtt_authority_reason_code_registry" in haystack
+    ):
+        return "QTT authority reason code registry"
     if (
         "validation_inventory" in stem
         or "changed_area" in stem
@@ -335,6 +345,14 @@ def _domain_globs(stem: str, command: Sequence[str]) -> tuple[str, ...]:
                 "tools/validation_scope_registry.py",
                 "tools/validate_validation_scope_registry.py",
                 "tests/tools/test_validation_scope_registry.py",
+            )
+        )
+    if "qtt_authority_reason_code_registry" in haystack:
+        globs.extend(
+            (
+                "tools/qtt_authority_reason_code_registry.py",
+                "tools/validate_qtt_authority_reason_code_registry.py",
+                "tests/tools/test_qtt_authority_reason_code_registry.py",
             )
         )
     if "grand_global_debug_logical_consistency_audit" in stem:

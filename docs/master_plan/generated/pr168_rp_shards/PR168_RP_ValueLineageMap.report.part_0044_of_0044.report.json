@@ -1,0 +1,639 @@
+{
+  "authority_boundary_codes": [
+    "NO_LIVE_ORDER_AUTHORITY",
+    "NO_SOURCE_TRUTH_AUTHORITY",
+    "NO_CONNECTOR_TRUTH_OR_BINDING",
+    "NO_PRIVATE_STATE_OR_CASH",
+    "NO_QUANTUM_BACKEND_EXECUTION",
+    "NO_LLM_HOT_PATH_AUTHORITY",
+    "NO_QTT_DIGEST_AUTHORITY",
+    "NO_ATOMICROWS_DIGEST_AUTHORITY"
+  ],
+  "connector_semantic_binding_created": false,
+  "connector_truth_authority": false,
+  "consumer": "PR168-RANK",
+  "downstream_route": "PR168_RP_ValueLineageMap.report.json",
+  "generated_digest_authority_created": false,
+  "live_authority": false,
+  "llm_hot_path_authority": false,
+  "no_orphan_status": "CONNECTED_TO_DECLARED_CONSUMER",
+  "order_authority": false,
+  "owning_agent": "Replay Paper Recompute Agent",
+  "pr_id": "PR168-RP",
+  "private_state_read_count": 0,
+  "producer": "PR168_RP_FORMULA_BASED_REPLAY_PAPER_RECOMPUTE",
+  "quantum_advantage_claim_count": 0,
+  "quantum_backend_execution_count": 0,
+  "record_count": 60,
+  "records": [
+    {
+      "consumer": "Input Materialization Agent",
+      "downstream_route": "PR168_RP_ValueLineageMap.report.json",
+      "metric_name": "missing_input_gap",
+      "no_orphan_status": "CONNECTED_TO_VALUE_LINEAGE_CONSUMER",
+      "owning_agent": "Quantum AutoMapper Agent",
+      "producer": "PR168_RP_INPUT_RESOLVER",
+      "upstream_source": "docs/master_plan/generated/PR161C_QKU9360PrimaryMaterializationRegistry.report.json",
+      "value_ref": "PR168_RP_INPUT_GAP::02470"
+    },
+    {
+      "consumer": "Input Materialization Agent",
+      "downstream_route": "PR168_RP_ValueLineageMap.report.json",
+      "metric_name": "missing_input_gap",
+      "no_orphan_status": "CONNECTED_TO_VALUE_LINEAGE_CONSUMER",
+      "owning_agent": "Quantum AutoMapper Agent",
+      "producer": "PR168_RP_INPUT_RESOLVER",
+      "upstream_source": "docs/master_plan/generated/PR161C_QKU9360PrimaryMaterializationRegistry.report.json",
+      "value_ref": "PR168_RP_INPUT_GAP::02471"
+    },
+    {
+      "consumer": "Input Materialization Agent",
+      "downstream_route": "PR168_RP_ValueLineageMap.report.json",
+      "metric_name": "missing_input_gap",
+      "no_orphan_status": "CONNECTED_TO_VALUE_LINEAGE_CONSUMER",
+      "owning_agent": "Quantum AutoMapper Agent",
+      "producer": "PR168_RP_INPUT_RESOLVER",
+      "upstream_source": "docs/master_plan/generated/PR161C_QKU9360PrimaryMaterializationRegistry.report.json",
+      "value_ref": "PR168_RP_INPUT_GAP::02472"
+    },
+    {
+      "consumer": "Input Materialization Agent",
+      "downstream_route": "PR168_RP_ValueLineageMap.report.json",
+      "metric_name": "missing_input_gap",
+      "no_orphan_status": "CONNECTED_TO_VALUE_LINEAGE_CONSUMER",
+      "owning_agent": "Quantum AutoMapper Agent",
+      "producer": "PR168_RP_INPUT_RESOLVER",
+      "upstream_source": "docs/master_plan/generated/PR161C_QKU9360PrimaryMaterializationRegistry.report.json",
+      "value_ref": "PR168_RP_INPUT_GAP::02473"
+    },
+    {
+      "consumer": "Input Materialization Agent",
+      "downstream_route": "PR168_RP_ValueLineageMap.report.json",
+      "metric_name": "missing_input_gap",
+      "no_orphan_status": "CONNECTED_TO_VALUE_LINEAGE_CONSUMER",
+      "owning_agent": "Quantum AutoMapper Agent",
+      "producer": "PR168_RP_INPUT_RESOLVER",
+      "upstream_source": "docs/master_plan/generated/PR161C_QKU9360PrimaryMaterializationRegistry.report.json",
+      "value_ref": "PR168_RP_INPUT_GAP::02474"
+    },
+    {
+      "consumer": "Input Materialization Agent",
+      "downstream_route": "PR168_RP_ValueLineageMap.report.json",
+      "metric_name": "missing_input_gap",
+      "no_orphan_status": "CONNECTED_TO_VALUE_LINEAGE_CONSUMER",
+      "owning_agent": "Quantum AutoMapper Agent",
+      "producer": "PR168_RP_INPUT_RESOLVER",
+      "upstream_source": "docs/master_plan/generated/PR161C_QKU9360PrimaryMaterializationRegistry.report.json",
+      "value_ref": "PR168_RP_INPUT_GAP::02475"
+    },
+    {
+      "consumer": "Input Materialization Agent",
+      "downstream_route": "PR168_RP_ValueLineageMap.report.json",
+      "metric_name": "missing_input_gap",
+      "no_orphan_status": "CONNECTED_TO_VALUE_LINEAGE_CONSUMER",
+      "owning_agent": "Quantum AutoMapper Agent",
+      "producer": "PR168_RP_INPUT_RESOLVER",
+      "upstream_source": "docs/master_plan/generated/PR161C_QKU9360PrimaryMaterializationRegistry.report.json",
+      "value_ref": "PR168_RP_INPUT_GAP::02478"
+    },
+    {
+      "consumer": "Input Materialization Agent",
+      "downstream_route": "PR168_RP_ValueLineageMap.report.json",
+      "metric_name": "missing_input_gap",
+      "no_orphan_status": "CONNECTED_TO_VALUE_LINEAGE_CONSUMER",
+      "owning_agent": "Quantum AutoMapper Agent",
+      "producer": "PR168_RP_INPUT_RESOLVER",
+      "upstream_source": "docs/master_plan/generated/PR161C_QKU9360PrimaryMaterializationRegistry.report.json",
+      "value_ref": "PR168_RP_INPUT_GAP::02480"
+    },
+    {
+      "consumer": "Input Materialization Agent",
+      "downstream_route": "PR168_RP_ValueLineageMap.report.json",
+      "metric_name": "missing_input_gap",
+      "no_orphan_status": "CONNECTED_TO_VALUE_LINEAGE_CONSUMER",
+      "owning_agent": "Quantum AutoMapper Agent",
+      "producer": "PR168_RP_INPUT_RESOLVER",
+      "upstream_source": "docs/master_plan/generated/PR161C_QKU9360PrimaryMaterializationRegistry.report.json",
+      "value_ref": "PR168_RP_INPUT_GAP::02481"
+    },
+    {
+      "consumer": "Input Materialization Agent",
+      "downstream_route": "PR168_RP_ValueLineageMap.report.json",
+      "metric_name": "missing_input_gap",
+      "no_orphan_status": "CONNECTED_TO_VALUE_LINEAGE_CONSUMER",
+      "owning_agent": "Quantum AutoMapper Agent",
+      "producer": "PR168_RP_INPUT_RESOLVER",
+      "upstream_source": "docs/master_plan/generated/PR161C_QKU9360PrimaryMaterializationRegistry.report.json",
+      "value_ref": "PR168_RP_INPUT_GAP::02483"
+    },
+    {
+      "consumer": "Input Materialization Agent",
+      "downstream_route": "PR168_RP_ValueLineageMap.report.json",
+      "metric_name": "missing_input_gap",
+      "no_orphan_status": "CONNECTED_TO_VALUE_LINEAGE_CONSUMER",
+      "owning_agent": "Quantum AutoMapper Agent",
+      "producer": "PR168_RP_INPUT_RESOLVER",
+      "upstream_source": "docs/master_plan/generated/PR161C_QKU9360PrimaryMaterializationRegistry.report.json",
+      "value_ref": "PR168_RP_INPUT_GAP::02484"
+    },
+    {
+      "consumer": "Input Materialization Agent",
+      "downstream_route": "PR168_RP_ValueLineageMap.report.json",
+      "metric_name": "missing_input_gap",
+      "no_orphan_status": "CONNECTED_TO_VALUE_LINEAGE_CONSUMER",
+      "owning_agent": "Quantum AutoMapper Agent",
+      "producer": "PR168_RP_INPUT_RESOLVER",
+      "upstream_source": "docs/master_plan/generated/PR161C_QKU9360PrimaryMaterializationRegistry.report.json",
+      "value_ref": "PR168_RP_INPUT_GAP::02485"
+    },
+    {
+      "consumer": "Input Materialization Agent",
+      "downstream_route": "PR168_RP_ValueLineageMap.report.json",
+      "metric_name": "missing_input_gap",
+      "no_orphan_status": "CONNECTED_TO_VALUE_LINEAGE_CONSUMER",
+      "owning_agent": "Quantum AutoMapper Agent",
+      "producer": "PR168_RP_INPUT_RESOLVER",
+      "upstream_source": "docs/master_plan/generated/PR161C_QKU9360PrimaryMaterializationRegistry.report.json",
+      "value_ref": "PR168_RP_INPUT_GAP::02487"
+    },
+    {
+      "consumer": "Input Materialization Agent",
+      "downstream_route": "PR168_RP_ValueLineageMap.report.json",
+      "metric_name": "missing_input_gap",
+      "no_orphan_status": "CONNECTED_TO_VALUE_LINEAGE_CONSUMER",
+      "owning_agent": "Quantum AutoMapper Agent",
+      "producer": "PR168_RP_INPUT_RESOLVER",
+      "upstream_source": "docs/master_plan/generated/PR161C_QKU9360PrimaryMaterializationRegistry.report.json",
+      "value_ref": "PR168_RP_INPUT_GAP::02488"
+    },
+    {
+      "consumer": "Input Materialization Agent",
+      "downstream_route": "PR168_RP_ValueLineageMap.report.json",
+      "metric_name": "missing_input_gap",
+      "no_orphan_status": "CONNECTED_TO_VALUE_LINEAGE_CONSUMER",
+      "owning_agent": "Quantum AutoMapper Agent",
+      "producer": "PR168_RP_INPUT_RESOLVER",
+      "upstream_source": "docs/master_plan/generated/PR161C_QKU9360PrimaryMaterializationRegistry.report.json",
+      "value_ref": "PR168_RP_INPUT_GAP::02490"
+    },
+    {
+      "consumer": "Input Materialization Agent",
+      "downstream_route": "PR168_RP_ValueLineageMap.report.json",
+      "metric_name": "missing_input_gap",
+      "no_orphan_status": "CONNECTED_TO_VALUE_LINEAGE_CONSUMER",
+      "owning_agent": "Quantum AutoMapper Agent",
+      "producer": "PR168_RP_INPUT_RESOLVER",
+      "upstream_source": "docs/master_plan/generated/PR161C_QKU9360PrimaryMaterializationRegistry.report.json",
+      "value_ref": "PR168_RP_INPUT_GAP::02506"
+    },
+    {
+      "consumer": "Input Materialization Agent",
+      "downstream_route": "PR168_RP_ValueLineageMap.report.json",
+      "metric_name": "missing_input_gap",
+      "no_orphan_status": "CONNECTED_TO_VALUE_LINEAGE_CONSUMER",
+      "owning_agent": "Quantum AutoMapper Agent",
+      "producer": "PR168_RP_INPUT_RESOLVER",
+      "upstream_source": "docs/master_plan/generated/PR161C_QKU9360PrimaryMaterializationRegistry.report.json",
+      "value_ref": "PR168_RP_INPUT_GAP::02507"
+    },
+    {
+      "consumer": "Input Materialization Agent",
+      "downstream_route": "PR168_RP_ValueLineageMap.report.json",
+      "metric_name": "missing_input_gap",
+      "no_orphan_status": "CONNECTED_TO_VALUE_LINEAGE_CONSUMER",
+      "owning_agent": "Quantum AutoMapper Agent",
+      "producer": "PR168_RP_INPUT_RESOLVER",
+      "upstream_source": "docs/master_plan/generated/PR161C_QKU9360PrimaryMaterializationRegistry.report.json",
+      "value_ref": "PR168_RP_INPUT_GAP::02508"
+    },
+    {
+      "consumer": "Input Materialization Agent",
+      "downstream_route": "PR168_RP_ValueLineageMap.report.json",
+      "metric_name": "missing_input_gap",
+      "no_orphan_status": "CONNECTED_TO_VALUE_LINEAGE_CONSUMER",
+      "owning_agent": "Quantum AutoMapper Agent",
+      "producer": "PR168_RP_INPUT_RESOLVER",
+      "upstream_source": "docs/master_plan/generated/PR161C_QKU9360PrimaryMaterializationRegistry.report.json",
+      "value_ref": "PR168_RP_INPUT_GAP::02509"
+    },
+    {
+      "consumer": "Input Materialization Agent",
+      "downstream_route": "PR168_RP_ValueLineageMap.report.json",
+      "metric_name": "missing_input_gap",
+      "no_orphan_status": "CONNECTED_TO_VALUE_LINEAGE_CONSUMER",
+      "owning_agent": "Quantum AutoMapper Agent",
+      "producer": "PR168_RP_INPUT_RESOLVER",
+      "upstream_source": "docs/master_plan/generated/PR161C_QKU9360PrimaryMaterializationRegistry.report.json",
+      "value_ref": "PR168_RP_INPUT_GAP::02510"
+    },
+    {
+      "consumer": "Input Materialization Agent",
+      "downstream_route": "PR168_RP_ValueLineageMap.report.json",
+      "metric_name": "missing_input_gap",
+      "no_orphan_status": "CONNECTED_TO_VALUE_LINEAGE_CONSUMER",
+      "owning_agent": "Quantum AutoMapper Agent",
+      "producer": "PR168_RP_INPUT_RESOLVER",
+      "upstream_source": "docs/master_plan/generated/PR161C_QKU9360PrimaryMaterializationRegistry.report.json",
+      "value_ref": "PR168_RP_INPUT_GAP::02511"
+    },
+    {
+      "consumer": "Input Materialization Agent",
+      "downstream_route": "PR168_RP_ValueLineageMap.report.json",
+      "metric_name": "missing_input_gap",
+      "no_orphan_status": "CONNECTED_TO_VALUE_LINEAGE_CONSUMER",
+      "owning_agent": "Quantum AutoMapper Agent",
+      "producer": "PR168_RP_INPUT_RESOLVER",
+      "upstream_source": "docs/master_plan/generated/PR161C_QKU9360PrimaryMaterializationRegistry.report.json",
+      "value_ref": "PR168_RP_INPUT_GAP::02512"
+    },
+    {
+      "consumer": "Input Materialization Agent",
+      "downstream_route": "PR168_RP_ValueLineageMap.report.json",
+      "metric_name": "missing_input_gap",
+      "no_orphan_status": "CONNECTED_TO_VALUE_LINEAGE_CONSUMER",
+      "owning_agent": "Quantum AutoMapper Agent",
+      "producer": "PR168_RP_INPUT_RESOLVER",
+      "upstream_source": "docs/master_plan/generated/PR161C_QKU9360PrimaryMaterializationRegistry.report.json",
+      "value_ref": "PR168_RP_INPUT_GAP::02514"
+    },
+    {
+      "consumer": "Input Materialization Agent",
+      "downstream_route": "PR168_RP_ValueLineageMap.report.json",
+      "metric_name": "missing_input_gap",
+      "no_orphan_status": "CONNECTED_TO_VALUE_LINEAGE_CONSUMER",
+      "owning_agent": "Quantum AutoMapper Agent",
+      "producer": "PR168_RP_INPUT_RESOLVER",
+      "upstream_source": "docs/master_plan/generated/PR161C_QKU9360PrimaryMaterializationRegistry.report.json",
+      "value_ref": "PR168_RP_INPUT_GAP::02515"
+    },
+    {
+      "consumer": "Input Materialization Agent",
+      "downstream_route": "PR168_RP_ValueLineageMap.report.json",
+      "metric_name": "missing_input_gap",
+      "no_orphan_status": "CONNECTED_TO_VALUE_LINEAGE_CONSUMER",
+      "owning_agent": "Quantum AutoMapper Agent",
+      "producer": "PR168_RP_INPUT_RESOLVER",
+      "upstream_source": "docs/master_plan/generated/PR161C_QKU9360PrimaryMaterializationRegistry.report.json",
+      "value_ref": "PR168_RP_INPUT_GAP::02517"
+    },
+    {
+      "consumer": "Input Materialization Agent",
+      "downstream_route": "PR168_RP_ValueLineageMap.report.json",
+      "metric_name": "missing_input_gap",
+      "no_orphan_status": "CONNECTED_TO_VALUE_LINEAGE_CONSUMER",
+      "owning_agent": "Quantum AutoMapper Agent",
+      "producer": "PR168_RP_INPUT_RESOLVER",
+      "upstream_source": "docs/master_plan/generated/PR161C_QKU9360PrimaryMaterializationRegistry.report.json",
+      "value_ref": "PR168_RP_INPUT_GAP::02518"
+    },
+    {
+      "consumer": "Input Materialization Agent",
+      "downstream_route": "PR168_RP_ValueLineageMap.report.json",
+      "metric_name": "missing_input_gap",
+      "no_orphan_status": "CONNECTED_TO_VALUE_LINEAGE_CONSUMER",
+      "owning_agent": "Quantum AutoMapper Agent",
+      "producer": "PR168_RP_INPUT_RESOLVER",
+      "upstream_source": "docs/master_plan/generated/PR161C_QKU9360PrimaryMaterializationRegistry.report.json",
+      "value_ref": "PR168_RP_INPUT_GAP::02519"
+    },
+    {
+      "consumer": "Input Materialization Agent",
+      "downstream_route": "PR168_RP_ValueLineageMap.report.json",
+      "metric_name": "missing_input_gap",
+      "no_orphan_status": "CONNECTED_TO_VALUE_LINEAGE_CONSUMER",
+      "owning_agent": "Quantum AutoMapper Agent",
+      "producer": "PR168_RP_INPUT_RESOLVER",
+      "upstream_source": "docs/master_plan/generated/PR161C_QKU9360PrimaryMaterializationRegistry.report.json",
+      "value_ref": "PR168_RP_INPUT_GAP::02520"
+    },
+    {
+      "consumer": "Input Materialization Agent",
+      "downstream_route": "PR168_RP_ValueLineageMap.report.json",
+      "metric_name": "missing_input_gap",
+      "no_orphan_status": "CONNECTED_TO_VALUE_LINEAGE_CONSUMER",
+      "owning_agent": "Quantum AutoMapper Agent",
+      "producer": "PR168_RP_INPUT_RESOLVER",
+      "upstream_source": "docs/master_plan/generated/PR161C_QKU9360PrimaryMaterializationRegistry.report.json",
+      "value_ref": "PR168_RP_INPUT_GAP::02521"
+    },
+    {
+      "consumer": "Input Materialization Agent",
+      "downstream_route": "PR168_RP_ValueLineageMap.report.json",
+      "metric_name": "missing_input_gap",
+      "no_orphan_status": "CONNECTED_TO_VALUE_LINEAGE_CONSUMER",
+      "owning_agent": "Quantum AutoMapper Agent",
+      "producer": "PR168_RP_INPUT_RESOLVER",
+      "upstream_source": "docs/master_plan/generated/PR161C_QKU9360PrimaryMaterializationRegistry.report.json",
+      "value_ref": "PR168_RP_INPUT_GAP::02522"
+    },
+    {
+      "consumer": "Input Materialization Agent",
+      "downstream_route": "PR168_RP_ValueLineageMap.report.json",
+      "metric_name": "missing_input_gap",
+      "no_orphan_status": "CONNECTED_TO_VALUE_LINEAGE_CONSUMER",
+      "owning_agent": "Quantum AutoMapper Agent",
+      "producer": "PR168_RP_INPUT_RESOLVER",
+      "upstream_source": "docs/master_plan/generated/PR161C_QKU9360PrimaryMaterializationRegistry.report.json",
+      "value_ref": "PR168_RP_INPUT_GAP::02524"
+    },
+    {
+      "consumer": "Input Materialization Agent",
+      "downstream_route": "PR168_RP_ValueLineageMap.report.json",
+      "metric_name": "missing_input_gap",
+      "no_orphan_status": "CONNECTED_TO_VALUE_LINEAGE_CONSUMER",
+      "owning_agent": "Quantum AutoMapper Agent",
+      "producer": "PR168_RP_INPUT_RESOLVER",
+      "upstream_source": "docs/master_plan/generated/PR161C_QKU9360PrimaryMaterializationRegistry.report.json",
+      "value_ref": "PR168_RP_INPUT_GAP::02525"
+    },
+    {
+      "consumer": "Input Materialization Agent",
+      "downstream_route": "PR168_RP_ValueLineageMap.report.json",
+      "metric_name": "missing_input_gap",
+      "no_orphan_status": "CONNECTED_TO_VALUE_LINEAGE_CONSUMER",
+      "owning_agent": "Quantum AutoMapper Agent",
+      "producer": "PR168_RP_INPUT_RESOLVER",
+      "upstream_source": "docs/master_plan/generated/PR161C_QKU9360PrimaryMaterializationRegistry.report.json",
+      "value_ref": "PR168_RP_INPUT_GAP::02526"
+    },
+    {
+      "consumer": "Input Materialization Agent",
+      "downstream_route": "PR168_RP_ValueLineageMap.report.json",
+      "metric_name": "missing_input_gap",
+      "no_orphan_status": "CONNECTED_TO_VALUE_LINEAGE_CONSUMER",
+      "owning_agent": "Quantum AutoMapper Agent",
+      "producer": "PR168_RP_INPUT_RESOLVER",
+      "upstream_source": "docs/master_plan/generated/PR161C_QKU9360PrimaryMaterializationRegistry.report.json",
+      "value_ref": "PR168_RP_INPUT_GAP::02527"
+    },
+    {
+      "consumer": "Input Materialization Agent",
+      "downstream_route": "PR168_RP_ValueLineageMap.report.json",
+      "metric_name": "missing_input_gap",
+      "no_orphan_status": "CONNECTED_TO_VALUE_LINEAGE_CONSUMER",
+      "owning_agent": "Quantum AutoMapper Agent",
+      "producer": "PR168_RP_INPUT_RESOLVER",
+      "upstream_source": "docs/master_plan/generated/PR161C_QKU9360PrimaryMaterializationRegistry.report.json",
+      "value_ref": "PR168_RP_INPUT_GAP::02528"
+    },
+    {
+      "consumer": "Input Materialization Agent",
+      "downstream_route": "PR168_RP_ValueLineageMap.report.json",
+      "metric_name": "missing_input_gap",
+      "no_orphan_status": "CONNECTED_TO_VALUE_LINEAGE_CONSUMER",
+      "owning_agent": "Quantum AutoMapper Agent",
+      "producer": "PR168_RP_INPUT_RESOLVER",
+      "upstream_source": "docs/master_plan/generated/PR161C_QKU9360PrimaryMaterializationRegistry.report.json",
+      "value_ref": "PR168_RP_INPUT_GAP::02529"
+    },
+    {
+      "consumer": "Input Materialization Agent",
+      "downstream_route": "PR168_RP_ValueLineageMap.report.json",
+      "metric_name": "missing_input_gap",
+      "no_orphan_status": "CONNECTED_TO_VALUE_LINEAGE_CONSUMER",
+      "owning_agent": "Quantum AutoMapper Agent",
+      "producer": "PR168_RP_INPUT_RESOLVER",
+      "upstream_source": "docs/master_plan/generated/PR161C_QKU9360PrimaryMaterializationRegistry.report.json",
+      "value_ref": "PR168_RP_INPUT_GAP::02530"
+    },
+    {
+      "consumer": "Input Materialization Agent",
+      "downstream_route": "PR168_RP_ValueLineageMap.report.json",
+      "metric_name": "missing_input_gap",
+      "no_orphan_status": "CONNECTED_TO_VALUE_LINEAGE_CONSUMER",
+      "owning_agent": "Quantum AutoMapper Agent",
+      "producer": "PR168_RP_INPUT_RESOLVER",
+      "upstream_source": "docs/master_plan/generated/PR161C_QKU9360PrimaryMaterializationRegistry.report.json",
+      "value_ref": "PR168_RP_INPUT_GAP::02531"
+    },
+    {
+      "consumer": "Input Materialization Agent",
+      "downstream_route": "PR168_RP_ValueLineageMap.report.json",
+      "metric_name": "missing_input_gap",
+      "no_orphan_status": "CONNECTED_TO_VALUE_LINEAGE_CONSUMER",
+      "owning_agent": "Quantum AutoMapper Agent",
+      "producer": "PR168_RP_INPUT_RESOLVER",
+      "upstream_source": "docs/master_plan/generated/PR161C_QKU9360PrimaryMaterializationRegistry.report.json",
+      "value_ref": "PR168_RP_INPUT_GAP::02532"
+    },
+    {
+      "consumer": "Input Materialization Agent",
+      "downstream_route": "PR168_RP_ValueLineageMap.report.json",
+      "metric_name": "missing_input_gap",
+      "no_orphan_status": "CONNECTED_TO_VALUE_LINEAGE_CONSUMER",
+      "owning_agent": "Quantum AutoMapper Agent",
+      "producer": "PR168_RP_INPUT_RESOLVER",
+      "upstream_source": "docs/master_plan/generated/PR161C_QKU9360PrimaryMaterializationRegistry.report.json",
+      "value_ref": "PR168_RP_INPUT_GAP::02534"
+    },
+    {
+      "consumer": "Input Materialization Agent",
+      "downstream_route": "PR168_RP_ValueLineageMap.report.json",
+      "metric_name": "missing_input_gap",
+      "no_orphan_status": "CONNECTED_TO_VALUE_LINEAGE_CONSUMER",
+      "owning_agent": "Quantum AutoMapper Agent",
+      "producer": "PR168_RP_INPUT_RESOLVER",
+      "upstream_source": "docs/master_plan/generated/PR161C_QKU9360PrimaryMaterializationRegistry.report.json",
+      "value_ref": "PR168_RP_INPUT_GAP::02535"
+    },
+    {
+      "consumer": "Input Materialization Agent",
+      "downstream_route": "PR168_RP_ValueLineageMap.report.json",
+      "metric_name": "missing_input_gap",
+      "no_orphan_status": "CONNECTED_TO_VALUE_LINEAGE_CONSUMER",
+      "owning_agent": "Quantum AutoMapper Agent",
+      "producer": "PR168_RP_INPUT_RESOLVER",
+      "upstream_source": "docs/master_plan/generated/PR161C_QKU9360PrimaryMaterializationRegistry.report.json",
+      "value_ref": "PR168_RP_INPUT_GAP::02537"
+    },
+    {
+      "consumer": "Input Materialization Agent",
+      "downstream_route": "PR168_RP_ValueLineageMap.report.json",
+      "metric_name": "missing_input_gap",
+      "no_orphan_status": "CONNECTED_TO_VALUE_LINEAGE_CONSUMER",
+      "owning_agent": "Quantum AutoMapper Agent",
+      "producer": "PR168_RP_INPUT_RESOLVER",
+      "upstream_source": "docs/master_plan/generated/PR161C_QKU9360PrimaryMaterializationRegistry.report.json",
+      "value_ref": "PR168_RP_INPUT_GAP::02538"
+    },
+    {
+      "consumer": "Input Materialization Agent",
+      "downstream_route": "PR168_RP_ValueLineageMap.report.json",
+      "metric_name": "missing_input_gap",
+      "no_orphan_status": "CONNECTED_TO_VALUE_LINEAGE_CONSUMER",
+      "owning_agent": "Quantum AutoMapper Agent",
+      "producer": "PR168_RP_INPUT_RESOLVER",
+      "upstream_source": "docs/master_plan/generated/PR161C_QKU9360PrimaryMaterializationRegistry.report.json",
+      "value_ref": "PR168_RP_INPUT_GAP::02539"
+    },
+    {
+      "consumer": "Input Materialization Agent",
+      "downstream_route": "PR168_RP_ValueLineageMap.report.json",
+      "metric_name": "missing_input_gap",
+      "no_orphan_status": "CONNECTED_TO_VALUE_LINEAGE_CONSUMER",
+      "owning_agent": "Quantum AutoMapper Agent",
+      "producer": "PR168_RP_INPUT_RESOLVER",
+      "upstream_source": "docs/master_plan/generated/PR161C_QKU9360PrimaryMaterializationRegistry.report.json",
+      "value_ref": "PR168_RP_INPUT_GAP::02542"
+    },
+    {
+      "consumer": "Input Materialization Agent",
+      "downstream_route": "PR168_RP_ValueLineageMap.report.json",
+      "metric_name": "missing_input_gap",
+      "no_orphan_status": "CONNECTED_TO_VALUE_LINEAGE_CONSUMER",
+      "owning_agent": "Quantum AutoMapper Agent",
+      "producer": "PR168_RP_INPUT_RESOLVER",
+      "upstream_source": "docs/master_plan/generated/PR161C_QKU9360PrimaryMaterializationRegistry.report.json",
+      "value_ref": "PR168_RP_INPUT_GAP::02543"
+    },
+    {
+      "consumer": "Input Materialization Agent",
+      "downstream_route": "PR168_RP_ValueLineageMap.report.json",
+      "metric_name": "missing_input_gap",
+      "no_orphan_status": "CONNECTED_TO_VALUE_LINEAGE_CONSUMER",
+      "owning_agent": "Quantum AutoMapper Agent",
+      "producer": "PR168_RP_INPUT_RESOLVER",
+      "upstream_source": "docs/master_plan/generated/PR161C_QKU9360PrimaryMaterializationRegistry.report.json",
+      "value_ref": "PR168_RP_INPUT_GAP::02559"
+    },
+    {
+      "consumer": "Input Materialization Agent",
+      "downstream_route": "PR168_RP_ValueLineageMap.report.json",
+      "metric_name": "missing_input_gap",
+      "no_orphan_status": "CONNECTED_TO_VALUE_LINEAGE_CONSUMER",
+      "owning_agent": "Quantum AutoMapper Agent",
+      "producer": "PR168_RP_INPUT_RESOLVER",
+      "upstream_source": "docs/master_plan/generated/PR161C_QKU9360PrimaryMaterializationRegistry.report.json",
+      "value_ref": "PR168_RP_INPUT_GAP::02569"
+    },
+    {
+      "consumer": "Input Materialization Agent",
+      "downstream_route": "PR168_RP_ValueLineageMap.report.json",
+      "metric_name": "missing_input_gap",
+      "no_orphan_status": "CONNECTED_TO_VALUE_LINEAGE_CONSUMER",
+      "owning_agent": "Quantum AutoMapper Agent",
+      "producer": "PR168_RP_INPUT_RESOLVER",
+      "upstream_source": "docs/master_plan/generated/PR161C_QKU9360PrimaryMaterializationRegistry.report.json",
+      "value_ref": "PR168_RP_INPUT_GAP::02572"
+    },
+    {
+      "consumer": "Input Materialization Agent",
+      "downstream_route": "PR168_RP_ValueLineageMap.report.json",
+      "metric_name": "missing_input_gap",
+      "no_orphan_status": "CONNECTED_TO_VALUE_LINEAGE_CONSUMER",
+      "owning_agent": "Quantum AutoMapper Agent",
+      "producer": "PR168_RP_INPUT_RESOLVER",
+      "upstream_source": "docs/master_plan/generated/PR161C_QKU9360PrimaryMaterializationRegistry.report.json",
+      "value_ref": "PR168_RP_INPUT_GAP::02575"
+    },
+    {
+      "consumer": "Input Materialization Agent",
+      "downstream_route": "PR168_RP_ValueLineageMap.report.json",
+      "metric_name": "missing_input_gap",
+      "no_orphan_status": "CONNECTED_TO_VALUE_LINEAGE_CONSUMER",
+      "owning_agent": "Quantum AutoMapper Agent",
+      "producer": "PR168_RP_INPUT_RESOLVER",
+      "upstream_source": "docs/master_plan/generated/PR161C_QKU9360PrimaryMaterializationRegistry.report.json",
+      "value_ref": "PR168_RP_INPUT_GAP::02576"
+    },
+    {
+      "consumer": "Input Materialization Agent",
+      "downstream_route": "PR168_RP_ValueLineageMap.report.json",
+      "metric_name": "missing_input_gap",
+      "no_orphan_status": "CONNECTED_TO_VALUE_LINEAGE_CONSUMER",
+      "owning_agent": "Quantum AutoMapper Agent",
+      "producer": "PR168_RP_INPUT_RESOLVER",
+      "upstream_source": "docs/master_plan/generated/PR161C_QKU9360PrimaryMaterializationRegistry.report.json",
+      "value_ref": "PR168_RP_INPUT_GAP::02577"
+    },
+    {
+      "consumer": "Input Materialization Agent",
+      "downstream_route": "PR168_RP_ValueLineageMap.report.json",
+      "metric_name": "missing_input_gap",
+      "no_orphan_status": "CONNECTED_TO_VALUE_LINEAGE_CONSUMER",
+      "owning_agent": "Quantum AutoMapper Agent",
+      "producer": "PR168_RP_INPUT_RESOLVER",
+      "upstream_source": "docs/master_plan/generated/PR161C_QKU9360PrimaryMaterializationRegistry.report.json",
+      "value_ref": "PR168_RP_INPUT_GAP::02582"
+    },
+    {
+      "consumer": "Input Materialization Agent",
+      "downstream_route": "PR168_RP_ValueLineageMap.report.json",
+      "metric_name": "missing_input_gap",
+      "no_orphan_status": "CONNECTED_TO_VALUE_LINEAGE_CONSUMER",
+      "owning_agent": "Quantum AutoMapper Agent",
+      "producer": "PR168_RP_INPUT_RESOLVER",
+      "upstream_source": "docs/master_plan/generated/PR161C_QKU9360PrimaryMaterializationRegistry.report.json",
+      "value_ref": "PR168_RP_INPUT_GAP::02583"
+    },
+    {
+      "consumer": "Input Materialization Agent",
+      "downstream_route": "PR168_RP_ValueLineageMap.report.json",
+      "metric_name": "missing_input_gap",
+      "no_orphan_status": "CONNECTED_TO_VALUE_LINEAGE_CONSUMER",
+      "owning_agent": "Quantum AutoMapper Agent",
+      "producer": "PR168_RP_INPUT_RESOLVER",
+      "upstream_source": "docs/master_plan/generated/PR161C_QKU9360PrimaryMaterializationRegistry.report.json",
+      "value_ref": "PR168_RP_INPUT_GAP::02584"
+    },
+    {
+      "consumer": "Input Materialization Agent",
+      "downstream_route": "PR168_RP_ValueLineageMap.report.json",
+      "metric_name": "missing_input_gap",
+      "no_orphan_status": "CONNECTED_TO_VALUE_LINEAGE_CONSUMER",
+      "owning_agent": "Quantum AutoMapper Agent",
+      "producer": "PR168_RP_INPUT_RESOLVER",
+      "upstream_source": "docs/master_plan/generated/PR161C_QKU9360PrimaryMaterializationRegistry.report.json",
+      "value_ref": "PR168_RP_INPUT_GAP::02585"
+    },
+    {
+      "consumer": "Input Materialization Agent",
+      "downstream_route": "PR168_RP_ValueLineageMap.report.json",
+      "metric_name": "missing_input_gap",
+      "no_orphan_status": "CONNECTED_TO_VALUE_LINEAGE_CONSUMER",
+      "owning_agent": "Quantum AutoMapper Agent",
+      "producer": "PR168_RP_INPUT_RESOLVER",
+      "upstream_source": "docs/master_plan/generated/PR161C_QKU9360PrimaryMaterializationRegistry.report.json",
+      "value_ref": "PR168_RP_INPUT_GAP::02586"
+    },
+    {
+      "consumer": "Input Materialization Agent",
+      "downstream_route": "PR168_RP_ValueLineageMap.report.json",
+      "metric_name": "missing_input_gap",
+      "no_orphan_status": "CONNECTED_TO_VALUE_LINEAGE_CONSUMER",
+      "owning_agent": "Quantum AutoMapper Agent",
+      "producer": "PR168_RP_INPUT_RESOLVER",
+      "upstream_source": "docs/master_plan/generated/PR161C_QKU9360PrimaryMaterializationRegistry.report.json",
+      "value_ref": "PR168_RP_INPUT_GAP::02587"
+    },
+    {
+      "consumer": "Input Materialization Agent",
+      "downstream_route": "PR168_RP_ValueLineageMap.report.json",
+      "metric_name": "missing_input_gap",
+      "no_orphan_status": "CONNECTED_TO_VALUE_LINEAGE_CONSUMER",
+      "owning_agent": "Quantum AutoMapper Agent",
+      "producer": "PR168_RP_INPUT_RESOLVER",
+      "upstream_source": "docs/master_plan/generated/PR161C_QKU9360PrimaryMaterializationRegistry.report.json",
+      "value_ref": "PR168_RP_INPUT_GAP::02591"
+    },
+    {
+      "consumer": "Input Materialization Agent",
+      "downstream_route": "PR168_RP_ValueLineageMap.report.json",
+      "metric_name": "missing_input_gap",
+      "no_orphan_status": "CONNECTED_TO_VALUE_LINEAGE_CONSUMER",
+      "owning_agent": "Quantum AutoMapper Agent",
+      "producer": "PR168_RP_INPUT_RESOLVER",
+      "upstream_source": "docs/master_plan/generated/PR161C_QKU9360PrimaryMaterializationRegistry.report.json",
+      "value_ref": "PR168_RP_INPUT_GAP::02595"
+    }
+  ],
+  "report_type": "PR168_RP_VALUELINEAGEMAP.REPORT_SHARD",
+  "runtime_cash_receipt_count": 0,
+  "source_truth_authority": false,
+  "summary": {
+    "parent_report": "PR168_RP_ValueLineageMap.report.json",
+    "record_count": 60,
+    "shard_index": 44
+  },
+  "upstream_source": "PR168-GFP truth overlay plus repo replay-paper evidence candidates"
+}
