@@ -99,6 +99,20 @@ jobs:
         with:
           python-version: '3.14'
 
+      - name: Verify AtomicRows bundle materialized and SHA absent
+        run: |
+          test -f docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl
+          test ! -e docs/master_plan/atomic_rows/AtomicRows.bundle.sha256
+          python - <<'PY'
+          from pathlib import Path
+
+          rows = Path("docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl").read_text(
+              encoding="utf-8"
+          ).splitlines()
+          if len(rows) != 4183:
+              raise SystemExit(f"expected 4183 AtomicRows rows, got {len(rows)}")
+          PY
+
       - name: Report changed-area validation scope
         run: python -B tools/changed_area_validation_router.py --repo-root . --report-out .tmp/qtt-validation-router/validation-gates.json
 
