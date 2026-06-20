@@ -15,6 +15,10 @@ def test_required_reason_codes_are_registered() -> None:
         "formula_inputs_missing",
         "no_trade_candidate_dominates",
         "FUTURE_LIVE_GATE_REQUIRED",
+        "REGISTRY_SEED_CONTRACT_ONLY",
+        "NO_FORBIDDEN_AUTHORITY_CREATED",
+        "PR168_RANK_PROVISIONAL_RANKING_DEFAULT",
+        "PR168_RANK_NO_TRADE_SURFACE_SELECTED",
     ]:
         assert code in registry.all_reason_code_names()
 

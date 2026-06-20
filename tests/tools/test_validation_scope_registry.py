@@ -31,6 +31,7 @@ from src.qtt.stage1_prediction_markets.qtt_owner_global_override_directive_curre
 
 PR168_BRANCH = registry.PR168_GFP_BRANCH
 PR168_RP_BRANCH = registry.PR168_RP_BRANCH
+PR168_RANK_BRANCH = registry.PR168_RANK_BRANCH
 FIXTURE_BRANCH = registry.VALIDATION_FIXTURE_BRANCH
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
@@ -82,6 +83,24 @@ def test_pr168_rp_allowed_paths_pass_on_real_branch(path: str) -> None:
     assert registry.is_pr_scoped_changed_path_allowed(FIXTURE_BRANCH, path)
 
 
+@pytest.mark.parametrize(
+    "path",
+    [
+        "docs/master_plan/generated/PR168_RANK_FinalSummary.report.json",
+        "docs/master_plan/generated/pr168_rank_shards/PR168_RANK_EvidenceBackedRanking.part_0001_of_0001.report.json",
+        "tools/build_pr168_rank_evidence_backed_ranking.py",
+        "tools/pr168_rank_compute_kernel.py",
+        "tools/validate_pr168_rank_input_consumption.py",
+        "tools/qtt_authority_reason_code_registry.py",
+        "tests/pr168_rank/test_input_consumption.py",
+        "tools/run_validation_gates.py",
+    ],
+)
+def test_pr168_rank_allowed_paths_pass_on_real_branch(path: str) -> None:
+    assert registry.is_pr_scoped_changed_path_allowed(PR168_RANK_BRANCH, path)
+    assert registry.is_pr_scoped_changed_path_allowed(FIXTURE_BRANCH, path)
+
+
 def test_pr168_allowed_paths_pass_on_validation_fixture_branch_only_when_registered() -> None:
     assert registry.is_validation_context_branch(FIXTURE_BRANCH)
     assert registry.is_pr_scoped_changed_path_allowed(
@@ -115,6 +134,7 @@ def test_pr168_allowed_paths_pass_on_validation_fixture_branch_only_when_registe
 def test_pr168_disallowed_and_forbidden_paths_fail(path: str) -> None:
     assert not registry.is_pr_scoped_changed_path_allowed(PR168_BRANCH, path)
     assert not registry.is_pr_scoped_changed_path_allowed(PR168_RP_BRANCH, path)
+    assert not registry.is_pr_scoped_changed_path_allowed(PR168_RANK_BRANCH, path)
     assert not registry.is_pr_scoped_changed_path_allowed(FIXTURE_BRANCH, path)
 
 
@@ -128,6 +148,7 @@ def test_pr168_disallowed_and_forbidden_paths_fail(path: str) -> None:
 )
 def test_pr168_rp_rejects_gfp_scope_paths(path: str) -> None:
     assert not registry.is_pr_scoped_changed_path_allowed(PR168_RP_BRANCH, path)
+    assert not registry.is_pr_scoped_changed_path_allowed(PR168_RANK_BRANCH, path)
 
 
 def test_pr167_production_builder_still_rejects_pr168_branch(monkeypatch: pytest.MonkeyPatch) -> None:

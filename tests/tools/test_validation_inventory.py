@@ -126,6 +126,15 @@ def test_inventory_has_pr167_open_trade_simulator_entry():
     )
 
 
+def test_inventory_has_pr168_rank_entry():
+    entry = inventory.inventory_by_id()["validate_pr168_rank_input_consumption"]
+
+    assert "docs/master_plan/generated/PR168_RANK_*.report.json" in entry.output_globs
+    assert "docs/master_plan/generated/pr168_rank*/**" in entry.output_globs
+    assert "tools/validate_pr168_rank_input_consumption.py" in entry.tool_globs
+    assert "tests/pr168_rank/**" in entry.required_when_files_match
+
+
 def test_inventory_knows_every_pytest_shard_phase_job():
     for phase in runner.ORDERED_PHASES:
         assert inventory.phase_job_id(phase) == inventory.VALIDATION_MATRIX_JOB_ID
