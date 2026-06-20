@@ -48,6 +48,22 @@ AUTHORITY_BOUNDARY_CODES: dict[str, dict[str, object]] = {
         "live_authority": False,
         "execution_router_required_future_gate": True,
     },
+    "REGISTRY_SEED_CONTRACT_ONLY": {
+        "description": "Registry rows are non-live seed contracts for future PR consumers only.",
+        "live_authority": False,
+        "order_authority": False,
+        "connector_truth_authority": False,
+        "source_truth_authority": False,
+    },
+    "NO_FORBIDDEN_AUTHORITY_CREATED": {
+        "description": "No live, source, connector, private-state, cash, order, backend, digest, or profit authority is created.",
+        "live_authority": False,
+        "order_authority": False,
+        "source_truth_authority": False,
+        "connector_truth_authority": False,
+        "quantum_backend_execution": False,
+        "quantum_advantage_claim": False,
+    },
 }
 
 GAP_REASON_CODES: dict[str, dict[str, object]] = {
@@ -58,6 +74,9 @@ GAP_REASON_CODES: dict[str, dict[str, object]] = {
     "MISSING_AGENT_DUTY_SOURCE": {"critical": True, "downstream_route": "PR168_RP_AgentDutySourceGapQueue.report.json"},
     "MISSING_CONNECTOR_ROUTE_TARGET": {"critical": False, "downstream_route": "PR168_RP_ConnectorCandidateRouteMap.report.json"},
     "TERMINAL_NON_TRADING_FORMULA": {"critical": False, "downstream_route": "PR168_RP_To_OwnerDashboardComputedTruth.report.json"},
+    "PR168_RANK_PROVISIONAL_RANKING_DEFAULT": {"critical": False, "downstream_route": "PR168_RANK_MissingRankingDefaultQueue.report.json"},
+    "PR168_RANK_THRESHOLD_SURFACE_GAP": {"critical": False, "downstream_route": "PR168_RANK_OrderDecisionSurfaceGapQueue.report.json"},
+    "PR168_RANK_REGISTRY_SEED_GAP": {"critical": False, "downstream_route": "PR168_RANK_RegistrySeedNoOrphanProof.report.json"},
 }
 
 NEGATIVE_RECOVERY_REASON_CODES: dict[str, dict[str, object]] = {
@@ -95,6 +114,8 @@ PRETRADE_DECISION_REASON_CODES: dict[str, dict[str, object]] = {
     "LCB_NOT_POSITIVE": {"decision_status": "PRETRADE_INPUT_GAP_OR_FAIL"},
     "AUTHORITY_BOUNDARY_FAIL": {"decision_status": "PRETRADE_BLOCKED_BY_AUTHORITY"},
     "FUTURE_LIVE_GATE_REQUIRED": {"decision_status": "LIVE_CANDIDATE_HANDOFF_ONLY_NOT_ORDER_AUTHORITY"},
+    "PR168_RANK_NO_TRADE_SURFACE_SELECTED": {"decision_status": "NO_TRADE_DOMINANT_NONLIVE_RANKING"},
+    "PR168_RANK_REGISTRY_SEED_ONLY": {"decision_status": "FUTURE_REGISTRY_SEED_ONLY_NO_LIVE_AUTHORITY"},
 }
 
 _SCATTERED_AUTHORITY_TEXT = (

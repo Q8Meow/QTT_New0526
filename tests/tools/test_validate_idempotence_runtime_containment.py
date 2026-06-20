@@ -472,6 +472,39 @@ def test_pr167_branch_scoped_exception_does_not_allow_other_reports():
     assert "FORBIDDEN_GENERATED_REPORT_PAYLOAD_CHANGE" in _codes(failures)
 
 
+def test_pr168_rank_branch_scoped_auto_discovered_changes_are_allowed():
+    failures = validator._validate_changed_files(
+        _inventory(),
+        (
+            "docs/master_plan/generated/"
+            "PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+            "docs/master_plan/generated/PR168_RANK_FinalSummary.report.json",
+            "docs/master_plan/generated/pr168_rank_shards/"
+            "PR168_RANK_EvidenceBackedRanking.part_0001_of_0001.report.json",
+            "tools/pr168_rank_compute_kernel.py",
+            "tools/validate_pr168_rank_input_consumption.py",
+            "tests/pr168_rank/test_input_consumption.py",
+        ),
+        workflow_text=WORKFLOW_TEXT,
+        current_branch="pr168-rank-evidence-backed-ranking",
+        auto_discovered_changed_paths=True,
+    )
+
+    assert failures == []
+
+
+def test_pr168_rank_branch_scoped_exception_does_not_allow_other_reports():
+    failures = validator._validate_changed_files(
+        _inventory(),
+        ("docs/master_plan/generated/PR168_RP_FinalSummary.report.json",),
+        workflow_text=WORKFLOW_TEXT,
+        current_branch="pr168-rank-evidence-backed-ranking",
+        auto_discovered_changed_paths=True,
+    )
+
+    assert "FORBIDDEN_GENERATED_REPORT_PAYLOAD_CHANGE" in _codes(failures)
+
+
 def test_pr165_d3_business_file_change_is_rejected_for_hardening_pr():
     failures = _validate(
         _inventory(),
