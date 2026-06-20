@@ -47,6 +47,20 @@ def test_inventory_has_pr208_validation_infrastructure_entries():
         assert entry.cross_platform_sensitive is True
 
 
+def test_inventory_has_qtt_authority_reason_code_registry_entry():
+    entry = inventory.inventory_by_id()["validate_qtt_authority_reason_code_registry"]
+
+    assert entry.owner_pr_or_feature == "PR168-RP"
+    assert entry.owner_domain == "QTT authority reason code registry"
+    assert entry.full_validation_required_when_changed is True
+    assert "tools/qtt_authority_reason_code_registry.py" in entry.required_when_files_match
+    assert "tools/validate_qtt_authority_reason_code_registry.py" in entry.tool_globs
+    assert (
+        "tests/tools/test_qtt_authority_reason_code_registry.py"
+        in entry.required_when_files_match
+    )
+
+
 def test_inventory_has_pr165_d3_quantum_selection_entry():
     entry = inventory.inventory_by_id()[
         "validate_pr165_d3_quantum_aware_scenario_selection_v3"

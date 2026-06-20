@@ -80,6 +80,15 @@ def test_validation_infrastructure_change_forces_full_validation():
     assert len(result.required_validators) > 100
 
 
+def test_qtt_authority_registry_change_routes_to_owner_validator():
+    result = _pull_request_result("tools/qtt_authority_reason_code_registry.py")
+
+    assert result.full_validation_required is True
+    assert "validate_qtt_authority_reason_code_registry" in result.required_validators
+    assert result.fail_closed_reasons == ()
+    assert "tools/qtt_authority_reason_code_registry.py" not in result.unknown_files
+
+
 def test_main_push_runs_full_validation():
     result = build_router_result(
         RouterInput(

@@ -46,6 +46,7 @@ def main() -> int:
                 failures.append(f"EXPECTED_ALLOWED:{branch}:{path}:{explain_pr_scope_decision(branch, path)}")
 
     rp_allowed_paths = [
+        "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
         "docs/master_plan/generated/PR168_RP_FinalSummary.report.json",
         "docs/master_plan/generated/pr168_rp_shards/PR168_RP_ComputedReplayResults.part_0001_of_0001.report.json",
         "tools/build_pr168_rp_formula_based_replay_paper_recompute.py",
@@ -54,6 +55,9 @@ def main() -> int:
         "tools/qtt_authority_reason_code_registry.py",
         "tools/validate_qtt_authority_reason_code_registry.py",
         "tests/tools/test_qtt_authority_reason_code_registry.py",
+        "tools/validation_inventory.py",
+        "tests/tools/test_validation_inventory.py",
+        "tests/tools/test_changed_area_validation_router.py",
         "tests/fail_closed/test_run_validation_gates.py",
         "tests/pr168_rp/test_formula_execution.py",
         "tools/run_validation_gates.py",

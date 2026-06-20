@@ -43,12 +43,16 @@ _PR168_ALLOWED_PATTERNS = (
 
 _PR168_RP_ALLOWED_EXACT_PATHS = frozenset(
     {
+        "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
         "tools/validation_scope_registry.py",
         "tools/validate_validation_scope_registry.py",
         "tests/tools/test_validation_scope_registry.py",
         "tools/qtt_authority_reason_code_registry.py",
         "tools/validate_qtt_authority_reason_code_registry.py",
         "tests/tools/test_qtt_authority_reason_code_registry.py",
+        "tools/validation_inventory.py",
+        "tests/tools/test_validation_inventory.py",
+        "tests/tools/test_changed_area_validation_router.py",
         "tests/fail_closed/test_run_validation_gates.py",
         "tools/build_pr168_rp_formula_based_replay_paper_recompute.py",
         "tools/run_validation_gates.py",
