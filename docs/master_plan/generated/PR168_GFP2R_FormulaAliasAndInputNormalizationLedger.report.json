@@ -1,0 +1,461 @@
+{
+  "DATA1A_refs": [
+    "docs/master_plan/generated/PR168_DATA1A_FinalSummary.report.json",
+    "docs/master_plan/generated/PR168_DATA1A_InputDiscovery.report.json",
+    "docs/master_plan/generated/PR168_DATA1A_FetchInventoryAudit.report.json",
+    "docs/master_plan/generated/PR168_DATA1A_DataProductIntegrityLedger.report.json",
+    "docs/master_plan/generated/PR168_DATA1A_QKUUnblockDeltaAudit.report.json",
+    "docs/master_plan/generated/PR168_DATA1A_DataQualityCoverageAudit.report.json",
+    "docs/master_plan/generated/PR168_DATA1A_HistoricalFullBookTruthLedger.report.json",
+    "docs/master_plan/generated/PR168_DATA1A_GFP2RReadinessDecision.report.json",
+    "docs/master_plan/generated/PR168_DATA1A_GFP2RAllowedDataFamilyContract.report.json",
+    "docs/master_plan/generated/PR168_DATA1A_QKUFormulaDataRequirementBridge.report.json",
+    "docs/master_plan/generated/PR168_DATA1A_QKUComputabilityRouteLedger.report.json",
+    "docs/master_plan/generated/PR168_DATA1A_FormulaInputCoverageMatrix.report.json",
+    "docs/master_plan/generated/PR168_DATA1A_DataQualitySeverityActionQueue.report.json",
+    "docs/master_plan/generated/PR168_DATA1A_RP2RANK2BatchReadinessAudit.report.json",
+    "docs/master_plan/generated/PR168_DATA1A_QuantumForwardUsabilityAudit.report.json",
+    "docs/master_plan/generated/PR168_DATA1A_AlphaCaptureReadinessMatrix.report.json",
+    "docs/master_plan/generated/PR168_DATA1A_NegativeToPositiveRecoveryReadinessQueue.report.json",
+    "docs/master_plan/generated/PR168_DATA1A_AgentRoutingAndNoOrphanProof.report.json",
+    "docs/master_plan/generated/PR168_DATA1A_DAGUpstreamDownstreamOrchestration.report.json",
+    "docs/master_plan/generated/PR168_DATA1A_EveryValueUpstreamDownstreamCrosswalk.report.json",
+    "docs/master_plan/generated/PR168_DATA1A_AgentConsumableDataValueRoutingLedger.report.json",
+    "docs/master_plan/generated/PR168_DATA1A_OperatorActionMatrix.report.json"
+  ],
+  "DATA1_refs": [
+    "docs/master_plan/generated/PR168_DATA1_FinalSummary.report.json",
+    "docs/master_plan/generated/PR168_DATA1_PR168_GFP2R_DataReadyFormulaUniverse.report.json",
+    "docs/master_plan/generated/PR168_DATA1_PR168_RP2_FirstReplayPaperRecomputeBatch.report.json",
+    "docs/master_plan/generated/PR168_DATA1_PR168_RANK2_FirstEvidenceRankingBatch.report.json",
+    "docs/master_plan/generated/PR168_DATA1_QuantumForwardCoefficientFeatureSurface.report.json",
+    "docs/master_plan/generated/PR168_DATA1_NormalizedMarketDataFeatureRegistry.report.json"
+  ],
+  "authority_class": "PR168_GFP2R_CANDIDATE_ONLY_NON_PROOF",
+  "computed_from_refs": [],
+  "connector_semantic_binding_created_flag": false,
+  "consumer_agents": [
+    "formula_execution_agent",
+    "replay_paper_agent",
+    "ranking_scoring_agent",
+    "risk_tca_capacity_agent",
+    "quantum_optimizer_agent",
+    "dashboard_operator_agent"
+  ],
+  "created_at_utc": "2026-06-21T22:30:42Z",
+  "created_by_tool": "tools/build_pr168_gfp2r_data1a_gated_candidate_recompute.py",
+  "data_provenance_refs": [],
+  "downstream_consumers": [
+    "formula_execution_agent",
+    "replay_paper_agent",
+    "ranking_scoring_agent",
+    "risk_tca_capacity_agent",
+    "quantum_optimizer_agent",
+    "dashboard_operator_agent"
+  ],
+  "downstream_pr_refs": [
+    "PR168-RP2",
+    "PR168-RANK2",
+    "PR165-B",
+    "PR167",
+    "PR162E-Q",
+    "PR166-Q",
+    "PR166-QB",
+    "PR166-QC",
+    "DATA1B"
+  ],
+  "formula_refs": [],
+  "formula_variant_refs_if_available": [],
+  "live_authority_created_flag": false,
+  "manual_edit_allowed_flag": false,
+  "no_orphan_status": "NO_ORPHAN_ROUTED",
+  "numeric_evidence_refs": [],
+  "order_authority_created_flag": false,
+  "owning_agent": "qku_formula_materialization_agent",
+  "private_state_access_created_flag": false,
+  "profit_evidence_created_flag": false,
+  "qtt_sha_or_atomicrows_hash_authority_flag": false,
+  "quantum_advantage_claim_flag": false,
+  "quantum_backend_execution_flag": false,
+  "records": {
+    "rows": [
+      {
+        "formula_variant_id": "gfp2r_formula_variant_00001",
+        "input_alias_normalization_refs": [
+          "entry_price->entry_price",
+          "payout_value->payout_value"
+        ],
+        "input_unit_normalization_refs": [
+          "entry_price:dollars_per_contract",
+          "payout_value:dollars_per_contract"
+        ],
+        "normalized_required_inputs": [
+          "entry_price",
+          "payout_value"
+        ],
+        "row_id": "alias_normalization_00001",
+        "template_id": "market_implied_probability_baseline"
+      },
+      {
+        "formula_variant_id": "gfp2r_formula_variant_00002",
+        "input_alias_normalization_refs": [
+          "entry_price->entry_price",
+          "candidate_cost_stack->candidate_cost_stack",
+          "payout_value->payout_value"
+        ],
+        "input_unit_normalization_refs": [
+          "entry_price:dollars_per_contract",
+          "candidate_cost_stack:dollars_per_contract",
+          "payout_value:dollars_per_contract"
+        ],
+        "normalized_required_inputs": [
+          "entry_price",
+          "candidate_cost_stack",
+          "payout_value"
+        ],
+        "row_id": "alias_normalization_00002",
+        "template_id": "break_even_probability_after_costs"
+      },
+      {
+        "formula_variant_id": "gfp2r_formula_variant_00003",
+        "input_alias_normalization_refs": [
+          "break_even_probability_after_costs->break_even_probability_after_costs",
+          "market_implied_probability->market_implied_probability"
+        ],
+        "input_unit_normalization_refs": [
+          "break_even_probability_after_costs:probability",
+          "market_implied_probability:probability"
+        ],
+        "normalized_required_inputs": [
+          "break_even_probability_after_costs",
+          "market_implied_probability"
+        ],
+        "row_id": "alias_normalization_00003",
+        "template_id": "required_probability_edge"
+      },
+      {
+        "formula_variant_id": "gfp2r_formula_variant_00004",
+        "input_alias_normalization_refs": [
+          "spread->spread",
+          "depth->depth"
+        ],
+        "input_unit_normalization_refs": [
+          "spread:dollars_per_contract",
+          "depth:contracts"
+        ],
+        "normalized_required_inputs": [
+          "spread",
+          "depth"
+        ],
+        "row_id": "alias_normalization_00004",
+        "template_id": "spread_depth_execution_cost"
+      },
+      {
+        "formula_variant_id": "gfp2r_formula_variant_00005",
+        "input_alias_normalization_refs": [
+          "orderbook_levels->orderbook_levels",
+          "entry_price->entry_price",
+          "price_band->price_band"
+        ],
+        "input_unit_normalization_refs": [
+          "orderbook_levels:price_size_levels",
+          "entry_price:dollars_per_contract",
+          "price_band:unknown"
+        ],
+        "normalized_required_inputs": [
+          "orderbook_levels",
+          "entry_price",
+          "price_band"
+        ],
+        "row_id": "alias_normalization_00005",
+        "template_id": "fillable_size_at_price_band"
+      },
+      {
+        "formula_variant_id": "gfp2r_formula_variant_00006",
+        "input_alias_normalization_refs": [
+          "orderbook_levels->orderbook_levels",
+          "entry_price->entry_price",
+          "edge_band->edge_band"
+        ],
+        "input_unit_normalization_refs": [
+          "orderbook_levels:price_size_levels",
+          "entry_price:dollars_per_contract",
+          "edge_band:unknown"
+        ],
+        "normalized_required_inputs": [
+          "orderbook_levels",
+          "entry_price",
+          "edge_band"
+        ],
+        "row_id": "alias_normalization_00006",
+        "template_id": "fillable_size_at_edge_band"
+      },
+      {
+        "formula_variant_id": "gfp2r_formula_variant_00007",
+        "input_alias_normalization_refs": [
+          "bid_depth->bid_depth",
+          "ask_depth->ask_depth"
+        ],
+        "input_unit_normalization_refs": [
+          "bid_depth:unknown",
+          "ask_depth:unknown"
+        ],
+        "normalized_required_inputs": [
+          "bid_depth",
+          "ask_depth"
+        ],
+        "row_id": "alias_normalization_00007",
+        "template_id": "orderbook_imbalance"
+      },
+      {
+        "formula_variant_id": "gfp2r_formula_variant_00008",
+        "input_alias_normalization_refs": [
+          "spread->spread",
+          "depth->depth"
+        ],
+        "input_unit_normalization_refs": [
+          "spread:dollars_per_contract",
+          "depth:contracts"
+        ],
+        "normalized_required_inputs": [
+          "spread",
+          "depth"
+        ],
+        "row_id": "alias_normalization_00008",
+        "template_id": "book_slope_proxy"
+      },
+      {
+        "formula_variant_id": "gfp2r_formula_variant_00009",
+        "input_alias_normalization_refs": [
+          "price_history->price_history"
+        ],
+        "input_unit_normalization_refs": [
+          "price_history:dollars_per_contract_series"
+        ],
+        "normalized_required_inputs": [
+          "price_history"
+        ],
+        "row_id": "alias_normalization_00009",
+        "template_id": "short_horizon_price_momentum"
+      },
+      {
+        "formula_variant_id": "gfp2r_formula_variant_00010",
+        "input_alias_normalization_refs": [
+          "price_history->price_history"
+        ],
+        "input_unit_normalization_refs": [
+          "price_history:dollars_per_contract_series"
+        ],
+        "normalized_required_inputs": [
+          "price_history"
+        ],
+        "row_id": "alias_normalization_00010",
+        "template_id": "price_history_volatility_proxy"
+      },
+      {
+        "formula_variant_id": "gfp2r_formula_variant_00011",
+        "input_alias_normalization_refs": [
+          "freshness_seconds->freshness_seconds",
+          "volatility_proxy->volatility_proxy"
+        ],
+        "input_unit_normalization_refs": [
+          "freshness_seconds:seconds",
+          "volatility_proxy:dollars_per_contract"
+        ],
+        "normalized_required_inputs": [
+          "freshness_seconds",
+          "volatility_proxy"
+        ],
+        "row_id": "alias_normalization_00011",
+        "template_id": "latency_decay_proxy"
+      },
+      {
+        "formula_variant_id": "gfp2r_formula_variant_00012",
+        "input_alias_normalization_refs": [
+          "order_size_bucket->order_size_bucket",
+          "top_level_depth->top_level_depth"
+        ],
+        "input_unit_normalization_refs": [
+          "order_size_bucket:contracts",
+          "top_level_depth:contracts"
+        ],
+        "normalized_required_inputs": [
+          "order_size_bucket",
+          "top_level_depth"
+        ],
+        "row_id": "alias_normalization_00012",
+        "template_id": "capacity_depth_penalty"
+      },
+      {
+        "formula_variant_id": "gfp2r_formula_variant_00013",
+        "input_alias_normalization_refs": [
+          "explicit_fee->explicit_fee",
+          "tick_size->tick_size",
+          "min_order_size->min_order_size"
+        ],
+        "input_unit_normalization_refs": [
+          "explicit_fee:dollars_per_contract",
+          "tick_size:dollars_per_contract",
+          "min_order_size:contracts"
+        ],
+        "normalized_required_inputs": [
+          "explicit_fee",
+          "tick_size",
+          "min_order_size"
+        ],
+        "row_id": "alias_normalization_00013",
+        "template_id": "fee_tick_min_size_threshold"
+      },
+      {
+        "formula_variant_id": "gfp2r_formula_variant_00014",
+        "input_alias_normalization_refs": [
+          "snapshot_timestamp->snapshot_timestamp",
+          "resolution_timestamp->resolution_timestamp"
+        ],
+        "input_unit_normalization_refs": [
+          "snapshot_timestamp:timestamp",
+          "resolution_timestamp:timestamp"
+        ],
+        "normalized_required_inputs": [
+          "snapshot_timestamp",
+          "resolution_timestamp"
+        ],
+        "row_id": "alias_normalization_00014",
+        "template_id": "time_to_resolution_lifecycle_feature"
+      },
+      {
+        "formula_variant_id": "gfp2r_formula_variant_00015",
+        "input_alias_normalization_refs": [
+          "candidate_cost_stack->candidate_cost_stack",
+          "independent_probability_state->independent_probability_state"
+        ],
+        "input_unit_normalization_refs": [
+          "candidate_cost_stack:dollars_per_contract",
+          "independent_probability_state:state"
+        ],
+        "normalized_required_inputs": [
+          "candidate_cost_stack",
+          "independent_probability_state"
+        ],
+        "row_id": "alias_normalization_00015",
+        "template_id": "no_trade_threshold"
+      },
+      {
+        "formula_variant_id": "gfp2r_formula_variant_00016",
+        "input_alias_normalization_refs": [
+          "p_resolve_yes_candidate->p_resolve_yes_candidate",
+          "payout_value->payout_value",
+          "entry_price->entry_price",
+          "candidate_cost_stack->candidate_cost_stack"
+        ],
+        "input_unit_normalization_refs": [
+          "p_resolve_yes_candidate:probability",
+          "payout_value:dollars_per_contract",
+          "entry_price:dollars_per_contract",
+          "candidate_cost_stack:dollars_per_contract"
+        ],
+        "normalized_required_inputs": [
+          "p_resolve_yes_candidate",
+          "payout_value",
+          "entry_price",
+          "candidate_cost_stack"
+        ],
+        "row_id": "alias_normalization_00016",
+        "template_id": "candidate_expected_value_if_independent_probability_exists"
+      },
+      {
+        "formula_variant_id": "gfp2r_formula_variant_00017",
+        "input_alias_normalization_refs": [
+          "break_even_probability_after_costs->break_even_probability_after_costs",
+          "candidate_cost_stack->candidate_cost_stack"
+        ],
+        "input_unit_normalization_refs": [
+          "break_even_probability_after_costs:probability",
+          "candidate_cost_stack:dollars_per_contract"
+        ],
+        "normalized_required_inputs": [
+          "break_even_probability_after_costs",
+          "candidate_cost_stack"
+        ],
+        "row_id": "alias_normalization_00017",
+        "template_id": "scenario_ladder_stress_candidate"
+      },
+      {
+        "formula_variant_id": "gfp2r_formula_variant_00018",
+        "input_alias_normalization_refs": [
+          "candidate_quality_i->candidate_quality_i",
+          "cost_penalty_i->cost_penalty_i",
+          "constraint_refs->constraint_refs"
+        ],
+        "input_unit_normalization_refs": [
+          "candidate_quality_i:unitless_score",
+          "cost_penalty_i:unitless_score",
+          "constraint_refs:constraint_reference_set"
+        ],
+        "normalized_required_inputs": [
+          "candidate_quality_i",
+          "cost_penalty_i",
+          "constraint_refs"
+        ],
+        "row_id": "alias_normalization_00018",
+        "template_id": "quantum_candidate_stack_variant"
+      },
+      {
+        "formula_variant_id": "gfp2r_formula_variant_00019",
+        "input_alias_normalization_refs": [
+          "entry_price->entry_price",
+          "payout_value->payout_value"
+        ],
+        "input_unit_normalization_refs": [
+          "entry_price:dollars_per_contract",
+          "payout_value:dollars_per_contract"
+        ],
+        "normalized_required_inputs": [
+          "entry_price",
+          "payout_value"
+        ],
+        "row_id": "alias_normalization_00019",
+        "template_id": "market_implied_probability_baseline"
+      },
+      {
+        "formula_variant_id": "gfp2r_formula_variant_00020",
+        "input_alias_normalization_refs": [
+          "entry_price->entry_price",
+          "resolution_timestamp->resolution_timestamp"
+        ],
+        "input_unit_normalization_refs": [
+          "entry_price:dollars_per_contract",
+          "resolution_timestamp:timestamp"
+        ],
+        "normalized_required_inputs": [
+          "entry_price",
+          "resolution_timestamp"
+        ],
+        "row_id": "alias_normalization_00020",
+        "template_id": "unit_invalid_entry_price_plus_resolution_timestamp_receipt"
+      }
+    ],
+    "summary": {
+      "alias_row_count": 60
+    }
+  },
+  "repair_route_if_gap": null,
+  "report_id": "PR168_GFP2R_FormulaAliasAndInputNormalizationLedger",
+  "report_version": "PR168-GFP2R-v3.0",
+  "row_shard_refs_if_any": [
+    "docs/master_plan/generated/pr168_gfp2r_candidate_compute/formula_variant_rows.jsonl",
+    "docs/master_plan/generated/pr168_gfp2r_candidate_compute/formula_variant_rows.manifest.json"
+  ],
+  "source_truth_acceptance_created_flag": false,
+  "terminal_by_nature_flag": false,
+  "terminal_reason_code": null,
+  "test_refs": [
+    "tests/pr168_gfp2r"
+  ],
+  "upstream_input_refs": [],
+  "upstream_refs": [],
+  "validator_refs": [
+    "tools/pr168_gfp2r_validator.py",
+    "tools/validate_pr168_gfp2r_data1a_gated_candidate_recompute.py"
+  ]
+}
