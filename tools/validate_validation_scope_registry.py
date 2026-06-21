@@ -10,6 +10,7 @@ if str(REPO_ROOT) not in sys.path:
 
 from tools.validation_scope_registry import (  # noqa: E402
     PR168_GFP_BRANCH,
+    PR168_DATA1A_BRANCH,
     PR168_DATA1_BRANCH,
     PR168_RP_BRANCH,
     VALIDATION_FIXTURE_BRANCH,
@@ -94,6 +95,25 @@ def main() -> int:
                 f"{explain_pr_scope_decision(VALIDATION_FIXTURE_BRANCH, path)}"
             )
 
+    data1a_allowed_paths = [
+        "docs/master_plan/generated/PR168_DATA1A_FinalSummary.report.json",
+        "docs/master_plan/generated/pr168_data1a_audit/fetch_inventory_rows.jsonl",
+        "docs/master_plan/generated/pr168_data1a_audit/fetch_inventory_rows.manifest.json",
+        "tools/build_pr168_data1a_focused_audit.py",
+        "tools/pr168_data1a_validator.py",
+        "tools/validate_pr168_data1a_focused_audit.py",
+        "tests/pr168_data1a/test_pr168_data1a_fetch_inventory_answers_owner_question_a.py",
+        "tools/run_validation_gates.py",
+    ]
+    for path in data1a_allowed_paths:
+        if not is_pr_scoped_changed_path_allowed(PR168_DATA1A_BRANCH, path):
+            failures.append(f"EXPECTED_ALLOWED:{PR168_DATA1A_BRANCH}:{path}:{explain_pr_scope_decision(PR168_DATA1A_BRANCH, path)}")
+        if not is_pr_scoped_changed_path_allowed(VALIDATION_FIXTURE_BRANCH, path):
+            failures.append(
+                f"EXPECTED_ALLOWED:{VALIDATION_FIXTURE_BRANCH}:{path}:"
+                f"{explain_pr_scope_decision(VALIDATION_FIXTURE_BRANCH, path)}"
+            )
+
     disallowed_paths = [
         "docs/master_plan/generated/SomeOtherReport.report.json",
         "tools/random_helper.py",
@@ -115,6 +135,8 @@ def main() -> int:
     for path in disallowed_paths:
         if is_pr_scoped_changed_path_allowed(PR168_DATA1_BRANCH, path):
             failures.append(f"EXPECTED_REJECTED:{PR168_DATA1_BRANCH}:{path}")
+        if is_pr_scoped_changed_path_allowed(PR168_DATA1A_BRANCH, path):
+            failures.append(f"EXPECTED_REJECTED:{PR168_DATA1A_BRANCH}:{path}")
     for path in [
         "docs/master_plan/generated/PR168_GFP_QKUBaselineCountReconcile.report.json",
         "tools/build_pr168_gfp_global_formula_discovery_real_computation.py",

@@ -1,0 +1,59 @@
+{
+  "DATA1_artifact_refs": [],
+  "authority_class": "PR168_DATA1A_PUBLIC_READ_ONLY_JSONL_SHARD_MANIFEST",
+  "connector_semantic_binding_created_flag": false,
+  "consumer_agents": [
+    "dashboard_operator_agent",
+    "source_evidence_agent",
+    "market_data_acquisition_agent"
+  ],
+  "data_family": "gfp2r_readiness",
+  "data_provenance_refs": [],
+  "downstream_consumers": [
+    "dashboard_operator_agent",
+    "source_evidence_agent",
+    "market_data_acquisition_agent"
+  ],
+  "downstream_pr_refs": [
+    "PR168-GFP2R",
+    "PR168-RP2",
+    "PR168-RANK2",
+    "PR165-B",
+    "PR167",
+    "PR162E-Q",
+    "PR166-Q",
+    "PR166-QB",
+    "PR166-QC"
+  ],
+  "live_authority_created_flag": false,
+  "manifest_id": "PR168_DATA1A_GFP2R_READINESS_ROWS",
+  "manual_edit_allowed_flag": false,
+  "no_orphan_status": "NO_ORPHAN_ROUTED",
+  "order_authority_created_flag": false,
+  "owning_agent": "governance_validation_agent",
+  "private_state_access_created_flag": false,
+  "profit_evidence_created_flag": false,
+  "qtt_sha_or_atomicrows_hash_authority_flag": false,
+  "quantum_advantage_claim_flag": false,
+  "quantum_backend_execution_flag": false,
+  "row_count": 2,
+  "row_refs": [
+    "gfp2r_readiness_00001",
+    "gfp2r_readiness_00002"
+  ],
+  "row_shard_refs_if_any": [
+    "docs/master_plan/generated/pr168_data1a_audit/gfp2r_readiness_rows.jsonl"
+  ],
+  "shard_path": "docs/master_plan/generated/pr168_data1a_audit/gfp2r_readiness_rows.jsonl",
+  "source_truth_acceptance_created_flag": false,
+  "terminal_by_nature_flag": false,
+  "terminal_reason_code": null,
+  "test_refs": [
+    "tests/pr168_data1a"
+  ],
+  "upstream_input_refs": [],
+  "validator_refs": [
+    "tools/pr168_data1a_validator.py",
+    "tools/validate_pr168_data1a_focused_audit.py"
+  ]
+}

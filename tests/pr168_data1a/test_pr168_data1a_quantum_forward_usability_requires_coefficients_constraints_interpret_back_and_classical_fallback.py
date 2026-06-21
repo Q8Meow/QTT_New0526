@@ -1,0 +1,5 @@
+from tests.pr168_data1a._helpers import assert_data1a_valid
+
+
+def test_pr168_data1a_quantum_forward_usability_requires_coefficients_constraints_interpret_back_and_classical_fallback():
+    assert_data1a_valid()

@@ -1,0 +1,226 @@
+{
+  "DATA1_artifact_refs": [
+    "docs/master_plan/generated/PR168_DATA1_FinalSummary.report.json",
+    "docs/master_plan/generated/PR168_DATA1_PublicFetchExecutionSummary.report.json",
+    "docs/master_plan/generated/PR168_DATA1_SourceEndpointDiscovery.report.json",
+    "docs/master_plan/generated/PR168_DATA1_KalshiSnapshotManifest.report.json",
+    "docs/master_plan/generated/PR168_DATA1_PolymarketSnapshotManifest.report.json",
+    "docs/master_plan/generated/PR168_DATA1_HistoricalFullBookAvailabilityAudit.report.json",
+    "docs/master_plan/generated/PR168_DATA1_HistoricalFullBookAcquisitionLedger.report.json",
+    "docs/master_plan/generated/PR168_DATA1_HistoricalL2GapRouteToFutureAcquisition.report.json",
+    "docs/master_plan/generated/PR168_DATA1_HistoricalPriceTradeCandleReplaySubstituteLedger.report.json",
+    "docs/master_plan/generated/PR168_DATA1_ForwardFullBookReplayCaptureBootstrap.report.json",
+    "docs/master_plan/generated/PR168_DATA1_ForwardL2CaptureShardManifest.report.json",
+    "docs/master_plan/generated/PR168_DATA1_NormalizedMarketDataFeatureRegistry.report.json",
+    "docs/master_plan/generated/PR168_DATA1_DataReadinessClassification.report.json",
+    "docs/master_plan/generated/PR168_DATA1_DataQualityFreshnessCoverageAudit.report.json",
+    "docs/master_plan/generated/PR168_DATA1_MinimumViableRealDataProofDatasetPlan.report.json",
+    "docs/master_plan/generated/PR168_DATA1_PR168_GFP2R_DataReadyFormulaUniverse.report.json",
+    "docs/master_plan/generated/PR168_DATA1_PR168_RP2_FirstReplayPaperRecomputeBatch.report.json",
+    "docs/master_plan/generated/PR168_DATA1_PR168_RANK2_FirstEvidenceRankingBatch.report.json",
+    "docs/master_plan/generated/PR168_DATA1_QuantumForwardCoefficientFeatureSurface.report.json",
+    "docs/master_plan/generated/PR168_DATA1_AgentRoutingAndNoOrphanProof.report.json",
+    "docs/master_plan/generated/PR168_DATA1_DAGUpstreamDownstreamOrchestration.report.json",
+    "docs/master_plan/generated/PR168_DATA1_OperatorActionMatrix.report.json"
+  ],
+  "authority_class": "PR168_DATA1A_PUBLIC_READ_ONLY_AUDIT",
+  "connector_semantic_binding_created_flag": false,
+  "consumer_agents": [
+    "dashboard_operator_agent",
+    "source_evidence_agent",
+    "market_data_acquisition_agent"
+  ],
+  "created_at_utc": "2026-06-21T11:04:04Z",
+  "created_by_tool": "tools/build_pr168_data1a_focused_audit.py",
+  "data_provenance_refs": [],
+  "downstream_consumers": [
+    "dashboard_operator_agent",
+    "source_evidence_agent",
+    "market_data_acquisition_agent"
+  ],
+  "downstream_pr_refs": [
+    "PR168-GFP2R",
+    "PR168-RP2",
+    "PR168-RANK2",
+    "PR165-B",
+    "PR167",
+    "PR162E-Q",
+    "PR166-Q",
+    "PR166-QB",
+    "PR166-QC"
+  ],
+  "live_authority_created_flag": false,
+  "manual_edit_allowed_flag": false,
+  "no_orphan_status": "NO_ORPHAN_ROUTED",
+  "order_authority_created_flag": false,
+  "owning_agent": "governance_validation_agent",
+  "private_state_access_created_flag": false,
+  "profit_evidence_created_flag": false,
+  "qtt_sha_or_atomicrows_hash_authority_flag": false,
+  "quantum_advantage_claim_flag": false,
+  "quantum_backend_execution_flag": false,
+  "records": {
+    "rows": [
+      {
+        "DATA1_artifact_refs": [
+          "docs/master_plan/generated/PR168_DATA1_DataQualityFreshnessCoverageAudit.report.json"
+        ],
+        "authority_class": "PR168_DATA1A_PUBLIC_READ_ONLY_AUDIT",
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "dashboard_operator_agent",
+          "source_evidence_agent",
+          "market_data_acquisition_agent"
+        ],
+        "created_at_utc": "2026-06-21T11:04:04Z",
+        "damaged_metric_pathways": [],
+        "data_provenance_refs": [],
+        "downstream_consumers": [
+          "dashboard_operator_agent",
+          "source_evidence_agent",
+          "market_data_acquisition_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-GFP2R",
+          "PR168-RP2",
+          "PR168-RANK2",
+          "PR165-B",
+          "PR167",
+          "PR162E-Q",
+          "PR166-Q",
+          "PR166-QB",
+          "PR166-QC"
+        ],
+        "expected_downstream_unblock_count": 3,
+        "live_authority_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "market_or_token_ref": "0x1fad72fae204143ff1c3035e99e7c0f65ea8d5cd9bd1070987bd1a3316f772be",
+        "next_action": "RUN_RP2_REPLAY_PAPER",
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "order_authority_created_flag": false,
+        "owning_agent": "governance_validation_agent",
+        "private_state_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quality_gap_codes": [
+          "current_orderbook_present",
+          "spread_present",
+          "depth_present",
+          "history_present",
+          "historical_full_book_missing"
+        ],
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "route_family": "RUN_RP2_REPLAY_PAPER",
+        "row_shard_refs_if_any": [],
+        "severity_action_row_id": "data_quality_action_00001",
+        "severity_state": "GREEN_READY_FOR_CANDIDATE_COMPUTE",
+        "source_truth_acceptance_created_flag": false,
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_data1a"
+        ],
+        "upstream_input_refs": [],
+        "validator_refs": [
+          "tools/pr168_data1a_validator.py",
+          "tools/validate_pr168_data1a_focused_audit.py"
+        ],
+        "venue": "polymarket"
+      },
+      {
+        "DATA1_artifact_refs": [
+          "docs/master_plan/generated/PR168_DATA1_DataQualityFreshnessCoverageAudit.report.json"
+        ],
+        "authority_class": "PR168_DATA1A_PUBLIC_READ_ONLY_AUDIT",
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "dashboard_operator_agent",
+          "source_evidence_agent",
+          "market_data_acquisition_agent"
+        ],
+        "created_at_utc": "2026-06-21T11:04:04Z",
+        "damaged_metric_pathways": [
+          "execution_adjusted_edge"
+        ],
+        "data_provenance_refs": [],
+        "downstream_consumers": [
+          "dashboard_operator_agent",
+          "source_evidence_agent",
+          "market_data_acquisition_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-GFP2R",
+          "PR168-RP2",
+          "PR168-RANK2",
+          "PR165-B",
+          "PR167",
+          "PR162E-Q",
+          "PR166-Q",
+          "PR166-QB",
+          "PR166-QC"
+        ],
+        "expected_downstream_unblock_count": 2,
+        "live_authority_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "market_or_token_ref": "KXMVECROSSCATEGORY-S2026F6847194F7A-CC6D65A8A6F",
+        "next_action": "RUN_GFP2R_CANDIDATE_COMPUTE",
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "order_authority_created_flag": false,
+        "owning_agent": "governance_validation_agent",
+        "private_state_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quality_gap_codes": [
+          "current_orderbook_present",
+          "spread_missing_or_derived_only",
+          "depth_present",
+          "history_present",
+          "historical_full_book_missing"
+        ],
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "route_family": "RUN_GFP2R_CANDIDATE_COMPUTE",
+        "row_shard_refs_if_any": [],
+        "severity_action_row_id": "data_quality_action_00002",
+        "severity_state": "YELLOW_READY_WITH_FORMULA_BINDING_REPAIR",
+        "source_truth_acceptance_created_flag": false,
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_data1a"
+        ],
+        "upstream_input_refs": [],
+        "validator_refs": [
+          "tools/pr168_data1a_validator.py",
+          "tools/validate_pr168_data1a_focused_audit.py"
+        ],
+        "venue": "kalshi"
+      }
+    ],
+    "summary": {
+      "data_quality_severity_row_count": 2,
+      "severity_state_counts": {
+        "GREEN_READY_FOR_CANDIDATE_COMPUTE": 1,
+        "YELLOW_READY_WITH_FORMULA_BINDING_REPAIR": 1
+      }
+    }
+  },
+  "report_id": "PR168_DATA1A_DataQualitySeverityActionQueue",
+  "report_version": "PR168-DATA1A-v3.0",
+  "row_shard_refs_if_any": [
+    "docs/master_plan/generated/pr168_data1a_audit/data_quality_rows.jsonl",
+    "docs/master_plan/generated/pr168_data1a_audit/data_quality_rows.manifest.json"
+  ],
+  "source_truth_acceptance_created_flag": false,
+  "terminal_by_nature_flag": false,
+  "terminal_reason_code": null,
+  "test_refs": [
+    "tests/pr168_data1a"
+  ],
+  "upstream_input_refs": [],
+  "validator_refs": [
+    "tools/pr168_data1a_validator.py",
+    "tools/validate_pr168_data1a_focused_audit.py"
+  ]
+}
