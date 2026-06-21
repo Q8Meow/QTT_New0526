@@ -1,0 +1,1547 @@
+{
+  "authority_class": "PUBLIC_READ_ONLY_DATA_ACQUISITION_CANDIDATE",
+  "computed_feature_refs": [
+    "pr168_data1_feature_0001",
+    "pr168_data1_feature_0002",
+    "pr168_data1_feature_0003",
+    "pr168_data1_feature_0004",
+    "pr168_data1_feature_0005",
+    "pr168_data1_feature_0006",
+    "pr168_data1_feature_0007",
+    "pr168_data1_feature_0008",
+    "pr168_data1_feature_0009",
+    "pr168_data1_feature_0010",
+    "pr168_data1_feature_0011",
+    "pr168_data1_feature_0012",
+    "pr168_data1_feature_0013",
+    "pr168_data1_feature_0014",
+    "pr168_data1_feature_0015",
+    "pr168_data1_feature_0016",
+    "pr168_data1_feature_0017",
+    "pr168_data1_feature_0018",
+    "pr168_data1_feature_0019",
+    "pr168_data1_feature_0020",
+    "pr168_data1_feature_0021",
+    "pr168_data1_feature_0022",
+    "pr168_data1_feature_0023",
+    "pr168_data1_feature_0024",
+    "pr168_data1_feature_0025",
+    "pr168_data1_feature_0026",
+    "pr168_data1_feature_0027",
+    "pr168_data1_feature_0028",
+    "pr168_data1_feature_0029",
+    "pr168_data1_feature_0030",
+    "pr168_data1_feature_0031",
+    "pr168_data1_feature_0032",
+    "pr168_data1_feature_0033",
+    "pr168_data1_feature_0034",
+    "pr168_data1_feature_0035",
+    "pr168_data1_feature_0036",
+    "pr168_data1_feature_0037",
+    "pr168_data1_feature_0038",
+    "pr168_data1_feature_0039",
+    "pr168_data1_feature_0040",
+    "pr168_data1_feature_0041",
+    "pr168_data1_feature_0042",
+    "pr168_data1_feature_0043",
+    "pr168_data1_feature_0044",
+    "pr168_data1_feature_0045",
+    "pr168_data1_feature_0046",
+    "pr168_data1_feature_0047",
+    "pr168_data1_feature_0048",
+    "pr168_data1_feature_0049",
+    "pr168_data1_feature_0050",
+    "pr168_data1_feature_0051"
+  ],
+  "connector_semantic_binding_created_flag": false,
+  "created_at_utc": "2026-06-21T04:41:22Z",
+  "created_by_tool": "tools/build_pr168_data1_public_market_data_snapshots.py",
+  "data_provenance_refs": [
+    "kalshi_quick_start_market_data",
+    "kalshi_orderbook_responses",
+    "kalshi_market_orderbook_endpoint",
+    "kalshi_trades_endpoint",
+    "kalshi_historical_data",
+    "kalshi_historical_orders",
+    "kalshi_orderbook_websocket",
+    "polymarket_api_introduction",
+    "polymarket_market_data_overview",
+    "polymarket_get_order_book",
+    "polymarket_prices_history",
+    "polymarket_market_websocket",
+    "polymarket_data_api_trades",
+    "ibkr_event_contracts",
+    "qiskit_qubo_converter",
+    "dwave_ocean_models",
+    "kalshi_markets",
+    "kalshi_current_orderbook",
+    "kalshi_live_trades",
+    "kalshi_historical_trades",
+    "kalshi_historical_orders",
+    "polymarket_gamma_markets",
+    "polymarket_clob_book",
+    "polymarket_prices_history",
+    "polymarket_data_trades",
+    "polymarket_public_market_websocket"
+  ],
+  "downstream_consumers": [
+    "market_data_acquisition_agent",
+    "governance_validation_agent",
+    "dashboard_operator_agent"
+  ],
+  "downstream_pr_refs": [
+    "PR168-GFP2R",
+    "PR168-RP2",
+    "PR168-RANK2"
+  ],
+  "l2_replay_manifest_refs": [
+    "docs/master_plan/generated/pr168_data1_forward_l2/kalshi/kalshi_forward_l2.manifest.json",
+    "docs/master_plan/generated/pr168_data1_forward_l2/polymarket/polymarket_forward_l2.manifest.json"
+  ],
+  "live_authority_created_flag": false,
+  "manual_edit_allowed_flag": false,
+  "no_orphan_status": "NO_ORPHAN_ROUTED",
+  "order_authority_created_flag": false,
+  "owning_agent": "source_evidence_agent",
+  "private_state_access_created_flag": false,
+  "profit_evidence_created_flag": false,
+  "qtt_sha_or_atomicrows_hash_authority_flag": false,
+  "quantum_advantage_claim_flag": false,
+  "quantum_backend_execution_flag": false,
+  "records": {
+    "endpoint_contract_rows": [
+      {
+        "auth_requirement": "PUBLIC_UNAUTHENTICATED",
+        "authority_class": "PUBLIC_READ_ONLY_DATA_ACQUISITION_CANDIDATE",
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "market_data_acquisition_agent",
+          "governance_validation_agent",
+          "dashboard_operator_agent"
+        ],
+        "data_families": [
+          "market_metadata",
+          "lifecycle",
+          "fees_tick_size"
+        ],
+        "discovered_at_utc": "2026-06-21T04:41:22Z",
+        "downstream_consumers": [
+          "market_data_acquisition_agent",
+          "governance_validation_agent",
+          "dashboard_operator_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-GFP2R",
+          "PR168-RP2",
+          "PR168-RANK2"
+        ],
+        "endpoint_contract_id": "kalshi_markets",
+        "endpoint_params": [
+          "limit",
+          "status"
+        ],
+        "endpoint_url_template": "https://external-api.kalshi.com/trade-api/v2/markets",
+        "historical_full_book_availability": "NOT_A_FULL_BOOK_ENDPOINT",
+        "live_authority_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "method": "GET",
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "order_authority_created_flag": false,
+        "owning_agent": "source_evidence_agent",
+        "private_state_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "rate_limit_notes": "respect public API limits; DATA1 uses bounded fetches and deterministic backoff",
+        "source_tier": "OFFICIAL_PUBLIC_API",
+        "source_truth_acceptance_created_flag": false,
+        "source_url": "https://external-api.kalshi.com/trade-api/v2/markets",
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_data1"
+        ],
+        "trust_tier": "OFFICIAL_PUBLIC_API_DOC",
+        "validator_refs": [
+          "tools/pr168_data1_validator.py",
+          "tools/validate_pr168_data1_public_market_data_snapshots.py"
+        ],
+        "venue": "kalshi",
+        "websocket_public_stream_availability": false
+      },
+      {
+        "auth_requirement": "PUBLIC_UNAUTHENTICATED",
+        "authority_class": "PUBLIC_READ_ONLY_DATA_ACQUISITION_CANDIDATE",
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "market_data_acquisition_agent",
+          "governance_validation_agent",
+          "dashboard_operator_agent"
+        ],
+        "data_families": [
+          "current_full_orderbook_snapshot"
+        ],
+        "discovered_at_utc": "2026-06-21T04:41:22Z",
+        "downstream_consumers": [
+          "market_data_acquisition_agent",
+          "governance_validation_agent",
+          "dashboard_operator_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-GFP2R",
+          "PR168-RP2",
+          "PR168-RANK2"
+        ],
+        "endpoint_contract_id": "kalshi_current_orderbook",
+        "endpoint_params": [
+          "ticker"
+        ],
+        "endpoint_url_template": "https://external-api.kalshi.com/trade-api/v2/markets/{ticker}/orderbook",
+        "historical_full_book_availability": "CURRENT_SNAPSHOT_ONLY",
+        "live_authority_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "method": "GET",
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "order_authority_created_flag": false,
+        "owning_agent": "source_evidence_agent",
+        "private_state_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "rate_limit_notes": "respect public API limits; DATA1 uses bounded fetches and deterministic backoff",
+        "source_tier": "OFFICIAL_PUBLIC_API",
+        "source_truth_acceptance_created_flag": false,
+        "source_url": "https://external-api.kalshi.com/trade-api/v2/markets/{ticker}/orderbook",
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_data1"
+        ],
+        "trust_tier": "OFFICIAL_PUBLIC_API_DOC",
+        "validator_refs": [
+          "tools/pr168_data1_validator.py",
+          "tools/validate_pr168_data1_public_market_data_snapshots.py"
+        ],
+        "venue": "kalshi",
+        "websocket_public_stream_availability": false
+      },
+      {
+        "auth_requirement": "PUBLIC_UNAUTHENTICATED",
+        "authority_class": "PUBLIC_READ_ONLY_DATA_ACQUISITION_CANDIDATE",
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "market_data_acquisition_agent",
+          "governance_validation_agent",
+          "dashboard_operator_agent"
+        ],
+        "data_families": [
+          "trade_history"
+        ],
+        "discovered_at_utc": "2026-06-21T04:41:22Z",
+        "downstream_consumers": [
+          "market_data_acquisition_agent",
+          "governance_validation_agent",
+          "dashboard_operator_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-GFP2R",
+          "PR168-RP2",
+          "PR168-RANK2"
+        ],
+        "endpoint_contract_id": "kalshi_live_trades",
+        "endpoint_params": [
+          "limit",
+          "cursor",
+          "ticker",
+          "min_ts",
+          "max_ts"
+        ],
+        "endpoint_url_template": "https://external-api.kalshi.com/trade-api/v2/markets/trades",
+        "historical_full_book_availability": "TRADE_HISTORY_NOT_FULL_BOOK",
+        "live_authority_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "method": "GET",
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "order_authority_created_flag": false,
+        "owning_agent": "source_evidence_agent",
+        "private_state_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "rate_limit_notes": "respect public API limits; DATA1 uses bounded fetches and deterministic backoff",
+        "source_tier": "OFFICIAL_PUBLIC_API",
+        "source_truth_acceptance_created_flag": false,
+        "source_url": "https://external-api.kalshi.com/trade-api/v2/markets/trades",
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_data1"
+        ],
+        "trust_tier": "OFFICIAL_PUBLIC_API_DOC",
+        "validator_refs": [
+          "tools/pr168_data1_validator.py",
+          "tools/validate_pr168_data1_public_market_data_snapshots.py"
+        ],
+        "venue": "kalshi",
+        "websocket_public_stream_availability": false
+      },
+      {
+        "auth_requirement": "PUBLIC_UNAUTHENTICATED",
+        "authority_class": "PUBLIC_READ_ONLY_DATA_ACQUISITION_CANDIDATE",
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "market_data_acquisition_agent",
+          "governance_validation_agent",
+          "dashboard_operator_agent"
+        ],
+        "data_families": [
+          "historical_trade_history"
+        ],
+        "discovered_at_utc": "2026-06-21T04:41:22Z",
+        "downstream_consumers": [
+          "market_data_acquisition_agent",
+          "governance_validation_agent",
+          "dashboard_operator_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-GFP2R",
+          "PR168-RP2",
+          "PR168-RANK2"
+        ],
+        "endpoint_contract_id": "kalshi_historical_trades",
+        "endpoint_params": [
+          "limit",
+          "cursor",
+          "ticker",
+          "min_ts",
+          "max_ts"
+        ],
+        "endpoint_url_template": "https://external-api.kalshi.com/trade-api/v2/historical/trades",
+        "historical_full_book_availability": "TRADE_HISTORY_NOT_FULL_BOOK",
+        "live_authority_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "method": "GET",
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "order_authority_created_flag": false,
+        "owning_agent": "source_evidence_agent",
+        "private_state_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "rate_limit_notes": "respect public API limits; DATA1 uses bounded fetches and deterministic backoff",
+        "source_tier": "OFFICIAL_PUBLIC_API",
+        "source_truth_acceptance_created_flag": false,
+        "source_url": "https://external-api.kalshi.com/trade-api/v2/historical/trades",
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_data1"
+        ],
+        "trust_tier": "OFFICIAL_PUBLIC_API_DOC",
+        "validator_refs": [
+          "tools/pr168_data1_validator.py",
+          "tools/validate_pr168_data1_public_market_data_snapshots.py"
+        ],
+        "venue": "kalshi",
+        "websocket_public_stream_availability": false
+      },
+      {
+        "auth_requirement": "AUTH_REQUIRED_USER_SCOPED_NOT_USED",
+        "authority_class": "PUBLIC_READ_ONLY_DATA_ACQUISITION_CANDIDATE",
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "market_data_acquisition_agent",
+          "governance_validation_agent",
+          "dashboard_operator_agent"
+        ],
+        "data_families": [
+          "historical_user_orders"
+        ],
+        "discovered_at_utc": "2026-06-21T04:41:22Z",
+        "downstream_consumers": [
+          "market_data_acquisition_agent",
+          "governance_validation_agent",
+          "dashboard_operator_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-GFP2R",
+          "PR168-RP2",
+          "PR168-RANK2"
+        ],
+        "endpoint_contract_id": "kalshi_historical_orders",
+        "endpoint_params": [
+          "ticker",
+          "cursor",
+          "limit"
+        ],
+        "endpoint_url_template": "https://external-api.kalshi.com/trade-api/v2/historical/orders",
+        "historical_full_book_availability": "AUTH_REQUIRED_NOT_USED_BY_DATA1_DEFAULT",
+        "live_authority_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "method": "GET",
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "order_authority_created_flag": false,
+        "owning_agent": "source_evidence_agent",
+        "private_state_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "rate_limit_notes": "respect public API limits; DATA1 uses bounded fetches and deterministic backoff",
+        "source_tier": "OFFICIAL_PUBLIC_API",
+        "source_truth_acceptance_created_flag": false,
+        "source_url": "https://external-api.kalshi.com/trade-api/v2/historical/orders",
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_data1"
+        ],
+        "trust_tier": "OFFICIAL_PUBLIC_API_DOC",
+        "validator_refs": [
+          "tools/pr168_data1_validator.py",
+          "tools/validate_pr168_data1_public_market_data_snapshots.py"
+        ],
+        "venue": "kalshi",
+        "websocket_public_stream_availability": false
+      },
+      {
+        "auth_requirement": "PUBLIC_UNAUTHENTICATED",
+        "authority_class": "PUBLIC_READ_ONLY_DATA_ACQUISITION_CANDIDATE",
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "market_data_acquisition_agent",
+          "governance_validation_agent",
+          "dashboard_operator_agent"
+        ],
+        "data_families": [
+          "market_metadata",
+          "lifecycle",
+          "liquidity_volume"
+        ],
+        "discovered_at_utc": "2026-06-21T04:41:22Z",
+        "downstream_consumers": [
+          "market_data_acquisition_agent",
+          "governance_validation_agent",
+          "dashboard_operator_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-GFP2R",
+          "PR168-RP2",
+          "PR168-RANK2"
+        ],
+        "endpoint_contract_id": "polymarket_gamma_markets",
+        "endpoint_params": [
+          "active",
+          "closed",
+          "limit"
+        ],
+        "endpoint_url_template": "https://gamma-api.polymarket.com/markets",
+        "historical_full_book_availability": "NOT_A_FULL_BOOK_ENDPOINT",
+        "live_authority_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "method": "GET",
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "order_authority_created_flag": false,
+        "owning_agent": "source_evidence_agent",
+        "private_state_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "rate_limit_notes": "respect public API limits; DATA1 uses bounded fetches and deterministic backoff",
+        "source_tier": "OFFICIAL_PUBLIC_API",
+        "source_truth_acceptance_created_flag": false,
+        "source_url": "https://gamma-api.polymarket.com/markets",
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_data1"
+        ],
+        "trust_tier": "OFFICIAL_PUBLIC_API_DOC",
+        "validator_refs": [
+          "tools/pr168_data1_validator.py",
+          "tools/validate_pr168_data1_public_market_data_snapshots.py"
+        ],
+        "venue": "polymarket",
+        "websocket_public_stream_availability": false
+      },
+      {
+        "auth_requirement": "PUBLIC_UNAUTHENTICATED",
+        "authority_class": "PUBLIC_READ_ONLY_DATA_ACQUISITION_CANDIDATE",
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "market_data_acquisition_agent",
+          "governance_validation_agent",
+          "dashboard_operator_agent"
+        ],
+        "data_families": [
+          "current_full_orderbook_snapshot"
+        ],
+        "discovered_at_utc": "2026-06-21T04:41:22Z",
+        "downstream_consumers": [
+          "market_data_acquisition_agent",
+          "governance_validation_agent",
+          "dashboard_operator_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-GFP2R",
+          "PR168-RP2",
+          "PR168-RANK2"
+        ],
+        "endpoint_contract_id": "polymarket_clob_book",
+        "endpoint_params": [
+          "token_id"
+        ],
+        "endpoint_url_template": "https://clob.polymarket.com/book",
+        "historical_full_book_availability": "CURRENT_SNAPSHOT_ONLY",
+        "live_authority_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "method": "GET",
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "order_authority_created_flag": false,
+        "owning_agent": "source_evidence_agent",
+        "private_state_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "rate_limit_notes": "respect public API limits; DATA1 uses bounded fetches and deterministic backoff",
+        "source_tier": "OFFICIAL_PUBLIC_API",
+        "source_truth_acceptance_created_flag": false,
+        "source_url": "https://clob.polymarket.com/book",
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_data1"
+        ],
+        "trust_tier": "OFFICIAL_PUBLIC_API_DOC",
+        "validator_refs": [
+          "tools/pr168_data1_validator.py",
+          "tools/validate_pr168_data1_public_market_data_snapshots.py"
+        ],
+        "venue": "polymarket",
+        "websocket_public_stream_availability": false
+      },
+      {
+        "auth_requirement": "PUBLIC_UNAUTHENTICATED",
+        "authority_class": "PUBLIC_READ_ONLY_DATA_ACQUISITION_CANDIDATE",
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "market_data_acquisition_agent",
+          "governance_validation_agent",
+          "dashboard_operator_agent"
+        ],
+        "data_families": [
+          "price_history"
+        ],
+        "discovered_at_utc": "2026-06-21T04:41:22Z",
+        "downstream_consumers": [
+          "market_data_acquisition_agent",
+          "governance_validation_agent",
+          "dashboard_operator_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-GFP2R",
+          "PR168-RP2",
+          "PR168-RANK2"
+        ],
+        "endpoint_contract_id": "polymarket_prices_history",
+        "endpoint_params": [
+          "market",
+          "startTs",
+          "endTs",
+          "interval",
+          "fidelity"
+        ],
+        "endpoint_url_template": "https://clob.polymarket.com/prices-history",
+        "historical_full_book_availability": "PRICE_HISTORY_NOT_FULL_BOOK",
+        "live_authority_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "method": "GET",
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "order_authority_created_flag": false,
+        "owning_agent": "source_evidence_agent",
+        "private_state_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "rate_limit_notes": "respect public API limits; DATA1 uses bounded fetches and deterministic backoff",
+        "source_tier": "OFFICIAL_PUBLIC_API",
+        "source_truth_acceptance_created_flag": false,
+        "source_url": "https://clob.polymarket.com/prices-history",
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_data1"
+        ],
+        "trust_tier": "OFFICIAL_PUBLIC_API_DOC",
+        "validator_refs": [
+          "tools/pr168_data1_validator.py",
+          "tools/validate_pr168_data1_public_market_data_snapshots.py"
+        ],
+        "venue": "polymarket",
+        "websocket_public_stream_availability": false
+      },
+      {
+        "auth_requirement": "PUBLIC_MARKET_SAFE_WHEN_NOT_USER_PRIVATE",
+        "authority_class": "PUBLIC_READ_ONLY_DATA_ACQUISITION_CANDIDATE",
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "market_data_acquisition_agent",
+          "governance_validation_agent",
+          "dashboard_operator_agent"
+        ],
+        "data_families": [
+          "trade_history",
+          "activity"
+        ],
+        "discovered_at_utc": "2026-06-21T04:41:22Z",
+        "downstream_consumers": [
+          "market_data_acquisition_agent",
+          "governance_validation_agent",
+          "dashboard_operator_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-GFP2R",
+          "PR168-RP2",
+          "PR168-RANK2"
+        ],
+        "endpoint_contract_id": "polymarket_data_trades",
+        "endpoint_params": [
+          "market",
+          "user",
+          "limit"
+        ],
+        "endpoint_url_template": "https://data-api.polymarket.com/trades",
+        "historical_full_book_availability": "TRADE_HISTORY_NOT_FULL_BOOK",
+        "live_authority_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "method": "GET",
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "order_authority_created_flag": false,
+        "owning_agent": "source_evidence_agent",
+        "private_state_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "rate_limit_notes": "respect public API limits; DATA1 uses bounded fetches and deterministic backoff",
+        "source_tier": "OFFICIAL_PUBLIC_API",
+        "source_truth_acceptance_created_flag": false,
+        "source_url": "https://data-api.polymarket.com/trades",
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_data1"
+        ],
+        "trust_tier": "OFFICIAL_PUBLIC_API_DOC",
+        "validator_refs": [
+          "tools/pr168_data1_validator.py",
+          "tools/validate_pr168_data1_public_market_data_snapshots.py"
+        ],
+        "venue": "polymarket",
+        "websocket_public_stream_availability": false
+      },
+      {
+        "auth_requirement": "PUBLIC_UNAUTHENTICATED_MARKET_CHANNEL",
+        "authority_class": "PUBLIC_READ_ONLY_DATA_ACQUISITION_CANDIDATE",
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "market_data_acquisition_agent",
+          "governance_validation_agent",
+          "dashboard_operator_agent"
+        ],
+        "data_families": [
+          "forward_l2_stream",
+          "price_change",
+          "last_trade_price"
+        ],
+        "discovered_at_utc": "2026-06-21T04:41:22Z",
+        "downstream_consumers": [
+          "market_data_acquisition_agent",
+          "governance_validation_agent",
+          "dashboard_operator_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-GFP2R",
+          "PR168-RP2",
+          "PR168-RANK2"
+        ],
+        "endpoint_contract_id": "polymarket_public_market_websocket",
+        "endpoint_params": [
+          "assets_ids",
+          "type=market"
+        ],
+        "endpoint_url_template": "wss://ws-subscriptions-clob.polymarket.com/ws/market",
+        "historical_full_book_availability": "FORWARD_CAPTURE_ONLY",
+        "live_authority_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "method": "WSS",
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "order_authority_created_flag": false,
+        "owning_agent": "source_evidence_agent",
+        "private_state_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "rate_limit_notes": "respect public API limits; DATA1 uses bounded fetches and deterministic backoff",
+        "source_tier": "OFFICIAL_PUBLIC_API",
+        "source_truth_acceptance_created_flag": false,
+        "source_url": "wss://ws-subscriptions-clob.polymarket.com/ws/market",
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_data1"
+        ],
+        "trust_tier": "OFFICIAL_PUBLIC_API_DOC",
+        "validator_refs": [
+          "tools/pr168_data1_validator.py",
+          "tools/validate_pr168_data1_public_market_data_snapshots.py"
+        ],
+        "venue": "polymarket",
+        "websocket_public_stream_availability": true
+      }
+    ],
+    "source_rows": [
+      {
+        "authority_class": "PUBLIC_READ_ONLY_DATA_ACQUISITION_CANDIDATE",
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "market_data_acquisition_agent",
+          "governance_validation_agent",
+          "dashboard_operator_agent"
+        ],
+        "content_snippet": "> ## Documentation Index\n> Fetch the complete documentation index at: https://docs.kalshi.com/llms.txt\n> Use this file to discover all available pages before ex",
+        "discovered_at_utc": "2026-06-21T04:41:22Z",
+        "downstream_consumers": [
+          "market_data_acquisition_agent",
+          "governance_validation_agent",
+          "dashboard_operator_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-GFP2R",
+          "PR168-RP2",
+          "PR168-RANK2"
+        ],
+        "http_status": 200,
+        "live_authority_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "online_probe_status": "EMPTY_RESPONSE",
+        "order_authority_created_flag": false,
+        "owning_agent": "source_evidence_agent",
+        "private_state_access_created_flag": false,
+        "probe_elapsed_ms": 301,
+        "probe_error": null,
+        "profit_evidence_created_flag": false,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "relevance": "public unauthenticated base URL, markets and orderbook quick start, WebSocket auth caveat",
+        "source_id": "kalshi_quick_start_market_data",
+        "source_tier": "OFFICIAL_PUBLIC_API",
+        "source_truth_acceptance_created_flag": false,
+        "source_url": "https://docs.kalshi.com/getting_started/quick_start_market_data",
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_data1"
+        ],
+        "trust_tier": "OFFICIAL_PUBLIC_API_DOC",
+        "validator_refs": [
+          "tools/pr168_data1_validator.py",
+          "tools/validate_pr168_data1_public_market_data_snapshots.py"
+        ],
+        "venue": "kalshi"
+      },
+      {
+        "authority_class": "PUBLIC_READ_ONLY_DATA_ACQUISITION_CANDIDATE",
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "market_data_acquisition_agent",
+          "governance_validation_agent",
+          "dashboard_operator_agent"
+        ],
+        "content_snippet": "> ## Documentation Index\n> Fetch the complete documentation index at: https://docs.kalshi.com/llms.txt\n> Use this file to discover all available pages before ex",
+        "discovered_at_utc": "2026-06-21T04:41:22Z",
+        "downstream_consumers": [
+          "market_data_acquisition_agent",
+          "governance_validation_agent",
+          "dashboard_operator_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-GFP2R",
+          "PR168-RP2",
+          "PR168-RANK2"
+        ],
+        "http_status": 200,
+        "live_authority_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "online_probe_status": "EMPTY_RESPONSE",
+        "order_authority_created_flag": false,
+        "owning_agent": "source_evidence_agent",
+        "private_state_access_created_flag": false,
+        "probe_elapsed_ms": 240,
+        "probe_error": null,
+        "profit_evidence_created_flag": false,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "relevance": "orderbook dollars schema, bid-only book semantics, binary-market ask derivation",
+        "source_id": "kalshi_orderbook_responses",
+        "source_tier": "OFFICIAL_PUBLIC_API",
+        "source_truth_acceptance_created_flag": false,
+        "source_url": "https://docs.kalshi.com/getting_started/orderbook_responses",
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_data1"
+        ],
+        "trust_tier": "OFFICIAL_PUBLIC_API_DOC",
+        "validator_refs": [
+          "tools/pr168_data1_validator.py",
+          "tools/validate_pr168_data1_public_market_data_snapshots.py"
+        ],
+        "venue": "kalshi"
+      },
+      {
+        "authority_class": "PUBLIC_READ_ONLY_DATA_ACQUISITION_CANDIDATE",
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "market_data_acquisition_agent",
+          "governance_validation_agent",
+          "dashboard_operator_agent"
+        ],
+        "content_snippet": "> ## Documentation Index\n> Fetch the complete documentation index at: https://docs.kalshi.com/llms.txt\n> Use this file to discover all available pages before ex",
+        "discovered_at_utc": "2026-06-21T04:41:22Z",
+        "downstream_consumers": [
+          "market_data_acquisition_agent",
+          "governance_validation_agent",
+          "dashboard_operator_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-GFP2R",
+          "PR168-RP2",
+          "PR168-RANK2"
+        ],
+        "http_status": 200,
+        "live_authority_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "online_probe_status": "EMPTY_RESPONSE",
+        "order_authority_created_flag": false,
+        "owning_agent": "source_evidence_agent",
+        "private_state_access_created_flag": false,
+        "probe_elapsed_ms": 171,
+        "probe_error": null,
+        "profit_evidence_created_flag": false,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "relevance": "GET /markets/{ticker}/orderbook public read-only contract",
+        "source_id": "kalshi_market_orderbook_endpoint",
+        "source_tier": "OFFICIAL_PUBLIC_API",
+        "source_truth_acceptance_created_flag": false,
+        "source_url": "https://docs.kalshi.com/api-reference/market/get-market-orderbook",
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_data1"
+        ],
+        "trust_tier": "OFFICIAL_PUBLIC_API_DOC",
+        "validator_refs": [
+          "tools/pr168_data1_validator.py",
+          "tools/validate_pr168_data1_public_market_data_snapshots.py"
+        ],
+        "venue": "kalshi"
+      },
+      {
+        "authority_class": "PUBLIC_READ_ONLY_DATA_ACQUISITION_CANDIDATE",
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "market_data_acquisition_agent",
+          "governance_validation_agent",
+          "dashboard_operator_agent"
+        ],
+        "content_snippet": "> ## Documentation Index\n> Fetch the complete documentation index at: https://docs.kalshi.com/llms.txt\n> Use this file to discover all available pages before ex",
+        "discovered_at_utc": "2026-06-21T04:41:22Z",
+        "downstream_consumers": [
+          "market_data_acquisition_agent",
+          "governance_validation_agent",
+          "dashboard_operator_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-GFP2R",
+          "PR168-RP2",
+          "PR168-RANK2"
+        ],
+        "http_status": 200,
+        "live_authority_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "online_probe_status": "EMPTY_RESPONSE",
+        "order_authority_created_flag": false,
+        "owning_agent": "source_evidence_agent",
+        "private_state_access_created_flag": false,
+        "probe_elapsed_ms": 156,
+        "probe_error": null,
+        "profit_evidence_created_flag": false,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "relevance": "GET /markets/trades public trade history contract",
+        "source_id": "kalshi_trades_endpoint",
+        "source_tier": "OFFICIAL_PUBLIC_API",
+        "source_truth_acceptance_created_flag": false,
+        "source_url": "https://docs.kalshi.com/api-reference/market/get-trades",
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_data1"
+        ],
+        "trust_tier": "OFFICIAL_PUBLIC_API_DOC",
+        "validator_refs": [
+          "tools/pr168_data1_validator.py",
+          "tools/validate_pr168_data1_public_market_data_snapshots.py"
+        ],
+        "venue": "kalshi"
+      },
+      {
+        "authority_class": "PUBLIC_READ_ONLY_DATA_ACQUISITION_CANDIDATE",
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "market_data_acquisition_agent",
+          "governance_validation_agent",
+          "dashboard_operator_agent"
+        ],
+        "content_snippet": "> ## Documentation Index\n> Fetch the complete documentation index at: https://docs.kalshi.com/llms.txt\n> Use this file to discover all available pages before ex",
+        "discovered_at_utc": "2026-06-21T04:41:22Z",
+        "downstream_consumers": [
+          "market_data_acquisition_agent",
+          "governance_validation_agent",
+          "dashboard_operator_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-GFP2R",
+          "PR168-RP2",
+          "PR168-RANK2"
+        ],
+        "http_status": 200,
+        "live_authority_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "online_probe_status": "EMPTY_RESPONSE",
+        "order_authority_created_flag": false,
+        "owning_agent": "source_evidence_agent",
+        "private_state_access_created_flag": false,
+        "probe_elapsed_ms": 168,
+        "probe_error": null,
+        "profit_evidence_created_flag": false,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "relevance": "historical cutoff, markets, trades, fills, orders, candlesticks; no public historical full-book route",
+        "source_id": "kalshi_historical_data",
+        "source_tier": "OFFICIAL_PUBLIC_API",
+        "source_truth_acceptance_created_flag": false,
+        "source_url": "https://docs.kalshi.com/getting_started/historical_data",
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_data1"
+        ],
+        "trust_tier": "OFFICIAL_PUBLIC_API_DOC",
+        "validator_refs": [
+          "tools/pr168_data1_validator.py",
+          "tools/validate_pr168_data1_public_market_data_snapshots.py"
+        ],
+        "venue": "kalshi"
+      },
+      {
+        "authority_class": "PUBLIC_READ_ONLY_DATA_ACQUISITION_CANDIDATE",
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "market_data_acquisition_agent",
+          "governance_validation_agent",
+          "dashboard_operator_agent"
+        ],
+        "content_snippet": "> ## Documentation Index\n> Fetch the complete documentation index at: https://docs.kalshi.com/llms.txt\n> Use this file to discover all available pages before ex",
+        "discovered_at_utc": "2026-06-21T04:41:22Z",
+        "downstream_consumers": [
+          "market_data_acquisition_agent",
+          "governance_validation_agent",
+          "dashboard_operator_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-GFP2R",
+          "PR168-RP2",
+          "PR168-RANK2"
+        ],
+        "http_status": 200,
+        "live_authority_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "online_probe_status": "EMPTY_RESPONSE",
+        "order_authority_created_flag": false,
+        "owning_agent": "source_evidence_agent",
+        "private_state_access_created_flag": false,
+        "probe_elapsed_ms": 172,
+        "probe_error": null,
+        "profit_evidence_created_flag": false,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "relevance": "auth-required user order history, blocked by DATA1 default",
+        "source_id": "kalshi_historical_orders",
+        "source_tier": "OFFICIAL_PUBLIC_API",
+        "source_truth_acceptance_created_flag": false,
+        "source_url": "https://docs.kalshi.com/api-reference/historical/get-historical-orders",
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_data1"
+        ],
+        "trust_tier": "OFFICIAL_PUBLIC_API_DOC",
+        "validator_refs": [
+          "tools/pr168_data1_validator.py",
+          "tools/validate_pr168_data1_public_market_data_snapshots.py"
+        ],
+        "venue": "kalshi"
+      },
+      {
+        "authority_class": "PUBLIC_READ_ONLY_DATA_ACQUISITION_CANDIDATE",
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "market_data_acquisition_agent",
+          "governance_validation_agent",
+          "dashboard_operator_agent"
+        ],
+        "content_snippet": "> ## Documentation Index\n> Fetch the complete documentation index at: https://docs.kalshi.com/llms.txt\n> Use this file to discover all available pages before ex",
+        "discovered_at_utc": "2026-06-21T04:41:22Z",
+        "downstream_consumers": [
+          "market_data_acquisition_agent",
+          "governance_validation_agent",
+          "dashboard_operator_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-GFP2R",
+          "PR168-RP2",
+          "PR168-RANK2"
+        ],
+        "http_status": 200,
+        "live_authority_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "online_probe_status": "EMPTY_RESPONSE",
+        "order_authority_created_flag": false,
+        "owning_agent": "source_evidence_agent",
+        "private_state_access_created_flag": false,
+        "probe_elapsed_ms": 180,
+        "probe_error": null,
+        "profit_evidence_created_flag": false,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "relevance": "orderbook_delta forward feed requires API key authentication",
+        "source_id": "kalshi_orderbook_websocket",
+        "source_tier": "OFFICIAL_PUBLIC_API",
+        "source_truth_acceptance_created_flag": false,
+        "source_url": "https://docs.kalshi.com/websockets/orderbook-updates",
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_data1"
+        ],
+        "trust_tier": "OFFICIAL_PUBLIC_API_DOC",
+        "validator_refs": [
+          "tools/pr168_data1_validator.py",
+          "tools/validate_pr168_data1_public_market_data_snapshots.py"
+        ],
+        "venue": "kalshi"
+      },
+      {
+        "authority_class": "PUBLIC_READ_ONLY_DATA_ACQUISITION_CANDIDATE",
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "market_data_acquisition_agent",
+          "governance_validation_agent",
+          "dashboard_operator_agent"
+        ],
+        "content_snippet": "> ## Documentation Index\n> Fetch the complete documentation index at: https://docs.polymarket.com/llms.txt\n> Use this file to discover all available pages befor",
+        "discovered_at_utc": "2026-06-21T04:41:22Z",
+        "downstream_consumers": [
+          "market_data_acquisition_agent",
+          "governance_validation_agent",
+          "dashboard_operator_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-GFP2R",
+          "PR168-RP2",
+          "PR168-RANK2"
+        ],
+        "http_status": 200,
+        "live_authority_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "online_probe_status": "EMPTY_RESPONSE",
+        "order_authority_created_flag": false,
+        "owning_agent": "source_evidence_agent",
+        "private_state_access_created_flag": false,
+        "probe_elapsed_ms": 247,
+        "probe_error": null,
+        "profit_evidence_created_flag": false,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "relevance": "public Gamma, Data, and CLOB read endpoints; auth only for trading/order management",
+        "source_id": "polymarket_api_introduction",
+        "source_tier": "OFFICIAL_PUBLIC_API",
+        "source_truth_acceptance_created_flag": false,
+        "source_url": "https://docs.polymarket.com/api-reference/introduction",
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_data1"
+        ],
+        "trust_tier": "OFFICIAL_PUBLIC_API_DOC",
+        "validator_refs": [
+          "tools/pr168_data1_validator.py",
+          "tools/validate_pr168_data1_public_market_data_snapshots.py"
+        ],
+        "venue": "polymarket"
+      },
+      {
+        "authority_class": "PUBLIC_READ_ONLY_DATA_ACQUISITION_CANDIDATE",
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "market_data_acquisition_agent",
+          "governance_validation_agent",
+          "dashboard_operator_agent"
+        ],
+        "content_snippet": "> ## Documentation Index\n> Fetch the complete documentation index at: https://docs.polymarket.com/llms.txt\n> Use this file to discover all available pages befor",
+        "discovered_at_utc": "2026-06-21T04:41:22Z",
+        "downstream_consumers": [
+          "market_data_acquisition_agent",
+          "governance_validation_agent",
+          "dashboard_operator_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-GFP2R",
+          "PR168-RP2",
+          "PR168-RANK2"
+        ],
+        "http_status": 200,
+        "live_authority_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "online_probe_status": "EMPTY_RESPONSE",
+        "order_authority_created_flag": false,
+        "owning_agent": "source_evidence_agent",
+        "private_state_access_created_flag": false,
+        "probe_elapsed_ms": 158,
+        "probe_error": null,
+        "profit_evidence_created_flag": false,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "relevance": "public REST market data overview, CLOB current book and price-history surfaces",
+        "source_id": "polymarket_market_data_overview",
+        "source_tier": "OFFICIAL_PUBLIC_API",
+        "source_truth_acceptance_created_flag": false,
+        "source_url": "https://docs.polymarket.com/market-data/overview",
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_data1"
+        ],
+        "trust_tier": "OFFICIAL_PUBLIC_API_DOC",
+        "validator_refs": [
+          "tools/pr168_data1_validator.py",
+          "tools/validate_pr168_data1_public_market_data_snapshots.py"
+        ],
+        "venue": "polymarket"
+      },
+      {
+        "authority_class": "PUBLIC_READ_ONLY_DATA_ACQUISITION_CANDIDATE",
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "market_data_acquisition_agent",
+          "governance_validation_agent",
+          "dashboard_operator_agent"
+        ],
+        "content_snippet": "> ## Documentation Index\n> Fetch the complete documentation index at: https://docs.polymarket.com/llms.txt\n> Use this file to discover all available pages befor",
+        "discovered_at_utc": "2026-06-21T04:41:22Z",
+        "downstream_consumers": [
+          "market_data_acquisition_agent",
+          "governance_validation_agent",
+          "dashboard_operator_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-GFP2R",
+          "PR168-RP2",
+          "PR168-RANK2"
+        ],
+        "http_status": 200,
+        "live_authority_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "online_probe_status": "EMPTY_RESPONSE",
+        "order_authority_created_flag": false,
+        "owning_agent": "source_evidence_agent",
+        "private_state_access_created_flag": false,
+        "probe_elapsed_ms": 203,
+        "probe_error": null,
+        "profit_evidence_created_flag": false,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "relevance": "GET /book current orderbook, bids, asks, min order size, tick size, raw venue book hash",
+        "source_id": "polymarket_get_order_book",
+        "source_tier": "OFFICIAL_PUBLIC_API",
+        "source_truth_acceptance_created_flag": false,
+        "source_url": "https://docs.polymarket.com/api-reference/market-data/get-order-book",
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_data1"
+        ],
+        "trust_tier": "OFFICIAL_PUBLIC_API_DOC",
+        "validator_refs": [
+          "tools/pr168_data1_validator.py",
+          "tools/validate_pr168_data1_public_market_data_snapshots.py"
+        ],
+        "venue": "polymarket"
+      },
+      {
+        "authority_class": "PUBLIC_READ_ONLY_DATA_ACQUISITION_CANDIDATE",
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "market_data_acquisition_agent",
+          "governance_validation_agent",
+          "dashboard_operator_agent"
+        ],
+        "content_snippet": "> ## Documentation Index\n> Fetch the complete documentation index at: https://docs.polymarket.com/llms.txt\n> Use this file to discover all available pages befor",
+        "discovered_at_utc": "2026-06-21T04:41:22Z",
+        "downstream_consumers": [
+          "market_data_acquisition_agent",
+          "governance_validation_agent",
+          "dashboard_operator_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-GFP2R",
+          "PR168-RP2",
+          "PR168-RANK2"
+        ],
+        "http_status": 200,
+        "live_authority_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "online_probe_status": "EMPTY_RESPONSE",
+        "order_authority_created_flag": false,
+        "owning_agent": "source_evidence_agent",
+        "private_state_access_created_flag": false,
+        "probe_elapsed_ms": 181,
+        "probe_error": null,
+        "profit_evidence_created_flag": false,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "relevance": "GET /prices-history public price history, not full historical book depth",
+        "source_id": "polymarket_prices_history",
+        "source_tier": "OFFICIAL_PUBLIC_API",
+        "source_truth_acceptance_created_flag": false,
+        "source_url": "https://docs.polymarket.com/api-reference/markets/get-prices-history",
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_data1"
+        ],
+        "trust_tier": "OFFICIAL_PUBLIC_API_DOC",
+        "validator_refs": [
+          "tools/pr168_data1_validator.py",
+          "tools/validate_pr168_data1_public_market_data_snapshots.py"
+        ],
+        "venue": "polymarket"
+      },
+      {
+        "authority_class": "PUBLIC_READ_ONLY_DATA_ACQUISITION_CANDIDATE",
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "market_data_acquisition_agent",
+          "governance_validation_agent",
+          "dashboard_operator_agent"
+        ],
+        "content_snippet": "> ## Documentation Index\n> Fetch the complete documentation index at: https://docs.polymarket.com/llms.txt\n> Use this file to discover all available pages befor",
+        "discovered_at_utc": "2026-06-21T04:41:22Z",
+        "downstream_consumers": [
+          "market_data_acquisition_agent",
+          "governance_validation_agent",
+          "dashboard_operator_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-GFP2R",
+          "PR168-RP2",
+          "PR168-RANK2"
+        ],
+        "http_status": 200,
+        "live_authority_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "online_probe_status": "EMPTY_RESPONSE",
+        "order_authority_created_flag": false,
+        "owning_agent": "source_evidence_agent",
+        "private_state_access_created_flag": false,
+        "probe_elapsed_ms": 209,
+        "probe_error": null,
+        "profit_evidence_created_flag": false,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "relevance": "public market WebSocket event types for forward capture when dependency is available",
+        "source_id": "polymarket_market_websocket",
+        "source_tier": "OFFICIAL_PUBLIC_API",
+        "source_truth_acceptance_created_flag": false,
+        "source_url": "https://docs.polymarket.com/api-reference/wss/market",
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_data1"
+        ],
+        "trust_tier": "OFFICIAL_PUBLIC_API_DOC",
+        "validator_refs": [
+          "tools/pr168_data1_validator.py",
+          "tools/validate_pr168_data1_public_market_data_snapshots.py"
+        ],
+        "venue": "polymarket"
+      },
+      {
+        "authority_class": "PUBLIC_READ_ONLY_DATA_ACQUISITION_CANDIDATE",
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "market_data_acquisition_agent",
+          "governance_validation_agent",
+          "dashboard_operator_agent"
+        ],
+        "content_snippet": "> ## Documentation Index\n> Fetch the complete documentation index at: https://docs.polymarket.com/llms.txt\n> Use this file to discover all available pages befor",
+        "discovered_at_utc": "2026-06-21T04:41:22Z",
+        "downstream_consumers": [
+          "market_data_acquisition_agent",
+          "governance_validation_agent",
+          "dashboard_operator_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-GFP2R",
+          "PR168-RP2",
+          "PR168-RANK2"
+        ],
+        "http_status": 200,
+        "live_authority_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "online_probe_status": "EMPTY_RESPONSE",
+        "order_authority_created_flag": false,
+        "owning_agent": "source_evidence_agent",
+        "private_state_access_created_flag": false,
+        "probe_elapsed_ms": 159,
+        "probe_error": null,
+        "profit_evidence_created_flag": false,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "relevance": "public Data API market/user trade activity; DATA1 uses only public market-safe access",
+        "source_id": "polymarket_data_api_trades",
+        "source_tier": "OFFICIAL_PUBLIC_API",
+        "source_truth_acceptance_created_flag": false,
+        "source_url": "https://docs.polymarket.com/api-reference/core/get-trades-for-a-user-or-markets",
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_data1"
+        ],
+        "trust_tier": "OFFICIAL_PUBLIC_API_DOC",
+        "validator_refs": [
+          "tools/pr168_data1_validator.py",
+          "tools/validate_pr168_data1_public_market_data_snapshots.py"
+        ],
+        "venue": "polymarket"
+      },
+      {
+        "authority_class": "PUBLIC_READ_ONLY_DATA_ACQUISITION_CANDIDATE",
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "market_data_acquisition_agent",
+          "governance_validation_agent",
+          "dashboard_operator_agent"
+        ],
+        "content_snippet": "<!DOCTYPE html><html dir=\"ltr\" data-theme=\"light\" lang=\"en\" class=\"no-js\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial",
+        "discovered_at_utc": "2026-06-21T04:41:22Z",
+        "downstream_consumers": [
+          "market_data_acquisition_agent",
+          "governance_validation_agent",
+          "dashboard_operator_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-GFP2R",
+          "PR168-RP2",
+          "PR168-RANK2"
+        ],
+        "http_status": 200,
+        "live_authority_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "online_probe_status": "EMPTY_RESPONSE",
+        "order_authority_created_flag": false,
+        "owning_agent": "source_evidence_agent",
+        "private_state_access_created_flag": false,
+        "probe_elapsed_ms": 461,
+        "probe_error": null,
+        "profit_evidence_created_flag": false,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "relevance": "event-contract conid and market-data entitlement requirements",
+        "source_id": "ibkr_event_contracts",
+        "source_tier": "OFFICIAL_PUBLIC_API",
+        "source_truth_acceptance_created_flag": false,
+        "source_url": "https://www.interactivebrokers.com/campus/ibkr-api-page/event-contracts/",
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_data1"
+        ],
+        "trust_tier": "OFFICIAL_PUBLIC_API_DOC",
+        "validator_refs": [
+          "tools/pr168_data1_validator.py",
+          "tools/validate_pr168_data1_public_market_data_snapshots.py"
+        ],
+        "venue": "forecastex_ibkr"
+      },
+      {
+        "authority_class": "PUBLIC_READ_ONLY_DATA_ACQUISITION_CANDIDATE",
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "market_data_acquisition_agent",
+          "governance_validation_agent",
+          "dashboard_operator_agent"
+        ],
+        "content_snippet": "<!doctype html>\n<html class=\"no-js\" lang=\"en\">\n  <head><meta charset=\"utf-8\"/>\n    <meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"/>\n    <met",
+        "discovered_at_utc": "2026-06-21T04:41:22Z",
+        "downstream_consumers": [
+          "market_data_acquisition_agent",
+          "governance_validation_agent",
+          "dashboard_operator_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-GFP2R",
+          "PR168-RP2",
+          "PR168-RANK2"
+        ],
+        "http_status": 200,
+        "live_authority_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "online_probe_status": "EMPTY_RESPONSE",
+        "order_authority_created_flag": false,
+        "owning_agent": "source_evidence_agent",
+        "private_state_access_created_flag": false,
+        "probe_elapsed_ms": 96,
+        "probe_error": null,
+        "profit_evidence_created_flag": false,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "relevance": "downstream QUBO conversion requires explicit penalty scaling discipline",
+        "source_id": "qiskit_qubo_converter",
+        "source_tier": "OFFICIAL_PUBLIC_API",
+        "source_truth_acceptance_created_flag": false,
+        "source_url": "https://qiskit-community.github.io/qiskit-optimization/stubs/qiskit_optimization.converters.QuadraticProgramToQubo.html",
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_data1"
+        ],
+        "trust_tier": "OFFICIAL_PUBLIC_API_DOC",
+        "validator_refs": [
+          "tools/pr168_data1_validator.py",
+          "tools/validate_pr168_data1_public_market_data_snapshots.py"
+        ],
+        "venue": "quantum_forward"
+      },
+      {
+        "authority_class": "PUBLIC_READ_ONLY_DATA_ACQUISITION_CANDIDATE",
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "market_data_acquisition_agent",
+          "governance_validation_agent",
+          "dashboard_operator_agent"
+        ],
+        "content_snippet": "\n<!DOCTYPE html>\n\n\n<html lang=\"en\" data-content_root=\"../\" >\n\n  <head>\n    <meta charset=\"utf-8\" />\n    <meta name=\"viewport\" content=\"width=device-width, initi",
+        "discovered_at_utc": "2026-06-21T04:41:22Z",
+        "downstream_consumers": [
+          "market_data_acquisition_agent",
+          "governance_validation_agent",
+          "dashboard_operator_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-GFP2R",
+          "PR168-RP2",
+          "PR168-RANK2"
+        ],
+        "http_status": 200,
+        "live_authority_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "online_probe_status": "EMPTY_RESPONSE",
+        "order_authority_created_flag": false,
+        "owning_agent": "source_evidence_agent",
+        "private_state_access_created_flag": false,
+        "probe_elapsed_ms": 299,
+        "probe_error": null,
+        "profit_evidence_created_flag": false,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "relevance": "BQM/CQM/Ising model readiness references for downstream mapping, no backend execution",
+        "source_id": "dwave_ocean_models",
+        "source_tier": "OFFICIAL_PUBLIC_API",
+        "source_truth_acceptance_created_flag": false,
+        "source_url": "https://docs.dwavequantum.com/en/latest/concepts/models.html",
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_data1"
+        ],
+        "trust_tier": "OFFICIAL_PUBLIC_API_DOC",
+        "validator_refs": [
+          "tools/pr168_data1_validator.py",
+          "tools/validate_pr168_data1_public_market_data_snapshots.py"
+        ],
+        "venue": "quantum_forward"
+      }
+    ]
+  },
+  "report_id": "PR168_DATA1_SourceEndpointDiscovery",
+  "report_version": "PR168-DATA1-v3.0",
+  "snapshot_manifest_refs": [
+    "docs/master_plan/generated/pr168_data1_snapshots/kalshi/kalshi_snapshots.manifest.json",
+    "docs/master_plan/generated/pr168_data1_snapshots/polymarket/polymarket_snapshots.manifest.json"
+  ],
+  "source_truth_acceptance_created_flag": false,
+  "terminal_by_nature_flag": false,
+  "terminal_reason_code": null,
+  "test_refs": [
+    "tests/pr168_data1"
+  ],
+  "upstream_input_refs": [],
+  "validator_refs": [
+    "tools/pr168_data1_validator.py",
+    "tools/validate_pr168_data1_public_market_data_snapshots.py"
+  ]
+}

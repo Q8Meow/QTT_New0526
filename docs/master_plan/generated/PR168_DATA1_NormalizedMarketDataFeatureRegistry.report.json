@@ -1,0 +1,3328 @@
+{
+  "authority_class": "PUBLIC_READ_ONLY_DATA_ACQUISITION_CANDIDATE",
+  "computed_feature_refs": [
+    "pr168_data1_feature_0001",
+    "pr168_data1_feature_0002",
+    "pr168_data1_feature_0003",
+    "pr168_data1_feature_0004",
+    "pr168_data1_feature_0005",
+    "pr168_data1_feature_0006",
+    "pr168_data1_feature_0007",
+    "pr168_data1_feature_0008",
+    "pr168_data1_feature_0009",
+    "pr168_data1_feature_0010",
+    "pr168_data1_feature_0011",
+    "pr168_data1_feature_0012",
+    "pr168_data1_feature_0013",
+    "pr168_data1_feature_0014",
+    "pr168_data1_feature_0015",
+    "pr168_data1_feature_0016",
+    "pr168_data1_feature_0017",
+    "pr168_data1_feature_0018",
+    "pr168_data1_feature_0019",
+    "pr168_data1_feature_0020",
+    "pr168_data1_feature_0021",
+    "pr168_data1_feature_0022",
+    "pr168_data1_feature_0023",
+    "pr168_data1_feature_0024",
+    "pr168_data1_feature_0025",
+    "pr168_data1_feature_0026",
+    "pr168_data1_feature_0027",
+    "pr168_data1_feature_0028",
+    "pr168_data1_feature_0029",
+    "pr168_data1_feature_0030",
+    "pr168_data1_feature_0031",
+    "pr168_data1_feature_0032",
+    "pr168_data1_feature_0033",
+    "pr168_data1_feature_0034",
+    "pr168_data1_feature_0035",
+    "pr168_data1_feature_0036",
+    "pr168_data1_feature_0037",
+    "pr168_data1_feature_0038",
+    "pr168_data1_feature_0039",
+    "pr168_data1_feature_0040",
+    "pr168_data1_feature_0041",
+    "pr168_data1_feature_0042",
+    "pr168_data1_feature_0043",
+    "pr168_data1_feature_0044",
+    "pr168_data1_feature_0045",
+    "pr168_data1_feature_0046",
+    "pr168_data1_feature_0047",
+    "pr168_data1_feature_0048",
+    "pr168_data1_feature_0049",
+    "pr168_data1_feature_0050",
+    "pr168_data1_feature_0051"
+  ],
+  "connector_semantic_binding_created_flag": false,
+  "created_at_utc": "2026-06-21T04:41:22Z",
+  "created_by_tool": "tools/build_pr168_data1_public_market_data_snapshots.py",
+  "data_provenance_refs": [
+    "kalshi_quick_start_market_data",
+    "kalshi_orderbook_responses",
+    "kalshi_market_orderbook_endpoint",
+    "kalshi_trades_endpoint",
+    "kalshi_historical_data",
+    "kalshi_historical_orders",
+    "kalshi_orderbook_websocket",
+    "polymarket_api_introduction",
+    "polymarket_market_data_overview",
+    "polymarket_get_order_book",
+    "polymarket_prices_history",
+    "polymarket_market_websocket",
+    "polymarket_data_api_trades",
+    "ibkr_event_contracts",
+    "qiskit_qubo_converter",
+    "dwave_ocean_models",
+    "kalshi_markets",
+    "kalshi_current_orderbook",
+    "kalshi_live_trades",
+    "kalshi_historical_trades",
+    "kalshi_historical_orders",
+    "polymarket_gamma_markets",
+    "polymarket_clob_book",
+    "polymarket_prices_history",
+    "polymarket_data_trades",
+    "polymarket_public_market_websocket"
+  ],
+  "downstream_consumers": [
+    "source_evidence_agent",
+    "qku_formula_materialization_agent",
+    "replay_paper_agent",
+    "ranking_scoring_agent",
+    "dashboard_operator_agent"
+  ],
+  "downstream_pr_refs": [
+    "PR168-GFP2R",
+    "PR168-RP2",
+    "PR168-RANK2"
+  ],
+  "l2_replay_manifest_refs": [
+    "docs/master_plan/generated/pr168_data1_forward_l2/kalshi/kalshi_forward_l2.manifest.json",
+    "docs/master_plan/generated/pr168_data1_forward_l2/polymarket/polymarket_forward_l2.manifest.json"
+  ],
+  "live_authority_created_flag": false,
+  "manual_edit_allowed_flag": false,
+  "no_orphan_status": "NO_ORPHAN_ROUTED",
+  "order_authority_created_flag": false,
+  "owning_agent": "market_data_acquisition_agent",
+  "private_state_access_created_flag": false,
+  "profit_evidence_created_flag": false,
+  "qtt_sha_or_atomicrows_hash_authority_flag": false,
+  "quantum_advantage_claim_flag": false,
+  "quantum_backend_execution_flag": false,
+  "records": [
+    {
+      "accepted_truth_flag": false,
+      "as_of_utc": "2026-06-21T04:41:22Z",
+      "candidate_only_flag": true,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "source_evidence_agent",
+        "qku_formula_materialization_agent",
+        "replay_paper_agent",
+        "ranking_scoring_agent",
+        "dashboard_operator_agent"
+      ],
+      "downstream_pr_refs": [
+        "PR168-GFP2R",
+        "PR168-RP2",
+        "PR168-RANK2"
+      ],
+      "feature_family": "market_metadata",
+      "feature_formula_ref": "PR168_DATA1_FEATURE_FORMULA::market_lifecycle_state",
+      "feature_name": "market_lifecycle_state",
+      "feature_row_id": "pr168_data1_feature_0001",
+      "feature_units": "categorical",
+      "feature_value": "active",
+      "input_data_authority_class": "DATA_READY_PUBLIC_REAL_SNAPSHOT_CANDIDATE",
+      "l2_replay_row_refs": [
+        "kalshi_forward_l2_rest_poll_0001"
+      ],
+      "live_authority_created_flag": false,
+      "manual_edit_allowed_flag": false,
+      "market_id_or_ticker_or_token_id": "KXMVECROSSCATEGORY-S2026F6847194F7A-CC6D65A8A6F",
+      "missing_input_flags": [],
+      "no_orphan_status": "NO_ORPHAN_ROUTED",
+      "order_authority_created_flag": false,
+      "owning_agent": "market_data_acquisition_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quality_flags": [
+        "PUBLIC_REAL_DATA_CANDIDATE",
+        "NON_PROFIT_MARKET_DATA_FEATURE"
+      ],
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "snapshot_row_refs": [
+        "kalshi_market_metadata_0001"
+      ],
+      "source_truth_acceptance_created_flag": false,
+      "staleness_seconds": 0,
+      "test_refs": [
+        "tests/pr168_data1"
+      ],
+      "validator_refs": [
+        "tools/pr168_data1_validator.py",
+        "tools/validate_pr168_data1_public_market_data_snapshots.py"
+      ],
+      "venue": "kalshi"
+    },
+    {
+      "accepted_truth_flag": false,
+      "as_of_utc": "2026-06-21T04:41:22Z",
+      "candidate_only_flag": true,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "source_evidence_agent",
+        "qku_formula_materialization_agent",
+        "replay_paper_agent",
+        "ranking_scoring_agent",
+        "dashboard_operator_agent"
+      ],
+      "downstream_pr_refs": [
+        "PR168-GFP2R",
+        "PR168-RP2",
+        "PR168-RANK2"
+      ],
+      "feature_family": "orderbook_microstructure",
+      "feature_formula_ref": "PR168_DATA1_FEATURE_FORMULA::best_yes_ask",
+      "feature_name": "best_yes_ask",
+      "feature_row_id": "pr168_data1_feature_0002",
+      "feature_units": "dollars_per_contract_or_unitless",
+      "feature_value": 0.619,
+      "input_data_authority_class": "DATA_READY_PUBLIC_REAL_ORDERBOOK_CANDIDATE",
+      "l2_replay_row_refs": [
+        "kalshi_forward_l2_rest_poll_0001"
+      ],
+      "live_authority_created_flag": false,
+      "manual_edit_allowed_flag": false,
+      "market_id_or_ticker_or_token_id": "KXMVECROSSCATEGORY-S2026F6847194F7A-CC6D65A8A6F",
+      "missing_input_flags": [],
+      "no_orphan_status": "NO_ORPHAN_ROUTED",
+      "order_authority_created_flag": false,
+      "owning_agent": "market_data_acquisition_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quality_flags": [
+        "PUBLIC_REAL_DATA_CANDIDATE",
+        "NON_PROFIT_MARKET_DATA_FEATURE"
+      ],
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "snapshot_row_refs": [
+        "kalshi_orderbook_snapshot_0001"
+      ],
+      "source_truth_acceptance_created_flag": false,
+      "staleness_seconds": 0,
+      "test_refs": [
+        "tests/pr168_data1"
+      ],
+      "validator_refs": [
+        "tools/pr168_data1_validator.py",
+        "tools/validate_pr168_data1_public_market_data_snapshots.py"
+      ],
+      "venue": "kalshi"
+    },
+    {
+      "accepted_truth_flag": false,
+      "as_of_utc": "2026-06-21T04:41:22Z",
+      "candidate_only_flag": true,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "source_evidence_agent",
+        "qku_formula_materialization_agent",
+        "replay_paper_agent",
+        "ranking_scoring_agent",
+        "dashboard_operator_agent"
+      ],
+      "downstream_pr_refs": [
+        "PR168-GFP2R",
+        "PR168-RP2",
+        "PR168-RANK2"
+      ],
+      "feature_family": "orderbook_microstructure",
+      "feature_formula_ref": "PR168_DATA1_FEATURE_FORMULA::best_no_bid",
+      "feature_name": "best_no_bid",
+      "feature_row_id": "pr168_data1_feature_0003",
+      "feature_units": "dollars_per_contract_or_unitless",
+      "feature_value": 0.381,
+      "input_data_authority_class": "DATA_READY_PUBLIC_REAL_ORDERBOOK_CANDIDATE",
+      "l2_replay_row_refs": [
+        "kalshi_forward_l2_rest_poll_0001"
+      ],
+      "live_authority_created_flag": false,
+      "manual_edit_allowed_flag": false,
+      "market_id_or_ticker_or_token_id": "KXMVECROSSCATEGORY-S2026F6847194F7A-CC6D65A8A6F",
+      "missing_input_flags": [],
+      "no_orphan_status": "NO_ORPHAN_ROUTED",
+      "order_authority_created_flag": false,
+      "owning_agent": "market_data_acquisition_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quality_flags": [
+        "PUBLIC_REAL_DATA_CANDIDATE",
+        "NON_PROFIT_MARKET_DATA_FEATURE"
+      ],
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "snapshot_row_refs": [
+        "kalshi_orderbook_snapshot_0001"
+      ],
+      "source_truth_acceptance_created_flag": false,
+      "staleness_seconds": 0,
+      "test_refs": [
+        "tests/pr168_data1"
+      ],
+      "validator_refs": [
+        "tools/pr168_data1_validator.py",
+        "tools/validate_pr168_data1_public_market_data_snapshots.py"
+      ],
+      "venue": "kalshi"
+    },
+    {
+      "accepted_truth_flag": false,
+      "as_of_utc": "2026-06-21T04:41:22Z",
+      "candidate_only_flag": true,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "source_evidence_agent",
+        "qku_formula_materialization_agent",
+        "replay_paper_agent",
+        "ranking_scoring_agent",
+        "dashboard_operator_agent"
+      ],
+      "downstream_pr_refs": [
+        "PR168-GFP2R",
+        "PR168-RP2",
+        "PR168-RANK2"
+      ],
+      "feature_family": "orderbook_microstructure",
+      "feature_formula_ref": "PR168_DATA1_FEATURE_FORMULA::top_level_depth_no",
+      "feature_name": "top_level_depth_no",
+      "feature_row_id": "pr168_data1_feature_0004",
+      "feature_units": "contracts_or_rows",
+      "feature_value": 161.0,
+      "input_data_authority_class": "DATA_READY_PUBLIC_REAL_ORDERBOOK_CANDIDATE",
+      "l2_replay_row_refs": [
+        "kalshi_forward_l2_rest_poll_0001"
+      ],
+      "live_authority_created_flag": false,
+      "manual_edit_allowed_flag": false,
+      "market_id_or_ticker_or_token_id": "KXMVECROSSCATEGORY-S2026F6847194F7A-CC6D65A8A6F",
+      "missing_input_flags": [],
+      "no_orphan_status": "NO_ORPHAN_ROUTED",
+      "order_authority_created_flag": false,
+      "owning_agent": "market_data_acquisition_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quality_flags": [
+        "PUBLIC_REAL_DATA_CANDIDATE",
+        "NON_PROFIT_MARKET_DATA_FEATURE"
+      ],
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "snapshot_row_refs": [
+        "kalshi_orderbook_snapshot_0001"
+      ],
+      "source_truth_acceptance_created_flag": false,
+      "staleness_seconds": 0,
+      "test_refs": [
+        "tests/pr168_data1"
+      ],
+      "validator_refs": [
+        "tools/pr168_data1_validator.py",
+        "tools/validate_pr168_data1_public_market_data_snapshots.py"
+      ],
+      "venue": "kalshi"
+    },
+    {
+      "accepted_truth_flag": false,
+      "as_of_utc": "2026-06-21T04:41:22Z",
+      "candidate_only_flag": true,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "source_evidence_agent",
+        "qku_formula_materialization_agent",
+        "replay_paper_agent",
+        "ranking_scoring_agent",
+        "dashboard_operator_agent"
+      ],
+      "downstream_pr_refs": [
+        "PR168-GFP2R",
+        "PR168-RP2",
+        "PR168-RANK2"
+      ],
+      "feature_family": "orderbook_microstructure",
+      "feature_formula_ref": "PR168_DATA1_FEATURE_FORMULA::full_book_depth_by_price_level",
+      "feature_name": "full_book_depth_by_price_level",
+      "feature_row_id": "pr168_data1_feature_0005",
+      "feature_units": "contracts_or_rows",
+      "feature_value": {
+        "asks": [],
+        "bids": [],
+        "no_bids": [
+          {
+            "price": 0.201,
+            "size": 127.0
+          },
+          {
+            "price": 0.381,
+            "size": 161.0
+          }
+        ]
+      },
+      "input_data_authority_class": "DATA_READY_PUBLIC_REAL_ORDERBOOK_CANDIDATE",
+      "l2_replay_row_refs": [
+        "kalshi_forward_l2_rest_poll_0001"
+      ],
+      "live_authority_created_flag": false,
+      "manual_edit_allowed_flag": false,
+      "market_id_or_ticker_or_token_id": "KXMVECROSSCATEGORY-S2026F6847194F7A-CC6D65A8A6F",
+      "missing_input_flags": [],
+      "no_orphan_status": "NO_ORPHAN_ROUTED",
+      "order_authority_created_flag": false,
+      "owning_agent": "market_data_acquisition_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quality_flags": [
+        "PUBLIC_REAL_DATA_CANDIDATE",
+        "NON_PROFIT_MARKET_DATA_FEATURE"
+      ],
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "snapshot_row_refs": [
+        "kalshi_orderbook_snapshot_0001"
+      ],
+      "source_truth_acceptance_created_flag": false,
+      "staleness_seconds": 0,
+      "test_refs": [
+        "tests/pr168_data1"
+      ],
+      "validator_refs": [
+        "tools/pr168_data1_validator.py",
+        "tools/validate_pr168_data1_public_market_data_snapshots.py"
+      ],
+      "venue": "kalshi"
+    },
+    {
+      "accepted_truth_flag": false,
+      "as_of_utc": "2026-06-21T04:41:22Z",
+      "candidate_only_flag": true,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "source_evidence_agent",
+        "qku_formula_materialization_agent",
+        "replay_paper_agent",
+        "ranking_scoring_agent",
+        "dashboard_operator_agent"
+      ],
+      "downstream_pr_refs": [
+        "PR168-GFP2R",
+        "PR168-RP2",
+        "PR168-RANK2"
+      ],
+      "feature_family": "orderbook_microstructure",
+      "feature_formula_ref": "PR168_DATA1_FEATURE_FORMULA::book_imbalance",
+      "feature_name": "book_imbalance",
+      "feature_row_id": "pr168_data1_feature_0006",
+      "feature_units": "dollars_per_contract_or_unitless",
+      "feature_value": -1.0,
+      "input_data_authority_class": "DATA_READY_PUBLIC_REAL_ORDERBOOK_CANDIDATE",
+      "l2_replay_row_refs": [
+        "kalshi_forward_l2_rest_poll_0001"
+      ],
+      "live_authority_created_flag": false,
+      "manual_edit_allowed_flag": false,
+      "market_id_or_ticker_or_token_id": "KXMVECROSSCATEGORY-S2026F6847194F7A-CC6D65A8A6F",
+      "missing_input_flags": [],
+      "no_orphan_status": "NO_ORPHAN_ROUTED",
+      "order_authority_created_flag": false,
+      "owning_agent": "market_data_acquisition_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quality_flags": [
+        "PUBLIC_REAL_DATA_CANDIDATE",
+        "NON_PROFIT_MARKET_DATA_FEATURE"
+      ],
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "snapshot_row_refs": [
+        "kalshi_orderbook_snapshot_0001"
+      ],
+      "source_truth_acceptance_created_flag": false,
+      "staleness_seconds": 0,
+      "test_refs": [
+        "tests/pr168_data1"
+      ],
+      "validator_refs": [
+        "tools/pr168_data1_validator.py",
+        "tools/validate_pr168_data1_public_market_data_snapshots.py"
+      ],
+      "venue": "kalshi"
+    },
+    {
+      "accepted_truth_flag": false,
+      "as_of_utc": "2026-06-21T04:41:22Z",
+      "candidate_only_flag": true,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "source_evidence_agent",
+        "qku_formula_materialization_agent",
+        "replay_paper_agent",
+        "ranking_scoring_agent",
+        "dashboard_operator_agent"
+      ],
+      "downstream_pr_refs": [
+        "PR168-GFP2R",
+        "PR168-RP2",
+        "PR168-RANK2"
+      ],
+      "feature_family": "market_metadata",
+      "feature_formula_ref": "PR168_DATA1_FEATURE_FORMULA::price_impact_curve_seed",
+      "feature_name": "price_impact_curve_seed",
+      "feature_row_id": "pr168_data1_feature_0007",
+      "feature_units": "dollars_per_contract_or_unitless",
+      "feature_value": {
+        "ask_cumulative_depth_top_5": 0,
+        "bid_cumulative_depth_top_5": 0
+      },
+      "input_data_authority_class": "DATA_READY_PUBLIC_REAL_ORDERBOOK_CANDIDATE",
+      "l2_replay_row_refs": [
+        "kalshi_forward_l2_rest_poll_0001"
+      ],
+      "live_authority_created_flag": false,
+      "manual_edit_allowed_flag": false,
+      "market_id_or_ticker_or_token_id": "KXMVECROSSCATEGORY-S2026F6847194F7A-CC6D65A8A6F",
+      "missing_input_flags": [],
+      "no_orphan_status": "NO_ORPHAN_ROUTED",
+      "order_authority_created_flag": false,
+      "owning_agent": "market_data_acquisition_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quality_flags": [
+        "PUBLIC_REAL_DATA_CANDIDATE",
+        "NON_PROFIT_MARKET_DATA_FEATURE"
+      ],
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "snapshot_row_refs": [
+        "kalshi_orderbook_snapshot_0001"
+      ],
+      "source_truth_acceptance_created_flag": false,
+      "staleness_seconds": 0,
+      "test_refs": [
+        "tests/pr168_data1"
+      ],
+      "validator_refs": [
+        "tools/pr168_data1_validator.py",
+        "tools/validate_pr168_data1_public_market_data_snapshots.py"
+      ],
+      "venue": "kalshi"
+    },
+    {
+      "accepted_truth_flag": false,
+      "as_of_utc": "2026-06-21T04:41:22Z",
+      "candidate_only_flag": true,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "source_evidence_agent",
+        "qku_formula_materialization_agent",
+        "replay_paper_agent",
+        "ranking_scoring_agent",
+        "dashboard_operator_agent"
+      ],
+      "downstream_pr_refs": [
+        "PR168-GFP2R",
+        "PR168-RP2",
+        "PR168-RANK2"
+      ],
+      "feature_family": "orderbook_microstructure",
+      "feature_formula_ref": "PR168_DATA1_FEATURE_FORMULA::orderbook_update_count",
+      "feature_name": "orderbook_update_count",
+      "feature_row_id": "pr168_data1_feature_0008",
+      "feature_units": "contracts_or_rows",
+      "feature_value": 1,
+      "input_data_authority_class": "DATA_READY_PUBLIC_REAL_ORDERBOOK_CANDIDATE",
+      "l2_replay_row_refs": [
+        "kalshi_forward_l2_rest_poll_0001"
+      ],
+      "live_authority_created_flag": false,
+      "manual_edit_allowed_flag": false,
+      "market_id_or_ticker_or_token_id": "KXMVECROSSCATEGORY-S2026F6847194F7A-CC6D65A8A6F",
+      "missing_input_flags": [],
+      "no_orphan_status": "NO_ORPHAN_ROUTED",
+      "order_authority_created_flag": false,
+      "owning_agent": "market_data_acquisition_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quality_flags": [
+        "PUBLIC_REAL_DATA_CANDIDATE",
+        "NON_PROFIT_MARKET_DATA_FEATURE"
+      ],
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "snapshot_row_refs": [
+        "kalshi_orderbook_snapshot_0001"
+      ],
+      "source_truth_acceptance_created_flag": false,
+      "staleness_seconds": 0,
+      "test_refs": [
+        "tests/pr168_data1"
+      ],
+      "validator_refs": [
+        "tools/pr168_data1_validator.py",
+        "tools/validate_pr168_data1_public_market_data_snapshots.py"
+      ],
+      "venue": "kalshi"
+    },
+    {
+      "accepted_truth_flag": false,
+      "as_of_utc": "2026-06-21T04:41:22Z",
+      "candidate_only_flag": true,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "source_evidence_agent",
+        "qku_formula_materialization_agent",
+        "replay_paper_agent",
+        "ranking_scoring_agent",
+        "dashboard_operator_agent"
+      ],
+      "downstream_pr_refs": [
+        "PR168-GFP2R",
+        "PR168-RP2",
+        "PR168-RANK2"
+      ],
+      "feature_family": "orderbook_microstructure",
+      "feature_formula_ref": "PR168_DATA1_FEATURE_FORMULA::orderbook_update_rate",
+      "feature_name": "orderbook_update_rate",
+      "feature_row_id": "pr168_data1_feature_0009",
+      "feature_units": "updates_per_second",
+      "feature_value": 0.0,
+      "input_data_authority_class": "DATA_READY_PUBLIC_REAL_ORDERBOOK_CANDIDATE",
+      "l2_replay_row_refs": [
+        "kalshi_forward_l2_rest_poll_0001"
+      ],
+      "live_authority_created_flag": false,
+      "manual_edit_allowed_flag": false,
+      "market_id_or_ticker_or_token_id": "KXMVECROSSCATEGORY-S2026F6847194F7A-CC6D65A8A6F",
+      "missing_input_flags": [],
+      "no_orphan_status": "NO_ORPHAN_ROUTED",
+      "order_authority_created_flag": false,
+      "owning_agent": "market_data_acquisition_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quality_flags": [
+        "PUBLIC_REAL_DATA_CANDIDATE",
+        "NON_PROFIT_MARKET_DATA_FEATURE"
+      ],
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "snapshot_row_refs": [
+        "kalshi_orderbook_snapshot_0001"
+      ],
+      "source_truth_acceptance_created_flag": false,
+      "staleness_seconds": 0,
+      "test_refs": [
+        "tests/pr168_data1"
+      ],
+      "validator_refs": [
+        "tools/pr168_data1_validator.py",
+        "tools/validate_pr168_data1_public_market_data_snapshots.py"
+      ],
+      "venue": "kalshi"
+    },
+    {
+      "accepted_truth_flag": false,
+      "as_of_utc": "2026-06-21T04:41:22Z",
+      "candidate_only_flag": true,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "source_evidence_agent",
+        "qku_formula_materialization_agent",
+        "replay_paper_agent",
+        "ranking_scoring_agent",
+        "dashboard_operator_agent"
+      ],
+      "downstream_pr_refs": [
+        "PR168-GFP2R",
+        "PR168-RP2",
+        "PR168-RANK2"
+      ],
+      "feature_family": "orderbook_microstructure",
+      "feature_formula_ref": "PR168_DATA1_FEATURE_FORMULA::historical_full_book_available_flag",
+      "feature_name": "historical_full_book_available_flag",
+      "feature_row_id": "pr168_data1_feature_0010",
+      "feature_units": "boolean",
+      "feature_value": false,
+      "input_data_authority_class": "DATA_READY_PUBLIC_REAL_ORDERBOOK_CANDIDATE",
+      "l2_replay_row_refs": [
+        "kalshi_forward_l2_rest_poll_0001"
+      ],
+      "live_authority_created_flag": false,
+      "manual_edit_allowed_flag": false,
+      "market_id_or_ticker_or_token_id": "KXMVECROSSCATEGORY-S2026F6847194F7A-CC6D65A8A6F",
+      "missing_input_flags": [],
+      "no_orphan_status": "NO_ORPHAN_ROUTED",
+      "order_authority_created_flag": false,
+      "owning_agent": "market_data_acquisition_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quality_flags": [
+        "PUBLIC_REAL_DATA_CANDIDATE",
+        "NON_PROFIT_MARKET_DATA_FEATURE"
+      ],
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "snapshot_row_refs": [
+        "kalshi_orderbook_snapshot_0001"
+      ],
+      "source_truth_acceptance_created_flag": false,
+      "staleness_seconds": 0,
+      "test_refs": [
+        "tests/pr168_data1"
+      ],
+      "validator_refs": [
+        "tools/pr168_data1_validator.py",
+        "tools/validate_pr168_data1_public_market_data_snapshots.py"
+      ],
+      "venue": "kalshi"
+    },
+    {
+      "accepted_truth_flag": false,
+      "as_of_utc": "2026-06-21T04:41:22Z",
+      "candidate_only_flag": true,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "source_evidence_agent",
+        "qku_formula_materialization_agent",
+        "replay_paper_agent",
+        "ranking_scoring_agent",
+        "dashboard_operator_agent"
+      ],
+      "downstream_pr_refs": [
+        "PR168-GFP2R",
+        "PR168-RP2",
+        "PR168-RANK2"
+      ],
+      "feature_family": "orderbook_microstructure",
+      "feature_formula_ref": "PR168_DATA1_FEATURE_FORMULA::historical_full_book_gap_flag",
+      "feature_name": "historical_full_book_gap_flag",
+      "feature_row_id": "pr168_data1_feature_0011",
+      "feature_units": "boolean",
+      "feature_value": true,
+      "input_data_authority_class": "DATA_READY_PUBLIC_REAL_ORDERBOOK_CANDIDATE",
+      "l2_replay_row_refs": [
+        "kalshi_forward_l2_rest_poll_0001"
+      ],
+      "live_authority_created_flag": false,
+      "manual_edit_allowed_flag": false,
+      "market_id_or_ticker_or_token_id": "KXMVECROSSCATEGORY-S2026F6847194F7A-CC6D65A8A6F",
+      "missing_input_flags": [],
+      "no_orphan_status": "NO_ORPHAN_ROUTED",
+      "order_authority_created_flag": false,
+      "owning_agent": "market_data_acquisition_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quality_flags": [
+        "PUBLIC_REAL_DATA_CANDIDATE",
+        "NON_PROFIT_MARKET_DATA_FEATURE"
+      ],
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "snapshot_row_refs": [
+        "kalshi_orderbook_snapshot_0001"
+      ],
+      "source_truth_acceptance_created_flag": false,
+      "staleness_seconds": 0,
+      "test_refs": [
+        "tests/pr168_data1"
+      ],
+      "validator_refs": [
+        "tools/pr168_data1_validator.py",
+        "tools/validate_pr168_data1_public_market_data_snapshots.py"
+      ],
+      "venue": "kalshi"
+    },
+    {
+      "accepted_truth_flag": false,
+      "as_of_utc": "2026-06-21T04:41:22Z",
+      "candidate_only_flag": true,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "source_evidence_agent",
+        "qku_formula_materialization_agent",
+        "replay_paper_agent",
+        "ranking_scoring_agent",
+        "dashboard_operator_agent"
+      ],
+      "downstream_pr_refs": [
+        "PR168-GFP2R",
+        "PR168-RP2",
+        "PR168-RANK2"
+      ],
+      "feature_family": "market_metadata",
+      "feature_formula_ref": "PR168_DATA1_FEATURE_FORMULA::forward_l2_capture_available_flag",
+      "feature_name": "forward_l2_capture_available_flag",
+      "feature_row_id": "pr168_data1_feature_0012",
+      "feature_units": "boolean",
+      "feature_value": true,
+      "input_data_authority_class": "DATA_READY_PUBLIC_REAL_ORDERBOOK_CANDIDATE",
+      "l2_replay_row_refs": [
+        "kalshi_forward_l2_rest_poll_0001"
+      ],
+      "live_authority_created_flag": false,
+      "manual_edit_allowed_flag": false,
+      "market_id_or_ticker_or_token_id": "KXMVECROSSCATEGORY-S2026F6847194F7A-CC6D65A8A6F",
+      "missing_input_flags": [],
+      "no_orphan_status": "NO_ORPHAN_ROUTED",
+      "order_authority_created_flag": false,
+      "owning_agent": "market_data_acquisition_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quality_flags": [
+        "PUBLIC_REAL_DATA_CANDIDATE",
+        "NON_PROFIT_MARKET_DATA_FEATURE"
+      ],
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "snapshot_row_refs": [
+        "kalshi_orderbook_snapshot_0001"
+      ],
+      "source_truth_acceptance_created_flag": false,
+      "staleness_seconds": 0,
+      "test_refs": [
+        "tests/pr168_data1"
+      ],
+      "validator_refs": [
+        "tools/pr168_data1_validator.py",
+        "tools/validate_pr168_data1_public_market_data_snapshots.py"
+      ],
+      "venue": "kalshi"
+    },
+    {
+      "accepted_truth_flag": false,
+      "as_of_utc": "2026-06-21T04:41:22Z",
+      "candidate_only_flag": true,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "source_evidence_agent",
+        "qku_formula_materialization_agent",
+        "replay_paper_agent",
+        "ranking_scoring_agent",
+        "dashboard_operator_agent"
+      ],
+      "downstream_pr_refs": [
+        "PR168-GFP2R",
+        "PR168-RP2",
+        "PR168-RANK2"
+      ],
+      "feature_family": "trade_history",
+      "feature_formula_ref": "PR168_DATA1_FEATURE_FORMULA::recent_trade_count",
+      "feature_name": "recent_trade_count",
+      "feature_row_id": "pr168_data1_feature_0013",
+      "feature_units": "contracts_or_rows",
+      "feature_value": 5,
+      "input_data_authority_class": "DATA_READY_PUBLIC_REAL_TRADE_HISTORY_CANDIDATE",
+      "l2_replay_row_refs": [
+        "kalshi_forward_l2_rest_poll_0001"
+      ],
+      "live_authority_created_flag": false,
+      "manual_edit_allowed_flag": false,
+      "market_id_or_ticker_or_token_id": "KXMVECROSSCATEGORY-S2026F6847194F7A-CC6D65A8A6F",
+      "missing_input_flags": [],
+      "no_orphan_status": "NO_ORPHAN_ROUTED",
+      "order_authority_created_flag": false,
+      "owning_agent": "market_data_acquisition_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quality_flags": [
+        "PUBLIC_REAL_DATA_CANDIDATE",
+        "NON_PROFIT_MARKET_DATA_FEATURE"
+      ],
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "snapshot_row_refs": [
+        "kalshi_market_trades_0001"
+      ],
+      "source_truth_acceptance_created_flag": false,
+      "staleness_seconds": 0,
+      "test_refs": [
+        "tests/pr168_data1"
+      ],
+      "validator_refs": [
+        "tools/pr168_data1_validator.py",
+        "tools/validate_pr168_data1_public_market_data_snapshots.py"
+      ],
+      "venue": "kalshi"
+    },
+    {
+      "accepted_truth_flag": false,
+      "as_of_utc": "2026-06-21T04:41:22Z",
+      "candidate_only_flag": true,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "source_evidence_agent",
+        "qku_formula_materialization_agent",
+        "replay_paper_agent",
+        "ranking_scoring_agent",
+        "dashboard_operator_agent"
+      ],
+      "downstream_pr_refs": [
+        "PR168-GFP2R",
+        "PR168-RP2",
+        "PR168-RANK2"
+      ],
+      "feature_family": "trade_history",
+      "feature_formula_ref": "PR168_DATA1_FEATURE_FORMULA::recent_trade_volume",
+      "feature_name": "recent_trade_volume",
+      "feature_row_id": "pr168_data1_feature_0014",
+      "feature_units": "contracts_or_rows",
+      "feature_value": 464.38,
+      "input_data_authority_class": "DATA_READY_PUBLIC_REAL_TRADE_HISTORY_CANDIDATE",
+      "l2_replay_row_refs": [
+        "kalshi_forward_l2_rest_poll_0001"
+      ],
+      "live_authority_created_flag": false,
+      "manual_edit_allowed_flag": false,
+      "market_id_or_ticker_or_token_id": "KXMVECROSSCATEGORY-S2026F6847194F7A-CC6D65A8A6F",
+      "missing_input_flags": [],
+      "no_orphan_status": "NO_ORPHAN_ROUTED",
+      "order_authority_created_flag": false,
+      "owning_agent": "market_data_acquisition_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quality_flags": [
+        "PUBLIC_REAL_DATA_CANDIDATE",
+        "NON_PROFIT_MARKET_DATA_FEATURE"
+      ],
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "snapshot_row_refs": [
+        "kalshi_market_trades_0001"
+      ],
+      "source_truth_acceptance_created_flag": false,
+      "staleness_seconds": 0,
+      "test_refs": [
+        "tests/pr168_data1"
+      ],
+      "validator_refs": [
+        "tools/pr168_data1_validator.py",
+        "tools/validate_pr168_data1_public_market_data_snapshots.py"
+      ],
+      "venue": "kalshi"
+    },
+    {
+      "accepted_truth_flag": false,
+      "as_of_utc": "2026-06-21T04:41:22Z",
+      "candidate_only_flag": true,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "source_evidence_agent",
+        "qku_formula_materialization_agent",
+        "replay_paper_agent",
+        "ranking_scoring_agent",
+        "dashboard_operator_agent"
+      ],
+      "downstream_pr_refs": [
+        "PR168-GFP2R",
+        "PR168-RP2",
+        "PR168-RANK2"
+      ],
+      "feature_family": "trade_history",
+      "feature_formula_ref": "PR168_DATA1_FEATURE_FORMULA::last_trade_timestamp",
+      "feature_name": "last_trade_timestamp",
+      "feature_row_id": "pr168_data1_feature_0015",
+      "feature_units": "dollars_per_contract_or_unitless",
+      "feature_value": "2026-06-21T04:41:26.240572Z",
+      "input_data_authority_class": "DATA_READY_PUBLIC_REAL_TRADE_HISTORY_CANDIDATE",
+      "l2_replay_row_refs": [
+        "kalshi_forward_l2_rest_poll_0001"
+      ],
+      "live_authority_created_flag": false,
+      "manual_edit_allowed_flag": false,
+      "market_id_or_ticker_or_token_id": "KXMVECROSSCATEGORY-S2026F6847194F7A-CC6D65A8A6F",
+      "missing_input_flags": [],
+      "no_orphan_status": "NO_ORPHAN_ROUTED",
+      "order_authority_created_flag": false,
+      "owning_agent": "market_data_acquisition_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quality_flags": [
+        "PUBLIC_REAL_DATA_CANDIDATE",
+        "NON_PROFIT_MARKET_DATA_FEATURE"
+      ],
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "snapshot_row_refs": [
+        "kalshi_market_trades_0001"
+      ],
+      "source_truth_acceptance_created_flag": false,
+      "staleness_seconds": 0,
+      "test_refs": [
+        "tests/pr168_data1"
+      ],
+      "validator_refs": [
+        "tools/pr168_data1_validator.py",
+        "tools/validate_pr168_data1_public_market_data_snapshots.py"
+      ],
+      "venue": "kalshi"
+    },
+    {
+      "accepted_truth_flag": false,
+      "as_of_utc": "2026-06-21T04:41:22Z",
+      "candidate_only_flag": true,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "source_evidence_agent",
+        "qku_formula_materialization_agent",
+        "replay_paper_agent",
+        "ranking_scoring_agent",
+        "dashboard_operator_agent"
+      ],
+      "downstream_pr_refs": [
+        "PR168-GFP2R",
+        "PR168-RP2",
+        "PR168-RANK2"
+      ],
+      "feature_family": "trade_history",
+      "feature_formula_ref": "PR168_DATA1_FEATURE_FORMULA::recent_trade_count",
+      "feature_name": "recent_trade_count",
+      "feature_row_id": "pr168_data1_feature_0016",
+      "feature_units": "contracts_or_rows",
+      "feature_value": 5,
+      "input_data_authority_class": "DATA_READY_PUBLIC_REAL_TRADE_HISTORY_CANDIDATE",
+      "l2_replay_row_refs": [
+        "kalshi_forward_l2_rest_poll_0001"
+      ],
+      "live_authority_created_flag": false,
+      "manual_edit_allowed_flag": false,
+      "market_id_or_ticker_or_token_id": "KXMVECROSSCATEGORY-S2026F6847194F7A-CC6D65A8A6F",
+      "missing_input_flags": [],
+      "no_orphan_status": "NO_ORPHAN_ROUTED",
+      "order_authority_created_flag": false,
+      "owning_agent": "market_data_acquisition_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quality_flags": [
+        "PUBLIC_REAL_DATA_CANDIDATE",
+        "NON_PROFIT_MARKET_DATA_FEATURE"
+      ],
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "snapshot_row_refs": [
+        "kalshi_historical_trades_0001"
+      ],
+      "source_truth_acceptance_created_flag": false,
+      "staleness_seconds": 0,
+      "test_refs": [
+        "tests/pr168_data1"
+      ],
+      "validator_refs": [
+        "tools/pr168_data1_validator.py",
+        "tools/validate_pr168_data1_public_market_data_snapshots.py"
+      ],
+      "venue": "kalshi"
+    },
+    {
+      "accepted_truth_flag": false,
+      "as_of_utc": "2026-06-21T04:41:22Z",
+      "candidate_only_flag": true,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "source_evidence_agent",
+        "qku_formula_materialization_agent",
+        "replay_paper_agent",
+        "ranking_scoring_agent",
+        "dashboard_operator_agent"
+      ],
+      "downstream_pr_refs": [
+        "PR168-GFP2R",
+        "PR168-RP2",
+        "PR168-RANK2"
+      ],
+      "feature_family": "trade_history",
+      "feature_formula_ref": "PR168_DATA1_FEATURE_FORMULA::recent_trade_volume",
+      "feature_name": "recent_trade_volume",
+      "feature_row_id": "pr168_data1_feature_0017",
+      "feature_units": "contracts_or_rows",
+      "feature_value": 2632.86,
+      "input_data_authority_class": "DATA_READY_PUBLIC_REAL_TRADE_HISTORY_CANDIDATE",
+      "l2_replay_row_refs": [
+        "kalshi_forward_l2_rest_poll_0001"
+      ],
+      "live_authority_created_flag": false,
+      "manual_edit_allowed_flag": false,
+      "market_id_or_ticker_or_token_id": "KXMVECROSSCATEGORY-S2026F6847194F7A-CC6D65A8A6F",
+      "missing_input_flags": [],
+      "no_orphan_status": "NO_ORPHAN_ROUTED",
+      "order_authority_created_flag": false,
+      "owning_agent": "market_data_acquisition_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quality_flags": [
+        "PUBLIC_REAL_DATA_CANDIDATE",
+        "NON_PROFIT_MARKET_DATA_FEATURE"
+      ],
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "snapshot_row_refs": [
+        "kalshi_historical_trades_0001"
+      ],
+      "source_truth_acceptance_created_flag": false,
+      "staleness_seconds": 0,
+      "test_refs": [
+        "tests/pr168_data1"
+      ],
+      "validator_refs": [
+        "tools/pr168_data1_validator.py",
+        "tools/validate_pr168_data1_public_market_data_snapshots.py"
+      ],
+      "venue": "kalshi"
+    },
+    {
+      "accepted_truth_flag": false,
+      "as_of_utc": "2026-06-21T04:41:22Z",
+      "candidate_only_flag": true,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "source_evidence_agent",
+        "qku_formula_materialization_agent",
+        "replay_paper_agent",
+        "ranking_scoring_agent",
+        "dashboard_operator_agent"
+      ],
+      "downstream_pr_refs": [
+        "PR168-GFP2R",
+        "PR168-RP2",
+        "PR168-RANK2"
+      ],
+      "feature_family": "trade_history",
+      "feature_formula_ref": "PR168_DATA1_FEATURE_FORMULA::last_trade_timestamp",
+      "feature_name": "last_trade_timestamp",
+      "feature_row_id": "pr168_data1_feature_0018",
+      "feature_units": "dollars_per_contract_or_unitless",
+      "feature_value": "2026-04-20T23:59:59.950908Z",
+      "input_data_authority_class": "DATA_READY_PUBLIC_REAL_TRADE_HISTORY_CANDIDATE",
+      "l2_replay_row_refs": [
+        "kalshi_forward_l2_rest_poll_0001"
+      ],
+      "live_authority_created_flag": false,
+      "manual_edit_allowed_flag": false,
+      "market_id_or_ticker_or_token_id": "KXMVECROSSCATEGORY-S2026F6847194F7A-CC6D65A8A6F",
+      "missing_input_flags": [],
+      "no_orphan_status": "NO_ORPHAN_ROUTED",
+      "order_authority_created_flag": false,
+      "owning_agent": "market_data_acquisition_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quality_flags": [
+        "PUBLIC_REAL_DATA_CANDIDATE",
+        "NON_PROFIT_MARKET_DATA_FEATURE"
+      ],
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "snapshot_row_refs": [
+        "kalshi_historical_trades_0001"
+      ],
+      "source_truth_acceptance_created_flag": false,
+      "staleness_seconds": 0,
+      "test_refs": [
+        "tests/pr168_data1"
+      ],
+      "validator_refs": [
+        "tools/pr168_data1_validator.py",
+        "tools/validate_pr168_data1_public_market_data_snapshots.py"
+      ],
+      "venue": "kalshi"
+    },
+    {
+      "accepted_truth_flag": false,
+      "as_of_utc": "2026-06-21T04:41:22Z",
+      "candidate_only_flag": true,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "source_evidence_agent",
+        "qku_formula_materialization_agent",
+        "replay_paper_agent",
+        "ranking_scoring_agent",
+        "dashboard_operator_agent"
+      ],
+      "downstream_pr_refs": [
+        "PR168-GFP2R",
+        "PR168-RP2",
+        "PR168-RANK2"
+      ],
+      "feature_family": "price_history",
+      "feature_formula_ref": "PR168_DATA1_FEATURE_FORMULA::candlestick_open_high_low_close",
+      "feature_name": "candlestick_open_high_low_close",
+      "feature_row_id": "pr168_data1_feature_0019",
+      "feature_units": "dollars_per_contract_or_unitless",
+      "feature_value": {
+        "candlesticks": [],
+        "ticker": "KXMVECROSSCATEGORY-S2026F6847194F7A-CC6D65A8A6F"
+      },
+      "input_data_authority_class": "DATA_READY_PUBLIC_REAL_PRICE_HISTORY_CANDIDATE",
+      "l2_replay_row_refs": [
+        "kalshi_forward_l2_rest_poll_0001"
+      ],
+      "live_authority_created_flag": false,
+      "manual_edit_allowed_flag": false,
+      "market_id_or_ticker_or_token_id": "KXMVECROSSCATEGORY-S2026F6847194F7A-CC6D65A8A6F",
+      "missing_input_flags": [],
+      "no_orphan_status": "NO_ORPHAN_ROUTED",
+      "order_authority_created_flag": false,
+      "owning_agent": "market_data_acquisition_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quality_flags": [
+        "PUBLIC_REAL_DATA_CANDIDATE",
+        "NON_PROFIT_MARKET_DATA_FEATURE"
+      ],
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "snapshot_row_refs": [
+        "kalshi_candlesticks_0001"
+      ],
+      "source_truth_acceptance_created_flag": false,
+      "staleness_seconds": 0,
+      "test_refs": [
+        "tests/pr168_data1"
+      ],
+      "validator_refs": [
+        "tools/pr168_data1_validator.py",
+        "tools/validate_pr168_data1_public_market_data_snapshots.py"
+      ],
+      "venue": "kalshi"
+    },
+    {
+      "accepted_truth_flag": false,
+      "as_of_utc": "2026-06-21T04:41:22Z",
+      "candidate_only_flag": true,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "source_evidence_agent",
+        "qku_formula_materialization_agent",
+        "replay_paper_agent",
+        "ranking_scoring_agent",
+        "dashboard_operator_agent"
+      ],
+      "downstream_pr_refs": [
+        "PR168-GFP2R",
+        "PR168-RP2",
+        "PR168-RANK2"
+      ],
+      "feature_family": "market_metadata",
+      "feature_formula_ref": "PR168_DATA1_FEATURE_FORMULA::market_lifecycle_state",
+      "feature_name": "market_lifecycle_state",
+      "feature_row_id": "pr168_data1_feature_0020",
+      "feature_units": "categorical",
+      "feature_value": true,
+      "input_data_authority_class": "DATA_READY_PUBLIC_REAL_SNAPSHOT_CANDIDATE",
+      "l2_replay_row_refs": [
+        "polymarket_forward_l2_rest_poll_0001"
+      ],
+      "live_authority_created_flag": false,
+      "manual_edit_allowed_flag": false,
+      "market_id_or_ticker_or_token_id": "98022490269692409998126496127597032490334070080325855126491859374983463996227",
+      "missing_input_flags": [],
+      "no_orphan_status": "NO_ORPHAN_ROUTED",
+      "order_authority_created_flag": false,
+      "owning_agent": "market_data_acquisition_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quality_flags": [
+        "PUBLIC_REAL_DATA_CANDIDATE",
+        "NON_PROFIT_MARKET_DATA_FEATURE"
+      ],
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "snapshot_row_refs": [
+        "polymarket_market_metadata_0001"
+      ],
+      "source_truth_acceptance_created_flag": false,
+      "staleness_seconds": 0,
+      "test_refs": [
+        "tests/pr168_data1"
+      ],
+      "validator_refs": [
+        "tools/pr168_data1_validator.py",
+        "tools/validate_pr168_data1_public_market_data_snapshots.py"
+      ],
+      "venue": "polymarket"
+    },
+    {
+      "accepted_truth_flag": false,
+      "as_of_utc": "2026-06-21T04:41:22Z",
+      "candidate_only_flag": true,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "source_evidence_agent",
+        "qku_formula_materialization_agent",
+        "replay_paper_agent",
+        "ranking_scoring_agent",
+        "dashboard_operator_agent"
+      ],
+      "downstream_pr_refs": [
+        "PR168-GFP2R",
+        "PR168-RP2",
+        "PR168-RANK2"
+      ],
+      "feature_family": "market_metadata",
+      "feature_formula_ref": "PR168_DATA1_FEATURE_FORMULA::tick_size",
+      "feature_name": "tick_size",
+      "feature_row_id": "pr168_data1_feature_0021",
+      "feature_units": "contracts_or_rows",
+      "feature_value": 0.01,
+      "input_data_authority_class": "DATA_READY_PUBLIC_REAL_SNAPSHOT_CANDIDATE",
+      "l2_replay_row_refs": [
+        "polymarket_forward_l2_rest_poll_0001"
+      ],
+      "live_authority_created_flag": false,
+      "manual_edit_allowed_flag": false,
+      "market_id_or_ticker_or_token_id": "98022490269692409998126496127597032490334070080325855126491859374983463996227",
+      "missing_input_flags": [],
+      "no_orphan_status": "NO_ORPHAN_ROUTED",
+      "order_authority_created_flag": false,
+      "owning_agent": "market_data_acquisition_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quality_flags": [
+        "PUBLIC_REAL_DATA_CANDIDATE",
+        "NON_PROFIT_MARKET_DATA_FEATURE"
+      ],
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "snapshot_row_refs": [
+        "polymarket_market_metadata_0001"
+      ],
+      "source_truth_acceptance_created_flag": false,
+      "staleness_seconds": 0,
+      "test_refs": [
+        "tests/pr168_data1"
+      ],
+      "validator_refs": [
+        "tools/pr168_data1_validator.py",
+        "tools/validate_pr168_data1_public_market_data_snapshots.py"
+      ],
+      "venue": "polymarket"
+    },
+    {
+      "accepted_truth_flag": false,
+      "as_of_utc": "2026-06-21T04:41:22Z",
+      "candidate_only_flag": true,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "source_evidence_agent",
+        "qku_formula_materialization_agent",
+        "replay_paper_agent",
+        "ranking_scoring_agent",
+        "dashboard_operator_agent"
+      ],
+      "downstream_pr_refs": [
+        "PR168-GFP2R",
+        "PR168-RP2",
+        "PR168-RANK2"
+      ],
+      "feature_family": "market_metadata",
+      "feature_formula_ref": "PR168_DATA1_FEATURE_FORMULA::min_order_size_candidate",
+      "feature_name": "min_order_size_candidate",
+      "feature_row_id": "pr168_data1_feature_0022",
+      "feature_units": "contracts_or_rows",
+      "feature_value": 5.0,
+      "input_data_authority_class": "DATA_READY_PUBLIC_REAL_SNAPSHOT_CANDIDATE",
+      "l2_replay_row_refs": [
+        "polymarket_forward_l2_rest_poll_0001"
+      ],
+      "live_authority_created_flag": false,
+      "manual_edit_allowed_flag": false,
+      "market_id_or_ticker_or_token_id": "98022490269692409998126496127597032490334070080325855126491859374983463996227",
+      "missing_input_flags": [],
+      "no_orphan_status": "NO_ORPHAN_ROUTED",
+      "order_authority_created_flag": false,
+      "owning_agent": "market_data_acquisition_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quality_flags": [
+        "PUBLIC_REAL_DATA_CANDIDATE",
+        "NON_PROFIT_MARKET_DATA_FEATURE"
+      ],
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "snapshot_row_refs": [
+        "polymarket_market_metadata_0001"
+      ],
+      "source_truth_acceptance_created_flag": false,
+      "staleness_seconds": 0,
+      "test_refs": [
+        "tests/pr168_data1"
+      ],
+      "validator_refs": [
+        "tools/pr168_data1_validator.py",
+        "tools/validate_pr168_data1_public_market_data_snapshots.py"
+      ],
+      "venue": "polymarket"
+    },
+    {
+      "accepted_truth_flag": false,
+      "as_of_utc": "2026-06-21T04:41:22Z",
+      "candidate_only_flag": true,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "source_evidence_agent",
+        "qku_formula_materialization_agent",
+        "replay_paper_agent",
+        "ranking_scoring_agent",
+        "dashboard_operator_agent"
+      ],
+      "downstream_pr_refs": [
+        "PR168-GFP2R",
+        "PR168-RP2",
+        "PR168-RANK2"
+      ],
+      "feature_family": "orderbook_microstructure",
+      "feature_formula_ref": "PR168_DATA1_FEATURE_FORMULA::best_yes_bid",
+      "feature_name": "best_yes_bid",
+      "feature_row_id": "pr168_data1_feature_0023",
+      "feature_units": "dollars_per_contract_or_unitless",
+      "feature_value": 0.51,
+      "input_data_authority_class": "DATA_READY_PUBLIC_REAL_ORDERBOOK_CANDIDATE",
+      "l2_replay_row_refs": [
+        "polymarket_forward_l2_rest_poll_0001"
+      ],
+      "live_authority_created_flag": false,
+      "manual_edit_allowed_flag": false,
+      "market_id_or_ticker_or_token_id": "98022490269692409998126496127597032490334070080325855126491859374983463996227",
+      "missing_input_flags": [],
+      "no_orphan_status": "NO_ORPHAN_ROUTED",
+      "order_authority_created_flag": false,
+      "owning_agent": "market_data_acquisition_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quality_flags": [
+        "PUBLIC_REAL_DATA_CANDIDATE",
+        "NON_PROFIT_MARKET_DATA_FEATURE"
+      ],
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "snapshot_row_refs": [
+        "polymarket_orderbook_snapshot_0001"
+      ],
+      "source_truth_acceptance_created_flag": false,
+      "staleness_seconds": 0,
+      "test_refs": [
+        "tests/pr168_data1"
+      ],
+      "validator_refs": [
+        "tools/pr168_data1_validator.py",
+        "tools/validate_pr168_data1_public_market_data_snapshots.py"
+      ],
+      "venue": "polymarket"
+    },
+    {
+      "accepted_truth_flag": false,
+      "as_of_utc": "2026-06-21T04:41:22Z",
+      "candidate_only_flag": true,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "source_evidence_agent",
+        "qku_formula_materialization_agent",
+        "replay_paper_agent",
+        "ranking_scoring_agent",
+        "dashboard_operator_agent"
+      ],
+      "downstream_pr_refs": [
+        "PR168-GFP2R",
+        "PR168-RP2",
+        "PR168-RANK2"
+      ],
+      "feature_family": "orderbook_microstructure",
+      "feature_formula_ref": "PR168_DATA1_FEATURE_FORMULA::best_yes_ask",
+      "feature_name": "best_yes_ask",
+      "feature_row_id": "pr168_data1_feature_0024",
+      "feature_units": "dollars_per_contract_or_unitless",
+      "feature_value": 0.53,
+      "input_data_authority_class": "DATA_READY_PUBLIC_REAL_ORDERBOOK_CANDIDATE",
+      "l2_replay_row_refs": [
+        "polymarket_forward_l2_rest_poll_0001"
+      ],
+      "live_authority_created_flag": false,
+      "manual_edit_allowed_flag": false,
+      "market_id_or_ticker_or_token_id": "98022490269692409998126496127597032490334070080325855126491859374983463996227",
+      "missing_input_flags": [],
+      "no_orphan_status": "NO_ORPHAN_ROUTED",
+      "order_authority_created_flag": false,
+      "owning_agent": "market_data_acquisition_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quality_flags": [
+        "PUBLIC_REAL_DATA_CANDIDATE",
+        "NON_PROFIT_MARKET_DATA_FEATURE"
+      ],
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "snapshot_row_refs": [
+        "polymarket_orderbook_snapshot_0001"
+      ],
+      "source_truth_acceptance_created_flag": false,
+      "staleness_seconds": 0,
+      "test_refs": [
+        "tests/pr168_data1"
+      ],
+      "validator_refs": [
+        "tools/pr168_data1_validator.py",
+        "tools/validate_pr168_data1_public_market_data_snapshots.py"
+      ],
+      "venue": "polymarket"
+    },
+    {
+      "accepted_truth_flag": false,
+      "as_of_utc": "2026-06-21T04:41:22Z",
+      "candidate_only_flag": true,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "source_evidence_agent",
+        "qku_formula_materialization_agent",
+        "replay_paper_agent",
+        "ranking_scoring_agent",
+        "dashboard_operator_agent"
+      ],
+      "downstream_pr_refs": [
+        "PR168-GFP2R",
+        "PR168-RP2",
+        "PR168-RANK2"
+      ],
+      "feature_family": "market_metadata",
+      "feature_formula_ref": "PR168_DATA1_FEATURE_FORMULA::mid_yes",
+      "feature_name": "mid_yes",
+      "feature_row_id": "pr168_data1_feature_0025",
+      "feature_units": "dollars_per_contract_or_unitless",
+      "feature_value": 0.52,
+      "input_data_authority_class": "DATA_READY_PUBLIC_REAL_ORDERBOOK_CANDIDATE",
+      "l2_replay_row_refs": [
+        "polymarket_forward_l2_rest_poll_0001"
+      ],
+      "live_authority_created_flag": false,
+      "manual_edit_allowed_flag": false,
+      "market_id_or_ticker_or_token_id": "98022490269692409998126496127597032490334070080325855126491859374983463996227",
+      "missing_input_flags": [],
+      "no_orphan_status": "NO_ORPHAN_ROUTED",
+      "order_authority_created_flag": false,
+      "owning_agent": "market_data_acquisition_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quality_flags": [
+        "PUBLIC_REAL_DATA_CANDIDATE",
+        "NON_PROFIT_MARKET_DATA_FEATURE"
+      ],
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "snapshot_row_refs": [
+        "polymarket_orderbook_snapshot_0001"
+      ],
+      "source_truth_acceptance_created_flag": false,
+      "staleness_seconds": 0,
+      "test_refs": [
+        "tests/pr168_data1"
+      ],
+      "validator_refs": [
+        "tools/pr168_data1_validator.py",
+        "tools/validate_pr168_data1_public_market_data_snapshots.py"
+      ],
+      "venue": "polymarket"
+    },
+    {
+      "accepted_truth_flag": false,
+      "as_of_utc": "2026-06-21T04:41:22Z",
+      "candidate_only_flag": true,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "source_evidence_agent",
+        "qku_formula_materialization_agent",
+        "replay_paper_agent",
+        "ranking_scoring_agent",
+        "dashboard_operator_agent"
+      ],
+      "downstream_pr_refs": [
+        "PR168-GFP2R",
+        "PR168-RP2",
+        "PR168-RANK2"
+      ],
+      "feature_family": "orderbook_microstructure",
+      "feature_formula_ref": "PR168_DATA1_FEATURE_FORMULA::spread_yes",
+      "feature_name": "spread_yes",
+      "feature_row_id": "pr168_data1_feature_0026",
+      "feature_units": "dollars_per_contract_or_unitless",
+      "feature_value": 0.02,
+      "input_data_authority_class": "DATA_READY_PUBLIC_REAL_ORDERBOOK_CANDIDATE",
+      "l2_replay_row_refs": [
+        "polymarket_forward_l2_rest_poll_0001"
+      ],
+      "live_authority_created_flag": false,
+      "manual_edit_allowed_flag": false,
+      "market_id_or_ticker_or_token_id": "98022490269692409998126496127597032490334070080325855126491859374983463996227",
+      "missing_input_flags": [],
+      "no_orphan_status": "NO_ORPHAN_ROUTED",
+      "order_authority_created_flag": false,
+      "owning_agent": "market_data_acquisition_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quality_flags": [
+        "PUBLIC_REAL_DATA_CANDIDATE",
+        "NON_PROFIT_MARKET_DATA_FEATURE"
+      ],
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "snapshot_row_refs": [
+        "polymarket_orderbook_snapshot_0001"
+      ],
+      "source_truth_acceptance_created_flag": false,
+      "staleness_seconds": 0,
+      "test_refs": [
+        "tests/pr168_data1"
+      ],
+      "validator_refs": [
+        "tools/pr168_data1_validator.py",
+        "tools/validate_pr168_data1_public_market_data_snapshots.py"
+      ],
+      "venue": "polymarket"
+    },
+    {
+      "accepted_truth_flag": false,
+      "as_of_utc": "2026-06-21T04:41:22Z",
+      "candidate_only_flag": true,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "source_evidence_agent",
+        "qku_formula_materialization_agent",
+        "replay_paper_agent",
+        "ranking_scoring_agent",
+        "dashboard_operator_agent"
+      ],
+      "downstream_pr_refs": [
+        "PR168-GFP2R",
+        "PR168-RP2",
+        "PR168-RANK2"
+      ],
+      "feature_family": "orderbook_microstructure",
+      "feature_formula_ref": "PR168_DATA1_FEATURE_FORMULA::top_level_depth_yes",
+      "feature_name": "top_level_depth_yes",
+      "feature_row_id": "pr168_data1_feature_0027",
+      "feature_units": "contracts_or_rows",
+      "feature_value": 53.06,
+      "input_data_authority_class": "DATA_READY_PUBLIC_REAL_ORDERBOOK_CANDIDATE",
+      "l2_replay_row_refs": [
+        "polymarket_forward_l2_rest_poll_0001"
+      ],
+      "live_authority_created_flag": false,
+      "manual_edit_allowed_flag": false,
+      "market_id_or_ticker_or_token_id": "98022490269692409998126496127597032490334070080325855126491859374983463996227",
+      "missing_input_flags": [],
+      "no_orphan_status": "NO_ORPHAN_ROUTED",
+      "order_authority_created_flag": false,
+      "owning_agent": "market_data_acquisition_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quality_flags": [
+        "PUBLIC_REAL_DATA_CANDIDATE",
+        "NON_PROFIT_MARKET_DATA_FEATURE"
+      ],
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "snapshot_row_refs": [
+        "polymarket_orderbook_snapshot_0001"
+      ],
+      "source_truth_acceptance_created_flag": false,
+      "staleness_seconds": 0,
+      "test_refs": [
+        "tests/pr168_data1"
+      ],
+      "validator_refs": [
+        "tools/pr168_data1_validator.py",
+        "tools/validate_pr168_data1_public_market_data_snapshots.py"
+      ],
+      "venue": "polymarket"
+    },
+    {
+      "accepted_truth_flag": false,
+      "as_of_utc": "2026-06-21T04:41:22Z",
+      "candidate_only_flag": true,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "source_evidence_agent",
+        "qku_formula_materialization_agent",
+        "replay_paper_agent",
+        "ranking_scoring_agent",
+        "dashboard_operator_agent"
+      ],
+      "downstream_pr_refs": [
+        "PR168-GFP2R",
+        "PR168-RP2",
+        "PR168-RANK2"
+      ],
+      "feature_family": "orderbook_microstructure",
+      "feature_formula_ref": "PR168_DATA1_FEATURE_FORMULA::depth_within_1c",
+      "feature_name": "depth_within_1c",
+      "feature_row_id": "pr168_data1_feature_0028",
+      "feature_units": "contracts_or_rows",
+      "feature_value": 8006.23,
+      "input_data_authority_class": "DATA_READY_PUBLIC_REAL_ORDERBOOK_CANDIDATE",
+      "l2_replay_row_refs": [
+        "polymarket_forward_l2_rest_poll_0001"
+      ],
+      "live_authority_created_flag": false,
+      "manual_edit_allowed_flag": false,
+      "market_id_or_ticker_or_token_id": "98022490269692409998126496127597032490334070080325855126491859374983463996227",
+      "missing_input_flags": [],
+      "no_orphan_status": "NO_ORPHAN_ROUTED",
+      "order_authority_created_flag": false,
+      "owning_agent": "market_data_acquisition_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quality_flags": [
+        "PUBLIC_REAL_DATA_CANDIDATE",
+        "NON_PROFIT_MARKET_DATA_FEATURE"
+      ],
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "snapshot_row_refs": [
+        "polymarket_orderbook_snapshot_0001"
+      ],
+      "source_truth_acceptance_created_flag": false,
+      "staleness_seconds": 0,
+      "test_refs": [
+        "tests/pr168_data1"
+      ],
+      "validator_refs": [
+        "tools/pr168_data1_validator.py",
+        "tools/validate_pr168_data1_public_market_data_snapshots.py"
+      ],
+      "venue": "polymarket"
+    },
+    {
+      "accepted_truth_flag": false,
+      "as_of_utc": "2026-06-21T04:41:22Z",
+      "candidate_only_flag": true,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "source_evidence_agent",
+        "qku_formula_materialization_agent",
+        "replay_paper_agent",
+        "ranking_scoring_agent",
+        "dashboard_operator_agent"
+      ],
+      "downstream_pr_refs": [
+        "PR168-GFP2R",
+        "PR168-RP2",
+        "PR168-RANK2"
+      ],
+      "feature_family": "orderbook_microstructure",
+      "feature_formula_ref": "PR168_DATA1_FEATURE_FORMULA::depth_within_2c",
+      "feature_name": "depth_within_2c",
+      "feature_row_id": "pr168_data1_feature_0029",
+      "feature_units": "contracts_or_rows",
+      "feature_value": 9069.2,
+      "input_data_authority_class": "DATA_READY_PUBLIC_REAL_ORDERBOOK_CANDIDATE",
+      "l2_replay_row_refs": [
+        "polymarket_forward_l2_rest_poll_0001"
+      ],
+      "live_authority_created_flag": false,
+      "manual_edit_allowed_flag": false,
+      "market_id_or_ticker_or_token_id": "98022490269692409998126496127597032490334070080325855126491859374983463996227",
+      "missing_input_flags": [],
+      "no_orphan_status": "NO_ORPHAN_ROUTED",
+      "order_authority_created_flag": false,
+      "owning_agent": "market_data_acquisition_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quality_flags": [
+        "PUBLIC_REAL_DATA_CANDIDATE",
+        "NON_PROFIT_MARKET_DATA_FEATURE"
+      ],
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "snapshot_row_refs": [
+        "polymarket_orderbook_snapshot_0001"
+      ],
+      "source_truth_acceptance_created_flag": false,
+      "staleness_seconds": 0,
+      "test_refs": [
+        "tests/pr168_data1"
+      ],
+      "validator_refs": [
+        "tools/pr168_data1_validator.py",
+        "tools/validate_pr168_data1_public_market_data_snapshots.py"
+      ],
+      "venue": "polymarket"
+    },
+    {
+      "accepted_truth_flag": false,
+      "as_of_utc": "2026-06-21T04:41:22Z",
+      "candidate_only_flag": true,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "source_evidence_agent",
+        "qku_formula_materialization_agent",
+        "replay_paper_agent",
+        "ranking_scoring_agent",
+        "dashboard_operator_agent"
+      ],
+      "downstream_pr_refs": [
+        "PR168-GFP2R",
+        "PR168-RP2",
+        "PR168-RANK2"
+      ],
+      "feature_family": "orderbook_microstructure",
+      "feature_formula_ref": "PR168_DATA1_FEATURE_FORMULA::depth_within_5c",
+      "feature_name": "depth_within_5c",
+      "feature_row_id": "pr168_data1_feature_0030",
+      "feature_units": "contracts_or_rows",
+      "feature_value": 9201.39,
+      "input_data_authority_class": "DATA_READY_PUBLIC_REAL_ORDERBOOK_CANDIDATE",
+      "l2_replay_row_refs": [
+        "polymarket_forward_l2_rest_poll_0001"
+      ],
+      "live_authority_created_flag": false,
+      "manual_edit_allowed_flag": false,
+      "market_id_or_ticker_or_token_id": "98022490269692409998126496127597032490334070080325855126491859374983463996227",
+      "missing_input_flags": [],
+      "no_orphan_status": "NO_ORPHAN_ROUTED",
+      "order_authority_created_flag": false,
+      "owning_agent": "market_data_acquisition_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quality_flags": [
+        "PUBLIC_REAL_DATA_CANDIDATE",
+        "NON_PROFIT_MARKET_DATA_FEATURE"
+      ],
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "snapshot_row_refs": [
+        "polymarket_orderbook_snapshot_0001"
+      ],
+      "source_truth_acceptance_created_flag": false,
+      "staleness_seconds": 0,
+      "test_refs": [
+        "tests/pr168_data1"
+      ],
+      "validator_refs": [
+        "tools/pr168_data1_validator.py",
+        "tools/validate_pr168_data1_public_market_data_snapshots.py"
+      ],
+      "venue": "polymarket"
+    },
+    {
+      "accepted_truth_flag": false,
+      "as_of_utc": "2026-06-21T04:41:22Z",
+      "candidate_only_flag": true,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "source_evidence_agent",
+        "qku_formula_materialization_agent",
+        "replay_paper_agent",
+        "ranking_scoring_agent",
+        "dashboard_operator_agent"
+      ],
+      "downstream_pr_refs": [
+        "PR168-GFP2R",
+        "PR168-RP2",
+        "PR168-RANK2"
+      ],
+      "feature_family": "orderbook_microstructure",
+      "feature_formula_ref": "PR168_DATA1_FEATURE_FORMULA::full_book_depth_by_price_level",
+      "feature_name": "full_book_depth_by_price_level",
+      "feature_row_id": "pr168_data1_feature_0031",
+      "feature_units": "contracts_or_rows",
+      "feature_value": {
+        "asks": [
+          {
+            "price": 0.53,
+            "size": 549.7
+          },
+          {
+            "price": 0.56,
+            "size": 19.85
+          },
+          {
+            "price": 0.57,
+            "size": 291.0
+          },
+          {
+            "price": 0.59,
+            "size": 144.0
+          },
+          {
+            "price": 0.6,
+            "size": 300.0
+          },
+          {
+            "price": 0.62,
+            "size": 520.0
+          },
+          {
+            "price": 0.63,
+            "size": 750.0
+          },
+          {
+            "price": 0.64,
+            "size": 200.0
+          },
+          {
+            "price": 0.65,
+            "size": 200.0
+          },
+          {
+            "price": 0.66,
+            "size": 199.99
+          },
+          {
+            "price": 0.7,
+            "size": 168.97
+          },
+          {
+            "price": 0.73,
+            "size": 195.66
+          },
+          {
+            "price": 0.78,
+            "size": 101.38
+          },
+          {
+            "price": 0.79,
+            "size": 651.57
+          },
+          {
+            "price": 0.82,
+            "size": 1875.0
+          },
+          {
+            "price": 0.83,
+            "size": 247.0
+          },
+          {
+            "price": 0.84,
+            "size": 3030.18
+          },
+          {
+            "price": 0.89,
+            "size": 600.0
+          },
+          {
+            "price": 0.9,
+            "size": 2100.0
+          },
+          {
+            "price": 0.91,
+            "size": 3891.99
+          },
+          {
+            "price": 0.92,
+            "size": 6.61
+          },
+          {
+            "price": 0.93,
+            "size": 10.0
+          },
+          {
+            "price": 0.96,
+            "size": 2825.74
+          },
+          {
+            "price": 0.97,
+            "size": 25.0
+          },
+          {
+            "price": 0.98,
+            "size": 9.93
+          },
+          {
+            "price": 0.99,
+            "size": 16330.56
+          }
+        ],
+        "bids": [
+          {
+            "price": 0.01,
+            "size": 41052.76
+          },
+          {
+            "price": 0.02,
+            "size": 15.0
+          },
+          {
+            "price": 0.03,
+            "size": 16.7
+          },
+          {
+            "price": 0.05,
+            "size": 5500.0
+          },
+          {
+            "price": 0.07,
+            "size": 4010.82
+          },
+          {
+            "price": 0.08,
+            "size": 6.66
+          },
+          {
+            "price": 0.09,
+            "size": 622.22
+          },
+          {
+            "price": 0.1,
+            "size": 15.0
+          },
+          {
+            "price": 0.11,
+            "size": 1454.54
+          },
+          {
+            "price": 0.12,
+            "size": 4056.31
+          },
+          {
+            "price": 0.13,
+            "size": 1590.0
+          },
+          {
+            "price": 0.14,
+            "size": 485.71
+          },
+          {
+            "price": 0.18,
+            "size": 355.55
+          },
+          {
+            "price": 0.2,
+            "size": 1150.0
+          },
+          {
+            "price": 0.21,
+            "size": 260.75
+          },
+          {
+            "price": 0.22,
+            "size": 272.72
+          },
+          {
+            "price": 0.23,
+            "size": 412.0
+          },
+          {
+            "price": 0.25,
+            "size": 619.03
+          },
+          {
+            "price": 0.26,
+            "size": 1924.0
+          },
+          {
+            "price": 0.27,
+            "size": 296.0
+          },
+          {
+            "price": 0.28,
+            "size": 922.0
+          },
+          {
+            "price": 0.29,
+            "size": 86.2
+          },
+          {
+            "price": 0.31,
+            "size": 5.0
+          },
+          {
+            "price": 0.32,
+            "size": 168.97
+          },
+          {
+            "price": 0.33,
+            "size": 101.38
+          },
+          {
+            "price": 0.35,
+            "size": 2156.45
+          },
+          {
+            "price": 0.36,
+            "size": 411.08
+          },
+          {
+            "price": 0.37,
+            "size": 176.0
+          },
+          {
+            "price": 0.4,
+            "size": 6.54
+          },
+          {
+            "price": 0.43,
+            "size": 17.44
+          },
+          {
+            "price": 0.45,
+            "size": 83.32
+          },
+          {
+            "price": 0.46,
+            "size": 21.3
+          },
+          {
+            "price": 0.47,
+            "size": 110.89
+          },
+          {
+            "price": 0.49,
+            "size": 1062.97
+          },
+          {
+            "price": 0.5,
+            "size": 7953.17
+          },
+          {
+            "price": 0.51,
+            "size": 53.06
+          }
+        ],
+        "no_bids": []
+      },
+      "input_data_authority_class": "DATA_READY_PUBLIC_REAL_ORDERBOOK_CANDIDATE",
+      "l2_replay_row_refs": [
+        "polymarket_forward_l2_rest_poll_0001"
+      ],
+      "live_authority_created_flag": false,
+      "manual_edit_allowed_flag": false,
+      "market_id_or_ticker_or_token_id": "98022490269692409998126496127597032490334070080325855126491859374983463996227",
+      "missing_input_flags": [],
+      "no_orphan_status": "NO_ORPHAN_ROUTED",
+      "order_authority_created_flag": false,
+      "owning_agent": "market_data_acquisition_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quality_flags": [
+        "PUBLIC_REAL_DATA_CANDIDATE",
+        "NON_PROFIT_MARKET_DATA_FEATURE"
+      ],
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "snapshot_row_refs": [
+        "polymarket_orderbook_snapshot_0001"
+      ],
+      "source_truth_acceptance_created_flag": false,
+      "staleness_seconds": 0,
+      "test_refs": [
+        "tests/pr168_data1"
+      ],
+      "validator_refs": [
+        "tools/pr168_data1_validator.py",
+        "tools/validate_pr168_data1_public_market_data_snapshots.py"
+      ],
+      "venue": "polymarket"
+    },
+    {
+      "accepted_truth_flag": false,
+      "as_of_utc": "2026-06-21T04:41:22Z",
+      "candidate_only_flag": true,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "source_evidence_agent",
+        "qku_formula_materialization_agent",
+        "replay_paper_agent",
+        "ranking_scoring_agent",
+        "dashboard_operator_agent"
+      ],
+      "downstream_pr_refs": [
+        "PR168-GFP2R",
+        "PR168-RP2",
+        "PR168-RANK2"
+      ],
+      "feature_family": "orderbook_microstructure",
+      "feature_formula_ref": "PR168_DATA1_FEATURE_FORMULA::book_imbalance",
+      "feature_name": "book_imbalance",
+      "feature_row_id": "pr168_data1_feature_0032",
+      "feature_units": "dollars_per_contract_or_unitless",
+      "feature_value": 0.37452557,
+      "input_data_authority_class": "DATA_READY_PUBLIC_REAL_ORDERBOOK_CANDIDATE",
+      "l2_replay_row_refs": [
+        "polymarket_forward_l2_rest_poll_0001"
+      ],
+      "live_authority_created_flag": false,
+      "manual_edit_allowed_flag": false,
+      "market_id_or_ticker_or_token_id": "98022490269692409998126496127597032490334070080325855126491859374983463996227",
+      "missing_input_flags": [],
+      "no_orphan_status": "NO_ORPHAN_ROUTED",
+      "order_authority_created_flag": false,
+      "owning_agent": "market_data_acquisition_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quality_flags": [
+        "PUBLIC_REAL_DATA_CANDIDATE",
+        "NON_PROFIT_MARKET_DATA_FEATURE"
+      ],
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "snapshot_row_refs": [
+        "polymarket_orderbook_snapshot_0001"
+      ],
+      "source_truth_acceptance_created_flag": false,
+      "staleness_seconds": 0,
+      "test_refs": [
+        "tests/pr168_data1"
+      ],
+      "validator_refs": [
+        "tools/pr168_data1_validator.py",
+        "tools/validate_pr168_data1_public_market_data_snapshots.py"
+      ],
+      "venue": "polymarket"
+    },
+    {
+      "accepted_truth_flag": false,
+      "as_of_utc": "2026-06-21T04:41:22Z",
+      "candidate_only_flag": true,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "source_evidence_agent",
+        "qku_formula_materialization_agent",
+        "replay_paper_agent",
+        "ranking_scoring_agent",
+        "dashboard_operator_agent"
+      ],
+      "downstream_pr_refs": [
+        "PR168-GFP2R",
+        "PR168-RP2",
+        "PR168-RANK2"
+      ],
+      "feature_family": "orderbook_microstructure",
+      "feature_formula_ref": "PR168_DATA1_FEATURE_FORMULA::book_slope_proxy",
+      "feature_name": "book_slope_proxy",
+      "feature_row_id": "pr168_data1_feature_0033",
+      "feature_units": "dollars_per_contract_or_unitless",
+      "feature_value": 81999.4,
+      "input_data_authority_class": "DATA_READY_PUBLIC_REAL_ORDERBOOK_CANDIDATE",
+      "l2_replay_row_refs": [
+        "polymarket_forward_l2_rest_poll_0001"
+      ],
+      "live_authority_created_flag": false,
+      "manual_edit_allowed_flag": false,
+      "market_id_or_ticker_or_token_id": "98022490269692409998126496127597032490334070080325855126491859374983463996227",
+      "missing_input_flags": [],
+      "no_orphan_status": "NO_ORPHAN_ROUTED",
+      "order_authority_created_flag": false,
+      "owning_agent": "market_data_acquisition_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quality_flags": [
+        "PUBLIC_REAL_DATA_CANDIDATE",
+        "NON_PROFIT_MARKET_DATA_FEATURE"
+      ],
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "snapshot_row_refs": [
+        "polymarket_orderbook_snapshot_0001"
+      ],
+      "source_truth_acceptance_created_flag": false,
+      "staleness_seconds": 0,
+      "test_refs": [
+        "tests/pr168_data1"
+      ],
+      "validator_refs": [
+        "tools/pr168_data1_validator.py",
+        "tools/validate_pr168_data1_public_market_data_snapshots.py"
+      ],
+      "venue": "polymarket"
+    },
+    {
+      "accepted_truth_flag": false,
+      "as_of_utc": "2026-06-21T04:41:22Z",
+      "candidate_only_flag": true,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "source_evidence_agent",
+        "qku_formula_materialization_agent",
+        "replay_paper_agent",
+        "ranking_scoring_agent",
+        "dashboard_operator_agent"
+      ],
+      "downstream_pr_refs": [
+        "PR168-GFP2R",
+        "PR168-RP2",
+        "PR168-RANK2"
+      ],
+      "feature_family": "market_metadata",
+      "feature_formula_ref": "PR168_DATA1_FEATURE_FORMULA::price_impact_curve_seed",
+      "feature_name": "price_impact_curve_seed",
+      "feature_row_id": "pr168_data1_feature_0034",
+      "feature_units": "dollars_per_contract_or_unitless",
+      "feature_value": {
+        "ask_cumulative_depth_top_5": 1304.55,
+        "bid_cumulative_depth_top_5": 9201.39
+      },
+      "input_data_authority_class": "DATA_READY_PUBLIC_REAL_ORDERBOOK_CANDIDATE",
+      "l2_replay_row_refs": [
+        "polymarket_forward_l2_rest_poll_0001"
+      ],
+      "live_authority_created_flag": false,
+      "manual_edit_allowed_flag": false,
+      "market_id_or_ticker_or_token_id": "98022490269692409998126496127597032490334070080325855126491859374983463996227",
+      "missing_input_flags": [],
+      "no_orphan_status": "NO_ORPHAN_ROUTED",
+      "order_authority_created_flag": false,
+      "owning_agent": "market_data_acquisition_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quality_flags": [
+        "PUBLIC_REAL_DATA_CANDIDATE",
+        "NON_PROFIT_MARKET_DATA_FEATURE"
+      ],
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "snapshot_row_refs": [
+        "polymarket_orderbook_snapshot_0001"
+      ],
+      "source_truth_acceptance_created_flag": false,
+      "staleness_seconds": 0,
+      "test_refs": [
+        "tests/pr168_data1"
+      ],
+      "validator_refs": [
+        "tools/pr168_data1_validator.py",
+        "tools/validate_pr168_data1_public_market_data_snapshots.py"
+      ],
+      "venue": "polymarket"
+    },
+    {
+      "accepted_truth_flag": false,
+      "as_of_utc": "2026-06-21T04:41:22Z",
+      "candidate_only_flag": true,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "source_evidence_agent",
+        "qku_formula_materialization_agent",
+        "replay_paper_agent",
+        "ranking_scoring_agent",
+        "dashboard_operator_agent"
+      ],
+      "downstream_pr_refs": [
+        "PR168-GFP2R",
+        "PR168-RP2",
+        "PR168-RANK2"
+      ],
+      "feature_family": "market_metadata",
+      "feature_formula_ref": "PR168_DATA1_FEATURE_FORMULA::fillable_size_at_price_band",
+      "feature_name": "fillable_size_at_price_band",
+      "feature_row_id": "pr168_data1_feature_0035",
+      "feature_units": "contracts_or_rows",
+      "feature_value": 9201.39,
+      "input_data_authority_class": "DATA_READY_PUBLIC_REAL_ORDERBOOK_CANDIDATE",
+      "l2_replay_row_refs": [
+        "polymarket_forward_l2_rest_poll_0001"
+      ],
+      "live_authority_created_flag": false,
+      "manual_edit_allowed_flag": false,
+      "market_id_or_ticker_or_token_id": "98022490269692409998126496127597032490334070080325855126491859374983463996227",
+      "missing_input_flags": [],
+      "no_orphan_status": "NO_ORPHAN_ROUTED",
+      "order_authority_created_flag": false,
+      "owning_agent": "market_data_acquisition_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quality_flags": [
+        "PUBLIC_REAL_DATA_CANDIDATE",
+        "NON_PROFIT_MARKET_DATA_FEATURE"
+      ],
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "snapshot_row_refs": [
+        "polymarket_orderbook_snapshot_0001"
+      ],
+      "source_truth_acceptance_created_flag": false,
+      "staleness_seconds": 0,
+      "test_refs": [
+        "tests/pr168_data1"
+      ],
+      "validator_refs": [
+        "tools/pr168_data1_validator.py",
+        "tools/validate_pr168_data1_public_market_data_snapshots.py"
+      ],
+      "venue": "polymarket"
+    },
+    {
+      "accepted_truth_flag": false,
+      "as_of_utc": "2026-06-21T04:41:22Z",
+      "candidate_only_flag": true,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "source_evidence_agent",
+        "qku_formula_materialization_agent",
+        "replay_paper_agent",
+        "ranking_scoring_agent",
+        "dashboard_operator_agent"
+      ],
+      "downstream_pr_refs": [
+        "PR168-GFP2R",
+        "PR168-RP2",
+        "PR168-RANK2"
+      ],
+      "feature_family": "market_metadata",
+      "feature_formula_ref": "PR168_DATA1_FEATURE_FORMULA::fillable_size_at_edge_band",
+      "feature_name": "fillable_size_at_edge_band",
+      "feature_row_id": "pr168_data1_feature_0036",
+      "feature_units": "contracts_or_rows",
+      "feature_value": 9069.2,
+      "input_data_authority_class": "DATA_READY_PUBLIC_REAL_ORDERBOOK_CANDIDATE",
+      "l2_replay_row_refs": [
+        "polymarket_forward_l2_rest_poll_0001"
+      ],
+      "live_authority_created_flag": false,
+      "manual_edit_allowed_flag": false,
+      "market_id_or_ticker_or_token_id": "98022490269692409998126496127597032490334070080325855126491859374983463996227",
+      "missing_input_flags": [],
+      "no_orphan_status": "NO_ORPHAN_ROUTED",
+      "order_authority_created_flag": false,
+      "owning_agent": "market_data_acquisition_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quality_flags": [
+        "PUBLIC_REAL_DATA_CANDIDATE",
+        "NON_PROFIT_MARKET_DATA_FEATURE"
+      ],
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "snapshot_row_refs": [
+        "polymarket_orderbook_snapshot_0001"
+      ],
+      "source_truth_acceptance_created_flag": false,
+      "staleness_seconds": 0,
+      "test_refs": [
+        "tests/pr168_data1"
+      ],
+      "validator_refs": [
+        "tools/pr168_data1_validator.py",
+        "tools/validate_pr168_data1_public_market_data_snapshots.py"
+      ],
+      "venue": "polymarket"
+    },
+    {
+      "accepted_truth_flag": false,
+      "as_of_utc": "2026-06-21T04:41:22Z",
+      "candidate_only_flag": true,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "source_evidence_agent",
+        "qku_formula_materialization_agent",
+        "replay_paper_agent",
+        "ranking_scoring_agent",
+        "dashboard_operator_agent"
+      ],
+      "downstream_pr_refs": [
+        "PR168-GFP2R",
+        "PR168-RP2",
+        "PR168-RANK2"
+      ],
+      "feature_family": "orderbook_microstructure",
+      "feature_formula_ref": "PR168_DATA1_FEATURE_FORMULA::orderbook_update_count",
+      "feature_name": "orderbook_update_count",
+      "feature_row_id": "pr168_data1_feature_0037",
+      "feature_units": "contracts_or_rows",
+      "feature_value": 1,
+      "input_data_authority_class": "DATA_READY_PUBLIC_REAL_ORDERBOOK_CANDIDATE",
+      "l2_replay_row_refs": [
+        "polymarket_forward_l2_rest_poll_0001"
+      ],
+      "live_authority_created_flag": false,
+      "manual_edit_allowed_flag": false,
+      "market_id_or_ticker_or_token_id": "98022490269692409998126496127597032490334070080325855126491859374983463996227",
+      "missing_input_flags": [],
+      "no_orphan_status": "NO_ORPHAN_ROUTED",
+      "order_authority_created_flag": false,
+      "owning_agent": "market_data_acquisition_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quality_flags": [
+        "PUBLIC_REAL_DATA_CANDIDATE",
+        "NON_PROFIT_MARKET_DATA_FEATURE"
+      ],
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "snapshot_row_refs": [
+        "polymarket_orderbook_snapshot_0001"
+      ],
+      "source_truth_acceptance_created_flag": false,
+      "staleness_seconds": 0,
+      "test_refs": [
+        "tests/pr168_data1"
+      ],
+      "validator_refs": [
+        "tools/pr168_data1_validator.py",
+        "tools/validate_pr168_data1_public_market_data_snapshots.py"
+      ],
+      "venue": "polymarket"
+    },
+    {
+      "accepted_truth_flag": false,
+      "as_of_utc": "2026-06-21T04:41:22Z",
+      "candidate_only_flag": true,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "source_evidence_agent",
+        "qku_formula_materialization_agent",
+        "replay_paper_agent",
+        "ranking_scoring_agent",
+        "dashboard_operator_agent"
+      ],
+      "downstream_pr_refs": [
+        "PR168-GFP2R",
+        "PR168-RP2",
+        "PR168-RANK2"
+      ],
+      "feature_family": "orderbook_microstructure",
+      "feature_formula_ref": "PR168_DATA1_FEATURE_FORMULA::orderbook_update_rate",
+      "feature_name": "orderbook_update_rate",
+      "feature_row_id": "pr168_data1_feature_0038",
+      "feature_units": "updates_per_second",
+      "feature_value": 0.0,
+      "input_data_authority_class": "DATA_READY_PUBLIC_REAL_ORDERBOOK_CANDIDATE",
+      "l2_replay_row_refs": [
+        "polymarket_forward_l2_rest_poll_0001"
+      ],
+      "live_authority_created_flag": false,
+      "manual_edit_allowed_flag": false,
+      "market_id_or_ticker_or_token_id": "98022490269692409998126496127597032490334070080325855126491859374983463996227",
+      "missing_input_flags": [],
+      "no_orphan_status": "NO_ORPHAN_ROUTED",
+      "order_authority_created_flag": false,
+      "owning_agent": "market_data_acquisition_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quality_flags": [
+        "PUBLIC_REAL_DATA_CANDIDATE",
+        "NON_PROFIT_MARKET_DATA_FEATURE"
+      ],
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "snapshot_row_refs": [
+        "polymarket_orderbook_snapshot_0001"
+      ],
+      "source_truth_acceptance_created_flag": false,
+      "staleness_seconds": 0,
+      "test_refs": [
+        "tests/pr168_data1"
+      ],
+      "validator_refs": [
+        "tools/pr168_data1_validator.py",
+        "tools/validate_pr168_data1_public_market_data_snapshots.py"
+      ],
+      "venue": "polymarket"
+    },
+    {
+      "accepted_truth_flag": false,
+      "as_of_utc": "2026-06-21T04:41:22Z",
+      "candidate_only_flag": true,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "source_evidence_agent",
+        "qku_formula_materialization_agent",
+        "replay_paper_agent",
+        "ranking_scoring_agent",
+        "dashboard_operator_agent"
+      ],
+      "downstream_pr_refs": [
+        "PR168-GFP2R",
+        "PR168-RP2",
+        "PR168-RANK2"
+      ],
+      "feature_family": "trade_history",
+      "feature_formula_ref": "PR168_DATA1_FEATURE_FORMULA::last_trade_price",
+      "feature_name": "last_trade_price",
+      "feature_row_id": "pr168_data1_feature_0039",
+      "feature_units": "dollars_per_contract_or_unitless",
+      "feature_value": 0.49,
+      "input_data_authority_class": "DATA_READY_PUBLIC_REAL_ORDERBOOK_CANDIDATE",
+      "l2_replay_row_refs": [
+        "polymarket_forward_l2_rest_poll_0001"
+      ],
+      "live_authority_created_flag": false,
+      "manual_edit_allowed_flag": false,
+      "market_id_or_ticker_or_token_id": "98022490269692409998126496127597032490334070080325855126491859374983463996227",
+      "missing_input_flags": [],
+      "no_orphan_status": "NO_ORPHAN_ROUTED",
+      "order_authority_created_flag": false,
+      "owning_agent": "market_data_acquisition_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quality_flags": [
+        "PUBLIC_REAL_DATA_CANDIDATE",
+        "NON_PROFIT_MARKET_DATA_FEATURE"
+      ],
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "snapshot_row_refs": [
+        "polymarket_orderbook_snapshot_0001"
+      ],
+      "source_truth_acceptance_created_flag": false,
+      "staleness_seconds": 0,
+      "test_refs": [
+        "tests/pr168_data1"
+      ],
+      "validator_refs": [
+        "tools/pr168_data1_validator.py",
+        "tools/validate_pr168_data1_public_market_data_snapshots.py"
+      ],
+      "venue": "polymarket"
+    },
+    {
+      "accepted_truth_flag": false,
+      "as_of_utc": "2026-06-21T04:41:22Z",
+      "candidate_only_flag": true,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "source_evidence_agent",
+        "qku_formula_materialization_agent",
+        "replay_paper_agent",
+        "ranking_scoring_agent",
+        "dashboard_operator_agent"
+      ],
+      "downstream_pr_refs": [
+        "PR168-GFP2R",
+        "PR168-RP2",
+        "PR168-RANK2"
+      ],
+      "feature_family": "market_metadata",
+      "feature_formula_ref": "PR168_DATA1_FEATURE_FORMULA::tick_size",
+      "feature_name": "tick_size",
+      "feature_row_id": "pr168_data1_feature_0040",
+      "feature_units": "contracts_or_rows",
+      "feature_value": 0.01,
+      "input_data_authority_class": "DATA_READY_PUBLIC_REAL_ORDERBOOK_CANDIDATE",
+      "l2_replay_row_refs": [
+        "polymarket_forward_l2_rest_poll_0001"
+      ],
+      "live_authority_created_flag": false,
+      "manual_edit_allowed_flag": false,
+      "market_id_or_ticker_or_token_id": "98022490269692409998126496127597032490334070080325855126491859374983463996227",
+      "missing_input_flags": [],
+      "no_orphan_status": "NO_ORPHAN_ROUTED",
+      "order_authority_created_flag": false,
+      "owning_agent": "market_data_acquisition_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quality_flags": [
+        "PUBLIC_REAL_DATA_CANDIDATE",
+        "NON_PROFIT_MARKET_DATA_FEATURE"
+      ],
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "snapshot_row_refs": [
+        "polymarket_orderbook_snapshot_0001"
+      ],
+      "source_truth_acceptance_created_flag": false,
+      "staleness_seconds": 0,
+      "test_refs": [
+        "tests/pr168_data1"
+      ],
+      "validator_refs": [
+        "tools/pr168_data1_validator.py",
+        "tools/validate_pr168_data1_public_market_data_snapshots.py"
+      ],
+      "venue": "polymarket"
+    },
+    {
+      "accepted_truth_flag": false,
+      "as_of_utc": "2026-06-21T04:41:22Z",
+      "candidate_only_flag": true,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "source_evidence_agent",
+        "qku_formula_materialization_agent",
+        "replay_paper_agent",
+        "ranking_scoring_agent",
+        "dashboard_operator_agent"
+      ],
+      "downstream_pr_refs": [
+        "PR168-GFP2R",
+        "PR168-RP2",
+        "PR168-RANK2"
+      ],
+      "feature_family": "market_metadata",
+      "feature_formula_ref": "PR168_DATA1_FEATURE_FORMULA::min_order_size_candidate",
+      "feature_name": "min_order_size_candidate",
+      "feature_row_id": "pr168_data1_feature_0041",
+      "feature_units": "contracts_or_rows",
+      "feature_value": 5.0,
+      "input_data_authority_class": "DATA_READY_PUBLIC_REAL_ORDERBOOK_CANDIDATE",
+      "l2_replay_row_refs": [
+        "polymarket_forward_l2_rest_poll_0001"
+      ],
+      "live_authority_created_flag": false,
+      "manual_edit_allowed_flag": false,
+      "market_id_or_ticker_or_token_id": "98022490269692409998126496127597032490334070080325855126491859374983463996227",
+      "missing_input_flags": [],
+      "no_orphan_status": "NO_ORPHAN_ROUTED",
+      "order_authority_created_flag": false,
+      "owning_agent": "market_data_acquisition_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quality_flags": [
+        "PUBLIC_REAL_DATA_CANDIDATE",
+        "NON_PROFIT_MARKET_DATA_FEATURE"
+      ],
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "snapshot_row_refs": [
+        "polymarket_orderbook_snapshot_0001"
+      ],
+      "source_truth_acceptance_created_flag": false,
+      "staleness_seconds": 0,
+      "test_refs": [
+        "tests/pr168_data1"
+      ],
+      "validator_refs": [
+        "tools/pr168_data1_validator.py",
+        "tools/validate_pr168_data1_public_market_data_snapshots.py"
+      ],
+      "venue": "polymarket"
+    },
+    {
+      "accepted_truth_flag": false,
+      "as_of_utc": "2026-06-21T04:41:22Z",
+      "candidate_only_flag": true,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "source_evidence_agent",
+        "qku_formula_materialization_agent",
+        "replay_paper_agent",
+        "ranking_scoring_agent",
+        "dashboard_operator_agent"
+      ],
+      "downstream_pr_refs": [
+        "PR168-GFP2R",
+        "PR168-RP2",
+        "PR168-RANK2"
+      ],
+      "feature_family": "orderbook_microstructure",
+      "feature_formula_ref": "PR168_DATA1_FEATURE_FORMULA::historical_full_book_available_flag",
+      "feature_name": "historical_full_book_available_flag",
+      "feature_row_id": "pr168_data1_feature_0042",
+      "feature_units": "boolean",
+      "feature_value": false,
+      "input_data_authority_class": "DATA_READY_PUBLIC_REAL_ORDERBOOK_CANDIDATE",
+      "l2_replay_row_refs": [
+        "polymarket_forward_l2_rest_poll_0001"
+      ],
+      "live_authority_created_flag": false,
+      "manual_edit_allowed_flag": false,
+      "market_id_or_ticker_or_token_id": "98022490269692409998126496127597032490334070080325855126491859374983463996227",
+      "missing_input_flags": [],
+      "no_orphan_status": "NO_ORPHAN_ROUTED",
+      "order_authority_created_flag": false,
+      "owning_agent": "market_data_acquisition_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quality_flags": [
+        "PUBLIC_REAL_DATA_CANDIDATE",
+        "NON_PROFIT_MARKET_DATA_FEATURE"
+      ],
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "snapshot_row_refs": [
+        "polymarket_orderbook_snapshot_0001"
+      ],
+      "source_truth_acceptance_created_flag": false,
+      "staleness_seconds": 0,
+      "test_refs": [
+        "tests/pr168_data1"
+      ],
+      "validator_refs": [
+        "tools/pr168_data1_validator.py",
+        "tools/validate_pr168_data1_public_market_data_snapshots.py"
+      ],
+      "venue": "polymarket"
+    },
+    {
+      "accepted_truth_flag": false,
+      "as_of_utc": "2026-06-21T04:41:22Z",
+      "candidate_only_flag": true,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "source_evidence_agent",
+        "qku_formula_materialization_agent",
+        "replay_paper_agent",
+        "ranking_scoring_agent",
+        "dashboard_operator_agent"
+      ],
+      "downstream_pr_refs": [
+        "PR168-GFP2R",
+        "PR168-RP2",
+        "PR168-RANK2"
+      ],
+      "feature_family": "orderbook_microstructure",
+      "feature_formula_ref": "PR168_DATA1_FEATURE_FORMULA::historical_full_book_gap_flag",
+      "feature_name": "historical_full_book_gap_flag",
+      "feature_row_id": "pr168_data1_feature_0043",
+      "feature_units": "boolean",
+      "feature_value": true,
+      "input_data_authority_class": "DATA_READY_PUBLIC_REAL_ORDERBOOK_CANDIDATE",
+      "l2_replay_row_refs": [
+        "polymarket_forward_l2_rest_poll_0001"
+      ],
+      "live_authority_created_flag": false,
+      "manual_edit_allowed_flag": false,
+      "market_id_or_ticker_or_token_id": "98022490269692409998126496127597032490334070080325855126491859374983463996227",
+      "missing_input_flags": [],
+      "no_orphan_status": "NO_ORPHAN_ROUTED",
+      "order_authority_created_flag": false,
+      "owning_agent": "market_data_acquisition_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quality_flags": [
+        "PUBLIC_REAL_DATA_CANDIDATE",
+        "NON_PROFIT_MARKET_DATA_FEATURE"
+      ],
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "snapshot_row_refs": [
+        "polymarket_orderbook_snapshot_0001"
+      ],
+      "source_truth_acceptance_created_flag": false,
+      "staleness_seconds": 0,
+      "test_refs": [
+        "tests/pr168_data1"
+      ],
+      "validator_refs": [
+        "tools/pr168_data1_validator.py",
+        "tools/validate_pr168_data1_public_market_data_snapshots.py"
+      ],
+      "venue": "polymarket"
+    },
+    {
+      "accepted_truth_flag": false,
+      "as_of_utc": "2026-06-21T04:41:22Z",
+      "candidate_only_flag": true,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "source_evidence_agent",
+        "qku_formula_materialization_agent",
+        "replay_paper_agent",
+        "ranking_scoring_agent",
+        "dashboard_operator_agent"
+      ],
+      "downstream_pr_refs": [
+        "PR168-GFP2R",
+        "PR168-RP2",
+        "PR168-RANK2"
+      ],
+      "feature_family": "market_metadata",
+      "feature_formula_ref": "PR168_DATA1_FEATURE_FORMULA::forward_l2_capture_available_flag",
+      "feature_name": "forward_l2_capture_available_flag",
+      "feature_row_id": "pr168_data1_feature_0044",
+      "feature_units": "boolean",
+      "feature_value": true,
+      "input_data_authority_class": "DATA_READY_PUBLIC_REAL_ORDERBOOK_CANDIDATE",
+      "l2_replay_row_refs": [
+        "polymarket_forward_l2_rest_poll_0001"
+      ],
+      "live_authority_created_flag": false,
+      "manual_edit_allowed_flag": false,
+      "market_id_or_ticker_or_token_id": "98022490269692409998126496127597032490334070080325855126491859374983463996227",
+      "missing_input_flags": [],
+      "no_orphan_status": "NO_ORPHAN_ROUTED",
+      "order_authority_created_flag": false,
+      "owning_agent": "market_data_acquisition_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quality_flags": [
+        "PUBLIC_REAL_DATA_CANDIDATE",
+        "NON_PROFIT_MARKET_DATA_FEATURE"
+      ],
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "snapshot_row_refs": [
+        "polymarket_orderbook_snapshot_0001"
+      ],
+      "source_truth_acceptance_created_flag": false,
+      "staleness_seconds": 0,
+      "test_refs": [
+        "tests/pr168_data1"
+      ],
+      "validator_refs": [
+        "tools/pr168_data1_validator.py",
+        "tools/validate_pr168_data1_public_market_data_snapshots.py"
+      ],
+      "venue": "polymarket"
+    },
+    {
+      "accepted_truth_flag": false,
+      "as_of_utc": "2026-06-21T04:41:22Z",
+      "candidate_only_flag": true,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "source_evidence_agent",
+        "qku_formula_materialization_agent",
+        "replay_paper_agent",
+        "ranking_scoring_agent",
+        "dashboard_operator_agent"
+      ],
+      "downstream_pr_refs": [
+        "PR168-GFP2R",
+        "PR168-RP2",
+        "PR168-RANK2"
+      ],
+      "feature_family": "market_metadata",
+      "feature_formula_ref": "PR168_DATA1_FEATURE_FORMULA::liquidity_score_non_proof",
+      "feature_name": "liquidity_score_non_proof",
+      "feature_row_id": "pr168_data1_feature_0045",
+      "feature_units": "dollars_per_contract_or_unitless",
+      "feature_value": 460069.5,
+      "input_data_authority_class": "DATA_READY_PUBLIC_REAL_ORDERBOOK_CANDIDATE",
+      "l2_replay_row_refs": [
+        "polymarket_forward_l2_rest_poll_0001"
+      ],
+      "live_authority_created_flag": false,
+      "manual_edit_allowed_flag": false,
+      "market_id_or_ticker_or_token_id": "98022490269692409998126496127597032490334070080325855126491859374983463996227",
+      "missing_input_flags": [],
+      "no_orphan_status": "NO_ORPHAN_ROUTED",
+      "order_authority_created_flag": false,
+      "owning_agent": "market_data_acquisition_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quality_flags": [
+        "PUBLIC_REAL_DATA_CANDIDATE",
+        "NON_PROFIT_MARKET_DATA_FEATURE"
+      ],
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "snapshot_row_refs": [
+        "polymarket_orderbook_snapshot_0001"
+      ],
+      "source_truth_acceptance_created_flag": false,
+      "staleness_seconds": 0,
+      "test_refs": [
+        "tests/pr168_data1"
+      ],
+      "validator_refs": [
+        "tools/pr168_data1_validator.py",
+        "tools/validate_pr168_data1_public_market_data_snapshots.py"
+      ],
+      "venue": "polymarket"
+    },
+    {
+      "accepted_truth_flag": false,
+      "as_of_utc": "2026-06-21T04:41:22Z",
+      "candidate_only_flag": true,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "source_evidence_agent",
+        "qku_formula_materialization_agent",
+        "replay_paper_agent",
+        "ranking_scoring_agent",
+        "dashboard_operator_agent"
+      ],
+      "downstream_pr_refs": [
+        "PR168-GFP2R",
+        "PR168-RP2",
+        "PR168-RANK2"
+      ],
+      "feature_family": "price_history",
+      "feature_formula_ref": "PR168_DATA1_FEATURE_FORMULA::price_history_return_15m_if_available",
+      "feature_name": "price_history_return_15m_if_available",
+      "feature_row_id": "pr168_data1_feature_0046",
+      "feature_units": "dollars_per_contract_or_unitless",
+      "feature_value": 0.0,
+      "input_data_authority_class": "DATA_READY_PUBLIC_REAL_PRICE_HISTORY_CANDIDATE",
+      "l2_replay_row_refs": [
+        "polymarket_forward_l2_rest_poll_0001"
+      ],
+      "live_authority_created_flag": false,
+      "manual_edit_allowed_flag": false,
+      "market_id_or_ticker_or_token_id": "98022490269692409998126496127597032490334070080325855126491859374983463996227",
+      "missing_input_flags": [],
+      "no_orphan_status": "NO_ORPHAN_ROUTED",
+      "order_authority_created_flag": false,
+      "owning_agent": "market_data_acquisition_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quality_flags": [
+        "PUBLIC_REAL_DATA_CANDIDATE",
+        "NON_PROFIT_MARKET_DATA_FEATURE"
+      ],
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "snapshot_row_refs": [
+        "polymarket_price_history_0001"
+      ],
+      "source_truth_acceptance_created_flag": false,
+      "staleness_seconds": 0,
+      "test_refs": [
+        "tests/pr168_data1"
+      ],
+      "validator_refs": [
+        "tools/pr168_data1_validator.py",
+        "tools/validate_pr168_data1_public_market_data_snapshots.py"
+      ],
+      "venue": "polymarket"
+    },
+    {
+      "accepted_truth_flag": false,
+      "as_of_utc": "2026-06-21T04:41:22Z",
+      "candidate_only_flag": true,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "source_evidence_agent",
+        "qku_formula_materialization_agent",
+        "replay_paper_agent",
+        "ranking_scoring_agent",
+        "dashboard_operator_agent"
+      ],
+      "downstream_pr_refs": [
+        "PR168-GFP2R",
+        "PR168-RP2",
+        "PR168-RANK2"
+      ],
+      "feature_family": "price_history",
+      "feature_formula_ref": "PR168_DATA1_FEATURE_FORMULA::price_history_return_1h",
+      "feature_name": "price_history_return_1h",
+      "feature_row_id": "pr168_data1_feature_0047",
+      "feature_units": "dollars_per_contract_or_unitless",
+      "feature_value": 0.0,
+      "input_data_authority_class": "DATA_READY_PUBLIC_REAL_PRICE_HISTORY_CANDIDATE",
+      "l2_replay_row_refs": [
+        "polymarket_forward_l2_rest_poll_0001"
+      ],
+      "live_authority_created_flag": false,
+      "manual_edit_allowed_flag": false,
+      "market_id_or_ticker_or_token_id": "98022490269692409998126496127597032490334070080325855126491859374983463996227",
+      "missing_input_flags": [],
+      "no_orphan_status": "NO_ORPHAN_ROUTED",
+      "order_authority_created_flag": false,
+      "owning_agent": "market_data_acquisition_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quality_flags": [
+        "PUBLIC_REAL_DATA_CANDIDATE",
+        "NON_PROFIT_MARKET_DATA_FEATURE"
+      ],
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "snapshot_row_refs": [
+        "polymarket_price_history_0001"
+      ],
+      "source_truth_acceptance_created_flag": false,
+      "staleness_seconds": 0,
+      "test_refs": [
+        "tests/pr168_data1"
+      ],
+      "validator_refs": [
+        "tools/pr168_data1_validator.py",
+        "tools/validate_pr168_data1_public_market_data_snapshots.py"
+      ],
+      "venue": "polymarket"
+    },
+    {
+      "accepted_truth_flag": false,
+      "as_of_utc": "2026-06-21T04:41:22Z",
+      "candidate_only_flag": true,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "source_evidence_agent",
+        "qku_formula_materialization_agent",
+        "replay_paper_agent",
+        "ranking_scoring_agent",
+        "dashboard_operator_agent"
+      ],
+      "downstream_pr_refs": [
+        "PR168-GFP2R",
+        "PR168-RP2",
+        "PR168-RANK2"
+      ],
+      "feature_family": "price_history",
+      "feature_formula_ref": "PR168_DATA1_FEATURE_FORMULA::price_history_return_24h",
+      "feature_name": "price_history_return_24h",
+      "feature_row_id": "pr168_data1_feature_0048",
+      "feature_units": "dollars_per_contract_or_unitless",
+      "feature_value": 0.0,
+      "input_data_authority_class": "DATA_READY_PUBLIC_REAL_PRICE_HISTORY_CANDIDATE",
+      "l2_replay_row_refs": [
+        "polymarket_forward_l2_rest_poll_0001"
+      ],
+      "live_authority_created_flag": false,
+      "manual_edit_allowed_flag": false,
+      "market_id_or_ticker_or_token_id": "98022490269692409998126496127597032490334070080325855126491859374983463996227",
+      "missing_input_flags": [],
+      "no_orphan_status": "NO_ORPHAN_ROUTED",
+      "order_authority_created_flag": false,
+      "owning_agent": "market_data_acquisition_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quality_flags": [
+        "PUBLIC_REAL_DATA_CANDIDATE",
+        "NON_PROFIT_MARKET_DATA_FEATURE"
+      ],
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "snapshot_row_refs": [
+        "polymarket_price_history_0001"
+      ],
+      "source_truth_acceptance_created_flag": false,
+      "staleness_seconds": 0,
+      "test_refs": [
+        "tests/pr168_data1"
+      ],
+      "validator_refs": [
+        "tools/pr168_data1_validator.py",
+        "tools/validate_pr168_data1_public_market_data_snapshots.py"
+      ],
+      "venue": "polymarket"
+    },
+    {
+      "accepted_truth_flag": false,
+      "as_of_utc": "2026-06-21T04:41:22Z",
+      "candidate_only_flag": true,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "source_evidence_agent",
+        "qku_formula_materialization_agent",
+        "replay_paper_agent",
+        "ranking_scoring_agent",
+        "dashboard_operator_agent"
+      ],
+      "downstream_pr_refs": [
+        "PR168-GFP2R",
+        "PR168-RP2",
+        "PR168-RANK2"
+      ],
+      "feature_family": "price_history",
+      "feature_formula_ref": "PR168_DATA1_FEATURE_FORMULA::price_history_volatility_proxy",
+      "feature_name": "price_history_volatility_proxy",
+      "feature_row_id": "pr168_data1_feature_0049",
+      "feature_units": "dollars_per_contract_or_unitless",
+      "feature_value": 0.0,
+      "input_data_authority_class": "DATA_READY_PUBLIC_REAL_PRICE_HISTORY_CANDIDATE",
+      "l2_replay_row_refs": [
+        "polymarket_forward_l2_rest_poll_0001"
+      ],
+      "live_authority_created_flag": false,
+      "manual_edit_allowed_flag": false,
+      "market_id_or_ticker_or_token_id": "98022490269692409998126496127597032490334070080325855126491859374983463996227",
+      "missing_input_flags": [],
+      "no_orphan_status": "NO_ORPHAN_ROUTED",
+      "order_authority_created_flag": false,
+      "owning_agent": "market_data_acquisition_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quality_flags": [
+        "PUBLIC_REAL_DATA_CANDIDATE",
+        "NON_PROFIT_MARKET_DATA_FEATURE"
+      ],
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "snapshot_row_refs": [
+        "polymarket_price_history_0001"
+      ],
+      "source_truth_acceptance_created_flag": false,
+      "staleness_seconds": 0,
+      "test_refs": [
+        "tests/pr168_data1"
+      ],
+      "validator_refs": [
+        "tools/pr168_data1_validator.py",
+        "tools/validate_pr168_data1_public_market_data_snapshots.py"
+      ],
+      "venue": "polymarket"
+    },
+    {
+      "accepted_truth_flag": false,
+      "as_of_utc": "2026-06-21T04:41:22Z",
+      "candidate_only_flag": true,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "source_evidence_agent",
+        "qku_formula_materialization_agent",
+        "replay_paper_agent",
+        "ranking_scoring_agent",
+        "dashboard_operator_agent"
+      ],
+      "downstream_pr_refs": [
+        "PR168-GFP2R",
+        "PR168-RP2",
+        "PR168-RANK2"
+      ],
+      "feature_family": "price_history",
+      "feature_formula_ref": "PR168_DATA1_FEATURE_FORMULA::candlestick_open_high_low_close",
+      "feature_name": "candlestick_open_high_low_close",
+      "feature_row_id": "pr168_data1_feature_0050",
+      "feature_units": "dollars_per_contract_or_unitless",
+      "feature_value": [
+        {
+          "p": 0.51,
+          "t": 1781931604
+        },
+        {
+          "p": 0.51,
+          "t": 1781935204
+        },
+        {
+          "p": 0.51,
+          "t": 1781938803
+        }
+      ],
+      "input_data_authority_class": "DATA_READY_PUBLIC_REAL_PRICE_HISTORY_CANDIDATE",
+      "l2_replay_row_refs": [
+        "polymarket_forward_l2_rest_poll_0001"
+      ],
+      "live_authority_created_flag": false,
+      "manual_edit_allowed_flag": false,
+      "market_id_or_ticker_or_token_id": "98022490269692409998126496127597032490334070080325855126491859374983463996227",
+      "missing_input_flags": [],
+      "no_orphan_status": "NO_ORPHAN_ROUTED",
+      "order_authority_created_flag": false,
+      "owning_agent": "market_data_acquisition_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quality_flags": [
+        "PUBLIC_REAL_DATA_CANDIDATE",
+        "NON_PROFIT_MARKET_DATA_FEATURE"
+      ],
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "snapshot_row_refs": [
+        "polymarket_price_history_0001"
+      ],
+      "source_truth_acceptance_created_flag": false,
+      "staleness_seconds": 0,
+      "test_refs": [
+        "tests/pr168_data1"
+      ],
+      "validator_refs": [
+        "tools/pr168_data1_validator.py",
+        "tools/validate_pr168_data1_public_market_data_snapshots.py"
+      ],
+      "venue": "polymarket"
+    },
+    {
+      "accepted_truth_flag": false,
+      "as_of_utc": "2026-06-21T04:41:22Z",
+      "candidate_only_flag": true,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "source_evidence_agent",
+        "qku_formula_materialization_agent",
+        "replay_paper_agent",
+        "ranking_scoring_agent",
+        "dashboard_operator_agent"
+      ],
+      "downstream_pr_refs": [
+        "PR168-GFP2R",
+        "PR168-RP2",
+        "PR168-RANK2"
+      ],
+      "feature_family": "trade_history",
+      "feature_formula_ref": "PR168_DATA1_FEATURE_FORMULA::recent_trade_count",
+      "feature_name": "recent_trade_count",
+      "feature_row_id": "pr168_data1_feature_0051",
+      "feature_units": "contracts_or_rows",
+      "feature_value": 5,
+      "input_data_authority_class": "DATA_READY_PUBLIC_REAL_TRADE_HISTORY_CANDIDATE",
+      "l2_replay_row_refs": [
+        "polymarket_forward_l2_rest_poll_0001"
+      ],
+      "live_authority_created_flag": false,
+      "manual_edit_allowed_flag": false,
+      "market_id_or_ticker_or_token_id": "98022490269692409998126496127597032490334070080325855126491859374983463996227",
+      "missing_input_flags": [],
+      "no_orphan_status": "NO_ORPHAN_ROUTED",
+      "order_authority_created_flag": false,
+      "owning_agent": "market_data_acquisition_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quality_flags": [
+        "PUBLIC_REAL_DATA_CANDIDATE",
+        "NON_PROFIT_MARKET_DATA_FEATURE"
+      ],
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "snapshot_row_refs": [
+        "polymarket_data_trades_0001"
+      ],
+      "source_truth_acceptance_created_flag": false,
+      "staleness_seconds": 0,
+      "test_refs": [
+        "tests/pr168_data1"
+      ],
+      "validator_refs": [
+        "tools/pr168_data1_validator.py",
+        "tools/validate_pr168_data1_public_market_data_snapshots.py"
+      ],
+      "venue": "polymarket"
+    }
+  ],
+  "report_id": "PR168_DATA1_NormalizedMarketDataFeatureRegistry",
+  "report_version": "PR168-DATA1-v3.0",
+  "snapshot_manifest_refs": [
+    "docs/master_plan/generated/pr168_data1_snapshots/kalshi/kalshi_snapshots.manifest.json",
+    "docs/master_plan/generated/pr168_data1_snapshots/polymarket/polymarket_snapshots.manifest.json"
+  ],
+  "source_truth_acceptance_created_flag": false,
+  "terminal_by_nature_flag": false,
+  "terminal_reason_code": null,
+  "test_refs": [
+    "tests/pr168_data1"
+  ],
+  "upstream_input_refs": [],
+  "validator_refs": [
+    "tools/pr168_data1_validator.py",
+    "tools/validate_pr168_data1_public_market_data_snapshots.py"
+  ]
+}

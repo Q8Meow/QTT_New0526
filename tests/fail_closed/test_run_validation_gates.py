@@ -969,6 +969,10 @@ def _expected_commands(
             python_executable,
             str(Path("tools") / "build_pr168_rank_evidence_backed_ranking.py"),
         ],
+        [
+            python_executable,
+            str(Path("tools") / "validate_pr168_data1_public_market_data_snapshots.py"),
+        ],
         *[
             [
                 python_executable,
@@ -2831,6 +2835,7 @@ def test_runner_splits_pytest_shard_2_longest_group_deterministically():
         ("tests/pr168_gfp",),
         ("tests/pr168_rp",),
         ("tests/pr168_rank",),
+        ("tests/pr168_data1",),
     ]
     assert all(command.reason for command in commands)
     assert ("tests/stage1_prediction_markets",) not in [
