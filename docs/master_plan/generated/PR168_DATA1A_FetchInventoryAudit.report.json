@@ -1,0 +1,2368 @@
+{
+  "DATA1_artifact_refs": [
+    "docs/master_plan/generated/PR168_DATA1_FinalSummary.report.json",
+    "docs/master_plan/generated/PR168_DATA1_PublicFetchExecutionSummary.report.json",
+    "docs/master_plan/generated/PR168_DATA1_SourceEndpointDiscovery.report.json",
+    "docs/master_plan/generated/PR168_DATA1_KalshiSnapshotManifest.report.json",
+    "docs/master_plan/generated/PR168_DATA1_PolymarketSnapshotManifest.report.json",
+    "docs/master_plan/generated/PR168_DATA1_HistoricalFullBookAvailabilityAudit.report.json",
+    "docs/master_plan/generated/PR168_DATA1_HistoricalFullBookAcquisitionLedger.report.json",
+    "docs/master_plan/generated/PR168_DATA1_HistoricalL2GapRouteToFutureAcquisition.report.json",
+    "docs/master_plan/generated/PR168_DATA1_HistoricalPriceTradeCandleReplaySubstituteLedger.report.json",
+    "docs/master_plan/generated/PR168_DATA1_ForwardFullBookReplayCaptureBootstrap.report.json",
+    "docs/master_plan/generated/PR168_DATA1_ForwardL2CaptureShardManifest.report.json",
+    "docs/master_plan/generated/PR168_DATA1_NormalizedMarketDataFeatureRegistry.report.json",
+    "docs/master_plan/generated/PR168_DATA1_DataReadinessClassification.report.json",
+    "docs/master_plan/generated/PR168_DATA1_DataQualityFreshnessCoverageAudit.report.json",
+    "docs/master_plan/generated/PR168_DATA1_MinimumViableRealDataProofDatasetPlan.report.json",
+    "docs/master_plan/generated/PR168_DATA1_PR168_GFP2R_DataReadyFormulaUniverse.report.json",
+    "docs/master_plan/generated/PR168_DATA1_PR168_RP2_FirstReplayPaperRecomputeBatch.report.json",
+    "docs/master_plan/generated/PR168_DATA1_PR168_RANK2_FirstEvidenceRankingBatch.report.json",
+    "docs/master_plan/generated/PR168_DATA1_QuantumForwardCoefficientFeatureSurface.report.json",
+    "docs/master_plan/generated/PR168_DATA1_AgentRoutingAndNoOrphanProof.report.json",
+    "docs/master_plan/generated/PR168_DATA1_DAGUpstreamDownstreamOrchestration.report.json",
+    "docs/master_plan/generated/PR168_DATA1_OperatorActionMatrix.report.json"
+  ],
+  "authority_class": "PR168_DATA1A_PUBLIC_READ_ONLY_AUDIT",
+  "connector_semantic_binding_created_flag": false,
+  "consumer_agents": [
+    "source_evidence_agent",
+    "qku_formula_materialization_agent",
+    "replay_paper_agent",
+    "ranking_scoring_agent",
+    "risk_tca_capacity_agent",
+    "dashboard_operator_agent"
+  ],
+  "created_at_utc": "2026-06-21T11:04:04Z",
+  "created_by_tool": "tools/build_pr168_data1a_focused_audit.py",
+  "data_provenance_refs": [],
+  "downstream_consumers": [
+    "source_evidence_agent",
+    "qku_formula_materialization_agent",
+    "replay_paper_agent",
+    "ranking_scoring_agent",
+    "risk_tca_capacity_agent",
+    "dashboard_operator_agent"
+  ],
+  "downstream_pr_refs": [
+    "PR168-GFP2R",
+    "PR168-RP2",
+    "PR168-RANK2",
+    "PR165-B",
+    "PR167",
+    "PR162E-Q",
+    "PR166-Q",
+    "PR166-QB",
+    "PR166-QC"
+  ],
+  "live_authority_created_flag": false,
+  "manual_edit_allowed_flag": false,
+  "no_orphan_status": "NO_ORPHAN_ROUTED",
+  "order_authority_created_flag": false,
+  "owning_agent": "market_data_acquisition_agent",
+  "private_state_access_created_flag": false,
+  "profit_evidence_created_flag": false,
+  "qtt_sha_or_atomicrows_hash_authority_flag": false,
+  "quantum_advantage_claim_flag": false,
+  "quantum_backend_execution_flag": false,
+  "records": {
+    "count_rows": [
+      {
+        "DATA1_artifact_refs": [
+          "docs/master_plan/generated/pr168_data1_snapshots/kalshi/kalshi_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_snapshots/polymarket/polymarket_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/kalshi/kalshi_forward_l2.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/polymarket/polymarket_forward_l2.jsonl"
+        ],
+        "GFP2R_consumption_allowed_flag": true,
+        "authority_class": "PR168_DATA1A_PUBLIC_READ_ONLY_AUDIT",
+        "confidence_level": "EXACT",
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "dashboard_operator_agent",
+          "source_evidence_agent",
+          "market_data_acquisition_agent"
+        ],
+        "count_authority_state": "EXACT_FROM_JSONL_ROW_SCAN",
+        "count_name": "kalshi_candlestick_point_count",
+        "count_value": 2,
+        "data_provenance_refs": [],
+        "dedupe_key_used": "source_row_id",
+        "downstream_consumers": [
+          "dashboard_operator_agent",
+          "source_evidence_agent",
+          "market_data_acquisition_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-GFP2R",
+          "PR168-RP2",
+          "PR168-RANK2",
+          "PR165-B",
+          "PR167",
+          "PR162E-Q",
+          "PR166-Q",
+          "PR166-QB",
+          "PR166-QC"
+        ],
+        "join_key_used": "NOT_APPLICABLE",
+        "live_authority_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "missing_or_unknown_reason": null,
+        "nested_array_expansion_rule": "price/history/trade arrays expanded from normalized_record.record_count when applicable",
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "order_authority_created_flag": false,
+        "owning_agent": "governance_validation_agent",
+        "private_state_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "row_selection_rule": "deterministic DATA1A scan for kalshi_candlestick_point_count",
+        "row_shard_refs_if_any": [],
+        "source_file_refs": [
+          "docs/master_plan/generated/pr168_data1_snapshots/kalshi/kalshi_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_snapshots/polymarket/polymarket_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/kalshi/kalshi_forward_l2.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/polymarket/polymarket_forward_l2.jsonl"
+        ],
+        "source_truth_acceptance_created_flag": false,
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_data1a"
+        ],
+        "upstream_input_refs": [],
+        "validator_refs": [
+          "tools/pr168_data1a_validator.py",
+          "tools/validate_pr168_data1a_focused_audit.py"
+        ]
+      },
+      {
+        "DATA1_artifact_refs": [
+          "docs/master_plan/generated/pr168_data1_snapshots/kalshi/kalshi_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_snapshots/polymarket/polymarket_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/kalshi/kalshi_forward_l2.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/polymarket/polymarket_forward_l2.jsonl"
+        ],
+        "GFP2R_consumption_allowed_flag": true,
+        "authority_class": "PR168_DATA1A_PUBLIC_READ_ONLY_AUDIT",
+        "confidence_level": "EXACT",
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "dashboard_operator_agent",
+          "source_evidence_agent",
+          "market_data_acquisition_agent"
+        ],
+        "count_authority_state": "EXACT_FROM_JSONL_ROW_SCAN",
+        "count_name": "kalshi_forward_l2_row_count",
+        "count_value": 1,
+        "data_provenance_refs": [],
+        "dedupe_key_used": "source_row_id",
+        "downstream_consumers": [
+          "dashboard_operator_agent",
+          "source_evidence_agent",
+          "market_data_acquisition_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-GFP2R",
+          "PR168-RP2",
+          "PR168-RANK2",
+          "PR165-B",
+          "PR167",
+          "PR162E-Q",
+          "PR166-Q",
+          "PR166-QB",
+          "PR166-QC"
+        ],
+        "join_key_used": "NOT_APPLICABLE",
+        "live_authority_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "missing_or_unknown_reason": null,
+        "nested_array_expansion_rule": "price/history/trade arrays expanded from normalized_record.record_count when applicable",
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "order_authority_created_flag": false,
+        "owning_agent": "governance_validation_agent",
+        "private_state_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "row_selection_rule": "deterministic DATA1A scan for kalshi_forward_l2_row_count",
+        "row_shard_refs_if_any": [],
+        "source_file_refs": [
+          "docs/master_plan/generated/pr168_data1_snapshots/kalshi/kalshi_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_snapshots/polymarket/polymarket_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/kalshi/kalshi_forward_l2.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/polymarket/polymarket_forward_l2.jsonl"
+        ],
+        "source_truth_acceptance_created_flag": false,
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_data1a"
+        ],
+        "upstream_input_refs": [],
+        "validator_refs": [
+          "tools/pr168_data1a_validator.py",
+          "tools/validate_pr168_data1a_focused_audit.py"
+        ]
+      },
+      {
+        "DATA1_artifact_refs": [
+          "docs/master_plan/generated/pr168_data1_snapshots/kalshi/kalshi_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_snapshots/polymarket/polymarket_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/kalshi/kalshi_forward_l2.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/polymarket/polymarket_forward_l2.jsonl"
+        ],
+        "GFP2R_consumption_allowed_flag": true,
+        "authority_class": "PR168_DATA1A_PUBLIC_READ_ONLY_AUDIT",
+        "confidence_level": "EXACT",
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "dashboard_operator_agent",
+          "source_evidence_agent",
+          "market_data_acquisition_agent"
+        ],
+        "count_authority_state": "EXACT_FROM_JSONL_ROW_SCAN",
+        "count_name": "kalshi_historical_trade_row_count",
+        "count_value": 5,
+        "data_provenance_refs": [],
+        "dedupe_key_used": "source_row_id",
+        "downstream_consumers": [
+          "dashboard_operator_agent",
+          "source_evidence_agent",
+          "market_data_acquisition_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-GFP2R",
+          "PR168-RP2",
+          "PR168-RANK2",
+          "PR165-B",
+          "PR167",
+          "PR162E-Q",
+          "PR166-Q",
+          "PR166-QB",
+          "PR166-QC"
+        ],
+        "join_key_used": "NOT_APPLICABLE",
+        "live_authority_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "missing_or_unknown_reason": null,
+        "nested_array_expansion_rule": "price/history/trade arrays expanded from normalized_record.record_count when applicable",
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "order_authority_created_flag": false,
+        "owning_agent": "governance_validation_agent",
+        "private_state_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "row_selection_rule": "deterministic DATA1A scan for kalshi_historical_trade_row_count",
+        "row_shard_refs_if_any": [],
+        "source_file_refs": [
+          "docs/master_plan/generated/pr168_data1_snapshots/kalshi/kalshi_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_snapshots/polymarket/polymarket_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/kalshi/kalshi_forward_l2.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/polymarket/polymarket_forward_l2.jsonl"
+        ],
+        "source_truth_acceptance_created_flag": false,
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_data1a"
+        ],
+        "upstream_input_refs": [],
+        "validator_refs": [
+          "tools/pr168_data1a_validator.py",
+          "tools/validate_pr168_data1a_focused_audit.py"
+        ]
+      },
+      {
+        "DATA1_artifact_refs": [
+          "docs/master_plan/generated/pr168_data1_snapshots/kalshi/kalshi_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_snapshots/polymarket/polymarket_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/kalshi/kalshi_forward_l2.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/polymarket/polymarket_forward_l2.jsonl"
+        ],
+        "GFP2R_consumption_allowed_flag": true,
+        "authority_class": "PR168_DATA1A_PUBLIC_READ_ONLY_AUDIT",
+        "confidence_level": "EXACT",
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "dashboard_operator_agent",
+          "source_evidence_agent",
+          "market_data_acquisition_agent"
+        ],
+        "count_authority_state": "EXACT_FROM_JSONL_ROW_SCAN",
+        "count_name": "kalshi_orderbook_market_count",
+        "count_value": 1,
+        "data_provenance_refs": [],
+        "dedupe_key_used": "venue_specific_market_identity",
+        "downstream_consumers": [
+          "dashboard_operator_agent",
+          "source_evidence_agent",
+          "market_data_acquisition_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-GFP2R",
+          "PR168-RP2",
+          "PR168-RANK2",
+          "PR165-B",
+          "PR167",
+          "PR162E-Q",
+          "PR166-Q",
+          "PR166-QB",
+          "PR166-QC"
+        ],
+        "join_key_used": "NOT_APPLICABLE",
+        "live_authority_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "missing_or_unknown_reason": null,
+        "nested_array_expansion_rule": "price/history/trade arrays expanded from normalized_record.record_count when applicable",
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "order_authority_created_flag": false,
+        "owning_agent": "governance_validation_agent",
+        "private_state_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "row_selection_rule": "deterministic DATA1A scan for kalshi_orderbook_market_count",
+        "row_shard_refs_if_any": [],
+        "source_file_refs": [
+          "docs/master_plan/generated/pr168_data1_snapshots/kalshi/kalshi_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_snapshots/polymarket/polymarket_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/kalshi/kalshi_forward_l2.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/polymarket/polymarket_forward_l2.jsonl"
+        ],
+        "source_truth_acceptance_created_flag": false,
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_data1a"
+        ],
+        "upstream_input_refs": [],
+        "validator_refs": [
+          "tools/pr168_data1a_validator.py",
+          "tools/validate_pr168_data1a_focused_audit.py"
+        ]
+      },
+      {
+        "DATA1_artifact_refs": [
+          "docs/master_plan/generated/pr168_data1_snapshots/kalshi/kalshi_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_snapshots/polymarket/polymarket_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/kalshi/kalshi_forward_l2.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/polymarket/polymarket_forward_l2.jsonl"
+        ],
+        "GFP2R_consumption_allowed_flag": true,
+        "authority_class": "PR168_DATA1A_PUBLIC_READ_ONLY_AUDIT",
+        "confidence_level": "EXACT",
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "dashboard_operator_agent",
+          "source_evidence_agent",
+          "market_data_acquisition_agent"
+        ],
+        "count_authority_state": "EXACT_FROM_JSONL_ROW_SCAN",
+        "count_name": "kalshi_orderbook_price_level_count",
+        "count_value": 2,
+        "data_provenance_refs": [],
+        "dedupe_key_used": "source_row_id",
+        "downstream_consumers": [
+          "dashboard_operator_agent",
+          "source_evidence_agent",
+          "market_data_acquisition_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-GFP2R",
+          "PR168-RP2",
+          "PR168-RANK2",
+          "PR165-B",
+          "PR167",
+          "PR162E-Q",
+          "PR166-Q",
+          "PR166-QB",
+          "PR166-QC"
+        ],
+        "join_key_used": "NOT_APPLICABLE",
+        "live_authority_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "missing_or_unknown_reason": null,
+        "nested_array_expansion_rule": "price/history/trade arrays expanded from normalized_record.record_count when applicable",
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "order_authority_created_flag": false,
+        "owning_agent": "governance_validation_agent",
+        "private_state_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "row_selection_rule": "deterministic DATA1A scan for kalshi_orderbook_price_level_count",
+        "row_shard_refs_if_any": [],
+        "source_file_refs": [
+          "docs/master_plan/generated/pr168_data1_snapshots/kalshi/kalshi_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_snapshots/polymarket/polymarket_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/kalshi/kalshi_forward_l2.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/polymarket/polymarket_forward_l2.jsonl"
+        ],
+        "source_truth_acceptance_created_flag": false,
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_data1a"
+        ],
+        "upstream_input_refs": [],
+        "validator_refs": [
+          "tools/pr168_data1a_validator.py",
+          "tools/validate_pr168_data1a_focused_audit.py"
+        ]
+      },
+      {
+        "DATA1_artifact_refs": [
+          "docs/master_plan/generated/pr168_data1_snapshots/kalshi/kalshi_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_snapshots/polymarket/polymarket_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/kalshi/kalshi_forward_l2.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/polymarket/polymarket_forward_l2.jsonl"
+        ],
+        "GFP2R_consumption_allowed_flag": true,
+        "authority_class": "PR168_DATA1A_PUBLIC_READ_ONLY_AUDIT",
+        "confidence_level": "EXACT",
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "dashboard_operator_agent",
+          "source_evidence_agent",
+          "market_data_acquisition_agent"
+        ],
+        "count_authority_state": "EXACT_FROM_JSONL_ROW_SCAN",
+        "count_name": "kalshi_orderbook_snapshot_row_count",
+        "count_value": 1,
+        "data_provenance_refs": [],
+        "dedupe_key_used": "source_row_id",
+        "downstream_consumers": [
+          "dashboard_operator_agent",
+          "source_evidence_agent",
+          "market_data_acquisition_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-GFP2R",
+          "PR168-RP2",
+          "PR168-RANK2",
+          "PR165-B",
+          "PR167",
+          "PR162E-Q",
+          "PR166-Q",
+          "PR166-QB",
+          "PR166-QC"
+        ],
+        "join_key_used": "NOT_APPLICABLE",
+        "live_authority_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "missing_or_unknown_reason": null,
+        "nested_array_expansion_rule": "price/history/trade arrays expanded from normalized_record.record_count when applicable",
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "order_authority_created_flag": false,
+        "owning_agent": "governance_validation_agent",
+        "private_state_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "row_selection_rule": "deterministic DATA1A scan for kalshi_orderbook_snapshot_row_count",
+        "row_shard_refs_if_any": [],
+        "source_file_refs": [
+          "docs/master_plan/generated/pr168_data1_snapshots/kalshi/kalshi_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_snapshots/polymarket/polymarket_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/kalshi/kalshi_forward_l2.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/polymarket/polymarket_forward_l2.jsonl"
+        ],
+        "source_truth_acceptance_created_flag": false,
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_data1a"
+        ],
+        "upstream_input_refs": [],
+        "validator_refs": [
+          "tools/pr168_data1a_validator.py",
+          "tools/validate_pr168_data1a_focused_audit.py"
+        ]
+      },
+      {
+        "DATA1_artifact_refs": [
+          "docs/master_plan/generated/pr168_data1_snapshots/kalshi/kalshi_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_snapshots/polymarket/polymarket_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/kalshi/kalshi_forward_l2.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/polymarket/polymarket_forward_l2.jsonl"
+        ],
+        "GFP2R_consumption_allowed_flag": true,
+        "authority_class": "PR168_DATA1A_PUBLIC_READ_ONLY_AUDIT",
+        "confidence_level": "EXACT",
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "dashboard_operator_agent",
+          "source_evidence_agent",
+          "market_data_acquisition_agent"
+        ],
+        "count_authority_state": "EXACT_FROM_JSONL_ROW_SCAN",
+        "count_name": "kalshi_recent_trade_row_count",
+        "count_value": 5,
+        "data_provenance_refs": [],
+        "dedupe_key_used": "source_row_id",
+        "downstream_consumers": [
+          "dashboard_operator_agent",
+          "source_evidence_agent",
+          "market_data_acquisition_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-GFP2R",
+          "PR168-RP2",
+          "PR168-RANK2",
+          "PR165-B",
+          "PR167",
+          "PR162E-Q",
+          "PR166-Q",
+          "PR166-QB",
+          "PR166-QC"
+        ],
+        "join_key_used": "NOT_APPLICABLE",
+        "live_authority_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "missing_or_unknown_reason": null,
+        "nested_array_expansion_rule": "price/history/trade arrays expanded from normalized_record.record_count when applicable",
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "order_authority_created_flag": false,
+        "owning_agent": "governance_validation_agent",
+        "private_state_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "row_selection_rule": "deterministic DATA1A scan for kalshi_recent_trade_row_count",
+        "row_shard_refs_if_any": [],
+        "source_file_refs": [
+          "docs/master_plan/generated/pr168_data1_snapshots/kalshi/kalshi_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_snapshots/polymarket/polymarket_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/kalshi/kalshi_forward_l2.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/polymarket/polymarket_forward_l2.jsonl"
+        ],
+        "source_truth_acceptance_created_flag": false,
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_data1a"
+        ],
+        "upstream_input_refs": [],
+        "validator_refs": [
+          "tools/pr168_data1a_validator.py",
+          "tools/validate_pr168_data1a_focused_audit.py"
+        ]
+      },
+      {
+        "DATA1_artifact_refs": [
+          "docs/master_plan/generated/pr168_data1_snapshots/kalshi/kalshi_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_snapshots/polymarket/polymarket_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/kalshi/kalshi_forward_l2.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/polymarket/polymarket_forward_l2.jsonl"
+        ],
+        "GFP2R_consumption_allowed_flag": true,
+        "authority_class": "PR168_DATA1A_PUBLIC_READ_ONLY_AUDIT",
+        "confidence_level": "EXACT",
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "dashboard_operator_agent",
+          "source_evidence_agent",
+          "market_data_acquisition_agent"
+        ],
+        "count_authority_state": "EXACT_FROM_JSONL_ROW_SCAN",
+        "count_name": "kalshi_snapshot_total_row_count",
+        "count_value": 6,
+        "data_provenance_refs": [],
+        "dedupe_key_used": "source_row_id",
+        "downstream_consumers": [
+          "dashboard_operator_agent",
+          "source_evidence_agent",
+          "market_data_acquisition_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-GFP2R",
+          "PR168-RP2",
+          "PR168-RANK2",
+          "PR165-B",
+          "PR167",
+          "PR162E-Q",
+          "PR166-Q",
+          "PR166-QB",
+          "PR166-QC"
+        ],
+        "join_key_used": "NOT_APPLICABLE",
+        "live_authority_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "missing_or_unknown_reason": null,
+        "nested_array_expansion_rule": "price/history/trade arrays expanded from normalized_record.record_count when applicable",
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "order_authority_created_flag": false,
+        "owning_agent": "governance_validation_agent",
+        "private_state_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "row_selection_rule": "deterministic DATA1A scan for kalshi_snapshot_total_row_count",
+        "row_shard_refs_if_any": [],
+        "source_file_refs": [
+          "docs/master_plan/generated/pr168_data1_snapshots/kalshi/kalshi_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_snapshots/polymarket/polymarket_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/kalshi/kalshi_forward_l2.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/polymarket/polymarket_forward_l2.jsonl"
+        ],
+        "source_truth_acceptance_created_flag": false,
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_data1a"
+        ],
+        "upstream_input_refs": [],
+        "validator_refs": [
+          "tools/pr168_data1a_validator.py",
+          "tools/validate_pr168_data1a_focused_audit.py"
+        ]
+      },
+      {
+        "DATA1_artifact_refs": [
+          "docs/master_plan/generated/pr168_data1_snapshots/kalshi/kalshi_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_snapshots/polymarket/polymarket_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/kalshi/kalshi_forward_l2.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/polymarket/polymarket_forward_l2.jsonl"
+        ],
+        "GFP2R_consumption_allowed_flag": true,
+        "authority_class": "PR168_DATA1A_PUBLIC_READ_ONLY_AUDIT",
+        "confidence_level": "EXACT",
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "dashboard_operator_agent",
+          "source_evidence_agent",
+          "market_data_acquisition_agent"
+        ],
+        "count_authority_state": "EXACT_FROM_JSONL_ROW_SCAN",
+        "count_name": "kalshi_unique_event_count",
+        "count_value": 1,
+        "data_provenance_refs": [],
+        "dedupe_key_used": "source_row_id",
+        "downstream_consumers": [
+          "dashboard_operator_agent",
+          "source_evidence_agent",
+          "market_data_acquisition_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-GFP2R",
+          "PR168-RP2",
+          "PR168-RANK2",
+          "PR165-B",
+          "PR167",
+          "PR162E-Q",
+          "PR166-Q",
+          "PR166-QB",
+          "PR166-QC"
+        ],
+        "join_key_used": "NOT_APPLICABLE",
+        "live_authority_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "missing_or_unknown_reason": null,
+        "nested_array_expansion_rule": "price/history/trade arrays expanded from normalized_record.record_count when applicable",
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "order_authority_created_flag": false,
+        "owning_agent": "governance_validation_agent",
+        "private_state_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "row_selection_rule": "deterministic DATA1A scan for kalshi_unique_event_count",
+        "row_shard_refs_if_any": [],
+        "source_file_refs": [
+          "docs/master_plan/generated/pr168_data1_snapshots/kalshi/kalshi_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_snapshots/polymarket/polymarket_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/kalshi/kalshi_forward_l2.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/polymarket/polymarket_forward_l2.jsonl"
+        ],
+        "source_truth_acceptance_created_flag": false,
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_data1a"
+        ],
+        "upstream_input_refs": [],
+        "validator_refs": [
+          "tools/pr168_data1a_validator.py",
+          "tools/validate_pr168_data1a_focused_audit.py"
+        ]
+      },
+      {
+        "DATA1_artifact_refs": [
+          "docs/master_plan/generated/pr168_data1_snapshots/kalshi/kalshi_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_snapshots/polymarket/polymarket_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/kalshi/kalshi_forward_l2.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/polymarket/polymarket_forward_l2.jsonl"
+        ],
+        "GFP2R_consumption_allowed_flag": true,
+        "authority_class": "PR168_DATA1A_PUBLIC_READ_ONLY_AUDIT",
+        "confidence_level": "EXACT",
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "dashboard_operator_agent",
+          "source_evidence_agent",
+          "market_data_acquisition_agent"
+        ],
+        "count_authority_state": "EXACT_FROM_JSONL_ROW_SCAN",
+        "count_name": "kalshi_unique_market_count",
+        "count_value": 1,
+        "data_provenance_refs": [],
+        "dedupe_key_used": "venue_specific_market_identity",
+        "downstream_consumers": [
+          "dashboard_operator_agent",
+          "source_evidence_agent",
+          "market_data_acquisition_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-GFP2R",
+          "PR168-RP2",
+          "PR168-RANK2",
+          "PR165-B",
+          "PR167",
+          "PR162E-Q",
+          "PR166-Q",
+          "PR166-QB",
+          "PR166-QC"
+        ],
+        "join_key_used": "NOT_APPLICABLE",
+        "live_authority_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "missing_or_unknown_reason": null,
+        "nested_array_expansion_rule": "price/history/trade arrays expanded from normalized_record.record_count when applicable",
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "order_authority_created_flag": false,
+        "owning_agent": "governance_validation_agent",
+        "private_state_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "row_selection_rule": "deterministic DATA1A scan for kalshi_unique_market_count",
+        "row_shard_refs_if_any": [],
+        "source_file_refs": [
+          "docs/master_plan/generated/pr168_data1_snapshots/kalshi/kalshi_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_snapshots/polymarket/polymarket_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/kalshi/kalshi_forward_l2.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/polymarket/polymarket_forward_l2.jsonl"
+        ],
+        "source_truth_acceptance_created_flag": false,
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_data1a"
+        ],
+        "upstream_input_refs": [],
+        "validator_refs": [
+          "tools/pr168_data1a_validator.py",
+          "tools/validate_pr168_data1a_focused_audit.py"
+        ]
+      },
+      {
+        "DATA1_artifact_refs": [
+          "docs/master_plan/generated/pr168_data1_snapshots/kalshi/kalshi_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_snapshots/polymarket/polymarket_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/kalshi/kalshi_forward_l2.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/polymarket/polymarket_forward_l2.jsonl"
+        ],
+        "GFP2R_consumption_allowed_flag": true,
+        "authority_class": "PR168_DATA1A_PUBLIC_READ_ONLY_AUDIT",
+        "confidence_level": "EXACT",
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "dashboard_operator_agent",
+          "source_evidence_agent",
+          "market_data_acquisition_agent"
+        ],
+        "count_authority_state": "EXACT_FROM_JSONL_ROW_SCAN",
+        "count_name": "kalshi_unique_series_count",
+        "count_value": 1,
+        "data_provenance_refs": [],
+        "dedupe_key_used": "source_row_id",
+        "downstream_consumers": [
+          "dashboard_operator_agent",
+          "source_evidence_agent",
+          "market_data_acquisition_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-GFP2R",
+          "PR168-RP2",
+          "PR168-RANK2",
+          "PR165-B",
+          "PR167",
+          "PR162E-Q",
+          "PR166-Q",
+          "PR166-QB",
+          "PR166-QC"
+        ],
+        "join_key_used": "NOT_APPLICABLE",
+        "live_authority_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "missing_or_unknown_reason": null,
+        "nested_array_expansion_rule": "price/history/trade arrays expanded from normalized_record.record_count when applicable",
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "order_authority_created_flag": false,
+        "owning_agent": "governance_validation_agent",
+        "private_state_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "row_selection_rule": "deterministic DATA1A scan for kalshi_unique_series_count",
+        "row_shard_refs_if_any": [],
+        "source_file_refs": [
+          "docs/master_plan/generated/pr168_data1_snapshots/kalshi/kalshi_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_snapshots/polymarket/polymarket_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/kalshi/kalshi_forward_l2.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/polymarket/polymarket_forward_l2.jsonl"
+        ],
+        "source_truth_acceptance_created_flag": false,
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_data1a"
+        ],
+        "upstream_input_refs": [],
+        "validator_refs": [
+          "tools/pr168_data1a_validator.py",
+          "tools/validate_pr168_data1a_focused_audit.py"
+        ]
+      },
+      {
+        "DATA1_artifact_refs": [
+          "docs/master_plan/generated/pr168_data1_snapshots/kalshi/kalshi_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_snapshots/polymarket/polymarket_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/kalshi/kalshi_forward_l2.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/polymarket/polymarket_forward_l2.jsonl"
+        ],
+        "GFP2R_consumption_allowed_flag": true,
+        "authority_class": "PR168_DATA1A_PUBLIC_READ_ONLY_AUDIT",
+        "confidence_level": "EXACT",
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "dashboard_operator_agent",
+          "source_evidence_agent",
+          "market_data_acquisition_agent"
+        ],
+        "count_authority_state": "EXACT_FROM_JSONL_ROW_SCAN",
+        "count_name": "polymarket_forward_l2_row_count",
+        "count_value": 1,
+        "data_provenance_refs": [],
+        "dedupe_key_used": "source_row_id",
+        "downstream_consumers": [
+          "dashboard_operator_agent",
+          "source_evidence_agent",
+          "market_data_acquisition_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-GFP2R",
+          "PR168-RP2",
+          "PR168-RANK2",
+          "PR165-B",
+          "PR167",
+          "PR162E-Q",
+          "PR166-Q",
+          "PR166-QB",
+          "PR166-QC"
+        ],
+        "join_key_used": "NOT_APPLICABLE",
+        "live_authority_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "missing_or_unknown_reason": null,
+        "nested_array_expansion_rule": "price/history/trade arrays expanded from normalized_record.record_count when applicable",
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "order_authority_created_flag": false,
+        "owning_agent": "governance_validation_agent",
+        "private_state_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "row_selection_rule": "deterministic DATA1A scan for polymarket_forward_l2_row_count",
+        "row_shard_refs_if_any": [],
+        "source_file_refs": [
+          "docs/master_plan/generated/pr168_data1_snapshots/kalshi/kalshi_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_snapshots/polymarket/polymarket_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/kalshi/kalshi_forward_l2.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/polymarket/polymarket_forward_l2.jsonl"
+        ],
+        "source_truth_acceptance_created_flag": false,
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_data1a"
+        ],
+        "upstream_input_refs": [],
+        "validator_refs": [
+          "tools/pr168_data1a_validator.py",
+          "tools/validate_pr168_data1a_focused_audit.py"
+        ]
+      },
+      {
+        "DATA1_artifact_refs": [
+          "docs/master_plan/generated/pr168_data1_snapshots/kalshi/kalshi_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_snapshots/polymarket/polymarket_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/kalshi/kalshi_forward_l2.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/polymarket/polymarket_forward_l2.jsonl"
+        ],
+        "GFP2R_consumption_allowed_flag": true,
+        "authority_class": "PR168_DATA1A_PUBLIC_READ_ONLY_AUDIT",
+        "confidence_level": "EXACT",
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "dashboard_operator_agent",
+          "source_evidence_agent",
+          "market_data_acquisition_agent"
+        ],
+        "count_authority_state": "EXACT_FROM_JSONL_ROW_SCAN",
+        "count_name": "polymarket_orderbook_market_count",
+        "count_value": 1,
+        "data_provenance_refs": [],
+        "dedupe_key_used": "venue_specific_market_identity",
+        "downstream_consumers": [
+          "dashboard_operator_agent",
+          "source_evidence_agent",
+          "market_data_acquisition_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-GFP2R",
+          "PR168-RP2",
+          "PR168-RANK2",
+          "PR165-B",
+          "PR167",
+          "PR162E-Q",
+          "PR166-Q",
+          "PR166-QB",
+          "PR166-QC"
+        ],
+        "join_key_used": "NOT_APPLICABLE",
+        "live_authority_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "missing_or_unknown_reason": null,
+        "nested_array_expansion_rule": "price/history/trade arrays expanded from normalized_record.record_count when applicable",
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "order_authority_created_flag": false,
+        "owning_agent": "governance_validation_agent",
+        "private_state_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "row_selection_rule": "deterministic DATA1A scan for polymarket_orderbook_market_count",
+        "row_shard_refs_if_any": [],
+        "source_file_refs": [
+          "docs/master_plan/generated/pr168_data1_snapshots/kalshi/kalshi_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_snapshots/polymarket/polymarket_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/kalshi/kalshi_forward_l2.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/polymarket/polymarket_forward_l2.jsonl"
+        ],
+        "source_truth_acceptance_created_flag": false,
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_data1a"
+        ],
+        "upstream_input_refs": [],
+        "validator_refs": [
+          "tools/pr168_data1a_validator.py",
+          "tools/validate_pr168_data1a_focused_audit.py"
+        ]
+      },
+      {
+        "DATA1_artifact_refs": [
+          "docs/master_plan/generated/pr168_data1_snapshots/kalshi/kalshi_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_snapshots/polymarket/polymarket_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/kalshi/kalshi_forward_l2.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/polymarket/polymarket_forward_l2.jsonl"
+        ],
+        "GFP2R_consumption_allowed_flag": true,
+        "authority_class": "PR168_DATA1A_PUBLIC_READ_ONLY_AUDIT",
+        "confidence_level": "EXACT",
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "dashboard_operator_agent",
+          "source_evidence_agent",
+          "market_data_acquisition_agent"
+        ],
+        "count_authority_state": "EXACT_FROM_JSONL_ROW_SCAN",
+        "count_name": "polymarket_orderbook_price_level_count",
+        "count_value": 62,
+        "data_provenance_refs": [],
+        "dedupe_key_used": "source_row_id",
+        "downstream_consumers": [
+          "dashboard_operator_agent",
+          "source_evidence_agent",
+          "market_data_acquisition_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-GFP2R",
+          "PR168-RP2",
+          "PR168-RANK2",
+          "PR165-B",
+          "PR167",
+          "PR162E-Q",
+          "PR166-Q",
+          "PR166-QB",
+          "PR166-QC"
+        ],
+        "join_key_used": "NOT_APPLICABLE",
+        "live_authority_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "missing_or_unknown_reason": null,
+        "nested_array_expansion_rule": "price/history/trade arrays expanded from normalized_record.record_count when applicable",
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "order_authority_created_flag": false,
+        "owning_agent": "governance_validation_agent",
+        "private_state_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "row_selection_rule": "deterministic DATA1A scan for polymarket_orderbook_price_level_count",
+        "row_shard_refs_if_any": [],
+        "source_file_refs": [
+          "docs/master_plan/generated/pr168_data1_snapshots/kalshi/kalshi_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_snapshots/polymarket/polymarket_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/kalshi/kalshi_forward_l2.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/polymarket/polymarket_forward_l2.jsonl"
+        ],
+        "source_truth_acceptance_created_flag": false,
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_data1a"
+        ],
+        "upstream_input_refs": [],
+        "validator_refs": [
+          "tools/pr168_data1a_validator.py",
+          "tools/validate_pr168_data1a_focused_audit.py"
+        ]
+      },
+      {
+        "DATA1_artifact_refs": [
+          "docs/master_plan/generated/pr168_data1_snapshots/kalshi/kalshi_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_snapshots/polymarket/polymarket_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/kalshi/kalshi_forward_l2.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/polymarket/polymarket_forward_l2.jsonl"
+        ],
+        "GFP2R_consumption_allowed_flag": true,
+        "authority_class": "PR168_DATA1A_PUBLIC_READ_ONLY_AUDIT",
+        "confidence_level": "EXACT",
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "dashboard_operator_agent",
+          "source_evidence_agent",
+          "market_data_acquisition_agent"
+        ],
+        "count_authority_state": "EXACT_FROM_JSONL_ROW_SCAN",
+        "count_name": "polymarket_orderbook_snapshot_row_count",
+        "count_value": 1,
+        "data_provenance_refs": [],
+        "dedupe_key_used": "source_row_id",
+        "downstream_consumers": [
+          "dashboard_operator_agent",
+          "source_evidence_agent",
+          "market_data_acquisition_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-GFP2R",
+          "PR168-RP2",
+          "PR168-RANK2",
+          "PR165-B",
+          "PR167",
+          "PR162E-Q",
+          "PR166-Q",
+          "PR166-QB",
+          "PR166-QC"
+        ],
+        "join_key_used": "NOT_APPLICABLE",
+        "live_authority_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "missing_or_unknown_reason": null,
+        "nested_array_expansion_rule": "price/history/trade arrays expanded from normalized_record.record_count when applicable",
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "order_authority_created_flag": false,
+        "owning_agent": "governance_validation_agent",
+        "private_state_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "row_selection_rule": "deterministic DATA1A scan for polymarket_orderbook_snapshot_row_count",
+        "row_shard_refs_if_any": [],
+        "source_file_refs": [
+          "docs/master_plan/generated/pr168_data1_snapshots/kalshi/kalshi_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_snapshots/polymarket/polymarket_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/kalshi/kalshi_forward_l2.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/polymarket/polymarket_forward_l2.jsonl"
+        ],
+        "source_truth_acceptance_created_flag": false,
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_data1a"
+        ],
+        "upstream_input_refs": [],
+        "validator_refs": [
+          "tools/pr168_data1a_validator.py",
+          "tools/validate_pr168_data1a_focused_audit.py"
+        ]
+      },
+      {
+        "DATA1_artifact_refs": [
+          "docs/master_plan/generated/pr168_data1_snapshots/kalshi/kalshi_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_snapshots/polymarket/polymarket_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/kalshi/kalshi_forward_l2.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/polymarket/polymarket_forward_l2.jsonl"
+        ],
+        "GFP2R_consumption_allowed_flag": true,
+        "authority_class": "PR168_DATA1A_PUBLIC_READ_ONLY_AUDIT",
+        "confidence_level": "EXACT",
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "dashboard_operator_agent",
+          "source_evidence_agent",
+          "market_data_acquisition_agent"
+        ],
+        "count_authority_state": "EXACT_FROM_JSONL_ROW_SCAN",
+        "count_name": "polymarket_price_history_point_count",
+        "count_value": 25,
+        "data_provenance_refs": [],
+        "dedupe_key_used": "source_row_id",
+        "downstream_consumers": [
+          "dashboard_operator_agent",
+          "source_evidence_agent",
+          "market_data_acquisition_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-GFP2R",
+          "PR168-RP2",
+          "PR168-RANK2",
+          "PR165-B",
+          "PR167",
+          "PR162E-Q",
+          "PR166-Q",
+          "PR166-QB",
+          "PR166-QC"
+        ],
+        "join_key_used": "NOT_APPLICABLE",
+        "live_authority_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "missing_or_unknown_reason": null,
+        "nested_array_expansion_rule": "price/history/trade arrays expanded from normalized_record.record_count when applicable",
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "order_authority_created_flag": false,
+        "owning_agent": "governance_validation_agent",
+        "private_state_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "row_selection_rule": "deterministic DATA1A scan for polymarket_price_history_point_count",
+        "row_shard_refs_if_any": [],
+        "source_file_refs": [
+          "docs/master_plan/generated/pr168_data1_snapshots/kalshi/kalshi_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_snapshots/polymarket/polymarket_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/kalshi/kalshi_forward_l2.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/polymarket/polymarket_forward_l2.jsonl"
+        ],
+        "source_truth_acceptance_created_flag": false,
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_data1a"
+        ],
+        "upstream_input_refs": [],
+        "validator_refs": [
+          "tools/pr168_data1a_validator.py",
+          "tools/validate_pr168_data1a_focused_audit.py"
+        ]
+      },
+      {
+        "DATA1_artifact_refs": [
+          "docs/master_plan/generated/pr168_data1_snapshots/kalshi/kalshi_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_snapshots/polymarket/polymarket_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/kalshi/kalshi_forward_l2.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/polymarket/polymarket_forward_l2.jsonl"
+        ],
+        "GFP2R_consumption_allowed_flag": true,
+        "authority_class": "PR168_DATA1A_PUBLIC_READ_ONLY_AUDIT",
+        "confidence_level": "EXACT",
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "dashboard_operator_agent",
+          "source_evidence_agent",
+          "market_data_acquisition_agent"
+        ],
+        "count_authority_state": "EXACT_FROM_JSONL_ROW_SCAN",
+        "count_name": "polymarket_snapshot_total_row_count",
+        "count_value": 4,
+        "data_provenance_refs": [],
+        "dedupe_key_used": "source_row_id",
+        "downstream_consumers": [
+          "dashboard_operator_agent",
+          "source_evidence_agent",
+          "market_data_acquisition_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-GFP2R",
+          "PR168-RP2",
+          "PR168-RANK2",
+          "PR165-B",
+          "PR167",
+          "PR162E-Q",
+          "PR166-Q",
+          "PR166-QB",
+          "PR166-QC"
+        ],
+        "join_key_used": "NOT_APPLICABLE",
+        "live_authority_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "missing_or_unknown_reason": null,
+        "nested_array_expansion_rule": "price/history/trade arrays expanded from normalized_record.record_count when applicable",
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "order_authority_created_flag": false,
+        "owning_agent": "governance_validation_agent",
+        "private_state_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "row_selection_rule": "deterministic DATA1A scan for polymarket_snapshot_total_row_count",
+        "row_shard_refs_if_any": [],
+        "source_file_refs": [
+          "docs/master_plan/generated/pr168_data1_snapshots/kalshi/kalshi_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_snapshots/polymarket/polymarket_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/kalshi/kalshi_forward_l2.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/polymarket/polymarket_forward_l2.jsonl"
+        ],
+        "source_truth_acceptance_created_flag": false,
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_data1a"
+        ],
+        "upstream_input_refs": [],
+        "validator_refs": [
+          "tools/pr168_data1a_validator.py",
+          "tools/validate_pr168_data1a_focused_audit.py"
+        ]
+      },
+      {
+        "DATA1_artifact_refs": [
+          "docs/master_plan/generated/pr168_data1_snapshots/kalshi/kalshi_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_snapshots/polymarket/polymarket_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/kalshi/kalshi_forward_l2.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/polymarket/polymarket_forward_l2.jsonl"
+        ],
+        "GFP2R_consumption_allowed_flag": true,
+        "authority_class": "PR168_DATA1A_PUBLIC_READ_ONLY_AUDIT",
+        "confidence_level": "EXACT",
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "dashboard_operator_agent",
+          "source_evidence_agent",
+          "market_data_acquisition_agent"
+        ],
+        "count_authority_state": "EXACT_FROM_JSONL_ROW_SCAN",
+        "count_name": "polymarket_trade_or_activity_row_count",
+        "count_value": 5,
+        "data_provenance_refs": [],
+        "dedupe_key_used": "source_row_id",
+        "downstream_consumers": [
+          "dashboard_operator_agent",
+          "source_evidence_agent",
+          "market_data_acquisition_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-GFP2R",
+          "PR168-RP2",
+          "PR168-RANK2",
+          "PR165-B",
+          "PR167",
+          "PR162E-Q",
+          "PR166-Q",
+          "PR166-QB",
+          "PR166-QC"
+        ],
+        "join_key_used": "NOT_APPLICABLE",
+        "live_authority_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "missing_or_unknown_reason": null,
+        "nested_array_expansion_rule": "price/history/trade arrays expanded from normalized_record.record_count when applicable",
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "order_authority_created_flag": false,
+        "owning_agent": "governance_validation_agent",
+        "private_state_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "row_selection_rule": "deterministic DATA1A scan for polymarket_trade_or_activity_row_count",
+        "row_shard_refs_if_any": [],
+        "source_file_refs": [
+          "docs/master_plan/generated/pr168_data1_snapshots/kalshi/kalshi_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_snapshots/polymarket/polymarket_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/kalshi/kalshi_forward_l2.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/polymarket/polymarket_forward_l2.jsonl"
+        ],
+        "source_truth_acceptance_created_flag": false,
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_data1a"
+        ],
+        "upstream_input_refs": [],
+        "validator_refs": [
+          "tools/pr168_data1a_validator.py",
+          "tools/validate_pr168_data1a_focused_audit.py"
+        ]
+      },
+      {
+        "DATA1_artifact_refs": [
+          "docs/master_plan/generated/pr168_data1_snapshots/kalshi/kalshi_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_snapshots/polymarket/polymarket_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/kalshi/kalshi_forward_l2.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/polymarket/polymarket_forward_l2.jsonl"
+        ],
+        "GFP2R_consumption_allowed_flag": true,
+        "authority_class": "PR168_DATA1A_PUBLIC_READ_ONLY_AUDIT",
+        "confidence_level": "EXACT",
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "dashboard_operator_agent",
+          "source_evidence_agent",
+          "market_data_acquisition_agent"
+        ],
+        "count_authority_state": "EXACT_FROM_JSONL_ROW_SCAN",
+        "count_name": "polymarket_unique_condition_count",
+        "count_value": 1,
+        "data_provenance_refs": [],
+        "dedupe_key_used": "source_row_id",
+        "downstream_consumers": [
+          "dashboard_operator_agent",
+          "source_evidence_agent",
+          "market_data_acquisition_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-GFP2R",
+          "PR168-RP2",
+          "PR168-RANK2",
+          "PR165-B",
+          "PR167",
+          "PR162E-Q",
+          "PR166-Q",
+          "PR166-QB",
+          "PR166-QC"
+        ],
+        "join_key_used": "NOT_APPLICABLE",
+        "live_authority_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "missing_or_unknown_reason": null,
+        "nested_array_expansion_rule": "price/history/trade arrays expanded from normalized_record.record_count when applicable",
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "order_authority_created_flag": false,
+        "owning_agent": "governance_validation_agent",
+        "private_state_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "row_selection_rule": "deterministic DATA1A scan for polymarket_unique_condition_count",
+        "row_shard_refs_if_any": [],
+        "source_file_refs": [
+          "docs/master_plan/generated/pr168_data1_snapshots/kalshi/kalshi_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_snapshots/polymarket/polymarket_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/kalshi/kalshi_forward_l2.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/polymarket/polymarket_forward_l2.jsonl"
+        ],
+        "source_truth_acceptance_created_flag": false,
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_data1a"
+        ],
+        "upstream_input_refs": [],
+        "validator_refs": [
+          "tools/pr168_data1a_validator.py",
+          "tools/validate_pr168_data1a_focused_audit.py"
+        ]
+      },
+      {
+        "DATA1_artifact_refs": [
+          "docs/master_plan/generated/pr168_data1_snapshots/kalshi/kalshi_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_snapshots/polymarket/polymarket_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/kalshi/kalshi_forward_l2.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/polymarket/polymarket_forward_l2.jsonl"
+        ],
+        "GFP2R_consumption_allowed_flag": true,
+        "authority_class": "PR168_DATA1A_PUBLIC_READ_ONLY_AUDIT",
+        "confidence_level": "EXACT",
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "dashboard_operator_agent",
+          "source_evidence_agent",
+          "market_data_acquisition_agent"
+        ],
+        "count_authority_state": "EXACT_FROM_JSONL_ROW_SCAN",
+        "count_name": "polymarket_unique_event_count",
+        "count_value": 0,
+        "data_provenance_refs": [],
+        "dedupe_key_used": "source_row_id",
+        "downstream_consumers": [
+          "dashboard_operator_agent",
+          "source_evidence_agent",
+          "market_data_acquisition_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-GFP2R",
+          "PR168-RP2",
+          "PR168-RANK2",
+          "PR165-B",
+          "PR167",
+          "PR162E-Q",
+          "PR166-Q",
+          "PR166-QB",
+          "PR166-QC"
+        ],
+        "join_key_used": "NOT_APPLICABLE",
+        "live_authority_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "missing_or_unknown_reason": null,
+        "nested_array_expansion_rule": "price/history/trade arrays expanded from normalized_record.record_count when applicable",
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "order_authority_created_flag": false,
+        "owning_agent": "governance_validation_agent",
+        "private_state_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "row_selection_rule": "deterministic DATA1A scan for polymarket_unique_event_count",
+        "row_shard_refs_if_any": [],
+        "source_file_refs": [
+          "docs/master_plan/generated/pr168_data1_snapshots/kalshi/kalshi_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_snapshots/polymarket/polymarket_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/kalshi/kalshi_forward_l2.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/polymarket/polymarket_forward_l2.jsonl"
+        ],
+        "source_truth_acceptance_created_flag": false,
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_data1a"
+        ],
+        "upstream_input_refs": [],
+        "validator_refs": [
+          "tools/pr168_data1a_validator.py",
+          "tools/validate_pr168_data1a_focused_audit.py"
+        ]
+      },
+      {
+        "DATA1_artifact_refs": [
+          "docs/master_plan/generated/pr168_data1_snapshots/kalshi/kalshi_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_snapshots/polymarket/polymarket_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/kalshi/kalshi_forward_l2.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/polymarket/polymarket_forward_l2.jsonl"
+        ],
+        "GFP2R_consumption_allowed_flag": true,
+        "authority_class": "PR168_DATA1A_PUBLIC_READ_ONLY_AUDIT",
+        "confidence_level": "EXACT",
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "dashboard_operator_agent",
+          "source_evidence_agent",
+          "market_data_acquisition_agent"
+        ],
+        "count_authority_state": "EXACT_FROM_JSONL_ROW_SCAN",
+        "count_name": "polymarket_unique_market_count",
+        "count_value": 1,
+        "data_provenance_refs": [],
+        "dedupe_key_used": "venue_specific_market_identity",
+        "downstream_consumers": [
+          "dashboard_operator_agent",
+          "source_evidence_agent",
+          "market_data_acquisition_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-GFP2R",
+          "PR168-RP2",
+          "PR168-RANK2",
+          "PR165-B",
+          "PR167",
+          "PR162E-Q",
+          "PR166-Q",
+          "PR166-QB",
+          "PR166-QC"
+        ],
+        "join_key_used": "NOT_APPLICABLE",
+        "live_authority_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "missing_or_unknown_reason": null,
+        "nested_array_expansion_rule": "price/history/trade arrays expanded from normalized_record.record_count when applicable",
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "order_authority_created_flag": false,
+        "owning_agent": "governance_validation_agent",
+        "private_state_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "row_selection_rule": "deterministic DATA1A scan for polymarket_unique_market_count",
+        "row_shard_refs_if_any": [],
+        "source_file_refs": [
+          "docs/master_plan/generated/pr168_data1_snapshots/kalshi/kalshi_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_snapshots/polymarket/polymarket_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/kalshi/kalshi_forward_l2.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/polymarket/polymarket_forward_l2.jsonl"
+        ],
+        "source_truth_acceptance_created_flag": false,
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_data1a"
+        ],
+        "upstream_input_refs": [],
+        "validator_refs": [
+          "tools/pr168_data1a_validator.py",
+          "tools/validate_pr168_data1a_focused_audit.py"
+        ]
+      },
+      {
+        "DATA1_artifact_refs": [
+          "docs/master_plan/generated/pr168_data1_snapshots/kalshi/kalshi_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_snapshots/polymarket/polymarket_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/kalshi/kalshi_forward_l2.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/polymarket/polymarket_forward_l2.jsonl"
+        ],
+        "GFP2R_consumption_allowed_flag": true,
+        "authority_class": "PR168_DATA1A_PUBLIC_READ_ONLY_AUDIT",
+        "confidence_level": "EXACT",
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "dashboard_operator_agent",
+          "source_evidence_agent",
+          "market_data_acquisition_agent"
+        ],
+        "count_authority_state": "EXACT_FROM_JSONL_ROW_SCAN",
+        "count_name": "polymarket_unique_token_or_asset_count",
+        "count_value": 2,
+        "data_provenance_refs": [],
+        "dedupe_key_used": "source_row_id",
+        "downstream_consumers": [
+          "dashboard_operator_agent",
+          "source_evidence_agent",
+          "market_data_acquisition_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-GFP2R",
+          "PR168-RP2",
+          "PR168-RANK2",
+          "PR165-B",
+          "PR167",
+          "PR162E-Q",
+          "PR166-Q",
+          "PR166-QB",
+          "PR166-QC"
+        ],
+        "join_key_used": "NOT_APPLICABLE",
+        "live_authority_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "missing_or_unknown_reason": null,
+        "nested_array_expansion_rule": "price/history/trade arrays expanded from normalized_record.record_count when applicable",
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "order_authority_created_flag": false,
+        "owning_agent": "governance_validation_agent",
+        "private_state_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "row_selection_rule": "deterministic DATA1A scan for polymarket_unique_token_or_asset_count",
+        "row_shard_refs_if_any": [],
+        "source_file_refs": [
+          "docs/master_plan/generated/pr168_data1_snapshots/kalshi/kalshi_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_snapshots/polymarket/polymarket_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/kalshi/kalshi_forward_l2.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/polymarket/polymarket_forward_l2.jsonl"
+        ],
+        "source_truth_acceptance_created_flag": false,
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_data1a"
+        ],
+        "upstream_input_refs": [],
+        "validator_refs": [
+          "tools/pr168_data1a_validator.py",
+          "tools/validate_pr168_data1a_focused_audit.py"
+        ]
+      },
+      {
+        "DATA1_artifact_refs": [
+          "docs/master_plan/generated/pr168_data1_snapshots/kalshi/kalshi_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_snapshots/polymarket/polymarket_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/kalshi/kalshi_forward_l2.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/polymarket/polymarket_forward_l2.jsonl"
+        ],
+        "GFP2R_consumption_allowed_flag": true,
+        "authority_class": "PR168_DATA1A_PUBLIC_READ_ONLY_AUDIT",
+        "confidence_level": "EXACT",
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "dashboard_operator_agent",
+          "source_evidence_agent",
+          "market_data_acquisition_agent"
+        ],
+        "count_authority_state": "EXACT_FROM_JSONL_ROW_SCAN",
+        "count_name": "total_feature_row_count",
+        "count_value": 51,
+        "data_provenance_refs": [],
+        "dedupe_key_used": "source_row_id",
+        "downstream_consumers": [
+          "dashboard_operator_agent",
+          "source_evidence_agent",
+          "market_data_acquisition_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-GFP2R",
+          "PR168-RP2",
+          "PR168-RANK2",
+          "PR165-B",
+          "PR167",
+          "PR162E-Q",
+          "PR166-Q",
+          "PR166-QB",
+          "PR166-QC"
+        ],
+        "join_key_used": "NOT_APPLICABLE",
+        "live_authority_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "missing_or_unknown_reason": null,
+        "nested_array_expansion_rule": "price/history/trade arrays expanded from normalized_record.record_count when applicable",
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "order_authority_created_flag": false,
+        "owning_agent": "governance_validation_agent",
+        "private_state_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "row_selection_rule": "deterministic DATA1A scan for total_feature_row_count",
+        "row_shard_refs_if_any": [],
+        "source_file_refs": [
+          "docs/master_plan/generated/pr168_data1_snapshots/kalshi/kalshi_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_snapshots/polymarket/polymarket_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/kalshi/kalshi_forward_l2.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/polymarket/polymarket_forward_l2.jsonl"
+        ],
+        "source_truth_acceptance_created_flag": false,
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_data1a"
+        ],
+        "upstream_input_refs": [],
+        "validator_refs": [
+          "tools/pr168_data1a_validator.py",
+          "tools/validate_pr168_data1a_focused_audit.py"
+        ]
+      },
+      {
+        "DATA1_artifact_refs": [
+          "docs/master_plan/generated/pr168_data1_snapshots/kalshi/kalshi_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_snapshots/polymarket/polymarket_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/kalshi/kalshi_forward_l2.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/polymarket/polymarket_forward_l2.jsonl"
+        ],
+        "GFP2R_consumption_allowed_flag": true,
+        "authority_class": "PR168_DATA1A_PUBLIC_READ_ONLY_AUDIT",
+        "confidence_level": "EXACT",
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "dashboard_operator_agent",
+          "source_evidence_agent",
+          "market_data_acquisition_agent"
+        ],
+        "count_authority_state": "EXACT_FROM_JSONL_ROW_SCAN",
+        "count_name": "total_forward_l2_row_count",
+        "count_value": 2,
+        "data_provenance_refs": [],
+        "dedupe_key_used": "source_row_id",
+        "downstream_consumers": [
+          "dashboard_operator_agent",
+          "source_evidence_agent",
+          "market_data_acquisition_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-GFP2R",
+          "PR168-RP2",
+          "PR168-RANK2",
+          "PR165-B",
+          "PR167",
+          "PR162E-Q",
+          "PR166-Q",
+          "PR166-QB",
+          "PR166-QC"
+        ],
+        "join_key_used": "NOT_APPLICABLE",
+        "live_authority_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "missing_or_unknown_reason": null,
+        "nested_array_expansion_rule": "price/history/trade arrays expanded from normalized_record.record_count when applicable",
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "order_authority_created_flag": false,
+        "owning_agent": "governance_validation_agent",
+        "private_state_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "row_selection_rule": "deterministic DATA1A scan for total_forward_l2_row_count",
+        "row_shard_refs_if_any": [],
+        "source_file_refs": [
+          "docs/master_plan/generated/pr168_data1_snapshots/kalshi/kalshi_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_snapshots/polymarket/polymarket_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/kalshi/kalshi_forward_l2.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/polymarket/polymarket_forward_l2.jsonl"
+        ],
+        "source_truth_acceptance_created_flag": false,
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_data1a"
+        ],
+        "upstream_input_refs": [],
+        "validator_refs": [
+          "tools/pr168_data1a_validator.py",
+          "tools/validate_pr168_data1a_focused_audit.py"
+        ]
+      },
+      {
+        "DATA1_artifact_refs": [
+          "docs/master_plan/generated/pr168_data1_snapshots/kalshi/kalshi_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_snapshots/polymarket/polymarket_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/kalshi/kalshi_forward_l2.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/polymarket/polymarket_forward_l2.jsonl"
+        ],
+        "GFP2R_consumption_allowed_flag": true,
+        "authority_class": "PR168_DATA1A_PUBLIC_READ_ONLY_AUDIT",
+        "confidence_level": "EXACT",
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "dashboard_operator_agent",
+          "source_evidence_agent",
+          "market_data_acquisition_agent"
+        ],
+        "count_authority_state": "EXACT_FROM_JSONL_ROW_SCAN",
+        "count_name": "total_historical_trade_row_count",
+        "count_value": 10,
+        "data_provenance_refs": [],
+        "dedupe_key_used": "source_row_id",
+        "downstream_consumers": [
+          "dashboard_operator_agent",
+          "source_evidence_agent",
+          "market_data_acquisition_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-GFP2R",
+          "PR168-RP2",
+          "PR168-RANK2",
+          "PR165-B",
+          "PR167",
+          "PR162E-Q",
+          "PR166-Q",
+          "PR166-QB",
+          "PR166-QC"
+        ],
+        "join_key_used": "NOT_APPLICABLE",
+        "live_authority_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "missing_or_unknown_reason": null,
+        "nested_array_expansion_rule": "price/history/trade arrays expanded from normalized_record.record_count when applicable",
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "order_authority_created_flag": false,
+        "owning_agent": "governance_validation_agent",
+        "private_state_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "row_selection_rule": "deterministic DATA1A scan for total_historical_trade_row_count",
+        "row_shard_refs_if_any": [],
+        "source_file_refs": [
+          "docs/master_plan/generated/pr168_data1_snapshots/kalshi/kalshi_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_snapshots/polymarket/polymarket_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/kalshi/kalshi_forward_l2.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/polymarket/polymarket_forward_l2.jsonl"
+        ],
+        "source_truth_acceptance_created_flag": false,
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_data1a"
+        ],
+        "upstream_input_refs": [],
+        "validator_refs": [
+          "tools/pr168_data1a_validator.py",
+          "tools/validate_pr168_data1a_focused_audit.py"
+        ]
+      },
+      {
+        "DATA1_artifact_refs": [
+          "docs/master_plan/generated/pr168_data1_snapshots/kalshi/kalshi_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_snapshots/polymarket/polymarket_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/kalshi/kalshi_forward_l2.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/polymarket/polymarket_forward_l2.jsonl"
+        ],
+        "GFP2R_consumption_allowed_flag": true,
+        "authority_class": "PR168_DATA1A_PUBLIC_READ_ONLY_AUDIT",
+        "confidence_level": "EXACT",
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "dashboard_operator_agent",
+          "source_evidence_agent",
+          "market_data_acquisition_agent"
+        ],
+        "count_authority_state": "EXACT_FROM_JSONL_ROW_SCAN",
+        "count_name": "total_manifest_file_count",
+        "count_value": 6,
+        "data_provenance_refs": [],
+        "dedupe_key_used": "source_row_id",
+        "downstream_consumers": [
+          "dashboard_operator_agent",
+          "source_evidence_agent",
+          "market_data_acquisition_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-GFP2R",
+          "PR168-RP2",
+          "PR168-RANK2",
+          "PR165-B",
+          "PR167",
+          "PR162E-Q",
+          "PR166-Q",
+          "PR166-QB",
+          "PR166-QC"
+        ],
+        "join_key_used": "NOT_APPLICABLE",
+        "live_authority_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "missing_or_unknown_reason": null,
+        "nested_array_expansion_rule": "price/history/trade arrays expanded from normalized_record.record_count when applicable",
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "order_authority_created_flag": false,
+        "owning_agent": "governance_validation_agent",
+        "private_state_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "row_selection_rule": "deterministic DATA1A scan for total_manifest_file_count",
+        "row_shard_refs_if_any": [],
+        "source_file_refs": [
+          "docs/master_plan/generated/pr168_data1_snapshots/kalshi/kalshi_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_snapshots/polymarket/polymarket_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/kalshi/kalshi_forward_l2.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/polymarket/polymarket_forward_l2.jsonl"
+        ],
+        "source_truth_acceptance_created_flag": false,
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_data1a"
+        ],
+        "upstream_input_refs": [],
+        "validator_refs": [
+          "tools/pr168_data1a_validator.py",
+          "tools/validate_pr168_data1a_focused_audit.py"
+        ]
+      },
+      {
+        "DATA1_artifact_refs": [
+          "docs/master_plan/generated/pr168_data1_snapshots/kalshi/kalshi_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_snapshots/polymarket/polymarket_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/kalshi/kalshi_forward_l2.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/polymarket/polymarket_forward_l2.jsonl"
+        ],
+        "GFP2R_consumption_allowed_flag": true,
+        "authority_class": "PR168_DATA1A_PUBLIC_READ_ONLY_AUDIT",
+        "confidence_level": "EXACT",
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "dashboard_operator_agent",
+          "source_evidence_agent",
+          "market_data_acquisition_agent"
+        ],
+        "count_authority_state": "EXACT_FROM_JSONL_ROW_SCAN",
+        "count_name": "total_orderbook_price_level_count",
+        "count_value": 64,
+        "data_provenance_refs": [],
+        "dedupe_key_used": "source_row_id",
+        "downstream_consumers": [
+          "dashboard_operator_agent",
+          "source_evidence_agent",
+          "market_data_acquisition_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-GFP2R",
+          "PR168-RP2",
+          "PR168-RANK2",
+          "PR165-B",
+          "PR167",
+          "PR162E-Q",
+          "PR166-Q",
+          "PR166-QB",
+          "PR166-QC"
+        ],
+        "join_key_used": "NOT_APPLICABLE",
+        "live_authority_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "missing_or_unknown_reason": null,
+        "nested_array_expansion_rule": "price/history/trade arrays expanded from normalized_record.record_count when applicable",
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "order_authority_created_flag": false,
+        "owning_agent": "governance_validation_agent",
+        "private_state_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "row_selection_rule": "deterministic DATA1A scan for total_orderbook_price_level_count",
+        "row_shard_refs_if_any": [],
+        "source_file_refs": [
+          "docs/master_plan/generated/pr168_data1_snapshots/kalshi/kalshi_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_snapshots/polymarket/polymarket_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/kalshi/kalshi_forward_l2.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/polymarket/polymarket_forward_l2.jsonl"
+        ],
+        "source_truth_acceptance_created_flag": false,
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_data1a"
+        ],
+        "upstream_input_refs": [],
+        "validator_refs": [
+          "tools/pr168_data1a_validator.py",
+          "tools/validate_pr168_data1a_focused_audit.py"
+        ]
+      },
+      {
+        "DATA1_artifact_refs": [
+          "docs/master_plan/generated/pr168_data1_snapshots/kalshi/kalshi_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_snapshots/polymarket/polymarket_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/kalshi/kalshi_forward_l2.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/polymarket/polymarket_forward_l2.jsonl"
+        ],
+        "GFP2R_consumption_allowed_flag": true,
+        "authority_class": "PR168_DATA1A_PUBLIC_READ_ONLY_AUDIT",
+        "confidence_level": "EXACT",
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "dashboard_operator_agent",
+          "source_evidence_agent",
+          "market_data_acquisition_agent"
+        ],
+        "count_authority_state": "EXACT_FROM_JSONL_ROW_SCAN",
+        "count_name": "total_orderbook_snapshot_row_count",
+        "count_value": 2,
+        "data_provenance_refs": [],
+        "dedupe_key_used": "source_row_id",
+        "downstream_consumers": [
+          "dashboard_operator_agent",
+          "source_evidence_agent",
+          "market_data_acquisition_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-GFP2R",
+          "PR168-RP2",
+          "PR168-RANK2",
+          "PR165-B",
+          "PR167",
+          "PR162E-Q",
+          "PR166-Q",
+          "PR166-QB",
+          "PR166-QC"
+        ],
+        "join_key_used": "NOT_APPLICABLE",
+        "live_authority_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "missing_or_unknown_reason": null,
+        "nested_array_expansion_rule": "price/history/trade arrays expanded from normalized_record.record_count when applicable",
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "order_authority_created_flag": false,
+        "owning_agent": "governance_validation_agent",
+        "private_state_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "row_selection_rule": "deterministic DATA1A scan for total_orderbook_snapshot_row_count",
+        "row_shard_refs_if_any": [],
+        "source_file_refs": [
+          "docs/master_plan/generated/pr168_data1_snapshots/kalshi/kalshi_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_snapshots/polymarket/polymarket_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/kalshi/kalshi_forward_l2.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/polymarket/polymarket_forward_l2.jsonl"
+        ],
+        "source_truth_acceptance_created_flag": false,
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_data1a"
+        ],
+        "upstream_input_refs": [],
+        "validator_refs": [
+          "tools/pr168_data1a_validator.py",
+          "tools/validate_pr168_data1a_focused_audit.py"
+        ]
+      },
+      {
+        "DATA1_artifact_refs": [
+          "docs/master_plan/generated/pr168_data1_snapshots/kalshi/kalshi_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_snapshots/polymarket/polymarket_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/kalshi/kalshi_forward_l2.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/polymarket/polymarket_forward_l2.jsonl"
+        ],
+        "GFP2R_consumption_allowed_flag": true,
+        "authority_class": "PR168_DATA1A_PUBLIC_READ_ONLY_AUDIT",
+        "confidence_level": "EXACT",
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "dashboard_operator_agent",
+          "source_evidence_agent",
+          "market_data_acquisition_agent"
+        ],
+        "count_authority_state": "EXACT_FROM_JSONL_ROW_SCAN",
+        "count_name": "total_price_history_or_candle_point_count",
+        "count_value": 27,
+        "data_provenance_refs": [],
+        "dedupe_key_used": "source_row_id",
+        "downstream_consumers": [
+          "dashboard_operator_agent",
+          "source_evidence_agent",
+          "market_data_acquisition_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-GFP2R",
+          "PR168-RP2",
+          "PR168-RANK2",
+          "PR165-B",
+          "PR167",
+          "PR162E-Q",
+          "PR166-Q",
+          "PR166-QB",
+          "PR166-QC"
+        ],
+        "join_key_used": "NOT_APPLICABLE",
+        "live_authority_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "missing_or_unknown_reason": null,
+        "nested_array_expansion_rule": "price/history/trade arrays expanded from normalized_record.record_count when applicable",
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "order_authority_created_flag": false,
+        "owning_agent": "governance_validation_agent",
+        "private_state_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "row_selection_rule": "deterministic DATA1A scan for total_price_history_or_candle_point_count",
+        "row_shard_refs_if_any": [],
+        "source_file_refs": [
+          "docs/master_plan/generated/pr168_data1_snapshots/kalshi/kalshi_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_snapshots/polymarket/polymarket_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/kalshi/kalshi_forward_l2.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/polymarket/polymarket_forward_l2.jsonl"
+        ],
+        "source_truth_acceptance_created_flag": false,
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_data1a"
+        ],
+        "upstream_input_refs": [],
+        "validator_refs": [
+          "tools/pr168_data1a_validator.py",
+          "tools/validate_pr168_data1a_focused_audit.py"
+        ]
+      },
+      {
+        "DATA1_artifact_refs": [
+          "docs/master_plan/generated/pr168_data1_snapshots/kalshi/kalshi_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_snapshots/polymarket/polymarket_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/kalshi/kalshi_forward_l2.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/polymarket/polymarket_forward_l2.jsonl"
+        ],
+        "GFP2R_consumption_allowed_flag": true,
+        "authority_class": "PR168_DATA1A_PUBLIC_READ_ONLY_AUDIT",
+        "confidence_level": "EXACT",
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "dashboard_operator_agent",
+          "source_evidence_agent",
+          "market_data_acquisition_agent"
+        ],
+        "count_authority_state": "EXACT_FROM_JSONL_ROW_SCAN",
+        "count_name": "total_snapshot_jsonl_file_count",
+        "count_value": 2,
+        "data_provenance_refs": [],
+        "dedupe_key_used": "source_row_id",
+        "downstream_consumers": [
+          "dashboard_operator_agent",
+          "source_evidence_agent",
+          "market_data_acquisition_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-GFP2R",
+          "PR168-RP2",
+          "PR168-RANK2",
+          "PR165-B",
+          "PR167",
+          "PR162E-Q",
+          "PR166-Q",
+          "PR166-QB",
+          "PR166-QC"
+        ],
+        "join_key_used": "NOT_APPLICABLE",
+        "live_authority_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "missing_or_unknown_reason": null,
+        "nested_array_expansion_rule": "price/history/trade arrays expanded from normalized_record.record_count when applicable",
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "order_authority_created_flag": false,
+        "owning_agent": "governance_validation_agent",
+        "private_state_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "row_selection_rule": "deterministic DATA1A scan for total_snapshot_jsonl_file_count",
+        "row_shard_refs_if_any": [],
+        "source_file_refs": [
+          "docs/master_plan/generated/pr168_data1_snapshots/kalshi/kalshi_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_snapshots/polymarket/polymarket_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/kalshi/kalshi_forward_l2.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/polymarket/polymarket_forward_l2.jsonl"
+        ],
+        "source_truth_acceptance_created_flag": false,
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_data1a"
+        ],
+        "upstream_input_refs": [],
+        "validator_refs": [
+          "tools/pr168_data1a_validator.py",
+          "tools/validate_pr168_data1a_focused_audit.py"
+        ]
+      },
+      {
+        "DATA1_artifact_refs": [
+          "docs/master_plan/generated/pr168_data1_snapshots/kalshi/kalshi_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_snapshots/polymarket/polymarket_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/kalshi/kalshi_forward_l2.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/polymarket/polymarket_forward_l2.jsonl"
+        ],
+        "GFP2R_consumption_allowed_flag": true,
+        "authority_class": "PR168_DATA1A_PUBLIC_READ_ONLY_AUDIT",
+        "confidence_level": "EXACT",
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "dashboard_operator_agent",
+          "source_evidence_agent",
+          "market_data_acquisition_agent"
+        ],
+        "count_authority_state": "EXACT_FROM_JSONL_ROW_SCAN",
+        "count_name": "total_snapshot_row_count",
+        "count_value": 10,
+        "data_provenance_refs": [],
+        "dedupe_key_used": "source_row_id",
+        "downstream_consumers": [
+          "dashboard_operator_agent",
+          "source_evidence_agent",
+          "market_data_acquisition_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-GFP2R",
+          "PR168-RP2",
+          "PR168-RANK2",
+          "PR165-B",
+          "PR167",
+          "PR162E-Q",
+          "PR166-Q",
+          "PR166-QB",
+          "PR166-QC"
+        ],
+        "join_key_used": "NOT_APPLICABLE",
+        "live_authority_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "missing_or_unknown_reason": null,
+        "nested_array_expansion_rule": "price/history/trade arrays expanded from normalized_record.record_count when applicable",
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "order_authority_created_flag": false,
+        "owning_agent": "governance_validation_agent",
+        "private_state_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "row_selection_rule": "deterministic DATA1A scan for total_snapshot_row_count",
+        "row_shard_refs_if_any": [],
+        "source_file_refs": [
+          "docs/master_plan/generated/pr168_data1_snapshots/kalshi/kalshi_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_snapshots/polymarket/polymarket_snapshots.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/kalshi/kalshi_forward_l2.jsonl",
+          "docs/master_plan/generated/pr168_data1_forward_l2/polymarket/polymarket_forward_l2.jsonl"
+        ],
+        "source_truth_acceptance_created_flag": false,
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_data1a"
+        ],
+        "upstream_input_refs": [],
+        "validator_refs": [
+          "tools/pr168_data1a_validator.py",
+          "tools/validate_pr168_data1a_focused_audit.py"
+        ]
+      },
+      {
+        "DATA1_artifact_refs": [
+          "docs/master_plan/generated/PR168_GFP_QKUComputationCoverage.report.json"
+        ],
+        "GFP2R_consumption_allowed_flag": false,
+        "authority_class": "PR168_DATA1A_PUBLIC_READ_ONLY_AUDIT",
+        "confidence_level": "UNKNOWN",
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "dashboard_operator_agent",
+          "source_evidence_agent",
+          "market_data_acquisition_agent"
+        ],
+        "count_authority_state": "UNKNOWN_BASELINE_MISSING_UPSTREAM_REF",
+        "count_name": "qku_pre_data1_exact_baseline_count",
+        "count_value": null,
+        "data_provenance_refs": [],
+        "dedupe_key_used": "NOT_APPLICABLE",
+        "downstream_consumers": [
+          "dashboard_operator_agent",
+          "source_evidence_agent",
+          "market_data_acquisition_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-GFP2R",
+          "PR168-RP2",
+          "PR168-RANK2",
+          "PR165-B",
+          "PR167",
+          "PR162E-Q",
+          "PR166-Q",
+          "PR166-QB",
+          "PR166-QC"
+        ],
+        "join_key_used": "NOT_APPLICABLE",
+        "live_authority_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "missing_or_unknown_reason": "PR168_GFP rows expose numeric-input-missing status, not a clean DATA1-pre/post market-data block baseline",
+        "nested_array_expansion_rule": "NOT_APPLICABLE",
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "order_authority_created_flag": false,
+        "owning_agent": "governance_validation_agent",
+        "private_state_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "row_selection_rule": "no exact pre-DATA1 missing-market-data baseline artifact found",
+        "row_shard_refs_if_any": [],
+        "source_file_refs": [
+          "docs/master_plan/generated/PR168_GFP_QKUComputationCoverage.report.json"
+        ],
+        "source_truth_acceptance_created_flag": false,
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_data1a"
+        ],
+        "upstream_input_refs": [],
+        "validator_refs": [
+          "tools/pr168_data1a_validator.py",
+          "tools/validate_pr168_data1a_focused_audit.py"
+        ]
+      }
+    ],
+    "summary": {
+      "inventory_count_family_counts": {
+        "candlestick_history": 1,
+        "forward_l2_row": 2,
+        "historical_cutoff": 1,
+        "historical_trade_history": 1,
+        "market_metadata": 2,
+        "orderbook_price_level": 2,
+        "orderbook_snapshot_record": 2,
+        "price_history": 1,
+        "trade_history": 1,
+        "trade_history_current": 1
+      },
+      "kalshi_candlestick_point_count": 2,
+      "kalshi_forward_l2_row_count": 1,
+      "kalshi_historical_trade_row_count": 5,
+      "kalshi_orderbook_market_count": 1,
+      "kalshi_orderbook_price_level_count": 2,
+      "kalshi_orderbook_snapshot_row_count": 1,
+      "kalshi_recent_trade_row_count": 5,
+      "kalshi_snapshot_total_row_count": 6,
+      "kalshi_unique_event_count": 1,
+      "kalshi_unique_market_count": 1,
+      "kalshi_unique_series_count": 1,
+      "polymarket_forward_l2_row_count": 1,
+      "polymarket_orderbook_market_count": 1,
+      "polymarket_orderbook_price_level_count": 62,
+      "polymarket_orderbook_snapshot_row_count": 1,
+      "polymarket_price_history_point_count": 25,
+      "polymarket_snapshot_total_row_count": 4,
+      "polymarket_trade_or_activity_row_count": 5,
+      "polymarket_unique_condition_count": 1,
+      "polymarket_unique_event_count": 0,
+      "polymarket_unique_market_count": 1,
+      "polymarket_unique_token_or_asset_count": 2,
+      "total_feature_row_count": 51,
+      "total_forward_l2_row_count": 2,
+      "total_historical_trade_row_count": 10,
+      "total_manifest_file_count": 6,
+      "total_orderbook_price_level_count": 64,
+      "total_orderbook_snapshot_row_count": 2,
+      "total_price_history_or_candle_point_count": 27,
+      "total_snapshot_jsonl_file_count": 2,
+      "total_snapshot_row_count": 10
+    }
+  },
+  "report_id": "PR168_DATA1A_FetchInventoryAudit",
+  "report_version": "PR168-DATA1A-v3.0",
+  "row_shard_refs_if_any": [
+    "docs/master_plan/generated/pr168_data1a_audit/fetch_inventory_rows.jsonl",
+    "docs/master_plan/generated/pr168_data1a_audit/fetch_inventory_rows.manifest.json"
+  ],
+  "source_truth_acceptance_created_flag": false,
+  "terminal_by_nature_flag": false,
+  "terminal_reason_code": null,
+  "test_refs": [
+    "tests/pr168_data1a"
+  ],
+  "upstream_input_refs": [],
+  "validator_refs": [
+    "tools/pr168_data1a_validator.py",
+    "tools/validate_pr168_data1a_focused_audit.py"
+  ]
+}

@@ -430,6 +430,12 @@ PYTEST_SHARD_COMMANDS: dict[str, tuple[PytestShardCommand, ...]] = {
             runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
             historical_runtime_seconds=20.0,
         ),
+        PytestShardCommand(
+            paths=("tests/pr168_data1a",),
+            reason="PR168-DATA1A focused DATA1 audit and GFP2R readiness tests",
+            runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
+            historical_runtime_seconds=20.0,
+        ),
     ),
     "pytest-shard-3": (
         PytestShardCommand(
@@ -3093,6 +3099,10 @@ def build_validation_commands(
         [
             sys.executable,
             _path("tools", "validate_pr168_data1_public_market_data_snapshots.py"),
+        ],
+        [
+            sys.executable,
+            _path("tools", "validate_pr168_data1a_focused_audit.py"),
         ],
         *[
             [sys.executable, _path("tools", f"validate_pr168_rank_{name}.py")]

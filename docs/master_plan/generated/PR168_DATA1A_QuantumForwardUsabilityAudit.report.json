@@ -1,0 +1,475 @@
+{
+  "DATA1_artifact_refs": [
+    "docs/master_plan/generated/PR168_DATA1_FinalSummary.report.json",
+    "docs/master_plan/generated/PR168_DATA1_PublicFetchExecutionSummary.report.json",
+    "docs/master_plan/generated/PR168_DATA1_SourceEndpointDiscovery.report.json",
+    "docs/master_plan/generated/PR168_DATA1_KalshiSnapshotManifest.report.json",
+    "docs/master_plan/generated/PR168_DATA1_PolymarketSnapshotManifest.report.json",
+    "docs/master_plan/generated/PR168_DATA1_HistoricalFullBookAvailabilityAudit.report.json",
+    "docs/master_plan/generated/PR168_DATA1_HistoricalFullBookAcquisitionLedger.report.json",
+    "docs/master_plan/generated/PR168_DATA1_HistoricalL2GapRouteToFutureAcquisition.report.json",
+    "docs/master_plan/generated/PR168_DATA1_HistoricalPriceTradeCandleReplaySubstituteLedger.report.json",
+    "docs/master_plan/generated/PR168_DATA1_ForwardFullBookReplayCaptureBootstrap.report.json",
+    "docs/master_plan/generated/PR168_DATA1_ForwardL2CaptureShardManifest.report.json",
+    "docs/master_plan/generated/PR168_DATA1_NormalizedMarketDataFeatureRegistry.report.json",
+    "docs/master_plan/generated/PR168_DATA1_DataReadinessClassification.report.json",
+    "docs/master_plan/generated/PR168_DATA1_DataQualityFreshnessCoverageAudit.report.json",
+    "docs/master_plan/generated/PR168_DATA1_MinimumViableRealDataProofDatasetPlan.report.json",
+    "docs/master_plan/generated/PR168_DATA1_PR168_GFP2R_DataReadyFormulaUniverse.report.json",
+    "docs/master_plan/generated/PR168_DATA1_PR168_RP2_FirstReplayPaperRecomputeBatch.report.json",
+    "docs/master_plan/generated/PR168_DATA1_PR168_RANK2_FirstEvidenceRankingBatch.report.json",
+    "docs/master_plan/generated/PR168_DATA1_QuantumForwardCoefficientFeatureSurface.report.json",
+    "docs/master_plan/generated/PR168_DATA1_AgentRoutingAndNoOrphanProof.report.json",
+    "docs/master_plan/generated/PR168_DATA1_DAGUpstreamDownstreamOrchestration.report.json",
+    "docs/master_plan/generated/PR168_DATA1_OperatorActionMatrix.report.json"
+  ],
+  "authority_class": "PR168_DATA1A_PUBLIC_READ_ONLY_AUDIT",
+  "connector_semantic_binding_created_flag": false,
+  "consumer_agents": [
+    "ranking_scoring_agent",
+    "governance_validation_agent",
+    "dashboard_operator_agent"
+  ],
+  "created_at_utc": "2026-06-21T11:04:04Z",
+  "created_by_tool": "tools/build_pr168_data1a_focused_audit.py",
+  "data_provenance_refs": [],
+  "downstream_consumers": [
+    "ranking_scoring_agent",
+    "governance_validation_agent",
+    "dashboard_operator_agent"
+  ],
+  "downstream_pr_refs": [
+    "PR168-GFP2R",
+    "PR168-RP2",
+    "PR168-RANK2",
+    "PR165-B",
+    "PR167",
+    "PR162E-Q",
+    "PR166-Q",
+    "PR166-QB",
+    "PR166-QC"
+  ],
+  "live_authority_created_flag": false,
+  "manual_edit_allowed_flag": false,
+  "no_orphan_status": "NO_ORPHAN_ROUTED",
+  "order_authority_created_flag": false,
+  "owning_agent": "quantum_optimizer_agent",
+  "private_state_access_created_flag": false,
+  "profit_evidence_created_flag": false,
+  "qtt_sha_or_atomicrows_hash_authority_flag": false,
+  "quantum_advantage_claim_flag": false,
+  "quantum_backend_execution_flag": false,
+  "records": {
+    "rows": [
+      {
+        "DATA1_artifact_refs": [
+          "docs/master_plan/generated/PR168_DATA1_QuantumForwardCoefficientFeatureSurface.report.json"
+        ],
+        "FDR_trial_family_penalty_source_ref": [
+          "fdr_family_id"
+        ],
+        "alpha_expected_value_proxy_source_ref": [
+          "pr168_data1_feature_0002",
+          "pr168_data1_feature_0003",
+          "pr168_data1_feature_0004",
+          "pr168_data1_feature_0005",
+          "pr168_data1_feature_0006",
+          "pr168_data1_feature_0007",
+          "pr168_data1_feature_0008",
+          "pr168_data1_feature_0009",
+          "pr168_data1_feature_0010",
+          "pr168_data1_feature_0011",
+          "pr168_data1_feature_0012"
+        ],
+        "authority_class": "PR168_DATA1A_PUBLIC_READ_ONLY_AUDIT",
+        "binary_decision_variable_identity": [
+          "x_1"
+        ],
+        "candidate_stack_binary_variable_universe": [
+          "x_1"
+        ],
+        "capacity_depth_constraint_source_ref": [
+          "pr168_data1_feature_0002",
+          "pr168_data1_feature_0003",
+          "pr168_data1_feature_0004",
+          "pr168_data1_feature_0005",
+          "pr168_data1_feature_0006",
+          "pr168_data1_feature_0007",
+          "pr168_data1_feature_0008",
+          "pr168_data1_feature_0009",
+          "pr168_data1_feature_0010",
+          "pr168_data1_feature_0011",
+          "pr168_data1_feature_0012"
+        ],
+        "classical_fallback_source_ref": true,
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "ranking_scoring_agent",
+          "governance_validation_agent",
+          "dashboard_operator_agent"
+        ],
+        "cost_TCA_coefficient_source_ref": [
+          "pr168_data1_feature_0002",
+          "pr168_data1_feature_0003",
+          "pr168_data1_feature_0004",
+          "pr168_data1_feature_0005",
+          "pr168_data1_feature_0006",
+          "pr168_data1_feature_0007",
+          "pr168_data1_feature_0008",
+          "pr168_data1_feature_0009",
+          "pr168_data1_feature_0010",
+          "pr168_data1_feature_0011",
+          "pr168_data1_feature_0012"
+        ],
+        "created_at_utc": "2026-06-21T11:04:04Z",
+        "data_provenance_refs": [],
+        "downstream_consumers": [
+          "ranking_scoring_agent",
+          "governance_validation_agent",
+          "dashboard_operator_agent"
+        ],
+        "downstream_mapping_route": [
+          "PR162E-Q quantum automapper",
+          "PR166-Q quantum/classical comparator",
+          "PR166-QB bounded optimizer benchmark",
+          "PR166-QC quantum-selected replay/paper retest",
+          "PR168-GFP2R",
+          "PR168-RP2",
+          "PR168-RANK2"
+        ],
+        "downstream_pr_refs": [
+          "PR168-GFP2R",
+          "PR168-RP2",
+          "PR168-RANK2",
+          "PR165-B",
+          "PR167",
+          "PR162E-Q",
+          "PR166-Q",
+          "PR166-QB",
+          "PR166-QC"
+        ],
+        "event_family_concentration_penalty_source_ref": [
+          "per_event_family_batch_size"
+        ],
+        "interpret_back_map_source_ref": null,
+        "latency_staleness_penalty_source_ref": [
+          "data_staleness_penalty_seed"
+        ],
+        "liquidity_spread_constraint_source_ref": [
+          "pr168_data1_feature_0002",
+          "pr168_data1_feature_0003",
+          "pr168_data1_feature_0004",
+          "pr168_data1_feature_0005",
+          "pr168_data1_feature_0006",
+          "pr168_data1_feature_0007",
+          "pr168_data1_feature_0008",
+          "pr168_data1_feature_0009",
+          "pr168_data1_feature_0010",
+          "pr168_data1_feature_0011",
+          "pr168_data1_feature_0012"
+        ],
+        "live_authority_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "mapping_readiness": "CQM_OR_QUADRATIC_PROGRAM_PREFERRED_UNTIL_PENALTY_SCALING_GAPS_RESOLVED",
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "no_trade_comparator_source_ref": [
+          "NO_TRADE_BASELINE_PERMANENT_COMPETITOR"
+        ],
+        "order_authority_created_flag": false,
+        "owning_agent": "quantum_optimizer_agent",
+        "penalty_scaling_source_or_gap": "MISSING_PENALTY_SCALING_SOURCE",
+        "private_state_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "quantum_feature_vector_id": "pr168_data1_quantum_feature_vector_0001",
+        "quantum_readiness_classification": "QUANTUM_FORWARD_PARTIAL_MISSING_COEFFICIENTS",
+        "quantum_usability_row_id": "quantum_usability_00001",
+        "row_shard_refs_if_any": [],
+        "source_truth_acceptance_created_flag": false,
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_data1a"
+        ],
+        "upstream_input_refs": [],
+        "validator_refs": [
+          "tools/pr168_data1a_validator.py",
+          "tools/validate_pr168_data1a_focused_audit.py"
+        ]
+      },
+      {
+        "DATA1_artifact_refs": [
+          "docs/master_plan/generated/PR168_DATA1_QuantumForwardCoefficientFeatureSurface.report.json"
+        ],
+        "FDR_trial_family_penalty_source_ref": [
+          "fdr_family_id"
+        ],
+        "alpha_expected_value_proxy_source_ref": [
+          "pr168_data1_feature_0023",
+          "pr168_data1_feature_0024",
+          "pr168_data1_feature_0025",
+          "pr168_data1_feature_0026",
+          "pr168_data1_feature_0027",
+          "pr168_data1_feature_0028",
+          "pr168_data1_feature_0029",
+          "pr168_data1_feature_0030",
+          "pr168_data1_feature_0031",
+          "pr168_data1_feature_0032",
+          "pr168_data1_feature_0033",
+          "pr168_data1_feature_0034",
+          "pr168_data1_feature_0035",
+          "pr168_data1_feature_0036",
+          "pr168_data1_feature_0037",
+          "pr168_data1_feature_0038",
+          "pr168_data1_feature_0039",
+          "pr168_data1_feature_0040",
+          "pr168_data1_feature_0041",
+          "pr168_data1_feature_0042",
+          "pr168_data1_feature_0043",
+          "pr168_data1_feature_0044",
+          "pr168_data1_feature_0045"
+        ],
+        "authority_class": "PR168_DATA1A_PUBLIC_READ_ONLY_AUDIT",
+        "binary_decision_variable_identity": [
+          "x_2"
+        ],
+        "candidate_stack_binary_variable_universe": [
+          "x_2"
+        ],
+        "capacity_depth_constraint_source_ref": [
+          "pr168_data1_feature_0023",
+          "pr168_data1_feature_0024",
+          "pr168_data1_feature_0025",
+          "pr168_data1_feature_0026",
+          "pr168_data1_feature_0027",
+          "pr168_data1_feature_0028",
+          "pr168_data1_feature_0029",
+          "pr168_data1_feature_0030",
+          "pr168_data1_feature_0031",
+          "pr168_data1_feature_0032",
+          "pr168_data1_feature_0033",
+          "pr168_data1_feature_0034",
+          "pr168_data1_feature_0035",
+          "pr168_data1_feature_0036",
+          "pr168_data1_feature_0037",
+          "pr168_data1_feature_0038",
+          "pr168_data1_feature_0039",
+          "pr168_data1_feature_0040",
+          "pr168_data1_feature_0041",
+          "pr168_data1_feature_0042",
+          "pr168_data1_feature_0043",
+          "pr168_data1_feature_0044",
+          "pr168_data1_feature_0045"
+        ],
+        "classical_fallback_source_ref": true,
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "ranking_scoring_agent",
+          "governance_validation_agent",
+          "dashboard_operator_agent"
+        ],
+        "cost_TCA_coefficient_source_ref": [
+          "pr168_data1_feature_0023",
+          "pr168_data1_feature_0024",
+          "pr168_data1_feature_0025",
+          "pr168_data1_feature_0026",
+          "pr168_data1_feature_0027",
+          "pr168_data1_feature_0028",
+          "pr168_data1_feature_0029",
+          "pr168_data1_feature_0030",
+          "pr168_data1_feature_0031",
+          "pr168_data1_feature_0032",
+          "pr168_data1_feature_0033",
+          "pr168_data1_feature_0034",
+          "pr168_data1_feature_0035",
+          "pr168_data1_feature_0036",
+          "pr168_data1_feature_0037",
+          "pr168_data1_feature_0038",
+          "pr168_data1_feature_0039",
+          "pr168_data1_feature_0040",
+          "pr168_data1_feature_0041",
+          "pr168_data1_feature_0042",
+          "pr168_data1_feature_0043",
+          "pr168_data1_feature_0044",
+          "pr168_data1_feature_0045"
+        ],
+        "created_at_utc": "2026-06-21T11:04:04Z",
+        "data_provenance_refs": [],
+        "downstream_consumers": [
+          "ranking_scoring_agent",
+          "governance_validation_agent",
+          "dashboard_operator_agent"
+        ],
+        "downstream_mapping_route": [
+          "PR162E-Q quantum automapper",
+          "PR166-Q quantum/classical comparator",
+          "PR166-QB bounded optimizer benchmark",
+          "PR166-QC quantum-selected replay/paper retest",
+          "PR168-GFP2R",
+          "PR168-RP2",
+          "PR168-RANK2"
+        ],
+        "downstream_pr_refs": [
+          "PR168-GFP2R",
+          "PR168-RP2",
+          "PR168-RANK2",
+          "PR165-B",
+          "PR167",
+          "PR162E-Q",
+          "PR166-Q",
+          "PR166-QB",
+          "PR166-QC"
+        ],
+        "event_family_concentration_penalty_source_ref": [
+          "per_event_family_batch_size"
+        ],
+        "interpret_back_map_source_ref": null,
+        "latency_staleness_penalty_source_ref": [
+          "data_staleness_penalty_seed"
+        ],
+        "liquidity_spread_constraint_source_ref": [
+          "pr168_data1_feature_0023",
+          "pr168_data1_feature_0024",
+          "pr168_data1_feature_0025",
+          "pr168_data1_feature_0026",
+          "pr168_data1_feature_0027",
+          "pr168_data1_feature_0028",
+          "pr168_data1_feature_0029",
+          "pr168_data1_feature_0030",
+          "pr168_data1_feature_0031",
+          "pr168_data1_feature_0032",
+          "pr168_data1_feature_0033",
+          "pr168_data1_feature_0034",
+          "pr168_data1_feature_0035",
+          "pr168_data1_feature_0036",
+          "pr168_data1_feature_0037",
+          "pr168_data1_feature_0038",
+          "pr168_data1_feature_0039",
+          "pr168_data1_feature_0040",
+          "pr168_data1_feature_0041",
+          "pr168_data1_feature_0042",
+          "pr168_data1_feature_0043",
+          "pr168_data1_feature_0044",
+          "pr168_data1_feature_0045"
+        ],
+        "live_authority_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "mapping_readiness": "CQM_OR_QUADRATIC_PROGRAM_PREFERRED_UNTIL_PENALTY_SCALING_GAPS_RESOLVED",
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "no_trade_comparator_source_ref": [
+          "NO_TRADE_BASELINE_PERMANENT_COMPETITOR"
+        ],
+        "order_authority_created_flag": false,
+        "owning_agent": "quantum_optimizer_agent",
+        "penalty_scaling_source_or_gap": "MISSING_PENALTY_SCALING_SOURCE",
+        "private_state_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "quantum_feature_vector_id": "pr168_data1_quantum_feature_vector_0002",
+        "quantum_readiness_classification": "QUANTUM_FORWARD_PARTIAL_MISSING_COEFFICIENTS",
+        "quantum_usability_row_id": "quantum_usability_00002",
+        "row_shard_refs_if_any": [],
+        "source_truth_acceptance_created_flag": false,
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_data1a"
+        ],
+        "upstream_input_refs": [],
+        "validator_refs": [
+          "tools/pr168_data1a_validator.py",
+          "tools/validate_pr168_data1a_focused_audit.py"
+        ]
+      }
+    ],
+    "summary": {
+      "DATA1_artifact_refs": [
+        "docs/master_plan/generated/PR168_DATA1_QuantumForwardCoefficientFeatureSurface.report.json"
+      ],
+      "alpha_coefficient_data_source_count": 2,
+      "authority_class": "PR168_DATA1A_PUBLIC_READ_ONLY_AUDIT",
+      "candidate_stack_binary_variable_count": 2,
+      "capacity_constraint_data_source_count": 2,
+      "classical_comparator_available_flag": true,
+      "classical_fallback_available_flag": true,
+      "concentration_penalty_data_source_count": 2,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "ranking_scoring_agent",
+        "governance_validation_agent",
+        "dashboard_operator_agent"
+      ],
+      "correlation_penalty_data_source_count": 2,
+      "cost_coefficient_data_source_count": 2,
+      "data_provenance_refs": [],
+      "downstream_consumers": [
+        "ranking_scoring_agent",
+        "governance_validation_agent",
+        "dashboard_operator_agent"
+      ],
+      "downstream_pr_refs": [
+        "PR168-GFP2R",
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR167",
+        "PR162E-Q",
+        "PR166-Q",
+        "PR166-QB",
+        "PR166-QC"
+      ],
+      "fdr_penalty_data_source_count": 2,
+      "interpret_back_gap_count": 2,
+      "latency_penalty_data_source_count": 2,
+      "liquidity_constraint_data_source_count": 2,
+      "live_authority_created_flag": false,
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_ROUTED",
+      "no_trade_constraint_data_source_count": 2,
+      "order_authority_created_flag": false,
+      "owning_agent": "quantum_optimizer_agent",
+      "penalty_scaling_gap_count": 2,
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "quantum_feature_vector_count": 2,
+      "quantum_forward_data_ready_candidate_count": 0,
+      "quantum_forward_partial_count": 2,
+      "row_shard_refs_if_any": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "test_refs": [
+        "tests/pr168_data1a"
+      ],
+      "upstream_input_refs": [],
+      "validator_refs": [
+        "tools/pr168_data1a_validator.py",
+        "tools/validate_pr168_data1a_focused_audit.py"
+      ]
+    }
+  },
+  "report_id": "PR168_DATA1A_QuantumForwardUsabilityAudit",
+  "report_version": "PR168-DATA1A-v3.0",
+  "row_shard_refs_if_any": [
+    "docs/master_plan/generated/pr168_data1a_audit/quantum_usability_rows.jsonl",
+    "docs/master_plan/generated/pr168_data1a_audit/quantum_usability_rows.manifest.json"
+  ],
+  "source_truth_acceptance_created_flag": false,
+  "terminal_by_nature_flag": false,
+  "terminal_reason_code": null,
+  "test_refs": [
+    "tests/pr168_data1a"
+  ],
+  "upstream_input_refs": [],
+  "validator_refs": [
+    "tools/pr168_data1a_validator.py",
+    "tools/validate_pr168_data1a_focused_audit.py"
+  ]
+}

@@ -202,6 +202,8 @@ def _pr_token(stem: str) -> str | None:
         return "pr167"
     if "pr165_d3" in stem:
         return "pr165_d3"
+    if "pr168_data1a" in stem:
+        return "pr168_data1a"
     if "pr168_data1" in stem:
         return "pr168_data1"
     match = re.search(r"(pr\d+[a-z]?(?:_[a-z]+)?)", stem)

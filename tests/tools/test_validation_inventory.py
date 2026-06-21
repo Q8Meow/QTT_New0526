@@ -145,6 +145,16 @@ def test_inventory_has_pr168_data1_entry():
     assert "tests/pr168_data1/**" in entry.required_when_files_match
 
 
+def test_inventory_has_pr168_data1a_entry():
+    entry = inventory.inventory_by_id()["validate_pr168_data1a_focused_audit"]
+
+    assert entry.owner_pr_or_feature == "PR168_DATA1A"
+    assert "docs/master_plan/generated/PR168_DATA1A_*.report.json" in entry.output_globs
+    assert "docs/master_plan/generated/pr168_data1a*/**" in entry.output_globs
+    assert "tools/validate_pr168_data1a_focused_audit.py" in entry.tool_globs
+    assert "tests/pr168_data1a/**" in entry.required_when_files_match
+
+
 def test_inventory_knows_every_pytest_shard_phase_job():
     for phase in runner.ORDERED_PHASES:
         assert inventory.phase_job_id(phase) == inventory.VALIDATION_MATRIX_JOB_ID
