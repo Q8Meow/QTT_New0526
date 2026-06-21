@@ -1,0 +1,5 @@
+from tests.pr168_gfp2.pr168_gfp2_test_support import validate_no_real_positive_negative_without_accepted_data
+
+
+def test_no_real_positive_or_negative_without_accepted_real_market_data() -> None:
+    validate_no_real_positive_negative_without_accepted_data()

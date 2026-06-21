@@ -7,11 +7,12 @@ from fnmatch import fnmatchcase
 
 
 PR168_GFP_BRANCH = "pr168-gfp-global-formula-discovery-real-computation"
+PR168_GFP2_BRANCH = "pr168-gfp2-full-universe-provenance-reopen"
 PR168_RP_BRANCH = "pr168-rp-formula-based-replay-paper-recompute"
 PR168_RANK_BRANCH = "pr168-rank-evidence-backed-ranking"
 VALIDATION_FIXTURE_BRANCH = "pr-ci-fastfail-validation-context-preflight"
 
-_PR168_BRANCHES = frozenset({PR168_GFP_BRANCH, PR168_RP_BRANCH, PR168_RANK_BRANCH, VALIDATION_FIXTURE_BRANCH})
+_PR168_BRANCHES = frozenset({PR168_GFP_BRANCH, PR168_GFP2_BRANCH, PR168_RP_BRANCH, PR168_RANK_BRANCH, VALIDATION_FIXTURE_BRANCH})
 _VALIDATION_CONTEXT_BRANCHES = frozenset({VALIDATION_FIXTURE_BRANCH})
 
 _PR168_ALLOWED_EXACT_PATHS = frozenset(
@@ -40,6 +41,26 @@ _PR168_ALLOWED_PATTERNS = (
     "src/qtt/stage1_prediction_markets/pr168_gfp_real_computation/**",
     "tests/pr168_gfp/**",
     "tools/validate_pr168_gfp_*.py",
+)
+
+_PR168_GFP2_ALLOWED_EXACT_PATHS = frozenset(
+    {
+        "tools/build_pr168_gfp2_full_universe_formula_data_provenance_reopen.py",
+        "tools/run_validation_gates.py",
+        "tools/validation_inventory.py",
+        "tools/validation_scope_registry.py",
+        "tools/validate_validation_scope_registry.py",
+        "tests/tools/test_validation_scope_registry.py",
+        "tests/tools/test_validation_inventory.py",
+    }
+)
+
+_PR168_GFP2_ALLOWED_PATTERNS = (
+    "docs/master_plan/generated/PR168_GFP2_*.report.json",
+    "docs/master_plan/generated/pr168_gfp2_shards/PR168_GFP2_*.report.json",
+    "tools/pr168_gfp2_*.py",
+    "tools/validate_pr168_gfp2_*.py",
+    "tests/pr168_gfp2/**",
 )
 
 _PR168_RP_ALLOWED_EXACT_PATHS = frozenset(
@@ -196,6 +217,29 @@ def _pr168_rank_scope_decision(branch_name: str, normalized: str) -> dict[str, o
     return None
 
 
+def _pr168_gfp2_scope_decision(branch_name: str, normalized: str) -> dict[str, object] | None:
+    if normalized in _PR168_GFP2_ALLOWED_EXACT_PATHS:
+        return {
+            "allowed": True,
+            "branch": branch_name,
+            "normalized_path": normalized,
+            "pr_id": "PR168-GFP2",
+            "matched_rule": f"exact:{normalized}",
+            "reason": "registered_exact_path",
+        }
+    for pattern in _PR168_GFP2_ALLOWED_PATTERNS:
+        if fnmatchcase(normalized, pattern):
+            return {
+                "allowed": True,
+                "branch": branch_name,
+                "normalized_path": normalized,
+                "pr_id": "PR168-GFP2",
+                "matched_rule": f"pattern:{pattern}",
+                "reason": "registered_pattern",
+            }
+    return None
+
+
 def explain_pr_scope_decision(branch: str, path: str) -> dict[str, object]:
     normalized = normalize_changed_path(path)
     branch_name = str(branch).strip()
@@ -244,6 +288,19 @@ def explain_pr_scope_decision(branch: str, path: str) -> dict[str, object]:
             "reason": "path_not_registered_for_pr_scope",
         }
 
+    if branch_name == PR168_GFP2_BRANCH:
+        gfp2_decision = _pr168_gfp2_scope_decision(branch_name, normalized)
+        if gfp2_decision:
+            return gfp2_decision
+        return {
+            "allowed": False,
+            "branch": branch_name,
+            "normalized_path": normalized,
+            "pr_id": "PR168-GFP2",
+            "matched_rule": "no_pr168_gfp2_scope_rule",
+            "reason": "path_not_registered_for_pr_scope",
+        }
+
     if branch_name == VALIDATION_FIXTURE_BRANCH:
         rp_decision = _pr168_rp_scope_decision(branch_name, normalized)
         if rp_decision:
@@ -251,6 +308,9 @@ def explain_pr_scope_decision(branch: str, path: str) -> dict[str, object]:
         rank_decision = _pr168_rank_scope_decision(branch_name, normalized)
         if rank_decision:
             return rank_decision
+        gfp2_decision = _pr168_gfp2_scope_decision(branch_name, normalized)
+        if gfp2_decision:
+            return gfp2_decision
 
     if normalized in _PR168_ALLOWED_EXACT_PATHS:
         return {

@@ -413,6 +413,12 @@ PYTEST_SHARD_COMMANDS: dict[str, tuple[PytestShardCommand, ...]] = {
             historical_runtime_seconds=2.0,
         ),
         PytestShardCommand(
+            paths=("tests/pr168_gfp2",),
+            reason="PR168-GFP2 full-universe provenance reopening focused tests",
+            runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
+            historical_runtime_seconds=5.0,
+        ),
+        PytestShardCommand(
             paths=("tests/pr168_rp",),
             reason="PR168-RP replay/paper recompute and pretrade focused tests",
             runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
@@ -2931,6 +2937,20 @@ def build_validation_commands(
             _path(
                 "tools",
                 "validate_pr168_gfp_authority_boundaries.py",
+            ),
+        ],
+        [
+            sys.executable,
+            _path(
+                "tools",
+                "build_pr168_gfp2_full_universe_formula_data_provenance_reopen.py",
+            ),
+        ],
+        [
+            sys.executable,
+            _path(
+                "tools",
+                "validate_pr168_gfp2_full_universe.py",
             ),
         ],
         [

@@ -30,6 +30,7 @@ from src.qtt.stage1_prediction_markets.qtt_owner_global_override_directive_curre
 
 
 PR168_BRANCH = registry.PR168_GFP_BRANCH
+PR168_GFP2_BRANCH = registry.PR168_GFP2_BRANCH
 PR168_RP_BRANCH = registry.PR168_RP_BRANCH
 PR168_RANK_BRANCH = registry.PR168_RANK_BRANCH
 FIXTURE_BRANCH = registry.VALIDATION_FIXTURE_BRANCH
@@ -100,6 +101,21 @@ def test_pr168_rp_allowed_paths_pass_on_real_branch(path: str) -> None:
 )
 def test_pr168_rank_allowed_paths_pass_on_real_branch(path: str) -> None:
     assert registry.is_pr_scoped_changed_path_allowed(PR168_RANK_BRANCH, path)
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        "docs/master_plan/generated/PR168_GFP2_FinalSummary.report.json",
+        "docs/master_plan/generated/pr168_gfp2_shards/PR168_GFP2_AllQKUComputabilityClassificationLedger.report.part_0001_of_0001.report.json",
+        "tools/build_pr168_gfp2_full_universe_formula_data_provenance_reopen.py",
+        "tools/pr168_gfp2_validator.py",
+        "tools/validate_pr168_gfp2_full_universe.py",
+        "tests/pr168_gfp2/test_pr168_gfp2_full_universe_not_selected35_only.py",
+    ],
+)
+def test_pr168_gfp2_allowed_paths_pass_on_real_branch(path: str) -> None:
+    assert registry.is_pr_scoped_changed_path_allowed(PR168_GFP2_BRANCH, path)
     assert registry.is_pr_scoped_changed_path_allowed(FIXTURE_BRANCH, path)
 
 
@@ -135,6 +151,7 @@ def test_pr168_allowed_paths_pass_on_validation_fixture_branch_only_when_registe
 )
 def test_pr168_disallowed_and_forbidden_paths_fail(path: str) -> None:
     assert not registry.is_pr_scoped_changed_path_allowed(PR168_BRANCH, path)
+    assert not registry.is_pr_scoped_changed_path_allowed(PR168_GFP2_BRANCH, path)
     assert not registry.is_pr_scoped_changed_path_allowed(PR168_RP_BRANCH, path)
     assert not registry.is_pr_scoped_changed_path_allowed(PR168_RANK_BRANCH, path)
     assert not registry.is_pr_scoped_changed_path_allowed(FIXTURE_BRANCH, path)
