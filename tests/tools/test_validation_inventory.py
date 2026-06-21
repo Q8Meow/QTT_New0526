@@ -135,6 +135,16 @@ def test_inventory_has_pr168_rank_entry():
     assert "tests/pr168_rank/**" in entry.required_when_files_match
 
 
+def test_inventory_has_pr168_data1_entry():
+    entry = inventory.inventory_by_id()["validate_pr168_data1_public_market_data_snapshots"]
+
+    assert entry.owner_pr_or_feature == "PR168_DATA1"
+    assert "docs/master_plan/generated/PR168_DATA1_*.report.json" in entry.output_globs
+    assert "docs/master_plan/generated/pr168_data1*/**" in entry.output_globs
+    assert "tools/validate_pr168_data1_public_market_data_snapshots.py" in entry.tool_globs
+    assert "tests/pr168_data1/**" in entry.required_when_files_match
+
+
 def test_inventory_knows_every_pytest_shard_phase_job():
     for phase in runner.ORDERED_PHASES:
         assert inventory.phase_job_id(phase) == inventory.VALIDATION_MATRIX_JOB_ID

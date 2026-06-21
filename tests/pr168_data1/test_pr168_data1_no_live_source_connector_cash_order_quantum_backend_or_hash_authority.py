@@ -1,0 +1,5 @@
+from tools.pr168_data1_validator import run_validation
+
+
+def test_pr168_data1_no_live_source_connector_cash_order_quantum_backend_or_hash_authority() -> None:
+    run_validation("no_live_source_connector_cash_order_quantum_backend_or_hash_authority")

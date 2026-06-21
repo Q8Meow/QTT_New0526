@@ -10,6 +10,7 @@ if str(REPO_ROOT) not in sys.path:
 
 from tools.validation_scope_registry import (  # noqa: E402
     PR168_GFP_BRANCH,
+    PR168_DATA1_BRANCH,
     PR168_RP_BRANCH,
     VALIDATION_FIXTURE_BRANCH,
     explain_pr_scope_decision,
@@ -71,6 +72,28 @@ def main() -> int:
                 f"{explain_pr_scope_decision(VALIDATION_FIXTURE_BRANCH, path)}"
             )
 
+    data1_allowed_paths = [
+        "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+        "docs/master_plan/generated/PR168_DATA1_FinalSummary.report.json",
+        "docs/master_plan/generated/pr168_data1_snapshots/kalshi/kalshi_snapshots.jsonl",
+        "docs/master_plan/generated/pr168_data1_snapshots/kalshi/kalshi_snapshots.manifest.json",
+        "docs/master_plan/generated/pr168_data1_forward_l2/polymarket/polymarket_forward_l2.jsonl",
+        "docs/master_plan/generated/pr168_data1_historical_replay_candidates/candidate_sources/historical_full_book_candidates.manifest.json",
+        "tools/build_pr168_data1_public_market_data_snapshots.py",
+        "tools/pr168_data1_validator.py",
+        "tools/validate_pr168_data1_public_market_data_snapshots.py",
+        "tests/pr168_data1/test_pr168_data1_public_fetch_summary_exists.py",
+        "tools/run_validation_gates.py",
+    ]
+    for path in data1_allowed_paths:
+        if not is_pr_scoped_changed_path_allowed(PR168_DATA1_BRANCH, path):
+            failures.append(f"EXPECTED_ALLOWED:{PR168_DATA1_BRANCH}:{path}:{explain_pr_scope_decision(PR168_DATA1_BRANCH, path)}")
+        if not is_pr_scoped_changed_path_allowed(VALIDATION_FIXTURE_BRANCH, path):
+            failures.append(
+                f"EXPECTED_ALLOWED:{VALIDATION_FIXTURE_BRANCH}:{path}:"
+                f"{explain_pr_scope_decision(VALIDATION_FIXTURE_BRANCH, path)}"
+            )
+
     disallowed_paths = [
         "docs/master_plan/generated/SomeOtherReport.report.json",
         "tools/random_helper.py",
@@ -89,6 +112,9 @@ def main() -> int:
         for path in disallowed_paths:
             if is_pr_scoped_changed_path_allowed(branch, path):
                 failures.append(f"EXPECTED_REJECTED:{branch}:{path}")
+    for path in disallowed_paths:
+        if is_pr_scoped_changed_path_allowed(PR168_DATA1_BRANCH, path):
+            failures.append(f"EXPECTED_REJECTED:{PR168_DATA1_BRANCH}:{path}")
     for path in [
         "docs/master_plan/generated/PR168_GFP_QKUBaselineCountReconcile.report.json",
         "tools/build_pr168_gfp_global_formula_discovery_real_computation.py",

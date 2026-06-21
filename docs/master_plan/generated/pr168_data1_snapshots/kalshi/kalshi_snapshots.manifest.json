@@ -1,0 +1,61 @@
+{
+  "authority_class": "PUBLIC_READ_ONLY_JSONL_SHARD_MANIFEST",
+  "connector_semantic_binding_created_flag": false,
+  "consumer_agents": [
+    "source_evidence_agent",
+    "qku_formula_materialization_agent",
+    "replay_paper_agent",
+    "ranking_scoring_agent",
+    "dashboard_operator_agent"
+  ],
+  "created_at_utc": "2026-06-21T04:41:22Z",
+  "data_family": "snapshot",
+  "downstream_consumers": [
+    "source_evidence_agent",
+    "qku_formula_materialization_agent",
+    "replay_paper_agent",
+    "ranking_scoring_agent",
+    "dashboard_operator_agent"
+  ],
+  "downstream_pr_refs": [
+    "PR168-GFP2R",
+    "PR168-RP2",
+    "PR168-RANK2"
+  ],
+  "live_authority_created_flag": false,
+  "manifest_id": "pr168_data1_kalshi_snapshot_manifest",
+  "manual_edit_allowed_flag": false,
+  "no_orphan_status": "NO_ORPHAN_ROUTED",
+  "order_authority_created_flag": false,
+  "owning_agent": "market_data_acquisition_agent",
+  "private_state_access_created_flag": false,
+  "profit_evidence_created_flag": false,
+  "qtt_sha_or_atomicrows_hash_authority_flag": false,
+  "quantum_advantage_claim_flag": false,
+  "quantum_backend_execution_flag": false,
+  "row_count": 6,
+  "row_refs": [
+    "kalshi_market_metadata_0001",
+    "kalshi_orderbook_snapshot_0001",
+    "kalshi_market_trades_0001",
+    "kalshi_historical_trades_0001",
+    "kalshi_candlesticks_0001",
+    "kalshi_historical_cutoff_0001"
+  ],
+  "shard_path": "docs/master_plan/generated/pr168_data1_snapshots/kalshi/kalshi_snapshots.jsonl",
+  "source_refs": [
+    "kalshi_quick_start_market_data",
+    "kalshi_orderbook_responses"
+  ],
+  "source_truth_acceptance_created_flag": false,
+  "terminal_by_nature_flag": false,
+  "terminal_reason_code": null,
+  "test_refs": [
+    "tests/pr168_data1"
+  ],
+  "validator_refs": [
+    "tools/pr168_data1_validator.py",
+    "tools/validate_pr168_data1_public_market_data_snapshots.py"
+  ],
+  "venue": "kalshi"
+}

@@ -1,0 +1,95 @@
+{
+  "authority_class": "PUBLIC_READ_ONLY_DATA_ACQUISITION_CANDIDATE",
+  "connector_semantic_binding_created_flag": false,
+  "consumer_agents": [
+    "dashboard_operator_agent",
+    "source_evidence_agent"
+  ],
+  "created_at_utc": "2026-06-21T04:41:22Z",
+  "downstream_consumers": [
+    "dashboard_operator_agent",
+    "source_evidence_agent"
+  ],
+  "downstream_pr_refs": [
+    "PR168-GFP2R",
+    "PR168-RP2",
+    "PR168-RANK2"
+  ],
+  "live_authority_created_flag": false,
+  "manifest_id": "pr168_data1_forecastex_ibkr_auth_required_manifest",
+  "manual_edit_allowed_flag": false,
+  "no_orphan_status": "NO_ORPHAN_ROUTED",
+  "order_authority_created_flag": false,
+  "owning_agent": "governance_validation_agent",
+  "private_state_access_created_flag": false,
+  "profit_evidence_created_flag": false,
+  "qtt_sha_or_atomicrows_hash_authority_flag": false,
+  "quantum_advantage_claim_flag": false,
+  "quantum_backend_execution_flag": false,
+  "row_count": 1,
+  "rows": [
+    {
+      "authority_class": "PUBLIC_READ_ONLY_DATA_ACQUISITION_CANDIDATE",
+      "conid_required": true,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "dashboard_operator_agent",
+        "source_evidence_agent"
+      ],
+      "created_at_utc": "2026-06-21T04:41:22Z",
+      "data_family": "event_contract_market_data",
+      "data_readiness_state": "AUTH_REQUIRED_PENDING_OWNER_SETUP",
+      "downstream_consumers": [
+        "dashboard_operator_agent",
+        "source_evidence_agent"
+      ],
+      "downstream_pr_refs": [
+        "PR168-GFP2R",
+        "PR168-RP2",
+        "PR168-RANK2"
+      ],
+      "forecast_ex_ibkr_row_id": "forecastex_ibkr_auth_required_0001",
+      "historical_data_state": "MARKET_DATA_SUBSCRIPTION_REQUIRED",
+      "live_authority_created_flag": false,
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_ROUTED",
+      "order_authority_created_flag": false,
+      "order_authority_default": "BLOCKED",
+      "orderbook_state": "MARKET_DATA_SUBSCRIPTION_REQUIRED",
+      "owner_setup_route": "OWNER_IBKR_SETUP",
+      "owning_agent": "governance_validation_agent",
+      "private_state_access_created_flag": false,
+      "private_state_default": "BLOCKED",
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "source_truth_acceptance_created_flag": false,
+      "source_urls": [
+        "https://www.interactivebrokers.com/campus/ibkr-api-page/event-contracts/",
+        "https://interactivebrokers.github.io/tws-api/market_data.html",
+        "https://interactivebrokers.github.io/tws-api/historical_data.html"
+      ],
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "test_refs": [
+        "tests/pr168_data1"
+      ],
+      "validator_refs": [
+        "tools/pr168_data1_validator.py",
+        "tools/validate_pr168_data1_public_market_data_snapshots.py"
+      ],
+      "venue": "forecastex_ibkr"
+    }
+  ],
+  "source_truth_acceptance_created_flag": false,
+  "terminal_by_nature_flag": false,
+  "terminal_reason_code": null,
+  "test_refs": [
+    "tests/pr168_data1"
+  ],
+  "validator_refs": [
+    "tools/pr168_data1_validator.py",
+    "tools/validate_pr168_data1_public_market_data_snapshots.py"
+  ]
+}
