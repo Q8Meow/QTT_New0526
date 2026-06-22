@@ -999,6 +999,15 @@ def _expected_commands(
             python_executable,
             str(Path("tools") / "validate_pr168_map3.py"),
         ],
+        [
+            python_executable,
+            str(Path("tools") / "build_pr168_rp3.py"),
+            "--offline",
+        ],
+        [
+            python_executable,
+            str(Path("tools") / "validate_pr168_rp3.py"),
+        ],
         *[
             [
                 python_executable,
@@ -2866,6 +2875,7 @@ def test_runner_splits_pytest_shard_2_longest_group_deterministically():
         ("tests/pr168_gfp2r",),
         ("tests/pr168_rp2",),
         ("tests/pr168_map3",),
+        ("tests/pr168_rp3",),
     ]
     assert all(command.reason for command in commands)
     assert ("tests/stage1_prediction_markets",) not in [

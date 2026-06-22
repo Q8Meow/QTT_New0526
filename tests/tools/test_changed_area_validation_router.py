@@ -109,6 +109,27 @@ def test_pr168_map3_validator_tool_maps_to_owner_validator():
     assert "tools/validate_pr168_map3.py" not in result.unknown_files
 
 
+def test_pr168_rp3_generated_report_maps_to_owner_validator():
+    result = _pull_request_result(
+        "docs/master_plan/generated/PR168_RP3_FinalSummary.report.json"
+    )
+
+    assert "validate_pr168_rp3" in result.required_validators
+    assert result.touched_generated_reports == (
+        "docs/master_plan/generated/PR168_RP3_FinalSummary.report.json",
+    )
+    assert result.cross_platform_path_scan_required is True
+    assert result.fail_closed_reasons == ()
+
+
+def test_pr168_rp3_validator_tool_maps_to_owner_validator():
+    result = _pull_request_result("tools/validate_pr168_rp3.py")
+
+    assert "validate_pr168_rp3" in result.required_validators
+    assert result.fail_closed_reasons == ()
+    assert "tools/validate_pr168_rp3.py" not in result.unknown_files
+
+
 def test_generated_report_without_owner_fails_closed():
     result = _pull_request_result(
         "docs/master_plan/generated/UnownedGeneratedReport.report.json"
