@@ -1,0 +1,151 @@
+{
+  "DATA1A_refs": [
+    "docs/master_plan/generated/PR168_DATA1A_FinalSummary.report.json",
+    "docs/master_plan/generated/PR168_DATA1A_GFP2RAllowedDataFamilyContract.report.json",
+    "docs/master_plan/generated/PR168_DATA1A_HistoricalFullBookTruthLedger.report.json",
+    "docs/master_plan/generated/PR168_DATA1A_AgentRoutingAndNoOrphanProof.report.json"
+  ],
+  "DATA1_refs": [
+    "docs/master_plan/generated/PR168_DATA1_FinalSummary.report.json",
+    "docs/master_plan/generated/PR168_DATA1_PR168_GFP2R_DataReadyFormulaUniverse.report.json",
+    "docs/master_plan/generated/PR168_DATA1_PR168_RP2_FirstReplayPaperRecomputeBatch.report.json",
+    "docs/master_plan/generated/PR168_DATA1_NormalizedMarketDataFeatureRegistry.report.json"
+  ],
+  "GFP2R_refs": [
+    "docs/master_plan/generated/PR168_GFP2R_FinalSummary.report.json",
+    "docs/master_plan/generated/pr168_gfp2r_candidate_compute/rp2_handoff_rows.jsonl"
+  ],
+  "MAP2_refs_if_any": [],
+  "TCA_refs": [],
+  "authority_class": "PR168_RP2_CANDIDATE_ONLY_NON_PROOF",
+  "cash_access_created_flag": false,
+  "computed_from_refs": [],
+  "connector_semantic_binding_created_flag": false,
+  "consumer_agents": [
+    "replay_paper_agent",
+    "ranking_scoring_agent",
+    "dashboard_operator_agent"
+  ],
+  "created_at_utc": "2026-06-22T00:00:00Z",
+  "created_by_tool": "tools/build_pr168_rp2_map2.py",
+  "data_provenance_refs": [],
+  "downstream_consumers": [
+    "replay_paper_agent",
+    "ranking_scoring_agent",
+    "dashboard_operator_agent"
+  ],
+  "downstream_pr_refs": [
+    "PR168-RANK2",
+    "PR165-B",
+    "PR167",
+    "DATA1B",
+    "GFP2R",
+    "PR162E-Q"
+  ],
+  "formula_refs": [],
+  "live_authority_created_flag": false,
+  "live_order_authority_flag": false,
+  "logical_to_physical_alias_ref": "docs/master_plan/generated/PR168_RP2_FileAliases.report.json",
+  "manual_edit_allowed_flag": false,
+  "no_orphan_status": "NO_ORPHAN_ROUTED",
+  "no_trade_refs": [],
+  "numeric_evidence_refs": [],
+  "order_authority_created_flag": false,
+  "order_intent_refs": [],
+  "owning_agent": "governance_validation_agent",
+  "paper_refs": [],
+  "path_length_audit_ref": "docs/master_plan/generated/PR168_RP2_PathAudit.report.json",
+  "physical_filename": "docs/master_plan/generated/PR168_RP2_HandoffAudit.report.json",
+  "private_state_access_created_flag": false,
+  "profit_evidence_created_flag": false,
+  "qku_refs_if_available": [],
+  "qtt_sha_or_atomicrows_hash_authority_flag": false,
+  "quantum_advantage_claim_flag": false,
+  "quantum_backend_execution_flag": false,
+  "quantum_refs": [],
+  "records": {
+    "formula_execution_count": 36,
+    "gfp2r_final_records": {
+      "DATA1A_source_counts": {
+        "GFP2R_historical_full_book_assumption_allowed_flag": false,
+        "data1a_consumed_flag": true,
+        "exact_qku_formula_unblocked_count": 0,
+        "false_precision_blocked_rows": 10,
+        "historical_full_book_verified_public_rows": 0,
+        "partial_or_candidate_computability_rows": 10,
+        "still_blocked_or_repair_routed_rows": 10
+      },
+      "break_even_threshold_computed_count": 5,
+      "candidate_formula_execution_count": 36,
+      "candidate_negative_edge_non_proof_count": 0,
+      "candidate_neutral_edge_non_proof_count": 0,
+      "candidate_no_trade_preferred_non_proof_count": 3,
+      "candidate_numeric_evidence_row_count": 31,
+      "candidate_positive_edge_non_proof_count": 0,
+      "data1a_consumed_flag": true,
+      "exact_qku_formula_candidate_compute_ready_count": 0,
+      "exact_repaired_qku_formula_candidate_compute_ready_count": 0,
+      "execution_adjusted_seed_count": 31,
+      "fdr_trial_family_seed_count": 31,
+      "formula_equivalence_cluster_count": 57,
+      "formula_variant_duplicate_suppressed_count": 3,
+      "formula_variant_executed_count": 31,
+      "formula_variant_generated_count": 60,
+      "formula_variant_unit_invalid_count": 12,
+      "historical_full_book_assumption_violation_count": 0,
+      "live_authority_created_flag": false,
+      "market_implied_probability_as_alpha_violation_count": 0,
+      "negative_recovery_repair_route_count": 180,
+      "no_orphan_violation_count": 0,
+      "portfolio_marginal_utility_seed_count": 31,
+      "probability_model_required_for_edge_count": 3,
+      "profit_evidence_created_flag": false,
+      "provisional_data_consumer_compute_ready_count": 2,
+      "provisional_formula_execution_count": 36,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_count": 0,
+      "quantum_backend_execution_count": 0,
+      "quantum_formula_variant_coverage_count": 31,
+      "quantum_structural_candidate_count": 31,
+      "rank2_candidate_handoff_count": 31,
+      "real_negative_count": 0,
+      "real_positive_count": 0,
+      "real_positive_negative_allowed_count": 0,
+      "recovery_variant_generated_count": 180,
+      "regime_conditioned_seed_count": 31,
+      "repair_required_historical_full_book_count": 5,
+      "repair_required_missing_data_family_count": 9,
+      "repair_required_missing_formula_input_count": 0,
+      "required_edge_threshold_computed_count": 2,
+      "rp2_candidate_handoff_count": 36,
+      "source_truth_acceptance_created_flag": false,
+      "tca_fill_latency_capacity_seed_count": 31
+    },
+    "rank2_handoff_count": 31,
+    "rp2_handoff_count": 36
+  },
+  "repair_route_if_gap": null,
+  "replay_refs": [],
+  "report_id": "PR168_RP2_GFP2RHandoffConsumptionAudit",
+  "report_version": "PR168-RP2-MAP2-v4.0",
+  "row_shard_refs_if_any": [],
+  "scenario_refs": [],
+  "source_truth_acceptance_created_flag": false,
+  "terminal_by_nature_flag": false,
+  "terminal_reason_code": null,
+  "test_refs": [
+    "tests/pr168_rp2"
+  ],
+  "upstream_input_refs": [
+    "docs/master_plan/generated/PR168_GFP2R_FinalSummary.report.json",
+    "docs/master_plan/generated/pr168_gfp2r_candidate_compute/rp2_handoff_rows.jsonl"
+  ],
+  "upstream_refs": [
+    "docs/master_plan/generated/PR168_GFP2R_FinalSummary.report.json",
+    "docs/master_plan/generated/pr168_gfp2r_candidate_compute/rp2_handoff_rows.jsonl"
+  ],
+  "validator_refs": [
+    "tools/pr168_rp2_validator.py",
+    "tools/validate_pr168_rp2_map2.py"
+  ]
+}

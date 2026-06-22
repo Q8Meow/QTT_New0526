@@ -35,6 +35,7 @@ PR168_RANK_BRANCH = registry.PR168_RANK_BRANCH
 PR168_DATA1_BRANCH = registry.PR168_DATA1_BRANCH
 PR168_DATA1A_BRANCH = registry.PR168_DATA1A_BRANCH
 PR168_GFP2R_BRANCH = registry.PR168_GFP2R_BRANCH
+PR168_RP2_BRANCH = registry.PR168_RP2_BRANCH
 FIXTURE_BRANCH = registry.VALIDATION_FIXTURE_BRANCH
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
@@ -164,6 +165,25 @@ def test_pr168_gfp2r_allowed_paths_pass_on_real_branch(path: str) -> None:
     assert registry.is_pr_scoped_changed_path_allowed(FIXTURE_BRANCH, path)
 
 
+@pytest.mark.parametrize(
+    "path",
+    [
+        "docs/master_plan/generated/PR168_RP2_Final.report.json",
+        "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+        "docs/master_plan/generated/rp2p/replay_exec.jsonl",
+        "docs/master_plan/generated/rp2p/replay_exec.manifest.json",
+        "tools/build_pr168_rp2_map2.py",
+        "tools/pr168_rp2_engine.py",
+        "tools/validate_pr168_rp2_map2.py",
+        "tests/pr168_rp2/test_numeric_pnl.py",
+        "tools/run_validation_gates.py",
+    ],
+)
+def test_pr168_rp2_allowed_paths_pass_on_real_branch(path: str) -> None:
+    assert registry.is_pr_scoped_changed_path_allowed(PR168_RP2_BRANCH, path)
+    assert registry.is_pr_scoped_changed_path_allowed(FIXTURE_BRANCH, path)
+
+
 def test_pr168_allowed_paths_pass_on_validation_fixture_branch_only_when_registered() -> None:
     assert registry.is_validation_context_branch(FIXTURE_BRANCH)
     assert registry.is_pr_scoped_changed_path_allowed(
@@ -201,6 +221,7 @@ def test_pr168_disallowed_and_forbidden_paths_fail(path: str) -> None:
     assert not registry.is_pr_scoped_changed_path_allowed(PR168_DATA1_BRANCH, path)
     assert not registry.is_pr_scoped_changed_path_allowed(PR168_DATA1A_BRANCH, path)
     assert not registry.is_pr_scoped_changed_path_allowed(PR168_GFP2R_BRANCH, path)
+    assert not registry.is_pr_scoped_changed_path_allowed(PR168_RP2_BRANCH, path)
     assert not registry.is_pr_scoped_changed_path_allowed(FIXTURE_BRANCH, path)
 
 
@@ -218,6 +239,7 @@ def test_pr168_rp_rejects_gfp_scope_paths(path: str) -> None:
     assert not registry.is_pr_scoped_changed_path_allowed(PR168_DATA1_BRANCH, path)
     assert not registry.is_pr_scoped_changed_path_allowed(PR168_DATA1A_BRANCH, path)
     assert not registry.is_pr_scoped_changed_path_allowed(PR168_GFP2R_BRANCH, path)
+    assert not registry.is_pr_scoped_changed_path_allowed(PR168_RP2_BRANCH, path)
 
 
 @pytest.mark.parametrize(
@@ -234,6 +256,24 @@ def test_other_pr168_branches_reject_gfp2r_scope_paths(path: str) -> None:
     assert not registry.is_pr_scoped_changed_path_allowed(PR168_RANK_BRANCH, path)
     assert not registry.is_pr_scoped_changed_path_allowed(PR168_DATA1_BRANCH, path)
     assert not registry.is_pr_scoped_changed_path_allowed(PR168_DATA1A_BRANCH, path)
+    assert not registry.is_pr_scoped_changed_path_allowed(PR168_RP2_BRANCH, path)
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        "docs/master_plan/generated/PR168_RP2_Final.report.json",
+        "tools/pr168_rp2_engine.py",
+        "tests/pr168_rp2/test_quantum_no_backend.py",
+    ],
+)
+def test_other_pr168_branches_reject_rp2_scope_paths(path: str) -> None:
+    assert not registry.is_pr_scoped_changed_path_allowed(PR168_BRANCH, path)
+    assert not registry.is_pr_scoped_changed_path_allowed(PR168_RP_BRANCH, path)
+    assert not registry.is_pr_scoped_changed_path_allowed(PR168_RANK_BRANCH, path)
+    assert not registry.is_pr_scoped_changed_path_allowed(PR168_DATA1_BRANCH, path)
+    assert not registry.is_pr_scoped_changed_path_allowed(PR168_DATA1A_BRANCH, path)
+    assert not registry.is_pr_scoped_changed_path_allowed(PR168_GFP2R_BRANCH, path)
 
 
 def test_pr167_production_builder_still_rejects_pr168_branch(monkeypatch: pytest.MonkeyPatch) -> None:

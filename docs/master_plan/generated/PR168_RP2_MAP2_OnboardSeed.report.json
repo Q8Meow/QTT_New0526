@@ -1,0 +1,689 @@
+{
+  "DATA1A_refs": [
+    "docs/master_plan/generated/PR168_DATA1A_FinalSummary.report.json",
+    "docs/master_plan/generated/PR168_DATA1A_GFP2RAllowedDataFamilyContract.report.json",
+    "docs/master_plan/generated/PR168_DATA1A_HistoricalFullBookTruthLedger.report.json",
+    "docs/master_plan/generated/PR168_DATA1A_AgentRoutingAndNoOrphanProof.report.json"
+  ],
+  "DATA1_refs": [
+    "docs/master_plan/generated/PR168_DATA1_FinalSummary.report.json",
+    "docs/master_plan/generated/PR168_DATA1_PR168_GFP2R_DataReadyFormulaUniverse.report.json",
+    "docs/master_plan/generated/PR168_DATA1_PR168_RP2_FirstReplayPaperRecomputeBatch.report.json",
+    "docs/master_plan/generated/PR168_DATA1_NormalizedMarketDataFeatureRegistry.report.json"
+  ],
+  "GFP2R_refs": [
+    "docs/master_plan/generated/PR168_GFP2R_FinalSummary.report.json",
+    "docs/master_plan/generated/pr168_gfp2r_candidate_compute/rp2_handoff_rows.jsonl"
+  ],
+  "MAP2_refs_if_any": [],
+  "TCA_refs": [],
+  "authority_class": "PR168_RP2_CANDIDATE_ONLY_NON_PROOF",
+  "cash_access_created_flag": false,
+  "computed_from_refs": [],
+  "connector_semantic_binding_created_flag": false,
+  "consumer_agents": [
+    "qku_formula_materialization_agent",
+    "formula_execution_agent",
+    "replay_paper_agent",
+    "ranking_scoring_agent",
+    "quantum_optimizer_agent"
+  ],
+  "created_at_utc": "2026-06-22T00:00:00Z",
+  "created_by_tool": "tools/build_pr168_rp2_map2.py",
+  "data_provenance_refs": [],
+  "downstream_consumers": [
+    "qku_formula_materialization_agent",
+    "formula_execution_agent",
+    "replay_paper_agent",
+    "ranking_scoring_agent",
+    "quantum_optimizer_agent"
+  ],
+  "downstream_pr_refs": [
+    "PR168-RANK2",
+    "PR165-B",
+    "PR167",
+    "DATA1B",
+    "GFP2R",
+    "PR162E-Q"
+  ],
+  "formula_refs": [],
+  "live_authority_created_flag": false,
+  "live_order_authority_flag": false,
+  "logical_to_physical_alias_ref": "docs/master_plan/generated/PR168_RP2_FileAliases.report.json",
+  "manual_edit_allowed_flag": false,
+  "no_orphan_status": "NO_ORPHAN_ROUTED",
+  "no_trade_refs": [],
+  "numeric_evidence_refs": [],
+  "order_authority_created_flag": false,
+  "order_intent_refs": [],
+  "owning_agent": "formula_onboarding_agent",
+  "paper_refs": [],
+  "path_length_audit_ref": "docs/master_plan/generated/PR168_RP2_PathAudit.report.json",
+  "physical_filename": "docs/master_plan/generated/PR168_RP2_MAP2_OnboardSeed.report.json",
+  "private_state_access_created_flag": false,
+  "profit_evidence_created_flag": false,
+  "qku_refs_if_available": [],
+  "qtt_sha_or_atomicrows_hash_authority_flag": false,
+  "quantum_advantage_claim_flag": false,
+  "quantum_backend_execution_flag": false,
+  "quantum_refs": [],
+  "records": {
+    "contract_count": 36,
+    "sample_rows": [
+      {
+        "DATA1A_refs": [],
+        "DATA1_refs": [],
+        "GFP2R_refs": [
+          "gfp2r_compute_00001"
+        ],
+        "MAP2_refs_if_any": [],
+        "TCA_refs": [],
+        "agent_route_contract_ref": "AgentRouteContractV1::PR168_GFP_FORMULA_MARKET_IMPLIED_PROBABILITY",
+        "authority_class": "PR168_RP2_CANDIDATE_ONLY_NON_PROOF",
+        "cash_access_created_flag": false,
+        "classical_fallback_ref": "ClassicalFallbackComparatorReplayPaperLedger",
+        "computed_from_refs": [],
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "qku_formula_materialization_agent",
+          "formula_execution_agent",
+          "replay_paper_agent",
+          "ranking_scoring_agent",
+          "quantum_optimizer_agent"
+        ],
+        "contract_family": "FormulaPluginContractV1",
+        "current_36_rows_seed_batch_flag": true,
+        "data_provenance_refs": [],
+        "data_requirement_contract_ref": "DataRequirementContractV1::PR168_GFP_FORMULA_MARKET_IMPLIED_PROBABILITY",
+        "downstream_consumers": [
+          "qku_formula_materialization_agent",
+          "formula_execution_agent",
+          "replay_paper_agent",
+          "ranking_scoring_agent",
+          "quantum_optimizer_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-RANK2",
+          "PR165-B",
+          "PR167",
+          "DATA1B",
+          "GFP2R",
+          "PR162E-Q"
+        ],
+        "execution_policy_grid_ref": "ExecutionPolicyGridContractV1::RP2_CANDIDATE_GRID",
+        "formula_expression_ref": "entry_price / payout_value",
+        "formula_family": "probability_formula",
+        "formula_id": "PR168_GFP_FORMULA_MARKET_IMPLIED_PROBABILITY",
+        "formula_owner": "qku_formula_materialization_agent",
+        "formula_plugin_id": "rp2_formula_plugin_00001",
+        "formula_refs": [
+          "PR168_GFP_FORMULA_MARKET_IMPLIED_PROBABILITY"
+        ],
+        "formula_variant_id": "gfp2r_formula_variant_00001",
+        "formula_version_ref": "PR168-GFP2R-v3.0",
+        "live_authority_created_flag": false,
+        "live_order_authority_flag": false,
+        "manual_edit_allowed_flag": false,
+        "market_type_applicability": [
+          "prediction_market_binary_contract"
+        ],
+        "metadata_only_formula_pass_flag": false,
+        "no_orphan_contract_ref": "NoOrphanDAGRegistry::PR168_RP2",
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "no_trade_refs": [],
+        "numeric_evidence_refs": [],
+        "optional_inputs": [
+          "independent_probability_model",
+          "forward_l2_after_capture_start",
+          "resolution_or_settlement_if_present"
+        ],
+        "order_authority_created_flag": false,
+        "order_intent_refs": [],
+        "owning_agent": "formula_onboarding_agent",
+        "paper_refs": [],
+        "private_state_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "qku_refs_if_available": [],
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "quantum_objective_mapping_contract_ref": "QuantumObjectiveMappingContractV1::PR168_GFP_FORMULA_MARKET_IMPLIED_PROBABILITY",
+        "quantum_refs": [],
+        "rank2_handoff_schema_ref": "PR168_RP2_To_PR168_RANK2_ReplayPaperEvidenceRows",
+        "repair_route_if_gap": null,
+        "replay_paper_compute_receipt_schema_ref": "ReplayPaperComputeReceiptV1",
+        "replay_refs": [],
+        "required_inputs": [
+          "entry_price",
+          "payout_value"
+        ],
+        "row_shard_refs_if_any": [],
+        "scenario_refs": [],
+        "side_applicability": [
+          "YES"
+        ],
+        "source_evidence_requirements": [
+          "SOURCE_EVIDENCE_ACCEPTANCE_REQUIRED_FOR_REAL_PROOF",
+          "CANDIDATE_DATA_ALLOWED_FOR_REPLAY_PAPER"
+        ],
+        "source_truth_acceptance_created_flag": false,
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_rp2"
+        ],
+        "unit_normalization_contract_ref": "UnitNormalizationContractV1::PR168_GFP_FORMULA_MARKET_IMPLIED_PROBABILITY",
+        "upstream_input_refs": [
+          "map2_promote_00001"
+        ],
+        "upstream_refs": [
+          "map2_promote_00001"
+        ],
+        "validator_refs": [
+          "tools/pr168_rp2_validator.py",
+          "tools/validate_pr168_rp2_map2.py"
+        ],
+        "venue_applicability": [
+          "kalshi"
+        ]
+      },
+      {
+        "DATA1A_refs": [],
+        "DATA1_refs": [],
+        "GFP2R_refs": [
+          "gfp2r_compute_00002"
+        ],
+        "MAP2_refs_if_any": [],
+        "TCA_refs": [],
+        "agent_route_contract_ref": "AgentRouteContractV1::PR168_GFP2R_FORMULA_BREAK_EVEN_PROBABILITY_AFTER_COSTS",
+        "authority_class": "PR168_RP2_CANDIDATE_ONLY_NON_PROOF",
+        "cash_access_created_flag": false,
+        "classical_fallback_ref": "ClassicalFallbackComparatorReplayPaperLedger",
+        "computed_from_refs": [],
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "qku_formula_materialization_agent",
+          "formula_execution_agent",
+          "replay_paper_agent",
+          "ranking_scoring_agent",
+          "quantum_optimizer_agent"
+        ],
+        "contract_family": "FormulaPluginContractV1",
+        "current_36_rows_seed_batch_flag": true,
+        "data_provenance_refs": [],
+        "data_requirement_contract_ref": "DataRequirementContractV1::PR168_GFP2R_FORMULA_BREAK_EVEN_PROBABILITY_AFTER_COSTS",
+        "downstream_consumers": [
+          "qku_formula_materialization_agent",
+          "formula_execution_agent",
+          "replay_paper_agent",
+          "ranking_scoring_agent",
+          "quantum_optimizer_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-RANK2",
+          "PR165-B",
+          "PR167",
+          "DATA1B",
+          "GFP2R",
+          "PR162E-Q"
+        ],
+        "execution_policy_grid_ref": "ExecutionPolicyGridContractV1::RP2_CANDIDATE_GRID",
+        "formula_expression_ref": "(entry_price + candidate_cost_stack) / payout_value",
+        "formula_family": "threshold_formula",
+        "formula_id": "PR168_GFP2R_FORMULA_BREAK_EVEN_PROBABILITY_AFTER_COSTS",
+        "formula_owner": "qku_formula_materialization_agent",
+        "formula_plugin_id": "rp2_formula_plugin_00002",
+        "formula_refs": [
+          "PR168_GFP2R_FORMULA_BREAK_EVEN_PROBABILITY_AFTER_COSTS"
+        ],
+        "formula_variant_id": "gfp2r_formula_variant_00002",
+        "formula_version_ref": "PR168-GFP2R-v3.0",
+        "live_authority_created_flag": false,
+        "live_order_authority_flag": false,
+        "manual_edit_allowed_flag": false,
+        "market_type_applicability": [
+          "prediction_market_binary_contract"
+        ],
+        "metadata_only_formula_pass_flag": false,
+        "no_orphan_contract_ref": "NoOrphanDAGRegistry::PR168_RP2",
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "no_trade_refs": [],
+        "numeric_evidence_refs": [],
+        "optional_inputs": [
+          "independent_probability_model",
+          "forward_l2_after_capture_start",
+          "resolution_or_settlement_if_present"
+        ],
+        "order_authority_created_flag": false,
+        "order_intent_refs": [],
+        "owning_agent": "formula_onboarding_agent",
+        "paper_refs": [],
+        "private_state_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "qku_refs_if_available": [],
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "quantum_objective_mapping_contract_ref": "QuantumObjectiveMappingContractV1::PR168_GFP2R_FORMULA_BREAK_EVEN_PROBABILITY_AFTER_COSTS",
+        "quantum_refs": [],
+        "rank2_handoff_schema_ref": "PR168_RP2_To_PR168_RANK2_ReplayPaperEvidenceRows",
+        "repair_route_if_gap": null,
+        "replay_paper_compute_receipt_schema_ref": "ReplayPaperComputeReceiptV1",
+        "replay_refs": [],
+        "required_inputs": [
+          "candidate_cost_stack",
+          "entry_price",
+          "payout_value"
+        ],
+        "row_shard_refs_if_any": [],
+        "scenario_refs": [],
+        "side_applicability": [
+          "YES"
+        ],
+        "source_evidence_requirements": [
+          "SOURCE_EVIDENCE_ACCEPTANCE_REQUIRED_FOR_REAL_PROOF",
+          "CANDIDATE_DATA_ALLOWED_FOR_REPLAY_PAPER"
+        ],
+        "source_truth_acceptance_created_flag": false,
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_rp2"
+        ],
+        "unit_normalization_contract_ref": "UnitNormalizationContractV1::PR168_GFP2R_FORMULA_BREAK_EVEN_PROBABILITY_AFTER_COSTS",
+        "upstream_input_refs": [
+          "map2_promote_00002"
+        ],
+        "upstream_refs": [
+          "map2_promote_00002"
+        ],
+        "validator_refs": [
+          "tools/pr168_rp2_validator.py",
+          "tools/validate_pr168_rp2_map2.py"
+        ],
+        "venue_applicability": [
+          "kalshi"
+        ]
+      },
+      {
+        "DATA1A_refs": [],
+        "DATA1_refs": [],
+        "GFP2R_refs": [
+          "gfp2r_compute_00003"
+        ],
+        "MAP2_refs_if_any": [],
+        "TCA_refs": [],
+        "agent_route_contract_ref": "AgentRouteContractV1::PR168_GFP_FORMULA_LATENCY_DECAY",
+        "authority_class": "PR168_RP2_CANDIDATE_ONLY_NON_PROOF",
+        "cash_access_created_flag": false,
+        "classical_fallback_ref": "ClassicalFallbackComparatorReplayPaperLedger",
+        "computed_from_refs": [],
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "qku_formula_materialization_agent",
+          "formula_execution_agent",
+          "replay_paper_agent",
+          "ranking_scoring_agent",
+          "quantum_optimizer_agent"
+        ],
+        "contract_family": "FormulaPluginContractV1",
+        "current_36_rows_seed_batch_flag": true,
+        "data_provenance_refs": [],
+        "data_requirement_contract_ref": "DataRequirementContractV1::PR168_GFP_FORMULA_LATENCY_DECAY",
+        "downstream_consumers": [
+          "qku_formula_materialization_agent",
+          "formula_execution_agent",
+          "replay_paper_agent",
+          "ranking_scoring_agent",
+          "quantum_optimizer_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-RANK2",
+          "PR165-B",
+          "PR167",
+          "DATA1B",
+          "GFP2R",
+          "PR162E-Q"
+        ],
+        "execution_policy_grid_ref": "ExecutionPolicyGridContractV1::RP2_CANDIDATE_GRID",
+        "formula_expression_ref": "staleness_seconds * volatility_proxy / 86400",
+        "formula_family": "execution_adjustment_formula",
+        "formula_id": "PR168_GFP_FORMULA_LATENCY_DECAY",
+        "formula_owner": "qku_formula_materialization_agent",
+        "formula_plugin_id": "rp2_formula_plugin_00003",
+        "formula_refs": [
+          "PR168_GFP_FORMULA_LATENCY_DECAY"
+        ],
+        "formula_variant_id": "gfp2r_formula_variant_00011",
+        "formula_version_ref": "PR168-GFP2R-v3.0",
+        "live_authority_created_flag": false,
+        "live_order_authority_flag": false,
+        "manual_edit_allowed_flag": false,
+        "market_type_applicability": [
+          "prediction_market_binary_contract"
+        ],
+        "metadata_only_formula_pass_flag": false,
+        "no_orphan_contract_ref": "NoOrphanDAGRegistry::PR168_RP2",
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "no_trade_refs": [],
+        "numeric_evidence_refs": [],
+        "optional_inputs": [
+          "independent_probability_model",
+          "forward_l2_after_capture_start",
+          "resolution_or_settlement_if_present"
+        ],
+        "order_authority_created_flag": false,
+        "order_intent_refs": [],
+        "owning_agent": "formula_onboarding_agent",
+        "paper_refs": [],
+        "private_state_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "qku_refs_if_available": [],
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "quantum_objective_mapping_contract_ref": "QuantumObjectiveMappingContractV1::PR168_GFP_FORMULA_LATENCY_DECAY",
+        "quantum_refs": [],
+        "rank2_handoff_schema_ref": "PR168_RP2_To_PR168_RANK2_ReplayPaperEvidenceRows",
+        "repair_route_if_gap": null,
+        "replay_paper_compute_receipt_schema_ref": "ReplayPaperComputeReceiptV1",
+        "replay_refs": [],
+        "required_inputs": [
+          "freshness_seconds",
+          "volatility_proxy"
+        ],
+        "row_shard_refs_if_any": [],
+        "scenario_refs": [],
+        "side_applicability": [
+          "YES"
+        ],
+        "source_evidence_requirements": [
+          "SOURCE_EVIDENCE_ACCEPTANCE_REQUIRED_FOR_REAL_PROOF",
+          "CANDIDATE_DATA_ALLOWED_FOR_REPLAY_PAPER"
+        ],
+        "source_truth_acceptance_created_flag": false,
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_rp2"
+        ],
+        "unit_normalization_contract_ref": "UnitNormalizationContractV1::PR168_GFP_FORMULA_LATENCY_DECAY",
+        "upstream_input_refs": [
+          "map2_promote_00003"
+        ],
+        "upstream_refs": [
+          "map2_promote_00003"
+        ],
+        "validator_refs": [
+          "tools/pr168_rp2_validator.py",
+          "tools/validate_pr168_rp2_map2.py"
+        ],
+        "venue_applicability": [
+          "kalshi"
+        ]
+      },
+      {
+        "DATA1A_refs": [],
+        "DATA1_refs": [],
+        "GFP2R_refs": [
+          "gfp2r_compute_00004"
+        ],
+        "MAP2_refs_if_any": [],
+        "TCA_refs": [],
+        "agent_route_contract_ref": "AgentRouteContractV1::PR168_GFP_FORMULA_CAPACITY_CROWDING",
+        "authority_class": "PR168_RP2_CANDIDATE_ONLY_NON_PROOF",
+        "cash_access_created_flag": false,
+        "classical_fallback_ref": "ClassicalFallbackComparatorReplayPaperLedger",
+        "computed_from_refs": [],
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "qku_formula_materialization_agent",
+          "formula_execution_agent",
+          "replay_paper_agent",
+          "ranking_scoring_agent",
+          "quantum_optimizer_agent"
+        ],
+        "contract_family": "FormulaPluginContractV1",
+        "current_36_rows_seed_batch_flag": true,
+        "data_provenance_refs": [],
+        "data_requirement_contract_ref": "DataRequirementContractV1::PR168_GFP_FORMULA_CAPACITY_CROWDING",
+        "downstream_consumers": [
+          "qku_formula_materialization_agent",
+          "formula_execution_agent",
+          "replay_paper_agent",
+          "ranking_scoring_agent",
+          "quantum_optimizer_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-RANK2",
+          "PR165-B",
+          "PR167",
+          "DATA1B",
+          "GFP2R",
+          "PR162E-Q"
+        ],
+        "execution_policy_grid_ref": "ExecutionPolicyGridContractV1::RP2_CANDIDATE_GRID",
+        "formula_expression_ref": "order_size_bucket / max(top_level_depth, 1)",
+        "formula_family": "execution_adjustment_formula",
+        "formula_id": "PR168_GFP_FORMULA_CAPACITY_CROWDING",
+        "formula_owner": "qku_formula_materialization_agent",
+        "formula_plugin_id": "rp2_formula_plugin_00004",
+        "formula_refs": [
+          "PR168_GFP_FORMULA_CAPACITY_CROWDING"
+        ],
+        "formula_variant_id": "gfp2r_formula_variant_00012",
+        "formula_version_ref": "PR168-GFP2R-v3.0",
+        "live_authority_created_flag": false,
+        "live_order_authority_flag": false,
+        "manual_edit_allowed_flag": false,
+        "market_type_applicability": [
+          "prediction_market_binary_contract"
+        ],
+        "metadata_only_formula_pass_flag": false,
+        "no_orphan_contract_ref": "NoOrphanDAGRegistry::PR168_RP2",
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "no_trade_refs": [],
+        "numeric_evidence_refs": [],
+        "optional_inputs": [
+          "independent_probability_model",
+          "forward_l2_after_capture_start",
+          "resolution_or_settlement_if_present"
+        ],
+        "order_authority_created_flag": false,
+        "order_intent_refs": [],
+        "owning_agent": "formula_onboarding_agent",
+        "paper_refs": [],
+        "private_state_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "qku_refs_if_available": [],
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "quantum_objective_mapping_contract_ref": "QuantumObjectiveMappingContractV1::PR168_GFP_FORMULA_CAPACITY_CROWDING",
+        "quantum_refs": [],
+        "rank2_handoff_schema_ref": "PR168_RP2_To_PR168_RANK2_ReplayPaperEvidenceRows",
+        "repair_route_if_gap": null,
+        "replay_paper_compute_receipt_schema_ref": "ReplayPaperComputeReceiptV1",
+        "replay_refs": [],
+        "required_inputs": [
+          "order_size_bucket",
+          "top_level_depth"
+        ],
+        "row_shard_refs_if_any": [],
+        "scenario_refs": [],
+        "side_applicability": [
+          "YES"
+        ],
+        "source_evidence_requirements": [
+          "SOURCE_EVIDENCE_ACCEPTANCE_REQUIRED_FOR_REAL_PROOF",
+          "CANDIDATE_DATA_ALLOWED_FOR_REPLAY_PAPER"
+        ],
+        "source_truth_acceptance_created_flag": false,
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_rp2"
+        ],
+        "unit_normalization_contract_ref": "UnitNormalizationContractV1::PR168_GFP_FORMULA_CAPACITY_CROWDING",
+        "upstream_input_refs": [
+          "map2_promote_00004"
+        ],
+        "upstream_refs": [
+          "map2_promote_00004"
+        ],
+        "validator_refs": [
+          "tools/pr168_rp2_validator.py",
+          "tools/validate_pr168_rp2_map2.py"
+        ],
+        "venue_applicability": [
+          "kalshi"
+        ]
+      },
+      {
+        "DATA1A_refs": [],
+        "DATA1_refs": [],
+        "GFP2R_refs": [
+          "gfp2r_compute_00005"
+        ],
+        "MAP2_refs_if_any": [],
+        "TCA_refs": [],
+        "agent_route_contract_ref": "AgentRouteContractV1::PR168_GFP2R_FORMULA_TIME_TO_RESOLUTION_LIFECYCLE_FEATURE",
+        "authority_class": "PR168_RP2_CANDIDATE_ONLY_NON_PROOF",
+        "cash_access_created_flag": false,
+        "classical_fallback_ref": "ClassicalFallbackComparatorReplayPaperLedger",
+        "computed_from_refs": [],
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "qku_formula_materialization_agent",
+          "formula_execution_agent",
+          "replay_paper_agent",
+          "ranking_scoring_agent",
+          "quantum_optimizer_agent"
+        ],
+        "contract_family": "FormulaPluginContractV1",
+        "current_36_rows_seed_batch_flag": true,
+        "data_provenance_refs": [],
+        "data_requirement_contract_ref": "DataRequirementContractV1::PR168_GFP2R_FORMULA_TIME_TO_RESOLUTION_LIFECYCLE_FEATURE",
+        "downstream_consumers": [
+          "qku_formula_materialization_agent",
+          "formula_execution_agent",
+          "replay_paper_agent",
+          "ranking_scoring_agent",
+          "quantum_optimizer_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-RANK2",
+          "PR165-B",
+          "PR167",
+          "DATA1B",
+          "GFP2R",
+          "PR162E-Q"
+        ],
+        "execution_policy_grid_ref": "ExecutionPolicyGridContractV1::RP2_CANDIDATE_GRID",
+        "formula_expression_ref": "resolution_timestamp - snapshot_timestamp",
+        "formula_family": "candidate_formula",
+        "formula_id": "PR168_GFP2R_FORMULA_TIME_TO_RESOLUTION_LIFECYCLE_FEATURE",
+        "formula_owner": "qku_formula_materialization_agent",
+        "formula_plugin_id": "rp2_formula_plugin_00005",
+        "formula_refs": [
+          "PR168_GFP2R_FORMULA_TIME_TO_RESOLUTION_LIFECYCLE_FEATURE"
+        ],
+        "formula_variant_id": "gfp2r_formula_variant_00014",
+        "formula_version_ref": "PR168-GFP2R-v3.0",
+        "live_authority_created_flag": false,
+        "live_order_authority_flag": false,
+        "manual_edit_allowed_flag": false,
+        "market_type_applicability": [
+          "prediction_market_binary_contract"
+        ],
+        "metadata_only_formula_pass_flag": false,
+        "no_orphan_contract_ref": "NoOrphanDAGRegistry::PR168_RP2",
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "no_trade_refs": [],
+        "numeric_evidence_refs": [],
+        "optional_inputs": [
+          "independent_probability_model",
+          "forward_l2_after_capture_start",
+          "resolution_or_settlement_if_present"
+        ],
+        "order_authority_created_flag": false,
+        "order_intent_refs": [],
+        "owning_agent": "formula_onboarding_agent",
+        "paper_refs": [],
+        "private_state_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "qku_refs_if_available": [],
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "quantum_objective_mapping_contract_ref": "QuantumObjectiveMappingContractV1::PR168_GFP2R_FORMULA_TIME_TO_RESOLUTION_LIFECYCLE_FEATURE",
+        "quantum_refs": [],
+        "rank2_handoff_schema_ref": "PR168_RP2_To_PR168_RANK2_ReplayPaperEvidenceRows",
+        "repair_route_if_gap": null,
+        "replay_paper_compute_receipt_schema_ref": "ReplayPaperComputeReceiptV1",
+        "replay_refs": [],
+        "required_inputs": [
+          "resolution_timestamp",
+          "snapshot_timestamp"
+        ],
+        "row_shard_refs_if_any": [],
+        "scenario_refs": [],
+        "side_applicability": [
+          "YES"
+        ],
+        "source_evidence_requirements": [
+          "SOURCE_EVIDENCE_ACCEPTANCE_REQUIRED_FOR_REAL_PROOF",
+          "CANDIDATE_DATA_ALLOWED_FOR_REPLAY_PAPER"
+        ],
+        "source_truth_acceptance_created_flag": false,
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_rp2"
+        ],
+        "unit_normalization_contract_ref": "UnitNormalizationContractV1::PR168_GFP2R_FORMULA_TIME_TO_RESOLUTION_LIFECYCLE_FEATURE",
+        "upstream_input_refs": [
+          "map2_promote_00005"
+        ],
+        "upstream_refs": [
+          "map2_promote_00005"
+        ],
+        "validator_refs": [
+          "tools/pr168_rp2_validator.py",
+          "tools/validate_pr168_rp2_map2.py"
+        ],
+        "venue_applicability": [
+          "kalshi"
+        ]
+      }
+    ],
+    "seed_batch_not_fixed_universe_flag": true
+  },
+  "repair_route_if_gap": null,
+  "replay_refs": [],
+  "report_id": "PR168_RP2_MAP2_FutureFormulaOnboardingRegistrySeed",
+  "report_version": "PR168-RP2-MAP2-v4.0",
+  "row_shard_refs_if_any": [
+    "docs/master_plan/generated/rp2p/formula_onboard.jsonl",
+    "docs/master_plan/generated/rp2p/formula_onboard.manifest.json"
+  ],
+  "scenario_refs": [],
+  "source_truth_acceptance_created_flag": false,
+  "terminal_by_nature_flag": false,
+  "terminal_reason_code": null,
+  "test_refs": [
+    "tests/pr168_rp2"
+  ],
+  "upstream_input_refs": [
+    "docs/master_plan/generated/PR168_GFP2R_FinalSummary.report.json",
+    "docs/master_plan/generated/pr168_gfp2r_candidate_compute/rp2_handoff_rows.jsonl"
+  ],
+  "upstream_refs": [
+    "docs/master_plan/generated/PR168_GFP2R_FinalSummary.report.json",
+    "docs/master_plan/generated/pr168_gfp2r_candidate_compute/rp2_handoff_rows.jsonl"
+  ],
+  "validator_refs": [
+    "tools/pr168_rp2_validator.py",
+    "tools/validate_pr168_rp2_map2.py"
+  ]
+}

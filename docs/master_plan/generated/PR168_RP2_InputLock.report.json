@@ -1,0 +1,823 @@
+{
+  "DATA1A_refs": [
+    "docs/master_plan/generated/PR168_DATA1A_FinalSummary.report.json",
+    "docs/master_plan/generated/PR168_DATA1A_GFP2RAllowedDataFamilyContract.report.json",
+    "docs/master_plan/generated/PR168_DATA1A_HistoricalFullBookTruthLedger.report.json",
+    "docs/master_plan/generated/PR168_DATA1A_AgentRoutingAndNoOrphanProof.report.json"
+  ],
+  "DATA1_refs": [
+    "docs/master_plan/generated/PR168_DATA1_FinalSummary.report.json",
+    "docs/master_plan/generated/PR168_DATA1_PR168_GFP2R_DataReadyFormulaUniverse.report.json",
+    "docs/master_plan/generated/PR168_DATA1_PR168_RP2_FirstReplayPaperRecomputeBatch.report.json",
+    "docs/master_plan/generated/PR168_DATA1_NormalizedMarketDataFeatureRegistry.report.json"
+  ],
+  "GFP2R_refs": [
+    "docs/master_plan/generated/PR168_GFP2R_FinalSummary.report.json",
+    "docs/master_plan/generated/pr168_gfp2r_candidate_compute/rp2_handoff_rows.jsonl"
+  ],
+  "MAP2_refs_if_any": [],
+  "TCA_refs": [],
+  "authority_class": "PR168_RP2_CANDIDATE_ONLY_NON_PROOF",
+  "cash_access_created_flag": false,
+  "computed_from_refs": [],
+  "connector_semantic_binding_created_flag": false,
+  "consumer_agents": [
+    "ranking_scoring_agent",
+    "risk_tca_capacity_agent",
+    "dashboard_operator_agent"
+  ],
+  "created_at_utc": "2026-06-22T00:00:00Z",
+  "created_by_tool": "tools/build_pr168_rp2_map2.py",
+  "data_provenance_refs": [],
+  "downstream_consumers": [
+    "ranking_scoring_agent",
+    "risk_tca_capacity_agent",
+    "dashboard_operator_agent"
+  ],
+  "downstream_pr_refs": [
+    "PR168-RANK2",
+    "PR165-B",
+    "PR167",
+    "DATA1B",
+    "GFP2R",
+    "PR162E-Q"
+  ],
+  "formula_refs": [],
+  "live_authority_created_flag": false,
+  "live_order_authority_flag": false,
+  "logical_to_physical_alias_ref": "docs/master_plan/generated/PR168_RP2_FileAliases.report.json",
+  "manual_edit_allowed_flag": false,
+  "no_orphan_status": "NO_ORPHAN_ROUTED",
+  "no_trade_refs": [],
+  "numeric_evidence_refs": [],
+  "order_authority_created_flag": false,
+  "order_intent_refs": [],
+  "owning_agent": "replay_paper_agent",
+  "paper_refs": [],
+  "path_length_audit_ref": "docs/master_plan/generated/PR168_RP2_PathAudit.report.json",
+  "physical_filename": "docs/master_plan/generated/PR168_RP2_InputLock.report.json",
+  "private_state_access_created_flag": false,
+  "profit_evidence_created_flag": false,
+  "qku_refs_if_available": [],
+  "qtt_sha_or_atomicrows_hash_authority_flag": false,
+  "quantum_advantage_claim_flag": false,
+  "quantum_backend_execution_flag": false,
+  "quantum_refs": [],
+  "records": {
+    "row_count": 36,
+    "sample_rows": [
+      {
+        "DATA1A_contract_refs": [
+          "docs/master_plan/generated/PR168_DATA1A_GFP2RAllowedDataFamilyContract.report.json"
+        ],
+        "DATA1A_refs": [
+          "docs/master_plan/generated/PR168_DATA1A_FinalSummary.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_InputDiscovery.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_FetchInventoryAudit.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_DataProductIntegrityLedger.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_QKUUnblockDeltaAudit.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_DataQualityCoverageAudit.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_HistoricalFullBookTruthLedger.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_GFP2RReadinessDecision.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_GFP2RAllowedDataFamilyContract.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_QKUFormulaDataRequirementBridge.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_QKUComputabilityRouteLedger.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_FormulaInputCoverageMatrix.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_DataQualitySeverityActionQueue.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_RP2RANK2BatchReadinessAudit.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_QuantumForwardUsabilityAudit.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_AlphaCaptureReadinessMatrix.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_NegativeToPositiveRecoveryReadinessQueue.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_AgentRoutingAndNoOrphanProof.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_DAGUpstreamDownstreamOrchestration.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_EveryValueUpstreamDownstreamCrosswalk.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_AgentConsumableDataValueRoutingLedger.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_OperatorActionMatrix.report.json"
+        ],
+        "DATA1_refs": [
+          "kalshi_market_metadata_0001",
+          "kalshi_orderbook_snapshot_0001",
+          "kalshi_market_trades_0001",
+          "kalshi_historical_trades_0001",
+          "kalshi_candlesticks_0001",
+          "kalshi_historical_cutoff_0001"
+        ],
+        "DATA1_snapshot_refs": [
+          "kalshi_market_metadata_0001",
+          "kalshi_orderbook_snapshot_0001",
+          "kalshi_market_trades_0001",
+          "kalshi_historical_trades_0001",
+          "kalshi_candlesticks_0001",
+          "kalshi_historical_cutoff_0001"
+        ],
+        "GFP2R_compute_refs": [
+          "gfp2r_compute_00001"
+        ],
+        "GFP2R_refs": [
+          "gfp2r_compute_00001"
+        ],
+        "MAP2_identity_refs": [
+          "map2_promote_00001"
+        ],
+        "MAP2_refs_if_any": [
+          "map2_promote_00001"
+        ],
+        "TCA_refs": [],
+        "authority_class": "PR168_RP2_CANDIDATE_ONLY_NON_PROOF",
+        "candidate_only_flag": true,
+        "cash_access_created_flag": false,
+        "compute_row_id": "gfp2r_compute_00001",
+        "computed_from_refs": [],
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "ranking_scoring_agent",
+          "risk_tca_capacity_agent",
+          "dashboard_operator_agent"
+        ],
+        "data_provenance_refs": [],
+        "downstream_consumers": [
+          "ranking_scoring_agent",
+          "risk_tca_capacity_agent",
+          "dashboard_operator_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-RANK2",
+          "PR165-B",
+          "PR167",
+          "DATA1B",
+          "GFP2R",
+          "PR162E-Q"
+        ],
+        "economic_candidate_id": "economic_candidate_00001",
+        "formula_refs": [
+          "PR168_GFP_FORMULA_MARKET_IMPLIED_PROBABILITY"
+        ],
+        "historical_full_book_assumption_allowed_flag": false,
+        "historical_full_book_available_flag": false,
+        "historical_full_book_required_flag": false,
+        "input_lock_id": "rp2_input_lock_00001",
+        "input_lock_state": "LOCKED_PUBLIC_CANDIDATE_REFS_NO_PRIVATE_STATE",
+        "live_authority_created_flag": false,
+        "live_order_authority_flag": false,
+        "manual_edit_allowed_flag": false,
+        "map2_row_id": "map2_promote_00001",
+        "market_id_or_token_id": "KXMVECROSSCATEGORY-S2026F6847194F7A-CC6D65A8A6F",
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "no_trade_refs": [],
+        "numeric_evidence_refs": [],
+        "order_authority_created_flag": false,
+        "order_intent_refs": [],
+        "owning_agent": "replay_paper_agent",
+        "paper_refs": [],
+        "private_state_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "qku_refs_if_available": [],
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "quantum_refs": [],
+        "repair_route_if_gap": null,
+        "replay_refs": [],
+        "row_shard_refs_if_any": [],
+        "scenario_refs": [],
+        "side": "YES",
+        "source_truth_acceptance_created_flag": false,
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_rp2"
+        ],
+        "upstream_input_refs": [
+          "map2_promote_00001",
+          "kalshi_market_metadata_0001",
+          "kalshi_orderbook_snapshot_0001",
+          "kalshi_market_trades_0001",
+          "kalshi_historical_trades_0001",
+          "kalshi_candlesticks_0001",
+          "kalshi_historical_cutoff_0001"
+        ],
+        "upstream_refs": [
+          "map2_promote_00001",
+          "kalshi_market_metadata_0001",
+          "kalshi_orderbook_snapshot_0001",
+          "kalshi_market_trades_0001",
+          "kalshi_historical_trades_0001",
+          "kalshi_candlesticks_0001",
+          "kalshi_historical_cutoff_0001"
+        ],
+        "validator_refs": [
+          "tools/pr168_rp2_validator.py",
+          "tools/validate_pr168_rp2_map2.py"
+        ],
+        "venue": "kalshi"
+      },
+      {
+        "DATA1A_contract_refs": [
+          "docs/master_plan/generated/PR168_DATA1A_GFP2RAllowedDataFamilyContract.report.json"
+        ],
+        "DATA1A_refs": [
+          "docs/master_plan/generated/PR168_DATA1A_FinalSummary.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_InputDiscovery.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_FetchInventoryAudit.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_DataProductIntegrityLedger.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_QKUUnblockDeltaAudit.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_DataQualityCoverageAudit.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_HistoricalFullBookTruthLedger.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_GFP2RReadinessDecision.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_GFP2RAllowedDataFamilyContract.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_QKUFormulaDataRequirementBridge.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_QKUComputabilityRouteLedger.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_FormulaInputCoverageMatrix.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_DataQualitySeverityActionQueue.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_RP2RANK2BatchReadinessAudit.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_QuantumForwardUsabilityAudit.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_AlphaCaptureReadinessMatrix.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_NegativeToPositiveRecoveryReadinessQueue.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_AgentRoutingAndNoOrphanProof.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_DAGUpstreamDownstreamOrchestration.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_EveryValueUpstreamDownstreamCrosswalk.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_AgentConsumableDataValueRoutingLedger.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_OperatorActionMatrix.report.json"
+        ],
+        "DATA1_refs": [
+          "kalshi_market_metadata_0001",
+          "kalshi_orderbook_snapshot_0001",
+          "kalshi_market_trades_0001",
+          "kalshi_historical_trades_0001",
+          "kalshi_candlesticks_0001",
+          "kalshi_historical_cutoff_0001"
+        ],
+        "DATA1_snapshot_refs": [
+          "kalshi_market_metadata_0001",
+          "kalshi_orderbook_snapshot_0001",
+          "kalshi_market_trades_0001",
+          "kalshi_historical_trades_0001",
+          "kalshi_candlesticks_0001",
+          "kalshi_historical_cutoff_0001"
+        ],
+        "GFP2R_compute_refs": [
+          "gfp2r_compute_00002"
+        ],
+        "GFP2R_refs": [
+          "gfp2r_compute_00002"
+        ],
+        "MAP2_identity_refs": [
+          "map2_promote_00002"
+        ],
+        "MAP2_refs_if_any": [
+          "map2_promote_00002"
+        ],
+        "TCA_refs": [],
+        "authority_class": "PR168_RP2_CANDIDATE_ONLY_NON_PROOF",
+        "candidate_only_flag": true,
+        "cash_access_created_flag": false,
+        "compute_row_id": "gfp2r_compute_00002",
+        "computed_from_refs": [],
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "ranking_scoring_agent",
+          "risk_tca_capacity_agent",
+          "dashboard_operator_agent"
+        ],
+        "data_provenance_refs": [],
+        "downstream_consumers": [
+          "ranking_scoring_agent",
+          "risk_tca_capacity_agent",
+          "dashboard_operator_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-RANK2",
+          "PR165-B",
+          "PR167",
+          "DATA1B",
+          "GFP2R",
+          "PR162E-Q"
+        ],
+        "economic_candidate_id": "economic_candidate_00002",
+        "formula_refs": [
+          "PR168_GFP2R_FORMULA_BREAK_EVEN_PROBABILITY_AFTER_COSTS"
+        ],
+        "historical_full_book_assumption_allowed_flag": false,
+        "historical_full_book_available_flag": false,
+        "historical_full_book_required_flag": false,
+        "input_lock_id": "rp2_input_lock_00002",
+        "input_lock_state": "LOCKED_PUBLIC_CANDIDATE_REFS_NO_PRIVATE_STATE",
+        "live_authority_created_flag": false,
+        "live_order_authority_flag": false,
+        "manual_edit_allowed_flag": false,
+        "map2_row_id": "map2_promote_00002",
+        "market_id_or_token_id": "KXMVECROSSCATEGORY-S2026F6847194F7A-CC6D65A8A6F",
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "no_trade_refs": [],
+        "numeric_evidence_refs": [],
+        "order_authority_created_flag": false,
+        "order_intent_refs": [],
+        "owning_agent": "replay_paper_agent",
+        "paper_refs": [],
+        "private_state_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "qku_refs_if_available": [],
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "quantum_refs": [],
+        "repair_route_if_gap": null,
+        "replay_refs": [],
+        "row_shard_refs_if_any": [],
+        "scenario_refs": [],
+        "side": "YES",
+        "source_truth_acceptance_created_flag": false,
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_rp2"
+        ],
+        "upstream_input_refs": [
+          "map2_promote_00002",
+          "kalshi_market_metadata_0001",
+          "kalshi_orderbook_snapshot_0001",
+          "kalshi_market_trades_0001",
+          "kalshi_historical_trades_0001",
+          "kalshi_candlesticks_0001",
+          "kalshi_historical_cutoff_0001"
+        ],
+        "upstream_refs": [
+          "map2_promote_00002",
+          "kalshi_market_metadata_0001",
+          "kalshi_orderbook_snapshot_0001",
+          "kalshi_market_trades_0001",
+          "kalshi_historical_trades_0001",
+          "kalshi_candlesticks_0001",
+          "kalshi_historical_cutoff_0001"
+        ],
+        "validator_refs": [
+          "tools/pr168_rp2_validator.py",
+          "tools/validate_pr168_rp2_map2.py"
+        ],
+        "venue": "kalshi"
+      },
+      {
+        "DATA1A_contract_refs": [
+          "docs/master_plan/generated/PR168_DATA1A_GFP2RAllowedDataFamilyContract.report.json"
+        ],
+        "DATA1A_refs": [
+          "docs/master_plan/generated/PR168_DATA1A_FinalSummary.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_InputDiscovery.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_FetchInventoryAudit.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_DataProductIntegrityLedger.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_QKUUnblockDeltaAudit.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_DataQualityCoverageAudit.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_HistoricalFullBookTruthLedger.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_GFP2RReadinessDecision.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_GFP2RAllowedDataFamilyContract.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_QKUFormulaDataRequirementBridge.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_QKUComputabilityRouteLedger.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_FormulaInputCoverageMatrix.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_DataQualitySeverityActionQueue.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_RP2RANK2BatchReadinessAudit.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_QuantumForwardUsabilityAudit.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_AlphaCaptureReadinessMatrix.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_NegativeToPositiveRecoveryReadinessQueue.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_AgentRoutingAndNoOrphanProof.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_DAGUpstreamDownstreamOrchestration.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_EveryValueUpstreamDownstreamCrosswalk.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_AgentConsumableDataValueRoutingLedger.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_OperatorActionMatrix.report.json"
+        ],
+        "DATA1_refs": [
+          "kalshi_market_metadata_0001",
+          "kalshi_orderbook_snapshot_0001",
+          "kalshi_market_trades_0001",
+          "kalshi_historical_trades_0001",
+          "kalshi_candlesticks_0001",
+          "kalshi_historical_cutoff_0001"
+        ],
+        "DATA1_snapshot_refs": [
+          "kalshi_market_metadata_0001",
+          "kalshi_orderbook_snapshot_0001",
+          "kalshi_market_trades_0001",
+          "kalshi_historical_trades_0001",
+          "kalshi_candlesticks_0001",
+          "kalshi_historical_cutoff_0001"
+        ],
+        "GFP2R_compute_refs": [
+          "gfp2r_compute_00003"
+        ],
+        "GFP2R_refs": [
+          "gfp2r_compute_00003"
+        ],
+        "MAP2_identity_refs": [
+          "map2_promote_00003"
+        ],
+        "MAP2_refs_if_any": [
+          "map2_promote_00003"
+        ],
+        "TCA_refs": [],
+        "authority_class": "PR168_RP2_CANDIDATE_ONLY_NON_PROOF",
+        "candidate_only_flag": true,
+        "cash_access_created_flag": false,
+        "compute_row_id": "gfp2r_compute_00003",
+        "computed_from_refs": [],
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "ranking_scoring_agent",
+          "risk_tca_capacity_agent",
+          "dashboard_operator_agent"
+        ],
+        "data_provenance_refs": [],
+        "downstream_consumers": [
+          "ranking_scoring_agent",
+          "risk_tca_capacity_agent",
+          "dashboard_operator_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-RANK2",
+          "PR165-B",
+          "PR167",
+          "DATA1B",
+          "GFP2R",
+          "PR162E-Q"
+        ],
+        "economic_candidate_id": "economic_candidate_00003",
+        "formula_refs": [
+          "PR168_GFP_FORMULA_LATENCY_DECAY"
+        ],
+        "historical_full_book_assumption_allowed_flag": false,
+        "historical_full_book_available_flag": false,
+        "historical_full_book_required_flag": false,
+        "input_lock_id": "rp2_input_lock_00003",
+        "input_lock_state": "LOCKED_PUBLIC_CANDIDATE_REFS_NO_PRIVATE_STATE",
+        "live_authority_created_flag": false,
+        "live_order_authority_flag": false,
+        "manual_edit_allowed_flag": false,
+        "map2_row_id": "map2_promote_00003",
+        "market_id_or_token_id": "KXMVECROSSCATEGORY-S2026F6847194F7A-CC6D65A8A6F",
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "no_trade_refs": [],
+        "numeric_evidence_refs": [],
+        "order_authority_created_flag": false,
+        "order_intent_refs": [],
+        "owning_agent": "replay_paper_agent",
+        "paper_refs": [],
+        "private_state_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "qku_refs_if_available": [],
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "quantum_refs": [],
+        "repair_route_if_gap": null,
+        "replay_refs": [],
+        "row_shard_refs_if_any": [],
+        "scenario_refs": [],
+        "side": "YES",
+        "source_truth_acceptance_created_flag": false,
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_rp2"
+        ],
+        "upstream_input_refs": [
+          "map2_promote_00003",
+          "kalshi_market_metadata_0001",
+          "kalshi_orderbook_snapshot_0001",
+          "kalshi_market_trades_0001",
+          "kalshi_historical_trades_0001",
+          "kalshi_candlesticks_0001",
+          "kalshi_historical_cutoff_0001"
+        ],
+        "upstream_refs": [
+          "map2_promote_00003",
+          "kalshi_market_metadata_0001",
+          "kalshi_orderbook_snapshot_0001",
+          "kalshi_market_trades_0001",
+          "kalshi_historical_trades_0001",
+          "kalshi_candlesticks_0001",
+          "kalshi_historical_cutoff_0001"
+        ],
+        "validator_refs": [
+          "tools/pr168_rp2_validator.py",
+          "tools/validate_pr168_rp2_map2.py"
+        ],
+        "venue": "kalshi"
+      },
+      {
+        "DATA1A_contract_refs": [
+          "docs/master_plan/generated/PR168_DATA1A_GFP2RAllowedDataFamilyContract.report.json"
+        ],
+        "DATA1A_refs": [
+          "docs/master_plan/generated/PR168_DATA1A_FinalSummary.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_InputDiscovery.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_FetchInventoryAudit.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_DataProductIntegrityLedger.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_QKUUnblockDeltaAudit.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_DataQualityCoverageAudit.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_HistoricalFullBookTruthLedger.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_GFP2RReadinessDecision.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_GFP2RAllowedDataFamilyContract.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_QKUFormulaDataRequirementBridge.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_QKUComputabilityRouteLedger.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_FormulaInputCoverageMatrix.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_DataQualitySeverityActionQueue.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_RP2RANK2BatchReadinessAudit.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_QuantumForwardUsabilityAudit.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_AlphaCaptureReadinessMatrix.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_NegativeToPositiveRecoveryReadinessQueue.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_AgentRoutingAndNoOrphanProof.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_DAGUpstreamDownstreamOrchestration.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_EveryValueUpstreamDownstreamCrosswalk.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_AgentConsumableDataValueRoutingLedger.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_OperatorActionMatrix.report.json"
+        ],
+        "DATA1_refs": [
+          "kalshi_market_metadata_0001",
+          "kalshi_orderbook_snapshot_0001",
+          "kalshi_market_trades_0001",
+          "kalshi_historical_trades_0001",
+          "kalshi_candlesticks_0001",
+          "kalshi_historical_cutoff_0001"
+        ],
+        "DATA1_snapshot_refs": [
+          "kalshi_market_metadata_0001",
+          "kalshi_orderbook_snapshot_0001",
+          "kalshi_market_trades_0001",
+          "kalshi_historical_trades_0001",
+          "kalshi_candlesticks_0001",
+          "kalshi_historical_cutoff_0001"
+        ],
+        "GFP2R_compute_refs": [
+          "gfp2r_compute_00004"
+        ],
+        "GFP2R_refs": [
+          "gfp2r_compute_00004"
+        ],
+        "MAP2_identity_refs": [
+          "map2_promote_00004"
+        ],
+        "MAP2_refs_if_any": [
+          "map2_promote_00004"
+        ],
+        "TCA_refs": [],
+        "authority_class": "PR168_RP2_CANDIDATE_ONLY_NON_PROOF",
+        "candidate_only_flag": true,
+        "cash_access_created_flag": false,
+        "compute_row_id": "gfp2r_compute_00004",
+        "computed_from_refs": [],
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "ranking_scoring_agent",
+          "risk_tca_capacity_agent",
+          "dashboard_operator_agent"
+        ],
+        "data_provenance_refs": [],
+        "downstream_consumers": [
+          "ranking_scoring_agent",
+          "risk_tca_capacity_agent",
+          "dashboard_operator_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-RANK2",
+          "PR165-B",
+          "PR167",
+          "DATA1B",
+          "GFP2R",
+          "PR162E-Q"
+        ],
+        "economic_candidate_id": "economic_candidate_00004",
+        "formula_refs": [
+          "PR168_GFP_FORMULA_CAPACITY_CROWDING"
+        ],
+        "historical_full_book_assumption_allowed_flag": false,
+        "historical_full_book_available_flag": false,
+        "historical_full_book_required_flag": false,
+        "input_lock_id": "rp2_input_lock_00004",
+        "input_lock_state": "LOCKED_PUBLIC_CANDIDATE_REFS_NO_PRIVATE_STATE",
+        "live_authority_created_flag": false,
+        "live_order_authority_flag": false,
+        "manual_edit_allowed_flag": false,
+        "map2_row_id": "map2_promote_00004",
+        "market_id_or_token_id": "KXMVECROSSCATEGORY-S2026F6847194F7A-CC6D65A8A6F",
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "no_trade_refs": [],
+        "numeric_evidence_refs": [],
+        "order_authority_created_flag": false,
+        "order_intent_refs": [],
+        "owning_agent": "replay_paper_agent",
+        "paper_refs": [],
+        "private_state_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "qku_refs_if_available": [],
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "quantum_refs": [],
+        "repair_route_if_gap": null,
+        "replay_refs": [],
+        "row_shard_refs_if_any": [],
+        "scenario_refs": [],
+        "side": "YES",
+        "source_truth_acceptance_created_flag": false,
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_rp2"
+        ],
+        "upstream_input_refs": [
+          "map2_promote_00004",
+          "kalshi_market_metadata_0001",
+          "kalshi_orderbook_snapshot_0001",
+          "kalshi_market_trades_0001",
+          "kalshi_historical_trades_0001",
+          "kalshi_candlesticks_0001",
+          "kalshi_historical_cutoff_0001"
+        ],
+        "upstream_refs": [
+          "map2_promote_00004",
+          "kalshi_market_metadata_0001",
+          "kalshi_orderbook_snapshot_0001",
+          "kalshi_market_trades_0001",
+          "kalshi_historical_trades_0001",
+          "kalshi_candlesticks_0001",
+          "kalshi_historical_cutoff_0001"
+        ],
+        "validator_refs": [
+          "tools/pr168_rp2_validator.py",
+          "tools/validate_pr168_rp2_map2.py"
+        ],
+        "venue": "kalshi"
+      },
+      {
+        "DATA1A_contract_refs": [
+          "docs/master_plan/generated/PR168_DATA1A_GFP2RAllowedDataFamilyContract.report.json"
+        ],
+        "DATA1A_refs": [
+          "docs/master_plan/generated/PR168_DATA1A_FinalSummary.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_InputDiscovery.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_FetchInventoryAudit.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_DataProductIntegrityLedger.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_QKUUnblockDeltaAudit.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_DataQualityCoverageAudit.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_HistoricalFullBookTruthLedger.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_GFP2RReadinessDecision.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_GFP2RAllowedDataFamilyContract.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_QKUFormulaDataRequirementBridge.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_QKUComputabilityRouteLedger.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_FormulaInputCoverageMatrix.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_DataQualitySeverityActionQueue.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_RP2RANK2BatchReadinessAudit.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_QuantumForwardUsabilityAudit.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_AlphaCaptureReadinessMatrix.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_NegativeToPositiveRecoveryReadinessQueue.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_AgentRoutingAndNoOrphanProof.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_DAGUpstreamDownstreamOrchestration.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_EveryValueUpstreamDownstreamCrosswalk.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_AgentConsumableDataValueRoutingLedger.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_OperatorActionMatrix.report.json"
+        ],
+        "DATA1_refs": [
+          "kalshi_market_metadata_0001",
+          "kalshi_orderbook_snapshot_0001",
+          "kalshi_market_trades_0001",
+          "kalshi_historical_trades_0001",
+          "kalshi_candlesticks_0001",
+          "kalshi_historical_cutoff_0001"
+        ],
+        "DATA1_snapshot_refs": [
+          "kalshi_market_metadata_0001",
+          "kalshi_orderbook_snapshot_0001",
+          "kalshi_market_trades_0001",
+          "kalshi_historical_trades_0001",
+          "kalshi_candlesticks_0001",
+          "kalshi_historical_cutoff_0001"
+        ],
+        "GFP2R_compute_refs": [
+          "gfp2r_compute_00005"
+        ],
+        "GFP2R_refs": [
+          "gfp2r_compute_00005"
+        ],
+        "MAP2_identity_refs": [
+          "map2_promote_00005"
+        ],
+        "MAP2_refs_if_any": [
+          "map2_promote_00005"
+        ],
+        "TCA_refs": [],
+        "authority_class": "PR168_RP2_CANDIDATE_ONLY_NON_PROOF",
+        "candidate_only_flag": true,
+        "cash_access_created_flag": false,
+        "compute_row_id": "gfp2r_compute_00005",
+        "computed_from_refs": [],
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "ranking_scoring_agent",
+          "risk_tca_capacity_agent",
+          "dashboard_operator_agent"
+        ],
+        "data_provenance_refs": [],
+        "downstream_consumers": [
+          "ranking_scoring_agent",
+          "risk_tca_capacity_agent",
+          "dashboard_operator_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-RANK2",
+          "PR165-B",
+          "PR167",
+          "DATA1B",
+          "GFP2R",
+          "PR162E-Q"
+        ],
+        "economic_candidate_id": "economic_candidate_00005",
+        "formula_refs": [
+          "PR168_GFP2R_FORMULA_TIME_TO_RESOLUTION_LIFECYCLE_FEATURE"
+        ],
+        "historical_full_book_assumption_allowed_flag": false,
+        "historical_full_book_available_flag": false,
+        "historical_full_book_required_flag": false,
+        "input_lock_id": "rp2_input_lock_00005",
+        "input_lock_state": "LOCKED_PUBLIC_CANDIDATE_REFS_NO_PRIVATE_STATE",
+        "live_authority_created_flag": false,
+        "live_order_authority_flag": false,
+        "manual_edit_allowed_flag": false,
+        "map2_row_id": "map2_promote_00005",
+        "market_id_or_token_id": "KXMVECROSSCATEGORY-S2026F6847194F7A-CC6D65A8A6F",
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "no_trade_refs": [],
+        "numeric_evidence_refs": [],
+        "order_authority_created_flag": false,
+        "order_intent_refs": [],
+        "owning_agent": "replay_paper_agent",
+        "paper_refs": [],
+        "private_state_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "qku_refs_if_available": [],
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "quantum_refs": [],
+        "repair_route_if_gap": null,
+        "replay_refs": [],
+        "row_shard_refs_if_any": [],
+        "scenario_refs": [],
+        "side": "YES",
+        "source_truth_acceptance_created_flag": false,
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_rp2"
+        ],
+        "upstream_input_refs": [
+          "map2_promote_00005",
+          "kalshi_market_metadata_0001",
+          "kalshi_orderbook_snapshot_0001",
+          "kalshi_market_trades_0001",
+          "kalshi_historical_trades_0001",
+          "kalshi_candlesticks_0001",
+          "kalshi_historical_cutoff_0001"
+        ],
+        "upstream_refs": [
+          "map2_promote_00005",
+          "kalshi_market_metadata_0001",
+          "kalshi_orderbook_snapshot_0001",
+          "kalshi_market_trades_0001",
+          "kalshi_historical_trades_0001",
+          "kalshi_candlesticks_0001",
+          "kalshi_historical_cutoff_0001"
+        ],
+        "validator_refs": [
+          "tools/pr168_rp2_validator.py",
+          "tools/validate_pr168_rp2_map2.py"
+        ],
+        "venue": "kalshi"
+      }
+    ]
+  },
+  "repair_route_if_gap": null,
+  "replay_refs": [],
+  "report_id": "PR168_RP2_ReplayPaperInputLock",
+  "report_version": "PR168-RP2-MAP2-v4.0",
+  "row_shard_refs_if_any": [
+    "docs/master_plan/generated/rp2p/input_locks.jsonl",
+    "docs/master_plan/generated/rp2p/input_locks.manifest.json"
+  ],
+  "scenario_refs": [],
+  "source_truth_acceptance_created_flag": false,
+  "terminal_by_nature_flag": false,
+  "terminal_reason_code": null,
+  "test_refs": [
+    "tests/pr168_rp2"
+  ],
+  "upstream_input_refs": [
+    "docs/master_plan/generated/PR168_GFP2R_FinalSummary.report.json",
+    "docs/master_plan/generated/pr168_gfp2r_candidate_compute/rp2_handoff_rows.jsonl"
+  ],
+  "upstream_refs": [
+    "docs/master_plan/generated/PR168_GFP2R_FinalSummary.report.json",
+    "docs/master_plan/generated/pr168_gfp2r_candidate_compute/rp2_handoff_rows.jsonl"
+  ],
+  "validator_refs": [
+    "tools/pr168_rp2_validator.py",
+    "tools/validate_pr168_rp2_map2.py"
+  ]
+}

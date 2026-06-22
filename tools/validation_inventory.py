@@ -204,6 +204,8 @@ def _pr_token(stem: str) -> str | None:
         return "pr165_d3"
     if "pr168_gfp2r" in stem:
         return "pr168_gfp2r"
+    if "pr168_rp2" in stem:
+        return "pr168_rp2"
     if "pr168_data1a" in stem:
         return "pr168_data1a"
     if "pr168_data1" in stem:
@@ -424,6 +426,8 @@ def _output_globs(script_name: str, stem: str) -> tuple[str, ...]:
                 f"docs/master_plan/generated/{lower}*/**",
             ]
         )
+        if token == "pr168_rp2":
+            globs.append("docs/master_plan/generated/rp2p/**")
     return tuple(globs)
 
 
