@@ -1,0 +1,4177 @@
+{
+  "alias_registry_ref": "docs/master_plan/generated/PR168_MAP3_FileAliases.report.json",
+  "authority_class": "MAP3_FILE_ALIAS_NON_PROOF",
+  "cash_access_created_flag": false,
+  "connector_semantic_binding_created_flag": false,
+  "consumer_agents": [
+    "PR168_RP2_agent",
+    "PR168_RANK2_agent",
+    "PR165B_memory_agent",
+    "PR162EQ_quantum_agent",
+    "DATA1B_repair_agent",
+    "source_evidence_review_agent"
+  ],
+  "created_at_utc": "2026-06-22T00:00:00Z",
+  "created_by_tool": "tools/build_pr168_map3.py",
+  "data_provenance_refs": [
+    "PR168_MAP3_OnlineScout_deep_structured_search_matrix"
+  ],
+  "data_requirement_refs": [],
+  "downstream_consumers": [
+    "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+    "PR168_RANK2_EVIDENCE_RANKING",
+    "PR165B_CONDITION_SCOPED_MEMORY",
+    "PR162E_Q_QUANTUM_MAPPING",
+    "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+    "SOURCE_EVIDENCE_REVIEW"
+  ],
+  "downstream_pr_refs": [
+    "PR168-RP2",
+    "PR168-RANK2",
+    "PR165-B",
+    "PR162E-Q",
+    "DATA1B"
+  ],
+  "dry_run_receipt_refs": [],
+  "formula_contract_refs": [],
+  "live_authority_created_flag": false,
+  "logical_report_id": "PR168_MAP3_FileAliasRegistry",
+  "manual_edit_allowed_flag": false,
+  "no_orphan_status": "NO_ORPHAN_LINKED",
+  "order_authority_created_flag": false,
+  "owning_agent": "PR168_MAP3_formula_intake_agent",
+  "path_audit_ref": "docs/master_plan/generated/PR168_MAP3_PathAudit.report.json",
+  "physical_filename": "PR168_MAP3_FileAliases.report.json",
+  "private_state_access_created_flag": false,
+  "profit_evidence_created_flag": false,
+  "qtt_sha_or_atomicrows_hash_authority_flag": false,
+  "quantum_advantage_claim_flag": false,
+  "quantum_backend_execution_flag": false,
+  "records": [
+    {
+      "alias_status": "CANONICAL_SHORT_PATH",
+      "authority_class": "MAP3_FILE_ALIAS_ROW_NON_PROOF",
+      "cash_access_created_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "live_authority_created_flag": false,
+      "logical_report_id": "PR168_MAP3_OnlineScoutDeepStructuredScoutingLedger",
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "path_length": 61,
+      "physical_filename": "PR168_MAP3_OnlineScout.report.json",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "alias_status": "CANONICAL_SHORT_PATH",
+      "authority_class": "MAP3_FILE_ALIAS_ROW_NON_PROOF",
+      "cash_access_created_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "live_authority_created_flag": false,
+      "logical_report_id": "PR168_MAP3_ExternalSourceTierAndEvidenceLedger",
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "path_length": 60,
+      "physical_filename": "PR168_MAP3_ExtSources.report.json",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "alias_status": "CANONICAL_SHORT_PATH",
+      "authority_class": "MAP3_FILE_ALIAS_ROW_NON_PROOF",
+      "cash_access_created_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "live_authority_created_flag": false,
+      "logical_report_id": "PR168_MAP3_ExternalCandidateFormulaIntakeLedger",
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "path_length": 59,
+      "physical_filename": "PR168_MAP3_ExtIntake.report.json",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "alias_status": "CANONICAL_SHORT_PATH",
+      "authority_class": "MAP3_FILE_ALIAS_ROW_NON_PROOF",
+      "cash_access_created_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "live_authority_created_flag": false,
+      "logical_report_id": "PR168_MAP3_FormulaFamilyCoverageMatrix",
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "path_length": 62,
+      "physical_filename": "PR168_MAP3_FamilyMatrix.report.json",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "alias_status": "CANONICAL_SHORT_PATH",
+      "authority_class": "MAP3_FILE_ALIAS_ROW_NON_PROOF",
+      "cash_access_created_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "live_authority_created_flag": false,
+      "logical_report_id": "PR168_MAP3_FormulaFactoryOperationalRows",
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "path_length": 64,
+      "physical_filename": "PR168_MAP3_FormulaFactory.report.json",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "alias_status": "CANONICAL_SHORT_PATH",
+      "authority_class": "MAP3_FILE_ALIAS_ROW_NON_PROOF",
+      "cash_access_created_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "live_authority_created_flag": false,
+      "logical_report_id": "PR168_MAP3_FormulaMaterializationLedger",
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "path_length": 72,
+      "physical_filename": "PR168_MAP3_FormulaMaterialization.report.json",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "alias_status": "CANONICAL_SHORT_PATH",
+      "authority_class": "MAP3_FILE_ALIAS_ROW_NON_PROOF",
+      "cash_access_created_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "live_authority_created_flag": false,
+      "logical_report_id": "PR168_MAP3_FormulaProvenanceLedger",
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "path_length": 61,
+      "physical_filename": "PR168_MAP3_FormulaProv.report.json",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "alias_status": "CANONICAL_SHORT_PATH",
+      "authority_class": "MAP3_FILE_ALIAS_ROW_NON_PROOF",
+      "cash_access_created_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "live_authority_created_flag": false,
+      "logical_report_id": "PR168_MAP3_SourceTriangulationLedger",
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "path_length": 69,
+      "physical_filename": "PR168_MAP3_SourceTriangulation.report.json",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "alias_status": "CANONICAL_SHORT_PATH",
+      "authority_class": "MAP3_FILE_ALIAS_ROW_NON_PROOF",
+      "cash_access_created_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "live_authority_created_flag": false,
+      "logical_report_id": "PR168_MAP3_InputDiscovery",
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "path_length": 55,
+      "physical_filename": "PR168_MAP3_Input.report.json",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "alias_status": "CANONICAL_SHORT_PATH",
+      "authority_class": "MAP3_FILE_ALIAS_ROW_NON_PROOF",
+      "cash_access_created_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "live_authority_created_flag": false,
+      "logical_report_id": "PR168_MAP3_ExistingIDRepoMiningLedger",
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "path_length": 56,
+      "physical_filename": "PR168_MAP3_IDMine.report.json",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "alias_status": "CANONICAL_SHORT_PATH",
+      "authority_class": "MAP3_FILE_ALIAS_ROW_NON_PROOF",
+      "cash_access_created_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "live_authority_created_flag": false,
+      "logical_report_id": "PR168_MAP3_QKUFormulaIDCoverageAudit",
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "path_length": 60,
+      "physical_filename": "PR168_MAP3_IDCoverage.report.json",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "alias_status": "CANONICAL_SHORT_PATH",
+      "authority_class": "MAP3_FILE_ALIAS_ROW_NON_PROOF",
+      "cash_access_created_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "live_authority_created_flag": false,
+      "logical_report_id": "PR168_MAP3_HiddenExactBindingPromotionLedger",
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "path_length": 60,
+      "physical_filename": "PR168_MAP3_HiddenBind.report.json",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "alias_status": "CANONICAL_SHORT_PATH",
+      "authority_class": "MAP3_FILE_ALIAS_ROW_NON_PROOF",
+      "cash_access_created_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "live_authority_created_flag": false,
+      "logical_report_id": "PR168_MAP3_ExistingQKUFormulaBindingProofLedger",
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "path_length": 59,
+      "physical_filename": "PR168_MAP3_BindProof.report.json",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "alias_status": "CANONICAL_SHORT_PATH",
+      "authority_class": "MAP3_FILE_ALIAS_ROW_NON_PROOF",
+      "cash_access_created_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "live_authority_created_flag": false,
+      "logical_report_id": "PR168_MAP3_BindingRejectionAndRepairQueue",
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "path_length": 60,
+      "physical_filename": "PR168_MAP3_BindReject.report.json",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "alias_status": "CANONICAL_SHORT_PATH",
+      "authority_class": "MAP3_FILE_ALIAS_ROW_NON_PROOF",
+      "cash_access_created_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "live_authority_created_flag": false,
+      "logical_report_id": "PR168_MAP3_NewCanonicalQTTIDRegistry",
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "path_length": 56,
+      "physical_filename": "PR168_MAP3_NewIDs.report.json",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "alias_status": "CANONICAL_SHORT_PATH",
+      "authority_class": "MAP3_FILE_ALIAS_ROW_NON_PROOF",
+      "cash_access_created_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "live_authority_created_flag": false,
+      "logical_report_id": "PR168_MAP3_NewIDCreationRuleLedger",
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "path_length": 60,
+      "physical_filename": "PR168_MAP3_NewIDRules.report.json",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "alias_status": "CANONICAL_SHORT_PATH",
+      "authority_class": "MAP3_FILE_ALIAS_ROW_NON_PROOF",
+      "cash_access_created_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "live_authority_created_flag": false,
+      "logical_report_id": "PR168_MAP3_IDSupersessionAndForwardAuthorityLedger",
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "path_length": 61,
+      "physical_filename": "PR168_MAP3_IDSupersede.report.json",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "alias_status": "CANONICAL_SHORT_PATH",
+      "authority_class": "MAP3_FILE_ALIAS_ROW_NON_PROOF",
+      "cash_access_created_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "live_authority_created_flag": false,
+      "logical_report_id": "PR168_MAP3_ExternalSourceRejectDedupSafetyLedger",
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "path_length": 60,
+      "physical_filename": "PR168_MAP3_ExtRejects.report.json",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "alias_status": "CANONICAL_SHORT_PATH",
+      "authority_class": "MAP3_FILE_ALIAS_ROW_NON_PROOF",
+      "cash_access_created_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "live_authority_created_flag": false,
+      "logical_report_id": "PR168_MAP3_FormulaPluginContractRegistry",
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "path_length": 65,
+      "physical_filename": "PR168_MAP3_PluginContracts.report.json",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "alias_status": "CANONICAL_SHORT_PATH",
+      "authority_class": "MAP3_FILE_ALIAS_ROW_NON_PROOF",
+      "cash_access_created_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "live_authority_created_flag": false,
+      "logical_report_id": "PR168_MAP3_QKUFormulaBindingRegistry",
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "path_length": 65,
+      "physical_filename": "PR168_MAP3_BindingRegistry.report.json",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "alias_status": "CANONICAL_SHORT_PATH",
+      "authority_class": "MAP3_FILE_ALIAS_ROW_NON_PROOF",
+      "cash_access_created_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "live_authority_created_flag": false,
+      "logical_report_id": "PR168_MAP3_DataRequirementContractRegistry",
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "path_length": 58,
+      "physical_filename": "PR168_MAP3_DataReqs.report.json",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "alias_status": "CANONICAL_SHORT_PATH",
+      "authority_class": "MAP3_FILE_ALIAS_ROW_NON_PROOF",
+      "cash_access_created_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "live_authority_created_flag": false,
+      "logical_report_id": "PR168_MAP3_UnitNormalizationContractRegistry",
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "path_length": 59,
+      "physical_filename": "PR168_MAP3_UnitNorms.report.json",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "alias_status": "CANONICAL_SHORT_PATH",
+      "authority_class": "MAP3_FILE_ALIAS_ROW_NON_PROOF",
+      "cash_access_created_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "live_authority_created_flag": false,
+      "logical_report_id": "PR168_MAP3_FormulaComputabilityRouteLedger",
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "path_length": 63,
+      "physical_filename": "PR168_MAP3_ComputeRoutes.report.json",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "alias_status": "CANONICAL_SHORT_PATH",
+      "authority_class": "MAP3_FILE_ALIAS_ROW_NON_PROOF",
+      "cash_access_created_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "live_authority_created_flag": false,
+      "logical_report_id": "PR168_MAP3_FormulaDryRunCandidateComputeReceiptLedger",
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "path_length": 63,
+      "physical_filename": "PR168_MAP3_FormulaDryRun.report.json",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "alias_status": "CANONICAL_SHORT_PATH",
+      "authority_class": "MAP3_FILE_ALIAS_ROW_NON_PROOF",
+      "cash_access_created_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "live_authority_created_flag": false,
+      "logical_report_id": "PR168_MAP3_FormulaEquivalenceAndDuplicateSuppressionLedger",
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "path_length": 56,
+      "physical_filename": "PR168_MAP3_Dedupe.report.json",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "alias_status": "CANONICAL_SHORT_PATH",
+      "authority_class": "MAP3_FILE_ALIAS_ROW_NON_PROOF",
+      "cash_access_created_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "live_authority_created_flag": false,
+      "logical_report_id": "PR168_MAP3_FormulaQualityAndInputCoverageScoreLedger",
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "path_length": 57,
+      "physical_filename": "PR168_MAP3_Quality.report.json",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "alias_status": "CANONICAL_SHORT_PATH",
+      "authority_class": "MAP3_FILE_ALIAS_ROW_NON_PROOF",
+      "cash_access_created_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "live_authority_created_flag": false,
+      "logical_report_id": "PR168_MAP3_FDRCalibrationPortfolioRegimeReadinessLedger",
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "path_length": 62,
+      "physical_filename": "PR168_MAP3_RiskControls.report.json",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "alias_status": "CANONICAL_SHORT_PATH",
+      "authority_class": "MAP3_FILE_ALIAS_ROW_NON_PROOF",
+      "cash_access_created_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "live_authority_created_flag": false,
+      "logical_report_id": "PR168_MAP3_EdgeAlphaCaptureApplicabilityMatrix",
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "path_length": 57,
+      "physical_filename": "PR168_MAP3_EdgeFit.report.json",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "alias_status": "CANONICAL_SHORT_PATH",
+      "authority_class": "MAP3_FILE_ALIAS_ROW_NON_PROOF",
+      "cash_access_created_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "live_authority_created_flag": false,
+      "logical_report_id": "PR168_MAP3_RetestVariantSeedLedger",
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "path_length": 61,
+      "physical_filename": "PR168_MAP3_RetestSeeds.report.json",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "alias_status": "CANONICAL_SHORT_PATH",
+      "authority_class": "MAP3_FILE_ALIAS_ROW_NON_PROOF",
+      "cash_access_created_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "live_authority_created_flag": false,
+      "logical_report_id": "PR168_MAP3_EdgeFormulaRows",
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "path_length": 62,
+      "physical_filename": "PR168_MAP3_EdgeFormulas.report.json",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "alias_status": "CANONICAL_SHORT_PATH",
+      "authority_class": "MAP3_FILE_ALIAS_ROW_NON_PROOF",
+      "cash_access_created_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "live_authority_created_flag": false,
+      "logical_report_id": "PR168_MAP3_TCAFormulaRows",
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "path_length": 61,
+      "physical_filename": "PR168_MAP3_TCAFormulas.report.json",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "alias_status": "CANONICAL_SHORT_PATH",
+      "authority_class": "MAP3_FILE_ALIAS_ROW_NON_PROOF",
+      "cash_access_created_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "live_authority_created_flag": false,
+      "logical_report_id": "PR168_MAP3_CalibrationFormulaRows",
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "path_length": 63,
+      "physical_filename": "PR168_MAP3_CalibFormulas.report.json",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "alias_status": "CANONICAL_SHORT_PATH",
+      "authority_class": "MAP3_FILE_ALIAS_ROW_NON_PROOF",
+      "cash_access_created_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "live_authority_created_flag": false,
+      "logical_report_id": "PR168_MAP3_PortfolioFormulaRows",
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "path_length": 67,
+      "physical_filename": "PR168_MAP3_PortfolioFormulas.report.json",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "alias_status": "CANONICAL_SHORT_PATH",
+      "authority_class": "MAP3_FILE_ALIAS_ROW_NON_PROOF",
+      "cash_access_created_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "live_authority_created_flag": false,
+      "logical_report_id": "PR168_MAP3_RegimeFormulaRows",
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "path_length": 64,
+      "physical_filename": "PR168_MAP3_RegimeFormulas.report.json",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "alias_status": "CANONICAL_SHORT_PATH",
+      "authority_class": "MAP3_FILE_ALIAS_ROW_NON_PROOF",
+      "cash_access_created_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "live_authority_created_flag": false,
+      "logical_report_id": "PR168_MAP3_FormulaIntakePriorityLedger",
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "path_length": 64,
+      "physical_filename": "PR168_MAP3_IntakePriority.report.json",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "alias_status": "CANONICAL_SHORT_PATH",
+      "authority_class": "MAP3_FILE_ALIAS_ROW_NON_PROOF",
+      "cash_access_created_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "live_authority_created_flag": false,
+      "logical_report_id": "PR168_MAP3_QuantumStructuralFormulaMap",
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "path_length": 54,
+      "physical_filename": "PR168_MAP3_QMap.report.json",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "alias_status": "CANONICAL_SHORT_PATH",
+      "authority_class": "MAP3_FILE_ALIAS_ROW_NON_PROOF",
+      "cash_access_created_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "live_authority_created_flag": false,
+      "logical_report_id": "PR168_MAP3_QuantumObjectiveCoefficientConstraintRegistry",
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "path_length": 60,
+      "physical_filename": "PR168_MAP3_QObjective.report.json",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "alias_status": "CANONICAL_SHORT_PATH",
+      "authority_class": "MAP3_FILE_ALIAS_ROW_NON_PROOF",
+      "cash_access_created_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "live_authority_created_flag": false,
+      "logical_report_id": "PR168_MAP3_ClassicalFallbackComparatorRegistry",
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "path_length": 59,
+      "physical_filename": "PR168_MAP3_QFallback.report.json",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "alias_status": "CANONICAL_SHORT_PATH",
+      "authority_class": "MAP3_FILE_ALIAS_ROW_NON_PROOF",
+      "cash_access_created_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "live_authority_created_flag": false,
+      "logical_report_id": "PR168_MAP3_QuantumMappingRepairQueue",
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "path_length": 57,
+      "physical_filename": "PR168_MAP3_QRepair.report.json",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "alias_status": "CANONICAL_SHORT_PATH",
+      "authority_class": "MAP3_FILE_ALIAS_ROW_NON_PROOF",
+      "cash_access_created_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "live_authority_created_flag": false,
+      "logical_report_id": "PR168_MAP3_To_PR168_RP2_ReplayPaperFormulaRows",
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "path_length": 55,
+      "physical_filename": "PR168_MAP3_ToRP2.report.json",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "alias_status": "CANONICAL_SHORT_PATH",
+      "authority_class": "MAP3_FILE_ALIAS_ROW_NON_PROOF",
+      "cash_access_created_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "live_authority_created_flag": false,
+      "logical_report_id": "PR168_MAP3_To_PR168_RANK2_FormulaRankingRows",
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "path_length": 57,
+      "physical_filename": "PR168_MAP3_ToRANK2.report.json",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "alias_status": "CANONICAL_SHORT_PATH",
+      "authority_class": "MAP3_FILE_ALIAS_ROW_NON_PROOF",
+      "cash_access_created_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "live_authority_created_flag": false,
+      "logical_report_id": "PR168_MAP3_To_PR165B_ConditionScopedMemoryRows",
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "path_length": 58,
+      "physical_filename": "PR168_MAP3_ToPR165B.report.json",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "alias_status": "CANONICAL_SHORT_PATH",
+      "authority_class": "MAP3_FILE_ALIAS_ROW_NON_PROOF",
+      "cash_access_created_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "live_authority_created_flag": false,
+      "logical_report_id": "PR168_MAP3_To_PR162E_Q_QuantumMappingRows",
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "path_length": 59,
+      "physical_filename": "PR168_MAP3_ToPR162EQ.report.json",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "alias_status": "CANONICAL_SHORT_PATH",
+      "authority_class": "MAP3_FILE_ALIAS_ROW_NON_PROOF",
+      "cash_access_created_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "live_authority_created_flag": false,
+      "logical_report_id": "PR168_MAP3_To_DATA1B_DataAcquisitionRepairRows",
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "path_length": 58,
+      "physical_filename": "PR168_MAP3_ToDATA1B.report.json",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "alias_status": "CANONICAL_SHORT_PATH",
+      "authority_class": "MAP3_FILE_ALIAS_ROW_NON_PROOF",
+      "cash_access_created_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "live_authority_created_flag": false,
+      "logical_report_id": "PR168_MAP3_To_SourceEvidenceReviewRows",
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "path_length": 62,
+      "physical_filename": "PR168_MAP3_SourceReview.report.json",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "alias_status": "CANONICAL_SHORT_PATH",
+      "authority_class": "MAP3_FILE_ALIAS_ROW_NON_PROOF",
+      "cash_access_created_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "live_authority_created_flag": false,
+      "logical_report_id": "PR168_MAP3_AgentRoutingAndNoOrphanDAG",
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "path_length": 58,
+      "physical_filename": "PR168_MAP3_AgentDAG.report.json",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "alias_status": "CANONICAL_SHORT_PATH",
+      "authority_class": "MAP3_FILE_ALIAS_ROW_NON_PROOF",
+      "cash_access_created_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "live_authority_created_flag": false,
+      "logical_report_id": "PR168_MAP3_EveryValueUpstreamDownstreamCrosswalk",
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "path_length": 60,
+      "physical_filename": "PR168_MAP3_EveryValue.report.json",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "alias_status": "CANONICAL_SHORT_PATH",
+      "authority_class": "MAP3_FILE_ALIAS_ROW_NON_PROOF",
+      "cash_access_created_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "live_authority_created_flag": false,
+      "logical_report_id": "PR168_MAP3_OperatorActionMatrix",
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "path_length": 58,
+      "physical_filename": "PR168_MAP3_Operator.report.json",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "alias_status": "CANONICAL_SHORT_PATH",
+      "authority_class": "MAP3_FILE_ALIAS_ROW_NON_PROOF",
+      "cash_access_created_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "live_authority_created_flag": false,
+      "logical_report_id": "PR168_MAP3_CanonicalIdentityGraph",
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "path_length": 57,
+      "physical_filename": "PR168_MAP3_IDGraph.report.json",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "alias_status": "CANONICAL_SHORT_PATH",
+      "authority_class": "MAP3_FILE_ALIAS_ROW_NON_PROOF",
+      "cash_access_created_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "live_authority_created_flag": false,
+      "logical_report_id": "PR168_MAP3_FormulaInvariantRows",
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "path_length": 60,
+      "physical_filename": "PR168_MAP3_Invariants.report.json",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "alias_status": "CANONICAL_SHORT_PATH",
+      "authority_class": "MAP3_FILE_ALIAS_ROW_NON_PROOF",
+      "cash_access_created_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "live_authority_created_flag": false,
+      "logical_report_id": "PR168_MAP3_PropertyTestRows",
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "path_length": 63,
+      "physical_filename": "PR168_MAP3_PropertyTests.report.json",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "alias_status": "CANONICAL_SHORT_PATH",
+      "authority_class": "MAP3_FILE_ALIAS_ROW_NON_PROOF",
+      "cash_access_created_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "live_authority_created_flag": false,
+      "logical_report_id": "PR168_MAP3_NegativeEvidenceFormulaRepairFactory",
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "path_length": 66,
+      "physical_filename": "PR168_MAP3_NegRepairFactory.report.json",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "alias_status": "CANONICAL_SHORT_PATH",
+      "authority_class": "MAP3_FILE_ALIAS_ROW_NON_PROOF",
+      "cash_access_created_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "live_authority_created_flag": false,
+      "logical_report_id": "PR168_MAP3_FormulaRepairPlaybook",
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "path_length": 71,
+      "physical_filename": "PR168_MAP3_FormulaRepairPlaybook.report.json",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "alias_status": "CANONICAL_SHORT_PATH",
+      "authority_class": "MAP3_FILE_ALIAS_ROW_NON_PROOF",
+      "cash_access_created_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "live_authority_created_flag": false,
+      "logical_report_id": "PR168_MAP3_ScenarioFormulaSelectionFeatures",
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "path_length": 64,
+      "physical_filename": "PR168_MAP3_SelectFeatures.report.json",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "alias_status": "CANONICAL_SHORT_PATH",
+      "authority_class": "MAP3_FILE_ALIAS_ROW_NON_PROOF",
+      "cash_access_created_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "live_authority_created_flag": false,
+      "logical_report_id": "PR168_MAP3_QuantumFormulaLift",
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "path_length": 62,
+      "physical_filename": "PR168_MAP3_QFormulaLift.report.json",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "alias_status": "CANONICAL_SHORT_PATH",
+      "authority_class": "MAP3_FILE_ALIAS_ROW_NON_PROOF",
+      "cash_access_created_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "live_authority_created_flag": false,
+      "logical_report_id": "PR168_MAP3_FormulaLifecycleDAG",
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "path_length": 62,
+      "physical_filename": "PR168_MAP3_LifecycleDAG.report.json",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "alias_status": "CANONICAL_SHORT_PATH",
+      "authority_class": "MAP3_FILE_ALIAS_ROW_NON_PROOF",
+      "cash_access_created_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "live_authority_created_flag": false,
+      "logical_report_id": "PR168_MAP3_RP2ReplayPaperFailureMiningLedger",
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "path_length": 66,
+      "physical_filename": "PR168_MAP3_RP2FailureMining.report.json",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "alias_status": "CANONICAL_SHORT_PATH",
+      "authority_class": "MAP3_FILE_ALIAS_ROW_NON_PROOF",
+      "cash_access_created_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "live_authority_created_flag": false,
+      "logical_report_id": "PR168_MAP3_FormulaRecoveryFactoryLedger",
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "path_length": 72,
+      "physical_filename": "PR168_MAP3_FormulaRecoveryFactory.report.json",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "alias_status": "CANONICAL_SHORT_PATH",
+      "authority_class": "MAP3_FILE_ALIAS_ROW_NON_PROOF",
+      "cash_access_created_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "live_authority_created_flag": false,
+      "logical_report_id": "PR168_MAP3_NegativeToCandidateFormulaRepairLedger",
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "path_length": 75,
+      "physical_filename": "PR168_MAP3_NegativeToCandidateRepair.report.json",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "alias_status": "CANONICAL_SHORT_PATH",
+      "authority_class": "MAP3_FILE_ALIAS_ROW_NON_PROOF",
+      "cash_access_created_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "live_authority_created_flag": false,
+      "logical_report_id": "PR168_MAP3_FormulaOntologyRegistry",
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "path_length": 65,
+      "physical_filename": "PR168_MAP3_FormulaOntology.report.json",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "alias_status": "CANONICAL_SHORT_PATH",
+      "authority_class": "MAP3_FILE_ALIAS_ROW_NON_PROOF",
+      "cash_access_created_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "live_authority_created_flag": false,
+      "logical_report_id": "PR168_MAP3_FormulaRetirementCandidateLedger",
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "path_length": 77,
+      "physical_filename": "PR168_MAP3_FormulaRetirementCandidates.report.json",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "alias_status": "CANONICAL_SHORT_PATH",
+      "authority_class": "MAP3_FILE_ALIAS_ROW_NON_PROOF",
+      "cash_access_created_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "live_authority_created_flag": false,
+      "logical_report_id": "PR168_MAP3_FormulaDependencyGraphLedger",
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "path_length": 72,
+      "physical_filename": "PR168_MAP3_FormulaDependencyGraph.report.json",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "alias_status": "CANONICAL_SHORT_PATH",
+      "authority_class": "MAP3_FILE_ALIAS_ROW_NON_PROOF",
+      "cash_access_created_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "live_authority_created_flag": false,
+      "logical_report_id": "PR168_MAP3_FormulaSelectionSurfaceForRANK2",
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "path_length": 73,
+      "physical_filename": "PR168_MAP3_FormulaSelectionSurface.report.json",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    }
+  ],
+  "repair_route_if_gap": null,
+  "repo_mining_refs": [
+    "PR168_RP2_MAP2_identity_gap"
+  ],
+  "report_version": "PR168-MAP3-v4.0",
+  "row_shard_refs_if_any": [],
+  "source_refs": [],
+  "source_truth_acceptance_created_flag": false,
+  "summary": {
+    "alias_count": 63,
+    "build_mode": "offline"
+  },
+  "terminal_by_nature_flag": false,
+  "terminal_reason_code": null,
+  "terminal_reason_if_terminal": null,
+  "test_refs": [
+    "tests/pr168_map3/test_online_scout.py"
+  ],
+  "unit_normalization_refs": [],
+  "upstream_input_refs": [
+    "PR168_MAP3_YOLO_SAFETY_GUARD",
+    "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+  ],
+  "upstream_refs": [
+    "PR168_MAP3_YOLO_SAFETY_GUARD",
+    "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+  ],
+  "validator_refs": [
+    "tools/validate_pr168_map3.py"
+  ]
+}

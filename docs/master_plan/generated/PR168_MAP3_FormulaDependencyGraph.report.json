@@ -1,0 +1,4601 @@
+{
+  "alias_registry_ref": "docs/master_plan/generated/PR168_MAP3_FileAliases.report.json",
+  "authority_class": "MAP3_ONLINE_SCOUTING_REPORT_NON_PROOF",
+  "cash_access_created_flag": false,
+  "connector_semantic_binding_created_flag": false,
+  "consumer_agents": [
+    "PR168_RP2_agent",
+    "PR168_RANK2_agent",
+    "PR165B_memory_agent",
+    "PR162EQ_quantum_agent",
+    "DATA1B_repair_agent",
+    "source_evidence_review_agent"
+  ],
+  "created_at_utc": "2026-06-22T00:00:00Z",
+  "created_by_tool": "tools/build_pr168_map3.py",
+  "data_provenance_refs": [
+    "PR168_MAP3_OnlineScout_deep_structured_search_matrix"
+  ],
+  "data_requirement_refs": [],
+  "downstream_consumers": [
+    "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+    "PR168_RANK2_EVIDENCE_RANKING",
+    "PR165B_CONDITION_SCOPED_MEMORY",
+    "PR162E_Q_QUANTUM_MAPPING",
+    "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+    "SOURCE_EVIDENCE_REVIEW"
+  ],
+  "downstream_pr_refs": [
+    "PR168-RP2",
+    "PR168-RANK2",
+    "PR165-B",
+    "PR162E-Q",
+    "DATA1B"
+  ],
+  "dry_run_receipt_refs": [],
+  "formula_contract_refs": [],
+  "live_authority_created_flag": false,
+  "logical_report_id": "PR168_MAP3_FormulaDependencyGraphLedger",
+  "manual_edit_allowed_flag": false,
+  "no_orphan_status": "NO_ORPHAN_LINKED",
+  "order_authority_created_flag": false,
+  "owning_agent": "PR168_MAP3_formula_intake_agent",
+  "path_audit_ref": "docs/master_plan/generated/PR168_MAP3_PathAudit.report.json",
+  "physical_filename": "PR168_MAP3_FormulaDependencyGraph.report.json",
+  "private_state_access_created_flag": false,
+  "profit_evidence_created_flag": false,
+  "qtt_sha_or_atomicrows_hash_authority_flag": false,
+  "quantum_advantage_claim_flag": false,
+  "quantum_backend_execution_flag": false,
+  "records": [
+    {
+      "accepted_truth_flag": false,
+      "authority_class": "MAP3_FORMULA_DEPENDENCY_NON_PROOF",
+      "candidate_only_flag": true,
+      "cash_access_created_flag": false,
+      "champion_allowed_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "dependency_direction": "FORMULA_DEPENDS_ON_INPUT_SOURCE_QKU",
+      "dependency_missing_flag": false,
+      "dependency_reason": "Replay/paper computability and source evidence routing",
+      "depends_on_data_family_ids": [
+        "market_implied_probability_and_parity"
+      ],
+      "depends_on_formula_ids": [],
+      "depends_on_input_ids": [
+        "payout_value",
+        "no_bid_price"
+      ],
+      "depends_on_qku_ids": [
+        "QKU_PMKT_EDGE_MARKET_IMPLIED_PROBABILITY_AND_PARITY_001"
+      ],
+      "depends_on_quantum_components": [],
+      "depends_on_source_ids": [
+        "https://docs.kalshi.com/api-reference/market/get-market-orderbook"
+      ],
+      "depends_on_unit_normalization_refs": [
+        "UnitNormalizationContractV1:FORM_MAP3_KALSHI_ORDERBOOK_001"
+      ],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "formula_dependency_row_id": "FORMULA_DEPENDENCY_0001",
+      "formula_family": "market_implied_probability_and_parity",
+      "formula_id": "FORM_MAP3_KALSHI_ORDERBOOK_001",
+      "formula_variant_id": "FVAR_FORM_MAP3_KALSHI_ORDERBOOK_001_BASE",
+      "live_authority_created_flag": false,
+      "live_candidate_allowed_flag": false,
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "not_profit_proof_flag": true,
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qku_id_if_available": "QKU_PMKT_EDGE_MARKET_IMPLIED_PROBABILITY_AND_PARITY_001",
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_dependency_missing": null,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "accepted_truth_flag": false,
+      "authority_class": "MAP3_FORMULA_DEPENDENCY_NON_PROOF",
+      "candidate_only_flag": true,
+      "cash_access_created_flag": false,
+      "champion_allowed_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "dependency_direction": "FORMULA_DEPENDS_ON_INPUT_SOURCE_QKU",
+      "dependency_missing_flag": false,
+      "dependency_reason": "Replay/paper computability and source evidence routing",
+      "depends_on_data_family_ids": [
+        "market_implied_probability_and_parity"
+      ],
+      "depends_on_formula_ids": [],
+      "depends_on_input_ids": [
+        "payout_value",
+        "yes_bid_price"
+      ],
+      "depends_on_qku_ids": [
+        "QKU_PMKT_EDGE_MARKET_IMPLIED_PROBABILITY_AND_PARITY_002"
+      ],
+      "depends_on_quantum_components": [],
+      "depends_on_source_ids": [
+        "https://docs.kalshi.com/getting_started/orderbook_responses"
+      ],
+      "depends_on_unit_normalization_refs": [
+        "UnitNormalizationContractV1:FORM_MAP3_KALSHI_ORDERBOOK_002"
+      ],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "formula_dependency_row_id": "FORMULA_DEPENDENCY_0002",
+      "formula_family": "market_implied_probability_and_parity",
+      "formula_id": "FORM_MAP3_KALSHI_ORDERBOOK_002",
+      "formula_variant_id": "FVAR_FORM_MAP3_KALSHI_ORDERBOOK_002_BASE",
+      "live_authority_created_flag": false,
+      "live_candidate_allowed_flag": false,
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "not_profit_proof_flag": true,
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qku_id_if_available": "QKU_PMKT_EDGE_MARKET_IMPLIED_PROBABILITY_AND_PARITY_002",
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_dependency_missing": null,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "accepted_truth_flag": false,
+      "authority_class": "MAP3_FORMULA_DEPENDENCY_NON_PROOF",
+      "candidate_only_flag": true,
+      "cash_access_created_flag": false,
+      "champion_allowed_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "dependency_direction": "FORMULA_DEPENDS_ON_INPUT_SOURCE_QKU",
+      "dependency_missing_flag": false,
+      "dependency_reason": "Replay/paper computability and source evidence routing",
+      "depends_on_data_family_ids": [
+        "orderbook_microstructure"
+      ],
+      "depends_on_formula_ids": [],
+      "depends_on_input_ids": [
+        "payout_value",
+        "no_bid_price",
+        "yes_bid_price"
+      ],
+      "depends_on_qku_ids": [
+        "QKU_PMKT_EDGE_ORDERBOOK_MICROSTRUCTURE_003"
+      ],
+      "depends_on_quantum_components": [],
+      "depends_on_source_ids": [
+        "https://docs.kalshi.com/api-reference/market/get-multiple-market-orderbooks"
+      ],
+      "depends_on_unit_normalization_refs": [
+        "UnitNormalizationContractV1:FORM_MAP3_KALSHI_ORDERBOOK_003"
+      ],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "formula_dependency_row_id": "FORMULA_DEPENDENCY_0003",
+      "formula_family": "orderbook_microstructure",
+      "formula_id": "FORM_MAP3_KALSHI_ORDERBOOK_003",
+      "formula_variant_id": "FVAR_FORM_MAP3_KALSHI_ORDERBOOK_003_BASE",
+      "live_authority_created_flag": false,
+      "live_candidate_allowed_flag": false,
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "not_profit_proof_flag": true,
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qku_id_if_available": "QKU_PMKT_EDGE_ORDERBOOK_MICROSTRUCTURE_003",
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_dependency_missing": null,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "accepted_truth_flag": false,
+      "authority_class": "MAP3_FORMULA_DEPENDENCY_NON_PROOF",
+      "candidate_only_flag": true,
+      "cash_access_created_flag": false,
+      "champion_allowed_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "dependency_direction": "FORMULA_DEPENDS_ON_INPUT_SOURCE_QKU",
+      "dependency_missing_flag": false,
+      "dependency_reason": "Replay/paper computability and source evidence routing",
+      "depends_on_data_family_ids": [
+        "trade_price_history_features"
+      ],
+      "depends_on_formula_ids": [],
+      "depends_on_input_ids": [
+        "trade_count",
+        "lookback_seconds"
+      ],
+      "depends_on_qku_ids": [
+        "QKU_PMKT_EDGE_TRADE_PRICE_HISTORY_FEATURES_004"
+      ],
+      "depends_on_quantum_components": [],
+      "depends_on_source_ids": [
+        "https://docs.kalshi.com/api-reference/market/get-trades"
+      ],
+      "depends_on_unit_normalization_refs": [
+        "UnitNormalizationContractV1:FORM_MAP3_KALSHI_TRADES_001"
+      ],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "formula_dependency_row_id": "FORMULA_DEPENDENCY_0004",
+      "formula_family": "trade_price_history_features",
+      "formula_id": "FORM_MAP3_KALSHI_TRADES_001",
+      "formula_variant_id": "FVAR_FORM_MAP3_KALSHI_TRADES_001_BASE",
+      "live_authority_created_flag": false,
+      "live_candidate_allowed_flag": false,
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "not_profit_proof_flag": true,
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qku_id_if_available": "QKU_PMKT_EDGE_TRADE_PRICE_HISTORY_FEATURES_004",
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_dependency_missing": null,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "accepted_truth_flag": false,
+      "authority_class": "MAP3_FORMULA_DEPENDENCY_NON_PROOF",
+      "candidate_only_flag": true,
+      "cash_access_created_flag": false,
+      "champion_allowed_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "dependency_direction": "FORMULA_DEPENDS_ON_INPUT_SOURCE_QKU",
+      "dependency_missing_flag": false,
+      "dependency_reason": "Replay/paper computability and source evidence routing",
+      "depends_on_data_family_ids": [
+        "trade_price_history_features"
+      ],
+      "depends_on_formula_ids": [],
+      "depends_on_input_ids": [
+        "close_price",
+        "open_price"
+      ],
+      "depends_on_qku_ids": [
+        "QKU_PMKT_EDGE_TRADE_PRICE_HISTORY_FEATURES_005"
+      ],
+      "depends_on_quantum_components": [],
+      "depends_on_source_ids": [
+        "https://docs.kalshi.com/api-reference/historical/get-historical-market-candlesticks"
+      ],
+      "depends_on_unit_normalization_refs": [
+        "UnitNormalizationContractV1:FORM_MAP3_KALSHI_CANDLES_001"
+      ],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "formula_dependency_row_id": "FORMULA_DEPENDENCY_0005",
+      "formula_family": "trade_price_history_features",
+      "formula_id": "FORM_MAP3_KALSHI_CANDLES_001",
+      "formula_variant_id": "FVAR_FORM_MAP3_KALSHI_CANDLES_001_BASE",
+      "live_authority_created_flag": false,
+      "live_candidate_allowed_flag": false,
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "not_profit_proof_flag": true,
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qku_id_if_available": "QKU_PMKT_EDGE_TRADE_PRICE_HISTORY_FEATURES_005",
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_dependency_missing": null,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "accepted_truth_flag": false,
+      "authority_class": "MAP3_FORMULA_DEPENDENCY_NON_PROOF",
+      "candidate_only_flag": true,
+      "cash_access_created_flag": false,
+      "champion_allowed_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "dependency_direction": "FORMULA_DEPENDS_ON_INPUT_SOURCE_QKU",
+      "dependency_missing_flag": false,
+      "dependency_reason": "Replay/paper computability and source evidence routing",
+      "depends_on_data_family_ids": [
+        "regime_and_scenario_ladder"
+      ],
+      "depends_on_formula_ids": [],
+      "depends_on_input_ids": [
+        "current_timestamp",
+        "candle_end_timestamp"
+      ],
+      "depends_on_qku_ids": [
+        "QKU_PMKT_EDGE_REGIME_AND_SCENARIO_LADDER_006"
+      ],
+      "depends_on_quantum_components": [],
+      "depends_on_source_ids": [
+        "https://docs.kalshi.com/api-reference/market/get-market-candlesticks"
+      ],
+      "depends_on_unit_normalization_refs": [
+        "UnitNormalizationContractV1:FORM_MAP3_KALSHI_CANDLES_002"
+      ],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "formula_dependency_row_id": "FORMULA_DEPENDENCY_0006",
+      "formula_family": "regime_and_scenario_ladder",
+      "formula_id": "FORM_MAP3_KALSHI_CANDLES_002",
+      "formula_variant_id": "FVAR_FORM_MAP3_KALSHI_CANDLES_002_BASE",
+      "live_authority_created_flag": false,
+      "live_candidate_allowed_flag": false,
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "not_profit_proof_flag": true,
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qku_id_if_available": "QKU_PMKT_EDGE_REGIME_AND_SCENARIO_LADDER_006",
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_dependency_missing": null,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "accepted_truth_flag": false,
+      "authority_class": "MAP3_FORMULA_DEPENDENCY_NON_PROOF",
+      "candidate_only_flag": true,
+      "cash_access_created_flag": false,
+      "champion_allowed_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "dependency_direction": "FORMULA_DEPENDS_ON_INPUT_SOURCE_QKU",
+      "dependency_missing_flag": false,
+      "dependency_reason": "Replay/paper computability and source evidence routing",
+      "depends_on_data_family_ids": [
+        "fill_latency_capacity"
+      ],
+      "depends_on_formula_ids": [],
+      "depends_on_input_ids": [
+        "edge_value",
+        "latency_seconds",
+        "decay_rate"
+      ],
+      "depends_on_qku_ids": [
+        "QKU_PMKT_EDGE_FILL_LATENCY_CAPACITY_007"
+      ],
+      "depends_on_quantum_components": [],
+      "depends_on_source_ids": [
+        "https://docs.kalshi.com/websockets/orderbook-updates"
+      ],
+      "depends_on_unit_normalization_refs": [
+        "UnitNormalizationContractV1:FORM_MAP3_KALSHI_WS_001"
+      ],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "formula_dependency_row_id": "FORMULA_DEPENDENCY_0007",
+      "formula_family": "fill_latency_capacity",
+      "formula_id": "FORM_MAP3_KALSHI_WS_001",
+      "formula_variant_id": "FVAR_FORM_MAP3_KALSHI_WS_001_BASE",
+      "live_authority_created_flag": false,
+      "live_candidate_allowed_flag": false,
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "not_profit_proof_flag": true,
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qku_id_if_available": "QKU_PMKT_EDGE_FILL_LATENCY_CAPACITY_007",
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_dependency_missing": null,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "accepted_truth_flag": false,
+      "authority_class": "MAP3_FORMULA_DEPENDENCY_NON_PROOF",
+      "candidate_only_flag": true,
+      "cash_access_created_flag": false,
+      "champion_allowed_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "dependency_direction": "FORMULA_DEPENDS_ON_INPUT_SOURCE_QKU",
+      "dependency_missing_flag": false,
+      "dependency_reason": "Replay/paper computability and source evidence routing",
+      "depends_on_data_family_ids": [
+        "regime_and_scenario_ladder"
+      ],
+      "depends_on_formula_ids": [],
+      "depends_on_input_ids": [
+        "websocket_update_count",
+        "lookback_seconds"
+      ],
+      "depends_on_qku_ids": [
+        "QKU_PMKT_EDGE_REGIME_AND_SCENARIO_LADDER_008"
+      ],
+      "depends_on_quantum_components": [],
+      "depends_on_source_ids": [
+        "https://docs.kalshi.com/getting_started/quick_start_websockets"
+      ],
+      "depends_on_unit_normalization_refs": [
+        "UnitNormalizationContractV1:FORM_MAP3_KALSHI_WS_002"
+      ],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "formula_dependency_row_id": "FORMULA_DEPENDENCY_0008",
+      "formula_family": "regime_and_scenario_ladder",
+      "formula_id": "FORM_MAP3_KALSHI_WS_002",
+      "formula_variant_id": "FVAR_FORM_MAP3_KALSHI_WS_002_BASE",
+      "live_authority_created_flag": false,
+      "live_candidate_allowed_flag": false,
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "not_profit_proof_flag": true,
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qku_id_if_available": "QKU_PMKT_EDGE_REGIME_AND_SCENARIO_LADDER_008",
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_dependency_missing": null,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "accepted_truth_flag": false,
+      "authority_class": "MAP3_FORMULA_DEPENDENCY_NON_PROOF",
+      "candidate_only_flag": true,
+      "cash_access_created_flag": false,
+      "champion_allowed_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "dependency_direction": "FORMULA_DEPENDS_ON_INPUT_SOURCE_QKU",
+      "dependency_missing_flag": true,
+      "dependency_reason": "Replay/paper computability and source evidence routing",
+      "depends_on_data_family_ids": [
+        "break_even_and_required_edge"
+      ],
+      "depends_on_formula_ids": [],
+      "depends_on_input_ids": [
+        "contract_count",
+        "price"
+      ],
+      "depends_on_qku_ids": [
+        "QKU_PMKT_EDGE_BREAK_EVEN_AND_REQUIRED_EDGE_009"
+      ],
+      "depends_on_quantum_components": [],
+      "depends_on_source_ids": [
+        "https://kalshi.com/docs/kalshi-fee-schedule.pdf"
+      ],
+      "depends_on_unit_normalization_refs": [
+        "UnitNormalizationContractV1:FORM_MAP3_KALSHI_FEE_001"
+      ],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "formula_dependency_row_id": "FORMULA_DEPENDENCY_0009",
+      "formula_family": "break_even_and_required_edge",
+      "formula_id": "FORM_MAP3_KALSHI_FEE_001",
+      "formula_variant_id": "FVAR_FORM_MAP3_KALSHI_FEE_001_BASE",
+      "live_authority_created_flag": false,
+      "live_candidate_allowed_flag": false,
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "not_profit_proof_flag": true,
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qku_id_if_available": "QKU_PMKT_EDGE_BREAK_EVEN_AND_REQUIRED_EDGE_009",
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_dependency_missing": "FORMULA_INPUT_REPAIR",
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "accepted_truth_flag": false,
+      "authority_class": "MAP3_FORMULA_DEPENDENCY_NON_PROOF",
+      "candidate_only_flag": true,
+      "cash_access_created_flag": false,
+      "champion_allowed_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "dependency_direction": "FORMULA_DEPENDS_ON_INPUT_SOURCE_QKU",
+      "dependency_missing_flag": true,
+      "dependency_reason": "Replay/paper computability and source evidence routing",
+      "depends_on_data_family_ids": [
+        "venue_mechanics_constraints"
+      ],
+      "depends_on_formula_ids": [],
+      "depends_on_input_ids": [
+        "price_level_structure",
+        "order_price"
+      ],
+      "depends_on_qku_ids": [
+        "QKU_PMKT_EDGE_VENUE_MECHANICS_CONSTRAINTS_010"
+      ],
+      "depends_on_quantum_components": [],
+      "depends_on_source_ids": [
+        "https://docs.kalshi.com/getting_started/fixed_point_migration"
+      ],
+      "depends_on_unit_normalization_refs": [
+        "UnitNormalizationContractV1:FORM_MAP3_KALSHI_TICK_001"
+      ],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "formula_dependency_row_id": "FORMULA_DEPENDENCY_0010",
+      "formula_family": "venue_mechanics_constraints",
+      "formula_id": "FORM_MAP3_KALSHI_TICK_001",
+      "formula_variant_id": "FVAR_FORM_MAP3_KALSHI_TICK_001_BASE",
+      "live_authority_created_flag": false,
+      "live_candidate_allowed_flag": false,
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "not_profit_proof_flag": true,
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qku_id_if_available": "QKU_PMKT_EDGE_VENUE_MECHANICS_CONSTRAINTS_010",
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_dependency_missing": "FORMULA_INPUT_REPAIR",
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "accepted_truth_flag": false,
+      "authority_class": "MAP3_FORMULA_DEPENDENCY_NON_PROOF",
+      "candidate_only_flag": true,
+      "cash_access_created_flag": false,
+      "champion_allowed_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "dependency_direction": "FORMULA_DEPENDS_ON_INPUT_SOURCE_QKU",
+      "dependency_missing_flag": false,
+      "dependency_reason": "Replay/paper computability and source evidence routing",
+      "depends_on_data_family_ids": [
+        "orderbook_microstructure"
+      ],
+      "depends_on_formula_ids": [],
+      "depends_on_input_ids": [
+        "best_ask",
+        "best_bid"
+      ],
+      "depends_on_qku_ids": [
+        "QKU_PMKT_EDGE_ORDERBOOK_MICROSTRUCTURE_011"
+      ],
+      "depends_on_quantum_components": [],
+      "depends_on_source_ids": [
+        "https://docs.polymarket.com/api-reference/market-data/get-order-book"
+      ],
+      "depends_on_unit_normalization_refs": [
+        "UnitNormalizationContractV1:FORM_MAP3_POLY_BOOK_001"
+      ],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "formula_dependency_row_id": "FORMULA_DEPENDENCY_0011",
+      "formula_family": "orderbook_microstructure",
+      "formula_id": "FORM_MAP3_POLY_BOOK_001",
+      "formula_variant_id": "FVAR_FORM_MAP3_POLY_BOOK_001_BASE",
+      "live_authority_created_flag": false,
+      "live_candidate_allowed_flag": false,
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "not_profit_proof_flag": true,
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qku_id_if_available": "QKU_PMKT_EDGE_ORDERBOOK_MICROSTRUCTURE_011",
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_dependency_missing": null,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "accepted_truth_flag": false,
+      "authority_class": "MAP3_FORMULA_DEPENDENCY_NON_PROOF",
+      "candidate_only_flag": true,
+      "cash_access_created_flag": false,
+      "champion_allowed_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "dependency_direction": "FORMULA_DEPENDS_ON_INPUT_SOURCE_QKU",
+      "dependency_missing_flag": false,
+      "dependency_reason": "Replay/paper computability and source evidence routing",
+      "depends_on_data_family_ids": [
+        "fill_latency_capacity"
+      ],
+      "depends_on_formula_ids": [],
+      "depends_on_input_ids": [
+        "order_size",
+        "depth_at_limit"
+      ],
+      "depends_on_qku_ids": [
+        "QKU_PMKT_EDGE_FILL_LATENCY_CAPACITY_012"
+      ],
+      "depends_on_quantum_components": [],
+      "depends_on_source_ids": [
+        "https://docs.polymarket.com/trading/orderbook"
+      ],
+      "depends_on_unit_normalization_refs": [
+        "UnitNormalizationContractV1:FORM_MAP3_POLY_BOOK_002"
+      ],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "formula_dependency_row_id": "FORMULA_DEPENDENCY_0012",
+      "formula_family": "fill_latency_capacity",
+      "formula_id": "FORM_MAP3_POLY_BOOK_002",
+      "formula_variant_id": "FVAR_FORM_MAP3_POLY_BOOK_002_BASE",
+      "live_authority_created_flag": false,
+      "live_candidate_allowed_flag": false,
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "not_profit_proof_flag": true,
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qku_id_if_available": "QKU_PMKT_EDGE_FILL_LATENCY_CAPACITY_012",
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_dependency_missing": null,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "accepted_truth_flag": false,
+      "authority_class": "MAP3_FORMULA_DEPENDENCY_NON_PROOF",
+      "candidate_only_flag": true,
+      "cash_access_created_flag": false,
+      "champion_allowed_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "dependency_direction": "FORMULA_DEPENDS_ON_INPUT_SOURCE_QKU",
+      "dependency_missing_flag": false,
+      "dependency_reason": "Replay/paper computability and source evidence routing",
+      "depends_on_data_family_ids": [
+        "trade_price_history_features"
+      ],
+      "depends_on_formula_ids": [],
+      "depends_on_input_ids": [
+        "current_price",
+        "prior_price"
+      ],
+      "depends_on_qku_ids": [
+        "QKU_PMKT_EDGE_TRADE_PRICE_HISTORY_FEATURES_013"
+      ],
+      "depends_on_quantum_components": [],
+      "depends_on_source_ids": [
+        "https://docs.polymarket.com/api-reference/markets/get-prices-history"
+      ],
+      "depends_on_unit_normalization_refs": [
+        "UnitNormalizationContractV1:FORM_MAP3_POLY_HISTORY_001"
+      ],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "formula_dependency_row_id": "FORMULA_DEPENDENCY_0013",
+      "formula_family": "trade_price_history_features",
+      "formula_id": "FORM_MAP3_POLY_HISTORY_001",
+      "formula_variant_id": "FVAR_FORM_MAP3_POLY_HISTORY_001_BASE",
+      "live_authority_created_flag": false,
+      "live_candidate_allowed_flag": false,
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "not_profit_proof_flag": true,
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qku_id_if_available": "QKU_PMKT_EDGE_TRADE_PRICE_HISTORY_FEATURES_013",
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_dependency_missing": null,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "accepted_truth_flag": false,
+      "authority_class": "MAP3_FORMULA_DEPENDENCY_NON_PROOF",
+      "candidate_only_flag": true,
+      "cash_access_created_flag": false,
+      "champion_allowed_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "dependency_direction": "FORMULA_DEPENDS_ON_INPUT_SOURCE_QKU",
+      "dependency_missing_flag": false,
+      "dependency_reason": "Replay/paper computability and source evidence routing",
+      "depends_on_data_family_ids": [
+        "market_implied_probability_and_parity"
+      ],
+      "depends_on_formula_ids": [],
+      "depends_on_input_ids": [
+        "best_bid",
+        "best_ask"
+      ],
+      "depends_on_qku_ids": [
+        "QKU_PMKT_EDGE_MARKET_IMPLIED_PROBABILITY_AND_PARITY_014"
+      ],
+      "depends_on_quantum_components": [],
+      "depends_on_source_ids": [
+        "https://docs.polymarket.com/api-reference/data/get-midpoint-price"
+      ],
+      "depends_on_unit_normalization_refs": [
+        "UnitNormalizationContractV1:FORM_MAP3_POLY_MID_001"
+      ],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "formula_dependency_row_id": "FORMULA_DEPENDENCY_0014",
+      "formula_family": "market_implied_probability_and_parity",
+      "formula_id": "FORM_MAP3_POLY_MID_001",
+      "formula_variant_id": "FVAR_FORM_MAP3_POLY_MID_001_BASE",
+      "live_authority_created_flag": false,
+      "live_candidate_allowed_flag": false,
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "not_profit_proof_flag": true,
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qku_id_if_available": "QKU_PMKT_EDGE_MARKET_IMPLIED_PROBABILITY_AND_PARITY_014",
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_dependency_missing": null,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "accepted_truth_flag": false,
+      "authority_class": "MAP3_FORMULA_DEPENDENCY_NON_PROOF",
+      "candidate_only_flag": true,
+      "cash_access_created_flag": false,
+      "champion_allowed_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "dependency_direction": "FORMULA_DEPENDS_ON_INPUT_SOURCE_QKU",
+      "dependency_missing_flag": false,
+      "dependency_reason": "Replay/paper computability and source evidence routing",
+      "depends_on_data_family_ids": [
+        "orderbook_microstructure"
+      ],
+      "depends_on_formula_ids": [],
+      "depends_on_input_ids": [
+        "spread",
+        "contract_count"
+      ],
+      "depends_on_qku_ids": [
+        "QKU_PMKT_EDGE_ORDERBOOK_MICROSTRUCTURE_015"
+      ],
+      "depends_on_quantum_components": [],
+      "depends_on_source_ids": [
+        "https://docs.polymarket.com/api-reference/market-data/get-spreads"
+      ],
+      "depends_on_unit_normalization_refs": [
+        "UnitNormalizationContractV1:FORM_MAP3_POLY_SPREAD_001"
+      ],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "formula_dependency_row_id": "FORMULA_DEPENDENCY_0015",
+      "formula_family": "orderbook_microstructure",
+      "formula_id": "FORM_MAP3_POLY_SPREAD_001",
+      "formula_variant_id": "FVAR_FORM_MAP3_POLY_SPREAD_001_BASE",
+      "live_authority_created_flag": false,
+      "live_candidate_allowed_flag": false,
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "not_profit_proof_flag": true,
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qku_id_if_available": "QKU_PMKT_EDGE_ORDERBOOK_MICROSTRUCTURE_015",
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_dependency_missing": null,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "accepted_truth_flag": false,
+      "authority_class": "MAP3_FORMULA_DEPENDENCY_NON_PROOF",
+      "candidate_only_flag": true,
+      "cash_access_created_flag": false,
+      "champion_allowed_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "dependency_direction": "FORMULA_DEPENDS_ON_INPUT_SOURCE_QKU",
+      "dependency_missing_flag": false,
+      "dependency_reason": "Replay/paper computability and source evidence routing",
+      "depends_on_data_family_ids": [
+        "trade_price_history_features"
+      ],
+      "depends_on_formula_ids": [],
+      "depends_on_input_ids": [
+        "last_trade_price",
+        "prior_trade_price"
+      ],
+      "depends_on_qku_ids": [
+        "QKU_PMKT_EDGE_TRADE_PRICE_HISTORY_FEATURES_016"
+      ],
+      "depends_on_quantum_components": [],
+      "depends_on_source_ids": [
+        "https://docs.polymarket.com/api-reference/market-data/get-last-trade-price"
+      ],
+      "depends_on_unit_normalization_refs": [
+        "UnitNormalizationContractV1:FORM_MAP3_POLY_LAST_001"
+      ],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "formula_dependency_row_id": "FORMULA_DEPENDENCY_0016",
+      "formula_family": "trade_price_history_features",
+      "formula_id": "FORM_MAP3_POLY_LAST_001",
+      "formula_variant_id": "FVAR_FORM_MAP3_POLY_LAST_001_BASE",
+      "live_authority_created_flag": false,
+      "live_candidate_allowed_flag": false,
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "not_profit_proof_flag": true,
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qku_id_if_available": "QKU_PMKT_EDGE_TRADE_PRICE_HISTORY_FEATURES_016",
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_dependency_missing": null,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "accepted_truth_flag": false,
+      "authority_class": "MAP3_FORMULA_DEPENDENCY_NON_PROOF",
+      "candidate_only_flag": true,
+      "cash_access_created_flag": false,
+      "champion_allowed_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "dependency_direction": "FORMULA_DEPENDS_ON_INPUT_SOURCE_QKU",
+      "dependency_missing_flag": false,
+      "dependency_reason": "Replay/paper computability and source evidence routing",
+      "depends_on_data_family_ids": [
+        "venue_mechanics_constraints"
+      ],
+      "depends_on_formula_ids": [],
+      "depends_on_input_ids": [
+        "notional",
+        "fee_rate_bps"
+      ],
+      "depends_on_qku_ids": [
+        "QKU_PMKT_EDGE_VENUE_MECHANICS_CONSTRAINTS_017"
+      ],
+      "depends_on_quantum_components": [],
+      "depends_on_source_ids": [
+        "https://docs.polymarket.com/trading/clients/public"
+      ],
+      "depends_on_unit_normalization_refs": [
+        "UnitNormalizationContractV1:FORM_MAP3_POLY_TICK_001"
+      ],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "formula_dependency_row_id": "FORMULA_DEPENDENCY_0017",
+      "formula_family": "venue_mechanics_constraints",
+      "formula_id": "FORM_MAP3_POLY_TICK_001",
+      "formula_variant_id": "FVAR_FORM_MAP3_POLY_TICK_001_BASE",
+      "live_authority_created_flag": false,
+      "live_candidate_allowed_flag": false,
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "not_profit_proof_flag": true,
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qku_id_if_available": "QKU_PMKT_EDGE_VENUE_MECHANICS_CONSTRAINTS_017",
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_dependency_missing": null,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "accepted_truth_flag": false,
+      "authority_class": "MAP3_FORMULA_DEPENDENCY_NON_PROOF",
+      "candidate_only_flag": true,
+      "cash_access_created_flag": false,
+      "champion_allowed_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "dependency_direction": "FORMULA_DEPENDS_ON_INPUT_SOURCE_QKU",
+      "dependency_missing_flag": false,
+      "dependency_reason": "Replay/paper computability and source evidence routing",
+      "depends_on_data_family_ids": [
+        "fill_latency_capacity"
+      ],
+      "depends_on_formula_ids": [],
+      "depends_on_input_ids": [
+        "current_timestamp",
+        "message_timestamp"
+      ],
+      "depends_on_qku_ids": [
+        "QKU_PMKT_EDGE_FILL_LATENCY_CAPACITY_018"
+      ],
+      "depends_on_quantum_components": [],
+      "depends_on_source_ids": [
+        "https://docs.polymarket.com/market-data/websocket/market-channel"
+      ],
+      "depends_on_unit_normalization_refs": [
+        "UnitNormalizationContractV1:FORM_MAP3_POLY_WS_001"
+      ],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "formula_dependency_row_id": "FORMULA_DEPENDENCY_0018",
+      "formula_family": "fill_latency_capacity",
+      "formula_id": "FORM_MAP3_POLY_WS_001",
+      "formula_variant_id": "FVAR_FORM_MAP3_POLY_WS_001_BASE",
+      "live_authority_created_flag": false,
+      "live_candidate_allowed_flag": false,
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "not_profit_proof_flag": true,
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qku_id_if_available": "QKU_PMKT_EDGE_FILL_LATENCY_CAPACITY_018",
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_dependency_missing": null,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "accepted_truth_flag": false,
+      "authority_class": "MAP3_FORMULA_DEPENDENCY_NON_PROOF",
+      "candidate_only_flag": true,
+      "cash_access_created_flag": false,
+      "champion_allowed_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "dependency_direction": "FORMULA_DEPENDS_ON_INPUT_SOURCE_QKU",
+      "dependency_missing_flag": false,
+      "dependency_reason": "Replay/paper computability and source evidence routing",
+      "depends_on_data_family_ids": [
+        "expected_value_and_payoff"
+      ],
+      "depends_on_formula_ids": [],
+      "depends_on_input_ids": [
+        "independent_probability",
+        "payout_value",
+        "entry_price"
+      ],
+      "depends_on_qku_ids": [
+        "QKU_PMKT_EDGE_EXPECTED_VALUE_AND_PAYOFF_019"
+      ],
+      "depends_on_quantum_components": [],
+      "depends_on_source_ids": [
+        "https://rodneywhitecenter.wharton.upenn.edu/wp-content/uploads/2014/04/0611.pdf"
+      ],
+      "depends_on_unit_normalization_refs": [
+        "UnitNormalizationContractV1:FORM_MAP3_PM_EV_001"
+      ],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "formula_dependency_row_id": "FORMULA_DEPENDENCY_0019",
+      "formula_family": "expected_value_and_payoff",
+      "formula_id": "FORM_MAP3_PM_EV_001",
+      "formula_variant_id": "FVAR_FORM_MAP3_PM_EV_001_BASE",
+      "live_authority_created_flag": false,
+      "live_candidate_allowed_flag": false,
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "not_profit_proof_flag": true,
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qku_id_if_available": "QKU_PMKT_EDGE_EXPECTED_VALUE_AND_PAYOFF_019",
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_dependency_missing": null,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "accepted_truth_flag": false,
+      "authority_class": "MAP3_FORMULA_DEPENDENCY_NON_PROOF",
+      "candidate_only_flag": true,
+      "cash_access_created_flag": false,
+      "champion_allowed_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "dependency_direction": "FORMULA_DEPENDS_ON_INPUT_SOURCE_QKU",
+      "dependency_missing_flag": false,
+      "dependency_reason": "Replay/paper computability and source evidence routing",
+      "depends_on_data_family_ids": [
+        "break_even_and_required_edge"
+      ],
+      "depends_on_formula_ids": [],
+      "depends_on_input_ids": [
+        "entry_price",
+        "total_fee_per_contract",
+        "payout_value"
+      ],
+      "depends_on_qku_ids": [
+        "QKU_PMKT_EDGE_BREAK_EVEN_AND_REQUIRED_EDGE_020"
+      ],
+      "depends_on_quantum_components": [],
+      "depends_on_source_ids": [
+        "https://www.tradealgo.com/trading-guides/prediction-markets/prediction-market-pricing"
+      ],
+      "depends_on_unit_normalization_refs": [
+        "UnitNormalizationContractV1:FORM_MAP3_PM_BREAKEVEN_001"
+      ],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "formula_dependency_row_id": "FORMULA_DEPENDENCY_0020",
+      "formula_family": "break_even_and_required_edge",
+      "formula_id": "FORM_MAP3_PM_BREAKEVEN_001",
+      "formula_variant_id": "FVAR_FORM_MAP3_PM_BREAKEVEN_001_BASE",
+      "live_authority_created_flag": false,
+      "live_candidate_allowed_flag": false,
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "not_profit_proof_flag": true,
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qku_id_if_available": "QKU_PMKT_EDGE_BREAK_EVEN_AND_REQUIRED_EDGE_020",
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_dependency_missing": null,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "accepted_truth_flag": false,
+      "authority_class": "MAP3_FORMULA_DEPENDENCY_NON_PROOF",
+      "candidate_only_flag": true,
+      "cash_access_created_flag": false,
+      "champion_allowed_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "dependency_direction": "FORMULA_DEPENDS_ON_INPUT_SOURCE_QKU",
+      "dependency_missing_flag": false,
+      "dependency_reason": "Replay/paper computability and source evidence routing",
+      "depends_on_data_family_ids": [
+        "market_implied_probability_and_parity"
+      ],
+      "depends_on_formula_ids": [],
+      "depends_on_input_ids": [
+        "yes_price",
+        "no_price",
+        "payout_value"
+      ],
+      "depends_on_qku_ids": [
+        "QKU_PMKT_EDGE_MARKET_IMPLIED_PROBABILITY_AND_PARITY_021"
+      ],
+      "depends_on_quantum_components": [],
+      "depends_on_source_ids": [
+        "https://www.tradealgo.com/trading-guides/prediction-markets/prediction-market-arbitrage-guide"
+      ],
+      "depends_on_unit_normalization_refs": [
+        "UnitNormalizationContractV1:FORM_MAP3_PM_PARITY_001"
+      ],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "formula_dependency_row_id": "FORMULA_DEPENDENCY_0021",
+      "formula_family": "market_implied_probability_and_parity",
+      "formula_id": "FORM_MAP3_PM_PARITY_001",
+      "formula_variant_id": "FVAR_FORM_MAP3_PM_PARITY_001_BASE",
+      "live_authority_created_flag": false,
+      "live_candidate_allowed_flag": false,
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "not_profit_proof_flag": true,
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qku_id_if_available": "QKU_PMKT_EDGE_MARKET_IMPLIED_PROBABILITY_AND_PARITY_021",
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_dependency_missing": null,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "accepted_truth_flag": false,
+      "authority_class": "MAP3_FORMULA_DEPENDENCY_NON_PROOF",
+      "candidate_only_flag": true,
+      "cash_access_created_flag": false,
+      "champion_allowed_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "dependency_direction": "FORMULA_DEPENDS_ON_INPUT_SOURCE_QKU",
+      "dependency_missing_flag": false,
+      "dependency_reason": "Replay/paper computability and source evidence routing",
+      "depends_on_data_family_ids": [
+        "market_implied_probability_and_parity"
+      ],
+      "depends_on_formula_ids": [],
+      "depends_on_input_ids": [
+        "payout_value",
+        "sum_outcome_prices"
+      ],
+      "depends_on_qku_ids": [
+        "QKU_PMKT_EDGE_MARKET_IMPLIED_PROBABILITY_AND_PARITY_022"
+      ],
+      "depends_on_quantum_components": [],
+      "depends_on_source_ids": [
+        "https://quantpedia.com/systematic-edges-in-prediction-markets/"
+      ],
+      "depends_on_unit_normalization_refs": [
+        "UnitNormalizationContractV1:FORM_MAP3_PM_ARBITRAGE_001"
+      ],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "formula_dependency_row_id": "FORMULA_DEPENDENCY_0022",
+      "formula_family": "market_implied_probability_and_parity",
+      "formula_id": "FORM_MAP3_PM_ARBITRAGE_001",
+      "formula_variant_id": "FVAR_FORM_MAP3_PM_ARBITRAGE_001_BASE",
+      "live_authority_created_flag": false,
+      "live_candidate_allowed_flag": false,
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "not_profit_proof_flag": true,
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qku_id_if_available": "QKU_PMKT_EDGE_MARKET_IMPLIED_PROBABILITY_AND_PARITY_022",
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_dependency_missing": null,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "accepted_truth_flag": false,
+      "authority_class": "MAP3_FORMULA_DEPENDENCY_NON_PROOF",
+      "candidate_only_flag": true,
+      "cash_access_created_flag": false,
+      "champion_allowed_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "dependency_direction": "FORMULA_DEPENDS_ON_INPUT_SOURCE_QKU",
+      "dependency_missing_flag": false,
+      "dependency_reason": "Replay/paper computability and source evidence routing",
+      "depends_on_data_family_ids": [
+        "fill_latency_capacity"
+      ],
+      "depends_on_formula_ids": [],
+      "depends_on_input_ids": [
+        "depth_at_limit",
+        "order_size"
+      ],
+      "depends_on_qku_ids": [
+        "QKU_PMKT_EDGE_FILL_LATENCY_CAPACITY_023"
+      ],
+      "depends_on_quantum_components": [],
+      "depends_on_source_ids": [
+        "https://questdb.com/glossary/fill-probability/"
+      ],
+      "depends_on_unit_normalization_refs": [
+        "UnitNormalizationContractV1:FORM_MAP3_FILL_001"
+      ],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "formula_dependency_row_id": "FORMULA_DEPENDENCY_0023",
+      "formula_family": "fill_latency_capacity",
+      "formula_id": "FORM_MAP3_FILL_001",
+      "formula_variant_id": "FVAR_FORM_MAP3_FILL_001_BASE",
+      "live_authority_created_flag": false,
+      "live_candidate_allowed_flag": false,
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "not_profit_proof_flag": true,
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qku_id_if_available": "QKU_PMKT_EDGE_FILL_LATENCY_CAPACITY_023",
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_dependency_missing": null,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "accepted_truth_flag": false,
+      "authority_class": "MAP3_FORMULA_DEPENDENCY_NON_PROOF",
+      "candidate_only_flag": true,
+      "cash_access_created_flag": false,
+      "champion_allowed_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "dependency_direction": "FORMULA_DEPENDS_ON_INPUT_SOURCE_QKU",
+      "dependency_missing_flag": true,
+      "dependency_reason": "Replay/paper computability and source evidence routing",
+      "depends_on_data_family_ids": [
+        "fill_latency_capacity"
+      ],
+      "depends_on_formula_ids": [],
+      "depends_on_input_ids": [
+        "queue_position",
+        "arrival_rate",
+        "cancel_rate",
+        "market_order_rate"
+      ],
+      "depends_on_qku_ids": [
+        "QKU_PMKT_EDGE_FILL_LATENCY_CAPACITY_024"
+      ],
+      "depends_on_quantum_components": [],
+      "depends_on_source_ids": [
+        "https://arxiv.org/pdf/2403.02572"
+      ],
+      "depends_on_unit_normalization_refs": [
+        "UnitNormalizationContractV1:FORM_MAP3_FILL_002"
+      ],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "formula_dependency_row_id": "FORMULA_DEPENDENCY_0024",
+      "formula_family": "fill_latency_capacity",
+      "formula_id": "FORM_MAP3_FILL_002",
+      "formula_variant_id": "FVAR_FORM_MAP3_FILL_002_BASE",
+      "live_authority_created_flag": false,
+      "live_candidate_allowed_flag": false,
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "not_profit_proof_flag": true,
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qku_id_if_available": "QKU_PMKT_EDGE_FILL_LATENCY_CAPACITY_024",
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_dependency_missing": "FORMULA_INPUT_REPAIR",
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "accepted_truth_flag": false,
+      "authority_class": "MAP3_FORMULA_DEPENDENCY_NON_PROOF",
+      "candidate_only_flag": true,
+      "cash_access_created_flag": false,
+      "champion_allowed_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "dependency_direction": "FORMULA_DEPENDS_ON_INPUT_SOURCE_QKU",
+      "dependency_missing_flag": false,
+      "dependency_reason": "Replay/paper computability and source evidence routing",
+      "depends_on_data_family_ids": [
+        "orderbook_microstructure"
+      ],
+      "depends_on_formula_ids": [],
+      "depends_on_input_ids": [
+        "bid_depth",
+        "ask_depth"
+      ],
+      "depends_on_qku_ids": [
+        "QKU_PMKT_EDGE_ORDERBOOK_MICROSTRUCTURE_025"
+      ],
+      "depends_on_quantum_components": [],
+      "depends_on_source_ids": [
+        "https://hftbacktest.readthedocs.io/en/latest/tutorials/Market%20Making%20with%20Alpha%20-%20Order%20Book%20Imbalance.html"
+      ],
+      "depends_on_unit_normalization_refs": [
+        "UnitNormalizationContractV1:FORM_MAP3_MICRO_001"
+      ],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "formula_dependency_row_id": "FORMULA_DEPENDENCY_0025",
+      "formula_family": "orderbook_microstructure",
+      "formula_id": "FORM_MAP3_MICRO_001",
+      "formula_variant_id": "FVAR_FORM_MAP3_MICRO_001_BASE",
+      "live_authority_created_flag": false,
+      "live_candidate_allowed_flag": false,
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "not_profit_proof_flag": true,
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qku_id_if_available": "QKU_PMKT_EDGE_ORDERBOOK_MICROSTRUCTURE_025",
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_dependency_missing": null,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "accepted_truth_flag": false,
+      "authority_class": "MAP3_FORMULA_DEPENDENCY_NON_PROOF",
+      "candidate_only_flag": true,
+      "cash_access_created_flag": false,
+      "champion_allowed_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "dependency_direction": "FORMULA_DEPENDS_ON_INPUT_SOURCE_QKU",
+      "dependency_missing_flag": false,
+      "dependency_reason": "Replay/paper computability and source evidence routing",
+      "depends_on_data_family_ids": [
+        "orderbook_microstructure"
+      ],
+      "depends_on_formula_ids": [],
+      "depends_on_input_ids": [
+        "best_ask",
+        "bid_depth",
+        "best_bid",
+        "ask_depth"
+      ],
+      "depends_on_qku_ids": [
+        "QKU_PMKT_EDGE_ORDERBOOK_MICROSTRUCTURE_026"
+      ],
+      "depends_on_quantum_components": [],
+      "depends_on_source_ids": [
+        "https://databento.com/docs/examples/order-book/microprice"
+      ],
+      "depends_on_unit_normalization_refs": [
+        "UnitNormalizationContractV1:FORM_MAP3_MICRO_002"
+      ],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "formula_dependency_row_id": "FORMULA_DEPENDENCY_0026",
+      "formula_family": "orderbook_microstructure",
+      "formula_id": "FORM_MAP3_MICRO_002",
+      "formula_variant_id": "FVAR_FORM_MAP3_MICRO_002_BASE",
+      "live_authority_created_flag": false,
+      "live_candidate_allowed_flag": false,
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "not_profit_proof_flag": true,
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qku_id_if_available": "QKU_PMKT_EDGE_ORDERBOOK_MICROSTRUCTURE_026",
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_dependency_missing": null,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "accepted_truth_flag": false,
+      "authority_class": "MAP3_FORMULA_DEPENDENCY_NON_PROOF",
+      "candidate_only_flag": true,
+      "cash_access_created_flag": false,
+      "champion_allowed_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "dependency_direction": "FORMULA_DEPENDS_ON_INPUT_SOURCE_QKU",
+      "dependency_missing_flag": true,
+      "dependency_reason": "Replay/paper computability and source evidence routing",
+      "depends_on_data_family_ids": [
+        "tca_implementation_shortfall"
+      ],
+      "depends_on_formula_ids": [],
+      "depends_on_input_ids": [
+        "average_execution_price",
+        "decision_price",
+        "explicit_fee",
+        "opportunity_cost"
+      ],
+      "depends_on_qku_ids": [
+        "QKU_PMKT_EDGE_TCA_IMPLEMENTATION_SHORTFALL_027"
+      ],
+      "depends_on_quantum_components": [],
+      "depends_on_source_ids": [
+        "https://www.investopedia.com/terms/i/implementationshortfall.asp"
+      ],
+      "depends_on_unit_normalization_refs": [
+        "UnitNormalizationContractV1:FORM_MAP3_TCA_001"
+      ],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "formula_dependency_row_id": "FORMULA_DEPENDENCY_0027",
+      "formula_family": "tca_implementation_shortfall",
+      "formula_id": "FORM_MAP3_TCA_001",
+      "formula_variant_id": "FVAR_FORM_MAP3_TCA_001_BASE",
+      "live_authority_created_flag": false,
+      "live_candidate_allowed_flag": false,
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "not_profit_proof_flag": true,
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qku_id_if_available": "QKU_PMKT_EDGE_TCA_IMPLEMENTATION_SHORTFALL_027",
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_dependency_missing": "FORMULA_INPUT_REPAIR",
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "accepted_truth_flag": false,
+      "authority_class": "MAP3_FORMULA_DEPENDENCY_NON_PROOF",
+      "candidate_only_flag": true,
+      "cash_access_created_flag": false,
+      "champion_allowed_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "dependency_direction": "FORMULA_DEPENDS_ON_INPUT_SOURCE_QKU",
+      "dependency_missing_flag": false,
+      "dependency_reason": "Replay/paper computability and source evidence routing",
+      "depends_on_data_family_ids": [
+        "tca_implementation_shortfall"
+      ],
+      "depends_on_formula_ids": [],
+      "depends_on_input_ids": [
+        "spread_cost",
+        "slippage_cost",
+        "explicit_fee",
+        "adverse_selection_cost"
+      ],
+      "depends_on_qku_ids": [
+        "QKU_PMKT_EDGE_TCA_IMPLEMENTATION_SHORTFALL_028"
+      ],
+      "depends_on_quantum_components": [],
+      "depends_on_source_ids": [
+        "https://www.talos.com/insights/understanding-crypto-transaction-cost-analysis"
+      ],
+      "depends_on_unit_normalization_refs": [
+        "UnitNormalizationContractV1:FORM_MAP3_TCA_002"
+      ],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "formula_dependency_row_id": "FORMULA_DEPENDENCY_0028",
+      "formula_family": "tca_implementation_shortfall",
+      "formula_id": "FORM_MAP3_TCA_002",
+      "formula_variant_id": "FVAR_FORM_MAP3_TCA_002_BASE",
+      "live_authority_created_flag": false,
+      "live_candidate_allowed_flag": false,
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "not_profit_proof_flag": true,
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qku_id_if_available": "QKU_PMKT_EDGE_TCA_IMPLEMENTATION_SHORTFALL_028",
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_dependency_missing": null,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "accepted_truth_flag": false,
+      "authority_class": "MAP3_FORMULA_DEPENDENCY_NON_PROOF",
+      "candidate_only_flag": true,
+      "cash_access_created_flag": false,
+      "champion_allowed_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "dependency_direction": "FORMULA_DEPENDS_ON_INPUT_SOURCE_QKU",
+      "dependency_missing_flag": false,
+      "dependency_reason": "Replay/paper computability and source evidence routing",
+      "depends_on_data_family_ids": [
+        "fill_latency_capacity"
+      ],
+      "depends_on_formula_ids": [],
+      "depends_on_input_ids": [
+        "edge_value",
+        "latency_seconds",
+        "decay_rate"
+      ],
+      "depends_on_qku_ids": [
+        "QKU_PMKT_EDGE_FILL_LATENCY_CAPACITY_029"
+      ],
+      "depends_on_quantum_components": [],
+      "depends_on_source_ids": [
+        "https://a-teaminsight.com/blog/latency-in-electronic-trading/"
+      ],
+      "depends_on_unit_normalization_refs": [
+        "UnitNormalizationContractV1:FORM_MAP3_LATENCY_001"
+      ],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "formula_dependency_row_id": "FORMULA_DEPENDENCY_0029",
+      "formula_family": "fill_latency_capacity",
+      "formula_id": "FORM_MAP3_LATENCY_001",
+      "formula_variant_id": "FVAR_FORM_MAP3_LATENCY_001_BASE",
+      "live_authority_created_flag": false,
+      "live_candidate_allowed_flag": false,
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "not_profit_proof_flag": true,
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qku_id_if_available": "QKU_PMKT_EDGE_FILL_LATENCY_CAPACITY_029",
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_dependency_missing": null,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "accepted_truth_flag": false,
+      "authority_class": "MAP3_FORMULA_DEPENDENCY_NON_PROOF",
+      "candidate_only_flag": true,
+      "cash_access_created_flag": false,
+      "champion_allowed_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "dependency_direction": "FORMULA_DEPENDS_ON_INPUT_SOURCE_QKU",
+      "dependency_missing_flag": false,
+      "dependency_reason": "Replay/paper computability and source evidence routing",
+      "depends_on_data_family_ids": [
+        "calibration_and_scoring"
+      ],
+      "depends_on_formula_ids": [],
+      "depends_on_input_ids": [
+        "predicted_probability",
+        "outcome"
+      ],
+      "depends_on_qku_ids": [
+        "QKU_PMKT_EDGE_CALIBRATION_AND_SCORING_030"
+      ],
+      "depends_on_quantum_components": [],
+      "depends_on_source_ids": [
+        "https://scikit-learn.org/stable/modules/generated/sklearn.metrics.brier_score_loss.html"
+      ],
+      "depends_on_unit_normalization_refs": [
+        "UnitNormalizationContractV1:FORM_MAP3_CALIB_BRIER_001"
+      ],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "formula_dependency_row_id": "FORMULA_DEPENDENCY_0030",
+      "formula_family": "calibration_and_scoring",
+      "formula_id": "FORM_MAP3_CALIB_BRIER_001",
+      "formula_variant_id": "FVAR_FORM_MAP3_CALIB_BRIER_001_BASE",
+      "live_authority_created_flag": false,
+      "live_candidate_allowed_flag": false,
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "not_profit_proof_flag": true,
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qku_id_if_available": "QKU_PMKT_EDGE_CALIBRATION_AND_SCORING_030",
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_dependency_missing": null,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "accepted_truth_flag": false,
+      "authority_class": "MAP3_FORMULA_DEPENDENCY_NON_PROOF",
+      "candidate_only_flag": true,
+      "cash_access_created_flag": false,
+      "champion_allowed_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "dependency_direction": "FORMULA_DEPENDS_ON_INPUT_SOURCE_QKU",
+      "dependency_missing_flag": false,
+      "dependency_reason": "Replay/paper computability and source evidence routing",
+      "depends_on_data_family_ids": [
+        "calibration_and_scoring"
+      ],
+      "depends_on_formula_ids": [],
+      "depends_on_input_ids": [
+        "bucket_weight",
+        "bucket_accuracy",
+        "bucket_confidence"
+      ],
+      "depends_on_qku_ids": [
+        "QKU_PMKT_EDGE_CALIBRATION_AND_SCORING_031"
+      ],
+      "depends_on_quantum_components": [],
+      "depends_on_source_ids": [
+        "https://lightning.ai/docs/torchmetrics/stable/classification/calibration_error.html"
+      ],
+      "depends_on_unit_normalization_refs": [
+        "UnitNormalizationContractV1:FORM_MAP3_CALIB_ECE_001"
+      ],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "formula_dependency_row_id": "FORMULA_DEPENDENCY_0031",
+      "formula_family": "calibration_and_scoring",
+      "formula_id": "FORM_MAP3_CALIB_ECE_001",
+      "formula_variant_id": "FVAR_FORM_MAP3_CALIB_ECE_001_BASE",
+      "live_authority_created_flag": false,
+      "live_candidate_allowed_flag": false,
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "not_profit_proof_flag": true,
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qku_id_if_available": "QKU_PMKT_EDGE_CALIBRATION_AND_SCORING_031",
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_dependency_missing": null,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "accepted_truth_flag": false,
+      "authority_class": "MAP3_FORMULA_DEPENDENCY_NON_PROOF",
+      "candidate_only_flag": true,
+      "cash_access_created_flag": false,
+      "champion_allowed_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "dependency_direction": "FORMULA_DEPENDS_ON_INPUT_SOURCE_QKU",
+      "dependency_missing_flag": true,
+      "dependency_reason": "Replay/paper computability and source evidence routing",
+      "depends_on_data_family_ids": [
+        "calibration_and_scoring"
+      ],
+      "depends_on_formula_ids": [],
+      "depends_on_input_ids": [
+        "predicted_probability_clipped",
+        "outcome"
+      ],
+      "depends_on_qku_ids": [
+        "QKU_PMKT_EDGE_CALIBRATION_AND_SCORING_032"
+      ],
+      "depends_on_quantum_components": [],
+      "depends_on_source_ids": [
+        "https://scikit-learn.org/stable/modules/calibration.html"
+      ],
+      "depends_on_unit_normalization_refs": [
+        "UnitNormalizationContractV1:FORM_MAP3_CALIB_LOGLOSS_001"
+      ],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "formula_dependency_row_id": "FORMULA_DEPENDENCY_0032",
+      "formula_family": "calibration_and_scoring",
+      "formula_id": "FORM_MAP3_CALIB_LOGLOSS_001",
+      "formula_variant_id": "FVAR_FORM_MAP3_CALIB_LOGLOSS_001_BASE",
+      "live_authority_created_flag": false,
+      "live_candidate_allowed_flag": false,
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "not_profit_proof_flag": true,
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qku_id_if_available": "QKU_PMKT_EDGE_CALIBRATION_AND_SCORING_032",
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_dependency_missing": "FORMULA_INPUT_REPAIR",
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "accepted_truth_flag": false,
+      "authority_class": "MAP3_FORMULA_DEPENDENCY_NON_PROOF",
+      "candidate_only_flag": true,
+      "cash_access_created_flag": false,
+      "champion_allowed_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "dependency_direction": "FORMULA_DEPENDS_ON_INPUT_SOURCE_QKU",
+      "dependency_missing_flag": false,
+      "dependency_reason": "Replay/paper computability and source evidence routing",
+      "depends_on_data_family_ids": [
+        "fdr_and_overfit_controls"
+      ],
+      "depends_on_formula_ids": [],
+      "depends_on_input_ids": [
+        "alpha",
+        "rank_index",
+        "trial_count"
+      ],
+      "depends_on_qku_ids": [
+        "QKU_PMKT_EDGE_FDR_AND_OVERFIT_CONTROLS_033"
+      ],
+      "depends_on_quantum_components": [],
+      "depends_on_source_ids": [
+        "https://en.wikipedia.org/wiki/False_discovery_rate"
+      ],
+      "depends_on_unit_normalization_refs": [
+        "UnitNormalizationContractV1:FORM_MAP3_FDR_BH_001"
+      ],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "formula_dependency_row_id": "FORMULA_DEPENDENCY_0033",
+      "formula_family": "fdr_and_overfit_controls",
+      "formula_id": "FORM_MAP3_FDR_BH_001",
+      "formula_variant_id": "FVAR_FORM_MAP3_FDR_BH_001_BASE",
+      "live_authority_created_flag": false,
+      "live_candidate_allowed_flag": false,
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "not_profit_proof_flag": true,
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qku_id_if_available": "QKU_PMKT_EDGE_FDR_AND_OVERFIT_CONTROLS_033",
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_dependency_missing": null,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "accepted_truth_flag": false,
+      "authority_class": "MAP3_FORMULA_DEPENDENCY_NON_PROOF",
+      "candidate_only_flag": true,
+      "cash_access_created_flag": false,
+      "champion_allowed_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "dependency_direction": "FORMULA_DEPENDS_ON_INPUT_SOURCE_QKU",
+      "dependency_missing_flag": true,
+      "dependency_reason": "Replay/paper computability and source evidence routing",
+      "depends_on_data_family_ids": [
+        "fdr_and_overfit_controls"
+      ],
+      "depends_on_formula_ids": [],
+      "depends_on_input_ids": [
+        "observed_sharpe",
+        "return_skew",
+        "return_kurtosis",
+        "trial_count"
+      ],
+      "depends_on_qku_ids": [
+        "QKU_PMKT_EDGE_FDR_AND_OVERFIT_CONTROLS_034"
+      ],
+      "depends_on_quantum_components": [],
+      "depends_on_source_ids": [
+        "https://www.davidhbailey.com/dhbpapers/deflated-sharpe.pdf"
+      ],
+      "depends_on_unit_normalization_refs": [
+        "UnitNormalizationContractV1:FORM_MAP3_FDR_DSR_001"
+      ],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "formula_dependency_row_id": "FORMULA_DEPENDENCY_0034",
+      "formula_family": "fdr_and_overfit_controls",
+      "formula_id": "FORM_MAP3_FDR_DSR_001",
+      "formula_variant_id": "FVAR_FORM_MAP3_FDR_DSR_001_BASE",
+      "live_authority_created_flag": false,
+      "live_candidate_allowed_flag": false,
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "not_profit_proof_flag": true,
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qku_id_if_available": "QKU_PMKT_EDGE_FDR_AND_OVERFIT_CONTROLS_034",
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_dependency_missing": "FORMULA_INPUT_REPAIR",
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "accepted_truth_flag": false,
+      "authority_class": "MAP3_FORMULA_DEPENDENCY_NON_PROOF",
+      "candidate_only_flag": true,
+      "cash_access_created_flag": false,
+      "champion_allowed_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "dependency_direction": "FORMULA_DEPENDS_ON_INPUT_SOURCE_QKU",
+      "dependency_missing_flag": true,
+      "dependency_reason": "Replay/paper computability and source evidence routing",
+      "depends_on_data_family_ids": [
+        "fdr_and_overfit_controls"
+      ],
+      "depends_on_formula_ids": [],
+      "depends_on_input_ids": [
+        "split_id",
+        "purge_window",
+        "embargo_window",
+        "label_interval"
+      ],
+      "depends_on_qku_ids": [
+        "QKU_PMKT_EDGE_FDR_AND_OVERFIT_CONTROLS_035"
+      ],
+      "depends_on_quantum_components": [],
+      "depends_on_source_ids": [
+        "https://www.quantbeckman.com/p/with-code-combinatorial-purged-cross"
+      ],
+      "depends_on_unit_normalization_refs": [
+        "UnitNormalizationContractV1:FORM_MAP3_FDR_CPCV_001"
+      ],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "formula_dependency_row_id": "FORMULA_DEPENDENCY_0035",
+      "formula_family": "fdr_and_overfit_controls",
+      "formula_id": "FORM_MAP3_FDR_CPCV_001",
+      "formula_variant_id": "FVAR_FORM_MAP3_FDR_CPCV_001_BASE",
+      "live_authority_created_flag": false,
+      "live_candidate_allowed_flag": false,
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "not_profit_proof_flag": true,
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qku_id_if_available": "QKU_PMKT_EDGE_FDR_AND_OVERFIT_CONTROLS_035",
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_dependency_missing": "FORMULA_INPUT_REPAIR",
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "accepted_truth_flag": false,
+      "authority_class": "MAP3_FORMULA_DEPENDENCY_NON_PROOF",
+      "candidate_only_flag": true,
+      "cash_access_created_flag": false,
+      "champion_allowed_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "dependency_direction": "FORMULA_DEPENDS_ON_INPUT_SOURCE_QKU",
+      "dependency_missing_flag": false,
+      "dependency_reason": "Replay/paper computability and source evidence routing",
+      "depends_on_data_family_ids": [
+        "portfolio_and_marginal_utility"
+      ],
+      "depends_on_formula_ids": [],
+      "depends_on_input_ids": [
+        "kelly_scale",
+        "independent_probability",
+        "net_odds"
+      ],
+      "depends_on_qku_ids": [
+        "QKU_PMKT_EDGE_PORTFOLIO_AND_MARGINAL_UTILITY_036"
+      ],
+      "depends_on_quantum_components": [],
+      "depends_on_source_ids": [
+        "https://en.wikipedia.org/wiki/Kelly_criterion"
+      ],
+      "depends_on_unit_normalization_refs": [
+        "UnitNormalizationContractV1:FORM_MAP3_PORT_KELLY_001"
+      ],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "formula_dependency_row_id": "FORMULA_DEPENDENCY_0036",
+      "formula_family": "portfolio_and_marginal_utility",
+      "formula_id": "FORM_MAP3_PORT_KELLY_001",
+      "formula_variant_id": "FVAR_FORM_MAP3_PORT_KELLY_001_BASE",
+      "live_authority_created_flag": false,
+      "live_candidate_allowed_flag": false,
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "not_profit_proof_flag": true,
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qku_id_if_available": "QKU_PMKT_EDGE_PORTFOLIO_AND_MARGINAL_UTILITY_036",
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_dependency_missing": null,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "accepted_truth_flag": false,
+      "authority_class": "MAP3_FORMULA_DEPENDENCY_NON_PROOF",
+      "candidate_only_flag": true,
+      "cash_access_created_flag": false,
+      "champion_allowed_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "dependency_direction": "FORMULA_DEPENDS_ON_INPUT_SOURCE_QKU",
+      "dependency_missing_flag": true,
+      "dependency_reason": "Replay/paper computability and source evidence routing",
+      "depends_on_data_family_ids": [
+        "portfolio_and_marginal_utility"
+      ],
+      "depends_on_formula_ids": [],
+      "depends_on_input_ids": [
+        "kelly_scale",
+        "independent_probability",
+        "net_odds"
+      ],
+      "depends_on_qku_ids": [
+        "QKU_PMKT_EDGE_PORTFOLIO_AND_MARGINAL_UTILITY_037"
+      ],
+      "depends_on_quantum_components": [],
+      "depends_on_source_ids": [
+        "https://www.bettoredge.com/post/kelly-criterion-prediction-markets"
+      ],
+      "depends_on_unit_normalization_refs": [
+        "UnitNormalizationContractV1:FORM_MAP3_PORT_KELLY_002"
+      ],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "formula_dependency_row_id": "FORMULA_DEPENDENCY_0037",
+      "formula_family": "portfolio_and_marginal_utility",
+      "formula_id": "FORM_MAP3_PORT_KELLY_002",
+      "formula_variant_id": "FVAR_FORM_MAP3_PORT_KELLY_002_BASE",
+      "live_authority_created_flag": false,
+      "live_candidate_allowed_flag": false,
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "not_profit_proof_flag": true,
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qku_id_if_available": "QKU_PMKT_EDGE_PORTFOLIO_AND_MARGINAL_UTILITY_037",
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_dependency_missing": "FORMULA_INPUT_REPAIR",
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "accepted_truth_flag": false,
+      "authority_class": "MAP3_FORMULA_DEPENDENCY_NON_PROOF",
+      "candidate_only_flag": true,
+      "cash_access_created_flag": false,
+      "champion_allowed_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "dependency_direction": "FORMULA_DEPENDS_ON_INPUT_SOURCE_QKU",
+      "dependency_missing_flag": false,
+      "dependency_reason": "Replay/paper computability and source evidence routing",
+      "depends_on_data_family_ids": [
+        "portfolio_and_marginal_utility"
+      ],
+      "depends_on_formula_ids": [],
+      "depends_on_input_ids": [
+        "concentration_lambda",
+        "venue_exposure_share"
+      ],
+      "depends_on_qku_ids": [
+        "QKU_PMKT_EDGE_PORTFOLIO_AND_MARGINAL_UTILITY_038"
+      ],
+      "depends_on_quantum_components": [],
+      "depends_on_source_ids": [
+        "https://www.wallstreetmojo.com/portfolio-concentration/"
+      ],
+      "depends_on_unit_normalization_refs": [
+        "UnitNormalizationContractV1:FORM_MAP3_PORT_CONC_001"
+      ],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "formula_dependency_row_id": "FORMULA_DEPENDENCY_0038",
+      "formula_family": "portfolio_and_marginal_utility",
+      "formula_id": "FORM_MAP3_PORT_CONC_001",
+      "formula_variant_id": "FVAR_FORM_MAP3_PORT_CONC_001_BASE",
+      "live_authority_created_flag": false,
+      "live_candidate_allowed_flag": false,
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "not_profit_proof_flag": true,
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qku_id_if_available": "QKU_PMKT_EDGE_PORTFOLIO_AND_MARGINAL_UTILITY_038",
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_dependency_missing": null,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "accepted_truth_flag": false,
+      "authority_class": "MAP3_FORMULA_DEPENDENCY_NON_PROOF",
+      "candidate_only_flag": true,
+      "cash_access_created_flag": false,
+      "champion_allowed_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "dependency_direction": "FORMULA_DEPENDS_ON_INPUT_SOURCE_QKU",
+      "dependency_missing_flag": false,
+      "dependency_reason": "Replay/paper computability and source evidence routing",
+      "depends_on_data_family_ids": [
+        "portfolio_and_marginal_utility"
+      ],
+      "depends_on_formula_ids": [],
+      "depends_on_input_ids": [
+        "correlation_lambda",
+        "exposure_i",
+        "exposure_j",
+        "correlation_ij"
+      ],
+      "depends_on_qku_ids": [
+        "QKU_PMKT_EDGE_PORTFOLIO_AND_MARGINAL_UTILITY_039"
+      ],
+      "depends_on_quantum_components": [],
+      "depends_on_source_ids": [
+        "https://fsc.stevens.edu/network-and-clustering-based-portfolio-optimization-enhancing-risk-adjusted-performance-through-diversification/"
+      ],
+      "depends_on_unit_normalization_refs": [
+        "UnitNormalizationContractV1:FORM_MAP3_PORT_CORR_001"
+      ],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "formula_dependency_row_id": "FORMULA_DEPENDENCY_0039",
+      "formula_family": "portfolio_and_marginal_utility",
+      "formula_id": "FORM_MAP3_PORT_CORR_001",
+      "formula_variant_id": "FVAR_FORM_MAP3_PORT_CORR_001_BASE",
+      "live_authority_created_flag": false,
+      "live_candidate_allowed_flag": false,
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "not_profit_proof_flag": true,
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qku_id_if_available": "QKU_PMKT_EDGE_PORTFOLIO_AND_MARGINAL_UTILITY_039",
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_dependency_missing": null,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "accepted_truth_flag": false,
+      "authority_class": "MAP3_FORMULA_DEPENDENCY_NON_PROOF",
+      "candidate_only_flag": true,
+      "cash_access_created_flag": false,
+      "champion_allowed_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "dependency_direction": "FORMULA_DEPENDS_ON_INPUT_SOURCE_QKU",
+      "dependency_missing_flag": false,
+      "dependency_reason": "Replay/paper computability and source evidence routing",
+      "depends_on_data_family_ids": [
+        "regime_and_scenario_ladder"
+      ],
+      "depends_on_formula_ids": [],
+      "depends_on_input_ids": [
+        "depth_score",
+        "spread_score",
+        "freshness_score"
+      ],
+      "depends_on_qku_ids": [
+        "QKU_PMKT_EDGE_REGIME_AND_SCENARIO_LADDER_040"
+      ],
+      "depends_on_quantum_components": [],
+      "depends_on_source_ids": [
+        "https://questdb.com/glossary/order-book-imbalance/"
+      ],
+      "depends_on_unit_normalization_refs": [
+        "UnitNormalizationContractV1:FORM_MAP3_REGIME_001"
+      ],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "formula_dependency_row_id": "FORMULA_DEPENDENCY_0040",
+      "formula_family": "regime_and_scenario_ladder",
+      "formula_id": "FORM_MAP3_REGIME_001",
+      "formula_variant_id": "FVAR_FORM_MAP3_REGIME_001_BASE",
+      "live_authority_created_flag": false,
+      "live_candidate_allowed_flag": false,
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "not_profit_proof_flag": true,
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qku_id_if_available": "QKU_PMKT_EDGE_REGIME_AND_SCENARIO_LADDER_040",
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_dependency_missing": null,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "accepted_truth_flag": false,
+      "authority_class": "MAP3_FORMULA_DEPENDENCY_NON_PROOF",
+      "candidate_only_flag": true,
+      "cash_access_created_flag": false,
+      "champion_allowed_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "dependency_direction": "FORMULA_DEPENDS_ON_INPUT_SOURCE_QKU",
+      "dependency_missing_flag": true,
+      "dependency_reason": "Replay/paper computability and source evidence routing",
+      "depends_on_data_family_ids": [
+        "quantum_forward_optimization"
+      ],
+      "depends_on_formula_ids": [],
+      "depends_on_input_ids": [
+        "binary_variables",
+        "linear_coefficients",
+        "quadratic_coefficients",
+        "constraints",
+        "penalty"
+      ],
+      "depends_on_qku_ids": [
+        "QKU_PMKT_EDGE_QUANTUM_FORWARD_OPTIMIZATION_041"
+      ],
+      "depends_on_quantum_components": [
+        "binary_variables",
+        "coefficients"
+      ],
+      "depends_on_source_ids": [
+        "https://qiskit-community.github.io/qiskit-optimization/tutorials/02_converters_for_quadratic_programs.html"
+      ],
+      "depends_on_unit_normalization_refs": [
+        "UnitNormalizationContractV1:FORM_MAP3_QISKIT_001"
+      ],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "formula_dependency_row_id": "FORMULA_DEPENDENCY_0041",
+      "formula_family": "quantum_forward_optimization",
+      "formula_id": "FORM_MAP3_QISKIT_001",
+      "formula_variant_id": "FVAR_FORM_MAP3_QISKIT_001_BASE",
+      "live_authority_created_flag": false,
+      "live_candidate_allowed_flag": false,
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "not_profit_proof_flag": true,
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qku_id_if_available": "QKU_PMKT_EDGE_QUANTUM_FORWARD_OPTIMIZATION_041",
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_dependency_missing": "FORMULA_INPUT_REPAIR",
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "accepted_truth_flag": false,
+      "authority_class": "MAP3_FORMULA_DEPENDENCY_NON_PROOF",
+      "candidate_only_flag": true,
+      "cash_access_created_flag": false,
+      "champion_allowed_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "dependency_direction": "FORMULA_DEPENDS_ON_INPUT_SOURCE_QKU",
+      "dependency_missing_flag": false,
+      "dependency_reason": "Replay/paper computability and source evidence routing",
+      "depends_on_data_family_ids": [
+        "quantum_forward_optimization"
+      ],
+      "depends_on_formula_ids": [],
+      "depends_on_input_ids": [
+        "candidate_utility"
+      ],
+      "depends_on_qku_ids": [
+        "QKU_PMKT_EDGE_QUANTUM_FORWARD_OPTIMIZATION_042"
+      ],
+      "depends_on_quantum_components": [
+        "binary_variables",
+        "coefficients"
+      ],
+      "depends_on_source_ids": [
+        "https://qiskit-community.github.io/qiskit-optimization/_modules/qiskit_optimization/converters/quadratic_program_to_qubo.html"
+      ],
+      "depends_on_unit_normalization_refs": [
+        "UnitNormalizationContractV1:FORM_MAP3_QISKIT_002"
+      ],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "formula_dependency_row_id": "FORMULA_DEPENDENCY_0042",
+      "formula_family": "quantum_forward_optimization",
+      "formula_id": "FORM_MAP3_QISKIT_002",
+      "formula_variant_id": "FVAR_FORM_MAP3_QISKIT_002_BASE",
+      "live_authority_created_flag": false,
+      "live_candidate_allowed_flag": false,
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "not_profit_proof_flag": true,
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qku_id_if_available": "QKU_PMKT_EDGE_QUANTUM_FORWARD_OPTIMIZATION_042",
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_dependency_missing": null,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "accepted_truth_flag": false,
+      "authority_class": "MAP3_FORMULA_DEPENDENCY_NON_PROOF",
+      "candidate_only_flag": true,
+      "cash_access_created_flag": false,
+      "champion_allowed_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "dependency_direction": "FORMULA_DEPENDS_ON_INPUT_SOURCE_QKU",
+      "dependency_missing_flag": false,
+      "dependency_reason": "Replay/paper computability and source evidence routing",
+      "depends_on_data_family_ids": [
+        "quantum_forward_optimization"
+      ],
+      "depends_on_formula_ids": [],
+      "depends_on_input_ids": [
+        "penalty_lambda",
+        "selection_i",
+        "selection_j",
+        "correlation_ij"
+      ],
+      "depends_on_qku_ids": [
+        "QKU_PMKT_EDGE_QUANTUM_FORWARD_OPTIMIZATION_043"
+      ],
+      "depends_on_quantum_components": [
+        "binary_variables",
+        "coefficients"
+      ],
+      "depends_on_source_ids": [
+        "https://docs.dwavequantum.com/en/latest/concepts/models.html"
+      ],
+      "depends_on_unit_normalization_refs": [
+        "UnitNormalizationContractV1:FORM_MAP3_DWAVE_001"
+      ],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "formula_dependency_row_id": "FORMULA_DEPENDENCY_0043",
+      "formula_family": "quantum_forward_optimization",
+      "formula_id": "FORM_MAP3_DWAVE_001",
+      "formula_variant_id": "FVAR_FORM_MAP3_DWAVE_001_BASE",
+      "live_authority_created_flag": false,
+      "live_candidate_allowed_flag": false,
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "not_profit_proof_flag": true,
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qku_id_if_available": "QKU_PMKT_EDGE_QUANTUM_FORWARD_OPTIMIZATION_043",
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_dependency_missing": null,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "accepted_truth_flag": false,
+      "authority_class": "MAP3_FORMULA_DEPENDENCY_NON_PROOF",
+      "candidate_only_flag": true,
+      "cash_access_created_flag": false,
+      "champion_allowed_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "dependency_direction": "FORMULA_DEPENDS_ON_INPUT_SOURCE_QKU",
+      "dependency_missing_flag": true,
+      "dependency_reason": "Replay/paper computability and source evidence routing",
+      "depends_on_data_family_ids": [
+        "quantum_forward_optimization"
+      ],
+      "depends_on_formula_ids": [],
+      "depends_on_input_ids": [
+        "objective_range",
+        "constraint_violation_penalty"
+      ],
+      "depends_on_qku_ids": [
+        "QKU_PMKT_EDGE_QUANTUM_FORWARD_OPTIMIZATION_044"
+      ],
+      "depends_on_quantum_components": [
+        "binary_variables",
+        "coefficients"
+      ],
+      "depends_on_source_ids": [
+        "https://docs.dwavequantum.com/en/latest/quantum_research/reformulating.html"
+      ],
+      "depends_on_unit_normalization_refs": [
+        "UnitNormalizationContractV1:FORM_MAP3_DWAVE_002"
+      ],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "formula_dependency_row_id": "FORMULA_DEPENDENCY_0044",
+      "formula_family": "quantum_forward_optimization",
+      "formula_id": "FORM_MAP3_DWAVE_002",
+      "formula_variant_id": "FVAR_FORM_MAP3_DWAVE_002_BASE",
+      "live_authority_created_flag": false,
+      "live_candidate_allowed_flag": false,
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "not_profit_proof_flag": true,
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qku_id_if_available": "QKU_PMKT_EDGE_QUANTUM_FORWARD_OPTIMIZATION_044",
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_dependency_missing": "FORMULA_INPUT_REPAIR",
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "accepted_truth_flag": false,
+      "authority_class": "MAP3_FORMULA_DEPENDENCY_NON_PROOF",
+      "candidate_only_flag": true,
+      "cash_access_created_flag": false,
+      "champion_allowed_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "dependency_direction": "FORMULA_DEPENDS_ON_INPUT_SOURCE_QKU",
+      "dependency_missing_flag": false,
+      "dependency_reason": "Replay/paper computability and source evidence routing",
+      "depends_on_data_family_ids": [
+        "source_evidence_and_data_quality"
+      ],
+      "depends_on_formula_ids": [],
+      "depends_on_input_ids": [
+        "current_timestamp",
+        "csv_published_timestamp"
+      ],
+      "depends_on_qku_ids": [
+        "QKU_PMKT_EDGE_SOURCE_EVIDENCE_AND_DATA_QUALITY_045"
+      ],
+      "depends_on_quantum_components": [],
+      "depends_on_source_ids": [
+        "https://forecastex.com/data"
+      ],
+      "depends_on_unit_normalization_refs": [
+        "UnitNormalizationContractV1:FORM_MAP3_FORECASTEX_001"
+      ],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "formula_dependency_row_id": "FORMULA_DEPENDENCY_0045",
+      "formula_family": "source_evidence_and_data_quality",
+      "formula_id": "FORM_MAP3_FORECASTEX_001",
+      "formula_variant_id": "FVAR_FORM_MAP3_FORECASTEX_001_BASE",
+      "live_authority_created_flag": false,
+      "live_candidate_allowed_flag": false,
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "not_profit_proof_flag": true,
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qku_id_if_available": "QKU_PMKT_EDGE_SOURCE_EVIDENCE_AND_DATA_QUALITY_045",
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_dependency_missing": null,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "accepted_truth_flag": false,
+      "authority_class": "MAP3_FORMULA_DEPENDENCY_NON_PROOF",
+      "candidate_only_flag": true,
+      "cash_access_created_flag": false,
+      "champion_allowed_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "dependency_direction": "FORMULA_DEPENDS_ON_INPUT_SOURCE_QKU",
+      "dependency_missing_flag": true,
+      "dependency_reason": "Replay/paper computability and source evidence routing",
+      "depends_on_data_family_ids": [
+        "source_evidence_and_data_quality"
+      ],
+      "depends_on_formula_ids": [],
+      "depends_on_input_ids": [
+        "contract_details_available_flag",
+        "market_data_subscription_state"
+      ],
+      "depends_on_qku_ids": [
+        "QKU_PMKT_EDGE_SOURCE_EVIDENCE_AND_DATA_QUALITY_046"
+      ],
+      "depends_on_quantum_components": [],
+      "depends_on_source_ids": [
+        "https://www.interactivebrokers.com/campus/ibkr-api-page/event-contracts/"
+      ],
+      "depends_on_unit_normalization_refs": [
+        "UnitNormalizationContractV1:FORM_MAP3_IBKR_001"
+      ],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "formula_dependency_row_id": "FORMULA_DEPENDENCY_0046",
+      "formula_family": "source_evidence_and_data_quality",
+      "formula_id": "FORM_MAP3_IBKR_001",
+      "formula_variant_id": "FVAR_FORM_MAP3_IBKR_001_BASE",
+      "live_authority_created_flag": false,
+      "live_candidate_allowed_flag": false,
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "not_profit_proof_flag": true,
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qku_id_if_available": "QKU_PMKT_EDGE_SOURCE_EVIDENCE_AND_DATA_QUALITY_046",
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_dependency_missing": "FORMULA_INPUT_REPAIR",
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "accepted_truth_flag": false,
+      "authority_class": "MAP3_FORMULA_DEPENDENCY_NON_PROOF",
+      "candidate_only_flag": true,
+      "cash_access_created_flag": false,
+      "champion_allowed_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "dependency_direction": "FORMULA_DEPENDS_ON_INPUT_SOURCE_QKU",
+      "dependency_missing_flag": true,
+      "dependency_reason": "Replay/paper computability and source evidence routing",
+      "depends_on_data_family_ids": [
+        "source_evidence_and_data_quality"
+      ],
+      "depends_on_formula_ids": [],
+      "depends_on_input_ids": [
+        "delayed_market_data_available"
+      ],
+      "depends_on_qku_ids": [
+        "QKU_PMKT_EDGE_SOURCE_EVIDENCE_AND_DATA_QUALITY_047"
+      ],
+      "depends_on_quantum_components": [],
+      "depends_on_source_ids": [
+        "https://www.interactivebrokers.com/campus/ibkr-api-page/trader-workstation-api/"
+      ],
+      "depends_on_unit_normalization_refs": [
+        "UnitNormalizationContractV1:FORM_MAP3_IBKR_002"
+      ],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "formula_dependency_row_id": "FORMULA_DEPENDENCY_0047",
+      "formula_family": "source_evidence_and_data_quality",
+      "formula_id": "FORM_MAP3_IBKR_002",
+      "formula_variant_id": "FVAR_FORM_MAP3_IBKR_002_BASE",
+      "live_authority_created_flag": false,
+      "live_candidate_allowed_flag": false,
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "not_profit_proof_flag": true,
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qku_id_if_available": "QKU_PMKT_EDGE_SOURCE_EVIDENCE_AND_DATA_QUALITY_047",
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_dependency_missing": "FORMULA_INPUT_REPAIR",
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "source_refs": [],
+      "source_truth_acceptance_created_flag": false,
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    }
+  ],
+  "repair_route_if_gap": null,
+  "repo_mining_refs": [
+    "PR168_RP2_MAP2_identity_gap"
+  ],
+  "report_version": "PR168-MAP3-v4.0",
+  "row_shard_refs_if_any": [
+    {
+      "manifest_ref": "docs/master_plan/generated/map3/formula_dependency_rows.jsonl.manifest.json",
+      "row_count": 47,
+      "row_shard_ref": "docs/master_plan/generated/map3/formula_dependency_rows.jsonl"
+    }
+  ],
+  "source_refs": [],
+  "source_truth_acceptance_created_flag": false,
+  "summary": {
+    "active_but_repair_required_formula_count": 12,
+    "active_formula_count": 35,
+    "ambiguous_identity_graph_component_count": 0,
+    "build_mode": "offline",
+    "calibration_formula_count": 6,
+    "champion_allowed_count": 0,
+    "connector_binding_created_count": 0,
+    "data1b_repair_handoff_count": 47,
+    "data1b_repair_route_count": 3301,
+    "data_requirement_contract_count": 473,
+    "distinct_source_url_count": 47,
+    "dry_run_receipt_count": 235,
+    "duplicate_formula_suppressed_count": 0,
+    "duplicate_superseded_formula_count": 0,
+    "edge_formula_count": 8,
+    "existing_data_consumer_id_count": 3,
+    "existing_formula_id_count": 5,
+    "existing_formula_variant_id_count": 21,
+    "existing_qku_id_count": 0,
+    "external_candidate_formula_count": 47,
+    "external_candidate_rejected_count": 0,
+    "external_source_count": 47,
+    "formula_computability_route_count": 47,
+    "formula_dependency_graph_row_count": 47,
+    "formula_dry_run_computable_count": 35,
+    "formula_dry_run_gap_routed_count": 12,
+    "formula_equivalence_cluster_count": 14,
+    "formula_factory_materialized_count": 35,
+    "formula_family_coverage_count": 14,
+    "formula_intake_priority_row_count": 47,
+    "formula_invariant_failure_count": 0,
+    "formula_invariant_row_count": 47,
+    "formula_lifecycle_dag_row_count": 423,
+    "formula_materialization_gap_count": 12,
+    "formula_ontology_row_count": 47,
+    "formula_plugin_contract_count": 540,
+    "formula_property_test_row_count": 47,
+    "formula_provenance_row_count": 47,
+    "formula_recovery_factory_row_count": 10,
+    "formula_repair_playbook_row_count": 10,
+    "formula_replay_paper_computable_with_available_candidate_data_count": 35,
+    "formula_retirement_candidate_count": 47,
+    "formula_selection_surface_row_count": 47,
+    "formula_shape_computable_synthetic_only_count": 47,
+    "hidden_exact_binding_promoted_count": 0,
+    "id_mining_row_count": 854,
+    "identity_graph_edge_count": 94,
+    "identity_graph_node_count": 188,
+    "live_candidate_allowed_count": 0,
+    "mandatory_formula_family_covered_count": 14,
+    "mandatory_formula_family_gap_routed_count": 0,
+    "materialized_formula_candidate_count": 140,
+    "multi_source_candidate_count": 46,
+    "negative_repair_factory_row_count": 10,
+    "negative_to_candidate_repair_row_count": 10,
+    "new_qtt_canonical_binding_count": 47,
+    "new_qtt_canonical_formula_id_count": 47,
+    "new_qtt_canonical_formula_variant_id_count": 47,
+    "new_qtt_canonical_qku_id_count": 47,
+    "no_orphan_violation_count": 0,
+    "official_plus_research_candidate_count": 1,
+    "online_scout_row_count": 47,
+    "order_authority_created_count": 0,
+    "path_audit_failure_count": 0,
+    "path_audit_warning_count": 0,
+    "portfolio_formula_count": 4,
+    "pr162e_q_handoff_count": 47,
+    "pr165b_memory_handoff_count": 47,
+    "pr236_merged_preflight_passed_flag": true,
+    "private_state_or_cash_access_created_count": 0,
+    "qtt_sha_or_atomicrows_hash_authority_count": 0,
+    "quantum_advantage_claim_count": 0,
+    "quantum_backend_execution_count": 0,
+    "quantum_formula_lift_row_count": 4,
+    "quantum_mapping_candidate_count": 4,
+    "quantum_mapping_route_count": 3301,
+    "query_family_count": 8,
+    "rank2_handoff_count": 47,
+    "real_negative_count": 0,
+    "real_positive_count": 0,
+    "regime_formula_count": 7,
+    "rejected_source_count": 0,
+    "repo_artifact_count_scanned": 237,
+    "research_only_formula_count": 0,
+    "retired_non_destructive_formula_count": 0,
+    "rp2_failure_mining_row_count": 10,
+    "rp2_handoff_count": 47,
+    "scenario_formula_selection_feature_count": 47,
+    "semantic_formula_repair_route_count": 28,
+    "single_source_candidate_count": 1,
+    "source_evidence_review_route_count": 3301,
+    "source_tier_count_by_tier": {
+      "INSTITUTIONAL_METHOD_CANDIDATE": 9,
+      "NON_OFFICIAL_CANDIDATE": 12,
+      "OFFICIAL_PUBLIC_DOC_CANDIDATE": 63,
+      "OPEN_SOURCE_DOC_CANDIDATE": 39,
+      "RESEARCH_PAPER_CANDIDATE": 18
+    },
+    "source_triangulation_row_count": 14,
+    "source_truth_acceptance_created_count": 0,
+    "structurally_broken_formula_count": 0,
+    "tca_formula_count": 8,
+    "unit_normalization_contract_count": 426,
+    "useful_formula_or_input_found_count": 47
+  },
+  "terminal_by_nature_flag": false,
+  "terminal_reason_code": null,
+  "terminal_reason_if_terminal": null,
+  "test_refs": [
+    "tests/pr168_map3/test_online_scout.py"
+  ],
+  "unit_normalization_refs": [],
+  "upstream_input_refs": [
+    "PR168_MAP3_YOLO_SAFETY_GUARD",
+    "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+  ],
+  "upstream_refs": [
+    "PR168_MAP3_YOLO_SAFETY_GUARD",
+    "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+  ],
+  "validator_refs": [
+    "tools/validate_pr168_map3.py"
+  ]
+}
