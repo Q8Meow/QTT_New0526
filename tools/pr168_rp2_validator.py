@@ -93,13 +93,35 @@ def validate_reports_exist() -> None:
 
 def validate_final_summary() -> None:
     final = final_summary()
+    expected_counts = {
+        "rp2_handoff_input_count": 36,
+        "map2_promotion_attempt_count": 36,
+        "map2_exact_repaired_qku_formula_count": 0,
+        "map2_provisional_preserved_count": 36,
+        "map2_binding_failure_count": 36,
+        "duplicate_economic_candidate_count": 0,
+        "unique_economic_candidate_count": 36,
+        "input_lock_count": 36,
+        "order_intent_count": 864,
+        "replay_execution_count": 864,
+        "paper_execution_count": 864,
+        "rank2_evidence_handoff_count": 756,
+        "scenario_ladder_count": 16416,
+        "tca_decomposition_count": 864,
+        "edge_alpha_capture_row_count": 756,
+        "scenario_specific_best_formula_surface_count": 35,
+        "future_formula_onboarding_contract_count": 36,
+        "formula_plugin_contract_count": 36,
+        "formula_computability_route_count": 36,
+        "retest_variant_count": 468,
+        "quantum_replay_paper_candidate_stack_count": 756,
+        "path_length_fail_count": 0,
+        "path_length_warn_count": 0,
+        "file_alias_count": 127,
+    }
     assert_true(final["gfp2r_consumed_flag"] is True, "PR168_RP2_GFP2R_NOT_CONSUMED", str(final))
-    assert_true(final["rp2_handoff_input_count"] == 36, "PR168_RP2_HANDOFF_COUNT", str(final["rp2_handoff_input_count"]))
-    assert_true(final["map2_promotion_attempt_count"] == 36, "PR168_RP2_MAP2_ATTEMPT_COUNT", str(final["map2_promotion_attempt_count"]))
-    assert_true(final["map2_exact_repaired_qku_formula_count"] >= 0, "PR168_RP2_EXACT_COUNT", str(final))
-    assert_true(final["unique_economic_candidate_count"] == 36, "PR168_RP2_UNIQUE_ECON_COUNT", str(final["unique_economic_candidate_count"]))
-    assert_true(final["order_intent_count"] == 36 * len(INTENT_POLICIES) * 3, "PR168_RP2_ORDER_INTENT_COUNT", str(final["order_intent_count"]))
-    assert_true(final["rank2_evidence_handoff_count"] > 0, "PR168_RP2_RANK2_EMPTY", str(final))
+    for key, expected in expected_counts.items():
+        assert_true(final.get(key) == expected, "PR168_RP2_FINAL_COUNT_MISMATCH", f"{key}={final.get(key)} expected={expected}")
     for key in (
         "real_positive_count",
         "real_negative_count",
@@ -158,6 +180,16 @@ def validate_order_replay_paper() -> None:
             assert_true(isinstance(row.get(key), (int, float)), "PR168_RP2_REPLAY_NUMERIC_MISSING", f"{row['replay_row_id']} {key}")
         assert_true(float(row["fill_probability_candidate"]) < 1.0, "PR168_RP2_FILL_DEFAULT_ONE", row["replay_row_id"])
     for row in paper:
+        for key in (
+            "paper_gross_pnl_candidate",
+            "paper_tca_total_candidate",
+            "paper_net_pnl_after_tca_candidate",
+            "paper_fill_adjusted_expected_pnl_candidate",
+            "paper_latency_adjusted_pnl_candidate",
+            "paper_capacity_adjusted_pnl_candidate",
+            "paper_no_trade_margin_candidate",
+        ):
+            assert_true(isinstance(row.get(key), (int, float)), "PR168_RP2_PAPER_NUMERIC_MISSING", f"{row['paper_ledger_row_id']} {key}")
         assert_true(row["private_cash_receipt_created_flag"] is False, "PR168_RP2_PRIVATE_CASH_RECEIPT", row["paper_ledger_row_id"])
         assert_true(row["live_order_receipt_created_flag"] is False, "PR168_RP2_LIVE_ORDER_RECEIPT", row["paper_ledger_row_id"])
 
@@ -167,6 +199,8 @@ def validate_tca_scenarios_rank2() -> None:
     replay = rows("replay_exec")
     scenarios = rows("scenarios")
     rank2 = rows("rank2_rows")
+    replay_ids = {row["replay_row_id"] for row in replay}
+    paper_ids = {row["paper_ledger_row_id"] for row in rows("paper_exec")}
     assert_true(len(tca) == len(replay), "PR168_RP2_TCA_COUNT", str(len(tca)))
     assert_true({row["scenario_family"] for row in scenarios}.issuperset(set([
         "BASE_OBSERVED",
@@ -180,13 +214,34 @@ def validate_tca_scenarios_rank2() -> None:
         "CAPACITY_DEPTH_LIMIT",
     ])), "PR168_RP2_SCENARIOS_MISSING", "scenario families")
     for row in tca:
+        for key in (
+            "implementation_shortfall_candidate",
+            "explicit_fee_candidate",
+            "spread_cross_cost",
+            "slippage_depth_cost",
+            "adverse_selection_proxy",
+            "latency_decay_penalty",
+            "missed_fill_opportunity_cost",
+            "capacity_depth_penalty",
+            "market_impact_proxy",
+            "TCA_total_candidate",
+        ):
+            assert_true(isinstance(row.get(key), (int, float)), "PR168_RP2_TCA_NUMERIC_MISSING", f"{row['tca_row_id']} {key}")
         assert_true(row["explicit_fee_candidate"] != 0 or row["TCA_total_candidate"] == 0, "PR168_RP2_FAKE_ZERO_FEE", row["tca_row_id"])
         assert_true(row["TCA_missing_component_flags"], "PR168_RP2_TCA_NO_GAP_FLAGS", row["tca_row_id"])
+        if float(row["TCA_total_candidate"]) == 0:
+            assert_true(row["repair_route_if_gap"] == "FILL_LATENCY_TCA_REPAIR", "PR168_RP2_ZERO_TCA_WITHOUT_GAP_ROUTE", row["tca_row_id"])
+        if row.get("simulated_execution_price") is None:
+            assert_true("QUEUE_POSITION_UNKNOWN_REPAIR_REQUIRED" in row["TCA_missing_component_flags"], "PR168_RP2_TCA_MISSING_EXECUTION_WITHOUT_GAP", row["tca_row_id"])
     for row in rank2:
         assert_true(row["rank2_consumption_allowed_flag"] is True, "PR168_RP2_RANK2_NOT_ALLOWED", row["rank2_evidence_row_id"])
         assert_true(row["champion_allowed_flag"] is False, "PR168_RP2_CHAMPION_ALLOWED", row["rank2_evidence_row_id"])
         assert_true(row["live_candidate_allowed_flag"] is False, "PR168_RP2_LIVE_ALLOWED", row["rank2_evidence_row_id"])
         assert_true(row["candidate_only_flag"] is True, "PR168_RP2_RANK2_NOT_CANDIDATE_ONLY", row["rank2_evidence_row_id"])
+        assert_true(row["rp2_replay_row_refs"], "PR168_RP2_RANK2_NO_REPLAY_REF", row["rank2_evidence_row_id"])
+        assert_true(row["rp2_paper_row_refs"], "PR168_RP2_RANK2_NO_PAPER_REF", row["rank2_evidence_row_id"])
+        assert_true(all(ref in replay_ids for ref in row["rp2_replay_row_refs"]), "PR168_RP2_RANK2_BAD_REPLAY_REF", row["rank2_evidence_row_id"])
+        assert_true(all(ref in paper_ids for ref in row["rp2_paper_row_refs"]), "PR168_RP2_RANK2_BAD_PAPER_REF", row["rank2_evidence_row_id"])
 
 
 def validate_formula_quantum_agent() -> None:
@@ -238,21 +293,23 @@ def validate_aliases_paths() -> None:
             assert_true(not long_copy.exists(), "PR168_RP2_LONG_DUPLICATE_REPORT", str(long_copy))
     for row in path_records:
         assert_true(row["path_length"] <= FAIL_PATH, "PR168_RP2_PATH_TOO_LONG", row["path"])
+        assert_true(row["threshold_state"] == "OK", "PR168_RP2_PATH_WARN_OR_FAIL", f"{row['path']} {row['threshold_state']}")
         if row["path"].startswith("tests/pr168_rp2/"):
             assert_true(len(Path(row["path"]).name) <= 96, "PR168_RP2_TEST_NAME_TOO_LONG", row["path"])
     assert_true((GENERATED_ROOT / "rp2p").name == "rp2p", "PR168_RP2_SHARD_DIR_NOT_SHORT", "rp2p")
 
 
 def validate_no_forbidden_authority() -> None:
-    for report_id in REPORT_ALIASES:
-        payload = load_report(report_id)
+    payloads = [load_report(report_id) for report_id in REPORT_ALIASES]
+    payloads.extend(rows(key) for key in ROW_SHARDS)
+    for payload in payloads:
         for item in walk(payload):
             for key in FALSE_FLAG_KEYS:
                 if key in item:
-                    assert_true(item[key] is False, "PR168_RP2_FORBIDDEN_AUTHORITY_FLAG", f"{report_id} {key}")
+                    assert_true(item[key] is False, "PR168_RP2_FORBIDDEN_AUTHORITY_FLAG", key)
             state_values = [str(value) for value in item.values() if isinstance(value, str)]
             forbidden = {"REAL_POSITIVE", "REAL_NEGATIVE", "CHAMPION", "LIVE_CANDIDATE", "PROFIT_PROOF", "SOURCE_TRUTH_ACCEPTED_BY_RP2", "CONNECTOR_BOUND_BY_RP2", "ORDER_AUTHORITY_CREATED_BY_RP2", "QUANTUM_BACKEND_EXECUTED_BY_RP2", "QUANTUM_ADVANTAGE_PROVEN_BY_RP2"}
-            assert_true(not forbidden.intersection(state_values), "PR168_RP2_FORBIDDEN_STATE", f"{report_id} {forbidden.intersection(state_values)}")
+            assert_true(not forbidden.intersection(state_values), "PR168_RP2_FORBIDDEN_STATE", str(forbidden.intersection(state_values)))
 
 
 def validate_generated_reports() -> list[str]:
