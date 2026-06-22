@@ -195,6 +195,21 @@ def test_inventory_has_pr168_map3_entries():
     assert "tools/validate_pr168_map3.py" in validate_entry.tool_globs
 
 
+def test_inventory_has_pr168_rp3_entries():
+    entries = inventory.inventory_by_id()
+    build_entry = entries["build_pr168_rp3"]
+    validate_entry = entries["validate_pr168_rp3"]
+
+    for entry in (build_entry, validate_entry):
+        assert entry.owner_pr_or_feature == "PR168_RP3"
+        assert "docs/master_plan/generated/PR168_RP3_*.report.json" in entry.output_globs
+        assert "docs/master_plan/generated/rp3/**" in entry.output_globs
+        assert "tests/pr168_rp3/**" in entry.required_when_files_match
+
+    assert "tools/build_pr168_rp3.py" in build_entry.tool_globs
+    assert "tools/validate_pr168_rp3.py" in validate_entry.tool_globs
+
+
 def test_inventory_knows_every_pytest_shard_phase_job():
     for phase in runner.ORDERED_PHASES:
         assert inventory.phase_job_id(phase) == inventory.VALIDATION_MATRIX_JOB_ID
