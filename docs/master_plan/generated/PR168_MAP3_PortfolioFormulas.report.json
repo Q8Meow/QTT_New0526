@@ -1,0 +1,478 @@
+{
+  "alias_registry_ref": "docs/master_plan/generated/PR168_MAP3_FileAliases.report.json",
+  "authority_class": "MAP3_ONLINE_SCOUTING_REPORT_NON_PROOF",
+  "cash_access_created_flag": false,
+  "connector_semantic_binding_created_flag": false,
+  "consumer_agents": [
+    "PR168_RP2_agent",
+    "PR168_RANK2_agent",
+    "PR165B_memory_agent",
+    "PR162EQ_quantum_agent",
+    "DATA1B_repair_agent",
+    "source_evidence_review_agent"
+  ],
+  "created_at_utc": "2026-06-22T00:00:00Z",
+  "created_by_tool": "tools/build_pr168_map3.py",
+  "data_provenance_refs": [
+    "PR168_MAP3_OnlineScout_deep_structured_search_matrix"
+  ],
+  "data_requirement_refs": [],
+  "downstream_consumers": [
+    "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+    "PR168_RANK2_EVIDENCE_RANKING",
+    "PR165B_CONDITION_SCOPED_MEMORY",
+    "PR162E_Q_QUANTUM_MAPPING",
+    "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+    "SOURCE_EVIDENCE_REVIEW"
+  ],
+  "downstream_pr_refs": [
+    "PR168-RP2",
+    "PR168-RANK2",
+    "PR165-B",
+    "PR162E-Q",
+    "DATA1B"
+  ],
+  "dry_run_receipt_refs": [],
+  "formula_contract_refs": [],
+  "live_authority_created_flag": false,
+  "logical_report_id": "PR168_MAP3_PortfolioFormulaRows",
+  "manual_edit_allowed_flag": false,
+  "no_orphan_status": "NO_ORPHAN_LINKED",
+  "order_authority_created_flag": false,
+  "owning_agent": "PR168_MAP3_formula_intake_agent",
+  "path_audit_ref": "docs/master_plan/generated/PR168_MAP3_PathAudit.report.json",
+  "physical_filename": "PR168_MAP3_PortfolioFormulas.report.json",
+  "private_state_access_created_flag": false,
+  "profit_evidence_created_flag": false,
+  "qtt_sha_or_atomicrows_hash_authority_flag": false,
+  "quantum_advantage_claim_flag": false,
+  "quantum_backend_execution_flag": false,
+  "records": [
+    {
+      "accepted_truth_flag": false,
+      "authority_class": "MAP3_PORTFOLIO_FORMULAS_NON_PROOF",
+      "candidate_only_flag": true,
+      "cash_access_created_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "formula_family": "portfolio_and_marginal_utility",
+      "formula_id": "FORM_MAP3_PORT_KELLY_001",
+      "formula_variant_id": "FVAR_FORM_MAP3_PORT_KELLY_001_BASE",
+      "live_authority_created_flag": false,
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "not_profit_proof_flag": true,
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "portfolio_formulas_row_id": "PORTFOLIO_FORMULAS_001",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "safe_formula_expression_or_semantic_definition": "fractional_kelly = kelly_scale * ((independent_probability * net_odds - (1 - independent_probability)) / net_odds)",
+      "source_refs": [
+        "https://en.wikipedia.org/wiki/Kelly_criterion"
+      ],
+      "source_truth_acceptance_created_flag": false,
+      "source_url": "https://en.wikipedia.org/wiki/Kelly_criterion",
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "accepted_truth_flag": false,
+      "authority_class": "MAP3_PORTFOLIO_FORMULAS_NON_PROOF",
+      "candidate_only_flag": true,
+      "cash_access_created_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "formula_family": "portfolio_and_marginal_utility",
+      "formula_id": "FORM_MAP3_PORT_KELLY_002",
+      "formula_variant_id": "FVAR_FORM_MAP3_PORT_KELLY_002_BASE",
+      "live_authority_created_flag": false,
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "not_profit_proof_flag": true,
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "portfolio_formulas_row_id": "PORTFOLIO_FORMULAS_002",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "safe_formula_expression_or_semantic_definition": "fractional Kelly candidate requires source evidence and independent probability calibration before sizing use",
+      "source_refs": [
+        "https://www.bettoredge.com/post/kelly-criterion-prediction-markets"
+      ],
+      "source_truth_acceptance_created_flag": false,
+      "source_url": "https://www.bettoredge.com/post/kelly-criterion-prediction-markets",
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "accepted_truth_flag": false,
+      "authority_class": "MAP3_PORTFOLIO_FORMULAS_NON_PROOF",
+      "candidate_only_flag": true,
+      "cash_access_created_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "formula_family": "portfolio_and_marginal_utility",
+      "formula_id": "FORM_MAP3_PORT_CONC_001",
+      "formula_variant_id": "FVAR_FORM_MAP3_PORT_CONC_001_BASE",
+      "live_authority_created_flag": false,
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "not_profit_proof_flag": true,
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "portfolio_formulas_row_id": "PORTFOLIO_FORMULAS_003",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "safe_formula_expression_or_semantic_definition": "concentration_penalty = concentration_lambda * venue_exposure_share ** 2",
+      "source_refs": [
+        "https://www.wallstreetmojo.com/portfolio-concentration/"
+      ],
+      "source_truth_acceptance_created_flag": false,
+      "source_url": "https://www.wallstreetmojo.com/portfolio-concentration/",
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    },
+    {
+      "accepted_truth_flag": false,
+      "authority_class": "MAP3_PORTFOLIO_FORMULAS_NON_PROOF",
+      "candidate_only_flag": true,
+      "cash_access_created_flag": false,
+      "connector_semantic_binding_created_flag": false,
+      "consumer_agents": [
+        "PR168_RP2_agent",
+        "PR168_RANK2_agent",
+        "PR165B_memory_agent",
+        "PR162EQ_quantum_agent",
+        "DATA1B_repair_agent",
+        "source_evidence_review_agent"
+      ],
+      "data_requirement_refs": [],
+      "downstream_consumers": [
+        "PR168_RP2_REPLAY_PAPER_RECOMPUTE",
+        "PR168_RANK2_EVIDENCE_RANKING",
+        "PR165B_CONDITION_SCOPED_MEMORY",
+        "PR162E_Q_QUANTUM_MAPPING",
+        "DATA1B_MARKET_DATA_ACQUISITION_REPAIR",
+        "SOURCE_EVIDENCE_REVIEW"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP2",
+        "PR168-RANK2",
+        "PR165-B",
+        "PR162E-Q",
+        "DATA1B"
+      ],
+      "dry_run_receipt_refs": [],
+      "formula_contract_refs": [],
+      "formula_family": "portfolio_and_marginal_utility",
+      "formula_id": "FORM_MAP3_PORT_CORR_001",
+      "formula_variant_id": "FVAR_FORM_MAP3_PORT_CORR_001_BASE",
+      "live_authority_created_flag": false,
+      "manual_edit_allowed_flag": false,
+      "no_orphan_status": "NO_ORPHAN_LINKED",
+      "not_profit_proof_flag": true,
+      "order_authority_created_flag": false,
+      "owning_agent": "PR168_MAP3_formula_intake_agent",
+      "portfolio_formulas_row_id": "PORTFOLIO_FORMULAS_004",
+      "private_state_access_created_flag": false,
+      "profit_evidence_created_flag": false,
+      "qtt_sha_or_atomicrows_hash_authority_flag": false,
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "repair_route_if_gap": null,
+      "repo_mining_refs": [
+        "PR168_RP2_MAP2_identity_gap"
+      ],
+      "safe_formula_expression_or_semantic_definition": "correlation_penalty = correlation_lambda * exposure_i * exposure_j * correlation_ij",
+      "source_refs": [
+        "https://fsc.stevens.edu/network-and-clustering-based-portfolio-optimization-enhancing-risk-adjusted-performance-through-diversification/"
+      ],
+      "source_truth_acceptance_created_flag": false,
+      "source_url": "https://fsc.stevens.edu/network-and-clustering-based-portfolio-optimization-enhancing-risk-adjusted-performance-through-diversification/",
+      "terminal_by_nature_flag": false,
+      "terminal_reason_code": null,
+      "terminal_reason_if_terminal": null,
+      "test_refs": [
+        "tests/pr168_map3/test_online_scout.py"
+      ],
+      "unit_normalization_refs": [],
+      "upstream_refs": [
+        "PR168_MAP3_YOLO_SAFETY_GUARD",
+        "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_map3.py"
+      ]
+    }
+  ],
+  "repair_route_if_gap": null,
+  "repo_mining_refs": [
+    "PR168_RP2_MAP2_identity_gap"
+  ],
+  "report_version": "PR168-MAP3-v4.0",
+  "row_shard_refs_if_any": [
+    {
+      "manifest_ref": "docs/master_plan/generated/map3/portfolio_formula_rows.jsonl.manifest.json",
+      "row_count": 4,
+      "row_shard_ref": "docs/master_plan/generated/map3/portfolio_formula_rows.jsonl"
+    }
+  ],
+  "source_refs": [],
+  "source_truth_acceptance_created_flag": false,
+  "summary": {
+    "active_but_repair_required_formula_count": 12,
+    "active_formula_count": 35,
+    "ambiguous_identity_graph_component_count": 0,
+    "build_mode": "offline",
+    "calibration_formula_count": 6,
+    "champion_allowed_count": 0,
+    "connector_binding_created_count": 0,
+    "data1b_repair_handoff_count": 47,
+    "data1b_repair_route_count": 3301,
+    "data_requirement_contract_count": 473,
+    "distinct_source_url_count": 47,
+    "dry_run_receipt_count": 235,
+    "duplicate_formula_suppressed_count": 0,
+    "duplicate_superseded_formula_count": 0,
+    "edge_formula_count": 8,
+    "existing_data_consumer_id_count": 3,
+    "existing_formula_id_count": 5,
+    "existing_formula_variant_id_count": 21,
+    "existing_qku_id_count": 0,
+    "external_candidate_formula_count": 47,
+    "external_candidate_rejected_count": 0,
+    "external_source_count": 47,
+    "formula_computability_route_count": 47,
+    "formula_dependency_graph_row_count": 47,
+    "formula_dry_run_computable_count": 35,
+    "formula_dry_run_gap_routed_count": 12,
+    "formula_equivalence_cluster_count": 14,
+    "formula_factory_materialized_count": 35,
+    "formula_family_coverage_count": 14,
+    "formula_intake_priority_row_count": 47,
+    "formula_invariant_failure_count": 0,
+    "formula_invariant_row_count": 47,
+    "formula_lifecycle_dag_row_count": 423,
+    "formula_materialization_gap_count": 12,
+    "formula_ontology_row_count": 47,
+    "formula_plugin_contract_count": 540,
+    "formula_property_test_row_count": 47,
+    "formula_provenance_row_count": 47,
+    "formula_recovery_factory_row_count": 10,
+    "formula_repair_playbook_row_count": 10,
+    "formula_replay_paper_computable_with_available_candidate_data_count": 35,
+    "formula_retirement_candidate_count": 47,
+    "formula_selection_surface_row_count": 47,
+    "formula_shape_computable_synthetic_only_count": 47,
+    "hidden_exact_binding_promoted_count": 0,
+    "id_mining_row_count": 854,
+    "identity_graph_edge_count": 94,
+    "identity_graph_node_count": 188,
+    "live_candidate_allowed_count": 0,
+    "mandatory_formula_family_covered_count": 14,
+    "mandatory_formula_family_gap_routed_count": 0,
+    "materialized_formula_candidate_count": 140,
+    "multi_source_candidate_count": 46,
+    "negative_repair_factory_row_count": 10,
+    "negative_to_candidate_repair_row_count": 10,
+    "new_qtt_canonical_binding_count": 47,
+    "new_qtt_canonical_formula_id_count": 47,
+    "new_qtt_canonical_formula_variant_id_count": 47,
+    "new_qtt_canonical_qku_id_count": 47,
+    "no_orphan_violation_count": 0,
+    "official_plus_research_candidate_count": 1,
+    "online_scout_row_count": 47,
+    "order_authority_created_count": 0,
+    "path_audit_failure_count": 0,
+    "path_audit_warning_count": 0,
+    "portfolio_formula_count": 4,
+    "pr162e_q_handoff_count": 47,
+    "pr165b_memory_handoff_count": 47,
+    "pr236_merged_preflight_passed_flag": true,
+    "private_state_or_cash_access_created_count": 0,
+    "qtt_sha_or_atomicrows_hash_authority_count": 0,
+    "quantum_advantage_claim_count": 0,
+    "quantum_backend_execution_count": 0,
+    "quantum_formula_lift_row_count": 4,
+    "quantum_mapping_candidate_count": 4,
+    "quantum_mapping_route_count": 3301,
+    "query_family_count": 8,
+    "rank2_handoff_count": 47,
+    "real_negative_count": 0,
+    "real_positive_count": 0,
+    "regime_formula_count": 7,
+    "rejected_source_count": 0,
+    "repo_artifact_count_scanned": 237,
+    "research_only_formula_count": 0,
+    "retired_non_destructive_formula_count": 0,
+    "rp2_failure_mining_row_count": 10,
+    "rp2_handoff_count": 47,
+    "scenario_formula_selection_feature_count": 47,
+    "semantic_formula_repair_route_count": 28,
+    "single_source_candidate_count": 1,
+    "source_evidence_review_route_count": 3301,
+    "source_tier_count_by_tier": {
+      "INSTITUTIONAL_METHOD_CANDIDATE": 9,
+      "NON_OFFICIAL_CANDIDATE": 12,
+      "OFFICIAL_PUBLIC_DOC_CANDIDATE": 63,
+      "OPEN_SOURCE_DOC_CANDIDATE": 39,
+      "RESEARCH_PAPER_CANDIDATE": 18
+    },
+    "source_triangulation_row_count": 14,
+    "source_truth_acceptance_created_count": 0,
+    "structurally_broken_formula_count": 0,
+    "tca_formula_count": 8,
+    "unit_normalization_contract_count": 426,
+    "useful_formula_or_input_found_count": 47
+  },
+  "terminal_by_nature_flag": false,
+  "terminal_reason_code": null,
+  "terminal_reason_if_terminal": null,
+  "test_refs": [
+    "tests/pr168_map3/test_online_scout.py"
+  ],
+  "unit_normalization_refs": [],
+  "upstream_input_refs": [
+    "PR168_MAP3_YOLO_SAFETY_GUARD",
+    "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+  ],
+  "upstream_refs": [
+    "PR168_MAP3_YOLO_SAFETY_GUARD",
+    "PR168_MAP3_QKU_FORMULA_ID_INTAKE_SAFETY_GUARD"
+  ],
+  "validator_refs": [
+    "tools/validate_pr168_map3.py"
+  ]
+}
