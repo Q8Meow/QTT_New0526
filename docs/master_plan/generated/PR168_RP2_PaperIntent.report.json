@@ -1,0 +1,653 @@
+{
+  "DATA1A_refs": [
+    "docs/master_plan/generated/PR168_DATA1A_FinalSummary.report.json",
+    "docs/master_plan/generated/PR168_DATA1A_GFP2RAllowedDataFamilyContract.report.json",
+    "docs/master_plan/generated/PR168_DATA1A_HistoricalFullBookTruthLedger.report.json",
+    "docs/master_plan/generated/PR168_DATA1A_AgentRoutingAndNoOrphanProof.report.json"
+  ],
+  "DATA1_refs": [
+    "docs/master_plan/generated/PR168_DATA1_FinalSummary.report.json",
+    "docs/master_plan/generated/PR168_DATA1_PR168_GFP2R_DataReadyFormulaUniverse.report.json",
+    "docs/master_plan/generated/PR168_DATA1_PR168_RP2_FirstReplayPaperRecomputeBatch.report.json",
+    "docs/master_plan/generated/PR168_DATA1_NormalizedMarketDataFeatureRegistry.report.json"
+  ],
+  "GFP2R_refs": [
+    "docs/master_plan/generated/PR168_GFP2R_FinalSummary.report.json",
+    "docs/master_plan/generated/pr168_gfp2r_candidate_compute/rp2_handoff_rows.jsonl"
+  ],
+  "MAP2_refs_if_any": [],
+  "TCA_refs": [],
+  "authority_class": "PR168_RP2_CANDIDATE_ONLY_NON_PROOF",
+  "cash_access_created_flag": false,
+  "computed_from_refs": [],
+  "connector_semantic_binding_created_flag": false,
+  "consumer_agents": [
+    "ranking_scoring_agent",
+    "risk_tca_capacity_agent",
+    "dashboard_operator_agent"
+  ],
+  "created_at_utc": "2026-06-22T00:00:00Z",
+  "created_by_tool": "tools/build_pr168_rp2_map2.py",
+  "data_provenance_refs": [],
+  "downstream_consumers": [
+    "ranking_scoring_agent",
+    "risk_tca_capacity_agent",
+    "dashboard_operator_agent"
+  ],
+  "downstream_pr_refs": [
+    "PR168-RANK2",
+    "PR165-B",
+    "PR167",
+    "DATA1B",
+    "GFP2R",
+    "PR162E-Q"
+  ],
+  "formula_refs": [],
+  "live_authority_created_flag": false,
+  "live_order_authority_flag": false,
+  "logical_to_physical_alias_ref": "docs/master_plan/generated/PR168_RP2_FileAliases.report.json",
+  "manual_edit_allowed_flag": false,
+  "no_orphan_status": "NO_ORPHAN_ROUTED",
+  "no_trade_refs": [],
+  "numeric_evidence_refs": [],
+  "order_authority_created_flag": false,
+  "order_intent_refs": [],
+  "owning_agent": "replay_paper_agent",
+  "paper_refs": [],
+  "path_length_audit_ref": "docs/master_plan/generated/PR168_RP2_PathAudit.report.json",
+  "physical_filename": "docs/master_plan/generated/PR168_RP2_PaperIntent.report.json",
+  "private_state_access_created_flag": false,
+  "profit_evidence_created_flag": false,
+  "qku_refs_if_available": [],
+  "qtt_sha_or_atomicrows_hash_authority_flag": false,
+  "quantum_advantage_claim_flag": false,
+  "quantum_backend_execution_flag": false,
+  "quantum_refs": [],
+  "records": {
+    "row_count": 864,
+    "sample_rows": [
+      {
+        "DATA1A_refs": [],
+        "DATA1_refs": [
+          "kalshi_market_metadata_0001",
+          "kalshi_orderbook_snapshot_0001",
+          "kalshi_market_trades_0001",
+          "kalshi_historical_trades_0001",
+          "kalshi_candlesticks_0001",
+          "kalshi_historical_cutoff_0001"
+        ],
+        "GFP2R_refs": [
+          "gfp2r_compute_00001"
+        ],
+        "MAP2_refs_if_any": [],
+        "TCA_refs": [],
+        "arrival_mid_price_ref": 0.619,
+        "authority_class": "PR168_RP2_CANDIDATE_ONLY_NON_PROOF",
+        "best_ask_ref": 0.619,
+        "best_bid_ref": 0.0,
+        "break_even_threshold_ref": "break_even::gfp2r_compute_00001",
+        "candidate_formula_output_ref": "formula_execution_receipt::gfp2r_compute_00001",
+        "candidate_probability_ref": "GFP2R_MARKET_IMPLIED_OR_THRESHOLD_NOT_ALPHA_PROOF",
+        "cash_access_created_flag": false,
+        "compute_lane": "PROVISIONAL_DATA_CONSUMER",
+        "compute_row_id": "gfp2r_compute_00001",
+        "computed_from_refs": [],
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "ranking_scoring_agent",
+          "risk_tca_capacity_agent",
+          "dashboard_operator_agent"
+        ],
+        "data_provenance_refs": [],
+        "data_quality_ref": "DATA_READY_PUBLIC_REAL_ORDERBOOK_CANDIDATE",
+        "dedupe_key": "economic_candidate_00001::NO_TRADE_BASELINE::size_bucket_tiny::base",
+        "depth_ref": 161.0,
+        "downstream_consumers": [
+          "ranking_scoring_agent",
+          "risk_tca_capacity_agent",
+          "dashboard_operator_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-RANK2",
+          "PR165-B",
+          "PR167",
+          "DATA1B",
+          "GFP2R",
+          "PR162E-Q"
+        ],
+        "economic_candidate_id": "economic_candidate_00001",
+        "entry_price_candidate": null,
+        "exact_repaired_qku_formula_row_ref": null,
+        "fee_ref": "CONFIGURED_CANDIDATE_FEE_PROXY_REPAIR_REQUIRED",
+        "formula_refs": [],
+        "historical_full_book_available_flag": false,
+        "historical_full_book_required_flag": false,
+        "input_lock_id": "rp2_input_lock_00001",
+        "limit_price_candidate": null,
+        "live_authority_created_flag": false,
+        "live_order_authority_flag": false,
+        "manual_edit_allowed_flag": false,
+        "market_id_or_token_id": "KXMVECROSSCATEGORY-S2026F6847194F7A-CC6D65A8A6F",
+        "min_order_size_ref": 1.0,
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "no_trade_refs": [],
+        "numeric_evidence_refs": [],
+        "order_authority_created_flag": false,
+        "order_intent_id": "rp2_order_intent_000001",
+        "order_intent_refs": [
+          "rp2_order_intent_000001"
+        ],
+        "order_policy": "NO_TRADE_BASELINE",
+        "order_quantity_candidate": 0.0,
+        "order_size_bucket": "size_bucket_tiny",
+        "owning_agent": "replay_paper_agent",
+        "paper_only_flag": true,
+        "paper_refs": [],
+        "private_state_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "provisional_origin_row_ref": "gfp2r_compute_00001",
+        "qku_refs_if_available": [],
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "quantum_refs": [],
+        "repair_route_if_gap": null,
+        "replay_refs": [],
+        "required_edge_threshold_ref": "required_edge_threshold_if_available",
+        "row_shard_refs_if_any": [],
+        "scenario_refs": [],
+        "side": "YES",
+        "source_truth_acceptance_created_flag": false,
+        "spread_ref": 0.619,
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_rp2"
+        ],
+        "tick_size_ref": 0.01,
+        "upstream_input_refs": [
+          "rp2_input_lock_00001"
+        ],
+        "upstream_refs": [
+          "rp2_input_lock_00001"
+        ],
+        "validator_refs": [
+          "tools/pr168_rp2_validator.py",
+          "tools/validate_pr168_rp2_map2.py"
+        ],
+        "venue": "kalshi"
+      },
+      {
+        "DATA1A_refs": [],
+        "DATA1_refs": [
+          "kalshi_market_metadata_0001",
+          "kalshi_orderbook_snapshot_0001",
+          "kalshi_market_trades_0001",
+          "kalshi_historical_trades_0001",
+          "kalshi_candlesticks_0001",
+          "kalshi_historical_cutoff_0001"
+        ],
+        "GFP2R_refs": [
+          "gfp2r_compute_00001"
+        ],
+        "MAP2_refs_if_any": [],
+        "TCA_refs": [],
+        "arrival_mid_price_ref": 0.619,
+        "authority_class": "PR168_RP2_CANDIDATE_ONLY_NON_PROOF",
+        "best_ask_ref": 0.619,
+        "best_bid_ref": 0.0,
+        "break_even_threshold_ref": "break_even::gfp2r_compute_00001",
+        "candidate_formula_output_ref": "formula_execution_receipt::gfp2r_compute_00001",
+        "candidate_probability_ref": "GFP2R_MARKET_IMPLIED_OR_THRESHOLD_NOT_ALPHA_PROOF",
+        "cash_access_created_flag": false,
+        "compute_lane": "PROVISIONAL_DATA_CONSUMER",
+        "compute_row_id": "gfp2r_compute_00001",
+        "computed_from_refs": [],
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "ranking_scoring_agent",
+          "risk_tca_capacity_agent",
+          "dashboard_operator_agent"
+        ],
+        "data_provenance_refs": [],
+        "data_quality_ref": "DATA_READY_PUBLIC_REAL_ORDERBOOK_CANDIDATE",
+        "dedupe_key": "economic_candidate_00001::NO_TRADE_BASELINE::size_bucket_small::base",
+        "depth_ref": 161.0,
+        "downstream_consumers": [
+          "ranking_scoring_agent",
+          "risk_tca_capacity_agent",
+          "dashboard_operator_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-RANK2",
+          "PR165-B",
+          "PR167",
+          "DATA1B",
+          "GFP2R",
+          "PR162E-Q"
+        ],
+        "economic_candidate_id": "economic_candidate_00001",
+        "entry_price_candidate": null,
+        "exact_repaired_qku_formula_row_ref": null,
+        "fee_ref": "CONFIGURED_CANDIDATE_FEE_PROXY_REPAIR_REQUIRED",
+        "formula_refs": [],
+        "historical_full_book_available_flag": false,
+        "historical_full_book_required_flag": false,
+        "input_lock_id": "rp2_input_lock_00001",
+        "limit_price_candidate": null,
+        "live_authority_created_flag": false,
+        "live_order_authority_flag": false,
+        "manual_edit_allowed_flag": false,
+        "market_id_or_token_id": "KXMVECROSSCATEGORY-S2026F6847194F7A-CC6D65A8A6F",
+        "min_order_size_ref": 1.0,
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "no_trade_refs": [],
+        "numeric_evidence_refs": [],
+        "order_authority_created_flag": false,
+        "order_intent_id": "rp2_order_intent_000002",
+        "order_intent_refs": [
+          "rp2_order_intent_000002"
+        ],
+        "order_policy": "NO_TRADE_BASELINE",
+        "order_quantity_candidate": 0.0,
+        "order_size_bucket": "size_bucket_small",
+        "owning_agent": "replay_paper_agent",
+        "paper_only_flag": true,
+        "paper_refs": [],
+        "private_state_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "provisional_origin_row_ref": "gfp2r_compute_00001",
+        "qku_refs_if_available": [],
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "quantum_refs": [],
+        "repair_route_if_gap": null,
+        "replay_refs": [],
+        "required_edge_threshold_ref": "required_edge_threshold_if_available",
+        "row_shard_refs_if_any": [],
+        "scenario_refs": [],
+        "side": "YES",
+        "source_truth_acceptance_created_flag": false,
+        "spread_ref": 0.619,
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_rp2"
+        ],
+        "tick_size_ref": 0.01,
+        "upstream_input_refs": [
+          "rp2_input_lock_00001"
+        ],
+        "upstream_refs": [
+          "rp2_input_lock_00001"
+        ],
+        "validator_refs": [
+          "tools/pr168_rp2_validator.py",
+          "tools/validate_pr168_rp2_map2.py"
+        ],
+        "venue": "kalshi"
+      },
+      {
+        "DATA1A_refs": [],
+        "DATA1_refs": [
+          "kalshi_market_metadata_0001",
+          "kalshi_orderbook_snapshot_0001",
+          "kalshi_market_trades_0001",
+          "kalshi_historical_trades_0001",
+          "kalshi_candlesticks_0001",
+          "kalshi_historical_cutoff_0001"
+        ],
+        "GFP2R_refs": [
+          "gfp2r_compute_00001"
+        ],
+        "MAP2_refs_if_any": [],
+        "TCA_refs": [],
+        "arrival_mid_price_ref": 0.619,
+        "authority_class": "PR168_RP2_CANDIDATE_ONLY_NON_PROOF",
+        "best_ask_ref": 0.619,
+        "best_bid_ref": 0.0,
+        "break_even_threshold_ref": "break_even::gfp2r_compute_00001",
+        "candidate_formula_output_ref": "formula_execution_receipt::gfp2r_compute_00001",
+        "candidate_probability_ref": "GFP2R_MARKET_IMPLIED_OR_THRESHOLD_NOT_ALPHA_PROOF",
+        "cash_access_created_flag": false,
+        "compute_lane": "PROVISIONAL_DATA_CONSUMER",
+        "compute_row_id": "gfp2r_compute_00001",
+        "computed_from_refs": [],
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "ranking_scoring_agent",
+          "risk_tca_capacity_agent",
+          "dashboard_operator_agent"
+        ],
+        "data_provenance_refs": [],
+        "data_quality_ref": "DATA_READY_PUBLIC_REAL_ORDERBOOK_CANDIDATE",
+        "dedupe_key": "economic_candidate_00001::NO_TRADE_BASELINE::size_bucket_depth_capped::base",
+        "depth_ref": 161.0,
+        "downstream_consumers": [
+          "ranking_scoring_agent",
+          "risk_tca_capacity_agent",
+          "dashboard_operator_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-RANK2",
+          "PR165-B",
+          "PR167",
+          "DATA1B",
+          "GFP2R",
+          "PR162E-Q"
+        ],
+        "economic_candidate_id": "economic_candidate_00001",
+        "entry_price_candidate": null,
+        "exact_repaired_qku_formula_row_ref": null,
+        "fee_ref": "CONFIGURED_CANDIDATE_FEE_PROXY_REPAIR_REQUIRED",
+        "formula_refs": [],
+        "historical_full_book_available_flag": false,
+        "historical_full_book_required_flag": false,
+        "input_lock_id": "rp2_input_lock_00001",
+        "limit_price_candidate": null,
+        "live_authority_created_flag": false,
+        "live_order_authority_flag": false,
+        "manual_edit_allowed_flag": false,
+        "market_id_or_token_id": "KXMVECROSSCATEGORY-S2026F6847194F7A-CC6D65A8A6F",
+        "min_order_size_ref": 1.0,
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "no_trade_refs": [],
+        "numeric_evidence_refs": [],
+        "order_authority_created_flag": false,
+        "order_intent_id": "rp2_order_intent_000003",
+        "order_intent_refs": [
+          "rp2_order_intent_000003"
+        ],
+        "order_policy": "NO_TRADE_BASELINE",
+        "order_quantity_candidate": 0.0,
+        "order_size_bucket": "size_bucket_depth_capped",
+        "owning_agent": "replay_paper_agent",
+        "paper_only_flag": true,
+        "paper_refs": [],
+        "private_state_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "provisional_origin_row_ref": "gfp2r_compute_00001",
+        "qku_refs_if_available": [],
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "quantum_refs": [],
+        "repair_route_if_gap": null,
+        "replay_refs": [],
+        "required_edge_threshold_ref": "required_edge_threshold_if_available",
+        "row_shard_refs_if_any": [],
+        "scenario_refs": [],
+        "side": "YES",
+        "source_truth_acceptance_created_flag": false,
+        "spread_ref": 0.619,
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_rp2"
+        ],
+        "tick_size_ref": 0.01,
+        "upstream_input_refs": [
+          "rp2_input_lock_00001"
+        ],
+        "upstream_refs": [
+          "rp2_input_lock_00001"
+        ],
+        "validator_refs": [
+          "tools/pr168_rp2_validator.py",
+          "tools/validate_pr168_rp2_map2.py"
+        ],
+        "venue": "kalshi"
+      },
+      {
+        "DATA1A_refs": [],
+        "DATA1_refs": [
+          "kalshi_market_metadata_0001",
+          "kalshi_orderbook_snapshot_0001",
+          "kalshi_market_trades_0001",
+          "kalshi_historical_trades_0001",
+          "kalshi_candlesticks_0001",
+          "kalshi_historical_cutoff_0001"
+        ],
+        "GFP2R_refs": [
+          "gfp2r_compute_00001"
+        ],
+        "MAP2_refs_if_any": [],
+        "TCA_refs": [],
+        "arrival_mid_price_ref": 0.619,
+        "authority_class": "PR168_RP2_CANDIDATE_ONLY_NON_PROOF",
+        "best_ask_ref": 0.619,
+        "best_bid_ref": 0.0,
+        "break_even_threshold_ref": "break_even::gfp2r_compute_00001",
+        "candidate_formula_output_ref": "formula_execution_receipt::gfp2r_compute_00001",
+        "candidate_probability_ref": "GFP2R_MARKET_IMPLIED_OR_THRESHOLD_NOT_ALPHA_PROOF",
+        "cash_access_created_flag": false,
+        "compute_lane": "PROVISIONAL_DATA_CONSUMER",
+        "compute_row_id": "gfp2r_compute_00001",
+        "computed_from_refs": [],
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "ranking_scoring_agent",
+          "risk_tca_capacity_agent",
+          "dashboard_operator_agent"
+        ],
+        "data_provenance_refs": [],
+        "data_quality_ref": "DATA_READY_PUBLIC_REAL_ORDERBOOK_CANDIDATE",
+        "dedupe_key": "economic_candidate_00001::TAKER_CROSS_AT_BEST_AVAILABLE::size_bucket_tiny::base",
+        "depth_ref": 161.0,
+        "downstream_consumers": [
+          "ranking_scoring_agent",
+          "risk_tca_capacity_agent",
+          "dashboard_operator_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-RANK2",
+          "PR165-B",
+          "PR167",
+          "DATA1B",
+          "GFP2R",
+          "PR162E-Q"
+        ],
+        "economic_candidate_id": "economic_candidate_00001",
+        "entry_price_candidate": 0.619,
+        "exact_repaired_qku_formula_row_ref": null,
+        "fee_ref": "CONFIGURED_CANDIDATE_FEE_PROXY_REPAIR_REQUIRED",
+        "formula_refs": [],
+        "historical_full_book_available_flag": false,
+        "historical_full_book_required_flag": false,
+        "input_lock_id": "rp2_input_lock_00001",
+        "limit_price_candidate": 0.619,
+        "live_authority_created_flag": false,
+        "live_order_authority_flag": false,
+        "manual_edit_allowed_flag": false,
+        "market_id_or_token_id": "KXMVECROSSCATEGORY-S2026F6847194F7A-CC6D65A8A6F",
+        "min_order_size_ref": 1.0,
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "no_trade_refs": [],
+        "numeric_evidence_refs": [],
+        "order_authority_created_flag": false,
+        "order_intent_id": "rp2_order_intent_000004",
+        "order_intent_refs": [
+          "rp2_order_intent_000004"
+        ],
+        "order_policy": "TAKER_CROSS_AT_BEST_AVAILABLE",
+        "order_quantity_candidate": 1.0,
+        "order_size_bucket": "size_bucket_tiny",
+        "owning_agent": "replay_paper_agent",
+        "paper_only_flag": true,
+        "paper_refs": [],
+        "private_state_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "provisional_origin_row_ref": "gfp2r_compute_00001",
+        "qku_refs_if_available": [],
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "quantum_refs": [],
+        "repair_route_if_gap": null,
+        "replay_refs": [],
+        "required_edge_threshold_ref": "required_edge_threshold_if_available",
+        "row_shard_refs_if_any": [],
+        "scenario_refs": [],
+        "side": "YES",
+        "source_truth_acceptance_created_flag": false,
+        "spread_ref": 0.619,
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_rp2"
+        ],
+        "tick_size_ref": 0.01,
+        "upstream_input_refs": [
+          "rp2_input_lock_00001"
+        ],
+        "upstream_refs": [
+          "rp2_input_lock_00001"
+        ],
+        "validator_refs": [
+          "tools/pr168_rp2_validator.py",
+          "tools/validate_pr168_rp2_map2.py"
+        ],
+        "venue": "kalshi"
+      },
+      {
+        "DATA1A_refs": [],
+        "DATA1_refs": [
+          "kalshi_market_metadata_0001",
+          "kalshi_orderbook_snapshot_0001",
+          "kalshi_market_trades_0001",
+          "kalshi_historical_trades_0001",
+          "kalshi_candlesticks_0001",
+          "kalshi_historical_cutoff_0001"
+        ],
+        "GFP2R_refs": [
+          "gfp2r_compute_00001"
+        ],
+        "MAP2_refs_if_any": [],
+        "TCA_refs": [],
+        "arrival_mid_price_ref": 0.619,
+        "authority_class": "PR168_RP2_CANDIDATE_ONLY_NON_PROOF",
+        "best_ask_ref": 0.619,
+        "best_bid_ref": 0.0,
+        "break_even_threshold_ref": "break_even::gfp2r_compute_00001",
+        "candidate_formula_output_ref": "formula_execution_receipt::gfp2r_compute_00001",
+        "candidate_probability_ref": "GFP2R_MARKET_IMPLIED_OR_THRESHOLD_NOT_ALPHA_PROOF",
+        "cash_access_created_flag": false,
+        "compute_lane": "PROVISIONAL_DATA_CONSUMER",
+        "compute_row_id": "gfp2r_compute_00001",
+        "computed_from_refs": [],
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "ranking_scoring_agent",
+          "risk_tca_capacity_agent",
+          "dashboard_operator_agent"
+        ],
+        "data_provenance_refs": [],
+        "data_quality_ref": "DATA_READY_PUBLIC_REAL_ORDERBOOK_CANDIDATE",
+        "dedupe_key": "economic_candidate_00001::TAKER_CROSS_AT_BEST_AVAILABLE::size_bucket_small::base",
+        "depth_ref": 161.0,
+        "downstream_consumers": [
+          "ranking_scoring_agent",
+          "risk_tca_capacity_agent",
+          "dashboard_operator_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-RANK2",
+          "PR165-B",
+          "PR167",
+          "DATA1B",
+          "GFP2R",
+          "PR162E-Q"
+        ],
+        "economic_candidate_id": "economic_candidate_00001",
+        "entry_price_candidate": 0.619,
+        "exact_repaired_qku_formula_row_ref": null,
+        "fee_ref": "CONFIGURED_CANDIDATE_FEE_PROXY_REPAIR_REQUIRED",
+        "formula_refs": [],
+        "historical_full_book_available_flag": false,
+        "historical_full_book_required_flag": false,
+        "input_lock_id": "rp2_input_lock_00001",
+        "limit_price_candidate": 0.619,
+        "live_authority_created_flag": false,
+        "live_order_authority_flag": false,
+        "manual_edit_allowed_flag": false,
+        "market_id_or_token_id": "KXMVECROSSCATEGORY-S2026F6847194F7A-CC6D65A8A6F",
+        "min_order_size_ref": 1.0,
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "no_trade_refs": [],
+        "numeric_evidence_refs": [],
+        "order_authority_created_flag": false,
+        "order_intent_id": "rp2_order_intent_000005",
+        "order_intent_refs": [
+          "rp2_order_intent_000005"
+        ],
+        "order_policy": "TAKER_CROSS_AT_BEST_AVAILABLE",
+        "order_quantity_candidate": 5.0,
+        "order_size_bucket": "size_bucket_small",
+        "owning_agent": "replay_paper_agent",
+        "paper_only_flag": true,
+        "paper_refs": [],
+        "private_state_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "provisional_origin_row_ref": "gfp2r_compute_00001",
+        "qku_refs_if_available": [],
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "quantum_refs": [],
+        "repair_route_if_gap": null,
+        "replay_refs": [],
+        "required_edge_threshold_ref": "required_edge_threshold_if_available",
+        "row_shard_refs_if_any": [],
+        "scenario_refs": [],
+        "side": "YES",
+        "source_truth_acceptance_created_flag": false,
+        "spread_ref": 0.619,
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_rp2"
+        ],
+        "tick_size_ref": 0.01,
+        "upstream_input_refs": [
+          "rp2_input_lock_00001"
+        ],
+        "upstream_refs": [
+          "rp2_input_lock_00001"
+        ],
+        "validator_refs": [
+          "tools/pr168_rp2_validator.py",
+          "tools/validate_pr168_rp2_map2.py"
+        ],
+        "venue": "kalshi"
+      }
+    ]
+  },
+  "repair_route_if_gap": null,
+  "replay_refs": [],
+  "report_id": "PR168_RP2_PaperOrderIntentLedger",
+  "report_version": "PR168-RP2-MAP2-v4.0",
+  "row_shard_refs_if_any": [
+    "docs/master_plan/generated/rp2p/order_intents.jsonl",
+    "docs/master_plan/generated/rp2p/order_intents.manifest.json"
+  ],
+  "scenario_refs": [],
+  "source_truth_acceptance_created_flag": false,
+  "terminal_by_nature_flag": false,
+  "terminal_reason_code": null,
+  "test_refs": [
+    "tests/pr168_rp2"
+  ],
+  "upstream_input_refs": [
+    "docs/master_plan/generated/PR168_GFP2R_FinalSummary.report.json",
+    "docs/master_plan/generated/pr168_gfp2r_candidate_compute/rp2_handoff_rows.jsonl"
+  ],
+  "upstream_refs": [
+    "docs/master_plan/generated/PR168_GFP2R_FinalSummary.report.json",
+    "docs/master_plan/generated/pr168_gfp2r_candidate_compute/rp2_handoff_rows.jsonl"
+  ],
+  "validator_refs": [
+    "tools/pr168_rp2_validator.py",
+    "tools/validate_pr168_rp2_map2.py"
+  ]
+}

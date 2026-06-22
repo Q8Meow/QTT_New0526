@@ -1,0 +1,573 @@
+{
+  "DATA1A_refs": [
+    "docs/master_plan/generated/PR168_DATA1A_FinalSummary.report.json",
+    "docs/master_plan/generated/PR168_DATA1A_GFP2RAllowedDataFamilyContract.report.json",
+    "docs/master_plan/generated/PR168_DATA1A_HistoricalFullBookTruthLedger.report.json",
+    "docs/master_plan/generated/PR168_DATA1A_AgentRoutingAndNoOrphanProof.report.json"
+  ],
+  "DATA1_refs": [
+    "docs/master_plan/generated/PR168_DATA1_FinalSummary.report.json",
+    "docs/master_plan/generated/PR168_DATA1_PR168_GFP2R_DataReadyFormulaUniverse.report.json",
+    "docs/master_plan/generated/PR168_DATA1_PR168_RP2_FirstReplayPaperRecomputeBatch.report.json",
+    "docs/master_plan/generated/PR168_DATA1_NormalizedMarketDataFeatureRegistry.report.json"
+  ],
+  "GFP2R_refs": [
+    "docs/master_plan/generated/PR168_GFP2R_FinalSummary.report.json",
+    "docs/master_plan/generated/pr168_gfp2r_candidate_compute/rp2_handoff_rows.jsonl"
+  ],
+  "MAP2_refs_if_any": [],
+  "TCA_refs": [],
+  "authority_class": "PR168_RP2_CANDIDATE_ONLY_NON_PROOF",
+  "cash_access_created_flag": false,
+  "computed_from_refs": [],
+  "connector_semantic_binding_created_flag": false,
+  "consumer_agents": [
+    "replay_paper_agent",
+    "ranking_scoring_agent",
+    "governance_validation_agent"
+  ],
+  "created_at_utc": "2026-06-22T00:00:00Z",
+  "created_by_tool": "tools/build_pr168_rp2_map2.py",
+  "data_provenance_refs": [],
+  "downstream_consumers": [
+    "replay_paper_agent",
+    "ranking_scoring_agent",
+    "governance_validation_agent"
+  ],
+  "downstream_pr_refs": [
+    "PR168-RANK2",
+    "PR165-B",
+    "PR167",
+    "DATA1B",
+    "GFP2R",
+    "PR162E-Q"
+  ],
+  "formula_refs": [],
+  "live_authority_created_flag": false,
+  "live_order_authority_flag": false,
+  "logical_to_physical_alias_ref": "docs/master_plan/generated/PR168_RP2_FileAliases.report.json",
+  "manual_edit_allowed_flag": false,
+  "no_orphan_status": "NO_ORPHAN_ROUTED",
+  "no_trade_refs": [],
+  "numeric_evidence_refs": [],
+  "order_authority_created_flag": false,
+  "order_intent_refs": [],
+  "owning_agent": "risk_tca_capacity_agent",
+  "paper_refs": [],
+  "path_length_audit_ref": "docs/master_plan/generated/PR168_RP2_PathAudit.report.json",
+  "physical_filename": "docs/master_plan/generated/PR168_RP2_StaleStress.report.json",
+  "private_state_access_created_flag": false,
+  "profit_evidence_created_flag": false,
+  "qku_refs_if_available": [],
+  "qtt_sha_or_atomicrows_hash_authority_flag": false,
+  "quantum_advantage_claim_flag": false,
+  "quantum_backend_execution_flag": false,
+  "quantum_refs": [],
+  "records": {
+    "row_count": 3456,
+    "sample_rows": [
+      {
+        "DATA1A_refs": [],
+        "DATA1_refs": [],
+        "GFP2R_refs": [],
+        "MAP2_refs_if_any": [],
+        "TCA_refs": [],
+        "authority_class": "PR168_RP2_CANDIDATE_ONLY_NON_PROOF",
+        "base_paper_row_ref": "rp2_paper_000001",
+        "base_replay_row_ref": "rp2_replay_000001",
+        "cash_access_created_flag": false,
+        "computed_from_refs": [],
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "replay_paper_agent",
+          "ranking_scoring_agent",
+          "governance_validation_agent"
+        ],
+        "data_provenance_refs": [],
+        "downstream_consumers": [
+          "replay_paper_agent",
+          "ranking_scoring_agent",
+          "governance_validation_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-RANK2",
+          "PR165-B",
+          "PR167",
+          "DATA1B",
+          "GFP2R",
+          "PR162E-Q"
+        ],
+        "formula_refs": [],
+        "live_authority_created_flag": false,
+        "live_order_authority_flag": false,
+        "manual_edit_allowed_flag": false,
+        "modified_inputs": [
+          "latency_delay_short"
+        ],
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "no_trade_refs": [],
+        "numeric_evidence_refs": [],
+        "order_authority_created_flag": false,
+        "order_intent_id": "rp2_order_intent_000001",
+        "order_intent_refs": [],
+        "owning_agent": "risk_tca_capacity_agent",
+        "paper_refs": [
+          "rp2_paper_000001"
+        ],
+        "private_state_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "qku_refs_if_available": [],
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "quantum_refs": [],
+        "repair_route_if_failed": null,
+        "repair_route_if_gap": null,
+        "replay_refs": [
+          "rp2_replay_000001"
+        ],
+        "row_shard_refs_if_any": [],
+        "scenario_family": "LATENCY_DELAY_SHORT",
+        "scenario_fill_adjusted_pnl_candidate": 0.0,
+        "scenario_id": "rp2_scenario_0000007",
+        "scenario_net_pnl_candidate": 0.0,
+        "scenario_no_trade_margin_candidate": 0.0,
+        "scenario_reason": "LATENCY_DELAY_SHORT bounded replay/paper stress without live authority.",
+        "scenario_refs": [
+          "rp2_scenario_0000007"
+        ],
+        "scenario_result_classification_non_proof": "REPLAY_NEUTRAL_AFTER_COSTS_NON_PROOF",
+        "scenario_tca_total_candidate": 0.0,
+        "source_truth_acceptance_created_flag": false,
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_rp2"
+        ],
+        "unchanged_inputs": [
+          "economic_candidate_id",
+          "venue",
+          "market_id_or_token_id",
+          "side"
+        ],
+        "upstream_input_refs": [
+          "rp2_replay_000001"
+        ],
+        "upstream_refs": [
+          "rp2_replay_000001"
+        ],
+        "validator_refs": [
+          "tools/pr168_rp2_validator.py",
+          "tools/validate_pr168_rp2_map2.py"
+        ]
+      },
+      {
+        "DATA1A_refs": [],
+        "DATA1_refs": [],
+        "GFP2R_refs": [],
+        "MAP2_refs_if_any": [],
+        "TCA_refs": [],
+        "authority_class": "PR168_RP2_CANDIDATE_ONLY_NON_PROOF",
+        "base_paper_row_ref": "rp2_paper_000001",
+        "base_replay_row_ref": "rp2_replay_000001",
+        "cash_access_created_flag": false,
+        "computed_from_refs": [],
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "replay_paper_agent",
+          "ranking_scoring_agent",
+          "governance_validation_agent"
+        ],
+        "data_provenance_refs": [],
+        "downstream_consumers": [
+          "replay_paper_agent",
+          "ranking_scoring_agent",
+          "governance_validation_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-RANK2",
+          "PR165-B",
+          "PR167",
+          "DATA1B",
+          "GFP2R",
+          "PR162E-Q"
+        ],
+        "formula_refs": [],
+        "live_authority_created_flag": false,
+        "live_order_authority_flag": false,
+        "manual_edit_allowed_flag": false,
+        "modified_inputs": [
+          "latency_delay_medium"
+        ],
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "no_trade_refs": [],
+        "numeric_evidence_refs": [],
+        "order_authority_created_flag": false,
+        "order_intent_id": "rp2_order_intent_000001",
+        "order_intent_refs": [],
+        "owning_agent": "risk_tca_capacity_agent",
+        "paper_refs": [
+          "rp2_paper_000001"
+        ],
+        "private_state_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "qku_refs_if_available": [],
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "quantum_refs": [],
+        "repair_route_if_failed": null,
+        "repair_route_if_gap": null,
+        "replay_refs": [
+          "rp2_replay_000001"
+        ],
+        "row_shard_refs_if_any": [],
+        "scenario_family": "LATENCY_DELAY_MEDIUM",
+        "scenario_fill_adjusted_pnl_candidate": 0.0,
+        "scenario_id": "rp2_scenario_0000008",
+        "scenario_net_pnl_candidate": 0.0,
+        "scenario_no_trade_margin_candidate": 0.0,
+        "scenario_reason": "LATENCY_DELAY_MEDIUM bounded replay/paper stress without live authority.",
+        "scenario_refs": [
+          "rp2_scenario_0000008"
+        ],
+        "scenario_result_classification_non_proof": "REPLAY_NEUTRAL_AFTER_COSTS_NON_PROOF",
+        "scenario_tca_total_candidate": 0.0,
+        "source_truth_acceptance_created_flag": false,
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_rp2"
+        ],
+        "unchanged_inputs": [
+          "economic_candidate_id",
+          "venue",
+          "market_id_or_token_id",
+          "side"
+        ],
+        "upstream_input_refs": [
+          "rp2_replay_000001"
+        ],
+        "upstream_refs": [
+          "rp2_replay_000001"
+        ],
+        "validator_refs": [
+          "tools/pr168_rp2_validator.py",
+          "tools/validate_pr168_rp2_map2.py"
+        ]
+      },
+      {
+        "DATA1A_refs": [],
+        "DATA1_refs": [],
+        "GFP2R_refs": [],
+        "MAP2_refs_if_any": [],
+        "TCA_refs": [],
+        "authority_class": "PR168_RP2_CANDIDATE_ONLY_NON_PROOF",
+        "base_paper_row_ref": "rp2_paper_000001",
+        "base_replay_row_ref": "rp2_replay_000001",
+        "cash_access_created_flag": false,
+        "computed_from_refs": [],
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "replay_paper_agent",
+          "ranking_scoring_agent",
+          "governance_validation_agent"
+        ],
+        "data_provenance_refs": [],
+        "downstream_consumers": [
+          "replay_paper_agent",
+          "ranking_scoring_agent",
+          "governance_validation_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-RANK2",
+          "PR165-B",
+          "PR167",
+          "DATA1B",
+          "GFP2R",
+          "PR162E-Q"
+        ],
+        "formula_refs": [],
+        "live_authority_created_flag": false,
+        "live_order_authority_flag": false,
+        "manual_edit_allowed_flag": false,
+        "modified_inputs": [
+          "latency_delay_long"
+        ],
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "no_trade_refs": [],
+        "numeric_evidence_refs": [],
+        "order_authority_created_flag": false,
+        "order_intent_id": "rp2_order_intent_000001",
+        "order_intent_refs": [],
+        "owning_agent": "risk_tca_capacity_agent",
+        "paper_refs": [
+          "rp2_paper_000001"
+        ],
+        "private_state_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "qku_refs_if_available": [],
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "quantum_refs": [],
+        "repair_route_if_failed": null,
+        "repair_route_if_gap": null,
+        "replay_refs": [
+          "rp2_replay_000001"
+        ],
+        "row_shard_refs_if_any": [],
+        "scenario_family": "LATENCY_DELAY_LONG",
+        "scenario_fill_adjusted_pnl_candidate": 0.0,
+        "scenario_id": "rp2_scenario_0000009",
+        "scenario_net_pnl_candidate": 0.0,
+        "scenario_no_trade_margin_candidate": 0.0,
+        "scenario_reason": "LATENCY_DELAY_LONG bounded replay/paper stress without live authority.",
+        "scenario_refs": [
+          "rp2_scenario_0000009"
+        ],
+        "scenario_result_classification_non_proof": "REPLAY_NEUTRAL_AFTER_COSTS_NON_PROOF",
+        "scenario_tca_total_candidate": 0.0,
+        "source_truth_acceptance_created_flag": false,
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_rp2"
+        ],
+        "unchanged_inputs": [
+          "economic_candidate_id",
+          "venue",
+          "market_id_or_token_id",
+          "side"
+        ],
+        "upstream_input_refs": [
+          "rp2_replay_000001"
+        ],
+        "upstream_refs": [
+          "rp2_replay_000001"
+        ],
+        "validator_refs": [
+          "tools/pr168_rp2_validator.py",
+          "tools/validate_pr168_rp2_map2.py"
+        ]
+      },
+      {
+        "DATA1A_refs": [],
+        "DATA1_refs": [],
+        "GFP2R_refs": [],
+        "MAP2_refs_if_any": [],
+        "TCA_refs": [],
+        "authority_class": "PR168_RP2_CANDIDATE_ONLY_NON_PROOF",
+        "base_paper_row_ref": "rp2_paper_000001",
+        "base_replay_row_ref": "rp2_replay_000001",
+        "cash_access_created_flag": false,
+        "computed_from_refs": [],
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "replay_paper_agent",
+          "ranking_scoring_agent",
+          "governance_validation_agent"
+        ],
+        "data_provenance_refs": [],
+        "downstream_consumers": [
+          "replay_paper_agent",
+          "ranking_scoring_agent",
+          "governance_validation_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-RANK2",
+          "PR165-B",
+          "PR167",
+          "DATA1B",
+          "GFP2R",
+          "PR162E-Q"
+        ],
+        "formula_refs": [],
+        "live_authority_created_flag": false,
+        "live_order_authority_flag": false,
+        "manual_edit_allowed_flag": false,
+        "modified_inputs": [
+          "stale_data_ttl_breach"
+        ],
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "no_trade_refs": [],
+        "numeric_evidence_refs": [],
+        "order_authority_created_flag": false,
+        "order_intent_id": "rp2_order_intent_000001",
+        "order_intent_refs": [],
+        "owning_agent": "risk_tca_capacity_agent",
+        "paper_refs": [
+          "rp2_paper_000001"
+        ],
+        "private_state_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "qku_refs_if_available": [],
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "quantum_refs": [],
+        "repair_route_if_failed": null,
+        "repair_route_if_gap": null,
+        "replay_refs": [
+          "rp2_replay_000001"
+        ],
+        "row_shard_refs_if_any": [],
+        "scenario_family": "STALE_DATA_TTL_BREACH",
+        "scenario_fill_adjusted_pnl_candidate": 0.0,
+        "scenario_id": "rp2_scenario_0000010",
+        "scenario_net_pnl_candidate": 0.0,
+        "scenario_no_trade_margin_candidate": 0.0,
+        "scenario_reason": "STALE_DATA_TTL_BREACH bounded replay/paper stress without live authority.",
+        "scenario_refs": [
+          "rp2_scenario_0000010"
+        ],
+        "scenario_result_classification_non_proof": "REPLAY_NEUTRAL_AFTER_COSTS_NON_PROOF",
+        "scenario_tca_total_candidate": 0.0,
+        "source_truth_acceptance_created_flag": false,
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_rp2"
+        ],
+        "unchanged_inputs": [
+          "economic_candidate_id",
+          "venue",
+          "market_id_or_token_id",
+          "side"
+        ],
+        "upstream_input_refs": [
+          "rp2_replay_000001"
+        ],
+        "upstream_refs": [
+          "rp2_replay_000001"
+        ],
+        "validator_refs": [
+          "tools/pr168_rp2_validator.py",
+          "tools/validate_pr168_rp2_map2.py"
+        ]
+      },
+      {
+        "DATA1A_refs": [],
+        "DATA1_refs": [],
+        "GFP2R_refs": [],
+        "MAP2_refs_if_any": [],
+        "TCA_refs": [],
+        "authority_class": "PR168_RP2_CANDIDATE_ONLY_NON_PROOF",
+        "base_paper_row_ref": "rp2_paper_000002",
+        "base_replay_row_ref": "rp2_replay_000002",
+        "cash_access_created_flag": false,
+        "computed_from_refs": [],
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "replay_paper_agent",
+          "ranking_scoring_agent",
+          "governance_validation_agent"
+        ],
+        "data_provenance_refs": [],
+        "downstream_consumers": [
+          "replay_paper_agent",
+          "ranking_scoring_agent",
+          "governance_validation_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-RANK2",
+          "PR165-B",
+          "PR167",
+          "DATA1B",
+          "GFP2R",
+          "PR162E-Q"
+        ],
+        "formula_refs": [],
+        "live_authority_created_flag": false,
+        "live_order_authority_flag": false,
+        "manual_edit_allowed_flag": false,
+        "modified_inputs": [
+          "latency_delay_short"
+        ],
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "no_trade_refs": [],
+        "numeric_evidence_refs": [],
+        "order_authority_created_flag": false,
+        "order_intent_id": "rp2_order_intent_000002",
+        "order_intent_refs": [],
+        "owning_agent": "risk_tca_capacity_agent",
+        "paper_refs": [
+          "rp2_paper_000002"
+        ],
+        "private_state_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "qku_refs_if_available": [],
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "quantum_refs": [],
+        "repair_route_if_failed": null,
+        "repair_route_if_gap": null,
+        "replay_refs": [
+          "rp2_replay_000002"
+        ],
+        "row_shard_refs_if_any": [],
+        "scenario_family": "LATENCY_DELAY_SHORT",
+        "scenario_fill_adjusted_pnl_candidate": 0.0,
+        "scenario_id": "rp2_scenario_0000026",
+        "scenario_net_pnl_candidate": 0.0,
+        "scenario_no_trade_margin_candidate": 0.0,
+        "scenario_reason": "LATENCY_DELAY_SHORT bounded replay/paper stress without live authority.",
+        "scenario_refs": [
+          "rp2_scenario_0000026"
+        ],
+        "scenario_result_classification_non_proof": "REPLAY_NEUTRAL_AFTER_COSTS_NON_PROOF",
+        "scenario_tca_total_candidate": 0.0,
+        "source_truth_acceptance_created_flag": false,
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_rp2"
+        ],
+        "unchanged_inputs": [
+          "economic_candidate_id",
+          "venue",
+          "market_id_or_token_id",
+          "side"
+        ],
+        "upstream_input_refs": [
+          "rp2_replay_000002"
+        ],
+        "upstream_refs": [
+          "rp2_replay_000002"
+        ],
+        "validator_refs": [
+          "tools/pr168_rp2_validator.py",
+          "tools/validate_pr168_rp2_map2.py"
+        ]
+      }
+    ]
+  },
+  "repair_route_if_gap": null,
+  "replay_refs": [],
+  "report_id": "PR168_RP2_StaleDataLatencyStressLedger",
+  "report_version": "PR168-RP2-MAP2-v4.0",
+  "row_shard_refs_if_any": [
+    "docs/master_plan/generated/rp2p/scenarios.jsonl",
+    "docs/master_plan/generated/rp2p/scenarios.manifest.json"
+  ],
+  "scenario_refs": [],
+  "source_truth_acceptance_created_flag": false,
+  "terminal_by_nature_flag": false,
+  "terminal_reason_code": null,
+  "test_refs": [
+    "tests/pr168_rp2"
+  ],
+  "upstream_input_refs": [
+    "docs/master_plan/generated/PR168_GFP2R_FinalSummary.report.json",
+    "docs/master_plan/generated/pr168_gfp2r_candidate_compute/rp2_handoff_rows.jsonl"
+  ],
+  "upstream_refs": [
+    "docs/master_plan/generated/PR168_GFP2R_FinalSummary.report.json",
+    "docs/master_plan/generated/pr168_gfp2r_candidate_compute/rp2_handoff_rows.jsonl"
+  ],
+  "validator_refs": [
+    "tools/pr168_rp2_validator.py",
+    "tools/validate_pr168_rp2_map2.py"
+  ]
+}

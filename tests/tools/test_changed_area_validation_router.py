@@ -75,6 +75,19 @@ def test_pr168_gfp2r_generated_report_maps_to_owner_validator():
     assert result.fail_closed_reasons == ()
 
 
+def test_pr168_rp2_generated_report_maps_to_owner_validator():
+    result = _pull_request_result(
+        "docs/master_plan/generated/PR168_RP2_Final.report.json"
+    )
+
+    assert "validate_pr168_rp2_map2" in result.required_validators
+    assert result.touched_generated_reports == (
+        "docs/master_plan/generated/PR168_RP2_Final.report.json",
+    )
+    assert result.cross_platform_path_scan_required is True
+    assert result.fail_closed_reasons == ()
+
+
 def test_generated_report_without_owner_fails_closed():
     result = _pull_request_result(
         "docs/master_plan/generated/UnownedGeneratedReport.report.json"
