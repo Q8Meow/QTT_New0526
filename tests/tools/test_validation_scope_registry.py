@@ -169,6 +169,7 @@ def test_pr168_gfp2r_allowed_paths_pass_on_real_branch(path: str) -> None:
     "path",
     [
         "docs/master_plan/generated/PR168_RP2_Final.report.json",
+        "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
         "docs/master_plan/generated/rp2p/replay_exec.jsonl",
         "docs/master_plan/generated/rp2p/replay_exec.manifest.json",
         "tools/build_pr168_rp2_map2.py",

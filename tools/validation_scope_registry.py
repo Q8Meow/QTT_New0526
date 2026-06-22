@@ -195,6 +195,7 @@ _PR168_RP2_ALLOWED_EXACT_PATHS = frozenset(
         "tools/validation_inventory.py",
         "tools/validation_scope_registry.py",
         "tools/validate_validation_scope_registry.py",
+        "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
         "tests/tools/test_validation_scope_registry.py",
         "tests/tools/test_validation_inventory.py",
         "tests/tools/test_changed_area_validation_router.py",
