@@ -155,6 +155,21 @@ def test_inventory_has_pr168_data1a_entry():
     assert "tests/pr168_data1a/**" in entry.required_when_files_match
 
 
+def test_inventory_has_pr168_gfp2r_entry():
+    entry = inventory.inventory_by_id()[
+        "validate_pr168_gfp2r_data1a_gated_candidate_recompute"
+    ]
+
+    assert entry.owner_pr_or_feature == "PR168_GFP2R"
+    assert "docs/master_plan/generated/PR168_GFP2R_*.report.json" in entry.output_globs
+    assert "docs/master_plan/generated/pr168_gfp2r*/**" in entry.output_globs
+    assert (
+        "tools/validate_pr168_gfp2r_data1a_gated_candidate_recompute.py"
+        in entry.tool_globs
+    )
+    assert "tests/pr168_gfp2r/**" in entry.required_when_files_match
+
+
 def test_inventory_knows_every_pytest_shard_phase_job():
     for phase in runner.ORDERED_PHASES:
         assert inventory.phase_job_id(phase) == inventory.VALIDATION_MATRIX_JOB_ID

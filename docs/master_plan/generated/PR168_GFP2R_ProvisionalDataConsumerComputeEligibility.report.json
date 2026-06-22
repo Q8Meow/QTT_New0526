@@ -1,0 +1,1189 @@
+{
+  "DATA1A_refs": [
+    "docs/master_plan/generated/PR168_DATA1A_FinalSummary.report.json",
+    "docs/master_plan/generated/PR168_DATA1A_InputDiscovery.report.json",
+    "docs/master_plan/generated/PR168_DATA1A_FetchInventoryAudit.report.json",
+    "docs/master_plan/generated/PR168_DATA1A_DataProductIntegrityLedger.report.json",
+    "docs/master_plan/generated/PR168_DATA1A_QKUUnblockDeltaAudit.report.json",
+    "docs/master_plan/generated/PR168_DATA1A_DataQualityCoverageAudit.report.json",
+    "docs/master_plan/generated/PR168_DATA1A_HistoricalFullBookTruthLedger.report.json",
+    "docs/master_plan/generated/PR168_DATA1A_GFP2RReadinessDecision.report.json",
+    "docs/master_plan/generated/PR168_DATA1A_GFP2RAllowedDataFamilyContract.report.json",
+    "docs/master_plan/generated/PR168_DATA1A_QKUFormulaDataRequirementBridge.report.json",
+    "docs/master_plan/generated/PR168_DATA1A_QKUComputabilityRouteLedger.report.json",
+    "docs/master_plan/generated/PR168_DATA1A_FormulaInputCoverageMatrix.report.json",
+    "docs/master_plan/generated/PR168_DATA1A_DataQualitySeverityActionQueue.report.json",
+    "docs/master_plan/generated/PR168_DATA1A_RP2RANK2BatchReadinessAudit.report.json",
+    "docs/master_plan/generated/PR168_DATA1A_QuantumForwardUsabilityAudit.report.json",
+    "docs/master_plan/generated/PR168_DATA1A_AlphaCaptureReadinessMatrix.report.json",
+    "docs/master_plan/generated/PR168_DATA1A_NegativeToPositiveRecoveryReadinessQueue.report.json",
+    "docs/master_plan/generated/PR168_DATA1A_AgentRoutingAndNoOrphanProof.report.json",
+    "docs/master_plan/generated/PR168_DATA1A_DAGUpstreamDownstreamOrchestration.report.json",
+    "docs/master_plan/generated/PR168_DATA1A_EveryValueUpstreamDownstreamCrosswalk.report.json",
+    "docs/master_plan/generated/PR168_DATA1A_AgentConsumableDataValueRoutingLedger.report.json",
+    "docs/master_plan/generated/PR168_DATA1A_OperatorActionMatrix.report.json"
+  ],
+  "DATA1_refs": [
+    "docs/master_plan/generated/PR168_DATA1_FinalSummary.report.json",
+    "docs/master_plan/generated/PR168_DATA1_PR168_GFP2R_DataReadyFormulaUniverse.report.json",
+    "docs/master_plan/generated/PR168_DATA1_PR168_RP2_FirstReplayPaperRecomputeBatch.report.json",
+    "docs/master_plan/generated/PR168_DATA1_PR168_RANK2_FirstEvidenceRankingBatch.report.json",
+    "docs/master_plan/generated/PR168_DATA1_QuantumForwardCoefficientFeatureSurface.report.json",
+    "docs/master_plan/generated/PR168_DATA1_NormalizedMarketDataFeatureRegistry.report.json"
+  ],
+  "authority_class": "PR168_GFP2R_CANDIDATE_ONLY_NON_PROOF",
+  "computed_from_refs": [],
+  "connector_semantic_binding_created_flag": false,
+  "consumer_agents": [
+    "replay_paper_agent",
+    "ranking_scoring_agent",
+    "risk_tca_capacity_agent",
+    "dashboard_operator_agent"
+  ],
+  "created_at_utc": "2026-06-21T22:30:42Z",
+  "created_by_tool": "tools/build_pr168_gfp2r_data1a_gated_candidate_recompute.py",
+  "data_provenance_refs": [],
+  "downstream_consumers": [
+    "replay_paper_agent",
+    "ranking_scoring_agent",
+    "risk_tca_capacity_agent",
+    "dashboard_operator_agent"
+  ],
+  "downstream_pr_refs": [
+    "PR168-RP2",
+    "PR168-RANK2",
+    "PR165-B",
+    "PR167",
+    "PR162E-Q",
+    "PR166-Q",
+    "PR166-QB",
+    "PR166-QC",
+    "DATA1B"
+  ],
+  "formula_refs": [],
+  "formula_variant_refs_if_available": [],
+  "live_authority_created_flag": false,
+  "manual_edit_allowed_flag": false,
+  "no_orphan_status": "NO_ORPHAN_ROUTED",
+  "numeric_evidence_refs": [],
+  "order_authority_created_flag": false,
+  "owning_agent": "formula_execution_agent",
+  "private_state_access_created_flag": false,
+  "profit_evidence_created_flag": false,
+  "qtt_sha_or_atomicrows_hash_authority_flag": false,
+  "quantum_advantage_claim_flag": false,
+  "quantum_backend_execution_flag": false,
+  "records": {
+    "sample_rows": [
+      {
+        "DATA1A_refs": [
+          "docs/master_plan/generated/PR168_DATA1A_FinalSummary.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_InputDiscovery.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_FetchInventoryAudit.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_DataProductIntegrityLedger.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_QKUUnblockDeltaAudit.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_DataQualityCoverageAudit.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_HistoricalFullBookTruthLedger.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_GFP2RReadinessDecision.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_GFP2RAllowedDataFamilyContract.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_QKUFormulaDataRequirementBridge.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_QKUComputabilityRouteLedger.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_FormulaInputCoverageMatrix.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_DataQualitySeverityActionQueue.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_RP2RANK2BatchReadinessAudit.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_QuantumForwardUsabilityAudit.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_AlphaCaptureReadinessMatrix.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_NegativeToPositiveRecoveryReadinessQueue.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_AgentRoutingAndNoOrphanProof.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_DAGUpstreamDownstreamOrchestration.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_EveryValueUpstreamDownstreamCrosswalk.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_AgentConsumableDataValueRoutingLedger.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_OperatorActionMatrix.report.json"
+        ],
+        "DATA1_refs": [
+          "docs/master_plan/generated/PR168_DATA1_FinalSummary.report.json",
+          "docs/master_plan/generated/PR168_DATA1_PR168_GFP2R_DataReadyFormulaUniverse.report.json",
+          "docs/master_plan/generated/PR168_DATA1_PR168_RP2_FirstReplayPaperRecomputeBatch.report.json",
+          "docs/master_plan/generated/PR168_DATA1_PR168_RANK2_FirstEvidenceRankingBatch.report.json",
+          "docs/master_plan/generated/PR168_DATA1_QuantumForwardCoefficientFeatureSurface.report.json",
+          "docs/master_plan/generated/PR168_DATA1_NormalizedMarketDataFeatureRegistry.report.json"
+        ],
+        "authority_class": "PR168_GFP2R_CANDIDATE_ONLY_NON_PROOF",
+        "candidate_only_flag": true,
+        "compute_eligibility_row_id": "compute_eligibility_00001",
+        "compute_lane": "PROVISIONAL_DATA_CONSUMER",
+        "computed_from_refs": [],
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "replay_paper_agent",
+          "ranking_scoring_agent",
+          "risk_tca_capacity_agent",
+          "dashboard_operator_agent"
+        ],
+        "data_provenance_refs": [],
+        "downstream_consumers": [
+          "replay_paper_agent",
+          "ranking_scoring_agent",
+          "risk_tca_capacity_agent",
+          "dashboard_operator_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-RP2",
+          "PR168-RANK2",
+          "PR165-B",
+          "PR167",
+          "PR162E-Q",
+          "PR166-Q",
+          "PR166-QB",
+          "PR166-QC",
+          "DATA1B"
+        ],
+        "duplicate_suppressed_flag": false,
+        "exact_candidate_compute_eligible_flag": false,
+        "formula_refs": [],
+        "formula_units_valid_flag": true,
+        "formula_variant_id": "gfp2r_formula_variant_00001",
+        "formula_variant_refs_if_available": [
+          "gfp2r_formula_variant_00001"
+        ],
+        "live_authority_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "mapping_row_id": "mapping_repair_00011",
+        "missing_formula_inputs": [],
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "numeric_evidence_refs": [],
+        "order_authority_created_flag": false,
+        "owning_agent": "formula_execution_agent",
+        "private_state_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "proof_authority_class": "PROVISIONAL_DATA_CONSUMER_NON_PROOF",
+        "provisional_compute_eligible_flag": true,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "repair_route_if_gap": null,
+        "row_shard_refs_if_any": [],
+        "source_truth_acceptance_created_flag": false,
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_gfp2r"
+        ],
+        "upstream_input_refs": [
+          "gfp2r_formula_variant_00001",
+          "mapping_repair_00011"
+        ],
+        "upstream_refs": [
+          "gfp2r_formula_variant_00001",
+          "mapping_repair_00011"
+        ],
+        "validator_refs": [
+          "tools/pr168_gfp2r_validator.py",
+          "tools/validate_pr168_gfp2r_data1a_gated_candidate_recompute.py"
+        ]
+      },
+      {
+        "DATA1A_refs": [
+          "docs/master_plan/generated/PR168_DATA1A_FinalSummary.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_InputDiscovery.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_FetchInventoryAudit.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_DataProductIntegrityLedger.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_QKUUnblockDeltaAudit.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_DataQualityCoverageAudit.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_HistoricalFullBookTruthLedger.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_GFP2RReadinessDecision.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_GFP2RAllowedDataFamilyContract.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_QKUFormulaDataRequirementBridge.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_QKUComputabilityRouteLedger.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_FormulaInputCoverageMatrix.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_DataQualitySeverityActionQueue.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_RP2RANK2BatchReadinessAudit.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_QuantumForwardUsabilityAudit.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_AlphaCaptureReadinessMatrix.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_NegativeToPositiveRecoveryReadinessQueue.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_AgentRoutingAndNoOrphanProof.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_DAGUpstreamDownstreamOrchestration.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_EveryValueUpstreamDownstreamCrosswalk.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_AgentConsumableDataValueRoutingLedger.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_OperatorActionMatrix.report.json"
+        ],
+        "DATA1_refs": [
+          "docs/master_plan/generated/PR168_DATA1_FinalSummary.report.json",
+          "docs/master_plan/generated/PR168_DATA1_PR168_GFP2R_DataReadyFormulaUniverse.report.json",
+          "docs/master_plan/generated/PR168_DATA1_PR168_RP2_FirstReplayPaperRecomputeBatch.report.json",
+          "docs/master_plan/generated/PR168_DATA1_PR168_RANK2_FirstEvidenceRankingBatch.report.json",
+          "docs/master_plan/generated/PR168_DATA1_QuantumForwardCoefficientFeatureSurface.report.json",
+          "docs/master_plan/generated/PR168_DATA1_NormalizedMarketDataFeatureRegistry.report.json"
+        ],
+        "authority_class": "PR168_GFP2R_CANDIDATE_ONLY_NON_PROOF",
+        "candidate_only_flag": true,
+        "compute_eligibility_row_id": "compute_eligibility_00002",
+        "compute_lane": "PROVISIONAL_DATA_CONSUMER",
+        "computed_from_refs": [],
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "replay_paper_agent",
+          "ranking_scoring_agent",
+          "risk_tca_capacity_agent",
+          "dashboard_operator_agent"
+        ],
+        "data_provenance_refs": [],
+        "downstream_consumers": [
+          "replay_paper_agent",
+          "ranking_scoring_agent",
+          "risk_tca_capacity_agent",
+          "dashboard_operator_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-RP2",
+          "PR168-RANK2",
+          "PR165-B",
+          "PR167",
+          "PR162E-Q",
+          "PR166-Q",
+          "PR166-QB",
+          "PR166-QC",
+          "DATA1B"
+        ],
+        "duplicate_suppressed_flag": false,
+        "exact_candidate_compute_eligible_flag": false,
+        "formula_refs": [],
+        "formula_units_valid_flag": true,
+        "formula_variant_id": "gfp2r_formula_variant_00002",
+        "formula_variant_refs_if_available": [
+          "gfp2r_formula_variant_00002"
+        ],
+        "live_authority_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "mapping_row_id": "mapping_repair_00011",
+        "missing_formula_inputs": [],
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "numeric_evidence_refs": [],
+        "order_authority_created_flag": false,
+        "owning_agent": "formula_execution_agent",
+        "private_state_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "proof_authority_class": "PROVISIONAL_DATA_CONSUMER_NON_PROOF",
+        "provisional_compute_eligible_flag": true,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "repair_route_if_gap": null,
+        "row_shard_refs_if_any": [],
+        "source_truth_acceptance_created_flag": false,
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_gfp2r"
+        ],
+        "upstream_input_refs": [
+          "gfp2r_formula_variant_00002",
+          "mapping_repair_00011"
+        ],
+        "upstream_refs": [
+          "gfp2r_formula_variant_00002",
+          "mapping_repair_00011"
+        ],
+        "validator_refs": [
+          "tools/pr168_gfp2r_validator.py",
+          "tools/validate_pr168_gfp2r_data1a_gated_candidate_recompute.py"
+        ]
+      },
+      {
+        "DATA1A_refs": [
+          "docs/master_plan/generated/PR168_DATA1A_FinalSummary.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_InputDiscovery.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_FetchInventoryAudit.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_DataProductIntegrityLedger.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_QKUUnblockDeltaAudit.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_DataQualityCoverageAudit.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_HistoricalFullBookTruthLedger.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_GFP2RReadinessDecision.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_GFP2RAllowedDataFamilyContract.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_QKUFormulaDataRequirementBridge.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_QKUComputabilityRouteLedger.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_FormulaInputCoverageMatrix.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_DataQualitySeverityActionQueue.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_RP2RANK2BatchReadinessAudit.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_QuantumForwardUsabilityAudit.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_AlphaCaptureReadinessMatrix.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_NegativeToPositiveRecoveryReadinessQueue.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_AgentRoutingAndNoOrphanProof.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_DAGUpstreamDownstreamOrchestration.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_EveryValueUpstreamDownstreamCrosswalk.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_AgentConsumableDataValueRoutingLedger.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_OperatorActionMatrix.report.json"
+        ],
+        "DATA1_refs": [
+          "docs/master_plan/generated/PR168_DATA1_FinalSummary.report.json",
+          "docs/master_plan/generated/PR168_DATA1_PR168_GFP2R_DataReadyFormulaUniverse.report.json",
+          "docs/master_plan/generated/PR168_DATA1_PR168_RP2_FirstReplayPaperRecomputeBatch.report.json",
+          "docs/master_plan/generated/PR168_DATA1_PR168_RANK2_FirstEvidenceRankingBatch.report.json",
+          "docs/master_plan/generated/PR168_DATA1_QuantumForwardCoefficientFeatureSurface.report.json",
+          "docs/master_plan/generated/PR168_DATA1_NormalizedMarketDataFeatureRegistry.report.json"
+        ],
+        "authority_class": "PR168_GFP2R_CANDIDATE_ONLY_NON_PROOF",
+        "candidate_only_flag": true,
+        "compute_eligibility_row_id": "compute_eligibility_00003",
+        "compute_lane": "NO_COMPUTE_ROUTE",
+        "computed_from_refs": [],
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "replay_paper_agent",
+          "ranking_scoring_agent",
+          "risk_tca_capacity_agent",
+          "dashboard_operator_agent"
+        ],
+        "data_provenance_refs": [],
+        "downstream_consumers": [
+          "replay_paper_agent",
+          "ranking_scoring_agent",
+          "risk_tca_capacity_agent",
+          "dashboard_operator_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-RP2",
+          "PR168-RANK2",
+          "PR165-B",
+          "PR167",
+          "PR162E-Q",
+          "PR166-Q",
+          "PR166-QB",
+          "PR166-QC",
+          "DATA1B"
+        ],
+        "duplicate_suppressed_flag": false,
+        "exact_candidate_compute_eligible_flag": false,
+        "formula_refs": [],
+        "formula_units_valid_flag": true,
+        "formula_variant_id": "gfp2r_formula_variant_00003",
+        "formula_variant_refs_if_available": [
+          "gfp2r_formula_variant_00003"
+        ],
+        "live_authority_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "mapping_row_id": "mapping_repair_00011",
+        "missing_formula_inputs": [
+          "market_implied_probability"
+        ],
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "numeric_evidence_refs": [],
+        "order_authority_created_flag": false,
+        "owning_agent": "formula_execution_agent",
+        "private_state_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "proof_authority_class": "REPAIR_ONLY_NOT_PROOF",
+        "provisional_compute_eligible_flag": false,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "repair_route_if_gap": null,
+        "row_shard_refs_if_any": [],
+        "source_truth_acceptance_created_flag": false,
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_gfp2r"
+        ],
+        "upstream_input_refs": [
+          "gfp2r_formula_variant_00003",
+          "mapping_repair_00011"
+        ],
+        "upstream_refs": [
+          "gfp2r_formula_variant_00003",
+          "mapping_repair_00011"
+        ],
+        "validator_refs": [
+          "tools/pr168_gfp2r_validator.py",
+          "tools/validate_pr168_gfp2r_data1a_gated_candidate_recompute.py"
+        ]
+      },
+      {
+        "DATA1A_refs": [
+          "docs/master_plan/generated/PR168_DATA1A_FinalSummary.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_InputDiscovery.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_FetchInventoryAudit.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_DataProductIntegrityLedger.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_QKUUnblockDeltaAudit.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_DataQualityCoverageAudit.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_HistoricalFullBookTruthLedger.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_GFP2RReadinessDecision.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_GFP2RAllowedDataFamilyContract.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_QKUFormulaDataRequirementBridge.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_QKUComputabilityRouteLedger.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_FormulaInputCoverageMatrix.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_DataQualitySeverityActionQueue.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_RP2RANK2BatchReadinessAudit.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_QuantumForwardUsabilityAudit.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_AlphaCaptureReadinessMatrix.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_NegativeToPositiveRecoveryReadinessQueue.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_AgentRoutingAndNoOrphanProof.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_DAGUpstreamDownstreamOrchestration.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_EveryValueUpstreamDownstreamCrosswalk.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_AgentConsumableDataValueRoutingLedger.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_OperatorActionMatrix.report.json"
+        ],
+        "DATA1_refs": [
+          "docs/master_plan/generated/PR168_DATA1_FinalSummary.report.json",
+          "docs/master_plan/generated/PR168_DATA1_PR168_GFP2R_DataReadyFormulaUniverse.report.json",
+          "docs/master_plan/generated/PR168_DATA1_PR168_RP2_FirstReplayPaperRecomputeBatch.report.json",
+          "docs/master_plan/generated/PR168_DATA1_PR168_RANK2_FirstEvidenceRankingBatch.report.json",
+          "docs/master_plan/generated/PR168_DATA1_QuantumForwardCoefficientFeatureSurface.report.json",
+          "docs/master_plan/generated/PR168_DATA1_NormalizedMarketDataFeatureRegistry.report.json"
+        ],
+        "authority_class": "PR168_GFP2R_CANDIDATE_ONLY_NON_PROOF",
+        "candidate_only_flag": true,
+        "compute_eligibility_row_id": "compute_eligibility_00004",
+        "compute_lane": "NO_COMPUTE_ROUTE",
+        "computed_from_refs": [],
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "replay_paper_agent",
+          "ranking_scoring_agent",
+          "risk_tca_capacity_agent",
+          "dashboard_operator_agent"
+        ],
+        "data_provenance_refs": [],
+        "downstream_consumers": [
+          "replay_paper_agent",
+          "ranking_scoring_agent",
+          "risk_tca_capacity_agent",
+          "dashboard_operator_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-RP2",
+          "PR168-RANK2",
+          "PR165-B",
+          "PR167",
+          "PR162E-Q",
+          "PR166-Q",
+          "PR166-QB",
+          "PR166-QC",
+          "DATA1B"
+        ],
+        "duplicate_suppressed_flag": false,
+        "exact_candidate_compute_eligible_flag": false,
+        "formula_refs": [],
+        "formula_units_valid_flag": true,
+        "formula_variant_id": "gfp2r_formula_variant_00004",
+        "formula_variant_refs_if_available": [
+          "gfp2r_formula_variant_00004"
+        ],
+        "live_authority_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "mapping_row_id": "mapping_repair_00011",
+        "missing_formula_inputs": [
+          "spread"
+        ],
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "numeric_evidence_refs": [],
+        "order_authority_created_flag": false,
+        "owning_agent": "formula_execution_agent",
+        "private_state_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "proof_authority_class": "REPAIR_ONLY_NOT_PROOF",
+        "provisional_compute_eligible_flag": false,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "repair_route_if_gap": null,
+        "row_shard_refs_if_any": [],
+        "source_truth_acceptance_created_flag": false,
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_gfp2r"
+        ],
+        "upstream_input_refs": [
+          "gfp2r_formula_variant_00004",
+          "mapping_repair_00011"
+        ],
+        "upstream_refs": [
+          "gfp2r_formula_variant_00004",
+          "mapping_repair_00011"
+        ],
+        "validator_refs": [
+          "tools/pr168_gfp2r_validator.py",
+          "tools/validate_pr168_gfp2r_data1a_gated_candidate_recompute.py"
+        ]
+      },
+      {
+        "DATA1A_refs": [
+          "docs/master_plan/generated/PR168_DATA1A_FinalSummary.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_InputDiscovery.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_FetchInventoryAudit.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_DataProductIntegrityLedger.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_QKUUnblockDeltaAudit.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_DataQualityCoverageAudit.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_HistoricalFullBookTruthLedger.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_GFP2RReadinessDecision.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_GFP2RAllowedDataFamilyContract.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_QKUFormulaDataRequirementBridge.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_QKUComputabilityRouteLedger.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_FormulaInputCoverageMatrix.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_DataQualitySeverityActionQueue.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_RP2RANK2BatchReadinessAudit.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_QuantumForwardUsabilityAudit.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_AlphaCaptureReadinessMatrix.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_NegativeToPositiveRecoveryReadinessQueue.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_AgentRoutingAndNoOrphanProof.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_DAGUpstreamDownstreamOrchestration.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_EveryValueUpstreamDownstreamCrosswalk.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_AgentConsumableDataValueRoutingLedger.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_OperatorActionMatrix.report.json"
+        ],
+        "DATA1_refs": [
+          "docs/master_plan/generated/PR168_DATA1_FinalSummary.report.json",
+          "docs/master_plan/generated/PR168_DATA1_PR168_GFP2R_DataReadyFormulaUniverse.report.json",
+          "docs/master_plan/generated/PR168_DATA1_PR168_RP2_FirstReplayPaperRecomputeBatch.report.json",
+          "docs/master_plan/generated/PR168_DATA1_PR168_RANK2_FirstEvidenceRankingBatch.report.json",
+          "docs/master_plan/generated/PR168_DATA1_QuantumForwardCoefficientFeatureSurface.report.json",
+          "docs/master_plan/generated/PR168_DATA1_NormalizedMarketDataFeatureRegistry.report.json"
+        ],
+        "authority_class": "PR168_GFP2R_CANDIDATE_ONLY_NON_PROOF",
+        "candidate_only_flag": true,
+        "compute_eligibility_row_id": "compute_eligibility_00005",
+        "compute_lane": "NO_COMPUTE_ROUTE",
+        "computed_from_refs": [],
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "replay_paper_agent",
+          "ranking_scoring_agent",
+          "risk_tca_capacity_agent",
+          "dashboard_operator_agent"
+        ],
+        "data_provenance_refs": [],
+        "downstream_consumers": [
+          "replay_paper_agent",
+          "ranking_scoring_agent",
+          "risk_tca_capacity_agent",
+          "dashboard_operator_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-RP2",
+          "PR168-RANK2",
+          "PR165-B",
+          "PR167",
+          "PR162E-Q",
+          "PR166-Q",
+          "PR166-QB",
+          "PR166-QC",
+          "DATA1B"
+        ],
+        "duplicate_suppressed_flag": false,
+        "exact_candidate_compute_eligible_flag": false,
+        "formula_refs": [],
+        "formula_units_valid_flag": false,
+        "formula_variant_id": "gfp2r_formula_variant_00005",
+        "formula_variant_refs_if_available": [
+          "gfp2r_formula_variant_00005"
+        ],
+        "live_authority_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "mapping_row_id": "mapping_repair_00011",
+        "missing_formula_inputs": [
+          "orderbook_levels"
+        ],
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "numeric_evidence_refs": [],
+        "order_authority_created_flag": false,
+        "owning_agent": "formula_execution_agent",
+        "private_state_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "proof_authority_class": "REPAIR_ONLY_NOT_PROOF",
+        "provisional_compute_eligible_flag": false,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "repair_route_if_gap": null,
+        "row_shard_refs_if_any": [],
+        "source_truth_acceptance_created_flag": false,
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_gfp2r"
+        ],
+        "upstream_input_refs": [
+          "gfp2r_formula_variant_00005",
+          "mapping_repair_00011"
+        ],
+        "upstream_refs": [
+          "gfp2r_formula_variant_00005",
+          "mapping_repair_00011"
+        ],
+        "validator_refs": [
+          "tools/pr168_gfp2r_validator.py",
+          "tools/validate_pr168_gfp2r_data1a_gated_candidate_recompute.py"
+        ]
+      },
+      {
+        "DATA1A_refs": [
+          "docs/master_plan/generated/PR168_DATA1A_FinalSummary.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_InputDiscovery.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_FetchInventoryAudit.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_DataProductIntegrityLedger.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_QKUUnblockDeltaAudit.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_DataQualityCoverageAudit.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_HistoricalFullBookTruthLedger.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_GFP2RReadinessDecision.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_GFP2RAllowedDataFamilyContract.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_QKUFormulaDataRequirementBridge.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_QKUComputabilityRouteLedger.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_FormulaInputCoverageMatrix.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_DataQualitySeverityActionQueue.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_RP2RANK2BatchReadinessAudit.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_QuantumForwardUsabilityAudit.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_AlphaCaptureReadinessMatrix.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_NegativeToPositiveRecoveryReadinessQueue.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_AgentRoutingAndNoOrphanProof.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_DAGUpstreamDownstreamOrchestration.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_EveryValueUpstreamDownstreamCrosswalk.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_AgentConsumableDataValueRoutingLedger.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_OperatorActionMatrix.report.json"
+        ],
+        "DATA1_refs": [
+          "docs/master_plan/generated/PR168_DATA1_FinalSummary.report.json",
+          "docs/master_plan/generated/PR168_DATA1_PR168_GFP2R_DataReadyFormulaUniverse.report.json",
+          "docs/master_plan/generated/PR168_DATA1_PR168_RP2_FirstReplayPaperRecomputeBatch.report.json",
+          "docs/master_plan/generated/PR168_DATA1_PR168_RANK2_FirstEvidenceRankingBatch.report.json",
+          "docs/master_plan/generated/PR168_DATA1_QuantumForwardCoefficientFeatureSurface.report.json",
+          "docs/master_plan/generated/PR168_DATA1_NormalizedMarketDataFeatureRegistry.report.json"
+        ],
+        "authority_class": "PR168_GFP2R_CANDIDATE_ONLY_NON_PROOF",
+        "candidate_only_flag": true,
+        "compute_eligibility_row_id": "compute_eligibility_00006",
+        "compute_lane": "NO_COMPUTE_ROUTE",
+        "computed_from_refs": [],
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "replay_paper_agent",
+          "ranking_scoring_agent",
+          "risk_tca_capacity_agent",
+          "dashboard_operator_agent"
+        ],
+        "data_provenance_refs": [],
+        "downstream_consumers": [
+          "replay_paper_agent",
+          "ranking_scoring_agent",
+          "risk_tca_capacity_agent",
+          "dashboard_operator_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-RP2",
+          "PR168-RANK2",
+          "PR165-B",
+          "PR167",
+          "PR162E-Q",
+          "PR166-Q",
+          "PR166-QB",
+          "PR166-QC",
+          "DATA1B"
+        ],
+        "duplicate_suppressed_flag": false,
+        "exact_candidate_compute_eligible_flag": false,
+        "formula_refs": [],
+        "formula_units_valid_flag": false,
+        "formula_variant_id": "gfp2r_formula_variant_00006",
+        "formula_variant_refs_if_available": [
+          "gfp2r_formula_variant_00006"
+        ],
+        "live_authority_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "mapping_row_id": "mapping_repair_00011",
+        "missing_formula_inputs": [
+          "orderbook_levels"
+        ],
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "numeric_evidence_refs": [],
+        "order_authority_created_flag": false,
+        "owning_agent": "formula_execution_agent",
+        "private_state_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "proof_authority_class": "REPAIR_ONLY_NOT_PROOF",
+        "provisional_compute_eligible_flag": false,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "repair_route_if_gap": null,
+        "row_shard_refs_if_any": [],
+        "source_truth_acceptance_created_flag": false,
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_gfp2r"
+        ],
+        "upstream_input_refs": [
+          "gfp2r_formula_variant_00006",
+          "mapping_repair_00011"
+        ],
+        "upstream_refs": [
+          "gfp2r_formula_variant_00006",
+          "mapping_repair_00011"
+        ],
+        "validator_refs": [
+          "tools/pr168_gfp2r_validator.py",
+          "tools/validate_pr168_gfp2r_data1a_gated_candidate_recompute.py"
+        ]
+      },
+      {
+        "DATA1A_refs": [
+          "docs/master_plan/generated/PR168_DATA1A_FinalSummary.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_InputDiscovery.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_FetchInventoryAudit.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_DataProductIntegrityLedger.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_QKUUnblockDeltaAudit.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_DataQualityCoverageAudit.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_HistoricalFullBookTruthLedger.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_GFP2RReadinessDecision.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_GFP2RAllowedDataFamilyContract.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_QKUFormulaDataRequirementBridge.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_QKUComputabilityRouteLedger.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_FormulaInputCoverageMatrix.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_DataQualitySeverityActionQueue.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_RP2RANK2BatchReadinessAudit.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_QuantumForwardUsabilityAudit.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_AlphaCaptureReadinessMatrix.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_NegativeToPositiveRecoveryReadinessQueue.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_AgentRoutingAndNoOrphanProof.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_DAGUpstreamDownstreamOrchestration.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_EveryValueUpstreamDownstreamCrosswalk.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_AgentConsumableDataValueRoutingLedger.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_OperatorActionMatrix.report.json"
+        ],
+        "DATA1_refs": [
+          "docs/master_plan/generated/PR168_DATA1_FinalSummary.report.json",
+          "docs/master_plan/generated/PR168_DATA1_PR168_GFP2R_DataReadyFormulaUniverse.report.json",
+          "docs/master_plan/generated/PR168_DATA1_PR168_RP2_FirstReplayPaperRecomputeBatch.report.json",
+          "docs/master_plan/generated/PR168_DATA1_PR168_RANK2_FirstEvidenceRankingBatch.report.json",
+          "docs/master_plan/generated/PR168_DATA1_QuantumForwardCoefficientFeatureSurface.report.json",
+          "docs/master_plan/generated/PR168_DATA1_NormalizedMarketDataFeatureRegistry.report.json"
+        ],
+        "authority_class": "PR168_GFP2R_CANDIDATE_ONLY_NON_PROOF",
+        "candidate_only_flag": true,
+        "compute_eligibility_row_id": "compute_eligibility_00007",
+        "compute_lane": "NO_COMPUTE_ROUTE",
+        "computed_from_refs": [],
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "replay_paper_agent",
+          "ranking_scoring_agent",
+          "risk_tca_capacity_agent",
+          "dashboard_operator_agent"
+        ],
+        "data_provenance_refs": [],
+        "downstream_consumers": [
+          "replay_paper_agent",
+          "ranking_scoring_agent",
+          "risk_tca_capacity_agent",
+          "dashboard_operator_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-RP2",
+          "PR168-RANK2",
+          "PR165-B",
+          "PR167",
+          "PR162E-Q",
+          "PR166-Q",
+          "PR166-QB",
+          "PR166-QC",
+          "DATA1B"
+        ],
+        "duplicate_suppressed_flag": false,
+        "exact_candidate_compute_eligible_flag": false,
+        "formula_refs": [],
+        "formula_units_valid_flag": false,
+        "formula_variant_id": "gfp2r_formula_variant_00007",
+        "formula_variant_refs_if_available": [
+          "gfp2r_formula_variant_00007"
+        ],
+        "live_authority_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "mapping_row_id": "mapping_repair_00011",
+        "missing_formula_inputs": [],
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "numeric_evidence_refs": [],
+        "order_authority_created_flag": false,
+        "owning_agent": "formula_execution_agent",
+        "private_state_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "proof_authority_class": "REPAIR_ONLY_NOT_PROOF",
+        "provisional_compute_eligible_flag": false,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "repair_route_if_gap": null,
+        "row_shard_refs_if_any": [],
+        "source_truth_acceptance_created_flag": false,
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_gfp2r"
+        ],
+        "upstream_input_refs": [
+          "gfp2r_formula_variant_00007",
+          "mapping_repair_00011"
+        ],
+        "upstream_refs": [
+          "gfp2r_formula_variant_00007",
+          "mapping_repair_00011"
+        ],
+        "validator_refs": [
+          "tools/pr168_gfp2r_validator.py",
+          "tools/validate_pr168_gfp2r_data1a_gated_candidate_recompute.py"
+        ]
+      },
+      {
+        "DATA1A_refs": [
+          "docs/master_plan/generated/PR168_DATA1A_FinalSummary.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_InputDiscovery.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_FetchInventoryAudit.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_DataProductIntegrityLedger.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_QKUUnblockDeltaAudit.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_DataQualityCoverageAudit.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_HistoricalFullBookTruthLedger.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_GFP2RReadinessDecision.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_GFP2RAllowedDataFamilyContract.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_QKUFormulaDataRequirementBridge.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_QKUComputabilityRouteLedger.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_FormulaInputCoverageMatrix.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_DataQualitySeverityActionQueue.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_RP2RANK2BatchReadinessAudit.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_QuantumForwardUsabilityAudit.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_AlphaCaptureReadinessMatrix.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_NegativeToPositiveRecoveryReadinessQueue.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_AgentRoutingAndNoOrphanProof.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_DAGUpstreamDownstreamOrchestration.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_EveryValueUpstreamDownstreamCrosswalk.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_AgentConsumableDataValueRoutingLedger.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_OperatorActionMatrix.report.json"
+        ],
+        "DATA1_refs": [
+          "docs/master_plan/generated/PR168_DATA1_FinalSummary.report.json",
+          "docs/master_plan/generated/PR168_DATA1_PR168_GFP2R_DataReadyFormulaUniverse.report.json",
+          "docs/master_plan/generated/PR168_DATA1_PR168_RP2_FirstReplayPaperRecomputeBatch.report.json",
+          "docs/master_plan/generated/PR168_DATA1_PR168_RANK2_FirstEvidenceRankingBatch.report.json",
+          "docs/master_plan/generated/PR168_DATA1_QuantumForwardCoefficientFeatureSurface.report.json",
+          "docs/master_plan/generated/PR168_DATA1_NormalizedMarketDataFeatureRegistry.report.json"
+        ],
+        "authority_class": "PR168_GFP2R_CANDIDATE_ONLY_NON_PROOF",
+        "candidate_only_flag": true,
+        "compute_eligibility_row_id": "compute_eligibility_00008",
+        "compute_lane": "NO_COMPUTE_ROUTE",
+        "computed_from_refs": [],
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "replay_paper_agent",
+          "ranking_scoring_agent",
+          "risk_tca_capacity_agent",
+          "dashboard_operator_agent"
+        ],
+        "data_provenance_refs": [],
+        "downstream_consumers": [
+          "replay_paper_agent",
+          "ranking_scoring_agent",
+          "risk_tca_capacity_agent",
+          "dashboard_operator_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-RP2",
+          "PR168-RANK2",
+          "PR165-B",
+          "PR167",
+          "PR162E-Q",
+          "PR166-Q",
+          "PR166-QB",
+          "PR166-QC",
+          "DATA1B"
+        ],
+        "duplicate_suppressed_flag": false,
+        "exact_candidate_compute_eligible_flag": false,
+        "formula_refs": [],
+        "formula_units_valid_flag": true,
+        "formula_variant_id": "gfp2r_formula_variant_00008",
+        "formula_variant_refs_if_available": [
+          "gfp2r_formula_variant_00008"
+        ],
+        "live_authority_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "mapping_row_id": "mapping_repair_00011",
+        "missing_formula_inputs": [
+          "spread"
+        ],
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "numeric_evidence_refs": [],
+        "order_authority_created_flag": false,
+        "owning_agent": "formula_execution_agent",
+        "private_state_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "proof_authority_class": "REPAIR_ONLY_NOT_PROOF",
+        "provisional_compute_eligible_flag": false,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "repair_route_if_gap": null,
+        "row_shard_refs_if_any": [],
+        "source_truth_acceptance_created_flag": false,
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_gfp2r"
+        ],
+        "upstream_input_refs": [
+          "gfp2r_formula_variant_00008",
+          "mapping_repair_00011"
+        ],
+        "upstream_refs": [
+          "gfp2r_formula_variant_00008",
+          "mapping_repair_00011"
+        ],
+        "validator_refs": [
+          "tools/pr168_gfp2r_validator.py",
+          "tools/validate_pr168_gfp2r_data1a_gated_candidate_recompute.py"
+        ]
+      },
+      {
+        "DATA1A_refs": [
+          "docs/master_plan/generated/PR168_DATA1A_FinalSummary.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_InputDiscovery.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_FetchInventoryAudit.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_DataProductIntegrityLedger.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_QKUUnblockDeltaAudit.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_DataQualityCoverageAudit.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_HistoricalFullBookTruthLedger.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_GFP2RReadinessDecision.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_GFP2RAllowedDataFamilyContract.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_QKUFormulaDataRequirementBridge.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_QKUComputabilityRouteLedger.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_FormulaInputCoverageMatrix.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_DataQualitySeverityActionQueue.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_RP2RANK2BatchReadinessAudit.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_QuantumForwardUsabilityAudit.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_AlphaCaptureReadinessMatrix.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_NegativeToPositiveRecoveryReadinessQueue.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_AgentRoutingAndNoOrphanProof.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_DAGUpstreamDownstreamOrchestration.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_EveryValueUpstreamDownstreamCrosswalk.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_AgentConsumableDataValueRoutingLedger.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_OperatorActionMatrix.report.json"
+        ],
+        "DATA1_refs": [
+          "docs/master_plan/generated/PR168_DATA1_FinalSummary.report.json",
+          "docs/master_plan/generated/PR168_DATA1_PR168_GFP2R_DataReadyFormulaUniverse.report.json",
+          "docs/master_plan/generated/PR168_DATA1_PR168_RP2_FirstReplayPaperRecomputeBatch.report.json",
+          "docs/master_plan/generated/PR168_DATA1_PR168_RANK2_FirstEvidenceRankingBatch.report.json",
+          "docs/master_plan/generated/PR168_DATA1_QuantumForwardCoefficientFeatureSurface.report.json",
+          "docs/master_plan/generated/PR168_DATA1_NormalizedMarketDataFeatureRegistry.report.json"
+        ],
+        "authority_class": "PR168_GFP2R_CANDIDATE_ONLY_NON_PROOF",
+        "candidate_only_flag": true,
+        "compute_eligibility_row_id": "compute_eligibility_00009",
+        "compute_lane": "NO_COMPUTE_ROUTE",
+        "computed_from_refs": [],
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "replay_paper_agent",
+          "ranking_scoring_agent",
+          "risk_tca_capacity_agent",
+          "dashboard_operator_agent"
+        ],
+        "data_provenance_refs": [],
+        "downstream_consumers": [
+          "replay_paper_agent",
+          "ranking_scoring_agent",
+          "risk_tca_capacity_agent",
+          "dashboard_operator_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-RP2",
+          "PR168-RANK2",
+          "PR165-B",
+          "PR167",
+          "PR162E-Q",
+          "PR166-Q",
+          "PR166-QB",
+          "PR166-QC",
+          "DATA1B"
+        ],
+        "duplicate_suppressed_flag": false,
+        "exact_candidate_compute_eligible_flag": false,
+        "formula_refs": [],
+        "formula_units_valid_flag": true,
+        "formula_variant_id": "gfp2r_formula_variant_00009",
+        "formula_variant_refs_if_available": [
+          "gfp2r_formula_variant_00009"
+        ],
+        "live_authority_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "mapping_row_id": "mapping_repair_00011",
+        "missing_formula_inputs": [
+          "price_history"
+        ],
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "numeric_evidence_refs": [],
+        "order_authority_created_flag": false,
+        "owning_agent": "formula_execution_agent",
+        "private_state_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "proof_authority_class": "REPAIR_ONLY_NOT_PROOF",
+        "provisional_compute_eligible_flag": false,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "repair_route_if_gap": null,
+        "row_shard_refs_if_any": [],
+        "source_truth_acceptance_created_flag": false,
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_gfp2r"
+        ],
+        "upstream_input_refs": [
+          "gfp2r_formula_variant_00009",
+          "mapping_repair_00011"
+        ],
+        "upstream_refs": [
+          "gfp2r_formula_variant_00009",
+          "mapping_repair_00011"
+        ],
+        "validator_refs": [
+          "tools/pr168_gfp2r_validator.py",
+          "tools/validate_pr168_gfp2r_data1a_gated_candidate_recompute.py"
+        ]
+      },
+      {
+        "DATA1A_refs": [
+          "docs/master_plan/generated/PR168_DATA1A_FinalSummary.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_InputDiscovery.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_FetchInventoryAudit.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_DataProductIntegrityLedger.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_QKUUnblockDeltaAudit.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_DataQualityCoverageAudit.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_HistoricalFullBookTruthLedger.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_GFP2RReadinessDecision.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_GFP2RAllowedDataFamilyContract.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_QKUFormulaDataRequirementBridge.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_QKUComputabilityRouteLedger.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_FormulaInputCoverageMatrix.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_DataQualitySeverityActionQueue.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_RP2RANK2BatchReadinessAudit.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_QuantumForwardUsabilityAudit.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_AlphaCaptureReadinessMatrix.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_NegativeToPositiveRecoveryReadinessQueue.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_AgentRoutingAndNoOrphanProof.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_DAGUpstreamDownstreamOrchestration.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_EveryValueUpstreamDownstreamCrosswalk.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_AgentConsumableDataValueRoutingLedger.report.json",
+          "docs/master_plan/generated/PR168_DATA1A_OperatorActionMatrix.report.json"
+        ],
+        "DATA1_refs": [
+          "docs/master_plan/generated/PR168_DATA1_FinalSummary.report.json",
+          "docs/master_plan/generated/PR168_DATA1_PR168_GFP2R_DataReadyFormulaUniverse.report.json",
+          "docs/master_plan/generated/PR168_DATA1_PR168_RP2_FirstReplayPaperRecomputeBatch.report.json",
+          "docs/master_plan/generated/PR168_DATA1_PR168_RANK2_FirstEvidenceRankingBatch.report.json",
+          "docs/master_plan/generated/PR168_DATA1_QuantumForwardCoefficientFeatureSurface.report.json",
+          "docs/master_plan/generated/PR168_DATA1_NormalizedMarketDataFeatureRegistry.report.json"
+        ],
+        "authority_class": "PR168_GFP2R_CANDIDATE_ONLY_NON_PROOF",
+        "candidate_only_flag": true,
+        "compute_eligibility_row_id": "compute_eligibility_00010",
+        "compute_lane": "NO_COMPUTE_ROUTE",
+        "computed_from_refs": [],
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "replay_paper_agent",
+          "ranking_scoring_agent",
+          "risk_tca_capacity_agent",
+          "dashboard_operator_agent"
+        ],
+        "data_provenance_refs": [],
+        "downstream_consumers": [
+          "replay_paper_agent",
+          "ranking_scoring_agent",
+          "risk_tca_capacity_agent",
+          "dashboard_operator_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-RP2",
+          "PR168-RANK2",
+          "PR165-B",
+          "PR167",
+          "PR162E-Q",
+          "PR166-Q",
+          "PR166-QB",
+          "PR166-QC",
+          "DATA1B"
+        ],
+        "duplicate_suppressed_flag": false,
+        "exact_candidate_compute_eligible_flag": false,
+        "formula_refs": [],
+        "formula_units_valid_flag": true,
+        "formula_variant_id": "gfp2r_formula_variant_00010",
+        "formula_variant_refs_if_available": [
+          "gfp2r_formula_variant_00010"
+        ],
+        "live_authority_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "mapping_row_id": "mapping_repair_00011",
+        "missing_formula_inputs": [
+          "price_history"
+        ],
+        "no_orphan_status": "NO_ORPHAN_ROUTED",
+        "numeric_evidence_refs": [],
+        "order_authority_created_flag": false,
+        "owning_agent": "formula_execution_agent",
+        "private_state_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "proof_authority_class": "REPAIR_ONLY_NOT_PROOF",
+        "provisional_compute_eligible_flag": false,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "repair_route_if_gap": null,
+        "row_shard_refs_if_any": [],
+        "source_truth_acceptance_created_flag": false,
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "test_refs": [
+          "tests/pr168_gfp2r"
+        ],
+        "upstream_input_refs": [
+          "gfp2r_formula_variant_00010",
+          "mapping_repair_00011"
+        ],
+        "upstream_refs": [
+          "gfp2r_formula_variant_00010",
+          "mapping_repair_00011"
+        ],
+        "validator_refs": [
+          "tools/pr168_gfp2r_validator.py",
+          "tools/validate_pr168_gfp2r_data1a_gated_candidate_recompute.py"
+        ]
+      }
+    ],
+    "summary": {
+      "compute_lane_counts": {
+        "PROVISIONAL_DATA_CONSUMER": 33
+      },
+      "row_count": 33
+    }
+  },
+  "repair_route_if_gap": null,
+  "report_id": "PR168_GFP2R_ProvisionalDataConsumerComputeEligibility",
+  "report_version": "PR168-GFP2R-v3.0",
+  "row_shard_refs_if_any": [
+    "docs/master_plan/generated/pr168_gfp2r_candidate_compute/compute_eligibility_rows.jsonl",
+    "docs/master_plan/generated/pr168_gfp2r_candidate_compute/compute_eligibility_rows.manifest.json"
+  ],
+  "source_truth_acceptance_created_flag": false,
+  "terminal_by_nature_flag": false,
+  "terminal_reason_code": null,
+  "test_refs": [
+    "tests/pr168_gfp2r"
+  ],
+  "upstream_input_refs": [],
+  "upstream_refs": [],
+  "validator_refs": [
+    "tools/pr168_gfp2r_validator.py",
+    "tools/validate_pr168_gfp2r_data1a_gated_candidate_recompute.py"
+  ]
+}
