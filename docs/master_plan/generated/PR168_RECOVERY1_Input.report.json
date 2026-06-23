@@ -633,7 +633,7 @@
       "source_rows_mapped_to_retest_rows_count": 5,
       "source_truth_acceptance_created_count": 0,
       "stack_repair_attempt_count": 35,
-      "staged_patch_intended_file_count": 368,
+      "staged_patch_intended_file_count": 375,
       "sum_after_TCA_total_candidate": 15.405995,
       "sum_after_execution_adjusted_edge": 1.269605,
       "sum_after_fill_adjusted_expected_pnl": -4.66139254,

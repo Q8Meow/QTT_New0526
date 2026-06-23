@@ -21,6 +21,7 @@ from tools.pr168_recovery1_config import (
     report_path,
     route_defaults,
 )
+from tools.pr168_recovery1_boundary_audit import build_boundary_audits
 from tools.pr168_recovery1_input_discovery import Recovery1Inputs, load_inputs
 from tools.pr168_recovery1_productivity_audit import build_productivity_payloads
 from tools.pr168_recovery1_report_writer import write_report, write_shard
@@ -1569,6 +1570,7 @@ class Recovery1Builder:
             }
             for report_id, filename in REPORT_ALIASES.items()
         ]
+        boundary_audits = build_boundary_audits(self.shards)
         coverage = _online_coverage(self.shards["online_verify"])
         search_passes = [
             {"search_pass_id": "PASS_1_BROAD_DISCOVERY", "status": "COMMITTED_RANK3_RP3_SOURCE_REUSE", "source_rows": len(self.shards["online_verify"])},
@@ -1814,6 +1816,21 @@ class Recovery1Builder:
                 {"rows": self.shards["merge_readiness_decision"], "summary": self.productivity_metrics},
                 "agent",
                 ["merge_readiness_decision"],
+            ),
+            "PR168_RECOVERY1_ComputabilityAudit": (
+                boundary_audits["computability"],
+                "retest",
+                ["before_after_delta", "improved_candidate", "expression_repair", "source_provenance"],
+            ),
+            "PR168_RECOVERY1_AgentConsumableFormulaAudit": (
+                boundary_audits["agent_consumable_formula"],
+                "repair",
+                ["expression_repair", "source_provenance", "candidate_usability_gain"],
+            ),
+            "PR168_RECOVERY1_LaunchReadinessBoundary": (
+                boundary_audits["launch_readiness"],
+                "handoff",
+                ["improved_candidate", "downstream_handoff", "merge_readiness_decision"],
             ),
             "PR168_RECOVERY1_FinalSummary": (self.summary, "agent", list(ROW_SHARDS)),
         }

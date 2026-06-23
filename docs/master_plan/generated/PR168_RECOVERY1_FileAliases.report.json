@@ -997,6 +997,24 @@
       },
       {
         "alias_state": "OK",
+        "logical_report_id": "PR168_RECOVERY1_ComputabilityAudit",
+        "path_length": 109,
+        "physical_filename": "PR168_RECOVERY1_ComputabilityAudit.report.json"
+      },
+      {
+        "alias_state": "OK",
+        "logical_report_id": "PR168_RECOVERY1_AgentConsumableFormulaAudit",
+        "path_length": 118,
+        "physical_filename": "PR168_RECOVERY1_AgentConsumableFormulaAudit.report.json"
+      },
+      {
+        "alias_state": "OK",
+        "logical_report_id": "PR168_RECOVERY1_LaunchReadinessBoundary",
+        "path_length": 114,
+        "physical_filename": "PR168_RECOVERY1_LaunchReadinessBoundary.report.json"
+      },
+      {
+        "alias_state": "OK",
         "logical_report_id": "PR168_RECOVERY1_FinalSummary",
         "path_length": 103,
         "physical_filename": "PR168_RECOVERY1_FinalSummary.report.json"

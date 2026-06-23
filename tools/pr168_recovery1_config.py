@@ -274,6 +274,9 @@ REPORT_NAMES = [
     "PR168_RECOVERY1_CandidateUsabilityGains.report.json",
     "PR168_RECOVERY1_SourceFormulaDataRepairResult.report.json",
     "PR168_RECOVERY1_MergeReadinessDecision.report.json",
+    "PR168_RECOVERY1_ComputabilityAudit.report.json",
+    "PR168_RECOVERY1_AgentConsumableFormulaAudit.report.json",
+    "PR168_RECOVERY1_LaunchReadinessBoundary.report.json",
     "PR168_RECOVERY1_FinalSummary.report.json",
 ]
 

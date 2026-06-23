@@ -54,6 +54,7 @@ def run_validation() -> dict[str, Any]:
     _assert_quantum(rows)
     _assert_handoff_memory(rows)
     _assert_productivity(reports, rows)
+    _assert_boundary_audits(reports)
     _assert_online(reports, rows)
     _assert_validation_runtime(reports, rows)
     _assert_path_alias(reports)
@@ -66,6 +67,7 @@ def run_validation() -> dict[str, Any]:
         "online_verify_source_count": final["online_verify_source_count"],
         "productivity_assessment": final.get("productivity_assessment"),
         "merge_productivity_pass_flag": final.get("merge_productivity_pass_flag"),
+        "launch_readiness_state": reports["PR168_RECOVERY1_LaunchReadinessBoundary"]["records"].get("launch_readiness_state"),
     }
 
 
@@ -430,6 +432,53 @@ def _assert_productivity(reports: Mapping[str, dict[str, Any]], rows: Mapping[st
     _require(merge_rows[0]["do_not_merge_flag"] is False, "merge row blocks productive merge")
     if not improved_rows:
         _require(rows["zero_improvement_root_cause"], "zero-improvement root cause missing when no improved rows exist")
+
+
+def _assert_boundary_audits(reports: Mapping[str, dict[str, Any]]) -> None:
+    computability = reports["PR168_RECOVERY1_ComputabilityAudit"]["records"]
+    agent = reports["PR168_RECOVERY1_AgentConsumableFormulaAudit"]["records"]
+    launch = reports["PR168_RECOVERY1_LaunchReadinessBoundary"]["records"]
+    for label, records in (
+        ("computability", computability),
+        ("agent consumability", agent),
+        ("launch readiness", launch),
+    ):
+        _require(records["improved_non_proof_retest_stack_row_count"] == 35, f"{label} wrong improved stack count")
+        _require(records["improved_rows_are_repaired_retested_stack_rows_flag"] is True, f"{label} not stack-row classified")
+        _require(records["improved_rows_are_new_formula_rows_flag"] is False, f"{label} misclassifies stack rows as formulas")
+        _require(records["new_formula_claim_proven_flag"] is False, f"{label} claims new formulas")
+        _require(records["new_formula_count"] == 0, f"{label} created new formula count")
+        _require(records["new_canonical_formula_id_count"] == 0, f"{label} created canonical formula IDs")
+        _require(records["expression_repair_count"] == 7, f"{label} wrong expression repair count")
+        _require(records["expression_repairs_are_existing_formula_repairs_flag"] is True, f"{label} expression repairs not existing-formula")
+        _require(records["source_provenance_candidate_usable_count"] == 5, f"{label} wrong source candidate count")
+        _require(records["source_provenance_rows_are_source_truth_flag"] is False, f"{label} treats sources as truth")
+        _require(records["still_no_trade_dominated_improved_row_count"] == 32, f"{label} wrong no-trade-dominated count")
+        _require(records["recovered_candidate_count"] == 3, f"{label} wrong recovered candidate count")
+        _require(records["replay_paper_agent_consumable_row_count"] == 35, f"{label} wrong agent-consumable count")
+        _require(records["live_trading_ready_row_count"] == 0, f"{label} claims live-ready rows")
+        _require(records["live_trading_ready_flag"] is False, f"{label} live-ready flag set")
+        _require(records["order_authority_created_count"] == 0, f"{label} order authority created")
+        _require(records["champion_allowed_count"] == 0, f"{label} champion authority created")
+        _require(records["live_candidate_allowed_count"] == 0, f"{label} live candidate authority created")
+        _require(records["source_truth_acceptance_created_count"] == 0, f"{label} source truth created")
+        _require(records["candidate_only_flag"] is True, f"{label} not candidate-only")
+        _require(records["accepted_truth_flag"] is False, f"{label} accepted truth")
+        _require(records["not_real_profit_proof_flag"] is True, f"{label} claims profit proof")
+        _require(records["no_live_order_or_champion_authority_created_flag"] is True, f"{label} boundary flag missing")
+    _require(
+        computability["computability_audit_state"] == "COMPUTABLE_REPAIRED_RETESTED_STACK_ROWS_NON_PROOF",
+        "unexpected computability state",
+    )
+    _require(
+        agent["agent_consumability_state"] == "REPLAY_PAPER_AGENT_CONSUMABLE_NON_PROOF_ONLY",
+        "unexpected agent consumability state",
+    )
+    _require(
+        launch["launch_readiness_state"] == "NOT_LIVE_READY_REPLAY_PAPER_ONLY",
+        "unexpected launch readiness state",
+    )
+    _require(launch["future_live_gate_required_flag"] is True, "launch boundary missing future gate")
 
 
 def _assert_online(reports: Mapping[str, dict[str, Any]], rows: Mapping[str, list[dict[str, Any]]]) -> None:
