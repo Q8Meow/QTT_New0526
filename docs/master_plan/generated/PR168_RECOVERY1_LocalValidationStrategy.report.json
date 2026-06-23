@@ -167,7 +167,7 @@
         "manual_edit_allowed_flag": false,
         "market_instantiation_refs": [],
         "mitigation_plan": "register Recovery1 scope, currentize PR152, and restore unrelated generated side effects before commit",
-        "new_test_file_count": 54,
+        "new_test_file_count": 61,
         "new_validation_scope_added_flag": true,
         "new_validator_tool_count": 1,
         "no_orphan_status": "NO_ORPHAN",

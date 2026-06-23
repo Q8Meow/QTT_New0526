@@ -53,6 +53,7 @@ def run_validation() -> dict[str, Any]:
     _assert_probability(rows)
     _assert_quantum(rows)
     _assert_handoff_memory(rows)
+    _assert_productivity(reports, rows)
     _assert_online(reports, rows)
     _assert_validation_runtime(reports, rows)
     _assert_path_alias(reports)
@@ -63,6 +64,8 @@ def run_validation() -> dict[str, Any]:
         "work_item_count": final["work_item_count"],
         "retest_before_after_count": final["retest_before_after_count"],
         "online_verify_source_count": final["online_verify_source_count"],
+        "productivity_assessment": final.get("productivity_assessment"),
+        "merge_productivity_pass_flag": final.get("merge_productivity_pass_flag"),
     }
 
 
@@ -347,6 +350,86 @@ def _assert_handoff_memory(rows: Mapping[str, list[dict[str, Any]]]) -> None:
         _require(row["before_after_refs"], "memory row missing before/after refs")
     for row in rows["operator_action"]:
         _require(row["operator_action_type"], "operator row missing action")
+
+
+def _assert_productivity(reports: Mapping[str, dict[str, Any]], rows: Mapping[str, list[dict[str, Any]]]) -> None:
+    audit = reports["PR168_RECOVERY1_ProductivityAudit"]["records"]
+    final = reports["PR168_RECOVERY1_FinalSummary"]["records"]
+    delta_rows = rows["before_after_delta"]
+    improved_rows = rows["improved_candidate"]
+    batch_rows = rows["rp5_ready_improvement_batch"]
+    merge_rows = rows["merge_readiness_decision"]
+
+    _require(rows["productivity_audit"], "productivity audit shard empty")
+    _require(delta_rows, "before/after delta shard empty")
+    _require(audit.get("productivity_assessment") != "REPORT_COUNT_ONLY", "productivity audit used report counts only")
+    _require(audit.get("retest_before_after_count") == len(delta_rows), "productivity delta count mismatch")
+    _require(audit.get("actual_numeric_improvement_flag") is True, "productivity audit found no numeric improvement")
+    _require(audit.get("actual_usability_improvement_flag") is True, "productivity audit found no usability improvement")
+    _require(audit.get("actual_downstream_batch_strengthened_flag") is True, "RP5/RANK4/QOPT1 batch not strengthened")
+    _require(audit.get("infrastructure_only_flag") is False, "Recovery1 is still infrastructure-only")
+    _require(audit.get("merge_productivity_pass_flag") is True, "merge productivity gate did not pass")
+    _require(audit.get("authority_flags_all_false") is True, "productivity audit authority flag failure")
+
+    for field in (
+        "sum_delta_net_expected_pnl_candidate",
+        "sum_delta_fill_adjusted_expected_pnl",
+        "sum_delta_execution_adjusted_edge",
+        "sum_delta_no_trade_margin_candidate",
+    ):
+        _require(_is_number(audit[field]), f"productivity audit missing numeric {field}")
+        _require(audit[field] > 0, f"productivity audit {field} not positive")
+        _require(audit[field] == final[field], f"FinalSummary mismatch for {field}")
+    _require(_is_number(audit["sum_delta_TCA_total_candidate"]), "productivity audit missing TCA delta")
+    _require(audit["sum_delta_TCA_total_candidate"] < 0, "TCA total did not improve as lower cost")
+
+    for row in delta_rows:
+        _require(row["actual_numeric_improvement_flag"] is True, "delta row does not show numeric improvement")
+        _require(row["invalid_cost_fill_probability_assumption_flag"] is False, "delta row has invalid assumption")
+        _require(row["fill_defaulted_to_one_flag"] is False, "delta row defaulted fill to one")
+        _require(row["cost_defaulted_to_zero_flag"] is False, "delta row defaulted cost to zero")
+        _require(row["market_implied_probability_as_alpha_flag"] is False, "delta row used market-implied probability as alpha")
+        _require(row["historical_full_book_assumed_flag"] is False, "delta row assumed historical full book")
+        expected = round(row["after_net_expected_pnl_candidate"] - row["before_net_expected_pnl_candidate"], 8)
+        _require(abs(expected - row["delta_net_expected_pnl_candidate"]) < 1e-8, "productivity net delta mismatch")
+    _require(len(improved_rows) == audit["retest_improved_count"], "improved candidate count mismatch")
+    for row in improved_rows:
+        _require(row["not_real_profit_proof_flag"] is True, "improved row claims profit proof")
+        _require(row["real_positive_flag"] is False, "improved row claims real positive")
+        _require(row["champion_allowed_flag"] is False, "improved row allows champion")
+        _require(row["live_candidate_allowed_flag"] is False, "improved row allows live candidate")
+        _require(row["delta_net_expected_pnl_candidate"] > 0, "improved row has non-positive net delta")
+        _require(row["changed_input_refs"], "improved row missing changed input refs")
+        _require(row["unchanged_input_refs"], "improved row missing unchanged input refs")
+
+    _require(batch_rows, "RP5 ready improvement batch empty")
+    _require(batch_rows[0]["batch_strengthened_flag"] is True, "RP5 batch not marked strengthened")
+    _require(batch_rows[0]["improved_candidate_refs"], "RP5 batch missing improved candidate refs")
+    handoff = next(row for row in rows["downstream_handoff"] if row["handoff_family"] == "RP5_RANK4_QOPT1")
+    _require(handoff["ready_batch_state"] == "IMPROVED_EVIDENCE_BATCH_READY_NON_PROOF", "RP5 handoff not strengthened")
+    _require(handoff["improved_candidate_refs"], "RP5 handoff missing improved candidate refs")
+
+    _require(rows["candidate_usability_gain"], "candidate usability gains empty")
+    _require(
+        any(row.get("gain_family") == "EXPRESSION_FORMULA" and row.get("candidate_usable_flag") for row in rows["candidate_usability_gain"]),
+        "no expression usability gain",
+    )
+    _require(
+        any(row.get("gain_family") == "SOURCE_PROVENANCE" and row.get("candidate_usable_flag") for row in rows["candidate_usability_gain"]),
+        "no source usability gain",
+    )
+    _require(
+        any(row.get("gain_family") == "DATA_PRECISION" and row.get("candidate_usable_flag") for row in rows["candidate_usability_gain"]),
+        "no data usability gain",
+    )
+
+    _require(merge_rows, "merge readiness decision missing")
+    merge_state = merge_rows[0]["merge_readiness_state"]
+    _require(merge_state == "RECOVERY1_PRODUCTIVE_READY_TO_MERGE", f"unexpected merge readiness state {merge_state}")
+    _require(merge_rows[0]["github_pr_ci_green_required_flag"] is True, "merge row does not require GitHub CI")
+    _require(merge_rows[0]["do_not_merge_flag"] is False, "merge row blocks productive merge")
+    if not improved_rows:
+        _require(rows["zero_improvement_root_cause"], "zero-improvement root cause missing when no improved rows exist")
 
 
 def _assert_online(reports: Mapping[str, dict[str, Any]], rows: Mapping[str, list[dict[str, Any]]]) -> None:

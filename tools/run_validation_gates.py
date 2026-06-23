@@ -466,6 +466,12 @@ PYTEST_SHARD_COMMANDS: dict[str, tuple[PytestShardCommand, ...]] = {
             runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
             historical_runtime_seconds=20.0,
         ),
+        PytestShardCommand(
+            paths=("tests/pr168_recovery1",),
+            reason="PR168-RECOVERY1 RANK3-guided repair and retest workbench tests",
+            runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
+            historical_runtime_seconds=20.0,
+        ),
     ),
     "pytest-shard-3": (
         PytestShardCommand(

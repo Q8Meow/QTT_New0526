@@ -1,0 +1,333 @@
+{
+  "DATA1A_refs": [
+    "PR168_DATA1A_FinalSummary.report.json"
+  ],
+  "DATA1_refs": [
+    "PR168_DATA1_FinalSummary.report.json"
+  ],
+  "GFP2R_refs": [
+    "PR168_GFP2R_FinalSummary.report.json"
+  ],
+  "MAP3_refs": [
+    "PR168_MAP3_FinalSummary.report.json"
+  ],
+  "PR162E_Q_refs_if_any": [
+    "PR162E-Q"
+  ],
+  "PR162E_refs_if_any": [
+    "PR162E"
+  ],
+  "PR165_memory_refs_if_any": [
+    "PR165-B",
+    "PR165-C",
+    "PR165-D2"
+  ],
+  "PR166_Q_refs_if_any": [
+    "PR166-Q/QB/QC"
+  ],
+  "PR167_refs_if_any": [
+    "PR167"
+  ],
+  "RANK3_refs": [
+    "PR168_RANK3_FinalSummary.report.json",
+    "docs/master_plan/generated/rank3"
+  ],
+  "RP2_refs_if_any": [],
+  "RP3_refs": [
+    "PR168_RP3_FinalSummary.report.json",
+    "docs/master_plan/generated/rp3"
+  ],
+  "TCA_refs": [],
+  "accepted_truth_flag": false,
+  "alias_registry_ref": "docs/master_plan/generated/PR168_RECOVERY1_FileAliases.report.json",
+  "authority_class": "RECOVERY1_REPLAY_PAPER_REPAIR_CANDIDATE_NON_PROOF",
+  "candidate_only_flag": true,
+  "capacity_refs": [],
+  "cash_access_created_flag": false,
+  "champion_allowed_flag": false,
+  "computed_from_refs": [],
+  "connector_binding_created_flag": false,
+  "connector_semantic_binding_created_flag": false,
+  "consumer_agents": [
+    "RP5_RANK4_QOPT1_agent",
+    "DATA1B_repair_agent",
+    "MAP4_formula_repair_agent"
+  ],
+  "created_at_utc": "2026-06-23T00:00:00Z",
+  "created_by_tool": "tools/build_pr168_recovery1.py",
+  "data_provenance_refs": [],
+  "downstream_consumers": [
+    "RP5_RANK4_QOPT1_agent",
+    "DATA1B_repair_agent",
+    "MAP4_formula_repair_agent"
+  ],
+  "downstream_pr_refs": [
+    "PR168-RP5-RANK4-QOPT1",
+    "PR168-DATA1B",
+    "PR168-MAP4",
+    "PR168-SOURCE-PROVENANCE",
+    "PR165-B",
+    "PR165-C",
+    "PR162E-Q",
+    "FUTURE-PAPER-LOOP",
+    "DASHBOARD-OPERATOR"
+  ],
+  "fill_refs": [],
+  "formula_refs": [],
+  "latency_refs": [],
+  "live_authority_created_flag": false,
+  "live_candidate_allowed_flag": false,
+  "live_order_authority_flag": false,
+  "live_order_receipt_created_flag": false,
+  "logical_report_id": "PR168_RECOVERY1_RP5ReadyImprovementBatch",
+  "manual_edit_allowed_flag": false,
+  "market_instantiation_refs": [],
+  "no_orphan_status": "NO_ORPHAN",
+  "no_trade_refs": [],
+  "numeric_evidence_refs": [],
+  "order_authority_created_flag": false,
+  "owning_agent": "recovery1_handoff_agent",
+  "paper_refs": [],
+  "path_audit_ref": "docs/master_plan/generated/PR168_RECOVERY1_PathAudit.report.json",
+  "physical_filename": "PR168_RECOVERY1_RP5ReadyImprovementBatch.report.json",
+  "private_cash_receipt_created_flag": false,
+  "private_state_access_created_flag": false,
+  "private_state_or_cash_access_created_flag": false,
+  "profit_evidence_created_flag": false,
+  "profit_evidence_flag": false,
+  "qtt_sha_or_atomicrows_hash_authority_flag": false,
+  "quantum_advantage_claim_flag": false,
+  "quantum_backend_execution_flag": false,
+  "quantum_refs": [],
+  "records": {
+    "rows": [
+      {
+        "DATA1A_refs": [],
+        "DATA1_refs": [],
+        "GFP2R_refs": [],
+        "MAP3_refs": [],
+        "PR162E_Q_refs_if_any": [],
+        "PR162E_refs_if_any": [],
+        "PR165_memory_refs_if_any": [],
+        "PR166_Q_refs_if_any": [],
+        "PR167_refs_if_any": [],
+        "RANK3_refs": [
+          "PR168_RANK3_FinalSummary.report.json"
+        ],
+        "RP2_refs_if_any": [],
+        "RP3_refs": [
+          "PR168_RP3_FinalSummary.report.json"
+        ],
+        "TCA_refs": [],
+        "accepted_truth_flag": false,
+        "authority_class": "RECOVERY1_REPLAY_PAPER_REPAIR_CANDIDATE_NON_PROOF",
+        "batch_strengthened_flag": true,
+        "candidate_only_flag": true,
+        "capacity_refs": [],
+        "cash_access_created_flag": false,
+        "champion_allowed_flag": false,
+        "computed_from_refs": [],
+        "connector_binding_created_flag": false,
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "RP5_RANK4_QOPT1_agent",
+          "DATA1B_repair_agent",
+          "MAP4_formula_repair_agent"
+        ],
+        "data_provenance_refs": [],
+        "downstream_consumers": [
+          "RP5_RANK4_QOPT1_agent",
+          "DATA1B_repair_agent",
+          "MAP4_formula_repair_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-RP5-RANK4-QOPT1",
+          "PR168-DATA1B",
+          "PR168-MAP4",
+          "PR168-SOURCE-PROVENANCE",
+          "PR165-B",
+          "PR165-C",
+          "PR162E-Q",
+          "FUTURE-PAPER-LOOP",
+          "DASHBOARD-OPERATOR"
+        ],
+        "fill_refs": [],
+        "formula_refs": [],
+        "handoff_ref": "recovery1_handoff_rp5_rank4_qopt1_00001",
+        "improved_candidate_refs": [
+          "recovery1_improved_candidate_00001",
+          "recovery1_improved_candidate_00002",
+          "recovery1_improved_candidate_00003",
+          "recovery1_improved_candidate_00004",
+          "recovery1_improved_candidate_00005",
+          "recovery1_improved_candidate_00006",
+          "recovery1_improved_candidate_00007",
+          "recovery1_improved_candidate_00008",
+          "recovery1_improved_candidate_00009",
+          "recovery1_improved_candidate_00010",
+          "recovery1_improved_candidate_00011",
+          "recovery1_improved_candidate_00012",
+          "recovery1_improved_candidate_00013",
+          "recovery1_improved_candidate_00014",
+          "recovery1_improved_candidate_00015",
+          "recovery1_improved_candidate_00016",
+          "recovery1_improved_candidate_00017",
+          "recovery1_improved_candidate_00018",
+          "recovery1_improved_candidate_00019",
+          "recovery1_improved_candidate_00020",
+          "recovery1_improved_candidate_00021",
+          "recovery1_improved_candidate_00022",
+          "recovery1_improved_candidate_00023",
+          "recovery1_improved_candidate_00024",
+          "recovery1_improved_candidate_00025",
+          "recovery1_improved_candidate_00026",
+          "recovery1_improved_candidate_00027",
+          "recovery1_improved_candidate_00028",
+          "recovery1_improved_candidate_00029",
+          "recovery1_improved_candidate_00030",
+          "recovery1_improved_candidate_00031",
+          "recovery1_improved_candidate_00032",
+          "recovery1_improved_candidate_00033",
+          "recovery1_improved_candidate_00034",
+          "recovery1_improved_candidate_00035"
+        ],
+        "latency_refs": [],
+        "live_authority_created_flag": false,
+        "live_candidate_allowed_flag": false,
+        "live_order_authority_flag": false,
+        "live_order_receipt_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "market_instantiation_refs": [],
+        "no_orphan_status": "NO_ORPHAN",
+        "no_trade_refs": [],
+        "not_real_profit_proof_flag": true,
+        "numeric_evidence_refs": [],
+        "order_authority_created_flag": false,
+        "owning_agent": "recovery1_handoff_agent",
+        "paper_refs": [],
+        "private_cash_receipt_created_flag": false,
+        "private_state_access_created_flag": false,
+        "private_state_or_cash_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "profit_evidence_flag": false,
+        "qopt1_handoff_improved_count": 1,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "quantum_refs": [],
+        "recovered_candidate_refs": [
+          "recovery1_improved_candidate_00009",
+          "recovery1_improved_candidate_00012",
+          "recovery1_improved_candidate_00021"
+        ],
+        "recovery1_row_id": "recovery1_rp5_ready_improvement_batch_00001",
+        "repair_route_if_gap": null,
+        "replay_refs": [],
+        "row_shard_refs_if_any": [
+          "docs/master_plan/generated/recovery1/rp5_ready_improvement_batch_rows.jsonl"
+        ],
+        "rp5_rank4_qopt1_handoff_improved_count": 1,
+        "rp5_ready_improvement_batch_row_id": "recovery1_rp5_ready_improvement_batch_00001",
+        "scenario_refs": [],
+        "selection_reason": "Artifact-derived before/after positive deltas are now explicit RP5/RANK4/QOPT1 inputs.",
+        "source_provenance_refs": [],
+        "source_provenance_refs_if_any": [],
+        "source_truth_acceptance_created_flag": false,
+        "stack_refs": [],
+        "stack_refs_if_any": [],
+        "stronger_before_after_evidence_refs": [
+          "recovery1_retest_before_after_00001",
+          "recovery1_retest_before_after_00002",
+          "recovery1_retest_before_after_00003",
+          "recovery1_retest_before_after_00004",
+          "recovery1_retest_before_after_00005",
+          "recovery1_retest_before_after_00006",
+          "recovery1_retest_before_after_00007",
+          "recovery1_retest_before_after_00008",
+          "recovery1_retest_before_after_00009",
+          "recovery1_retest_before_after_00010",
+          "recovery1_retest_before_after_00011",
+          "recovery1_retest_before_after_00012",
+          "recovery1_retest_before_after_00013",
+          "recovery1_retest_before_after_00014",
+          "recovery1_retest_before_after_00015",
+          "recovery1_retest_before_after_00016",
+          "recovery1_retest_before_after_00017",
+          "recovery1_retest_before_after_00018",
+          "recovery1_retest_before_after_00019",
+          "recovery1_retest_before_after_00020",
+          "recovery1_retest_before_after_00021",
+          "recovery1_retest_before_after_00022",
+          "recovery1_retest_before_after_00023",
+          "recovery1_retest_before_after_00024",
+          "recovery1_retest_before_after_00025",
+          "recovery1_retest_before_after_00026",
+          "recovery1_retest_before_after_00027",
+          "recovery1_retest_before_after_00028",
+          "recovery1_retest_before_after_00029",
+          "recovery1_retest_before_after_00030",
+          "recovery1_retest_before_after_00031",
+          "recovery1_retest_before_after_00032",
+          "recovery1_retest_before_after_00033",
+          "recovery1_retest_before_after_00034",
+          "recovery1_retest_before_after_00035"
+        ],
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "terminal_reason_if_terminal": null,
+        "test_refs": [
+          "tests/pr168_recovery1"
+        ],
+        "upstream_input_refs": [
+          "PR168_RECOVERY1_RetestBeforeAfter.report.json",
+          "PR168_RECOVERY1_ExpressionRepair.report.json",
+          "PR168_RECOVERY1_SourceProvenanceCandidateUse.report.json",
+          "PR168_RECOVERY1_DataPrecision.report.json",
+          "PR168_RECOVERY1_ToRP5Rank4QOPT1.report.json"
+        ],
+        "upstream_refs": [
+          "PR168_RECOVERY1_RetestBeforeAfter.report.json",
+          "PR168_RECOVERY1_ExpressionRepair.report.json",
+          "PR168_RECOVERY1_SourceProvenanceCandidateUse.report.json",
+          "PR168_RECOVERY1_DataPrecision.report.json",
+          "PR168_RECOVERY1_ToRP5Rank4QOPT1.report.json"
+        ],
+        "validator_refs": [
+          "tools/validate_pr168_recovery1.py",
+          "tools/pr168_recovery1_validator.py"
+        ],
+        "work_item_ref": "recovery1_wi_governance_00001"
+      }
+    ]
+  },
+  "repair_route_if_gap": null,
+  "replay_refs": [],
+  "report_version": "PR168-RECOVERY1-v1.0",
+  "row_shard_refs_if_any": [
+    "docs/master_plan/generated/recovery1/rp5_ready_improvement_batch_rows.jsonl"
+  ],
+  "scenario_refs": [],
+  "source_provenance_refs": [],
+  "source_provenance_refs_if_any": [],
+  "source_truth_acceptance_created_flag": false,
+  "stack_refs": [],
+  "stack_refs_if_any": [],
+  "terminal_by_nature_flag": false,
+  "terminal_reason_code": null,
+  "terminal_reason_if_terminal": null,
+  "test_refs": [
+    "tests/pr168_recovery1"
+  ],
+  "upstream_input_refs": [
+    "PR168_RANK3_FinalSummary.report.json",
+    "PR168_RP3_FinalSummary.report.json"
+  ],
+  "upstream_refs": [
+    "PR168_RANK3_FinalSummary.report.json",
+    "PR168_RP3_FinalSummary.report.json"
+  ],
+  "validator_refs": [
+    "tools/validate_pr168_recovery1.py",
+    "tools/pr168_recovery1_validator.py"
+  ]
+}

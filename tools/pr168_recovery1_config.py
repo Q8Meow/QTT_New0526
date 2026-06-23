@@ -265,6 +265,15 @@ REPORT_NAMES = [
     "PR168_RECOVERY1_CurrentizationNeedAudit.report.json",
     "PR168_RECOVERY1_FileAliases.report.json",
     "PR168_RECOVERY1_PathAudit.report.json",
+    "PR168_RECOVERY1_ProductivityAudit.report.json",
+    "PR168_RECOVERY1_ImprovedCandidateLedger.report.json",
+    "PR168_RECOVERY1_BeforeAfterNumericDeltas.report.json",
+    "PR168_RECOVERY1_ZeroImprovementRootCause.report.json",
+    "PR168_RECOVERY1_RP5ReadyImprovementBatch.report.json",
+    "PR168_RECOVERY1_RepairImpactScore.report.json",
+    "PR168_RECOVERY1_CandidateUsabilityGains.report.json",
+    "PR168_RECOVERY1_SourceFormulaDataRepairResult.report.json",
+    "PR168_RECOVERY1_MergeReadinessDecision.report.json",
     "PR168_RECOVERY1_FinalSummary.report.json",
 ]
 
@@ -312,6 +321,15 @@ ROW_SHARDS: "OrderedDict[str, str]" = OrderedDict(
         ("online_verify", "online_verify_rows.jsonl"),
         ("validation_runtime", "validation_runtime_rows.jsonl"),
         ("every_value", "every_value_rows.jsonl"),
+        ("productivity_audit", "productivity_audit_rows.jsonl"),
+        ("improved_candidate", "improved_candidate_rows.jsonl"),
+        ("before_after_delta", "before_after_delta_rows.jsonl"),
+        ("zero_improvement_root_cause", "zero_improvement_root_cause_rows.jsonl"),
+        ("rp5_ready_improvement_batch", "rp5_ready_improvement_batch_rows.jsonl"),
+        ("repair_impact_score", "repair_impact_score_rows.jsonl"),
+        ("candidate_usability_gain", "candidate_usability_gain_rows.jsonl"),
+        ("source_formula_data_repair_result", "source_formula_data_repair_result_rows.jsonl"),
+        ("merge_readiness_decision", "merge_readiness_decision_rows.jsonl"),
     ]
 )
 

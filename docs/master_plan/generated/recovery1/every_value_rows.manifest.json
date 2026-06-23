@@ -72,7 +72,7 @@
   "quantum_refs": [],
   "repair_route_if_gap": null,
   "replay_refs": [],
-  "row_count": 39,
+  "row_count": 48,
   "row_refs": [
     "recovery1_every_value_00001",
     "recovery1_every_value_00002",
@@ -112,7 +112,16 @@
     "recovery1_every_value_00036",
     "recovery1_every_value_00037",
     "recovery1_every_value_00038",
-    "recovery1_every_value_00039"
+    "recovery1_every_value_00039",
+    "recovery1_every_value_00040",
+    "recovery1_every_value_00041",
+    "recovery1_every_value_00042",
+    "recovery1_every_value_00043",
+    "recovery1_every_value_00044",
+    "recovery1_every_value_00045",
+    "recovery1_every_value_00046",
+    "recovery1_every_value_00047",
+    "recovery1_every_value_00048"
   ],
   "row_shard_refs_if_any": [
     "docs/master_plan/generated/recovery1/every_value_rows.jsonl"

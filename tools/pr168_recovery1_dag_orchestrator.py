@@ -22,6 +22,7 @@ from tools.pr168_recovery1_config import (
     route_defaults,
 )
 from tools.pr168_recovery1_input_discovery import Recovery1Inputs, load_inputs
+from tools.pr168_recovery1_productivity_audit import build_productivity_payloads
 from tools.pr168_recovery1_report_writer import write_report, write_shard
 
 
@@ -38,6 +39,7 @@ class Recovery1Builder:
         self.shards: dict[str, list[dict[str, Any]]] = {}
         self.manifests: dict[str, dict[str, Any]] = {}
         self.summary: dict[str, Any] = {}
+        self.productivity_metrics: dict[str, Any] = {}
         self.replay_by_formula = _by_key(self.inputs.rp3_rows.get("replay", []), "formula_id")
         self.paper_by_formula = _by_key(self.inputs.rp3_rows.get("paper", []), "formula_id")
         self.tca_by_formula = _by_key(self.inputs.rp3_rows.get("tca", []), "formula_id")
@@ -56,6 +58,7 @@ class Recovery1Builder:
         self._build_stack_repair_and_retest_rows()
         self._build_quantum_memory_and_handoff_rows()
         self._build_online_and_validation_rows()
+        self._build_productivity_rows()
         self._build_every_value_rows()
         self._write_shards()
         self._build_summary()
@@ -1328,6 +1331,86 @@ class Recovery1Builder:
             )
         ]
 
+    def _build_productivity_rows(self) -> None:
+        payloads = build_productivity_payloads(self.shards)
+        metrics = payloads["metrics"]
+        self.productivity_metrics = dict(metrics)
+        self._strengthen_downstream_handoffs(metrics, payloads["rp5_ready_improvement_batch_rows"])
+        productivity_sources = [
+            "PR168_RECOVERY1_RetestBeforeAfter.report.json",
+            "PR168_RECOVERY1_ExpressionRepair.report.json",
+            "PR168_RECOVERY1_SourceProvenanceCandidateUse.report.json",
+            "PR168_RECOVERY1_DataPrecision.report.json",
+            "PR168_RECOVERY1_ToRP5Rank4QOPT1.report.json",
+        ]
+        shard_specs = {
+            "productivity_audit": ("agent", payloads["productivity_audit_rows"]),
+            "improved_candidate": ("handoff", payloads["improved_candidate_rows"]),
+            "before_after_delta": ("retest", payloads["before_after_delta_rows"]),
+            "zero_improvement_root_cause": ("operator", payloads["zero_improvement_root_cause_rows"]),
+            "rp5_ready_improvement_batch": ("handoff", payloads["rp5_ready_improvement_batch_rows"]),
+            "repair_impact_score": ("risk", payloads["repair_impact_score_rows"]),
+            "candidate_usability_gain": ("repair", payloads["candidate_usability_gain_rows"]),
+            "source_formula_data_repair_result": ("repair", payloads["source_formula_data_repair_result_rows"]),
+            "merge_readiness_decision": ("agent", payloads["merge_readiness_decision_rows"]),
+        }
+        for key, (route_key, rows) in shard_specs.items():
+            wrapped_rows = []
+            for row in rows:
+                formula_refs = _as_list(row.get("formula_id")) + _as_list(row.get("formula_refs"))
+                stack_refs = _as_list(row.get("stack_id"))
+                row_id = (
+                    row.get("productivity_audit_row_id")
+                    or row.get("improved_candidate_row_id")
+                    or row.get("productivity_delta_row_id")
+                    or row.get("root_cause_id")
+                    or row.get("rp5_ready_improvement_batch_row_id")
+                    or row.get("repair_impact_score_row_id")
+                    or row.get("candidate_usability_gain_row_id")
+                    or row.get("source_formula_data_repair_result_row_id")
+                    or row.get("merge_readiness_decision_row_id")
+                )
+                wrapped_rows.append(
+                    self._row(
+                        {
+                            "recovery1_row_id": row_id,
+                            "work_item_ref": "recovery1_wi_governance_00001",
+                            **row,
+                        },
+                        route_key,
+                        upstream_refs=productivity_sources,
+                        rank3_refs=["PR168_RANK3_FinalSummary.report.json"],
+                        rp3_refs=["PR168_RP3_FinalSummary.report.json"],
+                        formula_refs=formula_refs,
+                        stack_refs=stack_refs,
+                        numeric_evidence_refs=_as_list(row.get("retest_row_ref") or row.get("after_row_ref")),
+                        row_shard_refs=[f"docs/master_plan/generated/recovery1/{ROW_SHARDS[key]}"],
+                    )
+                )
+            self.shards[key] = wrapped_rows
+
+    def _strengthen_downstream_handoffs(
+        self,
+        metrics: Mapping[str, Any],
+        rp5_batch_rows: list[Mapping[str, Any]],
+    ) -> None:
+        improved_refs = []
+        evidence_refs = []
+        if rp5_batch_rows:
+            improved_refs = list(rp5_batch_rows[0].get("improved_candidate_refs", []))
+            evidence_refs = list(rp5_batch_rows[0].get("stronger_before_after_evidence_refs", []))
+        for row in self.shards.get("downstream_handoff", []):
+            if row.get("handoff_family") == "RP5_RANK4_QOPT1":
+                row["ready_batch_state"] = "IMPROVED_EVIDENCE_BATCH_READY_NON_PROOF"
+                row["improved_candidate_refs"] = improved_refs
+                row["stronger_before_after_evidence_refs"] = evidence_refs
+                row["rp5_rank4_qopt1_handoff_improved_count"] = metrics["rp5_rank4_qopt1_handoff_improved_count"]
+                row["actual_downstream_batch_strengthened_flag"] = metrics["actual_downstream_batch_strengthened_flag"]
+            elif row.get("handoff_family") == "PR162E_Q":
+                row["qopt1_handoff_improved_count"] = metrics["qopt1_handoff_improved_count"]
+                row["stronger_before_after_evidence_refs"] = evidence_refs
+                row["actual_downstream_batch_strengthened_flag"] = metrics["actual_downstream_batch_strengthened_flag"]
+
     def _build_every_value_rows(self) -> None:
         rows = []
         for index, (key, shard_rows) in enumerate(sorted(self.shards.items()), start=1):
@@ -1448,6 +1531,8 @@ class Recovery1Builder:
             "path_audit_failure_count": sum(1 for row in path_rows if row["path_audit_state"] == "HARD_FAIL"),
             "path_audit_warning_count": sum(1 for row in path_rows if row["path_audit_state"] == "WARN"),
         }
+        if self.productivity_metrics:
+            self.summary.update(self.productivity_metrics)
 
     def _write_reports(self) -> None:
         shard_refs = [generated_ref(Path("docs/master_plan/generated/recovery1") / filename) for filename in ROW_SHARDS.values()]
@@ -1666,6 +1751,70 @@ class Recovery1Builder:
             "PR168_RECOVERY1_CurrentizationNeedAudit": (shared_currentization, "agent", ["validation_runtime"]),
             "PR168_RECOVERY1_FileAliases": ({"aliases": aliases}, "agent", ["every_value"]),
             "PR168_RECOVERY1_PathAudit": ({"rows": path_rows}, "agent", ["every_value"]),
+            "PR168_RECOVERY1_ProductivityAudit": (
+                {
+                    **self.productivity_metrics,
+                    "upstream_refs": [
+                        "PR168_RECOVERY1_RetestBeforeAfter.report.json",
+                        "PR168_RECOVERY1_ExpressionRepair.report.json",
+                        "PR168_RECOVERY1_SourceProvenanceCandidateUse.report.json",
+                        "PR168_RECOVERY1_DataPrecision.report.json",
+                        "PR168_RECOVERY1_ToRP5Rank4QOPT1.report.json",
+                    ],
+                    "downstream_refs": [
+                        "PR168_RECOVERY1_ImprovedCandidateLedger.report.json",
+                        "PR168_RECOVERY1_RP5ReadyImprovementBatch.report.json",
+                        "PR168_RECOVERY1_MergeReadinessDecision.report.json",
+                        "PR168-RP5-RANK4-QOPT1",
+                    ],
+                },
+                "agent",
+                ["productivity_audit"],
+            ),
+            "PR168_RECOVERY1_ImprovedCandidateLedger": (
+                {"rows": self.shards["improved_candidate"]},
+                "handoff",
+                ["improved_candidate"],
+            ),
+            "PR168_RECOVERY1_BeforeAfterNumericDeltas": (
+                {"rows": self.shards["before_after_delta"], "summary": self.productivity_metrics},
+                "retest",
+                ["before_after_delta"],
+            ),
+            "PR168_RECOVERY1_ZeroImprovementRootCause": (
+                {
+                    "rows": self.shards["zero_improvement_root_cause"],
+                    "root_cause_required_flag": self.productivity_metrics.get("infrastructure_only_flag", False),
+                    "zero_productivity_root_cause": self.productivity_metrics.get("zero_productivity_root_cause"),
+                },
+                "operator",
+                ["zero_improvement_root_cause"],
+            ),
+            "PR168_RECOVERY1_RP5ReadyImprovementBatch": (
+                {"rows": self.shards["rp5_ready_improvement_batch"]},
+                "handoff",
+                ["rp5_ready_improvement_batch"],
+            ),
+            "PR168_RECOVERY1_RepairImpactScore": (
+                {"rows": self.shards["repair_impact_score"]},
+                "risk",
+                ["repair_impact_score"],
+            ),
+            "PR168_RECOVERY1_CandidateUsabilityGains": (
+                {"rows": self.shards["candidate_usability_gain"]},
+                "repair",
+                ["candidate_usability_gain"],
+            ),
+            "PR168_RECOVERY1_SourceFormulaDataRepairResult": (
+                {"rows": self.shards["source_formula_data_repair_result"]},
+                "repair",
+                ["source_formula_data_repair_result"],
+            ),
+            "PR168_RECOVERY1_MergeReadinessDecision": (
+                {"rows": self.shards["merge_readiness_decision"], "summary": self.productivity_metrics},
+                "agent",
+                ["merge_readiness_decision"],
+            ),
             "PR168_RECOVERY1_FinalSummary": (self.summary, "agent", list(ROW_SHARDS)),
         }
         return base

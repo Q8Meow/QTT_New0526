@@ -1503,8 +1503,98 @@
       },
       {
         "hard_fail_physical_path_length": 240,
-        "logical_report_id": "PR168_RECOVERY1_FinalSummary",
+        "logical_report_id": "PR168_RECOVERY1_ProductivityAudit",
         "path_audit_row_id": "recovery1_path_audit_00141",
+        "path_audit_state": "OK",
+        "path_length": 108,
+        "physical_filename": "PR168_RECOVERY1_ProductivityAudit.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_ImprovedCandidateLedger",
+        "path_audit_row_id": "recovery1_path_audit_00142",
+        "path_audit_state": "OK",
+        "path_length": 114,
+        "physical_filename": "PR168_RECOVERY1_ImprovedCandidateLedger.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_BeforeAfterNumericDeltas",
+        "path_audit_row_id": "recovery1_path_audit_00143",
+        "path_audit_state": "OK",
+        "path_length": 115,
+        "physical_filename": "PR168_RECOVERY1_BeforeAfterNumericDeltas.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_ZeroImprovementRootCause",
+        "path_audit_row_id": "recovery1_path_audit_00144",
+        "path_audit_state": "OK",
+        "path_length": 115,
+        "physical_filename": "PR168_RECOVERY1_ZeroImprovementRootCause.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_RP5ReadyImprovementBatch",
+        "path_audit_row_id": "recovery1_path_audit_00145",
+        "path_audit_state": "OK",
+        "path_length": 115,
+        "physical_filename": "PR168_RECOVERY1_RP5ReadyImprovementBatch.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_RepairImpactScore",
+        "path_audit_row_id": "recovery1_path_audit_00146",
+        "path_audit_state": "OK",
+        "path_length": 108,
+        "physical_filename": "PR168_RECOVERY1_RepairImpactScore.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_CandidateUsabilityGains",
+        "path_audit_row_id": "recovery1_path_audit_00147",
+        "path_audit_state": "OK",
+        "path_length": 114,
+        "physical_filename": "PR168_RECOVERY1_CandidateUsabilityGains.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_SourceFormulaDataRepairResult",
+        "path_audit_row_id": "recovery1_path_audit_00148",
+        "path_audit_state": "OK",
+        "path_length": 120,
+        "physical_filename": "PR168_RECOVERY1_SourceFormulaDataRepairResult.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_MergeReadinessDecision",
+        "path_audit_row_id": "recovery1_path_audit_00149",
+        "path_audit_state": "OK",
+        "path_length": 113,
+        "physical_filename": "PR168_RECOVERY1_MergeReadinessDecision.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_FinalSummary",
+        "path_audit_row_id": "recovery1_path_audit_00150",
         "path_audit_state": "OK",
         "path_length": 103,
         "physical_filename": "PR168_RECOVERY1_FinalSummary.report.json",

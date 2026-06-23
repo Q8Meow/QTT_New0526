@@ -943,6 +943,60 @@
       },
       {
         "alias_state": "OK",
+        "logical_report_id": "PR168_RECOVERY1_ProductivityAudit",
+        "path_length": 108,
+        "physical_filename": "PR168_RECOVERY1_ProductivityAudit.report.json"
+      },
+      {
+        "alias_state": "OK",
+        "logical_report_id": "PR168_RECOVERY1_ImprovedCandidateLedger",
+        "path_length": 114,
+        "physical_filename": "PR168_RECOVERY1_ImprovedCandidateLedger.report.json"
+      },
+      {
+        "alias_state": "OK",
+        "logical_report_id": "PR168_RECOVERY1_BeforeAfterNumericDeltas",
+        "path_length": 115,
+        "physical_filename": "PR168_RECOVERY1_BeforeAfterNumericDeltas.report.json"
+      },
+      {
+        "alias_state": "OK",
+        "logical_report_id": "PR168_RECOVERY1_ZeroImprovementRootCause",
+        "path_length": 115,
+        "physical_filename": "PR168_RECOVERY1_ZeroImprovementRootCause.report.json"
+      },
+      {
+        "alias_state": "OK",
+        "logical_report_id": "PR168_RECOVERY1_RP5ReadyImprovementBatch",
+        "path_length": 115,
+        "physical_filename": "PR168_RECOVERY1_RP5ReadyImprovementBatch.report.json"
+      },
+      {
+        "alias_state": "OK",
+        "logical_report_id": "PR168_RECOVERY1_RepairImpactScore",
+        "path_length": 108,
+        "physical_filename": "PR168_RECOVERY1_RepairImpactScore.report.json"
+      },
+      {
+        "alias_state": "OK",
+        "logical_report_id": "PR168_RECOVERY1_CandidateUsabilityGains",
+        "path_length": 114,
+        "physical_filename": "PR168_RECOVERY1_CandidateUsabilityGains.report.json"
+      },
+      {
+        "alias_state": "OK",
+        "logical_report_id": "PR168_RECOVERY1_SourceFormulaDataRepairResult",
+        "path_length": 120,
+        "physical_filename": "PR168_RECOVERY1_SourceFormulaDataRepairResult.report.json"
+      },
+      {
+        "alias_state": "OK",
+        "logical_report_id": "PR168_RECOVERY1_MergeReadinessDecision",
+        "path_length": 113,
+        "physical_filename": "PR168_RECOVERY1_MergeReadinessDecision.report.json"
+      },
+      {
+        "alias_state": "OK",
         "logical_report_id": "PR168_RECOVERY1_FinalSummary",
         "path_length": 103,
         "physical_filename": "PR168_RECOVERY1_FinalSummary.report.json"

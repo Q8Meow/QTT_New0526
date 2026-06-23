@@ -114,7 +114,7 @@
       "tests/tools/test_validation_scope_registry.py",
       "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json"
     ],
-    "intended_patch_file_count": 333,
+    "intended_patch_file_count": 368,
     "status": "intended_scope_materialized_pending_diff_check",
     "unrelated_generated_side_effects_allowed_flag": false
   },
