@@ -1,0 +1,425 @@
+#!/usr/bin/env python3
+"""Central constants for PR168-RECOVERY1 repair/retest artifacts."""
+
+from __future__ import annotations
+
+from collections import OrderedDict
+from pathlib import Path
+from typing import Any
+
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+GENERATED_ROOT = REPO_ROOT / "docs" / "master_plan" / "generated"
+SHARD_ROOT = GENERATED_ROOT / "recovery1"
+
+TOOL_NAME = "tools/build_pr168_recovery1.py"
+VALIDATE_TOOL_NAME = "tools/validate_pr168_recovery1.py"
+REPORT_VERSION = "PR168-RECOVERY1-v1.0"
+CREATED_AT_UTC = "2026-06-23T00:00:00Z"
+BRANCH_NAME = "pr168-recovery1-rank3-guided-repair-retest"
+PR239_MERGE_COMMIT = "5b1112504f805033877cdeda13bff4b29dd0422a"
+LATEST_MAIN_RUN_ID = "27998063221"
+
+PREFERRED_MAX_PATH = 180
+WARN_PATH = 200
+FAIL_PATH = 240
+
+AUTHORITY_CLASS = "RECOVERY1_REPLAY_PAPER_REPAIR_CANDIDATE_NON_PROOF"
+
+AUTHORITY_FALSE_FLAGS = {
+    "manual_edit_allowed_flag": False,
+    "live_authority_created_flag": False,
+    "profit_evidence_created_flag": False,
+    "profit_evidence_flag": False,
+    "source_truth_acceptance_created_flag": False,
+    "connector_semantic_binding_created_flag": False,
+    "connector_binding_created_flag": False,
+    "private_state_access_created_flag": False,
+    "cash_access_created_flag": False,
+    "private_state_or_cash_access_created_flag": False,
+    "order_authority_created_flag": False,
+    "live_order_authority_flag": False,
+    "private_cash_receipt_created_flag": False,
+    "live_order_receipt_created_flag": False,
+    "quantum_backend_execution_flag": False,
+    "quantum_advantage_claim_flag": False,
+    "qtt_sha_or_atomicrows_hash_authority_flag": False,
+    "champion_allowed_flag": False,
+    "live_candidate_allowed_flag": False,
+}
+
+FORBIDDEN_STATE_VALUES = {
+    "REAL_POSITIVE",
+    "REAL_NEGATIVE",
+    "REAL_NO_TRADE_DOMINANT",
+    "CHAMPION",
+    "LIVE_CANDIDATE",
+    "LIVE_READY",
+    "PROFIT_PROOF",
+    "SOURCE_TRUTH_ACCEPTED_BY_RECOVERY1",
+    "CONNECTOR_BOUND_BY_RECOVERY1",
+    "PRIVATE_STATE_CONFIRMED_BY_RECOVERY1",
+    "CASH_ACCESS_CREATED_BY_RECOVERY1",
+    "ORDER_AUTHORITY_CREATED_BY_RECOVERY1",
+    "QUANTUM_BACKEND_EXECUTED_BY_RECOVERY1",
+    "QUANTUM_ADVANTAGE_PROVEN_BY_RECOVERY1",
+    "QTT_SHA_OR_ATOMICROWS_HASH_AUTHORITY",
+}
+
+DOWNSTREAM_PRS = [
+    "PR168-RP5-RANK4-QOPT1",
+    "PR168-DATA1B",
+    "PR168-MAP4",
+    "PR168-SOURCE-PROVENANCE",
+    "PR165-B",
+    "PR165-C",
+    "PR162E-Q",
+    "FUTURE-PAPER-LOOP",
+    "DASHBOARD-OPERATOR",
+]
+
+VALIDATOR_REFS = [VALIDATE_TOOL_NAME, "tools/pr168_recovery1_validator.py"]
+TEST_REFS = ["tests/pr168_recovery1"]
+
+ROUTES = {
+    "input": {
+        "owning_agent": "recovery1_input_consumption_agent",
+        "consumer_agents": ["recovery1_repair_workbench_agent", "governance_validation_agent"],
+    },
+    "repair": {
+        "owning_agent": "recovery1_repair_workbench_agent",
+        "consumer_agents": ["recovery1_retest_agent", "RP5_RANK4_QOPT1_agent", "dashboard_operator_agent"],
+    },
+    "source": {
+        "owning_agent": "recovery1_source_provenance_agent",
+        "consumer_agents": ["recovery1_retest_agent", "RP5_RANK4_QOPT1_agent", "source_provenance_followup_agent"],
+    },
+    "retest": {
+        "owning_agent": "recovery1_retest_agent",
+        "consumer_agents": ["RP5_RANK4_QOPT1_agent", "PR165B_memory_agent", "dashboard_operator_agent"],
+    },
+    "risk": {
+        "owning_agent": "recovery1_model_risk_agent",
+        "consumer_agents": ["recovery1_retest_agent", "RP5_RANK4_QOPT1_agent", "PR165B_memory_agent"],
+    },
+    "quantum": {
+        "owning_agent": "recovery1_quantum_repair_agent",
+        "consumer_agents": ["QOPT1_agent", "PR162E_Q_mapping_agent", "PR166_Q_comparator_agent"],
+    },
+    "memory": {
+        "owning_agent": "PR165B_memory_agent",
+        "consumer_agents": ["PR165C_agent_consumer_agent", "RP5_RANK4_QOPT1_agent", "dashboard_operator_agent"],
+    },
+    "handoff": {
+        "owning_agent": "recovery1_handoff_agent",
+        "consumer_agents": ["RP5_RANK4_QOPT1_agent", "DATA1B_repair_agent", "MAP4_formula_repair_agent"],
+    },
+    "agent": {
+        "owning_agent": "recovery1_agent_router",
+        "consumer_agents": ["governance_validation_agent", "dashboard_operator_agent", "operator_review_agent"],
+    },
+    "operator": {
+        "owning_agent": "dashboard_operator_agent",
+        "consumer_agents": ["operator_review_agent", "recovery1_handoff_agent"],
+    },
+}
+
+REPORT_NAMES = [
+    "PR168_RECOVERY1_Input.report.json",
+    "PR168_RECOVERY1_RANK3Consumption.report.json",
+    "PR168_RECOVERY1_OldRoadmapAbsorption.report.json",
+    "PR168_RECOVERY1_RepairUniverse.report.json",
+    "PR168_RECOVERY1_RepairPriority.report.json",
+    "PR168_RECOVERY1_MissingInputs.report.json",
+    "PR168_RECOVERY1_TriagePriority.report.json",
+    "PR168_RECOVERY1_RepairExpectedValue.report.json",
+    "PR168_RECOVERY1_RetestSamplePlan.report.json",
+    "PR168_RECOVERY1_RepairDedupe.report.json",
+    "PR168_RECOVERY1_LaunchCompressionPlan.report.json",
+    "PR168_RECOVERY1_StateMachine.report.json",
+    "PR168_RECOVERY1_CausalRepairGraph.report.json",
+    "PR168_RECOVERY1_RepairAblation.report.json",
+    "PR168_RECOVERY1_CounterfactualControls.report.json",
+    "PR168_RECOVERY1_OperationalUsefulnessAudit.report.json",
+    "PR168_RECOVERY1_RepairBudget.report.json",
+    "PR168_RECOVERY1_DataPrecision.report.json",
+    "PR168_RECOVERY1_MissingValueRepair.report.json",
+    "PR168_RECOVERY1_CandidateInputFill.report.json",
+    "PR168_RECOVERY1_DataFreshness.report.json",
+    "PR168_RECOVERY1_FillLatencyCapacityInputs.report.json",
+    "PR168_RECOVERY1_CalibrationSampleRepair.report.json",
+    "PR168_RECOVERY1_ProbabilitySourceBinding.report.json",
+    "PR168_RECOVERY1_ProbabilityRoleAudit.report.json",
+    "PR168_RECOVERY1_BreakEvenThresholdRepair.report.json",
+    "PR168_RECOVERY1_FeeSlippageLatencyRepair.report.json",
+    "PR168_RECOVERY1_FillCapacityDepthRepair.report.json",
+    "PR168_RECOVERY1_CalibrationWindowPlan.report.json",
+    "PR168_RECOVERY1_IndependentModelCandidateRoute.report.json",
+    "PR168_RECOVERY1_ExpressionRepair.report.json",
+    "PR168_RECOVERY1_RepairedFormulaContracts.report.json",
+    "PR168_RECOVERY1_RepairedFormulaToPnL.report.json",
+    "PR168_RECOVERY1_RepairedFormulaSafety.report.json",
+    "PR168_RECOVERY1_FormulaInvariantTests.report.json",
+    "PR168_RECOVERY1_ExpressionRepairFailure.report.json",
+    "PR168_RECOVERY1_SourceProvenanceCandidateUse.report.json",
+    "PR168_RECOVERY1_SourceProvenanceResolution.report.json",
+    "PR168_RECOVERY1_SourceInputMapping.report.json",
+    "PR168_RECOVERY1_SourceReliabilityPenalty.report.json",
+    "PR168_RECOVERY1_SourceProvenanceRepair.report.json",
+    "PR168_RECOVERY1_StackRepairFactory.report.json",
+    "PR168_RECOVERY1_NegativeRecovery.report.json",
+    "PR168_RECOVERY1_NoTradeDominatedRepair.report.json",
+    "PR168_RECOVERY1_FragilityRepair.report.json",
+    "PR168_RECOVERY1_RepairVariantGrid.report.json",
+    "PR168_RECOVERY1_CausalStackRepair.report.json",
+    "PR168_RECOVERY1_PortfolioRepairImpact.report.json",
+    "PR168_RECOVERY1_BatchDiversityGain.report.json",
+    "PR168_RECOVERY1_RecoveryAcceptanceGate.report.json",
+    "PR168_RECOVERY1_RepeatedUnresolvedSuppression.report.json",
+    "PR168_RECOVERY1_RetestPlan.report.json",
+    "PR168_RECOVERY1_RetestBeforeAfter.report.json",
+    "PR168_RECOVERY1_ReplayRetest.report.json",
+    "PR168_RECOVERY1_PaperRetest.report.json",
+    "PR168_RECOVERY1_TCAFillLatencyCapacityRetest.report.json",
+    "PR168_RECOVERY1_NoTradeRetest.report.json",
+    "PR168_RECOVERY1_ScenarioRetest.report.json",
+    "PR168_RECOVERY1_AsOfBarrier.report.json",
+    "PR168_RECOVERY1_NoLookahead.report.json",
+    "PR168_RECOVERY1_RetestQualityGate.report.json",
+    "PR168_RECOVERY1_RetestLeakageAudit.report.json",
+    "PR168_RECOVERY1_ExpectedVsRealizedRepair.report.json",
+    "PR168_RECOVERY1_NegativeToRecoveryCausalLoop.report.json",
+    "PR168_RECOVERY1_BeforeAfterCompare.report.json",
+    "PR168_RECOVERY1_ValidVsArtificial.report.json",
+    "PR168_RECOVERY1_RecoveryAttribution.report.json",
+    "PR168_RECOVERY1_RecoveryQuality.report.json",
+    "PR168_RECOVERY1_ModelRiskFDR.report.json",
+    "PR168_RECOVERY1_CalibrationLCB.report.json",
+    "PR168_RECOVERY1_RankReadiness.report.json",
+    "PR168_RECOVERY1_RP5Rank4QOPT1Readiness.report.json",
+    "PR168_RECOVERY1_LaunchUtilityScore.report.json",
+    "PR168_RECOVERY1_PaperLoopReadiness.report.json",
+    "PR168_RECOVERY1_FutureLiveGateReadinessCandidate.report.json",
+    "PR168_RECOVERY1_QRepair.report.json",
+    "PR168_RECOVERY1_QCoefficients.report.json",
+    "PR168_RECOVERY1_QConstraints.report.json",
+    "PR168_RECOVERY1_QFallback.report.json",
+    "PR168_RECOVERY1_QInterpret.report.json",
+    "PR168_RECOVERY1_ToQOPT1.report.json",
+    "PR168_RECOVERY1_QClassicalRepairCompare.report.json",
+    "PR168_RECOVERY1_QRepairPriority.report.json",
+    "PR168_RECOVERY1_QConstraintQuality.report.json",
+    "PR168_RECOVERY1_QPenaltyScalingRepair.report.json",
+    "PR168_RECOVERY1_QInterpretBackCoverage.report.json",
+    "PR168_RECOVERY1_ToPR165B.report.json",
+    "PR168_RECOVERY1_ToPR165C.report.json",
+    "PR168_RECOVERY1_AgentLearningDelta.report.json",
+    "PR168_RECOVERY1_RegimeMemoryUpdate.report.json",
+    "PR168_RECOVERY1_RetestCooldown.report.json",
+    "PR168_RECOVERY1_RepairImpactMemory.report.json",
+    "PR168_RECOVERY1_RepairFailureMemory.report.json",
+    "PR168_RECOVERY1_ToRP5Rank4QOPT1.report.json",
+    "PR168_RECOVERY1_ToDATA1BFollowup.report.json",
+    "PR168_RECOVERY1_ToMAP4Followup.report.json",
+    "PR168_RECOVERY1_ToSourceProvenanceFollowup.report.json",
+    "PR168_RECOVERY1_ToPR162EQ.report.json",
+    "PR168_RECOVERY1_Dashboard.report.json",
+    "PR168_RECOVERY1_Operator.report.json",
+    "PR168_RECOVERY1_AgentDAG.report.json",
+    "PR168_RECOVERY1_EveryValue.report.json",
+    "PR168_RECOVERY1_OnlineVerifyCoverage.report.json",
+    "PR168_RECOVERY1_WebSourceUse.report.json",
+    "PR168_RECOVERY1_EndpointDrift.report.json",
+    "PR168_RECOVERY1_DeepOnlineSearchPlan.report.json",
+    "PR168_RECOVERY1_DeepOnlineSearchCoverage.report.json",
+    "PR168_RECOVERY1_SearchPassLedger.report.json",
+    "PR168_RECOVERY1_SourceContradictionAudit.report.json",
+    "PR168_RECOVERY1_SourceRecencyAudit.report.json",
+    "PR168_RECOVERY1_SourceToRetestMaterialization.report.json",
+    "PR168_RECOVERY1_SourceFormulaInputFill.report.json",
+    "PR168_RECOVERY1_SourceDerivedThresholds.report.json",
+    "PR168_RECOVERY1_SourceRepairIdeaDedupe.report.json",
+    "PR168_RECOVERY1_RepairPortfolioBudget.report.json",
+    "PR168_RECOVERY1_CandidateRepairBatch.report.json",
+    "PR168_RECOVERY1_StackFamilyRetest.report.json",
+    "PR168_RECOVERY1_RepairBatchRetest.report.json",
+    "PR168_RECOVERY1_MarginalRepairUtility.report.json",
+    "PR168_RECOVERY1_RepairCooldown.report.json",
+    "PR168_RECOVERY1_RP5Rank4QOPT1InputPack.report.json",
+    "PR168_RECOVERY1_RepairPortfolioSelection.report.json",
+    "PR168_RECOVERY1_RP5ReadyBatch.report.json",
+    "PR168_RECOVERY1_RANK4FeatureReadyBatch.report.json",
+    "PR168_RECOVERY1_QOPT1ReadyBatch.report.json",
+    "PR168_RECOVERY1_PaperLoopSeedBatch.report.json",
+    "PR168_RECOVERY1_CandidateInputConfidence.report.json",
+    "PR168_RECOVERY1_AssumptionDeltaAudit.report.json",
+    "PR168_RECOVERY1_NoNewInputNoRetest.report.json",
+    "PR168_RECOVERY1_WorkItems.report.json",
+    "PR168_RECOVERY1_SharedCurrentizationPlan.report.json",
+    "PR168_RECOVERY1_ValidationScopeDelta.report.json",
+    "PR168_RECOVERY1_SideEffectCleanupAudit.report.json",
+    "PR168_RECOVERY1_StagedPatchAudit.report.json",
+    "PR168_RECOVERY1_ValidationRuntimeBudget.report.json",
+    "PR168_RECOVERY1_CIShardImpactAudit.report.json",
+    "PR168_RECOVERY1_LocalValidationStrategy.report.json",
+    "PR168_RECOVERY1_CurrentizationNeedAudit.report.json",
+    "PR168_RECOVERY1_FileAliases.report.json",
+    "PR168_RECOVERY1_PathAudit.report.json",
+    "PR168_RECOVERY1_FinalSummary.report.json",
+]
+
+REPORT_ALIASES: "OrderedDict[str, str]" = OrderedDict((name.removesuffix(".report.json"), name) for name in REPORT_NAMES)
+
+ROW_SHARDS: "OrderedDict[str, str]" = OrderedDict(
+    [
+        ("input", "input_rows.jsonl"),
+        ("work_item", "work_item_rows.jsonl"),
+        ("old_roadmap_absorption", "old_roadmap_absorption_rows.jsonl"),
+        ("repair_universe", "repair_universe_rows.jsonl"),
+        ("triage_priority", "triage_priority_rows.jsonl"),
+        ("repair_expected_value", "repair_expected_value_rows.jsonl"),
+        ("retest_sample_plan", "retest_sample_plan_rows.jsonl"),
+        ("repair_dedupe", "repair_dedupe_rows.jsonl"),
+        ("no_new_input_no_retest", "no_new_input_no_retest_rows.jsonl"),
+        ("candidate_input_confidence", "candidate_input_confidence_rows.jsonl"),
+        ("assumption_delta", "assumption_delta_rows.jsonl"),
+        ("data_precision", "data_precision_rows.jsonl"),
+        ("missing_value_repair", "missing_value_repair_rows.jsonl"),
+        ("expression_repair", "expression_repair_rows.jsonl"),
+        ("source_provenance", "source_provenance_rows.jsonl"),
+        ("source_to_retest", "source_to_retest_rows.jsonl"),
+        ("source_formula_input_fill", "source_formula_input_fill_rows.jsonl"),
+        ("stack_repair", "stack_repair_rows.jsonl"),
+        ("repair_portfolio", "repair_portfolio_rows.jsonl"),
+        ("candidate_repair_batch", "candidate_repair_batch_rows.jsonl"),
+        ("stack_family_retest", "stack_family_retest_rows.jsonl"),
+        ("retest_before_after", "retest_before_after_rows.jsonl"),
+        ("replay_retest", "replay_retest_rows.jsonl"),
+        ("paper_retest", "paper_retest_rows.jsonl"),
+        ("tca_fill_capacity_retest", "tca_fill_capacity_retest_rows.jsonl"),
+        ("no_trade_retest", "no_trade_retest_rows.jsonl"),
+        ("scenario_retest", "scenario_retest_rows.jsonl"),
+        ("valid_vs_artificial", "valid_vs_artificial_rows.jsonl"),
+        ("recovery_attribution", "recovery_attribution_rows.jsonl"),
+        ("repair_ablation", "repair_ablation_rows.jsonl"),
+        ("negative_to_recovery", "negative_to_recovery_rows.jsonl"),
+        ("probability_source", "probability_source_rows.jsonl"),
+        ("quantum_repair", "quantum_repair_rows.jsonl"),
+        ("q_classical_compare", "q_classical_compare_rows.jsonl"),
+        ("learning_memory", "learning_memory_rows.jsonl"),
+        ("downstream_handoff", "downstream_handoff_rows.jsonl"),
+        ("operator_action", "operator_action_rows.jsonl"),
+        ("online_verify", "online_verify_rows.jsonl"),
+        ("validation_runtime", "validation_runtime_rows.jsonl"),
+        ("every_value", "every_value_rows.jsonl"),
+    ]
+)
+
+
+def generated_ref(path: Path) -> str:
+    try:
+        return path.resolve().relative_to(REPO_ROOT).as_posix()
+    except ValueError:
+        return path.as_posix()
+
+
+def report_path(report_id: str) -> Path:
+    return GENERATED_ROOT / REPORT_ALIASES[report_id]
+
+
+def shard_path(key: str) -> Path:
+    return SHARD_ROOT / ROW_SHARDS[key]
+
+
+def authority_flags() -> dict[str, bool]:
+    return dict(AUTHORITY_FALSE_FLAGS)
+
+
+def route_defaults(
+    route_key: str,
+    *,
+    upstream_refs: list[str] | None = None,
+    rank3_refs: list[str] | None = None,
+    rp3_refs: list[str] | None = None,
+    map3_refs: list[str] | None = None,
+    data1_refs: list[str] | None = None,
+    data1a_refs: list[str] | None = None,
+    gfp2r_refs: list[str] | None = None,
+    rp2_refs: list[str] | None = None,
+    pr162e_refs: list[str] | None = None,
+    pr162e_q_refs: list[str] | None = None,
+    pr166_q_refs: list[str] | None = None,
+    pr167_refs: list[str] | None = None,
+    pr165_memory_refs: list[str] | None = None,
+    formula_refs: list[str] | None = None,
+    stack_refs: list[str] | None = None,
+    market_refs: list[str] | None = None,
+    replay_refs: list[str] | None = None,
+    paper_refs: list[str] | None = None,
+    tca_refs: list[str] | None = None,
+    fill_refs: list[str] | None = None,
+    latency_refs: list[str] | None = None,
+    capacity_refs: list[str] | None = None,
+    scenario_refs: list[str] | None = None,
+    no_trade_refs: list[str] | None = None,
+    source_provenance_refs: list[str] | None = None,
+    quantum_refs: list[str] | None = None,
+    computed_from_refs: list[str] | None = None,
+    row_shard_refs: list[str] | None = None,
+    numeric_evidence_refs: list[str] | None = None,
+    authority_class: str = AUTHORITY_CLASS,
+    terminal_by_nature_flag: bool = False,
+    terminal_reason_code: str | None = None,
+    repair_route_if_gap: str | None = None,
+) -> dict[str, Any]:
+    route = ROUTES[route_key]
+    return {
+        "upstream_input_refs": list(upstream_refs or []),
+        "upstream_refs": list(upstream_refs or []),
+        "RANK3_refs": list(rank3_refs or []),
+        "RP3_refs": list(rp3_refs or []),
+        "MAP3_refs": list(map3_refs or []),
+        "DATA1_refs": list(data1_refs or []),
+        "DATA1A_refs": list(data1a_refs or []),
+        "GFP2R_refs": list(gfp2r_refs or []),
+        "RP2_refs_if_any": list(rp2_refs or []),
+        "PR162E_refs_if_any": list(pr162e_refs or []),
+        "PR162E_Q_refs_if_any": list(pr162e_q_refs or []),
+        "PR166_Q_refs_if_any": list(pr166_q_refs or []),
+        "PR167_refs_if_any": list(pr167_refs or []),
+        "PR165_memory_refs_if_any": list(pr165_memory_refs or []),
+        "formula_refs": list(formula_refs or []),
+        "stack_refs_if_any": list(stack_refs or []),
+        "stack_refs": list(stack_refs or []),
+        "market_instantiation_refs": list(market_refs or []),
+        "replay_refs": list(replay_refs or []),
+        "paper_refs": list(paper_refs or []),
+        "TCA_refs": list(tca_refs or []),
+        "fill_refs": list(fill_refs or []),
+        "latency_refs": list(latency_refs or []),
+        "capacity_refs": list(capacity_refs or []),
+        "scenario_refs": list(scenario_refs or []),
+        "no_trade_refs": list(no_trade_refs or []),
+        "source_provenance_refs": list(source_provenance_refs or []),
+        "source_provenance_refs_if_any": list(source_provenance_refs or []),
+        "quantum_refs": list(quantum_refs or []),
+        "computed_from_refs": list(computed_from_refs or []),
+        "row_shard_refs_if_any": list(row_shard_refs or []),
+        "numeric_evidence_refs": list(numeric_evidence_refs or []),
+        "data_provenance_refs": list(computed_from_refs or []),
+        "owning_agent": route["owning_agent"],
+        "consumer_agents": list(route["consumer_agents"]),
+        "downstream_consumers": list(route["consumer_agents"]),
+        "downstream_pr_refs": list(DOWNSTREAM_PRS),
+        "validator_refs": list(VALIDATOR_REFS),
+        "test_refs": list(TEST_REFS),
+        "authority_class": authority_class,
+        "candidate_only_flag": True,
+        "accepted_truth_flag": False,
+        "no_orphan_status": "NO_ORPHAN",
+        "terminal_by_nature_flag": terminal_by_nature_flag,
+        "terminal_reason_code": terminal_reason_code,
+        "terminal_reason_if_terminal": terminal_reason_code,
+        "repair_route_if_gap": repair_route_if_gap,
+        **authority_flags(),
+    }

@@ -3174,6 +3174,15 @@ def build_validation_commands(
             sys.executable,
             _path("tools", "validate_pr168_rank3.py"),
         ],
+        [
+            sys.executable,
+            _path("tools", "build_pr168_recovery1.py"),
+            "--offline",
+        ],
+        [
+            sys.executable,
+            _path("tools", "validate_pr168_recovery1.py"),
+        ],
         *[
             [sys.executable, _path("tools", f"validate_pr168_rank_{name}.py")]
             for name in (

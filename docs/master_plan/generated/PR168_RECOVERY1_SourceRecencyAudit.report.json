@@ -1,0 +1,418 @@
+{
+  "DATA1A_refs": [
+    "PR168_DATA1A_FinalSummary.report.json"
+  ],
+  "DATA1_refs": [
+    "PR168_DATA1_FinalSummary.report.json"
+  ],
+  "GFP2R_refs": [
+    "PR168_GFP2R_FinalSummary.report.json"
+  ],
+  "MAP3_refs": [
+    "PR168_MAP3_FinalSummary.report.json"
+  ],
+  "PR162E_Q_refs_if_any": [
+    "PR162E-Q"
+  ],
+  "PR162E_refs_if_any": [
+    "PR162E"
+  ],
+  "PR165_memory_refs_if_any": [
+    "PR165-B",
+    "PR165-C",
+    "PR165-D2"
+  ],
+  "PR166_Q_refs_if_any": [
+    "PR166-Q/QB/QC"
+  ],
+  "PR167_refs_if_any": [
+    "PR167"
+  ],
+  "RANK3_refs": [
+    "PR168_RANK3_FinalSummary.report.json",
+    "docs/master_plan/generated/rank3"
+  ],
+  "RP2_refs_if_any": [],
+  "RP3_refs": [
+    "PR168_RP3_FinalSummary.report.json",
+    "docs/master_plan/generated/rp3"
+  ],
+  "TCA_refs": [],
+  "accepted_truth_flag": false,
+  "alias_registry_ref": "docs/master_plan/generated/PR168_RECOVERY1_FileAliases.report.json",
+  "authority_class": "RECOVERY1_REPLAY_PAPER_REPAIR_CANDIDATE_NON_PROOF",
+  "candidate_only_flag": true,
+  "capacity_refs": [],
+  "cash_access_created_flag": false,
+  "champion_allowed_flag": false,
+  "computed_from_refs": [],
+  "connector_binding_created_flag": false,
+  "connector_semantic_binding_created_flag": false,
+  "consumer_agents": [
+    "recovery1_retest_agent",
+    "RP5_RANK4_QOPT1_agent",
+    "source_provenance_followup_agent"
+  ],
+  "created_at_utc": "2026-06-23T00:00:00Z",
+  "created_by_tool": "tools/build_pr168_recovery1.py",
+  "data_provenance_refs": [],
+  "downstream_consumers": [
+    "recovery1_retest_agent",
+    "RP5_RANK4_QOPT1_agent",
+    "source_provenance_followup_agent"
+  ],
+  "downstream_pr_refs": [
+    "PR168-RP5-RANK4-QOPT1",
+    "PR168-DATA1B",
+    "PR168-MAP4",
+    "PR168-SOURCE-PROVENANCE",
+    "PR165-B",
+    "PR165-C",
+    "PR162E-Q",
+    "FUTURE-PAPER-LOOP",
+    "DASHBOARD-OPERATOR"
+  ],
+  "fill_refs": [],
+  "formula_refs": [],
+  "latency_refs": [],
+  "live_authority_created_flag": false,
+  "live_candidate_allowed_flag": false,
+  "live_order_authority_flag": false,
+  "live_order_receipt_created_flag": false,
+  "logical_report_id": "PR168_RECOVERY1_SourceRecencyAudit",
+  "manual_edit_allowed_flag": false,
+  "market_instantiation_refs": [],
+  "no_orphan_status": "NO_ORPHAN",
+  "no_trade_refs": [],
+  "numeric_evidence_refs": [],
+  "order_authority_created_flag": false,
+  "owning_agent": "recovery1_source_provenance_agent",
+  "paper_refs": [],
+  "path_audit_ref": "docs/master_plan/generated/PR168_RECOVERY1_PathAudit.report.json",
+  "physical_filename": "PR168_RECOVERY1_SourceRecencyAudit.report.json",
+  "private_cash_receipt_created_flag": false,
+  "private_state_access_created_flag": false,
+  "private_state_or_cash_access_created_flag": false,
+  "profit_evidence_created_flag": false,
+  "profit_evidence_flag": false,
+  "qtt_sha_or_atomicrows_hash_authority_flag": false,
+  "quantum_advantage_claim_flag": false,
+  "quantum_backend_execution_flag": false,
+  "quantum_refs": [],
+  "records": {
+    "rows": [
+      {
+        "accepted_truth_flag": false,
+        "source_url_or_owner_ref": "https://docs.kalshi.com/api-reference/market/get-market-orderbook",
+        "source_use_row_id": "recovery1_web_source_00001",
+        "staleness_or_version_risk": "RECENCY_NOT_REFETCHED_IN_OFFLINE_CI"
+      },
+      {
+        "accepted_truth_flag": false,
+        "source_url_or_owner_ref": "https://docs.kalshi.com/getting_started/orderbook_responses",
+        "source_use_row_id": "recovery1_web_source_00002",
+        "staleness_or_version_risk": "RECENCY_NOT_REFETCHED_IN_OFFLINE_CI"
+      },
+      {
+        "accepted_truth_flag": false,
+        "source_url_or_owner_ref": "https://docs.kalshi.com/api-reference/market/get-multiple-market-orderbooks",
+        "source_use_row_id": "recovery1_web_source_00003",
+        "staleness_or_version_risk": "RECENCY_NOT_REFETCHED_IN_OFFLINE_CI"
+      },
+      {
+        "accepted_truth_flag": false,
+        "source_url_or_owner_ref": "https://docs.kalshi.com/api-reference/market/get-trades",
+        "source_use_row_id": "recovery1_web_source_00004",
+        "staleness_or_version_risk": "RECENCY_NOT_REFETCHED_IN_OFFLINE_CI"
+      },
+      {
+        "accepted_truth_flag": false,
+        "source_url_or_owner_ref": "https://docs.kalshi.com/api-reference/historical/get-historical-market-candlesticks",
+        "source_use_row_id": "recovery1_web_source_00005",
+        "staleness_or_version_risk": "RECENCY_NOT_REFETCHED_IN_OFFLINE_CI"
+      },
+      {
+        "accepted_truth_flag": false,
+        "source_url_or_owner_ref": "https://docs.kalshi.com/api-reference/market/get-market-candlesticks",
+        "source_use_row_id": "recovery1_web_source_00006",
+        "staleness_or_version_risk": "RECENCY_NOT_REFETCHED_IN_OFFLINE_CI"
+      },
+      {
+        "accepted_truth_flag": false,
+        "source_url_or_owner_ref": "https://docs.kalshi.com/websockets/orderbook-updates",
+        "source_use_row_id": "recovery1_web_source_00007",
+        "staleness_or_version_risk": "RECENCY_NOT_REFETCHED_IN_OFFLINE_CI"
+      },
+      {
+        "accepted_truth_flag": false,
+        "source_url_or_owner_ref": "https://docs.kalshi.com/getting_started/quick_start_websockets",
+        "source_use_row_id": "recovery1_web_source_00008",
+        "staleness_or_version_risk": "RECENCY_NOT_REFETCHED_IN_OFFLINE_CI"
+      },
+      {
+        "accepted_truth_flag": false,
+        "source_url_or_owner_ref": "https://kalshi.com/docs/kalshi-fee-schedule.pdf",
+        "source_use_row_id": "recovery1_web_source_00009",
+        "staleness_or_version_risk": "RECENCY_NOT_REFETCHED_IN_OFFLINE_CI"
+      },
+      {
+        "accepted_truth_flag": false,
+        "source_url_or_owner_ref": "https://docs.kalshi.com/getting_started/fixed_point_migration",
+        "source_use_row_id": "recovery1_web_source_00010",
+        "staleness_or_version_risk": "RECENCY_NOT_REFETCHED_IN_OFFLINE_CI"
+      },
+      {
+        "accepted_truth_flag": false,
+        "source_url_or_owner_ref": "https://docs.polymarket.com/api-reference/market-data/get-order-book",
+        "source_use_row_id": "recovery1_web_source_00011",
+        "staleness_or_version_risk": "RECENCY_NOT_REFETCHED_IN_OFFLINE_CI"
+      },
+      {
+        "accepted_truth_flag": false,
+        "source_url_or_owner_ref": "https://docs.polymarket.com/trading/orderbook",
+        "source_use_row_id": "recovery1_web_source_00012",
+        "staleness_or_version_risk": "RECENCY_NOT_REFETCHED_IN_OFFLINE_CI"
+      },
+      {
+        "accepted_truth_flag": false,
+        "source_url_or_owner_ref": "https://docs.polymarket.com/api-reference/markets/get-prices-history",
+        "source_use_row_id": "recovery1_web_source_00013",
+        "staleness_or_version_risk": "RECENCY_NOT_REFETCHED_IN_OFFLINE_CI"
+      },
+      {
+        "accepted_truth_flag": false,
+        "source_url_or_owner_ref": "https://docs.polymarket.com/api-reference/data/get-midpoint-price",
+        "source_use_row_id": "recovery1_web_source_00014",
+        "staleness_or_version_risk": "RECENCY_NOT_REFETCHED_IN_OFFLINE_CI"
+      },
+      {
+        "accepted_truth_flag": false,
+        "source_url_or_owner_ref": "https://docs.polymarket.com/api-reference/market-data/get-spreads",
+        "source_use_row_id": "recovery1_web_source_00015",
+        "staleness_or_version_risk": "RECENCY_NOT_REFETCHED_IN_OFFLINE_CI"
+      },
+      {
+        "accepted_truth_flag": false,
+        "source_url_or_owner_ref": "https://docs.polymarket.com/api-reference/market-data/get-last-trade-price",
+        "source_use_row_id": "recovery1_web_source_00016",
+        "staleness_or_version_risk": "RECENCY_NOT_REFETCHED_IN_OFFLINE_CI"
+      },
+      {
+        "accepted_truth_flag": false,
+        "source_url_or_owner_ref": "https://docs.polymarket.com/trading/clients/public",
+        "source_use_row_id": "recovery1_web_source_00017",
+        "staleness_or_version_risk": "RECENCY_NOT_REFETCHED_IN_OFFLINE_CI"
+      },
+      {
+        "accepted_truth_flag": false,
+        "source_url_or_owner_ref": "https://docs.polymarket.com/market-data/websocket/market-channel",
+        "source_use_row_id": "recovery1_web_source_00018",
+        "staleness_or_version_risk": "RECENCY_NOT_REFETCHED_IN_OFFLINE_CI"
+      },
+      {
+        "accepted_truth_flag": false,
+        "source_url_or_owner_ref": "https://rodneywhitecenter.wharton.upenn.edu/wp-content/uploads/2014/04/0611.pdf",
+        "source_use_row_id": "recovery1_web_source_00019",
+        "staleness_or_version_risk": "RECENCY_NOT_REFETCHED_IN_OFFLINE_CI"
+      },
+      {
+        "accepted_truth_flag": false,
+        "source_url_or_owner_ref": "https://www.tradealgo.com/trading-guides/prediction-markets/prediction-market-pricing",
+        "source_use_row_id": "recovery1_web_source_00020",
+        "staleness_or_version_risk": "RECENCY_NOT_REFETCHED_IN_OFFLINE_CI"
+      },
+      {
+        "accepted_truth_flag": false,
+        "source_url_or_owner_ref": "https://www.tradealgo.com/trading-guides/prediction-markets/prediction-market-arbitrage-guide",
+        "source_use_row_id": "recovery1_web_source_00021",
+        "staleness_or_version_risk": "RECENCY_NOT_REFETCHED_IN_OFFLINE_CI"
+      },
+      {
+        "accepted_truth_flag": false,
+        "source_url_or_owner_ref": "https://quantpedia.com/systematic-edges-in-prediction-markets/",
+        "source_use_row_id": "recovery1_web_source_00022",
+        "staleness_or_version_risk": "RECENCY_NOT_REFETCHED_IN_OFFLINE_CI"
+      },
+      {
+        "accepted_truth_flag": false,
+        "source_url_or_owner_ref": "https://questdb.com/glossary/fill-probability/",
+        "source_use_row_id": "recovery1_web_source_00023",
+        "staleness_or_version_risk": "RECENCY_NOT_REFETCHED_IN_OFFLINE_CI"
+      },
+      {
+        "accepted_truth_flag": false,
+        "source_url_or_owner_ref": "https://arxiv.org/pdf/2403.02572",
+        "source_use_row_id": "recovery1_web_source_00024",
+        "staleness_or_version_risk": "RECENCY_NOT_REFETCHED_IN_OFFLINE_CI"
+      },
+      {
+        "accepted_truth_flag": false,
+        "source_url_or_owner_ref": "https://hftbacktest.readthedocs.io/en/latest/tutorials/Market%20Making%20with%20Alpha%20-%20Order%20Book%20Imbalance.html",
+        "source_use_row_id": "recovery1_web_source_00025",
+        "staleness_or_version_risk": "RECENCY_NOT_REFETCHED_IN_OFFLINE_CI"
+      },
+      {
+        "accepted_truth_flag": false,
+        "source_url_or_owner_ref": "https://databento.com/docs/examples/order-book/microprice",
+        "source_use_row_id": "recovery1_web_source_00026",
+        "staleness_or_version_risk": "RECENCY_NOT_REFETCHED_IN_OFFLINE_CI"
+      },
+      {
+        "accepted_truth_flag": false,
+        "source_url_or_owner_ref": "https://www.investopedia.com/terms/i/implementationshortfall.asp",
+        "source_use_row_id": "recovery1_web_source_00027",
+        "staleness_or_version_risk": "RECENCY_NOT_REFETCHED_IN_OFFLINE_CI"
+      },
+      {
+        "accepted_truth_flag": false,
+        "source_url_or_owner_ref": "https://www.talos.com/insights/understanding-crypto-transaction-cost-analysis",
+        "source_use_row_id": "recovery1_web_source_00028",
+        "staleness_or_version_risk": "RECENCY_NOT_REFETCHED_IN_OFFLINE_CI"
+      },
+      {
+        "accepted_truth_flag": false,
+        "source_url_or_owner_ref": "https://a-teaminsight.com/blog/latency-in-electronic-trading/",
+        "source_use_row_id": "recovery1_web_source_00029",
+        "staleness_or_version_risk": "RECENCY_NOT_REFETCHED_IN_OFFLINE_CI"
+      },
+      {
+        "accepted_truth_flag": false,
+        "source_url_or_owner_ref": "https://scikit-learn.org/stable/modules/generated/sklearn.metrics.brier_score_loss.html",
+        "source_use_row_id": "recovery1_web_source_00030",
+        "staleness_or_version_risk": "RECENCY_NOT_REFETCHED_IN_OFFLINE_CI"
+      },
+      {
+        "accepted_truth_flag": false,
+        "source_url_or_owner_ref": "https://lightning.ai/docs/torchmetrics/stable/classification/calibration_error.html",
+        "source_use_row_id": "recovery1_web_source_00031",
+        "staleness_or_version_risk": "RECENCY_NOT_REFETCHED_IN_OFFLINE_CI"
+      },
+      {
+        "accepted_truth_flag": false,
+        "source_url_or_owner_ref": "https://scikit-learn.org/stable/modules/calibration.html",
+        "source_use_row_id": "recovery1_web_source_00032",
+        "staleness_or_version_risk": "RECENCY_NOT_REFETCHED_IN_OFFLINE_CI"
+      },
+      {
+        "accepted_truth_flag": false,
+        "source_url_or_owner_ref": "https://en.wikipedia.org/wiki/False_discovery_rate",
+        "source_use_row_id": "recovery1_web_source_00033",
+        "staleness_or_version_risk": "RECENCY_NOT_REFETCHED_IN_OFFLINE_CI"
+      },
+      {
+        "accepted_truth_flag": false,
+        "source_url_or_owner_ref": "https://www.davidhbailey.com/dhbpapers/deflated-sharpe.pdf",
+        "source_use_row_id": "recovery1_web_source_00034",
+        "staleness_or_version_risk": "RECENCY_NOT_REFETCHED_IN_OFFLINE_CI"
+      },
+      {
+        "accepted_truth_flag": false,
+        "source_url_or_owner_ref": "https://www.quantbeckman.com/p/with-code-combinatorial-purged-cross",
+        "source_use_row_id": "recovery1_web_source_00035",
+        "staleness_or_version_risk": "RECENCY_NOT_REFETCHED_IN_OFFLINE_CI"
+      },
+      {
+        "accepted_truth_flag": false,
+        "source_url_or_owner_ref": "https://en.wikipedia.org/wiki/Kelly_criterion",
+        "source_use_row_id": "recovery1_web_source_00036",
+        "staleness_or_version_risk": "RECENCY_NOT_REFETCHED_IN_OFFLINE_CI"
+      },
+      {
+        "accepted_truth_flag": false,
+        "source_url_or_owner_ref": "https://www.bettoredge.com/post/kelly-criterion-prediction-markets",
+        "source_use_row_id": "recovery1_web_source_00037",
+        "staleness_or_version_risk": "RECENCY_NOT_REFETCHED_IN_OFFLINE_CI"
+      },
+      {
+        "accepted_truth_flag": false,
+        "source_url_or_owner_ref": "https://www.wallstreetmojo.com/portfolio-concentration/",
+        "source_use_row_id": "recovery1_web_source_00038",
+        "staleness_or_version_risk": "RECENCY_NOT_REFETCHED_IN_OFFLINE_CI"
+      },
+      {
+        "accepted_truth_flag": false,
+        "source_url_or_owner_ref": "https://fsc.stevens.edu/network-and-clustering-based-portfolio-optimization-enhancing-risk-adjusted-performance-through-diversification/",
+        "source_use_row_id": "recovery1_web_source_00039",
+        "staleness_or_version_risk": "RECENCY_NOT_REFETCHED_IN_OFFLINE_CI"
+      },
+      {
+        "accepted_truth_flag": false,
+        "source_url_or_owner_ref": "https://questdb.com/glossary/order-book-imbalance/",
+        "source_use_row_id": "recovery1_web_source_00040",
+        "staleness_or_version_risk": "RECENCY_NOT_REFETCHED_IN_OFFLINE_CI"
+      },
+      {
+        "accepted_truth_flag": false,
+        "source_url_or_owner_ref": "https://qiskit-community.github.io/qiskit-optimization/tutorials/02_converters_for_quadratic_programs.html",
+        "source_use_row_id": "recovery1_web_source_00041",
+        "staleness_or_version_risk": "RECENCY_NOT_REFETCHED_IN_OFFLINE_CI"
+      },
+      {
+        "accepted_truth_flag": false,
+        "source_url_or_owner_ref": "https://qiskit-community.github.io/qiskit-optimization/_modules/qiskit_optimization/converters/quadratic_program_to_qubo.html",
+        "source_use_row_id": "recovery1_web_source_00042",
+        "staleness_or_version_risk": "RECENCY_NOT_REFETCHED_IN_OFFLINE_CI"
+      },
+      {
+        "accepted_truth_flag": false,
+        "source_url_or_owner_ref": "https://docs.dwavequantum.com/en/latest/concepts/models.html",
+        "source_use_row_id": "recovery1_web_source_00043",
+        "staleness_or_version_risk": "RECENCY_NOT_REFETCHED_IN_OFFLINE_CI"
+      },
+      {
+        "accepted_truth_flag": false,
+        "source_url_or_owner_ref": "https://docs.dwavequantum.com/en/latest/quantum_research/reformulating.html",
+        "source_use_row_id": "recovery1_web_source_00044",
+        "staleness_or_version_risk": "RECENCY_NOT_REFETCHED_IN_OFFLINE_CI"
+      },
+      {
+        "accepted_truth_flag": false,
+        "source_url_or_owner_ref": "https://forecastex.com/data",
+        "source_use_row_id": "recovery1_web_source_00045",
+        "staleness_or_version_risk": "RECENCY_NOT_REFETCHED_IN_OFFLINE_CI"
+      },
+      {
+        "accepted_truth_flag": false,
+        "source_url_or_owner_ref": "https://www.interactivebrokers.com/campus/ibkr-api-page/event-contracts/",
+        "source_use_row_id": "recovery1_web_source_00046",
+        "staleness_or_version_risk": "RECENCY_NOT_REFETCHED_IN_OFFLINE_CI"
+      },
+      {
+        "accepted_truth_flag": false,
+        "source_url_or_owner_ref": "https://www.interactivebrokers.com/campus/ibkr-api-page/trader-workstation-api/",
+        "source_use_row_id": "recovery1_web_source_00047",
+        "staleness_or_version_risk": "RECENCY_NOT_REFETCHED_IN_OFFLINE_CI"
+      }
+    ]
+  },
+  "repair_route_if_gap": null,
+  "replay_refs": [],
+  "report_version": "PR168-RECOVERY1-v1.0",
+  "row_shard_refs_if_any": [
+    "docs/master_plan/generated/recovery1/online_verify_rows.jsonl"
+  ],
+  "scenario_refs": [],
+  "source_provenance_refs": [],
+  "source_provenance_refs_if_any": [],
+  "source_truth_acceptance_created_flag": false,
+  "stack_refs": [],
+  "stack_refs_if_any": [],
+  "terminal_by_nature_flag": false,
+  "terminal_reason_code": null,
+  "terminal_reason_if_terminal": null,
+  "test_refs": [
+    "tests/pr168_recovery1"
+  ],
+  "upstream_input_refs": [
+    "PR168_RANK3_FinalSummary.report.json",
+    "PR168_RP3_FinalSummary.report.json"
+  ],
+  "upstream_refs": [
+    "PR168_RANK3_FinalSummary.report.json",
+    "PR168_RP3_FinalSummary.report.json"
+  ],
+  "validator_refs": [
+    "tools/validate_pr168_recovery1.py",
+    "tools/pr168_recovery1_validator.py"
+  ]
+}

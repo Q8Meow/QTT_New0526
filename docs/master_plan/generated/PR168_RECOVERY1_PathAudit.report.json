@@ -1,0 +1,1546 @@
+{
+  "DATA1A_refs": [
+    "PR168_DATA1A_FinalSummary.report.json"
+  ],
+  "DATA1_refs": [
+    "PR168_DATA1_FinalSummary.report.json"
+  ],
+  "GFP2R_refs": [
+    "PR168_GFP2R_FinalSummary.report.json"
+  ],
+  "MAP3_refs": [
+    "PR168_MAP3_FinalSummary.report.json"
+  ],
+  "PR162E_Q_refs_if_any": [
+    "PR162E-Q"
+  ],
+  "PR162E_refs_if_any": [
+    "PR162E"
+  ],
+  "PR165_memory_refs_if_any": [
+    "PR165-B",
+    "PR165-C",
+    "PR165-D2"
+  ],
+  "PR166_Q_refs_if_any": [
+    "PR166-Q/QB/QC"
+  ],
+  "PR167_refs_if_any": [
+    "PR167"
+  ],
+  "RANK3_refs": [
+    "PR168_RANK3_FinalSummary.report.json",
+    "docs/master_plan/generated/rank3"
+  ],
+  "RP2_refs_if_any": [],
+  "RP3_refs": [
+    "PR168_RP3_FinalSummary.report.json",
+    "docs/master_plan/generated/rp3"
+  ],
+  "TCA_refs": [],
+  "accepted_truth_flag": false,
+  "alias_registry_ref": "docs/master_plan/generated/PR168_RECOVERY1_FileAliases.report.json",
+  "authority_class": "RECOVERY1_REPLAY_PAPER_REPAIR_CANDIDATE_NON_PROOF",
+  "candidate_only_flag": true,
+  "capacity_refs": [],
+  "cash_access_created_flag": false,
+  "champion_allowed_flag": false,
+  "computed_from_refs": [],
+  "connector_binding_created_flag": false,
+  "connector_semantic_binding_created_flag": false,
+  "consumer_agents": [
+    "governance_validation_agent",
+    "dashboard_operator_agent",
+    "operator_review_agent"
+  ],
+  "created_at_utc": "2026-06-23T00:00:00Z",
+  "created_by_tool": "tools/build_pr168_recovery1.py",
+  "data_provenance_refs": [],
+  "downstream_consumers": [
+    "governance_validation_agent",
+    "dashboard_operator_agent",
+    "operator_review_agent"
+  ],
+  "downstream_pr_refs": [
+    "PR168-RP5-RANK4-QOPT1",
+    "PR168-DATA1B",
+    "PR168-MAP4",
+    "PR168-SOURCE-PROVENANCE",
+    "PR165-B",
+    "PR165-C",
+    "PR162E-Q",
+    "FUTURE-PAPER-LOOP",
+    "DASHBOARD-OPERATOR"
+  ],
+  "fill_refs": [],
+  "formula_refs": [],
+  "latency_refs": [],
+  "live_authority_created_flag": false,
+  "live_candidate_allowed_flag": false,
+  "live_order_authority_flag": false,
+  "live_order_receipt_created_flag": false,
+  "logical_report_id": "PR168_RECOVERY1_PathAudit",
+  "manual_edit_allowed_flag": false,
+  "market_instantiation_refs": [],
+  "no_orphan_status": "NO_ORPHAN",
+  "no_trade_refs": [],
+  "numeric_evidence_refs": [],
+  "order_authority_created_flag": false,
+  "owning_agent": "recovery1_agent_router",
+  "paper_refs": [],
+  "path_audit_ref": "docs/master_plan/generated/PR168_RECOVERY1_PathAudit.report.json",
+  "physical_filename": "PR168_RECOVERY1_PathAudit.report.json",
+  "private_cash_receipt_created_flag": false,
+  "private_state_access_created_flag": false,
+  "private_state_or_cash_access_created_flag": false,
+  "profit_evidence_created_flag": false,
+  "profit_evidence_flag": false,
+  "qtt_sha_or_atomicrows_hash_authority_flag": false,
+  "quantum_advantage_claim_flag": false,
+  "quantum_backend_execution_flag": false,
+  "quantum_refs": [],
+  "records": {
+    "rows": [
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_Input",
+        "path_audit_row_id": "recovery1_path_audit_00001",
+        "path_audit_state": "OK",
+        "path_length": 96,
+        "physical_filename": "PR168_RECOVERY1_Input.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_RANK3Consumption",
+        "path_audit_row_id": "recovery1_path_audit_00002",
+        "path_audit_state": "OK",
+        "path_length": 107,
+        "physical_filename": "PR168_RECOVERY1_RANK3Consumption.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_OldRoadmapAbsorption",
+        "path_audit_row_id": "recovery1_path_audit_00003",
+        "path_audit_state": "OK",
+        "path_length": 111,
+        "physical_filename": "PR168_RECOVERY1_OldRoadmapAbsorption.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_RepairUniverse",
+        "path_audit_row_id": "recovery1_path_audit_00004",
+        "path_audit_state": "OK",
+        "path_length": 105,
+        "physical_filename": "PR168_RECOVERY1_RepairUniverse.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_RepairPriority",
+        "path_audit_row_id": "recovery1_path_audit_00005",
+        "path_audit_state": "OK",
+        "path_length": 105,
+        "physical_filename": "PR168_RECOVERY1_RepairPriority.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_MissingInputs",
+        "path_audit_row_id": "recovery1_path_audit_00006",
+        "path_audit_state": "OK",
+        "path_length": 104,
+        "physical_filename": "PR168_RECOVERY1_MissingInputs.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_TriagePriority",
+        "path_audit_row_id": "recovery1_path_audit_00007",
+        "path_audit_state": "OK",
+        "path_length": 105,
+        "physical_filename": "PR168_RECOVERY1_TriagePriority.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_RepairExpectedValue",
+        "path_audit_row_id": "recovery1_path_audit_00008",
+        "path_audit_state": "OK",
+        "path_length": 110,
+        "physical_filename": "PR168_RECOVERY1_RepairExpectedValue.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_RetestSamplePlan",
+        "path_audit_row_id": "recovery1_path_audit_00009",
+        "path_audit_state": "OK",
+        "path_length": 107,
+        "physical_filename": "PR168_RECOVERY1_RetestSamplePlan.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_RepairDedupe",
+        "path_audit_row_id": "recovery1_path_audit_00010",
+        "path_audit_state": "OK",
+        "path_length": 103,
+        "physical_filename": "PR168_RECOVERY1_RepairDedupe.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_LaunchCompressionPlan",
+        "path_audit_row_id": "recovery1_path_audit_00011",
+        "path_audit_state": "OK",
+        "path_length": 112,
+        "physical_filename": "PR168_RECOVERY1_LaunchCompressionPlan.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_StateMachine",
+        "path_audit_row_id": "recovery1_path_audit_00012",
+        "path_audit_state": "OK",
+        "path_length": 103,
+        "physical_filename": "PR168_RECOVERY1_StateMachine.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_CausalRepairGraph",
+        "path_audit_row_id": "recovery1_path_audit_00013",
+        "path_audit_state": "OK",
+        "path_length": 108,
+        "physical_filename": "PR168_RECOVERY1_CausalRepairGraph.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_RepairAblation",
+        "path_audit_row_id": "recovery1_path_audit_00014",
+        "path_audit_state": "OK",
+        "path_length": 105,
+        "physical_filename": "PR168_RECOVERY1_RepairAblation.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_CounterfactualControls",
+        "path_audit_row_id": "recovery1_path_audit_00015",
+        "path_audit_state": "OK",
+        "path_length": 113,
+        "physical_filename": "PR168_RECOVERY1_CounterfactualControls.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_OperationalUsefulnessAudit",
+        "path_audit_row_id": "recovery1_path_audit_00016",
+        "path_audit_state": "OK",
+        "path_length": 117,
+        "physical_filename": "PR168_RECOVERY1_OperationalUsefulnessAudit.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_RepairBudget",
+        "path_audit_row_id": "recovery1_path_audit_00017",
+        "path_audit_state": "OK",
+        "path_length": 103,
+        "physical_filename": "PR168_RECOVERY1_RepairBudget.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_DataPrecision",
+        "path_audit_row_id": "recovery1_path_audit_00018",
+        "path_audit_state": "OK",
+        "path_length": 104,
+        "physical_filename": "PR168_RECOVERY1_DataPrecision.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_MissingValueRepair",
+        "path_audit_row_id": "recovery1_path_audit_00019",
+        "path_audit_state": "OK",
+        "path_length": 109,
+        "physical_filename": "PR168_RECOVERY1_MissingValueRepair.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_CandidateInputFill",
+        "path_audit_row_id": "recovery1_path_audit_00020",
+        "path_audit_state": "OK",
+        "path_length": 109,
+        "physical_filename": "PR168_RECOVERY1_CandidateInputFill.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_DataFreshness",
+        "path_audit_row_id": "recovery1_path_audit_00021",
+        "path_audit_state": "OK",
+        "path_length": 104,
+        "physical_filename": "PR168_RECOVERY1_DataFreshness.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_FillLatencyCapacityInputs",
+        "path_audit_row_id": "recovery1_path_audit_00022",
+        "path_audit_state": "OK",
+        "path_length": 116,
+        "physical_filename": "PR168_RECOVERY1_FillLatencyCapacityInputs.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_CalibrationSampleRepair",
+        "path_audit_row_id": "recovery1_path_audit_00023",
+        "path_audit_state": "OK",
+        "path_length": 114,
+        "physical_filename": "PR168_RECOVERY1_CalibrationSampleRepair.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_ProbabilitySourceBinding",
+        "path_audit_row_id": "recovery1_path_audit_00024",
+        "path_audit_state": "OK",
+        "path_length": 115,
+        "physical_filename": "PR168_RECOVERY1_ProbabilitySourceBinding.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_ProbabilityRoleAudit",
+        "path_audit_row_id": "recovery1_path_audit_00025",
+        "path_audit_state": "OK",
+        "path_length": 111,
+        "physical_filename": "PR168_RECOVERY1_ProbabilityRoleAudit.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_BreakEvenThresholdRepair",
+        "path_audit_row_id": "recovery1_path_audit_00026",
+        "path_audit_state": "OK",
+        "path_length": 115,
+        "physical_filename": "PR168_RECOVERY1_BreakEvenThresholdRepair.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_FeeSlippageLatencyRepair",
+        "path_audit_row_id": "recovery1_path_audit_00027",
+        "path_audit_state": "OK",
+        "path_length": 115,
+        "physical_filename": "PR168_RECOVERY1_FeeSlippageLatencyRepair.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_FillCapacityDepthRepair",
+        "path_audit_row_id": "recovery1_path_audit_00028",
+        "path_audit_state": "OK",
+        "path_length": 114,
+        "physical_filename": "PR168_RECOVERY1_FillCapacityDepthRepair.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_CalibrationWindowPlan",
+        "path_audit_row_id": "recovery1_path_audit_00029",
+        "path_audit_state": "OK",
+        "path_length": 112,
+        "physical_filename": "PR168_RECOVERY1_CalibrationWindowPlan.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_IndependentModelCandidateRoute",
+        "path_audit_row_id": "recovery1_path_audit_00030",
+        "path_audit_state": "OK",
+        "path_length": 121,
+        "physical_filename": "PR168_RECOVERY1_IndependentModelCandidateRoute.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_ExpressionRepair",
+        "path_audit_row_id": "recovery1_path_audit_00031",
+        "path_audit_state": "OK",
+        "path_length": 107,
+        "physical_filename": "PR168_RECOVERY1_ExpressionRepair.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_RepairedFormulaContracts",
+        "path_audit_row_id": "recovery1_path_audit_00032",
+        "path_audit_state": "OK",
+        "path_length": 115,
+        "physical_filename": "PR168_RECOVERY1_RepairedFormulaContracts.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_RepairedFormulaToPnL",
+        "path_audit_row_id": "recovery1_path_audit_00033",
+        "path_audit_state": "OK",
+        "path_length": 111,
+        "physical_filename": "PR168_RECOVERY1_RepairedFormulaToPnL.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_RepairedFormulaSafety",
+        "path_audit_row_id": "recovery1_path_audit_00034",
+        "path_audit_state": "OK",
+        "path_length": 112,
+        "physical_filename": "PR168_RECOVERY1_RepairedFormulaSafety.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_FormulaInvariantTests",
+        "path_audit_row_id": "recovery1_path_audit_00035",
+        "path_audit_state": "OK",
+        "path_length": 112,
+        "physical_filename": "PR168_RECOVERY1_FormulaInvariantTests.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_ExpressionRepairFailure",
+        "path_audit_row_id": "recovery1_path_audit_00036",
+        "path_audit_state": "OK",
+        "path_length": 114,
+        "physical_filename": "PR168_RECOVERY1_ExpressionRepairFailure.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_SourceProvenanceCandidateUse",
+        "path_audit_row_id": "recovery1_path_audit_00037",
+        "path_audit_state": "OK",
+        "path_length": 119,
+        "physical_filename": "PR168_RECOVERY1_SourceProvenanceCandidateUse.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_SourceProvenanceResolution",
+        "path_audit_row_id": "recovery1_path_audit_00038",
+        "path_audit_state": "OK",
+        "path_length": 117,
+        "physical_filename": "PR168_RECOVERY1_SourceProvenanceResolution.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_SourceInputMapping",
+        "path_audit_row_id": "recovery1_path_audit_00039",
+        "path_audit_state": "OK",
+        "path_length": 109,
+        "physical_filename": "PR168_RECOVERY1_SourceInputMapping.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_SourceReliabilityPenalty",
+        "path_audit_row_id": "recovery1_path_audit_00040",
+        "path_audit_state": "OK",
+        "path_length": 115,
+        "physical_filename": "PR168_RECOVERY1_SourceReliabilityPenalty.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_SourceProvenanceRepair",
+        "path_audit_row_id": "recovery1_path_audit_00041",
+        "path_audit_state": "OK",
+        "path_length": 113,
+        "physical_filename": "PR168_RECOVERY1_SourceProvenanceRepair.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_StackRepairFactory",
+        "path_audit_row_id": "recovery1_path_audit_00042",
+        "path_audit_state": "OK",
+        "path_length": 109,
+        "physical_filename": "PR168_RECOVERY1_StackRepairFactory.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_NegativeRecovery",
+        "path_audit_row_id": "recovery1_path_audit_00043",
+        "path_audit_state": "OK",
+        "path_length": 107,
+        "physical_filename": "PR168_RECOVERY1_NegativeRecovery.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_NoTradeDominatedRepair",
+        "path_audit_row_id": "recovery1_path_audit_00044",
+        "path_audit_state": "OK",
+        "path_length": 113,
+        "physical_filename": "PR168_RECOVERY1_NoTradeDominatedRepair.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_FragilityRepair",
+        "path_audit_row_id": "recovery1_path_audit_00045",
+        "path_audit_state": "OK",
+        "path_length": 106,
+        "physical_filename": "PR168_RECOVERY1_FragilityRepair.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_RepairVariantGrid",
+        "path_audit_row_id": "recovery1_path_audit_00046",
+        "path_audit_state": "OK",
+        "path_length": 108,
+        "physical_filename": "PR168_RECOVERY1_RepairVariantGrid.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_CausalStackRepair",
+        "path_audit_row_id": "recovery1_path_audit_00047",
+        "path_audit_state": "OK",
+        "path_length": 108,
+        "physical_filename": "PR168_RECOVERY1_CausalStackRepair.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_PortfolioRepairImpact",
+        "path_audit_row_id": "recovery1_path_audit_00048",
+        "path_audit_state": "OK",
+        "path_length": 112,
+        "physical_filename": "PR168_RECOVERY1_PortfolioRepairImpact.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_BatchDiversityGain",
+        "path_audit_row_id": "recovery1_path_audit_00049",
+        "path_audit_state": "OK",
+        "path_length": 109,
+        "physical_filename": "PR168_RECOVERY1_BatchDiversityGain.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_RecoveryAcceptanceGate",
+        "path_audit_row_id": "recovery1_path_audit_00050",
+        "path_audit_state": "OK",
+        "path_length": 113,
+        "physical_filename": "PR168_RECOVERY1_RecoveryAcceptanceGate.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_RepeatedUnresolvedSuppression",
+        "path_audit_row_id": "recovery1_path_audit_00051",
+        "path_audit_state": "OK",
+        "path_length": 120,
+        "physical_filename": "PR168_RECOVERY1_RepeatedUnresolvedSuppression.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_RetestPlan",
+        "path_audit_row_id": "recovery1_path_audit_00052",
+        "path_audit_state": "OK",
+        "path_length": 101,
+        "physical_filename": "PR168_RECOVERY1_RetestPlan.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_RetestBeforeAfter",
+        "path_audit_row_id": "recovery1_path_audit_00053",
+        "path_audit_state": "OK",
+        "path_length": 108,
+        "physical_filename": "PR168_RECOVERY1_RetestBeforeAfter.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_ReplayRetest",
+        "path_audit_row_id": "recovery1_path_audit_00054",
+        "path_audit_state": "OK",
+        "path_length": 103,
+        "physical_filename": "PR168_RECOVERY1_ReplayRetest.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_PaperRetest",
+        "path_audit_row_id": "recovery1_path_audit_00055",
+        "path_audit_state": "OK",
+        "path_length": 102,
+        "physical_filename": "PR168_RECOVERY1_PaperRetest.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_TCAFillLatencyCapacityRetest",
+        "path_audit_row_id": "recovery1_path_audit_00056",
+        "path_audit_state": "OK",
+        "path_length": 119,
+        "physical_filename": "PR168_RECOVERY1_TCAFillLatencyCapacityRetest.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_NoTradeRetest",
+        "path_audit_row_id": "recovery1_path_audit_00057",
+        "path_audit_state": "OK",
+        "path_length": 104,
+        "physical_filename": "PR168_RECOVERY1_NoTradeRetest.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_ScenarioRetest",
+        "path_audit_row_id": "recovery1_path_audit_00058",
+        "path_audit_state": "OK",
+        "path_length": 105,
+        "physical_filename": "PR168_RECOVERY1_ScenarioRetest.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_AsOfBarrier",
+        "path_audit_row_id": "recovery1_path_audit_00059",
+        "path_audit_state": "OK",
+        "path_length": 102,
+        "physical_filename": "PR168_RECOVERY1_AsOfBarrier.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_NoLookahead",
+        "path_audit_row_id": "recovery1_path_audit_00060",
+        "path_audit_state": "OK",
+        "path_length": 102,
+        "physical_filename": "PR168_RECOVERY1_NoLookahead.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_RetestQualityGate",
+        "path_audit_row_id": "recovery1_path_audit_00061",
+        "path_audit_state": "OK",
+        "path_length": 108,
+        "physical_filename": "PR168_RECOVERY1_RetestQualityGate.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_RetestLeakageAudit",
+        "path_audit_row_id": "recovery1_path_audit_00062",
+        "path_audit_state": "OK",
+        "path_length": 109,
+        "physical_filename": "PR168_RECOVERY1_RetestLeakageAudit.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_ExpectedVsRealizedRepair",
+        "path_audit_row_id": "recovery1_path_audit_00063",
+        "path_audit_state": "OK",
+        "path_length": 115,
+        "physical_filename": "PR168_RECOVERY1_ExpectedVsRealizedRepair.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_NegativeToRecoveryCausalLoop",
+        "path_audit_row_id": "recovery1_path_audit_00064",
+        "path_audit_state": "OK",
+        "path_length": 119,
+        "physical_filename": "PR168_RECOVERY1_NegativeToRecoveryCausalLoop.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_BeforeAfterCompare",
+        "path_audit_row_id": "recovery1_path_audit_00065",
+        "path_audit_state": "OK",
+        "path_length": 109,
+        "physical_filename": "PR168_RECOVERY1_BeforeAfterCompare.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_ValidVsArtificial",
+        "path_audit_row_id": "recovery1_path_audit_00066",
+        "path_audit_state": "OK",
+        "path_length": 108,
+        "physical_filename": "PR168_RECOVERY1_ValidVsArtificial.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_RecoveryAttribution",
+        "path_audit_row_id": "recovery1_path_audit_00067",
+        "path_audit_state": "OK",
+        "path_length": 110,
+        "physical_filename": "PR168_RECOVERY1_RecoveryAttribution.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_RecoveryQuality",
+        "path_audit_row_id": "recovery1_path_audit_00068",
+        "path_audit_state": "OK",
+        "path_length": 106,
+        "physical_filename": "PR168_RECOVERY1_RecoveryQuality.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_ModelRiskFDR",
+        "path_audit_row_id": "recovery1_path_audit_00069",
+        "path_audit_state": "OK",
+        "path_length": 103,
+        "physical_filename": "PR168_RECOVERY1_ModelRiskFDR.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_CalibrationLCB",
+        "path_audit_row_id": "recovery1_path_audit_00070",
+        "path_audit_state": "OK",
+        "path_length": 105,
+        "physical_filename": "PR168_RECOVERY1_CalibrationLCB.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_RankReadiness",
+        "path_audit_row_id": "recovery1_path_audit_00071",
+        "path_audit_state": "OK",
+        "path_length": 104,
+        "physical_filename": "PR168_RECOVERY1_RankReadiness.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_RP5Rank4QOPT1Readiness",
+        "path_audit_row_id": "recovery1_path_audit_00072",
+        "path_audit_state": "OK",
+        "path_length": 113,
+        "physical_filename": "PR168_RECOVERY1_RP5Rank4QOPT1Readiness.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_LaunchUtilityScore",
+        "path_audit_row_id": "recovery1_path_audit_00073",
+        "path_audit_state": "OK",
+        "path_length": 109,
+        "physical_filename": "PR168_RECOVERY1_LaunchUtilityScore.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_PaperLoopReadiness",
+        "path_audit_row_id": "recovery1_path_audit_00074",
+        "path_audit_state": "OK",
+        "path_length": 109,
+        "physical_filename": "PR168_RECOVERY1_PaperLoopReadiness.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_FutureLiveGateReadinessCandidate",
+        "path_audit_row_id": "recovery1_path_audit_00075",
+        "path_audit_state": "OK",
+        "path_length": 123,
+        "physical_filename": "PR168_RECOVERY1_FutureLiveGateReadinessCandidate.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_QRepair",
+        "path_audit_row_id": "recovery1_path_audit_00076",
+        "path_audit_state": "OK",
+        "path_length": 98,
+        "physical_filename": "PR168_RECOVERY1_QRepair.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_QCoefficients",
+        "path_audit_row_id": "recovery1_path_audit_00077",
+        "path_audit_state": "OK",
+        "path_length": 104,
+        "physical_filename": "PR168_RECOVERY1_QCoefficients.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_QConstraints",
+        "path_audit_row_id": "recovery1_path_audit_00078",
+        "path_audit_state": "OK",
+        "path_length": 103,
+        "physical_filename": "PR168_RECOVERY1_QConstraints.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_QFallback",
+        "path_audit_row_id": "recovery1_path_audit_00079",
+        "path_audit_state": "OK",
+        "path_length": 100,
+        "physical_filename": "PR168_RECOVERY1_QFallback.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_QInterpret",
+        "path_audit_row_id": "recovery1_path_audit_00080",
+        "path_audit_state": "OK",
+        "path_length": 101,
+        "physical_filename": "PR168_RECOVERY1_QInterpret.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_ToQOPT1",
+        "path_audit_row_id": "recovery1_path_audit_00081",
+        "path_audit_state": "OK",
+        "path_length": 98,
+        "physical_filename": "PR168_RECOVERY1_ToQOPT1.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_QClassicalRepairCompare",
+        "path_audit_row_id": "recovery1_path_audit_00082",
+        "path_audit_state": "OK",
+        "path_length": 114,
+        "physical_filename": "PR168_RECOVERY1_QClassicalRepairCompare.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_QRepairPriority",
+        "path_audit_row_id": "recovery1_path_audit_00083",
+        "path_audit_state": "OK",
+        "path_length": 106,
+        "physical_filename": "PR168_RECOVERY1_QRepairPriority.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_QConstraintQuality",
+        "path_audit_row_id": "recovery1_path_audit_00084",
+        "path_audit_state": "OK",
+        "path_length": 109,
+        "physical_filename": "PR168_RECOVERY1_QConstraintQuality.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_QPenaltyScalingRepair",
+        "path_audit_row_id": "recovery1_path_audit_00085",
+        "path_audit_state": "OK",
+        "path_length": 112,
+        "physical_filename": "PR168_RECOVERY1_QPenaltyScalingRepair.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_QInterpretBackCoverage",
+        "path_audit_row_id": "recovery1_path_audit_00086",
+        "path_audit_state": "OK",
+        "path_length": 113,
+        "physical_filename": "PR168_RECOVERY1_QInterpretBackCoverage.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_ToPR165B",
+        "path_audit_row_id": "recovery1_path_audit_00087",
+        "path_audit_state": "OK",
+        "path_length": 99,
+        "physical_filename": "PR168_RECOVERY1_ToPR165B.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_ToPR165C",
+        "path_audit_row_id": "recovery1_path_audit_00088",
+        "path_audit_state": "OK",
+        "path_length": 99,
+        "physical_filename": "PR168_RECOVERY1_ToPR165C.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_AgentLearningDelta",
+        "path_audit_row_id": "recovery1_path_audit_00089",
+        "path_audit_state": "OK",
+        "path_length": 109,
+        "physical_filename": "PR168_RECOVERY1_AgentLearningDelta.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_RegimeMemoryUpdate",
+        "path_audit_row_id": "recovery1_path_audit_00090",
+        "path_audit_state": "OK",
+        "path_length": 109,
+        "physical_filename": "PR168_RECOVERY1_RegimeMemoryUpdate.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_RetestCooldown",
+        "path_audit_row_id": "recovery1_path_audit_00091",
+        "path_audit_state": "OK",
+        "path_length": 105,
+        "physical_filename": "PR168_RECOVERY1_RetestCooldown.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_RepairImpactMemory",
+        "path_audit_row_id": "recovery1_path_audit_00092",
+        "path_audit_state": "OK",
+        "path_length": 109,
+        "physical_filename": "PR168_RECOVERY1_RepairImpactMemory.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_RepairFailureMemory",
+        "path_audit_row_id": "recovery1_path_audit_00093",
+        "path_audit_state": "OK",
+        "path_length": 110,
+        "physical_filename": "PR168_RECOVERY1_RepairFailureMemory.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_ToRP5Rank4QOPT1",
+        "path_audit_row_id": "recovery1_path_audit_00094",
+        "path_audit_state": "OK",
+        "path_length": 106,
+        "physical_filename": "PR168_RECOVERY1_ToRP5Rank4QOPT1.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_ToDATA1BFollowup",
+        "path_audit_row_id": "recovery1_path_audit_00095",
+        "path_audit_state": "OK",
+        "path_length": 107,
+        "physical_filename": "PR168_RECOVERY1_ToDATA1BFollowup.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_ToMAP4Followup",
+        "path_audit_row_id": "recovery1_path_audit_00096",
+        "path_audit_state": "OK",
+        "path_length": 105,
+        "physical_filename": "PR168_RECOVERY1_ToMAP4Followup.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_ToSourceProvenanceFollowup",
+        "path_audit_row_id": "recovery1_path_audit_00097",
+        "path_audit_state": "OK",
+        "path_length": 117,
+        "physical_filename": "PR168_RECOVERY1_ToSourceProvenanceFollowup.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_ToPR162EQ",
+        "path_audit_row_id": "recovery1_path_audit_00098",
+        "path_audit_state": "OK",
+        "path_length": 100,
+        "physical_filename": "PR168_RECOVERY1_ToPR162EQ.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_Dashboard",
+        "path_audit_row_id": "recovery1_path_audit_00099",
+        "path_audit_state": "OK",
+        "path_length": 100,
+        "physical_filename": "PR168_RECOVERY1_Dashboard.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_Operator",
+        "path_audit_row_id": "recovery1_path_audit_00100",
+        "path_audit_state": "OK",
+        "path_length": 99,
+        "physical_filename": "PR168_RECOVERY1_Operator.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_AgentDAG",
+        "path_audit_row_id": "recovery1_path_audit_00101",
+        "path_audit_state": "OK",
+        "path_length": 99,
+        "physical_filename": "PR168_RECOVERY1_AgentDAG.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_EveryValue",
+        "path_audit_row_id": "recovery1_path_audit_00102",
+        "path_audit_state": "OK",
+        "path_length": 101,
+        "physical_filename": "PR168_RECOVERY1_EveryValue.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_OnlineVerifyCoverage",
+        "path_audit_row_id": "recovery1_path_audit_00103",
+        "path_audit_state": "OK",
+        "path_length": 111,
+        "physical_filename": "PR168_RECOVERY1_OnlineVerifyCoverage.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_WebSourceUse",
+        "path_audit_row_id": "recovery1_path_audit_00104",
+        "path_audit_state": "OK",
+        "path_length": 103,
+        "physical_filename": "PR168_RECOVERY1_WebSourceUse.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_EndpointDrift",
+        "path_audit_row_id": "recovery1_path_audit_00105",
+        "path_audit_state": "OK",
+        "path_length": 104,
+        "physical_filename": "PR168_RECOVERY1_EndpointDrift.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_DeepOnlineSearchPlan",
+        "path_audit_row_id": "recovery1_path_audit_00106",
+        "path_audit_state": "OK",
+        "path_length": 111,
+        "physical_filename": "PR168_RECOVERY1_DeepOnlineSearchPlan.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_DeepOnlineSearchCoverage",
+        "path_audit_row_id": "recovery1_path_audit_00107",
+        "path_audit_state": "OK",
+        "path_length": 115,
+        "physical_filename": "PR168_RECOVERY1_DeepOnlineSearchCoverage.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_SearchPassLedger",
+        "path_audit_row_id": "recovery1_path_audit_00108",
+        "path_audit_state": "OK",
+        "path_length": 107,
+        "physical_filename": "PR168_RECOVERY1_SearchPassLedger.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_SourceContradictionAudit",
+        "path_audit_row_id": "recovery1_path_audit_00109",
+        "path_audit_state": "OK",
+        "path_length": 115,
+        "physical_filename": "PR168_RECOVERY1_SourceContradictionAudit.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_SourceRecencyAudit",
+        "path_audit_row_id": "recovery1_path_audit_00110",
+        "path_audit_state": "OK",
+        "path_length": 109,
+        "physical_filename": "PR168_RECOVERY1_SourceRecencyAudit.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_SourceToRetestMaterialization",
+        "path_audit_row_id": "recovery1_path_audit_00111",
+        "path_audit_state": "OK",
+        "path_length": 120,
+        "physical_filename": "PR168_RECOVERY1_SourceToRetestMaterialization.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_SourceFormulaInputFill",
+        "path_audit_row_id": "recovery1_path_audit_00112",
+        "path_audit_state": "OK",
+        "path_length": 113,
+        "physical_filename": "PR168_RECOVERY1_SourceFormulaInputFill.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_SourceDerivedThresholds",
+        "path_audit_row_id": "recovery1_path_audit_00113",
+        "path_audit_state": "OK",
+        "path_length": 114,
+        "physical_filename": "PR168_RECOVERY1_SourceDerivedThresholds.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_SourceRepairIdeaDedupe",
+        "path_audit_row_id": "recovery1_path_audit_00114",
+        "path_audit_state": "OK",
+        "path_length": 113,
+        "physical_filename": "PR168_RECOVERY1_SourceRepairIdeaDedupe.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_RepairPortfolioBudget",
+        "path_audit_row_id": "recovery1_path_audit_00115",
+        "path_audit_state": "OK",
+        "path_length": 112,
+        "physical_filename": "PR168_RECOVERY1_RepairPortfolioBudget.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_CandidateRepairBatch",
+        "path_audit_row_id": "recovery1_path_audit_00116",
+        "path_audit_state": "OK",
+        "path_length": 111,
+        "physical_filename": "PR168_RECOVERY1_CandidateRepairBatch.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_StackFamilyRetest",
+        "path_audit_row_id": "recovery1_path_audit_00117",
+        "path_audit_state": "OK",
+        "path_length": 108,
+        "physical_filename": "PR168_RECOVERY1_StackFamilyRetest.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_RepairBatchRetest",
+        "path_audit_row_id": "recovery1_path_audit_00118",
+        "path_audit_state": "OK",
+        "path_length": 108,
+        "physical_filename": "PR168_RECOVERY1_RepairBatchRetest.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_MarginalRepairUtility",
+        "path_audit_row_id": "recovery1_path_audit_00119",
+        "path_audit_state": "OK",
+        "path_length": 112,
+        "physical_filename": "PR168_RECOVERY1_MarginalRepairUtility.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_RepairCooldown",
+        "path_audit_row_id": "recovery1_path_audit_00120",
+        "path_audit_state": "OK",
+        "path_length": 105,
+        "physical_filename": "PR168_RECOVERY1_RepairCooldown.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_RP5Rank4QOPT1InputPack",
+        "path_audit_row_id": "recovery1_path_audit_00121",
+        "path_audit_state": "OK",
+        "path_length": 113,
+        "physical_filename": "PR168_RECOVERY1_RP5Rank4QOPT1InputPack.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_RepairPortfolioSelection",
+        "path_audit_row_id": "recovery1_path_audit_00122",
+        "path_audit_state": "OK",
+        "path_length": 115,
+        "physical_filename": "PR168_RECOVERY1_RepairPortfolioSelection.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_RP5ReadyBatch",
+        "path_audit_row_id": "recovery1_path_audit_00123",
+        "path_audit_state": "OK",
+        "path_length": 104,
+        "physical_filename": "PR168_RECOVERY1_RP5ReadyBatch.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_RANK4FeatureReadyBatch",
+        "path_audit_row_id": "recovery1_path_audit_00124",
+        "path_audit_state": "OK",
+        "path_length": 113,
+        "physical_filename": "PR168_RECOVERY1_RANK4FeatureReadyBatch.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_QOPT1ReadyBatch",
+        "path_audit_row_id": "recovery1_path_audit_00125",
+        "path_audit_state": "OK",
+        "path_length": 106,
+        "physical_filename": "PR168_RECOVERY1_QOPT1ReadyBatch.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_PaperLoopSeedBatch",
+        "path_audit_row_id": "recovery1_path_audit_00126",
+        "path_audit_state": "OK",
+        "path_length": 109,
+        "physical_filename": "PR168_RECOVERY1_PaperLoopSeedBatch.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_CandidateInputConfidence",
+        "path_audit_row_id": "recovery1_path_audit_00127",
+        "path_audit_state": "OK",
+        "path_length": 115,
+        "physical_filename": "PR168_RECOVERY1_CandidateInputConfidence.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_AssumptionDeltaAudit",
+        "path_audit_row_id": "recovery1_path_audit_00128",
+        "path_audit_state": "OK",
+        "path_length": 111,
+        "physical_filename": "PR168_RECOVERY1_AssumptionDeltaAudit.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_NoNewInputNoRetest",
+        "path_audit_row_id": "recovery1_path_audit_00129",
+        "path_audit_state": "OK",
+        "path_length": 109,
+        "physical_filename": "PR168_RECOVERY1_NoNewInputNoRetest.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_WorkItems",
+        "path_audit_row_id": "recovery1_path_audit_00130",
+        "path_audit_state": "OK",
+        "path_length": 100,
+        "physical_filename": "PR168_RECOVERY1_WorkItems.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_SharedCurrentizationPlan",
+        "path_audit_row_id": "recovery1_path_audit_00131",
+        "path_audit_state": "OK",
+        "path_length": 115,
+        "physical_filename": "PR168_RECOVERY1_SharedCurrentizationPlan.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_ValidationScopeDelta",
+        "path_audit_row_id": "recovery1_path_audit_00132",
+        "path_audit_state": "OK",
+        "path_length": 111,
+        "physical_filename": "PR168_RECOVERY1_ValidationScopeDelta.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_SideEffectCleanupAudit",
+        "path_audit_row_id": "recovery1_path_audit_00133",
+        "path_audit_state": "OK",
+        "path_length": 113,
+        "physical_filename": "PR168_RECOVERY1_SideEffectCleanupAudit.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_StagedPatchAudit",
+        "path_audit_row_id": "recovery1_path_audit_00134",
+        "path_audit_state": "OK",
+        "path_length": 107,
+        "physical_filename": "PR168_RECOVERY1_StagedPatchAudit.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_ValidationRuntimeBudget",
+        "path_audit_row_id": "recovery1_path_audit_00135",
+        "path_audit_state": "OK",
+        "path_length": 114,
+        "physical_filename": "PR168_RECOVERY1_ValidationRuntimeBudget.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_CIShardImpactAudit",
+        "path_audit_row_id": "recovery1_path_audit_00136",
+        "path_audit_state": "OK",
+        "path_length": 109,
+        "physical_filename": "PR168_RECOVERY1_CIShardImpactAudit.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_LocalValidationStrategy",
+        "path_audit_row_id": "recovery1_path_audit_00137",
+        "path_audit_state": "OK",
+        "path_length": 114,
+        "physical_filename": "PR168_RECOVERY1_LocalValidationStrategy.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_CurrentizationNeedAudit",
+        "path_audit_row_id": "recovery1_path_audit_00138",
+        "path_audit_state": "OK",
+        "path_length": 114,
+        "physical_filename": "PR168_RECOVERY1_CurrentizationNeedAudit.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_FileAliases",
+        "path_audit_row_id": "recovery1_path_audit_00139",
+        "path_audit_state": "OK",
+        "path_length": 102,
+        "physical_filename": "PR168_RECOVERY1_FileAliases.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_PathAudit",
+        "path_audit_row_id": "recovery1_path_audit_00140",
+        "path_audit_state": "OK",
+        "path_length": 100,
+        "physical_filename": "PR168_RECOVERY1_PathAudit.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      },
+      {
+        "hard_fail_physical_path_length": 240,
+        "logical_report_id": "PR168_RECOVERY1_FinalSummary",
+        "path_audit_row_id": "recovery1_path_audit_00141",
+        "path_audit_state": "OK",
+        "path_length": 103,
+        "physical_filename": "PR168_RECOVERY1_FinalSummary.report.json",
+        "preferred_max_physical_path_length": 180,
+        "warning_threshold_physical_path_length": 200
+      }
+    ]
+  },
+  "repair_route_if_gap": null,
+  "replay_refs": [],
+  "report_version": "PR168-RECOVERY1-v1.0",
+  "row_shard_refs_if_any": [
+    "docs/master_plan/generated/recovery1/every_value_rows.jsonl"
+  ],
+  "scenario_refs": [],
+  "source_provenance_refs": [],
+  "source_provenance_refs_if_any": [],
+  "source_truth_acceptance_created_flag": false,
+  "stack_refs": [],
+  "stack_refs_if_any": [],
+  "terminal_by_nature_flag": false,
+  "terminal_reason_code": null,
+  "terminal_reason_if_terminal": null,
+  "test_refs": [
+    "tests/pr168_recovery1"
+  ],
+  "upstream_input_refs": [
+    "PR168_RANK3_FinalSummary.report.json",
+    "PR168_RP3_FinalSummary.report.json"
+  ],
+  "upstream_refs": [
+    "PR168_RANK3_FinalSummary.report.json",
+    "PR168_RP3_FinalSummary.report.json"
+  ],
+  "validator_refs": [
+    "tools/validate_pr168_recovery1.py",
+    "tools/pr168_recovery1_validator.py"
+  ]
+}

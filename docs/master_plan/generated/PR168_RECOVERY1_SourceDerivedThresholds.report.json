@@ -1,0 +1,737 @@
+{
+  "DATA1A_refs": [
+    "PR168_DATA1A_FinalSummary.report.json"
+  ],
+  "DATA1_refs": [
+    "PR168_DATA1_FinalSummary.report.json"
+  ],
+  "GFP2R_refs": [
+    "PR168_GFP2R_FinalSummary.report.json"
+  ],
+  "MAP3_refs": [
+    "PR168_MAP3_FinalSummary.report.json"
+  ],
+  "PR162E_Q_refs_if_any": [
+    "PR162E-Q"
+  ],
+  "PR162E_refs_if_any": [
+    "PR162E"
+  ],
+  "PR165_memory_refs_if_any": [
+    "PR165-B",
+    "PR165-C",
+    "PR165-D2"
+  ],
+  "PR166_Q_refs_if_any": [
+    "PR166-Q/QB/QC"
+  ],
+  "PR167_refs_if_any": [
+    "PR167"
+  ],
+  "RANK3_refs": [
+    "PR168_RANK3_FinalSummary.report.json",
+    "docs/master_plan/generated/rank3"
+  ],
+  "RP2_refs_if_any": [],
+  "RP3_refs": [
+    "PR168_RP3_FinalSummary.report.json",
+    "docs/master_plan/generated/rp3"
+  ],
+  "TCA_refs": [],
+  "accepted_truth_flag": false,
+  "alias_registry_ref": "docs/master_plan/generated/PR168_RECOVERY1_FileAliases.report.json",
+  "authority_class": "RECOVERY1_REPLAY_PAPER_REPAIR_CANDIDATE_NON_PROOF",
+  "candidate_only_flag": true,
+  "capacity_refs": [],
+  "cash_access_created_flag": false,
+  "champion_allowed_flag": false,
+  "computed_from_refs": [],
+  "connector_binding_created_flag": false,
+  "connector_semantic_binding_created_flag": false,
+  "consumer_agents": [
+    "recovery1_retest_agent",
+    "RP5_RANK4_QOPT1_agent",
+    "source_provenance_followup_agent"
+  ],
+  "created_at_utc": "2026-06-23T00:00:00Z",
+  "created_by_tool": "tools/build_pr168_recovery1.py",
+  "data_provenance_refs": [],
+  "downstream_consumers": [
+    "recovery1_retest_agent",
+    "RP5_RANK4_QOPT1_agent",
+    "source_provenance_followup_agent"
+  ],
+  "downstream_pr_refs": [
+    "PR168-RP5-RANK4-QOPT1",
+    "PR168-DATA1B",
+    "PR168-MAP4",
+    "PR168-SOURCE-PROVENANCE",
+    "PR165-B",
+    "PR165-C",
+    "PR162E-Q",
+    "FUTURE-PAPER-LOOP",
+    "DASHBOARD-OPERATOR"
+  ],
+  "fill_refs": [],
+  "formula_refs": [],
+  "latency_refs": [],
+  "live_authority_created_flag": false,
+  "live_candidate_allowed_flag": false,
+  "live_order_authority_flag": false,
+  "live_order_receipt_created_flag": false,
+  "logical_report_id": "PR168_RECOVERY1_SourceDerivedThresholds",
+  "manual_edit_allowed_flag": false,
+  "market_instantiation_refs": [],
+  "no_orphan_status": "NO_ORPHAN",
+  "no_trade_refs": [],
+  "numeric_evidence_refs": [],
+  "order_authority_created_flag": false,
+  "owning_agent": "recovery1_source_provenance_agent",
+  "paper_refs": [],
+  "path_audit_ref": "docs/master_plan/generated/PR168_RECOVERY1_PathAudit.report.json",
+  "physical_filename": "PR168_RECOVERY1_SourceDerivedThresholds.report.json",
+  "private_cash_receipt_created_flag": false,
+  "private_state_access_created_flag": false,
+  "private_state_or_cash_access_created_flag": false,
+  "profit_evidence_created_flag": false,
+  "profit_evidence_flag": false,
+  "qtt_sha_or_atomicrows_hash_authority_flag": false,
+  "quantum_advantage_claim_flag": false,
+  "quantum_backend_execution_flag": false,
+  "quantum_refs": [],
+  "records": {
+    "rows": [
+      {
+        "DATA1A_refs": [],
+        "DATA1_refs": [],
+        "GFP2R_refs": [],
+        "MAP3_refs": [],
+        "PR162E_Q_refs_if_any": [],
+        "PR162E_refs_if_any": [],
+        "PR165_memory_refs_if_any": [],
+        "PR166_Q_refs_if_any": [],
+        "PR167_refs_if_any": [],
+        "RANK3_refs": [
+          "rank3_source_resolution_00001"
+        ],
+        "RP2_refs_if_any": [],
+        "RP3_refs": [],
+        "TCA_refs": [],
+        "accepted_truth_flag": false,
+        "authority_class": "RECOVERY1_REPLAY_PAPER_REPAIR_CANDIDATE_NON_PROOF",
+        "candidate_only_flag": true,
+        "candidate_value_or_semantic_repair": "SOURCE_MAPPED_CANDIDATE_NON_PROOF",
+        "capacity_refs": [],
+        "cash_access_created_flag": false,
+        "champion_allowed_flag": false,
+        "computed_from_refs": [],
+        "connector_binding_created_flag": false,
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "recovery1_retest_agent",
+          "RP5_RANK4_QOPT1_agent",
+          "source_provenance_followup_agent"
+        ],
+        "data_provenance_refs": [],
+        "downstream_consumers": [
+          "recovery1_retest_agent",
+          "RP5_RANK4_QOPT1_agent",
+          "source_provenance_followup_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-RP5-RANK4-QOPT1",
+          "PR168-DATA1B",
+          "PR168-MAP4",
+          "PR168-SOURCE-PROVENANCE",
+          "PR165-B",
+          "PR165-C",
+          "PR162E-Q",
+          "FUTURE-PAPER-LOOP",
+          "DASHBOARD-OPERATOR"
+        ],
+        "fill_refs": [],
+        "formula_id_if_any": "FORM_MAP3_FDR_CPCV_001",
+        "formula_refs": [
+          "FORM_MAP3_FDR_CPCV_001"
+        ],
+        "input_field_target": "formula_source_reliability_or_threshold",
+        "latency_refs": [],
+        "live_authority_created_flag": false,
+        "live_candidate_allowed_flag": false,
+        "live_order_authority_flag": false,
+        "live_order_receipt_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "market_instantiation_refs": [],
+        "memory_route": "PR165B_DATA_PROVENANCE_MEMORY",
+        "no_orphan_status": "NO_ORPHAN",
+        "no_trade_refs": [],
+        "numeric_evidence_refs": [],
+        "order_authority_created_flag": false,
+        "owning_agent": "recovery1_source_provenance_agent",
+        "paper_refs": [],
+        "private_cash_receipt_created_flag": false,
+        "private_state_access_created_flag": false,
+        "private_state_or_cash_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "profit_evidence_flag": false,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "quantum_refs": [],
+        "rank_route": "RP5_RANK4_SOURCE_FEATURE_OR_PENALTY",
+        "reject_reason_if_any": null,
+        "rejected_flag": false,
+        "reliability_penalty": 0.08,
+        "repair_route_if_gap": null,
+        "replay_refs": [],
+        "retest_route": "SOURCE_PROVENANCE_REPAIR_REQUIRED_AND_RP4_INPUT_RETEST",
+        "row_shard_refs_if_any": [],
+        "scenario_refs": [],
+        "source_provenance_refs": [
+          "rp3_web_source_00035",
+          "rp3_web_source_00034"
+        ],
+        "source_provenance_refs_if_any": [
+          "rp3_web_source_00035",
+          "rp3_web_source_00034"
+        ],
+        "source_to_retest_mapping_status": "FORMULA_INPUT_CANDIDATE_MAPPED",
+        "source_to_retest_row_id": "recovery1_source_to_retest_00001",
+        "source_truth_acceptance_created_flag": false,
+        "source_use_ref": "recovery1_source_provenance_00001",
+        "stack_id_if_any": null,
+        "stack_refs": [],
+        "stack_refs_if_any": [],
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "terminal_reason_if_terminal": null,
+        "test_refs": [
+          "tests/pr168_recovery1"
+        ],
+        "unit_normalization_target": "candidate_formula_input_semantics",
+        "upstream_input_refs": [
+          "rank3_source_resolution_00001"
+        ],
+        "upstream_refs": [
+          "rank3_source_resolution_00001"
+        ],
+        "validator_refs": [
+          "tools/validate_pr168_recovery1.py",
+          "tools/pr168_recovery1_validator.py"
+        ],
+        "work_item_ref": "recovery1_wi_source_00001"
+      },
+      {
+        "DATA1A_refs": [],
+        "DATA1_refs": [],
+        "GFP2R_refs": [],
+        "MAP3_refs": [],
+        "PR162E_Q_refs_if_any": [],
+        "PR162E_refs_if_any": [],
+        "PR165_memory_refs_if_any": [],
+        "PR166_Q_refs_if_any": [],
+        "PR167_refs_if_any": [],
+        "RANK3_refs": [
+          "rank3_source_resolution_00002"
+        ],
+        "RP2_refs_if_any": [],
+        "RP3_refs": [],
+        "TCA_refs": [],
+        "accepted_truth_flag": false,
+        "authority_class": "RECOVERY1_REPLAY_PAPER_REPAIR_CANDIDATE_NON_PROOF",
+        "candidate_only_flag": true,
+        "candidate_value_or_semantic_repair": "SOURCE_MAPPED_CANDIDATE_NON_PROOF",
+        "capacity_refs": [],
+        "cash_access_created_flag": false,
+        "champion_allowed_flag": false,
+        "computed_from_refs": [],
+        "connector_binding_created_flag": false,
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "recovery1_retest_agent",
+          "RP5_RANK4_QOPT1_agent",
+          "source_provenance_followup_agent"
+        ],
+        "data_provenance_refs": [],
+        "downstream_consumers": [
+          "recovery1_retest_agent",
+          "RP5_RANK4_QOPT1_agent",
+          "source_provenance_followup_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-RP5-RANK4-QOPT1",
+          "PR168-DATA1B",
+          "PR168-MAP4",
+          "PR168-SOURCE-PROVENANCE",
+          "PR165-B",
+          "PR165-C",
+          "PR162E-Q",
+          "FUTURE-PAPER-LOOP",
+          "DASHBOARD-OPERATOR"
+        ],
+        "fill_refs": [],
+        "formula_id_if_any": "FORM_MAP3_IBKR_001",
+        "formula_refs": [
+          "FORM_MAP3_IBKR_001"
+        ],
+        "input_field_target": "formula_source_reliability_or_threshold",
+        "latency_refs": [],
+        "live_authority_created_flag": false,
+        "live_candidate_allowed_flag": false,
+        "live_order_authority_flag": false,
+        "live_order_receipt_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "market_instantiation_refs": [],
+        "memory_route": "PR165B_DATA_PROVENANCE_MEMORY",
+        "no_orphan_status": "NO_ORPHAN",
+        "no_trade_refs": [],
+        "numeric_evidence_refs": [],
+        "order_authority_created_flag": false,
+        "owning_agent": "recovery1_source_provenance_agent",
+        "paper_refs": [],
+        "private_cash_receipt_created_flag": false,
+        "private_state_access_created_flag": false,
+        "private_state_or_cash_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "profit_evidence_flag": false,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "quantum_refs": [],
+        "rank_route": "RP5_RANK4_SOURCE_FEATURE_OR_PENALTY",
+        "reject_reason_if_any": null,
+        "rejected_flag": false,
+        "reliability_penalty": 0.08,
+        "repair_route_if_gap": null,
+        "replay_refs": [],
+        "retest_route": "SOURCE_PROVENANCE_REPAIR_REQUIRED_AND_RP4_INPUT_RETEST",
+        "row_shard_refs_if_any": [],
+        "scenario_refs": [],
+        "source_provenance_refs": [
+          "rp3_web_source_00046",
+          "rp3_web_source_00047"
+        ],
+        "source_provenance_refs_if_any": [
+          "rp3_web_source_00046",
+          "rp3_web_source_00047"
+        ],
+        "source_to_retest_mapping_status": "FORMULA_INPUT_CANDIDATE_MAPPED",
+        "source_to_retest_row_id": "recovery1_source_to_retest_00002",
+        "source_truth_acceptance_created_flag": false,
+        "source_use_ref": "recovery1_source_provenance_00002",
+        "stack_id_if_any": null,
+        "stack_refs": [],
+        "stack_refs_if_any": [],
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "terminal_reason_if_terminal": null,
+        "test_refs": [
+          "tests/pr168_recovery1"
+        ],
+        "unit_normalization_target": "candidate_formula_input_semantics",
+        "upstream_input_refs": [
+          "rank3_source_resolution_00002"
+        ],
+        "upstream_refs": [
+          "rank3_source_resolution_00002"
+        ],
+        "validator_refs": [
+          "tools/validate_pr168_recovery1.py",
+          "tools/pr168_recovery1_validator.py"
+        ],
+        "work_item_ref": "recovery1_wi_source_00002"
+      },
+      {
+        "DATA1A_refs": [],
+        "DATA1_refs": [],
+        "GFP2R_refs": [],
+        "MAP3_refs": [],
+        "PR162E_Q_refs_if_any": [],
+        "PR162E_refs_if_any": [],
+        "PR165_memory_refs_if_any": [],
+        "PR166_Q_refs_if_any": [],
+        "PR167_refs_if_any": [],
+        "RANK3_refs": [
+          "rank3_source_resolution_00003"
+        ],
+        "RP2_refs_if_any": [],
+        "RP3_refs": [],
+        "TCA_refs": [],
+        "accepted_truth_flag": false,
+        "authority_class": "RECOVERY1_REPLAY_PAPER_REPAIR_CANDIDATE_NON_PROOF",
+        "candidate_only_flag": true,
+        "candidate_value_or_semantic_repair": "SOURCE_MAPPED_CANDIDATE_NON_PROOF",
+        "capacity_refs": [],
+        "cash_access_created_flag": false,
+        "champion_allowed_flag": false,
+        "computed_from_refs": [],
+        "connector_binding_created_flag": false,
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "recovery1_retest_agent",
+          "RP5_RANK4_QOPT1_agent",
+          "source_provenance_followup_agent"
+        ],
+        "data_provenance_refs": [],
+        "downstream_consumers": [
+          "recovery1_retest_agent",
+          "RP5_RANK4_QOPT1_agent",
+          "source_provenance_followup_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-RP5-RANK4-QOPT1",
+          "PR168-DATA1B",
+          "PR168-MAP4",
+          "PR168-SOURCE-PROVENANCE",
+          "PR165-B",
+          "PR165-C",
+          "PR162E-Q",
+          "FUTURE-PAPER-LOOP",
+          "DASHBOARD-OPERATOR"
+        ],
+        "fill_refs": [],
+        "formula_id_if_any": "FORM_MAP3_KALSHI_TICK_001",
+        "formula_refs": [
+          "FORM_MAP3_KALSHI_TICK_001"
+        ],
+        "input_field_target": "formula_source_reliability_or_threshold",
+        "latency_refs": [],
+        "live_authority_created_flag": false,
+        "live_candidate_allowed_flag": false,
+        "live_order_authority_flag": false,
+        "live_order_receipt_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "market_instantiation_refs": [],
+        "memory_route": "PR165B_DATA_PROVENANCE_MEMORY",
+        "no_orphan_status": "NO_ORPHAN",
+        "no_trade_refs": [],
+        "numeric_evidence_refs": [],
+        "order_authority_created_flag": false,
+        "owning_agent": "recovery1_source_provenance_agent",
+        "paper_refs": [],
+        "private_cash_receipt_created_flag": false,
+        "private_state_access_created_flag": false,
+        "private_state_or_cash_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "profit_evidence_flag": false,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "quantum_refs": [],
+        "rank_route": "RP5_RANK4_SOURCE_FEATURE_OR_PENALTY",
+        "reject_reason_if_any": null,
+        "rejected_flag": false,
+        "reliability_penalty": 0.08,
+        "repair_route_if_gap": null,
+        "replay_refs": [],
+        "retest_route": "SOURCE_PROVENANCE_REPAIR_REQUIRED_AND_RP4_INPUT_RETEST",
+        "row_shard_refs_if_any": [],
+        "scenario_refs": [],
+        "source_provenance_refs": [
+          "rp3_web_source_00010",
+          "rp3_web_source_00001"
+        ],
+        "source_provenance_refs_if_any": [
+          "rp3_web_source_00010",
+          "rp3_web_source_00001"
+        ],
+        "source_to_retest_mapping_status": "FORMULA_INPUT_CANDIDATE_MAPPED",
+        "source_to_retest_row_id": "recovery1_source_to_retest_00003",
+        "source_truth_acceptance_created_flag": false,
+        "source_use_ref": "recovery1_source_provenance_00003",
+        "stack_id_if_any": null,
+        "stack_refs": [],
+        "stack_refs_if_any": [],
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "terminal_reason_if_terminal": null,
+        "test_refs": [
+          "tests/pr168_recovery1"
+        ],
+        "unit_normalization_target": "candidate_formula_input_semantics",
+        "upstream_input_refs": [
+          "rank3_source_resolution_00003"
+        ],
+        "upstream_refs": [
+          "rank3_source_resolution_00003"
+        ],
+        "validator_refs": [
+          "tools/validate_pr168_recovery1.py",
+          "tools/pr168_recovery1_validator.py"
+        ],
+        "work_item_ref": "recovery1_wi_source_00003"
+      },
+      {
+        "DATA1A_refs": [],
+        "DATA1_refs": [],
+        "GFP2R_refs": [],
+        "MAP3_refs": [],
+        "PR162E_Q_refs_if_any": [],
+        "PR162E_refs_if_any": [],
+        "PR165_memory_refs_if_any": [],
+        "PR166_Q_refs_if_any": [],
+        "PR167_refs_if_any": [],
+        "RANK3_refs": [
+          "rank3_source_resolution_00004"
+        ],
+        "RP2_refs_if_any": [],
+        "RP3_refs": [],
+        "TCA_refs": [],
+        "accepted_truth_flag": false,
+        "authority_class": "RECOVERY1_REPLAY_PAPER_REPAIR_CANDIDATE_NON_PROOF",
+        "candidate_only_flag": true,
+        "candidate_value_or_semantic_repair": "SOURCE_MAPPED_CANDIDATE_NON_PROOF",
+        "capacity_refs": [],
+        "cash_access_created_flag": false,
+        "champion_allowed_flag": false,
+        "computed_from_refs": [],
+        "connector_binding_created_flag": false,
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "recovery1_retest_agent",
+          "RP5_RANK4_QOPT1_agent",
+          "source_provenance_followup_agent"
+        ],
+        "data_provenance_refs": [],
+        "downstream_consumers": [
+          "recovery1_retest_agent",
+          "RP5_RANK4_QOPT1_agent",
+          "source_provenance_followup_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-RP5-RANK4-QOPT1",
+          "PR168-DATA1B",
+          "PR168-MAP4",
+          "PR168-SOURCE-PROVENANCE",
+          "PR165-B",
+          "PR165-C",
+          "PR162E-Q",
+          "FUTURE-PAPER-LOOP",
+          "DASHBOARD-OPERATOR"
+        ],
+        "fill_refs": [],
+        "formula_id_if_any": "FORM_MAP3_PORT_KELLY_002",
+        "formula_refs": [
+          "FORM_MAP3_PORT_KELLY_002"
+        ],
+        "input_field_target": "formula_source_reliability_or_threshold",
+        "latency_refs": [],
+        "live_authority_created_flag": false,
+        "live_candidate_allowed_flag": false,
+        "live_order_authority_flag": false,
+        "live_order_receipt_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "market_instantiation_refs": [],
+        "memory_route": "PR165B_DATA_PROVENANCE_MEMORY",
+        "no_orphan_status": "NO_ORPHAN",
+        "no_trade_refs": [],
+        "numeric_evidence_refs": [],
+        "order_authority_created_flag": false,
+        "owning_agent": "recovery1_source_provenance_agent",
+        "paper_refs": [],
+        "private_cash_receipt_created_flag": false,
+        "private_state_access_created_flag": false,
+        "private_state_or_cash_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "profit_evidence_flag": false,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "quantum_refs": [],
+        "rank_route": "RP5_RANK4_SOURCE_FEATURE_OR_PENALTY",
+        "reject_reason_if_any": null,
+        "rejected_flag": false,
+        "reliability_penalty": 0.08,
+        "repair_route_if_gap": null,
+        "replay_refs": [],
+        "retest_route": "SOURCE_PROVENANCE_REPAIR_REQUIRED_AND_RP4_INPUT_RETEST",
+        "row_shard_refs_if_any": [],
+        "scenario_refs": [],
+        "source_provenance_refs": [
+          "rp3_web_source_00036",
+          "rp3_web_source_00037"
+        ],
+        "source_provenance_refs_if_any": [
+          "rp3_web_source_00036",
+          "rp3_web_source_00037"
+        ],
+        "source_to_retest_mapping_status": "FORMULA_INPUT_CANDIDATE_MAPPED",
+        "source_to_retest_row_id": "recovery1_source_to_retest_00004",
+        "source_truth_acceptance_created_flag": false,
+        "source_use_ref": "recovery1_source_provenance_00004",
+        "stack_id_if_any": null,
+        "stack_refs": [],
+        "stack_refs_if_any": [],
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "terminal_reason_if_terminal": null,
+        "test_refs": [
+          "tests/pr168_recovery1"
+        ],
+        "unit_normalization_target": "candidate_formula_input_semantics",
+        "upstream_input_refs": [
+          "rank3_source_resolution_00004"
+        ],
+        "upstream_refs": [
+          "rank3_source_resolution_00004"
+        ],
+        "validator_refs": [
+          "tools/validate_pr168_recovery1.py",
+          "tools/pr168_recovery1_validator.py"
+        ],
+        "work_item_ref": "recovery1_wi_source_00004"
+      },
+      {
+        "DATA1A_refs": [],
+        "DATA1_refs": [],
+        "GFP2R_refs": [],
+        "MAP3_refs": [],
+        "PR162E_Q_refs_if_any": [],
+        "PR162E_refs_if_any": [],
+        "PR165_memory_refs_if_any": [],
+        "PR166_Q_refs_if_any": [],
+        "PR167_refs_if_any": [],
+        "RANK3_refs": [
+          "rank3_source_resolution_00005"
+        ],
+        "RP2_refs_if_any": [],
+        "RP3_refs": [],
+        "TCA_refs": [],
+        "accepted_truth_flag": false,
+        "authority_class": "RECOVERY1_REPLAY_PAPER_REPAIR_CANDIDATE_NON_PROOF",
+        "candidate_only_flag": true,
+        "candidate_value_or_semantic_repair": "SOURCE_MAPPED_CANDIDATE_NON_PROOF",
+        "capacity_refs": [],
+        "cash_access_created_flag": false,
+        "champion_allowed_flag": false,
+        "computed_from_refs": [],
+        "connector_binding_created_flag": false,
+        "connector_semantic_binding_created_flag": false,
+        "consumer_agents": [
+          "recovery1_retest_agent",
+          "RP5_RANK4_QOPT1_agent",
+          "source_provenance_followup_agent"
+        ],
+        "data_provenance_refs": [],
+        "downstream_consumers": [
+          "recovery1_retest_agent",
+          "RP5_RANK4_QOPT1_agent",
+          "source_provenance_followup_agent"
+        ],
+        "downstream_pr_refs": [
+          "PR168-RP5-RANK4-QOPT1",
+          "PR168-DATA1B",
+          "PR168-MAP4",
+          "PR168-SOURCE-PROVENANCE",
+          "PR165-B",
+          "PR165-C",
+          "PR162E-Q",
+          "FUTURE-PAPER-LOOP",
+          "DASHBOARD-OPERATOR"
+        ],
+        "fill_refs": [],
+        "formula_id_if_any": "FORM_MAP3_QISKIT_001",
+        "formula_refs": [
+          "FORM_MAP3_QISKIT_001"
+        ],
+        "input_field_target": "formula_source_reliability_or_threshold",
+        "latency_refs": [],
+        "live_authority_created_flag": false,
+        "live_candidate_allowed_flag": false,
+        "live_order_authority_flag": false,
+        "live_order_receipt_created_flag": false,
+        "manual_edit_allowed_flag": false,
+        "market_instantiation_refs": [],
+        "memory_route": "PR165B_DATA_PROVENANCE_MEMORY",
+        "no_orphan_status": "NO_ORPHAN",
+        "no_trade_refs": [],
+        "numeric_evidence_refs": [],
+        "order_authority_created_flag": false,
+        "owning_agent": "recovery1_source_provenance_agent",
+        "paper_refs": [],
+        "private_cash_receipt_created_flag": false,
+        "private_state_access_created_flag": false,
+        "private_state_or_cash_access_created_flag": false,
+        "profit_evidence_created_flag": false,
+        "profit_evidence_flag": false,
+        "qtt_sha_or_atomicrows_hash_authority_flag": false,
+        "quantum_advantage_claim_flag": false,
+        "quantum_backend_execution_flag": false,
+        "quantum_refs": [],
+        "rank_route": "RP5_RANK4_SOURCE_FEATURE_OR_PENALTY",
+        "reject_reason_if_any": null,
+        "rejected_flag": false,
+        "reliability_penalty": 0.08,
+        "repair_route_if_gap": null,
+        "replay_refs": [],
+        "retest_route": "SOURCE_PROVENANCE_REPAIR_REQUIRED_AND_RP4_INPUT_RETEST",
+        "row_shard_refs_if_any": [],
+        "scenario_refs": [],
+        "source_provenance_refs": [
+          "rp3_web_source_00041",
+          "rp3_web_source_00042"
+        ],
+        "source_provenance_refs_if_any": [
+          "rp3_web_source_00041",
+          "rp3_web_source_00042"
+        ],
+        "source_to_retest_mapping_status": "FORMULA_INPUT_CANDIDATE_MAPPED",
+        "source_to_retest_row_id": "recovery1_source_to_retest_00005",
+        "source_truth_acceptance_created_flag": false,
+        "source_use_ref": "recovery1_source_provenance_00005",
+        "stack_id_if_any": null,
+        "stack_refs": [],
+        "stack_refs_if_any": [],
+        "terminal_by_nature_flag": false,
+        "terminal_reason_code": null,
+        "terminal_reason_if_terminal": null,
+        "test_refs": [
+          "tests/pr168_recovery1"
+        ],
+        "unit_normalization_target": "candidate_formula_input_semantics",
+        "upstream_input_refs": [
+          "rank3_source_resolution_00005"
+        ],
+        "upstream_refs": [
+          "rank3_source_resolution_00005"
+        ],
+        "validator_refs": [
+          "tools/validate_pr168_recovery1.py",
+          "tools/pr168_recovery1_validator.py"
+        ],
+        "work_item_ref": "recovery1_wi_source_00005"
+      }
+    ],
+    "threshold_mapping_state": "THRESHOLD_CANDIDATE_OR_PENALTY_MAPPED"
+  },
+  "repair_route_if_gap": null,
+  "replay_refs": [],
+  "report_version": "PR168-RECOVERY1-v1.0",
+  "row_shard_refs_if_any": [
+    "docs/master_plan/generated/recovery1/source_to_retest_rows.jsonl"
+  ],
+  "scenario_refs": [],
+  "source_provenance_refs": [],
+  "source_provenance_refs_if_any": [],
+  "source_truth_acceptance_created_flag": false,
+  "stack_refs": [],
+  "stack_refs_if_any": [],
+  "terminal_by_nature_flag": false,
+  "terminal_reason_code": null,
+  "terminal_reason_if_terminal": null,
+  "test_refs": [
+    "tests/pr168_recovery1"
+  ],
+  "upstream_input_refs": [
+    "PR168_RANK3_FinalSummary.report.json",
+    "PR168_RP3_FinalSummary.report.json"
+  ],
+  "upstream_refs": [
+    "PR168_RANK3_FinalSummary.report.json",
+    "PR168_RP3_FinalSummary.report.json"
+  ],
+  "validator_refs": [
+    "tools/validate_pr168_recovery1.py",
+    "tools/pr168_recovery1_validator.py"
+  ]
+}
