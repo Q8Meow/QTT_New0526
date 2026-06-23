@@ -38,6 +38,7 @@ PR168_GFP2R_BRANCH = registry.PR168_GFP2R_BRANCH
 PR168_RP2_BRANCH = registry.PR168_RP2_BRANCH
 PR168_MAP3_BRANCH = registry.PR168_MAP3_BRANCH
 PR168_RP3_BRANCH = registry.PR168_RP3_BRANCH
+PR168_RANK3_BRANCH = registry.PR168_RANK3_BRANCH
 FIXTURE_BRANCH = registry.VALIDATION_FIXTURE_BRANCH
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
@@ -221,6 +222,25 @@ def test_pr168_map3_allowed_paths_pass_on_real_branch(path: str) -> None:
 )
 def test_pr168_rp3_allowed_paths_pass_on_real_branch(path: str) -> None:
     assert registry.is_pr_scoped_changed_path_allowed(PR168_RP3_BRANCH, path)
+    assert registry.is_pr_scoped_changed_path_allowed(FIXTURE_BRANCH, path)
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        "docs/master_plan/generated/PR168_RANK3_FinalSummary.report.json",
+        "docs/master_plan/generated/PR168_RANK3_FeatureMatrix.report.json",
+        "docs/master_plan/generated/rank3/feature_matrix_rows.jsonl",
+        "docs/master_plan/generated/rank3/feature_matrix_rows.manifest.json",
+        "tools/build_pr168_rank3.py",
+        "tools/pr168_rank3_dag_orchestrator.py",
+        "tools/validate_pr168_rank3.py",
+        "tests/pr168_rank3/test_feature_matrix.py",
+        "tools/validation_scope_registry.py",
+    ],
+)
+def test_pr168_rank3_allowed_paths_pass_on_real_branch(path: str) -> None:
+    assert registry.is_pr_scoped_changed_path_allowed(PR168_RANK3_BRANCH, path)
     assert registry.is_pr_scoped_changed_path_allowed(FIXTURE_BRANCH, path)
 
 
