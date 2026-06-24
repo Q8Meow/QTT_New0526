@@ -1,0 +1,29 @@
+{
+  "active_consumer_file_count": 0,
+  "audit_only_flag": true,
+  "consumer_graph_row_count": 1,
+  "created_at_utc": "2026-06-24T00:00:00Z",
+  "logical_report_id": "PR168_RP5A_ConsumerGraph",
+  "manifest_ref": "docs/master_plan/generated/rp5a/consumer_graph_rows.manifest.json",
+  "physical_filename": "PR168_RP5A_ConsumerGraph.report.json",
+  "records": [
+    {
+      "active_consumer_flag": false,
+      "consumer_break_risk_if_deleted": "LOW",
+      "consumer_examples_capped_flag": false,
+      "consumer_examples_limited": [],
+      "consumer_file_path": null,
+      "consumer_graph_scan_mode": "BOUNDED_STATUS_ONLY_NO_ALL_PAIRS",
+      "consumer_line_or_json_path": null,
+      "consumer_purpose": "bounded dependency-status row; no exhaustive all-pairs reference expansion",
+      "consumer_strength": "DOC_REF",
+      "consumer_type": "PR body / docs only",
+      "file_path": "docs/master_plan/agents/QTTAgentRoleOperatingCharterRegistry.yaml",
+      "max_consumer_refs_per_file": 100,
+      "recommended_action": "KEEP_LEGACY_SUMMARY_ONLY",
+      "row_id": "RP5A_CONSUMER_0000001"
+    }
+  ],
+  "report_version": "PR168-RP5A-v2.0",
+  "rows_ref": "docs/master_plan/generated/rp5a/consumer_graph_rows.jsonl"
+}

@@ -1,0 +1,55 @@
+{
+  "audit_only_flag": true,
+  "created_at_utc": "2026-06-24T00:00:00Z",
+  "files_with_stale_terms_count": 1,
+  "logical_report_id": "PR168_RP5A_LegacyFileSemanticAudit",
+  "manifest_ref": "docs/master_plan/generated/rp5a/legacy_file_semantic_rows.manifest.json",
+  "physical_filename": "PR168_RP5A_LegacyFileSemanticAudit.report.json",
+  "records": [
+    {
+      "active_agent_touchpoint_detected_flag": true,
+      "active_consumer_detected_flag": false,
+      "active_consumer_status_ref": "consumer_graph:docs/master_plan/agents/QTTAgentRoleOperatingCharterRegistry.yaml",
+      "agent_touchpoint_ref": "agent_touchpoint:docs/master_plan/agents/QTTAgentRoleOperatingCharterRegistry.yaml",
+      "contains_agent_crosswalk_flag": true,
+      "contains_formula_expression_flag": false,
+      "contains_formula_id_flag": false,
+      "contains_formula_to_pnl_map_flag": false,
+      "contains_plugin_contract_flag": false,
+      "contains_qku_id_flag": false,
+      "contains_runtime_code_flag": false,
+      "contains_unique_identity_possible_flag": true,
+      "contains_validation_expectation_flag": false,
+      "delete_safe_now_flag": false,
+      "file_kind": "DOC",
+      "file_path": "docs/master_plan/agents/QTTAgentRoleOperatingCharterRegistry.yaml",
+      "identity_dependency_status_ref": "identity_dependency:docs/master_plan/agents/QTTAgentRoleOperatingCharterRegistry.yaml",
+      "line_hits_capped_flag": false,
+      "match_count": 1,
+      "matched_line_numbers_or_json_paths": [
+        "L227"
+      ],
+      "matched_term_ids": [
+        "R005"
+      ],
+      "matched_terms": [
+        "\\b(live|champion|source[-_ ]?truth).{0,40}(authority|ready|candidate|accepted)\\b"
+      ],
+      "originating_pr_if_known": null,
+      "recommended_classification_draft": "KEEP_UNIQUE_QKU_FORMULA_SOURCE",
+      "row_id": "RP5A_FILE_0000001",
+      "semantic_risk_level": "CRITICAL",
+      "structured_scan_statuses": [
+        "TEXT_LINE_SCAN_ONLY"
+      ],
+      "term_families": [
+        "LIVE_OR_CHAMPION_AUTHORITY_RISK"
+      ],
+      "unclear_dependency_flag": false,
+      "validation_dependency_detected_flag": false,
+      "validation_dependency_status_ref": "validation_dependency:docs/master_plan/agents/QTTAgentRoleOperatingCharterRegistry.yaml"
+    }
+  ],
+  "report_version": "PR168-RP5A-v2.0",
+  "rows_ref": "docs/master_plan/generated/rp5a/legacy_file_semantic_rows.jsonl"
+}

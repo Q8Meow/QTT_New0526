@@ -1,0 +1,728 @@
+{
+  "audit_only_flag": true,
+  "created_at_utc": "2026-06-24T00:00:00Z",
+  "github_metadata_source": "gh_pr_list",
+  "github_prs_scanned_count": 240,
+  "github_prs_with_stale_terms_count": 155,
+  "logical_report_id": "PR168_RP5A_LegacyPRSemanticAudit",
+  "manifest_ref": "docs/master_plan/generated/rp5a/legacy_pr_semantic_rows.manifest.json",
+  "physical_filename": "PR168_RP5A_LegacyPRSemanticAudit.report.json",
+  "pr240_closed_not_merged_preflight_passed": true,
+  "records": [
+    {
+      "audit_confidence": "HIGH",
+      "base_ref": "main",
+      "current_main_contains_pr_outputs_unknown_or_proven": "CLOSED_NOT_MERGED_HISTORICAL_ONLY",
+      "head_ref": "pr168-recovery1-rank3-guided-repair-retest",
+      "known_artifact_prefixes_if_inferred": [],
+      "matched_term_families": [
+        "FORMULA_REPAIR_SEMANTIC_RISK",
+        "LIVE_OR_CHAMPION_AUTHORITY_RISK",
+        "NO_TRADE_GLOBALIZATION_RISK",
+        "SOURCE_TRUTH_AUTHORITY_RISK"
+      ],
+      "matched_terms": [
+        "R002",
+        "R003",
+        "R005",
+        "T015",
+        "T040",
+        "T041"
+      ],
+      "merge_commit_if_available": null,
+      "merged_at": null,
+      "next_action": "HISTORICAL_ONLY",
+      "pr_number": 240,
+      "pr_title": "PR168-RECOVERY1: RANK3-guided repair, data precision, formula recovery, source-provenance usability, and retest",
+      "semantic_risk_summary": "matched stale legacy semantics in PR metadata",
+      "state": "CLOSED"
+    },
+    {
+      "audit_confidence": "MEDIUM",
+      "base_ref": "main",
+      "current_main_contains_pr_outputs_unknown_or_proven": "UNKNOWN_NEEDS_FILE_AUDIT",
+      "head_ref": "pr168-rank3-rp3-evidence-stack-ranking",
+      "known_artifact_prefixes_if_inferred": [
+        "PR168_RANK3",
+        "PR168_RANK"
+      ],
+      "matched_term_families": [
+        "FORMULA_REPAIR_SEMANTIC_RISK",
+        "HASH_OR_FREEZE_AUTHORITY_RISK",
+        "LIVE_OR_CHAMPION_AUTHORITY_RISK",
+        "NO_TRADE_GLOBALIZATION_RISK",
+        "SOURCE_TRUTH_AUTHORITY_RISK"
+      ],
+      "matched_terms": [
+        "R001",
+        "R002",
+        "R003",
+        "R005",
+        "T002",
+        "T040",
+        "T041",
+        "T048"
+      ],
+      "merge_commit_if_available": "5b1112504f805033877cdeda13bff4b29dd0422a",
+      "merged_at": "2026-06-23T02:30:11Z",
+      "next_action": "AUDIT_FILES",
+      "pr_number": 239,
+      "pr_title": "PR168-RANK3: RP3 evidence-backed formula stack ranking and no-trade competition",
+      "semantic_risk_summary": "matched stale legacy semantics in PR metadata",
+      "state": "MERGED"
+    },
+    {
+      "audit_confidence": "MEDIUM",
+      "base_ref": "main",
+      "current_main_contains_pr_outputs_unknown_or_proven": "UNKNOWN_NEEDS_FILE_AUDIT",
+      "head_ref": "pr168-rp3-map3-formula-replay-paper-evidence",
+      "known_artifact_prefixes_if_inferred": [
+        "PR168_RP3",
+        "PR168_RP"
+      ],
+      "matched_term_families": [
+        "FORMULA_REPAIR_SEMANTIC_RISK",
+        "LIVE_OR_CHAMPION_AUTHORITY_RISK",
+        "SOURCE_TRUTH_AUTHORITY_RISK"
+      ],
+      "matched_terms": [
+        "R001",
+        "R005",
+        "T002",
+        "T033",
+        "T040",
+        "T041"
+      ],
+      "merge_commit_if_available": "3b2be0cea9846ad5e858978bffd7df6be96256f6",
+      "merged_at": "2026-06-22T20:59:40Z",
+      "next_action": "AUDIT_FILES",
+      "pr_number": 238,
+      "pr_title": "PR168-RP3: MAP3 formula replay/paper recompute and RANK2 evidence expansion",
+      "semantic_risk_summary": "matched stale legacy semantics in PR metadata",
+      "state": "MERGED"
+    },
+    {
+      "audit_confidence": "MEDIUM",
+      "base_ref": "main",
+      "current_main_contains_pr_outputs_unknown_or_proven": "UNKNOWN_NEEDS_FILE_AUDIT",
+      "head_ref": "pr168-map3-qku-formula-id-intake",
+      "known_artifact_prefixes_if_inferred": [
+        "PR168_MAP3"
+      ],
+      "matched_term_families": [
+        "FORMULA_REPAIR_SEMANTIC_RISK",
+        "HASH_OR_FREEZE_AUTHORITY_RISK",
+        "LIVE_OR_CHAMPION_AUTHORITY_RISK",
+        "NEGATIVE_OUTCOME_GLOBALIZATION_RISK",
+        "SOURCE_TRUTH_AUTHORITY_RISK"
+      ],
+      "matched_terms": [
+        "R001",
+        "R003",
+        "T033",
+        "T035",
+        "T040",
+        "T041",
+        "T043",
+        "T044",
+        "T045",
+        "T047"
+      ],
+      "merge_commit_if_available": "6da7567d2b74572ae64e217bf5c22888ba883c43",
+      "merged_at": "2026-06-22T12:08:12Z",
+      "next_action": "AUDIT_FILES",
+      "pr_number": 237,
+      "pr_title": "PR168-MAP3: Canonical QKU/formula identity registry repair and external candidate formula intake",
+      "semantic_risk_summary": "matched stale legacy semantics in PR metadata",
+      "state": "MERGED"
+    },
+    {
+      "audit_confidence": "MEDIUM",
+      "base_ref": "main",
+      "current_main_contains_pr_outputs_unknown_or_proven": "UNKNOWN_NEEDS_FILE_AUDIT",
+      "head_ref": "pr168-rp2-map2-gfp2r-replay-paper-recompute",
+      "known_artifact_prefixes_if_inferred": [
+        "PR168_RP2",
+        "PR168_RP"
+      ],
+      "matched_term_families": [
+        "FORMULA_REPAIR_SEMANTIC_RISK",
+        "LIVE_OR_CHAMPION_AUTHORITY_RISK"
+      ],
+      "matched_terms": [
+        "R003",
+        "T033",
+        "T041",
+        "T042"
+      ],
+      "merge_commit_if_available": "bde1d8fb0d76cb92f7092591c94c632bca761263",
+      "merged_at": "2026-06-22T07:16:48Z",
+      "next_action": "AUDIT_FILES",
+      "pr_number": 236,
+      "pr_title": "PR168-RP2-MAP2: Canonical binding promotion and GFP2R-gated replay/paper recompute",
+      "semantic_risk_summary": "matched stale legacy semantics in PR metadata",
+      "state": "MERGED"
+    },
+    {
+      "audit_confidence": "MEDIUM",
+      "base_ref": "main",
+      "current_main_contains_pr_outputs_unknown_or_proven": "UNKNOWN_NEEDS_FILE_AUDIT",
+      "head_ref": "pr168-gfp2r-data1a-gated-candidate-recompute",
+      "known_artifact_prefixes_if_inferred": [
+        "PR168_GFP2R",
+        "PR168_GFP"
+      ],
+      "matched_term_families": [
+        "FORMULA_REPAIR_SEMANTIC_RISK",
+        "LIVE_OR_CHAMPION_AUTHORITY_RISK",
+        "NEGATIVE_OUTCOME_GLOBALIZATION_RISK"
+      ],
+      "matched_terms": [
+        "R001",
+        "R003",
+        "T033",
+        "T044",
+        "T045"
+      ],
+      "merge_commit_if_available": "156b8d741d92f84a72e2469906c5ed87c282cd05",
+      "merged_at": "2026-06-22T00:43:27Z",
+      "next_action": "AUDIT_FILES",
+      "pr_number": 235,
+      "pr_title": "PR168-GFP2R: DATA1A-gated candidate formula recompute",
+      "semantic_risk_summary": "matched stale legacy semantics in PR metadata",
+      "state": "MERGED"
+    },
+    {
+      "audit_confidence": "MEDIUM",
+      "base_ref": "main",
+      "current_main_contains_pr_outputs_unknown_or_proven": "UNKNOWN_NEEDS_FILE_AUDIT",
+      "head_ref": "pr168-data1a-focused-audit-gfp2r-readiness",
+      "known_artifact_prefixes_if_inferred": [
+        "PR168_DATA1A",
+        "PR168_DATA1"
+      ],
+      "matched_term_families": [
+        "FORMULA_REPAIR_SEMANTIC_RISK",
+        "LIVE_OR_CHAMPION_AUTHORITY_RISK",
+        "NEGATIVE_OUTCOME_GLOBALIZATION_RISK",
+        "SOURCE_TRUTH_AUTHORITY_RISK"
+      ],
+      "matched_terms": [
+        "R003",
+        "T002",
+        "T040",
+        "T041",
+        "T044",
+        "T045"
+      ],
+      "merge_commit_if_available": "dd31ba5129f3c427a67b7ffeadaa9fc80d2cb36f",
+      "merged_at": "2026-06-21T11:56:36Z",
+      "next_action": "AUDIT_FILES",
+      "pr_number": 234,
+      "pr_title": "PR168-DATA1A: Focused DATA1 audit and GFP2R readiness",
+      "semantic_risk_summary": "matched stale legacy semantics in PR metadata",
+      "state": "MERGED"
+    },
+    {
+      "audit_confidence": "MEDIUM",
+      "base_ref": "main",
+      "current_main_contains_pr_outputs_unknown_or_proven": "UNKNOWN_NEEDS_FILE_AUDIT",
+      "head_ref": "pr168-data1-public-market-data-snapshots",
+      "known_artifact_prefixes_if_inferred": [
+        "PR168_DATA1"
+      ],
+      "matched_term_families": [
+        "SOURCE_TRUTH_AUTHORITY_RISK"
+      ],
+      "matched_terms": [
+        "T039",
+        "T040"
+      ],
+      "merge_commit_if_available": "5fd13f51ee125400f9bd9bffad760b2443c07d7b",
+      "merged_at": "2026-06-21T06:55:05Z",
+      "next_action": "AUDIT_FILES",
+      "pr_number": 233,
+      "pr_title": "PR168-DATA1: Public real market data acquisition for Kalshi and Polymarket",
+      "semantic_risk_summary": "matched stale legacy semantics in PR metadata",
+      "state": "MERGED"
+    },
+    {
+      "audit_confidence": "MEDIUM",
+      "base_ref": "main",
+      "current_main_contains_pr_outputs_unknown_or_proven": "UNKNOWN_NEEDS_FILE_AUDIT",
+      "head_ref": "pr168-gfp2-full-universe-provenance-reopen",
+      "known_artifact_prefixes_if_inferred": [
+        "PR168_GFP"
+      ],
+      "matched_term_families": [
+        "FORMULA_REPAIR_SEMANTIC_RISK",
+        "HASH_OR_FREEZE_AUTHORITY_RISK",
+        "LIVE_OR_CHAMPION_AUTHORITY_RISK",
+        "NEGATIVE_OUTCOME_GLOBALIZATION_RISK",
+        "NO_TRADE_GLOBALIZATION_RISK",
+        "SOURCE_TRUTH_AUTHORITY_RISK"
+      ],
+      "matched_terms": [
+        "R001",
+        "R002",
+        "R003",
+        "R005",
+        "T040",
+        "T041",
+        "T044",
+        "T045",
+        "T048"
+      ],
+      "merge_commit_if_available": null,
+      "merged_at": null,
+      "next_action": "AUDIT_FILES",
+      "pr_number": 232,
+      "pr_title": "PR168-GFP2: Reopen full 9,360 universe and audit formula/data provenance",
+      "semantic_risk_summary": "matched stale legacy semantics in PR metadata",
+      "state": "CLOSED"
+    },
+    {
+      "audit_confidence": "MEDIUM",
+      "base_ref": "main",
+      "current_main_contains_pr_outputs_unknown_or_proven": "UNKNOWN_NEEDS_FILE_AUDIT",
+      "head_ref": "pr168-rank-evidence-backed-ranking",
+      "known_artifact_prefixes_if_inferred": [
+        "PR168_RANK",
+        "PR168_RP"
+      ],
+      "matched_term_families": [
+        "HASH_OR_FREEZE_AUTHORITY_RISK",
+        "LIVE_OR_CHAMPION_AUTHORITY_RISK",
+        "NO_TRADE_GLOBALIZATION_RISK",
+        "SOURCE_TRUTH_AUTHORITY_RISK"
+      ],
+      "matched_terms": [
+        "R002",
+        "R005",
+        "T039",
+        "T041",
+        "T043",
+        "T046",
+        "T051"
+      ],
+      "merge_commit_if_available": "482c5c5a251ecb55f865b96f31766ca031244782",
+      "merged_at": "2026-06-20T20:21:15Z",
+      "next_action": "AUDIT_FILES",
+      "pr_number": 231,
+      "pr_title": "PR168-RANK evidence backed ranking edge capture registry seeds and order-decision simulation from PR168-RP",
+      "semantic_risk_summary": "matched stale legacy semantics in PR metadata",
+      "state": "MERGED"
+    },
+    {
+      "audit_confidence": "MEDIUM",
+      "base_ref": "main",
+      "current_main_contains_pr_outputs_unknown_or_proven": "UNKNOWN_NEEDS_FILE_AUDIT",
+      "head_ref": "pr168-rp-formula-based-replay-paper-recompute",
+      "known_artifact_prefixes_if_inferred": [
+        "PR168_RP",
+        "PR168_GFP"
+      ],
+      "matched_term_families": [
+        "HASH_OR_FREEZE_AUTHORITY_RISK",
+        "LIVE_OR_CHAMPION_AUTHORITY_RISK",
+        "SOURCE_TRUTH_AUTHORITY_RISK"
+      ],
+      "matched_terms": [
+        "R005",
+        "T040",
+        "T051"
+      ],
+      "merge_commit_if_available": "5d3ad90b744a51af9c3c76e5aa6a3dc40059c0b1",
+      "merged_at": "2026-06-20T06:46:17Z",
+      "next_action": "AUDIT_FILES",
+      "pr_number": 229,
+      "pr_title": "PR168-RP formula based replay paper recompute from PR168-GFP",
+      "semantic_risk_summary": "matched stale legacy semantics in PR metadata",
+      "state": "MERGED"
+    },
+    {
+      "audit_confidence": "MEDIUM",
+      "base_ref": "main",
+      "current_main_contains_pr_outputs_unknown_or_proven": "UNKNOWN_NEEDS_FILE_AUDIT",
+      "head_ref": "pr168-gfp-global-formula-discovery-real-computation",
+      "known_artifact_prefixes_if_inferred": [
+        "PR168_GFP"
+      ],
+      "matched_term_families": [
+        "HASH_OR_FREEZE_AUTHORITY_RISK",
+        "SOURCE_TRUTH_AUTHORITY_RISK"
+      ],
+      "matched_terms": [
+        "T040",
+        "T046",
+        "T051"
+      ],
+      "merge_commit_if_available": "01ebe59578b09a7cac5861c6163a8e1e0c768b50",
+      "merged_at": "2026-06-19T21:42:19Z",
+      "next_action": "AUDIT_FILES",
+      "pr_number": 228,
+      "pr_title": "PR168-GFP global formula discovery and real computation enforcement",
+      "semantic_risk_summary": "matched stale legacy semantics in PR metadata",
+      "state": "MERGED"
+    },
+    {
+      "audit_confidence": "MEDIUM",
+      "base_ref": "main",
+      "current_main_contains_pr_outputs_unknown_or_proven": "UNKNOWN_NEEDS_FILE_AUDIT",
+      "head_ref": "pr162e-plugin-framework",
+      "known_artifact_prefixes_if_inferred": [
+        "PR162E"
+      ],
+      "matched_term_families": [
+        "FORMULA_REPAIR_SEMANTIC_RISK",
+        "HASH_OR_FREEZE_AUTHORITY_RISK",
+        "LIVE_OR_CHAMPION_AUTHORITY_RISK",
+        "NEGATIVE_OUTCOME_GLOBALIZATION_RISK",
+        "SOURCE_TRUTH_AUTHORITY_RISK"
+      ],
+      "matched_terms": [
+        "R001",
+        "R005",
+        "T035",
+        "T036",
+        "T039",
+        "T040",
+        "T041",
+        "T046",
+        "T051"
+      ],
+      "merge_commit_if_available": "ff2c7bdbc731b795966ab6e6424b2f8230ea61c0",
+      "merged_at": "2026-06-18T22:27:37Z",
+      "next_action": "AUDIT_FILES",
+      "pr_number": 227,
+      "pr_title": "PR162E formula algorithm quantum plugin framework and negative repair factory",
+      "semantic_risk_summary": "matched stale legacy semantics in PR metadata",
+      "state": "MERGED"
+    },
+    {
+      "audit_confidence": "MEDIUM",
+      "base_ref": "main",
+      "current_main_contains_pr_outputs_unknown_or_proven": "UNKNOWN_NEEDS_FILE_AUDIT",
+      "head_ref": "pr167-open-trade-simulator-integration",
+      "known_artifact_prefixes_if_inferred": [],
+      "matched_term_families": [
+        "HASH_OR_FREEZE_AUTHORITY_RISK",
+        "LIVE_OR_CHAMPION_AUTHORITY_RISK",
+        "SOURCE_TRUTH_AUTHORITY_RISK"
+      ],
+      "matched_terms": [
+        "R005",
+        "T040",
+        "T041",
+        "T046",
+        "T049",
+        "T051"
+      ],
+      "merge_commit_if_available": "bafe34306589cb02093bd8b36431d32951d0332a",
+      "merged_at": "2026-06-18T07:24:54Z",
+      "next_action": "AUDIT_FILES",
+      "pr_number": 226,
+      "pr_title": "PR167 open-trade simulator integration",
+      "semantic_risk_summary": "matched stale legacy semantics in PR metadata",
+      "state": "MERGED"
+    },
+    {
+      "audit_confidence": "MEDIUM",
+      "base_ref": "main",
+      "current_main_contains_pr_outputs_unknown_or_proven": "UNKNOWN_NEEDS_FILE_AUDIT",
+      "head_ref": "pr162e-q-quantum-automapper",
+      "known_artifact_prefixes_if_inferred": [
+        "PR162E_Q",
+        "PR162E"
+      ],
+      "matched_term_families": [
+        "HASH_OR_FREEZE_AUTHORITY_RISK",
+        "LIVE_OR_CHAMPION_AUTHORITY_RISK",
+        "SOURCE_TRUTH_AUTHORITY_RISK"
+      ],
+      "matched_terms": [
+        "R005",
+        "T040",
+        "T041",
+        "T046",
+        "T051"
+      ],
+      "merge_commit_if_available": "f069fe3b9f520c84ba4a9eee6d89eb99067441f6",
+      "merged_at": "2026-06-18T02:06:20Z",
+      "next_action": "AUDIT_FILES",
+      "pr_number": 225,
+      "pr_title": "PR162E-Q quantum automapper for QKU formula algorithm mappings",
+      "semantic_risk_summary": "matched stale legacy semantics in PR metadata",
+      "state": "MERGED"
+    },
+    {
+      "audit_confidence": "MEDIUM",
+      "base_ref": "main",
+      "current_main_contains_pr_outputs_unknown_or_proven": "UNKNOWN_NEEDS_FILE_AUDIT",
+      "head_ref": "pr166-qc-quantum-selected-replay-paper-retest",
+      "known_artifact_prefixes_if_inferred": [],
+      "matched_term_families": [
+        "HASH_OR_FREEZE_AUTHORITY_RISK",
+        "LIVE_OR_CHAMPION_AUTHORITY_RISK",
+        "SOURCE_TRUTH_AUTHORITY_RISK"
+      ],
+      "matched_terms": [
+        "T040",
+        "T041",
+        "T046",
+        "T049"
+      ],
+      "merge_commit_if_available": "c667bda75ff07dafc0157fe836e19f0d52ff02e4",
+      "merged_at": "2026-06-17T21:07:34Z",
+      "next_action": "AUDIT_FILES",
+      "pr_number": 224,
+      "pr_title": "PR166-QC quantum-selected replay paper retest evidence lanes",
+      "semantic_risk_summary": "matched stale legacy semantics in PR metadata",
+      "state": "MERGED"
+    },
+    {
+      "audit_confidence": "MEDIUM",
+      "base_ref": "main",
+      "current_main_contains_pr_outputs_unknown_or_proven": "UNKNOWN_NEEDS_FILE_AUDIT",
+      "head_ref": "pr166-qb-bounded-nonlive-quantum-optimizer-benchmark",
+      "known_artifact_prefixes_if_inferred": [],
+      "matched_term_families": [
+        "HASH_OR_FREEZE_AUTHORITY_RISK",
+        "LIVE_OR_CHAMPION_AUTHORITY_RISK",
+        "SOURCE_TRUTH_AUTHORITY_RISK"
+      ],
+      "matched_terms": [
+        "R005",
+        "T040",
+        "T041",
+        "T046",
+        "T049",
+        "T051"
+      ],
+      "merge_commit_if_available": "98d9045971349cd6d5559deab98716e42182b5b7",
+      "merged_at": "2026-06-17T12:02:55Z",
+      "next_action": "AUDIT_FILES",
+      "pr_number": 223,
+      "pr_title": "PR166-QB bounded non-live quantum optimizer benchmark",
+      "semantic_risk_summary": "matched stale legacy semantics in PR metadata",
+      "state": "MERGED"
+    },
+    {
+      "audit_confidence": "MEDIUM",
+      "base_ref": "main",
+      "current_main_contains_pr_outputs_unknown_or_proven": "UNKNOWN_NEEDS_FILE_AUDIT",
+      "head_ref": "pr166-q-quantum-classical-hybrid-comparator",
+      "known_artifact_prefixes_if_inferred": [],
+      "matched_term_families": [
+        "HASH_OR_FREEZE_AUTHORITY_RISK",
+        "LIVE_OR_CHAMPION_AUTHORITY_RISK",
+        "NEGATIVE_OUTCOME_GLOBALIZATION_RISK",
+        "SOURCE_TRUTH_AUTHORITY_RISK"
+      ],
+      "matched_terms": [
+        "R005",
+        "T035",
+        "T039",
+        "T040",
+        "T041",
+        "T046",
+        "T051"
+      ],
+      "merge_commit_if_available": "b538e4e809871c291c173357795b94edb807b287",
+      "merged_at": "2026-06-17T07:16:47Z",
+      "next_action": "AUDIT_FILES",
+      "pr_number": 222,
+      "pr_title": "PR166-Q quantum classical hybrid comparator and race ledger",
+      "semantic_risk_summary": "matched stale legacy semantics in PR metadata",
+      "state": "MERGED"
+    },
+    {
+      "audit_confidence": "MEDIUM",
+      "base_ref": "main",
+      "current_main_contains_pr_outputs_unknown_or_proven": "UNKNOWN_NEEDS_FILE_AUDIT",
+      "head_ref": "pr165-d3-quantum-aware-scenario-selection-v3",
+      "known_artifact_prefixes_if_inferred": [],
+      "matched_term_families": [
+        "FORMULA_REPAIR_SEMANTIC_RISK",
+        "HASH_OR_FREEZE_AUTHORITY_RISK",
+        "LIVE_OR_CHAMPION_AUTHORITY_RISK",
+        "SOURCE_TRUTH_AUTHORITY_RISK"
+      ],
+      "matched_terms": [
+        "R005",
+        "T033",
+        "T039",
+        "T040",
+        "T041",
+        "T046",
+        "T051"
+      ],
+      "merge_commit_if_available": "8cf81fd0b7520e28063ca68c280b93ac0c472302",
+      "merged_at": "2026-06-16T05:46:39Z",
+      "next_action": "AUDIT_FILES",
+      "pr_number": 219,
+      "pr_title": "PR165-D3 quantum-aware scenario selection v3",
+      "semantic_risk_summary": "matched stale legacy semantics in PR metadata",
+      "state": "MERGED"
+    },
+    {
+      "audit_confidence": "MEDIUM",
+      "base_ref": "main",
+      "current_main_contains_pr_outputs_unknown_or_proven": "UNKNOWN_NEEDS_FILE_AUDIT",
+      "head_ref": "pr166-sm3-score-memory-refresh-v3",
+      "known_artifact_prefixes_if_inferred": [],
+      "matched_term_families": [
+        "HASH_OR_FREEZE_AUTHORITY_RISK",
+        "LIVE_OR_CHAMPION_AUTHORITY_RISK",
+        "SOURCE_TRUTH_AUTHORITY_RISK"
+      ],
+      "matched_terms": [
+        "R005",
+        "T039",
+        "T040",
+        "T041",
+        "T046",
+        "T049"
+      ],
+      "merge_commit_if_available": "435e43d7822c7606bd0a28a447d1c26965c27655",
+      "merged_at": "2026-06-15T00:50:56Z",
+      "next_action": "AUDIT_FILES",
+      "pr_number": 218,
+      "pr_title": "PR166-SM3 score memory refresh v3",
+      "semantic_risk_summary": "matched stale legacy semantics in PR metadata",
+      "state": "MERGED"
+    },
+    {
+      "audit_confidence": "MEDIUM",
+      "base_ref": "main",
+      "current_main_contains_pr_outputs_unknown_or_proven": "UNKNOWN_NEEDS_FILE_AUDIT",
+      "head_ref": "pr166-sf-r2-targeted-conversion-repair-retest",
+      "known_artifact_prefixes_if_inferred": [
+        "PR166_SF"
+      ],
+      "matched_term_families": [
+        "HASH_OR_FREEZE_AUTHORITY_RISK",
+        "LIVE_OR_CHAMPION_AUTHORITY_RISK",
+        "SOURCE_TRUTH_AUTHORITY_RISK"
+      ],
+      "matched_terms": [
+        "R005",
+        "T039",
+        "T040",
+        "T046",
+        "T049"
+      ],
+      "merge_commit_if_available": "a3264ae56c86bc9d6bd7a119e5f7b4699712f506",
+      "merged_at": "2026-06-14T10:49:11Z",
+      "next_action": "AUDIT_FILES",
+      "pr_number": 217,
+      "pr_title": "PR166-SF-R2 targeted conversion repair retest",
+      "semantic_risk_summary": "matched stale legacy semantics in PR metadata",
+      "state": "MERGED"
+    },
+    {
+      "audit_confidence": "MEDIUM",
+      "base_ref": "main",
+      "current_main_contains_pr_outputs_unknown_or_proven": "UNKNOWN_NEEDS_FILE_AUDIT",
+      "head_ref": "pr166-s2-replay-paper-retest-loop-v2",
+      "known_artifact_prefixes_if_inferred": [],
+      "matched_term_families": [
+        "LIVE_OR_CHAMPION_AUTHORITY_RISK",
+        "SOURCE_TRUTH_AUTHORITY_RISK"
+      ],
+      "matched_terms": [
+        "T040",
+        "T041"
+      ],
+      "merge_commit_if_available": "ef670c41e44b60a238a03ad05dd6e81eb6fdd447",
+      "merged_at": "2026-06-13T05:44:38Z",
+      "next_action": "AUDIT_FILES",
+      "pr_number": 215,
+      "pr_title": "PR166-S2 replay paper retest loop v2",
+      "semantic_risk_summary": "matched stale legacy semantics in PR metadata",
+      "state": "MERGED"
+    },
+    {
+      "audit_confidence": "MEDIUM",
+      "base_ref": "main",
+      "current_main_contains_pr_outputs_unknown_or_proven": "UNKNOWN_NEEDS_FILE_AUDIT",
+      "head_ref": "pr166-sf-repair-materialization-before-retest",
+      "known_artifact_prefixes_if_inferred": [
+        "PR166_SF"
+      ],
+      "matched_term_families": [
+        "FORMULA_REPAIR_SEMANTIC_RISK",
+        "HASH_OR_FREEZE_AUTHORITY_RISK",
+        "SOURCE_TRUTH_AUTHORITY_RISK"
+      ],
+      "matched_terms": [
+        "R001",
+        "T001",
+        "T040",
+        "T046"
+      ],
+      "merge_commit_if_available": "f98020c6d563bca59a776dbb43c16d57ad060f28",
+      "merged_at": "2026-06-12T22:47:41Z",
+      "next_action": "AUDIT_FILES",
+      "pr_number": 214,
+      "pr_title": "PR166-SF repair materialization before retest",
+      "semantic_risk_summary": "matched stale legacy semantics in PR metadata",
+      "state": "MERGED"
+    },
+    {
+      "audit_confidence": "MEDIUM",
+      "base_ref": "main",
+      "current_main_contains_pr_outputs_unknown_or_proven": "UNKNOWN_NEEDS_FILE_AUDIT",
+      "head_ref": "pr165-d2-score-refreshed-scenario-selection-v2",
+      "known_artifact_prefixes_if_inferred": [
+        "PR165_D2"
+      ],
+      "matched_term_families": [
+        "FORMULA_REPAIR_SEMANTIC_RISK",
+        "HASH_OR_FREEZE_AUTHORITY_RISK",
+        "LIVE_OR_CHAMPION_AUTHORITY_RISK",
+        "SOURCE_TRUTH_AUTHORITY_RISK"
+      ],
+      "matched_terms": [
+        "R005",
+        "T038",
+        "T040",
+        "T041",
+        "T047"
+      ],
+      "merge_commit_if_available": "9becff1a40696a37f17ab904ad84c2f3f6d850f1",
+      "merged_at": "2026-06-11T19:34:29Z",
+      "next_action": "AUDIT_FILES",
+      "pr_number": 212,
+      "pr_title": "PR165-D2 score refreshed scenario selection v2",
+      "semantic_risk_summary": "matched stale legacy semantics in PR metadata",
+      "state": "MERGED"
+    },
+    {
+      "audit_confidence": "MEDIUM",
+      "base_ref": "main",
+      "current_main_contains_pr_outputs_unknown_or_proven": "UNKNOWN_NEEDS_FILE_AUDIT",
+      "head_ref": "pr166-sm-score-memory-refresh-from-pr166-s-results",
+      "known_artifact_prefixes_if_inferred": [],
+      "matched_term_families": [
+        "FORMULA_REPAIR_SEMANTIC_RISK",
+        "HASH_OR_FREEZE_AUTHORITY_RISK",
+        "SOURCE_TRUTH_AUTHORITY_RISK"
+      ],
+      "matched_terms": [
+        "T033",
+        "T040",
+        "T047"
+      ],
+      "merge_commit_if_available": "36180200f21c7609a2430fa8ea75a861d9ad1996",
+      "merged_at": "2026-06-11T04:33:52Z",
+      "next_action": "AUDIT_FILES",
+      "pr_number": 211,
+      "pr_title": "PR166-SM score memory refresh from PR166-S replay paper results",
+      "semantic_risk_summary": "matched stale legacy semantics in PR metadata",
+      "state": "MERGED"
+    }
+  ],
+  "report_version": "PR168-RP5A-v2.0",
+  "rows_ref": "docs/master_plan/generated/rp5a/legacy_pr_semantic_rows.jsonl"
+}

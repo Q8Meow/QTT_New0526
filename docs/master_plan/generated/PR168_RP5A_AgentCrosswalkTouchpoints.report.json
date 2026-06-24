@@ -1,0 +1,28 @@
+{
+  "agent_duty_source_crosswalk_present": true,
+  "agent_roster_discovery_audit_present": true,
+  "agent_touchpoint_file_count": 1,
+  "audit_only_flag": true,
+  "created_at_utc": "2026-06-24T00:00:00Z",
+  "documented_equivalent_crosswalk_present": true,
+  "logical_report_id": "PR168_RP5A_AgentCrosswalkTouchpoints",
+  "manifest_ref": "docs/master_plan/generated/rp5a/agent_touchpoint_rows.manifest.json",
+  "missing_crosswalk_report_required": false,
+  "physical_filename": "PR168_RP5A_AgentCrosswalkTouchpoints.report.json",
+  "records": [
+    {
+      "active_agent_touchpoint_flag": true,
+      "agent_ref_or_crosswalk_ref": "PR165_D2_AGENT_OR_LOCAL_AGENT_REF_DETECTED",
+      "downstream_consumer_ref_if_any": "downstream_consumer_or_handoff_detected",
+      "duty_ref_if_any": "AgentDutySourceCrosswalk",
+      "file_path": "docs/master_plan/agents/QTTAgentRoleOperatingCharterRegistry.yaml",
+      "future_pr": "PR168_RP5B",
+      "future_replacement_needed_flag": true,
+      "qku_or_formula_ref_if_any": "qku_or_formula_ref_possible",
+      "recommended_classification": "REWRITE_CONSUMER_FIRST",
+      "row_id": "RP5A_AGENT_TOUCH_0000001"
+    }
+  ],
+  "report_version": "PR168-RP5A-v2.0",
+  "rows_ref": "docs/master_plan/generated/rp5a/agent_touchpoint_rows.jsonl"
+}

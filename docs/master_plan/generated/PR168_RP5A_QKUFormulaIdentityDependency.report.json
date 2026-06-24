@@ -1,0 +1,29 @@
+{
+  "audit_only_flag": true,
+  "created_at_utc": "2026-06-24T00:00:00Z",
+  "logical_report_id": "PR168_RP5A_QKUFormulaIdentityDependency",
+  "manifest_ref": "docs/master_plan/generated/rp5a/qku_formula_identity_dependency_rows.manifest.json",
+  "physical_filename": "PR168_RP5A_QKUFormulaIdentityDependency.report.json",
+  "qku_formula_identity_dependency_file_count": 1,
+  "records": [
+    {
+      "canonical_replacement_file_if_exists": null,
+      "delete_requires_reclaim_flag": true,
+      "duplicate_elsewhere_proven_flag": false,
+      "file_path": "docs/master_plan/agents/QTTAgentRoleOperatingCharterRegistry.yaml",
+      "future_reclaim_target": "PR168_RP5C_IMMUTABLE_LIBRARY",
+      "identity_count": 3,
+      "identity_type": "QUANTUM_OBJECTIVE",
+      "recommended_classification": "DELETE_AFTER_QKU_FORMULA_IDENTITY_RECLAIM",
+      "row_id": "RP5A_IDENTITY_DEP_0000001",
+      "sample_identity_refs_limited": [
+        "ISING",
+        "Ising",
+        "QUBO"
+      ],
+      "unique_identity_possible_flag": true
+    }
+  ],
+  "report_version": "PR168-RP5A-v2.0",
+  "rows_ref": "docs/master_plan/generated/rp5a/qku_formula_identity_dependency_rows.jsonl"
+}

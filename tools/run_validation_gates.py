@@ -466,6 +466,12 @@ PYTEST_SHARD_COMMANDS: dict[str, tuple[PytestShardCommand, ...]] = {
             runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
             historical_runtime_seconds=20.0,
         ),
+        PytestShardCommand(
+            paths=("tests/pr168_rp5a",),
+            reason="PR168-RP5A legacy semantic audit and cleanup-readiness tests",
+            runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
+            historical_runtime_seconds=20.0,
+        ),
     ),
     "pytest-shard-3": (
         PytestShardCommand(
@@ -3173,6 +3179,15 @@ def build_validation_commands(
         [
             sys.executable,
             _path("tools", "validate_pr168_rank3.py"),
+        ],
+        [
+            sys.executable,
+            _path("tools", "build_pr168_rp5a_legacy_semantic_audit.py"),
+            "--offline",
+        ],
+        [
+            sys.executable,
+            _path("tools", "validate_pr168_rp5a_legacy_semantic_audit.py"),
         ],
         *[
             [sys.executable, _path("tools", f"validate_pr168_rank_{name}.py")]

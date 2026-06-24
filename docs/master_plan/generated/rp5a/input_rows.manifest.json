@@ -1,0 +1,27 @@
+{
+  "created_at_utc": "2026-06-24T00:00:00Z",
+  "logical_shard_family_id": "PR168_RP5A_INPUT_ROWS",
+  "manifest_id": "PR168_RP5A_INPUT_ROWS_MANIFEST",
+  "max_total_rows_per_shard": 500000,
+  "physical_filename": "docs/master_plan/generated/rp5a/input_rows.manifest.json",
+  "report_version": "PR168-RP5A-v2.0",
+  "row_count": 12,
+  "row_count_within_bound_flag": true,
+  "row_refs_limited": [
+    "RP5A_INPUT_0001",
+    "RP5A_INPUT_0002",
+    "RP5A_INPUT_0003",
+    "RP5A_INPUT_0004",
+    "RP5A_INPUT_0005",
+    "RP5A_INPUT_0006",
+    "RP5A_INPUT_0007",
+    "RP5A_INPUT_0008",
+    "RP5A_INPUT_0009",
+    "RP5A_INPUT_0010",
+    "RP5A_INPUT_0011",
+    "RP5A_INPUT_0012"
+  ],
+  "shard_path": "docs/master_plan/generated/rp5a/input_rows.jsonl",
+  "truncated_by_row_budget_flag": false,
+  "truncated_row_refs_flag": false
+}

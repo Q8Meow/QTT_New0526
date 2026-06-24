@@ -12,6 +12,7 @@ from tools.validation_scope_registry import (  # noqa: E402
     PR168_GFP_BRANCH,
     PR168_DATA1A_BRANCH,
     PR168_DATA1_BRANCH,
+    PR168_RP5A_BRANCH,
     PR168_RP_BRANCH,
     VALIDATION_FIXTURE_BRANCH,
     explain_pr_scope_decision,
@@ -114,6 +115,26 @@ def main() -> int:
                 f"{explain_pr_scope_decision(VALIDATION_FIXTURE_BRANCH, path)}"
             )
 
+    rp5a_allowed_paths = [
+        "docs/master_plan/generated/PR168_RP5A_FinalSummary.report.json",
+        "docs/master_plan/generated/PR168_RP5A_LegacyFileSemanticAudit.report.json",
+        "docs/master_plan/generated/rp5a/legacy_file_semantic_rows.jsonl",
+        "docs/master_plan/generated/rp5a/legacy_file_semantic_rows.manifest.json",
+        "tools/build_pr168_rp5a_legacy_semantic_audit.py",
+        "tools/pr168_rp5a_config.py",
+        "tools/validate_pr168_rp5a_legacy_semantic_audit.py",
+        "tests/pr168_rp5a/test_final_summary_counts.py",
+        "tools/run_validation_gates.py",
+    ]
+    for path in rp5a_allowed_paths:
+        if not is_pr_scoped_changed_path_allowed(PR168_RP5A_BRANCH, path):
+            failures.append(f"EXPECTED_ALLOWED:{PR168_RP5A_BRANCH}:{path}:{explain_pr_scope_decision(PR168_RP5A_BRANCH, path)}")
+        if not is_pr_scoped_changed_path_allowed(VALIDATION_FIXTURE_BRANCH, path):
+            failures.append(
+                f"EXPECTED_ALLOWED:{VALIDATION_FIXTURE_BRANCH}:{path}:"
+                f"{explain_pr_scope_decision(VALIDATION_FIXTURE_BRANCH, path)}"
+            )
+
     disallowed_paths = [
         "docs/master_plan/generated/SomeOtherReport.report.json",
         "tools/random_helper.py",
@@ -137,6 +158,8 @@ def main() -> int:
             failures.append(f"EXPECTED_REJECTED:{PR168_DATA1_BRANCH}:{path}")
         if is_pr_scoped_changed_path_allowed(PR168_DATA1A_BRANCH, path):
             failures.append(f"EXPECTED_REJECTED:{PR168_DATA1A_BRANCH}:{path}")
+        if is_pr_scoped_changed_path_allowed(PR168_RP5A_BRANCH, path):
+            failures.append(f"EXPECTED_REJECTED:{PR168_RP5A_BRANCH}:{path}")
     for path in [
         "docs/master_plan/generated/PR168_GFP_QKUBaselineCountReconcile.report.json",
         "tools/build_pr168_gfp_global_formula_discovery_real_computation.py",
