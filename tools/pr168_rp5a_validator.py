@@ -185,12 +185,15 @@ def _failures() -> list[str]:
         failures.append("SCAN_PERFORMANCE_BAD_STRUCTURED_JSON_CAP")
     if performance.get("max_total_rows_per_shard") != MAX_TOTAL_ROWS_PER_SHARD:
         failures.append("SCAN_PERFORMANCE_BAD_SHARD_CAP")
-    if performance.get("peak_memory_strategy") != "RG_TEMP_FILE_TWO_PASS_BOUNDED_HITS":
+    if performance.get("peak_memory_strategy") not in {
+        "RG_TEMP_FILE_TWO_PASS_BOUNDED_HITS",
+        "PYTHON_FALLBACK_STREAMING_BOUNDED_LINE_SCAN",
+    }:
         failures.append("SCAN_PERFORMANCE_BAD_MEMORY_STRATEGY")
     if performance.get("consumer_graph_scan_mode") != "BOUNDED_STATUS_ONLY_NO_ALL_PAIRS":
         failures.append("SCAN_PERFORMANCE_BAD_CONSUMER_MODE")
-    if not performance.get("rg_used_flag"):
-        failures.append("SCAN_PERFORMANCE_RG_NOT_USED")
+    if bool(performance.get("rg_used_flag")) == bool(performance.get("python_fallback_used_flag")):
+        failures.append("SCAN_PERFORMANCE_SCAN_ENGINE_STATE_INVALID")
     if performance.get("checkpoint_path") != generated_ref(CHECKPOINT_PATH):
         failures.append("SCAN_PERFORMANCE_BAD_CHECKPOINT_PATH")
     if performance.get("checkpoint_committed_flag") is not False:

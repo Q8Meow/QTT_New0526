@@ -9,6 +9,7 @@ from tools.pr168_rp5a_config import (
     MAX_TOTAL_ROWS_PER_SHARD,
     MAX_WALL_SECONDS,
 )
+from tools import pr168_rp5a_git_grep_scanner as scanner
 from tests.pr168_rp5a._helpers import file_rows, load_report, load_rows
 
 
@@ -16,9 +17,12 @@ def test_scan_is_bounded() -> None:
     report = load_report("PR168_RP5A_ScanPerformance.report.json")
     consumer_rows = load_rows("consumer_graph_rows")
 
-    assert report["peak_memory_strategy"] == "RG_TEMP_FILE_TWO_PASS_BOUNDED_HITS"
+    assert report["peak_memory_strategy"] in {
+        "RG_TEMP_FILE_TWO_PASS_BOUNDED_HITS",
+        "PYTHON_FALLBACK_STREAMING_BOUNDED_LINE_SCAN",
+    }
     assert report["consumer_graph_scan_mode"] == "BOUNDED_STATUS_ONLY_NO_ALL_PAIRS"
-    assert report["rg_used_flag"] is True
+    assert report["rg_used_flag"] is not report["python_fallback_used_flag"]
     assert report["quick_selftest_flag"] is False
     assert report["scan_budget_status"] in {"SCAN_BUDGET_OK", "SCAN_BUDGET_EXHAUSTED"}
     assert report["max_wall_seconds"] == MAX_WALL_SECONDS
@@ -39,3 +43,24 @@ def test_scan_is_bounded() -> None:
         or len(row.get("consumer_examples_limited", [])) <= MAX_CONSUMER_REFS_PER_FILE
         for row in consumer_rows
     )
+
+
+def test_scan_falls_back_when_rg_is_unavailable(monkeypatch, tmp_path) -> None:
+    sample = tmp_path / "sample.txt"
+    sample.write_text("formula repair should be audited only\n", encoding="utf-8")
+
+    monkeypatch.setattr(scanner.shutil, "which", lambda _name: None)
+
+    rows, index, stats = scanner.scan_files_for_terms(
+        ["sample.txt"],
+        tmp_path,
+        max_wall_seconds=60,
+        max_files_scanned=10,
+        max_total_line_hits=10,
+        progress_interval_seconds=999999,
+    )
+
+    assert stats["rg_used_flag"] is False
+    assert stats["python_fallback_used_flag"] is True
+    assert 1 <= len(rows) <= 10
+    assert list(index) == ["sample.txt"]

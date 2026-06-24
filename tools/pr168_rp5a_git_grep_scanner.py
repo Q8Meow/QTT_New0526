@@ -6,6 +6,7 @@ from __future__ import annotations
 from functools import lru_cache
 from pathlib import Path
 import json
+import shutil
 import subprocess
 import tempfile
 import time
@@ -226,6 +227,11 @@ def _scan_files_for_terms_with_rg(
     max_total_line_hits: int,
     progress_interval_seconds: int,
 ) -> list[dict[str, object]] | None:
+    rg_executable = shutil.which("rg")
+    if rg_executable is None:
+        LAST_SCAN_STATS.update({"rg_used_flag": False, "python_fallback_used_flag": True})
+        return None
+
     scan_files = files[:max_files_scanned]
     tracked = set(scan_files)
     LAST_SCAN_STATS.update(
@@ -278,7 +284,7 @@ def _scan_files_for_terms_with_rg(
             with tempfile.NamedTemporaryFile("w", encoding="utf-8", newline="\n", delete=False) as output_file:
                 output_path = Path(output_file.name)
             command = [
-                "rg",
+                rg_executable,
                 "--fixed-strings",
                 "--files-with-matches",
                 "--ignore-case",
@@ -304,6 +310,9 @@ def _scan_files_for_terms_with_rg(
                             errors="replace",
                             timeout=_batch_timeout_seconds(started_at, max_wall_seconds),
                         )
+                    except FileNotFoundError:
+                        LAST_SCAN_STATS.update({"rg_used_flag": False, "python_fallback_used_flag": True})
+                        return None
                     except subprocess.TimeoutExpired:
                         _mark_budget_exhausted("RG_PASS_A_BATCH_TIMEOUT")
                         break
@@ -404,7 +413,7 @@ def _scan_files_for_terms_with_rg(
             with tempfile.NamedTemporaryFile("w", encoding="utf-8", newline="\n", delete=False) as output_file:
                 output_path = Path(output_file.name)
             command = [
-                "rg",
+                rg_executable,
                 "--vimgrep",
                 "--fixed-strings",
                 "--ignore-case",
@@ -432,6 +441,9 @@ def _scan_files_for_terms_with_rg(
                             errors="replace",
                             timeout=_batch_timeout_seconds(started_at, max_wall_seconds),
                         )
+                    except FileNotFoundError:
+                        LAST_SCAN_STATS.update({"rg_used_flag": False, "python_fallback_used_flag": True})
+                        return None
                     except subprocess.TimeoutExpired:
                         _mark_budget_exhausted("RG_PASS_B_BATCH_TIMEOUT")
                         break
@@ -587,6 +599,13 @@ def _scan_files_for_terms_with_python(
             "capped_file_count": 0,
             "capped_match_count": 0,
             "total_line_hits_emitted": 0,
+            "skipped_large_line_scan_file_count": 0,
+            "skipped_large_line_scan_files_limited": [],
+            "skipped_large_line_scan_files_all": [],
+            "max_wall_seconds": max_wall_seconds,
+            "max_files_scanned": max_files_scanned,
+            "max_total_line_hits": max_total_line_hits,
+            "max_line_hits_per_file": MAX_LINE_HITS_PER_FILE,
         }
     )
     if len(files) > len(scan_files):
@@ -597,7 +616,9 @@ def _scan_files_for_terms_with_python(
     capped_files: set[str] = set()
     capped_match_count = 0
     last_progress = 0.0
+    files_processed = 0
     for file_number, file_path in enumerate(scan_files, start=1):
+        files_processed = file_number
         if _budget_status(started_at, max_wall_seconds):
             _mark_budget_exhausted("MAX_WALL_SECONDS_PYTHON_FALLBACK")
             break
@@ -674,7 +695,9 @@ def _scan_files_for_terms_with_python(
             row["line_hits_capped_flag"] = True
     LAST_SCAN_STATS.update(
         {
+            "candidate_files_count": len(file_index),
             "matched_files_count": len(file_index),
+            "matched_files_processed_count": files_processed,
             "capped_file_count": len(capped_files),
             "capped_match_count": capped_match_count,
             "total_line_hits_emitted": len(line_rows),

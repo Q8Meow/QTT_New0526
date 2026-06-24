@@ -729,7 +729,11 @@ def build_all(*, offline: bool = True, quick_selftest: bool = False) -> dict[str
         "matched_files_processed_count": int(scan_stats.get("matched_files_processed_count", 0)),
         "elapsed_seconds_by_phase": dict(timer.elapsed),
         "total_elapsed_seconds": timer.total(),
-        "peak_memory_strategy": "RG_TEMP_FILE_TWO_PASS_BOUNDED_HITS",
+        "peak_memory_strategy": (
+            "RG_TEMP_FILE_TWO_PASS_BOUNDED_HITS"
+            if bool(scan_stats.get("rg_used_flag"))
+            else "PYTHON_FALLBACK_STREAMING_BOUNDED_LINE_SCAN"
+        ),
         "scan_budget_status": scan_stats.get("scan_budget_status", "SCAN_BUDGET_OK"),
         "budget_exhausted_flag": bool(scan_stats.get("budget_exhausted_flag")),
         "budget_exhaustion_reasons": scan_stats.get("budget_exhaustion_reasons", []),

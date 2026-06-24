@@ -83,7 +83,7 @@
     "unclear_do_not_delete_count": 3824,
     "validation_dependency_row_count": 1,
     "validation_dependent_file_count": 0,
-    "validation_scope_changed_flag": true,
+    "validation_scope_changed_flag": false,
     "validation_scope_removed_count": 0,
     "validation_time_risk_row_count": 1,
     "validators_with_stale_terms_count": 0
@@ -100,7 +100,7 @@
   "unclear_do_not_delete_count": 3824,
   "validation_dependency_row_count": 1,
   "validation_dependent_file_count": 0,
-  "validation_scope_changed_flag": true,
+  "validation_scope_changed_flag": false,
   "validation_scope_removed_count": 0,
   "validation_time_risk_row_count": 1,
   "validators_with_stale_terms_count": 0
