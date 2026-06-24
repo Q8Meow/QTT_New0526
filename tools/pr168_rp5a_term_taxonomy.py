@@ -43,7 +43,7 @@ def match_text(text: object) -> list[dict[str, object]]:
             matches.append(
                 {
                     "term_id": compiled.spec.term_id,
-                    "term_text_or_regex": compiled.spec.term_text_or_regex,
+                    "term_text_or_regex": compiled.spec.report_safe_text_or_regex,
                     "matched_text": value,
                     "term_family": compiled.spec.term_family,
                     "severity": compiled.spec.severity,

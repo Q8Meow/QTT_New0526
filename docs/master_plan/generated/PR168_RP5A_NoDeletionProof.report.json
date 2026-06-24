@@ -39,8 +39,8 @@
     "source_truth_authority_created_count": 0,
     "trade_simulation_count": 0,
     "trade_simulation_refs": [],
-    "validation_scope_change_type": "ADD_RP5A_SCOPE_ONLY",
-    "validation_scope_changed_flag": true,
+    "validation_scope_change_type": "NONE",
+    "validation_scope_changed_flag": false,
     "validation_scope_removed_count": 0
   },
   "report_version": "PR168-RP5A-v2.0",
@@ -49,7 +49,7 @@
   "source_truth_authority_created_count": 0,
   "trade_simulation_count": 0,
   "trade_simulation_refs": [],
-  "validation_scope_change_type": "ADD_RP5A_SCOPE_ONLY",
-  "validation_scope_changed_flag": true,
+  "validation_scope_change_type": "NONE",
+  "validation_scope_changed_flag": false,
   "validation_scope_removed_count": 0
 }

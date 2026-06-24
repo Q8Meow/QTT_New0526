@@ -2,7 +2,7 @@
   "audit_only_flag": true,
   "created_at_utc": "2026-06-24T00:00:00Z",
   "github_metadata_source": "gh_pr_list",
-  "github_prs_scanned_count": 240,
+  "github_prs_scanned_count": 241,
   "github_prs_with_stale_terms_count": 155,
   "logical_report_id": "PR168_RP5A_LegacyPRSemanticAudit",
   "manifest_ref": "docs/master_plan/generated/rp5a/legacy_pr_semantic_rows.manifest.json",

@@ -33,7 +33,7 @@
         "R005"
       ],
       "matched_terms": [
-        "\\b(live|champion|source[-_ ]?truth).{0,40}(authority|ready|candidate|accepted)\\b"
+        "U+005Cb(live|champion|source[-_ ]?truth).{0,40}(authority|ready|candidate|accepted)U+005Cb"
       ],
       "originating_pr_if_known": null,
       "recommended_classification_draft": "KEEP_UNIQUE_QKU_FORMULA_SOURCE",

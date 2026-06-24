@@ -342,7 +342,7 @@ def _scan_files_for_terms_with_rg(
         except OSError:
             pass
 
-    matched_files = matched_files[:max_matched_files]
+    matched_files = sorted(matched_files, key=lambda value: (value.casefold(), value))[:max_matched_files]
     LAST_SCAN_STATS["candidate_files_count"] = len(matched_files)
     large_line_scan_skips: list[str] = []
     line_scan_files: list[str] = []

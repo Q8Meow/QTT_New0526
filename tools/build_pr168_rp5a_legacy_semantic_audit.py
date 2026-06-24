@@ -249,7 +249,7 @@ def _group_hits_by_file(hit_rows: list[dict[str, object]]) -> dict[str, dict[str
         spec = TERM_BY_ID.get(term_id)
         bucket["matched_term_ids"].add(term_id)
         if spec is not None:
-            bucket["matched_terms"].add(spec.term_text_or_regex)
+            bucket["matched_terms"].add(spec.report_safe_text_or_regex)
         bucket["term_families"].add(str(row["term_family"]))
         severity = str(row["semantic_risk_level"])
         bucket["severities"].append(severity)
@@ -378,7 +378,8 @@ def _wrong_concept_rows(hit_rows: list[dict[str, object]], pr_rows: list[dict[st
         rows.append(
             {
                 "term_id": spec.term_id,
-                "term_text_or_regex": spec.term_text_or_regex,
+                "term_text_or_regex": spec.report_safe_text_or_regex,
+                "raw_regex_redacted_for_path_safety_flag": spec.is_regex,
                 "term_family": spec.term_family,
                 "canonical_future_interpretation": spec.canonical_future_interpretation,
                 "matched_file_count": len(files_by_term.get(spec.term_id, set())),

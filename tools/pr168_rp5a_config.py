@@ -167,10 +167,15 @@ class TermSpec:
     default_delete_signal: bool = False
     requires_human_review_if_unclear: bool = True
 
+    @property
+    def report_safe_text_or_regex(self) -> str:
+        return self.term_text_or_regex.replace("\\", "U+005C")
+
     def to_row(self) -> dict[str, Any]:
         return {
             "term_id": self.term_id,
-            "term_text_or_regex": self.term_text_or_regex,
+            "term_text_or_regex": self.report_safe_text_or_regex,
+            "raw_regex_redacted_for_path_safety_flag": self.is_regex,
             "term_family": self.term_family,
             "severity": self.severity,
             "old_semantic_risk": self.old_semantic_risk,
