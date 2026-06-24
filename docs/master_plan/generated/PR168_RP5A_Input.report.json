@@ -1,0 +1,98 @@
+{
+  "audit_only_flag": true,
+  "created_at_utc": "2026-06-24T00:00:00Z",
+  "files_scanned_count": 17343,
+  "logical_report_id": "PR168_RP5A_Input",
+  "manifest_ref": "docs/master_plan/generated/rp5a/input_rows.manifest.json",
+  "physical_filename": "PR168_RP5A_Input.report.json",
+  "records": [
+    {
+      "audit_only_flag": true,
+      "input_description": "git status/log/fetch/preflight branch state",
+      "input_source_id": "git_status",
+      "read_status": "READ",
+      "row_id": "RP5A_INPUT_0001"
+    },
+    {
+      "audit_only_flag": true,
+      "input_description": "gh pr list/view PR metadata",
+      "input_source_id": "github_pr_metadata",
+      "read_status": "READ",
+      "row_id": "RP5A_INPUT_0002"
+    },
+    {
+      "audit_only_flag": true,
+      "input_description": "gh run list --branch main",
+      "input_source_id": "github_main_runs",
+      "read_status": "READ",
+      "row_id": "RP5A_INPUT_0003"
+    },
+    {
+      "audit_only_flag": true,
+      "input_description": "QTT_MasterPlan_Current.md and docs/master_plan markdown",
+      "input_source_id": "master_plan",
+      "read_status": "READ",
+      "row_id": "RP5A_INPUT_0004"
+    },
+    {
+      "audit_only_flag": true,
+      "input_description": "docs/roadmap artifacts",
+      "input_source_id": "roadmap",
+      "read_status": "READ",
+      "row_id": "RP5A_INPUT_0005"
+    },
+    {
+      "audit_only_flag": true,
+      "input_description": "AgentRosterDiscoveryAudit and AgentDutySourceCrosswalk",
+      "input_source_id": "pr165_d2_crosswalk",
+      "read_status": "READ",
+      "row_id": "RP5A_INPUT_0006"
+    },
+    {
+      "audit_only_flag": true,
+      "input_description": "docs/master_plan/generated reports/shards/manifests",
+      "input_source_id": "generated_artifacts",
+      "read_status": "READ",
+      "row_id": "RP5A_INPUT_0007"
+    },
+    {
+      "audit_only_flag": true,
+      "input_description": "tools/**/*.py",
+      "input_source_id": "tools",
+      "read_status": "READ",
+      "row_id": "RP5A_INPUT_0008"
+    },
+    {
+      "audit_only_flag": true,
+      "input_description": "tests/**/*.py",
+      "input_source_id": "tests",
+      "read_status": "READ",
+      "row_id": "RP5A_INPUT_0009"
+    },
+    {
+      "audit_only_flag": true,
+      "input_description": "run_validation_gates, validation registry/inventory/currentization tests",
+      "input_source_id": "validators_currentization",
+      "read_status": "READ",
+      "row_id": "RP5A_INPUT_0010"
+    },
+    {
+      "audit_only_flag": true,
+      "files_scanned_count": 17343,
+      "input_description": "tracked text files scanned for stale semantics",
+      "input_source_id": "scan_inventory",
+      "read_status": "READ",
+      "row_id": "RP5A_INPUT_0011"
+    },
+    {
+      "audit_only_flag": true,
+      "input_description": "PR #240 must be closed and not merged",
+      "input_source_id": "preflight_pr240",
+      "read_status": "PASS",
+      "row_id": "RP5A_INPUT_0012"
+    }
+  ],
+  "report_version": "PR168-RP5A-v2.0",
+  "rows_ref": "docs/master_plan/generated/rp5a/input_rows.jsonl",
+  "scan_excludes_rp5a_outputs_flag": true
+}

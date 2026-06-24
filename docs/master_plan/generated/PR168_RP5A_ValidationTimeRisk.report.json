@@ -1,0 +1,23 @@
+{
+  "audit_only_flag": true,
+  "created_at_utc": "2026-06-24T00:00:00Z",
+  "logical_report_id": "PR168_RP5A_ValidationTimeRisk",
+  "manifest_ref": "docs/master_plan/generated/rp5a/validation_time_risk_rows.manifest.json",
+  "physical_filename": "PR168_RP5A_ValidationTimeRisk.report.json",
+  "records": [
+    {
+      "approx_bytes_under_prefix": 179603,
+      "file_count_under_prefix": 1,
+      "file_path_or_prefix": "docs/master_plan/agents/QTTAgentRoleOperatingCharterRegistry.yaml",
+      "future_rp5b_validation_reduction_candidate_flag": false,
+      "generated_artifact_scan_flag": false,
+      "repo_wide_scan_flag": true,
+      "requires_replacement_or_summary_before_removal_flag": true,
+      "row_id": "RP5A_VALIDATION_TIME_0000001",
+      "validation_glob_scan_flag": false
+    }
+  ],
+  "report_version": "PR168-RP5A-v2.0",
+  "rows_ref": "docs/master_plan/generated/rp5a/validation_time_risk_rows.jsonl",
+  "validation_time_risk_row_count": 1
+}

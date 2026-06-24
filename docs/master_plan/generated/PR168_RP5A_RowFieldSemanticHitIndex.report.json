@@ -1,0 +1,27 @@
+{
+  "audit_only_flag": true,
+  "created_at_utc": "2026-06-24T00:00:00Z",
+  "logical_report_id": "PR168_RP5A_RowFieldSemanticHitIndex",
+  "manifest_ref": "docs/master_plan/generated/rp5a/row_field_semantic_hit_rows.manifest.json",
+  "physical_filename": "PR168_RP5A_RowFieldSemanticHitIndex.report.json",
+  "records": [
+    {
+      "candidate_future_action": "NORMALIZE_OR_ROUTE_TO_RP5B",
+      "file_kind": "DOC",
+      "file_path": "docs/master_plan/agents/QTTAgentRoleOperatingCharterRegistry.yaml",
+      "json_pointer_or_line_ref": "L227",
+      "line_hits_capped_flag": false,
+      "match_type": "TEXT_LINE",
+      "matched_term_id": "R005",
+      "matched_term_text_or_regex": "U+005Cb(live|champion|source[-_ ]?truth).{0,40}(authority|ready|candidate|accepted)U+005Cb",
+      "matched_text_short": "\"live_scope\": \"NO_LIVE_AUTHORITY; FUTURE LIVE HANDOFFS REQUIRE ALL GATES\",",
+      "row_id": "RP5A_HIT_0000001",
+      "semantic_risk_level": "CRITICAL",
+      "structured_scan_status": "TEXT_LINE_SCAN_ONLY",
+      "term_family": "LIVE_OR_CHAMPION_AUTHORITY_RISK"
+    }
+  ],
+  "report_version": "PR168-RP5A-v2.0",
+  "row_field_semantic_hit_count": 1,
+  "rows_ref": "docs/master_plan/generated/rp5a/row_field_semantic_hit_rows.jsonl"
+}

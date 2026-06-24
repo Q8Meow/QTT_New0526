@@ -1,0 +1,60 @@
+{
+  "audit_only_flag": true,
+  "created_at_utc": "2026-06-24T00:00:00Z",
+  "identity_custody_row_count": 3,
+  "logical_report_id": "PR168_RP5A_IdentityCustodyGraph",
+  "manifest_ref": "docs/master_plan/generated/rp5a/identity_custody_rows.manifest.json",
+  "physical_filename": "PR168_RP5A_IdentityCustodyGraph.report.json",
+  "records": [
+    {
+      "all_known_duplicate_refs_limited": [
+        "docs/master_plan/agents/QTTAgentRoleOperatingCharterRegistry.yaml"
+      ],
+      "current_canonical_holder_if_any": null,
+      "current_file_refs_limited": [
+        "docs/master_plan/agents/QTTAgentRoleOperatingCharterRegistry.yaml"
+      ],
+      "custody_risk": "HIGH",
+      "first_seen_file_or_pr_if_known": "docs/master_plan/agents/QTTAgentRoleOperatingCharterRegistry.yaml",
+      "future_reclaim_pr": "PR168_RP5C_IMMUTABLE_LIBRARY",
+      "identity_ref": "ISING",
+      "identity_type": "QUANTUM_OBJECTIVE",
+      "reclaim_required_flag": true,
+      "row_id": "RP5A_CUSTODY_0000001"
+    },
+    {
+      "all_known_duplicate_refs_limited": [
+        "docs/master_plan/agents/QTTAgentRoleOperatingCharterRegistry.yaml"
+      ],
+      "current_canonical_holder_if_any": null,
+      "current_file_refs_limited": [
+        "docs/master_plan/agents/QTTAgentRoleOperatingCharterRegistry.yaml"
+      ],
+      "custody_risk": "HIGH",
+      "first_seen_file_or_pr_if_known": "docs/master_plan/agents/QTTAgentRoleOperatingCharterRegistry.yaml",
+      "future_reclaim_pr": "PR168_RP5C_IMMUTABLE_LIBRARY",
+      "identity_ref": "Ising",
+      "identity_type": "QUANTUM_OBJECTIVE",
+      "reclaim_required_flag": true,
+      "row_id": "RP5A_CUSTODY_0000002"
+    },
+    {
+      "all_known_duplicate_refs_limited": [
+        "docs/master_plan/agents/QTTAgentRoleOperatingCharterRegistry.yaml"
+      ],
+      "current_canonical_holder_if_any": null,
+      "current_file_refs_limited": [
+        "docs/master_plan/agents/QTTAgentRoleOperatingCharterRegistry.yaml"
+      ],
+      "custody_risk": "HIGH",
+      "first_seen_file_or_pr_if_known": "docs/master_plan/agents/QTTAgentRoleOperatingCharterRegistry.yaml",
+      "future_reclaim_pr": "PR168_RP5C_IMMUTABLE_LIBRARY",
+      "identity_ref": "QUBO",
+      "identity_type": "QUANTUM_OBJECTIVE",
+      "reclaim_required_flag": true,
+      "row_id": "RP5A_CUSTODY_0000003"
+    }
+  ],
+  "report_version": "PR168-RP5A-v2.0",
+  "rows_ref": "docs/master_plan/generated/rp5a/identity_custody_rows.jsonl"
+}

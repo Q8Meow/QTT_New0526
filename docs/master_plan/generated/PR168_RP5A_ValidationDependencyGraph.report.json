@@ -1,0 +1,25 @@
+{
+  "audit_only_flag": true,
+  "created_at_utc": "2026-06-24T00:00:00Z",
+  "logical_report_id": "PR168_RP5A_ValidationDependencyGraph",
+  "manifest_ref": "docs/master_plan/generated/rp5a/validation_dependency_rows.manifest.json",
+  "physical_filename": "PR168_RP5A_ValidationDependencyGraph.report.json",
+  "records": [
+    {
+      "break_risk_if_removed": "LOW",
+      "can_be_removed_from_validation_future_pr_flag": true,
+      "dependency_file_path": null,
+      "file_path_or_prefix": "docs/master_plan/agents/QTTAgentRoleOperatingCharterRegistry.yaml",
+      "line_or_json_path": null,
+      "recommended_future_cleanup_step": "NO_VALIDATION_DEPENDENCY_FOUND",
+      "requires_currentization_if_changed_flag": false,
+      "row_id": "RP5A_VALIDATION_0000001",
+      "validation_component": "none_detected",
+      "validation_dependency_type": "NONE"
+    }
+  ],
+  "report_version": "PR168-RP5A-v2.0",
+  "rows_ref": "docs/master_plan/generated/rp5a/validation_dependency_rows.jsonl",
+  "validation_dependency_row_count": 1,
+  "validation_dependent_file_count": 0
+}

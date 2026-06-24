@@ -1,0 +1,63 @@
+{
+  "audit_only_flag": true,
+  "created_at_utc": "2026-06-24T00:00:00Z",
+  "current_branch": "pr168-rp5a-legacy-semantic-audit",
+  "git_status_short_after_rp5a_edits": "M docs/master_plan/generated/PR168_RP5A_CrossGraphConsistency.report.json\n M docs/master_plan/generated/PR168_RP5A_DeleteEligibilityDraft.report.json\n M docs/master_plan/generated/PR168_RP5A_FinalSummary.report.json\n M docs/master_plan/generated/PR168_RP5A_FutureRP5BPlan.report.json\n M docs/master_plan/generated/PR168_RP5A_Input.report.json\n M docs/master_plan/generated/PR168_RP5A_Preflight.report.json\n M docs/master_plan/generated/PR168_RP5A_ScanPerformance.report.json\n M docs/master_plan/generated/rp5a/delete_eligibility_rows.jsonl\n M docs/master_plan/generated/rp5a/delete_eligibility_rows.manifest.json\n M docs/master_plan/generated/rp5a/future_rp5b_plan_rows.jsonl\n M docs/master_plan/generated/rp5a/future_rp5b_plan_rows.manifest.json\n M docs/master_plan/generated/rp5a/input_rows.jsonl\n M tests/pr168_rp5a/test_scan_is_bounded.py\n M tools/build_pr168_rp5a_legacy_semantic_audit.py\n M tools/pr168_rp5a_git_grep_scanner.py\n M tools/pr168_rp5a_validator.py",
+  "intended_branch": "pr168-rp5a-legacy-semantic-audit",
+  "latest_main_run_green_or_exact_gapped": true,
+  "latest_main_run_state": {
+    "conclusion": "success",
+    "databaseId": 27998063221,
+    "displayTitle": "PR168-RANK3: RP3 evidence-backed formula stack ranking and no-trade c\u2026",
+    "headSha": "5b1112504f805033877cdeda13bff4b29dd0422a",
+    "status": "completed"
+  },
+  "logical_report_id": "PR168_RP5A_Preflight",
+  "main_current_with_origin_at_branch_time": true,
+  "no_open_pr_conflict_detected": true,
+  "open_prs_excluding_rp5a_branch": [],
+  "origin_main_head": "5b1112504f805033877cdeda13bff4b29dd0422a",
+  "physical_filename": "PR168_RP5A_Preflight.report.json",
+  "pr240_closed_not_merged_preflight_passed": true,
+  "pr240_state": {
+    "baseRefName": "main",
+    "headRefName": "pr168-recovery1-rank3-guided-repair-retest",
+    "headRefOid": "a8fa963d988acc3be2435c44501577e3aca8b869",
+    "mergeable": "MERGEABLE",
+    "mergedAt": null,
+    "number": 240,
+    "state": "CLOSED"
+  },
+  "preflight_note": "Runtime status is after RP5A edits; guard output recorded clean pre-edit state before file modifications.",
+  "records": {
+    "current_branch": "pr168-rp5a-legacy-semantic-audit",
+    "git_status_short_after_rp5a_edits": "M docs/master_plan/generated/PR168_RP5A_CrossGraphConsistency.report.json\n M docs/master_plan/generated/PR168_RP5A_DeleteEligibilityDraft.report.json\n M docs/master_plan/generated/PR168_RP5A_FinalSummary.report.json\n M docs/master_plan/generated/PR168_RP5A_FutureRP5BPlan.report.json\n M docs/master_plan/generated/PR168_RP5A_Input.report.json\n M docs/master_plan/generated/PR168_RP5A_Preflight.report.json\n M docs/master_plan/generated/PR168_RP5A_ScanPerformance.report.json\n M docs/master_plan/generated/rp5a/delete_eligibility_rows.jsonl\n M docs/master_plan/generated/rp5a/delete_eligibility_rows.manifest.json\n M docs/master_plan/generated/rp5a/future_rp5b_plan_rows.jsonl\n M docs/master_plan/generated/rp5a/future_rp5b_plan_rows.manifest.json\n M docs/master_plan/generated/rp5a/input_rows.jsonl\n M tests/pr168_rp5a/test_scan_is_bounded.py\n M tools/build_pr168_rp5a_legacy_semantic_audit.py\n M tools/pr168_rp5a_git_grep_scanner.py\n M tools/pr168_rp5a_validator.py",
+    "intended_branch": "pr168-rp5a-legacy-semantic-audit",
+    "latest_main_run_green_or_exact_gapped": true,
+    "latest_main_run_state": {
+      "conclusion": "success",
+      "databaseId": 27998063221,
+      "displayTitle": "PR168-RANK3: RP3 evidence-backed formula stack ranking and no-trade c\u2026",
+      "headSha": "5b1112504f805033877cdeda13bff4b29dd0422a",
+      "status": "completed"
+    },
+    "main_current_with_origin_at_branch_time": true,
+    "no_open_pr_conflict_detected": true,
+    "open_prs_excluding_rp5a_branch": [],
+    "origin_main_head": "5b1112504f805033877cdeda13bff4b29dd0422a",
+    "pr240_closed_not_merged_preflight_passed": true,
+    "pr240_state": {
+      "baseRefName": "main",
+      "headRefName": "pr168-recovery1-rank3-guided-repair-retest",
+      "headRefOid": "a8fa963d988acc3be2435c44501577e3aca8b869",
+      "mergeable": "MERGEABLE",
+      "mergedAt": null,
+      "number": 240,
+      "state": "CLOSED"
+    },
+    "preflight_note": "Runtime status is after RP5A edits; guard output recorded clean pre-edit state before file modifications.",
+    "recovery1_branch_not_active": true
+  },
+  "recovery1_branch_not_active": true,
+  "report_version": "PR168-RP5A-v2.0"
+}
