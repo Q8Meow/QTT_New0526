@@ -36,6 +36,7 @@ LAST_SCAN_STATS: dict[str, object] = {
     "budget_exhausted_flag": False,
     "budget_exhaustion_reasons": [],
     "rg_used_flag": False,
+    "git_grep_used_flag": False,
     "python_fallback_used_flag": False,
     "files_available_count": 0,
     "files_scanned_count": 0,
@@ -228,8 +229,15 @@ def _scan_files_for_terms_with_rg(
     progress_interval_seconds: int,
 ) -> list[dict[str, object]] | None:
     rg_executable = shutil.which("rg")
-    if rg_executable is None:
-        LAST_SCAN_STATS.update({"rg_used_flag": False, "python_fallback_used_flag": True})
+    git_executable = shutil.which("git")
+    if rg_executable is not None:
+        search_engine = "rg"
+        executable = rg_executable
+    elif git_executable is not None:
+        search_engine = "git_grep"
+        executable = git_executable
+    else:
+        LAST_SCAN_STATS.update({"rg_used_flag": False, "git_grep_used_flag": False, "python_fallback_used_flag": True})
         return None
 
     scan_files = files[:max_files_scanned]
@@ -239,7 +247,8 @@ def _scan_files_for_terms_with_rg(
             "scan_budget_status": "SCAN_BUDGET_OK",
             "budget_exhausted_flag": False,
             "budget_exhaustion_reasons": [],
-            "rg_used_flag": True,
+            "rg_used_flag": search_engine == "rg",
+            "git_grep_used_flag": search_engine == "git_grep",
             "python_fallback_used_flag": False,
             "files_available_count": len(files),
             "files_scanned_count": len(scan_files),
@@ -266,8 +275,10 @@ def _scan_files_for_terms_with_rg(
     matched_seen: set[str] = set()
     files_processed = 0
     last_progress = 0.0
+    pass_a_phase = "rp5a_rg_pass_a_files_with_matches" if search_engine == "rg" else "rp5a_git_grep_pass_a_files_with_matches"
+    pass_b_phase = "rp5a_rg_pass_b_bounded_line_hits" if search_engine == "rg" else "rp5a_git_grep_pass_b_bounded_line_hits"
     last_progress = _progress(
-        "rp5a_rg_pass_a_files_with_matches",
+        pass_a_phase,
         files_processed=0,
         matched_files=0,
         started_at=started_at,
@@ -283,19 +294,33 @@ def _scan_files_for_terms_with_rg(
             batch = scan_files[batch_start : batch_start + PASS_A_BATCH_SIZE]
             with tempfile.NamedTemporaryFile("w", encoding="utf-8", newline="\n", delete=False) as output_file:
                 output_path = Path(output_file.name)
-            command = [
-                rg_executable,
-                "--fixed-strings",
-                "--files-with-matches",
-                "--ignore-case",
-                "--no-messages",
-                "--color",
-                "never",
-                "--file",
-                str(pattern_path),
-                "--",
-                *batch,
-            ]
+            if search_engine == "rg":
+                command = [
+                    executable,
+                    "--fixed-strings",
+                    "--files-with-matches",
+                    "--ignore-case",
+                    "--no-messages",
+                    "--color",
+                    "never",
+                    "--file",
+                    str(pattern_path),
+                    "--",
+                    *batch,
+                ]
+            else:
+                command = [
+                    executable,
+                    "grep",
+                    "--name-only",
+                    "-I",
+                    "-i",
+                    "-F",
+                    "-f",
+                    str(pattern_path),
+                    "--",
+                    *batch,
+                ]
             try:
                 with output_path.open("w", encoding="utf-8", newline="\n") as output:
                     try:
@@ -311,13 +336,13 @@ def _scan_files_for_terms_with_rg(
                             timeout=_batch_timeout_seconds(started_at, max_wall_seconds),
                         )
                     except FileNotFoundError:
-                        LAST_SCAN_STATS.update({"rg_used_flag": False, "python_fallback_used_flag": True})
+                        LAST_SCAN_STATS.update({"rg_used_flag": False, "git_grep_used_flag": False, "python_fallback_used_flag": True})
                         return None
                     except subprocess.TimeoutExpired:
                         _mark_budget_exhausted("RG_PASS_A_BATCH_TIMEOUT")
                         break
                 if completed.returncode not in {0, 1}:
-                    LAST_SCAN_STATS.update({"rg_used_flag": False, "python_fallback_used_flag": True})
+                    LAST_SCAN_STATS.update({"rg_used_flag": False, "git_grep_used_flag": False, "python_fallback_used_flag": True})
                     return None
                 with output_path.open("r", encoding="utf-8", errors="replace") as handle:
                     for line in handle:
@@ -336,7 +361,7 @@ def _scan_files_for_terms_with_rg(
             files_processed += len(batch)
             LAST_SCAN_STATS["candidate_files_count"] = len(matched_files)
             last_progress = _progress(
-                "rp5a_rg_pass_a_files_with_matches",
+                pass_a_phase,
                 files_processed=files_processed,
                 matched_files=len(matched_files),
                 started_at=started_at,
@@ -375,7 +400,7 @@ def _scan_files_for_terms_with_rg(
         )
     if not matched_files:
         _progress(
-            "rp5a_rg_pass_b_bounded_line_hits",
+            pass_b_phase,
             files_processed=0,
             matched_files=0,
             started_at=started_at,
@@ -393,7 +418,7 @@ def _scan_files_for_terms_with_rg(
     matched_processed = 0
     last_progress = 0.0
     last_progress = _progress(
-        "rp5a_rg_pass_b_bounded_line_hits",
+        pass_b_phase,
         files_processed=0,
         matched_files=len(matched_files),
         started_at=started_at,
@@ -412,21 +437,35 @@ def _scan_files_for_terms_with_rg(
             batch = line_scan_files[batch_start : batch_start + PASS_B_BATCH_SIZE]
             with tempfile.NamedTemporaryFile("w", encoding="utf-8", newline="\n", delete=False) as output_file:
                 output_path = Path(output_file.name)
-            command = [
-                rg_executable,
-                "--vimgrep",
-                "--fixed-strings",
-                "--ignore-case",
-                "--no-messages",
-                "--color",
-                "never",
-                "--max-count",
-                str(MAX_LINE_HITS_PER_FILE),
-                "--file",
-                str(pattern_path),
-                "--",
-                *batch,
-            ]
+            if search_engine == "rg":
+                command = [
+                    executable,
+                    "--vimgrep",
+                    "--fixed-strings",
+                    "--ignore-case",
+                    "--no-messages",
+                    "--color",
+                    "never",
+                    "--max-count",
+                    str(MAX_LINE_HITS_PER_FILE),
+                    "--file",
+                    str(pattern_path),
+                    "--",
+                    *batch,
+                ]
+            else:
+                command = [
+                    executable,
+                    "grep",
+                    "-n",
+                    "-I",
+                    "-i",
+                    "-F",
+                    "-f",
+                    str(pattern_path),
+                    "--",
+                    *batch,
+                ]
             try:
                 with output_path.open("w", encoding="utf-8", newline="\n") as output:
                     try:
@@ -442,7 +481,7 @@ def _scan_files_for_terms_with_rg(
                             timeout=_batch_timeout_seconds(started_at, max_wall_seconds),
                         )
                     except FileNotFoundError:
-                        LAST_SCAN_STATS.update({"rg_used_flag": False, "python_fallback_used_flag": True})
+                        LAST_SCAN_STATS.update({"rg_used_flag": False, "git_grep_used_flag": False, "python_fallback_used_flag": True})
                         return None
                     except subprocess.TimeoutExpired:
                         _mark_budget_exhausted("RG_PASS_B_BATCH_TIMEOUT")
@@ -454,10 +493,16 @@ def _scan_files_for_terms_with_rg(
                         if len(rows) >= max_total_line_hits:
                             _mark_budget_exhausted("MAX_TOTAL_LINE_HITS")
                             break
-                        try:
-                            raw_path, line_number_text, _column, text = output_line.rstrip("\n").split(":", 3)
-                        except ValueError:
-                            continue
+                        if search_engine == "rg":
+                            try:
+                                raw_path, line_number_text, _column, text = output_line.rstrip("\n").split(":", 3)
+                            except ValueError:
+                                continue
+                        else:
+                            try:
+                                raw_path, line_number_text, text = output_line.rstrip("\n").split(":", 2)
+                            except ValueError:
+                                continue
                         file_path = _normalize_rg_path(raw_path)
                         if file_path not in tracked:
                             continue
@@ -508,7 +553,7 @@ def _scan_files_for_terms_with_rg(
             LAST_SCAN_STATS["matched_files_processed_count"] = matched_processed
             LAST_SCAN_STATS["total_line_hits_emitted"] = len(rows)
             last_progress = _progress(
-                "rp5a_rg_pass_b_bounded_line_hits",
+                pass_b_phase,
                 files_processed=matched_processed,
                 matched_files=len(hits_by_file),
                 started_at=started_at,
@@ -535,7 +580,7 @@ def _scan_files_for_terms_with_rg(
         }
     )
     _progress(
-        "rp5a_rg_pass_b_bounded_line_hits",
+        pass_b_phase,
         files_processed=matched_processed,
         matched_files=len(hits_by_file),
         started_at=started_at,
@@ -590,6 +635,7 @@ def _scan_files_for_terms_with_python(
             "budget_exhausted_flag": False,
             "budget_exhaustion_reasons": [],
             "rg_used_flag": False,
+            "git_grep_used_flag": False,
             "python_fallback_used_flag": True,
             "files_available_count": len(files),
             "files_scanned_count": len(scan_files),

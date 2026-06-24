@@ -732,7 +732,11 @@ def build_all(*, offline: bool = True, quick_selftest: bool = False) -> dict[str
         "peak_memory_strategy": (
             "RG_TEMP_FILE_TWO_PASS_BOUNDED_HITS"
             if bool(scan_stats.get("rg_used_flag"))
-            else "PYTHON_FALLBACK_STREAMING_BOUNDED_LINE_SCAN"
+            else (
+                "GIT_GREP_TEMP_FILE_TWO_PASS_BOUNDED_HITS"
+                if bool(scan_stats.get("git_grep_used_flag"))
+                else "PYTHON_FALLBACK_STREAMING_BOUNDED_LINE_SCAN"
+            )
         ),
         "scan_budget_status": scan_stats.get("scan_budget_status", "SCAN_BUDGET_OK"),
         "budget_exhausted_flag": bool(scan_stats.get("budget_exhausted_flag")),
@@ -746,6 +750,7 @@ def build_all(*, offline: bool = True, quick_selftest: bool = False) -> dict[str
         "skipped_large_line_scan_files_limited": scan_stats.get("skipped_large_line_scan_files_limited", []),
         "row_field_budget_exhausted_flag": bool(LAST_ROW_FIELD_STATS.get("row_field_budget_exhausted_flag")),
         "rg_used_flag": bool(scan_stats.get("rg_used_flag")),
+        "git_grep_used_flag": bool(scan_stats.get("git_grep_used_flag")),
         "python_fallback_used_flag": bool(scan_stats.get("python_fallback_used_flag")),
         "quick_selftest_flag": quick_selftest,
         "max_wall_seconds": max_wall_seconds,

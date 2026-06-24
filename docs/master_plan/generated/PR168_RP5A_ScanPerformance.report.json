@@ -12,16 +12,17 @@
   "consumer_graph_scan_mode": "BOUNDED_STATUS_ONLY_NO_ALL_PAIRS",
   "created_at_utc": "2026-06-24T00:00:00Z",
   "elapsed_seconds_by_phase": {
-    "bounded_dependency_graphs": 0.133755,
-    "bounded_row_field_hit_index": 0.000122,
-    "classification_and_reports_in_memory": 0.073287,
-    "github_pr_metadata": 1.94344,
-    "identity_and_agent_touchpoints": 0.020511,
-    "preflight_and_crosswalk": 1.590729,
-    "rg_two_pass_line_scan": 9.755855
+    "bounded_dependency_graphs": 0.131162,
+    "bounded_row_field_hit_index": 0.000121,
+    "classification_and_reports_in_memory": 0.080516,
+    "github_pr_metadata": 2.036928,
+    "identity_and_agent_touchpoints": 0.021892,
+    "preflight_and_crosswalk": 1.466742,
+    "rg_two_pass_line_scan": 9.762042
   },
   "files_available_count": 17343,
   "files_scanned_count": 17343,
+  "git_grep_used_flag": false,
   "logical_report_id": "PR168_RP5A_ScanPerformance",
   "matched_files_count": 1,
   "matched_files_processed_count": 50,
@@ -50,16 +51,17 @@
     "checkpoint_path": ".tmp/rp5a_scan_checkpoint.json",
     "consumer_graph_scan_mode": "BOUNDED_STATUS_ONLY_NO_ALL_PAIRS",
     "elapsed_seconds_by_phase": {
-      "bounded_dependency_graphs": 0.133755,
-      "bounded_row_field_hit_index": 0.000122,
-      "classification_and_reports_in_memory": 0.073287,
-      "github_pr_metadata": 1.94344,
-      "identity_and_agent_touchpoints": 0.020511,
-      "preflight_and_crosswalk": 1.590729,
-      "rg_two_pass_line_scan": 9.755855
+      "bounded_dependency_graphs": 0.131162,
+      "bounded_row_field_hit_index": 0.000121,
+      "classification_and_reports_in_memory": 0.080516,
+      "github_pr_metadata": 2.036928,
+      "identity_and_agent_touchpoints": 0.021892,
+      "preflight_and_crosswalk": 1.466742,
+      "rg_two_pass_line_scan": 9.762042
     },
     "files_available_count": 17343,
     "files_scanned_count": 17343,
+    "git_grep_used_flag": false,
     "matched_files_count": 1,
     "matched_files_processed_count": 50,
     "max_consumer_refs_per_file": 100,
@@ -133,7 +135,7 @@
     ],
     "skipped_large_structured_file_count": 0,
     "skipped_large_structured_files_limited": [],
-    "total_elapsed_seconds": 13.566197
+    "total_elapsed_seconds": 13.555329
   },
   "report_version": "PR168-RP5A-v2.0",
   "rg_used_flag": true,
@@ -195,5 +197,5 @@
   ],
   "skipped_large_structured_file_count": 0,
   "skipped_large_structured_files_limited": [],
-  "total_elapsed_seconds": 13.566197
+  "total_elapsed_seconds": 13.555329
 }
