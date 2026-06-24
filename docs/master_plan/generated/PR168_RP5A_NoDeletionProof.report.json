@@ -16,6 +16,8 @@
   "moved_refs": [],
   "no_legacy_scope_removal_flag": true,
   "physical_filename": "PR168_RP5A_NoDeletionProof.report.json",
+  "preexisting_legacy_artifact_modified_count": 0,
+  "preexisting_legacy_artifact_modified_refs": [],
   "qtt_sha_or_atomicrows_hash_authority_count": 0,
   "quantum_backend_execution_count": 0,
   "records": {
@@ -32,6 +34,8 @@
     "moved_file_count": 0,
     "moved_refs": [],
     "no_legacy_scope_removal_flag": true,
+    "preexisting_legacy_artifact_modified_count": 0,
+    "preexisting_legacy_artifact_modified_refs": [],
     "qtt_sha_or_atomicrows_hash_authority_count": 0,
     "quantum_backend_execution_count": 0,
     "runtime_stack_generation_count": 0,
@@ -39,8 +43,8 @@
     "source_truth_authority_created_count": 0,
     "trade_simulation_count": 0,
     "trade_simulation_refs": [],
-    "validation_scope_change_type": "NONE",
-    "validation_scope_changed_flag": false,
+    "validation_scope_change_type": "ADD_RP5A_SCOPE_ONLY",
+    "validation_scope_changed_flag": true,
     "validation_scope_removed_count": 0
   },
   "report_version": "PR168-RP5A-v2.0",
@@ -49,7 +53,7 @@
   "source_truth_authority_created_count": 0,
   "trade_simulation_count": 0,
   "trade_simulation_refs": [],
-  "validation_scope_change_type": "NONE",
-  "validation_scope_changed_flag": false,
+  "validation_scope_change_type": "ADD_RP5A_SCOPE_ONLY",
+  "validation_scope_changed_flag": true,
   "validation_scope_removed_count": 0
 }

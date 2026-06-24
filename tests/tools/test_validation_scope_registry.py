@@ -257,6 +257,7 @@ def test_pr168_rank3_allowed_paths_pass_on_real_branch(path: str) -> None:
         "tools/validate_pr168_rp5a_legacy_semantic_audit.py",
         "tests/pr168_rp5a/test_final_summary_counts.py",
         "tools/validation_scope_registry.py",
+        "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
     ],
 )
 def test_pr168_rp5a_allowed_paths_pass_on_real_branch(path: str) -> None:

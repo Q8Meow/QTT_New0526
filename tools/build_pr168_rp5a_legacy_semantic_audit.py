@@ -436,17 +436,51 @@ def _validation_scope_removed_count() -> int:
     return 0 if count == 0 else count
 
 
-def _no_deletion_proof() -> dict[str, object]:
+_ALLOWED_CURRENTIZATION_ARTIFACT_PATHS = frozenset(
+    {
+        "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+    }
+)
+
+
+def _status_path(line: str) -> str:
+    return normalize_repo_path(line[3:] if len(line) > 3 else line)
+
+
+def _status_code(line: str) -> str:
+    return line[:2].strip()
+
+
+def _is_legacy_generated_artifact_path(path: str) -> bool:
+    return (
+        path.startswith("docs/master_plan/generated/")
+        and not is_owned_rp5a_path(path)
+        and path not in _ALLOWED_CURRENTIZATION_ARTIFACT_PATHS
+    )
+
+
+def _no_deletion_proof(baseline_status_rows: list[str] | None = None) -> dict[str, object]:
+    baseline_status_rows = baseline_status_rows or []
+    baseline_legacy_modified = {
+        _status_path(line)
+        for line in baseline_status_rows
+        if _status_code(line) in {"M", "A"}
+        and _is_legacy_generated_artifact_path(_status_path(line))
+    }
     rows = _status_rows()
-    deleted = [line for line in rows if line[:2].strip() == "D" or "D" in line[:2]]
+    deleted = [line for line in rows if _status_code(line) == "D" or "D" in line[:2]]
     moved = [line for line in rows if "R" in line[:2]]
     legacy_modified = []
     validation_scope_changed = False
     for line in rows:
-        path = normalize_repo_path(line[3:] if len(line) > 3 else line)
+        path = _status_path(line)
         if path in {"tools/validation_scope_registry.py", "tools/validation_inventory.py", "tools/run_validation_gates.py"} or path.startswith("tests/tools/test_validation_") or path == "tests/fail_closed/test_run_validation_gates.py":
             validation_scope_changed = True
-        if path.startswith("docs/master_plan/generated/") and not is_owned_rp5a_path(path) and line[:2].strip() in {"M", "A"}:
+        if (
+            _is_legacy_generated_artifact_path(path)
+            and _status_code(line) in {"M", "A"}
+            and path not in baseline_legacy_modified
+        ):
             legacy_modified.append(path)
     validation_scope_removed = _validation_scope_removed_count()
     return {
@@ -467,6 +501,8 @@ def _no_deletion_proof() -> dict[str, object]:
         "trade_simulation_refs": [],
         "formula_reclaim_refs": [],
         "legacy_modified_refs": legacy_modified[:50],
+        "preexisting_legacy_artifact_modified_count": len(baseline_legacy_modified),
+        "preexisting_legacy_artifact_modified_refs": sorted(baseline_legacy_modified)[:50],
         "deleted_refs": deleted,
         "moved_refs": moved,
     }
@@ -561,6 +597,7 @@ def _quick_selftest_files(files: list[str]) -> list[str]:
 
 def build_all(*, offline: bool = True, quick_selftest: bool = False) -> dict[str, object]:
     timer = PhaseTimer()
+    baseline_status_rows = _status_rows()
     _write_checkpoint("start", offline=offline, quick_selftest=quick_selftest)
     _log_phase("start", started_at=timer.started_at)
     phase = timer.start_phase()
@@ -669,7 +706,7 @@ def build_all(*, offline: bool = True, quick_selftest: bool = False) -> dict[str
     file_rows = _file_semantic_rows(matched_files, file_term_map, pr_rows, consumer_rows, validation_rows, identity_rows, agent_rows, delete_rows)
     wrong_term_rows = _wrong_concept_rows(hit_rows, pr_rows)
     future_rows = _future_plan_rows(delete_rows, validation_rows, identity_rows, consumer_rows)
-    no_delete = _no_deletion_proof()
+    no_delete = _no_deletion_proof(baseline_status_rows)
     input_rows = _input_rows(files, preflight, crosswalk_status)
     timer.mark("classification_and_reports_in_memory", phase)
     _write_checkpoint("classification_and_reports_in_memory", delete_rows_count=len(delete_rows), consistency_failures=len([row for row in consistency_rows if not row["consistent_flag"]]))
