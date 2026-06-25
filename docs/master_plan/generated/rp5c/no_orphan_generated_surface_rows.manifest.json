@@ -24,7 +24,7 @@
   },
   "physical_filename": "docs/master_plan/generated/rp5c/no_orphan_generated_surface_rows.manifest.json",
   "report_version": "PR168-RP5C-v1.0",
-  "row_count": 52,
+  "row_count": 60,
   "row_count_within_bound_flag": true,
   "row_refs_limited": [
     "RP5C_GENERATED_SURFACE_00001",
@@ -78,7 +78,15 @@
     "RP5C_GENERATED_SURFACE_00049",
     "RP5C_GENERATED_SURFACE_00050",
     "RP5C_GENERATED_SURFACE_00051",
-    "RP5C_GENERATED_SURFACE_00052"
+    "RP5C_GENERATED_SURFACE_00052",
+    "RP5C_GENERATED_SURFACE_00053",
+    "RP5C_GENERATED_SURFACE_00054",
+    "RP5C_GENERATED_SURFACE_00055",
+    "RP5C_GENERATED_SURFACE_00056",
+    "RP5C_GENERATED_SURFACE_00057",
+    "RP5C_GENERATED_SURFACE_00058",
+    "RP5C_GENERATED_SURFACE_00059",
+    "RP5C_GENERATED_SURFACE_00060"
   ],
   "schema_version_name": "NoOrphanGeneratedSurfaceProofV1",
   "shard_file_path": "docs/master_plan/generated/rp5c/no_orphan_generated_surface_rows.jsonl",

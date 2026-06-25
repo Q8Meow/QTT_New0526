@@ -23,13 +23,19 @@
     "docs/master_plan/generated/rp5c/no_orphan_identity_rows.jsonl",
     "docs/master_plan/generated/rp5c/no_orphan_source_artifact_rows.jsonl",
     "docs/master_plan/generated/rp5c/no_orphan_generated_surface_rows.jsonl",
+    "docs/master_plan/generated/rp5c/stage1_prediction_market_qku_activation_view.jsonl",
+    "docs/master_plan/generated/rp5c/platform_applicability_registry.jsonl",
+    "docs/master_plan/generated/rp5c/dormant_future_market_qku_ledger.jsonl",
+    "docs/master_plan/generated/rp5c/stage1_agent_computation_universe_seed.jsonl",
     "docs/master_plan/generated/rp5c/rp5d_executability_handoff.jsonl"
   ],
-  "central_surface_count": 21,
+  "central_surface_count": 25,
   "champion_authority_created_count": 0,
   "connector_semantic_binding_count": 0,
   "created_at_utc": "2026-06-25T00:00:00Z",
   "deleted_file_count": 0,
+  "dormant_qku_deleted_count": 0,
+  "dormant_qku_global_ban_count": 0,
   "formula_expression_mutation_count": 0,
   "formula_identity_deleted_count": 0,
   "formula_profit_ranking_count": 0,
@@ -43,6 +49,8 @@
     "champion_authority_created_count": 0,
     "connector_semantic_binding_count": 0,
     "deleted_file_count": 0,
+    "dormant_qku_deleted_count": 0,
+    "dormant_qku_global_ban_count": 0,
     "formula_expression_mutation_count": 0,
     "formula_identity_deleted_count": 0,
     "formula_profit_ranking_count": 0,
@@ -55,6 +63,7 @@
     "master_plan_content_deleted_or_shortened_count": 0,
     "moved_file_count": 0,
     "mutable_agent_ownership_embedded_as_identity_authority_count": 0,
+    "non_prediction_market_qku_stage1_active_count": 0,
     "orphan_generated_shard_count": 0,
     "orphan_identity_count": 0,
     "orphan_input_report_count": 0,
@@ -73,8 +82,10 @@
     "silent_skipped_input_artifact_count": 0,
     "source_truth_authority_created_count": 0,
     "stack_combination_materialization_count": 0,
+    "stage1_default_full_universe_compute_route_count": 0,
     "trade_simulation_count": 0
   },
+  "immutable_qku_formula_library_remains_universal_preservation_surface": true,
   "launch_readiness_authority_created_count": 0,
   "live_order_authority_created_count": 0,
   "logical_report_id": "PR168_RP5C_CentralSurfaceManifest",
@@ -83,6 +94,7 @@
   "moved_file_count": 0,
   "mutable_agent_ownership_embedded_as_identity_authority_count": 0,
   "no_authority_statement": "RP5C is immutable identity, provenance, classification, and derived routing preparation only. It creates no live/order/source-truth/champion/launch/quantum/hash authority and does not mutate formulas or delete identities.",
+  "non_prediction_market_qku_stage1_active_count": 0,
   "orphan_generated_shard_count": 0,
   "orphan_identity_count": 0,
   "orphan_input_report_count": 0,
@@ -101,6 +113,7 @@
     {
       "authority_class": "RP5C_CENTRAL_ACTIVE_SURFACE_NOT_SOURCE_TRUTH",
       "central_surface_id": "RP5C_CENTRAL_SURFACE_0001",
+      "default_stage1_computation_seed_flag": false,
       "derived_route_overlay_not_identity_authority_flag": false,
       "future_consumer_refs": [
         "PR168-RP5D",
@@ -112,12 +125,16 @@
         "LiveFutureOnly"
       ],
       "manifest_ref": "docs/master_plan/generated/rp5c/immutable_qku_library.manifest.json",
+      "market_scope_or_platform_creates_trading_authority_flag": false,
       "raw_legacy_direct_consumer_allowed_flag": false,
-      "surface_ref": "docs/master_plan/generated/rp5c/immutable_qku_library.jsonl"
+      "stage1_agents_must_not_default_compute_full_universe_flag": false,
+      "surface_ref": "docs/master_plan/generated/rp5c/immutable_qku_library.jsonl",
+      "universal_preservation_surface_flag": false
     },
     {
       "authority_class": "RP5C_CENTRAL_ACTIVE_SURFACE_NOT_SOURCE_TRUTH",
       "central_surface_id": "RP5C_CENTRAL_SURFACE_0002",
+      "default_stage1_computation_seed_flag": false,
       "derived_route_overlay_not_identity_authority_flag": false,
       "future_consumer_refs": [
         "PR168-RP5D",
@@ -129,12 +146,16 @@
         "LiveFutureOnly"
       ],
       "manifest_ref": "docs/master_plan/generated/rp5c/immutable_formula_library.manifest.json",
+      "market_scope_or_platform_creates_trading_authority_flag": false,
       "raw_legacy_direct_consumer_allowed_flag": false,
-      "surface_ref": "docs/master_plan/generated/rp5c/immutable_formula_library.jsonl"
+      "stage1_agents_must_not_default_compute_full_universe_flag": false,
+      "surface_ref": "docs/master_plan/generated/rp5c/immutable_formula_library.jsonl",
+      "universal_preservation_surface_flag": false
     },
     {
       "authority_class": "RP5C_CENTRAL_ACTIVE_SURFACE_NOT_SOURCE_TRUTH",
       "central_surface_id": "RP5C_CENTRAL_SURFACE_0003",
+      "default_stage1_computation_seed_flag": false,
       "derived_route_overlay_not_identity_authority_flag": false,
       "future_consumer_refs": [
         "PR168-RP5D",
@@ -146,12 +167,16 @@
         "LiveFutureOnly"
       ],
       "manifest_ref": "docs/master_plan/generated/rp5c/immutable_qku_formula_library.manifest.json",
+      "market_scope_or_platform_creates_trading_authority_flag": false,
       "raw_legacy_direct_consumer_allowed_flag": false,
-      "surface_ref": "docs/master_plan/generated/rp5c/immutable_qku_formula_library.jsonl"
+      "stage1_agents_must_not_default_compute_full_universe_flag": false,
+      "surface_ref": "docs/master_plan/generated/rp5c/immutable_qku_formula_library.jsonl",
+      "universal_preservation_surface_flag": true
     },
     {
       "authority_class": "RP5C_CENTRAL_ACTIVE_SURFACE_NOT_SOURCE_TRUTH",
       "central_surface_id": "RP5C_CENTRAL_SURFACE_0004",
+      "default_stage1_computation_seed_flag": false,
       "derived_route_overlay_not_identity_authority_flag": false,
       "future_consumer_refs": [
         "PR168-RP5D",
@@ -163,12 +188,16 @@
         "LiveFutureOnly"
       ],
       "manifest_ref": "docs/master_plan/generated/rp5c/qku_formula_family_registry.manifest.json",
+      "market_scope_or_platform_creates_trading_authority_flag": false,
       "raw_legacy_direct_consumer_allowed_flag": false,
-      "surface_ref": "docs/master_plan/generated/rp5c/qku_formula_family_registry.jsonl"
+      "stage1_agents_must_not_default_compute_full_universe_flag": false,
+      "surface_ref": "docs/master_plan/generated/rp5c/qku_formula_family_registry.jsonl",
+      "universal_preservation_surface_flag": false
     },
     {
       "authority_class": "RP5C_CENTRAL_ACTIVE_SURFACE_NOT_SOURCE_TRUTH",
       "central_surface_id": "RP5C_CENTRAL_SURFACE_0005",
+      "default_stage1_computation_seed_flag": false,
       "derived_route_overlay_not_identity_authority_flag": false,
       "future_consumer_refs": [
         "PR168-RP5D",
@@ -180,12 +209,16 @@
         "LiveFutureOnly"
       ],
       "manifest_ref": "docs/master_plan/generated/rp5c/market_scope_family_registry.manifest.json",
+      "market_scope_or_platform_creates_trading_authority_flag": false,
       "raw_legacy_direct_consumer_allowed_flag": false,
-      "surface_ref": "docs/master_plan/generated/rp5c/market_scope_family_registry.jsonl"
+      "stage1_agents_must_not_default_compute_full_universe_flag": false,
+      "surface_ref": "docs/master_plan/generated/rp5c/market_scope_family_registry.jsonl",
+      "universal_preservation_surface_flag": false
     },
     {
       "authority_class": "RP5C_CENTRAL_ACTIVE_SURFACE_NOT_SOURCE_TRUTH",
       "central_surface_id": "RP5C_CENTRAL_SURFACE_0006",
+      "default_stage1_computation_seed_flag": false,
       "derived_route_overlay_not_identity_authority_flag": false,
       "future_consumer_refs": [
         "PR168-RP5D",
@@ -197,12 +230,16 @@
         "LiveFutureOnly"
       ],
       "manifest_ref": "docs/master_plan/generated/rp5c/ontology_role_registry.manifest.json",
+      "market_scope_or_platform_creates_trading_authority_flag": false,
       "raw_legacy_direct_consumer_allowed_flag": false,
-      "surface_ref": "docs/master_plan/generated/rp5c/ontology_role_registry.jsonl"
+      "stage1_agents_must_not_default_compute_full_universe_flag": false,
+      "surface_ref": "docs/master_plan/generated/rp5c/ontology_role_registry.jsonl",
+      "universal_preservation_surface_flag": false
     },
     {
       "authority_class": "RP5C_CENTRAL_ACTIVE_SURFACE_NOT_SOURCE_TRUTH",
       "central_surface_id": "RP5C_CENTRAL_SURFACE_0007",
+      "default_stage1_computation_seed_flag": false,
       "derived_route_overlay_not_identity_authority_flag": false,
       "future_consumer_refs": [
         "PR168-RP5D",
@@ -214,12 +251,16 @@
         "LiveFutureOnly"
       ],
       "manifest_ref": "docs/master_plan/generated/rp5c/formula_assignment_library.manifest.json",
+      "market_scope_or_platform_creates_trading_authority_flag": false,
       "raw_legacy_direct_consumer_allowed_flag": false,
-      "surface_ref": "docs/master_plan/generated/rp5c/formula_assignment_library.jsonl"
+      "stage1_agents_must_not_default_compute_full_universe_flag": false,
+      "surface_ref": "docs/master_plan/generated/rp5c/formula_assignment_library.jsonl",
+      "universal_preservation_surface_flag": false
     },
     {
       "authority_class": "RP5C_CENTRAL_ACTIVE_SURFACE_NOT_SOURCE_TRUTH",
       "central_surface_id": "RP5C_CENTRAL_SURFACE_0008",
+      "default_stage1_computation_seed_flag": false,
       "derived_route_overlay_not_identity_authority_flag": false,
       "future_consumer_refs": [
         "PR168-RP5D",
@@ -231,12 +272,16 @@
         "LiveFutureOnly"
       ],
       "manifest_ref": "docs/master_plan/generated/rp5c/qku_formula_identity_lineage.manifest.json",
+      "market_scope_or_platform_creates_trading_authority_flag": false,
       "raw_legacy_direct_consumer_allowed_flag": false,
-      "surface_ref": "docs/master_plan/generated/rp5c/qku_formula_identity_lineage.jsonl"
+      "stage1_agents_must_not_default_compute_full_universe_flag": false,
+      "surface_ref": "docs/master_plan/generated/rp5c/qku_formula_identity_lineage.jsonl",
+      "universal_preservation_surface_flag": false
     },
     {
       "authority_class": "RP5C_CENTRAL_ACTIVE_SURFACE_NOT_SOURCE_TRUTH",
       "central_surface_id": "RP5C_CENTRAL_SURFACE_0009",
+      "default_stage1_computation_seed_flag": false,
       "derived_route_overlay_not_identity_authority_flag": false,
       "future_consumer_refs": [
         "PR168-RP5D",
@@ -248,12 +293,16 @@
         "LiveFutureOnly"
       ],
       "manifest_ref": "docs/master_plan/generated/rp5c/source_artifact_consumption_ledger.manifest.json",
+      "market_scope_or_platform_creates_trading_authority_flag": false,
       "raw_legacy_direct_consumer_allowed_flag": false,
-      "surface_ref": "docs/master_plan/generated/rp5c/source_artifact_consumption_ledger.jsonl"
+      "stage1_agents_must_not_default_compute_full_universe_flag": false,
+      "surface_ref": "docs/master_plan/generated/rp5c/source_artifact_consumption_ledger.jsonl",
+      "universal_preservation_surface_flag": false
     },
     {
       "authority_class": "RP5C_CENTRAL_ACTIVE_SURFACE_NOT_SOURCE_TRUTH",
       "central_surface_id": "RP5C_CENTRAL_SURFACE_0010",
+      "default_stage1_computation_seed_flag": false,
       "derived_route_overlay_not_identity_authority_flag": false,
       "future_consumer_refs": [
         "PR168-RP5D",
@@ -265,12 +314,16 @@
         "LiveFutureOnly"
       ],
       "manifest_ref": "docs/master_plan/generated/rp5c/agent_responsibility_group_registry.manifest.json",
+      "market_scope_or_platform_creates_trading_authority_flag": false,
       "raw_legacy_direct_consumer_allowed_flag": false,
-      "surface_ref": "docs/master_plan/generated/rp5c/agent_responsibility_group_registry.jsonl"
+      "stage1_agents_must_not_default_compute_full_universe_flag": false,
+      "surface_ref": "docs/master_plan/generated/rp5c/agent_responsibility_group_registry.jsonl",
+      "universal_preservation_surface_flag": false
     },
     {
       "authority_class": "RP5C_CENTRAL_ACTIVE_SURFACE_NOT_SOURCE_TRUTH",
       "central_surface_id": "RP5C_CENTRAL_SURFACE_0011",
+      "default_stage1_computation_seed_flag": false,
       "derived_route_overlay_not_identity_authority_flag": true,
       "future_consumer_refs": [
         "PR168-RP5D",
@@ -282,12 +335,16 @@
         "LiveFutureOnly"
       ],
       "manifest_ref": "docs/master_plan/generated/rp5c/agent_duty_routing_rulebook.manifest.json",
+      "market_scope_or_platform_creates_trading_authority_flag": false,
       "raw_legacy_direct_consumer_allowed_flag": false,
-      "surface_ref": "docs/master_plan/generated/rp5c/agent_duty_routing_rulebook.jsonl"
+      "stage1_agents_must_not_default_compute_full_universe_flag": false,
+      "surface_ref": "docs/master_plan/generated/rp5c/agent_duty_routing_rulebook.jsonl",
+      "universal_preservation_surface_flag": false
     },
     {
       "authority_class": "RP5C_CENTRAL_ACTIVE_SURFACE_NOT_SOURCE_TRUTH",
       "central_surface_id": "RP5C_CENTRAL_SURFACE_0012",
+      "default_stage1_computation_seed_flag": false,
       "derived_route_overlay_not_identity_authority_flag": true,
       "future_consumer_refs": [
         "PR168-RP5D",
@@ -299,12 +356,16 @@
         "LiveFutureOnly"
       ],
       "manifest_ref": "docs/master_plan/generated/rp5c/derived_agent_route_resolution_ledger.manifest.json",
+      "market_scope_or_platform_creates_trading_authority_flag": false,
       "raw_legacy_direct_consumer_allowed_flag": false,
-      "surface_ref": "docs/master_plan/generated/rp5c/derived_agent_route_resolution_ledger.jsonl"
+      "stage1_agents_must_not_default_compute_full_universe_flag": false,
+      "surface_ref": "docs/master_plan/generated/rp5c/derived_agent_route_resolution_ledger.jsonl",
+      "universal_preservation_surface_flag": false
     },
     {
       "authority_class": "RP5C_CENTRAL_ACTIVE_SURFACE_NOT_SOURCE_TRUTH",
       "central_surface_id": "RP5C_CENTRAL_SURFACE_0013",
+      "default_stage1_computation_seed_flag": false,
       "derived_route_overlay_not_identity_authority_flag": true,
       "future_consumer_refs": [
         "PR168-RP5D",
@@ -316,12 +377,16 @@
         "LiveFutureOnly"
       ],
       "manifest_ref": "docs/master_plan/generated/rp5c/file_to_derived_route_crosswalk.manifest.json",
+      "market_scope_or_platform_creates_trading_authority_flag": false,
       "raw_legacy_direct_consumer_allowed_flag": false,
-      "surface_ref": "docs/master_plan/generated/rp5c/file_to_derived_route_crosswalk.jsonl"
+      "stage1_agents_must_not_default_compute_full_universe_flag": false,
+      "surface_ref": "docs/master_plan/generated/rp5c/file_to_derived_route_crosswalk.jsonl",
+      "universal_preservation_surface_flag": false
     },
     {
       "authority_class": "RP5C_CENTRAL_ACTIVE_SURFACE_NOT_SOURCE_TRUTH",
       "central_surface_id": "RP5C_CENTRAL_SURFACE_0014",
+      "default_stage1_computation_seed_flag": false,
       "derived_route_overlay_not_identity_authority_flag": false,
       "future_consumer_refs": [
         "PR168-RP5D",
@@ -333,12 +398,16 @@
         "LiveFutureOnly"
       ],
       "manifest_ref": "docs/master_plan/generated/rp5c/identity_deduplication_ledger.manifest.json",
+      "market_scope_or_platform_creates_trading_authority_flag": false,
       "raw_legacy_direct_consumer_allowed_flag": false,
-      "surface_ref": "docs/master_plan/generated/rp5c/identity_deduplication_ledger.jsonl"
+      "stage1_agents_must_not_default_compute_full_universe_flag": false,
+      "surface_ref": "docs/master_plan/generated/rp5c/identity_deduplication_ledger.jsonl",
+      "universal_preservation_surface_flag": false
     },
     {
       "authority_class": "RP5C_CENTRAL_ACTIVE_SURFACE_NOT_SOURCE_TRUTH",
       "central_surface_id": "RP5C_CENTRAL_SURFACE_0015",
+      "default_stage1_computation_seed_flag": false,
       "derived_route_overlay_not_identity_authority_flag": false,
       "future_consumer_refs": [
         "PR168-RP5D",
@@ -350,12 +419,16 @@
         "LiveFutureOnly"
       ],
       "manifest_ref": "docs/master_plan/generated/rp5c/formula_ontology.manifest.json",
+      "market_scope_or_platform_creates_trading_authority_flag": false,
       "raw_legacy_direct_consumer_allowed_flag": false,
-      "surface_ref": "docs/master_plan/generated/rp5c/formula_ontology.jsonl"
+      "stage1_agents_must_not_default_compute_full_universe_flag": false,
+      "surface_ref": "docs/master_plan/generated/rp5c/formula_ontology.jsonl",
+      "universal_preservation_surface_flag": false
     },
     {
       "authority_class": "RP5C_CENTRAL_ACTIVE_SURFACE_NOT_SOURCE_TRUTH",
       "central_surface_id": "RP5C_CENTRAL_SURFACE_0016",
+      "default_stage1_computation_seed_flag": false,
       "derived_route_overlay_not_identity_authority_flag": false,
       "future_consumer_refs": [
         "PR168-RP5D",
@@ -367,12 +440,16 @@
         "LiveFutureOnly"
       ],
       "manifest_ref": "docs/master_plan/generated/rp5c/identity_provenance_tier.manifest.json",
+      "market_scope_or_platform_creates_trading_authority_flag": false,
       "raw_legacy_direct_consumer_allowed_flag": false,
-      "surface_ref": "docs/master_plan/generated/rp5c/identity_provenance_tier.jsonl"
+      "stage1_agents_must_not_default_compute_full_universe_flag": false,
+      "surface_ref": "docs/master_plan/generated/rp5c/identity_provenance_tier.jsonl",
+      "universal_preservation_surface_flag": false
     },
     {
       "authority_class": "RP5C_CENTRAL_ACTIVE_SURFACE_NOT_SOURCE_TRUTH",
       "central_surface_id": "RP5C_CENTRAL_SURFACE_0017",
+      "default_stage1_computation_seed_flag": false,
       "derived_route_overlay_not_identity_authority_flag": false,
       "future_consumer_refs": [
         "PR168-RP5D",
@@ -384,12 +461,16 @@
         "LiveFutureOnly"
       ],
       "manifest_ref": "docs/master_plan/generated/rp5c/no_global_ban_rows.manifest.json",
+      "market_scope_or_platform_creates_trading_authority_flag": false,
       "raw_legacy_direct_consumer_allowed_flag": false,
-      "surface_ref": "docs/master_plan/generated/rp5c/no_global_ban_rows.jsonl"
+      "stage1_agents_must_not_default_compute_full_universe_flag": false,
+      "surface_ref": "docs/master_plan/generated/rp5c/no_global_ban_rows.jsonl",
+      "universal_preservation_surface_flag": false
     },
     {
       "authority_class": "RP5C_CENTRAL_ACTIVE_SURFACE_NOT_SOURCE_TRUTH",
       "central_surface_id": "RP5C_CENTRAL_SURFACE_0018",
+      "default_stage1_computation_seed_flag": false,
       "derived_route_overlay_not_identity_authority_flag": false,
       "future_consumer_refs": [
         "PR168-RP5D",
@@ -401,12 +482,16 @@
         "LiveFutureOnly"
       ],
       "manifest_ref": "docs/master_plan/generated/rp5c/no_orphan_identity_rows.manifest.json",
+      "market_scope_or_platform_creates_trading_authority_flag": false,
       "raw_legacy_direct_consumer_allowed_flag": false,
-      "surface_ref": "docs/master_plan/generated/rp5c/no_orphan_identity_rows.jsonl"
+      "stage1_agents_must_not_default_compute_full_universe_flag": false,
+      "surface_ref": "docs/master_plan/generated/rp5c/no_orphan_identity_rows.jsonl",
+      "universal_preservation_surface_flag": false
     },
     {
       "authority_class": "RP5C_CENTRAL_ACTIVE_SURFACE_NOT_SOURCE_TRUTH",
       "central_surface_id": "RP5C_CENTRAL_SURFACE_0019",
+      "default_stage1_computation_seed_flag": false,
       "derived_route_overlay_not_identity_authority_flag": false,
       "future_consumer_refs": [
         "PR168-RP5D",
@@ -418,12 +503,16 @@
         "LiveFutureOnly"
       ],
       "manifest_ref": "docs/master_plan/generated/rp5c/no_orphan_source_artifact_rows.manifest.json",
+      "market_scope_or_platform_creates_trading_authority_flag": false,
       "raw_legacy_direct_consumer_allowed_flag": false,
-      "surface_ref": "docs/master_plan/generated/rp5c/no_orphan_source_artifact_rows.jsonl"
+      "stage1_agents_must_not_default_compute_full_universe_flag": false,
+      "surface_ref": "docs/master_plan/generated/rp5c/no_orphan_source_artifact_rows.jsonl",
+      "universal_preservation_surface_flag": false
     },
     {
       "authority_class": "RP5C_CENTRAL_ACTIVE_SURFACE_NOT_SOURCE_TRUTH",
       "central_surface_id": "RP5C_CENTRAL_SURFACE_0020",
+      "default_stage1_computation_seed_flag": false,
       "derived_route_overlay_not_identity_authority_flag": false,
       "future_consumer_refs": [
         "PR168-RP5D",
@@ -435,12 +524,104 @@
         "LiveFutureOnly"
       ],
       "manifest_ref": "docs/master_plan/generated/rp5c/no_orphan_generated_surface_rows.manifest.json",
+      "market_scope_or_platform_creates_trading_authority_flag": false,
       "raw_legacy_direct_consumer_allowed_flag": false,
-      "surface_ref": "docs/master_plan/generated/rp5c/no_orphan_generated_surface_rows.jsonl"
+      "stage1_agents_must_not_default_compute_full_universe_flag": false,
+      "surface_ref": "docs/master_plan/generated/rp5c/no_orphan_generated_surface_rows.jsonl",
+      "universal_preservation_surface_flag": false
     },
     {
       "authority_class": "RP5C_CENTRAL_ACTIVE_SURFACE_NOT_SOURCE_TRUTH",
       "central_surface_id": "RP5C_CENTRAL_SURFACE_0021",
+      "default_stage1_computation_seed_flag": false,
+      "derived_route_overlay_not_identity_authority_flag": false,
+      "future_consumer_refs": [
+        "Stage1QTTAgents",
+        "PR168-RP5D",
+        "PR168-RP5E",
+        "PR168-RP5G",
+        "RANK4",
+        "QOPT",
+        "Paper",
+        "LiveFutureOnly"
+      ],
+      "manifest_ref": "docs/master_plan/generated/rp5c/stage1_prediction_market_qku_activation_view.manifest.json",
+      "market_scope_or_platform_creates_trading_authority_flag": false,
+      "raw_legacy_direct_consumer_allowed_flag": false,
+      "stage1_agents_must_not_default_compute_full_universe_flag": true,
+      "surface_ref": "docs/master_plan/generated/rp5c/stage1_prediction_market_qku_activation_view.jsonl",
+      "universal_preservation_surface_flag": false
+    },
+    {
+      "authority_class": "RP5C_CENTRAL_ACTIVE_SURFACE_NOT_SOURCE_TRUTH",
+      "central_surface_id": "RP5C_CENTRAL_SURFACE_0022",
+      "default_stage1_computation_seed_flag": false,
+      "derived_route_overlay_not_identity_authority_flag": false,
+      "future_consumer_refs": [
+        "Stage1QTTAgents",
+        "PR168-RP5D",
+        "PR168-RP5E",
+        "PR168-RP5G",
+        "RANK4",
+        "QOPT",
+        "Paper",
+        "LiveFutureOnly"
+      ],
+      "manifest_ref": "docs/master_plan/generated/rp5c/platform_applicability_registry.manifest.json",
+      "market_scope_or_platform_creates_trading_authority_flag": false,
+      "raw_legacy_direct_consumer_allowed_flag": false,
+      "stage1_agents_must_not_default_compute_full_universe_flag": true,
+      "surface_ref": "docs/master_plan/generated/rp5c/platform_applicability_registry.jsonl",
+      "universal_preservation_surface_flag": false
+    },
+    {
+      "authority_class": "RP5C_CENTRAL_ACTIVE_SURFACE_NOT_SOURCE_TRUTH",
+      "central_surface_id": "RP5C_CENTRAL_SURFACE_0023",
+      "default_stage1_computation_seed_flag": false,
+      "derived_route_overlay_not_identity_authority_flag": false,
+      "future_consumer_refs": [
+        "Stage1QTTAgents",
+        "PR168-RP5D",
+        "PR168-RP5E",
+        "PR168-RP5G",
+        "RANK4",
+        "QOPT",
+        "Paper",
+        "LiveFutureOnly"
+      ],
+      "manifest_ref": "docs/master_plan/generated/rp5c/dormant_future_market_qku_ledger.manifest.json",
+      "market_scope_or_platform_creates_trading_authority_flag": false,
+      "raw_legacy_direct_consumer_allowed_flag": false,
+      "stage1_agents_must_not_default_compute_full_universe_flag": true,
+      "surface_ref": "docs/master_plan/generated/rp5c/dormant_future_market_qku_ledger.jsonl",
+      "universal_preservation_surface_flag": false
+    },
+    {
+      "authority_class": "RP5C_CENTRAL_ACTIVE_SURFACE_NOT_SOURCE_TRUTH",
+      "central_surface_id": "RP5C_CENTRAL_SURFACE_0024",
+      "default_stage1_computation_seed_flag": true,
+      "derived_route_overlay_not_identity_authority_flag": false,
+      "future_consumer_refs": [
+        "Stage1QTTAgents",
+        "PR168-RP5D",
+        "PR168-RP5E",
+        "PR168-RP5G",
+        "RANK4",
+        "QOPT",
+        "Paper",
+        "LiveFutureOnly"
+      ],
+      "manifest_ref": "docs/master_plan/generated/rp5c/stage1_agent_computation_universe_seed.manifest.json",
+      "market_scope_or_platform_creates_trading_authority_flag": false,
+      "raw_legacy_direct_consumer_allowed_flag": false,
+      "stage1_agents_must_not_default_compute_full_universe_flag": true,
+      "surface_ref": "docs/master_plan/generated/rp5c/stage1_agent_computation_universe_seed.jsonl",
+      "universal_preservation_surface_flag": false
+    },
+    {
+      "authority_class": "RP5C_CENTRAL_ACTIVE_SURFACE_NOT_SOURCE_TRUTH",
+      "central_surface_id": "RP5C_CENTRAL_SURFACE_0025",
+      "default_stage1_computation_seed_flag": false,
       "derived_route_overlay_not_identity_authority_flag": false,
       "future_consumer_refs": [
         "PR168-RP5D",
@@ -452,8 +633,11 @@
         "LiveFutureOnly"
       ],
       "manifest_ref": "docs/master_plan/generated/rp5c/rp5d_executability_handoff.manifest.json",
+      "market_scope_or_platform_creates_trading_authority_flag": false,
       "raw_legacy_direct_consumer_allowed_flag": false,
-      "surface_ref": "docs/master_plan/generated/rp5c/rp5d_executability_handoff.jsonl"
+      "stage1_agents_must_not_default_compute_full_universe_flag": false,
+      "surface_ref": "docs/master_plan/generated/rp5c/rp5d_executability_handoff.jsonl",
+      "universal_preservation_surface_flag": false
     }
   ],
   "report_version": "PR168-RP5C-v1.0",
@@ -462,5 +646,14 @@
   "silent_skipped_input_artifact_count": 0,
   "source_truth_authority_created_count": 0,
   "stack_combination_materialization_count": 0,
+  "stage1_active_universe_surfaces": [
+    "docs/master_plan/generated/rp5c/stage1_prediction_market_qku_activation_view.jsonl",
+    "docs/master_plan/generated/rp5c/platform_applicability_registry.jsonl",
+    "docs/master_plan/generated/rp5c/dormant_future_market_qku_ledger.jsonl",
+    "docs/master_plan/generated/rp5c/stage1_agent_computation_universe_seed.jsonl"
+  ],
+  "stage1_agent_computation_universe_seed_is_default_stage1_seed": true,
+  "stage1_agents_must_not_default_compute_full_universe": true,
+  "stage1_default_full_universe_compute_route_count": 0,
   "trade_simulation_count": 0
 }

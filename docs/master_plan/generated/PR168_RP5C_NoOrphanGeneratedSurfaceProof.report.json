@@ -6,6 +6,8 @@
   "connector_semantic_binding_count": 0,
   "created_at_utc": "2026-06-25T00:00:00Z",
   "deleted_file_count": 0,
+  "dormant_qku_deleted_count": 0,
+  "dormant_qku_global_ban_count": 0,
   "formula_expression_mutation_count": 0,
   "formula_identity_deleted_count": 0,
   "formula_profit_ranking_count": 0,
@@ -19,6 +21,8 @@
     "champion_authority_created_count": 0,
     "connector_semantic_binding_count": 0,
     "deleted_file_count": 0,
+    "dormant_qku_deleted_count": 0,
+    "dormant_qku_global_ban_count": 0,
     "formula_expression_mutation_count": 0,
     "formula_identity_deleted_count": 0,
     "formula_profit_ranking_count": 0,
@@ -31,6 +35,7 @@
     "master_plan_content_deleted_or_shortened_count": 0,
     "moved_file_count": 0,
     "mutable_agent_ownership_embedded_as_identity_authority_count": 0,
+    "non_prediction_market_qku_stage1_active_count": 0,
     "orphan_generated_shard_count": 0,
     "orphan_identity_count": 0,
     "orphan_input_report_count": 0,
@@ -49,6 +54,7 @@
     "silent_skipped_input_artifact_count": 0,
     "source_truth_authority_created_count": 0,
     "stack_combination_materialization_count": 0,
+    "stage1_default_full_universe_compute_route_count": 0,
     "trade_simulation_count": 0
   },
   "launch_readiness_authority_created_count": 0,
@@ -60,7 +66,8 @@
   "moved_file_count": 0,
   "mutable_agent_ownership_embedded_as_identity_authority_count": 0,
   "no_authority_statement": "RP5C is immutable identity, provenance, classification, and derived routing preparation only. It creates no live/order/source-truth/champion/launch/quantum/hash authority and does not mutate formulas or delete identities.",
-  "no_orphan_generated_surface_row_count": 52,
+  "no_orphan_generated_surface_row_count": 60,
+  "non_prediction_market_qku_stage1_active_count": 0,
   "orphan_generated_shard_count": 0,
   "orphan_identity_count": 0,
   "orphan_input_report_count": 0,
@@ -208,7 +215,9 @@
         "PR168_RP5C_ImmutableQKULibrary.report.json",
         "PR168_RP5C_ImmutableQKUFormulaLibrary.report.json",
         "PR168_RP5C_QKUFormulaFamilyRegistry.report.json",
-        "PR168_RP5C_QKUFormulaIdentityLineage.report.json"
+        "PR168_RP5C_QKUFormulaIdentityLineage.report.json",
+        "PR168_RP5C_Stage1PredictionMarketQKUActivationView.report.json",
+        "PR168_RP5C_DormantFutureMarketQKULedger.report.json"
       ],
       "validator_refs": [
         "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
@@ -229,7 +238,9 @@
       "report_only_validation_reason": null,
       "row_id": "RP5C_GENERATED_SURFACE_00007",
       "top_level_report_refs": [
-        "PR168_RP5C_MarketScopeFamilyRegistry.report.json"
+        "PR168_RP5C_MarketScopeFamilyRegistry.report.json",
+        "PR168_RP5C_Stage1PredictionMarketQKUActivationView.report.json",
+        "PR168_RP5C_DormantFutureMarketQKULedger.report.json"
       ],
       "validator_refs": [
         "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
@@ -301,7 +312,9 @@
         "PR168_RP5C_ImmutableQKULibrary.report.json",
         "PR168_RP5C_ImmutableQKUFormulaLibrary.report.json",
         "PR168_RP5C_QKUFormulaFamilyRegistry.report.json",
-        "PR168_RP5C_QKUFormulaIdentityLineage.report.json"
+        "PR168_RP5C_QKUFormulaIdentityLineage.report.json",
+        "PR168_RP5C_Stage1PredictionMarketQKUActivationView.report.json",
+        "PR168_RP5C_DormantFutureMarketQKULedger.report.json"
       ],
       "validator_refs": [
         "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
@@ -399,7 +412,8 @@
         "PR168_RP5C_AgentDutyInput.report.json",
         "PR168_RP5C_AgentResponsibilityGroupRegistry.report.json",
         "PR168_RP5C_AgentDutyRoutingRulebook.report.json",
-        "PR168_RP5C_DerivedAgentRouteResolutionLedger.report.json"
+        "PR168_RP5C_DerivedAgentRouteResolutionLedger.report.json",
+        "PR168_RP5C_Stage1AgentComputationUniverseSeed.report.json"
       ],
       "validator_refs": [
         "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
@@ -423,7 +437,8 @@
         "PR168_RP5C_AgentDutyInput.report.json",
         "PR168_RP5C_AgentResponsibilityGroupRegistry.report.json",
         "PR168_RP5C_AgentDutyRoutingRulebook.report.json",
-        "PR168_RP5C_DerivedAgentRouteResolutionLedger.report.json"
+        "PR168_RP5C_DerivedAgentRouteResolutionLedger.report.json",
+        "PR168_RP5C_Stage1AgentComputationUniverseSeed.report.json"
       ],
       "validator_refs": [
         "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
@@ -576,80 +591,79 @@
         "RANK4",
         "QOPT"
       ],
-      "generated_surface_ref": "docs/master_plan/generated/rp5c/rp5d_executability_handoff.jsonl",
+      "generated_surface_ref": "docs/master_plan/generated/rp5c/stage1_prediction_market_qku_activation_view.jsonl",
       "generated_surface_type": "ROW_SHARD",
-      "manifest_ref": "docs/master_plan/generated/rp5c/rp5d_executability_handoff.manifest.json",
+      "manifest_ref": "docs/master_plan/generated/rp5c/stage1_prediction_market_qku_activation_view.manifest.json",
       "no_orphan_generated_surface_status": "NO_ORPHAN_GENERATED_SURFACE_HAS_MANIFEST_AND_REPORT",
       "report_only_validation_reason": null,
       "row_id": "RP5C_GENERATED_SURFACE_00022",
       "top_level_report_refs": [
-        "PR168_RP5C_ToRP5DExecutabilityHandoff.report.json"
+        "PR168_RP5C_Stage1PredictionMarketQKUActivationView.report.json",
+        "PR168_RP5C_Stage1AgentComputationUniverseSeed.report.json"
       ],
       "validator_refs": [
         "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
       ]
     },
     {
-      "central_surface_manifest_listed_flag": false,
+      "central_surface_manifest_listed_flag": true,
       "downstream_consumer_refs": [
         "PR168-RP5D",
         "PR168-RP5E",
         "RANK4",
         "QOPT"
       ],
-      "generated_surface_ref": "docs/master_plan/generated/rp5c/identity_quality_gap_queue.jsonl",
+      "generated_surface_ref": "docs/master_plan/generated/rp5c/platform_applicability_registry.jsonl",
       "generated_surface_type": "ROW_SHARD",
-      "manifest_ref": "docs/master_plan/generated/rp5c/identity_quality_gap_queue.manifest.json",
+      "manifest_ref": "docs/master_plan/generated/rp5c/platform_applicability_registry.manifest.json",
       "no_orphan_generated_surface_status": "NO_ORPHAN_GENERATED_SURFACE_HAS_MANIFEST_AND_REPORT",
       "report_only_validation_reason": null,
       "row_id": "RP5C_GENERATED_SURFACE_00023",
       "top_level_report_refs": [
-        "PR168_RP5C_QKUFormulaIdentityLineage.report.json",
-        "PR168_RP5C_IdentityDeduplicationLedger.report.json",
-        "PR168_RP5C_IdentityProvenanceTier.report.json",
-        "PR168_RP5C_NoOrphanIdentityProof.report.json"
+        "PR168_RP5C_PlatformApplicabilityRegistry.report.json"
       ],
       "validator_refs": [
         "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
       ]
     },
     {
-      "central_surface_manifest_listed_flag": false,
+      "central_surface_manifest_listed_flag": true,
       "downstream_consumer_refs": [
         "PR168-RP5D",
         "PR168-RP5E",
         "RANK4",
         "QOPT"
       ],
-      "generated_surface_ref": "docs/master_plan/generated/PR168_RP5C_Input.report.json",
-      "generated_surface_type": "TOP_LEVEL_REPORT",
-      "manifest_ref": null,
-      "no_orphan_generated_surface_status": "NO_ORPHAN_TOP_LEVEL_REPORT_HAS_VALIDATOR",
-      "report_only_validation_reason": "Top-level proof report.",
+      "generated_surface_ref": "docs/master_plan/generated/rp5c/dormant_future_market_qku_ledger.jsonl",
+      "generated_surface_type": "ROW_SHARD",
+      "manifest_ref": "docs/master_plan/generated/rp5c/dormant_future_market_qku_ledger.manifest.json",
+      "no_orphan_generated_surface_status": "NO_ORPHAN_GENERATED_SURFACE_HAS_MANIFEST_AND_REPORT",
+      "report_only_validation_reason": null,
       "row_id": "RP5C_GENERATED_SURFACE_00024",
       "top_level_report_refs": [
-        "PR168_RP5C_Input.report.json"
+        "PR168_RP5C_DormantFutureMarketQKULedger.report.json"
       ],
       "validator_refs": [
         "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
       ]
     },
     {
-      "central_surface_manifest_listed_flag": false,
+      "central_surface_manifest_listed_flag": true,
       "downstream_consumer_refs": [
         "PR168-RP5D",
         "PR168-RP5E",
         "RANK4",
         "QOPT"
       ],
-      "generated_surface_ref": "docs/master_plan/generated/PR168_RP5C_Preflight.report.json",
-      "generated_surface_type": "TOP_LEVEL_REPORT",
-      "manifest_ref": null,
-      "no_orphan_generated_surface_status": "NO_ORPHAN_TOP_LEVEL_REPORT_HAS_VALIDATOR",
-      "report_only_validation_reason": "Top-level proof report.",
+      "generated_surface_ref": "docs/master_plan/generated/rp5c/stage1_agent_computation_universe_seed.jsonl",
+      "generated_surface_type": "ROW_SHARD",
+      "manifest_ref": "docs/master_plan/generated/rp5c/stage1_agent_computation_universe_seed.manifest.json",
+      "no_orphan_generated_surface_status": "NO_ORPHAN_GENERATED_SURFACE_HAS_MANIFEST_AND_REPORT",
+      "report_only_validation_reason": null,
       "row_id": "RP5C_GENERATED_SURFACE_00025",
       "top_level_report_refs": [
-        "PR168_RP5C_Preflight.report.json"
+        "PR168_RP5C_Stage1PredictionMarketQKUActivationView.report.json",
+        "PR168_RP5C_Stage1AgentComputationUniverseSeed.report.json"
       ],
       "validator_refs": [
         "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
@@ -663,5 +677,12 @@
   "silent_skipped_input_artifact_count": 0,
   "source_truth_authority_created_count": 0,
   "stack_combination_materialization_count": 0,
+  "stage1_active_universe_surface_refs": [
+    "docs/master_plan/generated/rp5c/stage1_prediction_market_qku_activation_view.jsonl",
+    "docs/master_plan/generated/rp5c/platform_applicability_registry.jsonl",
+    "docs/master_plan/generated/rp5c/dormant_future_market_qku_ledger.jsonl",
+    "docs/master_plan/generated/rp5c/stage1_agent_computation_universe_seed.jsonl"
+  ],
+  "stage1_default_full_universe_compute_route_count": 0,
   "trade_simulation_count": 0
 }

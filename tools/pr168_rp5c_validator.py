@@ -10,8 +10,10 @@ from tools.pr168_rp5c_config import (
     HARD_ZERO_COUNTERS,
     MARKET_SCOPES,
     ONTOLOGY_CATEGORIES,
+    PLATFORM_APPLICABILITY_STATES,
     REPORT_NAMES,
     ROW_SHARDS,
+    STAGE1_ACTIVE_UNIVERSE_SHARDS,
     generated_ref,
     manifest_path_for_shard,
     report_path,
@@ -170,6 +172,56 @@ def _failures() -> list[str]:
     required = {generated_ref(shard_path(key)) for key in CENTRAL_SURFACE_SHARDS}
     if not required.issubset(listed):
         failures.append("CENTRAL_SURFACE_MANIFEST_MISSING_REQUIRED_SURFACE")
+    stage1_required = {generated_ref(shard_path(key)) for key in STAGE1_ACTIVE_UNIVERSE_SHARDS}
+    if not stage1_required.issubset(listed):
+        failures.append("CENTRAL_SURFACE_MANIFEST_MISSING_STAGE1_SURFACE")
+    if central.get("stage1_agent_computation_universe_seed_is_default_stage1_seed") is not True:
+        failures.append("CENTRAL_SURFACE_MANIFEST_STAGE1_SEED_NOT_DEFAULT")
+    if central.get("stage1_agents_must_not_default_compute_full_universe") is not True:
+        failures.append("CENTRAL_SURFACE_MANIFEST_FULL_UNIVERSE_DEFAULT_ALLOWED")
+
+    activation_rows = read_jsonl(shard_path("stage1_prediction_market_qku_activation_view"))
+    platform_rows = read_jsonl(shard_path("platform_applicability_registry"))
+    dormant_rows = read_jsonl(shard_path("dormant_future_market_qku_ledger"))
+    seed_rows = read_jsonl(shard_path("stage1_agent_computation_universe_seed"))
+    if len(activation_rows) != len(identities):
+        failures.append("STAGE1_ACTIVATION_IDENTITY_COUNT_MISMATCH")
+    if not seed_rows:
+        failures.append("STAGE1_SEED_EMPTY")
+    if not dormant_rows:
+        failures.append("DORMANT_FUTURE_MARKET_LEDGER_EMPTY")
+    activation_ids = {row["stage1_activation_row_id"] for row in activation_rows}
+    seed_activation_refs = {ref for row in seed_rows for ref in row.get("stage1_activation_view_refs", [])}
+    dormant_activation_refs = {ref for row in dormant_rows for ref in row.get("stage1_activation_view_refs", [])}
+    if not seed_activation_refs.issubset(activation_ids):
+        failures.append("STAGE1_SEED_NOT_DERIVED_FROM_ACTIVATION_VIEW")
+    if not dormant_activation_refs.issubset(activation_ids):
+        failures.append("DORMANT_LEDGER_NOT_DERIVED_FROM_ACTIVATION_VIEW")
+    if any(row.get("default_compute_from_universal_library_flag") is not False for row in seed_rows):
+        failures.append("STAGE1_SEED_DEFAULTS_TO_FULL_UNIVERSE")
+    if any(row.get("derived_from_classification_and_routing_surfaces_flag") is not True for row in seed_rows):
+        failures.append("STAGE1_SEED_NOT_DERIVED_FROM_CLASSIFICATION_ROUTING")
+    for row in seed_rows:
+        state = row.get("stage1_classification_state")
+        scope = row.get("market_scope")
+        if state == "STAGE1_PREDICTION_MARKET_ACTIVE_CANDIDATE" and scope != "prediction_market":
+            failures.append(f"STAGE1_ACTIVE_NON_PREDICTION_MARKET:{row.get('identity_row_id')}")
+        if state == "STAGE1_PREDICTION_MARKET_SUPPORTING_MARKET_AGNOSTIC" and scope != "market_agnostic":
+            failures.append(f"STAGE1_SUPPORTING_NOT_MARKET_AGNOSTIC:{row.get('identity_row_id')}")
+        if state not in {"STAGE1_PREDICTION_MARKET_ACTIVE_CANDIDATE", "STAGE1_PREDICTION_MARKET_SUPPORTING_MARKET_AGNOSTIC"}:
+            failures.append(f"STAGE1_SEED_INVALID_CLASSIFICATION:{row.get('identity_row_id')}")
+    if any(row.get("deleted_flag") is not False for row in dormant_rows):
+        failures.append("DORMANT_QKU_DELETED")
+    if any(row.get("global_ban_flag") is not False for row in dormant_rows):
+        failures.append("DORMANT_QKU_GLOBAL_BANNED")
+    if any(row.get("preserved_in_universal_library_flag") is not True for row in dormant_rows):
+        failures.append("DORMANT_QKU_NOT_PRESERVED_IN_UNIVERSAL_LIBRARY")
+    platform_states = {row.get("platform_applicability_state") for row in platform_rows}
+    if set(PLATFORM_APPLICABILITY_STATES) - platform_states:
+        failures.append("PLATFORM_APPLICABILITY_REGISTRY_INCOMPLETE")
+    required_platform_states = {"KALSHI_APPLICABLE", "POLYMARKET_APPLICABLE", "FORECASTEX_IBKR_APPLICABLE"}
+    if not required_platform_states.issubset(platform_states):
+        failures.append("PLATFORM_APPLICABILITY_REGISTRY_MISSING_STAGE1_PLATFORMS")
 
     portability = read_json(report_path("PR168_RP5C_CrossOSPathPortabilityAudit.report.json"))
     for field in ("generated_path_case_collision_count", "absolute_local_path_leak_count", "backslash_only_path_leak_count"):

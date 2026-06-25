@@ -104,6 +104,30 @@ ROUTE_RESOLUTION_STATES: Final = (
     "ROUTE_UNRESOLVED_NEEDS_REVIEW",
 )
 
+STAGE1_CLASSIFICATION_STATES: Final = (
+    "STAGE1_PREDICTION_MARKET_ACTIVE_CANDIDATE",
+    "STAGE1_PREDICTION_MARKET_SUPPORTING_MARKET_AGNOSTIC",
+    "THREE_PLATFORM_COMMON",
+    "KALSHI_APPLICABLE",
+    "POLYMARKET_APPLICABLE",
+    "FORECASTEX_IBKR_APPLICABLE",
+    "PLATFORM_SPECIFIC_NEEDS_SOURCE_BINDING",
+    "FUTURE_MARKET_DORMANT",
+    "CROSS_MARKET_REVIEW_REQUIRED",
+    "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
+)
+
+PLATFORM_APPLICABILITY_STATES: Final = (
+    "KALSHI_APPLICABLE",
+    "POLYMARKET_APPLICABLE",
+    "FORECASTEX_IBKR_APPLICABLE",
+    "THREE_PLATFORM_COMMON",
+    "PREDICTION_MARKET_GENERIC",
+    "PLATFORM_SPECIFIC_NEEDS_SOURCE_BINDING",
+    "NOT_STAGE1_PLATFORM_APPLICABLE",
+    "UNKNOWN_PLATFORM_SCOPE_NEEDS_REVIEW",
+)
+
 PROVENANCE_TIERS: Final = (
     "ACTIVE_CANONICAL_REGISTRY",
     "RP5C_CENTRAL_ACTIVE_SURFACE",
@@ -171,6 +195,10 @@ HARD_ZERO_COUNTERS: Final = {
     "generated_path_case_collision_count": 0,
     "absolute_local_path_leak_count": 0,
     "backslash_only_path_leak_count": 0,
+    "stage1_default_full_universe_compute_route_count": 0,
+    "non_prediction_market_qku_stage1_active_count": 0,
+    "dormant_qku_deleted_count": 0,
+    "dormant_qku_global_ban_count": 0,
 }
 
 REPORT_NAMES: Final = (
@@ -199,6 +227,10 @@ REPORT_NAMES: Final = (
     "PR168_RP5C_NoOrphanSourceArtifactProof.report.json",
     "PR168_RP5C_NoOrphanGeneratedSurfaceProof.report.json",
     "PR168_RP5C_CentralSurfaceManifest.report.json",
+    "PR168_RP5C_Stage1PredictionMarketQKUActivationView.report.json",
+    "PR168_RP5C_PlatformApplicabilityRegistry.report.json",
+    "PR168_RP5C_DormantFutureMarketQKULedger.report.json",
+    "PR168_RP5C_Stage1AgentComputationUniverseSeed.report.json",
     "PR168_RP5C_CrossOSPathPortabilityAudit.report.json",
     "PR168_RP5C_PathAudit.report.json",
     "PR168_RP5C_ToRP5DExecutabilityHandoff.report.json",
@@ -227,6 +259,10 @@ ROW_SHARDS: Final = {
     "no_orphan_identity_rows": "no_orphan_identity_rows.jsonl",
     "no_orphan_source_artifact_rows": "no_orphan_source_artifact_rows.jsonl",
     "no_orphan_generated_surface_rows": "no_orphan_generated_surface_rows.jsonl",
+    "stage1_prediction_market_qku_activation_view": "stage1_prediction_market_qku_activation_view.jsonl",
+    "platform_applicability_registry": "platform_applicability_registry.jsonl",
+    "dormant_future_market_qku_ledger": "dormant_future_market_qku_ledger.jsonl",
+    "stage1_agent_computation_universe_seed": "stage1_agent_computation_universe_seed.jsonl",
     "rp5d_executability_handoff": "rp5d_executability_handoff.jsonl",
     "identity_quality_gap_queue": "identity_quality_gap_queue.jsonl",
 }
@@ -302,7 +338,18 @@ CENTRAL_SURFACE_SHARDS: Final = (
     "no_orphan_identity_rows",
     "no_orphan_source_artifact_rows",
     "no_orphan_generated_surface_rows",
+    "stage1_prediction_market_qku_activation_view",
+    "platform_applicability_registry",
+    "dormant_future_market_qku_ledger",
+    "stage1_agent_computation_universe_seed",
     "rp5d_executability_handoff",
+)
+
+STAGE1_ACTIVE_UNIVERSE_SHARDS: Final = (
+    "stage1_prediction_market_qku_activation_view",
+    "platform_applicability_registry",
+    "dormant_future_market_qku_ledger",
+    "stage1_agent_computation_universe_seed",
 )
 
 FALLBACK_ROUTING_MATRIX: Final = {

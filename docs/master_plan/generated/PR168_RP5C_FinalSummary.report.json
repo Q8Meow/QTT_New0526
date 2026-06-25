@@ -11,7 +11,7 @@
     "absolute_local_path_leak_count": 0,
     "backslash_only_path_leak_count": 0,
     "generated_path_case_collision_count": 0,
-    "generated_path_count": 75
+    "generated_path_count": 87
   },
   "dedupe_counts": {
     "CANONICAL_REPRESENTATIVE_PRESERVED": 9949,
@@ -19,6 +19,8 @@
   },
   "deleted_file_count": 0,
   "derived_route_resolution_count": 10189,
+  "dormant_qku_deleted_count": 0,
+  "dormant_qku_global_ban_count": 0,
   "family_registry_counts": {
     "qku_formula_family_registry_row_count": 207
   },
@@ -35,6 +37,8 @@
     "champion_authority_created_count": 0,
     "connector_semantic_binding_count": 0,
     "deleted_file_count": 0,
+    "dormant_qku_deleted_count": 0,
+    "dormant_qku_global_ban_count": 0,
     "formula_expression_mutation_count": 0,
     "formula_identity_deleted_count": 0,
     "formula_profit_ranking_count": 0,
@@ -47,6 +51,7 @@
     "master_plan_content_deleted_or_shortened_count": 0,
     "moved_file_count": 0,
     "mutable_agent_ownership_embedded_as_identity_authority_count": 0,
+    "non_prediction_market_qku_stage1_active_count": 0,
     "orphan_generated_shard_count": 0,
     "orphan_identity_count": 0,
     "orphan_input_report_count": 0,
@@ -65,10 +70,11 @@
     "silent_skipped_input_artifact_count": 0,
     "source_truth_authority_created_count": 0,
     "stack_combination_materialization_count": 0,
+    "stage1_default_full_universe_compute_route_count": 0,
     "trade_simulation_count": 0
   },
   "input_artifact_counts": {
-    "discovery_elapsed_seconds_rounded": 0.034,
+    "discovery_elapsed_seconds_rounded": 0.036,
     "found_input_artifact_count": 272,
     "input_artifact_count": 272,
     "inspected_input_roots": [
@@ -106,7 +112,7 @@
   },
   "no_orphan_generated_surface_proof": {
     "orphan_generated_shard_count": 0,
-    "proof_row_count": 52
+    "proof_row_count": 60
   },
   "no_orphan_identity_proof": {
     "orphan_identity_count": 0,
@@ -116,6 +122,7 @@
     "orphan_source_artifact_count": 0,
     "proof_row_count": 272
   },
+  "non_prediction_market_qku_stage1_active_count": 0,
   "ontology_registry_counts": {
     "formula_ontology_row_count": 10188,
     "ontology_role_registry_row_count": 14
@@ -153,7 +160,7 @@
       "absolute_local_path_leak_count": 0,
       "backslash_only_path_leak_count": 0,
       "generated_path_case_collision_count": 0,
-      "generated_path_count": 75
+      "generated_path_count": 87
     },
     "dedupe_counts": {
       "CANONICAL_REPRESENTATIVE_PRESERVED": 9949,
@@ -161,6 +168,8 @@
     },
     "deleted_file_count": 0,
     "derived_route_resolution_count": 10189,
+    "dormant_qku_deleted_count": 0,
+    "dormant_qku_global_ban_count": 0,
     "family_registry_counts": {
       "qku_formula_family_registry_row_count": 207
     },
@@ -171,7 +180,7 @@
     "global_formula_ban_count": 0,
     "global_qku_ban_count": 0,
     "input_artifact_counts": {
-      "discovery_elapsed_seconds_rounded": 0.034,
+      "discovery_elapsed_seconds_rounded": 0.036,
       "found_input_artifact_count": 272,
       "input_artifact_count": 272,
       "inspected_input_roots": [
@@ -207,7 +216,7 @@
     },
     "no_orphan_generated_surface_proof": {
       "orphan_generated_shard_count": 0,
-      "proof_row_count": 52
+      "proof_row_count": 60
     },
     "no_orphan_identity_proof": {
       "orphan_identity_count": 0,
@@ -217,6 +226,7 @@
       "orphan_source_artifact_count": 0,
       "proof_row_count": 272
     },
+    "non_prediction_market_qku_stage1_active_count": 0,
     "ontology_registry_counts": {
       "formula_ontology_row_count": 10188,
       "ontology_role_registry_row_count": 14
@@ -250,7 +260,7 @@
     "runtime_cash_receipt_count": 0,
     "runtime_stack_generation_count": 0,
     "scan_performance": {
-      "elapsed_seconds_rounded": 8.899,
+      "elapsed_seconds_rounded": 9.453,
       "records_scanned_count": 184786,
       "records_with_identity_count": 182801
     },
@@ -265,6 +275,57 @@
     },
     "source_truth_authority_created_count": 0,
     "stack_combination_materialization_count": 0,
+    "stage1_active_universe_summary": {
+      "dormant_future_market_row_count": 9649,
+      "dormant_market_scope_counts": {
+        "repo_financing": 9382,
+        "unknown_needs_review": 267
+      },
+      "dormant_qku_deleted_count": 0,
+      "dormant_qku_global_ban_count": 0,
+      "immutable_qku_formula_library_remains_universal_preservation_surface": true,
+      "market_scope_and_platform_applicability_create_trading_authority": false,
+      "non_prediction_market_qku_stage1_active_count": 0,
+      "platform_applicability_registry_row_count": 8,
+      "platform_applicability_states": [
+        "KALSHI_APPLICABLE",
+        "POLYMARKET_APPLICABLE",
+        "FORECASTEX_IBKR_APPLICABLE",
+        "THREE_PLATFORM_COMMON",
+        "PREDICTION_MARKET_GENERIC",
+        "PLATFORM_SPECIFIC_NEEDS_SOURCE_BINDING",
+        "NOT_STAGE1_PLATFORM_APPLICABLE",
+        "UNKNOWN_PLATFORM_SCOPE_NEEDS_REVIEW"
+      ],
+      "stage1_activation_row_count": 10189,
+      "stage1_agent_computation_universe_seed_is_default_stage1_seed": true,
+      "stage1_agents_must_not_default_compute_full_universe": true,
+      "stage1_classification_state_counts": {
+        "FUTURE_MARKET_DORMANT": 9382,
+        "STAGE1_PREDICTION_MARKET_ACTIVE_CANDIDATE": 530,
+        "STAGE1_PREDICTION_MARKET_SUPPORTING_MARKET_AGNOSTIC": 10,
+        "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW": 267
+      },
+      "stage1_classification_states": [
+        "STAGE1_PREDICTION_MARKET_ACTIVE_CANDIDATE",
+        "STAGE1_PREDICTION_MARKET_SUPPORTING_MARKET_AGNOSTIC",
+        "THREE_PLATFORM_COMMON",
+        "KALSHI_APPLICABLE",
+        "POLYMARKET_APPLICABLE",
+        "FORECASTEX_IBKR_APPLICABLE",
+        "PLATFORM_SPECIFIC_NEEDS_SOURCE_BINDING",
+        "FUTURE_MARKET_DORMANT",
+        "CROSS_MARKET_REVIEW_REQUIRED",
+        "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW"
+      ],
+      "stage1_default_full_universe_compute_route_count": 0,
+      "stage1_seed_market_scope_counts": {
+        "market_agnostic": 10,
+        "prediction_market": 530
+      },
+      "stage1_seed_row_count": 540
+    },
+    "stage1_default_full_universe_compute_route_count": 0,
     "trade_simulation_count": 0
   },
   "report_version": "PR168-RP5C-v1.0",
@@ -277,7 +338,7 @@
   "runtime_cash_receipt_count": 0,
   "runtime_stack_generation_count": 0,
   "scan_performance": {
-    "elapsed_seconds_rounded": 8.899,
+    "elapsed_seconds_rounded": 9.453,
     "records_scanned_count": 184786,
     "records_with_identity_count": 182801
   },
@@ -292,5 +353,56 @@
   },
   "source_truth_authority_created_count": 0,
   "stack_combination_materialization_count": 0,
+  "stage1_active_universe_summary": {
+    "dormant_future_market_row_count": 9649,
+    "dormant_market_scope_counts": {
+      "repo_financing": 9382,
+      "unknown_needs_review": 267
+    },
+    "dormant_qku_deleted_count": 0,
+    "dormant_qku_global_ban_count": 0,
+    "immutable_qku_formula_library_remains_universal_preservation_surface": true,
+    "market_scope_and_platform_applicability_create_trading_authority": false,
+    "non_prediction_market_qku_stage1_active_count": 0,
+    "platform_applicability_registry_row_count": 8,
+    "platform_applicability_states": [
+      "KALSHI_APPLICABLE",
+      "POLYMARKET_APPLICABLE",
+      "FORECASTEX_IBKR_APPLICABLE",
+      "THREE_PLATFORM_COMMON",
+      "PREDICTION_MARKET_GENERIC",
+      "PLATFORM_SPECIFIC_NEEDS_SOURCE_BINDING",
+      "NOT_STAGE1_PLATFORM_APPLICABLE",
+      "UNKNOWN_PLATFORM_SCOPE_NEEDS_REVIEW"
+    ],
+    "stage1_activation_row_count": 10189,
+    "stage1_agent_computation_universe_seed_is_default_stage1_seed": true,
+    "stage1_agents_must_not_default_compute_full_universe": true,
+    "stage1_classification_state_counts": {
+      "FUTURE_MARKET_DORMANT": 9382,
+      "STAGE1_PREDICTION_MARKET_ACTIVE_CANDIDATE": 530,
+      "STAGE1_PREDICTION_MARKET_SUPPORTING_MARKET_AGNOSTIC": 10,
+      "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW": 267
+    },
+    "stage1_classification_states": [
+      "STAGE1_PREDICTION_MARKET_ACTIVE_CANDIDATE",
+      "STAGE1_PREDICTION_MARKET_SUPPORTING_MARKET_AGNOSTIC",
+      "THREE_PLATFORM_COMMON",
+      "KALSHI_APPLICABLE",
+      "POLYMARKET_APPLICABLE",
+      "FORECASTEX_IBKR_APPLICABLE",
+      "PLATFORM_SPECIFIC_NEEDS_SOURCE_BINDING",
+      "FUTURE_MARKET_DORMANT",
+      "CROSS_MARKET_REVIEW_REQUIRED",
+      "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW"
+    ],
+    "stage1_default_full_universe_compute_route_count": 0,
+    "stage1_seed_market_scope_counts": {
+      "market_agnostic": 10,
+      "prediction_market": 530
+    },
+    "stage1_seed_row_count": 540
+  },
+  "stage1_default_full_universe_compute_route_count": 0,
   "trade_simulation_count": 0
 }
