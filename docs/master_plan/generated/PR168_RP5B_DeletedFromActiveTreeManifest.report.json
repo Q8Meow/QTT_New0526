@@ -1,0 +1,10 @@
+{
+  "created_at_utc": "2026-06-24T00:00:00Z",
+  "files_deleted_count": 0,
+  "logical_report_id": "PR168_RP5B_DeletedFromActiveTreeManifest",
+  "manifest_ref": "docs/master_plan/generated/rp5b/deleted_from_active_tree_rows.manifest.json",
+  "physical_filename": "PR168_RP5B_DeletedFromActiveTreeManifest.report.json",
+  "records": [],
+  "report_version": "PR168-RP5B-v1.0",
+  "rows_ref": "docs/master_plan/generated/rp5b/deleted_from_active_tree_rows.jsonl"
+}

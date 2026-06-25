@@ -1026,6 +1026,16 @@ def _expected_commands(
             python_executable,
             str(Path("tools") / "validate_pr168_rp5a_legacy_semantic_audit.py"),
         ],
+        [
+            python_executable,
+            str(Path("tools") / "build_pr168_rp5b_active_registry_safe_cleanup.py"),
+            "--dry-run",
+            "--offline",
+        ],
+        [
+            python_executable,
+            str(Path("tools") / "validate_pr168_rp5b_active_registry_safe_cleanup.py"),
+        ],
         *[
             [
                 python_executable,
@@ -2896,6 +2906,7 @@ def test_runner_splits_pytest_shard_2_longest_group_deterministically():
         ("tests/pr168_rp3",),
         ("tests/pr168_rank3",),
         ("tests/pr168_rp5a",),
+        ("tests/pr168_rp5b",),
     ]
     assert all(command.reason for command in commands)
     assert ("tests/stage1_prediction_markets",) not in [

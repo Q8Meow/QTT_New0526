@@ -1,0 +1,70 @@
+{
+  "created_at_utc": "2026-06-24T00:00:00Z",
+  "input_row_count": 8,
+  "intended_branch": "pr168-rp5b-active-registry-safe-legacy-cleanup",
+  "logical_report_id": "PR168_RP5B_Input",
+  "manifest_ref": "docs/master_plan/generated/rp5b/input_rows.manifest.json",
+  "physical_filename": "PR168_RP5B_Input.report.json",
+  "pr240_closed_not_merged_preflight_passed": true,
+  "pr241_merged_preflight_passed": true,
+  "records": [
+    {
+      "input_description": "git status/log/fetch/preflight branch state",
+      "input_source_id": "git_status",
+      "preflight_ref": "PR168_RP5B_Preflight",
+      "read_status": "READ",
+      "row_id": "RP5B_INPUT_0001"
+    },
+    {
+      "input_description": "gh pr view 241 and 240, gh pr list",
+      "input_source_id": "github_pr_metadata",
+      "preflight_ref": "PR168_RP5B_Preflight",
+      "read_status": "READ",
+      "row_id": "RP5B_INPUT_0002"
+    },
+    {
+      "input_description": "gh run list --branch main",
+      "input_source_id": "github_main_runs",
+      "preflight_ref": "PR168_RP5B_Preflight",
+      "read_status": "READ",
+      "row_id": "RP5B_INPUT_0003"
+    },
+    {
+      "input_description": "docs/master_plan/generated/PR168_RP5A_*.report.json",
+      "input_source_id": "rp5a_reports",
+      "preflight_ref": "PR168_RP5B_Preflight",
+      "read_status": "READ",
+      "row_id": "RP5B_INPUT_0004"
+    },
+    {
+      "input_description": "docs/master_plan/generated/rp5a/*.jsonl and manifests",
+      "input_source_id": "rp5a_row_shards",
+      "preflight_ref": "PR168_RP5B_Preflight",
+      "read_status": "READ",
+      "row_id": "RP5B_INPUT_0005"
+    },
+    {
+      "input_description": "PR165-D2 AgentRosterDiscoveryAudit and AgentDutySourceCrosswalk",
+      "input_source_id": "agent_crosswalk",
+      "preflight_ref": "PR168_RP5B_Preflight",
+      "read_status": "READ",
+      "row_id": "RP5B_INPUT_0006"
+    },
+    {
+      "input_description": "run_validation_gates, validation_scope_registry, validation_inventory",
+      "input_source_id": "validation_infrastructure",
+      "preflight_ref": "PR168_RP5B_Preflight",
+      "read_status": "READ",
+      "row_id": "RP5B_INPUT_0007"
+    },
+    {
+      "input_description": "PR241 merged and PR240 closed unmerged before RP5B edits",
+      "input_source_id": "preflight_guard",
+      "preflight_ref": "PR168_RP5B_Preflight",
+      "read_status": "PASS",
+      "row_id": "RP5B_INPUT_0008"
+    }
+  ],
+  "report_version": "PR168-RP5B-v1.0",
+  "rows_ref": "docs/master_plan/generated/rp5b/input_rows.jsonl"
+}

@@ -1,0 +1,388 @@
+{
+  "cleanup_candidate_count": 3825,
+  "created_at_utc": "2026-06-24T00:00:00Z",
+  "logical_report_id": "PR168_RP5B_CleanupCandidateUniverse",
+  "manifest_ref": "docs/master_plan/generated/rp5b/cleanup_candidate_rows.manifest.json",
+  "physical_filename": "PR168_RP5B_CleanupCandidateUniverse.report.json",
+  "records": [
+    {
+      "active_consumer_status_from_rp5a": "NO_ACTIVE_CONSUMER_DETECTED",
+      "cleanup_candidate_scope": "RP5B_PROTECTED_NON_DELETION_LEDGER",
+      "file_kind": "DOC",
+      "file_path": "docs/master_plan/agents/QTTAgentRoleOperatingCharterRegistry.yaml",
+      "identity_dependency_status_from_rp5a": "UNIQUE_IDENTITY_POSSIBLE",
+      "matched_stale_terms": [
+        "R005"
+      ],
+      "row_id": "RP5B_CLEANUP_CANDIDATE_0000001",
+      "rp5a_classification": "KEEP_UNIQUE_QKU_FORMULA_SOURCE",
+      "rp5a_refs": [
+        "RP5A_DELETE_0000001"
+      ],
+      "rp5b_reverification_required_flag": true,
+      "validation_dependency_status_from_rp5a": "NONE"
+    },
+    {
+      "active_consumer_status_from_rp5a": "NO_ACTIVE_CONSUMER_DETECTED",
+      "cleanup_candidate_scope": "RP5B_PROTECTED_NON_DELETION_LEDGER",
+      "file_kind": "DOC",
+      "file_path": "docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl",
+      "identity_dependency_status_from_rp5a": "NO_UNIQUE_IDENTITY_DETECTED",
+      "matched_stale_terms": [],
+      "row_id": "RP5B_CLEANUP_CANDIDATE_0000002",
+      "rp5a_classification": "UNCLEAR_DO_NOT_DELETE",
+      "rp5a_refs": [
+        "RP5A_DELETE_BUDGET_0000002"
+      ],
+      "rp5b_reverification_required_flag": true,
+      "validation_dependency_status_from_rp5a": "NONE"
+    },
+    {
+      "active_consumer_status_from_rp5a": "NO_ACTIVE_CONSUMER_DETECTED",
+      "cleanup_candidate_scope": "RP5B_PROTECTED_NON_DELETION_LEDGER",
+      "file_kind": "DOC",
+      "file_path": "docs/master_plan/atomic_rows/exact_row_sources/001_signal_features.exact_rows.jsonl",
+      "identity_dependency_status_from_rp5a": "NO_UNIQUE_IDENTITY_DETECTED",
+      "matched_stale_terms": [],
+      "row_id": "RP5B_CLEANUP_CANDIDATE_0000003",
+      "rp5a_classification": "UNCLEAR_DO_NOT_DELETE",
+      "rp5a_refs": [
+        "RP5A_DELETE_BUDGET_0000003"
+      ],
+      "rp5b_reverification_required_flag": true,
+      "validation_dependency_status_from_rp5a": "NONE"
+    },
+    {
+      "active_consumer_status_from_rp5a": "NO_ACTIVE_CONSUMER_DETECTED",
+      "cleanup_candidate_scope": "RP5B_PROTECTED_NON_DELETION_LEDGER",
+      "file_kind": "DOC",
+      "file_path": "docs/master_plan/atomic_rows/exact_row_sources/002_scoring_ranking.exact_rows.jsonl",
+      "identity_dependency_status_from_rp5a": "NO_UNIQUE_IDENTITY_DETECTED",
+      "matched_stale_terms": [],
+      "row_id": "RP5B_CLEANUP_CANDIDATE_0000004",
+      "rp5a_classification": "UNCLEAR_DO_NOT_DELETE",
+      "rp5a_refs": [
+        "RP5A_DELETE_BUDGET_0000004"
+      ],
+      "rp5b_reverification_required_flag": true,
+      "validation_dependency_status_from_rp5a": "NONE"
+    },
+    {
+      "active_consumer_status_from_rp5a": "NO_ACTIVE_CONSUMER_DETECTED",
+      "cleanup_candidate_scope": "RP5B_PROTECTED_NON_DELETION_LEDGER",
+      "file_kind": "DOC",
+      "file_path": "docs/master_plan/atomic_rows/exact_row_sources/003_normalization_calibration.exact_rows.jsonl",
+      "identity_dependency_status_from_rp5a": "NO_UNIQUE_IDENTITY_DETECTED",
+      "matched_stale_terms": [],
+      "row_id": "RP5B_CLEANUP_CANDIDATE_0000005",
+      "rp5a_classification": "UNCLEAR_DO_NOT_DELETE",
+      "rp5a_refs": [
+        "RP5A_DELETE_BUDGET_0000005"
+      ],
+      "rp5b_reverification_required_flag": true,
+      "validation_dependency_status_from_rp5a": "NONE"
+    },
+    {
+      "active_consumer_status_from_rp5a": "NO_ACTIVE_CONSUMER_DETECTED",
+      "cleanup_candidate_scope": "RP5B_PROTECTED_NON_DELETION_LEDGER",
+      "file_kind": "DOC",
+      "file_path": "docs/master_plan/atomic_rows/exact_row_sources/004_risk_control.exact_rows.jsonl",
+      "identity_dependency_status_from_rp5a": "NO_UNIQUE_IDENTITY_DETECTED",
+      "matched_stale_terms": [],
+      "row_id": "RP5B_CLEANUP_CANDIDATE_0000006",
+      "rp5a_classification": "UNCLEAR_DO_NOT_DELETE",
+      "rp5a_refs": [
+        "RP5A_DELETE_BUDGET_0000006"
+      ],
+      "rp5b_reverification_required_flag": true,
+      "validation_dependency_status_from_rp5a": "NONE"
+    },
+    {
+      "active_consumer_status_from_rp5a": "NO_ACTIVE_CONSUMER_DETECTED",
+      "cleanup_candidate_scope": "RP5B_PROTECTED_NON_DELETION_LEDGER",
+      "file_kind": "DOC",
+      "file_path": "docs/master_plan/atomic_rows/exact_row_sources/005_execution_connector_boundary.exact_rows.jsonl",
+      "identity_dependency_status_from_rp5a": "NO_UNIQUE_IDENTITY_DETECTED",
+      "matched_stale_terms": [],
+      "row_id": "RP5B_CLEANUP_CANDIDATE_0000007",
+      "rp5a_classification": "UNCLEAR_DO_NOT_DELETE",
+      "rp5a_refs": [
+        "RP5A_DELETE_BUDGET_0000007"
+      ],
+      "rp5b_reverification_required_flag": true,
+      "validation_dependency_status_from_rp5a": "NONE"
+    },
+    {
+      "active_consumer_status_from_rp5a": "NO_ACTIVE_CONSUMER_DETECTED",
+      "cleanup_candidate_scope": "RP5B_PROTECTED_NON_DELETION_LEDGER",
+      "file_kind": "DOC",
+      "file_path": "docs/master_plan/atomic_rows/exact_row_sources/007_latency_routing.exact_rows.jsonl",
+      "identity_dependency_status_from_rp5a": "NO_UNIQUE_IDENTITY_DETECTED",
+      "matched_stale_terms": [],
+      "row_id": "RP5B_CLEANUP_CANDIDATE_0000008",
+      "rp5a_classification": "UNCLEAR_DO_NOT_DELETE",
+      "rp5a_refs": [
+        "RP5A_DELETE_BUDGET_0000008"
+      ],
+      "rp5b_reverification_required_flag": true,
+      "validation_dependency_status_from_rp5a": "NONE"
+    },
+    {
+      "active_consumer_status_from_rp5a": "NO_ACTIVE_CONSUMER_DETECTED",
+      "cleanup_candidate_scope": "RP5B_PROTECTED_NON_DELETION_LEDGER",
+      "file_kind": "DOC",
+      "file_path": "docs/master_plan/atomic_rows/exact_row_sources/008_error_guard_fail_closed.exact_rows.jsonl",
+      "identity_dependency_status_from_rp5a": "NO_UNIQUE_IDENTITY_DETECTED",
+      "matched_stale_terms": [],
+      "row_id": "RP5B_CLEANUP_CANDIDATE_0000009",
+      "rp5a_classification": "UNCLEAR_DO_NOT_DELETE",
+      "rp5a_refs": [
+        "RP5A_DELETE_BUDGET_0000009"
+      ],
+      "rp5b_reverification_required_flag": true,
+      "validation_dependency_status_from_rp5a": "NONE"
+    },
+    {
+      "active_consumer_status_from_rp5a": "NO_ACTIVE_CONSUMER_DETECTED",
+      "cleanup_candidate_scope": "RP5B_PROTECTED_NON_DELETION_LEDGER",
+      "file_kind": "DOC",
+      "file_path": "docs/master_plan/atomic_rows/exact_row_sources/009_lifecycle_agent_binding.exact_rows.jsonl",
+      "identity_dependency_status_from_rp5a": "NO_UNIQUE_IDENTITY_DETECTED",
+      "matched_stale_terms": [],
+      "row_id": "RP5B_CLEANUP_CANDIDATE_0000010",
+      "rp5a_classification": "UNCLEAR_DO_NOT_DELETE",
+      "rp5a_refs": [
+        "RP5A_DELETE_BUDGET_0000010"
+      ],
+      "rp5b_reverification_required_flag": true,
+      "validation_dependency_status_from_rp5a": "NONE"
+    },
+    {
+      "active_consumer_status_from_rp5a": "NO_ACTIVE_CONSUMER_DETECTED",
+      "cleanup_candidate_scope": "RP5B_PROTECTED_NON_DELETION_LEDGER",
+      "file_kind": "DOC",
+      "file_path": "docs/master_plan/atomic_rows/exact_row_sources/010_source_evidence_connector_semantic.exact_rows.jsonl",
+      "identity_dependency_status_from_rp5a": "NO_UNIQUE_IDENTITY_DETECTED",
+      "matched_stale_terms": [],
+      "row_id": "RP5B_CLEANUP_CANDIDATE_0000011",
+      "rp5a_classification": "UNCLEAR_DO_NOT_DELETE",
+      "rp5a_refs": [
+        "RP5A_DELETE_BUDGET_0000011"
+      ],
+      "rp5b_reverification_required_flag": true,
+      "validation_dependency_status_from_rp5a": "NONE"
+    },
+    {
+      "active_consumer_status_from_rp5a": "NO_ACTIVE_CONSUMER_DETECTED",
+      "cleanup_candidate_scope": "RP5B_PROTECTED_NON_DELETION_LEDGER",
+      "file_kind": "DOC",
+      "file_path": "docs/master_plan/atomic_rows/exact_row_sources/011_replay_paper_validation.exact_rows.jsonl",
+      "identity_dependency_status_from_rp5a": "NO_UNIQUE_IDENTITY_DETECTED",
+      "matched_stale_terms": [],
+      "row_id": "RP5B_CLEANUP_CANDIDATE_0000012",
+      "rp5a_classification": "UNCLEAR_DO_NOT_DELETE",
+      "rp5a_refs": [
+        "RP5A_DELETE_BUDGET_0000012"
+      ],
+      "rp5b_reverification_required_flag": true,
+      "validation_dependency_status_from_rp5a": "NONE"
+    },
+    {
+      "active_consumer_status_from_rp5a": "NO_ACTIVE_CONSUMER_DETECTED",
+      "cleanup_candidate_scope": "RP5B_PROTECTED_NON_DELETION_LEDGER",
+      "file_kind": "DOC",
+      "file_path": "docs/master_plan/atomic_rows/exact_row_sources/012_quantum_advisory_optimization.exact_rows.jsonl",
+      "identity_dependency_status_from_rp5a": "NO_UNIQUE_IDENTITY_DETECTED",
+      "matched_stale_terms": [],
+      "row_id": "RP5B_CLEANUP_CANDIDATE_0000013",
+      "rp5a_classification": "UNCLEAR_DO_NOT_DELETE",
+      "rp5a_refs": [
+        "RP5A_DELETE_BUDGET_0000013"
+      ],
+      "rp5b_reverification_required_flag": true,
+      "validation_dependency_status_from_rp5a": "NONE"
+    },
+    {
+      "active_consumer_status_from_rp5a": "NO_ACTIVE_CONSUMER_DETECTED",
+      "cleanup_candidate_scope": "RP5B_PROTECTED_NON_DELETION_LEDGER",
+      "file_kind": "DOC",
+      "file_path": "docs/master_plan/atomic_rows/exact_row_sources/013_quantum_qubo_ising_metadata.exact_rows.jsonl",
+      "identity_dependency_status_from_rp5a": "NO_UNIQUE_IDENTITY_DETECTED",
+      "matched_stale_terms": [],
+      "row_id": "RP5B_CLEANUP_CANDIDATE_0000014",
+      "rp5a_classification": "UNCLEAR_DO_NOT_DELETE",
+      "rp5a_refs": [
+        "RP5A_DELETE_BUDGET_0000014"
+      ],
+      "rp5b_reverification_required_flag": true,
+      "validation_dependency_status_from_rp5a": "NONE"
+    },
+    {
+      "active_consumer_status_from_rp5a": "NO_ACTIVE_CONSUMER_DETECTED",
+      "cleanup_candidate_scope": "RP5B_PROTECTED_NON_DELETION_LEDGER",
+      "file_kind": "DOC",
+      "file_path": "docs/master_plan/atomic_rows/exact_row_sources/014_quantum_qaoa_vqe_annealing_metadata.exact_rows.jsonl",
+      "identity_dependency_status_from_rp5a": "NO_UNIQUE_IDENTITY_DETECTED",
+      "matched_stale_terms": [],
+      "row_id": "RP5B_CLEANUP_CANDIDATE_0000015",
+      "rp5a_classification": "UNCLEAR_DO_NOT_DELETE",
+      "rp5a_refs": [
+        "RP5A_DELETE_BUDGET_0000015"
+      ],
+      "rp5b_reverification_required_flag": true,
+      "validation_dependency_status_from_rp5a": "NONE"
+    },
+    {
+      "active_consumer_status_from_rp5a": "NO_ACTIVE_CONSUMER_DETECTED",
+      "cleanup_candidate_scope": "RP5B_PROTECTED_NON_DELETION_LEDGER",
+      "file_kind": "DOC",
+      "file_path": "docs/master_plan/atomic_rows/exact_row_sources/015_quantum_portfolio_hybrid_comparator.exact_rows.jsonl",
+      "identity_dependency_status_from_rp5a": "NO_UNIQUE_IDENTITY_DETECTED",
+      "matched_stale_terms": [],
+      "row_id": "RP5B_CLEANUP_CANDIDATE_0000016",
+      "rp5a_classification": "UNCLEAR_DO_NOT_DELETE",
+      "rp5a_refs": [
+        "RP5A_DELETE_BUDGET_0000016"
+      ],
+      "rp5b_reverification_required_flag": true,
+      "validation_dependency_status_from_rp5a": "NONE"
+    },
+    {
+      "active_consumer_status_from_rp5a": "NO_ACTIVE_CONSUMER_DETECTED",
+      "cleanup_candidate_scope": "RP5B_PROTECTED_NON_DELETION_LEDGER",
+      "file_kind": "DOC",
+      "file_path": "docs/master_plan/atomicrows/AtomicRowsExactRowAgentFamilyEligibilityMatrix.yaml",
+      "identity_dependency_status_from_rp5a": "NO_UNIQUE_IDENTITY_DETECTED",
+      "matched_stale_terms": [],
+      "row_id": "RP5B_CLEANUP_CANDIDATE_0000017",
+      "rp5a_classification": "UNCLEAR_DO_NOT_DELETE",
+      "rp5a_refs": [
+        "RP5A_DELETE_BUDGET_0000017"
+      ],
+      "rp5b_reverification_required_flag": true,
+      "validation_dependency_status_from_rp5a": "NONE"
+    },
+    {
+      "active_consumer_status_from_rp5a": "NO_ACTIVE_CONSUMER_DETECTED",
+      "cleanup_candidate_scope": "RP5B_PROTECTED_NON_DELETION_LEDGER",
+      "file_kind": "GENERATED_REPORT",
+      "file_path": "docs/master_plan/generated/MasterPlanSectionCoverageReport.json",
+      "identity_dependency_status_from_rp5a": "NO_UNIQUE_IDENTITY_DETECTED",
+      "matched_stale_terms": [],
+      "row_id": "RP5B_CLEANUP_CANDIDATE_0000018",
+      "rp5a_classification": "UNCLEAR_DO_NOT_DELETE",
+      "rp5a_refs": [
+        "RP5A_DELETE_BUDGET_0000018"
+      ],
+      "rp5b_reverification_required_flag": true,
+      "validation_dependency_status_from_rp5a": "NONE"
+    },
+    {
+      "active_consumer_status_from_rp5a": "NO_ACTIVE_CONSUMER_DETECTED",
+      "cleanup_candidate_scope": "RP5B_PROTECTED_NON_DELETION_LEDGER",
+      "file_kind": "GENERATED_REPORT",
+      "file_path": "docs/master_plan/generated/OwnerApprovalRequestQueueRegistry.report.json",
+      "identity_dependency_status_from_rp5a": "NO_UNIQUE_IDENTITY_DETECTED",
+      "matched_stale_terms": [],
+      "row_id": "RP5B_CLEANUP_CANDIDATE_0000019",
+      "rp5a_classification": "UNCLEAR_DO_NOT_DELETE",
+      "rp5a_refs": [
+        "RP5A_DELETE_BUDGET_0000019"
+      ],
+      "rp5b_reverification_required_flag": true,
+      "validation_dependency_status_from_rp5a": "NONE"
+    },
+    {
+      "active_consumer_status_from_rp5a": "NO_ACTIVE_CONSUMER_DETECTED",
+      "cleanup_candidate_scope": "RP5B_PROTECTED_NON_DELETION_LEDGER",
+      "file_kind": "GENERATED_REPORT",
+      "file_path": "docs/master_plan/generated/OwnerOverrideReceiptAuthoringGate.report.json",
+      "identity_dependency_status_from_rp5a": "NO_UNIQUE_IDENTITY_DETECTED",
+      "matched_stale_terms": [],
+      "row_id": "RP5B_CLEANUP_CANDIDATE_0000020",
+      "rp5a_classification": "UNCLEAR_DO_NOT_DELETE",
+      "rp5a_refs": [
+        "RP5A_DELETE_BUDGET_0000020"
+      ],
+      "rp5b_reverification_required_flag": true,
+      "validation_dependency_status_from_rp5a": "NONE"
+    },
+    {
+      "active_consumer_status_from_rp5a": "NO_ACTIVE_CONSUMER_DETECTED",
+      "cleanup_candidate_scope": "RP5B_PROTECTED_NON_DELETION_LEDGER",
+      "file_kind": "GENERATED_REPORT",
+      "file_path": "docs/master_plan/generated/PR151_OfficialSourceRetrievalTargetPackForParameterDefaults.report.json",
+      "identity_dependency_status_from_rp5a": "NO_UNIQUE_IDENTITY_DETECTED",
+      "matched_stale_terms": [],
+      "row_id": "RP5B_CLEANUP_CANDIDATE_0000021",
+      "rp5a_classification": "UNCLEAR_DO_NOT_DELETE",
+      "rp5a_refs": [
+        "RP5A_DELETE_BUDGET_0000021"
+      ],
+      "rp5b_reverification_required_flag": true,
+      "validation_dependency_status_from_rp5a": "NONE"
+    },
+    {
+      "active_consumer_status_from_rp5a": "NO_ACTIVE_CONSUMER_DETECTED",
+      "cleanup_candidate_scope": "RP5B_PROTECTED_NON_DELETION_LEDGER",
+      "file_kind": "GENERATED_REPORT",
+      "file_path": "docs/master_plan/generated/PR153_ControlledOfficialSourceCaptureCandidatePackets.report.json",
+      "identity_dependency_status_from_rp5a": "NO_UNIQUE_IDENTITY_DETECTED",
+      "matched_stale_terms": [],
+      "row_id": "RP5B_CLEANUP_CANDIDATE_0000022",
+      "rp5a_classification": "UNCLEAR_DO_NOT_DELETE",
+      "rp5a_refs": [
+        "RP5A_DELETE_BUDGET_0000022"
+      ],
+      "rp5b_reverification_required_flag": true,
+      "validation_dependency_status_from_rp5a": "NONE"
+    },
+    {
+      "active_consumer_status_from_rp5a": "NO_ACTIVE_CONSUMER_DETECTED",
+      "cleanup_candidate_scope": "RP5B_PROTECTED_NON_DELETION_LEDGER",
+      "file_kind": "GENERATED_REPORT",
+      "file_path": "docs/master_plan/generated/PR155_AgentConsumableParameterDefaultRegistry.registry.json",
+      "identity_dependency_status_from_rp5a": "NO_UNIQUE_IDENTITY_DETECTED",
+      "matched_stale_terms": [],
+      "row_id": "RP5B_CLEANUP_CANDIDATE_0000023",
+      "rp5a_classification": "UNCLEAR_DO_NOT_DELETE",
+      "rp5a_refs": [
+        "RP5A_DELETE_BUDGET_0000023"
+      ],
+      "rp5b_reverification_required_flag": true,
+      "validation_dependency_status_from_rp5a": "NONE"
+    },
+    {
+      "active_consumer_status_from_rp5a": "NO_ACTIVE_CONSUMER_DETECTED",
+      "cleanup_candidate_scope": "RP5B_PROTECTED_NON_DELETION_LEDGER",
+      "file_kind": "GENERATED_REPORT",
+      "file_path": "docs/master_plan/generated/PR156_AgentDefaultBindingUniversalIntakeGate.registry.json",
+      "identity_dependency_status_from_rp5a": "NO_UNIQUE_IDENTITY_DETECTED",
+      "matched_stale_terms": [],
+      "row_id": "RP5B_CLEANUP_CANDIDATE_0000024",
+      "rp5a_classification": "UNCLEAR_DO_NOT_DELETE",
+      "rp5a_refs": [
+        "RP5A_DELETE_BUDGET_0000024"
+      ],
+      "rp5b_reverification_required_flag": true,
+      "validation_dependency_status_from_rp5a": "NONE"
+    },
+    {
+      "active_consumer_status_from_rp5a": "NO_ACTIVE_CONSUMER_DETECTED",
+      "cleanup_candidate_scope": "RP5B_PROTECTED_NON_DELETION_LEDGER",
+      "file_kind": "GENERATED_REPORT",
+      "file_path": "docs/master_plan/generated/pr157_atomicrows_completion_shards/PR157_AtomicRows4183CompletionMaterialization.shard_0001.json",
+      "identity_dependency_status_from_rp5a": "NO_UNIQUE_IDENTITY_DETECTED",
+      "matched_stale_terms": [],
+      "row_id": "RP5B_CLEANUP_CANDIDATE_0000025",
+      "rp5a_classification": "UNCLEAR_DO_NOT_DELETE",
+      "rp5a_refs": [
+        "RP5A_DELETE_BUDGET_0000025"
+      ],
+      "rp5b_reverification_required_flag": true,
+      "validation_dependency_status_from_rp5a": "NONE"
+    }
+  ],
+  "report_version": "PR168-RP5B-v1.0",
+  "rows_ref": "docs/master_plan/generated/rp5b/cleanup_candidate_rows.jsonl"
+}
