@@ -1,0 +1,17 @@
+{
+  "created_at_utc": "2026-06-24T00:00:00Z",
+  "logical_shard_family_id": "PR168_RP5B_AGENT_ROUTE_PRESERVATION_ROWS",
+  "manifest_id": "PR168_RP5B_AGENT_ROUTE_PRESERVATION_ROWS_MANIFEST",
+  "max_total_rows_per_shard": 500000,
+  "physical_filename": "docs/master_plan/generated/rp5b/agent_route_preservation_rows.manifest.json",
+  "report_version": "PR168-RP5B-v1.0",
+  "row_count": 2,
+  "row_count_within_bound_flag": true,
+  "row_refs_limited": [
+    "RP5B_AGENT_ROUTE_PRESERVE_0001",
+    "RP5B_AGENT_ROUTE_PRESERVE_0002"
+  ],
+  "shard_path": "docs/master_plan/generated/rp5b/agent_route_preservation_rows.jsonl",
+  "truncated_by_row_budget_flag": false,
+  "truncated_row_refs_flag": false
+}

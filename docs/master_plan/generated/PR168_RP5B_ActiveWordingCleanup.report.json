@@ -1,0 +1,11 @@
+{
+  "active_wording_cleanup_count": 0,
+  "active_wording_cleanup_note": "No active wording cleanup was required; historical generated artifact content was not edited.",
+  "created_at_utc": "2026-06-24T00:00:00Z",
+  "logical_report_id": "PR168_RP5B_ActiveWordingCleanup",
+  "manifest_ref": "docs/master_plan/generated/rp5b/active_wording_cleanup_rows.manifest.json",
+  "physical_filename": "PR168_RP5B_ActiveWordingCleanup.report.json",
+  "records": [],
+  "report_version": "PR168-RP5B-v1.0",
+  "rows_ref": "docs/master_plan/generated/rp5b/active_wording_cleanup_rows.jsonl"
+}

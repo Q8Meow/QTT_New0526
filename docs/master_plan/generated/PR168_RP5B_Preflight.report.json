@@ -1,0 +1,84 @@
+{
+  "created_at_utc": "2026-06-24T00:00:00Z",
+  "current_branch": "pr168-rp5b-active-registry-safe-legacy-cleanup",
+  "git_status_short": "M tests/fail_closed/test_run_validation_gates.py\n M tests/tools/test_validation_inventory.py\n M tests/tools/test_validation_scope_registry.py\n M tools/run_validation_gates.py\n M tools/validate_validation_scope_registry.py\n M tools/validation_inventory.py\n M tools/validation_scope_registry.py\n?? docs/master_plan/generated/PR168_RP5B_ActiveArtifactRegistry.report.json\n?? docs/master_plan/generated/PR168_RP5B_ActiveWordingCleanup.report.json\n?? docs/master_plan/generated/PR168_RP5B_AgentRoutePreservation.report.json\n?? docs/master_plan/generated/PR168_RP5B_CleanupCandidateUniverse.report.json\n?? docs/master_plan/generated/PR168_RP5B_DeletedFromActiveTreeManifest.report.json\n?? docs/master_plan/generated/PR168_RP5B_FinalSummary.report.json\n?? docs/master_plan/generated/PR168_RP5B_Input.report.json\n?? docs/master_plan/generated/PR168_RP5B_LegacyKeepReasonLedger.report.json\n?? docs/master_plan/generated/PR168_RP5B_LegacySemanticSupersession.report.json\n?? docs/master_plan/generated/PR168_RP5B_NoRawLegacyDecisionAuthority.report.json\n?? docs/master_plan/generated/PR168_RP5B_PathAudit.report.json\n?? docs/master_plan/generated/PR168_RP5B_Preflight.report.json\n?? docs/master_plan/generated/PR168_RP5B_QKUFormulaIdentityPreservation.report.json\n?? docs/master_plan/generated/PR168_RP5B_RP5AInputIntegrity.report.json\n?? docs/master_plan/generated/PR168_RP5B_SafeDeletionVerification.report.json\n?? docs/master_plan/generated/PR168_RP5B_ValidationScopeReduction.report.json\n?? docs/master_plan/generated/rp5b/active_artifact_registry_rows.jsonl\n?? docs/master_plan/generated/rp5b/active_artifact_registry_rows.manifest.json\n?? docs/master_plan/generated/rp5b/active_wording_cleanup_rows.jsonl\n?? docs/master_plan/generated/rp5b/active_wording_cleanup_rows.manifest.json\n?? docs/master_plan/generated/rp5b/agent_route_preservation_rows.jsonl\n?? docs/master_plan/generated/rp5b/agent_route_preservation_rows.manifest.json\n?? docs/master_plan/generated/rp5b/cleanup_candidate_rows.jsonl\n?? docs/master_plan/generated/rp5b/cleanup_candidate_rows.manifest.json\n?? docs/master_plan/generated/rp5b/deleted_from_active_tree_rows.jsonl\n?? docs/master_plan/generated/rp5b/deleted_from_active_tree_rows.manifest.json\n?? docs/master_plan/generated/rp5b/input_rows.jsonl\n?? docs/master_plan/generated/rp5b/input_rows.manifest.json\n?? docs/master_plan/generated/rp5b/legacy_keep_reason_rows.jsonl\n?? docs/master_plan/generated/rp5b/legacy_keep_reason_rows.manifest.json\n?? docs/master_plan/generated/rp5b/legacy_semantic_supersession_rows.jsonl\n?? docs/master_plan/generated/rp5b/legacy_semantic_supersession_rows.manifest.json\n?? docs/master_plan/generated/rp5b/no_raw_legacy_decision_authority_rows.jsonl\n?? docs/master_plan/generated/rp5b/no_raw_legacy_decision_authority_rows.manifest.json\n?? docs/master_plan/generated/rp5b/path_audit_rows.jsonl\n?? docs/master_plan/generated/rp5b/path_audit_rows.manifest.json\n?? docs/master_plan/generated/rp5b/qku_formula_identity_preservation_rows.jsonl\n?? docs/master_plan/generated/rp5b/qku_formula_identity_preservation_rows.manifest.json\n?? docs/master_plan/generated/rp5b/rp5a_input_integrity_rows.jsonl\n?? docs/master_plan/generated/rp5b/rp5a_input_integrity_rows.manifest.json\n?? docs/master_plan/generated/rp5b/safe_deletion_verification_rows.jsonl\n?? docs/master_plan/generated/rp5b/safe_deletion_verification_rows.manifest.json\n?? docs/master_plan/generated/rp5b/validation_scope_reduction_rows.jsonl\n?? docs/master_plan/generated/rp5b/validation_scope_reduction_rows.manifest.json\n?? tests/pr168_rp5b/__init__.py\n?? tests/pr168_rp5b/_helpers.py\n?? tests/pr168_rp5b/test_active_artifact_registry_exists.py\n?? tests/pr168_rp5b/test_active_wording_cleanup_safe.py\n?? tests/pr168_rp5b/test_cleanup_candidate_universe_exists.py\n?? tests/pr168_rp5b/test_deleted_manifest_matches_git_deletions.py\n?? tests/pr168_rp5b/test_final_summary_counts.py\n?? tests/pr168_rp5b/test_legacy_keep_reason_ledger_exists.py\n?? tests/pr168_rp5b/test_legacy_semantic_supersession_exists.py\n?? tests/pr168_rp5b/test_no_delete_active_consumers.py\n?? tests/pr168_rp5b/test_no_delete_unclear_files.py\n?? tests/pr168_rp5b/test_no_delete_validation_dependencies.py\n?? tests/pr168_rp5b/test_no_full_library_reclaim.py\n?? tests/pr168_rp5b/test_no_live_order_or_source_truth_authority.py\n?? tests/pr168_rp5b/test_no_raw_legacy_decision_authority.py\n?? tests/pr168_rp5b/test_no_runtime_stack_generation.py\n?? tests/pr168_rp5b/test_no_trade_simulation.py\n?? tests/pr168_rp5b/test_no_unique_identity_loss.py\n?? tests/pr168_rp5b/test_path_audit.py\n?? tests/pr168_rp5b/test_rp5a_inputs_exist.py\n?? tests/pr168_rp5b/test_safe_deletion_verification_exists.py\n?? tests/pr168_rp5b/test_validation_scope_reduction_has_replacement.py\n?? tools/build_pr168_rp5b_active_registry_safe_cleanup.py\n?? tools/pr168_rp5b_active_registry.py\n?? tools/pr168_rp5b_config.py\n?? tools/pr168_rp5b_identity_preservation.py\n?? tools/pr168_rp5b_no_raw_legacy_authority.py\n?? tools/pr168_rp5b_report_writer.py\n?? tools/pr168_rp5b_rp5a_loader.py\n?? tools/pr168_rp5b_safe_deletion_verifier.py\n?? tools/pr168_rp5b_semantic_supersession.py\n?? tools/pr168_rp5b_validation_scope_reduction.py\n?? tools/pr168_rp5b_validator.py\n?? tools/validate_pr168_rp5b_active_registry_safe_cleanup.py",
+  "intended_branch": "pr168-rp5b-active-registry-safe-legacy-cleanup",
+  "latest_main_run_green_or_exact_gapped": true,
+  "latest_main_run_state": {
+    "conclusion": "success",
+    "databaseId": 28127086872,
+    "displayTitle": "PR168-RP5A: Legacy semantic audit for immutable QKU/formula architect\u2026",
+    "headSha": "894c6bdd3d4b3fd1923a801db9a8cb048173a108",
+    "status": "completed"
+  },
+  "logical_report_id": "PR168_RP5B_Preflight",
+  "main_current_with_origin_at_branch_time": true,
+  "no_open_pr_conflict_detected": true,
+  "open_prs": [],
+  "origin_main_head": "894c6bdd3d4b3fd1923a801db9a8cb048173a108",
+  "physical_filename": "PR168_RP5B_Preflight.report.json",
+  "pr240_closed_not_merged_preflight_passed": true,
+  "pr240_state": {
+    "baseRefName": "main",
+    "headRefName": "pr168-recovery1-rank3-guided-repair-retest",
+    "headRefOid": "a8fa963d988acc3be2435c44501577e3aca8b869",
+    "mergeable": "MERGEABLE",
+    "mergedAt": null,
+    "number": 240,
+    "state": "CLOSED"
+  },
+  "pr241_merged_preflight_passed": true,
+  "pr241_state": {
+    "baseRefName": "main",
+    "headRefName": "pr168-rp5a-legacy-semantic-audit",
+    "headRefOid": "c3a0ca1a7655639b4ebc1050b7f35abef743118c",
+    "mergeCommit": {
+      "oid": "894c6bdd3d4b3fd1923a801db9a8cb048173a108"
+    },
+    "mergedAt": "2026-06-24T20:20:27Z",
+    "number": 241,
+    "state": "MERGED"
+  },
+  "preflight_source": "gh_and_git",
+  "records": {
+    "current_branch": "pr168-rp5b-active-registry-safe-legacy-cleanup",
+    "git_status_short": "M tests/fail_closed/test_run_validation_gates.py\n M tests/tools/test_validation_inventory.py\n M tests/tools/test_validation_scope_registry.py\n M tools/run_validation_gates.py\n M tools/validate_validation_scope_registry.py\n M tools/validation_inventory.py\n M tools/validation_scope_registry.py\n?? docs/master_plan/generated/PR168_RP5B_ActiveArtifactRegistry.report.json\n?? docs/master_plan/generated/PR168_RP5B_ActiveWordingCleanup.report.json\n?? docs/master_plan/generated/PR168_RP5B_AgentRoutePreservation.report.json\n?? docs/master_plan/generated/PR168_RP5B_CleanupCandidateUniverse.report.json\n?? docs/master_plan/generated/PR168_RP5B_DeletedFromActiveTreeManifest.report.json\n?? docs/master_plan/generated/PR168_RP5B_FinalSummary.report.json\n?? docs/master_plan/generated/PR168_RP5B_Input.report.json\n?? docs/master_plan/generated/PR168_RP5B_LegacyKeepReasonLedger.report.json\n?? docs/master_plan/generated/PR168_RP5B_LegacySemanticSupersession.report.json\n?? docs/master_plan/generated/PR168_RP5B_NoRawLegacyDecisionAuthority.report.json\n?? docs/master_plan/generated/PR168_RP5B_PathAudit.report.json\n?? docs/master_plan/generated/PR168_RP5B_Preflight.report.json\n?? docs/master_plan/generated/PR168_RP5B_QKUFormulaIdentityPreservation.report.json\n?? docs/master_plan/generated/PR168_RP5B_RP5AInputIntegrity.report.json\n?? docs/master_plan/generated/PR168_RP5B_SafeDeletionVerification.report.json\n?? docs/master_plan/generated/PR168_RP5B_ValidationScopeReduction.report.json\n?? docs/master_plan/generated/rp5b/active_artifact_registry_rows.jsonl\n?? docs/master_plan/generated/rp5b/active_artifact_registry_rows.manifest.json\n?? docs/master_plan/generated/rp5b/active_wording_cleanup_rows.jsonl\n?? docs/master_plan/generated/rp5b/active_wording_cleanup_rows.manifest.json\n?? docs/master_plan/generated/rp5b/agent_route_preservation_rows.jsonl\n?? docs/master_plan/generated/rp5b/agent_route_preservation_rows.manifest.json\n?? docs/master_plan/generated/rp5b/cleanup_candidate_rows.jsonl\n?? docs/master_plan/generated/rp5b/cleanup_candidate_rows.manifest.json\n?? docs/master_plan/generated/rp5b/deleted_from_active_tree_rows.jsonl\n?? docs/master_plan/generated/rp5b/deleted_from_active_tree_rows.manifest.json\n?? docs/master_plan/generated/rp5b/input_rows.jsonl\n?? docs/master_plan/generated/rp5b/input_rows.manifest.json\n?? docs/master_plan/generated/rp5b/legacy_keep_reason_rows.jsonl\n?? docs/master_plan/generated/rp5b/legacy_keep_reason_rows.manifest.json\n?? docs/master_plan/generated/rp5b/legacy_semantic_supersession_rows.jsonl\n?? docs/master_plan/generated/rp5b/legacy_semantic_supersession_rows.manifest.json\n?? docs/master_plan/generated/rp5b/no_raw_legacy_decision_authority_rows.jsonl\n?? docs/master_plan/generated/rp5b/no_raw_legacy_decision_authority_rows.manifest.json\n?? docs/master_plan/generated/rp5b/path_audit_rows.jsonl\n?? docs/master_plan/generated/rp5b/path_audit_rows.manifest.json\n?? docs/master_plan/generated/rp5b/qku_formula_identity_preservation_rows.jsonl\n?? docs/master_plan/generated/rp5b/qku_formula_identity_preservation_rows.manifest.json\n?? docs/master_plan/generated/rp5b/rp5a_input_integrity_rows.jsonl\n?? docs/master_plan/generated/rp5b/rp5a_input_integrity_rows.manifest.json\n?? docs/master_plan/generated/rp5b/safe_deletion_verification_rows.jsonl\n?? docs/master_plan/generated/rp5b/safe_deletion_verification_rows.manifest.json\n?? docs/master_plan/generated/rp5b/validation_scope_reduction_rows.jsonl\n?? docs/master_plan/generated/rp5b/validation_scope_reduction_rows.manifest.json\n?? tests/pr168_rp5b/__init__.py\n?? tests/pr168_rp5b/_helpers.py\n?? tests/pr168_rp5b/test_active_artifact_registry_exists.py\n?? tests/pr168_rp5b/test_active_wording_cleanup_safe.py\n?? tests/pr168_rp5b/test_cleanup_candidate_universe_exists.py\n?? tests/pr168_rp5b/test_deleted_manifest_matches_git_deletions.py\n?? tests/pr168_rp5b/test_final_summary_counts.py\n?? tests/pr168_rp5b/test_legacy_keep_reason_ledger_exists.py\n?? tests/pr168_rp5b/test_legacy_semantic_supersession_exists.py\n?? tests/pr168_rp5b/test_no_delete_active_consumers.py\n?? tests/pr168_rp5b/test_no_delete_unclear_files.py\n?? tests/pr168_rp5b/test_no_delete_validation_dependencies.py\n?? tests/pr168_rp5b/test_no_full_library_reclaim.py\n?? tests/pr168_rp5b/test_no_live_order_or_source_truth_authority.py\n?? tests/pr168_rp5b/test_no_raw_legacy_decision_authority.py\n?? tests/pr168_rp5b/test_no_runtime_stack_generation.py\n?? tests/pr168_rp5b/test_no_trade_simulation.py\n?? tests/pr168_rp5b/test_no_unique_identity_loss.py\n?? tests/pr168_rp5b/test_path_audit.py\n?? tests/pr168_rp5b/test_rp5a_inputs_exist.py\n?? tests/pr168_rp5b/test_safe_deletion_verification_exists.py\n?? tests/pr168_rp5b/test_validation_scope_reduction_has_replacement.py\n?? tools/build_pr168_rp5b_active_registry_safe_cleanup.py\n?? tools/pr168_rp5b_active_registry.py\n?? tools/pr168_rp5b_config.py\n?? tools/pr168_rp5b_identity_preservation.py\n?? tools/pr168_rp5b_no_raw_legacy_authority.py\n?? tools/pr168_rp5b_report_writer.py\n?? tools/pr168_rp5b_rp5a_loader.py\n?? tools/pr168_rp5b_safe_deletion_verifier.py\n?? tools/pr168_rp5b_semantic_supersession.py\n?? tools/pr168_rp5b_validation_scope_reduction.py\n?? tools/pr168_rp5b_validator.py\n?? tools/validate_pr168_rp5b_active_registry_safe_cleanup.py",
+    "intended_branch": "pr168-rp5b-active-registry-safe-legacy-cleanup",
+    "latest_main_run_green_or_exact_gapped": true,
+    "latest_main_run_state": {
+      "conclusion": "success",
+      "databaseId": 28127086872,
+      "displayTitle": "PR168-RP5A: Legacy semantic audit for immutable QKU/formula architect\u2026",
+      "headSha": "894c6bdd3d4b3fd1923a801db9a8cb048173a108",
+      "status": "completed"
+    },
+    "main_current_with_origin_at_branch_time": true,
+    "no_open_pr_conflict_detected": true,
+    "open_prs": [],
+    "origin_main_head": "894c6bdd3d4b3fd1923a801db9a8cb048173a108",
+    "pr240_closed_not_merged_preflight_passed": true,
+    "pr240_state": {
+      "baseRefName": "main",
+      "headRefName": "pr168-recovery1-rank3-guided-repair-retest",
+      "headRefOid": "a8fa963d988acc3be2435c44501577e3aca8b869",
+      "mergeable": "MERGEABLE",
+      "mergedAt": null,
+      "number": 240,
+      "state": "CLOSED"
+    },
+    "pr241_merged_preflight_passed": true,
+    "pr241_state": {
+      "baseRefName": "main",
+      "headRefName": "pr168-rp5a-legacy-semantic-audit",
+      "headRefOid": "c3a0ca1a7655639b4ebc1050b7f35abef743118c",
+      "mergeCommit": {
+        "oid": "894c6bdd3d4b3fd1923a801db9a8cb048173a108"
+      },
+      "mergedAt": "2026-06-24T20:20:27Z",
+      "number": 241,
+      "state": "MERGED"
+    },
+    "preflight_source": "gh_and_git"
+  },
+  "report_version": "PR168-RP5B-v1.0"
+}

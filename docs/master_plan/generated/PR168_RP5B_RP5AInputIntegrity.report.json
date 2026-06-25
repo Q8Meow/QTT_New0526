@@ -1,0 +1,242 @@
+{
+  "created_at_utc": "2026-06-24T00:00:00Z",
+  "logical_report_id": "PR168_RP5B_RP5AInputIntegrity",
+  "manifest_ref": "docs/master_plan/generated/rp5b/rp5a_input_integrity_rows.manifest.json",
+  "physical_filename": "PR168_RP5B_RP5AInputIntegrity.report.json",
+  "records": [
+    {
+      "exists_flag": true,
+      "input_kind": "RP5A_REPORT",
+      "input_ref": "docs/master_plan/generated/PR168_RP5A_FinalSummary.report.json",
+      "integrity_status": "PASS",
+      "loaded_flag": true,
+      "row_id": "RP5B_RP5A_INPUT_0001"
+    },
+    {
+      "exists_flag": true,
+      "input_kind": "RP5A_REPORT",
+      "input_ref": "docs/master_plan/generated/PR168_RP5A_DeleteEligibilityDraft.report.json",
+      "integrity_status": "PASS",
+      "loaded_flag": true,
+      "row_id": "RP5B_RP5A_INPUT_0002"
+    },
+    {
+      "exists_flag": true,
+      "input_kind": "RP5A_REPORT",
+      "input_ref": "docs/master_plan/generated/PR168_RP5A_LegacyFileSemanticAudit.report.json",
+      "integrity_status": "PASS",
+      "loaded_flag": true,
+      "row_id": "RP5B_RP5A_INPUT_0003"
+    },
+    {
+      "exists_flag": true,
+      "input_kind": "RP5A_REPORT",
+      "input_ref": "docs/master_plan/generated/PR168_RP5A_LegacyPRSemanticAudit.report.json",
+      "integrity_status": "PASS",
+      "loaded_flag": true,
+      "row_id": "RP5B_RP5A_INPUT_0004"
+    },
+    {
+      "exists_flag": true,
+      "input_kind": "RP5A_REPORT",
+      "input_ref": "docs/master_plan/generated/PR168_RP5A_WrongConceptTermIndex.report.json",
+      "integrity_status": "PASS",
+      "loaded_flag": true,
+      "row_id": "RP5B_RP5A_INPUT_0005"
+    },
+    {
+      "exists_flag": true,
+      "input_kind": "RP5A_REPORT",
+      "input_ref": "docs/master_plan/generated/PR168_RP5A_ConsumerGraph.report.json",
+      "integrity_status": "PASS",
+      "loaded_flag": true,
+      "row_id": "RP5B_RP5A_INPUT_0006"
+    },
+    {
+      "exists_flag": true,
+      "input_kind": "RP5A_REPORT",
+      "input_ref": "docs/master_plan/generated/PR168_RP5A_ValidationDependencyGraph.report.json",
+      "integrity_status": "PASS",
+      "loaded_flag": true,
+      "row_id": "RP5B_RP5A_INPUT_0007"
+    },
+    {
+      "exists_flag": true,
+      "input_kind": "RP5A_REPORT",
+      "input_ref": "docs/master_plan/generated/PR168_RP5A_QKUFormulaIdentityDependency.report.json",
+      "integrity_status": "PASS",
+      "loaded_flag": true,
+      "row_id": "RP5B_RP5A_INPUT_0008"
+    },
+    {
+      "exists_flag": true,
+      "input_kind": "RP5A_REPORT",
+      "input_ref": "docs/master_plan/generated/PR168_RP5A_IdentityCustodyGraph.report.json",
+      "integrity_status": "PASS",
+      "loaded_flag": true,
+      "row_id": "RP5B_RP5A_INPUT_0009"
+    },
+    {
+      "exists_flag": true,
+      "input_kind": "RP5A_REPORT",
+      "input_ref": "docs/master_plan/generated/PR168_RP5A_StaleSemanticBlastRadius.report.json",
+      "integrity_status": "PASS",
+      "loaded_flag": true,
+      "row_id": "RP5B_RP5A_INPUT_0010"
+    },
+    {
+      "exists_flag": true,
+      "input_kind": "RP5A_REPORT",
+      "input_ref": "docs/master_plan/generated/PR168_RP5A_ValidationTimeRisk.report.json",
+      "integrity_status": "PASS",
+      "loaded_flag": true,
+      "row_id": "RP5B_RP5A_INPUT_0011"
+    },
+    {
+      "exists_flag": true,
+      "input_kind": "RP5A_REPORT",
+      "input_ref": "docs/master_plan/generated/PR168_RP5A_FutureRP5BPlan.report.json",
+      "integrity_status": "PASS",
+      "loaded_flag": true,
+      "row_id": "RP5B_RP5A_INPUT_0012"
+    },
+    {
+      "exists_flag": true,
+      "input_kind": "RP5A_REPORT",
+      "input_ref": "docs/master_plan/generated/PR168_RP5A_NoDeletionProof.report.json",
+      "integrity_status": "PASS",
+      "loaded_flag": true,
+      "row_id": "RP5B_RP5A_INPUT_0013"
+    },
+    {
+      "exists_flag": true,
+      "input_kind": "RP5A_REPORT",
+      "input_ref": "docs/master_plan/generated/PR168_RP5A_ScanPerformance.report.json",
+      "integrity_status": "PASS",
+      "loaded_flag": true,
+      "row_id": "RP5B_RP5A_INPUT_0014"
+    },
+    {
+      "exists_flag": true,
+      "input_kind": "RP5A_ROW_SHARD",
+      "input_ref": "docs/master_plan/generated/rp5a/delete_eligibility_rows.jsonl",
+      "integrity_status": "PASS",
+      "loaded_flag": true,
+      "manifest_ref": "docs/master_plan/generated/rp5a/delete_eligibility_rows.manifest.json",
+      "manifest_row_count_matches_flag": true,
+      "row_id": "RP5B_RP5A_INPUT_0015"
+    },
+    {
+      "exists_flag": true,
+      "input_kind": "RP5A_ROW_SHARD",
+      "input_ref": "docs/master_plan/generated/rp5a/future_rp5b_plan_rows.jsonl",
+      "integrity_status": "PASS",
+      "loaded_flag": true,
+      "manifest_ref": "docs/master_plan/generated/rp5a/future_rp5b_plan_rows.manifest.json",
+      "manifest_row_count_matches_flag": true,
+      "row_id": "RP5B_RP5A_INPUT_0016"
+    },
+    {
+      "exists_flag": true,
+      "input_kind": "RP5A_ROW_SHARD",
+      "input_ref": "docs/master_plan/generated/rp5a/legacy_file_semantic_rows.jsonl",
+      "integrity_status": "PASS",
+      "loaded_flag": true,
+      "manifest_ref": "docs/master_plan/generated/rp5a/legacy_file_semantic_rows.manifest.json",
+      "manifest_row_count_matches_flag": true,
+      "row_id": "RP5B_RP5A_INPUT_0017"
+    },
+    {
+      "exists_flag": true,
+      "input_kind": "RP5A_ROW_SHARD",
+      "input_ref": "docs/master_plan/generated/rp5a/legacy_pr_semantic_rows.jsonl",
+      "integrity_status": "PASS",
+      "loaded_flag": true,
+      "manifest_ref": "docs/master_plan/generated/rp5a/legacy_pr_semantic_rows.manifest.json",
+      "manifest_row_count_matches_flag": true,
+      "row_id": "RP5B_RP5A_INPUT_0018"
+    },
+    {
+      "exists_flag": true,
+      "input_kind": "RP5A_ROW_SHARD",
+      "input_ref": "docs/master_plan/generated/rp5a/wrong_concept_term_rows.jsonl",
+      "integrity_status": "PASS",
+      "loaded_flag": true,
+      "manifest_ref": "docs/master_plan/generated/rp5a/wrong_concept_term_rows.manifest.json",
+      "manifest_row_count_matches_flag": true,
+      "row_id": "RP5B_RP5A_INPUT_0019"
+    },
+    {
+      "exists_flag": true,
+      "input_kind": "RP5A_ROW_SHARD",
+      "input_ref": "docs/master_plan/generated/rp5a/consumer_graph_rows.jsonl",
+      "integrity_status": "PASS",
+      "loaded_flag": true,
+      "manifest_ref": "docs/master_plan/generated/rp5a/consumer_graph_rows.manifest.json",
+      "manifest_row_count_matches_flag": true,
+      "row_id": "RP5B_RP5A_INPUT_0020"
+    },
+    {
+      "exists_flag": true,
+      "input_kind": "RP5A_ROW_SHARD",
+      "input_ref": "docs/master_plan/generated/rp5a/validation_dependency_rows.jsonl",
+      "integrity_status": "PASS",
+      "loaded_flag": true,
+      "manifest_ref": "docs/master_plan/generated/rp5a/validation_dependency_rows.manifest.json",
+      "manifest_row_count_matches_flag": true,
+      "row_id": "RP5B_RP5A_INPUT_0021"
+    },
+    {
+      "exists_flag": true,
+      "input_kind": "RP5A_ROW_SHARD",
+      "input_ref": "docs/master_plan/generated/rp5a/qku_formula_identity_dependency_rows.jsonl",
+      "integrity_status": "PASS",
+      "loaded_flag": true,
+      "manifest_ref": "docs/master_plan/generated/rp5a/qku_formula_identity_dependency_rows.manifest.json",
+      "manifest_row_count_matches_flag": true,
+      "row_id": "RP5B_RP5A_INPUT_0022"
+    },
+    {
+      "exists_flag": true,
+      "input_kind": "RP5A_ROW_SHARD",
+      "input_ref": "docs/master_plan/generated/rp5a/identity_custody_rows.jsonl",
+      "integrity_status": "PASS",
+      "loaded_flag": true,
+      "manifest_ref": "docs/master_plan/generated/rp5a/identity_custody_rows.manifest.json",
+      "manifest_row_count_matches_flag": true,
+      "row_id": "RP5B_RP5A_INPUT_0023"
+    },
+    {
+      "exists_flag": true,
+      "input_kind": "RP5A_ROW_SHARD",
+      "input_ref": "docs/master_plan/generated/rp5a/agent_touchpoint_rows.jsonl",
+      "integrity_status": "PASS",
+      "loaded_flag": true,
+      "manifest_ref": "docs/master_plan/generated/rp5a/agent_touchpoint_rows.manifest.json",
+      "manifest_row_count_matches_flag": true,
+      "row_id": "RP5B_RP5A_INPUT_0024"
+    },
+    {
+      "exists_flag": true,
+      "input_kind": "RP5A_ROW_SHARD",
+      "input_ref": "docs/master_plan/generated/rp5a/blast_radius_rows.jsonl",
+      "integrity_status": "PASS",
+      "loaded_flag": true,
+      "manifest_ref": "docs/master_plan/generated/rp5a/blast_radius_rows.manifest.json",
+      "manifest_row_count_matches_flag": true,
+      "row_id": "RP5B_RP5A_INPUT_0025"
+    }
+  ],
+  "report_version": "PR168-RP5B-v1.0",
+  "rows_ref": "docs/master_plan/generated/rp5b/rp5a_input_integrity_rows.jsonl",
+  "rp5a_consumer_graph_exists_flag": true,
+  "rp5a_delete_eligibility_exists_flag": true,
+  "rp5a_final_summary_exists_flag": true,
+  "rp5a_identity_dependency_exists_flag": true,
+  "rp5a_input_integrity_passed": true,
+  "rp5a_no_deletion_zero_flag": true,
+  "rp5a_scan_budget_exhausted_flag": true,
+  "rp5a_scan_budget_exhaustion_unclear_protected_flag": true,
+  "rp5a_unclear_do_not_delete_count": 3824,
+  "rp5a_validation_dependency_graph_exists_flag": true
+}

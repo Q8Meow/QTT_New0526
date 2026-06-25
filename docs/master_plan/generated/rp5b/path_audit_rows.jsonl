@@ -1,0 +1,7 @@
+{"file_path":"tools/build_pr168_rp5b_active_registry_safe_cleanup.py","path_status":"PASS","physical_path_length":54,"row_id":"RP5B_PATH_AUDIT_0001"}
+{"file_path":"tools/validate_pr168_rp5b_active_registry_safe_cleanup.py","path_status":"PASS","physical_path_length":57,"row_id":"RP5B_PATH_AUDIT_0002"}
+{"file_path":"tools/pr168_rp5b_config.py","path_status":"PASS","physical_path_length":26,"row_id":"RP5B_PATH_AUDIT_0003"}
+{"file_path":"tools/pr168_rp5b_validator.py","path_status":"PASS","physical_path_length":29,"row_id":"RP5B_PATH_AUDIT_0004"}
+{"file_path":"tests/pr168_rp5b/_helpers.py","path_status":"PASS","physical_path_length":28,"row_id":"RP5B_PATH_AUDIT_0005"}
+{"file_path":"docs/master_plan/generated/PR168_RP5B_ActiveArtifactRegistry.report.json","path_status":"PASS","physical_path_length":72,"row_id":"RP5B_PATH_AUDIT_0006"}
+{"file_path":"docs/master_plan/generated/rp5b/active_artifact_registry_rows.jsonl","path_status":"PASS","physical_path_length":67,"row_id":"RP5B_PATH_AUDIT_0007"}

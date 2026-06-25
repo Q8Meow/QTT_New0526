@@ -1,0 +1,26 @@
+{
+  "agent_route_preservation_passed": true,
+  "agent_route_preservation_row_count": 2,
+  "created_at_utc": "2026-06-24T00:00:00Z",
+  "logical_report_id": "PR168_RP5B_AgentRoutePreservation",
+  "manifest_ref": "docs/master_plan/generated/rp5b/agent_route_preservation_rows.manifest.json",
+  "physical_filename": "PR168_RP5B_AgentRoutePreservation.report.json",
+  "records": [
+    {
+      "artifact_path": "docs/master_plan/generated/PR165_D2_AgentRosterDiscoveryAudit.report.json",
+      "preservation_reason": "PR165-D2 agent roster/crosswalk is active route authority and must not be deleted by RP5B.",
+      "preserved_flag": true,
+      "row_id": "RP5B_AGENT_ROUTE_PRESERVE_0001",
+      "validator_ref": "tools/validate_pr168_rp5b_active_registry_safe_cleanup.py"
+    },
+    {
+      "artifact_path": "docs/master_plan/generated/PR165_D2_AgentDutySourceCrosswalk.report.json",
+      "preservation_reason": "PR165-D2 agent roster/crosswalk is active route authority and must not be deleted by RP5B.",
+      "preserved_flag": true,
+      "row_id": "RP5B_AGENT_ROUTE_PRESERVE_0002",
+      "validator_ref": "tools/validate_pr168_rp5b_active_registry_safe_cleanup.py"
+    }
+  ],
+  "report_version": "PR168-RP5B-v1.0",
+  "rows_ref": "docs/master_plan/generated/rp5b/agent_route_preservation_rows.jsonl"
+}

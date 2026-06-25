@@ -1,0 +1,22 @@
+{
+  "created_at_utc": "2026-06-24T00:00:00Z",
+  "logical_shard_family_id": "PR168_RP5B_PATH_AUDIT_ROWS",
+  "manifest_id": "PR168_RP5B_PATH_AUDIT_ROWS_MANIFEST",
+  "max_total_rows_per_shard": 500000,
+  "physical_filename": "docs/master_plan/generated/rp5b/path_audit_rows.manifest.json",
+  "report_version": "PR168-RP5B-v1.0",
+  "row_count": 7,
+  "row_count_within_bound_flag": true,
+  "row_refs_limited": [
+    "RP5B_PATH_AUDIT_0001",
+    "RP5B_PATH_AUDIT_0002",
+    "RP5B_PATH_AUDIT_0003",
+    "RP5B_PATH_AUDIT_0004",
+    "RP5B_PATH_AUDIT_0005",
+    "RP5B_PATH_AUDIT_0006",
+    "RP5B_PATH_AUDIT_0007"
+  ],
+  "shard_path": "docs/master_plan/generated/rp5b/path_audit_rows.jsonl",
+  "truncated_by_row_budget_flag": false,
+  "truncated_row_refs_flag": false
+}

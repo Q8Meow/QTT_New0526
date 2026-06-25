@@ -1,0 +1,31 @@
+{
+  "created_at_utc": "2026-06-24T00:00:00Z",
+  "expected_validation_scan_reduction_count": 0,
+  "files_archived_by_registry_count": 0,
+  "logical_report_id": "PR168_RP5B_ValidationScopeReduction",
+  "manifest_ref": "docs/master_plan/generated/rp5b/validation_scope_reduction_rows.manifest.json",
+  "physical_filename": "PR168_RP5B_ValidationScopeReduction.report.json",
+  "records": [
+    {
+      "active_prefix_count": 32,
+      "archived_legacy_prefix_count": 0,
+      "expected_validation_time_reduction_reason": "No RP5A-safe deletion/archive rows existed, so RP5B adds replacement active-registry validation without removing active coverage.",
+      "new_validation_file_count": 3825,
+      "old_validation_file_count": 3825,
+      "removed_from_fast_preflight_count": 0,
+      "removed_from_generated_artifact_scan_count": 0,
+      "removed_from_repo_wide_integrity_count": 0,
+      "replacement_validator_refs": [
+        "tools/validate_pr168_rp5b_active_registry_safe_cleanup.py",
+        "tests/pr168_rp5b/test_active_artifact_registry_exists.py",
+        "tests/pr168_rp5b/test_no_raw_legacy_decision_authority.py"
+      ],
+      "row_id": "RP5B_VALIDATION_SCOPE_REDUCTION_0001",
+      "scope_change_type": "ACTIVE_REGISTRY_REPLACEMENT_VALIDATION"
+    }
+  ],
+  "report_version": "PR168-RP5B-v1.0",
+  "rows_ref": "docs/master_plan/generated/rp5b/validation_scope_reduction_rows.jsonl",
+  "validation_replacement_rule_count": 1,
+  "validation_scope_removed_count": 0
+}

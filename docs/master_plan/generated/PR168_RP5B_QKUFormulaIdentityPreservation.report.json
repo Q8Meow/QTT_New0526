@@ -1,0 +1,10 @@
+{
+  "created_at_utc": "2026-06-24T00:00:00Z",
+  "identity_preservation_row_count": 0,
+  "logical_report_id": "PR168_RP5B_QKUFormulaIdentityPreservation",
+  "manifest_ref": "docs/master_plan/generated/rp5b/qku_formula_identity_preservation_rows.manifest.json",
+  "physical_filename": "PR168_RP5B_QKUFormulaIdentityPreservation.report.json",
+  "records": [],
+  "report_version": "PR168-RP5B-v1.0",
+  "rows_ref": "docs/master_plan/generated/rp5b/qku_formula_identity_preservation_rows.jsonl"
+}

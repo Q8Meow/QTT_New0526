@@ -1,0 +1,166 @@
+{
+  "created_at_utc": "2026-06-24T00:00:00Z",
+  "logical_report_id": "PR168_RP5B_LegacySemanticSupersession",
+  "manifest_ref": "docs/master_plan/generated/rp5b/legacy_semantic_supersession_rows.manifest.json",
+  "physical_filename": "PR168_RP5B_LegacySemanticSupersession.report.json",
+  "records": [
+    {
+      "allowed_future_consumers": [
+        "ActiveArtifactRegistryV1",
+        "LegacySemanticSupersessionV1",
+        "PR168_RP5C_IMMUTABLE_LIBRARY_RECLAIM",
+        "PR168_RP5D_REPLAY_PAPER_EXECUTABILITY"
+      ],
+      "canonical_future_interpretation": "FORMULA_EXECUTION_ADAPTER_OR_INPUT_BINDING",
+      "example_rp5a_refs": [
+        "T001"
+      ],
+      "forbidden_old_interpretation": "canonical formula mutation or profit-forcing repair permission",
+      "legacy_term": "formula repair",
+      "legacy_term_family": "FORMULA_REPAIR",
+      "row_id": "RP5B_SEMANTIC_SUPERSESSION_0001",
+      "validator_rule_required": "NoRawLegacyDecisionAuthority must reject direct trading authority from this legacy term."
+    },
+    {
+      "allowed_future_consumers": [
+        "ActiveArtifactRegistryV1",
+        "LegacySemanticSupersessionV1",
+        "PR168_RP5C_IMMUTABLE_LIBRARY_RECLAIM",
+        "PR168_RP5D_REPLAY_PAPER_EXECUTABILITY"
+      ],
+      "canonical_future_interpretation": "QKU_EXECUTION_ROUTE_OR_TRADE_PLAN_BINDING",
+      "example_rp5a_refs": [
+        "T005"
+      ],
+      "forbidden_old_interpretation": "canonical QKU mutation or permanent QKU defect label",
+      "legacy_term": "QKU repair",
+      "legacy_term_family": "QKU_REPAIR",
+      "row_id": "RP5B_SEMANTIC_SUPERSESSION_0002",
+      "validator_rule_required": "NoRawLegacyDecisionAuthority must reject direct trading authority from this legacy term."
+    },
+    {
+      "allowed_future_consumers": [
+        "ActiveArtifactRegistryV1",
+        "LegacySemanticSupersessionV1",
+        "PR168_RP5C_IMMUTABLE_LIBRARY_RECLAIM",
+        "PR168_RP5D_REPLAY_PAPER_EXECUTABILITY"
+      ],
+      "canonical_future_interpretation": "CONDITION_SCOPED_NEGATIVE_OUTCOME_MEMORY",
+      "example_rp5a_refs": [
+        "T009"
+      ],
+      "forbidden_old_interpretation": "global formula ban or permanent negative truth",
+      "legacy_term": "negative formula",
+      "legacy_term_family": "NEGATIVE_FORMULA",
+      "row_id": "RP5B_SEMANTIC_SUPERSESSION_0003",
+      "validator_rule_required": "NoRawLegacyDecisionAuthority must reject direct trading authority from this legacy term."
+    },
+    {
+      "allowed_future_consumers": [
+        "ActiveArtifactRegistryV1",
+        "LegacySemanticSupersessionV1",
+        "PR168_RP5C_IMMUTABLE_LIBRARY_RECLAIM",
+        "PR168_RP5D_REPLAY_PAPER_EXECUTABILITY"
+      ],
+      "canonical_future_interpretation": "NO_TRADE_ADVISED_FOR_THIS_CONTEXT_ONLY",
+      "example_rp5a_refs": [
+        "T012"
+      ],
+      "forbidden_old_interpretation": "global or permanent no-trade dominance or replay exclusion",
+      "legacy_term": "no-trade dominated formula",
+      "legacy_term_family": "NO_TRADE_DOMINATED_FORMULA",
+      "row_id": "RP5B_SEMANTIC_SUPERSESSION_0004",
+      "validator_rule_required": "NoRawLegacyDecisionAuthority must reject direct trading authority from this legacy term."
+    },
+    {
+      "allowed_future_consumers": [
+        "ActiveArtifactRegistryV1",
+        "LegacySemanticSupersessionV1",
+        "PR168_RP5C_IMMUTABLE_LIBRARY_RECLAIM",
+        "PR168_RP5D_REPLAY_PAPER_EXECUTABILITY"
+      ],
+      "canonical_future_interpretation": "NOT_SELECTED_IN_THIS_CONTEXT_ONLY",
+      "example_rp5a_refs": [
+        "T025"
+      ],
+      "forbidden_old_interpretation": "global non-selection or permanent formula blocker",
+      "legacy_term": "unselected formula",
+      "legacy_term_family": "UNSELECTED_FORMULA",
+      "row_id": "RP5B_SEMANTIC_SUPERSESSION_0005",
+      "validator_rule_required": "NoRawLegacyDecisionAuthority must reject direct trading authority from this legacy term."
+    },
+    {
+      "allowed_future_consumers": [
+        "ActiveArtifactRegistryV1",
+        "LegacySemanticSupersessionV1",
+        "PR168_RP5C_IMMUTABLE_LIBRARY_RECLAIM",
+        "PR168_RP5D_REPLAY_PAPER_EXECUTABILITY"
+      ],
+      "canonical_future_interpretation": "FORMULA_STACK_OR_ORDER_PLAN_FAILED_UNDER_CONTEXT",
+      "example_rp5a_refs": [
+        "T027"
+      ],
+      "forbidden_old_interpretation": "permanent formula failure or mutation mandate",
+      "legacy_term": "failed formula",
+      "legacy_term_family": "FAILED_FORMULA",
+      "row_id": "RP5B_SEMANTIC_SUPERSESSION_0006",
+      "validator_rule_required": "NoRawLegacyDecisionAuthority must reject direct trading authority from this legacy term."
+    },
+    {
+      "allowed_future_consumers": [
+        "ActiveArtifactRegistryV1",
+        "LegacySemanticSupersessionV1",
+        "PR168_RP5C_IMMUTABLE_LIBRARY_RECLAIM",
+        "PR168_RP5D_REPLAY_PAPER_EXECUTABILITY"
+      ],
+      "canonical_future_interpretation": "PRESERVED_NEEDS_EXECUTION_CONTRACT",
+      "example_rp5a_refs": [
+        "T029"
+      ],
+      "forbidden_old_interpretation": "permanent non-computability or library exclusion",
+      "legacy_term": "non-computable formula",
+      "legacy_term_family": "NON_COMPUTABLE_FORMULA",
+      "row_id": "RP5B_SEMANTIC_SUPERSESSION_0007",
+      "validator_rule_required": "NoRawLegacyDecisionAuthority must reject direct trading authority from this legacy term."
+    },
+    {
+      "allowed_future_consumers": [
+        "ActiveArtifactRegistryV1",
+        "LegacySemanticSupersessionV1",
+        "PR168_RP5C_IMMUTABLE_LIBRARY_RECLAIM",
+        "PR168_RP5D_REPLAY_PAPER_EXECUTABILITY"
+      ],
+      "canonical_future_interpretation": "SOURCE_PROVENANCE_OR_AUTHORITY_BOUNDARY_LABEL_ONLY",
+      "example_rp5a_refs": [
+        "T039"
+      ],
+      "forbidden_old_interpretation": "source-truth authority or live decision authority",
+      "legacy_term": "source truth",
+      "legacy_term_family": "SOURCE_TRUTH",
+      "row_id": "RP5B_SEMANTIC_SUPERSESSION_0008",
+      "validator_rule_required": "NoRawLegacyDecisionAuthority must reject direct trading authority from this legacy term."
+    },
+    {
+      "allowed_future_consumers": [
+        "ActiveArtifactRegistryV1",
+        "LegacySemanticSupersessionV1",
+        "PR168_RP5C_IMMUTABLE_LIBRARY_RECLAIM",
+        "PR168_RP5D_REPLAY_PAPER_EXECUTABILITY"
+      ],
+      "canonical_future_interpretation": "AUTHORITY_BOUNDARY_LABEL_ONLY_UNTIL_LAUNCH_GATES",
+      "example_rp5a_refs": [
+        "T041",
+        "T042",
+        "R005"
+      ],
+      "forbidden_old_interpretation": "champion, live, source-truth, or order authority",
+      "legacy_term": "champion/live candidate",
+      "legacy_term_family": "CHAMPION_LIVE_CANDIDATE",
+      "row_id": "RP5B_SEMANTIC_SUPERSESSION_0009",
+      "validator_rule_required": "NoRawLegacyDecisionAuthority must reject direct trading authority from this legacy term."
+    }
+  ],
+  "report_version": "PR168-RP5B-v1.0",
+  "rows_ref": "docs/master_plan/generated/rp5b/legacy_semantic_supersession_rows.jsonl",
+  "semantic_supersession_row_count": 9
+}
