@@ -74,7 +74,7 @@
     "trade_simulation_count": 0
   },
   "input_artifact_counts": {
-    "discovery_elapsed_seconds_rounded": 0.036,
+    "discovery_elapsed_seconds_rounded": 0.033,
     "found_input_artifact_count": 272,
     "input_artifact_count": 272,
     "inspected_input_roots": [
@@ -180,7 +180,7 @@
     "global_formula_ban_count": 0,
     "global_qku_ban_count": 0,
     "input_artifact_counts": {
-      "discovery_elapsed_seconds_rounded": 0.036,
+      "discovery_elapsed_seconds_rounded": 0.033,
       "found_input_artifact_count": 272,
       "input_artifact_count": 272,
       "inspected_input_roots": [
@@ -260,7 +260,7 @@
     "runtime_cash_receipt_count": 0,
     "runtime_stack_generation_count": 0,
     "scan_performance": {
-      "elapsed_seconds_rounded": 9.453,
+      "elapsed_seconds_rounded": 9.452,
       "records_scanned_count": 184786,
       "records_with_identity_count": 182801
     },
@@ -338,7 +338,7 @@
   "runtime_cash_receipt_count": 0,
   "runtime_stack_generation_count": 0,
   "scan_performance": {
-    "elapsed_seconds_rounded": 9.453,
+    "elapsed_seconds_rounded": 9.452,
     "records_scanned_count": 184786,
     "records_with_identity_count": 182801
   },

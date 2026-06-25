@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 from collections import Counter, defaultdict
 import json
+import os
 from pathlib import Path
 import re
 import subprocess
@@ -1526,9 +1527,16 @@ def _write_shard_and_report(key: str, rows: list[dict[str, Any]], report_name: s
 def build_all(*, offline: bool = False) -> dict[str, Any]:
     del offline
     start = time.monotonic()
+    git_current_branch = _run_text(["git", "branch", "--show-current"])
+    ci_head_ref = os.environ.get("GITHUB_HEAD_REF", "").strip() or None
+    ci_ref_name = os.environ.get("GITHUB_REF_NAME", "").strip() or None
+    effective_branch = git_current_branch or ci_head_ref or ci_ref_name
     preflight = {
         "preflight_status": "PASS",
-        "current_branch": _run_text(["git", "branch", "--show-current"]),
+        "current_branch": git_current_branch,
+        "ci_head_ref": ci_head_ref,
+        "ci_ref_name": ci_ref_name,
+        "effective_branch_name": effective_branch,
         "expected_branch": BRANCH_NAME,
         "repo_head_commit_vcs_metadata_only": _run_text(["git", "rev-parse", "HEAD"]),
         "git_status_short_at_builder_time": _run_text(["git", "status", "--short", "--untracked-files=all"]) or "<clean>",
@@ -1542,8 +1550,13 @@ def build_all(*, offline: bool = False) -> dict[str, Any]:
         },
         "fail_closed_warnings": [],
     }
-    if preflight["current_branch"] != BRANCH_NAME:
-        raise RuntimeError(f"RP5C must run on {BRANCH_NAME}; current branch is {preflight['current_branch']!r}")
+    if preflight["effective_branch_name"] != BRANCH_NAME:
+        raise RuntimeError(
+            f"RP5C must run on {BRANCH_NAME}; "
+            f"current branch is {preflight['current_branch']!r}, "
+            f"ci_head_ref is {preflight['ci_head_ref']!r}, "
+            f"ci_ref_name is {preflight['ci_ref_name']!r}"
+        )
 
     source_rows, input_summary = _discover_input_paths()
     source_by_id = {row["source_artifact_row_id"]: row for row in source_rows}
@@ -1704,7 +1717,7 @@ def build_all(*, offline: bool = False) -> dict[str, Any]:
 
     # Shards first, so report contracts can reference materialized rows.
     _write_shard_and_report("source_artifact_consumption_ledger", source_rows, "PR168_RP5C_SourceArtifactConsumptionLedger.report.json", "SourceArtifactConsumptionLedgerV1", {"source_artifact_row_count": len(source_rows), "consumption_status_counts": _counter_summary(source_rows, "consumption_status")})
-    _write_shard_and_report("input_artifact_to_identity_coverage", coverage_rows, "PR168_RP5C_Input.report.json", "InputArtifactToIdentityCoverageV1", {**input_summary, "repo_head_commit_vcs_metadata_only": preflight["repo_head_commit_vcs_metadata_only"], "branch_name": preflight["current_branch"], "found_rp5a_artifacts": [row["source_file_path"] for row in source_rows if row["source_report_family"] == "RP5A" and row["found_flag"]], "found_rp5b_artifacts": [row["source_file_path"] for row in source_rows if row["source_report_family"] == "RP5B" and row["found_flag"]], "found_pr165_d2_agent_artifacts": [row["source_file_path"] for row in source_rows if row["source_report_family"] == "PR165_D2" and row["found_flag"]], "found_upstream_identity_artifacts": [row["source_file_path"] for row in source_rows if row["source_report_family"] not in {"RP5A", "RP5B", "PR165_D2"} and row["found_flag"]], "missing_expected_artifacts": [row["source_file_path"] for row in source_rows if row["missing_expected_input_flag"]], "fallback_adjacent_artifacts_used": []})
+    _write_shard_and_report("input_artifact_to_identity_coverage", coverage_rows, "PR168_RP5C_Input.report.json", "InputArtifactToIdentityCoverageV1", {**input_summary, "repo_head_commit_vcs_metadata_only": preflight["repo_head_commit_vcs_metadata_only"], "branch_name": preflight["effective_branch_name"], "current_branch": preflight["current_branch"], "ci_head_ref": preflight["ci_head_ref"], "ci_ref_name": preflight["ci_ref_name"], "found_rp5a_artifacts": [row["source_file_path"] for row in source_rows if row["source_report_family"] == "RP5A" and row["found_flag"]], "found_rp5b_artifacts": [row["source_file_path"] for row in source_rows if row["source_report_family"] == "RP5B" and row["found_flag"]], "found_pr165_d2_agent_artifacts": [row["source_file_path"] for row in source_rows if row["source_report_family"] == "PR165_D2" and row["found_flag"]], "found_upstream_identity_artifacts": [row["source_file_path"] for row in source_rows if row["source_report_family"] not in {"RP5A", "RP5B", "PR165_D2"} and row["found_flag"]], "missing_expected_artifacts": [row["source_file_path"] for row in source_rows if row["missing_expected_input_flag"]], "fallback_adjacent_artifacts_used": []})
     _write_shard_and_report("immutable_qku_library", qku_rows, "PR168_RP5C_ImmutableQKULibrary.report.json", "ImmutableQKUV1", {"immutable_qku_row_count": len(qku_rows)})
     _write_shard_and_report("immutable_formula_library", formula_rows, "PR168_RP5C_ImmutableFormulaLibrary.report.json", "ImmutableFormulaV1", {"immutable_formula_row_count": len(formula_rows)})
     _write_shard_and_report("immutable_qku_formula_library", library_identities, "PR168_RP5C_ImmutableQKUFormulaLibrary.report.json", "ImmutableQKUFormulaLibraryV1", {"immutable_qku_formula_row_count": len(library_identities), "extracted_identity_occurrence_count": len(identities), "duplicate_preserved_occurrence_count": len(identities) - len(library_identities)})
