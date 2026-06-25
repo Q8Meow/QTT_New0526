@@ -14,6 +14,7 @@ from tools.pr168_rp5b_config import (
     REPORT_NAMES,
     REPO_ROOT,
     ROW_SHARDS,
+    ZERO_DELETION_RESULT_NOTE,
     generated_ref,
     manifest_path_for_shard,
     report_path,
@@ -176,6 +177,9 @@ def _failures() -> list[str]:
         failures.append("FINAL_RAW_LEGACY_VIOLATIONS")
     if final_summary.get("unique_qku_formula_identity_lost_count") != 0:
         failures.append("UNIQUE_IDENTITY_LOST")
+    if final_summary.get("files_deleted_count") == 0 and final_summary.get("files_archived_by_registry_count") == 0:
+        if final_summary.get("cleanup_result_note") != ZERO_DELETION_RESULT_NOTE:
+            failures.append("FINAL_SUMMARY_MISSING_ZERO_DELETION_NOTE")
     return failures
 
 

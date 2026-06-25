@@ -82,6 +82,11 @@ HARD_ZERO_FINAL_SUMMARY_FIELDS = (
     "qtt_sha_or_atomicrows_hash_authority_count",
 )
 
+ZERO_DELETION_RESULT_NOTE = (
+    "RP5B performed active-registry/no-raw-authority transition only; "
+    "no physical deletion was allowed because all cleanup candidates were unclear or identity-protected."
+)
+
 RP5A_REQUIRED_REPORTS = (
     "PR168_RP5A_FinalSummary.report.json",
     "PR168_RP5A_DeleteEligibilityDraft.report.json",
