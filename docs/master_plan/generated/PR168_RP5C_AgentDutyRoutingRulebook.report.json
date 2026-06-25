@@ -1,0 +1,546 @@
+{
+  "absolute_local_path_leak_count": 0,
+  "agent_duty_routing_rule_count": 14,
+  "archived_file_count": 0,
+  "backslash_only_path_leak_count": 0,
+  "champion_authority_created_count": 0,
+  "connector_semantic_binding_count": 0,
+  "created_at_utc": "2026-06-25T00:00:00Z",
+  "deleted_file_count": 0,
+  "formula_expression_mutation_count": 0,
+  "formula_identity_deleted_count": 0,
+  "formula_profit_ranking_count": 0,
+  "generated_path_case_collision_count": 0,
+  "global_formula_ban_count": 0,
+  "global_qku_ban_count": 0,
+  "hard_zero_counters": {
+    "absolute_local_path_leak_count": 0,
+    "archived_file_count": 0,
+    "backslash_only_path_leak_count": 0,
+    "champion_authority_created_count": 0,
+    "connector_semantic_binding_count": 0,
+    "deleted_file_count": 0,
+    "formula_expression_mutation_count": 0,
+    "formula_identity_deleted_count": 0,
+    "formula_profit_ranking_count": 0,
+    "generated_path_case_collision_count": 0,
+    "global_formula_ban_count": 0,
+    "global_qku_ban_count": 0,
+    "launch_readiness_authority_created_count": 0,
+    "live_order_authority_created_count": 0,
+    "manual_per_qku_hardcoded_agent_assignment_count": 0,
+    "master_plan_content_deleted_or_shortened_count": 0,
+    "moved_file_count": 0,
+    "mutable_agent_ownership_embedded_as_identity_authority_count": 0,
+    "orphan_generated_shard_count": 0,
+    "orphan_identity_count": 0,
+    "orphan_input_report_count": 0,
+    "orphan_source_artifact_count": 0,
+    "paper_loop_runtime_count": 0,
+    "private_state_fetch_count": 0,
+    "qku_identity_deleted_count": 0,
+    "qopt_batch_count": 0,
+    "qtt_sha_or_atomicrows_hash_authority_count": 0,
+    "quantum_advantage_claim_count": 0,
+    "quantum_backend_execution_count": 0,
+    "rank4_ranking_count": 0,
+    "raw_legacy_direct_agent_consumer_count": 0,
+    "runtime_cash_receipt_count": 0,
+    "runtime_stack_generation_count": 0,
+    "silent_skipped_input_artifact_count": 0,
+    "source_truth_authority_created_count": 0,
+    "stack_combination_materialization_count": 0,
+    "trade_simulation_count": 0
+  },
+  "launch_readiness_authority_created_count": 0,
+  "live_order_authority_created_count": 0,
+  "logical_report_id": "PR168_RP5C_AgentDutyRoutingRulebook",
+  "manifest_ref": "docs/master_plan/generated/rp5c/agent_duty_routing_rulebook.manifest.json",
+  "manual_per_qku_hardcoded_agent_assignment_count": 0,
+  "master_plan_content_deleted_or_shortened_count": 0,
+  "moved_file_count": 0,
+  "mutable_agent_ownership_embedded_as_identity_authority_count": 0,
+  "no_authority_statement": "RP5C is immutable identity, provenance, classification, and derived routing preparation only. It creates no live/order/source-truth/champion/launch/quantum/hash authority and does not mutate formulas or delete identities.",
+  "orphan_generated_shard_count": 0,
+  "orphan_identity_count": 0,
+  "orphan_input_report_count": 0,
+  "orphan_source_artifact_count": 0,
+  "paper_loop_runtime_count": 0,
+  "physical_filename": "PR168_RP5C_AgentDutyRoutingRulebook.report.json",
+  "private_state_fetch_count": 0,
+  "qku_identity_deleted_count": 0,
+  "qopt_batch_count": 0,
+  "qtt_sha_or_atomicrows_hash_authority_count": 0,
+  "quantum_advantage_claim_count": 0,
+  "quantum_backend_execution_count": 0,
+  "rank4_ranking_count": 0,
+  "raw_legacy_direct_agent_consumer_count": 0,
+  "records": [
+    {
+      "dependency_type_match": "signal_dependency",
+      "downstream_agent_refs_derived": [
+        "Rank4Agent",
+        "ReplayPaperAgent",
+        "TradePlanSimulationAgent"
+      ],
+      "downstream_pr_phase_match": "PR168-RP5D",
+      "fallback_allowed_flag": false,
+      "formula_family_match": "*",
+      "manual_per_qku_override_allowed_flag": false,
+      "market_family_match": "*",
+      "market_scope_match": "*",
+      "notes": "Central rule derives route rows for identities and files.",
+      "ontology_category_match": "signal_probability",
+      "owning_agent_refs_derived": [
+        "governance_agent",
+        "parameter_selector_agent",
+        "research_agent"
+      ],
+      "qku_family_match": "*",
+      "quantum_role_type_match": "*",
+      "responsibility_group_refs": [
+        "RP5C_RESP_GROUP_0001"
+      ],
+      "route_resolution_state": "ROUTE_RESOLVED_FROM_PR165_D2_AGENT_DUTY",
+      "route_rule_id": "RP5C_ROUTE_RULE_0001",
+      "route_rule_name": "route_signal_probability_to_research_signal_probability_group",
+      "rule_priority": 1,
+      "source_rule_basis": "PR165_D2_AGENT_DUTY_PLUS_CENTRAL_ONTOLOGY_RULE",
+      "validator_agent_refs_derived": [
+        "governance_agent"
+      ]
+    },
+    {
+      "dependency_type_match": "calibration_dependency",
+      "downstream_agent_refs_derived": [
+        "RP5DExecutabilityAgent",
+        "TradePlanSimulationAgent"
+      ],
+      "downstream_pr_phase_match": "PR168-RP5D",
+      "fallback_allowed_flag": false,
+      "formula_family_match": "*",
+      "manual_per_qku_override_allowed_flag": false,
+      "market_family_match": "*",
+      "market_scope_match": "*",
+      "notes": "Central rule derives route rows for identities and files.",
+      "ontology_category_match": "calibration",
+      "owning_agent_refs_derived": [
+        "governance_agent",
+        "research_agent"
+      ],
+      "qku_family_match": "*",
+      "quantum_role_type_match": "*",
+      "responsibility_group_refs": [
+        "RP5C_RESP_GROUP_0002"
+      ],
+      "route_resolution_state": "ROUTE_RESOLVED_FROM_PR165_D2_AGENT_DUTY",
+      "route_rule_id": "RP5C_ROUTE_RULE_0002",
+      "route_rule_name": "route_calibration_to_calibration_group",
+      "rule_priority": 2,
+      "source_rule_basis": "PR165_D2_AGENT_DUTY_PLUS_CENTRAL_ONTOLOGY_RULE",
+      "validator_agent_refs_derived": [
+        "governance_agent"
+      ]
+    },
+    {
+      "dependency_type_match": "market_data_dependency",
+      "downstream_agent_refs_derived": [
+        "ReplayPaperAgent",
+        "TradeTargetScoutAgent"
+      ],
+      "downstream_pr_phase_match": "PR168-RP5D",
+      "fallback_allowed_flag": false,
+      "formula_family_match": "*",
+      "manual_per_qku_override_allowed_flag": false,
+      "market_family_match": "*",
+      "market_scope_match": "*",
+      "notes": "Central rule derives route rows for identities and files.",
+      "ontology_category_match": "market_implied_probability",
+      "owning_agent_refs_derived": [
+        "governance_agent",
+        "research_agent"
+      ],
+      "qku_family_match": "*",
+      "quantum_role_type_match": "*",
+      "responsibility_group_refs": [
+        "RP5C_RESP_GROUP_0003"
+      ],
+      "route_resolution_state": "ROUTE_RESOLVED_FROM_PR165_D2_AGENT_DUTY",
+      "route_rule_id": "RP5C_ROUTE_RULE_0003",
+      "route_rule_name": "route_market_implied_probability_to_market_data_implied_probability_group",
+      "rule_priority": 3,
+      "source_rule_basis": "PR165_D2_AGENT_DUTY_PLUS_CENTRAL_ONTOLOGY_RULE",
+      "validator_agent_refs_derived": [
+        "governance_agent"
+      ]
+    },
+    {
+      "dependency_type_match": "tca_dependency",
+      "downstream_agent_refs_derived": [
+        "risk_manager_agent"
+      ],
+      "downstream_pr_phase_match": "PR168-RP5D",
+      "fallback_allowed_flag": false,
+      "formula_family_match": "*",
+      "manual_per_qku_override_allowed_flag": false,
+      "market_family_match": "*",
+      "market_scope_match": "*",
+      "notes": "Central rule derives route rows for identities and files.",
+      "ontology_category_match": "tca_cost",
+      "owning_agent_refs_derived": [
+        "governance_agent",
+        "risk_manager_agent"
+      ],
+      "qku_family_match": "*",
+      "quantum_role_type_match": "*",
+      "responsibility_group_refs": [
+        "RP5C_RESP_GROUP_0004"
+      ],
+      "route_resolution_state": "ROUTE_RESOLVED_FROM_PR165_D2_AGENT_DUTY",
+      "route_rule_id": "RP5C_ROUTE_RULE_0004",
+      "route_rule_name": "route_tca_cost_to_tca_cost_group",
+      "rule_priority": 4,
+      "source_rule_basis": "PR165_D2_AGENT_DUTY_PLUS_CENTRAL_ONTOLOGY_RULE",
+      "validator_agent_refs_derived": [
+        "governance_agent"
+      ]
+    },
+    {
+      "dependency_type_match": "fill_liquidity_dependency",
+      "downstream_agent_refs_derived": [
+        "risk_manager_agent"
+      ],
+      "downstream_pr_phase_match": "PR168-RP5D",
+      "fallback_allowed_flag": false,
+      "formula_family_match": "*",
+      "manual_per_qku_override_allowed_flag": false,
+      "market_family_match": "*",
+      "market_scope_match": "*",
+      "notes": "Central rule derives route rows for identities and files.",
+      "ontology_category_match": "fill_queue_liquidity",
+      "owning_agent_refs_derived": [
+        "governance_agent",
+        "risk_manager_agent"
+      ],
+      "qku_family_match": "*",
+      "quantum_role_type_match": "*",
+      "responsibility_group_refs": [
+        "RP5C_RESP_GROUP_0005"
+      ],
+      "route_resolution_state": "ROUTE_RESOLVED_FROM_PR165_D2_AGENT_DUTY",
+      "route_rule_id": "RP5C_ROUTE_RULE_0005",
+      "route_rule_name": "route_fill_queue_liquidity_to_fill_queue_liquidity_group",
+      "rule_priority": 5,
+      "source_rule_basis": "PR165_D2_AGENT_DUTY_PLUS_CENTRAL_ONTOLOGY_RULE",
+      "validator_agent_refs_derived": [
+        "governance_agent"
+      ]
+    },
+    {
+      "dependency_type_match": "latency_dependency",
+      "downstream_agent_refs_derived": [
+        "risk_manager_agent"
+      ],
+      "downstream_pr_phase_match": "PR168-RP5D",
+      "fallback_allowed_flag": false,
+      "formula_family_match": "*",
+      "manual_per_qku_override_allowed_flag": false,
+      "market_family_match": "*",
+      "market_scope_match": "*",
+      "notes": "Central rule derives route rows for identities and files.",
+      "ontology_category_match": "latency_staleness",
+      "owning_agent_refs_derived": [
+        "governance_agent",
+        "risk_manager_agent"
+      ],
+      "qku_family_match": "*",
+      "quantum_role_type_match": "*",
+      "responsibility_group_refs": [
+        "RP5C_RESP_GROUP_0006"
+      ],
+      "route_resolution_state": "ROUTE_RESOLVED_FROM_PR165_D2_AGENT_DUTY",
+      "route_rule_id": "RP5C_ROUTE_RULE_0006",
+      "route_rule_name": "route_latency_staleness_to_latency_staleness_group",
+      "rule_priority": 6,
+      "source_rule_basis": "PR165_D2_AGENT_DUTY_PLUS_CENTRAL_ONTOLOGY_RULE",
+      "validator_agent_refs_derived": [
+        "governance_agent"
+      ]
+    },
+    {
+      "dependency_type_match": "capacity_dependency",
+      "downstream_agent_refs_derived": [
+        "Rank4Agent",
+        "TradePlanSimulationAgent"
+      ],
+      "downstream_pr_phase_match": "PR168-RP5D",
+      "fallback_allowed_flag": false,
+      "formula_family_match": "*",
+      "manual_per_qku_override_allowed_flag": false,
+      "market_family_match": "*",
+      "market_scope_match": "*",
+      "notes": "Central rule derives route rows for identities and files.",
+      "ontology_category_match": "capacity_crowding",
+      "owning_agent_refs_derived": [
+        "governance_agent",
+        "risk_manager_agent"
+      ],
+      "qku_family_match": "*",
+      "quantum_role_type_match": "*",
+      "responsibility_group_refs": [
+        "RP5C_RESP_GROUP_0007"
+      ],
+      "route_resolution_state": "ROUTE_RESOLVED_FROM_PR165_D2_AGENT_DUTY",
+      "route_rule_id": "RP5C_ROUTE_RULE_0007",
+      "route_rule_name": "route_capacity_crowding_to_capacity_crowding_group",
+      "rule_priority": 7,
+      "source_rule_basis": "PR165_D2_AGENT_DUTY_PLUS_CENTRAL_ONTOLOGY_RULE",
+      "validator_agent_refs_derived": [
+        "governance_agent"
+      ]
+    },
+    {
+      "dependency_type_match": "portfolio_risk_dependency",
+      "downstream_agent_refs_derived": [
+        "ExecutionRouterAgent",
+        "TradePlanSimulationAgent"
+      ],
+      "downstream_pr_phase_match": "PR168-RP5D",
+      "fallback_allowed_flag": false,
+      "formula_family_match": "*",
+      "manual_per_qku_override_allowed_flag": false,
+      "market_family_match": "*",
+      "market_scope_match": "*",
+      "notes": "Central rule derives route rows for identities and files.",
+      "ontology_category_match": "portfolio_risk",
+      "owning_agent_refs_derived": [
+        "governance_agent",
+        "risk_manager_agent"
+      ],
+      "qku_family_match": "*",
+      "quantum_role_type_match": "*",
+      "responsibility_group_refs": [
+        "RP5C_RESP_GROUP_0008"
+      ],
+      "route_resolution_state": "ROUTE_RESOLVED_FROM_PR165_D2_AGENT_DUTY",
+      "route_rule_id": "RP5C_ROUTE_RULE_0008",
+      "route_rule_name": "route_portfolio_risk_to_portfolio_risk_group",
+      "rule_priority": 8,
+      "source_rule_basis": "PR165_D2_AGENT_DUTY_PLUS_CENTRAL_ONTOLOGY_RULE",
+      "validator_agent_refs_derived": [
+        "governance_agent"
+      ]
+    },
+    {
+      "dependency_type_match": "regime_scenario_dependency",
+      "downstream_agent_refs_derived": [
+        "ReplayPaperAgent",
+        "TradePlanSimulationAgent"
+      ],
+      "downstream_pr_phase_match": "PR168-RP5D",
+      "fallback_allowed_flag": false,
+      "formula_family_match": "*",
+      "manual_per_qku_override_allowed_flag": false,
+      "market_family_match": "*",
+      "market_scope_match": "*",
+      "notes": "Central rule derives route rows for identities and files.",
+      "ontology_category_match": "regime_scenario",
+      "owning_agent_refs_derived": [
+        "governance_agent",
+        "research_agent"
+      ],
+      "qku_family_match": "*",
+      "quantum_role_type_match": "*",
+      "responsibility_group_refs": [
+        "RP5C_RESP_GROUP_0009"
+      ],
+      "route_resolution_state": "ROUTE_RESOLVED_FROM_PR165_D2_AGENT_DUTY",
+      "route_rule_id": "RP5C_ROUTE_RULE_0009",
+      "route_rule_name": "route_regime_scenario_to_regime_scenario_group",
+      "rule_priority": 9,
+      "source_rule_basis": "PR165_D2_AGENT_DUTY_PLUS_CENTRAL_ONTOLOGY_RULE",
+      "validator_agent_refs_derived": [
+        "governance_agent"
+      ]
+    },
+    {
+      "dependency_type_match": "exit_timing_dependency",
+      "downstream_agent_refs_derived": [
+        "ReplayPaperAgent",
+        "TradePlanSimulationAgent"
+      ],
+      "downstream_pr_phase_match": "PR168-RP5D",
+      "fallback_allowed_flag": false,
+      "formula_family_match": "*",
+      "manual_per_qku_override_allowed_flag": false,
+      "market_family_match": "*",
+      "market_scope_match": "*",
+      "notes": "Central rule derives route rows for identities and files.",
+      "ontology_category_match": "exit_timing",
+      "owning_agent_refs_derived": [
+        "governance_agent",
+        "research_agent"
+      ],
+      "qku_family_match": "*",
+      "quantum_role_type_match": "*",
+      "responsibility_group_refs": [
+        "RP5C_RESP_GROUP_0010"
+      ],
+      "route_resolution_state": "ROUTE_RESOLVED_FROM_PR165_D2_AGENT_DUTY",
+      "route_rule_id": "RP5C_ROUTE_RULE_0010",
+      "route_rule_name": "route_exit_timing_to_exit_timing_group",
+      "rule_priority": 10,
+      "source_rule_basis": "PR165_D2_AGENT_DUTY_PLUS_CENTRAL_ONTOLOGY_RULE",
+      "validator_agent_refs_derived": [
+        "governance_agent"
+      ]
+    },
+    {
+      "dependency_type_match": "quantum_objective_dependency",
+      "downstream_agent_refs_derived": [
+        "QOPTAgent",
+        "ReplayPaperAgent"
+      ],
+      "downstream_pr_phase_match": "PR168-RP5D",
+      "fallback_allowed_flag": false,
+      "formula_family_match": "*",
+      "manual_per_qku_override_allowed_flag": false,
+      "market_family_match": "*",
+      "market_scope_match": "*",
+      "notes": "Central rule derives route rows for identities and files.",
+      "ontology_category_match": "quantum_objective_constraint",
+      "owning_agent_refs_derived": [
+        "governance_agent",
+        "quantum_optimizer_agent",
+        "research_agent"
+      ],
+      "qku_family_match": "*",
+      "quantum_role_type_match": "quantum_objective",
+      "responsibility_group_refs": [
+        "RP5C_RESP_GROUP_0011"
+      ],
+      "route_resolution_state": "ROUTE_RESOLVED_FROM_PR165_D2_AGENT_DUTY",
+      "route_rule_id": "RP5C_ROUTE_RULE_0011",
+      "route_rule_name": "route_quantum_objective_constraint_to_quantum_objective_constraint_group",
+      "rule_priority": 11,
+      "source_rule_basis": "PR165_D2_AGENT_DUTY_PLUS_CENTRAL_ONTOLOGY_RULE",
+      "validator_agent_refs_derived": [
+        "governance_agent"
+      ]
+    },
+    {
+      "dependency_type_match": "classical_fallback_dependency",
+      "downstream_agent_refs_derived": [
+        "QOPTAgent",
+        "ReplayPaperAgent"
+      ],
+      "downstream_pr_phase_match": "PR168-RP5D",
+      "fallback_allowed_flag": false,
+      "formula_family_match": "*",
+      "manual_per_qku_override_allowed_flag": false,
+      "market_family_match": "*",
+      "market_scope_match": "*",
+      "notes": "Central rule derives route rows for identities and files.",
+      "ontology_category_match": "classical_fallback",
+      "owning_agent_refs_derived": [
+        "governance_agent",
+        "parameter_selector_agent"
+      ],
+      "qku_family_match": "*",
+      "quantum_role_type_match": "*",
+      "responsibility_group_refs": [
+        "RP5C_RESP_GROUP_0012"
+      ],
+      "route_resolution_state": "ROUTE_RESOLVED_FROM_PR165_D2_AGENT_DUTY",
+      "route_rule_id": "RP5C_ROUTE_RULE_0012",
+      "route_rule_name": "route_classical_fallback_to_classical_fallback_group",
+      "rule_priority": 12,
+      "source_rule_basis": "PR165_D2_AGENT_DUTY_PLUS_CENTRAL_ONTOLOGY_RULE",
+      "validator_agent_refs_derived": [
+        "governance_agent"
+      ]
+    },
+    {
+      "dependency_type_match": "governance_dependency",
+      "downstream_agent_refs_derived": [
+        "risk_manager_agent"
+      ],
+      "downstream_pr_phase_match": "PR168-RP5D",
+      "fallback_allowed_flag": false,
+      "formula_family_match": "*",
+      "manual_per_qku_override_allowed_flag": false,
+      "market_family_match": "*",
+      "market_scope_match": "*",
+      "notes": "Central rule derives route rows for identities and files.",
+      "ontology_category_match": "governance_source_risk",
+      "owning_agent_refs_derived": [
+        "governance_agent",
+        "risk_manager_agent"
+      ],
+      "qku_family_match": "*",
+      "quantum_role_type_match": "*",
+      "responsibility_group_refs": [
+        "RP5C_RESP_GROUP_0013"
+      ],
+      "route_resolution_state": "ROUTE_RESOLVED_FROM_PR165_D2_AGENT_DUTY",
+      "route_rule_id": "RP5C_ROUTE_RULE_0013",
+      "route_rule_name": "route_governance_source_risk_to_governance_source_risk_group",
+      "rule_priority": 13,
+      "source_rule_basis": "PR165_D2_AGENT_DUTY_PLUS_CENTRAL_ONTOLOGY_RULE",
+      "validator_agent_refs_derived": [
+        "governance_agent"
+      ]
+    },
+    {
+      "dependency_type_match": "unknown_needs_review",
+      "downstream_agent_refs_derived": [
+        "RP5DExecutabilityAgent"
+      ],
+      "downstream_pr_phase_match": "PR168-RP5D",
+      "fallback_allowed_flag": false,
+      "formula_family_match": "*",
+      "manual_per_qku_override_allowed_flag": false,
+      "market_family_match": "*",
+      "market_scope_match": "*",
+      "notes": "Central rule derives route rows for identities and files.",
+      "ontology_category_match": "unknown_needs_review",
+      "owning_agent_refs_derived": [
+        "governance_agent",
+        "research_agent"
+      ],
+      "qku_family_match": "*",
+      "quantum_role_type_match": "*",
+      "responsibility_group_refs": [
+        "RP5C_RESP_GROUP_0014"
+      ],
+      "route_resolution_state": "ROUTE_RESOLVED_FROM_PR165_D2_AGENT_DUTY",
+      "route_rule_id": "RP5C_ROUTE_RULE_0014",
+      "route_rule_name": "route_unknown_needs_review_to_unknown_review_group",
+      "rule_priority": 14,
+      "source_rule_basis": "PR165_D2_AGENT_DUTY_PLUS_CENTRAL_ONTOLOGY_RULE",
+      "validator_agent_refs_derived": [
+        "governance_agent"
+      ]
+    }
+  ],
+  "report_version": "PR168-RP5C-v1.0",
+  "route_resolution_states": [
+    "ROUTE_RESOLVED_FROM_PR165_D2_AGENT_DUTY",
+    "ROUTE_RESOLVED_FROM_EXISTING_AGENT_MANIFEST",
+    "ROUTE_RESOLVED_FROM_CENTRAL_RULEBOOK_FALLBACK",
+    "ROUTE_PARTIAL_NEEDS_AGENT_DUTY_INPUT",
+    "ROUTE_PARTIAL_NEEDS_VALIDATOR_ROUTE",
+    "ROUTE_UNRESOLVED_NEEDS_AGENT_ROUTE",
+    "ROUTE_UNRESOLVED_NEEDS_MARKET_SCOPE",
+    "ROUTE_UNRESOLVED_NEEDS_ONTOLOGY",
+    "ROUTE_UNRESOLVED_NEEDS_FAMILY",
+    "ROUTE_UNRESOLVED_NEEDS_REVIEW"
+  ],
+  "rows_ref": "docs/master_plan/generated/rp5c/agent_duty_routing_rulebook.jsonl",
+  "runtime_cash_receipt_count": 0,
+  "runtime_stack_generation_count": 0,
+  "silent_skipped_input_artifact_count": 0,
+  "source_truth_authority_created_count": 0,
+  "stack_combination_materialization_count": 0,
+  "trade_simulation_count": 0
+}

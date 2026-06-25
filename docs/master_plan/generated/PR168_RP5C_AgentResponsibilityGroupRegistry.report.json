@@ -1,0 +1,849 @@
+{
+  "absolute_local_path_leak_count": 0,
+  "agent_responsibility_group_count": 14,
+  "archived_file_count": 0,
+  "backslash_only_path_leak_count": 0,
+  "champion_authority_created_count": 0,
+  "connector_semantic_binding_count": 0,
+  "created_at_utc": "2026-06-25T00:00:00Z",
+  "deleted_file_count": 0,
+  "formula_expression_mutation_count": 0,
+  "formula_identity_deleted_count": 0,
+  "formula_profit_ranking_count": 0,
+  "generated_path_case_collision_count": 0,
+  "global_formula_ban_count": 0,
+  "global_qku_ban_count": 0,
+  "hard_zero_counters": {
+    "absolute_local_path_leak_count": 0,
+    "archived_file_count": 0,
+    "backslash_only_path_leak_count": 0,
+    "champion_authority_created_count": 0,
+    "connector_semantic_binding_count": 0,
+    "deleted_file_count": 0,
+    "formula_expression_mutation_count": 0,
+    "formula_identity_deleted_count": 0,
+    "formula_profit_ranking_count": 0,
+    "generated_path_case_collision_count": 0,
+    "global_formula_ban_count": 0,
+    "global_qku_ban_count": 0,
+    "launch_readiness_authority_created_count": 0,
+    "live_order_authority_created_count": 0,
+    "manual_per_qku_hardcoded_agent_assignment_count": 0,
+    "master_plan_content_deleted_or_shortened_count": 0,
+    "moved_file_count": 0,
+    "mutable_agent_ownership_embedded_as_identity_authority_count": 0,
+    "orphan_generated_shard_count": 0,
+    "orphan_identity_count": 0,
+    "orphan_input_report_count": 0,
+    "orphan_source_artifact_count": 0,
+    "paper_loop_runtime_count": 0,
+    "private_state_fetch_count": 0,
+    "qku_identity_deleted_count": 0,
+    "qopt_batch_count": 0,
+    "qtt_sha_or_atomicrows_hash_authority_count": 0,
+    "quantum_advantage_claim_count": 0,
+    "quantum_backend_execution_count": 0,
+    "rank4_ranking_count": 0,
+    "raw_legacy_direct_agent_consumer_count": 0,
+    "runtime_cash_receipt_count": 0,
+    "runtime_stack_generation_count": 0,
+    "silent_skipped_input_artifact_count": 0,
+    "source_truth_authority_created_count": 0,
+    "stack_combination_materialization_count": 0,
+    "trade_simulation_count": 0
+  },
+  "launch_readiness_authority_created_count": 0,
+  "live_order_authority_created_count": 0,
+  "logical_report_id": "PR168_RP5C_AgentResponsibilityGroupRegistry",
+  "manifest_ref": "docs/master_plan/generated/rp5c/agent_responsibility_group_registry.manifest.json",
+  "manual_per_qku_hardcoded_agent_assignment_count": 0,
+  "master_plan_content_deleted_or_shortened_count": 0,
+  "moved_file_count": 0,
+  "mutable_agent_ownership_embedded_as_identity_authority_count": 0,
+  "no_authority_statement": "RP5C is immutable identity, provenance, classification, and derived routing preparation only. It creates no live/order/source-truth/champion/launch/quantum/hash authority and does not mutate formulas or delete identities.",
+  "orphan_generated_shard_count": 0,
+  "orphan_identity_count": 0,
+  "orphan_input_report_count": 0,
+  "orphan_source_artifact_count": 0,
+  "paper_loop_runtime_count": 0,
+  "physical_filename": "PR168_RP5C_AgentResponsibilityGroupRegistry.report.json",
+  "private_state_fetch_count": 0,
+  "qku_identity_deleted_count": 0,
+  "qopt_batch_count": 0,
+  "qtt_sha_or_atomicrows_hash_authority_count": 0,
+  "quantum_advantage_claim_count": 0,
+  "quantum_backend_execution_count": 0,
+  "rank4_ranking_count": 0,
+  "raw_legacy_direct_agent_consumer_count": 0,
+  "records": [
+    {
+      "blocker_codes": [],
+      "canonical_agent_refs": [
+        "governance_agent",
+        "parameter_selector_agent",
+        "research_agent"
+      ],
+      "dependency_type_refs": [
+        "signal_dependency"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D",
+        "PR168-RP5E",
+        "RANK4",
+        "QOPT",
+        "Paper",
+        "LiveFutureOnly"
+      ],
+      "fallback_role_alias_refs": [
+        "GovernanceAgent",
+        "ParameterSelectorAgent",
+        "Rank4Agent",
+        "ReplayPaperAgent",
+        "ReplayPaperValidator",
+        "ResearchAgent",
+        "TradePlanSimulationAgent"
+      ],
+      "formula_family_refs": [],
+      "group_authority_class": "DERIVED_ROUTE_OVERLAY_FROM_PR165_D2_AND_CENTRAL_RULES_NOT_IDENTITY_AUTHORITY",
+      "market_scope_refs": [
+        "prediction_market",
+        "market_agnostic",
+        "equities",
+        "options",
+        "futures_commodities",
+        "crypto",
+        "fx_macro",
+        "fixed_income",
+        "repo_financing",
+        "cross_market",
+        "unknown_needs_review"
+      ],
+      "notes": "Central responsibility group; not a per-QKU ownership assignment.",
+      "ontology_category_refs": [
+        "signal_probability"
+      ],
+      "qku_family_refs": [],
+      "responsibility_group_id": "RP5C_RESP_GROUP_0001",
+      "responsibility_group_name": "research_signal_probability_group",
+      "source_agent_duty_refs": [
+        "docs/master_plan/generated/PR165_D2_AgentRosterDiscoveryAudit.report.json",
+        "docs/master_plan/generated/PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "validator_group_refs": [
+        "governance_agent"
+      ]
+    },
+    {
+      "blocker_codes": [],
+      "canonical_agent_refs": [
+        "governance_agent",
+        "research_agent"
+      ],
+      "dependency_type_refs": [
+        "calibration_dependency"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D",
+        "PR168-RP5E",
+        "RANK4",
+        "QOPT",
+        "Paper",
+        "LiveFutureOnly"
+      ],
+      "fallback_role_alias_refs": [
+        "CalibrationAgent",
+        "GovernanceAgent",
+        "ReplayPaperAgent",
+        "ResearchAgent",
+        "RP5DExecutabilityAgent",
+        "TradePlanSimulationAgent"
+      ],
+      "formula_family_refs": [],
+      "group_authority_class": "DERIVED_ROUTE_OVERLAY_FROM_PR165_D2_AND_CENTRAL_RULES_NOT_IDENTITY_AUTHORITY",
+      "market_scope_refs": [
+        "prediction_market",
+        "market_agnostic",
+        "equities",
+        "options",
+        "futures_commodities",
+        "crypto",
+        "fx_macro",
+        "fixed_income",
+        "repo_financing",
+        "cross_market",
+        "unknown_needs_review"
+      ],
+      "notes": "Central responsibility group; not a per-QKU ownership assignment.",
+      "ontology_category_refs": [
+        "calibration"
+      ],
+      "qku_family_refs": [],
+      "responsibility_group_id": "RP5C_RESP_GROUP_0002",
+      "responsibility_group_name": "calibration_group",
+      "source_agent_duty_refs": [
+        "docs/master_plan/generated/PR165_D2_AgentRosterDiscoveryAudit.report.json",
+        "docs/master_plan/generated/PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "validator_group_refs": [
+        "governance_agent"
+      ]
+    },
+    {
+      "blocker_codes": [],
+      "canonical_agent_refs": [
+        "governance_agent",
+        "research_agent"
+      ],
+      "dependency_type_refs": [
+        "market_data_dependency"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D",
+        "PR168-RP5E",
+        "RANK4",
+        "QOPT",
+        "Paper",
+        "LiveFutureOnly"
+      ],
+      "fallback_role_alias_refs": [
+        "GovernanceAgent",
+        "MarketDataAgent",
+        "ReplayPaperAgent",
+        "ResearchAgent",
+        "SourceEvidenceAgent",
+        "TradeTargetScoutAgent"
+      ],
+      "formula_family_refs": [],
+      "group_authority_class": "DERIVED_ROUTE_OVERLAY_FROM_PR165_D2_AND_CENTRAL_RULES_NOT_IDENTITY_AUTHORITY",
+      "market_scope_refs": [
+        "prediction_market",
+        "market_agnostic",
+        "equities",
+        "options",
+        "futures_commodities",
+        "crypto",
+        "fx_macro",
+        "fixed_income",
+        "repo_financing",
+        "cross_market",
+        "unknown_needs_review"
+      ],
+      "notes": "Central responsibility group; not a per-QKU ownership assignment.",
+      "ontology_category_refs": [
+        "market_implied_probability"
+      ],
+      "qku_family_refs": [],
+      "responsibility_group_id": "RP5C_RESP_GROUP_0003",
+      "responsibility_group_name": "market_data_implied_probability_group",
+      "source_agent_duty_refs": [
+        "docs/master_plan/generated/PR165_D2_AgentRosterDiscoveryAudit.report.json",
+        "docs/master_plan/generated/PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "validator_group_refs": [
+        "governance_agent"
+      ]
+    },
+    {
+      "blocker_codes": [],
+      "canonical_agent_refs": [
+        "governance_agent",
+        "risk_manager_agent"
+      ],
+      "dependency_type_refs": [
+        "tca_dependency"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D",
+        "PR168-RP5E",
+        "RANK4",
+        "QOPT",
+        "Paper",
+        "LiveFutureOnly"
+      ],
+      "fallback_role_alias_refs": [
+        "ExecutionRouterAgent",
+        "GovernanceAgent",
+        "ReplayPaperAgent",
+        "RiskManagerAgent",
+        "TCAAgent"
+      ],
+      "formula_family_refs": [],
+      "group_authority_class": "DERIVED_ROUTE_OVERLAY_FROM_PR165_D2_AND_CENTRAL_RULES_NOT_IDENTITY_AUTHORITY",
+      "market_scope_refs": [
+        "prediction_market",
+        "market_agnostic",
+        "equities",
+        "options",
+        "futures_commodities",
+        "crypto",
+        "fx_macro",
+        "fixed_income",
+        "repo_financing",
+        "cross_market",
+        "unknown_needs_review"
+      ],
+      "notes": "Central responsibility group; not a per-QKU ownership assignment.",
+      "ontology_category_refs": [
+        "tca_cost"
+      ],
+      "qku_family_refs": [],
+      "responsibility_group_id": "RP5C_RESP_GROUP_0004",
+      "responsibility_group_name": "tca_cost_group",
+      "source_agent_duty_refs": [
+        "docs/master_plan/generated/PR165_D2_AgentRosterDiscoveryAudit.report.json",
+        "docs/master_plan/generated/PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "validator_group_refs": [
+        "governance_agent"
+      ]
+    },
+    {
+      "blocker_codes": [],
+      "canonical_agent_refs": [
+        "governance_agent",
+        "risk_manager_agent"
+      ],
+      "dependency_type_refs": [
+        "fill_liquidity_dependency"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D",
+        "PR168-RP5E",
+        "RANK4",
+        "QOPT",
+        "Paper",
+        "LiveFutureOnly"
+      ],
+      "fallback_role_alias_refs": [
+        "ExecutionRouterAgent",
+        "FillIntegrityValidator",
+        "GovernanceAgent",
+        "ReplayPaperAgent",
+        "RiskManagerAgent",
+        "VenueSpecialistAgent"
+      ],
+      "formula_family_refs": [],
+      "group_authority_class": "DERIVED_ROUTE_OVERLAY_FROM_PR165_D2_AND_CENTRAL_RULES_NOT_IDENTITY_AUTHORITY",
+      "market_scope_refs": [
+        "prediction_market",
+        "market_agnostic",
+        "equities",
+        "options",
+        "futures_commodities",
+        "crypto",
+        "fx_macro",
+        "fixed_income",
+        "repo_financing",
+        "cross_market",
+        "unknown_needs_review"
+      ],
+      "notes": "Central responsibility group; not a per-QKU ownership assignment.",
+      "ontology_category_refs": [
+        "fill_queue_liquidity"
+      ],
+      "qku_family_refs": [],
+      "responsibility_group_id": "RP5C_RESP_GROUP_0005",
+      "responsibility_group_name": "fill_queue_liquidity_group",
+      "source_agent_duty_refs": [
+        "docs/master_plan/generated/PR165_D2_AgentRosterDiscoveryAudit.report.json",
+        "docs/master_plan/generated/PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "validator_group_refs": [
+        "governance_agent"
+      ]
+    },
+    {
+      "blocker_codes": [],
+      "canonical_agent_refs": [
+        "governance_agent",
+        "risk_manager_agent"
+      ],
+      "dependency_type_refs": [
+        "latency_dependency"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D",
+        "PR168-RP5E",
+        "RANK4",
+        "QOPT",
+        "Paper",
+        "LiveFutureOnly"
+      ],
+      "fallback_role_alias_refs": [
+        "ExecutionRouterAgent",
+        "GovernanceAgent",
+        "LatencyMonitorAgent",
+        "ReplayPaperAgent",
+        "RiskManagerAgent"
+      ],
+      "formula_family_refs": [],
+      "group_authority_class": "DERIVED_ROUTE_OVERLAY_FROM_PR165_D2_AND_CENTRAL_RULES_NOT_IDENTITY_AUTHORITY",
+      "market_scope_refs": [
+        "prediction_market",
+        "market_agnostic",
+        "equities",
+        "options",
+        "futures_commodities",
+        "crypto",
+        "fx_macro",
+        "fixed_income",
+        "repo_financing",
+        "cross_market",
+        "unknown_needs_review"
+      ],
+      "notes": "Central responsibility group; not a per-QKU ownership assignment.",
+      "ontology_category_refs": [
+        "latency_staleness"
+      ],
+      "qku_family_refs": [],
+      "responsibility_group_id": "RP5C_RESP_GROUP_0006",
+      "responsibility_group_name": "latency_staleness_group",
+      "source_agent_duty_refs": [
+        "docs/master_plan/generated/PR165_D2_AgentRosterDiscoveryAudit.report.json",
+        "docs/master_plan/generated/PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "validator_group_refs": [
+        "governance_agent"
+      ]
+    },
+    {
+      "blocker_codes": [],
+      "canonical_agent_refs": [
+        "governance_agent",
+        "risk_manager_agent"
+      ],
+      "dependency_type_refs": [
+        "capacity_dependency"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D",
+        "PR168-RP5E",
+        "RANK4",
+        "QOPT",
+        "Paper",
+        "LiveFutureOnly"
+      ],
+      "fallback_role_alias_refs": [
+        "GovernanceAgent",
+        "PortfolioRiskAgent",
+        "Rank4Agent",
+        "RiskManagerAgent",
+        "TradePlanSimulationAgent"
+      ],
+      "formula_family_refs": [],
+      "group_authority_class": "DERIVED_ROUTE_OVERLAY_FROM_PR165_D2_AND_CENTRAL_RULES_NOT_IDENTITY_AUTHORITY",
+      "market_scope_refs": [
+        "prediction_market",
+        "market_agnostic",
+        "equities",
+        "options",
+        "futures_commodities",
+        "crypto",
+        "fx_macro",
+        "fixed_income",
+        "repo_financing",
+        "cross_market",
+        "unknown_needs_review"
+      ],
+      "notes": "Central responsibility group; not a per-QKU ownership assignment.",
+      "ontology_category_refs": [
+        "capacity_crowding"
+      ],
+      "qku_family_refs": [],
+      "responsibility_group_id": "RP5C_RESP_GROUP_0007",
+      "responsibility_group_name": "capacity_crowding_group",
+      "source_agent_duty_refs": [
+        "docs/master_plan/generated/PR165_D2_AgentRosterDiscoveryAudit.report.json",
+        "docs/master_plan/generated/PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "validator_group_refs": [
+        "governance_agent"
+      ]
+    },
+    {
+      "blocker_codes": [],
+      "canonical_agent_refs": [
+        "governance_agent",
+        "risk_manager_agent"
+      ],
+      "dependency_type_refs": [
+        "portfolio_risk_dependency"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D",
+        "PR168-RP5E",
+        "RANK4",
+        "QOPT",
+        "Paper",
+        "LiveFutureOnly"
+      ],
+      "fallback_role_alias_refs": [
+        "ExecutionRouterAgent",
+        "GovernanceAgent",
+        "PortfolioRiskAgent",
+        "RiskManagerAgent",
+        "TradePlanSimulationAgent"
+      ],
+      "formula_family_refs": [],
+      "group_authority_class": "DERIVED_ROUTE_OVERLAY_FROM_PR165_D2_AND_CENTRAL_RULES_NOT_IDENTITY_AUTHORITY",
+      "market_scope_refs": [
+        "prediction_market",
+        "market_agnostic",
+        "equities",
+        "options",
+        "futures_commodities",
+        "crypto",
+        "fx_macro",
+        "fixed_income",
+        "repo_financing",
+        "cross_market",
+        "unknown_needs_review"
+      ],
+      "notes": "Central responsibility group; not a per-QKU ownership assignment.",
+      "ontology_category_refs": [
+        "portfolio_risk"
+      ],
+      "qku_family_refs": [],
+      "responsibility_group_id": "RP5C_RESP_GROUP_0008",
+      "responsibility_group_name": "portfolio_risk_group",
+      "source_agent_duty_refs": [
+        "docs/master_plan/generated/PR165_D2_AgentRosterDiscoveryAudit.report.json",
+        "docs/master_plan/generated/PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "validator_group_refs": [
+        "governance_agent"
+      ]
+    },
+    {
+      "blocker_codes": [],
+      "canonical_agent_refs": [
+        "governance_agent",
+        "research_agent"
+      ],
+      "dependency_type_refs": [
+        "regime_scenario_dependency"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D",
+        "PR168-RP5E",
+        "RANK4",
+        "QOPT",
+        "Paper",
+        "LiveFutureOnly"
+      ],
+      "fallback_role_alias_refs": [
+        "GovernanceAgent",
+        "ReplayPaperAgent",
+        "ResearchAgent",
+        "ScenarioStressAgent",
+        "TradePlanSimulationAgent"
+      ],
+      "formula_family_refs": [],
+      "group_authority_class": "DERIVED_ROUTE_OVERLAY_FROM_PR165_D2_AND_CENTRAL_RULES_NOT_IDENTITY_AUTHORITY",
+      "market_scope_refs": [
+        "prediction_market",
+        "market_agnostic",
+        "equities",
+        "options",
+        "futures_commodities",
+        "crypto",
+        "fx_macro",
+        "fixed_income",
+        "repo_financing",
+        "cross_market",
+        "unknown_needs_review"
+      ],
+      "notes": "Central responsibility group; not a per-QKU ownership assignment.",
+      "ontology_category_refs": [
+        "regime_scenario"
+      ],
+      "qku_family_refs": [],
+      "responsibility_group_id": "RP5C_RESP_GROUP_0009",
+      "responsibility_group_name": "regime_scenario_group",
+      "source_agent_duty_refs": [
+        "docs/master_plan/generated/PR165_D2_AgentRosterDiscoveryAudit.report.json",
+        "docs/master_plan/generated/PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "validator_group_refs": [
+        "governance_agent"
+      ]
+    },
+    {
+      "blocker_codes": [],
+      "canonical_agent_refs": [
+        "governance_agent",
+        "research_agent"
+      ],
+      "dependency_type_refs": [
+        "exit_timing_dependency"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D",
+        "PR168-RP5E",
+        "RANK4",
+        "QOPT",
+        "Paper",
+        "LiveFutureOnly"
+      ],
+      "fallback_role_alias_refs": [
+        "ExecutionRouterAgent",
+        "GovernanceAgent",
+        "ReplayPaperAgent",
+        "ResearchAgent",
+        "TradePlanSimulationAgent"
+      ],
+      "formula_family_refs": [],
+      "group_authority_class": "DERIVED_ROUTE_OVERLAY_FROM_PR165_D2_AND_CENTRAL_RULES_NOT_IDENTITY_AUTHORITY",
+      "market_scope_refs": [
+        "prediction_market",
+        "market_agnostic",
+        "equities",
+        "options",
+        "futures_commodities",
+        "crypto",
+        "fx_macro",
+        "fixed_income",
+        "repo_financing",
+        "cross_market",
+        "unknown_needs_review"
+      ],
+      "notes": "Central responsibility group; not a per-QKU ownership assignment.",
+      "ontology_category_refs": [
+        "exit_timing"
+      ],
+      "qku_family_refs": [],
+      "responsibility_group_id": "RP5C_RESP_GROUP_0010",
+      "responsibility_group_name": "exit_timing_group",
+      "source_agent_duty_refs": [
+        "docs/master_plan/generated/PR165_D2_AgentRosterDiscoveryAudit.report.json",
+        "docs/master_plan/generated/PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "validator_group_refs": [
+        "governance_agent"
+      ]
+    },
+    {
+      "blocker_codes": [],
+      "canonical_agent_refs": [
+        "governance_agent",
+        "quantum_optimizer_agent",
+        "research_agent"
+      ],
+      "dependency_type_refs": [
+        "quantum_objective_dependency"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D",
+        "PR168-RP5E",
+        "RANK4",
+        "QOPT",
+        "Paper",
+        "LiveFutureOnly"
+      ],
+      "fallback_role_alias_refs": [
+        "ClassicalComparatorAgent",
+        "GovernanceAgent",
+        "QOPTAgent",
+        "QuantumOptimizerAgent",
+        "ReplayPaperAgent",
+        "ResearchAgent"
+      ],
+      "formula_family_refs": [],
+      "group_authority_class": "DERIVED_ROUTE_OVERLAY_FROM_PR165_D2_AND_CENTRAL_RULES_NOT_IDENTITY_AUTHORITY",
+      "market_scope_refs": [
+        "prediction_market",
+        "market_agnostic",
+        "equities",
+        "options",
+        "futures_commodities",
+        "crypto",
+        "fx_macro",
+        "fixed_income",
+        "repo_financing",
+        "cross_market",
+        "unknown_needs_review"
+      ],
+      "notes": "Central responsibility group; not a per-QKU ownership assignment.",
+      "ontology_category_refs": [
+        "quantum_objective_constraint"
+      ],
+      "qku_family_refs": [],
+      "responsibility_group_id": "RP5C_RESP_GROUP_0011",
+      "responsibility_group_name": "quantum_objective_constraint_group",
+      "source_agent_duty_refs": [
+        "docs/master_plan/generated/PR165_D2_AgentRosterDiscoveryAudit.report.json",
+        "docs/master_plan/generated/PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "validator_group_refs": [
+        "governance_agent"
+      ]
+    },
+    {
+      "blocker_codes": [],
+      "canonical_agent_refs": [
+        "governance_agent",
+        "parameter_selector_agent"
+      ],
+      "dependency_type_refs": [
+        "classical_fallback_dependency"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D",
+        "PR168-RP5E",
+        "RANK4",
+        "QOPT",
+        "Paper",
+        "LiveFutureOnly"
+      ],
+      "fallback_role_alias_refs": [
+        "ClassicalOptimizerAgent",
+        "GovernanceAgent",
+        "ParameterSelectorAgent",
+        "QOPTAgent",
+        "ReplayPaperAgent"
+      ],
+      "formula_family_refs": [],
+      "group_authority_class": "DERIVED_ROUTE_OVERLAY_FROM_PR165_D2_AND_CENTRAL_RULES_NOT_IDENTITY_AUTHORITY",
+      "market_scope_refs": [
+        "prediction_market",
+        "market_agnostic",
+        "equities",
+        "options",
+        "futures_commodities",
+        "crypto",
+        "fx_macro",
+        "fixed_income",
+        "repo_financing",
+        "cross_market",
+        "unknown_needs_review"
+      ],
+      "notes": "Central responsibility group; not a per-QKU ownership assignment.",
+      "ontology_category_refs": [
+        "classical_fallback"
+      ],
+      "qku_family_refs": [],
+      "responsibility_group_id": "RP5C_RESP_GROUP_0012",
+      "responsibility_group_name": "classical_fallback_group",
+      "source_agent_duty_refs": [
+        "docs/master_plan/generated/PR165_D2_AgentRosterDiscoveryAudit.report.json",
+        "docs/master_plan/generated/PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "validator_group_refs": [
+        "governance_agent"
+      ]
+    },
+    {
+      "blocker_codes": [],
+      "canonical_agent_refs": [
+        "governance_agent",
+        "risk_manager_agent"
+      ],
+      "dependency_type_refs": [
+        "governance_dependency"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D",
+        "PR168-RP5E",
+        "RANK4",
+        "QOPT",
+        "Paper",
+        "LiveFutureOnly"
+      ],
+      "fallback_role_alias_refs": [
+        "GovernanceAgent",
+        "RiskManagerAgent",
+        "RP5DExecutabilityAgent",
+        "SourceEvidenceAgent"
+      ],
+      "formula_family_refs": [],
+      "group_authority_class": "DERIVED_ROUTE_OVERLAY_FROM_PR165_D2_AND_CENTRAL_RULES_NOT_IDENTITY_AUTHORITY",
+      "market_scope_refs": [
+        "prediction_market",
+        "market_agnostic",
+        "equities",
+        "options",
+        "futures_commodities",
+        "crypto",
+        "fx_macro",
+        "fixed_income",
+        "repo_financing",
+        "cross_market",
+        "unknown_needs_review"
+      ],
+      "notes": "Central responsibility group; not a per-QKU ownership assignment.",
+      "ontology_category_refs": [
+        "governance_source_risk"
+      ],
+      "qku_family_refs": [],
+      "responsibility_group_id": "RP5C_RESP_GROUP_0013",
+      "responsibility_group_name": "governance_source_risk_group",
+      "source_agent_duty_refs": [
+        "docs/master_plan/generated/PR165_D2_AgentRosterDiscoveryAudit.report.json",
+        "docs/master_plan/generated/PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "validator_group_refs": [
+        "governance_agent"
+      ]
+    },
+    {
+      "blocker_codes": [],
+      "canonical_agent_refs": [
+        "governance_agent",
+        "research_agent"
+      ],
+      "dependency_type_refs": [
+        "unknown_needs_review"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D",
+        "PR168-RP5E",
+        "RANK4",
+        "QOPT",
+        "Paper",
+        "LiveFutureOnly"
+      ],
+      "fallback_role_alias_refs": [
+        "GovernanceAgent",
+        "ResearchAgent",
+        "RP5DExecutabilityAgent"
+      ],
+      "formula_family_refs": [],
+      "group_authority_class": "DERIVED_ROUTE_OVERLAY_FROM_PR165_D2_AND_CENTRAL_RULES_NOT_IDENTITY_AUTHORITY",
+      "market_scope_refs": [
+        "prediction_market",
+        "market_agnostic",
+        "equities",
+        "options",
+        "futures_commodities",
+        "crypto",
+        "fx_macro",
+        "fixed_income",
+        "repo_financing",
+        "cross_market",
+        "unknown_needs_review"
+      ],
+      "notes": "Central responsibility group; not a per-QKU ownership assignment.",
+      "ontology_category_refs": [
+        "unknown_needs_review"
+      ],
+      "qku_family_refs": [],
+      "responsibility_group_id": "RP5C_RESP_GROUP_0014",
+      "responsibility_group_name": "unknown_review_group",
+      "source_agent_duty_refs": [
+        "docs/master_plan/generated/PR165_D2_AgentRosterDiscoveryAudit.report.json",
+        "docs/master_plan/generated/PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "validator_group_refs": [
+        "governance_agent"
+      ]
+    }
+  ],
+  "report_version": "PR168-RP5C-v1.0",
+  "rows_ref": "docs/master_plan/generated/rp5c/agent_responsibility_group_registry.jsonl",
+  "runtime_cash_receipt_count": 0,
+  "runtime_stack_generation_count": 0,
+  "silent_skipped_input_artifact_count": 0,
+  "source_truth_authority_created_count": 0,
+  "stack_combination_materialization_count": 0,
+  "trade_simulation_count": 0
+}

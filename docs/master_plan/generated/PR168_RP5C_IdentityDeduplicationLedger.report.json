@@ -1,0 +1,479 @@
+{
+  "absolute_local_path_leak_count": 0,
+  "archived_file_count": 0,
+  "backslash_only_path_leak_count": 0,
+  "champion_authority_created_count": 0,
+  "connector_semantic_binding_count": 0,
+  "created_at_utc": "2026-06-25T00:00:00Z",
+  "dedupe_group_count": 10189,
+  "dedupe_member_occurrence_count": 183802,
+  "dedupe_status_counts": {
+    "CANONICAL_REPRESENTATIVE_PRESERVED": 9949,
+    "UNIQUE_PRESERVED": 240
+  },
+  "deleted_file_count": 0,
+  "formula_expression_mutation_count": 0,
+  "formula_identity_deleted_count": 0,
+  "formula_profit_ranking_count": 0,
+  "generated_path_case_collision_count": 0,
+  "global_formula_ban_count": 0,
+  "global_qku_ban_count": 0,
+  "hard_zero_counters": {
+    "absolute_local_path_leak_count": 0,
+    "archived_file_count": 0,
+    "backslash_only_path_leak_count": 0,
+    "champion_authority_created_count": 0,
+    "connector_semantic_binding_count": 0,
+    "deleted_file_count": 0,
+    "formula_expression_mutation_count": 0,
+    "formula_identity_deleted_count": 0,
+    "formula_profit_ranking_count": 0,
+    "generated_path_case_collision_count": 0,
+    "global_formula_ban_count": 0,
+    "global_qku_ban_count": 0,
+    "launch_readiness_authority_created_count": 0,
+    "live_order_authority_created_count": 0,
+    "manual_per_qku_hardcoded_agent_assignment_count": 0,
+    "master_plan_content_deleted_or_shortened_count": 0,
+    "moved_file_count": 0,
+    "mutable_agent_ownership_embedded_as_identity_authority_count": 0,
+    "orphan_generated_shard_count": 0,
+    "orphan_identity_count": 0,
+    "orphan_input_report_count": 0,
+    "orphan_source_artifact_count": 0,
+    "paper_loop_runtime_count": 0,
+    "private_state_fetch_count": 0,
+    "qku_identity_deleted_count": 0,
+    "qopt_batch_count": 0,
+    "qtt_sha_or_atomicrows_hash_authority_count": 0,
+    "quantum_advantage_claim_count": 0,
+    "quantum_backend_execution_count": 0,
+    "rank4_ranking_count": 0,
+    "raw_legacy_direct_agent_consumer_count": 0,
+    "runtime_cash_receipt_count": 0,
+    "runtime_stack_generation_count": 0,
+    "silent_skipped_input_artifact_count": 0,
+    "source_truth_authority_created_count": 0,
+    "stack_combination_materialization_count": 0,
+    "trade_simulation_count": 0
+  },
+  "immutable_library_identity_row_count": 10189,
+  "launch_readiness_authority_created_count": 0,
+  "live_order_authority_created_count": 0,
+  "logical_report_id": "PR168_RP5C_IdentityDeduplicationLedger",
+  "manifest_ref": "docs/master_plan/generated/rp5c/identity_deduplication_ledger.manifest.json",
+  "manual_per_qku_hardcoded_agent_assignment_count": 0,
+  "master_plan_content_deleted_or_shortened_count": 0,
+  "moved_file_count": 0,
+  "mutable_agent_ownership_embedded_as_identity_authority_count": 0,
+  "no_authority_statement": "RP5C is immutable identity, provenance, classification, and derived routing preparation only. It creates no live/order/source-truth/champion/launch/quantum/hash authority and does not mutate formulas or delete identities.",
+  "orphan_generated_shard_count": 0,
+  "orphan_identity_count": 0,
+  "orphan_input_report_count": 0,
+  "orphan_source_artifact_count": 0,
+  "paper_loop_runtime_count": 0,
+  "physical_filename": "PR168_RP5C_IdentityDeduplicationLedger.report.json",
+  "private_state_fetch_count": 0,
+  "qku_identity_deleted_count": 0,
+  "qopt_batch_count": 0,
+  "qtt_sha_or_atomicrows_hash_authority_count": 0,
+  "quantum_advantage_claim_count": 0,
+  "quantum_backend_execution_count": 0,
+  "rank4_ranking_count": 0,
+  "raw_legacy_direct_agent_consumer_count": 0,
+  "records": [
+    {
+      "canonical_identity_row_id": "RP5C_IDENTITY_00000001",
+      "dedupe_status": "UNIQUE_PRESERVED",
+      "dedupe_without_deletion_flag": true,
+      "duplicate_group_id": "RP5C_DUP_GROUP_00000001",
+      "duplicate_member_count": 1,
+      "duplicate_member_identity_row_ids": [
+        "RP5C_IDENTITY_00000001"
+      ],
+      "global_ban_flag": false,
+      "notes": "Duplicate grouping preserves every original identity row and only changes review priority.",
+      "row_id": "RP5C_DEDUP_00000001"
+    },
+    {
+      "canonical_identity_row_id": "RP5C_IDENTITY_00000003",
+      "dedupe_status": "CANONICAL_REPRESENTATIVE_PRESERVED",
+      "dedupe_without_deletion_flag": true,
+      "duplicate_group_id": "RP5C_DUP_GROUP_00000002",
+      "duplicate_member_count": 4,
+      "duplicate_member_identity_row_ids": [
+        "RP5C_IDENTITY_00000003",
+        "RP5C_IDENTITY_00000004",
+        "RP5C_IDENTITY_00000005",
+        "RP5C_IDENTITY_00000006"
+      ],
+      "global_ban_flag": false,
+      "notes": "Duplicate grouping preserves every original identity row and only changes review priority.",
+      "row_id": "RP5C_DEDUP_00000002"
+    },
+    {
+      "canonical_identity_row_id": "RP5C_IDENTITY_00000002",
+      "dedupe_status": "UNIQUE_PRESERVED",
+      "dedupe_without_deletion_flag": true,
+      "duplicate_group_id": "RP5C_DUP_GROUP_00000003",
+      "duplicate_member_count": 1,
+      "duplicate_member_identity_row_ids": [
+        "RP5C_IDENTITY_00000002"
+      ],
+      "global_ban_flag": false,
+      "notes": "Duplicate grouping preserves every original identity row and only changes review priority.",
+      "row_id": "RP5C_DEDUP_00000003"
+    },
+    {
+      "canonical_identity_row_id": "RP5C_IDENTITY_00000010",
+      "dedupe_status": "CANONICAL_REPRESENTATIVE_PRESERVED",
+      "dedupe_without_deletion_flag": true,
+      "duplicate_group_id": "RP5C_DUP_GROUP_00000004",
+      "duplicate_member_count": 2,
+      "duplicate_member_identity_row_ids": [
+        "RP5C_IDENTITY_00000010",
+        "RP5C_IDENTITY_00000014"
+      ],
+      "global_ban_flag": false,
+      "notes": "Duplicate grouping preserves every original identity row and only changes review priority.",
+      "row_id": "RP5C_DEDUP_00000004"
+    },
+    {
+      "canonical_identity_row_id": "RP5C_IDENTITY_00000011",
+      "dedupe_status": "CANONICAL_REPRESENTATIVE_PRESERVED",
+      "dedupe_without_deletion_flag": true,
+      "duplicate_group_id": "RP5C_DUP_GROUP_00000005",
+      "duplicate_member_count": 4,
+      "duplicate_member_identity_row_ids": [
+        "RP5C_IDENTITY_00000011",
+        "RP5C_IDENTITY_00000013",
+        "RP5C_IDENTITY_00000015",
+        "RP5C_IDENTITY_00000016"
+      ],
+      "global_ban_flag": false,
+      "notes": "Duplicate grouping preserves every original identity row and only changes review priority.",
+      "row_id": "RP5C_DEDUP_00000005"
+    },
+    {
+      "canonical_identity_row_id": "RP5C_IDENTITY_00000012",
+      "dedupe_status": "CANONICAL_REPRESENTATIVE_PRESERVED",
+      "dedupe_without_deletion_flag": true,
+      "duplicate_group_id": "RP5C_DUP_GROUP_00000006",
+      "duplicate_member_count": 5,
+      "duplicate_member_identity_row_ids": [
+        "RP5C_IDENTITY_00000012",
+        "RP5C_IDENTITY_00000017",
+        "RP5C_IDENTITY_00000018",
+        "RP5C_IDENTITY_00000021",
+        "RP5C_IDENTITY_00000022"
+      ],
+      "global_ban_flag": false,
+      "notes": "Duplicate grouping preserves every original identity row and only changes review priority.",
+      "row_id": "RP5C_DEDUP_00000006"
+    },
+    {
+      "canonical_identity_row_id": "RP5C_IDENTITY_00000019",
+      "dedupe_status": "CANONICAL_REPRESENTATIVE_PRESERVED",
+      "dedupe_without_deletion_flag": true,
+      "duplicate_group_id": "RP5C_DUP_GROUP_00000007",
+      "duplicate_member_count": 3,
+      "duplicate_member_identity_row_ids": [
+        "RP5C_IDENTITY_00000019",
+        "RP5C_IDENTITY_00000020",
+        "RP5C_IDENTITY_00000023"
+      ],
+      "global_ban_flag": false,
+      "notes": "Duplicate grouping preserves every original identity row and only changes review priority.",
+      "row_id": "RP5C_DEDUP_00000007"
+    },
+    {
+      "canonical_identity_row_id": "RP5C_IDENTITY_00000007",
+      "dedupe_status": "CANONICAL_REPRESENTATIVE_PRESERVED",
+      "dedupe_without_deletion_flag": true,
+      "duplicate_group_id": "RP5C_DUP_GROUP_00000008",
+      "duplicate_member_count": 3,
+      "duplicate_member_identity_row_ids": [
+        "RP5C_IDENTITY_00000007",
+        "RP5C_IDENTITY_00000008",
+        "RP5C_IDENTITY_00000009"
+      ],
+      "global_ban_flag": false,
+      "notes": "Duplicate grouping preserves every original identity row and only changes review priority.",
+      "row_id": "RP5C_DEDUP_00000008"
+    },
+    {
+      "canonical_identity_row_id": "RP5C_IDENTITY_00000027",
+      "dedupe_status": "CANONICAL_REPRESENTATIVE_PRESERVED",
+      "dedupe_without_deletion_flag": true,
+      "duplicate_group_id": "RP5C_DUP_GROUP_00000009",
+      "duplicate_member_count": 2,
+      "duplicate_member_identity_row_ids": [
+        "RP5C_IDENTITY_00000027",
+        "RP5C_IDENTITY_00000031"
+      ],
+      "global_ban_flag": false,
+      "notes": "Duplicate grouping preserves every original identity row and only changes review priority.",
+      "row_id": "RP5C_DEDUP_00000009"
+    },
+    {
+      "canonical_identity_row_id": "RP5C_IDENTITY_00000028",
+      "dedupe_status": "CANONICAL_REPRESENTATIVE_PRESERVED",
+      "dedupe_without_deletion_flag": true,
+      "duplicate_group_id": "RP5C_DUP_GROUP_00000010",
+      "duplicate_member_count": 4,
+      "duplicate_member_identity_row_ids": [
+        "RP5C_IDENTITY_00000028",
+        "RP5C_IDENTITY_00000030",
+        "RP5C_IDENTITY_00000032",
+        "RP5C_IDENTITY_00000033"
+      ],
+      "global_ban_flag": false,
+      "notes": "Duplicate grouping preserves every original identity row and only changes review priority.",
+      "row_id": "RP5C_DEDUP_00000010"
+    },
+    {
+      "canonical_identity_row_id": "RP5C_IDENTITY_00000029",
+      "dedupe_status": "CANONICAL_REPRESENTATIVE_PRESERVED",
+      "dedupe_without_deletion_flag": true,
+      "duplicate_group_id": "RP5C_DUP_GROUP_00000011",
+      "duplicate_member_count": 5,
+      "duplicate_member_identity_row_ids": [
+        "RP5C_IDENTITY_00000029",
+        "RP5C_IDENTITY_00000034",
+        "RP5C_IDENTITY_00000035",
+        "RP5C_IDENTITY_00000038",
+        "RP5C_IDENTITY_00000039"
+      ],
+      "global_ban_flag": false,
+      "notes": "Duplicate grouping preserves every original identity row and only changes review priority.",
+      "row_id": "RP5C_DEDUP_00000011"
+    },
+    {
+      "canonical_identity_row_id": "RP5C_IDENTITY_00000036",
+      "dedupe_status": "CANONICAL_REPRESENTATIVE_PRESERVED",
+      "dedupe_without_deletion_flag": true,
+      "duplicate_group_id": "RP5C_DUP_GROUP_00000012",
+      "duplicate_member_count": 3,
+      "duplicate_member_identity_row_ids": [
+        "RP5C_IDENTITY_00000036",
+        "RP5C_IDENTITY_00000037",
+        "RP5C_IDENTITY_00000040"
+      ],
+      "global_ban_flag": false,
+      "notes": "Duplicate grouping preserves every original identity row and only changes review priority.",
+      "row_id": "RP5C_DEDUP_00000012"
+    },
+    {
+      "canonical_identity_row_id": "RP5C_IDENTITY_00000024",
+      "dedupe_status": "CANONICAL_REPRESENTATIVE_PRESERVED",
+      "dedupe_without_deletion_flag": true,
+      "duplicate_group_id": "RP5C_DUP_GROUP_00000013",
+      "duplicate_member_count": 3,
+      "duplicate_member_identity_row_ids": [
+        "RP5C_IDENTITY_00000024",
+        "RP5C_IDENTITY_00000025",
+        "RP5C_IDENTITY_00000026"
+      ],
+      "global_ban_flag": false,
+      "notes": "Duplicate grouping preserves every original identity row and only changes review priority.",
+      "row_id": "RP5C_DEDUP_00000013"
+    },
+    {
+      "canonical_identity_row_id": "RP5C_IDENTITY_00000041",
+      "dedupe_status": "CANONICAL_REPRESENTATIVE_PRESERVED",
+      "dedupe_without_deletion_flag": true,
+      "duplicate_group_id": "RP5C_DUP_GROUP_00000014",
+      "duplicate_member_count": 6,
+      "duplicate_member_identity_row_ids": [
+        "RP5C_IDENTITY_00000041",
+        "RP5C_IDENTITY_00000042",
+        "RP5C_IDENTITY_00000044",
+        "RP5C_IDENTITY_00000045",
+        "RP5C_IDENTITY_00000046",
+        "RP5C_IDENTITY_00000047"
+      ],
+      "global_ban_flag": false,
+      "notes": "Duplicate grouping preserves every original identity row and only changes review priority.",
+      "row_id": "RP5C_DEDUP_00000014"
+    },
+    {
+      "canonical_identity_row_id": "RP5C_IDENTITY_00000043",
+      "dedupe_status": "CANONICAL_REPRESENTATIVE_PRESERVED",
+      "dedupe_without_deletion_flag": true,
+      "duplicate_group_id": "RP5C_DUP_GROUP_00000015",
+      "duplicate_member_count": 7,
+      "duplicate_member_identity_row_ids": [
+        "RP5C_IDENTITY_00000043",
+        "RP5C_IDENTITY_00000048",
+        "RP5C_IDENTITY_00000049",
+        "RP5C_IDENTITY_00000050",
+        "RP5C_IDENTITY_00000051",
+        "RP5C_IDENTITY_00000052",
+        "RP5C_IDENTITY_00000053"
+      ],
+      "global_ban_flag": false,
+      "notes": "Duplicate grouping preserves every original identity row and only changes review priority.",
+      "row_id": "RP5C_DEDUP_00000015"
+    },
+    {
+      "canonical_identity_row_id": "RP5C_IDENTITY_00000054",
+      "dedupe_status": "UNIQUE_PRESERVED",
+      "dedupe_without_deletion_flag": true,
+      "duplicate_group_id": "RP5C_DUP_GROUP_00000016",
+      "duplicate_member_count": 1,
+      "duplicate_member_identity_row_ids": [
+        "RP5C_IDENTITY_00000054"
+      ],
+      "global_ban_flag": false,
+      "notes": "Duplicate grouping preserves every original identity row and only changes review priority.",
+      "row_id": "RP5C_DEDUP_00000016"
+    },
+    {
+      "canonical_identity_row_id": "RP5C_IDENTITY_00000059",
+      "dedupe_status": "CANONICAL_REPRESENTATIVE_PRESERVED",
+      "dedupe_without_deletion_flag": true,
+      "duplicate_group_id": "RP5C_DUP_GROUP_00000017",
+      "duplicate_member_count": 4,
+      "duplicate_member_identity_row_ids": [
+        "RP5C_IDENTITY_00000059",
+        "RP5C_IDENTITY_00000061",
+        "RP5C_IDENTITY_00000062",
+        "RP5C_IDENTITY_00000063"
+      ],
+      "global_ban_flag": false,
+      "notes": "Duplicate grouping preserves every original identity row and only changes review priority.",
+      "row_id": "RP5C_DEDUP_00000017"
+    },
+    {
+      "canonical_identity_row_id": "RP5C_IDENTITY_00000060",
+      "dedupe_status": "CANONICAL_REPRESENTATIVE_PRESERVED",
+      "dedupe_without_deletion_flag": true,
+      "duplicate_group_id": "RP5C_DUP_GROUP_00000018",
+      "duplicate_member_count": 5,
+      "duplicate_member_identity_row_ids": [
+        "RP5C_IDENTITY_00000060",
+        "RP5C_IDENTITY_00000064",
+        "RP5C_IDENTITY_00000065",
+        "RP5C_IDENTITY_00000068",
+        "RP5C_IDENTITY_00000069"
+      ],
+      "global_ban_flag": false,
+      "notes": "Duplicate grouping preserves every original identity row and only changes review priority.",
+      "row_id": "RP5C_DEDUP_00000018"
+    },
+    {
+      "canonical_identity_row_id": "RP5C_IDENTITY_00000066",
+      "dedupe_status": "CANONICAL_REPRESENTATIVE_PRESERVED",
+      "dedupe_without_deletion_flag": true,
+      "duplicate_group_id": "RP5C_DUP_GROUP_00000019",
+      "duplicate_member_count": 3,
+      "duplicate_member_identity_row_ids": [
+        "RP5C_IDENTITY_00000066",
+        "RP5C_IDENTITY_00000067",
+        "RP5C_IDENTITY_00000070"
+      ],
+      "global_ban_flag": false,
+      "notes": "Duplicate grouping preserves every original identity row and only changes review priority.",
+      "row_id": "RP5C_DEDUP_00000019"
+    },
+    {
+      "canonical_identity_row_id": "RP5C_IDENTITY_00000055",
+      "dedupe_status": "CANONICAL_REPRESENTATIVE_PRESERVED",
+      "dedupe_without_deletion_flag": true,
+      "duplicate_group_id": "RP5C_DUP_GROUP_00000020",
+      "duplicate_member_count": 4,
+      "duplicate_member_identity_row_ids": [
+        "RP5C_IDENTITY_00000055",
+        "RP5C_IDENTITY_00000056",
+        "RP5C_IDENTITY_00000057",
+        "RP5C_IDENTITY_00000058"
+      ],
+      "global_ban_flag": false,
+      "notes": "Duplicate grouping preserves every original identity row and only changes review priority.",
+      "row_id": "RP5C_DEDUP_00000020"
+    },
+    {
+      "canonical_identity_row_id": "RP5C_IDENTITY_00000072",
+      "dedupe_status": "CANONICAL_REPRESENTATIVE_PRESERVED",
+      "dedupe_without_deletion_flag": true,
+      "duplicate_group_id": "RP5C_DUP_GROUP_00000021",
+      "duplicate_member_count": 4,
+      "duplicate_member_identity_row_ids": [
+        "RP5C_IDENTITY_00000072",
+        "RP5C_IDENTITY_00000074",
+        "RP5C_IDENTITY_00000075",
+        "RP5C_IDENTITY_00000076"
+      ],
+      "global_ban_flag": false,
+      "notes": "Duplicate grouping preserves every original identity row and only changes review priority.",
+      "row_id": "RP5C_DEDUP_00000021"
+    },
+    {
+      "canonical_identity_row_id": "RP5C_IDENTITY_00000073",
+      "dedupe_status": "CANONICAL_REPRESENTATIVE_PRESERVED",
+      "dedupe_without_deletion_flag": true,
+      "duplicate_group_id": "RP5C_DUP_GROUP_00000022",
+      "duplicate_member_count": 7,
+      "duplicate_member_identity_row_ids": [
+        "RP5C_IDENTITY_00000073",
+        "RP5C_IDENTITY_00000077",
+        "RP5C_IDENTITY_00000078",
+        "RP5C_IDENTITY_00000079",
+        "RP5C_IDENTITY_00000080",
+        "RP5C_IDENTITY_00000081",
+        "RP5C_IDENTITY_00000082"
+      ],
+      "global_ban_flag": false,
+      "notes": "Duplicate grouping preserves every original identity row and only changes review priority.",
+      "row_id": "RP5C_DEDUP_00000022"
+    },
+    {
+      "canonical_identity_row_id": "RP5C_IDENTITY_00000083",
+      "dedupe_status": "UNIQUE_PRESERVED",
+      "dedupe_without_deletion_flag": true,
+      "duplicate_group_id": "RP5C_DUP_GROUP_00000023",
+      "duplicate_member_count": 1,
+      "duplicate_member_identity_row_ids": [
+        "RP5C_IDENTITY_00000083"
+      ],
+      "global_ban_flag": false,
+      "notes": "Duplicate grouping preserves every original identity row and only changes review priority.",
+      "row_id": "RP5C_DEDUP_00000023"
+    },
+    {
+      "canonical_identity_row_id": "RP5C_IDENTITY_00000071",
+      "dedupe_status": "UNIQUE_PRESERVED",
+      "dedupe_without_deletion_flag": true,
+      "duplicate_group_id": "RP5C_DUP_GROUP_00000024",
+      "duplicate_member_count": 1,
+      "duplicate_member_identity_row_ids": [
+        "RP5C_IDENTITY_00000071"
+      ],
+      "global_ban_flag": false,
+      "notes": "Duplicate grouping preserves every original identity row and only changes review priority.",
+      "row_id": "RP5C_DEDUP_00000024"
+    },
+    {
+      "canonical_identity_row_id": "RP5C_IDENTITY_00000087",
+      "dedupe_status": "CANONICAL_REPRESENTATIVE_PRESERVED",
+      "dedupe_without_deletion_flag": true,
+      "duplicate_group_id": "RP5C_DUP_GROUP_00000025",
+      "duplicate_member_count": 2,
+      "duplicate_member_identity_row_ids": [
+        "RP5C_IDENTITY_00000087",
+        "RP5C_IDENTITY_00000091"
+      ],
+      "global_ban_flag": false,
+      "notes": "Duplicate grouping preserves every original identity row and only changes review priority.",
+      "row_id": "RP5C_DEDUP_00000025"
+    }
+  ],
+  "report_version": "PR168-RP5C-v1.0",
+  "rows_ref": "docs/master_plan/generated/rp5c/identity_deduplication_ledger.jsonl",
+  "runtime_cash_receipt_count": 0,
+  "runtime_stack_generation_count": 0,
+  "silent_skipped_input_artifact_count": 0,
+  "source_truth_authority_created_count": 0,
+  "stack_combination_materialization_count": 0,
+  "trade_simulation_count": 0
+}

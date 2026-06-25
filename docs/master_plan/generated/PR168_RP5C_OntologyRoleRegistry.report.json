@@ -1,0 +1,758 @@
+{
+  "absolute_local_path_leak_count": 0,
+  "archived_file_count": 0,
+  "backslash_only_path_leak_count": 0,
+  "champion_authority_created_count": 0,
+  "connector_semantic_binding_count": 0,
+  "created_at_utc": "2026-06-25T00:00:00Z",
+  "deleted_file_count": 0,
+  "formula_expression_mutation_count": 0,
+  "formula_identity_deleted_count": 0,
+  "formula_profit_ranking_count": 0,
+  "generated_path_case_collision_count": 0,
+  "global_formula_ban_count": 0,
+  "global_qku_ban_count": 0,
+  "hard_zero_counters": {
+    "absolute_local_path_leak_count": 0,
+    "archived_file_count": 0,
+    "backslash_only_path_leak_count": 0,
+    "champion_authority_created_count": 0,
+    "connector_semantic_binding_count": 0,
+    "deleted_file_count": 0,
+    "formula_expression_mutation_count": 0,
+    "formula_identity_deleted_count": 0,
+    "formula_profit_ranking_count": 0,
+    "generated_path_case_collision_count": 0,
+    "global_formula_ban_count": 0,
+    "global_qku_ban_count": 0,
+    "launch_readiness_authority_created_count": 0,
+    "live_order_authority_created_count": 0,
+    "manual_per_qku_hardcoded_agent_assignment_count": 0,
+    "master_plan_content_deleted_or_shortened_count": 0,
+    "moved_file_count": 0,
+    "mutable_agent_ownership_embedded_as_identity_authority_count": 0,
+    "orphan_generated_shard_count": 0,
+    "orphan_identity_count": 0,
+    "orphan_input_report_count": 0,
+    "orphan_source_artifact_count": 0,
+    "paper_loop_runtime_count": 0,
+    "private_state_fetch_count": 0,
+    "qku_identity_deleted_count": 0,
+    "qopt_batch_count": 0,
+    "qtt_sha_or_atomicrows_hash_authority_count": 0,
+    "quantum_advantage_claim_count": 0,
+    "quantum_backend_execution_count": 0,
+    "rank4_ranking_count": 0,
+    "raw_legacy_direct_agent_consumer_count": 0,
+    "runtime_cash_receipt_count": 0,
+    "runtime_stack_generation_count": 0,
+    "silent_skipped_input_artifact_count": 0,
+    "source_truth_authority_created_count": 0,
+    "stack_combination_materialization_count": 0,
+    "trade_simulation_count": 0
+  },
+  "launch_readiness_authority_created_count": 0,
+  "live_order_authority_created_count": 0,
+  "logical_report_id": "PR168_RP5C_OntologyRoleRegistry",
+  "manifest_ref": "docs/master_plan/generated/rp5c/ontology_role_registry.manifest.json",
+  "manual_per_qku_hardcoded_agent_assignment_count": 0,
+  "master_plan_content_deleted_or_shortened_count": 0,
+  "moved_file_count": 0,
+  "mutable_agent_ownership_embedded_as_identity_authority_count": 0,
+  "no_authority_statement": "RP5C is immutable identity, provenance, classification, and derived routing preparation only. It creates no live/order/source-truth/champion/launch/quantum/hash authority and does not mutate formulas or delete identities.",
+  "ontology_categories": [
+    "signal_probability",
+    "calibration",
+    "market_implied_probability",
+    "tca_cost",
+    "fill_queue_liquidity",
+    "latency_staleness",
+    "capacity_crowding",
+    "portfolio_risk",
+    "regime_scenario",
+    "exit_timing",
+    "quantum_objective_constraint",
+    "classical_fallback",
+    "governance_source_risk",
+    "unknown_needs_review"
+  ],
+  "ontology_role_registry_row_count": 14,
+  "orphan_generated_shard_count": 0,
+  "orphan_identity_count": 0,
+  "orphan_input_report_count": 0,
+  "orphan_source_artifact_count": 0,
+  "paper_loop_runtime_count": 0,
+  "physical_filename": "PR168_RP5C_OntologyRoleRegistry.report.json",
+  "private_state_fetch_count": 0,
+  "qku_identity_deleted_count": 0,
+  "qopt_batch_count": 0,
+  "qtt_sha_or_atomicrows_hash_authority_count": 0,
+  "quantum_advantage_claim_count": 0,
+  "quantum_backend_execution_count": 0,
+  "rank4_ranking_count": 0,
+  "raw_legacy_direct_agent_consumer_count": 0,
+  "records": [
+    {
+      "dependency_type_refs": [
+        "signal_dependency"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D",
+        "PR168-RP5E",
+        "RANK4"
+      ],
+      "formula_family_refs": [
+        "break_even_and_required_edge",
+        "execution_adjusted_edge",
+        "expected_value_and_payoff",
+        "fdr_and_overfit_controls",
+        "formulaplugincontractv1",
+        "gross_edge",
+        "signal_probability",
+        "trade_price_history_features",
+        "venue_mechanics_constraints"
+      ],
+      "functional_role": "signal_probability",
+      "notes": "Top-level ontology role category required by RP5C.",
+      "ontology_category": "signal_probability",
+      "ontology_role_row_id": "RP5C_ONTOLOGY_ROLE_0001",
+      "ontology_subcategory": "signal_probability",
+      "qku_family_refs": [
+        "atomicrow_qku",
+        "prediction_market_break_even_and_required_edge",
+        "prediction_market_expected_value_and_payoff",
+        "prediction_market_fdr_and_overfit_controls",
+        "prediction_market_formulaplugincontractv1",
+        "prediction_market_trade_price_history_features",
+        "prediction_market_venue_mechanics_constraints",
+        "qku_break_even_and_required_edge",
+        "qku_execution_adjusted_edge",
+        "qku_expected_value_and_payoff",
+        "qku_gross_edge",
+        "qku_signal_probability"
+      ],
+      "route_rule_refs": [
+        "RP5C_ROUTE_RULE_0001"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
+      ]
+    },
+    {
+      "dependency_type_refs": [
+        "calibration_dependency"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D",
+        "PR168-RP5E",
+        "RANK4"
+      ],
+      "formula_family_refs": [
+        "bayesian_shrinkage_calibration",
+        "calibration",
+        "calibration_and_scoring",
+        "calibration_or_lcb_component",
+        "expected_gross_pnl",
+        "fdr_and_overfit_controls",
+        "fill_probability_or_fillability",
+        "portfolio_marginal_utility_component",
+        "quantum_objective_coefficient",
+        "scenario_transform",
+        "tca_component",
+        "unit_dimension_invariant"
+      ],
+      "functional_role": "calibration",
+      "notes": "Top-level ontology role category required by RP5C.",
+      "ontology_category": "calibration",
+      "ontology_role_row_id": "RP5C_ONTOLOGY_ROLE_0002",
+      "ontology_subcategory": "calibration",
+      "qku_family_refs": [
+        "atomicrow_qku",
+        "prediction_market_calibration",
+        "prediction_market_calibration_and_scoring",
+        "qku_bayesian_shrinkage_calibration",
+        "qku_calibration",
+        "qku_calibration_and_scoring",
+        "qku_calibration_or_lcb_component",
+        "qku_expected_gross_pnl",
+        "qku_fdr_and_overfit_controls",
+        "qku_fill_probability_or_fillability",
+        "qku_portfolio_marginal_utility_component",
+        "qku_quantum_objective_coefficient",
+        "qku_scenario_transform",
+        "qku_tca_component",
+        "qku_unit_dimension_invariant"
+      ],
+      "route_rule_refs": [
+        "RP5C_ROUTE_RULE_0002"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
+      ]
+    },
+    {
+      "dependency_type_refs": [
+        "market_data_dependency"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D",
+        "PR168-RP5E",
+        "RANK4"
+      ],
+      "formula_family_refs": [
+        "candidatepacketv1",
+        "formulaplugincontractv1",
+        "market_implied_probability",
+        "market_implied_probability_and_parity",
+        "qku"
+      ],
+      "functional_role": "market_implied_probability",
+      "notes": "Top-level ontology role category required by RP5C.",
+      "ontology_category": "market_implied_probability",
+      "ontology_role_row_id": "RP5C_ONTOLOGY_ROLE_0003",
+      "ontology_subcategory": "market_implied_probability",
+      "qku_family_refs": [
+        "atomicrow_qku",
+        "prediction_market_formulaplugincontractv1",
+        "prediction_market_market_implied_probability_and_parity",
+        "qku_formulaplugincontractv1",
+        "qku_market_implied_probability",
+        "qku_market_implied_probability_and_parity"
+      ],
+      "route_rule_refs": [
+        "RP5C_ROUTE_RULE_0003"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
+      ]
+    },
+    {
+      "dependency_type_refs": [
+        "tca_dependency"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D",
+        "PR168-RP5E",
+        "RANK4"
+      ],
+      "formula_family_refs": [
+        "break_even_and_required_edge",
+        "expected_gross_pnl",
+        "explicit_fee_cost",
+        "fill_latency_capacity",
+        "formulaplugincontractv1",
+        "implementation_shortfall",
+        "orderbook_microstructure",
+        "slippage_cost",
+        "spread_cost",
+        "tca_component",
+        "tca_cost",
+        "tca_decomposition",
+        "tca_implementation_shortfall",
+        "unit_dimension_invariant"
+      ],
+      "functional_role": "tca_cost",
+      "notes": "Top-level ontology role category required by RP5C.",
+      "ontology_category": "tca_cost",
+      "ontology_role_row_id": "RP5C_ONTOLOGY_ROLE_0004",
+      "ontology_subcategory": "tca_cost",
+      "qku_family_refs": [
+        "prediction_market_break_even_and_required_edge",
+        "prediction_market_formulaplugincontractv1",
+        "prediction_market_orderbook_microstructure",
+        "prediction_market_tca_cost",
+        "prediction_market_tca_implementation_shortfall",
+        "qku_break_even_and_required_edge",
+        "qku_expected_gross_pnl",
+        "qku_explicit_fee_cost",
+        "qku_fill_latency_capacity",
+        "qku_formulaplugincontractv1",
+        "qku_implementation_shortfall",
+        "qku_slippage_cost",
+        "qku_spread_cost",
+        "qku_tca_component",
+        "qku_tca_cost",
+        "qku_tca_decomposition",
+        "qku_tca_implementation_shortfall",
+        "qku_unit_dimension_invariant"
+      ],
+      "route_rule_refs": [
+        "RP5C_ROUTE_RULE_0004"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
+      ]
+    },
+    {
+      "dependency_type_refs": [
+        "fill_liquidity_dependency"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D",
+        "PR168-RP5E",
+        "RANK4"
+      ],
+      "formula_family_refs": [
+        "fill_latency_capacity",
+        "fill_probability_or_fillability",
+        "fill_queue_liquidity",
+        "formulaplugincontractv1",
+        "orderbook_microstructure",
+        "partial_fill",
+        "queue_fill_probability",
+        "unit_dimension_invariant"
+      ],
+      "functional_role": "fill_queue_liquidity",
+      "notes": "Top-level ontology role category required by RP5C.",
+      "ontology_category": "fill_queue_liquidity",
+      "ontology_role_row_id": "RP5C_ONTOLOGY_ROLE_0005",
+      "ontology_subcategory": "fill_queue_liquidity",
+      "qku_family_refs": [
+        "prediction_market_fill_latency_capacity",
+        "prediction_market_fill_queue_liquidity",
+        "prediction_market_formulaplugincontractv1",
+        "prediction_market_orderbook_microstructure",
+        "qku_fill_latency_capacity",
+        "qku_fill_probability_or_fillability",
+        "qku_fill_queue_liquidity",
+        "qku_formulaplugincontractv1",
+        "qku_partial_fill",
+        "qku_queue_fill_probability",
+        "qku_unit_dimension_invariant"
+      ],
+      "route_rule_refs": [
+        "RP5C_ROUTE_RULE_0005"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
+      ]
+    },
+    {
+      "dependency_type_refs": [
+        "latency_dependency"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D",
+        "PR168-RP5E",
+        "RANK4"
+      ],
+      "formula_family_refs": [
+        "latency",
+        "latency_decay",
+        "latency_staleness",
+        "unit_dimension_invariant"
+      ],
+      "functional_role": "latency_staleness",
+      "notes": "Top-level ontology role category required by RP5C.",
+      "ontology_category": "latency_staleness",
+      "ontology_role_row_id": "RP5C_ONTOLOGY_ROLE_0006",
+      "ontology_subcategory": "latency_staleness",
+      "qku_family_refs": [
+        "atomicrow_qku",
+        "prediction_market_latency_staleness",
+        "qku_latency",
+        "qku_latency_decay",
+        "qku_latency_staleness",
+        "qku_unit_dimension_invariant"
+      ],
+      "route_rule_refs": [
+        "RP5C_ROUTE_RULE_0006"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
+      ]
+    },
+    {
+      "dependency_type_refs": [
+        "capacity_dependency"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D",
+        "PR168-RP5E",
+        "RANK4"
+      ],
+      "formula_family_refs": [
+        "capacity",
+        "capacity_crowding"
+      ],
+      "functional_role": "capacity_crowding",
+      "notes": "Top-level ontology role category required by RP5C.",
+      "ontology_category": "capacity_crowding",
+      "ontology_role_row_id": "RP5C_ONTOLOGY_ROLE_0007",
+      "ontology_subcategory": "capacity_crowding",
+      "qku_family_refs": [
+        "qku_capacity",
+        "qku_capacity_crowding"
+      ],
+      "route_rule_refs": [
+        "RP5C_ROUTE_RULE_0007"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
+      ]
+    },
+    {
+      "dependency_type_refs": [
+        "portfolio_risk_dependency"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D",
+        "PR168-RP5E",
+        "RANK4"
+      ],
+      "formula_family_refs": [
+        "formulaplugincontractv1",
+        "portfolio_and_marginal_utility",
+        "portfolio_marginal_utility",
+        "portfolio_marginal_utility_component",
+        "portfolio_risk",
+        "risk_budget"
+      ],
+      "functional_role": "portfolio_risk",
+      "notes": "Top-level ontology role category required by RP5C.",
+      "ontology_category": "portfolio_risk",
+      "ontology_role_row_id": "RP5C_ONTOLOGY_ROLE_0008",
+      "ontology_subcategory": "portfolio_risk",
+      "qku_family_refs": [
+        "atomicrow_qku",
+        "prediction_market_formulaplugincontractv1",
+        "prediction_market_portfolio_and_marginal_utility",
+        "prediction_market_portfolio_risk",
+        "qku_formulaplugincontractv1",
+        "qku_portfolio_and_marginal_utility",
+        "qku_portfolio_marginal_utility",
+        "qku_portfolio_marginal_utility_component",
+        "qku_risk_budget"
+      ],
+      "route_rule_refs": [
+        "RP5C_ROUTE_RULE_0008"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
+      ]
+    },
+    {
+      "dependency_type_refs": [
+        "regime_scenario_dependency"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D",
+        "PR168-RP5E",
+        "RANK4"
+      ],
+      "formula_family_refs": [
+        "formulaplugincontractv1",
+        "regime_and_scenario_ladder",
+        "regime_conditioned_memory",
+        "regime_scenario",
+        "trade_price_history_features",
+        "unit_dimension_invariant"
+      ],
+      "functional_role": "regime_scenario",
+      "notes": "Top-level ontology role category required by RP5C.",
+      "ontology_category": "regime_scenario",
+      "ontology_role_row_id": "RP5C_ONTOLOGY_ROLE_0009",
+      "ontology_subcategory": "regime_scenario",
+      "qku_family_refs": [
+        "prediction_market_formulaplugincontractv1",
+        "prediction_market_regime_and_scenario_ladder",
+        "qku_formulaplugincontractv1",
+        "qku_regime_and_scenario_ladder",
+        "qku_regime_conditioned_memory",
+        "qku_regime_scenario",
+        "qku_trade_price_history_features",
+        "qku_unit_dimension_invariant"
+      ],
+      "route_rule_refs": [
+        "RP5C_ROUTE_RULE_0009"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
+      ]
+    },
+    {
+      "dependency_type_refs": [
+        "exit_timing_dependency"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D",
+        "PR168-RP5E",
+        "RANK4"
+      ],
+      "formula_family_refs": [],
+      "functional_role": "exit_timing",
+      "notes": "Top-level ontology role category required by RP5C.",
+      "ontology_category": "exit_timing",
+      "ontology_role_row_id": "RP5C_ONTOLOGY_ROLE_0010",
+      "ontology_subcategory": "exit_timing",
+      "qku_family_refs": [],
+      "route_rule_refs": [
+        "RP5C_ROUTE_RULE_0010"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
+      ]
+    },
+    {
+      "dependency_type_refs": [
+        "quantum_objective_dependency"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D",
+        "PR168-RP5E",
+        "RANK4"
+      ],
+      "formula_family_refs": [
+        "bqm_objective",
+        "cqm_objective",
+        "dqm_objective",
+        "formulaplugincontractv1",
+        "ising_objective",
+        "quadprogram_objective",
+        "quantum_forward_optimization",
+        "quantum_objective_coefficient",
+        "quantum_objective_constraint",
+        "qubo_objective"
+      ],
+      "functional_role": "quantum_objective_constraint",
+      "notes": "Top-level ontology role category required by RP5C.",
+      "ontology_category": "quantum_objective_constraint",
+      "ontology_role_row_id": "RP5C_ONTOLOGY_ROLE_0011",
+      "ontology_subcategory": "quantum_objective_constraint",
+      "qku_family_refs": [
+        "atomicrow_qku",
+        "prediction_market_formulaplugincontractv1",
+        "prediction_market_quantum_forward_optimization",
+        "prediction_market_quantum_objective_constraint",
+        "qku_bqm_objective",
+        "qku_cqm_objective",
+        "qku_dqm_objective",
+        "qku_formulaplugincontractv1",
+        "qku_ising_objective",
+        "qku_quadprogram_objective",
+        "qku_quantum_forward_optimization",
+        "qku_quantum_objective_coefficient",
+        "qku_qubo_objective"
+      ],
+      "route_rule_refs": [
+        "RP5C_ROUTE_RULE_0011"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
+      ]
+    },
+    {
+      "dependency_type_refs": [
+        "classical_fallback_dependency"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D",
+        "PR168-RP5E",
+        "RANK4"
+      ],
+      "formula_family_refs": [
+        "classical_fallback",
+        "classical_fallback_objective"
+      ],
+      "functional_role": "classical_fallback",
+      "notes": "Top-level ontology role category required by RP5C.",
+      "ontology_category": "classical_fallback",
+      "ontology_role_row_id": "RP5C_ONTOLOGY_ROLE_0012",
+      "ontology_subcategory": "classical_fallback",
+      "qku_family_refs": [
+        "prediction_market_classical_fallback",
+        "qku_classical_fallback_objective"
+      ],
+      "route_rule_refs": [
+        "RP5C_ROUTE_RULE_0012"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
+      ]
+    },
+    {
+      "dependency_type_refs": [
+        "governance_dependency"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D",
+        "PR168-RP5E",
+        "RANK4"
+      ],
+      "formula_family_refs": [
+        "adverse_selection",
+        "binary_contract_expected_value",
+        "champion_challenger_arbitration",
+        "conformal_lcb_or_uncertainty_ranking",
+        "execution_adjusted_edge",
+        "expected_shortfall_cvar",
+        "expected_value",
+        "formulaplugincontractv1",
+        "governance_source_risk",
+        "gross_edge",
+        "lower_confidence_bound",
+        "market_impact",
+        "net_expected_pnl",
+        "overfit_fdr",
+        "positive_negative_decision",
+        "robust_covariance_or_hrp_cluster",
+        "source_evidence_and_data_quality"
+      ],
+      "functional_role": "governance_source_risk",
+      "notes": "Top-level ontology role category required by RP5C.",
+      "ontology_category": "governance_source_risk",
+      "ontology_role_row_id": "RP5C_ONTOLOGY_ROLE_0013",
+      "ontology_subcategory": "governance_source_risk",
+      "qku_family_refs": [
+        "atomicrow_qku",
+        "prediction_market_formulaplugincontractv1",
+        "prediction_market_governance_source_risk",
+        "prediction_market_source_evidence_and_data_quality",
+        "qku_adverse_selection",
+        "qku_binary_contract_expected_value",
+        "qku_champion_challenger_arbitration",
+        "qku_conformal_lcb_or_uncertainty_ranking",
+        "qku_execution_adjusted_edge",
+        "qku_expected_shortfall_cvar",
+        "qku_expected_value",
+        "qku_formulaplugincontractv1",
+        "qku_governance_source_risk",
+        "qku_gross_edge",
+        "qku_lower_confidence_bound",
+        "qku_market_impact",
+        "qku_net_expected_pnl",
+        "qku_overfit_fdr",
+        "qku_positive_negative_decision",
+        "qku_robust_covariance_or_hrp_cluster",
+        "qku_source_evidence_and_data_quality"
+      ],
+      "route_rule_refs": [
+        "RP5C_ROUTE_RULE_0013"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
+      ]
+    },
+    {
+      "dependency_type_refs": [
+        "unknown_needs_review"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D",
+        "PR168-RP5E",
+        "RANK4"
+      ],
+      "formula_family_refs": [
+        "adverse_selection",
+        "binary_contract_expected_value",
+        "capacity",
+        "champion_challenger_arbitration",
+        "conformal_lcb_or_uncertainty_ranking",
+        "expected_gross_pnl",
+        "expected_shortfall_cvar",
+        "expected_value",
+        "expected_value_and_payoff",
+        "fdr_and_overfit_controls",
+        "fill",
+        "formula_compare",
+        "formula_contribution",
+        "formula_eligibility",
+        "formula_equivalence",
+        "formula_exec_receipt",
+        "formula_execution",
+        "formula_quality",
+        "formula_repair",
+        "formula_repair_semantic_risk",
+        "formula_stack",
+        "formula_stack_builder",
+        "formula_to_pnl_map",
+        "formula_universe",
+        "formula_variant",
+        "formulaplugincontractv1",
+        "latency",
+        "lower_confidence_bound",
+        "market_impact",
+        "market_implied_probability",
+        "net_expected_pnl",
+        "overfit_fdr",
+        "positive_negative_decision",
+        "qku_baseline_equation",
+        "qku_formula_identity_source",
+        "qku_repair",
+        "qku_repair_semantic_risk",
+        "regime",
+        "robust_covariance_or_hrp_cluster",
+        "tca",
+        "unit_dimension_invariant",
+        "unknown_needs_review",
+        "venue_mechanics_constraints"
+      ],
+      "functional_role": "unknown_needs_review",
+      "notes": "Top-level ontology role category required by RP5C.",
+      "ontology_category": "unknown_needs_review",
+      "ontology_role_row_id": "RP5C_ONTOLOGY_ROLE_0014",
+      "ontology_subcategory": "unknown_needs_review",
+      "qku_family_refs": [
+        "atomicrow_qku",
+        "prediction_market_unknown_needs_review",
+        "qku_adverse_selection",
+        "qku_binary_contract_expected_value",
+        "qku_capacity",
+        "qku_champion_challenger_arbitration",
+        "qku_conformal_lcb_or_uncertainty_ranking",
+        "qku_expected_gross_pnl",
+        "qku_expected_shortfall_cvar",
+        "qku_expected_value",
+        "qku_expected_value_and_payoff",
+        "qku_fdr_and_overfit_controls",
+        "qku_fill",
+        "qku_formula_compare",
+        "qku_formula_contribution",
+        "qku_formula_eligibility",
+        "qku_formula_equivalence",
+        "qku_formula_exec_receipt",
+        "qku_formula_execution",
+        "qku_formula_quality",
+        "qku_formula_repair",
+        "qku_formula_repair_semantic_risk",
+        "qku_formula_stack",
+        "qku_formula_stack_builder",
+        "qku_formula_to_pnl_map",
+        "qku_formula_universe",
+        "qku_formula_variant",
+        "qku_formulaplugincontractv1",
+        "qku_latency",
+        "qku_lower_confidence_bound",
+        "qku_market_impact",
+        "qku_market_implied_probability",
+        "qku_net_expected_pnl",
+        "qku_overfit_fdr",
+        "qku_positive_negative_decision",
+        "qku_qku_baseline_equation",
+        "qku_qku_formula_identity_source",
+        "qku_qku_repair",
+        "qku_qku_repair_semantic_risk",
+        "qku_regime",
+        "qku_robust_covariance_or_hrp_cluster",
+        "qku_tca",
+        "qku_unit_dimension_invariant",
+        "qku_unknown_needs_review",
+        "qku_venue_mechanics_constraints"
+      ],
+      "route_rule_refs": [
+        "RP5C_ROUTE_RULE_0014"
+      ],
+      "validator_refs": [
+        "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
+      ]
+    }
+  ],
+  "report_version": "PR168-RP5C-v1.0",
+  "rows_ref": "docs/master_plan/generated/rp5c/ontology_role_registry.jsonl",
+  "runtime_cash_receipt_count": 0,
+  "runtime_stack_generation_count": 0,
+  "silent_skipped_input_artifact_count": 0,
+  "source_truth_authority_created_count": 0,
+  "stack_combination_materialization_count": 0,
+  "trade_simulation_count": 0
+}

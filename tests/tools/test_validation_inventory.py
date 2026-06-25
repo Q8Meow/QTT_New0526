@@ -255,6 +255,21 @@ def test_inventory_has_pr168_rp5b_entries():
     assert "tools/validate_pr168_rp5b_active_registry_safe_cleanup.py" in validate_entry.tool_globs
 
 
+def test_inventory_has_pr168_rp5c_entries():
+    entries = inventory.inventory_by_id()
+    build_entry = entries["build_pr168_rp5c_immutable_qku_formula_library"]
+    validate_entry = entries["validate_pr168_rp5c_immutable_qku_formula_library"]
+
+    for entry in (build_entry, validate_entry):
+        assert entry.owner_pr_or_feature == "PR168_RP5C"
+        assert "docs/master_plan/generated/PR168_RP5C_*.report.json" in entry.output_globs
+        assert "docs/master_plan/generated/rp5c/**" in entry.output_globs
+        assert "tests/pr168_rp5c/**" in entry.required_when_files_match
+
+    assert "tools/build_pr168_rp5c_immutable_qku_formula_library.py" in build_entry.tool_globs
+    assert "tools/validate_pr168_rp5c_immutable_qku_formula_library.py" in validate_entry.tool_globs
+
+
 def test_inventory_knows_every_pytest_shard_phase_job():
     for phase in runner.ORDERED_PHASES:
         assert inventory.phase_job_id(phase) == inventory.VALIDATION_MATRIX_JOB_ID
