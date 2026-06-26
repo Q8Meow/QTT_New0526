@@ -85,7 +85,7 @@
   "raw_legacy_direct_agent_consumer_count": 0,
   "records": [
     {
-      "available_on_demand_count": 10,
+      "available_on_demand_count": 1471,
       "default_compute_count": 290,
       "downstream_consumer_refs": [
         "VS1-TradingIntelligence",
@@ -101,7 +101,7 @@
       "vs1_handoff_row_id": "RP5C_VS1_HANDOFF_0001"
     },
     {
-      "available_on_demand_count": 10,
+      "available_on_demand_count": 1471,
       "default_compute_count": 223,
       "downstream_consumer_refs": [
         "VS1-TradingIntelligence",
@@ -117,7 +117,7 @@
       "vs1_handoff_row_id": "RP5C_VS1_HANDOFF_0002"
     },
     {
-      "available_on_demand_count": 10,
+      "available_on_demand_count": 1471,
       "default_compute_count": 235,
       "downstream_consumer_refs": [
         "VS1-TradingIntelligence",

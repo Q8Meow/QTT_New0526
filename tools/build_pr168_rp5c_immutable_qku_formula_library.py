@@ -371,7 +371,17 @@ def _market_scope(record: dict[str, Any], path: str) -> tuple[str, str]:
         return "fx_macro", "fx_macro"
     if any(token in text for token in ("fixed_income", "bond", "rates")):
         return "fixed_income", "fixed_income"
-    if any(token in text for token in ("repo", "financing")):
+    repo_financing_evidence = re.search(
+        r"\b("
+        r"securities[_ -]?financing|"
+        r"secured[_ -]?financing|"
+        r"repo[_ -]?(financing|rate|market|trade|haircut|special|gc|collateral)|"
+        r"repurchase[_ -]?agreement|"
+        r"general[_ -]?collateral"
+        r")\b",
+        text,
+    )
+    if repo_financing_evidence:
         return "repo_financing", "repo_financing"
     if "cross_market" in text:
         return "cross_market", "cross_market"
@@ -1083,7 +1093,7 @@ def _master_market_family_and_applicability(row: dict[str, Any]) -> tuple[list[s
     if market_scope == "prediction_market":
         return ["PREDICTION_MARKETS"], "MARKET_SPECIFIC", blockers
     if market_scope == "market_agnostic":
-        return list(MASTER_PLAN_MARKET_FAMILIES), "CROSS_MARKET_SHARED", blockers
+        return [], "CROSS_MARKET_SHARED", blockers
     if market_scope == "equities":
         return ["EQUITIES_AND_ETFS"], "MARKET_SPECIFIC", blockers
     if market_scope == "options":
@@ -1144,9 +1154,13 @@ def _build_qku_market_applicability_matrix(rows: list[dict[str, Any]]) -> list[d
         market_family_refs, applicability_mode, blockers = _master_market_family_and_applicability(row)
         platform_refs = _platform_refs_for_identity(row, applicability_mode)
         stage_access_mode = _stage1_access_mode(market_family_refs, applicability_mode, platform_refs)
+        specific_market_family_refs = market_family_refs if applicability_mode == "MARKET_SPECIFIC" else []
         matrix_row_id = f"RP5C_QKU_MARKET_APPLICABILITY_{index:08d}"
         row["qku_market_applicability_matrix_refs"] = [matrix_row_id]
         row["master_plan_market_family_refs"] = market_family_refs
+        row["specific_market_family_refs"] = specific_market_family_refs
+        row["shared_cross_market_support_flag"] = applicability_mode == "CROSS_MARKET_SHARED"
+        row["unknown_needs_review_flag"] = applicability_mode == "UNKNOWN_NEEDS_REVIEW"
         row["applicability_mode"] = applicability_mode
         row["stage1_access_mode"] = stage_access_mode
         row["stage1_platform_refs"] = platform_refs
@@ -1157,7 +1171,10 @@ def _build_qku_market_applicability_matrix(rows: list[dict[str, Any]]) -> list[d
                 "qku_id": row.get("qku_id"),
                 "formula_id": row.get("formula_id"),
                 "market_family_refs": market_family_refs,
+                "specific_market_family_refs": specific_market_family_refs,
                 "applicability_mode": applicability_mode,
+                "shared_cross_market_support_flag": applicability_mode == "CROSS_MARKET_SHARED",
+                "unknown_needs_review_flag": applicability_mode == "UNKNOWN_NEEDS_REVIEW",
                 "platform_refs": platform_refs,
                 "stage_access_mode_by_profile": {STAGE1_PROFILE_ID: stage_access_mode},
                 "stage_profile_refs": [STAGE1_PROFILE_ID] if stage_access_mode in {"DEFAULT_COMPUTE", "AVAILABLE_ON_DEMAND"} else [],
@@ -1178,13 +1195,14 @@ def _build_qku_market_applicability_matrix(rows: list[dict[str, Any]]) -> list[d
 
 
 def _build_stage_profile_rows() -> list[dict[str, Any]]:
-    return [
+    rows = [
         {
             "stage_profile_row_id": "RP5C_STAGE_PROFILE_0001",
             "profile_id": STAGE1_PROFILE_ID,
             "enabled_market_family_refs": list(STAGE1_ENABLED_MARKET_FAMILIES),
             "enabled_platform_refs": list(STAGE1_ENABLED_PLATFORMS),
             "include_cross_market_shared": True,
+            "include_shared_cross_market_support": True,
             "access_modes": list(STAGE_ACCESS_MODES),
             "default_compute_access_mode": "DEFAULT_COMPUTE",
             "available_on_demand_access_mode": "AVAILABLE_ON_DEMAND",
@@ -1197,6 +1215,32 @@ def _build_stage_profile_rows() -> list[dict[str, Any]]:
             "notes": "Stage-1 prediction-market profile enables PREDICTION_MARKETS plus cross-market shared support by ID view only.",
         }
     ]
+    for market_family in MASTER_PLAN_MARKET_FAMILIES:
+        if market_family in STAGE1_ENABLED_MARKET_FAMILIES:
+            continue
+        rows.append(
+            {
+                "stage_profile_row_id": f"RP5C_STAGE_PROFILE_TEMPLATE_{len(rows) + 1:04d}",
+                "profile_id": f"MARKET_PROFILE_TEMPLATE_{market_family}",
+                "enabled_market_family_refs": [market_family],
+                "enabled_platform_refs": [],
+                "include_cross_market_shared": False,
+                "include_shared_cross_market_support": False,
+                "access_modes": list(STAGE_ACCESS_MODES),
+                "default_compute_access_mode": None,
+                "available_on_demand_access_mode": None,
+                "inactive_access_mode": "INACTIVE_FOR_STAGE",
+                "unknown_access_mode": "UNKNOWN_NEEDS_REVIEW",
+                "stage_profile_version": STAGE_PROFILE_VERSION,
+                "profile_state": "DISABLED_TEMPLATE_NEEDS_OWNER_STAGE_ASSIGNMENT",
+                "no_owner_approved_stage_number_claimed_flag": True,
+                "no_executability_tier_decided_flag": True,
+                "no_trade_simulation_flag": True,
+                "no_live_authority_flag": True,
+                "notes": "Disabled future market-family profile template; assigning a stage number belongs to a later owner-approved PR.",
+            }
+        )
+    return rows
 
 
 def _build_stage1_surfaces(rows: list[dict[str, Any]], matrix_by_identity: dict[str, dict[str, Any]]) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]], dict[str, Any]]:
@@ -1424,14 +1468,14 @@ def _agent_allowed_ontology_categories(agent_id: str, duties: list[str]) -> tupl
     allowed: set[str] = set()
     if "research" in text or "signal" in text or "scenario feature" in text or "materialization" in text:
         allowed.update({"signal_probability", "calibration", "market_implied_probability", "regime_scenario", "governance_source_risk"})
-    if "parameter" in text or "selection" in text or "ranking" in text or "retest" in text:
-        allowed.update({"signal_probability", "calibration", "classical_fallback", "governance_source_risk"})
+    if "parameter" in text or "selector" in text or "parameter_selector" in text:
+        allowed.update({"signal_probability", "calibration", "regime_scenario", "classical_fallback", "governance_source_risk"})
     if "risk" in text or "tca" in text or "capacity" in text or "microstructure" in text or "liquidity" in text or "latency" in text:
-        allowed.update({"tca_cost", "fill_queue_liquidity", "latency_staleness", "capacity_crowding", "portfolio_risk", "governance_source_risk"})
+        allowed.update({"tca_cost", "fill_queue_liquidity", "latency_staleness", "capacity_crowding", "portfolio_risk", "regime_scenario", "governance_source_risk"})
     if "quantum" in text or "qubo" in text or "ising" in text:
         allowed.update({"quantum_objective_constraint", "classical_fallback", "governance_source_risk"})
-    if "connector" in text or "venue" in text:
-        allowed.update({"market_implied_probability", "tca_cost", "fill_queue_liquidity", "latency_staleness", "governance_source_risk"})
+    if "connector" in text or "venue" in text or "execution" in text:
+        allowed.update({"market_implied_probability", "tca_cost", "fill_queue_liquidity", "latency_staleness", "exit_timing", "governance_source_risk"})
     if "dashboard" in text or "commander" in text:
         allowed.update({"governance_source_risk"})
         validator_only = True
@@ -1507,11 +1551,15 @@ def _stage_market_allowed(matrix_row: dict[str, Any], stage_profile: dict[str, A
 
 
 def _policy_allows_identity(policy: dict[str, Any], identity: dict[str, Any], matrix_row: dict[str, Any], platform_id: str, access_mode: str) -> bool:
+    market_allowed = (
+        matrix_row["applicability_mode"] == "CROSS_MARKET_SHARED"
+        or bool(set(matrix_row["market_family_refs"]) & set(policy["allowed_market_family_refs"]))
+    )
     return (
         identity.get("ontology_category") in set(policy["allowed_ontology_categories"])
         and identity.get("formula_family") in set(policy["allowed_formula_family_refs"])
         and identity.get("qku_family") in set(policy["allowed_qku_family_refs"])
-        and bool(set(matrix_row["market_family_refs"]) & set(policy["allowed_market_family_refs"]))
+        and market_allowed
         and platform_id in set(policy["allowed_platform_refs"])
         and access_mode in set(policy["allowed_access_modes"])
     )

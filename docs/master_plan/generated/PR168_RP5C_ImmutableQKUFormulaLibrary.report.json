@@ -92,10 +92,11 @@
       "all_provenance_tiers": [
         "UPSTREAM_FORMULA_QKU_REGISTRY"
       ],
-      "applicability_mode": "MARKET_SPECIFIC",
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
         "NEEDS_FAMILY_CLASSIFICATION",
         "NEEDS_FORMULA_EXPRESSION_REF",
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION",
         "NEEDS_ONTOLOGY_CLASSIFICATION"
       ],
       "canonical_identity_row_id": "RP5C_IDENTITY_00000001",
@@ -154,14 +155,12 @@
       "latency_dependency_refs": [],
       "latency_dependency_type": "unknown_needs_review",
       "library_state": "NEEDS_FORMULA_EXPRESSION_REF",
-      "market_family": "repo_financing",
-      "market_scope": "repo_financing",
+      "market_family": "unknown_needs_review",
+      "market_scope": "unknown_needs_review",
       "market_scope_registry_refs": [
-        "RP5C_MARKET_SCOPE_0009"
+        "RP5C_MARKET_SCOPE_0011"
       ],
-      "master_plan_market_family_refs": [
-        "SECURITIES_FINANCING_AND_REPO"
-      ],
+      "master_plan_market_family_refs": [],
       "mutation_allowed_flag": false,
       "no_orphan_reason": "Identity has source, registry classification, derived route, validators, downstream refs, and RP5D handoff.",
       "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
@@ -173,10 +172,10 @@
       ],
       "ontology_subcategory": "unknown_needs_review",
       "platform_applicability_registry_refs": [
-        "RP5C_PLATFORM_APPLICABILITY_0007"
+        "RP5C_PLATFORM_APPLICABILITY_0008"
       ],
       "platform_applicability_states": [
-        "NOT_STAGE1_PLATFORM_APPLICABLE"
+        "UNKNOWN_PLATFORM_SCOPE_NEEDS_REVIEW"
       ],
       "plugin_ref": null,
       "provenance_tier": "UPSTREAM_FORMULA_QKU_REGISTRY",
@@ -195,6 +194,7 @@
       ],
       "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "shared_cross_market_support_flag": false,
       "signal_dependency_refs": [],
       "source_artifact_ref": "docs/master_plan/generated/PR161C_QKUTypeTaxonomy.report.json",
       "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000096",
@@ -206,18 +206,20 @@
       "source_identity_value_ref": [],
       "source_line_or_json_path": "records[5]",
       "source_pr_ref": "UPSTREAM_QKU",
-      "stage1_access_mode": "INACTIVE_FOR_STAGE",
+      "specific_market_family_refs": [],
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000001"
       ],
       "stage1_agent_computation_universe_seed_refs": [],
-      "stage1_classification_state": "FUTURE_MARKET_DORMANT",
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
       "stage1_classification_states": [
-        "FUTURE_MARKET_DORMANT"
+        "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW"
       ],
       "stage1_dormant_future_market_flag": true,
       "stage1_platform_refs": [],
       "stage1_seed_inclusion_flag": false,
+      "unknown_needs_review_flag": true,
       "validator_refs": [
         "governance_agent",
         "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
@@ -230,9 +232,10 @@
       "all_provenance_tiers": [
         "RP5B_SEMANTIC_SUPERSESSION_INPUT"
       ],
-      "applicability_mode": "MARKET_SPECIFIC",
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
         "NEEDS_FORMULA_EXPRESSION_REF",
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION",
         "NEEDS_ONTOLOGY_CLASSIFICATION"
       ],
       "canonical_identity_row_id": "RP5C_IDENTITY_00000002",
@@ -291,14 +294,12 @@
       "latency_dependency_refs": [],
       "latency_dependency_type": "unknown_needs_review",
       "library_state": "NEEDS_FORMULA_EXPRESSION_REF",
-      "market_family": "repo_financing",
-      "market_scope": "repo_financing",
+      "market_family": "unknown_needs_review",
+      "market_scope": "unknown_needs_review",
       "market_scope_registry_refs": [
-        "RP5C_MARKET_SCOPE_0009"
+        "RP5C_MARKET_SCOPE_0011"
       ],
-      "master_plan_market_family_refs": [
-        "SECURITIES_FINANCING_AND_REPO"
-      ],
+      "master_plan_market_family_refs": [],
       "mutation_allowed_flag": false,
       "no_orphan_reason": "Identity has source, registry classification, derived route, validators, downstream refs, and RP5D handoff.",
       "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
@@ -310,10 +311,10 @@
       ],
       "ontology_subcategory": "unknown_needs_review",
       "platform_applicability_registry_refs": [
-        "RP5C_PLATFORM_APPLICABILITY_0007"
+        "RP5C_PLATFORM_APPLICABILITY_0008"
       ],
       "platform_applicability_states": [
-        "NOT_STAGE1_PLATFORM_APPLICABLE"
+        "UNKNOWN_PLATFORM_SCOPE_NEEDS_REVIEW"
       ],
       "plugin_ref": null,
       "provenance_tier": "RP5B_SEMANTIC_SUPERSESSION_INPUT",
@@ -332,6 +333,7 @@
       ],
       "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "shared_cross_market_support_flag": false,
       "signal_dependency_refs": [],
       "source_artifact_ref": "docs/master_plan/generated/PR168_RP5B_LegacySemanticSupersession.report.json",
       "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000221",
@@ -343,18 +345,20 @@
       "source_identity_value_ref": [],
       "source_line_or_json_path": "records[1]",
       "source_pr_ref": "RP5B",
-      "stage1_access_mode": "INACTIVE_FOR_STAGE",
+      "specific_market_family_refs": [],
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000002"
       ],
       "stage1_agent_computation_universe_seed_refs": [],
-      "stage1_classification_state": "FUTURE_MARKET_DORMANT",
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
       "stage1_classification_states": [
-        "FUTURE_MARKET_DORMANT"
+        "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW"
       ],
       "stage1_dormant_future_market_flag": true,
       "stage1_platform_refs": [],
       "stage1_seed_inclusion_flag": false,
+      "unknown_needs_review_flag": true,
       "validator_refs": [
         "governance_agent",
         "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
@@ -367,9 +371,10 @@
       "all_provenance_tiers": [
         "GENERATED_REPORT_HISTORICAL_EVIDENCE"
       ],
-      "applicability_mode": "MARKET_SPECIFIC",
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
         "NEEDS_FORMULA_EXPRESSION_REF",
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION",
         "NEEDS_ONTOLOGY_CLASSIFICATION"
       ],
       "canonical_identity_row_id": "RP5C_IDENTITY_00000003",
@@ -428,14 +433,12 @@
       "latency_dependency_refs": [],
       "latency_dependency_type": "unknown_needs_review",
       "library_state": "NEEDS_FORMULA_EXPRESSION_REF",
-      "market_family": "repo_financing",
-      "market_scope": "repo_financing",
+      "market_family": "unknown_needs_review",
+      "market_scope": "unknown_needs_review",
       "market_scope_registry_refs": [
-        "RP5C_MARKET_SCOPE_0009"
+        "RP5C_MARKET_SCOPE_0011"
       ],
-      "master_plan_market_family_refs": [
-        "SECURITIES_FINANCING_AND_REPO"
-      ],
+      "master_plan_market_family_refs": [],
       "mutation_allowed_flag": false,
       "no_orphan_reason": "Identity has source, registry classification, derived route, validators, downstream refs, and RP5D handoff.",
       "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
@@ -447,10 +450,10 @@
       ],
       "ontology_subcategory": "unknown_needs_review",
       "platform_applicability_registry_refs": [
-        "RP5C_PLATFORM_APPLICABILITY_0007"
+        "RP5C_PLATFORM_APPLICABILITY_0008"
       ],
       "platform_applicability_states": [
-        "NOT_STAGE1_PLATFORM_APPLICABLE"
+        "UNKNOWN_PLATFORM_SCOPE_NEEDS_REVIEW"
       ],
       "plugin_ref": null,
       "provenance_tier": "GENERATED_REPORT_HISTORICAL_EVIDENCE",
@@ -469,6 +472,7 @@
       ],
       "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "shared_cross_market_support_flag": false,
       "signal_dependency_refs": [],
       "source_artifact_ref": "docs/master_plan/generated/PR168_RP5A_WrongConceptTermIndex.report.json",
       "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000215",
@@ -480,18 +484,20 @@
       "source_identity_value_ref": [],
       "source_line_or_json_path": "records[1]",
       "source_pr_ref": "RP5A",
-      "stage1_access_mode": "INACTIVE_FOR_STAGE",
+      "specific_market_family_refs": [],
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000003"
       ],
       "stage1_agent_computation_universe_seed_refs": [],
-      "stage1_classification_state": "FUTURE_MARKET_DORMANT",
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
       "stage1_classification_states": [
-        "FUTURE_MARKET_DORMANT"
+        "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW"
       ],
       "stage1_dormant_future_market_flag": true,
       "stage1_platform_refs": [],
       "stage1_seed_inclusion_flag": false,
+      "unknown_needs_review_flag": true,
       "validator_refs": [
         "governance_agent",
         "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
@@ -606,6 +612,7 @@
       ],
       "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "shared_cross_market_support_flag": false,
       "signal_dependency_refs": [],
       "source_artifact_ref": "docs/master_plan/generated/rank3/rank_score_lineage_rows.jsonl",
       "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000239",
@@ -617,6 +624,7 @@
       "source_identity_value_ref": [],
       "source_line_or_json_path": "jsonl[1]",
       "source_pr_ref": "RANK3",
+      "specific_market_family_refs": [],
       "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000004"
@@ -629,6 +637,7 @@
       "stage1_dormant_future_market_flag": true,
       "stage1_platform_refs": [],
       "stage1_seed_inclusion_flag": false,
+      "unknown_needs_review_flag": true,
       "validator_refs": [
         "governance_agent",
         "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
@@ -740,6 +749,7 @@
       ],
       "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "shared_cross_market_support_flag": false,
       "signal_dependency_refs": [],
       "source_artifact_ref": "docs/master_plan/generated/map3/calibration_formula_rows.jsonl",
       "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000001",
@@ -754,6 +764,7 @@
       ],
       "source_line_or_json_path": "jsonl[1]",
       "source_pr_ref": "MAP3",
+      "specific_market_family_refs": [],
       "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000005"
@@ -766,6 +777,7 @@
       "stage1_dormant_future_market_flag": true,
       "stage1_platform_refs": [],
       "stage1_seed_inclusion_flag": false,
+      "unknown_needs_review_flag": true,
       "validator_refs": [
         "governance_agent",
         "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
@@ -877,6 +889,7 @@
       ],
       "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "shared_cross_market_support_flag": false,
       "signal_dependency_refs": [],
       "source_artifact_ref": "docs/master_plan/generated/map3/formula_factory_rows.jsonl",
       "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000011",
@@ -891,6 +904,7 @@
       ],
       "source_line_or_json_path": "jsonl[30]",
       "source_pr_ref": "MAP3",
+      "specific_market_family_refs": [],
       "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000006"
@@ -903,6 +917,7 @@
       "stage1_dormant_future_market_flag": true,
       "stage1_platform_refs": [],
       "stage1_seed_inclusion_flag": false,
+      "unknown_needs_review_flag": true,
       "validator_refs": [
         "governance_agent",
         "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
@@ -1015,6 +1030,7 @@
       ],
       "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "shared_cross_market_support_flag": false,
       "signal_dependency_refs": [],
       "source_artifact_ref": "docs/master_plan/generated/map3/formula_invariant_rows.jsonl",
       "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000015",
@@ -1029,6 +1045,7 @@
       ],
       "source_line_or_json_path": "jsonl[30]",
       "source_pr_ref": "MAP3",
+      "specific_market_family_refs": [],
       "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000007"
@@ -1041,6 +1058,7 @@
       "stage1_dormant_future_market_flag": true,
       "stage1_platform_refs": [],
       "stage1_seed_inclusion_flag": false,
+      "unknown_needs_review_flag": true,
       "validator_refs": [
         "governance_agent",
         "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
@@ -1153,6 +1171,7 @@
       ],
       "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "shared_cross_market_support_flag": false,
       "signal_dependency_refs": [],
       "source_artifact_ref": "docs/master_plan/generated/rp3/formula_exec_receipt_rows.jsonl",
       "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000257",
@@ -1167,6 +1186,7 @@
       ],
       "source_line_or_json_path": "jsonl[1]",
       "source_pr_ref": "RP3",
+      "specific_market_family_refs": [],
       "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000008"
@@ -1179,6 +1199,7 @@
       "stage1_dormant_future_market_flag": true,
       "stage1_platform_refs": [],
       "stage1_seed_inclusion_flag": false,
+      "unknown_needs_review_flag": true,
       "validator_refs": [
         "governance_agent",
         "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
@@ -1293,6 +1314,7 @@
       ],
       "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "shared_cross_market_support_flag": false,
       "signal_dependency_refs": [],
       "source_artifact_ref": "docs/master_plan/generated/rank3/rank_score_lineage_rows.jsonl",
       "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000239",
@@ -1304,6 +1326,7 @@
       "source_identity_value_ref": [],
       "source_line_or_json_path": "jsonl[2]",
       "source_pr_ref": "RANK3",
+      "specific_market_family_refs": [],
       "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000009"
@@ -1316,6 +1339,7 @@
       "stage1_dormant_future_market_flag": true,
       "stage1_platform_refs": [],
       "stage1_seed_inclusion_flag": false,
+      "unknown_needs_review_flag": true,
       "validator_refs": [
         "governance_agent",
         "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
@@ -1427,6 +1451,7 @@
       ],
       "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "shared_cross_market_support_flag": false,
       "signal_dependency_refs": [],
       "source_artifact_ref": "docs/master_plan/generated/map3/calibration_formula_rows.jsonl",
       "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000001",
@@ -1441,6 +1466,7 @@
       ],
       "source_line_or_json_path": "jsonl[2]",
       "source_pr_ref": "MAP3",
+      "specific_market_family_refs": [],
       "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000010"
@@ -1453,6 +1479,7 @@
       "stage1_dormant_future_market_flag": true,
       "stage1_platform_refs": [],
       "stage1_seed_inclusion_flag": false,
+      "unknown_needs_review_flag": true,
       "validator_refs": [
         "governance_agent",
         "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
@@ -1564,6 +1591,7 @@
       ],
       "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "shared_cross_market_support_flag": false,
       "signal_dependency_refs": [],
       "source_artifact_ref": "docs/master_plan/generated/map3/formula_factory_rows.jsonl",
       "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000011",
@@ -1578,6 +1606,7 @@
       ],
       "source_line_or_json_path": "jsonl[31]",
       "source_pr_ref": "MAP3",
+      "specific_market_family_refs": [],
       "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000011"
@@ -1590,6 +1619,7 @@
       "stage1_dormant_future_market_flag": true,
       "stage1_platform_refs": [],
       "stage1_seed_inclusion_flag": false,
+      "unknown_needs_review_flag": true,
       "validator_refs": [
         "governance_agent",
         "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
@@ -1702,6 +1732,7 @@
       ],
       "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "shared_cross_market_support_flag": false,
       "signal_dependency_refs": [],
       "source_artifact_ref": "docs/master_plan/generated/map3/formula_invariant_rows.jsonl",
       "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000015",
@@ -1716,6 +1747,7 @@
       ],
       "source_line_or_json_path": "jsonl[31]",
       "source_pr_ref": "MAP3",
+      "specific_market_family_refs": [],
       "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000012"
@@ -1728,6 +1760,7 @@
       "stage1_dormant_future_market_flag": true,
       "stage1_platform_refs": [],
       "stage1_seed_inclusion_flag": false,
+      "unknown_needs_review_flag": true,
       "validator_refs": [
         "governance_agent",
         "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
@@ -1840,6 +1873,7 @@
       ],
       "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "shared_cross_market_support_flag": false,
       "signal_dependency_refs": [],
       "source_artifact_ref": "docs/master_plan/generated/rp3/formula_exec_receipt_rows.jsonl",
       "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000257",
@@ -1854,6 +1888,7 @@
       ],
       "source_line_or_json_path": "jsonl[3]",
       "source_pr_ref": "RP3",
+      "specific_market_family_refs": [],
       "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000013"
@@ -1866,6 +1901,7 @@
       "stage1_dormant_future_market_flag": true,
       "stage1_platform_refs": [],
       "stage1_seed_inclusion_flag": false,
+      "unknown_needs_review_flag": true,
       "validator_refs": [
         "governance_agent",
         "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
@@ -1977,6 +2013,7 @@
       ],
       "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "shared_cross_market_support_flag": false,
       "signal_dependency_refs": [],
       "source_artifact_ref": "docs/master_plan/generated/map3/calibration_formula_rows.jsonl",
       "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000001",
@@ -1991,6 +2028,7 @@
       ],
       "source_line_or_json_path": "jsonl[3]",
       "source_pr_ref": "MAP3",
+      "specific_market_family_refs": [],
       "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000014"
@@ -2003,6 +2041,7 @@
       "stage1_dormant_future_market_flag": true,
       "stage1_platform_refs": [],
       "stage1_seed_inclusion_flag": false,
+      "unknown_needs_review_flag": true,
       "validator_refs": [
         "governance_agent",
         "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
@@ -2116,6 +2155,7 @@
       ],
       "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "shared_cross_market_support_flag": false,
       "signal_dependency_refs": [],
       "source_artifact_ref": "docs/master_plan/generated/map3/formula_invariant_rows.jsonl",
       "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000015",
@@ -2130,6 +2170,7 @@
       ],
       "source_line_or_json_path": "jsonl[32]",
       "source_pr_ref": "MAP3",
+      "specific_market_family_refs": [],
       "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000015"
@@ -2142,6 +2183,7 @@
       "stage1_dormant_future_market_flag": true,
       "stage1_platform_refs": [],
       "stage1_seed_inclusion_flag": false,
+      "unknown_needs_review_flag": true,
       "validator_refs": [
         "governance_agent",
         "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
@@ -2254,6 +2296,7 @@
       ],
       "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "shared_cross_market_support_flag": false,
       "signal_dependency_refs": [],
       "source_artifact_ref": "docs/master_plan/generated/rp3/formula_to_pnl_map_rows.jsonl",
       "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000269",
@@ -2268,6 +2311,7 @@
       ],
       "source_line_or_json_path": "jsonl[3]",
       "source_pr_ref": "RP3",
+      "specific_market_family_refs": [],
       "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000016"
@@ -2280,6 +2324,7 @@
       "stage1_dormant_future_market_flag": true,
       "stage1_platform_refs": [],
       "stage1_seed_inclusion_flag": false,
+      "unknown_needs_review_flag": true,
       "validator_refs": [
         "governance_agent",
         "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
@@ -2292,10 +2337,11 @@
       "all_provenance_tiers": [
         "UPSTREAM_FORMULA_QKU_REGISTRY"
       ],
-      "applicability_mode": "MARKET_SPECIFIC",
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
         "NEEDS_FAMILY_CLASSIFICATION",
         "NEEDS_FORMULA_EXPRESSION_REF",
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION",
         "NEEDS_ONTOLOGY_CLASSIFICATION"
       ],
       "canonical_identity_row_id": "RP5C_IDENTITY_00000055",
@@ -2354,14 +2400,12 @@
       "latency_dependency_refs": [],
       "latency_dependency_type": "unknown_needs_review",
       "library_state": "NEEDS_FORMULA_EXPRESSION_REF",
-      "market_family": "repo_financing",
-      "market_scope": "repo_financing",
+      "market_family": "unknown_needs_review",
+      "market_scope": "unknown_needs_review",
       "market_scope_registry_refs": [
-        "RP5C_MARKET_SCOPE_0009"
+        "RP5C_MARKET_SCOPE_0011"
       ],
-      "master_plan_market_family_refs": [
-        "SECURITIES_FINANCING_AND_REPO"
-      ],
+      "master_plan_market_family_refs": [],
       "mutation_allowed_flag": false,
       "no_orphan_reason": "Identity has source, registry classification, derived route, validators, downstream refs, and RP5D handoff.",
       "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
@@ -2373,10 +2417,10 @@
       ],
       "ontology_subcategory": "unknown_needs_review",
       "platform_applicability_registry_refs": [
-        "RP5C_PLATFORM_APPLICABILITY_0007"
+        "RP5C_PLATFORM_APPLICABILITY_0008"
       ],
       "platform_applicability_states": [
-        "NOT_STAGE1_PLATFORM_APPLICABLE"
+        "UNKNOWN_PLATFORM_SCOPE_NEEDS_REVIEW"
       ],
       "plugin_ref": null,
       "provenance_tier": "UPSTREAM_FORMULA_QKU_REGISTRY",
@@ -2395,6 +2439,7 @@
       ],
       "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "shared_cross_market_support_flag": false,
       "signal_dependency_refs": [],
       "source_artifact_ref": "docs/master_plan/generated/PR168_MAP3_QFormulaLift.report.json",
       "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000161",
@@ -2406,18 +2451,20 @@
       "source_identity_value_ref": [],
       "source_line_or_json_path": "records[3]",
       "source_pr_ref": "MAP3",
-      "stage1_access_mode": "INACTIVE_FOR_STAGE",
+      "specific_market_family_refs": [],
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000017"
       ],
       "stage1_agent_computation_universe_seed_refs": [],
-      "stage1_classification_state": "FUTURE_MARKET_DORMANT",
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
       "stage1_classification_states": [
-        "FUTURE_MARKET_DORMANT"
+        "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW"
       ],
       "stage1_dormant_future_market_flag": true,
       "stage1_platform_refs": [],
       "stage1_seed_inclusion_flag": false,
+      "unknown_needs_review_flag": true,
       "validator_refs": [
         "governance_agent",
         "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
@@ -2491,18 +2538,7 @@
       "market_scope_registry_refs": [
         "RP5C_MARKET_SCOPE_0002"
       ],
-      "master_plan_market_family_refs": [
-        "PREDICTION_MARKETS",
-        "EQUITIES_AND_ETFS",
-        "CRYPTO_SPOT",
-        "CRYPTO_DERIVATIVES",
-        "LISTED_OPTIONS",
-        "EXCHANGE_TRADED_FUTURES_AND_COMMODITIES",
-        "MACRO_FX_EVENT",
-        "SECURITIES_FINANCING_AND_REPO",
-        "FIXED_INCOME_RFQ",
-        "CROSS_MARKET_RELATIVE_VALUE"
-      ],
+      "master_plan_market_family_refs": [],
       "mutation_allowed_flag": false,
       "no_orphan_reason": "Identity has source, registry classification, derived route, validators, downstream refs, and RP5D handoff.",
       "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
@@ -2536,6 +2572,7 @@
       ],
       "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
       "rp5d_handoff_state": "READY_FOR_RP5D_EXECUTABILITY_CLASSIFICATION",
+      "shared_cross_market_support_flag": true,
       "signal_dependency_refs": [],
       "source_artifact_ref": "docs/master_plan/generated/map3/formula_factory_rows.jsonl",
       "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000011",
@@ -2550,6 +2587,7 @@
       ],
       "source_line_or_json_path": "jsonl[43]",
       "source_pr_ref": "MAP3",
+      "specific_market_family_refs": [],
       "stage1_access_mode": "AVAILABLE_ON_DEMAND",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000018"
@@ -2569,6 +2607,7 @@
         "FORECASTEX_IBKR"
       ],
       "stage1_seed_inclusion_flag": false,
+      "unknown_needs_review_flag": false,
       "validator_refs": [
         "governance_agent",
         "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
@@ -2682,6 +2721,7 @@
       ],
       "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "shared_cross_market_support_flag": false,
       "signal_dependency_refs": [],
       "source_artifact_ref": "docs/master_plan/generated/map3/formula_invariant_rows.jsonl",
       "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000015",
@@ -2696,6 +2736,7 @@
       ],
       "source_line_or_json_path": "jsonl[43]",
       "source_pr_ref": "MAP3",
+      "specific_market_family_refs": [],
       "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000019"
@@ -2708,6 +2749,7 @@
       "stage1_dormant_future_market_flag": true,
       "stage1_platform_refs": [],
       "stage1_seed_inclusion_flag": false,
+      "unknown_needs_review_flag": true,
       "validator_refs": [
         "governance_agent",
         "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
@@ -2783,18 +2825,7 @@
       "market_scope_registry_refs": [
         "RP5C_MARKET_SCOPE_0002"
       ],
-      "master_plan_market_family_refs": [
-        "PREDICTION_MARKETS",
-        "EQUITIES_AND_ETFS",
-        "CRYPTO_SPOT",
-        "CRYPTO_DERIVATIVES",
-        "LISTED_OPTIONS",
-        "EXCHANGE_TRADED_FUTURES_AND_COMMODITIES",
-        "MACRO_FX_EVENT",
-        "SECURITIES_FINANCING_AND_REPO",
-        "FIXED_INCOME_RFQ",
-        "CROSS_MARKET_RELATIVE_VALUE"
-      ],
+      "master_plan_market_family_refs": [],
       "mutation_allowed_flag": false,
       "no_orphan_reason": "Identity has source, registry classification, derived route, validators, downstream refs, and RP5D handoff.",
       "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
@@ -2828,6 +2859,7 @@
       ],
       "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "shared_cross_market_support_flag": true,
       "signal_dependency_refs": [],
       "source_artifact_ref": "docs/master_plan/generated/rp3/formula_exec_receipt_rows.jsonl",
       "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000257",
@@ -2842,6 +2874,7 @@
       ],
       "source_line_or_json_path": "jsonl[5]",
       "source_pr_ref": "RP3",
+      "specific_market_family_refs": [],
       "stage1_access_mode": "AVAILABLE_ON_DEMAND",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000020"
@@ -2861,6 +2894,7 @@
         "FORECASTEX_IBKR"
       ],
       "stage1_seed_inclusion_flag": false,
+      "unknown_needs_review_flag": false,
       "validator_refs": [
         "governance_agent",
         "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
@@ -2873,10 +2907,11 @@
       "all_provenance_tiers": [
         "UPSTREAM_FORMULA_QKU_REGISTRY"
       ],
-      "applicability_mode": "MARKET_SPECIFIC",
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
         "NEEDS_FAMILY_CLASSIFICATION",
         "NEEDS_FORMULA_EXPRESSION_REF",
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION",
         "NEEDS_ONTOLOGY_CLASSIFICATION"
       ],
       "canonical_identity_row_id": "RP5C_IDENTITY_00000071",
@@ -2935,14 +2970,12 @@
       "latency_dependency_refs": [],
       "latency_dependency_type": "unknown_needs_review",
       "library_state": "NEEDS_FORMULA_EXPRESSION_REF",
-      "market_family": "repo_financing",
-      "market_scope": "repo_financing",
+      "market_family": "unknown_needs_review",
+      "market_scope": "unknown_needs_review",
       "market_scope_registry_refs": [
-        "RP5C_MARKET_SCOPE_0009"
+        "RP5C_MARKET_SCOPE_0011"
       ],
-      "master_plan_market_family_refs": [
-        "SECURITIES_FINANCING_AND_REPO"
-      ],
+      "master_plan_market_family_refs": [],
       "mutation_allowed_flag": false,
       "no_orphan_reason": "Identity has source, registry classification, derived route, validators, downstream refs, and RP5D handoff.",
       "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
@@ -2954,10 +2987,10 @@
       ],
       "ontology_subcategory": "unknown_needs_review",
       "platform_applicability_registry_refs": [
-        "RP5C_PLATFORM_APPLICABILITY_0007"
+        "RP5C_PLATFORM_APPLICABILITY_0008"
       ],
       "platform_applicability_states": [
-        "NOT_STAGE1_PLATFORM_APPLICABLE"
+        "UNKNOWN_PLATFORM_SCOPE_NEEDS_REVIEW"
       ],
       "plugin_ref": null,
       "provenance_tier": "UPSTREAM_FORMULA_QKU_REGISTRY",
@@ -2976,6 +3009,7 @@
       ],
       "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "shared_cross_market_support_flag": false,
       "signal_dependency_refs": [],
       "source_artifact_ref": "docs/master_plan/generated/PR168_MAP3_QFormulaLift.report.json",
       "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000161",
@@ -2987,18 +3021,20 @@
       "source_identity_value_ref": [],
       "source_line_or_json_path": "records[4]",
       "source_pr_ref": "MAP3",
-      "stage1_access_mode": "INACTIVE_FOR_STAGE",
+      "specific_market_family_refs": [],
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000021"
       ],
       "stage1_agent_computation_universe_seed_refs": [],
-      "stage1_classification_state": "FUTURE_MARKET_DORMANT",
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
       "stage1_classification_states": [
-        "FUTURE_MARKET_DORMANT"
+        "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW"
       ],
       "stage1_dormant_future_market_flag": true,
       "stage1_platform_refs": [],
       "stage1_seed_inclusion_flag": false,
+      "unknown_needs_review_flag": true,
       "validator_refs": [
         "governance_agent",
         "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
@@ -3072,18 +3108,7 @@
       "market_scope_registry_refs": [
         "RP5C_MARKET_SCOPE_0002"
       ],
-      "master_plan_market_family_refs": [
-        "PREDICTION_MARKETS",
-        "EQUITIES_AND_ETFS",
-        "CRYPTO_SPOT",
-        "CRYPTO_DERIVATIVES",
-        "LISTED_OPTIONS",
-        "EXCHANGE_TRADED_FUTURES_AND_COMMODITIES",
-        "MACRO_FX_EVENT",
-        "SECURITIES_FINANCING_AND_REPO",
-        "FIXED_INCOME_RFQ",
-        "CROSS_MARKET_RELATIVE_VALUE"
-      ],
+      "master_plan_market_family_refs": [],
       "mutation_allowed_flag": false,
       "no_orphan_reason": "Identity has source, registry classification, derived route, validators, downstream refs, and RP5D handoff.",
       "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
@@ -3117,6 +3142,7 @@
       ],
       "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
       "rp5d_handoff_state": "READY_FOR_RP5D_EXECUTABILITY_CLASSIFICATION",
+      "shared_cross_market_support_flag": true,
       "signal_dependency_refs": [],
       "source_artifact_ref": "docs/master_plan/generated/map3/formula_factory_rows.jsonl",
       "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000011",
@@ -3131,6 +3157,7 @@
       ],
       "source_line_or_json_path": "jsonl[44]",
       "source_pr_ref": "MAP3",
+      "specific_market_family_refs": [],
       "stage1_access_mode": "AVAILABLE_ON_DEMAND",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000022"
@@ -3150,6 +3177,7 @@
         "FORECASTEX_IBKR"
       ],
       "stage1_seed_inclusion_flag": false,
+      "unknown_needs_review_flag": false,
       "validator_refs": [
         "governance_agent",
         "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
@@ -3263,6 +3291,7 @@
       ],
       "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "shared_cross_market_support_flag": false,
       "signal_dependency_refs": [],
       "source_artifact_ref": "docs/master_plan/generated/map3/formula_invariant_rows.jsonl",
       "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000015",
@@ -3277,6 +3306,7 @@
       ],
       "source_line_or_json_path": "jsonl[44]",
       "source_pr_ref": "MAP3",
+      "specific_market_family_refs": [],
       "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000023"
@@ -3289,6 +3319,7 @@
       "stage1_dormant_future_market_flag": true,
       "stage1_platform_refs": [],
       "stage1_seed_inclusion_flag": false,
+      "unknown_needs_review_flag": true,
       "validator_refs": [
         "governance_agent",
         "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
@@ -3364,18 +3395,7 @@
       "market_scope_registry_refs": [
         "RP5C_MARKET_SCOPE_0002"
       ],
-      "master_plan_market_family_refs": [
-        "PREDICTION_MARKETS",
-        "EQUITIES_AND_ETFS",
-        "CRYPTO_SPOT",
-        "CRYPTO_DERIVATIVES",
-        "LISTED_OPTIONS",
-        "EXCHANGE_TRADED_FUTURES_AND_COMMODITIES",
-        "MACRO_FX_EVENT",
-        "SECURITIES_FINANCING_AND_REPO",
-        "FIXED_INCOME_RFQ",
-        "CROSS_MARKET_RELATIVE_VALUE"
-      ],
+      "master_plan_market_family_refs": [],
       "mutation_allowed_flag": false,
       "no_orphan_reason": "Identity has source, registry classification, derived route, validators, downstream refs, and RP5D handoff.",
       "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
@@ -3409,6 +3429,7 @@
       ],
       "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "shared_cross_market_support_flag": true,
       "signal_dependency_refs": [],
       "source_artifact_ref": "docs/master_plan/generated/rp3/formula_to_pnl_map_rows.jsonl",
       "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000269",
@@ -3423,6 +3444,7 @@
       ],
       "source_line_or_json_path": "jsonl[5]",
       "source_pr_ref": "RP3",
+      "specific_market_family_refs": [],
       "stage1_access_mode": "AVAILABLE_ON_DEMAND",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000024"
@@ -3442,6 +3464,7 @@
         "FORECASTEX_IBKR"
       ],
       "stage1_seed_inclusion_flag": false,
+      "unknown_needs_review_flag": false,
       "validator_refs": [
         "governance_agent",
         "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
@@ -3556,6 +3579,7 @@
       ],
       "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "shared_cross_market_support_flag": false,
       "signal_dependency_refs": [],
       "source_artifact_ref": "docs/master_plan/generated/rank3/rank_score_lineage_rows.jsonl",
       "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000239",
@@ -3567,6 +3591,7 @@
       "source_identity_value_ref": [],
       "source_line_or_json_path": "jsonl[4]",
       "source_pr_ref": "RANK3",
+      "specific_market_family_refs": [],
       "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000025"
@@ -3579,6 +3604,7 @@
       "stage1_dormant_future_market_flag": true,
       "stage1_platform_refs": [],
       "stage1_seed_inclusion_flag": false,
+      "unknown_needs_review_flag": true,
       "validator_refs": [
         "governance_agent",
         "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"

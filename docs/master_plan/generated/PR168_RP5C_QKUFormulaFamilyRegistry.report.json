@@ -103,7 +103,8 @@
       "formula_subfamily": "adverse_selection",
       "formula_variant_refs": [],
       "market_scope_refs": [
-        "repo_financing"
+        "market_agnostic",
+        "unknown_needs_review"
       ],
       "notes": "Central family row generated from immutable library classifications.",
       "ontology_category_refs": [
@@ -137,7 +138,8 @@
       "formula_subfamily": "bayesian_shrinkage_calibration",
       "formula_variant_refs": [],
       "market_scope_refs": [
-        "repo_financing"
+        "market_agnostic",
+        "unknown_needs_review"
       ],
       "notes": "Central family row generated from immutable library classifications.",
       "ontology_category_refs": [
@@ -205,7 +207,8 @@
       "formula_subfamily": "bqm_objective",
       "formula_variant_refs": [],
       "market_scope_refs": [
-        "repo_financing"
+        "market_agnostic",
+        "unknown_needs_review"
       ],
       "notes": "Central family row generated from immutable library classifications.",
       "ontology_category_refs": [
@@ -278,7 +281,6 @@
       "formula_variant_refs": [],
       "market_scope_refs": [
         "prediction_market",
-        "repo_financing",
         "unknown_needs_review"
       ],
       "notes": "Central family row generated from immutable library classifications.",
@@ -1048,7 +1050,7 @@
       "formula_subfamily": "candidatepacketv1",
       "formula_variant_refs": [],
       "market_scope_refs": [
-        "repo_financing"
+        "unknown_needs_review"
       ],
       "notes": "Central family row generated from immutable library classifications.",
       "ontology_category_refs": [
@@ -1124,7 +1126,8 @@
       "formula_subfamily": "capacity_crowding",
       "formula_variant_refs": [],
       "market_scope_refs": [
-        "repo_financing"
+        "market_agnostic",
+        "unknown_needs_review"
       ],
       "notes": "Central family row generated from immutable library classifications.",
       "ontology_category_refs": [
@@ -1157,7 +1160,8 @@
       "formula_subfamily": "champion_challenger_arbitration",
       "formula_variant_refs": [],
       "market_scope_refs": [
-        "repo_financing"
+        "market_agnostic",
+        "unknown_needs_review"
       ],
       "notes": "Central family row generated from immutable library classifications.",
       "ontology_category_refs": [
@@ -1257,7 +1261,7 @@
       "formula_subfamily": "classical_fallback_objective",
       "formula_variant_refs": [],
       "market_scope_refs": [
-        "repo_financing"
+        "market_agnostic"
       ],
       "notes": "Central family row generated from immutable library classifications.",
       "ontology_category_refs": [
@@ -1290,7 +1294,8 @@
       "formula_subfamily": "conformal_lcb_or_uncertainty_ranking",
       "formula_variant_refs": [],
       "market_scope_refs": [
-        "repo_financing"
+        "market_agnostic",
+        "unknown_needs_review"
       ],
       "notes": "Central family row generated from immutable library classifications.",
       "ontology_category_refs": [
@@ -1324,7 +1329,8 @@
       "formula_subfamily": "cqm_objective",
       "formula_variant_refs": [],
       "market_scope_refs": [
-        "repo_financing"
+        "market_agnostic",
+        "unknown_needs_review"
       ],
       "notes": "Central family row generated from immutable library classifications.",
       "ontology_category_refs": [
@@ -1356,7 +1362,8 @@
       "formula_subfamily": "dqm_objective",
       "formula_variant_refs": [],
       "market_scope_refs": [
-        "repo_financing"
+        "market_agnostic",
+        "unknown_needs_review"
       ],
       "notes": "Central family row generated from immutable library classifications.",
       "ontology_category_refs": [
@@ -1389,7 +1396,8 @@
       "formula_subfamily": "execution_adjusted_edge",
       "formula_variant_refs": [],
       "market_scope_refs": [
-        "repo_financing"
+        "market_agnostic",
+        "unknown_needs_review"
       ],
       "notes": "Central family row generated from immutable library classifications.",
       "ontology_category_refs": [
@@ -1493,7 +1501,8 @@
       "formula_subfamily": "expected_shortfall_cvar",
       "formula_variant_refs": [],
       "market_scope_refs": [
-        "repo_financing"
+        "market_agnostic",
+        "unknown_needs_review"
       ],
       "notes": "Central family row generated from immutable library classifications.",
       "ontology_category_refs": [
@@ -1528,7 +1537,8 @@
       "formula_subfamily": "expected_value",
       "formula_variant_refs": [],
       "market_scope_refs": [
-        "repo_financing"
+        "market_agnostic",
+        "unknown_needs_review"
       ],
       "notes": "Central family row generated from immutable library classifications.",
       "ontology_category_refs": [
@@ -1603,7 +1613,8 @@
       "formula_subfamily": "explicit_fee_cost",
       "formula_variant_refs": [],
       "market_scope_refs": [
-        "repo_financing"
+        "market_agnostic",
+        "unknown_needs_review"
       ],
       "notes": "Central family row generated from immutable library classifications.",
       "ontology_category_refs": [

@@ -112,16 +112,7 @@
         "source_evidence_and_data_quality"
       ],
       "allowed_market_family_refs": [
-        "CROSS_MARKET_RELATIVE_VALUE",
-        "CRYPTO_DERIVATIVES",
-        "CRYPTO_SPOT",
-        "EQUITIES_AND_ETFS",
-        "EXCHANGE_TRADED_FUTURES_AND_COMMODITIES",
-        "FIXED_INCOME_RFQ",
-        "LISTED_OPTIONS",
-        "MACRO_FX_EVENT",
-        "PREDICTION_MARKETS",
-        "SECURITIES_FINANCING_AND_REPO"
+        "PREDICTION_MARKETS"
       ],
       "allowed_ontology_categories": [
         "governance_source_risk"
@@ -231,22 +222,14 @@
         "unit_dimension_invariant"
       ],
       "allowed_market_family_refs": [
-        "CROSS_MARKET_RELATIVE_VALUE",
-        "CRYPTO_DERIVATIVES",
-        "CRYPTO_SPOT",
-        "EQUITIES_AND_ETFS",
-        "EXCHANGE_TRADED_FUTURES_AND_COMMODITIES",
-        "FIXED_INCOME_RFQ",
-        "LISTED_OPTIONS",
-        "MACRO_FX_EVENT",
-        "PREDICTION_MARKETS",
-        "SECURITIES_FINANCING_AND_REPO"
+        "PREDICTION_MARKETS"
       ],
       "allowed_ontology_categories": [
         "market_implied_probability",
         "tca_cost",
         "fill_queue_liquidity",
         "latency_staleness",
+        "exit_timing",
         "governance_source_risk"
       ],
       "allowed_platform_refs": [
@@ -355,16 +338,7 @@
         "source_evidence_and_data_quality"
       ],
       "allowed_market_family_refs": [
-        "CROSS_MARKET_RELATIVE_VALUE",
-        "CRYPTO_DERIVATIVES",
-        "CRYPTO_SPOT",
-        "EQUITIES_AND_ETFS",
-        "EXCHANGE_TRADED_FUTURES_AND_COMMODITIES",
-        "FIXED_INCOME_RFQ",
-        "LISTED_OPTIONS",
-        "MACRO_FX_EVENT",
-        "PREDICTION_MARKETS",
-        "SECURITIES_FINANCING_AND_REPO"
+        "PREDICTION_MARKETS"
       ],
       "allowed_ontology_categories": [
         "governance_source_risk"
@@ -527,16 +501,7 @@
         "venue_mechanics_constraints"
       ],
       "allowed_market_family_refs": [
-        "CROSS_MARKET_RELATIVE_VALUE",
-        "CRYPTO_DERIVATIVES",
-        "CRYPTO_SPOT",
-        "EQUITIES_AND_ETFS",
-        "EXCHANGE_TRADED_FUTURES_AND_COMMODITIES",
-        "FIXED_INCOME_RFQ",
-        "LISTED_OPTIONS",
-        "MACRO_FX_EVENT",
-        "PREDICTION_MARKETS",
-        "SECURITIES_FINANCING_AND_REPO"
+        "PREDICTION_MARKETS"
       ],
       "allowed_ontology_categories": [
         "signal_probability",
@@ -736,6 +701,9 @@
         "portfolio_marginal_utility_component",
         "positive_negative_decision",
         "quantum_objective_coefficient",
+        "regime_and_scenario_ladder",
+        "regime_conditioned_memory",
+        "regime_scenario",
         "robust_covariance_or_hrp_cluster",
         "scenario_transform",
         "signal_probability",
@@ -746,20 +714,12 @@
         "venue_mechanics_constraints"
       ],
       "allowed_market_family_refs": [
-        "CROSS_MARKET_RELATIVE_VALUE",
-        "CRYPTO_DERIVATIVES",
-        "CRYPTO_SPOT",
-        "EQUITIES_AND_ETFS",
-        "EXCHANGE_TRADED_FUTURES_AND_COMMODITIES",
-        "FIXED_INCOME_RFQ",
-        "LISTED_OPTIONS",
-        "MACRO_FX_EVENT",
-        "PREDICTION_MARKETS",
-        "SECURITIES_FINANCING_AND_REPO"
+        "PREDICTION_MARKETS"
       ],
       "allowed_ontology_categories": [
         "signal_probability",
         "calibration",
+        "regime_scenario",
         "classical_fallback",
         "governance_source_risk"
       ],
@@ -778,6 +738,7 @@
         "prediction_market_fdr_and_overfit_controls",
         "prediction_market_formulaplugincontractv1",
         "prediction_market_governance_source_risk",
+        "prediction_market_regime_and_scenario_ladder",
         "prediction_market_source_evidence_and_data_quality",
         "prediction_market_trade_price_history_features",
         "prediction_market_venue_mechanics_constraints",
@@ -808,11 +769,15 @@
         "qku_portfolio_marginal_utility_component",
         "qku_positive_negative_decision",
         "qku_quantum_objective_coefficient",
+        "qku_regime_and_scenario_ladder",
+        "qku_regime_conditioned_memory",
+        "qku_regime_scenario",
         "qku_robust_covariance_or_hrp_cluster",
         "qku_scenario_transform",
         "qku_signal_probability",
         "qku_source_evidence_and_data_quality",
         "qku_tca_component",
+        "qku_trade_price_history_features",
         "qku_unit_dimension_invariant"
       ],
       "canonical_agent_ref": "parameter_selector_agent",
@@ -877,16 +842,7 @@
         "source_evidence_and_data_quality"
       ],
       "allowed_market_family_refs": [
-        "CROSS_MARKET_RELATIVE_VALUE",
-        "CRYPTO_DERIVATIVES",
-        "CRYPTO_SPOT",
-        "EQUITIES_AND_ETFS",
-        "EXCHANGE_TRADED_FUTURES_AND_COMMODITIES",
-        "FIXED_INCOME_RFQ",
-        "LISTED_OPTIONS",
-        "MACRO_FX_EVENT",
-        "PREDICTION_MARKETS",
-        "SECURITIES_FINANCING_AND_REPO"
+        "PREDICTION_MARKETS"
       ],
       "allowed_ontology_categories": [
         "quantum_objective_constraint",
@@ -973,8 +929,6 @@
         "calibration_or_lcb_component",
         "candidatepacketv1",
         "champion_challenger_arbitration",
-        "classical_fallback",
-        "classical_fallback_objective",
         "conformal_lcb_or_uncertainty_ranking",
         "execution_adjusted_edge",
         "expected_gross_pnl",
@@ -1009,23 +963,13 @@
         "venue_mechanics_constraints"
       ],
       "allowed_market_family_refs": [
-        "CROSS_MARKET_RELATIVE_VALUE",
-        "CRYPTO_DERIVATIVES",
-        "CRYPTO_SPOT",
-        "EQUITIES_AND_ETFS",
-        "EXCHANGE_TRADED_FUTURES_AND_COMMODITIES",
-        "FIXED_INCOME_RFQ",
-        "LISTED_OPTIONS",
-        "MACRO_FX_EVENT",
-        "PREDICTION_MARKETS",
-        "SECURITIES_FINANCING_AND_REPO"
+        "PREDICTION_MARKETS"
       ],
       "allowed_ontology_categories": [
         "signal_probability",
         "calibration",
         "market_implied_probability",
         "regime_scenario",
-        "classical_fallback",
         "governance_source_risk"
       ],
       "allowed_platform_refs": [
@@ -1038,7 +982,6 @@
         "prediction_market_break_even_and_required_edge",
         "prediction_market_calibration",
         "prediction_market_calibration_and_scoring",
-        "prediction_market_classical_fallback",
         "prediction_market_expected_value_and_payoff",
         "prediction_market_fdr_and_overfit_controls",
         "prediction_market_formulaplugincontractv1",
@@ -1056,7 +999,6 @@
         "qku_calibration_and_scoring",
         "qku_calibration_or_lcb_component",
         "qku_champion_challenger_arbitration",
-        "qku_classical_fallback_objective",
         "qku_conformal_lcb_or_uncertainty_ranking",
         "qku_execution_adjusted_edge",
         "qku_expected_gross_pnl",
@@ -1121,25 +1063,17 @@
       ],
       "allowed_formula_family_refs": [
         "adverse_selection",
-        "bayesian_shrinkage_calibration",
         "binary_contract_expected_value",
         "break_even_and_required_edge",
-        "calibration",
-        "calibration_and_scoring",
-        "calibration_or_lcb_component",
         "capacity",
         "capacity_crowding",
         "champion_challenger_arbitration",
-        "classical_fallback",
-        "classical_fallback_objective",
         "conformal_lcb_or_uncertainty_ranking",
         "execution_adjusted_edge",
         "expected_gross_pnl",
         "expected_shortfall_cvar",
         "expected_value",
-        "expected_value_and_payoff",
         "explicit_fee_cost",
-        "fdr_and_overfit_controls",
         "fill_latency_capacity",
         "fill_probability_or_fillability",
         "fill_queue_liquidity",
@@ -1161,12 +1095,12 @@
         "portfolio_marginal_utility_component",
         "portfolio_risk",
         "positive_negative_decision",
-        "quantum_objective_coefficient",
         "queue_fill_probability",
+        "regime_and_scenario_ladder",
+        "regime_conditioned_memory",
+        "regime_scenario",
         "risk_budget",
         "robust_covariance_or_hrp_cluster",
-        "scenario_transform",
-        "signal_probability",
         "slippage_cost",
         "source_evidence_and_data_quality",
         "spread_cost",
@@ -1175,30 +1109,18 @@
         "tca_decomposition",
         "tca_implementation_shortfall",
         "trade_price_history_features",
-        "unit_dimension_invariant",
-        "venue_mechanics_constraints"
+        "unit_dimension_invariant"
       ],
       "allowed_market_family_refs": [
-        "CROSS_MARKET_RELATIVE_VALUE",
-        "CRYPTO_DERIVATIVES",
-        "CRYPTO_SPOT",
-        "EQUITIES_AND_ETFS",
-        "EXCHANGE_TRADED_FUTURES_AND_COMMODITIES",
-        "FIXED_INCOME_RFQ",
-        "LISTED_OPTIONS",
-        "MACRO_FX_EVENT",
-        "PREDICTION_MARKETS",
-        "SECURITIES_FINANCING_AND_REPO"
+        "PREDICTION_MARKETS"
       ],
       "allowed_ontology_categories": [
-        "signal_probability",
-        "calibration",
         "tca_cost",
         "fill_queue_liquidity",
         "latency_staleness",
         "capacity_crowding",
         "portfolio_risk",
-        "classical_fallback",
+        "regime_scenario",
         "governance_source_risk"
       ],
       "allowed_platform_refs": [
@@ -1209,11 +1131,6 @@
       "allowed_qku_family_refs": [
         "atomicrow_qku",
         "prediction_market_break_even_and_required_edge",
-        "prediction_market_calibration",
-        "prediction_market_calibration_and_scoring",
-        "prediction_market_classical_fallback",
-        "prediction_market_expected_value_and_payoff",
-        "prediction_market_fdr_and_overfit_controls",
         "prediction_market_fill_latency_capacity",
         "prediction_market_fill_queue_liquidity",
         "prediction_market_formulaplugincontractv1",
@@ -1222,30 +1139,22 @@
         "prediction_market_orderbook_microstructure",
         "prediction_market_portfolio_and_marginal_utility",
         "prediction_market_portfolio_risk",
+        "prediction_market_regime_and_scenario_ladder",
         "prediction_market_source_evidence_and_data_quality",
         "prediction_market_tca_cost",
         "prediction_market_tca_implementation_shortfall",
-        "prediction_market_trade_price_history_features",
-        "prediction_market_venue_mechanics_constraints",
         "qku_adverse_selection",
-        "qku_bayesian_shrinkage_calibration",
         "qku_binary_contract_expected_value",
         "qku_break_even_and_required_edge",
-        "qku_calibration",
-        "qku_calibration_and_scoring",
-        "qku_calibration_or_lcb_component",
         "qku_capacity",
         "qku_capacity_crowding",
         "qku_champion_challenger_arbitration",
-        "qku_classical_fallback_objective",
         "qku_conformal_lcb_or_uncertainty_ranking",
         "qku_execution_adjusted_edge",
         "qku_expected_gross_pnl",
         "qku_expected_shortfall_cvar",
         "qku_expected_value",
-        "qku_expected_value_and_payoff",
         "qku_explicit_fee_cost",
-        "qku_fdr_and_overfit_controls",
         "qku_fill_latency_capacity",
         "qku_fill_probability_or_fillability",
         "qku_fill_queue_liquidity",
@@ -1265,12 +1174,12 @@
         "qku_portfolio_marginal_utility",
         "qku_portfolio_marginal_utility_component",
         "qku_positive_negative_decision",
-        "qku_quantum_objective_coefficient",
         "qku_queue_fill_probability",
+        "qku_regime_and_scenario_ladder",
+        "qku_regime_conditioned_memory",
+        "qku_regime_scenario",
         "qku_risk_budget",
         "qku_robust_covariance_or_hrp_cluster",
-        "qku_scenario_transform",
-        "qku_signal_probability",
         "qku_slippage_cost",
         "qku_source_evidence_and_data_quality",
         "qku_spread_cost",
@@ -1278,6 +1187,7 @@
         "qku_tca_cost",
         "qku_tca_decomposition",
         "qku_tca_implementation_shortfall",
+        "qku_trade_price_history_features",
         "qku_unit_dimension_invariant"
       ],
       "canonical_agent_ref": "risk_manager_agent",

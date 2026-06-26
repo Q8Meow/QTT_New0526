@@ -87,6 +87,7 @@
       "blocker_codes": [
         "NEEDS_FAMILY_CLASSIFICATION",
         "NEEDS_FORMULA_EXPRESSION_REF",
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION",
         "NEEDS_ONTOLOGY_CLASSIFICATION"
       ],
       "downstream_agent_refs_derived": [
@@ -112,7 +113,7 @@
       "route_rule_match_basis": {
         "dependency_type": "unknown_needs_review",
         "formula_family": "unknown_needs_review",
-        "market_scope": "repo_financing",
+        "market_scope": "unknown_needs_review",
         "ontology_category": "unknown_needs_review",
         "qku_family": "qku_unknown_needs_review"
       },
@@ -129,6 +130,7 @@
     {
       "blocker_codes": [
         "NEEDS_FORMULA_EXPRESSION_REF",
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION",
         "NEEDS_ONTOLOGY_CLASSIFICATION"
       ],
       "downstream_agent_refs_derived": [
@@ -154,7 +156,7 @@
       "route_rule_match_basis": {
         "dependency_type": "unknown_needs_review",
         "formula_family": "formula_repair",
-        "market_scope": "repo_financing",
+        "market_scope": "unknown_needs_review",
         "ontology_category": "unknown_needs_review",
         "qku_family": "qku_formula_repair"
       },
@@ -171,6 +173,7 @@
     {
       "blocker_codes": [
         "NEEDS_FORMULA_EXPRESSION_REF",
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION",
         "NEEDS_ONTOLOGY_CLASSIFICATION"
       ],
       "downstream_agent_refs_derived": [
@@ -196,7 +199,7 @@
       "route_rule_match_basis": {
         "dependency_type": "unknown_needs_review",
         "formula_family": "formula_repair_semantic_risk",
-        "market_scope": "repo_financing",
+        "market_scope": "unknown_needs_review",
         "ontology_category": "unknown_needs_review",
         "qku_family": "qku_formula_repair_semantic_risk"
       },
@@ -770,6 +773,7 @@
       "blocker_codes": [
         "NEEDS_FAMILY_CLASSIFICATION",
         "NEEDS_FORMULA_EXPRESSION_REF",
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION",
         "NEEDS_ONTOLOGY_CLASSIFICATION"
       ],
       "downstream_agent_refs_derived": [
@@ -795,7 +799,7 @@
       "route_rule_match_basis": {
         "dependency_type": "unknown_needs_review",
         "formula_family": "unknown_needs_review",
-        "market_scope": "repo_financing",
+        "market_scope": "unknown_needs_review",
         "ontology_category": "unknown_needs_review",
         "qku_family": "qku_unknown_needs_review"
       },
@@ -939,6 +943,7 @@
       "blocker_codes": [
         "NEEDS_FAMILY_CLASSIFICATION",
         "NEEDS_FORMULA_EXPRESSION_REF",
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION",
         "NEEDS_ONTOLOGY_CLASSIFICATION"
       ],
       "downstream_agent_refs_derived": [
@@ -964,7 +969,7 @@
       "route_rule_match_basis": {
         "dependency_type": "unknown_needs_review",
         "formula_family": "unknown_needs_review",
-        "market_scope": "repo_financing",
+        "market_scope": "unknown_needs_review",
         "ontology_category": "unknown_needs_review",
         "qku_family": "qku_unknown_needs_review"
       },

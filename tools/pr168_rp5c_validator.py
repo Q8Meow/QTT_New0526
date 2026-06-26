@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import re
 from typing import Any
 
 from tools.pr168_rp5c_config import (
@@ -89,6 +90,7 @@ def _failures() -> list[str]:
             failures.append(f"SOURCE_ROW_MISSING_VALIDATOR:{row.get('source_file_path')}")
 
     identities = read_jsonl(shard_path("immutable_qku_formula_library"))
+    identity_by_id = {row["identity_row_id"]: row for row in identities}
     qku_rows = read_jsonl(shard_path("immutable_qku_library"))
     formula_rows = read_jsonl(shard_path("immutable_formula_library"))
     if not identities or not qku_rows or not formula_rows:
@@ -221,10 +223,41 @@ def _failures() -> list[str]:
             failures.append(f"MARKET_APPLICABILITY_INVALID_MODE:{row.get('identity_row_id')}")
         if set(row.get("market_family_refs", [])) - valid_market_families:
             failures.append(f"MARKET_APPLICABILITY_INVALID_FAMILY:{row.get('identity_row_id')}")
+        if row.get("applicability_mode") == "CROSS_MARKET_SHARED":
+            if row.get("shared_cross_market_support_flag") is not True:
+                failures.append(f"CROSS_MARKET_SHARED_FLAG_FALSE:{row.get('identity_row_id')}")
+            if row.get("specific_market_family_refs"):
+                failures.append(f"CROSS_MARKET_SHARED_HAS_SPECIFIC_MARKET_REFS:{row.get('identity_row_id')}")
         if row.get("applicability_mode") == "UNKNOWN_NEEDS_REVIEW" and "CROSS_MARKET_SHARED" in row.get("market_family_refs", []):
             failures.append(f"UNKNOWN_ROW_SILENTLY_CROSS_MARKET:{row.get('identity_row_id')}")
         if row.get("applicability_mode") == "CROSS_MARKET_SHARED" and row.get("stage_access_mode_by_profile", {}).get(STAGE1_PROFILE_ID) == "DEFAULT_COMPUTE":
             failures.append(f"CROSS_MARKET_SHARED_DEFAULT_COMPUTE:{row.get('identity_row_id')}")
+        if "SECURITIES_FINANCING_AND_REPO" in row.get("market_family_refs", []):
+            identity = identity_by_id.get(row["identity_row_id"], {})
+            evidence = " ".join(
+                str(value)
+                for value in [
+                    identity.get("qku_id"),
+                    identity.get("formula_id"),
+                    identity.get("formula_family"),
+                    identity.get("qku_family"),
+                    identity.get("source_file_path"),
+                    *identity.get("blocker_codes", []),
+                ]
+            )
+            repo_financing_evidence = re.search(
+                r"\b("
+                r"securities[_ -]?financing|"
+                r"secured[_ -]?financing|"
+                r"repo[_ -]?(financing|rate|market|trade|haircut|special|gc|collateral)|"
+                r"repurchase[_ -]?agreement|"
+                r"general[_ -]?collateral"
+                r")\b",
+                evidence,
+                flags=re.IGNORECASE,
+            )
+            if not repo_financing_evidence:
+                failures.append(f"REPO_FINANCING_WITHOUT_REPO_EVIDENCE:{row.get('identity_row_id')}")
         if row.get("market_scope_or_platform_creates_trading_authority_flag") is not False:
             failures.append(f"MARKET_APPLICABILITY_TRADING_AUTHORITY:{row.get('identity_row_id')}")
     if not any(row.get("applicability_mode") == "CROSS_MARKET_SHARED" for row in matrix_rows):
@@ -242,13 +275,26 @@ def _failures() -> list[str]:
             failures.append("STAGE_PROFILE_PLATFORM_REFS_MISMATCH")
         if stage_profile.get("include_cross_market_shared") is not True:
             failures.append("STAGE_PROFILE_DOES_NOT_INCLUDE_CROSS_MARKET_SHARED")
+        if stage_profile.get("include_shared_cross_market_support") is not True:
+            failures.append("STAGE_PROFILE_SHARED_SUPPORT_ALIAS_MISSING")
         if set(stage_profile.get("access_modes", [])) != set(STAGE_ACCESS_MODES):
             failures.append("STAGE_PROFILE_ACCESS_MODES_MISMATCH")
         if stage_profile.get("stage_profile_version") != STAGE_PROFILE_VERSION:
             failures.append("STAGE_PROFILE_VERSION_MISMATCH")
+    represented_profile_families = {
+        row.get("enabled_market_family_refs", [None])[0]
+        for row in stage_profiles
+        if row.get("enabled_market_family_refs")
+    }
+    if set(MASTER_PLAN_MARKET_FAMILIES) - represented_profile_families:
+        failures.append("STAGE_PROFILE_MARKET_FAMILY_TEMPLATES_INCOMPLETE")
+    for row in stage_profiles:
+        if row.get("profile_id") != STAGE1_PROFILE_ID and row.get("profile_state") != "DISABLED_TEMPLATE_NEEDS_OWNER_STAGE_ASSIGNMENT":
+            failures.append(f"FUTURE_STAGE_PROFILE_NOT_DISABLED_TEMPLATE:{row.get('profile_id')}")
 
     if not access_policies:
         failures.append("AGENT_ACCESS_POLICY_EMPTY")
+    policies_by_agent = {row.get("agent_id"): row for row in access_policies}
     for row in access_policies:
         if row.get("agent_access_policy_version") != AGENT_ACCESS_POLICY_VERSION:
             failures.append(f"AGENT_ACCESS_POLICY_VERSION_MISMATCH:{row.get('agent_id')}")
@@ -261,6 +307,16 @@ def _failures() -> list[str]:
                 failures.append(f"AGENT_ACCESS_POLICY_MISSING_{field.upper()}:{row.get('agent_id')}")
         if not {"docs/master_plan/generated/PR165_D2_AgentRosterDiscoveryAudit.report.json", "docs/master_plan/generated/PR165_D2_AgentDutySourceCrosswalk.report.json"}.issubset(set(row.get("source_duty_refs", []))):
             failures.append(f"AGENT_ACCESS_POLICY_MISSING_PR165_D2_SOURCE:{row.get('agent_id')}")
+    expected_agent_categories = {
+        "research_agent": {"signal_probability", "calibration", "market_implied_probability", "regime_scenario"},
+        "connector_venue_readiness_future_consumer": {"tca_cost", "fill_queue_liquidity", "latency_staleness", "exit_timing"},
+        "risk_manager_agent": {"portfolio_risk", "capacity_crowding", "regime_scenario", "governance_source_risk"},
+        "quantum_optimizer_agent": {"quantum_objective_constraint", "classical_fallback"},
+    }
+    for agent_id, expected_categories in expected_agent_categories.items():
+        actual_categories = set(policies_by_agent.get(agent_id, {}).get("allowed_ontology_categories", []))
+        if not expected_categories.issubset(actual_categories):
+            failures.append(f"AGENT_ACCESS_POLICY_CATEGORY_GAP:{agent_id}")
 
     if {row.get("platform_id") for row in stage_views} != set(STAGE1_ENABLED_PLATFORMS):
         failures.append("STAGE_COMPUTATION_VIEW_PLATFORM_MISMATCH")
@@ -313,6 +369,9 @@ def _failures() -> list[str]:
     vs1_report = read_json(report_path("PR168_RP5C_ToVS1TradingIntelligenceHandoff.report.json"))
     if vs1_report.get("no_trade_simulation_or_live_authority_flag") is not True or vs1_report.get("no_source_truth_authority_flag") is not True:
         failures.append("VS1_HANDOFF_FORBIDDEN_AUTHORITY")
+    reader_source = (report_path("PR168_RP5C_FinalSummary.report.json").parents[3] / "tools" / "pr168_rp5c_library_reader.py").read_text(encoding="utf-8")
+    if 'for identity in sorted(data["immutable_qku_formula_library"]' in reader_source:
+        failures.append("LIBRARY_READER_QUERY_SCANS_FULL_UNIVERSE")
 
     reader_library = load_library()
     if reader_library.get("raw_legacy_surface_paths_read"):

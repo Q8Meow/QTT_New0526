@@ -83,7 +83,7 @@
   },
   "independent_full_library_copy_count": 0,
   "input_artifact_counts": {
-    "discovery_elapsed_seconds_rounded": 0.035,
+    "discovery_elapsed_seconds_rounded": 0.034,
     "found_input_artifact_count": 272,
     "input_artifact_count": 272,
     "inspected_input_roots": [
@@ -130,8 +130,8 @@
     ],
     "stage1_default_full_universe_compute_route_count": 0,
     "stage_agent_resolver_row_count": 24,
-    "stage_available_on_demand_count_max": 10,
-    "stage_available_on_demand_count_min": 10,
+    "stage_available_on_demand_count_max": 1471,
+    "stage_available_on_demand_count_min": 1471,
     "stage_computation_universe_view_count": 3,
     "stage_default_compute_count_max": 290,
     "stage_default_compute_count_min": 223
@@ -229,7 +229,7 @@
     "global_qku_ban_count": 0,
     "independent_full_library_copy_count": 0,
     "input_artifact_counts": {
-      "discovery_elapsed_seconds_rounded": 0.035,
+      "discovery_elapsed_seconds_rounded": 0.034,
       "found_input_artifact_count": 272,
       "input_artifact_count": 272,
       "inspected_input_roots": [
@@ -275,8 +275,8 @@
       ],
       "stage1_default_full_universe_compute_route_count": 0,
       "stage_agent_resolver_row_count": 24,
-      "stage_available_on_demand_count_max": 10,
-      "stage_available_on_demand_count_min": 10,
+      "stage_available_on_demand_count_max": 1471,
+      "stage_available_on_demand_count_min": 1471,
       "stage_computation_universe_view_count": 3,
       "stage_default_compute_count_max": 290,
       "stage_default_compute_count_min": 223
@@ -334,13 +334,13 @@
     "routing_rule_count": 14,
     "rp5c_status": "PASS",
     "rp5d_handoff_counts": {
-      "NEEDS_RP5D_EXECUTABILITY_REVIEW": 1928,
-      "READY_FOR_RP5D_EXECUTABILITY_CLASSIFICATION": 8261
+      "NEEDS_RP5D_EXECUTABILITY_REVIEW": 8403,
+      "READY_FOR_RP5D_EXECUTABILITY_CLASSIFICATION": 1786
     },
     "runtime_cash_receipt_count": 0,
     "runtime_stack_generation_count": 0,
     "scan_performance": {
-      "elapsed_seconds_rounded": 9.617,
+      "elapsed_seconds_rounded": 11.22,
       "records_scanned_count": 184786,
       "records_with_identity_count": 182801
     },
@@ -356,10 +356,9 @@
     "source_truth_authority_created_count": 0,
     "stack_combination_materialization_count": 0,
     "stage1_active_universe_summary": {
-      "dormant_future_market_row_count": 9649,
+      "dormant_future_market_row_count": 8188,
       "dormant_market_scope_counts": {
-        "repo_financing": 9382,
-        "unknown_needs_review": 267
+        "unknown_needs_review": 8188
       },
       "dormant_qku_deleted_count": 0,
       "dormant_qku_global_ban_count": 0,
@@ -381,10 +380,9 @@
       "stage1_agent_computation_universe_seed_is_default_stage1_seed": true,
       "stage1_agents_must_not_default_compute_full_universe": true,
       "stage1_classification_state_counts": {
-        "FUTURE_MARKET_DORMANT": 9382,
         "STAGE1_PREDICTION_MARKET_ACTIVE_CANDIDATE": 530,
-        "STAGE1_PREDICTION_MARKET_SUPPORTING_MARKET_AGNOSTIC": 10,
-        "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW": 267
+        "STAGE1_PREDICTION_MARKET_SUPPORTING_MARKET_AGNOSTIC": 1471,
+        "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW": 8188
       },
       "stage1_classification_states": [
         "STAGE1_PREDICTION_MARKET_ACTIVE_CANDIDATE",
@@ -400,10 +398,10 @@
       ],
       "stage1_default_full_universe_compute_route_count": 0,
       "stage1_seed_market_scope_counts": {
-        "market_agnostic": 10,
+        "market_agnostic": 1471,
         "prediction_market": 530
       },
-      "stage1_seed_row_count": 540
+      "stage1_seed_row_count": 2001
     },
     "stage1_default_full_universe_compute_route_count": 0,
     "trade_simulation_count": 0
@@ -412,13 +410,13 @@
   "routing_rule_count": 14,
   "rp5c_status": "PASS",
   "rp5d_handoff_counts": {
-    "NEEDS_RP5D_EXECUTABILITY_REVIEW": 1928,
-    "READY_FOR_RP5D_EXECUTABILITY_CLASSIFICATION": 8261
+    "NEEDS_RP5D_EXECUTABILITY_REVIEW": 8403,
+    "READY_FOR_RP5D_EXECUTABILITY_CLASSIFICATION": 1786
   },
   "runtime_cash_receipt_count": 0,
   "runtime_stack_generation_count": 0,
   "scan_performance": {
-    "elapsed_seconds_rounded": 9.617,
+    "elapsed_seconds_rounded": 11.22,
     "records_scanned_count": 184786,
     "records_with_identity_count": 182801
   },
@@ -434,10 +432,9 @@
   "source_truth_authority_created_count": 0,
   "stack_combination_materialization_count": 0,
   "stage1_active_universe_summary": {
-    "dormant_future_market_row_count": 9649,
+    "dormant_future_market_row_count": 8188,
     "dormant_market_scope_counts": {
-      "repo_financing": 9382,
-      "unknown_needs_review": 267
+      "unknown_needs_review": 8188
     },
     "dormant_qku_deleted_count": 0,
     "dormant_qku_global_ban_count": 0,
@@ -459,10 +456,9 @@
     "stage1_agent_computation_universe_seed_is_default_stage1_seed": true,
     "stage1_agents_must_not_default_compute_full_universe": true,
     "stage1_classification_state_counts": {
-      "FUTURE_MARKET_DORMANT": 9382,
       "STAGE1_PREDICTION_MARKET_ACTIVE_CANDIDATE": 530,
-      "STAGE1_PREDICTION_MARKET_SUPPORTING_MARKET_AGNOSTIC": 10,
-      "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW": 267
+      "STAGE1_PREDICTION_MARKET_SUPPORTING_MARKET_AGNOSTIC": 1471,
+      "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW": 8188
     },
     "stage1_classification_states": [
       "STAGE1_PREDICTION_MARKET_ACTIVE_CANDIDATE",
@@ -478,10 +474,10 @@
     ],
     "stage1_default_full_universe_compute_route_count": 0,
     "stage1_seed_market_scope_counts": {
-      "market_agnostic": 10,
+      "market_agnostic": 1471,
       "prediction_market": 530
     },
-    "stage1_seed_row_count": 540
+    "stage1_seed_row_count": 2001
   },
   "stage1_default_full_universe_compute_route_count": 0,
   "trade_simulation_count": 0

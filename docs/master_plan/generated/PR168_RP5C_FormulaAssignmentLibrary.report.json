@@ -107,7 +107,7 @@
       "identity_row_id": "RP5C_IDENTITY_00182106",
       "no_authority_statement": "RP5C is immutable identity, provenance, classification, and derived routing preparation only. It creates no live/order/source-truth/champion/launch/quantum/hash authority and does not mutate formulas or delete identities.",
       "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000001",
-      "rp5d_handoff_state": "READY_FOR_RP5D_EXECUTABILITY_CLASSIFICATION",
+      "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
       "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000131",
       "source_file_path": "docs/master_plan/generated/PR168_GFP_FormulaAssignmentMatrix.report.json"
     },
@@ -135,7 +135,7 @@
       "identity_row_id": "RP5C_IDENTITY_00182113",
       "no_authority_statement": "RP5C is immutable identity, provenance, classification, and derived routing preparation only. It creates no live/order/source-truth/champion/launch/quantum/hash authority and does not mutate formulas or delete identities.",
       "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000001",
-      "rp5d_handoff_state": "READY_FOR_RP5D_EXECUTABILITY_CLASSIFICATION",
+      "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
       "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000131",
       "source_file_path": "docs/master_plan/generated/PR168_GFP_FormulaAssignmentMatrix.report.json"
     },
@@ -163,7 +163,7 @@
       "identity_row_id": "RP5C_IDENTITY_00182120",
       "no_authority_statement": "RP5C is immutable identity, provenance, classification, and derived routing preparation only. It creates no live/order/source-truth/champion/launch/quantum/hash authority and does not mutate formulas or delete identities.",
       "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000001",
-      "rp5d_handoff_state": "READY_FOR_RP5D_EXECUTABILITY_CLASSIFICATION",
+      "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
       "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000131",
       "source_file_path": "docs/master_plan/generated/PR168_GFP_FormulaAssignmentMatrix.report.json"
     },
@@ -191,7 +191,7 @@
       "identity_row_id": "RP5C_IDENTITY_00182127",
       "no_authority_statement": "RP5C is immutable identity, provenance, classification, and derived routing preparation only. It creates no live/order/source-truth/champion/launch/quantum/hash authority and does not mutate formulas or delete identities.",
       "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000001",
-      "rp5d_handoff_state": "READY_FOR_RP5D_EXECUTABILITY_CLASSIFICATION",
+      "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
       "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000131",
       "source_file_path": "docs/master_plan/generated/PR168_GFP_FormulaAssignmentMatrix.report.json"
     },
@@ -219,7 +219,7 @@
       "identity_row_id": "RP5C_IDENTITY_00182134",
       "no_authority_statement": "RP5C is immutable identity, provenance, classification, and derived routing preparation only. It creates no live/order/source-truth/champion/launch/quantum/hash authority and does not mutate formulas or delete identities.",
       "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000001",
-      "rp5d_handoff_state": "READY_FOR_RP5D_EXECUTABILITY_CLASSIFICATION",
+      "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
       "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000131",
       "source_file_path": "docs/master_plan/generated/PR168_GFP_FormulaAssignmentMatrix.report.json"
     },
@@ -247,7 +247,7 @@
       "identity_row_id": "RP5C_IDENTITY_00182141",
       "no_authority_statement": "RP5C is immutable identity, provenance, classification, and derived routing preparation only. It creates no live/order/source-truth/champion/launch/quantum/hash authority and does not mutate formulas or delete identities.",
       "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000001",
-      "rp5d_handoff_state": "READY_FOR_RP5D_EXECUTABILITY_CLASSIFICATION",
+      "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
       "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000131",
       "source_file_path": "docs/master_plan/generated/PR168_GFP_FormulaAssignmentMatrix.report.json"
     },
@@ -275,7 +275,7 @@
       "identity_row_id": "RP5C_IDENTITY_00182148",
       "no_authority_statement": "RP5C is immutable identity, provenance, classification, and derived routing preparation only. It creates no live/order/source-truth/champion/launch/quantum/hash authority and does not mutate formulas or delete identities.",
       "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000001",
-      "rp5d_handoff_state": "READY_FOR_RP5D_EXECUTABILITY_CLASSIFICATION",
+      "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
       "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000131",
       "source_file_path": "docs/master_plan/generated/PR168_GFP_FormulaAssignmentMatrix.report.json"
     },
@@ -303,7 +303,7 @@
       "identity_row_id": "RP5C_IDENTITY_00182155",
       "no_authority_statement": "RP5C is immutable identity, provenance, classification, and derived routing preparation only. It creates no live/order/source-truth/champion/launch/quantum/hash authority and does not mutate formulas or delete identities.",
       "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000001",
-      "rp5d_handoff_state": "READY_FOR_RP5D_EXECUTABILITY_CLASSIFICATION",
+      "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
       "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000131",
       "source_file_path": "docs/master_plan/generated/PR168_GFP_FormulaAssignmentMatrix.report.json"
     },
@@ -331,7 +331,7 @@
       "identity_row_id": "RP5C_IDENTITY_00182162",
       "no_authority_statement": "RP5C is immutable identity, provenance, classification, and derived routing preparation only. It creates no live/order/source-truth/champion/launch/quantum/hash authority and does not mutate formulas or delete identities.",
       "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000001",
-      "rp5d_handoff_state": "READY_FOR_RP5D_EXECUTABILITY_CLASSIFICATION",
+      "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
       "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000131",
       "source_file_path": "docs/master_plan/generated/PR168_GFP_FormulaAssignmentMatrix.report.json"
     },
@@ -359,7 +359,7 @@
       "identity_row_id": "RP5C_IDENTITY_00182169",
       "no_authority_statement": "RP5C is immutable identity, provenance, classification, and derived routing preparation only. It creates no live/order/source-truth/champion/launch/quantum/hash authority and does not mutate formulas or delete identities.",
       "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000001",
-      "rp5d_handoff_state": "READY_FOR_RP5D_EXECUTABILITY_CLASSIFICATION",
+      "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
       "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000131",
       "source_file_path": "docs/master_plan/generated/PR168_GFP_FormulaAssignmentMatrix.report.json"
     },
@@ -387,7 +387,7 @@
       "identity_row_id": "RP5C_IDENTITY_00182176",
       "no_authority_statement": "RP5C is immutable identity, provenance, classification, and derived routing preparation only. It creates no live/order/source-truth/champion/launch/quantum/hash authority and does not mutate formulas or delete identities.",
       "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000001",
-      "rp5d_handoff_state": "READY_FOR_RP5D_EXECUTABILITY_CLASSIFICATION",
+      "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
       "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000131",
       "source_file_path": "docs/master_plan/generated/PR168_GFP_FormulaAssignmentMatrix.report.json"
     },
@@ -415,7 +415,7 @@
       "identity_row_id": "RP5C_IDENTITY_00182183",
       "no_authority_statement": "RP5C is immutable identity, provenance, classification, and derived routing preparation only. It creates no live/order/source-truth/champion/launch/quantum/hash authority and does not mutate formulas or delete identities.",
       "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000001",
-      "rp5d_handoff_state": "READY_FOR_RP5D_EXECUTABILITY_CLASSIFICATION",
+      "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
       "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000131",
       "source_file_path": "docs/master_plan/generated/PR168_GFP_FormulaAssignmentMatrix.report.json"
     },

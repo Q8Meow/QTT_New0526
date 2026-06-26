@@ -88,8 +88,25 @@ def load_library(
         "library_query_receipts",
     )
     loaded = {key: sorted(_read_jsonl(_shard_path(key, repo_root)), key=_stable_identity_key) for key in keys}
+    identity_by_id = {row["identity_row_id"]: row for row in loaded["immutable_qku_formula_library"]}
+    matrix_by_identity = {row["identity_row_id"]: row for row in loaded["qku_market_applicability_matrix"]}
+    stage_profile_by_id = {row["profile_id"]: row for row in loaded["market_stage_activation_profile_registry"]}
+    agent_policy_by_id = {row["agent_id"]: row for row in loaded["agent_qku_access_policy_registry"]}
+    stage_view_by_profile_platform = {
+        (row["stage_profile_id"], row["platform_id"]): row for row in loaded["stage_computation_universe_view"]
+    }
+    agent_view_by_profile_agent_platform = {
+        (row["stage_profile_id"], row["agent_id"], row["platform_id"]): row
+        for row in loaded["agent_computation_universe_view"]
+    }
     return {
         **loaded,
+        "identity_by_id": identity_by_id,
+        "matrix_by_identity": matrix_by_identity,
+        "stage_profile_by_id": stage_profile_by_id,
+        "agent_policy_by_id": agent_policy_by_id,
+        "stage_view_by_profile_platform": stage_view_by_profile_platform,
+        "agent_view_by_profile_agent_platform": agent_view_by_profile_agent_platform,
         "versions": {
             "library_version": LIBRARY_VERSION,
             "applicability_matrix_version": APPLICABILITY_MATRIX_VERSION,
@@ -145,27 +162,31 @@ def _policy_allows_identity(
     platform_id: str,
     access_mode: str,
 ) -> bool:
+    market_allowed = (
+        matrix_row.get("applicability_mode") == "CROSS_MARKET_SHARED"
+        or bool(set(matrix_row.get("market_family_refs", [])) & set(policy.get("allowed_market_family_refs", [])))
+    )
     return (
         identity.get("ontology_category") in set(policy.get("allowed_ontology_categories", []))
         and identity.get("formula_family") in set(policy.get("allowed_formula_family_refs", []))
         and identity.get("qku_family") in set(policy.get("allowed_qku_family_refs", []))
-        and bool(set(matrix_row.get("market_family_refs", [])) & set(policy.get("allowed_market_family_refs", [])))
+        and market_allowed
         and platform_id in set(policy.get("allowed_platform_refs", []))
         and access_mode in set(policy.get("allowed_access_modes", []))
     )
 
 
 def _find_stage_profile(data: dict[str, Any], stage_profile_id: str) -> dict[str, Any]:
-    for row in data["market_stage_activation_profile_registry"]:
-        if row.get("profile_id") == stage_profile_id:
-            return row
+    row = data["stage_profile_by_id"].get(stage_profile_id)
+    if row is not None:
+        return row
     raise KeyError(f"Unknown RP5C stage profile: {stage_profile_id}")
 
 
 def _find_agent_policy(data: dict[str, Any], agent_id: str) -> dict[str, Any]:
-    for row in data["agent_qku_access_policy_registry"]:
-        if row.get("agent_id") == agent_id:
-            return row
+    row = data["agent_policy_by_id"].get(agent_id)
+    if row is not None:
+        return row
     raise KeyError(f"Unknown RP5C agent policy: {agent_id}")
 
 
@@ -183,10 +204,24 @@ def query_ids(
     policy = _find_agent_policy(data, agent_id)
     ontology_filter = set(ontology_roles or [])
     family_filter = set(formula_families or [])
-    matrix_by_identity = {row["identity_row_id"]: row for row in data["qku_market_applicability_matrix"]}
+    matrix_by_identity = data["matrix_by_identity"]
+    identity_by_id = data["identity_by_id"]
+    stage_view = data["stage_view_by_profile_platform"].get((stage_profile_id, platform_id))
+    if stage_view is None:
+        return []
+    candidate_refs = sorted(
+        {
+            *stage_view.get("default_compute_identity_refs", []),
+            *stage_view.get("available_on_demand_identity_refs", []),
+        },
+        key=_stable_ref_key,
+    )
     result: list[str] = []
-    for identity in sorted(data["immutable_qku_formula_library"], key=_stable_identity_key):
-        matrix_row = matrix_by_identity.get(identity["identity_row_id"])
+    for identity_ref in candidate_refs:
+        identity = identity_by_id.get(identity_ref)
+        matrix_row = matrix_by_identity.get(identity_ref)
+        if identity is None:
+            continue
         if not matrix_row:
             continue
         resolved_access_mode = matrix_row.get("stage_access_mode_by_profile", {}).get(stage_profile_id)
@@ -206,7 +241,7 @@ def query_ids(
             continue
         if not _policy_allows_identity(policy, identity, matrix_row, platform_id, resolved_access_mode):
             continue
-        result.append(identity["identity_row_id"])
+        result.append(identity_ref)
     return sorted(result, key=_stable_ref_key)
 
 
@@ -218,7 +253,7 @@ def resolve_stage_agent_universe(
 ) -> dict[str, Any]:
     data = library if library is not None else load_library()
     resolved_refs = query_ids(stage_profile_id, agent_id, platform_id, library=data)
-    matrix_by_identity = {row["identity_row_id"]: row for row in data["qku_market_applicability_matrix"]}
+    matrix_by_identity = data["matrix_by_identity"]
     default_refs = [
         ref
         for ref in resolved_refs
@@ -255,7 +290,7 @@ def resolve_stage_agent_universe(
 def load_rows(identity_ids: Iterable[str], library: dict[str, Any] | None = None) -> list[dict[str, Any]]:
     data = library if library is not None else load_library()
     requested = set(identity_ids)
-    rows = [row for row in data["immutable_qku_formula_library"] if row.get("identity_row_id") in requested]
+    rows = [data["identity_by_id"][identity_id] for identity_id in requested if identity_id in data["identity_by_id"]]
     return [dict(row) for row in sorted(rows, key=_stable_identity_key)]
 
 

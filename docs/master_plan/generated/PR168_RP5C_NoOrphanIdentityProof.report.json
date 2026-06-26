@@ -6,7 +6,7 @@
   "connector_semantic_binding_count": 0,
   "created_at_utc": "2026-06-25T00:00:00Z",
   "deleted_file_count": 0,
-  "dormant_future_market_row_count": 9649,
+  "dormant_future_market_row_count": 8188,
   "dormant_qku_deleted_count": 0,
   "dormant_qku_global_ban_count": 0,
   "formula_expression_mutation_count": 0,
@@ -89,12 +89,13 @@
       "blocker_codes": [
         "NEEDS_FAMILY_CLASSIFICATION",
         "NEEDS_FORMULA_EXPRESSION_REF",
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION",
         "NEEDS_ONTOLOGY_CLASSIFICATION"
       ],
       "classification_registry_refs": [
         "RP5C_FAMILY_00093",
         "RP5C_FAMILY_00206",
-        "RP5C_MARKET_SCOPE_0009",
+        "RP5C_MARKET_SCOPE_0011",
         "RP5C_ONTOLOGY_ROLE_0014"
       ],
       "derived_route_resolution_refs": [
@@ -116,7 +117,7 @@
       "identity_row_id": "RP5C_IDENTITY_00000001",
       "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
       "platform_applicability_registry_refs": [
-        "RP5C_PLATFORM_APPLICABILITY_0007"
+        "RP5C_PLATFORM_APPLICABILITY_0008"
       ],
       "row_id": "RP5C_NO_ORPHAN_IDENTITY_00000001",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
@@ -125,7 +126,7 @@
         "RP5C_STAGE1_ACTIVATION_00000001"
       ],
       "stage1_agent_computation_universe_seed_refs": [],
-      "stage1_classification_state": "FUTURE_MARKET_DORMANT",
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
       "upstream_refs": [
         "docs/master_plan/generated/PR161C_QKUTypeTaxonomy.report.json"
       ],
@@ -137,12 +138,13 @@
     {
       "blocker_codes": [
         "NEEDS_FORMULA_EXPRESSION_REF",
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION",
         "NEEDS_ONTOLOGY_CLASSIFICATION"
       ],
       "classification_registry_refs": [
         "RP5C_FAMILY_00036",
         "RP5C_FAMILY_00153",
-        "RP5C_MARKET_SCOPE_0009",
+        "RP5C_MARKET_SCOPE_0011",
         "RP5C_ONTOLOGY_ROLE_0014"
       ],
       "derived_route_resolution_refs": [
@@ -164,7 +166,7 @@
       "identity_row_id": "RP5C_IDENTITY_00000002",
       "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
       "platform_applicability_registry_refs": [
-        "RP5C_PLATFORM_APPLICABILITY_0007"
+        "RP5C_PLATFORM_APPLICABILITY_0008"
       ],
       "row_id": "RP5C_NO_ORPHAN_IDENTITY_00000002",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
@@ -173,7 +175,7 @@
         "RP5C_STAGE1_ACTIVATION_00000002"
       ],
       "stage1_agent_computation_universe_seed_refs": [],
-      "stage1_classification_state": "FUTURE_MARKET_DORMANT",
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
       "upstream_refs": [
         "docs/master_plan/generated/PR168_RP5B_LegacySemanticSupersession.report.json"
       ],
@@ -185,12 +187,13 @@
     {
       "blocker_codes": [
         "NEEDS_FORMULA_EXPRESSION_REF",
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION",
         "NEEDS_ONTOLOGY_CLASSIFICATION"
       ],
       "classification_registry_refs": [
         "RP5C_FAMILY_00037",
         "RP5C_FAMILY_00154",
-        "RP5C_MARKET_SCOPE_0009",
+        "RP5C_MARKET_SCOPE_0011",
         "RP5C_ONTOLOGY_ROLE_0014"
       ],
       "derived_route_resolution_refs": [
@@ -212,7 +215,7 @@
       "identity_row_id": "RP5C_IDENTITY_00000003",
       "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
       "platform_applicability_registry_refs": [
-        "RP5C_PLATFORM_APPLICABILITY_0007"
+        "RP5C_PLATFORM_APPLICABILITY_0008"
       ],
       "row_id": "RP5C_NO_ORPHAN_IDENTITY_00000003",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
@@ -221,7 +224,7 @@
         "RP5C_STAGE1_ACTIVATION_00000003"
       ],
       "stage1_agent_computation_universe_seed_refs": [],
-      "stage1_classification_state": "FUTURE_MARKET_DORMANT",
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
       "upstream_refs": [
         "docs/master_plan/generated/PR168_RP5A_WrongConceptTermIndex.report.json"
       ],
@@ -858,12 +861,13 @@
       "blocker_codes": [
         "NEEDS_FAMILY_CLASSIFICATION",
         "NEEDS_FORMULA_EXPRESSION_REF",
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION",
         "NEEDS_ONTOLOGY_CLASSIFICATION"
       ],
       "classification_registry_refs": [
         "RP5C_FAMILY_00093",
         "RP5C_FAMILY_00206",
-        "RP5C_MARKET_SCOPE_0009",
+        "RP5C_MARKET_SCOPE_0011",
         "RP5C_ONTOLOGY_ROLE_0014"
       ],
       "derived_route_resolution_refs": [
@@ -885,7 +889,7 @@
       "identity_row_id": "RP5C_IDENTITY_00000055",
       "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
       "platform_applicability_registry_refs": [
-        "RP5C_PLATFORM_APPLICABILITY_0007"
+        "RP5C_PLATFORM_APPLICABILITY_0008"
       ],
       "row_id": "RP5C_NO_ORPHAN_IDENTITY_00000017",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
@@ -894,7 +898,7 @@
         "RP5C_STAGE1_ACTIVATION_00000017"
       ],
       "stage1_agent_computation_universe_seed_refs": [],
-      "stage1_classification_state": "FUTURE_MARKET_DORMANT",
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
       "upstream_refs": [
         "docs/master_plan/generated/PR168_MAP3_QFormulaLift.report.json"
       ],
@@ -1048,12 +1052,13 @@
       "blocker_codes": [
         "NEEDS_FAMILY_CLASSIFICATION",
         "NEEDS_FORMULA_EXPRESSION_REF",
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION",
         "NEEDS_ONTOLOGY_CLASSIFICATION"
       ],
       "classification_registry_refs": [
         "RP5C_FAMILY_00093",
         "RP5C_FAMILY_00206",
-        "RP5C_MARKET_SCOPE_0009",
+        "RP5C_MARKET_SCOPE_0011",
         "RP5C_ONTOLOGY_ROLE_0014"
       ],
       "derived_route_resolution_refs": [
@@ -1075,7 +1080,7 @@
       "identity_row_id": "RP5C_IDENTITY_00000071",
       "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
       "platform_applicability_registry_refs": [
-        "RP5C_PLATFORM_APPLICABILITY_0007"
+        "RP5C_PLATFORM_APPLICABILITY_0008"
       ],
       "row_id": "RP5C_NO_ORPHAN_IDENTITY_00000021",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
@@ -1084,7 +1089,7 @@
         "RP5C_STAGE1_ACTIVATION_00000021"
       ],
       "stage1_agent_computation_universe_seed_refs": [],
-      "stage1_classification_state": "FUTURE_MARKET_DORMANT",
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
       "upstream_refs": [
         "docs/master_plan/generated/PR168_MAP3_QFormulaLift.report.json"
       ],
@@ -1294,7 +1299,7 @@
   "stack_combination_materialization_count": 0,
   "stage1_activation_view_row_count": 10189,
   "stage1_default_full_universe_compute_route_count": 0,
-  "stage1_seed_row_count": 540,
+  "stage1_seed_row_count": 2001,
   "stage_agent_resolver_row_count": 24,
   "trade_simulation_count": 0
 }
