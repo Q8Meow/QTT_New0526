@@ -1,0 +1,51 @@
+{
+  "created_at_utc": "2026-06-25T00:00:00Z",
+  "downstream_consumer_refs": [
+    "PR168-RP5D",
+    "PR168-RP5E",
+    "RANK4",
+    "QOPT",
+    "Paper",
+    "LiveFutureOnly"
+  ],
+  "generated_surface_authority_class": "RP5C_CENTRAL_ACTIVE_SURFACE_NOT_SOURCE_TRUTH",
+  "manifest_id": "PR168_RP5C_MARKET_SPECIFIC_QKU_POOL_REGISTRY_MANIFEST",
+  "max_total_rows_per_shard": 500000,
+  "no_authority_statement": "RP5C is immutable identity, provenance, classification, and derived routing preparation only. It creates no live/order/source-truth/champion/launch/quantum/hash authority and does not mutate formulas or delete identities.",
+  "no_deletion_no_mutation_counters": {
+    "archived_file_count": 0,
+    "deleted_file_count": 0,
+    "formula_expression_mutation_count": 0,
+    "formula_identity_deleted_count": 0,
+    "global_formula_ban_count": 0,
+    "global_qku_ban_count": 0,
+    "moved_file_count": 0,
+    "qku_identity_deleted_count": 0
+  },
+  "physical_filename": "docs/master_plan/generated/rp5c/market_specific_qku_pool_registry.manifest.json",
+  "report_version": "PR168-RP5C-v1.0",
+  "row_count": 10,
+  "row_count_within_bound_flag": true,
+  "row_refs_limited": [
+    "RP5C_MARKET_SPECIFIC_QKU_POOL_0001",
+    "RP5C_MARKET_SPECIFIC_QKU_POOL_0002",
+    "RP5C_MARKET_SPECIFIC_QKU_POOL_0003",
+    "RP5C_MARKET_SPECIFIC_QKU_POOL_0004",
+    "RP5C_MARKET_SPECIFIC_QKU_POOL_0005",
+    "RP5C_MARKET_SPECIFIC_QKU_POOL_0006",
+    "RP5C_MARKET_SPECIFIC_QKU_POOL_0007",
+    "RP5C_MARKET_SPECIFIC_QKU_POOL_0008",
+    "RP5C_MARKET_SPECIFIC_QKU_POOL_0009",
+    "RP5C_MARKET_SPECIFIC_QKU_POOL_0010"
+  ],
+  "schema_version_name": "MarketSpecificQKUPoolRegistryV1",
+  "shard_file_path": "docs/master_plan/generated/rp5c/market_specific_qku_pool_registry.jsonl",
+  "source_artifact_refs": [],
+  "source_report_refs": [
+    "PR168_RP5C_MarketScopeClassificationQualityAudit.report.json",
+    "PR168_RP5C_MachineConsumableLibraryAccess.report.json"
+  ],
+  "stable_ordering_key": "deterministic_row_id",
+  "truncated_by_row_budget_flag": false,
+  "truncated_row_refs_flag": false
+}

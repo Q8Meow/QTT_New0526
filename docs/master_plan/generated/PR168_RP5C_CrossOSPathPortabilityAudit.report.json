@@ -16,7 +16,7 @@
   "formula_identity_deleted_count": 0,
   "formula_profit_ranking_count": 0,
   "generated_path_case_collision_count": 0,
-  "generated_path_count": 107,
+  "generated_path_count": 114,
   "global_formula_ban_count": 0,
   "global_qku_ban_count": 0,
   "hard_zero_counters": {
@@ -94,7 +94,7 @@
     "casefold_collision_refs": [],
     "cross_os_path_portability_status": "PASS",
     "generated_path_case_collision_count": 0,
-    "generated_path_count": 107,
+    "generated_path_count": 114,
     "linux_compatible_command_equivalent": "python -B -m pytest tests/pr168_rp5c -q",
     "windows_validation_command_used": ".venv/Scripts/python.exe -B -m pytest tests/pr168_rp5c -q"
   },

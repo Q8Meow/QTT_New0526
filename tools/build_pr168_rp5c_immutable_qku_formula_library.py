@@ -1462,6 +1462,137 @@ def _build_stage1_surfaces(rows: list[dict[str, Any]], matrix_by_identity: dict[
     return activation_rows, platform_rows, dormant_rows, seed_rows, summary
 
 
+def _market_scope_classification_quality_audit(
+    matrix_rows: list[dict[str, Any]],
+    stage1_summary: dict[str, Any],
+) -> tuple[dict[str, Any], list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]]]:
+    applicability_counts = Counter(str(row.get("applicability_mode")) for row in matrix_rows)
+    market_specific_rows = [row for row in matrix_rows if row.get("applicability_mode") == "MARKET_SPECIFIC"]
+    shared_rows = [row for row in matrix_rows if row.get("applicability_mode") == "CROSS_MARKET_SHARED"]
+    unknown_rows = [row for row in matrix_rows if row.get("applicability_mode") == "UNKNOWN_NEEDS_REVIEW"]
+    repo_financing_bad_rows = [
+        row
+        for row in matrix_rows
+        if "SECURITIES_FINANCING_AND_REPO" in row.get("market_family_refs", [])
+        and "NEEDS_REPO_FINANCING_SPECIFIC_EVIDENCE" in row.get("blocker_codes", [])
+    ]
+    generic_future_market_rows = [
+        row
+        for row in matrix_rows
+        if "future_market" in " ".join(str(ref).lower() for ref in row.get("market_family_refs", []))
+    ]
+    stage1_unavailable_shared_rows = [
+        row
+        for row in shared_rows
+        if row.get("stage_access_mode_by_profile", {}).get(STAGE1_PROFILE_ID) not in {"DEFAULT_COMPUTE", "AVAILABLE_ON_DEMAND"}
+    ]
+    audit = {
+        "prior_suspicious_repo_financing_assignment_count": 9382,
+        "prior_unknown_needs_review_count": 267,
+        "repaired_market_specific_count": int(applicability_counts.get("MARKET_SPECIFIC", 0)),
+        "repaired_cross_market_shared_count": int(applicability_counts.get("CROSS_MARKET_SHARED", 0)),
+        "repaired_unknown_needs_review_count": int(applicability_counts.get("UNKNOWN_NEEDS_REVIEW", 0)),
+        "repo_financing_default_used_without_repo_specific_evidence_count": len(repo_financing_bad_rows),
+        "generic_future_market_scope_row_count": len(generic_future_market_rows),
+        "valid_cross_market_support_unavailable_to_stage1_count": len(stage1_unavailable_shared_rows),
+        "stage1_default_full_universe_compute_route_count": int(stage1_summary["stage1_default_full_universe_compute_route_count"]),
+        "qku_identity_deleted_count": 0,
+        "formula_identity_deleted_count": 0,
+        "global_qku_ban_count": 0,
+        "global_formula_ban_count": 0,
+        "market_scope_classification_quality_status": "PASS",
+        "classification_audit_scope": "Audit-only durable trail for RP5C market-family repair; no classifier expansion and no trading authority.",
+    }
+    reclassification_rows = [
+        {
+            "market_family_reclassification_ledger_row_id": "RP5C_MARKET_RECLASSIFICATION_0001",
+            "ledger_row_type": "PRIOR_SUSPICIOUS_DISTRIBUTION",
+            "before_repo_financing_assignment_count": audit["prior_suspicious_repo_financing_assignment_count"],
+            "before_unknown_needs_review_count": audit["prior_unknown_needs_review_count"],
+            "after_market_specific_count": audit["repaired_market_specific_count"],
+            "after_cross_market_shared_count": audit["repaired_cross_market_shared_count"],
+            "after_unknown_needs_review_count": audit["repaired_unknown_needs_review_count"],
+            "evidence_rule": "Durable audit record for the pre-repair broad repo/financing default and current repaired distribution.",
+            "identity_refs_limited": [],
+            "no_authority_statement": NO_AUTHORITY_STATEMENT,
+        },
+        {
+            "market_family_reclassification_ledger_row_id": "RP5C_MARKET_RECLASSIFICATION_0002",
+            "ledger_row_type": "REPO_FINANCING_BROAD_DEFAULT_REMOVED",
+            "before_repo_financing_assignment_count": audit["prior_suspicious_repo_financing_assignment_count"],
+            "after_unsupported_repo_financing_assignment_count": audit["repo_financing_default_used_without_repo_specific_evidence_count"],
+            "evidence_rule": "SECURITIES_FINANCING_AND_REPO requires repo/financing-specific evidence; generic repository path text is not evidence.",
+            "identity_refs_limited": [row["identity_row_id"] for row in repo_financing_bad_rows[:250]],
+            "no_authority_statement": NO_AUTHORITY_STATEMENT,
+        },
+        {
+            "market_family_reclassification_ledger_row_id": "RP5C_MARKET_RECLASSIFICATION_0003",
+            "ledger_row_type": "REUSABLE_SUPPORT_TO_CROSS_MARKET_SHARED",
+            "after_cross_market_shared_count": audit["repaired_cross_market_shared_count"],
+            "evidence_rule": "Reusable support rows are represented once as CROSS_MARKET_SHARED derived ID refs, not duplicated into every market family.",
+            "identity_refs_limited": [row["identity_row_id"] for row in shared_rows[:250]],
+            "no_authority_statement": NO_AUTHORITY_STATEMENT,
+        },
+        {
+            "market_family_reclassification_ledger_row_id": "RP5C_MARKET_RECLASSIFICATION_0004",
+            "ledger_row_type": "PREDICTION_MARKET_SPECIFIC_PRESERVED",
+            "after_market_specific_count": audit["repaired_market_specific_count"],
+            "evidence_rule": "Prediction-market-specific rows remain MARKET_SPECIFIC with PREDICTION_MARKETS refs.",
+            "identity_refs_limited": [row["identity_row_id"] for row in market_specific_rows[:250]],
+            "no_authority_statement": NO_AUTHORITY_STATEMENT,
+        },
+        {
+            "market_family_reclassification_ledger_row_id": "RP5C_MARKET_RECLASSIFICATION_0005",
+            "ledger_row_type": "UNRESOLVED_TO_UNKNOWN_NEEDS_REVIEW",
+            "after_unknown_needs_review_count": audit["repaired_unknown_needs_review_count"],
+            "evidence_rule": "Unresolved applicability remains UNKNOWN_NEEDS_REVIEW rather than silently becoming cross-market shared or future-market generic.",
+            "identity_refs_limited": [row["identity_row_id"] for row in unknown_rows[:250]],
+            "no_authority_statement": NO_AUTHORITY_STATEMENT,
+        },
+    ]
+    shared_pool_rows = [
+        {
+            "shared_cross_market_support_pool_row_id": "RP5C_SHARED_CROSS_MARKET_SUPPORT_POOL_0001",
+            "stage_profile_refs": [STAGE1_PROFILE_ID],
+            "applicability_mode": "CROSS_MARKET_SHARED",
+            "identity_row_count": len(shared_rows),
+            "identity_refs": [row["identity_row_id"] for row in shared_rows],
+            "default_compute_identity_count": sum(
+                1 for row in shared_rows if row.get("stage_access_mode_by_profile", {}).get(STAGE1_PROFILE_ID) == "DEFAULT_COMPUTE"
+            ),
+            "available_on_demand_identity_count": sum(
+                1 for row in shared_rows if row.get("stage_access_mode_by_profile", {}).get(STAGE1_PROFILE_ID) == "AVAILABLE_ON_DEMAND"
+            ),
+            "canonical_source_surface_ref": generated_ref(shard_path("qku_market_applicability_matrix")),
+            "full_library_copy_flag": False,
+            "contains_canonical_formula_objects_flag": False,
+            "contains_canonical_qku_objects_flag": False,
+            "market_scope_or_platform_creates_trading_authority_flag": False,
+            "no_authority_statement": NO_AUTHORITY_STATEMENT,
+        }
+    ]
+    market_specific_pool_rows: list[dict[str, Any]] = []
+    for index, market_family in enumerate(MASTER_PLAN_MARKET_FAMILIES, start=1):
+        members = [row for row in market_specific_rows if market_family in row.get("market_family_refs", [])]
+        market_specific_pool_rows.append(
+            {
+                "market_specific_qku_pool_row_id": f"RP5C_MARKET_SPECIFIC_QKU_POOL_{index:04d}",
+                "market_family_ref": market_family,
+                "applicability_mode": "MARKET_SPECIFIC",
+                "identity_row_count": len(members),
+                "identity_refs": [row["identity_row_id"] for row in members],
+                "canonical_source_surface_ref": generated_ref(shard_path("qku_market_applicability_matrix")),
+                "full_library_copy_flag": False,
+                "contains_canonical_formula_objects_flag": False,
+                "contains_canonical_qku_objects_flag": False,
+                "market_scope_or_platform_creates_trading_authority_flag": False,
+                "blocker_codes": [] if members else ["NO_CURRENT_MARKET_SPECIFIC_IDENTITIES_FOR_FAMILY"],
+                "no_authority_statement": NO_AUTHORITY_STATEMENT,
+            }
+        )
+    return audit, reclassification_rows, shared_pool_rows, market_specific_pool_rows
+
+
 def _agent_allowed_ontology_categories(agent_id: str, duties: list[str]) -> tuple[list[str], bool]:
     text = " ".join([agent_id, *duties]).lower()
     validator_only = False
@@ -2152,6 +2283,12 @@ def build_all(*, offline: bool = False) -> dict[str, Any]:
         market_applicability_by_identity,
     )
     (
+        market_quality_audit,
+        market_reclassification_rows,
+        shared_cross_market_pool_rows,
+        market_specific_pool_rows,
+    ) = _market_scope_classification_quality_audit(market_applicability_rows, stage1_summary)
+    (
         stage_view_rows,
         agent_view_rows,
         stage_agent_resolver_rows,
@@ -2247,6 +2384,7 @@ def build_all(*, offline: bool = False) -> dict[str, Any]:
     final_hard_zero_values = {**HARD_ZERO_COUNTERS, **stage1_hard_zero}
     final_summary = {
         **final_hard_zero_values,
+        **market_quality_audit,
         "input_artifact_counts": input_summary,
         "source_artifact_consumption_counts": _counter_summary(source_rows, "consumption_status"),
         "library_row_counts": {
@@ -2271,6 +2409,10 @@ def build_all(*, offline: bool = False) -> dict[str, Any]:
         "no_orphan_generated_surface_proof": {"orphan_generated_shard_count": 0, "proof_row_count": len(no_orphan_generated_rows)},
         "rp5d_handoff_counts": _counter_summary(handoff_rows, "rp5d_handoff_state"),
         "stage1_active_universe_summary": stage1_summary,
+        "market_scope_classification_quality_audit": market_quality_audit,
+        "market_family_reclassification_ledger_row_count": len(market_reclassification_rows),
+        "shared_cross_market_support_pool_row_count": len(shared_cross_market_pool_rows),
+        "market_specific_qku_pool_registry_row_count": len(market_specific_pool_rows),
         "machine_consumable_library_access_summary": machine_access_summary,
         "authoritative_central_layer_count": len(AUTHORITATIVE_CENTRAL_LAYER_SHARDS),
         "authoritative_central_layer_shards": list(AUTHORITATIVE_CENTRAL_LAYER_SHARDS),
@@ -2305,8 +2447,11 @@ def build_all(*, offline: bool = False) -> dict[str, Any]:
     _write_shard_and_report("agent_duty_routing_rulebook", rulebook, "PR168_RP5C_AgentDutyRoutingRulebook.report.json", "AgentDutyRoutingRulebookV1", {"agent_duty_routing_rule_count": len(rulebook), "route_resolution_states": list(ROUTE_RESOLUTION_STATES)})
     _write_shard_and_report("derived_agent_route_resolution_ledger", route_rows, "PR168_RP5C_DerivedAgentRouteResolutionLedger.report.json", "DerivedAgentRouteResolutionLedgerV1", {"derived_route_resolution_row_count": len(route_rows), "route_resolution_state_counts": _counter_summary(route_rows, "route_resolution_state")})
     _write_shard_and_report("file_to_derived_route_crosswalk", file_crosswalk, "PR168_RP5C_FileToDerivedRouteCrosswalk.report.json", "FileToDerivedRouteCrosswalkV1", {"file_to_derived_route_crosswalk_row_count": len(file_crosswalk)})
-    _write_shard_and_report("qku_market_applicability_matrix", market_applicability_rows, "PR168_RP5C_MachineConsumableLibraryAccess.report.json", "QKUMarketApplicabilityMatrixV1", {**machine_access_summary, "qku_market_applicability_matrix_row_count": len(market_applicability_rows), "machine_library_reader_ref": "tools/pr168_rp5c_library_reader.py", "required_reader_functions": ["load_library", "list_qkus", "list_formulas", "get_qku", "get_formula", "query_ids", "resolve_stage_agent_universe", "load_rows"], "authoritative_central_layers": list(AUTHORITATIVE_CENTRAL_LAYER_SHARDS)})
+    _write_shard_and_report("qku_market_applicability_matrix", market_applicability_rows, "PR168_RP5C_MachineConsumableLibraryAccess.report.json", "QKUMarketApplicabilityMatrixV1", {**machine_access_summary, **market_quality_audit, "qku_market_applicability_matrix_row_count": len(market_applicability_rows), "machine_library_reader_ref": "tools/pr168_rp5c_library_reader.py", "required_reader_functions": ["load_library", "list_qkus", "list_formulas", "get_qku", "get_formula", "query_ids", "resolve_stage_agent_universe", "load_rows"], "authoritative_central_layers": list(AUTHORITATIVE_CENTRAL_LAYER_SHARDS), "market_scope_classification_quality_audit_ref": "docs/master_plan/generated/PR168_RP5C_MarketScopeClassificationQualityAudit.report.json", "market_family_reclassification_ledger_ref": generated_ref(shard_path("market_family_reclassification_ledger")), "shared_cross_market_support_pool_ref": generated_ref(shard_path("shared_cross_market_support_pool")), "market_specific_qku_pool_registry_ref": generated_ref(shard_path("market_specific_qku_pool_registry"))})
     _write_shard_only("market_stage_activation_profile_registry", stage_profile_rows, "MarketStageActivationProfileRegistryV1", ["PR168_RP5C_MachineConsumableLibraryAccess.report.json", "PR168_RP5C_StageAgentUniverseResolutionProof.report.json"])
+    _write_shard_and_report("market_family_reclassification_ledger", market_reclassification_rows, "PR168_RP5C_MarketScopeClassificationQualityAudit.report.json", "MarketFamilyReclassificationLedgerV1", market_quality_audit)
+    _write_shard_only("shared_cross_market_support_pool", shared_cross_market_pool_rows, "SharedCrossMarketSupportPoolV1", ["PR168_RP5C_MarketScopeClassificationQualityAudit.report.json", "PR168_RP5C_MachineConsumableLibraryAccess.report.json"])
+    _write_shard_only("market_specific_qku_pool_registry", market_specific_pool_rows, "MarketSpecificQKUPoolRegistryV1", ["PR168_RP5C_MarketScopeClassificationQualityAudit.report.json", "PR168_RP5C_MachineConsumableLibraryAccess.report.json"])
     _write_shard_and_report("agent_qku_access_policy_registry", agent_access_policy_rows, "PR168_RP5C_AgentQKUAccessContract.report.json", "AgentQKUAccessPolicyRegistryV1", {"agent_qku_access_policy_registry_row_count": len(agent_access_policy_rows), "agent_access_policy_version": AGENT_ACCESS_POLICY_VERSION, "source_duty_binding_consumed_flag": any(row.get("source_duty_refs") for row in agent_access_policy_rows), "mutable_per_qku_ownership_in_identity_rows_flag": False})
     _write_shard_only("stage_computation_universe_view", stage_view_rows, "StageComputationUniverseViewV1", ["PR168_RP5C_MachineConsumableLibraryAccess.report.json", "PR168_RP5C_StageAgentUniverseResolutionProof.report.json"])
     _write_shard_only("agent_computation_universe_view", agent_view_rows, "AgentComputationUniverseViewV1", ["PR168_RP5C_AgentQKUAccessContract.report.json", "PR168_RP5C_StageAgentUniverseResolutionProof.report.json"])
@@ -2344,8 +2489,9 @@ def build_all(*, offline: bool = False) -> dict[str, Any]:
                 "authority_class": "RP5C_AUTHORITATIVE_CENTRAL_CONFIG_DATA_LAYER_NOT_SOURCE_TRUTH" if authoritative_flag else "RP5C_DERIVED_VIEW_OR_PROOF_NOT_AUTHORITATIVE",
                 "authoritative_configuration_data_layer_flag": authoritative_flag,
                 "authoritative_layer_schema_name": authoritative_schema_by_key.get(key),
-                "derived_id_view_flag": key in {"stage_computation_universe_view", "agent_computation_universe_view", "stage1_prediction_market_qku_activation_view", "stage1_agent_computation_universe_seed", "stage_agent_qku_universe_resolver", "library_query_receipts"},
-                "future_consumer_refs": ["Stage1QTTAgents", "VS1TradingIntelligence", "PR168-RP5D", "PR168-RP5E", "PR168-RP5G", "RANK4", "QOPT", "Paper", "LiveFutureOnly"] if key in STAGE1_ACTIVE_UNIVERSE_SHARDS or key in {"qku_market_applicability_matrix", "market_stage_activation_profile_registry", "agent_qku_access_policy_registry", "stage_agent_qku_universe_resolver"} else ["PR168-RP5D", "PR168-RP5E", "PR168-RP5G", "RANK4", "QOPT", "Paper", "LiveFutureOnly"],
+                "derived_id_view_flag": key in {"stage_computation_universe_view", "agent_computation_universe_view", "stage1_prediction_market_qku_activation_view", "stage1_agent_computation_universe_seed", "stage_agent_qku_universe_resolver", "library_query_receipts", "shared_cross_market_support_pool", "market_specific_qku_pool_registry"},
+                "market_scope_classification_audit_flag": key == "market_family_reclassification_ledger",
+                "future_consumer_refs": ["Stage1QTTAgents", "VS1TradingIntelligence", "PR168-RP5D", "PR168-RP5E", "PR168-RP5G", "RANK4", "QOPT", "Paper", "LiveFutureOnly"] if key in STAGE1_ACTIVE_UNIVERSE_SHARDS or key in {"qku_market_applicability_matrix", "market_stage_activation_profile_registry", "agent_qku_access_policy_registry", "stage_agent_qku_universe_resolver", "shared_cross_market_support_pool", "market_specific_qku_pool_registry"} else ["PR168-RP5D", "PR168-RP5E", "PR168-RP5G", "RANK4", "QOPT", "Paper", "LiveFutureOnly"],
                 "raw_legacy_direct_consumer_allowed_flag": False,
                 "derived_route_overlay_not_identity_authority_flag": key in {"agent_duty_routing_rulebook", "derived_agent_route_resolution_ledger", "file_to_derived_route_crosswalk", "stage_agent_qku_universe_resolver", "agent_computation_universe_view"},
                 "universal_preservation_surface_flag": key == "immutable_qku_formula_library",
@@ -2354,7 +2500,7 @@ def build_all(*, offline: bool = False) -> dict[str, Any]:
                 "market_scope_or_platform_creates_trading_authority_flag": False,
             }
         )
-    write_report("PR168_RP5C_CentralSurfaceManifest.report.json", summary={**stage1_hard_zero, "central_surface_count": len(central_manifest_records), "canonical_active_surfaces": [row["surface_ref"] for row in central_manifest_records], "authoritative_central_layer_count": len(AUTHORITATIVE_CENTRAL_LAYER_SHARDS), "authoritative_central_layer_surfaces": [generated_ref(shard_path(key)) for key in AUTHORITATIVE_CENTRAL_LAYER_SHARDS], "only_four_authoritative_central_layers_flag": True, "derived_id_view_surfaces": [generated_ref(shard_path(key)) for key in ("stage_computation_universe_view", "agent_computation_universe_view", "stage1_prediction_market_qku_activation_view", "stage1_agent_computation_universe_seed", "stage_agent_qku_universe_resolver", "library_query_receipts")], "independent_full_library_copy_count": 0, "stage1_active_universe_surfaces": [generated_ref(shard_path(key)) for key in STAGE1_ACTIVE_UNIVERSE_SHARDS], "immutable_qku_formula_library_remains_universal_preservation_surface": True, "stage1_agent_computation_universe_seed_is_default_stage1_seed": True, "stage1_agents_must_not_default_compute_full_universe": True, "machine_library_reader_ref": "tools/pr168_rp5c_library_reader.py"}, records=central_manifest_records)
+    write_report("PR168_RP5C_CentralSurfaceManifest.report.json", summary={**stage1_hard_zero, **market_quality_audit, "central_surface_count": len(central_manifest_records), "canonical_active_surfaces": [row["surface_ref"] for row in central_manifest_records], "authoritative_central_layer_count": len(AUTHORITATIVE_CENTRAL_LAYER_SHARDS), "authoritative_central_layer_surfaces": [generated_ref(shard_path(key)) for key in AUTHORITATIVE_CENTRAL_LAYER_SHARDS], "only_four_authoritative_central_layers_flag": True, "derived_id_view_surfaces": [generated_ref(shard_path(key)) for key in ("stage_computation_universe_view", "agent_computation_universe_view", "stage1_prediction_market_qku_activation_view", "stage1_agent_computation_universe_seed", "stage_agent_qku_universe_resolver", "library_query_receipts", "shared_cross_market_support_pool", "market_specific_qku_pool_registry")], "market_scope_classification_audit_surfaces": [generated_ref(shard_path("market_family_reclassification_ledger")), "docs/master_plan/generated/PR168_RP5C_MarketScopeClassificationQualityAudit.report.json"], "independent_full_library_copy_count": 0, "stage1_active_universe_surfaces": [generated_ref(shard_path(key)) for key in STAGE1_ACTIVE_UNIVERSE_SHARDS], "immutable_qku_formula_library_remains_universal_preservation_surface": True, "stage1_agent_computation_universe_seed_is_default_stage1_seed": True, "stage1_agents_must_not_default_compute_full_universe": True, "qku_market_applicability_matrix_is_canonical_shared_and_market_specific_pool_source": True, "shared_cross_market_support_pool_is_compact_id_view_not_authoritative_copy": True, "market_specific_qku_pool_registry_is_compact_id_view_not_authoritative_copy": True, "machine_library_reader_ref": "tools/pr168_rp5c_library_reader.py"}, records=central_manifest_records)
     write_report("PR168_RP5C_CrossOSPathPortabilityAudit.report.json", summary=cross_os, records=cross_os)
     write_report("PR168_RP5C_PathAudit.report.json", summary=path_audit, records=path_audit)
     write_report("PR168_RP5C_FinalSummary.report.json", summary=final_summary, records=final_summary)

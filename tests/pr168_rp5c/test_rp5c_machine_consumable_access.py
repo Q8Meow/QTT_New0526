@@ -105,6 +105,64 @@ def test_rp5c_repo_financing_family_requires_repo_specific_evidence() -> None:
         assert repo_financing_evidence.search(evidence)
 
 
+def test_rp5c_market_scope_quality_audit_records_repair_distribution() -> None:
+    report = load_report("PR168_RP5C_MarketScopeClassificationQualityAudit.report.json")
+    matrix_rows = load_rows("qku_market_applicability_matrix")
+    counts = {}
+    for row in matrix_rows:
+        counts[row["applicability_mode"]] = counts.get(row["applicability_mode"], 0) + 1
+
+    assert report["prior_suspicious_repo_financing_assignment_count"] == 9382
+    assert report["prior_unknown_needs_review_count"] == 267
+    assert report["repo_financing_default_used_without_repo_specific_evidence_count"] == 0
+    assert report["generic_future_market_scope_row_count"] == 0
+    assert report["valid_cross_market_support_unavailable_to_stage1_count"] == 0
+    assert report["stage1_default_full_universe_compute_route_count"] == 0
+    assert report["repaired_cross_market_shared_count"] == counts["CROSS_MARKET_SHARED"] == 1471
+    assert report["repaired_market_specific_count"] == counts["MARKET_SPECIFIC"] == 530
+    assert report["repaired_unknown_needs_review_count"] == counts["UNKNOWN_NEEDS_REVIEW"] == 8188
+    assert report["qku_identity_deleted_count"] == 0
+    assert report["formula_identity_deleted_count"] == 0
+    assert report["global_qku_ban_count"] == 0
+    assert report["global_formula_ban_count"] == 0
+
+
+def test_rp5c_market_family_reclassification_ledger_records_evidence_rules() -> None:
+    rows = load_rows("market_family_reclassification_ledger")
+    row_types = {row["ledger_row_type"] for row in rows}
+
+    assert {
+        "PRIOR_SUSPICIOUS_DISTRIBUTION",
+        "REPO_FINANCING_BROAD_DEFAULT_REMOVED",
+        "REUSABLE_SUPPORT_TO_CROSS_MARKET_SHARED",
+        "PREDICTION_MARKET_SPECIFIC_PRESERVED",
+        "UNRESOLVED_TO_UNKNOWN_NEEDS_REVIEW",
+    }.issubset(row_types)
+    repo_rule = next(row for row in rows if row["ledger_row_type"] == "REPO_FINANCING_BROAD_DEFAULT_REMOVED")
+    assert repo_rule["before_repo_financing_assignment_count"] == 9382
+    assert repo_rule["after_unsupported_repo_financing_assignment_count"] == 0
+
+
+def test_rp5c_compact_market_pool_views_match_applicability_matrix() -> None:
+    matrix_rows = load_rows("qku_market_applicability_matrix")
+    shared_rows = [row for row in matrix_rows if row["applicability_mode"] == "CROSS_MARKET_SHARED"]
+    specific_rows = [row for row in matrix_rows if row["applicability_mode"] == "MARKET_SPECIFIC"]
+    shared_pool = load_rows("shared_cross_market_support_pool")
+    market_specific_pools = load_rows("market_specific_qku_pool_registry")
+
+    assert len(shared_pool) == 1
+    assert shared_pool[0]["identity_row_count"] == len(shared_rows) == 1471
+    assert shared_pool[0]["full_library_copy_flag"] is False
+    assert shared_pool[0]["contains_canonical_formula_objects_flag"] is False
+    assert shared_pool[0]["contains_canonical_qku_objects_flag"] is False
+    assert set(shared_pool[0]["identity_refs"]) == {row["identity_row_id"] for row in shared_rows}
+    assert len(market_specific_pools) == len(MASTER_PLAN_MARKET_FAMILIES)
+    assert sum(row["identity_row_count"] for row in market_specific_pools) == len(specific_rows) == 530
+    assert all(row["full_library_copy_flag"] is False for row in market_specific_pools)
+    assert all(row["contains_canonical_formula_objects_flag"] is False for row in market_specific_pools)
+    assert all(row["contains_canonical_qku_objects_flag"] is False for row in market_specific_pools)
+
+
 def test_rp5c_market_agnostic_shared_support_is_not_specific_market_family_assignment() -> None:
     matrix_rows = load_rows("qku_market_applicability_matrix")
     shared_rows = [row for row in matrix_rows if row["applicability_mode"] == "CROSS_MARKET_SHARED"]

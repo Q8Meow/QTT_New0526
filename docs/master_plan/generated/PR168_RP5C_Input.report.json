@@ -10,7 +10,7 @@
   "created_at_utc": "2026-06-25T00:00:00Z",
   "current_branch": "pr168-rp5c-immutable-qku-formula-library",
   "deleted_file_count": 0,
-  "discovery_elapsed_seconds_rounded": 0.034,
+  "discovery_elapsed_seconds_rounded": 0.035,
   "dormant_qku_deleted_count": 0,
   "dormant_qku_global_ban_count": 0,
   "fallback_adjacent_artifacts_used": [],
@@ -680,7 +680,7 @@
       "source_file_path": "docs/master_plan/generated/map3/formula_repair_playbook_rows.jsonl"
     }
   ],
-  "repo_head_commit_vcs_metadata_only": "772329314f0d89580775f71490bd781fb1b6a2bd",
+  "repo_head_commit_vcs_metadata_only": "8a96050699d50799c6573e7fdb1a65bea23cd519",
   "report_version": "PR168-RP5C-v1.0",
   "rows_ref": "docs/master_plan/generated/rp5c/input_artifact_to_identity_coverage.jsonl",
   "runtime_cash_receipt_count": 0,

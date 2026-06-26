@@ -17,6 +17,7 @@
   ],
   "backslash_only_path_leak_count": 0,
   "champion_authority_created_count": 0,
+  "classification_audit_scope": "Audit-only durable trail for RP5C market-family repair; no classifier expansion and no trading authority.",
   "connector_semantic_binding_count": 0,
   "created_at_utc": "2026-06-25T00:00:00Z",
   "deleted_file_count": 0,
@@ -27,6 +28,7 @@
   "formula_identity_deleted_count": 0,
   "formula_profit_ranking_count": 0,
   "generated_path_case_collision_count": 0,
+  "generic_future_market_scope_row_count": 0,
   "global_formula_ban_count": 0,
   "global_qku_ban_count": 0,
   "hard_zero_counters": {
@@ -80,6 +82,10 @@
   "machine_library_reader_ref": "tools/pr168_rp5c_library_reader.py",
   "manifest_ref": "docs/master_plan/generated/rp5c/qku_market_applicability_matrix.manifest.json",
   "manual_per_qku_hardcoded_agent_assignment_count": 0,
+  "market_family_reclassification_ledger_ref": "docs/master_plan/generated/rp5c/market_family_reclassification_ledger.jsonl",
+  "market_scope_classification_quality_audit_ref": "docs/master_plan/generated/PR168_RP5C_MarketScopeClassificationQualityAudit.report.json",
+  "market_scope_classification_quality_status": "PASS",
+  "market_specific_qku_pool_registry_ref": "docs/master_plan/generated/rp5c/market_specific_qku_pool_registry.jsonl",
   "master_plan_content_deleted_or_shortened_count": 0,
   "moved_file_count": 0,
   "mutable_agent_ownership_embedded_as_identity_authority_count": 0,
@@ -91,6 +97,8 @@
   "orphan_source_artifact_count": 0,
   "paper_loop_runtime_count": 0,
   "physical_filename": "PR168_RP5C_MachineConsumableLibraryAccess.report.json",
+  "prior_suspicious_repo_financing_assignment_count": 9382,
+  "prior_unknown_needs_review_count": 267,
   "private_state_fetch_count": 0,
   "qku_identity_deleted_count": 0,
   "qku_market_applicability_matrix_row_count": 10189,
@@ -961,6 +969,10 @@
       "unknown_needs_review_flag": true
     }
   ],
+  "repaired_cross_market_shared_count": 1471,
+  "repaired_market_specific_count": 530,
+  "repaired_unknown_needs_review_count": 8188,
+  "repo_financing_default_used_without_repo_specific_evidence_count": 0,
   "report_version": "PR168-RP5C-v1.0",
   "required_reader_functions": [
     "load_library",
@@ -975,6 +987,7 @@
   "rows_ref": "docs/master_plan/generated/rp5c/qku_market_applicability_matrix.jsonl",
   "runtime_cash_receipt_count": 0,
   "runtime_stack_generation_count": 0,
+  "shared_cross_market_support_pool_ref": "docs/master_plan/generated/rp5c/shared_cross_market_support_pool.jsonl",
   "silent_skipped_input_artifact_count": 0,
   "source_truth_authority_created_count": 0,
   "stack_combination_materialization_count": 0,
@@ -985,5 +998,6 @@
   "stage_computation_universe_view_count": 3,
   "stage_default_compute_count_max": 290,
   "stage_default_compute_count_min": 223,
-  "trade_simulation_count": 0
+  "trade_simulation_count": 0,
+  "valid_cross_market_support_unavailable_to_stage1_count": 0
 }

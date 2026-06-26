@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+from collections import Counter
 import re
 from typing import Any
 
@@ -264,6 +265,65 @@ def _failures() -> list[str]:
         failures.append("MARKET_APPLICABILITY_NO_CROSS_MARKET_SHARED_ROWS")
     if not any("PREDICTION_MARKETS" in row.get("market_family_refs", []) for row in matrix_rows):
         failures.append("MARKET_APPLICABILITY_NO_PREDICTION_MARKET_ROWS")
+    applicability_counts = Counter(str(row.get("applicability_mode")) for row in matrix_rows)
+    market_quality = read_json(report_path("PR168_RP5C_MarketScopeClassificationQualityAudit.report.json"))
+    expected_quality_counts = {
+        "prior_suspicious_repo_financing_assignment_count": 9382,
+        "prior_unknown_needs_review_count": 267,
+        "repaired_market_specific_count": int(applicability_counts.get("MARKET_SPECIFIC", 0)),
+        "repaired_cross_market_shared_count": int(applicability_counts.get("CROSS_MARKET_SHARED", 0)),
+        "repaired_unknown_needs_review_count": int(applicability_counts.get("UNKNOWN_NEEDS_REVIEW", 0)),
+        "repo_financing_default_used_without_repo_specific_evidence_count": 0,
+        "generic_future_market_scope_row_count": 0,
+        "valid_cross_market_support_unavailable_to_stage1_count": 0,
+        "stage1_default_full_universe_compute_route_count": 0,
+        "qku_identity_deleted_count": 0,
+        "formula_identity_deleted_count": 0,
+        "global_qku_ban_count": 0,
+        "global_formula_ban_count": 0,
+    }
+    for key, expected in expected_quality_counts.items():
+        if market_quality.get(key) != expected:
+            failures.append(f"MARKET_SCOPE_QUALITY_AUDIT_MISMATCH:{key}:{market_quality.get(key)}")
+    if market_quality.get("repaired_cross_market_shared_count") != 1471:
+        failures.append("MARKET_SCOPE_QUALITY_SHARED_COUNT_NOT_DURABLE")
+    if market_quality.get("repaired_market_specific_count") != 530:
+        failures.append("MARKET_SCOPE_QUALITY_MARKET_SPECIFIC_COUNT_NOT_DURABLE")
+    if market_quality.get("repaired_unknown_needs_review_count") != 8188:
+        failures.append("MARKET_SCOPE_QUALITY_UNKNOWN_COUNT_NOT_DURABLE")
+
+    market_reclassification_rows = read_jsonl(shard_path("market_family_reclassification_ledger"))
+    reclassification_types = {row.get("ledger_row_type") for row in market_reclassification_rows}
+    required_reclassification_types = {
+        "PRIOR_SUSPICIOUS_DISTRIBUTION",
+        "REPO_FINANCING_BROAD_DEFAULT_REMOVED",
+        "REUSABLE_SUPPORT_TO_CROSS_MARKET_SHARED",
+        "PREDICTION_MARKET_SPECIFIC_PRESERVED",
+        "UNRESOLVED_TO_UNKNOWN_NEEDS_REVIEW",
+    }
+    if not required_reclassification_types.issubset(reclassification_types):
+        failures.append("MARKET_FAMILY_RECLASSIFICATION_LEDGER_INCOMPLETE")
+    shared_pool_rows = read_jsonl(shard_path("shared_cross_market_support_pool"))
+    if len(shared_pool_rows) != 1 or shared_pool_rows[0].get("identity_row_count") != int(applicability_counts.get("CROSS_MARKET_SHARED", 0)):
+        failures.append("SHARED_CROSS_MARKET_SUPPORT_POOL_COUNT_MISMATCH")
+    if shared_pool_rows and (
+        shared_pool_rows[0].get("full_library_copy_flag") is not False
+        or shared_pool_rows[0].get("contains_canonical_formula_objects_flag") is not False
+        or shared_pool_rows[0].get("contains_canonical_qku_objects_flag") is not False
+    ):
+        failures.append("SHARED_CROSS_MARKET_SUPPORT_POOL_NOT_ID_ONLY")
+    market_specific_pool_rows = read_jsonl(shard_path("market_specific_qku_pool_registry"))
+    if len(market_specific_pool_rows) != len(MASTER_PLAN_MARKET_FAMILIES):
+        failures.append("MARKET_SPECIFIC_QKU_POOL_MISSING_CANONICAL_FAMILIES")
+    if sum(int(row.get("identity_row_count", 0)) for row in market_specific_pool_rows) != int(applicability_counts.get("MARKET_SPECIFIC", 0)):
+        failures.append("MARKET_SPECIFIC_QKU_POOL_COUNT_MISMATCH")
+    if any(
+        row.get("full_library_copy_flag") is not False
+        or row.get("contains_canonical_formula_objects_flag") is not False
+        or row.get("contains_canonical_qku_objects_flag") is not False
+        for row in market_specific_pool_rows
+    ):
+        failures.append("MARKET_SPECIFIC_QKU_POOL_NOT_ID_ONLY")
 
     stage_profile = next((row for row in stage_profiles if row.get("profile_id") == STAGE1_PROFILE_ID), None)
     if stage_profile is None:

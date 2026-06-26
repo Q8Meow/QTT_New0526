@@ -67,6 +67,9 @@ def _row_ref(row: Mapping[str, Any]) -> str:
         "market_scope_row_id",
         "ontology_role_row_id",
         "formula_assignment_row_id",
+        "market_family_reclassification_ledger_row_id",
+        "shared_cross_market_support_pool_row_id",
+        "market_specific_qku_pool_row_id",
         "row_id",
         "generated_surface_ref",
     ):

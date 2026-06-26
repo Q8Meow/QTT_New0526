@@ -23,7 +23,7 @@
   "formula_identity_deleted_count": 0,
   "formula_profit_ranking_count": 0,
   "generated_path_case_collision_count": 0,
-  "git_status_short_at_builder_time": "M docs/master_plan/generated/PR168_RP5C_AgentQKUAccessContract.report.json\n M docs/master_plan/generated/PR168_RP5C_FinalSummary.report.json\n M docs/master_plan/generated/PR168_RP5C_ImmutableFormulaLibrary.report.json\n M docs/master_plan/generated/PR168_RP5C_ImmutableQKUFormulaLibrary.report.json\n M docs/master_plan/generated/PR168_RP5C_ImmutableQKULibrary.report.json\n M docs/master_plan/generated/PR168_RP5C_Input.report.json\n M docs/master_plan/generated/PR168_RP5C_MachineConsumableLibraryAccess.report.json\n M docs/master_plan/generated/PR168_RP5C_Preflight.report.json\n M docs/master_plan/generated/PR168_RP5C_Stage1AgentComputationUniverseSeed.report.json\n M docs/master_plan/generated/PR168_RP5C_Stage1PredictionMarketQKUActivationView.report.json\n M docs/master_plan/generated/PR168_RP5C_StageAgentUniverseResolutionProof.report.json\n M docs/master_plan/generated/PR168_RP5C_ToRP5DExecutabilityHandoff.report.json\n M docs/master_plan/generated/rp5c/agent_computation_universe_view.jsonl\n M docs/master_plan/generated/rp5c/agent_qku_access_policy_registry.jsonl\n M docs/master_plan/generated/rp5c/immutable_formula_library.jsonl\n M docs/master_plan/generated/rp5c/immutable_qku_formula_library.jsonl\n M docs/master_plan/generated/rp5c/immutable_qku_library.jsonl\n M docs/master_plan/generated/rp5c/library_query_receipts.jsonl\n M docs/master_plan/generated/rp5c/market_stage_activation_profile_registry.jsonl\n M docs/master_plan/generated/rp5c/market_stage_activation_profile_registry.manifest.json\n M docs/master_plan/generated/rp5c/qku_market_applicability_matrix.jsonl\n M docs/master_plan/generated/rp5c/rp5d_executability_handoff.jsonl\n M docs/master_plan/generated/rp5c/stage1_agent_computation_universe_seed.jsonl\n M docs/master_plan/generated/rp5c/stage1_prediction_market_qku_activation_view.jsonl\n M docs/master_plan/generated/rp5c/stage_agent_qku_universe_resolver.jsonl\n M tests/pr168_rp5c/test_rp5c_machine_consumable_access.py\n M tools/build_pr168_rp5c_immutable_qku_formula_library.py\n M tools/pr168_rp5c_library_reader.py\n M tools/pr168_rp5c_validator.py",
+  "git_status_short_at_builder_time": "M tests/pr168_rp5c/test_rp5c_machine_consumable_access.py\n M tools/build_pr168_rp5c_immutable_qku_formula_library.py\n M tools/pr168_rp5c_config.py\n M tools/pr168_rp5c_report_writer.py\n M tools/pr168_rp5c_validator.py",
   "global_formula_ban_count": 0,
   "global_qku_ban_count": 0,
   "hard_zero_counters": {
@@ -106,14 +106,14 @@
     "effective_branch_name": "pr168-rp5c-immutable-qku-formula-library",
     "expected_branch": "pr168-rp5c-immutable-qku-formula-library",
     "fail_closed_warnings": [],
-    "git_status_short_at_builder_time": "M docs/master_plan/generated/PR168_RP5C_AgentQKUAccessContract.report.json\n M docs/master_plan/generated/PR168_RP5C_FinalSummary.report.json\n M docs/master_plan/generated/PR168_RP5C_ImmutableFormulaLibrary.report.json\n M docs/master_plan/generated/PR168_RP5C_ImmutableQKUFormulaLibrary.report.json\n M docs/master_plan/generated/PR168_RP5C_ImmutableQKULibrary.report.json\n M docs/master_plan/generated/PR168_RP5C_Input.report.json\n M docs/master_plan/generated/PR168_RP5C_MachineConsumableLibraryAccess.report.json\n M docs/master_plan/generated/PR168_RP5C_Preflight.report.json\n M docs/master_plan/generated/PR168_RP5C_Stage1AgentComputationUniverseSeed.report.json\n M docs/master_plan/generated/PR168_RP5C_Stage1PredictionMarketQKUActivationView.report.json\n M docs/master_plan/generated/PR168_RP5C_StageAgentUniverseResolutionProof.report.json\n M docs/master_plan/generated/PR168_RP5C_ToRP5DExecutabilityHandoff.report.json\n M docs/master_plan/generated/rp5c/agent_computation_universe_view.jsonl\n M docs/master_plan/generated/rp5c/agent_qku_access_policy_registry.jsonl\n M docs/master_plan/generated/rp5c/immutable_formula_library.jsonl\n M docs/master_plan/generated/rp5c/immutable_qku_formula_library.jsonl\n M docs/master_plan/generated/rp5c/immutable_qku_library.jsonl\n M docs/master_plan/generated/rp5c/library_query_receipts.jsonl\n M docs/master_plan/generated/rp5c/market_stage_activation_profile_registry.jsonl\n M docs/master_plan/generated/rp5c/market_stage_activation_profile_registry.manifest.json\n M docs/master_plan/generated/rp5c/qku_market_applicability_matrix.jsonl\n M docs/master_plan/generated/rp5c/rp5d_executability_handoff.jsonl\n M docs/master_plan/generated/rp5c/stage1_agent_computation_universe_seed.jsonl\n M docs/master_plan/generated/rp5c/stage1_prediction_market_qku_activation_view.jsonl\n M docs/master_plan/generated/rp5c/stage_agent_qku_universe_resolver.jsonl\n M tests/pr168_rp5c/test_rp5c_machine_consumable_access.py\n M tools/build_pr168_rp5c_immutable_qku_formula_library.py\n M tools/pr168_rp5c_library_reader.py\n M tools/pr168_rp5c_validator.py",
+    "git_status_short_at_builder_time": "M tests/pr168_rp5c/test_rp5c_machine_consumable_access.py\n M tools/build_pr168_rp5c_immutable_qku_formula_library.py\n M tools/pr168_rp5c_config.py\n M tools/pr168_rp5c_report_writer.py\n M tools/pr168_rp5c_validator.py",
     "preflight_status": "PASS",
     "python_executable_used": ".venv/Scripts/python.exe",
-    "repo_head_commit_vcs_metadata_only": "772329314f0d89580775f71490bd781fb1b6a2bd",
+    "repo_head_commit_vcs_metadata_only": "8a96050699d50799c6573e7fdb1a65bea23cd519",
     "scan_strategy": "bounded exact RP5A/RP5B/PR165-D2 discovery plus selected upstream identity surface parsing",
     "validation_environment": "Windows local with Linux-compatible Python/path handling"
   },
-  "repo_head_commit_vcs_metadata_only": "772329314f0d89580775f71490bd781fb1b6a2bd",
+  "repo_head_commit_vcs_metadata_only": "8a96050699d50799c6573e7fdb1a65bea23cd519",
   "report_version": "PR168-RP5C-v1.0",
   "runtime_cash_receipt_count": 0,
   "runtime_stack_generation_count": 0,
@@ -123,7 +123,7 @@
   "stack_combination_materialization_count": 0,
   "stage1_default_full_universe_compute_route_count": 0,
   "streaming_scanning_performance": {
-    "elapsed_seconds_rounded": 11.22,
+    "elapsed_seconds_rounded": 12.469,
     "records_scanned_count": 184786,
     "records_with_identity_count": 182801
   },
