@@ -1,5 +1,10 @@
 from __future__ import annotations
 
+import pytest
+
+from tools import build_pr168_rp5c_immutable_qku_formula_library as builder
+from tools.pr168_rp5c_config import ALLOWED_BUILD_BRANCH_NAMES, BRANCH_NAME
+
 from ._helpers import assert_hard_zero_report, load_report, load_rows
 
 
@@ -16,3 +21,47 @@ def test_rp5c_input_discovery_consumes_required_surfaces() -> None:
     assert "docs/master_plan/generated/PR165_D2_AgentDutySourceCrosswalk.report.json" in paths
     assert all(row["consumption_status"] for row in rows)
     assert_hard_zero_report(report)
+
+
+def _preflight(branch: str) -> dict[str, object]:
+    return {
+        "effective_branch_name": branch,
+        "current_branch": branch,
+        "ci_head_ref": None,
+        "ci_ref_name": None,
+    }
+
+
+@pytest.mark.parametrize("branch", ALLOWED_BUILD_BRANCH_NAMES)
+def test_rp5c_builder_accepts_expected_post_merge_branch_contexts(branch: str) -> None:
+    builder._ensure_allowed_build_branch(_preflight(branch))
+
+
+def test_rp5c_builder_accepts_github_actions_main_detached_head_context() -> None:
+    effective = builder._effective_branch_name(
+        "",
+        None,
+        "main",
+        github_actions=True,
+    )
+
+    assert effective == "main"
+    builder._ensure_allowed_build_branch(_preflight(effective))
+
+
+def test_rp5c_builder_rejects_arbitrary_branch_context() -> None:
+    with pytest.raises(RuntimeError, match=BRANCH_NAME):
+        builder._ensure_allowed_build_branch(_preflight("feature/not-rp5c"))
+
+
+def test_rp5c_builder_ignores_ci_branch_env_outside_github_actions() -> None:
+    effective = builder._effective_branch_name(
+        "",
+        BRANCH_NAME,
+        "main",
+        github_actions=False,
+    )
+
+    assert effective == ""
+    with pytest.raises(RuntimeError, match=BRANCH_NAME):
+        builder._ensure_allowed_build_branch(_preflight(effective))

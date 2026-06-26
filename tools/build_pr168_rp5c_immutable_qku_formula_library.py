@@ -20,6 +20,7 @@ if str(REPO_ROOT) not in sys.path:
 
 from tools.pr168_rp5c_config import (
     AGENT_ACCESS_POLICY_VERSION,
+    ALLOWED_BUILD_BRANCH_NAMES,
     APPLICABILITY_MATRIX_VERSION,
     AUTHORITATIVE_CENTRAL_LAYER_SHARDS,
     BRANCH_NAME,
@@ -88,6 +89,37 @@ def _run_text(args: list[str]) -> str:
         errors="replace",
     )
     return completed.stdout.strip() if completed.returncode == 0 else ""
+
+
+def _github_actions_enabled() -> bool:
+    return os.environ.get("GITHUB_ACTIONS", "").strip().lower() == "true"
+
+
+def _effective_branch_name(
+    git_current_branch: str,
+    ci_head_ref: str | None,
+    ci_ref_name: str | None,
+    *,
+    github_actions: bool,
+) -> str:
+    if git_current_branch:
+        return git_current_branch
+    if github_actions:
+        return ci_head_ref or ci_ref_name or ""
+    return ""
+
+
+def _ensure_allowed_build_branch(preflight: dict[str, Any]) -> None:
+    effective_branch = preflight["effective_branch_name"]
+    if effective_branch in ALLOWED_BUILD_BRANCH_NAMES:
+        return
+    allowed = ", ".join(ALLOWED_BUILD_BRANCH_NAMES)
+    raise RuntimeError(
+        f"RP5C build must run on one of [{allowed}]; "
+        f"current branch is {preflight['current_branch']!r}, "
+        f"ci_head_ref is {preflight['ci_head_ref']!r}, "
+        f"ci_ref_name is {preflight['ci_ref_name']!r}"
+    )
 
 
 def _stable_path_key(path: str | Path) -> tuple[str, str]:
@@ -2205,14 +2237,22 @@ def build_all(*, offline: bool = False) -> dict[str, Any]:
     git_current_branch = _run_text(["git", "branch", "--show-current"])
     ci_head_ref = os.environ.get("GITHUB_HEAD_REF", "").strip() or None
     ci_ref_name = os.environ.get("GITHUB_REF_NAME", "").strip() or None
-    effective_branch = git_current_branch or ci_head_ref or ci_ref_name
+    github_actions = _github_actions_enabled()
+    effective_branch = _effective_branch_name(
+        git_current_branch,
+        ci_head_ref,
+        ci_ref_name,
+        github_actions=github_actions,
+    )
     preflight = {
         "preflight_status": "PASS",
         "current_branch": git_current_branch,
         "ci_head_ref": ci_head_ref,
         "ci_ref_name": ci_ref_name,
+        "github_actions": github_actions,
         "effective_branch_name": effective_branch,
         "expected_branch": BRANCH_NAME,
+        "allowed_build_branch_names": list(ALLOWED_BUILD_BRANCH_NAMES),
         "repo_head_commit_vcs_metadata_only": _run_text(["git", "rev-parse", "HEAD"]),
         "git_status_short_at_builder_time": _run_text(["git", "status", "--short", "--untracked-files=all"]) or "<clean>",
         "validation_environment": "Windows local with Linux-compatible Python/path handling",
@@ -2225,13 +2265,7 @@ def build_all(*, offline: bool = False) -> dict[str, Any]:
         },
         "fail_closed_warnings": [],
     }
-    if preflight["effective_branch_name"] != BRANCH_NAME:
-        raise RuntimeError(
-            f"RP5C must run on {BRANCH_NAME}; "
-            f"current branch is {preflight['current_branch']!r}, "
-            f"ci_head_ref is {preflight['ci_head_ref']!r}, "
-            f"ci_ref_name is {preflight['ci_ref_name']!r}"
-        )
+    _ensure_allowed_build_branch(preflight)
 
     source_rows, input_summary = _discover_input_paths()
     source_by_id = {row["source_artifact_row_id"]: row for row in source_rows}
@@ -2431,7 +2465,7 @@ def build_all(*, offline: bool = False) -> dict[str, Any]:
 
     # Shards first, so report contracts can reference materialized rows.
     _write_shard_and_report("source_artifact_consumption_ledger", source_rows, "PR168_RP5C_SourceArtifactConsumptionLedger.report.json", "SourceArtifactConsumptionLedgerV1", {"source_artifact_row_count": len(source_rows), "consumption_status_counts": _counter_summary(source_rows, "consumption_status")})
-    _write_shard_and_report("input_artifact_to_identity_coverage", coverage_rows, "PR168_RP5C_Input.report.json", "InputArtifactToIdentityCoverageV1", {**input_summary, "repo_head_commit_vcs_metadata_only": preflight["repo_head_commit_vcs_metadata_only"], "branch_name": preflight["effective_branch_name"], "current_branch": preflight["current_branch"], "ci_head_ref": preflight["ci_head_ref"], "ci_ref_name": preflight["ci_ref_name"], "found_rp5a_artifacts": [row["source_file_path"] for row in source_rows if row["source_report_family"] == "RP5A" and row["found_flag"]], "found_rp5b_artifacts": [row["source_file_path"] for row in source_rows if row["source_report_family"] == "RP5B" and row["found_flag"]], "found_pr165_d2_agent_artifacts": [row["source_file_path"] for row in source_rows if row["source_report_family"] == "PR165_D2" and row["found_flag"]], "found_upstream_identity_artifacts": [row["source_file_path"] for row in source_rows if row["source_report_family"] not in {"RP5A", "RP5B", "PR165_D2"} and row["found_flag"]], "missing_expected_artifacts": [row["source_file_path"] for row in source_rows if row["missing_expected_input_flag"]], "fallback_adjacent_artifacts_used": []})
+    _write_shard_and_report("input_artifact_to_identity_coverage", coverage_rows, "PR168_RP5C_Input.report.json", "InputArtifactToIdentityCoverageV1", {**input_summary, "repo_head_commit_vcs_metadata_only": preflight["repo_head_commit_vcs_metadata_only"], "branch_name": BRANCH_NAME, "current_branch": preflight["current_branch"], "ci_head_ref": preflight["ci_head_ref"], "ci_ref_name": preflight["ci_ref_name"], "github_actions": preflight["github_actions"], "effective_branch_name": preflight["effective_branch_name"], "allowed_build_branch_names": preflight["allowed_build_branch_names"], "found_rp5a_artifacts": [row["source_file_path"] for row in source_rows if row["source_report_family"] == "RP5A" and row["found_flag"]], "found_rp5b_artifacts": [row["source_file_path"] for row in source_rows if row["source_report_family"] == "RP5B" and row["found_flag"]], "found_pr165_d2_agent_artifacts": [row["source_file_path"] for row in source_rows if row["source_report_family"] == "PR165_D2" and row["found_flag"]], "found_upstream_identity_artifacts": [row["source_file_path"] for row in source_rows if row["source_report_family"] not in {"RP5A", "RP5B", "PR165_D2"} and row["found_flag"]], "missing_expected_artifacts": [row["source_file_path"] for row in source_rows if row["missing_expected_input_flag"]], "fallback_adjacent_artifacts_used": []})
     _write_shard_and_report("immutable_qku_library", qku_rows, "PR168_RP5C_ImmutableQKULibrary.report.json", "ImmutableQKUV1", {"immutable_qku_row_count": len(qku_rows)})
     _write_shard_and_report("immutable_formula_library", formula_rows, "PR168_RP5C_ImmutableFormulaLibrary.report.json", "ImmutableFormulaV1", {"immutable_formula_row_count": len(formula_rows)})
     _write_shard_and_report("immutable_qku_formula_library", library_identities, "PR168_RP5C_ImmutableQKUFormulaLibrary.report.json", "ImmutableQKUFormulaLibraryV1", {"immutable_qku_formula_row_count": len(library_identities), "extracted_identity_occurrence_count": len(identities), "duplicate_preserved_occurrence_count": len(identities) - len(library_identities)})
