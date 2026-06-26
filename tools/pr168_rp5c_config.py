@@ -53,6 +53,48 @@ MARKET_SCOPES: Final = (
     "unknown_needs_review",
 )
 
+MASTER_PLAN_MARKET_FAMILIES: Final = (
+    "PREDICTION_MARKETS",
+    "EQUITIES_AND_ETFS",
+    "CRYPTO_SPOT",
+    "CRYPTO_DERIVATIVES",
+    "LISTED_OPTIONS",
+    "EXCHANGE_TRADED_FUTURES_AND_COMMODITIES",
+    "MACRO_FX_EVENT",
+    "SECURITIES_FINANCING_AND_REPO",
+    "FIXED_INCOME_RFQ",
+    "CROSS_MARKET_RELATIVE_VALUE",
+)
+
+MARKET_APPLICABILITY_MODES: Final = (
+    "MARKET_SPECIFIC",
+    "CROSS_MARKET_SHARED",
+    "UNKNOWN_NEEDS_REVIEW",
+)
+
+STAGE_ACCESS_MODES: Final = (
+    "DEFAULT_COMPUTE",
+    "AVAILABLE_ON_DEMAND",
+    "INACTIVE_FOR_STAGE",
+    "UNKNOWN_NEEDS_REVIEW",
+)
+
+STAGE1_PROFILE_ID: Final = "STAGE1_PREDICTION_MARKETS"
+STAGE1_ENABLED_MARKET_FAMILIES: Final = ("PREDICTION_MARKETS",)
+STAGE1_ENABLED_PLATFORMS: Final = ("KALSHI", "POLYMARKET", "FORECASTEX_IBKR")
+
+LIBRARY_VERSION: Final = "ImmutableQKUFormulaLibraryV1"
+APPLICABILITY_MATRIX_VERSION: Final = "QKUMarketApplicabilityMatrixV1"
+STAGE_PROFILE_VERSION: Final = "MarketStageActivationProfileRegistryV1"
+AGENT_ACCESS_POLICY_VERSION: Final = "AgentQKUAccessPolicyRegistryV1"
+
+AUTHORITATIVE_CENTRAL_LAYER_SHARDS: Final = (
+    "immutable_qku_formula_library",
+    "qku_market_applicability_matrix",
+    "market_stage_activation_profile_registry",
+    "agent_qku_access_policy_registry",
+)
+
 DEPENDENCY_TYPES: Final = (
     "signal_dependency",
     "calibration_dependency",
@@ -231,6 +273,10 @@ REPORT_NAMES: Final = (
     "PR168_RP5C_PlatformApplicabilityRegistry.report.json",
     "PR168_RP5C_DormantFutureMarketQKULedger.report.json",
     "PR168_RP5C_Stage1AgentComputationUniverseSeed.report.json",
+    "PR168_RP5C_MachineConsumableLibraryAccess.report.json",
+    "PR168_RP5C_AgentQKUAccessContract.report.json",
+    "PR168_RP5C_StageAgentUniverseResolutionProof.report.json",
+    "PR168_RP5C_ToVS1TradingIntelligenceHandoff.report.json",
     "PR168_RP5C_CrossOSPathPortabilityAudit.report.json",
     "PR168_RP5C_PathAudit.report.json",
     "PR168_RP5C_ToRP5DExecutabilityHandoff.report.json",
@@ -259,6 +305,14 @@ ROW_SHARDS: Final = {
     "no_orphan_identity_rows": "no_orphan_identity_rows.jsonl",
     "no_orphan_source_artifact_rows": "no_orphan_source_artifact_rows.jsonl",
     "no_orphan_generated_surface_rows": "no_orphan_generated_surface_rows.jsonl",
+    "qku_market_applicability_matrix": "qku_market_applicability_matrix.jsonl",
+    "market_stage_activation_profile_registry": "market_stage_activation_profile_registry.jsonl",
+    "agent_qku_access_policy_registry": "agent_qku_access_policy_registry.jsonl",
+    "stage_agent_qku_universe_resolver": "stage_agent_qku_universe_resolver.jsonl",
+    "stage_computation_universe_view": "stage_computation_universe_view.jsonl",
+    "agent_computation_universe_view": "agent_computation_universe_view.jsonl",
+    "library_query_receipts": "library_query_receipts.jsonl",
+    "vs1_trading_intelligence_handoff": "vs1_trading_intelligence_handoff.jsonl",
     "stage1_prediction_market_qku_activation_view": "stage1_prediction_market_qku_activation_view.jsonl",
     "platform_applicability_registry": "platform_applicability_registry.jsonl",
     "dormant_future_market_qku_ledger": "dormant_future_market_qku_ledger.jsonl",
@@ -338,6 +392,14 @@ CENTRAL_SURFACE_SHARDS: Final = (
     "no_orphan_identity_rows",
     "no_orphan_source_artifact_rows",
     "no_orphan_generated_surface_rows",
+    "qku_market_applicability_matrix",
+    "market_stage_activation_profile_registry",
+    "agent_qku_access_policy_registry",
+    "stage_agent_qku_universe_resolver",
+    "stage_computation_universe_view",
+    "agent_computation_universe_view",
+    "library_query_receipts",
+    "vs1_trading_intelligence_handoff",
     "stage1_prediction_market_qku_activation_view",
     "platform_applicability_registry",
     "dormant_future_market_qku_ledger",

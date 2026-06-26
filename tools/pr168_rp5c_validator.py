@@ -6,19 +6,31 @@ from __future__ import annotations
 from typing import Any
 
 from tools.pr168_rp5c_config import (
+    AGENT_ACCESS_POLICY_VERSION,
+    APPLICABILITY_MATRIX_VERSION,
+    AUTHORITATIVE_CENTRAL_LAYER_SHARDS,
     CENTRAL_SURFACE_SHARDS,
     HARD_ZERO_COUNTERS,
+    LIBRARY_VERSION,
+    MARKET_APPLICABILITY_MODES,
     MARKET_SCOPES,
+    MASTER_PLAN_MARKET_FAMILIES,
     ONTOLOGY_CATEGORIES,
     PLATFORM_APPLICABILITY_STATES,
     REPORT_NAMES,
     ROW_SHARDS,
     STAGE1_ACTIVE_UNIVERSE_SHARDS,
+    STAGE1_ENABLED_MARKET_FAMILIES,
+    STAGE1_ENABLED_PLATFORMS,
+    STAGE1_PROFILE_ID,
+    STAGE_ACCESS_MODES,
+    STAGE_PROFILE_VERSION,
     generated_ref,
     manifest_path_for_shard,
     report_path,
     shard_path,
 )
+from tools.pr168_rp5c_library_reader import LibraryVersionMismatchError, load_library, query_ids, resolve_stage_agent_universe
 from tools.pr168_rp5c_report_writer import read_json, read_jsonl
 
 
@@ -172,6 +184,20 @@ def _failures() -> list[str]:
     required = {generated_ref(shard_path(key)) for key in CENTRAL_SURFACE_SHARDS}
     if not required.issubset(listed):
         failures.append("CENTRAL_SURFACE_MANIFEST_MISSING_REQUIRED_SURFACE")
+    authoritative_refs = {generated_ref(shard_path(key)) for key in AUTHORITATIVE_CENTRAL_LAYER_SHARDS}
+    if set(central.get("authoritative_central_layer_surfaces", [])) != authoritative_refs:
+        failures.append("CENTRAL_SURFACE_MANIFEST_AUTHORITATIVE_LAYER_MISMATCH")
+    if central.get("authoritative_central_layer_count") != 4 or central.get("only_four_authoritative_central_layers_flag") is not True:
+        failures.append("CENTRAL_SURFACE_MANIFEST_NOT_EXACTLY_FOUR_AUTHORITATIVE_LAYERS")
+    if central.get("independent_full_library_copy_count") != 0:
+        failures.append("CENTRAL_SURFACE_MANIFEST_HAS_FULL_LIBRARY_COPY")
+    authoritative_record_refs = {
+        row.get("surface_ref")
+        for row in central.get("records", [])
+        if row.get("authoritative_configuration_data_layer_flag") is True
+    }
+    if authoritative_record_refs != authoritative_refs:
+        failures.append("CENTRAL_SURFACE_RECORD_AUTHORITATIVE_LAYER_MISMATCH")
     stage1_required = {generated_ref(shard_path(key)) for key in STAGE1_ACTIVE_UNIVERSE_SHARDS}
     if not stage1_required.issubset(listed):
         failures.append("CENTRAL_SURFACE_MANIFEST_MISSING_STAGE1_SURFACE")
@@ -179,6 +205,132 @@ def _failures() -> list[str]:
         failures.append("CENTRAL_SURFACE_MANIFEST_STAGE1_SEED_NOT_DEFAULT")
     if central.get("stage1_agents_must_not_default_compute_full_universe") is not True:
         failures.append("CENTRAL_SURFACE_MANIFEST_FULL_UNIVERSE_DEFAULT_ALLOWED")
+
+    matrix_rows = read_jsonl(shard_path("qku_market_applicability_matrix"))
+    stage_profiles = read_jsonl(shard_path("market_stage_activation_profile_registry"))
+    access_policies = read_jsonl(shard_path("agent_qku_access_policy_registry"))
+    stage_views = read_jsonl(shard_path("stage_computation_universe_view"))
+    agent_views = read_jsonl(shard_path("agent_computation_universe_view"))
+    resolver_rows = read_jsonl(shard_path("stage_agent_qku_universe_resolver"))
+    receipt_rows = read_jsonl(shard_path("library_query_receipts"))
+    if len(matrix_rows) != len(identities):
+        failures.append("MARKET_APPLICABILITY_MATRIX_IDENTITY_COUNT_MISMATCH")
+    valid_market_families = set(MASTER_PLAN_MARKET_FAMILIES)
+    for row in matrix_rows:
+        if row.get("applicability_mode") not in set(MARKET_APPLICABILITY_MODES):
+            failures.append(f"MARKET_APPLICABILITY_INVALID_MODE:{row.get('identity_row_id')}")
+        if set(row.get("market_family_refs", [])) - valid_market_families:
+            failures.append(f"MARKET_APPLICABILITY_INVALID_FAMILY:{row.get('identity_row_id')}")
+        if row.get("applicability_mode") == "UNKNOWN_NEEDS_REVIEW" and "CROSS_MARKET_SHARED" in row.get("market_family_refs", []):
+            failures.append(f"UNKNOWN_ROW_SILENTLY_CROSS_MARKET:{row.get('identity_row_id')}")
+        if row.get("applicability_mode") == "CROSS_MARKET_SHARED" and row.get("stage_access_mode_by_profile", {}).get(STAGE1_PROFILE_ID) == "DEFAULT_COMPUTE":
+            failures.append(f"CROSS_MARKET_SHARED_DEFAULT_COMPUTE:{row.get('identity_row_id')}")
+        if row.get("market_scope_or_platform_creates_trading_authority_flag") is not False:
+            failures.append(f"MARKET_APPLICABILITY_TRADING_AUTHORITY:{row.get('identity_row_id')}")
+    if not any(row.get("applicability_mode") == "CROSS_MARKET_SHARED" for row in matrix_rows):
+        failures.append("MARKET_APPLICABILITY_NO_CROSS_MARKET_SHARED_ROWS")
+    if not any("PREDICTION_MARKETS" in row.get("market_family_refs", []) for row in matrix_rows):
+        failures.append("MARKET_APPLICABILITY_NO_PREDICTION_MARKET_ROWS")
+
+    stage_profile = next((row for row in stage_profiles if row.get("profile_id") == STAGE1_PROFILE_ID), None)
+    if stage_profile is None:
+        failures.append("STAGE_PROFILE_STAGE1_MISSING")
+    else:
+        if stage_profile.get("enabled_market_family_refs") != list(STAGE1_ENABLED_MARKET_FAMILIES):
+            failures.append("STAGE_PROFILE_MARKET_FAMILIES_MISMATCH")
+        if stage_profile.get("enabled_platform_refs") != list(STAGE1_ENABLED_PLATFORMS):
+            failures.append("STAGE_PROFILE_PLATFORM_REFS_MISMATCH")
+        if stage_profile.get("include_cross_market_shared") is not True:
+            failures.append("STAGE_PROFILE_DOES_NOT_INCLUDE_CROSS_MARKET_SHARED")
+        if set(stage_profile.get("access_modes", [])) != set(STAGE_ACCESS_MODES):
+            failures.append("STAGE_PROFILE_ACCESS_MODES_MISMATCH")
+        if stage_profile.get("stage_profile_version") != STAGE_PROFILE_VERSION:
+            failures.append("STAGE_PROFILE_VERSION_MISMATCH")
+
+    if not access_policies:
+        failures.append("AGENT_ACCESS_POLICY_EMPTY")
+    for row in access_policies:
+        if row.get("agent_access_policy_version") != AGENT_ACCESS_POLICY_VERSION:
+            failures.append(f"AGENT_ACCESS_POLICY_VERSION_MISMATCH:{row.get('agent_id')}")
+        if row.get("mutable_per_qku_ownership_authority_flag") is not False:
+            failures.append(f"AGENT_ACCESS_POLICY_MUTABLE_OWNERSHIP:{row.get('agent_id')}")
+        if row.get("default_full_universe_access_flag") is not False:
+            failures.append(f"AGENT_ACCESS_POLICY_FULL_UNIVERSE:{row.get('agent_id')}")
+        for field in ("allowed_ontology_categories", "allowed_formula_family_refs", "allowed_qku_family_refs", "allowed_market_family_refs", "allowed_platform_refs", "allowed_access_modes", "source_duty_refs"):
+            if not row.get(field):
+                failures.append(f"AGENT_ACCESS_POLICY_MISSING_{field.upper()}:{row.get('agent_id')}")
+        if not {"docs/master_plan/generated/PR165_D2_AgentRosterDiscoveryAudit.report.json", "docs/master_plan/generated/PR165_D2_AgentDutySourceCrosswalk.report.json"}.issubset(set(row.get("source_duty_refs", []))):
+            failures.append(f"AGENT_ACCESS_POLICY_MISSING_PR165_D2_SOURCE:{row.get('agent_id')}")
+
+    if {row.get("platform_id") for row in stage_views} != set(STAGE1_ENABLED_PLATFORMS):
+        failures.append("STAGE_COMPUTATION_VIEW_PLATFORM_MISMATCH")
+    cross_shared_ids = {row["identity_row_id"] for row in matrix_rows if row.get("applicability_mode") == "CROSS_MARKET_SHARED"}
+    prediction_ids = {row["identity_row_id"] for row in matrix_rows if "PREDICTION_MARKETS" in row.get("market_family_refs", []) and row.get("applicability_mode") == "MARKET_SPECIFIC"}
+    for row in stage_views:
+        if row.get("library_version") != LIBRARY_VERSION or row.get("applicability_matrix_version") != APPLICABILITY_MATRIX_VERSION or row.get("stage_profile_version") != STAGE_PROFILE_VERSION or row.get("agent_access_policy_version") != AGENT_ACCESS_POLICY_VERSION:
+            failures.append(f"STAGE_VIEW_VERSION_MISMATCH:{row.get('stage_computation_universe_view_id')}")
+        if row.get("contains_canonical_formula_objects_flag") is not False or row.get("contains_canonical_qku_objects_flag") is not False:
+            failures.append(f"STAGE_VIEW_DUPLICATES_CANONICAL_OBJECTS:{row.get('stage_computation_universe_view_id')}")
+        default_refs = set(row.get("default_compute_identity_refs", []))
+        on_demand_refs = set(row.get("available_on_demand_identity_refs", []))
+        if not default_refs.issubset(prediction_ids):
+            failures.append(f"STAGE_VIEW_DEFAULT_NOT_PREDICTION_ONLY:{row.get('platform_id')}")
+        if not cross_shared_ids.issubset(on_demand_refs):
+            failures.append(f"STAGE_VIEW_MISSING_CROSS_MARKET_SHARED_ON_DEMAND:{row.get('platform_id')}")
+        if cross_shared_ids & default_refs:
+            failures.append(f"STAGE_VIEW_CROSS_MARKET_SHARED_DEFAULT_COMPUTE:{row.get('platform_id')}")
+    for row in agent_views:
+        if row.get("contains_canonical_formula_objects_flag") is not False or row.get("contains_canonical_qku_objects_flag") is not False:
+            failures.append(f"AGENT_VIEW_DUPLICATES_CANONICAL_OBJECTS:{row.get('agent_computation_universe_view_id')}")
+        if len(row.get("identity_refs", [])) >= len(identities):
+            failures.append(f"AGENT_VIEW_FULL_UNIVERSE_DEFAULT:{row.get('agent_id')}:{row.get('platform_id')}")
+    if len(resolver_rows) != len(access_policies) * len(STAGE1_ENABLED_PLATFORMS):
+        failures.append("STAGE_AGENT_RESOLVER_POLICY_PLATFORM_COUNT_MISMATCH")
+    for row in resolver_rows:
+        if row.get("library_version") != LIBRARY_VERSION or row.get("applicability_matrix_version") != APPLICABILITY_MATRIX_VERSION or row.get("stage_profile_version") != STAGE_PROFILE_VERSION or row.get("agent_access_policy_version") != AGENT_ACCESS_POLICY_VERSION:
+            failures.append(f"STAGE_AGENT_RESOLVER_VERSION_MISMATCH:{row.get('stage_agent_resolver_row_id')}")
+        if row.get("contains_canonical_formula_objects_flag") is not False or row.get("contains_canonical_qku_objects_flag") is not False:
+            failures.append(f"STAGE_AGENT_RESOLVER_DUPLICATES_CANONICAL_OBJECTS:{row.get('stage_agent_resolver_row_id')}")
+        if len(row.get("resolved_identity_refs", [])) >= len(identities):
+            failures.append(f"STAGE_AGENT_RESOLVER_FULL_UNIVERSE:{row.get('agent_id')}:{row.get('platform_id')}")
+    if not receipt_rows:
+        failures.append("LIBRARY_QUERY_RECEIPTS_EMPTY")
+    for row in receipt_rows:
+        if not row.get("query_receipt_id") or "result_identity_refs" not in row:
+            failures.append(f"LIBRARY_QUERY_RECEIPT_INCOMPLETE:{row.get('query_receipt_id')}")
+
+    machine_report = read_json(report_path("PR168_RP5C_MachineConsumableLibraryAccess.report.json"))
+    if machine_report.get("machine_library_reader_ref") != "tools/pr168_rp5c_library_reader.py":
+        failures.append("MACHINE_ACCESS_REPORT_MISSING_READER")
+    if machine_report.get("authoritative_central_layer_count") != 4:
+        failures.append("MACHINE_ACCESS_REPORT_AUTHORITATIVE_LAYER_COUNT_MISMATCH")
+    agent_contract = read_json(report_path("PR168_RP5C_AgentQKUAccessContract.report.json"))
+    if agent_contract.get("mutable_per_qku_ownership_in_identity_rows_flag") is not False:
+        failures.append("AGENT_ACCESS_CONTRACT_MUTABLE_PER_QKU_OWNERSHIP")
+    resolver_report = read_json(report_path("PR168_RP5C_StageAgentUniverseResolutionProof.report.json"))
+    if resolver_report.get("version_mismatch_fail_closed_flag") is not True:
+        failures.append("RESOLVER_REPORT_VERSION_MISMATCH_NOT_FAIL_CLOSED")
+    vs1_report = read_json(report_path("PR168_RP5C_ToVS1TradingIntelligenceHandoff.report.json"))
+    if vs1_report.get("no_trade_simulation_or_live_authority_flag") is not True or vs1_report.get("no_source_truth_authority_flag") is not True:
+        failures.append("VS1_HANDOFF_FORBIDDEN_AUTHORITY")
+
+    reader_library = load_library()
+    if reader_library.get("raw_legacy_surface_paths_read"):
+        failures.append("LIBRARY_READER_READS_RAW_LEGACY_SURFACES")
+    try:
+        load_library(expected_versions={"library_version": "WRONG_VERSION"})
+    except LibraryVersionMismatchError:
+        pass
+    else:
+        failures.append("LIBRARY_READER_VERSION_MISMATCH_DID_NOT_FAIL_CLOSED")
+    first_policy = access_policies[0]["agent_id"] if access_policies else None
+    if first_policy:
+        reader_resolution = resolve_stage_agent_universe(STAGE1_PROFILE_ID, first_policy, STAGE1_ENABLED_PLATFORMS[0], reader_library)
+        if reader_resolution["resolved_identity_count"] >= len(identities):
+            failures.append("LIBRARY_READER_RESOLVES_FULL_UNIVERSE")
+        queried_default = query_ids(STAGE1_PROFILE_ID, first_policy, STAGE1_ENABLED_PLATFORMS[0], access_mode="DEFAULT_COMPUTE", library=reader_library)
+        if len(queried_default) >= len(identities):
+            failures.append("LIBRARY_READER_QUERY_DEFAULT_FULL_UNIVERSE")
 
     activation_rows = read_jsonl(shard_path("stage1_prediction_market_qku_activation_view"))
     platform_rows = read_jsonl(shard_path("platform_applicability_registry"))

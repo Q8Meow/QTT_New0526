@@ -19,6 +19,9 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from tools.pr168_rp5c_config import (
+    AGENT_ACCESS_POLICY_VERSION,
+    APPLICABILITY_MATRIX_VERSION,
+    AUTHORITATIVE_CENTRAL_LAYER_SHARDS,
     BRANCH_NAME,
     CENTRAL_SURFACE_SHARDS,
     CONSUMPTION_STATUSES,
@@ -29,7 +32,10 @@ from tools.pr168_rp5c_config import (
     GENERATED_ROOT,
     HARD_ZERO_COUNTERS,
     LIBRARY_STATES,
+    LIBRARY_VERSION,
+    MARKET_APPLICABILITY_MODES,
     MARKET_SCOPES,
+    MASTER_PLAN_MARKET_FAMILIES,
     MAX_JSON_PARSE_BYTES,
     MAX_RECORDS_PER_ARTIFACT,
     MAX_TOTAL_PARSED_RECORDS,
@@ -43,6 +49,11 @@ from tools.pr168_rp5c_config import (
     SHARD_ROOT,
     STAGE1_ACTIVE_UNIVERSE_SHARDS,
     STAGE1_CLASSIFICATION_STATES,
+    STAGE1_ENABLED_MARKET_FAMILIES,
+    STAGE1_ENABLED_PLATFORMS,
+    STAGE1_PROFILE_ID,
+    STAGE_ACCESS_MODES,
+    STAGE_PROFILE_VERSION,
     UPSTREAM_IDENTITY_DIRS,
     UPSTREAM_IDENTITY_KEYWORDS,
     classify_file_kind,
@@ -1045,21 +1056,170 @@ def _stage1_classification_state(row: dict[str, Any]) -> str:
     return "FUTURE_MARKET_DORMANT"
 
 
-def _build_stage1_surfaces(rows: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]], dict[str, Any]]:
+def _identity_evidence_text(row: dict[str, Any]) -> str:
+    return " ".join(
+        _stable_values(
+            [
+                row.get("qku_id"),
+                row.get("formula_id"),
+                row.get("formula_family"),
+                row.get("qku_family"),
+                row.get("market_scope"),
+                row.get("market_family"),
+                row.get("ontology_category"),
+                row.get("source_artifact_ref"),
+                row.get("source_file_path"),
+                row.get("source_identity_value_ref"),
+                row.get("notes"),
+            ]
+        )
+    ).lower()
+
+
+def _master_market_family_and_applicability(row: dict[str, Any]) -> tuple[list[str], str, list[str]]:
+    market_scope = str(row.get("market_scope") or "unknown_needs_review")
+    text = _identity_evidence_text(row)
+    blockers: list[str] = []
+    if market_scope == "prediction_market":
+        return ["PREDICTION_MARKETS"], "MARKET_SPECIFIC", blockers
+    if market_scope == "market_agnostic":
+        return list(MASTER_PLAN_MARKET_FAMILIES), "CROSS_MARKET_SHARED", blockers
+    if market_scope == "equities":
+        return ["EQUITIES_AND_ETFS"], "MARKET_SPECIFIC", blockers
+    if market_scope == "options":
+        return ["LISTED_OPTIONS"], "MARKET_SPECIFIC", blockers
+    if market_scope == "futures_commodities":
+        return ["EXCHANGE_TRADED_FUTURES_AND_COMMODITIES"], "MARKET_SPECIFIC", blockers
+    if market_scope == "crypto":
+        family = "CRYPTO_DERIVATIVES" if any(token in text for token in ("derivative", "perp", "future", "option")) else "CRYPTO_SPOT"
+        return [family], "MARKET_SPECIFIC", blockers
+    if market_scope == "fx_macro":
+        return ["MACRO_FX_EVENT"], "MARKET_SPECIFIC", blockers
+    if market_scope == "fixed_income":
+        return ["FIXED_INCOME_RFQ"], "MARKET_SPECIFIC", blockers
+    if market_scope == "repo_financing":
+        repo_evidence = re.search(r"\b(securities[_ -]?financing|repo[_ -]?(financing|rate|market|trade|haircut|special|gc)|secured[_ -]?financing)\b", text)
+        if repo_evidence:
+            return ["SECURITIES_FINANCING_AND_REPO"], "MARKET_SPECIFIC", blockers
+        return [], "UNKNOWN_NEEDS_REVIEW", ["NEEDS_REPO_FINANCING_SPECIFIC_EVIDENCE"]
+    if market_scope == "cross_market":
+        rv_evidence = re.search(r"\b(relative[_ -]?value|spread|basis|equivalence|hedged|multi[_ -]?market|cross[_ -]?market)\b", text)
+        if rv_evidence:
+            return ["CROSS_MARKET_RELATIVE_VALUE"], "MARKET_SPECIFIC", blockers
+        return [], "UNKNOWN_NEEDS_REVIEW", ["NEEDS_CROSS_MARKET_RELATIVE_VALUE_EVIDENCE"]
+    return [], "UNKNOWN_NEEDS_REVIEW", ["NEEDS_MARKET_FAMILY_CLASSIFICATION"]
+
+
+def _platform_refs_for_identity(row: dict[str, Any], applicability_mode: str) -> list[str]:
+    if applicability_mode == "CROSS_MARKET_SHARED":
+        return list(STAGE1_ENABLED_PLATFORMS)
+    states = _platform_states_for_identity(row)
+    if "NOT_STAGE1_PLATFORM_APPLICABLE" in states or "UNKNOWN_PLATFORM_SCOPE_NEEDS_REVIEW" in states:
+        return []
+    refs: list[str] = []
+    if "KALSHI_APPLICABLE" in states:
+        refs.append("KALSHI")
+    if "POLYMARKET_APPLICABLE" in states:
+        refs.append("POLYMARKET")
+    if "FORECASTEX_IBKR_APPLICABLE" in states:
+        refs.append("FORECASTEX_IBKR")
+    if "PREDICTION_MARKET_GENERIC" in states or "THREE_PLATFORM_COMMON" in states:
+        refs.extend(STAGE1_ENABLED_PLATFORMS)
+    return _stable_values(refs)
+
+
+def _stage1_access_mode(market_family_refs: list[str], applicability_mode: str, platform_refs: list[str]) -> str:
+    if applicability_mode == "UNKNOWN_NEEDS_REVIEW":
+        return "UNKNOWN_NEEDS_REVIEW"
+    if applicability_mode == "CROSS_MARKET_SHARED":
+        return "AVAILABLE_ON_DEMAND"
+    if "PREDICTION_MARKETS" in market_family_refs and platform_refs:
+        return "DEFAULT_COMPUTE"
+    return "INACTIVE_FOR_STAGE"
+
+
+def _build_qku_market_applicability_matrix(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    matrix_rows: list[dict[str, Any]] = []
+    for index, row in enumerate(rows, start=1):
+        market_family_refs, applicability_mode, blockers = _master_market_family_and_applicability(row)
+        platform_refs = _platform_refs_for_identity(row, applicability_mode)
+        stage_access_mode = _stage1_access_mode(market_family_refs, applicability_mode, platform_refs)
+        matrix_row_id = f"RP5C_QKU_MARKET_APPLICABILITY_{index:08d}"
+        row["qku_market_applicability_matrix_refs"] = [matrix_row_id]
+        row["master_plan_market_family_refs"] = market_family_refs
+        row["applicability_mode"] = applicability_mode
+        row["stage1_access_mode"] = stage_access_mode
+        row["stage1_platform_refs"] = platform_refs
+        matrix_rows.append(
+            {
+                "qku_market_applicability_row_id": matrix_row_id,
+                "identity_row_id": row["identity_row_id"],
+                "qku_id": row.get("qku_id"),
+                "formula_id": row.get("formula_id"),
+                "market_family_refs": market_family_refs,
+                "applicability_mode": applicability_mode,
+                "platform_refs": platform_refs,
+                "stage_access_mode_by_profile": {STAGE1_PROFILE_ID: stage_access_mode},
+                "stage_profile_refs": [STAGE1_PROFILE_ID] if stage_access_mode in {"DEFAULT_COMPUTE", "AVAILABLE_ON_DEMAND"} else [],
+                "ontology_category": row.get("ontology_category"),
+                "formula_family": row.get("formula_family"),
+                "qku_family": row.get("qku_family"),
+                "source_artifact_row_id": row.get("source_artifact_row_id"),
+                "derived_route_resolution_refs": row.get("derived_route_resolution_refs", []),
+                "library_version": LIBRARY_VERSION,
+                "applicability_matrix_version": APPLICABILITY_MATRIX_VERSION,
+                "market_scope_or_platform_creates_trading_authority_flag": False,
+                "default_compute_from_universal_library_flag": False,
+                "blocker_codes": _stable_values([*row.get("blocker_codes", []), *blockers]),
+                "notes": "Authoritative market applicability row keyed by immutable identity id; this is not a duplicate formula/QKU object.",
+            }
+        )
+    return matrix_rows
+
+
+def _build_stage_profile_rows() -> list[dict[str, Any]]:
+    return [
+        {
+            "stage_profile_row_id": "RP5C_STAGE_PROFILE_0001",
+            "profile_id": STAGE1_PROFILE_ID,
+            "enabled_market_family_refs": list(STAGE1_ENABLED_MARKET_FAMILIES),
+            "enabled_platform_refs": list(STAGE1_ENABLED_PLATFORMS),
+            "include_cross_market_shared": True,
+            "access_modes": list(STAGE_ACCESS_MODES),
+            "default_compute_access_mode": "DEFAULT_COMPUTE",
+            "available_on_demand_access_mode": "AVAILABLE_ON_DEMAND",
+            "inactive_access_mode": "INACTIVE_FOR_STAGE",
+            "unknown_access_mode": "UNKNOWN_NEEDS_REVIEW",
+            "stage_profile_version": STAGE_PROFILE_VERSION,
+            "no_executability_tier_decided_flag": True,
+            "no_trade_simulation_flag": True,
+            "no_live_authority_flag": True,
+            "notes": "Stage-1 prediction-market profile enables PREDICTION_MARKETS plus cross-market shared support by ID view only.",
+        }
+    ]
+
+
+def _build_stage1_surfaces(rows: list[dict[str, Any]], matrix_by_identity: dict[str, dict[str, Any]]) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]], dict[str, Any]]:
     activation_rows: list[dict[str, Any]] = []
     identity_by_id = {row["identity_row_id"]: row for row in rows}
     for index, row in enumerate(rows, start=1):
+        matrix_row = matrix_by_identity[row["identity_row_id"]]
         activation_id = f"RP5C_STAGE1_ACTIVATION_{index:08d}"
         platform_states = _platform_states_for_identity(row)
-        classification_state = _stage1_classification_state(row)
+        access_mode = matrix_row["stage_access_mode_by_profile"][STAGE1_PROFILE_ID]
+        if matrix_row["applicability_mode"] == "CROSS_MARKET_SHARED":
+            classification_state = "STAGE1_PREDICTION_MARKET_SUPPORTING_MARKET_AGNOSTIC"
+        elif "PREDICTION_MARKETS" in matrix_row["market_family_refs"]:
+            classification_state = "STAGE1_PREDICTION_MARKET_ACTIVE_CANDIDATE"
+        elif matrix_row["applicability_mode"] == "UNKNOWN_NEEDS_REVIEW":
+            classification_state = "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW"
+        else:
+            classification_state = _stage1_classification_state(row)
         stage1_classification_states = _stable_values(
             [classification_state, *(state for state in platform_states if state in STAGE1_CLASSIFICATION_STATES)]
         )
-        seed_inclusion = classification_state in {
-            "STAGE1_PREDICTION_MARKET_ACTIVE_CANDIDATE",
-            "STAGE1_PREDICTION_MARKET_SUPPORTING_MARKET_AGNOSTIC",
-        }
-        dormant = not seed_inclusion
+        seed_inclusion = access_mode == "DEFAULT_COMPUTE"
+        dormant = access_mode in {"INACTIVE_FOR_STAGE", "UNKNOWN_NEEDS_REVIEW"}
         blocker_codes = list(row.get("blocker_codes", []))
         if classification_state == "FUTURE_MARKET_DORMANT":
             blocker_codes.append("FUTURE_MARKET_DORMANT")
@@ -1089,6 +1249,9 @@ def _build_stage1_surfaces(rows: list[dict[str, Any]]) -> tuple[list[dict[str, A
                 "identity_type": row.get("identity_type"),
                 "market_scope": row.get("market_scope"),
                 "market_family": row.get("market_family"),
+                "market_family_refs": matrix_row["market_family_refs"],
+                "applicability_mode": matrix_row["applicability_mode"],
+                "stage_access_mode": access_mode,
                 "ontology_category": row.get("ontology_category"),
                 "formula_family": row.get("formula_family"),
                 "qku_family": row.get("qku_family"),
@@ -1100,6 +1263,7 @@ def _build_stage1_surfaces(rows: list[dict[str, Any]]) -> tuple[list[dict[str, A
                 "stage1_supporting_market_agnostic_flag": classification_state == "STAGE1_PREDICTION_MARKET_SUPPORTING_MARKET_AGNOSTIC",
                 "stage1_seed_inclusion_flag": seed_inclusion,
                 "stage1_dormant_future_market_flag": dormant,
+                "qku_market_applicability_matrix_refs": [matrix_row["qku_market_applicability_row_id"]],
                 "universal_library_identity_ref": row["identity_row_id"],
                 "immutable_qku_formula_library_ref": generated_ref(shard_path("immutable_qku_formula_library")),
                 "derived_from_classification_registry_refs": [
@@ -1174,6 +1338,9 @@ def _build_stage1_surfaces(rows: list[dict[str, Any]]) -> tuple[list[dict[str, A
                     "qku_id": activation.get("qku_id"),
                     "formula_id": activation.get("formula_id"),
                     "market_scope": activation.get("market_scope"),
+                    "market_family_refs": activation.get("market_family_refs", []),
+                    "applicability_mode": activation.get("applicability_mode"),
+                    "stage_access_mode": activation.get("stage_access_mode"),
                     "stage1_classification_state": activation["stage1_classification_state"],
                     "platform_applicability_states": activation["platform_applicability_states"],
                     "stage1_activation_view_refs": [activation["stage1_activation_row_id"]],
@@ -1189,7 +1356,7 @@ def _build_stage1_surfaces(rows: list[dict[str, Any]]) -> tuple[list[dict[str, A
                     "notes": "Future/non-Stage-1 market identity remains immutable and routed, but is not in the Stage-1 default computation seed.",
                 }
             )
-        else:
+        elif seed_inclusion:
             seed_id = f"RP5C_STAGE1_AGENT_SEED_{len(seed_rows) + 1:08d}"
             identity["stage1_agent_computation_universe_seed_refs"] = [seed_id]
             seed_rows.append(
@@ -1199,6 +1366,9 @@ def _build_stage1_surfaces(rows: list[dict[str, Any]]) -> tuple[list[dict[str, A
                     "qku_id": activation.get("qku_id"),
                     "formula_id": activation.get("formula_id"),
                     "market_scope": activation.get("market_scope"),
+                    "market_family_refs": activation.get("market_family_refs", []),
+                    "applicability_mode": activation.get("applicability_mode"),
+                    "stage_access_mode": activation.get("stage_access_mode"),
                     "stage1_classification_state": activation["stage1_classification_state"],
                     "platform_applicability_states": activation["platform_applicability_states"],
                     "stage1_activation_view_refs": [activation["stage1_activation_row_id"]],
@@ -1220,6 +1390,8 @@ def _build_stage1_surfaces(rows: list[dict[str, Any]]) -> tuple[list[dict[str, A
                     "notes": "Default Stage-1 computation seed; Stage-1 agents must start here, not from the full universal immutable library.",
                 }
             )
+        else:
+            identity["stage1_agent_computation_universe_seed_refs"] = []
 
     stage1_hard_zero = {
         "stage1_default_full_universe_compute_route_count": sum(1 for row in seed_rows if row["default_compute_from_universal_library_flag"]),
@@ -1244,6 +1416,315 @@ def _build_stage1_surfaces(rows: list[dict[str, Any]]) -> tuple[list[dict[str, A
         "market_scope_and_platform_applicability_create_trading_authority": False,
     }
     return activation_rows, platform_rows, dormant_rows, seed_rows, summary
+
+
+def _agent_allowed_ontology_categories(agent_id: str, duties: list[str]) -> tuple[list[str], bool]:
+    text = " ".join([agent_id, *duties]).lower()
+    validator_only = False
+    allowed: set[str] = set()
+    if "research" in text or "signal" in text or "scenario feature" in text or "materialization" in text:
+        allowed.update({"signal_probability", "calibration", "market_implied_probability", "regime_scenario", "governance_source_risk"})
+    if "parameter" in text or "selection" in text or "ranking" in text or "retest" in text:
+        allowed.update({"signal_probability", "calibration", "classical_fallback", "governance_source_risk"})
+    if "risk" in text or "tca" in text or "capacity" in text or "microstructure" in text or "liquidity" in text or "latency" in text:
+        allowed.update({"tca_cost", "fill_queue_liquidity", "latency_staleness", "capacity_crowding", "portfolio_risk", "governance_source_risk"})
+    if "quantum" in text or "qubo" in text or "ising" in text:
+        allowed.update({"quantum_objective_constraint", "classical_fallback", "governance_source_risk"})
+    if "connector" in text or "venue" in text:
+        allowed.update({"market_implied_probability", "tca_cost", "fill_queue_liquidity", "latency_staleness", "governance_source_risk"})
+    if "dashboard" in text or "commander" in text:
+        allowed.update({"governance_source_risk"})
+        validator_only = True
+    if "governance" in text:
+        allowed.update(ONTOLOGY_CATEGORIES)
+        validator_only = True
+    if not allowed:
+        allowed.add("unknown_needs_review")
+        validator_only = True
+    return [category for category in ONTOLOGY_CATEGORIES if category in allowed], validator_only
+
+
+def _build_agent_access_policies(agent_input: dict[str, Any], rows: list[dict[str, Any]], matrix_rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    matrix_by_identity = {row["identity_row_id"]: row for row in matrix_rows}
+    agent_ids = _stable_values(agent_input["status"].get("parsed_agent_ids", []))
+    if not agent_ids:
+        agent_ids = ["governance_agent"]
+    policy_rows: list[dict[str, Any]] = []
+    for index, agent_id in enumerate(agent_ids, start=1):
+        duties = _stable_values(agent_input.get("duties", {}).get(agent_id, []))
+        allowed_categories, validator_only = _agent_allowed_ontology_categories(agent_id, duties)
+        allowed_members = [row for row in rows if row.get("ontology_category") in allowed_categories]
+        allowed_formula_families = _stable_values(row.get("formula_family") for row in allowed_members)
+        allowed_qku_families = _stable_values(row.get("qku_family") for row in allowed_members)
+        allowed_market_families = _stable_values(
+            family
+            for row in allowed_members
+            for family in matrix_by_identity.get(row["identity_row_id"], {}).get("market_family_refs", [])
+        )
+        allowed_access_modes = ["AVAILABLE_ON_DEMAND", "UNKNOWN_NEEDS_REVIEW"] if validator_only else ["DEFAULT_COMPUTE", "AVAILABLE_ON_DEMAND"]
+        if agent_id in {"dashboard_agent", "commander_agent"}:
+            allowed_access_modes = ["AVAILABLE_ON_DEMAND"]
+        policy_rows.append(
+            {
+                "agent_access_policy_id": f"RP5C_AGENT_QKU_ACCESS_POLICY_{index:04d}",
+                "agent_id": agent_id,
+                "canonical_agent_ref": agent_id,
+                "allowed_ontology_categories": allowed_categories,
+                "allowed_formula_family_refs": allowed_formula_families,
+                "allowed_qku_family_refs": allowed_qku_families,
+                "allowed_market_family_refs": _stable_values([*allowed_market_families, *STAGE1_ENABLED_MARKET_FAMILIES]),
+                "allowed_platform_refs": list(STAGE1_ENABLED_PLATFORMS),
+                "allowed_access_modes": allowed_access_modes,
+                "validator_only_roles": ["GOVERNANCE_REVIEW"] if validator_only else [],
+                "prohibited_consumer_roles": [
+                    "LIVE_ORDER_CONSUMER",
+                    "SOURCE_TRUTH_CONSUMER",
+                    "QUANTUM_BACKEND_EXECUTOR",
+                    "STACK_GENERATOR",
+                    "TRADE_SIMULATOR",
+                    "RANKING_ENGINE",
+                ],
+                "source_duty_refs": [
+                    "docs/master_plan/generated/PR165_D2_AgentRosterDiscoveryAudit.report.json",
+                    "docs/master_plan/generated/PR165_D2_AgentDutySourceCrosswalk.report.json",
+                ],
+                "source_duty_values": duties,
+                "agent_access_policy_version": AGENT_ACCESS_POLICY_VERSION,
+                "mutable_per_qku_ownership_authority_flag": False,
+                "default_full_universe_access_flag": False,
+                "notes": "Central policy derived from PR165-D2 duty bindings and formula/QKU family classifications; no per-QKU ownership is embedded in identity rows.",
+            }
+        )
+    return policy_rows
+
+
+def _stage_market_allowed(matrix_row: dict[str, Any], stage_profile: dict[str, Any]) -> bool:
+    if matrix_row["applicability_mode"] == "CROSS_MARKET_SHARED":
+        return bool(stage_profile.get("include_cross_market_shared"))
+    if matrix_row["applicability_mode"] == "MARKET_SPECIFIC":
+        return bool(set(matrix_row["market_family_refs"]) & set(stage_profile["enabled_market_family_refs"]))
+    return False
+
+
+def _policy_allows_identity(policy: dict[str, Any], identity: dict[str, Any], matrix_row: dict[str, Any], platform_id: str, access_mode: str) -> bool:
+    return (
+        identity.get("ontology_category") in set(policy["allowed_ontology_categories"])
+        and identity.get("formula_family") in set(policy["allowed_formula_family_refs"])
+        and identity.get("qku_family") in set(policy["allowed_qku_family_refs"])
+        and bool(set(matrix_row["market_family_refs"]) & set(policy["allowed_market_family_refs"]))
+        and platform_id in set(policy["allowed_platform_refs"])
+        and access_mode in set(policy["allowed_access_modes"])
+    )
+
+
+def _resolve_identity_ids(
+    *,
+    rows: list[dict[str, Any]],
+    matrix_by_identity: dict[str, dict[str, Any]],
+    stage_profile: dict[str, Any],
+    policy: dict[str, Any],
+    platform_id: str,
+    requested_access_mode: str | None = None,
+) -> tuple[list[str], list[str], list[str], list[str]]:
+    default_ids: list[str] = []
+    on_demand_ids: list[str] = []
+    blocked_ids: list[str] = []
+    blockers: list[str] = []
+    for row in rows:
+        matrix_row = matrix_by_identity[row["identity_row_id"]]
+        access_mode = matrix_row["stage_access_mode_by_profile"][stage_profile["profile_id"]]
+        allowed = (
+            _stage_market_allowed(matrix_row, stage_profile)
+            and platform_id in matrix_row["platform_refs"]
+            and access_mode in set(stage_profile["access_modes"])
+            and (requested_access_mode is None or access_mode == requested_access_mode)
+            and _policy_allows_identity(policy, row, matrix_row, platform_id, access_mode)
+        )
+        if not allowed:
+            blocked_ids.append(row["identity_row_id"])
+            continue
+        if access_mode == "DEFAULT_COMPUTE":
+            default_ids.append(row["identity_row_id"])
+        elif access_mode == "AVAILABLE_ON_DEMAND":
+            on_demand_ids.append(row["identity_row_id"])
+        else:
+            blocked_ids.append(row["identity_row_id"])
+    if not default_ids and not on_demand_ids:
+        blockers.append("NO_AGENT_STAGE_PLATFORM_MATCH")
+    return (
+        sorted(default_ids),
+        sorted(on_demand_ids),
+        sorted(blocked_ids),
+        blockers,
+    )
+
+
+def _build_machine_access_surfaces(
+    *,
+    rows: list[dict[str, Any]],
+    matrix_rows: list[dict[str, Any]],
+    stage_profiles: list[dict[str, Any]],
+    agent_policies: list[dict[str, Any]],
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]], dict[str, Any]]:
+    matrix_by_identity = {row["identity_row_id"]: row for row in matrix_rows}
+    stage_profile = next(row for row in stage_profiles if row["profile_id"] == STAGE1_PROFILE_ID)
+    rows_by_id = {row["identity_row_id"]: row for row in rows}
+    stage_view_rows: list[dict[str, Any]] = []
+    for platform_id in STAGE1_ENABLED_PLATFORMS:
+        eligible = [
+            matrix_row
+            for matrix_row in matrix_rows
+            if _stage_market_allowed(matrix_row, stage_profile)
+            and platform_id in matrix_row["platform_refs"]
+            and matrix_row["stage_access_mode_by_profile"][STAGE1_PROFILE_ID] in {"DEFAULT_COMPUTE", "AVAILABLE_ON_DEMAND"}
+        ]
+        default_refs = [row["identity_row_id"] for row in eligible if row["stage_access_mode_by_profile"][STAGE1_PROFILE_ID] == "DEFAULT_COMPUTE"]
+        on_demand_refs = [row["identity_row_id"] for row in eligible if row["stage_access_mode_by_profile"][STAGE1_PROFILE_ID] == "AVAILABLE_ON_DEMAND"]
+        stage_view_rows.append(
+            {
+                "stage_computation_universe_view_id": f"RP5C_STAGE_VIEW_{platform_id}",
+                "stage_profile_id": STAGE1_PROFILE_ID,
+                "platform_id": platform_id,
+                "library_version": LIBRARY_VERSION,
+                "applicability_matrix_version": APPLICABILITY_MATRIX_VERSION,
+                "stage_profile_version": STAGE_PROFILE_VERSION,
+                "agent_access_policy_version": AGENT_ACCESS_POLICY_VERSION,
+                "default_compute_identity_refs": sorted(default_refs),
+                "available_on_demand_identity_refs": sorted(on_demand_refs),
+                "blocked_identity_count": len(rows) - len(default_refs) - len(on_demand_refs),
+                "route_metadata_ref": generated_ref(shard_path("derived_agent_route_resolution_ledger")),
+                "contains_canonical_formula_objects_flag": False,
+                "contains_canonical_qku_objects_flag": False,
+                "notes": "Stage view is an ID-only projection from ImmutableQKUFormulaLibraryV1 and QKUMarketApplicabilityMatrixV1.",
+            }
+        )
+
+    resolver_rows: list[dict[str, Any]] = []
+    agent_view_rows: list[dict[str, Any]] = []
+    receipt_rows: list[dict[str, Any]] = []
+    receipt_index = 0
+    for policy in agent_policies:
+        for platform_id in STAGE1_ENABLED_PLATFORMS:
+            default_ids, on_demand_ids, blocked_ids, blockers = _resolve_identity_ids(
+                rows=rows,
+                matrix_by_identity=matrix_by_identity,
+                stage_profile=stage_profile,
+                policy=policy,
+                platform_id=platform_id,
+            )
+            resolved_ids = sorted([*default_ids, *on_demand_ids])
+            resolver_id = f"RP5C_STAGE_AGENT_RESOLVER_{len(resolver_rows) + 1:05d}"
+            resolver_rows.append(
+                {
+                    "stage_agent_resolver_row_id": resolver_id,
+                    "stage_profile_id": STAGE1_PROFILE_ID,
+                    "agent_id": policy["agent_id"],
+                    "platform_id": platform_id,
+                    "resolution_rule": "((StageEnabledMarketSpecificIds UNION CrossMarketSharedIds) INTERSECT PlatformApplicableIds INTERSECT AgentDutyAllowedIds INTERSECT StageAccessModeIds)",
+                    "library_version": LIBRARY_VERSION,
+                    "applicability_matrix_version": APPLICABILITY_MATRIX_VERSION,
+                    "stage_profile_version": STAGE_PROFILE_VERSION,
+                    "agent_access_policy_version": AGENT_ACCESS_POLICY_VERSION,
+                    "resolved_identity_refs": resolved_ids,
+                    "default_compute_identity_refs": default_ids,
+                    "available_on_demand_identity_refs": on_demand_ids,
+                    "blocked_identity_count": len(blocked_ids),
+                    "blocker_codes": blockers,
+                    "contains_canonical_formula_objects_flag": False,
+                    "contains_canonical_qku_objects_flag": False,
+                    "notes": "RP5D will add executability-tier and input-availability intersections later.",
+                }
+            )
+            agent_view_rows.append(
+                {
+                    "agent_computation_universe_view_id": f"RP5C_AGENT_VIEW_{len(agent_view_rows) + 1:05d}",
+                    "stage_agent_resolver_row_id": resolver_id,
+                    "stage_profile_id": STAGE1_PROFILE_ID,
+                    "agent_id": policy["agent_id"],
+                    "platform_id": platform_id,
+                    "identity_refs": resolved_ids,
+                    "route_resolution_refs": _stable_values(
+                        ref
+                        for identity_id in resolved_ids
+                        for ref in rows_by_id[identity_id].get("derived_route_resolution_refs", [])
+                    ),
+                    "library_version": LIBRARY_VERSION,
+                    "applicability_matrix_version": APPLICABILITY_MATRIX_VERSION,
+                    "stage_profile_version": STAGE_PROFILE_VERSION,
+                    "agent_access_policy_version": AGENT_ACCESS_POLICY_VERSION,
+                    "contains_canonical_formula_objects_flag": False,
+                    "contains_canonical_qku_objects_flag": False,
+                }
+            )
+            receipt_index += 1
+            receipt_rows.append(
+                {
+                    "query_receipt_id": f"RP5C_LIBRARY_QUERY_RECEIPT_{receipt_index:05d}",
+                    "agent_id": policy["agent_id"],
+                    "stage_profile_id": STAGE1_PROFILE_ID,
+                    "platform_id": platform_id,
+                    "library_version": LIBRARY_VERSION,
+                    "applicability_matrix_version": APPLICABILITY_MATRIX_VERSION,
+                    "access_policy_version": AGENT_ACCESS_POLICY_VERSION,
+                    "requested_filters": {
+                        "ontology_roles": None,
+                        "formula_families": None,
+                        "access_mode": None,
+                    },
+                    "resolved_identity_count": len(resolved_ids),
+                    "default_compute_count": len(default_ids),
+                    "available_on_demand_count": len(on_demand_ids),
+                    "blocked_count": len(blocked_ids),
+                    "blocker_codes": blockers,
+                    "result_identity_refs": resolved_ids,
+                    "reader_function_ref": "tools/pr168_rp5c_library_reader.py::resolve_stage_agent_universe",
+                }
+            )
+
+    vs1_rows = [
+        {
+            "vs1_handoff_row_id": f"RP5C_VS1_HANDOFF_{index:04d}",
+            "stage_profile_id": STAGE1_PROFILE_ID,
+            "platform_id": platform_id,
+            "stage_computation_universe_view_ref": row["stage_computation_universe_view_id"],
+            "default_compute_count": len(row["default_compute_identity_refs"]),
+            "available_on_demand_count": len(row["available_on_demand_identity_refs"]),
+            "library_reader_ref": "tools/pr168_rp5c_library_reader.py",
+            "no_trade_simulation_flag": True,
+            "no_live_authority_flag": True,
+            "no_source_truth_authority_flag": True,
+            "downstream_consumer_refs": ["VS1-TradingIntelligence", "PR168-RP5D"],
+        }
+        for index, (platform_id, row) in enumerate(zip(STAGE1_ENABLED_PLATFORMS, stage_view_rows), start=1)
+    ]
+    default_counts = [len(row["default_compute_identity_refs"]) for row in stage_view_rows]
+    on_demand_counts = [len(row["available_on_demand_identity_refs"]) for row in stage_view_rows]
+    summary = {
+        "machine_consumable_library_reader_ref": "tools/pr168_rp5c_library_reader.py",
+        "reader_function_names": [
+            "load_library",
+            "list_qkus",
+            "list_formulas",
+            "get_qku",
+            "get_formula",
+            "query_ids",
+            "resolve_stage_agent_universe",
+            "load_rows",
+        ],
+        "authoritative_central_layer_count": len(AUTHORITATIVE_CENTRAL_LAYER_SHARDS),
+        "authoritative_central_layer_shards": [ROW_SHARDS[key] for key in AUTHORITATIVE_CENTRAL_LAYER_SHARDS],
+        "stage_computation_universe_view_count": len(stage_view_rows),
+        "agent_computation_universe_view_count": len(agent_view_rows),
+        "stage_agent_resolver_row_count": len(resolver_rows),
+        "library_query_receipt_count": len(receipt_rows),
+        "stage_default_compute_count_min": min(default_counts) if default_counts else 0,
+        "stage_default_compute_count_max": max(default_counts) if default_counts else 0,
+        "stage_available_on_demand_count_min": min(on_demand_counts) if on_demand_counts else 0,
+        "stage_available_on_demand_count_max": max(on_demand_counts) if on_demand_counts else 0,
+        "stage1_default_full_universe_compute_route_count": 0,
+        "derived_views_duplicate_canonical_object_count": 0,
+    }
+    return stage_view_rows, agent_view_rows, resolver_rows, receipt_rows, vs1_rows, summary
 
 
 def _source_route_crosswalk(source_rows: list[dict[str, Any]], identities: list[dict[str, Any]], route_rows: list[dict[str, Any]], rules: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -1434,12 +1915,17 @@ def _rp5d_handoff(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
             "rp5d_handoff_reason": row["rp5d_handoff_reason"],
             "blocker_codes": row["blocker_codes"],
             "derived_route_resolution_refs": row["derived_route_resolution_refs"],
+            "qku_market_applicability_matrix_refs": row.get("qku_market_applicability_matrix_refs", []),
+            "master_plan_market_family_refs": row.get("master_plan_market_family_refs", []),
+            "applicability_mode": row.get("applicability_mode"),
+            "stage1_access_mode": row.get("stage1_access_mode"),
             "stage1_activation_view_refs": row.get("stage1_activation_view_refs", []),
             "stage1_agent_computation_universe_seed_refs": row.get("stage1_agent_computation_universe_seed_refs", []),
             "dormant_future_market_qku_ledger_refs": row.get("dormant_future_market_qku_ledger_refs", []),
             "stage1_classification_state": row.get("stage1_classification_state"),
             "stage1_seed_inclusion_flag": row.get("stage1_seed_inclusion_flag"),
             "stage1_dormant_future_market_flag": row.get("stage1_dormant_future_market_flag"),
+            "machine_library_reader_ref": "tools/pr168_rp5c_library_reader.py",
             "downstream_pr_refs": ["PR168-RP5D"],
             "no_executability_tier_decided_flag": True,
         }
@@ -1524,6 +2010,16 @@ def _write_shard_and_report(key: str, rows: list[dict[str, Any]], report_name: s
     )
 
 
+def _write_shard_only(key: str, rows: list[dict[str, Any]], schema_name: str, source_report_refs: list[str]) -> None:
+    write_shard(
+        key,
+        rows,
+        schema_name=schema_name,
+        source_report_refs=source_report_refs,
+        source_artifact_refs=[],
+    )
+
+
 def build_all(*, offline: bool = False) -> dict[str, Any]:
     del offline
     start = time.monotonic()
@@ -1599,7 +2095,27 @@ def build_all(*, offline: bool = False) -> dict[str, Any]:
     family_rows, market_rows, ontology_rows, formula_ontology_rows = _build_registries(library_identities, rulebook)
     route_rows = _route_identities(library_identities, responsibility_groups, rulebook)
     _propagate_canonical_routes(identities, library_identities)
-    stage1_activation_rows, platform_rows, dormant_rows, stage1_seed_rows, stage1_summary = _build_stage1_surfaces(library_identities)
+    market_applicability_rows = _build_qku_market_applicability_matrix(library_identities)
+    market_applicability_by_identity = {row["identity_row_id"]: row for row in market_applicability_rows}
+    stage_profile_rows = _build_stage_profile_rows()
+    agent_access_policy_rows = _build_agent_access_policies(agent_input, library_identities, market_applicability_rows)
+    stage1_activation_rows, platform_rows, dormant_rows, stage1_seed_rows, stage1_summary = _build_stage1_surfaces(
+        library_identities,
+        market_applicability_by_identity,
+    )
+    (
+        stage_view_rows,
+        agent_view_rows,
+        stage_agent_resolver_rows,
+        library_query_receipt_rows,
+        vs1_handoff_rows,
+        machine_access_summary,
+    ) = _build_machine_access_surfaces(
+        rows=library_identities,
+        matrix_rows=market_applicability_rows,
+        stage_profiles=stage_profile_rows,
+        agent_policies=agent_access_policy_rows,
+    )
     file_crosswalk = _source_route_crosswalk(source_rows, identities, route_rows, rulebook)
     assignment_rows = _assignment_rows(library_identities)
     lineage_rows = _lineage_rows(identities)
@@ -1650,6 +2166,7 @@ def build_all(*, offline: bool = False) -> dict[str, Any]:
         "modified_paths": [
             "tools/build_pr168_rp5c_immutable_qku_formula_library.py",
             "tools/pr168_rp5c_config.py",
+            "tools/pr168_rp5c_library_reader.py",
             "tools/pr168_rp5c_report_writer.py",
             "tools/pr168_rp5c_validator.py",
             "tools/validate_pr168_rp5c_immutable_qku_formula_library.py",
@@ -1659,6 +2176,7 @@ def build_all(*, offline: bool = False) -> dict[str, Any]:
             "tests/tools/test_validation_scope_registry.py",
             "tests/tools/test_validation_inventory.py",
             "tests/pr168_rp5c",
+            "tests/pr168_rp5c/test_rp5c_machine_consumable_access.py",
         ],
         "forbidden_paths_not_touched": [
             "docs/master_plan/QTT_MasterPlan_Current.md",
@@ -1705,6 +2223,12 @@ def build_all(*, offline: bool = False) -> dict[str, Any]:
         "no_orphan_generated_surface_proof": {"orphan_generated_shard_count": 0, "proof_row_count": len(no_orphan_generated_rows)},
         "rp5d_handoff_counts": _counter_summary(handoff_rows, "rp5d_handoff_state"),
         "stage1_active_universe_summary": stage1_summary,
+        "machine_consumable_library_access_summary": machine_access_summary,
+        "authoritative_central_layer_count": len(AUTHORITATIVE_CENTRAL_LAYER_SHARDS),
+        "authoritative_central_layer_shards": list(AUTHORITATIVE_CENTRAL_LAYER_SHARDS),
+        "only_four_authoritative_central_layers_flag": len(AUTHORITATIVE_CENTRAL_LAYER_SHARDS) == 4,
+        "independent_full_library_copy_count": 0,
+        "derived_views_duplicate_canonical_object_count": machine_access_summary["derived_views_duplicate_canonical_object_count"],
         "cross_os_portability_audit_counts": {key: cross_os[key] for key in ("generated_path_count", "generated_path_case_collision_count", "absolute_local_path_leak_count", "backslash_only_path_leak_count")},
         "all_hard_zero_counters_zero_flag": all(final_summary_value == 0 for final_summary_value in final_hard_zero_values.values()),
         "rp5c_status": "PASS",
@@ -1733,37 +2257,56 @@ def build_all(*, offline: bool = False) -> dict[str, Any]:
     _write_shard_and_report("agent_duty_routing_rulebook", rulebook, "PR168_RP5C_AgentDutyRoutingRulebook.report.json", "AgentDutyRoutingRulebookV1", {"agent_duty_routing_rule_count": len(rulebook), "route_resolution_states": list(ROUTE_RESOLUTION_STATES)})
     _write_shard_and_report("derived_agent_route_resolution_ledger", route_rows, "PR168_RP5C_DerivedAgentRouteResolutionLedger.report.json", "DerivedAgentRouteResolutionLedgerV1", {"derived_route_resolution_row_count": len(route_rows), "route_resolution_state_counts": _counter_summary(route_rows, "route_resolution_state")})
     _write_shard_and_report("file_to_derived_route_crosswalk", file_crosswalk, "PR168_RP5C_FileToDerivedRouteCrosswalk.report.json", "FileToDerivedRouteCrosswalkV1", {"file_to_derived_route_crosswalk_row_count": len(file_crosswalk)})
+    _write_shard_and_report("qku_market_applicability_matrix", market_applicability_rows, "PR168_RP5C_MachineConsumableLibraryAccess.report.json", "QKUMarketApplicabilityMatrixV1", {**machine_access_summary, "qku_market_applicability_matrix_row_count": len(market_applicability_rows), "machine_library_reader_ref": "tools/pr168_rp5c_library_reader.py", "required_reader_functions": ["load_library", "list_qkus", "list_formulas", "get_qku", "get_formula", "query_ids", "resolve_stage_agent_universe", "load_rows"], "authoritative_central_layers": list(AUTHORITATIVE_CENTRAL_LAYER_SHARDS)})
+    _write_shard_only("market_stage_activation_profile_registry", stage_profile_rows, "MarketStageActivationProfileRegistryV1", ["PR168_RP5C_MachineConsumableLibraryAccess.report.json", "PR168_RP5C_StageAgentUniverseResolutionProof.report.json"])
+    _write_shard_and_report("agent_qku_access_policy_registry", agent_access_policy_rows, "PR168_RP5C_AgentQKUAccessContract.report.json", "AgentQKUAccessPolicyRegistryV1", {"agent_qku_access_policy_registry_row_count": len(agent_access_policy_rows), "agent_access_policy_version": AGENT_ACCESS_POLICY_VERSION, "source_duty_binding_consumed_flag": any(row.get("source_duty_refs") for row in agent_access_policy_rows), "mutable_per_qku_ownership_in_identity_rows_flag": False})
+    _write_shard_only("stage_computation_universe_view", stage_view_rows, "StageComputationUniverseViewV1", ["PR168_RP5C_MachineConsumableLibraryAccess.report.json", "PR168_RP5C_StageAgentUniverseResolutionProof.report.json"])
+    _write_shard_only("agent_computation_universe_view", agent_view_rows, "AgentComputationUniverseViewV1", ["PR168_RP5C_AgentQKUAccessContract.report.json", "PR168_RP5C_StageAgentUniverseResolutionProof.report.json"])
+    _write_shard_and_report("stage_agent_qku_universe_resolver", stage_agent_resolver_rows, "PR168_RP5C_StageAgentUniverseResolutionProof.report.json", "StageAgentQKUUniverseResolverV1", {**machine_access_summary, "stage_agent_qku_universe_resolver_row_count": len(stage_agent_resolver_rows), "resolution_rule": "((StageEnabledMarketSpecificIds UNION CrossMarketSharedIds) INTERSECT PlatformApplicableIds INTERSECT AgentDutyAllowedIds INTERSECT StageAccessModeIds)", "version_mismatch_fail_closed_flag": True})
+    _write_shard_only("library_query_receipts", library_query_receipt_rows, "LibraryQueryReceiptV1", ["PR168_RP5C_MachineConsumableLibraryAccess.report.json", "PR168_RP5C_StageAgentUniverseResolutionProof.report.json"])
+    _write_shard_and_report("vs1_trading_intelligence_handoff", vs1_handoff_rows, "PR168_RP5C_ToVS1TradingIntelligenceHandoff.report.json", "VS1TradingIntelligenceHandoffV1", {"vs1_trading_intelligence_handoff_row_count": len(vs1_handoff_rows), "stage_profile_id": STAGE1_PROFILE_ID, "no_trade_simulation_or_live_authority_flag": True, "no_source_truth_authority_flag": True, "uses_stage_agent_universe_resolver_flag": True})
     _write_shard_and_report("no_global_ban_rows", no_global_rows, "PR168_RP5C_NoGlobalBanProof.report.json", "NoGlobalBanProofV1", {**stage1_hard_zero, "global_formula_ban_count": 0, "global_qku_ban_count": 0, "no_global_ban_row_count": len(no_global_rows), "dormant_future_market_qku_preserved_not_deleted_or_banned_flag": True})
-    _write_shard_and_report("no_orphan_identity_rows", no_orphan_identity_rows, "PR168_RP5C_NoOrphanIdentityProof.report.json", "NoOrphanIdentityProofV1", {**stage1_hard_zero, "orphan_identity_count": 0, "no_orphan_identity_row_count": len(no_orphan_identity_rows), "stage1_activation_view_row_count": len(stage1_activation_rows), "stage1_seed_row_count": len(stage1_seed_rows), "dormant_future_market_row_count": len(dormant_rows)})
-    _write_shard_and_report("no_orphan_source_artifact_rows", no_orphan_source_rows, "PR168_RP5C_NoOrphanSourceArtifactProof.report.json", "NoOrphanSourceArtifactProofV1", {**stage1_hard_zero, "orphan_source_artifact_count": 0, "orphan_input_report_count": 0, "no_orphan_source_artifact_row_count": len(no_orphan_source_rows), "stage1_active_universe_surface_refs": [generated_ref(shard_path(key)) for key in STAGE1_ACTIVE_UNIVERSE_SHARDS]})
-    _write_shard_and_report("no_orphan_generated_surface_rows", no_orphan_generated_rows, "PR168_RP5C_NoOrphanGeneratedSurfaceProof.report.json", "NoOrphanGeneratedSurfaceProofV1", {**stage1_hard_zero, "orphan_generated_shard_count": 0, "no_orphan_generated_surface_row_count": len(no_orphan_generated_rows), "stage1_active_universe_surface_refs": [generated_ref(shard_path(key)) for key in STAGE1_ACTIVE_UNIVERSE_SHARDS]})
+    _write_shard_and_report("no_orphan_identity_rows", no_orphan_identity_rows, "PR168_RP5C_NoOrphanIdentityProof.report.json", "NoOrphanIdentityProofV1", {**stage1_hard_zero, "orphan_identity_count": 0, "no_orphan_identity_row_count": len(no_orphan_identity_rows), "stage1_activation_view_row_count": len(stage1_activation_rows), "stage1_seed_row_count": len(stage1_seed_rows), "dormant_future_market_row_count": len(dormant_rows), "qku_market_applicability_matrix_row_count": len(market_applicability_rows), "stage_agent_resolver_row_count": len(stage_agent_resolver_rows)})
+    _write_shard_and_report("no_orphan_source_artifact_rows", no_orphan_source_rows, "PR168_RP5C_NoOrphanSourceArtifactProof.report.json", "NoOrphanSourceArtifactProofV1", {**stage1_hard_zero, "orphan_source_artifact_count": 0, "orphan_input_report_count": 0, "no_orphan_source_artifact_row_count": len(no_orphan_source_rows), "stage1_active_universe_surface_refs": [generated_ref(shard_path(key)) for key in STAGE1_ACTIVE_UNIVERSE_SHARDS], "machine_consumable_surface_refs": [generated_ref(shard_path(key)) for key in ("qku_market_applicability_matrix", "market_stage_activation_profile_registry", "agent_qku_access_policy_registry", "stage_agent_qku_universe_resolver")]})
+    _write_shard_and_report("no_orphan_generated_surface_rows", no_orphan_generated_rows, "PR168_RP5C_NoOrphanGeneratedSurfaceProof.report.json", "NoOrphanGeneratedSurfaceProofV1", {**stage1_hard_zero, "orphan_generated_shard_count": 0, "no_orphan_generated_surface_row_count": len(no_orphan_generated_rows), "stage1_active_universe_surface_refs": [generated_ref(shard_path(key)) for key in STAGE1_ACTIVE_UNIVERSE_SHARDS], "machine_consumable_surface_refs": [generated_ref(shard_path(key)) for key in ("qku_market_applicability_matrix", "market_stage_activation_profile_registry", "agent_qku_access_policy_registry", "stage_agent_qku_universe_resolver", "stage_computation_universe_view", "agent_computation_universe_view", "library_query_receipts")]})
     _write_shard_and_report("stage1_prediction_market_qku_activation_view", stage1_activation_rows, "PR168_RP5C_Stage1PredictionMarketQKUActivationView.report.json", "Stage1PredictionMarketQKUActivationViewV1", {**stage1_summary, "stage1_prediction_market_qku_activation_view_row_count": len(stage1_activation_rows)})
     _write_shard_and_report("platform_applicability_registry", platform_rows, "PR168_RP5C_PlatformApplicabilityRegistry.report.json", "PlatformApplicabilityRegistryV1", {**stage1_hard_zero, "platform_applicability_registry_row_count": len(platform_rows), "platform_applicability_states": list(PLATFORM_APPLICABILITY_STATES)})
     _write_shard_and_report("dormant_future_market_qku_ledger", dormant_rows, "PR168_RP5C_DormantFutureMarketQKULedger.report.json", "DormantFutureMarketQKULedgerV1", {**stage1_hard_zero, "dormant_future_market_qku_ledger_row_count": len(dormant_rows), "dormant_future_market_qku_preserved_not_deleted_or_banned_flag": True})
     _write_shard_and_report("stage1_agent_computation_universe_seed", stage1_seed_rows, "PR168_RP5C_Stage1AgentComputationUniverseSeed.report.json", "Stage1AgentComputationUniverseSeedV1", {**stage1_hard_zero, "stage1_agent_computation_universe_seed_row_count": len(stage1_seed_rows), "default_stage1_computation_seed_flag": True, "stage1_agents_must_not_default_compute_full_universe": True})
-    _write_shard_and_report("rp5d_executability_handoff", handoff_rows, "PR168_RP5C_ToRP5DExecutabilityHandoff.report.json", "RP5DExecutabilityHandoffV1", {**stage1_hard_zero, "rp5d_handoff_row_count": len(handoff_rows), "rp5d_handoff_state_counts": _counter_summary(handoff_rows, "rp5d_handoff_state"), "stage1_seed_row_count": len(stage1_seed_rows), "dormant_future_market_row_count": len(dormant_rows)})
+    _write_shard_and_report("rp5d_executability_handoff", handoff_rows, "PR168_RP5C_ToRP5DExecutabilityHandoff.report.json", "RP5DExecutabilityHandoffV1", {**stage1_hard_zero, "rp5d_handoff_row_count": len(handoff_rows), "rp5d_handoff_state_counts": _counter_summary(handoff_rows, "rp5d_handoff_state"), "stage1_seed_row_count": len(stage1_seed_rows), "dormant_future_market_row_count": len(dormant_rows), "machine_library_reader_ref": "tools/pr168_rp5c_library_reader.py", "qku_market_applicability_matrix_row_count": len(market_applicability_rows), "stage_agent_resolver_row_count": len(stage_agent_resolver_rows)})
     _write_shard_and_report("identity_quality_gap_queue", quality_gap_rows, "PR168_RP5C_FinalSummary.report.json", "IdentityQualityGapQueueV1", {"identity_quality_gap_row_count": len(quality_gap_rows)})
 
     write_report("PR168_RP5C_Preflight.report.json", summary={**preflight, "streaming_scanning_performance": final_summary["scan_performance"]}, records=preflight)
     write_report("PR168_RP5C_RP5BInputIntegrity.report.json", summary=rp5b_integrity, records=rp5b_integrity)
     write_report("PR168_RP5C_AgentDutyInput.report.json", summary=agent_input["status"], records=agent_records[:25])
-    central_manifest_records = [
-        {
-            "central_surface_id": f"RP5C_CENTRAL_SURFACE_{index:04d}",
-            "surface_ref": generated_ref(shard_path(key)),
-            "manifest_ref": generated_ref(manifest_path_for_shard(shard_path(key))),
-            "authority_class": "RP5C_CENTRAL_ACTIVE_SURFACE_NOT_SOURCE_TRUTH",
-            "future_consumer_refs": ["Stage1QTTAgents", "PR168-RP5D", "PR168-RP5E", "PR168-RP5G", "RANK4", "QOPT", "Paper", "LiveFutureOnly"] if key in STAGE1_ACTIVE_UNIVERSE_SHARDS else ["PR168-RP5D", "PR168-RP5E", "PR168-RP5G", "RANK4", "QOPT", "Paper", "LiveFutureOnly"],
-            "raw_legacy_direct_consumer_allowed_flag": False,
-            "derived_route_overlay_not_identity_authority_flag": key in {"agent_duty_routing_rulebook", "derived_agent_route_resolution_ledger", "file_to_derived_route_crosswalk"},
-            "universal_preservation_surface_flag": key == "immutable_qku_formula_library",
-            "default_stage1_computation_seed_flag": key == "stage1_agent_computation_universe_seed",
-            "stage1_agents_must_not_default_compute_full_universe_flag": key in STAGE1_ACTIVE_UNIVERSE_SHARDS,
-            "market_scope_or_platform_creates_trading_authority_flag": False,
-        }
-        for index, key in enumerate(CENTRAL_SURFACE_SHARDS, start=1)
-    ]
-    write_report("PR168_RP5C_CentralSurfaceManifest.report.json", summary={**stage1_hard_zero, "central_surface_count": len(central_manifest_records), "canonical_active_surfaces": [row["surface_ref"] for row in central_manifest_records], "stage1_active_universe_surfaces": [generated_ref(shard_path(key)) for key in STAGE1_ACTIVE_UNIVERSE_SHARDS], "immutable_qku_formula_library_remains_universal_preservation_surface": True, "stage1_agent_computation_universe_seed_is_default_stage1_seed": True, "stage1_agents_must_not_default_compute_full_universe": True}, records=central_manifest_records)
+    authoritative_schema_by_key = {
+        "immutable_qku_formula_library": "ImmutableQKUFormulaLibraryV1",
+        "qku_market_applicability_matrix": "QKUMarketApplicabilityMatrixV1",
+        "market_stage_activation_profile_registry": "MarketStageActivationProfileRegistryV1",
+        "agent_qku_access_policy_registry": "AgentQKUAccessPolicyRegistryV1",
+    }
+    central_manifest_records = []
+    for index, key in enumerate(CENTRAL_SURFACE_SHARDS, start=1):
+        authoritative_flag = key in AUTHORITATIVE_CENTRAL_LAYER_SHARDS
+        central_manifest_records.append(
+            {
+                "central_surface_id": f"RP5C_CENTRAL_SURFACE_{index:04d}",
+                "surface_ref": generated_ref(shard_path(key)),
+                "manifest_ref": generated_ref(manifest_path_for_shard(shard_path(key))),
+                "authority_class": "RP5C_AUTHORITATIVE_CENTRAL_CONFIG_DATA_LAYER_NOT_SOURCE_TRUTH" if authoritative_flag else "RP5C_DERIVED_VIEW_OR_PROOF_NOT_AUTHORITATIVE",
+                "authoritative_configuration_data_layer_flag": authoritative_flag,
+                "authoritative_layer_schema_name": authoritative_schema_by_key.get(key),
+                "derived_id_view_flag": key in {"stage_computation_universe_view", "agent_computation_universe_view", "stage1_prediction_market_qku_activation_view", "stage1_agent_computation_universe_seed", "stage_agent_qku_universe_resolver", "library_query_receipts"},
+                "future_consumer_refs": ["Stage1QTTAgents", "VS1TradingIntelligence", "PR168-RP5D", "PR168-RP5E", "PR168-RP5G", "RANK4", "QOPT", "Paper", "LiveFutureOnly"] if key in STAGE1_ACTIVE_UNIVERSE_SHARDS or key in {"qku_market_applicability_matrix", "market_stage_activation_profile_registry", "agent_qku_access_policy_registry", "stage_agent_qku_universe_resolver"} else ["PR168-RP5D", "PR168-RP5E", "PR168-RP5G", "RANK4", "QOPT", "Paper", "LiveFutureOnly"],
+                "raw_legacy_direct_consumer_allowed_flag": False,
+                "derived_route_overlay_not_identity_authority_flag": key in {"agent_duty_routing_rulebook", "derived_agent_route_resolution_ledger", "file_to_derived_route_crosswalk", "stage_agent_qku_universe_resolver", "agent_computation_universe_view"},
+                "universal_preservation_surface_flag": key == "immutable_qku_formula_library",
+                "default_stage1_computation_seed_flag": key == "stage1_agent_computation_universe_seed",
+                "stage1_agents_must_not_default_compute_full_universe_flag": key in STAGE1_ACTIVE_UNIVERSE_SHARDS or key in {"stage_computation_universe_view", "agent_computation_universe_view"},
+                "market_scope_or_platform_creates_trading_authority_flag": False,
+            }
+        )
+    write_report("PR168_RP5C_CentralSurfaceManifest.report.json", summary={**stage1_hard_zero, "central_surface_count": len(central_manifest_records), "canonical_active_surfaces": [row["surface_ref"] for row in central_manifest_records], "authoritative_central_layer_count": len(AUTHORITATIVE_CENTRAL_LAYER_SHARDS), "authoritative_central_layer_surfaces": [generated_ref(shard_path(key)) for key in AUTHORITATIVE_CENTRAL_LAYER_SHARDS], "only_four_authoritative_central_layers_flag": True, "derived_id_view_surfaces": [generated_ref(shard_path(key)) for key in ("stage_computation_universe_view", "agent_computation_universe_view", "stage1_prediction_market_qku_activation_view", "stage1_agent_computation_universe_seed", "stage_agent_qku_universe_resolver", "library_query_receipts")], "independent_full_library_copy_count": 0, "stage1_active_universe_surfaces": [generated_ref(shard_path(key)) for key in STAGE1_ACTIVE_UNIVERSE_SHARDS], "immutable_qku_formula_library_remains_universal_preservation_surface": True, "stage1_agent_computation_universe_seed_is_default_stage1_seed": True, "stage1_agents_must_not_default_compute_full_universe": True, "machine_library_reader_ref": "tools/pr168_rp5c_library_reader.py"}, records=central_manifest_records)
     write_report("PR168_RP5C_CrossOSPathPortabilityAudit.report.json", summary=cross_os, records=cross_os)
     write_report("PR168_RP5C_PathAudit.report.json", summary=path_audit, records=path_audit)
     write_report("PR168_RP5C_FinalSummary.report.json", summary=final_summary, records=final_summary)

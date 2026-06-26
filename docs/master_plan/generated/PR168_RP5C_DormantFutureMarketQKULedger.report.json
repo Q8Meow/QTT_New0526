@@ -85,6 +85,7 @@
   "raw_legacy_direct_agent_consumer_count": 0,
   "records": [
     {
+      "applicability_mode": "MARKET_SPECIFIC",
       "blocker_codes": [
         "FUTURE_MARKET_DORMANT",
         "NEEDS_FAMILY_CLASSIFICATION",
@@ -105,6 +106,9 @@
       "future_market_reactivation_requires_central_classification_update_flag": true,
       "global_ban_flag": false,
       "identity_row_id": "RP5C_IDENTITY_00000001",
+      "market_family_refs": [
+        "SECURITIES_FINANCING_AND_REPO"
+      ],
       "market_scope": "repo_financing",
       "notes": "Future/non-Stage-1 market identity remains immutable and routed, but is not in the Stage-1 default computation seed.",
       "platform_applicability_states": [
@@ -115,9 +119,11 @@
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000001"
       ],
-      "stage1_classification_state": "FUTURE_MARKET_DORMANT"
+      "stage1_classification_state": "FUTURE_MARKET_DORMANT",
+      "stage_access_mode": "INACTIVE_FOR_STAGE"
     },
     {
+      "applicability_mode": "MARKET_SPECIFIC",
       "blocker_codes": [
         "FUTURE_MARKET_DORMANT",
         "NEEDS_FORMULA_EXPRESSION_REF",
@@ -137,6 +143,9 @@
       "future_market_reactivation_requires_central_classification_update_flag": true,
       "global_ban_flag": false,
       "identity_row_id": "RP5C_IDENTITY_00000002",
+      "market_family_refs": [
+        "SECURITIES_FINANCING_AND_REPO"
+      ],
       "market_scope": "repo_financing",
       "notes": "Future/non-Stage-1 market identity remains immutable and routed, but is not in the Stage-1 default computation seed.",
       "platform_applicability_states": [
@@ -147,9 +156,11 @@
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000002"
       ],
-      "stage1_classification_state": "FUTURE_MARKET_DORMANT"
+      "stage1_classification_state": "FUTURE_MARKET_DORMANT",
+      "stage_access_mode": "INACTIVE_FOR_STAGE"
     },
     {
+      "applicability_mode": "MARKET_SPECIFIC",
       "blocker_codes": [
         "FUTURE_MARKET_DORMANT",
         "NEEDS_FORMULA_EXPRESSION_REF",
@@ -169,6 +180,9 @@
       "future_market_reactivation_requires_central_classification_update_flag": true,
       "global_ban_flag": false,
       "identity_row_id": "RP5C_IDENTITY_00000003",
+      "market_family_refs": [
+        "SECURITIES_FINANCING_AND_REPO"
+      ],
       "market_scope": "repo_financing",
       "notes": "Future/non-Stage-1 market identity remains immutable and routed, but is not in the Stage-1 default computation seed.",
       "platform_applicability_states": [
@@ -179,9 +193,11 @@
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000003"
       ],
-      "stage1_classification_state": "FUTURE_MARKET_DORMANT"
+      "stage1_classification_state": "FUTURE_MARKET_DORMANT",
+      "stage_access_mode": "INACTIVE_FOR_STAGE"
     },
     {
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
         "NEEDS_FAMILY_CLASSIFICATION",
         "NEEDS_FORMULA_EXPRESSION_REF",
@@ -202,6 +218,7 @@
       "future_market_reactivation_requires_central_classification_update_flag": true,
       "global_ban_flag": false,
       "identity_row_id": "RP5C_IDENTITY_00000007",
+      "market_family_refs": [],
       "market_scope": "unknown_needs_review",
       "notes": "Future/non-Stage-1 market identity remains immutable and routed, but is not in the Stage-1 default computation seed.",
       "platform_applicability_states": [
@@ -212,9 +229,11 @@
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000004"
       ],
-      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW"
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
+      "stage_access_mode": "UNKNOWN_NEEDS_REVIEW"
     },
     {
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
         "NEEDS_MARKET_SCOPE_CLASSIFICATION"
       ],
@@ -232,6 +251,7 @@
       "future_market_reactivation_requires_central_classification_update_flag": true,
       "global_ban_flag": false,
       "identity_row_id": "RP5C_IDENTITY_00000010",
+      "market_family_refs": [],
       "market_scope": "unknown_needs_review",
       "notes": "Future/non-Stage-1 market identity remains immutable and routed, but is not in the Stage-1 default computation seed.",
       "platform_applicability_states": [
@@ -242,9 +262,11 @@
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000005"
       ],
-      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW"
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
+      "stage_access_mode": "UNKNOWN_NEEDS_REVIEW"
     },
     {
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
         "NEEDS_MARKET_SCOPE_CLASSIFICATION"
       ],
@@ -262,6 +284,7 @@
       "future_market_reactivation_requires_central_classification_update_flag": true,
       "global_ban_flag": false,
       "identity_row_id": "RP5C_IDENTITY_00000011",
+      "market_family_refs": [],
       "market_scope": "unknown_needs_review",
       "notes": "Future/non-Stage-1 market identity remains immutable and routed, but is not in the Stage-1 default computation seed.",
       "platform_applicability_states": [
@@ -272,9 +295,11 @@
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000006"
       ],
-      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW"
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
+      "stage_access_mode": "UNKNOWN_NEEDS_REVIEW"
     },
     {
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
         "NEEDS_FORMULA_EXPRESSION_REF",
         "NEEDS_MARKET_SCOPE_CLASSIFICATION"
@@ -293,6 +318,7 @@
       "future_market_reactivation_requires_central_classification_update_flag": true,
       "global_ban_flag": false,
       "identity_row_id": "RP5C_IDENTITY_00000012",
+      "market_family_refs": [],
       "market_scope": "unknown_needs_review",
       "notes": "Future/non-Stage-1 market identity remains immutable and routed, but is not in the Stage-1 default computation seed.",
       "platform_applicability_states": [
@@ -303,9 +329,11 @@
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000007"
       ],
-      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW"
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
+      "stage_access_mode": "UNKNOWN_NEEDS_REVIEW"
     },
     {
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
         "NEEDS_FORMULA_EXPRESSION_REF",
         "NEEDS_MARKET_SCOPE_CLASSIFICATION"
@@ -324,6 +352,7 @@
       "future_market_reactivation_requires_central_classification_update_flag": true,
       "global_ban_flag": false,
       "identity_row_id": "RP5C_IDENTITY_00000019",
+      "market_family_refs": [],
       "market_scope": "unknown_needs_review",
       "notes": "Future/non-Stage-1 market identity remains immutable and routed, but is not in the Stage-1 default computation seed.",
       "platform_applicability_states": [
@@ -334,9 +363,11 @@
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000008"
       ],
-      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW"
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
+      "stage_access_mode": "UNKNOWN_NEEDS_REVIEW"
     },
     {
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
         "NEEDS_FAMILY_CLASSIFICATION",
         "NEEDS_FORMULA_EXPRESSION_REF",
@@ -357,6 +388,7 @@
       "future_market_reactivation_requires_central_classification_update_flag": true,
       "global_ban_flag": false,
       "identity_row_id": "RP5C_IDENTITY_00000024",
+      "market_family_refs": [],
       "market_scope": "unknown_needs_review",
       "notes": "Future/non-Stage-1 market identity remains immutable and routed, but is not in the Stage-1 default computation seed.",
       "platform_applicability_states": [
@@ -367,9 +399,11 @@
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000009"
       ],
-      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW"
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
+      "stage_access_mode": "UNKNOWN_NEEDS_REVIEW"
     },
     {
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
         "NEEDS_MARKET_SCOPE_CLASSIFICATION"
       ],
@@ -387,6 +421,7 @@
       "future_market_reactivation_requires_central_classification_update_flag": true,
       "global_ban_flag": false,
       "identity_row_id": "RP5C_IDENTITY_00000027",
+      "market_family_refs": [],
       "market_scope": "unknown_needs_review",
       "notes": "Future/non-Stage-1 market identity remains immutable and routed, but is not in the Stage-1 default computation seed.",
       "platform_applicability_states": [
@@ -397,9 +432,11 @@
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000010"
       ],
-      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW"
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
+      "stage_access_mode": "UNKNOWN_NEEDS_REVIEW"
     },
     {
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
         "NEEDS_MARKET_SCOPE_CLASSIFICATION"
       ],
@@ -417,6 +454,7 @@
       "future_market_reactivation_requires_central_classification_update_flag": true,
       "global_ban_flag": false,
       "identity_row_id": "RP5C_IDENTITY_00000028",
+      "market_family_refs": [],
       "market_scope": "unknown_needs_review",
       "notes": "Future/non-Stage-1 market identity remains immutable and routed, but is not in the Stage-1 default computation seed.",
       "platform_applicability_states": [
@@ -427,9 +465,11 @@
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000011"
       ],
-      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW"
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
+      "stage_access_mode": "UNKNOWN_NEEDS_REVIEW"
     },
     {
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
         "NEEDS_FORMULA_EXPRESSION_REF",
         "NEEDS_MARKET_SCOPE_CLASSIFICATION"
@@ -448,6 +488,7 @@
       "future_market_reactivation_requires_central_classification_update_flag": true,
       "global_ban_flag": false,
       "identity_row_id": "RP5C_IDENTITY_00000029",
+      "market_family_refs": [],
       "market_scope": "unknown_needs_review",
       "notes": "Future/non-Stage-1 market identity remains immutable and routed, but is not in the Stage-1 default computation seed.",
       "platform_applicability_states": [
@@ -458,9 +499,11 @@
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000012"
       ],
-      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW"
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
+      "stage_access_mode": "UNKNOWN_NEEDS_REVIEW"
     },
     {
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
         "NEEDS_FORMULA_EXPRESSION_REF",
         "NEEDS_MARKET_SCOPE_CLASSIFICATION"
@@ -479,6 +522,7 @@
       "future_market_reactivation_requires_central_classification_update_flag": true,
       "global_ban_flag": false,
       "identity_row_id": "RP5C_IDENTITY_00000036",
+      "market_family_refs": [],
       "market_scope": "unknown_needs_review",
       "notes": "Future/non-Stage-1 market identity remains immutable and routed, but is not in the Stage-1 default computation seed.",
       "platform_applicability_states": [
@@ -489,9 +533,11 @@
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000013"
       ],
-      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW"
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
+      "stage_access_mode": "UNKNOWN_NEEDS_REVIEW"
     },
     {
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
         "NEEDS_MARKET_SCOPE_CLASSIFICATION"
       ],
@@ -509,6 +555,7 @@
       "future_market_reactivation_requires_central_classification_update_flag": true,
       "global_ban_flag": false,
       "identity_row_id": "RP5C_IDENTITY_00000041",
+      "market_family_refs": [],
       "market_scope": "unknown_needs_review",
       "notes": "Future/non-Stage-1 market identity remains immutable and routed, but is not in the Stage-1 default computation seed.",
       "platform_applicability_states": [
@@ -519,9 +566,11 @@
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000014"
       ],
-      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW"
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
+      "stage_access_mode": "UNKNOWN_NEEDS_REVIEW"
     },
     {
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
         "NEEDS_FORMULA_EXPRESSION_REF",
         "NEEDS_MARKET_SCOPE_CLASSIFICATION",
@@ -541,6 +590,7 @@
       "future_market_reactivation_requires_central_classification_update_flag": true,
       "global_ban_flag": false,
       "identity_row_id": "RP5C_IDENTITY_00000043",
+      "market_family_refs": [],
       "market_scope": "unknown_needs_review",
       "notes": "Future/non-Stage-1 market identity remains immutable and routed, but is not in the Stage-1 default computation seed.",
       "platform_applicability_states": [
@@ -551,9 +601,11 @@
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000015"
       ],
-      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW"
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
+      "stage_access_mode": "UNKNOWN_NEEDS_REVIEW"
     },
     {
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
         "NEEDS_FORMULA_EXPRESSION_REF",
         "NEEDS_MARKET_SCOPE_CLASSIFICATION"
@@ -572,6 +624,7 @@
       "future_market_reactivation_requires_central_classification_update_flag": true,
       "global_ban_flag": false,
       "identity_row_id": "RP5C_IDENTITY_00000054",
+      "market_family_refs": [],
       "market_scope": "unknown_needs_review",
       "notes": "Future/non-Stage-1 market identity remains immutable and routed, but is not in the Stage-1 default computation seed.",
       "platform_applicability_states": [
@@ -582,9 +635,11 @@
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000016"
       ],
-      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW"
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
+      "stage_access_mode": "UNKNOWN_NEEDS_REVIEW"
     },
     {
+      "applicability_mode": "MARKET_SPECIFIC",
       "blocker_codes": [
         "FUTURE_MARKET_DORMANT",
         "NEEDS_FAMILY_CLASSIFICATION",
@@ -605,6 +660,9 @@
       "future_market_reactivation_requires_central_classification_update_flag": true,
       "global_ban_flag": false,
       "identity_row_id": "RP5C_IDENTITY_00000055",
+      "market_family_refs": [
+        "SECURITIES_FINANCING_AND_REPO"
+      ],
       "market_scope": "repo_financing",
       "notes": "Future/non-Stage-1 market identity remains immutable and routed, but is not in the Stage-1 default computation seed.",
       "platform_applicability_states": [
@@ -615,9 +673,11 @@
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000017"
       ],
-      "stage1_classification_state": "FUTURE_MARKET_DORMANT"
+      "stage1_classification_state": "FUTURE_MARKET_DORMANT",
+      "stage_access_mode": "INACTIVE_FOR_STAGE"
     },
     {
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
         "NEEDS_FORMULA_EXPRESSION_REF",
         "NEEDS_MARKET_SCOPE_CLASSIFICATION",
@@ -637,6 +697,7 @@
       "future_market_reactivation_requires_central_classification_update_flag": true,
       "global_ban_flag": false,
       "identity_row_id": "RP5C_IDENTITY_00000060",
+      "market_family_refs": [],
       "market_scope": "unknown_needs_review",
       "notes": "Future/non-Stage-1 market identity remains immutable and routed, but is not in the Stage-1 default computation seed.",
       "platform_applicability_states": [
@@ -647,9 +708,11 @@
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000019"
       ],
-      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW"
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
+      "stage_access_mode": "UNKNOWN_NEEDS_REVIEW"
     },
     {
+      "applicability_mode": "MARKET_SPECIFIC",
       "blocker_codes": [
         "FUTURE_MARKET_DORMANT",
         "NEEDS_FAMILY_CLASSIFICATION",
@@ -670,6 +733,9 @@
       "future_market_reactivation_requires_central_classification_update_flag": true,
       "global_ban_flag": false,
       "identity_row_id": "RP5C_IDENTITY_00000071",
+      "market_family_refs": [
+        "SECURITIES_FINANCING_AND_REPO"
+      ],
       "market_scope": "repo_financing",
       "notes": "Future/non-Stage-1 market identity remains immutable and routed, but is not in the Stage-1 default computation seed.",
       "platform_applicability_states": [
@@ -680,9 +746,11 @@
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000021"
       ],
-      "stage1_classification_state": "FUTURE_MARKET_DORMANT"
+      "stage1_classification_state": "FUTURE_MARKET_DORMANT",
+      "stage_access_mode": "INACTIVE_FOR_STAGE"
     },
     {
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
         "NEEDS_FORMULA_EXPRESSION_REF",
         "NEEDS_MARKET_SCOPE_CLASSIFICATION",
@@ -702,6 +770,7 @@
       "future_market_reactivation_requires_central_classification_update_flag": true,
       "global_ban_flag": false,
       "identity_row_id": "RP5C_IDENTITY_00000073",
+      "market_family_refs": [],
       "market_scope": "unknown_needs_review",
       "notes": "Future/non-Stage-1 market identity remains immutable and routed, but is not in the Stage-1 default computation seed.",
       "platform_applicability_states": [
@@ -712,9 +781,11 @@
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000023"
       ],
-      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW"
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
+      "stage_access_mode": "UNKNOWN_NEEDS_REVIEW"
     },
     {
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
         "NEEDS_FAMILY_CLASSIFICATION",
         "NEEDS_FORMULA_EXPRESSION_REF",
@@ -735,6 +806,7 @@
       "future_market_reactivation_requires_central_classification_update_flag": true,
       "global_ban_flag": false,
       "identity_row_id": "RP5C_IDENTITY_00000084",
+      "market_family_refs": [],
       "market_scope": "unknown_needs_review",
       "notes": "Future/non-Stage-1 market identity remains immutable and routed, but is not in the Stage-1 default computation seed.",
       "platform_applicability_states": [
@@ -745,9 +817,11 @@
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000025"
       ],
-      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW"
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
+      "stage_access_mode": "UNKNOWN_NEEDS_REVIEW"
     },
     {
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
         "NEEDS_MARKET_SCOPE_CLASSIFICATION"
       ],
@@ -765,6 +839,7 @@
       "future_market_reactivation_requires_central_classification_update_flag": true,
       "global_ban_flag": false,
       "identity_row_id": "RP5C_IDENTITY_00000087",
+      "market_family_refs": [],
       "market_scope": "unknown_needs_review",
       "notes": "Future/non-Stage-1 market identity remains immutable and routed, but is not in the Stage-1 default computation seed.",
       "platform_applicability_states": [
@@ -775,9 +850,11 @@
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000026"
       ],
-      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW"
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
+      "stage_access_mode": "UNKNOWN_NEEDS_REVIEW"
     },
     {
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
         "NEEDS_MARKET_SCOPE_CLASSIFICATION",
         "NEEDS_ONTOLOGY_CLASSIFICATION"
@@ -796,6 +873,7 @@
       "future_market_reactivation_requires_central_classification_update_flag": true,
       "global_ban_flag": false,
       "identity_row_id": "RP5C_IDENTITY_00000088",
+      "market_family_refs": [],
       "market_scope": "unknown_needs_review",
       "notes": "Future/non-Stage-1 market identity remains immutable and routed, but is not in the Stage-1 default computation seed.",
       "platform_applicability_states": [
@@ -806,9 +884,11 @@
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000027"
       ],
-      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW"
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
+      "stage_access_mode": "UNKNOWN_NEEDS_REVIEW"
     },
     {
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
         "NEEDS_FORMULA_EXPRESSION_REF",
         "NEEDS_MARKET_SCOPE_CLASSIFICATION",
@@ -828,6 +908,7 @@
       "future_market_reactivation_requires_central_classification_update_flag": true,
       "global_ban_flag": false,
       "identity_row_id": "RP5C_IDENTITY_00000089",
+      "market_family_refs": [],
       "market_scope": "unknown_needs_review",
       "notes": "Future/non-Stage-1 market identity remains immutable and routed, but is not in the Stage-1 default computation seed.",
       "platform_applicability_states": [
@@ -838,9 +919,11 @@
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000028"
       ],
-      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW"
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
+      "stage_access_mode": "UNKNOWN_NEEDS_REVIEW"
     },
     {
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
         "NEEDS_FORMULA_EXPRESSION_REF",
         "NEEDS_MARKET_SCOPE_CLASSIFICATION"
@@ -859,6 +942,7 @@
       "future_market_reactivation_requires_central_classification_update_flag": true,
       "global_ban_flag": false,
       "identity_row_id": "RP5C_IDENTITY_00000096",
+      "market_family_refs": [],
       "market_scope": "unknown_needs_review",
       "notes": "Future/non-Stage-1 market identity remains immutable and routed, but is not in the Stage-1 default computation seed.",
       "platform_applicability_states": [
@@ -869,7 +953,8 @@
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000029"
       ],
-      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW"
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
+      "stage_access_mode": "UNKNOWN_NEEDS_REVIEW"
     }
   ],
   "report_version": "PR168-RP5C-v1.0",

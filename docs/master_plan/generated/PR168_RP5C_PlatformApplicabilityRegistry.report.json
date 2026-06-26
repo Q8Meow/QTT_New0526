@@ -1725,7 +1725,7 @@
         "RP5C_STAGE1_ACTIVATION_00010189"
       ],
       "stage1_platform_state_available_flag": true,
-      "stage1_seed_row_count": 119
+      "stage1_seed_row_count": 109
     },
     {
       "blocker_codes": [],

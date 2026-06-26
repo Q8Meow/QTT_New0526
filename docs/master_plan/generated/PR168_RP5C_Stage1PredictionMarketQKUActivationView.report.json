@@ -104,6 +104,7 @@
       "agent_responsibility_group_refs": [
         "RP5C_RESP_GROUP_0014"
       ],
+      "applicability_mode": "MARKET_SPECIFIC",
       "blocker_codes": [
         "FUTURE_MARKET_DORMANT",
         "NEEDS_FAMILY_CLASSIFICATION",
@@ -135,6 +136,9 @@
       "identity_type": "FORMULA",
       "immutable_qku_formula_library_ref": "docs/master_plan/generated/rp5c/immutable_qku_formula_library.jsonl",
       "market_family": "repo_financing",
+      "market_family_refs": [
+        "SECURITIES_FINANCING_AND_REPO"
+      ],
       "market_scope": "repo_financing",
       "market_scope_or_platform_creates_trading_authority_flag": false,
       "notes": "Stage-1 active universe overlay derived from market scope, platform applicability, ontology, family, and central route rules.",
@@ -147,6 +151,9 @@
       ],
       "qku_family": "qku_unknown_needs_review",
       "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000001"
+      ],
       "route_rule_refs": [
         "RP5C_ROUTE_RULE_0014"
       ],
@@ -160,12 +167,14 @@
       "stage1_dormant_future_market_flag": true,
       "stage1_seed_inclusion_flag": false,
       "stage1_supporting_market_agnostic_flag": false,
+      "stage_access_mode": "INACTIVE_FOR_STAGE",
       "universal_library_identity_ref": "RP5C_IDENTITY_00000001"
     },
     {
       "agent_responsibility_group_refs": [
         "RP5C_RESP_GROUP_0014"
       ],
+      "applicability_mode": "MARKET_SPECIFIC",
       "blocker_codes": [
         "FUTURE_MARKET_DORMANT",
         "NEEDS_FORMULA_EXPRESSION_REF",
@@ -196,6 +205,9 @@
       "identity_type": "FORMULA",
       "immutable_qku_formula_library_ref": "docs/master_plan/generated/rp5c/immutable_qku_formula_library.jsonl",
       "market_family": "repo_financing",
+      "market_family_refs": [
+        "SECURITIES_FINANCING_AND_REPO"
+      ],
       "market_scope": "repo_financing",
       "market_scope_or_platform_creates_trading_authority_flag": false,
       "notes": "Stage-1 active universe overlay derived from market scope, platform applicability, ontology, family, and central route rules.",
@@ -208,6 +220,9 @@
       ],
       "qku_family": "qku_formula_repair",
       "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000002"
+      ],
       "route_rule_refs": [
         "RP5C_ROUTE_RULE_0014"
       ],
@@ -221,12 +236,14 @@
       "stage1_dormant_future_market_flag": true,
       "stage1_seed_inclusion_flag": false,
       "stage1_supporting_market_agnostic_flag": false,
+      "stage_access_mode": "INACTIVE_FOR_STAGE",
       "universal_library_identity_ref": "RP5C_IDENTITY_00000002"
     },
     {
       "agent_responsibility_group_refs": [
         "RP5C_RESP_GROUP_0014"
       ],
+      "applicability_mode": "MARKET_SPECIFIC",
       "blocker_codes": [
         "FUTURE_MARKET_DORMANT",
         "NEEDS_FORMULA_EXPRESSION_REF",
@@ -257,6 +274,9 @@
       "identity_type": "FORMULA",
       "immutable_qku_formula_library_ref": "docs/master_plan/generated/rp5c/immutable_qku_formula_library.jsonl",
       "market_family": "repo_financing",
+      "market_family_refs": [
+        "SECURITIES_FINANCING_AND_REPO"
+      ],
       "market_scope": "repo_financing",
       "market_scope_or_platform_creates_trading_authority_flag": false,
       "notes": "Stage-1 active universe overlay derived from market scope, platform applicability, ontology, family, and central route rules.",
@@ -269,6 +289,9 @@
       ],
       "qku_family": "qku_formula_repair_semantic_risk",
       "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000003"
+      ],
       "route_rule_refs": [
         "RP5C_ROUTE_RULE_0014"
       ],
@@ -282,12 +305,14 @@
       "stage1_dormant_future_market_flag": true,
       "stage1_seed_inclusion_flag": false,
       "stage1_supporting_market_agnostic_flag": false,
+      "stage_access_mode": "INACTIVE_FOR_STAGE",
       "universal_library_identity_ref": "RP5C_IDENTITY_00000003"
     },
     {
       "agent_responsibility_group_refs": [
         "RP5C_RESP_GROUP_0014"
       ],
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
         "NEEDS_FAMILY_CLASSIFICATION",
         "NEEDS_FORMULA_EXPRESSION_REF",
@@ -319,6 +344,7 @@
       "identity_type": "FORMULA",
       "immutable_qku_formula_library_ref": "docs/master_plan/generated/rp5c/immutable_qku_formula_library.jsonl",
       "market_family": "unknown_needs_review",
+      "market_family_refs": [],
       "market_scope": "unknown_needs_review",
       "market_scope_or_platform_creates_trading_authority_flag": false,
       "notes": "Stage-1 active universe overlay derived from market scope, platform applicability, ontology, family, and central route rules.",
@@ -331,6 +357,9 @@
       ],
       "qku_family": "qku_unknown_needs_review",
       "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000004"
+      ],
       "route_rule_refs": [
         "RP5C_ROUTE_RULE_0014"
       ],
@@ -344,12 +373,14 @@
       "stage1_dormant_future_market_flag": true,
       "stage1_seed_inclusion_flag": false,
       "stage1_supporting_market_agnostic_flag": false,
+      "stage_access_mode": "UNKNOWN_NEEDS_REVIEW",
       "universal_library_identity_ref": "RP5C_IDENTITY_00000007"
     },
     {
       "agent_responsibility_group_refs": [
         "RP5C_RESP_GROUP_0002"
       ],
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
         "NEEDS_MARKET_SCOPE_CLASSIFICATION"
       ],
@@ -378,6 +409,7 @@
       "identity_type": "FORMULA",
       "immutable_qku_formula_library_ref": "docs/master_plan/generated/rp5c/immutable_qku_formula_library.jsonl",
       "market_family": "unknown_needs_review",
+      "market_family_refs": [],
       "market_scope": "unknown_needs_review",
       "market_scope_or_platform_creates_trading_authority_flag": false,
       "notes": "Stage-1 active universe overlay derived from market scope, platform applicability, ontology, family, and central route rules.",
@@ -390,6 +422,9 @@
       ],
       "qku_family": "qku_calibration_and_scoring",
       "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000005"
+      ],
       "route_rule_refs": [
         "RP5C_ROUTE_RULE_0002"
       ],
@@ -403,12 +438,14 @@
       "stage1_dormant_future_market_flag": true,
       "stage1_seed_inclusion_flag": false,
       "stage1_supporting_market_agnostic_flag": false,
+      "stage_access_mode": "UNKNOWN_NEEDS_REVIEW",
       "universal_library_identity_ref": "RP5C_IDENTITY_00000010"
     },
     {
       "agent_responsibility_group_refs": [
         "RP5C_RESP_GROUP_0002"
       ],
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
         "NEEDS_MARKET_SCOPE_CLASSIFICATION"
       ],
@@ -437,6 +474,7 @@
       "identity_type": "FORMULA",
       "immutable_qku_formula_library_ref": "docs/master_plan/generated/rp5c/immutable_qku_formula_library.jsonl",
       "market_family": "unknown_needs_review",
+      "market_family_refs": [],
       "market_scope": "unknown_needs_review",
       "market_scope_or_platform_creates_trading_authority_flag": false,
       "notes": "Stage-1 active universe overlay derived from market scope, platform applicability, ontology, family, and central route rules.",
@@ -449,6 +487,9 @@
       ],
       "qku_family": "qku_calibration_and_scoring",
       "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000006"
+      ],
       "route_rule_refs": [
         "RP5C_ROUTE_RULE_0002"
       ],
@@ -462,12 +503,14 @@
       "stage1_dormant_future_market_flag": true,
       "stage1_seed_inclusion_flag": false,
       "stage1_supporting_market_agnostic_flag": false,
+      "stage_access_mode": "UNKNOWN_NEEDS_REVIEW",
       "universal_library_identity_ref": "RP5C_IDENTITY_00000011"
     },
     {
       "agent_responsibility_group_refs": [
         "RP5C_RESP_GROUP_0002"
       ],
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
         "NEEDS_FORMULA_EXPRESSION_REF",
         "NEEDS_MARKET_SCOPE_CLASSIFICATION"
@@ -497,6 +540,7 @@
       "identity_type": "FORMULA",
       "immutable_qku_formula_library_ref": "docs/master_plan/generated/rp5c/immutable_qku_formula_library.jsonl",
       "market_family": "unknown_needs_review",
+      "market_family_refs": [],
       "market_scope": "unknown_needs_review",
       "market_scope_or_platform_creates_trading_authority_flag": false,
       "notes": "Stage-1 active universe overlay derived from market scope, platform applicability, ontology, family, and central route rules.",
@@ -509,6 +553,9 @@
       ],
       "qku_family": "qku_unit_dimension_invariant",
       "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000007"
+      ],
       "route_rule_refs": [
         "RP5C_ROUTE_RULE_0002"
       ],
@@ -522,12 +569,14 @@
       "stage1_dormant_future_market_flag": true,
       "stage1_seed_inclusion_flag": false,
       "stage1_supporting_market_agnostic_flag": false,
+      "stage_access_mode": "UNKNOWN_NEEDS_REVIEW",
       "universal_library_identity_ref": "RP5C_IDENTITY_00000012"
     },
     {
       "agent_responsibility_group_refs": [
         "RP5C_RESP_GROUP_0002"
       ],
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
         "NEEDS_FORMULA_EXPRESSION_REF",
         "NEEDS_MARKET_SCOPE_CLASSIFICATION"
@@ -557,6 +606,7 @@
       "identity_type": "FORMULA",
       "immutable_qku_formula_library_ref": "docs/master_plan/generated/rp5c/immutable_qku_formula_library.jsonl",
       "market_family": "unknown_needs_review",
+      "market_family_refs": [],
       "market_scope": "unknown_needs_review",
       "market_scope_or_platform_creates_trading_authority_flag": false,
       "notes": "Stage-1 active universe overlay derived from market scope, platform applicability, ontology, family, and central route rules.",
@@ -569,6 +619,9 @@
       ],
       "qku_family": "qku_calibration_or_lcb_component",
       "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000008"
+      ],
       "route_rule_refs": [
         "RP5C_ROUTE_RULE_0002"
       ],
@@ -582,12 +635,14 @@
       "stage1_dormant_future_market_flag": true,
       "stage1_seed_inclusion_flag": false,
       "stage1_supporting_market_agnostic_flag": false,
+      "stage_access_mode": "UNKNOWN_NEEDS_REVIEW",
       "universal_library_identity_ref": "RP5C_IDENTITY_00000019"
     },
     {
       "agent_responsibility_group_refs": [
         "RP5C_RESP_GROUP_0014"
       ],
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
         "NEEDS_FAMILY_CLASSIFICATION",
         "NEEDS_FORMULA_EXPRESSION_REF",
@@ -619,6 +674,7 @@
       "identity_type": "FORMULA",
       "immutable_qku_formula_library_ref": "docs/master_plan/generated/rp5c/immutable_qku_formula_library.jsonl",
       "market_family": "unknown_needs_review",
+      "market_family_refs": [],
       "market_scope": "unknown_needs_review",
       "market_scope_or_platform_creates_trading_authority_flag": false,
       "notes": "Stage-1 active universe overlay derived from market scope, platform applicability, ontology, family, and central route rules.",
@@ -631,6 +687,9 @@
       ],
       "qku_family": "qku_unknown_needs_review",
       "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000009"
+      ],
       "route_rule_refs": [
         "RP5C_ROUTE_RULE_0014"
       ],
@@ -644,12 +703,14 @@
       "stage1_dormant_future_market_flag": true,
       "stage1_seed_inclusion_flag": false,
       "stage1_supporting_market_agnostic_flag": false,
+      "stage_access_mode": "UNKNOWN_NEEDS_REVIEW",
       "universal_library_identity_ref": "RP5C_IDENTITY_00000024"
     },
     {
       "agent_responsibility_group_refs": [
         "RP5C_RESP_GROUP_0002"
       ],
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
         "NEEDS_MARKET_SCOPE_CLASSIFICATION"
       ],
@@ -678,6 +739,7 @@
       "identity_type": "FORMULA",
       "immutable_qku_formula_library_ref": "docs/master_plan/generated/rp5c/immutable_qku_formula_library.jsonl",
       "market_family": "unknown_needs_review",
+      "market_family_refs": [],
       "market_scope": "unknown_needs_review",
       "market_scope_or_platform_creates_trading_authority_flag": false,
       "notes": "Stage-1 active universe overlay derived from market scope, platform applicability, ontology, family, and central route rules.",
@@ -690,6 +752,9 @@
       ],
       "qku_family": "qku_calibration_and_scoring",
       "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000010"
+      ],
       "route_rule_refs": [
         "RP5C_ROUTE_RULE_0002"
       ],
@@ -703,12 +768,14 @@
       "stage1_dormant_future_market_flag": true,
       "stage1_seed_inclusion_flag": false,
       "stage1_supporting_market_agnostic_flag": false,
+      "stage_access_mode": "UNKNOWN_NEEDS_REVIEW",
       "universal_library_identity_ref": "RP5C_IDENTITY_00000027"
     },
     {
       "agent_responsibility_group_refs": [
         "RP5C_RESP_GROUP_0002"
       ],
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
         "NEEDS_MARKET_SCOPE_CLASSIFICATION"
       ],
@@ -737,6 +804,7 @@
       "identity_type": "FORMULA",
       "immutable_qku_formula_library_ref": "docs/master_plan/generated/rp5c/immutable_qku_formula_library.jsonl",
       "market_family": "unknown_needs_review",
+      "market_family_refs": [],
       "market_scope": "unknown_needs_review",
       "market_scope_or_platform_creates_trading_authority_flag": false,
       "notes": "Stage-1 active universe overlay derived from market scope, platform applicability, ontology, family, and central route rules.",
@@ -749,6 +817,9 @@
       ],
       "qku_family": "qku_calibration_and_scoring",
       "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000011"
+      ],
       "route_rule_refs": [
         "RP5C_ROUTE_RULE_0002"
       ],
@@ -762,12 +833,14 @@
       "stage1_dormant_future_market_flag": true,
       "stage1_seed_inclusion_flag": false,
       "stage1_supporting_market_agnostic_flag": false,
+      "stage_access_mode": "UNKNOWN_NEEDS_REVIEW",
       "universal_library_identity_ref": "RP5C_IDENTITY_00000028"
     },
     {
       "agent_responsibility_group_refs": [
         "RP5C_RESP_GROUP_0002"
       ],
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
         "NEEDS_FORMULA_EXPRESSION_REF",
         "NEEDS_MARKET_SCOPE_CLASSIFICATION"
@@ -797,6 +870,7 @@
       "identity_type": "FORMULA",
       "immutable_qku_formula_library_ref": "docs/master_plan/generated/rp5c/immutable_qku_formula_library.jsonl",
       "market_family": "unknown_needs_review",
+      "market_family_refs": [],
       "market_scope": "unknown_needs_review",
       "market_scope_or_platform_creates_trading_authority_flag": false,
       "notes": "Stage-1 active universe overlay derived from market scope, platform applicability, ontology, family, and central route rules.",
@@ -809,6 +883,9 @@
       ],
       "qku_family": "qku_unit_dimension_invariant",
       "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000012"
+      ],
       "route_rule_refs": [
         "RP5C_ROUTE_RULE_0002"
       ],
@@ -822,12 +899,14 @@
       "stage1_dormant_future_market_flag": true,
       "stage1_seed_inclusion_flag": false,
       "stage1_supporting_market_agnostic_flag": false,
+      "stage_access_mode": "UNKNOWN_NEEDS_REVIEW",
       "universal_library_identity_ref": "RP5C_IDENTITY_00000029"
     },
     {
       "agent_responsibility_group_refs": [
         "RP5C_RESP_GROUP_0002"
       ],
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
         "NEEDS_FORMULA_EXPRESSION_REF",
         "NEEDS_MARKET_SCOPE_CLASSIFICATION"
@@ -857,6 +936,7 @@
       "identity_type": "FORMULA",
       "immutable_qku_formula_library_ref": "docs/master_plan/generated/rp5c/immutable_qku_formula_library.jsonl",
       "market_family": "unknown_needs_review",
+      "market_family_refs": [],
       "market_scope": "unknown_needs_review",
       "market_scope_or_platform_creates_trading_authority_flag": false,
       "notes": "Stage-1 active universe overlay derived from market scope, platform applicability, ontology, family, and central route rules.",
@@ -869,6 +949,9 @@
       ],
       "qku_family": "qku_calibration_or_lcb_component",
       "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000013"
+      ],
       "route_rule_refs": [
         "RP5C_ROUTE_RULE_0002"
       ],
@@ -882,12 +965,14 @@
       "stage1_dormant_future_market_flag": true,
       "stage1_seed_inclusion_flag": false,
       "stage1_supporting_market_agnostic_flag": false,
+      "stage_access_mode": "UNKNOWN_NEEDS_REVIEW",
       "universal_library_identity_ref": "RP5C_IDENTITY_00000036"
     },
     {
       "agent_responsibility_group_refs": [
         "RP5C_RESP_GROUP_0002"
       ],
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
         "NEEDS_MARKET_SCOPE_CLASSIFICATION"
       ],
@@ -916,6 +1001,7 @@
       "identity_type": "FORMULA",
       "immutable_qku_formula_library_ref": "docs/master_plan/generated/rp5c/immutable_qku_formula_library.jsonl",
       "market_family": "unknown_needs_review",
+      "market_family_refs": [],
       "market_scope": "unknown_needs_review",
       "market_scope_or_platform_creates_trading_authority_flag": false,
       "notes": "Stage-1 active universe overlay derived from market scope, platform applicability, ontology, family, and central route rules.",
@@ -928,6 +1014,9 @@
       ],
       "qku_family": "qku_calibration_and_scoring",
       "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000014"
+      ],
       "route_rule_refs": [
         "RP5C_ROUTE_RULE_0002"
       ],
@@ -941,12 +1030,14 @@
       "stage1_dormant_future_market_flag": true,
       "stage1_seed_inclusion_flag": false,
       "stage1_supporting_market_agnostic_flag": false,
+      "stage_access_mode": "UNKNOWN_NEEDS_REVIEW",
       "universal_library_identity_ref": "RP5C_IDENTITY_00000041"
     },
     {
       "agent_responsibility_group_refs": [
         "RP5C_RESP_GROUP_0014"
       ],
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
         "NEEDS_FORMULA_EXPRESSION_REF",
         "NEEDS_MARKET_SCOPE_CLASSIFICATION",
@@ -977,6 +1068,7 @@
       "identity_type": "FORMULA",
       "immutable_qku_formula_library_ref": "docs/master_plan/generated/rp5c/immutable_qku_formula_library.jsonl",
       "market_family": "unknown_needs_review",
+      "market_family_refs": [],
       "market_scope": "unknown_needs_review",
       "market_scope_or_platform_creates_trading_authority_flag": false,
       "notes": "Stage-1 active universe overlay derived from market scope, platform applicability, ontology, family, and central route rules.",
@@ -989,6 +1081,9 @@
       ],
       "qku_family": "qku_unit_dimension_invariant",
       "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000015"
+      ],
       "route_rule_refs": [
         "RP5C_ROUTE_RULE_0014"
       ],
@@ -1002,12 +1097,14 @@
       "stage1_dormant_future_market_flag": true,
       "stage1_seed_inclusion_flag": false,
       "stage1_supporting_market_agnostic_flag": false,
+      "stage_access_mode": "UNKNOWN_NEEDS_REVIEW",
       "universal_library_identity_ref": "RP5C_IDENTITY_00000043"
     },
     {
       "agent_responsibility_group_refs": [
         "RP5C_RESP_GROUP_0002"
       ],
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
         "NEEDS_FORMULA_EXPRESSION_REF",
         "NEEDS_MARKET_SCOPE_CLASSIFICATION"
@@ -1037,6 +1134,7 @@
       "identity_type": "FORMULA",
       "immutable_qku_formula_library_ref": "docs/master_plan/generated/rp5c/immutable_qku_formula_library.jsonl",
       "market_family": "unknown_needs_review",
+      "market_family_refs": [],
       "market_scope": "unknown_needs_review",
       "market_scope_or_platform_creates_trading_authority_flag": false,
       "notes": "Stage-1 active universe overlay derived from market scope, platform applicability, ontology, family, and central route rules.",
@@ -1049,6 +1147,9 @@
       ],
       "qku_family": "qku_calibration_or_lcb_component",
       "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000016"
+      ],
       "route_rule_refs": [
         "RP5C_ROUTE_RULE_0002"
       ],
@@ -1062,12 +1163,14 @@
       "stage1_dormant_future_market_flag": true,
       "stage1_seed_inclusion_flag": false,
       "stage1_supporting_market_agnostic_flag": false,
+      "stage_access_mode": "UNKNOWN_NEEDS_REVIEW",
       "universal_library_identity_ref": "RP5C_IDENTITY_00000054"
     },
     {
       "agent_responsibility_group_refs": [
         "RP5C_RESP_GROUP_0014"
       ],
+      "applicability_mode": "MARKET_SPECIFIC",
       "blocker_codes": [
         "FUTURE_MARKET_DORMANT",
         "NEEDS_FAMILY_CLASSIFICATION",
@@ -1099,6 +1202,9 @@
       "identity_type": "FORMULA",
       "immutable_qku_formula_library_ref": "docs/master_plan/generated/rp5c/immutable_qku_formula_library.jsonl",
       "market_family": "repo_financing",
+      "market_family_refs": [
+        "SECURITIES_FINANCING_AND_REPO"
+      ],
       "market_scope": "repo_financing",
       "market_scope_or_platform_creates_trading_authority_flag": false,
       "notes": "Stage-1 active universe overlay derived from market scope, platform applicability, ontology, family, and central route rules.",
@@ -1111,6 +1217,9 @@
       ],
       "qku_family": "qku_unknown_needs_review",
       "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000017"
+      ],
       "route_rule_refs": [
         "RP5C_ROUTE_RULE_0014"
       ],
@@ -1124,12 +1233,14 @@
       "stage1_dormant_future_market_flag": true,
       "stage1_seed_inclusion_flag": false,
       "stage1_supporting_market_agnostic_flag": false,
+      "stage_access_mode": "INACTIVE_FOR_STAGE",
       "universal_library_identity_ref": "RP5C_IDENTITY_00000055"
     },
     {
       "agent_responsibility_group_refs": [
         "RP5C_RESP_GROUP_0011"
       ],
+      "applicability_mode": "CROSS_MARKET_SHARED",
       "blocker_codes": [],
       "default_compute_from_universal_library_flag": false,
       "deleted_flag": false,
@@ -1156,6 +1267,18 @@
       "identity_type": "FORMULA",
       "immutable_qku_formula_library_ref": "docs/master_plan/generated/rp5c/immutable_qku_formula_library.jsonl",
       "market_family": "market_agnostic",
+      "market_family_refs": [
+        "PREDICTION_MARKETS",
+        "EQUITIES_AND_ETFS",
+        "CRYPTO_SPOT",
+        "CRYPTO_DERIVATIVES",
+        "LISTED_OPTIONS",
+        "EXCHANGE_TRADED_FUTURES_AND_COMMODITIES",
+        "MACRO_FX_EVENT",
+        "SECURITIES_FINANCING_AND_REPO",
+        "FIXED_INCOME_RFQ",
+        "CROSS_MARKET_RELATIVE_VALUE"
+      ],
       "market_scope": "market_agnostic",
       "market_scope_or_platform_creates_trading_authority_flag": false,
       "notes": "Stage-1 active universe overlay derived from market scope, platform applicability, ontology, family, and central route rules.",
@@ -1168,6 +1291,9 @@
       ],
       "qku_family": "qku_formulaplugincontractv1",
       "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000018"
+      ],
       "route_rule_refs": [
         "RP5C_ROUTE_RULE_0011"
       ],
@@ -1180,14 +1306,16 @@
         "THREE_PLATFORM_COMMON"
       ],
       "stage1_dormant_future_market_flag": false,
-      "stage1_seed_inclusion_flag": true,
+      "stage1_seed_inclusion_flag": false,
       "stage1_supporting_market_agnostic_flag": true,
+      "stage_access_mode": "AVAILABLE_ON_DEMAND",
       "universal_library_identity_ref": "RP5C_IDENTITY_00000059"
     },
     {
       "agent_responsibility_group_refs": [
         "RP5C_RESP_GROUP_0014"
       ],
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
         "NEEDS_FORMULA_EXPRESSION_REF",
         "NEEDS_MARKET_SCOPE_CLASSIFICATION",
@@ -1218,6 +1346,7 @@
       "identity_type": "FORMULA",
       "immutable_qku_formula_library_ref": "docs/master_plan/generated/rp5c/immutable_qku_formula_library.jsonl",
       "market_family": "unknown_needs_review",
+      "market_family_refs": [],
       "market_scope": "unknown_needs_review",
       "market_scope_or_platform_creates_trading_authority_flag": false,
       "notes": "Stage-1 active universe overlay derived from market scope, platform applicability, ontology, family, and central route rules.",
@@ -1230,6 +1359,9 @@
       ],
       "qku_family": "qku_unit_dimension_invariant",
       "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000019"
+      ],
       "route_rule_refs": [
         "RP5C_ROUTE_RULE_0014"
       ],
@@ -1243,12 +1375,14 @@
       "stage1_dormant_future_market_flag": true,
       "stage1_seed_inclusion_flag": false,
       "stage1_supporting_market_agnostic_flag": false,
+      "stage_access_mode": "UNKNOWN_NEEDS_REVIEW",
       "universal_library_identity_ref": "RP5C_IDENTITY_00000060"
     },
     {
       "agent_responsibility_group_refs": [
         "RP5C_RESP_GROUP_0002"
       ],
+      "applicability_mode": "CROSS_MARKET_SHARED",
       "blocker_codes": [
         "NEEDS_FORMULA_EXPRESSION_REF"
       ],
@@ -1277,6 +1411,18 @@
       "identity_type": "FORMULA",
       "immutable_qku_formula_library_ref": "docs/master_plan/generated/rp5c/immutable_qku_formula_library.jsonl",
       "market_family": "market_agnostic",
+      "market_family_refs": [
+        "PREDICTION_MARKETS",
+        "EQUITIES_AND_ETFS",
+        "CRYPTO_SPOT",
+        "CRYPTO_DERIVATIVES",
+        "LISTED_OPTIONS",
+        "EXCHANGE_TRADED_FUTURES_AND_COMMODITIES",
+        "MACRO_FX_EVENT",
+        "SECURITIES_FINANCING_AND_REPO",
+        "FIXED_INCOME_RFQ",
+        "CROSS_MARKET_RELATIVE_VALUE"
+      ],
       "market_scope": "market_agnostic",
       "market_scope_or_platform_creates_trading_authority_flag": false,
       "notes": "Stage-1 active universe overlay derived from market scope, platform applicability, ontology, family, and central route rules.",
@@ -1289,6 +1435,9 @@
       ],
       "qku_family": "qku_quantum_objective_coefficient",
       "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000020"
+      ],
       "route_rule_refs": [
         "RP5C_ROUTE_RULE_0002"
       ],
@@ -1301,14 +1450,16 @@
         "THREE_PLATFORM_COMMON"
       ],
       "stage1_dormant_future_market_flag": false,
-      "stage1_seed_inclusion_flag": true,
+      "stage1_seed_inclusion_flag": false,
       "stage1_supporting_market_agnostic_flag": true,
+      "stage_access_mode": "AVAILABLE_ON_DEMAND",
       "universal_library_identity_ref": "RP5C_IDENTITY_00000066"
     },
     {
       "agent_responsibility_group_refs": [
         "RP5C_RESP_GROUP_0014"
       ],
+      "applicability_mode": "MARKET_SPECIFIC",
       "blocker_codes": [
         "FUTURE_MARKET_DORMANT",
         "NEEDS_FAMILY_CLASSIFICATION",
@@ -1340,6 +1491,9 @@
       "identity_type": "FORMULA",
       "immutable_qku_formula_library_ref": "docs/master_plan/generated/rp5c/immutable_qku_formula_library.jsonl",
       "market_family": "repo_financing",
+      "market_family_refs": [
+        "SECURITIES_FINANCING_AND_REPO"
+      ],
       "market_scope": "repo_financing",
       "market_scope_or_platform_creates_trading_authority_flag": false,
       "notes": "Stage-1 active universe overlay derived from market scope, platform applicability, ontology, family, and central route rules.",
@@ -1352,6 +1506,9 @@
       ],
       "qku_family": "qku_unknown_needs_review",
       "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000021"
+      ],
       "route_rule_refs": [
         "RP5C_ROUTE_RULE_0014"
       ],
@@ -1365,12 +1522,14 @@
       "stage1_dormant_future_market_flag": true,
       "stage1_seed_inclusion_flag": false,
       "stage1_supporting_market_agnostic_flag": false,
+      "stage_access_mode": "INACTIVE_FOR_STAGE",
       "universal_library_identity_ref": "RP5C_IDENTITY_00000071"
     },
     {
       "agent_responsibility_group_refs": [
         "RP5C_RESP_GROUP_0011"
       ],
+      "applicability_mode": "CROSS_MARKET_SHARED",
       "blocker_codes": [],
       "default_compute_from_universal_library_flag": false,
       "deleted_flag": false,
@@ -1397,6 +1556,18 @@
       "identity_type": "FORMULA",
       "immutable_qku_formula_library_ref": "docs/master_plan/generated/rp5c/immutable_qku_formula_library.jsonl",
       "market_family": "market_agnostic",
+      "market_family_refs": [
+        "PREDICTION_MARKETS",
+        "EQUITIES_AND_ETFS",
+        "CRYPTO_SPOT",
+        "CRYPTO_DERIVATIVES",
+        "LISTED_OPTIONS",
+        "EXCHANGE_TRADED_FUTURES_AND_COMMODITIES",
+        "MACRO_FX_EVENT",
+        "SECURITIES_FINANCING_AND_REPO",
+        "FIXED_INCOME_RFQ",
+        "CROSS_MARKET_RELATIVE_VALUE"
+      ],
       "market_scope": "market_agnostic",
       "market_scope_or_platform_creates_trading_authority_flag": false,
       "notes": "Stage-1 active universe overlay derived from market scope, platform applicability, ontology, family, and central route rules.",
@@ -1409,6 +1580,9 @@
       ],
       "qku_family": "qku_quantum_forward_optimization",
       "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000022"
+      ],
       "route_rule_refs": [
         "RP5C_ROUTE_RULE_0011"
       ],
@@ -1421,14 +1595,16 @@
         "THREE_PLATFORM_COMMON"
       ],
       "stage1_dormant_future_market_flag": false,
-      "stage1_seed_inclusion_flag": true,
+      "stage1_seed_inclusion_flag": false,
       "stage1_supporting_market_agnostic_flag": true,
+      "stage_access_mode": "AVAILABLE_ON_DEMAND",
       "universal_library_identity_ref": "RP5C_IDENTITY_00000072"
     },
     {
       "agent_responsibility_group_refs": [
         "RP5C_RESP_GROUP_0014"
       ],
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
         "NEEDS_FORMULA_EXPRESSION_REF",
         "NEEDS_MARKET_SCOPE_CLASSIFICATION",
@@ -1459,6 +1635,7 @@
       "identity_type": "FORMULA",
       "immutable_qku_formula_library_ref": "docs/master_plan/generated/rp5c/immutable_qku_formula_library.jsonl",
       "market_family": "unknown_needs_review",
+      "market_family_refs": [],
       "market_scope": "unknown_needs_review",
       "market_scope_or_platform_creates_trading_authority_flag": false,
       "notes": "Stage-1 active universe overlay derived from market scope, platform applicability, ontology, family, and central route rules.",
@@ -1471,6 +1648,9 @@
       ],
       "qku_family": "qku_unit_dimension_invariant",
       "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000023"
+      ],
       "route_rule_refs": [
         "RP5C_ROUTE_RULE_0014"
       ],
@@ -1484,12 +1664,14 @@
       "stage1_dormant_future_market_flag": true,
       "stage1_seed_inclusion_flag": false,
       "stage1_supporting_market_agnostic_flag": false,
+      "stage_access_mode": "UNKNOWN_NEEDS_REVIEW",
       "universal_library_identity_ref": "RP5C_IDENTITY_00000073"
     },
     {
       "agent_responsibility_group_refs": [
         "RP5C_RESP_GROUP_0011"
       ],
+      "applicability_mode": "CROSS_MARKET_SHARED",
       "blocker_codes": [
         "NEEDS_FORMULA_EXPRESSION_REF"
       ],
@@ -1518,6 +1700,18 @@
       "identity_type": "FORMULA",
       "immutable_qku_formula_library_ref": "docs/master_plan/generated/rp5c/immutable_qku_formula_library.jsonl",
       "market_family": "market_agnostic",
+      "market_family_refs": [
+        "PREDICTION_MARKETS",
+        "EQUITIES_AND_ETFS",
+        "CRYPTO_SPOT",
+        "CRYPTO_DERIVATIVES",
+        "LISTED_OPTIONS",
+        "EXCHANGE_TRADED_FUTURES_AND_COMMODITIES",
+        "MACRO_FX_EVENT",
+        "SECURITIES_FINANCING_AND_REPO",
+        "FIXED_INCOME_RFQ",
+        "CROSS_MARKET_RELATIVE_VALUE"
+      ],
       "market_scope": "market_agnostic",
       "market_scope_or_platform_creates_trading_authority_flag": false,
       "notes": "Stage-1 active universe overlay derived from market scope, platform applicability, ontology, family, and central route rules.",
@@ -1530,6 +1724,9 @@
       ],
       "qku_family": "qku_quantum_objective_coefficient",
       "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000024"
+      ],
       "route_rule_refs": [
         "RP5C_ROUTE_RULE_0011"
       ],
@@ -1542,14 +1739,16 @@
         "THREE_PLATFORM_COMMON"
       ],
       "stage1_dormant_future_market_flag": false,
-      "stage1_seed_inclusion_flag": true,
+      "stage1_seed_inclusion_flag": false,
       "stage1_supporting_market_agnostic_flag": true,
+      "stage_access_mode": "AVAILABLE_ON_DEMAND",
       "universal_library_identity_ref": "RP5C_IDENTITY_00000083"
     },
     {
       "agent_responsibility_group_refs": [
         "RP5C_RESP_GROUP_0014"
       ],
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
         "NEEDS_FAMILY_CLASSIFICATION",
         "NEEDS_FORMULA_EXPRESSION_REF",
@@ -1581,6 +1780,7 @@
       "identity_type": "FORMULA",
       "immutable_qku_formula_library_ref": "docs/master_plan/generated/rp5c/immutable_qku_formula_library.jsonl",
       "market_family": "unknown_needs_review",
+      "market_family_refs": [],
       "market_scope": "unknown_needs_review",
       "market_scope_or_platform_creates_trading_authority_flag": false,
       "notes": "Stage-1 active universe overlay derived from market scope, platform applicability, ontology, family, and central route rules.",
@@ -1593,6 +1793,9 @@
       ],
       "qku_family": "qku_unknown_needs_review",
       "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000025"
+      ],
       "route_rule_refs": [
         "RP5C_ROUTE_RULE_0014"
       ],
@@ -1606,6 +1809,7 @@
       "stage1_dormant_future_market_flag": true,
       "stage1_seed_inclusion_flag": false,
       "stage1_supporting_market_agnostic_flag": false,
+      "stage_access_mode": "UNKNOWN_NEEDS_REVIEW",
       "universal_library_identity_ref": "RP5C_IDENTITY_00000084"
     }
   ],

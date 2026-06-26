@@ -92,6 +92,7 @@
       "all_provenance_tiers": [
         "UPSTREAM_FORMULA_QKU_REGISTRY"
       ],
+      "applicability_mode": "MARKET_SPECIFIC",
       "blocker_codes": [
         "NEEDS_FAMILY_CLASSIFICATION",
         "NEEDS_FORMULA_EXPRESSION_REF",
@@ -158,6 +159,9 @@
       "market_scope_registry_refs": [
         "RP5C_MARKET_SCOPE_0009"
       ],
+      "master_plan_market_family_refs": [
+        "SECURITIES_FINANCING_AND_REPO"
+      ],
       "mutation_allowed_flag": false,
       "no_orphan_reason": "Identity has source, registry classification, derived route, validators, downstream refs, and RP5D handoff.",
       "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
@@ -178,6 +182,9 @@
       "provenance_tier": "UPSTREAM_FORMULA_QKU_REGISTRY",
       "qku_family": "qku_unknown_needs_review",
       "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000001"
+      ],
       "qku_subfamily": "unknown_needs_review",
       "qku_type": null,
       "quantum_role_type": "not_quantum",
@@ -199,6 +206,7 @@
       "source_identity_value_ref": [],
       "source_line_or_json_path": "records[5]",
       "source_pr_ref": "UPSTREAM_QKU",
+      "stage1_access_mode": "INACTIVE_FOR_STAGE",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000001"
       ],
@@ -208,6 +216,7 @@
         "FUTURE_MARKET_DORMANT"
       ],
       "stage1_dormant_future_market_flag": true,
+      "stage1_platform_refs": [],
       "stage1_seed_inclusion_flag": false,
       "validator_refs": [
         "governance_agent",
@@ -221,6 +230,7 @@
       "all_provenance_tiers": [
         "RP5B_SEMANTIC_SUPERSESSION_INPUT"
       ],
+      "applicability_mode": "MARKET_SPECIFIC",
       "blocker_codes": [
         "NEEDS_FORMULA_EXPRESSION_REF",
         "NEEDS_ONTOLOGY_CLASSIFICATION"
@@ -286,6 +296,9 @@
       "market_scope_registry_refs": [
         "RP5C_MARKET_SCOPE_0009"
       ],
+      "master_plan_market_family_refs": [
+        "SECURITIES_FINANCING_AND_REPO"
+      ],
       "mutation_allowed_flag": false,
       "no_orphan_reason": "Identity has source, registry classification, derived route, validators, downstream refs, and RP5D handoff.",
       "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
@@ -306,6 +319,9 @@
       "provenance_tier": "RP5B_SEMANTIC_SUPERSESSION_INPUT",
       "qku_family": "qku_formula_repair",
       "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000002"
+      ],
       "qku_subfamily": "formula_repair",
       "qku_type": null,
       "quantum_role_type": "not_quantum",
@@ -327,6 +343,7 @@
       "source_identity_value_ref": [],
       "source_line_or_json_path": "records[1]",
       "source_pr_ref": "RP5B",
+      "stage1_access_mode": "INACTIVE_FOR_STAGE",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000002"
       ],
@@ -336,6 +353,7 @@
         "FUTURE_MARKET_DORMANT"
       ],
       "stage1_dormant_future_market_flag": true,
+      "stage1_platform_refs": [],
       "stage1_seed_inclusion_flag": false,
       "validator_refs": [
         "governance_agent",
@@ -349,6 +367,7 @@
       "all_provenance_tiers": [
         "GENERATED_REPORT_HISTORICAL_EVIDENCE"
       ],
+      "applicability_mode": "MARKET_SPECIFIC",
       "blocker_codes": [
         "NEEDS_FORMULA_EXPRESSION_REF",
         "NEEDS_ONTOLOGY_CLASSIFICATION"
@@ -414,6 +433,9 @@
       "market_scope_registry_refs": [
         "RP5C_MARKET_SCOPE_0009"
       ],
+      "master_plan_market_family_refs": [
+        "SECURITIES_FINANCING_AND_REPO"
+      ],
       "mutation_allowed_flag": false,
       "no_orphan_reason": "Identity has source, registry classification, derived route, validators, downstream refs, and RP5D handoff.",
       "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
@@ -434,6 +456,9 @@
       "provenance_tier": "GENERATED_REPORT_HISTORICAL_EVIDENCE",
       "qku_family": "qku_formula_repair_semantic_risk",
       "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000003"
+      ],
       "qku_subfamily": "formula_repair_semantic_risk",
       "qku_type": null,
       "quantum_role_type": "not_quantum",
@@ -455,6 +480,7 @@
       "source_identity_value_ref": [],
       "source_line_or_json_path": "records[1]",
       "source_pr_ref": "RP5A",
+      "stage1_access_mode": "INACTIVE_FOR_STAGE",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000003"
       ],
@@ -464,6 +490,7 @@
         "FUTURE_MARKET_DORMANT"
       ],
       "stage1_dormant_future_market_flag": true,
+      "stage1_platform_refs": [],
       "stage1_seed_inclusion_flag": false,
       "validator_refs": [
         "governance_agent",
@@ -477,6 +504,7 @@
       "all_provenance_tiers": [
         "UPSTREAM_FORMULA_QKU_REGISTRY"
       ],
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
         "NEEDS_FAMILY_CLASSIFICATION",
         "NEEDS_FORMULA_EXPRESSION_REF",
@@ -544,6 +572,7 @@
       "market_scope_registry_refs": [
         "RP5C_MARKET_SCOPE_0011"
       ],
+      "master_plan_market_family_refs": [],
       "mutation_allowed_flag": false,
       "no_orphan_reason": "Identity has source, registry classification, derived route, validators, downstream refs, and RP5D handoff.",
       "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
@@ -564,6 +593,9 @@
       "provenance_tier": "UPSTREAM_FORMULA_QKU_REGISTRY",
       "qku_family": "qku_unknown_needs_review",
       "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000004"
+      ],
       "qku_subfamily": "unknown_needs_review",
       "qku_type": null,
       "quantum_role_type": "not_quantum",
@@ -585,6 +617,7 @@
       "source_identity_value_ref": [],
       "source_line_or_json_path": "jsonl[1]",
       "source_pr_ref": "RANK3",
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000004"
       ],
@@ -594,6 +627,7 @@
         "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW"
       ],
       "stage1_dormant_future_market_flag": true,
+      "stage1_platform_refs": [],
       "stage1_seed_inclusion_flag": false,
       "validator_refs": [
         "governance_agent",
@@ -607,6 +641,7 @@
       "all_provenance_tiers": [
         "UPSTREAM_FORMULA_QKU_REGISTRY"
       ],
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
         "NEEDS_MARKET_SCOPE_CLASSIFICATION"
       ],
@@ -671,6 +706,7 @@
       "market_scope_registry_refs": [
         "RP5C_MARKET_SCOPE_0011"
       ],
+      "master_plan_market_family_refs": [],
       "mutation_allowed_flag": false,
       "no_orphan_reason": "Identity has source, registry classification, derived route, validators, downstream refs, and RP5D handoff.",
       "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
@@ -691,6 +727,9 @@
       "provenance_tier": "UPSTREAM_FORMULA_QKU_REGISTRY",
       "qku_family": "qku_calibration_and_scoring",
       "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000005"
+      ],
       "qku_subfamily": "calibration_and_scoring",
       "qku_type": null,
       "quantum_role_type": "not_quantum",
@@ -715,6 +754,7 @@
       ],
       "source_line_or_json_path": "jsonl[1]",
       "source_pr_ref": "MAP3",
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000005"
       ],
@@ -724,6 +764,7 @@
         "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW"
       ],
       "stage1_dormant_future_market_flag": true,
+      "stage1_platform_refs": [],
       "stage1_seed_inclusion_flag": false,
       "validator_refs": [
         "governance_agent",
@@ -737,6 +778,7 @@
       "all_provenance_tiers": [
         "UPSTREAM_FORMULA_QKU_REGISTRY"
       ],
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
         "NEEDS_MARKET_SCOPE_CLASSIFICATION"
       ],
@@ -801,6 +843,7 @@
       "market_scope_registry_refs": [
         "RP5C_MARKET_SCOPE_0011"
       ],
+      "master_plan_market_family_refs": [],
       "mutation_allowed_flag": false,
       "no_orphan_reason": "Identity has source, registry classification, derived route, validators, downstream refs, and RP5D handoff.",
       "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
@@ -821,6 +864,9 @@
       "provenance_tier": "UPSTREAM_FORMULA_QKU_REGISTRY",
       "qku_family": "qku_calibration_and_scoring",
       "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000006"
+      ],
       "qku_subfamily": "calibration_and_scoring",
       "qku_type": null,
       "quantum_role_type": "not_quantum",
@@ -845,6 +891,7 @@
       ],
       "source_line_or_json_path": "jsonl[30]",
       "source_pr_ref": "MAP3",
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000006"
       ],
@@ -854,6 +901,7 @@
         "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW"
       ],
       "stage1_dormant_future_market_flag": true,
+      "stage1_platform_refs": [],
       "stage1_seed_inclusion_flag": false,
       "validator_refs": [
         "governance_agent",
@@ -867,6 +915,7 @@
       "all_provenance_tiers": [
         "UPSTREAM_FORMULA_QKU_REGISTRY"
       ],
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
         "NEEDS_FORMULA_EXPRESSION_REF",
         "NEEDS_MARKET_SCOPE_CLASSIFICATION"
@@ -932,6 +981,7 @@
       "market_scope_registry_refs": [
         "RP5C_MARKET_SCOPE_0011"
       ],
+      "master_plan_market_family_refs": [],
       "mutation_allowed_flag": false,
       "no_orphan_reason": "Identity has source, registry classification, derived route, validators, downstream refs, and RP5D handoff.",
       "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
@@ -952,6 +1002,9 @@
       "provenance_tier": "UPSTREAM_FORMULA_QKU_REGISTRY",
       "qku_family": "qku_unit_dimension_invariant",
       "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000007"
+      ],
       "qku_subfamily": "unit_dimension_invariant",
       "qku_type": null,
       "quantum_role_type": "not_quantum",
@@ -976,6 +1029,7 @@
       ],
       "source_line_or_json_path": "jsonl[30]",
       "source_pr_ref": "MAP3",
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000007"
       ],
@@ -985,6 +1039,7 @@
         "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW"
       ],
       "stage1_dormant_future_market_flag": true,
+      "stage1_platform_refs": [],
       "stage1_seed_inclusion_flag": false,
       "validator_refs": [
         "governance_agent",
@@ -998,6 +1053,7 @@
       "all_provenance_tiers": [
         "UPSTREAM_FORMULA_QKU_REGISTRY"
       ],
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
         "NEEDS_FORMULA_EXPRESSION_REF",
         "NEEDS_MARKET_SCOPE_CLASSIFICATION"
@@ -1063,6 +1119,7 @@
       "market_scope_registry_refs": [
         "RP5C_MARKET_SCOPE_0011"
       ],
+      "master_plan_market_family_refs": [],
       "mutation_allowed_flag": false,
       "no_orphan_reason": "Identity has source, registry classification, derived route, validators, downstream refs, and RP5D handoff.",
       "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
@@ -1083,6 +1140,9 @@
       "provenance_tier": "UPSTREAM_FORMULA_QKU_REGISTRY",
       "qku_family": "qku_calibration_or_lcb_component",
       "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000008"
+      ],
       "qku_subfamily": "calibration_or_lcb_component",
       "qku_type": null,
       "quantum_role_type": "not_quantum",
@@ -1107,6 +1167,7 @@
       ],
       "source_line_or_json_path": "jsonl[1]",
       "source_pr_ref": "RP3",
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000008"
       ],
@@ -1116,6 +1177,7 @@
         "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW"
       ],
       "stage1_dormant_future_market_flag": true,
+      "stage1_platform_refs": [],
       "stage1_seed_inclusion_flag": false,
       "validator_refs": [
         "governance_agent",
@@ -1129,6 +1191,7 @@
       "all_provenance_tiers": [
         "UPSTREAM_FORMULA_QKU_REGISTRY"
       ],
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
         "NEEDS_FAMILY_CLASSIFICATION",
         "NEEDS_FORMULA_EXPRESSION_REF",
@@ -1196,6 +1259,7 @@
       "market_scope_registry_refs": [
         "RP5C_MARKET_SCOPE_0011"
       ],
+      "master_plan_market_family_refs": [],
       "mutation_allowed_flag": false,
       "no_orphan_reason": "Identity has source, registry classification, derived route, validators, downstream refs, and RP5D handoff.",
       "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
@@ -1216,6 +1280,9 @@
       "provenance_tier": "UPSTREAM_FORMULA_QKU_REGISTRY",
       "qku_family": "qku_unknown_needs_review",
       "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000009"
+      ],
       "qku_subfamily": "unknown_needs_review",
       "qku_type": null,
       "quantum_role_type": "not_quantum",
@@ -1237,6 +1304,7 @@
       "source_identity_value_ref": [],
       "source_line_or_json_path": "jsonl[2]",
       "source_pr_ref": "RANK3",
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000009"
       ],
@@ -1246,6 +1314,7 @@
         "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW"
       ],
       "stage1_dormant_future_market_flag": true,
+      "stage1_platform_refs": [],
       "stage1_seed_inclusion_flag": false,
       "validator_refs": [
         "governance_agent",
@@ -1259,6 +1328,7 @@
       "all_provenance_tiers": [
         "UPSTREAM_FORMULA_QKU_REGISTRY"
       ],
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
         "NEEDS_MARKET_SCOPE_CLASSIFICATION"
       ],
@@ -1323,6 +1393,7 @@
       "market_scope_registry_refs": [
         "RP5C_MARKET_SCOPE_0011"
       ],
+      "master_plan_market_family_refs": [],
       "mutation_allowed_flag": false,
       "no_orphan_reason": "Identity has source, registry classification, derived route, validators, downstream refs, and RP5D handoff.",
       "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
@@ -1343,6 +1414,9 @@
       "provenance_tier": "UPSTREAM_FORMULA_QKU_REGISTRY",
       "qku_family": "qku_calibration_and_scoring",
       "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000010"
+      ],
       "qku_subfamily": "calibration_and_scoring",
       "qku_type": null,
       "quantum_role_type": "not_quantum",
@@ -1367,6 +1441,7 @@
       ],
       "source_line_or_json_path": "jsonl[2]",
       "source_pr_ref": "MAP3",
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000010"
       ],
@@ -1376,6 +1451,7 @@
         "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW"
       ],
       "stage1_dormant_future_market_flag": true,
+      "stage1_platform_refs": [],
       "stage1_seed_inclusion_flag": false,
       "validator_refs": [
         "governance_agent",
@@ -1389,6 +1465,7 @@
       "all_provenance_tiers": [
         "UPSTREAM_FORMULA_QKU_REGISTRY"
       ],
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
         "NEEDS_MARKET_SCOPE_CLASSIFICATION"
       ],
@@ -1453,6 +1530,7 @@
       "market_scope_registry_refs": [
         "RP5C_MARKET_SCOPE_0011"
       ],
+      "master_plan_market_family_refs": [],
       "mutation_allowed_flag": false,
       "no_orphan_reason": "Identity has source, registry classification, derived route, validators, downstream refs, and RP5D handoff.",
       "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
@@ -1473,6 +1551,9 @@
       "provenance_tier": "UPSTREAM_FORMULA_QKU_REGISTRY",
       "qku_family": "qku_calibration_and_scoring",
       "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000011"
+      ],
       "qku_subfamily": "calibration_and_scoring",
       "qku_type": null,
       "quantum_role_type": "not_quantum",
@@ -1497,6 +1578,7 @@
       ],
       "source_line_or_json_path": "jsonl[31]",
       "source_pr_ref": "MAP3",
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000011"
       ],
@@ -1506,6 +1588,7 @@
         "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW"
       ],
       "stage1_dormant_future_market_flag": true,
+      "stage1_platform_refs": [],
       "stage1_seed_inclusion_flag": false,
       "validator_refs": [
         "governance_agent",
@@ -1519,6 +1602,7 @@
       "all_provenance_tiers": [
         "UPSTREAM_FORMULA_QKU_REGISTRY"
       ],
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
         "NEEDS_FORMULA_EXPRESSION_REF",
         "NEEDS_MARKET_SCOPE_CLASSIFICATION"
@@ -1584,6 +1668,7 @@
       "market_scope_registry_refs": [
         "RP5C_MARKET_SCOPE_0011"
       ],
+      "master_plan_market_family_refs": [],
       "mutation_allowed_flag": false,
       "no_orphan_reason": "Identity has source, registry classification, derived route, validators, downstream refs, and RP5D handoff.",
       "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
@@ -1604,6 +1689,9 @@
       "provenance_tier": "UPSTREAM_FORMULA_QKU_REGISTRY",
       "qku_family": "qku_unit_dimension_invariant",
       "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000012"
+      ],
       "qku_subfamily": "unit_dimension_invariant",
       "qku_type": null,
       "quantum_role_type": "not_quantum",
@@ -1628,6 +1716,7 @@
       ],
       "source_line_or_json_path": "jsonl[31]",
       "source_pr_ref": "MAP3",
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000012"
       ],
@@ -1637,6 +1726,7 @@
         "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW"
       ],
       "stage1_dormant_future_market_flag": true,
+      "stage1_platform_refs": [],
       "stage1_seed_inclusion_flag": false,
       "validator_refs": [
         "governance_agent",
@@ -1650,6 +1740,7 @@
       "all_provenance_tiers": [
         "UPSTREAM_FORMULA_QKU_REGISTRY"
       ],
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
         "NEEDS_FORMULA_EXPRESSION_REF",
         "NEEDS_MARKET_SCOPE_CLASSIFICATION"
@@ -1715,6 +1806,7 @@
       "market_scope_registry_refs": [
         "RP5C_MARKET_SCOPE_0011"
       ],
+      "master_plan_market_family_refs": [],
       "mutation_allowed_flag": false,
       "no_orphan_reason": "Identity has source, registry classification, derived route, validators, downstream refs, and RP5D handoff.",
       "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
@@ -1735,6 +1827,9 @@
       "provenance_tier": "UPSTREAM_FORMULA_QKU_REGISTRY",
       "qku_family": "qku_calibration_or_lcb_component",
       "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000013"
+      ],
       "qku_subfamily": "calibration_or_lcb_component",
       "qku_type": null,
       "quantum_role_type": "not_quantum",
@@ -1759,6 +1854,7 @@
       ],
       "source_line_or_json_path": "jsonl[3]",
       "source_pr_ref": "RP3",
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000013"
       ],
@@ -1768,6 +1864,7 @@
         "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW"
       ],
       "stage1_dormant_future_market_flag": true,
+      "stage1_platform_refs": [],
       "stage1_seed_inclusion_flag": false,
       "validator_refs": [
         "governance_agent",
@@ -1781,6 +1878,7 @@
       "all_provenance_tiers": [
         "UPSTREAM_FORMULA_QKU_REGISTRY"
       ],
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
         "NEEDS_MARKET_SCOPE_CLASSIFICATION"
       ],
@@ -1845,6 +1943,7 @@
       "market_scope_registry_refs": [
         "RP5C_MARKET_SCOPE_0011"
       ],
+      "master_plan_market_family_refs": [],
       "mutation_allowed_flag": false,
       "no_orphan_reason": "Identity has source, registry classification, derived route, validators, downstream refs, and RP5D handoff.",
       "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
@@ -1865,6 +1964,9 @@
       "provenance_tier": "UPSTREAM_FORMULA_QKU_REGISTRY",
       "qku_family": "qku_calibration_and_scoring",
       "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000014"
+      ],
       "qku_subfamily": "calibration_and_scoring",
       "qku_type": null,
       "quantum_role_type": "not_quantum",
@@ -1889,6 +1991,7 @@
       ],
       "source_line_or_json_path": "jsonl[3]",
       "source_pr_ref": "MAP3",
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000014"
       ],
@@ -1898,6 +2001,7 @@
         "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW"
       ],
       "stage1_dormant_future_market_flag": true,
+      "stage1_platform_refs": [],
       "stage1_seed_inclusion_flag": false,
       "validator_refs": [
         "governance_agent",
@@ -1911,6 +2015,7 @@
       "all_provenance_tiers": [
         "UPSTREAM_FORMULA_QKU_REGISTRY"
       ],
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
         "NEEDS_FORMULA_EXPRESSION_REF",
         "NEEDS_MARKET_SCOPE_CLASSIFICATION",
@@ -1977,6 +2082,7 @@
       "market_scope_registry_refs": [
         "RP5C_MARKET_SCOPE_0011"
       ],
+      "master_plan_market_family_refs": [],
       "mutation_allowed_flag": false,
       "no_orphan_reason": "Identity has source, registry classification, derived route, validators, downstream refs, and RP5D handoff.",
       "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
@@ -1997,6 +2103,9 @@
       "provenance_tier": "UPSTREAM_FORMULA_QKU_REGISTRY",
       "qku_family": "qku_unit_dimension_invariant",
       "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000015"
+      ],
       "qku_subfamily": "unit_dimension_invariant",
       "qku_type": null,
       "quantum_role_type": "not_quantum",
@@ -2021,6 +2130,7 @@
       ],
       "source_line_or_json_path": "jsonl[32]",
       "source_pr_ref": "MAP3",
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000015"
       ],
@@ -2030,6 +2140,7 @@
         "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW"
       ],
       "stage1_dormant_future_market_flag": true,
+      "stage1_platform_refs": [],
       "stage1_seed_inclusion_flag": false,
       "validator_refs": [
         "governance_agent",
@@ -2043,6 +2154,7 @@
       "all_provenance_tiers": [
         "UPSTREAM_FORMULA_QKU_REGISTRY"
       ],
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
         "NEEDS_FORMULA_EXPRESSION_REF",
         "NEEDS_MARKET_SCOPE_CLASSIFICATION"
@@ -2108,6 +2220,7 @@
       "market_scope_registry_refs": [
         "RP5C_MARKET_SCOPE_0011"
       ],
+      "master_plan_market_family_refs": [],
       "mutation_allowed_flag": false,
       "no_orphan_reason": "Identity has source, registry classification, derived route, validators, downstream refs, and RP5D handoff.",
       "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
@@ -2128,6 +2241,9 @@
       "provenance_tier": "UPSTREAM_FORMULA_QKU_REGISTRY",
       "qku_family": "qku_calibration_or_lcb_component",
       "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000016"
+      ],
       "qku_subfamily": "calibration_or_lcb_component",
       "qku_type": null,
       "quantum_role_type": "not_quantum",
@@ -2152,6 +2268,7 @@
       ],
       "source_line_or_json_path": "jsonl[3]",
       "source_pr_ref": "RP3",
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000016"
       ],
@@ -2161,6 +2278,7 @@
         "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW"
       ],
       "stage1_dormant_future_market_flag": true,
+      "stage1_platform_refs": [],
       "stage1_seed_inclusion_flag": false,
       "validator_refs": [
         "governance_agent",
@@ -2174,6 +2292,7 @@
       "all_provenance_tiers": [
         "UPSTREAM_FORMULA_QKU_REGISTRY"
       ],
+      "applicability_mode": "MARKET_SPECIFIC",
       "blocker_codes": [
         "NEEDS_FAMILY_CLASSIFICATION",
         "NEEDS_FORMULA_EXPRESSION_REF",
@@ -2240,6 +2359,9 @@
       "market_scope_registry_refs": [
         "RP5C_MARKET_SCOPE_0009"
       ],
+      "master_plan_market_family_refs": [
+        "SECURITIES_FINANCING_AND_REPO"
+      ],
       "mutation_allowed_flag": false,
       "no_orphan_reason": "Identity has source, registry classification, derived route, validators, downstream refs, and RP5D handoff.",
       "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
@@ -2260,6 +2382,9 @@
       "provenance_tier": "UPSTREAM_FORMULA_QKU_REGISTRY",
       "qku_family": "qku_unknown_needs_review",
       "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000017"
+      ],
       "qku_subfamily": "unknown_needs_review",
       "qku_type": null,
       "quantum_role_type": "not_quantum",
@@ -2281,6 +2406,7 @@
       "source_identity_value_ref": [],
       "source_line_or_json_path": "records[3]",
       "source_pr_ref": "MAP3",
+      "stage1_access_mode": "INACTIVE_FOR_STAGE",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000017"
       ],
@@ -2290,6 +2416,7 @@
         "FUTURE_MARKET_DORMANT"
       ],
       "stage1_dormant_future_market_flag": true,
+      "stage1_platform_refs": [],
       "stage1_seed_inclusion_flag": false,
       "validator_refs": [
         "governance_agent",
@@ -2303,6 +2430,7 @@
       "all_provenance_tiers": [
         "UPSTREAM_FORMULA_QKU_REGISTRY"
       ],
+      "applicability_mode": "CROSS_MARKET_SHARED",
       "blocker_codes": [],
       "canonical_identity_row_id": "RP5C_IDENTITY_00000059",
       "condition_memory_slot_template": {
@@ -2363,6 +2491,18 @@
       "market_scope_registry_refs": [
         "RP5C_MARKET_SCOPE_0002"
       ],
+      "master_plan_market_family_refs": [
+        "PREDICTION_MARKETS",
+        "EQUITIES_AND_ETFS",
+        "CRYPTO_SPOT",
+        "CRYPTO_DERIVATIVES",
+        "LISTED_OPTIONS",
+        "EXCHANGE_TRADED_FUTURES_AND_COMMODITIES",
+        "MACRO_FX_EVENT",
+        "SECURITIES_FINANCING_AND_REPO",
+        "FIXED_INCOME_RFQ",
+        "CROSS_MARKET_RELATIVE_VALUE"
+      ],
       "mutation_allowed_flag": false,
       "no_orphan_reason": "Identity has source, registry classification, derived route, validators, downstream refs, and RP5D handoff.",
       "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
@@ -2383,6 +2523,9 @@
       "provenance_tier": "UPSTREAM_FORMULA_QKU_REGISTRY",
       "qku_family": "qku_formulaplugincontractv1",
       "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000018"
+      ],
       "qku_subfamily": "formulaplugincontractv1",
       "qku_type": null,
       "quantum_role_type": "quantum_objective",
@@ -2407,6 +2550,7 @@
       ],
       "source_line_or_json_path": "jsonl[43]",
       "source_pr_ref": "MAP3",
+      "stage1_access_mode": "AVAILABLE_ON_DEMAND",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000018"
       ],
@@ -2419,7 +2563,12 @@
         "THREE_PLATFORM_COMMON"
       ],
       "stage1_dormant_future_market_flag": false,
-      "stage1_seed_inclusion_flag": true,
+      "stage1_platform_refs": [
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "stage1_seed_inclusion_flag": false,
       "validator_refs": [
         "governance_agent",
         "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
@@ -2432,6 +2581,7 @@
       "all_provenance_tiers": [
         "UPSTREAM_FORMULA_QKU_REGISTRY"
       ],
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
         "NEEDS_FORMULA_EXPRESSION_REF",
         "NEEDS_MARKET_SCOPE_CLASSIFICATION",
@@ -2498,6 +2648,7 @@
       "market_scope_registry_refs": [
         "RP5C_MARKET_SCOPE_0011"
       ],
+      "master_plan_market_family_refs": [],
       "mutation_allowed_flag": false,
       "no_orphan_reason": "Identity has source, registry classification, derived route, validators, downstream refs, and RP5D handoff.",
       "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
@@ -2518,6 +2669,9 @@
       "provenance_tier": "UPSTREAM_FORMULA_QKU_REGISTRY",
       "qku_family": "qku_unit_dimension_invariant",
       "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000019"
+      ],
       "qku_subfamily": "unit_dimension_invariant",
       "qku_type": null,
       "quantum_role_type": "not_quantum",
@@ -2542,6 +2696,7 @@
       ],
       "source_line_or_json_path": "jsonl[43]",
       "source_pr_ref": "MAP3",
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000019"
       ],
@@ -2551,6 +2706,7 @@
         "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW"
       ],
       "stage1_dormant_future_market_flag": true,
+      "stage1_platform_refs": [],
       "stage1_seed_inclusion_flag": false,
       "validator_refs": [
         "governance_agent",
@@ -2564,6 +2720,7 @@
       "all_provenance_tiers": [
         "UPSTREAM_FORMULA_QKU_REGISTRY"
       ],
+      "applicability_mode": "CROSS_MARKET_SHARED",
       "blocker_codes": [
         "NEEDS_FORMULA_EXPRESSION_REF"
       ],
@@ -2626,6 +2783,18 @@
       "market_scope_registry_refs": [
         "RP5C_MARKET_SCOPE_0002"
       ],
+      "master_plan_market_family_refs": [
+        "PREDICTION_MARKETS",
+        "EQUITIES_AND_ETFS",
+        "CRYPTO_SPOT",
+        "CRYPTO_DERIVATIVES",
+        "LISTED_OPTIONS",
+        "EXCHANGE_TRADED_FUTURES_AND_COMMODITIES",
+        "MACRO_FX_EVENT",
+        "SECURITIES_FINANCING_AND_REPO",
+        "FIXED_INCOME_RFQ",
+        "CROSS_MARKET_RELATIVE_VALUE"
+      ],
       "mutation_allowed_flag": false,
       "no_orphan_reason": "Identity has source, registry classification, derived route, validators, downstream refs, and RP5D handoff.",
       "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
@@ -2646,6 +2815,9 @@
       "provenance_tier": "UPSTREAM_FORMULA_QKU_REGISTRY",
       "qku_family": "qku_quantum_objective_coefficient",
       "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000020"
+      ],
       "qku_subfamily": "quantum_objective_coefficient",
       "qku_type": null,
       "quantum_role_type": "not_quantum",
@@ -2670,6 +2842,7 @@
       ],
       "source_line_or_json_path": "jsonl[5]",
       "source_pr_ref": "RP3",
+      "stage1_access_mode": "AVAILABLE_ON_DEMAND",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000020"
       ],
@@ -2682,7 +2855,12 @@
         "THREE_PLATFORM_COMMON"
       ],
       "stage1_dormant_future_market_flag": false,
-      "stage1_seed_inclusion_flag": true,
+      "stage1_platform_refs": [
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "stage1_seed_inclusion_flag": false,
       "validator_refs": [
         "governance_agent",
         "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
@@ -2695,6 +2873,7 @@
       "all_provenance_tiers": [
         "UPSTREAM_FORMULA_QKU_REGISTRY"
       ],
+      "applicability_mode": "MARKET_SPECIFIC",
       "blocker_codes": [
         "NEEDS_FAMILY_CLASSIFICATION",
         "NEEDS_FORMULA_EXPRESSION_REF",
@@ -2761,6 +2940,9 @@
       "market_scope_registry_refs": [
         "RP5C_MARKET_SCOPE_0009"
       ],
+      "master_plan_market_family_refs": [
+        "SECURITIES_FINANCING_AND_REPO"
+      ],
       "mutation_allowed_flag": false,
       "no_orphan_reason": "Identity has source, registry classification, derived route, validators, downstream refs, and RP5D handoff.",
       "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
@@ -2781,6 +2963,9 @@
       "provenance_tier": "UPSTREAM_FORMULA_QKU_REGISTRY",
       "qku_family": "qku_unknown_needs_review",
       "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000021"
+      ],
       "qku_subfamily": "unknown_needs_review",
       "qku_type": null,
       "quantum_role_type": "not_quantum",
@@ -2802,6 +2987,7 @@
       "source_identity_value_ref": [],
       "source_line_or_json_path": "records[4]",
       "source_pr_ref": "MAP3",
+      "stage1_access_mode": "INACTIVE_FOR_STAGE",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000021"
       ],
@@ -2811,6 +2997,7 @@
         "FUTURE_MARKET_DORMANT"
       ],
       "stage1_dormant_future_market_flag": true,
+      "stage1_platform_refs": [],
       "stage1_seed_inclusion_flag": false,
       "validator_refs": [
         "governance_agent",
@@ -2824,6 +3011,7 @@
       "all_provenance_tiers": [
         "UPSTREAM_FORMULA_QKU_REGISTRY"
       ],
+      "applicability_mode": "CROSS_MARKET_SHARED",
       "blocker_codes": [],
       "canonical_identity_row_id": "RP5C_IDENTITY_00000072",
       "condition_memory_slot_template": {
@@ -2884,6 +3072,18 @@
       "market_scope_registry_refs": [
         "RP5C_MARKET_SCOPE_0002"
       ],
+      "master_plan_market_family_refs": [
+        "PREDICTION_MARKETS",
+        "EQUITIES_AND_ETFS",
+        "CRYPTO_SPOT",
+        "CRYPTO_DERIVATIVES",
+        "LISTED_OPTIONS",
+        "EXCHANGE_TRADED_FUTURES_AND_COMMODITIES",
+        "MACRO_FX_EVENT",
+        "SECURITIES_FINANCING_AND_REPO",
+        "FIXED_INCOME_RFQ",
+        "CROSS_MARKET_RELATIVE_VALUE"
+      ],
       "mutation_allowed_flag": false,
       "no_orphan_reason": "Identity has source, registry classification, derived route, validators, downstream refs, and RP5D handoff.",
       "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
@@ -2904,6 +3104,9 @@
       "provenance_tier": "UPSTREAM_FORMULA_QKU_REGISTRY",
       "qku_family": "qku_quantum_forward_optimization",
       "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000022"
+      ],
       "qku_subfamily": "quantum_forward_optimization",
       "qku_type": null,
       "quantum_role_type": "quantum_objective",
@@ -2928,6 +3131,7 @@
       ],
       "source_line_or_json_path": "jsonl[44]",
       "source_pr_ref": "MAP3",
+      "stage1_access_mode": "AVAILABLE_ON_DEMAND",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000022"
       ],
@@ -2940,7 +3144,12 @@
         "THREE_PLATFORM_COMMON"
       ],
       "stage1_dormant_future_market_flag": false,
-      "stage1_seed_inclusion_flag": true,
+      "stage1_platform_refs": [
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "stage1_seed_inclusion_flag": false,
       "validator_refs": [
         "governance_agent",
         "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
@@ -2953,6 +3162,7 @@
       "all_provenance_tiers": [
         "UPSTREAM_FORMULA_QKU_REGISTRY"
       ],
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
         "NEEDS_FORMULA_EXPRESSION_REF",
         "NEEDS_MARKET_SCOPE_CLASSIFICATION",
@@ -3019,6 +3229,7 @@
       "market_scope_registry_refs": [
         "RP5C_MARKET_SCOPE_0011"
       ],
+      "master_plan_market_family_refs": [],
       "mutation_allowed_flag": false,
       "no_orphan_reason": "Identity has source, registry classification, derived route, validators, downstream refs, and RP5D handoff.",
       "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
@@ -3039,6 +3250,9 @@
       "provenance_tier": "UPSTREAM_FORMULA_QKU_REGISTRY",
       "qku_family": "qku_unit_dimension_invariant",
       "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000023"
+      ],
       "qku_subfamily": "unit_dimension_invariant",
       "qku_type": null,
       "quantum_role_type": "not_quantum",
@@ -3063,6 +3277,7 @@
       ],
       "source_line_or_json_path": "jsonl[44]",
       "source_pr_ref": "MAP3",
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000023"
       ],
@@ -3072,6 +3287,7 @@
         "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW"
       ],
       "stage1_dormant_future_market_flag": true,
+      "stage1_platform_refs": [],
       "stage1_seed_inclusion_flag": false,
       "validator_refs": [
         "governance_agent",
@@ -3085,6 +3301,7 @@
       "all_provenance_tiers": [
         "UPSTREAM_FORMULA_QKU_REGISTRY"
       ],
+      "applicability_mode": "CROSS_MARKET_SHARED",
       "blocker_codes": [
         "NEEDS_FORMULA_EXPRESSION_REF"
       ],
@@ -3147,6 +3364,18 @@
       "market_scope_registry_refs": [
         "RP5C_MARKET_SCOPE_0002"
       ],
+      "master_plan_market_family_refs": [
+        "PREDICTION_MARKETS",
+        "EQUITIES_AND_ETFS",
+        "CRYPTO_SPOT",
+        "CRYPTO_DERIVATIVES",
+        "LISTED_OPTIONS",
+        "EXCHANGE_TRADED_FUTURES_AND_COMMODITIES",
+        "MACRO_FX_EVENT",
+        "SECURITIES_FINANCING_AND_REPO",
+        "FIXED_INCOME_RFQ",
+        "CROSS_MARKET_RELATIVE_VALUE"
+      ],
       "mutation_allowed_flag": false,
       "no_orphan_reason": "Identity has source, registry classification, derived route, validators, downstream refs, and RP5D handoff.",
       "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
@@ -3167,6 +3396,9 @@
       "provenance_tier": "UPSTREAM_FORMULA_QKU_REGISTRY",
       "qku_family": "qku_quantum_objective_coefficient",
       "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000024"
+      ],
       "qku_subfamily": "quantum_objective_coefficient",
       "qku_type": null,
       "quantum_role_type": "quantum_objective",
@@ -3191,6 +3423,7 @@
       ],
       "source_line_or_json_path": "jsonl[5]",
       "source_pr_ref": "RP3",
+      "stage1_access_mode": "AVAILABLE_ON_DEMAND",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000024"
       ],
@@ -3203,7 +3436,12 @@
         "THREE_PLATFORM_COMMON"
       ],
       "stage1_dormant_future_market_flag": false,
-      "stage1_seed_inclusion_flag": true,
+      "stage1_platform_refs": [
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "stage1_seed_inclusion_flag": false,
       "validator_refs": [
         "governance_agent",
         "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
@@ -3216,6 +3454,7 @@
       "all_provenance_tiers": [
         "UPSTREAM_FORMULA_QKU_REGISTRY"
       ],
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
         "NEEDS_FAMILY_CLASSIFICATION",
         "NEEDS_FORMULA_EXPRESSION_REF",
@@ -3283,6 +3522,7 @@
       "market_scope_registry_refs": [
         "RP5C_MARKET_SCOPE_0011"
       ],
+      "master_plan_market_family_refs": [],
       "mutation_allowed_flag": false,
       "no_orphan_reason": "Identity has source, registry classification, derived route, validators, downstream refs, and RP5D handoff.",
       "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
@@ -3303,6 +3543,9 @@
       "provenance_tier": "UPSTREAM_FORMULA_QKU_REGISTRY",
       "qku_family": "qku_unknown_needs_review",
       "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000025"
+      ],
       "qku_subfamily": "unknown_needs_review",
       "qku_type": null,
       "quantum_role_type": "not_quantum",
@@ -3324,6 +3567,7 @@
       "source_identity_value_ref": [],
       "source_line_or_json_path": "jsonl[4]",
       "source_pr_ref": "RANK3",
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000025"
       ],
@@ -3333,6 +3577,7 @@
         "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW"
       ],
       "stage1_dormant_future_market_flag": true,
+      "stage1_platform_refs": [],
       "stage1_seed_inclusion_flag": false,
       "validator_refs": [
         "governance_agent",

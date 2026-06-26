@@ -77,6 +77,7 @@
   "physical_filename": "PR168_RP5C_NoOrphanIdentityProof.report.json",
   "private_state_fetch_count": 0,
   "qku_identity_deleted_count": 0,
+  "qku_market_applicability_matrix_row_count": 10189,
   "qopt_batch_count": 0,
   "qtt_sha_or_atomicrows_hash_authority_count": 0,
   "quantum_advantage_claim_count": 0,
@@ -1294,5 +1295,6 @@
   "stage1_activation_view_row_count": 10189,
   "stage1_default_full_universe_compute_route_count": 0,
   "stage1_seed_row_count": 540,
+  "stage_agent_resolver_row_count": 24,
   "trade_simulation_count": 0
 }

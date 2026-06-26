@@ -60,6 +60,12 @@
   "launch_readiness_authority_created_count": 0,
   "live_order_authority_created_count": 0,
   "logical_report_id": "PR168_RP5C_NoOrphanSourceArtifactProof",
+  "machine_consumable_surface_refs": [
+    "docs/master_plan/generated/rp5c/qku_market_applicability_matrix.jsonl",
+    "docs/master_plan/generated/rp5c/market_stage_activation_profile_registry.jsonl",
+    "docs/master_plan/generated/rp5c/agent_qku_access_policy_registry.jsonl",
+    "docs/master_plan/generated/rp5c/stage_agent_qku_universe_resolver.jsonl"
+  ],
   "manifest_ref": "docs/master_plan/generated/rp5c/no_orphan_source_artifact_rows.manifest.json",
   "manual_per_qku_hardcoded_agent_assignment_count": 0,
   "master_plan_content_deleted_or_shortened_count": 0,

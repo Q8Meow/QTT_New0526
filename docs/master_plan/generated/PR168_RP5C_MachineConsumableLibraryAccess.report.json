@@ -1,0 +1,958 @@
+{
+  "absolute_local_path_leak_count": 0,
+  "agent_computation_universe_view_count": 24,
+  "archived_file_count": 0,
+  "authoritative_central_layer_count": 4,
+  "authoritative_central_layer_shards": [
+    "immutable_qku_formula_library.jsonl",
+    "qku_market_applicability_matrix.jsonl",
+    "market_stage_activation_profile_registry.jsonl",
+    "agent_qku_access_policy_registry.jsonl"
+  ],
+  "authoritative_central_layers": [
+    "immutable_qku_formula_library",
+    "qku_market_applicability_matrix",
+    "market_stage_activation_profile_registry",
+    "agent_qku_access_policy_registry"
+  ],
+  "backslash_only_path_leak_count": 0,
+  "champion_authority_created_count": 0,
+  "connector_semantic_binding_count": 0,
+  "created_at_utc": "2026-06-25T00:00:00Z",
+  "deleted_file_count": 0,
+  "derived_views_duplicate_canonical_object_count": 0,
+  "dormant_qku_deleted_count": 0,
+  "dormant_qku_global_ban_count": 0,
+  "formula_expression_mutation_count": 0,
+  "formula_identity_deleted_count": 0,
+  "formula_profit_ranking_count": 0,
+  "generated_path_case_collision_count": 0,
+  "global_formula_ban_count": 0,
+  "global_qku_ban_count": 0,
+  "hard_zero_counters": {
+    "absolute_local_path_leak_count": 0,
+    "archived_file_count": 0,
+    "backslash_only_path_leak_count": 0,
+    "champion_authority_created_count": 0,
+    "connector_semantic_binding_count": 0,
+    "deleted_file_count": 0,
+    "dormant_qku_deleted_count": 0,
+    "dormant_qku_global_ban_count": 0,
+    "formula_expression_mutation_count": 0,
+    "formula_identity_deleted_count": 0,
+    "formula_profit_ranking_count": 0,
+    "generated_path_case_collision_count": 0,
+    "global_formula_ban_count": 0,
+    "global_qku_ban_count": 0,
+    "launch_readiness_authority_created_count": 0,
+    "live_order_authority_created_count": 0,
+    "manual_per_qku_hardcoded_agent_assignment_count": 0,
+    "master_plan_content_deleted_or_shortened_count": 0,
+    "moved_file_count": 0,
+    "mutable_agent_ownership_embedded_as_identity_authority_count": 0,
+    "non_prediction_market_qku_stage1_active_count": 0,
+    "orphan_generated_shard_count": 0,
+    "orphan_identity_count": 0,
+    "orphan_input_report_count": 0,
+    "orphan_source_artifact_count": 0,
+    "paper_loop_runtime_count": 0,
+    "private_state_fetch_count": 0,
+    "qku_identity_deleted_count": 0,
+    "qopt_batch_count": 0,
+    "qtt_sha_or_atomicrows_hash_authority_count": 0,
+    "quantum_advantage_claim_count": 0,
+    "quantum_backend_execution_count": 0,
+    "rank4_ranking_count": 0,
+    "raw_legacy_direct_agent_consumer_count": 0,
+    "runtime_cash_receipt_count": 0,
+    "runtime_stack_generation_count": 0,
+    "silent_skipped_input_artifact_count": 0,
+    "source_truth_authority_created_count": 0,
+    "stack_combination_materialization_count": 0,
+    "stage1_default_full_universe_compute_route_count": 0,
+    "trade_simulation_count": 0
+  },
+  "launch_readiness_authority_created_count": 0,
+  "library_query_receipt_count": 24,
+  "live_order_authority_created_count": 0,
+  "logical_report_id": "PR168_RP5C_MachineConsumableLibraryAccess",
+  "machine_consumable_library_reader_ref": "tools/pr168_rp5c_library_reader.py",
+  "machine_library_reader_ref": "tools/pr168_rp5c_library_reader.py",
+  "manifest_ref": "docs/master_plan/generated/rp5c/qku_market_applicability_matrix.manifest.json",
+  "manual_per_qku_hardcoded_agent_assignment_count": 0,
+  "master_plan_content_deleted_or_shortened_count": 0,
+  "moved_file_count": 0,
+  "mutable_agent_ownership_embedded_as_identity_authority_count": 0,
+  "no_authority_statement": "RP5C is immutable identity, provenance, classification, and derived routing preparation only. It creates no live/order/source-truth/champion/launch/quantum/hash authority and does not mutate formulas or delete identities.",
+  "non_prediction_market_qku_stage1_active_count": 0,
+  "orphan_generated_shard_count": 0,
+  "orphan_identity_count": 0,
+  "orphan_input_report_count": 0,
+  "orphan_source_artifact_count": 0,
+  "paper_loop_runtime_count": 0,
+  "physical_filename": "PR168_RP5C_MachineConsumableLibraryAccess.report.json",
+  "private_state_fetch_count": 0,
+  "qku_identity_deleted_count": 0,
+  "qku_market_applicability_matrix_row_count": 10189,
+  "qopt_batch_count": 0,
+  "qtt_sha_or_atomicrows_hash_authority_count": 0,
+  "quantum_advantage_claim_count": 0,
+  "quantum_backend_execution_count": 0,
+  "rank4_ranking_count": 0,
+  "raw_legacy_direct_agent_consumer_count": 0,
+  "reader_function_names": [
+    "load_library",
+    "list_qkus",
+    "list_formulas",
+    "get_qku",
+    "get_formula",
+    "query_ids",
+    "resolve_stage_agent_universe",
+    "load_rows"
+  ],
+  "records": [
+    {
+      "applicability_matrix_version": "QKUMarketApplicabilityMatrixV1",
+      "applicability_mode": "MARKET_SPECIFIC",
+      "blocker_codes": [
+        "NEEDS_FAMILY_CLASSIFICATION",
+        "NEEDS_FORMULA_EXPRESSION_REF",
+        "NEEDS_ONTOLOGY_CLASSIFICATION"
+      ],
+      "default_compute_from_universal_library_flag": false,
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000001"
+      ],
+      "formula_family": "unknown_needs_review",
+      "formula_id": "FORMULA_QKU",
+      "identity_row_id": "RP5C_IDENTITY_00000001",
+      "library_version": "ImmutableQKUFormulaLibraryV1",
+      "market_family_refs": [
+        "SECURITIES_FINANCING_AND_REPO"
+      ],
+      "market_scope_or_platform_creates_trading_authority_flag": false,
+      "notes": "Authoritative market applicability row keyed by immutable identity id; this is not a duplicate formula/QKU object.",
+      "ontology_category": "unknown_needs_review",
+      "platform_refs": [],
+      "qku_family": "qku_unknown_needs_review",
+      "qku_id": null,
+      "qku_market_applicability_row_id": "RP5C_QKU_MARKET_APPLICABILITY_00000001",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000096",
+      "stage_access_mode_by_profile": {
+        "STAGE1_PREDICTION_MARKETS": "INACTIVE_FOR_STAGE"
+      },
+      "stage_profile_refs": []
+    },
+    {
+      "applicability_matrix_version": "QKUMarketApplicabilityMatrixV1",
+      "applicability_mode": "MARKET_SPECIFIC",
+      "blocker_codes": [
+        "NEEDS_FORMULA_EXPRESSION_REF",
+        "NEEDS_ONTOLOGY_CLASSIFICATION"
+      ],
+      "default_compute_from_universal_library_flag": false,
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000002"
+      ],
+      "formula_family": "formula_repair",
+      "formula_id": "FORMULA_REPAIR",
+      "identity_row_id": "RP5C_IDENTITY_00000002",
+      "library_version": "ImmutableQKUFormulaLibraryV1",
+      "market_family_refs": [
+        "SECURITIES_FINANCING_AND_REPO"
+      ],
+      "market_scope_or_platform_creates_trading_authority_flag": false,
+      "notes": "Authoritative market applicability row keyed by immutable identity id; this is not a duplicate formula/QKU object.",
+      "ontology_category": "unknown_needs_review",
+      "platform_refs": [],
+      "qku_family": "qku_formula_repair",
+      "qku_id": null,
+      "qku_market_applicability_row_id": "RP5C_QKU_MARKET_APPLICABILITY_00000002",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000221",
+      "stage_access_mode_by_profile": {
+        "STAGE1_PREDICTION_MARKETS": "INACTIVE_FOR_STAGE"
+      },
+      "stage_profile_refs": []
+    },
+    {
+      "applicability_matrix_version": "QKUMarketApplicabilityMatrixV1",
+      "applicability_mode": "MARKET_SPECIFIC",
+      "blocker_codes": [
+        "NEEDS_FORMULA_EXPRESSION_REF",
+        "NEEDS_ONTOLOGY_CLASSIFICATION"
+      ],
+      "default_compute_from_universal_library_flag": false,
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000003"
+      ],
+      "formula_family": "formula_repair_semantic_risk",
+      "formula_id": "FORMULA_REPAIR_SEMANTIC_RISK",
+      "identity_row_id": "RP5C_IDENTITY_00000003",
+      "library_version": "ImmutableQKUFormulaLibraryV1",
+      "market_family_refs": [
+        "SECURITIES_FINANCING_AND_REPO"
+      ],
+      "market_scope_or_platform_creates_trading_authority_flag": false,
+      "notes": "Authoritative market applicability row keyed by immutable identity id; this is not a duplicate formula/QKU object.",
+      "ontology_category": "unknown_needs_review",
+      "platform_refs": [],
+      "qku_family": "qku_formula_repair_semantic_risk",
+      "qku_id": null,
+      "qku_market_applicability_row_id": "RP5C_QKU_MARKET_APPLICABILITY_00000003",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000215",
+      "stage_access_mode_by_profile": {
+        "STAGE1_PREDICTION_MARKETS": "INACTIVE_FOR_STAGE"
+      },
+      "stage_profile_refs": []
+    },
+    {
+      "applicability_matrix_version": "QKUMarketApplicabilityMatrixV1",
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
+      "blocker_codes": [
+        "NEEDS_FAMILY_CLASSIFICATION",
+        "NEEDS_FORMULA_EXPRESSION_REF",
+        "NEEDS_MARKET_FAMILY_CLASSIFICATION",
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION",
+        "NEEDS_ONTOLOGY_CLASSIFICATION"
+      ],
+      "default_compute_from_universal_library_flag": false,
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000004"
+      ],
+      "formula_family": "unknown_needs_review",
+      "formula_id": "FORM_MAP3_CALIB_BRIER_001",
+      "identity_row_id": "RP5C_IDENTITY_00000007",
+      "library_version": "ImmutableQKUFormulaLibraryV1",
+      "market_family_refs": [],
+      "market_scope_or_platform_creates_trading_authority_flag": false,
+      "notes": "Authoritative market applicability row keyed by immutable identity id; this is not a duplicate formula/QKU object.",
+      "ontology_category": "unknown_needs_review",
+      "platform_refs": [],
+      "qku_family": "qku_unknown_needs_review",
+      "qku_id": null,
+      "qku_market_applicability_row_id": "RP5C_QKU_MARKET_APPLICABILITY_00000004",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000239",
+      "stage_access_mode_by_profile": {
+        "STAGE1_PREDICTION_MARKETS": "UNKNOWN_NEEDS_REVIEW"
+      },
+      "stage_profile_refs": []
+    },
+    {
+      "applicability_matrix_version": "QKUMarketApplicabilityMatrixV1",
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
+      "blocker_codes": [
+        "NEEDS_MARKET_FAMILY_CLASSIFICATION",
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION"
+      ],
+      "default_compute_from_universal_library_flag": false,
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000005"
+      ],
+      "formula_family": "calibration_and_scoring",
+      "formula_id": "FORM_MAP3_CALIB_BRIER_001",
+      "identity_row_id": "RP5C_IDENTITY_00000010",
+      "library_version": "ImmutableQKUFormulaLibraryV1",
+      "market_family_refs": [],
+      "market_scope_or_platform_creates_trading_authority_flag": false,
+      "notes": "Authoritative market applicability row keyed by immutable identity id; this is not a duplicate formula/QKU object.",
+      "ontology_category": "calibration",
+      "platform_refs": [],
+      "qku_family": "qku_calibration_and_scoring",
+      "qku_id": null,
+      "qku_market_applicability_row_id": "RP5C_QKU_MARKET_APPLICABILITY_00000005",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000001",
+      "stage_access_mode_by_profile": {
+        "STAGE1_PREDICTION_MARKETS": "UNKNOWN_NEEDS_REVIEW"
+      },
+      "stage_profile_refs": []
+    },
+    {
+      "applicability_matrix_version": "QKUMarketApplicabilityMatrixV1",
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
+      "blocker_codes": [
+        "NEEDS_MARKET_FAMILY_CLASSIFICATION",
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION"
+      ],
+      "default_compute_from_universal_library_flag": false,
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000006"
+      ],
+      "formula_family": "calibration_and_scoring",
+      "formula_id": "FORM_MAP3_CALIB_BRIER_001",
+      "identity_row_id": "RP5C_IDENTITY_00000011",
+      "library_version": "ImmutableQKUFormulaLibraryV1",
+      "market_family_refs": [],
+      "market_scope_or_platform_creates_trading_authority_flag": false,
+      "notes": "Authoritative market applicability row keyed by immutable identity id; this is not a duplicate formula/QKU object.",
+      "ontology_category": "calibration",
+      "platform_refs": [],
+      "qku_family": "qku_calibration_and_scoring",
+      "qku_id": null,
+      "qku_market_applicability_row_id": "RP5C_QKU_MARKET_APPLICABILITY_00000006",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000011",
+      "stage_access_mode_by_profile": {
+        "STAGE1_PREDICTION_MARKETS": "UNKNOWN_NEEDS_REVIEW"
+      },
+      "stage_profile_refs": []
+    },
+    {
+      "applicability_matrix_version": "QKUMarketApplicabilityMatrixV1",
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
+      "blocker_codes": [
+        "NEEDS_FORMULA_EXPRESSION_REF",
+        "NEEDS_MARKET_FAMILY_CLASSIFICATION",
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION"
+      ],
+      "default_compute_from_universal_library_flag": false,
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000007"
+      ],
+      "formula_family": "unit_dimension_invariant",
+      "formula_id": "FORM_MAP3_CALIB_BRIER_001",
+      "identity_row_id": "RP5C_IDENTITY_00000012",
+      "library_version": "ImmutableQKUFormulaLibraryV1",
+      "market_family_refs": [],
+      "market_scope_or_platform_creates_trading_authority_flag": false,
+      "notes": "Authoritative market applicability row keyed by immutable identity id; this is not a duplicate formula/QKU object.",
+      "ontology_category": "calibration",
+      "platform_refs": [],
+      "qku_family": "qku_unit_dimension_invariant",
+      "qku_id": null,
+      "qku_market_applicability_row_id": "RP5C_QKU_MARKET_APPLICABILITY_00000007",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000015",
+      "stage_access_mode_by_profile": {
+        "STAGE1_PREDICTION_MARKETS": "UNKNOWN_NEEDS_REVIEW"
+      },
+      "stage_profile_refs": []
+    },
+    {
+      "applicability_matrix_version": "QKUMarketApplicabilityMatrixV1",
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
+      "blocker_codes": [
+        "NEEDS_FORMULA_EXPRESSION_REF",
+        "NEEDS_MARKET_FAMILY_CLASSIFICATION",
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION"
+      ],
+      "default_compute_from_universal_library_flag": false,
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000008"
+      ],
+      "formula_family": "calibration_or_lcb_component",
+      "formula_id": "FORM_MAP3_CALIB_BRIER_001",
+      "identity_row_id": "RP5C_IDENTITY_00000019",
+      "library_version": "ImmutableQKUFormulaLibraryV1",
+      "market_family_refs": [],
+      "market_scope_or_platform_creates_trading_authority_flag": false,
+      "notes": "Authoritative market applicability row keyed by immutable identity id; this is not a duplicate formula/QKU object.",
+      "ontology_category": "calibration",
+      "platform_refs": [],
+      "qku_family": "qku_calibration_or_lcb_component",
+      "qku_id": null,
+      "qku_market_applicability_row_id": "RP5C_QKU_MARKET_APPLICABILITY_00000008",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000257",
+      "stage_access_mode_by_profile": {
+        "STAGE1_PREDICTION_MARKETS": "UNKNOWN_NEEDS_REVIEW"
+      },
+      "stage_profile_refs": []
+    },
+    {
+      "applicability_matrix_version": "QKUMarketApplicabilityMatrixV1",
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
+      "blocker_codes": [
+        "NEEDS_FAMILY_CLASSIFICATION",
+        "NEEDS_FORMULA_EXPRESSION_REF",
+        "NEEDS_MARKET_FAMILY_CLASSIFICATION",
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION",
+        "NEEDS_ONTOLOGY_CLASSIFICATION"
+      ],
+      "default_compute_from_universal_library_flag": false,
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000009"
+      ],
+      "formula_family": "unknown_needs_review",
+      "formula_id": "FORM_MAP3_CALIB_ECE_001",
+      "identity_row_id": "RP5C_IDENTITY_00000024",
+      "library_version": "ImmutableQKUFormulaLibraryV1",
+      "market_family_refs": [],
+      "market_scope_or_platform_creates_trading_authority_flag": false,
+      "notes": "Authoritative market applicability row keyed by immutable identity id; this is not a duplicate formula/QKU object.",
+      "ontology_category": "unknown_needs_review",
+      "platform_refs": [],
+      "qku_family": "qku_unknown_needs_review",
+      "qku_id": null,
+      "qku_market_applicability_row_id": "RP5C_QKU_MARKET_APPLICABILITY_00000009",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000239",
+      "stage_access_mode_by_profile": {
+        "STAGE1_PREDICTION_MARKETS": "UNKNOWN_NEEDS_REVIEW"
+      },
+      "stage_profile_refs": []
+    },
+    {
+      "applicability_matrix_version": "QKUMarketApplicabilityMatrixV1",
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
+      "blocker_codes": [
+        "NEEDS_MARKET_FAMILY_CLASSIFICATION",
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION"
+      ],
+      "default_compute_from_universal_library_flag": false,
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000010"
+      ],
+      "formula_family": "calibration_and_scoring",
+      "formula_id": "FORM_MAP3_CALIB_ECE_001",
+      "identity_row_id": "RP5C_IDENTITY_00000027",
+      "library_version": "ImmutableQKUFormulaLibraryV1",
+      "market_family_refs": [],
+      "market_scope_or_platform_creates_trading_authority_flag": false,
+      "notes": "Authoritative market applicability row keyed by immutable identity id; this is not a duplicate formula/QKU object.",
+      "ontology_category": "calibration",
+      "platform_refs": [],
+      "qku_family": "qku_calibration_and_scoring",
+      "qku_id": null,
+      "qku_market_applicability_row_id": "RP5C_QKU_MARKET_APPLICABILITY_00000010",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000001",
+      "stage_access_mode_by_profile": {
+        "STAGE1_PREDICTION_MARKETS": "UNKNOWN_NEEDS_REVIEW"
+      },
+      "stage_profile_refs": []
+    },
+    {
+      "applicability_matrix_version": "QKUMarketApplicabilityMatrixV1",
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
+      "blocker_codes": [
+        "NEEDS_MARKET_FAMILY_CLASSIFICATION",
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION"
+      ],
+      "default_compute_from_universal_library_flag": false,
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000011"
+      ],
+      "formula_family": "calibration_and_scoring",
+      "formula_id": "FORM_MAP3_CALIB_ECE_001",
+      "identity_row_id": "RP5C_IDENTITY_00000028",
+      "library_version": "ImmutableQKUFormulaLibraryV1",
+      "market_family_refs": [],
+      "market_scope_or_platform_creates_trading_authority_flag": false,
+      "notes": "Authoritative market applicability row keyed by immutable identity id; this is not a duplicate formula/QKU object.",
+      "ontology_category": "calibration",
+      "platform_refs": [],
+      "qku_family": "qku_calibration_and_scoring",
+      "qku_id": null,
+      "qku_market_applicability_row_id": "RP5C_QKU_MARKET_APPLICABILITY_00000011",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000011",
+      "stage_access_mode_by_profile": {
+        "STAGE1_PREDICTION_MARKETS": "UNKNOWN_NEEDS_REVIEW"
+      },
+      "stage_profile_refs": []
+    },
+    {
+      "applicability_matrix_version": "QKUMarketApplicabilityMatrixV1",
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
+      "blocker_codes": [
+        "NEEDS_FORMULA_EXPRESSION_REF",
+        "NEEDS_MARKET_FAMILY_CLASSIFICATION",
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION"
+      ],
+      "default_compute_from_universal_library_flag": false,
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000012"
+      ],
+      "formula_family": "unit_dimension_invariant",
+      "formula_id": "FORM_MAP3_CALIB_ECE_001",
+      "identity_row_id": "RP5C_IDENTITY_00000029",
+      "library_version": "ImmutableQKUFormulaLibraryV1",
+      "market_family_refs": [],
+      "market_scope_or_platform_creates_trading_authority_flag": false,
+      "notes": "Authoritative market applicability row keyed by immutable identity id; this is not a duplicate formula/QKU object.",
+      "ontology_category": "calibration",
+      "platform_refs": [],
+      "qku_family": "qku_unit_dimension_invariant",
+      "qku_id": null,
+      "qku_market_applicability_row_id": "RP5C_QKU_MARKET_APPLICABILITY_00000012",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000015",
+      "stage_access_mode_by_profile": {
+        "STAGE1_PREDICTION_MARKETS": "UNKNOWN_NEEDS_REVIEW"
+      },
+      "stage_profile_refs": []
+    },
+    {
+      "applicability_matrix_version": "QKUMarketApplicabilityMatrixV1",
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
+      "blocker_codes": [
+        "NEEDS_FORMULA_EXPRESSION_REF",
+        "NEEDS_MARKET_FAMILY_CLASSIFICATION",
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION"
+      ],
+      "default_compute_from_universal_library_flag": false,
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000013"
+      ],
+      "formula_family": "calibration_or_lcb_component",
+      "formula_id": "FORM_MAP3_CALIB_ECE_001",
+      "identity_row_id": "RP5C_IDENTITY_00000036",
+      "library_version": "ImmutableQKUFormulaLibraryV1",
+      "market_family_refs": [],
+      "market_scope_or_platform_creates_trading_authority_flag": false,
+      "notes": "Authoritative market applicability row keyed by immutable identity id; this is not a duplicate formula/QKU object.",
+      "ontology_category": "calibration",
+      "platform_refs": [],
+      "qku_family": "qku_calibration_or_lcb_component",
+      "qku_id": null,
+      "qku_market_applicability_row_id": "RP5C_QKU_MARKET_APPLICABILITY_00000013",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000257",
+      "stage_access_mode_by_profile": {
+        "STAGE1_PREDICTION_MARKETS": "UNKNOWN_NEEDS_REVIEW"
+      },
+      "stage_profile_refs": []
+    },
+    {
+      "applicability_matrix_version": "QKUMarketApplicabilityMatrixV1",
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
+      "blocker_codes": [
+        "NEEDS_MARKET_FAMILY_CLASSIFICATION",
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION"
+      ],
+      "default_compute_from_universal_library_flag": false,
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000014"
+      ],
+      "formula_family": "calibration_and_scoring",
+      "formula_id": "FORM_MAP3_CALIB_LOGLOSS_001",
+      "identity_row_id": "RP5C_IDENTITY_00000041",
+      "library_version": "ImmutableQKUFormulaLibraryV1",
+      "market_family_refs": [],
+      "market_scope_or_platform_creates_trading_authority_flag": false,
+      "notes": "Authoritative market applicability row keyed by immutable identity id; this is not a duplicate formula/QKU object.",
+      "ontology_category": "calibration",
+      "platform_refs": [],
+      "qku_family": "qku_calibration_and_scoring",
+      "qku_id": null,
+      "qku_market_applicability_row_id": "RP5C_QKU_MARKET_APPLICABILITY_00000014",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000001",
+      "stage_access_mode_by_profile": {
+        "STAGE1_PREDICTION_MARKETS": "UNKNOWN_NEEDS_REVIEW"
+      },
+      "stage_profile_refs": []
+    },
+    {
+      "applicability_matrix_version": "QKUMarketApplicabilityMatrixV1",
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
+      "blocker_codes": [
+        "NEEDS_FORMULA_EXPRESSION_REF",
+        "NEEDS_MARKET_FAMILY_CLASSIFICATION",
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION",
+        "NEEDS_ONTOLOGY_CLASSIFICATION"
+      ],
+      "default_compute_from_universal_library_flag": false,
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000015"
+      ],
+      "formula_family": "unit_dimension_invariant",
+      "formula_id": "FORM_MAP3_CALIB_LOGLOSS_001",
+      "identity_row_id": "RP5C_IDENTITY_00000043",
+      "library_version": "ImmutableQKUFormulaLibraryV1",
+      "market_family_refs": [],
+      "market_scope_or_platform_creates_trading_authority_flag": false,
+      "notes": "Authoritative market applicability row keyed by immutable identity id; this is not a duplicate formula/QKU object.",
+      "ontology_category": "unknown_needs_review",
+      "platform_refs": [],
+      "qku_family": "qku_unit_dimension_invariant",
+      "qku_id": null,
+      "qku_market_applicability_row_id": "RP5C_QKU_MARKET_APPLICABILITY_00000015",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000015",
+      "stage_access_mode_by_profile": {
+        "STAGE1_PREDICTION_MARKETS": "UNKNOWN_NEEDS_REVIEW"
+      },
+      "stage_profile_refs": []
+    },
+    {
+      "applicability_matrix_version": "QKUMarketApplicabilityMatrixV1",
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
+      "blocker_codes": [
+        "NEEDS_FORMULA_EXPRESSION_REF",
+        "NEEDS_MARKET_FAMILY_CLASSIFICATION",
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION"
+      ],
+      "default_compute_from_universal_library_flag": false,
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000016"
+      ],
+      "formula_family": "calibration_or_lcb_component",
+      "formula_id": "FORM_MAP3_CALIB_LOGLOSS_001",
+      "identity_row_id": "RP5C_IDENTITY_00000054",
+      "library_version": "ImmutableQKUFormulaLibraryV1",
+      "market_family_refs": [],
+      "market_scope_or_platform_creates_trading_authority_flag": false,
+      "notes": "Authoritative market applicability row keyed by immutable identity id; this is not a duplicate formula/QKU object.",
+      "ontology_category": "calibration",
+      "platform_refs": [],
+      "qku_family": "qku_calibration_or_lcb_component",
+      "qku_id": null,
+      "qku_market_applicability_row_id": "RP5C_QKU_MARKET_APPLICABILITY_00000016",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000269",
+      "stage_access_mode_by_profile": {
+        "STAGE1_PREDICTION_MARKETS": "UNKNOWN_NEEDS_REVIEW"
+      },
+      "stage_profile_refs": []
+    },
+    {
+      "applicability_matrix_version": "QKUMarketApplicabilityMatrixV1",
+      "applicability_mode": "MARKET_SPECIFIC",
+      "blocker_codes": [
+        "NEEDS_FAMILY_CLASSIFICATION",
+        "NEEDS_FORMULA_EXPRESSION_REF",
+        "NEEDS_ONTOLOGY_CLASSIFICATION"
+      ],
+      "default_compute_from_universal_library_flag": false,
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000017"
+      ],
+      "formula_family": "unknown_needs_review",
+      "formula_id": "FORM_MAP3_DWAVE_001",
+      "identity_row_id": "RP5C_IDENTITY_00000055",
+      "library_version": "ImmutableQKUFormulaLibraryV1",
+      "market_family_refs": [
+        "SECURITIES_FINANCING_AND_REPO"
+      ],
+      "market_scope_or_platform_creates_trading_authority_flag": false,
+      "notes": "Authoritative market applicability row keyed by immutable identity id; this is not a duplicate formula/QKU object.",
+      "ontology_category": "unknown_needs_review",
+      "platform_refs": [],
+      "qku_family": "qku_unknown_needs_review",
+      "qku_id": null,
+      "qku_market_applicability_row_id": "RP5C_QKU_MARKET_APPLICABILITY_00000017",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000161",
+      "stage_access_mode_by_profile": {
+        "STAGE1_PREDICTION_MARKETS": "INACTIVE_FOR_STAGE"
+      },
+      "stage_profile_refs": []
+    },
+    {
+      "applicability_matrix_version": "QKUMarketApplicabilityMatrixV1",
+      "applicability_mode": "CROSS_MARKET_SHARED",
+      "blocker_codes": [],
+      "default_compute_from_universal_library_flag": false,
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000018"
+      ],
+      "formula_family": "formulaplugincontractv1",
+      "formula_id": "FORM_MAP3_DWAVE_001",
+      "identity_row_id": "RP5C_IDENTITY_00000059",
+      "library_version": "ImmutableQKUFormulaLibraryV1",
+      "market_family_refs": [
+        "PREDICTION_MARKETS",
+        "EQUITIES_AND_ETFS",
+        "CRYPTO_SPOT",
+        "CRYPTO_DERIVATIVES",
+        "LISTED_OPTIONS",
+        "EXCHANGE_TRADED_FUTURES_AND_COMMODITIES",
+        "MACRO_FX_EVENT",
+        "SECURITIES_FINANCING_AND_REPO",
+        "FIXED_INCOME_RFQ",
+        "CROSS_MARKET_RELATIVE_VALUE"
+      ],
+      "market_scope_or_platform_creates_trading_authority_flag": false,
+      "notes": "Authoritative market applicability row keyed by immutable identity id; this is not a duplicate formula/QKU object.",
+      "ontology_category": "quantum_objective_constraint",
+      "platform_refs": [
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "qku_family": "qku_formulaplugincontractv1",
+      "qku_id": null,
+      "qku_market_applicability_row_id": "RP5C_QKU_MARKET_APPLICABILITY_00000018",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000011",
+      "stage_access_mode_by_profile": {
+        "STAGE1_PREDICTION_MARKETS": "AVAILABLE_ON_DEMAND"
+      },
+      "stage_profile_refs": [
+        "STAGE1_PREDICTION_MARKETS"
+      ]
+    },
+    {
+      "applicability_matrix_version": "QKUMarketApplicabilityMatrixV1",
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
+      "blocker_codes": [
+        "NEEDS_FORMULA_EXPRESSION_REF",
+        "NEEDS_MARKET_FAMILY_CLASSIFICATION",
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION",
+        "NEEDS_ONTOLOGY_CLASSIFICATION"
+      ],
+      "default_compute_from_universal_library_flag": false,
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000019"
+      ],
+      "formula_family": "unit_dimension_invariant",
+      "formula_id": "FORM_MAP3_DWAVE_001",
+      "identity_row_id": "RP5C_IDENTITY_00000060",
+      "library_version": "ImmutableQKUFormulaLibraryV1",
+      "market_family_refs": [],
+      "market_scope_or_platform_creates_trading_authority_flag": false,
+      "notes": "Authoritative market applicability row keyed by immutable identity id; this is not a duplicate formula/QKU object.",
+      "ontology_category": "unknown_needs_review",
+      "platform_refs": [],
+      "qku_family": "qku_unit_dimension_invariant",
+      "qku_id": null,
+      "qku_market_applicability_row_id": "RP5C_QKU_MARKET_APPLICABILITY_00000019",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000015",
+      "stage_access_mode_by_profile": {
+        "STAGE1_PREDICTION_MARKETS": "UNKNOWN_NEEDS_REVIEW"
+      },
+      "stage_profile_refs": []
+    },
+    {
+      "applicability_matrix_version": "QKUMarketApplicabilityMatrixV1",
+      "applicability_mode": "CROSS_MARKET_SHARED",
+      "blocker_codes": [
+        "NEEDS_FORMULA_EXPRESSION_REF"
+      ],
+      "default_compute_from_universal_library_flag": false,
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000020"
+      ],
+      "formula_family": "quantum_objective_coefficient",
+      "formula_id": "FORM_MAP3_DWAVE_001",
+      "identity_row_id": "RP5C_IDENTITY_00000066",
+      "library_version": "ImmutableQKUFormulaLibraryV1",
+      "market_family_refs": [
+        "PREDICTION_MARKETS",
+        "EQUITIES_AND_ETFS",
+        "CRYPTO_SPOT",
+        "CRYPTO_DERIVATIVES",
+        "LISTED_OPTIONS",
+        "EXCHANGE_TRADED_FUTURES_AND_COMMODITIES",
+        "MACRO_FX_EVENT",
+        "SECURITIES_FINANCING_AND_REPO",
+        "FIXED_INCOME_RFQ",
+        "CROSS_MARKET_RELATIVE_VALUE"
+      ],
+      "market_scope_or_platform_creates_trading_authority_flag": false,
+      "notes": "Authoritative market applicability row keyed by immutable identity id; this is not a duplicate formula/QKU object.",
+      "ontology_category": "calibration",
+      "platform_refs": [
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "qku_family": "qku_quantum_objective_coefficient",
+      "qku_id": null,
+      "qku_market_applicability_row_id": "RP5C_QKU_MARKET_APPLICABILITY_00000020",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000257",
+      "stage_access_mode_by_profile": {
+        "STAGE1_PREDICTION_MARKETS": "AVAILABLE_ON_DEMAND"
+      },
+      "stage_profile_refs": [
+        "STAGE1_PREDICTION_MARKETS"
+      ]
+    },
+    {
+      "applicability_matrix_version": "QKUMarketApplicabilityMatrixV1",
+      "applicability_mode": "MARKET_SPECIFIC",
+      "blocker_codes": [
+        "NEEDS_FAMILY_CLASSIFICATION",
+        "NEEDS_FORMULA_EXPRESSION_REF",
+        "NEEDS_ONTOLOGY_CLASSIFICATION"
+      ],
+      "default_compute_from_universal_library_flag": false,
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000021"
+      ],
+      "formula_family": "unknown_needs_review",
+      "formula_id": "FORM_MAP3_DWAVE_002",
+      "identity_row_id": "RP5C_IDENTITY_00000071",
+      "library_version": "ImmutableQKUFormulaLibraryV1",
+      "market_family_refs": [
+        "SECURITIES_FINANCING_AND_REPO"
+      ],
+      "market_scope_or_platform_creates_trading_authority_flag": false,
+      "notes": "Authoritative market applicability row keyed by immutable identity id; this is not a duplicate formula/QKU object.",
+      "ontology_category": "unknown_needs_review",
+      "platform_refs": [],
+      "qku_family": "qku_unknown_needs_review",
+      "qku_id": null,
+      "qku_market_applicability_row_id": "RP5C_QKU_MARKET_APPLICABILITY_00000021",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000161",
+      "stage_access_mode_by_profile": {
+        "STAGE1_PREDICTION_MARKETS": "INACTIVE_FOR_STAGE"
+      },
+      "stage_profile_refs": []
+    },
+    {
+      "applicability_matrix_version": "QKUMarketApplicabilityMatrixV1",
+      "applicability_mode": "CROSS_MARKET_SHARED",
+      "blocker_codes": [],
+      "default_compute_from_universal_library_flag": false,
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000022"
+      ],
+      "formula_family": "quantum_forward_optimization",
+      "formula_id": "FORM_MAP3_DWAVE_002",
+      "identity_row_id": "RP5C_IDENTITY_00000072",
+      "library_version": "ImmutableQKUFormulaLibraryV1",
+      "market_family_refs": [
+        "PREDICTION_MARKETS",
+        "EQUITIES_AND_ETFS",
+        "CRYPTO_SPOT",
+        "CRYPTO_DERIVATIVES",
+        "LISTED_OPTIONS",
+        "EXCHANGE_TRADED_FUTURES_AND_COMMODITIES",
+        "MACRO_FX_EVENT",
+        "SECURITIES_FINANCING_AND_REPO",
+        "FIXED_INCOME_RFQ",
+        "CROSS_MARKET_RELATIVE_VALUE"
+      ],
+      "market_scope_or_platform_creates_trading_authority_flag": false,
+      "notes": "Authoritative market applicability row keyed by immutable identity id; this is not a duplicate formula/QKU object.",
+      "ontology_category": "quantum_objective_constraint",
+      "platform_refs": [
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "qku_family": "qku_quantum_forward_optimization",
+      "qku_id": null,
+      "qku_market_applicability_row_id": "RP5C_QKU_MARKET_APPLICABILITY_00000022",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000011",
+      "stage_access_mode_by_profile": {
+        "STAGE1_PREDICTION_MARKETS": "AVAILABLE_ON_DEMAND"
+      },
+      "stage_profile_refs": [
+        "STAGE1_PREDICTION_MARKETS"
+      ]
+    },
+    {
+      "applicability_matrix_version": "QKUMarketApplicabilityMatrixV1",
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
+      "blocker_codes": [
+        "NEEDS_FORMULA_EXPRESSION_REF",
+        "NEEDS_MARKET_FAMILY_CLASSIFICATION",
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION",
+        "NEEDS_ONTOLOGY_CLASSIFICATION"
+      ],
+      "default_compute_from_universal_library_flag": false,
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000023"
+      ],
+      "formula_family": "unit_dimension_invariant",
+      "formula_id": "FORM_MAP3_DWAVE_002",
+      "identity_row_id": "RP5C_IDENTITY_00000073",
+      "library_version": "ImmutableQKUFormulaLibraryV1",
+      "market_family_refs": [],
+      "market_scope_or_platform_creates_trading_authority_flag": false,
+      "notes": "Authoritative market applicability row keyed by immutable identity id; this is not a duplicate formula/QKU object.",
+      "ontology_category": "unknown_needs_review",
+      "platform_refs": [],
+      "qku_family": "qku_unit_dimension_invariant",
+      "qku_id": null,
+      "qku_market_applicability_row_id": "RP5C_QKU_MARKET_APPLICABILITY_00000023",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000015",
+      "stage_access_mode_by_profile": {
+        "STAGE1_PREDICTION_MARKETS": "UNKNOWN_NEEDS_REVIEW"
+      },
+      "stage_profile_refs": []
+    },
+    {
+      "applicability_matrix_version": "QKUMarketApplicabilityMatrixV1",
+      "applicability_mode": "CROSS_MARKET_SHARED",
+      "blocker_codes": [
+        "NEEDS_FORMULA_EXPRESSION_REF"
+      ],
+      "default_compute_from_universal_library_flag": false,
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000024"
+      ],
+      "formula_family": "quantum_objective_coefficient",
+      "formula_id": "FORM_MAP3_DWAVE_002",
+      "identity_row_id": "RP5C_IDENTITY_00000083",
+      "library_version": "ImmutableQKUFormulaLibraryV1",
+      "market_family_refs": [
+        "PREDICTION_MARKETS",
+        "EQUITIES_AND_ETFS",
+        "CRYPTO_SPOT",
+        "CRYPTO_DERIVATIVES",
+        "LISTED_OPTIONS",
+        "EXCHANGE_TRADED_FUTURES_AND_COMMODITIES",
+        "MACRO_FX_EVENT",
+        "SECURITIES_FINANCING_AND_REPO",
+        "FIXED_INCOME_RFQ",
+        "CROSS_MARKET_RELATIVE_VALUE"
+      ],
+      "market_scope_or_platform_creates_trading_authority_flag": false,
+      "notes": "Authoritative market applicability row keyed by immutable identity id; this is not a duplicate formula/QKU object.",
+      "ontology_category": "quantum_objective_constraint",
+      "platform_refs": [
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "qku_family": "qku_quantum_objective_coefficient",
+      "qku_id": null,
+      "qku_market_applicability_row_id": "RP5C_QKU_MARKET_APPLICABILITY_00000024",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000269",
+      "stage_access_mode_by_profile": {
+        "STAGE1_PREDICTION_MARKETS": "AVAILABLE_ON_DEMAND"
+      },
+      "stage_profile_refs": [
+        "STAGE1_PREDICTION_MARKETS"
+      ]
+    },
+    {
+      "applicability_matrix_version": "QKUMarketApplicabilityMatrixV1",
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
+      "blocker_codes": [
+        "NEEDS_FAMILY_CLASSIFICATION",
+        "NEEDS_FORMULA_EXPRESSION_REF",
+        "NEEDS_MARKET_FAMILY_CLASSIFICATION",
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION",
+        "NEEDS_ONTOLOGY_CLASSIFICATION"
+      ],
+      "default_compute_from_universal_library_flag": false,
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000025"
+      ],
+      "formula_family": "unknown_needs_review",
+      "formula_id": "FORM_MAP3_FDR_BH_001",
+      "identity_row_id": "RP5C_IDENTITY_00000084",
+      "library_version": "ImmutableQKUFormulaLibraryV1",
+      "market_family_refs": [],
+      "market_scope_or_platform_creates_trading_authority_flag": false,
+      "notes": "Authoritative market applicability row keyed by immutable identity id; this is not a duplicate formula/QKU object.",
+      "ontology_category": "unknown_needs_review",
+      "platform_refs": [],
+      "qku_family": "qku_unknown_needs_review",
+      "qku_id": null,
+      "qku_market_applicability_row_id": "RP5C_QKU_MARKET_APPLICABILITY_00000025",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000239",
+      "stage_access_mode_by_profile": {
+        "STAGE1_PREDICTION_MARKETS": "UNKNOWN_NEEDS_REVIEW"
+      },
+      "stage_profile_refs": []
+    }
+  ],
+  "report_version": "PR168-RP5C-v1.0",
+  "required_reader_functions": [
+    "load_library",
+    "list_qkus",
+    "list_formulas",
+    "get_qku",
+    "get_formula",
+    "query_ids",
+    "resolve_stage_agent_universe",
+    "load_rows"
+  ],
+  "rows_ref": "docs/master_plan/generated/rp5c/qku_market_applicability_matrix.jsonl",
+  "runtime_cash_receipt_count": 0,
+  "runtime_stack_generation_count": 0,
+  "silent_skipped_input_artifact_count": 0,
+  "source_truth_authority_created_count": 0,
+  "stack_combination_materialization_count": 0,
+  "stage1_default_full_universe_compute_route_count": 0,
+  "stage_agent_resolver_row_count": 24,
+  "stage_available_on_demand_count_max": 10,
+  "stage_available_on_demand_count_min": 10,
+  "stage_computation_universe_view_count": 3,
+  "stage_default_compute_count_max": 290,
+  "stage_default_compute_count_min": 223,
+  "trade_simulation_count": 0
+}

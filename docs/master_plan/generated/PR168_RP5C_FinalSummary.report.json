@@ -3,6 +3,13 @@
   "agent_responsibility_group_count": 14,
   "all_hard_zero_counters_zero_flag": true,
   "archived_file_count": 0,
+  "authoritative_central_layer_count": 4,
+  "authoritative_central_layer_shards": [
+    "immutable_qku_formula_library",
+    "qku_market_applicability_matrix",
+    "market_stage_activation_profile_registry",
+    "agent_qku_access_policy_registry"
+  ],
   "backslash_only_path_leak_count": 0,
   "champion_authority_created_count": 0,
   "connector_semantic_binding_count": 0,
@@ -11,7 +18,7 @@
     "absolute_local_path_leak_count": 0,
     "backslash_only_path_leak_count": 0,
     "generated_path_case_collision_count": 0,
-    "generated_path_count": 87
+    "generated_path_count": 107
   },
   "dedupe_counts": {
     "CANONICAL_REPRESENTATIVE_PRESERVED": 9949,
@@ -19,6 +26,7 @@
   },
   "deleted_file_count": 0,
   "derived_route_resolution_count": 10189,
+  "derived_views_duplicate_canonical_object_count": 0,
   "dormant_qku_deleted_count": 0,
   "dormant_qku_global_ban_count": 0,
   "family_registry_counts": {
@@ -73,8 +81,9 @@
     "stage1_default_full_universe_compute_route_count": 0,
     "trade_simulation_count": 0
   },
+  "independent_full_library_copy_count": 0,
   "input_artifact_counts": {
-    "discovery_elapsed_seconds_rounded": 0.033,
+    "discovery_elapsed_seconds_rounded": 0.035,
     "found_input_artifact_count": 272,
     "input_artifact_count": 272,
     "inspected_input_roots": [
@@ -97,6 +106,36 @@
   },
   "live_order_authority_created_count": 0,
   "logical_report_id": "PR168_RP5C_FinalSummary",
+  "machine_consumable_library_access_summary": {
+    "agent_computation_universe_view_count": 24,
+    "authoritative_central_layer_count": 4,
+    "authoritative_central_layer_shards": [
+      "immutable_qku_formula_library.jsonl",
+      "qku_market_applicability_matrix.jsonl",
+      "market_stage_activation_profile_registry.jsonl",
+      "agent_qku_access_policy_registry.jsonl"
+    ],
+    "derived_views_duplicate_canonical_object_count": 0,
+    "library_query_receipt_count": 24,
+    "machine_consumable_library_reader_ref": "tools/pr168_rp5c_library_reader.py",
+    "reader_function_names": [
+      "load_library",
+      "list_qkus",
+      "list_formulas",
+      "get_qku",
+      "get_formula",
+      "query_ids",
+      "resolve_stage_agent_universe",
+      "load_rows"
+    ],
+    "stage1_default_full_universe_compute_route_count": 0,
+    "stage_agent_resolver_row_count": 24,
+    "stage_available_on_demand_count_max": 10,
+    "stage_available_on_demand_count_min": 10,
+    "stage_computation_universe_view_count": 3,
+    "stage_default_compute_count_max": 290,
+    "stage_default_compute_count_min": 223
+  },
   "manual_per_qku_hardcoded_agent_assignment_count": 0,
   "market_scope_registry_counts": {
     "market_scope_registry_row_count": 11
@@ -112,7 +151,7 @@
   },
   "no_orphan_generated_surface_proof": {
     "orphan_generated_shard_count": 0,
-    "proof_row_count": 60
+    "proof_row_count": 72
   },
   "no_orphan_identity_proof": {
     "orphan_identity_count": 0,
@@ -123,6 +162,7 @@
     "proof_row_count": 272
   },
   "non_prediction_market_qku_stage1_active_count": 0,
+  "only_four_authoritative_central_layers_flag": true,
   "ontology_registry_counts": {
     "formula_ontology_row_count": 10188,
     "ontology_role_registry_row_count": 14
@@ -153,6 +193,13 @@
     "agent_responsibility_group_count": 14,
     "all_hard_zero_counters_zero_flag": true,
     "archived_file_count": 0,
+    "authoritative_central_layer_count": 4,
+    "authoritative_central_layer_shards": [
+      "immutable_qku_formula_library",
+      "qku_market_applicability_matrix",
+      "market_stage_activation_profile_registry",
+      "agent_qku_access_policy_registry"
+    ],
     "backslash_only_path_leak_count": 0,
     "champion_authority_created_count": 0,
     "connector_semantic_binding_count": 0,
@@ -160,7 +207,7 @@
       "absolute_local_path_leak_count": 0,
       "backslash_only_path_leak_count": 0,
       "generated_path_case_collision_count": 0,
-      "generated_path_count": 87
+      "generated_path_count": 107
     },
     "dedupe_counts": {
       "CANONICAL_REPRESENTATIVE_PRESERVED": 9949,
@@ -168,6 +215,7 @@
     },
     "deleted_file_count": 0,
     "derived_route_resolution_count": 10189,
+    "derived_views_duplicate_canonical_object_count": 0,
     "dormant_qku_deleted_count": 0,
     "dormant_qku_global_ban_count": 0,
     "family_registry_counts": {
@@ -179,8 +227,9 @@
     "generated_path_case_collision_count": 0,
     "global_formula_ban_count": 0,
     "global_qku_ban_count": 0,
+    "independent_full_library_copy_count": 0,
     "input_artifact_counts": {
-      "discovery_elapsed_seconds_rounded": 0.033,
+      "discovery_elapsed_seconds_rounded": 0.035,
       "found_input_artifact_count": 272,
       "input_artifact_count": 272,
       "inspected_input_roots": [
@@ -202,6 +251,36 @@
       "immutable_qku_library_row_count": 9791
     },
     "live_order_authority_created_count": 0,
+    "machine_consumable_library_access_summary": {
+      "agent_computation_universe_view_count": 24,
+      "authoritative_central_layer_count": 4,
+      "authoritative_central_layer_shards": [
+        "immutable_qku_formula_library.jsonl",
+        "qku_market_applicability_matrix.jsonl",
+        "market_stage_activation_profile_registry.jsonl",
+        "agent_qku_access_policy_registry.jsonl"
+      ],
+      "derived_views_duplicate_canonical_object_count": 0,
+      "library_query_receipt_count": 24,
+      "machine_consumable_library_reader_ref": "tools/pr168_rp5c_library_reader.py",
+      "reader_function_names": [
+        "load_library",
+        "list_qkus",
+        "list_formulas",
+        "get_qku",
+        "get_formula",
+        "query_ids",
+        "resolve_stage_agent_universe",
+        "load_rows"
+      ],
+      "stage1_default_full_universe_compute_route_count": 0,
+      "stage_agent_resolver_row_count": 24,
+      "stage_available_on_demand_count_max": 10,
+      "stage_available_on_demand_count_min": 10,
+      "stage_computation_universe_view_count": 3,
+      "stage_default_compute_count_max": 290,
+      "stage_default_compute_count_min": 223
+    },
     "manual_per_qku_hardcoded_agent_assignment_count": 0,
     "market_scope_registry_counts": {
       "market_scope_registry_row_count": 11
@@ -216,7 +295,7 @@
     },
     "no_orphan_generated_surface_proof": {
       "orphan_generated_shard_count": 0,
-      "proof_row_count": 60
+      "proof_row_count": 72
     },
     "no_orphan_identity_proof": {
       "orphan_identity_count": 0,
@@ -227,6 +306,7 @@
       "proof_row_count": 272
     },
     "non_prediction_market_qku_stage1_active_count": 0,
+    "only_four_authoritative_central_layers_flag": true,
     "ontology_registry_counts": {
       "formula_ontology_row_count": 10188,
       "ontology_role_registry_row_count": 14
@@ -260,7 +340,7 @@
     "runtime_cash_receipt_count": 0,
     "runtime_stack_generation_count": 0,
     "scan_performance": {
-      "elapsed_seconds_rounded": 9.452,
+      "elapsed_seconds_rounded": 9.617,
       "records_scanned_count": 184786,
       "records_with_identity_count": 182801
     },
@@ -338,7 +418,7 @@
   "runtime_cash_receipt_count": 0,
   "runtime_stack_generation_count": 0,
   "scan_performance": {
-    "elapsed_seconds_rounded": 9.452,
+    "elapsed_seconds_rounded": 9.617,
     "records_scanned_count": 184786,
     "records_with_identity_count": 182801
   },

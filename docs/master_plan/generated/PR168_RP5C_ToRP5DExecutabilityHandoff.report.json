@@ -61,6 +61,7 @@
   "launch_readiness_authority_created_count": 0,
   "live_order_authority_created_count": 0,
   "logical_report_id": "PR168_RP5C_ToRP5DExecutabilityHandoff",
+  "machine_library_reader_ref": "tools/pr168_rp5c_library_reader.py",
   "manifest_ref": "docs/master_plan/generated/rp5c/rp5d_executability_handoff.manifest.json",
   "manual_per_qku_hardcoded_agent_assignment_count": 0,
   "master_plan_content_deleted_or_shortened_count": 0,
@@ -76,6 +77,7 @@
   "physical_filename": "PR168_RP5C_ToRP5DExecutabilityHandoff.report.json",
   "private_state_fetch_count": 0,
   "qku_identity_deleted_count": 0,
+  "qku_market_applicability_matrix_row_count": 10189,
   "qopt_batch_count": 0,
   "qtt_sha_or_atomicrows_hash_authority_count": 0,
   "quantum_advantage_claim_count": 0,
@@ -84,6 +86,7 @@
   "raw_legacy_direct_agent_consumer_count": 0,
   "records": [
     {
+      "applicability_mode": "MARKET_SPECIFIC",
       "blocker_codes": [
         "NEEDS_FAMILY_CLASSIFICATION",
         "NEEDS_FORMULA_EXPRESSION_REF",
@@ -100,11 +103,19 @@
       ],
       "formula_id": "FORMULA_QKU",
       "identity_row_id": "RP5C_IDENTITY_00000001",
+      "machine_library_reader_ref": "tools/pr168_rp5c_library_reader.py",
+      "master_plan_market_family_refs": [
+        "SECURITIES_FINANCING_AND_REPO"
+      ],
       "no_executability_tier_decided_flag": true,
       "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000001"
+      ],
       "row_id": "RP5C_RP5D_HANDOFF_00000001",
       "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "stage1_access_mode": "INACTIVE_FOR_STAGE",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000001"
       ],
@@ -114,6 +125,7 @@
       "stage1_seed_inclusion_flag": false
     },
     {
+      "applicability_mode": "MARKET_SPECIFIC",
       "blocker_codes": [
         "NEEDS_FORMULA_EXPRESSION_REF",
         "NEEDS_ONTOLOGY_CLASSIFICATION"
@@ -129,11 +141,19 @@
       ],
       "formula_id": "FORMULA_REPAIR",
       "identity_row_id": "RP5C_IDENTITY_00000002",
+      "machine_library_reader_ref": "tools/pr168_rp5c_library_reader.py",
+      "master_plan_market_family_refs": [
+        "SECURITIES_FINANCING_AND_REPO"
+      ],
       "no_executability_tier_decided_flag": true,
       "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000002"
+      ],
       "row_id": "RP5C_RP5D_HANDOFF_00000002",
       "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "stage1_access_mode": "INACTIVE_FOR_STAGE",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000002"
       ],
@@ -143,6 +163,7 @@
       "stage1_seed_inclusion_flag": false
     },
     {
+      "applicability_mode": "MARKET_SPECIFIC",
       "blocker_codes": [
         "NEEDS_FORMULA_EXPRESSION_REF",
         "NEEDS_ONTOLOGY_CLASSIFICATION"
@@ -158,11 +179,19 @@
       ],
       "formula_id": "FORMULA_REPAIR_SEMANTIC_RISK",
       "identity_row_id": "RP5C_IDENTITY_00000003",
+      "machine_library_reader_ref": "tools/pr168_rp5c_library_reader.py",
+      "master_plan_market_family_refs": [
+        "SECURITIES_FINANCING_AND_REPO"
+      ],
       "no_executability_tier_decided_flag": true,
       "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000003"
+      ],
       "row_id": "RP5C_RP5D_HANDOFF_00000003",
       "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "stage1_access_mode": "INACTIVE_FOR_STAGE",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000003"
       ],
@@ -172,6 +201,7 @@
       "stage1_seed_inclusion_flag": false
     },
     {
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
         "NEEDS_FAMILY_CLASSIFICATION",
         "NEEDS_FORMULA_EXPRESSION_REF",
@@ -189,11 +219,17 @@
       ],
       "formula_id": "FORM_MAP3_CALIB_BRIER_001",
       "identity_row_id": "RP5C_IDENTITY_00000007",
+      "machine_library_reader_ref": "tools/pr168_rp5c_library_reader.py",
+      "master_plan_market_family_refs": [],
       "no_executability_tier_decided_flag": true,
       "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000004"
+      ],
       "row_id": "RP5C_RP5D_HANDOFF_00000004",
       "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000004"
       ],
@@ -203,6 +239,7 @@
       "stage1_seed_inclusion_flag": false
     },
     {
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
         "NEEDS_MARKET_SCOPE_CLASSIFICATION"
       ],
@@ -217,11 +254,17 @@
       ],
       "formula_id": "FORM_MAP3_CALIB_BRIER_001",
       "identity_row_id": "RP5C_IDENTITY_00000010",
+      "machine_library_reader_ref": "tools/pr168_rp5c_library_reader.py",
+      "master_plan_market_family_refs": [],
       "no_executability_tier_decided_flag": true,
       "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000005"
+      ],
       "row_id": "RP5C_RP5D_HANDOFF_00000005",
       "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000005"
       ],
@@ -231,6 +274,7 @@
       "stage1_seed_inclusion_flag": false
     },
     {
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
         "NEEDS_MARKET_SCOPE_CLASSIFICATION"
       ],
@@ -245,11 +289,17 @@
       ],
       "formula_id": "FORM_MAP3_CALIB_BRIER_001",
       "identity_row_id": "RP5C_IDENTITY_00000011",
+      "machine_library_reader_ref": "tools/pr168_rp5c_library_reader.py",
+      "master_plan_market_family_refs": [],
       "no_executability_tier_decided_flag": true,
       "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000006"
+      ],
       "row_id": "RP5C_RP5D_HANDOFF_00000006",
       "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000006"
       ],
@@ -259,6 +309,7 @@
       "stage1_seed_inclusion_flag": false
     },
     {
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
         "NEEDS_FORMULA_EXPRESSION_REF",
         "NEEDS_MARKET_SCOPE_CLASSIFICATION"
@@ -274,11 +325,17 @@
       ],
       "formula_id": "FORM_MAP3_CALIB_BRIER_001",
       "identity_row_id": "RP5C_IDENTITY_00000012",
+      "machine_library_reader_ref": "tools/pr168_rp5c_library_reader.py",
+      "master_plan_market_family_refs": [],
       "no_executability_tier_decided_flag": true,
       "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000007"
+      ],
       "row_id": "RP5C_RP5D_HANDOFF_00000007",
       "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000007"
       ],
@@ -288,6 +345,7 @@
       "stage1_seed_inclusion_flag": false
     },
     {
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
         "NEEDS_FORMULA_EXPRESSION_REF",
         "NEEDS_MARKET_SCOPE_CLASSIFICATION"
@@ -303,11 +361,17 @@
       ],
       "formula_id": "FORM_MAP3_CALIB_BRIER_001",
       "identity_row_id": "RP5C_IDENTITY_00000019",
+      "machine_library_reader_ref": "tools/pr168_rp5c_library_reader.py",
+      "master_plan_market_family_refs": [],
       "no_executability_tier_decided_flag": true,
       "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000008"
+      ],
       "row_id": "RP5C_RP5D_HANDOFF_00000008",
       "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000008"
       ],
@@ -317,6 +381,7 @@
       "stage1_seed_inclusion_flag": false
     },
     {
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
         "NEEDS_FAMILY_CLASSIFICATION",
         "NEEDS_FORMULA_EXPRESSION_REF",
@@ -334,11 +399,17 @@
       ],
       "formula_id": "FORM_MAP3_CALIB_ECE_001",
       "identity_row_id": "RP5C_IDENTITY_00000024",
+      "machine_library_reader_ref": "tools/pr168_rp5c_library_reader.py",
+      "master_plan_market_family_refs": [],
       "no_executability_tier_decided_flag": true,
       "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000009"
+      ],
       "row_id": "RP5C_RP5D_HANDOFF_00000009",
       "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000009"
       ],
@@ -348,6 +419,7 @@
       "stage1_seed_inclusion_flag": false
     },
     {
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
         "NEEDS_MARKET_SCOPE_CLASSIFICATION"
       ],
@@ -362,11 +434,17 @@
       ],
       "formula_id": "FORM_MAP3_CALIB_ECE_001",
       "identity_row_id": "RP5C_IDENTITY_00000027",
+      "machine_library_reader_ref": "tools/pr168_rp5c_library_reader.py",
+      "master_plan_market_family_refs": [],
       "no_executability_tier_decided_flag": true,
       "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000010"
+      ],
       "row_id": "RP5C_RP5D_HANDOFF_00000010",
       "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000010"
       ],
@@ -376,6 +454,7 @@
       "stage1_seed_inclusion_flag": false
     },
     {
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
         "NEEDS_MARKET_SCOPE_CLASSIFICATION"
       ],
@@ -390,11 +469,17 @@
       ],
       "formula_id": "FORM_MAP3_CALIB_ECE_001",
       "identity_row_id": "RP5C_IDENTITY_00000028",
+      "machine_library_reader_ref": "tools/pr168_rp5c_library_reader.py",
+      "master_plan_market_family_refs": [],
       "no_executability_tier_decided_flag": true,
       "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000011"
+      ],
       "row_id": "RP5C_RP5D_HANDOFF_00000011",
       "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000011"
       ],
@@ -404,6 +489,7 @@
       "stage1_seed_inclusion_flag": false
     },
     {
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
         "NEEDS_FORMULA_EXPRESSION_REF",
         "NEEDS_MARKET_SCOPE_CLASSIFICATION"
@@ -419,11 +505,17 @@
       ],
       "formula_id": "FORM_MAP3_CALIB_ECE_001",
       "identity_row_id": "RP5C_IDENTITY_00000029",
+      "machine_library_reader_ref": "tools/pr168_rp5c_library_reader.py",
+      "master_plan_market_family_refs": [],
       "no_executability_tier_decided_flag": true,
       "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000012"
+      ],
       "row_id": "RP5C_RP5D_HANDOFF_00000012",
       "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000012"
       ],
@@ -433,6 +525,7 @@
       "stage1_seed_inclusion_flag": false
     },
     {
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
         "NEEDS_FORMULA_EXPRESSION_REF",
         "NEEDS_MARKET_SCOPE_CLASSIFICATION"
@@ -448,11 +541,17 @@
       ],
       "formula_id": "FORM_MAP3_CALIB_ECE_001",
       "identity_row_id": "RP5C_IDENTITY_00000036",
+      "machine_library_reader_ref": "tools/pr168_rp5c_library_reader.py",
+      "master_plan_market_family_refs": [],
       "no_executability_tier_decided_flag": true,
       "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000013"
+      ],
       "row_id": "RP5C_RP5D_HANDOFF_00000013",
       "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000013"
       ],
@@ -462,6 +561,7 @@
       "stage1_seed_inclusion_flag": false
     },
     {
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
         "NEEDS_MARKET_SCOPE_CLASSIFICATION"
       ],
@@ -476,11 +576,17 @@
       ],
       "formula_id": "FORM_MAP3_CALIB_LOGLOSS_001",
       "identity_row_id": "RP5C_IDENTITY_00000041",
+      "machine_library_reader_ref": "tools/pr168_rp5c_library_reader.py",
+      "master_plan_market_family_refs": [],
       "no_executability_tier_decided_flag": true,
       "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000014"
+      ],
       "row_id": "RP5C_RP5D_HANDOFF_00000014",
       "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000014"
       ],
@@ -490,6 +596,7 @@
       "stage1_seed_inclusion_flag": false
     },
     {
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
         "NEEDS_FORMULA_EXPRESSION_REF",
         "NEEDS_MARKET_SCOPE_CLASSIFICATION",
@@ -506,11 +613,17 @@
       ],
       "formula_id": "FORM_MAP3_CALIB_LOGLOSS_001",
       "identity_row_id": "RP5C_IDENTITY_00000043",
+      "machine_library_reader_ref": "tools/pr168_rp5c_library_reader.py",
+      "master_plan_market_family_refs": [],
       "no_executability_tier_decided_flag": true,
       "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000015"
+      ],
       "row_id": "RP5C_RP5D_HANDOFF_00000015",
       "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000015"
       ],
@@ -520,6 +633,7 @@
       "stage1_seed_inclusion_flag": false
     },
     {
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
         "NEEDS_FORMULA_EXPRESSION_REF",
         "NEEDS_MARKET_SCOPE_CLASSIFICATION"
@@ -535,11 +649,17 @@
       ],
       "formula_id": "FORM_MAP3_CALIB_LOGLOSS_001",
       "identity_row_id": "RP5C_IDENTITY_00000054",
+      "machine_library_reader_ref": "tools/pr168_rp5c_library_reader.py",
+      "master_plan_market_family_refs": [],
       "no_executability_tier_decided_flag": true,
       "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000016"
+      ],
       "row_id": "RP5C_RP5D_HANDOFF_00000016",
       "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000016"
       ],
@@ -549,6 +669,7 @@
       "stage1_seed_inclusion_flag": false
     },
     {
+      "applicability_mode": "MARKET_SPECIFIC",
       "blocker_codes": [
         "NEEDS_FAMILY_CLASSIFICATION",
         "NEEDS_FORMULA_EXPRESSION_REF",
@@ -565,11 +686,19 @@
       ],
       "formula_id": "FORM_MAP3_DWAVE_001",
       "identity_row_id": "RP5C_IDENTITY_00000055",
+      "machine_library_reader_ref": "tools/pr168_rp5c_library_reader.py",
+      "master_plan_market_family_refs": [
+        "SECURITIES_FINANCING_AND_REPO"
+      ],
       "no_executability_tier_decided_flag": true,
       "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000017"
+      ],
       "row_id": "RP5C_RP5D_HANDOFF_00000017",
       "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "stage1_access_mode": "INACTIVE_FOR_STAGE",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000017"
       ],
@@ -579,6 +708,7 @@
       "stage1_seed_inclusion_flag": false
     },
     {
+      "applicability_mode": "CROSS_MARKET_SHARED",
       "blocker_codes": [],
       "derived_route_resolution_refs": [
         "RP5C_ROUTE_RESOLUTION_00000018"
@@ -589,11 +719,28 @@
       ],
       "formula_id": "FORM_MAP3_DWAVE_001",
       "identity_row_id": "RP5C_IDENTITY_00000059",
+      "machine_library_reader_ref": "tools/pr168_rp5c_library_reader.py",
+      "master_plan_market_family_refs": [
+        "PREDICTION_MARKETS",
+        "EQUITIES_AND_ETFS",
+        "CRYPTO_SPOT",
+        "CRYPTO_DERIVATIVES",
+        "LISTED_OPTIONS",
+        "EXCHANGE_TRADED_FUTURES_AND_COMMODITIES",
+        "MACRO_FX_EVENT",
+        "SECURITIES_FINANCING_AND_REPO",
+        "FIXED_INCOME_RFQ",
+        "CROSS_MARKET_RELATIVE_VALUE"
+      ],
       "no_executability_tier_decided_flag": true,
       "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000018"
+      ],
       "row_id": "RP5C_RP5D_HANDOFF_00000018",
       "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
       "rp5d_handoff_state": "READY_FOR_RP5D_EXECUTABILITY_CLASSIFICATION",
+      "stage1_access_mode": "AVAILABLE_ON_DEMAND",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000018"
       ],
@@ -602,9 +749,10 @@
       ],
       "stage1_classification_state": "STAGE1_PREDICTION_MARKET_SUPPORTING_MARKET_AGNOSTIC",
       "stage1_dormant_future_market_flag": false,
-      "stage1_seed_inclusion_flag": true
+      "stage1_seed_inclusion_flag": false
     },
     {
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
         "NEEDS_FORMULA_EXPRESSION_REF",
         "NEEDS_MARKET_SCOPE_CLASSIFICATION",
@@ -621,11 +769,17 @@
       ],
       "formula_id": "FORM_MAP3_DWAVE_001",
       "identity_row_id": "RP5C_IDENTITY_00000060",
+      "machine_library_reader_ref": "tools/pr168_rp5c_library_reader.py",
+      "master_plan_market_family_refs": [],
       "no_executability_tier_decided_flag": true,
       "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000019"
+      ],
       "row_id": "RP5C_RP5D_HANDOFF_00000019",
       "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000019"
       ],
@@ -635,6 +789,7 @@
       "stage1_seed_inclusion_flag": false
     },
     {
+      "applicability_mode": "CROSS_MARKET_SHARED",
       "blocker_codes": [
         "NEEDS_FORMULA_EXPRESSION_REF"
       ],
@@ -647,11 +802,28 @@
       ],
       "formula_id": "FORM_MAP3_DWAVE_001",
       "identity_row_id": "RP5C_IDENTITY_00000066",
+      "machine_library_reader_ref": "tools/pr168_rp5c_library_reader.py",
+      "master_plan_market_family_refs": [
+        "PREDICTION_MARKETS",
+        "EQUITIES_AND_ETFS",
+        "CRYPTO_SPOT",
+        "CRYPTO_DERIVATIVES",
+        "LISTED_OPTIONS",
+        "EXCHANGE_TRADED_FUTURES_AND_COMMODITIES",
+        "MACRO_FX_EVENT",
+        "SECURITIES_FINANCING_AND_REPO",
+        "FIXED_INCOME_RFQ",
+        "CROSS_MARKET_RELATIVE_VALUE"
+      ],
       "no_executability_tier_decided_flag": true,
       "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000020"
+      ],
       "row_id": "RP5C_RP5D_HANDOFF_00000020",
       "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "stage1_access_mode": "AVAILABLE_ON_DEMAND",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000020"
       ],
@@ -660,9 +832,10 @@
       ],
       "stage1_classification_state": "STAGE1_PREDICTION_MARKET_SUPPORTING_MARKET_AGNOSTIC",
       "stage1_dormant_future_market_flag": false,
-      "stage1_seed_inclusion_flag": true
+      "stage1_seed_inclusion_flag": false
     },
     {
+      "applicability_mode": "MARKET_SPECIFIC",
       "blocker_codes": [
         "NEEDS_FAMILY_CLASSIFICATION",
         "NEEDS_FORMULA_EXPRESSION_REF",
@@ -679,11 +852,19 @@
       ],
       "formula_id": "FORM_MAP3_DWAVE_002",
       "identity_row_id": "RP5C_IDENTITY_00000071",
+      "machine_library_reader_ref": "tools/pr168_rp5c_library_reader.py",
+      "master_plan_market_family_refs": [
+        "SECURITIES_FINANCING_AND_REPO"
+      ],
       "no_executability_tier_decided_flag": true,
       "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000021"
+      ],
       "row_id": "RP5C_RP5D_HANDOFF_00000021",
       "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "stage1_access_mode": "INACTIVE_FOR_STAGE",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000021"
       ],
@@ -693,6 +874,7 @@
       "stage1_seed_inclusion_flag": false
     },
     {
+      "applicability_mode": "CROSS_MARKET_SHARED",
       "blocker_codes": [],
       "derived_route_resolution_refs": [
         "RP5C_ROUTE_RESOLUTION_00000022"
@@ -703,11 +885,28 @@
       ],
       "formula_id": "FORM_MAP3_DWAVE_002",
       "identity_row_id": "RP5C_IDENTITY_00000072",
+      "machine_library_reader_ref": "tools/pr168_rp5c_library_reader.py",
+      "master_plan_market_family_refs": [
+        "PREDICTION_MARKETS",
+        "EQUITIES_AND_ETFS",
+        "CRYPTO_SPOT",
+        "CRYPTO_DERIVATIVES",
+        "LISTED_OPTIONS",
+        "EXCHANGE_TRADED_FUTURES_AND_COMMODITIES",
+        "MACRO_FX_EVENT",
+        "SECURITIES_FINANCING_AND_REPO",
+        "FIXED_INCOME_RFQ",
+        "CROSS_MARKET_RELATIVE_VALUE"
+      ],
       "no_executability_tier_decided_flag": true,
       "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000022"
+      ],
       "row_id": "RP5C_RP5D_HANDOFF_00000022",
       "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
       "rp5d_handoff_state": "READY_FOR_RP5D_EXECUTABILITY_CLASSIFICATION",
+      "stage1_access_mode": "AVAILABLE_ON_DEMAND",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000022"
       ],
@@ -716,9 +915,10 @@
       ],
       "stage1_classification_state": "STAGE1_PREDICTION_MARKET_SUPPORTING_MARKET_AGNOSTIC",
       "stage1_dormant_future_market_flag": false,
-      "stage1_seed_inclusion_flag": true
+      "stage1_seed_inclusion_flag": false
     },
     {
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
         "NEEDS_FORMULA_EXPRESSION_REF",
         "NEEDS_MARKET_SCOPE_CLASSIFICATION",
@@ -735,11 +935,17 @@
       ],
       "formula_id": "FORM_MAP3_DWAVE_002",
       "identity_row_id": "RP5C_IDENTITY_00000073",
+      "machine_library_reader_ref": "tools/pr168_rp5c_library_reader.py",
+      "master_plan_market_family_refs": [],
       "no_executability_tier_decided_flag": true,
       "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000023"
+      ],
       "row_id": "RP5C_RP5D_HANDOFF_00000023",
       "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000023"
       ],
@@ -749,6 +955,7 @@
       "stage1_seed_inclusion_flag": false
     },
     {
+      "applicability_mode": "CROSS_MARKET_SHARED",
       "blocker_codes": [
         "NEEDS_FORMULA_EXPRESSION_REF"
       ],
@@ -761,11 +968,28 @@
       ],
       "formula_id": "FORM_MAP3_DWAVE_002",
       "identity_row_id": "RP5C_IDENTITY_00000083",
+      "machine_library_reader_ref": "tools/pr168_rp5c_library_reader.py",
+      "master_plan_market_family_refs": [
+        "PREDICTION_MARKETS",
+        "EQUITIES_AND_ETFS",
+        "CRYPTO_SPOT",
+        "CRYPTO_DERIVATIVES",
+        "LISTED_OPTIONS",
+        "EXCHANGE_TRADED_FUTURES_AND_COMMODITIES",
+        "MACRO_FX_EVENT",
+        "SECURITIES_FINANCING_AND_REPO",
+        "FIXED_INCOME_RFQ",
+        "CROSS_MARKET_RELATIVE_VALUE"
+      ],
       "no_executability_tier_decided_flag": true,
       "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000024"
+      ],
       "row_id": "RP5C_RP5D_HANDOFF_00000024",
       "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "stage1_access_mode": "AVAILABLE_ON_DEMAND",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000024"
       ],
@@ -774,9 +998,10 @@
       ],
       "stage1_classification_state": "STAGE1_PREDICTION_MARKET_SUPPORTING_MARKET_AGNOSTIC",
       "stage1_dormant_future_market_flag": false,
-      "stage1_seed_inclusion_flag": true
+      "stage1_seed_inclusion_flag": false
     },
     {
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
         "NEEDS_FAMILY_CLASSIFICATION",
         "NEEDS_FORMULA_EXPRESSION_REF",
@@ -794,11 +1019,17 @@
       ],
       "formula_id": "FORM_MAP3_FDR_BH_001",
       "identity_row_id": "RP5C_IDENTITY_00000084",
+      "machine_library_reader_ref": "tools/pr168_rp5c_library_reader.py",
+      "master_plan_market_family_refs": [],
       "no_executability_tier_decided_flag": true,
       "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000025"
+      ],
       "row_id": "RP5C_RP5D_HANDOFF_00000025",
       "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000025"
       ],
@@ -822,5 +1053,6 @@
   "stack_combination_materialization_count": 0,
   "stage1_default_full_universe_compute_route_count": 0,
   "stage1_seed_row_count": 540,
+  "stage_agent_resolver_row_count": 24,
   "trade_simulation_count": 0
 }
