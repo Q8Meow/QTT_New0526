@@ -1,0 +1,1009 @@
+{
+  "absolute_local_path_leak_count": 0,
+  "archived_file_count": 0,
+  "backslash_only_path_leak_count": 0,
+  "champion_authority_created_count": 0,
+  "connector_semantic_binding_count": 0,
+  "created_at_utc": "2026-06-25T00:00:00Z",
+  "deleted_file_count": 0,
+  "dormant_future_market_row_count": 8188,
+  "dormant_qku_deleted_count": 0,
+  "dormant_qku_global_ban_count": 0,
+  "formula_expression_mutation_count": 0,
+  "formula_identity_deleted_count": 0,
+  "formula_profit_ranking_count": 0,
+  "generated_path_case_collision_count": 0,
+  "global_formula_ban_count": 0,
+  "global_qku_ban_count": 0,
+  "hard_zero_counters": {
+    "absolute_local_path_leak_count": 0,
+    "archived_file_count": 0,
+    "backslash_only_path_leak_count": 0,
+    "champion_authority_created_count": 0,
+    "connector_semantic_binding_count": 0,
+    "deleted_file_count": 0,
+    "dormant_qku_deleted_count": 0,
+    "dormant_qku_global_ban_count": 0,
+    "formula_expression_mutation_count": 0,
+    "formula_identity_deleted_count": 0,
+    "formula_profit_ranking_count": 0,
+    "generated_path_case_collision_count": 0,
+    "global_formula_ban_count": 0,
+    "global_qku_ban_count": 0,
+    "launch_readiness_authority_created_count": 0,
+    "live_order_authority_created_count": 0,
+    "manual_per_qku_hardcoded_agent_assignment_count": 0,
+    "master_plan_content_deleted_or_shortened_count": 0,
+    "moved_file_count": 0,
+    "mutable_agent_ownership_embedded_as_identity_authority_count": 0,
+    "non_prediction_market_qku_stage1_active_count": 0,
+    "orphan_generated_shard_count": 0,
+    "orphan_identity_count": 0,
+    "orphan_input_report_count": 0,
+    "orphan_source_artifact_count": 0,
+    "paper_loop_runtime_count": 0,
+    "private_state_fetch_count": 0,
+    "qku_identity_deleted_count": 0,
+    "qopt_batch_count": 0,
+    "qtt_sha_or_atomicrows_hash_authority_count": 0,
+    "quantum_advantage_claim_count": 0,
+    "quantum_backend_execution_count": 0,
+    "rank4_ranking_count": 0,
+    "raw_legacy_direct_agent_consumer_count": 0,
+    "runtime_cash_receipt_count": 0,
+    "runtime_stack_generation_count": 0,
+    "silent_skipped_input_artifact_count": 0,
+    "source_truth_authority_created_count": 0,
+    "stack_combination_materialization_count": 0,
+    "stage1_default_full_universe_compute_route_count": 0,
+    "trade_simulation_count": 0
+  },
+  "launch_readiness_authority_created_count": 0,
+  "live_order_authority_created_count": 0,
+  "logical_report_id": "PR168_RP5C_ToRP5DExecutabilityHandoff",
+  "machine_library_reader_ref": "tools/pr168_rp5c_library_reader.py",
+  "manifest_ref": "docs/master_plan/generated/rp5c/rp5d_executability_handoff.manifest.json",
+  "manual_per_qku_hardcoded_agent_assignment_count": 0,
+  "master_plan_content_deleted_or_shortened_count": 0,
+  "moved_file_count": 0,
+  "mutable_agent_ownership_embedded_as_identity_authority_count": 0,
+  "no_authority_statement": "RP5C is immutable identity, provenance, classification, and derived routing preparation only. It creates no live/order/source-truth/champion/launch/quantum/hash authority and does not mutate formulas or delete identities.",
+  "non_prediction_market_qku_stage1_active_count": 0,
+  "orphan_generated_shard_count": 0,
+  "orphan_identity_count": 0,
+  "orphan_input_report_count": 0,
+  "orphan_source_artifact_count": 0,
+  "paper_loop_runtime_count": 0,
+  "physical_filename": "PR168_RP5C_ToRP5DExecutabilityHandoff.report.json",
+  "private_state_fetch_count": 0,
+  "qku_identity_deleted_count": 0,
+  "qku_market_applicability_matrix_row_count": 10189,
+  "qopt_batch_count": 0,
+  "qtt_sha_or_atomicrows_hash_authority_count": 0,
+  "quantum_advantage_claim_count": 0,
+  "quantum_backend_execution_count": 0,
+  "rank4_ranking_count": 0,
+  "raw_legacy_direct_agent_consumer_count": 0,
+  "records": [
+    {
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
+      "blocker_codes": [
+        "NEEDS_FAMILY_CLASSIFICATION",
+        "NEEDS_FORMULA_EXPRESSION_REF",
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION",
+        "NEEDS_ONTOLOGY_CLASSIFICATION"
+      ],
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000001"
+      ],
+      "dormant_future_market_qku_ledger_refs": [
+        "RP5C_DORMANT_FUTURE_MARKET_QKU_00000001"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D"
+      ],
+      "formula_id": "FORMULA_QKU",
+      "identity_row_id": "RP5C_IDENTITY_00000001",
+      "machine_library_reader_ref": "tools/pr168_rp5c_library_reader.py",
+      "master_plan_market_family_refs": [],
+      "no_executability_tier_decided_flag": true,
+      "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000001"
+      ],
+      "row_id": "RP5C_RP5D_HANDOFF_00000001",
+      "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
+      "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
+      "stage1_activation_view_refs": [
+        "RP5C_STAGE1_ACTIVATION_00000001"
+      ],
+      "stage1_agent_computation_universe_seed_refs": [],
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
+      "stage1_dormant_future_market_flag": true,
+      "stage1_seed_inclusion_flag": false
+    },
+    {
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
+      "blocker_codes": [
+        "NEEDS_FORMULA_EXPRESSION_REF",
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION",
+        "NEEDS_ONTOLOGY_CLASSIFICATION"
+      ],
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000002"
+      ],
+      "dormant_future_market_qku_ledger_refs": [
+        "RP5C_DORMANT_FUTURE_MARKET_QKU_00000002"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D"
+      ],
+      "formula_id": "FORMULA_REPAIR",
+      "identity_row_id": "RP5C_IDENTITY_00000002",
+      "machine_library_reader_ref": "tools/pr168_rp5c_library_reader.py",
+      "master_plan_market_family_refs": [],
+      "no_executability_tier_decided_flag": true,
+      "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000002"
+      ],
+      "row_id": "RP5C_RP5D_HANDOFF_00000002",
+      "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
+      "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
+      "stage1_activation_view_refs": [
+        "RP5C_STAGE1_ACTIVATION_00000002"
+      ],
+      "stage1_agent_computation_universe_seed_refs": [],
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
+      "stage1_dormant_future_market_flag": true,
+      "stage1_seed_inclusion_flag": false
+    },
+    {
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
+      "blocker_codes": [
+        "NEEDS_FORMULA_EXPRESSION_REF",
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION",
+        "NEEDS_ONTOLOGY_CLASSIFICATION"
+      ],
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000003"
+      ],
+      "dormant_future_market_qku_ledger_refs": [
+        "RP5C_DORMANT_FUTURE_MARKET_QKU_00000003"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D"
+      ],
+      "formula_id": "FORMULA_REPAIR_SEMANTIC_RISK",
+      "identity_row_id": "RP5C_IDENTITY_00000003",
+      "machine_library_reader_ref": "tools/pr168_rp5c_library_reader.py",
+      "master_plan_market_family_refs": [],
+      "no_executability_tier_decided_flag": true,
+      "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000003"
+      ],
+      "row_id": "RP5C_RP5D_HANDOFF_00000003",
+      "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
+      "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
+      "stage1_activation_view_refs": [
+        "RP5C_STAGE1_ACTIVATION_00000003"
+      ],
+      "stage1_agent_computation_universe_seed_refs": [],
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
+      "stage1_dormant_future_market_flag": true,
+      "stage1_seed_inclusion_flag": false
+    },
+    {
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
+      "blocker_codes": [
+        "NEEDS_FAMILY_CLASSIFICATION",
+        "NEEDS_FORMULA_EXPRESSION_REF",
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION",
+        "NEEDS_ONTOLOGY_CLASSIFICATION"
+      ],
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000004"
+      ],
+      "dormant_future_market_qku_ledger_refs": [
+        "RP5C_DORMANT_FUTURE_MARKET_QKU_00000004"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D"
+      ],
+      "formula_id": "FORM_MAP3_CALIB_BRIER_001",
+      "identity_row_id": "RP5C_IDENTITY_00000007",
+      "machine_library_reader_ref": "tools/pr168_rp5c_library_reader.py",
+      "master_plan_market_family_refs": [],
+      "no_executability_tier_decided_flag": true,
+      "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000004"
+      ],
+      "row_id": "RP5C_RP5D_HANDOFF_00000004",
+      "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
+      "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
+      "stage1_activation_view_refs": [
+        "RP5C_STAGE1_ACTIVATION_00000004"
+      ],
+      "stage1_agent_computation_universe_seed_refs": [],
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
+      "stage1_dormant_future_market_flag": true,
+      "stage1_seed_inclusion_flag": false
+    },
+    {
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
+      "blocker_codes": [
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION"
+      ],
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000005"
+      ],
+      "dormant_future_market_qku_ledger_refs": [
+        "RP5C_DORMANT_FUTURE_MARKET_QKU_00000005"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D"
+      ],
+      "formula_id": "FORM_MAP3_CALIB_BRIER_001",
+      "identity_row_id": "RP5C_IDENTITY_00000010",
+      "machine_library_reader_ref": "tools/pr168_rp5c_library_reader.py",
+      "master_plan_market_family_refs": [],
+      "no_executability_tier_decided_flag": true,
+      "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000005"
+      ],
+      "row_id": "RP5C_RP5D_HANDOFF_00000005",
+      "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
+      "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
+      "stage1_activation_view_refs": [
+        "RP5C_STAGE1_ACTIVATION_00000005"
+      ],
+      "stage1_agent_computation_universe_seed_refs": [],
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
+      "stage1_dormant_future_market_flag": true,
+      "stage1_seed_inclusion_flag": false
+    },
+    {
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
+      "blocker_codes": [
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION"
+      ],
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000006"
+      ],
+      "dormant_future_market_qku_ledger_refs": [
+        "RP5C_DORMANT_FUTURE_MARKET_QKU_00000006"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D"
+      ],
+      "formula_id": "FORM_MAP3_CALIB_BRIER_001",
+      "identity_row_id": "RP5C_IDENTITY_00000011",
+      "machine_library_reader_ref": "tools/pr168_rp5c_library_reader.py",
+      "master_plan_market_family_refs": [],
+      "no_executability_tier_decided_flag": true,
+      "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000006"
+      ],
+      "row_id": "RP5C_RP5D_HANDOFF_00000006",
+      "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
+      "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
+      "stage1_activation_view_refs": [
+        "RP5C_STAGE1_ACTIVATION_00000006"
+      ],
+      "stage1_agent_computation_universe_seed_refs": [],
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
+      "stage1_dormant_future_market_flag": true,
+      "stage1_seed_inclusion_flag": false
+    },
+    {
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
+      "blocker_codes": [
+        "NEEDS_FORMULA_EXPRESSION_REF",
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION"
+      ],
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000007"
+      ],
+      "dormant_future_market_qku_ledger_refs": [
+        "RP5C_DORMANT_FUTURE_MARKET_QKU_00000007"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D"
+      ],
+      "formula_id": "FORM_MAP3_CALIB_BRIER_001",
+      "identity_row_id": "RP5C_IDENTITY_00000012",
+      "machine_library_reader_ref": "tools/pr168_rp5c_library_reader.py",
+      "master_plan_market_family_refs": [],
+      "no_executability_tier_decided_flag": true,
+      "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000007"
+      ],
+      "row_id": "RP5C_RP5D_HANDOFF_00000007",
+      "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
+      "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
+      "stage1_activation_view_refs": [
+        "RP5C_STAGE1_ACTIVATION_00000007"
+      ],
+      "stage1_agent_computation_universe_seed_refs": [],
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
+      "stage1_dormant_future_market_flag": true,
+      "stage1_seed_inclusion_flag": false
+    },
+    {
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
+      "blocker_codes": [
+        "NEEDS_FORMULA_EXPRESSION_REF",
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION"
+      ],
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000008"
+      ],
+      "dormant_future_market_qku_ledger_refs": [
+        "RP5C_DORMANT_FUTURE_MARKET_QKU_00000008"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D"
+      ],
+      "formula_id": "FORM_MAP3_CALIB_BRIER_001",
+      "identity_row_id": "RP5C_IDENTITY_00000019",
+      "machine_library_reader_ref": "tools/pr168_rp5c_library_reader.py",
+      "master_plan_market_family_refs": [],
+      "no_executability_tier_decided_flag": true,
+      "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000008"
+      ],
+      "row_id": "RP5C_RP5D_HANDOFF_00000008",
+      "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
+      "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
+      "stage1_activation_view_refs": [
+        "RP5C_STAGE1_ACTIVATION_00000008"
+      ],
+      "stage1_agent_computation_universe_seed_refs": [],
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
+      "stage1_dormant_future_market_flag": true,
+      "stage1_seed_inclusion_flag": false
+    },
+    {
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
+      "blocker_codes": [
+        "NEEDS_FAMILY_CLASSIFICATION",
+        "NEEDS_FORMULA_EXPRESSION_REF",
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION",
+        "NEEDS_ONTOLOGY_CLASSIFICATION"
+      ],
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000009"
+      ],
+      "dormant_future_market_qku_ledger_refs": [
+        "RP5C_DORMANT_FUTURE_MARKET_QKU_00000009"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D"
+      ],
+      "formula_id": "FORM_MAP3_CALIB_ECE_001",
+      "identity_row_id": "RP5C_IDENTITY_00000024",
+      "machine_library_reader_ref": "tools/pr168_rp5c_library_reader.py",
+      "master_plan_market_family_refs": [],
+      "no_executability_tier_decided_flag": true,
+      "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000009"
+      ],
+      "row_id": "RP5C_RP5D_HANDOFF_00000009",
+      "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
+      "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
+      "stage1_activation_view_refs": [
+        "RP5C_STAGE1_ACTIVATION_00000009"
+      ],
+      "stage1_agent_computation_universe_seed_refs": [],
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
+      "stage1_dormant_future_market_flag": true,
+      "stage1_seed_inclusion_flag": false
+    },
+    {
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
+      "blocker_codes": [
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION"
+      ],
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000010"
+      ],
+      "dormant_future_market_qku_ledger_refs": [
+        "RP5C_DORMANT_FUTURE_MARKET_QKU_00000010"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D"
+      ],
+      "formula_id": "FORM_MAP3_CALIB_ECE_001",
+      "identity_row_id": "RP5C_IDENTITY_00000027",
+      "machine_library_reader_ref": "tools/pr168_rp5c_library_reader.py",
+      "master_plan_market_family_refs": [],
+      "no_executability_tier_decided_flag": true,
+      "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000010"
+      ],
+      "row_id": "RP5C_RP5D_HANDOFF_00000010",
+      "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
+      "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
+      "stage1_activation_view_refs": [
+        "RP5C_STAGE1_ACTIVATION_00000010"
+      ],
+      "stage1_agent_computation_universe_seed_refs": [],
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
+      "stage1_dormant_future_market_flag": true,
+      "stage1_seed_inclusion_flag": false
+    },
+    {
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
+      "blocker_codes": [
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION"
+      ],
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000011"
+      ],
+      "dormant_future_market_qku_ledger_refs": [
+        "RP5C_DORMANT_FUTURE_MARKET_QKU_00000011"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D"
+      ],
+      "formula_id": "FORM_MAP3_CALIB_ECE_001",
+      "identity_row_id": "RP5C_IDENTITY_00000028",
+      "machine_library_reader_ref": "tools/pr168_rp5c_library_reader.py",
+      "master_plan_market_family_refs": [],
+      "no_executability_tier_decided_flag": true,
+      "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000011"
+      ],
+      "row_id": "RP5C_RP5D_HANDOFF_00000011",
+      "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
+      "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
+      "stage1_activation_view_refs": [
+        "RP5C_STAGE1_ACTIVATION_00000011"
+      ],
+      "stage1_agent_computation_universe_seed_refs": [],
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
+      "stage1_dormant_future_market_flag": true,
+      "stage1_seed_inclusion_flag": false
+    },
+    {
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
+      "blocker_codes": [
+        "NEEDS_FORMULA_EXPRESSION_REF",
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION"
+      ],
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000012"
+      ],
+      "dormant_future_market_qku_ledger_refs": [
+        "RP5C_DORMANT_FUTURE_MARKET_QKU_00000012"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D"
+      ],
+      "formula_id": "FORM_MAP3_CALIB_ECE_001",
+      "identity_row_id": "RP5C_IDENTITY_00000029",
+      "machine_library_reader_ref": "tools/pr168_rp5c_library_reader.py",
+      "master_plan_market_family_refs": [],
+      "no_executability_tier_decided_flag": true,
+      "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000012"
+      ],
+      "row_id": "RP5C_RP5D_HANDOFF_00000012",
+      "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
+      "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
+      "stage1_activation_view_refs": [
+        "RP5C_STAGE1_ACTIVATION_00000012"
+      ],
+      "stage1_agent_computation_universe_seed_refs": [],
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
+      "stage1_dormant_future_market_flag": true,
+      "stage1_seed_inclusion_flag": false
+    },
+    {
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
+      "blocker_codes": [
+        "NEEDS_FORMULA_EXPRESSION_REF",
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION"
+      ],
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000013"
+      ],
+      "dormant_future_market_qku_ledger_refs": [
+        "RP5C_DORMANT_FUTURE_MARKET_QKU_00000013"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D"
+      ],
+      "formula_id": "FORM_MAP3_CALIB_ECE_001",
+      "identity_row_id": "RP5C_IDENTITY_00000036",
+      "machine_library_reader_ref": "tools/pr168_rp5c_library_reader.py",
+      "master_plan_market_family_refs": [],
+      "no_executability_tier_decided_flag": true,
+      "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000013"
+      ],
+      "row_id": "RP5C_RP5D_HANDOFF_00000013",
+      "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
+      "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
+      "stage1_activation_view_refs": [
+        "RP5C_STAGE1_ACTIVATION_00000013"
+      ],
+      "stage1_agent_computation_universe_seed_refs": [],
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
+      "stage1_dormant_future_market_flag": true,
+      "stage1_seed_inclusion_flag": false
+    },
+    {
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
+      "blocker_codes": [
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION"
+      ],
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000014"
+      ],
+      "dormant_future_market_qku_ledger_refs": [
+        "RP5C_DORMANT_FUTURE_MARKET_QKU_00000014"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D"
+      ],
+      "formula_id": "FORM_MAP3_CALIB_LOGLOSS_001",
+      "identity_row_id": "RP5C_IDENTITY_00000041",
+      "machine_library_reader_ref": "tools/pr168_rp5c_library_reader.py",
+      "master_plan_market_family_refs": [],
+      "no_executability_tier_decided_flag": true,
+      "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000014"
+      ],
+      "row_id": "RP5C_RP5D_HANDOFF_00000014",
+      "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
+      "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
+      "stage1_activation_view_refs": [
+        "RP5C_STAGE1_ACTIVATION_00000014"
+      ],
+      "stage1_agent_computation_universe_seed_refs": [],
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
+      "stage1_dormant_future_market_flag": true,
+      "stage1_seed_inclusion_flag": false
+    },
+    {
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
+      "blocker_codes": [
+        "NEEDS_FORMULA_EXPRESSION_REF",
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION",
+        "NEEDS_ONTOLOGY_CLASSIFICATION"
+      ],
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000015"
+      ],
+      "dormant_future_market_qku_ledger_refs": [
+        "RP5C_DORMANT_FUTURE_MARKET_QKU_00000015"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D"
+      ],
+      "formula_id": "FORM_MAP3_CALIB_LOGLOSS_001",
+      "identity_row_id": "RP5C_IDENTITY_00000043",
+      "machine_library_reader_ref": "tools/pr168_rp5c_library_reader.py",
+      "master_plan_market_family_refs": [],
+      "no_executability_tier_decided_flag": true,
+      "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000015"
+      ],
+      "row_id": "RP5C_RP5D_HANDOFF_00000015",
+      "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
+      "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
+      "stage1_activation_view_refs": [
+        "RP5C_STAGE1_ACTIVATION_00000015"
+      ],
+      "stage1_agent_computation_universe_seed_refs": [],
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
+      "stage1_dormant_future_market_flag": true,
+      "stage1_seed_inclusion_flag": false
+    },
+    {
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
+      "blocker_codes": [
+        "NEEDS_FORMULA_EXPRESSION_REF",
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION"
+      ],
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000016"
+      ],
+      "dormant_future_market_qku_ledger_refs": [
+        "RP5C_DORMANT_FUTURE_MARKET_QKU_00000016"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D"
+      ],
+      "formula_id": "FORM_MAP3_CALIB_LOGLOSS_001",
+      "identity_row_id": "RP5C_IDENTITY_00000054",
+      "machine_library_reader_ref": "tools/pr168_rp5c_library_reader.py",
+      "master_plan_market_family_refs": [],
+      "no_executability_tier_decided_flag": true,
+      "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000016"
+      ],
+      "row_id": "RP5C_RP5D_HANDOFF_00000016",
+      "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
+      "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
+      "stage1_activation_view_refs": [
+        "RP5C_STAGE1_ACTIVATION_00000016"
+      ],
+      "stage1_agent_computation_universe_seed_refs": [],
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
+      "stage1_dormant_future_market_flag": true,
+      "stage1_seed_inclusion_flag": false
+    },
+    {
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
+      "blocker_codes": [
+        "NEEDS_FAMILY_CLASSIFICATION",
+        "NEEDS_FORMULA_EXPRESSION_REF",
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION",
+        "NEEDS_ONTOLOGY_CLASSIFICATION"
+      ],
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000017"
+      ],
+      "dormant_future_market_qku_ledger_refs": [
+        "RP5C_DORMANT_FUTURE_MARKET_QKU_00000017"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D"
+      ],
+      "formula_id": "FORM_MAP3_DWAVE_001",
+      "identity_row_id": "RP5C_IDENTITY_00000055",
+      "machine_library_reader_ref": "tools/pr168_rp5c_library_reader.py",
+      "master_plan_market_family_refs": [],
+      "no_executability_tier_decided_flag": true,
+      "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000017"
+      ],
+      "row_id": "RP5C_RP5D_HANDOFF_00000017",
+      "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
+      "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
+      "stage1_activation_view_refs": [
+        "RP5C_STAGE1_ACTIVATION_00000017"
+      ],
+      "stage1_agent_computation_universe_seed_refs": [],
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
+      "stage1_dormant_future_market_flag": true,
+      "stage1_seed_inclusion_flag": false
+    },
+    {
+      "applicability_mode": "CROSS_MARKET_SHARED",
+      "blocker_codes": [],
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000018"
+      ],
+      "dormant_future_market_qku_ledger_refs": [],
+      "downstream_pr_refs": [
+        "PR168-RP5D"
+      ],
+      "formula_id": "FORM_MAP3_DWAVE_001",
+      "identity_row_id": "RP5C_IDENTITY_00000059",
+      "machine_library_reader_ref": "tools/pr168_rp5c_library_reader.py",
+      "master_plan_market_family_refs": [],
+      "no_executability_tier_decided_flag": true,
+      "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000018"
+      ],
+      "row_id": "RP5C_RP5D_HANDOFF_00000018",
+      "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
+      "rp5d_handoff_state": "READY_FOR_RP5D_EXECUTABILITY_CLASSIFICATION",
+      "stage1_access_mode": "AVAILABLE_ON_DEMAND",
+      "stage1_activation_view_refs": [
+        "RP5C_STAGE1_ACTIVATION_00000018"
+      ],
+      "stage1_agent_computation_universe_seed_refs": [
+        "RP5C_STAGE1_AGENT_SEED_00000001"
+      ],
+      "stage1_classification_state": "STAGE1_PREDICTION_MARKET_SUPPORTING_MARKET_AGNOSTIC",
+      "stage1_dormant_future_market_flag": false,
+      "stage1_seed_inclusion_flag": false
+    },
+    {
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
+      "blocker_codes": [
+        "NEEDS_FORMULA_EXPRESSION_REF",
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION",
+        "NEEDS_ONTOLOGY_CLASSIFICATION"
+      ],
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000019"
+      ],
+      "dormant_future_market_qku_ledger_refs": [
+        "RP5C_DORMANT_FUTURE_MARKET_QKU_00000018"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D"
+      ],
+      "formula_id": "FORM_MAP3_DWAVE_001",
+      "identity_row_id": "RP5C_IDENTITY_00000060",
+      "machine_library_reader_ref": "tools/pr168_rp5c_library_reader.py",
+      "master_plan_market_family_refs": [],
+      "no_executability_tier_decided_flag": true,
+      "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000019"
+      ],
+      "row_id": "RP5C_RP5D_HANDOFF_00000019",
+      "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
+      "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
+      "stage1_activation_view_refs": [
+        "RP5C_STAGE1_ACTIVATION_00000019"
+      ],
+      "stage1_agent_computation_universe_seed_refs": [],
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
+      "stage1_dormant_future_market_flag": true,
+      "stage1_seed_inclusion_flag": false
+    },
+    {
+      "applicability_mode": "CROSS_MARKET_SHARED",
+      "blocker_codes": [
+        "NEEDS_FORMULA_EXPRESSION_REF"
+      ],
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000020"
+      ],
+      "dormant_future_market_qku_ledger_refs": [],
+      "downstream_pr_refs": [
+        "PR168-RP5D"
+      ],
+      "formula_id": "FORM_MAP3_DWAVE_001",
+      "identity_row_id": "RP5C_IDENTITY_00000066",
+      "machine_library_reader_ref": "tools/pr168_rp5c_library_reader.py",
+      "master_plan_market_family_refs": [],
+      "no_executability_tier_decided_flag": true,
+      "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000020"
+      ],
+      "row_id": "RP5C_RP5D_HANDOFF_00000020",
+      "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
+      "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "stage1_access_mode": "AVAILABLE_ON_DEMAND",
+      "stage1_activation_view_refs": [
+        "RP5C_STAGE1_ACTIVATION_00000020"
+      ],
+      "stage1_agent_computation_universe_seed_refs": [
+        "RP5C_STAGE1_AGENT_SEED_00000002"
+      ],
+      "stage1_classification_state": "STAGE1_PREDICTION_MARKET_SUPPORTING_MARKET_AGNOSTIC",
+      "stage1_dormant_future_market_flag": false,
+      "stage1_seed_inclusion_flag": false
+    },
+    {
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
+      "blocker_codes": [
+        "NEEDS_FAMILY_CLASSIFICATION",
+        "NEEDS_FORMULA_EXPRESSION_REF",
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION",
+        "NEEDS_ONTOLOGY_CLASSIFICATION"
+      ],
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000021"
+      ],
+      "dormant_future_market_qku_ledger_refs": [
+        "RP5C_DORMANT_FUTURE_MARKET_QKU_00000019"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D"
+      ],
+      "formula_id": "FORM_MAP3_DWAVE_002",
+      "identity_row_id": "RP5C_IDENTITY_00000071",
+      "machine_library_reader_ref": "tools/pr168_rp5c_library_reader.py",
+      "master_plan_market_family_refs": [],
+      "no_executability_tier_decided_flag": true,
+      "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000021"
+      ],
+      "row_id": "RP5C_RP5D_HANDOFF_00000021",
+      "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
+      "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
+      "stage1_activation_view_refs": [
+        "RP5C_STAGE1_ACTIVATION_00000021"
+      ],
+      "stage1_agent_computation_universe_seed_refs": [],
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
+      "stage1_dormant_future_market_flag": true,
+      "stage1_seed_inclusion_flag": false
+    },
+    {
+      "applicability_mode": "CROSS_MARKET_SHARED",
+      "blocker_codes": [],
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000022"
+      ],
+      "dormant_future_market_qku_ledger_refs": [],
+      "downstream_pr_refs": [
+        "PR168-RP5D"
+      ],
+      "formula_id": "FORM_MAP3_DWAVE_002",
+      "identity_row_id": "RP5C_IDENTITY_00000072",
+      "machine_library_reader_ref": "tools/pr168_rp5c_library_reader.py",
+      "master_plan_market_family_refs": [],
+      "no_executability_tier_decided_flag": true,
+      "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000022"
+      ],
+      "row_id": "RP5C_RP5D_HANDOFF_00000022",
+      "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
+      "rp5d_handoff_state": "READY_FOR_RP5D_EXECUTABILITY_CLASSIFICATION",
+      "stage1_access_mode": "AVAILABLE_ON_DEMAND",
+      "stage1_activation_view_refs": [
+        "RP5C_STAGE1_ACTIVATION_00000022"
+      ],
+      "stage1_agent_computation_universe_seed_refs": [
+        "RP5C_STAGE1_AGENT_SEED_00000003"
+      ],
+      "stage1_classification_state": "STAGE1_PREDICTION_MARKET_SUPPORTING_MARKET_AGNOSTIC",
+      "stage1_dormant_future_market_flag": false,
+      "stage1_seed_inclusion_flag": false
+    },
+    {
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
+      "blocker_codes": [
+        "NEEDS_FORMULA_EXPRESSION_REF",
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION",
+        "NEEDS_ONTOLOGY_CLASSIFICATION"
+      ],
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000023"
+      ],
+      "dormant_future_market_qku_ledger_refs": [
+        "RP5C_DORMANT_FUTURE_MARKET_QKU_00000020"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D"
+      ],
+      "formula_id": "FORM_MAP3_DWAVE_002",
+      "identity_row_id": "RP5C_IDENTITY_00000073",
+      "machine_library_reader_ref": "tools/pr168_rp5c_library_reader.py",
+      "master_plan_market_family_refs": [],
+      "no_executability_tier_decided_flag": true,
+      "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000023"
+      ],
+      "row_id": "RP5C_RP5D_HANDOFF_00000023",
+      "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
+      "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
+      "stage1_activation_view_refs": [
+        "RP5C_STAGE1_ACTIVATION_00000023"
+      ],
+      "stage1_agent_computation_universe_seed_refs": [],
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
+      "stage1_dormant_future_market_flag": true,
+      "stage1_seed_inclusion_flag": false
+    },
+    {
+      "applicability_mode": "CROSS_MARKET_SHARED",
+      "blocker_codes": [
+        "NEEDS_FORMULA_EXPRESSION_REF"
+      ],
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000024"
+      ],
+      "dormant_future_market_qku_ledger_refs": [],
+      "downstream_pr_refs": [
+        "PR168-RP5D"
+      ],
+      "formula_id": "FORM_MAP3_DWAVE_002",
+      "identity_row_id": "RP5C_IDENTITY_00000083",
+      "machine_library_reader_ref": "tools/pr168_rp5c_library_reader.py",
+      "master_plan_market_family_refs": [],
+      "no_executability_tier_decided_flag": true,
+      "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000024"
+      ],
+      "row_id": "RP5C_RP5D_HANDOFF_00000024",
+      "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
+      "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "stage1_access_mode": "AVAILABLE_ON_DEMAND",
+      "stage1_activation_view_refs": [
+        "RP5C_STAGE1_ACTIVATION_00000024"
+      ],
+      "stage1_agent_computation_universe_seed_refs": [
+        "RP5C_STAGE1_AGENT_SEED_00000004"
+      ],
+      "stage1_classification_state": "STAGE1_PREDICTION_MARKET_SUPPORTING_MARKET_AGNOSTIC",
+      "stage1_dormant_future_market_flag": false,
+      "stage1_seed_inclusion_flag": false
+    },
+    {
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
+      "blocker_codes": [
+        "NEEDS_FAMILY_CLASSIFICATION",
+        "NEEDS_FORMULA_EXPRESSION_REF",
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION",
+        "NEEDS_ONTOLOGY_CLASSIFICATION"
+      ],
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000025"
+      ],
+      "dormant_future_market_qku_ledger_refs": [
+        "RP5C_DORMANT_FUTURE_MARKET_QKU_00000021"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D"
+      ],
+      "formula_id": "FORM_MAP3_FDR_BH_001",
+      "identity_row_id": "RP5C_IDENTITY_00000084",
+      "machine_library_reader_ref": "tools/pr168_rp5c_library_reader.py",
+      "master_plan_market_family_refs": [],
+      "no_executability_tier_decided_flag": true,
+      "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000025"
+      ],
+      "row_id": "RP5C_RP5D_HANDOFF_00000025",
+      "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
+      "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
+      "stage1_activation_view_refs": [
+        "RP5C_STAGE1_ACTIVATION_00000025"
+      ],
+      "stage1_agent_computation_universe_seed_refs": [],
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
+      "stage1_dormant_future_market_flag": true,
+      "stage1_seed_inclusion_flag": false
+    }
+  ],
+  "report_version": "PR168-RP5C-v1.0",
+  "rows_ref": "docs/master_plan/generated/rp5c/rp5d_executability_handoff.jsonl",
+  "rp5d_handoff_row_count": 10189,
+  "rp5d_handoff_state_counts": {
+    "NEEDS_RP5D_EXECUTABILITY_REVIEW": 8403,
+    "READY_FOR_RP5D_EXECUTABILITY_CLASSIFICATION": 1786
+  },
+  "runtime_cash_receipt_count": 0,
+  "runtime_stack_generation_count": 0,
+  "silent_skipped_input_artifact_count": 0,
+  "source_truth_authority_created_count": 0,
+  "stack_combination_materialization_count": 0,
+  "stage1_default_full_universe_compute_route_count": 0,
+  "stage1_seed_row_count": 2001,
+  "stage_agent_resolver_row_count": 24,
+  "trade_simulation_count": 0
+}

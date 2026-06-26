@@ -1,0 +1,3571 @@
+{
+  "absolute_local_path_leak_count": 0,
+  "archived_file_count": 0,
+  "backslash_only_path_leak_count": 0,
+  "champion_authority_created_count": 0,
+  "connector_semantic_binding_count": 0,
+  "created_at_utc": "2026-06-25T00:00:00Z",
+  "deleted_file_count": 0,
+  "dormant_qku_deleted_count": 0,
+  "dormant_qku_global_ban_count": 0,
+  "formula_expression_mutation_count": 0,
+  "formula_identity_deleted_count": 0,
+  "formula_profit_ranking_count": 0,
+  "generated_path_case_collision_count": 0,
+  "global_formula_ban_count": 0,
+  "global_qku_ban_count": 0,
+  "hard_zero_counters": {
+    "absolute_local_path_leak_count": 0,
+    "archived_file_count": 0,
+    "backslash_only_path_leak_count": 0,
+    "champion_authority_created_count": 0,
+    "connector_semantic_binding_count": 0,
+    "deleted_file_count": 0,
+    "dormant_qku_deleted_count": 0,
+    "dormant_qku_global_ban_count": 0,
+    "formula_expression_mutation_count": 0,
+    "formula_identity_deleted_count": 0,
+    "formula_profit_ranking_count": 0,
+    "generated_path_case_collision_count": 0,
+    "global_formula_ban_count": 0,
+    "global_qku_ban_count": 0,
+    "launch_readiness_authority_created_count": 0,
+    "live_order_authority_created_count": 0,
+    "manual_per_qku_hardcoded_agent_assignment_count": 0,
+    "master_plan_content_deleted_or_shortened_count": 0,
+    "moved_file_count": 0,
+    "mutable_agent_ownership_embedded_as_identity_authority_count": 0,
+    "non_prediction_market_qku_stage1_active_count": 0,
+    "orphan_generated_shard_count": 0,
+    "orphan_identity_count": 0,
+    "orphan_input_report_count": 0,
+    "orphan_source_artifact_count": 0,
+    "paper_loop_runtime_count": 0,
+    "private_state_fetch_count": 0,
+    "qku_identity_deleted_count": 0,
+    "qopt_batch_count": 0,
+    "qtt_sha_or_atomicrows_hash_authority_count": 0,
+    "quantum_advantage_claim_count": 0,
+    "quantum_backend_execution_count": 0,
+    "rank4_ranking_count": 0,
+    "raw_legacy_direct_agent_consumer_count": 0,
+    "runtime_cash_receipt_count": 0,
+    "runtime_stack_generation_count": 0,
+    "silent_skipped_input_artifact_count": 0,
+    "source_truth_authority_created_count": 0,
+    "stack_combination_materialization_count": 0,
+    "stage1_default_full_universe_compute_route_count": 0,
+    "trade_simulation_count": 0
+  },
+  "immutable_qku_row_count": 9791,
+  "launch_readiness_authority_created_count": 0,
+  "live_order_authority_created_count": 0,
+  "logical_report_id": "PR168_RP5C_ImmutableQKULibrary",
+  "manifest_ref": "docs/master_plan/generated/rp5c/immutable_qku_library.manifest.json",
+  "manual_per_qku_hardcoded_agent_assignment_count": 0,
+  "master_plan_content_deleted_or_shortened_count": 0,
+  "moved_file_count": 0,
+  "mutable_agent_ownership_embedded_as_identity_authority_count": 0,
+  "no_authority_statement": "RP5C is immutable identity, provenance, classification, and derived routing preparation only. It creates no live/order/source-truth/champion/launch/quantum/hash authority and does not mutate formulas or delete identities.",
+  "non_prediction_market_qku_stage1_active_count": 0,
+  "orphan_generated_shard_count": 0,
+  "orphan_identity_count": 0,
+  "orphan_input_report_count": 0,
+  "orphan_source_artifact_count": 0,
+  "paper_loop_runtime_count": 0,
+  "physical_filename": "PR168_RP5C_ImmutableQKULibrary.report.json",
+  "private_state_fetch_count": 0,
+  "qku_identity_deleted_count": 0,
+  "qopt_batch_count": 0,
+  "qtt_sha_or_atomicrows_hash_authority_count": 0,
+  "quantum_advantage_claim_count": 0,
+  "quantum_backend_execution_count": 0,
+  "rank4_ranking_count": 0,
+  "raw_legacy_direct_agent_consumer_count": 0,
+  "records": [
+    {
+      "agent_responsibility_group_refs": [
+        "RP5C_RESP_GROUP_0001"
+      ],
+      "all_provenance_tiers": [
+        "UPSTREAM_FORMULA_QKU_REGISTRY"
+      ],
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
+      "blocker_codes": [
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION"
+      ],
+      "canonical_identity_row_id": "RP5C_IDENTITY_00005652",
+      "condition_memory_slot_template": {
+        "data_freshness_bucket": "UNKNOWN",
+        "depth_bucket": "UNKNOWN",
+        "fee_model_ref": null,
+        "hold_duration_bucket": "UNKNOWN",
+        "latency_bucket": "UNKNOWN",
+        "market_category": "UNKNOWN",
+        "order_size_bucket": "UNKNOWN",
+        "outcome_context_ref": null,
+        "side": "UNKNOWN",
+        "slippage_model_ref": null,
+        "spread_bucket": "UNKNOWN",
+        "stack_context": "UNKNOWN",
+        "time_to_close_bucket": "UNKNOWN",
+        "venue": "UNKNOWN",
+        "volatility_bucket": "UNKNOWN"
+      },
+      "condition_scoped_memory_only_flag": false,
+      "data_dependency_refs": [],
+      "data_dependency_type": "market_data_dependency",
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000399"
+      ],
+      "dormant_future_market_qku_ledger_refs": [
+        "RP5C_DORMANT_FUTURE_MARKET_QKU_00000299"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D",
+        "PR168-RP5E",
+        "RANK4"
+      ],
+      "duplicate_group_id": "RP5C_DUP_GROUP_00000826",
+      "duplicate_status": "CANONICAL_REPRESENTATIVE_PRESERVED",
+      "execution_dependency_refs": [],
+      "execution_dependency_type": "signal_dependency",
+      "family_registry_refs": [
+        "RP5C_FAMILY_00082",
+        "RP5C_FAMILY_00095"
+      ],
+      "formula_expression_presence_state": "NEEDS_FORMULA_EXPRESSION_REF",
+      "formula_expression_ref": null,
+      "formula_family": "signal_probability",
+      "formula_id": null,
+      "formula_subfamily": "signal_probability",
+      "formula_to_pnl_ref": null,
+      "formula_variant_id": null,
+      "formula_variant_label": "base_or_unspecified",
+      "global_ban_flag": false,
+      "identity_authority_class": "RP5C_IMMUTABLE_IDENTITY_PRESERVATION_NOT_SOURCE_TRUTH",
+      "identity_row_id": "RP5C_IDENTITY_00005652",
+      "identity_type": "QKU",
+      "immutable_original_preserved_flag": true,
+      "latency_dependency_refs": [],
+      "latency_dependency_type": "unknown_needs_review",
+      "library_state": "LIBRARY_ELIGIBLE_IMMUTABLE",
+      "market_family": "unknown_needs_review",
+      "market_scope": "unknown_needs_review",
+      "market_scope_registry_refs": [
+        "RP5C_MARKET_SCOPE_0011"
+      ],
+      "master_plan_market_family_refs": [],
+      "mutation_allowed_flag": false,
+      "no_orphan_reason": "Identity has source, registry classification, derived route, validators, downstream refs, and RP5D handoff.",
+      "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
+      "notes": "Immutable identity row extracted without formula mutation or global ban authority.",
+      "ontology_category": "signal_probability",
+      "ontology_role_confidence": "LOW",
+      "ontology_role_registry_refs": [
+        "RP5C_ONTOLOGY_ROLE_0001"
+      ],
+      "ontology_subcategory": "signal_probability",
+      "platform_applicability_registry_refs": [
+        "RP5C_PLATFORM_APPLICABILITY_0008"
+      ],
+      "platform_applicability_states": [
+        "UNKNOWN_PLATFORM_SCOPE_NEEDS_REVIEW"
+      ],
+      "plugin_ref": null,
+      "provenance_tier": "UPSTREAM_FORMULA_QKU_REGISTRY",
+      "qku_family": "atomicrow_qku",
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000001",
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000399"
+      ],
+      "qku_subfamily": "signal_probability",
+      "qku_type": "QKU",
+      "quantum_role_type": "not_quantum",
+      "risk_dependency_refs": [],
+      "risk_dependency_type": "unknown_needs_review",
+      "route_rule_refs": [
+        "RP5C_ROUTE_RULE_0001"
+      ],
+      "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
+      "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "shared_cross_market_support_flag": false,
+      "signal_dependency_refs": [],
+      "source_artifact_ref": "docs/master_plan/generated/PR161C_QKUAgentConsumptionBridge.report.json",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000041",
+      "source_evidence_dependency_refs": [
+        "RP5C_SOURCE_ARTIFACT_000041"
+      ],
+      "source_evidence_dependency_type": "source_evidence_dependency",
+      "source_file_path": "docs/master_plan/generated/PR161C_QKUAgentConsumptionBridge.report.json",
+      "source_identity_value_ref": [
+        "qku_id"
+      ],
+      "source_line_or_json_path": "records[1]",
+      "source_pr_ref": "UPSTREAM_QKU",
+      "specific_market_family_refs": [],
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
+      "stage1_activation_view_refs": [
+        "RP5C_STAGE1_ACTIVATION_00000399"
+      ],
+      "stage1_agent_computation_universe_seed_refs": [],
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
+      "stage1_classification_states": [
+        "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW"
+      ],
+      "stage1_dormant_future_market_flag": true,
+      "stage1_platform_refs": [],
+      "stage1_seed_inclusion_flag": false,
+      "unknown_needs_review_flag": true,
+      "validator_refs": [
+        "governance_agent",
+        "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
+      ]
+    },
+    {
+      "agent_responsibility_group_refs": [
+        "RP5C_RESP_GROUP_0001"
+      ],
+      "all_provenance_tiers": [
+        "UPSTREAM_FORMULA_QKU_REGISTRY"
+      ],
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
+      "blocker_codes": [
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION"
+      ],
+      "canonical_identity_row_id": "RP5C_IDENTITY_00005671",
+      "condition_memory_slot_template": {
+        "data_freshness_bucket": "UNKNOWN",
+        "depth_bucket": "UNKNOWN",
+        "fee_model_ref": null,
+        "hold_duration_bucket": "UNKNOWN",
+        "latency_bucket": "UNKNOWN",
+        "market_category": "UNKNOWN",
+        "order_size_bucket": "UNKNOWN",
+        "outcome_context_ref": null,
+        "side": "UNKNOWN",
+        "slippage_model_ref": null,
+        "spread_bucket": "UNKNOWN",
+        "stack_context": "UNKNOWN",
+        "time_to_close_bucket": "UNKNOWN",
+        "venue": "UNKNOWN",
+        "volatility_bucket": "UNKNOWN"
+      },
+      "condition_scoped_memory_only_flag": false,
+      "data_dependency_refs": [],
+      "data_dependency_type": "market_data_dependency",
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000400"
+      ],
+      "dormant_future_market_qku_ledger_refs": [
+        "RP5C_DORMANT_FUTURE_MARKET_QKU_00000300"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D",
+        "PR168-RP5E",
+        "RANK4"
+      ],
+      "duplicate_group_id": "RP5C_DUP_GROUP_00000827",
+      "duplicate_status": "CANONICAL_REPRESENTATIVE_PRESERVED",
+      "execution_dependency_refs": [],
+      "execution_dependency_type": "signal_dependency",
+      "family_registry_refs": [
+        "RP5C_FAMILY_00082",
+        "RP5C_FAMILY_00095"
+      ],
+      "formula_expression_presence_state": "NEEDS_FORMULA_EXPRESSION_REF",
+      "formula_expression_ref": null,
+      "formula_family": "signal_probability",
+      "formula_id": null,
+      "formula_subfamily": "signal_probability",
+      "formula_to_pnl_ref": null,
+      "formula_variant_id": null,
+      "formula_variant_label": "base_or_unspecified",
+      "global_ban_flag": false,
+      "identity_authority_class": "RP5C_IMMUTABLE_IDENTITY_PRESERVATION_NOT_SOURCE_TRUTH",
+      "identity_row_id": "RP5C_IDENTITY_00005671",
+      "identity_type": "QKU",
+      "immutable_original_preserved_flag": true,
+      "latency_dependency_refs": [],
+      "latency_dependency_type": "unknown_needs_review",
+      "library_state": "LIBRARY_ELIGIBLE_IMMUTABLE",
+      "market_family": "unknown_needs_review",
+      "market_scope": "unknown_needs_review",
+      "market_scope_registry_refs": [
+        "RP5C_MARKET_SCOPE_0011"
+      ],
+      "master_plan_market_family_refs": [],
+      "mutation_allowed_flag": false,
+      "no_orphan_reason": "Identity has source, registry classification, derived route, validators, downstream refs, and RP5D handoff.",
+      "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
+      "notes": "Immutable identity row extracted without formula mutation or global ban authority.",
+      "ontology_category": "signal_probability",
+      "ontology_role_confidence": "LOW",
+      "ontology_role_registry_refs": [
+        "RP5C_ONTOLOGY_ROLE_0001"
+      ],
+      "ontology_subcategory": "signal_probability",
+      "platform_applicability_registry_refs": [
+        "RP5C_PLATFORM_APPLICABILITY_0008"
+      ],
+      "platform_applicability_states": [
+        "UNKNOWN_PLATFORM_SCOPE_NEEDS_REVIEW"
+      ],
+      "plugin_ref": null,
+      "provenance_tier": "UPSTREAM_FORMULA_QKU_REGISTRY",
+      "qku_family": "atomicrow_qku",
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000002",
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000400"
+      ],
+      "qku_subfamily": "signal_probability",
+      "qku_type": "QKU",
+      "quantum_role_type": "not_quantum",
+      "risk_dependency_refs": [],
+      "risk_dependency_type": "unknown_needs_review",
+      "route_rule_refs": [
+        "RP5C_ROUTE_RULE_0001"
+      ],
+      "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
+      "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "shared_cross_market_support_flag": false,
+      "signal_dependency_refs": [],
+      "source_artifact_ref": "docs/master_plan/generated/PR161C_QKUAgentConsumptionBridge.report.json",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000041",
+      "source_evidence_dependency_refs": [
+        "RP5C_SOURCE_ARTIFACT_000041"
+      ],
+      "source_evidence_dependency_type": "source_evidence_dependency",
+      "source_file_path": "docs/master_plan/generated/PR161C_QKUAgentConsumptionBridge.report.json",
+      "source_identity_value_ref": [
+        "qku_id"
+      ],
+      "source_line_or_json_path": "records[2]",
+      "source_pr_ref": "UPSTREAM_QKU",
+      "specific_market_family_refs": [],
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
+      "stage1_activation_view_refs": [
+        "RP5C_STAGE1_ACTIVATION_00000400"
+      ],
+      "stage1_agent_computation_universe_seed_refs": [],
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
+      "stage1_classification_states": [
+        "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW"
+      ],
+      "stage1_dormant_future_market_flag": true,
+      "stage1_platform_refs": [],
+      "stage1_seed_inclusion_flag": false,
+      "unknown_needs_review_flag": true,
+      "validator_refs": [
+        "governance_agent",
+        "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
+      ]
+    },
+    {
+      "agent_responsibility_group_refs": [
+        "RP5C_RESP_GROUP_0001"
+      ],
+      "all_provenance_tiers": [
+        "UPSTREAM_FORMULA_QKU_REGISTRY"
+      ],
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
+      "blocker_codes": [
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION"
+      ],
+      "canonical_identity_row_id": "RP5C_IDENTITY_00005690",
+      "condition_memory_slot_template": {
+        "data_freshness_bucket": "UNKNOWN",
+        "depth_bucket": "UNKNOWN",
+        "fee_model_ref": null,
+        "hold_duration_bucket": "UNKNOWN",
+        "latency_bucket": "UNKNOWN",
+        "market_category": "UNKNOWN",
+        "order_size_bucket": "UNKNOWN",
+        "outcome_context_ref": null,
+        "side": "UNKNOWN",
+        "slippage_model_ref": null,
+        "spread_bucket": "UNKNOWN",
+        "stack_context": "UNKNOWN",
+        "time_to_close_bucket": "UNKNOWN",
+        "venue": "UNKNOWN",
+        "volatility_bucket": "UNKNOWN"
+      },
+      "condition_scoped_memory_only_flag": false,
+      "data_dependency_refs": [],
+      "data_dependency_type": "market_data_dependency",
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000401"
+      ],
+      "dormant_future_market_qku_ledger_refs": [
+        "RP5C_DORMANT_FUTURE_MARKET_QKU_00000301"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D",
+        "PR168-RP5E",
+        "RANK4"
+      ],
+      "duplicate_group_id": "RP5C_DUP_GROUP_00000828",
+      "duplicate_status": "CANONICAL_REPRESENTATIVE_PRESERVED",
+      "execution_dependency_refs": [],
+      "execution_dependency_type": "signal_dependency",
+      "family_registry_refs": [
+        "RP5C_FAMILY_00082",
+        "RP5C_FAMILY_00095"
+      ],
+      "formula_expression_presence_state": "NEEDS_FORMULA_EXPRESSION_REF",
+      "formula_expression_ref": null,
+      "formula_family": "signal_probability",
+      "formula_id": null,
+      "formula_subfamily": "signal_probability",
+      "formula_to_pnl_ref": null,
+      "formula_variant_id": null,
+      "formula_variant_label": "base_or_unspecified",
+      "global_ban_flag": false,
+      "identity_authority_class": "RP5C_IMMUTABLE_IDENTITY_PRESERVATION_NOT_SOURCE_TRUTH",
+      "identity_row_id": "RP5C_IDENTITY_00005690",
+      "identity_type": "QKU",
+      "immutable_original_preserved_flag": true,
+      "latency_dependency_refs": [],
+      "latency_dependency_type": "unknown_needs_review",
+      "library_state": "LIBRARY_ELIGIBLE_IMMUTABLE",
+      "market_family": "unknown_needs_review",
+      "market_scope": "unknown_needs_review",
+      "market_scope_registry_refs": [
+        "RP5C_MARKET_SCOPE_0011"
+      ],
+      "master_plan_market_family_refs": [],
+      "mutation_allowed_flag": false,
+      "no_orphan_reason": "Identity has source, registry classification, derived route, validators, downstream refs, and RP5D handoff.",
+      "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
+      "notes": "Immutable identity row extracted without formula mutation or global ban authority.",
+      "ontology_category": "signal_probability",
+      "ontology_role_confidence": "LOW",
+      "ontology_role_registry_refs": [
+        "RP5C_ONTOLOGY_ROLE_0001"
+      ],
+      "ontology_subcategory": "signal_probability",
+      "platform_applicability_registry_refs": [
+        "RP5C_PLATFORM_APPLICABILITY_0008"
+      ],
+      "platform_applicability_states": [
+        "UNKNOWN_PLATFORM_SCOPE_NEEDS_REVIEW"
+      ],
+      "plugin_ref": null,
+      "provenance_tier": "UPSTREAM_FORMULA_QKU_REGISTRY",
+      "qku_family": "atomicrow_qku",
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000003",
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000401"
+      ],
+      "qku_subfamily": "signal_probability",
+      "qku_type": "QKU",
+      "quantum_role_type": "not_quantum",
+      "risk_dependency_refs": [],
+      "risk_dependency_type": "unknown_needs_review",
+      "route_rule_refs": [
+        "RP5C_ROUTE_RULE_0001"
+      ],
+      "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
+      "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "shared_cross_market_support_flag": false,
+      "signal_dependency_refs": [],
+      "source_artifact_ref": "docs/master_plan/generated/PR161C_QKUAgentConsumptionBridge.report.json",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000041",
+      "source_evidence_dependency_refs": [
+        "RP5C_SOURCE_ARTIFACT_000041"
+      ],
+      "source_evidence_dependency_type": "source_evidence_dependency",
+      "source_file_path": "docs/master_plan/generated/PR161C_QKUAgentConsumptionBridge.report.json",
+      "source_identity_value_ref": [
+        "qku_id"
+      ],
+      "source_line_or_json_path": "records[3]",
+      "source_pr_ref": "UPSTREAM_QKU",
+      "specific_market_family_refs": [],
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
+      "stage1_activation_view_refs": [
+        "RP5C_STAGE1_ACTIVATION_00000401"
+      ],
+      "stage1_agent_computation_universe_seed_refs": [],
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
+      "stage1_classification_states": [
+        "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW"
+      ],
+      "stage1_dormant_future_market_flag": true,
+      "stage1_platform_refs": [],
+      "stage1_seed_inclusion_flag": false,
+      "unknown_needs_review_flag": true,
+      "validator_refs": [
+        "governance_agent",
+        "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
+      ]
+    },
+    {
+      "agent_responsibility_group_refs": [
+        "RP5C_RESP_GROUP_0001"
+      ],
+      "all_provenance_tiers": [
+        "UPSTREAM_FORMULA_QKU_REGISTRY"
+      ],
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
+      "blocker_codes": [
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION"
+      ],
+      "canonical_identity_row_id": "RP5C_IDENTITY_00005709",
+      "condition_memory_slot_template": {
+        "data_freshness_bucket": "UNKNOWN",
+        "depth_bucket": "UNKNOWN",
+        "fee_model_ref": null,
+        "hold_duration_bucket": "UNKNOWN",
+        "latency_bucket": "UNKNOWN",
+        "market_category": "UNKNOWN",
+        "order_size_bucket": "UNKNOWN",
+        "outcome_context_ref": null,
+        "side": "UNKNOWN",
+        "slippage_model_ref": null,
+        "spread_bucket": "UNKNOWN",
+        "stack_context": "UNKNOWN",
+        "time_to_close_bucket": "UNKNOWN",
+        "venue": "UNKNOWN",
+        "volatility_bucket": "UNKNOWN"
+      },
+      "condition_scoped_memory_only_flag": false,
+      "data_dependency_refs": [],
+      "data_dependency_type": "market_data_dependency",
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000402"
+      ],
+      "dormant_future_market_qku_ledger_refs": [
+        "RP5C_DORMANT_FUTURE_MARKET_QKU_00000302"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D",
+        "PR168-RP5E",
+        "RANK4"
+      ],
+      "duplicate_group_id": "RP5C_DUP_GROUP_00000829",
+      "duplicate_status": "CANONICAL_REPRESENTATIVE_PRESERVED",
+      "execution_dependency_refs": [],
+      "execution_dependency_type": "signal_dependency",
+      "family_registry_refs": [
+        "RP5C_FAMILY_00082",
+        "RP5C_FAMILY_00095"
+      ],
+      "formula_expression_presence_state": "NEEDS_FORMULA_EXPRESSION_REF",
+      "formula_expression_ref": null,
+      "formula_family": "signal_probability",
+      "formula_id": null,
+      "formula_subfamily": "signal_probability",
+      "formula_to_pnl_ref": null,
+      "formula_variant_id": null,
+      "formula_variant_label": "base_or_unspecified",
+      "global_ban_flag": false,
+      "identity_authority_class": "RP5C_IMMUTABLE_IDENTITY_PRESERVATION_NOT_SOURCE_TRUTH",
+      "identity_row_id": "RP5C_IDENTITY_00005709",
+      "identity_type": "QKU",
+      "immutable_original_preserved_flag": true,
+      "latency_dependency_refs": [],
+      "latency_dependency_type": "unknown_needs_review",
+      "library_state": "LIBRARY_ELIGIBLE_IMMUTABLE",
+      "market_family": "unknown_needs_review",
+      "market_scope": "unknown_needs_review",
+      "market_scope_registry_refs": [
+        "RP5C_MARKET_SCOPE_0011"
+      ],
+      "master_plan_market_family_refs": [],
+      "mutation_allowed_flag": false,
+      "no_orphan_reason": "Identity has source, registry classification, derived route, validators, downstream refs, and RP5D handoff.",
+      "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
+      "notes": "Immutable identity row extracted without formula mutation or global ban authority.",
+      "ontology_category": "signal_probability",
+      "ontology_role_confidence": "LOW",
+      "ontology_role_registry_refs": [
+        "RP5C_ONTOLOGY_ROLE_0001"
+      ],
+      "ontology_subcategory": "signal_probability",
+      "platform_applicability_registry_refs": [
+        "RP5C_PLATFORM_APPLICABILITY_0008"
+      ],
+      "platform_applicability_states": [
+        "UNKNOWN_PLATFORM_SCOPE_NEEDS_REVIEW"
+      ],
+      "plugin_ref": null,
+      "provenance_tier": "UPSTREAM_FORMULA_QKU_REGISTRY",
+      "qku_family": "atomicrow_qku",
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000004",
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000402"
+      ],
+      "qku_subfamily": "signal_probability",
+      "qku_type": "QKU",
+      "quantum_role_type": "not_quantum",
+      "risk_dependency_refs": [],
+      "risk_dependency_type": "unknown_needs_review",
+      "route_rule_refs": [
+        "RP5C_ROUTE_RULE_0001"
+      ],
+      "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
+      "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "shared_cross_market_support_flag": false,
+      "signal_dependency_refs": [],
+      "source_artifact_ref": "docs/master_plan/generated/PR161C_QKUAgentConsumptionBridge.report.json",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000041",
+      "source_evidence_dependency_refs": [
+        "RP5C_SOURCE_ARTIFACT_000041"
+      ],
+      "source_evidence_dependency_type": "source_evidence_dependency",
+      "source_file_path": "docs/master_plan/generated/PR161C_QKUAgentConsumptionBridge.report.json",
+      "source_identity_value_ref": [
+        "qku_id"
+      ],
+      "source_line_or_json_path": "records[4]",
+      "source_pr_ref": "UPSTREAM_QKU",
+      "specific_market_family_refs": [],
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
+      "stage1_activation_view_refs": [
+        "RP5C_STAGE1_ACTIVATION_00000402"
+      ],
+      "stage1_agent_computation_universe_seed_refs": [],
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
+      "stage1_classification_states": [
+        "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW"
+      ],
+      "stage1_dormant_future_market_flag": true,
+      "stage1_platform_refs": [],
+      "stage1_seed_inclusion_flag": false,
+      "unknown_needs_review_flag": true,
+      "validator_refs": [
+        "governance_agent",
+        "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
+      ]
+    },
+    {
+      "agent_responsibility_group_refs": [
+        "RP5C_RESP_GROUP_0001"
+      ],
+      "all_provenance_tiers": [
+        "UPSTREAM_FORMULA_QKU_REGISTRY"
+      ],
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
+      "blocker_codes": [
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION"
+      ],
+      "canonical_identity_row_id": "RP5C_IDENTITY_00005728",
+      "condition_memory_slot_template": {
+        "data_freshness_bucket": "UNKNOWN",
+        "depth_bucket": "UNKNOWN",
+        "fee_model_ref": null,
+        "hold_duration_bucket": "UNKNOWN",
+        "latency_bucket": "UNKNOWN",
+        "market_category": "UNKNOWN",
+        "order_size_bucket": "UNKNOWN",
+        "outcome_context_ref": null,
+        "side": "UNKNOWN",
+        "slippage_model_ref": null,
+        "spread_bucket": "UNKNOWN",
+        "stack_context": "UNKNOWN",
+        "time_to_close_bucket": "UNKNOWN",
+        "venue": "UNKNOWN",
+        "volatility_bucket": "UNKNOWN"
+      },
+      "condition_scoped_memory_only_flag": false,
+      "data_dependency_refs": [],
+      "data_dependency_type": "market_data_dependency",
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000403"
+      ],
+      "dormant_future_market_qku_ledger_refs": [
+        "RP5C_DORMANT_FUTURE_MARKET_QKU_00000303"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D",
+        "PR168-RP5E",
+        "RANK4"
+      ],
+      "duplicate_group_id": "RP5C_DUP_GROUP_00000830",
+      "duplicate_status": "CANONICAL_REPRESENTATIVE_PRESERVED",
+      "execution_dependency_refs": [],
+      "execution_dependency_type": "signal_dependency",
+      "family_registry_refs": [
+        "RP5C_FAMILY_00082",
+        "RP5C_FAMILY_00095"
+      ],
+      "formula_expression_presence_state": "NEEDS_FORMULA_EXPRESSION_REF",
+      "formula_expression_ref": null,
+      "formula_family": "signal_probability",
+      "formula_id": null,
+      "formula_subfamily": "signal_probability",
+      "formula_to_pnl_ref": null,
+      "formula_variant_id": null,
+      "formula_variant_label": "base_or_unspecified",
+      "global_ban_flag": false,
+      "identity_authority_class": "RP5C_IMMUTABLE_IDENTITY_PRESERVATION_NOT_SOURCE_TRUTH",
+      "identity_row_id": "RP5C_IDENTITY_00005728",
+      "identity_type": "QKU",
+      "immutable_original_preserved_flag": true,
+      "latency_dependency_refs": [],
+      "latency_dependency_type": "unknown_needs_review",
+      "library_state": "LIBRARY_ELIGIBLE_IMMUTABLE",
+      "market_family": "unknown_needs_review",
+      "market_scope": "unknown_needs_review",
+      "market_scope_registry_refs": [
+        "RP5C_MARKET_SCOPE_0011"
+      ],
+      "master_plan_market_family_refs": [],
+      "mutation_allowed_flag": false,
+      "no_orphan_reason": "Identity has source, registry classification, derived route, validators, downstream refs, and RP5D handoff.",
+      "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
+      "notes": "Immutable identity row extracted without formula mutation or global ban authority.",
+      "ontology_category": "signal_probability",
+      "ontology_role_confidence": "LOW",
+      "ontology_role_registry_refs": [
+        "RP5C_ONTOLOGY_ROLE_0001"
+      ],
+      "ontology_subcategory": "signal_probability",
+      "platform_applicability_registry_refs": [
+        "RP5C_PLATFORM_APPLICABILITY_0008"
+      ],
+      "platform_applicability_states": [
+        "UNKNOWN_PLATFORM_SCOPE_NEEDS_REVIEW"
+      ],
+      "plugin_ref": null,
+      "provenance_tier": "UPSTREAM_FORMULA_QKU_REGISTRY",
+      "qku_family": "atomicrow_qku",
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000005",
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000403"
+      ],
+      "qku_subfamily": "signal_probability",
+      "qku_type": "QKU",
+      "quantum_role_type": "not_quantum",
+      "risk_dependency_refs": [],
+      "risk_dependency_type": "unknown_needs_review",
+      "route_rule_refs": [
+        "RP5C_ROUTE_RULE_0001"
+      ],
+      "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
+      "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "shared_cross_market_support_flag": false,
+      "signal_dependency_refs": [],
+      "source_artifact_ref": "docs/master_plan/generated/PR161C_QKUAgentConsumptionBridge.report.json",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000041",
+      "source_evidence_dependency_refs": [
+        "RP5C_SOURCE_ARTIFACT_000041"
+      ],
+      "source_evidence_dependency_type": "source_evidence_dependency",
+      "source_file_path": "docs/master_plan/generated/PR161C_QKUAgentConsumptionBridge.report.json",
+      "source_identity_value_ref": [
+        "qku_id"
+      ],
+      "source_line_or_json_path": "records[5]",
+      "source_pr_ref": "UPSTREAM_QKU",
+      "specific_market_family_refs": [],
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
+      "stage1_activation_view_refs": [
+        "RP5C_STAGE1_ACTIVATION_00000403"
+      ],
+      "stage1_agent_computation_universe_seed_refs": [],
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
+      "stage1_classification_states": [
+        "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW"
+      ],
+      "stage1_dormant_future_market_flag": true,
+      "stage1_platform_refs": [],
+      "stage1_seed_inclusion_flag": false,
+      "unknown_needs_review_flag": true,
+      "validator_refs": [
+        "governance_agent",
+        "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
+      ]
+    },
+    {
+      "agent_responsibility_group_refs": [
+        "RP5C_RESP_GROUP_0001"
+      ],
+      "all_provenance_tiers": [
+        "UPSTREAM_FORMULA_QKU_REGISTRY"
+      ],
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
+      "blocker_codes": [
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION"
+      ],
+      "canonical_identity_row_id": "RP5C_IDENTITY_00005747",
+      "condition_memory_slot_template": {
+        "data_freshness_bucket": "UNKNOWN",
+        "depth_bucket": "UNKNOWN",
+        "fee_model_ref": null,
+        "hold_duration_bucket": "UNKNOWN",
+        "latency_bucket": "UNKNOWN",
+        "market_category": "UNKNOWN",
+        "order_size_bucket": "UNKNOWN",
+        "outcome_context_ref": null,
+        "side": "UNKNOWN",
+        "slippage_model_ref": null,
+        "spread_bucket": "UNKNOWN",
+        "stack_context": "UNKNOWN",
+        "time_to_close_bucket": "UNKNOWN",
+        "venue": "UNKNOWN",
+        "volatility_bucket": "UNKNOWN"
+      },
+      "condition_scoped_memory_only_flag": false,
+      "data_dependency_refs": [],
+      "data_dependency_type": "market_data_dependency",
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000404"
+      ],
+      "dormant_future_market_qku_ledger_refs": [
+        "RP5C_DORMANT_FUTURE_MARKET_QKU_00000304"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D",
+        "PR168-RP5E",
+        "RANK4"
+      ],
+      "duplicate_group_id": "RP5C_DUP_GROUP_00000831",
+      "duplicate_status": "CANONICAL_REPRESENTATIVE_PRESERVED",
+      "execution_dependency_refs": [],
+      "execution_dependency_type": "signal_dependency",
+      "family_registry_refs": [
+        "RP5C_FAMILY_00082",
+        "RP5C_FAMILY_00095"
+      ],
+      "formula_expression_presence_state": "NEEDS_FORMULA_EXPRESSION_REF",
+      "formula_expression_ref": null,
+      "formula_family": "signal_probability",
+      "formula_id": null,
+      "formula_subfamily": "signal_probability",
+      "formula_to_pnl_ref": null,
+      "formula_variant_id": null,
+      "formula_variant_label": "base_or_unspecified",
+      "global_ban_flag": false,
+      "identity_authority_class": "RP5C_IMMUTABLE_IDENTITY_PRESERVATION_NOT_SOURCE_TRUTH",
+      "identity_row_id": "RP5C_IDENTITY_00005747",
+      "identity_type": "QKU",
+      "immutable_original_preserved_flag": true,
+      "latency_dependency_refs": [],
+      "latency_dependency_type": "unknown_needs_review",
+      "library_state": "LIBRARY_ELIGIBLE_IMMUTABLE",
+      "market_family": "unknown_needs_review",
+      "market_scope": "unknown_needs_review",
+      "market_scope_registry_refs": [
+        "RP5C_MARKET_SCOPE_0011"
+      ],
+      "master_plan_market_family_refs": [],
+      "mutation_allowed_flag": false,
+      "no_orphan_reason": "Identity has source, registry classification, derived route, validators, downstream refs, and RP5D handoff.",
+      "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
+      "notes": "Immutable identity row extracted without formula mutation or global ban authority.",
+      "ontology_category": "signal_probability",
+      "ontology_role_confidence": "LOW",
+      "ontology_role_registry_refs": [
+        "RP5C_ONTOLOGY_ROLE_0001"
+      ],
+      "ontology_subcategory": "signal_probability",
+      "platform_applicability_registry_refs": [
+        "RP5C_PLATFORM_APPLICABILITY_0008"
+      ],
+      "platform_applicability_states": [
+        "UNKNOWN_PLATFORM_SCOPE_NEEDS_REVIEW"
+      ],
+      "plugin_ref": null,
+      "provenance_tier": "UPSTREAM_FORMULA_QKU_REGISTRY",
+      "qku_family": "atomicrow_qku",
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000006",
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000404"
+      ],
+      "qku_subfamily": "signal_probability",
+      "qku_type": "QKU",
+      "quantum_role_type": "not_quantum",
+      "risk_dependency_refs": [],
+      "risk_dependency_type": "unknown_needs_review",
+      "route_rule_refs": [
+        "RP5C_ROUTE_RULE_0001"
+      ],
+      "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
+      "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "shared_cross_market_support_flag": false,
+      "signal_dependency_refs": [],
+      "source_artifact_ref": "docs/master_plan/generated/PR161C_QKUAgentConsumptionBridge.report.json",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000041",
+      "source_evidence_dependency_refs": [
+        "RP5C_SOURCE_ARTIFACT_000041"
+      ],
+      "source_evidence_dependency_type": "source_evidence_dependency",
+      "source_file_path": "docs/master_plan/generated/PR161C_QKUAgentConsumptionBridge.report.json",
+      "source_identity_value_ref": [
+        "qku_id"
+      ],
+      "source_line_or_json_path": "records[6]",
+      "source_pr_ref": "UPSTREAM_QKU",
+      "specific_market_family_refs": [],
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
+      "stage1_activation_view_refs": [
+        "RP5C_STAGE1_ACTIVATION_00000404"
+      ],
+      "stage1_agent_computation_universe_seed_refs": [],
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
+      "stage1_classification_states": [
+        "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW"
+      ],
+      "stage1_dormant_future_market_flag": true,
+      "stage1_platform_refs": [],
+      "stage1_seed_inclusion_flag": false,
+      "unknown_needs_review_flag": true,
+      "validator_refs": [
+        "governance_agent",
+        "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
+      ]
+    },
+    {
+      "agent_responsibility_group_refs": [
+        "RP5C_RESP_GROUP_0001"
+      ],
+      "all_provenance_tiers": [
+        "UPSTREAM_FORMULA_QKU_REGISTRY"
+      ],
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
+      "blocker_codes": [
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION"
+      ],
+      "canonical_identity_row_id": "RP5C_IDENTITY_00005764",
+      "condition_memory_slot_template": {
+        "data_freshness_bucket": "UNKNOWN",
+        "depth_bucket": "UNKNOWN",
+        "fee_model_ref": null,
+        "hold_duration_bucket": "UNKNOWN",
+        "latency_bucket": "UNKNOWN",
+        "market_category": "UNKNOWN",
+        "order_size_bucket": "UNKNOWN",
+        "outcome_context_ref": null,
+        "side": "UNKNOWN",
+        "slippage_model_ref": null,
+        "spread_bucket": "UNKNOWN",
+        "stack_context": "UNKNOWN",
+        "time_to_close_bucket": "UNKNOWN",
+        "venue": "UNKNOWN",
+        "volatility_bucket": "UNKNOWN"
+      },
+      "condition_scoped_memory_only_flag": false,
+      "data_dependency_refs": [],
+      "data_dependency_type": "market_data_dependency",
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000405"
+      ],
+      "dormant_future_market_qku_ledger_refs": [
+        "RP5C_DORMANT_FUTURE_MARKET_QKU_00000305"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D",
+        "PR168-RP5E",
+        "RANK4"
+      ],
+      "duplicate_group_id": "RP5C_DUP_GROUP_00000832",
+      "duplicate_status": "CANONICAL_REPRESENTATIVE_PRESERVED",
+      "execution_dependency_refs": [],
+      "execution_dependency_type": "signal_dependency",
+      "family_registry_refs": [
+        "RP5C_FAMILY_00082",
+        "RP5C_FAMILY_00095"
+      ],
+      "formula_expression_presence_state": "NEEDS_FORMULA_EXPRESSION_REF",
+      "formula_expression_ref": null,
+      "formula_family": "signal_probability",
+      "formula_id": null,
+      "formula_subfamily": "signal_probability",
+      "formula_to_pnl_ref": null,
+      "formula_variant_id": null,
+      "formula_variant_label": "base_or_unspecified",
+      "global_ban_flag": false,
+      "identity_authority_class": "RP5C_IMMUTABLE_IDENTITY_PRESERVATION_NOT_SOURCE_TRUTH",
+      "identity_row_id": "RP5C_IDENTITY_00005764",
+      "identity_type": "QKU",
+      "immutable_original_preserved_flag": true,
+      "latency_dependency_refs": [],
+      "latency_dependency_type": "unknown_needs_review",
+      "library_state": "LIBRARY_ELIGIBLE_IMMUTABLE",
+      "market_family": "unknown_needs_review",
+      "market_scope": "unknown_needs_review",
+      "market_scope_registry_refs": [
+        "RP5C_MARKET_SCOPE_0011"
+      ],
+      "master_plan_market_family_refs": [],
+      "mutation_allowed_flag": false,
+      "no_orphan_reason": "Identity has source, registry classification, derived route, validators, downstream refs, and RP5D handoff.",
+      "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
+      "notes": "Immutable identity row extracted without formula mutation or global ban authority.",
+      "ontology_category": "signal_probability",
+      "ontology_role_confidence": "LOW",
+      "ontology_role_registry_refs": [
+        "RP5C_ONTOLOGY_ROLE_0001"
+      ],
+      "ontology_subcategory": "signal_probability",
+      "platform_applicability_registry_refs": [
+        "RP5C_PLATFORM_APPLICABILITY_0008"
+      ],
+      "platform_applicability_states": [
+        "UNKNOWN_PLATFORM_SCOPE_NEEDS_REVIEW"
+      ],
+      "plugin_ref": null,
+      "provenance_tier": "UPSTREAM_FORMULA_QKU_REGISTRY",
+      "qku_family": "atomicrow_qku",
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000007",
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000405"
+      ],
+      "qku_subfamily": "signal_probability",
+      "qku_type": "QKU",
+      "quantum_role_type": "not_quantum",
+      "risk_dependency_refs": [],
+      "risk_dependency_type": "unknown_needs_review",
+      "route_rule_refs": [
+        "RP5C_ROUTE_RULE_0001"
+      ],
+      "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
+      "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "shared_cross_market_support_flag": false,
+      "signal_dependency_refs": [],
+      "source_artifact_ref": "docs/master_plan/generated/PR161C_QKUAgentConsumptionBridge.report.json",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000041",
+      "source_evidence_dependency_refs": [
+        "RP5C_SOURCE_ARTIFACT_000041"
+      ],
+      "source_evidence_dependency_type": "source_evidence_dependency",
+      "source_file_path": "docs/master_plan/generated/PR161C_QKUAgentConsumptionBridge.report.json",
+      "source_identity_value_ref": [
+        "qku_id"
+      ],
+      "source_line_or_json_path": "records[7]",
+      "source_pr_ref": "UPSTREAM_QKU",
+      "specific_market_family_refs": [],
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
+      "stage1_activation_view_refs": [
+        "RP5C_STAGE1_ACTIVATION_00000405"
+      ],
+      "stage1_agent_computation_universe_seed_refs": [],
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
+      "stage1_classification_states": [
+        "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW"
+      ],
+      "stage1_dormant_future_market_flag": true,
+      "stage1_platform_refs": [],
+      "stage1_seed_inclusion_flag": false,
+      "unknown_needs_review_flag": true,
+      "validator_refs": [
+        "governance_agent",
+        "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
+      ]
+    },
+    {
+      "agent_responsibility_group_refs": [
+        "RP5C_RESP_GROUP_0001"
+      ],
+      "all_provenance_tiers": [
+        "UPSTREAM_FORMULA_QKU_REGISTRY"
+      ],
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
+      "blocker_codes": [
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION"
+      ],
+      "canonical_identity_row_id": "RP5C_IDENTITY_00005781",
+      "condition_memory_slot_template": {
+        "data_freshness_bucket": "UNKNOWN",
+        "depth_bucket": "UNKNOWN",
+        "fee_model_ref": null,
+        "hold_duration_bucket": "UNKNOWN",
+        "latency_bucket": "UNKNOWN",
+        "market_category": "UNKNOWN",
+        "order_size_bucket": "UNKNOWN",
+        "outcome_context_ref": null,
+        "side": "UNKNOWN",
+        "slippage_model_ref": null,
+        "spread_bucket": "UNKNOWN",
+        "stack_context": "UNKNOWN",
+        "time_to_close_bucket": "UNKNOWN",
+        "venue": "UNKNOWN",
+        "volatility_bucket": "UNKNOWN"
+      },
+      "condition_scoped_memory_only_flag": false,
+      "data_dependency_refs": [],
+      "data_dependency_type": "market_data_dependency",
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000406"
+      ],
+      "dormant_future_market_qku_ledger_refs": [
+        "RP5C_DORMANT_FUTURE_MARKET_QKU_00000306"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D",
+        "PR168-RP5E",
+        "RANK4"
+      ],
+      "duplicate_group_id": "RP5C_DUP_GROUP_00000833",
+      "duplicate_status": "CANONICAL_REPRESENTATIVE_PRESERVED",
+      "execution_dependency_refs": [],
+      "execution_dependency_type": "signal_dependency",
+      "family_registry_refs": [
+        "RP5C_FAMILY_00082",
+        "RP5C_FAMILY_00095"
+      ],
+      "formula_expression_presence_state": "NEEDS_FORMULA_EXPRESSION_REF",
+      "formula_expression_ref": null,
+      "formula_family": "signal_probability",
+      "formula_id": null,
+      "formula_subfamily": "signal_probability",
+      "formula_to_pnl_ref": null,
+      "formula_variant_id": null,
+      "formula_variant_label": "base_or_unspecified",
+      "global_ban_flag": false,
+      "identity_authority_class": "RP5C_IMMUTABLE_IDENTITY_PRESERVATION_NOT_SOURCE_TRUTH",
+      "identity_row_id": "RP5C_IDENTITY_00005781",
+      "identity_type": "QKU",
+      "immutable_original_preserved_flag": true,
+      "latency_dependency_refs": [],
+      "latency_dependency_type": "unknown_needs_review",
+      "library_state": "LIBRARY_ELIGIBLE_IMMUTABLE",
+      "market_family": "unknown_needs_review",
+      "market_scope": "unknown_needs_review",
+      "market_scope_registry_refs": [
+        "RP5C_MARKET_SCOPE_0011"
+      ],
+      "master_plan_market_family_refs": [],
+      "mutation_allowed_flag": false,
+      "no_orphan_reason": "Identity has source, registry classification, derived route, validators, downstream refs, and RP5D handoff.",
+      "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
+      "notes": "Immutable identity row extracted without formula mutation or global ban authority.",
+      "ontology_category": "signal_probability",
+      "ontology_role_confidence": "LOW",
+      "ontology_role_registry_refs": [
+        "RP5C_ONTOLOGY_ROLE_0001"
+      ],
+      "ontology_subcategory": "signal_probability",
+      "platform_applicability_registry_refs": [
+        "RP5C_PLATFORM_APPLICABILITY_0008"
+      ],
+      "platform_applicability_states": [
+        "UNKNOWN_PLATFORM_SCOPE_NEEDS_REVIEW"
+      ],
+      "plugin_ref": null,
+      "provenance_tier": "UPSTREAM_FORMULA_QKU_REGISTRY",
+      "qku_family": "atomicrow_qku",
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000008",
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000406"
+      ],
+      "qku_subfamily": "signal_probability",
+      "qku_type": "QKU",
+      "quantum_role_type": "not_quantum",
+      "risk_dependency_refs": [],
+      "risk_dependency_type": "unknown_needs_review",
+      "route_rule_refs": [
+        "RP5C_ROUTE_RULE_0001"
+      ],
+      "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
+      "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "shared_cross_market_support_flag": false,
+      "signal_dependency_refs": [],
+      "source_artifact_ref": "docs/master_plan/generated/PR161C_QKUAgentConsumptionBridge.report.json",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000041",
+      "source_evidence_dependency_refs": [
+        "RP5C_SOURCE_ARTIFACT_000041"
+      ],
+      "source_evidence_dependency_type": "source_evidence_dependency",
+      "source_file_path": "docs/master_plan/generated/PR161C_QKUAgentConsumptionBridge.report.json",
+      "source_identity_value_ref": [
+        "qku_id"
+      ],
+      "source_line_or_json_path": "records[8]",
+      "source_pr_ref": "UPSTREAM_QKU",
+      "specific_market_family_refs": [],
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
+      "stage1_activation_view_refs": [
+        "RP5C_STAGE1_ACTIVATION_00000406"
+      ],
+      "stage1_agent_computation_universe_seed_refs": [],
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
+      "stage1_classification_states": [
+        "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW"
+      ],
+      "stage1_dormant_future_market_flag": true,
+      "stage1_platform_refs": [],
+      "stage1_seed_inclusion_flag": false,
+      "unknown_needs_review_flag": true,
+      "validator_refs": [
+        "governance_agent",
+        "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
+      ]
+    },
+    {
+      "agent_responsibility_group_refs": [
+        "RP5C_RESP_GROUP_0001"
+      ],
+      "all_provenance_tiers": [
+        "UPSTREAM_FORMULA_QKU_REGISTRY"
+      ],
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
+      "blocker_codes": [
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION"
+      ],
+      "canonical_identity_row_id": "RP5C_IDENTITY_00005798",
+      "condition_memory_slot_template": {
+        "data_freshness_bucket": "UNKNOWN",
+        "depth_bucket": "UNKNOWN",
+        "fee_model_ref": null,
+        "hold_duration_bucket": "UNKNOWN",
+        "latency_bucket": "UNKNOWN",
+        "market_category": "UNKNOWN",
+        "order_size_bucket": "UNKNOWN",
+        "outcome_context_ref": null,
+        "side": "UNKNOWN",
+        "slippage_model_ref": null,
+        "spread_bucket": "UNKNOWN",
+        "stack_context": "UNKNOWN",
+        "time_to_close_bucket": "UNKNOWN",
+        "venue": "UNKNOWN",
+        "volatility_bucket": "UNKNOWN"
+      },
+      "condition_scoped_memory_only_flag": false,
+      "data_dependency_refs": [],
+      "data_dependency_type": "market_data_dependency",
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000407"
+      ],
+      "dormant_future_market_qku_ledger_refs": [
+        "RP5C_DORMANT_FUTURE_MARKET_QKU_00000307"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D",
+        "PR168-RP5E",
+        "RANK4"
+      ],
+      "duplicate_group_id": "RP5C_DUP_GROUP_00000834",
+      "duplicate_status": "CANONICAL_REPRESENTATIVE_PRESERVED",
+      "execution_dependency_refs": [],
+      "execution_dependency_type": "signal_dependency",
+      "family_registry_refs": [
+        "RP5C_FAMILY_00082",
+        "RP5C_FAMILY_00095"
+      ],
+      "formula_expression_presence_state": "NEEDS_FORMULA_EXPRESSION_REF",
+      "formula_expression_ref": null,
+      "formula_family": "signal_probability",
+      "formula_id": null,
+      "formula_subfamily": "signal_probability",
+      "formula_to_pnl_ref": null,
+      "formula_variant_id": null,
+      "formula_variant_label": "base_or_unspecified",
+      "global_ban_flag": false,
+      "identity_authority_class": "RP5C_IMMUTABLE_IDENTITY_PRESERVATION_NOT_SOURCE_TRUTH",
+      "identity_row_id": "RP5C_IDENTITY_00005798",
+      "identity_type": "QKU",
+      "immutable_original_preserved_flag": true,
+      "latency_dependency_refs": [],
+      "latency_dependency_type": "unknown_needs_review",
+      "library_state": "LIBRARY_ELIGIBLE_IMMUTABLE",
+      "market_family": "unknown_needs_review",
+      "market_scope": "unknown_needs_review",
+      "market_scope_registry_refs": [
+        "RP5C_MARKET_SCOPE_0011"
+      ],
+      "master_plan_market_family_refs": [],
+      "mutation_allowed_flag": false,
+      "no_orphan_reason": "Identity has source, registry classification, derived route, validators, downstream refs, and RP5D handoff.",
+      "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
+      "notes": "Immutable identity row extracted without formula mutation or global ban authority.",
+      "ontology_category": "signal_probability",
+      "ontology_role_confidence": "LOW",
+      "ontology_role_registry_refs": [
+        "RP5C_ONTOLOGY_ROLE_0001"
+      ],
+      "ontology_subcategory": "signal_probability",
+      "platform_applicability_registry_refs": [
+        "RP5C_PLATFORM_APPLICABILITY_0008"
+      ],
+      "platform_applicability_states": [
+        "UNKNOWN_PLATFORM_SCOPE_NEEDS_REVIEW"
+      ],
+      "plugin_ref": null,
+      "provenance_tier": "UPSTREAM_FORMULA_QKU_REGISTRY",
+      "qku_family": "atomicrow_qku",
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000009",
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000407"
+      ],
+      "qku_subfamily": "signal_probability",
+      "qku_type": "QKU",
+      "quantum_role_type": "not_quantum",
+      "risk_dependency_refs": [],
+      "risk_dependency_type": "unknown_needs_review",
+      "route_rule_refs": [
+        "RP5C_ROUTE_RULE_0001"
+      ],
+      "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
+      "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "shared_cross_market_support_flag": false,
+      "signal_dependency_refs": [],
+      "source_artifact_ref": "docs/master_plan/generated/PR161C_QKUAgentConsumptionBridge.report.json",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000041",
+      "source_evidence_dependency_refs": [
+        "RP5C_SOURCE_ARTIFACT_000041"
+      ],
+      "source_evidence_dependency_type": "source_evidence_dependency",
+      "source_file_path": "docs/master_plan/generated/PR161C_QKUAgentConsumptionBridge.report.json",
+      "source_identity_value_ref": [
+        "qku_id"
+      ],
+      "source_line_or_json_path": "records[9]",
+      "source_pr_ref": "UPSTREAM_QKU",
+      "specific_market_family_refs": [],
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
+      "stage1_activation_view_refs": [
+        "RP5C_STAGE1_ACTIVATION_00000407"
+      ],
+      "stage1_agent_computation_universe_seed_refs": [],
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
+      "stage1_classification_states": [
+        "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW"
+      ],
+      "stage1_dormant_future_market_flag": true,
+      "stage1_platform_refs": [],
+      "stage1_seed_inclusion_flag": false,
+      "unknown_needs_review_flag": true,
+      "validator_refs": [
+        "governance_agent",
+        "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
+      ]
+    },
+    {
+      "agent_responsibility_group_refs": [
+        "RP5C_RESP_GROUP_0001"
+      ],
+      "all_provenance_tiers": [
+        "UPSTREAM_FORMULA_QKU_REGISTRY"
+      ],
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
+      "blocker_codes": [
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION"
+      ],
+      "canonical_identity_row_id": "RP5C_IDENTITY_00005815",
+      "condition_memory_slot_template": {
+        "data_freshness_bucket": "UNKNOWN",
+        "depth_bucket": "UNKNOWN",
+        "fee_model_ref": null,
+        "hold_duration_bucket": "UNKNOWN",
+        "latency_bucket": "UNKNOWN",
+        "market_category": "UNKNOWN",
+        "order_size_bucket": "UNKNOWN",
+        "outcome_context_ref": null,
+        "side": "UNKNOWN",
+        "slippage_model_ref": null,
+        "spread_bucket": "UNKNOWN",
+        "stack_context": "UNKNOWN",
+        "time_to_close_bucket": "UNKNOWN",
+        "venue": "UNKNOWN",
+        "volatility_bucket": "UNKNOWN"
+      },
+      "condition_scoped_memory_only_flag": false,
+      "data_dependency_refs": [],
+      "data_dependency_type": "market_data_dependency",
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000408"
+      ],
+      "dormant_future_market_qku_ledger_refs": [
+        "RP5C_DORMANT_FUTURE_MARKET_QKU_00000308"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D",
+        "PR168-RP5E",
+        "RANK4"
+      ],
+      "duplicate_group_id": "RP5C_DUP_GROUP_00000835",
+      "duplicate_status": "CANONICAL_REPRESENTATIVE_PRESERVED",
+      "execution_dependency_refs": [],
+      "execution_dependency_type": "signal_dependency",
+      "family_registry_refs": [
+        "RP5C_FAMILY_00082",
+        "RP5C_FAMILY_00095"
+      ],
+      "formula_expression_presence_state": "NEEDS_FORMULA_EXPRESSION_REF",
+      "formula_expression_ref": null,
+      "formula_family": "signal_probability",
+      "formula_id": null,
+      "formula_subfamily": "signal_probability",
+      "formula_to_pnl_ref": null,
+      "formula_variant_id": null,
+      "formula_variant_label": "base_or_unspecified",
+      "global_ban_flag": false,
+      "identity_authority_class": "RP5C_IMMUTABLE_IDENTITY_PRESERVATION_NOT_SOURCE_TRUTH",
+      "identity_row_id": "RP5C_IDENTITY_00005815",
+      "identity_type": "QKU",
+      "immutable_original_preserved_flag": true,
+      "latency_dependency_refs": [],
+      "latency_dependency_type": "unknown_needs_review",
+      "library_state": "LIBRARY_ELIGIBLE_IMMUTABLE",
+      "market_family": "unknown_needs_review",
+      "market_scope": "unknown_needs_review",
+      "market_scope_registry_refs": [
+        "RP5C_MARKET_SCOPE_0011"
+      ],
+      "master_plan_market_family_refs": [],
+      "mutation_allowed_flag": false,
+      "no_orphan_reason": "Identity has source, registry classification, derived route, validators, downstream refs, and RP5D handoff.",
+      "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
+      "notes": "Immutable identity row extracted without formula mutation or global ban authority.",
+      "ontology_category": "signal_probability",
+      "ontology_role_confidence": "LOW",
+      "ontology_role_registry_refs": [
+        "RP5C_ONTOLOGY_ROLE_0001"
+      ],
+      "ontology_subcategory": "signal_probability",
+      "platform_applicability_registry_refs": [
+        "RP5C_PLATFORM_APPLICABILITY_0008"
+      ],
+      "platform_applicability_states": [
+        "UNKNOWN_PLATFORM_SCOPE_NEEDS_REVIEW"
+      ],
+      "plugin_ref": null,
+      "provenance_tier": "UPSTREAM_FORMULA_QKU_REGISTRY",
+      "qku_family": "atomicrow_qku",
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000010",
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000408"
+      ],
+      "qku_subfamily": "signal_probability",
+      "qku_type": "QKU",
+      "quantum_role_type": "not_quantum",
+      "risk_dependency_refs": [],
+      "risk_dependency_type": "unknown_needs_review",
+      "route_rule_refs": [
+        "RP5C_ROUTE_RULE_0001"
+      ],
+      "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
+      "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "shared_cross_market_support_flag": false,
+      "signal_dependency_refs": [],
+      "source_artifact_ref": "docs/master_plan/generated/PR161C_QKUAgentConsumptionBridge.report.json",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000041",
+      "source_evidence_dependency_refs": [
+        "RP5C_SOURCE_ARTIFACT_000041"
+      ],
+      "source_evidence_dependency_type": "source_evidence_dependency",
+      "source_file_path": "docs/master_plan/generated/PR161C_QKUAgentConsumptionBridge.report.json",
+      "source_identity_value_ref": [
+        "qku_id"
+      ],
+      "source_line_or_json_path": "records[10]",
+      "source_pr_ref": "UPSTREAM_QKU",
+      "specific_market_family_refs": [],
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
+      "stage1_activation_view_refs": [
+        "RP5C_STAGE1_ACTIVATION_00000408"
+      ],
+      "stage1_agent_computation_universe_seed_refs": [],
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
+      "stage1_classification_states": [
+        "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW"
+      ],
+      "stage1_dormant_future_market_flag": true,
+      "stage1_platform_refs": [],
+      "stage1_seed_inclusion_flag": false,
+      "unknown_needs_review_flag": true,
+      "validator_refs": [
+        "governance_agent",
+        "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
+      ]
+    },
+    {
+      "agent_responsibility_group_refs": [
+        "RP5C_RESP_GROUP_0001"
+      ],
+      "all_provenance_tiers": [
+        "UPSTREAM_FORMULA_QKU_REGISTRY"
+      ],
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
+      "blocker_codes": [
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION"
+      ],
+      "canonical_identity_row_id": "RP5C_IDENTITY_00005832",
+      "condition_memory_slot_template": {
+        "data_freshness_bucket": "UNKNOWN",
+        "depth_bucket": "UNKNOWN",
+        "fee_model_ref": null,
+        "hold_duration_bucket": "UNKNOWN",
+        "latency_bucket": "UNKNOWN",
+        "market_category": "UNKNOWN",
+        "order_size_bucket": "UNKNOWN",
+        "outcome_context_ref": null,
+        "side": "UNKNOWN",
+        "slippage_model_ref": null,
+        "spread_bucket": "UNKNOWN",
+        "stack_context": "UNKNOWN",
+        "time_to_close_bucket": "UNKNOWN",
+        "venue": "UNKNOWN",
+        "volatility_bucket": "UNKNOWN"
+      },
+      "condition_scoped_memory_only_flag": false,
+      "data_dependency_refs": [],
+      "data_dependency_type": "market_data_dependency",
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000409"
+      ],
+      "dormant_future_market_qku_ledger_refs": [
+        "RP5C_DORMANT_FUTURE_MARKET_QKU_00000309"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D",
+        "PR168-RP5E",
+        "RANK4"
+      ],
+      "duplicate_group_id": "RP5C_DUP_GROUP_00000836",
+      "duplicate_status": "CANONICAL_REPRESENTATIVE_PRESERVED",
+      "execution_dependency_refs": [],
+      "execution_dependency_type": "signal_dependency",
+      "family_registry_refs": [
+        "RP5C_FAMILY_00082",
+        "RP5C_FAMILY_00095"
+      ],
+      "formula_expression_presence_state": "NEEDS_FORMULA_EXPRESSION_REF",
+      "formula_expression_ref": null,
+      "formula_family": "signal_probability",
+      "formula_id": null,
+      "formula_subfamily": "signal_probability",
+      "formula_to_pnl_ref": null,
+      "formula_variant_id": null,
+      "formula_variant_label": "base_or_unspecified",
+      "global_ban_flag": false,
+      "identity_authority_class": "RP5C_IMMUTABLE_IDENTITY_PRESERVATION_NOT_SOURCE_TRUTH",
+      "identity_row_id": "RP5C_IDENTITY_00005832",
+      "identity_type": "QKU",
+      "immutable_original_preserved_flag": true,
+      "latency_dependency_refs": [],
+      "latency_dependency_type": "unknown_needs_review",
+      "library_state": "LIBRARY_ELIGIBLE_IMMUTABLE",
+      "market_family": "unknown_needs_review",
+      "market_scope": "unknown_needs_review",
+      "market_scope_registry_refs": [
+        "RP5C_MARKET_SCOPE_0011"
+      ],
+      "master_plan_market_family_refs": [],
+      "mutation_allowed_flag": false,
+      "no_orphan_reason": "Identity has source, registry classification, derived route, validators, downstream refs, and RP5D handoff.",
+      "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
+      "notes": "Immutable identity row extracted without formula mutation or global ban authority.",
+      "ontology_category": "signal_probability",
+      "ontology_role_confidence": "LOW",
+      "ontology_role_registry_refs": [
+        "RP5C_ONTOLOGY_ROLE_0001"
+      ],
+      "ontology_subcategory": "signal_probability",
+      "platform_applicability_registry_refs": [
+        "RP5C_PLATFORM_APPLICABILITY_0008"
+      ],
+      "platform_applicability_states": [
+        "UNKNOWN_PLATFORM_SCOPE_NEEDS_REVIEW"
+      ],
+      "plugin_ref": null,
+      "provenance_tier": "UPSTREAM_FORMULA_QKU_REGISTRY",
+      "qku_family": "atomicrow_qku",
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000011",
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000409"
+      ],
+      "qku_subfamily": "signal_probability",
+      "qku_type": "QKU",
+      "quantum_role_type": "not_quantum",
+      "risk_dependency_refs": [],
+      "risk_dependency_type": "unknown_needs_review",
+      "route_rule_refs": [
+        "RP5C_ROUTE_RULE_0001"
+      ],
+      "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
+      "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "shared_cross_market_support_flag": false,
+      "signal_dependency_refs": [],
+      "source_artifact_ref": "docs/master_plan/generated/PR161C_QKUAgentConsumptionBridge.report.json",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000041",
+      "source_evidence_dependency_refs": [
+        "RP5C_SOURCE_ARTIFACT_000041"
+      ],
+      "source_evidence_dependency_type": "source_evidence_dependency",
+      "source_file_path": "docs/master_plan/generated/PR161C_QKUAgentConsumptionBridge.report.json",
+      "source_identity_value_ref": [
+        "qku_id"
+      ],
+      "source_line_or_json_path": "records[11]",
+      "source_pr_ref": "UPSTREAM_QKU",
+      "specific_market_family_refs": [],
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
+      "stage1_activation_view_refs": [
+        "RP5C_STAGE1_ACTIVATION_00000409"
+      ],
+      "stage1_agent_computation_universe_seed_refs": [],
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
+      "stage1_classification_states": [
+        "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW"
+      ],
+      "stage1_dormant_future_market_flag": true,
+      "stage1_platform_refs": [],
+      "stage1_seed_inclusion_flag": false,
+      "unknown_needs_review_flag": true,
+      "validator_refs": [
+        "governance_agent",
+        "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
+      ]
+    },
+    {
+      "agent_responsibility_group_refs": [
+        "RP5C_RESP_GROUP_0001"
+      ],
+      "all_provenance_tiers": [
+        "UPSTREAM_FORMULA_QKU_REGISTRY"
+      ],
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
+      "blocker_codes": [
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION"
+      ],
+      "canonical_identity_row_id": "RP5C_IDENTITY_00005849",
+      "condition_memory_slot_template": {
+        "data_freshness_bucket": "UNKNOWN",
+        "depth_bucket": "UNKNOWN",
+        "fee_model_ref": null,
+        "hold_duration_bucket": "UNKNOWN",
+        "latency_bucket": "UNKNOWN",
+        "market_category": "UNKNOWN",
+        "order_size_bucket": "UNKNOWN",
+        "outcome_context_ref": null,
+        "side": "UNKNOWN",
+        "slippage_model_ref": null,
+        "spread_bucket": "UNKNOWN",
+        "stack_context": "UNKNOWN",
+        "time_to_close_bucket": "UNKNOWN",
+        "venue": "UNKNOWN",
+        "volatility_bucket": "UNKNOWN"
+      },
+      "condition_scoped_memory_only_flag": false,
+      "data_dependency_refs": [],
+      "data_dependency_type": "market_data_dependency",
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000410"
+      ],
+      "dormant_future_market_qku_ledger_refs": [
+        "RP5C_DORMANT_FUTURE_MARKET_QKU_00000310"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D",
+        "PR168-RP5E",
+        "RANK4"
+      ],
+      "duplicate_group_id": "RP5C_DUP_GROUP_00000837",
+      "duplicate_status": "CANONICAL_REPRESENTATIVE_PRESERVED",
+      "execution_dependency_refs": [],
+      "execution_dependency_type": "signal_dependency",
+      "family_registry_refs": [
+        "RP5C_FAMILY_00082",
+        "RP5C_FAMILY_00095"
+      ],
+      "formula_expression_presence_state": "NEEDS_FORMULA_EXPRESSION_REF",
+      "formula_expression_ref": null,
+      "formula_family": "signal_probability",
+      "formula_id": null,
+      "formula_subfamily": "signal_probability",
+      "formula_to_pnl_ref": null,
+      "formula_variant_id": null,
+      "formula_variant_label": "base_or_unspecified",
+      "global_ban_flag": false,
+      "identity_authority_class": "RP5C_IMMUTABLE_IDENTITY_PRESERVATION_NOT_SOURCE_TRUTH",
+      "identity_row_id": "RP5C_IDENTITY_00005849",
+      "identity_type": "QKU",
+      "immutable_original_preserved_flag": true,
+      "latency_dependency_refs": [],
+      "latency_dependency_type": "unknown_needs_review",
+      "library_state": "LIBRARY_ELIGIBLE_IMMUTABLE",
+      "market_family": "unknown_needs_review",
+      "market_scope": "unknown_needs_review",
+      "market_scope_registry_refs": [
+        "RP5C_MARKET_SCOPE_0011"
+      ],
+      "master_plan_market_family_refs": [],
+      "mutation_allowed_flag": false,
+      "no_orphan_reason": "Identity has source, registry classification, derived route, validators, downstream refs, and RP5D handoff.",
+      "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
+      "notes": "Immutable identity row extracted without formula mutation or global ban authority.",
+      "ontology_category": "signal_probability",
+      "ontology_role_confidence": "LOW",
+      "ontology_role_registry_refs": [
+        "RP5C_ONTOLOGY_ROLE_0001"
+      ],
+      "ontology_subcategory": "signal_probability",
+      "platform_applicability_registry_refs": [
+        "RP5C_PLATFORM_APPLICABILITY_0008"
+      ],
+      "platform_applicability_states": [
+        "UNKNOWN_PLATFORM_SCOPE_NEEDS_REVIEW"
+      ],
+      "plugin_ref": null,
+      "provenance_tier": "UPSTREAM_FORMULA_QKU_REGISTRY",
+      "qku_family": "atomicrow_qku",
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000012",
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000410"
+      ],
+      "qku_subfamily": "signal_probability",
+      "qku_type": "QKU",
+      "quantum_role_type": "not_quantum",
+      "risk_dependency_refs": [],
+      "risk_dependency_type": "unknown_needs_review",
+      "route_rule_refs": [
+        "RP5C_ROUTE_RULE_0001"
+      ],
+      "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
+      "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "shared_cross_market_support_flag": false,
+      "signal_dependency_refs": [],
+      "source_artifact_ref": "docs/master_plan/generated/PR161C_QKUAgentConsumptionBridge.report.json",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000041",
+      "source_evidence_dependency_refs": [
+        "RP5C_SOURCE_ARTIFACT_000041"
+      ],
+      "source_evidence_dependency_type": "source_evidence_dependency",
+      "source_file_path": "docs/master_plan/generated/PR161C_QKUAgentConsumptionBridge.report.json",
+      "source_identity_value_ref": [
+        "qku_id"
+      ],
+      "source_line_or_json_path": "records[12]",
+      "source_pr_ref": "UPSTREAM_QKU",
+      "specific_market_family_refs": [],
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
+      "stage1_activation_view_refs": [
+        "RP5C_STAGE1_ACTIVATION_00000410"
+      ],
+      "stage1_agent_computation_universe_seed_refs": [],
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
+      "stage1_classification_states": [
+        "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW"
+      ],
+      "stage1_dormant_future_market_flag": true,
+      "stage1_platform_refs": [],
+      "stage1_seed_inclusion_flag": false,
+      "unknown_needs_review_flag": true,
+      "validator_refs": [
+        "governance_agent",
+        "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
+      ]
+    },
+    {
+      "agent_responsibility_group_refs": [
+        "RP5C_RESP_GROUP_0001"
+      ],
+      "all_provenance_tiers": [
+        "UPSTREAM_FORMULA_QKU_REGISTRY"
+      ],
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
+      "blocker_codes": [
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION"
+      ],
+      "canonical_identity_row_id": "RP5C_IDENTITY_00005866",
+      "condition_memory_slot_template": {
+        "data_freshness_bucket": "UNKNOWN",
+        "depth_bucket": "UNKNOWN",
+        "fee_model_ref": null,
+        "hold_duration_bucket": "UNKNOWN",
+        "latency_bucket": "UNKNOWN",
+        "market_category": "UNKNOWN",
+        "order_size_bucket": "UNKNOWN",
+        "outcome_context_ref": null,
+        "side": "UNKNOWN",
+        "slippage_model_ref": null,
+        "spread_bucket": "UNKNOWN",
+        "stack_context": "UNKNOWN",
+        "time_to_close_bucket": "UNKNOWN",
+        "venue": "UNKNOWN",
+        "volatility_bucket": "UNKNOWN"
+      },
+      "condition_scoped_memory_only_flag": false,
+      "data_dependency_refs": [],
+      "data_dependency_type": "market_data_dependency",
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000411"
+      ],
+      "dormant_future_market_qku_ledger_refs": [
+        "RP5C_DORMANT_FUTURE_MARKET_QKU_00000311"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D",
+        "PR168-RP5E",
+        "RANK4"
+      ],
+      "duplicate_group_id": "RP5C_DUP_GROUP_00000838",
+      "duplicate_status": "CANONICAL_REPRESENTATIVE_PRESERVED",
+      "execution_dependency_refs": [],
+      "execution_dependency_type": "signal_dependency",
+      "family_registry_refs": [
+        "RP5C_FAMILY_00082",
+        "RP5C_FAMILY_00095"
+      ],
+      "formula_expression_presence_state": "NEEDS_FORMULA_EXPRESSION_REF",
+      "formula_expression_ref": null,
+      "formula_family": "signal_probability",
+      "formula_id": null,
+      "formula_subfamily": "signal_probability",
+      "formula_to_pnl_ref": null,
+      "formula_variant_id": null,
+      "formula_variant_label": "base_or_unspecified",
+      "global_ban_flag": false,
+      "identity_authority_class": "RP5C_IMMUTABLE_IDENTITY_PRESERVATION_NOT_SOURCE_TRUTH",
+      "identity_row_id": "RP5C_IDENTITY_00005866",
+      "identity_type": "QKU",
+      "immutable_original_preserved_flag": true,
+      "latency_dependency_refs": [],
+      "latency_dependency_type": "unknown_needs_review",
+      "library_state": "LIBRARY_ELIGIBLE_IMMUTABLE",
+      "market_family": "unknown_needs_review",
+      "market_scope": "unknown_needs_review",
+      "market_scope_registry_refs": [
+        "RP5C_MARKET_SCOPE_0011"
+      ],
+      "master_plan_market_family_refs": [],
+      "mutation_allowed_flag": false,
+      "no_orphan_reason": "Identity has source, registry classification, derived route, validators, downstream refs, and RP5D handoff.",
+      "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
+      "notes": "Immutable identity row extracted without formula mutation or global ban authority.",
+      "ontology_category": "signal_probability",
+      "ontology_role_confidence": "LOW",
+      "ontology_role_registry_refs": [
+        "RP5C_ONTOLOGY_ROLE_0001"
+      ],
+      "ontology_subcategory": "signal_probability",
+      "platform_applicability_registry_refs": [
+        "RP5C_PLATFORM_APPLICABILITY_0008"
+      ],
+      "platform_applicability_states": [
+        "UNKNOWN_PLATFORM_SCOPE_NEEDS_REVIEW"
+      ],
+      "plugin_ref": null,
+      "provenance_tier": "UPSTREAM_FORMULA_QKU_REGISTRY",
+      "qku_family": "atomicrow_qku",
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000013",
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000411"
+      ],
+      "qku_subfamily": "signal_probability",
+      "qku_type": "QKU",
+      "quantum_role_type": "not_quantum",
+      "risk_dependency_refs": [],
+      "risk_dependency_type": "unknown_needs_review",
+      "route_rule_refs": [
+        "RP5C_ROUTE_RULE_0001"
+      ],
+      "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
+      "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "shared_cross_market_support_flag": false,
+      "signal_dependency_refs": [],
+      "source_artifact_ref": "docs/master_plan/generated/PR161C_QKUAgentConsumptionBridge.report.json",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000041",
+      "source_evidence_dependency_refs": [
+        "RP5C_SOURCE_ARTIFACT_000041"
+      ],
+      "source_evidence_dependency_type": "source_evidence_dependency",
+      "source_file_path": "docs/master_plan/generated/PR161C_QKUAgentConsumptionBridge.report.json",
+      "source_identity_value_ref": [
+        "qku_id"
+      ],
+      "source_line_or_json_path": "records[13]",
+      "source_pr_ref": "UPSTREAM_QKU",
+      "specific_market_family_refs": [],
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
+      "stage1_activation_view_refs": [
+        "RP5C_STAGE1_ACTIVATION_00000411"
+      ],
+      "stage1_agent_computation_universe_seed_refs": [],
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
+      "stage1_classification_states": [
+        "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW"
+      ],
+      "stage1_dormant_future_market_flag": true,
+      "stage1_platform_refs": [],
+      "stage1_seed_inclusion_flag": false,
+      "unknown_needs_review_flag": true,
+      "validator_refs": [
+        "governance_agent",
+        "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
+      ]
+    },
+    {
+      "agent_responsibility_group_refs": [
+        "RP5C_RESP_GROUP_0001"
+      ],
+      "all_provenance_tiers": [
+        "UPSTREAM_FORMULA_QKU_REGISTRY"
+      ],
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
+      "blocker_codes": [
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION"
+      ],
+      "canonical_identity_row_id": "RP5C_IDENTITY_00005883",
+      "condition_memory_slot_template": {
+        "data_freshness_bucket": "UNKNOWN",
+        "depth_bucket": "UNKNOWN",
+        "fee_model_ref": null,
+        "hold_duration_bucket": "UNKNOWN",
+        "latency_bucket": "UNKNOWN",
+        "market_category": "UNKNOWN",
+        "order_size_bucket": "UNKNOWN",
+        "outcome_context_ref": null,
+        "side": "UNKNOWN",
+        "slippage_model_ref": null,
+        "spread_bucket": "UNKNOWN",
+        "stack_context": "UNKNOWN",
+        "time_to_close_bucket": "UNKNOWN",
+        "venue": "UNKNOWN",
+        "volatility_bucket": "UNKNOWN"
+      },
+      "condition_scoped_memory_only_flag": false,
+      "data_dependency_refs": [],
+      "data_dependency_type": "market_data_dependency",
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000412"
+      ],
+      "dormant_future_market_qku_ledger_refs": [
+        "RP5C_DORMANT_FUTURE_MARKET_QKU_00000312"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D",
+        "PR168-RP5E",
+        "RANK4"
+      ],
+      "duplicate_group_id": "RP5C_DUP_GROUP_00000839",
+      "duplicate_status": "CANONICAL_REPRESENTATIVE_PRESERVED",
+      "execution_dependency_refs": [],
+      "execution_dependency_type": "signal_dependency",
+      "family_registry_refs": [
+        "RP5C_FAMILY_00082",
+        "RP5C_FAMILY_00095"
+      ],
+      "formula_expression_presence_state": "NEEDS_FORMULA_EXPRESSION_REF",
+      "formula_expression_ref": null,
+      "formula_family": "signal_probability",
+      "formula_id": null,
+      "formula_subfamily": "signal_probability",
+      "formula_to_pnl_ref": null,
+      "formula_variant_id": null,
+      "formula_variant_label": "base_or_unspecified",
+      "global_ban_flag": false,
+      "identity_authority_class": "RP5C_IMMUTABLE_IDENTITY_PRESERVATION_NOT_SOURCE_TRUTH",
+      "identity_row_id": "RP5C_IDENTITY_00005883",
+      "identity_type": "QKU",
+      "immutable_original_preserved_flag": true,
+      "latency_dependency_refs": [],
+      "latency_dependency_type": "unknown_needs_review",
+      "library_state": "LIBRARY_ELIGIBLE_IMMUTABLE",
+      "market_family": "unknown_needs_review",
+      "market_scope": "unknown_needs_review",
+      "market_scope_registry_refs": [
+        "RP5C_MARKET_SCOPE_0011"
+      ],
+      "master_plan_market_family_refs": [],
+      "mutation_allowed_flag": false,
+      "no_orphan_reason": "Identity has source, registry classification, derived route, validators, downstream refs, and RP5D handoff.",
+      "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
+      "notes": "Immutable identity row extracted without formula mutation or global ban authority.",
+      "ontology_category": "signal_probability",
+      "ontology_role_confidence": "LOW",
+      "ontology_role_registry_refs": [
+        "RP5C_ONTOLOGY_ROLE_0001"
+      ],
+      "ontology_subcategory": "signal_probability",
+      "platform_applicability_registry_refs": [
+        "RP5C_PLATFORM_APPLICABILITY_0008"
+      ],
+      "platform_applicability_states": [
+        "UNKNOWN_PLATFORM_SCOPE_NEEDS_REVIEW"
+      ],
+      "plugin_ref": null,
+      "provenance_tier": "UPSTREAM_FORMULA_QKU_REGISTRY",
+      "qku_family": "atomicrow_qku",
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000014",
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000412"
+      ],
+      "qku_subfamily": "signal_probability",
+      "qku_type": "QKU",
+      "quantum_role_type": "not_quantum",
+      "risk_dependency_refs": [],
+      "risk_dependency_type": "unknown_needs_review",
+      "route_rule_refs": [
+        "RP5C_ROUTE_RULE_0001"
+      ],
+      "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
+      "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "shared_cross_market_support_flag": false,
+      "signal_dependency_refs": [],
+      "source_artifact_ref": "docs/master_plan/generated/PR161C_QKUAgentConsumptionBridge.report.json",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000041",
+      "source_evidence_dependency_refs": [
+        "RP5C_SOURCE_ARTIFACT_000041"
+      ],
+      "source_evidence_dependency_type": "source_evidence_dependency",
+      "source_file_path": "docs/master_plan/generated/PR161C_QKUAgentConsumptionBridge.report.json",
+      "source_identity_value_ref": [
+        "qku_id"
+      ],
+      "source_line_or_json_path": "records[14]",
+      "source_pr_ref": "UPSTREAM_QKU",
+      "specific_market_family_refs": [],
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
+      "stage1_activation_view_refs": [
+        "RP5C_STAGE1_ACTIVATION_00000412"
+      ],
+      "stage1_agent_computation_universe_seed_refs": [],
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
+      "stage1_classification_states": [
+        "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW"
+      ],
+      "stage1_dormant_future_market_flag": true,
+      "stage1_platform_refs": [],
+      "stage1_seed_inclusion_flag": false,
+      "unknown_needs_review_flag": true,
+      "validator_refs": [
+        "governance_agent",
+        "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
+      ]
+    },
+    {
+      "agent_responsibility_group_refs": [
+        "RP5C_RESP_GROUP_0001"
+      ],
+      "all_provenance_tiers": [
+        "UPSTREAM_FORMULA_QKU_REGISTRY"
+      ],
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
+      "blocker_codes": [
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION"
+      ],
+      "canonical_identity_row_id": "RP5C_IDENTITY_00005900",
+      "condition_memory_slot_template": {
+        "data_freshness_bucket": "UNKNOWN",
+        "depth_bucket": "UNKNOWN",
+        "fee_model_ref": null,
+        "hold_duration_bucket": "UNKNOWN",
+        "latency_bucket": "UNKNOWN",
+        "market_category": "UNKNOWN",
+        "order_size_bucket": "UNKNOWN",
+        "outcome_context_ref": null,
+        "side": "UNKNOWN",
+        "slippage_model_ref": null,
+        "spread_bucket": "UNKNOWN",
+        "stack_context": "UNKNOWN",
+        "time_to_close_bucket": "UNKNOWN",
+        "venue": "UNKNOWN",
+        "volatility_bucket": "UNKNOWN"
+      },
+      "condition_scoped_memory_only_flag": false,
+      "data_dependency_refs": [],
+      "data_dependency_type": "market_data_dependency",
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000413"
+      ],
+      "dormant_future_market_qku_ledger_refs": [
+        "RP5C_DORMANT_FUTURE_MARKET_QKU_00000313"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D",
+        "PR168-RP5E",
+        "RANK4"
+      ],
+      "duplicate_group_id": "RP5C_DUP_GROUP_00000840",
+      "duplicate_status": "CANONICAL_REPRESENTATIVE_PRESERVED",
+      "execution_dependency_refs": [],
+      "execution_dependency_type": "signal_dependency",
+      "family_registry_refs": [
+        "RP5C_FAMILY_00082",
+        "RP5C_FAMILY_00095"
+      ],
+      "formula_expression_presence_state": "NEEDS_FORMULA_EXPRESSION_REF",
+      "formula_expression_ref": null,
+      "formula_family": "signal_probability",
+      "formula_id": null,
+      "formula_subfamily": "signal_probability",
+      "formula_to_pnl_ref": null,
+      "formula_variant_id": null,
+      "formula_variant_label": "base_or_unspecified",
+      "global_ban_flag": false,
+      "identity_authority_class": "RP5C_IMMUTABLE_IDENTITY_PRESERVATION_NOT_SOURCE_TRUTH",
+      "identity_row_id": "RP5C_IDENTITY_00005900",
+      "identity_type": "QKU",
+      "immutable_original_preserved_flag": true,
+      "latency_dependency_refs": [],
+      "latency_dependency_type": "unknown_needs_review",
+      "library_state": "LIBRARY_ELIGIBLE_IMMUTABLE",
+      "market_family": "unknown_needs_review",
+      "market_scope": "unknown_needs_review",
+      "market_scope_registry_refs": [
+        "RP5C_MARKET_SCOPE_0011"
+      ],
+      "master_plan_market_family_refs": [],
+      "mutation_allowed_flag": false,
+      "no_orphan_reason": "Identity has source, registry classification, derived route, validators, downstream refs, and RP5D handoff.",
+      "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
+      "notes": "Immutable identity row extracted without formula mutation or global ban authority.",
+      "ontology_category": "signal_probability",
+      "ontology_role_confidence": "LOW",
+      "ontology_role_registry_refs": [
+        "RP5C_ONTOLOGY_ROLE_0001"
+      ],
+      "ontology_subcategory": "signal_probability",
+      "platform_applicability_registry_refs": [
+        "RP5C_PLATFORM_APPLICABILITY_0008"
+      ],
+      "platform_applicability_states": [
+        "UNKNOWN_PLATFORM_SCOPE_NEEDS_REVIEW"
+      ],
+      "plugin_ref": null,
+      "provenance_tier": "UPSTREAM_FORMULA_QKU_REGISTRY",
+      "qku_family": "atomicrow_qku",
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000015",
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000413"
+      ],
+      "qku_subfamily": "signal_probability",
+      "qku_type": "QKU",
+      "quantum_role_type": "not_quantum",
+      "risk_dependency_refs": [],
+      "risk_dependency_type": "unknown_needs_review",
+      "route_rule_refs": [
+        "RP5C_ROUTE_RULE_0001"
+      ],
+      "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
+      "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "shared_cross_market_support_flag": false,
+      "signal_dependency_refs": [],
+      "source_artifact_ref": "docs/master_plan/generated/PR161C_QKUAgentConsumptionBridge.report.json",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000041",
+      "source_evidence_dependency_refs": [
+        "RP5C_SOURCE_ARTIFACT_000041"
+      ],
+      "source_evidence_dependency_type": "source_evidence_dependency",
+      "source_file_path": "docs/master_plan/generated/PR161C_QKUAgentConsumptionBridge.report.json",
+      "source_identity_value_ref": [
+        "qku_id"
+      ],
+      "source_line_or_json_path": "records[15]",
+      "source_pr_ref": "UPSTREAM_QKU",
+      "specific_market_family_refs": [],
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
+      "stage1_activation_view_refs": [
+        "RP5C_STAGE1_ACTIVATION_00000413"
+      ],
+      "stage1_agent_computation_universe_seed_refs": [],
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
+      "stage1_classification_states": [
+        "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW"
+      ],
+      "stage1_dormant_future_market_flag": true,
+      "stage1_platform_refs": [],
+      "stage1_seed_inclusion_flag": false,
+      "unknown_needs_review_flag": true,
+      "validator_refs": [
+        "governance_agent",
+        "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
+      ]
+    },
+    {
+      "agent_responsibility_group_refs": [
+        "RP5C_RESP_GROUP_0001"
+      ],
+      "all_provenance_tiers": [
+        "UPSTREAM_FORMULA_QKU_REGISTRY"
+      ],
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
+      "blocker_codes": [
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION"
+      ],
+      "canonical_identity_row_id": "RP5C_IDENTITY_00005917",
+      "condition_memory_slot_template": {
+        "data_freshness_bucket": "UNKNOWN",
+        "depth_bucket": "UNKNOWN",
+        "fee_model_ref": null,
+        "hold_duration_bucket": "UNKNOWN",
+        "latency_bucket": "UNKNOWN",
+        "market_category": "UNKNOWN",
+        "order_size_bucket": "UNKNOWN",
+        "outcome_context_ref": null,
+        "side": "UNKNOWN",
+        "slippage_model_ref": null,
+        "spread_bucket": "UNKNOWN",
+        "stack_context": "UNKNOWN",
+        "time_to_close_bucket": "UNKNOWN",
+        "venue": "UNKNOWN",
+        "volatility_bucket": "UNKNOWN"
+      },
+      "condition_scoped_memory_only_flag": false,
+      "data_dependency_refs": [],
+      "data_dependency_type": "market_data_dependency",
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000414"
+      ],
+      "dormant_future_market_qku_ledger_refs": [
+        "RP5C_DORMANT_FUTURE_MARKET_QKU_00000314"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D",
+        "PR168-RP5E",
+        "RANK4"
+      ],
+      "duplicate_group_id": "RP5C_DUP_GROUP_00000841",
+      "duplicate_status": "CANONICAL_REPRESENTATIVE_PRESERVED",
+      "execution_dependency_refs": [],
+      "execution_dependency_type": "signal_dependency",
+      "family_registry_refs": [
+        "RP5C_FAMILY_00082",
+        "RP5C_FAMILY_00095"
+      ],
+      "formula_expression_presence_state": "NEEDS_FORMULA_EXPRESSION_REF",
+      "formula_expression_ref": null,
+      "formula_family": "signal_probability",
+      "formula_id": null,
+      "formula_subfamily": "signal_probability",
+      "formula_to_pnl_ref": null,
+      "formula_variant_id": null,
+      "formula_variant_label": "base_or_unspecified",
+      "global_ban_flag": false,
+      "identity_authority_class": "RP5C_IMMUTABLE_IDENTITY_PRESERVATION_NOT_SOURCE_TRUTH",
+      "identity_row_id": "RP5C_IDENTITY_00005917",
+      "identity_type": "QKU",
+      "immutable_original_preserved_flag": true,
+      "latency_dependency_refs": [],
+      "latency_dependency_type": "unknown_needs_review",
+      "library_state": "LIBRARY_ELIGIBLE_IMMUTABLE",
+      "market_family": "unknown_needs_review",
+      "market_scope": "unknown_needs_review",
+      "market_scope_registry_refs": [
+        "RP5C_MARKET_SCOPE_0011"
+      ],
+      "master_plan_market_family_refs": [],
+      "mutation_allowed_flag": false,
+      "no_orphan_reason": "Identity has source, registry classification, derived route, validators, downstream refs, and RP5D handoff.",
+      "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
+      "notes": "Immutable identity row extracted without formula mutation or global ban authority.",
+      "ontology_category": "signal_probability",
+      "ontology_role_confidence": "LOW",
+      "ontology_role_registry_refs": [
+        "RP5C_ONTOLOGY_ROLE_0001"
+      ],
+      "ontology_subcategory": "signal_probability",
+      "platform_applicability_registry_refs": [
+        "RP5C_PLATFORM_APPLICABILITY_0008"
+      ],
+      "platform_applicability_states": [
+        "UNKNOWN_PLATFORM_SCOPE_NEEDS_REVIEW"
+      ],
+      "plugin_ref": null,
+      "provenance_tier": "UPSTREAM_FORMULA_QKU_REGISTRY",
+      "qku_family": "atomicrow_qku",
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000016",
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000414"
+      ],
+      "qku_subfamily": "signal_probability",
+      "qku_type": "QKU",
+      "quantum_role_type": "not_quantum",
+      "risk_dependency_refs": [],
+      "risk_dependency_type": "unknown_needs_review",
+      "route_rule_refs": [
+        "RP5C_ROUTE_RULE_0001"
+      ],
+      "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
+      "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "shared_cross_market_support_flag": false,
+      "signal_dependency_refs": [],
+      "source_artifact_ref": "docs/master_plan/generated/PR161C_QKUAgentConsumptionBridge.report.json",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000041",
+      "source_evidence_dependency_refs": [
+        "RP5C_SOURCE_ARTIFACT_000041"
+      ],
+      "source_evidence_dependency_type": "source_evidence_dependency",
+      "source_file_path": "docs/master_plan/generated/PR161C_QKUAgentConsumptionBridge.report.json",
+      "source_identity_value_ref": [
+        "qku_id"
+      ],
+      "source_line_or_json_path": "records[16]",
+      "source_pr_ref": "UPSTREAM_QKU",
+      "specific_market_family_refs": [],
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
+      "stage1_activation_view_refs": [
+        "RP5C_STAGE1_ACTIVATION_00000414"
+      ],
+      "stage1_agent_computation_universe_seed_refs": [],
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
+      "stage1_classification_states": [
+        "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW"
+      ],
+      "stage1_dormant_future_market_flag": true,
+      "stage1_platform_refs": [],
+      "stage1_seed_inclusion_flag": false,
+      "unknown_needs_review_flag": true,
+      "validator_refs": [
+        "governance_agent",
+        "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
+      ]
+    },
+    {
+      "agent_responsibility_group_refs": [
+        "RP5C_RESP_GROUP_0001"
+      ],
+      "all_provenance_tiers": [
+        "UPSTREAM_FORMULA_QKU_REGISTRY"
+      ],
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
+      "blocker_codes": [
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION"
+      ],
+      "canonical_identity_row_id": "RP5C_IDENTITY_00005934",
+      "condition_memory_slot_template": {
+        "data_freshness_bucket": "UNKNOWN",
+        "depth_bucket": "UNKNOWN",
+        "fee_model_ref": null,
+        "hold_duration_bucket": "UNKNOWN",
+        "latency_bucket": "UNKNOWN",
+        "market_category": "UNKNOWN",
+        "order_size_bucket": "UNKNOWN",
+        "outcome_context_ref": null,
+        "side": "UNKNOWN",
+        "slippage_model_ref": null,
+        "spread_bucket": "UNKNOWN",
+        "stack_context": "UNKNOWN",
+        "time_to_close_bucket": "UNKNOWN",
+        "venue": "UNKNOWN",
+        "volatility_bucket": "UNKNOWN"
+      },
+      "condition_scoped_memory_only_flag": false,
+      "data_dependency_refs": [],
+      "data_dependency_type": "market_data_dependency",
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000415"
+      ],
+      "dormant_future_market_qku_ledger_refs": [
+        "RP5C_DORMANT_FUTURE_MARKET_QKU_00000315"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D",
+        "PR168-RP5E",
+        "RANK4"
+      ],
+      "duplicate_group_id": "RP5C_DUP_GROUP_00000842",
+      "duplicate_status": "CANONICAL_REPRESENTATIVE_PRESERVED",
+      "execution_dependency_refs": [],
+      "execution_dependency_type": "signal_dependency",
+      "family_registry_refs": [
+        "RP5C_FAMILY_00082",
+        "RP5C_FAMILY_00095"
+      ],
+      "formula_expression_presence_state": "NEEDS_FORMULA_EXPRESSION_REF",
+      "formula_expression_ref": null,
+      "formula_family": "signal_probability",
+      "formula_id": null,
+      "formula_subfamily": "signal_probability",
+      "formula_to_pnl_ref": null,
+      "formula_variant_id": null,
+      "formula_variant_label": "base_or_unspecified",
+      "global_ban_flag": false,
+      "identity_authority_class": "RP5C_IMMUTABLE_IDENTITY_PRESERVATION_NOT_SOURCE_TRUTH",
+      "identity_row_id": "RP5C_IDENTITY_00005934",
+      "identity_type": "QKU",
+      "immutable_original_preserved_flag": true,
+      "latency_dependency_refs": [],
+      "latency_dependency_type": "unknown_needs_review",
+      "library_state": "LIBRARY_ELIGIBLE_IMMUTABLE",
+      "market_family": "unknown_needs_review",
+      "market_scope": "unknown_needs_review",
+      "market_scope_registry_refs": [
+        "RP5C_MARKET_SCOPE_0011"
+      ],
+      "master_plan_market_family_refs": [],
+      "mutation_allowed_flag": false,
+      "no_orphan_reason": "Identity has source, registry classification, derived route, validators, downstream refs, and RP5D handoff.",
+      "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
+      "notes": "Immutable identity row extracted without formula mutation or global ban authority.",
+      "ontology_category": "signal_probability",
+      "ontology_role_confidence": "LOW",
+      "ontology_role_registry_refs": [
+        "RP5C_ONTOLOGY_ROLE_0001"
+      ],
+      "ontology_subcategory": "signal_probability",
+      "platform_applicability_registry_refs": [
+        "RP5C_PLATFORM_APPLICABILITY_0008"
+      ],
+      "platform_applicability_states": [
+        "UNKNOWN_PLATFORM_SCOPE_NEEDS_REVIEW"
+      ],
+      "plugin_ref": null,
+      "provenance_tier": "UPSTREAM_FORMULA_QKU_REGISTRY",
+      "qku_family": "atomicrow_qku",
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000017",
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000415"
+      ],
+      "qku_subfamily": "signal_probability",
+      "qku_type": "QKU",
+      "quantum_role_type": "not_quantum",
+      "risk_dependency_refs": [],
+      "risk_dependency_type": "unknown_needs_review",
+      "route_rule_refs": [
+        "RP5C_ROUTE_RULE_0001"
+      ],
+      "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
+      "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "shared_cross_market_support_flag": false,
+      "signal_dependency_refs": [],
+      "source_artifact_ref": "docs/master_plan/generated/PR161C_QKUAgentConsumptionBridge.report.json",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000041",
+      "source_evidence_dependency_refs": [
+        "RP5C_SOURCE_ARTIFACT_000041"
+      ],
+      "source_evidence_dependency_type": "source_evidence_dependency",
+      "source_file_path": "docs/master_plan/generated/PR161C_QKUAgentConsumptionBridge.report.json",
+      "source_identity_value_ref": [
+        "qku_id"
+      ],
+      "source_line_or_json_path": "records[17]",
+      "source_pr_ref": "UPSTREAM_QKU",
+      "specific_market_family_refs": [],
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
+      "stage1_activation_view_refs": [
+        "RP5C_STAGE1_ACTIVATION_00000415"
+      ],
+      "stage1_agent_computation_universe_seed_refs": [],
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
+      "stage1_classification_states": [
+        "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW"
+      ],
+      "stage1_dormant_future_market_flag": true,
+      "stage1_platform_refs": [],
+      "stage1_seed_inclusion_flag": false,
+      "unknown_needs_review_flag": true,
+      "validator_refs": [
+        "governance_agent",
+        "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
+      ]
+    },
+    {
+      "agent_responsibility_group_refs": [
+        "RP5C_RESP_GROUP_0001"
+      ],
+      "all_provenance_tiers": [
+        "UPSTREAM_FORMULA_QKU_REGISTRY"
+      ],
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
+      "blocker_codes": [
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION"
+      ],
+      "canonical_identity_row_id": "RP5C_IDENTITY_00005951",
+      "condition_memory_slot_template": {
+        "data_freshness_bucket": "UNKNOWN",
+        "depth_bucket": "UNKNOWN",
+        "fee_model_ref": null,
+        "hold_duration_bucket": "UNKNOWN",
+        "latency_bucket": "UNKNOWN",
+        "market_category": "UNKNOWN",
+        "order_size_bucket": "UNKNOWN",
+        "outcome_context_ref": null,
+        "side": "UNKNOWN",
+        "slippage_model_ref": null,
+        "spread_bucket": "UNKNOWN",
+        "stack_context": "UNKNOWN",
+        "time_to_close_bucket": "UNKNOWN",
+        "venue": "UNKNOWN",
+        "volatility_bucket": "UNKNOWN"
+      },
+      "condition_scoped_memory_only_flag": false,
+      "data_dependency_refs": [],
+      "data_dependency_type": "market_data_dependency",
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000416"
+      ],
+      "dormant_future_market_qku_ledger_refs": [
+        "RP5C_DORMANT_FUTURE_MARKET_QKU_00000316"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D",
+        "PR168-RP5E",
+        "RANK4"
+      ],
+      "duplicate_group_id": "RP5C_DUP_GROUP_00000843",
+      "duplicate_status": "CANONICAL_REPRESENTATIVE_PRESERVED",
+      "execution_dependency_refs": [],
+      "execution_dependency_type": "signal_dependency",
+      "family_registry_refs": [
+        "RP5C_FAMILY_00082",
+        "RP5C_FAMILY_00095"
+      ],
+      "formula_expression_presence_state": "NEEDS_FORMULA_EXPRESSION_REF",
+      "formula_expression_ref": null,
+      "formula_family": "signal_probability",
+      "formula_id": null,
+      "formula_subfamily": "signal_probability",
+      "formula_to_pnl_ref": null,
+      "formula_variant_id": null,
+      "formula_variant_label": "base_or_unspecified",
+      "global_ban_flag": false,
+      "identity_authority_class": "RP5C_IMMUTABLE_IDENTITY_PRESERVATION_NOT_SOURCE_TRUTH",
+      "identity_row_id": "RP5C_IDENTITY_00005951",
+      "identity_type": "QKU",
+      "immutable_original_preserved_flag": true,
+      "latency_dependency_refs": [],
+      "latency_dependency_type": "unknown_needs_review",
+      "library_state": "LIBRARY_ELIGIBLE_IMMUTABLE",
+      "market_family": "unknown_needs_review",
+      "market_scope": "unknown_needs_review",
+      "market_scope_registry_refs": [
+        "RP5C_MARKET_SCOPE_0011"
+      ],
+      "master_plan_market_family_refs": [],
+      "mutation_allowed_flag": false,
+      "no_orphan_reason": "Identity has source, registry classification, derived route, validators, downstream refs, and RP5D handoff.",
+      "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
+      "notes": "Immutable identity row extracted without formula mutation or global ban authority.",
+      "ontology_category": "signal_probability",
+      "ontology_role_confidence": "LOW",
+      "ontology_role_registry_refs": [
+        "RP5C_ONTOLOGY_ROLE_0001"
+      ],
+      "ontology_subcategory": "signal_probability",
+      "platform_applicability_registry_refs": [
+        "RP5C_PLATFORM_APPLICABILITY_0008"
+      ],
+      "platform_applicability_states": [
+        "UNKNOWN_PLATFORM_SCOPE_NEEDS_REVIEW"
+      ],
+      "plugin_ref": null,
+      "provenance_tier": "UPSTREAM_FORMULA_QKU_REGISTRY",
+      "qku_family": "atomicrow_qku",
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000018",
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000416"
+      ],
+      "qku_subfamily": "signal_probability",
+      "qku_type": "QKU",
+      "quantum_role_type": "not_quantum",
+      "risk_dependency_refs": [],
+      "risk_dependency_type": "unknown_needs_review",
+      "route_rule_refs": [
+        "RP5C_ROUTE_RULE_0001"
+      ],
+      "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
+      "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "shared_cross_market_support_flag": false,
+      "signal_dependency_refs": [],
+      "source_artifact_ref": "docs/master_plan/generated/PR161C_QKUAgentConsumptionBridge.report.json",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000041",
+      "source_evidence_dependency_refs": [
+        "RP5C_SOURCE_ARTIFACT_000041"
+      ],
+      "source_evidence_dependency_type": "source_evidence_dependency",
+      "source_file_path": "docs/master_plan/generated/PR161C_QKUAgentConsumptionBridge.report.json",
+      "source_identity_value_ref": [
+        "qku_id"
+      ],
+      "source_line_or_json_path": "records[18]",
+      "source_pr_ref": "UPSTREAM_QKU",
+      "specific_market_family_refs": [],
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
+      "stage1_activation_view_refs": [
+        "RP5C_STAGE1_ACTIVATION_00000416"
+      ],
+      "stage1_agent_computation_universe_seed_refs": [],
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
+      "stage1_classification_states": [
+        "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW"
+      ],
+      "stage1_dormant_future_market_flag": true,
+      "stage1_platform_refs": [],
+      "stage1_seed_inclusion_flag": false,
+      "unknown_needs_review_flag": true,
+      "validator_refs": [
+        "governance_agent",
+        "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
+      ]
+    },
+    {
+      "agent_responsibility_group_refs": [
+        "RP5C_RESP_GROUP_0001"
+      ],
+      "all_provenance_tiers": [
+        "UPSTREAM_FORMULA_QKU_REGISTRY"
+      ],
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
+      "blocker_codes": [
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION"
+      ],
+      "canonical_identity_row_id": "RP5C_IDENTITY_00005968",
+      "condition_memory_slot_template": {
+        "data_freshness_bucket": "UNKNOWN",
+        "depth_bucket": "UNKNOWN",
+        "fee_model_ref": null,
+        "hold_duration_bucket": "UNKNOWN",
+        "latency_bucket": "UNKNOWN",
+        "market_category": "UNKNOWN",
+        "order_size_bucket": "UNKNOWN",
+        "outcome_context_ref": null,
+        "side": "UNKNOWN",
+        "slippage_model_ref": null,
+        "spread_bucket": "UNKNOWN",
+        "stack_context": "UNKNOWN",
+        "time_to_close_bucket": "UNKNOWN",
+        "venue": "UNKNOWN",
+        "volatility_bucket": "UNKNOWN"
+      },
+      "condition_scoped_memory_only_flag": false,
+      "data_dependency_refs": [],
+      "data_dependency_type": "market_data_dependency",
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000417"
+      ],
+      "dormant_future_market_qku_ledger_refs": [
+        "RP5C_DORMANT_FUTURE_MARKET_QKU_00000317"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D",
+        "PR168-RP5E",
+        "RANK4"
+      ],
+      "duplicate_group_id": "RP5C_DUP_GROUP_00000844",
+      "duplicate_status": "CANONICAL_REPRESENTATIVE_PRESERVED",
+      "execution_dependency_refs": [],
+      "execution_dependency_type": "signal_dependency",
+      "family_registry_refs": [
+        "RP5C_FAMILY_00082",
+        "RP5C_FAMILY_00095"
+      ],
+      "formula_expression_presence_state": "NEEDS_FORMULA_EXPRESSION_REF",
+      "formula_expression_ref": null,
+      "formula_family": "signal_probability",
+      "formula_id": null,
+      "formula_subfamily": "signal_probability",
+      "formula_to_pnl_ref": null,
+      "formula_variant_id": null,
+      "formula_variant_label": "base_or_unspecified",
+      "global_ban_flag": false,
+      "identity_authority_class": "RP5C_IMMUTABLE_IDENTITY_PRESERVATION_NOT_SOURCE_TRUTH",
+      "identity_row_id": "RP5C_IDENTITY_00005968",
+      "identity_type": "QKU",
+      "immutable_original_preserved_flag": true,
+      "latency_dependency_refs": [],
+      "latency_dependency_type": "unknown_needs_review",
+      "library_state": "LIBRARY_ELIGIBLE_IMMUTABLE",
+      "market_family": "unknown_needs_review",
+      "market_scope": "unknown_needs_review",
+      "market_scope_registry_refs": [
+        "RP5C_MARKET_SCOPE_0011"
+      ],
+      "master_plan_market_family_refs": [],
+      "mutation_allowed_flag": false,
+      "no_orphan_reason": "Identity has source, registry classification, derived route, validators, downstream refs, and RP5D handoff.",
+      "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
+      "notes": "Immutable identity row extracted without formula mutation or global ban authority.",
+      "ontology_category": "signal_probability",
+      "ontology_role_confidence": "LOW",
+      "ontology_role_registry_refs": [
+        "RP5C_ONTOLOGY_ROLE_0001"
+      ],
+      "ontology_subcategory": "signal_probability",
+      "platform_applicability_registry_refs": [
+        "RP5C_PLATFORM_APPLICABILITY_0008"
+      ],
+      "platform_applicability_states": [
+        "UNKNOWN_PLATFORM_SCOPE_NEEDS_REVIEW"
+      ],
+      "plugin_ref": null,
+      "provenance_tier": "UPSTREAM_FORMULA_QKU_REGISTRY",
+      "qku_family": "atomicrow_qku",
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000019",
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000417"
+      ],
+      "qku_subfamily": "signal_probability",
+      "qku_type": "QKU",
+      "quantum_role_type": "not_quantum",
+      "risk_dependency_refs": [],
+      "risk_dependency_type": "unknown_needs_review",
+      "route_rule_refs": [
+        "RP5C_ROUTE_RULE_0001"
+      ],
+      "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
+      "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "shared_cross_market_support_flag": false,
+      "signal_dependency_refs": [],
+      "source_artifact_ref": "docs/master_plan/generated/PR161C_QKUAgentConsumptionBridge.report.json",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000041",
+      "source_evidence_dependency_refs": [
+        "RP5C_SOURCE_ARTIFACT_000041"
+      ],
+      "source_evidence_dependency_type": "source_evidence_dependency",
+      "source_file_path": "docs/master_plan/generated/PR161C_QKUAgentConsumptionBridge.report.json",
+      "source_identity_value_ref": [
+        "qku_id"
+      ],
+      "source_line_or_json_path": "records[19]",
+      "source_pr_ref": "UPSTREAM_QKU",
+      "specific_market_family_refs": [],
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
+      "stage1_activation_view_refs": [
+        "RP5C_STAGE1_ACTIVATION_00000417"
+      ],
+      "stage1_agent_computation_universe_seed_refs": [],
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
+      "stage1_classification_states": [
+        "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW"
+      ],
+      "stage1_dormant_future_market_flag": true,
+      "stage1_platform_refs": [],
+      "stage1_seed_inclusion_flag": false,
+      "unknown_needs_review_flag": true,
+      "validator_refs": [
+        "governance_agent",
+        "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
+      ]
+    },
+    {
+      "agent_responsibility_group_refs": [
+        "RP5C_RESP_GROUP_0001"
+      ],
+      "all_provenance_tiers": [
+        "UPSTREAM_FORMULA_QKU_REGISTRY"
+      ],
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
+      "blocker_codes": [
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION"
+      ],
+      "canonical_identity_row_id": "RP5C_IDENTITY_00005985",
+      "condition_memory_slot_template": {
+        "data_freshness_bucket": "UNKNOWN",
+        "depth_bucket": "UNKNOWN",
+        "fee_model_ref": null,
+        "hold_duration_bucket": "UNKNOWN",
+        "latency_bucket": "UNKNOWN",
+        "market_category": "UNKNOWN",
+        "order_size_bucket": "UNKNOWN",
+        "outcome_context_ref": null,
+        "side": "UNKNOWN",
+        "slippage_model_ref": null,
+        "spread_bucket": "UNKNOWN",
+        "stack_context": "UNKNOWN",
+        "time_to_close_bucket": "UNKNOWN",
+        "venue": "UNKNOWN",
+        "volatility_bucket": "UNKNOWN"
+      },
+      "condition_scoped_memory_only_flag": false,
+      "data_dependency_refs": [],
+      "data_dependency_type": "market_data_dependency",
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000418"
+      ],
+      "dormant_future_market_qku_ledger_refs": [
+        "RP5C_DORMANT_FUTURE_MARKET_QKU_00000318"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D",
+        "PR168-RP5E",
+        "RANK4"
+      ],
+      "duplicate_group_id": "RP5C_DUP_GROUP_00000845",
+      "duplicate_status": "CANONICAL_REPRESENTATIVE_PRESERVED",
+      "execution_dependency_refs": [],
+      "execution_dependency_type": "signal_dependency",
+      "family_registry_refs": [
+        "RP5C_FAMILY_00082",
+        "RP5C_FAMILY_00095"
+      ],
+      "formula_expression_presence_state": "NEEDS_FORMULA_EXPRESSION_REF",
+      "formula_expression_ref": null,
+      "formula_family": "signal_probability",
+      "formula_id": null,
+      "formula_subfamily": "signal_probability",
+      "formula_to_pnl_ref": null,
+      "formula_variant_id": null,
+      "formula_variant_label": "base_or_unspecified",
+      "global_ban_flag": false,
+      "identity_authority_class": "RP5C_IMMUTABLE_IDENTITY_PRESERVATION_NOT_SOURCE_TRUTH",
+      "identity_row_id": "RP5C_IDENTITY_00005985",
+      "identity_type": "QKU",
+      "immutable_original_preserved_flag": true,
+      "latency_dependency_refs": [],
+      "latency_dependency_type": "unknown_needs_review",
+      "library_state": "LIBRARY_ELIGIBLE_IMMUTABLE",
+      "market_family": "unknown_needs_review",
+      "market_scope": "unknown_needs_review",
+      "market_scope_registry_refs": [
+        "RP5C_MARKET_SCOPE_0011"
+      ],
+      "master_plan_market_family_refs": [],
+      "mutation_allowed_flag": false,
+      "no_orphan_reason": "Identity has source, registry classification, derived route, validators, downstream refs, and RP5D handoff.",
+      "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
+      "notes": "Immutable identity row extracted without formula mutation or global ban authority.",
+      "ontology_category": "signal_probability",
+      "ontology_role_confidence": "LOW",
+      "ontology_role_registry_refs": [
+        "RP5C_ONTOLOGY_ROLE_0001"
+      ],
+      "ontology_subcategory": "signal_probability",
+      "platform_applicability_registry_refs": [
+        "RP5C_PLATFORM_APPLICABILITY_0008"
+      ],
+      "platform_applicability_states": [
+        "UNKNOWN_PLATFORM_SCOPE_NEEDS_REVIEW"
+      ],
+      "plugin_ref": null,
+      "provenance_tier": "UPSTREAM_FORMULA_QKU_REGISTRY",
+      "qku_family": "atomicrow_qku",
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000020",
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000418"
+      ],
+      "qku_subfamily": "signal_probability",
+      "qku_type": "QKU",
+      "quantum_role_type": "not_quantum",
+      "risk_dependency_refs": [],
+      "risk_dependency_type": "unknown_needs_review",
+      "route_rule_refs": [
+        "RP5C_ROUTE_RULE_0001"
+      ],
+      "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
+      "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "shared_cross_market_support_flag": false,
+      "signal_dependency_refs": [],
+      "source_artifact_ref": "docs/master_plan/generated/PR161C_QKUAgentConsumptionBridge.report.json",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000041",
+      "source_evidence_dependency_refs": [
+        "RP5C_SOURCE_ARTIFACT_000041"
+      ],
+      "source_evidence_dependency_type": "source_evidence_dependency",
+      "source_file_path": "docs/master_plan/generated/PR161C_QKUAgentConsumptionBridge.report.json",
+      "source_identity_value_ref": [
+        "qku_id"
+      ],
+      "source_line_or_json_path": "records[20]",
+      "source_pr_ref": "UPSTREAM_QKU",
+      "specific_market_family_refs": [],
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
+      "stage1_activation_view_refs": [
+        "RP5C_STAGE1_ACTIVATION_00000418"
+      ],
+      "stage1_agent_computation_universe_seed_refs": [],
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
+      "stage1_classification_states": [
+        "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW"
+      ],
+      "stage1_dormant_future_market_flag": true,
+      "stage1_platform_refs": [],
+      "stage1_seed_inclusion_flag": false,
+      "unknown_needs_review_flag": true,
+      "validator_refs": [
+        "governance_agent",
+        "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
+      ]
+    },
+    {
+      "agent_responsibility_group_refs": [
+        "RP5C_RESP_GROUP_0001"
+      ],
+      "all_provenance_tiers": [
+        "UPSTREAM_FORMULA_QKU_REGISTRY"
+      ],
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
+      "blocker_codes": [
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION"
+      ],
+      "canonical_identity_row_id": "RP5C_IDENTITY_00006002",
+      "condition_memory_slot_template": {
+        "data_freshness_bucket": "UNKNOWN",
+        "depth_bucket": "UNKNOWN",
+        "fee_model_ref": null,
+        "hold_duration_bucket": "UNKNOWN",
+        "latency_bucket": "UNKNOWN",
+        "market_category": "UNKNOWN",
+        "order_size_bucket": "UNKNOWN",
+        "outcome_context_ref": null,
+        "side": "UNKNOWN",
+        "slippage_model_ref": null,
+        "spread_bucket": "UNKNOWN",
+        "stack_context": "UNKNOWN",
+        "time_to_close_bucket": "UNKNOWN",
+        "venue": "UNKNOWN",
+        "volatility_bucket": "UNKNOWN"
+      },
+      "condition_scoped_memory_only_flag": false,
+      "data_dependency_refs": [],
+      "data_dependency_type": "market_data_dependency",
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000419"
+      ],
+      "dormant_future_market_qku_ledger_refs": [
+        "RP5C_DORMANT_FUTURE_MARKET_QKU_00000319"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D",
+        "PR168-RP5E",
+        "RANK4"
+      ],
+      "duplicate_group_id": "RP5C_DUP_GROUP_00000846",
+      "duplicate_status": "CANONICAL_REPRESENTATIVE_PRESERVED",
+      "execution_dependency_refs": [],
+      "execution_dependency_type": "signal_dependency",
+      "family_registry_refs": [
+        "RP5C_FAMILY_00082",
+        "RP5C_FAMILY_00095"
+      ],
+      "formula_expression_presence_state": "NEEDS_FORMULA_EXPRESSION_REF",
+      "formula_expression_ref": null,
+      "formula_family": "signal_probability",
+      "formula_id": null,
+      "formula_subfamily": "signal_probability",
+      "formula_to_pnl_ref": null,
+      "formula_variant_id": null,
+      "formula_variant_label": "base_or_unspecified",
+      "global_ban_flag": false,
+      "identity_authority_class": "RP5C_IMMUTABLE_IDENTITY_PRESERVATION_NOT_SOURCE_TRUTH",
+      "identity_row_id": "RP5C_IDENTITY_00006002",
+      "identity_type": "QKU",
+      "immutable_original_preserved_flag": true,
+      "latency_dependency_refs": [],
+      "latency_dependency_type": "unknown_needs_review",
+      "library_state": "LIBRARY_ELIGIBLE_IMMUTABLE",
+      "market_family": "unknown_needs_review",
+      "market_scope": "unknown_needs_review",
+      "market_scope_registry_refs": [
+        "RP5C_MARKET_SCOPE_0011"
+      ],
+      "master_plan_market_family_refs": [],
+      "mutation_allowed_flag": false,
+      "no_orphan_reason": "Identity has source, registry classification, derived route, validators, downstream refs, and RP5D handoff.",
+      "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
+      "notes": "Immutable identity row extracted without formula mutation or global ban authority.",
+      "ontology_category": "signal_probability",
+      "ontology_role_confidence": "LOW",
+      "ontology_role_registry_refs": [
+        "RP5C_ONTOLOGY_ROLE_0001"
+      ],
+      "ontology_subcategory": "signal_probability",
+      "platform_applicability_registry_refs": [
+        "RP5C_PLATFORM_APPLICABILITY_0008"
+      ],
+      "platform_applicability_states": [
+        "UNKNOWN_PLATFORM_SCOPE_NEEDS_REVIEW"
+      ],
+      "plugin_ref": null,
+      "provenance_tier": "UPSTREAM_FORMULA_QKU_REGISTRY",
+      "qku_family": "atomicrow_qku",
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000021",
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000419"
+      ],
+      "qku_subfamily": "signal_probability",
+      "qku_type": "QKU",
+      "quantum_role_type": "not_quantum",
+      "risk_dependency_refs": [],
+      "risk_dependency_type": "unknown_needs_review",
+      "route_rule_refs": [
+        "RP5C_ROUTE_RULE_0001"
+      ],
+      "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
+      "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "shared_cross_market_support_flag": false,
+      "signal_dependency_refs": [],
+      "source_artifact_ref": "docs/master_plan/generated/PR161C_QKUAgentConsumptionBridge.report.json",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000041",
+      "source_evidence_dependency_refs": [
+        "RP5C_SOURCE_ARTIFACT_000041"
+      ],
+      "source_evidence_dependency_type": "source_evidence_dependency",
+      "source_file_path": "docs/master_plan/generated/PR161C_QKUAgentConsumptionBridge.report.json",
+      "source_identity_value_ref": [
+        "qku_id"
+      ],
+      "source_line_or_json_path": "records[21]",
+      "source_pr_ref": "UPSTREAM_QKU",
+      "specific_market_family_refs": [],
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
+      "stage1_activation_view_refs": [
+        "RP5C_STAGE1_ACTIVATION_00000419"
+      ],
+      "stage1_agent_computation_universe_seed_refs": [],
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
+      "stage1_classification_states": [
+        "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW"
+      ],
+      "stage1_dormant_future_market_flag": true,
+      "stage1_platform_refs": [],
+      "stage1_seed_inclusion_flag": false,
+      "unknown_needs_review_flag": true,
+      "validator_refs": [
+        "governance_agent",
+        "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
+      ]
+    },
+    {
+      "agent_responsibility_group_refs": [
+        "RP5C_RESP_GROUP_0001"
+      ],
+      "all_provenance_tiers": [
+        "UPSTREAM_FORMULA_QKU_REGISTRY"
+      ],
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
+      "blocker_codes": [
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION"
+      ],
+      "canonical_identity_row_id": "RP5C_IDENTITY_00006019",
+      "condition_memory_slot_template": {
+        "data_freshness_bucket": "UNKNOWN",
+        "depth_bucket": "UNKNOWN",
+        "fee_model_ref": null,
+        "hold_duration_bucket": "UNKNOWN",
+        "latency_bucket": "UNKNOWN",
+        "market_category": "UNKNOWN",
+        "order_size_bucket": "UNKNOWN",
+        "outcome_context_ref": null,
+        "side": "UNKNOWN",
+        "slippage_model_ref": null,
+        "spread_bucket": "UNKNOWN",
+        "stack_context": "UNKNOWN",
+        "time_to_close_bucket": "UNKNOWN",
+        "venue": "UNKNOWN",
+        "volatility_bucket": "UNKNOWN"
+      },
+      "condition_scoped_memory_only_flag": false,
+      "data_dependency_refs": [],
+      "data_dependency_type": "market_data_dependency",
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000420"
+      ],
+      "dormant_future_market_qku_ledger_refs": [
+        "RP5C_DORMANT_FUTURE_MARKET_QKU_00000320"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D",
+        "PR168-RP5E",
+        "RANK4"
+      ],
+      "duplicate_group_id": "RP5C_DUP_GROUP_00000847",
+      "duplicate_status": "CANONICAL_REPRESENTATIVE_PRESERVED",
+      "execution_dependency_refs": [],
+      "execution_dependency_type": "signal_dependency",
+      "family_registry_refs": [
+        "RP5C_FAMILY_00082",
+        "RP5C_FAMILY_00095"
+      ],
+      "formula_expression_presence_state": "NEEDS_FORMULA_EXPRESSION_REF",
+      "formula_expression_ref": null,
+      "formula_family": "signal_probability",
+      "formula_id": null,
+      "formula_subfamily": "signal_probability",
+      "formula_to_pnl_ref": null,
+      "formula_variant_id": null,
+      "formula_variant_label": "base_or_unspecified",
+      "global_ban_flag": false,
+      "identity_authority_class": "RP5C_IMMUTABLE_IDENTITY_PRESERVATION_NOT_SOURCE_TRUTH",
+      "identity_row_id": "RP5C_IDENTITY_00006019",
+      "identity_type": "QKU",
+      "immutable_original_preserved_flag": true,
+      "latency_dependency_refs": [],
+      "latency_dependency_type": "unknown_needs_review",
+      "library_state": "LIBRARY_ELIGIBLE_IMMUTABLE",
+      "market_family": "unknown_needs_review",
+      "market_scope": "unknown_needs_review",
+      "market_scope_registry_refs": [
+        "RP5C_MARKET_SCOPE_0011"
+      ],
+      "master_plan_market_family_refs": [],
+      "mutation_allowed_flag": false,
+      "no_orphan_reason": "Identity has source, registry classification, derived route, validators, downstream refs, and RP5D handoff.",
+      "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
+      "notes": "Immutable identity row extracted without formula mutation or global ban authority.",
+      "ontology_category": "signal_probability",
+      "ontology_role_confidence": "LOW",
+      "ontology_role_registry_refs": [
+        "RP5C_ONTOLOGY_ROLE_0001"
+      ],
+      "ontology_subcategory": "signal_probability",
+      "platform_applicability_registry_refs": [
+        "RP5C_PLATFORM_APPLICABILITY_0008"
+      ],
+      "platform_applicability_states": [
+        "UNKNOWN_PLATFORM_SCOPE_NEEDS_REVIEW"
+      ],
+      "plugin_ref": null,
+      "provenance_tier": "UPSTREAM_FORMULA_QKU_REGISTRY",
+      "qku_family": "atomicrow_qku",
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000022",
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000420"
+      ],
+      "qku_subfamily": "signal_probability",
+      "qku_type": "QKU",
+      "quantum_role_type": "not_quantum",
+      "risk_dependency_refs": [],
+      "risk_dependency_type": "unknown_needs_review",
+      "route_rule_refs": [
+        "RP5C_ROUTE_RULE_0001"
+      ],
+      "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
+      "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "shared_cross_market_support_flag": false,
+      "signal_dependency_refs": [],
+      "source_artifact_ref": "docs/master_plan/generated/PR161C_QKUAgentConsumptionBridge.report.json",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000041",
+      "source_evidence_dependency_refs": [
+        "RP5C_SOURCE_ARTIFACT_000041"
+      ],
+      "source_evidence_dependency_type": "source_evidence_dependency",
+      "source_file_path": "docs/master_plan/generated/PR161C_QKUAgentConsumptionBridge.report.json",
+      "source_identity_value_ref": [
+        "qku_id"
+      ],
+      "source_line_or_json_path": "records[22]",
+      "source_pr_ref": "UPSTREAM_QKU",
+      "specific_market_family_refs": [],
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
+      "stage1_activation_view_refs": [
+        "RP5C_STAGE1_ACTIVATION_00000420"
+      ],
+      "stage1_agent_computation_universe_seed_refs": [],
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
+      "stage1_classification_states": [
+        "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW"
+      ],
+      "stage1_dormant_future_market_flag": true,
+      "stage1_platform_refs": [],
+      "stage1_seed_inclusion_flag": false,
+      "unknown_needs_review_flag": true,
+      "validator_refs": [
+        "governance_agent",
+        "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
+      ]
+    },
+    {
+      "agent_responsibility_group_refs": [
+        "RP5C_RESP_GROUP_0001"
+      ],
+      "all_provenance_tiers": [
+        "UPSTREAM_FORMULA_QKU_REGISTRY"
+      ],
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
+      "blocker_codes": [
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION"
+      ],
+      "canonical_identity_row_id": "RP5C_IDENTITY_00006036",
+      "condition_memory_slot_template": {
+        "data_freshness_bucket": "UNKNOWN",
+        "depth_bucket": "UNKNOWN",
+        "fee_model_ref": null,
+        "hold_duration_bucket": "UNKNOWN",
+        "latency_bucket": "UNKNOWN",
+        "market_category": "UNKNOWN",
+        "order_size_bucket": "UNKNOWN",
+        "outcome_context_ref": null,
+        "side": "UNKNOWN",
+        "slippage_model_ref": null,
+        "spread_bucket": "UNKNOWN",
+        "stack_context": "UNKNOWN",
+        "time_to_close_bucket": "UNKNOWN",
+        "venue": "UNKNOWN",
+        "volatility_bucket": "UNKNOWN"
+      },
+      "condition_scoped_memory_only_flag": false,
+      "data_dependency_refs": [],
+      "data_dependency_type": "market_data_dependency",
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000421"
+      ],
+      "dormant_future_market_qku_ledger_refs": [
+        "RP5C_DORMANT_FUTURE_MARKET_QKU_00000321"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D",
+        "PR168-RP5E",
+        "RANK4"
+      ],
+      "duplicate_group_id": "RP5C_DUP_GROUP_00000848",
+      "duplicate_status": "CANONICAL_REPRESENTATIVE_PRESERVED",
+      "execution_dependency_refs": [],
+      "execution_dependency_type": "signal_dependency",
+      "family_registry_refs": [
+        "RP5C_FAMILY_00082",
+        "RP5C_FAMILY_00095"
+      ],
+      "formula_expression_presence_state": "NEEDS_FORMULA_EXPRESSION_REF",
+      "formula_expression_ref": null,
+      "formula_family": "signal_probability",
+      "formula_id": null,
+      "formula_subfamily": "signal_probability",
+      "formula_to_pnl_ref": null,
+      "formula_variant_id": null,
+      "formula_variant_label": "base_or_unspecified",
+      "global_ban_flag": false,
+      "identity_authority_class": "RP5C_IMMUTABLE_IDENTITY_PRESERVATION_NOT_SOURCE_TRUTH",
+      "identity_row_id": "RP5C_IDENTITY_00006036",
+      "identity_type": "QKU",
+      "immutable_original_preserved_flag": true,
+      "latency_dependency_refs": [],
+      "latency_dependency_type": "unknown_needs_review",
+      "library_state": "LIBRARY_ELIGIBLE_IMMUTABLE",
+      "market_family": "unknown_needs_review",
+      "market_scope": "unknown_needs_review",
+      "market_scope_registry_refs": [
+        "RP5C_MARKET_SCOPE_0011"
+      ],
+      "master_plan_market_family_refs": [],
+      "mutation_allowed_flag": false,
+      "no_orphan_reason": "Identity has source, registry classification, derived route, validators, downstream refs, and RP5D handoff.",
+      "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
+      "notes": "Immutable identity row extracted without formula mutation or global ban authority.",
+      "ontology_category": "signal_probability",
+      "ontology_role_confidence": "LOW",
+      "ontology_role_registry_refs": [
+        "RP5C_ONTOLOGY_ROLE_0001"
+      ],
+      "ontology_subcategory": "signal_probability",
+      "platform_applicability_registry_refs": [
+        "RP5C_PLATFORM_APPLICABILITY_0008"
+      ],
+      "platform_applicability_states": [
+        "UNKNOWN_PLATFORM_SCOPE_NEEDS_REVIEW"
+      ],
+      "plugin_ref": null,
+      "provenance_tier": "UPSTREAM_FORMULA_QKU_REGISTRY",
+      "qku_family": "atomicrow_qku",
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000023",
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000421"
+      ],
+      "qku_subfamily": "signal_probability",
+      "qku_type": "QKU",
+      "quantum_role_type": "not_quantum",
+      "risk_dependency_refs": [],
+      "risk_dependency_type": "unknown_needs_review",
+      "route_rule_refs": [
+        "RP5C_ROUTE_RULE_0001"
+      ],
+      "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
+      "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "shared_cross_market_support_flag": false,
+      "signal_dependency_refs": [],
+      "source_artifact_ref": "docs/master_plan/generated/PR161C_QKUAgentConsumptionBridge.report.json",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000041",
+      "source_evidence_dependency_refs": [
+        "RP5C_SOURCE_ARTIFACT_000041"
+      ],
+      "source_evidence_dependency_type": "source_evidence_dependency",
+      "source_file_path": "docs/master_plan/generated/PR161C_QKUAgentConsumptionBridge.report.json",
+      "source_identity_value_ref": [
+        "qku_id"
+      ],
+      "source_line_or_json_path": "records[23]",
+      "source_pr_ref": "UPSTREAM_QKU",
+      "specific_market_family_refs": [],
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
+      "stage1_activation_view_refs": [
+        "RP5C_STAGE1_ACTIVATION_00000421"
+      ],
+      "stage1_agent_computation_universe_seed_refs": [],
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
+      "stage1_classification_states": [
+        "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW"
+      ],
+      "stage1_dormant_future_market_flag": true,
+      "stage1_platform_refs": [],
+      "stage1_seed_inclusion_flag": false,
+      "unknown_needs_review_flag": true,
+      "validator_refs": [
+        "governance_agent",
+        "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
+      ]
+    },
+    {
+      "agent_responsibility_group_refs": [
+        "RP5C_RESP_GROUP_0001"
+      ],
+      "all_provenance_tiers": [
+        "UPSTREAM_FORMULA_QKU_REGISTRY"
+      ],
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
+      "blocker_codes": [
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION"
+      ],
+      "canonical_identity_row_id": "RP5C_IDENTITY_00006053",
+      "condition_memory_slot_template": {
+        "data_freshness_bucket": "UNKNOWN",
+        "depth_bucket": "UNKNOWN",
+        "fee_model_ref": null,
+        "hold_duration_bucket": "UNKNOWN",
+        "latency_bucket": "UNKNOWN",
+        "market_category": "UNKNOWN",
+        "order_size_bucket": "UNKNOWN",
+        "outcome_context_ref": null,
+        "side": "UNKNOWN",
+        "slippage_model_ref": null,
+        "spread_bucket": "UNKNOWN",
+        "stack_context": "UNKNOWN",
+        "time_to_close_bucket": "UNKNOWN",
+        "venue": "UNKNOWN",
+        "volatility_bucket": "UNKNOWN"
+      },
+      "condition_scoped_memory_only_flag": false,
+      "data_dependency_refs": [],
+      "data_dependency_type": "market_data_dependency",
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000422"
+      ],
+      "dormant_future_market_qku_ledger_refs": [
+        "RP5C_DORMANT_FUTURE_MARKET_QKU_00000322"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D",
+        "PR168-RP5E",
+        "RANK4"
+      ],
+      "duplicate_group_id": "RP5C_DUP_GROUP_00000849",
+      "duplicate_status": "CANONICAL_REPRESENTATIVE_PRESERVED",
+      "execution_dependency_refs": [],
+      "execution_dependency_type": "signal_dependency",
+      "family_registry_refs": [
+        "RP5C_FAMILY_00082",
+        "RP5C_FAMILY_00095"
+      ],
+      "formula_expression_presence_state": "NEEDS_FORMULA_EXPRESSION_REF",
+      "formula_expression_ref": null,
+      "formula_family": "signal_probability",
+      "formula_id": null,
+      "formula_subfamily": "signal_probability",
+      "formula_to_pnl_ref": null,
+      "formula_variant_id": null,
+      "formula_variant_label": "base_or_unspecified",
+      "global_ban_flag": false,
+      "identity_authority_class": "RP5C_IMMUTABLE_IDENTITY_PRESERVATION_NOT_SOURCE_TRUTH",
+      "identity_row_id": "RP5C_IDENTITY_00006053",
+      "identity_type": "QKU",
+      "immutable_original_preserved_flag": true,
+      "latency_dependency_refs": [],
+      "latency_dependency_type": "unknown_needs_review",
+      "library_state": "LIBRARY_ELIGIBLE_IMMUTABLE",
+      "market_family": "unknown_needs_review",
+      "market_scope": "unknown_needs_review",
+      "market_scope_registry_refs": [
+        "RP5C_MARKET_SCOPE_0011"
+      ],
+      "master_plan_market_family_refs": [],
+      "mutation_allowed_flag": false,
+      "no_orphan_reason": "Identity has source, registry classification, derived route, validators, downstream refs, and RP5D handoff.",
+      "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
+      "notes": "Immutable identity row extracted without formula mutation or global ban authority.",
+      "ontology_category": "signal_probability",
+      "ontology_role_confidence": "LOW",
+      "ontology_role_registry_refs": [
+        "RP5C_ONTOLOGY_ROLE_0001"
+      ],
+      "ontology_subcategory": "signal_probability",
+      "platform_applicability_registry_refs": [
+        "RP5C_PLATFORM_APPLICABILITY_0008"
+      ],
+      "platform_applicability_states": [
+        "UNKNOWN_PLATFORM_SCOPE_NEEDS_REVIEW"
+      ],
+      "plugin_ref": null,
+      "provenance_tier": "UPSTREAM_FORMULA_QKU_REGISTRY",
+      "qku_family": "atomicrow_qku",
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000024",
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000422"
+      ],
+      "qku_subfamily": "signal_probability",
+      "qku_type": "QKU",
+      "quantum_role_type": "not_quantum",
+      "risk_dependency_refs": [],
+      "risk_dependency_type": "unknown_needs_review",
+      "route_rule_refs": [
+        "RP5C_ROUTE_RULE_0001"
+      ],
+      "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
+      "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "shared_cross_market_support_flag": false,
+      "signal_dependency_refs": [],
+      "source_artifact_ref": "docs/master_plan/generated/PR161C_QKUAgentConsumptionBridge.report.json",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000041",
+      "source_evidence_dependency_refs": [
+        "RP5C_SOURCE_ARTIFACT_000041"
+      ],
+      "source_evidence_dependency_type": "source_evidence_dependency",
+      "source_file_path": "docs/master_plan/generated/PR161C_QKUAgentConsumptionBridge.report.json",
+      "source_identity_value_ref": [
+        "qku_id"
+      ],
+      "source_line_or_json_path": "records[24]",
+      "source_pr_ref": "UPSTREAM_QKU",
+      "specific_market_family_refs": [],
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
+      "stage1_activation_view_refs": [
+        "RP5C_STAGE1_ACTIVATION_00000422"
+      ],
+      "stage1_agent_computation_universe_seed_refs": [],
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
+      "stage1_classification_states": [
+        "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW"
+      ],
+      "stage1_dormant_future_market_flag": true,
+      "stage1_platform_refs": [],
+      "stage1_seed_inclusion_flag": false,
+      "unknown_needs_review_flag": true,
+      "validator_refs": [
+        "governance_agent",
+        "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
+      ]
+    },
+    {
+      "agent_responsibility_group_refs": [
+        "RP5C_RESP_GROUP_0001"
+      ],
+      "all_provenance_tiers": [
+        "UPSTREAM_FORMULA_QKU_REGISTRY"
+      ],
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
+      "blocker_codes": [
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION"
+      ],
+      "canonical_identity_row_id": "RP5C_IDENTITY_00006070",
+      "condition_memory_slot_template": {
+        "data_freshness_bucket": "UNKNOWN",
+        "depth_bucket": "UNKNOWN",
+        "fee_model_ref": null,
+        "hold_duration_bucket": "UNKNOWN",
+        "latency_bucket": "UNKNOWN",
+        "market_category": "UNKNOWN",
+        "order_size_bucket": "UNKNOWN",
+        "outcome_context_ref": null,
+        "side": "UNKNOWN",
+        "slippage_model_ref": null,
+        "spread_bucket": "UNKNOWN",
+        "stack_context": "UNKNOWN",
+        "time_to_close_bucket": "UNKNOWN",
+        "venue": "UNKNOWN",
+        "volatility_bucket": "UNKNOWN"
+      },
+      "condition_scoped_memory_only_flag": false,
+      "data_dependency_refs": [],
+      "data_dependency_type": "market_data_dependency",
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000423"
+      ],
+      "dormant_future_market_qku_ledger_refs": [
+        "RP5C_DORMANT_FUTURE_MARKET_QKU_00000323"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D",
+        "PR168-RP5E",
+        "RANK4"
+      ],
+      "duplicate_group_id": "RP5C_DUP_GROUP_00000850",
+      "duplicate_status": "CANONICAL_REPRESENTATIVE_PRESERVED",
+      "execution_dependency_refs": [],
+      "execution_dependency_type": "signal_dependency",
+      "family_registry_refs": [
+        "RP5C_FAMILY_00082",
+        "RP5C_FAMILY_00095"
+      ],
+      "formula_expression_presence_state": "NEEDS_FORMULA_EXPRESSION_REF",
+      "formula_expression_ref": null,
+      "formula_family": "signal_probability",
+      "formula_id": null,
+      "formula_subfamily": "signal_probability",
+      "formula_to_pnl_ref": null,
+      "formula_variant_id": null,
+      "formula_variant_label": "base_or_unspecified",
+      "global_ban_flag": false,
+      "identity_authority_class": "RP5C_IMMUTABLE_IDENTITY_PRESERVATION_NOT_SOURCE_TRUTH",
+      "identity_row_id": "RP5C_IDENTITY_00006070",
+      "identity_type": "QKU",
+      "immutable_original_preserved_flag": true,
+      "latency_dependency_refs": [],
+      "latency_dependency_type": "unknown_needs_review",
+      "library_state": "LIBRARY_ELIGIBLE_IMMUTABLE",
+      "market_family": "unknown_needs_review",
+      "market_scope": "unknown_needs_review",
+      "market_scope_registry_refs": [
+        "RP5C_MARKET_SCOPE_0011"
+      ],
+      "master_plan_market_family_refs": [],
+      "mutation_allowed_flag": false,
+      "no_orphan_reason": "Identity has source, registry classification, derived route, validators, downstream refs, and RP5D handoff.",
+      "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
+      "notes": "Immutable identity row extracted without formula mutation or global ban authority.",
+      "ontology_category": "signal_probability",
+      "ontology_role_confidence": "LOW",
+      "ontology_role_registry_refs": [
+        "RP5C_ONTOLOGY_ROLE_0001"
+      ],
+      "ontology_subcategory": "signal_probability",
+      "platform_applicability_registry_refs": [
+        "RP5C_PLATFORM_APPLICABILITY_0008"
+      ],
+      "platform_applicability_states": [
+        "UNKNOWN_PLATFORM_SCOPE_NEEDS_REVIEW"
+      ],
+      "plugin_ref": null,
+      "provenance_tier": "UPSTREAM_FORMULA_QKU_REGISTRY",
+      "qku_family": "atomicrow_qku",
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000025",
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000423"
+      ],
+      "qku_subfamily": "signal_probability",
+      "qku_type": "QKU",
+      "quantum_role_type": "not_quantum",
+      "risk_dependency_refs": [],
+      "risk_dependency_type": "unknown_needs_review",
+      "route_rule_refs": [
+        "RP5C_ROUTE_RULE_0001"
+      ],
+      "rp5d_handoff_reason": "RP5C does not decide executability tiers.",
+      "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "shared_cross_market_support_flag": false,
+      "signal_dependency_refs": [],
+      "source_artifact_ref": "docs/master_plan/generated/PR161C_QKUAgentConsumptionBridge.report.json",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000041",
+      "source_evidence_dependency_refs": [
+        "RP5C_SOURCE_ARTIFACT_000041"
+      ],
+      "source_evidence_dependency_type": "source_evidence_dependency",
+      "source_file_path": "docs/master_plan/generated/PR161C_QKUAgentConsumptionBridge.report.json",
+      "source_identity_value_ref": [
+        "qku_id"
+      ],
+      "source_line_or_json_path": "records[25]",
+      "source_pr_ref": "UPSTREAM_QKU",
+      "specific_market_family_refs": [],
+      "stage1_access_mode": "UNKNOWN_NEEDS_REVIEW",
+      "stage1_activation_view_refs": [
+        "RP5C_STAGE1_ACTIVATION_00000423"
+      ],
+      "stage1_agent_computation_universe_seed_refs": [],
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
+      "stage1_classification_states": [
+        "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW"
+      ],
+      "stage1_dormant_future_market_flag": true,
+      "stage1_platform_refs": [],
+      "stage1_seed_inclusion_flag": false,
+      "unknown_needs_review_flag": true,
+      "validator_refs": [
+        "governance_agent",
+        "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
+      ]
+    }
+  ],
+  "report_version": "PR168-RP5C-v1.0",
+  "rows_ref": "docs/master_plan/generated/rp5c/immutable_qku_library.jsonl",
+  "runtime_cash_receipt_count": 0,
+  "runtime_stack_generation_count": 0,
+  "silent_skipped_input_artifact_count": 0,
+  "source_truth_authority_created_count": 0,
+  "stack_combination_materialization_count": 0,
+  "stage1_default_full_universe_compute_route_count": 0,
+  "trade_simulation_count": 0
+}

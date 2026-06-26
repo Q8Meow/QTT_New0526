@@ -1,0 +1,2322 @@
+{
+  "absolute_local_path_leak_count": 0,
+  "archived_file_count": 0,
+  "backslash_only_path_leak_count": 0,
+  "champion_authority_created_count": 0,
+  "connector_semantic_binding_count": 0,
+  "created_at_utc": "2026-06-25T00:00:00Z",
+  "deleted_file_count": 0,
+  "dormant_qku_deleted_count": 0,
+  "dormant_qku_global_ban_count": 0,
+  "duty_crosswalk_exists": true,
+  "duty_crosswalk_paths": [
+    "docs/master_plan/generated/PR165_D2_AgentDutySourceCrosswalk.report.json"
+  ],
+  "formula_expression_mutation_count": 0,
+  "formula_identity_deleted_count": 0,
+  "formula_profit_ranking_count": 0,
+  "generated_path_case_collision_count": 0,
+  "global_formula_ban_count": 0,
+  "global_qku_ban_count": 0,
+  "hard_zero_counters": {
+    "absolute_local_path_leak_count": 0,
+    "archived_file_count": 0,
+    "backslash_only_path_leak_count": 0,
+    "champion_authority_created_count": 0,
+    "connector_semantic_binding_count": 0,
+    "deleted_file_count": 0,
+    "dormant_qku_deleted_count": 0,
+    "dormant_qku_global_ban_count": 0,
+    "formula_expression_mutation_count": 0,
+    "formula_identity_deleted_count": 0,
+    "formula_profit_ranking_count": 0,
+    "generated_path_case_collision_count": 0,
+    "global_formula_ban_count": 0,
+    "global_qku_ban_count": 0,
+    "launch_readiness_authority_created_count": 0,
+    "live_order_authority_created_count": 0,
+    "manual_per_qku_hardcoded_agent_assignment_count": 0,
+    "master_plan_content_deleted_or_shortened_count": 0,
+    "moved_file_count": 0,
+    "mutable_agent_ownership_embedded_as_identity_authority_count": 0,
+    "non_prediction_market_qku_stage1_active_count": 0,
+    "orphan_generated_shard_count": 0,
+    "orphan_identity_count": 0,
+    "orphan_input_report_count": 0,
+    "orphan_source_artifact_count": 0,
+    "paper_loop_runtime_count": 0,
+    "private_state_fetch_count": 0,
+    "qku_identity_deleted_count": 0,
+    "qopt_batch_count": 0,
+    "qtt_sha_or_atomicrows_hash_authority_count": 0,
+    "quantum_advantage_claim_count": 0,
+    "quantum_backend_execution_count": 0,
+    "rank4_ranking_count": 0,
+    "raw_legacy_direct_agent_consumer_count": 0,
+    "runtime_cash_receipt_count": 0,
+    "runtime_stack_generation_count": 0,
+    "silent_skipped_input_artifact_count": 0,
+    "source_truth_authority_created_count": 0,
+    "stack_combination_materialization_count": 0,
+    "stage1_default_full_universe_compute_route_count": 0,
+    "trade_simulation_count": 0
+  },
+  "launch_readiness_authority_created_count": 0,
+  "live_order_authority_created_count": 0,
+  "logical_report_id": "PR168_RP5C_AgentDutyInput",
+  "manual_per_qku_hardcoded_agent_assignment_count": 0,
+  "master_plan_content_deleted_or_shortened_count": 0,
+  "missing_blocker_codes": [],
+  "moved_file_count": 0,
+  "mutable_agent_ownership_embedded_as_identity_authority_count": 0,
+  "no_authority_statement": "RP5C is immutable identity, provenance, classification, and derived routing preparation only. It creates no live/order/source-truth/champion/launch/quantum/hash authority and does not mutate formulas or delete identities.",
+  "non_prediction_market_qku_stage1_active_count": 0,
+  "orphan_generated_shard_count": 0,
+  "orphan_identity_count": 0,
+  "orphan_input_report_count": 0,
+  "orphan_source_artifact_count": 0,
+  "paper_loop_runtime_count": 0,
+  "parsed_agent_count": 8,
+  "parsed_agent_ids": [
+    "commander_agent",
+    "connector_venue_readiness_future_consumer",
+    "dashboard_agent",
+    "governance_agent",
+    "parameter_selector_agent",
+    "quantum_optimizer_agent",
+    "research_agent",
+    "risk_manager_agent"
+  ],
+  "parsed_duty_families": [
+    "QUBO Ising BQM CQM DQM QuadraticProgram route review",
+    "authority boundary audit",
+    "capacity crowding correlation controls",
+    "champion challenger selection",
+    "command action matrix",
+    "downstream route ownership",
+    "external selection signal candidates",
+    "false-discovery overfit rank instability",
+    "formula and value materialization",
+    "future connector readiness reference route consumption",
+    "net-edge adjusted ranking",
+    "next PR routing",
+    "no orphan audit",
+    "no semantic binding from PR165-D2",
+    "owner review labels without live action",
+    "quantum candidate priority v2",
+    "retest batch and repair queue ownership",
+    "scenario feature scouting",
+    "selected batch display",
+    "settlement liquidity latency adverse selection",
+    "status enum drift audit",
+    "watchlist and exclusion display"
+  ],
+  "physical_filename": "PR168_RP5C_AgentDutyInput.report.json",
+  "private_state_fetch_count": 0,
+  "qku_identity_deleted_count": 0,
+  "qopt_batch_count": 0,
+  "qtt_sha_or_atomicrows_hash_authority_count": 0,
+  "quantum_advantage_claim_count": 0,
+  "quantum_backend_execution_count": 0,
+  "rank4_ranking_count": 0,
+  "raw_legacy_direct_agent_consumer_count": 0,
+  "records": [
+    {
+      "agent_family": "research",
+      "agent_handoff_blocked_until_roster_audit_passes": true,
+      "agent_id": "research_agent",
+      "agent_name": "Research Agent",
+      "agent_role": "external_signal_and_materialization_research",
+      "algorithm_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "allowed_consumed_artifact_classes": [
+        "external_signal_candidate",
+        "materialization_gap"
+      ],
+      "allowed_output_artifact_classes": [
+        "materialization_action",
+        "candidate_signal_route"
+      ],
+      "artifact_id": "PR165_D2_AGENT_ROSTER_DISCOVERY_AUDIT",
+      "atomicrows_bundle_sha_hash_checksum_authority_count": 0,
+      "atomicrows_bundle_sha_reference_count": 0,
+      "authority_boundary_ref": "PR165_D2_AUTHORITY_BOUNDARY::REPLAY_PAPER_SELECTION_ONLY_NO_LIVE_SOURCE_TRUTH_CONNECTOR_OR_QUANTUM_BACKEND",
+      "candidate_packet_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "canonical_roster_source": "COMPILED_FROM_PRIOR_ARTIFACTS",
+      "combination_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "commander_route_required_flag": false,
+      "computability_status": "COMPUTABLE_FOR_AGENT_HANDOFF_ONLY",
+      "condition_fingerprint_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "condition_memory_policy_ref": "PR165_D2_CONDITION_MEMORY_POLICY::CONDITION_SCOPED_PREFERENCE_V2",
+      "connector_binding_allowed_in_this_pr": false,
+      "connector_dependency_class": "NO_CONNECTOR_DEPENDENCY_FOR_SELECTION",
+      "connector_readiness_policy_ref": "PR165_D2_CONNECTOR_READINESS_POLICY::REFERENCE_ROUTE_ONLY_V1",
+      "connector_semantic_binding_count": 0,
+      "connector_truth_count": 0,
+      "created_at_utc": "2026-06-11T00:00:00Z",
+      "created_by_pr": "PR165-D2",
+      "dashboard_visibility_flag": false,
+      "deterministic_sort_key": "PR165_D2_AGENT_ROSTER::000001",
+      "downstream_agent_consumers": [
+        "parameter_selector_agent",
+        "risk_manager_agent",
+        "quantum_optimizer_agent",
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "downstream_artifact_refs": [
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "downstream_consumers": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "downstream_pr_refs": [
+        "DASHBOARD_GOVERNANCE_COMMANDER_REVIEW"
+      ],
+      "duties_from_prior_artifacts": [
+        "external selection signal candidates",
+        "formula and value materialization",
+        "scenario feature scouting"
+      ],
+      "forbidden_authority_classes": [
+        "LIVE_ORDER_AUTHORITY",
+        "SOURCE_TRUTH_ACCEPTANCE",
+        "CONNECTOR_SEMANTIC_BINDING",
+        "PRIVATE_STATE_FETCH",
+        "PROFIT_EVIDENCE_AUTHORITY_FORBIDDEN_BY_PR165_D2",
+        "QUANTUM_BACKEND_EXECUTION"
+      ],
+      "formula_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "future_connector_pr_refs": [
+        "DASHBOARD_GOVERNANCE_COMMANDER_REVIEW"
+      ],
+      "future_venue_readiness_route": "DASHBOARD_GOVERNANCE_COMMANDER_REVIEW",
+      "governance_review_required_flag": true,
+      "live_order_authority_count": 0,
+      "live_promotion_claim_count": 0,
+      "llm_hot_path_artifact_count": 0,
+      "llm_order_release_artifact_count": 0,
+      "llm_result_rewrite_artifact_count": 0,
+      "llm_source_acceptance_artifact_count": 0,
+      "manifest_ref": "PR165_D2_ReportManifest.report.json",
+      "materialization_action_ref": "PR165_D2_MATERIALIZATION_ACTION::NOT_REQUIRED_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "missing_single_roster_artifact_flag": true,
+      "new_sha256_artifact_count": 0,
+      "no_orphan_status": "CONNECTED_TO_AGENT_ROSTER_DISCOVERY_ROUTE",
+      "normalization_policy_ref": "PR165_D2_NORMALIZATION_POLICY::ROBUST_SCENARIO_GROUP_RANK_MINMAX_V2",
+      "owning_agent": "governance_agent",
+      "pr165_d2_duty_mapping": [
+        "external selection signal candidates",
+        "formula and value materialization",
+        "scenario feature scouting"
+      ],
+      "private_state_fetch_allowed_in_this_pr": false,
+      "private_state_fetch_count": 0,
+      "profit_evidence_count": 0,
+      "qku_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "qtt_sha_authority_count": 0,
+      "qtt_sha_freeze_checksum_global_digest_authority_count": 0,
+      "quantum_advantage_claim_count": 0,
+      "quantum_backend_execution_count": 0,
+      "repair_route_ref": "PR165_D2_REPAIR_ROUTE::NOT_REQUIRED_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "reviewer_or_challenger_agent": "commander_agent",
+      "row_id": "PR165_D2_AGENT_ROSTER::000001",
+      "runtime_cash_receipt_allowed_in_this_pr": false,
+      "runtime_cash_receipt_count": 0,
+      "scenario_group_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "schema_ref": "pr165_d2_agent_roster_discovery_audit.schema.json",
+      "score_policy_ref": "PR165_D2_SCORE_POLICY::EXECUTION_ADJUSTED_SCENARIO_SELECTION_V2",
+      "selection_blocked_flag": false,
+      "selection_state": "ROUTE_TO_PR173_AGENT_GOVERNANCE_FUTURE",
+      "source_artifact_refs": [
+        "PR166_SM_AgentScoreMemoryRefreshContract.report.json",
+        "PR166_SM_AgentTaskQueue.report.json",
+        "PR165_C_MemoryConsumerRouter.report.json",
+        "PR165_D_AgentSelectionHandoff.report.json"
+      ],
+      "source_authority_class": "PRIOR_ROADMAP_ARTIFACT_NOT_SOURCE_TRUTH",
+      "source_roadmap_pr_refs": [
+        "PR166-SM",
+        "PR166-S",
+        "PR165-C",
+        "PR165-D",
+        "PR165-B"
+      ],
+      "source_row_refs": [
+        "COMPILED_PRIOR_ARTIFACT_AGENT_ROW::research_agent"
+      ],
+      "source_truth_acceptance_allowed_in_this_pr": false,
+      "source_truth_acceptance_count": 0,
+      "terminal_status_flag": false,
+      "terminal_status_reason": "ROW_CONTINUES_TO_DECLARED_DOWNSTREAM_ROUTE",
+      "upstream_artifact_refs": [
+        "PR166_SM_AgentScoreMemoryRefreshContract.report.json",
+        "PR166_SM_AgentTaskQueue.report.json",
+        "PR165_C_MemoryConsumerRouter.report.json",
+        "PR165_D_AgentSelectionHandoff.report.json"
+      ],
+      "upstream_dependencies": [
+        "PR166_SM_AgentScoreMemoryRefreshContract.report.json",
+        "PR166_SM_AgentTaskQueue.report.json",
+        "PR165_C_MemoryConsumerRouter.report.json",
+        "PR165_D_AgentSelectionHandoff.report.json"
+      ],
+      "upstream_pr_refs": [
+        "PR165",
+        "PR165-B",
+        "PR165-C",
+        "PR165-D",
+        "PR166-S",
+        "PR166-SM",
+        "PR164"
+      ],
+      "upstream_row_refs": [
+        "PR165_D2_AGENT_ROSTER_SOURCE::research_agent"
+      ],
+      "upstream_value_refs": [
+        "agent_id",
+        "agent_role",
+        "agent_family"
+      ],
+      "validation_status": "PASS",
+      "validator_ref": "tools/validate_pr165_d2_score_refreshed_scenario_selection_v2.py",
+      "value_authority_lane": "AGENT_HANDOFF_LANE",
+      "venue_account_truth_count": 0,
+      "venue_semantic_dependency_class": "NO_VENUE_SEMANTIC_DEPENDENCY_FOR_SELECTION"
+    },
+    {
+      "agent_family": "selection",
+      "agent_handoff_blocked_until_roster_audit_passes": true,
+      "agent_id": "parameter_selector_agent",
+      "agent_name": "Parameter Selector",
+      "agent_role": "scenario_selection_and_retest_batch_building",
+      "algorithm_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "allowed_consumed_artifact_classes": [
+        "ranking",
+        "retest_batch",
+        "repair_queue"
+      ],
+      "allowed_output_artifact_classes": [
+        "selected_batch",
+        "repair_handoff"
+      ],
+      "artifact_id": "PR165_D2_AGENT_ROSTER_DISCOVERY_AUDIT",
+      "atomicrows_bundle_sha_hash_checksum_authority_count": 0,
+      "atomicrows_bundle_sha_reference_count": 0,
+      "authority_boundary_ref": "PR165_D2_AUTHORITY_BOUNDARY::REPLAY_PAPER_SELECTION_ONLY_NO_LIVE_SOURCE_TRUTH_CONNECTOR_OR_QUANTUM_BACKEND",
+      "candidate_packet_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "canonical_roster_source": "COMPILED_FROM_PRIOR_ARTIFACTS",
+      "combination_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "commander_route_required_flag": true,
+      "computability_status": "COMPUTABLE_FOR_AGENT_HANDOFF_ONLY",
+      "condition_fingerprint_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "condition_memory_policy_ref": "PR165_D2_CONDITION_MEMORY_POLICY::CONDITION_SCOPED_PREFERENCE_V2",
+      "connector_binding_allowed_in_this_pr": false,
+      "connector_dependency_class": "NO_CONNECTOR_DEPENDENCY_FOR_SELECTION",
+      "connector_readiness_policy_ref": "PR165_D2_CONNECTOR_READINESS_POLICY::REFERENCE_ROUTE_ONLY_V1",
+      "connector_semantic_binding_count": 0,
+      "connector_truth_count": 0,
+      "created_at_utc": "2026-06-11T00:00:00Z",
+      "created_by_pr": "PR165-D2",
+      "dashboard_visibility_flag": true,
+      "deterministic_sort_key": "PR165_D2_AGENT_ROSTER::000002",
+      "downstream_agent_consumers": [
+        "parameter_selector_agent",
+        "risk_manager_agent",
+        "quantum_optimizer_agent",
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "downstream_artifact_refs": [
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "downstream_consumers": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "downstream_pr_refs": [
+        "DASHBOARD_GOVERNANCE_COMMANDER_REVIEW"
+      ],
+      "duties_from_prior_artifacts": [
+        "net-edge adjusted ranking",
+        "champion challenger selection",
+        "retest batch and repair queue ownership"
+      ],
+      "forbidden_authority_classes": [
+        "LIVE_ORDER_AUTHORITY",
+        "SOURCE_TRUTH_ACCEPTANCE",
+        "CONNECTOR_SEMANTIC_BINDING",
+        "PRIVATE_STATE_FETCH",
+        "PROFIT_EVIDENCE_AUTHORITY_FORBIDDEN_BY_PR165_D2",
+        "QUANTUM_BACKEND_EXECUTION"
+      ],
+      "formula_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "future_connector_pr_refs": [
+        "DASHBOARD_GOVERNANCE_COMMANDER_REVIEW"
+      ],
+      "future_venue_readiness_route": "DASHBOARD_GOVERNANCE_COMMANDER_REVIEW",
+      "governance_review_required_flag": true,
+      "live_order_authority_count": 0,
+      "live_promotion_claim_count": 0,
+      "llm_hot_path_artifact_count": 0,
+      "llm_order_release_artifact_count": 0,
+      "llm_result_rewrite_artifact_count": 0,
+      "llm_source_acceptance_artifact_count": 0,
+      "manifest_ref": "PR165_D2_ReportManifest.report.json",
+      "materialization_action_ref": "PR165_D2_MATERIALIZATION_ACTION::NOT_REQUIRED_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "missing_single_roster_artifact_flag": true,
+      "new_sha256_artifact_count": 0,
+      "no_orphan_status": "CONNECTED_TO_AGENT_ROSTER_DISCOVERY_ROUTE",
+      "normalization_policy_ref": "PR165_D2_NORMALIZATION_POLICY::ROBUST_SCENARIO_GROUP_RANK_MINMAX_V2",
+      "owning_agent": "governance_agent",
+      "pr165_d2_duty_mapping": [
+        "net-edge adjusted ranking",
+        "champion challenger selection",
+        "retest batch and repair queue ownership"
+      ],
+      "private_state_fetch_allowed_in_this_pr": false,
+      "private_state_fetch_count": 0,
+      "profit_evidence_count": 0,
+      "qku_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "qtt_sha_authority_count": 0,
+      "qtt_sha_freeze_checksum_global_digest_authority_count": 0,
+      "quantum_advantage_claim_count": 0,
+      "quantum_backend_execution_count": 0,
+      "repair_route_ref": "PR165_D2_REPAIR_ROUTE::NOT_REQUIRED_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "reviewer_or_challenger_agent": "commander_agent",
+      "row_id": "PR165_D2_AGENT_ROSTER::000002",
+      "runtime_cash_receipt_allowed_in_this_pr": false,
+      "runtime_cash_receipt_count": 0,
+      "scenario_group_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "schema_ref": "pr165_d2_agent_roster_discovery_audit.schema.json",
+      "score_policy_ref": "PR165_D2_SCORE_POLICY::EXECUTION_ADJUSTED_SCENARIO_SELECTION_V2",
+      "selection_blocked_flag": false,
+      "selection_state": "ROUTE_TO_PR173_AGENT_GOVERNANCE_FUTURE",
+      "source_artifact_refs": [
+        "PR166_SM_AgentScoreMemoryRefreshContract.report.json",
+        "PR166_SM_AgentTaskQueue.report.json",
+        "PR165_C_MemoryConsumerRouter.report.json",
+        "PR165_D_AgentSelectionHandoff.report.json"
+      ],
+      "source_authority_class": "PRIOR_ROADMAP_ARTIFACT_NOT_SOURCE_TRUTH",
+      "source_roadmap_pr_refs": [
+        "PR166-SM",
+        "PR166-S",
+        "PR165-C",
+        "PR165-D",
+        "PR165-B"
+      ],
+      "source_row_refs": [
+        "COMPILED_PRIOR_ARTIFACT_AGENT_ROW::parameter_selector_agent"
+      ],
+      "source_truth_acceptance_allowed_in_this_pr": false,
+      "source_truth_acceptance_count": 0,
+      "terminal_status_flag": false,
+      "terminal_status_reason": "ROW_CONTINUES_TO_DECLARED_DOWNSTREAM_ROUTE",
+      "upstream_artifact_refs": [
+        "PR166_SM_AgentScoreMemoryRefreshContract.report.json",
+        "PR166_SM_AgentTaskQueue.report.json",
+        "PR165_C_MemoryConsumerRouter.report.json",
+        "PR165_D_AgentSelectionHandoff.report.json"
+      ],
+      "upstream_dependencies": [
+        "PR166_SM_AgentScoreMemoryRefreshContract.report.json",
+        "PR166_SM_AgentTaskQueue.report.json",
+        "PR165_C_MemoryConsumerRouter.report.json",
+        "PR165_D_AgentSelectionHandoff.report.json"
+      ],
+      "upstream_pr_refs": [
+        "PR165",
+        "PR165-B",
+        "PR165-C",
+        "PR165-D",
+        "PR166-S",
+        "PR166-SM",
+        "PR164"
+      ],
+      "upstream_row_refs": [
+        "PR165_D2_AGENT_ROSTER_SOURCE::parameter_selector_agent"
+      ],
+      "upstream_value_refs": [
+        "agent_id",
+        "agent_role",
+        "agent_family"
+      ],
+      "validation_status": "PASS",
+      "validator_ref": "tools/validate_pr165_d2_score_refreshed_scenario_selection_v2.py",
+      "value_authority_lane": "AGENT_HANDOFF_LANE",
+      "venue_account_truth_count": 0,
+      "venue_semantic_dependency_class": "NO_VENUE_SEMANTIC_DEPENDENCY_FOR_SELECTION"
+    },
+    {
+      "agent_family": "risk",
+      "agent_handoff_blocked_until_roster_audit_passes": true,
+      "agent_id": "risk_manager_agent",
+      "agent_name": "Risk Manager",
+      "agent_role": "tca_false_discovery_capacity_and_microstructure_review",
+      "algorithm_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "allowed_consumed_artifact_classes": [
+        "tca",
+        "false_discovery",
+        "capacity",
+        "microstructure"
+      ],
+      "allowed_output_artifact_classes": [
+        "risk_review_task"
+      ],
+      "artifact_id": "PR165_D2_AGENT_ROSTER_DISCOVERY_AUDIT",
+      "atomicrows_bundle_sha_hash_checksum_authority_count": 0,
+      "atomicrows_bundle_sha_reference_count": 0,
+      "authority_boundary_ref": "PR165_D2_AUTHORITY_BOUNDARY::REPLAY_PAPER_SELECTION_ONLY_NO_LIVE_SOURCE_TRUTH_CONNECTOR_OR_QUANTUM_BACKEND",
+      "candidate_packet_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "canonical_roster_source": "COMPILED_FROM_PRIOR_ARTIFACTS",
+      "combination_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "commander_route_required_flag": false,
+      "computability_status": "COMPUTABLE_FOR_AGENT_HANDOFF_ONLY",
+      "condition_fingerprint_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "condition_memory_policy_ref": "PR165_D2_CONDITION_MEMORY_POLICY::CONDITION_SCOPED_PREFERENCE_V2",
+      "connector_binding_allowed_in_this_pr": false,
+      "connector_dependency_class": "NO_CONNECTOR_DEPENDENCY_FOR_SELECTION",
+      "connector_readiness_policy_ref": "PR165_D2_CONNECTOR_READINESS_POLICY::REFERENCE_ROUTE_ONLY_V1",
+      "connector_semantic_binding_count": 0,
+      "connector_truth_count": 0,
+      "created_at_utc": "2026-06-11T00:00:00Z",
+      "created_by_pr": "PR165-D2",
+      "dashboard_visibility_flag": true,
+      "deterministic_sort_key": "PR165_D2_AGENT_ROSTER::000003",
+      "downstream_agent_consumers": [
+        "parameter_selector_agent",
+        "risk_manager_agent",
+        "quantum_optimizer_agent",
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "downstream_artifact_refs": [
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "downstream_consumers": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "downstream_pr_refs": [
+        "DASHBOARD_GOVERNANCE_COMMANDER_REVIEW"
+      ],
+      "duties_from_prior_artifacts": [
+        "false-discovery overfit rank instability",
+        "settlement liquidity latency adverse selection",
+        "capacity crowding correlation controls"
+      ],
+      "forbidden_authority_classes": [
+        "LIVE_ORDER_AUTHORITY",
+        "SOURCE_TRUTH_ACCEPTANCE",
+        "CONNECTOR_SEMANTIC_BINDING",
+        "PRIVATE_STATE_FETCH",
+        "PROFIT_EVIDENCE_AUTHORITY_FORBIDDEN_BY_PR165_D2",
+        "QUANTUM_BACKEND_EXECUTION"
+      ],
+      "formula_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "future_connector_pr_refs": [
+        "DASHBOARD_GOVERNANCE_COMMANDER_REVIEW"
+      ],
+      "future_venue_readiness_route": "DASHBOARD_GOVERNANCE_COMMANDER_REVIEW",
+      "governance_review_required_flag": true,
+      "live_order_authority_count": 0,
+      "live_promotion_claim_count": 0,
+      "llm_hot_path_artifact_count": 0,
+      "llm_order_release_artifact_count": 0,
+      "llm_result_rewrite_artifact_count": 0,
+      "llm_source_acceptance_artifact_count": 0,
+      "manifest_ref": "PR165_D2_ReportManifest.report.json",
+      "materialization_action_ref": "PR165_D2_MATERIALIZATION_ACTION::NOT_REQUIRED_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "missing_single_roster_artifact_flag": true,
+      "new_sha256_artifact_count": 0,
+      "no_orphan_status": "CONNECTED_TO_AGENT_ROSTER_DISCOVERY_ROUTE",
+      "normalization_policy_ref": "PR165_D2_NORMALIZATION_POLICY::ROBUST_SCENARIO_GROUP_RANK_MINMAX_V2",
+      "owning_agent": "governance_agent",
+      "pr165_d2_duty_mapping": [
+        "false-discovery overfit rank instability",
+        "settlement liquidity latency adverse selection",
+        "capacity crowding correlation controls"
+      ],
+      "private_state_fetch_allowed_in_this_pr": false,
+      "private_state_fetch_count": 0,
+      "profit_evidence_count": 0,
+      "qku_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "qtt_sha_authority_count": 0,
+      "qtt_sha_freeze_checksum_global_digest_authority_count": 0,
+      "quantum_advantage_claim_count": 0,
+      "quantum_backend_execution_count": 0,
+      "repair_route_ref": "PR165_D2_REPAIR_ROUTE::NOT_REQUIRED_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "reviewer_or_challenger_agent": "commander_agent",
+      "row_id": "PR165_D2_AGENT_ROSTER::000003",
+      "runtime_cash_receipt_allowed_in_this_pr": false,
+      "runtime_cash_receipt_count": 0,
+      "scenario_group_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "schema_ref": "pr165_d2_agent_roster_discovery_audit.schema.json",
+      "score_policy_ref": "PR165_D2_SCORE_POLICY::EXECUTION_ADJUSTED_SCENARIO_SELECTION_V2",
+      "selection_blocked_flag": false,
+      "selection_state": "ROUTE_TO_PR173_AGENT_GOVERNANCE_FUTURE",
+      "source_artifact_refs": [
+        "PR166_SM_AgentScoreMemoryRefreshContract.report.json",
+        "PR166_SM_AgentTaskQueue.report.json",
+        "PR165_C_MemoryConsumerRouter.report.json",
+        "PR165_D_AgentSelectionHandoff.report.json"
+      ],
+      "source_authority_class": "PRIOR_ROADMAP_ARTIFACT_NOT_SOURCE_TRUTH",
+      "source_roadmap_pr_refs": [
+        "PR166-SM",
+        "PR166-S",
+        "PR165-C",
+        "PR165-D",
+        "PR165-B"
+      ],
+      "source_row_refs": [
+        "COMPILED_PRIOR_ARTIFACT_AGENT_ROW::risk_manager_agent"
+      ],
+      "source_truth_acceptance_allowed_in_this_pr": false,
+      "source_truth_acceptance_count": 0,
+      "terminal_status_flag": false,
+      "terminal_status_reason": "ROW_CONTINUES_TO_DECLARED_DOWNSTREAM_ROUTE",
+      "upstream_artifact_refs": [
+        "PR166_SM_AgentScoreMemoryRefreshContract.report.json",
+        "PR166_SM_AgentTaskQueue.report.json",
+        "PR165_C_MemoryConsumerRouter.report.json",
+        "PR165_D_AgentSelectionHandoff.report.json"
+      ],
+      "upstream_dependencies": [
+        "PR166_SM_AgentScoreMemoryRefreshContract.report.json",
+        "PR166_SM_AgentTaskQueue.report.json",
+        "PR165_C_MemoryConsumerRouter.report.json",
+        "PR165_D_AgentSelectionHandoff.report.json"
+      ],
+      "upstream_pr_refs": [
+        "PR165",
+        "PR165-B",
+        "PR165-C",
+        "PR165-D",
+        "PR166-S",
+        "PR166-SM",
+        "PR164"
+      ],
+      "upstream_row_refs": [
+        "PR165_D2_AGENT_ROSTER_SOURCE::risk_manager_agent"
+      ],
+      "upstream_value_refs": [
+        "agent_id",
+        "agent_role",
+        "agent_family"
+      ],
+      "validation_status": "PASS",
+      "validator_ref": "tools/validate_pr165_d2_score_refreshed_scenario_selection_v2.py",
+      "value_authority_lane": "AGENT_HANDOFF_LANE",
+      "venue_account_truth_count": 0,
+      "venue_semantic_dependency_class": "NO_VENUE_SEMANTIC_DEPENDENCY_FOR_SELECTION"
+    },
+    {
+      "agent_family": "quantum",
+      "agent_handoff_blocked_until_roster_audit_passes": true,
+      "agent_id": "quantum_optimizer_agent",
+      "agent_name": "Quantum Optimizer",
+      "agent_role": "quantum_candidate_priority_and_mapping_review",
+      "algorithm_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "allowed_consumed_artifact_classes": [
+        "quantum_priority",
+        "computability_routing"
+      ],
+      "allowed_output_artifact_classes": [
+        "quantum_route_task"
+      ],
+      "artifact_id": "PR165_D2_AGENT_ROSTER_DISCOVERY_AUDIT",
+      "atomicrows_bundle_sha_hash_checksum_authority_count": 0,
+      "atomicrows_bundle_sha_reference_count": 0,
+      "authority_boundary_ref": "PR165_D2_AUTHORITY_BOUNDARY::REPLAY_PAPER_SELECTION_ONLY_NO_LIVE_SOURCE_TRUTH_CONNECTOR_OR_QUANTUM_BACKEND",
+      "candidate_packet_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "canonical_roster_source": "COMPILED_FROM_PRIOR_ARTIFACTS",
+      "combination_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "commander_route_required_flag": true,
+      "computability_status": "COMPUTABLE_FOR_AGENT_HANDOFF_ONLY",
+      "condition_fingerprint_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "condition_memory_policy_ref": "PR165_D2_CONDITION_MEMORY_POLICY::CONDITION_SCOPED_PREFERENCE_V2",
+      "connector_binding_allowed_in_this_pr": false,
+      "connector_dependency_class": "NO_CONNECTOR_DEPENDENCY_FOR_SELECTION",
+      "connector_readiness_policy_ref": "PR165_D2_CONNECTOR_READINESS_POLICY::REFERENCE_ROUTE_ONLY_V1",
+      "connector_semantic_binding_count": 0,
+      "connector_truth_count": 0,
+      "created_at_utc": "2026-06-11T00:00:00Z",
+      "created_by_pr": "PR165-D2",
+      "dashboard_visibility_flag": true,
+      "deterministic_sort_key": "PR165_D2_AGENT_ROSTER::000004",
+      "downstream_agent_consumers": [
+        "parameter_selector_agent",
+        "risk_manager_agent",
+        "quantum_optimizer_agent",
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "downstream_artifact_refs": [
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "downstream_consumers": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "downstream_pr_refs": [
+        "DASHBOARD_GOVERNANCE_COMMANDER_REVIEW"
+      ],
+      "duties_from_prior_artifacts": [
+        "quantum candidate priority v2",
+        "QUBO Ising BQM CQM DQM QuadraticProgram route review"
+      ],
+      "forbidden_authority_classes": [
+        "LIVE_ORDER_AUTHORITY",
+        "SOURCE_TRUTH_ACCEPTANCE",
+        "CONNECTOR_SEMANTIC_BINDING",
+        "PRIVATE_STATE_FETCH",
+        "PROFIT_EVIDENCE_AUTHORITY_FORBIDDEN_BY_PR165_D2",
+        "QUANTUM_BACKEND_EXECUTION"
+      ],
+      "formula_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "future_connector_pr_refs": [
+        "DASHBOARD_GOVERNANCE_COMMANDER_REVIEW"
+      ],
+      "future_venue_readiness_route": "DASHBOARD_GOVERNANCE_COMMANDER_REVIEW",
+      "governance_review_required_flag": true,
+      "live_order_authority_count": 0,
+      "live_promotion_claim_count": 0,
+      "llm_hot_path_artifact_count": 0,
+      "llm_order_release_artifact_count": 0,
+      "llm_result_rewrite_artifact_count": 0,
+      "llm_source_acceptance_artifact_count": 0,
+      "manifest_ref": "PR165_D2_ReportManifest.report.json",
+      "materialization_action_ref": "PR165_D2_MATERIALIZATION_ACTION::NOT_REQUIRED_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "missing_single_roster_artifact_flag": true,
+      "new_sha256_artifact_count": 0,
+      "no_orphan_status": "CONNECTED_TO_AGENT_ROSTER_DISCOVERY_ROUTE",
+      "normalization_policy_ref": "PR165_D2_NORMALIZATION_POLICY::ROBUST_SCENARIO_GROUP_RANK_MINMAX_V2",
+      "owning_agent": "governance_agent",
+      "pr165_d2_duty_mapping": [
+        "quantum candidate priority v2",
+        "QUBO Ising BQM CQM DQM QuadraticProgram route review"
+      ],
+      "private_state_fetch_allowed_in_this_pr": false,
+      "private_state_fetch_count": 0,
+      "profit_evidence_count": 0,
+      "qku_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "qtt_sha_authority_count": 0,
+      "qtt_sha_freeze_checksum_global_digest_authority_count": 0,
+      "quantum_advantage_claim_count": 0,
+      "quantum_backend_execution_count": 0,
+      "repair_route_ref": "PR165_D2_REPAIR_ROUTE::NOT_REQUIRED_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "reviewer_or_challenger_agent": "commander_agent",
+      "row_id": "PR165_D2_AGENT_ROSTER::000004",
+      "runtime_cash_receipt_allowed_in_this_pr": false,
+      "runtime_cash_receipt_count": 0,
+      "scenario_group_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "schema_ref": "pr165_d2_agent_roster_discovery_audit.schema.json",
+      "score_policy_ref": "PR165_D2_SCORE_POLICY::EXECUTION_ADJUSTED_SCENARIO_SELECTION_V2",
+      "selection_blocked_flag": false,
+      "selection_state": "ROUTE_TO_PR173_AGENT_GOVERNANCE_FUTURE",
+      "source_artifact_refs": [
+        "PR166_SM_AgentScoreMemoryRefreshContract.report.json",
+        "PR166_SM_AgentTaskQueue.report.json",
+        "PR165_C_MemoryConsumerRouter.report.json",
+        "PR165_D_AgentSelectionHandoff.report.json"
+      ],
+      "source_authority_class": "PRIOR_ROADMAP_ARTIFACT_NOT_SOURCE_TRUTH",
+      "source_roadmap_pr_refs": [
+        "PR166-SM",
+        "PR166-S",
+        "PR165-C",
+        "PR165-D",
+        "PR165-B"
+      ],
+      "source_row_refs": [
+        "COMPILED_PRIOR_ARTIFACT_AGENT_ROW::quantum_optimizer_agent"
+      ],
+      "source_truth_acceptance_allowed_in_this_pr": false,
+      "source_truth_acceptance_count": 0,
+      "terminal_status_flag": false,
+      "terminal_status_reason": "ROW_CONTINUES_TO_DECLARED_DOWNSTREAM_ROUTE",
+      "upstream_artifact_refs": [
+        "PR166_SM_AgentScoreMemoryRefreshContract.report.json",
+        "PR166_SM_AgentTaskQueue.report.json",
+        "PR165_C_MemoryConsumerRouter.report.json",
+        "PR165_D_AgentSelectionHandoff.report.json"
+      ],
+      "upstream_dependencies": [
+        "PR166_SM_AgentScoreMemoryRefreshContract.report.json",
+        "PR166_SM_AgentTaskQueue.report.json",
+        "PR165_C_MemoryConsumerRouter.report.json",
+        "PR165_D_AgentSelectionHandoff.report.json"
+      ],
+      "upstream_pr_refs": [
+        "PR165",
+        "PR165-B",
+        "PR165-C",
+        "PR165-D",
+        "PR166-S",
+        "PR166-SM",
+        "PR164"
+      ],
+      "upstream_row_refs": [
+        "PR165_D2_AGENT_ROSTER_SOURCE::quantum_optimizer_agent"
+      ],
+      "upstream_value_refs": [
+        "agent_id",
+        "agent_role",
+        "agent_family"
+      ],
+      "validation_status": "PASS",
+      "validator_ref": "tools/validate_pr165_d2_score_refreshed_scenario_selection_v2.py",
+      "value_authority_lane": "AGENT_HANDOFF_LANE",
+      "venue_account_truth_count": 0,
+      "venue_semantic_dependency_class": "NO_VENUE_SEMANTIC_DEPENDENCY_FOR_SELECTION"
+    },
+    {
+      "agent_family": "commander",
+      "agent_handoff_blocked_until_roster_audit_passes": true,
+      "agent_id": "commander_agent",
+      "agent_name": "Commander",
+      "agent_role": "downstream_pr_route_and_command_action_ownership",
+      "algorithm_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "allowed_consumed_artifact_classes": [
+        "route_triage",
+        "command_action"
+      ],
+      "allowed_output_artifact_classes": [
+        "command_action_task"
+      ],
+      "artifact_id": "PR165_D2_AGENT_ROSTER_DISCOVERY_AUDIT",
+      "atomicrows_bundle_sha_hash_checksum_authority_count": 0,
+      "atomicrows_bundle_sha_reference_count": 0,
+      "authority_boundary_ref": "PR165_D2_AUTHORITY_BOUNDARY::REPLAY_PAPER_SELECTION_ONLY_NO_LIVE_SOURCE_TRUTH_CONNECTOR_OR_QUANTUM_BACKEND",
+      "candidate_packet_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "canonical_roster_source": "COMPILED_FROM_PRIOR_ARTIFACTS",
+      "combination_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "commander_route_required_flag": true,
+      "computability_status": "COMPUTABLE_FOR_AGENT_HANDOFF_ONLY",
+      "condition_fingerprint_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "condition_memory_policy_ref": "PR165_D2_CONDITION_MEMORY_POLICY::CONDITION_SCOPED_PREFERENCE_V2",
+      "connector_binding_allowed_in_this_pr": false,
+      "connector_dependency_class": "NO_CONNECTOR_DEPENDENCY_FOR_SELECTION",
+      "connector_readiness_policy_ref": "PR165_D2_CONNECTOR_READINESS_POLICY::REFERENCE_ROUTE_ONLY_V1",
+      "connector_semantic_binding_count": 0,
+      "connector_truth_count": 0,
+      "created_at_utc": "2026-06-11T00:00:00Z",
+      "created_by_pr": "PR165-D2",
+      "dashboard_visibility_flag": false,
+      "deterministic_sort_key": "PR165_D2_AGENT_ROSTER::000005",
+      "downstream_agent_consumers": [
+        "parameter_selector_agent",
+        "risk_manager_agent",
+        "quantum_optimizer_agent",
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "downstream_artifact_refs": [
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "downstream_consumers": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "downstream_pr_refs": [
+        "DASHBOARD_GOVERNANCE_COMMANDER_REVIEW"
+      ],
+      "duties_from_prior_artifacts": [
+        "next PR routing",
+        "command action matrix",
+        "downstream route ownership"
+      ],
+      "forbidden_authority_classes": [
+        "LIVE_ORDER_AUTHORITY",
+        "SOURCE_TRUTH_ACCEPTANCE",
+        "CONNECTOR_SEMANTIC_BINDING",
+        "PRIVATE_STATE_FETCH",
+        "PROFIT_EVIDENCE_AUTHORITY_FORBIDDEN_BY_PR165_D2",
+        "QUANTUM_BACKEND_EXECUTION"
+      ],
+      "formula_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "future_connector_pr_refs": [
+        "DASHBOARD_GOVERNANCE_COMMANDER_REVIEW"
+      ],
+      "future_venue_readiness_route": "DASHBOARD_GOVERNANCE_COMMANDER_REVIEW",
+      "governance_review_required_flag": true,
+      "live_order_authority_count": 0,
+      "live_promotion_claim_count": 0,
+      "llm_hot_path_artifact_count": 0,
+      "llm_order_release_artifact_count": 0,
+      "llm_result_rewrite_artifact_count": 0,
+      "llm_source_acceptance_artifact_count": 0,
+      "manifest_ref": "PR165_D2_ReportManifest.report.json",
+      "materialization_action_ref": "PR165_D2_MATERIALIZATION_ACTION::NOT_REQUIRED_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "missing_single_roster_artifact_flag": true,
+      "new_sha256_artifact_count": 0,
+      "no_orphan_status": "CONNECTED_TO_AGENT_ROSTER_DISCOVERY_ROUTE",
+      "normalization_policy_ref": "PR165_D2_NORMALIZATION_POLICY::ROBUST_SCENARIO_GROUP_RANK_MINMAX_V2",
+      "owning_agent": "governance_agent",
+      "pr165_d2_duty_mapping": [
+        "next PR routing",
+        "command action matrix",
+        "downstream route ownership"
+      ],
+      "private_state_fetch_allowed_in_this_pr": false,
+      "private_state_fetch_count": 0,
+      "profit_evidence_count": 0,
+      "qku_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "qtt_sha_authority_count": 0,
+      "qtt_sha_freeze_checksum_global_digest_authority_count": 0,
+      "quantum_advantage_claim_count": 0,
+      "quantum_backend_execution_count": 0,
+      "repair_route_ref": "PR165_D2_REPAIR_ROUTE::NOT_REQUIRED_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "reviewer_or_challenger_agent": "commander_agent",
+      "row_id": "PR165_D2_AGENT_ROSTER::000005",
+      "runtime_cash_receipt_allowed_in_this_pr": false,
+      "runtime_cash_receipt_count": 0,
+      "scenario_group_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "schema_ref": "pr165_d2_agent_roster_discovery_audit.schema.json",
+      "score_policy_ref": "PR165_D2_SCORE_POLICY::EXECUTION_ADJUSTED_SCENARIO_SELECTION_V2",
+      "selection_blocked_flag": false,
+      "selection_state": "ROUTE_TO_PR173_AGENT_GOVERNANCE_FUTURE",
+      "source_artifact_refs": [
+        "PR166_SM_AgentScoreMemoryRefreshContract.report.json",
+        "PR166_SM_AgentTaskQueue.report.json",
+        "PR165_C_MemoryConsumerRouter.report.json",
+        "PR165_D_AgentSelectionHandoff.report.json"
+      ],
+      "source_authority_class": "PRIOR_ROADMAP_ARTIFACT_NOT_SOURCE_TRUTH",
+      "source_roadmap_pr_refs": [
+        "PR166-SM",
+        "PR166-S",
+        "PR165-C",
+        "PR165-D",
+        "PR165-B"
+      ],
+      "source_row_refs": [
+        "COMPILED_PRIOR_ARTIFACT_AGENT_ROW::commander_agent"
+      ],
+      "source_truth_acceptance_allowed_in_this_pr": false,
+      "source_truth_acceptance_count": 0,
+      "terminal_status_flag": false,
+      "terminal_status_reason": "ROW_CONTINUES_TO_DECLARED_DOWNSTREAM_ROUTE",
+      "upstream_artifact_refs": [
+        "PR166_SM_AgentScoreMemoryRefreshContract.report.json",
+        "PR166_SM_AgentTaskQueue.report.json",
+        "PR165_C_MemoryConsumerRouter.report.json",
+        "PR165_D_AgentSelectionHandoff.report.json"
+      ],
+      "upstream_dependencies": [
+        "PR166_SM_AgentScoreMemoryRefreshContract.report.json",
+        "PR166_SM_AgentTaskQueue.report.json",
+        "PR165_C_MemoryConsumerRouter.report.json",
+        "PR165_D_AgentSelectionHandoff.report.json"
+      ],
+      "upstream_pr_refs": [
+        "PR165",
+        "PR165-B",
+        "PR165-C",
+        "PR165-D",
+        "PR166-S",
+        "PR166-SM",
+        "PR164"
+      ],
+      "upstream_row_refs": [
+        "PR165_D2_AGENT_ROSTER_SOURCE::commander_agent"
+      ],
+      "upstream_value_refs": [
+        "agent_id",
+        "agent_role",
+        "agent_family"
+      ],
+      "validation_status": "PASS",
+      "validator_ref": "tools/validate_pr165_d2_score_refreshed_scenario_selection_v2.py",
+      "value_authority_lane": "AGENT_HANDOFF_LANE",
+      "venue_account_truth_count": 0,
+      "venue_semantic_dependency_class": "NO_VENUE_SEMANTIC_DEPENDENCY_FOR_SELECTION"
+    },
+    {
+      "agent_family": "governance",
+      "agent_handoff_blocked_until_roster_audit_passes": true,
+      "agent_id": "governance_agent",
+      "agent_name": "Governance",
+      "agent_role": "authority_boundary_no_orphan_status_and_validation_review",
+      "algorithm_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "allowed_consumed_artifact_classes": [
+        "authority_audit",
+        "orphan_audit",
+        "status_audit"
+      ],
+      "allowed_output_artifact_classes": [
+        "audit_receipt"
+      ],
+      "artifact_id": "PR165_D2_AGENT_ROSTER_DISCOVERY_AUDIT",
+      "atomicrows_bundle_sha_hash_checksum_authority_count": 0,
+      "atomicrows_bundle_sha_reference_count": 0,
+      "authority_boundary_ref": "PR165_D2_AUTHORITY_BOUNDARY::REPLAY_PAPER_SELECTION_ONLY_NO_LIVE_SOURCE_TRUTH_CONNECTOR_OR_QUANTUM_BACKEND",
+      "candidate_packet_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "canonical_roster_source": "COMPILED_FROM_PRIOR_ARTIFACTS",
+      "combination_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "commander_route_required_flag": false,
+      "computability_status": "COMPUTABLE_FOR_AGENT_HANDOFF_ONLY",
+      "condition_fingerprint_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "condition_memory_policy_ref": "PR165_D2_CONDITION_MEMORY_POLICY::CONDITION_SCOPED_PREFERENCE_V2",
+      "connector_binding_allowed_in_this_pr": false,
+      "connector_dependency_class": "NO_CONNECTOR_DEPENDENCY_FOR_SELECTION",
+      "connector_readiness_policy_ref": "PR165_D2_CONNECTOR_READINESS_POLICY::REFERENCE_ROUTE_ONLY_V1",
+      "connector_semantic_binding_count": 0,
+      "connector_truth_count": 0,
+      "created_at_utc": "2026-06-11T00:00:00Z",
+      "created_by_pr": "PR165-D2",
+      "dashboard_visibility_flag": false,
+      "deterministic_sort_key": "PR165_D2_AGENT_ROSTER::000006",
+      "downstream_agent_consumers": [
+        "parameter_selector_agent",
+        "risk_manager_agent",
+        "quantum_optimizer_agent",
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "downstream_artifact_refs": [
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "downstream_consumers": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "downstream_pr_refs": [
+        "DASHBOARD_GOVERNANCE_COMMANDER_REVIEW"
+      ],
+      "duties_from_prior_artifacts": [
+        "authority boundary audit",
+        "status enum drift audit",
+        "no orphan audit"
+      ],
+      "forbidden_authority_classes": [
+        "LIVE_ORDER_AUTHORITY",
+        "SOURCE_TRUTH_ACCEPTANCE",
+        "CONNECTOR_SEMANTIC_BINDING",
+        "PRIVATE_STATE_FETCH",
+        "PROFIT_EVIDENCE_AUTHORITY_FORBIDDEN_BY_PR165_D2",
+        "QUANTUM_BACKEND_EXECUTION"
+      ],
+      "formula_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "future_connector_pr_refs": [
+        "DASHBOARD_GOVERNANCE_COMMANDER_REVIEW"
+      ],
+      "future_venue_readiness_route": "DASHBOARD_GOVERNANCE_COMMANDER_REVIEW",
+      "governance_review_required_flag": true,
+      "live_order_authority_count": 0,
+      "live_promotion_claim_count": 0,
+      "llm_hot_path_artifact_count": 0,
+      "llm_order_release_artifact_count": 0,
+      "llm_result_rewrite_artifact_count": 0,
+      "llm_source_acceptance_artifact_count": 0,
+      "manifest_ref": "PR165_D2_ReportManifest.report.json",
+      "materialization_action_ref": "PR165_D2_MATERIALIZATION_ACTION::NOT_REQUIRED_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "missing_single_roster_artifact_flag": true,
+      "new_sha256_artifact_count": 0,
+      "no_orphan_status": "CONNECTED_TO_AGENT_ROSTER_DISCOVERY_ROUTE",
+      "normalization_policy_ref": "PR165_D2_NORMALIZATION_POLICY::ROBUST_SCENARIO_GROUP_RANK_MINMAX_V2",
+      "owning_agent": "governance_agent",
+      "pr165_d2_duty_mapping": [
+        "authority boundary audit",
+        "status enum drift audit",
+        "no orphan audit"
+      ],
+      "private_state_fetch_allowed_in_this_pr": false,
+      "private_state_fetch_count": 0,
+      "profit_evidence_count": 0,
+      "qku_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "qtt_sha_authority_count": 0,
+      "qtt_sha_freeze_checksum_global_digest_authority_count": 0,
+      "quantum_advantage_claim_count": 0,
+      "quantum_backend_execution_count": 0,
+      "repair_route_ref": "PR165_D2_REPAIR_ROUTE::NOT_REQUIRED_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "reviewer_or_challenger_agent": "commander_agent",
+      "row_id": "PR165_D2_AGENT_ROSTER::000006",
+      "runtime_cash_receipt_allowed_in_this_pr": false,
+      "runtime_cash_receipt_count": 0,
+      "scenario_group_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "schema_ref": "pr165_d2_agent_roster_discovery_audit.schema.json",
+      "score_policy_ref": "PR165_D2_SCORE_POLICY::EXECUTION_ADJUSTED_SCENARIO_SELECTION_V2",
+      "selection_blocked_flag": false,
+      "selection_state": "ROUTE_TO_PR173_AGENT_GOVERNANCE_FUTURE",
+      "source_artifact_refs": [
+        "PR166_SM_AgentScoreMemoryRefreshContract.report.json",
+        "PR166_SM_AgentTaskQueue.report.json",
+        "PR165_C_MemoryConsumerRouter.report.json",
+        "PR165_D_AgentSelectionHandoff.report.json"
+      ],
+      "source_authority_class": "PRIOR_ROADMAP_ARTIFACT_NOT_SOURCE_TRUTH",
+      "source_roadmap_pr_refs": [
+        "PR166-SM",
+        "PR166-S",
+        "PR165-C",
+        "PR165-D",
+        "PR165-B"
+      ],
+      "source_row_refs": [
+        "COMPILED_PRIOR_ARTIFACT_AGENT_ROW::governance_agent"
+      ],
+      "source_truth_acceptance_allowed_in_this_pr": false,
+      "source_truth_acceptance_count": 0,
+      "terminal_status_flag": false,
+      "terminal_status_reason": "ROW_CONTINUES_TO_DECLARED_DOWNSTREAM_ROUTE",
+      "upstream_artifact_refs": [
+        "PR166_SM_AgentScoreMemoryRefreshContract.report.json",
+        "PR166_SM_AgentTaskQueue.report.json",
+        "PR165_C_MemoryConsumerRouter.report.json",
+        "PR165_D_AgentSelectionHandoff.report.json"
+      ],
+      "upstream_dependencies": [
+        "PR166_SM_AgentScoreMemoryRefreshContract.report.json",
+        "PR166_SM_AgentTaskQueue.report.json",
+        "PR165_C_MemoryConsumerRouter.report.json",
+        "PR165_D_AgentSelectionHandoff.report.json"
+      ],
+      "upstream_pr_refs": [
+        "PR165",
+        "PR165-B",
+        "PR165-C",
+        "PR165-D",
+        "PR166-S",
+        "PR166-SM",
+        "PR164"
+      ],
+      "upstream_row_refs": [
+        "PR165_D2_AGENT_ROSTER_SOURCE::governance_agent"
+      ],
+      "upstream_value_refs": [
+        "agent_id",
+        "agent_role",
+        "agent_family"
+      ],
+      "validation_status": "PASS",
+      "validator_ref": "tools/validate_pr165_d2_score_refreshed_scenario_selection_v2.py",
+      "value_authority_lane": "AGENT_HANDOFF_LANE",
+      "venue_account_truth_count": 0,
+      "venue_semantic_dependency_class": "NO_VENUE_SEMANTIC_DEPENDENCY_FOR_SELECTION"
+    },
+    {
+      "agent_family": "dashboard",
+      "agent_handoff_blocked_until_roster_audit_passes": true,
+      "agent_id": "dashboard_agent",
+      "agent_name": "Dashboard",
+      "agent_role": "owner_visible_selection_handoff_and_review_labels",
+      "algorithm_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "allowed_consumed_artifact_classes": [
+        "dashboard_handoff",
+        "market_index"
+      ],
+      "allowed_output_artifact_classes": [
+        "owner_review_display_label"
+      ],
+      "artifact_id": "PR165_D2_AGENT_ROSTER_DISCOVERY_AUDIT",
+      "atomicrows_bundle_sha_hash_checksum_authority_count": 0,
+      "atomicrows_bundle_sha_reference_count": 0,
+      "authority_boundary_ref": "PR165_D2_AUTHORITY_BOUNDARY::REPLAY_PAPER_SELECTION_ONLY_NO_LIVE_SOURCE_TRUTH_CONNECTOR_OR_QUANTUM_BACKEND",
+      "candidate_packet_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "canonical_roster_source": "COMPILED_FROM_PRIOR_ARTIFACTS",
+      "combination_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "commander_route_required_flag": false,
+      "computability_status": "COMPUTABLE_FOR_AGENT_HANDOFF_ONLY",
+      "condition_fingerprint_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "condition_memory_policy_ref": "PR165_D2_CONDITION_MEMORY_POLICY::CONDITION_SCOPED_PREFERENCE_V2",
+      "connector_binding_allowed_in_this_pr": false,
+      "connector_dependency_class": "NO_CONNECTOR_DEPENDENCY_FOR_SELECTION",
+      "connector_readiness_policy_ref": "PR165_D2_CONNECTOR_READINESS_POLICY::REFERENCE_ROUTE_ONLY_V1",
+      "connector_semantic_binding_count": 0,
+      "connector_truth_count": 0,
+      "created_at_utc": "2026-06-11T00:00:00Z",
+      "created_by_pr": "PR165-D2",
+      "dashboard_visibility_flag": true,
+      "deterministic_sort_key": "PR165_D2_AGENT_ROSTER::000007",
+      "downstream_agent_consumers": [
+        "parameter_selector_agent",
+        "risk_manager_agent",
+        "quantum_optimizer_agent",
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "downstream_artifact_refs": [
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "downstream_consumers": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "downstream_pr_refs": [
+        "DASHBOARD_GOVERNANCE_COMMANDER_REVIEW"
+      ],
+      "duties_from_prior_artifacts": [
+        "selected batch display",
+        "watchlist and exclusion display",
+        "owner review labels without live action"
+      ],
+      "forbidden_authority_classes": [
+        "LIVE_ORDER_AUTHORITY",
+        "SOURCE_TRUTH_ACCEPTANCE",
+        "CONNECTOR_SEMANTIC_BINDING",
+        "PRIVATE_STATE_FETCH",
+        "PROFIT_EVIDENCE_AUTHORITY_FORBIDDEN_BY_PR165_D2",
+        "QUANTUM_BACKEND_EXECUTION"
+      ],
+      "formula_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "future_connector_pr_refs": [
+        "DASHBOARD_GOVERNANCE_COMMANDER_REVIEW"
+      ],
+      "future_venue_readiness_route": "DASHBOARD_GOVERNANCE_COMMANDER_REVIEW",
+      "governance_review_required_flag": true,
+      "live_order_authority_count": 0,
+      "live_promotion_claim_count": 0,
+      "llm_hot_path_artifact_count": 0,
+      "llm_order_release_artifact_count": 0,
+      "llm_result_rewrite_artifact_count": 0,
+      "llm_source_acceptance_artifact_count": 0,
+      "manifest_ref": "PR165_D2_ReportManifest.report.json",
+      "materialization_action_ref": "PR165_D2_MATERIALIZATION_ACTION::NOT_REQUIRED_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "missing_single_roster_artifact_flag": true,
+      "new_sha256_artifact_count": 0,
+      "no_orphan_status": "CONNECTED_TO_AGENT_ROSTER_DISCOVERY_ROUTE",
+      "normalization_policy_ref": "PR165_D2_NORMALIZATION_POLICY::ROBUST_SCENARIO_GROUP_RANK_MINMAX_V2",
+      "owning_agent": "governance_agent",
+      "pr165_d2_duty_mapping": [
+        "selected batch display",
+        "watchlist and exclusion display",
+        "owner review labels without live action"
+      ],
+      "private_state_fetch_allowed_in_this_pr": false,
+      "private_state_fetch_count": 0,
+      "profit_evidence_count": 0,
+      "qku_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "qtt_sha_authority_count": 0,
+      "qtt_sha_freeze_checksum_global_digest_authority_count": 0,
+      "quantum_advantage_claim_count": 0,
+      "quantum_backend_execution_count": 0,
+      "repair_route_ref": "PR165_D2_REPAIR_ROUTE::NOT_REQUIRED_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "reviewer_or_challenger_agent": "commander_agent",
+      "row_id": "PR165_D2_AGENT_ROSTER::000007",
+      "runtime_cash_receipt_allowed_in_this_pr": false,
+      "runtime_cash_receipt_count": 0,
+      "scenario_group_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "schema_ref": "pr165_d2_agent_roster_discovery_audit.schema.json",
+      "score_policy_ref": "PR165_D2_SCORE_POLICY::EXECUTION_ADJUSTED_SCENARIO_SELECTION_V2",
+      "selection_blocked_flag": false,
+      "selection_state": "ROUTE_TO_PR173_AGENT_GOVERNANCE_FUTURE",
+      "source_artifact_refs": [
+        "PR166_SM_AgentScoreMemoryRefreshContract.report.json",
+        "PR166_SM_AgentTaskQueue.report.json",
+        "PR165_C_MemoryConsumerRouter.report.json",
+        "PR165_D_AgentSelectionHandoff.report.json"
+      ],
+      "source_authority_class": "PRIOR_ROADMAP_ARTIFACT_NOT_SOURCE_TRUTH",
+      "source_roadmap_pr_refs": [
+        "PR166-SM",
+        "PR166-S",
+        "PR165-C",
+        "PR165-D",
+        "PR165-B"
+      ],
+      "source_row_refs": [
+        "COMPILED_PRIOR_ARTIFACT_AGENT_ROW::dashboard_agent"
+      ],
+      "source_truth_acceptance_allowed_in_this_pr": false,
+      "source_truth_acceptance_count": 0,
+      "terminal_status_flag": false,
+      "terminal_status_reason": "ROW_CONTINUES_TO_DECLARED_DOWNSTREAM_ROUTE",
+      "upstream_artifact_refs": [
+        "PR166_SM_AgentScoreMemoryRefreshContract.report.json",
+        "PR166_SM_AgentTaskQueue.report.json",
+        "PR165_C_MemoryConsumerRouter.report.json",
+        "PR165_D_AgentSelectionHandoff.report.json"
+      ],
+      "upstream_dependencies": [
+        "PR166_SM_AgentScoreMemoryRefreshContract.report.json",
+        "PR166_SM_AgentTaskQueue.report.json",
+        "PR165_C_MemoryConsumerRouter.report.json",
+        "PR165_D_AgentSelectionHandoff.report.json"
+      ],
+      "upstream_pr_refs": [
+        "PR165",
+        "PR165-B",
+        "PR165-C",
+        "PR165-D",
+        "PR166-S",
+        "PR166-SM",
+        "PR164"
+      ],
+      "upstream_row_refs": [
+        "PR165_D2_AGENT_ROSTER_SOURCE::dashboard_agent"
+      ],
+      "upstream_value_refs": [
+        "agent_id",
+        "agent_role",
+        "agent_family"
+      ],
+      "validation_status": "PASS",
+      "validator_ref": "tools/validate_pr165_d2_score_refreshed_scenario_selection_v2.py",
+      "value_authority_lane": "AGENT_HANDOFF_LANE",
+      "venue_account_truth_count": 0,
+      "venue_semantic_dependency_class": "NO_VENUE_SEMANTIC_DEPENDENCY_FOR_SELECTION"
+    },
+    {
+      "agent_family": "connector_readiness",
+      "agent_handoff_blocked_until_roster_audit_passes": true,
+      "agent_id": "connector_venue_readiness_future_consumer",
+      "agent_name": "Connector Venue Readiness Future Consumers",
+      "agent_role": "future_connector_readiness_reference_consumption_only",
+      "algorithm_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "allowed_consumed_artifact_classes": [
+        "connector_reference_route"
+      ],
+      "allowed_output_artifact_classes": [
+        "future_connector_readiness_task"
+      ],
+      "artifact_id": "PR165_D2_AGENT_ROSTER_DISCOVERY_AUDIT",
+      "atomicrows_bundle_sha_hash_checksum_authority_count": 0,
+      "atomicrows_bundle_sha_reference_count": 0,
+      "authority_boundary_ref": "PR165_D2_AUTHORITY_BOUNDARY::REPLAY_PAPER_SELECTION_ONLY_NO_LIVE_SOURCE_TRUTH_CONNECTOR_OR_QUANTUM_BACKEND",
+      "candidate_packet_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "canonical_roster_source": "COMPILED_FROM_PRIOR_ARTIFACTS",
+      "combination_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "commander_route_required_flag": true,
+      "computability_status": "COMPUTABLE_FOR_AGENT_HANDOFF_ONLY",
+      "condition_fingerprint_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "condition_memory_policy_ref": "PR165_D2_CONDITION_MEMORY_POLICY::CONDITION_SCOPED_PREFERENCE_V2",
+      "connector_binding_allowed_in_this_pr": false,
+      "connector_dependency_class": "NO_CONNECTOR_DEPENDENCY_FOR_SELECTION",
+      "connector_readiness_policy_ref": "PR165_D2_CONNECTOR_READINESS_POLICY::REFERENCE_ROUTE_ONLY_V1",
+      "connector_semantic_binding_count": 0,
+      "connector_truth_count": 0,
+      "created_at_utc": "2026-06-11T00:00:00Z",
+      "created_by_pr": "PR165-D2",
+      "dashboard_visibility_flag": false,
+      "deterministic_sort_key": "PR165_D2_AGENT_ROSTER::000008",
+      "downstream_agent_consumers": [
+        "parameter_selector_agent",
+        "risk_manager_agent",
+        "quantum_optimizer_agent",
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "downstream_artifact_refs": [
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "downstream_consumers": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "downstream_pr_refs": [
+        "DASHBOARD_GOVERNANCE_COMMANDER_REVIEW"
+      ],
+      "duties_from_prior_artifacts": [
+        "future connector readiness reference route consumption",
+        "no semantic binding from PR165-D2"
+      ],
+      "forbidden_authority_classes": [
+        "LIVE_ORDER_AUTHORITY",
+        "SOURCE_TRUTH_ACCEPTANCE",
+        "CONNECTOR_SEMANTIC_BINDING",
+        "PRIVATE_STATE_FETCH",
+        "PROFIT_EVIDENCE_AUTHORITY_FORBIDDEN_BY_PR165_D2",
+        "QUANTUM_BACKEND_EXECUTION"
+      ],
+      "formula_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "future_connector_pr_refs": [
+        "DASHBOARD_GOVERNANCE_COMMANDER_REVIEW"
+      ],
+      "future_venue_readiness_route": "DASHBOARD_GOVERNANCE_COMMANDER_REVIEW",
+      "governance_review_required_flag": true,
+      "live_order_authority_count": 0,
+      "live_promotion_claim_count": 0,
+      "llm_hot_path_artifact_count": 0,
+      "llm_order_release_artifact_count": 0,
+      "llm_result_rewrite_artifact_count": 0,
+      "llm_source_acceptance_artifact_count": 0,
+      "manifest_ref": "PR165_D2_ReportManifest.report.json",
+      "materialization_action_ref": "PR165_D2_MATERIALIZATION_ACTION::NOT_REQUIRED_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "missing_single_roster_artifact_flag": true,
+      "new_sha256_artifact_count": 0,
+      "no_orphan_status": "CONNECTED_TO_AGENT_ROSTER_DISCOVERY_ROUTE",
+      "normalization_policy_ref": "PR165_D2_NORMALIZATION_POLICY::ROBUST_SCENARIO_GROUP_RANK_MINMAX_V2",
+      "owning_agent": "governance_agent",
+      "pr165_d2_duty_mapping": [
+        "future connector readiness reference route consumption",
+        "no semantic binding from PR165-D2"
+      ],
+      "private_state_fetch_allowed_in_this_pr": false,
+      "private_state_fetch_count": 0,
+      "profit_evidence_count": 0,
+      "qku_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "qtt_sha_authority_count": 0,
+      "qtt_sha_freeze_checksum_global_digest_authority_count": 0,
+      "quantum_advantage_claim_count": 0,
+      "quantum_backend_execution_count": 0,
+      "repair_route_ref": "PR165_D2_REPAIR_ROUTE::NOT_REQUIRED_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "reviewer_or_challenger_agent": "commander_agent",
+      "row_id": "PR165_D2_AGENT_ROSTER::000008",
+      "runtime_cash_receipt_allowed_in_this_pr": false,
+      "runtime_cash_receipt_count": 0,
+      "scenario_group_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "schema_ref": "pr165_d2_agent_roster_discovery_audit.schema.json",
+      "score_policy_ref": "PR165_D2_SCORE_POLICY::EXECUTION_ADJUSTED_SCENARIO_SELECTION_V2",
+      "selection_blocked_flag": false,
+      "selection_state": "ROUTE_TO_PR173_AGENT_GOVERNANCE_FUTURE",
+      "source_artifact_refs": [
+        "PR166_SM_AgentScoreMemoryRefreshContract.report.json",
+        "PR166_SM_AgentTaskQueue.report.json",
+        "PR165_C_MemoryConsumerRouter.report.json",
+        "PR165_D_AgentSelectionHandoff.report.json"
+      ],
+      "source_authority_class": "PRIOR_ROADMAP_ARTIFACT_NOT_SOURCE_TRUTH",
+      "source_roadmap_pr_refs": [
+        "PR166-SM",
+        "PR166-S",
+        "PR165-C",
+        "PR165-D",
+        "PR165-B"
+      ],
+      "source_row_refs": [
+        "COMPILED_PRIOR_ARTIFACT_AGENT_ROW::connector_venue_readiness_future_consumer"
+      ],
+      "source_truth_acceptance_allowed_in_this_pr": false,
+      "source_truth_acceptance_count": 0,
+      "terminal_status_flag": false,
+      "terminal_status_reason": "ROW_CONTINUES_TO_DECLARED_DOWNSTREAM_ROUTE",
+      "upstream_artifact_refs": [
+        "PR166_SM_AgentScoreMemoryRefreshContract.report.json",
+        "PR166_SM_AgentTaskQueue.report.json",
+        "PR165_C_MemoryConsumerRouter.report.json",
+        "PR165_D_AgentSelectionHandoff.report.json"
+      ],
+      "upstream_dependencies": [
+        "PR166_SM_AgentScoreMemoryRefreshContract.report.json",
+        "PR166_SM_AgentTaskQueue.report.json",
+        "PR165_C_MemoryConsumerRouter.report.json",
+        "PR165_D_AgentSelectionHandoff.report.json"
+      ],
+      "upstream_pr_refs": [
+        "PR165",
+        "PR165-B",
+        "PR165-C",
+        "PR165-D",
+        "PR166-S",
+        "PR166-SM",
+        "PR164"
+      ],
+      "upstream_row_refs": [
+        "PR165_D2_AGENT_ROSTER_SOURCE::connector_venue_readiness_future_consumer"
+      ],
+      "upstream_value_refs": [
+        "agent_id",
+        "agent_role",
+        "agent_family"
+      ],
+      "validation_status": "PASS",
+      "validator_ref": "tools/validate_pr165_d2_score_refreshed_scenario_selection_v2.py",
+      "value_authority_lane": "AGENT_HANDOFF_LANE",
+      "venue_account_truth_count": 0,
+      "venue_semantic_dependency_class": "NO_VENUE_SEMANTIC_DEPENDENCY_FOR_SELECTION"
+    },
+    {
+      "agent_id": "research_agent",
+      "algorithm_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "artifact_id": "PR165_D2_AGENT_DUTY_SOURCE_CROSSWALK",
+      "atomicrows_bundle_sha_hash_checksum_authority_count": 0,
+      "atomicrows_bundle_sha_reference_count": 0,
+      "authority_boundary_ref": "PR165_D2_AUTHORITY_BOUNDARY::REPLAY_PAPER_SELECTION_ONLY_NO_LIVE_SOURCE_TRUTH_CONNECTOR_OR_QUANTUM_BACKEND",
+      "candidate_packet_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "combination_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "computability_status": "COMPUTABLE_FOR_AGENT_HANDOFF_ONLY",
+      "condition_fingerprint_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "condition_memory_policy_ref": "PR165_D2_CONDITION_MEMORY_POLICY::CONDITION_SCOPED_PREFERENCE_V2",
+      "conflict_resolution_reason": "COMPILED_PRIOR_ARTIFACT_DUTIES_ARE_COMPATIBLE",
+      "conflicting_source_flag": false,
+      "connector_binding_allowed_in_this_pr": false,
+      "connector_dependency_class": "NO_CONNECTOR_DEPENDENCY_FOR_SELECTION",
+      "connector_readiness_policy_ref": "PR165_D2_CONNECTOR_READINESS_POLICY::REFERENCE_ROUTE_ONLY_V1",
+      "connector_semantic_binding_count": 0,
+      "connector_truth_count": 0,
+      "created_at_utc": "2026-06-11T00:00:00Z",
+      "created_by_pr": "PR165-D2",
+      "deterministic_sort_key": "PR165_D2_AGENT_DUTY_CROSSWALK::000001",
+      "downstream_agent_consumers": [
+        "parameter_selector_agent",
+        "risk_manager_agent",
+        "quantum_optimizer_agent",
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "downstream_artifact_refs": [
+        "PR165_D2_AgentSelectionHandoff.report.json"
+      ],
+      "downstream_pr_refs": [
+        "DASHBOARD_GOVERNANCE_COMMANDER_REVIEW"
+      ],
+      "formula_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "future_connector_pr_refs": [
+        "DASHBOARD_GOVERNANCE_COMMANDER_REVIEW"
+      ],
+      "future_consolidation_route": "DASHBOARD_GOVERNANCE_COMMANDER_REVIEW",
+      "future_venue_readiness_route": "DASHBOARD_GOVERNANCE_COMMANDER_REVIEW",
+      "historical_duty_preserved_flag": true,
+      "historical_duty_removed_flag": false,
+      "live_order_authority_count": 0,
+      "live_promotion_claim_count": 0,
+      "llm_hot_path_artifact_count": 0,
+      "llm_order_release_artifact_count": 0,
+      "llm_result_rewrite_artifact_count": 0,
+      "llm_source_acceptance_artifact_count": 0,
+      "manifest_ref": "PR165_D2_ReportManifest.report.json",
+      "materialization_action_ref": "PR165_D2_MATERIALIZATION_ACTION::NOT_REQUIRED_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "new_sha256_artifact_count": 0,
+      "no_orphan_status": "CONNECTED_TO_AGENT_ROSTER_DISCOVERY_ROUTE",
+      "normalization_policy_ref": "PR165_D2_NORMALIZATION_POLICY::ROBUST_SCENARIO_GROUP_RANK_MINMAX_V2",
+      "owning_agent": "governance_agent",
+      "private_state_fetch_allowed_in_this_pr": false,
+      "private_state_fetch_count": 0,
+      "profit_evidence_count": 0,
+      "qku_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "qtt_sha_authority_count": 0,
+      "qtt_sha_freeze_checksum_global_digest_authority_count": 0,
+      "quantum_advantage_claim_count": 0,
+      "quantum_backend_execution_count": 0,
+      "repair_route_ref": "PR165_D2_REPAIR_ROUTE::NOT_REQUIRED_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "reviewer_or_challenger_agent": "commander_agent",
+      "row_id": "PR165_D2_AGENT_DUTY_CROSSWALK::000001",
+      "runtime_cash_receipt_allowed_in_this_pr": false,
+      "runtime_cash_receipt_count": 0,
+      "scenario_group_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "schema_ref": "pr165_d2_agent_duty_source_crosswalk.schema.json",
+      "score_policy_ref": "PR165_D2_SCORE_POLICY::EXECUTION_ADJUSTED_SCENARIO_SELECTION_V2",
+      "selection_state": "ROUTE_TO_PR173_AGENT_GOVERNANCE_FUTURE",
+      "source_authority_class": "PRIOR_ROADMAP_ARTIFACT_NOT_SOURCE_TRUTH",
+      "source_priority_tier": "TIER_1_DIRECT_PR165_D2_UPSTREAM_AGENT_DUTY_SOURCES",
+      "source_truth_acceptance_allowed_in_this_pr": false,
+      "source_truth_acceptance_count": 0,
+      "stronger_specific_definition_ref": "PR166_SM_AgentScoreMemoryRefreshContract.report.json,PR166_SM_AgentTaskQueue.report.json",
+      "terminal_status_flag": false,
+      "terminal_status_reason": "ROW_CONTINUES_TO_DECLARED_DOWNSTREAM_ROUTE",
+      "upstream_artifact_refs": [
+        "PR166_SM_AgentScoreMemoryRefreshContract.report.json",
+        "PR166_SM_AgentTaskQueue.report.json",
+        "PR165_C_MemoryConsumerRouter.report.json",
+        "PR165_D_AgentSelectionHandoff.report.json"
+      ],
+      "upstream_pr_refs": [
+        "PR165",
+        "PR165-B",
+        "PR165-C",
+        "PR165-D",
+        "PR166-S",
+        "PR166-SM",
+        "PR164"
+      ],
+      "upstream_row_refs": [
+        "PR165_D2_AGENT_ROSTER::000001"
+      ],
+      "upstream_value_refs": [
+        "duties_from_prior_artifacts",
+        "pr165_d2_duty_mapping"
+      ],
+      "validation_status": "PASS",
+      "validator_ref": "tools/validate_pr165_d2_score_refreshed_scenario_selection_v2.py",
+      "value_authority_lane": "AGENT_HANDOFF_LANE",
+      "venue_account_truth_count": 0,
+      "venue_semantic_dependency_class": "NO_VENUE_SEMANTIC_DEPENDENCY_FOR_SELECTION",
+      "weaker_or_superseded_definition_ref": "NO_SUPERSEDED_DUTY_DETECTED"
+    },
+    {
+      "agent_id": "parameter_selector_agent",
+      "algorithm_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "artifact_id": "PR165_D2_AGENT_DUTY_SOURCE_CROSSWALK",
+      "atomicrows_bundle_sha_hash_checksum_authority_count": 0,
+      "atomicrows_bundle_sha_reference_count": 0,
+      "authority_boundary_ref": "PR165_D2_AUTHORITY_BOUNDARY::REPLAY_PAPER_SELECTION_ONLY_NO_LIVE_SOURCE_TRUTH_CONNECTOR_OR_QUANTUM_BACKEND",
+      "candidate_packet_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "combination_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "computability_status": "COMPUTABLE_FOR_AGENT_HANDOFF_ONLY",
+      "condition_fingerprint_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "condition_memory_policy_ref": "PR165_D2_CONDITION_MEMORY_POLICY::CONDITION_SCOPED_PREFERENCE_V2",
+      "conflict_resolution_reason": "COMPILED_PRIOR_ARTIFACT_DUTIES_ARE_COMPATIBLE",
+      "conflicting_source_flag": false,
+      "connector_binding_allowed_in_this_pr": false,
+      "connector_dependency_class": "NO_CONNECTOR_DEPENDENCY_FOR_SELECTION",
+      "connector_readiness_policy_ref": "PR165_D2_CONNECTOR_READINESS_POLICY::REFERENCE_ROUTE_ONLY_V1",
+      "connector_semantic_binding_count": 0,
+      "connector_truth_count": 0,
+      "created_at_utc": "2026-06-11T00:00:00Z",
+      "created_by_pr": "PR165-D2",
+      "deterministic_sort_key": "PR165_D2_AGENT_DUTY_CROSSWALK::000002",
+      "downstream_agent_consumers": [
+        "parameter_selector_agent",
+        "risk_manager_agent",
+        "quantum_optimizer_agent",
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "downstream_artifact_refs": [
+        "PR165_D2_AgentSelectionHandoff.report.json"
+      ],
+      "downstream_pr_refs": [
+        "DASHBOARD_GOVERNANCE_COMMANDER_REVIEW"
+      ],
+      "formula_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "future_connector_pr_refs": [
+        "DASHBOARD_GOVERNANCE_COMMANDER_REVIEW"
+      ],
+      "future_consolidation_route": "DASHBOARD_GOVERNANCE_COMMANDER_REVIEW",
+      "future_venue_readiness_route": "DASHBOARD_GOVERNANCE_COMMANDER_REVIEW",
+      "historical_duty_preserved_flag": true,
+      "historical_duty_removed_flag": false,
+      "live_order_authority_count": 0,
+      "live_promotion_claim_count": 0,
+      "llm_hot_path_artifact_count": 0,
+      "llm_order_release_artifact_count": 0,
+      "llm_result_rewrite_artifact_count": 0,
+      "llm_source_acceptance_artifact_count": 0,
+      "manifest_ref": "PR165_D2_ReportManifest.report.json",
+      "materialization_action_ref": "PR165_D2_MATERIALIZATION_ACTION::NOT_REQUIRED_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "new_sha256_artifact_count": 0,
+      "no_orphan_status": "CONNECTED_TO_AGENT_ROSTER_DISCOVERY_ROUTE",
+      "normalization_policy_ref": "PR165_D2_NORMALIZATION_POLICY::ROBUST_SCENARIO_GROUP_RANK_MINMAX_V2",
+      "owning_agent": "governance_agent",
+      "private_state_fetch_allowed_in_this_pr": false,
+      "private_state_fetch_count": 0,
+      "profit_evidence_count": 0,
+      "qku_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "qtt_sha_authority_count": 0,
+      "qtt_sha_freeze_checksum_global_digest_authority_count": 0,
+      "quantum_advantage_claim_count": 0,
+      "quantum_backend_execution_count": 0,
+      "repair_route_ref": "PR165_D2_REPAIR_ROUTE::NOT_REQUIRED_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "reviewer_or_challenger_agent": "commander_agent",
+      "row_id": "PR165_D2_AGENT_DUTY_CROSSWALK::000002",
+      "runtime_cash_receipt_allowed_in_this_pr": false,
+      "runtime_cash_receipt_count": 0,
+      "scenario_group_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "schema_ref": "pr165_d2_agent_duty_source_crosswalk.schema.json",
+      "score_policy_ref": "PR165_D2_SCORE_POLICY::EXECUTION_ADJUSTED_SCENARIO_SELECTION_V2",
+      "selection_state": "ROUTE_TO_PR173_AGENT_GOVERNANCE_FUTURE",
+      "source_authority_class": "PRIOR_ROADMAP_ARTIFACT_NOT_SOURCE_TRUTH",
+      "source_priority_tier": "TIER_1_DIRECT_PR165_D2_UPSTREAM_AGENT_DUTY_SOURCES",
+      "source_truth_acceptance_allowed_in_this_pr": false,
+      "source_truth_acceptance_count": 0,
+      "stronger_specific_definition_ref": "PR166_SM_AgentScoreMemoryRefreshContract.report.json,PR166_SM_AgentTaskQueue.report.json",
+      "terminal_status_flag": false,
+      "terminal_status_reason": "ROW_CONTINUES_TO_DECLARED_DOWNSTREAM_ROUTE",
+      "upstream_artifact_refs": [
+        "PR166_SM_AgentScoreMemoryRefreshContract.report.json",
+        "PR166_SM_AgentTaskQueue.report.json",
+        "PR165_C_MemoryConsumerRouter.report.json",
+        "PR165_D_AgentSelectionHandoff.report.json"
+      ],
+      "upstream_pr_refs": [
+        "PR165",
+        "PR165-B",
+        "PR165-C",
+        "PR165-D",
+        "PR166-S",
+        "PR166-SM",
+        "PR164"
+      ],
+      "upstream_row_refs": [
+        "PR165_D2_AGENT_ROSTER::000002"
+      ],
+      "upstream_value_refs": [
+        "duties_from_prior_artifacts",
+        "pr165_d2_duty_mapping"
+      ],
+      "validation_status": "PASS",
+      "validator_ref": "tools/validate_pr165_d2_score_refreshed_scenario_selection_v2.py",
+      "value_authority_lane": "AGENT_HANDOFF_LANE",
+      "venue_account_truth_count": 0,
+      "venue_semantic_dependency_class": "NO_VENUE_SEMANTIC_DEPENDENCY_FOR_SELECTION",
+      "weaker_or_superseded_definition_ref": "NO_SUPERSEDED_DUTY_DETECTED"
+    },
+    {
+      "agent_id": "risk_manager_agent",
+      "algorithm_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "artifact_id": "PR165_D2_AGENT_DUTY_SOURCE_CROSSWALK",
+      "atomicrows_bundle_sha_hash_checksum_authority_count": 0,
+      "atomicrows_bundle_sha_reference_count": 0,
+      "authority_boundary_ref": "PR165_D2_AUTHORITY_BOUNDARY::REPLAY_PAPER_SELECTION_ONLY_NO_LIVE_SOURCE_TRUTH_CONNECTOR_OR_QUANTUM_BACKEND",
+      "candidate_packet_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "combination_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "computability_status": "COMPUTABLE_FOR_AGENT_HANDOFF_ONLY",
+      "condition_fingerprint_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "condition_memory_policy_ref": "PR165_D2_CONDITION_MEMORY_POLICY::CONDITION_SCOPED_PREFERENCE_V2",
+      "conflict_resolution_reason": "COMPILED_PRIOR_ARTIFACT_DUTIES_ARE_COMPATIBLE",
+      "conflicting_source_flag": false,
+      "connector_binding_allowed_in_this_pr": false,
+      "connector_dependency_class": "NO_CONNECTOR_DEPENDENCY_FOR_SELECTION",
+      "connector_readiness_policy_ref": "PR165_D2_CONNECTOR_READINESS_POLICY::REFERENCE_ROUTE_ONLY_V1",
+      "connector_semantic_binding_count": 0,
+      "connector_truth_count": 0,
+      "created_at_utc": "2026-06-11T00:00:00Z",
+      "created_by_pr": "PR165-D2",
+      "deterministic_sort_key": "PR165_D2_AGENT_DUTY_CROSSWALK::000003",
+      "downstream_agent_consumers": [
+        "parameter_selector_agent",
+        "risk_manager_agent",
+        "quantum_optimizer_agent",
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "downstream_artifact_refs": [
+        "PR165_D2_AgentSelectionHandoff.report.json"
+      ],
+      "downstream_pr_refs": [
+        "DASHBOARD_GOVERNANCE_COMMANDER_REVIEW"
+      ],
+      "formula_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "future_connector_pr_refs": [
+        "DASHBOARD_GOVERNANCE_COMMANDER_REVIEW"
+      ],
+      "future_consolidation_route": "DASHBOARD_GOVERNANCE_COMMANDER_REVIEW",
+      "future_venue_readiness_route": "DASHBOARD_GOVERNANCE_COMMANDER_REVIEW",
+      "historical_duty_preserved_flag": true,
+      "historical_duty_removed_flag": false,
+      "live_order_authority_count": 0,
+      "live_promotion_claim_count": 0,
+      "llm_hot_path_artifact_count": 0,
+      "llm_order_release_artifact_count": 0,
+      "llm_result_rewrite_artifact_count": 0,
+      "llm_source_acceptance_artifact_count": 0,
+      "manifest_ref": "PR165_D2_ReportManifest.report.json",
+      "materialization_action_ref": "PR165_D2_MATERIALIZATION_ACTION::NOT_REQUIRED_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "new_sha256_artifact_count": 0,
+      "no_orphan_status": "CONNECTED_TO_AGENT_ROSTER_DISCOVERY_ROUTE",
+      "normalization_policy_ref": "PR165_D2_NORMALIZATION_POLICY::ROBUST_SCENARIO_GROUP_RANK_MINMAX_V2",
+      "owning_agent": "governance_agent",
+      "private_state_fetch_allowed_in_this_pr": false,
+      "private_state_fetch_count": 0,
+      "profit_evidence_count": 0,
+      "qku_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "qtt_sha_authority_count": 0,
+      "qtt_sha_freeze_checksum_global_digest_authority_count": 0,
+      "quantum_advantage_claim_count": 0,
+      "quantum_backend_execution_count": 0,
+      "repair_route_ref": "PR165_D2_REPAIR_ROUTE::NOT_REQUIRED_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "reviewer_or_challenger_agent": "commander_agent",
+      "row_id": "PR165_D2_AGENT_DUTY_CROSSWALK::000003",
+      "runtime_cash_receipt_allowed_in_this_pr": false,
+      "runtime_cash_receipt_count": 0,
+      "scenario_group_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "schema_ref": "pr165_d2_agent_duty_source_crosswalk.schema.json",
+      "score_policy_ref": "PR165_D2_SCORE_POLICY::EXECUTION_ADJUSTED_SCENARIO_SELECTION_V2",
+      "selection_state": "ROUTE_TO_PR173_AGENT_GOVERNANCE_FUTURE",
+      "source_authority_class": "PRIOR_ROADMAP_ARTIFACT_NOT_SOURCE_TRUTH",
+      "source_priority_tier": "TIER_1_DIRECT_PR165_D2_UPSTREAM_AGENT_DUTY_SOURCES",
+      "source_truth_acceptance_allowed_in_this_pr": false,
+      "source_truth_acceptance_count": 0,
+      "stronger_specific_definition_ref": "PR166_SM_AgentScoreMemoryRefreshContract.report.json,PR166_SM_AgentTaskQueue.report.json",
+      "terminal_status_flag": false,
+      "terminal_status_reason": "ROW_CONTINUES_TO_DECLARED_DOWNSTREAM_ROUTE",
+      "upstream_artifact_refs": [
+        "PR166_SM_AgentScoreMemoryRefreshContract.report.json",
+        "PR166_SM_AgentTaskQueue.report.json",
+        "PR165_C_MemoryConsumerRouter.report.json",
+        "PR165_D_AgentSelectionHandoff.report.json"
+      ],
+      "upstream_pr_refs": [
+        "PR165",
+        "PR165-B",
+        "PR165-C",
+        "PR165-D",
+        "PR166-S",
+        "PR166-SM",
+        "PR164"
+      ],
+      "upstream_row_refs": [
+        "PR165_D2_AGENT_ROSTER::000003"
+      ],
+      "upstream_value_refs": [
+        "duties_from_prior_artifacts",
+        "pr165_d2_duty_mapping"
+      ],
+      "validation_status": "PASS",
+      "validator_ref": "tools/validate_pr165_d2_score_refreshed_scenario_selection_v2.py",
+      "value_authority_lane": "AGENT_HANDOFF_LANE",
+      "venue_account_truth_count": 0,
+      "venue_semantic_dependency_class": "NO_VENUE_SEMANTIC_DEPENDENCY_FOR_SELECTION",
+      "weaker_or_superseded_definition_ref": "NO_SUPERSEDED_DUTY_DETECTED"
+    },
+    {
+      "agent_id": "quantum_optimizer_agent",
+      "algorithm_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "artifact_id": "PR165_D2_AGENT_DUTY_SOURCE_CROSSWALK",
+      "atomicrows_bundle_sha_hash_checksum_authority_count": 0,
+      "atomicrows_bundle_sha_reference_count": 0,
+      "authority_boundary_ref": "PR165_D2_AUTHORITY_BOUNDARY::REPLAY_PAPER_SELECTION_ONLY_NO_LIVE_SOURCE_TRUTH_CONNECTOR_OR_QUANTUM_BACKEND",
+      "candidate_packet_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "combination_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "computability_status": "COMPUTABLE_FOR_AGENT_HANDOFF_ONLY",
+      "condition_fingerprint_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "condition_memory_policy_ref": "PR165_D2_CONDITION_MEMORY_POLICY::CONDITION_SCOPED_PREFERENCE_V2",
+      "conflict_resolution_reason": "COMPILED_PRIOR_ARTIFACT_DUTIES_ARE_COMPATIBLE",
+      "conflicting_source_flag": false,
+      "connector_binding_allowed_in_this_pr": false,
+      "connector_dependency_class": "NO_CONNECTOR_DEPENDENCY_FOR_SELECTION",
+      "connector_readiness_policy_ref": "PR165_D2_CONNECTOR_READINESS_POLICY::REFERENCE_ROUTE_ONLY_V1",
+      "connector_semantic_binding_count": 0,
+      "connector_truth_count": 0,
+      "created_at_utc": "2026-06-11T00:00:00Z",
+      "created_by_pr": "PR165-D2",
+      "deterministic_sort_key": "PR165_D2_AGENT_DUTY_CROSSWALK::000004",
+      "downstream_agent_consumers": [
+        "parameter_selector_agent",
+        "risk_manager_agent",
+        "quantum_optimizer_agent",
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "downstream_artifact_refs": [
+        "PR165_D2_AgentSelectionHandoff.report.json"
+      ],
+      "downstream_pr_refs": [
+        "DASHBOARD_GOVERNANCE_COMMANDER_REVIEW"
+      ],
+      "formula_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "future_connector_pr_refs": [
+        "DASHBOARD_GOVERNANCE_COMMANDER_REVIEW"
+      ],
+      "future_consolidation_route": "DASHBOARD_GOVERNANCE_COMMANDER_REVIEW",
+      "future_venue_readiness_route": "DASHBOARD_GOVERNANCE_COMMANDER_REVIEW",
+      "historical_duty_preserved_flag": true,
+      "historical_duty_removed_flag": false,
+      "live_order_authority_count": 0,
+      "live_promotion_claim_count": 0,
+      "llm_hot_path_artifact_count": 0,
+      "llm_order_release_artifact_count": 0,
+      "llm_result_rewrite_artifact_count": 0,
+      "llm_source_acceptance_artifact_count": 0,
+      "manifest_ref": "PR165_D2_ReportManifest.report.json",
+      "materialization_action_ref": "PR165_D2_MATERIALIZATION_ACTION::NOT_REQUIRED_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "new_sha256_artifact_count": 0,
+      "no_orphan_status": "CONNECTED_TO_AGENT_ROSTER_DISCOVERY_ROUTE",
+      "normalization_policy_ref": "PR165_D2_NORMALIZATION_POLICY::ROBUST_SCENARIO_GROUP_RANK_MINMAX_V2",
+      "owning_agent": "governance_agent",
+      "private_state_fetch_allowed_in_this_pr": false,
+      "private_state_fetch_count": 0,
+      "profit_evidence_count": 0,
+      "qku_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "qtt_sha_authority_count": 0,
+      "qtt_sha_freeze_checksum_global_digest_authority_count": 0,
+      "quantum_advantage_claim_count": 0,
+      "quantum_backend_execution_count": 0,
+      "repair_route_ref": "PR165_D2_REPAIR_ROUTE::NOT_REQUIRED_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "reviewer_or_challenger_agent": "commander_agent",
+      "row_id": "PR165_D2_AGENT_DUTY_CROSSWALK::000004",
+      "runtime_cash_receipt_allowed_in_this_pr": false,
+      "runtime_cash_receipt_count": 0,
+      "scenario_group_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "schema_ref": "pr165_d2_agent_duty_source_crosswalk.schema.json",
+      "score_policy_ref": "PR165_D2_SCORE_POLICY::EXECUTION_ADJUSTED_SCENARIO_SELECTION_V2",
+      "selection_state": "ROUTE_TO_PR173_AGENT_GOVERNANCE_FUTURE",
+      "source_authority_class": "PRIOR_ROADMAP_ARTIFACT_NOT_SOURCE_TRUTH",
+      "source_priority_tier": "TIER_1_DIRECT_PR165_D2_UPSTREAM_AGENT_DUTY_SOURCES",
+      "source_truth_acceptance_allowed_in_this_pr": false,
+      "source_truth_acceptance_count": 0,
+      "stronger_specific_definition_ref": "PR166_SM_AgentScoreMemoryRefreshContract.report.json,PR166_SM_AgentTaskQueue.report.json",
+      "terminal_status_flag": false,
+      "terminal_status_reason": "ROW_CONTINUES_TO_DECLARED_DOWNSTREAM_ROUTE",
+      "upstream_artifact_refs": [
+        "PR166_SM_AgentScoreMemoryRefreshContract.report.json",
+        "PR166_SM_AgentTaskQueue.report.json",
+        "PR165_C_MemoryConsumerRouter.report.json",
+        "PR165_D_AgentSelectionHandoff.report.json"
+      ],
+      "upstream_pr_refs": [
+        "PR165",
+        "PR165-B",
+        "PR165-C",
+        "PR165-D",
+        "PR166-S",
+        "PR166-SM",
+        "PR164"
+      ],
+      "upstream_row_refs": [
+        "PR165_D2_AGENT_ROSTER::000004"
+      ],
+      "upstream_value_refs": [
+        "duties_from_prior_artifacts",
+        "pr165_d2_duty_mapping"
+      ],
+      "validation_status": "PASS",
+      "validator_ref": "tools/validate_pr165_d2_score_refreshed_scenario_selection_v2.py",
+      "value_authority_lane": "AGENT_HANDOFF_LANE",
+      "venue_account_truth_count": 0,
+      "venue_semantic_dependency_class": "NO_VENUE_SEMANTIC_DEPENDENCY_FOR_SELECTION",
+      "weaker_or_superseded_definition_ref": "NO_SUPERSEDED_DUTY_DETECTED"
+    },
+    {
+      "agent_id": "commander_agent",
+      "algorithm_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "artifact_id": "PR165_D2_AGENT_DUTY_SOURCE_CROSSWALK",
+      "atomicrows_bundle_sha_hash_checksum_authority_count": 0,
+      "atomicrows_bundle_sha_reference_count": 0,
+      "authority_boundary_ref": "PR165_D2_AUTHORITY_BOUNDARY::REPLAY_PAPER_SELECTION_ONLY_NO_LIVE_SOURCE_TRUTH_CONNECTOR_OR_QUANTUM_BACKEND",
+      "candidate_packet_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "combination_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "computability_status": "COMPUTABLE_FOR_AGENT_HANDOFF_ONLY",
+      "condition_fingerprint_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "condition_memory_policy_ref": "PR165_D2_CONDITION_MEMORY_POLICY::CONDITION_SCOPED_PREFERENCE_V2",
+      "conflict_resolution_reason": "COMPILED_PRIOR_ARTIFACT_DUTIES_ARE_COMPATIBLE",
+      "conflicting_source_flag": false,
+      "connector_binding_allowed_in_this_pr": false,
+      "connector_dependency_class": "NO_CONNECTOR_DEPENDENCY_FOR_SELECTION",
+      "connector_readiness_policy_ref": "PR165_D2_CONNECTOR_READINESS_POLICY::REFERENCE_ROUTE_ONLY_V1",
+      "connector_semantic_binding_count": 0,
+      "connector_truth_count": 0,
+      "created_at_utc": "2026-06-11T00:00:00Z",
+      "created_by_pr": "PR165-D2",
+      "deterministic_sort_key": "PR165_D2_AGENT_DUTY_CROSSWALK::000005",
+      "downstream_agent_consumers": [
+        "parameter_selector_agent",
+        "risk_manager_agent",
+        "quantum_optimizer_agent",
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "downstream_artifact_refs": [
+        "PR165_D2_AgentSelectionHandoff.report.json"
+      ],
+      "downstream_pr_refs": [
+        "DASHBOARD_GOVERNANCE_COMMANDER_REVIEW"
+      ],
+      "formula_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "future_connector_pr_refs": [
+        "DASHBOARD_GOVERNANCE_COMMANDER_REVIEW"
+      ],
+      "future_consolidation_route": "DASHBOARD_GOVERNANCE_COMMANDER_REVIEW",
+      "future_venue_readiness_route": "DASHBOARD_GOVERNANCE_COMMANDER_REVIEW",
+      "historical_duty_preserved_flag": true,
+      "historical_duty_removed_flag": false,
+      "live_order_authority_count": 0,
+      "live_promotion_claim_count": 0,
+      "llm_hot_path_artifact_count": 0,
+      "llm_order_release_artifact_count": 0,
+      "llm_result_rewrite_artifact_count": 0,
+      "llm_source_acceptance_artifact_count": 0,
+      "manifest_ref": "PR165_D2_ReportManifest.report.json",
+      "materialization_action_ref": "PR165_D2_MATERIALIZATION_ACTION::NOT_REQUIRED_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "new_sha256_artifact_count": 0,
+      "no_orphan_status": "CONNECTED_TO_AGENT_ROSTER_DISCOVERY_ROUTE",
+      "normalization_policy_ref": "PR165_D2_NORMALIZATION_POLICY::ROBUST_SCENARIO_GROUP_RANK_MINMAX_V2",
+      "owning_agent": "governance_agent",
+      "private_state_fetch_allowed_in_this_pr": false,
+      "private_state_fetch_count": 0,
+      "profit_evidence_count": 0,
+      "qku_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "qtt_sha_authority_count": 0,
+      "qtt_sha_freeze_checksum_global_digest_authority_count": 0,
+      "quantum_advantage_claim_count": 0,
+      "quantum_backend_execution_count": 0,
+      "repair_route_ref": "PR165_D2_REPAIR_ROUTE::NOT_REQUIRED_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "reviewer_or_challenger_agent": "commander_agent",
+      "row_id": "PR165_D2_AGENT_DUTY_CROSSWALK::000005",
+      "runtime_cash_receipt_allowed_in_this_pr": false,
+      "runtime_cash_receipt_count": 0,
+      "scenario_group_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "schema_ref": "pr165_d2_agent_duty_source_crosswalk.schema.json",
+      "score_policy_ref": "PR165_D2_SCORE_POLICY::EXECUTION_ADJUSTED_SCENARIO_SELECTION_V2",
+      "selection_state": "ROUTE_TO_PR173_AGENT_GOVERNANCE_FUTURE",
+      "source_authority_class": "PRIOR_ROADMAP_ARTIFACT_NOT_SOURCE_TRUTH",
+      "source_priority_tier": "TIER_1_DIRECT_PR165_D2_UPSTREAM_AGENT_DUTY_SOURCES",
+      "source_truth_acceptance_allowed_in_this_pr": false,
+      "source_truth_acceptance_count": 0,
+      "stronger_specific_definition_ref": "PR166_SM_AgentScoreMemoryRefreshContract.report.json,PR166_SM_AgentTaskQueue.report.json",
+      "terminal_status_flag": false,
+      "terminal_status_reason": "ROW_CONTINUES_TO_DECLARED_DOWNSTREAM_ROUTE",
+      "upstream_artifact_refs": [
+        "PR166_SM_AgentScoreMemoryRefreshContract.report.json",
+        "PR166_SM_AgentTaskQueue.report.json",
+        "PR165_C_MemoryConsumerRouter.report.json",
+        "PR165_D_AgentSelectionHandoff.report.json"
+      ],
+      "upstream_pr_refs": [
+        "PR165",
+        "PR165-B",
+        "PR165-C",
+        "PR165-D",
+        "PR166-S",
+        "PR166-SM",
+        "PR164"
+      ],
+      "upstream_row_refs": [
+        "PR165_D2_AGENT_ROSTER::000005"
+      ],
+      "upstream_value_refs": [
+        "duties_from_prior_artifacts",
+        "pr165_d2_duty_mapping"
+      ],
+      "validation_status": "PASS",
+      "validator_ref": "tools/validate_pr165_d2_score_refreshed_scenario_selection_v2.py",
+      "value_authority_lane": "AGENT_HANDOFF_LANE",
+      "venue_account_truth_count": 0,
+      "venue_semantic_dependency_class": "NO_VENUE_SEMANTIC_DEPENDENCY_FOR_SELECTION",
+      "weaker_or_superseded_definition_ref": "NO_SUPERSEDED_DUTY_DETECTED"
+    },
+    {
+      "agent_id": "governance_agent",
+      "algorithm_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "artifact_id": "PR165_D2_AGENT_DUTY_SOURCE_CROSSWALK",
+      "atomicrows_bundle_sha_hash_checksum_authority_count": 0,
+      "atomicrows_bundle_sha_reference_count": 0,
+      "authority_boundary_ref": "PR165_D2_AUTHORITY_BOUNDARY::REPLAY_PAPER_SELECTION_ONLY_NO_LIVE_SOURCE_TRUTH_CONNECTOR_OR_QUANTUM_BACKEND",
+      "candidate_packet_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "combination_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "computability_status": "COMPUTABLE_FOR_AGENT_HANDOFF_ONLY",
+      "condition_fingerprint_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "condition_memory_policy_ref": "PR165_D2_CONDITION_MEMORY_POLICY::CONDITION_SCOPED_PREFERENCE_V2",
+      "conflict_resolution_reason": "COMPILED_PRIOR_ARTIFACT_DUTIES_ARE_COMPATIBLE",
+      "conflicting_source_flag": false,
+      "connector_binding_allowed_in_this_pr": false,
+      "connector_dependency_class": "NO_CONNECTOR_DEPENDENCY_FOR_SELECTION",
+      "connector_readiness_policy_ref": "PR165_D2_CONNECTOR_READINESS_POLICY::REFERENCE_ROUTE_ONLY_V1",
+      "connector_semantic_binding_count": 0,
+      "connector_truth_count": 0,
+      "created_at_utc": "2026-06-11T00:00:00Z",
+      "created_by_pr": "PR165-D2",
+      "deterministic_sort_key": "PR165_D2_AGENT_DUTY_CROSSWALK::000006",
+      "downstream_agent_consumers": [
+        "parameter_selector_agent",
+        "risk_manager_agent",
+        "quantum_optimizer_agent",
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "downstream_artifact_refs": [
+        "PR165_D2_AgentSelectionHandoff.report.json"
+      ],
+      "downstream_pr_refs": [
+        "DASHBOARD_GOVERNANCE_COMMANDER_REVIEW"
+      ],
+      "formula_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "future_connector_pr_refs": [
+        "DASHBOARD_GOVERNANCE_COMMANDER_REVIEW"
+      ],
+      "future_consolidation_route": "DASHBOARD_GOVERNANCE_COMMANDER_REVIEW",
+      "future_venue_readiness_route": "DASHBOARD_GOVERNANCE_COMMANDER_REVIEW",
+      "historical_duty_preserved_flag": true,
+      "historical_duty_removed_flag": false,
+      "live_order_authority_count": 0,
+      "live_promotion_claim_count": 0,
+      "llm_hot_path_artifact_count": 0,
+      "llm_order_release_artifact_count": 0,
+      "llm_result_rewrite_artifact_count": 0,
+      "llm_source_acceptance_artifact_count": 0,
+      "manifest_ref": "PR165_D2_ReportManifest.report.json",
+      "materialization_action_ref": "PR165_D2_MATERIALIZATION_ACTION::NOT_REQUIRED_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "new_sha256_artifact_count": 0,
+      "no_orphan_status": "CONNECTED_TO_AGENT_ROSTER_DISCOVERY_ROUTE",
+      "normalization_policy_ref": "PR165_D2_NORMALIZATION_POLICY::ROBUST_SCENARIO_GROUP_RANK_MINMAX_V2",
+      "owning_agent": "governance_agent",
+      "private_state_fetch_allowed_in_this_pr": false,
+      "private_state_fetch_count": 0,
+      "profit_evidence_count": 0,
+      "qku_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "qtt_sha_authority_count": 0,
+      "qtt_sha_freeze_checksum_global_digest_authority_count": 0,
+      "quantum_advantage_claim_count": 0,
+      "quantum_backend_execution_count": 0,
+      "repair_route_ref": "PR165_D2_REPAIR_ROUTE::NOT_REQUIRED_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "reviewer_or_challenger_agent": "commander_agent",
+      "row_id": "PR165_D2_AGENT_DUTY_CROSSWALK::000006",
+      "runtime_cash_receipt_allowed_in_this_pr": false,
+      "runtime_cash_receipt_count": 0,
+      "scenario_group_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "schema_ref": "pr165_d2_agent_duty_source_crosswalk.schema.json",
+      "score_policy_ref": "PR165_D2_SCORE_POLICY::EXECUTION_ADJUSTED_SCENARIO_SELECTION_V2",
+      "selection_state": "ROUTE_TO_PR173_AGENT_GOVERNANCE_FUTURE",
+      "source_authority_class": "PRIOR_ROADMAP_ARTIFACT_NOT_SOURCE_TRUTH",
+      "source_priority_tier": "TIER_1_DIRECT_PR165_D2_UPSTREAM_AGENT_DUTY_SOURCES",
+      "source_truth_acceptance_allowed_in_this_pr": false,
+      "source_truth_acceptance_count": 0,
+      "stronger_specific_definition_ref": "PR166_SM_AgentScoreMemoryRefreshContract.report.json,PR166_SM_AgentTaskQueue.report.json",
+      "terminal_status_flag": false,
+      "terminal_status_reason": "ROW_CONTINUES_TO_DECLARED_DOWNSTREAM_ROUTE",
+      "upstream_artifact_refs": [
+        "PR166_SM_AgentScoreMemoryRefreshContract.report.json",
+        "PR166_SM_AgentTaskQueue.report.json",
+        "PR165_C_MemoryConsumerRouter.report.json",
+        "PR165_D_AgentSelectionHandoff.report.json"
+      ],
+      "upstream_pr_refs": [
+        "PR165",
+        "PR165-B",
+        "PR165-C",
+        "PR165-D",
+        "PR166-S",
+        "PR166-SM",
+        "PR164"
+      ],
+      "upstream_row_refs": [
+        "PR165_D2_AGENT_ROSTER::000006"
+      ],
+      "upstream_value_refs": [
+        "duties_from_prior_artifacts",
+        "pr165_d2_duty_mapping"
+      ],
+      "validation_status": "PASS",
+      "validator_ref": "tools/validate_pr165_d2_score_refreshed_scenario_selection_v2.py",
+      "value_authority_lane": "AGENT_HANDOFF_LANE",
+      "venue_account_truth_count": 0,
+      "venue_semantic_dependency_class": "NO_VENUE_SEMANTIC_DEPENDENCY_FOR_SELECTION",
+      "weaker_or_superseded_definition_ref": "NO_SUPERSEDED_DUTY_DETECTED"
+    },
+    {
+      "agent_id": "dashboard_agent",
+      "algorithm_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "artifact_id": "PR165_D2_AGENT_DUTY_SOURCE_CROSSWALK",
+      "atomicrows_bundle_sha_hash_checksum_authority_count": 0,
+      "atomicrows_bundle_sha_reference_count": 0,
+      "authority_boundary_ref": "PR165_D2_AUTHORITY_BOUNDARY::REPLAY_PAPER_SELECTION_ONLY_NO_LIVE_SOURCE_TRUTH_CONNECTOR_OR_QUANTUM_BACKEND",
+      "candidate_packet_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "combination_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "computability_status": "COMPUTABLE_FOR_AGENT_HANDOFF_ONLY",
+      "condition_fingerprint_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "condition_memory_policy_ref": "PR165_D2_CONDITION_MEMORY_POLICY::CONDITION_SCOPED_PREFERENCE_V2",
+      "conflict_resolution_reason": "COMPILED_PRIOR_ARTIFACT_DUTIES_ARE_COMPATIBLE",
+      "conflicting_source_flag": false,
+      "connector_binding_allowed_in_this_pr": false,
+      "connector_dependency_class": "NO_CONNECTOR_DEPENDENCY_FOR_SELECTION",
+      "connector_readiness_policy_ref": "PR165_D2_CONNECTOR_READINESS_POLICY::REFERENCE_ROUTE_ONLY_V1",
+      "connector_semantic_binding_count": 0,
+      "connector_truth_count": 0,
+      "created_at_utc": "2026-06-11T00:00:00Z",
+      "created_by_pr": "PR165-D2",
+      "deterministic_sort_key": "PR165_D2_AGENT_DUTY_CROSSWALK::000007",
+      "downstream_agent_consumers": [
+        "parameter_selector_agent",
+        "risk_manager_agent",
+        "quantum_optimizer_agent",
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "downstream_artifact_refs": [
+        "PR165_D2_AgentSelectionHandoff.report.json"
+      ],
+      "downstream_pr_refs": [
+        "DASHBOARD_GOVERNANCE_COMMANDER_REVIEW"
+      ],
+      "formula_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "future_connector_pr_refs": [
+        "DASHBOARD_GOVERNANCE_COMMANDER_REVIEW"
+      ],
+      "future_consolidation_route": "DASHBOARD_GOVERNANCE_COMMANDER_REVIEW",
+      "future_venue_readiness_route": "DASHBOARD_GOVERNANCE_COMMANDER_REVIEW",
+      "historical_duty_preserved_flag": true,
+      "historical_duty_removed_flag": false,
+      "live_order_authority_count": 0,
+      "live_promotion_claim_count": 0,
+      "llm_hot_path_artifact_count": 0,
+      "llm_order_release_artifact_count": 0,
+      "llm_result_rewrite_artifact_count": 0,
+      "llm_source_acceptance_artifact_count": 0,
+      "manifest_ref": "PR165_D2_ReportManifest.report.json",
+      "materialization_action_ref": "PR165_D2_MATERIALIZATION_ACTION::NOT_REQUIRED_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "new_sha256_artifact_count": 0,
+      "no_orphan_status": "CONNECTED_TO_AGENT_ROSTER_DISCOVERY_ROUTE",
+      "normalization_policy_ref": "PR165_D2_NORMALIZATION_POLICY::ROBUST_SCENARIO_GROUP_RANK_MINMAX_V2",
+      "owning_agent": "governance_agent",
+      "private_state_fetch_allowed_in_this_pr": false,
+      "private_state_fetch_count": 0,
+      "profit_evidence_count": 0,
+      "qku_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "qtt_sha_authority_count": 0,
+      "qtt_sha_freeze_checksum_global_digest_authority_count": 0,
+      "quantum_advantage_claim_count": 0,
+      "quantum_backend_execution_count": 0,
+      "repair_route_ref": "PR165_D2_REPAIR_ROUTE::NOT_REQUIRED_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "reviewer_or_challenger_agent": "commander_agent",
+      "row_id": "PR165_D2_AGENT_DUTY_CROSSWALK::000007",
+      "runtime_cash_receipt_allowed_in_this_pr": false,
+      "runtime_cash_receipt_count": 0,
+      "scenario_group_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "schema_ref": "pr165_d2_agent_duty_source_crosswalk.schema.json",
+      "score_policy_ref": "PR165_D2_SCORE_POLICY::EXECUTION_ADJUSTED_SCENARIO_SELECTION_V2",
+      "selection_state": "ROUTE_TO_PR173_AGENT_GOVERNANCE_FUTURE",
+      "source_authority_class": "PRIOR_ROADMAP_ARTIFACT_NOT_SOURCE_TRUTH",
+      "source_priority_tier": "TIER_1_DIRECT_PR165_D2_UPSTREAM_AGENT_DUTY_SOURCES",
+      "source_truth_acceptance_allowed_in_this_pr": false,
+      "source_truth_acceptance_count": 0,
+      "stronger_specific_definition_ref": "PR166_SM_AgentScoreMemoryRefreshContract.report.json,PR166_SM_AgentTaskQueue.report.json",
+      "terminal_status_flag": false,
+      "terminal_status_reason": "ROW_CONTINUES_TO_DECLARED_DOWNSTREAM_ROUTE",
+      "upstream_artifact_refs": [
+        "PR166_SM_AgentScoreMemoryRefreshContract.report.json",
+        "PR166_SM_AgentTaskQueue.report.json",
+        "PR165_C_MemoryConsumerRouter.report.json",
+        "PR165_D_AgentSelectionHandoff.report.json"
+      ],
+      "upstream_pr_refs": [
+        "PR165",
+        "PR165-B",
+        "PR165-C",
+        "PR165-D",
+        "PR166-S",
+        "PR166-SM",
+        "PR164"
+      ],
+      "upstream_row_refs": [
+        "PR165_D2_AGENT_ROSTER::000007"
+      ],
+      "upstream_value_refs": [
+        "duties_from_prior_artifacts",
+        "pr165_d2_duty_mapping"
+      ],
+      "validation_status": "PASS",
+      "validator_ref": "tools/validate_pr165_d2_score_refreshed_scenario_selection_v2.py",
+      "value_authority_lane": "AGENT_HANDOFF_LANE",
+      "venue_account_truth_count": 0,
+      "venue_semantic_dependency_class": "NO_VENUE_SEMANTIC_DEPENDENCY_FOR_SELECTION",
+      "weaker_or_superseded_definition_ref": "NO_SUPERSEDED_DUTY_DETECTED"
+    },
+    {
+      "agent_id": "connector_venue_readiness_future_consumer",
+      "algorithm_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "artifact_id": "PR165_D2_AGENT_DUTY_SOURCE_CROSSWALK",
+      "atomicrows_bundle_sha_hash_checksum_authority_count": 0,
+      "atomicrows_bundle_sha_reference_count": 0,
+      "authority_boundary_ref": "PR165_D2_AUTHORITY_BOUNDARY::REPLAY_PAPER_SELECTION_ONLY_NO_LIVE_SOURCE_TRUTH_CONNECTOR_OR_QUANTUM_BACKEND",
+      "candidate_packet_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "combination_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "computability_status": "COMPUTABLE_FOR_AGENT_HANDOFF_ONLY",
+      "condition_fingerprint_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "condition_memory_policy_ref": "PR165_D2_CONDITION_MEMORY_POLICY::CONDITION_SCOPED_PREFERENCE_V2",
+      "conflict_resolution_reason": "COMPILED_PRIOR_ARTIFACT_DUTIES_ARE_COMPATIBLE",
+      "conflicting_source_flag": false,
+      "connector_binding_allowed_in_this_pr": false,
+      "connector_dependency_class": "NO_CONNECTOR_DEPENDENCY_FOR_SELECTION",
+      "connector_readiness_policy_ref": "PR165_D2_CONNECTOR_READINESS_POLICY::REFERENCE_ROUTE_ONLY_V1",
+      "connector_semantic_binding_count": 0,
+      "connector_truth_count": 0,
+      "created_at_utc": "2026-06-11T00:00:00Z",
+      "created_by_pr": "PR165-D2",
+      "deterministic_sort_key": "PR165_D2_AGENT_DUTY_CROSSWALK::000008",
+      "downstream_agent_consumers": [
+        "parameter_selector_agent",
+        "risk_manager_agent",
+        "quantum_optimizer_agent",
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "downstream_artifact_refs": [
+        "PR165_D2_AgentSelectionHandoff.report.json"
+      ],
+      "downstream_pr_refs": [
+        "DASHBOARD_GOVERNANCE_COMMANDER_REVIEW"
+      ],
+      "formula_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "future_connector_pr_refs": [
+        "DASHBOARD_GOVERNANCE_COMMANDER_REVIEW"
+      ],
+      "future_consolidation_route": "DASHBOARD_GOVERNANCE_COMMANDER_REVIEW",
+      "future_venue_readiness_route": "DASHBOARD_GOVERNANCE_COMMANDER_REVIEW",
+      "historical_duty_preserved_flag": true,
+      "historical_duty_removed_flag": false,
+      "live_order_authority_count": 0,
+      "live_promotion_claim_count": 0,
+      "llm_hot_path_artifact_count": 0,
+      "llm_order_release_artifact_count": 0,
+      "llm_result_rewrite_artifact_count": 0,
+      "llm_source_acceptance_artifact_count": 0,
+      "manifest_ref": "PR165_D2_ReportManifest.report.json",
+      "materialization_action_ref": "PR165_D2_MATERIALIZATION_ACTION::NOT_REQUIRED_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "new_sha256_artifact_count": 0,
+      "no_orphan_status": "CONNECTED_TO_AGENT_ROSTER_DISCOVERY_ROUTE",
+      "normalization_policy_ref": "PR165_D2_NORMALIZATION_POLICY::ROBUST_SCENARIO_GROUP_RANK_MINMAX_V2",
+      "owning_agent": "governance_agent",
+      "private_state_fetch_allowed_in_this_pr": false,
+      "private_state_fetch_count": 0,
+      "profit_evidence_count": 0,
+      "qku_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "qtt_sha_authority_count": 0,
+      "qtt_sha_freeze_checksum_global_digest_authority_count": 0,
+      "quantum_advantage_claim_count": 0,
+      "quantum_backend_execution_count": 0,
+      "repair_route_ref": "PR165_D2_REPAIR_ROUTE::NOT_REQUIRED_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "reviewer_or_challenger_agent": "commander_agent",
+      "row_id": "PR165_D2_AGENT_DUTY_CROSSWALK::000008",
+      "runtime_cash_receipt_allowed_in_this_pr": false,
+      "runtime_cash_receipt_count": 0,
+      "scenario_group_id": "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE",
+      "schema_ref": "pr165_d2_agent_duty_source_crosswalk.schema.json",
+      "score_policy_ref": "PR165_D2_SCORE_POLICY::EXECUTION_ADJUSTED_SCENARIO_SELECTION_V2",
+      "selection_state": "ROUTE_TO_PR173_AGENT_GOVERNANCE_FUTURE",
+      "source_authority_class": "PRIOR_ROADMAP_ARTIFACT_NOT_SOURCE_TRUTH",
+      "source_priority_tier": "TIER_1_DIRECT_PR165_D2_UPSTREAM_AGENT_DUTY_SOURCES",
+      "source_truth_acceptance_allowed_in_this_pr": false,
+      "source_truth_acceptance_count": 0,
+      "stronger_specific_definition_ref": "PR166_SM_AgentScoreMemoryRefreshContract.report.json,PR166_SM_AgentTaskQueue.report.json",
+      "terminal_status_flag": false,
+      "terminal_status_reason": "ROW_CONTINUES_TO_DECLARED_DOWNSTREAM_ROUTE",
+      "upstream_artifact_refs": [
+        "PR166_SM_AgentScoreMemoryRefreshContract.report.json",
+        "PR166_SM_AgentTaskQueue.report.json",
+        "PR165_C_MemoryConsumerRouter.report.json",
+        "PR165_D_AgentSelectionHandoff.report.json"
+      ],
+      "upstream_pr_refs": [
+        "PR165",
+        "PR165-B",
+        "PR165-C",
+        "PR165-D",
+        "PR166-S",
+        "PR166-SM",
+        "PR164"
+      ],
+      "upstream_row_refs": [
+        "PR165_D2_AGENT_ROSTER::000008"
+      ],
+      "upstream_value_refs": [
+        "duties_from_prior_artifacts",
+        "pr165_d2_duty_mapping"
+      ],
+      "validation_status": "PASS",
+      "validator_ref": "tools/validate_pr165_d2_score_refreshed_scenario_selection_v2.py",
+      "value_authority_lane": "AGENT_HANDOFF_LANE",
+      "venue_account_truth_count": 0,
+      "venue_semantic_dependency_class": "NO_VENUE_SEMANTIC_DEPENDENCY_FOR_SELECTION",
+      "weaker_or_superseded_definition_ref": "NO_SUPERSEDED_DUTY_DETECTED"
+    }
+  ],
+  "report_version": "PR168-RP5C-v1.0",
+  "roster_exists": true,
+  "roster_paths": [
+    "docs/master_plan/generated/PR165_D2_AgentRosterDiscoveryAudit.report.json"
+  ],
+  "runtime_cash_receipt_count": 0,
+  "runtime_stack_generation_count": 0,
+  "silent_skipped_input_artifact_count": 0,
+  "source_truth_authority_created_count": 0,
+  "stack_combination_materialization_count": 0,
+  "stage1_default_full_universe_compute_route_count": 0,
+  "trade_simulation_count": 0
+}
