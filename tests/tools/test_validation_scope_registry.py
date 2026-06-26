@@ -42,6 +42,7 @@ PR168_RANK3_BRANCH = registry.PR168_RANK3_BRANCH
 PR168_RP5A_BRANCH = registry.PR168_RP5A_BRANCH
 PR168_RP5B_BRANCH = registry.PR168_RP5B_BRANCH
 PR168_RP5C_BRANCH = registry.PR168_RP5C_BRANCH
+PR168_RP5C_POST_MERGE_REPAIR_BRANCH = registry.PR168_RP5C_POST_MERGE_REPAIR_BRANCH
 FIXTURE_BRANCH = registry.VALIDATION_FIXTURE_BRANCH
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
@@ -304,6 +305,10 @@ def test_pr168_rp5b_allowed_paths_pass_on_real_branch(path: str) -> None:
 )
 def test_pr168_rp5c_allowed_paths_pass_on_real_branch(path: str) -> None:
     assert registry.is_pr_scoped_changed_path_allowed(PR168_RP5C_BRANCH, path)
+    assert registry.is_pr_scoped_changed_path_allowed(
+        PR168_RP5C_POST_MERGE_REPAIR_BRANCH,
+        path,
+    )
     assert registry.is_pr_scoped_changed_path_allowed(FIXTURE_BRANCH, path)
 
 

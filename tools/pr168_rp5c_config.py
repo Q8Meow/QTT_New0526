@@ -14,6 +14,13 @@ SHARD_ROOT: Final = GENERATED_ROOT / "rp5c"
 REPORT_VERSION: Final = "PR168-RP5C-v1.0"
 CREATED_AT_UTC: Final = "2026-06-25T00:00:00Z"
 BRANCH_NAME: Final = "pr168-rp5c-immutable-qku-formula-library"
+BASE_BRANCH: Final = "main"
+POST_MERGE_REPAIR_BRANCH_NAME: Final = "pr168-rp5c-postmerge-ci-repair"
+ALLOWED_BUILD_BRANCH_NAMES: Final = (
+    BRANCH_NAME,
+    BASE_BRANCH,
+    POST_MERGE_REPAIR_BRANCH_NAME,
+)
 ROADMAP_PR: Final = "PR168-RP5C"
 PR_TITLE: Final = "PR168-RP5C: Immutable QKU/formula library reclaim from active registry"
 

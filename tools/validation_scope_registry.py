@@ -19,6 +19,7 @@ PR168_RANK3_BRANCH = "pr168-rank3-rp3-evidence-stack-ranking"
 PR168_RP5A_BRANCH = "pr168-rp5a-legacy-semantic-audit"
 PR168_RP5B_BRANCH = "pr168-rp5b-active-registry-safe-legacy-cleanup"
 PR168_RP5C_BRANCH = "pr168-rp5c-immutable-qku-formula-library"
+PR168_RP5C_POST_MERGE_REPAIR_BRANCH = "pr168-rp5c-postmerge-ci-repair"
 VALIDATION_FIXTURE_BRANCH = "pr-ci-fastfail-validation-context-preflight"
 
 _PR168_BRANCHES = frozenset(
@@ -36,6 +37,7 @@ _PR168_BRANCHES = frozenset(
         PR168_RP5A_BRANCH,
         PR168_RP5B_BRANCH,
         PR168_RP5C_BRANCH,
+        PR168_RP5C_POST_MERGE_REPAIR_BRANCH,
         VALIDATION_FIXTURE_BRANCH,
     }
 )
@@ -874,7 +876,7 @@ def explain_pr_scope_decision(branch: str, path: str) -> dict[str, object]:
             "reason": "path_not_registered_for_pr_scope",
         }
 
-    if branch_name == PR168_RP5C_BRANCH:
+    if branch_name in {PR168_RP5C_BRANCH, PR168_RP5C_POST_MERGE_REPAIR_BRANCH}:
         rp5c_decision = _pr168_rp5c_scope_decision(branch_name, normalized)
         if rp5c_decision:
             return rp5c_decision
