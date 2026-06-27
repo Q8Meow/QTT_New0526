@@ -1,0 +1,64 @@
+{
+  "blocker_policy_ref": "VS1_BLOCKER_POLICY::PR168_VS1",
+  "consumer_agent_refs": [
+    "RP5D",
+    "RP5E",
+    "RP5F",
+    "RP5G",
+    "RANK4",
+    "QOPT",
+    "MEM1",
+    "AGENT-ORCH1"
+  ],
+  "execution_authority_ref": "VS1_EXECUTION_AUTHORITY::PR168_VS1_PREVIEW_ONLY",
+  "future_handoff_mappings": {
+    "AGENT-ORCH1": [
+      "vs1_agent_dag_receipts.jsonl",
+      "vs1_agent_artifact_routing_ledger.jsonl"
+    ],
+    "MEM1": [
+      "no_trade_comparator_receipts.jsonl condition_scoped_memory_hint"
+    ],
+    "QOPT": [
+      "quantum_structural_readiness_receipts.jsonl",
+      "trade_plan_quantum_encoding_receipts.jsonl"
+    ],
+    "RANK4": [
+      "execution_adjusted_ranking_receipts.jsonl",
+      "overfit_fdr_control_receipts.jsonl"
+    ],
+    "RP5D": [
+      "selected_computable_qku_formula_bindings.jsonl",
+      "no_orphan_qku_formula_proof.jsonl"
+    ],
+    "RP5E": [
+      "temporary_stack_candidate_receipts.jsonl"
+    ],
+    "RP5F": [
+      "order_variable_candidate_receipts.jsonl"
+    ],
+    "RP5G": [
+      "expected_cash_pnl_receipts.jsonl",
+      "tca_breakdown_receipts.jsonl",
+      "scenario_ladder_receipts.jsonl"
+    ]
+  },
+  "pr_id": "PR168-VS1",
+  "producer_agent": "GovernanceAgent",
+  "run_id": "PR168_VS1_DETERMINISTIC_RUN_20260626T000000Z",
+  "scope_boundaries": [
+    "NO_RP5D_EXECUTABILITY_TIERING",
+    "NO_RP5E_PERMANENT_STACK_AUTHORITY",
+    "NO_RP5F_TARGET_SCOUT_EXPANSION",
+    "NO_RP5G_FULL_SIMULATION",
+    "NO_RANK4_PRODUCTION_RANKING",
+    "NO_QOPT_BACKEND_EXECUTION",
+    "NO_MEM1_IMPLEMENTATION",
+    "NO_PAPER_OR_LIVE_EXECUTION"
+  ],
+  "upstream_artifact_refs": [
+    "docs/master_plan/generated/pr168_vs1/vs1_run_receipt.report.json"
+  ],
+  "validation_status": "PASS_GENERATED_OFFLINE",
+  "vs1_to_future_handoff_report_id": "VS1_TO_RP5D_RP5E_RP5F_RP5G_RANK4_QOPT_MEM1_AGENT_ORCH_HANDOFF"
+}

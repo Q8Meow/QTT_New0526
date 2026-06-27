@@ -484,6 +484,12 @@ PYTEST_SHARD_COMMANDS: dict[str, tuple[PytestShardCommand, ...]] = {
             runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
             historical_runtime_seconds=20.0,
         ),
+        PytestShardCommand(
+            paths=("tests/pr168_vs1",),
+            reason="PR168-VS1 trading-intelligence vertical slice tests",
+            runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
+            historical_runtime_seconds=20.0,
+        ),
     ),
     "pytest-shard-3": (
         PytestShardCommand(
@@ -3219,6 +3225,23 @@ def build_validation_commands(
         [
             sys.executable,
             _path("tools", "validate_pr168_rp5c_immutable_qku_formula_library.py"),
+        ],
+        [
+            sys.executable,
+            _path("tools", "run_pr168_vs1_trading_intelligence_slice.py"),
+            "--fixture",
+            "all",
+            "--top-k",
+            "10",
+            "--max-identities",
+            "50",
+            "--max-stacks-per-fixture",
+            "20",
+            "--dump-temp",
+        ],
+        [
+            sys.executable,
+            _path("tools", "validate_pr168_vs1_trading_intelligence_slice.py"),
         ],
         *[
             [sys.executable, _path("tools", f"validate_pr168_rank_{name}.py")]

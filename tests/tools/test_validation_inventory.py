@@ -270,6 +270,24 @@ def test_inventory_has_pr168_rp5c_entries():
     assert "tools/validate_pr168_rp5c_immutable_qku_formula_library.py" in validate_entry.tool_globs
 
 
+def test_inventory_has_pr168_vs1_entries():
+    entries = inventory.inventory_by_id()
+    run_entry = entries["run_pr168_vs1_trading_intelligence_slice"]
+    validate_entry = entries["validate_pr168_vs1_trading_intelligence_slice"]
+
+    for entry in (run_entry, validate_entry):
+        assert entry.owner_pr_or_feature == "PR168_VS1"
+        assert "docs/master_plan/generated/PR168_VS1_*.report.json" in entry.output_globs
+        assert "docs/master_plan/generated/pr168_vs1/**" in entry.output_globs
+        assert "tests/pr168_vs1/**" in entry.required_when_files_match
+
+    assert "tools/run_pr168_vs1_trading_intelligence_slice.py" in run_entry.tool_globs
+    assert (
+        "tools/validate_pr168_vs1_trading_intelligence_slice.py"
+        in validate_entry.tool_globs
+    )
+
+
 def test_inventory_knows_every_pytest_shard_phase_job():
     for phase in runner.ORDERED_PHASES:
         assert inventory.phase_job_id(phase) == inventory.VALIDATION_MATRIX_JOB_ID
