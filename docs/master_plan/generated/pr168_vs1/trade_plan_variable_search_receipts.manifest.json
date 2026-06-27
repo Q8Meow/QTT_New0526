@@ -1,0 +1,19 @@
+{
+  "blocker_policy_ref": "VS1_BLOCKER_POLICY::PR168_VS1",
+  "created_at_utc": "2026-06-26T00:00:00Z",
+  "downstream_consumer_refs": [
+    "VS1Validator",
+    "VS1RunReceipt",
+    "FutureHandoffConsumers"
+  ],
+  "execution_authority_ref": "VS1_EXECUTION_AUTHORITY::PR168_VS1_PREVIEW_ONLY",
+  "generated_surface_authority_class": "VS1_GENERATED_PREVIEW_ARTIFACT_NOT_SOURCE_TRUTH",
+  "manifest_id": "TRADE_PLAN_VARIABLE_SEARCH_RECEIPTS_MANIFEST",
+  "physical_filename": "docs/master_plan/generated/pr168_vs1/trade_plan_variable_search_receipts.jsonl",
+  "pr_id": "PR168-VS1",
+  "report_version": "PR168-VS1-v1.0",
+  "row_count": 5,
+  "row_count_within_bound_flag": true,
+  "schema_version_name": "TradePlanVariableSearchReceiptsV1",
+  "shard_file_path": "docs/master_plan/generated/pr168_vs1/trade_plan_variable_search_receipts.jsonl"
+}

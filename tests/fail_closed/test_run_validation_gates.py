@@ -1045,6 +1045,23 @@ def _expected_commands(
             python_executable,
             str(Path("tools") / "validate_pr168_rp5c_immutable_qku_formula_library.py"),
         ],
+        [
+            python_executable,
+            str(Path("tools") / "run_pr168_vs1_trading_intelligence_slice.py"),
+            "--fixture",
+            "all",
+            "--top-k",
+            "10",
+            "--max-identities",
+            "50",
+            "--max-stacks-per-fixture",
+            "20",
+            "--dump-temp",
+        ],
+        [
+            python_executable,
+            str(Path("tools") / "validate_pr168_vs1_trading_intelligence_slice.py"),
+        ],
         *[
             [
                 python_executable,
@@ -2917,6 +2934,7 @@ def test_runner_splits_pytest_shard_2_longest_group_deterministically():
         ("tests/pr168_rp5a",),
         ("tests/pr168_rp5b",),
         ("tests/pr168_rp5c",),
+        ("tests/pr168_vs1",),
     ]
     assert all(command.reason for command in commands)
     assert ("tests/stage1_prediction_markets",) not in [
