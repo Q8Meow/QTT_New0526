@@ -1,0 +1,58 @@
+{
+  "blocker_policy_ref": "RP5D_BLOCKER_POLICY::PR168_RP5D",
+  "consumer_agent_refs": [
+    "GovernanceAgent",
+    "RP5DValidator"
+  ],
+  "downstream_artifact_refs": [
+    "docs/master_plan/generated/pr168_rp5d/rp5d_run_receipt.report.json"
+  ],
+  "execution_authority_ref": "RP5D_EXECUTION_AUTHORITY::COMPUTABILITY_TIERING_ONLY",
+  "future_handoff_mappings": {
+    "AGENT-ORCH1": [
+      "rp5d_agent_exec_resolver.jsonl",
+      "rp5d_agent_routing_ledger.jsonl"
+    ],
+    "LIVE-DRYRUN": [
+      "rp5d_hot_path_readiness.jsonl",
+      "no_live_execution_authority"
+    ],
+    "MEM1": [
+      "rp5d_regime_memory_readiness.jsonl",
+      "condition_scoped_only_no_global_bans"
+    ],
+    "PAPER-LOOP": [
+      "replay_paper_executable_or_schedulable_after_adapter_only"
+    ],
+    "QOPT": [
+      "rp5d_quantum_compat.jsonl",
+      "rp5d_qobj_constraint_ledger.jsonl",
+      "rp5d_optimizer_readiness.jsonl"
+    ],
+    "RANK4": [
+      "rp5d_exec_tiers.jsonl",
+      "rp5d_rank_readiness.jsonl",
+      "rp5d_overfit_fdr_readiness.jsonl"
+    ],
+    "RP5F": [
+      "rp5d_market_data_queue.jsonl",
+      "rp5d_trade_var_readiness.jsonl"
+    ],
+    "RP5G": [
+      "rp5d_tca_readiness.jsonl",
+      "rp5d_no_trade_readiness.jsonl",
+      "rp5d_alpha_readiness.jsonl"
+    ]
+  },
+  "handoff_ref": "RP5D_FUTURE_PR_HANDOFF",
+  "no_future_scope_implemented_flag": true,
+  "producer_agent": "GovernanceAgent",
+  "run_id": "PR168_RP5D_DETERMINISTIC_RUN_20260627T000000Z",
+  "upstream_artifact_refs": [
+    "docs/master_plan/generated/pr168_rp5d/rp5d_exec_tiers.jsonl"
+  ],
+  "validation_refs": [
+    "tools/validate_pr168_rp5d_replay_paper_executability_tiers.py"
+  ],
+  "validation_status": "PASS_GENERATED_OFFLINE"
+}

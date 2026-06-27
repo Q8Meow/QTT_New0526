@@ -1,0 +1,29 @@
+{
+  "blocker_policy_ref": "RP5D_BLOCKER_POLICY::PR168_RP5D",
+  "consumer_agent_refs": [
+    "ArtifactNameAgent",
+    "PathSafetyAgent",
+    "RP5DValidator"
+  ],
+  "downstream_artifact_refs": [
+    "docs/master_plan/generated/pr168_rp5d/rp5d_run_receipt.report.json"
+  ],
+  "execution_authority_ref": "RP5D_EXECUTION_AUTHORITY::COMPUTABILITY_TIERING_ONLY",
+  "generated_surface_authority_class": "RP5D_GENERATED_COMPUTABILITY_TIERING_ARTIFACT_NOT_SOURCE_TRUTH",
+  "manifest_id": "RP5D_MARKET_DATA_QUEUE_MANIFEST",
+  "physical_filename": "docs/master_plan/generated/pr168_rp5d/rp5d_market_data_queue.jsonl",
+  "pr_id": "PR168_RP5D",
+  "producer_agent": "GovernanceAgent",
+  "report_version": "PR168-RP5D-v1.0",
+  "row_count": 1852,
+  "row_count_within_bound_flag": true,
+  "run_id": "PR168_RP5D_DETERMINISTIC_RUN_20260627T000000Z",
+  "schema_version_name": "Rp5dMarketDataQueueV1",
+  "shard_file_path": "docs/master_plan/generated/pr168_rp5d/rp5d_market_data_queue.jsonl",
+  "upstream_artifact_refs": [
+    "docs/master_plan/generated/pr168_rp5d/rp5d_market_data_queue.jsonl"
+  ],
+  "validation_refs": [
+    "tools/validate_pr168_rp5d_replay_paper_executability_tiers.py"
+  ]
+}
