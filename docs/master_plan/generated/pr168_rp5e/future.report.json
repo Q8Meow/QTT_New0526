@@ -1,0 +1,72 @@
+{
+  "accepted_source_fact_flag": false,
+  "atomicrows_sha_ref_flag": false,
+  "blocker_policy_ref": "RP5E_BLOCKER_POLICY::PRECISE_NO_GLOBAL_BAN",
+  "consumer_agent_refs": [
+    "CommanderAgent",
+    "RP5EValidator"
+  ],
+  "consumer_agents": [
+    "CommanderAgent",
+    "RP5EValidator"
+  ],
+  "created_at_utc": "2026-06-27T00:00:00Z",
+  "downstream_artifact_refs": [
+    "docs/master_plan/generated/pr168_rp5e/run_receipt.report.json"
+  ],
+  "downstream_refs": [
+    "docs/master_plan/generated/pr168_rp5e/run_receipt.report.json"
+  ],
+  "execution_authority_ref": "RP5E_EXEC_AUTH::STACK_PREVIEW_HANDOFF_ONLY_NO_ORDER_AUTHORITY",
+  "future_handoff_reports": [
+    "to_rp5f.report.json",
+    "to_rp5g.report.json",
+    "to_rank4.report.json",
+    "to_qopt1.report.json",
+    "to_vs2.report.json",
+    "to_mem1.report.json",
+    "to_orch1.report.json",
+    "to_paper.report.json",
+    "to_shadow.report.json",
+    "to_live_dry.report.json",
+    "to_unlock.report.json",
+    "re_handoff.report.json"
+  ],
+  "future_report_id": "RP5E_FUTURE_HANDOFF_SUMMARY",
+  "known_non_authority_states": [
+    "STRUCTURALLY_READY",
+    "DRYRUN_STACK_PREVIEW",
+    "SCHEDULABLE_AFTER_ADAPTER",
+    "REPAIR_NEEDED",
+    "FUTURE_RP5F_HANDOFF",
+    "FUTURE_RP5G_HANDOFF",
+    "FUTURE_TRIGGERED_SHADOW_COMPARISON_HANDOFF",
+    "FUTURE_LIVE_DRYRUN_HANDOFF"
+  ],
+  "live_authority_flag": false,
+  "metadata_is_proof_flag": false,
+  "owner_agent": "GovernanceAgent",
+  "paper_authority_flag": false,
+  "producer_agent": "GovernanceAgent",
+  "proprietary_claim_flag": false,
+  "provenance_tier": "RP5E_GENERATED_PREVIEW_NOT_PROOF",
+  "qopt_execution_flag": false,
+  "qtt_sha_authority_flag": false,
+  "quantum_advantage_claim_flag": false,
+  "quantum_backend_execution_flag": false,
+  "row_id": "RP5E_FUTURE_HANDOFF_SUMMARY",
+  "run_id": "PR168_RP5E_DETERMINISTIC_RUN_20260627T000000Z",
+  "schema_version": "PR168-RP5E-v1.0",
+  "scope_boundaries": "RP5E is stack preview / features / handoffs only; no execution authority.",
+  "shadow_authority_flag": false,
+  "source_pr": "PR168-RP5E",
+  "upstream_artifact_refs": [
+    "docs/master_plan/generated/pr168_rp5e/downstream.jsonl"
+  ],
+  "upstream_refs": [
+    "docs/master_plan/generated/pr168_rp5e/downstream.jsonl"
+  ],
+  "validation_refs": [
+    "tools/validate_pr168_rp5e_stack_gen.py"
+  ]
+}

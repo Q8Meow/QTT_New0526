@@ -1,0 +1,85 @@
+{
+  "accepted_source_fact_flag": false,
+  "atomicrows_bundle_hash_reference_authorized": false,
+  "atomicrows_sha_ref_flag": false,
+  "blocker_policy_ref": "RP5E_BLOCKER_POLICY::PRECISE_NO_GLOBAL_BAN",
+  "cash_runtime_authorized": false,
+  "champion_selection_authorized": false,
+  "connector_runtime_authorized": false,
+  "connector_write_authorized": false,
+  "consumer_agent_refs": [
+    "CommanderAgent",
+    "RiskAgent",
+    "RP5EValidator"
+  ],
+  "consumer_agents": [
+    "CommanderAgent",
+    "RiskAgent",
+    "RP5EValidator"
+  ],
+  "created_at_utc": "2026-06-27T00:00:00Z",
+  "downstream_artifact_refs": [
+    "docs/master_plan/generated/pr168_rp5e/downstream.jsonl",
+    "docs/master_plan/generated/pr168_rp5e/run_receipt.report.json"
+  ],
+  "downstream_handoff_authorized": true,
+  "downstream_refs": [
+    "docs/master_plan/generated/pr168_rp5e/downstream.jsonl",
+    "docs/master_plan/generated/pr168_rp5e/run_receipt.report.json"
+  ],
+  "execution_authority_ref": "RP5E_EXEC_AUTH::STACK_PREVIEW_HANDOFF_ONLY_NO_ORDER_AUTHORITY",
+  "execution_authority_statement": "RP5E enables stack computation and feature generation; it does not adjust order variables, select final trade scenarios, or create paper/live-dry-run/shadow/live order authority.",
+  "execution_mode": "STACK_GENERATION_AND_STACK_PREVIEW_ONLY",
+  "feature_generation_authorized": true,
+  "final_trade_ranking_authorized": false,
+  "limited_live_canary_authorized": false,
+  "limited_live_canary_execution_authorized": false,
+  "live_authority_flag": false,
+  "live_dryrun_execution_authorized": false,
+  "metadata_is_proof_flag": false,
+  "order_submit_cancel_replace_reduce_close_authorized": false,
+  "order_variable_optimization_authorized": false,
+  "owner_agent": "GovernanceAgent",
+  "paper_authority_flag": false,
+  "paper_order_authority_authorized": false,
+  "private_state_fetch_authorized": false,
+  "producer_agent": "GovernanceAgent",
+  "proprietary_claim_flag": false,
+  "provenance_tier": "RP5E_GENERATED_PREVIEW_NOT_PROOF",
+  "qopt_execution_authorized": false,
+  "qopt_execution_flag": false,
+  "qtt_sha_authority_authorized": false,
+  "qtt_sha_authority_flag": false,
+  "quantum_advantage_claim_authorized": false,
+  "quantum_advantage_claim_flag": false,
+  "quantum_backend_execution_authorized": false,
+  "quantum_backend_execution_flag": false,
+  "real_positive_negative_authorized": false,
+  "row_id": "RP5E_EXEC_AUTH_REPORT",
+  "rp5e_scope": "STACK_PREVIEW_FEATURE_HANDOFF_ONLY",
+  "run_id": "PR168_RP5E_DETERMINISTIC_RUN_20260627T000000Z",
+  "schema_version": "PR168-RP5E-v1.0",
+  "self_audit_v4_boundary": {
+    "limited_live_canary": "future owner-approved tiny real-order execution after paper loop and live dry-run gates",
+    "live_dry_run": "future PR170 connector/risk/order-intent pipeline with submit disabled; no order write",
+    "paper_mode": "simulated orders/fills/portfolio only; no real exchange order state; no live submit",
+    "rp5e": "stack preview, features, and handoffs only",
+    "shadow_mode": "future triggered live-concurrent comparison lane after reliable live execution surface/live receipts; not paper; not pre-live gate; not authority"
+  },
+  "shadow_authority_flag": false,
+  "shadow_execution_authorized": false,
+  "source_fact_acceptance_authorized": false,
+  "source_pr": "PR168-RP5E",
+  "stack_preview_authorized": true,
+  "trade_plan_simulation_authorized": false,
+  "upstream_artifact_refs": [
+    "docs/master_plan/generated/pr168_rp5e/mode_boundary.jsonl"
+  ],
+  "upstream_refs": [
+    "docs/master_plan/generated/pr168_rp5e/mode_boundary.jsonl"
+  ],
+  "validation_refs": [
+    "tools/validate_pr168_rp5e_stack_gen.py"
+  ],
+  "venue_api_call_authorized": false
+}

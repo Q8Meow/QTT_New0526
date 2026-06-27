@@ -496,6 +496,12 @@ PYTEST_SHARD_COMMANDS: dict[str, tuple[PytestShardCommand, ...]] = {
             runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
             historical_runtime_seconds=20.0,
         ),
+        PytestShardCommand(
+            paths=("tests/pr168_rp5e",),
+            reason="PR168-RP5E runtime stack generator and handoff tests",
+            runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
+            historical_runtime_seconds=20.0,
+        ),
     ),
     "pytest-shard-3": (
         PytestShardCommand(
@@ -3257,6 +3263,20 @@ def build_validation_commands(
         [
             sys.executable,
             _path("tools", "validate_pr168_rp5d_replay_paper_executability_tiers.py"),
+        ],
+        [
+            sys.executable,
+            _path("tools", "build_pr168_rp5e_stack_gen.py"),
+            "--offline",
+            "--fixture",
+            "sample",
+            "--max-stacks",
+            "1000",
+            "--dump-temp",
+        ],
+        [
+            sys.executable,
+            _path("tools", "validate_pr168_rp5e_stack_gen.py"),
         ],
         *[
             [sys.executable, _path("tools", f"validate_pr168_rank_{name}.py")]
