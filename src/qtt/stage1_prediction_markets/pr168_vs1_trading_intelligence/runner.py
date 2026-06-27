@@ -537,8 +537,13 @@ def discover_reading_inputs() -> tuple[list[dict[str, Any]], list[dict[str, Any]
     for index, ref in enumerate(REQUIRED_READING_FILES, start=1):
         path = REPO_ROOT / ref
         status = "READ" if path.is_file() else "MISSING_BLOCKING" if ref in RP5C_REQUIRED_FILES else "MISSING_NON_BLOCKING"
-        byte_size = path.stat().st_size if path.is_file() else 0
-        line_count = len(path.read_text(encoding="utf-8", errors="replace").splitlines()) if path.is_file() else 0
+        if path.is_file():
+            file_text = path.read_text(encoding="utf-8", errors="replace")
+            byte_size = len(file_text.encode("utf-8"))
+            line_count = len(file_text.splitlines())
+        else:
+            byte_size = 0
+            line_count = 0
         reading_rows.append(
             with_common(
                 {

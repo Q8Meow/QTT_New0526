@@ -386,6 +386,7 @@ _PR168_VS1_ALLOWED_EXACT_PATHS = frozenset(
     {
         "tools/run_pr168_vs1_trading_intelligence_slice.py",
         "tools/validate_pr168_vs1_trading_intelligence_slice.py",
+        "tools/pr168_rp5c_config.py",
         "tools/run_validation_gates.py",
         "tools/validation_inventory.py",
         "tools/validation_scope_registry.py",

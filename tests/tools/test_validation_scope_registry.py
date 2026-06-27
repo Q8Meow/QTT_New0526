@@ -323,6 +323,7 @@ def test_pr168_rp5c_allowed_paths_pass_on_real_branch(path: str) -> None:
         "src/qtt/stage1_prediction_markets/pr168_vs1_trading_intelligence/validator.py",
         "tools/run_pr168_vs1_trading_intelligence_slice.py",
         "tools/validate_pr168_vs1_trading_intelligence_slice.py",
+        "tools/pr168_rp5c_config.py",
         "tests/pr168_vs1/test_vs1_validation.py",
         "tools/validation_scope_registry.py",
         "tools/validation_inventory.py",
