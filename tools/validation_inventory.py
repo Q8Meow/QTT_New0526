@@ -214,6 +214,8 @@ def _pr_token(stem: str) -> str | None:
         return "pr168_rp5b"
     if "pr168_rp5c" in stem:
         return "pr168_rp5c"
+    if "pr168_rp5d_r1" in stem:
+        return "pr168_rp5d_r1"
     if "pr168_rp5d" in stem:
         return "pr168_rp5d"
     if "pr168_rp5e" in stem:
@@ -462,6 +464,8 @@ def _output_globs(script_name: str, stem: str) -> tuple[str, ...]:
             globs.append("docs/master_plan/generated/pr168_vs1/**")
         if token == "pr168_rp5d":
             globs.append("docs/master_plan/generated/pr168_rp5d/**")
+        if token == "pr168_rp5d_r1":
+            globs.append("docs/master_plan/generated/pr168_rp5d_r1/**")
         if token == "pr168_rp5e":
             globs.append("docs/master_plan/generated/pr168_rp5e/**")
     return tuple(globs)
@@ -698,7 +702,49 @@ def entries_matching_path(path: str) -> tuple[ValidatorInventoryEntry, ...]:
         for entry in validation_inventory()
         if _matches_any(normalized, entry.required_when_files_match)
     ]
+    specific_token = _specific_pr_token_for_path(normalized)
+    if specific_token is not None:
+        matches = [
+            entry
+            for entry in matches
+            if _entry_matches_specific_token(entry, specific_token)
+        ]
     return tuple(sorted(matches, key=lambda entry: entry.validator_id))
+
+
+def _specific_pr_token_for_path(path: str) -> str | None:
+    if (
+        path.startswith("docs/master_plan/generated/pr168_rp5d_r1/")
+        or path.startswith(
+            "src/qtt/stage1_prediction_markets/pr168_rp5d_r1_unlock/"
+        )
+        or path.startswith("tests/pr168_rp5d_r1/")
+        or "pr168_rp5d_r1" in PurePosixPath(path).name.lower()
+    ):
+        return "pr168_rp5d_r1"
+    return None
+
+
+def _entry_matches_specific_token(
+    entry: ValidatorInventoryEntry,
+    token: str,
+) -> bool:
+    token = token.lower()
+    tag = _pr_tag_from_token(token)
+    haystack = " ".join(
+        (
+            entry.validator_id,
+            entry.owner_pr_or_feature,
+            *entry.input_globs,
+            *entry.output_globs,
+            *entry.generated_report_globs,
+            *entry.schema_globs,
+            *entry.tool_globs,
+            *entry.test_globs,
+            *entry.required_when_files_match,
+        )
+    ).lower()
+    return entry.owner_pr_or_feature == tag or token in haystack
 
 
 def inventory_counts(

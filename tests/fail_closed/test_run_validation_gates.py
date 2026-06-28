@@ -1085,6 +1085,21 @@ def _expected_commands(
             python_executable,
             str(Path("tools") / "validate_pr168_rp5e_stack_gen.py"),
         ],
+        [
+            python_executable,
+            str(Path("tools") / "build_pr168_rp5d_r1_exec_now_unlock.py"),
+            "--offline",
+            "--fixture",
+            "sample",
+            "--target-min",
+            "5",
+            "--target-max",
+            "15",
+        ],
+        [
+            python_executable,
+            str(Path("tools") / "validate_pr168_rp5d_r1_exec_now_unlock.py"),
+        ],
         *[
             [
                 python_executable,
@@ -2960,6 +2975,7 @@ def test_runner_splits_pytest_shard_2_longest_group_deterministically():
         ("tests/pr168_vs1",),
         ("tests/pr168_rp5d",),
         ("tests/pr168_rp5e",),
+        ("tests/pr168_rp5d_r1",),
     ]
     assert all(command.reason for command in commands)
     assert ("tests/stage1_prediction_markets",) not in [

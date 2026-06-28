@@ -19,6 +19,7 @@ POST_MERGE_REPAIR_BRANCH_NAME: Final = "pr168-rp5c-postmerge-ci-repair"
 VS1_CONSUMER_BRANCH_NAME: Final = "pr168-vs1-trading-intelligence-vertical-slice"
 RP5D_CONSUMER_BRANCH_NAME: Final = "pr168-rp5d-replay-paper-executability-tiers"
 RP5E_CONSUMER_BRANCH_NAME: Final = "pr168-rp5e-stack-gen"
+RP5D_R1_CONSUMER_BRANCH_NAME: Final = "pr168-rp5d-r1-exec-now-unlock"
 ALLOWED_BUILD_BRANCH_NAMES: Final = (
     BRANCH_NAME,
     BASE_BRANCH,
@@ -26,6 +27,7 @@ ALLOWED_BUILD_BRANCH_NAMES: Final = (
     VS1_CONSUMER_BRANCH_NAME,
     RP5D_CONSUMER_BRANCH_NAME,
     RP5E_CONSUMER_BRANCH_NAME,
+    RP5D_R1_CONSUMER_BRANCH_NAME,
 )
 ROADMAP_PR: Final = "PR168-RP5C"
 PR_TITLE: Final = "PR168-RP5C: Immutable QKU/formula library reclaim from active registry"

@@ -46,6 +46,7 @@ PR168_RP5C_POST_MERGE_REPAIR_BRANCH = registry.PR168_RP5C_POST_MERGE_REPAIR_BRAN
 PR168_VS1_BRANCH = registry.PR168_VS1_BRANCH
 PR168_RP5D_BRANCH = registry.PR168_RP5D_BRANCH
 PR168_RP5E_BRANCH = registry.PR168_RP5E_BRANCH
+PR168_RP5D_R1_BRANCH = registry.PR168_RP5D_R1_BRANCH
 FIXTURE_BRANCH = registry.VALIDATION_FIXTURE_BRANCH
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
@@ -384,6 +385,30 @@ def test_pr168_rp5d_allowed_paths_pass_on_real_branch(path: str) -> None:
 )
 def test_pr168_rp5e_allowed_paths_pass_on_real_branch(path: str) -> None:
     assert registry.is_pr_scoped_changed_path_allowed(PR168_RP5E_BRANCH, path)
+    assert registry.is_pr_scoped_changed_path_allowed(FIXTURE_BRANCH, path)
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        "docs/master_plan/generated/pr168_rp5d_r1/art_reg.json",
+        "docs/master_plan/generated/pr168_rp5d_r1/exec_now_proof.jsonl",
+        "docs/master_plan/generated/pr168_rp5d_r1/exec_now_proof.manifest.json",
+        "docs/master_plan/generated/pr168_rp5d_r1/run_receipt.report.json",
+        "src/qtt/stage1_prediction_markets/pr168_rp5d_r1_unlock/runner.py",
+        "src/qtt/stage1_prediction_markets/pr168_rp5d_r1_unlock/validator.py",
+        "src/qtt/stage1_prediction_markets/pr168_rp5d_executability/validator.py",
+        "tools/build_pr168_rp5d_r1_exec_now_unlock.py",
+        "tools/validate_pr168_rp5d_r1_exec_now_unlock.py",
+        "tests/pr168_rp5d_r1/test_validation.py",
+        "tools/validation_scope_registry.py",
+        "tools/validation_inventory.py",
+        "tools/pr168_rp5c_config.py",
+        "tools/run_validation_gates.py",
+    ],
+)
+def test_pr168_rp5d_r1_allowed_paths_pass_on_real_branch(path: str) -> None:
+    assert registry.is_pr_scoped_changed_path_allowed(PR168_RP5D_R1_BRANCH, path)
     assert registry.is_pr_scoped_changed_path_allowed(FIXTURE_BRANCH, path)
 
 
