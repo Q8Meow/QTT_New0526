@@ -130,6 +130,23 @@ def test_pr168_rp3_validator_tool_maps_to_owner_validator():
     assert "tools/validate_pr168_rp3.py" not in result.unknown_files
 
 
+def test_pr168_rp5d_r1_generated_output_routes_only_to_rp5d_r1_owner():
+    result = _pull_request_result(
+        "docs/master_plan/generated/pr168_rp5d_r1/agent_consume.jsonl"
+    )
+
+    assert result.full_validation_required is False
+    assert result.fail_closed_reasons == ()
+    assert "build_pr168_rp5d_r1_exec_now_unlock" in result.required_validators
+    assert "validate_pr168_rp5d_r1_exec_now_unlock" in result.required_validators
+    assert "validate_pr168_rp_validation_scope_registry_integration" not in (
+        result.required_validators
+    )
+    assert "build_pr168_rp_formula_based_replay_paper_recompute" not in (
+        result.required_validators
+    )
+
+
 def test_generated_report_without_owner_fails_closed():
     result = _pull_request_result(
         "docs/master_plan/generated/UnownedGeneratedReport.report.json"

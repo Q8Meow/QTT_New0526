@@ -477,8 +477,10 @@ _PR168_RP5D_R1_ALLOWED_EXACT_PATHS = frozenset(
         "tools/validation_inventory.py",
         "tools/validation_scope_registry.py",
         "tools/validate_validation_scope_registry.py",
+        "src/qtt/stage1_prediction_markets/pr168_rp5d_executability/validator.py",
         "tests/tools/test_validation_scope_registry.py",
         "tests/tools/test_validation_inventory.py",
+        "tests/tools/test_changed_area_validation_router.py",
         "tests/fail_closed/test_run_validation_gates.py",
         "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
     }

@@ -397,6 +397,7 @@ def test_pr168_rp5e_allowed_paths_pass_on_real_branch(path: str) -> None:
         "docs/master_plan/generated/pr168_rp5d_r1/run_receipt.report.json",
         "src/qtt/stage1_prediction_markets/pr168_rp5d_r1_unlock/runner.py",
         "src/qtt/stage1_prediction_markets/pr168_rp5d_r1_unlock/validator.py",
+        "src/qtt/stage1_prediction_markets/pr168_rp5d_executability/validator.py",
         "tools/build_pr168_rp5d_r1_exec_now_unlock.py",
         "tools/validate_pr168_rp5d_r1_exec_now_unlock.py",
         "tests/pr168_rp5d_r1/test_validation.py",

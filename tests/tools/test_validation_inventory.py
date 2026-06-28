@@ -339,6 +339,31 @@ def test_inventory_has_pr168_rp5d_r1_entries():
     assert "tools/validate_pr168_rp5d_r1_exec_now_unlock.py" in validate_entry.tool_globs
 
 
+def test_pr168_rp5d_r1_paths_do_not_match_broad_pr168_rp_validators():
+    paths = (
+        "docs/master_plan/generated/pr168_rp5d_r1/agent_consume.jsonl",
+        "docs/master_plan/generated/pr168_rp5d_r1/run_receipt.report.json",
+        "src/qtt/stage1_prediction_markets/pr168_rp5d_r1_unlock/runner.py",
+        "tools/validate_pr168_rp5d_r1_exec_now_unlock.py",
+    )
+
+    for path in paths:
+        matching_ids = {
+            entry.validator_id for entry in inventory.entries_matching_path(path)
+        }
+        assert "build_pr168_rp5d_r1_exec_now_unlock" in matching_ids
+        assert "validate_pr168_rp5d_r1_exec_now_unlock" in matching_ids
+        assert (
+            "validate_pr168_rp_validation_scope_registry_integration"
+            not in matching_ids
+        )
+        assert "build_pr168_rp_formula_based_replay_paper_recompute" not in matching_ids
+        assert (
+            "validate_pr168_rp5d_replay_paper_executability_tiers"
+            not in matching_ids
+        )
+
+
 def test_inventory_knows_every_pytest_shard_phase_job():
     for phase in runner.ORDERED_PHASES:
         assert inventory.phase_job_id(phase) == inventory.VALIDATION_MATRIX_JOB_ID

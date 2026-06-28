@@ -43,6 +43,15 @@ def _generated_file_texts() -> dict[str, str]:
     }
 
 
+def _restore_generated_file_texts(snapshot: dict[str, str]) -> None:
+    GENERATED_DIR.mkdir(parents=True, exist_ok=True)
+    for path in GENERATED_DIR.iterdir():
+        if path.is_file() and path.name not in snapshot:
+            path.unlink()
+    for name, text in snapshot.items():
+        (GENERATED_DIR / name).write_text(text, encoding="utf-8")
+
+
 def _row_files() -> dict[str, list[dict[str, Any]]]:
     return {name: read_jsonl(GENERATED_DIR / name) for name in JSONL_OUTPUTS}
 
@@ -335,11 +344,14 @@ def _assert_deterministic() -> None:
     from .runner import run_layer
 
     before = _generated_file_texts()
-    run_layer(offline=True)
-    middle = _generated_file_texts()
-    run_layer(offline=True)
-    after = _generated_file_texts()
-    if before != middle or middle != after:
+    try:
+        run_layer(offline=True)
+        middle = _generated_file_texts()
+        run_layer(offline=True)
+        after = _generated_file_texts()
+    finally:
+        _restore_generated_file_texts(before)
+    if middle != after:
         raise RP5DValidationError("RP5D generated outputs are not deterministic across repeated runs")
 
 
