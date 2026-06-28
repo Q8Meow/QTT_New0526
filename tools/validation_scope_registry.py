@@ -476,6 +476,7 @@ _PR168_RP5D_R1_ALLOWED_EXACT_PATHS = frozenset(
         "tools/run_validation_gates.py",
         "tools/validation_inventory.py",
         "tools/validation_scope_registry.py",
+        "tools/pr168_rp5c_config.py",
         "tools/validate_validation_scope_registry.py",
         "src/qtt/stage1_prediction_markets/pr168_rp5d_executability/validator.py",
         "tests/tools/test_validation_scope_registry.py",

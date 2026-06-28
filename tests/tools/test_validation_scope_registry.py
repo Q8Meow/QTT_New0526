@@ -403,6 +403,7 @@ def test_pr168_rp5e_allowed_paths_pass_on_real_branch(path: str) -> None:
         "tests/pr168_rp5d_r1/test_validation.py",
         "tools/validation_scope_registry.py",
         "tools/validation_inventory.py",
+        "tools/pr168_rp5c_config.py",
         "tools/run_validation_gates.py",
     ],
 )
