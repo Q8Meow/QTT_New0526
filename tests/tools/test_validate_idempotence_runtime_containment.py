@@ -310,6 +310,22 @@ def test_pr166_q_branch_scoped_exception_does_not_allow_master_plan():
     assert "FORBIDDEN_MASTER_PLAN_CHANGE" in _codes(failures)
 
 
+def test_pr168_rp5e_shared_receipt_currentization_is_allowed():
+    failures = validator._validate_changed_files(
+        _inventory(),
+        (
+            "docs/master_plan/generated/pr168_rp5d/rp5d_input_consumption.jsonl",
+            "docs/master_plan/generated/pr168_rp5d/rp5d_input_inventory.jsonl",
+            "docs/master_plan/generated/pr168_rp5d/rp5d_reading_receipts.jsonl",
+        ),
+        workflow_text=WORKFLOW_TEXT,
+        current_branch="pr168-rp5e-stack-gen",
+        auto_discovered_changed_paths=True,
+    )
+
+    assert "FORBIDDEN_GENERATED_REPORT_PAYLOAD_CHANGE" not in _codes(failures)
+
+
 def test_pr166_qb_branch_scoped_auto_discovered_changes_are_allowed():
     failures = validator._validate_changed_files(
         _inventory(),

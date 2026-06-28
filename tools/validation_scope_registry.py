@@ -444,11 +444,16 @@ _PR168_RP5E_ALLOWED_EXACT_PATHS = frozenset(
         "tools/run_validation_gates.py",
         "tools/validation_inventory.py",
         "tools/validation_scope_registry.py",
+        "tools/pr168_rp5c_config.py",
         "tools/validate_validation_scope_registry.py",
         "tests/tools/test_validation_scope_registry.py",
         "tests/tools/test_validation_inventory.py",
+        "tests/tools/test_validate_idempotence_runtime_containment.py",
         "tests/fail_closed/test_run_validation_gates.py",
         "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+        "docs/master_plan/generated/pr168_rp5d/rp5d_input_consumption.jsonl",
+        "docs/master_plan/generated/pr168_rp5d/rp5d_input_inventory.jsonl",
+        "docs/master_plan/generated/pr168_rp5d/rp5d_reading_receipts.jsonl",
     }
 )
 
