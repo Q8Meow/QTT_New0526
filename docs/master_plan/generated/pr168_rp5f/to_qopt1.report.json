@@ -1,0 +1,84 @@
+{
+  "accepted_source_fact_flag": false,
+  "atomicrows_sha_ref_flag": false,
+  "blocker_policy_ref": "RP5F_BLOCKER_POLICY::PRECISE_INVALIDATABLE_DYNAMIC_TARGETS_ONLY",
+  "candidate_only_flag": false,
+  "cash_account_read_flag": false,
+  "connector_refs_or_future_connector_status": "FUTURE_CONNECTOR_STATUS_ONLY_NO_WRITE",
+  "connector_write_flag": false,
+  "consumer_agent_refs": [
+    "CommanderAgent",
+    "QOPT1",
+    "RP5FValidator"
+  ],
+  "consumer_agents": [
+    "CommanderAgent",
+    "QOPT1",
+    "RP5FValidator"
+  ],
+  "created_at_utc": "2026-06-28T12:00:00Z",
+  "downstream_artifact_refs": [
+    "docs/master_plan/generated/pr168_rp5f/future.report.json",
+    "docs/master_plan/generated/pr168_rp5f/run_receipt.report.json"
+  ],
+  "downstream_refs": [
+    "docs/master_plan/generated/pr168_rp5f/future.report.json",
+    "docs/master_plan/generated/pr168_rp5f/run_receipt.report.json"
+  ],
+  "execution_authority_ref": "RP5F_EXEC_AUTH::DYNAMIC_TARGET_GRID_SEED_HANDOFF_ONLY_NO_ORDER_AUTHORITY",
+  "fixed_trade_instruction_flag": false,
+  "formula_deletion_flag": false,
+  "formula_mutation_flag": false,
+  "future_consumer_must_revalidate_flag": true,
+  "global_ban_flag": false,
+  "grid_refs": [
+    "docs/master_plan/generated/pr168_rp5f/var_grid.jsonl"
+  ],
+  "handoff_purpose": "future quantum/classical batch optimization over bounded variable grids",
+  "handoff_report_id": "RP5F_TO_QOPT1",
+  "live_authority_flag": false,
+  "metadata_is_proof_flag": false,
+  "non_authority_handoff_flag": true,
+  "non_expiring_trade_plan_flag": false,
+  "order_authority_flag": false,
+  "orphan_flag": false,
+  "owner_agent": "GovernanceAgent",
+  "paper_authority_flag": false,
+  "paper_submit_authority_flag": false,
+  "pre_submit_revalidation_refs": [
+    "docs/master_plan/generated/pr168_rp5f/pre_submit_reval.jsonl"
+  ],
+  "private_state_fetch_flag": false,
+  "producer_agent": "GovernanceAgent",
+  "profit_proof_flag": false,
+  "proprietary_claim_flag": false,
+  "provenance_tier": "RP5F_DYNAMIC_TARGET_GRID_SEED_NOT_PROOF",
+  "qku_deletion_flag": false,
+  "qku_mutation_flag": false,
+  "qopt_execution_flag": false,
+  "qtt_sha_authority_flag": false,
+  "quantum_advantage_claim_flag": false,
+  "quantum_backend_execution_flag": false,
+  "row_id": "RP5F_REPORT_QOPT1",
+  "run_id": "PR168_RP5F_DETERMINISTIC_RUN_20260628T120000Z",
+  "schema_version": "PR168-RP5F-v1.0",
+  "shadow_authority_flag": false,
+  "source_pr": "PR168-RP5F",
+  "stale_candidate_authority_flag": false,
+  "target_pr_or_mode": "QOPT1",
+  "target_refs": [
+    "docs/master_plan/generated/pr168_rp5f/targets.jsonl"
+  ],
+  "trade_seed_refs": [
+    "docs/master_plan/generated/pr168_rp5f/trade_seed.jsonl"
+  ],
+  "upstream_artifact_refs": [
+    "docs/master_plan/generated/pr168_rp5f/downstream.jsonl"
+  ],
+  "upstream_refs": [
+    "docs/master_plan/generated/pr168_rp5f/downstream.jsonl"
+  ],
+  "validation_refs": [
+    "tools/validate_pr168_rp5f_dynamic_targets.py"
+  ]
+}

@@ -1,0 +1,85 @@
+{
+  "accepted_source_fact_flag": false,
+  "atomicrows_sha_ref_flag": false,
+  "blocker_policy_ref": "RP5F_BLOCKER_POLICY::PRECISE_INVALIDATABLE_DYNAMIC_TARGETS_ONLY",
+  "candidate_only_flag": false,
+  "cash_account_read_flag": false,
+  "connector_refs_or_future_connector_status": "FUTURE_CONNECTOR_STATUS_ONLY_NO_WRITE",
+  "connector_write_flag": false,
+  "consumer_agent_refs": [
+    "CommanderAgent",
+    "RP5FValidator"
+  ],
+  "consumer_agents": [
+    "CommanderAgent",
+    "RP5FValidator"
+  ],
+  "created_at_utc": "2026-06-28T12:00:00Z",
+  "downstream_artifact_refs": [
+    "docs/master_plan/generated/pr168_rp5f/run_receipt.report.json"
+  ],
+  "downstream_refs": [
+    "docs/master_plan/generated/pr168_rp5f/run_receipt.report.json"
+  ],
+  "execution_authority_ref": "RP5F_EXEC_AUTH::DYNAMIC_TARGET_GRID_SEED_HANDOFF_ONLY_NO_ORDER_AUTHORITY",
+  "fixed_trade_instruction_flag": false,
+  "formula_deletion_flag": false,
+  "formula_mutation_flag": false,
+  "future_handoff_reports": [
+    "to_rp5g.report.json",
+    "to_rank4.report.json",
+    "to_qopt1.report.json",
+    "to_vs2.report.json",
+    "to_mem1.report.json",
+    "to_orch1.report.json",
+    "to_paper.report.json",
+    "to_live_dry.report.json",
+    "to_shadow.report.json"
+  ],
+  "future_report_id": "RP5F_FUTURE_HANDOFF_SUMMARY",
+  "global_ban_flag": false,
+  "known_non_authority_states": [
+    "DYNAMIC_TRADE_TARGET_CANDIDATE",
+    "SNAPSHOT_CONDITIONED_TARGET",
+    "EPHEMERAL_ORDER_VARIABLE_GRID",
+    "SNAPSHOT_CONDITIONED_TRADE_PLAN_SEED",
+    "FUTURE_RP5G_HANDOFF",
+    "FUTURE_LIVE_DRYRUN_HANDOFF",
+    "FUTURE_TRIGGERED_SHADOW_COMPARISON_HANDOFF"
+  ],
+  "live_authority_flag": false,
+  "metadata_is_proof_flag": false,
+  "non_expiring_trade_plan_flag": false,
+  "order_authority_flag": false,
+  "orphan_flag": false,
+  "owner_agent": "GovernanceAgent",
+  "paper_authority_flag": false,
+  "paper_submit_authority_flag": false,
+  "private_state_fetch_flag": false,
+  "producer_agent": "GovernanceAgent",
+  "profit_proof_flag": false,
+  "proprietary_claim_flag": false,
+  "provenance_tier": "RP5F_DYNAMIC_TARGET_GRID_SEED_NOT_PROOF",
+  "qku_deletion_flag": false,
+  "qku_mutation_flag": false,
+  "qopt_execution_flag": false,
+  "qtt_sha_authority_flag": false,
+  "quantum_advantage_claim_flag": false,
+  "quantum_backend_execution_flag": false,
+  "row_id": "RP5F_FUTURE_HANDOFF_SUMMARY",
+  "run_id": "PR168_RP5F_DETERMINISTIC_RUN_20260628T120000Z",
+  "schema_version": "PR168-RP5F-v1.0",
+  "scope_boundaries": "RP5F creates dynamic, TTL-bound, invalidatable targets/grids/seeds only; no trade-plan simulation, final ranking, profit proof, order authority, connector write, private state, cash/account read, QOPT execution, or quantum backend.",
+  "shadow_authority_flag": false,
+  "source_pr": "PR168-RP5F",
+  "stale_candidate_authority_flag": false,
+  "upstream_artifact_refs": [
+    "docs/master_plan/generated/pr168_rp5f/downstream.jsonl"
+  ],
+  "upstream_refs": [
+    "docs/master_plan/generated/pr168_rp5f/downstream.jsonl"
+  ],
+  "validation_refs": [
+    "tools/validate_pr168_rp5f_dynamic_targets.py"
+  ]
+}

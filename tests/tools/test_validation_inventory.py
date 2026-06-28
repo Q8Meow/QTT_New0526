@@ -364,6 +364,47 @@ def test_pr168_rp5d_r1_paths_do_not_match_broad_pr168_rp_validators():
         )
 
 
+def test_inventory_has_pr168_rp5f_entries():
+    entries = inventory.inventory_by_id()
+    build_entry = entries["build_pr168_rp5f_dynamic_targets"]
+    validate_entry = entries["validate_pr168_rp5f_dynamic_targets"]
+
+    for entry in (build_entry, validate_entry):
+        assert entry.owner_pr_or_feature == "PR168_RP5F"
+        assert "docs/master_plan/generated/PR168_RP5F_*.report.json" in entry.output_globs
+        assert "docs/master_plan/generated/pr168_rp5f/**" in entry.output_globs
+        assert "tests/pr168_rp5f/**" in entry.required_when_files_match
+
+    assert "tools/build_pr168_rp5f_dynamic_targets.py" in build_entry.tool_globs
+    assert "tools/validate_pr168_rp5f_dynamic_targets.py" in validate_entry.tool_globs
+
+
+def test_pr168_rp5f_paths_do_not_match_broad_pr168_rp_validators():
+    paths = (
+        "docs/master_plan/generated/pr168_rp5f/targets.jsonl",
+        "docs/master_plan/generated/pr168_rp5f/run_receipt.report.json",
+        "src/qtt/stage1_prediction_markets/pr168_rp5f_dynamic_targets/runner.py",
+        "tools/validate_pr168_rp5f_dynamic_targets.py",
+    )
+
+    for path in paths:
+        matching_ids = {
+            entry.validator_id for entry in inventory.entries_matching_path(path)
+        }
+        assert "build_pr168_rp5f_dynamic_targets" in matching_ids
+        assert "validate_pr168_rp5f_dynamic_targets" in matching_ids
+        assert (
+            "validate_pr168_rp_validation_scope_registry_integration"
+            not in matching_ids
+        )
+        assert "build_pr168_rp_formula_based_replay_paper_recompute" not in matching_ids
+        assert (
+            "validate_pr168_rp5d_replay_paper_executability_tiers"
+            not in matching_ids
+        )
+        assert "validate_pr168_rp5e_stack_gen" not in matching_ids
+
+
 def test_inventory_knows_every_pytest_shard_phase_job():
     for phase in runner.ORDERED_PHASES:
         assert inventory.phase_job_id(phase) == inventory.VALIDATION_MATRIX_JOB_ID

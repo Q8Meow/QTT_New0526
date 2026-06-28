@@ -47,6 +47,7 @@ PR168_VS1_BRANCH = registry.PR168_VS1_BRANCH
 PR168_RP5D_BRANCH = registry.PR168_RP5D_BRANCH
 PR168_RP5E_BRANCH = registry.PR168_RP5E_BRANCH
 PR168_RP5D_R1_BRANCH = registry.PR168_RP5D_R1_BRANCH
+PR168_RP5F_BRANCH = registry.PR168_RP5F_BRANCH
 FIXTURE_BRANCH = registry.VALIDATION_FIXTURE_BRANCH
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
@@ -409,6 +410,28 @@ def test_pr168_rp5e_allowed_paths_pass_on_real_branch(path: str) -> None:
 )
 def test_pr168_rp5d_r1_allowed_paths_pass_on_real_branch(path: str) -> None:
     assert registry.is_pr_scoped_changed_path_allowed(PR168_RP5D_R1_BRANCH, path)
+    assert registry.is_pr_scoped_changed_path_allowed(FIXTURE_BRANCH, path)
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        "docs/master_plan/generated/pr168_rp5f/art_reg.json",
+        "docs/master_plan/generated/pr168_rp5f/targets.jsonl",
+        "docs/master_plan/generated/pr168_rp5f/trade_seed.manifest.json",
+        "docs/master_plan/generated/pr168_rp5f/run_receipt.report.json",
+        "src/qtt/stage1_prediction_markets/pr168_rp5f_dynamic_targets/runner.py",
+        "src/qtt/stage1_prediction_markets/pr168_rp5f_dynamic_targets/validator.py",
+        "tools/build_pr168_rp5f_dynamic_targets.py",
+        "tools/validate_pr168_rp5f_dynamic_targets.py",
+        "tests/pr168_rp5f/test_validation.py",
+        "tools/validation_scope_registry.py",
+        "tools/validation_inventory.py",
+        "tools/run_validation_gates.py",
+    ],
+)
+def test_pr168_rp5f_allowed_paths_pass_on_real_branch(path: str) -> None:
+    assert registry.is_pr_scoped_changed_path_allowed(PR168_RP5F_BRANCH, path)
     assert registry.is_pr_scoped_changed_path_allowed(FIXTURE_BRANCH, path)
 
 
