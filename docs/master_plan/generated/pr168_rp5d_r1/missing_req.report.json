@@ -1,0 +1,58 @@
+{
+  "accepted_source_fact_flag": false,
+  "atomicrows_sha_ref_flag": false,
+  "blocker_policy_ref": "RP5D_R1_BLOCKER_POLICY::PRECISE_EXECUTION_CONTRACT_ONLY",
+  "cash_account_read_flag": false,
+  "connector_write_flag": false,
+  "consumer_agent_refs": [
+    "GovernanceAgent"
+  ],
+  "consumer_agents": [
+    "GovernanceAgent"
+  ],
+  "created_at_utc": "2026-06-28T00:00:00Z",
+  "downstream_artifact_refs": [
+    "docs/master_plan/generated/pr168_rp5d_r1/run_receipt.report.json"
+  ],
+  "downstream_refs": [
+    "docs/master_plan/generated/pr168_rp5d_r1/run_receipt.report.json"
+  ],
+  "execution_authority_ref": "RP5D_R1_EXEC_AUTH::REPLAY_PAPER_CONTRACT_PROOF_ONLY",
+  "fail_closed_flag": false,
+  "formula_mutation_flag": false,
+  "global_ban_flag": false,
+  "live_authority_flag": false,
+  "metadata_is_proof_flag": false,
+  "missing_required_refs": [],
+  "missing_required_report_id": "RP5D_R1_MISSING_REQ",
+  "order_authority_flag": false,
+  "orphan_flag": false,
+  "owner_agent": "CommanderAgent",
+  "paper_authority_flag": false,
+  "paper_submit_authority_flag": false,
+  "private_state_fetch_flag": false,
+  "producer_agent": "CommanderAgent",
+  "profit_proof_flag": false,
+  "proprietary_claim_flag": false,
+  "provenance_tier": "RP5D_R1_EXECUTION_CONTRACT_OVERLAY_NOT_PROFIT_PROOF",
+  "qku_mutation_flag": false,
+  "qopt_execution_flag": false,
+  "qtt_sha_authority_flag": false,
+  "quantum_advantage_claim_flag": false,
+  "quantum_backend_execution_flag": false,
+  "row_id": "RP5D_R1_MISSING_REQ",
+  "run_id": "PR168_RP5D_R1_DETERMINISTIC_RUN_20260628T000000Z",
+  "schema_version": "PR168-RP5D-R1-v1.0",
+  "scope_compatible_flag": true,
+  "shadow_authority_flag": false,
+  "source_pr": "PR168-RP5D-R1",
+  "upstream_artifact_refs": [
+    "owner_prompt_pr168_rp5d_r1_v5"
+  ],
+  "upstream_refs": [
+    "owner_prompt_pr168_rp5d_r1_v5"
+  ],
+  "validation_refs": [
+    "tools/validate_pr168_rp5d_r1_exec_now_unlock.py"
+  ]
+}

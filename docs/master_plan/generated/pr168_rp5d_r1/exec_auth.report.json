@@ -1,0 +1,77 @@
+{
+  "accepted_source_fact_flag": false,
+  "atomicrows_sha_ref_flag": false,
+  "blocker_policy_ref": "RP5D_R1_BLOCKER_POLICY::PRECISE_EXECUTION_CONTRACT_ONLY",
+  "cash_account_read_authorized": false,
+  "cash_account_read_flag": false,
+  "connector_write_authorized": false,
+  "connector_write_flag": false,
+  "consumer_agent_refs": [
+    "CommanderAgent",
+    "RiskAgent",
+    "RP5D_R1Validator"
+  ],
+  "consumer_agents": [
+    "CommanderAgent",
+    "RiskAgent",
+    "RP5D_R1Validator"
+  ],
+  "contract_completion_authorized": true,
+  "created_at_utc": "2026-06-28T00:00:00Z",
+  "downstream_artifact_refs": [
+    "docs/master_plan/generated/pr168_rp5d_r1/run_receipt.report.json"
+  ],
+  "downstream_refs": [
+    "docs/master_plan/generated/pr168_rp5d_r1/run_receipt.report.json"
+  ],
+  "execution_authority_ref": "RP5D_R1_EXEC_AUTH::REPLAY_PAPER_CONTRACT_PROOF_ONLY",
+  "execution_mode": "REPLAY_PAPER_EXECUTION_CONTRACT_PROOF_ONLY",
+  "fixture_smoke_authorized": true,
+  "formula_mutation_flag": false,
+  "global_ban_flag": false,
+  "limited_live_canary_execution_authorized": false,
+  "live_authority_flag": false,
+  "live_dryrun_execution_authorized": false,
+  "metadata_is_proof_flag": false,
+  "order_authority_flag": false,
+  "order_submit_cancel_replace_reduce_close_authorized": false,
+  "orphan_flag": false,
+  "owner_agent": "GovernanceAgent",
+  "paper_authority_flag": false,
+  "paper_order_authority_authorized": false,
+  "paper_submit_authority_flag": false,
+  "private_state_fetch_authorized": false,
+  "private_state_fetch_flag": false,
+  "producer_agent": "GovernanceAgent",
+  "profit_proof_flag": false,
+  "proprietary_claim_flag": false,
+  "provenance_tier": "RP5D_R1_EXECUTION_CONTRACT_OVERLAY_NOT_PROFIT_PROOF",
+  "qku_mutation_flag": false,
+  "qopt_execution_authorized": false,
+  "qopt_execution_flag": false,
+  "qtt_sha_authority_flag": false,
+  "quantum_advantage_claim_authorized": false,
+  "quantum_advantage_claim_flag": false,
+  "quantum_backend_execution_authorized": false,
+  "quantum_backend_execution_flag": false,
+  "real_positive_negative_authorized": false,
+  "row_id": "RP5D_R1_EXEC_AUTH_REPORT",
+  "run_id": "PR168_RP5D_R1_DETERMINISTIC_RUN_20260628T000000Z",
+  "schema_version": "PR168-RP5D-R1-v1.0",
+  "shadow_authority_flag": false,
+  "shadow_execution_authorized": false,
+  "source_fact_acceptance_authorized": false,
+  "source_pr": "PR168-RP5D-R1",
+  "tier_overlay_authorized": true,
+  "trade_plan_simulation_authorized": false,
+  "upstream_artifact_refs": [
+    "docs/master_plan/generated/pr168_rp5d_r1/mode_bound.jsonl"
+  ],
+  "upstream_refs": [
+    "docs/master_plan/generated/pr168_rp5d_r1/mode_bound.jsonl"
+  ],
+  "validation_refs": [
+    "tools/validate_pr168_rp5d_r1_exec_now_unlock.py"
+  ],
+  "yolo_safety_confirmation": "Branch, scope, authority, upstream mutation, CI, merge, and post-merge watch controls remain active."
+}
