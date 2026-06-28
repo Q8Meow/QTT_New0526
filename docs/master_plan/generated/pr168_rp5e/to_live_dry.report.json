@@ -1,0 +1,71 @@
+{
+  "accepted_source_fact_flag": false,
+  "atomicrows_sha_ref_flag": false,
+  "blocker_policy_ref": "RP5E_BLOCKER_POLICY::PRECISE_NO_GLOBAL_BAN",
+  "connector_write_flag": false,
+  "consumer_agent_refs": [
+    "CommanderAgent",
+    "LIVE-DRYRUN",
+    "RP5EValidator"
+  ],
+  "consumer_agents": [
+    "CommanderAgent",
+    "LIVE-DRYRUN",
+    "RP5EValidator"
+  ],
+  "created_at_utc": "2026-06-27T00:00:00Z",
+  "downstream_artifact_refs": [
+    "docs/master_plan/generated/pr168_rp5e/future.report.json",
+    "docs/master_plan/generated/pr168_rp5e/run_receipt.report.json"
+  ],
+  "downstream_refs": [
+    "docs/master_plan/generated/pr168_rp5e/future.report.json",
+    "docs/master_plan/generated/pr168_rp5e/run_receipt.report.json"
+  ],
+  "execution_authority_ref": "RP5E_EXEC_AUTH::STACK_PREVIEW_HANDOFF_ONLY_NO_ORDER_AUTHORITY",
+  "future_consumer_must_validate_numeric_evidence_flag": false,
+  "handoff_purpose": "future live-like dry run with submit disabled",
+  "handoff_report_id": "RP5E_TO_LIVE_DRYRUN",
+  "live_authority_flag": false,
+  "live_executable_now_promotion_count": 0,
+  "metadata_is_proof_flag": false,
+  "non_authority_handoff_flag": true,
+  "order_authority_flag": false,
+  "owner_agent": "GovernanceAgent",
+  "paper_authority_flag": false,
+  "paper_executable_now_promotion_count": 0,
+  "private_state_fetch_flag": false,
+  "producer_agent": "GovernanceAgent",
+  "promotion_in_rp5e_count": 0,
+  "proprietary_claim_flag": false,
+  "provenance_tier": "RP5E_GENERATED_PREVIEW_NOT_PROOF",
+  "qopt_execution_flag": false,
+  "qtt_sha_authority_flag": false,
+  "quantum_advantage_claim_flag": false,
+  "quantum_backend_execution_flag": false,
+  "replay_paper_executable_now_promotion_count": 0,
+  "row_id": "RP5E_REPORT_LIVE_DRYRUN",
+  "run_id": "PR168_RP5E_DETERMINISTIC_RUN_20260627T000000Z",
+  "runtime_cash_receipt_flag": false,
+  "schema_version": "PR168-RP5E-v1.0",
+  "shadow_authority_flag": false,
+  "shadow_executable_now_promotion_count": 0,
+  "source_pr": "PR168-RP5E",
+  "stack_preview_feature_refs": [
+    "docs/master_plan/generated/pr168_rp5e/topk.jsonl",
+    "docs/master_plan/generated/pr168_rp5e/features.jsonl",
+    "docs/master_plan/generated/pr168_rp5e/edge_feats.jsonl"
+  ],
+  "target_pr_or_mode": "LIVE-DRYRUN",
+  "upstream_artifact_refs": [
+    "docs/master_plan/generated/pr168_rp5e/downstream.jsonl",
+    "docs/master_plan/generated/pr168_rp5e/mode_boundary.jsonl"
+  ],
+  "upstream_refs": [
+    "docs/master_plan/generated/pr168_rp5e/downstream.jsonl",
+    "docs/master_plan/generated/pr168_rp5e/mode_boundary.jsonl"
+  ],
+  "validation_refs": [
+    "tools/validate_pr168_rp5e_stack_gen.py"
+  ]
+}
