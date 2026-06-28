@@ -501,6 +501,7 @@ _PR168_RP5D_R1_ALLOWED_PATTERNS = (
 
 _PR168_RP5F_ALLOWED_EXACT_PATHS = frozenset(
     {
+        "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
         "tools/build_pr168_rp5f_dynamic_targets.py",
         "tools/validate_pr168_rp5f_dynamic_targets.py",
         "tools/run_validation_gates.py",
@@ -510,6 +511,7 @@ _PR168_RP5F_ALLOWED_EXACT_PATHS = frozenset(
         "tests/tools/test_validation_scope_registry.py",
         "tests/tools/test_validation_inventory.py",
         "tests/tools/test_changed_area_validation_router.py",
+        "tests/tools/test_validate_idempotence_runtime_containment.py",
         "tests/fail_closed/test_run_validation_gates.py",
     }
 )
