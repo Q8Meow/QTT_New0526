@@ -1637,7 +1637,7 @@ def _route_command_generated_outputs_to_temp(
     routed = [str(part) for part in command]
     for index, token in enumerate(routed[:-1]):
         if (
-            token in {"--out", "--report-out"}
+            token in {"--out", "--report-out", "--generated"}
             or token.endswith("-out")
         ) and _is_tracked_generated_output_path(routed[index + 1]):
             routed[index + 1] = str(
@@ -3356,6 +3356,8 @@ def build_validation_commands(
             "sample",
             "--max-candidates",
             "10",
+            "--out",
+            "docs/master_plan/generated/pr168_rp5g",
             "--timeout-ms",
             "3600000",
         ],

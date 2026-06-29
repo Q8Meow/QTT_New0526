@@ -1043,7 +1043,7 @@ All paper/live/shadow/order/connector/private-state/cash/source-fact/QOPT/quantu
 - PASS: `.\\.venv\\Scripts\\python.exe -B tools\\run_validation_gates.py --phase deterministic-validators --timing-report .tmp\\qtt-validation-timing\\deterministic-rp5g.json --router-report .tmp\\qtt-validation-routing\\deterministic-rp5g.json`
 
 ## CI Debug Actions If Any
-None before PR creation. CI will be watched after the PR is opened; failures must be fixed with scoped changes and rerun.
+CI repair commit updated validation-router temp-output handling for RP5G `--out` and `--generated` paths, made RP5G generator/validator deterministic against routed temp directories, currentized the PR152 global consistency audit, and reran the failed affected-scope checks.
 
 ## Post-Merge Main Workflow Watch Result
 Pending until the PR is merged. `run_receipt.report.json` records that the post-merge main workflow watch is required.
@@ -1051,54 +1051,57 @@ Pending until the PR is merged. `run_receipt.report.json` records that the post-
 
 
 def run_layer(offline: bool = True, fixture: str = "sample", max_candidates: int = 10, timeout_ms: int = 3600000, out: str | None = None) -> dict[str, Any]:
+    global GENERATED_DIR
+    original_generated_dir = GENERATED_DIR
     if out:
-        requested = (REPO_ROOT / out).resolve() if not Path(out).is_absolute() else Path(out).resolve()
-        if requested != GENERATED_DIR.resolve():
-            raise ValueError(f"RP5G output directory must be {GENERATED_DIR}, got {requested}")
-    _clean_generated_dir()
-    read_rows, in_cons_rows, miss_opt_rows, missing_required = build_reading_rows()
-    upstream = _load_upstream()
-    blockers, completion, params, policy = build_policy_rows()
-    master_trace, roadmap_trace, mode_rows, owner_audit_rows, owner_enable_rows = build_trace_rows()
-    all_rows: dict[str, list[dict[str, Any]]] = {
-        "read_rec.jsonl": read_rows,
-        "in_cons.jsonl": in_cons_rows,
-        "miss_opt.jsonl": miss_opt_rows,
-        "self_audit_pre.jsonl": build_self_audit(post=False),
-        "mode_bound.jsonl": mode_rows,
-        "blockers.jsonl": blockers,
-        "completion_route.jsonl": completion,
-        "params.jsonl": params,
-        "policy_prov.jsonl": policy,
-        "master_trace.jsonl": master_trace,
-        "roadmap_trace.jsonl": roadmap_trace,
-        "owner_audit.jsonl": owner_audit_rows,
-        "owner_enable.jsonl": owner_enable_rows,
-    }
-    all_rows.update(build_source_rows())
-    all_rows.update(build_ingest_rows(upstream))
-    all_rows.update(build_agent_rows())
-    sim_rows = build_candidate_simulation_rows(upstream, max_candidates=max_candidates)
-    for filename, file_rows in sim_rows.items():
-        all_rows.setdefault(filename, []).extend(file_rows)
-    all_rows["comp_fail.jsonl"] = [with_common({"comp_fail_id": "RP5G_COMP_FAIL_0001", "failure_count": 0, "all_selected_compute_receipts_present_flag": True}, row_id="RP5G_COMP_FAIL_0001", owner_agent="GovernanceAgent", consumer_agents=["RP5GValidator"], upstream_refs=[generated_ref("formula_comp.jsonl")], downstream_refs=[generated_ref("run_receipt.report.json")])]
-    all_rows["self_audit_post.jsonl"] = build_self_audit(post=True)
-    route_rows = build_route_governance_rows(all_rows)
-    for filename, file_rows in route_rows.items():
-        all_rows.setdefault(filename, []).extend(file_rows)
-    for filename in JSONL_OUTPUTS:
-        if filename not in all_rows or not all_rows[filename]:
-            all_rows[filename] = [with_common({"placeholder_id": f"RP5G_{Path(filename).stem.upper()}_0001", "purpose": "non-empty compact ledger; no authority; routed downstream", "completion_route_ref": generated_ref("completion_route.jsonl")}, row_id=f"RP5G_{Path(filename).stem.upper()}_0001", owner_agent="GovernanceAgent", consumer_agents=["RP5GValidator"], upstream_refs=[generated_ref("master_trace.jsonl")], downstream_refs=[generated_ref("run_receipt.report.json")])]
-    artifact_entries = build_artifact_name_entries()
-    art_reg = with_common({"artifact_registry_id": "RP5G_ARTIFACT_REGISTRY", "artifact_name_registry_count": len(artifact_entries), "entries": artifact_entries, "artifacts": artifact_entries}, row_id="RP5G_ARTIFACT_REGISTRY", owner_agent="ArtifactNameAgent", consumer_agents=["PathSafetyAgent", "GovernanceAgent", "RP5GValidator"], upstream_refs=[generated_ref("params.jsonl")], downstream_refs=[generated_ref("run_receipt.report.json")])
-    write_json(GENERATED_DIR / "art_reg.json", art_reg)
-    for name in JSONL_OUTPUTS:
-        write_jsonl(GENERATED_DIR / name, all_rows.get(name, []), schema_version_name=schema_name(name))
-    reports = build_reports(all_rows, missing_required)
-    for name in REPORT_OUTPUTS:
-        write_json(GENERATED_DIR / name, reports[name])
-    write_text(GENERATED_DIR / "pr_body.md", build_pr_body(reports["run_receipt.report.json"]))
-    return reports["run_receipt.report.json"]
+        GENERATED_DIR = (REPO_ROOT / out).resolve() if not Path(out).is_absolute() else Path(out).resolve()
+    try:
+        _clean_generated_dir()
+        read_rows, in_cons_rows, miss_opt_rows, missing_required = build_reading_rows()
+        upstream = _load_upstream()
+        blockers, completion, params, policy = build_policy_rows()
+        master_trace, roadmap_trace, mode_rows, owner_audit_rows, owner_enable_rows = build_trace_rows()
+        all_rows: dict[str, list[dict[str, Any]]] = {
+            "read_rec.jsonl": read_rows,
+            "in_cons.jsonl": in_cons_rows,
+            "miss_opt.jsonl": miss_opt_rows,
+            "self_audit_pre.jsonl": build_self_audit(post=False),
+            "mode_bound.jsonl": mode_rows,
+            "blockers.jsonl": blockers,
+            "completion_route.jsonl": completion,
+            "params.jsonl": params,
+            "policy_prov.jsonl": policy,
+            "master_trace.jsonl": master_trace,
+            "roadmap_trace.jsonl": roadmap_trace,
+            "owner_audit.jsonl": owner_audit_rows,
+            "owner_enable.jsonl": owner_enable_rows,
+        }
+        all_rows.update(build_source_rows())
+        all_rows.update(build_ingest_rows(upstream))
+        all_rows.update(build_agent_rows())
+        sim_rows = build_candidate_simulation_rows(upstream, max_candidates=max_candidates)
+        for filename, file_rows in sim_rows.items():
+            all_rows.setdefault(filename, []).extend(file_rows)
+        all_rows["comp_fail.jsonl"] = [with_common({"comp_fail_id": "RP5G_COMP_FAIL_0001", "failure_count": 0, "all_selected_compute_receipts_present_flag": True}, row_id="RP5G_COMP_FAIL_0001", owner_agent="GovernanceAgent", consumer_agents=["RP5GValidator"], upstream_refs=[generated_ref("formula_comp.jsonl")], downstream_refs=[generated_ref("run_receipt.report.json")])]
+        all_rows["self_audit_post.jsonl"] = build_self_audit(post=True)
+        route_rows = build_route_governance_rows(all_rows)
+        for filename, file_rows in route_rows.items():
+            all_rows.setdefault(filename, []).extend(file_rows)
+        for filename in JSONL_OUTPUTS:
+            if filename not in all_rows or not all_rows[filename]:
+                all_rows[filename] = [with_common({"placeholder_id": f"RP5G_{Path(filename).stem.upper()}_0001", "purpose": "non-empty compact ledger; no authority; routed downstream", "completion_route_ref": generated_ref("completion_route.jsonl")}, row_id=f"RP5G_{Path(filename).stem.upper()}_0001", owner_agent="GovernanceAgent", consumer_agents=["RP5GValidator"], upstream_refs=[generated_ref("master_trace.jsonl")], downstream_refs=[generated_ref("run_receipt.report.json")])]
+        artifact_entries = build_artifact_name_entries()
+        art_reg = with_common({"artifact_registry_id": "RP5G_ARTIFACT_REGISTRY", "artifact_name_registry_count": len(artifact_entries), "entries": artifact_entries, "artifacts": artifact_entries}, row_id="RP5G_ARTIFACT_REGISTRY", owner_agent="ArtifactNameAgent", consumer_agents=["PathSafetyAgent", "GovernanceAgent", "RP5GValidator"], upstream_refs=[generated_ref("params.jsonl")], downstream_refs=[generated_ref("run_receipt.report.json")])
+        write_json(GENERATED_DIR / "art_reg.json", art_reg)
+        for name in JSONL_OUTPUTS:
+            write_jsonl(GENERATED_DIR / name, all_rows.get(name, []), schema_version_name=schema_name(name))
+        reports = build_reports(all_rows, missing_required)
+        for name in REPORT_OUTPUTS:
+            write_json(GENERATED_DIR / name, reports[name])
+        write_text(GENERATED_DIR / "pr_body.md", build_pr_body(reports["run_receipt.report.json"]))
+        return reports["run_receipt.report.json"]
+    finally:
+        GENERATED_DIR = original_generated_dir
 
 
 def main(argv: list[str] | None = None) -> int:

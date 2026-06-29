@@ -227,16 +227,16 @@ def _assert_deterministic() -> None:
     from .runner import run_layer
 
     before = _generated_file_texts()
-    run_layer(offline=True, fixture="sample", max_candidates=10, timeout_ms=3600000)
+    run_layer(offline=True, fixture="sample", max_candidates=10, timeout_ms=3600000, out=str(GENERATED_DIR))
     middle = _generated_file_texts()
-    run_layer(offline=True, fixture="sample", max_candidates=10, timeout_ms=3600000)
+    run_layer(offline=True, fixture="sample", max_candidates=10, timeout_ms=3600000, out=str(GENERATED_DIR))
     after = _generated_file_texts()
     if before != middle or middle != after:
         raise RP5GValidationError("RP5G generated outputs are not deterministic across repeated runs")
 
 
-@lru_cache(maxsize=1)
-def _validation_result() -> dict[str, Any]:
+@lru_cache(maxsize=8)
+def _validation_result(generated_dir_key: str) -> dict[str, Any]:
     failures = _failures()
     if failures:
         raise RP5GValidationError("; ".join(failures[:200]))
@@ -253,8 +253,15 @@ def _validation_result() -> dict[str, Any]:
     }
 
 
-def run_validation(_section: str | None = None) -> dict[str, Any]:
-    return dict(_validation_result())
+def run_validation(_section: str | None = None, generated_dir: Path | None = None) -> dict[str, Any]:
+    global GENERATED_DIR
+    original_generated_dir = GENERATED_DIR
+    if generated_dir is not None:
+        GENERATED_DIR = generated_dir.resolve()
+    try:
+        return dict(_validation_result(str(GENERATED_DIR)))
+    finally:
+        GENERATED_DIR = original_generated_dir
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -266,13 +273,10 @@ def main(argv: list[str] | None = None) -> int:
     requested = Path(args.generated)
     if not requested.is_absolute():
         requested = Path.cwd() / requested
-    if requested.resolve() != GENERATED_DIR.resolve():
-        raise RP5GValidationError(f"RP5G generated directory must be {GENERATED_DIR}, got {requested}")
-    result = run_validation(args.section)
+    result = run_validation(args.section, requested)
     print(result)
     return 0
 
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

@@ -434,7 +434,10 @@ def clamp(value: str | int | float | Decimal, low: Decimal = Decimal("0"), high:
 def rel_ref(path: Path | str) -> str:
     p = Path(path)
     if p.is_absolute():
-        p = p.relative_to(REPO_ROOT)
+        try:
+            p = p.relative_to(REPO_ROOT)
+        except ValueError:
+            return p.as_posix()
     return p.as_posix()
 
 
@@ -569,4 +572,3 @@ def write_jsonl(path: Path, rows: Iterable[dict[str, Any]], *, schema_version_na
 def schema_name(filename: str) -> str:
     stem = filename.removesuffix(".jsonl").removesuffix(".json").replace(".report", "")
     return "".join(part.capitalize() for part in stem.split("_") if part) + "V1"
-
