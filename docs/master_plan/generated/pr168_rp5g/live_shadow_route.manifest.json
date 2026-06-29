@@ -1,0 +1,96 @@
+{
+  "accepted_source_fact_flag": false,
+  "atomicrows_sha_ref_flag": false,
+  "blocker_policy_ref": "RP5G_BLOCKER_POLICY::NUMERIC_EVIDENCE_AND_NON_AUTHORITY_HANDOFF_ONLY",
+  "buy_sell_open_close_created_flag": false,
+  "buy_sell_open_close_logic_created_flag": false,
+  "candidate_only_flag": false,
+  "cash_account_read_flag": false,
+  "connector_refs_or_future_connector_status": "FUTURE_CONNECTOR_STATUS_ONLY_NO_WRITE",
+  "connector_semantic_binding_flag": false,
+  "connector_write_created_flag": false,
+  "connector_write_flag": false,
+  "consumer_agent_refs": [
+    "ArtifactNameAgent",
+    "PathSafetyAgent",
+    "RP5GValidator"
+  ],
+  "consumer_agents": [
+    "ArtifactNameAgent",
+    "PathSafetyAgent",
+    "RP5GValidator"
+  ],
+  "created_at_utc": "2026-06-29T12:00:00Z",
+  "downstream_artifact_refs": [
+    "docs/master_plan/generated/pr168_rp5g/run_receipt.report.json"
+  ],
+  "downstream_refs": [
+    "docs/master_plan/generated/pr168_rp5g/run_receipt.report.json"
+  ],
+  "execution_authority_ref": "RP5G_EXEC_AUTH::REPLAY_PAPER_SIMULATION_EVIDENCE_ONLY_NO_ORDER_AUTHORITY",
+  "fixed_trade_instruction_flag": false,
+  "formula_deletion_flag": false,
+  "formula_mutation_flag": false,
+  "generated_surface_authority_class": "RP5G_GENERATED_REPLAY_PAPER_SIMULATION_EVIDENCE_NOT_ORDER_AUTHORITY",
+  "global_ban_flag": false,
+  "live_authority_flag": false,
+  "live_default_flag": false,
+  "live_or_shadow_authority_created_flag": false,
+  "live_order_authority_created_flag": false,
+  "live_submit_authority_flag": false,
+  "live_submit_ready_flag": false,
+  "manifest_for_shard_family_required_flag": true,
+  "manifest_id": "LIVE_SHADOW_ROUTE_MANIFEST",
+  "master_plan_trace_refs": [
+    "docs/master_plan/generated/pr168_rp5g/master_trace.jsonl"
+  ],
+  "metadata_is_proof_flag": false,
+  "non_expiring_trade_plan_flag": false,
+  "order_authority_created_flag": false,
+  "order_authority_flag": false,
+  "order_submit_ready_flag": false,
+  "orphan_flag": false,
+  "owner_agent": "GovernanceAgent",
+  "paper_authority_flag": false,
+  "paper_order_authority_created_flag": false,
+  "paper_submit_authority_created_flag": false,
+  "paper_submit_authority_flag": false,
+  "paper_submit_ready_flag": false,
+  "physical_filename": "docs/master_plan/generated/pr168_rp5g/live_shadow_route.jsonl",
+  "private_state_fetch_flag": false,
+  "producer_agent": "GovernanceAgent",
+  "profit_guarantee_flag": false,
+  "profit_proof_flag": false,
+  "proprietary_claim_flag": false,
+  "provenance_tier": "RP5G_REPLAY_PAPER_SIMULATION_EVIDENCE",
+  "qku_deletion_flag": false,
+  "qku_mutation_flag": false,
+  "qopt_execution_flag": false,
+  "qtt_sha_authority_flag": false,
+  "quantum_advantage_claim_flag": false,
+  "quantum_backend_execution_flag": false,
+  "real_market_loss_proof_flag": false,
+  "real_market_profit_proof_flag": false,
+  "real_order_authority_created_flag": false,
+  "row_count": 1,
+  "row_id": "LIVE_SHADOW_ROUTE_MANIFEST",
+  "row_shard_family": "live_shadow_route.jsonl",
+  "run_id": "PR168_RP5G_DETERMINISTIC_RUN_20260629T120000Z",
+  "runtime_authority_created_flag": false,
+  "schema_version": "PR168-RP5G-v3.0",
+  "schema_version_name": "LiveShadowRouteV1",
+  "shadow_authority_flag": false,
+  "shard_file_path": "docs/master_plan/generated/pr168_rp5g/live_shadow_route.jsonl",
+  "source_fact_acceptance_flag": false,
+  "source_pr": "PR168-RP5G",
+  "stale_candidate_authority_flag": false,
+  "upstream_artifact_refs": [
+    "docs/master_plan/generated/pr168_rp5g/live_shadow_route.jsonl"
+  ],
+  "upstream_refs": [
+    "docs/master_plan/generated/pr168_rp5g/live_shadow_route.jsonl"
+  ],
+  "validation_refs": [
+    "tools/validate_pr168_rp5g_trade_plan_sim.py"
+  ]
+}

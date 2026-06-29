@@ -71,6 +71,13 @@ PR168_RP5F_DETERMINISTIC_SCRIPT_NAMES = frozenset(
         "validate_pr168_rp5f_dynamic_targets.py",
     }
 )
+PR168_RP5G_BRANCH = "pr168-rp5g-trade-plan-sim-engine"
+PR168_RP5G_DETERMINISTIC_SCRIPT_NAMES = frozenset(
+    {
+        "build_pr168_rp5g_trade_plan_sim.py",
+        "validate_pr168_rp5g_trade_plan_sim.py",
+    }
+)
 ORDERED_PHASES = (
     FAST_PREFLIGHT_PHASE,
     DETERMINISTIC_VALIDATORS_PHASE,
@@ -525,6 +532,12 @@ PYTEST_SHARD_COMMANDS: dict[str, tuple[PytestShardCommand, ...]] = {
         PytestShardCommand(
             paths=("tests/pr168_rp5f",),
             reason="PR168-RP5F dynamic target and order-variable grid tests",
+            runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
+            historical_runtime_seconds=5.0,
+        ),
+        PytestShardCommand(
+            paths=("tests/pr168_rp5g",),
+            reason="PR168-RP5G replay/paper trade-plan simulation tests",
             runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
             historical_runtime_seconds=5.0,
         ),
@@ -3335,6 +3348,25 @@ def build_validation_commands(
             sys.executable,
             _path("tools", "validate_pr168_rp5f_dynamic_targets.py"),
         ],
+        [
+            sys.executable,
+            _path("tools", "build_pr168_rp5g_trade_plan_sim.py"),
+            "--offline",
+            "--fixture",
+            "sample",
+            "--max-candidates",
+            "10",
+            "--timeout-ms",
+            "3600000",
+        ],
+        [
+            sys.executable,
+            _path("tools", "validate_pr168_rp5g_trade_plan_sim.py"),
+            "--generated",
+            "docs/master_plan/generated/pr168_rp5g",
+            "--timeout-ms",
+            "3600000",
+        ],
         *[
             [sys.executable, _path("tools", f"validate_pr168_rank_{name}.py")]
             for name in (
@@ -5649,6 +5681,81 @@ def _write_rp5f_local_branch_scope_report(
     )
 
 
+def _rp5g_local_branch_scope_active(
+    *,
+    repo_root: pathlib.Path,
+    phase: str,
+    validation_mode: str,
+    changed_files: Sequence[str],
+    force_full: bool,
+    manual_mode: str,
+) -> bool:
+    if phase != DETERMINISTIC_VALIDATORS_PHASE:
+        return False
+    if validation_mode != "auto" or changed_files or force_full or manual_mode:
+        return False
+    return _current_git_branch(repo_root) == PR168_RP5G_BRANCH
+
+
+def _filter_commands_for_rp5g_local_branch_scope(
+    commands: Sequence[Sequence[str]],
+) -> list[list[str]]:
+    kept = [
+        list(command)
+        for command in commands
+        if _command_script_name(command) in PR168_RP5G_DETERMINISTIC_SCRIPT_NAMES
+    ]
+    skipped = [
+        _command_script_name(command)
+        for command in commands
+        if _command_script_name(command) not in PR168_RP5G_DETERMINISTIC_SCRIPT_NAMES
+    ]
+    if skipped:
+        print(
+            "QTT_RP5G_LOCAL_BRANCH_SCOPE_SKIPPED "
+            f"phase={DETERMINISTIC_VALIDATORS_PHASE} "
+            f"scripts={','.join(sorted(name for name in skipped if name))}",
+            flush=True,
+        )
+    return kept
+
+
+def _write_rp5g_local_branch_scope_report(
+    router_report_path: pathlib.Path | None,
+    *,
+    repo_root: pathlib.Path,
+    kept_commands: Sequence[Sequence[str]],
+) -> None:
+    if router_report_path is None:
+        return
+    if not router_report_path.is_absolute():
+        router_report_path = repo_root / router_report_path
+    router_report_path.parent.mkdir(parents=True, exist_ok=True)
+    router_report_path.write_text(
+        json.dumps(
+            {
+                "routing_policy": "RP5G_LOCAL_BRANCH_AFFECTED_SCOPE",
+                "branch": PR168_RP5G_BRANCH,
+                "phase": DETERMINISTIC_VALIDATORS_PHASE,
+                "full_validation_required": False,
+                "required_scripts": [
+                    _command_script_name(command) for command in kept_commands
+                ],
+                "reason": (
+                    "Local deterministic-validators on PR168-RP5G validates the "
+                    "branch-owned replay/paper trade-plan simulation build/validator "
+                    "pair. RP5C/VS1/RP5D/RP5E/RP5D-R1/RP5F remain read-only "
+                    "upstream inputs and are not rebuilt on this branch."
+                ),
+            },
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+
 def _filter_commands_for_router_result(
     commands: Sequence[Sequence[str]],
     *,
@@ -5795,6 +5902,25 @@ def main(argv: Sequence[str] | None = None) -> int:
                     )
                     print(
                         "QTT_RP5F_LOCAL_BRANCH_SCOPE_MODE "
+                        f"phase={args.phase} full_validation_required=False",
+                        flush=True,
+                    )
+                elif _rp5g_local_branch_scope_active(
+                    repo_root=repo_root,
+                    phase=args.phase,
+                    validation_mode=args.validation_mode,
+                    changed_files=args.changed_file,
+                    force_full=args.force_full,
+                    manual_mode=args.manual_mode,
+                ):
+                    commands = _filter_commands_for_rp5g_local_branch_scope(commands)
+                    _write_rp5g_local_branch_scope_report(
+                        args.router_report,
+                        repo_root=repo_root,
+                        kept_commands=commands,
+                    )
+                    print(
+                        "QTT_RP5G_LOCAL_BRANCH_SCOPE_MODE "
                         f"phase={args.phase} full_validation_required=False",
                         flush=True,
                     )
