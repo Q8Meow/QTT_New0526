@@ -14,6 +14,7 @@ from tools.validation_scope_registry import (  # noqa: E402
     PR168_DATA1_BRANCH,
     PR168_RP5A_BRANCH,
     PR168_RP5B_BRANCH,
+    PR168_RANK4_BRANCH,
     PR168_RP_BRANCH,
     VALIDATION_FIXTURE_BRANCH,
     explain_pr_scope_decision,
@@ -156,6 +157,31 @@ def main() -> int:
                 f"{explain_pr_scope_decision(VALIDATION_FIXTURE_BRANCH, path)}"
             )
 
+    rank4_allowed_paths = [
+        "docs/master_plan/generated/pr168_rank4/art_reg.json",
+        "docs/master_plan/generated/pr168_rank4/rank_order.jsonl",
+        "docs/master_plan/generated/pr168_rank4/rank_order.manifest.json",
+        "docs/master_plan/generated/pr168_rank4/run_receipt.report.json",
+        "docs/master_plan/generated/pr168_rank4/pr_body.md",
+        "src/qtt/ranking/__init__.py",
+        "src/qtt/ranking/pr168_rank4/builder.py",
+        "src/qtt/ranking/pr168_rank4/validator.py",
+        "tools/build_pr168_rank4_advisory_ranking.py",
+        "tools/validate_pr168_rank4_advisory_ranking.py",
+        "tests/pr168_rank4/test_rank4_builder.py",
+        "tools/run_validation_gates.py",
+        "tools/validation_inventory.py",
+        "tools/validation_scope_registry.py",
+    ]
+    for path in rank4_allowed_paths:
+        if not is_pr_scoped_changed_path_allowed(PR168_RANK4_BRANCH, path):
+            failures.append(f"EXPECTED_ALLOWED:{PR168_RANK4_BRANCH}:{path}:{explain_pr_scope_decision(PR168_RANK4_BRANCH, path)}")
+        if not is_pr_scoped_changed_path_allowed(VALIDATION_FIXTURE_BRANCH, path):
+            failures.append(
+                f"EXPECTED_ALLOWED:{VALIDATION_FIXTURE_BRANCH}:{path}:"
+                f"{explain_pr_scope_decision(VALIDATION_FIXTURE_BRANCH, path)}"
+            )
+
     disallowed_paths = [
         "docs/master_plan/generated/SomeOtherReport.report.json",
         "tools/random_helper.py",
@@ -183,6 +209,8 @@ def main() -> int:
             failures.append(f"EXPECTED_REJECTED:{PR168_RP5A_BRANCH}:{path}")
         if is_pr_scoped_changed_path_allowed(PR168_RP5B_BRANCH, path):
             failures.append(f"EXPECTED_REJECTED:{PR168_RP5B_BRANCH}:{path}")
+        if is_pr_scoped_changed_path_allowed(PR168_RANK4_BRANCH, path):
+            failures.append(f"EXPECTED_REJECTED:{PR168_RANK4_BRANCH}:{path}")
     for path in [
         "docs/master_plan/generated/PR168_GFP_QKUBaselineCountReconcile.report.json",
         "tools/build_pr168_gfp_global_formula_discovery_real_computation.py",

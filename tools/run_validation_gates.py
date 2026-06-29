@@ -1001,6 +1001,14 @@ CHECK_ONLY_VALIDATOR_SCRIPTS = frozenset(
     }
 )
 DEFAULT_GENERATED_OUTPUT_ARGS = {
+    "build_pr168_rank4_advisory_ranking.py": (
+        "--out-dir",
+        "docs/master_plan/generated/pr168_rank4",
+    ),
+    "validate_pr168_rank4_advisory_ranking.py": (
+        "--artifact-dir",
+        "docs/master_plan/generated/pr168_rank4",
+    ),
     "validate_qtt_owner_global_override_authority.py": (
         "--out",
         "docs/master_plan/generated/QTTOwnerGlobalOverrideAuthority.report.json",
@@ -3366,6 +3374,26 @@ def build_validation_commands(
             _path("tools", "validate_pr168_rp5g_trade_plan_sim.py"),
             "--generated",
             "docs/master_plan/generated/pr168_rp5g",
+            "--timeout-ms",
+            "3600000",
+        ],
+        [
+            sys.executable,
+            _path("tools", "build_pr168_rank4_advisory_ranking.py"),
+            "--repo-root",
+            ".",
+            "--out-dir",
+            "docs/master_plan/generated/pr168_rank4",
+            "--timeout-ms",
+            "3600000",
+        ],
+        [
+            sys.executable,
+            _path("tools", "validate_pr168_rank4_advisory_ranking.py"),
+            "--repo-root",
+            ".",
+            "--artifact-dir",
+            "docs/master_plan/generated/pr168_rank4",
             "--timeout-ms",
             "3600000",
         ],

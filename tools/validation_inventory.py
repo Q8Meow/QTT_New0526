@@ -206,6 +206,8 @@ def _pr_token(stem: str) -> str | None:
         return "pr168_gfp2r"
     if "pr168_rp3" in stem:
         return "pr168_rp3"
+    if "pr168_rank4" in stem:
+        return "pr168_rank4"
     if "pr168_rank3" in stem:
         return "pr168_rank3"
     if "pr168_rp5a" in stem:
@@ -328,6 +330,13 @@ def _pr_globs(stem: str) -> tuple[str, ...]:
             [
                 "src/qtt/plugins/**",
                 "tests/pr162e/**",
+            ]
+        )
+    if token == "pr168_rank4":
+        globs.extend(
+            [
+                "src/qtt/ranking/__init__.py",
+                "src/qtt/ranking/pr168_rank4/**",
             ]
         )
     return tuple(globs)
@@ -458,6 +467,8 @@ def _output_globs(script_name: str, stem: str) -> tuple[str, ...]:
             globs.append("docs/master_plan/generated/rp3/**")
         if token == "pr168_rank3":
             globs.append("docs/master_plan/generated/rank3/**")
+        if token == "pr168_rank4":
+            globs.append("docs/master_plan/generated/pr168_rank4/**")
         if token == "pr168_rp5a":
             globs.append("docs/master_plan/generated/rp5a/**")
         if token == "pr168_rp5b":
@@ -721,6 +732,14 @@ def entries_matching_path(path: str) -> tuple[ValidatorInventoryEntry, ...]:
 
 
 def _specific_pr_token_for_path(path: str) -> str | None:
+    if (
+        path.startswith("docs/master_plan/generated/pr168_rank4/")
+        or path == "src/qtt/ranking/__init__.py"
+        or path.startswith("src/qtt/ranking/pr168_rank4/")
+        or path.startswith("tests/pr168_rank4/")
+        or "pr168_rank4" in PurePosixPath(path).name.lower()
+    ):
+        return "pr168_rank4"
     if (
         path.startswith("docs/master_plan/generated/pr168_rp5d_r1/")
         or path.startswith(
