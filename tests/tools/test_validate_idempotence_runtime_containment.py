@@ -326,6 +326,24 @@ def test_pr168_rp5e_shared_receipt_currentization_is_allowed():
     assert "FORBIDDEN_GENERATED_REPORT_PAYLOAD_CHANGE" not in _codes(failures)
 
 
+def test_pr168_rp5f_pr152_currentization_is_allowed():
+    failures = validator._validate_changed_files(
+        _inventory(),
+        (
+            "docs/master_plan/generated/"
+            "PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+            "docs/master_plan/generated/pr168_rp5f/run_receipt.report.json",
+            "tools/validate_pr168_rp5f_dynamic_targets.py",
+            "tests/pr168_rp5f/test_validation.py",
+        ),
+        workflow_text=WORKFLOW_TEXT,
+        current_branch="pr168-rp5f-dynamic-target-order-grid",
+        auto_discovered_changed_paths=True,
+    )
+
+    assert "FORBIDDEN_GENERATED_REPORT_PAYLOAD_CHANGE" not in _codes(failures)
+
+
 def test_pr166_qb_branch_scoped_auto_discovered_changes_are_allowed():
     failures = validator._validate_changed_files(
         _inventory(),

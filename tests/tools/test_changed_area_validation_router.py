@@ -147,6 +147,24 @@ def test_pr168_rp5d_r1_generated_output_routes_only_to_rp5d_r1_owner():
     )
 
 
+def test_pr168_rp5f_generated_output_routes_only_to_rp5f_owner():
+    result = _pull_request_result(
+        "docs/master_plan/generated/pr168_rp5f/targets.jsonl"
+    )
+
+    assert result.full_validation_required is False
+    assert result.fail_closed_reasons == ()
+    assert "build_pr168_rp5f_dynamic_targets" in result.required_validators
+    assert "validate_pr168_rp5f_dynamic_targets" in result.required_validators
+    assert "validate_pr168_rp_validation_scope_registry_integration" not in (
+        result.required_validators
+    )
+    assert "build_pr168_rp_formula_based_replay_paper_recompute" not in (
+        result.required_validators
+    )
+    assert "validate_pr168_rp5e_stack_gen" not in result.required_validators
+
+
 def test_generated_report_without_owner_fails_closed():
     result = _pull_request_result(
         "docs/master_plan/generated/UnownedGeneratedReport.report.json"

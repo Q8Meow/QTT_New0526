@@ -49,6 +49,18 @@ def test_rp5c_builder_accepts_github_actions_main_detached_head_context() -> Non
     builder._ensure_allowed_build_branch(_preflight(effective))
 
 
+def test_rp5c_builder_accepts_rp5f_pull_request_merge_context() -> None:
+    effective = builder._effective_branch_name(
+        "",
+        "pr168-rp5f-dynamic-target-order-grid",
+        "250/merge",
+        github_actions=True,
+    )
+
+    assert effective == "pr168-rp5f-dynamic-target-order-grid"
+    builder._ensure_allowed_build_branch(_preflight(effective))
+
+
 def test_rp5c_builder_rejects_arbitrary_branch_context() -> None:
     with pytest.raises(RuntimeError, match=BRANCH_NAME):
         builder._ensure_allowed_build_branch(_preflight("feature/not-rp5c"))

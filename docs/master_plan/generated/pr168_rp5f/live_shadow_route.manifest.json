@@ -1,0 +1,71 @@
+{
+  "accepted_source_fact_flag": false,
+  "atomicrows_sha_ref_flag": false,
+  "blocker_policy_ref": "RP5F_BLOCKER_POLICY::PRECISE_INVALIDATABLE_DYNAMIC_TARGETS_ONLY",
+  "candidate_only_flag": false,
+  "cash_account_read_flag": false,
+  "connector_refs_or_future_connector_status": "FUTURE_CONNECTOR_STATUS_ONLY_NO_WRITE",
+  "connector_write_flag": false,
+  "consumer_agent_refs": [
+    "ArtifactNameAgent",
+    "PathSafetyAgent",
+    "RP5FValidator"
+  ],
+  "consumer_agents": [
+    "ArtifactNameAgent",
+    "PathSafetyAgent",
+    "RP5FValidator"
+  ],
+  "created_at_utc": "2026-06-28T12:00:00Z",
+  "downstream_artifact_refs": [
+    "docs/master_plan/generated/pr168_rp5f/run_receipt.report.json"
+  ],
+  "downstream_refs": [
+    "docs/master_plan/generated/pr168_rp5f/run_receipt.report.json"
+  ],
+  "execution_authority_ref": "RP5F_EXEC_AUTH::DYNAMIC_TARGET_GRID_SEED_HANDOFF_ONLY_NO_ORDER_AUTHORITY",
+  "fixed_trade_instruction_flag": false,
+  "formula_deletion_flag": false,
+  "formula_mutation_flag": false,
+  "generated_surface_authority_class": "RP5F_GENERATED_DYNAMIC_TARGET_GRID_SEED_NOT_SOURCE_TRUTH",
+  "global_ban_flag": false,
+  "live_authority_flag": false,
+  "manifest_id": "LIVE_SHADOW_ROUTE_MANIFEST",
+  "metadata_is_proof_flag": false,
+  "non_expiring_trade_plan_flag": false,
+  "order_authority_flag": false,
+  "orphan_flag": false,
+  "owner_agent": "GovernanceAgent",
+  "paper_authority_flag": false,
+  "paper_submit_authority_flag": false,
+  "physical_filename": "docs/master_plan/generated/pr168_rp5f/live_shadow_route.jsonl",
+  "private_state_fetch_flag": false,
+  "producer_agent": "GovernanceAgent",
+  "profit_proof_flag": false,
+  "proprietary_claim_flag": false,
+  "provenance_tier": "RP5F_DYNAMIC_TARGET_GRID_SEED_NOT_PROOF",
+  "qku_deletion_flag": false,
+  "qku_mutation_flag": false,
+  "qopt_execution_flag": false,
+  "qtt_sha_authority_flag": false,
+  "quantum_advantage_claim_flag": false,
+  "quantum_backend_execution_flag": false,
+  "row_count": 20,
+  "row_id": "LIVE_SHADOW_ROUTE_MANIFEST",
+  "run_id": "PR168_RP5F_DETERMINISTIC_RUN_20260628T120000Z",
+  "schema_version": "PR168-RP5F-v1.0",
+  "schema_version_name": "LiveShadowRouteV1",
+  "shadow_authority_flag": false,
+  "shard_file_path": "docs/master_plan/generated/pr168_rp5f/live_shadow_route.jsonl",
+  "source_pr": "PR168-RP5F",
+  "stale_candidate_authority_flag": false,
+  "upstream_artifact_refs": [
+    "docs/master_plan/generated/pr168_rp5f/live_shadow_route.jsonl"
+  ],
+  "upstream_refs": [
+    "docs/master_plan/generated/pr168_rp5f/live_shadow_route.jsonl"
+  ],
+  "validation_refs": [
+    "tools/validate_pr168_rp5f_dynamic_targets.py"
+  ]
+}

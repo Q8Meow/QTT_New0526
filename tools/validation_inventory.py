@@ -216,6 +216,8 @@ def _pr_token(stem: str) -> str | None:
         return "pr168_rp5c"
     if "pr168_rp5d_r1" in stem:
         return "pr168_rp5d_r1"
+    if "pr168_rp5f" in stem:
+        return "pr168_rp5f"
     if "pr168_rp5d" in stem:
         return "pr168_rp5d"
     if "pr168_rp5e" in stem:
@@ -466,6 +468,8 @@ def _output_globs(script_name: str, stem: str) -> tuple[str, ...]:
             globs.append("docs/master_plan/generated/pr168_rp5d/**")
         if token == "pr168_rp5d_r1":
             globs.append("docs/master_plan/generated/pr168_rp5d_r1/**")
+        if token == "pr168_rp5f":
+            globs.append("docs/master_plan/generated/pr168_rp5f/**")
         if token == "pr168_rp5e":
             globs.append("docs/master_plan/generated/pr168_rp5e/**")
     return tuple(globs)
@@ -722,6 +726,15 @@ def _specific_pr_token_for_path(path: str) -> str | None:
         or "pr168_rp5d_r1" in PurePosixPath(path).name.lower()
     ):
         return "pr168_rp5d_r1"
+    if (
+        path.startswith("docs/master_plan/generated/pr168_rp5f/")
+        or path.startswith(
+            "src/qtt/stage1_prediction_markets/pr168_rp5f_dynamic_targets/"
+        )
+        or path.startswith("tests/pr168_rp5f/")
+        or "pr168_rp5f" in PurePosixPath(path).name.lower()
+    ):
+        return "pr168_rp5f"
     return None
 
 
