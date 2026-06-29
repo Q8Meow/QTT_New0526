@@ -451,6 +451,7 @@ def test_pr168_rp5f_allowed_paths_pass_on_real_branch(path: str) -> None:
         "src/qtt/ranking/pr168_rank4/validator.py",
         "tools/build_pr168_rank4_advisory_ranking.py",
         "tools/validate_pr168_rank4_advisory_ranking.py",
+        "tools/pr168_rp5c_config.py",
         "tests/pr168_rank4/test_rank4_builder.py",
         "tools/validation_scope_registry.py",
         "tools/validation_inventory.py",

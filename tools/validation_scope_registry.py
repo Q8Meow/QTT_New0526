@@ -565,6 +565,7 @@ _PR168_RANK4_ALLOWED_EXACT_PATHS = frozenset(
         "src/qtt/ranking/__init__.py",
         "tools/build_pr168_rank4_advisory_ranking.py",
         "tools/validate_pr168_rank4_advisory_ranking.py",
+        "tools/pr168_rp5c_config.py",
         "tools/run_validation_gates.py",
         "tools/validation_inventory.py",
         "tools/validation_scope_registry.py",
