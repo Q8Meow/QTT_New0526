@@ -226,6 +226,19 @@ def _default_temp_generated_report(filename: str) -> str:
     )
 
 
+def test_runner_uses_github_head_ref_for_detached_pr_merge_checkout(monkeypatch):
+    _clear_branch_context_env(monkeypatch)
+
+    class Completed:
+        returncode = 0
+        stdout = "\n"
+
+    monkeypatch.setenv("GITHUB_HEAD_REF", runner.PR168_RP5G_BRANCH)
+    monkeypatch.setattr(runner.subprocess, "run", lambda *args, **kwargs: Completed())
+
+    assert runner._current_git_branch(REPO_ROOT) == runner.PR168_RP5G_BRANCH
+
+
 def test_run_validation_gates_direct_script_imports_router_without_pythonpath():
     completed = subprocess.run(
         [
@@ -1115,6 +1128,27 @@ def _expected_commands(
         [
             python_executable,
             str(Path("tools") / "validate_pr168_rp5f_dynamic_targets.py"),
+        ],
+        [
+            python_executable,
+            str(Path("tools") / "build_pr168_rp5g_trade_plan_sim.py"),
+            "--offline",
+            "--fixture",
+            "sample",
+            "--max-candidates",
+            "10",
+            "--out",
+            "docs/master_plan/generated/pr168_rp5g",
+            "--timeout-ms",
+            "3600000",
+        ],
+        [
+            python_executable,
+            str(Path("tools") / "validate_pr168_rp5g_trade_plan_sim.py"),
+            "--generated",
+            "docs/master_plan/generated/pr168_rp5g",
+            "--timeout-ms",
+            "3600000",
         ],
         *[
             [
@@ -2989,11 +3023,12 @@ def test_runner_splits_pytest_shard_2_longest_group_deterministically():
         ("tests/pr168_rp5b",),
         ("tests/pr168_rp5c",),
         ("tests/pr168_vs1",),
-            ("tests/pr168_rp5d",),
-            ("tests/pr168_rp5e",),
-            ("tests/pr168_rp5d_r1",),
-            ("tests/pr168_rp5f",),
-        ]
+        ("tests/pr168_rp5d",),
+        ("tests/pr168_rp5e",),
+        ("tests/pr168_rp5d_r1",),
+        ("tests/pr168_rp5f",),
+        ("tests/pr168_rp5g",),
+    ]
     assert all(command.reason for command in commands)
     assert ("tests/stage1_prediction_markets",) not in [
         command.paths for command in commands

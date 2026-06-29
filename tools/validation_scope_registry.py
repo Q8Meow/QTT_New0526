@@ -25,6 +25,7 @@ PR168_RP5D_BRANCH = "pr168-rp5d-replay-paper-executability-tiers"
 PR168_RP5E_BRANCH = "pr168-rp5e-stack-gen"
 PR168_RP5D_R1_BRANCH = "pr168-rp5d-r1-exec-now-unlock"
 PR168_RP5F_BRANCH = "pr168-rp5f-dynamic-target-order-grid"
+PR168_RP5G_BRANCH = "pr168-rp5g-trade-plan-sim-engine"
 VALIDATION_FIXTURE_BRANCH = "pr-ci-fastfail-validation-context-preflight"
 
 _PR168_BRANCHES = frozenset(
@@ -48,6 +49,7 @@ _PR168_BRANCHES = frozenset(
         PR168_RP5E_BRANCH,
         PR168_RP5D_R1_BRANCH,
         PR168_RP5F_BRANCH,
+        PR168_RP5G_BRANCH,
         VALIDATION_FIXTURE_BRANCH,
     }
 )
@@ -528,6 +530,33 @@ _PR168_RP5F_ALLOWED_PATTERNS = (
     "tests/pr168_rp5f/**",
 )
 
+_PR168_RP5G_ALLOWED_EXACT_PATHS = frozenset(
+    {
+        "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+        "tools/build_pr168_rp5g_trade_plan_sim.py",
+        "tools/validate_pr168_rp5g_trade_plan_sim.py",
+        "tools/run_validation_gates.py",
+        "tools/validation_inventory.py",
+        "tools/validation_scope_registry.py",
+        "tools/validate_validation_scope_registry.py",
+        "tests/tools/test_validation_scope_registry.py",
+        "tests/tools/test_validation_inventory.py",
+        "tests/tools/test_changed_area_validation_router.py",
+        "tests/fail_closed/test_run_validation_gates.py",
+    }
+)
+
+_PR168_RP5G_ALLOWED_PATTERNS = (
+    "docs/master_plan/generated/pr168_rp5g/*.jsonl",
+    "docs/master_plan/generated/pr168_rp5g/*.manifest.json",
+    "docs/master_plan/generated/pr168_rp5g/*.report.json",
+    "docs/master_plan/generated/pr168_rp5g/*.json",
+    "docs/master_plan/generated/pr168_rp5g/*.md",
+    "src/qtt/stage1_prediction_markets/pr168_rp5g_trade_plan_sim/**",
+    "tools/*pr168_rp5g*.py",
+    "tests/pr168_rp5g/**",
+)
+
 _FORBIDDEN_EXACT_PATHS = frozenset(
     {
         "docs/master_plan/QTT_MasterPlan_Current.md",
@@ -974,6 +1003,29 @@ def _pr168_rp5f_scope_decision(branch_name: str, normalized: str) -> dict[str, o
     return None
 
 
+def _pr168_rp5g_scope_decision(branch_name: str, normalized: str) -> dict[str, object] | None:
+    if normalized in _PR168_RP5G_ALLOWED_EXACT_PATHS:
+        return {
+            "allowed": True,
+            "branch": branch_name,
+            "normalized_path": normalized,
+            "pr_id": "PR168-RP5G",
+            "matched_rule": f"exact:{normalized}",
+            "reason": "registered_exact_path",
+        }
+    for pattern in _PR168_RP5G_ALLOWED_PATTERNS:
+        if fnmatchcase(normalized, pattern):
+            return {
+                "allowed": True,
+                "branch": branch_name,
+                "normalized_path": normalized,
+                "pr_id": "PR168-RP5G",
+                "matched_rule": f"pattern:{pattern}",
+                "reason": "registered_pattern",
+            }
+    return None
+
+
 def explain_pr_scope_decision(branch: str, path: str) -> dict[str, object]:
     normalized = normalize_changed_path(path)
     branch_name = str(branch).strip()
@@ -1217,6 +1269,19 @@ def explain_pr_scope_decision(branch: str, path: str) -> dict[str, object]:
             "reason": "path_not_registered_for_pr_scope",
         }
 
+    if branch_name == PR168_RP5G_BRANCH:
+        rp5g_decision = _pr168_rp5g_scope_decision(branch_name, normalized)
+        if rp5g_decision:
+            return rp5g_decision
+        return {
+            "allowed": False,
+            "branch": branch_name,
+            "normalized_path": normalized,
+            "pr_id": "PR168-RP5G",
+            "matched_rule": "no_pr168_rp5g_scope_rule",
+            "reason": "path_not_registered_for_pr_scope",
+        }
+
     if branch_name == VALIDATION_FIXTURE_BRANCH:
         rp_decision = _pr168_rp_scope_decision(branch_name, normalized)
         if rp_decision:
@@ -1269,6 +1334,9 @@ def explain_pr_scope_decision(branch: str, path: str) -> dict[str, object]:
         rp5f_decision = _pr168_rp5f_scope_decision(branch_name, normalized)
         if rp5f_decision:
             return rp5f_decision
+        rp5g_decision = _pr168_rp5g_scope_decision(branch_name, normalized)
+        if rp5g_decision:
+            return rp5g_decision
 
     if normalized in _PR168_ALLOWED_EXACT_PATHS:
         return {
