@@ -5529,8 +5529,8 @@ def _current_git_branch(repo_root: pathlib.Path) -> str:
         check=False,
     )
     if completed.returncode == 0:
-        return completed.stdout.strip()
-    return ""
+        return completed.stdout.strip() or os.environ.get("GITHUB_HEAD_REF", "").strip()
+    return os.environ.get("GITHUB_HEAD_REF", "").strip()
 
 
 def _rp5d_r1_local_branch_scope_active(

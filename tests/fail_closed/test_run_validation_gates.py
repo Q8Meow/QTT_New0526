@@ -226,6 +226,19 @@ def _default_temp_generated_report(filename: str) -> str:
     )
 
 
+def test_runner_uses_github_head_ref_for_detached_pr_merge_checkout(monkeypatch):
+    _clear_branch_context_env(monkeypatch)
+
+    class Completed:
+        returncode = 0
+        stdout = "\n"
+
+    monkeypatch.setenv("GITHUB_HEAD_REF", runner.PR168_RP5G_BRANCH)
+    monkeypatch.setattr(runner.subprocess, "run", lambda *args, **kwargs: Completed())
+
+    assert runner._current_git_branch(REPO_ROOT) == runner.PR168_RP5G_BRANCH
+
+
 def test_run_validation_gates_direct_script_imports_router_without_pythonpath():
     completed = subprocess.run(
         [

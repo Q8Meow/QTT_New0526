@@ -1043,7 +1043,7 @@ All paper/live/shadow/order/connector/private-state/cash/source-fact/QOPT/quantu
 - PASS: `.\\.venv\\Scripts\\python.exe -B tools\\run_validation_gates.py --phase deterministic-validators --timing-report .tmp\\qtt-validation-timing\\deterministic-rp5g.json --router-report .tmp\\qtt-validation-routing\\deterministic-rp5g.json`
 
 ## CI Debug Actions If Any
-CI repair commit updated validation-router temp-output handling for RP5G `--out` and `--generated` paths, made RP5G generator/validator deterministic against routed temp directories, currentized the PR152 global consistency audit, and reran the failed affected-scope checks.
+CI repair commits updated validation-router temp-output handling for RP5G `--out` and `--generated` paths, made RP5G generator/validator deterministic against routed temp directories, made deterministic branch-scope routing recognize GitHub Actions detached PR head refs, currentized the PR152 global consistency audit, and reran the failed affected-scope checks.
 
 ## Post-Merge Main Workflow Watch Result
 Pending until the PR is merged. `run_receipt.report.json` records that the post-merge main workflow watch is required.
