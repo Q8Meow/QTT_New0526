@@ -596,6 +596,7 @@ _PR168_QOPT1_ALLOWED_EXACT_PATHS = frozenset(
         "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
         "src/qtt/optimization/__init__.py",
         "tools/build_pr168_qopt1_batch_optimization.py",
+        "tools/pr168_rp5c_config.py",
         "tools/validate_pr168_qopt1_batch_optimization.py",
         "tools/run_validation_gates.py",
         "tools/validation_inventory.py",
