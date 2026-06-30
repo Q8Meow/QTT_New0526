@@ -49,6 +49,7 @@ PR168_RP5E_BRANCH = registry.PR168_RP5E_BRANCH
 PR168_RP5D_R1_BRANCH = registry.PR168_RP5D_R1_BRANCH
 PR168_RP5F_BRANCH = registry.PR168_RP5F_BRANCH
 PR168_RANK4_BRANCH = registry.PR168_RANK4_BRANCH
+PR168_QOPT1_BRANCH = registry.PR168_QOPT1_BRANCH
 FIXTURE_BRANCH = registry.VALIDATION_FIXTURE_BRANCH
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
@@ -460,6 +461,31 @@ def test_pr168_rp5f_allowed_paths_pass_on_real_branch(path: str) -> None:
 )
 def test_pr168_rank4_allowed_paths_pass_on_real_branch(path: str) -> None:
     assert registry.is_pr_scoped_changed_path_allowed(PR168_RANK4_BRANCH, path)
+    assert registry.is_pr_scoped_changed_path_allowed(FIXTURE_BRANCH, path)
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        "docs/master_plan/generated/pr168_qopt1/art_reg.json",
+        "docs/master_plan/generated/pr168_qopt1/batch_select.jsonl",
+        "docs/master_plan/generated/pr168_qopt1/batch_select.manifest.json",
+        "docs/master_plan/generated/pr168_qopt1/run_receipt.report.json",
+        "docs/master_plan/generated/pr168_qopt1/pr_body.md",
+        "src/qtt/optimization/__init__.py",
+        "src/qtt/optimization/pr168_qopt1/builder.py",
+        "src/qtt/optimization/pr168_qopt1/validator.py",
+        "tools/build_pr168_qopt1_batch_optimization.py",
+        "tools/pr168_rp5c_config.py",
+        "tools/validate_pr168_qopt1_batch_optimization.py",
+        "tests/pr168_qopt1/test_qopt1_builder.py",
+        "tools/validation_scope_registry.py",
+        "tools/validation_inventory.py",
+        "tools/run_validation_gates.py",
+    ],
+)
+def test_pr168_qopt1_allowed_paths_pass_on_real_branch(path: str) -> None:
+    assert registry.is_pr_scoped_changed_path_allowed(PR168_QOPT1_BRANCH, path)
     assert registry.is_pr_scoped_changed_path_allowed(FIXTURE_BRANCH, path)
 
 
