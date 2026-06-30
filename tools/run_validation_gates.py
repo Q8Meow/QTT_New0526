@@ -78,6 +78,13 @@ PR168_RP5G_DETERMINISTIC_SCRIPT_NAMES = frozenset(
         "validate_pr168_rp5g_trade_plan_sim.py",
     }
 )
+PR168_QOPT1_BRANCH = "pr168-qopt1-quantum-classical-batch-optimization"
+PR168_QOPT1_DETERMINISTIC_SCRIPT_NAMES = frozenset(
+    {
+        "build_pr168_qopt1_batch_optimization.py",
+        "validate_pr168_qopt1_batch_optimization.py",
+    }
+)
 ORDERED_PHASES = (
     FAST_PREFLIGHT_PHASE,
     DETERMINISTIC_VALIDATORS_PHASE,
@@ -544,6 +551,14 @@ PYTEST_SHARD_COMMANDS: dict[str, tuple[PytestShardCommand, ...]] = {
         PytestShardCommand(
             paths=("tests/pr168_rank4",),
             reason="PR168-RANK4 execution-adjusted advisory ranking tests",
+            runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
+            historical_runtime_seconds=5.0,
+        ),
+        PytestShardCommand(
+            paths=("tests/pr168_qopt1",),
+            reason=(
+                "PR168-QOPT1 quantum/classical advisory batch optimization tests"
+            ),
             runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
             historical_runtime_seconds=5.0,
         ),
@@ -3393,6 +3408,26 @@ def build_validation_commands(
             ".",
             "--artifact-dir",
             "docs/master_plan/generated/pr168_rank4",
+            "--timeout-ms",
+            "3600000",
+        ],
+        [
+            sys.executable,
+            _path("tools", "build_pr168_qopt1_batch_optimization.py"),
+            "--repo-root",
+            ".",
+            "--out-dir",
+            "docs/master_plan/generated/pr168_qopt1",
+            "--timeout-ms",
+            "3600000",
+        ],
+        [
+            sys.executable,
+            _path("tools", "validate_pr168_qopt1_batch_optimization.py"),
+            "--repo-root",
+            ".",
+            "--artifact-dir",
+            "docs/master_plan/generated/pr168_qopt1",
             "--timeout-ms",
             "3600000",
         ],

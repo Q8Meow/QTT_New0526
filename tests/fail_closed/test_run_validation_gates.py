@@ -1170,6 +1170,26 @@ def _expected_commands(
             "--timeout-ms",
             "3600000",
         ],
+        [
+            python_executable,
+            str(Path("tools") / "build_pr168_qopt1_batch_optimization.py"),
+            "--repo-root",
+            ".",
+            "--out-dir",
+            "docs/master_plan/generated/pr168_qopt1",
+            "--timeout-ms",
+            "3600000",
+        ],
+        [
+            python_executable,
+            str(Path("tools") / "validate_pr168_qopt1_batch_optimization.py"),
+            "--repo-root",
+            ".",
+            "--artifact-dir",
+            "docs/master_plan/generated/pr168_qopt1",
+            "--timeout-ms",
+            "3600000",
+        ],
         *[
             [
                 python_executable,
@@ -3049,6 +3069,7 @@ def test_runner_splits_pytest_shard_2_longest_group_deterministically():
         ("tests/pr168_rp5f",),
         ("tests/pr168_rp5g",),
         ("tests/pr168_rank4",),
+        ("tests/pr168_qopt1",),
     ]
     assert all(command.reason for command in commands)
     assert ("tests/stage1_prediction_markets",) not in [
