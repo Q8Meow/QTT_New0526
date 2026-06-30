@@ -541,6 +541,12 @@ PYTEST_SHARD_COMMANDS: dict[str, tuple[PytestShardCommand, ...]] = {
             runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
             historical_runtime_seconds=5.0,
         ),
+        PytestShardCommand(
+            paths=("tests/pr168_rank4",),
+            reason="PR168-RANK4 execution-adjusted advisory ranking tests",
+            runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
+            historical_runtime_seconds=5.0,
+        ),
     ),
     "pytest-shard-3": (
         PytestShardCommand(
@@ -1637,7 +1643,8 @@ def _route_command_generated_outputs_to_temp(
     routed = [str(part) for part in command]
     for index, token in enumerate(routed[:-1]):
         if (
-            token in {"--out", "--report-out", "--generated"}
+            token
+            in {"--out", "--report-out", "--generated", "--out-dir", "--artifact-dir"}
             or token.endswith("-out")
         ) and _is_tracked_generated_output_path(routed[index + 1]):
             routed[index + 1] = str(
@@ -3366,6 +3373,26 @@ def build_validation_commands(
             _path("tools", "validate_pr168_rp5g_trade_plan_sim.py"),
             "--generated",
             "docs/master_plan/generated/pr168_rp5g",
+            "--timeout-ms",
+            "3600000",
+        ],
+        [
+            sys.executable,
+            _path("tools", "build_pr168_rank4_advisory_ranking.py"),
+            "--repo-root",
+            ".",
+            "--out-dir",
+            "docs/master_plan/generated/pr168_rank4",
+            "--timeout-ms",
+            "3600000",
+        ],
+        [
+            sys.executable,
+            _path("tools", "validate_pr168_rank4_advisory_ranking.py"),
+            "--repo-root",
+            ".",
+            "--artifact-dir",
+            "docs/master_plan/generated/pr168_rank4",
             "--timeout-ms",
             "3600000",
         ],
