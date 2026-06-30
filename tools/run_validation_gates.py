@@ -85,6 +85,13 @@ PR168_QOPT1_DETERMINISTIC_SCRIPT_NAMES = frozenset(
         "validate_pr168_qopt1_batch_optimization.py",
     }
 )
+PR168_VS2_BRANCH = "pr168-vs2-paper-intent-candidate-generator"
+PR168_VS2_DETERMINISTIC_SCRIPT_NAMES = frozenset(
+    {
+        "build_pr168_vs2_paper_intent_candidates.py",
+        "validate_pr168_vs2_paper_intent_candidates.py",
+    }
+)
 ORDERED_PHASES = (
     FAST_PREFLIGHT_PHASE,
     DETERMINISTIC_VALIDATORS_PHASE,
@@ -559,6 +566,12 @@ PYTEST_SHARD_COMMANDS: dict[str, tuple[PytestShardCommand, ...]] = {
             reason=(
                 "PR168-QOPT1 quantum/classical advisory batch optimization tests"
             ),
+            runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
+            historical_runtime_seconds=5.0,
+        ),
+        PytestShardCommand(
+            paths=("tests/pr168_vs2",),
+            reason="PR168-VS2 paper-intent candidate packet tests",
             runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
             historical_runtime_seconds=5.0,
         ),
@@ -3428,6 +3441,26 @@ def build_validation_commands(
             ".",
             "--artifact-dir",
             "docs/master_plan/generated/pr168_qopt1",
+            "--timeout-ms",
+            "3600000",
+        ],
+        [
+            sys.executable,
+            _path("tools", "build_pr168_vs2_paper_intent_candidates.py"),
+            "--repo-root",
+            ".",
+            "--out-dir",
+            "docs/master_plan/generated/pr168_vs2",
+            "--timeout-ms",
+            "3600000",
+        ],
+        [
+            sys.executable,
+            _path("tools", "validate_pr168_vs2_paper_intent_candidates.py"),
+            "--repo-root",
+            ".",
+            "--artifact-dir",
+            "docs/master_plan/generated/pr168_vs2",
             "--timeout-ms",
             "3600000",
         ],
