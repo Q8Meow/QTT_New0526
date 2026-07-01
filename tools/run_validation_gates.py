@@ -92,6 +92,13 @@ PR168_VS2_DETERMINISTIC_SCRIPT_NAMES = frozenset(
         "validate_pr168_vs2_paper_intent_candidates.py",
     }
 )
+PR168_MEM1_BRANCH = "pr168-mem1-condition-scoped-outcome-memory"
+PR168_MEM1_DETERMINISTIC_SCRIPT_NAMES = frozenset(
+    {
+        "build_pr168_mem1_condition_scoped_memory.py",
+        "validate_pr168_mem1_condition_scoped_memory.py",
+    }
+)
 ORDERED_PHASES = (
     FAST_PREFLIGHT_PHASE,
     DETERMINISTIC_VALIDATORS_PHASE,
@@ -572,6 +579,12 @@ PYTEST_SHARD_COMMANDS: dict[str, tuple[PytestShardCommand, ...]] = {
         PytestShardCommand(
             paths=("tests/pr168_vs2",),
             reason="PR168-VS2 paper-intent candidate packet tests",
+            runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
+            historical_runtime_seconds=5.0,
+        ),
+        PytestShardCommand(
+            paths=("tests/pr168_mem1",),
+            reason="PR168-MEM1 condition-scoped outcome memory tests",
             runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
             historical_runtime_seconds=5.0,
         ),
@@ -3461,6 +3474,26 @@ def build_validation_commands(
             ".",
             "--artifact-dir",
             "docs/master_plan/generated/pr168_vs2",
+            "--timeout-ms",
+            "3600000",
+        ],
+        [
+            sys.executable,
+            _path("tools", "build_pr168_mem1_condition_scoped_memory.py"),
+            "--repo-root",
+            ".",
+            "--out-dir",
+            "docs/master_plan/generated/pr168_mem1",
+            "--timeout-ms",
+            "3600000",
+        ],
+        [
+            sys.executable,
+            _path("tools", "validate_pr168_mem1_condition_scoped_memory.py"),
+            "--repo-root",
+            ".",
+            "--artifact-dir",
+            "docs/master_plan/generated/pr168_mem1",
             "--timeout-ms",
             "3600000",
         ],

@@ -1210,6 +1210,26 @@ def _expected_commands(
             "--timeout-ms",
             "3600000",
         ],
+        [
+            python_executable,
+            str(Path("tools") / "build_pr168_mem1_condition_scoped_memory.py"),
+            "--repo-root",
+            ".",
+            "--out-dir",
+            str(validation_dir / "master_plan_generated" / "pr168_mem1"),
+            "--timeout-ms",
+            "3600000",
+        ],
+        [
+            python_executable,
+            str(Path("tools") / "validate_pr168_mem1_condition_scoped_memory.py"),
+            "--repo-root",
+            ".",
+            "--artifact-dir",
+            str(validation_dir / "master_plan_generated" / "pr168_mem1"),
+            "--timeout-ms",
+            "3600000",
+        ],
         *[
             [
                 python_executable,
@@ -3091,6 +3111,7 @@ def test_runner_splits_pytest_shard_2_longest_group_deterministically():
         ("tests/pr168_rank4",),
         ("tests/pr168_qopt1",),
         ("tests/pr168_vs2",),
+        ("tests/pr168_mem1",),
     ]
     assert all(command.reason for command in commands)
     assert ("tests/stage1_prediction_markets",) not in [
