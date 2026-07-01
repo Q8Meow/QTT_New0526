@@ -50,6 +50,7 @@ PR168_RP5D_R1_BRANCH = registry.PR168_RP5D_R1_BRANCH
 PR168_RP5F_BRANCH = registry.PR168_RP5F_BRANCH
 PR168_RANK4_BRANCH = registry.PR168_RANK4_BRANCH
 PR168_QOPT1_BRANCH = registry.PR168_QOPT1_BRANCH
+PR168_VS2_BRANCH = registry.PR168_VS2_BRANCH
 FIXTURE_BRANCH = registry.VALIDATION_FIXTURE_BRANCH
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
@@ -489,6 +490,30 @@ def test_pr168_qopt1_allowed_paths_pass_on_real_branch(path: str) -> None:
     assert registry.is_pr_scoped_changed_path_allowed(FIXTURE_BRANCH, path)
 
 
+@pytest.mark.parametrize(
+    "path",
+    [
+        "docs/master_plan/generated/pr168_vs2/art_reg.json",
+        "docs/master_plan/generated/pr168_vs2/vs2_packet_registry.jsonl",
+        "docs/master_plan/generated/pr168_vs2/paper_loop_contract.jsonl",
+        "docs/master_plan/generated/pr168_vs2/pr_body.md",
+        "src/qtt/paper/__init__.py",
+        "src/qtt/paper/pr168_vs2/builder.py",
+        "src/qtt/paper/pr168_vs2/validator.py",
+        "tools/build_pr168_vs2_paper_intent_candidates.py",
+        "tools/pr168_rp5c_config.py",
+        "tools/validate_pr168_vs2_paper_intent_candidates.py",
+        "tests/pr168_vs2/test_vs2_builder.py",
+        "tools/validation_scope_registry.py",
+        "tools/validation_inventory.py",
+        "tools/run_validation_gates.py",
+    ],
+)
+def test_pr168_vs2_allowed_paths_pass_on_real_branch(path: str) -> None:
+    assert registry.is_pr_scoped_changed_path_allowed(PR168_VS2_BRANCH, path)
+    assert registry.is_pr_scoped_changed_path_allowed(FIXTURE_BRANCH, path)
+
+
 def test_pr168_allowed_paths_pass_on_validation_fixture_branch_only_when_registered() -> None:
     assert registry.is_validation_context_branch(FIXTURE_BRANCH)
     assert registry.is_pr_scoped_changed_path_allowed(
@@ -536,6 +561,7 @@ def test_pr168_disallowed_and_forbidden_paths_fail(path: str) -> None:
     assert not registry.is_pr_scoped_changed_path_allowed(PR168_RP5D_BRANCH, path)
     assert not registry.is_pr_scoped_changed_path_allowed(PR168_RP5E_BRANCH, path)
     assert not registry.is_pr_scoped_changed_path_allowed(PR168_RANK4_BRANCH, path)
+    assert not registry.is_pr_scoped_changed_path_allowed(PR168_VS2_BRANCH, path)
 
 
 @pytest.mark.parametrize(
