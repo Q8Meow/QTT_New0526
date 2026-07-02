@@ -1,4 +1,4 @@
-﻿from src.qtt.dashboard.owner_action_registry import ACTION_DEFINITIONS
+from src.qtt.dashboard.owner_action_registry import ACTION_DEFINITIONS
 from tests.pr169_dash1.conftest import jsonl, registry
 
 

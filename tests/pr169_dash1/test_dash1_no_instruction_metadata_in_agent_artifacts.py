@@ -1,4 +1,4 @@
-﻿from src.qtt.dashboard.owner_surface_models import FORBIDDEN_AGENT_FIELDS, REQUIRED_JSONL_OUTPUTS
+from src.qtt.dashboard.owner_surface_models import FORBIDDEN_AGENT_FIELDS, REQUIRED_JSONL_OUTPUTS
 from tests.pr169_dash1.conftest import jsonl
 
 

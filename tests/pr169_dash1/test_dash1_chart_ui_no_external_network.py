@@ -1,4 +1,4 @@
-﻿from tests.pr169_dash1.conftest import BASE
+from tests.pr169_dash1.conftest import BASE
 
 
 def test_static_chart_ui_uses_local_files_only() -> None:

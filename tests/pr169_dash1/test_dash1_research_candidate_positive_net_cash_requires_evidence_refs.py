@@ -1,4 +1,4 @@
-﻿from tests.pr169_dash1.conftest import jsonl
+from tests.pr169_dash1.conftest import jsonl
 
 
 def test_positive_net_cash_pipeline_state_requires_all_evidence_refs() -> None:

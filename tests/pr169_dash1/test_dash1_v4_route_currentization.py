@@ -1,4 +1,4 @@
-﻿from src.qtt.dashboard.owner_surface_models import V4_ROUTE_LABELS
+from src.qtt.dashboard.owner_surface_models import V4_ROUTE_LABELS
 from tests.pr169_dash1.conftest import registry
 
 

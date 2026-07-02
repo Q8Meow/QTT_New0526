@@ -1,4 +1,4 @@
-﻿from tests.pr169_dash1.conftest import json_doc, registry
+from tests.pr169_dash1.conftest import json_doc, registry
 
 
 def test_no_qtt_sha_or_atomicrows_hash_authority_created() -> None:

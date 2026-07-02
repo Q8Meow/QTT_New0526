@@ -1,4 +1,4 @@
-﻿from pathlib import Path
+from pathlib import Path
 
 from src.qtt.dashboard.owner_surface_models import REQUIRED_JSONL_OUTPUTS
 from tests.pr169_dash1.conftest import BASE, jsonl, registry_ids

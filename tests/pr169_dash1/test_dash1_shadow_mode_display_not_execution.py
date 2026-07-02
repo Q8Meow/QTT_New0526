@@ -1,4 +1,4 @@
-﻿from tests.pr169_dash1.conftest import jsonl
+from tests.pr169_dash1.conftest import jsonl
 
 
 def test_shadow_mode_rows_have_comparison_slots_not_execution_authority() -> None:

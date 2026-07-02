@@ -1,4 +1,4 @@
-﻿from src.qtt.dashboard.owner_dashboard_projection_builder import RESEARCH_SOURCE_FAMILIES
+from src.qtt.dashboard.owner_dashboard_projection_builder import RESEARCH_SOURCE_FAMILIES
 from tests.pr169_dash1.conftest import jsonl
 
 

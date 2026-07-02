@@ -1,4 +1,4 @@
-﻿from pathlib import Path
+from pathlib import Path
 
 
 def test_resolver_does_not_glob_raw_generated_jsonl_files() -> None:

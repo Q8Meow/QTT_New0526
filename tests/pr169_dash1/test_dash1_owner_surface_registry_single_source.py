@@ -1,4 +1,4 @@
-﻿from tests.pr169_dash1.conftest import json_doc, registry
+from tests.pr169_dash1.conftest import json_doc, registry
 
 
 def test_single_canonical_registry_is_declared_and_only_registry_source() -> None:
