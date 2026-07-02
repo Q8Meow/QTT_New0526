@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>QTT Owner Dashboard Review Surface</title>
+  <link rel="stylesheet" href="owner_dashboard_review_surface.css">
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <h1>QTT Owner Dashboard</h1>
+      <p>Static review surface - contracts and provider snapshots only</p>
+    </div>
+    <div class="status-pill">No order authority</div>
+  </header>
+  <main class="shell">
+    <section class="toolbar" aria-label="Dashboard filters">
+      <div class="segment" id="rangeButtons"></div>
+      <select id="modeFilter" aria-label="Mode filter"></select>
+      <select id="agentFilter" aria-label="Agent filter"></select>
+      <select id="marketFilter" aria-label="Market filter"></select>
+      <select id="venueFilter" aria-label="Venue filter"></select>
+    </section>
+    <section class="grid">
+      <article class="panel span-2">
+        <div class="panel-head"><h2>Portfolio PnL</h2><button id="drillPortfolio">Drill Down</button></div>
+        <svg id="equityChart" viewBox="0 0 900 300" role="img" aria-label="Portfolio equity curve"></svg>
+      </article>
+      <article class="panel">
+        <div class="panel-head"><h2>Costs</h2></div>
+        <svg id="costChart" viewBox="0 0 420 260" role="img" aria-label="Cost breakdown"></svg>
+      </article>
+      <article class="panel">
+        <div class="panel-head"><h2>Agents</h2></div>
+        <div id="agentTable" class="table-shell"></div>
+      </article>
+      <article class="panel span-2">
+        <div class="panel-head"><h2>Research Candidate Funnel</h2><button id="drillResearch">Drill Down</button></div>
+        <svg id="funnelChart" viewBox="0 0 900 260" role="img" aria-label="Research candidate funnel"></svg>
+      </article>
+      <article class="panel span-2">
+        <div class="panel-head"><h2>Drilldown</h2></div>
+        <pre id="drilldown"></pre>
+      </article>
+    </section>
+  </main>
+  <div id="tooltip" class="tooltip" hidden></div>
+  <script src="owner_dashboard_review_surface.js"></script>
+</body>
+</html>

@@ -1,0 +1,106 @@
+{
+  "artifact_id": "PR169_DASH1_READ_RECEIPT",
+  "created_by_pr": "PR169-DASH1",
+  "files_read": [
+    {
+      "implementation_action": "Cover or route dashboard features through registry rows.",
+      "path": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "summary": "20D dashboard inventory reviewed."
+    },
+    {
+      "implementation_action": "Keep DASH1 control-plane only.",
+      "path": "docs/roadmap/README.md",
+      "summary": "Roadmap guidance is not runtime truth."
+    },
+    {
+      "implementation_action": "Preserve authority boundaries.",
+      "path": "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.md",
+      "summary": "Controller is not runtime authority."
+    },
+    {
+      "implementation_action": "Generate receipt templates.",
+      "path": "docs/master_plan/governance/owner_overrides/README.md",
+      "summary": "Owner decisions require receipts."
+    },
+    {
+      "implementation_action": "Route edge/TCA/fill refs.",
+      "path": "docs/master_plan/generated/pr168_rp5g/pr_body.md",
+      "summary": "RP5G evidence refs."
+    },
+    {
+      "implementation_action": "Route ranking/champion refs.",
+      "path": "docs/master_plan/generated/pr168_rank4/pr_body.md",
+      "summary": "RANK4 advisory rank refs."
+    },
+    {
+      "implementation_action": "Route optimization and qstruct refs.",
+      "path": "docs/master_plan/generated/pr168_qopt1/pr_body.md",
+      "summary": "QOPT1 advisory/qstruct refs."
+    },
+    {
+      "implementation_action": "Route candidate and paper-intent refs.",
+      "path": "docs/master_plan/generated/pr168_vs2/pr_body.md",
+      "summary": "VS2 paper-intent/QKU route refs."
+    },
+    {
+      "implementation_action": "Route memory views without proof claims.",
+      "path": "docs/master_plan/generated/pr168_mem1/pr_body.md",
+      "summary": "MEM1 condition-scoped memory refs."
+    },
+    {
+      "implementation_action": "Use PR165-D2 role refs.",
+      "path": "PR165_D2_AgentRosterDiscoveryAudit.report.json",
+      "summary": "Agent roster audit."
+    },
+    {
+      "implementation_action": "Use PR165-D2 role refs.",
+      "path": "PR165_D2_AgentDutySourceCrosswalk.report.json",
+      "summary": "Agent duty crosswalk."
+    },
+    {
+      "implementation_action": "Route owner actions to roles.",
+      "path": "PR165_D2_CommandActionMatrix.report.json",
+      "summary": "Command/action matrix."
+    },
+    {
+      "implementation_action": "Register DASH1 builder and validator.",
+      "path": "tools/run_validation_gates.py",
+      "summary": "Validation gate runner."
+    },
+    {
+      "implementation_action": "Classify DASH1 validations.",
+      "path": "tools/validation_inventory.py",
+      "summary": "Validation inventory."
+    },
+    {
+      "implementation_action": "Add DASH1 branch scope.",
+      "path": "tools/validation_scope_registry.py",
+      "summary": "Changed-path scope registry."
+    }
+  ],
+  "generated_from": "pre_implementation_repository_audit",
+  "manual_edit_allowed": false,
+  "missing_required_inputs": [
+    {
+      "discovery_result": "not found",
+      "implementation_action": "Use owner-supplied v4 route map.",
+      "requested_path_or_title": "QTT_NewGPT_Handoff_Post_MEM1_Roadmap_v4.md"
+    },
+    {
+      "discovery_result": "not found",
+      "implementation_action": "Do not invent missing input.",
+      "requested_path_or_title": "Pasted text.txt"
+    },
+    {
+      "discovery_result": "not found",
+      "implementation_action": "Do not invent missing input.",
+      "requested_path_or_title": "Pasted text (2).txt"
+    },
+    {
+      "discovery_result": "not found",
+      "implementation_action": "Generate coverage from master plan 20D and prompt seed list.",
+      "requested_path_or_title": "PR169_DASH1_MasterPlan_Dashboard_Feature_Coverage_Audit.md"
+    }
+  ],
+  "read_receipt_status": "COMPLETE_BEFORE_IMPLEMENTATION"
+}

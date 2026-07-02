@@ -51,6 +51,7 @@ PR168_RP5F_BRANCH = registry.PR168_RP5F_BRANCH
 PR168_RANK4_BRANCH = registry.PR168_RANK4_BRANCH
 PR168_QOPT1_BRANCH = registry.PR168_QOPT1_BRANCH
 PR168_VS2_BRANCH = registry.PR168_VS2_BRANCH
+PR169_DASH1_BRANCH = registry.PR169_DASH1_BRANCH
 FIXTURE_BRANCH = registry.VALIDATION_FIXTURE_BRANCH
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
@@ -75,6 +76,39 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 )
 def test_pr168_allowed_paths_pass_on_real_branch(path: str) -> None:
     assert registry.is_pr_scoped_changed_path_allowed(PR168_BRANCH, path)
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        "docs/master_plan/generated/pr169_dash1/owner_dashboard_surface_registry.jsonl",
+        "docs/master_plan/generated/pr169_dash1/ui/owner_dashboard_review_surface.html",
+        "src/qtt/dashboard/owner_surface_resolver.py",
+        "src/qtt/dashboard/owner_dashboard_projection_builder.py",
+        "tools/build_pr169_dash1_owner_dashboard.py",
+        "tools/validate_pr169_dash1_owner_dashboard.py",
+        "tests/pr169_dash1/test_dash1_owner_surface_registry_single_source.py",
+        "tools/run_validation_gates.py",
+        "tools/validation_inventory.py",
+        "tools/validation_scope_registry.py",
+    ],
+)
+def test_pr169_dash1_allowed_paths_pass_on_real_branch(path: str) -> None:
+    assert registry.is_pr_scoped_changed_path_allowed(PR169_DASH1_BRANCH, path)
+    assert registry.is_pr_scoped_changed_path_allowed(FIXTURE_BRANCH, path)
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        "src/qtt/live_connectors/order_client.py",
+        "private_state/account_snapshot.json",
+        "cash/account.json",
+        "docs/master_plan/QTT_MasterPlan_Current.md",
+    ],
+)
+def test_pr169_dash1_forbidden_paths_fail(path: str) -> None:
+    assert not registry.is_pr_scoped_changed_path_allowed(PR169_DASH1_BRANCH, path)
 
 
 @pytest.mark.parametrize(
