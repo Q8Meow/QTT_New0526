@@ -192,6 +192,8 @@ def validator_id_for_command(command: Sequence[str], phase: str) -> str:
 
 
 def _pr_token(stem: str) -> str | None:
+    if "pr169_dash1" in stem:
+        return "pr169_dash1"
     if (
         "pr162e_plugin_framework" in stem
         or "pr162e_negative_repair_factory" in stem
@@ -367,6 +369,14 @@ def _pr_globs(stem: str) -> tuple[str, ...]:
                 "src/qtt/memory/__init__.py",
                 "src/qtt/memory/pr168_mem1/**",
                 "tests/pr168_mem1/**",
+            ]
+        )
+    if token == "pr169_dash1":
+        globs.extend(
+            [
+                "docs/master_plan/generated/pr169_dash1/**",
+                "src/qtt/dashboard/**",
+                "tests/pr169_dash1/**",
             ]
         )
     return tuple(globs)
@@ -768,6 +778,13 @@ def entries_matching_path(path: str) -> tuple[ValidatorInventoryEntry, ...]:
 
 
 def _specific_pr_token_for_path(path: str) -> str | None:
+    if (
+        path.startswith("docs/master_plan/generated/pr169_dash1/")
+        or path.startswith("src/qtt/dashboard/")
+        or path.startswith("tests/pr169_dash1/")
+        or "pr169_dash1" in PurePosixPath(path).name.lower()
+    ):
+        return "pr169_dash1"
     if (
         path.startswith("docs/master_plan/generated/pr168_mem1/")
         or path == "src/qtt/memory/__init__.py"

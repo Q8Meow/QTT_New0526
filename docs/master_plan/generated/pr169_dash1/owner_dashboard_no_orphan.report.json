@@ -1,0 +1,21 @@
+{
+  "action_codes_trace_to_registry_decision_queue_receipts": true,
+  "agent_routes_resolve_through_PR165_D2_or_gap": true,
+  "artifact_id": "PR169_DASH1_OWNER_DASHBOARD_NO_ORPHAN_REPORT",
+  "charts_trace_to_registry_data_contract": true,
+  "edge_alpha_rows_route_to_evidence_or_review": true,
+  "generated_artifacts_in_data_value_route_map": true,
+  "institutional_metric_rows_have_refs_or_review_route": true,
+  "live_cash_private_slots_have_no_direct_reader": true,
+  "llm_view_has_no_root_authority": true,
+  "panels_trace_to_registry_surface_contract": true,
+  "projection_rows_trace_to_registry": true,
+  "provider_pending_features_have_route_fields": true,
+  "qku_formula_candidate_memory_qstruct_refs_routed": true,
+  "quantum_rows_structural_or_QMAP1_routed": true,
+  "registry_rows_checked": 171,
+  "shadow_slots_have_no_execution_authority": true,
+  "source_panel_has_no_direct_truth_creation": true,
+  "status": "PASS",
+  "upstream_evidence_refs_resolve_or_route": true
+}

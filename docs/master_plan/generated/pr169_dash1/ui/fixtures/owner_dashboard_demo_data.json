@@ -1,0 +1,111 @@
+{
+  "agents": [
+    {
+      "agent": "dashboard_agent",
+      "quarantine": "clear",
+      "score": 91
+    },
+    {
+      "agent": "risk_manager_agent",
+      "quarantine": "review",
+      "score": 88
+    },
+    {
+      "agent": "quantum_optimizer_agent",
+      "quarantine": "clear",
+      "score": 84
+    },
+    {
+      "agent": "commander_agent",
+      "quarantine": "clear",
+      "score": 90
+    }
+  ],
+  "authority": "Read-only fixture. No credentials, connectors, cash reads, source truth, or order authority.",
+  "costs": [
+    {
+      "k": "fee",
+      "v": 90
+    },
+    {
+      "k": "spread",
+      "v": 140
+    },
+    {
+      "k": "slippage",
+      "v": 70
+    },
+    {
+      "k": "impact",
+      "v": 50
+    },
+    {
+      "k": "latency",
+      "v": 35
+    }
+  ],
+  "funnel": [
+    {
+      "k": "submitted",
+      "v": 12
+    },
+    {
+      "k": "captured",
+      "v": 9
+    },
+    {
+      "k": "extracted",
+      "v": 7
+    },
+    {
+      "k": "qku",
+      "v": 5
+    },
+    {
+      "k": "replay",
+      "v": 3
+    },
+    {
+      "k": "owner_review",
+      "v": 1
+    }
+  ],
+  "points": [
+    {
+      "agent": "dashboard_agent",
+      "drawdown": 0,
+      "equity": 100000,
+      "market": "Kalshi",
+      "mode": "REPLAY",
+      "t": "D1",
+      "venue": "KALSHI"
+    },
+    {
+      "agent": "risk_manager_agent",
+      "drawdown": -120,
+      "equity": 101200,
+      "market": "Polymarket",
+      "mode": "PAPER",
+      "t": "D2",
+      "venue": "POLYMARKET"
+    },
+    {
+      "agent": "quantum_optimizer_agent",
+      "drawdown": -450,
+      "equity": 100850,
+      "market": "Kalshi",
+      "mode": "SHADOW",
+      "t": "D3",
+      "venue": "KALSHI"
+    },
+    {
+      "agent": "commander_agent",
+      "drawdown": -60,
+      "equity": 102450,
+      "market": "ForecastEx",
+      "mode": "LIVE_DRYRUN",
+      "t": "D4",
+      "venue": "FORECASTEX"
+    }
+  ]
+}

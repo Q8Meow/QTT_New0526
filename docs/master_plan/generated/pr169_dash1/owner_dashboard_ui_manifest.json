@@ -1,0 +1,10 @@
+{
+  "artifact_id": "PR169_DASH1_OWNER_DASHBOARD_UI_MANIFEST",
+  "credential_or_connector_required": false,
+  "external_network_required": false,
+  "fixture_ref": "ui/fixtures/owner_dashboard_demo_data.json",
+  "html_ref": "ui/owner_dashboard_review_surface.html",
+  "runtime_server_created": false,
+  "script_ref": "ui/owner_dashboard_review_surface.js",
+  "style_ref": "ui/owner_dashboard_review_surface.css"
+}

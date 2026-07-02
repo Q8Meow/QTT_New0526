@@ -30,6 +30,7 @@ PR168_RANK4_BRANCH = "pr168-rank4-exec-advisory-ranking"
 PR168_QOPT1_BRANCH = "pr168-qopt1-quantum-classical-batch-optimization"
 PR168_VS2_BRANCH = "pr168-vs2-paper-intent-candidate-generator"
 PR168_MEM1_BRANCH = "pr168-mem1-condition-scoped-outcome-memory"
+PR169_DASH1_BRANCH = "pr169-dash1-owner-dashboard-interactive-research-v6"
 VALIDATION_FIXTURE_BRANCH = "pr-ci-fastfail-validation-context-preflight"
 
 _PR168_BRANCHES = frozenset(
@@ -58,6 +59,7 @@ _PR168_BRANCHES = frozenset(
         PR168_QOPT1_BRANCH,
         PR168_VS2_BRANCH,
         PR168_MEM1_BRANCH,
+        PR169_DASH1_BRANCH,
         VALIDATION_FIXTURE_BRANCH,
     }
 )
@@ -683,6 +685,37 @@ _PR168_MEM1_ALLOWED_PATTERNS = (
     "tests/pr168_mem1/**",
 )
 
+_PR169_DASH1_ALLOWED_EXACT_PATHS = frozenset(
+    {
+        "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+        "src/qtt/dashboard/__init__.py",
+        "src/qtt/dashboard/owner_surface_models.py",
+        "src/qtt/dashboard/owner_surface_registry.py",
+        "src/qtt/dashboard/owner_surface_resolver.py",
+        "src/qtt/dashboard/owner_action_registry.py",
+        "src/qtt/dashboard/owner_dashboard_packet_builder.py",
+        "src/qtt/dashboard/owner_dashboard_projection_builder.py",
+        "src/qtt/dashboard/owner_dashboard_validator.py",
+        "tools/build_pr169_dash1_owner_dashboard.py",
+        "tools/validate_pr169_dash1_owner_dashboard.py",
+        "tools/run_validation_gates.py",
+        "tools/validation_inventory.py",
+        "tools/validation_scope_registry.py",
+        "tools/validate_validation_scope_registry.py",
+        "tests/tools/test_validation_scope_registry.py",
+        "tests/tools/test_validation_inventory.py",
+        "tests/tools/test_changed_area_validation_router.py",
+        "tests/fail_closed/test_run_validation_gates.py",
+    }
+)
+
+_PR169_DASH1_ALLOWED_PATTERNS = (
+    "docs/master_plan/generated/pr169_dash1/**",
+    "src/qtt/dashboard/**",
+    "tools/*pr169_dash1*.py",
+    "tests/pr169_dash1/**",
+)
+
 _FORBIDDEN_EXACT_PATHS = frozenset(
     {
         "docs/master_plan/QTT_MasterPlan_Current.md",
@@ -1244,6 +1277,29 @@ def _pr168_mem1_scope_decision(branch_name: str, normalized: str) -> dict[str, o
     return None
 
 
+def _pr169_dash1_scope_decision(branch_name: str, normalized: str) -> dict[str, object] | None:
+    if normalized in _PR169_DASH1_ALLOWED_EXACT_PATHS:
+        return {
+            "allowed": True,
+            "branch": branch_name,
+            "normalized_path": normalized,
+            "pr_id": "PR169-DASH1",
+            "matched_rule": f"exact:{normalized}",
+            "reason": "registered_exact_path",
+        }
+    for pattern in _PR169_DASH1_ALLOWED_PATTERNS:
+        if fnmatchcase(normalized, pattern):
+            return {
+                "allowed": True,
+                "branch": branch_name,
+                "normalized_path": normalized,
+                "pr_id": "PR169-DASH1",
+                "matched_rule": f"pattern:{pattern}",
+                "reason": "registered_pattern",
+            }
+    return None
+
+
 def explain_pr_scope_decision(branch: str, path: str) -> dict[str, object]:
     normalized = normalize_changed_path(path)
     branch_name = str(branch).strip()
@@ -1552,6 +1608,19 @@ def explain_pr_scope_decision(branch: str, path: str) -> dict[str, object]:
             "reason": "path_not_registered_for_pr_scope",
         }
 
+    if branch_name == PR169_DASH1_BRANCH:
+        dash1_decision = _pr169_dash1_scope_decision(branch_name, normalized)
+        if dash1_decision:
+            return dash1_decision
+        return {
+            "allowed": False,
+            "branch": branch_name,
+            "normalized_path": normalized,
+            "pr_id": "PR169-DASH1",
+            "matched_rule": "no_pr169_dash1_scope_rule",
+            "reason": "path_not_registered_for_pr_scope",
+        }
+
     if branch_name == VALIDATION_FIXTURE_BRANCH:
         rp_decision = _pr168_rp_scope_decision(branch_name, normalized)
         if rp_decision:
@@ -1619,6 +1688,9 @@ def explain_pr_scope_decision(branch: str, path: str) -> dict[str, object]:
         mem1_decision = _pr168_mem1_scope_decision(branch_name, normalized)
         if mem1_decision:
             return mem1_decision
+        dash1_decision = _pr169_dash1_scope_decision(branch_name, normalized)
+        if dash1_decision:
+            return dash1_decision
 
     if normalized in _PR168_ALLOWED_EXACT_PATHS:
         return {
@@ -1669,6 +1741,12 @@ def _forbidden_reason(normalized: str) -> str | None:
                 token == "live_order"
                 and lowered.startswith("tests/")
                 and "/test_no_live_order" in lowered
+            ):
+                continue
+            if (
+                token in {"qtt_sha", "qtt-sha"}
+                and lowered.startswith("tests/pr169_dash1/")
+                and "/test_dash1_no_qtt_sha" in lowered
             ):
                 continue
             return f"forbidden_token:{token}"
