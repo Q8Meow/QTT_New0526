@@ -239,6 +239,42 @@ def test_runner_uses_github_head_ref_for_detached_pr_merge_checkout(monkeypatch)
     assert runner._current_git_branch(REPO_ROOT) == runner.PR168_RP5G_BRANCH
 
 
+def test_runner_pr169_dash1_branch_scope_keeps_only_dash1_deterministic_commands(
+    monkeypatch,
+    tmp_path,
+):
+    monkeypatch.setattr(
+        runner,
+        "_current_git_branch",
+        lambda _repo_root: runner.PR169_DASH1_BRANCH,
+    )
+    assert runner._pr169_dash1_local_branch_scope_active(
+        repo_root=REPO_ROOT,
+        phase=runner.DETERMINISTIC_VALIDATORS_PHASE,
+        validation_mode="auto",
+        changed_files=(),
+        force_full=False,
+        manual_mode="",
+    )
+
+    commands = runner.build_phase_commands(
+        runner.DETERMINISTIC_VALIDATORS_PHASE,
+        tmp_path / "validation",
+        tmp_path / "pytest",
+    )
+    kept = runner._filter_commands_for_pr169_dash1_local_branch_scope(commands)
+
+    assert [Path(command[1]).name for command in kept] == [
+        "build_pr169_dash1_owner_dashboard.py",
+        "validate_pr169_dash1_owner_dashboard.py",
+    ]
+    assert all(
+        str(tmp_path / "validation" / "master_plan_generated" / "pr169_dash1")
+        in command
+        for command in kept
+    )
+
+
 def test_run_validation_gates_direct_script_imports_router_without_pythonpath():
     completed = subprocess.run(
         [
@@ -1227,6 +1263,26 @@ def _expected_commands(
             ".",
             "--artifact-dir",
             str(validation_dir / "master_plan_generated" / "pr168_mem1"),
+            "--timeout-ms",
+            "3600000",
+        ],
+        [
+            python_executable,
+            str(Path("tools") / "build_pr169_dash1_owner_dashboard.py"),
+            "--repo-root",
+            ".",
+            "--out",
+            str(validation_dir / "master_plan_generated" / "pr169_dash1"),
+            "--timeout-ms",
+            "3600000",
+        ],
+        [
+            python_executable,
+            str(Path("tools") / "validate_pr169_dash1_owner_dashboard.py"),
+            "--repo-root",
+            ".",
+            "--base",
+            str(validation_dir / "master_plan_generated" / "pr169_dash1"),
             "--timeout-ms",
             "3600000",
         ],
@@ -3112,6 +3168,7 @@ def test_runner_splits_pytest_shard_2_longest_group_deterministically():
         ("tests/pr168_qopt1",),
         ("tests/pr168_vs2",),
         ("tests/pr168_mem1",),
+        ("tests/pr169_dash1",),
     ]
     assert all(command.reason for command in commands)
     assert ("tests/stage1_prediction_markets",) not in [
