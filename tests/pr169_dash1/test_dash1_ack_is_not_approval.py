@@ -1,4 +1,4 @@
-﻿from tests.pr169_dash1.conftest import jsonl
+from tests.pr169_dash1.conftest import jsonl
 
 
 def test_acknowledgment_action_is_never_live_approval() -> None:

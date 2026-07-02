@@ -1,4 +1,4 @@
-﻿from tests.pr169_dash1.conftest import jsonl
+from tests.pr169_dash1.conftest import jsonl
 
 
 def test_all_seeded_20d_dashboard_features_are_covered() -> None:

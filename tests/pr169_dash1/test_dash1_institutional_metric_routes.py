@@ -1,4 +1,4 @@
-﻿from tests.pr169_dash1.conftest import jsonl
+from tests.pr169_dash1.conftest import jsonl
 
 
 def test_institutional_metric_rows_route_to_upstream_refs() -> None:

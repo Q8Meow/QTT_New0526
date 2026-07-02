@@ -1,4 +1,4 @@
-﻿"""Shared constants and JSON helpers for the PR169-DASH1 owner surface."""
+"""Shared constants and JSON helpers for the PR169-DASH1 owner surface."""
 
 from __future__ import annotations
 

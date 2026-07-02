@@ -1,4 +1,4 @@
-﻿from tests.pr169_dash1.conftest import jsonl
+from tests.pr169_dash1.conftest import jsonl
 
 
 def test_owner_global_authority_policy_preserves_receipt_and_external_fact_boundary() -> None:

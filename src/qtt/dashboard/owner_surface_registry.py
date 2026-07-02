@@ -1,4 +1,4 @@
-﻿"""Central loader for the PR169-DASH1 owner dashboard surface registry."""
+"""Central loader for the PR169-DASH1 owner dashboard surface registry."""
 
 from __future__ import annotations
 

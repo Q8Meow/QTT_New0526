@@ -1,4 +1,4 @@
-﻿from tests.pr169_dash1.conftest import jsonl
+from tests.pr169_dash1.conftest import jsonl
 
 
 def test_qku_formula_candidate_routes_have_refs_and_no_formula_mutation() -> None:

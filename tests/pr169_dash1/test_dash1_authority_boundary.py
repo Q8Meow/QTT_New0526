@@ -1,4 +1,4 @@
-﻿from tests.pr169_dash1.conftest import json_doc
+from tests.pr169_dash1.conftest import json_doc
 
 
 def test_authority_boundary_report_blocks_runtime_and_order_authority() -> None:

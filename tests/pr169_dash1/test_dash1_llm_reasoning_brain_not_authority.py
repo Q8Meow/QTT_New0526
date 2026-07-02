@@ -1,4 +1,4 @@
-﻿from tests.pr169_dash1.conftest import jsonl
+from tests.pr169_dash1.conftest import jsonl
 
 
 def test_llm_view_allows_reasoning_actions_but_forbids_root_authority() -> None:

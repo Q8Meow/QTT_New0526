@@ -1,4 +1,4 @@
-﻿from tests.pr169_dash1.conftest import json_doc
+from tests.pr169_dash1.conftest import json_doc
 
 
 def test_no_orphan_report_passes_required_proofs() -> None:

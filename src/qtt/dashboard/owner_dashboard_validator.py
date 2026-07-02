@@ -1,4 +1,4 @@
-﻿"""Fail-closed validation for PR169-DASH1 owner dashboard artifacts."""
+"""Fail-closed validation for PR169-DASH1 owner dashboard artifacts."""
 
 from __future__ import annotations
 

@@ -1,4 +1,4 @@
-﻿from tests.pr169_dash1.conftest import jsonl
+from tests.pr169_dash1.conftest import jsonl
 
 
 def test_edge_alpha_rows_have_evidence_refs_or_actionable_routes() -> None:

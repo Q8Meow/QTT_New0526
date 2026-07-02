@@ -1,4 +1,4 @@
-﻿"""Single resolver API for PR169-DASH1 owner dashboard consumers."""
+"""Single resolver API for PR169-DASH1 owner dashboard consumers."""
 
 from __future__ import annotations
 

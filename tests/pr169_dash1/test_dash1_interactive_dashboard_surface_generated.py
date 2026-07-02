@@ -1,4 +1,4 @@
-﻿from tests.pr169_dash1.conftest import BASE, json_doc, jsonl
+from tests.pr169_dash1.conftest import BASE, json_doc, jsonl
 
 
 def test_static_interactive_dashboard_surface_files_exist_and_are_manifested() -> None:

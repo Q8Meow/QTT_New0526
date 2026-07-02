@@ -1,4 +1,4 @@
-﻿"""Packet and queue builders derived from the owner surface registry."""
+"""Packet and queue builders derived from the owner surface registry."""
 
 from __future__ import annotations
 

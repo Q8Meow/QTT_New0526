@@ -1,4 +1,4 @@
-﻿from src.qtt.dashboard.owner_dashboard_projection_builder import EXECUTION_LADDER_STATES
+from src.qtt.dashboard.owner_dashboard_projection_builder import EXECUTION_LADDER_STATES
 from tests.pr169_dash1.conftest import jsonl
 
 

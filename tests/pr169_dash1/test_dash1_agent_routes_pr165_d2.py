@@ -1,4 +1,4 @@
-﻿from tests.pr169_dash1.conftest import registry
+from tests.pr169_dash1.conftest import registry
 
 
 def test_agent_routes_reference_pr165_d2_roles_and_validation_artifact() -> None:

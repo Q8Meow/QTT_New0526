@@ -1,4 +1,4 @@
-﻿"""Build PR169-DASH1 owner dashboard projections from one registry."""
+"""Build PR169-DASH1 owner dashboard projections from one registry."""
 
 from __future__ import annotations
 

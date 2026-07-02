@@ -1,4 +1,4 @@
-﻿"""Central owner action grammar for PR169-DASH1."""
+"""Central owner action grammar for PR169-DASH1."""
 
 from __future__ import annotations
 
