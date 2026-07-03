@@ -601,6 +601,12 @@ PYTEST_SHARD_COMMANDS: dict[str, tuple[PytestShardCommand, ...]] = {
             runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
             historical_runtime_seconds=5.0,
         ),
+        PytestShardCommand(
+            paths=("tests/pr169_dash1_ui1",),
+            reason="PR169-DASH1-UI1 renderer, theme, mobile, chat, and safe artifact rendering tests",
+            runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
+            historical_runtime_seconds=3.0,
+        ),
     ),
     "pytest-shard-3": (
         PytestShardCommand(

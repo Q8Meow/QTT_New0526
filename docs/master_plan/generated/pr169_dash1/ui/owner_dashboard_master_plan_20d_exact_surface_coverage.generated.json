@@ -14460,11 +14460,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "OWNER_DASHBOARD_PACKET_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_PACKET",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_PACKET",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/packet",
+      "exact_text_or_token": "SLASH_COMMAND packet",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -14482,7 +14482,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/packet"
+      "visible_label": "SLASH_COMMAND packet"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_026_OWNERACTIONRECEIPTV1",
@@ -14494,11 +14494,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_026_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_DECISIONS",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_DECISIONS",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/decisions",
+      "exact_text_or_token": "SLASH_COMMAND decisions",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -14516,7 +14516,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/decisions"
+      "visible_label": "SLASH_COMMAND decisions"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_013_RISK_AND_KILL_SWITCH_PANEL_OWNERRISKPANELV1_OWNERKILLSWITCHSURFA",
@@ -14528,11 +14528,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_013_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_RISK",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_RISK",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/risk",
+      "exact_text_or_token": "SLASH_COMMAND risk",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -14551,7 +14551,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/risk"
+      "visible_label": "SLASH_COMMAND risk"
     },
     {
       "activation_route": "LIVE-DRYRUN1_ACTIVATION_ROUTE::DASH1_FEATURE_011_ACKNOWLEDGMENT_IS_NOT_LIVE_APPROVAL",
@@ -14563,11 +14563,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_011_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_LIVE",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_LIVE",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/live",
+      "exact_text_or_token": "SLASH_COMMAND live",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -14586,7 +14586,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/live"
+      "visible_label": "SLASH_COMMAND live"
     },
     {
       "activation_route": "LLM2_ACTIVATION_ROUTE::DASH1_FEATURE_015_RESEARCH_PROPOSAL_INBOX_OWNERRESEARCHPANELV1",
@@ -14598,11 +14598,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_015_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_RESEARCH",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_RESEARCH",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/research",
+      "exact_text_or_token": "SLASH_COMMAND research",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -14620,7 +14620,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/research"
+      "visible_label": "SLASH_COMMAND research"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_016_SHADOW_REVIEW_INBOX_OWNERSHADOWPANELV1",
@@ -14632,11 +14632,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_016_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_SHADOW",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_SHADOW",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/shadow",
+      "exact_text_or_token": "SLASH_COMMAND shadow",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -14654,7 +14654,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/shadow"
+      "visible_label": "SLASH_COMMAND shadow"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_017_REFINEMENT_AND_REHAB_QUEUE_OWNERBACKLOGPANELV1",
@@ -14666,11 +14666,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_017_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_REFINE",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_REFINE",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/refine",
+      "exact_text_or_token": "SLASH_COMMAND refine",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -14688,7 +14688,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/refine"
+      "visible_label": "SLASH_COMMAND refine"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_017_REFINEMENT_AND_REHAB_QUEUE_OWNERBACKLOGPANELV1",
@@ -14700,11 +14700,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_017_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_BACKLOG",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_BACKLOG",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/backlog",
+      "exact_text_or_token": "SLASH_COMMAND backlog",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -14722,7 +14722,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/backlog"
+      "visible_label": "SLASH_COMMAND backlog"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_018_CHANGE_QUEUE_AND_DEPLOYMENT_STATE_OWNERCHANGEQUEUEPANELV1",
@@ -14734,11 +14734,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_018_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_CHANGEQ",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_CHANGEQ",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/changeq",
+      "exact_text_or_token": "SLASH_COMMAND changeq",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -14756,7 +14756,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/changeq"
+      "visible_label": "SLASH_COMMAND changeq"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::OWNER_DASHBOARD_PACKET_V1",
@@ -14768,11 +14768,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "OWNER_DASHBOARD_PACKET_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_ACK_CARD_ID",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_ACK_CARD_ID",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/ack CARD_ID",
+      "exact_text_or_token": "SLASH_COMMAND ack CARD_ID",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -14790,7 +14790,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/ack CARD_ID"
+      "visible_label": "SLASH_COMMAND ack CARD_ID"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_026_OWNERACTIONRECEIPTV1",
@@ -14802,11 +14802,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_026_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_APPROVE_SHADOW_CARD_ID",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_APPROVE_SHADOW_CARD_ID",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/approve_shadow CARD_ID",
+      "exact_text_or_token": "SLASH_COMMAND approve_shadow CARD_ID",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -14824,7 +14824,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/approve_shadow CARD_ID"
+      "visible_label": "SLASH_COMMAND approve_shadow CARD_ID"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_026_OWNERACTIONRECEIPTV1",
@@ -14836,11 +14836,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_026_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_MORE_RESEARCH_CARD_ID",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_MORE_RESEARCH_CARD_ID",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/more_research CARD_ID",
+      "exact_text_or_token": "SLASH_COMMAND more_research CARD_ID",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -14858,7 +14858,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/more_research CARD_ID"
+      "visible_label": "SLASH_COMMAND more_research CARD_ID"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_026_OWNERACTIONRECEIPTV1",
@@ -14870,11 +14870,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_026_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_REJECT_ARCHIVE_CARD_ID",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_REJECT_ARCHIVE_CARD_ID",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/reject_archive CARD_ID",
+      "exact_text_or_token": "SLASH_COMMAND reject_archive CARD_ID",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -14892,7 +14892,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/reject_archive CARD_ID"
+      "visible_label": "SLASH_COMMAND reject_archive CARD_ID"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_026_OWNERACTIONRECEIPTV1",
@@ -14904,11 +14904,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_026_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_BACKLOG_REVITALIZATION_CARD_ID",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_BACKLOG_REVITALIZATION_CARD_ID",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/backlog_revitalization CARD_ID",
+      "exact_text_or_token": "SLASH_COMMAND backlog_revitalization CARD_ID",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -14926,7 +14926,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/backlog_revitalization CARD_ID"
+      "visible_label": "SLASH_COMMAND backlog_revitalization CARD_ID"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_026_OWNERACTIONRECEIPTV1",
@@ -14938,11 +14938,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_026_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_APPROVE_LIVE_CARD_ID",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_APPROVE_LIVE_CARD_ID",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/approve_live CARD_ID",
+      "exact_text_or_token": "SLASH_COMMAND approve_live CARD_ID",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -14960,7 +14960,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/approve_live CARD_ID"
+      "visible_label": "SLASH_COMMAND approve_live CARD_ID"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_026_OWNERACTIONRECEIPTV1",
@@ -14972,11 +14972,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_026_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_EXTEND_SHADOW_CARD_ID_EXTEND_SHADOW_BASIS_CLASS",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_EXTEND_SHADOW_CARD_ID_EXTEND_SHADOW_BASIS_CLASS",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/extend_shadow CARD_ID EXTEND_SHADOW_BASIS_CLASS",
+      "exact_text_or_token": "SLASH_COMMAND extend_shadow CARD_ID EXTEND_SHADOW_BASIS_CLASS",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -14994,7 +14994,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/extend_shadow CARD_ID EXTEND_SHADOW_BASIS_CLASS"
+      "visible_label": "SLASH_COMMAND extend_shadow CARD_ID EXTEND_SHADOW_BASIS_CLASS"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_026_OWNERACTIONRECEIPTV1",
@@ -15006,11 +15006,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_026_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_RETURN_REFINEMENT_CARD_ID",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_RETURN_REFINEMENT_CARD_ID",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/return_refinement CARD_ID",
+      "exact_text_or_token": "SLASH_COMMAND return_refinement CARD_ID",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -15028,7 +15028,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/return_refinement CARD_ID"
+      "visible_label": "SLASH_COMMAND return_refinement CARD_ID"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_026_OWNERACTIONRECEIPTV1",
@@ -15040,11 +15040,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_026_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_RESTRICT_LIVE_CARD_ID",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_RESTRICT_LIVE_CARD_ID",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/restrict_live CARD_ID",
+      "exact_text_or_token": "SLASH_COMMAND restrict_live CARD_ID",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -15062,7 +15062,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/restrict_live CARD_ID"
+      "visible_label": "SLASH_COMMAND restrict_live CARD_ID"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_026_OWNERACTIONRECEIPTV1",
@@ -15074,11 +15074,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_026_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_KILL_SWITCH_CARD_ID",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_KILL_SWITCH_CARD_ID",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/kill_switch CARD_ID",
+      "exact_text_or_token": "SLASH_COMMAND kill_switch CARD_ID",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -15096,7 +15096,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/kill_switch CARD_ID"
+      "visible_label": "SLASH_COMMAND kill_switch CARD_ID"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_026_OWNERACTIONRECEIPTV1",
@@ -15108,11 +15108,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_026_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_INVESTIGATE_CARD_ID",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_INVESTIGATE_CARD_ID",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/investigate CARD_ID",
+      "exact_text_or_token": "SLASH_COMMAND investigate CARD_ID",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -15130,7 +15130,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/investigate CARD_ID"
+      "visible_label": "SLASH_COMMAND investigate CARD_ID"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_026_OWNERACTIONRECEIPTV1",
@@ -15142,11 +15142,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_026_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_REOPEN_GATE1_CARD_ID",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_REOPEN_GATE1_CARD_ID",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/reopen_gate1 CARD_ID",
+      "exact_text_or_token": "SLASH_COMMAND reopen_gate1 CARD_ID",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -15164,7 +15164,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/reopen_gate1 CARD_ID"
+      "visible_label": "SLASH_COMMAND reopen_gate1 CARD_ID"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_026_OWNERACTIONRECEIPTV1",
@@ -15176,11 +15176,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_026_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_KEEP_PARKED_CARD_ID",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_KEEP_PARKED_CARD_ID",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/keep_parked CARD_ID",
+      "exact_text_or_token": "SLASH_COMMAND keep_parked CARD_ID",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -15198,7 +15198,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/keep_parked CARD_ID"
+      "visible_label": "SLASH_COMMAND keep_parked CARD_ID"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_026_OWNERACTIONRECEIPTV1",
@@ -15210,11 +15210,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_026_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_UPDATED_RESEARCH_CARD_ID",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_UPDATED_RESEARCH_CARD_ID",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/updated_research CARD_ID",
+      "exact_text_or_token": "SLASH_COMMAND updated_research CARD_ID",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -15232,7 +15232,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/updated_research CARD_ID"
+      "visible_label": "SLASH_COMMAND updated_research CARD_ID"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::OWNER_DASHBOARD_PACKET_V1",
@@ -15687,11 +15687,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_027_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_CHAT_AGENT_OR_POD_ID",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_CHAT_AGENT_OR_POD_ID",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/chat AGENT_OR_POD_ID",
+      "exact_text_or_token": "SLASH_COMMAND chat AGENT_OR_POD_ID",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -15709,7 +15709,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/chat AGENT_OR_POD_ID"
+      "visible_label": "SLASH_COMMAND chat AGENT_OR_POD_ID"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_027_OWNERNOTIFYTRANSPORTREGISTRYV1",
@@ -15721,11 +15721,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_027_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_REPLY_CONVERSATION_ID_OWNER_MESSAGE_TEXT",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_REPLY_CONVERSATION_ID_OWNER_MESSAGE_TEXT",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/reply CONVERSATION_ID OWNER_MESSAGE_TEXT",
+      "exact_text_or_token": "SLASH_COMMAND reply CONVERSATION_ID OWNER_MESSAGE_TEXT",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -15743,7 +15743,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/reply CONVERSATION_ID OWNER_MESSAGE_TEXT"
+      "visible_label": "SLASH_COMMAND reply CONVERSATION_ID OWNER_MESSAGE_TEXT"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_027_OWNERNOTIFYTRANSPORTREGISTRYV1",
@@ -15755,11 +15755,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_027_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_BROADCAST_SCOPE_ID_OWNER_MESSAGE_TEXT",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_BROADCAST_SCOPE_ID_OWNER_MESSAGE_TEXT",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/broadcast SCOPE_ID OWNER_MESSAGE_TEXT",
+      "exact_text_or_token": "SLASH_COMMAND broadcast SCOPE_ID OWNER_MESSAGE_TEXT",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -15777,7 +15777,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/broadcast SCOPE_ID OWNER_MESSAGE_TEXT"
+      "visible_label": "SLASH_COMMAND broadcast SCOPE_ID OWNER_MESSAGE_TEXT"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_027_OWNERNOTIFYTRANSPORTREGISTRYV1",
@@ -15789,11 +15789,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_027_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_TRANSCRIPT_CONVERSATION_ID",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_TRANSCRIPT_CONVERSATION_ID",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/transcript CONVERSATION_ID",
+      "exact_text_or_token": "SLASH_COMMAND transcript CONVERSATION_ID",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -15811,7 +15811,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/transcript CONVERSATION_ID"
+      "visible_label": "SLASH_COMMAND transcript CONVERSATION_ID"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_027_OWNERNOTIFYTRANSPORTREGISTRYV1",
@@ -15823,11 +15823,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_027_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_MESSAGES_AGENT_OR_POD_ID",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_MESSAGES_AGENT_OR_POD_ID",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/messages AGENT_OR_POD_ID",
+      "exact_text_or_token": "SLASH_COMMAND messages AGENT_OR_POD_ID",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -15845,7 +15845,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/messages AGENT_OR_POD_ID"
+      "visible_label": "SLASH_COMMAND messages AGENT_OR_POD_ID"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_027_OWNERNOTIFYTRANSPORTREGISTRYV1",
@@ -15857,11 +15857,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_027_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_DIRECTIVE_AGENT_OR_POD_ID",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_DIRECTIVE_AGENT_OR_POD_ID",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/directive AGENT_OR_POD_ID",
+      "exact_text_or_token": "SLASH_COMMAND directive AGENT_OR_POD_ID",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -15879,7 +15879,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/directive AGENT_OR_POD_ID"
+      "visible_label": "SLASH_COMMAND directive AGENT_OR_POD_ID"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_027_OWNERNOTIFYTRANSPORTREGISTRYV1",
@@ -15891,11 +15891,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_027_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_DIRECTIVE_AGENT_OR_POD_ID_LINKED_CARD_ID",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_DIRECTIVE_AGENT_OR_POD_ID_LINKED_CARD_ID",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/directive AGENT_OR_POD_ID LINKED_CARD_ID",
+      "exact_text_or_token": "SLASH_COMMAND directive AGENT_OR_POD_ID LINKED_CARD_ID",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -15913,7 +15913,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/directive AGENT_OR_POD_ID LINKED_CARD_ID"
+      "visible_label": "SLASH_COMMAND directive AGENT_OR_POD_ID LINKED_CARD_ID"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_027_OWNERNOTIFYTRANSPORTREGISTRYV1",
@@ -15925,11 +15925,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_027_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_PAUSE_AGENT_AGENT_ID",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_PAUSE_AGENT_AGENT_ID",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/pause_agent AGENT_ID",
+      "exact_text_or_token": "SLASH_COMMAND pause_agent AGENT_ID",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -15947,7 +15947,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/pause_agent AGENT_ID"
+      "visible_label": "SLASH_COMMAND pause_agent AGENT_ID"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_027_OWNERNOTIFYTRANSPORTREGISTRYV1",
@@ -15959,11 +15959,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_027_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_RESUME_AGENT_AGENT_ID",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_RESUME_AGENT_AGENT_ID",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/resume_agent AGENT_ID",
+      "exact_text_or_token": "SLASH_COMMAND resume_agent AGENT_ID",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -15981,7 +15981,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/resume_agent AGENT_ID"
+      "visible_label": "SLASH_COMMAND resume_agent AGENT_ID"
     },
     {
       "activation_route": "LLM2_ACTIVATION_ROUTE::RESEARCH_INTAKE_QUANTUM_STRATEGY_TEXT",
@@ -15993,11 +15993,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "OWNER_RESEARCH_CANDIDATE_INTAKE_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_QUANTUM_RESEARCH_QUANTUM_CANDIDATE_ID",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_QUANTUM_RESEARCH_QUANTUM_CANDIDATE_ID",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/quantum_research QUANTUM_CANDIDATE_ID",
+      "exact_text_or_token": "SLASH_COMMAND quantum_research QUANTUM_CANDIDATE_ID",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -16016,7 +16016,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/quantum_research QUANTUM_CANDIDATE_ID"
+      "visible_label": "SLASH_COMMAND quantum_research QUANTUM_CANDIDATE_ID"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_027_OWNERNOTIFYTRANSPORTREGISTRYV1",
@@ -16028,11 +16028,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_027_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_QUANTUM_REPLAY_QUANTUM_CANDIDATE_ID",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_QUANTUM_REPLAY_QUANTUM_CANDIDATE_ID",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/quantum_replay QUANTUM_CANDIDATE_ID",
+      "exact_text_or_token": "SLASH_COMMAND quantum_replay QUANTUM_CANDIDATE_ID",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -16050,7 +16050,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/quantum_replay QUANTUM_CANDIDATE_ID"
+      "visible_label": "SLASH_COMMAND quantum_replay QUANTUM_CANDIDATE_ID"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_027_OWNERNOTIFYTRANSPORTREGISTRYV1",
@@ -16062,11 +16062,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_027_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_QUANTUM_SHADOW_QUANTUM_CANDIDATE_ID",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_QUANTUM_SHADOW_QUANTUM_CANDIDATE_ID",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/quantum_shadow QUANTUM_CANDIDATE_ID",
+      "exact_text_or_token": "SLASH_COMMAND quantum_shadow QUANTUM_CANDIDATE_ID",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -16084,7 +16084,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/quantum_shadow QUANTUM_CANDIDATE_ID"
+      "visible_label": "SLASH_COMMAND quantum_shadow QUANTUM_CANDIDATE_ID"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_027_OWNERNOTIFYTRANSPORTREGISTRYV1",
@@ -16096,11 +16096,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_027_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_QUANTUM_EXTEND_SHADOW_QUANTUM_CANDIDATE_ID",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_QUANTUM_EXTEND_SHADOW_QUANTUM_CANDIDATE_ID",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/quantum_extend_shadow QUANTUM_CANDIDATE_ID",
+      "exact_text_or_token": "SLASH_COMMAND quantum_extend_shadow QUANTUM_CANDIDATE_ID",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -16118,7 +16118,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/quantum_extend_shadow QUANTUM_CANDIDATE_ID"
+      "visible_label": "SLASH_COMMAND quantum_extend_shadow QUANTUM_CANDIDATE_ID"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_027_OWNERNOTIFYTRANSPORTREGISTRYV1",
@@ -16130,11 +16130,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_027_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_QUANTUM_APPROVE_CACHED_LIVE_QUANTUM_CANDIDATE_ID",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_QUANTUM_APPROVE_CACHED_LIVE_QUANTUM_CANDIDATE_ID",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/quantum_approve_cached_live QUANTUM_CANDIDATE_ID",
+      "exact_text_or_token": "SLASH_COMMAND quantum_approve_cached_live QUANTUM_CANDIDATE_ID",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -16152,7 +16152,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/quantum_approve_cached_live QUANTUM_CANDIDATE_ID"
+      "visible_label": "SLASH_COMMAND quantum_approve_cached_live QUANTUM_CANDIDATE_ID"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_027_OWNERNOTIFYTRANSPORTREGISTRYV1",
@@ -16164,11 +16164,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_027_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_QUANTUM_ROLLBACK_QUANTUM_CANDIDATE_ID",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_QUANTUM_ROLLBACK_QUANTUM_CANDIDATE_ID",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/quantum_rollback QUANTUM_CANDIDATE_ID",
+      "exact_text_or_token": "SLASH_COMMAND quantum_rollback QUANTUM_CANDIDATE_ID",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -16186,7 +16186,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/quantum_rollback QUANTUM_CANDIDATE_ID"
+      "visible_label": "SLASH_COMMAND quantum_rollback QUANTUM_CANDIDATE_ID"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_027_OWNERNOTIFYTRANSPORTREGISTRYV1",
@@ -16198,11 +16198,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_027_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_QUANTUM_REVITALIZATION_QUANTUM_CANDIDATE_ID",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_QUANTUM_REVITALIZATION_QUANTUM_CANDIDATE_ID",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/quantum_revitalization QUANTUM_CANDIDATE_ID",
+      "exact_text_or_token": "SLASH_COMMAND quantum_revitalization QUANTUM_CANDIDATE_ID",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -16220,7 +16220,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/quantum_revitalization QUANTUM_CANDIDATE_ID"
+      "visible_label": "SLASH_COMMAND quantum_revitalization QUANTUM_CANDIDATE_ID"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_027_OWNERNOTIFYTRANSPORTREGISTRYV1",
@@ -16232,11 +16232,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_027_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_QUANTUM_RETIRE_QUANTUM_CANDIDATE_ID",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_QUANTUM_RETIRE_QUANTUM_CANDIDATE_ID",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/quantum_retire QUANTUM_CANDIDATE_ID",
+      "exact_text_or_token": "SLASH_COMMAND quantum_retire QUANTUM_CANDIDATE_ID",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -16254,7 +16254,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/quantum_retire QUANTUM_CANDIDATE_ID"
+      "visible_label": "SLASH_COMMAND quantum_retire QUANTUM_CANDIDATE_ID"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_027_OWNERNOTIFYTRANSPORTREGISTRYV1",
@@ -16300,11 +16300,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_027_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_REPLY",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_REPLY",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/reply",
+      "exact_text_or_token": "SLASH_COMMAND reply",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -16322,7 +16322,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/reply"
+      "visible_label": "SLASH_COMMAND reply"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_027_OWNERNOTIFYTRANSPORTREGISTRYV1",
@@ -16334,11 +16334,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_027_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_BROADCAST",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_BROADCAST",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/broadcast",
+      "exact_text_or_token": "SLASH_COMMAND broadcast",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -16356,7 +16356,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/broadcast"
+      "visible_label": "SLASH_COMMAND broadcast"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_027_OWNERNOTIFYTRANSPORTREGISTRYV1",
@@ -16436,11 +16436,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_027_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_PAUSE_AGENT",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_PAUSE_AGENT",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/pause_agent",
+      "exact_text_or_token": "SLASH_COMMAND pause_agent",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -16458,7 +16458,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/pause_agent"
+      "visible_label": "SLASH_COMMAND pause_agent"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_027_OWNERNOTIFYTRANSPORTREGISTRYV1",
@@ -16470,11 +16470,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_027_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_RESUME_AGENT",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_RESUME_AGENT",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/resume_agent",
+      "exact_text_or_token": "SLASH_COMMAND resume_agent",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -16492,7 +16492,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/resume_agent"
+      "visible_label": "SLASH_COMMAND resume_agent"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_032_DIRECT_OWNER_TO_AGENT_CONVERSATION_EXTENSION",

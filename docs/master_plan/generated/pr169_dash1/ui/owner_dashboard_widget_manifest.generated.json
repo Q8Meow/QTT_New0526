@@ -25,7 +25,7 @@
       "desktop_layout": "workstation_scroll_anchor",
       "drilldown_ref": "drawer::overview",
       "empty_state_policy": "show useful routed provider-pending card",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -72,7 +72,7 @@
       "desktop_layout": "workstation_scroll_anchor",
       "drilldown_ref": "drawer::portfolio-pnl",
       "empty_state_policy": "show useful routed provider-pending card",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -119,7 +119,7 @@
       "desktop_layout": "workstation_scroll_anchor",
       "drilldown_ref": "drawer::decision-queue",
       "empty_state_policy": "show useful routed provider-pending card",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "ACK_OWNER_PACKET"
@@ -215,7 +215,7 @@
       "desktop_layout": "workstation_scroll_anchor",
       "drilldown_ref": "drawer::research-intake",
       "empty_state_policy": "show useful routed provider-pending card",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "SUBMIT_RESEARCH_CANDIDATE"
@@ -310,7 +310,7 @@
       "desktop_layout": "workstation_scroll_anchor",
       "drilldown_ref": "drawer::edge-alpha-board",
       "empty_state_policy": "show useful routed provider-pending card",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -358,7 +358,7 @@
       "desktop_layout": "workstation_scroll_anchor",
       "drilldown_ref": "drawer::parameter-control",
       "empty_state_policy": "show useful routed provider-pending card",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -408,7 +408,7 @@
       "desktop_layout": "workstation_scroll_anchor",
       "drilldown_ref": "drawer::qku-formula-stack-routes",
       "empty_state_policy": "show useful routed provider-pending card",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_FORMULA_EXTRACTION",
@@ -460,7 +460,7 @@
       "desktop_layout": "workstation_scroll_anchor",
       "drilldown_ref": "drawer::quantum-control-center",
       "empty_state_policy": "show useful routed provider-pending card",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_QSTRUCT_MAPPING_REVIEW"
@@ -514,7 +514,7 @@
       "desktop_layout": "workstation_scroll_anchor",
       "drilldown_ref": "drawer::llm-intelligence",
       "empty_state_policy": "show useful routed provider-pending card",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_LLM_RESEARCH_EXTRACTION"
@@ -561,7 +561,7 @@
       "desktop_layout": "workstation_scroll_anchor",
       "drilldown_ref": "drawer::agent-operations",
       "empty_state_policy": "show useful routed provider-pending card",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -658,7 +658,7 @@
       "desktop_layout": "workstation_scroll_anchor",
       "drilldown_ref": "drawer::execution-costs-tca",
       "empty_state_policy": "show useful routed provider-pending card",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -849,7 +849,7 @@
       "desktop_layout": "workstation_scroll_anchor",
       "drilldown_ref": "drawer::arbitrage-dry-run",
       "empty_state_policy": "show useful routed provider-pending card",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -943,7 +943,7 @@
       "desktop_layout": "workstation_scroll_anchor",
       "drilldown_ref": "drawer::neural-signal-lab",
       "empty_state_policy": "show useful routed provider-pending card",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -990,7 +990,7 @@
       "desktop_layout": "workstation_scroll_anchor",
       "drilldown_ref": "drawer::external-bot-threat-intelligence",
       "empty_state_policy": "show useful routed provider-pending card",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -1227,7 +1227,7 @@
       "desktop_layout": "workstation_scroll_anchor",
       "drilldown_ref": "drawer::dag-data-route-map",
       "empty_state_policy": "show useful routed provider-pending card",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -1274,7 +1274,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::owner-dashboard-packet-card",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "ACK_OWNER_PACKET"
@@ -1321,7 +1321,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::owner-header-strip-card",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -1368,7 +1368,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::decision-queue-card-shell",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -1415,7 +1415,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::telegram-owner-packet-mirror-card",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "ACK_OWNER_PACKET",
@@ -1463,7 +1463,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::owner-packet-ack-audit-row",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "ACK_OWNER_PACKET"
@@ -1510,7 +1510,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::owner-command-normalized-form-card",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -1557,7 +1557,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::owner-command-parse-instance-card",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -1604,7 +1604,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::owner-command-idempotency-card",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -1651,7 +1651,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::owner-command-execution-claim-card",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -1698,7 +1698,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::owner-command-claim-recovery-card",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -1745,7 +1745,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::owner-command-receipt-sequence-card",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -1792,7 +1792,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::owner-trade-target-intake-panel-card",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "SUBMIT_RESEARCH_CANDIDATE"
@@ -1839,7 +1839,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::owner-progress-board-card",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -1886,7 +1886,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::event-credibility-panel-card",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_RISK_REVIEW",
@@ -1934,7 +1934,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::trade-readiness-scorecard",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -1981,7 +1981,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::trade-structure-optimization-packet",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "ACK_OWNER_PACKET"
@@ -2028,7 +2028,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::trade-proposal-card",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -2075,7 +2075,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::watch-monitor-card",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -2122,7 +2122,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::trade-management-plan-card",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -2169,7 +2169,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::exit-decision-card",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -2216,7 +2216,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::active-elite-strategies-panel-card",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "ACK_OWNER_PACKET"
@@ -2263,7 +2263,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::elite-strategy-pipeline-panel-card",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -2310,7 +2310,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::elite-research-queue-panel-card",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -2357,7 +2357,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::elite-shadow-daily-report-card",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -2404,7 +2404,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::elite-strategy-archive-panel-card",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -2451,7 +2451,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::elite-strategy-health-state-card",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -2498,7 +2498,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::performance-intelligence-panel",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -2545,7 +2545,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::decision-attribution-panel",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "ACK_OWNER_PACKET",
@@ -2593,7 +2593,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::slippage-intelligence-panel",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -2640,7 +2640,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::execution-forensics-panel-card",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "ACK_OWNER_PACKET",
@@ -2688,7 +2688,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::cumulative-slippage-dashboard-card",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_TELEGRAM_MIRROR"
@@ -2735,7 +2735,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::alpha-promotion-scorecard-panel-card",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -2782,7 +2782,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::direct-live-on-approval-queue-panel-card",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "SUBMIT_RESEARCH_CANDIDATE"
@@ -2829,7 +2829,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::edge-source-budgeting-panel-card",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "ACK_OWNER_PACKET"
@@ -2876,7 +2876,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::alpha-death-monitor-panel-card",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_LIVE_CANARY_REVIEW"
@@ -2923,7 +2923,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::live-edge-radar-panel",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_LIVE_CANARY_REVIEW"
@@ -2970,7 +2970,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::source-watchlist-panel",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_SOURCE_CAPTURE",
@@ -3018,7 +3018,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::research-queue-panel",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "SUBMIT_RESEARCH_CANDIDATE"
@@ -3065,7 +3065,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::edge-hypothesis-board",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -3112,7 +3112,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::alpha-candidate-scoreboard",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -3159,7 +3159,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::no-trade-board",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_NO_TRADE_REOPTIMIZATION_REVIEW"
@@ -3206,7 +3206,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::replay-paper-test-queue-panel",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_REPLAY_TEST",
@@ -3254,7 +3254,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::owner-approval-queue-panel",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -3301,7 +3301,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::capital-usage-panel",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -3348,7 +3348,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::latency-and-error-panel",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -3395,7 +3395,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::microstructure-calibration-panel",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -3442,7 +3442,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::local-llm-model-control-panel",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_LLM_RESEARCH_EXTRACTION"
@@ -3489,7 +3489,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::day1-owner-review-digest-panel",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "ACK_OWNER_PACKET",
@@ -3537,7 +3537,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::day1-arbitrage-dry-run-dashboard-panel",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -3584,7 +3584,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::day1-arbitrage-live-promotion-panel",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -3631,7 +3631,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::agent-duty-board",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -3678,7 +3678,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::agent-kpi-board",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -3725,7 +3725,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::missed-duty-queue",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -3772,7 +3772,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::agent-trust-score-panel",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "SUBMIT_RESEARCH_CANDIDATE"
@@ -3819,7 +3819,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::agent-failure-escalation-queue",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "ACK_OWNER_PACKET",
@@ -3868,7 +3868,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::agent-quarantine-state-panel",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -3915,7 +3915,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::agent-self-healing-action-log",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "ACK_OWNER_PACKET"
@@ -3962,7 +3962,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::agent-replacement-candidate-panel",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -4009,7 +4009,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::agent-reroute-control-panel",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -4056,7 +4056,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::agent-permission-change-request-panel",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -4103,7 +4103,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::external-bot-strategy-candidate-panel",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -4150,7 +4150,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::external-bot-supply-chain-quarantine-panel",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -4197,7 +4197,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::external-bot-threat-intelligence-panel",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "SUBMIT_RESEARCH_CANDIDATE"
@@ -4244,7 +4244,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::prediction-market-execution-mechanics-panel",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -4291,7 +4291,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::cross-venue-execution-normalization-panel",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -4338,7 +4338,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::source-evidence-retrieval-readiness-panel",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_SOURCE_CAPTURE",
@@ -4386,7 +4386,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::neural-signal-candidate-panel",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -4433,7 +4433,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::stationary-feature-catalog-panel",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -4480,7 +4480,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::target-construction-panel",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -4527,7 +4527,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::leakage-audit-panel",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -4574,7 +4574,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::purged-walk-forward-validation-panel",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -4621,7 +4621,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::model-calibration-panel",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -4668,7 +4668,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::model-drift-monitor-panel",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -4715,7 +4715,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::signal-to-sizing-boundary-panel",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -4762,7 +4762,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::neural-dual-result-review-panel",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -4809,7 +4809,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::neural-owner-promotion-gate-panel",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -4856,7 +4856,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::forbidden-claim-and-source-retrieval-target-panel",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_SOURCE_CAPTURE",
@@ -4904,7 +4904,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::quantum-candidate-lifecycle-panel",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -4951,7 +4951,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::quantum-artifact-panel",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -4998,7 +4998,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::mbo-order-lifecycle-observability-panel",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -5045,7 +5045,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::quantum-intelligence-panel",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_REPLAY_TEST",
@@ -5093,7 +5093,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::quantum-proof-propagation-attribution-panel",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -5140,7 +5140,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::true-quantum-primacy-responsibility-core-gap-panel",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -5187,7 +5187,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::quantum-centrality-scoreboard",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -5234,7 +5234,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::quantum-formula-to-decision-registry-viewer",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -5281,7 +5281,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::quantum-policy-bundle-diff-viewer",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -5328,7 +5328,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::quantum-propagation-receipt-panel",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -5375,7 +5375,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::quantum-checkpoint-completion-panel",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -5422,7 +5422,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::quantum-causality-panel",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_LLM_RESEARCH_EXTRACTION"
@@ -5469,7 +5469,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::quantum-freshness-by-decision-surface-panel",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -5516,7 +5516,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::quantum-failure-heatmap",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -5563,7 +5563,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::official-ecosystem-alignment-panel",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -5610,7 +5610,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::quantum-responsibility-class-badge",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -5657,7 +5657,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::backend-role-matrix-panel",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -5704,7 +5704,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::formula-registry-reference-panel",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_SOURCE_CAPTURE",
@@ -5752,7 +5752,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::hard-part-decomposition-panel",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -5799,7 +5799,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::numeric-authority-chain-panel",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -5846,7 +5846,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::quantum-bridge-panel",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -5893,7 +5893,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::noise-confidence-haircut-panel",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -5940,7 +5940,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::tensor-network-readiness-panel",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -5987,7 +5987,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::solver-league-panel",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -6034,7 +6034,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::compatibility-matrix-panel",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -6081,7 +6081,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::lineage-ledger-panel",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -6128,7 +6128,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::quantum-stack-health-monitor",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -6175,7 +6175,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::qpu-enablement-panel",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -6222,7 +6222,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::provider-routing-panel",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -6269,7 +6269,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::failover-control-panel",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_SOURCE_CAPTURE",
@@ -6317,7 +6317,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::owner-live-execution-mode-panel",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_SOURCE_CAPTURE",
@@ -6372,7 +6372,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::blocker-remediation-panel",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_FORMULA_EXTRACTION",
@@ -6424,7 +6424,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::force-override-control-panel",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_FORMULA_EXTRACTION",
@@ -6476,7 +6476,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::pnl-timeseries-row",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "ACK_OWNER_PACKET",
@@ -6528,7 +6528,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::market-platform-rollup-card",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_SOURCE_CAPTURE",
@@ -6578,7 +6578,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::cumulative-earnings-graph-spec",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_REPLAY_TEST",
@@ -6626,7 +6626,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::fee-and-slippage-waterfall-card",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -6673,7 +6673,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::experimental-vs-live-comparator-card",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -6720,7 +6720,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::quantum-classical-comparator-timeseries-row",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -6767,7 +6767,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::quantum-uplift-percentage-curve-spec",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -6814,7 +6814,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::quantum-regime-bucket-heatmap-card",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -6861,7 +6861,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::quantum-degradation-trend-graph-spec",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -6908,7 +6908,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::quantum-value-decomposition-graph-spec",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -6955,7 +6955,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::quantum-complexity-roi-graph-spec",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -7002,7 +7002,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::counterfactual-opportunity-loss-graph-spec",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -7049,7 +7049,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::capital-routing-recommendation-overlay-card",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -7096,7 +7096,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::graph-color-semantics-legend-card",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -7143,7 +7143,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::daily-opportunity-census-panel-card",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_NO_TRADE_REOPTIMIZATION_REVIEW"
@@ -7190,7 +7190,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::daily-alpha-board-panel-card",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -7237,7 +7237,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::realized-edge-closure-ratio-curve",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_QKU_COMPUTABILITY_REVIEW",
@@ -7286,7 +7286,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::execution-loss-decomposition-waterfall",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_QSTRUCT_MAPPING_REVIEW"
@@ -7333,7 +7333,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::alpha-basket-concentration-overlay",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_QSTRUCT_MAPPING_REVIEW"
@@ -7380,7 +7380,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::cross-edge-correlation-overlay",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -7427,7 +7427,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::failure-mode-diversity-overlay",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -7474,7 +7474,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::latency-histogram",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -7521,7 +7521,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::reject-throttle-error-rate-chart",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -7568,7 +7568,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::capital-usage-chart",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"
@@ -7615,7 +7615,7 @@
       "desktop_layout": "alias_search_and_panel_card",
       "drilldown_ref": "drawer::parameter-revitalization-board",
       "empty_state_policy": "visible alias backed to canonical DASH1 route",
-      "empty_state_reason": "",
+      "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "linked_action_codes": [
         "REQUEST_OWNER_REVIEW"

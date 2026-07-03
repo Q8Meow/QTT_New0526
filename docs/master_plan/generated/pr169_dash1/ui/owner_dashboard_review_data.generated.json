@@ -37854,11 +37854,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "OWNER_DASHBOARD_PACKET_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_PACKET",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_PACKET",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/packet",
+      "exact_text_or_token": "SLASH_COMMAND packet",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -37876,7 +37876,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/packet"
+      "visible_label": "SLASH_COMMAND packet"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_026_OWNERACTIONRECEIPTV1",
@@ -37888,11 +37888,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_026_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_DECISIONS",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_DECISIONS",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/decisions",
+      "exact_text_or_token": "SLASH_COMMAND decisions",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -37910,7 +37910,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/decisions"
+      "visible_label": "SLASH_COMMAND decisions"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_013_RISK_AND_KILL_SWITCH_PANEL_OWNERRISKPANELV1_OWNERKILLSWITCHSURFA",
@@ -37922,11 +37922,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_013_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_RISK",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_RISK",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/risk",
+      "exact_text_or_token": "SLASH_COMMAND risk",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -37945,7 +37945,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/risk"
+      "visible_label": "SLASH_COMMAND risk"
     },
     {
       "activation_route": "LIVE-DRYRUN1_ACTIVATION_ROUTE::DASH1_FEATURE_011_ACKNOWLEDGMENT_IS_NOT_LIVE_APPROVAL",
@@ -37957,11 +37957,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_011_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_LIVE",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_LIVE",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/live",
+      "exact_text_or_token": "SLASH_COMMAND live",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -37980,7 +37980,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/live"
+      "visible_label": "SLASH_COMMAND live"
     },
     {
       "activation_route": "LLM2_ACTIVATION_ROUTE::DASH1_FEATURE_015_RESEARCH_PROPOSAL_INBOX_OWNERRESEARCHPANELV1",
@@ -37992,11 +37992,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_015_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_RESEARCH",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_RESEARCH",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/research",
+      "exact_text_or_token": "SLASH_COMMAND research",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -38014,7 +38014,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/research"
+      "visible_label": "SLASH_COMMAND research"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_016_SHADOW_REVIEW_INBOX_OWNERSHADOWPANELV1",
@@ -38026,11 +38026,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_016_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_SHADOW",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_SHADOW",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/shadow",
+      "exact_text_or_token": "SLASH_COMMAND shadow",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -38048,7 +38048,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/shadow"
+      "visible_label": "SLASH_COMMAND shadow"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_017_REFINEMENT_AND_REHAB_QUEUE_OWNERBACKLOGPANELV1",
@@ -38060,11 +38060,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_017_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_REFINE",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_REFINE",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/refine",
+      "exact_text_or_token": "SLASH_COMMAND refine",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -38082,7 +38082,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/refine"
+      "visible_label": "SLASH_COMMAND refine"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_017_REFINEMENT_AND_REHAB_QUEUE_OWNERBACKLOGPANELV1",
@@ -38094,11 +38094,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_017_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_BACKLOG",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_BACKLOG",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/backlog",
+      "exact_text_or_token": "SLASH_COMMAND backlog",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -38116,7 +38116,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/backlog"
+      "visible_label": "SLASH_COMMAND backlog"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_018_CHANGE_QUEUE_AND_DEPLOYMENT_STATE_OWNERCHANGEQUEUEPANELV1",
@@ -38128,11 +38128,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_018_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_CHANGEQ",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_CHANGEQ",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/changeq",
+      "exact_text_or_token": "SLASH_COMMAND changeq",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -38150,7 +38150,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/changeq"
+      "visible_label": "SLASH_COMMAND changeq"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::OWNER_DASHBOARD_PACKET_V1",
@@ -38162,11 +38162,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "OWNER_DASHBOARD_PACKET_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_ACK_CARD_ID",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_ACK_CARD_ID",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/ack CARD_ID",
+      "exact_text_or_token": "SLASH_COMMAND ack CARD_ID",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -38184,7 +38184,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/ack CARD_ID"
+      "visible_label": "SLASH_COMMAND ack CARD_ID"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_026_OWNERACTIONRECEIPTV1",
@@ -38196,11 +38196,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_026_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_APPROVE_SHADOW_CARD_ID",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_APPROVE_SHADOW_CARD_ID",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/approve_shadow CARD_ID",
+      "exact_text_or_token": "SLASH_COMMAND approve_shadow CARD_ID",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -38218,7 +38218,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/approve_shadow CARD_ID"
+      "visible_label": "SLASH_COMMAND approve_shadow CARD_ID"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_026_OWNERACTIONRECEIPTV1",
@@ -38230,11 +38230,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_026_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_MORE_RESEARCH_CARD_ID",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_MORE_RESEARCH_CARD_ID",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/more_research CARD_ID",
+      "exact_text_or_token": "SLASH_COMMAND more_research CARD_ID",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -38252,7 +38252,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/more_research CARD_ID"
+      "visible_label": "SLASH_COMMAND more_research CARD_ID"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_026_OWNERACTIONRECEIPTV1",
@@ -38264,11 +38264,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_026_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_REJECT_ARCHIVE_CARD_ID",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_REJECT_ARCHIVE_CARD_ID",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/reject_archive CARD_ID",
+      "exact_text_or_token": "SLASH_COMMAND reject_archive CARD_ID",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -38286,7 +38286,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/reject_archive CARD_ID"
+      "visible_label": "SLASH_COMMAND reject_archive CARD_ID"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_026_OWNERACTIONRECEIPTV1",
@@ -38298,11 +38298,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_026_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_BACKLOG_REVITALIZATION_CARD_ID",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_BACKLOG_REVITALIZATION_CARD_ID",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/backlog_revitalization CARD_ID",
+      "exact_text_or_token": "SLASH_COMMAND backlog_revitalization CARD_ID",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -38320,7 +38320,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/backlog_revitalization CARD_ID"
+      "visible_label": "SLASH_COMMAND backlog_revitalization CARD_ID"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_026_OWNERACTIONRECEIPTV1",
@@ -38332,11 +38332,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_026_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_APPROVE_LIVE_CARD_ID",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_APPROVE_LIVE_CARD_ID",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/approve_live CARD_ID",
+      "exact_text_or_token": "SLASH_COMMAND approve_live CARD_ID",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -38354,7 +38354,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/approve_live CARD_ID"
+      "visible_label": "SLASH_COMMAND approve_live CARD_ID"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_026_OWNERACTIONRECEIPTV1",
@@ -38366,11 +38366,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_026_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_EXTEND_SHADOW_CARD_ID_EXTEND_SHADOW_BASIS_CLASS",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_EXTEND_SHADOW_CARD_ID_EXTEND_SHADOW_BASIS_CLASS",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/extend_shadow CARD_ID EXTEND_SHADOW_BASIS_CLASS",
+      "exact_text_or_token": "SLASH_COMMAND extend_shadow CARD_ID EXTEND_SHADOW_BASIS_CLASS",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -38388,7 +38388,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/extend_shadow CARD_ID EXTEND_SHADOW_BASIS_CLASS"
+      "visible_label": "SLASH_COMMAND extend_shadow CARD_ID EXTEND_SHADOW_BASIS_CLASS"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_026_OWNERACTIONRECEIPTV1",
@@ -38400,11 +38400,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_026_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_RETURN_REFINEMENT_CARD_ID",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_RETURN_REFINEMENT_CARD_ID",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/return_refinement CARD_ID",
+      "exact_text_or_token": "SLASH_COMMAND return_refinement CARD_ID",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -38422,7 +38422,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/return_refinement CARD_ID"
+      "visible_label": "SLASH_COMMAND return_refinement CARD_ID"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_026_OWNERACTIONRECEIPTV1",
@@ -38434,11 +38434,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_026_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_RESTRICT_LIVE_CARD_ID",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_RESTRICT_LIVE_CARD_ID",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/restrict_live CARD_ID",
+      "exact_text_or_token": "SLASH_COMMAND restrict_live CARD_ID",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -38456,7 +38456,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/restrict_live CARD_ID"
+      "visible_label": "SLASH_COMMAND restrict_live CARD_ID"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_026_OWNERACTIONRECEIPTV1",
@@ -38468,11 +38468,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_026_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_KILL_SWITCH_CARD_ID",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_KILL_SWITCH_CARD_ID",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/kill_switch CARD_ID",
+      "exact_text_or_token": "SLASH_COMMAND kill_switch CARD_ID",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -38490,7 +38490,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/kill_switch CARD_ID"
+      "visible_label": "SLASH_COMMAND kill_switch CARD_ID"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_026_OWNERACTIONRECEIPTV1",
@@ -38502,11 +38502,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_026_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_INVESTIGATE_CARD_ID",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_INVESTIGATE_CARD_ID",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/investigate CARD_ID",
+      "exact_text_or_token": "SLASH_COMMAND investigate CARD_ID",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -38524,7 +38524,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/investigate CARD_ID"
+      "visible_label": "SLASH_COMMAND investigate CARD_ID"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_026_OWNERACTIONRECEIPTV1",
@@ -38536,11 +38536,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_026_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_REOPEN_GATE1_CARD_ID",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_REOPEN_GATE1_CARD_ID",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/reopen_gate1 CARD_ID",
+      "exact_text_or_token": "SLASH_COMMAND reopen_gate1 CARD_ID",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -38558,7 +38558,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/reopen_gate1 CARD_ID"
+      "visible_label": "SLASH_COMMAND reopen_gate1 CARD_ID"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_026_OWNERACTIONRECEIPTV1",
@@ -38570,11 +38570,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_026_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_KEEP_PARKED_CARD_ID",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_KEEP_PARKED_CARD_ID",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/keep_parked CARD_ID",
+      "exact_text_or_token": "SLASH_COMMAND keep_parked CARD_ID",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -38592,7 +38592,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/keep_parked CARD_ID"
+      "visible_label": "SLASH_COMMAND keep_parked CARD_ID"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_026_OWNERACTIONRECEIPTV1",
@@ -38604,11 +38604,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_026_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_UPDATED_RESEARCH_CARD_ID",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_UPDATED_RESEARCH_CARD_ID",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/updated_research CARD_ID",
+      "exact_text_or_token": "SLASH_COMMAND updated_research CARD_ID",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -38626,7 +38626,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/updated_research CARD_ID"
+      "visible_label": "SLASH_COMMAND updated_research CARD_ID"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::OWNER_DASHBOARD_PACKET_V1",
@@ -39081,11 +39081,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_027_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_CHAT_AGENT_OR_POD_ID",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_CHAT_AGENT_OR_POD_ID",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/chat AGENT_OR_POD_ID",
+      "exact_text_or_token": "SLASH_COMMAND chat AGENT_OR_POD_ID",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -39103,7 +39103,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/chat AGENT_OR_POD_ID"
+      "visible_label": "SLASH_COMMAND chat AGENT_OR_POD_ID"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_027_OWNERNOTIFYTRANSPORTREGISTRYV1",
@@ -39115,11 +39115,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_027_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_REPLY_CONVERSATION_ID_OWNER_MESSAGE_TEXT",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_REPLY_CONVERSATION_ID_OWNER_MESSAGE_TEXT",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/reply CONVERSATION_ID OWNER_MESSAGE_TEXT",
+      "exact_text_or_token": "SLASH_COMMAND reply CONVERSATION_ID OWNER_MESSAGE_TEXT",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -39137,7 +39137,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/reply CONVERSATION_ID OWNER_MESSAGE_TEXT"
+      "visible_label": "SLASH_COMMAND reply CONVERSATION_ID OWNER_MESSAGE_TEXT"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_027_OWNERNOTIFYTRANSPORTREGISTRYV1",
@@ -39149,11 +39149,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_027_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_BROADCAST_SCOPE_ID_OWNER_MESSAGE_TEXT",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_BROADCAST_SCOPE_ID_OWNER_MESSAGE_TEXT",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/broadcast SCOPE_ID OWNER_MESSAGE_TEXT",
+      "exact_text_or_token": "SLASH_COMMAND broadcast SCOPE_ID OWNER_MESSAGE_TEXT",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -39171,7 +39171,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/broadcast SCOPE_ID OWNER_MESSAGE_TEXT"
+      "visible_label": "SLASH_COMMAND broadcast SCOPE_ID OWNER_MESSAGE_TEXT"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_027_OWNERNOTIFYTRANSPORTREGISTRYV1",
@@ -39183,11 +39183,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_027_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_TRANSCRIPT_CONVERSATION_ID",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_TRANSCRIPT_CONVERSATION_ID",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/transcript CONVERSATION_ID",
+      "exact_text_or_token": "SLASH_COMMAND transcript CONVERSATION_ID",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -39205,7 +39205,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/transcript CONVERSATION_ID"
+      "visible_label": "SLASH_COMMAND transcript CONVERSATION_ID"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_027_OWNERNOTIFYTRANSPORTREGISTRYV1",
@@ -39217,11 +39217,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_027_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_MESSAGES_AGENT_OR_POD_ID",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_MESSAGES_AGENT_OR_POD_ID",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/messages AGENT_OR_POD_ID",
+      "exact_text_or_token": "SLASH_COMMAND messages AGENT_OR_POD_ID",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -39239,7 +39239,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/messages AGENT_OR_POD_ID"
+      "visible_label": "SLASH_COMMAND messages AGENT_OR_POD_ID"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_027_OWNERNOTIFYTRANSPORTREGISTRYV1",
@@ -39251,11 +39251,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_027_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_DIRECTIVE_AGENT_OR_POD_ID",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_DIRECTIVE_AGENT_OR_POD_ID",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/directive AGENT_OR_POD_ID",
+      "exact_text_or_token": "SLASH_COMMAND directive AGENT_OR_POD_ID",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -39273,7 +39273,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/directive AGENT_OR_POD_ID"
+      "visible_label": "SLASH_COMMAND directive AGENT_OR_POD_ID"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_027_OWNERNOTIFYTRANSPORTREGISTRYV1",
@@ -39285,11 +39285,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_027_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_DIRECTIVE_AGENT_OR_POD_ID_LINKED_CARD_ID",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_DIRECTIVE_AGENT_OR_POD_ID_LINKED_CARD_ID",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/directive AGENT_OR_POD_ID LINKED_CARD_ID",
+      "exact_text_or_token": "SLASH_COMMAND directive AGENT_OR_POD_ID LINKED_CARD_ID",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -39307,7 +39307,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/directive AGENT_OR_POD_ID LINKED_CARD_ID"
+      "visible_label": "SLASH_COMMAND directive AGENT_OR_POD_ID LINKED_CARD_ID"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_027_OWNERNOTIFYTRANSPORTREGISTRYV1",
@@ -39319,11 +39319,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_027_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_PAUSE_AGENT_AGENT_ID",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_PAUSE_AGENT_AGENT_ID",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/pause_agent AGENT_ID",
+      "exact_text_or_token": "SLASH_COMMAND pause_agent AGENT_ID",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -39341,7 +39341,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/pause_agent AGENT_ID"
+      "visible_label": "SLASH_COMMAND pause_agent AGENT_ID"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_027_OWNERNOTIFYTRANSPORTREGISTRYV1",
@@ -39353,11 +39353,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_027_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_RESUME_AGENT_AGENT_ID",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_RESUME_AGENT_AGENT_ID",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/resume_agent AGENT_ID",
+      "exact_text_or_token": "SLASH_COMMAND resume_agent AGENT_ID",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -39375,7 +39375,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/resume_agent AGENT_ID"
+      "visible_label": "SLASH_COMMAND resume_agent AGENT_ID"
     },
     {
       "activation_route": "LLM2_ACTIVATION_ROUTE::RESEARCH_INTAKE_QUANTUM_STRATEGY_TEXT",
@@ -39387,11 +39387,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "OWNER_RESEARCH_CANDIDATE_INTAKE_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_QUANTUM_RESEARCH_QUANTUM_CANDIDATE_ID",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_QUANTUM_RESEARCH_QUANTUM_CANDIDATE_ID",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/quantum_research QUANTUM_CANDIDATE_ID",
+      "exact_text_or_token": "SLASH_COMMAND quantum_research QUANTUM_CANDIDATE_ID",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -39410,7 +39410,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/quantum_research QUANTUM_CANDIDATE_ID"
+      "visible_label": "SLASH_COMMAND quantum_research QUANTUM_CANDIDATE_ID"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_027_OWNERNOTIFYTRANSPORTREGISTRYV1",
@@ -39422,11 +39422,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_027_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_QUANTUM_REPLAY_QUANTUM_CANDIDATE_ID",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_QUANTUM_REPLAY_QUANTUM_CANDIDATE_ID",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/quantum_replay QUANTUM_CANDIDATE_ID",
+      "exact_text_or_token": "SLASH_COMMAND quantum_replay QUANTUM_CANDIDATE_ID",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -39444,7 +39444,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/quantum_replay QUANTUM_CANDIDATE_ID"
+      "visible_label": "SLASH_COMMAND quantum_replay QUANTUM_CANDIDATE_ID"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_027_OWNERNOTIFYTRANSPORTREGISTRYV1",
@@ -39456,11 +39456,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_027_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_QUANTUM_SHADOW_QUANTUM_CANDIDATE_ID",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_QUANTUM_SHADOW_QUANTUM_CANDIDATE_ID",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/quantum_shadow QUANTUM_CANDIDATE_ID",
+      "exact_text_or_token": "SLASH_COMMAND quantum_shadow QUANTUM_CANDIDATE_ID",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -39478,7 +39478,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/quantum_shadow QUANTUM_CANDIDATE_ID"
+      "visible_label": "SLASH_COMMAND quantum_shadow QUANTUM_CANDIDATE_ID"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_027_OWNERNOTIFYTRANSPORTREGISTRYV1",
@@ -39490,11 +39490,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_027_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_QUANTUM_EXTEND_SHADOW_QUANTUM_CANDIDATE_ID",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_QUANTUM_EXTEND_SHADOW_QUANTUM_CANDIDATE_ID",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/quantum_extend_shadow QUANTUM_CANDIDATE_ID",
+      "exact_text_or_token": "SLASH_COMMAND quantum_extend_shadow QUANTUM_CANDIDATE_ID",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -39512,7 +39512,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/quantum_extend_shadow QUANTUM_CANDIDATE_ID"
+      "visible_label": "SLASH_COMMAND quantum_extend_shadow QUANTUM_CANDIDATE_ID"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_027_OWNERNOTIFYTRANSPORTREGISTRYV1",
@@ -39524,11 +39524,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_027_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_QUANTUM_APPROVE_CACHED_LIVE_QUANTUM_CANDIDATE_ID",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_QUANTUM_APPROVE_CACHED_LIVE_QUANTUM_CANDIDATE_ID",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/quantum_approve_cached_live QUANTUM_CANDIDATE_ID",
+      "exact_text_or_token": "SLASH_COMMAND quantum_approve_cached_live QUANTUM_CANDIDATE_ID",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -39546,7 +39546,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/quantum_approve_cached_live QUANTUM_CANDIDATE_ID"
+      "visible_label": "SLASH_COMMAND quantum_approve_cached_live QUANTUM_CANDIDATE_ID"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_027_OWNERNOTIFYTRANSPORTREGISTRYV1",
@@ -39558,11 +39558,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_027_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_QUANTUM_ROLLBACK_QUANTUM_CANDIDATE_ID",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_QUANTUM_ROLLBACK_QUANTUM_CANDIDATE_ID",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/quantum_rollback QUANTUM_CANDIDATE_ID",
+      "exact_text_or_token": "SLASH_COMMAND quantum_rollback QUANTUM_CANDIDATE_ID",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -39580,7 +39580,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/quantum_rollback QUANTUM_CANDIDATE_ID"
+      "visible_label": "SLASH_COMMAND quantum_rollback QUANTUM_CANDIDATE_ID"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_027_OWNERNOTIFYTRANSPORTREGISTRYV1",
@@ -39592,11 +39592,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_027_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_QUANTUM_REVITALIZATION_QUANTUM_CANDIDATE_ID",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_QUANTUM_REVITALIZATION_QUANTUM_CANDIDATE_ID",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/quantum_revitalization QUANTUM_CANDIDATE_ID",
+      "exact_text_or_token": "SLASH_COMMAND quantum_revitalization QUANTUM_CANDIDATE_ID",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -39614,7 +39614,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/quantum_revitalization QUANTUM_CANDIDATE_ID"
+      "visible_label": "SLASH_COMMAND quantum_revitalization QUANTUM_CANDIDATE_ID"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_027_OWNERNOTIFYTRANSPORTREGISTRYV1",
@@ -39626,11 +39626,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_027_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_QUANTUM_RETIRE_QUANTUM_CANDIDATE_ID",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_QUANTUM_RETIRE_QUANTUM_CANDIDATE_ID",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/quantum_retire QUANTUM_CANDIDATE_ID",
+      "exact_text_or_token": "SLASH_COMMAND quantum_retire QUANTUM_CANDIDATE_ID",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -39648,7 +39648,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/quantum_retire QUANTUM_CANDIDATE_ID"
+      "visible_label": "SLASH_COMMAND quantum_retire QUANTUM_CANDIDATE_ID"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_027_OWNERNOTIFYTRANSPORTREGISTRYV1",
@@ -39694,11 +39694,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_027_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_REPLY",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_REPLY",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/reply",
+      "exact_text_or_token": "SLASH_COMMAND reply",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -39716,7 +39716,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/reply"
+      "visible_label": "SLASH_COMMAND reply"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_027_OWNERNOTIFYTRANSPORTREGISTRYV1",
@@ -39728,11 +39728,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_027_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_BROADCAST",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_BROADCAST",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/broadcast",
+      "exact_text_or_token": "SLASH_COMMAND broadcast",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -39750,7 +39750,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/broadcast"
+      "visible_label": "SLASH_COMMAND broadcast"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_027_OWNERNOTIFYTRANSPORTREGISTRYV1",
@@ -39830,11 +39830,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_027_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_PAUSE_AGENT",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_PAUSE_AGENT",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/pause_agent",
+      "exact_text_or_token": "SLASH_COMMAND pause_agent",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -39852,7 +39852,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/pause_agent"
+      "visible_label": "SLASH_COMMAND pause_agent"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_027_OWNERNOTIFYTRANSPORTREGISTRYV1",
@@ -39864,11 +39864,11 @@
       ],
       "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       "canonical_panel_id": "DASH1_20D_027_PANEL",
-      "canonical_widget_id": "UI1_TOKEN_RESUME_AGENT",
+      "canonical_widget_id": "UI1_TOKEN_SLASH_COMMAND_RESUME_AGENT",
       "connector_access_allowed": false,
       "credential_access_allowed": false,
       "element_kind": "FIELD",
-      "exact_text_or_token": "/resume_agent",
+      "exact_text_or_token": "SLASH_COMMAND resume_agent",
       "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
       "manual_edit_allowed": false,
       "order_execution_allowed": false,
@@ -39886,7 +39886,7 @@
       ],
       "source_truth_authority": false,
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
-      "visible_label": "/resume_agent"
+      "visible_label": "SLASH_COMMAND resume_agent"
     },
     {
       "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_032_DIRECT_OWNER_TO_AGENT_CONVERSATION_EXTENSION",
@@ -59040,7 +59040,7 @@
     "data_source": "GENERATED_ARTIFACTS",
     "decision_queue_count": 171,
     "fixture_fallback_active": false,
-    "generated_at": "2026-07-03T05:49:11+00:00",
+    "generated_at": "2026-07-03T08:36:05+00:00",
     "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
     "manual_edit_allowed": false,
     "order_execution_allowed": false,
@@ -63313,7 +63313,7 @@
   },
   "stale_data_banner": {
     "data_freshness": "STATIC_GENERATED_BOOT_DATA",
-    "last_snapshot_time": "2026-07-03T05:49:11+00:00",
+    "last_snapshot_time": "2026-07-03T08:36:05+00:00",
     "meta": {
       "agent_consumable_authority": false,
       "artifact_id": "UI1_STALE_DATA_BANNER",
@@ -63339,7 +63339,7 @@
     "agent_route_count": 171,
     "artifact_directory": "docs/master_plan/generated/pr169_dash1",
     "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
-    "boot_data_generated_timestamp": "2026-07-03T05:49:11+00:00",
+    "boot_data_generated_timestamp": "2026-07-03T08:36:05+00:00",
     "chart_count": 48,
     "decision_queue_count": 171,
     "input_data_source": "GENERATED_ARTIFACTS",
@@ -63520,7 +63520,7 @@
         "desktop_layout": "workstation_scroll_anchor",
         "drilldown_ref": "drawer::overview",
         "empty_state_policy": "show useful routed provider-pending card",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -63567,7 +63567,7 @@
         "desktop_layout": "workstation_scroll_anchor",
         "drilldown_ref": "drawer::portfolio-pnl",
         "empty_state_policy": "show useful routed provider-pending card",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -63614,7 +63614,7 @@
         "desktop_layout": "workstation_scroll_anchor",
         "drilldown_ref": "drawer::decision-queue",
         "empty_state_policy": "show useful routed provider-pending card",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "ACK_OWNER_PACKET"
@@ -63710,7 +63710,7 @@
         "desktop_layout": "workstation_scroll_anchor",
         "drilldown_ref": "drawer::research-intake",
         "empty_state_policy": "show useful routed provider-pending card",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "SUBMIT_RESEARCH_CANDIDATE"
@@ -63805,7 +63805,7 @@
         "desktop_layout": "workstation_scroll_anchor",
         "drilldown_ref": "drawer::edge-alpha-board",
         "empty_state_policy": "show useful routed provider-pending card",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -63853,7 +63853,7 @@
         "desktop_layout": "workstation_scroll_anchor",
         "drilldown_ref": "drawer::parameter-control",
         "empty_state_policy": "show useful routed provider-pending card",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -63903,7 +63903,7 @@
         "desktop_layout": "workstation_scroll_anchor",
         "drilldown_ref": "drawer::qku-formula-stack-routes",
         "empty_state_policy": "show useful routed provider-pending card",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_FORMULA_EXTRACTION",
@@ -63955,7 +63955,7 @@
         "desktop_layout": "workstation_scroll_anchor",
         "drilldown_ref": "drawer::quantum-control-center",
         "empty_state_policy": "show useful routed provider-pending card",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_QSTRUCT_MAPPING_REVIEW"
@@ -64009,7 +64009,7 @@
         "desktop_layout": "workstation_scroll_anchor",
         "drilldown_ref": "drawer::llm-intelligence",
         "empty_state_policy": "show useful routed provider-pending card",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_LLM_RESEARCH_EXTRACTION"
@@ -64056,7 +64056,7 @@
         "desktop_layout": "workstation_scroll_anchor",
         "drilldown_ref": "drawer::agent-operations",
         "empty_state_policy": "show useful routed provider-pending card",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -64153,7 +64153,7 @@
         "desktop_layout": "workstation_scroll_anchor",
         "drilldown_ref": "drawer::execution-costs-tca",
         "empty_state_policy": "show useful routed provider-pending card",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -64344,7 +64344,7 @@
         "desktop_layout": "workstation_scroll_anchor",
         "drilldown_ref": "drawer::arbitrage-dry-run",
         "empty_state_policy": "show useful routed provider-pending card",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -64438,7 +64438,7 @@
         "desktop_layout": "workstation_scroll_anchor",
         "drilldown_ref": "drawer::neural-signal-lab",
         "empty_state_policy": "show useful routed provider-pending card",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -64485,7 +64485,7 @@
         "desktop_layout": "workstation_scroll_anchor",
         "drilldown_ref": "drawer::external-bot-threat-intelligence",
         "empty_state_policy": "show useful routed provider-pending card",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -64722,7 +64722,7 @@
         "desktop_layout": "workstation_scroll_anchor",
         "drilldown_ref": "drawer::dag-data-route-map",
         "empty_state_policy": "show useful routed provider-pending card",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -64769,7 +64769,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::owner-dashboard-packet-card",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "ACK_OWNER_PACKET"
@@ -64816,7 +64816,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::owner-header-strip-card",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -64863,7 +64863,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::decision-queue-card-shell",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -64910,7 +64910,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::telegram-owner-packet-mirror-card",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "ACK_OWNER_PACKET",
@@ -64958,7 +64958,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::owner-packet-ack-audit-row",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "ACK_OWNER_PACKET"
@@ -65005,7 +65005,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::owner-command-normalized-form-card",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -65052,7 +65052,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::owner-command-parse-instance-card",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -65099,7 +65099,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::owner-command-idempotency-card",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -65146,7 +65146,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::owner-command-execution-claim-card",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -65193,7 +65193,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::owner-command-claim-recovery-card",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -65240,7 +65240,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::owner-command-receipt-sequence-card",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -65287,7 +65287,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::owner-trade-target-intake-panel-card",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "SUBMIT_RESEARCH_CANDIDATE"
@@ -65334,7 +65334,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::owner-progress-board-card",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -65381,7 +65381,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::event-credibility-panel-card",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_RISK_REVIEW",
@@ -65429,7 +65429,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::trade-readiness-scorecard",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -65476,7 +65476,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::trade-structure-optimization-packet",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "ACK_OWNER_PACKET"
@@ -65523,7 +65523,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::trade-proposal-card",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -65570,7 +65570,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::watch-monitor-card",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -65617,7 +65617,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::trade-management-plan-card",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -65664,7 +65664,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::exit-decision-card",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -65711,7 +65711,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::active-elite-strategies-panel-card",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "ACK_OWNER_PACKET"
@@ -65758,7 +65758,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::elite-strategy-pipeline-panel-card",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -65805,7 +65805,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::elite-research-queue-panel-card",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -65852,7 +65852,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::elite-shadow-daily-report-card",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -65899,7 +65899,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::elite-strategy-archive-panel-card",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -65946,7 +65946,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::elite-strategy-health-state-card",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -65993,7 +65993,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::performance-intelligence-panel",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -66040,7 +66040,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::decision-attribution-panel",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "ACK_OWNER_PACKET",
@@ -66088,7 +66088,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::slippage-intelligence-panel",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -66135,7 +66135,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::execution-forensics-panel-card",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "ACK_OWNER_PACKET",
@@ -66183,7 +66183,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::cumulative-slippage-dashboard-card",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_TELEGRAM_MIRROR"
@@ -66230,7 +66230,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::alpha-promotion-scorecard-panel-card",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -66277,7 +66277,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::direct-live-on-approval-queue-panel-card",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "SUBMIT_RESEARCH_CANDIDATE"
@@ -66324,7 +66324,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::edge-source-budgeting-panel-card",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "ACK_OWNER_PACKET"
@@ -66371,7 +66371,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::alpha-death-monitor-panel-card",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_LIVE_CANARY_REVIEW"
@@ -66418,7 +66418,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::live-edge-radar-panel",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_LIVE_CANARY_REVIEW"
@@ -66465,7 +66465,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::source-watchlist-panel",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_SOURCE_CAPTURE",
@@ -66513,7 +66513,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::research-queue-panel",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "SUBMIT_RESEARCH_CANDIDATE"
@@ -66560,7 +66560,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::edge-hypothesis-board",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -66607,7 +66607,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::alpha-candidate-scoreboard",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -66654,7 +66654,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::no-trade-board",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_NO_TRADE_REOPTIMIZATION_REVIEW"
@@ -66701,7 +66701,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::replay-paper-test-queue-panel",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_REPLAY_TEST",
@@ -66749,7 +66749,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::owner-approval-queue-panel",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -66796,7 +66796,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::capital-usage-panel",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -66843,7 +66843,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::latency-and-error-panel",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -66890,7 +66890,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::microstructure-calibration-panel",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -66937,7 +66937,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::local-llm-model-control-panel",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_LLM_RESEARCH_EXTRACTION"
@@ -66984,7 +66984,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::day1-owner-review-digest-panel",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "ACK_OWNER_PACKET",
@@ -67032,7 +67032,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::day1-arbitrage-dry-run-dashboard-panel",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -67079,7 +67079,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::day1-arbitrage-live-promotion-panel",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -67126,7 +67126,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::agent-duty-board",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -67173,7 +67173,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::agent-kpi-board",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -67220,7 +67220,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::missed-duty-queue",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -67267,7 +67267,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::agent-trust-score-panel",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "SUBMIT_RESEARCH_CANDIDATE"
@@ -67314,7 +67314,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::agent-failure-escalation-queue",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "ACK_OWNER_PACKET",
@@ -67363,7 +67363,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::agent-quarantine-state-panel",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -67410,7 +67410,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::agent-self-healing-action-log",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "ACK_OWNER_PACKET"
@@ -67457,7 +67457,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::agent-replacement-candidate-panel",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -67504,7 +67504,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::agent-reroute-control-panel",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -67551,7 +67551,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::agent-permission-change-request-panel",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -67598,7 +67598,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::external-bot-strategy-candidate-panel",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -67645,7 +67645,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::external-bot-supply-chain-quarantine-panel",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -67692,7 +67692,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::external-bot-threat-intelligence-panel",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "SUBMIT_RESEARCH_CANDIDATE"
@@ -67739,7 +67739,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::prediction-market-execution-mechanics-panel",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -67786,7 +67786,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::cross-venue-execution-normalization-panel",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -67833,7 +67833,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::source-evidence-retrieval-readiness-panel",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_SOURCE_CAPTURE",
@@ -67881,7 +67881,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::neural-signal-candidate-panel",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -67928,7 +67928,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::stationary-feature-catalog-panel",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -67975,7 +67975,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::target-construction-panel",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -68022,7 +68022,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::leakage-audit-panel",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -68069,7 +68069,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::purged-walk-forward-validation-panel",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -68116,7 +68116,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::model-calibration-panel",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -68163,7 +68163,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::model-drift-monitor-panel",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -68210,7 +68210,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::signal-to-sizing-boundary-panel",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -68257,7 +68257,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::neural-dual-result-review-panel",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -68304,7 +68304,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::neural-owner-promotion-gate-panel",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -68351,7 +68351,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::forbidden-claim-and-source-retrieval-target-panel",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_SOURCE_CAPTURE",
@@ -68399,7 +68399,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::quantum-candidate-lifecycle-panel",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -68446,7 +68446,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::quantum-artifact-panel",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -68493,7 +68493,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::mbo-order-lifecycle-observability-panel",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -68540,7 +68540,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::quantum-intelligence-panel",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_REPLAY_TEST",
@@ -68588,7 +68588,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::quantum-proof-propagation-attribution-panel",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -68635,7 +68635,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::true-quantum-primacy-responsibility-core-gap-panel",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -68682,7 +68682,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::quantum-centrality-scoreboard",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -68729,7 +68729,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::quantum-formula-to-decision-registry-viewer",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -68776,7 +68776,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::quantum-policy-bundle-diff-viewer",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -68823,7 +68823,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::quantum-propagation-receipt-panel",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -68870,7 +68870,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::quantum-checkpoint-completion-panel",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -68917,7 +68917,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::quantum-causality-panel",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_LLM_RESEARCH_EXTRACTION"
@@ -68964,7 +68964,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::quantum-freshness-by-decision-surface-panel",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -69011,7 +69011,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::quantum-failure-heatmap",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -69058,7 +69058,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::official-ecosystem-alignment-panel",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -69105,7 +69105,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::quantum-responsibility-class-badge",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -69152,7 +69152,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::backend-role-matrix-panel",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -69199,7 +69199,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::formula-registry-reference-panel",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_SOURCE_CAPTURE",
@@ -69247,7 +69247,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::hard-part-decomposition-panel",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -69294,7 +69294,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::numeric-authority-chain-panel",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -69341,7 +69341,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::quantum-bridge-panel",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -69388,7 +69388,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::noise-confidence-haircut-panel",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -69435,7 +69435,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::tensor-network-readiness-panel",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -69482,7 +69482,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::solver-league-panel",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -69529,7 +69529,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::compatibility-matrix-panel",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -69576,7 +69576,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::lineage-ledger-panel",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -69623,7 +69623,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::quantum-stack-health-monitor",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -69670,7 +69670,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::qpu-enablement-panel",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -69717,7 +69717,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::provider-routing-panel",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -69764,7 +69764,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::failover-control-panel",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_SOURCE_CAPTURE",
@@ -69812,7 +69812,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::owner-live-execution-mode-panel",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_SOURCE_CAPTURE",
@@ -69867,7 +69867,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::blocker-remediation-panel",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_FORMULA_EXTRACTION",
@@ -69919,7 +69919,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::force-override-control-panel",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_FORMULA_EXTRACTION",
@@ -69971,7 +69971,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::pnl-timeseries-row",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "ACK_OWNER_PACKET",
@@ -70023,7 +70023,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::market-platform-rollup-card",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_SOURCE_CAPTURE",
@@ -70073,7 +70073,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::cumulative-earnings-graph-spec",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_REPLAY_TEST",
@@ -70121,7 +70121,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::fee-and-slippage-waterfall-card",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -70168,7 +70168,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::experimental-vs-live-comparator-card",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -70215,7 +70215,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::quantum-classical-comparator-timeseries-row",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -70262,7 +70262,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::quantum-uplift-percentage-curve-spec",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -70309,7 +70309,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::quantum-regime-bucket-heatmap-card",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -70356,7 +70356,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::quantum-degradation-trend-graph-spec",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -70403,7 +70403,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::quantum-value-decomposition-graph-spec",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -70450,7 +70450,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::quantum-complexity-roi-graph-spec",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -70497,7 +70497,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::counterfactual-opportunity-loss-graph-spec",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -70544,7 +70544,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::capital-routing-recommendation-overlay-card",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -70591,7 +70591,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::graph-color-semantics-legend-card",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -70638,7 +70638,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::daily-opportunity-census-panel-card",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_NO_TRADE_REOPTIMIZATION_REVIEW"
@@ -70685,7 +70685,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::daily-alpha-board-panel-card",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -70732,7 +70732,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::realized-edge-closure-ratio-curve",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_QKU_COMPUTABILITY_REVIEW",
@@ -70781,7 +70781,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::execution-loss-decomposition-waterfall",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_QSTRUCT_MAPPING_REVIEW"
@@ -70828,7 +70828,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::alpha-basket-concentration-overlay",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_QSTRUCT_MAPPING_REVIEW"
@@ -70875,7 +70875,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::cross-edge-correlation-overlay",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -70922,7 +70922,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::failure-mode-diversity-overlay",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -70969,7 +70969,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::latency-histogram",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -71016,7 +71016,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::reject-throttle-error-rate-chart",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -71063,7 +71063,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::capital-usage-chart",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"
@@ -71110,7 +71110,7 @@
         "desktop_layout": "alias_search_and_panel_card",
         "drilldown_ref": "drawer::parameter-revitalization-board",
         "empty_state_policy": "visible alias backed to canonical DASH1 route",
-        "empty_state_reason": "",
+        "empty_state_reason": "Not applicable: widget renders DASH1 artifact rows.",
         "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
         "linked_action_codes": [
           "REQUEST_OWNER_REVIEW"

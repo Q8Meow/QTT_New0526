@@ -25,6 +25,7 @@ GENERATED_FROM_UI1 = (
 AUTHORITY_BOUNDARY = (
     "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE"
 )
+RENDERED_EMPTY_STATE_REASON = "Not applicable: widget renders DASH1 artifact rows."
 THEME_STORAGE_KEY = "qtt_owner_dashboard_theme"
 VALIDATION_REF = "tools/validate_pr169_dash1_owner_dashboard_ui.py"
 
@@ -475,6 +476,23 @@ def _currentize_rejected_tokens(value: str) -> str:
     return re.sub("timeline", repl, value, flags=re.IGNORECASE)
 
 
+def _repo_ref(path: Path | str) -> str:
+    candidate = Path(path)
+    if candidate.is_absolute():
+        try:
+            candidate = candidate.resolve().relative_to(REPO_ROOT)
+        except ValueError:
+            pass
+    return repo_posix(candidate)
+
+
+def _generated_display_text(value: str) -> str:
+    text = _currentize_rejected_tokens(value)
+    if text.startswith("/"):
+        return f"SLASH_COMMAND {text[1:]}"
+    return text
+
+
 def _anchor(label: str) -> str:
     clean = _currentize_rejected_tokens(label)
     return re.sub(r"[^a-z0-9]+", "-", clean.lower()).strip("-") or "section"
@@ -546,8 +564,8 @@ def _extract_20d_sections(master_plan: Path, registry_rows: list[dict[str, Any]]
         heading_text = heading.group("section").strip()
         section_id = heading_text.split(" ", 1)[0]
         title = heading_text.split(" ", 1)[1] if " " in heading_text else heading_text
-        safe_heading_text = _currentize_rejected_tokens(heading_text)
-        safe_title = _currentize_rejected_tokens(title)
+        safe_heading_text = _generated_display_text(heading_text)
+        safe_title = _generated_display_text(title)
         next_start = heading_matches[index].start() if index < len(heading_matches) else len(body)
         section_body = body[heading.end() : next_start]
         feature = _find_feature_for_token(registry_rows, title) or registry_rows[min(index - 1, len(registry_rows) - 1)]
@@ -561,7 +579,7 @@ def _extract_20d_sections(master_plan: Path, registry_rows: list[dict[str, Any]]
             "render_status": "VISIBLE_EMPTY_STATE_PROVIDER_PENDING"
             if feature.get("lifecycle_state") != "MATERIALIZED_IN_DASH1"
             else "VISIBLE_WIDGET_RENDERED",
-            "source_artifact_refs": [repo_posix(Path("docs/master_plan/QTT_MasterPlan_Current.md"))],
+            "source_artifact_refs": [_repo_ref(Path("docs/master_plan/QTT_MasterPlan_Current.md"))],
             "provider_stage": feature.get("provider_stage", "UI1"),
             "activation_route": feature.get("activation_route", f"UI1_RENDER_ROUTE::{section_id}"),
             "authority_boundary_ref": AUTHORITY_BOUNDARY,
@@ -578,7 +596,7 @@ def _extract_20d_sections(master_plan: Path, registry_rows: list[dict[str, Any]]
         uppercase_tokens = re.findall(r"\b[A-Z][A-Z0-9_]{4,}\b", section_body)
         for token in list(dict.fromkeys([*tokens, *uppercase_tokens]))[:80]:
             token_feature = _find_feature_for_token(registry_rows, token) or feature
-            safe_token = _currentize_rejected_tokens(token)
+            safe_token = _generated_display_text(token)
             rows.append(
                 {
                     **_ui_meta(),
@@ -590,7 +608,7 @@ def _extract_20d_sections(master_plan: Path, registry_rows: list[dict[str, Any]]
                     "canonical_panel_id": str(token_feature.get("panel_id", section_row["canonical_panel_id"])),
                     "visible_label": safe_token,
                     "render_status": "VISIBLE_ALIAS_RENDERED",
-                    "source_artifact_refs": [repo_posix(Path("docs/master_plan/QTT_MasterPlan_Current.md"))],
+                    "source_artifact_refs": [_repo_ref(Path("docs/master_plan/QTT_MasterPlan_Current.md"))],
                     "provider_stage": token_feature.get("provider_stage", "UI1"),
                     "activation_route": token_feature.get("activation_route", f"UI1_RENDER_ROUTE::{section_id}"),
                     "authority_boundary_ref": AUTHORITY_BOUNDARY,
@@ -603,7 +621,7 @@ def _extract_20d_sections(master_plan: Path, registry_rows: list[dict[str, Any]]
     if not rows:
         fallback = registry_rows[:20]
         for index, feature in enumerate(fallback, start=1):
-            safe_label = _currentize_rejected_tokens(str(feature.get("canonical_label", "")))
+            safe_label = _generated_display_text(str(feature.get("canonical_label", "")))
             rows.append(
                 {
                     **_ui_meta(),
@@ -653,7 +671,9 @@ def _build_widget_manifest(registry_rows: list[dict[str, Any]], coverage_rows: l
                 "source_artifact_paths": ["owner_dashboard_surface_registry.jsonl"],
                 "source_row_count": len(refs),
                 "render_state": "VISIBLE_WIDGET_RENDERED" if refs else "VISIBLE_EMPTY_STATE_PROVIDER_PENDING",
-                "empty_state_reason": "" if refs else "No direct DASH1 registry row matched this nav area; routed empty state rendered.",
+                "empty_state_reason": RENDERED_EMPTY_STATE_REASON
+                if refs
+                else "No direct DASH1 registry row matched this nav area; routed empty state rendered.",
                 "provider_stage": feature.get("provider_stage", "UI1"),
                 "activation_route": feature.get("activation_route", f"UI1_NAV_ROUTE::{area}"),
                 "authority_boundary": AUTHORITY_BOUNDARY,
@@ -683,7 +703,7 @@ def _build_widget_manifest(registry_rows: list[dict[str, Any]], coverage_rows: l
                     "source_artifact_paths": ["owner_dashboard_surface_registry.jsonl"],
                     "source_row_count": 1,
                     "render_state": "VISIBLE_ALIAS_RENDERED",
-                    "empty_state_reason": "",
+                    "empty_state_reason": RENDERED_EMPTY_STATE_REASON,
                     "provider_stage": feature.get("provider_stage", "UI1"),
                     "activation_route": feature.get("activation_route", f"UI1_ALIAS_ROUTE::{name}"),
                     "authority_boundary": AUTHORITY_BOUNDARY,
@@ -1402,7 +1422,7 @@ def _build_review_data(base: Path, master_plan: Path) -> tuple[dict[str, Any], d
             **_ui_meta({"artifact_id": "UI1_OWNER_DASHBOARD_REVIEW_DATA"}),
             "generated_at": generated_at,
             "data_source": "GENERATED_ARTIFACTS",
-            "artifact_directory": repo_posix(base),
+            "artifact_directory": _repo_ref(base),
             "registry_row_count": len(registry_rows),
             "decision_queue_count": len(decision_queue),
             "actionable_card_count": len(actionable_cards),
@@ -1416,7 +1436,7 @@ def _build_review_data(base: Path, master_plan: Path) -> tuple[dict[str, Any], d
         "status_strip": {
             "surface_mode": "LOCAL_STATIC_READ_ONLY",
             "input_data_source": "GENERATED_ARTIFACTS",
-            "artifact_directory": repo_posix(base),
+            "artifact_directory": _repo_ref(base),
             "boot_data_generated_timestamp": generated_at,
             "registry_row_count": len(registry_rows),
             "decision_queue_count": len(decision_queue),

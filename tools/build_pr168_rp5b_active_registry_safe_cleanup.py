@@ -194,11 +194,7 @@ def _final_summary(
         "quantum_backend_execution_count": 0,
         "qtt_sha_or_atomicrows_hash_authority_count": 0,
     }
-    if (
-        not deleted_actions
-        and not archived_actions
-        and all(row.get("final_action") in {"UNCLEAR_DO_NOT_DELETE", "KEEP_UNIQUE_IDENTITY_SOURCE"} for row in verification_rows)
-    ):
+    if not deleted_actions and not archived_actions:
         summary["cleanup_result_note"] = ZERO_DELETION_RESULT_NOTE
     for field in HARD_ZERO_FINAL_SUMMARY_FIELDS:
         summary.setdefault(field, 0)
