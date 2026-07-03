@@ -1,0 +1,32 @@
+{
+  "activation_route": "PRETRADE1_ACTIVATION_ROUTE::DECISION_KERNEL",
+  "meta": {
+    "agent_consumable_authority": false,
+    "artifact_id": "UI1_PRETRADE_DECISION_KERNEL_CONTRACT",
+    "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+    "connector_access_allowed": false,
+    "credential_access_allowed": false,
+    "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
+    "manual_edit_allowed": false,
+    "order_execution_allowed": false,
+    "runtime_side_effect_allowed": false,
+    "runtime_truth_authority": false,
+    "source_truth_authority": false,
+    "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+  },
+  "no_connector_writes": true,
+  "no_live_order_release": true,
+  "objects": [
+    "PreTradeDecisionCandidateV1",
+    "PreTradeModePolicyV1",
+    "NoTradeCandidateV1",
+    "OrderPolicyCandidateSetV1",
+    "ScenarioLadderDecisionV1",
+    "LatencyBudgetDecisionV1",
+    "ModeAuthorityMatrixV1",
+    "DecisionToPaperLoopHandoffV1",
+    "DecisionToLiveDryRunHandoffV1"
+  ],
+  "provider_stage": "PRETRADE1",
+  "render_state": "VISIBLE_EMPTY_STATE_PROVIDER_PENDING"
+}

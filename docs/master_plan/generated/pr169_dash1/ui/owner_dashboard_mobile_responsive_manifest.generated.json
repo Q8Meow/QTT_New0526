@@ -1,0 +1,24 @@
+{
+  "actual_responsive_desktop_mobile_rendering": true,
+  "desktop_width_min_px": 1200,
+  "meta": {
+    "agent_consumable_authority": false,
+    "artifact_id": "UI1_MOBILE_RESPONSIVE_MANIFEST",
+    "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+    "connector_access_allowed": false,
+    "credential_access_allowed": false,
+    "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
+    "manual_edit_allowed": false,
+    "order_execution_allowed": false,
+    "runtime_side_effect_allowed": false,
+    "runtime_truth_authority": false,
+    "source_truth_authority": false,
+    "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+  },
+  "mobile_bottom_navigation": true,
+  "mobile_drilldown_bottom_sheet": true,
+  "no_mobile_horizontal_page_overflow": true,
+  "phone_width_max_px": 767,
+  "small_phone_width_max_px": 430,
+  "tablet_width_px": "768-1199"
+}

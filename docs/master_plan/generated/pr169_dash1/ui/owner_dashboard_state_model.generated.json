@@ -1,0 +1,32 @@
+{
+  "action_registry_ref": "OwnerActionRegistryV1",
+  "meta": {
+    "agent_consumable_authority": false,
+    "artifact_id": "UI1_OWNER_DASHBOARD_STATE_MODEL",
+    "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+    "connector_access_allowed": false,
+    "credential_access_allowed": false,
+    "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
+    "manual_edit_allowed": false,
+    "order_execution_allowed": false,
+    "runtime_side_effect_allowed": false,
+    "runtime_truth_authority": false,
+    "source_truth_authority": false,
+    "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+  },
+  "no_duplicate_chat_system": true,
+  "no_duplicate_mobile_only_data_layer": true,
+  "no_duplicate_telegram_governance_plane": true,
+  "one_audit_receipt_model": true,
+  "one_dashboard_state_model": true,
+  "one_owner_action_grammar": true,
+  "one_owner_agent_conversation_model": true,
+  "one_resolver_or_API_path": true,
+  "one_source_agnostic_research_intake_model": true,
+  "one_trade_workbench_model": true,
+  "one_widget_chart_action_chat_manifest": true,
+  "resolver_ref": "OwnerSurfaceResolver",
+  "state_model_id": "OwnerDashboardStateV1",
+  "widget_count": 161,
+  "widget_manifest_ref": "owner_dashboard_widget_manifest.generated.json"
+}

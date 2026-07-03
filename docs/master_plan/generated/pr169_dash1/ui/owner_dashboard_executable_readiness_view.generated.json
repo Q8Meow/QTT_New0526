@@ -1,0 +1,32 @@
+{
+  "current_executable_now_count": null,
+  "current_paper_loop_usable_count": null,
+  "current_schedulable_after_adapter_count": null,
+  "executable_now_means_safely_computable_testable_not_profitable": true,
+  "fixture_only_vs_real_replay_proof_status": "PROVIDER_PENDING",
+  "highest_value_unlock_queue": [
+    "READINESS1",
+    "PLUGIN1",
+    "QMAP1",
+    "ALLOW1"
+  ],
+  "meta": {
+    "agent_consumable_authority": false,
+    "artifact_id": "UI1_EXECUTABLE_READINESS_VIEW",
+    "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+    "connector_access_allowed": false,
+    "credential_access_allowed": false,
+    "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
+    "manual_edit_allowed": false,
+    "order_execution_allowed": false,
+    "runtime_side_effect_allowed": false,
+    "runtime_truth_authority": false,
+    "source_truth_authority": false,
+    "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+  },
+  "no_fake_readiness_proof": true,
+  "remaining_blocker_family_rank": [
+    "READINESS1_PROVIDER_RECEIPT_REQUIRED"
+  ],
+  "route_to_READINESS1": "READINESS1_ACTIVATION_ROUTE::EXECUTABLE_READINESS"
+}

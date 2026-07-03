@@ -1,0 +1,30 @@
+{
+  "ExecutionRouter_release": "FORBIDDEN_IN_UI1",
+  "action_request_API": "CONTRACT_ONLY_NOT_IMPLEMENTED_IN_UI1",
+  "audit_receipt_API": "CONTRACT_ONLY_NOT_IMPLEMENTED_IN_UI1",
+  "authenticated_owner_session": "CONTRACT_ONLY_NOT_IMPLEMENTED_IN_UI1",
+  "connector_reads": "FORBIDDEN_IN_UI1",
+  "credential_handling": "FORBIDDEN_IN_UI1",
+  "device_registration": "CONTRACT_ONLY_NOT_IMPLEMENTED_IN_UI1",
+  "direct_venue_submit": "FORBIDDEN_IN_UI1",
+  "installable_PWA_runtime": "CONTRACT_ONLY_NOT_IMPLEMENTED_IN_UI1",
+  "live_status_streams": "CONTRACT_ONLY_NOT_IMPLEMENTED_IN_UI1",
+  "meta": {
+    "agent_consumable_authority": false,
+    "artifact_id": "UI1_MOBILE_RUNTIME_BOUNDARY",
+    "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+    "connector_access_allowed": false,
+    "credential_access_allowed": false,
+    "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
+    "manual_edit_allowed": false,
+    "order_execution_allowed": false,
+    "runtime_side_effect_allowed": false,
+    "runtime_truth_authority": false,
+    "source_truth_authority": false,
+    "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+  },
+  "order_execution": "FORBIDDEN_IN_UI1",
+  "push_notifications": "CONTRACT_ONLY_NOT_IMPLEMENTED_IN_UI1",
+  "secure_mobile_storage": "CONTRACT_ONLY_NOT_IMPLEMENTED_IN_UI1",
+  "service_worker_lifecycle": "CONTRACT_ONLY_NOT_IMPLEMENTED_IN_UI1"
+}

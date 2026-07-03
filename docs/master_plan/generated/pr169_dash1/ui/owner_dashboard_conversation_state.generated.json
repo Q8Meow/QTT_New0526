@@ -1,0 +1,40 @@
+{
+  "conversation_state_id": "OwnerConversationStateV1",
+  "message_preview_count": 3,
+  "meta": {
+    "agent_consumable_authority": false,
+    "artifact_id": "UI1_CONVERSATION_STATE",
+    "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+    "connector_access_allowed": false,
+    "credential_access_allowed": false,
+    "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
+    "manual_edit_allowed": false,
+    "order_execution_allowed": false,
+    "runtime_side_effect_allowed": false,
+    "runtime_truth_authority": false,
+    "source_truth_authority": false,
+    "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+  },
+  "thread_count": 3,
+  "threads": [
+    {
+      "linked_widget_id": "OWNER_TRADE_WORKBENCH_PANEL",
+      "route_receipt_preview_ref": "OwnerChatRouteReceiptPreviewV1",
+      "thread_id": "OWNER_THREAD_TRADE_WORKBENCH",
+      "title": "Trade Workbench requests"
+    },
+    {
+      "linked_widget_id": "OWNER_AGENT_CHAT_WORKSPACE_PANEL",
+      "route_receipt_preview_ref": "OwnerChatRouteReceiptPreviewV1",
+      "thread_id": "OWNER_THREAD_RESEARCH_INTAKE",
+      "title": "Research candidate intake"
+    },
+    {
+      "linked_widget_id": "OWNER_AGENT_CHAT_WORKSPACE_PANEL",
+      "route_receipt_preview_ref": "OwnerAgentDirectiveEnvelopeV1",
+      "thread_id": "OWNER_THREAD_AGENT_DIRECTIVES",
+      "title": "Agent directives"
+    }
+  ],
+  "uses_owner_dashboard_state_model": true
+}

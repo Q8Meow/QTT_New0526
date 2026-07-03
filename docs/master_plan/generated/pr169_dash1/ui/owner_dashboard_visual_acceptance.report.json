@@ -1,0 +1,20 @@
+{
+  "DARK_and_LIGHT_modes_both_render": true,
+  "charts_readable_in_both_modes": true,
+  "colors_are_never_the_only_carrier_of_meaning": true,
+  "drilldown_drawer_present": true,
+  "meta": {
+    "agent_consumable_authority": false,
+    "artifact_id": "UI1_VISUAL_ACCEPTANCE_REPORT",
+    "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+    "connector_access_allowed": false,
+    "credential_access_allowed": false,
+    "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
+    "manual_edit_allowed": false,
+    "order_execution_allowed": false,
+    "runtime_side_effect_allowed": false,
+    "runtime_truth_authority": false,
+    "source_truth_authority": false,
+    "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+  }
+}

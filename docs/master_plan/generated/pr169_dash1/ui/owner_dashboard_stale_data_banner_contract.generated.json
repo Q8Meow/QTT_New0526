@@ -1,0 +1,22 @@
+{
+  "data_freshness": "STATIC_GENERATED_BOOT_DATA",
+  "last_snapshot_time": "2026-07-03T05:49:11+00:00",
+  "meta": {
+    "agent_consumable_authority": false,
+    "artifact_id": "UI1_STALE_DATA_BANNER",
+    "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+    "connector_access_allowed": false,
+    "credential_access_allowed": false,
+    "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
+    "manual_edit_allowed": false,
+    "order_execution_allowed": false,
+    "runtime_side_effect_allowed": false,
+    "runtime_truth_authority": false,
+    "source_truth_authority": false,
+    "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+  },
+  "provider_state": "MATERIALIZED_IN_UI1",
+  "read_only_or_actionable_mode": "READ_ONLY_LOCAL_STATIC",
+  "stale_warning": "No live refresh stream in UI1; provider receipts required for current runtime state.",
+  "visible_on_mobile_sized_layout": true
+}

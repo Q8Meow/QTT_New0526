@@ -1,0 +1,249 @@
+{
+  "empty_states": [
+    {
+      "activation_route": "UI1_ACTIVATION_ROUTE::EXECUTABLE_READINESS_AND_ADAPTER_UNLOCK_PANEL",
+      "agent_consumable_authority": false,
+      "agent_role_refs_from_PR165_D2": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "blocked_authority_refs": [
+        "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE"
+      ],
+      "connector_access_allowed": false,
+      "credential_access_allowed": false,
+      "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
+      "manual_edit_allowed": false,
+      "missing_data_family": "provider_runtime_receipts",
+      "order_execution_allowed": false,
+      "owner_action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "panel_id": "EXECUTABLE_READINESS_AND_ADAPTER_UNLOCK_PANEL",
+      "provider_stage": "UI1",
+      "runtime_side_effect_allowed": false,
+      "runtime_truth_authority": false,
+      "source_artifact_attempted": "owner_dashboard_surface_registry.jsonl",
+      "source_truth_authority": false,
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "what_later_PR_will_materialize": "Provider service, receipt, or API contract outside UI1.",
+      "what_owner_can_do_next": "Review routed request preview and provider stage refs.",
+      "why_missing": "UI1 is a local static renderer and does not run provider services.",
+      "widget_id": "EXECUTABLE_READINESS_AND_ADAPTER_UNLOCK_PANEL"
+    },
+    {
+      "activation_route": "UI2_ACTIVATION_ROUTE::PRETRADE_DECISION_KERNEL_PANEL",
+      "agent_consumable_authority": false,
+      "agent_role_refs_from_PR165_D2": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "blocked_authority_refs": [
+        "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE"
+      ],
+      "connector_access_allowed": false,
+      "credential_access_allowed": false,
+      "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
+      "manual_edit_allowed": false,
+      "missing_data_family": "provider_runtime_receipts",
+      "order_execution_allowed": false,
+      "owner_action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "panel_id": "PRETRADE_DECISION_KERNEL_PANEL",
+      "provider_stage": "UI2",
+      "runtime_side_effect_allowed": false,
+      "runtime_truth_authority": false,
+      "source_artifact_attempted": "owner_dashboard_surface_registry.jsonl",
+      "source_truth_authority": false,
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "what_later_PR_will_materialize": "Provider service, receipt, or API contract outside UI1.",
+      "what_owner_can_do_next": "Review routed request preview and provider stage refs.",
+      "why_missing": "UI1 is a local static renderer and does not run provider services.",
+      "widget_id": "PRETRADE_DECISION_KERNEL_PANEL"
+    },
+    {
+      "activation_route": "SVC1_ACTIVATION_ROUTE::PREDICTION_MARKET_REALITY_MODEL_PANEL",
+      "agent_consumable_authority": false,
+      "agent_role_refs_from_PR165_D2": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "blocked_authority_refs": [
+        "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE"
+      ],
+      "connector_access_allowed": false,
+      "credential_access_allowed": false,
+      "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
+      "manual_edit_allowed": false,
+      "missing_data_family": "provider_runtime_receipts",
+      "order_execution_allowed": false,
+      "owner_action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "panel_id": "PREDICTION_MARKET_REALITY_MODEL_PANEL",
+      "provider_stage": "SVC1",
+      "runtime_side_effect_allowed": false,
+      "runtime_truth_authority": false,
+      "source_artifact_attempted": "owner_dashboard_surface_registry.jsonl",
+      "source_truth_authority": false,
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "what_later_PR_will_materialize": "Provider service, receipt, or API contract outside UI1.",
+      "what_owner_can_do_next": "Review routed request preview and provider stage refs.",
+      "why_missing": "UI1 is a local static renderer and does not run provider services.",
+      "widget_id": "PREDICTION_MARKET_REALITY_MODEL_PANEL"
+    },
+    {
+      "activation_route": "MOBILE1_ACTIVATION_ROUTE::HOTPATH_RUNTIME_METRICS_CONTRACT_PANEL",
+      "agent_consumable_authority": false,
+      "agent_role_refs_from_PR165_D2": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "blocked_authority_refs": [
+        "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE"
+      ],
+      "connector_access_allowed": false,
+      "credential_access_allowed": false,
+      "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
+      "manual_edit_allowed": false,
+      "missing_data_family": "provider_runtime_receipts",
+      "order_execution_allowed": false,
+      "owner_action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "panel_id": "HOTPATH_RUNTIME_METRICS_CONTRACT_PANEL",
+      "provider_stage": "MOBILE1",
+      "runtime_side_effect_allowed": false,
+      "runtime_truth_authority": false,
+      "source_artifact_attempted": "owner_dashboard_surface_registry.jsonl",
+      "source_truth_authority": false,
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "what_later_PR_will_materialize": "Provider service, receipt, or API contract outside UI1.",
+      "what_owner_can_do_next": "Review routed request preview and provider stage refs.",
+      "why_missing": "UI1 is a local static renderer and does not run provider services.",
+      "widget_id": "HOTPATH_RUNTIME_METRICS_CONTRACT_PANEL"
+    },
+    {
+      "activation_route": "MOBILE2_ACTIVATION_ROUTE::CENTRALIZED_AGENT_QKU_ACCESS_RESOLVER_PANEL",
+      "agent_consumable_authority": false,
+      "agent_role_refs_from_PR165_D2": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "blocked_authority_refs": [
+        "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE"
+      ],
+      "connector_access_allowed": false,
+      "credential_access_allowed": false,
+      "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
+      "manual_edit_allowed": false,
+      "missing_data_family": "provider_runtime_receipts",
+      "order_execution_allowed": false,
+      "owner_action_refs": [
+        "ACK_OWNER_PACKET"
+      ],
+      "panel_id": "CENTRALIZED_AGENT_QKU_ACCESS_RESOLVER_PANEL",
+      "provider_stage": "MOBILE2",
+      "runtime_side_effect_allowed": false,
+      "runtime_truth_authority": false,
+      "source_artifact_attempted": "owner_dashboard_surface_registry.jsonl",
+      "source_truth_authority": false,
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "what_later_PR_will_materialize": "Provider service, receipt, or API contract outside UI1.",
+      "what_owner_can_do_next": "Review routed request preview and provider stage refs.",
+      "why_missing": "UI1 is a local static renderer and does not run provider services.",
+      "widget_id": "CENTRALIZED_AGENT_QKU_ACCESS_RESOLVER_PANEL"
+    },
+    {
+      "activation_route": "TG1_ACTIVATION_ROUTE::PWA_NATIVE_RUNTIME_BOUNDARY_PANEL",
+      "agent_consumable_authority": false,
+      "agent_role_refs_from_PR165_D2": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "blocked_authority_refs": [
+        "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE"
+      ],
+      "connector_access_allowed": false,
+      "credential_access_allowed": false,
+      "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
+      "manual_edit_allowed": false,
+      "missing_data_family": "provider_runtime_receipts",
+      "order_execution_allowed": false,
+      "owner_action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "panel_id": "PWA_NATIVE_RUNTIME_BOUNDARY_PANEL",
+      "provider_stage": "TG1",
+      "runtime_side_effect_allowed": false,
+      "runtime_truth_authority": false,
+      "source_artifact_attempted": "owner_dashboard_surface_registry.jsonl",
+      "source_truth_authority": false,
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "what_later_PR_will_materialize": "Provider service, receipt, or API contract outside UI1.",
+      "what_owner_can_do_next": "Review routed request preview and provider stage refs.",
+      "why_missing": "UI1 is a local static renderer and does not run provider services.",
+      "widget_id": "PWA_NATIVE_RUNTIME_BOUNDARY_PANEL"
+    },
+    {
+      "activation_route": "READINESS1_ACTIVATION_ROUTE::PROVIDER_STAGE_ROUTE_MAP_PANEL",
+      "agent_consumable_authority": false,
+      "agent_role_refs_from_PR165_D2": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "blocked_authority_refs": [
+        "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE"
+      ],
+      "connector_access_allowed": false,
+      "credential_access_allowed": false,
+      "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
+      "manual_edit_allowed": false,
+      "missing_data_family": "provider_runtime_receipts",
+      "order_execution_allowed": false,
+      "owner_action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "panel_id": "PROVIDER_STAGE_ROUTE_MAP_PANEL",
+      "provider_stage": "READINESS1",
+      "runtime_side_effect_allowed": false,
+      "runtime_truth_authority": false,
+      "source_artifact_attempted": "owner_dashboard_surface_registry.jsonl",
+      "source_truth_authority": false,
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "what_later_PR_will_materialize": "Provider service, receipt, or API contract outside UI1.",
+      "what_owner_can_do_next": "Review routed request preview and provider stage refs.",
+      "why_missing": "UI1 is a local static renderer and does not run provider services.",
+      "widget_id": "PROVIDER_STAGE_ROUTE_MAP_PANEL"
+    }
+  ],
+  "meta": {
+    "agent_consumable_authority": false,
+    "artifact_id": "UI1_USEFUL_EMPTY_STATE_MANIFEST",
+    "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+    "connector_access_allowed": false,
+    "credential_access_allowed": false,
+    "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
+    "manual_edit_allowed": false,
+    "order_execution_allowed": false,
+    "runtime_side_effect_allowed": false,
+    "runtime_truth_authority": false,
+    "source_truth_authority": false,
+    "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+  }
+}

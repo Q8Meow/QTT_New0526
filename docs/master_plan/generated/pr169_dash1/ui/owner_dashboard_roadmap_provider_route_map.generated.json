@@ -1,0 +1,1336 @@
+{
+  "meta": {
+    "agent_consumable_authority": false,
+    "artifact_id": "UI1_PROVIDER_STAGE_ROUTE_MAP",
+    "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+    "connector_access_allowed": false,
+    "credential_access_allowed": false,
+    "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
+    "manual_edit_allowed": false,
+    "order_execution_allowed": false,
+    "runtime_side_effect_allowed": false,
+    "runtime_truth_authority": false,
+    "source_truth_authority": false,
+    "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+  },
+  "routes": [
+    {
+      "LLM_view_refs": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "LLM_visibility_policy": "LLM may research, critique, summarize, explain, and request evidence; LLM cannot create source truth, risk pass, live readiness, or order release.",
+      "QKU_formula_candidate_refs": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "QKU_formula_candidate_refs_when_applicable": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::OWNER_HEADER_STRIP_V1",
+      "agent_consumable_authority": false,
+      "agent_role_refs_from_PR165_D2": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "authority_class": "LOCAL_STATIC_RENDER_CONTRACT",
+      "blocked_authority_refs": [
+        "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE"
+      ],
+      "connector_access_allowed": false,
+      "credential_access_allowed": false,
+      "downstream_consumer_refs": [
+        "OwnerSurfaceResolver",
+        "owner_panel_projection.generated.jsonl",
+        "owner_downstream_route_projection.generated.jsonl"
+      ],
+      "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
+      "manual_edit_allowed": false,
+      "no_orphan_status": "ROUTED",
+      "order_execution_allowed": false,
+      "owner_action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "owning_stage_or_pr": "PR169-DASH1",
+      "provider_contract_ref": "PR169_DASH1_PROVIDER_CONTRACT::OWNER_HEADER_STRIP_V1",
+      "provider_stage": "DASH1",
+      "provider_state": "MATERIALIZED_IN_DASH1",
+      "route_purpose": "Owner-visible provider-stage route; UI1 renders contract/readiness only.",
+      "runtime_side_effect_allowed": false,
+      "runtime_side_effect_allowed_in_UI1": false,
+      "runtime_truth_authority": false,
+      "source_artifact_refs": [
+        "PR165_D2_CommandActionMatrix.report.json"
+      ],
+      "source_truth_authority": false,
+      "stage_id": "DASH1",
+      "stage_label": "DASH1",
+      "upstream_artifact_refs": [
+        "PR165_D2_CommandActionMatrix.report.json"
+      ],
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "what_UI1_renders_now": "Static routed card, no runtime provider action.",
+      "what_later_provider_must_supply": "Authenticated provider receipts, APIs, streams, or runtime engines outside UI1."
+    },
+    {
+      "LLM_view_refs": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "LLM_visibility_policy": "LLM may research, critique, summarize, explain, and request evidence; LLM cannot create source truth, risk pass, live readiness, or order release.",
+      "QKU_formula_candidate_refs": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "QKU_formula_candidate_refs_when_applicable": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::OWNER_DECISION_QUEUE_V1",
+      "agent_consumable_authority": false,
+      "agent_role_refs_from_PR165_D2": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "authority_class": "LOCAL_STATIC_RENDER_CONTRACT",
+      "blocked_authority_refs": [
+        "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE"
+      ],
+      "connector_access_allowed": false,
+      "credential_access_allowed": false,
+      "downstream_consumer_refs": [
+        "OwnerSurfaceResolver",
+        "owner_panel_projection.generated.jsonl",
+        "owner_downstream_route_projection.generated.jsonl"
+      ],
+      "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
+      "manual_edit_allowed": false,
+      "no_orphan_status": "ROUTED",
+      "order_execution_allowed": false,
+      "owner_action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "owning_stage_or_pr": "PR169-DASH1-UI1",
+      "provider_contract_ref": "PR169_DASH1_PROVIDER_CONTRACT::OWNER_DECISION_QUEUE_V1",
+      "provider_stage": "UI1",
+      "provider_state": "MATERIALIZED_IN_UI1",
+      "route_purpose": "Owner-visible provider-stage route; UI1 renders contract/readiness only.",
+      "runtime_side_effect_allowed": false,
+      "runtime_side_effect_allowed_in_UI1": false,
+      "runtime_truth_authority": false,
+      "source_artifact_refs": [
+        "PR165_D2_CommandActionMatrix.report.json"
+      ],
+      "source_truth_authority": false,
+      "stage_id": "UI1",
+      "stage_label": "UI1",
+      "upstream_artifact_refs": [
+        "PR165_D2_CommandActionMatrix.report.json"
+      ],
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "what_UI1_renders_now": "Static routed card, no runtime provider action.",
+      "what_later_provider_must_supply": "Authenticated provider receipts, APIs, streams, or runtime engines outside UI1."
+    },
+    {
+      "LLM_view_refs": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "LLM_visibility_policy": "LLM may research, critique, summarize, explain, and request evidence; LLM cannot create source truth, risk pass, live readiness, or order release.",
+      "QKU_formula_candidate_refs": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "QKU_formula_candidate_refs_when_applicable": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::OWNER_ACTION_REGISTRY_V1",
+      "agent_consumable_authority": false,
+      "agent_role_refs_from_PR165_D2": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "authority_class": "LOCAL_STATIC_RENDER_CONTRACT",
+      "blocked_authority_refs": [
+        "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE"
+      ],
+      "connector_access_allowed": false,
+      "credential_access_allowed": false,
+      "downstream_consumer_refs": [
+        "OwnerSurfaceResolver",
+        "owner_panel_projection.generated.jsonl",
+        "owner_downstream_route_projection.generated.jsonl"
+      ],
+      "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
+      "manual_edit_allowed": false,
+      "no_orphan_status": "ROUTED",
+      "order_execution_allowed": false,
+      "owner_action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "owning_stage_or_pr": "UI2",
+      "provider_contract_ref": "PR169_DASH1_PROVIDER_CONTRACT::OWNER_ACTION_REGISTRY_V1",
+      "provider_stage": "UI2",
+      "provider_state": "CONTRACT_DEFINED_PROVIDER_PENDING",
+      "route_purpose": "Owner-visible provider-stage route; UI1 renders contract/readiness only.",
+      "runtime_side_effect_allowed": false,
+      "runtime_side_effect_allowed_in_UI1": false,
+      "runtime_truth_authority": false,
+      "source_artifact_refs": [
+        "PR165_D2_CommandActionMatrix.report.json"
+      ],
+      "source_truth_authority": false,
+      "stage_id": "UI2",
+      "stage_label": "UI2",
+      "upstream_artifact_refs": [
+        "PR165_D2_CommandActionMatrix.report.json"
+      ],
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "what_UI1_renders_now": "Static routed card, no runtime provider action.",
+      "what_later_provider_must_supply": "Authenticated provider receipts, APIs, streams, or runtime engines outside UI1."
+    },
+    {
+      "LLM_view_refs": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "LLM_visibility_policy": "LLM may research, critique, summarize, explain, and request evidence; LLM cannot create source truth, risk pass, live readiness, or order release.",
+      "QKU_formula_candidate_refs": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "QKU_formula_candidate_refs_when_applicable": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::OWNER_GLOBAL_AUTHORITY_POLICY_V1",
+      "agent_consumable_authority": false,
+      "agent_role_refs_from_PR165_D2": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "authority_class": "LOCAL_STATIC_RENDER_CONTRACT",
+      "blocked_authority_refs": [
+        "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE"
+      ],
+      "connector_access_allowed": false,
+      "credential_access_allowed": false,
+      "downstream_consumer_refs": [
+        "OwnerSurfaceResolver",
+        "owner_panel_projection.generated.jsonl",
+        "owner_downstream_route_projection.generated.jsonl"
+      ],
+      "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
+      "manual_edit_allowed": false,
+      "no_orphan_status": "ROUTED",
+      "order_execution_allowed": false,
+      "owner_action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "owning_stage_or_pr": "SVC1",
+      "provider_contract_ref": "PR169_DASH1_PROVIDER_CONTRACT::OWNER_GLOBAL_AUTHORITY_POLICY_V1",
+      "provider_stage": "SVC1",
+      "provider_state": "CONTRACT_DEFINED_PROVIDER_PENDING",
+      "route_purpose": "Owner-visible provider-stage route; UI1 renders contract/readiness only.",
+      "runtime_side_effect_allowed": false,
+      "runtime_side_effect_allowed_in_UI1": false,
+      "runtime_truth_authority": false,
+      "source_artifact_refs": [
+        "PR165_D2_CommandActionMatrix.report.json"
+      ],
+      "source_truth_authority": false,
+      "stage_id": "SVC1",
+      "stage_label": "SVC1",
+      "upstream_artifact_refs": [
+        "PR165_D2_CommandActionMatrix.report.json"
+      ],
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "what_UI1_renders_now": "Static routed card, no runtime provider action.",
+      "what_later_provider_must_supply": "Authenticated provider receipts, APIs, streams, or runtime engines outside UI1."
+    },
+    {
+      "LLM_view_refs": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "LLM_visibility_policy": "LLM may research, critique, summarize, explain, and request evidence; LLM cannot create source truth, risk pass, live readiness, or order release.",
+      "QKU_formula_candidate_refs": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "QKU_formula_candidate_refs_when_applicable": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::OWNER_DASHBOARD_PACKET_ALIAS_CARD",
+      "agent_consumable_authority": false,
+      "agent_role_refs_from_PR165_D2": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "authority_class": "LOCAL_STATIC_RENDER_CONTRACT",
+      "blocked_authority_refs": [
+        "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE"
+      ],
+      "connector_access_allowed": false,
+      "credential_access_allowed": false,
+      "downstream_consumer_refs": [
+        "OwnerSurfaceResolver",
+        "owner_panel_projection.generated.jsonl",
+        "owner_downstream_route_projection.generated.jsonl"
+      ],
+      "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
+      "manual_edit_allowed": false,
+      "no_orphan_status": "ROUTED",
+      "order_execution_allowed": false,
+      "owner_action_refs": [
+        "ACK_OWNER_PACKET"
+      ],
+      "owning_stage_or_pr": "MOBILE1",
+      "provider_contract_ref": "PR169_DASH1_PROVIDER_CONTRACT::OWNER_DASHBOARD_PACKET_ALIAS_CARD",
+      "provider_stage": "MOBILE1",
+      "provider_state": "CONTRACT_DEFINED_PROVIDER_PENDING",
+      "route_purpose": "Owner-visible provider-stage route; UI1 renders contract/readiness only.",
+      "runtime_side_effect_allowed": false,
+      "runtime_side_effect_allowed_in_UI1": false,
+      "runtime_truth_authority": false,
+      "source_artifact_refs": [
+        "PR165_D2_CommandActionMatrix.report.json"
+      ],
+      "source_truth_authority": false,
+      "stage_id": "MOBILE1",
+      "stage_label": "MOBILE1",
+      "upstream_artifact_refs": [
+        "PR165_D2_CommandActionMatrix.report.json"
+      ],
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "what_UI1_renders_now": "Static routed card, no runtime provider action.",
+      "what_later_provider_must_supply": "Authenticated provider receipts, APIs, streams, or runtime engines outside UI1."
+    },
+    {
+      "LLM_view_refs": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "LLM_visibility_policy": "LLM may research, critique, summarize, explain, and request evidence; LLM cannot create source truth, risk pass, live readiness, or order release.",
+      "QKU_formula_candidate_refs": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "QKU_formula_candidate_refs_when_applicable": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::OWNER_HEADER_STRIP_ALIAS_CARD",
+      "agent_consumable_authority": false,
+      "agent_role_refs_from_PR165_D2": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "authority_class": "LOCAL_STATIC_RENDER_CONTRACT",
+      "blocked_authority_refs": [
+        "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE"
+      ],
+      "connector_access_allowed": false,
+      "credential_access_allowed": false,
+      "downstream_consumer_refs": [
+        "OwnerSurfaceResolver",
+        "owner_panel_projection.generated.jsonl",
+        "owner_downstream_route_projection.generated.jsonl"
+      ],
+      "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
+      "manual_edit_allowed": false,
+      "no_orphan_status": "ROUTED",
+      "order_execution_allowed": false,
+      "owner_action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "owning_stage_or_pr": "MOBILE2",
+      "provider_contract_ref": "PR169_DASH1_PROVIDER_CONTRACT::OWNER_HEADER_STRIP_ALIAS_CARD",
+      "provider_stage": "MOBILE2",
+      "provider_state": "CONTRACT_DEFINED_PROVIDER_PENDING",
+      "route_purpose": "Owner-visible provider-stage route; UI1 renders contract/readiness only.",
+      "runtime_side_effect_allowed": false,
+      "runtime_side_effect_allowed_in_UI1": false,
+      "runtime_truth_authority": false,
+      "source_artifact_refs": [
+        "PR165_D2_CommandActionMatrix.report.json"
+      ],
+      "source_truth_authority": false,
+      "stage_id": "MOBILE2",
+      "stage_label": "MOBILE2",
+      "upstream_artifact_refs": [
+        "PR165_D2_CommandActionMatrix.report.json"
+      ],
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "what_UI1_renders_now": "Static routed card, no runtime provider action.",
+      "what_later_provider_must_supply": "Authenticated provider receipts, APIs, streams, or runtime engines outside UI1."
+    },
+    {
+      "LLM_view_refs": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "LLM_visibility_policy": "LLM may research, critique, summarize, explain, and request evidence; LLM cannot create source truth, risk pass, live readiness, or order release.",
+      "QKU_formula_candidate_refs": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "QKU_formula_candidate_refs_when_applicable": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "activation_route": "TG1_ACTIVATION_ROUTE::DASH1_FEATURE_030_TELEGRAM_OWNER_PACKET_MIRROR_CONTRACT",
+      "agent_consumable_authority": false,
+      "agent_role_refs_from_PR165_D2": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "authority_class": "LOCAL_STATIC_RENDER_CONTRACT",
+      "blocked_authority_refs": [
+        "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE"
+      ],
+      "connector_access_allowed": false,
+      "credential_access_allowed": false,
+      "downstream_consumer_refs": [
+        "OwnerSurfaceResolver",
+        "owner_panel_projection.generated.jsonl",
+        "owner_downstream_route_projection.generated.jsonl"
+      ],
+      "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
+      "manual_edit_allowed": false,
+      "no_orphan_status": "ROUTED",
+      "order_execution_allowed": false,
+      "owner_action_refs": [
+        "ACK_OWNER_PACKET",
+        "REQUEST_TELEGRAM_MIRROR"
+      ],
+      "owning_stage_or_pr": "TG1",
+      "provider_contract_ref": "PR169_DASH1_PROVIDER_CONTRACT::DASH1_FEATURE_030_TELEGRAM_OWNER_PACKET_MIRROR_CONTRACT",
+      "provider_stage": "TG1",
+      "provider_state": "CONTRACT_DEFINED_PROVIDER_PENDING",
+      "route_purpose": "Owner-visible provider-stage route; UI1 renders contract/readiness only.",
+      "runtime_side_effect_allowed": false,
+      "runtime_side_effect_allowed_in_UI1": false,
+      "runtime_truth_authority": false,
+      "source_artifact_refs": [
+        "PR165_D2_CommandActionMatrix.report.json"
+      ],
+      "source_truth_authority": false,
+      "stage_id": "TG1",
+      "stage_label": "TG1",
+      "upstream_artifact_refs": [
+        "PR165_D2_CommandActionMatrix.report.json"
+      ],
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "what_UI1_renders_now": "Static routed card, no runtime provider action.",
+      "what_later_provider_must_supply": "Authenticated provider receipts, APIs, streams, or runtime engines outside UI1."
+    },
+    {
+      "LLM_view_refs": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "LLM_visibility_policy": "LLM may research, critique, summarize, explain, and request evidence; LLM cannot create source truth, risk pass, live readiness, or order release.",
+      "QKU_formula_candidate_refs": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "QKU_formula_candidate_refs_when_applicable": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_007_SEVERITY_BADGES_S0_INFO_THROUGH_S4_CRITICAL",
+      "agent_consumable_authority": false,
+      "agent_role_refs_from_PR165_D2": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "authority_class": "LOCAL_STATIC_RENDER_CONTRACT",
+      "blocked_authority_refs": [
+        "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE"
+      ],
+      "connector_access_allowed": false,
+      "credential_access_allowed": false,
+      "downstream_consumer_refs": [
+        "OwnerSurfaceResolver",
+        "owner_panel_projection.generated.jsonl",
+        "owner_downstream_route_projection.generated.jsonl"
+      ],
+      "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
+      "manual_edit_allowed": false,
+      "no_orphan_status": "ROUTED",
+      "order_execution_allowed": false,
+      "owner_action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "owning_stage_or_pr": "READINESS1",
+      "provider_contract_ref": "PR169_DASH1_PROVIDER_CONTRACT::DASH1_FEATURE_007_SEVERITY_BADGES_S0_INFO_THROUGH_S4_CRITICAL",
+      "provider_stage": "READINESS1",
+      "provider_state": "CONTRACT_DEFINED_PROVIDER_PENDING",
+      "route_purpose": "Owner-visible provider-stage route; UI1 renders contract/readiness only.",
+      "runtime_side_effect_allowed": false,
+      "runtime_side_effect_allowed_in_UI1": false,
+      "runtime_truth_authority": false,
+      "source_artifact_refs": [
+        "PR165_D2_CommandActionMatrix.report.json"
+      ],
+      "source_truth_authority": false,
+      "stage_id": "READINESS1",
+      "stage_label": "READINESS1",
+      "upstream_artifact_refs": [
+        "PR165_D2_CommandActionMatrix.report.json"
+      ],
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "what_UI1_renders_now": "Static routed card, no runtime provider action.",
+      "what_later_provider_must_supply": "Authenticated provider receipts, APIs, streams, or runtime engines outside UI1."
+    },
+    {
+      "LLM_view_refs": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "LLM_visibility_policy": "LLM may research, critique, summarize, explain, and request evidence; LLM cannot create source truth, risk pass, live readiness, or order release.",
+      "QKU_formula_candidate_refs": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "QKU_formula_candidate_refs_when_applicable": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "activation_route": "PRETRADE1_ACTIVATION_ROUTE::DASH1_FEATURE_056_TRADE_READINESS_SCORECARD",
+      "agent_consumable_authority": false,
+      "agent_role_refs_from_PR165_D2": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "authority_class": "LOCAL_STATIC_RENDER_CONTRACT",
+      "blocked_authority_refs": [
+        "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE"
+      ],
+      "connector_access_allowed": false,
+      "credential_access_allowed": false,
+      "downstream_consumer_refs": [
+        "OwnerSurfaceResolver",
+        "owner_panel_projection.generated.jsonl",
+        "owner_downstream_route_projection.generated.jsonl"
+      ],
+      "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
+      "manual_edit_allowed": false,
+      "no_orphan_status": "ROUTED",
+      "order_execution_allowed": false,
+      "owner_action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "owning_stage_or_pr": "PRETRADE1",
+      "provider_contract_ref": "PR169_DASH1_PROVIDER_CONTRACT::DASH1_FEATURE_056_TRADE_READINESS_SCORECARD",
+      "provider_stage": "PRETRADE1",
+      "provider_state": "CONTRACT_DEFINED_PROVIDER_PENDING",
+      "route_purpose": "Owner-visible provider-stage route; UI1 renders contract/readiness only.",
+      "runtime_side_effect_allowed": false,
+      "runtime_side_effect_allowed_in_UI1": false,
+      "runtime_truth_authority": false,
+      "source_artifact_refs": [
+        "PR165_D2_CommandActionMatrix.report.json",
+        "docs/master_plan/generated/pr168_rp5g/exec_pnl.jsonl",
+        "docs/master_plan/generated/pr168_rank4/rank_edge_capture.jsonl",
+        "docs/master_plan/generated/pr168_vs2/vs2_packet_registry.jsonl"
+      ],
+      "source_truth_authority": false,
+      "stage_id": "PRETRADE1",
+      "stage_label": "PRETRADE1",
+      "upstream_artifact_refs": [
+        "PR165_D2_CommandActionMatrix.report.json",
+        "docs/master_plan/generated/pr168_rp5g/exec_pnl.jsonl",
+        "docs/master_plan/generated/pr168_rank4/rank_edge_capture.jsonl",
+        "docs/master_plan/generated/pr168_vs2/vs2_packet_registry.jsonl"
+      ],
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "what_UI1_renders_now": "Static routed card, no runtime provider action.",
+      "what_later_provider_must_supply": "Authenticated provider receipts, APIs, streams, or runtime engines outside UI1."
+    },
+    {
+      "LLM_view_refs": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "LLM_visibility_policy": "LLM may research, critique, summarize, explain, and request evidence; LLM cannot create source truth, risk pass, live readiness, or order release.",
+      "QKU_formula_candidate_refs": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "QKU_formula_candidate_refs_when_applicable": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_009_OWNERACTIONABLECARDV1",
+      "agent_consumable_authority": false,
+      "agent_role_refs_from_PR165_D2": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "authority_class": "LOCAL_STATIC_RENDER_CONTRACT",
+      "blocked_authority_refs": [
+        "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE"
+      ],
+      "connector_access_allowed": false,
+      "credential_access_allowed": false,
+      "downstream_consumer_refs": [
+        "OwnerSurfaceResolver",
+        "owner_panel_projection.generated.jsonl",
+        "owner_downstream_route_projection.generated.jsonl"
+      ],
+      "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
+      "manual_edit_allowed": false,
+      "no_orphan_status": "ROUTED",
+      "order_execution_allowed": false,
+      "owner_action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "owning_stage_or_pr": "LLM1",
+      "provider_contract_ref": "PR169_DASH1_PROVIDER_CONTRACT::DASH1_FEATURE_009_OWNERACTIONABLECARDV1",
+      "provider_stage": "LLM1",
+      "provider_state": "CONTRACT_DEFINED_PROVIDER_PENDING",
+      "route_purpose": "Owner-visible provider-stage route; UI1 renders contract/readiness only.",
+      "runtime_side_effect_allowed": false,
+      "runtime_side_effect_allowed_in_UI1": false,
+      "runtime_truth_authority": false,
+      "source_artifact_refs": [
+        "PR165_D2_CommandActionMatrix.report.json"
+      ],
+      "source_truth_authority": false,
+      "stage_id": "LLM1",
+      "stage_label": "LLM1",
+      "upstream_artifact_refs": [
+        "PR165_D2_CommandActionMatrix.report.json"
+      ],
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "what_UI1_renders_now": "Static routed card, no runtime provider action.",
+      "what_later_provider_must_supply": "Authenticated provider receipts, APIs, streams, or runtime engines outside UI1."
+    },
+    {
+      "LLM_view_refs": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "LLM_visibility_policy": "LLM may research, critique, summarize, explain, and request evidence; LLM cannot create source truth, risk pass, live readiness, or order release.",
+      "QKU_formula_candidate_refs": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "QKU_formula_candidate_refs_when_applicable": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "activation_route": "LLM2_ACTIVATION_ROUTE::DASH1_FEATURE_015_RESEARCH_PROPOSAL_INBOX_OWNERRESEARCHPANELV1",
+      "agent_consumable_authority": false,
+      "agent_role_refs_from_PR165_D2": [
+        "parameter_selector_agent",
+        "dashboard_agent",
+        "commander_agent"
+      ],
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "authority_class": "LOCAL_STATIC_RENDER_CONTRACT",
+      "blocked_authority_refs": [
+        "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE"
+      ],
+      "connector_access_allowed": false,
+      "credential_access_allowed": false,
+      "downstream_consumer_refs": [
+        "OwnerSurfaceResolver",
+        "owner_panel_projection.generated.jsonl",
+        "owner_downstream_route_projection.generated.jsonl"
+      ],
+      "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
+      "manual_edit_allowed": false,
+      "no_orphan_status": "ROUTED",
+      "order_execution_allowed": false,
+      "owner_action_refs": [
+        "SUBMIT_RESEARCH_CANDIDATE"
+      ],
+      "owning_stage_or_pr": "LLM2",
+      "provider_contract_ref": "PR169_DASH1_PROVIDER_CONTRACT::DASH1_FEATURE_015_RESEARCH_PROPOSAL_INBOX_OWNERRESEARCHPANELV1",
+      "provider_stage": "LLM2",
+      "provider_state": "CONTRACT_DEFINED_PROVIDER_PENDING",
+      "route_purpose": "Owner-visible provider-stage route; UI1 renders contract/readiness only.",
+      "runtime_side_effect_allowed": false,
+      "runtime_side_effect_allowed_in_UI1": false,
+      "runtime_truth_authority": false,
+      "source_artifact_refs": [
+        "PR165_D2_CommandActionMatrix.report.json",
+        "docs/master_plan/generated/pr168_mem1/memory_query_contract.jsonl",
+        "docs/master_plan/generated/pr168_vs2/qku_formula_route_bundle.jsonl"
+      ],
+      "source_truth_authority": false,
+      "stage_id": "LLM2",
+      "stage_label": "LLM2",
+      "upstream_artifact_refs": [
+        "PR165_D2_CommandActionMatrix.report.json",
+        "docs/master_plan/generated/pr168_mem1/memory_query_contract.jsonl",
+        "docs/master_plan/generated/pr168_vs2/qku_formula_route_bundle.jsonl"
+      ],
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "what_UI1_renders_now": "Static routed card, no runtime provider action.",
+      "what_later_provider_must_supply": "Authenticated provider receipts, APIs, streams, or runtime engines outside UI1."
+    },
+    {
+      "LLM_view_refs": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "LLM_visibility_policy": "LLM may research, critique, summarize, explain, and request evidence; LLM cannot create source truth, risk pass, live readiness, or order release.",
+      "QKU_formula_candidate_refs": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "QKU_formula_candidate_refs_when_applicable": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::OWNER_DASHBOARD_PACKET_V1",
+      "agent_consumable_authority": false,
+      "agent_role_refs_from_PR165_D2": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "authority_class": "LOCAL_STATIC_RENDER_CONTRACT",
+      "blocked_authority_refs": [
+        "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE"
+      ],
+      "connector_access_allowed": false,
+      "credential_access_allowed": false,
+      "downstream_consumer_refs": [
+        "OwnerSurfaceResolver",
+        "owner_panel_projection.generated.jsonl",
+        "owner_downstream_route_projection.generated.jsonl"
+      ],
+      "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
+      "manual_edit_allowed": false,
+      "no_orphan_status": "ROUTED",
+      "order_execution_allowed": false,
+      "owner_action_refs": [
+        "ACK_OWNER_PACKET"
+      ],
+      "owning_stage_or_pr": "AGENT_ORCH1",
+      "provider_contract_ref": "PR169_DASH1_PROVIDER_CONTRACT::OWNER_DASHBOARD_PACKET_V1",
+      "provider_stage": "AGENT_ORCH1",
+      "provider_state": "CONTRACT_DEFINED_PROVIDER_PENDING",
+      "route_purpose": "Owner-visible provider-stage route; UI1 renders contract/readiness only.",
+      "runtime_side_effect_allowed": false,
+      "runtime_side_effect_allowed_in_UI1": false,
+      "runtime_truth_authority": false,
+      "source_artifact_refs": [
+        "PR165_D2_CommandActionMatrix.report.json"
+      ],
+      "source_truth_authority": false,
+      "stage_id": "AGENT_ORCH1",
+      "stage_label": "AGENT ORCH1",
+      "upstream_artifact_refs": [
+        "PR165_D2_CommandActionMatrix.report.json"
+      ],
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "what_UI1_renders_now": "Static routed card, no runtime provider action.",
+      "what_later_provider_must_supply": "Authenticated provider receipts, APIs, streams, or runtime engines outside UI1."
+    },
+    {
+      "LLM_view_refs": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "LLM_visibility_policy": "LLM may research, critique, summarize, explain, and request evidence; LLM cannot create source truth, risk pass, live readiness, or order release.",
+      "QKU_formula_candidate_refs": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "QKU_formula_candidate_refs_when_applicable": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "activation_route": "PAPER-LOOP_ACTIVATION_ROUTE::DASH1_FEATURE_077_REPLAY_PAPER_TEST_QUEUE_PANEL",
+      "agent_consumable_authority": false,
+      "agent_role_refs_from_PR165_D2": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "authority_class": "LOCAL_STATIC_RENDER_CONTRACT",
+      "blocked_authority_refs": [
+        "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE"
+      ],
+      "connector_access_allowed": false,
+      "credential_access_allowed": false,
+      "downstream_consumer_refs": [
+        "OwnerSurfaceResolver",
+        "owner_panel_projection.generated.jsonl",
+        "owner_downstream_route_projection.generated.jsonl"
+      ],
+      "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
+      "manual_edit_allowed": false,
+      "no_orphan_status": "ROUTED",
+      "order_execution_allowed": false,
+      "owner_action_refs": [
+        "REQUEST_REPLAY_TEST",
+        "REQUEST_PAPER_TEST"
+      ],
+      "owning_stage_or_pr": "PAPER_LOOP",
+      "provider_contract_ref": "PR169_DASH1_PROVIDER_CONTRACT::DASH1_FEATURE_077_REPLAY_PAPER_TEST_QUEUE_PANEL",
+      "provider_stage": "PAPER_LOOP",
+      "provider_state": "CONTRACT_DEFINED_PROVIDER_PENDING",
+      "route_purpose": "Owner-visible provider-stage route; UI1 renders contract/readiness only.",
+      "runtime_side_effect_allowed": false,
+      "runtime_side_effect_allowed_in_UI1": false,
+      "runtime_truth_authority": false,
+      "source_artifact_refs": [
+        "PR165_D2_CommandActionMatrix.report.json",
+        "docs/master_plan/generated/pr168_rp5g/exec_pnl.jsonl",
+        "docs/master_plan/generated/pr168_rank4/rank_edge_capture.jsonl",
+        "docs/master_plan/generated/pr168_vs2/vs2_packet_registry.jsonl"
+      ],
+      "source_truth_authority": false,
+      "stage_id": "PAPER_LOOP",
+      "stage_label": "PAPER LOOP",
+      "upstream_artifact_refs": [
+        "PR165_D2_CommandActionMatrix.report.json",
+        "docs/master_plan/generated/pr168_rp5g/exec_pnl.jsonl",
+        "docs/master_plan/generated/pr168_rank4/rank_edge_capture.jsonl",
+        "docs/master_plan/generated/pr168_vs2/vs2_packet_registry.jsonl"
+      ],
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "what_UI1_renders_now": "Static routed card, no runtime provider action.",
+      "what_later_provider_must_supply": "Authenticated provider receipts, APIs, streams, or runtime engines outside UI1."
+    },
+    {
+      "LLM_view_refs": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "LLM_visibility_policy": "LLM may research, critique, summarize, explain, and request evidence; LLM cannot create source truth, risk pass, live readiness, or order release.",
+      "QKU_formula_candidate_refs": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "QKU_formula_candidate_refs_when_applicable": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_013_RISK_AND_KILL_SWITCH_PANEL_OWNERRISKPANELV1_OWNERKILLSWITCHSURFA",
+      "agent_consumable_authority": false,
+      "agent_role_refs_from_PR165_D2": [
+        "risk_manager_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "authority_class": "LOCAL_STATIC_RENDER_CONTRACT",
+      "blocked_authority_refs": [
+        "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE"
+      ],
+      "connector_access_allowed": false,
+      "credential_access_allowed": false,
+      "downstream_consumer_refs": [
+        "OwnerSurfaceResolver",
+        "owner_panel_projection.generated.jsonl",
+        "owner_downstream_route_projection.generated.jsonl"
+      ],
+      "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
+      "manual_edit_allowed": false,
+      "no_orphan_status": "ROUTED",
+      "order_execution_allowed": false,
+      "owner_action_refs": [
+        "REQUEST_RISK_REVIEW",
+        "REQUEST_KILL_SWITCH_REVIEW"
+      ],
+      "owning_stage_or_pr": "HOTPATH1",
+      "provider_contract_ref": "PR169_DASH1_PROVIDER_CONTRACT::DASH1_FEATURE_013_RISK_AND_KILL_SWITCH_PANEL_OWNERRISKPANELV1_OWNERKILLSWITCHSURFA",
+      "provider_stage": "HOTPATH1",
+      "provider_state": "CONTRACT_DEFINED_PROVIDER_PENDING",
+      "route_purpose": "Owner-visible provider-stage route; UI1 renders contract/readiness only.",
+      "runtime_side_effect_allowed": false,
+      "runtime_side_effect_allowed_in_UI1": false,
+      "runtime_truth_authority": false,
+      "source_artifact_refs": [
+        "PR165_D2_CommandActionMatrix.report.json"
+      ],
+      "source_truth_authority": false,
+      "stage_id": "HOTPATH1",
+      "stage_label": "HOTPATH1",
+      "upstream_artifact_refs": [
+        "PR165_D2_CommandActionMatrix.report.json"
+      ],
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "what_UI1_renders_now": "Static routed card, no runtime provider action.",
+      "what_later_provider_must_supply": "Authenticated provider receipts, APIs, streams, or runtime engines outside UI1."
+    },
+    {
+      "LLM_view_refs": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "LLM_visibility_policy": "LLM may research, critique, summarize, explain, and request evidence; LLM cannot create source truth, risk pass, live readiness, or order release.",
+      "QKU_formula_candidate_refs": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "QKU_formula_candidate_refs_when_applicable": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "activation_route": "LIVE-DRYRUN1_ACTIVATION_ROUTE::DASH1_FEATURE_011_ACKNOWLEDGMENT_IS_NOT_LIVE_APPROVAL",
+      "agent_consumable_authority": false,
+      "agent_role_refs_from_PR165_D2": [
+        "risk_manager_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "authority_class": "LOCAL_STATIC_RENDER_CONTRACT",
+      "blocked_authority_refs": [
+        "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE"
+      ],
+      "connector_access_allowed": false,
+      "credential_access_allowed": false,
+      "downstream_consumer_refs": [
+        "OwnerSurfaceResolver",
+        "owner_panel_projection.generated.jsonl",
+        "owner_downstream_route_projection.generated.jsonl"
+      ],
+      "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
+      "manual_edit_allowed": false,
+      "no_orphan_status": "ROUTED",
+      "order_execution_allowed": false,
+      "owner_action_refs": [
+        "ACK_OWNER_PACKET",
+        "REQUEST_LIVE_CANARY_REVIEW"
+      ],
+      "owning_stage_or_pr": "LIVE_DRYRUN1",
+      "provider_contract_ref": "PR169_DASH1_PROVIDER_CONTRACT::DASH1_FEATURE_011_ACKNOWLEDGMENT_IS_NOT_LIVE_APPROVAL",
+      "provider_stage": "LIVE_DRYRUN1",
+      "provider_state": "CONTRACT_DEFINED_PROVIDER_PENDING",
+      "route_purpose": "Owner-visible provider-stage route; UI1 renders contract/readiness only.",
+      "runtime_side_effect_allowed": false,
+      "runtime_side_effect_allowed_in_UI1": false,
+      "runtime_truth_authority": false,
+      "source_artifact_refs": [
+        "PR165_D2_CommandActionMatrix.report.json",
+        "docs/master_plan/generated/pr168_rank4/rank_edge_capture.jsonl",
+        "docs/master_plan/generated/pr168_qopt1/notrade_reopt.jsonl"
+      ],
+      "source_truth_authority": false,
+      "stage_id": "LIVE_DRYRUN1",
+      "stage_label": "LIVE DRYRUN1",
+      "upstream_artifact_refs": [
+        "PR165_D2_CommandActionMatrix.report.json",
+        "docs/master_plan/generated/pr168_rank4/rank_edge_capture.jsonl",
+        "docs/master_plan/generated/pr168_qopt1/notrade_reopt.jsonl"
+      ],
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "what_UI1_renders_now": "Static routed card, no runtime provider action.",
+      "what_later_provider_must_supply": "Authenticated provider receipts, APIs, streams, or runtime engines outside UI1."
+    },
+    {
+      "LLM_view_refs": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "LLM_visibility_policy": "LLM may research, critique, summarize, explain, and request evidence; LLM cannot create source truth, risk pass, live readiness, or order release.",
+      "QKU_formula_candidate_refs": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "QKU_formula_candidate_refs_when_applicable": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "activation_route": "LLM2_ACTIVATION_ROUTE::DASH1_FEATURE_015_RESEARCH_PROPOSAL_INBOX_OWNERRESEARCHPANELV1",
+      "agent_consumable_authority": false,
+      "agent_role_refs_from_PR165_D2": [
+        "parameter_selector_agent",
+        "dashboard_agent",
+        "commander_agent"
+      ],
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "authority_class": "LOCAL_STATIC_RENDER_CONTRACT",
+      "blocked_authority_refs": [
+        "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE"
+      ],
+      "connector_access_allowed": false,
+      "credential_access_allowed": false,
+      "downstream_consumer_refs": [
+        "OwnerSurfaceResolver",
+        "owner_panel_projection.generated.jsonl",
+        "owner_downstream_route_projection.generated.jsonl"
+      ],
+      "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
+      "manual_edit_allowed": false,
+      "no_orphan_status": "ROUTED",
+      "order_execution_allowed": false,
+      "owner_action_refs": [
+        "SUBMIT_RESEARCH_CANDIDATE"
+      ],
+      "owning_stage_or_pr": "LIVE_PILOT",
+      "provider_contract_ref": "PR169_DASH1_PROVIDER_CONTRACT::DASH1_FEATURE_015_RESEARCH_PROPOSAL_INBOX_OWNERRESEARCHPANELV1",
+      "provider_stage": "LIVE_PILOT",
+      "provider_state": "CONTRACT_DEFINED_PROVIDER_PENDING",
+      "route_purpose": "Owner-visible provider-stage route; UI1 renders contract/readiness only.",
+      "runtime_side_effect_allowed": false,
+      "runtime_side_effect_allowed_in_UI1": false,
+      "runtime_truth_authority": false,
+      "source_artifact_refs": [
+        "PR165_D2_CommandActionMatrix.report.json",
+        "docs/master_plan/generated/pr168_mem1/memory_query_contract.jsonl",
+        "docs/master_plan/generated/pr168_vs2/qku_formula_route_bundle.jsonl"
+      ],
+      "source_truth_authority": false,
+      "stage_id": "LIVE_PILOT",
+      "stage_label": "LIVE PILOT",
+      "upstream_artifact_refs": [
+        "PR165_D2_CommandActionMatrix.report.json",
+        "docs/master_plan/generated/pr168_mem1/memory_query_contract.jsonl",
+        "docs/master_plan/generated/pr168_vs2/qku_formula_route_bundle.jsonl"
+      ],
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "what_UI1_renders_now": "Static routed card, no runtime provider action.",
+      "what_later_provider_must_supply": "Authenticated provider receipts, APIs, streams, or runtime engines outside UI1."
+    },
+    {
+      "LLM_view_refs": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "LLM_visibility_policy": "LLM may research, critique, summarize, explain, and request evidence; LLM cannot create source truth, risk pass, live readiness, or order release.",
+      "QKU_formula_candidate_refs": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "QKU_formula_candidate_refs_when_applicable": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_016_SHADOW_REVIEW_INBOX_OWNERSHADOWPANELV1",
+      "agent_consumable_authority": false,
+      "agent_role_refs_from_PR165_D2": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "authority_class": "LOCAL_STATIC_RENDER_CONTRACT",
+      "blocked_authority_refs": [
+        "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE"
+      ],
+      "connector_access_allowed": false,
+      "credential_access_allowed": false,
+      "downstream_consumer_refs": [
+        "OwnerSurfaceResolver",
+        "owner_panel_projection.generated.jsonl",
+        "owner_downstream_route_projection.generated.jsonl"
+      ],
+      "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
+      "manual_edit_allowed": false,
+      "no_orphan_status": "ROUTED",
+      "order_execution_allowed": false,
+      "owner_action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "owning_stage_or_pr": "LAUNCH",
+      "provider_contract_ref": "PR169_DASH1_PROVIDER_CONTRACT::DASH1_FEATURE_016_SHADOW_REVIEW_INBOX_OWNERSHADOWPANELV1",
+      "provider_stage": "LAUNCH",
+      "provider_state": "CONTRACT_DEFINED_PROVIDER_PENDING",
+      "route_purpose": "Owner-visible provider-stage route; UI1 renders contract/readiness only.",
+      "runtime_side_effect_allowed": false,
+      "runtime_side_effect_allowed_in_UI1": false,
+      "runtime_truth_authority": false,
+      "source_artifact_refs": [
+        "PR165_D2_CommandActionMatrix.report.json"
+      ],
+      "source_truth_authority": false,
+      "stage_id": "LAUNCH",
+      "stage_label": "LAUNCH",
+      "upstream_artifact_refs": [
+        "PR165_D2_CommandActionMatrix.report.json"
+      ],
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "what_UI1_renders_now": "Static routed card, no runtime provider action.",
+      "what_later_provider_must_supply": "Authenticated provider receipts, APIs, streams, or runtime engines outside UI1."
+    },
+    {
+      "LLM_view_refs": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "LLM_visibility_policy": "LLM may research, critique, summarize, explain, and request evidence; LLM cannot create source truth, risk pass, live readiness, or order release.",
+      "QKU_formula_candidate_refs": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "QKU_formula_candidate_refs_when_applicable": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_017_REFINEMENT_AND_REHAB_QUEUE_OWNERBACKLOGPANELV1",
+      "agent_consumable_authority": false,
+      "agent_role_refs_from_PR165_D2": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "authority_class": "LOCAL_STATIC_RENDER_CONTRACT",
+      "blocked_authority_refs": [
+        "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE"
+      ],
+      "connector_access_allowed": false,
+      "credential_access_allowed": false,
+      "downstream_consumer_refs": [
+        "OwnerSurfaceResolver",
+        "owner_panel_projection.generated.jsonl",
+        "owner_downstream_route_projection.generated.jsonl"
+      ],
+      "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
+      "manual_edit_allowed": false,
+      "no_orphan_status": "ROUTED",
+      "order_execution_allowed": false,
+      "owner_action_refs": [
+        "ACK_OWNER_PACKET"
+      ],
+      "owning_stage_or_pr": "POSTLAUNCH",
+      "provider_contract_ref": "PR169_DASH1_PROVIDER_CONTRACT::DASH1_FEATURE_017_REFINEMENT_AND_REHAB_QUEUE_OWNERBACKLOGPANELV1",
+      "provider_stage": "POSTLAUNCH",
+      "provider_state": "CONTRACT_DEFINED_PROVIDER_PENDING",
+      "route_purpose": "Owner-visible provider-stage route; UI1 renders contract/readiness only.",
+      "runtime_side_effect_allowed": false,
+      "runtime_side_effect_allowed_in_UI1": false,
+      "runtime_truth_authority": false,
+      "source_artifact_refs": [
+        "PR165_D2_CommandActionMatrix.report.json"
+      ],
+      "source_truth_authority": false,
+      "stage_id": "POSTLAUNCH",
+      "stage_label": "POSTLAUNCH",
+      "upstream_artifact_refs": [
+        "PR165_D2_CommandActionMatrix.report.json"
+      ],
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "what_UI1_renders_now": "Static routed card, no runtime provider action.",
+      "what_later_provider_must_supply": "Authenticated provider receipts, APIs, streams, or runtime engines outside UI1."
+    },
+    {
+      "LLM_view_refs": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "LLM_visibility_policy": "LLM may research, critique, summarize, explain, and request evidence; LLM cannot create source truth, risk pass, live readiness, or order release.",
+      "QKU_formula_candidate_refs": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "QKU_formula_candidate_refs_when_applicable": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "activation_route": "AGENT-ORCH1_ACTIVATION_ROUTE::DASH1_FEATURE_018_CHANGE_QUEUE_AND_DEPLOYMENT_STATE_OWNERCHANGEQUEUEPANELV1",
+      "agent_consumable_authority": false,
+      "agent_role_refs_from_PR165_D2": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "authority_class": "LOCAL_STATIC_RENDER_CONTRACT",
+      "blocked_authority_refs": [
+        "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE"
+      ],
+      "connector_access_allowed": false,
+      "credential_access_allowed": false,
+      "downstream_consumer_refs": [
+        "OwnerSurfaceResolver",
+        "owner_panel_projection.generated.jsonl",
+        "owner_downstream_route_projection.generated.jsonl"
+      ],
+      "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
+      "manual_edit_allowed": false,
+      "no_orphan_status": "ROUTED",
+      "order_execution_allowed": false,
+      "owner_action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "owning_stage_or_pr": "RI1",
+      "provider_contract_ref": "PR169_DASH1_PROVIDER_CONTRACT::DASH1_FEATURE_018_CHANGE_QUEUE_AND_DEPLOYMENT_STATE_OWNERCHANGEQUEUEPANELV1",
+      "provider_stage": "RI1",
+      "provider_state": "CONTRACT_DEFINED_PROVIDER_PENDING",
+      "route_purpose": "Owner-visible provider-stage route; UI1 renders contract/readiness only.",
+      "runtime_side_effect_allowed": false,
+      "runtime_side_effect_allowed_in_UI1": false,
+      "runtime_truth_authority": false,
+      "source_artifact_refs": [
+        "PR165_D2_CommandActionMatrix.report.json"
+      ],
+      "source_truth_authority": false,
+      "stage_id": "RI1",
+      "stage_label": "RI1",
+      "upstream_artifact_refs": [
+        "PR165_D2_CommandActionMatrix.report.json"
+      ],
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "what_UI1_renders_now": "Static routed card, no runtime provider action.",
+      "what_later_provider_must_supply": "Authenticated provider receipts, APIs, streams, or runtime engines outside UI1."
+    },
+    {
+      "LLM_view_refs": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "LLM_visibility_policy": "LLM may research, critique, summarize, explain, and request evidence; LLM cannot create source truth, risk pass, live readiness, or order release.",
+      "QKU_formula_candidate_refs": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "QKU_formula_candidate_refs_when_applicable": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "activation_route": "PLUGIN1_ACTIVATION_ROUTE::DASH1_FEATURE_109_FORMULA_TRADE_CONTROLS_PROMOTE_TO_REPLAY_PROMOTE_TO_PAPER",
+      "agent_consumable_authority": false,
+      "agent_role_refs_from_PR165_D2": [
+        "parameter_selector_agent",
+        "dashboard_agent",
+        "commander_agent"
+      ],
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "authority_class": "LOCAL_STATIC_RENDER_CONTRACT",
+      "blocked_authority_refs": [
+        "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE"
+      ],
+      "connector_access_allowed": false,
+      "credential_access_allowed": false,
+      "downstream_consumer_refs": [
+        "OwnerSurfaceResolver",
+        "owner_panel_projection.generated.jsonl",
+        "owner_downstream_route_projection.generated.jsonl"
+      ],
+      "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
+      "manual_edit_allowed": false,
+      "no_orphan_status": "ROUTED",
+      "order_execution_allowed": false,
+      "owner_action_refs": [
+        "REQUEST_FORMULA_EXTRACTION",
+        "RUN_FORMULA_TEST_VECTOR_REQUEST",
+        "REQUEST_REPLAY_TEST",
+        "REQUEST_PAPER_TEST",
+        "PROMOTE_TO_REPLAY_REQUEST",
+        "PROMOTE_TO_PAPER_REQUEST"
+      ],
+      "owning_stage_or_pr": "PLUGIN1",
+      "provider_contract_ref": "PR169_DASH1_PROVIDER_CONTRACT::DASH1_FEATURE_109_FORMULA_TRADE_CONTROLS_PROMOTE_TO_REPLAY_PROMOTE_TO_PAPER",
+      "provider_stage": "PLUGIN1",
+      "provider_state": "CONTRACT_DEFINED_PROVIDER_PENDING",
+      "route_purpose": "Owner-visible provider-stage route; UI1 renders contract/readiness only.",
+      "runtime_side_effect_allowed": false,
+      "runtime_side_effect_allowed_in_UI1": false,
+      "runtime_truth_authority": false,
+      "source_artifact_refs": [
+        "PR165_D2_CommandActionMatrix.report.json",
+        "docs/master_plan/generated/pr168_vs2/qku_formula_route_bundle.jsonl",
+        "docs/master_plan/generated/pr168_qopt1/qstruct_optimized.jsonl"
+      ],
+      "source_truth_authority": false,
+      "stage_id": "PLUGIN1",
+      "stage_label": "PLUGIN1",
+      "upstream_artifact_refs": [
+        "PR165_D2_CommandActionMatrix.report.json",
+        "docs/master_plan/generated/pr168_vs2/qku_formula_route_bundle.jsonl",
+        "docs/master_plan/generated/pr168_qopt1/qstruct_optimized.jsonl"
+      ],
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "what_UI1_renders_now": "Static routed card, no runtime provider action.",
+      "what_later_provider_must_supply": "Authenticated provider receipts, APIs, streams, or runtime engines outside UI1."
+    },
+    {
+      "LLM_view_refs": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "LLM_visibility_policy": "LLM may research, critique, summarize, explain, and request evidence; LLM cannot create source truth, risk pass, live readiness, or order release.",
+      "QKU_formula_candidate_refs": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "QKU_formula_candidate_refs_when_applicable": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "activation_route": "QMAP1_ACTIVATION_ROUTE::CHART_CONTRACT_QUANTUM_STRUCTURAL_READINESS_HEATMAP",
+      "agent_consumable_authority": false,
+      "agent_role_refs_from_PR165_D2": [
+        "quantum_optimizer_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "authority_class": "LOCAL_STATIC_RENDER_CONTRACT",
+      "blocked_authority_refs": [
+        "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE"
+      ],
+      "connector_access_allowed": false,
+      "credential_access_allowed": false,
+      "downstream_consumer_refs": [
+        "OwnerSurfaceResolver",
+        "owner_panel_projection.generated.jsonl",
+        "owner_downstream_route_projection.generated.jsonl"
+      ],
+      "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
+      "manual_edit_allowed": false,
+      "no_orphan_status": "ROUTED",
+      "order_execution_allowed": false,
+      "owner_action_refs": [
+        "REQUEST_QSTRUCT_MAPPING_REVIEW"
+      ],
+      "owning_stage_or_pr": "QMAP1",
+      "provider_contract_ref": "PR169_DASH1_PROVIDER_CONTRACT::CHART_CONTRACT_QUANTUM_STRUCTURAL_READINESS_HEATMAP",
+      "provider_stage": "QMAP1",
+      "provider_state": "CONTRACT_DEFINED_PROVIDER_PENDING",
+      "route_purpose": "Owner-visible provider-stage route; UI1 renders contract/readiness only.",
+      "runtime_side_effect_allowed": false,
+      "runtime_side_effect_allowed_in_UI1": false,
+      "runtime_truth_authority": false,
+      "source_artifact_refs": [
+        "PR165_D2_CommandActionMatrix.report.json",
+        "docs/master_plan/generated/pr168_vs2/qku_formula_route_bundle.jsonl",
+        "docs/master_plan/generated/pr168_qopt1/qstruct_optimized.jsonl"
+      ],
+      "source_truth_authority": false,
+      "stage_id": "QMAP1",
+      "stage_label": "QMAP1",
+      "upstream_artifact_refs": [
+        "PR165_D2_CommandActionMatrix.report.json",
+        "docs/master_plan/generated/pr168_vs2/qku_formula_route_bundle.jsonl",
+        "docs/master_plan/generated/pr168_qopt1/qstruct_optimized.jsonl"
+      ],
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "what_UI1_renders_now": "Static routed card, no runtime provider action.",
+      "what_later_provider_must_supply": "Authenticated provider receipts, APIs, streams, or runtime engines outside UI1."
+    },
+    {
+      "LLM_view_refs": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "LLM_visibility_policy": "LLM may research, critique, summarize, explain, and request evidence; LLM cannot create source truth, risk pass, live readiness, or order release.",
+      "QKU_formula_candidate_refs": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "QKU_formula_candidate_refs_when_applicable": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "activation_route": "ALLOW1_ACTIVATION_ROUTE::DASH1_FEATURE_048_DECISION_LEVEL_ATTRIBUTION_COUNTERFACTUAL_PROMOTION_ROLLBACK_EVI",
+      "agent_consumable_authority": false,
+      "agent_role_refs_from_PR165_D2": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "authority_class": "LOCAL_STATIC_RENDER_CONTRACT",
+      "blocked_authority_refs": [
+        "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE"
+      ],
+      "connector_access_allowed": false,
+      "credential_access_allowed": false,
+      "downstream_consumer_refs": [
+        "OwnerSurfaceResolver",
+        "owner_panel_projection.generated.jsonl",
+        "owner_downstream_route_projection.generated.jsonl"
+      ],
+      "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
+      "manual_edit_allowed": false,
+      "no_orphan_status": "ROUTED",
+      "order_execution_allowed": false,
+      "owner_action_refs": [
+        "ACK_OWNER_PACKET",
+        "REQUEST_ALLOWLIST_REVIEW"
+      ],
+      "owning_stage_or_pr": "ALLOW1",
+      "provider_contract_ref": "PR169_DASH1_PROVIDER_CONTRACT::DASH1_FEATURE_048_DECISION_LEVEL_ATTRIBUTION_COUNTERFACTUAL_PROMOTION_ROLLBACK_EVI",
+      "provider_stage": "ALLOW1",
+      "provider_state": "CONTRACT_DEFINED_PROVIDER_PENDING",
+      "route_purpose": "Owner-visible provider-stage route; UI1 renders contract/readiness only.",
+      "runtime_side_effect_allowed": false,
+      "runtime_side_effect_allowed_in_UI1": false,
+      "runtime_truth_authority": false,
+      "source_artifact_refs": [
+        "PR165_D2_CommandActionMatrix.report.json"
+      ],
+      "source_truth_authority": false,
+      "stage_id": "ALLOW1",
+      "stage_label": "ALLOW1",
+      "upstream_artifact_refs": [
+        "PR165_D2_CommandActionMatrix.report.json"
+      ],
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "what_UI1_renders_now": "Static routed card, no runtime provider action.",
+      "what_later_provider_must_supply": "Authenticated provider receipts, APIs, streams, or runtime engines outside UI1."
+    }
+  ]
+}
