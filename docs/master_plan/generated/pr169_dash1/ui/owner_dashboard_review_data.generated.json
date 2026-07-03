@@ -59040,7 +59040,7 @@
     "data_source": "GENERATED_ARTIFACTS",
     "decision_queue_count": 171,
     "fixture_fallback_active": false,
-    "generated_at": "2026-07-03T22:41:00+00:00",
+    "generated_at": "2026-07-03T23:21:31+00:00",
     "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
     "manual_edit_allowed": false,
     "order_execution_allowed": false,
@@ -63337,7 +63337,7 @@
   },
   "stale_data_banner": {
     "data_freshness": "STATIC_GENERATED_BOOT_DATA",
-    "last_snapshot_time": "2026-07-03T22:41:00+00:00",
+    "last_snapshot_time": "2026-07-03T23:21:31+00:00",
     "meta": {
       "agent_consumable_authority": false,
       "artifact_id": "UI1_STALE_DATA_BANNER",
@@ -63363,7 +63363,7 @@
     "agent_route_count": 171,
     "artifact_directory": "docs/master_plan/generated/pr169_dash1",
     "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
-    "boot_data_generated_timestamp": "2026-07-03T22:41:00+00:00",
+    "boot_data_generated_timestamp": "2026-07-03T23:21:31+00:00",
     "chart_count": 48,
     "decision_queue_count": 171,
     "input_data_source": "GENERATED_ARTIFACTS",
@@ -69329,7 +69329,7 @@
     "console_breaking_errors": [],
     "console_status": "PASS",
     "external_network_requests": [],
-    "generated_at": "2026-07-03T22:41:00+00:00",
+    "generated_at": "2026-07-03T23:21:31+00:00",
     "meta": {
       "agent_consumable_authority": false,
       "artifact_id": "UI1R1_PLAYWRIGHT_REPORT",

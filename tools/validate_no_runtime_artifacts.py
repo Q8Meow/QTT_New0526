@@ -256,6 +256,9 @@ STATIC_THREE_VENUE_CANARY_ELIGIBILITY_ALLOWED_PATHS = {
         "synthetic_stage1_three_venue_canary_eligibility_contracts.v1.fixture.json"
     ),
 }
+LOCAL_VISUAL_QA_BROWSER_AUTOMATION_ALLOWED_PATHS = {
+    pathlib.PurePosixPath("tools/playwright_pr169_dash1_ui1_r1_visual_smoke.py"),
+}
 FORBIDDEN_RUNTIME_RESOLVER_ARTIFACT_NAMES = {
     "dual_result_review.packet.json",
     "dual_result_review_runtime.py",
@@ -517,6 +520,22 @@ def _is_allowed_static_three_venue_canary_eligibility_contract_path(
     rel: pathlib.PurePosixPath,
 ) -> bool:
     return rel in STATIC_THREE_VENUE_CANARY_ELIGIBILITY_ALLOWED_PATHS
+
+
+def _is_allowed_local_visual_qa_browser_automation_path(
+    rel: pathlib.PurePosixPath,
+) -> bool:
+    return rel in LOCAL_VISUAL_QA_BROWSER_AUTOMATION_ALLOWED_PATHS
+
+
+def _content_label_allowed_for_path(
+    rel: pathlib.PurePosixPath,
+    label: str,
+) -> bool:
+    return (
+        label == "browser retrieval automation"
+        and _is_allowed_local_visual_qa_browser_automation_path(rel)
+    )
 
 
 def _is_allowed_always_forbidden_path(
@@ -855,6 +874,7 @@ def _scan_python_content(path: pathlib.Path, text: str, enabled_flags: list[str]
         f"forbidden {label} in {path}"
         for flag in enabled_flags
         for label in sorted(found_by_flag.get(flag, set()))
+        if not _content_label_allowed_for_path(path, label)
     ]
 
 
@@ -907,7 +927,7 @@ def _scan_text_content(
                     violations.append(f"forbidden {label} in {path}")
                 continue
 
-            if matches:
+            if matches and not _content_label_allowed_for_path(path, label):
                 violations.append(f"forbidden {label} in {path}")
     return violations
 

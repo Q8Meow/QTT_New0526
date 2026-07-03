@@ -758,6 +758,38 @@ def test_scanner_scans_tests_py_for_real_runtime_code(tmp_path):
     assert any("order execution call" in violation for violation in violations)
 
 
+def test_scanner_allows_exact_local_visual_qa_browser_automation_path(tmp_path):
+    script = tmp_path / "tools" / "playwright_pr169_dash1_ui1_r1_visual_smoke.py"
+    script.parent.mkdir(parents=True)
+    script.write_text(
+        "\n".join(
+            [
+                "from playwright.sync_api import sync_playwright",
+                "def main():",
+                "    return sync_playwright",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    violations = scan_repository(tmp_path, _strict_options())
+
+    assert violations == []
+
+
+def test_scanner_rejects_unregistered_browser_automation_path(tmp_path):
+    script = tmp_path / "tools" / "bad_browser_fetch.py"
+    script.parent.mkdir(parents=True)
+    script.write_text(
+        "from playwright.sync_api import sync_playwright\n",
+        encoding="utf-8",
+    )
+
+    violations = scan_repository(tmp_path, _strict_options())
+
+    assert any("browser retrieval automation" in violation for violation in violations)
+
+
 def test_scanner_allows_synthetic_negative_test_strings_in_tests_py(tmp_path):
     tests_dir = tmp_path / "tests"
     tests_dir.mkdir()
