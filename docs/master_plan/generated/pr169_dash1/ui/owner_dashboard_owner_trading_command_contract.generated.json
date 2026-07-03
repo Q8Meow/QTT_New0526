@@ -1,0 +1,30 @@
+{
+  "authority_levels": [
+    "VIEW_AUTHORITY",
+    "RESEARCH_INTAKE_AUTHORITY",
+    "TRADE_CHECK_AUTHORITY",
+    "REPLAY_PAPER_REQUEST_AUTHORITY",
+    "LIVE_CANARY_REVIEW_AUTHORITY",
+    "OWNER_APPROVAL_AUTHORITY",
+    "EXECUTION_ROUTER_RELEASE_AUTHORITY"
+  ],
+  "dashboard_exposes_first_six_as_request_previews": true,
+  "direct_venue_submit_allowed": false,
+  "execution_router_release_authority_owned_by_UI1": false,
+  "meta": {
+    "agent_consumable_authority": false,
+    "artifact_id": "UI1_OWNER_TRADING_COMMAND_CONTRACT",
+    "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+    "connector_access_allowed": false,
+    "credential_access_allowed": false,
+    "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
+    "manual_edit_allowed": false,
+    "order_execution_allowed": false,
+    "runtime_side_effect_allowed": false,
+    "runtime_truth_authority": false,
+    "source_truth_authority": false,
+    "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+  },
+  "owner_trading_command_authority_contract": true,
+  "owner_trading_command_authority_contract_status": "RENDERED_AS_REQUEST_PREVIEW_NO_DIRECT_SUBMIT"
+}

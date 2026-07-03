@@ -1,0 +1,35 @@
+{
+  "agent_stage_universe_formula": "AgentStageUniverse = (SpecificQKUs(active_market_family) union SharedCrossMarketQKUs) intersection PlatformApplicableQKUs intersection AgentDutyAllowedQKUs intersection StageAccessMode intersection ExecutabilityOverlay intersection ContextOpportunityFilter intersection MEM1ConditionSimilarityFilter",
+  "canonical_access_path": [
+    "Owner/Commander active stage profile",
+    "MarketStageActivationProfileRegistryV1",
+    "QKUMarketApplicabilityMatrixV1",
+    "platform applicability filter",
+    "AgentQKUAccessPolicyRegistryV1",
+    "PR165-D2 agent-duty filter",
+    "executability overlay",
+    "context/opportunity filter",
+    "MEM1 regime/memory filter",
+    "selected immutable QKU/formula refs",
+    "LibraryQueryReceiptV1 / resolver receipt route"
+  ],
+  "computability_matrix_ref": "owner_dashboard_qku_formula_computability_matrix.generated.json",
+  "computability_row_count": 1,
+  "meta": {
+    "agent_consumable_authority": false,
+    "artifact_id": "UI1_AGENT_QKU_ACCESS_RESOLVER_VIEW",
+    "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+    "connector_access_allowed": false,
+    "credential_access_allowed": false,
+    "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
+    "manual_edit_allowed": false,
+    "order_execution_allowed": false,
+    "runtime_side_effect_allowed": false,
+    "runtime_truth_authority": false,
+    "source_truth_authority": false,
+    "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+  },
+  "no_raw_JSONL_scanning_badge": true,
+  "panel_id": "CENTRALIZED_AGENT_QKU_ACCESS_RESOLVER_PANEL",
+  "route_to_READINESS1_if_counts_or_resolver_receipts_are_provider_pending": true
+}

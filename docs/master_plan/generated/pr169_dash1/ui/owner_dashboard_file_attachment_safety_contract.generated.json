@@ -1,0 +1,26 @@
+{
+  "allowed_preview_states": [
+    "LOCAL_PREVIEW_ONLY",
+    "QUEUED_FOR_SOURCE_FAMILY_CLASSIFICATION_PROVIDER_PENDING",
+    "QUEUED_FOR_DUPLICATE_RECENCY_RELEVANCE_SAFETY_CHECK_PROVIDER_PENDING",
+    "QUEUED_FOR_SOURCE_EVIDENCE_ROUTE_PROVIDER_PENDING",
+    "QUEUED_FOR_LLM_EXTRACTION_PROVIDER_PENDING",
+    "QUEUED_FOR_QKU_FORMULA_MATERIALIZATION_PROVIDER_PENDING",
+    "BLOCKED_BY_AUTHORITY_BOUNDARY"
+  ],
+  "meta": {
+    "agent_consumable_authority": false,
+    "artifact_id": "UI1_FILE_ATTACHMENT_SAFETY_CONTRACT",
+    "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+    "connector_access_allowed": false,
+    "credential_access_allowed": false,
+    "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
+    "manual_edit_allowed": false,
+    "order_execution_allowed": false,
+    "runtime_side_effect_allowed": false,
+    "runtime_truth_authority": false,
+    "source_truth_authority": false,
+    "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+  },
+  "no_raw_credentials_or_private_account_state": true
+}

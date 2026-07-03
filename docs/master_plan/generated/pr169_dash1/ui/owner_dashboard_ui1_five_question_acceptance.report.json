@@ -1,0 +1,826 @@
+{
+  "answers": [
+    {
+      "LLM_view_refs": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "agent_role_refs_from_PR165_D2": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "answer_status": "PASS",
+      "downstream_refs": [
+        "DASH1",
+        "UI1",
+        "UI2",
+        "SVC1",
+        "MOBILE1",
+        "MOBILE2",
+        "TG1",
+        "READINESS1",
+        "PRETRADE1",
+        "LLM1",
+        "LLM2",
+        "AGENT_ORCH1",
+        "PAPER_LOOP",
+        "HOTPATH1",
+        "LIVE_DRYRUN1",
+        "LIVE_PILOT",
+        "LAUNCH",
+        "POSTLAUNCH",
+        "RI1",
+        "PLUGIN1",
+        "QMAP1",
+        "ALLOW1"
+      ],
+      "generated_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_state_model.generated.json",
+        "owner_dashboard_provider_stage_route_map.generated.json",
+        "owner_dashboard_data_value_route_map or generated equivalent"
+      ],
+      "missing_items": [],
+      "provider_stage_refs": [
+        "DASH1",
+        "UI1",
+        "UI2",
+        "SVC1",
+        "MOBILE1",
+        "MOBILE2",
+        "TG1",
+        "READINESS1",
+        "PRETRADE1",
+        "LLM1",
+        "LLM2",
+        "AGENT_ORCH1",
+        "PAPER_LOOP",
+        "HOTPATH1",
+        "LIVE_DRYRUN1",
+        "LIVE_PILOT",
+        "LAUNCH",
+        "POSTLAUNCH",
+        "RI1",
+        "PLUGIN1",
+        "QMAP1",
+        "ALLOW1"
+      ],
+      "question_id": "Q1",
+      "question_text": "How do this PR's UI features help QTT and QTT agents capture and maximize edges, alphas, and validated positive net-cash evidence per trade order?",
+      "upstream_refs": [
+        "owner_dashboard_surface_registry.jsonl",
+        "OwnerSurfaceResolver"
+      ],
+      "validation_refs": [
+        "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+      ],
+      "visible_widget_refs": [
+        "Edge / Alpha Board",
+        "Trade Workbench",
+        "Execution Costs & TCA",
+        "QKU / Formula / Stack Routes",
+        "Quantum Control Center"
+      ]
+    },
+    {
+      "LLM_view_refs": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "agent_role_refs_from_PR165_D2": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "answer_status": "PASS",
+      "downstream_refs": [
+        "DASH1",
+        "UI1",
+        "UI2",
+        "SVC1",
+        "MOBILE1",
+        "MOBILE2",
+        "TG1",
+        "READINESS1",
+        "PRETRADE1",
+        "LLM1",
+        "LLM2",
+        "AGENT_ORCH1",
+        "PAPER_LOOP",
+        "HOTPATH1",
+        "LIVE_DRYRUN1",
+        "LIVE_PILOT",
+        "LAUNCH",
+        "POSTLAUNCH",
+        "RI1",
+        "PLUGIN1",
+        "QMAP1",
+        "ALLOW1"
+      ],
+      "generated_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_state_model.generated.json",
+        "owner_dashboard_provider_stage_route_map.generated.json",
+        "owner_dashboard_data_value_route_map or generated equivalent"
+      ],
+      "missing_items": [],
+      "provider_stage_refs": [
+        "DASH1",
+        "UI1",
+        "UI2",
+        "SVC1",
+        "MOBILE1",
+        "MOBILE2",
+        "TG1",
+        "READINESS1",
+        "PRETRADE1",
+        "LLM1",
+        "LLM2",
+        "AGENT_ORCH1",
+        "PAPER_LOOP",
+        "HOTPATH1",
+        "LIVE_DRYRUN1",
+        "LIVE_PILOT",
+        "LAUNCH",
+        "POSTLAUNCH",
+        "RI1",
+        "PLUGIN1",
+        "QMAP1",
+        "ALLOW1"
+      ],
+      "question_id": "Q2",
+      "question_text": "Did Codex connect every generated UI1 file, information, value, and data row upstream and downstream?",
+      "upstream_refs": [
+        "owner_dashboard_surface_registry.jsonl",
+        "OwnerSurfaceResolver"
+      ],
+      "validation_refs": [
+        "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+      ],
+      "visible_widget_refs": [
+        "DAG / Data Route Map",
+        "OwnerSurfaceResolver",
+        "OwnerActionRegistry",
+        "PR165-D2 refs"
+      ]
+    },
+    {
+      "LLM_view_refs": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "agent_role_refs_from_PR165_D2": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "answer_status": "PASS",
+      "downstream_refs": [
+        "DASH1",
+        "UI1",
+        "UI2",
+        "SVC1",
+        "MOBILE1",
+        "MOBILE2",
+        "TG1",
+        "READINESS1",
+        "PRETRADE1",
+        "LLM1",
+        "LLM2",
+        "AGENT_ORCH1",
+        "PAPER_LOOP",
+        "HOTPATH1",
+        "LIVE_DRYRUN1",
+        "LIVE_PILOT",
+        "LAUNCH",
+        "POSTLAUNCH",
+        "RI1",
+        "PLUGIN1",
+        "QMAP1",
+        "ALLOW1"
+      ],
+      "generated_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_state_model.generated.json",
+        "owner_dashboard_provider_stage_route_map.generated.json",
+        "owner_dashboard_data_value_route_map or generated equivalent"
+      ],
+      "missing_items": [],
+      "provider_stage_refs": [
+        "DASH1",
+        "UI1",
+        "UI2",
+        "SVC1",
+        "MOBILE1",
+        "MOBILE2",
+        "TG1",
+        "READINESS1",
+        "PRETRADE1",
+        "LLM1",
+        "LLM2",
+        "AGENT_ORCH1",
+        "PAPER_LOOP",
+        "HOTPATH1",
+        "LIVE_DRYRUN1",
+        "LIVE_PILOT",
+        "LAUNCH",
+        "POSTLAUNCH",
+        "RI1",
+        "PLUGIN1",
+        "QMAP1",
+        "ALLOW1"
+      ],
+      "question_id": "Q3",
+      "question_text": "Does UI1 honestly represent the QTT agent/LLM path for QKUs, formulas, variables, trade scenarios, and later execution?",
+      "upstream_refs": [
+        "owner_dashboard_surface_registry.jsonl",
+        "OwnerSurfaceResolver"
+      ],
+      "validation_refs": [
+        "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+      ],
+      "visible_widget_refs": [
+        "Owner-Agent Chat Workspace",
+        "Trade Workbench",
+        "Provider Stage Route Map"
+      ]
+    },
+    {
+      "LLM_view_refs": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "agent_role_refs_from_PR165_D2": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "answer_status": "PASS",
+      "downstream_refs": [
+        "DASH1",
+        "UI1",
+        "UI2",
+        "SVC1",
+        "MOBILE1",
+        "MOBILE2",
+        "TG1",
+        "READINESS1",
+        "PRETRADE1",
+        "LLM1",
+        "LLM2",
+        "AGENT_ORCH1",
+        "PAPER_LOOP",
+        "HOTPATH1",
+        "LIVE_DRYRUN1",
+        "LIVE_PILOT",
+        "LAUNCH",
+        "POSTLAUNCH",
+        "RI1",
+        "PLUGIN1",
+        "QMAP1",
+        "ALLOW1"
+      ],
+      "generated_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_state_model.generated.json",
+        "owner_dashboard_provider_stage_route_map.generated.json",
+        "owner_dashboard_data_value_route_map or generated equivalent"
+      ],
+      "missing_items": [],
+      "provider_stage_refs": [
+        "DASH1",
+        "UI1",
+        "UI2",
+        "SVC1",
+        "MOBILE1",
+        "MOBILE2",
+        "TG1",
+        "READINESS1",
+        "PRETRADE1",
+        "LLM1",
+        "LLM2",
+        "AGENT_ORCH1",
+        "PAPER_LOOP",
+        "HOTPATH1",
+        "LIVE_DRYRUN1",
+        "LIVE_PILOT",
+        "LAUNCH",
+        "POSTLAUNCH",
+        "RI1",
+        "PLUGIN1",
+        "QMAP1",
+        "ALLOW1"
+      ],
+      "question_id": "Q4",
+      "question_text": "Does UI1 build the graph/chart features requested in the master plan?",
+      "upstream_refs": [
+        "owner_dashboard_surface_registry.jsonl",
+        "OwnerSurfaceResolver"
+      ],
+      "validation_refs": [
+        "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+      ],
+      "visible_widget_refs": [
+        "Portfolio & PnL",
+        "Execution Costs & TCA",
+        "Quantum Control Center",
+        "DAG / Data Route Map"
+      ]
+    },
+    {
+      "LLM_view_refs": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "agent_role_refs_from_PR165_D2": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "answer_status": "PASS",
+      "downstream_refs": [
+        "DASH1",
+        "UI1",
+        "UI2",
+        "SVC1",
+        "MOBILE1",
+        "MOBILE2",
+        "TG1",
+        "READINESS1",
+        "PRETRADE1",
+        "LLM1",
+        "LLM2",
+        "AGENT_ORCH1",
+        "PAPER_LOOP",
+        "HOTPATH1",
+        "LIVE_DRYRUN1",
+        "LIVE_PILOT",
+        "LAUNCH",
+        "POSTLAUNCH",
+        "RI1",
+        "PLUGIN1",
+        "QMAP1",
+        "ALLOW1"
+      ],
+      "generated_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_state_model.generated.json",
+        "owner_dashboard_provider_stage_route_map.generated.json",
+        "owner_dashboard_data_value_route_map or generated equivalent"
+      ],
+      "missing_items": [],
+      "provider_stage_refs": [
+        "DASH1",
+        "UI1",
+        "UI2",
+        "SVC1",
+        "MOBILE1",
+        "MOBILE2",
+        "TG1",
+        "READINESS1",
+        "PRETRADE1",
+        "LLM1",
+        "LLM2",
+        "AGENT_ORCH1",
+        "PAPER_LOOP",
+        "HOTPATH1",
+        "LIVE_DRYRUN1",
+        "LIVE_PILOT",
+        "LAUNCH",
+        "POSTLAUNCH",
+        "RI1",
+        "PLUGIN1",
+        "QMAP1",
+        "ALLOW1"
+      ],
+      "question_id": "Q5",
+      "question_text": "Did Codex implement useful owner-dashboard information from master-plan 20D.* while avoiding stale logic?",
+      "upstream_refs": [
+        "owner_dashboard_surface_registry.jsonl",
+        "OwnerSurfaceResolver"
+      ],
+      "validation_refs": [
+        "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+      ],
+      "visible_widget_refs": [
+        "owner_dashboard_master_plan_20d_exact_surface_coverage.generated.json",
+        "source-agnostic currentization"
+      ]
+    }
+  ],
+  "meta": {
+    "agent_consumable_authority": false,
+    "artifact_id": "UI1_FIVE_QUESTION_ACCEPTANCE_REPORT",
+    "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+    "connector_access_allowed": false,
+    "credential_access_allowed": false,
+    "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
+    "manual_edit_allowed": false,
+    "order_execution_allowed": false,
+    "runtime_side_effect_allowed": false,
+    "runtime_truth_authority": false,
+    "source_truth_authority": false,
+    "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+  },
+  "questions": [
+    {
+      "LLM_view_refs": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "agent_role_refs_from_PR165_D2": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "answer_status": "PASS",
+      "downstream_refs": [
+        "DASH1",
+        "UI1",
+        "UI2",
+        "SVC1",
+        "MOBILE1",
+        "MOBILE2",
+        "TG1",
+        "READINESS1",
+        "PRETRADE1",
+        "LLM1",
+        "LLM2",
+        "AGENT_ORCH1",
+        "PAPER_LOOP",
+        "HOTPATH1",
+        "LIVE_DRYRUN1",
+        "LIVE_PILOT",
+        "LAUNCH",
+        "POSTLAUNCH",
+        "RI1",
+        "PLUGIN1",
+        "QMAP1",
+        "ALLOW1"
+      ],
+      "generated_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_state_model.generated.json",
+        "owner_dashboard_provider_stage_route_map.generated.json",
+        "owner_dashboard_data_value_route_map or generated equivalent"
+      ],
+      "missing_items": [],
+      "provider_stage_refs": [
+        "DASH1",
+        "UI1",
+        "UI2",
+        "SVC1",
+        "MOBILE1",
+        "MOBILE2",
+        "TG1",
+        "READINESS1",
+        "PRETRADE1",
+        "LLM1",
+        "LLM2",
+        "AGENT_ORCH1",
+        "PAPER_LOOP",
+        "HOTPATH1",
+        "LIVE_DRYRUN1",
+        "LIVE_PILOT",
+        "LAUNCH",
+        "POSTLAUNCH",
+        "RI1",
+        "PLUGIN1",
+        "QMAP1",
+        "ALLOW1"
+      ],
+      "question_id": "Q1",
+      "question_text": "How do this PR's UI features help QTT and QTT agents capture and maximize edges, alphas, and validated positive net-cash evidence per trade order?",
+      "upstream_refs": [
+        "owner_dashboard_surface_registry.jsonl",
+        "OwnerSurfaceResolver"
+      ],
+      "validation_refs": [
+        "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+      ],
+      "visible_widget_refs": [
+        "Edge / Alpha Board",
+        "Trade Workbench",
+        "Execution Costs & TCA",
+        "QKU / Formula / Stack Routes",
+        "Quantum Control Center"
+      ]
+    },
+    {
+      "LLM_view_refs": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "agent_role_refs_from_PR165_D2": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "answer_status": "PASS",
+      "downstream_refs": [
+        "DASH1",
+        "UI1",
+        "UI2",
+        "SVC1",
+        "MOBILE1",
+        "MOBILE2",
+        "TG1",
+        "READINESS1",
+        "PRETRADE1",
+        "LLM1",
+        "LLM2",
+        "AGENT_ORCH1",
+        "PAPER_LOOP",
+        "HOTPATH1",
+        "LIVE_DRYRUN1",
+        "LIVE_PILOT",
+        "LAUNCH",
+        "POSTLAUNCH",
+        "RI1",
+        "PLUGIN1",
+        "QMAP1",
+        "ALLOW1"
+      ],
+      "generated_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_state_model.generated.json",
+        "owner_dashboard_provider_stage_route_map.generated.json",
+        "owner_dashboard_data_value_route_map or generated equivalent"
+      ],
+      "missing_items": [],
+      "provider_stage_refs": [
+        "DASH1",
+        "UI1",
+        "UI2",
+        "SVC1",
+        "MOBILE1",
+        "MOBILE2",
+        "TG1",
+        "READINESS1",
+        "PRETRADE1",
+        "LLM1",
+        "LLM2",
+        "AGENT_ORCH1",
+        "PAPER_LOOP",
+        "HOTPATH1",
+        "LIVE_DRYRUN1",
+        "LIVE_PILOT",
+        "LAUNCH",
+        "POSTLAUNCH",
+        "RI1",
+        "PLUGIN1",
+        "QMAP1",
+        "ALLOW1"
+      ],
+      "question_id": "Q2",
+      "question_text": "Did Codex connect every generated UI1 file, information, value, and data row upstream and downstream?",
+      "upstream_refs": [
+        "owner_dashboard_surface_registry.jsonl",
+        "OwnerSurfaceResolver"
+      ],
+      "validation_refs": [
+        "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+      ],
+      "visible_widget_refs": [
+        "DAG / Data Route Map",
+        "OwnerSurfaceResolver",
+        "OwnerActionRegistry",
+        "PR165-D2 refs"
+      ]
+    },
+    {
+      "LLM_view_refs": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "agent_role_refs_from_PR165_D2": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "answer_status": "PASS",
+      "downstream_refs": [
+        "DASH1",
+        "UI1",
+        "UI2",
+        "SVC1",
+        "MOBILE1",
+        "MOBILE2",
+        "TG1",
+        "READINESS1",
+        "PRETRADE1",
+        "LLM1",
+        "LLM2",
+        "AGENT_ORCH1",
+        "PAPER_LOOP",
+        "HOTPATH1",
+        "LIVE_DRYRUN1",
+        "LIVE_PILOT",
+        "LAUNCH",
+        "POSTLAUNCH",
+        "RI1",
+        "PLUGIN1",
+        "QMAP1",
+        "ALLOW1"
+      ],
+      "generated_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_state_model.generated.json",
+        "owner_dashboard_provider_stage_route_map.generated.json",
+        "owner_dashboard_data_value_route_map or generated equivalent"
+      ],
+      "missing_items": [],
+      "provider_stage_refs": [
+        "DASH1",
+        "UI1",
+        "UI2",
+        "SVC1",
+        "MOBILE1",
+        "MOBILE2",
+        "TG1",
+        "READINESS1",
+        "PRETRADE1",
+        "LLM1",
+        "LLM2",
+        "AGENT_ORCH1",
+        "PAPER_LOOP",
+        "HOTPATH1",
+        "LIVE_DRYRUN1",
+        "LIVE_PILOT",
+        "LAUNCH",
+        "POSTLAUNCH",
+        "RI1",
+        "PLUGIN1",
+        "QMAP1",
+        "ALLOW1"
+      ],
+      "question_id": "Q3",
+      "question_text": "Does UI1 honestly represent the QTT agent/LLM path for QKUs, formulas, variables, trade scenarios, and later execution?",
+      "upstream_refs": [
+        "owner_dashboard_surface_registry.jsonl",
+        "OwnerSurfaceResolver"
+      ],
+      "validation_refs": [
+        "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+      ],
+      "visible_widget_refs": [
+        "Owner-Agent Chat Workspace",
+        "Trade Workbench",
+        "Provider Stage Route Map"
+      ]
+    },
+    {
+      "LLM_view_refs": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "agent_role_refs_from_PR165_D2": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "answer_status": "PASS",
+      "downstream_refs": [
+        "DASH1",
+        "UI1",
+        "UI2",
+        "SVC1",
+        "MOBILE1",
+        "MOBILE2",
+        "TG1",
+        "READINESS1",
+        "PRETRADE1",
+        "LLM1",
+        "LLM2",
+        "AGENT_ORCH1",
+        "PAPER_LOOP",
+        "HOTPATH1",
+        "LIVE_DRYRUN1",
+        "LIVE_PILOT",
+        "LAUNCH",
+        "POSTLAUNCH",
+        "RI1",
+        "PLUGIN1",
+        "QMAP1",
+        "ALLOW1"
+      ],
+      "generated_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_state_model.generated.json",
+        "owner_dashboard_provider_stage_route_map.generated.json",
+        "owner_dashboard_data_value_route_map or generated equivalent"
+      ],
+      "missing_items": [],
+      "provider_stage_refs": [
+        "DASH1",
+        "UI1",
+        "UI2",
+        "SVC1",
+        "MOBILE1",
+        "MOBILE2",
+        "TG1",
+        "READINESS1",
+        "PRETRADE1",
+        "LLM1",
+        "LLM2",
+        "AGENT_ORCH1",
+        "PAPER_LOOP",
+        "HOTPATH1",
+        "LIVE_DRYRUN1",
+        "LIVE_PILOT",
+        "LAUNCH",
+        "POSTLAUNCH",
+        "RI1",
+        "PLUGIN1",
+        "QMAP1",
+        "ALLOW1"
+      ],
+      "question_id": "Q4",
+      "question_text": "Does UI1 build the graph/chart features requested in the master plan?",
+      "upstream_refs": [
+        "owner_dashboard_surface_registry.jsonl",
+        "OwnerSurfaceResolver"
+      ],
+      "validation_refs": [
+        "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+      ],
+      "visible_widget_refs": [
+        "Portfolio & PnL",
+        "Execution Costs & TCA",
+        "Quantum Control Center",
+        "DAG / Data Route Map"
+      ]
+    },
+    {
+      "LLM_view_refs": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "agent_role_refs_from_PR165_D2": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "answer_status": "PASS",
+      "downstream_refs": [
+        "DASH1",
+        "UI1",
+        "UI2",
+        "SVC1",
+        "MOBILE1",
+        "MOBILE2",
+        "TG1",
+        "READINESS1",
+        "PRETRADE1",
+        "LLM1",
+        "LLM2",
+        "AGENT_ORCH1",
+        "PAPER_LOOP",
+        "HOTPATH1",
+        "LIVE_DRYRUN1",
+        "LIVE_PILOT",
+        "LAUNCH",
+        "POSTLAUNCH",
+        "RI1",
+        "PLUGIN1",
+        "QMAP1",
+        "ALLOW1"
+      ],
+      "generated_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_state_model.generated.json",
+        "owner_dashboard_provider_stage_route_map.generated.json",
+        "owner_dashboard_data_value_route_map or generated equivalent"
+      ],
+      "missing_items": [],
+      "provider_stage_refs": [
+        "DASH1",
+        "UI1",
+        "UI2",
+        "SVC1",
+        "MOBILE1",
+        "MOBILE2",
+        "TG1",
+        "READINESS1",
+        "PRETRADE1",
+        "LLM1",
+        "LLM2",
+        "AGENT_ORCH1",
+        "PAPER_LOOP",
+        "HOTPATH1",
+        "LIVE_DRYRUN1",
+        "LIVE_PILOT",
+        "LAUNCH",
+        "POSTLAUNCH",
+        "RI1",
+        "PLUGIN1",
+        "QMAP1",
+        "ALLOW1"
+      ],
+      "question_id": "Q5",
+      "question_text": "Did Codex implement useful owner-dashboard information from master-plan 20D.* while avoiding stale logic?",
+      "upstream_refs": [
+        "owner_dashboard_surface_registry.jsonl",
+        "OwnerSurfaceResolver"
+      ],
+      "validation_refs": [
+        "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+      ],
+      "visible_widget_refs": [
+        "owner_dashboard_master_plan_20d_exact_surface_coverage.generated.json",
+        "source-agnostic currentization"
+      ]
+    }
+  ]
+}

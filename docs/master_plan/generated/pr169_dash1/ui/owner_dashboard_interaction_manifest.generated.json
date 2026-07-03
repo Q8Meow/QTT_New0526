@@ -1,0 +1,38 @@
+{
+  "click_press_drilldown_drawer": true,
+  "filter_chips": [
+    "market",
+    "venue",
+    "agent",
+    "QKU",
+    "formula_stack",
+    "regime",
+    "source_family"
+  ],
+  "hover_tooltip": true,
+  "meta": {
+    "agent_consumable_authority": false,
+    "artifact_id": "UI1_INTERACTION_MANIFEST",
+    "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+    "connector_access_allowed": false,
+    "credential_access_allowed": false,
+    "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
+    "manual_edit_allowed": false,
+    "order_execution_allowed": false,
+    "runtime_side_effect_allowed": false,
+    "runtime_truth_authority": false,
+    "source_truth_authority": false,
+    "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+  },
+  "raw_JSON_primary_display": false,
+  "sortable_tables": true,
+  "time_range_buttons": [
+    "1D",
+    "1W",
+    "1M",
+    "3M",
+    "YTD",
+    "1Y",
+    "ALL"
+  ]
+}

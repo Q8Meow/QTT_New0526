@@ -1,0 +1,345 @@
+{
+  "dash1_rows": [
+    {
+      "accepted_payload_refs": [
+        "owner_submission_ref",
+        "source_candidate_ref",
+        "evidence_capture_request_ref"
+      ],
+      "activation_route": "LLM2_ACTIVATION_ROUTE::RESEARCH_INTAKE_SOCIAL_POST_URL",
+      "agent_role_refs_from_PR165_D2": [
+        "parameter_selector_agent",
+        "dashboard_agent",
+        "commander_agent"
+      ],
+      "authoritative_source": "owner_dashboard_surface_registry.jsonl",
+      "authority_boundary_ref": "PR169_DASH1_AUTHORITY_BOUNDARY::NO_DASHBOARD_RUNTIME_NO_ORDER_NO_PRIVATE_READS",
+      "first_pipeline_state": "RESEARCH_SUBMITTED",
+      "generated_from": "owner_dashboard_surface_registry.jsonl",
+      "intake_contract_id": "RESEARCH_CANDIDATE_INTAKE::social_post_url",
+      "manual_edit_allowed": false,
+      "owner_action_code_refs": [
+        "SUBMIT_RESEARCH_CANDIDATE"
+      ],
+      "registry_row_ref": "owner_dashboard_surface_registry.jsonl::RESEARCH_INTAKE_SOCIAL_POST_URL",
+      "source_family": "social_post_url",
+      "source_truth_created": false,
+      "target_stage": "LLM2"
+    },
+    {
+      "accepted_payload_refs": [
+        "owner_submission_ref",
+        "source_candidate_ref",
+        "evidence_capture_request_ref"
+      ],
+      "activation_route": "LLM2_ACTIVATION_ROUTE::RESEARCH_INTAKE_NEWS_ARTICLE_URL",
+      "agent_role_refs_from_PR165_D2": [
+        "parameter_selector_agent",
+        "dashboard_agent",
+        "commander_agent"
+      ],
+      "authoritative_source": "owner_dashboard_surface_registry.jsonl",
+      "authority_boundary_ref": "PR169_DASH1_AUTHORITY_BOUNDARY::NO_DASHBOARD_RUNTIME_NO_ORDER_NO_PRIVATE_READS",
+      "first_pipeline_state": "RESEARCH_SUBMITTED",
+      "generated_from": "owner_dashboard_surface_registry.jsonl",
+      "intake_contract_id": "RESEARCH_CANDIDATE_INTAKE::news_article_url",
+      "manual_edit_allowed": false,
+      "owner_action_code_refs": [
+        "SUBMIT_RESEARCH_CANDIDATE"
+      ],
+      "registry_row_ref": "owner_dashboard_surface_registry.jsonl::RESEARCH_INTAKE_NEWS_ARTICLE_URL",
+      "source_family": "news_article_url",
+      "source_truth_created": false,
+      "target_stage": "LLM2"
+    },
+    {
+      "accepted_payload_refs": [
+        "owner_submission_ref",
+        "source_candidate_ref",
+        "evidence_capture_request_ref"
+      ],
+      "activation_route": "LLM2_ACTIVATION_ROUTE::RESEARCH_INTAKE_WEBSITE_URL",
+      "agent_role_refs_from_PR165_D2": [
+        "parameter_selector_agent",
+        "dashboard_agent",
+        "commander_agent"
+      ],
+      "authoritative_source": "owner_dashboard_surface_registry.jsonl",
+      "authority_boundary_ref": "PR169_DASH1_AUTHORITY_BOUNDARY::NO_DASHBOARD_RUNTIME_NO_ORDER_NO_PRIVATE_READS",
+      "first_pipeline_state": "RESEARCH_SUBMITTED",
+      "generated_from": "owner_dashboard_surface_registry.jsonl",
+      "intake_contract_id": "RESEARCH_CANDIDATE_INTAKE::website_url",
+      "manual_edit_allowed": false,
+      "owner_action_code_refs": [
+        "SUBMIT_RESEARCH_CANDIDATE"
+      ],
+      "registry_row_ref": "owner_dashboard_surface_registry.jsonl::RESEARCH_INTAKE_WEBSITE_URL",
+      "source_family": "website_url",
+      "source_truth_created": false,
+      "target_stage": "LLM2"
+    },
+    {
+      "accepted_payload_refs": [
+        "owner_submission_ref",
+        "source_candidate_ref",
+        "evidence_capture_request_ref"
+      ],
+      "activation_route": "LLM2_ACTIVATION_ROUTE::RESEARCH_INTAKE_PDF_OR_UPLOADED_DOCUMENT",
+      "agent_role_refs_from_PR165_D2": [
+        "parameter_selector_agent",
+        "dashboard_agent",
+        "commander_agent"
+      ],
+      "authoritative_source": "owner_dashboard_surface_registry.jsonl",
+      "authority_boundary_ref": "PR169_DASH1_AUTHORITY_BOUNDARY::NO_DASHBOARD_RUNTIME_NO_ORDER_NO_PRIVATE_READS",
+      "first_pipeline_state": "RESEARCH_SUBMITTED",
+      "generated_from": "owner_dashboard_surface_registry.jsonl",
+      "intake_contract_id": "RESEARCH_CANDIDATE_INTAKE::pdf_or_uploaded_document",
+      "manual_edit_allowed": false,
+      "owner_action_code_refs": [
+        "SUBMIT_RESEARCH_CANDIDATE"
+      ],
+      "registry_row_ref": "owner_dashboard_surface_registry.jsonl::RESEARCH_INTAKE_PDF_OR_UPLOADED_DOCUMENT",
+      "source_family": "pdf_or_uploaded_document",
+      "source_truth_created": false,
+      "target_stage": "LLM2"
+    },
+    {
+      "accepted_payload_refs": [
+        "owner_submission_ref",
+        "source_candidate_ref",
+        "evidence_capture_request_ref"
+      ],
+      "activation_route": "LLM2_ACTIVATION_ROUTE::RESEARCH_INTAKE_OWNER_PLAIN_TEXT_IDEA",
+      "agent_role_refs_from_PR165_D2": [
+        "parameter_selector_agent",
+        "dashboard_agent",
+        "commander_agent"
+      ],
+      "authoritative_source": "owner_dashboard_surface_registry.jsonl",
+      "authority_boundary_ref": "PR169_DASH1_AUTHORITY_BOUNDARY::NO_DASHBOARD_RUNTIME_NO_ORDER_NO_PRIVATE_READS",
+      "first_pipeline_state": "RESEARCH_SUBMITTED",
+      "generated_from": "owner_dashboard_surface_registry.jsonl",
+      "intake_contract_id": "RESEARCH_CANDIDATE_INTAKE::owner_plain_text_idea",
+      "manual_edit_allowed": false,
+      "owner_action_code_refs": [
+        "SUBMIT_RESEARCH_CANDIDATE"
+      ],
+      "registry_row_ref": "owner_dashboard_surface_registry.jsonl::RESEARCH_INTAKE_OWNER_PLAIN_TEXT_IDEA",
+      "source_family": "owner_plain_text_idea",
+      "source_truth_created": false,
+      "target_stage": "LLM2"
+    },
+    {
+      "accepted_payload_refs": [
+        "owner_submission_ref",
+        "source_candidate_ref",
+        "evidence_capture_request_ref"
+      ],
+      "activation_route": "LLM2_ACTIVATION_ROUTE::RESEARCH_INTAKE_FORMULA_TEXT",
+      "agent_role_refs_from_PR165_D2": [
+        "parameter_selector_agent",
+        "dashboard_agent",
+        "commander_agent"
+      ],
+      "authoritative_source": "owner_dashboard_surface_registry.jsonl",
+      "authority_boundary_ref": "PR169_DASH1_AUTHORITY_BOUNDARY::NO_DASHBOARD_RUNTIME_NO_ORDER_NO_PRIVATE_READS",
+      "first_pipeline_state": "RESEARCH_SUBMITTED",
+      "generated_from": "owner_dashboard_surface_registry.jsonl",
+      "intake_contract_id": "RESEARCH_CANDIDATE_INTAKE::formula_text",
+      "manual_edit_allowed": false,
+      "owner_action_code_refs": [
+        "SUBMIT_RESEARCH_CANDIDATE",
+        "REQUEST_FORMULA_EXTRACTION",
+        "RUN_FORMULA_TEST_VECTOR_REQUEST"
+      ],
+      "registry_row_ref": "owner_dashboard_surface_registry.jsonl::RESEARCH_INTAKE_FORMULA_TEXT",
+      "source_family": "formula_text",
+      "source_truth_created": false,
+      "target_stage": "LLM2"
+    },
+    {
+      "accepted_payload_refs": [
+        "owner_submission_ref",
+        "source_candidate_ref",
+        "evidence_capture_request_ref"
+      ],
+      "activation_route": "LLM2_ACTIVATION_ROUTE::RESEARCH_INTAKE_ALGORITHM_TEXT",
+      "agent_role_refs_from_PR165_D2": [
+        "parameter_selector_agent",
+        "dashboard_agent",
+        "commander_agent"
+      ],
+      "authoritative_source": "owner_dashboard_surface_registry.jsonl",
+      "authority_boundary_ref": "PR169_DASH1_AUTHORITY_BOUNDARY::NO_DASHBOARD_RUNTIME_NO_ORDER_NO_PRIVATE_READS",
+      "first_pipeline_state": "RESEARCH_SUBMITTED",
+      "generated_from": "owner_dashboard_surface_registry.jsonl",
+      "intake_contract_id": "RESEARCH_CANDIDATE_INTAKE::algorithm_text",
+      "manual_edit_allowed": false,
+      "owner_action_code_refs": [
+        "SUBMIT_RESEARCH_CANDIDATE"
+      ],
+      "registry_row_ref": "owner_dashboard_surface_registry.jsonl::RESEARCH_INTAKE_ALGORITHM_TEXT",
+      "source_family": "algorithm_text",
+      "source_truth_created": false,
+      "target_stage": "LLM2"
+    },
+    {
+      "accepted_payload_refs": [
+        "owner_submission_ref",
+        "source_candidate_ref",
+        "evidence_capture_request_ref"
+      ],
+      "activation_route": "LLM2_ACTIVATION_ROUTE::RESEARCH_INTAKE_QUANTUM_STRATEGY_TEXT",
+      "agent_role_refs_from_PR165_D2": [
+        "quantum_optimizer_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "authoritative_source": "owner_dashboard_surface_registry.jsonl",
+      "authority_boundary_ref": "PR169_DASH1_AUTHORITY_BOUNDARY::NO_DASHBOARD_RUNTIME_NO_ORDER_NO_PRIVATE_READS",
+      "first_pipeline_state": "RESEARCH_SUBMITTED",
+      "generated_from": "owner_dashboard_surface_registry.jsonl",
+      "intake_contract_id": "RESEARCH_CANDIDATE_INTAKE::quantum_strategy_text",
+      "manual_edit_allowed": false,
+      "owner_action_code_refs": [
+        "SUBMIT_RESEARCH_CANDIDATE",
+        "REQUEST_QSTRUCT_MAPPING_REVIEW"
+      ],
+      "registry_row_ref": "owner_dashboard_surface_registry.jsonl::RESEARCH_INTAKE_QUANTUM_STRATEGY_TEXT",
+      "source_family": "quantum_strategy_text",
+      "source_truth_created": false,
+      "target_stage": "LLM2"
+    },
+    {
+      "accepted_payload_refs": [
+        "owner_submission_ref",
+        "source_candidate_ref",
+        "evidence_capture_request_ref"
+      ],
+      "activation_route": "LLM2_ACTIVATION_ROUTE::RESEARCH_INTAKE_MARKET_URL_OR_CONTRACT_URL",
+      "agent_role_refs_from_PR165_D2": [
+        "parameter_selector_agent",
+        "dashboard_agent",
+        "commander_agent"
+      ],
+      "authoritative_source": "owner_dashboard_surface_registry.jsonl",
+      "authority_boundary_ref": "PR169_DASH1_AUTHORITY_BOUNDARY::NO_DASHBOARD_RUNTIME_NO_ORDER_NO_PRIVATE_READS",
+      "first_pipeline_state": "RESEARCH_SUBMITTED",
+      "generated_from": "owner_dashboard_surface_registry.jsonl",
+      "intake_contract_id": "RESEARCH_CANDIDATE_INTAKE::market_url_or_contract_url",
+      "manual_edit_allowed": false,
+      "owner_action_code_refs": [
+        "SUBMIT_RESEARCH_CANDIDATE"
+      ],
+      "registry_row_ref": "owner_dashboard_surface_registry.jsonl::RESEARCH_INTAKE_MARKET_URL_OR_CONTRACT_URL",
+      "source_family": "market_url_or_contract_url",
+      "source_truth_created": false,
+      "target_stage": "LLM2"
+    },
+    {
+      "accepted_payload_refs": [
+        "owner_submission_ref",
+        "source_candidate_ref",
+        "evidence_capture_request_ref"
+      ],
+      "activation_route": "LLM2_ACTIVATION_ROUTE::RESEARCH_INTAKE_OPEN_TRADE_URL",
+      "agent_role_refs_from_PR165_D2": [
+        "parameter_selector_agent",
+        "dashboard_agent",
+        "commander_agent"
+      ],
+      "authoritative_source": "owner_dashboard_surface_registry.jsonl",
+      "authority_boundary_ref": "PR169_DASH1_AUTHORITY_BOUNDARY::NO_DASHBOARD_RUNTIME_NO_ORDER_NO_PRIVATE_READS",
+      "first_pipeline_state": "RESEARCH_SUBMITTED",
+      "generated_from": "owner_dashboard_surface_registry.jsonl",
+      "intake_contract_id": "RESEARCH_CANDIDATE_INTAKE::open_trade_url",
+      "manual_edit_allowed": false,
+      "owner_action_code_refs": [
+        "REQUEST_SOURCE_CAPTURE",
+        "REQUEST_SOURCE_VALIDATION",
+        "SUBMIT_RESEARCH_CANDIDATE"
+      ],
+      "registry_row_ref": "owner_dashboard_surface_registry.jsonl::RESEARCH_INTAKE_OPEN_TRADE_URL",
+      "source_family": "open_trade_url",
+      "source_truth_created": false,
+      "target_stage": "LLM2"
+    }
+  ],
+  "meta": {
+    "agent_consumable_authority": false,
+    "artifact_id": "UI1_SOURCE_AGNOSTIC_INTAKE_CONTRACT",
+    "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+    "connector_access_allowed": false,
+    "credential_access_allowed": false,
+    "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
+    "manual_edit_allowed": false,
+    "order_execution_allowed": false,
+    "runtime_side_effect_allowed": false,
+    "runtime_truth_authority": false,
+    "source_truth_authority": false,
+    "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+  },
+  "no_single_source_family_is_default": true,
+  "no_single_source_family_is_default_truth_or_default_trading_authority": true,
+  "object_fields": [
+    "source_family",
+    "input_kind",
+    "owner_intent_summary",
+    "requested_route",
+    "provider_stage",
+    "activation_route",
+    "authority_boundary_ref",
+    "runtime_side_effect"
+  ],
+  "preview_lifecycle_states": [
+    "LOCAL_PREVIEW_ONLY",
+    "QUEUED_FOR_SOURCE_FAMILY_CLASSIFICATION_PROVIDER_PENDING",
+    "QUEUED_FOR_DUPLICATE_RECENCY_RELEVANCE_SAFETY_CHECK_PROVIDER_PENDING",
+    "QUEUED_FOR_SOURCE_EVIDENCE_ROUTE_PROVIDER_PENDING",
+    "QUEUED_FOR_LLM_EXTRACTION_PROVIDER_PENDING",
+    "QUEUED_FOR_QKU_FORMULA_MATERIALIZATION_PROVIDER_PENDING",
+    "BLOCKED_BY_AUTHORITY_BOUNDARY"
+  ],
+  "source_candidate_is_research_input_not_source_truth": true,
+  "source_family_optional_examples": [
+    "website",
+    "link",
+    "PDF",
+    "academic_paper",
+    "scholar_reference",
+    "research_article",
+    "news_article",
+    "social_post_or_thread",
+    "public_document",
+    "repository_link",
+    "dataset",
+    "screenshot_or_image",
+    "formula_text",
+    "algorithm_text",
+    "quantum_strategy_note",
+    "market_or_event_page",
+    "free_form_trade_idea",
+    "owner_uploaded_file"
+  ],
+  "supported_source_families": [
+    "website",
+    "link",
+    "PDF",
+    "academic_paper",
+    "scholar_reference",
+    "research_article",
+    "news_article",
+    "social_post_or_thread",
+    "public_document",
+    "repository_link",
+    "dataset",
+    "screenshot_or_image",
+    "formula_text",
+    "algorithm_text",
+    "quantum_strategy_note",
+    "market_or_event_page",
+    "free_form_trade_idea",
+    "owner_uploaded_file"
+  ]
+}

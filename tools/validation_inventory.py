@@ -377,6 +377,7 @@ def _pr_globs(stem: str) -> tuple[str, ...]:
                 "docs/master_plan/generated/pr169_dash1/**",
                 "src/qtt/dashboard/**",
                 "tests/pr169_dash1/**",
+                "tests/pr169_dash1_ui1/**",
             ]
         )
     return tuple(globs)
@@ -782,6 +783,7 @@ def _specific_pr_token_for_path(path: str) -> str | None:
         path.startswith("docs/master_plan/generated/pr169_dash1/")
         or path.startswith("src/qtt/dashboard/")
         or path.startswith("tests/pr169_dash1/")
+        or path.startswith("tests/pr169_dash1_ui1/")
         or "pr169_dash1" in PurePosixPath(path).name.lower()
     ):
         return "pr169_dash1"

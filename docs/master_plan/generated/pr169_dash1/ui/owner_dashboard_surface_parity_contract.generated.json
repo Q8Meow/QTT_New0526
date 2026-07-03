@@ -1,0 +1,22 @@
+{
+  "meta": {
+    "agent_consumable_authority": false,
+    "artifact_id": "UI1_SURFACE_PARITY_CONTRACT",
+    "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+    "connector_access_allowed": false,
+    "credential_access_allowed": false,
+    "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
+    "manual_edit_allowed": false,
+    "order_execution_allowed": false,
+    "runtime_side_effect_allowed": false,
+    "runtime_truth_authority": false,
+    "source_truth_authority": false,
+    "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+  },
+  "same_action_ids": true,
+  "same_authority_boundary_ids": true,
+  "same_owner_dashboard_state_keys": true,
+  "same_route_ids": true,
+  "same_thread_message_ids": true,
+  "same_widget_ids": true
+}

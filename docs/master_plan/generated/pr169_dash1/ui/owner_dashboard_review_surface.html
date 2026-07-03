@@ -1,51 +1,230 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>QTT Owner Dashboard Review Surface</title>
+  <title>QTT Owner Dashboard Workstation</title>
   <link rel="stylesheet" href="owner_dashboard_review_surface.css">
 </head>
 <body>
-  <header class="topbar">
-    <div>
-      <h1>QTT Owner Dashboard</h1>
-      <p>Static review surface - contracts and provider snapshots only</p>
+  <header class="topbar" aria-label="Owner dashboard header">
+    <div class="brand-block">
+      <span class="eyebrow">PR169-DASH1-UI1 renderer layer</span>
+      <h1>QTT Owner Dashboard Workstation</h1>
+      <p>OwnerSurfaceResolver + OwnerActionRegistry renderer for DASH1 generated artifacts.</p>
     </div>
-    <div class="status-pill">No order authority</div>
+    <div class="header-controls">
+      <div class="theme-switch" role="group" aria-label="Theme switch">
+        <button id="themeDark" class="seg-button" type="button" data-theme-choice="DARK">DARK</button>
+        <button id="themeLight" class="seg-button" type="button" data-theme-choice="LIGHT">LIGHT</button>
+      </div>
+      <button id="openGlobalDrilldown" class="icon-command" type="button" aria-label="Open dashboard refs">Refs</button>
+    </div>
   </header>
-  <main class="shell">
-    <section class="toolbar" aria-label="Dashboard filters">
-      <div class="segment" id="rangeButtons"></div>
-      <select id="modeFilter" aria-label="Mode filter"></select>
-      <select id="agentFilter" aria-label="Agent filter"></select>
-      <select id="marketFilter" aria-label="Market filter"></select>
-      <select id="venueFilter" aria-label="Venue filter"></select>
-    </section>
-    <section class="grid">
-      <article class="panel span-2">
-        <div class="panel-head"><h2>Portfolio PnL</h2><button id="drillPortfolio">Drill Down</button></div>
-        <svg id="equityChart" viewBox="0 0 900 300" role="img" aria-label="Portfolio equity curve"></svg>
-      </article>
-      <article class="panel">
-        <div class="panel-head"><h2>Costs</h2></div>
-        <svg id="costChart" viewBox="0 0 420 260" role="img" aria-label="Cost breakdown"></svg>
-      </article>
-      <article class="panel">
-        <div class="panel-head"><h2>Agents</h2></div>
-        <div id="agentTable" class="table-shell"></div>
-      </article>
-      <article class="panel span-2">
-        <div class="panel-head"><h2>Research Candidate Funnel</h2><button id="drillResearch">Drill Down</button></div>
-        <svg id="funnelChart" viewBox="0 0 900 260" role="img" aria-label="Research candidate funnel"></svg>
-      </article>
-      <article class="panel span-2">
-        <div class="panel-head"><h2>Drilldown</h2></div>
-        <pre id="drilldown"></pre>
-      </article>
-    </section>
-  </main>
-  <div id="tooltip" class="tooltip" hidden></div>
+
+  <section class="status-strip" aria-label="DASH1 renderer status">
+    <div id="statusGrid" class="status-grid"></div>
+  </section>
+
+  <div class="layout-shell">
+    <nav class="rail" aria-label="Dashboard sections">
+      <a href="#overview">Overview</a>
+      <a href="#portfolio">Portfolio &amp; PnL</a>
+      <a href="#decisions">Decision Queue</a>
+      <a href="#actionable-cards">Actionable Cards</a>
+      <a href="#research">Research Intake</a>
+      <a href="#edge-alpha">Edge / Alpha Board</a>
+      <a href="#parameter-control">Parameter Control</a>
+      <a href="#qku-formula">QKU / Formula / Stack Routes</a>
+      <a href="#quantum">Quantum Control Center</a>
+      <a href="#chat">Owner-Agent Chat Workspace</a>
+      <a href="#trade-workbench">Trade Workbench</a>
+      <a href="#agents">Agent Operations</a>
+      <a href="#provider-stage">Provider Stage Route Map</a>
+      <a href="#more">DAG / Data Route Map</a>
+    </nav>
+
+    <main class="workspace" id="workspace">
+      <section id="overview" class="section">
+        <div class="section-head">
+          <div>
+            <span class="eyebrow">LOCAL_STATIC_READ_ONLY</span>
+            <h2>Overview</h2>
+          </div>
+          <div class="search-row">
+            <label for="globalSearch">Search / filter / sort</label>
+            <input id="globalSearch" type="search" placeholder="Filter cards, routes, actions, agents">
+          </div>
+        </div>
+        <div id="overviewCards" class="metric-grid"></div>
+      </section>
+
+      <section id="portfolio" class="section">
+        <div class="section-head">
+          <div>
+            <span class="eyebrow">Portfolio-centered charts</span>
+            <h2>Portfolio &amp; PnL</h2>
+          </div>
+          <div id="rangeButtons" class="segment" role="group" aria-label="Time range controls"></div>
+        </div>
+        <div id="portfolioCards" class="card-grid"></div>
+        <div id="chartGrid" class="chart-grid"></div>
+      </section>
+
+      <section id="decisions" class="section">
+        <div class="section-head">
+          <div>
+            <span class="eyebrow">OwnerDashboardPacket</span>
+            <h2>OwnerDecisionQueue</h2>
+          </div>
+          <div class="filter-row" id="decisionFilters"></div>
+        </div>
+        <div id="ownerPacketCard" class="wide-card"></div>
+        <div id="decisionQueue" class="queue-grid"></div>
+      </section>
+
+      <section id="actionable-cards" class="section">
+        <div class="section-head">
+          <div>
+            <span class="eyebrow">OwnerActionRegistry governed</span>
+            <h2>OwnerActionableCards</h2>
+          </div>
+        </div>
+        <div id="actionCatalog" class="command-catalog"></div>
+        <div id="actionableCards" class="queue-grid"></div>
+      </section>
+
+      <section id="research" class="section">
+        <div class="section-head">
+          <div>
+            <span class="eyebrow">Source-agnostic intake</span>
+            <h2>Research Intake</h2>
+          </div>
+        </div>
+        <div id="researchPipeline" class="timeline"></div>
+        <div id="sourceWatchlist" class="table-shell"></div>
+      </section>
+
+      <section id="edge-alpha" class="section">
+        <div class="section-head">
+          <div>
+            <span class="eyebrow">validated positive net-cash evidence</span>
+            <h2>Edge / Alpha Board</h2>
+          </div>
+        </div>
+        <div id="edgeAlphaBoard" class="card-grid"></div>
+      </section>
+
+      <section id="parameter-control" class="section">
+        <div class="section-head">
+          <div>
+            <span class="eyebrow">Read-only provenance controls</span>
+            <h2>Parameter Control</h2>
+          </div>
+        </div>
+        <div id="parameterControl" class="card-grid"></div>
+      </section>
+
+      <section id="qku-formula" class="section">
+        <div class="section-head">
+          <div>
+            <span class="eyebrow">CENTRALIZED_AGENT_QKU_ACCESS_RESOLVER_PANEL</span>
+            <h2>QKU / Formula / Stack Routes</h2>
+          </div>
+        </div>
+        <div id="qkuFormulaRoutes" class="table-shell"></div>
+        <div id="agentQkuResolver" class="wide-card"></div>
+      </section>
+
+      <section id="quantum" class="section">
+        <div class="section-head">
+          <div>
+            <span class="eyebrow">Observability only</span>
+            <h2>Quantum Control Center</h2>
+          </div>
+        </div>
+        <div id="quantumCenter" class="card-grid"></div>
+      </section>
+
+      <section id="chat" class="section">
+        <div class="section-head">
+          <div>
+            <span class="eyebrow">Unified conversation state</span>
+            <h2>Owner-Agent Chat Workspace</h2>
+          </div>
+        </div>
+        <div id="chatWorkspace" class="chat-grid"></div>
+      </section>
+
+      <section id="trade-workbench" class="section">
+        <div class="section-head">
+          <div>
+            <span class="eyebrow">CHECK_TRADE_WITH_QTT_AGENTS</span>
+            <h2>Trade Workbench</h2>
+          </div>
+        </div>
+        <div id="tradeWorkbench" class="workbench-grid"></div>
+      </section>
+
+      <section id="agents" class="section">
+        <div class="section-head">
+          <div>
+            <span class="eyebrow">PR165-D2 routed roles</span>
+            <h2>Agent Operations</h2>
+          </div>
+        </div>
+        <div id="agentOperations" class="card-grid"></div>
+        <div id="llmPanel" class="wide-card"></div>
+      </section>
+
+      <section id="provider-stage" class="section">
+        <div class="section-head">
+          <div>
+            <span class="eyebrow">Provider-pending runtime boundaries</span>
+            <h2>Provider Stage Route Map</h2>
+          </div>
+        </div>
+        <div id="providerStageRoutes" class="route-grid"></div>
+      </section>
+
+      <section id="more" class="section">
+        <div class="section-head">
+          <div>
+            <span class="eyebrow">DAG / Data Route Map</span>
+            <h2>More</h2>
+          </div>
+        </div>
+        <div id="systemContracts" class="card-grid"></div>
+        <div id="dagRouteMap" class="table-shell"></div>
+      </section>
+    </main>
+  </div>
+
+  <aside id="drilldownDrawer" class="drilldown" aria-label="Linked drilldown drawer" aria-hidden="true">
+    <div class="drawer-head">
+      <div>
+        <span id="drawerKicker" class="eyebrow">Linked refs</span>
+        <h2 id="drawerTitle">Drilldown</h2>
+      </div>
+      <button id="closeDrawer" class="icon-command" type="button" aria-label="Close drilldown">Close</button>
+    </div>
+    <div id="drawerBody" class="drawer-body"></div>
+  </aside>
+
+  <nav id="mobileBottomNav" class="mobile-bottom-nav" aria-label="Mobile bottom navigation">
+    <a href="#overview">Home</a>
+    <a href="#portfolio">Portfolio</a>
+    <a href="#decisions">Decisions</a>
+    <a href="#research">Research</a>
+    <a href="#chat">Chat</a>
+    <a href="#trade-workbench">Trade Workbench</a>
+    <a href="#agents">Agents</a>
+    <a href="#quantum">Quantum</a>
+    <a href="#more">More</a>
+    <button id="mobileThemeToggle" type="button">Theme</button>
+  </nav>
+
+  <script src="owner_dashboard_review_bootstrap.generated.js"></script>
   <script src="owner_dashboard_review_surface.js"></script>
 </body>
 </html>

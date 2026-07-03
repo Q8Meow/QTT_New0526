@@ -1,0 +1,62 @@
+{
+  "meta": {
+    "agent_consumable_authority": false,
+    "artifact_id": "UI1_QKU_FORMULA_COMPUTABILITY_MATRIX",
+    "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+    "connector_access_allowed": false,
+    "credential_access_allowed": false,
+    "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
+    "manual_edit_allowed": false,
+    "order_execution_allowed": false,
+    "runtime_side_effect_allowed": false,
+    "runtime_truth_authority": false,
+    "source_truth_authority": false,
+    "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+  },
+  "rows": [
+    {
+      "LLM_reasoning_view_ref": "owner_reasoning_brain_view_contract.generated.jsonl",
+      "activation_route": "PRETRADE1_ACTIVATION_ROUTE::DASH1_FEATURE_056_TRADE_READINESS_SCORECARD",
+      "agent_consumable_authority": false,
+      "agent_role_refs_from_PR165_D2": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "candidate_ref": "docs/master_plan/generated/pr168_vs2/vs2_packet_registry.jsonl",
+      "computability_state": "COMPUTABLE_AFTER_PROVIDER_ROUTE",
+      "connector_access_allowed": false,
+      "credential_access_allowed": false,
+      "current_evidence_refs": [
+        "docs/master_plan/generated/pr168_rp5g/exec_pnl.jsonl",
+        "docs/master_plan/generated/pr168_rank4/rank_edge_capture.jsonl"
+      ],
+      "downstream_consumer_refs": [
+        "READINESS1",
+        "PRETRADE1",
+        "PAPER-LOOP"
+      ],
+      "formula_ref": "docs/master_plan/generated/pr168_vs2/qku_formula_route_bundle.jsonl",
+      "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
+      "manual_edit_allowed": false,
+      "matrix_row_id": "UI1_QKU_MATRIX_0001",
+      "missing_evidence_refs": [],
+      "no_orphan_status": "PASS",
+      "order_execution_allowed": false,
+      "owner_action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "provider_stage": "PRETRADE1",
+      "qku_ref": "docs/master_plan/generated/pr168_vs2/qku_formula_route_bundle.jsonl",
+      "runtime_side_effect_allowed": false,
+      "runtime_truth_authority": false,
+      "source_truth_authority": false,
+      "upstream_artifact_refs": [
+        "docs/master_plan/generated/pr168_rp5g/exec_pnl.jsonl",
+        "docs/master_plan/generated/pr168_rank4/rank_edge_capture.jsonl"
+      ],
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+    }
+  ]
+}

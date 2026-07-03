@@ -1,0 +1,39 @@
+{
+  "activation_route": "HOTPATH1_ACTIVATION_ROUTE::RUNTIME_METRICS",
+  "contract_groups": [
+    "RuntimeFormulaStackAllowlistView",
+    "HotPathCacheReadinessView",
+    "CachedCoefficientSetView",
+    "CachedQKUCombinationSetView",
+    "CachedRiskCapacityEnvelopeView",
+    "CachedNoTradeThresholdView",
+    "MarketQuoteReceiptRoute",
+    "OrderBookSnapshotReceiptRoute",
+    "DecisionTimestampReceiptRoute",
+    "SubmitTimestampReceiptRoute",
+    "AckTimestampReceiptRoute",
+    "CancelRejectReceiptRoute",
+    "FillTimestampReceiptRoute",
+    "SettlementReceiptRoute",
+    "TCAMetricReceiptRoute",
+    "RealizedPnLReceiptRoute",
+    "CashReconciliationReceiptRoute",
+    "LiveVsPaperVsReplayAuditRoute"
+  ],
+  "meta": {
+    "agent_consumable_authority": false,
+    "artifact_id": "UI1_HOTPATH_METRICS_CONTRACT_VIEW",
+    "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+    "connector_access_allowed": false,
+    "credential_access_allowed": false,
+    "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
+    "manual_edit_allowed": false,
+    "order_execution_allowed": false,
+    "runtime_side_effect_allowed": false,
+    "runtime_truth_authority": false,
+    "source_truth_authority": false,
+    "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+  },
+  "provider_stage": "HOTPATH1",
+  "render_state": "VISIBLE_EMPTY_STATE_PROVIDER_PENDING"
+}

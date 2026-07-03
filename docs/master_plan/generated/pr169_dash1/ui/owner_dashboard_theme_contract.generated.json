@@ -1,0 +1,53 @@
+{
+  "DARK_and_LIGHT_modes_supported": true,
+  "colors_never_the_only_carrier_of_meaning": true,
+  "credential_access": false,
+  "default_theme": "DARK",
+  "high_contrast_text_in_both_themes": true,
+  "light_mode_not_separate_dashboard_state": true,
+  "localStorage_key": "qtt_owner_dashboard_theme",
+  "meta": {
+    "agent_consumable_authority": false,
+    "artifact_id": "UI1_THEME_CONTRACT",
+    "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+    "connector_access_allowed": false,
+    "credential_access_allowed": false,
+    "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
+    "manual_edit_allowed": false,
+    "order_execution_allowed": false,
+    "runtime_side_effect_allowed": false,
+    "runtime_truth_authority": false,
+    "source_truth_authority": false,
+    "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+  },
+  "network_call": false,
+  "semantic_colors": {
+    "caution_insufficient_support": "#F59E0B",
+    "classical_baseline": "#2563EB",
+    "degradation_watch": "#F97316",
+    "inactive_pending_unattributed": "#64748B",
+    "loss_negative": "#DC2626",
+    "positive_gain": "#16A34A",
+    "quantum_applied": "#7C3AED"
+  },
+  "stored_value_exclusions": [
+    "credentials",
+    "tokens",
+    "cash",
+    "account",
+    "connector_private_data",
+    "order_data",
+    "source_truth_data"
+  ],
+  "stored_values_allowed": [
+    "DARK",
+    "LIGHT"
+  ],
+  "supported_modes": [
+    "DARK",
+    "LIGHT"
+  ],
+  "theme_preference_storage_non_secret_only": true,
+  "theme_switch_visible_in_desktop_header": true,
+  "theme_switch_visible_or_accessible_in_mobile_navigation": true
+}

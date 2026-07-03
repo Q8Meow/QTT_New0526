@@ -31,6 +31,7 @@ PR168_QOPT1_BRANCH = "pr168-qopt1-quantum-classical-batch-optimization"
 PR168_VS2_BRANCH = "pr168-vs2-paper-intent-candidate-generator"
 PR168_MEM1_BRANCH = "pr168-mem1-condition-scoped-outcome-memory"
 PR169_DASH1_BRANCH = "pr169-dash1-owner-dashboard-interactive-research-v6"
+PR169_DASH1_UI1_BRANCH = "pr169-dash1-ui1-theme-switch-safe-renderer-v9"
 VALIDATION_FIXTURE_BRANCH = "pr-ci-fastfail-validation-context-preflight"
 
 _PR168_BRANCHES = frozenset(
@@ -60,6 +61,7 @@ _PR168_BRANCHES = frozenset(
         PR168_VS2_BRANCH,
         PR168_MEM1_BRANCH,
         PR169_DASH1_BRANCH,
+        PR169_DASH1_UI1_BRANCH,
         VALIDATION_FIXTURE_BRANCH,
     }
 )
@@ -696,7 +698,9 @@ _PR169_DASH1_ALLOWED_EXACT_PATHS = frozenset(
         "src/qtt/dashboard/owner_dashboard_packet_builder.py",
         "src/qtt/dashboard/owner_dashboard_projection_builder.py",
         "src/qtt/dashboard/owner_dashboard_validator.py",
+        "tools/build_pr168_rp5b_active_registry_safe_cleanup.py",
         "tools/build_pr169_dash1_owner_dashboard.py",
+        "tools/pr168_rp5c_config.py",
         "tools/validate_pr169_dash1_owner_dashboard.py",
         "tools/run_validation_gates.py",
         "tools/validation_inventory.py",
@@ -714,6 +718,7 @@ _PR169_DASH1_ALLOWED_PATTERNS = (
     "src/qtt/dashboard/**",
     "tools/*pr169_dash1*.py",
     "tests/pr169_dash1/**",
+    "tests/pr169_dash1_ui1/**",
 )
 
 _FORBIDDEN_EXACT_PATHS = frozenset(
@@ -1608,7 +1613,7 @@ def explain_pr_scope_decision(branch: str, path: str) -> dict[str, object]:
             "reason": "path_not_registered_for_pr_scope",
         }
 
-    if branch_name == PR169_DASH1_BRANCH:
+    if branch_name in {PR169_DASH1_BRANCH, PR169_DASH1_UI1_BRANCH}:
         dash1_decision = _pr169_dash1_scope_decision(branch_name, normalized)
         if dash1_decision:
             return dash1_decision
