@@ -1,0 +1,28 @@
+{
+  "agent_disagreement_panel_visible": true,
+  "chart_acceptance_markers_present": true,
+  "chat_composer_typeable": true,
+  "developer_mode_collapsed_by_default": true,
+  "edge_alpha_execution_adjusted_board_visible": true,
+  "meta": {
+    "agent_consumable_authority": false,
+    "artifact_id": "UI1R1_VISUAL_ACCEPTANCE_REPORT",
+    "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+    "connector_access_allowed": false,
+    "credential_access_allowed": false,
+    "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config + PR169-DASH1 artifacts + PR169-DASH1-UI1 boot data + OwnerDashboardStateV1 + OwnerSurfaceResolver + OwnerActionRegistry + UI component config",
+    "manual_edit_allowed": false,
+    "order_execution_allowed": false,
+    "runtime_side_effect_allowed": false,
+    "runtime_truth_authority": false,
+    "source_truth_authority": false,
+    "ui1r1_generated_from": "PR169-DASH1 artifacts + PR169-DASH1-UI1 boot data + OwnerDashboardStateV1 + OwnerSurfaceResolver + OwnerActionRegistry + UI component config",
+    "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+  },
+  "no_external_network_required": true,
+  "no_text_only_chart_boxes": true,
+  "owner_first_home_visible": true,
+  "parameter_tuning_preview_visible": true,
+  "status": "PASS",
+  "trade_workbench_simulator_visible": true
+}

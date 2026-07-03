@@ -1,0 +1,597 @@
+{
+  "chart_visual_component_acceptance_markers": [
+    "data-chart-id",
+    "data-chart-kind",
+    "data-chart-render-state",
+    "data-chart-source-ref",
+    "data-provider-stage",
+    "data-authority-boundary"
+  ],
+  "charts": [
+    {
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_CommandActionMatrix.report.json",
+        "PR165_D2_AGENT_ROLE_GAP_ROUTE::provider_pending"
+      ],
+      "activation_route": "PAPER_LOOP_ACTIVATION_ROUTE::UI1R1_CHART_01",
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "axis_or_labeled_scale_required": true,
+      "chart_id": "portfolio_equity_curve",
+      "chart_kind": "line",
+      "chart_title": "Portfolio equity curve",
+      "data_authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "data_chart_id": "portfolio_equity_curve",
+      "data_chart_kind": "line",
+      "data_chart_render_state": "PROVIDER_PENDING_VISUAL_FRAME",
+      "data_chart_source_ref": "owner_portfolio_pnl_chart_view.generated.jsonl",
+      "data_provider_stage": "PAPER_LOOP",
+      "drilldown_required": true,
+      "fake_value_allowed": false,
+      "legend_required": true,
+      "linked_action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "linked_agent_role_refs": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "provider_stage": "PAPER_LOOP",
+      "provider_state_badge_required": true,
+      "row_id": "UI1R1_CHART_01",
+      "runtime_side_effect": false,
+      "source_artifact_ref": "owner_portfolio_pnl_chart_view.generated.jsonl",
+      "source_artifact_refs": [
+        "owner_portfolio_pnl_chart_view.generated.jsonl",
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_state_model.generated.json",
+        "owner_dashboard_widget_manifest.generated.json",
+        "owner_action_registry.generated.jsonl",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "supported_time_ranges": [
+        "1D",
+        "1W",
+        "1M",
+        "3M",
+        "YTD",
+        "1Y",
+        "ALL"
+      ],
+      "time_range_controls": true,
+      "title": "portfolio_equity_curve",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "visual_shape_required": true
+    },
+    {
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_CommandActionMatrix.report.json",
+        "PR165_D2_AGENT_ROLE_GAP_ROUTE::provider_pending"
+      ],
+      "activation_route": "METRICS1_ACTIVATION_ROUTE::UI1R1_CHART_02",
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "axis_or_labeled_scale_required": true,
+      "chart_id": "net_cash_pnl_by_time_range",
+      "chart_kind": "line",
+      "chart_title": "Net cash pnl by time range",
+      "data_authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "data_chart_id": "net_cash_pnl_by_time_range",
+      "data_chart_kind": "line",
+      "data_chart_render_state": "PROVIDER_PENDING_VISUAL_FRAME",
+      "data_chart_source_ref": "owner_portfolio_pnl_chart_view.generated.jsonl",
+      "data_provider_stage": "METRICS1",
+      "drilldown_required": true,
+      "fake_value_allowed": false,
+      "legend_required": true,
+      "linked_action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "linked_agent_role_refs": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "provider_stage": "METRICS1",
+      "provider_state_badge_required": true,
+      "row_id": "UI1R1_CHART_02",
+      "runtime_side_effect": false,
+      "source_artifact_ref": "owner_portfolio_pnl_chart_view.generated.jsonl",
+      "source_artifact_refs": [
+        "owner_portfolio_pnl_chart_view.generated.jsonl",
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_state_model.generated.json",
+        "owner_dashboard_widget_manifest.generated.json",
+        "owner_action_registry.generated.jsonl",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "supported_time_ranges": [
+        "1D",
+        "1W",
+        "1M",
+        "3M",
+        "YTD",
+        "1Y",
+        "ALL"
+      ],
+      "time_range_controls": true,
+      "title": "net_cash_pnl_by_time_range",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "visual_shape_required": true
+    },
+    {
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_CommandActionMatrix.report.json",
+        "PR165_D2_AGENT_ROLE_GAP_ROUTE::provider_pending"
+      ],
+      "activation_route": "METRICS1_ACTIVATION_ROUTE::UI1R1_CHART_03",
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "axis_or_labeled_scale_required": true,
+      "chart_id": "cost_adjusted_net_pnl",
+      "chart_kind": "line",
+      "chart_title": "Cost adjusted net pnl",
+      "data_authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "data_chart_id": "cost_adjusted_net_pnl",
+      "data_chart_kind": "line",
+      "data_chart_render_state": "PROVIDER_PENDING_VISUAL_FRAME",
+      "data_chart_source_ref": "owner_chart_surface_contract.generated.jsonl",
+      "data_provider_stage": "METRICS1",
+      "drilldown_required": true,
+      "fake_value_allowed": false,
+      "legend_required": true,
+      "linked_action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "linked_agent_role_refs": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "provider_stage": "METRICS1",
+      "provider_state_badge_required": true,
+      "row_id": "UI1R1_CHART_03",
+      "runtime_side_effect": false,
+      "source_artifact_ref": "owner_chart_surface_contract.generated.jsonl",
+      "source_artifact_refs": [
+        "owner_chart_surface_contract.generated.jsonl",
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_state_model.generated.json",
+        "owner_dashboard_widget_manifest.generated.json",
+        "owner_action_registry.generated.jsonl",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "supported_time_ranges": [
+        "1D",
+        "1W",
+        "1M",
+        "3M",
+        "YTD",
+        "1Y",
+        "ALL"
+      ],
+      "time_range_controls": true,
+      "title": "cost_adjusted_net_pnl",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "visual_shape_required": true
+    },
+    {
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_CommandActionMatrix.report.json",
+        "PR165_D2_AGENT_ROLE_GAP_ROUTE::provider_pending"
+      ],
+      "activation_route": "METRICS1_ACTIVATION_ROUTE::UI1R1_CHART_04",
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "axis_or_labeled_scale_required": true,
+      "chart_id": "drawdown_curve",
+      "chart_kind": "area",
+      "chart_title": "Drawdown curve",
+      "data_authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "data_chart_id": "drawdown_curve",
+      "data_chart_kind": "area",
+      "data_chart_render_state": "PROVIDER_PENDING_VISUAL_FRAME",
+      "data_chart_source_ref": "owner_chart_surface_contract.generated.jsonl",
+      "data_provider_stage": "METRICS1",
+      "drilldown_required": true,
+      "fake_value_allowed": false,
+      "legend_required": true,
+      "linked_action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "linked_agent_role_refs": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "provider_stage": "METRICS1",
+      "provider_state_badge_required": true,
+      "row_id": "UI1R1_CHART_04",
+      "runtime_side_effect": false,
+      "source_artifact_ref": "owner_chart_surface_contract.generated.jsonl",
+      "source_artifact_refs": [
+        "owner_chart_surface_contract.generated.jsonl",
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_state_model.generated.json",
+        "owner_dashboard_widget_manifest.generated.json",
+        "owner_action_registry.generated.jsonl",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "supported_time_ranges": [
+        "1D",
+        "1W",
+        "1M",
+        "3M",
+        "YTD",
+        "1Y",
+        "ALL"
+      ],
+      "time_range_controls": true,
+      "title": "drawdown_curve",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "visual_shape_required": true
+    },
+    {
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_CommandActionMatrix.report.json",
+        "PR165_D2_AGENT_ROLE_GAP_ROUTE::provider_pending"
+      ],
+      "activation_route": "PAPER_LOOP_ACTIVATION_ROUTE::UI1R1_CHART_05",
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "axis_or_labeled_scale_required": true,
+      "chart_id": "replay_vs_paper_vs_shadow_vs_live_pnl",
+      "chart_kind": "line",
+      "chart_title": "Replay vs paper vs shadow vs live pnl",
+      "data_authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "data_chart_id": "replay_vs_paper_vs_shadow_vs_live_pnl",
+      "data_chart_kind": "line",
+      "data_chart_render_state": "PROVIDER_PENDING_VISUAL_FRAME",
+      "data_chart_source_ref": "owner_chart_surface_contract.generated.jsonl",
+      "data_provider_stage": "PAPER_LOOP",
+      "drilldown_required": true,
+      "fake_value_allowed": false,
+      "legend_required": true,
+      "linked_action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "linked_agent_role_refs": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "provider_stage": "PAPER_LOOP",
+      "provider_state_badge_required": true,
+      "row_id": "UI1R1_CHART_05",
+      "runtime_side_effect": false,
+      "source_artifact_ref": "owner_chart_surface_contract.generated.jsonl",
+      "source_artifact_refs": [
+        "owner_chart_surface_contract.generated.jsonl",
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_state_model.generated.json",
+        "owner_dashboard_widget_manifest.generated.json",
+        "owner_action_registry.generated.jsonl",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "supported_time_ranges": [
+        "1D",
+        "1W",
+        "1M",
+        "3M",
+        "YTD",
+        "1Y",
+        "ALL"
+      ],
+      "time_range_controls": true,
+      "title": "replay_vs_paper_vs_shadow_vs_live_pnl",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "visual_shape_required": true
+    },
+    {
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_CommandActionMatrix.report.json",
+        "PR165_D2_AGENT_ROLE_GAP_ROUTE::provider_pending"
+      ],
+      "activation_route": "PRETRADE1_ACTIVATION_ROUTE::UI1R1_CHART_06",
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "axis_or_labeled_scale_required": true,
+      "chart_id": "TCA_waterfall_and_implementation_shortfall",
+      "chart_kind": "waterfall",
+      "chart_title": "TCA waterfall and implementation shortfall",
+      "data_authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "data_chart_id": "TCA_waterfall_and_implementation_shortfall",
+      "data_chart_kind": "waterfall",
+      "data_chart_render_state": "PROVIDER_PENDING_VISUAL_FRAME",
+      "data_chart_source_ref": "docs/master_plan/generated/pr168_rp5g/tca_decomp.jsonl",
+      "data_provider_stage": "PRETRADE1",
+      "drilldown_required": true,
+      "fake_value_allowed": false,
+      "legend_required": true,
+      "linked_action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "linked_agent_role_refs": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "provider_stage": "PRETRADE1",
+      "provider_state_badge_required": true,
+      "row_id": "UI1R1_CHART_06",
+      "runtime_side_effect": false,
+      "source_artifact_ref": "docs/master_plan/generated/pr168_rp5g/tca_decomp.jsonl",
+      "source_artifact_refs": [
+        "docs/master_plan/generated/pr168_rp5g/tca_decomp.jsonl",
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_state_model.generated.json",
+        "owner_dashboard_widget_manifest.generated.json",
+        "owner_action_registry.generated.jsonl",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "supported_time_ranges": [],
+      "time_range_controls": false,
+      "title": "TCA_waterfall_and_implementation_shortfall",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "visual_shape_required": true
+    },
+    {
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_CommandActionMatrix.report.json",
+        "PR165_D2_AGENT_ROLE_GAP_ROUTE::provider_pending"
+      ],
+      "activation_route": "PRETRADE1_ACTIVATION_ROUTE::UI1R1_CHART_07",
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "axis_or_labeled_scale_required": true,
+      "chart_id": "capital_allocation_by_market",
+      "chart_kind": "donut",
+      "chart_title": "Capital allocation by market",
+      "data_authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "data_chart_id": "capital_allocation_by_market",
+      "data_chart_kind": "donut",
+      "data_chart_render_state": "PROVIDER_PENDING_VISUAL_FRAME",
+      "data_chart_source_ref": "owner_live_cash_private_display_contract.generated.jsonl",
+      "data_provider_stage": "PRETRADE1",
+      "drilldown_required": true,
+      "fake_value_allowed": false,
+      "legend_required": true,
+      "linked_action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "linked_agent_role_refs": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "provider_stage": "PRETRADE1",
+      "provider_state_badge_required": true,
+      "row_id": "UI1R1_CHART_07",
+      "runtime_side_effect": false,
+      "source_artifact_ref": "owner_live_cash_private_display_contract.generated.jsonl",
+      "source_artifact_refs": [
+        "owner_live_cash_private_display_contract.generated.jsonl",
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_state_model.generated.json",
+        "owner_dashboard_widget_manifest.generated.json",
+        "owner_action_registry.generated.jsonl",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "supported_time_ranges": [],
+      "time_range_controls": false,
+      "title": "capital_allocation_by_market",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "visual_shape_required": true
+    },
+    {
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_CommandActionMatrix.report.json",
+        "PR165_D2_AGENT_ROLE_GAP_ROUTE::provider_pending"
+      ],
+      "activation_route": "PRETRADE1_ACTIVATION_ROUTE::UI1R1_CHART_08",
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "axis_or_labeled_scale_required": true,
+      "chart_id": "exposure_by_venue",
+      "chart_kind": "stacked_bar",
+      "chart_title": "Exposure by venue",
+      "data_authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "data_chart_id": "exposure_by_venue",
+      "data_chart_kind": "stacked_bar",
+      "data_chart_render_state": "PROVIDER_PENDING_VISUAL_FRAME",
+      "data_chart_source_ref": "owner_live_cash_private_display_contract.generated.jsonl",
+      "data_provider_stage": "PRETRADE1",
+      "drilldown_required": true,
+      "fake_value_allowed": false,
+      "legend_required": true,
+      "linked_action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "linked_agent_role_refs": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "provider_stage": "PRETRADE1",
+      "provider_state_badge_required": true,
+      "row_id": "UI1R1_CHART_08",
+      "runtime_side_effect": false,
+      "source_artifact_ref": "owner_live_cash_private_display_contract.generated.jsonl",
+      "source_artifact_refs": [
+        "owner_live_cash_private_display_contract.generated.jsonl",
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_state_model.generated.json",
+        "owner_dashboard_widget_manifest.generated.json",
+        "owner_action_registry.generated.jsonl",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "supported_time_ranges": [],
+      "time_range_controls": false,
+      "title": "exposure_by_venue",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "visual_shape_required": true
+    },
+    {
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_CommandActionMatrix.report.json",
+        "PR165_D2_AGENT_ROLE_GAP_ROUTE::provider_pending"
+      ],
+      "activation_route": "PRETRADE1_ACTIVATION_ROUTE::UI1R1_CHART_09",
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "axis_or_labeled_scale_required": true,
+      "chart_id": "edge_alpha_scoreboard_visual",
+      "chart_kind": "scoreboard",
+      "chart_title": "Edge alpha scoreboard visual",
+      "data_authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "data_chart_id": "edge_alpha_scoreboard_visual",
+      "data_chart_kind": "scoreboard",
+      "data_chart_render_state": "PROVIDER_PENDING_VISUAL_FRAME",
+      "data_chart_source_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "data_provider_stage": "PRETRADE1",
+      "drilldown_required": true,
+      "fake_value_allowed": false,
+      "legend_required": true,
+      "linked_action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "linked_agent_role_refs": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "provider_stage": "PRETRADE1",
+      "provider_state_badge_required": true,
+      "row_id": "UI1R1_CHART_09",
+      "runtime_side_effect": false,
+      "source_artifact_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "source_artifact_refs": [
+        "owner_edge_alpha_capture_view.generated.jsonl",
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_state_model.generated.json",
+        "owner_dashboard_widget_manifest.generated.json",
+        "owner_action_registry.generated.jsonl",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "supported_time_ranges": [],
+      "time_range_controls": false,
+      "title": "edge_alpha_scoreboard_visual",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "visual_shape_required": true
+    },
+    {
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_CommandActionMatrix.report.json",
+        "PR165_D2_AGENT_ROLE_GAP_ROUTE::provider_pending"
+      ],
+      "activation_route": "AGENT_ORCH1_ACTIVATION_ROUTE::UI1R1_CHART_10",
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "axis_or_labeled_scale_required": true,
+      "chart_id": "agent_disagreement_visual",
+      "chart_kind": "bar",
+      "chart_title": "Agent disagreement visual",
+      "data_authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "data_chart_id": "agent_disagreement_visual",
+      "data_chart_kind": "bar",
+      "data_chart_render_state": "PROVIDER_PENDING_VISUAL_FRAME",
+      "data_chart_source_ref": "owner_agent_performance_chart_view.generated.jsonl",
+      "data_provider_stage": "AGENT_ORCH1",
+      "drilldown_required": true,
+      "fake_value_allowed": false,
+      "legend_required": true,
+      "linked_action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "linked_agent_role_refs": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "provider_stage": "AGENT_ORCH1",
+      "provider_state_badge_required": true,
+      "row_id": "UI1R1_CHART_10",
+      "runtime_side_effect": false,
+      "source_artifact_ref": "owner_agent_performance_chart_view.generated.jsonl",
+      "source_artifact_refs": [
+        "owner_agent_performance_chart_view.generated.jsonl",
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_state_model.generated.json",
+        "owner_dashboard_widget_manifest.generated.json",
+        "owner_action_registry.generated.jsonl",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "supported_time_ranges": [],
+      "time_range_controls": false,
+      "title": "agent_disagreement_visual",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "visual_shape_required": true
+    },
+    {
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_CommandActionMatrix.report.json",
+        "PR165_D2_AGENT_ROLE_GAP_ROUTE::provider_pending"
+      ],
+      "activation_route": "DASH1_ACTIVATION_ROUTE::UI1R1_CHART_11",
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "axis_or_labeled_scale_required": true,
+      "chart_id": "DAG_route_graph_visual",
+      "chart_kind": "dag",
+      "chart_title": "DAG route graph visual",
+      "data_authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "data_chart_id": "DAG_route_graph_visual",
+      "data_chart_kind": "dag",
+      "data_chart_render_state": "PROVIDER_PENDING_VISUAL_FRAME",
+      "data_chart_source_ref": "dag.generated.jsonl",
+      "data_provider_stage": "DASH1",
+      "drilldown_required": true,
+      "fake_value_allowed": false,
+      "legend_required": true,
+      "linked_action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "linked_agent_role_refs": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "provider_stage": "DASH1",
+      "provider_state_badge_required": true,
+      "row_id": "UI1R1_CHART_11",
+      "runtime_side_effect": false,
+      "source_artifact_ref": "dag.generated.jsonl",
+      "source_artifact_refs": [
+        "dag.generated.jsonl",
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_state_model.generated.json",
+        "owner_dashboard_widget_manifest.generated.json",
+        "owner_action_registry.generated.jsonl",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "supported_time_ranges": [],
+      "time_range_controls": false,
+      "title": "DAG_route_graph_visual",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "visual_shape_required": true
+    }
+  ],
+  "meta": {
+    "agent_consumable_authority": false,
+    "artifact_id": "UI1R1_CHART_MANIFEST",
+    "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+    "connector_access_allowed": false,
+    "credential_access_allowed": false,
+    "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config + PR169-DASH1 artifacts + PR169-DASH1-UI1 boot data + OwnerDashboardStateV1 + OwnerSurfaceResolver + OwnerActionRegistry + UI component config",
+    "manual_edit_allowed": false,
+    "order_execution_allowed": false,
+    "runtime_side_effect_allowed": false,
+    "runtime_truth_authority": false,
+    "source_truth_authority": false,
+    "ui1r1_generated_from": "PR169-DASH1 artifacts + PR169-DASH1-UI1 boot data + OwnerDashboardStateV1 + OwnerSurfaceResolver + OwnerActionRegistry + UI component config",
+    "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+  },
+  "no_fake_PnL_cash_fills_live_positions": true,
+  "no_text_only_chart_boxes": true
+}

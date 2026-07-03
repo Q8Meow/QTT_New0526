@@ -21,13 +21,16 @@
   "stable_tab_labels": [
     "Home",
     "Portfolio",
+    "Trade Workbench",
+    "Chat",
     "Decisions",
     "Research",
-    "Chat",
-    "Trade Workbench",
+    "Edge / Alpha",
     "Agents",
+    "Parameters",
     "Quantum",
-    "More"
+    "More",
+    "Developer"
   ],
   "stale_data_banner_rendered_on_mobile_viewports": true,
   "tabs": [
@@ -41,6 +44,20 @@
     {
       "label": "Portfolio",
       "tab_id": "MOBILE_TAB_PORTFOLIO",
+      "uses_owner_action_registry": true,
+      "uses_owner_dashboard_state_model": true,
+      "uses_owner_surface_resolver": true
+    },
+    {
+      "label": "Trade Workbench",
+      "tab_id": "MOBILE_TAB_TRADE_WORKBENCH",
+      "uses_owner_action_registry": true,
+      "uses_owner_dashboard_state_model": true,
+      "uses_owner_surface_resolver": true
+    },
+    {
+      "label": "Chat",
+      "tab_id": "MOBILE_TAB_CHAT",
       "uses_owner_action_registry": true,
       "uses_owner_dashboard_state_model": true,
       "uses_owner_surface_resolver": true
@@ -60,15 +77,8 @@
       "uses_owner_surface_resolver": true
     },
     {
-      "label": "Chat",
-      "tab_id": "MOBILE_TAB_CHAT",
-      "uses_owner_action_registry": true,
-      "uses_owner_dashboard_state_model": true,
-      "uses_owner_surface_resolver": true
-    },
-    {
-      "label": "Trade Workbench",
-      "tab_id": "MOBILE_TAB_TRADE_WORKBENCH",
+      "label": "Edge / Alpha",
+      "tab_id": "MOBILE_TAB_EDGE_ALPHA",
       "uses_owner_action_registry": true,
       "uses_owner_dashboard_state_model": true,
       "uses_owner_surface_resolver": true
@@ -76,6 +86,13 @@
     {
       "label": "Agents",
       "tab_id": "MOBILE_TAB_AGENTS",
+      "uses_owner_action_registry": true,
+      "uses_owner_dashboard_state_model": true,
+      "uses_owner_surface_resolver": true
+    },
+    {
+      "label": "Parameters",
+      "tab_id": "MOBILE_TAB_PARAMETERS",
       "uses_owner_action_registry": true,
       "uses_owner_dashboard_state_model": true,
       "uses_owner_surface_resolver": true
@@ -90,6 +107,13 @@
     {
       "label": "More",
       "tab_id": "MOBILE_TAB_MORE",
+      "uses_owner_action_registry": true,
+      "uses_owner_dashboard_state_model": true,
+      "uses_owner_surface_resolver": true
+    },
+    {
+      "label": "Developer",
+      "tab_id": "MOBILE_TAB_DEVELOPER",
       "uses_owner_action_registry": true,
       "uses_owner_dashboard_state_model": true,
       "uses_owner_surface_resolver": true

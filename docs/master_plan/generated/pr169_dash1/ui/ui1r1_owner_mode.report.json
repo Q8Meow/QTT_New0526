@@ -1,0 +1,48 @@
+{
+  "developer_mode_collapsed_by_default": true,
+  "meta": {
+    "agent_consumable_authority": false,
+    "artifact_id": "UI1R1_OWNER_MODE_REPORT",
+    "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+    "connector_access_allowed": false,
+    "credential_access_allowed": false,
+    "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config + PR169-DASH1 artifacts + PR169-DASH1-UI1 boot data + OwnerDashboardStateV1 + OwnerSurfaceResolver + OwnerActionRegistry + UI component config",
+    "manual_edit_allowed": false,
+    "order_execution_allowed": false,
+    "runtime_side_effect_allowed": false,
+    "runtime_truth_authority": false,
+    "source_truth_authority": false,
+    "ui1r1_generated_from": "PR169-DASH1 artifacts + PR169-DASH1-UI1 boot data + OwnerDashboardStateV1 + OwnerSurfaceResolver + OwnerActionRegistry + UI component config",
+    "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+  },
+  "moved_to_developer_mode": [
+    "registry_row_count",
+    "decision_row_count",
+    "actionable_card_count",
+    "chart_row_count",
+    "artifact_directory",
+    "validator_status",
+    "no_orphan_report_status",
+    "authority_boundary_report_status",
+    "projection_generation_status",
+    "DASH1_UI1_renderer_lineage",
+    "playwright_screenshot_manifest"
+  ],
+  "owner_mode_default": true,
+  "owner_primary_surfaces": [
+    "owner_top_bar",
+    "portfolio_hero_cards",
+    "portfolio_equity_curve",
+    "TCA_waterfall",
+    "decision_summary",
+    "trade_workbench_quick_card",
+    "plain_english_chat_composer_quick_card",
+    "edge_alpha_preview",
+    "agent_disagreement_preview",
+    "risk_capital_exposure_preview",
+    "developer_mode_collapsed_toggle"
+  ],
+  "raw_json_not_primary_owner_content": true,
+  "registry_diagnostics_not_owner_default": true,
+  "status": "PASS"
+}
