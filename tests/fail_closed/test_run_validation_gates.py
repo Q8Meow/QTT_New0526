@@ -3169,6 +3169,7 @@ def test_runner_splits_pytest_shard_2_longest_group_deterministically():
         ("tests/pr168_vs2",),
         ("tests/pr168_mem1",),
         ("tests/pr169_dash1",),
+        ("tests/pr169_dash1_ui1",),
     ]
     assert all(command.reason for command in commands)
     assert ("tests/stage1_prediction_markets",) not in [
