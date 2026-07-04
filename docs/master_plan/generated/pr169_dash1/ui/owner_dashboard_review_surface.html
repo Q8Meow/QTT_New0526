@@ -9,16 +9,21 @@
 <body>
   <header class="topbar" aria-label="Owner dashboard header">
     <div class="brand-block">
-      <span class="eyebrow">PR169-DASH1-UI1 renderer layer</span>
+      <span class="eyebrow">Guided owner workstation</span>
       <h1>QTT Owner Dashboard Workstation</h1>
-      <p>Owner Mode trading cockpit over OwnerDashboardStateV1, OwnerSurfaceResolver, and OwnerActionRegistry. No direct venue submit.</p>
+      <p>Review trades, evidence, costs, routes, and next safe steps. This page creates local previews only.</p>
     </div>
     <div class="header-controls">
-      <div class="theme-switch" role="group" aria-label="Theme switch">
-        <button id="themeDark" class="seg-button" type="button" data-theme-choice="DARK">DARK</button>
-        <button id="themeLight" class="seg-button" type="button" data-theme-choice="LIGHT">LIGHT</button>
+      <div id="experienceModeSwitch" class="mode-switch" role="group" aria-label="Experience mode switch" data-experience-mode="GUIDED_OWNER">
+        <button class="seg-button" type="button" data-mode-choice="GUIDED_OWNER" aria-pressed="true">Guided</button>
+        <button class="seg-button" type="button" data-mode-choice="ADVANCED_OWNER" aria-pressed="false">Advanced</button>
+        <button class="seg-button" type="button" data-mode-choice="DEVELOPER" aria-pressed="false">Developer</button>
       </div>
-      <button id="openGlobalDrilldown" class="icon-command" type="button" aria-label="Open dashboard refs">Refs</button>
+      <div class="theme-switch" role="group" aria-label="Theme switch">
+        <button id="themeDark" class="seg-button" type="button" data-theme-choice="DARK">Dark</button>
+        <button id="themeLight" class="seg-button" type="button" data-theme-choice="LIGHT">Light</button>
+      </div>
+      <button id="openGlobalDrilldown" class="icon-command" type="button" aria-label="Open dashboard technical details">Technical Details</button>
     </div>
   </header>
 
@@ -57,6 +62,8 @@
             <input id="globalSearch" type="search" placeholder="Filter cards, routes, actions, agents">
           </div>
         </div>
+        <div id="ownerCoachPanel" class="coach-panel"></div>
+        <div id="tellMattersPanel" class="tell-matters-panel"></div>
         <div id="overviewCards" class="metric-grid"></div>
         <div id="homeQuickGrid" class="home-grid"></div>
         <div id="homeDeveloperSummary" class="developer-summary"></div>
@@ -77,8 +84,8 @@
       <section id="decisions" class="section">
         <div class="section-head">
           <div>
-            <span class="eyebrow">OwnerDashboardPacket</span>
-            <h2>OwnerDecisionQueue</h2>
+            <span class="eyebrow">Owner review queue</span>
+            <h2>Decision Queue</h2>
           </div>
           <div class="filter-row" id="decisionFilters"></div>
         </div>
@@ -89,8 +96,8 @@
       <section id="actionable-cards" class="section">
         <div class="section-head">
           <div>
-            <span class="eyebrow">OwnerActionRegistry governed</span>
-            <h2>OwnerActionableCards</h2>
+            <span class="eyebrow">Governed local actions</span>
+            <h2>Actionable Cards</h2>
           </div>
         </div>
         <div id="actionCatalog" class="command-catalog"></div>
@@ -131,7 +138,7 @@
       <section id="qku-formula" class="section">
         <div class="section-head">
           <div>
-            <span class="eyebrow">CENTRALIZED_AGENT_QKU_ACCESS_RESOLVER_PANEL</span>
+            <span class="eyebrow">Knowledge and formula routes</span>
             <h2>QKU / Formula / Stack Routes</h2>
           </div>
         </div>
@@ -162,10 +169,12 @@
       <section id="trade-workbench" class="section">
         <div class="section-head">
           <div>
-            <span class="eyebrow">CHECK_TRADE_WITH_QTT_AGENTS</span>
+            <span class="eyebrow">Guided local trade preview</span>
             <h2>Trade Workbench</h2>
           </div>
         </div>
+        <div id="guidedWorkflowPanel" class="guided-workflow-panel"></div>
+        <div id="routePreviewPanel" class="route-preview-panel"></div>
         <div id="tradeWorkbench" class="workbench-grid"></div>
       </section>
 
@@ -193,11 +202,13 @@
       <section id="more" class="section">
         <div class="section-head">
           <div>
-            <span class="eyebrow">DAG / Data Route Map</span>
+            <span class="eyebrow">Workflow and data routes</span>
             <h2>More</h2>
           </div>
         </div>
         <div id="systemContracts" class="card-grid"></div>
+        <div id="ownerAutonomyEducation" class="wide-card"></div>
+        <div id="ownerGlossary" class="wide-card"></div>
         <div id="dagRouteMap" class="table-shell"></div>
       </section>
 
@@ -216,7 +227,7 @@
   <aside id="drilldownDrawer" class="drilldown" aria-label="Linked drilldown drawer" aria-hidden="true">
     <div class="drawer-head">
       <div>
-        <span id="drawerKicker" class="eyebrow">Linked refs</span>
+        <span id="drawerKicker" class="eyebrow">Evidence and routing</span>
         <h2 id="drawerTitle">Drilldown</h2>
       </div>
       <button id="closeDrawer" class="icon-command" type="button" aria-label="Close drilldown">Close</button>

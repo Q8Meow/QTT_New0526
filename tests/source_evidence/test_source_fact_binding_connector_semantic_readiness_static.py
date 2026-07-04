@@ -5,6 +5,8 @@ import json
 from pathlib import Path
 import subprocess
 
+import pytest
+
 from tools.validate_source_fact_binding_connector_semantic_readiness_static import (
     ACCEPTED_PACKET_REQUIRED,
     BLOCKED_PENDING_PACKET,
@@ -195,8 +197,15 @@ def test_validator_blocks_atomicrows_bundle_hash_creation_or_mutation(tmp_path):
     _assert_failure_contains(failures, "canonical AtomicRows bundle must remain absent")
 
 
-def test_python_usage_scan_allows_exact_local_visual_qa_playwright_path(tmp_path):
-    script = tmp_path / "tools" / "playwright_pr169_dash1_ui1_r1_visual_smoke.py"
+@pytest.mark.parametrize(
+    "script_name",
+    [
+        "playwright_pr169_dash1_ui1_r1_visual_smoke.py",
+        "playwright_pr169_dash1_ui1_r2_visual_smoke.py",
+    ],
+)
+def test_python_usage_scan_allows_exact_local_visual_qa_playwright_path(tmp_path, script_name):
+    script = tmp_path / "tools" / script_name
     script.parent.mkdir(parents=True)
     script.write_text(
         "\n".join(

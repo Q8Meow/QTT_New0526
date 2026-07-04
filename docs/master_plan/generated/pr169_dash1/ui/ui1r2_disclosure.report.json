@@ -1,0 +1,30 @@
+{
+  "ADVANCED_OWNER_available": true,
+  "DEVELOPER_available": true,
+  "Developer_Mode_default": false,
+  "GUIDED_OWNER_default": true,
+  "default_expansion_state_on_page_load": "collapsed",
+  "education_text_wall_visible_by_default": false,
+  "local_storage_keys_allowed": [
+    "qtt_owner_dashboard_experience_mode",
+    "qtt_owner_dashboard_guidance_density"
+  ],
+  "meta": {
+    "agent_consumable_authority": false,
+    "artifact_id": "UI1R2_DISCLOSURE_REPORT",
+    "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+    "connector_access_allowed": false,
+    "credential_access_allowed": false,
+    "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config + PR169-DASH1 artifacts + PR169-DASH1-UI1/R1 boot data + OwnerPresentationLayer / OwnerGuidancePolicy config",
+    "manual_edit_allowed": false,
+    "order_execution_allowed": false,
+    "runtime_side_effect_allowed": false,
+    "runtime_truth_authority": false,
+    "source_truth_authority": false,
+    "ui1r2_generated_from": "PR169-DASH1 artifacts + PR169-DASH1-UI1/R1 boot data + OwnerPresentationLayer / OwnerGuidancePolicy config",
+    "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+  },
+  "raw_refs_visible_by_default": false,
+  "technical_details_visible_by_default": false,
+  "validation_status": "PASS"
+}

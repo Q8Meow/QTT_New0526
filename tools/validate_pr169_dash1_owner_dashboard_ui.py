@@ -15,6 +15,8 @@ from tools.build_pr169_dash1_owner_dashboard_ui import (
     AUTHORITY_BOUNDARY,
     BOOT_JS,
     BOOT_JSON,
+    EXPERIENCE_MODE_STORAGE_KEY,
+    GUIDANCE_DENSITY_STORAGE_KEY,
     MOBILE_TABS,
     REQUIRED_TOP_LEVEL_KEYS,
     SEMANTIC_COLORS,
@@ -428,6 +430,203 @@ def validate(base: Path) -> tuple[str, ...]:
         failures.append("ui1r1_playwright_screenshot_rows_missing")
     if playwright.get("network_status") != "PASS" or playwright.get("console_status") != "PASS":
         failures.append("ui1r1_playwright_status_not_pass")
+
+    copy_map = _read_json(ui_dir / "ui1r2_copy_map.generated.json")
+    copy_rows = copy_map.get("rows", [])
+    exact_copy = {row.get("technical_pattern_or_exact_id"): row for row in copy_rows}
+    required_copy = {
+        "DASH1_FEATURE_011_ACKNOWLEDGMENT_IS_NOT_LIVE_APPROVAL": "Acknowledging review does not approve a live trade.",
+        "VISIBLE_EMPTY_STATE_PROVIDER_PENDING": "Waiting for provider data.",
+        "CONTRACT_DEFINED_PROVIDER_PENDING": "Provider contract defined; runtime not active yet.",
+        "ROUTED_PENDING_PROVIDER": "Connected to a pending QTT provider route.",
+        "NO_DASHBOARD_RUNTIME_NO_ORDER_NO_PRIVATE_READS": "Review-only dashboard.",
+        "CHECK_TRADE_WITH_QTT_AGENTS": "Check trade with QTT agents.",
+        "REQUEST_NO_TRADE_REOPTIMIZATION": "Ask QTT to improve the no-trade result.",
+        "OwnerSurfaceResolver": "QTT routing link verified.",
+        "OwnerActionRegistry": "Owner actions governed.",
+        "owner_dashboard_surface_registry.jsonl": "Verified dashboard registry source.",
+    }
+    for technical_id, owner_title in required_copy.items():
+        if exact_copy.get(technical_id, {}).get("owner_title") != owner_title:
+            failures.append(f"ui1r2_copy_map_missing_translation:{technical_id}")
+    for row in copy_rows:
+        for key in (
+            "presentation_id",
+            "technical_pattern_or_exact_id",
+            "owner_title",
+            "owner_summary",
+            "owner_status_label",
+            "owner_action_label",
+            "source_artifact_refs",
+            "PR165_D2_agent_role_refs_or_gap",
+            "QKU_formula_refs_or_gap",
+            "authority_boundary",
+            "provider_stage",
+            "activation_route",
+            "validation_ref",
+        ):
+            if not row.get(key):
+                failures.append(f"ui1r2_copy_row_missing:{key}")
+
+    mode = _read_json(ui_dir / "ui1r2_mode.generated.json")
+    mode_rows = {row.get("mode_id"): row for row in mode.get("rows", [])}
+    if mode.get("default_mode") != "GUIDED_OWNER":
+        failures.append("ui1r2_default_mode_not_guided_owner")
+    if set(mode_rows) != {"GUIDED_OWNER", "ADVANCED_OWNER", "DEVELOPER"}:
+        failures.append("ui1r2_modes_missing")
+    if mode.get("no_second_dashboard_state_model") is not True or mode.get("no_second_action_grammar") is not True:
+        failures.append("ui1r2_mode_policy_second_model_or_action_grammar")
+    if set(mode.get("local_storage_keys_allowed", [])) != {EXPERIENCE_MODE_STORAGE_KEY, GUIDANCE_DENSITY_STORAGE_KEY}:
+        failures.append("ui1r2_mode_storage_keys_bad")
+
+    disclosure = _read_json(ui_dir / "ui1r2_disclosure.report.json")
+    for key, expected in (
+        ("education_text_wall_visible_by_default", False),
+        ("technical_details_visible_by_default", False),
+        ("raw_refs_visible_by_default", False),
+        ("Developer_Mode_default", False),
+        ("GUIDED_OWNER_default", True),
+        ("ADVANCED_OWNER_available", True),
+        ("DEVELOPER_available", True),
+    ):
+        if disclosure.get(key) is not expected:
+            failures.append(f"ui1r2_disclosure_bad:{key}")
+
+    education = _read_json(ui_dir / "ui1r2_education.generated.json")
+    glossary_terms = {row.get("term") for row in education.get("glossary", [])}
+    for term in {"PnL", "expected net cash", "TCA", "no-trade", "QKU", "Execution Router", "paper trading", "replay", "shadow"}:
+        if term not in glossary_terms:
+            failures.append(f"ui1r2_glossary_term_missing:{term}")
+    if education.get("education_text_wall_visible_by_default") is not False:
+        failures.append("ui1r2_education_text_wall_default_bad")
+
+    guided = _read_json(ui_dir / "ui1r2_guided_flow.generated.json")
+    flow_ids = {row.get("workflow_id") for row in guided.get("flows", [])}
+    for workflow_id in {"CHECK_TRADE", "RESEARCH_CANDIDATE", "EXPLAIN_NO_TRADE", "PARAMETER_TUNING", "EDGE_ALPHA_REVIEW"}:
+        if workflow_id not in flow_ids:
+            failures.append(f"ui1r2_guided_flow_missing:{workflow_id}")
+    for key in (
+        "runtime_side_effect_allowed",
+        "live_LLM_call_allowed",
+        "real_agent_execution_allowed",
+        "paper_execution_allowed",
+        "live_execution_allowed",
+        "direct_venue_submit_allowed",
+        "ExecutionRouter_release_allowed",
+    ):
+        if guided.get(key) is not False:
+            failures.append(f"ui1r2_guided_flow_authority_bad:{key}")
+
+    next_step = _read_json(ui_dir / "ui1r2_next_step.generated.json")
+    next_rows = next_step.get("rows", [])
+    next_ids = {row.get("next_step_id") for row in next_rows}
+    required_next_ids = {
+        "NEXT_STEP_SEND_TO_TRADE_WORKBENCH",
+        "NEXT_STEP_CHECK_TRADE_WITH_QTT_AGENTS",
+        "NEXT_STEP_REQUEST_REPLAY_PREVIEW",
+        "NEXT_STEP_REQUEST_PAPER_PREVIEW",
+        "NEXT_STEP_SHOW_QKU_FORMULA_ROUTES",
+        "NEXT_STEP_EXPLAIN_NO_TRADE",
+        "NEXT_STEP_SHOW_TCA_COST_BREAKDOWN",
+        "NEXT_STEP_OPEN_CHART_DRILLDOWN",
+        "NEXT_STEP_OPEN_TECHNICAL_DETAILS",
+        "NEXT_STEP_DISABLED_PROVIDER_PENDING_EDUCATION",
+    }
+    if not required_next_ids <= next_ids:
+        failures.append("ui1r2_next_step_required_rows_missing")
+    for row in next_rows:
+        for key in (
+            "action_id",
+            "owner_label",
+            "current_surface_id",
+            "target_surface_id",
+            "target_workflow_id",
+            "target_step_id",
+            "prefill_context_refs",
+            "preview_object_type",
+            "provider_stage",
+            "authority_boundary",
+            "what_happens_next",
+            "what_will_not_happen_now",
+            "source_artifact_refs",
+            "PR165_D2_agent_role_refs_or_gap",
+            "QKU_formula_refs_or_gap",
+            "LLM_view_refs_or_provider_route",
+            "activation_route",
+            "validation_ref",
+        ):
+            if not row.get(key):
+                failures.append(f"ui1r2_next_step_row_missing:{key}")
+        if row.get("runtime_side_effect_allowed") is not False:
+            failures.append(f"ui1r2_next_step_runtime_allowed:{row.get('next_step_id')}")
+        forbidden_claims = (
+            "live LLM call runs",
+            "agent task runs",
+            "replay runs",
+            "paper runs",
+            "venue order",
+            "Execution Router release occurs",
+        )
+        if any(claim in str(row.get("what_happens_next", "")) for claim in forbidden_claims):
+            failures.append(f"ui1r2_next_step_bad_runtime_claim:{row.get('next_step_id')}")
+
+    action_menu = _read_json(ui_dir / "ui1r2_action_menu.generated.json")
+    option_next_ids = {
+        option.get("next_step_id")
+        for row in action_menu.get("rows", [])
+        for option in row.get("options", [])
+        if option.get("state") == "ENABLED_LOCAL_PREVIEW"
+    }
+    if not option_next_ids <= next_ids:
+        failures.append("ui1r2_action_menu_enabled_option_without_next_step")
+    for row in action_menu.get("rows", []):
+        if not row.get("options"):
+            failures.append(f"ui1r2_action_menu_no_options:{row.get('menu_id')}")
+        if row.get("runtime_side_effect_allowed") is not False:
+            failures.append(f"ui1r2_action_menu_runtime_allowed:{row.get('menu_id')}")
+        for option in row.get("options", []):
+            if option.get("owner_label", "").isupper() or "_" in option.get("owner_label", ""):
+                failures.append(f"ui1r2_action_option_machine_label:{option.get('next_step_id')}")
+            if option.get("runtime_side_effect_allowed") is not False:
+                failures.append(f"ui1r2_action_option_runtime_allowed:{option.get('next_step_id')}")
+
+    guidance = _read_json(ui_dir / "ui1r2_guidance.report.json")
+    for key in (
+        "all_dropdown_options_readable",
+        "all_disabled_actions_explain_reason",
+        "all_menus_route_to_central_registry_or_navigation_type",
+        "all_enabled_menu_actions_have_next_step_route",
+        "all_next_step_routes_create_only_local_preview_or_navigation",
+        "all_agent_refs_resolve_or_gap",
+        "all_qku_formula_refs_resolve_or_gap",
+        "no_raw_action_ids_in_owner_mode",
+        "no_new_blockers_created_by_guidance",
+        "education_collapsed_by_default",
+    ):
+        if guidance.get(key) is not True:
+            failures.append(f"ui1r2_guidance_report_missing:{key}")
+
+    card_copy = _read_json(ui_dir / "ui1r2_card_copy.report.json")
+    if card_copy.get("owner_cards_human_readable") is not True or card_copy.get("learning_sections_collapsed_by_default") is not True:
+        failures.append("ui1r2_card_copy_report_bad")
+    text_safety = _read_json(ui_dir / "ui1r2_text_safety.report.json")
+    if text_safety.get("owner_mode_blocklist_visible_count") != 0:
+        failures.append("ui1r2_text_safety_blocklist_nonzero")
+    if "OwnerNextStepRouter" not in combined or "DashboardSystem" not in combined:
+        failures.append("ui1r2_central_router_or_dashboard_system_missing_from_renderer")
+    for snippet in (
+        "data-experience-mode",
+        "data-owner-next-action-menu",
+        "data-next-step-id",
+        "data-local-receipt-preview",
+        "Tell me what matters",
+        "How QTT will trade with AI",
+        "ownerGlossary",
+        "guidedWorkflowPanel",
+        "routePreviewPanel",
+    ):
+        if snippet not in combined:
+            failures.append(f"ui1r2_required_ui_snippet_missing:{snippet}")
 
     return tuple(failures)
 

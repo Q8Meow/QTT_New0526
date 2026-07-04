@@ -1,0 +1,531 @@
+{
+  "chart_explainers": [
+    {
+      "body": "Cost charts explain fees, spread, slippage, latency, impact, opportunity cost, and missing provider evidence.",
+      "chart_kind": "TCA",
+      "collapsed_by_default": true
+    },
+    {
+      "body": "Quantum/classical charts show structural readiness and classical fallback routes. They do not claim quantum advantage.",
+      "chart_kind": "quantum_classical",
+      "collapsed_by_default": true
+    },
+    {
+      "body": "Charts show what a provider route will explain after receipts exist; no fake values are rendered.",
+      "chart_kind": "generic",
+      "collapsed_by_default": true
+    }
+  ],
+  "default_expansion_state_on_page_load": "collapsed",
+  "education_policy_id": "OwnerGuidancePolicy",
+  "education_text_wall_visible_by_default": false,
+  "glossary": [
+    {
+      "collapsed_by_default": true,
+      "plain_english_definition": "Profit and loss. In this dashboard it appears only after receipts exist.",
+      "related_actions": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "technical_detail_ref": "ui1r2_education.generated.json",
+      "term": "PnL",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "where_used_widget_refs": [
+        "portfolio",
+        "trade-workbench",
+        "edge-alpha",
+        "qku-formula"
+      ],
+      "why_it_matters": "Shows whether a completed path gained or lost value after costs."
+    },
+    {
+      "collapsed_by_default": true,
+      "plain_english_definition": "Estimated cash result after costs and constraints, when evidence exists.",
+      "related_actions": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "technical_detail_ref": "ui1r2_education.generated.json",
+      "term": "expected net cash",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "where_used_widget_refs": [
+        "portfolio",
+        "trade-workbench",
+        "edge-alpha",
+        "qku-formula"
+      ],
+      "why_it_matters": "Keeps QTT from ranking gross edge while hiding costs."
+    },
+    {
+      "collapsed_by_default": true,
+      "plain_english_definition": "Transaction cost analysis: fees, spread, slippage, latency, impact, and opportunity cost.",
+      "related_actions": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "technical_detail_ref": "ui1r2_education.generated.json",
+      "term": "TCA",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "where_used_widget_refs": [
+        "portfolio",
+        "trade-workbench",
+        "edge-alpha",
+        "qku-formula"
+      ],
+      "why_it_matters": "Costs can turn an apparent edge into no-trade."
+    },
+    {
+      "collapsed_by_default": true,
+      "plain_english_definition": "The gap between buy and sell prices.",
+      "related_actions": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "technical_detail_ref": "ui1r2_education.generated.json",
+      "term": "spread",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "where_used_widget_refs": [
+        "portfolio",
+        "trade-workbench",
+        "edge-alpha",
+        "qku-formula"
+      ],
+      "why_it_matters": "A wider spread makes entry and exit more expensive."
+    },
+    {
+      "collapsed_by_default": true,
+      "plain_english_definition": "The difference between expected and actual execution price.",
+      "related_actions": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "technical_detail_ref": "ui1r2_education.generated.json",
+      "term": "slippage",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "where_used_widget_refs": [
+        "portfolio",
+        "trade-workbench",
+        "edge-alpha",
+        "qku-formula"
+      ],
+      "why_it_matters": "Slippage can erase expected edge."
+    },
+    {
+      "collapsed_by_default": true,
+      "plain_english_definition": "Value lost because a signal or order arrives late.",
+      "related_actions": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "technical_detail_ref": "ui1r2_education.generated.json",
+      "term": "latency drag",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "where_used_widget_refs": [
+        "portfolio",
+        "trade-workbench",
+        "edge-alpha",
+        "qku-formula"
+      ],
+      "why_it_matters": "Late execution can change fill quality."
+    },
+    {
+      "collapsed_by_default": true,
+      "plain_english_definition": "Price movement caused by trying to trade size.",
+      "related_actions": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "technical_detail_ref": "ui1r2_education.generated.json",
+      "term": "market impact",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "where_used_widget_refs": [
+        "portfolio",
+        "trade-workbench",
+        "edge-alpha",
+        "qku-formula"
+      ],
+      "why_it_matters": "Large size can worsen execution."
+    },
+    {
+      "collapsed_by_default": true,
+      "plain_english_definition": "Value lost by locking capital in one path instead of another.",
+      "related_actions": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "technical_detail_ref": "ui1r2_education.generated.json",
+      "term": "opportunity cost",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "where_used_widget_refs": [
+        "portfolio",
+        "trade-workbench",
+        "edge-alpha",
+        "qku-formula"
+      ],
+      "why_it_matters": "Capital has competing uses."
+    },
+    {
+      "collapsed_by_default": true,
+      "plain_english_definition": "Likelihood an order fills under the planned terms.",
+      "related_actions": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "technical_detail_ref": "ui1r2_education.generated.json",
+      "term": "fill probability",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "where_used_widget_refs": [
+        "portfolio",
+        "trade-workbench",
+        "edge-alpha",
+        "qku-formula"
+      ],
+      "why_it_matters": "Low fill probability reduces usable expected value."
+    },
+    {
+      "collapsed_by_default": true,
+      "plain_english_definition": "Only part of the intended order fills.",
+      "related_actions": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "technical_detail_ref": "ui1r2_education.generated.json",
+      "term": "partial fill",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "where_used_widget_refs": [
+        "portfolio",
+        "trade-workbench",
+        "edge-alpha",
+        "qku-formula"
+      ],
+      "why_it_matters": "Partial fills can leave unwanted exposure."
+    },
+    {
+      "collapsed_by_default": true,
+      "plain_english_definition": "How much size a strategy can handle before quality degrades.",
+      "related_actions": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "technical_detail_ref": "ui1r2_education.generated.json",
+      "term": "capacity",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "where_used_widget_refs": [
+        "portfolio",
+        "trade-workbench",
+        "edge-alpha",
+        "qku-formula"
+      ],
+      "why_it_matters": "Capacity limits prevent oversizing."
+    },
+    {
+      "collapsed_by_default": true,
+      "plain_english_definition": "Many traders using similar signals or routes.",
+      "related_actions": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "technical_detail_ref": "ui1r2_education.generated.json",
+      "term": "crowding",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "where_used_widget_refs": [
+        "portfolio",
+        "trade-workbench",
+        "edge-alpha",
+        "qku-formula"
+      ],
+      "why_it_matters": "Crowding can reduce edge and increase costs."
+    },
+    {
+      "collapsed_by_default": true,
+      "plain_english_definition": "A first-class comparator that may beat available trade candidates.",
+      "related_actions": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "technical_detail_ref": "ui1r2_education.generated.json",
+      "term": "no-trade",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "where_used_widget_refs": [
+        "portfolio",
+        "trade-workbench",
+        "edge-alpha",
+        "qku-formula"
+      ],
+      "why_it_matters": "No-trade prevents forcing weak trades."
+    },
+    {
+      "collapsed_by_default": true,
+      "plain_english_definition": "A best current candidate compared with alternatives.",
+      "related_actions": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "technical_detail_ref": "ui1r2_education.generated.json",
+      "term": "champion/challenger",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "where_used_widget_refs": [
+        "portfolio",
+        "trade-workbench",
+        "edge-alpha",
+        "qku-formula"
+      ],
+      "why_it_matters": "Keeps QTT from assuming the first candidate is best."
+    },
+    {
+      "collapsed_by_default": true,
+      "plain_english_definition": "A conservative estimate under uncertainty.",
+      "related_actions": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "technical_detail_ref": "ui1r2_education.generated.json",
+      "term": "lower confidence bound",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "where_used_widget_refs": [
+        "portfolio",
+        "trade-workbench",
+        "edge-alpha",
+        "qku-formula"
+      ],
+      "why_it_matters": "Protects against overconfident estimates."
+    },
+    {
+      "collapsed_by_default": true,
+      "plain_english_definition": "A check for patterns that may be statistical noise.",
+      "related_actions": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "technical_detail_ref": "ui1r2_education.generated.json",
+      "term": "FDR / false discovery",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "where_used_widget_refs": [
+        "portfolio",
+        "trade-workbench",
+        "edge-alpha",
+        "qku-formula"
+      ],
+      "why_it_matters": "Reduces overfit risk."
+    },
+    {
+      "collapsed_by_default": true,
+      "plain_english_definition": "A strategy that looks good on old data but may fail later.",
+      "related_actions": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "technical_detail_ref": "ui1r2_education.generated.json",
+      "term": "overfit",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "where_used_widget_refs": [
+        "portfolio",
+        "trade-workbench",
+        "edge-alpha",
+        "qku-formula"
+      ],
+      "why_it_matters": "Overfit candidates need more evidence."
+    },
+    {
+      "collapsed_by_default": true,
+      "plain_english_definition": "Portfolio benefit after diversification and capital cost.",
+      "related_actions": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "technical_detail_ref": "ui1r2_education.generated.json",
+      "term": "portfolio marginal utility",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "where_used_widget_refs": [
+        "portfolio",
+        "trade-workbench",
+        "edge-alpha",
+        "qku-formula"
+      ],
+      "why_it_matters": "A trade can be good alone but bad for the portfolio."
+    },
+    {
+      "collapsed_by_default": true,
+      "plain_english_definition": "Similar-regime prior evidence, not current proof.",
+      "related_actions": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "technical_detail_ref": "ui1r2_education.generated.json",
+      "term": "regime memory",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "where_used_widget_refs": [
+        "portfolio",
+        "trade-workbench",
+        "edge-alpha",
+        "qku-formula"
+      ],
+      "why_it_matters": "Memory speeds review but does not prove profit."
+    },
+    {
+      "collapsed_by_default": true,
+      "plain_english_definition": "An immutable QTT knowledge object.",
+      "related_actions": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "technical_detail_ref": "ui1r2_education.generated.json",
+      "term": "QKU",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "where_used_widget_refs": [
+        "portfolio",
+        "trade-workbench",
+        "edge-alpha",
+        "qku-formula"
+      ],
+      "why_it_matters": "QTT optimizes trade plans, not QKUs."
+    },
+    {
+      "collapsed_by_default": true,
+      "plain_english_definition": "A set of immutable formulas used to evaluate a candidate.",
+      "related_actions": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "technical_detail_ref": "ui1r2_education.generated.json",
+      "term": "formula stack",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "where_used_widget_refs": [
+        "portfolio",
+        "trade-workbench",
+        "edge-alpha",
+        "qku-formula"
+      ],
+      "why_it_matters": "Stacks need computability and route evidence."
+    },
+    {
+      "collapsed_by_default": true,
+      "plain_english_definition": "Whether a problem is structurally mappable to quantum forms.",
+      "related_actions": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "technical_detail_ref": "ui1r2_education.generated.json",
+      "term": "quantum structural readiness",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "where_used_widget_refs": [
+        "portfolio",
+        "trade-workbench",
+        "edge-alpha",
+        "qku-formula"
+      ],
+      "why_it_matters": "This is not a quantum advantage claim."
+    },
+    {
+      "collapsed_by_default": true,
+      "plain_english_definition": "The non-quantum comparator route.",
+      "related_actions": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "technical_detail_ref": "ui1r2_education.generated.json",
+      "term": "classical fallback",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "where_used_widget_refs": [
+        "portfolio",
+        "trade-workbench",
+        "edge-alpha",
+        "qku-formula"
+      ],
+      "why_it_matters": "QTT must keep a strong classical baseline."
+    },
+    {
+      "collapsed_by_default": true,
+      "plain_english_definition": "The governed downstream component that may release live venue orders later.",
+      "related_actions": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "technical_detail_ref": "ui1r2_education.generated.json",
+      "term": "Execution Router",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "where_used_widget_refs": [
+        "portfolio",
+        "trade-workbench",
+        "edge-alpha",
+        "qku-formula"
+      ],
+      "why_it_matters": "The dashboard does not release orders."
+    },
+    {
+      "collapsed_by_default": true,
+      "plain_english_definition": "A tightly gated small live review stage later in the launch path.",
+      "related_actions": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "technical_detail_ref": "ui1r2_education.generated.json",
+      "term": "live canary",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "where_used_widget_refs": [
+        "portfolio",
+        "trade-workbench",
+        "edge-alpha",
+        "qku-formula"
+      ],
+      "why_it_matters": "It requires downstream evidence and approval."
+    },
+    {
+      "collapsed_by_default": true,
+      "plain_english_definition": "A non-live test path using paper execution receipts later.",
+      "related_actions": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "technical_detail_ref": "ui1r2_education.generated.json",
+      "term": "paper trading",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "where_used_widget_refs": [
+        "portfolio",
+        "trade-workbench",
+        "edge-alpha",
+        "qku-formula"
+      ],
+      "why_it_matters": "R2 only previews the request route."
+    },
+    {
+      "collapsed_by_default": true,
+      "plain_english_definition": "A historical scenario test path later.",
+      "related_actions": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "technical_detail_ref": "ui1r2_education.generated.json",
+      "term": "replay",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "where_used_widget_refs": [
+        "portfolio",
+        "trade-workbench",
+        "edge-alpha",
+        "qku-formula"
+      ],
+      "why_it_matters": "R2 only previews the request route."
+    },
+    {
+      "collapsed_by_default": true,
+      "plain_english_definition": "Observation beside live conditions without direct live execution authority.",
+      "related_actions": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "technical_detail_ref": "ui1r2_education.generated.json",
+      "term": "shadow",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "where_used_widget_refs": [
+        "portfolio",
+        "trade-workbench",
+        "edge-alpha",
+        "qku-formula"
+      ],
+      "why_it_matters": "R2 only shows contract routes."
+    }
+  ],
+  "meta": {
+    "agent_consumable_authority": false,
+    "artifact_id": "UI1R2_EDUCATION",
+    "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+    "connector_access_allowed": false,
+    "credential_access_allowed": false,
+    "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config + PR169-DASH1 artifacts + PR169-DASH1-UI1/R1 boot data + OwnerPresentationLayer / OwnerGuidancePolicy config",
+    "manual_edit_allowed": false,
+    "order_execution_allowed": false,
+    "runtime_side_effect_allowed": false,
+    "runtime_truth_authority": false,
+    "source_truth_authority": false,
+    "ui1r2_generated_from": "PR169-DASH1 artifacts + PR169-DASH1-UI1/R1 boot data + OwnerPresentationLayer / OwnerGuidancePolicy config",
+    "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+  },
+  "page_lessons": [
+    {
+      "body": "R2 can guide, explain, navigate, and prepare local previews. It cannot run agents or trade.",
+      "collapsed_by_default": true,
+      "lesson_id": "WHAT_CAN_QTT_DO_NOW",
+      "title": "What QTT can do now"
+    },
+    {
+      "body": "Owner idea / QTT scout -> Research -> QKU/formula stack -> Trade-variable search -> Replay -> Paper -> Shadow / live-dryrun -> Live canary review -> Execution Router -> Venue.",
+      "collapsed_by_default": true,
+      "lesson_id": "AUTONOMY_LADDER",
+      "title": "How QTT will trade with AI"
+    }
+  ],
+  "raw_refs_visible_by_default": false,
+  "technical_details_visible_by_default": false
+}

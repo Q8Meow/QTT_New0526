@@ -758,8 +758,15 @@ def test_scanner_scans_tests_py_for_real_runtime_code(tmp_path):
     assert any("order execution call" in violation for violation in violations)
 
 
-def test_scanner_allows_exact_local_visual_qa_browser_automation_path(tmp_path):
-    script = tmp_path / "tools" / "playwright_pr169_dash1_ui1_r1_visual_smoke.py"
+@pytest.mark.parametrize(
+    "script_name",
+    [
+        "playwright_pr169_dash1_ui1_r1_visual_smoke.py",
+        "playwright_pr169_dash1_ui1_r2_visual_smoke.py",
+    ],
+)
+def test_scanner_allows_exact_local_visual_qa_browser_automation_path(tmp_path, script_name):
+    script = tmp_path / "tools" / script_name
     script.parent.mkdir(parents=True)
     script.write_text(
         "\n".join(

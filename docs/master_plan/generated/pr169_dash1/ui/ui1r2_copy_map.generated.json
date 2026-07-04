@@ -1,0 +1,1706 @@
+{
+  "fallback_owner_summary": "This item is connected to QTT technical evidence. Technical details are available below.",
+  "fallback_owner_title": "QTT workflow item",
+  "high_priority_owner_mode_raw_id_leaks_fail_validation": true,
+  "meta": {
+    "agent_consumable_authority": false,
+    "artifact_id": "UI1R2_COPY_MAP",
+    "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+    "connector_access_allowed": false,
+    "credential_access_allowed": false,
+    "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config + PR169-DASH1 artifacts + PR169-DASH1-UI1/R1 boot data + OwnerPresentationLayer / OwnerGuidancePolicy config",
+    "manual_edit_allowed": false,
+    "order_execution_allowed": false,
+    "runtime_side_effect_allowed": false,
+    "runtime_truth_authority": false,
+    "source_truth_authority": false,
+    "ui1r2_generated_from": "PR169-DASH1 artifacts + PR169-DASH1-UI1/R1 boot data + OwnerPresentationLayer / OwnerGuidancePolicy config",
+    "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+  },
+  "presentation_layer_id": "OwnerPresentationLayer",
+  "rows": [
+    {
+      "LLM_view_refs_or_provider_route": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_AgentRosterDiscoveryAudit.report.json",
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "QKU_formula_refs_or_gap": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "activation_route": "UI1R2_PRESENTATION::R2_COPY_ACK_NOT_LIVE_APPROVAL",
+      "allowed_surfaces": [
+        "GUIDED_OWNER",
+        "ADVANCED_OWNER",
+        "DEVELOPER"
+      ],
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "chart_refs": [
+        "portfolio_equity_curve",
+        "TCA_waterfall_and_implementation_shortfall"
+      ],
+      "mode_scope": [
+        "GUIDED_OWNER",
+        "ADVANCED_OWNER",
+        "DEVELOPER"
+      ],
+      "owner_action_label": "Open technical details",
+      "owner_empty_state_text": "Waiting for the matching provider receipt. No fake value is shown.",
+      "owner_next_step": "Open the next-action menu or technical details if more evidence is needed.",
+      "owner_status_label": "Review recorded only",
+      "owner_summary": "An acknowledgment records that the owner reviewed the item. It is not permission to trade.",
+      "owner_title": "Acknowledging review does not approve a live trade.",
+      "owner_trading_relevance": "Presentation-only owner guidance for a trading workflow.",
+      "owner_warning_text": "This dashboard can prepare local previews only. It cannot submit trades or read private account data.",
+      "owner_why_it_matters": "This helps the owner understand what QTT can review next without creating trading authority.",
+      "presentation_id": "R2_COPY_ACK_NOT_LIVE_APPROVAL",
+      "provider_stage": "UI1",
+      "severity_or_status_class": "info",
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "technical_detail_label": "DASH1_FEATURE_011_ACKNOWLEDGMENT_IS_NOT_LIVE_APPROVAL",
+      "technical_detail_ref": "Technical evidence available in Developer Mode.",
+      "technical_pattern_or_exact_id": "DASH1_FEATURE_011_ACKNOWLEDGMENT_IS_NOT_LIVE_APPROVAL",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+    },
+    {
+      "LLM_view_refs_or_provider_route": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_AgentRosterDiscoveryAudit.report.json",
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "QKU_formula_refs_or_gap": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "activation_route": "UI1R2_PRESENTATION::R2_COPY_VISIBLE_EMPTY_PROVIDER_PENDING",
+      "allowed_surfaces": [
+        "GUIDED_OWNER",
+        "ADVANCED_OWNER",
+        "DEVELOPER"
+      ],
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "chart_refs": [
+        "portfolio_equity_curve",
+        "TCA_waterfall_and_implementation_shortfall"
+      ],
+      "mode_scope": [
+        "GUIDED_OWNER",
+        "ADVANCED_OWNER",
+        "DEVELOPER"
+      ],
+      "owner_action_label": "Show missing evidence",
+      "owner_empty_state_text": "Waiting for the matching provider receipt. No fake value is shown.",
+      "owner_next_step": "Open the next-action menu or technical details if more evidence is needed.",
+      "owner_status_label": "Waiting for data",
+      "owner_summary": "QTT has a routed slot for this data, but the provider receipt is not available in this local UI.",
+      "owner_title": "Waiting for provider data.",
+      "owner_trading_relevance": "Presentation-only owner guidance for a trading workflow.",
+      "owner_warning_text": "This dashboard can prepare local previews only. It cannot submit trades or read private account data.",
+      "owner_why_it_matters": "This helps the owner understand what QTT can review next without creating trading authority.",
+      "presentation_id": "R2_COPY_VISIBLE_EMPTY_PROVIDER_PENDING",
+      "provider_stage": "UI1",
+      "severity_or_status_class": "info",
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "technical_detail_label": "VISIBLE_EMPTY_STATE_PROVIDER_PENDING",
+      "technical_detail_ref": "Technical evidence available in Developer Mode.",
+      "technical_pattern_or_exact_id": "VISIBLE_EMPTY_STATE_PROVIDER_PENDING",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+    },
+    {
+      "LLM_view_refs_or_provider_route": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_AgentRosterDiscoveryAudit.report.json",
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "QKU_formula_refs_or_gap": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "activation_route": "UI1R2_PRESENTATION::R2_COPY_CONTRACT_PROVIDER_PENDING",
+      "allowed_surfaces": [
+        "GUIDED_OWNER",
+        "ADVANCED_OWNER",
+        "DEVELOPER"
+      ],
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "chart_refs": [
+        "portfolio_equity_curve",
+        "TCA_waterfall_and_implementation_shortfall"
+      ],
+      "mode_scope": [
+        "GUIDED_OWNER",
+        "ADVANCED_OWNER",
+        "DEVELOPER"
+      ],
+      "owner_action_label": "Show provider route",
+      "owner_empty_state_text": "Waiting for the matching provider receipt. No fake value is shown.",
+      "owner_next_step": "Open the next-action menu or technical details if more evidence is needed.",
+      "owner_status_label": "Provider route defined",
+      "owner_summary": "The workflow is specified, but no runtime provider is running in this PR.",
+      "owner_title": "Provider contract defined; runtime not active yet.",
+      "owner_trading_relevance": "Presentation-only owner guidance for a trading workflow.",
+      "owner_warning_text": "This dashboard can prepare local previews only. It cannot submit trades or read private account data.",
+      "owner_why_it_matters": "This helps the owner understand what QTT can review next without creating trading authority.",
+      "presentation_id": "R2_COPY_CONTRACT_PROVIDER_PENDING",
+      "provider_stage": "UI1",
+      "severity_or_status_class": "info",
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "technical_detail_label": "CONTRACT_DEFINED_PROVIDER_PENDING",
+      "technical_detail_ref": "Technical evidence available in Developer Mode.",
+      "technical_pattern_or_exact_id": "CONTRACT_DEFINED_PROVIDER_PENDING",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+    },
+    {
+      "LLM_view_refs_or_provider_route": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_AgentRosterDiscoveryAudit.report.json",
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "QKU_formula_refs_or_gap": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "activation_route": "UI1R2_PRESENTATION::R2_COPY_ROUTED_PENDING_PROVIDER",
+      "allowed_surfaces": [
+        "GUIDED_OWNER",
+        "ADVANCED_OWNER",
+        "DEVELOPER"
+      ],
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "chart_refs": [
+        "portfolio_equity_curve",
+        "TCA_waterfall_and_implementation_shortfall"
+      ],
+      "mode_scope": [
+        "GUIDED_OWNER",
+        "ADVANCED_OWNER",
+        "DEVELOPER"
+      ],
+      "owner_action_label": "Show provider route",
+      "owner_empty_state_text": "Waiting for the matching provider receipt. No fake value is shown.",
+      "owner_next_step": "Open the next-action menu or technical details if more evidence is needed.",
+      "owner_status_label": "Provider pending",
+      "owner_summary": "QTT knows where the evidence should come from later; this UI only shows the route.",
+      "owner_title": "Connected to a pending QTT provider route.",
+      "owner_trading_relevance": "Presentation-only owner guidance for a trading workflow.",
+      "owner_warning_text": "This dashboard can prepare local previews only. It cannot submit trades or read private account data.",
+      "owner_why_it_matters": "This helps the owner understand what QTT can review next without creating trading authority.",
+      "presentation_id": "R2_COPY_ROUTED_PENDING_PROVIDER",
+      "provider_stage": "UI1",
+      "severity_or_status_class": "info",
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "technical_detail_label": "ROUTED_PENDING_PROVIDER",
+      "technical_detail_ref": "Technical evidence available in Developer Mode.",
+      "technical_pattern_or_exact_id": "ROUTED_PENDING_PROVIDER",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+    },
+    {
+      "LLM_view_refs_or_provider_route": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_AgentRosterDiscoveryAudit.report.json",
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "QKU_formula_refs_or_gap": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "activation_route": "UI1R2_PRESENTATION::R2_COPY_REVIEW_ONLY",
+      "allowed_surfaces": [
+        "GUIDED_OWNER",
+        "ADVANCED_OWNER",
+        "DEVELOPER"
+      ],
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "chart_refs": [
+        "portfolio_equity_curve",
+        "TCA_waterfall_and_implementation_shortfall"
+      ],
+      "mode_scope": [
+        "GUIDED_OWNER",
+        "ADVANCED_OWNER",
+        "DEVELOPER"
+      ],
+      "owner_action_label": "Open safety boundary",
+      "owner_empty_state_text": "Waiting for the matching provider receipt. No fake value is shown.",
+      "owner_next_step": "Open the next-action menu or technical details if more evidence is needed.",
+      "owner_status_label": "Local preview only",
+      "owner_summary": "The page prepares local previews and never submits orders or reads private account data.",
+      "owner_title": "Review-only dashboard.",
+      "owner_trading_relevance": "Presentation-only owner guidance for a trading workflow.",
+      "owner_warning_text": "This dashboard can prepare local previews only. It cannot submit trades or read private account data.",
+      "owner_why_it_matters": "This helps the owner understand what QTT can review next without creating trading authority.",
+      "presentation_id": "R2_COPY_REVIEW_ONLY",
+      "provider_stage": "UI1",
+      "severity_or_status_class": "info",
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "technical_detail_label": "NO_DASHBOARD_RUNTIME_NO_ORDER_NO_PRIVATE_READS",
+      "technical_detail_ref": "Technical evidence available in Developer Mode.",
+      "technical_pattern_or_exact_id": "NO_DASHBOARD_RUNTIME_NO_ORDER_NO_PRIVATE_READS",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+    },
+    {
+      "LLM_view_refs_or_provider_route": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_AgentRosterDiscoveryAudit.report.json",
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "QKU_formula_refs_or_gap": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "activation_route": "UI1R2_PRESENTATION::R2_COPY_CHECK_TRADE",
+      "allowed_surfaces": [
+        "GUIDED_OWNER",
+        "ADVANCED_OWNER",
+        "DEVELOPER"
+      ],
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "chart_refs": [
+        "portfolio_equity_curve",
+        "TCA_waterfall_and_implementation_shortfall"
+      ],
+      "mode_scope": [
+        "GUIDED_OWNER",
+        "ADVANCED_OWNER",
+        "DEVELOPER"
+      ],
+      "owner_action_label": "Start check trade",
+      "owner_empty_state_text": "Waiting for the matching provider receipt. No fake value is shown.",
+      "owner_next_step": "Open the next-action menu or technical details if more evidence is needed.",
+      "owner_status_label": "Local route preview",
+      "owner_summary": "Open a guided local trade-check preview. No agent task runs now.",
+      "owner_title": "Check trade with QTT agents.",
+      "owner_trading_relevance": "Presentation-only owner guidance for a trading workflow.",
+      "owner_warning_text": "This dashboard can prepare local previews only. It cannot submit trades or read private account data.",
+      "owner_why_it_matters": "This helps the owner understand what QTT can review next without creating trading authority.",
+      "presentation_id": "R2_COPY_CHECK_TRADE",
+      "provider_stage": "UI1",
+      "severity_or_status_class": "info",
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "technical_detail_label": "CHECK_TRADE_WITH_QTT_AGENTS",
+      "technical_detail_ref": "Technical evidence available in Developer Mode.",
+      "technical_pattern_or_exact_id": "CHECK_TRADE_WITH_QTT_AGENTS",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+    },
+    {
+      "LLM_view_refs_or_provider_route": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_AgentRosterDiscoveryAudit.report.json",
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "QKU_formula_refs_or_gap": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "activation_route": "UI1R2_PRESENTATION::R2_COPY_NO_TRADE_REOPT",
+      "allowed_surfaces": [
+        "GUIDED_OWNER",
+        "ADVANCED_OWNER",
+        "DEVELOPER"
+      ],
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "chart_refs": [
+        "portfolio_equity_curve",
+        "TCA_waterfall_and_implementation_shortfall"
+      ],
+      "mode_scope": [
+        "GUIDED_OWNER",
+        "ADVANCED_OWNER",
+        "DEVELOPER"
+      ],
+      "owner_action_label": "Explain no-trade",
+      "owner_empty_state_text": "Waiting for the matching provider receipt. No fake value is shown.",
+      "owner_next_step": "Open the next-action menu or technical details if more evidence is needed.",
+      "owner_status_label": "Comparator route",
+      "owner_summary": "No-trade is a comparator. QTT can preview routes for retesting variables without changing formulas.",
+      "owner_title": "Ask QTT to improve the no-trade result.",
+      "owner_trading_relevance": "Presentation-only owner guidance for a trading workflow.",
+      "owner_warning_text": "This dashboard can prepare local previews only. It cannot submit trades or read private account data.",
+      "owner_why_it_matters": "This helps the owner understand what QTT can review next without creating trading authority.",
+      "presentation_id": "R2_COPY_NO_TRADE_REOPT",
+      "provider_stage": "UI1",
+      "severity_or_status_class": "info",
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "technical_detail_label": "REQUEST_NO_TRADE_REOPTIMIZATION",
+      "technical_detail_ref": "Technical evidence available in Developer Mode.",
+      "technical_pattern_or_exact_id": "REQUEST_NO_TRADE_REOPTIMIZATION",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+    },
+    {
+      "LLM_view_refs_or_provider_route": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_AgentRosterDiscoveryAudit.report.json",
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "QKU_formula_refs_or_gap": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "activation_route": "UI1R2_PRESENTATION::R2_COPY_RESOLVER",
+      "allowed_surfaces": [
+        "GUIDED_OWNER",
+        "ADVANCED_OWNER",
+        "DEVELOPER"
+      ],
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "chart_refs": [
+        "portfolio_equity_curve",
+        "TCA_waterfall_and_implementation_shortfall"
+      ],
+      "mode_scope": [
+        "GUIDED_OWNER",
+        "ADVANCED_OWNER",
+        "DEVELOPER"
+      ],
+      "owner_action_label": "Open technical details",
+      "owner_empty_state_text": "Waiting for the matching provider receipt. No fake value is shown.",
+      "owner_next_step": "Open the next-action menu or technical details if more evidence is needed.",
+      "owner_status_label": "Routing verified",
+      "owner_summary": "This item is connected to the dashboard routing layer.",
+      "owner_title": "QTT routing link verified.",
+      "owner_trading_relevance": "Presentation-only owner guidance for a trading workflow.",
+      "owner_warning_text": "This dashboard can prepare local previews only. It cannot submit trades or read private account data.",
+      "owner_why_it_matters": "This helps the owner understand what QTT can review next without creating trading authority.",
+      "presentation_id": "R2_COPY_RESOLVER",
+      "provider_stage": "UI1",
+      "severity_or_status_class": "info",
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "technical_detail_label": "OwnerSurfaceResolver",
+      "technical_detail_ref": "Technical evidence available in Developer Mode.",
+      "technical_pattern_or_exact_id": "OwnerSurfaceResolver",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+    },
+    {
+      "LLM_view_refs_or_provider_route": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_AgentRosterDiscoveryAudit.report.json",
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "QKU_formula_refs_or_gap": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "activation_route": "UI1R2_PRESENTATION::R2_COPY_ACTION_REGISTRY",
+      "allowed_surfaces": [
+        "GUIDED_OWNER",
+        "ADVANCED_OWNER",
+        "DEVELOPER"
+      ],
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "chart_refs": [
+        "portfolio_equity_curve",
+        "TCA_waterfall_and_implementation_shortfall"
+      ],
+      "mode_scope": [
+        "GUIDED_OWNER",
+        "ADVANCED_OWNER",
+        "DEVELOPER"
+      ],
+      "owner_action_label": "Open technical details",
+      "owner_empty_state_text": "Waiting for the matching provider receipt. No fake value is shown.",
+      "owner_next_step": "Open the next-action menu or technical details if more evidence is needed.",
+      "owner_status_label": "Governed action",
+      "owner_summary": "Owner actions route through the governed action registry and remain local previews in R2.",
+      "owner_title": "Owner actions governed.",
+      "owner_trading_relevance": "Presentation-only owner guidance for a trading workflow.",
+      "owner_warning_text": "This dashboard can prepare local previews only. It cannot submit trades or read private account data.",
+      "owner_why_it_matters": "This helps the owner understand what QTT can review next without creating trading authority.",
+      "presentation_id": "R2_COPY_ACTION_REGISTRY",
+      "provider_stage": "UI1",
+      "severity_or_status_class": "info",
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "technical_detail_label": "OwnerActionRegistry",
+      "technical_detail_ref": "Technical evidence available in Developer Mode.",
+      "technical_pattern_or_exact_id": "OwnerActionRegistry",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+    },
+    {
+      "LLM_view_refs_or_provider_route": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_AgentRosterDiscoveryAudit.report.json",
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "QKU_formula_refs_or_gap": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "activation_route": "UI1R2_PRESENTATION::R2_COPY_RUNTIME_FALSE",
+      "allowed_surfaces": [
+        "GUIDED_OWNER",
+        "ADVANCED_OWNER",
+        "DEVELOPER"
+      ],
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "chart_refs": [
+        "portfolio_equity_curve",
+        "TCA_waterfall_and_implementation_shortfall"
+      ],
+      "mode_scope": [
+        "GUIDED_OWNER",
+        "ADVANCED_OWNER",
+        "DEVELOPER"
+      ],
+      "owner_action_label": "View safety boundary",
+      "owner_empty_state_text": "Waiting for the matching provider receipt. No fake value is shown.",
+      "owner_next_step": "Open the next-action menu or technical details if more evidence is needed.",
+      "owner_status_label": "No runtime side effect",
+      "owner_summary": "Clicking here changes only local UI state or preview receipts.",
+      "owner_title": "No live action will run from this UI.",
+      "owner_trading_relevance": "Presentation-only owner guidance for a trading workflow.",
+      "owner_warning_text": "This dashboard can prepare local previews only. It cannot submit trades or read private account data.",
+      "owner_why_it_matters": "This helps the owner understand what QTT can review next without creating trading authority.",
+      "presentation_id": "R2_COPY_RUNTIME_FALSE",
+      "provider_stage": "UI1",
+      "severity_or_status_class": "info",
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "technical_detail_label": "runtime_side_effect = false",
+      "technical_detail_ref": "Technical evidence available in Developer Mode.",
+      "technical_pattern_or_exact_id": "runtime_side_effect = false",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+    },
+    {
+      "LLM_view_refs_or_provider_route": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_AgentRosterDiscoveryAudit.report.json",
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "QKU_formula_refs_or_gap": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "activation_route": "UI1R2_PRESENTATION::R2_COPY_SURFACE_REGISTRY",
+      "allowed_surfaces": [
+        "GUIDED_OWNER",
+        "ADVANCED_OWNER",
+        "DEVELOPER"
+      ],
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "chart_refs": [
+        "portfolio_equity_curve",
+        "TCA_waterfall_and_implementation_shortfall"
+      ],
+      "mode_scope": [
+        "GUIDED_OWNER",
+        "ADVANCED_OWNER",
+        "DEVELOPER"
+      ],
+      "owner_action_label": "Open technical details",
+      "owner_empty_state_text": "Waiting for the matching provider receipt. No fake value is shown.",
+      "owner_next_step": "Open the next-action menu or technical details if more evidence is needed.",
+      "owner_status_label": "Evidence available",
+      "owner_summary": "The technical source stays available in Developer Mode.",
+      "owner_title": "Verified dashboard registry source.",
+      "owner_trading_relevance": "Presentation-only owner guidance for a trading workflow.",
+      "owner_warning_text": "This dashboard can prepare local previews only. It cannot submit trades or read private account data.",
+      "owner_why_it_matters": "This helps the owner understand what QTT can review next without creating trading authority.",
+      "presentation_id": "R2_COPY_SURFACE_REGISTRY",
+      "provider_stage": "UI1",
+      "severity_or_status_class": "info",
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "technical_detail_label": "owner_dashboard_surface_registry.jsonl",
+      "technical_detail_ref": "Technical evidence available in Developer Mode.",
+      "technical_pattern_or_exact_id": "owner_dashboard_surface_registry.jsonl",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+    },
+    {
+      "LLM_view_refs_or_provider_route": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_AgentRosterDiscoveryAudit.report.json",
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "QKU_formula_refs_or_gap": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "activation_route": "UI1R2_PRESENTATION::R2_COPY_DECISION_QUEUE",
+      "allowed_surfaces": [
+        "GUIDED_OWNER",
+        "ADVANCED_OWNER",
+        "DEVELOPER"
+      ],
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "chart_refs": [
+        "portfolio_equity_curve",
+        "TCA_waterfall_and_implementation_shortfall"
+      ],
+      "mode_scope": [
+        "GUIDED_OWNER",
+        "ADVANCED_OWNER",
+        "DEVELOPER"
+      ],
+      "owner_action_label": "Open technical details",
+      "owner_empty_state_text": "Waiting for the matching provider receipt. No fake value is shown.",
+      "owner_next_step": "Open the next-action menu or technical details if more evidence is needed.",
+      "owner_status_label": "Evidence available",
+      "owner_summary": "Decision rows come from generated evidence and are not edited by hand.",
+      "owner_title": "Owner decision queue source.",
+      "owner_trading_relevance": "Presentation-only owner guidance for a trading workflow.",
+      "owner_warning_text": "This dashboard can prepare local previews only. It cannot submit trades or read private account data.",
+      "owner_why_it_matters": "This helps the owner understand what QTT can review next without creating trading authority.",
+      "presentation_id": "R2_COPY_DECISION_QUEUE",
+      "provider_stage": "UI1",
+      "severity_or_status_class": "info",
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "technical_detail_label": "owner_decision_queue.generated.jsonl",
+      "technical_detail_ref": "Technical evidence available in Developer Mode.",
+      "technical_pattern_or_exact_id": "owner_decision_queue.generated.jsonl",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+    },
+    {
+      "LLM_view_refs_or_provider_route": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_AgentRosterDiscoveryAudit.report.json",
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "QKU_formula_refs_or_gap": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "activation_route": "UI1R2_PRESENTATION::R2_COPY_ACTION_SOURCE",
+      "allowed_surfaces": [
+        "GUIDED_OWNER",
+        "ADVANCED_OWNER",
+        "DEVELOPER"
+      ],
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "chart_refs": [
+        "portfolio_equity_curve",
+        "TCA_waterfall_and_implementation_shortfall"
+      ],
+      "mode_scope": [
+        "GUIDED_OWNER",
+        "ADVANCED_OWNER",
+        "DEVELOPER"
+      ],
+      "owner_action_label": "Open technical details",
+      "owner_empty_state_text": "Waiting for the matching provider receipt. No fake value is shown.",
+      "owner_next_step": "Open the next-action menu or technical details if more evidence is needed.",
+      "owner_status_label": "Evidence available",
+      "owner_summary": "Action rows preserve the existing action grammar.",
+      "owner_title": "Governed owner action source.",
+      "owner_trading_relevance": "Presentation-only owner guidance for a trading workflow.",
+      "owner_warning_text": "This dashboard can prepare local previews only. It cannot submit trades or read private account data.",
+      "owner_why_it_matters": "This helps the owner understand what QTT can review next without creating trading authority.",
+      "presentation_id": "R2_COPY_ACTION_SOURCE",
+      "provider_stage": "UI1",
+      "severity_or_status_class": "info",
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "technical_detail_label": "owner_action_registry.generated.jsonl",
+      "technical_detail_ref": "Technical evidence available in Developer Mode.",
+      "technical_pattern_or_exact_id": "owner_action_registry.generated.jsonl",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+    },
+    {
+      "LLM_view_refs_or_provider_route": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_AgentRosterDiscoveryAudit.report.json",
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "QKU_formula_refs_or_gap": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "activation_route": "UI1R2_PRESENTATION::R2_COPY_MANUAL_EDIT_FALSE",
+      "allowed_surfaces": [
+        "GUIDED_OWNER",
+        "ADVANCED_OWNER",
+        "DEVELOPER"
+      ],
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "chart_refs": [
+        "portfolio_equity_curve",
+        "TCA_waterfall_and_implementation_shortfall"
+      ],
+      "mode_scope": [
+        "GUIDED_OWNER",
+        "ADVANCED_OWNER",
+        "DEVELOPER"
+      ],
+      "owner_action_label": "Open technical details",
+      "owner_empty_state_text": "Waiting for the matching provider receipt. No fake value is shown.",
+      "owner_next_step": "Open the next-action menu or technical details if more evidence is needed.",
+      "owner_status_label": "Generated evidence",
+      "owner_summary": "The displayed evidence is generated from DASH1 artifacts.",
+      "owner_title": "Generated technical evidence; not edited by hand.",
+      "owner_trading_relevance": "Presentation-only owner guidance for a trading workflow.",
+      "owner_warning_text": "This dashboard can prepare local previews only. It cannot submit trades or read private account data.",
+      "owner_why_it_matters": "This helps the owner understand what QTT can review next without creating trading authority.",
+      "presentation_id": "R2_COPY_MANUAL_EDIT_FALSE",
+      "provider_stage": "UI1",
+      "severity_or_status_class": "info",
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "technical_detail_label": "manual_edit_allowed = false",
+      "technical_detail_ref": "Technical evidence available in Developer Mode.",
+      "technical_pattern_or_exact_id": "manual_edit_allowed = false",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+    },
+    {
+      "LLM_view_refs_or_provider_route": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_AgentRosterDiscoveryAudit.report.json",
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "QKU_formula_refs_or_gap": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "activation_route": "UI1R2_PRESENTATION::R2_COPY_SYSTEM_CONTRACT",
+      "allowed_surfaces": [
+        "GUIDED_OWNER",
+        "ADVANCED_OWNER",
+        "DEVELOPER"
+      ],
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "chart_refs": [
+        "portfolio_equity_curve",
+        "TCA_waterfall_and_implementation_shortfall"
+      ],
+      "mode_scope": [
+        "GUIDED_OWNER",
+        "ADVANCED_OWNER",
+        "DEVELOPER"
+      ],
+      "owner_action_label": "Show what matters",
+      "owner_empty_state_text": "Waiting for the matching provider receipt. No fake value is shown.",
+      "owner_next_step": "Open the next-action menu or technical details if more evidence is needed.",
+      "owner_status_label": "Workflow status",
+      "owner_summary": "This card describes a workflow boundary or provider route.",
+      "owner_title": "Workflow status.",
+      "owner_trading_relevance": "Presentation-only owner guidance for a trading workflow.",
+      "owner_warning_text": "This dashboard can prepare local previews only. It cannot submit trades or read private account data.",
+      "owner_why_it_matters": "This helps the owner understand what QTT can review next without creating trading authority.",
+      "presentation_id": "R2_COPY_SYSTEM_CONTRACT",
+      "provider_stage": "UI1",
+      "severity_or_status_class": "info",
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "technical_detail_label": "SYSTEM CONTRACT",
+      "technical_detail_ref": "Technical evidence available in Developer Mode.",
+      "technical_pattern_or_exact_id": "SYSTEM CONTRACT",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+    },
+    {
+      "LLM_view_refs_or_provider_route": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_AgentRosterDiscoveryAudit.report.json",
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "QKU_formula_refs_or_gap": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "activation_route": "UI1R2_PRESENTATION::R2_COPY_LINKED_REFS",
+      "allowed_surfaces": [
+        "GUIDED_OWNER",
+        "ADVANCED_OWNER",
+        "DEVELOPER"
+      ],
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "chart_refs": [
+        "portfolio_equity_curve",
+        "TCA_waterfall_and_implementation_shortfall"
+      ],
+      "mode_scope": [
+        "GUIDED_OWNER",
+        "ADVANCED_OWNER",
+        "DEVELOPER"
+      ],
+      "owner_action_label": "Open technical details",
+      "owner_empty_state_text": "Waiting for the matching provider receipt. No fake value is shown.",
+      "owner_next_step": "Open the next-action menu or technical details if more evidence is needed.",
+      "owner_status_label": "Evidence available",
+      "owner_summary": "Supporting evidence is available on demand.",
+      "owner_title": "Evidence and routing.",
+      "owner_trading_relevance": "Presentation-only owner guidance for a trading workflow.",
+      "owner_warning_text": "This dashboard can prepare local previews only. It cannot submit trades or read private account data.",
+      "owner_why_it_matters": "This helps the owner understand what QTT can review next without creating trading authority.",
+      "presentation_id": "R2_COPY_LINKED_REFS",
+      "provider_stage": "UI1",
+      "severity_or_status_class": "info",
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "technical_detail_label": "Linked refs",
+      "technical_detail_ref": "Technical evidence available in Developer Mode.",
+      "technical_pattern_or_exact_id": "Linked refs",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+    },
+    {
+      "LLM_view_refs_or_provider_route": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_AgentRosterDiscoveryAudit.report.json",
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "QKU_formula_refs_or_gap": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "activation_route": "UI1R2_PRESENTATION::R2_COPY_RAW_REFS",
+      "allowed_surfaces": [
+        "GUIDED_OWNER",
+        "ADVANCED_OWNER",
+        "DEVELOPER"
+      ],
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "chart_refs": [
+        "portfolio_equity_curve",
+        "TCA_waterfall_and_implementation_shortfall"
+      ],
+      "mode_scope": [
+        "GUIDED_OWNER",
+        "ADVANCED_OWNER",
+        "DEVELOPER"
+      ],
+      "owner_action_label": "Open raw details",
+      "owner_empty_state_text": "Waiting for the matching provider receipt. No fake value is shown.",
+      "owner_next_step": "Open the next-action menu or technical details if more evidence is needed.",
+      "owner_status_label": "Collapsed by default",
+      "owner_summary": "Raw technical references stay collapsed until explicitly opened.",
+      "owner_title": "Technical details.",
+      "owner_trading_relevance": "Presentation-only owner guidance for a trading workflow.",
+      "owner_warning_text": "This dashboard can prepare local previews only. It cannot submit trades or read private account data.",
+      "owner_why_it_matters": "This helps the owner understand what QTT can review next without creating trading authority.",
+      "presentation_id": "R2_COPY_RAW_REFS",
+      "provider_stage": "UI1",
+      "severity_or_status_class": "info",
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "technical_detail_label": "Raw refs",
+      "technical_detail_ref": "Technical evidence available in Developer Mode.",
+      "technical_pattern_or_exact_id": "Raw refs",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+    },
+    {
+      "LLM_view_refs_or_provider_route": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_AgentRosterDiscoveryAudit.report.json",
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "QKU_formula_refs_or_gap": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "activation_route": "UI1R2_PRESENTATION::R2_COPY_REGISTRY_ROW_REF",
+      "allowed_surfaces": [
+        "GUIDED_OWNER",
+        "ADVANCED_OWNER",
+        "DEVELOPER"
+      ],
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "chart_refs": [
+        "portfolio_equity_curve",
+        "TCA_waterfall_and_implementation_shortfall"
+      ],
+      "mode_scope": [
+        "GUIDED_OWNER",
+        "ADVANCED_OWNER",
+        "DEVELOPER"
+      ],
+      "owner_action_label": "Open technical details",
+      "owner_empty_state_text": "Waiting for the matching provider receipt. No fake value is shown.",
+      "owner_next_step": "Open the next-action menu or technical details if more evidence is needed.",
+      "owner_status_label": "Evidence available",
+      "owner_summary": "The exact generated row is available in technical details.",
+      "owner_title": "Dashboard evidence row.",
+      "owner_trading_relevance": "Presentation-only owner guidance for a trading workflow.",
+      "owner_warning_text": "This dashboard can prepare local previews only. It cannot submit trades or read private account data.",
+      "owner_why_it_matters": "This helps the owner understand what QTT can review next without creating trading authority.",
+      "presentation_id": "R2_COPY_REGISTRY_ROW_REF",
+      "provider_stage": "UI1",
+      "severity_or_status_class": "info",
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "technical_detail_label": "registry_row_ref",
+      "technical_detail_ref": "Technical evidence available in Developer Mode.",
+      "technical_pattern_or_exact_id": "registry_row_ref",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+    },
+    {
+      "LLM_view_refs_or_provider_route": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_AgentRosterDiscoveryAudit.report.json",
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "QKU_formula_refs_or_gap": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "activation_route": "UI1R2_PRESENTATION::R2_COPY_AUTHORITY_REF",
+      "allowed_surfaces": [
+        "GUIDED_OWNER",
+        "ADVANCED_OWNER",
+        "DEVELOPER"
+      ],
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "chart_refs": [
+        "portfolio_equity_curve",
+        "TCA_waterfall_and_implementation_shortfall"
+      ],
+      "mode_scope": [
+        "GUIDED_OWNER",
+        "ADVANCED_OWNER",
+        "DEVELOPER"
+      ],
+      "owner_action_label": "Open safety boundary",
+      "owner_empty_state_text": "Waiting for the matching provider receipt. No fake value is shown.",
+      "owner_next_step": "Open the next-action menu or technical details if more evidence is needed.",
+      "owner_status_label": "Safety boundary",
+      "owner_summary": "This explains what the dashboard is not allowed to do.",
+      "owner_title": "Safety boundary.",
+      "owner_trading_relevance": "Presentation-only owner guidance for a trading workflow.",
+      "owner_warning_text": "This dashboard can prepare local previews only. It cannot submit trades or read private account data.",
+      "owner_why_it_matters": "This helps the owner understand what QTT can review next without creating trading authority.",
+      "presentation_id": "R2_COPY_AUTHORITY_REF",
+      "provider_stage": "UI1",
+      "severity_or_status_class": "info",
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "technical_detail_label": "authority_boundary_ref",
+      "technical_detail_ref": "Technical evidence available in Developer Mode.",
+      "technical_pattern_or_exact_id": "authority_boundary_ref",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+    },
+    {
+      "LLM_view_refs_or_provider_route": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_AgentRosterDiscoveryAudit.report.json",
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "QKU_formula_refs_or_gap": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "activation_route": "UI1R2_PRESENTATION::R2_COPY_PROVIDER_STAGE",
+      "allowed_surfaces": [
+        "GUIDED_OWNER",
+        "ADVANCED_OWNER",
+        "DEVELOPER"
+      ],
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "chart_refs": [
+        "portfolio_equity_curve",
+        "TCA_waterfall_and_implementation_shortfall"
+      ],
+      "mode_scope": [
+        "GUIDED_OWNER",
+        "ADVANCED_OWNER",
+        "DEVELOPER"
+      ],
+      "owner_action_label": "Show provider route",
+      "owner_empty_state_text": "Waiting for the matching provider receipt. No fake value is shown.",
+      "owner_next_step": "Open the next-action menu or technical details if more evidence is needed.",
+      "owner_status_label": "Provider route",
+      "owner_summary": "This shows which provider stage would supply the missing evidence later.",
+      "owner_title": "Provider stage.",
+      "owner_trading_relevance": "Presentation-only owner guidance for a trading workflow.",
+      "owner_warning_text": "This dashboard can prepare local previews only. It cannot submit trades or read private account data.",
+      "owner_why_it_matters": "This helps the owner understand what QTT can review next without creating trading authority.",
+      "presentation_id": "R2_COPY_PROVIDER_STAGE",
+      "provider_stage": "UI1",
+      "severity_or_status_class": "info",
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "technical_detail_label": "provider_stage",
+      "technical_detail_ref": "Technical evidence available in Developer Mode.",
+      "technical_pattern_or_exact_id": "provider_stage",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+    },
+    {
+      "LLM_view_refs_or_provider_route": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_AgentRosterDiscoveryAudit.report.json",
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "QKU_formula_refs_or_gap": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "activation_route": "UI1R2_PRESENTATION::R2_COPY_ACTIVATION_ROUTE",
+      "allowed_surfaces": [
+        "GUIDED_OWNER",
+        "ADVANCED_OWNER",
+        "DEVELOPER"
+      ],
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "chart_refs": [
+        "portfolio_equity_curve",
+        "TCA_waterfall_and_implementation_shortfall"
+      ],
+      "mode_scope": [
+        "GUIDED_OWNER",
+        "ADVANCED_OWNER",
+        "DEVELOPER"
+      ],
+      "owner_action_label": "Show provider route",
+      "owner_empty_state_text": "Waiting for the matching provider receipt. No fake value is shown.",
+      "owner_next_step": "Open the next-action menu or technical details if more evidence is needed.",
+      "owner_status_label": "Provider route",
+      "owner_summary": "This is the route QTT would use after the matching provider stage exists.",
+      "owner_title": "Activation route.",
+      "owner_trading_relevance": "Presentation-only owner guidance for a trading workflow.",
+      "owner_warning_text": "This dashboard can prepare local previews only. It cannot submit trades or read private account data.",
+      "owner_why_it_matters": "This helps the owner understand what QTT can review next without creating trading authority.",
+      "presentation_id": "R2_COPY_ACTIVATION_ROUTE",
+      "provider_stage": "UI1",
+      "severity_or_status_class": "info",
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "technical_detail_label": "activation_route",
+      "technical_detail_ref": "Technical evidence available in Developer Mode.",
+      "technical_pattern_or_exact_id": "activation_route",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+    },
+    {
+      "LLM_view_refs_or_provider_route": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_AgentRosterDiscoveryAudit.report.json",
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "QKU_formula_refs_or_gap": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "activation_route": "UI1R2_PRESENTATION::R2_COPY_INST_01",
+      "allowed_surfaces": [
+        "GUIDED_OWNER",
+        "ADVANCED_OWNER",
+        "DEVELOPER"
+      ],
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "chart_refs": [
+        "portfolio_equity_curve",
+        "TCA_waterfall_and_implementation_shortfall"
+      ],
+      "mode_scope": [
+        "GUIDED_OWNER",
+        "ADVANCED_OWNER",
+        "DEVELOPER"
+      ],
+      "owner_action_label": "Show related evidence",
+      "owner_empty_state_text": "Waiting for the matching provider receipt. No fake value is shown.",
+      "owner_next_step": "Open the next-action menu or technical details if more evidence is needed.",
+      "owner_status_label": "Readable label",
+      "owner_summary": "QTT keeps the technical reference linked but shows the owner a readable trading label first.",
+      "owner_title": "Execution-adjusted rank",
+      "owner_trading_relevance": "Presentation-only owner guidance for a trading workflow.",
+      "owner_warning_text": "This dashboard can prepare local previews only. It cannot submit trades or read private account data.",
+      "owner_why_it_matters": "This helps the owner understand what QTT can review next without creating trading authority.",
+      "presentation_id": "R2_COPY_INST_01",
+      "provider_stage": "UI1",
+      "severity_or_status_class": "info",
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "technical_detail_label": "execution_adjusted_rank",
+      "technical_detail_ref": "Technical evidence available in Developer Mode.",
+      "technical_pattern_or_exact_id": "execution_adjusted_rank",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+    },
+    {
+      "LLM_view_refs_or_provider_route": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_AgentRosterDiscoveryAudit.report.json",
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "QKU_formula_refs_or_gap": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "activation_route": "UI1R2_PRESENTATION::R2_COPY_INST_02",
+      "allowed_surfaces": [
+        "GUIDED_OWNER",
+        "ADVANCED_OWNER",
+        "DEVELOPER"
+      ],
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "chart_refs": [
+        "portfolio_equity_curve",
+        "TCA_waterfall_and_implementation_shortfall"
+      ],
+      "mode_scope": [
+        "GUIDED_OWNER",
+        "ADVANCED_OWNER",
+        "DEVELOPER"
+      ],
+      "owner_action_label": "Show related evidence",
+      "owner_empty_state_text": "Waiting for the matching provider receipt. No fake value is shown.",
+      "owner_next_step": "Open the next-action menu or technical details if more evidence is needed.",
+      "owner_status_label": "Readable label",
+      "owner_summary": "QTT keeps the technical reference linked but shows the owner a readable trading label first.",
+      "owner_title": "Cost breakdown",
+      "owner_trading_relevance": "Presentation-only owner guidance for a trading workflow.",
+      "owner_warning_text": "This dashboard can prepare local previews only. It cannot submit trades or read private account data.",
+      "owner_why_it_matters": "This helps the owner understand what QTT can review next without creating trading authority.",
+      "presentation_id": "R2_COPY_INST_02",
+      "provider_stage": "UI1",
+      "severity_or_status_class": "info",
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "technical_detail_label": "TCA_decomposition",
+      "technical_detail_ref": "Technical evidence available in Developer Mode.",
+      "technical_pattern_or_exact_id": "TCA_decomposition",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+    },
+    {
+      "LLM_view_refs_or_provider_route": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_AgentRosterDiscoveryAudit.report.json",
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "QKU_formula_refs_or_gap": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "activation_route": "UI1R2_PRESENTATION::R2_COPY_INST_03",
+      "allowed_surfaces": [
+        "GUIDED_OWNER",
+        "ADVANCED_OWNER",
+        "DEVELOPER"
+      ],
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "chart_refs": [
+        "portfolio_equity_curve",
+        "TCA_waterfall_and_implementation_shortfall"
+      ],
+      "mode_scope": [
+        "GUIDED_OWNER",
+        "ADVANCED_OWNER",
+        "DEVELOPER"
+      ],
+      "owner_action_label": "Show related evidence",
+      "owner_empty_state_text": "Waiting for the matching provider receipt. No fake value is shown.",
+      "owner_next_step": "Open the next-action menu or technical details if more evidence is needed.",
+      "owner_status_label": "Readable label",
+      "owner_summary": "QTT keeps the technical reference linked but shows the owner a readable trading label first.",
+      "owner_title": "Implementation shortfall",
+      "owner_trading_relevance": "Presentation-only owner guidance for a trading workflow.",
+      "owner_warning_text": "This dashboard can prepare local previews only. It cannot submit trades or read private account data.",
+      "owner_why_it_matters": "This helps the owner understand what QTT can review next without creating trading authority.",
+      "presentation_id": "R2_COPY_INST_03",
+      "provider_stage": "UI1",
+      "severity_or_status_class": "info",
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "technical_detail_label": "implementation_shortfall",
+      "technical_detail_ref": "Technical evidence available in Developer Mode.",
+      "technical_pattern_or_exact_id": "implementation_shortfall",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+    },
+    {
+      "LLM_view_refs_or_provider_route": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_AgentRosterDiscoveryAudit.report.json",
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "QKU_formula_refs_or_gap": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "activation_route": "UI1R2_PRESENTATION::R2_COPY_INST_04",
+      "allowed_surfaces": [
+        "GUIDED_OWNER",
+        "ADVANCED_OWNER",
+        "DEVELOPER"
+      ],
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "chart_refs": [
+        "portfolio_equity_curve",
+        "TCA_waterfall_and_implementation_shortfall"
+      ],
+      "mode_scope": [
+        "GUIDED_OWNER",
+        "ADVANCED_OWNER",
+        "DEVELOPER"
+      ],
+      "owner_action_label": "Show related evidence",
+      "owner_empty_state_text": "Waiting for the matching provider receipt. No fake value is shown.",
+      "owner_next_step": "Open the next-action menu or technical details if more evidence is needed.",
+      "owner_status_label": "Readable label",
+      "owner_summary": "QTT keeps the technical reference linked but shows the owner a readable trading label first.",
+      "owner_title": "Overfit / false-discovery check",
+      "owner_trading_relevance": "Presentation-only owner guidance for a trading workflow.",
+      "owner_warning_text": "This dashboard can prepare local previews only. It cannot submit trades or read private account data.",
+      "owner_why_it_matters": "This helps the owner understand what QTT can review next without creating trading authority.",
+      "presentation_id": "R2_COPY_INST_04",
+      "provider_stage": "UI1",
+      "severity_or_status_class": "info",
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "technical_detail_label": "overfit_false_discovery_control",
+      "technical_detail_ref": "Technical evidence available in Developer Mode.",
+      "technical_pattern_or_exact_id": "overfit_false_discovery_control",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+    },
+    {
+      "LLM_view_refs_or_provider_route": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_AgentRosterDiscoveryAudit.report.json",
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "QKU_formula_refs_or_gap": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "activation_route": "UI1R2_PRESENTATION::R2_COPY_INST_05",
+      "allowed_surfaces": [
+        "GUIDED_OWNER",
+        "ADVANCED_OWNER",
+        "DEVELOPER"
+      ],
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "chart_refs": [
+        "portfolio_equity_curve",
+        "TCA_waterfall_and_implementation_shortfall"
+      ],
+      "mode_scope": [
+        "GUIDED_OWNER",
+        "ADVANCED_OWNER",
+        "DEVELOPER"
+      ],
+      "owner_action_label": "Show related evidence",
+      "owner_empty_state_text": "Waiting for the matching provider receipt. No fake value is shown.",
+      "owner_next_step": "Open the next-action menu or technical details if more evidence is needed.",
+      "owner_status_label": "Readable label",
+      "owner_summary": "QTT keeps the technical reference linked but shows the owner a readable trading label first.",
+      "owner_title": "Portfolio benefit after diversification and capital cost",
+      "owner_trading_relevance": "Presentation-only owner guidance for a trading workflow.",
+      "owner_warning_text": "This dashboard can prepare local previews only. It cannot submit trades or read private account data.",
+      "owner_why_it_matters": "This helps the owner understand what QTT can review next without creating trading authority.",
+      "presentation_id": "R2_COPY_INST_05",
+      "provider_stage": "UI1",
+      "severity_or_status_class": "info",
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "technical_detail_label": "portfolio_marginal_utility",
+      "technical_detail_ref": "Technical evidence available in Developer Mode.",
+      "technical_pattern_or_exact_id": "portfolio_marginal_utility",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+    },
+    {
+      "LLM_view_refs_or_provider_route": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_AgentRosterDiscoveryAudit.report.json",
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "QKU_formula_refs_or_gap": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "activation_route": "UI1R2_PRESENTATION::R2_COPY_INST_06",
+      "allowed_surfaces": [
+        "GUIDED_OWNER",
+        "ADVANCED_OWNER",
+        "DEVELOPER"
+      ],
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "chart_refs": [
+        "portfolio_equity_curve",
+        "TCA_waterfall_and_implementation_shortfall"
+      ],
+      "mode_scope": [
+        "GUIDED_OWNER",
+        "ADVANCED_OWNER",
+        "DEVELOPER"
+      ],
+      "owner_action_label": "Show related evidence",
+      "owner_empty_state_text": "Waiting for the matching provider receipt. No fake value is shown.",
+      "owner_next_step": "Open the next-action menu or technical details if more evidence is needed.",
+      "owner_status_label": "Readable label",
+      "owner_summary": "QTT keeps the technical reference linked but shows the owner a readable trading label first.",
+      "owner_title": "Capacity and crowding limit",
+      "owner_trading_relevance": "Presentation-only owner guidance for a trading workflow.",
+      "owner_warning_text": "This dashboard can prepare local previews only. It cannot submit trades or read private account data.",
+      "owner_why_it_matters": "This helps the owner understand what QTT can review next without creating trading authority.",
+      "presentation_id": "R2_COPY_INST_06",
+      "provider_stage": "UI1",
+      "severity_or_status_class": "info",
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "technical_detail_label": "capacity_crowding_limit",
+      "technical_detail_ref": "Technical evidence available in Developer Mode.",
+      "technical_pattern_or_exact_id": "capacity_crowding_limit",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+    },
+    {
+      "LLM_view_refs_or_provider_route": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_AgentRosterDiscoveryAudit.report.json",
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "QKU_formula_refs_or_gap": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "activation_route": "UI1R2_PRESENTATION::R2_COPY_INST_07",
+      "allowed_surfaces": [
+        "GUIDED_OWNER",
+        "ADVANCED_OWNER",
+        "DEVELOPER"
+      ],
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "chart_refs": [
+        "portfolio_equity_curve",
+        "TCA_waterfall_and_implementation_shortfall"
+      ],
+      "mode_scope": [
+        "GUIDED_OWNER",
+        "ADVANCED_OWNER",
+        "DEVELOPER"
+      ],
+      "owner_action_label": "Show related evidence",
+      "owner_empty_state_text": "Waiting for the matching provider receipt. No fake value is shown.",
+      "owner_next_step": "Open the next-action menu or technical details if more evidence is needed.",
+      "owner_status_label": "Readable label",
+      "owner_summary": "QTT keeps the technical reference linked but shows the owner a readable trading label first.",
+      "owner_title": "Champion / challenger comparison",
+      "owner_trading_relevance": "Presentation-only owner guidance for a trading workflow.",
+      "owner_warning_text": "This dashboard can prepare local previews only. It cannot submit trades or read private account data.",
+      "owner_why_it_matters": "This helps the owner understand what QTT can review next without creating trading authority.",
+      "presentation_id": "R2_COPY_INST_07",
+      "provider_stage": "UI1",
+      "severity_or_status_class": "info",
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "technical_detail_label": "champion_challenger_selection",
+      "technical_detail_ref": "Technical evidence available in Developer Mode.",
+      "technical_pattern_or_exact_id": "champion_challenger_selection",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+    },
+    {
+      "LLM_view_refs_or_provider_route": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_AgentRosterDiscoveryAudit.report.json",
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "QKU_formula_refs_or_gap": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "activation_route": "UI1R2_PRESENTATION::R2_COPY_INST_08",
+      "allowed_surfaces": [
+        "GUIDED_OWNER",
+        "ADVANCED_OWNER",
+        "DEVELOPER"
+      ],
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "chart_refs": [
+        "portfolio_equity_curve",
+        "TCA_waterfall_and_implementation_shortfall"
+      ],
+      "mode_scope": [
+        "GUIDED_OWNER",
+        "ADVANCED_OWNER",
+        "DEVELOPER"
+      ],
+      "owner_action_label": "Show related evidence",
+      "owner_empty_state_text": "Waiting for the matching provider receipt. No fake value is shown.",
+      "owner_next_step": "Open the next-action menu or technical details if more evidence is needed.",
+      "owner_status_label": "Readable label",
+      "owner_summary": "QTT keeps the technical reference linked but shows the owner a readable trading label first.",
+      "owner_title": "Similar-regime memory prior",
+      "owner_trading_relevance": "Presentation-only owner guidance for a trading workflow.",
+      "owner_warning_text": "This dashboard can prepare local previews only. It cannot submit trades or read private account data.",
+      "owner_why_it_matters": "This helps the owner understand what QTT can review next without creating trading authority.",
+      "presentation_id": "R2_COPY_INST_08",
+      "provider_stage": "UI1",
+      "severity_or_status_class": "info",
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "technical_detail_label": "regime_conditioned_memory",
+      "technical_detail_ref": "Technical evidence available in Developer Mode.",
+      "technical_pattern_or_exact_id": "regime_conditioned_memory",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+    },
+    {
+      "LLM_view_refs_or_provider_route": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_AgentRosterDiscoveryAudit.report.json",
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "QKU_formula_refs_or_gap": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "activation_route": "UI1R2_PRESENTATION::R2_COPY_INST_09",
+      "allowed_surfaces": [
+        "GUIDED_OWNER",
+        "ADVANCED_OWNER",
+        "DEVELOPER"
+      ],
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "chart_refs": [
+        "portfolio_equity_curve",
+        "TCA_waterfall_and_implementation_shortfall"
+      ],
+      "mode_scope": [
+        "GUIDED_OWNER",
+        "ADVANCED_OWNER",
+        "DEVELOPER"
+      ],
+      "owner_action_label": "Show related evidence",
+      "owner_empty_state_text": "Waiting for the matching provider receipt. No fake value is shown.",
+      "owner_next_step": "Open the next-action menu or technical details if more evidence is needed.",
+      "owner_status_label": "Readable label",
+      "owner_summary": "QTT keeps the technical reference linked but shows the owner a readable trading label first.",
+      "owner_title": "Quantum-structure readiness",
+      "owner_trading_relevance": "Presentation-only owner guidance for a trading workflow.",
+      "owner_warning_text": "This dashboard can prepare local previews only. It cannot submit trades or read private account data.",
+      "owner_why_it_matters": "This helps the owner understand what QTT can review next without creating trading authority.",
+      "presentation_id": "R2_COPY_INST_09",
+      "provider_stage": "UI1",
+      "severity_or_status_class": "info",
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "technical_detail_label": "quantum_structural_readiness",
+      "technical_detail_ref": "Technical evidence available in Developer Mode.",
+      "technical_pattern_or_exact_id": "quantum_structural_readiness",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+    },
+    {
+      "LLM_view_refs_or_provider_route": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_AgentRosterDiscoveryAudit.report.json",
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "QKU_formula_refs_or_gap": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "activation_route": "UI1R2_PRESENTATION::R2_COPY_INST_10",
+      "allowed_surfaces": [
+        "GUIDED_OWNER",
+        "ADVANCED_OWNER",
+        "DEVELOPER"
+      ],
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "chart_refs": [
+        "portfolio_equity_curve",
+        "TCA_waterfall_and_implementation_shortfall"
+      ],
+      "mode_scope": [
+        "GUIDED_OWNER",
+        "ADVANCED_OWNER",
+        "DEVELOPER"
+      ],
+      "owner_action_label": "Show related evidence",
+      "owner_empty_state_text": "Waiting for the matching provider receipt. No fake value is shown.",
+      "owner_next_step": "Open the next-action menu or technical details if more evidence is needed.",
+      "owner_status_label": "Readable label",
+      "owner_summary": "QTT keeps the technical reference linked but shows the owner a readable trading label first.",
+      "owner_title": "Quantum objective / constraint / variable map",
+      "owner_trading_relevance": "Presentation-only owner guidance for a trading workflow.",
+      "owner_warning_text": "This dashboard can prepare local previews only. It cannot submit trades or read private account data.",
+      "owner_why_it_matters": "This helps the owner understand what QTT can review next without creating trading authority.",
+      "presentation_id": "R2_COPY_INST_10",
+      "provider_stage": "UI1",
+      "severity_or_status_class": "info",
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "technical_detail_label": "qstruct_objective_constraint_variable_ref",
+      "technical_detail_ref": "Technical evidence available in Developer Mode.",
+      "technical_pattern_or_exact_id": "qstruct_objective_constraint_variable_ref",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+    },
+    {
+      "LLM_view_refs_or_provider_route": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_AgentRosterDiscoveryAudit.report.json",
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "QKU_formula_refs_or_gap": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "activation_route": "UI1R2_PRESENTATION::R2_COPY_INST_11",
+      "allowed_surfaces": [
+        "GUIDED_OWNER",
+        "ADVANCED_OWNER",
+        "DEVELOPER"
+      ],
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "chart_refs": [
+        "portfolio_equity_curve",
+        "TCA_waterfall_and_implementation_shortfall"
+      ],
+      "mode_scope": [
+        "GUIDED_OWNER",
+        "ADVANCED_OWNER",
+        "DEVELOPER"
+      ],
+      "owner_action_label": "Show related evidence",
+      "owner_empty_state_text": "Waiting for the matching provider receipt. No fake value is shown.",
+      "owner_next_step": "Open the next-action menu or technical details if more evidence is needed.",
+      "owner_status_label": "Readable label",
+      "owner_summary": "QTT keeps the technical reference linked but shows the owner a readable trading label first.",
+      "owner_title": "Interpret-back map",
+      "owner_trading_relevance": "Presentation-only owner guidance for a trading workflow.",
+      "owner_warning_text": "This dashboard can prepare local previews only. It cannot submit trades or read private account data.",
+      "owner_why_it_matters": "This helps the owner understand what QTT can review next without creating trading authority.",
+      "presentation_id": "R2_COPY_INST_11",
+      "provider_stage": "UI1",
+      "severity_or_status_class": "info",
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "technical_detail_label": "interpret_back_map_ref",
+      "technical_detail_ref": "Technical evidence available in Developer Mode.",
+      "technical_pattern_or_exact_id": "interpret_back_map_ref",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+    },
+    {
+      "LLM_view_refs_or_provider_route": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_AgentRosterDiscoveryAudit.report.json",
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "QKU_formula_refs_or_gap": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "activation_route": "UI1R2_PRESENTATION::R2_COPY_INST_12",
+      "allowed_surfaces": [
+        "GUIDED_OWNER",
+        "ADVANCED_OWNER",
+        "DEVELOPER"
+      ],
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "chart_refs": [
+        "portfolio_equity_curve",
+        "TCA_waterfall_and_implementation_shortfall"
+      ],
+      "mode_scope": [
+        "GUIDED_OWNER",
+        "ADVANCED_OWNER",
+        "DEVELOPER"
+      ],
+      "owner_action_label": "Show related evidence",
+      "owner_empty_state_text": "Waiting for the matching provider receipt. No fake value is shown.",
+      "owner_next_step": "Open the next-action menu or technical details if more evidence is needed.",
+      "owner_status_label": "Readable label",
+      "owner_summary": "QTT keeps the technical reference linked but shows the owner a readable trading label first.",
+      "owner_title": "Upstream / downstream workflow route",
+      "owner_trading_relevance": "Presentation-only owner guidance for a trading workflow.",
+      "owner_warning_text": "This dashboard can prepare local previews only. It cannot submit trades or read private account data.",
+      "owner_why_it_matters": "This helps the owner understand what QTT can review next without creating trading authority.",
+      "presentation_id": "R2_COPY_INST_12",
+      "provider_stage": "UI1",
+      "severity_or_status_class": "info",
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "technical_detail_label": "DAG_upstream_downstream_route_ref",
+      "technical_detail_ref": "Technical evidence available in Developer Mode.",
+      "technical_pattern_or_exact_id": "DAG_upstream_downstream_route_ref",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+    }
+  ]
+}

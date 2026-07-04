@@ -1,0 +1,117 @@
+{
+  "all_modes_use_same_OwnerActionRegistry": true,
+  "all_modes_use_same_OwnerDashboardStateV1": true,
+  "all_modes_use_same_OwnerSurfaceResolver": true,
+  "default_mode": "GUIDED_OWNER",
+  "local_storage_keys_allowed": [
+    "qtt_owner_dashboard_experience_mode",
+    "qtt_owner_dashboard_guidance_density"
+  ],
+  "meta": {
+    "agent_consumable_authority": false,
+    "artifact_id": "UI1R2_MODE_POLICY",
+    "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+    "connector_access_allowed": false,
+    "credential_access_allowed": false,
+    "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config + PR169-DASH1 artifacts + PR169-DASH1-UI1/R1 boot data + OwnerPresentationLayer / OwnerGuidancePolicy config",
+    "manual_edit_allowed": false,
+    "order_execution_allowed": false,
+    "runtime_side_effect_allowed": false,
+    "runtime_truth_authority": false,
+    "source_truth_authority": false,
+    "ui1r2_generated_from": "PR169-DASH1 artifacts + PR169-DASH1-UI1/R1 boot data + OwnerPresentationLayer / OwnerGuidancePolicy config",
+    "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+  },
+  "mode_policy_id": "DashboardSystem.Modes",
+  "no_second_action_grammar": true,
+  "no_second_dashboard_state_model": true,
+  "rows": [
+    {
+      "action_registry_ref": "OwnerActionRegistryV1",
+      "default_state": true,
+      "education_disclosure_policy": "collapsed_until_owner_clicks_learn_why_or_explain",
+      "hidden_surfaces": [
+        "long_education",
+        "technical_refs",
+        "raw_refs",
+        "developer_diagnostics"
+      ],
+      "local_storage_policy": {
+        "allowed_key": "qtt_owner_dashboard_experience_mode",
+        "allowed_values": [
+          "GUIDED_OWNER",
+          "ADVANCED_OWNER",
+          "DEVELOPER"
+        ],
+        "non_secret_only": true
+      },
+      "mode_id": "GUIDED_OWNER",
+      "mode_label": "Guided",
+      "state_model_ref": "OwnerDashboardStateV1",
+      "technical_disclosure_policy": "collapsed_until_owner_clicks_technical_details",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "visible_surfaces": [
+        "owner_cards",
+        "recommended_actions",
+        "compact_badges",
+        "learn_buttons"
+      ]
+    },
+    {
+      "action_registry_ref": "OwnerActionRegistryV1",
+      "default_state": false,
+      "education_disclosure_policy": "collapsed_by_default_fewer_beginner_lessons",
+      "hidden_surfaces": [
+        "raw_refs",
+        "developer_diagnostics"
+      ],
+      "local_storage_policy": {
+        "allowed_key": "qtt_owner_dashboard_experience_mode",
+        "allowed_values": [
+          "GUIDED_OWNER",
+          "ADVANCED_OWNER",
+          "DEVELOPER"
+        ],
+        "non_secret_only": true
+      },
+      "mode_id": "ADVANCED_OWNER",
+      "mode_label": "Advanced",
+      "state_model_ref": "OwnerDashboardStateV1",
+      "technical_disclosure_policy": "technical_summaries_owner_readable_raw_refs_collapsed",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "visible_surfaces": [
+        "owner_cards",
+        "recommended_actions",
+        "compact_metrics",
+        "cost_risk_rows"
+      ]
+    },
+    {
+      "action_registry_ref": "OwnerActionRegistryV1",
+      "default_state": false,
+      "education_disclosure_policy": "education_available_but_not_default_focus",
+      "hidden_surfaces": [],
+      "local_storage_policy": {
+        "allowed_key": "qtt_owner_dashboard_experience_mode",
+        "allowed_values": [
+          "GUIDED_OWNER",
+          "ADVANCED_OWNER",
+          "DEVELOPER"
+        ],
+        "non_secret_only": true
+      },
+      "mode_id": "DEVELOPER",
+      "mode_label": "Developer",
+      "state_model_ref": "OwnerDashboardStateV1",
+      "technical_disclosure_policy": "developer_mode_can_show_raw_refs_after_selected",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "visible_surfaces": [
+        "technical_refs",
+        "registry_rows",
+        "validators",
+        "row_counts",
+        "raw_refs_after_click"
+      ]
+    }
+  ]
+}
