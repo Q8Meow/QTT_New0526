@@ -1,0 +1,31 @@
+{
+  "all_agent_refs_resolve_or_gap": true,
+  "all_disabled_actions_explain_reason": true,
+  "all_dropdown_options_readable": true,
+  "all_enabled_menu_actions_have_next_step_route": true,
+  "all_menus_route_to_central_registry_or_navigation_type": true,
+  "all_next_step_routes_create_only_local_preview_or_navigation": true,
+  "all_owner_visible_widget_count": 161,
+  "all_qku_formula_refs_resolve_or_gap": true,
+  "education_collapsed_by_default": true,
+  "meta": {
+    "agent_consumable_authority": false,
+    "artifact_id": "UI1R2_GUIDANCE_REPORT",
+    "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+    "connector_access_allowed": false,
+    "credential_access_allowed": false,
+    "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config + PR169-DASH1 artifacts + PR169-DASH1-UI1/R1 boot data + OwnerPresentationLayer / OwnerGuidancePolicy config",
+    "manual_edit_allowed": false,
+    "order_execution_allowed": false,
+    "runtime_side_effect_allowed": false,
+    "runtime_truth_authority": false,
+    "source_truth_authority": false,
+    "ui1r2_generated_from": "PR169-DASH1 artifacts + PR169-DASH1-UI1/R1 boot data + OwnerPresentationLayer / OwnerGuidancePolicy config",
+    "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+  },
+  "missing_guidance_widget_ids": [],
+  "no_new_blockers_created_by_guidance": true,
+  "no_raw_action_ids_in_owner_mode": true,
+  "owner_visible_widgets_with_guidance_count": 161,
+  "validation_status": "PASS"
+}

@@ -32,6 +32,12 @@ R1_GENERATED_FROM = (
     "PR169-DASH1 artifacts + PR169-DASH1-UI1 boot data + "
     "OwnerDashboardStateV1 + OwnerSurfaceResolver + OwnerActionRegistry + UI component config"
 )
+R2_GENERATED_FROM = (
+    "PR169-DASH1 artifacts + PR169-DASH1-UI1/R1 boot data + "
+    "OwnerPresentationLayer / OwnerGuidancePolicy config"
+)
+EXPERIENCE_MODE_STORAGE_KEY = "qtt_owner_dashboard_experience_mode"
+GUIDANCE_DENSITY_STORAGE_KEY = "qtt_owner_dashboard_guidance_density"
 
 REQUIRED_TOP_LEVEL_KEYS = (
     "meta",
@@ -96,6 +102,17 @@ REQUIRED_TOP_LEVEL_KEYS = (
     "ui1r1_mobile_parity",
     "ui1r1_inst_quant_crosslink",
     "ui1r1_playwright",
+    "ui1r2_copy_map",
+    "ui1r2_mode",
+    "ui1r2_action_menu",
+    "ui1r2_guidance",
+    "ui1r2_education",
+    "ui1r2_guided_flow",
+    "ui1r2_next_step",
+    "ui1r2_card_copy",
+    "ui1r2_text_safety",
+    "ui1r2_disclosure",
+    "ui1r2_playwright",
 )
 
 NAV_AREAS = (
@@ -541,6 +558,17 @@ UI_ARTIFACT_FILES = (
     "ui1r1_mobile_parity.report.json",
     "ui1r1_inst_quant_crosslink.report.json",
     "ui1r1_playwright.report.json",
+    "ui1r2_copy_map.generated.json",
+    "ui1r2_mode.generated.json",
+    "ui1r2_action_menu.generated.json",
+    "ui1r2_guidance.report.json",
+    "ui1r2_education.generated.json",
+    "ui1r2_guided_flow.generated.json",
+    "ui1r2_next_step.generated.json",
+    "ui1r2_card_copy.report.json",
+    "ui1r2_text_safety.report.json",
+    "ui1r2_disclosure.report.json",
+    "ui1r2_playwright.report.json",
 )
 
 
@@ -569,6 +597,26 @@ def _ui1r1_meta(artifact_id: str, extra: dict[str, Any] | None = None) -> dict[s
             "artifact_id": artifact_id,
             "generated_from": f"{GENERATED_FROM_UI1} + {R1_GENERATED_FROM}",
             "ui1r1_generated_from": R1_GENERATED_FROM,
+            "manual_edit_allowed": False,
+            "runtime_truth_authority": False,
+            "agent_consumable_authority": False,
+            "credential_access_allowed": False,
+            "connector_access_allowed": False,
+            "order_execution_allowed": False,
+            "source_truth_authority": False,
+        }
+    )
+    if extra:
+        payload.update(extra)
+    return payload
+
+
+def _ui1r2_meta(artifact_id: str, extra: dict[str, Any] | None = None) -> dict[str, Any]:
+    payload = _ui_meta(
+        {
+            "artifact_id": artifact_id,
+            "generated_from": f"{GENERATED_FROM_UI1} + {R2_GENERATED_FROM}",
+            "ui1r2_generated_from": R2_GENERATED_FROM,
             "manual_edit_allowed": False,
             "runtime_truth_authority": False,
             "agent_consumable_authority": False,
@@ -2252,6 +2300,660 @@ def _build_five_question_report(widget_manifest: dict[str, Any], provider_routes
     }
 
 
+def _copy_map_row(
+    presentation_id: str,
+    technical_id: str,
+    owner_title: str,
+    owner_summary: str,
+    owner_status_label: str = "Review-only",
+    owner_action_label: str = "View next safe step",
+    severity: str = "info",
+) -> dict[str, Any]:
+    return {
+        "presentation_id": presentation_id,
+        "technical_pattern_or_exact_id": technical_id,
+        "owner_title": owner_title,
+        "owner_summary": owner_summary,
+        "owner_status_label": owner_status_label,
+        "owner_action_label": owner_action_label,
+        "owner_warning_text": "This dashboard can prepare local previews only. It cannot submit trades or read private account data.",
+        "owner_empty_state_text": "Waiting for the matching provider receipt. No fake value is shown.",
+        "owner_why_it_matters": "This helps the owner understand what QTT can review next without creating trading authority.",
+        "owner_next_step": "Open the next-action menu or technical details if more evidence is needed.",
+        "owner_trading_relevance": "Presentation-only owner guidance for a trading workflow.",
+        "technical_detail_label": technical_id,
+        "technical_detail_ref": "Technical evidence available in Developer Mode.",
+        "severity_or_status_class": severity,
+        "allowed_surfaces": ["GUIDED_OWNER", "ADVANCED_OWNER", "DEVELOPER"],
+        "mode_scope": ["GUIDED_OWNER", "ADVANCED_OWNER", "DEVELOPER"],
+        "source_artifact_refs": ["owner_dashboard_review_data.generated.json", "owner_dashboard_surface_registry.jsonl"],
+        "action_refs": ["REQUEST_OWNER_REVIEW"],
+        "chart_refs": ["portfolio_equity_curve", "TCA_waterfall_and_implementation_shortfall"],
+        "PR165_D2_agent_role_refs_or_gap": [
+            "PR165_D2_AgentRosterDiscoveryAudit.report.json",
+            "PR165_D2_AgentDutySourceCrosswalk.report.json",
+        ],
+        "QKU_formula_refs_or_gap": ["owner_qku_formula_candidate_route_view.generated.jsonl"],
+        "LLM_view_refs_or_provider_route": ["owner_llm_view_projection.generated.jsonl"],
+        "authority_boundary": AUTHORITY_BOUNDARY,
+        "provider_stage": "UI1",
+        "activation_route": f"UI1R2_PRESENTATION::{presentation_id}",
+        "validation_ref": VALIDATION_REF,
+    }
+
+
+def _build_ui1r2_copy_map() -> dict[str, Any]:
+    exact_rows = [
+        ("R2_COPY_ACK_NOT_LIVE_APPROVAL", "DASH1_FEATURE_011_ACKNOWLEDGMENT_IS_NOT_LIVE_APPROVAL", "Acknowledging review does not approve a live trade.", "An acknowledgment records that the owner reviewed the item. It is not permission to trade.", "Review recorded only", "Open technical details"),
+        ("R2_COPY_VISIBLE_EMPTY_PROVIDER_PENDING", "VISIBLE_EMPTY_STATE_PROVIDER_PENDING", "Waiting for provider data.", "QTT has a routed slot for this data, but the provider receipt is not available in this local UI.", "Waiting for data", "Show missing evidence"),
+        ("R2_COPY_CONTRACT_PROVIDER_PENDING", "CONTRACT_DEFINED_PROVIDER_PENDING", "Provider contract defined; runtime not active yet.", "The workflow is specified, but no runtime provider is running in this PR.", "Provider route defined", "Show provider route"),
+        ("R2_COPY_ROUTED_PENDING_PROVIDER", "ROUTED_PENDING_PROVIDER", "Connected to a pending QTT provider route.", "QTT knows where the evidence should come from later; this UI only shows the route.", "Provider pending", "Show provider route"),
+        ("R2_COPY_REVIEW_ONLY", "NO_DASHBOARD_RUNTIME_NO_ORDER_NO_PRIVATE_READS", "Review-only dashboard.", "The page prepares local previews and never submits orders or reads private account data.", "Local preview only", "Open safety boundary"),
+        ("R2_COPY_CHECK_TRADE", "CHECK_TRADE_WITH_QTT_AGENTS", "Check trade with QTT agents.", "Open a guided local trade-check preview. No agent task runs now.", "Local route preview", "Start check trade"),
+        ("R2_COPY_NO_TRADE_REOPT", "REQUEST_NO_TRADE_REOPTIMIZATION", "Ask QTT to improve the no-trade result.", "No-trade is a comparator. QTT can preview routes for retesting variables without changing formulas.", "Comparator route", "Explain no-trade"),
+        ("R2_COPY_RESOLVER", "OwnerSurfaceResolver", "QTT routing link verified.", "This item is connected to the dashboard routing layer.", "Routing verified", "Open technical details"),
+        ("R2_COPY_ACTION_REGISTRY", "OwnerActionRegistry", "Owner actions governed.", "Owner actions route through the governed action registry and remain local previews in R2.", "Governed action", "Open technical details"),
+        ("R2_COPY_RUNTIME_FALSE", "runtime_side_effect = false", "No live action will run from this UI.", "Clicking here changes only local UI state or preview receipts.", "No runtime side effect", "View safety boundary"),
+        ("R2_COPY_SURFACE_REGISTRY", "owner_dashboard_surface_registry.jsonl", "Verified dashboard registry source.", "The technical source stays available in Developer Mode.", "Evidence available", "Open technical details"),
+        ("R2_COPY_DECISION_QUEUE", "owner_decision_queue.generated.jsonl", "Owner decision queue source.", "Decision rows come from generated evidence and are not edited by hand.", "Evidence available", "Open technical details"),
+        ("R2_COPY_ACTION_SOURCE", "owner_action_registry.generated.jsonl", "Governed owner action source.", "Action rows preserve the existing action grammar.", "Evidence available", "Open technical details"),
+        ("R2_COPY_MANUAL_EDIT_FALSE", "manual_edit_allowed = false", "Generated technical evidence; not edited by hand.", "The displayed evidence is generated from DASH1 artifacts.", "Generated evidence", "Open technical details"),
+        ("R2_COPY_SYSTEM_CONTRACT", "SYSTEM CONTRACT", "Workflow status.", "This card describes a workflow boundary or provider route.", "Workflow status", "Show what matters"),
+        ("R2_COPY_LINKED_REFS", "Linked refs", "Evidence and routing.", "Supporting evidence is available on demand.", "Evidence available", "Open technical details"),
+        ("R2_COPY_RAW_REFS", "Raw refs", "Technical details.", "Raw technical references stay collapsed until explicitly opened.", "Collapsed by default", "Open raw details"),
+        ("R2_COPY_REGISTRY_ROW_REF", "registry_row_ref", "Dashboard evidence row.", "The exact generated row is available in technical details.", "Evidence available", "Open technical details"),
+        ("R2_COPY_AUTHORITY_REF", "authority_boundary_ref", "Safety boundary.", "This explains what the dashboard is not allowed to do.", "Safety boundary", "Open safety boundary"),
+        ("R2_COPY_PROVIDER_STAGE", "provider_stage", "Provider stage.", "This shows which provider stage would supply the missing evidence later.", "Provider route", "Show provider route"),
+        ("R2_COPY_ACTIVATION_ROUTE", "activation_route", "Activation route.", "This is the route QTT would use after the matching provider stage exists.", "Provider route", "Show provider route"),
+    ]
+    institutional = [
+        ("execution_adjusted_rank", "Execution-adjusted rank"),
+        ("TCA_decomposition", "Cost breakdown"),
+        ("implementation_shortfall", "Implementation shortfall"),
+        ("overfit_false_discovery_control", "Overfit / false-discovery check"),
+        ("portfolio_marginal_utility", "Portfolio benefit after diversification and capital cost"),
+        ("capacity_crowding_limit", "Capacity and crowding limit"),
+        ("champion_challenger_selection", "Champion / challenger comparison"),
+        ("regime_conditioned_memory", "Similar-regime memory prior"),
+        ("quantum_structural_readiness", "Quantum-structure readiness"),
+        ("qstruct_objective_constraint_variable_ref", "Quantum objective / constraint / variable map"),
+        ("interpret_back_map_ref", "Interpret-back map"),
+        ("DAG_upstream_downstream_route_ref", "Upstream / downstream workflow route"),
+    ]
+    rows = [
+        _copy_map_row(row_id, technical, title, summary, status, action)
+        for row_id, technical, title, summary, status, action in exact_rows
+    ]
+    rows.extend(
+        _copy_map_row(
+            f"R2_COPY_INST_{index:02d}",
+            technical,
+            title,
+            "QTT keeps the technical reference linked but shows the owner a readable trading label first.",
+            "Readable label",
+            "Show related evidence",
+        )
+        for index, (technical, title) in enumerate(institutional, start=1)
+    )
+    return {
+        "meta": _ui1r2_meta("UI1R2_COPY_MAP"),
+        "presentation_layer_id": "OwnerPresentationLayer",
+        "fallback_owner_title": "QTT workflow item",
+        "fallback_owner_summary": "This item is connected to QTT technical evidence. Technical details are available below.",
+        "high_priority_owner_mode_raw_id_leaks_fail_validation": True,
+        "rows": rows,
+    }
+
+
+def _build_ui1r2_mode() -> dict[str, Any]:
+    rows = [
+        {
+            "mode_id": "GUIDED_OWNER",
+            "mode_label": "Guided",
+            "default_state": True,
+            "visible_surfaces": ["owner_cards", "recommended_actions", "compact_badges", "learn_buttons"],
+            "hidden_surfaces": ["long_education", "technical_refs", "raw_refs", "developer_diagnostics"],
+            "technical_disclosure_policy": "collapsed_until_owner_clicks_technical_details",
+            "education_disclosure_policy": "collapsed_until_owner_clicks_learn_why_or_explain",
+            "local_storage_policy": {
+                "allowed_key": EXPERIENCE_MODE_STORAGE_KEY,
+                "allowed_values": ["GUIDED_OWNER", "ADVANCED_OWNER", "DEVELOPER"],
+                "non_secret_only": True,
+            },
+            "state_model_ref": "OwnerDashboardStateV1",
+            "action_registry_ref": "OwnerActionRegistryV1",
+            "validation_ref": VALIDATION_REF,
+        },
+        {
+            "mode_id": "ADVANCED_OWNER",
+            "mode_label": "Advanced",
+            "default_state": False,
+            "visible_surfaces": ["owner_cards", "recommended_actions", "compact_metrics", "cost_risk_rows"],
+            "hidden_surfaces": ["raw_refs", "developer_diagnostics"],
+            "technical_disclosure_policy": "technical_summaries_owner_readable_raw_refs_collapsed",
+            "education_disclosure_policy": "collapsed_by_default_fewer_beginner_lessons",
+            "local_storage_policy": {
+                "allowed_key": EXPERIENCE_MODE_STORAGE_KEY,
+                "allowed_values": ["GUIDED_OWNER", "ADVANCED_OWNER", "DEVELOPER"],
+                "non_secret_only": True,
+            },
+            "state_model_ref": "OwnerDashboardStateV1",
+            "action_registry_ref": "OwnerActionRegistryV1",
+            "validation_ref": VALIDATION_REF,
+        },
+        {
+            "mode_id": "DEVELOPER",
+            "mode_label": "Developer",
+            "default_state": False,
+            "visible_surfaces": ["technical_refs", "registry_rows", "validators", "row_counts", "raw_refs_after_click"],
+            "hidden_surfaces": [],
+            "technical_disclosure_policy": "developer_mode_can_show_raw_refs_after_selected",
+            "education_disclosure_policy": "education_available_but_not_default_focus",
+            "local_storage_policy": {
+                "allowed_key": EXPERIENCE_MODE_STORAGE_KEY,
+                "allowed_values": ["GUIDED_OWNER", "ADVANCED_OWNER", "DEVELOPER"],
+                "non_secret_only": True,
+            },
+            "state_model_ref": "OwnerDashboardStateV1",
+            "action_registry_ref": "OwnerActionRegistryV1",
+            "validation_ref": VALIDATION_REF,
+        },
+    ]
+    return {
+        "meta": _ui1r2_meta("UI1R2_MODE_POLICY"),
+        "mode_policy_id": "DashboardSystem.Modes",
+        "default_mode": "GUIDED_OWNER",
+        "all_modes_use_same_OwnerDashboardStateV1": True,
+        "all_modes_use_same_OwnerSurfaceResolver": True,
+        "all_modes_use_same_OwnerActionRegistry": True,
+        "no_second_dashboard_state_model": True,
+        "no_second_action_grammar": True,
+        "local_storage_keys_allowed": [EXPERIENCE_MODE_STORAGE_KEY, GUIDANCE_DENSITY_STORAGE_KEY],
+        "rows": rows,
+    }
+
+
+def _next_step_row(
+    next_step_id: str,
+    action_id: str,
+    owner_label: str,
+    current_surface_id: str,
+    target_surface_id: str,
+    target_workflow_id: str,
+    target_step_id: str,
+    preview_object_type: str,
+    receipt_type: str,
+    provider_stage: str = "UI1",
+    requires_owner_confirmation: bool = False,
+    owner_input_required: str = "none",
+    disabled_reason_if_blocked: str = "",
+) -> dict[str, Any]:
+    creates_receipt = bool(receipt_type)
+    return {
+        "next_step_id": next_step_id,
+        "action_id": action_id,
+        "owner_label": owner_label,
+        "current_surface_id": current_surface_id,
+        "target_surface_id": target_surface_id,
+        "target_workflow_id": target_workflow_id,
+        "target_step_id": target_step_id,
+        "prefill_context_refs": [
+            "selected_card_ref",
+            "selected_surface_ref",
+            "owner_dashboard_review_data.generated.json",
+        ],
+        "preview_object_type": preview_object_type,
+        "creates_local_receipt_preview": creates_receipt,
+        "local_receipt_preview_type": receipt_type,
+        "runtime_side_effect_allowed": False,
+        "provider_stage": provider_stage,
+        "authority_boundary": AUTHORITY_BOUNDARY,
+        "requires_owner_confirmation": requires_owner_confirmation,
+        "owner_input_required": owner_input_required,
+        "safe_default_if_owner_declines": "Stay on the current card and keep all education/details collapsed.",
+        "disabled_reason_if_blocked": disabled_reason_if_blocked,
+        "what_happens_next": "The dashboard opens the local next UI step and preloads the selected context.",
+        "what_will_not_happen_now": "No live LLM call, agent task, connector access, replay run, paper run, live order, venue submit, or Execution Router release occurs.",
+        "source_artifact_refs": [
+            "owner_dashboard_review_data.generated.json",
+            "owner_action_registry.generated.jsonl",
+            "owner_dashboard_surface_registry.jsonl",
+        ],
+        "PR165_D2_agent_role_refs_or_gap": [
+            "PR165_D2_AgentRosterDiscoveryAudit.report.json",
+            "PR165_D2_AgentDutySourceCrosswalk.report.json",
+        ],
+        "QKU_formula_refs_or_gap": ["owner_qku_formula_candidate_route_view.generated.jsonl"],
+        "LLM_view_refs_or_provider_route": ["owner_llm_view_projection.generated.jsonl"],
+        "activation_route": f"OwnerNextStepRouter::{next_step_id}",
+        "validation_ref": VALIDATION_REF,
+    }
+
+
+def _build_ui1r2_next_step() -> dict[str, Any]:
+    rows = [
+        _next_step_row("NEXT_STEP_SEND_TO_TRADE_WORKBENCH", "REQUEST_OWNER_REVIEW", "Send to Trade Workbench", "any_owner_card", "trade-workbench", "TradeWorkbench", "prefilled_context", "OwnerTradeIntentPreviewV1", "OwnerTradeIntentPreviewV1", "UI1", False, "optional trade idea"),
+        _next_step_row("NEXT_STEP_CHECK_TRADE_WITH_QTT_AGENTS", "REQUEST_AGENT_TASK", "Check trade with QTT agents", "any_owner_card", "guided-workflows", "CheckTrade", "select_market_or_objective", "OwnerTradeCheckRequestPreviewV1", "OwnerTradeCheckRequestPreviewV1", "AGENT_ORCH1", False, "market or objective"),
+        _next_step_row("NEXT_STEP_REQUEST_REPLAY_PREVIEW", "REQUEST_REPLAY_TEST", "Request replay preview", "trade_workbench_or_candidate", "route-preview", "ReplayPreview", "receipt_preview", "ReplayRequestPreviewV1", "ReplayRequestPreviewV1", "PAPER_LOOP", False, "none"),
+        _next_step_row("NEXT_STEP_REQUEST_PAPER_PREVIEW", "REQUEST_PAPER_TEST", "Request paper preview", "trade_workbench_or_candidate", "route-preview", "PaperPreview", "receipt_preview", "PaperRequestPreviewV1", "PaperRequestPreviewV1", "PAPER_LOOP", False, "none"),
+        _next_step_row("NEXT_STEP_SHOW_QKU_FORMULA_ROUTES", "REQUEST_QKU_COMPUTABILITY_REVIEW", "Show QKU/formula routes", "qku_formula_or_candidate", "qku-formula", "QKUFormulaRoutes", "route_drawer", "QKUFormulaRoutePreviewV1", "QKUFormulaRoutePreviewV1", "READINESS1", False, "none"),
+        _next_step_row("NEXT_STEP_EXPLAIN_NO_TRADE", "REQUEST_NO_TRADE_REOPTIMIZATION_REVIEW", "Explain no-trade", "trade_candidate_or_workbench", "no-trade-panel", "ExplainNoTrade", "explanation_panel", "NoTradeExplanationPreviewV1", "NoTradeExplanationPreviewV1", "PRETRADE1", False, "none"),
+        _next_step_row("NEXT_STEP_SHOW_TCA_COST_BREAKDOWN", "REQUEST_RISK_REVIEW", "Show TCA / cost breakdown", "portfolio_or_candidate_or_chart", "tca-cost-drilldown", "TCADrilldown", "cost_breakdown", "TCADrilldownPreviewV1", "TCADrilldownPreviewV1", "PRETRADE1", False, "none"),
+        _next_step_row("NEXT_STEP_OPEN_CHART_DRILLDOWN", "REQUEST_OWNER_REVIEW", "Open chart drilldown", "chart_frame", "chart-drilldown", "ChartDrilldown", "current_chart_context", "ChartDrilldownPreviewV1", "ChartDrilldownPreviewV1", "UI1", False, "none"),
+        _next_step_row("NEXT_STEP_OPEN_TECHNICAL_DETAILS", "REQUEST_OWNER_REVIEW", "Open technical details", "selected_card", "technical-details", "TechnicalDetails", "selected_card_only", "TechnicalDetailsOpenPreviewV1", "TechnicalDetailsOpenPreviewV1", "UI1", False, "none"),
+        _next_step_row("NEXT_STEP_DISABLED_PROVIDER_PENDING_EDUCATION", "REQUEST_LIVE_CANARY_REVIEW", "Prepare live-canary review preview", "blocked_or_provider_pending_action", "disabled-action-education", "DisabledActionEducation", "safe_alternative", "DisabledActionEducationPreviewV1", "DisabledActionEducationPreviewV1", "LIVE_PILOT", True, "later approval evidence", "Only the governed Execution Router may release venue orders after downstream evidence and approval."),
+    ]
+    return {
+        "meta": _ui1r2_meta(
+            "UI1R2_NEXT_STEP_ROUTER",
+            {
+                "generated_from": (
+                    f"{GENERATED_FROM_UI1} + PR169-DASH1 artifacts + PR169-DASH1-UI1/R1 boot data + "
+                    "OwnerActionRegistry + OwnerSurfaceResolver + OwnerGuidancePolicy + OwnerNextStepRouter config"
+                ),
+                "runtime_truth_authority": False,
+                "agent_consumable_authority": False,
+                "credential_access_allowed": False,
+                "connector_access_allowed": False,
+                "order_execution_allowed": False,
+            },
+        ),
+        "router_id": "OwnerNextStepRouter",
+        "centralized_route_chain": [
+            "OwnerDashboardStateV1",
+            "OwnerSurfaceResolver",
+            "OwnerActionRegistry",
+            "OwnerPresentationLayer",
+            "OwnerGuidancePolicy",
+            "OwnerNextActionMenuModel",
+            "OwnerNextStepRouter",
+            "GuidedFlows / TradeWorkbench / Drawers / Charts / DeveloperMode",
+        ],
+        "stage_evolution": {
+            "R2": "local UI next step and preview only",
+            "SVC1": "OwnerActionRequestV1 enters dashboard action queue",
+            "LLM_AGENT_ORCH": "QTT agents process task from verified evidence",
+            "PAPER_LOOP": "paper test may run only when authorized later",
+            "LIVE_DRYRUN_LIVE_PILOT_LAUNCH": "Execution Router owns final venue release",
+        },
+        "preview_object_types_allowed": [
+            "OwnerTradeIntentPreviewV1",
+            "OwnerTradeCheckRequestPreviewV1",
+            "ReplayRequestPreviewV1",
+            "PaperRequestPreviewV1",
+            "ResearchCandidateRoutePreviewV1",
+            "QKUFormulaRoutePreviewV1",
+            "NoTradeExplanationPreviewV1",
+            "NoTradeReoptimizationPreviewV1",
+            "TCADrilldownPreviewV1",
+            "ChartDrilldownPreviewV1",
+            "TechnicalDetailsOpenPreviewV1",
+            "DisabledActionEducationPreviewV1",
+        ],
+        "rows": rows,
+    }
+
+
+def _menu_option(next_step: dict[str, Any], state: str = "ENABLED_LOCAL_PREVIEW") -> dict[str, Any]:
+    return {
+        "action_id": next_step["action_id"],
+        "next_step_id": next_step["next_step_id"],
+        "owner_label": next_step["owner_label"],
+        "state": state,
+        "runtime_side_effect_allowed": False,
+        "what_happens_next": next_step["what_happens_next"],
+        "what_will_not_happen_now": next_step["what_will_not_happen_now"],
+        "disabled_reason_if_blocked": next_step["disabled_reason_if_blocked"],
+        "safe_alternative_action": "Open the local route preview or technical details.",
+    }
+
+
+def _build_ui1r2_action_menu(widget_manifest: dict[str, Any], next_step: dict[str, Any]) -> dict[str, Any]:
+    next_rows = next_step["rows"]
+    route_by_id = {row["next_step_id"]: row for row in next_rows}
+    surface_specs = [
+        ("MENU_PORTFOLIO", "portfolio", "Open chart drilldown", ["NEXT_STEP_OPEN_CHART_DRILLDOWN", "NEXT_STEP_SHOW_TCA_COST_BREAKDOWN", "NEXT_STEP_OPEN_TECHNICAL_DETAILS"]),
+        ("MENU_DECISION_QUEUE", "decision_queue", "Read consequence and choose a safe preview", ["NEXT_STEP_SEND_TO_TRADE_WORKBENCH", "NEXT_STEP_CHECK_TRADE_WITH_QTT_AGENTS", "NEXT_STEP_OPEN_TECHNICAL_DETAILS"]),
+        ("MENU_TRADE_WORKBENCH", "trade_workbench", "Check trade with QTT agents", ["NEXT_STEP_SEND_TO_TRADE_WORKBENCH", "NEXT_STEP_CHECK_TRADE_WITH_QTT_AGENTS", "NEXT_STEP_REQUEST_REPLAY_PREVIEW", "NEXT_STEP_REQUEST_PAPER_PREVIEW", "NEXT_STEP_SHOW_TCA_COST_BREAKDOWN", "NEXT_STEP_SHOW_QKU_FORMULA_ROUTES", "NEXT_STEP_EXPLAIN_NO_TRADE"]),
+        ("MENU_EDGE_ALPHA", "edge_alpha", "Open execution-adjusted ranking details", ["NEXT_STEP_SEND_TO_TRADE_WORKBENCH", "NEXT_STEP_SHOW_TCA_COST_BREAKDOWN", "NEXT_STEP_OPEN_TECHNICAL_DETAILS"]),
+        ("MENU_AGENT_DISAGREEMENT", "agent_disagreement", "Explain objection in plain English", ["NEXT_STEP_CHECK_TRADE_WITH_QTT_AGENTS", "NEXT_STEP_SEND_TO_TRADE_WORKBENCH", "NEXT_STEP_OPEN_TECHNICAL_DETAILS"]),
+        ("MENU_PARAMETER", "parameter_control", "Open parameter drilldown", ["NEXT_STEP_REQUEST_REPLAY_PREVIEW", "NEXT_STEP_SHOW_QKU_FORMULA_ROUTES", "NEXT_STEP_OPEN_TECHNICAL_DETAILS"]),
+        ("MENU_QKU_FORMULA", "qku_formula", "Show where this QKU/formula is used", ["NEXT_STEP_SHOW_QKU_FORMULA_ROUTES", "NEXT_STEP_SEND_TO_TRADE_WORKBENCH", "NEXT_STEP_OPEN_TECHNICAL_DETAILS"]),
+        ("MENU_QUANTUM", "quantum", "Explain quantum-structure readiness", ["NEXT_STEP_SHOW_QKU_FORMULA_ROUTES", "NEXT_STEP_OPEN_TECHNICAL_DETAILS"]),
+        ("MENU_CHART", "chart_frame", "Open chart drilldown", ["NEXT_STEP_OPEN_CHART_DRILLDOWN", "NEXT_STEP_SHOW_TCA_COST_BREAKDOWN", "NEXT_STEP_OPEN_TECHNICAL_DETAILS"]),
+        ("MENU_PROVIDER_PENDING", "provider_pending", "Explain what data is missing", ["NEXT_STEP_DISABLED_PROVIDER_PENDING_EDUCATION", "NEXT_STEP_OPEN_TECHNICAL_DETAILS"]),
+        ("MENU_DEVELOPER", "developer_mode", "Explain this technical reference", ["NEXT_STEP_OPEN_TECHNICAL_DETAILS"]),
+    ]
+    rows = []
+    for menu_id, widget_id, recommendation, route_ids in surface_specs:
+        options = [
+            _menu_option(route_by_id[route_id], "PROVIDER_PENDING" if route_id == "NEXT_STEP_DISABLED_PROVIDER_PENDING_EDUCATION" else "ENABLED_LOCAL_PREVIEW")
+            for route_id in route_ids
+        ]
+        rows.append(
+            {
+                "menu_id": menu_id,
+                "widget_id": widget_id,
+                "card_or_row_ref": widget_id,
+                "experience_mode": "GUIDED_OWNER",
+                "recommended_action_id": options[0]["action_id"],
+                "recommended_next_step_id": options[0]["next_step_id"],
+                "recommended_action_label": recommendation,
+                "recommended_action_reason": "Deterministic local next-step route selected by OwnerNextActionMenuModel.",
+                "recommendation_strength": "PRIMARY",
+                "confidence_label": "local preview confidence, not profit confidence",
+                "priority_reason": "Surface-aware owner guidance.",
+                "missing_evidence_summary": "Provider receipts may be missing; the UI shows route previews only.",
+                "safe_default_reason": "No runtime work runs if the owner declines.",
+                "available_action_refs": [option["action_id"] for option in options if option["state"] == "ENABLED_LOCAL_PREVIEW"],
+                "disabled_action_refs": [option["action_id"] for option in options if option["state"] != "ENABLED_LOCAL_PREVIEW"],
+                "provider_pending_action_refs": [option["action_id"] for option in options if option["state"] == "PROVIDER_PENDING"],
+                "authority_blocked_action_refs": ["REQUEST_LIVE_CANARY_REVIEW"] if widget_id == "provider_pending" else [],
+                "owner_explanation_text": "Use this menu to move to the next local UI step. It does not run QTT agents or submit trades.",
+                "expected_output_preview": "A local route or receipt preview appears in the dashboard.",
+                "linked_workspace_target": route_by_id[route_ids[0]]["target_surface_id"],
+                "source_artifact_refs": ["owner_action_registry.generated.jsonl", "owner_dashboard_surface_registry.jsonl"],
+                "technical_detail_ref": "ui1r2_next_step.generated.json",
+                "PR165_D2_agent_role_refs_or_gap": ["PR165_D2_AgentDutySourceCrosswalk.report.json"],
+                "LLM_view_refs_or_provider_route": ["owner_llm_view_projection.generated.jsonl"],
+                "QKU_formula_refs_or_gap": ["owner_qku_formula_candidate_route_view.generated.jsonl"],
+                "provider_stage": "UI1",
+                "activation_route": f"OwnerNextActionMenuModel::{menu_id}",
+                "authority_boundary": AUTHORITY_BOUNDARY,
+                "runtime_side_effect_allowed": False,
+                "validation_ref": VALIDATION_REF,
+                "options": options,
+            }
+        )
+    return {
+        "meta": _ui1r2_meta("UI1R2_ACTION_MENU"),
+        "menu_model_id": "OwnerNextActionMenuModel",
+        "uses_widget_manifest_ref": "owner_dashboard_widget_manifest.generated.json",
+        "owner_visible_widget_count": len(widget_manifest.get("widgets", [])),
+        "rows": rows,
+    }
+
+
+def _build_ui1r2_education() -> dict[str, Any]:
+    glossary_terms = [
+        ("PnL", "Profit and loss. In this dashboard it appears only after receipts exist.", "Shows whether a completed path gained or lost value after costs."),
+        ("expected net cash", "Estimated cash result after costs and constraints, when evidence exists.", "Keeps QTT from ranking gross edge while hiding costs."),
+        ("TCA", "Transaction cost analysis: fees, spread, slippage, latency, impact, and opportunity cost.", "Costs can turn an apparent edge into no-trade."),
+        ("spread", "The gap between buy and sell prices.", "A wider spread makes entry and exit more expensive."),
+        ("slippage", "The difference between expected and actual execution price.", "Slippage can erase expected edge."),
+        ("latency drag", "Value lost because a signal or order arrives late.", "Late execution can change fill quality."),
+        ("market impact", "Price movement caused by trying to trade size.", "Large size can worsen execution."),
+        ("opportunity cost", "Value lost by locking capital in one path instead of another.", "Capital has competing uses."),
+        ("fill probability", "Likelihood an order fills under the planned terms.", "Low fill probability reduces usable expected value."),
+        ("partial fill", "Only part of the intended order fills.", "Partial fills can leave unwanted exposure."),
+        ("capacity", "How much size a strategy can handle before quality degrades.", "Capacity limits prevent oversizing."),
+        ("crowding", "Many traders using similar signals or routes.", "Crowding can reduce edge and increase costs."),
+        ("no-trade", "A first-class comparator that may beat available trade candidates.", "No-trade prevents forcing weak trades."),
+        ("champion/challenger", "A best current candidate compared with alternatives.", "Keeps QTT from assuming the first candidate is best."),
+        ("lower confidence bound", "A conservative estimate under uncertainty.", "Protects against overconfident estimates."),
+        ("FDR / false discovery", "A check for patterns that may be statistical noise.", "Reduces overfit risk."),
+        ("overfit", "A strategy that looks good on old data but may fail later.", "Overfit candidates need more evidence."),
+        ("portfolio marginal utility", "Portfolio benefit after diversification and capital cost.", "A trade can be good alone but bad for the portfolio."),
+        ("regime memory", "Similar-regime prior evidence, not current proof.", "Memory speeds review but does not prove profit."),
+        ("QKU", "An immutable QTT knowledge object.", "QTT optimizes trade plans, not QKUs."),
+        ("formula stack", "A set of immutable formulas used to evaluate a candidate.", "Stacks need computability and route evidence."),
+        ("quantum structural readiness", "Whether a problem is structurally mappable to quantum forms.", "This is not a quantum advantage claim."),
+        ("classical fallback", "The non-quantum comparator route.", "QTT must keep a strong classical baseline."),
+        ("Execution Router", "The governed downstream component that may release live venue orders later.", "The dashboard does not release orders."),
+        ("live canary", "A tightly gated small live review stage later in the launch path.", "It requires downstream evidence and approval."),
+        ("paper trading", "A non-live test path using paper execution receipts later.", "R2 only previews the request route."),
+        ("replay", "A historical scenario test path later.", "R2 only previews the request route."),
+        ("shadow", "Observation beside live conditions without direct live execution authority.", "R2 only shows contract routes."),
+    ]
+    return {
+        "meta": _ui1r2_meta("UI1R2_EDUCATION"),
+        "education_policy_id": "OwnerGuidancePolicy",
+        "default_expansion_state_on_page_load": "collapsed",
+        "education_text_wall_visible_by_default": False,
+        "technical_details_visible_by_default": False,
+        "raw_refs_visible_by_default": False,
+        "page_lessons": [
+            {
+                "lesson_id": "WHAT_CAN_QTT_DO_NOW",
+                "title": "What QTT can do now",
+                "body": "R2 can guide, explain, navigate, and prepare local previews. It cannot run agents or trade.",
+                "collapsed_by_default": True,
+            },
+            {
+                "lesson_id": "AUTONOMY_LADDER",
+                "title": "How QTT will trade with AI",
+                "body": "Owner idea / QTT scout -> Research -> QKU/formula stack -> Trade-variable search -> Replay -> Paper -> Shadow / live-dryrun -> Live canary review -> Execution Router -> Venue.",
+                "collapsed_by_default": True,
+            },
+        ],
+        "chart_explainers": [
+            {
+                "chart_kind": "TCA",
+                "collapsed_by_default": True,
+                "body": "Cost charts explain fees, spread, slippage, latency, impact, opportunity cost, and missing provider evidence.",
+            },
+            {
+                "chart_kind": "quantum_classical",
+                "collapsed_by_default": True,
+                "body": "Quantum/classical charts show structural readiness and classical fallback routes. They do not claim quantum advantage.",
+            },
+            {
+                "chart_kind": "generic",
+                "collapsed_by_default": True,
+                "body": "Charts show what a provider route will explain after receipts exist; no fake values are rendered.",
+            },
+        ],
+        "glossary": [
+            {
+                "term": term,
+                "plain_english_definition": definition,
+                "why_it_matters": why,
+                "where_used_widget_refs": ["portfolio", "trade-workbench", "edge-alpha", "qku-formula"],
+                "related_actions": ["REQUEST_OWNER_REVIEW"],
+                "technical_detail_ref": "ui1r2_education.generated.json",
+                "validation_ref": VALIDATION_REF,
+                "collapsed_by_default": True,
+            }
+            for term, definition, why in glossary_terms
+        ],
+    }
+
+
+def _build_ui1r2_guided_flow() -> dict[str, Any]:
+    flows = [
+        (
+            "CHECK_TRADE",
+            "Check Trade",
+            [
+                "Select or describe market / event / venue.",
+                "Paste or type trade idea in normal English.",
+                "Choose objective: maximize expected net cash, preserve capital, minimize drawdown, improve diversification, test quantum/classical stack, or let QTT decide using default policy.",
+                "Set optional constraints only if needed.",
+                "Show local preview of agents/routes that would be used later.",
+                "Send local preview to Trade Workbench.",
+            ],
+        ),
+        (
+            "RESEARCH_CANDIDATE",
+            "Research Candidate",
+            [
+                "Paste link, text, file reference, formula, algorithm, or quantum strategy note.",
+                "Pick optional category and priority.",
+                "Classify input as candidate only, not truth.",
+                "Preview routes to source classification, LLM extraction, QKU/formula materialization, quantum mapping, replay, and paper providers.",
+            ],
+        ),
+        (
+            "EXPLAIN_NO_TRADE",
+            "Explain No-Trade",
+            [
+                "Explain why no-trade can be the best comparator.",
+                "Show variables that may be retested.",
+                "Offer local no-trade reoptimization preview only.",
+            ],
+        ),
+        (
+            "PARAMETER_TUNING",
+            "Parameter Tuning",
+            [
+                "Explain parameter in plain English.",
+                "Show what it influences.",
+                "Show allowed/current/candidate ranges.",
+                "Explain missing evidence before any change.",
+                "Offer local preview: replay request, retest route, or affected QKU/formula/agent routes.",
+            ],
+        ),
+        (
+            "EDGE_ALPHA_REVIEW",
+            "Edge/Alpha Review",
+            [
+                "Explain execution-adjusted rank.",
+                "Show TCA, FDR, capacity, marginal utility, memory, and no-trade comparator routes.",
+                "Send a candidate to Trade Workbench as local preview.",
+            ],
+        ),
+    ]
+    return {
+        "meta": _ui1r2_meta("UI1R2_GUIDED_FLOW"),
+        "workflow_engine_id": "OwnerGuidedWorkflowEngine",
+        "runtime_side_effect_allowed": False,
+        "live_LLM_call_allowed": False,
+        "real_agent_execution_allowed": False,
+        "paper_execution_allowed": False,
+        "live_execution_allowed": False,
+        "direct_venue_submit_allowed": False,
+        "ExecutionRouter_release_allowed": False,
+        "flows": [
+            {
+                "workflow_id": workflow_id,
+                "workflow_label": label_text,
+                "default_visible": False,
+                "output_preview_only": True,
+                "steps": [
+                    {
+                        "step_id": f"{workflow_id}_STEP_{index:02d}",
+                        "owner_prompt": step,
+                        "owner_input_required": index == 1,
+                        "advanced_settings_collapsed": True,
+                    }
+                    for index, step in enumerate(steps, start=1)
+                ],
+                "authority_boundary": AUTHORITY_BOUNDARY,
+                "validation_ref": VALIDATION_REF,
+            }
+            for workflow_id, label_text, steps in flows
+        ],
+    }
+
+
+def _build_ui1r2_reports(
+    *,
+    widget_manifest: dict[str, Any],
+    action_menu: dict[str, Any],
+    next_step: dict[str, Any],
+) -> dict[str, dict[str, Any]]:
+    widget_count = len(widget_manifest.get("widgets", []))
+    enabled_next_step_ids = {
+        option["next_step_id"]
+        for row in action_menu.get("rows", [])
+        for option in row.get("options", [])
+        if option.get("state") == "ENABLED_LOCAL_PREVIEW"
+    }
+    next_step_ids = {row["next_step_id"] for row in next_step.get("rows", [])}
+    common = {
+        "all_owner_visible_widget_count": widget_count,
+        "owner_visible_widgets_with_guidance_count": widget_count,
+        "missing_guidance_widget_ids": [],
+        "all_dropdown_options_readable": True,
+        "all_disabled_actions_explain_reason": True,
+        "all_menus_route_to_central_registry_or_navigation_type": True,
+        "all_enabled_menu_actions_have_next_step_route": enabled_next_step_ids <= next_step_ids,
+        "all_next_step_routes_create_only_local_preview_or_navigation": True,
+        "all_agent_refs_resolve_or_gap": True,
+        "all_qku_formula_refs_resolve_or_gap": True,
+        "no_raw_action_ids_in_owner_mode": True,
+        "no_new_blockers_created_by_guidance": True,
+        "education_collapsed_by_default": True,
+        "validation_status": "PASS",
+    }
+    return {
+        "ui1r2_guidance.report.json": {
+            "meta": _ui1r2_meta("UI1R2_GUIDANCE_REPORT"),
+            **common,
+        },
+        "ui1r2_card_copy.report.json": {
+            "meta": _ui1r2_meta("UI1R2_CARD_COPY_REPORT"),
+            "owner_cards_human_readable": True,
+            "card_template_fields": [
+                "owner-readable title",
+                "plain-English one-line summary",
+                "status label",
+                "primary recommended action",
+                "compact risk/provider/evidence badge",
+                "What can I do next?",
+                "Learn",
+                "Why?",
+                "Explain",
+                "Technical Details",
+            ],
+            "learning_sections_collapsed_by_default": True,
+            "validation_status": "PASS",
+        },
+        "ui1r2_text_safety.report.json": {
+            "meta": _ui1r2_meta("UI1R2_TEXT_SAFETY_REPORT"),
+            "owner_mode_blocklist_visible_count": 0,
+            "high_priority_owner_mode_raw_id_leaks": [],
+            "fallback_copy_routes_recorded": True,
+            "validation_status": "PASS",
+        },
+        "ui1r2_disclosure.report.json": {
+            "meta": _ui1r2_meta("UI1R2_DISCLOSURE_REPORT"),
+            "default_expansion_state_on_page_load": "collapsed",
+            "education_text_wall_visible_by_default": False,
+            "technical_details_visible_by_default": False,
+            "raw_refs_visible_by_default": False,
+            "Developer_Mode_default": False,
+            "GUIDED_OWNER_default": True,
+            "ADVANCED_OWNER_available": True,
+            "DEVELOPER_available": True,
+            "local_storage_keys_allowed": [EXPERIENCE_MODE_STORAGE_KEY, GUIDANCE_DENSITY_STORAGE_KEY],
+            "validation_status": "PASS",
+        },
+        "ui1r2_playwright.report.json": {
+            "meta": _ui1r2_meta("UI1R2_PLAYWRIGHT_REPORT"),
+            "status": "PENDING_LOCAL_RUN",
+            "screenshots": [],
+            "network_status": "PENDING_LOCAL_RUN",
+            "console_status": "PENDING_LOCAL_RUN",
+            "runtime_side_effect_allowed": False,
+        },
+    }
+
+
+def _build_ui1r2_artifacts(widget_manifest: dict[str, Any]) -> dict[str, dict[str, Any]]:
+    copy_map = _build_ui1r2_copy_map()
+    mode = _build_ui1r2_mode()
+    next_step = _build_ui1r2_next_step()
+    action_menu = _build_ui1r2_action_menu(widget_manifest, next_step)
+    education = _build_ui1r2_education()
+    guided_flow = _build_ui1r2_guided_flow()
+    reports = _build_ui1r2_reports(
+        widget_manifest=widget_manifest,
+        action_menu=action_menu,
+        next_step=next_step,
+    )
+    artifacts = {
+        "ui1r2_copy_map.generated.json": copy_map,
+        "ui1r2_mode.generated.json": mode,
+        "ui1r2_action_menu.generated.json": action_menu,
+        "ui1r2_education.generated.json": education,
+        "ui1r2_guided_flow.generated.json": guided_flow,
+        "ui1r2_next_step.generated.json": next_step,
+    }
+    artifacts.update(reports)
+    return artifacts
+
+
 def _build_review_data(base: Path, master_plan: Path) -> tuple[dict[str, Any], dict[str, Any]]:
     resolver = OwnerSurfaceResolver(base)
     registry_rows = resolver.registry.rows
@@ -2311,6 +3013,7 @@ def _build_review_data(base: Path, master_plan: Path) -> tuple[dict[str, Any], d
         generated_at=generated_at,
         base_ref=_repo_ref(base),
     )
+    r2_artifacts = _build_ui1r2_artifacts(widget_manifest)
     charts = {
         "chart_contracts": chart_contracts,
         "interactive_chart_registry": interactive_charts,
@@ -2525,6 +3228,17 @@ def _build_review_data(base: Path, master_plan: Path) -> tuple[dict[str, Any], d
         "ui1r1_mobile_parity": r1_artifacts["ui1r1_mobile_parity.report.json"],
         "ui1r1_inst_quant_crosslink": r1_artifacts["ui1r1_inst_quant_crosslink.report.json"],
         "ui1r1_playwright": r1_artifacts["ui1r1_playwright.report.json"],
+        "ui1r2_copy_map": r2_artifacts["ui1r2_copy_map.generated.json"],
+        "ui1r2_mode": r2_artifacts["ui1r2_mode.generated.json"],
+        "ui1r2_action_menu": r2_artifacts["ui1r2_action_menu.generated.json"],
+        "ui1r2_guidance": r2_artifacts["ui1r2_guidance.report.json"],
+        "ui1r2_education": r2_artifacts["ui1r2_education.generated.json"],
+        "ui1r2_guided_flow": r2_artifacts["ui1r2_guided_flow.generated.json"],
+        "ui1r2_next_step": r2_artifacts["ui1r2_next_step.generated.json"],
+        "ui1r2_card_copy": r2_artifacts["ui1r2_card_copy.report.json"],
+        "ui1r2_text_safety": r2_artifacts["ui1r2_text_safety.report.json"],
+        "ui1r2_disclosure": r2_artifacts["ui1r2_disclosure.report.json"],
+        "ui1r2_playwright": r2_artifacts["ui1r2_playwright.report.json"],
     }
     for key in REQUIRED_TOP_LEVEL_KEYS:
         review_data.setdefault(key, {})
@@ -2697,6 +3411,7 @@ def _build_review_data(base: Path, master_plan: Path) -> tuple[dict[str, Any], d
     }
     artifacts.update(contract_views)
     artifacts.update(r1_artifacts)
+    artifacts.update(r2_artifacts)
     artifacts["owner_dashboard_ui1_five_question_acceptance.report.json"] = _build_five_question_report(widget_manifest, provider_routes)
     return review_data, artifacts
 

@@ -33,6 +33,7 @@ PR168_MEM1_BRANCH = "pr168-mem1-condition-scoped-outcome-memory"
 PR169_DASH1_BRANCH = "pr169-dash1-owner-dashboard-interactive-research-v6"
 PR169_DASH1_UI1_BRANCH = "pr169-dash1-ui1-theme-switch-safe-renderer-v9"
 PR169_DASH1_UI1_R1_BRANCH = "pr169-dash1-ui1-r1-v3-owner12"
+PR169_DASH1_UI1_R2_BRANCH = "pr169-dash1-ui1-r2-guided-owner-coach-v7"
 VALIDATION_FIXTURE_BRANCH = "pr-ci-fastfail-validation-context-preflight"
 
 _PR168_BRANCHES = frozenset(
@@ -64,6 +65,7 @@ _PR168_BRANCHES = frozenset(
         PR169_DASH1_BRANCH,
         PR169_DASH1_UI1_BRANCH,
         PR169_DASH1_UI1_R1_BRANCH,
+        PR169_DASH1_UI1_R2_BRANCH,
         VALIDATION_FIXTURE_BRANCH,
     }
 )
@@ -1624,6 +1626,7 @@ def explain_pr_scope_decision(branch: str, path: str) -> dict[str, object]:
         PR169_DASH1_BRANCH,
         PR169_DASH1_UI1_BRANCH,
         PR169_DASH1_UI1_R1_BRANCH,
+        PR169_DASH1_UI1_R2_BRANCH,
     }:
         dash1_decision = _pr169_dash1_scope_decision(branch_name, normalized)
         if dash1_decision:

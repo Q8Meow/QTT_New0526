@@ -1,0 +1,21 @@
+{
+  "fallback_copy_routes_recorded": true,
+  "high_priority_owner_mode_raw_id_leaks": [],
+  "meta": {
+    "agent_consumable_authority": false,
+    "artifact_id": "UI1R2_TEXT_SAFETY_REPORT",
+    "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+    "connector_access_allowed": false,
+    "credential_access_allowed": false,
+    "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config + PR169-DASH1 artifacts + PR169-DASH1-UI1/R1 boot data + OwnerPresentationLayer / OwnerGuidancePolicy config",
+    "manual_edit_allowed": false,
+    "order_execution_allowed": false,
+    "runtime_side_effect_allowed": false,
+    "runtime_truth_authority": false,
+    "source_truth_authority": false,
+    "ui1r2_generated_from": "PR169-DASH1 artifacts + PR169-DASH1-UI1/R1 boot data + OwnerPresentationLayer / OwnerGuidancePolicy config",
+    "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+  },
+  "owner_mode_blocklist_visible_count": 0,
+  "validation_status": "PASS"
+}

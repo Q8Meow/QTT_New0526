@@ -1,0 +1,203 @@
+{
+  "ExecutionRouter_release_allowed": false,
+  "direct_venue_submit_allowed": false,
+  "flows": [
+    {
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "default_visible": false,
+      "output_preview_only": true,
+      "steps": [
+        {
+          "advanced_settings_collapsed": true,
+          "owner_input_required": true,
+          "owner_prompt": "Select or describe market / event / venue.",
+          "step_id": "CHECK_TRADE_STEP_01"
+        },
+        {
+          "advanced_settings_collapsed": true,
+          "owner_input_required": false,
+          "owner_prompt": "Paste or type trade idea in normal English.",
+          "step_id": "CHECK_TRADE_STEP_02"
+        },
+        {
+          "advanced_settings_collapsed": true,
+          "owner_input_required": false,
+          "owner_prompt": "Choose objective: maximize expected net cash, preserve capital, minimize drawdown, improve diversification, test quantum/classical stack, or let QTT decide using default policy.",
+          "step_id": "CHECK_TRADE_STEP_03"
+        },
+        {
+          "advanced_settings_collapsed": true,
+          "owner_input_required": false,
+          "owner_prompt": "Set optional constraints only if needed.",
+          "step_id": "CHECK_TRADE_STEP_04"
+        },
+        {
+          "advanced_settings_collapsed": true,
+          "owner_input_required": false,
+          "owner_prompt": "Show local preview of agents/routes that would be used later.",
+          "step_id": "CHECK_TRADE_STEP_05"
+        },
+        {
+          "advanced_settings_collapsed": true,
+          "owner_input_required": false,
+          "owner_prompt": "Send local preview to Trade Workbench.",
+          "step_id": "CHECK_TRADE_STEP_06"
+        }
+      ],
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "workflow_id": "CHECK_TRADE",
+      "workflow_label": "Check Trade"
+    },
+    {
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "default_visible": false,
+      "output_preview_only": true,
+      "steps": [
+        {
+          "advanced_settings_collapsed": true,
+          "owner_input_required": true,
+          "owner_prompt": "Paste link, text, file reference, formula, algorithm, or quantum strategy note.",
+          "step_id": "RESEARCH_CANDIDATE_STEP_01"
+        },
+        {
+          "advanced_settings_collapsed": true,
+          "owner_input_required": false,
+          "owner_prompt": "Pick optional category and priority.",
+          "step_id": "RESEARCH_CANDIDATE_STEP_02"
+        },
+        {
+          "advanced_settings_collapsed": true,
+          "owner_input_required": false,
+          "owner_prompt": "Classify input as candidate only, not truth.",
+          "step_id": "RESEARCH_CANDIDATE_STEP_03"
+        },
+        {
+          "advanced_settings_collapsed": true,
+          "owner_input_required": false,
+          "owner_prompt": "Preview routes to source classification, LLM extraction, QKU/formula materialization, quantum mapping, replay, and paper providers.",
+          "step_id": "RESEARCH_CANDIDATE_STEP_04"
+        }
+      ],
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "workflow_id": "RESEARCH_CANDIDATE",
+      "workflow_label": "Research Candidate"
+    },
+    {
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "default_visible": false,
+      "output_preview_only": true,
+      "steps": [
+        {
+          "advanced_settings_collapsed": true,
+          "owner_input_required": true,
+          "owner_prompt": "Explain why no-trade can be the best comparator.",
+          "step_id": "EXPLAIN_NO_TRADE_STEP_01"
+        },
+        {
+          "advanced_settings_collapsed": true,
+          "owner_input_required": false,
+          "owner_prompt": "Show variables that may be retested.",
+          "step_id": "EXPLAIN_NO_TRADE_STEP_02"
+        },
+        {
+          "advanced_settings_collapsed": true,
+          "owner_input_required": false,
+          "owner_prompt": "Offer local no-trade reoptimization preview only.",
+          "step_id": "EXPLAIN_NO_TRADE_STEP_03"
+        }
+      ],
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "workflow_id": "EXPLAIN_NO_TRADE",
+      "workflow_label": "Explain No-Trade"
+    },
+    {
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "default_visible": false,
+      "output_preview_only": true,
+      "steps": [
+        {
+          "advanced_settings_collapsed": true,
+          "owner_input_required": true,
+          "owner_prompt": "Explain parameter in plain English.",
+          "step_id": "PARAMETER_TUNING_STEP_01"
+        },
+        {
+          "advanced_settings_collapsed": true,
+          "owner_input_required": false,
+          "owner_prompt": "Show what it influences.",
+          "step_id": "PARAMETER_TUNING_STEP_02"
+        },
+        {
+          "advanced_settings_collapsed": true,
+          "owner_input_required": false,
+          "owner_prompt": "Show allowed/current/candidate ranges.",
+          "step_id": "PARAMETER_TUNING_STEP_03"
+        },
+        {
+          "advanced_settings_collapsed": true,
+          "owner_input_required": false,
+          "owner_prompt": "Explain missing evidence before any change.",
+          "step_id": "PARAMETER_TUNING_STEP_04"
+        },
+        {
+          "advanced_settings_collapsed": true,
+          "owner_input_required": false,
+          "owner_prompt": "Offer local preview: replay request, retest route, or affected QKU/formula/agent routes.",
+          "step_id": "PARAMETER_TUNING_STEP_05"
+        }
+      ],
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "workflow_id": "PARAMETER_TUNING",
+      "workflow_label": "Parameter Tuning"
+    },
+    {
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "default_visible": false,
+      "output_preview_only": true,
+      "steps": [
+        {
+          "advanced_settings_collapsed": true,
+          "owner_input_required": true,
+          "owner_prompt": "Explain execution-adjusted rank.",
+          "step_id": "EDGE_ALPHA_REVIEW_STEP_01"
+        },
+        {
+          "advanced_settings_collapsed": true,
+          "owner_input_required": false,
+          "owner_prompt": "Show TCA, FDR, capacity, marginal utility, memory, and no-trade comparator routes.",
+          "step_id": "EDGE_ALPHA_REVIEW_STEP_02"
+        },
+        {
+          "advanced_settings_collapsed": true,
+          "owner_input_required": false,
+          "owner_prompt": "Send a candidate to Trade Workbench as local preview.",
+          "step_id": "EDGE_ALPHA_REVIEW_STEP_03"
+        }
+      ],
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "workflow_id": "EDGE_ALPHA_REVIEW",
+      "workflow_label": "Edge/Alpha Review"
+    }
+  ],
+  "live_LLM_call_allowed": false,
+  "live_execution_allowed": false,
+  "meta": {
+    "agent_consumable_authority": false,
+    "artifact_id": "UI1R2_GUIDED_FLOW",
+    "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+    "connector_access_allowed": false,
+    "credential_access_allowed": false,
+    "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config + PR169-DASH1 artifacts + PR169-DASH1-UI1/R1 boot data + OwnerPresentationLayer / OwnerGuidancePolicy config",
+    "manual_edit_allowed": false,
+    "order_execution_allowed": false,
+    "runtime_side_effect_allowed": false,
+    "runtime_truth_authority": false,
+    "source_truth_authority": false,
+    "ui1r2_generated_from": "PR169-DASH1 artifacts + PR169-DASH1-UI1/R1 boot data + OwnerPresentationLayer / OwnerGuidancePolicy config",
+    "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+  },
+  "paper_execution_allowed": false,
+  "real_agent_execution_allowed": false,
+  "runtime_side_effect_allowed": false,
+  "workflow_engine_id": "OwnerGuidedWorkflowEngine"
+}

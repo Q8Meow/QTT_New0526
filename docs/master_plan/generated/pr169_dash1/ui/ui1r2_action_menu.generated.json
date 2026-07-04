@@ -1,0 +1,907 @@
+{
+  "menu_model_id": "OwnerNextActionMenuModel",
+  "meta": {
+    "agent_consumable_authority": false,
+    "artifact_id": "UI1R2_ACTION_MENU",
+    "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+    "connector_access_allowed": false,
+    "credential_access_allowed": false,
+    "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config + PR169-DASH1 artifacts + PR169-DASH1-UI1/R1 boot data + OwnerPresentationLayer / OwnerGuidancePolicy config",
+    "manual_edit_allowed": false,
+    "order_execution_allowed": false,
+    "runtime_side_effect_allowed": false,
+    "runtime_truth_authority": false,
+    "source_truth_authority": false,
+    "ui1r2_generated_from": "PR169-DASH1 artifacts + PR169-DASH1-UI1/R1 boot data + OwnerPresentationLayer / OwnerGuidancePolicy config",
+    "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+  },
+  "owner_visible_widget_count": 161,
+  "rows": [
+    {
+      "LLM_view_refs_or_provider_route": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "QKU_formula_refs_or_gap": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "activation_route": "OwnerNextActionMenuModel::MENU_PORTFOLIO",
+      "authority_blocked_action_refs": [],
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "available_action_refs": [
+        "REQUEST_OWNER_REVIEW",
+        "REQUEST_RISK_REVIEW",
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "card_or_row_ref": "portfolio",
+      "confidence_label": "local preview confidence, not profit confidence",
+      "disabled_action_refs": [],
+      "expected_output_preview": "A local route or receipt preview appears in the dashboard.",
+      "experience_mode": "GUIDED_OWNER",
+      "linked_workspace_target": "chart-drilldown",
+      "menu_id": "MENU_PORTFOLIO",
+      "missing_evidence_summary": "Provider receipts may be missing; the UI shows route previews only.",
+      "options": [
+        {
+          "action_id": "REQUEST_OWNER_REVIEW",
+          "disabled_reason_if_blocked": "",
+          "next_step_id": "NEXT_STEP_OPEN_CHART_DRILLDOWN",
+          "owner_label": "Open chart drilldown",
+          "runtime_side_effect_allowed": false,
+          "safe_alternative_action": "Open the local route preview or technical details.",
+          "state": "ENABLED_LOCAL_PREVIEW",
+          "what_happens_next": "The dashboard opens the local next UI step and preloads the selected context.",
+          "what_will_not_happen_now": "No live LLM call, agent task, connector access, replay run, paper run, live order, venue submit, or Execution Router release occurs."
+        },
+        {
+          "action_id": "REQUEST_RISK_REVIEW",
+          "disabled_reason_if_blocked": "",
+          "next_step_id": "NEXT_STEP_SHOW_TCA_COST_BREAKDOWN",
+          "owner_label": "Show TCA / cost breakdown",
+          "runtime_side_effect_allowed": false,
+          "safe_alternative_action": "Open the local route preview or technical details.",
+          "state": "ENABLED_LOCAL_PREVIEW",
+          "what_happens_next": "The dashboard opens the local next UI step and preloads the selected context.",
+          "what_will_not_happen_now": "No live LLM call, agent task, connector access, replay run, paper run, live order, venue submit, or Execution Router release occurs."
+        },
+        {
+          "action_id": "REQUEST_OWNER_REVIEW",
+          "disabled_reason_if_blocked": "",
+          "next_step_id": "NEXT_STEP_OPEN_TECHNICAL_DETAILS",
+          "owner_label": "Open technical details",
+          "runtime_side_effect_allowed": false,
+          "safe_alternative_action": "Open the local route preview or technical details.",
+          "state": "ENABLED_LOCAL_PREVIEW",
+          "what_happens_next": "The dashboard opens the local next UI step and preloads the selected context.",
+          "what_will_not_happen_now": "No live LLM call, agent task, connector access, replay run, paper run, live order, venue submit, or Execution Router release occurs."
+        }
+      ],
+      "owner_explanation_text": "Use this menu to move to the next local UI step. It does not run QTT agents or submit trades.",
+      "priority_reason": "Surface-aware owner guidance.",
+      "provider_pending_action_refs": [],
+      "provider_stage": "UI1",
+      "recommendation_strength": "PRIMARY",
+      "recommended_action_id": "REQUEST_OWNER_REVIEW",
+      "recommended_action_label": "Open chart drilldown",
+      "recommended_action_reason": "Deterministic local next-step route selected by OwnerNextActionMenuModel.",
+      "recommended_next_step_id": "NEXT_STEP_OPEN_CHART_DRILLDOWN",
+      "runtime_side_effect_allowed": false,
+      "safe_default_reason": "No runtime work runs if the owner declines.",
+      "source_artifact_refs": [
+        "owner_action_registry.generated.jsonl",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "technical_detail_ref": "ui1r2_next_step.generated.json",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "widget_id": "portfolio"
+    },
+    {
+      "LLM_view_refs_or_provider_route": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "QKU_formula_refs_or_gap": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "activation_route": "OwnerNextActionMenuModel::MENU_DECISION_QUEUE",
+      "authority_blocked_action_refs": [],
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "available_action_refs": [
+        "REQUEST_OWNER_REVIEW",
+        "REQUEST_AGENT_TASK",
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "card_or_row_ref": "decision_queue",
+      "confidence_label": "local preview confidence, not profit confidence",
+      "disabled_action_refs": [],
+      "expected_output_preview": "A local route or receipt preview appears in the dashboard.",
+      "experience_mode": "GUIDED_OWNER",
+      "linked_workspace_target": "trade-workbench",
+      "menu_id": "MENU_DECISION_QUEUE",
+      "missing_evidence_summary": "Provider receipts may be missing; the UI shows route previews only.",
+      "options": [
+        {
+          "action_id": "REQUEST_OWNER_REVIEW",
+          "disabled_reason_if_blocked": "",
+          "next_step_id": "NEXT_STEP_SEND_TO_TRADE_WORKBENCH",
+          "owner_label": "Send to Trade Workbench",
+          "runtime_side_effect_allowed": false,
+          "safe_alternative_action": "Open the local route preview or technical details.",
+          "state": "ENABLED_LOCAL_PREVIEW",
+          "what_happens_next": "The dashboard opens the local next UI step and preloads the selected context.",
+          "what_will_not_happen_now": "No live LLM call, agent task, connector access, replay run, paper run, live order, venue submit, or Execution Router release occurs."
+        },
+        {
+          "action_id": "REQUEST_AGENT_TASK",
+          "disabled_reason_if_blocked": "",
+          "next_step_id": "NEXT_STEP_CHECK_TRADE_WITH_QTT_AGENTS",
+          "owner_label": "Check trade with QTT agents",
+          "runtime_side_effect_allowed": false,
+          "safe_alternative_action": "Open the local route preview or technical details.",
+          "state": "ENABLED_LOCAL_PREVIEW",
+          "what_happens_next": "The dashboard opens the local next UI step and preloads the selected context.",
+          "what_will_not_happen_now": "No live LLM call, agent task, connector access, replay run, paper run, live order, venue submit, or Execution Router release occurs."
+        },
+        {
+          "action_id": "REQUEST_OWNER_REVIEW",
+          "disabled_reason_if_blocked": "",
+          "next_step_id": "NEXT_STEP_OPEN_TECHNICAL_DETAILS",
+          "owner_label": "Open technical details",
+          "runtime_side_effect_allowed": false,
+          "safe_alternative_action": "Open the local route preview or technical details.",
+          "state": "ENABLED_LOCAL_PREVIEW",
+          "what_happens_next": "The dashboard opens the local next UI step and preloads the selected context.",
+          "what_will_not_happen_now": "No live LLM call, agent task, connector access, replay run, paper run, live order, venue submit, or Execution Router release occurs."
+        }
+      ],
+      "owner_explanation_text": "Use this menu to move to the next local UI step. It does not run QTT agents or submit trades.",
+      "priority_reason": "Surface-aware owner guidance.",
+      "provider_pending_action_refs": [],
+      "provider_stage": "UI1",
+      "recommendation_strength": "PRIMARY",
+      "recommended_action_id": "REQUEST_OWNER_REVIEW",
+      "recommended_action_label": "Read consequence and choose a safe preview",
+      "recommended_action_reason": "Deterministic local next-step route selected by OwnerNextActionMenuModel.",
+      "recommended_next_step_id": "NEXT_STEP_SEND_TO_TRADE_WORKBENCH",
+      "runtime_side_effect_allowed": false,
+      "safe_default_reason": "No runtime work runs if the owner declines.",
+      "source_artifact_refs": [
+        "owner_action_registry.generated.jsonl",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "technical_detail_ref": "ui1r2_next_step.generated.json",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "widget_id": "decision_queue"
+    },
+    {
+      "LLM_view_refs_or_provider_route": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "QKU_formula_refs_or_gap": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "activation_route": "OwnerNextActionMenuModel::MENU_TRADE_WORKBENCH",
+      "authority_blocked_action_refs": [],
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "available_action_refs": [
+        "REQUEST_OWNER_REVIEW",
+        "REQUEST_AGENT_TASK",
+        "REQUEST_REPLAY_TEST",
+        "REQUEST_PAPER_TEST",
+        "REQUEST_RISK_REVIEW",
+        "REQUEST_QKU_COMPUTABILITY_REVIEW",
+        "REQUEST_NO_TRADE_REOPTIMIZATION_REVIEW"
+      ],
+      "card_or_row_ref": "trade_workbench",
+      "confidence_label": "local preview confidence, not profit confidence",
+      "disabled_action_refs": [],
+      "expected_output_preview": "A local route or receipt preview appears in the dashboard.",
+      "experience_mode": "GUIDED_OWNER",
+      "linked_workspace_target": "trade-workbench",
+      "menu_id": "MENU_TRADE_WORKBENCH",
+      "missing_evidence_summary": "Provider receipts may be missing; the UI shows route previews only.",
+      "options": [
+        {
+          "action_id": "REQUEST_OWNER_REVIEW",
+          "disabled_reason_if_blocked": "",
+          "next_step_id": "NEXT_STEP_SEND_TO_TRADE_WORKBENCH",
+          "owner_label": "Send to Trade Workbench",
+          "runtime_side_effect_allowed": false,
+          "safe_alternative_action": "Open the local route preview or technical details.",
+          "state": "ENABLED_LOCAL_PREVIEW",
+          "what_happens_next": "The dashboard opens the local next UI step and preloads the selected context.",
+          "what_will_not_happen_now": "No live LLM call, agent task, connector access, replay run, paper run, live order, venue submit, or Execution Router release occurs."
+        },
+        {
+          "action_id": "REQUEST_AGENT_TASK",
+          "disabled_reason_if_blocked": "",
+          "next_step_id": "NEXT_STEP_CHECK_TRADE_WITH_QTT_AGENTS",
+          "owner_label": "Check trade with QTT agents",
+          "runtime_side_effect_allowed": false,
+          "safe_alternative_action": "Open the local route preview or technical details.",
+          "state": "ENABLED_LOCAL_PREVIEW",
+          "what_happens_next": "The dashboard opens the local next UI step and preloads the selected context.",
+          "what_will_not_happen_now": "No live LLM call, agent task, connector access, replay run, paper run, live order, venue submit, or Execution Router release occurs."
+        },
+        {
+          "action_id": "REQUEST_REPLAY_TEST",
+          "disabled_reason_if_blocked": "",
+          "next_step_id": "NEXT_STEP_REQUEST_REPLAY_PREVIEW",
+          "owner_label": "Request replay preview",
+          "runtime_side_effect_allowed": false,
+          "safe_alternative_action": "Open the local route preview or technical details.",
+          "state": "ENABLED_LOCAL_PREVIEW",
+          "what_happens_next": "The dashboard opens the local next UI step and preloads the selected context.",
+          "what_will_not_happen_now": "No live LLM call, agent task, connector access, replay run, paper run, live order, venue submit, or Execution Router release occurs."
+        },
+        {
+          "action_id": "REQUEST_PAPER_TEST",
+          "disabled_reason_if_blocked": "",
+          "next_step_id": "NEXT_STEP_REQUEST_PAPER_PREVIEW",
+          "owner_label": "Request paper preview",
+          "runtime_side_effect_allowed": false,
+          "safe_alternative_action": "Open the local route preview or technical details.",
+          "state": "ENABLED_LOCAL_PREVIEW",
+          "what_happens_next": "The dashboard opens the local next UI step and preloads the selected context.",
+          "what_will_not_happen_now": "No live LLM call, agent task, connector access, replay run, paper run, live order, venue submit, or Execution Router release occurs."
+        },
+        {
+          "action_id": "REQUEST_RISK_REVIEW",
+          "disabled_reason_if_blocked": "",
+          "next_step_id": "NEXT_STEP_SHOW_TCA_COST_BREAKDOWN",
+          "owner_label": "Show TCA / cost breakdown",
+          "runtime_side_effect_allowed": false,
+          "safe_alternative_action": "Open the local route preview or technical details.",
+          "state": "ENABLED_LOCAL_PREVIEW",
+          "what_happens_next": "The dashboard opens the local next UI step and preloads the selected context.",
+          "what_will_not_happen_now": "No live LLM call, agent task, connector access, replay run, paper run, live order, venue submit, or Execution Router release occurs."
+        },
+        {
+          "action_id": "REQUEST_QKU_COMPUTABILITY_REVIEW",
+          "disabled_reason_if_blocked": "",
+          "next_step_id": "NEXT_STEP_SHOW_QKU_FORMULA_ROUTES",
+          "owner_label": "Show QKU/formula routes",
+          "runtime_side_effect_allowed": false,
+          "safe_alternative_action": "Open the local route preview or technical details.",
+          "state": "ENABLED_LOCAL_PREVIEW",
+          "what_happens_next": "The dashboard opens the local next UI step and preloads the selected context.",
+          "what_will_not_happen_now": "No live LLM call, agent task, connector access, replay run, paper run, live order, venue submit, or Execution Router release occurs."
+        },
+        {
+          "action_id": "REQUEST_NO_TRADE_REOPTIMIZATION_REVIEW",
+          "disabled_reason_if_blocked": "",
+          "next_step_id": "NEXT_STEP_EXPLAIN_NO_TRADE",
+          "owner_label": "Explain no-trade",
+          "runtime_side_effect_allowed": false,
+          "safe_alternative_action": "Open the local route preview or technical details.",
+          "state": "ENABLED_LOCAL_PREVIEW",
+          "what_happens_next": "The dashboard opens the local next UI step and preloads the selected context.",
+          "what_will_not_happen_now": "No live LLM call, agent task, connector access, replay run, paper run, live order, venue submit, or Execution Router release occurs."
+        }
+      ],
+      "owner_explanation_text": "Use this menu to move to the next local UI step. It does not run QTT agents or submit trades.",
+      "priority_reason": "Surface-aware owner guidance.",
+      "provider_pending_action_refs": [],
+      "provider_stage": "UI1",
+      "recommendation_strength": "PRIMARY",
+      "recommended_action_id": "REQUEST_OWNER_REVIEW",
+      "recommended_action_label": "Check trade with QTT agents",
+      "recommended_action_reason": "Deterministic local next-step route selected by OwnerNextActionMenuModel.",
+      "recommended_next_step_id": "NEXT_STEP_SEND_TO_TRADE_WORKBENCH",
+      "runtime_side_effect_allowed": false,
+      "safe_default_reason": "No runtime work runs if the owner declines.",
+      "source_artifact_refs": [
+        "owner_action_registry.generated.jsonl",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "technical_detail_ref": "ui1r2_next_step.generated.json",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "widget_id": "trade_workbench"
+    },
+    {
+      "LLM_view_refs_or_provider_route": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "QKU_formula_refs_or_gap": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "activation_route": "OwnerNextActionMenuModel::MENU_EDGE_ALPHA",
+      "authority_blocked_action_refs": [],
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "available_action_refs": [
+        "REQUEST_OWNER_REVIEW",
+        "REQUEST_RISK_REVIEW",
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "card_or_row_ref": "edge_alpha",
+      "confidence_label": "local preview confidence, not profit confidence",
+      "disabled_action_refs": [],
+      "expected_output_preview": "A local route or receipt preview appears in the dashboard.",
+      "experience_mode": "GUIDED_OWNER",
+      "linked_workspace_target": "trade-workbench",
+      "menu_id": "MENU_EDGE_ALPHA",
+      "missing_evidence_summary": "Provider receipts may be missing; the UI shows route previews only.",
+      "options": [
+        {
+          "action_id": "REQUEST_OWNER_REVIEW",
+          "disabled_reason_if_blocked": "",
+          "next_step_id": "NEXT_STEP_SEND_TO_TRADE_WORKBENCH",
+          "owner_label": "Send to Trade Workbench",
+          "runtime_side_effect_allowed": false,
+          "safe_alternative_action": "Open the local route preview or technical details.",
+          "state": "ENABLED_LOCAL_PREVIEW",
+          "what_happens_next": "The dashboard opens the local next UI step and preloads the selected context.",
+          "what_will_not_happen_now": "No live LLM call, agent task, connector access, replay run, paper run, live order, venue submit, or Execution Router release occurs."
+        },
+        {
+          "action_id": "REQUEST_RISK_REVIEW",
+          "disabled_reason_if_blocked": "",
+          "next_step_id": "NEXT_STEP_SHOW_TCA_COST_BREAKDOWN",
+          "owner_label": "Show TCA / cost breakdown",
+          "runtime_side_effect_allowed": false,
+          "safe_alternative_action": "Open the local route preview or technical details.",
+          "state": "ENABLED_LOCAL_PREVIEW",
+          "what_happens_next": "The dashboard opens the local next UI step and preloads the selected context.",
+          "what_will_not_happen_now": "No live LLM call, agent task, connector access, replay run, paper run, live order, venue submit, or Execution Router release occurs."
+        },
+        {
+          "action_id": "REQUEST_OWNER_REVIEW",
+          "disabled_reason_if_blocked": "",
+          "next_step_id": "NEXT_STEP_OPEN_TECHNICAL_DETAILS",
+          "owner_label": "Open technical details",
+          "runtime_side_effect_allowed": false,
+          "safe_alternative_action": "Open the local route preview or technical details.",
+          "state": "ENABLED_LOCAL_PREVIEW",
+          "what_happens_next": "The dashboard opens the local next UI step and preloads the selected context.",
+          "what_will_not_happen_now": "No live LLM call, agent task, connector access, replay run, paper run, live order, venue submit, or Execution Router release occurs."
+        }
+      ],
+      "owner_explanation_text": "Use this menu to move to the next local UI step. It does not run QTT agents or submit trades.",
+      "priority_reason": "Surface-aware owner guidance.",
+      "provider_pending_action_refs": [],
+      "provider_stage": "UI1",
+      "recommendation_strength": "PRIMARY",
+      "recommended_action_id": "REQUEST_OWNER_REVIEW",
+      "recommended_action_label": "Open execution-adjusted ranking details",
+      "recommended_action_reason": "Deterministic local next-step route selected by OwnerNextActionMenuModel.",
+      "recommended_next_step_id": "NEXT_STEP_SEND_TO_TRADE_WORKBENCH",
+      "runtime_side_effect_allowed": false,
+      "safe_default_reason": "No runtime work runs if the owner declines.",
+      "source_artifact_refs": [
+        "owner_action_registry.generated.jsonl",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "technical_detail_ref": "ui1r2_next_step.generated.json",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "widget_id": "edge_alpha"
+    },
+    {
+      "LLM_view_refs_or_provider_route": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "QKU_formula_refs_or_gap": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "activation_route": "OwnerNextActionMenuModel::MENU_AGENT_DISAGREEMENT",
+      "authority_blocked_action_refs": [],
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "available_action_refs": [
+        "REQUEST_AGENT_TASK",
+        "REQUEST_OWNER_REVIEW",
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "card_or_row_ref": "agent_disagreement",
+      "confidence_label": "local preview confidence, not profit confidence",
+      "disabled_action_refs": [],
+      "expected_output_preview": "A local route or receipt preview appears in the dashboard.",
+      "experience_mode": "GUIDED_OWNER",
+      "linked_workspace_target": "guided-workflows",
+      "menu_id": "MENU_AGENT_DISAGREEMENT",
+      "missing_evidence_summary": "Provider receipts may be missing; the UI shows route previews only.",
+      "options": [
+        {
+          "action_id": "REQUEST_AGENT_TASK",
+          "disabled_reason_if_blocked": "",
+          "next_step_id": "NEXT_STEP_CHECK_TRADE_WITH_QTT_AGENTS",
+          "owner_label": "Check trade with QTT agents",
+          "runtime_side_effect_allowed": false,
+          "safe_alternative_action": "Open the local route preview or technical details.",
+          "state": "ENABLED_LOCAL_PREVIEW",
+          "what_happens_next": "The dashboard opens the local next UI step and preloads the selected context.",
+          "what_will_not_happen_now": "No live LLM call, agent task, connector access, replay run, paper run, live order, venue submit, or Execution Router release occurs."
+        },
+        {
+          "action_id": "REQUEST_OWNER_REVIEW",
+          "disabled_reason_if_blocked": "",
+          "next_step_id": "NEXT_STEP_SEND_TO_TRADE_WORKBENCH",
+          "owner_label": "Send to Trade Workbench",
+          "runtime_side_effect_allowed": false,
+          "safe_alternative_action": "Open the local route preview or technical details.",
+          "state": "ENABLED_LOCAL_PREVIEW",
+          "what_happens_next": "The dashboard opens the local next UI step and preloads the selected context.",
+          "what_will_not_happen_now": "No live LLM call, agent task, connector access, replay run, paper run, live order, venue submit, or Execution Router release occurs."
+        },
+        {
+          "action_id": "REQUEST_OWNER_REVIEW",
+          "disabled_reason_if_blocked": "",
+          "next_step_id": "NEXT_STEP_OPEN_TECHNICAL_DETAILS",
+          "owner_label": "Open technical details",
+          "runtime_side_effect_allowed": false,
+          "safe_alternative_action": "Open the local route preview or technical details.",
+          "state": "ENABLED_LOCAL_PREVIEW",
+          "what_happens_next": "The dashboard opens the local next UI step and preloads the selected context.",
+          "what_will_not_happen_now": "No live LLM call, agent task, connector access, replay run, paper run, live order, venue submit, or Execution Router release occurs."
+        }
+      ],
+      "owner_explanation_text": "Use this menu to move to the next local UI step. It does not run QTT agents or submit trades.",
+      "priority_reason": "Surface-aware owner guidance.",
+      "provider_pending_action_refs": [],
+      "provider_stage": "UI1",
+      "recommendation_strength": "PRIMARY",
+      "recommended_action_id": "REQUEST_AGENT_TASK",
+      "recommended_action_label": "Explain objection in plain English",
+      "recommended_action_reason": "Deterministic local next-step route selected by OwnerNextActionMenuModel.",
+      "recommended_next_step_id": "NEXT_STEP_CHECK_TRADE_WITH_QTT_AGENTS",
+      "runtime_side_effect_allowed": false,
+      "safe_default_reason": "No runtime work runs if the owner declines.",
+      "source_artifact_refs": [
+        "owner_action_registry.generated.jsonl",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "technical_detail_ref": "ui1r2_next_step.generated.json",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "widget_id": "agent_disagreement"
+    },
+    {
+      "LLM_view_refs_or_provider_route": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "QKU_formula_refs_or_gap": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "activation_route": "OwnerNextActionMenuModel::MENU_PARAMETER",
+      "authority_blocked_action_refs": [],
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "available_action_refs": [
+        "REQUEST_REPLAY_TEST",
+        "REQUEST_QKU_COMPUTABILITY_REVIEW",
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "card_or_row_ref": "parameter_control",
+      "confidence_label": "local preview confidence, not profit confidence",
+      "disabled_action_refs": [],
+      "expected_output_preview": "A local route or receipt preview appears in the dashboard.",
+      "experience_mode": "GUIDED_OWNER",
+      "linked_workspace_target": "route-preview",
+      "menu_id": "MENU_PARAMETER",
+      "missing_evidence_summary": "Provider receipts may be missing; the UI shows route previews only.",
+      "options": [
+        {
+          "action_id": "REQUEST_REPLAY_TEST",
+          "disabled_reason_if_blocked": "",
+          "next_step_id": "NEXT_STEP_REQUEST_REPLAY_PREVIEW",
+          "owner_label": "Request replay preview",
+          "runtime_side_effect_allowed": false,
+          "safe_alternative_action": "Open the local route preview or technical details.",
+          "state": "ENABLED_LOCAL_PREVIEW",
+          "what_happens_next": "The dashboard opens the local next UI step and preloads the selected context.",
+          "what_will_not_happen_now": "No live LLM call, agent task, connector access, replay run, paper run, live order, venue submit, or Execution Router release occurs."
+        },
+        {
+          "action_id": "REQUEST_QKU_COMPUTABILITY_REVIEW",
+          "disabled_reason_if_blocked": "",
+          "next_step_id": "NEXT_STEP_SHOW_QKU_FORMULA_ROUTES",
+          "owner_label": "Show QKU/formula routes",
+          "runtime_side_effect_allowed": false,
+          "safe_alternative_action": "Open the local route preview or technical details.",
+          "state": "ENABLED_LOCAL_PREVIEW",
+          "what_happens_next": "The dashboard opens the local next UI step and preloads the selected context.",
+          "what_will_not_happen_now": "No live LLM call, agent task, connector access, replay run, paper run, live order, venue submit, or Execution Router release occurs."
+        },
+        {
+          "action_id": "REQUEST_OWNER_REVIEW",
+          "disabled_reason_if_blocked": "",
+          "next_step_id": "NEXT_STEP_OPEN_TECHNICAL_DETAILS",
+          "owner_label": "Open technical details",
+          "runtime_side_effect_allowed": false,
+          "safe_alternative_action": "Open the local route preview or technical details.",
+          "state": "ENABLED_LOCAL_PREVIEW",
+          "what_happens_next": "The dashboard opens the local next UI step and preloads the selected context.",
+          "what_will_not_happen_now": "No live LLM call, agent task, connector access, replay run, paper run, live order, venue submit, or Execution Router release occurs."
+        }
+      ],
+      "owner_explanation_text": "Use this menu to move to the next local UI step. It does not run QTT agents or submit trades.",
+      "priority_reason": "Surface-aware owner guidance.",
+      "provider_pending_action_refs": [],
+      "provider_stage": "UI1",
+      "recommendation_strength": "PRIMARY",
+      "recommended_action_id": "REQUEST_REPLAY_TEST",
+      "recommended_action_label": "Open parameter drilldown",
+      "recommended_action_reason": "Deterministic local next-step route selected by OwnerNextActionMenuModel.",
+      "recommended_next_step_id": "NEXT_STEP_REQUEST_REPLAY_PREVIEW",
+      "runtime_side_effect_allowed": false,
+      "safe_default_reason": "No runtime work runs if the owner declines.",
+      "source_artifact_refs": [
+        "owner_action_registry.generated.jsonl",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "technical_detail_ref": "ui1r2_next_step.generated.json",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "widget_id": "parameter_control"
+    },
+    {
+      "LLM_view_refs_or_provider_route": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "QKU_formula_refs_or_gap": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "activation_route": "OwnerNextActionMenuModel::MENU_QKU_FORMULA",
+      "authority_blocked_action_refs": [],
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "available_action_refs": [
+        "REQUEST_QKU_COMPUTABILITY_REVIEW",
+        "REQUEST_OWNER_REVIEW",
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "card_or_row_ref": "qku_formula",
+      "confidence_label": "local preview confidence, not profit confidence",
+      "disabled_action_refs": [],
+      "expected_output_preview": "A local route or receipt preview appears in the dashboard.",
+      "experience_mode": "GUIDED_OWNER",
+      "linked_workspace_target": "qku-formula",
+      "menu_id": "MENU_QKU_FORMULA",
+      "missing_evidence_summary": "Provider receipts may be missing; the UI shows route previews only.",
+      "options": [
+        {
+          "action_id": "REQUEST_QKU_COMPUTABILITY_REVIEW",
+          "disabled_reason_if_blocked": "",
+          "next_step_id": "NEXT_STEP_SHOW_QKU_FORMULA_ROUTES",
+          "owner_label": "Show QKU/formula routes",
+          "runtime_side_effect_allowed": false,
+          "safe_alternative_action": "Open the local route preview or technical details.",
+          "state": "ENABLED_LOCAL_PREVIEW",
+          "what_happens_next": "The dashboard opens the local next UI step and preloads the selected context.",
+          "what_will_not_happen_now": "No live LLM call, agent task, connector access, replay run, paper run, live order, venue submit, or Execution Router release occurs."
+        },
+        {
+          "action_id": "REQUEST_OWNER_REVIEW",
+          "disabled_reason_if_blocked": "",
+          "next_step_id": "NEXT_STEP_SEND_TO_TRADE_WORKBENCH",
+          "owner_label": "Send to Trade Workbench",
+          "runtime_side_effect_allowed": false,
+          "safe_alternative_action": "Open the local route preview or technical details.",
+          "state": "ENABLED_LOCAL_PREVIEW",
+          "what_happens_next": "The dashboard opens the local next UI step and preloads the selected context.",
+          "what_will_not_happen_now": "No live LLM call, agent task, connector access, replay run, paper run, live order, venue submit, or Execution Router release occurs."
+        },
+        {
+          "action_id": "REQUEST_OWNER_REVIEW",
+          "disabled_reason_if_blocked": "",
+          "next_step_id": "NEXT_STEP_OPEN_TECHNICAL_DETAILS",
+          "owner_label": "Open technical details",
+          "runtime_side_effect_allowed": false,
+          "safe_alternative_action": "Open the local route preview or technical details.",
+          "state": "ENABLED_LOCAL_PREVIEW",
+          "what_happens_next": "The dashboard opens the local next UI step and preloads the selected context.",
+          "what_will_not_happen_now": "No live LLM call, agent task, connector access, replay run, paper run, live order, venue submit, or Execution Router release occurs."
+        }
+      ],
+      "owner_explanation_text": "Use this menu to move to the next local UI step. It does not run QTT agents or submit trades.",
+      "priority_reason": "Surface-aware owner guidance.",
+      "provider_pending_action_refs": [],
+      "provider_stage": "UI1",
+      "recommendation_strength": "PRIMARY",
+      "recommended_action_id": "REQUEST_QKU_COMPUTABILITY_REVIEW",
+      "recommended_action_label": "Show where this QKU/formula is used",
+      "recommended_action_reason": "Deterministic local next-step route selected by OwnerNextActionMenuModel.",
+      "recommended_next_step_id": "NEXT_STEP_SHOW_QKU_FORMULA_ROUTES",
+      "runtime_side_effect_allowed": false,
+      "safe_default_reason": "No runtime work runs if the owner declines.",
+      "source_artifact_refs": [
+        "owner_action_registry.generated.jsonl",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "technical_detail_ref": "ui1r2_next_step.generated.json",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "widget_id": "qku_formula"
+    },
+    {
+      "LLM_view_refs_or_provider_route": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "QKU_formula_refs_or_gap": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "activation_route": "OwnerNextActionMenuModel::MENU_QUANTUM",
+      "authority_blocked_action_refs": [],
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "available_action_refs": [
+        "REQUEST_QKU_COMPUTABILITY_REVIEW",
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "card_or_row_ref": "quantum",
+      "confidence_label": "local preview confidence, not profit confidence",
+      "disabled_action_refs": [],
+      "expected_output_preview": "A local route or receipt preview appears in the dashboard.",
+      "experience_mode": "GUIDED_OWNER",
+      "linked_workspace_target": "qku-formula",
+      "menu_id": "MENU_QUANTUM",
+      "missing_evidence_summary": "Provider receipts may be missing; the UI shows route previews only.",
+      "options": [
+        {
+          "action_id": "REQUEST_QKU_COMPUTABILITY_REVIEW",
+          "disabled_reason_if_blocked": "",
+          "next_step_id": "NEXT_STEP_SHOW_QKU_FORMULA_ROUTES",
+          "owner_label": "Show QKU/formula routes",
+          "runtime_side_effect_allowed": false,
+          "safe_alternative_action": "Open the local route preview or technical details.",
+          "state": "ENABLED_LOCAL_PREVIEW",
+          "what_happens_next": "The dashboard opens the local next UI step and preloads the selected context.",
+          "what_will_not_happen_now": "No live LLM call, agent task, connector access, replay run, paper run, live order, venue submit, or Execution Router release occurs."
+        },
+        {
+          "action_id": "REQUEST_OWNER_REVIEW",
+          "disabled_reason_if_blocked": "",
+          "next_step_id": "NEXT_STEP_OPEN_TECHNICAL_DETAILS",
+          "owner_label": "Open technical details",
+          "runtime_side_effect_allowed": false,
+          "safe_alternative_action": "Open the local route preview or technical details.",
+          "state": "ENABLED_LOCAL_PREVIEW",
+          "what_happens_next": "The dashboard opens the local next UI step and preloads the selected context.",
+          "what_will_not_happen_now": "No live LLM call, agent task, connector access, replay run, paper run, live order, venue submit, or Execution Router release occurs."
+        }
+      ],
+      "owner_explanation_text": "Use this menu to move to the next local UI step. It does not run QTT agents or submit trades.",
+      "priority_reason": "Surface-aware owner guidance.",
+      "provider_pending_action_refs": [],
+      "provider_stage": "UI1",
+      "recommendation_strength": "PRIMARY",
+      "recommended_action_id": "REQUEST_QKU_COMPUTABILITY_REVIEW",
+      "recommended_action_label": "Explain quantum-structure readiness",
+      "recommended_action_reason": "Deterministic local next-step route selected by OwnerNextActionMenuModel.",
+      "recommended_next_step_id": "NEXT_STEP_SHOW_QKU_FORMULA_ROUTES",
+      "runtime_side_effect_allowed": false,
+      "safe_default_reason": "No runtime work runs if the owner declines.",
+      "source_artifact_refs": [
+        "owner_action_registry.generated.jsonl",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "technical_detail_ref": "ui1r2_next_step.generated.json",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "widget_id": "quantum"
+    },
+    {
+      "LLM_view_refs_or_provider_route": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "QKU_formula_refs_or_gap": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "activation_route": "OwnerNextActionMenuModel::MENU_CHART",
+      "authority_blocked_action_refs": [],
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "available_action_refs": [
+        "REQUEST_OWNER_REVIEW",
+        "REQUEST_RISK_REVIEW",
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "card_or_row_ref": "chart_frame",
+      "confidence_label": "local preview confidence, not profit confidence",
+      "disabled_action_refs": [],
+      "expected_output_preview": "A local route or receipt preview appears in the dashboard.",
+      "experience_mode": "GUIDED_OWNER",
+      "linked_workspace_target": "chart-drilldown",
+      "menu_id": "MENU_CHART",
+      "missing_evidence_summary": "Provider receipts may be missing; the UI shows route previews only.",
+      "options": [
+        {
+          "action_id": "REQUEST_OWNER_REVIEW",
+          "disabled_reason_if_blocked": "",
+          "next_step_id": "NEXT_STEP_OPEN_CHART_DRILLDOWN",
+          "owner_label": "Open chart drilldown",
+          "runtime_side_effect_allowed": false,
+          "safe_alternative_action": "Open the local route preview or technical details.",
+          "state": "ENABLED_LOCAL_PREVIEW",
+          "what_happens_next": "The dashboard opens the local next UI step and preloads the selected context.",
+          "what_will_not_happen_now": "No live LLM call, agent task, connector access, replay run, paper run, live order, venue submit, or Execution Router release occurs."
+        },
+        {
+          "action_id": "REQUEST_RISK_REVIEW",
+          "disabled_reason_if_blocked": "",
+          "next_step_id": "NEXT_STEP_SHOW_TCA_COST_BREAKDOWN",
+          "owner_label": "Show TCA / cost breakdown",
+          "runtime_side_effect_allowed": false,
+          "safe_alternative_action": "Open the local route preview or technical details.",
+          "state": "ENABLED_LOCAL_PREVIEW",
+          "what_happens_next": "The dashboard opens the local next UI step and preloads the selected context.",
+          "what_will_not_happen_now": "No live LLM call, agent task, connector access, replay run, paper run, live order, venue submit, or Execution Router release occurs."
+        },
+        {
+          "action_id": "REQUEST_OWNER_REVIEW",
+          "disabled_reason_if_blocked": "",
+          "next_step_id": "NEXT_STEP_OPEN_TECHNICAL_DETAILS",
+          "owner_label": "Open technical details",
+          "runtime_side_effect_allowed": false,
+          "safe_alternative_action": "Open the local route preview or technical details.",
+          "state": "ENABLED_LOCAL_PREVIEW",
+          "what_happens_next": "The dashboard opens the local next UI step and preloads the selected context.",
+          "what_will_not_happen_now": "No live LLM call, agent task, connector access, replay run, paper run, live order, venue submit, or Execution Router release occurs."
+        }
+      ],
+      "owner_explanation_text": "Use this menu to move to the next local UI step. It does not run QTT agents or submit trades.",
+      "priority_reason": "Surface-aware owner guidance.",
+      "provider_pending_action_refs": [],
+      "provider_stage": "UI1",
+      "recommendation_strength": "PRIMARY",
+      "recommended_action_id": "REQUEST_OWNER_REVIEW",
+      "recommended_action_label": "Open chart drilldown",
+      "recommended_action_reason": "Deterministic local next-step route selected by OwnerNextActionMenuModel.",
+      "recommended_next_step_id": "NEXT_STEP_OPEN_CHART_DRILLDOWN",
+      "runtime_side_effect_allowed": false,
+      "safe_default_reason": "No runtime work runs if the owner declines.",
+      "source_artifact_refs": [
+        "owner_action_registry.generated.jsonl",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "technical_detail_ref": "ui1r2_next_step.generated.json",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "widget_id": "chart_frame"
+    },
+    {
+      "LLM_view_refs_or_provider_route": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "QKU_formula_refs_or_gap": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "activation_route": "OwnerNextActionMenuModel::MENU_PROVIDER_PENDING",
+      "authority_blocked_action_refs": [
+        "REQUEST_LIVE_CANARY_REVIEW"
+      ],
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "available_action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "card_or_row_ref": "provider_pending",
+      "confidence_label": "local preview confidence, not profit confidence",
+      "disabled_action_refs": [
+        "REQUEST_LIVE_CANARY_REVIEW"
+      ],
+      "expected_output_preview": "A local route or receipt preview appears in the dashboard.",
+      "experience_mode": "GUIDED_OWNER",
+      "linked_workspace_target": "disabled-action-education",
+      "menu_id": "MENU_PROVIDER_PENDING",
+      "missing_evidence_summary": "Provider receipts may be missing; the UI shows route previews only.",
+      "options": [
+        {
+          "action_id": "REQUEST_LIVE_CANARY_REVIEW",
+          "disabled_reason_if_blocked": "Only the governed Execution Router may release venue orders after downstream evidence and approval.",
+          "next_step_id": "NEXT_STEP_DISABLED_PROVIDER_PENDING_EDUCATION",
+          "owner_label": "Prepare live-canary review preview",
+          "runtime_side_effect_allowed": false,
+          "safe_alternative_action": "Open the local route preview or technical details.",
+          "state": "PROVIDER_PENDING",
+          "what_happens_next": "The dashboard opens the local next UI step and preloads the selected context.",
+          "what_will_not_happen_now": "No live LLM call, agent task, connector access, replay run, paper run, live order, venue submit, or Execution Router release occurs."
+        },
+        {
+          "action_id": "REQUEST_OWNER_REVIEW",
+          "disabled_reason_if_blocked": "",
+          "next_step_id": "NEXT_STEP_OPEN_TECHNICAL_DETAILS",
+          "owner_label": "Open technical details",
+          "runtime_side_effect_allowed": false,
+          "safe_alternative_action": "Open the local route preview or technical details.",
+          "state": "ENABLED_LOCAL_PREVIEW",
+          "what_happens_next": "The dashboard opens the local next UI step and preloads the selected context.",
+          "what_will_not_happen_now": "No live LLM call, agent task, connector access, replay run, paper run, live order, venue submit, or Execution Router release occurs."
+        }
+      ],
+      "owner_explanation_text": "Use this menu to move to the next local UI step. It does not run QTT agents or submit trades.",
+      "priority_reason": "Surface-aware owner guidance.",
+      "provider_pending_action_refs": [
+        "REQUEST_LIVE_CANARY_REVIEW"
+      ],
+      "provider_stage": "UI1",
+      "recommendation_strength": "PRIMARY",
+      "recommended_action_id": "REQUEST_LIVE_CANARY_REVIEW",
+      "recommended_action_label": "Explain what data is missing",
+      "recommended_action_reason": "Deterministic local next-step route selected by OwnerNextActionMenuModel.",
+      "recommended_next_step_id": "NEXT_STEP_DISABLED_PROVIDER_PENDING_EDUCATION",
+      "runtime_side_effect_allowed": false,
+      "safe_default_reason": "No runtime work runs if the owner declines.",
+      "source_artifact_refs": [
+        "owner_action_registry.generated.jsonl",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "technical_detail_ref": "ui1r2_next_step.generated.json",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "widget_id": "provider_pending"
+    },
+    {
+      "LLM_view_refs_or_provider_route": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "QKU_formula_refs_or_gap": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "activation_route": "OwnerNextActionMenuModel::MENU_DEVELOPER",
+      "authority_blocked_action_refs": [],
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "available_action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "card_or_row_ref": "developer_mode",
+      "confidence_label": "local preview confidence, not profit confidence",
+      "disabled_action_refs": [],
+      "expected_output_preview": "A local route or receipt preview appears in the dashboard.",
+      "experience_mode": "GUIDED_OWNER",
+      "linked_workspace_target": "technical-details",
+      "menu_id": "MENU_DEVELOPER",
+      "missing_evidence_summary": "Provider receipts may be missing; the UI shows route previews only.",
+      "options": [
+        {
+          "action_id": "REQUEST_OWNER_REVIEW",
+          "disabled_reason_if_blocked": "",
+          "next_step_id": "NEXT_STEP_OPEN_TECHNICAL_DETAILS",
+          "owner_label": "Open technical details",
+          "runtime_side_effect_allowed": false,
+          "safe_alternative_action": "Open the local route preview or technical details.",
+          "state": "ENABLED_LOCAL_PREVIEW",
+          "what_happens_next": "The dashboard opens the local next UI step and preloads the selected context.",
+          "what_will_not_happen_now": "No live LLM call, agent task, connector access, replay run, paper run, live order, venue submit, or Execution Router release occurs."
+        }
+      ],
+      "owner_explanation_text": "Use this menu to move to the next local UI step. It does not run QTT agents or submit trades.",
+      "priority_reason": "Surface-aware owner guidance.",
+      "provider_pending_action_refs": [],
+      "provider_stage": "UI1",
+      "recommendation_strength": "PRIMARY",
+      "recommended_action_id": "REQUEST_OWNER_REVIEW",
+      "recommended_action_label": "Explain this technical reference",
+      "recommended_action_reason": "Deterministic local next-step route selected by OwnerNextActionMenuModel.",
+      "recommended_next_step_id": "NEXT_STEP_OPEN_TECHNICAL_DETAILS",
+      "runtime_side_effect_allowed": false,
+      "safe_default_reason": "No runtime work runs if the owner declines.",
+      "source_artifact_refs": [
+        "owner_action_registry.generated.jsonl",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "technical_detail_ref": "ui1r2_next_step.generated.json",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "widget_id": "developer_mode"
+    }
+  ],
+  "uses_widget_manifest_ref": "owner_dashboard_widget_manifest.generated.json"
+}
