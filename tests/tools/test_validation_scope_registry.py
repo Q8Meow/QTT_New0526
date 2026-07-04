@@ -91,6 +91,7 @@ def test_pr168_allowed_paths_pass_on_real_branch(path: str) -> None:
         "tools/pr168_rp5c_config.py",
         "tools/validate_pr169_dash1_owner_dashboard.py",
         "tools/validate_no_runtime_artifacts.py",
+        "tools/pr168_rp5c_config.py",
         "tests/pr169_dash1/test_dash1_owner_surface_registry_single_source.py",
         "tests/fail_closed/test_no_runtime_artifacts_strict.py",
         "tools/run_validation_gates.py",

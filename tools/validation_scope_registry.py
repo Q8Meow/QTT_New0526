@@ -705,6 +705,7 @@ _PR169_DASH1_ALLOWED_EXACT_PATHS = frozenset(
         "tools/pr168_rp5c_config.py",
         "tools/validate_pr169_dash1_owner_dashboard.py",
         "tools/validate_no_runtime_artifacts.py",
+        "tools/pr168_rp5c_config.py",
         "tools/run_validation_gates.py",
         "tools/validation_inventory.py",
         "tools/validation_scope_registry.py",
