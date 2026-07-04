@@ -189,6 +189,20 @@ FORBIDDEN_PYTHON_MODULES = {
     "playwright.async_api",
 }
 
+LOCAL_VISUAL_QA_BROWSER_AUTOMATION_ALLOWED_PATHS = {
+    pathlib.PurePosixPath("tools/playwright_pr169_dash1_ui1_r1_visual_smoke.py"),
+}
+
+
+def _is_allowed_local_visual_qa_browser_module(
+    rel: pathlib.PurePosixPath,
+    module: str,
+) -> bool:
+    return (
+        rel in LOCAL_VISUAL_QA_BROWSER_AUTOMATION_ALLOWED_PATHS
+        and module in {"playwright.sync_api", "playwright.async_api"}
+    )
+
 SKIP_DIR_PARTS = {
     ".git",
     ".mypy_cache",
@@ -555,7 +569,10 @@ def _scan_forbidden_python_usage(repo_root: pathlib.Path) -> list[str]:
         for node in ast.walk(tree):
             for module in _imported_modules(node):
                 root_name = module.split(".", 1)[0]
-                if module in FORBIDDEN_PYTHON_MODULES or root_name in FORBIDDEN_PYTHON_MODULE_ROOTS:
+                if (
+                    module in FORBIDDEN_PYTHON_MODULES
+                    and not _is_allowed_local_visual_qa_browser_module(rel, module)
+                ) or root_name in FORBIDDEN_PYTHON_MODULE_ROOTS:
                     failures.append(f"{rel} imports forbidden network/client module {module}")
             if isinstance(node, ast.Call):
                 name = _dotted_name(node.func)
