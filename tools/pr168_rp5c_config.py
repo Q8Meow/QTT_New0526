@@ -28,6 +28,7 @@ QOPT1_CONSUMER_BRANCH_NAME: Final = (
 VS2_CONSUMER_BRANCH_NAME: Final = "pr168-vs2-paper-intent-candidate-generator"
 MEM1_CONSUMER_BRANCH_NAME: Final = "pr168-mem1-condition-scoped-outcome-memory"
 DASH1_UI1_VALIDATION_BRANCH_NAME: Final = "pr169-dash1-ui1-theme-switch-safe-renderer-v9"
+DASH1_UI1_R1_VALIDATION_BRANCH_NAME: Final = "pr169-dash1-ui1-r1-v3-owner12"
 ALLOWED_BUILD_BRANCH_NAMES: Final = (
     BRANCH_NAME,
     BASE_BRANCH,
@@ -42,6 +43,7 @@ ALLOWED_BUILD_BRANCH_NAMES: Final = (
     VS2_CONSUMER_BRANCH_NAME,
     MEM1_CONSUMER_BRANCH_NAME,
     DASH1_UI1_VALIDATION_BRANCH_NAME,
+    DASH1_UI1_R1_VALIDATION_BRANCH_NAME,
 )
 ROADMAP_PR: Final = "PR168-RP5C"
 PR_TITLE: Final = "PR168-RP5C: Immutable QKU/formula library reclaim from active registry"

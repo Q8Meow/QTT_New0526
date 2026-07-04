@@ -52,6 +52,7 @@ PR168_RANK4_BRANCH = registry.PR168_RANK4_BRANCH
 PR168_QOPT1_BRANCH = registry.PR168_QOPT1_BRANCH
 PR168_VS2_BRANCH = registry.PR168_VS2_BRANCH
 PR169_DASH1_BRANCH = registry.PR169_DASH1_BRANCH
+PR169_DASH1_UI1_R1_BRANCH = registry.PR169_DASH1_UI1_R1_BRANCH
 FIXTURE_BRANCH = registry.VALIDATION_FIXTURE_BRANCH
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
@@ -89,7 +90,12 @@ def test_pr168_allowed_paths_pass_on_real_branch(path: str) -> None:
         "tools/build_pr169_dash1_owner_dashboard.py",
         "tools/pr168_rp5c_config.py",
         "tools/validate_pr169_dash1_owner_dashboard.py",
+        "tools/validate_no_runtime_artifacts.py",
+        "tools/pr168_rp5c_config.py",
+        "tools/validate_source_fact_binding_connector_semantic_readiness_static.py",
         "tests/pr169_dash1/test_dash1_owner_surface_registry_single_source.py",
+        "tests/fail_closed/test_no_runtime_artifacts_strict.py",
+        "tests/source_evidence/test_source_fact_binding_connector_semantic_readiness_static.py",
         "tools/run_validation_gates.py",
         "tools/validation_inventory.py",
         "tools/validation_scope_registry.py",
@@ -97,6 +103,7 @@ def test_pr168_allowed_paths_pass_on_real_branch(path: str) -> None:
 )
 def test_pr169_dash1_allowed_paths_pass_on_real_branch(path: str) -> None:
     assert registry.is_pr_scoped_changed_path_allowed(PR169_DASH1_BRANCH, path)
+    assert registry.is_pr_scoped_changed_path_allowed(PR169_DASH1_UI1_R1_BRANCH, path)
     assert registry.is_pr_scoped_changed_path_allowed(FIXTURE_BRANCH, path)
 
 
@@ -111,6 +118,10 @@ def test_pr169_dash1_allowed_paths_pass_on_real_branch(path: str) -> None:
 )
 def test_pr169_dash1_forbidden_paths_fail(path: str) -> None:
     assert not registry.is_pr_scoped_changed_path_allowed(PR169_DASH1_BRANCH, path)
+    assert not registry.is_pr_scoped_changed_path_allowed(
+        PR169_DASH1_UI1_R1_BRANCH,
+        path,
+    )
 
 
 @pytest.mark.parametrize(

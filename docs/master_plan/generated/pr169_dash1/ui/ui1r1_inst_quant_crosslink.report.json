@@ -1,0 +1,830 @@
+{
+  "meta": {
+    "agent_consumable_authority": false,
+    "artifact_id": "UI1R1_INST_QUANT_CROSSLINK",
+    "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+    "connector_access_allowed": false,
+    "credential_access_allowed": false,
+    "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config + PR169-DASH1 artifacts + PR169-DASH1-UI1 boot data + OwnerDashboardStateV1 + OwnerSurfaceResolver + OwnerActionRegistry + UI component config",
+    "manual_edit_allowed": false,
+    "order_execution_allowed": false,
+    "runtime_side_effect_allowed": false,
+    "runtime_truth_authority": false,
+    "source_truth_authority": false,
+    "ui1r1_generated_from": "PR169-DASH1 artifacts + PR169-DASH1-UI1 boot data + OwnerDashboardStateV1 + OwnerSurfaceResolver + OwnerActionRegistry + UI component config",
+    "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+  },
+  "quantum_advantage_claim": false,
+  "rows": [
+    {
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_CommandActionMatrix.report.json",
+        "PR165_D2_AGENT_ROLE_GAP_ROUTE::provider_pending"
+      ],
+      "activation_route": "PRETRADE1_ACTIVATION_ROUTE::UI1R1_INST_QUANT_HOME",
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "decision_spine_fields": {
+        "DAG_upstream_downstream_ref": "provider_stage_route::DAG_upstream_downstream_ref",
+        "MEM1_similarity_prior_ref": "provider_stage_route::MEM1_similarity_prior_ref",
+        "TCA_adjusted_expected_net_cash": "provider_stage_route::TCA_adjusted_expected_net_cash",
+        "candidate_minus_no_trade_cash": "provider_stage_route::candidate_minus_no_trade_cash",
+        "capacity_adjusted_expected_value": "provider_stage_route::capacity_adjusted_expected_value",
+        "champion_challenger_status": "provider_stage_route::champion_challenger_status",
+        "classical_fallback_ref": "docs/master_plan/generated/pr168_rp5g/q_classic_fb.jsonl",
+        "execution_adjusted_rank": "provider_stage_route::execution_adjusted_rank",
+        "fill_adjusted_expected_value": "provider_stage_route::fill_adjusted_expected_value",
+        "lower_confidence_bound_cash": "provider_stage_route::lower_confidence_bound_cash",
+        "no_trade_comparator_status": "provider_stage_route::no_trade_comparator_status",
+        "no_trade_reoptimization_route": "provider_stage_route::no_trade_reoptimization_route",
+        "overfit_false_discovery_status": "provider_stage_route::overfit_false_discovery_status",
+        "portfolio_marginal_utility": "docs/master_plan/generated/pr168_rp5g/portfolio_mu.jsonl",
+        "quantum_structural_readiness_status": "provider_stage_route::quantum_structural_readiness_status",
+        "regime_conditioned_memory_status": "provider_stage_route::regime_conditioned_memory_status",
+        "scenario_ladder_status": "provider_stage_route::scenario_ladder_status"
+      },
+      "institutional_refs": {
+        "DAG_upstream_downstream_route_ref": "dag.generated.jsonl",
+        "MEM1_similarity_and_shrinkage_prior_refs": "docs/master_plan/generated/pr168_mem1/memory_query_contract.jsonl",
+        "QAOA_VQE_annealing_candidate_readiness": "QMAP1_PROVIDER_ROUTE::qaoa_vqe_annealing_candidate_readiness",
+        "QUBO_BQM_CQM_QuadraticProgram_Ising_readiness": "docs/master_plan/generated/pr168_qopt1/qstruct_optimized.jsonl",
+        "TCA_decomposition": "docs/master_plan/generated/pr168_rp5g/tca_decomp.jsonl",
+        "calibration_state": "docs/master_plan/generated/pr168_rp5g/calibration.jsonl",
+        "capacity_crowding_limit": "docs/master_plan/generated/pr168_rp5g/fill_latency_cap.jsonl",
+        "champion_challenger_selection": "docs/master_plan/generated/pr168_rank4/rank_edge_capture.jsonl",
+        "classical_fallback_ref": "docs/master_plan/generated/pr168_rp5g/q_classic_fb.jsonl",
+        "execution_adjusted_ranking": "docs/master_plan/generated/pr168_rank4/rank_edge_capture.jsonl",
+        "fee_spread_slippage_impact_latency_opportunity_cost": "docs/master_plan/generated/pr168_rp5g/tca_decomp.jsonl",
+        "fill_probability_partial_fill_penalty": "docs/master_plan/generated/pr168_rp5g/fill_latency_cap.jsonl",
+        "implementation_shortfall": "docs/master_plan/generated/pr168_rp5g/tca_decomp.jsonl",
+        "interpret_back_map_ref": "docs/master_plan/generated/pr168_qopt1/interpret_back.jsonl",
+        "no_trade_comparator_and_reoptimization_route": "docs/master_plan/generated/pr168_qopt1/notrade_reopt.jsonl",
+        "overfit_false_discovery_control": "docs/master_plan/generated/pr168_rank4/rank_edge_capture.jsonl",
+        "portfolio_marginal_utility": "docs/master_plan/generated/pr168_rp5g/portfolio_mu.jsonl",
+        "portfolio_style_diversification": "docs/master_plan/generated/pr168_qopt1/portfolio_exposure.jsonl",
+        "qstruct_objective_constraint_variable_ref": "docs/master_plan/generated/pr168_qopt1/qstruct_optimized.jsonl",
+        "quantum_structural_readiness": "owner_quantum_structural_readiness_view.generated.jsonl",
+        "regime_conditioned_memory": "docs/master_plan/generated/pr168_mem1/memory_query_contract.jsonl",
+        "scenario_ladder": "docs/master_plan/generated/pr168_rp5g/scenario_ladder.jsonl"
+      },
+      "labels_only": false,
+      "linked_action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "linked_agent_role_refs": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "provider_stage": "PRETRADE1",
+      "quantum_refs": {
+        "QAOA_VQE_annealing_candidate_readiness_ref": "QMAP1_PROVIDER_ROUTE::qaoa_vqe_annealing_candidate_readiness",
+        "QMAP1_activation_route": "QMAP1_ACTIVATION_ROUTE::quantum_structural_readiness",
+        "QUBO_BQM_CQM_QuadraticProgram_Ising_readiness_ref": "docs/master_plan/generated/pr168_qopt1/qstruct_optimized.jsonl",
+        "classical_fallback_ref": "docs/master_plan/generated/pr168_rp5g/q_classic_fb.jsonl",
+        "interpret_back_map_ref": "docs/master_plan/generated/pr168_qopt1/interpret_back.jsonl"
+      },
+      "row_id": "UI1R1_INST_QUANT_HOME",
+      "runtime_side_effect": false,
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_state_model.generated.json",
+        "owner_dashboard_widget_manifest.generated.json",
+        "owner_action_registry.generated.jsonl",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "surface": "Home",
+      "title": "Home",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+    },
+    {
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_CommandActionMatrix.report.json",
+        "PR165_D2_AGENT_ROLE_GAP_ROUTE::provider_pending"
+      ],
+      "activation_route": "PRETRADE1_ACTIVATION_ROUTE::UI1R1_INST_QUANT_PNL_EQUITY_CHART_DRILLDOWN",
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "decision_spine_fields": {
+        "DAG_upstream_downstream_ref": "provider_stage_route::DAG_upstream_downstream_ref",
+        "MEM1_similarity_prior_ref": "provider_stage_route::MEM1_similarity_prior_ref",
+        "TCA_adjusted_expected_net_cash": "provider_stage_route::TCA_adjusted_expected_net_cash",
+        "candidate_minus_no_trade_cash": "provider_stage_route::candidate_minus_no_trade_cash",
+        "capacity_adjusted_expected_value": "provider_stage_route::capacity_adjusted_expected_value",
+        "champion_challenger_status": "provider_stage_route::champion_challenger_status",
+        "classical_fallback_ref": "docs/master_plan/generated/pr168_rp5g/q_classic_fb.jsonl",
+        "execution_adjusted_rank": "provider_stage_route::execution_adjusted_rank",
+        "fill_adjusted_expected_value": "provider_stage_route::fill_adjusted_expected_value",
+        "lower_confidence_bound_cash": "provider_stage_route::lower_confidence_bound_cash",
+        "no_trade_comparator_status": "provider_stage_route::no_trade_comparator_status",
+        "no_trade_reoptimization_route": "provider_stage_route::no_trade_reoptimization_route",
+        "overfit_false_discovery_status": "provider_stage_route::overfit_false_discovery_status",
+        "portfolio_marginal_utility": "docs/master_plan/generated/pr168_rp5g/portfolio_mu.jsonl",
+        "quantum_structural_readiness_status": "provider_stage_route::quantum_structural_readiness_status",
+        "regime_conditioned_memory_status": "provider_stage_route::regime_conditioned_memory_status",
+        "scenario_ladder_status": "provider_stage_route::scenario_ladder_status"
+      },
+      "institutional_refs": {
+        "DAG_upstream_downstream_route_ref": "dag.generated.jsonl",
+        "MEM1_similarity_and_shrinkage_prior_refs": "docs/master_plan/generated/pr168_mem1/memory_query_contract.jsonl",
+        "QAOA_VQE_annealing_candidate_readiness": "QMAP1_PROVIDER_ROUTE::qaoa_vqe_annealing_candidate_readiness",
+        "QUBO_BQM_CQM_QuadraticProgram_Ising_readiness": "docs/master_plan/generated/pr168_qopt1/qstruct_optimized.jsonl",
+        "TCA_decomposition": "docs/master_plan/generated/pr168_rp5g/tca_decomp.jsonl",
+        "calibration_state": "docs/master_plan/generated/pr168_rp5g/calibration.jsonl",
+        "capacity_crowding_limit": "docs/master_plan/generated/pr168_rp5g/fill_latency_cap.jsonl",
+        "champion_challenger_selection": "docs/master_plan/generated/pr168_rank4/rank_edge_capture.jsonl",
+        "classical_fallback_ref": "docs/master_plan/generated/pr168_rp5g/q_classic_fb.jsonl",
+        "execution_adjusted_ranking": "docs/master_plan/generated/pr168_rank4/rank_edge_capture.jsonl",
+        "fee_spread_slippage_impact_latency_opportunity_cost": "docs/master_plan/generated/pr168_rp5g/tca_decomp.jsonl",
+        "fill_probability_partial_fill_penalty": "docs/master_plan/generated/pr168_rp5g/fill_latency_cap.jsonl",
+        "implementation_shortfall": "docs/master_plan/generated/pr168_rp5g/tca_decomp.jsonl",
+        "interpret_back_map_ref": "docs/master_plan/generated/pr168_qopt1/interpret_back.jsonl",
+        "no_trade_comparator_and_reoptimization_route": "docs/master_plan/generated/pr168_qopt1/notrade_reopt.jsonl",
+        "overfit_false_discovery_control": "docs/master_plan/generated/pr168_rank4/rank_edge_capture.jsonl",
+        "portfolio_marginal_utility": "docs/master_plan/generated/pr168_rp5g/portfolio_mu.jsonl",
+        "portfolio_style_diversification": "docs/master_plan/generated/pr168_qopt1/portfolio_exposure.jsonl",
+        "qstruct_objective_constraint_variable_ref": "docs/master_plan/generated/pr168_qopt1/qstruct_optimized.jsonl",
+        "quantum_structural_readiness": "owner_quantum_structural_readiness_view.generated.jsonl",
+        "regime_conditioned_memory": "docs/master_plan/generated/pr168_mem1/memory_query_contract.jsonl",
+        "scenario_ladder": "docs/master_plan/generated/pr168_rp5g/scenario_ladder.jsonl"
+      },
+      "labels_only": false,
+      "linked_action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "linked_agent_role_refs": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "provider_stage": "PRETRADE1",
+      "quantum_refs": {
+        "QAOA_VQE_annealing_candidate_readiness_ref": "QMAP1_PROVIDER_ROUTE::qaoa_vqe_annealing_candidate_readiness",
+        "QMAP1_activation_route": "QMAP1_ACTIVATION_ROUTE::quantum_structural_readiness",
+        "QUBO_BQM_CQM_QuadraticProgram_Ising_readiness_ref": "docs/master_plan/generated/pr168_qopt1/qstruct_optimized.jsonl",
+        "classical_fallback_ref": "docs/master_plan/generated/pr168_rp5g/q_classic_fb.jsonl",
+        "interpret_back_map_ref": "docs/master_plan/generated/pr168_qopt1/interpret_back.jsonl"
+      },
+      "row_id": "UI1R1_INST_QUANT_PNL_EQUITY_CHART_DRILLDOWN",
+      "runtime_side_effect": false,
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_state_model.generated.json",
+        "owner_dashboard_widget_manifest.generated.json",
+        "owner_action_registry.generated.jsonl",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "surface": "PnL/equity chart drilldown",
+      "title": "PnL/equity chart drilldown",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+    },
+    {
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_CommandActionMatrix.report.json",
+        "PR165_D2_AGENT_ROLE_GAP_ROUTE::provider_pending"
+      ],
+      "activation_route": "PRETRADE1_ACTIVATION_ROUTE::UI1R1_INST_QUANT_TCA_WATERFALL_DRILLDOWN",
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "decision_spine_fields": {
+        "DAG_upstream_downstream_ref": "provider_stage_route::DAG_upstream_downstream_ref",
+        "MEM1_similarity_prior_ref": "provider_stage_route::MEM1_similarity_prior_ref",
+        "TCA_adjusted_expected_net_cash": "provider_stage_route::TCA_adjusted_expected_net_cash",
+        "candidate_minus_no_trade_cash": "provider_stage_route::candidate_minus_no_trade_cash",
+        "capacity_adjusted_expected_value": "provider_stage_route::capacity_adjusted_expected_value",
+        "champion_challenger_status": "provider_stage_route::champion_challenger_status",
+        "classical_fallback_ref": "docs/master_plan/generated/pr168_rp5g/q_classic_fb.jsonl",
+        "execution_adjusted_rank": "provider_stage_route::execution_adjusted_rank",
+        "fill_adjusted_expected_value": "provider_stage_route::fill_adjusted_expected_value",
+        "lower_confidence_bound_cash": "provider_stage_route::lower_confidence_bound_cash",
+        "no_trade_comparator_status": "provider_stage_route::no_trade_comparator_status",
+        "no_trade_reoptimization_route": "provider_stage_route::no_trade_reoptimization_route",
+        "overfit_false_discovery_status": "provider_stage_route::overfit_false_discovery_status",
+        "portfolio_marginal_utility": "docs/master_plan/generated/pr168_rp5g/portfolio_mu.jsonl",
+        "quantum_structural_readiness_status": "provider_stage_route::quantum_structural_readiness_status",
+        "regime_conditioned_memory_status": "provider_stage_route::regime_conditioned_memory_status",
+        "scenario_ladder_status": "provider_stage_route::scenario_ladder_status"
+      },
+      "institutional_refs": {
+        "DAG_upstream_downstream_route_ref": "dag.generated.jsonl",
+        "MEM1_similarity_and_shrinkage_prior_refs": "docs/master_plan/generated/pr168_mem1/memory_query_contract.jsonl",
+        "QAOA_VQE_annealing_candidate_readiness": "QMAP1_PROVIDER_ROUTE::qaoa_vqe_annealing_candidate_readiness",
+        "QUBO_BQM_CQM_QuadraticProgram_Ising_readiness": "docs/master_plan/generated/pr168_qopt1/qstruct_optimized.jsonl",
+        "TCA_decomposition": "docs/master_plan/generated/pr168_rp5g/tca_decomp.jsonl",
+        "calibration_state": "docs/master_plan/generated/pr168_rp5g/calibration.jsonl",
+        "capacity_crowding_limit": "docs/master_plan/generated/pr168_rp5g/fill_latency_cap.jsonl",
+        "champion_challenger_selection": "docs/master_plan/generated/pr168_rank4/rank_edge_capture.jsonl",
+        "classical_fallback_ref": "docs/master_plan/generated/pr168_rp5g/q_classic_fb.jsonl",
+        "execution_adjusted_ranking": "docs/master_plan/generated/pr168_rank4/rank_edge_capture.jsonl",
+        "fee_spread_slippage_impact_latency_opportunity_cost": "docs/master_plan/generated/pr168_rp5g/tca_decomp.jsonl",
+        "fill_probability_partial_fill_penalty": "docs/master_plan/generated/pr168_rp5g/fill_latency_cap.jsonl",
+        "implementation_shortfall": "docs/master_plan/generated/pr168_rp5g/tca_decomp.jsonl",
+        "interpret_back_map_ref": "docs/master_plan/generated/pr168_qopt1/interpret_back.jsonl",
+        "no_trade_comparator_and_reoptimization_route": "docs/master_plan/generated/pr168_qopt1/notrade_reopt.jsonl",
+        "overfit_false_discovery_control": "docs/master_plan/generated/pr168_rank4/rank_edge_capture.jsonl",
+        "portfolio_marginal_utility": "docs/master_plan/generated/pr168_rp5g/portfolio_mu.jsonl",
+        "portfolio_style_diversification": "docs/master_plan/generated/pr168_qopt1/portfolio_exposure.jsonl",
+        "qstruct_objective_constraint_variable_ref": "docs/master_plan/generated/pr168_qopt1/qstruct_optimized.jsonl",
+        "quantum_structural_readiness": "owner_quantum_structural_readiness_view.generated.jsonl",
+        "regime_conditioned_memory": "docs/master_plan/generated/pr168_mem1/memory_query_contract.jsonl",
+        "scenario_ladder": "docs/master_plan/generated/pr168_rp5g/scenario_ladder.jsonl"
+      },
+      "labels_only": false,
+      "linked_action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "linked_agent_role_refs": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "provider_stage": "PRETRADE1",
+      "quantum_refs": {
+        "QAOA_VQE_annealing_candidate_readiness_ref": "QMAP1_PROVIDER_ROUTE::qaoa_vqe_annealing_candidate_readiness",
+        "QMAP1_activation_route": "QMAP1_ACTIVATION_ROUTE::quantum_structural_readiness",
+        "QUBO_BQM_CQM_QuadraticProgram_Ising_readiness_ref": "docs/master_plan/generated/pr168_qopt1/qstruct_optimized.jsonl",
+        "classical_fallback_ref": "docs/master_plan/generated/pr168_rp5g/q_classic_fb.jsonl",
+        "interpret_back_map_ref": "docs/master_plan/generated/pr168_qopt1/interpret_back.jsonl"
+      },
+      "row_id": "UI1R1_INST_QUANT_TCA_WATERFALL_DRILLDOWN",
+      "runtime_side_effect": false,
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_state_model.generated.json",
+        "owner_dashboard_widget_manifest.generated.json",
+        "owner_action_registry.generated.jsonl",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "surface": "TCA waterfall drilldown",
+      "title": "TCA waterfall drilldown",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+    },
+    {
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_CommandActionMatrix.report.json",
+        "PR165_D2_AGENT_ROLE_GAP_ROUTE::provider_pending"
+      ],
+      "activation_route": "PRETRADE1_ACTIVATION_ROUTE::UI1R1_INST_QUANT_TRADE_WORKBENCH",
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "decision_spine_fields": {
+        "DAG_upstream_downstream_ref": "provider_stage_route::DAG_upstream_downstream_ref",
+        "MEM1_similarity_prior_ref": "provider_stage_route::MEM1_similarity_prior_ref",
+        "TCA_adjusted_expected_net_cash": "provider_stage_route::TCA_adjusted_expected_net_cash",
+        "candidate_minus_no_trade_cash": "provider_stage_route::candidate_minus_no_trade_cash",
+        "capacity_adjusted_expected_value": "provider_stage_route::capacity_adjusted_expected_value",
+        "champion_challenger_status": "provider_stage_route::champion_challenger_status",
+        "classical_fallback_ref": "docs/master_plan/generated/pr168_rp5g/q_classic_fb.jsonl",
+        "execution_adjusted_rank": "provider_stage_route::execution_adjusted_rank",
+        "fill_adjusted_expected_value": "provider_stage_route::fill_adjusted_expected_value",
+        "lower_confidence_bound_cash": "provider_stage_route::lower_confidence_bound_cash",
+        "no_trade_comparator_status": "provider_stage_route::no_trade_comparator_status",
+        "no_trade_reoptimization_route": "provider_stage_route::no_trade_reoptimization_route",
+        "overfit_false_discovery_status": "provider_stage_route::overfit_false_discovery_status",
+        "portfolio_marginal_utility": "docs/master_plan/generated/pr168_rp5g/portfolio_mu.jsonl",
+        "quantum_structural_readiness_status": "provider_stage_route::quantum_structural_readiness_status",
+        "regime_conditioned_memory_status": "provider_stage_route::regime_conditioned_memory_status",
+        "scenario_ladder_status": "provider_stage_route::scenario_ladder_status"
+      },
+      "institutional_refs": {
+        "DAG_upstream_downstream_route_ref": "dag.generated.jsonl",
+        "MEM1_similarity_and_shrinkage_prior_refs": "docs/master_plan/generated/pr168_mem1/memory_query_contract.jsonl",
+        "QAOA_VQE_annealing_candidate_readiness": "QMAP1_PROVIDER_ROUTE::qaoa_vqe_annealing_candidate_readiness",
+        "QUBO_BQM_CQM_QuadraticProgram_Ising_readiness": "docs/master_plan/generated/pr168_qopt1/qstruct_optimized.jsonl",
+        "TCA_decomposition": "docs/master_plan/generated/pr168_rp5g/tca_decomp.jsonl",
+        "calibration_state": "docs/master_plan/generated/pr168_rp5g/calibration.jsonl",
+        "capacity_crowding_limit": "docs/master_plan/generated/pr168_rp5g/fill_latency_cap.jsonl",
+        "champion_challenger_selection": "docs/master_plan/generated/pr168_rank4/rank_edge_capture.jsonl",
+        "classical_fallback_ref": "docs/master_plan/generated/pr168_rp5g/q_classic_fb.jsonl",
+        "execution_adjusted_ranking": "docs/master_plan/generated/pr168_rank4/rank_edge_capture.jsonl",
+        "fee_spread_slippage_impact_latency_opportunity_cost": "docs/master_plan/generated/pr168_rp5g/tca_decomp.jsonl",
+        "fill_probability_partial_fill_penalty": "docs/master_plan/generated/pr168_rp5g/fill_latency_cap.jsonl",
+        "implementation_shortfall": "docs/master_plan/generated/pr168_rp5g/tca_decomp.jsonl",
+        "interpret_back_map_ref": "docs/master_plan/generated/pr168_qopt1/interpret_back.jsonl",
+        "no_trade_comparator_and_reoptimization_route": "docs/master_plan/generated/pr168_qopt1/notrade_reopt.jsonl",
+        "overfit_false_discovery_control": "docs/master_plan/generated/pr168_rank4/rank_edge_capture.jsonl",
+        "portfolio_marginal_utility": "docs/master_plan/generated/pr168_rp5g/portfolio_mu.jsonl",
+        "portfolio_style_diversification": "docs/master_plan/generated/pr168_qopt1/portfolio_exposure.jsonl",
+        "qstruct_objective_constraint_variable_ref": "docs/master_plan/generated/pr168_qopt1/qstruct_optimized.jsonl",
+        "quantum_structural_readiness": "owner_quantum_structural_readiness_view.generated.jsonl",
+        "regime_conditioned_memory": "docs/master_plan/generated/pr168_mem1/memory_query_contract.jsonl",
+        "scenario_ladder": "docs/master_plan/generated/pr168_rp5g/scenario_ladder.jsonl"
+      },
+      "labels_only": false,
+      "linked_action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "linked_agent_role_refs": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "provider_stage": "PRETRADE1",
+      "quantum_refs": {
+        "QAOA_VQE_annealing_candidate_readiness_ref": "QMAP1_PROVIDER_ROUTE::qaoa_vqe_annealing_candidate_readiness",
+        "QMAP1_activation_route": "QMAP1_ACTIVATION_ROUTE::quantum_structural_readiness",
+        "QUBO_BQM_CQM_QuadraticProgram_Ising_readiness_ref": "docs/master_plan/generated/pr168_qopt1/qstruct_optimized.jsonl",
+        "classical_fallback_ref": "docs/master_plan/generated/pr168_rp5g/q_classic_fb.jsonl",
+        "interpret_back_map_ref": "docs/master_plan/generated/pr168_qopt1/interpret_back.jsonl"
+      },
+      "row_id": "UI1R1_INST_QUANT_TRADE_WORKBENCH",
+      "runtime_side_effect": false,
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_state_model.generated.json",
+        "owner_dashboard_widget_manifest.generated.json",
+        "owner_action_registry.generated.jsonl",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "surface": "Trade Workbench",
+      "title": "Trade Workbench",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+    },
+    {
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_CommandActionMatrix.report.json",
+        "PR165_D2_AGENT_ROLE_GAP_ROUTE::provider_pending"
+      ],
+      "activation_route": "PRETRADE1_ACTIVATION_ROUTE::UI1R1_INST_QUANT_CHAT_ROUTE_PREVIEW",
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "decision_spine_fields": {
+        "DAG_upstream_downstream_ref": "provider_stage_route::DAG_upstream_downstream_ref",
+        "MEM1_similarity_prior_ref": "provider_stage_route::MEM1_similarity_prior_ref",
+        "TCA_adjusted_expected_net_cash": "provider_stage_route::TCA_adjusted_expected_net_cash",
+        "candidate_minus_no_trade_cash": "provider_stage_route::candidate_minus_no_trade_cash",
+        "capacity_adjusted_expected_value": "provider_stage_route::capacity_adjusted_expected_value",
+        "champion_challenger_status": "provider_stage_route::champion_challenger_status",
+        "classical_fallback_ref": "docs/master_plan/generated/pr168_rp5g/q_classic_fb.jsonl",
+        "execution_adjusted_rank": "provider_stage_route::execution_adjusted_rank",
+        "fill_adjusted_expected_value": "provider_stage_route::fill_adjusted_expected_value",
+        "lower_confidence_bound_cash": "provider_stage_route::lower_confidence_bound_cash",
+        "no_trade_comparator_status": "provider_stage_route::no_trade_comparator_status",
+        "no_trade_reoptimization_route": "provider_stage_route::no_trade_reoptimization_route",
+        "overfit_false_discovery_status": "provider_stage_route::overfit_false_discovery_status",
+        "portfolio_marginal_utility": "docs/master_plan/generated/pr168_rp5g/portfolio_mu.jsonl",
+        "quantum_structural_readiness_status": "provider_stage_route::quantum_structural_readiness_status",
+        "regime_conditioned_memory_status": "provider_stage_route::regime_conditioned_memory_status",
+        "scenario_ladder_status": "provider_stage_route::scenario_ladder_status"
+      },
+      "institutional_refs": {
+        "DAG_upstream_downstream_route_ref": "dag.generated.jsonl",
+        "MEM1_similarity_and_shrinkage_prior_refs": "docs/master_plan/generated/pr168_mem1/memory_query_contract.jsonl",
+        "QAOA_VQE_annealing_candidate_readiness": "QMAP1_PROVIDER_ROUTE::qaoa_vqe_annealing_candidate_readiness",
+        "QUBO_BQM_CQM_QuadraticProgram_Ising_readiness": "docs/master_plan/generated/pr168_qopt1/qstruct_optimized.jsonl",
+        "TCA_decomposition": "docs/master_plan/generated/pr168_rp5g/tca_decomp.jsonl",
+        "calibration_state": "docs/master_plan/generated/pr168_rp5g/calibration.jsonl",
+        "capacity_crowding_limit": "docs/master_plan/generated/pr168_rp5g/fill_latency_cap.jsonl",
+        "champion_challenger_selection": "docs/master_plan/generated/pr168_rank4/rank_edge_capture.jsonl",
+        "classical_fallback_ref": "docs/master_plan/generated/pr168_rp5g/q_classic_fb.jsonl",
+        "execution_adjusted_ranking": "docs/master_plan/generated/pr168_rank4/rank_edge_capture.jsonl",
+        "fee_spread_slippage_impact_latency_opportunity_cost": "docs/master_plan/generated/pr168_rp5g/tca_decomp.jsonl",
+        "fill_probability_partial_fill_penalty": "docs/master_plan/generated/pr168_rp5g/fill_latency_cap.jsonl",
+        "implementation_shortfall": "docs/master_plan/generated/pr168_rp5g/tca_decomp.jsonl",
+        "interpret_back_map_ref": "docs/master_plan/generated/pr168_qopt1/interpret_back.jsonl",
+        "no_trade_comparator_and_reoptimization_route": "docs/master_plan/generated/pr168_qopt1/notrade_reopt.jsonl",
+        "overfit_false_discovery_control": "docs/master_plan/generated/pr168_rank4/rank_edge_capture.jsonl",
+        "portfolio_marginal_utility": "docs/master_plan/generated/pr168_rp5g/portfolio_mu.jsonl",
+        "portfolio_style_diversification": "docs/master_plan/generated/pr168_qopt1/portfolio_exposure.jsonl",
+        "qstruct_objective_constraint_variable_ref": "docs/master_plan/generated/pr168_qopt1/qstruct_optimized.jsonl",
+        "quantum_structural_readiness": "owner_quantum_structural_readiness_view.generated.jsonl",
+        "regime_conditioned_memory": "docs/master_plan/generated/pr168_mem1/memory_query_contract.jsonl",
+        "scenario_ladder": "docs/master_plan/generated/pr168_rp5g/scenario_ladder.jsonl"
+      },
+      "labels_only": false,
+      "linked_action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "linked_agent_role_refs": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "provider_stage": "PRETRADE1",
+      "quantum_refs": {
+        "QAOA_VQE_annealing_candidate_readiness_ref": "QMAP1_PROVIDER_ROUTE::qaoa_vqe_annealing_candidate_readiness",
+        "QMAP1_activation_route": "QMAP1_ACTIVATION_ROUTE::quantum_structural_readiness",
+        "QUBO_BQM_CQM_QuadraticProgram_Ising_readiness_ref": "docs/master_plan/generated/pr168_qopt1/qstruct_optimized.jsonl",
+        "classical_fallback_ref": "docs/master_plan/generated/pr168_rp5g/q_classic_fb.jsonl",
+        "interpret_back_map_ref": "docs/master_plan/generated/pr168_qopt1/interpret_back.jsonl"
+      },
+      "row_id": "UI1R1_INST_QUANT_CHAT_ROUTE_PREVIEW",
+      "runtime_side_effect": false,
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_state_model.generated.json",
+        "owner_dashboard_widget_manifest.generated.json",
+        "owner_action_registry.generated.jsonl",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "surface": "Chat route preview",
+      "title": "Chat route preview",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+    },
+    {
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_CommandActionMatrix.report.json",
+        "PR165_D2_AGENT_ROLE_GAP_ROUTE::provider_pending"
+      ],
+      "activation_route": "PRETRADE1_ACTIVATION_ROUTE::UI1R1_INST_QUANT_EDGE_ALPHA_BOARD",
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "decision_spine_fields": {
+        "DAG_upstream_downstream_ref": "provider_stage_route::DAG_upstream_downstream_ref",
+        "MEM1_similarity_prior_ref": "provider_stage_route::MEM1_similarity_prior_ref",
+        "TCA_adjusted_expected_net_cash": "provider_stage_route::TCA_adjusted_expected_net_cash",
+        "candidate_minus_no_trade_cash": "provider_stage_route::candidate_minus_no_trade_cash",
+        "capacity_adjusted_expected_value": "provider_stage_route::capacity_adjusted_expected_value",
+        "champion_challenger_status": "provider_stage_route::champion_challenger_status",
+        "classical_fallback_ref": "docs/master_plan/generated/pr168_rp5g/q_classic_fb.jsonl",
+        "execution_adjusted_rank": "provider_stage_route::execution_adjusted_rank",
+        "fill_adjusted_expected_value": "provider_stage_route::fill_adjusted_expected_value",
+        "lower_confidence_bound_cash": "provider_stage_route::lower_confidence_bound_cash",
+        "no_trade_comparator_status": "provider_stage_route::no_trade_comparator_status",
+        "no_trade_reoptimization_route": "provider_stage_route::no_trade_reoptimization_route",
+        "overfit_false_discovery_status": "provider_stage_route::overfit_false_discovery_status",
+        "portfolio_marginal_utility": "docs/master_plan/generated/pr168_rp5g/portfolio_mu.jsonl",
+        "quantum_structural_readiness_status": "provider_stage_route::quantum_structural_readiness_status",
+        "regime_conditioned_memory_status": "provider_stage_route::regime_conditioned_memory_status",
+        "scenario_ladder_status": "provider_stage_route::scenario_ladder_status"
+      },
+      "institutional_refs": {
+        "DAG_upstream_downstream_route_ref": "dag.generated.jsonl",
+        "MEM1_similarity_and_shrinkage_prior_refs": "docs/master_plan/generated/pr168_mem1/memory_query_contract.jsonl",
+        "QAOA_VQE_annealing_candidate_readiness": "QMAP1_PROVIDER_ROUTE::qaoa_vqe_annealing_candidate_readiness",
+        "QUBO_BQM_CQM_QuadraticProgram_Ising_readiness": "docs/master_plan/generated/pr168_qopt1/qstruct_optimized.jsonl",
+        "TCA_decomposition": "docs/master_plan/generated/pr168_rp5g/tca_decomp.jsonl",
+        "calibration_state": "docs/master_plan/generated/pr168_rp5g/calibration.jsonl",
+        "capacity_crowding_limit": "docs/master_plan/generated/pr168_rp5g/fill_latency_cap.jsonl",
+        "champion_challenger_selection": "docs/master_plan/generated/pr168_rank4/rank_edge_capture.jsonl",
+        "classical_fallback_ref": "docs/master_plan/generated/pr168_rp5g/q_classic_fb.jsonl",
+        "execution_adjusted_ranking": "docs/master_plan/generated/pr168_rank4/rank_edge_capture.jsonl",
+        "fee_spread_slippage_impact_latency_opportunity_cost": "docs/master_plan/generated/pr168_rp5g/tca_decomp.jsonl",
+        "fill_probability_partial_fill_penalty": "docs/master_plan/generated/pr168_rp5g/fill_latency_cap.jsonl",
+        "implementation_shortfall": "docs/master_plan/generated/pr168_rp5g/tca_decomp.jsonl",
+        "interpret_back_map_ref": "docs/master_plan/generated/pr168_qopt1/interpret_back.jsonl",
+        "no_trade_comparator_and_reoptimization_route": "docs/master_plan/generated/pr168_qopt1/notrade_reopt.jsonl",
+        "overfit_false_discovery_control": "docs/master_plan/generated/pr168_rank4/rank_edge_capture.jsonl",
+        "portfolio_marginal_utility": "docs/master_plan/generated/pr168_rp5g/portfolio_mu.jsonl",
+        "portfolio_style_diversification": "docs/master_plan/generated/pr168_qopt1/portfolio_exposure.jsonl",
+        "qstruct_objective_constraint_variable_ref": "docs/master_plan/generated/pr168_qopt1/qstruct_optimized.jsonl",
+        "quantum_structural_readiness": "owner_quantum_structural_readiness_view.generated.jsonl",
+        "regime_conditioned_memory": "docs/master_plan/generated/pr168_mem1/memory_query_contract.jsonl",
+        "scenario_ladder": "docs/master_plan/generated/pr168_rp5g/scenario_ladder.jsonl"
+      },
+      "labels_only": false,
+      "linked_action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "linked_agent_role_refs": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "provider_stage": "PRETRADE1",
+      "quantum_refs": {
+        "QAOA_VQE_annealing_candidate_readiness_ref": "QMAP1_PROVIDER_ROUTE::qaoa_vqe_annealing_candidate_readiness",
+        "QMAP1_activation_route": "QMAP1_ACTIVATION_ROUTE::quantum_structural_readiness",
+        "QUBO_BQM_CQM_QuadraticProgram_Ising_readiness_ref": "docs/master_plan/generated/pr168_qopt1/qstruct_optimized.jsonl",
+        "classical_fallback_ref": "docs/master_plan/generated/pr168_rp5g/q_classic_fb.jsonl",
+        "interpret_back_map_ref": "docs/master_plan/generated/pr168_qopt1/interpret_back.jsonl"
+      },
+      "row_id": "UI1R1_INST_QUANT_EDGE_ALPHA_BOARD",
+      "runtime_side_effect": false,
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_state_model.generated.json",
+        "owner_dashboard_widget_manifest.generated.json",
+        "owner_action_registry.generated.jsonl",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "surface": "Edge/Alpha board",
+      "title": "Edge/Alpha board",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+    },
+    {
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_CommandActionMatrix.report.json",
+        "PR165_D2_AGENT_ROLE_GAP_ROUTE::provider_pending"
+      ],
+      "activation_route": "PRETRADE1_ACTIVATION_ROUTE::UI1R1_INST_QUANT_AGENT_DISAGREEMENT_PANEL",
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "decision_spine_fields": {
+        "DAG_upstream_downstream_ref": "provider_stage_route::DAG_upstream_downstream_ref",
+        "MEM1_similarity_prior_ref": "provider_stage_route::MEM1_similarity_prior_ref",
+        "TCA_adjusted_expected_net_cash": "provider_stage_route::TCA_adjusted_expected_net_cash",
+        "candidate_minus_no_trade_cash": "provider_stage_route::candidate_minus_no_trade_cash",
+        "capacity_adjusted_expected_value": "provider_stage_route::capacity_adjusted_expected_value",
+        "champion_challenger_status": "provider_stage_route::champion_challenger_status",
+        "classical_fallback_ref": "docs/master_plan/generated/pr168_rp5g/q_classic_fb.jsonl",
+        "execution_adjusted_rank": "provider_stage_route::execution_adjusted_rank",
+        "fill_adjusted_expected_value": "provider_stage_route::fill_adjusted_expected_value",
+        "lower_confidence_bound_cash": "provider_stage_route::lower_confidence_bound_cash",
+        "no_trade_comparator_status": "provider_stage_route::no_trade_comparator_status",
+        "no_trade_reoptimization_route": "provider_stage_route::no_trade_reoptimization_route",
+        "overfit_false_discovery_status": "provider_stage_route::overfit_false_discovery_status",
+        "portfolio_marginal_utility": "docs/master_plan/generated/pr168_rp5g/portfolio_mu.jsonl",
+        "quantum_structural_readiness_status": "provider_stage_route::quantum_structural_readiness_status",
+        "regime_conditioned_memory_status": "provider_stage_route::regime_conditioned_memory_status",
+        "scenario_ladder_status": "provider_stage_route::scenario_ladder_status"
+      },
+      "institutional_refs": {
+        "DAG_upstream_downstream_route_ref": "dag.generated.jsonl",
+        "MEM1_similarity_and_shrinkage_prior_refs": "docs/master_plan/generated/pr168_mem1/memory_query_contract.jsonl",
+        "QAOA_VQE_annealing_candidate_readiness": "QMAP1_PROVIDER_ROUTE::qaoa_vqe_annealing_candidate_readiness",
+        "QUBO_BQM_CQM_QuadraticProgram_Ising_readiness": "docs/master_plan/generated/pr168_qopt1/qstruct_optimized.jsonl",
+        "TCA_decomposition": "docs/master_plan/generated/pr168_rp5g/tca_decomp.jsonl",
+        "calibration_state": "docs/master_plan/generated/pr168_rp5g/calibration.jsonl",
+        "capacity_crowding_limit": "docs/master_plan/generated/pr168_rp5g/fill_latency_cap.jsonl",
+        "champion_challenger_selection": "docs/master_plan/generated/pr168_rank4/rank_edge_capture.jsonl",
+        "classical_fallback_ref": "docs/master_plan/generated/pr168_rp5g/q_classic_fb.jsonl",
+        "execution_adjusted_ranking": "docs/master_plan/generated/pr168_rank4/rank_edge_capture.jsonl",
+        "fee_spread_slippage_impact_latency_opportunity_cost": "docs/master_plan/generated/pr168_rp5g/tca_decomp.jsonl",
+        "fill_probability_partial_fill_penalty": "docs/master_plan/generated/pr168_rp5g/fill_latency_cap.jsonl",
+        "implementation_shortfall": "docs/master_plan/generated/pr168_rp5g/tca_decomp.jsonl",
+        "interpret_back_map_ref": "docs/master_plan/generated/pr168_qopt1/interpret_back.jsonl",
+        "no_trade_comparator_and_reoptimization_route": "docs/master_plan/generated/pr168_qopt1/notrade_reopt.jsonl",
+        "overfit_false_discovery_control": "docs/master_plan/generated/pr168_rank4/rank_edge_capture.jsonl",
+        "portfolio_marginal_utility": "docs/master_plan/generated/pr168_rp5g/portfolio_mu.jsonl",
+        "portfolio_style_diversification": "docs/master_plan/generated/pr168_qopt1/portfolio_exposure.jsonl",
+        "qstruct_objective_constraint_variable_ref": "docs/master_plan/generated/pr168_qopt1/qstruct_optimized.jsonl",
+        "quantum_structural_readiness": "owner_quantum_structural_readiness_view.generated.jsonl",
+        "regime_conditioned_memory": "docs/master_plan/generated/pr168_mem1/memory_query_contract.jsonl",
+        "scenario_ladder": "docs/master_plan/generated/pr168_rp5g/scenario_ladder.jsonl"
+      },
+      "labels_only": false,
+      "linked_action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "linked_agent_role_refs": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "provider_stage": "PRETRADE1",
+      "quantum_refs": {
+        "QAOA_VQE_annealing_candidate_readiness_ref": "QMAP1_PROVIDER_ROUTE::qaoa_vqe_annealing_candidate_readiness",
+        "QMAP1_activation_route": "QMAP1_ACTIVATION_ROUTE::quantum_structural_readiness",
+        "QUBO_BQM_CQM_QuadraticProgram_Ising_readiness_ref": "docs/master_plan/generated/pr168_qopt1/qstruct_optimized.jsonl",
+        "classical_fallback_ref": "docs/master_plan/generated/pr168_rp5g/q_classic_fb.jsonl",
+        "interpret_back_map_ref": "docs/master_plan/generated/pr168_qopt1/interpret_back.jsonl"
+      },
+      "row_id": "UI1R1_INST_QUANT_AGENT_DISAGREEMENT_PANEL",
+      "runtime_side_effect": false,
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_state_model.generated.json",
+        "owner_dashboard_widget_manifest.generated.json",
+        "owner_action_registry.generated.jsonl",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "surface": "Agent disagreement panel",
+      "title": "Agent disagreement panel",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+    },
+    {
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_CommandActionMatrix.report.json",
+        "PR165_D2_AGENT_ROLE_GAP_ROUTE::provider_pending"
+      ],
+      "activation_route": "PRETRADE1_ACTIVATION_ROUTE::UI1R1_INST_QUANT_PARAMETER_TUNING_PREVIEW",
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "decision_spine_fields": {
+        "DAG_upstream_downstream_ref": "provider_stage_route::DAG_upstream_downstream_ref",
+        "MEM1_similarity_prior_ref": "provider_stage_route::MEM1_similarity_prior_ref",
+        "TCA_adjusted_expected_net_cash": "provider_stage_route::TCA_adjusted_expected_net_cash",
+        "candidate_minus_no_trade_cash": "provider_stage_route::candidate_minus_no_trade_cash",
+        "capacity_adjusted_expected_value": "provider_stage_route::capacity_adjusted_expected_value",
+        "champion_challenger_status": "provider_stage_route::champion_challenger_status",
+        "classical_fallback_ref": "docs/master_plan/generated/pr168_rp5g/q_classic_fb.jsonl",
+        "execution_adjusted_rank": "provider_stage_route::execution_adjusted_rank",
+        "fill_adjusted_expected_value": "provider_stage_route::fill_adjusted_expected_value",
+        "lower_confidence_bound_cash": "provider_stage_route::lower_confidence_bound_cash",
+        "no_trade_comparator_status": "provider_stage_route::no_trade_comparator_status",
+        "no_trade_reoptimization_route": "provider_stage_route::no_trade_reoptimization_route",
+        "overfit_false_discovery_status": "provider_stage_route::overfit_false_discovery_status",
+        "portfolio_marginal_utility": "docs/master_plan/generated/pr168_rp5g/portfolio_mu.jsonl",
+        "quantum_structural_readiness_status": "provider_stage_route::quantum_structural_readiness_status",
+        "regime_conditioned_memory_status": "provider_stage_route::regime_conditioned_memory_status",
+        "scenario_ladder_status": "provider_stage_route::scenario_ladder_status"
+      },
+      "institutional_refs": {
+        "DAG_upstream_downstream_route_ref": "dag.generated.jsonl",
+        "MEM1_similarity_and_shrinkage_prior_refs": "docs/master_plan/generated/pr168_mem1/memory_query_contract.jsonl",
+        "QAOA_VQE_annealing_candidate_readiness": "QMAP1_PROVIDER_ROUTE::qaoa_vqe_annealing_candidate_readiness",
+        "QUBO_BQM_CQM_QuadraticProgram_Ising_readiness": "docs/master_plan/generated/pr168_qopt1/qstruct_optimized.jsonl",
+        "TCA_decomposition": "docs/master_plan/generated/pr168_rp5g/tca_decomp.jsonl",
+        "calibration_state": "docs/master_plan/generated/pr168_rp5g/calibration.jsonl",
+        "capacity_crowding_limit": "docs/master_plan/generated/pr168_rp5g/fill_latency_cap.jsonl",
+        "champion_challenger_selection": "docs/master_plan/generated/pr168_rank4/rank_edge_capture.jsonl",
+        "classical_fallback_ref": "docs/master_plan/generated/pr168_rp5g/q_classic_fb.jsonl",
+        "execution_adjusted_ranking": "docs/master_plan/generated/pr168_rank4/rank_edge_capture.jsonl",
+        "fee_spread_slippage_impact_latency_opportunity_cost": "docs/master_plan/generated/pr168_rp5g/tca_decomp.jsonl",
+        "fill_probability_partial_fill_penalty": "docs/master_plan/generated/pr168_rp5g/fill_latency_cap.jsonl",
+        "implementation_shortfall": "docs/master_plan/generated/pr168_rp5g/tca_decomp.jsonl",
+        "interpret_back_map_ref": "docs/master_plan/generated/pr168_qopt1/interpret_back.jsonl",
+        "no_trade_comparator_and_reoptimization_route": "docs/master_plan/generated/pr168_qopt1/notrade_reopt.jsonl",
+        "overfit_false_discovery_control": "docs/master_plan/generated/pr168_rank4/rank_edge_capture.jsonl",
+        "portfolio_marginal_utility": "docs/master_plan/generated/pr168_rp5g/portfolio_mu.jsonl",
+        "portfolio_style_diversification": "docs/master_plan/generated/pr168_qopt1/portfolio_exposure.jsonl",
+        "qstruct_objective_constraint_variable_ref": "docs/master_plan/generated/pr168_qopt1/qstruct_optimized.jsonl",
+        "quantum_structural_readiness": "owner_quantum_structural_readiness_view.generated.jsonl",
+        "regime_conditioned_memory": "docs/master_plan/generated/pr168_mem1/memory_query_contract.jsonl",
+        "scenario_ladder": "docs/master_plan/generated/pr168_rp5g/scenario_ladder.jsonl"
+      },
+      "labels_only": false,
+      "linked_action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "linked_agent_role_refs": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "provider_stage": "PRETRADE1",
+      "quantum_refs": {
+        "QAOA_VQE_annealing_candidate_readiness_ref": "QMAP1_PROVIDER_ROUTE::qaoa_vqe_annealing_candidate_readiness",
+        "QMAP1_activation_route": "QMAP1_ACTIVATION_ROUTE::quantum_structural_readiness",
+        "QUBO_BQM_CQM_QuadraticProgram_Ising_readiness_ref": "docs/master_plan/generated/pr168_qopt1/qstruct_optimized.jsonl",
+        "classical_fallback_ref": "docs/master_plan/generated/pr168_rp5g/q_classic_fb.jsonl",
+        "interpret_back_map_ref": "docs/master_plan/generated/pr168_qopt1/interpret_back.jsonl"
+      },
+      "row_id": "UI1R1_INST_QUANT_PARAMETER_TUNING_PREVIEW",
+      "runtime_side_effect": false,
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_state_model.generated.json",
+        "owner_dashboard_widget_manifest.generated.json",
+        "owner_action_registry.generated.jsonl",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "surface": "Parameter tuning preview",
+      "title": "Parameter tuning preview",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+    },
+    {
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_CommandActionMatrix.report.json",
+        "PR165_D2_AGENT_ROLE_GAP_ROUTE::provider_pending"
+      ],
+      "activation_route": "PRETRADE1_ACTIVATION_ROUTE::UI1R1_INST_QUANT_QKU_FORMULA_ROUTE_DRAWER",
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "decision_spine_fields": {
+        "DAG_upstream_downstream_ref": "provider_stage_route::DAG_upstream_downstream_ref",
+        "MEM1_similarity_prior_ref": "provider_stage_route::MEM1_similarity_prior_ref",
+        "TCA_adjusted_expected_net_cash": "provider_stage_route::TCA_adjusted_expected_net_cash",
+        "candidate_minus_no_trade_cash": "provider_stage_route::candidate_minus_no_trade_cash",
+        "capacity_adjusted_expected_value": "provider_stage_route::capacity_adjusted_expected_value",
+        "champion_challenger_status": "provider_stage_route::champion_challenger_status",
+        "classical_fallback_ref": "docs/master_plan/generated/pr168_rp5g/q_classic_fb.jsonl",
+        "execution_adjusted_rank": "provider_stage_route::execution_adjusted_rank",
+        "fill_adjusted_expected_value": "provider_stage_route::fill_adjusted_expected_value",
+        "lower_confidence_bound_cash": "provider_stage_route::lower_confidence_bound_cash",
+        "no_trade_comparator_status": "provider_stage_route::no_trade_comparator_status",
+        "no_trade_reoptimization_route": "provider_stage_route::no_trade_reoptimization_route",
+        "overfit_false_discovery_status": "provider_stage_route::overfit_false_discovery_status",
+        "portfolio_marginal_utility": "docs/master_plan/generated/pr168_rp5g/portfolio_mu.jsonl",
+        "quantum_structural_readiness_status": "provider_stage_route::quantum_structural_readiness_status",
+        "regime_conditioned_memory_status": "provider_stage_route::regime_conditioned_memory_status",
+        "scenario_ladder_status": "provider_stage_route::scenario_ladder_status"
+      },
+      "institutional_refs": {
+        "DAG_upstream_downstream_route_ref": "dag.generated.jsonl",
+        "MEM1_similarity_and_shrinkage_prior_refs": "docs/master_plan/generated/pr168_mem1/memory_query_contract.jsonl",
+        "QAOA_VQE_annealing_candidate_readiness": "QMAP1_PROVIDER_ROUTE::qaoa_vqe_annealing_candidate_readiness",
+        "QUBO_BQM_CQM_QuadraticProgram_Ising_readiness": "docs/master_plan/generated/pr168_qopt1/qstruct_optimized.jsonl",
+        "TCA_decomposition": "docs/master_plan/generated/pr168_rp5g/tca_decomp.jsonl",
+        "calibration_state": "docs/master_plan/generated/pr168_rp5g/calibration.jsonl",
+        "capacity_crowding_limit": "docs/master_plan/generated/pr168_rp5g/fill_latency_cap.jsonl",
+        "champion_challenger_selection": "docs/master_plan/generated/pr168_rank4/rank_edge_capture.jsonl",
+        "classical_fallback_ref": "docs/master_plan/generated/pr168_rp5g/q_classic_fb.jsonl",
+        "execution_adjusted_ranking": "docs/master_plan/generated/pr168_rank4/rank_edge_capture.jsonl",
+        "fee_spread_slippage_impact_latency_opportunity_cost": "docs/master_plan/generated/pr168_rp5g/tca_decomp.jsonl",
+        "fill_probability_partial_fill_penalty": "docs/master_plan/generated/pr168_rp5g/fill_latency_cap.jsonl",
+        "implementation_shortfall": "docs/master_plan/generated/pr168_rp5g/tca_decomp.jsonl",
+        "interpret_back_map_ref": "docs/master_plan/generated/pr168_qopt1/interpret_back.jsonl",
+        "no_trade_comparator_and_reoptimization_route": "docs/master_plan/generated/pr168_qopt1/notrade_reopt.jsonl",
+        "overfit_false_discovery_control": "docs/master_plan/generated/pr168_rank4/rank_edge_capture.jsonl",
+        "portfolio_marginal_utility": "docs/master_plan/generated/pr168_rp5g/portfolio_mu.jsonl",
+        "portfolio_style_diversification": "docs/master_plan/generated/pr168_qopt1/portfolio_exposure.jsonl",
+        "qstruct_objective_constraint_variable_ref": "docs/master_plan/generated/pr168_qopt1/qstruct_optimized.jsonl",
+        "quantum_structural_readiness": "owner_quantum_structural_readiness_view.generated.jsonl",
+        "regime_conditioned_memory": "docs/master_plan/generated/pr168_mem1/memory_query_contract.jsonl",
+        "scenario_ladder": "docs/master_plan/generated/pr168_rp5g/scenario_ladder.jsonl"
+      },
+      "labels_only": false,
+      "linked_action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "linked_agent_role_refs": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "provider_stage": "PRETRADE1",
+      "quantum_refs": {
+        "QAOA_VQE_annealing_candidate_readiness_ref": "QMAP1_PROVIDER_ROUTE::qaoa_vqe_annealing_candidate_readiness",
+        "QMAP1_activation_route": "QMAP1_ACTIVATION_ROUTE::quantum_structural_readiness",
+        "QUBO_BQM_CQM_QuadraticProgram_Ising_readiness_ref": "docs/master_plan/generated/pr168_qopt1/qstruct_optimized.jsonl",
+        "classical_fallback_ref": "docs/master_plan/generated/pr168_rp5g/q_classic_fb.jsonl",
+        "interpret_back_map_ref": "docs/master_plan/generated/pr168_qopt1/interpret_back.jsonl"
+      },
+      "row_id": "UI1R1_INST_QUANT_QKU_FORMULA_ROUTE_DRAWER",
+      "runtime_side_effect": false,
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_state_model.generated.json",
+        "owner_dashboard_widget_manifest.generated.json",
+        "owner_action_registry.generated.jsonl",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "surface": "QKU/formula route drawer",
+      "title": "QKU/formula route drawer",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+    },
+    {
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_CommandActionMatrix.report.json",
+        "PR165_D2_AGENT_ROLE_GAP_ROUTE::provider_pending"
+      ],
+      "activation_route": "PRETRADE1_ACTIVATION_ROUTE::UI1R1_INST_QUANT_DEVELOPER_MODE_DIAGNOSTICS",
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "decision_spine_fields": {
+        "DAG_upstream_downstream_ref": "provider_stage_route::DAG_upstream_downstream_ref",
+        "MEM1_similarity_prior_ref": "provider_stage_route::MEM1_similarity_prior_ref",
+        "TCA_adjusted_expected_net_cash": "provider_stage_route::TCA_adjusted_expected_net_cash",
+        "candidate_minus_no_trade_cash": "provider_stage_route::candidate_minus_no_trade_cash",
+        "capacity_adjusted_expected_value": "provider_stage_route::capacity_adjusted_expected_value",
+        "champion_challenger_status": "provider_stage_route::champion_challenger_status",
+        "classical_fallback_ref": "docs/master_plan/generated/pr168_rp5g/q_classic_fb.jsonl",
+        "execution_adjusted_rank": "provider_stage_route::execution_adjusted_rank",
+        "fill_adjusted_expected_value": "provider_stage_route::fill_adjusted_expected_value",
+        "lower_confidence_bound_cash": "provider_stage_route::lower_confidence_bound_cash",
+        "no_trade_comparator_status": "provider_stage_route::no_trade_comparator_status",
+        "no_trade_reoptimization_route": "provider_stage_route::no_trade_reoptimization_route",
+        "overfit_false_discovery_status": "provider_stage_route::overfit_false_discovery_status",
+        "portfolio_marginal_utility": "docs/master_plan/generated/pr168_rp5g/portfolio_mu.jsonl",
+        "quantum_structural_readiness_status": "provider_stage_route::quantum_structural_readiness_status",
+        "regime_conditioned_memory_status": "provider_stage_route::regime_conditioned_memory_status",
+        "scenario_ladder_status": "provider_stage_route::scenario_ladder_status"
+      },
+      "institutional_refs": {
+        "DAG_upstream_downstream_route_ref": "dag.generated.jsonl",
+        "MEM1_similarity_and_shrinkage_prior_refs": "docs/master_plan/generated/pr168_mem1/memory_query_contract.jsonl",
+        "QAOA_VQE_annealing_candidate_readiness": "QMAP1_PROVIDER_ROUTE::qaoa_vqe_annealing_candidate_readiness",
+        "QUBO_BQM_CQM_QuadraticProgram_Ising_readiness": "docs/master_plan/generated/pr168_qopt1/qstruct_optimized.jsonl",
+        "TCA_decomposition": "docs/master_plan/generated/pr168_rp5g/tca_decomp.jsonl",
+        "calibration_state": "docs/master_plan/generated/pr168_rp5g/calibration.jsonl",
+        "capacity_crowding_limit": "docs/master_plan/generated/pr168_rp5g/fill_latency_cap.jsonl",
+        "champion_challenger_selection": "docs/master_plan/generated/pr168_rank4/rank_edge_capture.jsonl",
+        "classical_fallback_ref": "docs/master_plan/generated/pr168_rp5g/q_classic_fb.jsonl",
+        "execution_adjusted_ranking": "docs/master_plan/generated/pr168_rank4/rank_edge_capture.jsonl",
+        "fee_spread_slippage_impact_latency_opportunity_cost": "docs/master_plan/generated/pr168_rp5g/tca_decomp.jsonl",
+        "fill_probability_partial_fill_penalty": "docs/master_plan/generated/pr168_rp5g/fill_latency_cap.jsonl",
+        "implementation_shortfall": "docs/master_plan/generated/pr168_rp5g/tca_decomp.jsonl",
+        "interpret_back_map_ref": "docs/master_plan/generated/pr168_qopt1/interpret_back.jsonl",
+        "no_trade_comparator_and_reoptimization_route": "docs/master_plan/generated/pr168_qopt1/notrade_reopt.jsonl",
+        "overfit_false_discovery_control": "docs/master_plan/generated/pr168_rank4/rank_edge_capture.jsonl",
+        "portfolio_marginal_utility": "docs/master_plan/generated/pr168_rp5g/portfolio_mu.jsonl",
+        "portfolio_style_diversification": "docs/master_plan/generated/pr168_qopt1/portfolio_exposure.jsonl",
+        "qstruct_objective_constraint_variable_ref": "docs/master_plan/generated/pr168_qopt1/qstruct_optimized.jsonl",
+        "quantum_structural_readiness": "owner_quantum_structural_readiness_view.generated.jsonl",
+        "regime_conditioned_memory": "docs/master_plan/generated/pr168_mem1/memory_query_contract.jsonl",
+        "scenario_ladder": "docs/master_plan/generated/pr168_rp5g/scenario_ladder.jsonl"
+      },
+      "labels_only": false,
+      "linked_action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "linked_agent_role_refs": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "provider_stage": "PRETRADE1",
+      "quantum_refs": {
+        "QAOA_VQE_annealing_candidate_readiness_ref": "QMAP1_PROVIDER_ROUTE::qaoa_vqe_annealing_candidate_readiness",
+        "QMAP1_activation_route": "QMAP1_ACTIVATION_ROUTE::quantum_structural_readiness",
+        "QUBO_BQM_CQM_QuadraticProgram_Ising_readiness_ref": "docs/master_plan/generated/pr168_qopt1/qstruct_optimized.jsonl",
+        "classical_fallback_ref": "docs/master_plan/generated/pr168_rp5g/q_classic_fb.jsonl",
+        "interpret_back_map_ref": "docs/master_plan/generated/pr168_qopt1/interpret_back.jsonl"
+      },
+      "row_id": "UI1R1_INST_QUANT_DEVELOPER_MODE_DIAGNOSTICS",
+      "runtime_side_effect": false,
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_state_model.generated.json",
+        "owner_dashboard_widget_manifest.generated.json",
+        "owner_action_registry.generated.jsonl",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "surface": "Developer Mode diagnostics",
+      "title": "Developer Mode diagnostics",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+    }
+  ]
+}

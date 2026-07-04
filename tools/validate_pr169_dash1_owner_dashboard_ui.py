@@ -269,6 +269,25 @@ def validate(base: Path) -> tuple[str, ...]:
         failures.append("owner_action_registry_ref_missing")
     if "OwnerSurfaceResolver" not in combined:
         failures.append("owner_surface_resolver_ref_missing")
+    for snippet in (
+        "data-chart-id",
+        "data-chart-kind",
+        "data-chart-render-state",
+        "data-chart-source-ref",
+        "data-provider-stage",
+        "data-authority-boundary",
+        'data-chat-composer="owner-plain-english"',
+        'data-chat-runtime-side-effect="false"',
+        'data-intent-parser="local-preview"',
+        "data-workbench-id",
+        "data-owner-trade-intent-preview",
+        "data-trade-variable-field",
+        "data-no-trade-comparator",
+        "data-execution-router-provider-pending",
+        "Developer Mode",
+    ):
+        if snippet not in combined:
+            failures.append(f"required_ui1r1_snippet_missing:{snippet}")
 
     all_values = "\n".join(str(value) for value in _walk(data))
     if "guaranteed positive profit" in all_values:
@@ -294,6 +313,121 @@ def validate(base: Path) -> tuple[str, ...]:
             failures.append(f"connector_access_not_false:{file_name}")
         if meta.get("order_execution_allowed") is not False:
             failures.append(f"order_execution_not_false:{file_name}")
+
+    forbidden_files = (
+        "owner_dashboard_workstation_expansion_matrix.generated.json",
+        "owner_dashboard_workstation_expansion_matrix.generated.jsonl",
+        "workstation_expansion_matrix.generated.json",
+        "50_idea_backlog.generated.json",
+    )
+    for file_name in forbidden_files:
+        if (ui_dir / file_name).exists() or (base / file_name).exists():
+            failures.append(f"deferred_idea_artifact_forbidden:{file_name}")
+
+    acceptance = _read_json(ui_dir / "ui1r1_12fix_acceptance.generated.json")
+    rows = acceptance.get("rows", [])
+    if len(rows) != 12:
+        failures.append("ui1r1_12fix_acceptance_wrong_count")
+    if any(row.get("status") != "PASS" for row in rows):
+        failures.append("ui1r1_12fix_acceptance_not_all_pass")
+    if acceptance.get("deferred_brainstorm_ideas_not_materialized") is not True:
+        failures.append("ui1r1_deferred_brainstorm_containment_missing")
+
+    owner_mode = _read_json(ui_dir / "ui1r1_owner_mode.report.json")
+    for key in (
+        "owner_mode_default",
+        "developer_mode_collapsed_by_default",
+        "registry_diagnostics_not_owner_default",
+        "raw_json_not_primary_owner_content",
+    ):
+        if owner_mode.get(key) is not True:
+            failures.append(f"ui1r1_owner_mode_report_missing:{key}")
+
+    chart_manifest = _read_json(ui_dir / "ui1r1_chart_manifest.generated.json")
+    chart_rows = chart_manifest.get("charts", [])
+    required_chart_ids = {
+        "portfolio_equity_curve",
+        "net_cash_pnl_by_time_range",
+        "cost_adjusted_net_pnl",
+        "drawdown_curve",
+        "TCA_waterfall_and_implementation_shortfall",
+        "capital_allocation_by_market",
+        "exposure_by_venue",
+        "edge_alpha_scoreboard_visual",
+        "agent_disagreement_visual",
+        "DAG_route_graph_visual",
+    }
+    present_chart_ids = {row.get("chart_id") for row in chart_rows}
+    for chart_id in required_chart_ids:
+        if chart_id not in present_chart_ids:
+            failures.append(f"ui1r1_chart_missing:{chart_id}")
+    for row in chart_rows:
+        if row.get("data_chart_render_state") not in {"VISUAL_RENDERED", "PROVIDER_PENDING_VISUAL_FRAME"}:
+            failures.append(f"ui1r1_bad_chart_render_state:{row.get('chart_id')}")
+        if row.get("fake_value_allowed") is not False:
+            failures.append(f"ui1r1_chart_allows_fake_value:{row.get('chart_id')}")
+
+    chat_contract = _read_json(ui_dir / "ui1r1_chat_contract.generated.json")
+    if len(chat_contract.get("prompt_chips", [])) < 8:
+        failures.append("ui1r1_chat_prompt_chips_missing")
+    intent_contract = _read_json(ui_dir / "ui1r1_intent_contract.generated.json")
+    for intent in ("TRADE_CHECK_REQUEST", "RESEARCH_ANALYSIS_REQUEST", "NO_TRADE_EXPLANATION_REQUEST", "EDGE_ALPHA_RANKING_REQUEST"):
+        if intent not in intent_contract.get("intent_families", []):
+            failures.append(f"ui1r1_intent_family_missing:{intent}")
+    chat_examples = _read_json(ui_dir / "ui1r1_chat_examples.generated.json")
+    for row in chat_examples.get("examples", []):
+        parsed = row.get("parsed_preview_output", {})
+        if parsed.get("object_type") != "OwnerPlainEnglishIntentV1":
+            failures.append("ui1r1_chat_example_missing_owner_intent")
+        if parsed.get("runtime_side_effect") is not False:
+            failures.append("ui1r1_chat_example_runtime_side_effect")
+
+    order_sim = _read_json(ui_dir / "ui1r1_order_sim.generated.json")
+    if len(order_sim.get("owner_input_fields", [])) < 17:
+        failures.append("ui1r1_order_sim_fields_missing")
+    if order_sim.get("runtime_side_effect") is not False:
+        failures.append("ui1r1_order_sim_runtime_side_effect")
+    if {row.get("card_id") for row in order_sim.get("comparison_cards", [])} != {"best_candidate", "runner_up_challenger", "no_trade_alternative"}:
+        failures.append("ui1r1_order_sim_comparison_cards_missing")
+
+    edge = _read_json(ui_dir / "ui1r1_edge_alpha.generated.json")
+    if edge.get("ranking_rule") != "execution_adjusted_ordering_not_raw_edge_only":
+        failures.append("ui1r1_edge_alpha_ranking_rule_bad")
+    for row in edge.get("rows", []):
+        if row.get("metadata_only_ranking") is not False:
+            failures.append("ui1r1_edge_alpha_metadata_only_ranking")
+
+    disagreement = _read_json(ui_dir / "ui1r1_agent_disagreement.generated.json")
+    if len(disagreement.get("rows", [])) < 10:
+        failures.append("ui1r1_agent_disagreement_rows_missing")
+    if any(row.get("fake_agent_claim") is not False for row in disagreement.get("rows", [])):
+        failures.append("ui1r1_agent_disagreement_fake_claim")
+
+    params = _read_json(ui_dir / "ui1r1_parameter_tuning.generated.json")
+    if params.get("live_parameter_mutation_allowed") is not False:
+        failures.append("ui1r1_parameter_live_mutation_allowed")
+    if not all(row.get("atomic_drilldown") for row in params.get("rows", [])):
+        failures.append("ui1r1_parameter_atomic_drilldown_missing")
+
+    mobile_parity = _read_json(ui_dir / "ui1r1_mobile_parity.report.json")
+    mobile_surfaces = {row.get("surface") for row in mobile_parity.get("surfaces", [])}
+    for surface in {"Home", "Portfolio", "Trade Workbench", "Chat", "Edge/Alpha", "Agents", "Parameters", "Developer Mode"}:
+        if surface not in mobile_surfaces:
+            failures.append(f"ui1r1_mobile_surface_missing:{surface}")
+    if mobile_parity.get("separate_mobile_state_model") is not False:
+        failures.append("ui1r1_mobile_has_separate_state_model")
+
+    crosslink = _read_json(ui_dir / "ui1r1_inst_quant_crosslink.report.json")
+    if any(row.get("labels_only") is not False for row in crosslink.get("rows", [])):
+        failures.append("ui1r1_inst_quant_labels_only")
+    if crosslink.get("quantum_advantage_claim") is not False:
+        failures.append("ui1r1_quantum_advantage_claim")
+
+    playwright = _read_json(ui_dir / "ui1r1_playwright.report.json")
+    if len(playwright.get("screenshots", [])) < 9:
+        failures.append("ui1r1_playwright_screenshot_rows_missing")
+    if playwright.get("network_status") != "PASS" or playwright.get("console_status") != "PASS":
+        failures.append("ui1r1_playwright_status_not_pass")
 
     return tuple(failures)
 

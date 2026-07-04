@@ -1,0 +1,368 @@
+{
+  "all_examples_parse_to_preview_objects": true,
+  "examples": [
+    {
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_CommandActionMatrix.report.json",
+        "PR165_D2_AGENT_ROLE_GAP_ROUTE::provider_pending"
+      ],
+      "activation_route": "LLM1_ACTIVATION_ROUTE::UI1R1_CHAT_EXAMPLE_01",
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "linked_action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "linked_agent_role_refs": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "owner_example_text": "Can QTT check this market and find the best trade?",
+      "parsed_preview_output": {
+        "LLM_provider_stage_ref": "LLM1_PROVIDER_PENDING",
+        "agent_orchestration_provider_stage_ref": "AGENT_ORCH1_PROVIDER_PENDING",
+        "agent_role_refs_from_PR165_D2_or_gap": [
+          "PR165_D2_CommandActionMatrix.report.json",
+          "PR165_D2_AGENT_ROLE_GAP_ROUTE::provider_pending"
+        ],
+        "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+        "clarifying_question_if_needed": "No clarification needed for this high-confidence preview.",
+        "confidence_label": "HIGH_CONFIDENCE_PREVIEW",
+        "execution_router_provider_pending_ref": "Execution_Router_release_route_provider_pending",
+        "intent_family": "TRADE_CHECK_REQUEST",
+        "intent_id": "UI1R1_INTENT_01",
+        "object_type": "OwnerPlainEnglishIntentV1",
+        "owner_action_preview_refs": [
+          "REQUEST_OWNER_REVIEW"
+        ],
+        "owner_message_ref": "OwnerMessageV1::UI1R1_MSG_01",
+        "paper_loop_provider_stage_ref": "PAPER_LOOP_PROVIDER_PENDING",
+        "plain_english_summary": "TRADE CHECK REQUEST",
+        "raw_owner_text_excerpt": "Can QTT check this market and find the best trade?",
+        "runtime_side_effect": false,
+        "structured_request_preview_refs": [
+          "OwnerTradeCheckRequestV1"
+        ],
+        "target_workspace": "Trade Workbench",
+        "thread_id": "OWNER_THREAD_TRADE_WORKBENCH"
+      },
+      "provider_stage": "LLM1",
+      "row_id": "UI1R1_CHAT_EXAMPLE_01",
+      "runtime_side_effect": false,
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_state_model.generated.json",
+        "owner_dashboard_widget_manifest.generated.json",
+        "owner_action_registry.generated.jsonl",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "title": "TRADE_CHECK_REQUEST",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+    },
+    {
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_CommandActionMatrix.report.json",
+        "PR165_D2_AGENT_ROLE_GAP_ROUTE::provider_pending"
+      ],
+      "activation_route": "LLM1_ACTIVATION_ROUTE::UI1R1_CHAT_EXAMPLE_02",
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "linked_action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "linked_agent_role_refs": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "owner_example_text": "Research this article and tell me if it creates a prediction-market edge.",
+      "parsed_preview_output": {
+        "LLM_provider_stage_ref": "LLM1_PROVIDER_PENDING",
+        "agent_orchestration_provider_stage_ref": "AGENT_ORCH1_PROVIDER_PENDING",
+        "agent_role_refs_from_PR165_D2_or_gap": [
+          "PR165_D2_CommandActionMatrix.report.json",
+          "PR165_D2_AGENT_ROLE_GAP_ROUTE::provider_pending"
+        ],
+        "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+        "clarifying_question_if_needed": "No clarification needed for this high-confidence preview.",
+        "confidence_label": "HIGH_CONFIDENCE_PREVIEW",
+        "execution_router_provider_pending_ref": "Execution_Router_release_route_provider_pending",
+        "intent_family": "RESEARCH_ANALYSIS_REQUEST",
+        "intent_id": "UI1R1_INTENT_02",
+        "object_type": "OwnerPlainEnglishIntentV1",
+        "owner_action_preview_refs": [
+          "REQUEST_OWNER_REVIEW"
+        ],
+        "owner_message_ref": "OwnerMessageV1::UI1R1_MSG_02",
+        "paper_loop_provider_stage_ref": "PAPER_LOOP_PROVIDER_PENDING",
+        "plain_english_summary": "RESEARCH ANALYSIS REQUEST",
+        "raw_owner_text_excerpt": "Research this article and tell me if it creates a prediction-market edge.",
+        "runtime_side_effect": false,
+        "structured_request_preview_refs": [
+          "OwnerResearchSubmissionV1"
+        ],
+        "target_workspace": "Research Intake",
+        "thread_id": "OWNER_THREAD_RESEARCH_INTAKE"
+      },
+      "provider_stage": "LLM1",
+      "row_id": "UI1R1_CHAT_EXAMPLE_02",
+      "runtime_side_effect": false,
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_state_model.generated.json",
+        "owner_dashboard_widget_manifest.generated.json",
+        "owner_action_registry.generated.jsonl",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "title": "RESEARCH_ANALYSIS_REQUEST",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+    },
+    {
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_CommandActionMatrix.report.json",
+        "PR165_D2_AGENT_ROLE_GAP_ROUTE::provider_pending"
+      ],
+      "activation_route": "LLM1_ACTIVATION_ROUTE::UI1R1_CHAT_EXAMPLE_03",
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "linked_action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "linked_agent_role_refs": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "owner_example_text": "Ask the QKU agents to compare the best formula stacks for this event.",
+      "parsed_preview_output": {
+        "LLM_provider_stage_ref": "LLM1_PROVIDER_PENDING",
+        "agent_orchestration_provider_stage_ref": "AGENT_ORCH1_PROVIDER_PENDING",
+        "agent_role_refs_from_PR165_D2_or_gap": [
+          "PR165_D2_CommandActionMatrix.report.json",
+          "PR165_D2_AGENT_ROLE_GAP_ROUTE::provider_pending"
+        ],
+        "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+        "clarifying_question_if_needed": "No clarification needed for this high-confidence preview.",
+        "confidence_label": "HIGH_CONFIDENCE_PREVIEW",
+        "execution_router_provider_pending_ref": "Execution_Router_release_route_provider_pending",
+        "intent_family": "QKU_FORMULA_STACK_COMPARISON_REQUEST",
+        "intent_id": "UI1R1_INTENT_03",
+        "object_type": "OwnerPlainEnglishIntentV1",
+        "owner_action_preview_refs": [
+          "REQUEST_OWNER_REVIEW"
+        ],
+        "owner_message_ref": "OwnerMessageV1::UI1R1_MSG_03",
+        "paper_loop_provider_stage_ref": "PAPER_LOOP_PROVIDER_PENDING",
+        "plain_english_summary": "QKU FORMULA STACK COMPARISON REQUEST",
+        "raw_owner_text_excerpt": "Ask the QKU agents to compare the best formula stacks for this event.",
+        "runtime_side_effect": false,
+        "structured_request_preview_refs": [
+          "QKUCandidateMaterializationRequestV1"
+        ],
+        "target_workspace": "Agents",
+        "thread_id": "OWNER_THREAD_AGENT_DIRECTIVES"
+      },
+      "provider_stage": "LLM1",
+      "row_id": "UI1R1_CHAT_EXAMPLE_03",
+      "runtime_side_effect": false,
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_state_model.generated.json",
+        "owner_dashboard_widget_manifest.generated.json",
+        "owner_action_registry.generated.jsonl",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "title": "QKU_FORMULA_STACK_COMPARISON_REQUEST",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+    },
+    {
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_CommandActionMatrix.report.json",
+        "PR165_D2_AGENT_ROLE_GAP_ROUTE::provider_pending"
+      ],
+      "activation_route": "LLM1_ACTIVATION_ROUTE::UI1R1_CHAT_EXAMPLE_04",
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "linked_action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "linked_agent_role_refs": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "owner_example_text": "Why did no-trade win here?",
+      "parsed_preview_output": {
+        "LLM_provider_stage_ref": "LLM1_PROVIDER_PENDING",
+        "agent_orchestration_provider_stage_ref": "AGENT_ORCH1_PROVIDER_PENDING",
+        "agent_role_refs_from_PR165_D2_or_gap": [
+          "PR165_D2_CommandActionMatrix.report.json",
+          "PR165_D2_AGENT_ROLE_GAP_ROUTE::provider_pending"
+        ],
+        "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+        "clarifying_question_if_needed": "No clarification needed for this high-confidence preview.",
+        "confidence_label": "HIGH_CONFIDENCE_PREVIEW",
+        "execution_router_provider_pending_ref": "Execution_Router_release_route_provider_pending",
+        "intent_family": "NO_TRADE_EXPLANATION_REQUEST",
+        "intent_id": "UI1R1_INTENT_04",
+        "object_type": "OwnerPlainEnglishIntentV1",
+        "owner_action_preview_refs": [
+          "REQUEST_OWNER_REVIEW"
+        ],
+        "owner_message_ref": "OwnerMessageV1::UI1R1_MSG_04",
+        "paper_loop_provider_stage_ref": "PAPER_LOOP_PROVIDER_PENDING",
+        "plain_english_summary": "NO TRADE EXPLANATION REQUEST",
+        "raw_owner_text_excerpt": "Why did no-trade win here?",
+        "runtime_side_effect": false,
+        "structured_request_preview_refs": [
+          "NoTradeReoptimizationRequestPreviewV1"
+        ],
+        "target_workspace": "Trade Workbench",
+        "thread_id": "OWNER_THREAD_TRADE_WORKBENCH"
+      },
+      "provider_stage": "LLM1",
+      "row_id": "UI1R1_CHAT_EXAMPLE_04",
+      "runtime_side_effect": false,
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_state_model.generated.json",
+        "owner_dashboard_widget_manifest.generated.json",
+        "owner_action_registry.generated.jsonl",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "title": "NO_TRADE_EXPLANATION_REQUEST",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+    },
+    {
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_CommandActionMatrix.report.json",
+        "PR165_D2_AGENT_ROLE_GAP_ROUTE::provider_pending"
+      ],
+      "activation_route": "LLM1_ACTIVATION_ROUTE::UI1R1_CHAT_EXAMPLE_05",
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "linked_action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "linked_agent_role_refs": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "owner_example_text": "What variables would make this trade pass replay and paper?",
+      "parsed_preview_output": {
+        "LLM_provider_stage_ref": "LLM1_PROVIDER_PENDING",
+        "agent_orchestration_provider_stage_ref": "AGENT_ORCH1_PROVIDER_PENDING",
+        "agent_role_refs_from_PR165_D2_or_gap": [
+          "PR165_D2_CommandActionMatrix.report.json",
+          "PR165_D2_AGENT_ROLE_GAP_ROUTE::provider_pending"
+        ],
+        "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+        "clarifying_question_if_needed": "No clarification needed for this high-confidence preview.",
+        "confidence_label": "HIGH_CONFIDENCE_PREVIEW",
+        "execution_router_provider_pending_ref": "Execution_Router_release_route_provider_pending",
+        "intent_family": "PARAMETER_TUNING_REQUEST",
+        "intent_id": "UI1R1_INTENT_05",
+        "object_type": "OwnerPlainEnglishIntentV1",
+        "owner_action_preview_refs": [
+          "REQUEST_OWNER_REVIEW"
+        ],
+        "owner_message_ref": "OwnerMessageV1::UI1R1_MSG_05",
+        "paper_loop_provider_stage_ref": "PAPER_LOOP_PROVIDER_PENDING",
+        "plain_english_summary": "PARAMETER TUNING REQUEST",
+        "raw_owner_text_excerpt": "What variables would make this trade pass replay and paper?",
+        "runtime_side_effect": false,
+        "structured_request_preview_refs": [
+          "ReplayPaperRequestPreviewV1"
+        ],
+        "target_workspace": "Trade Workbench",
+        "thread_id": "OWNER_THREAD_AGENT_DIRECTIVES"
+      },
+      "provider_stage": "LLM1",
+      "row_id": "UI1R1_CHAT_EXAMPLE_05",
+      "runtime_side_effect": false,
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_state_model.generated.json",
+        "owner_dashboard_widget_manifest.generated.json",
+        "owner_action_registry.generated.jsonl",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "title": "PARAMETER_TUNING_REQUEST",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+    },
+    {
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_CommandActionMatrix.report.json",
+        "PR165_D2_AGENT_ROLE_GAP_ROUTE::provider_pending"
+      ],
+      "activation_route": "LLM1_ACTIVATION_ROUTE::UI1R1_CHAT_EXAMPLE_06",
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "linked_action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "linked_agent_role_refs": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "owner_example_text": "Show me which agent disagrees and why.",
+      "parsed_preview_output": {
+        "LLM_provider_stage_ref": "LLM1_PROVIDER_PENDING",
+        "agent_orchestration_provider_stage_ref": "AGENT_ORCH1_PROVIDER_PENDING",
+        "agent_role_refs_from_PR165_D2_or_gap": [
+          "PR165_D2_CommandActionMatrix.report.json",
+          "PR165_D2_AGENT_ROLE_GAP_ROUTE::provider_pending"
+        ],
+        "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+        "clarifying_question_if_needed": "No clarification needed for this high-confidence preview.",
+        "confidence_label": "HIGH_CONFIDENCE_PREVIEW",
+        "execution_router_provider_pending_ref": "Execution_Router_release_route_provider_pending",
+        "intent_family": "AGENT_DISAGREEMENT_QUESTION",
+        "intent_id": "UI1R1_INTENT_06",
+        "object_type": "OwnerPlainEnglishIntentV1",
+        "owner_action_preview_refs": [
+          "REQUEST_OWNER_REVIEW"
+        ],
+        "owner_message_ref": "OwnerMessageV1::UI1R1_MSG_06",
+        "paper_loop_provider_stage_ref": "PAPER_LOOP_PROVIDER_PENDING",
+        "plain_english_summary": "AGENT DISAGREEMENT QUESTION",
+        "raw_owner_text_excerpt": "Show me which agent disagrees and why.",
+        "runtime_side_effect": false,
+        "structured_request_preview_refs": [
+          "OwnerPlainEnglishIntentV1"
+        ],
+        "target_workspace": "Agents",
+        "thread_id": "OWNER_THREAD_AGENT_DIRECTIVES"
+      },
+      "provider_stage": "LLM1",
+      "row_id": "UI1R1_CHAT_EXAMPLE_06",
+      "runtime_side_effect": false,
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_state_model.generated.json",
+        "owner_dashboard_widget_manifest.generated.json",
+        "owner_action_registry.generated.jsonl",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "title": "AGENT_DISAGREEMENT_QUESTION",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+    }
+  ],
+  "meta": {
+    "agent_consumable_authority": false,
+    "artifact_id": "UI1R1_CHAT_EXAMPLES",
+    "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+    "connector_access_allowed": false,
+    "credential_access_allowed": false,
+    "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config + PR169-DASH1 artifacts + PR169-DASH1-UI1 boot data + OwnerDashboardStateV1 + OwnerSurfaceResolver + OwnerActionRegistry + UI component config",
+    "manual_edit_allowed": false,
+    "order_execution_allowed": false,
+    "runtime_side_effect_allowed": false,
+    "runtime_truth_authority": false,
+    "source_truth_authority": false,
+    "ui1r1_generated_from": "PR169-DASH1 artifacts + PR169-DASH1-UI1 boot data + OwnerDashboardStateV1 + OwnerSurfaceResolver + OwnerActionRegistry + UI component config",
+    "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+  }
+}

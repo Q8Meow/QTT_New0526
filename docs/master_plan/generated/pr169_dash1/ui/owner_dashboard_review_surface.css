@@ -53,14 +53,16 @@ body {
 
 button,
 input,
-select {
+select,
+textarea {
   font: inherit;
 }
 
 button,
 a,
 input,
-select {
+select,
+textarea {
   min-height: 44px;
 }
 
@@ -166,6 +168,14 @@ select:focus-visible,
   gap: 10px;
 }
 
+.home-grid,
+.developer-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
 .status-tile,
 .metric-card,
 .card,
@@ -183,6 +193,35 @@ select:focus-visible,
 .metric-card {
   padding: 12px;
   min-height: 78px;
+}
+
+.owner-hero-card {
+  text-align: left;
+}
+
+.quick-card {
+  min-height: 132px;
+}
+
+.developer-summary {
+  margin-top: 12px;
+}
+
+.dev-details,
+.developer-details {
+  border: 1px solid var(--qtt-border);
+  border-radius: 8px;
+  background: var(--qtt-bg-card);
+  padding: 12px;
+}
+
+.inline-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  margin-top: 8px;
+  color: var(--qtt-blue);
+  font-weight: 800;
 }
 
 .status-tile .value,
@@ -354,6 +393,128 @@ select:focus-visible,
   overflow: hidden;
 }
 
+.provider-frame {
+  display: grid;
+  place-items: stretch;
+}
+
+.chart-svg {
+  width: 100%;
+  height: 220px;
+}
+
+.chart-svg .axis,
+.chart-svg .edge {
+  stroke: var(--qtt-muted);
+  stroke-width: 2;
+  opacity: 0.8;
+}
+
+.chart-svg .series-line {
+  fill: none;
+  stroke: var(--qtt-green);
+  stroke-width: 5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.chart-svg .muted-line {
+  stroke: var(--qtt-blue);
+  opacity: 0.55;
+}
+
+.chart-svg .series-point {
+  fill: var(--qtt-bg-card);
+  stroke: var(--qtt-green);
+  stroke-width: 3;
+}
+
+.chart-svg text {
+  fill: var(--qtt-muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.chart-svg .bar-positive,
+.chart-svg .seg-green {
+  fill: none;
+  stroke: var(--qtt-green);
+  stroke-width: 28;
+}
+
+.chart-svg .bar-negative,
+.chart-svg .seg-blue {
+  fill: none;
+  stroke: var(--qtt-red);
+  stroke-width: 28;
+}
+
+.chart-svg .seg-purple {
+  fill: none;
+  stroke: var(--qtt-purple);
+  stroke-width: 28;
+}
+
+.chart-svg .bar-positive,
+.chart-svg .bar-negative {
+  fill: currentColor;
+  stroke-width: 0;
+}
+
+.chart-svg .bar-positive {
+  color: var(--qtt-green);
+}
+
+.chart-svg .bar-negative {
+  color: var(--qtt-red);
+}
+
+.donut-base {
+  fill: none;
+  stroke: var(--qtt-soft);
+  stroke-width: 28;
+}
+
+.donut-seg {
+  fill: none;
+  stroke-linecap: round;
+  stroke-width: 28;
+}
+
+.dag-svg .node {
+  fill: var(--qtt-soft);
+  stroke: var(--qtt-border);
+  stroke-width: 2;
+}
+
+.dag-svg marker path {
+  fill: var(--qtt-muted);
+}
+
+.provider-overlay {
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  bottom: 12px;
+  min-height: 34px;
+  display: flex;
+  align-items: center;
+  padding: 6px 10px;
+  border: 1px solid var(--qtt-border);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--qtt-bg-panel), transparent 10%);
+  color: var(--qtt-muted);
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.mini-range {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
 .chart-line {
   position: absolute;
   left: 18px;
@@ -421,6 +582,122 @@ select:focus-visible,
   height: 10px;
   border-radius: 999px;
   background: var(--legend-color);
+}
+
+.chat-composer-card,
+.workbench-form-card {
+  grid-column: span 2;
+}
+
+.chat-composer-card textarea {
+  width: 100%;
+  resize: vertical;
+  border: 1px solid var(--qtt-border);
+  border-radius: 8px;
+  background: var(--qtt-bg-panel);
+  color: var(--qtt-text);
+  padding: 10px 12px;
+}
+
+.field-label {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--qtt-muted);
+  font-weight: 800;
+}
+
+.control-row,
+.action-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.control-row label {
+  display: grid;
+  gap: 4px;
+  min-width: min(240px, 100%);
+  color: var(--qtt-muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.control-row select,
+.control-row input,
+.workbench-fields input {
+  border: 1px solid var(--qtt-border);
+  border-radius: 8px;
+  background: var(--qtt-bg-panel);
+  color: var(--qtt-text);
+  padding: 0 10px;
+}
+
+.primary-command {
+  min-width: 150px;
+  margin-top: 10px;
+  border: 1px solid var(--qtt-green);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--qtt-green), var(--qtt-bg-card) 82%);
+  color: var(--qtt-text);
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.chat-receipt-column {
+  display: grid;
+  gap: 12px;
+}
+
+.preview-grid,
+.param-grid,
+.edge-components,
+.workbench-fields {
+  display: grid;
+  gap: 8px;
+}
+
+.preview-grid,
+.param-grid,
+.edge-components {
+  margin-top: 10px;
+  color: var(--qtt-muted);
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.edge-components span,
+.param-grid span,
+.preview-grid span {
+  border: 1px solid var(--qtt-border);
+  border-radius: 8px;
+  padding: 7px 8px;
+  background: var(--qtt-bg-panel);
+}
+
+.workbench-fields {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.workbench-fields label {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  color: var(--qtt-muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.comparison-card {
+  min-height: 160px;
+}
+
+.developer-panel {
+  margin-bottom: 32px;
+}
+
+.raw-ref-table {
+  margin-top: 12px;
 }
 
 .table-shell {
@@ -543,6 +820,8 @@ pre {
 @media (max-width: 1199px) {
   .status-grid,
   .metric-grid,
+  .home-grid,
+  .developer-grid,
   .card-grid,
   .chart-grid,
   .route-grid,
@@ -594,6 +873,8 @@ pre {
 
   .status-grid,
   .metric-grid,
+  .home-grid,
+  .developer-grid,
   .card-grid,
   .chart-grid,
   .queue-grid,
@@ -616,6 +897,15 @@ pre {
   .chip,
   .theme-switch button {
     flex: 1 1 auto;
+  }
+
+  .chat-composer-card,
+  .workbench-form-card {
+    grid-column: auto;
+  }
+
+  .workbench-fields {
+    grid-template-columns: 1fr;
   }
 
   .drilldown {

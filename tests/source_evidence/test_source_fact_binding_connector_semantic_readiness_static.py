@@ -195,6 +195,57 @@ def test_validator_blocks_atomicrows_bundle_hash_creation_or_mutation(tmp_path):
     _assert_failure_contains(failures, "canonical AtomicRows bundle must remain absent")
 
 
+def test_python_usage_scan_allows_exact_local_visual_qa_playwright_path(tmp_path):
+    script = tmp_path / "tools" / "playwright_pr169_dash1_ui1_r1_visual_smoke.py"
+    script.parent.mkdir(parents=True)
+    script.write_text(
+        "\n".join(
+            [
+                "from playwright.sync_api import sync_playwright",
+                "def main():",
+                "    return sync_playwright",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    failures = validate_static_surface(
+        repo_root=tmp_path,
+        source_to_connector_schema_path=SOURCE_MATRIX_SCHEMA,
+        source_to_connector_fixture_path=SOURCE_MATRIX_FIXTURE,
+        connector_target_schema_path=CONNECTOR_MATRIX_SCHEMA,
+        connector_target_fixture_path=CONNECTOR_MATRIX_FIXTURE,
+        gate_report_schema_path=GATE_REPORT_SCHEMA,
+        gate_report_fixture_path=GATE_REPORT_FIXTURE,
+    )
+
+    assert failures == []
+
+
+def test_python_usage_scan_rejects_unregistered_playwright_path(tmp_path):
+    script = tmp_path / "tools" / "bad_browser_fetch.py"
+    script.parent.mkdir(parents=True)
+    script.write_text(
+        "from playwright.sync_api import sync_playwright\n",
+        encoding="utf-8",
+    )
+
+    failures = validate_static_surface(
+        repo_root=tmp_path,
+        source_to_connector_schema_path=SOURCE_MATRIX_SCHEMA,
+        source_to_connector_fixture_path=SOURCE_MATRIX_FIXTURE,
+        connector_target_schema_path=CONNECTOR_MATRIX_SCHEMA,
+        connector_target_fixture_path=CONNECTOR_MATRIX_FIXTURE,
+        gate_report_schema_path=GATE_REPORT_SCHEMA,
+        gate_report_fixture_path=GATE_REPORT_FIXTURE,
+    )
+
+    _assert_failure_contains(
+        failures,
+        "tools/bad_browser_fetch.py imports forbidden network/client module playwright.sync_api",
+    )
+
+
 def test_validator_does_not_mutate_inputs_or_create_atomicrows_files(tmp_path):
     source_before = SOURCE_MATRIX_FIXTURE.read_bytes()
     connector_before = CONNECTOR_MATRIX_FIXTURE.read_bytes()

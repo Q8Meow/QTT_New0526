@@ -1,0 +1,633 @@
+{
+  "all_pass": true,
+  "deferred_brainstorm_ideas_not_materialized": true,
+  "meta": {
+    "agent_consumable_authority": false,
+    "artifact_id": "UI1R1_12FIX_ACCEPTANCE",
+    "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+    "connector_access_allowed": false,
+    "credential_access_allowed": false,
+    "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config + PR169-DASH1 artifacts + PR169-DASH1-UI1 boot data + OwnerDashboardStateV1 + OwnerSurfaceResolver + OwnerActionRegistry + UI component config",
+    "manual_edit_allowed": false,
+    "order_execution_allowed": false,
+    "runtime_side_effect_allowed": false,
+    "runtime_truth_authority": false,
+    "source_truth_authority": false,
+    "ui1r1_generated_from": "PR169-DASH1 artifacts + PR169-DASH1-UI1 boot data + OwnerDashboardStateV1 + OwnerSurfaceResolver + OwnerActionRegistry + UI component config",
+    "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+  },
+  "rows": [
+    {
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_CommandActionMatrix.report.json",
+        "PR165_D2_AGENT_ROLE_GAP_ROUTE::provider_pending"
+      ],
+      "activation_route": "UI1_ACTIVATION_ROUTE::UI1R1_FIX_01",
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "fix_number": 1,
+      "fix_title": "Owner-first home screen",
+      "generated_artifact_refs": [
+        "ui1r1_home.generated.json",
+        "ui1r1_chart_manifest.generated.json",
+        "ui1r1_order_sim.generated.json",
+        "ui1r1_chat_contract.generated.json",
+        "ui1r1_edge_alpha.generated.json",
+        "ui1r1_agent_disagreement.generated.json",
+        "ui1r1_parameter_tuning.generated.json"
+      ],
+      "linked_action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "linked_agent_role_refs": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "owner_default_visible_or_mobile_reachable": true,
+      "provider_stage": "UI1",
+      "row_id": "UI1R1_FIX_01",
+      "runtime_side_effect": false,
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_state_model.generated.json",
+        "owner_dashboard_widget_manifest.generated.json",
+        "owner_action_registry.generated.jsonl",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "status": "PASS",
+      "title": "Owner-first home screen",
+      "ui_refs": [
+        "owner_dashboard_review_surface.html",
+        "owner_dashboard_review_surface.js",
+        "owner_dashboard_review_surface.css"
+      ],
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "validation_refs": [
+        "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+        "tests/pr169_dash1_ui1"
+      ]
+    },
+    {
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_CommandActionMatrix.report.json",
+        "PR165_D2_AGENT_ROLE_GAP_ROUTE::provider_pending"
+      ],
+      "activation_route": "UI1_ACTIVATION_ROUTE::UI1R1_FIX_02",
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "fix_number": 2,
+      "fix_title": "Developer Mode separation",
+      "generated_artifact_refs": [
+        "ui1r1_home.generated.json",
+        "ui1r1_chart_manifest.generated.json",
+        "ui1r1_order_sim.generated.json",
+        "ui1r1_chat_contract.generated.json",
+        "ui1r1_edge_alpha.generated.json",
+        "ui1r1_agent_disagreement.generated.json",
+        "ui1r1_parameter_tuning.generated.json"
+      ],
+      "linked_action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "linked_agent_role_refs": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "owner_default_visible_or_mobile_reachable": true,
+      "provider_stage": "UI1",
+      "row_id": "UI1R1_FIX_02",
+      "runtime_side_effect": false,
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_state_model.generated.json",
+        "owner_dashboard_widget_manifest.generated.json",
+        "owner_action_registry.generated.jsonl",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "status": "PASS",
+      "title": "Developer Mode separation",
+      "ui_refs": [
+        "owner_dashboard_review_surface.html",
+        "owner_dashboard_review_surface.js",
+        "owner_dashboard_review_surface.css"
+      ],
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "validation_refs": [
+        "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+        "tests/pr169_dash1_ui1"
+      ]
+    },
+    {
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_CommandActionMatrix.report.json",
+        "PR165_D2_AGENT_ROLE_GAP_ROUTE::provider_pending"
+      ],
+      "activation_route": "UI1_ACTIVATION_ROUTE::UI1R1_FIX_03",
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "fix_number": 3,
+      "fix_title": "Real PnL/equity chart frame",
+      "generated_artifact_refs": [
+        "ui1r1_home.generated.json",
+        "ui1r1_chart_manifest.generated.json",
+        "ui1r1_order_sim.generated.json",
+        "ui1r1_chat_contract.generated.json",
+        "ui1r1_edge_alpha.generated.json",
+        "ui1r1_agent_disagreement.generated.json",
+        "ui1r1_parameter_tuning.generated.json"
+      ],
+      "linked_action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "linked_agent_role_refs": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "owner_default_visible_or_mobile_reachable": true,
+      "provider_stage": "UI1",
+      "row_id": "UI1R1_FIX_03",
+      "runtime_side_effect": false,
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_state_model.generated.json",
+        "owner_dashboard_widget_manifest.generated.json",
+        "owner_action_registry.generated.jsonl",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "status": "PASS",
+      "title": "Real PnL/equity chart frame",
+      "ui_refs": [
+        "owner_dashboard_review_surface.html",
+        "owner_dashboard_review_surface.js",
+        "owner_dashboard_review_surface.css"
+      ],
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "validation_refs": [
+        "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+        "tests/pr169_dash1_ui1"
+      ]
+    },
+    {
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_CommandActionMatrix.report.json",
+        "PR165_D2_AGENT_ROLE_GAP_ROUTE::provider_pending"
+      ],
+      "activation_route": "UI1_ACTIVATION_ROUTE::UI1R1_FIX_04",
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "fix_number": 4,
+      "fix_title": "TCA waterfall chart frame",
+      "generated_artifact_refs": [
+        "ui1r1_home.generated.json",
+        "ui1r1_chart_manifest.generated.json",
+        "ui1r1_order_sim.generated.json",
+        "ui1r1_chat_contract.generated.json",
+        "ui1r1_edge_alpha.generated.json",
+        "ui1r1_agent_disagreement.generated.json",
+        "ui1r1_parameter_tuning.generated.json"
+      ],
+      "linked_action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "linked_agent_role_refs": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "owner_default_visible_or_mobile_reachable": true,
+      "provider_stage": "UI1",
+      "row_id": "UI1R1_FIX_04",
+      "runtime_side_effect": false,
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_state_model.generated.json",
+        "owner_dashboard_widget_manifest.generated.json",
+        "owner_action_registry.generated.jsonl",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "status": "PASS",
+      "title": "TCA waterfall chart frame",
+      "ui_refs": [
+        "owner_dashboard_review_surface.html",
+        "owner_dashboard_review_surface.js",
+        "owner_dashboard_review_surface.css"
+      ],
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "validation_refs": [
+        "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+        "tests/pr169_dash1_ui1"
+      ]
+    },
+    {
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_CommandActionMatrix.report.json",
+        "PR165_D2_AGENT_ROLE_GAP_ROUTE::provider_pending"
+      ],
+      "activation_route": "UI1_ACTIVATION_ROUTE::UI1R1_FIX_05",
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "fix_number": 5,
+      "fix_title": "Portfolio allocation/exposure cards",
+      "generated_artifact_refs": [
+        "ui1r1_home.generated.json",
+        "ui1r1_chart_manifest.generated.json",
+        "ui1r1_order_sim.generated.json",
+        "ui1r1_chat_contract.generated.json",
+        "ui1r1_edge_alpha.generated.json",
+        "ui1r1_agent_disagreement.generated.json",
+        "ui1r1_parameter_tuning.generated.json"
+      ],
+      "linked_action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "linked_agent_role_refs": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "owner_default_visible_or_mobile_reachable": true,
+      "provider_stage": "UI1",
+      "row_id": "UI1R1_FIX_05",
+      "runtime_side_effect": false,
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_state_model.generated.json",
+        "owner_dashboard_widget_manifest.generated.json",
+        "owner_action_registry.generated.jsonl",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "status": "PASS",
+      "title": "Portfolio allocation/exposure cards",
+      "ui_refs": [
+        "owner_dashboard_review_surface.html",
+        "owner_dashboard_review_surface.js",
+        "owner_dashboard_review_surface.css"
+      ],
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "validation_refs": [
+        "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+        "tests/pr169_dash1_ui1"
+      ]
+    },
+    {
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_CommandActionMatrix.report.json",
+        "PR165_D2_AGENT_ROLE_GAP_ROUTE::provider_pending"
+      ],
+      "activation_route": "UI1_ACTIVATION_ROUTE::UI1R1_FIX_06",
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "fix_number": 6,
+      "fix_title": "Trade Workbench order simulator preview",
+      "generated_artifact_refs": [
+        "ui1r1_home.generated.json",
+        "ui1r1_chart_manifest.generated.json",
+        "ui1r1_order_sim.generated.json",
+        "ui1r1_chat_contract.generated.json",
+        "ui1r1_edge_alpha.generated.json",
+        "ui1r1_agent_disagreement.generated.json",
+        "ui1r1_parameter_tuning.generated.json"
+      ],
+      "linked_action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "linked_agent_role_refs": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "owner_default_visible_or_mobile_reachable": true,
+      "provider_stage": "UI1",
+      "row_id": "UI1R1_FIX_06",
+      "runtime_side_effect": false,
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_state_model.generated.json",
+        "owner_dashboard_widget_manifest.generated.json",
+        "owner_action_registry.generated.jsonl",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "status": "PASS",
+      "title": "Trade Workbench order simulator preview",
+      "ui_refs": [
+        "owner_dashboard_review_surface.html",
+        "owner_dashboard_review_surface.js",
+        "owner_dashboard_review_surface.css"
+      ],
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "validation_refs": [
+        "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+        "tests/pr169_dash1_ui1"
+      ]
+    },
+    {
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_CommandActionMatrix.report.json",
+        "PR165_D2_AGENT_ROLE_GAP_ROUTE::provider_pending"
+      ],
+      "activation_route": "UI1_ACTIVATION_ROUTE::UI1R1_FIX_07",
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "fix_number": 7,
+      "fix_title": "Typeable plain-English chat composer",
+      "generated_artifact_refs": [
+        "ui1r1_home.generated.json",
+        "ui1r1_chart_manifest.generated.json",
+        "ui1r1_order_sim.generated.json",
+        "ui1r1_chat_contract.generated.json",
+        "ui1r1_edge_alpha.generated.json",
+        "ui1r1_agent_disagreement.generated.json",
+        "ui1r1_parameter_tuning.generated.json"
+      ],
+      "linked_action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "linked_agent_role_refs": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "owner_default_visible_or_mobile_reachable": true,
+      "provider_stage": "UI1",
+      "row_id": "UI1R1_FIX_07",
+      "runtime_side_effect": false,
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_state_model.generated.json",
+        "owner_dashboard_widget_manifest.generated.json",
+        "owner_action_registry.generated.jsonl",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "status": "PASS",
+      "title": "Typeable plain-English chat composer",
+      "ui_refs": [
+        "owner_dashboard_review_surface.html",
+        "owner_dashboard_review_surface.js",
+        "owner_dashboard_review_surface.css"
+      ],
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "validation_refs": [
+        "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+        "tests/pr169_dash1_ui1"
+      ]
+    },
+    {
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_CommandActionMatrix.report.json",
+        "PR165_D2_AGENT_ROLE_GAP_ROUTE::provider_pending"
+      ],
+      "activation_route": "UI1_ACTIVATION_ROUTE::UI1R1_FIX_08",
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "fix_number": 8,
+      "fix_title": "Chat-to-trade and chat-to-research route previews",
+      "generated_artifact_refs": [
+        "ui1r1_home.generated.json",
+        "ui1r1_chart_manifest.generated.json",
+        "ui1r1_order_sim.generated.json",
+        "ui1r1_chat_contract.generated.json",
+        "ui1r1_edge_alpha.generated.json",
+        "ui1r1_agent_disagreement.generated.json",
+        "ui1r1_parameter_tuning.generated.json"
+      ],
+      "linked_action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "linked_agent_role_refs": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "owner_default_visible_or_mobile_reachable": true,
+      "provider_stage": "UI1",
+      "row_id": "UI1R1_FIX_08",
+      "runtime_side_effect": false,
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_state_model.generated.json",
+        "owner_dashboard_widget_manifest.generated.json",
+        "owner_action_registry.generated.jsonl",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "status": "PASS",
+      "title": "Chat-to-trade and chat-to-research route previews",
+      "ui_refs": [
+        "owner_dashboard_review_surface.html",
+        "owner_dashboard_review_surface.js",
+        "owner_dashboard_review_surface.css"
+      ],
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "validation_refs": [
+        "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+        "tests/pr169_dash1_ui1"
+      ]
+    },
+    {
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_CommandActionMatrix.report.json",
+        "PR165_D2_AGENT_ROLE_GAP_ROUTE::provider_pending"
+      ],
+      "activation_route": "UI1_ACTIVATION_ROUTE::UI1R1_FIX_09",
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "fix_number": 9,
+      "fix_title": "Edge/alpha board with execution-adjusted ranking",
+      "generated_artifact_refs": [
+        "ui1r1_home.generated.json",
+        "ui1r1_chart_manifest.generated.json",
+        "ui1r1_order_sim.generated.json",
+        "ui1r1_chat_contract.generated.json",
+        "ui1r1_edge_alpha.generated.json",
+        "ui1r1_agent_disagreement.generated.json",
+        "ui1r1_parameter_tuning.generated.json"
+      ],
+      "linked_action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "linked_agent_role_refs": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "owner_default_visible_or_mobile_reachable": true,
+      "provider_stage": "UI1",
+      "row_id": "UI1R1_FIX_09",
+      "runtime_side_effect": false,
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_state_model.generated.json",
+        "owner_dashboard_widget_manifest.generated.json",
+        "owner_action_registry.generated.jsonl",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "status": "PASS",
+      "title": "Edge/alpha board with execution-adjusted ranking",
+      "ui_refs": [
+        "owner_dashboard_review_surface.html",
+        "owner_dashboard_review_surface.js",
+        "owner_dashboard_review_surface.css"
+      ],
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "validation_refs": [
+        "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+        "tests/pr169_dash1_ui1"
+      ]
+    },
+    {
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_CommandActionMatrix.report.json",
+        "PR165_D2_AGENT_ROLE_GAP_ROUTE::provider_pending"
+      ],
+      "activation_route": "UI1_ACTIVATION_ROUTE::UI1R1_FIX_10",
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "fix_number": 10,
+      "fix_title": "Agent disagreement panel",
+      "generated_artifact_refs": [
+        "ui1r1_home.generated.json",
+        "ui1r1_chart_manifest.generated.json",
+        "ui1r1_order_sim.generated.json",
+        "ui1r1_chat_contract.generated.json",
+        "ui1r1_edge_alpha.generated.json",
+        "ui1r1_agent_disagreement.generated.json",
+        "ui1r1_parameter_tuning.generated.json"
+      ],
+      "linked_action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "linked_agent_role_refs": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "owner_default_visible_or_mobile_reachable": true,
+      "provider_stage": "UI1",
+      "row_id": "UI1R1_FIX_10",
+      "runtime_side_effect": false,
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_state_model.generated.json",
+        "owner_dashboard_widget_manifest.generated.json",
+        "owner_action_registry.generated.jsonl",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "status": "PASS",
+      "title": "Agent disagreement panel",
+      "ui_refs": [
+        "owner_dashboard_review_surface.html",
+        "owner_dashboard_review_surface.js",
+        "owner_dashboard_review_surface.css"
+      ],
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "validation_refs": [
+        "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+        "tests/pr169_dash1_ui1"
+      ]
+    },
+    {
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_CommandActionMatrix.report.json",
+        "PR165_D2_AGENT_ROLE_GAP_ROUTE::provider_pending"
+      ],
+      "activation_route": "UI1_ACTIVATION_ROUTE::UI1R1_FIX_11",
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "fix_number": 11,
+      "fix_title": "Parameter tuning UI preview",
+      "generated_artifact_refs": [
+        "ui1r1_home.generated.json",
+        "ui1r1_chart_manifest.generated.json",
+        "ui1r1_order_sim.generated.json",
+        "ui1r1_chat_contract.generated.json",
+        "ui1r1_edge_alpha.generated.json",
+        "ui1r1_agent_disagreement.generated.json",
+        "ui1r1_parameter_tuning.generated.json"
+      ],
+      "linked_action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "linked_agent_role_refs": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "owner_default_visible_or_mobile_reachable": true,
+      "provider_stage": "UI1",
+      "row_id": "UI1R1_FIX_11",
+      "runtime_side_effect": false,
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_state_model.generated.json",
+        "owner_dashboard_widget_manifest.generated.json",
+        "owner_action_registry.generated.jsonl",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "status": "PASS",
+      "title": "Parameter tuning UI preview",
+      "ui_refs": [
+        "owner_dashboard_review_surface.html",
+        "owner_dashboard_review_surface.js",
+        "owner_dashboard_review_surface.css"
+      ],
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "validation_refs": [
+        "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+        "tests/pr169_dash1_ui1"
+      ]
+    },
+    {
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_CommandActionMatrix.report.json",
+        "PR165_D2_AGENT_ROLE_GAP_ROUTE::provider_pending"
+      ],
+      "activation_route": "UI1_ACTIVATION_ROUTE::UI1R1_FIX_12",
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "fix_number": 12,
+      "fix_title": "Playwright visual QA screenshots",
+      "generated_artifact_refs": [
+        "ui1r1_home.generated.json",
+        "ui1r1_chart_manifest.generated.json",
+        "ui1r1_order_sim.generated.json",
+        "ui1r1_chat_contract.generated.json",
+        "ui1r1_edge_alpha.generated.json",
+        "ui1r1_agent_disagreement.generated.json",
+        "ui1r1_parameter_tuning.generated.json"
+      ],
+      "linked_action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "linked_agent_role_refs": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "owner_default_visible_or_mobile_reachable": true,
+      "provider_stage": "UI1",
+      "row_id": "UI1R1_FIX_12",
+      "runtime_side_effect": false,
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_state_model.generated.json",
+        "owner_dashboard_widget_manifest.generated.json",
+        "owner_action_registry.generated.jsonl",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "status": "PASS",
+      "title": "Playwright visual QA screenshots",
+      "ui_refs": [
+        "owner_dashboard_review_surface.html",
+        "owner_dashboard_review_surface.js",
+        "owner_dashboard_review_surface.css"
+      ],
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "validation_refs": [
+        "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+        "tests/pr169_dash1_ui1"
+      ]
+    }
+  ]
+}

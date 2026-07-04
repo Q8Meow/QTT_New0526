@@ -1,0 +1,376 @@
+{
+  "meta": {
+    "agent_consumable_authority": false,
+    "artifact_id": "UI1R1_AGENT_DISAGREEMENT",
+    "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+    "connector_access_allowed": false,
+    "credential_access_allowed": false,
+    "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config + PR169-DASH1 artifacts + PR169-DASH1-UI1 boot data + OwnerDashboardStateV1 + OwnerSurfaceResolver + OwnerActionRegistry + UI component config",
+    "manual_edit_allowed": false,
+    "order_execution_allowed": false,
+    "runtime_side_effect_allowed": false,
+    "runtime_truth_authority": false,
+    "source_truth_authority": false,
+    "ui1r1_generated_from": "PR169-DASH1 artifacts + PR169-DASH1-UI1 boot data + OwnerDashboardStateV1 + OwnerSurfaceResolver + OwnerActionRegistry + UI component config",
+    "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+  },
+  "placements": [
+    "Home preview card",
+    "Trade Workbench section",
+    "Chat response-preview card",
+    "Decision Queue drilldown",
+    "Agents tab"
+  ],
+  "rows": [
+    {
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_CommandActionMatrix.report.json",
+        "PR165_D2_AGENT_ROLE_GAP_ROUTE::provider_pending"
+      ],
+      "activation_route": "AGENT_ORCH1_ACTIVATION_ROUTE::UI1R1_AGENT_DISAGREE_01",
+      "agent_role_ref_from_PR165_D2_or_gap": "dashboard_agent",
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "fake_agent_claim": false,
+      "linked_action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "linked_agent_role_refs": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "linked_evidence_ref_or_provider_pending_route": "AGENT_ORCH1_PROVIDER_ROUTE::agreement_receipts",
+      "linked_trade_or_research_candidate_ref": "TradePlanCandidateV1::provider_pending",
+      "objection_type": "agents_in_agreement",
+      "owner_next_action": "Open Trade Workbench route preview or request more evidence.",
+      "provider_stage": "AGENT_ORCH1",
+      "row_id": "UI1R1_AGENT_DISAGREE_01",
+      "runtime_side_effect": false,
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_state_model.generated.json",
+        "owner_dashboard_widget_manifest.generated.json",
+        "owner_action_registry.generated.jsonl",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "title": "agents_in_agreement",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+    },
+    {
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_CommandActionMatrix.report.json",
+        "PR165_D2_AGENT_ROLE_GAP_ROUTE::provider_pending"
+      ],
+      "activation_route": "AGENT_ORCH1_ACTIVATION_ROUTE::UI1R1_AGENT_DISAGREE_02",
+      "agent_role_ref_from_PR165_D2_or_gap": "risk_manager_agent",
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "fake_agent_claim": false,
+      "linked_action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "linked_agent_role_refs": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "linked_evidence_ref_or_provider_pending_route": "AGENT_ORCH1_PROVIDER_ROUTE::objection_receipts",
+      "linked_trade_or_research_candidate_ref": "TradePlanCandidateV1::provider_pending",
+      "objection_type": "agents_objecting",
+      "owner_next_action": "Open Trade Workbench route preview or request more evidence.",
+      "provider_stage": "AGENT_ORCH1",
+      "row_id": "UI1R1_AGENT_DISAGREE_02",
+      "runtime_side_effect": false,
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_state_model.generated.json",
+        "owner_dashboard_widget_manifest.generated.json",
+        "owner_action_registry.generated.jsonl",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "title": "agents_objecting",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+    },
+    {
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_CommandActionMatrix.report.json",
+        "PR165_D2_AGENT_ROLE_GAP_ROUTE::provider_pending"
+      ],
+      "activation_route": "AGENT_ORCH1_ACTIVATION_ROUTE::UI1R1_AGENT_DISAGREE_03",
+      "agent_role_ref_from_PR165_D2_or_gap": "commander_agent",
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "fake_agent_claim": false,
+      "linked_action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "linked_agent_role_refs": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "linked_evidence_ref_or_provider_pending_route": "LLM3_PROVIDER_ROUTE::critic_objections",
+      "linked_trade_or_research_candidate_ref": "TradePlanCandidateV1::provider_pending",
+      "objection_type": "LLM_critic_objections",
+      "owner_next_action": "Open Trade Workbench route preview or request more evidence.",
+      "provider_stage": "AGENT_ORCH1",
+      "row_id": "UI1R1_AGENT_DISAGREE_03",
+      "runtime_side_effect": false,
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_state_model.generated.json",
+        "owner_dashboard_widget_manifest.generated.json",
+        "owner_action_registry.generated.jsonl",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "title": "LLM_critic_objections",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+    },
+    {
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_CommandActionMatrix.report.json",
+        "PR165_D2_AGENT_ROLE_GAP_ROUTE::provider_pending"
+      ],
+      "activation_route": "AGENT_ORCH1_ACTIVATION_ROUTE::UI1R1_AGENT_DISAGREE_04",
+      "agent_role_ref_from_PR165_D2_or_gap": "risk_manager_agent",
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "fake_agent_claim": false,
+      "linked_action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "linked_agent_role_refs": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "linked_evidence_ref_or_provider_pending_route": "docs/master_plan/generated/pr168_rp5g/fill_latency_cap.jsonl",
+      "linked_trade_or_research_candidate_ref": "TradePlanCandidateV1::provider_pending",
+      "objection_type": "risk_objections",
+      "owner_next_action": "Open Trade Workbench route preview or request more evidence.",
+      "provider_stage": "AGENT_ORCH1",
+      "row_id": "UI1R1_AGENT_DISAGREE_04",
+      "runtime_side_effect": false,
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_state_model.generated.json",
+        "owner_dashboard_widget_manifest.generated.json",
+        "owner_action_registry.generated.jsonl",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "title": "risk_objections",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+    },
+    {
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_CommandActionMatrix.report.json",
+        "PR165_D2_AGENT_ROLE_GAP_ROUTE::provider_pending"
+      ],
+      "activation_route": "AGENT_ORCH1_ACTIVATION_ROUTE::UI1R1_AGENT_DISAGREE_05",
+      "agent_role_ref_from_PR165_D2_or_gap": "source_verifier",
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "fake_agent_claim": false,
+      "linked_action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "linked_agent_role_refs": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "linked_evidence_ref_or_provider_pending_route": "LLM2_PROVIDER_ROUTE::source_evidence",
+      "linked_trade_or_research_candidate_ref": "TradePlanCandidateV1::provider_pending",
+      "objection_type": "source_objections",
+      "owner_next_action": "Open Trade Workbench route preview or request more evidence.",
+      "provider_stage": "AGENT_ORCH1",
+      "row_id": "UI1R1_AGENT_DISAGREE_05",
+      "runtime_side_effect": false,
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_state_model.generated.json",
+        "owner_dashboard_widget_manifest.generated.json",
+        "owner_action_registry.generated.jsonl",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "title": "source_objections",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+    },
+    {
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_CommandActionMatrix.report.json",
+        "PR165_D2_AGENT_ROLE_GAP_ROUTE::provider_pending"
+      ],
+      "activation_route": "AGENT_ORCH1_ACTIVATION_ROUTE::UI1R1_AGENT_DISAGREE_06",
+      "agent_role_ref_from_PR165_D2_or_gap": "risk_manager_agent",
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "fake_agent_claim": false,
+      "linked_action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "linked_agent_role_refs": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "linked_evidence_ref_or_provider_pending_route": "docs/master_plan/generated/pr168_rp5g/tca_decomp.jsonl",
+      "linked_trade_or_research_candidate_ref": "TradePlanCandidateV1::provider_pending",
+      "objection_type": "TCA_objections",
+      "owner_next_action": "Open Trade Workbench route preview or request more evidence.",
+      "provider_stage": "AGENT_ORCH1",
+      "row_id": "UI1R1_AGENT_DISAGREE_06",
+      "runtime_side_effect": false,
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_state_model.generated.json",
+        "owner_dashboard_widget_manifest.generated.json",
+        "owner_action_registry.generated.jsonl",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "title": "TCA_objections",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+    },
+    {
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_CommandActionMatrix.report.json",
+        "PR165_D2_AGENT_ROLE_GAP_ROUTE::provider_pending"
+      ],
+      "activation_route": "AGENT_ORCH1_ACTIVATION_ROUTE::UI1R1_AGENT_DISAGREE_07",
+      "agent_role_ref_from_PR165_D2_or_gap": "memory_revalidation_provider",
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "fake_agent_claim": false,
+      "linked_action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "linked_agent_role_refs": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "linked_evidence_ref_or_provider_pending_route": "docs/master_plan/generated/pr168_mem1/memory_query_contract.jsonl",
+      "linked_trade_or_research_candidate_ref": "TradePlanCandidateV1::provider_pending",
+      "objection_type": "memory_regime_objections",
+      "owner_next_action": "Open Trade Workbench route preview or request more evidence.",
+      "provider_stage": "AGENT_ORCH1",
+      "row_id": "UI1R1_AGENT_DISAGREE_07",
+      "runtime_side_effect": false,
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_state_model.generated.json",
+        "owner_dashboard_widget_manifest.generated.json",
+        "owner_action_registry.generated.jsonl",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "title": "memory_regime_objections",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+    },
+    {
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_CommandActionMatrix.report.json",
+        "PR165_D2_AGENT_ROLE_GAP_ROUTE::provider_pending"
+      ],
+      "activation_route": "AGENT_ORCH1_ACTIVATION_ROUTE::UI1R1_AGENT_DISAGREE_08",
+      "agent_role_ref_from_PR165_D2_or_gap": "quantum_optimizer_agent",
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "fake_agent_claim": false,
+      "linked_action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "linked_agent_role_refs": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "linked_evidence_ref_or_provider_pending_route": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "linked_trade_or_research_candidate_ref": "TradePlanCandidateV1::provider_pending",
+      "objection_type": "quantum_readiness_objections",
+      "owner_next_action": "Open Trade Workbench route preview or request more evidence.",
+      "provider_stage": "AGENT_ORCH1",
+      "row_id": "UI1R1_AGENT_DISAGREE_08",
+      "runtime_side_effect": false,
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_state_model.generated.json",
+        "owner_dashboard_widget_manifest.generated.json",
+        "owner_action_registry.generated.jsonl",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "title": "quantum_readiness_objections",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+    },
+    {
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_CommandActionMatrix.report.json",
+        "PR165_D2_AGENT_ROLE_GAP_ROUTE::provider_pending"
+      ],
+      "activation_route": "AGENT_ORCH1_ACTIVATION_ROUTE::UI1R1_AGENT_DISAGREE_09",
+      "agent_role_ref_from_PR165_D2_or_gap": "risk_manager_agent",
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "fake_agent_claim": false,
+      "linked_action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "linked_agent_role_refs": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "linked_evidence_ref_or_provider_pending_route": "docs/master_plan/generated/pr168_rp5g/fill_latency_cap.jsonl",
+      "linked_trade_or_research_candidate_ref": "TradePlanCandidateV1::provider_pending",
+      "objection_type": "capacity_crowding_objections",
+      "owner_next_action": "Open Trade Workbench route preview or request more evidence.",
+      "provider_stage": "AGENT_ORCH1",
+      "row_id": "UI1R1_AGENT_DISAGREE_09",
+      "runtime_side_effect": false,
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_state_model.generated.json",
+        "owner_dashboard_widget_manifest.generated.json",
+        "owner_action_registry.generated.jsonl",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "title": "capacity_crowding_objections",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+    },
+    {
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_CommandActionMatrix.report.json",
+        "PR165_D2_AGENT_ROLE_GAP_ROUTE::provider_pending"
+      ],
+      "activation_route": "AGENT_ORCH1_ACTIVATION_ROUTE::UI1R1_AGENT_DISAGREE_10",
+      "agent_role_ref_from_PR165_D2_or_gap": "dashboard_agent",
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "fake_agent_claim": false,
+      "linked_action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "linked_agent_role_refs": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "linked_evidence_ref_or_provider_pending_route": "READINESS1_PROVIDER_ROUTE::freshness_receipts",
+      "linked_trade_or_research_candidate_ref": "TradePlanCandidateV1::provider_pending",
+      "objection_type": "data_freshness_objections",
+      "owner_next_action": "Open Trade Workbench route preview or request more evidence.",
+      "provider_stage": "AGENT_ORCH1",
+      "row_id": "UI1R1_AGENT_DISAGREE_10",
+      "runtime_side_effect": false,
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_state_model.generated.json",
+        "owner_dashboard_widget_manifest.generated.json",
+        "owner_action_registry.generated.jsonl",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "title": "data_freshness_objections",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+    }
+  ]
+}

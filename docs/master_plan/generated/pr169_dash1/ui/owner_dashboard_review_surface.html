@@ -11,7 +11,7 @@
     <div class="brand-block">
       <span class="eyebrow">PR169-DASH1-UI1 renderer layer</span>
       <h1>QTT Owner Dashboard Workstation</h1>
-      <p>OwnerSurfaceResolver + OwnerActionRegistry renderer for DASH1 generated artifacts.</p>
+      <p>Owner Mode trading cockpit over OwnerDashboardStateV1, OwnerSurfaceResolver, and OwnerActionRegistry. No direct venue submit.</p>
     </div>
     <div class="header-controls">
       <div class="theme-switch" role="group" aria-label="Theme switch">
@@ -22,7 +22,7 @@
     </div>
   </header>
 
-  <section class="status-strip" aria-label="DASH1 renderer status">
+  <section class="status-strip" aria-label="Owner Mode data freshness and authority status">
     <div id="statusGrid" class="status-grid"></div>
   </section>
 
@@ -30,26 +30,27 @@
     <nav class="rail" aria-label="Dashboard sections">
       <a href="#overview">Overview</a>
       <a href="#portfolio">Portfolio &amp; PnL</a>
+      <a href="#trade-workbench">Trade Workbench</a>
+      <a href="#chat">Chat</a>
       <a href="#decisions">Decision Queue</a>
-      <a href="#actionable-cards">Actionable Cards</a>
       <a href="#research">Research Intake</a>
       <a href="#edge-alpha">Edge / Alpha Board</a>
       <a href="#parameter-control">Parameter Control</a>
+      <a href="#agents">Agent Operations</a>
       <a href="#qku-formula">QKU / Formula / Stack Routes</a>
       <a href="#quantum">Quantum Control Center</a>
-      <a href="#chat">Owner-Agent Chat Workspace</a>
-      <a href="#trade-workbench">Trade Workbench</a>
-      <a href="#agents">Agent Operations</a>
+      <a href="#actionable-cards">Actionable Cards</a>
       <a href="#provider-stage">Provider Stage Route Map</a>
       <a href="#more">DAG / Data Route Map</a>
+      <a href="#developer-mode">Developer Mode</a>
     </nav>
 
     <main class="workspace" id="workspace">
       <section id="overview" class="section">
         <div class="section-head">
           <div>
-            <span class="eyebrow">LOCAL_STATIC_READ_ONLY</span>
-            <h2>Overview</h2>
+            <span class="eyebrow">OWNER MODE · LOCAL STATIC REQUEST PREVIEWS</span>
+            <h2>Owner Home</h2>
           </div>
           <div class="search-row">
             <label for="globalSearch">Search / filter / sort</label>
@@ -57,6 +58,8 @@
           </div>
         </div>
         <div id="overviewCards" class="metric-grid"></div>
+        <div id="homeQuickGrid" class="home-grid"></div>
+        <div id="homeDeveloperSummary" class="developer-summary"></div>
       </section>
 
       <section id="portfolio" class="section">
@@ -197,6 +200,16 @@
         <div id="systemContracts" class="card-grid"></div>
         <div id="dagRouteMap" class="table-shell"></div>
       </section>
+
+      <section id="developer-mode" class="section">
+        <div class="section-head">
+          <div>
+            <span class="eyebrow">Collapsed by default</span>
+            <h2>Developer Mode</h2>
+          </div>
+        </div>
+        <div id="developerMode" class="developer-panel"></div>
+      </section>
     </main>
   </div>
 
@@ -214,13 +227,16 @@
   <nav id="mobileBottomNav" class="mobile-bottom-nav" aria-label="Mobile bottom navigation">
     <a href="#overview">Home</a>
     <a href="#portfolio">Portfolio</a>
+    <a href="#trade-workbench">Trade Workbench</a>
+    <a href="#chat">Chat</a>
     <a href="#decisions">Decisions</a>
     <a href="#research">Research</a>
-    <a href="#chat">Chat</a>
-    <a href="#trade-workbench">Trade Workbench</a>
+    <a href="#edge-alpha">Edge/Alpha</a>
     <a href="#agents">Agents</a>
+    <a href="#parameter-control">Parameters</a>
     <a href="#quantum">Quantum</a>
     <a href="#more">More</a>
+    <a href="#developer-mode">Developer</a>
     <button id="mobileThemeToggle" type="button">Theme</button>
   </nav>
 

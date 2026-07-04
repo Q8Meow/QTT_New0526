@@ -32,6 +32,7 @@ PR168_VS2_BRANCH = "pr168-vs2-paper-intent-candidate-generator"
 PR168_MEM1_BRANCH = "pr168-mem1-condition-scoped-outcome-memory"
 PR169_DASH1_BRANCH = "pr169-dash1-owner-dashboard-interactive-research-v6"
 PR169_DASH1_UI1_BRANCH = "pr169-dash1-ui1-theme-switch-safe-renderer-v9"
+PR169_DASH1_UI1_R1_BRANCH = "pr169-dash1-ui1-r1-v3-owner12"
 VALIDATION_FIXTURE_BRANCH = "pr-ci-fastfail-validation-context-preflight"
 
 _PR168_BRANCHES = frozenset(
@@ -62,6 +63,7 @@ _PR168_BRANCHES = frozenset(
         PR168_MEM1_BRANCH,
         PR169_DASH1_BRANCH,
         PR169_DASH1_UI1_BRANCH,
+        PR169_DASH1_UI1_R1_BRANCH,
         VALIDATION_FIXTURE_BRANCH,
     }
 )
@@ -702,10 +704,15 @@ _PR169_DASH1_ALLOWED_EXACT_PATHS = frozenset(
         "tools/build_pr169_dash1_owner_dashboard.py",
         "tools/pr168_rp5c_config.py",
         "tools/validate_pr169_dash1_owner_dashboard.py",
+        "tools/validate_no_runtime_artifacts.py",
+        "tools/pr168_rp5c_config.py",
+        "tools/validate_source_fact_binding_connector_semantic_readiness_static.py",
         "tools/run_validation_gates.py",
         "tools/validation_inventory.py",
         "tools/validation_scope_registry.py",
         "tools/validate_validation_scope_registry.py",
+        "tests/fail_closed/test_no_runtime_artifacts_strict.py",
+        "tests/source_evidence/test_source_fact_binding_connector_semantic_readiness_static.py",
         "tests/tools/test_validation_scope_registry.py",
         "tests/tools/test_validation_inventory.py",
         "tests/tools/test_changed_area_validation_router.py",
@@ -1613,7 +1620,11 @@ def explain_pr_scope_decision(branch: str, path: str) -> dict[str, object]:
             "reason": "path_not_registered_for_pr_scope",
         }
 
-    if branch_name in {PR169_DASH1_BRANCH, PR169_DASH1_UI1_BRANCH}:
+    if branch_name in {
+        PR169_DASH1_BRANCH,
+        PR169_DASH1_UI1_BRANCH,
+        PR169_DASH1_UI1_R1_BRANCH,
+    }:
         dash1_decision = _pr169_dash1_scope_decision(branch_name, normalized)
         if dash1_decision:
             return dash1_decision
