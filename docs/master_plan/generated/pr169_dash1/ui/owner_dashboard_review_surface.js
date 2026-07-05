@@ -107,6 +107,20 @@ const DashboardSystem = (() => {
   const nextById = new Map(nextRows.map((row) => [row.next_step_id, row]));
   const menuRows = asList(DASHBOARD_DATA.ui1r2_action_menu && DASHBOARD_DATA.ui1r2_action_menu.rows);
   const menuByWidget = new Map(menuRows.map((row) => [row.widget_id, row]));
+  const modeRows = asList(DASHBOARD_DATA.ui1r2r1_mode_policy && DASHBOARD_DATA.ui1r2r1_mode_policy.rows);
+  const modeById = new Map(modeRows.map((row) => [row.mode_id, row]));
+  const interactionState = {
+    receipts: [],
+    chatMessages: [],
+    chatEnterToSend: false,
+    guided: {},
+    workbenchContext: null
+  };
+
+  // OwnerExperienceModePolicy: one central mode policy over the shared OwnerDashboardStateV1.
+  function modePolicy(mode) {
+    return modeById.get(mode) || modeById.get("GUIDED_OWNER") || {};
+  }
 
   function cleanTechnicalText(text) {
     let value = String(text || "").trim();
@@ -185,9 +199,24 @@ const DashboardSystem = (() => {
     );
   }
 
+  function semanticFallback(row, fallback = "QTT workflow item") {
+    const text = `${fallback} ${row ? Object.values(row).slice(0, 12).join(" ") : ""}`.toLowerCase();
+    if (/no[- ]trade/.test(text)) return "Inspect no-trade reason";
+    if (/tca|cost|slippage|spread|fee|latency|impact/.test(text)) return "Review cost breakdown";
+    if (/qku|formula|stack/.test(text)) return "Inspect QKU/formula route";
+    if (/agent|objection|disagree/.test(text)) return "Review agent disagreement";
+    if (/parameter|variable|tuning/.test(text)) return "Open parameter tuning preview";
+    if (/quantum|qubo|bqm|cqm|qaoa|vqe|ising/.test(text)) return "Review quantum readiness";
+    if (/provider|stage|route/.test(text)) return "Review provider-stage route";
+    if (/capital|cash|exposure|portfolio/.test(text)) return "Inspect capital/exposure status";
+    if (/trade|candidate|market|venue|edge|alpha|rank/.test(text)) return "Check trade candidate";
+    if (/dashboard|packet|readiness|status|decision/.test(text)) return "Review dashboard readiness";
+    return "QTT workflow item";
+  }
+
   function ownerTitle(row, fallback = "QTT workflow item") {
     if (!row || typeof row !== "object") return fallback;
-    return present(
+    const title = present(
       row.owner_title ||
       row.chart_title ||
       row.widget_title ||
@@ -202,6 +231,10 @@ const DashboardSystem = (() => {
       row.stage_id ||
       fallback
     );
+    if (/^(Owner Decision|Actionable Card|QTT Workflow Item|Dashboard Evidence Row)$/i.test(title)) {
+      return semanticFallback(row, fallback);
+    }
+    return title;
   }
 
   function summary(row, fallback = "This item is connected to QTT technical evidence. Technical details are available below.") {
@@ -267,14 +300,17 @@ const DashboardSystem = (() => {
 
   function localReceipt(route, context, text) {
     const receipt = {
+      interaction_id: `UI1R2R1_LOCAL_${Date.now()}_${interactionState.receipts.length + 1}`,
       route,
       context_id: idOf(context, "local_context"),
       title: route ? route.owner_label : "Local route preview",
       preview_object_type: route ? route.preview_object_type : "OwnerTradeIntentPreviewV1",
       receipt_type: route ? route.local_receipt_preview_type : "OwnerTradeIntentPreviewV1",
+      authority_boundary: "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
       runtime_side_effect_allowed: false,
       text: text || "Local preview created. No runtime work runs now."
     };
+    interactionState.receipts.push(receipt);
     const target = qs("#routePreviewPanel");
     if (target) {
       target.innerHTML = receiptCard(receipt);
@@ -288,11 +324,26 @@ const DashboardSystem = (() => {
     const route = nextStep(nextStepId);
     if (!route) return;
     if (nextStepId === "NEXT_STEP_SEND_TO_TRADE_WORKBENCH") {
+      // OwnerWorkbenchPrefillAdapter: all selected contexts enter one local prefill path.
       const workbench = qs("#tradeWorkbench");
       if (workbench) {
         workbench.dataset.prefilledContext = "true";
+        workbench.dataset.prefillSource = idOf(context, "selected_context");
+        interactionState.workbenchContext = context;
         const prefill = qs("#tradeWorkbenchPrefill");
-        if (prefill) prefill.textContent = `Prefilled local context: ${ownerTitle(context, "selected card")}`;
+        if (prefill) prefill.textContent = `Prefilled local context: ${ownerTitle(context, "selected card")}. Missing owner input: confirm market, side, size, and objective before any later provider can act.`;
+        const refs = qs("#tradeWorkbenchContextRefs");
+        if (refs) {
+          refs.innerHTML = [
+            "selected card/widget/chat ref carried locally",
+            "execution-adjusted rank ref or provider-pending gap",
+            "TCA / cost ref or provider-pending gap",
+            "no-trade comparator and reoptimization route",
+            "QKU/formula refs or explicit gap route",
+            "PR165-D2 agent role refs or explicit gap route",
+            "DAG upstream/downstream route ref"
+          ].map((item) => `<span>${safe(item)}</span>`).join("");
+        }
       }
       localReceipt(route, context, "Trade Workbench is open with selected local context. QTT needs the owner to confirm the objective or add a plain-English trade idea.");
       location.hash = "trade-workbench";
@@ -346,8 +397,10 @@ const DashboardSystem = (() => {
     guidanceFor,
     menuFor,
     nextStep,
+    modePolicy,
     routeAction,
-    localReceipt
+    localReceipt,
+    interactionState
   };
 })();
 
@@ -375,10 +428,11 @@ function badges(row, extra = []) {
 
 function receiptCard(receipt) {
   return `
-    <article class="card receipt-card" data-local-receipt-preview="${safe(receipt.receipt_type)}">
+    <article class="card receipt-card" data-local-receipt-preview="${safe(receipt.receipt_type)}" data-interaction-result="OwnerInteractionResultV1" data-runtime-side-effect-allowed="false">
       <h3>${safe(receipt.title)}</h3>
       <p>${safe(receipt.text)}</p>
       <div class="preview-grid">
+        <span>Interaction: ${safe(receipt.interaction_id || "local preview")}</span>
         <span>Preview object: ${safe(label(receipt.preview_object_type))}</span>
         <span>Context: ${safe(label(receipt.context_id))}</span>
         <span>Runtime work: none</span>
@@ -399,13 +453,14 @@ function ownerControls(row, surface = "trade_workbench") {
         <summary>What can I do next?</summary>
         <div class="action-menu-body">
           <p><strong>Recommended:</strong> ${safe(menu.recommended_action_label || guidance.recommended)}</p>
-          ${options.map((option) => `
+          ${options.map((option, index) => `
             <button
-              class="menu-option ${option.state === "ENABLED_LOCAL_PREVIEW" ? "" : "is-disabled"}"
+              class="menu-option ${index === 0 && option.state === "ENABLED_LOCAL_PREVIEW" ? "action-primary" : "action-secondary"} ${option.state === "PROVIDER_PENDING" ? "is-provider-pending" : ""} ${option.state === "ENABLED_LOCAL_PREVIEW" ? "" : "is-disabled"}"
               type="button"
               data-next-step-id="${safe(option.next_step_id)}"
               data-local-receipt-preview="${safe(option.next_step_id)}"
               data-action-state="${safe(option.state)}"
+              ${option.state === "PROVIDER_PENDING" ? 'data-provider-pending-action="true"' : ""}
               aria-disabled="false">
               ${safe(option.owner_label)}
             </button>
@@ -424,7 +479,7 @@ function ownerControls(row, surface = "trade_workbench") {
         <summary>Explain</summary>
         <p>${safe(guidance.missing)}</p>
       </details>
-      <button class="text-command" type="button" data-next-step-id="NEXT_STEP_OPEN_TECHNICAL_DETAILS" data-local-receipt-preview="TechnicalDetailsOpenPreviewV1">Technical Details</button>
+      <button class="text-command technical-compact-control" type="button" data-next-step-id="NEXT_STEP_OPEN_TECHNICAL_DETAILS" data-local-receipt-preview="TechnicalDetailsOpenPreviewV1">Technical Details</button>
     </div>
   `;
 }
@@ -483,20 +538,32 @@ function openDrawer(title, kicker, row = {}, kind = "general") {
   const guidance = DashboardSystem.guidanceFor(row, kind);
   const rows = technicalRows(row);
   const kindBlocks = {
-    "no-trade": "No-trade is a comparator and reoptimization route. It is not a dead end and it does not repair formulas into profit.",
-    tca: "Cost breakdown covers fees, spread, slippage, latency, impact, opportunity cost, and capital lock when provider evidence exists.",
+    "no-trade": "No-trade is a comparator and reoptimization route. It is not a dead end. Local routes include smaller size, different venue, maker-only, later timing, different stack, better liquidity window, and different hold duration.",
+    tca: "Cost breakdown covers fees, spread, slippage, latency, impact, opportunity cost, capital lock, implementation shortfall, and net-of-friction basis when provider evidence exists. Missing values stay provider-pending.",
     chart: "The chart drilldown uses the selected chart context, provider state, and explanation control. No fake values are added.",
-    qku: "QKUs and formulas are immutable knowledge objects. QTT optimizes trade-plan variables and keeps computability gaps routed.",
-    disabled: "This action is blocked or provider-pending. The safe alternative is a local route preview or technical details.",
-    technical: "Technical references are available for this selected card only. Raw data stays collapsed until explicitly opened."
+    qku: "QKUs and formulas are immutable knowledge objects. QTT optimizes trade-plan variables and keeps computability gaps routed through the centralized resolver, with no raw JSONL scanning path.",
+    disabled: "This action is blocked or provider-pending. The safe alternative is a local route preview or technical details; no provider call or venue submit runs now.",
+    technical: "Technical references are available for this selected card only. Raw data stays collapsed until explicitly opened or Developer mode is selected."
   };
+  drawer.dataset.drawerKind = kind;
   qs("#drawerTitle").textContent = title || guidance.title;
   qs("#drawerKicker").textContent = kicker || "Evidence and routing";
   qs("#drawerBody").innerHTML = `
-    <div class="drawer-block">
+    <div class="drawer-block" data-drilldown-kind="${safe(kind)}">
       <h3>What this means</h3>
       <p>${safe(kindBlocks[kind] || guidance.summary)}</p>
       ${badges(row)}
+    </div>
+    <div class="drawer-block evidence-spine-block">
+      <h3>Selected context carried forward</h3>
+      <div class="preview-grid">
+        <span>Context: ${safe(DashboardSystem.ownerTitle(row, "selected dashboard item"))}</span>
+        <span>Execution-adjusted rank: ref or provider-pending gap</span>
+        <span>TCA / cost: ref or provider-pending gap</span>
+        <span>No-trade: comparator and reoptimization route</span>
+        <span>QKU/formula refs or explicit gap route</span>
+        <span>DAG: upstream/downstream route ref</span>
+      </div>
     </div>
     <div class="drawer-block">
       <h3>Current status</h3>
@@ -576,10 +643,28 @@ function initTheme() {
   }
 }
 
+function applyExperienceModePolicy(mode) {
+  const policy = DashboardSystem.modePolicy(mode);
+  document.body.dataset.metricDensity = policy.metric_density || "LOW";
+  document.body.dataset.educationDensity = policy.education_density || "COMPACT_COLLAPSED";
+  qsa("[data-mode-panel]").forEach((panel) => {
+    panel.hidden = panel.dataset.modePanel !== mode;
+  });
+  const overviewEyebrow = qs("#overview .section-head .eyebrow");
+  if (overviewEyebrow) {
+    overviewEyebrow.textContent = mode === "ADVANCED_OWNER"
+      ? "Advanced owner mode - dense trading metrics"
+      : mode === "DEVELOPER"
+        ? "Developer mode - technical evidence"
+        : "Guided owner mode - compact local previews";
+  }
+}
+
 function setExperienceMode(mode, persist = true) {
   const allowed = new Set(["GUIDED_OWNER", "ADVANCED_OWNER", "DEVELOPER"]);
   const normalized = allowed.has(mode) ? mode : "GUIDED_OWNER";
   document.body.dataset.experienceMode = normalized;
+  applyExperienceModePolicy(normalized);
   const switcher = qs("#experienceModeSwitch");
   if (switcher) switcher.dataset.experienceMode = normalized;
   qsa("[data-mode-choice]").forEach((button) => {
@@ -641,6 +726,46 @@ function renderCoach() {
         <summary>How guidance works</summary>
         <p>QTT agents may later evaluate, rank, test, and route candidates inside owner-approved policies. R2 only creates local next-step previews.</p>
       </details>
+    </article>
+    <article class="card mode-policy-card mode-only guided-mode-panel" data-mode-panel="GUIDED_OWNER">
+      <h3>Review dashboard readiness</h3>
+      <p>Compact owner view: one safe primary action, key safety badges, and collapsed details.</p>
+      <div class="compact-mode-grid">
+        <span data-mode-guided-metric="safety">Local preview only</span>
+        <span data-mode-guided-metric="evidence">Provider gaps visible</span>
+        <span data-mode-guided-metric="action">Start one guided step</span>
+      </div>
+    </article>
+    <article class="card mode-policy-card mode-only advanced-mode-panel" data-mode-panel="ADVANCED_OWNER" hidden>
+      <h3>Review execution-adjusted trade metrics</h3>
+      <p>Advanced owner view: denser readable metrics without raw registry rows.</p>
+      <div class="advanced-metric-grid">
+        ${[
+          "Execution-adjusted rank",
+          "TCA / implementation shortfall",
+          "Candidate minus no-trade",
+          "Capacity / crowding",
+          "FDR / overfit",
+          "Portfolio marginal utility",
+          "Champion / challenger",
+          "Regime memory / MEM1 prior",
+          "QKU/formula stack",
+          "Quantum structural readiness",
+          "Provider-stage route"
+        ].map((item) => `<span data-mode-advanced-metric="${safe(item)}">${safe(item)}</span>`).join("")}
+      </div>
+    </article>
+    <article class="card mode-policy-card mode-only developer-mode-panel" data-mode-panel="DEVELOPER" hidden>
+      <h3>Inspect renderer and registry evidence</h3>
+      <p>Developer view exposes refs, JSON, registry rows, validators, generated_from, provider_stage, runtime_side_effect, and debug details.</p>
+      <pre data-mode-developer-technical="true">${safe(JSON.stringify({
+        state_model: "OwnerDashboardStateV1",
+        resolver: "OwnerSurfaceResolver",
+        action_registry: "OwnerActionRegistry",
+        next_step_router: "OwnerNextStepRouter",
+        validation_ref: "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+        runtime_side_effect_allowed: false
+      }, null, 2))}</pre>
     </article>
   `;
   const matters = qs("#tellMattersPanel");
@@ -1033,19 +1158,22 @@ function renderQkuAndQuantum() {
 
 function inferIntentFamily(text) {
   const lower = text.toLowerCase();
-  if (lower.includes("no-trade") || lower.includes("no trade")) return lower.includes("why") || lower.includes("explain") ? "NO_TRADE_EXPLANATION_REQUEST" : "NO_TRADE_REOPTIMIZATION_REQUEST";
+  if (lower.includes("no-trade") || lower.includes("no trade")) return "NO_TRADE_EXPLANATION_REQUEST";
   if (lower.includes("research") || lower.includes("article") || lower.includes("link")) return "RESEARCH_ANALYSIS_REQUEST";
-  if (lower.includes("formula") || lower.includes("qku") || lower.includes("stack")) return "QKU_FORMULA_STACK_COMPARISON_REQUEST";
-  if (lower.includes("replay") || lower.includes("paper")) return "REPLAY_PAPER_REQUEST";
-  if (lower.includes("agent") && (lower.includes("disagree") || lower.includes("object"))) return "AGENT_DISAGREEMENT_QUESTION";
+  if (lower.includes("formula") && !lower.includes("qku")) return "FORMULA_EXTRACTION_REQUEST";
+  if (lower.includes("qku") || lower.includes("stack")) return "QKU_MATERIALIZATION_REQUEST";
+  if (lower.includes("quantum") || lower.includes("qubo") || lower.includes("qaoa") || lower.includes("vqe")) return "QUANTUM_STRUCTURE_MAPPING_REQUEST";
+  if (lower.includes("replay") && !lower.includes("paper")) return "REPLAY_PREVIEW_REQUEST";
+  if (lower.includes("paper") && !lower.includes("replay")) return "PAPER_PREVIEW_REQUEST";
+  if (lower.includes("agent") && (lower.includes("disagree") || lower.includes("object"))) return "AGENT_DISAGREEMENT_REQUEST";
   if (lower.includes("cost") || lower.includes("tca") || lower.includes("slippage")) return "TCA_COST_EXPLANATION_REQUEST";
   if (lower.includes("risk") || lower.includes("capacity")) return "RISK_CAPACITY_EXPLANATION_REQUEST";
-  if (lower.includes("parameter") || lower.includes("variable")) return "PARAMETER_TUNING_REQUEST";
-  if (lower.includes("edge") || lower.includes("alpha") || lower.includes("rank")) return "EDGE_ALPHA_RANKING_REQUEST";
+  if (lower.includes("parameter") || lower.includes("variable") || lower.includes("pass replay") || lower.includes("pass paper")) return "PARAMETER_TUNING_REQUEST";
+  if (lower.includes("edge") || lower.includes("alpha") || lower.includes("rank")) return "EDGE_ALPHA_REVIEW_REQUEST";
   if (lower.includes("live") || lower.includes("canary")) return "LIVE_CANARY_REVIEW_REQUEST_PREVIEW";
   if (lower.includes("kill")) return "KILL_SWITCH_REQUEST_PREVIEW";
   if (lower.includes("trade") || lower.includes("market") || lower.includes("best")) return "TRADE_CHECK_REQUEST";
-  return "GENERAL_QTT_QUESTION_PROVIDER_PENDING";
+  return "UNKNOWN_OWNER_REQUEST_NEEDS_CLARIFICATION";
 }
 
 function targetWorkspaceForIntent(intentFamily) {
@@ -1057,18 +1185,18 @@ function targetWorkspaceForIntent(intentFamily) {
 }
 
 function buildOwnerIntentPreview(rawText) {
-  const text = rawText.trim() || "Can QTT check this market?";
+  const text = String(rawText || "").trim();
   const intentFamily = inferIntentFamily(text);
   const targetWorkspace = targetWorkspaceForIntent(intentFamily);
   const previewObjects = intentFamily.includes("RESEARCH")
-    ? ["OwnerPlainEnglishIntentV1", "OwnerResearchSubmissionV1", "SourceCandidateV1", "FormulaExtractionCandidateV1"]
+    ? ["OwnerMessagePreviewV1", "OwnerPlainEnglishIntentPreviewV1", "OwnerResearchSubmissionPreviewV1", "SourceCandidatePreviewV1", "FormulaExtractionCandidatePreviewV1"]
     : intentFamily.includes("QKU") || intentFamily.includes("FORMULA")
-      ? ["OwnerPlainEnglishIntentV1", "QKUCandidateMaterializationRequestV1", "QuantumStructureMappingRequestV1"]
+      ? ["OwnerMessagePreviewV1", "OwnerPlainEnglishIntentPreviewV1", "QKUCandidateMaterializationPreviewV1", "QuantumStructureMappingPreviewV1"]
       : intentFamily.includes("NO_TRADE")
-        ? ["OwnerPlainEnglishIntentV1", "NoTradeReoptimizationRequestPreviewV1", "TradePlanCandidateV1"]
-        : ["OwnerPlainEnglishIntentV1", "OwnerTradeIntentV1", "OwnerTradeCheckRequestV1", "ReplayPaperRequestPreviewV1"];
+        ? ["OwnerMessagePreviewV1", "OwnerPlainEnglishIntentPreviewV1", "NoTradeReoptimizationRequestPreviewV1", "TradePlanCandidatePreviewV1"]
+        : ["OwnerMessagePreviewV1", "OwnerPlainEnglishIntentPreviewV1", "OwnerTradeIntentPreviewV1", "OwnerTradeCheckRequestPreviewV1", "ReplayPaperRequestPreviewV1"];
   return {
-    object_type: "OwnerPlainEnglishIntentV1",
+    object_type: "OwnerPlainEnglishIntentPreviewV1",
     intent_id: `LOCAL_PREVIEW_${Date.now()}`,
     thread_id: targetWorkspace === "Research Intake" ? "OWNER_THREAD_RESEARCH_INTAKE" : "OWNER_THREAD_TRADE_WORKBENCH",
     raw_owner_text_excerpt: text.slice(0, 140),
@@ -1078,14 +1206,20 @@ function buildOwnerIntentPreview(rawText) {
     clarifying_question_if_needed: text.length > 18 ? "No clarification needed for this preview." : "Which market, source, or candidate should QTT inspect?",
     target_workspace: targetWorkspace,
     structured_request_preview_refs: previewObjects,
-    runtime_side_effect: false
+    source_artifact_refs: ["owner_dashboard_conversation_state.generated.json", "owner_dashboard_chat_route_map.generated.json"],
+    PR165_D2_agent_role_refs_or_gap: ["PR165_D2_AgentDutySourceCrosswalk.report.json"],
+    QKU_formula_refs_or_gap: ["owner_qku_formula_candidate_route_view.generated.jsonl"],
+    LLM_view_refs_or_provider_route: ["owner_llm_view_projection.generated.jsonl"],
+    runtime_side_effect: false,
+    runtime_side_effect_allowed: false
   };
 }
 
 function renderIntentReceipt(preview) {
   const receipt = qs("#chatReceiptPreview");
+  DashboardSystem.interactionState.chatMessages.push(preview);
   receipt.innerHTML = `
-    <article class="card receipt-card" data-preview-object="OwnerPlainEnglishIntentV1">
+    <article class="card receipt-card" data-preview-object="OwnerPlainEnglishIntentPreviewV1" data-intent-family="${safe(preview.intent_family)}" data-runtime-side-effect-allowed="false">
       <h3>Local chat route preview</h3>
       <div class="chat-bubble owner-bubble">
         <strong>Owner</strong>
@@ -1100,6 +1234,14 @@ function renderIntentReceipt(preview) {
         <span>Preview objects: ${safe(label(preview.structured_request_preview_refs))}</span>
         <span>Confidence: ${safe(preview.confidence_label)}</span>
         <span>Next: ${safe(preview.clarifying_question_if_needed)}</span>
+        <span>Receipt: OwnerChatRouteReceiptPreviewV1</span>
+        <span>Agent response: provider-pending</span>
+        <span>Runtime side effect: false</span>
+      </div>
+      <div class="coach-actions">
+        <button class="primary-command" type="button" data-next-step-id="NEXT_STEP_SEND_TO_TRADE_WORKBENCH" data-local-receipt-preview="OwnerTradeIntentPreviewV1">Send to Trade Workbench</button>
+        <button class="text-command" type="button" data-next-step-id="NEXT_STEP_SHOW_QKU_FORMULA_ROUTES" data-local-receipt-preview="QKUFormulaRoutePreviewV1">Show QKU/formula routes</button>
+        <button class="text-command" type="button" data-next-step-id="NEXT_STEP_EXPLAIN_NO_TRADE" data-local-receipt-preview="NoTradeExplanationPreviewV1">Explain no-trade</button>
       </div>
       ${badges(preview, ["local coach reply", "receipt preview"])}
       ${ownerControls(preview, "trade_workbench")}
@@ -1110,42 +1252,159 @@ function renderIntentReceipt(preview) {
   wireNextActions(receipt);
 }
 
+// OwnerChatSubmitHandler: Ctrl+Enter and Send submit; Enter stays a safe newline by default.
+function submitOwnerChat(source = "BUTTON_SUBMIT") {
+  const input = qs("#ownerChatInput");
+  const hint = qs("#chatSubmitHint");
+  if (!input) return null;
+  const raw = input.value;
+  if (!raw.trim()) {
+    if (hint) {
+      hint.hidden = false;
+      hint.textContent = "Type a plain-English request before creating a local preview.";
+    }
+    input.focus();
+    return null;
+  }
+  if (hint) {
+    hint.hidden = false;
+    hint.textContent = source === "CTRL_ENTER_SUBMIT"
+      ? "Ctrl+Enter created a local route preview."
+      : source === "ENTER_TO_SEND_SUBMIT"
+        ? "Enter-to-send is enabled for this local preview."
+        : "Send created a local route preview.";
+  }
+  const preview = buildOwnerIntentPreview(raw);
+  preview.input_event_type = source;
+  renderIntentReceipt(preview);
+  input.value = "";
+  input.focus();
+  return preview;
+}
+
 function showGuidedWorkflow(workflowId, context = {}) {
   const flow = asList(DASHBOARD_DATA.ui1r2_guided_flow && DASHBOARD_DATA.ui1r2_guided_flow.flows).find((row) => row.workflow_id === workflowId) ||
     asList(DASHBOARD_DATA.ui1r2_guided_flow && DASHBOARD_DATA.ui1r2_guided_flow.flows)[0];
   const panel = qs("#guidedWorkflowPanel");
   if (!flow || !panel) return;
+  DashboardSystem.interactionState.guided[flow.workflow_id] = DashboardSystem.interactionState.guided[flow.workflow_id] || {
+    currentStep: 0,
+    values: {},
+    context
+  };
+  const state = DashboardSystem.interactionState.guided[flow.workflow_id];
   panel.innerHTML = `
-    <article class="card guided-flow-card" data-guided-workflow="${safe(flow.workflow_id)}">
+    <article class="card guided-flow-card" data-guided-workflow="${safe(flow.workflow_id)}" data-guided-current-step="${safe(state.currentStep)}">
       <h3>${safe(flow.workflow_label)}</h3>
       <p id="guidedWorkflowContext">Current local context: ${safe(DashboardSystem.ownerTitle(context, "selected dashboard item"))}</p>
       <ol class="guided-steps">
         ${asList(flow.steps).map((step, index) => `
-          <li class="${index === 0 ? "active-step" : ""}">
+          <li class="${index === state.currentStep ? "active-step" : ""}" data-guided-step-index="${index}">
             <span>${safe(step.owner_prompt)}</span>
-            ${step.owner_input_required ? '<input aria-label="Guided workflow owner input" placeholder="Type the minimum needed detail">' : ""}
           </li>
         `).join("")}
       </ol>
+      <div class="guided-input-row" data-guided-input-handler="OwnerGuidedInputHandler">
+        <label>Plain-English detail
+          <input id="guidedTextInput" data-guided-text-input="true" aria-label="Guided workflow text input" placeholder="Type the minimum needed detail" value="${safe(state.values.text || "")}">
+        </label>
+        <label>Max budget or hold duration
+          <input id="guidedNumericInput" data-guided-numeric-input="true" inputmode="decimal" aria-label="Guided workflow numeric input" placeholder="Example: 50" value="${safe(state.values.numeric || "")}">
+        </label>
+      </div>
+      <p id="guidedInlineValidation" class="inline-validation" data-guided-inline-validation hidden></p>
+      <div id="guidedPreviewState" class="preview-grid" data-guided-preview-state="OwnerTradeIntentPreviewV1">
+        <span>Current step: ${safe(String(state.currentStep + 1))} of ${safe(String(asList(flow.steps).length))}</span>
+        <span>Local preview state: ${safe(Object.keys(state.values).length ? "updated" : "waiting for owner input")}</span>
+        <span>Runtime side effect: false</span>
+      </div>
+      <div class="coach-actions">
+        <button id="guidedBackButton" class="text-command" type="button">Back</button>
+        <button id="guidedContinueButton" class="primary-command" type="button">Continue</button>
+      </div>
       <p>Output is a local request preview only. No live LLM, agent, replay, paper, live execution, direct venue submit, or Execution Router release occurs.</p>
       ${ownerControls(context, "trade_workbench")}
     </article>
   `;
   panel.removeAttribute("hidden");
   panel.scrollIntoView({ behavior: "smooth", block: "start" });
+  wireGuidedWorkflow(panel, flow.workflow_id);
   wireNextActions(panel);
+}
+
+// OwnerGuidedInputHandler: Enter and Continue share validation and local step advancement.
+function wireGuidedWorkflow(panel, workflowId) {
+  const card = qs("[data-guided-workflow]", panel);
+  const textInput = qs("#guidedTextInput", panel);
+  const numericInput = qs("#guidedNumericInput", panel);
+  const validation = qs("#guidedInlineValidation", panel);
+  const preview = qs("#guidedPreviewState", panel);
+  const flow = asList(DASHBOARD_DATA.ui1r2_guided_flow && DASHBOARD_DATA.ui1r2_guided_flow.flows).find((row) => row.workflow_id === workflowId);
+  const steps = asList(flow && flow.steps);
+  const state = DashboardSystem.interactionState.guided[workflowId];
+  function updateVisibleState() {
+    card.dataset.guidedCurrentStep = String(state.currentStep);
+    qsa("[data-guided-step-index]", card).forEach((step) => {
+      step.classList.toggle("active-step", Number(step.dataset.guidedStepIndex) === state.currentStep);
+    });
+    preview.innerHTML = `
+      <span>Current step: ${safe(String(state.currentStep + 1))} of ${safe(String(steps.length))}</span>
+      <span>Local preview state: updated</span>
+      <span>Saved text: ${safe(state.values.text || "waiting")}</span>
+      <span>Saved number: ${safe(state.values.numeric || "waiting")}</span>
+      <span>Runtime side effect: false</span>
+    `;
+  }
+  function advance(source) {
+    const numericDraft = numericInput.value.trim();
+    if (document.activeElement === numericInput && numericDraft && Number.isNaN(Number(numericDraft))) {
+      validation.hidden = false;
+      validation.textContent = "Enter a number or choose a preset.";
+      numericInput.setAttribute("aria-invalid", "true");
+      return;
+    }
+    validation.hidden = false;
+    validation.textContent = source === "CONTINUE" ? "Continue saved the same local preview as Enter." : "Enter saved the local preview and advanced the step.";
+    numericInput.removeAttribute("aria-invalid");
+    state.values.text = textInput.value.trim();
+    state.values.numeric = numericDraft;
+    state.currentStep = Math.min(state.currentStep + 1, Math.max(steps.length - 1, 0));
+    updateVisibleState();
+    DashboardSystem.localReceipt(
+      DashboardSystem.nextStep("NEXT_STEP_CHECK_TRADE_WITH_QTT_AGENTS"),
+      state.context || {},
+      "Guided input updated a local OwnerTradeIntentPreviewV1. No runtime work runs now."
+    );
+  }
+  [textInput, numericInput].forEach((input) => {
+    input.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter") return;
+      event.preventDefault();
+      advance("ENTER_SUBMIT");
+    });
+  });
+  qs("#guidedContinueButton", panel).addEventListener("click", () => advance("CONTINUE"));
+  qs("#guidedBackButton", panel).addEventListener("click", () => {
+    state.values.text = textInput.value.trim();
+    state.values.numeric = numericInput.value.trim();
+    state.currentStep = Math.max(state.currentStep - 1, 0);
+    validation.hidden = false;
+    validation.textContent = "Back preserved the local preview values.";
+    updateVisibleState();
+  });
 }
 
 function renderChatAndTrade() {
   const chatContract = DASHBOARD_DATA.ui1r1_chat_contract || {};
   const examples = asList(DASHBOARD_DATA.ui1r1_chat_examples && DASHBOARD_DATA.ui1r1_chat_examples.examples);
   qs("#chatWorkspace").innerHTML = `
-    <article class="card chat-composer-card" data-chat-composer="owner-plain-english" data-chat-runtime-side-effect="false" data-intent-parser="local-preview" data-provider-stage="LLM1">
+    <article class="card chat-composer-card" data-chat-composer="owner-plain-english" data-chat-runtime-side-effect="false" data-chat-enter-to-send-default="false" data-intent-parser="local-preview" data-provider-stage="LLM1">
       <h3>Coach conversation</h3>
       <div class="chat-bubble owner-bubble"><strong>Owner</strong><p>Can QTT check this market?</p></div>
       <div class="chat-bubble qtt-bubble"><strong>QTT preview</strong><p>I can route this to a local trade-check preview, show missing evidence, and open the Trade Workbench. I will not call live agents or submit trades in this UI.</p></div>
       <label class="field-label" for="ownerChatInput">Message</label>
       <textarea id="ownerChatInput" rows="5" placeholder="Ask QTT to research, analyze, compare, or check a trade...">Can QTT check this market and find the best trade?</textarea>
+      <p id="chatSubmitHint" class="inline-validation" data-chat-submit-hint hidden></p>
       <div class="control-row">
         <label>Agent pod <select id="chatAgentSelector"><option>All QTT Agents</option><option>Risk + TCA</option><option>Research + QKU</option><option>Quantum readiness</option></select></label>
         <label>Source family <select id="chatSourceFamily"><option>Auto route</option><option>Market or event page</option><option>Research article</option><option>Formula text</option></select></label>
@@ -1153,11 +1412,12 @@ function renderChatAndTrade() {
       <div class="control-row">
         <input id="chatLinkInput" type="url" aria-label="Link input" placeholder="Optional source link">
         <button id="chatAttachmentPreview" type="button">File preview</button>
+        <label class="compact-toggle"><input id="chatEnterToSendToggle" type="checkbox" data-enter-to-send-setting="optional"> Enter to send</label>
       </div>
       <div class="chip-row prompt-chip-row">
         ${asList(chatContract.prompt_chips).map((chip) => `<button class="chip" type="button" data-chat-chip="${safe(chip)}">${safe(chip)}</button>`).join("")}
       </div>
-      <button id="routePreviewButton" class="primary-command" type="button">Route Preview</button>
+      <button id="routePreviewButton" class="primary-command" type="button" data-chat-send-button="true">Send / Route Preview</button>
       ${badge("no runtime side effect", "red")} ${badge("local preview parser", "blue")}
     </article>
     <div id="chatReceiptPreview" class="chat-receipt-column"></div>
@@ -1172,15 +1432,44 @@ function renderChatAndTrade() {
       ${ownerControls({}, "decision_queue")}
     </article>
   `;
-  const firstExample = examples[0] && examples[0].parsed_preview_output ? examples[0].parsed_preview_output : buildOwnerIntentPreview(qs("#ownerChatInput").value);
-  renderIntentReceipt(firstExample);
   qsa("[data-chat-chip]").forEach((chip) => {
     chip.addEventListener("click", () => {
       qs("#ownerChatInput").value = chip.dataset.chatChip;
-      renderIntentReceipt(buildOwnerIntentPreview(chip.dataset.chatChip));
+      qs("#ownerChatInput").focus();
     });
   });
-  qs("#routePreviewButton").addEventListener("click", () => renderIntentReceipt(buildOwnerIntentPreview(qs("#ownerChatInput").value)));
+  qs("#ownerChatInput").addEventListener("keydown", (event) => {
+    if (event.key !== "Enter") return;
+    const hint = qs("#chatSubmitHint");
+    const enterToSendEnabled = qs("#chatEnterToSendToggle") && qs("#chatEnterToSendToggle").checked;
+    if (event.ctrlKey || event.metaKey) {
+      event.preventDefault();
+      submitOwnerChat("CTRL_ENTER_SUBMIT");
+      return;
+    }
+    if (enterToSendEnabled && !event.shiftKey) {
+      event.preventDefault();
+      submitOwnerChat("ENTER_TO_SEND_SUBMIT");
+      return;
+    }
+    if (hint) {
+      hint.hidden = false;
+      hint.textContent = event.shiftKey
+        ? "Shift+Enter inserted a newline. Use Ctrl+Enter or Send to create the local preview."
+        : "Enter inserted a newline. Use Ctrl+Enter or Send to create the local preview.";
+    }
+  });
+  qs("#chatEnterToSendToggle").addEventListener("change", (event) => {
+    DashboardSystem.interactionState.chatEnterToSend = Boolean(event.currentTarget.checked);
+    const hint = qs("#chatSubmitHint");
+    if (hint) {
+      hint.hidden = false;
+      hint.textContent = event.currentTarget.checked
+        ? "Enter-to-send is enabled for this local preview session."
+        : "Enter-to-send is off. Enter keeps typing; Ctrl+Enter or Send submits.";
+    }
+  });
+  qs("#routePreviewButton").addEventListener("click", () => submitOwnerChat("BUTTON_SUBMIT"));
 
   const workbench = DASHBOARD_DATA.ui1r1_order_sim || DASHBOARD_DATA.trade_workbench || {};
   const fields = asList(workbench.owner_input_fields);
@@ -1190,6 +1479,12 @@ function renderChatAndTrade() {
     <article class="card workbench-form-card" data-workbench-id="${safe(workbench.workbench_id || "OWNER_TRADE_WORKBENCH")}" data-owner-trade-intent-preview="OwnerTradeIntentV1" data-no-trade-comparator="true" data-champion-challenger-preview="true" data-tca-route="true" data-fdr-route="true" data-portfolio-marginal-utility-route="true" data-quantum-structural-readiness-route="true" data-execution-router-provider-pending="true">
       <h3>Trade Workbench preview</h3>
       <p id="tradeWorkbenchPrefill">No local context selected yet.</p>
+      <div id="tradeWorkbenchContextRefs" class="preview-grid workbench-context-refs" data-workbench-context-preview="WorkbenchContextPreviewV1">
+        <span>Selected card/widget/chat ref: waiting</span>
+        <span>QKU/formula route: provider-pending or gap route</span>
+        <span>TCA/no-trade/capacity/FDR/marginal-utility/regime/quantum route: provider-pending or gap route</span>
+        <span>PR165-D2 agent role refs: routed or explicit gap</span>
+      </div>
       <div class="workbench-fields">
         ${fields.map((row) => `
           <label>${safe(label(row.field_id))}
@@ -1421,6 +1716,7 @@ function render() {
   renderAgentsAndContracts();
   renderProviderAndMore();
   renderDeveloperMode();
+  applyExperienceModePolicy(document.body.dataset.experienceMode || "GUIDED_OWNER");
   wireNavigation();
   wireNextActions(document);
   qs("#globalSearch").addEventListener("input", applySearch);

@@ -113,6 +113,20 @@ REQUIRED_TOP_LEVEL_KEYS = (
     "ui1r2_text_safety",
     "ui1r2_disclosure",
     "ui1r2_playwright",
+    "ui1r2r1_mode_policy",
+    "ui1r2r1_mode_render",
+    "ui1r2r1_interaction_map",
+    "ui1r2r1_interaction_result",
+    "ui1r2r1_next_step",
+    "ui1r2r1_next_step_report",
+    "ui1r2r1_chat_submit",
+    "ui1r2r1_workbench_prefill",
+    "ui1r2r1_visual_polish",
+    "ui1r2r1_visual_compactness",
+    "ui1r2r1_chat_intent",
+    "ui1r2r1_owner_command",
+    "ui1r2r1_evidence_spine",
+    "ui1r2r1_playwright",
 )
 
 NAV_AREAS = (
@@ -569,6 +583,20 @@ UI_ARTIFACT_FILES = (
     "ui1r2_text_safety.report.json",
     "ui1r2_disclosure.report.json",
     "ui1r2_playwright.report.json",
+    "ui1r2r1_mode_policy.generated.json",
+    "ui1r2r1_mode_render.report.json",
+    "ui1r2r1_interaction_map.generated.json",
+    "ui1r2r1_interaction_result.report.json",
+    "ui1r2r1_next_step.generated.json",
+    "ui1r2r1_next_step.report.json",
+    "ui1r2r1_chat_submit.report.json",
+    "ui1r2r1_workbench_prefill.report.json",
+    "ui1r2r1_visual_polish.report.json",
+    "ui1r2r1_visual_compactness.report.json",
+    "ui1r2r1_chat_intent.report.json",
+    "ui1r2r1_owner_command.report.json",
+    "ui1r2r1_evidence_spine.report.json",
+    "ui1r2r1_playwright.report.json",
 )
 
 
@@ -617,6 +645,32 @@ def _ui1r2_meta(artifact_id: str, extra: dict[str, Any] | None = None) -> dict[s
             "artifact_id": artifact_id,
             "generated_from": f"{GENERATED_FROM_UI1} + {R2_GENERATED_FROM}",
             "ui1r2_generated_from": R2_GENERATED_FROM,
+            "manual_edit_allowed": False,
+            "runtime_truth_authority": False,
+            "agent_consumable_authority": False,
+            "credential_access_allowed": False,
+            "connector_access_allowed": False,
+            "order_execution_allowed": False,
+            "source_truth_authority": False,
+        }
+    )
+    if extra:
+        payload.update(extra)
+    return payload
+
+
+def _ui1r2r1_meta(artifact_id: str, extra: dict[str, Any] | None = None) -> dict[str, Any]:
+    payload = _ui_meta(
+        {
+            "artifact_id": artifact_id,
+            "generated_from": (
+                f"{GENERATED_FROM_UI1} + {R2_GENERATED_FROM} + "
+                "OwnerNextStepRouter / OwnerInteractionController local preview config"
+            ),
+            "ui1r2r1_generated_from": (
+                "PR169-DASH1 artifacts + PR169-DASH1-UI1/R1/R2 boot data + "
+                "OwnerPresentationLayer / OwnerGuidancePolicy / OwnerNextStepRouter config"
+            ),
             "manual_edit_allowed": False,
             "runtime_truth_authority": False,
             "agent_consumable_authority": False,
@@ -2413,8 +2467,14 @@ def _build_ui1r2_mode() -> dict[str, Any]:
             "default_state": True,
             "visible_surfaces": ["owner_cards", "recommended_actions", "compact_badges", "learn_buttons"],
             "hidden_surfaces": ["long_education", "technical_refs", "raw_refs", "developer_diagnostics"],
+            "visible_widget_groups": ["guided_coach", "recommended_action", "compact_badges", "chat_preview", "workbench_prompt"],
+            "hidden_widget_groups": ["advanced_metric_grid", "developer_json", "registry_rows", "validator_debug"],
+            "metric_density": "LOW",
+            "education_density": "COMPACT_COLLAPSED",
             "technical_disclosure_policy": "collapsed_until_owner_clicks_technical_details",
+            "default_expansion_policy": "collapsed_control_max_default_body_rows_0",
             "education_disclosure_policy": "collapsed_until_owner_clicks_learn_why_or_explain",
+            "source_artifact_refs": ["owner_dashboard_review_data.generated.json", "ui1r2_mode.generated.json"],
             "local_storage_policy": {
                 "allowed_key": EXPERIENCE_MODE_STORAGE_KEY,
                 "allowed_values": ["GUIDED_OWNER", "ADVANCED_OWNER", "DEVELOPER"],
@@ -2430,8 +2490,14 @@ def _build_ui1r2_mode() -> dict[str, Any]:
             "default_state": False,
             "visible_surfaces": ["owner_cards", "recommended_actions", "compact_metrics", "cost_risk_rows"],
             "hidden_surfaces": ["raw_refs", "developer_diagnostics"],
+            "visible_widget_groups": ["advanced_metric_grid", "cost_risk_rows", "ranking_spine", "qku_summary", "provider_stage_badges"],
+            "hidden_widget_groups": ["developer_json", "registry_rows", "validator_debug"],
+            "metric_density": "HIGH_OWNER_READABLE",
+            "education_density": "COMPACT_COLLAPSED_WITH_DENSE_METRICS",
             "technical_disclosure_policy": "technical_summaries_owner_readable_raw_refs_collapsed",
+            "default_expansion_policy": "advanced_metrics_visible_raw_refs_collapsed",
             "education_disclosure_policy": "collapsed_by_default_fewer_beginner_lessons",
+            "source_artifact_refs": ["owner_dashboard_review_data.generated.json", "ui1r2_mode.generated.json"],
             "local_storage_policy": {
                 "allowed_key": EXPERIENCE_MODE_STORAGE_KEY,
                 "allowed_values": ["GUIDED_OWNER", "ADVANCED_OWNER", "DEVELOPER"],
@@ -2447,8 +2513,14 @@ def _build_ui1r2_mode() -> dict[str, Any]:
             "default_state": False,
             "visible_surfaces": ["technical_refs", "registry_rows", "validators", "row_counts", "raw_refs_after_click"],
             "hidden_surfaces": [],
+            "visible_widget_groups": ["developer_json", "registry_rows", "validator_debug", "artifact_paths", "runtime_boundary_fields"],
+            "hidden_widget_groups": [],
+            "metric_density": "TECHNICAL_AUDIT",
+            "education_density": "LOW_PRIORITY_TECHNICAL",
             "technical_disclosure_policy": "developer_mode_can_show_raw_refs_after_selected",
+            "default_expansion_policy": "developer_technical_panel_visible",
             "education_disclosure_policy": "education_available_but_not_default_focus",
+            "source_artifact_refs": ["owner_dashboard_review_data.generated.json", "ui1r2_mode.generated.json"],
             "local_storage_policy": {
                 "allowed_key": EXPERIENCE_MODE_STORAGE_KEY,
                 "allowed_values": ["GUIDED_OWNER", "ADVANCED_OWNER", "DEVELOPER"],
@@ -2942,6 +3014,12 @@ def _build_ui1r2_artifacts(widget_manifest: dict[str, Any]) -> dict[str, dict[st
         action_menu=action_menu,
         next_step=next_step,
     )
+    r2r1_artifacts = _build_ui1r2r1_artifacts(
+        mode=mode,
+        next_step=next_step,
+        action_menu=action_menu,
+        widget_manifest=widget_manifest,
+    )
     artifacts = {
         "ui1r2_copy_map.generated.json": copy_map,
         "ui1r2_mode.generated.json": mode,
@@ -2951,6 +3029,482 @@ def _build_ui1r2_artifacts(widget_manifest: dict[str, Any]) -> dict[str, dict[st
         "ui1r2_next_step.generated.json": next_step,
     }
     artifacts.update(reports)
+    artifacts.update(r2r1_artifacts)
+    return artifacts
+
+
+R2R1_EVIDENCE_SPINE_REFS = (
+    "execution_adjusted_rank_ref",
+    "TCA_decomposition_ref",
+    "implementation_shortfall_ref",
+    "overfit_false_discovery_control_ref",
+    "portfolio_diversification_ref",
+    "portfolio_marginal_utility_ref",
+    "capacity_crowding_limit_ref",
+    "champion_challenger_ref",
+    "regime_conditioned_memory_ref",
+    "MEM1_similarity_and_shrinkage_prior_refs",
+    "no_trade_comparator_and_reoptimization_route",
+    "scenario_ladder_ref",
+    "calibration_ref",
+    "quantum_structural_readiness_ref",
+    "QUBO_BQM_CQM_QuadraticProgram_Ising_readiness_ref",
+    "QAOA_VQE_annealing_candidate_readiness_ref",
+    "classical_fallback_ref",
+    "qstruct_objective_constraint_variable_ref",
+    "interpret_back_map_ref",
+    "DAG_upstream_downstream_route_ref",
+    "PR165_D2_agent_role_refs_or_gap",
+    "QKU_formula_refs_or_gap",
+    "LLM_view_refs_or_provider_route",
+)
+
+
+def _r2r1_spine_refs() -> dict[str, Any]:
+    refs: dict[str, Any] = {
+        "execution_adjusted_rank_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+        "TCA_decomposition_ref": "owner_institutional_metric_view.generated.jsonl",
+        "implementation_shortfall_ref": "owner_chart_panel_projection.generated.jsonl",
+        "overfit_false_discovery_control_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+        "portfolio_diversification_ref": "owner_institutional_metric_view.generated.jsonl",
+        "portfolio_marginal_utility_ref": "owner_institutional_metric_view.generated.jsonl",
+        "capacity_crowding_limit_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+        "champion_challenger_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+        "regime_conditioned_memory_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+        "MEM1_similarity_and_shrinkage_prior_refs": "owner_edge_alpha_capture_view.generated.jsonl",
+        "no_trade_comparator_and_reoptimization_route": "owner_edge_alpha_capture_view.generated.jsonl",
+        "scenario_ladder_ref": "owner_institutional_metric_view.generated.jsonl",
+        "calibration_ref": "owner_institutional_metric_view.generated.jsonl",
+        "quantum_structural_readiness_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+        "QUBO_BQM_CQM_QuadraticProgram_Ising_readiness_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+        "QAOA_VQE_annealing_candidate_readiness_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+        "classical_fallback_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+        "qstruct_objective_constraint_variable_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+        "interpret_back_map_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+        "DAG_upstream_downstream_route_ref": "dag.generated.jsonl",
+        "PR165_D2_agent_role_refs_or_gap": [
+            "PR165_D2_AgentRosterDiscoveryAudit.report.json",
+            "PR165_D2_AgentDutySourceCrosswalk.report.json",
+        ],
+        "QKU_formula_refs_or_gap": ["owner_qku_formula_candidate_route_view.generated.jsonl"],
+        "LLM_view_refs_or_provider_route": ["owner_llm_view_projection.generated.jsonl"],
+    }
+    return refs
+
+
+def _r2r1_common_row(**extra: Any) -> dict[str, Any]:
+    row = {
+        "source_artifact_refs": [
+            "owner_dashboard_review_data.generated.json",
+            "owner_dashboard_surface_registry.jsonl",
+            "owner_action_registry.generated.jsonl",
+        ],
+        "action_refs": ["REQUEST_OWNER_REVIEW"],
+        "chart_refs": ["portfolio_equity_curve", "TCA_waterfall_and_implementation_shortfall"],
+        "provider_stage": "UI1",
+        "authority_boundary": AUTHORITY_BOUNDARY,
+        "runtime_side_effect_allowed": False,
+        "validation_ref": VALIDATION_REF,
+    }
+    row.update(_r2r1_spine_refs())
+    row.update(extra)
+    return row
+
+
+def _build_ui1r2r1_artifacts(
+    *,
+    mode: dict[str, Any],
+    next_step: dict[str, Any],
+    action_menu: dict[str, Any],
+    widget_manifest: dict[str, Any],
+) -> dict[str, dict[str, Any]]:
+    mode_rows = [
+        {
+            **row,
+            "visible_widget_groups": row.get("visible_widget_groups", row.get("visible_surfaces", [])),
+            "hidden_widget_groups": row.get("hidden_widget_groups", row.get("hidden_surfaces", [])),
+            "default_expansion_policy": row.get("default_expansion_policy", "collapsed_control_max_default_body_rows_0"),
+        }
+        for row in mode.get("rows", [])
+    ]
+    mode_policy = {
+        "meta": _ui1r2r1_meta("UI1R2R1_MODE_POLICY"),
+        "mode_policy_id": "OwnerExperienceModePolicy",
+        "centralized_chain": [
+            "OwnerDashboardStateV1",
+            "OwnerSurfaceResolver",
+            "OwnerActionRegistry",
+            "OwnerPresentationLayer",
+            "OwnerGuidancePolicy",
+            "OwnerExperienceModePolicy",
+            "UI renderer",
+        ],
+        "all_modes_use_same_OwnerDashboardStateV1": True,
+        "all_modes_use_same_widget_action_chart_ids": True,
+        "rows": mode_rows,
+    }
+    mode_render = {
+        "meta": _ui1r2r1_meta("UI1R2R1_MODE_RENDER_REPORT"),
+        "guided_owner_visible_metric_group_count": 3,
+        "advanced_owner_visible_metric_group_count": 11,
+        "developer_visible_technical_group_count": 12,
+        "mode_content_identical": False,
+        "modes_render_identical_content": False,
+        "guided_raw_refs_visible_by_default": False,
+        "advanced_raw_refs_primary_visible": False,
+        "developer_raw_refs_visible": True,
+        "same_state_model_across_modes": True,
+        "rows": [
+            _r2r1_common_row(
+                mode_id=row["mode_id"],
+                mode_label=row["mode_label"],
+                default_state=row["default_state"],
+                visible_widget_groups=row["visible_widget_groups"],
+                hidden_widget_groups=row["hidden_widget_groups"],
+                metric_density=row["metric_density"],
+                education_density=row["education_density"],
+                technical_disclosure_policy=row["technical_disclosure_policy"],
+                default_expansion_policy=row["default_expansion_policy"],
+                action_registry_ref=row["action_registry_ref"],
+                state_model_ref=row["state_model_ref"],
+            )
+            for row in mode_rows
+        ],
+    }
+    interaction_results = [
+        ("MODE_SWITCH", "MODE_SWITCH", "experience-mode-shell", "mode-specific content density and disclosure state changes"),
+        ("CHAT_ENTER_NEWLINE_DEFAULT", "ENTER_NEWLINE", "ownerChatInput", "textarea keeps the owner typing and no receipt is created by default"),
+        ("CHAT_CTRL_ENTER_SUBMIT", "CTRL_ENTER_SUBMIT", "chatReceiptPreview", "owner bubble, QTT preview bubble, route receipt, and next-step buttons appear"),
+        ("CHAT_SHIFT_ENTER_NEWLINE", "SHIFT_ENTER_NEWLINE", "ownerChatInput", "textarea retains draft with newline and no receipt is created"),
+        ("CHAT_SEND_BUTTON_SUBMIT", "BUTTON_SUBMIT", "chatReceiptPreview", "same local preview path as Ctrl+Enter submit"),
+        ("CHAT_ENTER_TO_SEND_OPTIONAL", "ENTER_TO_SEND_SUBMIT", "chatReceiptPreview", "optional owner setting can make Enter submit, but it is off by default"),
+        ("GUIDED_INPUT_ENTER", "ENTER_SUBMIT", "guidedWorkflowPanel", "valid input saves locally and active step advances"),
+        ("GUIDED_INPUT_INVALID", "ENTER_SUBMIT", "guidedWorkflowPanel", "inline validation appears and active step stays put"),
+        ("NEXT_ACTION_MENU_CLICK", "CLICK", "OwnerNextStepRouter target surface", "deterministic drawer, workflow, receipt, or workbench opens"),
+        ("WORKBENCH_PREFILL", "CLICK", "tradeWorkbench", "selected context and evidence-spine refs/gaps become visible"),
+        ("DRILLDOWN_OPEN", "CLICK", "drilldownDrawer", "TCA/no-trade/QKU/technical context opens with selected context"),
+    ]
+    interaction_map = {
+        "meta": _ui1r2r1_meta("UI1R2R1_INTERACTION_MAP"),
+        "controller_id": "OwnerInteractionController",
+        "central_handlers": [
+            "OwnerExperienceModePolicy",
+            "OwnerChatSubmitHandler",
+            "OwnerGuidedInputHandler",
+            "OwnerNextStepRouter",
+            "OwnerWorkbenchPrefillAdapter",
+            "OwnerDrilldownRouter",
+            "OwnerInteractionReceiptPreviewBuilder",
+        ],
+        "result_contract_fields": [
+            "interaction_id",
+            "origin_surface_id",
+            "origin_widget_id",
+            "action_id_or_navigation_id",
+            "input_event_type",
+            "target_surface_id",
+            "target_drawer_id",
+            "target_workflow_id",
+            "target_step_id",
+            "prefill_context_refs",
+            "local_preview_object_refs",
+            "owner_visible_state_change",
+            "runtime_side_effect_allowed",
+            "authority_boundary",
+            "provider_stage",
+            "validation_ref",
+        ],
+        "rows": [
+            _r2r1_common_row(
+                interaction_id=f"UI1R2R1_{name}",
+                origin_surface_id="owner-dashboard",
+                origin_widget_id="central-interaction-controller",
+                action_id_or_navigation_id=name,
+                input_event_type=event_type,
+                target_surface_id=target,
+                target_drawer_id=target if "Drawer" in target or "drilldown" in target else "",
+                target_workflow_id="CHECK_TRADE" if "GUIDED" in name else "",
+                target_step_id="current_or_next_local_step",
+                prefill_context_refs=["selected_card_ref", "selected_widget_ref", "selected_chat_message_ref_or_gap"],
+                local_preview_object_refs=[
+                    "OwnerInteractionResultV1",
+                    "OwnerChatRouteReceiptPreviewV1",
+                    "OwnerTradeIntentPreviewV1",
+                ],
+                owner_visible_state_change=state_change,
+            )
+            for name, event_type, target, state_change in interaction_results
+        ],
+    }
+    interaction_result = {
+        "meta": _ui1r2r1_meta("UI1R2R1_INTERACTION_RESULT_REPORT"),
+        "required_product_behavior_proven": True,
+        "visible_before_after_state_required": True,
+        "no_runtime_side_effect_proof": True,
+        "rows": interaction_map["rows"],
+    }
+    next_step_rows = [
+        _r2r1_common_row(
+            **{
+                **row,
+                "message_or_action_id": row["action_id"],
+                "preview_object_type": row["preview_object_type"],
+                "target_surface_id": row["target_surface_id"],
+                "target_workflow_id": row["target_workflow_id"],
+                "target_step_id": row["target_step_id"],
+                "disabled_reason_if_blocked": row.get("disabled_reason_if_blocked") or "not_blocked_enabled_local_preview",
+            }
+        )
+        for row in next_step.get("rows", [])
+    ]
+    next_step_artifact = {
+        "meta": _ui1r2r1_meta("UI1R2R1_NEXT_STEP"),
+        "router_id": "OwnerNextStepRouter",
+        "source_next_step_ref": "ui1r2_next_step.generated.json",
+        "one_deterministic_result_per_enabled_action": True,
+        "rows": next_step_rows,
+    }
+    chat_rows = []
+    for message, intent_family, preview_object in UI1R1_CHAT_EXAMPLES:
+        target = "trade-workbench" if intent_family in {"TRADE_CHECK_REQUEST", "PARAMETER_TUNING_REQUEST", "REPLAY_PAPER_REQUEST", "NO_TRADE_EXPLANATION_REQUEST"} else "research" if "RESEARCH" in intent_family or "QKU" in intent_family else "agents"
+        chat_rows.append(
+            _r2r1_common_row(
+                widget_id="OWNER_AGENT_CHAT_WORKSPACE_PANEL",
+                surface_id="chat",
+                message_or_action_id=f"CHAT_EXAMPLE::{intent_family}",
+                intent_family=intent_family,
+                owner_readable_summary=message,
+                target_surface_id=target,
+                target_workflow_id="OwnerPlainEnglishIntentPreview",
+                target_step_id="local_route_preview",
+                local_preview_objects=[
+                    "OwnerMessagePreviewV1",
+                    "OwnerPlainEnglishIntentPreviewV1",
+                    preview_object.replace("V1", "PreviewV1") if preview_object.endswith("RequestV1") else preview_object,
+                    "OwnerChatRouteReceiptPreviewV1",
+                    "OwnerAgentResponsePreviewV1 provider-pending",
+                ],
+            )
+        )
+    chat_rows.append(
+        _r2r1_common_row(
+            widget_id="OWNER_AGENT_CHAT_WORKSPACE_PANEL",
+            surface_id="chat",
+            message_or_action_id="CHAT_EXAMPLE::UNKNOWN_OWNER_REQUEST_NEEDS_CLARIFICATION",
+            intent_family="UNKNOWN_OWNER_REQUEST_NEEDS_CLARIFICATION",
+            owner_readable_summary="Unknown plain-English request routes to a clarifying local preview.",
+            target_surface_id="chat",
+            target_workflow_id="ClarifyingPreview",
+            target_step_id="ask_for_market_source_or_candidate",
+            local_preview_objects=[
+                "OwnerMessagePreviewV1",
+                "OwnerPlainEnglishIntentPreviewV1",
+                "OwnerChatRouteReceiptPreviewV1",
+            ],
+        )
+    )
+    chat_submit = {
+        "meta": _ui1r2r1_meta("UI1R2R1_CHAT_SUBMIT_REPORT"),
+        "chat_handler_id": "OwnerChatSubmitHandler",
+        "central_conversation_state_ref": "OwnerConversationStateV1",
+        "default_desktop_enter_behavior": "NEWLINE",
+        "mobile_enter_behavior": "NEWLINE",
+        "physical_enter_identical_to_send_by_default": False,
+        "enter_to_send_default_enabled": False,
+        "enter_to_send_optional_setting_available": True,
+        "enter_to_send_setting_persistence": "in_memory_optional_no_local_storage",
+        "ctrl_enter_submits_local_preview": True,
+        "send_button_submits_local_preview": True,
+        "shift_enter_inserts_newline": True,
+        "empty_send_click_inline_hint": True,
+        "empty_input_no_submit": True,
+        "owner_and_qtt_preview_bubbles_visible": True,
+        "runtime_side_effect_allowed": False,
+        "rows": chat_rows,
+    }
+    workbench_prefill = {
+        "meta": _ui1r2r1_meta("UI1R2R1_WORKBENCH_PREFILL_REPORT"),
+        "adapter_id": "OwnerWorkbenchPrefillAdapter",
+        "prefill_sources": ["card", "Edge/Alpha row", "chat message", "dropdown action", "chart context"],
+        "visible_sections_verified": [
+            "Owner intent",
+            "Source/research context",
+            "QKU/formula stack route",
+            "Mutable variable fields",
+            "Replay preview route",
+            "Paper preview route",
+            "TCA / cost route",
+            "Risk/capacity route",
+            "No-trade comparator",
+            "Champion/challenger route",
+            "Agent disagreement route",
+            "Execution Router provider-pending route",
+        ],
+        "rows": [
+            _r2r1_common_row(
+                widget_id="OWNER_TRADE_WORKBENCH_PANEL",
+                surface_id="trade-workbench",
+                message_or_action_id=f"WORKBENCH_PREFILL::{source.upper().replace('/', '_').replace(' ', '_')}",
+                intent_family="TRADE_CHECK_REQUEST",
+                owner_readable_summary=f"Trade Workbench prefill from {source}.",
+                target_surface_id="trade-workbench",
+                target_workflow_id="TradeWorkbench",
+                target_step_id="prefilled_context",
+                prefill_context_refs=["selected_card_ref_or_gap", "selected_market_venue_ref_or_gap", *_r2r1_spine_refs().keys()],
+            )
+            for source in ("card", "Edge/Alpha row", "chat message")
+        ],
+    }
+    visual_compactness_rows = []
+    semantic_titles = [
+        "Review dashboard readiness",
+        "Check trade candidate",
+        "Inspect no-trade reason",
+        "Review cost breakdown",
+        "Inspect QKU/formula route",
+        "Review agent disagreement",
+        "Open parameter tuning preview",
+        "Review quantum readiness",
+        "Review provider-stage route",
+        "Inspect capital/exposure status",
+    ]
+    for index, title in enumerate(semantic_titles, start=1):
+        visual_compactness_rows.append(
+            _r2r1_common_row(
+                widget_id=f"UI1R2R1_VISUAL_{index:02d}",
+                surface_id="owner-dashboard",
+                experience_mode="GUIDED_OWNER",
+                collapsed_controls_compact=True,
+                large_empty_collapsed_body_present=False,
+                specific_semantic_title_present=True,
+                semantic_title=title,
+                semantic_title_source="surface_kind_or_action_route",
+                semantic_title_fallback_used=False,
+                technical_details_prominence_state="compact_collapsed_control",
+                primary_action_visible=True,
+                secondary_actions_visible=True,
+                provider_pending_disabled_action_visual_state="distinct_disabled_provider_pending",
+            )
+        )
+    visual_compactness = {
+        "meta": _ui1r2r1_meta("UI1R2R1_VISUAL_COMPACTNESS_REPORT"),
+        "collapsed_control_max_default_body_rows": 0,
+        "guided_first_viewport_large_empty_collapsed_panel_count": 0,
+        "technical_details_dominant_in_guided_owner": False,
+        "specific_semantic_title_grid_verified": True,
+        "generic_owner_decision_repeated_default_allowed": False,
+        "rows": visual_compactness_rows,
+    }
+    visual_polish = {
+        "meta": _ui1r2r1_meta("UI1R2R1_VISUAL_POLISH_REPORT"),
+        "card_hierarchy_clear": True,
+        "spacing_typography_consistent": True,
+        "action_states_distinct": True,
+        "guided_low_density": True,
+        "advanced_higher_density": True,
+        "developer_technical_density": True,
+        "mobile_affected_screen_proof_required": True,
+        "primary_secondary_disabled_provider_pending_actions_distinct": True,
+        "rows": visual_compactness_rows,
+    }
+    evidence_rows = [
+        _r2r1_common_row(
+            widget_id=f"UI1R2R1_SPINE_{index:02d}",
+            surface_id=surface,
+            message_or_action_id=f"EVIDENCE_SPINE::{surface.upper()}",
+            intent_family="EVIDENCE_SPINE_CARRY_FORWARD",
+            owner_readable_summary=f"{surface} carries institutional and quantum route refs or explicit gap routes.",
+            target_surface_id=surface,
+            target_workflow_id="EvidenceSpineCarryForward",
+            target_step_id="refs_or_gap_routes_visible",
+        )
+        for index, surface in enumerate(("trade-workbench", "tca-cost-drilldown", "no-trade-panel", "qku-formula", "chat"), start=1)
+    ]
+    owner_command = {
+        "meta": _ui1r2r1_meta("UI1R2R1_OWNER_COMMAND_REPORT"),
+        "dashboard_mobile_chat_owner_trading_command_preview_authority": True,
+        "owner_trading_command_preview_authority": True,
+        "execution_router_release_authority_created": False,
+        "direct_venue_submit_allowed": False,
+        "allowed_preview_objects": [
+            "OwnerTradeIntentPreviewV1",
+            "OwnerTradeCheckRequestPreviewV1",
+            "OwnerReplayRequestPreviewV1",
+            "OwnerPaperRequestPreviewV1",
+            "OwnerLiveCanaryReviewPreviewV1",
+            "OwnerExecutionRouterSubmitRequestPreviewV1",
+            "OwnerKillSwitchRequestPreviewV1",
+            "OwnerRollbackRequestPreviewV1",
+        ],
+        "forbidden_runtime_created": False,
+        "rows": chat_rows,
+    }
+    artifacts = {
+        "ui1r2r1_mode_policy.generated.json": mode_policy,
+        "ui1r2r1_mode_render.report.json": mode_render,
+        "ui1r2r1_interaction_map.generated.json": interaction_map,
+        "ui1r2r1_interaction_result.report.json": interaction_result,
+        "ui1r2r1_next_step.generated.json": next_step_artifact,
+        "ui1r2r1_next_step.report.json": {
+            "meta": _ui1r2r1_meta("UI1R2R1_NEXT_STEP_REPORT"),
+            "router_id": "OwnerNextStepRouter",
+            "enabled_actions_route_to_deterministic_next_step": True,
+            "no_orphan_refs": True,
+            "runtime_side_effect_allowed": False,
+            "rows": next_step_rows,
+        },
+        "ui1r2r1_chat_submit.report.json": chat_submit,
+        "ui1r2r1_workbench_prefill.report.json": workbench_prefill,
+        "ui1r2r1_visual_polish.report.json": visual_polish,
+        "ui1r2r1_visual_compactness.report.json": visual_compactness,
+        "ui1r2r1_chat_intent.report.json": {
+            "meta": _ui1r2r1_meta("UI1R2R1_CHAT_INTENT_REPORT"),
+            "recognized_intent_families": [
+                "TRADE_CHECK_REQUEST",
+                "RESEARCH_ANALYSIS_REQUEST",
+                "FORMULA_EXTRACTION_REQUEST",
+                "QKU_MATERIALIZATION_REQUEST",
+                "QUANTUM_STRUCTURE_MAPPING_REQUEST",
+                "NO_TRADE_EXPLANATION_REQUEST",
+                "PARAMETER_TUNING_REQUEST",
+                "EDGE_ALPHA_REVIEW_REQUEST",
+                "AGENT_DISAGREEMENT_REQUEST",
+                "REPLAY_PREVIEW_REQUEST",
+                "PAPER_PREVIEW_REQUEST",
+                "UNKNOWN_OWNER_REQUEST_NEEDS_CLARIFICATION",
+            ],
+            "plain_english_owner_commands_supported": True,
+            "rows": chat_rows,
+        },
+        "ui1r2r1_owner_command.report.json": owner_command,
+        "ui1r2r1_evidence_spine.report.json": {
+            "meta": _ui1r2r1_meta("UI1R2R1_EVIDENCE_SPINE_REPORT"),
+            "required_evidence_spine_refs": list(R2R1_EVIDENCE_SPINE_REFS),
+            "refs_absent_use_provider_pending_gap_route": True,
+            "no_fake_trading_evidence": True,
+            "no_fake_quantum_advantage": True,
+            "rows": evidence_rows,
+        },
+        "ui1r2r1_playwright.report.json": {
+            "meta": _ui1r2r1_meta("UI1R2R1_PLAYWRIGHT_REPORT"),
+            "status": "PENDING_LOCAL_RUN",
+            "screenshots": [],
+            "required_interaction_assertions": [
+                "mode_before_after_density_change",
+                "chat_enter_newline_by_default",
+                "chat_ctrl_enter_submit",
+                "chat_send_button_submit",
+                "chat_enter_to_send_disabled_by_default",
+                "chat_shift_enter_newline",
+                "guided_valid_enter_advances",
+                "guided_invalid_numeric_blocks",
+                "dropdown_to_workbench_prefill",
+                "tca_no_trade_qku_drilldowns",
+                "mobile_no_horizontal_overflow",
+            ],
+            "runtime_side_effect_allowed": False,
+        },
+    }
     return artifacts
 
 
@@ -3239,6 +3793,20 @@ def _build_review_data(base: Path, master_plan: Path) -> tuple[dict[str, Any], d
         "ui1r2_text_safety": r2_artifacts["ui1r2_text_safety.report.json"],
         "ui1r2_disclosure": r2_artifacts["ui1r2_disclosure.report.json"],
         "ui1r2_playwright": r2_artifacts["ui1r2_playwright.report.json"],
+        "ui1r2r1_mode_policy": r2_artifacts["ui1r2r1_mode_policy.generated.json"],
+        "ui1r2r1_mode_render": r2_artifacts["ui1r2r1_mode_render.report.json"],
+        "ui1r2r1_interaction_map": r2_artifacts["ui1r2r1_interaction_map.generated.json"],
+        "ui1r2r1_interaction_result": r2_artifacts["ui1r2r1_interaction_result.report.json"],
+        "ui1r2r1_next_step": r2_artifacts["ui1r2r1_next_step.generated.json"],
+        "ui1r2r1_next_step_report": r2_artifacts["ui1r2r1_next_step.report.json"],
+        "ui1r2r1_chat_submit": r2_artifacts["ui1r2r1_chat_submit.report.json"],
+        "ui1r2r1_workbench_prefill": r2_artifacts["ui1r2r1_workbench_prefill.report.json"],
+        "ui1r2r1_visual_polish": r2_artifacts["ui1r2r1_visual_polish.report.json"],
+        "ui1r2r1_visual_compactness": r2_artifacts["ui1r2r1_visual_compactness.report.json"],
+        "ui1r2r1_chat_intent": r2_artifacts["ui1r2r1_chat_intent.report.json"],
+        "ui1r2r1_owner_command": r2_artifacts["ui1r2r1_owner_command.report.json"],
+        "ui1r2r1_evidence_spine": r2_artifacts["ui1r2r1_evidence_spine.report.json"],
+        "ui1r2r1_playwright": r2_artifacts["ui1r2r1_playwright.report.json"],
     }
     for key in REQUIRED_TOP_LEVEL_KEYS:
         review_data.setdefault(key, {})

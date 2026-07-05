@@ -1,0 +1,634 @@
+{
+  "collapsed_control_max_default_body_rows": 0,
+  "generic_owner_decision_repeated_default_allowed": false,
+  "guided_first_viewport_large_empty_collapsed_panel_count": 0,
+  "meta": {
+    "agent_consumable_authority": false,
+    "artifact_id": "UI1R2R1_VISUAL_COMPACTNESS_REPORT",
+    "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+    "connector_access_allowed": false,
+    "credential_access_allowed": false,
+    "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config + PR169-DASH1 artifacts + PR169-DASH1-UI1/R1 boot data + OwnerPresentationLayer / OwnerGuidancePolicy config + OwnerNextStepRouter / OwnerInteractionController local preview config",
+    "manual_edit_allowed": false,
+    "order_execution_allowed": false,
+    "runtime_side_effect_allowed": false,
+    "runtime_truth_authority": false,
+    "source_truth_authority": false,
+    "ui1r2r1_generated_from": "PR169-DASH1 artifacts + PR169-DASH1-UI1/R1/R2 boot data + OwnerPresentationLayer / OwnerGuidancePolicy / OwnerNextStepRouter config",
+    "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+  },
+  "rows": [
+    {
+      "DAG_upstream_downstream_route_ref": "dag.generated.jsonl",
+      "LLM_view_refs_or_provider_route": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "MEM1_similarity_and_shrinkage_prior_refs": "owner_edge_alpha_capture_view.generated.jsonl",
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_AgentRosterDiscoveryAudit.report.json",
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "QAOA_VQE_annealing_candidate_readiness_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "QKU_formula_refs_or_gap": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "QUBO_BQM_CQM_QuadraticProgram_Ising_readiness_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "TCA_decomposition_ref": "owner_institutional_metric_view.generated.jsonl",
+      "action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "calibration_ref": "owner_institutional_metric_view.generated.jsonl",
+      "capacity_crowding_limit_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "champion_challenger_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "chart_refs": [
+        "portfolio_equity_curve",
+        "TCA_waterfall_and_implementation_shortfall"
+      ],
+      "classical_fallback_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "collapsed_controls_compact": true,
+      "execution_adjusted_rank_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "experience_mode": "GUIDED_OWNER",
+      "implementation_shortfall_ref": "owner_chart_panel_projection.generated.jsonl",
+      "interpret_back_map_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "large_empty_collapsed_body_present": false,
+      "no_trade_comparator_and_reoptimization_route": "owner_edge_alpha_capture_view.generated.jsonl",
+      "overfit_false_discovery_control_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "portfolio_diversification_ref": "owner_institutional_metric_view.generated.jsonl",
+      "portfolio_marginal_utility_ref": "owner_institutional_metric_view.generated.jsonl",
+      "primary_action_visible": true,
+      "provider_pending_disabled_action_visual_state": "distinct_disabled_provider_pending",
+      "provider_stage": "UI1",
+      "qstruct_objective_constraint_variable_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "quantum_structural_readiness_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "regime_conditioned_memory_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "runtime_side_effect_allowed": false,
+      "scenario_ladder_ref": "owner_institutional_metric_view.generated.jsonl",
+      "secondary_actions_visible": true,
+      "semantic_title": "Review dashboard readiness",
+      "semantic_title_fallback_used": false,
+      "semantic_title_source": "surface_kind_or_action_route",
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_surface_registry.jsonl",
+        "owner_action_registry.generated.jsonl"
+      ],
+      "specific_semantic_title_present": true,
+      "surface_id": "owner-dashboard",
+      "technical_details_prominence_state": "compact_collapsed_control",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "widget_id": "UI1R2R1_VISUAL_01"
+    },
+    {
+      "DAG_upstream_downstream_route_ref": "dag.generated.jsonl",
+      "LLM_view_refs_or_provider_route": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "MEM1_similarity_and_shrinkage_prior_refs": "owner_edge_alpha_capture_view.generated.jsonl",
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_AgentRosterDiscoveryAudit.report.json",
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "QAOA_VQE_annealing_candidate_readiness_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "QKU_formula_refs_or_gap": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "QUBO_BQM_CQM_QuadraticProgram_Ising_readiness_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "TCA_decomposition_ref": "owner_institutional_metric_view.generated.jsonl",
+      "action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "calibration_ref": "owner_institutional_metric_view.generated.jsonl",
+      "capacity_crowding_limit_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "champion_challenger_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "chart_refs": [
+        "portfolio_equity_curve",
+        "TCA_waterfall_and_implementation_shortfall"
+      ],
+      "classical_fallback_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "collapsed_controls_compact": true,
+      "execution_adjusted_rank_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "experience_mode": "GUIDED_OWNER",
+      "implementation_shortfall_ref": "owner_chart_panel_projection.generated.jsonl",
+      "interpret_back_map_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "large_empty_collapsed_body_present": false,
+      "no_trade_comparator_and_reoptimization_route": "owner_edge_alpha_capture_view.generated.jsonl",
+      "overfit_false_discovery_control_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "portfolio_diversification_ref": "owner_institutional_metric_view.generated.jsonl",
+      "portfolio_marginal_utility_ref": "owner_institutional_metric_view.generated.jsonl",
+      "primary_action_visible": true,
+      "provider_pending_disabled_action_visual_state": "distinct_disabled_provider_pending",
+      "provider_stage": "UI1",
+      "qstruct_objective_constraint_variable_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "quantum_structural_readiness_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "regime_conditioned_memory_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "runtime_side_effect_allowed": false,
+      "scenario_ladder_ref": "owner_institutional_metric_view.generated.jsonl",
+      "secondary_actions_visible": true,
+      "semantic_title": "Check trade candidate",
+      "semantic_title_fallback_used": false,
+      "semantic_title_source": "surface_kind_or_action_route",
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_surface_registry.jsonl",
+        "owner_action_registry.generated.jsonl"
+      ],
+      "specific_semantic_title_present": true,
+      "surface_id": "owner-dashboard",
+      "technical_details_prominence_state": "compact_collapsed_control",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "widget_id": "UI1R2R1_VISUAL_02"
+    },
+    {
+      "DAG_upstream_downstream_route_ref": "dag.generated.jsonl",
+      "LLM_view_refs_or_provider_route": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "MEM1_similarity_and_shrinkage_prior_refs": "owner_edge_alpha_capture_view.generated.jsonl",
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_AgentRosterDiscoveryAudit.report.json",
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "QAOA_VQE_annealing_candidate_readiness_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "QKU_formula_refs_or_gap": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "QUBO_BQM_CQM_QuadraticProgram_Ising_readiness_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "TCA_decomposition_ref": "owner_institutional_metric_view.generated.jsonl",
+      "action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "calibration_ref": "owner_institutional_metric_view.generated.jsonl",
+      "capacity_crowding_limit_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "champion_challenger_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "chart_refs": [
+        "portfolio_equity_curve",
+        "TCA_waterfall_and_implementation_shortfall"
+      ],
+      "classical_fallback_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "collapsed_controls_compact": true,
+      "execution_adjusted_rank_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "experience_mode": "GUIDED_OWNER",
+      "implementation_shortfall_ref": "owner_chart_panel_projection.generated.jsonl",
+      "interpret_back_map_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "large_empty_collapsed_body_present": false,
+      "no_trade_comparator_and_reoptimization_route": "owner_edge_alpha_capture_view.generated.jsonl",
+      "overfit_false_discovery_control_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "portfolio_diversification_ref": "owner_institutional_metric_view.generated.jsonl",
+      "portfolio_marginal_utility_ref": "owner_institutional_metric_view.generated.jsonl",
+      "primary_action_visible": true,
+      "provider_pending_disabled_action_visual_state": "distinct_disabled_provider_pending",
+      "provider_stage": "UI1",
+      "qstruct_objective_constraint_variable_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "quantum_structural_readiness_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "regime_conditioned_memory_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "runtime_side_effect_allowed": false,
+      "scenario_ladder_ref": "owner_institutional_metric_view.generated.jsonl",
+      "secondary_actions_visible": true,
+      "semantic_title": "Inspect no-trade reason",
+      "semantic_title_fallback_used": false,
+      "semantic_title_source": "surface_kind_or_action_route",
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_surface_registry.jsonl",
+        "owner_action_registry.generated.jsonl"
+      ],
+      "specific_semantic_title_present": true,
+      "surface_id": "owner-dashboard",
+      "technical_details_prominence_state": "compact_collapsed_control",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "widget_id": "UI1R2R1_VISUAL_03"
+    },
+    {
+      "DAG_upstream_downstream_route_ref": "dag.generated.jsonl",
+      "LLM_view_refs_or_provider_route": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "MEM1_similarity_and_shrinkage_prior_refs": "owner_edge_alpha_capture_view.generated.jsonl",
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_AgentRosterDiscoveryAudit.report.json",
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "QAOA_VQE_annealing_candidate_readiness_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "QKU_formula_refs_or_gap": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "QUBO_BQM_CQM_QuadraticProgram_Ising_readiness_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "TCA_decomposition_ref": "owner_institutional_metric_view.generated.jsonl",
+      "action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "calibration_ref": "owner_institutional_metric_view.generated.jsonl",
+      "capacity_crowding_limit_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "champion_challenger_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "chart_refs": [
+        "portfolio_equity_curve",
+        "TCA_waterfall_and_implementation_shortfall"
+      ],
+      "classical_fallback_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "collapsed_controls_compact": true,
+      "execution_adjusted_rank_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "experience_mode": "GUIDED_OWNER",
+      "implementation_shortfall_ref": "owner_chart_panel_projection.generated.jsonl",
+      "interpret_back_map_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "large_empty_collapsed_body_present": false,
+      "no_trade_comparator_and_reoptimization_route": "owner_edge_alpha_capture_view.generated.jsonl",
+      "overfit_false_discovery_control_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "portfolio_diversification_ref": "owner_institutional_metric_view.generated.jsonl",
+      "portfolio_marginal_utility_ref": "owner_institutional_metric_view.generated.jsonl",
+      "primary_action_visible": true,
+      "provider_pending_disabled_action_visual_state": "distinct_disabled_provider_pending",
+      "provider_stage": "UI1",
+      "qstruct_objective_constraint_variable_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "quantum_structural_readiness_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "regime_conditioned_memory_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "runtime_side_effect_allowed": false,
+      "scenario_ladder_ref": "owner_institutional_metric_view.generated.jsonl",
+      "secondary_actions_visible": true,
+      "semantic_title": "Review cost breakdown",
+      "semantic_title_fallback_used": false,
+      "semantic_title_source": "surface_kind_or_action_route",
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_surface_registry.jsonl",
+        "owner_action_registry.generated.jsonl"
+      ],
+      "specific_semantic_title_present": true,
+      "surface_id": "owner-dashboard",
+      "technical_details_prominence_state": "compact_collapsed_control",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "widget_id": "UI1R2R1_VISUAL_04"
+    },
+    {
+      "DAG_upstream_downstream_route_ref": "dag.generated.jsonl",
+      "LLM_view_refs_or_provider_route": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "MEM1_similarity_and_shrinkage_prior_refs": "owner_edge_alpha_capture_view.generated.jsonl",
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_AgentRosterDiscoveryAudit.report.json",
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "QAOA_VQE_annealing_candidate_readiness_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "QKU_formula_refs_or_gap": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "QUBO_BQM_CQM_QuadraticProgram_Ising_readiness_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "TCA_decomposition_ref": "owner_institutional_metric_view.generated.jsonl",
+      "action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "calibration_ref": "owner_institutional_metric_view.generated.jsonl",
+      "capacity_crowding_limit_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "champion_challenger_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "chart_refs": [
+        "portfolio_equity_curve",
+        "TCA_waterfall_and_implementation_shortfall"
+      ],
+      "classical_fallback_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "collapsed_controls_compact": true,
+      "execution_adjusted_rank_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "experience_mode": "GUIDED_OWNER",
+      "implementation_shortfall_ref": "owner_chart_panel_projection.generated.jsonl",
+      "interpret_back_map_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "large_empty_collapsed_body_present": false,
+      "no_trade_comparator_and_reoptimization_route": "owner_edge_alpha_capture_view.generated.jsonl",
+      "overfit_false_discovery_control_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "portfolio_diversification_ref": "owner_institutional_metric_view.generated.jsonl",
+      "portfolio_marginal_utility_ref": "owner_institutional_metric_view.generated.jsonl",
+      "primary_action_visible": true,
+      "provider_pending_disabled_action_visual_state": "distinct_disabled_provider_pending",
+      "provider_stage": "UI1",
+      "qstruct_objective_constraint_variable_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "quantum_structural_readiness_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "regime_conditioned_memory_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "runtime_side_effect_allowed": false,
+      "scenario_ladder_ref": "owner_institutional_metric_view.generated.jsonl",
+      "secondary_actions_visible": true,
+      "semantic_title": "Inspect QKU/formula route",
+      "semantic_title_fallback_used": false,
+      "semantic_title_source": "surface_kind_or_action_route",
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_surface_registry.jsonl",
+        "owner_action_registry.generated.jsonl"
+      ],
+      "specific_semantic_title_present": true,
+      "surface_id": "owner-dashboard",
+      "technical_details_prominence_state": "compact_collapsed_control",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "widget_id": "UI1R2R1_VISUAL_05"
+    },
+    {
+      "DAG_upstream_downstream_route_ref": "dag.generated.jsonl",
+      "LLM_view_refs_or_provider_route": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "MEM1_similarity_and_shrinkage_prior_refs": "owner_edge_alpha_capture_view.generated.jsonl",
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_AgentRosterDiscoveryAudit.report.json",
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "QAOA_VQE_annealing_candidate_readiness_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "QKU_formula_refs_or_gap": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "QUBO_BQM_CQM_QuadraticProgram_Ising_readiness_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "TCA_decomposition_ref": "owner_institutional_metric_view.generated.jsonl",
+      "action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "calibration_ref": "owner_institutional_metric_view.generated.jsonl",
+      "capacity_crowding_limit_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "champion_challenger_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "chart_refs": [
+        "portfolio_equity_curve",
+        "TCA_waterfall_and_implementation_shortfall"
+      ],
+      "classical_fallback_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "collapsed_controls_compact": true,
+      "execution_adjusted_rank_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "experience_mode": "GUIDED_OWNER",
+      "implementation_shortfall_ref": "owner_chart_panel_projection.generated.jsonl",
+      "interpret_back_map_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "large_empty_collapsed_body_present": false,
+      "no_trade_comparator_and_reoptimization_route": "owner_edge_alpha_capture_view.generated.jsonl",
+      "overfit_false_discovery_control_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "portfolio_diversification_ref": "owner_institutional_metric_view.generated.jsonl",
+      "portfolio_marginal_utility_ref": "owner_institutional_metric_view.generated.jsonl",
+      "primary_action_visible": true,
+      "provider_pending_disabled_action_visual_state": "distinct_disabled_provider_pending",
+      "provider_stage": "UI1",
+      "qstruct_objective_constraint_variable_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "quantum_structural_readiness_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "regime_conditioned_memory_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "runtime_side_effect_allowed": false,
+      "scenario_ladder_ref": "owner_institutional_metric_view.generated.jsonl",
+      "secondary_actions_visible": true,
+      "semantic_title": "Review agent disagreement",
+      "semantic_title_fallback_used": false,
+      "semantic_title_source": "surface_kind_or_action_route",
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_surface_registry.jsonl",
+        "owner_action_registry.generated.jsonl"
+      ],
+      "specific_semantic_title_present": true,
+      "surface_id": "owner-dashboard",
+      "technical_details_prominence_state": "compact_collapsed_control",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "widget_id": "UI1R2R1_VISUAL_06"
+    },
+    {
+      "DAG_upstream_downstream_route_ref": "dag.generated.jsonl",
+      "LLM_view_refs_or_provider_route": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "MEM1_similarity_and_shrinkage_prior_refs": "owner_edge_alpha_capture_view.generated.jsonl",
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_AgentRosterDiscoveryAudit.report.json",
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "QAOA_VQE_annealing_candidate_readiness_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "QKU_formula_refs_or_gap": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "QUBO_BQM_CQM_QuadraticProgram_Ising_readiness_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "TCA_decomposition_ref": "owner_institutional_metric_view.generated.jsonl",
+      "action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "calibration_ref": "owner_institutional_metric_view.generated.jsonl",
+      "capacity_crowding_limit_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "champion_challenger_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "chart_refs": [
+        "portfolio_equity_curve",
+        "TCA_waterfall_and_implementation_shortfall"
+      ],
+      "classical_fallback_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "collapsed_controls_compact": true,
+      "execution_adjusted_rank_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "experience_mode": "GUIDED_OWNER",
+      "implementation_shortfall_ref": "owner_chart_panel_projection.generated.jsonl",
+      "interpret_back_map_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "large_empty_collapsed_body_present": false,
+      "no_trade_comparator_and_reoptimization_route": "owner_edge_alpha_capture_view.generated.jsonl",
+      "overfit_false_discovery_control_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "portfolio_diversification_ref": "owner_institutional_metric_view.generated.jsonl",
+      "portfolio_marginal_utility_ref": "owner_institutional_metric_view.generated.jsonl",
+      "primary_action_visible": true,
+      "provider_pending_disabled_action_visual_state": "distinct_disabled_provider_pending",
+      "provider_stage": "UI1",
+      "qstruct_objective_constraint_variable_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "quantum_structural_readiness_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "regime_conditioned_memory_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "runtime_side_effect_allowed": false,
+      "scenario_ladder_ref": "owner_institutional_metric_view.generated.jsonl",
+      "secondary_actions_visible": true,
+      "semantic_title": "Open parameter tuning preview",
+      "semantic_title_fallback_used": false,
+      "semantic_title_source": "surface_kind_or_action_route",
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_surface_registry.jsonl",
+        "owner_action_registry.generated.jsonl"
+      ],
+      "specific_semantic_title_present": true,
+      "surface_id": "owner-dashboard",
+      "technical_details_prominence_state": "compact_collapsed_control",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "widget_id": "UI1R2R1_VISUAL_07"
+    },
+    {
+      "DAG_upstream_downstream_route_ref": "dag.generated.jsonl",
+      "LLM_view_refs_or_provider_route": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "MEM1_similarity_and_shrinkage_prior_refs": "owner_edge_alpha_capture_view.generated.jsonl",
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_AgentRosterDiscoveryAudit.report.json",
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "QAOA_VQE_annealing_candidate_readiness_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "QKU_formula_refs_or_gap": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "QUBO_BQM_CQM_QuadraticProgram_Ising_readiness_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "TCA_decomposition_ref": "owner_institutional_metric_view.generated.jsonl",
+      "action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "calibration_ref": "owner_institutional_metric_view.generated.jsonl",
+      "capacity_crowding_limit_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "champion_challenger_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "chart_refs": [
+        "portfolio_equity_curve",
+        "TCA_waterfall_and_implementation_shortfall"
+      ],
+      "classical_fallback_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "collapsed_controls_compact": true,
+      "execution_adjusted_rank_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "experience_mode": "GUIDED_OWNER",
+      "implementation_shortfall_ref": "owner_chart_panel_projection.generated.jsonl",
+      "interpret_back_map_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "large_empty_collapsed_body_present": false,
+      "no_trade_comparator_and_reoptimization_route": "owner_edge_alpha_capture_view.generated.jsonl",
+      "overfit_false_discovery_control_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "portfolio_diversification_ref": "owner_institutional_metric_view.generated.jsonl",
+      "portfolio_marginal_utility_ref": "owner_institutional_metric_view.generated.jsonl",
+      "primary_action_visible": true,
+      "provider_pending_disabled_action_visual_state": "distinct_disabled_provider_pending",
+      "provider_stage": "UI1",
+      "qstruct_objective_constraint_variable_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "quantum_structural_readiness_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "regime_conditioned_memory_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "runtime_side_effect_allowed": false,
+      "scenario_ladder_ref": "owner_institutional_metric_view.generated.jsonl",
+      "secondary_actions_visible": true,
+      "semantic_title": "Review quantum readiness",
+      "semantic_title_fallback_used": false,
+      "semantic_title_source": "surface_kind_or_action_route",
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_surface_registry.jsonl",
+        "owner_action_registry.generated.jsonl"
+      ],
+      "specific_semantic_title_present": true,
+      "surface_id": "owner-dashboard",
+      "technical_details_prominence_state": "compact_collapsed_control",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "widget_id": "UI1R2R1_VISUAL_08"
+    },
+    {
+      "DAG_upstream_downstream_route_ref": "dag.generated.jsonl",
+      "LLM_view_refs_or_provider_route": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "MEM1_similarity_and_shrinkage_prior_refs": "owner_edge_alpha_capture_view.generated.jsonl",
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_AgentRosterDiscoveryAudit.report.json",
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "QAOA_VQE_annealing_candidate_readiness_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "QKU_formula_refs_or_gap": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "QUBO_BQM_CQM_QuadraticProgram_Ising_readiness_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "TCA_decomposition_ref": "owner_institutional_metric_view.generated.jsonl",
+      "action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "calibration_ref": "owner_institutional_metric_view.generated.jsonl",
+      "capacity_crowding_limit_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "champion_challenger_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "chart_refs": [
+        "portfolio_equity_curve",
+        "TCA_waterfall_and_implementation_shortfall"
+      ],
+      "classical_fallback_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "collapsed_controls_compact": true,
+      "execution_adjusted_rank_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "experience_mode": "GUIDED_OWNER",
+      "implementation_shortfall_ref": "owner_chart_panel_projection.generated.jsonl",
+      "interpret_back_map_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "large_empty_collapsed_body_present": false,
+      "no_trade_comparator_and_reoptimization_route": "owner_edge_alpha_capture_view.generated.jsonl",
+      "overfit_false_discovery_control_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "portfolio_diversification_ref": "owner_institutional_metric_view.generated.jsonl",
+      "portfolio_marginal_utility_ref": "owner_institutional_metric_view.generated.jsonl",
+      "primary_action_visible": true,
+      "provider_pending_disabled_action_visual_state": "distinct_disabled_provider_pending",
+      "provider_stage": "UI1",
+      "qstruct_objective_constraint_variable_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "quantum_structural_readiness_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "regime_conditioned_memory_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "runtime_side_effect_allowed": false,
+      "scenario_ladder_ref": "owner_institutional_metric_view.generated.jsonl",
+      "secondary_actions_visible": true,
+      "semantic_title": "Review provider-stage route",
+      "semantic_title_fallback_used": false,
+      "semantic_title_source": "surface_kind_or_action_route",
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_surface_registry.jsonl",
+        "owner_action_registry.generated.jsonl"
+      ],
+      "specific_semantic_title_present": true,
+      "surface_id": "owner-dashboard",
+      "technical_details_prominence_state": "compact_collapsed_control",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "widget_id": "UI1R2R1_VISUAL_09"
+    },
+    {
+      "DAG_upstream_downstream_route_ref": "dag.generated.jsonl",
+      "LLM_view_refs_or_provider_route": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "MEM1_similarity_and_shrinkage_prior_refs": "owner_edge_alpha_capture_view.generated.jsonl",
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_AgentRosterDiscoveryAudit.report.json",
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "QAOA_VQE_annealing_candidate_readiness_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "QKU_formula_refs_or_gap": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "QUBO_BQM_CQM_QuadraticProgram_Ising_readiness_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "TCA_decomposition_ref": "owner_institutional_metric_view.generated.jsonl",
+      "action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "calibration_ref": "owner_institutional_metric_view.generated.jsonl",
+      "capacity_crowding_limit_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "champion_challenger_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "chart_refs": [
+        "portfolio_equity_curve",
+        "TCA_waterfall_and_implementation_shortfall"
+      ],
+      "classical_fallback_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "collapsed_controls_compact": true,
+      "execution_adjusted_rank_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "experience_mode": "GUIDED_OWNER",
+      "implementation_shortfall_ref": "owner_chart_panel_projection.generated.jsonl",
+      "interpret_back_map_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "large_empty_collapsed_body_present": false,
+      "no_trade_comparator_and_reoptimization_route": "owner_edge_alpha_capture_view.generated.jsonl",
+      "overfit_false_discovery_control_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "portfolio_diversification_ref": "owner_institutional_metric_view.generated.jsonl",
+      "portfolio_marginal_utility_ref": "owner_institutional_metric_view.generated.jsonl",
+      "primary_action_visible": true,
+      "provider_pending_disabled_action_visual_state": "distinct_disabled_provider_pending",
+      "provider_stage": "UI1",
+      "qstruct_objective_constraint_variable_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "quantum_structural_readiness_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "regime_conditioned_memory_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "runtime_side_effect_allowed": false,
+      "scenario_ladder_ref": "owner_institutional_metric_view.generated.jsonl",
+      "secondary_actions_visible": true,
+      "semantic_title": "Inspect capital/exposure status",
+      "semantic_title_fallback_used": false,
+      "semantic_title_source": "surface_kind_or_action_route",
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_surface_registry.jsonl",
+        "owner_action_registry.generated.jsonl"
+      ],
+      "specific_semantic_title_present": true,
+      "surface_id": "owner-dashboard",
+      "technical_details_prominence_state": "compact_collapsed_control",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "widget_id": "UI1R2R1_VISUAL_10"
+    }
+  ],
+  "specific_semantic_title_grid_verified": true,
+  "technical_details_dominant_in_guided_owner": false
+}

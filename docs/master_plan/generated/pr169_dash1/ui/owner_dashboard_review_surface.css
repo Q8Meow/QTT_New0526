@@ -232,6 +232,45 @@ select:focus-visible,
   gap: 10px;
 }
 
+.mode-policy-card {
+  border-left: 4px solid var(--qtt-green);
+}
+
+.advanced-mode-panel {
+  border-left-color: var(--qtt-blue);
+}
+
+.developer-mode-panel {
+  border-left-color: var(--qtt-purple);
+}
+
+.compact-mode-grid,
+.advanced-metric-grid {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.compact-mode-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.advanced-metric-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.compact-mode-grid span,
+.advanced-metric-grid span,
+.workbench-context-refs span {
+  border: 1px solid var(--qtt-border);
+  border-radius: 8px;
+  padding: 7px 8px;
+  background: var(--qtt-bg-panel);
+  color: var(--qtt-muted);
+  font-size: 12px;
+  font-weight: 750;
+}
+
 .coach-actions,
 .owner-card-controls {
   display: flex;
@@ -251,6 +290,29 @@ select:focus-visible,
   min-width: min(220px, 100%);
   padding: 8px 10px;
   background: var(--qtt-bg-panel);
+}
+
+.owner-card-controls details:not([open]) > :not(summary) {
+  display: none;
+}
+
+body[data-experience-mode="GUIDED_OWNER"] .owner-card-controls .next-action-menu:not([open]),
+body[data-experience-mode="GUIDED_OWNER"] .owner-card-controls .learning-details:not([open]) {
+  flex: 0 0 auto;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+body[data-experience-mode="GUIDED_OWNER"] .owner-card-controls summary,
+.technical-compact-control {
+  min-height: 34px;
+  border: 1px solid var(--qtt-border);
+  border-radius: 8px;
+  padding: 7px 9px;
+  background: var(--qtt-bg-panel);
+  color: var(--qtt-muted);
 }
 
 .action-menu-body {
@@ -279,6 +341,46 @@ select:focus-visible,
 .menu-option.is-disabled {
   border-style: dashed;
   color: var(--qtt-muted);
+}
+
+.menu-option.action-primary,
+.primary-command {
+  border-color: var(--qtt-green);
+  background: color-mix(in srgb, var(--qtt-green), var(--qtt-bg-card) 78%);
+}
+
+.menu-option.action-secondary,
+.text-command {
+  border-color: var(--qtt-blue);
+}
+
+.menu-option.is-provider-pending,
+[data-provider-pending-action="true"] {
+  border-color: var(--qtt-orange);
+  color: var(--qtt-orange);
+  background: color-mix(in srgb, var(--qtt-orange), var(--qtt-bg-card) 90%);
+}
+
+body[data-experience-mode="GUIDED_OWNER"] .metric-grid .owner-hero-card:nth-child(n+5),
+body[data-experience-mode="GUIDED_OWNER"] .home-grid .quick-card:nth-child(n+7),
+body[data-experience-mode="GUIDED_OWNER"] .queue-grid .card:nth-child(n+7) {
+  display: none;
+}
+
+body[data-experience-mode="ADVANCED_OWNER"] .card,
+body[data-experience-mode="ADVANCED_OWNER"] .chart-panel,
+body[data-experience-mode="ADVANCED_OWNER"] .route-card {
+  padding: 11px;
+}
+
+body[data-experience-mode="ADVANCED_OWNER"] .card p,
+body[data-experience-mode="ADVANCED_OWNER"] .chart-panel p {
+  font-size: 13px;
+}
+
+body[data-experience-mode="DEVELOPER"] .developer-panel details,
+body[data-experience-mode="DEVELOPER"] #homeDeveloperSummary details {
+  border-color: var(--qtt-purple);
 }
 
 .coach-output {
@@ -715,6 +817,24 @@ select:focus-visible,
   font-weight: 800;
 }
 
+.control-row .compact-toggle {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-width: auto;
+  padding: 0 10px;
+  border: 1px solid var(--qtt-border);
+  border-radius: 8px;
+  background: var(--qtt-bg-soft);
+}
+
+.compact-toggle input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--qtt-blue);
+}
+
 .control-row select,
 .control-row input,
 .workbench-fields input {
@@ -723,6 +843,11 @@ select:focus-visible,
   background: var(--qtt-bg-panel);
   color: var(--qtt-text);
   padding: 0 10px;
+}
+
+.control-row .compact-toggle input {
+  padding: 0;
+  border-radius: 4px;
 }
 
 .primary-command {
@@ -815,6 +940,42 @@ select:focus-visible,
   background: var(--qtt-bg-card);
   color: var(--qtt-text);
   padding: 0 10px;
+}
+
+.guided-input-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.guided-input-row label {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  color: var(--qtt-muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.guided-input-row input {
+  width: 100%;
+  border: 1px solid var(--qtt-border);
+  border-radius: 8px;
+  background: var(--qtt-bg-card);
+  color: var(--qtt-text);
+  padding: 0 10px;
+}
+
+.guided-input-row input[aria-invalid="true"] {
+  border-color: var(--qtt-red);
+}
+
+.inline-validation {
+  margin: 8px 0 0;
+  color: var(--qtt-yellow);
+  font-size: 13px;
+  font-weight: 750;
 }
 
 .glossary-grid {
@@ -1063,6 +1224,12 @@ pre {
   }
 
   .workbench-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .compact-mode-grid,
+  .advanced-metric-grid,
+  .guided-input-row {
     grid-template-columns: 1fr;
   }
 

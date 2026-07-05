@@ -628,6 +628,181 @@ def validate(base: Path) -> tuple[str, ...]:
         if snippet not in combined:
             failures.append(f"ui1r2_required_ui_snippet_missing:{snippet}")
 
+    r2r1_files = (
+        "ui1r2r1_mode_policy.generated.json",
+        "ui1r2r1_mode_render.report.json",
+        "ui1r2r1_interaction_map.generated.json",
+        "ui1r2r1_interaction_result.report.json",
+        "ui1r2r1_next_step.generated.json",
+        "ui1r2r1_next_step.report.json",
+        "ui1r2r1_chat_submit.report.json",
+        "ui1r2r1_workbench_prefill.report.json",
+        "ui1r2r1_visual_polish.report.json",
+        "ui1r2r1_visual_compactness.report.json",
+        "ui1r2r1_chat_intent.report.json",
+        "ui1r2r1_owner_command.report.json",
+        "ui1r2r1_evidence_spine.report.json",
+        "ui1r2r1_playwright.report.json",
+    )
+    for file_name in r2r1_files:
+        doc = _read_json(ui_dir / file_name)
+        meta = doc.get("meta", {})
+        for key in (
+            "manual_edit_allowed",
+            "runtime_truth_authority",
+            "agent_consumable_authority",
+            "credential_access_allowed",
+            "connector_access_allowed",
+            "order_execution_allowed",
+        ):
+            if meta.get(key) is not False:
+                failures.append(f"ui1r2r1_meta_bad:{file_name}:{key}")
+        if doc.get("runtime_side_effect_allowed", False) is not False:
+            failures.append(f"ui1r2r1_runtime_allowed:{file_name}")
+
+    mode_policy = _read_json(ui_dir / "ui1r2r1_mode_policy.generated.json")
+    if mode_policy.get("mode_policy_id") != "OwnerExperienceModePolicy":
+        failures.append("ui1r2r1_mode_policy_not_centralized")
+    mode_rows = {row.get("mode_id"): row for row in mode_policy.get("rows", [])}
+    if set(mode_rows) != {"GUIDED_OWNER", "ADVANCED_OWNER", "DEVELOPER"}:
+        failures.append("ui1r2r1_mode_rows_missing")
+    for mode_id, row in mode_rows.items():
+        for field in (
+            "visible_widget_groups",
+            "hidden_widget_groups",
+            "metric_density",
+            "education_density",
+            "technical_disclosure_policy",
+            "default_expansion_policy",
+            "source_artifact_refs",
+            "action_registry_ref",
+            "state_model_ref",
+            "validation_ref",
+        ):
+            if field not in row:
+                failures.append(f"ui1r2r1_mode_field_missing:{mode_id}:{field}")
+    if mode_rows.get("GUIDED_OWNER", {}).get("visible_widget_groups") == mode_rows.get("ADVANCED_OWNER", {}).get("visible_widget_groups"):
+        failures.append("ui1r2r1_guided_advanced_widget_groups_identical")
+    if "developer_json" not in mode_rows.get("DEVELOPER", {}).get("visible_widget_groups", []):
+        failures.append("ui1r2r1_developer_missing_technical_group")
+
+    mode_render = _read_json(ui_dir / "ui1r2r1_mode_render.report.json")
+    if mode_render.get("mode_content_identical") is not False:
+        failures.append("ui1r2r1_mode_render_identical")
+    if mode_render.get("advanced_owner_visible_metric_group_count", 0) <= mode_render.get("guided_owner_visible_metric_group_count", 0):
+        failures.append("ui1r2r1_advanced_not_denser_than_guided")
+    if mode_render.get("developer_visible_technical_group_count", 0) <= mode_render.get("advanced_owner_visible_metric_group_count", 0):
+        failures.append("ui1r2r1_developer_not_more_technical_than_advanced")
+
+    interaction_map = _read_json(ui_dir / "ui1r2r1_interaction_map.generated.json")
+    required_handlers = {
+        "OwnerExperienceModePolicy",
+        "OwnerChatSubmitHandler",
+        "OwnerGuidedInputHandler",
+        "OwnerNextStepRouter",
+        "OwnerWorkbenchPrefillAdapter",
+        "OwnerDrilldownRouter",
+        "OwnerInteractionReceiptPreviewBuilder",
+    }
+    if not required_handlers <= set(interaction_map.get("central_handlers", [])):
+        failures.append("ui1r2r1_interaction_handlers_missing")
+    for row in interaction_map.get("rows", []):
+        if row.get("runtime_side_effect_allowed") is not False:
+            failures.append(f"ui1r2r1_interaction_runtime_allowed:{row.get('interaction_id')}")
+        if not row.get("owner_visible_state_change"):
+            failures.append(f"ui1r2r1_interaction_no_visible_state:{row.get('interaction_id')}")
+
+    chat_submit = _read_json(ui_dir / "ui1r2r1_chat_submit.report.json")
+    if chat_submit.get("default_desktop_enter_behavior") != "NEWLINE":
+        failures.append("ui1r2r1_chat_enter_not_newline_default")
+    if chat_submit.get("mobile_enter_behavior") != "NEWLINE":
+        failures.append("ui1r2r1_chat_mobile_enter_not_newline")
+    if chat_submit.get("physical_enter_identical_to_send_by_default") is not False:
+        failures.append("ui1r2r1_chat_enter_matches_send_by_default")
+    if chat_submit.get("enter_to_send_default_enabled") is not False:
+        failures.append("ui1r2r1_chat_enter_to_send_enabled_by_default")
+    for key in (
+        "enter_to_send_optional_setting_available",
+        "ctrl_enter_submits_local_preview",
+        "send_button_submits_local_preview",
+        "shift_enter_inserts_newline",
+        "empty_send_click_inline_hint",
+        "empty_input_no_submit",
+        "owner_and_qtt_preview_bubbles_visible",
+    ):
+        if chat_submit.get(key) is not True:
+            failures.append(f"ui1r2r1_chat_submit_missing:{key}")
+    if chat_submit.get("central_conversation_state_ref") != "OwnerConversationStateV1":
+        failures.append("ui1r2r1_chat_not_central_conversation_state")
+    intent_report = _read_json(ui_dir / "ui1r2r1_chat_intent.report.json")
+    for intent in (
+        "TRADE_CHECK_REQUEST",
+        "RESEARCH_ANALYSIS_REQUEST",
+        "QKU_MATERIALIZATION_REQUEST",
+        "NO_TRADE_EXPLANATION_REQUEST",
+        "PARAMETER_TUNING_REQUEST",
+        "UNKNOWN_OWNER_REQUEST_NEEDS_CLARIFICATION",
+    ):
+        if intent not in intent_report.get("recognized_intent_families", []):
+            failures.append(f"ui1r2r1_intent_missing:{intent}")
+
+    visual_compactness = _read_json(ui_dir / "ui1r2r1_visual_compactness.report.json")
+    if visual_compactness.get("collapsed_control_max_default_body_rows") != 0:
+        failures.append("ui1r2r1_collapsed_budget_bad")
+    if visual_compactness.get("technical_details_dominant_in_guided_owner") is not False:
+        failures.append("ui1r2r1_technical_details_dominant")
+    if visual_compactness.get("generic_owner_decision_repeated_default_allowed") is not False:
+        failures.append("ui1r2r1_generic_owner_decision_allowed")
+    for row in visual_compactness.get("rows", []):
+        if row.get("large_empty_collapsed_body_present") is not False:
+            failures.append(f"ui1r2r1_large_empty_collapsed_body:{row.get('widget_id')}")
+        if row.get("specific_semantic_title_present") is not True:
+            failures.append(f"ui1r2r1_semantic_title_missing:{row.get('widget_id')}")
+
+    owner_command = _read_json(ui_dir / "ui1r2r1_owner_command.report.json")
+    if owner_command.get("execution_router_release_authority_created") is not False:
+        failures.append("ui1r2r1_execution_router_release_authority_created")
+    evidence_spine = _read_json(ui_dir / "ui1r2r1_evidence_spine.report.json")
+    required_spine = {
+        "execution_adjusted_rank_ref",
+        "TCA_decomposition_ref",
+        "overfit_false_discovery_control_ref",
+        "portfolio_marginal_utility_ref",
+        "capacity_crowding_limit_ref",
+        "champion_challenger_ref",
+        "no_trade_comparator_and_reoptimization_route",
+        "quantum_structural_readiness_ref",
+        "qstruct_objective_constraint_variable_ref",
+        "interpret_back_map_ref",
+        "DAG_upstream_downstream_route_ref",
+        "PR165_D2_agent_role_refs_or_gap",
+        "QKU_formula_refs_or_gap",
+        "LLM_view_refs_or_provider_route",
+    }
+    if not required_spine <= set(evidence_spine.get("required_evidence_spine_refs", [])):
+        failures.append("ui1r2r1_evidence_spine_missing_refs")
+    if evidence_spine.get("no_fake_trading_evidence") is not True or evidence_spine.get("no_fake_quantum_advantage") is not True:
+        failures.append("ui1r2r1_fake_evidence_guard_missing")
+    for row in evidence_spine.get("rows", []):
+        for field in required_spine:
+            if not row.get(field):
+                failures.append(f"ui1r2r1_evidence_row_missing:{row.get('widget_id')}:{field}")
+
+    for snippet in (
+        "OwnerChatSubmitHandler",
+        "OwnerGuidedInputHandler",
+        "OwnerWorkbenchPrefillAdapter",
+        "data-chat-submit-hint",
+        "data-enter-to-send-setting",
+        "CTRL_ENTER_SUBMIT",
+        "data-guided-current-step",
+        "data-mode-advanced-metric",
+        "data-mode-developer-technical",
+        "data-provider-pending-action",
+    ):
+        if snippet not in combined:
+            failures.append(f"ui1r2r1_renderer_snippet_missing:{snippet}")
+
     return tuple(failures)
 
 

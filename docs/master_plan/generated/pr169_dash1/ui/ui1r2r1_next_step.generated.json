@@ -1,0 +1,732 @@
+{
+  "meta": {
+    "agent_consumable_authority": false,
+    "artifact_id": "UI1R2R1_NEXT_STEP",
+    "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+    "connector_access_allowed": false,
+    "credential_access_allowed": false,
+    "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config + PR169-DASH1 artifacts + PR169-DASH1-UI1/R1 boot data + OwnerPresentationLayer / OwnerGuidancePolicy config + OwnerNextStepRouter / OwnerInteractionController local preview config",
+    "manual_edit_allowed": false,
+    "order_execution_allowed": false,
+    "runtime_side_effect_allowed": false,
+    "runtime_truth_authority": false,
+    "source_truth_authority": false,
+    "ui1r2r1_generated_from": "PR169-DASH1 artifacts + PR169-DASH1-UI1/R1/R2 boot data + OwnerPresentationLayer / OwnerGuidancePolicy / OwnerNextStepRouter config",
+    "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+  },
+  "one_deterministic_result_per_enabled_action": true,
+  "router_id": "OwnerNextStepRouter",
+  "rows": [
+    {
+      "DAG_upstream_downstream_route_ref": "dag.generated.jsonl",
+      "LLM_view_refs_or_provider_route": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "MEM1_similarity_and_shrinkage_prior_refs": "owner_edge_alpha_capture_view.generated.jsonl",
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_AgentRosterDiscoveryAudit.report.json",
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "QAOA_VQE_annealing_candidate_readiness_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "QKU_formula_refs_or_gap": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "QUBO_BQM_CQM_QuadraticProgram_Ising_readiness_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "TCA_decomposition_ref": "owner_institutional_metric_view.generated.jsonl",
+      "action_id": "REQUEST_OWNER_REVIEW",
+      "action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "activation_route": "OwnerNextStepRouter::NEXT_STEP_SEND_TO_TRADE_WORKBENCH",
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "calibration_ref": "owner_institutional_metric_view.generated.jsonl",
+      "capacity_crowding_limit_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "champion_challenger_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "chart_refs": [
+        "portfolio_equity_curve",
+        "TCA_waterfall_and_implementation_shortfall"
+      ],
+      "classical_fallback_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "creates_local_receipt_preview": true,
+      "current_surface_id": "any_owner_card",
+      "disabled_reason_if_blocked": "not_blocked_enabled_local_preview",
+      "execution_adjusted_rank_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "implementation_shortfall_ref": "owner_chart_panel_projection.generated.jsonl",
+      "interpret_back_map_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "local_receipt_preview_type": "OwnerTradeIntentPreviewV1",
+      "message_or_action_id": "REQUEST_OWNER_REVIEW",
+      "next_step_id": "NEXT_STEP_SEND_TO_TRADE_WORKBENCH",
+      "no_trade_comparator_and_reoptimization_route": "owner_edge_alpha_capture_view.generated.jsonl",
+      "overfit_false_discovery_control_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "owner_input_required": "optional trade idea",
+      "owner_label": "Send to Trade Workbench",
+      "portfolio_diversification_ref": "owner_institutional_metric_view.generated.jsonl",
+      "portfolio_marginal_utility_ref": "owner_institutional_metric_view.generated.jsonl",
+      "prefill_context_refs": [
+        "selected_card_ref",
+        "selected_surface_ref",
+        "owner_dashboard_review_data.generated.json"
+      ],
+      "preview_object_type": "OwnerTradeIntentPreviewV1",
+      "provider_stage": "UI1",
+      "qstruct_objective_constraint_variable_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "quantum_structural_readiness_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "regime_conditioned_memory_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "requires_owner_confirmation": false,
+      "runtime_side_effect_allowed": false,
+      "safe_default_if_owner_declines": "Stay on the current card and keep all education/details collapsed.",
+      "scenario_ladder_ref": "owner_institutional_metric_view.generated.jsonl",
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_action_registry.generated.jsonl",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "target_step_id": "prefilled_context",
+      "target_surface_id": "trade-workbench",
+      "target_workflow_id": "TradeWorkbench",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "what_happens_next": "The dashboard opens the local next UI step and preloads the selected context.",
+      "what_will_not_happen_now": "No live LLM call, agent task, connector access, replay run, paper run, live order, venue submit, or Execution Router release occurs."
+    },
+    {
+      "DAG_upstream_downstream_route_ref": "dag.generated.jsonl",
+      "LLM_view_refs_or_provider_route": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "MEM1_similarity_and_shrinkage_prior_refs": "owner_edge_alpha_capture_view.generated.jsonl",
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_AgentRosterDiscoveryAudit.report.json",
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "QAOA_VQE_annealing_candidate_readiness_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "QKU_formula_refs_or_gap": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "QUBO_BQM_CQM_QuadraticProgram_Ising_readiness_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "TCA_decomposition_ref": "owner_institutional_metric_view.generated.jsonl",
+      "action_id": "REQUEST_AGENT_TASK",
+      "action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "activation_route": "OwnerNextStepRouter::NEXT_STEP_CHECK_TRADE_WITH_QTT_AGENTS",
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "calibration_ref": "owner_institutional_metric_view.generated.jsonl",
+      "capacity_crowding_limit_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "champion_challenger_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "chart_refs": [
+        "portfolio_equity_curve",
+        "TCA_waterfall_and_implementation_shortfall"
+      ],
+      "classical_fallback_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "creates_local_receipt_preview": true,
+      "current_surface_id": "any_owner_card",
+      "disabled_reason_if_blocked": "not_blocked_enabled_local_preview",
+      "execution_adjusted_rank_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "implementation_shortfall_ref": "owner_chart_panel_projection.generated.jsonl",
+      "interpret_back_map_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "local_receipt_preview_type": "OwnerTradeCheckRequestPreviewV1",
+      "message_or_action_id": "REQUEST_AGENT_TASK",
+      "next_step_id": "NEXT_STEP_CHECK_TRADE_WITH_QTT_AGENTS",
+      "no_trade_comparator_and_reoptimization_route": "owner_edge_alpha_capture_view.generated.jsonl",
+      "overfit_false_discovery_control_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "owner_input_required": "market or objective",
+      "owner_label": "Check trade with QTT agents",
+      "portfolio_diversification_ref": "owner_institutional_metric_view.generated.jsonl",
+      "portfolio_marginal_utility_ref": "owner_institutional_metric_view.generated.jsonl",
+      "prefill_context_refs": [
+        "selected_card_ref",
+        "selected_surface_ref",
+        "owner_dashboard_review_data.generated.json"
+      ],
+      "preview_object_type": "OwnerTradeCheckRequestPreviewV1",
+      "provider_stage": "AGENT_ORCH1",
+      "qstruct_objective_constraint_variable_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "quantum_structural_readiness_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "regime_conditioned_memory_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "requires_owner_confirmation": false,
+      "runtime_side_effect_allowed": false,
+      "safe_default_if_owner_declines": "Stay on the current card and keep all education/details collapsed.",
+      "scenario_ladder_ref": "owner_institutional_metric_view.generated.jsonl",
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_action_registry.generated.jsonl",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "target_step_id": "select_market_or_objective",
+      "target_surface_id": "guided-workflows",
+      "target_workflow_id": "CheckTrade",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "what_happens_next": "The dashboard opens the local next UI step and preloads the selected context.",
+      "what_will_not_happen_now": "No live LLM call, agent task, connector access, replay run, paper run, live order, venue submit, or Execution Router release occurs."
+    },
+    {
+      "DAG_upstream_downstream_route_ref": "dag.generated.jsonl",
+      "LLM_view_refs_or_provider_route": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "MEM1_similarity_and_shrinkage_prior_refs": "owner_edge_alpha_capture_view.generated.jsonl",
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_AgentRosterDiscoveryAudit.report.json",
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "QAOA_VQE_annealing_candidate_readiness_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "QKU_formula_refs_or_gap": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "QUBO_BQM_CQM_QuadraticProgram_Ising_readiness_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "TCA_decomposition_ref": "owner_institutional_metric_view.generated.jsonl",
+      "action_id": "REQUEST_REPLAY_TEST",
+      "action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "activation_route": "OwnerNextStepRouter::NEXT_STEP_REQUEST_REPLAY_PREVIEW",
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "calibration_ref": "owner_institutional_metric_view.generated.jsonl",
+      "capacity_crowding_limit_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "champion_challenger_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "chart_refs": [
+        "portfolio_equity_curve",
+        "TCA_waterfall_and_implementation_shortfall"
+      ],
+      "classical_fallback_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "creates_local_receipt_preview": true,
+      "current_surface_id": "trade_workbench_or_candidate",
+      "disabled_reason_if_blocked": "not_blocked_enabled_local_preview",
+      "execution_adjusted_rank_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "implementation_shortfall_ref": "owner_chart_panel_projection.generated.jsonl",
+      "interpret_back_map_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "local_receipt_preview_type": "ReplayRequestPreviewV1",
+      "message_or_action_id": "REQUEST_REPLAY_TEST",
+      "next_step_id": "NEXT_STEP_REQUEST_REPLAY_PREVIEW",
+      "no_trade_comparator_and_reoptimization_route": "owner_edge_alpha_capture_view.generated.jsonl",
+      "overfit_false_discovery_control_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "owner_input_required": "none",
+      "owner_label": "Request replay preview",
+      "portfolio_diversification_ref": "owner_institutional_metric_view.generated.jsonl",
+      "portfolio_marginal_utility_ref": "owner_institutional_metric_view.generated.jsonl",
+      "prefill_context_refs": [
+        "selected_card_ref",
+        "selected_surface_ref",
+        "owner_dashboard_review_data.generated.json"
+      ],
+      "preview_object_type": "ReplayRequestPreviewV1",
+      "provider_stage": "PAPER_LOOP",
+      "qstruct_objective_constraint_variable_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "quantum_structural_readiness_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "regime_conditioned_memory_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "requires_owner_confirmation": false,
+      "runtime_side_effect_allowed": false,
+      "safe_default_if_owner_declines": "Stay on the current card and keep all education/details collapsed.",
+      "scenario_ladder_ref": "owner_institutional_metric_view.generated.jsonl",
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_action_registry.generated.jsonl",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "target_step_id": "receipt_preview",
+      "target_surface_id": "route-preview",
+      "target_workflow_id": "ReplayPreview",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "what_happens_next": "The dashboard opens the local next UI step and preloads the selected context.",
+      "what_will_not_happen_now": "No live LLM call, agent task, connector access, replay run, paper run, live order, venue submit, or Execution Router release occurs."
+    },
+    {
+      "DAG_upstream_downstream_route_ref": "dag.generated.jsonl",
+      "LLM_view_refs_or_provider_route": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "MEM1_similarity_and_shrinkage_prior_refs": "owner_edge_alpha_capture_view.generated.jsonl",
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_AgentRosterDiscoveryAudit.report.json",
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "QAOA_VQE_annealing_candidate_readiness_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "QKU_formula_refs_or_gap": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "QUBO_BQM_CQM_QuadraticProgram_Ising_readiness_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "TCA_decomposition_ref": "owner_institutional_metric_view.generated.jsonl",
+      "action_id": "REQUEST_PAPER_TEST",
+      "action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "activation_route": "OwnerNextStepRouter::NEXT_STEP_REQUEST_PAPER_PREVIEW",
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "calibration_ref": "owner_institutional_metric_view.generated.jsonl",
+      "capacity_crowding_limit_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "champion_challenger_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "chart_refs": [
+        "portfolio_equity_curve",
+        "TCA_waterfall_and_implementation_shortfall"
+      ],
+      "classical_fallback_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "creates_local_receipt_preview": true,
+      "current_surface_id": "trade_workbench_or_candidate",
+      "disabled_reason_if_blocked": "not_blocked_enabled_local_preview",
+      "execution_adjusted_rank_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "implementation_shortfall_ref": "owner_chart_panel_projection.generated.jsonl",
+      "interpret_back_map_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "local_receipt_preview_type": "PaperRequestPreviewV1",
+      "message_or_action_id": "REQUEST_PAPER_TEST",
+      "next_step_id": "NEXT_STEP_REQUEST_PAPER_PREVIEW",
+      "no_trade_comparator_and_reoptimization_route": "owner_edge_alpha_capture_view.generated.jsonl",
+      "overfit_false_discovery_control_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "owner_input_required": "none",
+      "owner_label": "Request paper preview",
+      "portfolio_diversification_ref": "owner_institutional_metric_view.generated.jsonl",
+      "portfolio_marginal_utility_ref": "owner_institutional_metric_view.generated.jsonl",
+      "prefill_context_refs": [
+        "selected_card_ref",
+        "selected_surface_ref",
+        "owner_dashboard_review_data.generated.json"
+      ],
+      "preview_object_type": "PaperRequestPreviewV1",
+      "provider_stage": "PAPER_LOOP",
+      "qstruct_objective_constraint_variable_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "quantum_structural_readiness_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "regime_conditioned_memory_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "requires_owner_confirmation": false,
+      "runtime_side_effect_allowed": false,
+      "safe_default_if_owner_declines": "Stay on the current card and keep all education/details collapsed.",
+      "scenario_ladder_ref": "owner_institutional_metric_view.generated.jsonl",
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_action_registry.generated.jsonl",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "target_step_id": "receipt_preview",
+      "target_surface_id": "route-preview",
+      "target_workflow_id": "PaperPreview",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "what_happens_next": "The dashboard opens the local next UI step and preloads the selected context.",
+      "what_will_not_happen_now": "No live LLM call, agent task, connector access, replay run, paper run, live order, venue submit, or Execution Router release occurs."
+    },
+    {
+      "DAG_upstream_downstream_route_ref": "dag.generated.jsonl",
+      "LLM_view_refs_or_provider_route": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "MEM1_similarity_and_shrinkage_prior_refs": "owner_edge_alpha_capture_view.generated.jsonl",
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_AgentRosterDiscoveryAudit.report.json",
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "QAOA_VQE_annealing_candidate_readiness_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "QKU_formula_refs_or_gap": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "QUBO_BQM_CQM_QuadraticProgram_Ising_readiness_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "TCA_decomposition_ref": "owner_institutional_metric_view.generated.jsonl",
+      "action_id": "REQUEST_QKU_COMPUTABILITY_REVIEW",
+      "action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "activation_route": "OwnerNextStepRouter::NEXT_STEP_SHOW_QKU_FORMULA_ROUTES",
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "calibration_ref": "owner_institutional_metric_view.generated.jsonl",
+      "capacity_crowding_limit_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "champion_challenger_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "chart_refs": [
+        "portfolio_equity_curve",
+        "TCA_waterfall_and_implementation_shortfall"
+      ],
+      "classical_fallback_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "creates_local_receipt_preview": true,
+      "current_surface_id": "qku_formula_or_candidate",
+      "disabled_reason_if_blocked": "not_blocked_enabled_local_preview",
+      "execution_adjusted_rank_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "implementation_shortfall_ref": "owner_chart_panel_projection.generated.jsonl",
+      "interpret_back_map_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "local_receipt_preview_type": "QKUFormulaRoutePreviewV1",
+      "message_or_action_id": "REQUEST_QKU_COMPUTABILITY_REVIEW",
+      "next_step_id": "NEXT_STEP_SHOW_QKU_FORMULA_ROUTES",
+      "no_trade_comparator_and_reoptimization_route": "owner_edge_alpha_capture_view.generated.jsonl",
+      "overfit_false_discovery_control_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "owner_input_required": "none",
+      "owner_label": "Show QKU/formula routes",
+      "portfolio_diversification_ref": "owner_institutional_metric_view.generated.jsonl",
+      "portfolio_marginal_utility_ref": "owner_institutional_metric_view.generated.jsonl",
+      "prefill_context_refs": [
+        "selected_card_ref",
+        "selected_surface_ref",
+        "owner_dashboard_review_data.generated.json"
+      ],
+      "preview_object_type": "QKUFormulaRoutePreviewV1",
+      "provider_stage": "READINESS1",
+      "qstruct_objective_constraint_variable_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "quantum_structural_readiness_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "regime_conditioned_memory_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "requires_owner_confirmation": false,
+      "runtime_side_effect_allowed": false,
+      "safe_default_if_owner_declines": "Stay on the current card and keep all education/details collapsed.",
+      "scenario_ladder_ref": "owner_institutional_metric_view.generated.jsonl",
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_action_registry.generated.jsonl",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "target_step_id": "route_drawer",
+      "target_surface_id": "qku-formula",
+      "target_workflow_id": "QKUFormulaRoutes",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "what_happens_next": "The dashboard opens the local next UI step and preloads the selected context.",
+      "what_will_not_happen_now": "No live LLM call, agent task, connector access, replay run, paper run, live order, venue submit, or Execution Router release occurs."
+    },
+    {
+      "DAG_upstream_downstream_route_ref": "dag.generated.jsonl",
+      "LLM_view_refs_or_provider_route": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "MEM1_similarity_and_shrinkage_prior_refs": "owner_edge_alpha_capture_view.generated.jsonl",
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_AgentRosterDiscoveryAudit.report.json",
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "QAOA_VQE_annealing_candidate_readiness_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "QKU_formula_refs_or_gap": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "QUBO_BQM_CQM_QuadraticProgram_Ising_readiness_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "TCA_decomposition_ref": "owner_institutional_metric_view.generated.jsonl",
+      "action_id": "REQUEST_NO_TRADE_REOPTIMIZATION_REVIEW",
+      "action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "activation_route": "OwnerNextStepRouter::NEXT_STEP_EXPLAIN_NO_TRADE",
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "calibration_ref": "owner_institutional_metric_view.generated.jsonl",
+      "capacity_crowding_limit_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "champion_challenger_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "chart_refs": [
+        "portfolio_equity_curve",
+        "TCA_waterfall_and_implementation_shortfall"
+      ],
+      "classical_fallback_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "creates_local_receipt_preview": true,
+      "current_surface_id": "trade_candidate_or_workbench",
+      "disabled_reason_if_blocked": "not_blocked_enabled_local_preview",
+      "execution_adjusted_rank_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "implementation_shortfall_ref": "owner_chart_panel_projection.generated.jsonl",
+      "interpret_back_map_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "local_receipt_preview_type": "NoTradeExplanationPreviewV1",
+      "message_or_action_id": "REQUEST_NO_TRADE_REOPTIMIZATION_REVIEW",
+      "next_step_id": "NEXT_STEP_EXPLAIN_NO_TRADE",
+      "no_trade_comparator_and_reoptimization_route": "owner_edge_alpha_capture_view.generated.jsonl",
+      "overfit_false_discovery_control_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "owner_input_required": "none",
+      "owner_label": "Explain no-trade",
+      "portfolio_diversification_ref": "owner_institutional_metric_view.generated.jsonl",
+      "portfolio_marginal_utility_ref": "owner_institutional_metric_view.generated.jsonl",
+      "prefill_context_refs": [
+        "selected_card_ref",
+        "selected_surface_ref",
+        "owner_dashboard_review_data.generated.json"
+      ],
+      "preview_object_type": "NoTradeExplanationPreviewV1",
+      "provider_stage": "PRETRADE1",
+      "qstruct_objective_constraint_variable_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "quantum_structural_readiness_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "regime_conditioned_memory_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "requires_owner_confirmation": false,
+      "runtime_side_effect_allowed": false,
+      "safe_default_if_owner_declines": "Stay on the current card and keep all education/details collapsed.",
+      "scenario_ladder_ref": "owner_institutional_metric_view.generated.jsonl",
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_action_registry.generated.jsonl",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "target_step_id": "explanation_panel",
+      "target_surface_id": "no-trade-panel",
+      "target_workflow_id": "ExplainNoTrade",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "what_happens_next": "The dashboard opens the local next UI step and preloads the selected context.",
+      "what_will_not_happen_now": "No live LLM call, agent task, connector access, replay run, paper run, live order, venue submit, or Execution Router release occurs."
+    },
+    {
+      "DAG_upstream_downstream_route_ref": "dag.generated.jsonl",
+      "LLM_view_refs_or_provider_route": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "MEM1_similarity_and_shrinkage_prior_refs": "owner_edge_alpha_capture_view.generated.jsonl",
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_AgentRosterDiscoveryAudit.report.json",
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "QAOA_VQE_annealing_candidate_readiness_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "QKU_formula_refs_or_gap": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "QUBO_BQM_CQM_QuadraticProgram_Ising_readiness_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "TCA_decomposition_ref": "owner_institutional_metric_view.generated.jsonl",
+      "action_id": "REQUEST_RISK_REVIEW",
+      "action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "activation_route": "OwnerNextStepRouter::NEXT_STEP_SHOW_TCA_COST_BREAKDOWN",
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "calibration_ref": "owner_institutional_metric_view.generated.jsonl",
+      "capacity_crowding_limit_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "champion_challenger_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "chart_refs": [
+        "portfolio_equity_curve",
+        "TCA_waterfall_and_implementation_shortfall"
+      ],
+      "classical_fallback_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "creates_local_receipt_preview": true,
+      "current_surface_id": "portfolio_or_candidate_or_chart",
+      "disabled_reason_if_blocked": "not_blocked_enabled_local_preview",
+      "execution_adjusted_rank_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "implementation_shortfall_ref": "owner_chart_panel_projection.generated.jsonl",
+      "interpret_back_map_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "local_receipt_preview_type": "TCADrilldownPreviewV1",
+      "message_or_action_id": "REQUEST_RISK_REVIEW",
+      "next_step_id": "NEXT_STEP_SHOW_TCA_COST_BREAKDOWN",
+      "no_trade_comparator_and_reoptimization_route": "owner_edge_alpha_capture_view.generated.jsonl",
+      "overfit_false_discovery_control_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "owner_input_required": "none",
+      "owner_label": "Show TCA / cost breakdown",
+      "portfolio_diversification_ref": "owner_institutional_metric_view.generated.jsonl",
+      "portfolio_marginal_utility_ref": "owner_institutional_metric_view.generated.jsonl",
+      "prefill_context_refs": [
+        "selected_card_ref",
+        "selected_surface_ref",
+        "owner_dashboard_review_data.generated.json"
+      ],
+      "preview_object_type": "TCADrilldownPreviewV1",
+      "provider_stage": "PRETRADE1",
+      "qstruct_objective_constraint_variable_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "quantum_structural_readiness_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "regime_conditioned_memory_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "requires_owner_confirmation": false,
+      "runtime_side_effect_allowed": false,
+      "safe_default_if_owner_declines": "Stay on the current card and keep all education/details collapsed.",
+      "scenario_ladder_ref": "owner_institutional_metric_view.generated.jsonl",
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_action_registry.generated.jsonl",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "target_step_id": "cost_breakdown",
+      "target_surface_id": "tca-cost-drilldown",
+      "target_workflow_id": "TCADrilldown",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "what_happens_next": "The dashboard opens the local next UI step and preloads the selected context.",
+      "what_will_not_happen_now": "No live LLM call, agent task, connector access, replay run, paper run, live order, venue submit, or Execution Router release occurs."
+    },
+    {
+      "DAG_upstream_downstream_route_ref": "dag.generated.jsonl",
+      "LLM_view_refs_or_provider_route": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "MEM1_similarity_and_shrinkage_prior_refs": "owner_edge_alpha_capture_view.generated.jsonl",
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_AgentRosterDiscoveryAudit.report.json",
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "QAOA_VQE_annealing_candidate_readiness_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "QKU_formula_refs_or_gap": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "QUBO_BQM_CQM_QuadraticProgram_Ising_readiness_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "TCA_decomposition_ref": "owner_institutional_metric_view.generated.jsonl",
+      "action_id": "REQUEST_OWNER_REVIEW",
+      "action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "activation_route": "OwnerNextStepRouter::NEXT_STEP_OPEN_CHART_DRILLDOWN",
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "calibration_ref": "owner_institutional_metric_view.generated.jsonl",
+      "capacity_crowding_limit_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "champion_challenger_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "chart_refs": [
+        "portfolio_equity_curve",
+        "TCA_waterfall_and_implementation_shortfall"
+      ],
+      "classical_fallback_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "creates_local_receipt_preview": true,
+      "current_surface_id": "chart_frame",
+      "disabled_reason_if_blocked": "not_blocked_enabled_local_preview",
+      "execution_adjusted_rank_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "implementation_shortfall_ref": "owner_chart_panel_projection.generated.jsonl",
+      "interpret_back_map_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "local_receipt_preview_type": "ChartDrilldownPreviewV1",
+      "message_or_action_id": "REQUEST_OWNER_REVIEW",
+      "next_step_id": "NEXT_STEP_OPEN_CHART_DRILLDOWN",
+      "no_trade_comparator_and_reoptimization_route": "owner_edge_alpha_capture_view.generated.jsonl",
+      "overfit_false_discovery_control_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "owner_input_required": "none",
+      "owner_label": "Open chart drilldown",
+      "portfolio_diversification_ref": "owner_institutional_metric_view.generated.jsonl",
+      "portfolio_marginal_utility_ref": "owner_institutional_metric_view.generated.jsonl",
+      "prefill_context_refs": [
+        "selected_card_ref",
+        "selected_surface_ref",
+        "owner_dashboard_review_data.generated.json"
+      ],
+      "preview_object_type": "ChartDrilldownPreviewV1",
+      "provider_stage": "UI1",
+      "qstruct_objective_constraint_variable_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "quantum_structural_readiness_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "regime_conditioned_memory_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "requires_owner_confirmation": false,
+      "runtime_side_effect_allowed": false,
+      "safe_default_if_owner_declines": "Stay on the current card and keep all education/details collapsed.",
+      "scenario_ladder_ref": "owner_institutional_metric_view.generated.jsonl",
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_action_registry.generated.jsonl",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "target_step_id": "current_chart_context",
+      "target_surface_id": "chart-drilldown",
+      "target_workflow_id": "ChartDrilldown",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "what_happens_next": "The dashboard opens the local next UI step and preloads the selected context.",
+      "what_will_not_happen_now": "No live LLM call, agent task, connector access, replay run, paper run, live order, venue submit, or Execution Router release occurs."
+    },
+    {
+      "DAG_upstream_downstream_route_ref": "dag.generated.jsonl",
+      "LLM_view_refs_or_provider_route": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "MEM1_similarity_and_shrinkage_prior_refs": "owner_edge_alpha_capture_view.generated.jsonl",
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_AgentRosterDiscoveryAudit.report.json",
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "QAOA_VQE_annealing_candidate_readiness_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "QKU_formula_refs_or_gap": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "QUBO_BQM_CQM_QuadraticProgram_Ising_readiness_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "TCA_decomposition_ref": "owner_institutional_metric_view.generated.jsonl",
+      "action_id": "REQUEST_OWNER_REVIEW",
+      "action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "activation_route": "OwnerNextStepRouter::NEXT_STEP_OPEN_TECHNICAL_DETAILS",
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "calibration_ref": "owner_institutional_metric_view.generated.jsonl",
+      "capacity_crowding_limit_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "champion_challenger_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "chart_refs": [
+        "portfolio_equity_curve",
+        "TCA_waterfall_and_implementation_shortfall"
+      ],
+      "classical_fallback_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "creates_local_receipt_preview": true,
+      "current_surface_id": "selected_card",
+      "disabled_reason_if_blocked": "not_blocked_enabled_local_preview",
+      "execution_adjusted_rank_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "implementation_shortfall_ref": "owner_chart_panel_projection.generated.jsonl",
+      "interpret_back_map_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "local_receipt_preview_type": "TechnicalDetailsOpenPreviewV1",
+      "message_or_action_id": "REQUEST_OWNER_REVIEW",
+      "next_step_id": "NEXT_STEP_OPEN_TECHNICAL_DETAILS",
+      "no_trade_comparator_and_reoptimization_route": "owner_edge_alpha_capture_view.generated.jsonl",
+      "overfit_false_discovery_control_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "owner_input_required": "none",
+      "owner_label": "Open technical details",
+      "portfolio_diversification_ref": "owner_institutional_metric_view.generated.jsonl",
+      "portfolio_marginal_utility_ref": "owner_institutional_metric_view.generated.jsonl",
+      "prefill_context_refs": [
+        "selected_card_ref",
+        "selected_surface_ref",
+        "owner_dashboard_review_data.generated.json"
+      ],
+      "preview_object_type": "TechnicalDetailsOpenPreviewV1",
+      "provider_stage": "UI1",
+      "qstruct_objective_constraint_variable_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "quantum_structural_readiness_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "regime_conditioned_memory_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "requires_owner_confirmation": false,
+      "runtime_side_effect_allowed": false,
+      "safe_default_if_owner_declines": "Stay on the current card and keep all education/details collapsed.",
+      "scenario_ladder_ref": "owner_institutional_metric_view.generated.jsonl",
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_action_registry.generated.jsonl",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "target_step_id": "selected_card_only",
+      "target_surface_id": "technical-details",
+      "target_workflow_id": "TechnicalDetails",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "what_happens_next": "The dashboard opens the local next UI step and preloads the selected context.",
+      "what_will_not_happen_now": "No live LLM call, agent task, connector access, replay run, paper run, live order, venue submit, or Execution Router release occurs."
+    },
+    {
+      "DAG_upstream_downstream_route_ref": "dag.generated.jsonl",
+      "LLM_view_refs_or_provider_route": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "MEM1_similarity_and_shrinkage_prior_refs": "owner_edge_alpha_capture_view.generated.jsonl",
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_AgentRosterDiscoveryAudit.report.json",
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "QAOA_VQE_annealing_candidate_readiness_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "QKU_formula_refs_or_gap": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "QUBO_BQM_CQM_QuadraticProgram_Ising_readiness_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "TCA_decomposition_ref": "owner_institutional_metric_view.generated.jsonl",
+      "action_id": "REQUEST_LIVE_CANARY_REVIEW",
+      "action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "activation_route": "OwnerNextStepRouter::NEXT_STEP_DISABLED_PROVIDER_PENDING_EDUCATION",
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "calibration_ref": "owner_institutional_metric_view.generated.jsonl",
+      "capacity_crowding_limit_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "champion_challenger_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "chart_refs": [
+        "portfolio_equity_curve",
+        "TCA_waterfall_and_implementation_shortfall"
+      ],
+      "classical_fallback_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "creates_local_receipt_preview": true,
+      "current_surface_id": "blocked_or_provider_pending_action",
+      "disabled_reason_if_blocked": "Only the governed Execution Router may release venue orders after downstream evidence and approval.",
+      "execution_adjusted_rank_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "implementation_shortfall_ref": "owner_chart_panel_projection.generated.jsonl",
+      "interpret_back_map_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "local_receipt_preview_type": "DisabledActionEducationPreviewV1",
+      "message_or_action_id": "REQUEST_LIVE_CANARY_REVIEW",
+      "next_step_id": "NEXT_STEP_DISABLED_PROVIDER_PENDING_EDUCATION",
+      "no_trade_comparator_and_reoptimization_route": "owner_edge_alpha_capture_view.generated.jsonl",
+      "overfit_false_discovery_control_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "owner_input_required": "later approval evidence",
+      "owner_label": "Prepare live-canary review preview",
+      "portfolio_diversification_ref": "owner_institutional_metric_view.generated.jsonl",
+      "portfolio_marginal_utility_ref": "owner_institutional_metric_view.generated.jsonl",
+      "prefill_context_refs": [
+        "selected_card_ref",
+        "selected_surface_ref",
+        "owner_dashboard_review_data.generated.json"
+      ],
+      "preview_object_type": "DisabledActionEducationPreviewV1",
+      "provider_stage": "LIVE_PILOT",
+      "qstruct_objective_constraint_variable_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "quantum_structural_readiness_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "regime_conditioned_memory_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "requires_owner_confirmation": true,
+      "runtime_side_effect_allowed": false,
+      "safe_default_if_owner_declines": "Stay on the current card and keep all education/details collapsed.",
+      "scenario_ladder_ref": "owner_institutional_metric_view.generated.jsonl",
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_action_registry.generated.jsonl",
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "target_step_id": "safe_alternative",
+      "target_surface_id": "disabled-action-education",
+      "target_workflow_id": "DisabledActionEducation",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "what_happens_next": "The dashboard opens the local next UI step and preloads the selected context.",
+      "what_will_not_happen_now": "No live LLM call, agent task, connector access, replay run, paper run, live order, venue submit, or Execution Router release occurs."
+    }
+  ],
+  "source_next_step_ref": "ui1r2_next_step.generated.json"
+}

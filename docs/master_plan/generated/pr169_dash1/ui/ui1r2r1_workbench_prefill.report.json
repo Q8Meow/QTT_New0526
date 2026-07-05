@@ -1,0 +1,290 @@
+{
+  "adapter_id": "OwnerWorkbenchPrefillAdapter",
+  "meta": {
+    "agent_consumable_authority": false,
+    "artifact_id": "UI1R2R1_WORKBENCH_PREFILL_REPORT",
+    "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+    "connector_access_allowed": false,
+    "credential_access_allowed": false,
+    "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config + PR169-DASH1 artifacts + PR169-DASH1-UI1/R1 boot data + OwnerPresentationLayer / OwnerGuidancePolicy config + OwnerNextStepRouter / OwnerInteractionController local preview config",
+    "manual_edit_allowed": false,
+    "order_execution_allowed": false,
+    "runtime_side_effect_allowed": false,
+    "runtime_truth_authority": false,
+    "source_truth_authority": false,
+    "ui1r2r1_generated_from": "PR169-DASH1 artifacts + PR169-DASH1-UI1/R1/R2 boot data + OwnerPresentationLayer / OwnerGuidancePolicy / OwnerNextStepRouter config",
+    "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+  },
+  "prefill_sources": [
+    "card",
+    "Edge/Alpha row",
+    "chat message",
+    "dropdown action",
+    "chart context"
+  ],
+  "rows": [
+    {
+      "DAG_upstream_downstream_route_ref": "dag.generated.jsonl",
+      "LLM_view_refs_or_provider_route": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "MEM1_similarity_and_shrinkage_prior_refs": "owner_edge_alpha_capture_view.generated.jsonl",
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_AgentRosterDiscoveryAudit.report.json",
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "QAOA_VQE_annealing_candidate_readiness_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "QKU_formula_refs_or_gap": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "QUBO_BQM_CQM_QuadraticProgram_Ising_readiness_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "TCA_decomposition_ref": "owner_institutional_metric_view.generated.jsonl",
+      "action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "calibration_ref": "owner_institutional_metric_view.generated.jsonl",
+      "capacity_crowding_limit_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "champion_challenger_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "chart_refs": [
+        "portfolio_equity_curve",
+        "TCA_waterfall_and_implementation_shortfall"
+      ],
+      "classical_fallback_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "execution_adjusted_rank_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "implementation_shortfall_ref": "owner_chart_panel_projection.generated.jsonl",
+      "intent_family": "TRADE_CHECK_REQUEST",
+      "interpret_back_map_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "message_or_action_id": "WORKBENCH_PREFILL::CARD",
+      "no_trade_comparator_and_reoptimization_route": "owner_edge_alpha_capture_view.generated.jsonl",
+      "overfit_false_discovery_control_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "owner_readable_summary": "Trade Workbench prefill from card.",
+      "portfolio_diversification_ref": "owner_institutional_metric_view.generated.jsonl",
+      "portfolio_marginal_utility_ref": "owner_institutional_metric_view.generated.jsonl",
+      "prefill_context_refs": [
+        "selected_card_ref_or_gap",
+        "selected_market_venue_ref_or_gap",
+        "execution_adjusted_rank_ref",
+        "TCA_decomposition_ref",
+        "implementation_shortfall_ref",
+        "overfit_false_discovery_control_ref",
+        "portfolio_diversification_ref",
+        "portfolio_marginal_utility_ref",
+        "capacity_crowding_limit_ref",
+        "champion_challenger_ref",
+        "regime_conditioned_memory_ref",
+        "MEM1_similarity_and_shrinkage_prior_refs",
+        "no_trade_comparator_and_reoptimization_route",
+        "scenario_ladder_ref",
+        "calibration_ref",
+        "quantum_structural_readiness_ref",
+        "QUBO_BQM_CQM_QuadraticProgram_Ising_readiness_ref",
+        "QAOA_VQE_annealing_candidate_readiness_ref",
+        "classical_fallback_ref",
+        "qstruct_objective_constraint_variable_ref",
+        "interpret_back_map_ref",
+        "DAG_upstream_downstream_route_ref",
+        "PR165_D2_agent_role_refs_or_gap",
+        "QKU_formula_refs_or_gap",
+        "LLM_view_refs_or_provider_route"
+      ],
+      "provider_stage": "UI1",
+      "qstruct_objective_constraint_variable_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "quantum_structural_readiness_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "regime_conditioned_memory_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "runtime_side_effect_allowed": false,
+      "scenario_ladder_ref": "owner_institutional_metric_view.generated.jsonl",
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_surface_registry.jsonl",
+        "owner_action_registry.generated.jsonl"
+      ],
+      "surface_id": "trade-workbench",
+      "target_step_id": "prefilled_context",
+      "target_surface_id": "trade-workbench",
+      "target_workflow_id": "TradeWorkbench",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "widget_id": "OWNER_TRADE_WORKBENCH_PANEL"
+    },
+    {
+      "DAG_upstream_downstream_route_ref": "dag.generated.jsonl",
+      "LLM_view_refs_or_provider_route": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "MEM1_similarity_and_shrinkage_prior_refs": "owner_edge_alpha_capture_view.generated.jsonl",
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_AgentRosterDiscoveryAudit.report.json",
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "QAOA_VQE_annealing_candidate_readiness_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "QKU_formula_refs_or_gap": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "QUBO_BQM_CQM_QuadraticProgram_Ising_readiness_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "TCA_decomposition_ref": "owner_institutional_metric_view.generated.jsonl",
+      "action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "calibration_ref": "owner_institutional_metric_view.generated.jsonl",
+      "capacity_crowding_limit_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "champion_challenger_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "chart_refs": [
+        "portfolio_equity_curve",
+        "TCA_waterfall_and_implementation_shortfall"
+      ],
+      "classical_fallback_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "execution_adjusted_rank_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "implementation_shortfall_ref": "owner_chart_panel_projection.generated.jsonl",
+      "intent_family": "TRADE_CHECK_REQUEST",
+      "interpret_back_map_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "message_or_action_id": "WORKBENCH_PREFILL::EDGE_ALPHA_ROW",
+      "no_trade_comparator_and_reoptimization_route": "owner_edge_alpha_capture_view.generated.jsonl",
+      "overfit_false_discovery_control_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "owner_readable_summary": "Trade Workbench prefill from Edge/Alpha row.",
+      "portfolio_diversification_ref": "owner_institutional_metric_view.generated.jsonl",
+      "portfolio_marginal_utility_ref": "owner_institutional_metric_view.generated.jsonl",
+      "prefill_context_refs": [
+        "selected_card_ref_or_gap",
+        "selected_market_venue_ref_or_gap",
+        "execution_adjusted_rank_ref",
+        "TCA_decomposition_ref",
+        "implementation_shortfall_ref",
+        "overfit_false_discovery_control_ref",
+        "portfolio_diversification_ref",
+        "portfolio_marginal_utility_ref",
+        "capacity_crowding_limit_ref",
+        "champion_challenger_ref",
+        "regime_conditioned_memory_ref",
+        "MEM1_similarity_and_shrinkage_prior_refs",
+        "no_trade_comparator_and_reoptimization_route",
+        "scenario_ladder_ref",
+        "calibration_ref",
+        "quantum_structural_readiness_ref",
+        "QUBO_BQM_CQM_QuadraticProgram_Ising_readiness_ref",
+        "QAOA_VQE_annealing_candidate_readiness_ref",
+        "classical_fallback_ref",
+        "qstruct_objective_constraint_variable_ref",
+        "interpret_back_map_ref",
+        "DAG_upstream_downstream_route_ref",
+        "PR165_D2_agent_role_refs_or_gap",
+        "QKU_formula_refs_or_gap",
+        "LLM_view_refs_or_provider_route"
+      ],
+      "provider_stage": "UI1",
+      "qstruct_objective_constraint_variable_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "quantum_structural_readiness_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "regime_conditioned_memory_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "runtime_side_effect_allowed": false,
+      "scenario_ladder_ref": "owner_institutional_metric_view.generated.jsonl",
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_surface_registry.jsonl",
+        "owner_action_registry.generated.jsonl"
+      ],
+      "surface_id": "trade-workbench",
+      "target_step_id": "prefilled_context",
+      "target_surface_id": "trade-workbench",
+      "target_workflow_id": "TradeWorkbench",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "widget_id": "OWNER_TRADE_WORKBENCH_PANEL"
+    },
+    {
+      "DAG_upstream_downstream_route_ref": "dag.generated.jsonl",
+      "LLM_view_refs_or_provider_route": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "MEM1_similarity_and_shrinkage_prior_refs": "owner_edge_alpha_capture_view.generated.jsonl",
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_AgentRosterDiscoveryAudit.report.json",
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "QAOA_VQE_annealing_candidate_readiness_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "QKU_formula_refs_or_gap": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "QUBO_BQM_CQM_QuadraticProgram_Ising_readiness_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "TCA_decomposition_ref": "owner_institutional_metric_view.generated.jsonl",
+      "action_refs": [
+        "REQUEST_OWNER_REVIEW"
+      ],
+      "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "calibration_ref": "owner_institutional_metric_view.generated.jsonl",
+      "capacity_crowding_limit_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "champion_challenger_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "chart_refs": [
+        "portfolio_equity_curve",
+        "TCA_waterfall_and_implementation_shortfall"
+      ],
+      "classical_fallback_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "execution_adjusted_rank_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "implementation_shortfall_ref": "owner_chart_panel_projection.generated.jsonl",
+      "intent_family": "TRADE_CHECK_REQUEST",
+      "interpret_back_map_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "message_or_action_id": "WORKBENCH_PREFILL::CHAT_MESSAGE",
+      "no_trade_comparator_and_reoptimization_route": "owner_edge_alpha_capture_view.generated.jsonl",
+      "overfit_false_discovery_control_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "owner_readable_summary": "Trade Workbench prefill from chat message.",
+      "portfolio_diversification_ref": "owner_institutional_metric_view.generated.jsonl",
+      "portfolio_marginal_utility_ref": "owner_institutional_metric_view.generated.jsonl",
+      "prefill_context_refs": [
+        "selected_card_ref_or_gap",
+        "selected_market_venue_ref_or_gap",
+        "execution_adjusted_rank_ref",
+        "TCA_decomposition_ref",
+        "implementation_shortfall_ref",
+        "overfit_false_discovery_control_ref",
+        "portfolio_diversification_ref",
+        "portfolio_marginal_utility_ref",
+        "capacity_crowding_limit_ref",
+        "champion_challenger_ref",
+        "regime_conditioned_memory_ref",
+        "MEM1_similarity_and_shrinkage_prior_refs",
+        "no_trade_comparator_and_reoptimization_route",
+        "scenario_ladder_ref",
+        "calibration_ref",
+        "quantum_structural_readiness_ref",
+        "QUBO_BQM_CQM_QuadraticProgram_Ising_readiness_ref",
+        "QAOA_VQE_annealing_candidate_readiness_ref",
+        "classical_fallback_ref",
+        "qstruct_objective_constraint_variable_ref",
+        "interpret_back_map_ref",
+        "DAG_upstream_downstream_route_ref",
+        "PR165_D2_agent_role_refs_or_gap",
+        "QKU_formula_refs_or_gap",
+        "LLM_view_refs_or_provider_route"
+      ],
+      "provider_stage": "UI1",
+      "qstruct_objective_constraint_variable_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "quantum_structural_readiness_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "regime_conditioned_memory_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "runtime_side_effect_allowed": false,
+      "scenario_ladder_ref": "owner_institutional_metric_view.generated.jsonl",
+      "source_artifact_refs": [
+        "owner_dashboard_review_data.generated.json",
+        "owner_dashboard_surface_registry.jsonl",
+        "owner_action_registry.generated.jsonl"
+      ],
+      "surface_id": "trade-workbench",
+      "target_step_id": "prefilled_context",
+      "target_surface_id": "trade-workbench",
+      "target_workflow_id": "TradeWorkbench",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+      "widget_id": "OWNER_TRADE_WORKBENCH_PANEL"
+    }
+  ],
+  "visible_sections_verified": [
+    "Owner intent",
+    "Source/research context",
+    "QKU/formula stack route",
+    "Mutable variable fields",
+    "Replay preview route",
+    "Paper preview route",
+    "TCA / cost route",
+    "Risk/capacity route",
+    "No-trade comparator",
+    "Champion/challenger route",
+    "Agent disagreement route",
+    "Execution Router provider-pending route"
+  ]
+}
