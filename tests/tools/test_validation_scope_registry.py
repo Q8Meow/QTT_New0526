@@ -55,6 +55,7 @@ PR169_DASH1_BRANCH = registry.PR169_DASH1_BRANCH
 PR169_DASH1_UI1_BRANCH = registry.PR169_DASH1_UI1_BRANCH
 PR169_DASH1_UI1_R1_BRANCH = registry.PR169_DASH1_UI1_R1_BRANCH
 PR169_DASH1_UI1_R2_BRANCH = registry.PR169_DASH1_UI1_R2_BRANCH
+PR169_DASH1_UI1_R2_R1_BRANCH = registry.PR169_DASH1_UI1_R2_R1_BRANCH
 FIXTURE_BRANCH = registry.VALIDATION_FIXTURE_BRANCH
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
@@ -115,6 +116,7 @@ def test_pr169_dash1_allowed_paths_pass_on_real_branch(path: str) -> None:
     assert registry.is_pr_scoped_changed_path_allowed(PR169_DASH1_UI1_BRANCH, path)
     assert registry.is_pr_scoped_changed_path_allowed(PR169_DASH1_UI1_R1_BRANCH, path)
     assert registry.is_pr_scoped_changed_path_allowed(PR169_DASH1_UI1_R2_BRANCH, path)
+    assert registry.is_pr_scoped_changed_path_allowed(PR169_DASH1_UI1_R2_R1_BRANCH, path)
     assert registry.is_pr_scoped_changed_path_allowed(FIXTURE_BRANCH, path)
 
 
@@ -135,6 +137,10 @@ def test_pr169_dash1_forbidden_paths_fail(path: str) -> None:
     )
     assert not registry.is_pr_scoped_changed_path_allowed(
         PR169_DASH1_UI1_R2_BRANCH,
+        path,
+    )
+    assert not registry.is_pr_scoped_changed_path_allowed(
+        PR169_DASH1_UI1_R2_R1_BRANCH,
         path,
     )
 

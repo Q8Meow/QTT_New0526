@@ -1,30 +1,31 @@
 {
-  "all_modes_use_same_OwnerActionRegistry": true,
   "all_modes_use_same_OwnerDashboardStateV1": true,
-  "all_modes_use_same_OwnerSurfaceResolver": true,
-  "default_mode": "GUIDED_OWNER",
-  "local_storage_keys_allowed": [
-    "qtt_owner_dashboard_experience_mode",
-    "qtt_owner_dashboard_guidance_density"
+  "all_modes_use_same_widget_action_chart_ids": true,
+  "centralized_chain": [
+    "OwnerDashboardStateV1",
+    "OwnerSurfaceResolver",
+    "OwnerActionRegistry",
+    "OwnerPresentationLayer",
+    "OwnerGuidancePolicy",
+    "OwnerExperienceModePolicy",
+    "UI renderer"
   ],
   "meta": {
     "agent_consumable_authority": false,
-    "artifact_id": "UI1R2_MODE_POLICY",
+    "artifact_id": "UI1R2R1_MODE_POLICY",
     "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
     "connector_access_allowed": false,
     "credential_access_allowed": false,
-    "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config + PR169-DASH1 artifacts + PR169-DASH1-UI1/R1 boot data + OwnerPresentationLayer / OwnerGuidancePolicy config",
+    "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config + PR169-DASH1 artifacts + PR169-DASH1-UI1/R1 boot data + OwnerPresentationLayer / OwnerGuidancePolicy config + OwnerNextStepRouter / OwnerInteractionController local preview config",
     "manual_edit_allowed": false,
     "order_execution_allowed": false,
     "runtime_side_effect_allowed": false,
     "runtime_truth_authority": false,
     "source_truth_authority": false,
-    "ui1r2_generated_from": "PR169-DASH1 artifacts + PR169-DASH1-UI1/R1 boot data + OwnerPresentationLayer / OwnerGuidancePolicy config",
+    "ui1r2r1_generated_from": "PR169-DASH1 artifacts + PR169-DASH1-UI1/R1/R2 boot data + OwnerPresentationLayer / OwnerGuidancePolicy / OwnerNextStepRouter config",
     "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
   },
-  "mode_policy_id": "DashboardSystem.Modes",
-  "no_second_action_grammar": true,
-  "no_second_dashboard_state_model": true,
+  "mode_policy_id": "OwnerExperienceModePolicy",
   "rows": [
     {
       "action_registry_ref": "OwnerActionRegistryV1",

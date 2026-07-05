@@ -202,7 +202,7 @@ def run(repo: Path) -> None:
         _assert_visible(page, ".owner-bubble")
         _assert_visible(page, ".qtt-bubble")
         page.locator("#routePreviewButton").click()
-        _assert_visible(page, "[data-preview-object='OwnerPlainEnglishIntentV1']")
+        _assert_visible(page, "[data-preview-object='OwnerPlainEnglishIntentPreviewV1']")
         _screenshot(page, repo, "chat_coach")
 
         page.locator("a[href='#more']").first.click()
