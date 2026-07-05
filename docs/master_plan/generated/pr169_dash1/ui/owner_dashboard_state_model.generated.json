@@ -1,5 +1,17 @@
 {
   "action_registry_ref": "OwnerActionRegistryV1",
+  "allowed_non_secret_preference_keys": [
+    "qtt_owner_dashboard_theme",
+    "qtt_owner_dashboard_experience_mode",
+    "qtt_owner_dashboard_guidance_density",
+    "qtt_owner_dashboard_text_size",
+    "qtt_owner_dashboard_technical_details_open",
+    "qtt_owner_dashboard_enter_to_send_enabled"
+  ],
+  "display_preference_model_ref": "OwnerDisplayPreferenceV1",
+  "enter_to_send_state_owned_by": "OwnerDashboardStateV1.display_preferences.enter_to_send_enabled",
+  "experience_mode_state_owned_by": "OwnerDashboardStateV1.display_preferences.mode",
+  "menu_state_owned_by": "OwnerDashboardStateV1.display_preferences.menu_open",
   "meta": {
     "agent_consumable_authority": false,
     "artifact_id": "UI1_OWNER_DASHBOARD_STATE_MODEL",
@@ -19,6 +31,7 @@
   "no_duplicate_telegram_governance_plane": true,
   "one_audit_receipt_model": true,
   "one_dashboard_state_model": true,
+  "one_display_preference_model": true,
   "one_owner_action_grammar": true,
   "one_owner_agent_conversation_model": true,
   "one_resolver_or_API_path": true,
@@ -27,6 +40,10 @@
   "one_widget_chart_action_chat_manifest": true,
   "resolver_ref": "OwnerSurfaceResolver",
   "state_model_id": "OwnerDashboardStateV1",
+  "technical_details_state_owned_by": "OwnerDashboardStateV1.display_preferences.technical_details_open",
+  "text_size_state_owned_by": "OwnerDashboardStateV1.display_preferences.text_size",
+  "theme_state_owned_by": "OwnerDashboardStateV1.display_preferences.theme",
+  "ui_preference_service_ref": "OwnerUIPreferenceServiceV1",
   "widget_count": 161,
   "widget_manifest_ref": "owner_dashboard_widget_manifest.generated.json"
 }

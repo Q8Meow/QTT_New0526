@@ -1,4 +1,7 @@
 {
+  "console_breaking_errors": [],
+  "console_status": "PASS",
+  "external_network_requests": [],
   "meta": {
     "agent_consumable_authority": false,
     "artifact_id": "UI1R1_PLAYWRIGHT_MANIFEST",
@@ -14,6 +17,7 @@
     "ui1r1_generated_from": "PR169-DASH1 artifacts + PR169-DASH1-UI1 boot data + OwnerDashboardStateV1 + OwnerSurfaceResolver + OwnerActionRegistry + UI component config",
     "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
   },
+  "network_status": "PASS",
   "no_console_breaking_errors": true,
   "no_external_network_requests": true,
   "screenshots": [
@@ -22,7 +26,7 @@
       "external_network_requests": [],
       "path": ".tmp/ui1r1_v3_before.png",
       "result": "PASS",
-      "tested_interaction": "baseline before implementation",
+      "tested_interaction": "before",
       "viewport": "desktop"
     },
     {
@@ -30,7 +34,7 @@
       "external_network_requests": [],
       "path": ".tmp/ui1r1_v3_home_dark.png",
       "result": "PASS",
-      "tested_interaction": "Owner Mode dark",
+      "tested_interaction": "home_dark",
       "viewport": "desktop"
     },
     {
@@ -38,7 +42,7 @@
       "external_network_requests": [],
       "path": ".tmp/ui1r1_v3_home_light.png",
       "result": "PASS",
-      "tested_interaction": "Owner Mode light",
+      "tested_interaction": "home_light",
       "viewport": "desktop"
     },
     {
@@ -46,7 +50,7 @@
       "external_network_requests": [],
       "path": ".tmp/ui1r1_v3_mobile_home.png",
       "result": "PASS",
-      "tested_interaction": "mobile home",
+      "tested_interaction": "mobile_home",
       "viewport": "mobile"
     },
     {
@@ -54,7 +58,7 @@
       "external_network_requests": [],
       "path": ".tmp/ui1r1_v3_chat.png",
       "result": "PASS",
-      "tested_interaction": "chat composer typed English",
+      "tested_interaction": "chat",
       "viewport": "desktop"
     },
     {
@@ -62,7 +66,7 @@
       "external_network_requests": [],
       "path": ".tmp/ui1r1_v3_workbench.png",
       "result": "PASS",
-      "tested_interaction": "Trade Workbench",
+      "tested_interaction": "workbench",
       "viewport": "desktop"
     },
     {
@@ -70,7 +74,7 @@
       "external_network_requests": [],
       "path": ".tmp/ui1r1_v3_edge.png",
       "result": "PASS",
-      "tested_interaction": "Edge/Alpha board",
+      "tested_interaction": "edge",
       "viewport": "desktop"
     },
     {
@@ -78,7 +82,7 @@
       "external_network_requests": [],
       "path": ".tmp/ui1r1_v3_dev_mode.png",
       "result": "PASS",
-      "tested_interaction": "Developer Mode diagnostics collapsed/open verification",
+      "tested_interaction": "dev_mode",
       "viewport": "desktop"
     },
     {
@@ -86,9 +90,10 @@
       "external_network_requests": [],
       "path": ".tmp/ui1r1_v3_drilldown.png",
       "result": "PASS",
-      "tested_interaction": "drilldown drawer",
+      "tested_interaction": "drilldown",
       "viewport": "desktop"
     }
   ],
-  "script": "tools/playwright_pr169_dash1_ui1_r1_visual_smoke.py"
+  "script": "tools/playwright_pr169_dash1_ui1_r1_visual_smoke.py",
+  "status": "PASS"
 }

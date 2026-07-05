@@ -1,0 +1,43 @@
+{
+  "allowed_localStorage_keys": [
+    "qtt_owner_dashboard_theme",
+    "qtt_owner_dashboard_experience_mode",
+    "qtt_owner_dashboard_guidance_density",
+    "qtt_owner_dashboard_text_size",
+    "qtt_owner_dashboard_technical_details_open",
+    "qtt_owner_dashboard_enter_to_send_enabled"
+  ],
+  "forbidden_localStorage_categories": [
+    "secrets",
+    "credentials",
+    "tokens",
+    "private_account_data",
+    "cash_or_account_values",
+    "market_source_truth",
+    "order_state",
+    "owner_approval_receipts",
+    "replay_or_paper_results",
+    "live_readiness_state",
+    "connector_authority",
+    "QKU_formula_authority_changes"
+  ],
+  "localStorage_limited_to_non_secret_UI_preferences": true,
+  "meta": {
+    "agent_consumable_authority": false,
+    "artifact_id": "UI1R2R2_PREFERENCE_STORAGE_GUARD_REPORT",
+    "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+    "connector_access_allowed": false,
+    "credential_access_allowed": false,
+    "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config + PR169-DASH1 artifacts + PR169-DASH1-UI1/R1 boot data + OwnerPresentationLayer / OwnerGuidancePolicy config + PR169-DASH1-UI1-R2-R2 owner product UX repair config",
+    "manual_edit_allowed": false,
+    "order_execution_allowed": false,
+    "runtime_side_effect_allowed": false,
+    "runtime_truth_authority": false,
+    "source_truth_authority": false,
+    "ui1r2r2_generated_from": "OwnerDashboardStateV1 + OwnerSurfaceResolver + OwnerActionRegistry + OwnerPresentationLayer + OwnerNextStepRouter + shared widget/chart/action/chat manifests",
+    "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+  },
+  "no_private_or_order_or_receipt_state_in_localStorage": true,
+  "no_trade_state_in_localStorage": true,
+  "renderer_uses_single_preference_service": true
+}

@@ -1,0 +1,119 @@
+{
+  "checks": [
+    "mobile_closed_header_menu_only_first_viewport_trading_content",
+    "menu_opens_text_size_extra_large_applies",
+    "chat_send_creates_local_preview_only",
+    "workbench_form_updates_trade_plan_candidate_preview",
+    "owner_copy_hides_raw_refs_until_developer"
+  ],
+  "console_breaking_errors": [],
+  "console_status": "PASS",
+  "external_network_requests": [],
+  "meta": {
+    "agent_consumable_authority": false,
+    "artifact_id": "UI1R2R2_PLAYWRIGHT_REPORT",
+    "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+    "connector_access_allowed": false,
+    "credential_access_allowed": false,
+    "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config + PR169-DASH1 artifacts + PR169-DASH1-UI1/R1 boot data + OwnerPresentationLayer / OwnerGuidancePolicy config + PR169-DASH1-UI1-R2-R2 owner product UX repair config",
+    "manual_edit_allowed": false,
+    "order_execution_allowed": false,
+    "runtime_side_effect_allowed": false,
+    "runtime_truth_authority": false,
+    "source_truth_authority": false,
+    "ui1r2r2_generated_from": "OwnerDashboardStateV1 + OwnerSurfaceResolver + OwnerActionRegistry + OwnerPresentationLayer + OwnerNextStepRouter + shared widget/chart/action/chat manifests",
+    "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+  },
+  "network_status": "PASS",
+  "no_console_breaking_errors": true,
+  "no_external_network_requests": true,
+  "runtime_side_effect_allowed": false,
+  "screenshots": [
+    {
+      "path": ".tmp/ui1r2r2_mobile_menu_only_header_closed.png",
+      "result": "PASS",
+      "runtime_side_effect_allowed": false,
+      "tested_interaction": "mobile_menu_only_header_closed",
+      "viewport": "mobile"
+    },
+    {
+      "path": ".tmp/ui1r2r2_mobile_first_viewport_trading_content.png",
+      "result": "PASS",
+      "runtime_side_effect_allowed": false,
+      "tested_interaction": "mobile_first_viewport_trading_content",
+      "viewport": "mobile"
+    },
+    {
+      "path": ".tmp/ui1r2r2_mobile_menu_open_controls_visible.png",
+      "result": "PASS",
+      "runtime_side_effect_allowed": false,
+      "tested_interaction": "mobile_menu_open_controls_visible",
+      "viewport": "mobile"
+    },
+    {
+      "path": ".tmp/ui1r2r2_mobile_text_extra_large.png",
+      "result": "PASS",
+      "runtime_side_effect_allowed": false,
+      "tested_interaction": "mobile_text_extra_large",
+      "viewport": "mobile"
+    },
+    {
+      "path": ".tmp/ui1r2r2_chat_composer_send_visible.png",
+      "result": "PASS",
+      "runtime_side_effect_allowed": false,
+      "tested_interaction": "chat_composer_send_visible",
+      "viewport": "mobile"
+    },
+    {
+      "path": ".tmp/ui1r2r2_chat_after_send.png",
+      "result": "PASS",
+      "runtime_side_effect_allowed": false,
+      "tested_interaction": "chat_after_send",
+      "viewport": "mobile"
+    },
+    {
+      "path": ".tmp/ui1r2r2_action_to_workbench_prefill.png",
+      "result": "PASS",
+      "runtime_side_effect_allowed": false,
+      "tested_interaction": "action_to_workbench_prefill",
+      "viewport": "mobile"
+    },
+    {
+      "path": ".tmp/ui1r2r2_workbench_form_fields.png",
+      "result": "PASS",
+      "runtime_side_effect_allowed": false,
+      "tested_interaction": "workbench_form_fields",
+      "viewport": "mobile"
+    },
+    {
+      "path": ".tmp/ui1r2r2_workbench_dropdown_open.png",
+      "result": "PASS",
+      "runtime_side_effect_allowed": false,
+      "tested_interaction": "workbench_dropdown_open",
+      "viewport": "mobile"
+    },
+    {
+      "path": ".tmp/ui1r2r2_workbench_trade_plan_preview.png",
+      "result": "PASS",
+      "runtime_side_effect_allowed": false,
+      "tested_interaction": "workbench_trade_plan_preview",
+      "viewport": "mobile"
+    },
+    {
+      "path": ".tmp/ui1r2r2_owner_readable_home.png",
+      "result": "PASS",
+      "runtime_side_effect_allowed": false,
+      "tested_interaction": "owner_readable_home",
+      "viewport": "desktop"
+    },
+    {
+      "path": ".tmp/ui1r2r2_developer_raw_refs_visible.png",
+      "result": "PASS",
+      "runtime_side_effect_allowed": false,
+      "tested_interaction": "developer_raw_refs_visible",
+      "viewport": "desktop"
+    }
+  ],
+  "script": "tools/playwright_pr169_dash1_ui1_r2_r2_visual_smoke.py",
+  "status": "PASS"
+}

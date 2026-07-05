@@ -31,6 +31,7 @@ DASH1_UI1_VALIDATION_BRANCH_NAME: Final = "pr169-dash1-ui1-theme-switch-safe-ren
 DASH1_UI1_R1_VALIDATION_BRANCH_NAME: Final = "pr169-dash1-ui1-r1-v3-owner12"
 DASH1_UI1_R2_VALIDATION_BRANCH_NAME: Final = "pr169-dash1-ui1-r2-guided-owner-coach-v7"
 DASH1_UI1_R2_R1_VALIDATION_BRANCH_NAME: Final = "pr169-dash1-ui1-r2-r1-interaction-v4"
+DASH1_UI1_R2_R2_VALIDATION_BRANCH_NAME: Final = "pr169-dash1-ui1-r2-r2-owner-product-ux"
 ALLOWED_BUILD_BRANCH_NAMES: Final = (
     BRANCH_NAME,
     BASE_BRANCH,
@@ -48,6 +49,7 @@ ALLOWED_BUILD_BRANCH_NAMES: Final = (
     DASH1_UI1_R1_VALIDATION_BRANCH_NAME,
     DASH1_UI1_R2_VALIDATION_BRANCH_NAME,
     DASH1_UI1_R2_R1_VALIDATION_BRANCH_NAME,
+    DASH1_UI1_R2_R2_VALIDATION_BRANCH_NAME,
 )
 ROADMAP_PR: Final = "PR168-RP5C"
 PR_TITLE: Final = "PR168-RP5C: Immutable QKU/formula library reclaim from active registry"

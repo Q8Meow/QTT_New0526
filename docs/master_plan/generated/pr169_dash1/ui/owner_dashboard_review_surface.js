@@ -1,6 +1,10 @@
 const THEME_STORAGE_KEY = "qtt_owner_dashboard_theme";
 const EXPERIENCE_MODE_STORAGE_KEY = "qtt_owner_dashboard_experience_mode";
 const GUIDANCE_DENSITY_STORAGE_KEY = "qtt_owner_dashboard_guidance_density";
+const TEXT_SIZE_STORAGE_KEY = "qtt_owner_dashboard_text_size";
+const TECHNICAL_DETAILS_STORAGE_KEY = "qtt_owner_dashboard_technical_details_open";
+const ENTER_TO_SEND_STORAGE_KEY = "qtt_owner_dashboard_enter_to_send_enabled";
+const TEXT_SIZE_VALUES = ["small", "default", "large", "extra_large"];
 
 // Source-level validator anchors: DashboardSystem, OwnerDashboardStateV1,
 // OwnerSurfaceResolver, OwnerActionRegistry, OwnerNextStepRouter.
@@ -45,7 +49,10 @@ const DASHBOARD_DATA = window.QTT_OWNER_DASHBOARD_DATA || {
   ui1r2_action_menu: { rows: [] },
   ui1r2_education: { glossary: [], chart_explainers: [], page_lessons: [] },
   ui1r2_guided_flow: { flows: [] },
-  ui1r2_next_step: { rows: [] }
+  ui1r2_next_step: { rows: [] },
+  ui1r2r2_display_preferences: {},
+  ui1r2r2_workbench_form: { field_catalog: [], option_catalog: {}, local_preview_output: {} },
+  ui1r2r2_chat_intent_preview: {}
 };
 
 const RANGES = ["1D", "1W", "1M", "3M", "YTD", "1Y", "ALL"];
@@ -113,8 +120,11 @@ const DashboardSystem = (() => {
     receipts: [],
     chatMessages: [],
     chatEnterToSend: false,
+    optionsMenuOpen: false,
+    textSize: "default",
     guided: {},
-    workbenchContext: null
+    workbenchContext: null,
+    workbenchPreview: {}
   };
 
   // OwnerExperienceModePolicy: one central mode policy over the shared OwnerDashboardStateV1.
@@ -332,6 +342,17 @@ const DashboardSystem = (() => {
         interactionState.workbenchContext = context;
         const prefill = qs("#tradeWorkbenchPrefill");
         if (prefill) prefill.textContent = `Prefilled local context: ${ownerTitle(context, "selected card")}. Missing owner input: confirm market, side, size, and objective before any later provider can act.`;
+        const marketInput = qs('[data-workbench-field="market_event"]');
+        const sourceInput = qs('[data-workbench-field="source_thesis_url"]');
+        if (marketInput && context && context.raw_owner_text_excerpt) {
+          marketInput.value = context.raw_owner_text_excerpt;
+        } else if (marketInput && context) {
+          marketInput.value = ownerTitle(context, "selected dashboard item");
+        }
+        if (sourceInput && context && context.raw_owner_text_excerpt) {
+          sourceInput.value = context.raw_owner_text_excerpt;
+        }
+        if (typeof updateWorkbenchPreview === "function") updateWorkbenchPreview();
         const refs = qs("#tradeWorkbenchContextRefs");
         if (refs) {
           refs.innerHTML = [
@@ -608,6 +629,44 @@ function closeDrawer() {
   drawer.setAttribute("aria-hidden", "true");
 }
 
+function setOptionsMenu(open) {
+  const panel = qs("#ownerOptionsPanel");
+  const backdrop = qs("#ownerOptionsBackdrop");
+  const toggle = qs("#ownerOptionsToggle");
+  if (!panel || !toggle) return;
+  DashboardSystem.interactionState.optionsMenuOpen = Boolean(open);
+  panel.hidden = !open;
+  panel.setAttribute("aria-hidden", open ? "false" : "true");
+  toggle.setAttribute("aria-expanded", open ? "true" : "false");
+  if (backdrop) backdrop.hidden = !open;
+  if (open) {
+    const first = qs("button, input, select, textarea, [href]", panel);
+    if (first) first.focus();
+  } else {
+    toggle.focus({ preventScroll: true });
+  }
+}
+
+function closeOwnerOptions() {
+  setOptionsMenu(false);
+}
+
+function initOptionsMenu() {
+  const toggle = qs("#ownerOptionsToggle");
+  const close = qs("#ownerOptionsClose");
+  const panel = qs("#ownerOptionsPanel");
+  const backdrop = qs("#ownerOptionsBackdrop");
+  if (!toggle || !panel) return;
+  toggle.addEventListener("click", () => setOptionsMenu(toggle.getAttribute("aria-expanded") !== "true"));
+  if (close) close.addEventListener("click", closeOwnerOptions);
+  if (backdrop) backdrop.addEventListener("click", closeOwnerOptions);
+  document.addEventListener("click", (event) => {
+    if (!DashboardSystem.interactionState.optionsMenuOpen) return;
+    if (panel.contains(event.target) || toggle.contains(event.target)) return;
+    closeOwnerOptions();
+  });
+}
+
 function setTheme(mode, persist = true) {
   const normalized = mode === "LIGHT" ? "light" : "dark";
   document.documentElement.dataset.theme = normalized;
@@ -632,15 +691,43 @@ function initTheme() {
   }
   setTheme(saved, false);
   qsa("[data-theme-choice]").forEach((button) => {
-    button.addEventListener("click", () => setTheme(button.dataset.themeChoice));
-  });
-  const mobileToggle = qs("#mobileThemeToggle");
-  if (mobileToggle) {
-    mobileToggle.addEventListener("click", () => {
-      const next = document.documentElement.dataset.theme === "dark" ? "LIGHT" : "DARK";
-      setTheme(next);
+    button.addEventListener("click", () => {
+      setTheme(button.dataset.themeChoice);
+      closeOwnerOptions();
     });
+  });
+}
+
+function setTextSize(size, persist = true) {
+  const normalized = TEXT_SIZE_VALUES.includes(size) ? size : "default";
+  document.documentElement.dataset.textSize = normalized;
+  DashboardSystem.interactionState.textSize = normalized;
+  qsa("[data-text-size-choice]").forEach((button) => {
+    button.setAttribute("aria-pressed", button.dataset.textSizeChoice === normalized ? "true" : "false");
+  });
+  if (!persist) return;
+  try {
+    localStorage.setItem(TEXT_SIZE_STORAGE_KEY, normalized);
+  } catch {
+    window.__QTT_IN_SESSION_TEXT_SIZE = normalized;
   }
+}
+
+function initTextSize() {
+  let saved = "default";
+  try {
+    const stored = localStorage.getItem(TEXT_SIZE_STORAGE_KEY);
+    saved = TEXT_SIZE_VALUES.includes(stored) ? stored : "default";
+  } catch {
+    saved = window.__QTT_IN_SESSION_TEXT_SIZE || "default";
+  }
+  setTextSize(saved, false);
+  qsa("[data-text-size-choice]").forEach((button) => {
+    button.addEventListener("click", () => {
+      setTextSize(button.dataset.textSizeChoice);
+      closeOwnerOptions();
+    });
+  });
 }
 
 function applyExperienceModePolicy(mode) {
@@ -689,7 +776,10 @@ function initExperienceMode() {
   }
   setExperienceMode(saved, false);
   qsa("[data-mode-choice]").forEach((button) => {
-    button.addEventListener("click", () => setExperienceMode(button.dataset.modeChoice));
+    button.addEventListener("click", () => {
+      setExperienceMode(button.dataset.modeChoice);
+      closeOwnerOptions();
+    });
   });
 }
 
@@ -1159,8 +1249,8 @@ function renderQkuAndQuantum() {
 function inferIntentFamily(text) {
   const lower = text.toLowerCase();
   if (lower.includes("no-trade") || lower.includes("no trade")) return "NO_TRADE_EXPLANATION_REQUEST";
-  if (lower.includes("research") || lower.includes("article") || lower.includes("link")) return "RESEARCH_ANALYSIS_REQUEST";
-  if (lower.includes("formula") && !lower.includes("qku")) return "FORMULA_EXTRACTION_REQUEST";
+  if (/(https?:\/\/|www\.|\.pdf\b|dataset|paper|article|news|research|source|link|social|thread|post|screenshot)/i.test(text)) return "RESEARCH_ANALYSIS_REQUEST";
+  if ((lower.includes("formula") || lower.includes("algorithm")) && !lower.includes("qku")) return "FORMULA_EXTRACTION_REQUEST";
   if (lower.includes("qku") || lower.includes("stack")) return "QKU_MATERIALIZATION_REQUEST";
   if (lower.includes("quantum") || lower.includes("qubo") || lower.includes("qaoa") || lower.includes("vqe")) return "QUANTUM_STRUCTURE_MAPPING_REQUEST";
   if (lower.includes("replay") && !lower.includes("paper")) return "REPLAY_PREVIEW_REQUEST";
@@ -1195,17 +1285,27 @@ function buildOwnerIntentPreview(rawText) {
       : intentFamily.includes("NO_TRADE")
         ? ["OwnerMessagePreviewV1", "OwnerPlainEnglishIntentPreviewV1", "NoTradeReoptimizationRequestPreviewV1", "TradePlanCandidatePreviewV1"]
         : ["OwnerMessagePreviewV1", "OwnerPlainEnglishIntentPreviewV1", "OwnerTradeIntentPreviewV1", "OwnerTradeCheckRequestPreviewV1", "ReplayPaperRequestPreviewV1"];
+  const unknown = intentFamily === "UNKNOWN_OWNER_REQUEST_NEEDS_CLARIFICATION";
   return {
     object_type: "OwnerPlainEnglishIntentPreviewV1",
     intent_id: `LOCAL_PREVIEW_${Date.now()}`,
     thread_id: targetWorkspace === "Research Intake" ? "OWNER_THREAD_RESEARCH_INTAKE" : "OWNER_THREAD_TRADE_WORKBENCH",
     raw_owner_text_excerpt: text.slice(0, 140),
-    plain_english_summary: label(intentFamily),
+    plain_english_summary: unknown
+      ? "I need a market, trade idea, source link, formula, or research question to route this."
+      : label(intentFamily),
     intent_family: intentFamily,
-    confidence_label: text.length > 18 ? "High confidence local preview" : "Medium confidence local preview",
-    clarifying_question_if_needed: text.length > 18 ? "No clarification needed for this preview." : "Which market, source, or candidate should QTT inspect?",
+    confidence_label: unknown ? "Needs clarification" : text.length > 18 ? "High confidence local preview" : "Medium confidence local preview",
+    clarifying_question_if_needed: unknown
+      ? "Choose: Check a trade, Research a source, Explain no-trade, Compare formula stacks, Open Trade Workbench."
+      : text.length > 18
+        ? "No clarification needed for this preview."
+        : "Which market, source, or candidate should QTT inspect?",
     target_workspace: targetWorkspace,
     structured_request_preview_refs: previewObjects,
+    suggested_chips: unknown
+      ? ["Check a trade", "Research a source", "Explain no-trade", "Compare formula stacks", "Open Trade Workbench"]
+      : [],
     source_artifact_refs: ["owner_dashboard_conversation_state.generated.json", "owner_dashboard_chat_route_map.generated.json"],
     PR165_D2_agent_role_refs_or_gap: ["PR165_D2_AgentDutySourceCrosswalk.report.json"],
     QKU_formula_refs_or_gap: ["owner_qku_formula_candidate_route_view.generated.jsonl"],
@@ -1227,9 +1327,15 @@ function renderIntentReceipt(preview) {
       </div>
       <div class="chat-bubble qtt-bubble">
         <strong>QTT preview</strong>
-        <p>I understood this as ${safe(label(preview.intent_family))}. I would route it to ${safe(preview.target_workspace)} and show which agents, QKUs, formula routes, and evidence receipts are needed later.</p>
+        <p>${safe(preview.plain_english_summary)}</p>
+        <p>I would route it to ${safe(preview.target_workspace)} and show which agents, QKUs, formula routes, and evidence receipts are needed later.</p>
         <p>What will not happen now: no live LLM call, no agent task, no connector read, no replay, no paper run, and no order submission.</p>
       </div>
+      ${preview.suggested_chips && preview.suggested_chips.length ? `
+        <div class="chip-row clarification-chip-row" data-unknown-intent-chips="OwnerNextStepRouter">
+          ${preview.suggested_chips.map((chip) => `<button class="chip" type="button" data-clarify-chip="${safe(chip)}">${safe(chip)}</button>`).join("")}
+        </div>
+      ` : ""}
       <div class="preview-grid">
         <span>Preview objects: ${safe(label(preview.structured_request_preview_refs))}</span>
         <span>Confidence: ${safe(preview.confidence_label)}</span>
@@ -1249,6 +1355,29 @@ function renderIntentReceipt(preview) {
   `;
   receipt.querySelector(".receipt-card").__qttRow = preview;
   receipt.querySelector(".receipt-card").addEventListener("click", () => openDrawer("Local chat route preview", "Chat coach receipt", preview));
+  qsa("[data-clarify-chip]", receipt).forEach((chip) => {
+    chip.addEventListener("click", (event) => {
+      event.stopPropagation();
+      const text = chip.dataset.clarifyChip || "";
+      const mapped = text === "Check a trade"
+        ? "Can QTT check this market and find the best trade?"
+        : text === "Research a source"
+          ? "Research this source and tell me if it creates a prediction-market edge."
+          : text === "Explain no-trade"
+            ? "Why did no-trade win here?"
+            : text === "Compare formula stacks"
+              ? "Ask the QKU agents to compare the best formula stacks for this event."
+              : "Open Trade Workbench";
+      const input = qs("#ownerChatInput");
+      if (input) {
+        input.value = mapped;
+        input.focus();
+      }
+      if (text === "Open Trade Workbench") {
+        DashboardSystem.routeAction("NEXT_STEP_SEND_TO_TRADE_WORKBENCH", preview);
+      }
+    });
+  });
   wireNextActions(receipt);
 }
 
@@ -1280,6 +1409,42 @@ function submitOwnerChat(source = "BUTTON_SUBMIT") {
   input.value = "";
   input.focus();
   return preview;
+}
+
+function setEnterToSend(enabled, persist = true) {
+  const value = Boolean(enabled);
+  DashboardSystem.interactionState.chatEnterToSend = value;
+  qsa("[data-enter-to-send-setting]").forEach((input) => {
+    input.checked = value;
+  });
+  if (!persist) return;
+  try {
+    localStorage.setItem(ENTER_TO_SEND_STORAGE_KEY, value ? "true" : "false");
+  } catch {
+    window.__QTT_IN_SESSION_ENTER_TO_SEND = value ? "true" : "false";
+  }
+}
+
+function initEnterToSendPreference(root = document) {
+  let saved = false;
+  try {
+    saved = localStorage.getItem(ENTER_TO_SEND_STORAGE_KEY) === "true";
+  } catch {
+    saved = window.__QTT_IN_SESSION_ENTER_TO_SEND === "true";
+  }
+  setEnterToSend(saved, false);
+  qsa("[data-enter-to-send-setting]", root).forEach((input) => {
+    input.addEventListener("change", (event) => {
+      setEnterToSend(event.currentTarget.checked);
+      const hint = qs("#chatSubmitHint");
+      if (hint) {
+        hint.hidden = false;
+        hint.textContent = event.currentTarget.checked
+          ? "Enter-to-send is enabled for this local preview preference."
+          : "Enter-to-send is off. Enter keeps typing; Ctrl+Enter or Send submits.";
+      }
+    });
+  });
 }
 
 function showGuidedWorkflow(workflowId, context = {}) {
@@ -1403,7 +1568,11 @@ function renderChatAndTrade() {
       <div class="chat-bubble owner-bubble"><strong>Owner</strong><p>Can QTT check this market?</p></div>
       <div class="chat-bubble qtt-bubble"><strong>QTT preview</strong><p>I can route this to a local trade-check preview, show missing evidence, and open the Trade Workbench. I will not call live agents or submit trades in this UI.</p></div>
       <label class="field-label" for="ownerChatInput">Message</label>
-      <textarea id="ownerChatInput" rows="5" placeholder="Ask QTT to research, analyze, compare, or check a trade...">Can QTT check this market and find the best trade?</textarea>
+      <div class="chat-composer-row" data-chat-send-attached="true">
+        <textarea id="ownerChatInput" rows="5" placeholder="Ask QTT to research, analyze, compare, or check a trade...">Can QTT check this market and find the best trade?</textarea>
+        <button id="routePreviewButton" class="primary-command" type="button" data-chat-send-button="true">Send</button>
+      </div>
+      <p class="composer-hint">Ctrl+Enter = Send. Enter adds a new line.</p>
       <p id="chatSubmitHint" class="inline-validation" data-chat-submit-hint hidden></p>
       <div class="control-row">
         <label>Agent pod <select id="chatAgentSelector"><option>All QTT Agents</option><option>Risk + TCA</option><option>Research + QKU</option><option>Quantum readiness</option></select></label>
@@ -1417,7 +1586,6 @@ function renderChatAndTrade() {
       <div class="chip-row prompt-chip-row">
         ${asList(chatContract.prompt_chips).map((chip) => `<button class="chip" type="button" data-chat-chip="${safe(chip)}">${safe(chip)}</button>`).join("")}
       </div>
-      <button id="routePreviewButton" class="primary-command" type="button" data-chat-send-button="true">Send / Route Preview</button>
       ${badge("no runtime side effect", "red")} ${badge("local preview parser", "blue")}
     </article>
     <div id="chatReceiptPreview" class="chat-receipt-column"></div>
@@ -1441,7 +1609,7 @@ function renderChatAndTrade() {
   qs("#ownerChatInput").addEventListener("keydown", (event) => {
     if (event.key !== "Enter") return;
     const hint = qs("#chatSubmitHint");
-    const enterToSendEnabled = qs("#chatEnterToSendToggle") && qs("#chatEnterToSendToggle").checked;
+    const enterToSendEnabled = DashboardSystem.interactionState.chatEnterToSend;
     if (event.ctrlKey || event.metaKey) {
       event.preventDefault();
       submitOwnerChat("CTRL_ENTER_SUBMIT");
@@ -1459,26 +1627,63 @@ function renderChatAndTrade() {
         : "Enter inserted a newline. Use Ctrl+Enter or Send to create the local preview.";
     }
   });
-  qs("#chatEnterToSendToggle").addEventListener("change", (event) => {
-    DashboardSystem.interactionState.chatEnterToSend = Boolean(event.currentTarget.checked);
-    const hint = qs("#chatSubmitHint");
-    if (hint) {
-      hint.hidden = false;
-      hint.textContent = event.currentTarget.checked
-        ? "Enter-to-send is enabled for this local preview session."
-        : "Enter-to-send is off. Enter keeps typing; Ctrl+Enter or Send submits.";
-    }
-  });
+  initEnterToSendPreference(document);
   qs("#routePreviewButton").addEventListener("click", () => submitOwnerChat("BUTTON_SUBMIT"));
 
-  const workbench = DASHBOARD_DATA.ui1r1_order_sim || DASHBOARD_DATA.trade_workbench || {};
-  const fields = asList(workbench.owner_input_fields);
-  const buttons = asList(workbench.preview_buttons);
-  const comparisons = asList(workbench.comparison_cards);
+  const r2r2Workbench = DASHBOARD_DATA.ui1r2r2_workbench_form || {};
+  const workbench = Object.keys(r2r2Workbench).length ? r2r2Workbench : (DASHBOARD_DATA.trade_workbench || DASHBOARD_DATA.ui1r1_order_sim || {});
+  const fields = asList(workbench.field_catalog).length ? asList(workbench.field_catalog) : asList(workbench.owner_input_fields);
+  const options = workbench.option_catalog || {};
+  const buttons = [
+    { label: "Check trade", next_step_id: "NEXT_STEP_CHECK_TRADE_WITH_QTT_AGENTS" },
+    { label: "Request replay preview", next_step_id: "NEXT_STEP_REQUEST_REPLAY_PREVIEW" },
+    { label: "Request paper preview", next_step_id: "NEXT_STEP_REQUEST_PAPER_PREVIEW" },
+    { label: "Show TCA", next_step_id: "NEXT_STEP_SHOW_TCA_COST_BREAKDOWN" },
+    { label: "Explain no-trade", next_step_id: "NEXT_STEP_EXPLAIN_NO_TRADE" },
+    { label: "Show QKU/formula routes", next_step_id: "NEXT_STEP_SHOW_QKU_FORMULA_ROUTES" }
+  ];
+  const comparisons = asList((DASHBOARD_DATA.ui1r1_order_sim || {}).comparison_cards);
+  const defaultValueFor = (field) => {
+    if (field.field_id === "market_event") return "Describe the market or event";
+    if (field.field_id === "max_budget") return "";
+    if (field.field_id === "max_loss") return "";
+    if (field.field_id === "hold_duration") return "";
+    if (field.field_id === "source_thesis_url") return "Paste a thesis, market page, article, paper, formula, dataset, or trade idea.";
+    return "";
+  };
+  const fieldHtml = (field) => {
+    const fieldId = field.field_id || field.id || "owner_input";
+    const ownerLabel = field.owner_label || label(fieldId);
+    if (field.input_kind === "select" && field.option_source && options[field.option_source]) {
+      return `
+        <label>${safe(ownerLabel)}
+          <select data-workbench-field="${safe(fieldId)}" data-trade-variable-field="${safe(fieldId)}" aria-label="${safe(ownerLabel)}">
+            ${asList(options[field.option_source]).map((option) => `<option value="${safe(option.option_id)}">${safe(option.owner_label)}</option>`).join("")}
+          </select>
+        </label>
+      `;
+    }
+    if (field.input_kind === "textarea") {
+      return `
+        <label>${safe(ownerLabel)}
+          <textarea data-workbench-field="${safe(fieldId)}" data-trade-variable-field="${safe(fieldId)}" aria-label="${safe(ownerLabel)}">${safe(defaultValueFor(field))}</textarea>
+        </label>
+      `;
+    }
+    const type = field.input_kind === "number" ? "number" : "text";
+    return `
+      <label>${safe(ownerLabel)}
+        <input type="${safe(type)}" data-workbench-field="${safe(fieldId)}" data-trade-variable-field="${safe(fieldId)}" value="${safe(defaultValueFor(field))}" aria-label="${safe(ownerLabel)}">
+      </label>
+    `;
+  };
   qs("#tradeWorkbench").innerHTML = `
     <article class="card workbench-form-card" data-workbench-id="${safe(workbench.workbench_id || "OWNER_TRADE_WORKBENCH")}" data-owner-trade-intent-preview="OwnerTradeIntentV1" data-no-trade-comparator="true" data-champion-challenger-preview="true" data-tca-route="true" data-fdr-route="true" data-portfolio-marginal-utility-route="true" data-quantum-structural-readiness-route="true" data-execution-router-provider-pending="true">
       <h3>Trade Workbench preview</h3>
       <p id="tradeWorkbenchPrefill">No local context selected yet.</p>
+      <div class="local-status-strip" data-workbench-local-status-strip="true">
+        ${asList(workbench.local_status_strip).map((item) => badge(item, DashboardSystem.toneFor(item))).join("")}
+      </div>
       <div id="tradeWorkbenchContextRefs" class="preview-grid workbench-context-refs" data-workbench-context-preview="WorkbenchContextPreviewV1">
         <span>Selected card/widget/chat ref: waiting</span>
         <span>QKU/formula route: provider-pending or gap route</span>
@@ -1486,17 +1691,21 @@ function renderChatAndTrade() {
         <span>PR165-D2 agent role refs: routed or explicit gap</span>
       </div>
       <div class="workbench-fields">
-        ${fields.map((row) => `
-          <label>${safe(label(row.field_id))}
-            <input data-trade-variable-field="${safe(row.field_id)}" value="${safe(label(row.current_value_slot || ""))}" aria-label="${safe(row.field_id)}">
-          </label>
-        `).join("")}
+        ${fields.map(fieldHtml).join("")}
       </div>
       <div class="chip-row action-row">
-        ${buttons.map((row) => `<button class="chip" type="button" data-preview-button="${safe(row.button_id)}">${safe(label(row.button_id))}</button>`).join("")}
+        ${buttons.map((row) => `<button class="chip" type="button" data-next-step-id="${safe(row.next_step_id)}" data-local-receipt-preview="TradePlanCandidatePreviewV1">${safe(row.label)}</button>`).join("")}
       </div>
       ${badge("local request preview only", "red")} ${badge("Execution Router provider-pending", "gray")}
       ${ownerControls(workbench, "trade_workbench")}
+    </article>
+    <article id="tradePlanCandidatePreview" class="card workbench-preview-card" data-preview-object="TradePlanCandidatePreviewV1" data-runtime-side-effect-allowed="false">
+      <h3>Trade plan candidate preview</h3>
+      <p>Complete the local form to preview a candidate, the challenger, and no-trade route without creating any runtime request.</p>
+      <div id="workbenchPreviewGrid" class="preview-grid"></div>
+      <div class="preview-grid">
+        ${asList(workbench.local_preview_output && workbench.local_preview_output.route_previews).map((route) => `<span>${safe(label(route))}: provider-pending or gap-routed</span>`).join("")}
+      </div>
     </article>
     ${comparisons.map((row) => `
       <article class="card comparison-card" data-comparison-card="${safe(row.card_id)}">
@@ -1521,8 +1730,63 @@ function renderChatAndTrade() {
   `;
   qsa("#tradeWorkbench .card").forEach((card) => {
     card.__qttRow = workbench;
-    card.addEventListener("click", () => openDrawer(card.querySelector("h3").textContent, "Trade Workbench", workbench));
+    card.addEventListener("click", (event) => {
+      if (event.target.closest("button, input, select, textarea, summary, details")) return;
+      openDrawer(card.querySelector("h3").textContent, "Trade Workbench", workbench);
+    });
   });
+  wireWorkbenchForm();
+  wireNextActions(qs("#tradeWorkbench"));
+}
+
+function workbenchValues() {
+  const values = {};
+  qsa("[data-workbench-field]").forEach((field) => {
+    values[field.dataset.workbenchField] = field.value;
+  });
+  return values;
+}
+
+function optionLabel(fieldId, value) {
+  const workbench = DASHBOARD_DATA.ui1r2r2_workbench_form || DASHBOARD_DATA.trade_workbench || {};
+  const fields = asList(workbench.field_catalog);
+  const field = fields.find((row) => row.field_id === fieldId) || {};
+  const options = asList((workbench.option_catalog || {})[field.option_source]);
+  const option = options.find((row) => row.option_id === value);
+  return option ? option.owner_label : value;
+}
+
+function updateWorkbenchPreview() {
+  const values = workbenchValues();
+  DashboardSystem.interactionState.workbenchPreview = values;
+  const grid = qs("#workbenchPreviewGrid");
+  if (!grid) return;
+  const summaryRows = [
+    ["Market/event", values.market_event || "needs owner input"],
+    ["Venue", optionLabel("venue", values.venue || "qtt_decide")],
+    ["Side", optionLabel("side", values.side || "qtt_decide")],
+    ["Objective", optionLabel("objective", values.objective || "qtt_decide")],
+    ["Max budget", values.max_budget || "needs owner input"],
+    ["Max loss", values.max_loss || "needs owner input"],
+    ["Hold duration", values.hold_duration || "needs owner input"],
+    ["Urgency", optionLabel("urgency", values.urgency || "normal")],
+    ["Entry", optionLabel("entry_preference", values.entry_preference || "qtt_decide")],
+    ["Exit", optionLabel("exit_preference", values.exit_preference || "qtt_decide")],
+    ["Maker/taker", optionLabel("maker_taker_preference", values.maker_taker_preference || "qtt_decide")],
+    ["Source/thesis", values.source_thesis_url || "candidate/provisional input"],
+    ["No-trade comparator", "shown as first-class local preview"],
+    ["What would make this pass", "smaller size, different venue, maker-only, better liquidity, or later timing may be retested later"],
+    ["Runtime work", "none"],
+  ];
+  grid.innerHTML = summaryRows.map(([name, value]) => `<span><strong>${safe(name)}:</strong> ${safe(label(value))}</span>`).join("");
+}
+
+function wireWorkbenchForm() {
+  qsa("[data-workbench-field]").forEach((field) => {
+    field.addEventListener("input", updateWorkbenchPreview);
+    field.addEventListener("change", updateWorkbenchPreview);
+  });
+  updateWorkbenchPreview();
 }
 
 function renderAgentsAndContracts() {
@@ -1700,7 +1964,9 @@ function repairStaticShellCopy() {
 
 function render() {
   initTheme();
+  initTextSize();
   initExperienceMode();
+  initOptionsMenu();
   repairStaticShellCopy();
   renderStatus();
   renderCoach();
@@ -1723,7 +1989,10 @@ function render() {
   qs("#closeDrawer").addEventListener("click", closeDrawer);
   qs("#openGlobalDrilldown").addEventListener("click", () => openDrawer("Dashboard technical details", "Renderer, not execution authority", DASHBOARD_DATA.authority_boundary || {}, "technical"));
   document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape") closeDrawer();
+    if (event.key === "Escape") {
+      closeDrawer();
+      closeOwnerOptions();
+    }
   });
 }
 

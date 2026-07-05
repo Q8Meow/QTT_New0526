@@ -1,0 +1,36 @@
+{
+  "accepted_candidate_input_families": [
+    "websites / links",
+    "PDFs / academic papers / research articles",
+    "news articles",
+    "public/social posts as research signals only",
+    "public documents",
+    "repo links / datasets",
+    "screenshots/images as research candidates",
+    "formulas / algorithms / quantum strategy notes",
+    "market/event pages",
+    "free-form trade ideas"
+  ],
+  "candidate_or_provisional_only": true,
+  "meta": {
+    "agent_consumable_authority": false,
+    "artifact_id": "UI1R2R2_SOURCE_AGNOSTIC_CANDIDATE_ONLY_REPORT",
+    "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+    "connector_access_allowed": false,
+    "credential_access_allowed": false,
+    "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config + PR169-DASH1 artifacts + PR169-DASH1-UI1/R1 boot data + OwnerPresentationLayer / OwnerGuidancePolicy config + PR169-DASH1-UI1-R2-R2 owner product UX repair config",
+    "manual_edit_allowed": false,
+    "order_execution_allowed": false,
+    "runtime_side_effect_allowed": false,
+    "runtime_truth_authority": false,
+    "source_truth_authority": false,
+    "ui1r2r2_generated_from": "OwnerDashboardStateV1 + OwnerSurfaceResolver + OwnerActionRegistry + OwnerPresentationLayer + OwnerNextStepRouter + shared widget/chart/action/chat manifests",
+    "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+  },
+  "no_cash_truth": true,
+  "no_connector_semantics": true,
+  "no_runtime_authority": true,
+  "no_trading_evidence_promotion": true,
+  "non_official_information_not_source_truth": true,
+  "requires_safe_relevant_non_duplicate_mappable_check": true
+}

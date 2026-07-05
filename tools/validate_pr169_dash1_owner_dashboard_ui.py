@@ -17,9 +17,13 @@ from tools.build_pr169_dash1_owner_dashboard_ui import (
     BOOT_JSON,
     EXPERIENCE_MODE_STORAGE_KEY,
     GUIDANCE_DENSITY_STORAGE_KEY,
+    DISPLAY_TEXT_SIZES,
+    ENTER_TO_SEND_STORAGE_KEY,
     MOBILE_TABS,
     REQUIRED_TOP_LEVEL_KEYS,
     SEMANTIC_COLORS,
+    TECHNICAL_DETAILS_STORAGE_KEY,
+    TEXT_SIZE_STORAGE_KEY,
     THEME_STORAGE_KEY,
     UI_ARTIFACT_FILES,
 )
@@ -802,6 +806,218 @@ def validate(base: Path) -> tuple[str, ...]:
     ):
         if snippet not in combined:
             failures.append(f"ui1r2r1_renderer_snippet_missing:{snippet}")
+
+    display_prefs = _read_json(ui_dir / "ui1r2r2_display_preferences.generated.json")
+    if display_prefs.get("preference_model_id") != "OwnerDisplayPreferenceV1":
+        failures.append("ui1r2r2_display_preference_model_bad")
+    if set(display_prefs.get("text_size", {}).get("allowed", [])) != set(DISPLAY_TEXT_SIZES):
+        failures.append("ui1r2r2_text_size_options_bad")
+    if display_prefs.get("text_size", {}).get("localStorage_key") != TEXT_SIZE_STORAGE_KEY:
+        failures.append("ui1r2r2_text_size_key_bad")
+    allowed_keys = set(display_prefs.get("allowed_localStorage_keys", []))
+    for key in {
+        THEME_STORAGE_KEY,
+        EXPERIENCE_MODE_STORAGE_KEY,
+        GUIDANCE_DENSITY_STORAGE_KEY,
+        TEXT_SIZE_STORAGE_KEY,
+        TECHNICAL_DETAILS_STORAGE_KEY,
+        ENTER_TO_SEND_STORAGE_KEY,
+    }:
+        if key not in allowed_keys:
+            failures.append(f"ui1r2r2_preference_key_missing:{key}")
+    if display_prefs.get("no_trade_state_persisted") is not True or display_prefs.get("no_private_state_persisted") is not True:
+        failures.append("ui1r2r2_preference_private_state_guard_missing")
+
+    header_menu = _read_json(ui_dir / "ui1r2r2_header_menu.report.json")
+    if header_menu.get("strict_menu_only_header_chrome") is not True:
+        failures.append("ui1r2r2_header_not_strict_menu_only")
+    header_match = re.search(r"<header\b.*?</header>", html_text, flags=re.IGNORECASE | re.DOTALL)
+    header_markup = header_match.group(0) if header_match else ""
+    if not header_markup:
+        failures.append("ui1r2r2_header_markup_missing")
+    for forbidden in header_menu.get("closed_header_forbidden_visible_text", []):
+        if forbidden in header_markup:
+            failures.append(f"ui1r2r2_closed_header_forbidden_text:{forbidden}")
+    for snippet in (
+        'data-header-chrome="menu-only"',
+        'id="ownerOptionsToggle"',
+        'aria-expanded="false"',
+        'aria-controls="ownerOptionsPanel"',
+        'id="ownerOptionsPanel"',
+        'data-options-menu="owner-display-preferences"',
+        'data-text-size-choice="small"',
+        'data-text-size-choice="default"',
+        'data-text-size-choice="large"',
+        'data-text-size-choice="extra_large"',
+        "TEXT_SIZE_STORAGE_KEY",
+        "setTextSize",
+        "initOptionsMenu",
+    ):
+        if snippet not in combined:
+            failures.append(f"ui1r2r2_menu_renderer_snippet_missing:{snippet}")
+    if re.search(r"<section class=\"status-strip\"", html_text):
+        failures.append("ui1r2r2_status_strip_permanent_outside_menu")
+
+    parity = _read_json(ui_dir / "ui1r2r2_mode_action_parity.report.json")
+    if parity.get("guided_advanced_non_developer_action_parity") is not True:
+        failures.append("ui1r2r2_guided_advanced_action_parity_missing")
+    if parity.get("guided_non_developer_next_step_ids") != parity.get("advanced_non_developer_next_step_ids"):
+        failures.append("ui1r2r2_guided_advanced_next_steps_differ")
+    if parity.get("guided_adds_coaching_not_capability_removal") is not True:
+        failures.append("ui1r2r2_guided_coaching_rule_missing")
+
+    owner_copy = _read_json(ui_dir / "ui1r2r2_owner_readable_copy.report.json")
+    if owner_copy.get("centralized_copy_adapter") is not True:
+        failures.append("ui1r2r2_owner_copy_not_centralized")
+    if owner_copy.get("raw_refs_available_in_developer_or_collapsed_technical_details") is not True:
+        failures.append("ui1r2r2_raw_refs_not_preserved")
+    for pattern in owner_copy.get("guided_advanced_raw_pattern_rejections", []):
+        if not pattern:
+            failures.append("ui1r2r2_owner_copy_empty_raw_pattern")
+
+    chat_preview = _read_json(ui_dir / "ui1r2r2_chat_intent_preview.report.json")
+    if chat_preview.get("primary_button_label") != "Send":
+        failures.append("ui1r2r2_chat_send_label_bad")
+    if chat_preview.get("send_button_attached_to_composer") is not True:
+        failures.append("ui1r2r2_chat_send_not_attached")
+    for intent in (
+        "TRADE_CHECK_REQUEST",
+        "RESEARCH_ANALYSIS_REQUEST",
+        "FORMULA_EXTRACTION_REQUEST",
+        "QKU_MATERIALIZATION_REQUEST",
+        "QUANTUM_STRUCTURE_MAPPING_REQUEST",
+        "NO_TRADE_EXPLANATION_REQUEST",
+        "PARAMETER_TUNING_REQUEST",
+        "EDGE_ALPHA_REVIEW_REQUEST",
+        "AGENT_DISAGREEMENT_REQUEST",
+        "REPLAY_PREVIEW_REQUEST",
+        "PAPER_PREVIEW_REQUEST",
+        "UNKNOWN_OWNER_REQUEST_NEEDS_CLARIFICATION",
+    ):
+        if intent not in chat_preview.get("recognized_intent_families", []):
+            failures.append(f"ui1r2r2_chat_intent_missing:{intent}")
+    for snippet in (
+        'data-chat-send-attached="true"',
+        'data-chat-send-button="true">Send<',
+        "Ctrl+Enter = Send",
+        "I need a market, trade idea, source link, formula, or research question to route this.",
+        "data-unknown-intent-chips",
+    ):
+        if snippet not in combined:
+            failures.append(f"ui1r2r2_chat_renderer_snippet_missing:{snippet}")
+
+    workbench_form = _read_json(ui_dir / "ui1r2r2_workbench_form.generated.json")
+    required_workbench_fields = {
+        "market_event",
+        "venue",
+        "side",
+        "objective",
+        "max_budget",
+        "max_loss",
+        "hold_duration",
+        "urgency",
+        "entry_preference",
+        "exit_preference",
+        "maker_taker_preference",
+        "source_thesis_url",
+        "target_price_probability",
+        "stop_exit_preference",
+        "source_family",
+        "route_selector",
+    }
+    present_fields = {row.get("field_id") for row in workbench_form.get("field_catalog", [])}
+    if not required_workbench_fields <= present_fields:
+        failures.append("ui1r2r2_workbench_required_fields_missing")
+    for option_source in (
+        "venue",
+        "side",
+        "objective",
+        "urgency",
+        "entry_preference",
+        "exit_preference",
+        "maker_taker_preference",
+        "source_family",
+        "route_selector",
+    ):
+        if option_source not in workbench_form.get("option_catalog", {}):
+            failures.append(f"ui1r2r2_workbench_option_source_missing:{option_source}")
+    if workbench_form.get("all_selectors_use_central_option_catalog") is not True:
+        failures.append("ui1r2r2_workbench_option_catalog_not_central")
+    for snippet in (
+        "data-workbench-field",
+        "data-workbench-local-status-strip",
+        "TradePlanCandidatePreviewV1",
+        "workbenchPreviewGrid",
+        "updateWorkbenchPreview",
+    ):
+        if snippet not in combined:
+            failures.append(f"ui1r2r2_workbench_renderer_snippet_missing:{snippet}")
+
+    next_step_report = _read_json(ui_dir / "ui1r2r2_action_next_step.report.json")
+    if next_step_report.get("router_id") != "OwnerNextStepRouter":
+        failures.append("ui1r2r2_next_step_router_bad")
+    if next_step_report.get("enabled_options_route_to_next_step") is not True:
+        failures.append("ui1r2r2_enabled_actions_not_routed")
+    if next_step_report.get("no_runtime_queue_created") is not True:
+        failures.append("ui1r2r2_next_step_runtime_queue_created")
+
+    r2r2_authority = _read_json(ui_dir / "ui1r2r2_authority_boundary.report.json")
+    for key in (
+        "no_SVC1_runtime",
+        "no_live_LLM",
+        "no_real_QTT_agent_execution",
+        "no_real_replay_paper_live_execution",
+        "no_connector_private_or_cash_account_reads",
+        "no_source_truth_acceptance",
+        "no_direct_venue_submit",
+        "no_Execution_Router_release",
+        "no_QTT_SHA_or_AtomicRows_hash_authority",
+        "no_profit_guarantee",
+    ):
+        if r2r2_authority.get(key) is not True:
+            failures.append(f"ui1r2r2_authority_guard_missing:{key}")
+
+    no_orphan = _read_json(ui_dir / "ui1r2r2_no_orphan_central_routes.report.json")
+    for key in (
+        "no_independent_dashboard_truth_files",
+        "no_chat_only_command_grammar",
+        "no_workbench_only_route_ids",
+        "no_mobile_only_feature_list",
+        "all_new_values_route_or_gap",
+    ):
+        if no_orphan.get(key) is not True:
+            failures.append(f"ui1r2r2_no_orphan_guard_missing:{key}")
+
+    source_candidate = _read_json(ui_dir / "ui1r2r2_source_agnostic_candidate_only.report.json")
+    if source_candidate.get("candidate_or_provisional_only") is not True:
+        failures.append("ui1r2r2_source_candidate_not_candidate_only")
+    if source_candidate.get("non_official_information_not_source_truth") is not True:
+        failures.append("ui1r2r2_non_official_source_truth_allowed")
+
+    pref_guard = _read_json(ui_dir / "ui1r2r2_preference_storage_guard.report.json")
+    if pref_guard.get("localStorage_limited_to_non_secret_UI_preferences") is not True:
+        failures.append("ui1r2r2_localstorage_not_limited_to_ui_prefs")
+    if pref_guard.get("no_trade_state_in_localStorage") is not True:
+        failures.append("ui1r2r2_trade_state_localstorage_allowed")
+
+    mobile_r2r2 = _read_json(ui_dir / "ui1r2r2_mobile_responsive.report.json")
+    for key in (
+        "closed_header_menu_only_by_default",
+        "trading_content_in_first_viewport",
+        "no_horizontal_overflow_default_large_extra_large",
+        "chat_and_workbench_reachable",
+        "send_visible_on_mobile",
+        "workbench_fields_stack_correctly",
+        "no_separate_mobile_state_model",
+    ):
+        if mobile_r2r2.get(key) is not True:
+            failures.append(f"ui1r2r2_mobile_guard_missing:{key}")
+
+    evidence_r2r2 = _read_json(ui_dir / "ui1r2r2_evidence_spine.report.json")
+    if evidence_r2r2.get("every_repaired_route_preserves_or_gap_routes_spine") is not True:
+        failures.append("ui1r2r2_evidence_spine_not_preserved")
+    if evidence_r2r2.get("no_fake_runtime_output") is not True or evidence_r2r2.get("no_fake_quantum_advantage") is not True:
+        failures.append("ui1r2r2_fake_evidence_guard_missing")
 
     return tuple(failures)
 

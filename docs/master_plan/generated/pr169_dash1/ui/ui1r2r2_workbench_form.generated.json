@@ -1,20 +1,9 @@
 {
-  "QKUs_formulas_remain_immutable": true,
-  "agent_disagreement_preview_categories": [
-    "agents in agreement",
-    "agents objecting",
-    "LLM critic objections",
-    "risk objections",
-    "source objections",
-    "TCA objections",
-    "memory/regime objections",
-    "next safe action"
-  ],
-  "all_fields_route_through_owner_action_registry": true,
   "all_selectors_use_central_option_catalog": true,
+  "all_workbench_actions_route_through_owner_next_step_router": true,
   "central_option_catalog_id": "OwnerInputOptionCatalogV1",
   "direct_venue_submit_allowed": false,
-  "execution_router_release_required": true,
+  "execution_router_release_allowed": false,
   "field_catalog": [
     {
       "field_id": "market_event",
@@ -195,7 +184,6 @@
       "route_selector"
     ]
   },
-  "local_static_preview_only": true,
   "local_status_strip": [
     "local preview only",
     "provider pending",
@@ -206,38 +194,19 @@
   ],
   "meta": {
     "agent_consumable_authority": false,
-    "artifact_id": "UI1_TRADE_WORKBENCH",
+    "artifact_id": "UI1R2R2_WORKBENCH_FORM",
     "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
     "connector_access_allowed": false,
     "credential_access_allowed": false,
-    "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
+    "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config + PR169-DASH1 artifacts + PR169-DASH1-UI1/R1 boot data + OwnerPresentationLayer / OwnerGuidancePolicy config + PR169-DASH1-UI1-R2-R2 owner product UX repair config",
     "manual_edit_allowed": false,
     "order_execution_allowed": false,
     "runtime_side_effect_allowed": false,
     "runtime_truth_authority": false,
     "source_truth_authority": false,
+    "ui1r2r2_generated_from": "OwnerDashboardStateV1 + OwnerSurfaceResolver + OwnerActionRegistry + OwnerPresentationLayer + OwnerNextStepRouter + shared widget/chart/action/chat manifests",
     "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
   },
-  "mutable_trade_variables": [
-    "market",
-    "venue",
-    "stack",
-    "side",
-    "entry",
-    "size",
-    "hold_duration",
-    "exit_rule",
-    "maker_taker_split",
-    "cancel_replace_interval",
-    "liquidity_filter",
-    "spread_filter",
-    "depth_filter",
-    "latency_budget",
-    "portfolio_exposure",
-    "order_policy",
-    "scenario_path"
-  ],
-  "no_trade_first_class_candidate": true,
   "option_catalog": {
     "entry_preference": [
       {
@@ -523,59 +492,7 @@
       }
     ]
   },
-  "owner_action_request_previews": [
-    "REQUEST_OWNER_REVIEW",
-    "REQUEST_REPLAY_TEST",
-    "REQUEST_PAPER_TEST",
-    "REQUEST_VARIABLE_OPTIMIZATION",
-    "REQUEST_QKU_COMPUTABILITY_REVIEW",
-    "REQUEST_NO_TRADE_REOPTIMIZATION_REVIEW",
-    "REQUEST_LIVE_CANARY_REVIEW",
-    "REQUEST_ALLOWLIST_REVIEW",
-    "REQUEST_KILL_SWITCH_REVIEW"
-  ],
-  "owner_trade_check_request_object": "OwnerTradeCheckRequestV1",
-  "owner_trade_intent_object": "OwnerTradeIntentV1",
-  "primary_owner_button": "CHECK_TRADE_WITH_QTT_AGENTS",
-  "profit_guarantee": false,
-  "route_chain": [
-    "OwnerTradeIntentV1",
-    "OwnerTradeCheckRequestV1",
-    "source_agnostic_research_candidate_route",
-    "centralized_agent_QKU_formula_access_resolver_route",
-    "formula_QKU_stack_candidate_route",
-    "mutable_trade_variable_search_route",
-    "quantum_structure_mapping_route",
-    "replay_route",
-    "paper_route",
-    "TCA_fill_latency_capacity_crowding_route",
-    "portfolio_marginal_utility_route",
-    "overfit_FDR_route",
-    "no_trade_comparator_and_reoptimization_route",
-    "champion_challenger_selection_route",
-    "MEM1_similarity_winning_failure_no_trade_memory_route",
-    "owner_approval_veto_more_research_more_variable_search_route",
-    "Execution_Router_release_route_provider_pending"
-  ],
-  "runtime_queue_created": false,
-  "validated_positive_net_cash_evidence_wording": true,
-  "visible_sections": [
-    "Owner intent",
-    "Source evidence",
-    "QKU/formula stack",
-    "Variable search",
-    "Replay result",
-    "Paper result",
-    "TCA",
-    "Risk/capacity",
-    "No-trade comparison",
-    "Champion/challenger",
-    "Owner decision",
-    "Execution Router status",
-    "Agent disagreement",
-    "Emergency actions"
-  ],
-  "workbench_contract_id": "OwnerTradeWorkbenchV1",
+  "runtime_side_effect_allowed": false,
   "workbench_id": "OWNER_TRADE_WORKBENCH",
-  "workbench_state_owned_by": "OwnerDashboardStateV1.trade_workbench"
+  "workbench_state_owner": "OwnerDashboardStateV1.trade_workbench"
 }

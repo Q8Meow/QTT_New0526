@@ -1,6 +1,21 @@
 {
   "actual_responsive_desktop_mobile_rendering": true,
   "chat_tab_rendered_in_mobile_navigation": true,
+  "closed_header_forbidden_visible_text": [
+    "Guided",
+    "Advanced",
+    "Developer",
+    "Dark",
+    "Light",
+    "Local Preview",
+    "No Runtime Side Effect",
+    "Technical Details",
+    "View Options"
+  ],
+  "closed_header_menu_only_by_default": true,
+  "closed_header_visible_text": [
+    "QTT"
+  ],
   "drilldown_drawer_uses_bottom_sheet_on_mobile": true,
   "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
   "meta": {
@@ -18,6 +33,7 @@
     "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
   },
   "mobile_bottom_navigation_rendered": true,
+  "mode_theme_text_size_status_inside_options_menu": true,
   "stable_tab_labels": [
     "Home",
     "Portfolio",

@@ -59040,7 +59040,7 @@
     "data_source": "GENERATED_ARTIFACTS",
     "decision_queue_count": 171,
     "fixture_fallback_active": false,
-    "generated_at": "2026-07-05T00:35:40+00:00",
+    "generated_at": "2026-07-05T09:03:13+00:00",
     "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
     "manual_edit_allowed": false,
     "order_execution_allowed": false,
@@ -59075,6 +59075,21 @@
   "mobile_navigation": {
     "actual_responsive_desktop_mobile_rendering": true,
     "chat_tab_rendered_in_mobile_navigation": true,
+    "closed_header_forbidden_visible_text": [
+      "Guided",
+      "Advanced",
+      "Developer",
+      "Dark",
+      "Light",
+      "Local Preview",
+      "No Runtime Side Effect",
+      "Technical Details",
+      "View Options"
+    ],
+    "closed_header_menu_only_by_default": true,
+    "closed_header_visible_text": [
+      "QTT"
+    ],
     "drilldown_drawer_uses_bottom_sheet_on_mobile": true,
     "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
     "meta": {
@@ -59092,6 +59107,7 @@
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
     },
     "mobile_bottom_navigation_rendered": true,
+    "mode_theme_text_size_status_inside_options_menu": true,
     "stable_tab_labels": [
       "Home",
       "Portfolio",
@@ -63337,7 +63353,7 @@
   },
   "stale_data_banner": {
     "data_freshness": "STATIC_GENERATED_BOOT_DATA",
-    "last_snapshot_time": "2026-07-05T00:35:40+00:00",
+    "last_snapshot_time": "2026-07-05T09:03:13+00:00",
     "meta": {
       "agent_consumable_authority": false,
       "artifact_id": "UI1_STALE_DATA_BANNER",
@@ -63363,7 +63379,7 @@
     "agent_route_count": 171,
     "artifact_directory": "docs/master_plan/generated/pr169_dash1",
     "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
-    "boot_data_generated_timestamp": "2026-07-05T00:35:40+00:00",
+    "boot_data_generated_timestamp": "2026-07-05T09:03:13+00:00",
     "chart_count": 48,
     "decision_queue_count": 171,
     "input_data_source": "GENERATED_ARTIFACTS",
@@ -63415,19 +63431,222 @@
       "DARK",
       "LIGHT"
     ],
+    "strict_menu_only_header_chrome": true,
     "supported_modes": [
       "DARK",
       "LIGHT"
     ],
     "theme_preference_storage_non_secret_only": true,
-    "theme_switch_visible_in_desktop_header": true,
-    "theme_switch_visible_or_accessible_in_mobile_navigation": true
+    "theme_switch_visible_in_desktop_header": false,
+    "theme_switch_visible_only_after_owner_opens_menu": true,
+    "theme_switch_visible_or_accessible_in_mobile_navigation": false
   },
   "trade_workbench": {
     "QKUs_formulas_remain_immutable": true,
+    "agent_disagreement_preview_categories": [
+      "agents in agreement",
+      "agents objecting",
+      "LLM critic objections",
+      "risk objections",
+      "source objections",
+      "TCA objections",
+      "memory/regime objections",
+      "next safe action"
+    ],
+    "all_fields_route_through_owner_action_registry": true,
+    "all_selectors_use_central_option_catalog": true,
+    "central_option_catalog_id": "OwnerInputOptionCatalogV1",
     "direct_venue_submit_allowed": false,
     "execution_router_release_required": true,
+    "field_catalog": [
+      {
+        "field_id": "market_event",
+        "input_kind": "text",
+        "owner_label": "Market / event",
+        "required": true
+      },
+      {
+        "field_id": "venue",
+        "input_kind": "select",
+        "option_source": "venue",
+        "owner_label": "Venue",
+        "required": true
+      },
+      {
+        "field_id": "side",
+        "input_kind": "select",
+        "option_source": "side",
+        "owner_label": "Side",
+        "required": true
+      },
+      {
+        "field_id": "objective",
+        "input_kind": "select",
+        "option_source": "objective",
+        "owner_label": "Objective",
+        "required": true
+      },
+      {
+        "field_id": "max_budget",
+        "input_kind": "number",
+        "owner_label": "Max budget",
+        "required": true
+      },
+      {
+        "field_id": "max_loss",
+        "input_kind": "number",
+        "owner_label": "Max loss",
+        "required": true
+      },
+      {
+        "field_id": "hold_duration",
+        "input_kind": "text",
+        "owner_label": "Hold duration",
+        "required": true
+      },
+      {
+        "field_id": "urgency",
+        "input_kind": "select",
+        "option_source": "urgency",
+        "owner_label": "Urgency",
+        "required": true
+      },
+      {
+        "field_id": "entry_preference",
+        "input_kind": "select",
+        "option_source": "entry_preference",
+        "owner_label": "Entry preference",
+        "required": true
+      },
+      {
+        "field_id": "exit_preference",
+        "input_kind": "select",
+        "option_source": "exit_preference",
+        "owner_label": "Exit preference",
+        "required": true
+      },
+      {
+        "field_id": "maker_taker_preference",
+        "input_kind": "select",
+        "option_source": "maker_taker_preference",
+        "owner_label": "Maker/taker preference",
+        "required": true
+      },
+      {
+        "field_id": "source_thesis_url",
+        "input_kind": "textarea",
+        "owner_label": "Source / thesis / URL",
+        "required": true
+      },
+      {
+        "field_id": "target_price_probability",
+        "input_kind": "text",
+        "owner_label": "Optional target price/probability",
+        "required": false
+      },
+      {
+        "field_id": "stop_exit_preference",
+        "input_kind": "text",
+        "owner_label": "Optional stop/exit preference",
+        "required": false
+      },
+      {
+        "field_id": "source_family",
+        "input_kind": "select",
+        "option_source": "source_family",
+        "owner_label": "Source family",
+        "required": false
+      },
+      {
+        "field_id": "route_selector",
+        "input_kind": "select",
+        "option_source": "route_selector",
+        "owner_label": "Route",
+        "required": true
+      }
+    ],
+    "local_preview_output": {
+      "forbidden_claims": [
+        "real expected profit",
+        "real fill probability",
+        "paper pass",
+        "replay pass",
+        "live readiness",
+        "cash availability",
+        "source truth",
+        "live order eligibility"
+      ],
+      "mutable_variable_fields": [
+        "market",
+        "venue",
+        "stack",
+        "side",
+        "entry",
+        "size",
+        "hold_duration",
+        "exit_rule",
+        "maker_taker_split",
+        "cancel_replace_interval",
+        "liquidity_filter",
+        "spread_filter",
+        "depth_filter",
+        "latency_budget",
+        "portfolio_exposure",
+        "order_policy",
+        "scenario_path"
+      ],
+      "no_runtime_side_effect_state": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "no_trade_reoptimization_options": [
+        "smaller size",
+        "different venue",
+        "maker-only",
+        "different hold duration",
+        "different stack",
+        "better liquidity window",
+        "later timing"
+      ],
+      "owner_intent_summary": "Owner trade idea becomes a local candidate preview only.",
+      "preview_object_type": "TradePlanCandidatePreviewV1",
+      "route_previews": [
+        "no_trade_comparator_preview",
+        "TCA_cost_route_preview",
+        "QKU_formula_stack_route_preview",
+        "risk_capacity_route_preview",
+        "portfolio_marginal_utility_route_preview",
+        "champion_challenger_route_preview",
+        "agent_disagreement_route_preview",
+        "replay_preview_route",
+        "paper_preview_route",
+        "Execution_Router_provider_pending_route"
+      ],
+      "selected_fields_from_field_catalog": [
+        "market_event",
+        "venue",
+        "side",
+        "objective",
+        "max_budget",
+        "max_loss",
+        "hold_duration",
+        "urgency",
+        "entry_preference",
+        "exit_preference",
+        "maker_taker_preference",
+        "source_thesis_url",
+        "target_price_probability",
+        "stop_exit_preference",
+        "source_family",
+        "route_selector"
+      ]
+    },
     "local_static_preview_only": true,
+    "local_status_strip": [
+      "local preview only",
+      "provider pending",
+      "needs owner input",
+      "candidate/provisional input",
+      "no runtime side effect",
+      "technical details available"
+    ],
     "meta": {
       "agent_consumable_authority": false,
       "artifact_id": "UI1_TRADE_WORKBENCH",
@@ -63462,6 +63681,291 @@
       "scenario_path"
     ],
     "no_trade_first_class_candidate": true,
+    "option_catalog": {
+      "entry_preference": [
+        {
+          "option_id": "maker_only",
+          "owner_label": "maker-only",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "taker_allowed_preview",
+          "owner_label": "taker-allowed preview",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "price_threshold",
+          "owner_label": "price threshold",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "wait_for_spread_improvement",
+          "owner_label": "wait for spread improvement",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "qtt_decide",
+          "owner_label": "let QTT decide",
+          "runtime_side_effect_allowed": false
+        }
+      ],
+      "exit_preference": [
+        {
+          "option_id": "hold_to_resolution_preview",
+          "owner_label": "hold to resolution preview",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "time_based_exit_preview",
+          "owner_label": "time-based exit preview",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "target_price_exit_preview",
+          "owner_label": "target-price exit preview",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "stop_invalid_thesis_exit_preview",
+          "owner_label": "stop/invalid-thesis exit preview",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "qtt_decide",
+          "owner_label": "let QTT decide",
+          "runtime_side_effect_allowed": false
+        }
+      ],
+      "maker_taker_preference": [
+        {
+          "option_id": "maker_only",
+          "owner_label": "maker-only",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "maker_first_taker_fallback",
+          "owner_label": "maker-first, taker fallback",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "taker_allowed_preview",
+          "owner_label": "taker-allowed preview",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "split_policy_preview",
+          "owner_label": "split policy preview",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "qtt_decide",
+          "owner_label": "let QTT decide",
+          "runtime_side_effect_allowed": false
+        }
+      ],
+      "objective": [
+        {
+          "option_id": "maximize_expected_net_cash",
+          "owner_label": "maximize expected net cash",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "preserve_capital",
+          "owner_label": "preserve capital",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "minimize_drawdown",
+          "owner_label": "minimize drawdown",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "improve_diversification",
+          "owner_label": "improve diversification",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "minimize_latency",
+          "owner_label": "minimize latency",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "maximize_fill_quality",
+          "owner_label": "maximize fill quality",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "qtt_decide",
+          "owner_label": "let QTT decide",
+          "runtime_side_effect_allowed": false
+        }
+      ],
+      "route_selector": [
+        {
+          "option_id": "check_trade",
+          "owner_label": "Check trade",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "research_source",
+          "owner_label": "Research source",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "compare_qku_formula_stacks",
+          "owner_label": "Compare QKU/formula stacks",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "explain_no_trade",
+          "owner_label": "Explain no-trade",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "tune_parameters",
+          "owner_label": "Tune parameters",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "show_agent_disagreement",
+          "owner_label": "Show agent disagreement",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "replay_preview_route",
+          "owner_label": "Replay preview route",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "paper_preview_route",
+          "owner_label": "Paper preview route",
+          "runtime_side_effect_allowed": false
+        }
+      ],
+      "side": [
+        {
+          "option_id": "yes",
+          "owner_label": "YES",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "no",
+          "owner_label": "NO",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "buy",
+          "owner_label": "BUY",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "sell",
+          "owner_label": "SELL",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "open",
+          "owner_label": "OPEN",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "close",
+          "owner_label": "CLOSE",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "qtt_decide",
+          "owner_label": "Let QTT decide",
+          "runtime_side_effect_allowed": false
+        }
+      ],
+      "source_family": [
+        {
+          "option_id": "owner_thesis",
+          "owner_label": "owner thesis",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "url_article_news",
+          "owner_label": "URL / article / news",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "market_page",
+          "owner_label": "market page",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "pdf_paper_dataset_note",
+          "owner_label": "PDF / paper / dataset note",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "formula_algorithm_note",
+          "owner_label": "formula / algorithm note",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "social_public_post_research_signal_only",
+          "owner_label": "social/public post as research signal only",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "none_yet",
+          "owner_label": "none yet",
+          "runtime_side_effect_allowed": false
+        }
+      ],
+      "urgency": [
+        {
+          "option_id": "passive_maker_preferred",
+          "owner_label": "passive / maker-preferred",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "normal",
+          "owner_label": "normal",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "urgent_preview",
+          "owner_label": "urgent preview",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "wait_for_better_liquidity",
+          "owner_label": "wait for better liquidity",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "qtt_decide",
+          "owner_label": "let QTT decide",
+          "runtime_side_effect_allowed": false
+        }
+      ],
+      "venue": [
+        {
+          "option_id": "kalshi",
+          "owner_label": "Kalshi",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "polymarket",
+          "owner_label": "Polymarket",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "forecastex_ibkr",
+          "owner_label": "FORECASTEX_IBKR",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "qtt_decide",
+          "owner_label": "Let QTT decide",
+          "runtime_side_effect_allowed": false
+        }
+      ]
+    },
     "owner_action_request_previews": [
       "REQUEST_OWNER_REVIEW",
       "REQUEST_REPLAY_TEST",
@@ -63515,7 +64019,8 @@
       "Emergency actions"
     ],
     "workbench_contract_id": "OwnerTradeWorkbenchV1",
-    "workbench_id": "OWNER_TRADE_WORKBENCH"
+    "workbench_id": "OWNER_TRADE_WORKBENCH",
+    "workbench_state_owned_by": "OwnerDashboardStateV1.trade_workbench"
   },
   "ui1r1_12fix_acceptance": {
     "all_pass": true,
@@ -69329,7 +69834,7 @@
     "console_breaking_errors": [],
     "console_status": "PASS",
     "external_network_requests": [],
-    "generated_at": "2026-07-05T00:35:40+00:00",
+    "generated_at": "2026-07-05T09:03:13+00:00",
     "meta": {
       "agent_consumable_authority": false,
       "artifact_id": "UI1R1_PLAYWRIGHT_REPORT",
@@ -80506,6 +81011,1140 @@
       "Agent disagreement route",
       "Execution Router provider-pending route"
     ]
+  },
+  "ui1r2r2_action_next_step": {
+    "action_menu_rows_checked": 11,
+    "chip_card_dropdown_workbench_actions_share_router": true,
+    "disabled_provider_pending_actions_explain_safe_alternative": true,
+    "enabled_options_route_to_next_step": true,
+    "local_preview_only": true,
+    "meta": {
+      "agent_consumable_authority": false,
+      "artifact_id": "UI1R2R2_ACTION_NEXT_STEP_REPORT",
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "connector_access_allowed": false,
+      "credential_access_allowed": false,
+      "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config + PR169-DASH1 artifacts + PR169-DASH1-UI1/R1 boot data + OwnerPresentationLayer / OwnerGuidancePolicy config + PR169-DASH1-UI1-R2-R2 owner product UX repair config",
+      "manual_edit_allowed": false,
+      "order_execution_allowed": false,
+      "runtime_side_effect_allowed": false,
+      "runtime_truth_authority": false,
+      "source_truth_authority": false,
+      "ui1r2r2_generated_from": "OwnerDashboardStateV1 + OwnerSurfaceResolver + OwnerActionRegistry + OwnerPresentationLayer + OwnerNextStepRouter + shared widget/chart/action/chat manifests",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+    },
+    "next_step_ids": [
+      "NEXT_STEP_SEND_TO_TRADE_WORKBENCH",
+      "NEXT_STEP_CHECK_TRADE_WITH_QTT_AGENTS",
+      "NEXT_STEP_REQUEST_REPLAY_PREVIEW",
+      "NEXT_STEP_REQUEST_PAPER_PREVIEW",
+      "NEXT_STEP_SHOW_QKU_FORMULA_ROUTES",
+      "NEXT_STEP_EXPLAIN_NO_TRADE",
+      "NEXT_STEP_SHOW_TCA_COST_BREAKDOWN",
+      "NEXT_STEP_OPEN_CHART_DRILLDOWN",
+      "NEXT_STEP_OPEN_TECHNICAL_DETAILS",
+      "NEXT_STEP_DISABLED_PROVIDER_PENDING_EDUCATION"
+    ],
+    "no_execution_router_release": true,
+    "no_live_LLM_or_agent_or_replay_or_paper_or_live_execution": true,
+    "no_runtime_queue_created": true,
+    "router_id": "OwnerNextStepRouter"
+  },
+  "ui1r2r2_authority_boundary": {
+    "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+    "dashboard_mobile_chat_authority": "owner command and approval-preview only",
+    "execution_router_authority": "final venue order-release authority remains downstream",
+    "meta": {
+      "agent_consumable_authority": false,
+      "artifact_id": "UI1R2R2_AUTHORITY_BOUNDARY_REPORT",
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "connector_access_allowed": false,
+      "credential_access_allowed": false,
+      "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config + PR169-DASH1 artifacts + PR169-DASH1-UI1/R1 boot data + OwnerPresentationLayer / OwnerGuidancePolicy config + PR169-DASH1-UI1-R2-R2 owner product UX repair config",
+      "manual_edit_allowed": false,
+      "order_execution_allowed": false,
+      "runtime_side_effect_allowed": false,
+      "runtime_truth_authority": false,
+      "source_truth_authority": false,
+      "ui1r2r2_generated_from": "OwnerDashboardStateV1 + OwnerSurfaceResolver + OwnerActionRegistry + OwnerPresentationLayer + OwnerNextStepRouter + shared widget/chart/action/chat manifests",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+    },
+    "no_Execution_Router_release": true,
+    "no_QTT_SHA_or_AtomicRows_hash_authority": true,
+    "no_SVC1_runtime": true,
+    "no_connector_private_or_cash_account_reads": true,
+    "no_direct_venue_submit": true,
+    "no_live_LLM": true,
+    "no_profit_guarantee": true,
+    "no_real_QTT_agent_execution": true,
+    "no_real_replay_paper_live_execution": true,
+    "no_source_truth_acceptance": true
+  },
+  "ui1r2r2_chat_intent_preview": {
+    "chat_state_owner": "OwnerDashboardStateV1.conversation_state",
+    "ctrl_enter_submits_local_preview": true,
+    "default_enter_behavior": "NEWLINE",
+    "empty_send_inline_hint_no_receipt": true,
+    "enter_to_send_default_enabled": false,
+    "live_LLM_call_allowed": false,
+    "meta": {
+      "agent_consumable_authority": false,
+      "artifact_id": "UI1R2R2_CHAT_INTENT_PREVIEW_REPORT",
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "connector_access_allowed": false,
+      "credential_access_allowed": false,
+      "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config + PR169-DASH1 artifacts + PR169-DASH1-UI1/R1 boot data + OwnerPresentationLayer / OwnerGuidancePolicy config + PR169-DASH1-UI1-R2-R2 owner product UX repair config",
+      "manual_edit_allowed": false,
+      "order_execution_allowed": false,
+      "runtime_side_effect_allowed": false,
+      "runtime_truth_authority": false,
+      "source_truth_authority": false,
+      "ui1r2r2_generated_from": "OwnerDashboardStateV1 + OwnerSurfaceResolver + OwnerActionRegistry + OwnerPresentationLayer + OwnerNextStepRouter + shared widget/chart/action/chat manifests",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+    },
+    "plain_english_first": true,
+    "primary_button_label": "Send",
+    "real_agent_execution_allowed": false,
+    "recognized_intent_families": [
+      "TRADE_CHECK_REQUEST",
+      "RESEARCH_ANALYSIS_REQUEST",
+      "FORMULA_EXTRACTION_REQUEST",
+      "QKU_MATERIALIZATION_REQUEST",
+      "QUANTUM_STRUCTURE_MAPPING_REQUEST",
+      "NO_TRADE_EXPLANATION_REQUEST",
+      "PARAMETER_TUNING_REQUEST",
+      "EDGE_ALPHA_REVIEW_REQUEST",
+      "AGENT_DISAGREEMENT_REQUEST",
+      "REPLAY_PREVIEW_REQUEST",
+      "PAPER_PREVIEW_REQUEST",
+      "UNKNOWN_OWNER_REQUEST_NEEDS_CLARIFICATION"
+    ],
+    "runtime_side_effect_allowed": false,
+    "send_button_attached_to_composer": true,
+    "shift_enter_inserts_newline": true,
+    "source_agnostic_candidate_families": [
+      "websites / links",
+      "PDFs / academic papers / research articles",
+      "news articles",
+      "public/social posts as research signals only",
+      "public documents",
+      "repo links / datasets",
+      "screenshots/images as research candidates",
+      "formulas / algorithms / quantum strategy notes",
+      "market/event pages",
+      "free-form trade ideas"
+    ],
+    "unknown_owner_facing_message": "I need a market, trade idea, source link, formula, or research question to route this.",
+    "unknown_suggested_chips": [
+      "Check a trade",
+      "Research a source",
+      "Explain no-trade",
+      "Compare formula stacks",
+      "Open Trade Workbench"
+    ]
+  },
+  "ui1r2r2_display_preferences": {
+    "allowed_localStorage_keys": [
+      "qtt_owner_dashboard_theme",
+      "qtt_owner_dashboard_experience_mode",
+      "qtt_owner_dashboard_guidance_density",
+      "qtt_owner_dashboard_text_size",
+      "qtt_owner_dashboard_technical_details_open",
+      "qtt_owner_dashboard_enter_to_send_enabled"
+    ],
+    "enter_to_send": {
+      "ctrl_enter_submits": true,
+      "default_enabled": false,
+      "enter_default_newline": true,
+      "localStorage_key": "qtt_owner_dashboard_enter_to_send_enabled"
+    },
+    "forbidden_localStorage_categories": [
+      "secrets",
+      "credentials",
+      "tokens",
+      "private_account_data",
+      "cash_or_account_values",
+      "market_source_truth",
+      "order_state",
+      "owner_approval_receipts",
+      "replay_or_paper_results",
+      "live_readiness_state",
+      "connector_authority",
+      "QKU_formula_authority_changes"
+    ],
+    "meta": {
+      "agent_consumable_authority": false,
+      "artifact_id": "UI1R2R2_DISPLAY_PREFERENCES",
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "connector_access_allowed": false,
+      "credential_access_allowed": false,
+      "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config + PR169-DASH1 artifacts + PR169-DASH1-UI1/R1 boot data + OwnerPresentationLayer / OwnerGuidancePolicy config + PR169-DASH1-UI1-R2-R2 owner product UX repair config",
+      "manual_edit_allowed": false,
+      "order_execution_allowed": false,
+      "runtime_side_effect_allowed": false,
+      "runtime_truth_authority": false,
+      "source_truth_authority": false,
+      "ui1r2r2_generated_from": "OwnerDashboardStateV1 + OwnerSurfaceResolver + OwnerActionRegistry + OwnerPresentationLayer + OwnerNextStepRouter + shared widget/chart/action/chat manifests",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+    },
+    "mode": {
+      "allowed": [
+        "GUIDED_OWNER",
+        "ADVANCED_OWNER",
+        "DEVELOPER"
+      ],
+      "default": "GUIDED_OWNER",
+      "localStorage_key": "qtt_owner_dashboard_experience_mode"
+    },
+    "no_private_state_persisted": true,
+    "no_trade_state_persisted": true,
+    "non_secret_ui_preferences_only": true,
+    "preference_model_id": "OwnerDisplayPreferenceV1",
+    "preference_service_id": "OwnerUIPreferenceServiceV1",
+    "state_owner": "OwnerDashboardStateV1.display_preferences",
+    "technical_details": {
+      "default_open": false,
+      "developer_mode_may_open": true,
+      "localStorage_key": "qtt_owner_dashboard_technical_details_open"
+    },
+    "text_size": {
+      "allowed": [
+        "small",
+        "default",
+        "large",
+        "extra_large"
+      ],
+      "applies_to": [
+        "cards",
+        "chat composer",
+        "chat bubbles",
+        "Workbench fields",
+        "navigation",
+        "buttons",
+        "dropdowns/selectors",
+        "drilldowns/drawers",
+        "chart labels where practical",
+        "route preview receipts"
+      ],
+      "default": "default",
+      "localStorage_key": "qtt_owner_dashboard_text_size",
+      "uses_central_design_tokens": true
+    },
+    "theme": {
+      "allowed": [
+        "DARK",
+        "LIGHT"
+      ],
+      "default": "DARK",
+      "localStorage_key": "qtt_owner_dashboard_theme"
+    }
+  },
+  "ui1r2r2_evidence_spine": {
+    "every_repaired_route_preserves_or_gap_routes_spine": true,
+    "meta": {
+      "agent_consumable_authority": false,
+      "artifact_id": "UI1R2R2_EVIDENCE_SPINE_REPORT",
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "connector_access_allowed": false,
+      "credential_access_allowed": false,
+      "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config + PR169-DASH1 artifacts + PR169-DASH1-UI1/R1 boot data + OwnerPresentationLayer / OwnerGuidancePolicy config + PR169-DASH1-UI1-R2-R2 owner product UX repair config",
+      "manual_edit_allowed": false,
+      "order_execution_allowed": false,
+      "runtime_side_effect_allowed": false,
+      "runtime_truth_authority": false,
+      "source_truth_authority": false,
+      "ui1r2r2_generated_from": "OwnerDashboardStateV1 + OwnerSurfaceResolver + OwnerActionRegistry + OwnerPresentationLayer + OwnerNextStepRouter + shared widget/chart/action/chat manifests",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+    },
+    "no_fake_quantum_advantage": true,
+    "no_fake_runtime_output": true,
+    "required_evidence_spine_refs": [
+      "execution_adjusted_rank_ref",
+      "TCA_decomposition_ref",
+      "implementation_shortfall_ref",
+      "overfit_false_discovery_control_ref",
+      "portfolio_diversification_ref",
+      "portfolio_marginal_utility_ref",
+      "capacity_crowding_limit_ref",
+      "champion_challenger_ref",
+      "regime_conditioned_memory_ref",
+      "MEM1_similarity_and_shrinkage_prior_refs",
+      "no_trade_comparator_and_reoptimization_route",
+      "scenario_ladder_ref",
+      "calibration_ref",
+      "quantum_structural_readiness_ref",
+      "QUBO_BQM_CQM_QuadraticProgram_Ising_readiness_ref",
+      "QAOA_VQE_annealing_candidate_readiness_ref",
+      "classical_fallback_ref",
+      "qstruct_objective_constraint_variable_ref",
+      "interpret_back_map_ref",
+      "DAG_upstream_downstream_route_ref",
+      "PR165_D2_agent_role_refs_or_gap",
+      "QKU_formula_refs_or_gap",
+      "LLM_view_refs_or_provider_route"
+    ],
+    "route_refs": {
+      "DAG_upstream_downstream_route_ref": "dag.generated.jsonl",
+      "LLM_view_refs_or_provider_route": [
+        "owner_llm_view_projection.generated.jsonl"
+      ],
+      "MEM1_similarity_and_shrinkage_prior_refs": "owner_edge_alpha_capture_view.generated.jsonl",
+      "PR165_D2_agent_role_refs_or_gap": [
+        "PR165_D2_AgentRosterDiscoveryAudit.report.json",
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ],
+      "QAOA_VQE_annealing_candidate_readiness_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "QKU_formula_refs_or_gap": [
+        "owner_qku_formula_candidate_route_view.generated.jsonl"
+      ],
+      "QUBO_BQM_CQM_QuadraticProgram_Ising_readiness_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "TCA_decomposition_ref": "owner_institutional_metric_view.generated.jsonl",
+      "calibration_ref": "owner_institutional_metric_view.generated.jsonl",
+      "capacity_crowding_limit_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "champion_challenger_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "classical_fallback_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "execution_adjusted_rank_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "implementation_shortfall_ref": "owner_chart_panel_projection.generated.jsonl",
+      "interpret_back_map_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "no_trade_comparator_and_reoptimization_route": "owner_edge_alpha_capture_view.generated.jsonl",
+      "overfit_false_discovery_control_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "portfolio_diversification_ref": "owner_institutional_metric_view.generated.jsonl",
+      "portfolio_marginal_utility_ref": "owner_institutional_metric_view.generated.jsonl",
+      "qstruct_objective_constraint_variable_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "quantum_structural_readiness_ref": "owner_quantum_structural_readiness_view.generated.jsonl",
+      "regime_conditioned_memory_ref": "owner_edge_alpha_capture_view.generated.jsonl",
+      "scenario_ladder_ref": "owner_institutional_metric_view.generated.jsonl"
+    },
+    "validated_positive_net_cash_wording_only_as_future_required_evidence": true
+  },
+  "ui1r2r2_header_menu": {
+    "closed_header_consumes_layout_space": false,
+    "closed_header_forbidden_visible_text": [
+      "Guided",
+      "Advanced",
+      "Developer",
+      "Dark",
+      "Light",
+      "Local Preview",
+      "Provider Pending",
+      "No Runtime Side Effect",
+      "Technical Details",
+      "View Options"
+    ],
+    "closed_header_menu_trigger_accessible_name": "Open dashboard options",
+    "closed_header_visible_text": [
+      "QTT"
+    ],
+    "escape_closes_menu": true,
+    "first_viewport_prioritizes_trading_content": true,
+    "menu_state_owner": "OwnerDashboardStateV1.display_preferences.menu_open",
+    "menu_trigger_has_aria_label_expanded_controls": true,
+    "meta": {
+      "agent_consumable_authority": false,
+      "artifact_id": "UI1R2R2_HEADER_MENU_REPORT",
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "connector_access_allowed": false,
+      "credential_access_allowed": false,
+      "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config + PR169-DASH1 artifacts + PR169-DASH1-UI1/R1 boot data + OwnerPresentationLayer / OwnerGuidancePolicy config + PR169-DASH1-UI1-R2-R2 owner product UX repair config",
+      "manual_edit_allowed": false,
+      "order_execution_allowed": false,
+      "runtime_side_effect_allowed": false,
+      "runtime_truth_authority": false,
+      "source_truth_authority": false,
+      "ui1r2r2_generated_from": "OwnerDashboardStateV1 + OwnerSurfaceResolver + OwnerActionRegistry + OwnerPresentationLayer + OwnerNextStepRouter + shared widget/chart/action/chat manifests",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+    },
+    "mode_theme_text_size_status_technical_details_inside_opened_menu": true,
+    "outside_click_closes_menu": true,
+    "strict_menu_only_header_chrome": true,
+    "touch_targets_minimum_px": 44,
+    "validation_status": "PASS"
+  },
+  "ui1r2r2_mobile_responsive": {
+    "chat_and_workbench_reachable": true,
+    "closed_header_menu_only_by_default": true,
+    "developer_technical_details_not_dominant": true,
+    "drilldown_drawer_uses_bottom_sheet_on_mobile": true,
+    "dropdowns_usable_in_viewport": true,
+    "menu_options_open_and_close": true,
+    "meta": {
+      "agent_consumable_authority": false,
+      "artifact_id": "UI1R2R2_MOBILE_RESPONSIVE_REPORT",
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "connector_access_allowed": false,
+      "credential_access_allowed": false,
+      "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config + PR169-DASH1 artifacts + PR169-DASH1-UI1/R1 boot data + OwnerPresentationLayer / OwnerGuidancePolicy config + PR169-DASH1-UI1-R2-R2 owner product UX repair config",
+      "manual_edit_allowed": false,
+      "order_execution_allowed": false,
+      "runtime_side_effect_allowed": false,
+      "runtime_truth_authority": false,
+      "source_truth_authority": false,
+      "ui1r2r2_generated_from": "OwnerDashboardStateV1 + OwnerSurfaceResolver + OwnerActionRegistry + OwnerPresentationLayer + OwnerNextStepRouter + shared widget/chart/action/chat manifests",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+    },
+    "no_horizontal_overflow_default_large_extra_large": true,
+    "no_separate_mobile_state_model": true,
+    "send_visible_on_mobile": true,
+    "trading_content_in_first_viewport": true,
+    "viewport_height_px": 844,
+    "viewport_width_px": 390,
+    "workbench_fields_stack_correctly": true
+  },
+  "ui1r2r2_mode_action_parity": {
+    "advanced_capability_rule": "same non-developer capability plus denser metrics",
+    "advanced_non_developer_next_step_ids": [
+      "NEXT_STEP_SEND_TO_TRADE_WORKBENCH",
+      "NEXT_STEP_CHECK_TRADE_WITH_QTT_AGENTS",
+      "NEXT_STEP_REQUEST_REPLAY_PREVIEW",
+      "NEXT_STEP_REQUEST_PAPER_PREVIEW",
+      "NEXT_STEP_SHOW_QKU_FORMULA_ROUTES",
+      "NEXT_STEP_EXPLAIN_NO_TRADE",
+      "NEXT_STEP_SHOW_TCA_COST_BREAKDOWN",
+      "NEXT_STEP_OPEN_CHART_DRILLDOWN",
+      "NEXT_STEP_DISABLED_PROVIDER_PENDING_EDUCATION"
+    ],
+    "developer_capability_rule": "same capability plus raw refs/debug when selected",
+    "developer_raw_refs_visible_only_when_selected_or_opened": true,
+    "experience_modes": [
+      "GUIDED_OWNER",
+      "ADVANCED_OWNER",
+      "DEVELOPER"
+    ],
+    "guided_adds_coaching_not_capability_removal": true,
+    "guided_advanced_non_developer_action_parity": true,
+    "guided_capability_rule": "full capability plus more coaching",
+    "guided_non_developer_next_step_ids": [
+      "NEXT_STEP_SEND_TO_TRADE_WORKBENCH",
+      "NEXT_STEP_CHECK_TRADE_WITH_QTT_AGENTS",
+      "NEXT_STEP_REQUEST_REPLAY_PREVIEW",
+      "NEXT_STEP_REQUEST_PAPER_PREVIEW",
+      "NEXT_STEP_SHOW_QKU_FORMULA_ROUTES",
+      "NEXT_STEP_EXPLAIN_NO_TRADE",
+      "NEXT_STEP_SHOW_TCA_COST_BREAKDOWN",
+      "NEXT_STEP_OPEN_CHART_DRILLDOWN",
+      "NEXT_STEP_DISABLED_PROVIDER_PENDING_EDUCATION"
+    ],
+    "meta": {
+      "agent_consumable_authority": false,
+      "artifact_id": "UI1R2R2_MODE_ACTION_PARITY_REPORT",
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "connector_access_allowed": false,
+      "credential_access_allowed": false,
+      "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config + PR169-DASH1 artifacts + PR169-DASH1-UI1/R1 boot data + OwnerPresentationLayer / OwnerGuidancePolicy config + PR169-DASH1-UI1-R2-R2 owner product UX repair config",
+      "manual_edit_allowed": false,
+      "order_execution_allowed": false,
+      "runtime_side_effect_allowed": false,
+      "runtime_truth_authority": false,
+      "source_truth_authority": false,
+      "ui1r2r2_generated_from": "OwnerDashboardStateV1 + OwnerSurfaceResolver + OwnerActionRegistry + OwnerPresentationLayer + OwnerNextStepRouter + shared widget/chart/action/chat manifests",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+    },
+    "owner_role_is_not_a_mode": true,
+    "source_artifact_refs": [
+      "ui1r2_mode.generated.json",
+      "ui1r2_next_step.generated.json"
+    ]
+  },
+  "ui1r2r2_no_orphan_central_routes": {
+    "action_registry_ref": "OwnerActionRegistryV1",
+    "all_new_values_route_or_gap": true,
+    "central_state_ref": "OwnerDashboardStateV1",
+    "chart_manifest_ref": "ui1r1_chart_manifest.generated.json",
+    "chat_manifest_ref": "owner_dashboard_chat_route_map.generated.json",
+    "meta": {
+      "agent_consumable_authority": false,
+      "artifact_id": "UI1R2R2_NO_ORPHAN_CENTRAL_ROUTES_REPORT",
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "connector_access_allowed": false,
+      "credential_access_allowed": false,
+      "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config + PR169-DASH1 artifacts + PR169-DASH1-UI1/R1 boot data + OwnerPresentationLayer / OwnerGuidancePolicy config + PR169-DASH1-UI1-R2-R2 owner product UX repair config",
+      "manual_edit_allowed": false,
+      "order_execution_allowed": false,
+      "runtime_side_effect_allowed": false,
+      "runtime_truth_authority": false,
+      "source_truth_authority": false,
+      "ui1r2r2_generated_from": "OwnerDashboardStateV1 + OwnerSurfaceResolver + OwnerActionRegistry + OwnerPresentationLayer + OwnerNextStepRouter + shared widget/chart/action/chat manifests",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+    },
+    "mobile_navigation_projection_ref": "owner_dashboard_mobile_navigation.generated.json",
+    "next_step_router_ref": "OwnerNextStepRouter",
+    "no_chat_only_command_grammar": true,
+    "no_independent_dashboard_truth_files": true,
+    "no_mobile_only_feature_list": true,
+    "no_workbench_only_route_ids": true,
+    "owner_readable_copy_adapter_ref": "ui1r2_copy_map.generated.json",
+    "surface_resolver_ref": "OwnerSurfaceResolver",
+    "ui_preference_service_ref": "OwnerUIPreferenceServiceV1",
+    "widget_manifest_ref": "owner_dashboard_widget_manifest.generated.json",
+    "workbench_model_ref": "owner_dashboard_trade_workbench.generated.json"
+  },
+  "ui1r2r2_owner_readable_copy": {
+    "centralized_copy_adapter": true,
+    "guided_advanced_raw_pattern_rejections": [
+      "::",
+      ".jsonl",
+      "registry_row_ref",
+      "authority_boundary_ref",
+      "manual_edit_allowed",
+      "generated_from",
+      "surface_registry_row_count",
+      "DASH1_FEATURE_",
+      "OWNER_DASHBOARD_PACKET_V1",
+      "VISIBLE_EMPTY_STATE_PROVIDER_PENDING",
+      "CONTRACT_DEFINED_PROVIDER_PENDING",
+      "Raw refs",
+      "Linked refs",
+      "SYSTEM CONTRACT"
+    ],
+    "meta": {
+      "agent_consumable_authority": false,
+      "artifact_id": "UI1R2R2_OWNER_READABLE_COPY_REPORT",
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "connector_access_allowed": false,
+      "credential_access_allowed": false,
+      "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config + PR169-DASH1 artifacts + PR169-DASH1-UI1/R1 boot data + OwnerPresentationLayer / OwnerGuidancePolicy config + PR169-DASH1-UI1-R2-R2 owner product UX repair config",
+      "manual_edit_allowed": false,
+      "order_execution_allowed": false,
+      "runtime_side_effect_allowed": false,
+      "runtime_truth_authority": false,
+      "source_truth_authority": false,
+      "ui1r2r2_generated_from": "OwnerDashboardStateV1 + OwnerSurfaceResolver + OwnerActionRegistry + OwnerPresentationLayer + OwnerNextStepRouter + shared widget/chart/action/chat manifests",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+    },
+    "owner_card_template_fields": [
+      "Title",
+      "Plain-English summary",
+      "Current status",
+      "Why this matters",
+      "What owner can do next",
+      "Trading relevance / workflow relevance",
+      "Related QTT agents or local route",
+      "Evidence and routing summary",
+      "Technical details collapsed"
+    ],
+    "owner_readable_copy_map_ref": "ui1r2_copy_map.generated.json",
+    "presentation_layer_id": "OwnerPresentationLayer",
+    "provider_state_translations": {
+      "CONTRACT_DEFINED_PROVIDER_PENDING": "Provider contract defined; runtime not active yet.",
+      "NO_DASHBOARD_RUNTIME_NO_ORDER_NO_PRIVATE_READS": "Review-only dashboard. No direct order submission or private account access.",
+      "VISIBLE_EMPTY_STATE_PROVIDER_PENDING": "Waiting for provider data. No fake trading result is shown.",
+      "runtime_side_effect_false": "Live side effect: none."
+    },
+    "raw_refs_available_in_developer_or_collapsed_technical_details": true,
+    "validation_status": "PASS"
+  },
+  "ui1r2r2_playwright": {
+    "console_status": "PENDING_LOCAL_RUN",
+    "meta": {
+      "agent_consumable_authority": false,
+      "artifact_id": "UI1R2R2_PLAYWRIGHT_REPORT",
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "connector_access_allowed": false,
+      "credential_access_allowed": false,
+      "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config + PR169-DASH1 artifacts + PR169-DASH1-UI1/R1 boot data + OwnerPresentationLayer / OwnerGuidancePolicy config + PR169-DASH1-UI1-R2-R2 owner product UX repair config",
+      "manual_edit_allowed": false,
+      "order_execution_allowed": false,
+      "runtime_side_effect_allowed": false,
+      "runtime_truth_authority": false,
+      "source_truth_authority": false,
+      "ui1r2r2_generated_from": "OwnerDashboardStateV1 + OwnerSurfaceResolver + OwnerActionRegistry + OwnerPresentationLayer + OwnerNextStepRouter + shared widget/chart/action/chat manifests",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+    },
+    "network_status": "PENDING_LOCAL_RUN",
+    "runtime_side_effect_allowed": false,
+    "screenshots": [
+      ".tmp/ui1r2r2_mobile_menu_only_header_closed.png",
+      ".tmp/ui1r2r2_mobile_menu_open_controls_visible.png",
+      ".tmp/ui1r2r2_mobile_first_viewport_trading_content.png",
+      ".tmp/ui1r2r2_mobile_text_extra_large.png",
+      ".tmp/ui1r2r2_chat_composer_send_visible.png",
+      ".tmp/ui1r2r2_chat_after_send.png",
+      ".tmp/ui1r2r2_workbench_form_fields.png",
+      ".tmp/ui1r2r2_workbench_dropdown_open.png",
+      ".tmp/ui1r2r2_workbench_trade_plan_preview.png",
+      ".tmp/ui1r2r2_owner_readable_home.png",
+      ".tmp/ui1r2r2_developer_raw_refs_visible.png",
+      ".tmp/ui1r2r2_action_to_workbench_prefill.png"
+    ],
+    "script": "tools/playwright_pr169_dash1_ui1_r2_r2_visual_smoke.py",
+    "status": "PENDING_LOCAL_RUN"
+  },
+  "ui1r2r2_preferences_no_private_state": {
+    "allowed_localStorage_keys": [
+      "qtt_owner_dashboard_theme",
+      "qtt_owner_dashboard_experience_mode",
+      "qtt_owner_dashboard_guidance_density",
+      "qtt_owner_dashboard_text_size",
+      "qtt_owner_dashboard_technical_details_open",
+      "qtt_owner_dashboard_enter_to_send_enabled"
+    ],
+    "forbidden_localStorage_categories": [
+      "secrets",
+      "credentials",
+      "tokens",
+      "private_account_data",
+      "cash_or_account_values",
+      "market_source_truth",
+      "order_state",
+      "owner_approval_receipts",
+      "replay_or_paper_results",
+      "live_readiness_state",
+      "connector_authority",
+      "QKU_formula_authority_changes"
+    ],
+    "localStorage_limited_to_non_secret_UI_preferences": true,
+    "meta": {
+      "agent_consumable_authority": false,
+      "artifact_id": "UI1R2R2_PREFERENCE_STORAGE_GUARD_REPORT",
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "connector_access_allowed": false,
+      "credential_access_allowed": false,
+      "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config + PR169-DASH1 artifacts + PR169-DASH1-UI1/R1 boot data + OwnerPresentationLayer / OwnerGuidancePolicy config + PR169-DASH1-UI1-R2-R2 owner product UX repair config",
+      "manual_edit_allowed": false,
+      "order_execution_allowed": false,
+      "runtime_side_effect_allowed": false,
+      "runtime_truth_authority": false,
+      "source_truth_authority": false,
+      "ui1r2r2_generated_from": "OwnerDashboardStateV1 + OwnerSurfaceResolver + OwnerActionRegistry + OwnerPresentationLayer + OwnerNextStepRouter + shared widget/chart/action/chat manifests",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+    },
+    "no_private_or_order_or_receipt_state_in_localStorage": true,
+    "no_trade_state_in_localStorage": true,
+    "renderer_uses_single_preference_service": true
+  },
+  "ui1r2r2_source_agnostic_candidate_only": {
+    "accepted_candidate_input_families": [
+      "websites / links",
+      "PDFs / academic papers / research articles",
+      "news articles",
+      "public/social posts as research signals only",
+      "public documents",
+      "repo links / datasets",
+      "screenshots/images as research candidates",
+      "formulas / algorithms / quantum strategy notes",
+      "market/event pages",
+      "free-form trade ideas"
+    ],
+    "candidate_or_provisional_only": true,
+    "meta": {
+      "agent_consumable_authority": false,
+      "artifact_id": "UI1R2R2_SOURCE_AGNOSTIC_CANDIDATE_ONLY_REPORT",
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "connector_access_allowed": false,
+      "credential_access_allowed": false,
+      "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config + PR169-DASH1 artifacts + PR169-DASH1-UI1/R1 boot data + OwnerPresentationLayer / OwnerGuidancePolicy config + PR169-DASH1-UI1-R2-R2 owner product UX repair config",
+      "manual_edit_allowed": false,
+      "order_execution_allowed": false,
+      "runtime_side_effect_allowed": false,
+      "runtime_truth_authority": false,
+      "source_truth_authority": false,
+      "ui1r2r2_generated_from": "OwnerDashboardStateV1 + OwnerSurfaceResolver + OwnerActionRegistry + OwnerPresentationLayer + OwnerNextStepRouter + shared widget/chart/action/chat manifests",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+    },
+    "no_cash_truth": true,
+    "no_connector_semantics": true,
+    "no_runtime_authority": true,
+    "no_trading_evidence_promotion": true,
+    "non_official_information_not_source_truth": true,
+    "requires_safe_relevant_non_duplicate_mappable_check": true
+  },
+  "ui1r2r2_workbench_form": {
+    "all_selectors_use_central_option_catalog": true,
+    "all_workbench_actions_route_through_owner_next_step_router": true,
+    "central_option_catalog_id": "OwnerInputOptionCatalogV1",
+    "direct_venue_submit_allowed": false,
+    "execution_router_release_allowed": false,
+    "field_catalog": [
+      {
+        "field_id": "market_event",
+        "input_kind": "text",
+        "owner_label": "Market / event",
+        "required": true
+      },
+      {
+        "field_id": "venue",
+        "input_kind": "select",
+        "option_source": "venue",
+        "owner_label": "Venue",
+        "required": true
+      },
+      {
+        "field_id": "side",
+        "input_kind": "select",
+        "option_source": "side",
+        "owner_label": "Side",
+        "required": true
+      },
+      {
+        "field_id": "objective",
+        "input_kind": "select",
+        "option_source": "objective",
+        "owner_label": "Objective",
+        "required": true
+      },
+      {
+        "field_id": "max_budget",
+        "input_kind": "number",
+        "owner_label": "Max budget",
+        "required": true
+      },
+      {
+        "field_id": "max_loss",
+        "input_kind": "number",
+        "owner_label": "Max loss",
+        "required": true
+      },
+      {
+        "field_id": "hold_duration",
+        "input_kind": "text",
+        "owner_label": "Hold duration",
+        "required": true
+      },
+      {
+        "field_id": "urgency",
+        "input_kind": "select",
+        "option_source": "urgency",
+        "owner_label": "Urgency",
+        "required": true
+      },
+      {
+        "field_id": "entry_preference",
+        "input_kind": "select",
+        "option_source": "entry_preference",
+        "owner_label": "Entry preference",
+        "required": true
+      },
+      {
+        "field_id": "exit_preference",
+        "input_kind": "select",
+        "option_source": "exit_preference",
+        "owner_label": "Exit preference",
+        "required": true
+      },
+      {
+        "field_id": "maker_taker_preference",
+        "input_kind": "select",
+        "option_source": "maker_taker_preference",
+        "owner_label": "Maker/taker preference",
+        "required": true
+      },
+      {
+        "field_id": "source_thesis_url",
+        "input_kind": "textarea",
+        "owner_label": "Source / thesis / URL",
+        "required": true
+      },
+      {
+        "field_id": "target_price_probability",
+        "input_kind": "text",
+        "owner_label": "Optional target price/probability",
+        "required": false
+      },
+      {
+        "field_id": "stop_exit_preference",
+        "input_kind": "text",
+        "owner_label": "Optional stop/exit preference",
+        "required": false
+      },
+      {
+        "field_id": "source_family",
+        "input_kind": "select",
+        "option_source": "source_family",
+        "owner_label": "Source family",
+        "required": false
+      },
+      {
+        "field_id": "route_selector",
+        "input_kind": "select",
+        "option_source": "route_selector",
+        "owner_label": "Route",
+        "required": true
+      }
+    ],
+    "local_preview_output": {
+      "forbidden_claims": [
+        "real expected profit",
+        "real fill probability",
+        "paper pass",
+        "replay pass",
+        "live readiness",
+        "cash availability",
+        "source truth",
+        "live order eligibility"
+      ],
+      "mutable_variable_fields": [
+        "market",
+        "venue",
+        "stack",
+        "side",
+        "entry",
+        "size",
+        "hold_duration",
+        "exit_rule",
+        "maker_taker_split",
+        "cancel_replace_interval",
+        "liquidity_filter",
+        "spread_filter",
+        "depth_filter",
+        "latency_budget",
+        "portfolio_exposure",
+        "order_policy",
+        "scenario_path"
+      ],
+      "no_runtime_side_effect_state": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "no_trade_reoptimization_options": [
+        "smaller size",
+        "different venue",
+        "maker-only",
+        "different hold duration",
+        "different stack",
+        "better liquidity window",
+        "later timing"
+      ],
+      "owner_intent_summary": "Owner trade idea becomes a local candidate preview only.",
+      "preview_object_type": "TradePlanCandidatePreviewV1",
+      "route_previews": [
+        "no_trade_comparator_preview",
+        "TCA_cost_route_preview",
+        "QKU_formula_stack_route_preview",
+        "risk_capacity_route_preview",
+        "portfolio_marginal_utility_route_preview",
+        "champion_challenger_route_preview",
+        "agent_disagreement_route_preview",
+        "replay_preview_route",
+        "paper_preview_route",
+        "Execution_Router_provider_pending_route"
+      ],
+      "selected_fields_from_field_catalog": [
+        "market_event",
+        "venue",
+        "side",
+        "objective",
+        "max_budget",
+        "max_loss",
+        "hold_duration",
+        "urgency",
+        "entry_preference",
+        "exit_preference",
+        "maker_taker_preference",
+        "source_thesis_url",
+        "target_price_probability",
+        "stop_exit_preference",
+        "source_family",
+        "route_selector"
+      ]
+    },
+    "local_status_strip": [
+      "local preview only",
+      "provider pending",
+      "needs owner input",
+      "candidate/provisional input",
+      "no runtime side effect",
+      "technical details available"
+    ],
+    "meta": {
+      "agent_consumable_authority": false,
+      "artifact_id": "UI1R2R2_WORKBENCH_FORM",
+      "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+      "connector_access_allowed": false,
+      "credential_access_allowed": false,
+      "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config + PR169-DASH1 artifacts + PR169-DASH1-UI1/R1 boot data + OwnerPresentationLayer / OwnerGuidancePolicy config + PR169-DASH1-UI1-R2-R2 owner product UX repair config",
+      "manual_edit_allowed": false,
+      "order_execution_allowed": false,
+      "runtime_side_effect_allowed": false,
+      "runtime_truth_authority": false,
+      "source_truth_authority": false,
+      "ui1r2r2_generated_from": "OwnerDashboardStateV1 + OwnerSurfaceResolver + OwnerActionRegistry + OwnerPresentationLayer + OwnerNextStepRouter + shared widget/chart/action/chat manifests",
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+    },
+    "option_catalog": {
+      "entry_preference": [
+        {
+          "option_id": "maker_only",
+          "owner_label": "maker-only",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "taker_allowed_preview",
+          "owner_label": "taker-allowed preview",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "price_threshold",
+          "owner_label": "price threshold",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "wait_for_spread_improvement",
+          "owner_label": "wait for spread improvement",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "qtt_decide",
+          "owner_label": "let QTT decide",
+          "runtime_side_effect_allowed": false
+        }
+      ],
+      "exit_preference": [
+        {
+          "option_id": "hold_to_resolution_preview",
+          "owner_label": "hold to resolution preview",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "time_based_exit_preview",
+          "owner_label": "time-based exit preview",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "target_price_exit_preview",
+          "owner_label": "target-price exit preview",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "stop_invalid_thesis_exit_preview",
+          "owner_label": "stop/invalid-thesis exit preview",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "qtt_decide",
+          "owner_label": "let QTT decide",
+          "runtime_side_effect_allowed": false
+        }
+      ],
+      "maker_taker_preference": [
+        {
+          "option_id": "maker_only",
+          "owner_label": "maker-only",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "maker_first_taker_fallback",
+          "owner_label": "maker-first, taker fallback",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "taker_allowed_preview",
+          "owner_label": "taker-allowed preview",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "split_policy_preview",
+          "owner_label": "split policy preview",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "qtt_decide",
+          "owner_label": "let QTT decide",
+          "runtime_side_effect_allowed": false
+        }
+      ],
+      "objective": [
+        {
+          "option_id": "maximize_expected_net_cash",
+          "owner_label": "maximize expected net cash",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "preserve_capital",
+          "owner_label": "preserve capital",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "minimize_drawdown",
+          "owner_label": "minimize drawdown",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "improve_diversification",
+          "owner_label": "improve diversification",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "minimize_latency",
+          "owner_label": "minimize latency",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "maximize_fill_quality",
+          "owner_label": "maximize fill quality",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "qtt_decide",
+          "owner_label": "let QTT decide",
+          "runtime_side_effect_allowed": false
+        }
+      ],
+      "route_selector": [
+        {
+          "option_id": "check_trade",
+          "owner_label": "Check trade",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "research_source",
+          "owner_label": "Research source",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "compare_qku_formula_stacks",
+          "owner_label": "Compare QKU/formula stacks",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "explain_no_trade",
+          "owner_label": "Explain no-trade",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "tune_parameters",
+          "owner_label": "Tune parameters",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "show_agent_disagreement",
+          "owner_label": "Show agent disagreement",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "replay_preview_route",
+          "owner_label": "Replay preview route",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "paper_preview_route",
+          "owner_label": "Paper preview route",
+          "runtime_side_effect_allowed": false
+        }
+      ],
+      "side": [
+        {
+          "option_id": "yes",
+          "owner_label": "YES",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "no",
+          "owner_label": "NO",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "buy",
+          "owner_label": "BUY",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "sell",
+          "owner_label": "SELL",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "open",
+          "owner_label": "OPEN",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "close",
+          "owner_label": "CLOSE",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "qtt_decide",
+          "owner_label": "Let QTT decide",
+          "runtime_side_effect_allowed": false
+        }
+      ],
+      "source_family": [
+        {
+          "option_id": "owner_thesis",
+          "owner_label": "owner thesis",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "url_article_news",
+          "owner_label": "URL / article / news",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "market_page",
+          "owner_label": "market page",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "pdf_paper_dataset_note",
+          "owner_label": "PDF / paper / dataset note",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "formula_algorithm_note",
+          "owner_label": "formula / algorithm note",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "social_public_post_research_signal_only",
+          "owner_label": "social/public post as research signal only",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "none_yet",
+          "owner_label": "none yet",
+          "runtime_side_effect_allowed": false
+        }
+      ],
+      "urgency": [
+        {
+          "option_id": "passive_maker_preferred",
+          "owner_label": "passive / maker-preferred",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "normal",
+          "owner_label": "normal",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "urgent_preview",
+          "owner_label": "urgent preview",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "wait_for_better_liquidity",
+          "owner_label": "wait for better liquidity",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "qtt_decide",
+          "owner_label": "let QTT decide",
+          "runtime_side_effect_allowed": false
+        }
+      ],
+      "venue": [
+        {
+          "option_id": "kalshi",
+          "owner_label": "Kalshi",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "polymarket",
+          "owner_label": "Polymarket",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "forecastex_ibkr",
+          "owner_label": "FORECASTEX_IBKR",
+          "runtime_side_effect_allowed": false
+        },
+        {
+          "option_id": "qtt_decide",
+          "owner_label": "Let QTT decide",
+          "runtime_side_effect_allowed": false
+        }
+      ]
+    },
+    "runtime_side_effect_allowed": false,
+    "workbench_id": "OWNER_TRADE_WORKBENCH",
+    "workbench_state_owner": "OwnerDashboardStateV1.trade_workbench"
   },
   "widget_manifest": {
     "meta": {

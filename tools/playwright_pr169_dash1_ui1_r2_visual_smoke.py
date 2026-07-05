@@ -70,6 +70,13 @@ def _assert_visible(page: Page, selector: str) -> None:
     page.locator(selector).first.wait_for(state="visible", timeout=10_000)
 
 
+def _choose_mode(page: Page, mode: str) -> None:
+    toggle = page.locator("#ownerOptionsToggle")
+    if toggle.count() and page.locator("#ownerOptionsPanel:visible").count() == 0:
+        toggle.click()
+    page.locator(f"[data-mode-choice='{mode}']:visible").click()
+
+
 def _owner_text(page: Page) -> str:
     return page.locator("body").inner_text(timeout=10_000)
 
@@ -139,10 +146,10 @@ def run(repo: Path) -> None:
         _assert_owner_text_clean(page)
         _screenshot(page, repo, "home_guided")
 
-        page.locator("[data-mode-choice='ADVANCED_OWNER']").click()
+        _choose_mode(page, "ADVANCED_OWNER")
         _assert_visible(page, "body[data-experience-mode='ADVANCED_OWNER']")
         _assert_owner_text_clean(page)
-        page.locator("[data-mode-choice='GUIDED_OWNER']").click()
+        _choose_mode(page, "GUIDED_OWNER")
         _screenshot(page, repo, "mode_switch")
 
         _assert_visible(page, "#overviewCards .owner-hero-card")
@@ -219,7 +226,7 @@ def run(repo: Path) -> None:
         _screenshot(page, repo, "next_step_disabled_action")
         page.locator("#closeDrawer").click()
 
-        page.locator("[data-mode-choice='DEVELOPER']").click()
+        _choose_mode(page, "DEVELOPER")
         _assert_visible(page, "body[data-experience-mode='DEVELOPER']")
         page.locator("a[href='#developer-mode']").first.click()
         page.locator("#developerMode summary").click()

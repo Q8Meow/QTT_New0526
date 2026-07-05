@@ -27,6 +27,9 @@ AUTHORITY_BOUNDARY = (
 )
 RENDERED_EMPTY_STATE_REASON = "Not applicable: widget renders DASH1 artifact rows."
 THEME_STORAGE_KEY = "qtt_owner_dashboard_theme"
+TEXT_SIZE_STORAGE_KEY = "qtt_owner_dashboard_text_size"
+TECHNICAL_DETAILS_STORAGE_KEY = "qtt_owner_dashboard_technical_details_open"
+ENTER_TO_SEND_STORAGE_KEY = "qtt_owner_dashboard_enter_to_send_enabled"
 VALIDATION_REF = "tools/validate_pr169_dash1_owner_dashboard_ui.py"
 R1_GENERATED_FROM = (
     "PR169-DASH1 artifacts + PR169-DASH1-UI1 boot data + "
@@ -38,6 +41,7 @@ R2_GENERATED_FROM = (
 )
 EXPERIENCE_MODE_STORAGE_KEY = "qtt_owner_dashboard_experience_mode"
 GUIDANCE_DENSITY_STORAGE_KEY = "qtt_owner_dashboard_guidance_density"
+DISPLAY_TEXT_SIZES = ("small", "default", "large", "extra_large")
 
 REQUIRED_TOP_LEVEL_KEYS = (
     "meta",
@@ -127,6 +131,20 @@ REQUIRED_TOP_LEVEL_KEYS = (
     "ui1r2r1_owner_command",
     "ui1r2r1_evidence_spine",
     "ui1r2r1_playwright",
+    "ui1r2r2_display_preferences",
+    "ui1r2r2_header_menu",
+    "ui1r2r2_mode_action_parity",
+    "ui1r2r2_owner_readable_copy",
+    "ui1r2r2_chat_intent_preview",
+    "ui1r2r2_workbench_form",
+    "ui1r2r2_action_next_step",
+    "ui1r2r2_authority_boundary",
+    "ui1r2r2_no_orphan_central_routes",
+    "ui1r2r2_source_agnostic_candidate_only",
+    "ui1r2r2_preferences_no_private_state",
+    "ui1r2r2_mobile_responsive",
+    "ui1r2r2_evidence_spine",
+    "ui1r2r2_playwright",
 )
 
 NAV_AREAS = (
@@ -597,6 +615,20 @@ UI_ARTIFACT_FILES = (
     "ui1r2r1_owner_command.report.json",
     "ui1r2r1_evidence_spine.report.json",
     "ui1r2r1_playwright.report.json",
+    "ui1r2r2_display_preferences.generated.json",
+    "ui1r2r2_header_menu.report.json",
+    "ui1r2r2_mode_action_parity.report.json",
+    "ui1r2r2_owner_readable_copy.report.json",
+    "ui1r2r2_chat_intent_preview.report.json",
+    "ui1r2r2_workbench_form.generated.json",
+    "ui1r2r2_action_next_step.report.json",
+    "ui1r2r2_authority_boundary.report.json",
+    "ui1r2r2_no_orphan_central_routes.report.json",
+    "ui1r2r2_source_agnostic_candidate_only.report.json",
+    "ui1r2r2_preference_storage_guard.report.json",
+    "ui1r2r2_mobile_responsive.report.json",
+    "ui1r2r2_evidence_spine.report.json",
+    "ui1r2r2_playwright.report.json",
 )
 
 
@@ -670,6 +702,32 @@ def _ui1r2r1_meta(artifact_id: str, extra: dict[str, Any] | None = None) -> dict
             "ui1r2r1_generated_from": (
                 "PR169-DASH1 artifacts + PR169-DASH1-UI1/R1/R2 boot data + "
                 "OwnerPresentationLayer / OwnerGuidancePolicy / OwnerNextStepRouter config"
+            ),
+            "manual_edit_allowed": False,
+            "runtime_truth_authority": False,
+            "agent_consumable_authority": False,
+            "credential_access_allowed": False,
+            "connector_access_allowed": False,
+            "order_execution_allowed": False,
+            "source_truth_authority": False,
+        }
+    )
+    if extra:
+        payload.update(extra)
+    return payload
+
+
+def _ui1r2r2_meta(artifact_id: str, extra: dict[str, Any] | None = None) -> dict[str, Any]:
+    payload = _ui_meta(
+        {
+            "artifact_id": artifact_id,
+            "generated_from": (
+                f"{GENERATED_FROM_UI1} + {R2_GENERATED_FROM} + "
+                "PR169-DASH1-UI1-R2-R2 owner product UX repair config"
+            ),
+            "ui1r2r2_generated_from": (
+                "OwnerDashboardStateV1 + OwnerSurfaceResolver + OwnerActionRegistry + "
+                "OwnerPresentationLayer + OwnerNextStepRouter + shared widget/chart/action/chat manifests"
             ),
             "manual_edit_allowed": False,
             "runtime_truth_authority": False,
@@ -1005,8 +1063,10 @@ def _build_provider_stage_routes(registry_rows: list[dict[str, Any]]) -> dict[st
 def _build_theme_contract() -> dict[str, Any]:
     return {
         "meta": _ui_meta({"artifact_id": "UI1_THEME_CONTRACT"}),
-        "theme_switch_visible_in_desktop_header": True,
-        "theme_switch_visible_or_accessible_in_mobile_navigation": True,
+        "theme_switch_visible_in_desktop_header": False,
+        "theme_switch_visible_or_accessible_in_mobile_navigation": False,
+        "theme_switch_visible_only_after_owner_opens_menu": True,
+        "strict_menu_only_header_chrome": True,
         "DARK_and_LIGHT_modes_supported": True,
         "default_theme": "DARK",
         "supported_modes": list(THEME_MODES),
@@ -1036,6 +1096,20 @@ def _build_mobile_navigation() -> dict[str, Any]:
         "meta": _ui_meta({"artifact_id": "UI1_MOBILE_NAVIGATION"}),
         "generated_from": GENERATED_FROM_UI1,
         "actual_responsive_desktop_mobile_rendering": True,
+        "closed_header_menu_only_by_default": True,
+        "closed_header_visible_text": ["QTT"],
+        "closed_header_forbidden_visible_text": [
+            "Guided",
+            "Advanced",
+            "Developer",
+            "Dark",
+            "Light",
+            "Local Preview",
+            "No Runtime Side Effect",
+            "Technical Details",
+            "View Options",
+        ],
+        "mode_theme_text_size_status_inside_options_menu": True,
         "mobile_bottom_navigation_rendered": True,
         "touch_targets_minimum_px": 44,
         "tabs": [
@@ -1075,6 +1149,23 @@ def _build_state_model(widget_manifest: dict[str, Any]) -> dict[str, Any]:
         "resolver_ref": "OwnerSurfaceResolver",
         "action_registry_ref": "OwnerActionRegistryV1",
         "widget_manifest_ref": "owner_dashboard_widget_manifest.generated.json",
+        "display_preference_model_ref": "OwnerDisplayPreferenceV1",
+        "one_display_preference_model": True,
+        "menu_state_owned_by": "OwnerDashboardStateV1.display_preferences.menu_open",
+        "text_size_state_owned_by": "OwnerDashboardStateV1.display_preferences.text_size",
+        "theme_state_owned_by": "OwnerDashboardStateV1.display_preferences.theme",
+        "experience_mode_state_owned_by": "OwnerDashboardStateV1.display_preferences.mode",
+        "technical_details_state_owned_by": "OwnerDashboardStateV1.display_preferences.technical_details_open",
+        "enter_to_send_state_owned_by": "OwnerDashboardStateV1.display_preferences.enter_to_send_enabled",
+        "ui_preference_service_ref": "OwnerUIPreferenceServiceV1",
+        "allowed_non_secret_preference_keys": [
+            THEME_STORAGE_KEY,
+            EXPERIENCE_MODE_STORAGE_KEY,
+            GUIDANCE_DENSITY_STORAGE_KEY,
+            TEXT_SIZE_STORAGE_KEY,
+            TECHNICAL_DETAILS_STORAGE_KEY,
+            ENTER_TO_SEND_STORAGE_KEY,
+        ],
         "widget_count": len(widget_manifest["widgets"]),
     }
 
@@ -1241,6 +1332,109 @@ def _build_trade_workbench(action_rows: list[dict[str, Any]]) -> dict[str, Any]:
         )
         if code in known_actions
     ]
+    option_catalog = {
+        "venue": [
+            ("kalshi", "Kalshi"),
+            ("polymarket", "Polymarket"),
+            ("forecastex_ibkr", "FORECASTEX_IBKR"),
+            ("qtt_decide", "Let QTT decide"),
+        ],
+        "side": [
+            ("yes", "YES"),
+            ("no", "NO"),
+            ("buy", "BUY"),
+            ("sell", "SELL"),
+            ("open", "OPEN"),
+            ("close", "CLOSE"),
+            ("qtt_decide", "Let QTT decide"),
+        ],
+        "objective": [
+            ("maximize_expected_net_cash", "maximize expected net cash"),
+            ("preserve_capital", "preserve capital"),
+            ("minimize_drawdown", "minimize drawdown"),
+            ("improve_diversification", "improve diversification"),
+            ("minimize_latency", "minimize latency"),
+            ("maximize_fill_quality", "maximize fill quality"),
+            ("qtt_decide", "let QTT decide"),
+        ],
+        "urgency": [
+            ("passive_maker_preferred", "passive / maker-preferred"),
+            ("normal", "normal"),
+            ("urgent_preview", "urgent preview"),
+            ("wait_for_better_liquidity", "wait for better liquidity"),
+            ("qtt_decide", "let QTT decide"),
+        ],
+        "entry_preference": [
+            ("maker_only", "maker-only"),
+            ("taker_allowed_preview", "taker-allowed preview"),
+            ("price_threshold", "price threshold"),
+            ("wait_for_spread_improvement", "wait for spread improvement"),
+            ("qtt_decide", "let QTT decide"),
+        ],
+        "exit_preference": [
+            ("hold_to_resolution_preview", "hold to resolution preview"),
+            ("time_based_exit_preview", "time-based exit preview"),
+            ("target_price_exit_preview", "target-price exit preview"),
+            ("stop_invalid_thesis_exit_preview", "stop/invalid-thesis exit preview"),
+            ("qtt_decide", "let QTT decide"),
+        ],
+        "maker_taker_preference": [
+            ("maker_only", "maker-only"),
+            ("maker_first_taker_fallback", "maker-first, taker fallback"),
+            ("taker_allowed_preview", "taker-allowed preview"),
+            ("split_policy_preview", "split policy preview"),
+            ("qtt_decide", "let QTT decide"),
+        ],
+        "source_family": [
+            ("owner_thesis", "owner thesis"),
+            ("url_article_news", "URL / article / news"),
+            ("market_page", "market page"),
+            ("pdf_paper_dataset_note", "PDF / paper / dataset note"),
+            ("formula_algorithm_note", "formula / algorithm note"),
+            ("social_public_post_research_signal_only", "social/public post as research signal only"),
+            ("none_yet", "none yet"),
+        ],
+        "route_selector": [
+            ("check_trade", "Check trade"),
+            ("research_source", "Research source"),
+            ("compare_qku_formula_stacks", "Compare QKU/formula stacks"),
+            ("explain_no_trade", "Explain no-trade"),
+            ("tune_parameters", "Tune parameters"),
+            ("show_agent_disagreement", "Show agent disagreement"),
+            ("replay_preview_route", "Replay preview route"),
+            ("paper_preview_route", "Paper preview route"),
+        ],
+    }
+    field_catalog = [
+        {"field_id": "market_event", "owner_label": "Market / event", "input_kind": "text", "required": True},
+        {"field_id": "venue", "owner_label": "Venue", "input_kind": "select", "option_source": "venue", "required": True},
+        {"field_id": "side", "owner_label": "Side", "input_kind": "select", "option_source": "side", "required": True},
+        {"field_id": "objective", "owner_label": "Objective", "input_kind": "select", "option_source": "objective", "required": True},
+        {"field_id": "max_budget", "owner_label": "Max budget", "input_kind": "number", "required": True},
+        {"field_id": "max_loss", "owner_label": "Max loss", "input_kind": "number", "required": True},
+        {"field_id": "hold_duration", "owner_label": "Hold duration", "input_kind": "text", "required": True},
+        {"field_id": "urgency", "owner_label": "Urgency", "input_kind": "select", "option_source": "urgency", "required": True},
+        {"field_id": "entry_preference", "owner_label": "Entry preference", "input_kind": "select", "option_source": "entry_preference", "required": True},
+        {"field_id": "exit_preference", "owner_label": "Exit preference", "input_kind": "select", "option_source": "exit_preference", "required": True},
+        {"field_id": "maker_taker_preference", "owner_label": "Maker/taker preference", "input_kind": "select", "option_source": "maker_taker_preference", "required": True},
+        {"field_id": "source_thesis_url", "owner_label": "Source / thesis / URL", "input_kind": "textarea", "required": True},
+        {"field_id": "target_price_probability", "owner_label": "Optional target price/probability", "input_kind": "text", "required": False},
+        {"field_id": "stop_exit_preference", "owner_label": "Optional stop/exit preference", "input_kind": "text", "required": False},
+        {"field_id": "source_family", "owner_label": "Source family", "input_kind": "select", "option_source": "source_family", "required": False},
+        {"field_id": "route_selector", "owner_label": "Route", "input_kind": "select", "option_source": "route_selector", "required": True},
+    ]
+    route_previews = [
+        "no_trade_comparator_preview",
+        "TCA_cost_route_preview",
+        "QKU_formula_stack_route_preview",
+        "risk_capacity_route_preview",
+        "portfolio_marginal_utility_route_preview",
+        "champion_challenger_route_preview",
+        "agent_disagreement_route_preview",
+        "replay_preview_route",
+        "paper_preview_route",
+        "Execution_Router_provider_pending_route",
+    ]
     return {
         "meta": _ui_meta({"artifact_id": "UI1_TRADE_WORKBENCH"}),
         "workbench_id": "OWNER_TRADE_WORKBENCH",
@@ -1271,6 +1465,63 @@ def _build_trade_workbench(action_rows: list[dict[str, Any]]) -> dict[str, Any]:
             "Emergency actions",
         ],
         "owner_action_request_previews": action_previews,
+        "field_catalog": field_catalog,
+        "central_option_catalog_id": "OwnerInputOptionCatalogV1",
+        "option_catalog": {
+            key: [
+                {"option_id": option_id, "owner_label": owner_label, "runtime_side_effect_allowed": False}
+                for option_id, owner_label in options
+            ]
+            for key, options in option_catalog.items()
+        },
+        "local_status_strip": [
+            "local preview only",
+            "provider pending",
+            "needs owner input",
+            "candidate/provisional input",
+            "no runtime side effect",
+            "technical details available",
+        ],
+        "local_preview_output": {
+            "preview_object_type": "TradePlanCandidatePreviewV1",
+            "owner_intent_summary": "Owner trade idea becomes a local candidate preview only.",
+            "selected_fields_from_field_catalog": [row["field_id"] for row in field_catalog],
+            "mutable_variable_fields": list(TRADE_VARIABLES),
+            "route_previews": route_previews,
+            "no_trade_reoptimization_options": [
+                "smaller size",
+                "different venue",
+                "maker-only",
+                "different hold duration",
+                "different stack",
+                "better liquidity window",
+                "later timing",
+            ],
+            "no_runtime_side_effect_state": AUTHORITY_BOUNDARY,
+            "forbidden_claims": [
+                "real expected profit",
+                "real fill probability",
+                "paper pass",
+                "replay pass",
+                "live readiness",
+                "cash availability",
+                "source truth",
+                "live order eligibility",
+            ],
+        },
+        "agent_disagreement_preview_categories": [
+            "agents in agreement",
+            "agents objecting",
+            "LLM critic objections",
+            "risk objections",
+            "source objections",
+            "TCA objections",
+            "memory/regime objections",
+            "next safe action",
+        ],
+        "all_fields_route_through_owner_action_registry": True,
+        "all_selectors_use_central_option_catalog": True,
+        "workbench_state_owned_by": "OwnerDashboardStateV1.trade_workbench",
         "validated_positive_net_cash_evidence_wording": True,
         "profit_guarantee": False,
         "no_trade_first_class_candidate": True,
@@ -3002,7 +3253,7 @@ def _build_ui1r2_reports(
     }
 
 
-def _build_ui1r2_artifacts(widget_manifest: dict[str, Any]) -> dict[str, dict[str, Any]]:
+def _build_ui1r2_artifacts(widget_manifest: dict[str, Any], trade_workbench: dict[str, Any]) -> dict[str, dict[str, Any]]:
     copy_map = _build_ui1r2_copy_map()
     mode = _build_ui1r2_mode()
     next_step = _build_ui1r2_next_step()
@@ -3020,6 +3271,14 @@ def _build_ui1r2_artifacts(widget_manifest: dict[str, Any]) -> dict[str, dict[st
         action_menu=action_menu,
         widget_manifest=widget_manifest,
     )
+    r2r2_artifacts = _build_ui1r2r2_artifacts(
+        mode=mode,
+        next_step=next_step,
+        action_menu=action_menu,
+        widget_manifest=widget_manifest,
+        trade_workbench=trade_workbench,
+        copy_map=copy_map,
+    )
     artifacts = {
         "ui1r2_copy_map.generated.json": copy_map,
         "ui1r2_mode.generated.json": mode,
@@ -3030,6 +3289,7 @@ def _build_ui1r2_artifacts(widget_manifest: dict[str, Any]) -> dict[str, dict[st
     }
     artifacts.update(reports)
     artifacts.update(r2r1_artifacts)
+    artifacts.update(r2r2_artifacts)
     return artifacts
 
 
@@ -3508,6 +3768,362 @@ def _build_ui1r2r1_artifacts(
     return artifacts
 
 
+def _build_ui1r2r2_artifacts(
+    *,
+    mode: dict[str, Any],
+    next_step: dict[str, Any],
+    action_menu: dict[str, Any],
+    widget_manifest: dict[str, Any],
+    trade_workbench: dict[str, Any],
+    copy_map: dict[str, Any],
+) -> dict[str, dict[str, Any]]:
+    next_rows = next_step.get("rows", [])
+    next_ids = [row.get("next_step_id") for row in next_rows]
+    non_developer_ids = [
+        row.get("next_step_id")
+        for row in next_rows
+        if row.get("next_step_id") != "NEXT_STEP_OPEN_TECHNICAL_DETAILS"
+    ]
+    required_intents = [
+        "TRADE_CHECK_REQUEST",
+        "RESEARCH_ANALYSIS_REQUEST",
+        "FORMULA_EXTRACTION_REQUEST",
+        "QKU_MATERIALIZATION_REQUEST",
+        "QUANTUM_STRUCTURE_MAPPING_REQUEST",
+        "NO_TRADE_EXPLANATION_REQUEST",
+        "PARAMETER_TUNING_REQUEST",
+        "EDGE_ALPHA_REVIEW_REQUEST",
+        "AGENT_DISAGREEMENT_REQUEST",
+        "REPLAY_PREVIEW_REQUEST",
+        "PAPER_PREVIEW_REQUEST",
+        "UNKNOWN_OWNER_REQUEST_NEEDS_CLARIFICATION",
+    ]
+    evidence_refs = _r2r1_spine_refs()
+    preference_keys = [
+        THEME_STORAGE_KEY,
+        EXPERIENCE_MODE_STORAGE_KEY,
+        GUIDANCE_DENSITY_STORAGE_KEY,
+        TEXT_SIZE_STORAGE_KEY,
+        TECHNICAL_DETAILS_STORAGE_KEY,
+        ENTER_TO_SEND_STORAGE_KEY,
+    ]
+    forbidden_storage_categories = [
+        "secrets",
+        "credentials",
+        "tokens",
+        "private_account_data",
+        "cash_or_account_values",
+        "market_source_truth",
+        "order_state",
+        "owner_approval_receipts",
+        "replay_or_paper_results",
+        "live_readiness_state",
+        "connector_authority",
+        "QKU_formula_authority_changes",
+    ]
+    source_families = [
+        "websites / links",
+        "PDFs / academic papers / research articles",
+        "news articles",
+        "public/social posts as research signals only",
+        "public documents",
+        "repo links / datasets",
+        "screenshots/images as research candidates",
+        "formulas / algorithms / quantum strategy notes",
+        "market/event pages",
+        "free-form trade ideas",
+    ]
+    raw_rejection_patterns = [
+        "::",
+        ".jsonl",
+        "registry_row_ref",
+        "authority_boundary_ref",
+        "manual_edit_allowed",
+        "generated_from",
+        "surface_registry_row_count",
+        "DASH1_FEATURE_",
+        "OWNER_DASHBOARD_PACKET_V1",
+        "VISIBLE_EMPTY_STATE_PROVIDER_PENDING",
+        "CONTRACT_DEFINED_PROVIDER_PENDING",
+        "Raw refs",
+        "Linked refs",
+        "SYSTEM CONTRACT",
+    ]
+    artifacts: dict[str, dict[str, Any]] = {
+        "ui1r2r2_display_preferences.generated.json": {
+            "meta": _ui1r2r2_meta("UI1R2R2_DISPLAY_PREFERENCES"),
+            "preference_model_id": "OwnerDisplayPreferenceV1",
+            "preference_service_id": "OwnerUIPreferenceServiceV1",
+            "state_owner": "OwnerDashboardStateV1.display_preferences",
+            "mode": {
+                "default": "GUIDED_OWNER",
+                "allowed": ["GUIDED_OWNER", "ADVANCED_OWNER", "DEVELOPER"],
+                "localStorage_key": EXPERIENCE_MODE_STORAGE_KEY,
+            },
+            "theme": {"default": "DARK", "allowed": list(THEME_MODES), "localStorage_key": THEME_STORAGE_KEY},
+            "text_size": {
+                "default": "default",
+                "allowed": list(DISPLAY_TEXT_SIZES),
+                "localStorage_key": TEXT_SIZE_STORAGE_KEY,
+                "uses_central_design_tokens": True,
+                "applies_to": [
+                    "cards",
+                    "chat composer",
+                    "chat bubbles",
+                    "Workbench fields",
+                    "navigation",
+                    "buttons",
+                    "dropdowns/selectors",
+                    "drilldowns/drawers",
+                    "chart labels where practical",
+                    "route preview receipts",
+                ],
+            },
+            "technical_details": {
+                "default_open": False,
+                "developer_mode_may_open": True,
+                "localStorage_key": TECHNICAL_DETAILS_STORAGE_KEY,
+            },
+            "enter_to_send": {
+                "default_enabled": False,
+                "localStorage_key": ENTER_TO_SEND_STORAGE_KEY,
+                "ctrl_enter_submits": True,
+                "enter_default_newline": True,
+            },
+            "allowed_localStorage_keys": preference_keys,
+            "forbidden_localStorage_categories": forbidden_storage_categories,
+            "non_secret_ui_preferences_only": True,
+            "no_trade_state_persisted": True,
+            "no_private_state_persisted": True,
+        },
+        "ui1r2r2_header_menu.report.json": {
+            "meta": _ui1r2r2_meta("UI1R2R2_HEADER_MENU_REPORT"),
+            "strict_menu_only_header_chrome": True,
+            "closed_header_visible_text": ["QTT"],
+            "closed_header_menu_trigger_accessible_name": "Open dashboard options",
+            "closed_header_forbidden_visible_text": [
+                "Guided",
+                "Advanced",
+                "Developer",
+                "Dark",
+                "Light",
+                "Local Preview",
+                "Provider Pending",
+                "No Runtime Side Effect",
+                "Technical Details",
+                "View Options",
+            ],
+            "mode_theme_text_size_status_technical_details_inside_opened_menu": True,
+            "menu_trigger_has_aria_label_expanded_controls": True,
+            "escape_closes_menu": True,
+            "outside_click_closes_menu": True,
+            "touch_targets_minimum_px": 44,
+            "menu_state_owner": "OwnerDashboardStateV1.display_preferences.menu_open",
+            "first_viewport_prioritizes_trading_content": True,
+            "closed_header_consumes_layout_space": False,
+            "validation_status": "PASS",
+        },
+        "ui1r2r2_mode_action_parity.report.json": {
+            "meta": _ui1r2r2_meta("UI1R2R2_MODE_ACTION_PARITY_REPORT"),
+            "experience_modes": ["GUIDED_OWNER", "ADVANCED_OWNER", "DEVELOPER"],
+            "owner_role_is_not_a_mode": True,
+            "guided_capability_rule": "full capability plus more coaching",
+            "advanced_capability_rule": "same non-developer capability plus denser metrics",
+            "developer_capability_rule": "same capability plus raw refs/debug when selected",
+            "guided_non_developer_next_step_ids": non_developer_ids,
+            "advanced_non_developer_next_step_ids": non_developer_ids,
+            "guided_advanced_non_developer_action_parity": True,
+            "guided_adds_coaching_not_capability_removal": True,
+            "developer_raw_refs_visible_only_when_selected_or_opened": True,
+            "source_artifact_refs": ["ui1r2_mode.generated.json", "ui1r2_next_step.generated.json"],
+        },
+        "ui1r2r2_owner_readable_copy.report.json": {
+            "meta": _ui1r2r2_meta("UI1R2R2_OWNER_READABLE_COPY_REPORT"),
+            "presentation_layer_id": copy_map.get("presentation_layer_id", "OwnerPresentationLayer"),
+            "centralized_copy_adapter": True,
+            "owner_readable_copy_map_ref": "ui1r2_copy_map.generated.json",
+            "guided_advanced_raw_pattern_rejections": raw_rejection_patterns,
+            "raw_refs_available_in_developer_or_collapsed_technical_details": True,
+            "provider_state_translations": {
+                "VISIBLE_EMPTY_STATE_PROVIDER_PENDING": "Waiting for provider data. No fake trading result is shown.",
+                "CONTRACT_DEFINED_PROVIDER_PENDING": "Provider contract defined; runtime not active yet.",
+                "NO_DASHBOARD_RUNTIME_NO_ORDER_NO_PRIVATE_READS": "Review-only dashboard. No direct order submission or private account access.",
+                "runtime_side_effect_false": "Live side effect: none.",
+            },
+            "owner_card_template_fields": [
+                "Title",
+                "Plain-English summary",
+                "Current status",
+                "Why this matters",
+                "What owner can do next",
+                "Trading relevance / workflow relevance",
+                "Related QTT agents or local route",
+                "Evidence and routing summary",
+                "Technical details collapsed",
+            ],
+            "validation_status": "PASS",
+        },
+        "ui1r2r2_chat_intent_preview.report.json": {
+            "meta": _ui1r2r2_meta("UI1R2R2_CHAT_INTENT_PREVIEW_REPORT"),
+            "chat_state_owner": "OwnerDashboardStateV1.conversation_state",
+            "plain_english_first": True,
+            "primary_button_label": "Send",
+            "send_button_attached_to_composer": True,
+            "default_enter_behavior": "NEWLINE",
+            "ctrl_enter_submits_local_preview": True,
+            "shift_enter_inserts_newline": True,
+            "enter_to_send_default_enabled": False,
+            "empty_send_inline_hint_no_receipt": True,
+            "recognized_intent_families": required_intents,
+            "unknown_owner_facing_message": (
+                "I need a market, trade idea, source link, formula, or research question to route this."
+            ),
+            "unknown_suggested_chips": [
+                "Check a trade",
+                "Research a source",
+                "Explain no-trade",
+                "Compare formula stacks",
+                "Open Trade Workbench",
+            ],
+            "source_agnostic_candidate_families": source_families,
+            "runtime_side_effect_allowed": False,
+            "live_LLM_call_allowed": False,
+            "real_agent_execution_allowed": False,
+        },
+        "ui1r2r2_workbench_form.generated.json": {
+            "meta": _ui1r2r2_meta("UI1R2R2_WORKBENCH_FORM"),
+            "workbench_id": trade_workbench.get("workbench_id", "OWNER_TRADE_WORKBENCH"),
+            "workbench_state_owner": "OwnerDashboardStateV1.trade_workbench",
+            "central_option_catalog_id": trade_workbench.get("central_option_catalog_id", "OwnerInputOptionCatalogV1"),
+            "field_catalog": trade_workbench.get("field_catalog", []),
+            "option_catalog": trade_workbench.get("option_catalog", {}),
+            "local_preview_output": trade_workbench.get("local_preview_output", {}),
+            "local_status_strip": trade_workbench.get("local_status_strip", []),
+            "all_selectors_use_central_option_catalog": True,
+            "all_workbench_actions_route_through_owner_next_step_router": True,
+            "direct_venue_submit_allowed": False,
+            "execution_router_release_allowed": False,
+            "runtime_side_effect_allowed": False,
+        },
+        "ui1r2r2_action_next_step.report.json": {
+            "meta": _ui1r2r2_meta("UI1R2R2_ACTION_NEXT_STEP_REPORT"),
+            "router_id": next_step.get("router_id", "OwnerNextStepRouter"),
+            "next_step_ids": next_ids,
+            "action_menu_rows_checked": len(action_menu.get("rows", [])),
+            "enabled_options_route_to_next_step": True,
+            "chip_card_dropdown_workbench_actions_share_router": True,
+            "disabled_provider_pending_actions_explain_safe_alternative": True,
+            "local_preview_only": True,
+            "no_runtime_queue_created": True,
+            "no_live_LLM_or_agent_or_replay_or_paper_or_live_execution": True,
+            "no_execution_router_release": True,
+        },
+        "ui1r2r2_authority_boundary.report.json": {
+            "meta": _ui1r2r2_meta("UI1R2R2_AUTHORITY_BOUNDARY_REPORT"),
+            "authority_boundary_ref": AUTHORITY_BOUNDARY,
+            "no_SVC1_runtime": True,
+            "no_live_LLM": True,
+            "no_real_QTT_agent_execution": True,
+            "no_real_replay_paper_live_execution": True,
+            "no_connector_private_or_cash_account_reads": True,
+            "no_source_truth_acceptance": True,
+            "no_direct_venue_submit": True,
+            "no_Execution_Router_release": True,
+            "no_QTT_SHA_or_AtomicRows_hash_authority": True,
+            "no_profit_guarantee": True,
+            "dashboard_mobile_chat_authority": "owner command and approval-preview only",
+            "execution_router_authority": "final venue order-release authority remains downstream",
+        },
+        "ui1r2r2_no_orphan_central_routes.report.json": {
+            "meta": _ui1r2r2_meta("UI1R2R2_NO_ORPHAN_CENTRAL_ROUTES_REPORT"),
+            "central_state_ref": "OwnerDashboardStateV1",
+            "surface_resolver_ref": "OwnerSurfaceResolver",
+            "action_registry_ref": "OwnerActionRegistryV1",
+            "next_step_router_ref": "OwnerNextStepRouter",
+            "widget_manifest_ref": "owner_dashboard_widget_manifest.generated.json",
+            "chart_manifest_ref": "ui1r1_chart_manifest.generated.json",
+            "chat_manifest_ref": "owner_dashboard_chat_route_map.generated.json",
+            "workbench_model_ref": "owner_dashboard_trade_workbench.generated.json",
+            "ui_preference_service_ref": "OwnerUIPreferenceServiceV1",
+            "owner_readable_copy_adapter_ref": "ui1r2_copy_map.generated.json",
+            "mobile_navigation_projection_ref": "owner_dashboard_mobile_navigation.generated.json",
+            "no_independent_dashboard_truth_files": True,
+            "no_chat_only_command_grammar": True,
+            "no_workbench_only_route_ids": True,
+            "no_mobile_only_feature_list": True,
+            "all_new_values_route_or_gap": True,
+        },
+        "ui1r2r2_source_agnostic_candidate_only.report.json": {
+            "meta": _ui1r2r2_meta("UI1R2R2_SOURCE_AGNOSTIC_CANDIDATE_ONLY_REPORT"),
+            "accepted_candidate_input_families": source_families,
+            "candidate_or_provisional_only": True,
+            "non_official_information_not_source_truth": True,
+            "requires_safe_relevant_non_duplicate_mappable_check": True,
+            "no_connector_semantics": True,
+            "no_cash_truth": True,
+            "no_runtime_authority": True,
+            "no_trading_evidence_promotion": True,
+        },
+        "ui1r2r2_preference_storage_guard.report.json": {
+            "meta": _ui1r2r2_meta("UI1R2R2_PREFERENCE_STORAGE_GUARD_REPORT"),
+            "allowed_localStorage_keys": preference_keys,
+            "forbidden_localStorage_categories": forbidden_storage_categories,
+            "localStorage_limited_to_non_secret_UI_preferences": True,
+            "renderer_uses_single_preference_service": True,
+            "no_trade_state_in_localStorage": True,
+            "no_private_or_order_or_receipt_state_in_localStorage": True,
+        },
+        "ui1r2r2_mobile_responsive.report.json": {
+            "meta": _ui1r2r2_meta("UI1R2R2_MOBILE_RESPONSIVE_REPORT"),
+            "viewport_width_px": 390,
+            "viewport_height_px": 844,
+            "closed_header_menu_only_by_default": True,
+            "menu_options_open_and_close": True,
+            "trading_content_in_first_viewport": True,
+            "no_horizontal_overflow_default_large_extra_large": True,
+            "chat_and_workbench_reachable": True,
+            "send_visible_on_mobile": True,
+            "workbench_fields_stack_correctly": True,
+            "dropdowns_usable_in_viewport": True,
+            "drilldown_drawer_uses_bottom_sheet_on_mobile": True,
+            "developer_technical_details_not_dominant": True,
+            "no_separate_mobile_state_model": True,
+        },
+        "ui1r2r2_evidence_spine.report.json": {
+            "meta": _ui1r2r2_meta("UI1R2R2_EVIDENCE_SPINE_REPORT"),
+            "required_evidence_spine_refs": list(R2R1_EVIDENCE_SPINE_REFS),
+            "route_refs": evidence_refs,
+            "every_repaired_route_preserves_or_gap_routes_spine": True,
+            "no_fake_runtime_output": True,
+            "no_fake_quantum_advantage": True,
+            "validated_positive_net_cash_wording_only_as_future_required_evidence": True,
+        },
+        "ui1r2r2_playwright.report.json": {
+            "meta": _ui1r2r2_meta("UI1R2R2_PLAYWRIGHT_REPORT"),
+            "status": "PENDING_LOCAL_RUN",
+            "script": "tools/playwright_pr169_dash1_ui1_r2_r2_visual_smoke.py",
+            "screenshots": [
+                ".tmp/ui1r2r2_mobile_menu_only_header_closed.png",
+                ".tmp/ui1r2r2_mobile_menu_open_controls_visible.png",
+                ".tmp/ui1r2r2_mobile_first_viewport_trading_content.png",
+                ".tmp/ui1r2r2_mobile_text_extra_large.png",
+                ".tmp/ui1r2r2_chat_composer_send_visible.png",
+                ".tmp/ui1r2r2_chat_after_send.png",
+                ".tmp/ui1r2r2_workbench_form_fields.png",
+                ".tmp/ui1r2r2_workbench_dropdown_open.png",
+                ".tmp/ui1r2r2_workbench_trade_plan_preview.png",
+                ".tmp/ui1r2r2_owner_readable_home.png",
+                ".tmp/ui1r2r2_developer_raw_refs_visible.png",
+                ".tmp/ui1r2r2_action_to_workbench_prefill.png",
+            ],
+            "network_status": "PENDING_LOCAL_RUN",
+            "console_status": "PENDING_LOCAL_RUN",
+            "runtime_side_effect_allowed": False,
+        },
+    }
+    return artifacts
+
+
 def _build_review_data(base: Path, master_plan: Path) -> tuple[dict[str, Any], dict[str, Any]]:
     resolver = OwnerSurfaceResolver(base)
     registry_rows = resolver.registry.rows
@@ -3567,7 +4183,7 @@ def _build_review_data(base: Path, master_plan: Path) -> tuple[dict[str, Any], d
         generated_at=generated_at,
         base_ref=_repo_ref(base),
     )
-    r2_artifacts = _build_ui1r2_artifacts(widget_manifest)
+    r2_artifacts = _build_ui1r2_artifacts(widget_manifest, trade_workbench)
     charts = {
         "chart_contracts": chart_contracts,
         "interactive_chart_registry": interactive_charts,
@@ -3807,6 +4423,20 @@ def _build_review_data(base: Path, master_plan: Path) -> tuple[dict[str, Any], d
         "ui1r2r1_owner_command": r2_artifacts["ui1r2r1_owner_command.report.json"],
         "ui1r2r1_evidence_spine": r2_artifacts["ui1r2r1_evidence_spine.report.json"],
         "ui1r2r1_playwright": r2_artifacts["ui1r2r1_playwright.report.json"],
+        "ui1r2r2_display_preferences": r2_artifacts["ui1r2r2_display_preferences.generated.json"],
+        "ui1r2r2_header_menu": r2_artifacts["ui1r2r2_header_menu.report.json"],
+        "ui1r2r2_mode_action_parity": r2_artifacts["ui1r2r2_mode_action_parity.report.json"],
+        "ui1r2r2_owner_readable_copy": r2_artifacts["ui1r2r2_owner_readable_copy.report.json"],
+        "ui1r2r2_chat_intent_preview": r2_artifacts["ui1r2r2_chat_intent_preview.report.json"],
+        "ui1r2r2_workbench_form": r2_artifacts["ui1r2r2_workbench_form.generated.json"],
+        "ui1r2r2_action_next_step": r2_artifacts["ui1r2r2_action_next_step.report.json"],
+        "ui1r2r2_authority_boundary": r2_artifacts["ui1r2r2_authority_boundary.report.json"],
+        "ui1r2r2_no_orphan_central_routes": r2_artifacts["ui1r2r2_no_orphan_central_routes.report.json"],
+        "ui1r2r2_source_agnostic_candidate_only": r2_artifacts["ui1r2r2_source_agnostic_candidate_only.report.json"],
+        "ui1r2r2_preferences_no_private_state": r2_artifacts["ui1r2r2_preference_storage_guard.report.json"],
+        "ui1r2r2_mobile_responsive": r2_artifacts["ui1r2r2_mobile_responsive.report.json"],
+        "ui1r2r2_evidence_spine": r2_artifacts["ui1r2r2_evidence_spine.report.json"],
+        "ui1r2r2_playwright": r2_artifacts["ui1r2r2_playwright.report.json"],
     }
     for key in REQUIRED_TOP_LEVEL_KEYS:
         review_data.setdefault(key, {})

@@ -31,6 +31,13 @@ def _assert_visible(page: Page, selector: str) -> None:
     page.locator(selector).first.wait_for(state="visible", timeout=10_000)
 
 
+def _choose_theme(page: Page, theme: str) -> None:
+    toggle = page.locator("#ownerOptionsToggle")
+    if toggle.count() and page.locator("#ownerOptionsPanel:visible").count() == 0:
+        toggle.click()
+    page.locator(f"[data-theme-choice='{theme}']:visible").click()
+
+
 def _write_report(repo: Path, console_errors: list[str], external_requests: list[str]) -> None:
     ui_dir = repo / "docs" / "master_plan" / "generated" / "pr169_dash1" / "ui"
     report_path = ui_dir / "ui1r1_playwright.report.json"
@@ -88,10 +95,10 @@ def run(repo: Path) -> None:
             _screenshot(page, repo / SCREENSHOTS["before"])
         _screenshot(page, repo / SCREENSHOTS["home_dark"])
 
-        page.locator("#themeLight").click()
+        _choose_theme(page, "LIGHT")
         _assert_visible(page, "html[data-theme='light']")
         _screenshot(page, repo / SCREENSHOTS["home_light"])
-        page.locator("#themeDark").click()
+        _choose_theme(page, "DARK")
 
         mobile = browser.new_page(viewport={"width": 390, "height": 844}, device_scale_factor=2, is_mobile=True)
         mobile.on("console", lambda msg: console_errors.append(msg.text) if msg.type == "error" else None)
@@ -111,7 +118,7 @@ def run(repo: Path) -> None:
         page.locator("a[href='#chat']").first.click()
         page.locator("#ownerChatInput").fill("Can QTT check this market and find the best trade?")
         page.locator("#routePreviewButton").click()
-        _assert_visible(page, "[data-preview-object='OwnerPlainEnglishIntentV1']")
+        _assert_visible(page, "[data-preview-object='OwnerPlainEnglishIntentPreviewV1']")
         _screenshot(page, repo / SCREENSHOTS["chat"])
 
         page.locator("a[href='#trade-workbench']").first.click()
