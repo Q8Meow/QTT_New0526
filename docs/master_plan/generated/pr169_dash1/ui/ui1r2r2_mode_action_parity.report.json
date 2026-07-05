@@ -1,0 +1,55 @@
+{
+  "advanced_capability_rule": "same non-developer capability plus denser metrics",
+  "advanced_non_developer_next_step_ids": [
+    "NEXT_STEP_SEND_TO_TRADE_WORKBENCH",
+    "NEXT_STEP_CHECK_TRADE_WITH_QTT_AGENTS",
+    "NEXT_STEP_REQUEST_REPLAY_PREVIEW",
+    "NEXT_STEP_REQUEST_PAPER_PREVIEW",
+    "NEXT_STEP_SHOW_QKU_FORMULA_ROUTES",
+    "NEXT_STEP_EXPLAIN_NO_TRADE",
+    "NEXT_STEP_SHOW_TCA_COST_BREAKDOWN",
+    "NEXT_STEP_OPEN_CHART_DRILLDOWN",
+    "NEXT_STEP_DISABLED_PROVIDER_PENDING_EDUCATION"
+  ],
+  "developer_capability_rule": "same capability plus raw refs/debug when selected",
+  "developer_raw_refs_visible_only_when_selected_or_opened": true,
+  "experience_modes": [
+    "GUIDED_OWNER",
+    "ADVANCED_OWNER",
+    "DEVELOPER"
+  ],
+  "guided_adds_coaching_not_capability_removal": true,
+  "guided_advanced_non_developer_action_parity": true,
+  "guided_capability_rule": "full capability plus more coaching",
+  "guided_non_developer_next_step_ids": [
+    "NEXT_STEP_SEND_TO_TRADE_WORKBENCH",
+    "NEXT_STEP_CHECK_TRADE_WITH_QTT_AGENTS",
+    "NEXT_STEP_REQUEST_REPLAY_PREVIEW",
+    "NEXT_STEP_REQUEST_PAPER_PREVIEW",
+    "NEXT_STEP_SHOW_QKU_FORMULA_ROUTES",
+    "NEXT_STEP_EXPLAIN_NO_TRADE",
+    "NEXT_STEP_SHOW_TCA_COST_BREAKDOWN",
+    "NEXT_STEP_OPEN_CHART_DRILLDOWN",
+    "NEXT_STEP_DISABLED_PROVIDER_PENDING_EDUCATION"
+  ],
+  "meta": {
+    "agent_consumable_authority": false,
+    "artifact_id": "UI1R2R2_MODE_ACTION_PARITY_REPORT",
+    "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+    "connector_access_allowed": false,
+    "credential_access_allowed": false,
+    "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config + PR169-DASH1 artifacts + PR169-DASH1-UI1/R1 boot data + OwnerPresentationLayer / OwnerGuidancePolicy config + PR169-DASH1-UI1-R2-R2 owner product UX repair config",
+    "manual_edit_allowed": false,
+    "order_execution_allowed": false,
+    "runtime_side_effect_allowed": false,
+    "runtime_truth_authority": false,
+    "source_truth_authority": false,
+    "ui1r2r2_generated_from": "OwnerDashboardStateV1 + OwnerSurfaceResolver + OwnerActionRegistry + OwnerPresentationLayer + OwnerNextStepRouter + shared widget/chart/action/chat manifests",
+    "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+  },
+  "owner_role_is_not_a_mode": true,
+  "source_artifact_refs": [
+    "ui1r2_mode.generated.json",
+    "ui1r2_next_step.generated.json"
+  ]
+}

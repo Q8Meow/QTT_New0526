@@ -7,29 +7,52 @@
   <link rel="stylesheet" href="owner_dashboard_review_surface.css">
 </head>
 <body>
-  <header class="topbar" aria-label="Owner dashboard header">
-    <div class="brand-block">
-      <span class="eyebrow">Guided owner workstation</span>
-      <h1>QTT Owner Dashboard Workstation</h1>
-      <p>Review trades, evidence, costs, routes, and next safe steps. This page creates local previews only.</p>
+  <header class="topbar" aria-label="Owner dashboard header" data-header-chrome="menu-only">
+    <div class="brand-block compact-brand">
+      <h1>QTT</h1>
     </div>
-    <div class="header-controls">
+    <button id="ownerOptionsToggle" class="menu-trigger" type="button" aria-label="Open dashboard options" aria-expanded="false" aria-controls="ownerOptionsPanel">&#9776;</button>
+  </header>
+
+  <div id="ownerOptionsBackdrop" class="owner-options-backdrop" hidden></div>
+  <aside id="ownerOptionsPanel" class="owner-options-panel" data-options-menu="owner-display-preferences" aria-label="Dashboard options" aria-hidden="true" hidden>
+    <div class="owner-options-head">
+      <h2>Options</h2>
+      <button id="ownerOptionsClose" class="icon-command" type="button" aria-label="Close dashboard options">Close</button>
+    </div>
+    <section class="owner-options-section" aria-label="Experience mode">
+      <h3>Experience mode</h3>
       <div id="experienceModeSwitch" class="mode-switch" role="group" aria-label="Experience mode switch" data-experience-mode="GUIDED_OWNER">
         <button class="seg-button" type="button" data-mode-choice="GUIDED_OWNER" aria-pressed="true">Guided</button>
         <button class="seg-button" type="button" data-mode-choice="ADVANCED_OWNER" aria-pressed="false">Advanced</button>
         <button class="seg-button" type="button" data-mode-choice="DEVELOPER" aria-pressed="false">Developer</button>
       </div>
+    </section>
+    <section class="owner-options-section" aria-label="Theme">
+      <h3>Theme</h3>
       <div class="theme-switch" role="group" aria-label="Theme switch">
         <button id="themeDark" class="seg-button" type="button" data-theme-choice="DARK">Dark</button>
         <button id="themeLight" class="seg-button" type="button" data-theme-choice="LIGHT">Light</button>
       </div>
+    </section>
+    <section class="owner-options-section" aria-label="Text size">
+      <h3>Text size</h3>
+      <div id="textSizeSwitch" class="text-size-switch" role="group" aria-label="Display text size">
+        <button class="seg-button" type="button" data-text-size-choice="small" aria-pressed="false">Small</button>
+        <button class="seg-button" type="button" data-text-size-choice="default" aria-pressed="true">Default</button>
+        <button class="seg-button" type="button" data-text-size-choice="large" aria-pressed="false">Large</button>
+        <button class="seg-button" type="button" data-text-size-choice="extra_large" aria-pressed="false">Extra Large</button>
+      </div>
+    </section>
+    <section class="owner-options-section owner-menu-status" aria-label="Preview and runtime status">
+      <h3>Preview/runtime status</h3>
+      <div id="statusGrid" class="status-grid"></div>
+    </section>
+    <section class="owner-options-section" aria-label="Composer preference">
+      <label class="compact-toggle"><input id="menuEnterToSendToggle" type="checkbox" data-enter-to-send-setting="optional"> Enter to send</label>
       <button id="openGlobalDrilldown" class="icon-command" type="button" aria-label="Open dashboard technical details">Technical Details</button>
-    </div>
-  </header>
-
-  <section class="status-strip" aria-label="Owner Mode data freshness and authority status">
-    <div id="statusGrid" class="status-grid"></div>
-  </section>
+    </section>
+  </aside>
 
   <div class="layout-shell">
     <nav class="rail" aria-label="Dashboard sections">
@@ -248,7 +271,6 @@
     <a href="#quantum">Quantum</a>
     <a href="#more">More</a>
     <a href="#developer-mode">Developer</a>
-    <button id="mobileThemeToggle" type="button">Theme</button>
   </nav>
 
   <script src="owner_dashboard_review_bootstrap.generated.js"></script>

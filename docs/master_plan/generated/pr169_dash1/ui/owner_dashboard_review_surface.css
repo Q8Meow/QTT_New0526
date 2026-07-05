@@ -7,7 +7,29 @@
   --qtt-yellow: #F59E0B;
   --qtt-gray: #64748B;
   --qtt-shadow: 0 14px 40px rgba(15, 23, 42, 0.18);
+  --qtt-type-scale: 1;
+  --qtt-font-body: calc(16px * var(--qtt-type-scale));
+  --qtt-font-small: calc(12px * var(--qtt-type-scale));
+  --qtt-font-compact: calc(13px * var(--qtt-type-scale));
+  --qtt-font-card-title: calc(15px * var(--qtt-type-scale));
+  --qtt-font-section-title: calc(20px * var(--qtt-type-scale));
   color-scheme: dark light;
+}
+
+:root[data-text-size="small"] {
+  --qtt-type-scale: 0.92;
+}
+
+:root[data-text-size="default"] {
+  --qtt-type-scale: 1;
+}
+
+:root[data-text-size="large"] {
+  --qtt-type-scale: 1.12;
+}
+
+:root[data-text-size="extra_large"] {
+  --qtt-type-scale: 1.24;
 }
 
 :root[data-theme="dark"] {
@@ -47,6 +69,7 @@ body {
   background: var(--qtt-bg);
   color: var(--qtt-text);
   font-family: Inter, "Segoe UI", Arial, sans-serif;
+  font-size: var(--qtt-font-body);
   line-height: 1.45;
   letter-spacing: 0;
 }
@@ -81,9 +104,10 @@ select:focus-visible,
   z-index: 30;
   display: flex;
   justify-content: space-between;
-  gap: 18px;
+  gap: 10px;
   align-items: center;
-  padding: 14px 22px;
+  min-height: 54px;
+  padding: 7px 12px;
   border-bottom: 1px solid var(--qtt-border);
   background: color-mix(in srgb, var(--qtt-bg-panel), transparent 4%);
   backdrop-filter: blur(16px);
@@ -97,7 +121,8 @@ select:focus-visible,
 }
 
 .brand-block h1 {
-  font-size: 22px;
+  font-size: calc(18px * var(--qtt-type-scale));
+  line-height: 1;
 }
 
 .brand-block p,
@@ -109,15 +134,16 @@ select:focus-visible,
 .eyebrow {
   display: block;
   color: var(--qtt-muted);
-  font-size: 11px;
+  font-size: calc(11px * var(--qtt-type-scale));
   font-weight: 800;
-  letter-spacing: 0.04em;
+  letter-spacing: 0;
   text-transform: uppercase;
 }
 
 .header-controls,
 .theme-switch,
 .mode-switch,
+.text-size-switch,
 .segment,
 .filter-row,
 .search-row,
@@ -130,6 +156,7 @@ select:focus-visible,
 
 .seg-button,
 .icon-command,
+.menu-trigger,
 .chip,
 .card button,
 .mobile-bottom-nav button {
@@ -139,6 +166,68 @@ select:focus-visible,
   color: var(--qtt-text);
   padding: 0 12px;
   cursor: pointer;
+}
+
+.menu-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  font-size: 24px;
+  line-height: 1;
+}
+
+.owner-options-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 36;
+  background: rgba(2, 6, 23, 0.42);
+}
+
+.owner-options-backdrop[hidden],
+.owner-options-panel[hidden] {
+  display: none !important;
+}
+
+.owner-options-panel {
+  position: fixed;
+  top: 62px;
+  right: 12px;
+  z-index: 40;
+  width: min(420px, calc(100vw - 24px));
+  max-height: calc(100vh - 76px);
+  overflow: auto;
+  border: 1px solid var(--qtt-border);
+  border-radius: 8px;
+  padding: 12px;
+  background: var(--qtt-bg-panel);
+  box-shadow: var(--qtt-shadow);
+}
+
+.owner-options-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.owner-options-head h2,
+.owner-options-section h3 {
+  margin: 0;
+}
+
+.owner-options-section {
+  display: grid;
+  gap: 8px;
+  padding: 10px 0;
+  border-top: 1px solid var(--qtt-border);
+}
+
+.owner-options-section:first-of-type {
+  border-top: 0;
 }
 
 .seg-button[aria-pressed="true"],
@@ -156,17 +245,15 @@ select:focus-visible,
   background: var(--qtt-hover);
 }
 
-.status-strip {
-  padding: 14px 22px;
-  border-bottom: 1px solid var(--qtt-border);
-  background: var(--qtt-bg);
-}
-
 .status-grid,
 .metric-grid {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 10px;
+}
+
+.owner-menu-status .status-grid {
+  grid-template-columns: 1fr;
 }
 
 .home-grid,
@@ -267,7 +354,7 @@ select:focus-visible,
   padding: 7px 8px;
   background: var(--qtt-bg-panel);
   color: var(--qtt-muted);
-  font-size: 12px;
+  font-size: var(--qtt-font-small);
   font-weight: 750;
 }
 
@@ -375,7 +462,7 @@ body[data-experience-mode="ADVANCED_OWNER"] .route-card {
 
 body[data-experience-mode="ADVANCED_OWNER"] .card p,
 body[data-experience-mode="ADVANCED_OWNER"] .chart-panel p {
-  font-size: 13px;
+  font-size: var(--qtt-font-compact);
 }
 
 body[data-experience-mode="DEVELOPER"] .developer-panel details,
@@ -404,21 +491,21 @@ body[data-experience-mode="DEVELOPER"] #homeDeveloperSummary details {
 .metric-card .value {
   display: block;
   margin-top: 4px;
-  font-size: 21px;
+  font-size: calc(21px * var(--qtt-type-scale));
   font-weight: 800;
 }
 
 .layout-shell {
   display: grid;
   grid-template-columns: 244px minmax(0, 1fr);
-  min-height: calc(100vh - 126px);
+  min-height: calc(100vh - 54px);
 }
 
 .rail {
   position: sticky;
-  top: 86px;
+  top: 54px;
   align-self: start;
-  height: calc(100vh - 86px);
+  height: calc(100vh - 54px);
   overflow: auto;
   padding: 14px;
   border-right: 1px solid var(--qtt-border);
@@ -433,7 +520,7 @@ body[data-experience-mode="DEVELOPER"] #homeDeveloperSummary details {
   border-radius: 8px;
   color: var(--qtt-muted);
   text-decoration: none;
-  font-size: 13px;
+  font-size: var(--qtt-font-compact);
   font-weight: 700;
 }
 
@@ -461,7 +548,7 @@ body[data-experience-mode="DEVELOPER"] #homeDeveloperSummary details {
 }
 
 .section h2 {
-  font-size: 20px;
+  font-size: var(--qtt-font-section-title);
 }
 
 .search-row label {
@@ -520,7 +607,7 @@ body[data-experience-mode="DEVELOPER"] #homeDeveloperSummary details {
 .chart-panel h3,
 .route-card h3 {
   margin: 0 0 8px;
-  font-size: 15px;
+  font-size: var(--qtt-font-card-title);
 }
 
 .card p,
@@ -546,7 +633,7 @@ body[data-experience-mode="DEVELOPER"] #homeDeveloperSummary details {
   border-radius: 999px;
   border: 1px solid var(--qtt-border);
   color: var(--qtt-text);
-  font-size: 12px;
+  font-size: var(--qtt-font-small);
   font-weight: 750;
 }
 
@@ -607,7 +694,7 @@ body[data-experience-mode="DEVELOPER"] #homeDeveloperSummary details {
 
 .chart-svg text {
   fill: var(--qtt-muted);
-  font-size: 12px;
+  font-size: var(--qtt-font-small);
   font-weight: 800;
 }
 
@@ -680,7 +767,7 @@ body[data-experience-mode="DEVELOPER"] #homeDeveloperSummary details {
   border-radius: 8px;
   background: color-mix(in srgb, var(--qtt-bg-panel), transparent 10%);
   color: var(--qtt-muted);
-  font-size: 12px;
+  font-size: var(--qtt-font-small);
   font-weight: 750;
 }
 
@@ -719,7 +806,7 @@ body[data-experience-mode="DEVELOPER"] #homeDeveloperSummary details {
   align-items: center;
   margin: 8px 0;
   color: var(--qtt-muted);
-  font-size: 13px;
+  font-size: var(--qtt-font-compact);
 }
 
 .bar-track {
@@ -749,7 +836,7 @@ body[data-experience-mode="DEVELOPER"] #homeDeveloperSummary details {
   gap: 6px;
   align-items: center;
   color: var(--qtt-muted);
-  font-size: 12px;
+  font-size: var(--qtt-font-small);
 }
 
 .legend i {
@@ -793,6 +880,26 @@ body[data-experience-mode="DEVELOPER"] #homeDeveloperSummary details {
   padding: 10px 12px;
 }
 
+.chat-composer-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(88px, auto);
+  align-items: stretch;
+  gap: 0;
+}
+
+.chat-composer-row textarea {
+  min-width: 0;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.chat-composer-row .primary-command {
+  min-width: 88px;
+  margin-top: 0;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
 .field-label {
   display: block;
   margin-bottom: 6px;
@@ -813,7 +920,7 @@ body[data-experience-mode="DEVELOPER"] #homeDeveloperSummary details {
   gap: 4px;
   min-width: min(240px, 100%);
   color: var(--qtt-muted);
-  font-size: 12px;
+  font-size: var(--qtt-font-small);
   font-weight: 800;
 }
 
@@ -826,7 +933,7 @@ body[data-experience-mode="DEVELOPER"] #homeDeveloperSummary details {
   padding: 0 10px;
   border: 1px solid var(--qtt-border);
   border-radius: 8px;
-  background: var(--qtt-bg-soft);
+  background: var(--qtt-soft);
 }
 
 .compact-toggle input {
@@ -837,12 +944,21 @@ body[data-experience-mode="DEVELOPER"] #homeDeveloperSummary details {
 
 .control-row select,
 .control-row input,
-.workbench-fields input {
+.workbench-fields input,
+.workbench-fields select,
+.workbench-fields textarea {
   border: 1px solid var(--qtt-border);
   border-radius: 8px;
   background: var(--qtt-bg-panel);
   color: var(--qtt-text);
   padding: 0 10px;
+  width: 100%;
+}
+
+.workbench-fields textarea {
+  min-height: 92px;
+  padding-top: 10px;
+  resize: vertical;
 }
 
 .control-row .compact-toggle input {
@@ -879,7 +995,7 @@ body[data-experience-mode="DEVELOPER"] #homeDeveloperSummary details {
 .edge-components {
   margin-top: 10px;
   color: var(--qtt-muted);
-  font-size: 12px;
+  font-size: var(--qtt-font-small);
   font-weight: 750;
 }
 
@@ -901,8 +1017,19 @@ body[data-experience-mode="DEVELOPER"] #homeDeveloperSummary details {
   gap: 5px;
   min-width: 0;
   color: var(--qtt-muted);
-  font-size: 12px;
+  font-size: var(--qtt-font-small);
   font-weight: 800;
+}
+
+.local-status-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 10px 0;
+}
+
+.workbench-preview-card {
+  grid-column: span 2;
 }
 
 .comparison-card {
@@ -954,7 +1081,7 @@ body[data-experience-mode="DEVELOPER"] #homeDeveloperSummary details {
   gap: 5px;
   min-width: 0;
   color: var(--qtt-muted);
-  font-size: 12px;
+  font-size: var(--qtt-font-small);
   font-weight: 800;
 }
 
@@ -974,7 +1101,7 @@ body[data-experience-mode="DEVELOPER"] #homeDeveloperSummary details {
 .inline-validation {
   margin: 8px 0 0;
   color: var(--qtt-yellow);
-  font-size: 13px;
+  font-size: var(--qtt-font-compact);
   font-weight: 750;
 }
 
@@ -1031,12 +1158,12 @@ td {
   border-bottom: 1px solid var(--qtt-border);
   text-align: left;
   vertical-align: top;
-  font-size: 13px;
+  font-size: var(--qtt-font-compact);
 }
 
 th {
   color: var(--qtt-muted);
-  font-size: 12px;
+  font-size: var(--qtt-font-small);
   text-transform: uppercase;
 }
 
@@ -1056,7 +1183,7 @@ th {
 
 .timeline-step h3 {
   margin: 0 0 8px;
-  font-size: 14px;
+  font-size: var(--qtt-font-card-title);
 }
 
 .drilldown {
@@ -1151,18 +1278,9 @@ pre {
 
 @media (max-width: 767px) {
   .topbar {
-    align-items: flex-start;
-    flex-direction: column;
-    padding: 12px 14px;
-  }
-
-  .header-controls {
-    width: 100%;
-    justify-content: space-between;
-  }
-
-  .status-strip {
-    padding: 10px 12px;
+    align-items: center;
+    flex-direction: row;
+    padding: 6px 10px;
   }
 
   .layout-shell {
@@ -1174,11 +1292,20 @@ pre {
   }
 
   .workspace {
-    padding: 14px 12px 104px;
+    padding: 10px 12px 104px;
   }
 
   .section {
-    scroll-margin-top: 92px;
+    scroll-margin-top: 66px;
+  }
+
+  .owner-options-panel {
+    top: auto;
+    right: 8px;
+    bottom: 8px;
+    left: 8px;
+    width: auto;
+    max-height: min(78vh, 720px);
   }
 
   .section-head {
@@ -1273,7 +1400,7 @@ pre {
     background: var(--qtt-bg-panel);
     color: var(--qtt-muted);
     text-decoration: none;
-    font-size: 12px;
+    font-size: var(--qtt-font-small);
     font-weight: 800;
     white-space: normal;
     text-align: center;
@@ -1288,12 +1415,12 @@ pre {
 
 @media (max-width: 430px) {
   .brand-block h1 {
-    font-size: 19px;
+    font-size: calc(18px * var(--qtt-type-scale));
   }
 
   .status-tile .value,
   .metric-card .value {
-    font-size: 18px;
+    font-size: calc(18px * var(--qtt-type-scale));
   }
 
   .card,

@@ -58,6 +58,13 @@ def _assert_visible(page: Page, selector: str) -> None:
     page.locator(selector).first.wait_for(state="visible", timeout=10_000)
 
 
+def _choose_mode(page: Page, mode: str) -> None:
+    toggle = page.locator("#ownerOptionsToggle")
+    if toggle.count() and page.locator("#ownerOptionsPanel:visible").count() == 0:
+        toggle.click()
+    page.locator(f"[data-mode-choice='{mode}']:visible").click()
+
+
 def _open_menu(page: Page, selector: str) -> None:
     menu = page.locator(selector).first
     menu.wait_for(state="attached", timeout=10_000)
@@ -127,7 +134,7 @@ def run(repo: Path) -> None:
         _screenshot(page, repo, "collapsed_controls_compact", screenshots)
         checks.append("guided_default_compact_no_raw_refs_visible")
 
-        page.locator("[data-mode-choice='ADVANCED_OWNER']").click()
+        _choose_mode(page, "ADVANCED_OWNER")
         _assert_visible(page, "body[data-experience-mode='ADVANCED_OWNER']")
         _assert_visible(page, "[data-mode-panel='ADVANCED_OWNER']")
         advanced_metric_count = _visible_count(page, "[data-mode-advanced-metric]")
@@ -137,7 +144,7 @@ def run(repo: Path) -> None:
         _screenshot(page, repo, "advanced_density", screenshots)
         checks.append("advanced_metric_density_exceeds_guided")
 
-        page.locator("[data-mode-choice='DEVELOPER']").click()
+        _choose_mode(page, "DEVELOPER")
         _assert_visible(page, "body[data-experience-mode='DEVELOPER']")
         _assert_visible(page, "[data-mode-developer-technical]")
         developer_text = page.locator("[data-mode-panel='DEVELOPER']").inner_text(timeout=10_000)
@@ -148,7 +155,7 @@ def run(repo: Path) -> None:
         _screenshot(page, repo, "mode_density_compare", screenshots)
         checks.append("developer_technical_evidence_visible_only_in_developer")
 
-        page.locator("[data-mode-choice='GUIDED_OWNER']").click()
+        _choose_mode(page, "GUIDED_OWNER")
         _assert_visible(page, "body[data-experience-mode='GUIDED_OWNER']")
         assert _visible_count(page, "[data-mode-developer-technical]") == 0
         _screenshot(page, repo, "mode_diff_evidence", screenshots)

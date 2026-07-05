@@ -43,11 +43,13 @@
     "DARK",
     "LIGHT"
   ],
+  "strict_menu_only_header_chrome": true,
   "supported_modes": [
     "DARK",
     "LIGHT"
   ],
   "theme_preference_storage_non_secret_only": true,
-  "theme_switch_visible_in_desktop_header": true,
-  "theme_switch_visible_or_accessible_in_mobile_navigation": true
+  "theme_switch_visible_in_desktop_header": false,
+  "theme_switch_visible_only_after_owner_opens_menu": true,
+  "theme_switch_visible_or_accessible_in_mobile_navigation": false
 }

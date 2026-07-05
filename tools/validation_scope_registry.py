@@ -35,6 +35,7 @@ PR169_DASH1_UI1_BRANCH = "pr169-dash1-ui1-theme-switch-safe-renderer-v9"
 PR169_DASH1_UI1_R1_BRANCH = "pr169-dash1-ui1-r1-v3-owner12"
 PR169_DASH1_UI1_R2_BRANCH = "pr169-dash1-ui1-r2-guided-owner-coach-v7"
 PR169_DASH1_UI1_R2_R1_BRANCH = "pr169-dash1-ui1-r2-r1-interaction-v4"
+PR169_DASH1_UI1_R2_R2_BRANCH = "pr169-dash1-ui1-r2-r2-owner-product-ux"
 VALIDATION_FIXTURE_BRANCH = "pr-ci-fastfail-validation-context-preflight"
 
 _PR168_BRANCHES = frozenset(
@@ -68,6 +69,7 @@ _PR168_BRANCHES = frozenset(
         PR169_DASH1_UI1_R1_BRANCH,
         PR169_DASH1_UI1_R2_BRANCH,
         PR169_DASH1_UI1_R2_R1_BRANCH,
+        PR169_DASH1_UI1_R2_R2_BRANCH,
         VALIDATION_FIXTURE_BRANCH,
     }
 )
@@ -1630,6 +1632,7 @@ def explain_pr_scope_decision(branch: str, path: str) -> dict[str, object]:
         PR169_DASH1_UI1_R1_BRANCH,
         PR169_DASH1_UI1_R2_BRANCH,
         PR169_DASH1_UI1_R2_R1_BRANCH,
+        PR169_DASH1_UI1_R2_R2_BRANCH,
     }:
         dash1_decision = _pr169_dash1_scope_decision(branch_name, normalized)
         if dash1_decision:
