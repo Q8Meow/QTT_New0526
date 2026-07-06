@@ -58,6 +58,8 @@ PR169_DASH1_UI1_R2_BRANCH = registry.PR169_DASH1_UI1_R2_BRANCH
 PR169_DASH1_UI1_R2_R1_BRANCH = registry.PR169_DASH1_UI1_R2_R1_BRANCH
 PR169_DASH1_UI1_R2_R2_BRANCH = registry.PR169_DASH1_UI1_R2_R2_BRANCH
 PR169_DASH1_UI1_R2_R3_BRANCH = registry.PR169_DASH1_UI1_R2_R3_BRANCH
+PR169_DASH1_UI1_R2_R4_BRANCH = registry.PR169_DASH1_UI1_R2_R4_BRANCH
+PR169_DASH1_UI1_R2_R5_BRANCH = registry.PR169_DASH1_UI1_R2_R5_BRANCH
 FIXTURE_BRANCH = registry.VALIDATION_FIXTURE_BRANCH
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
@@ -98,6 +100,7 @@ def test_pr168_allowed_paths_pass_on_real_branch(path: str) -> None:
         "tools/build_pr169_dash1_owner_dashboard_ui.py",
         "tools/playwright_pr169_dash1_ui1_r2_visual_smoke.py",
         "tools/playwright_pr169_dash1_ui1_r2_r3_visual_smoke.py",
+        "tools/playwright_pr169_dash1_ui1_r2_r4_visual_smoke.py",
         "tools/pr168_rp5c_config.py",
         "tools/validate_pr169_dash1_owner_dashboard.py",
         "tools/validate_pr169_dash1_owner_dashboard_ui.py",
@@ -106,7 +109,11 @@ def test_pr168_allowed_paths_pass_on_real_branch(path: str) -> None:
         "tools/validate_source_fact_binding_connector_semantic_readiness_static.py",
         "tests/pr169_dash1/test_dash1_owner_surface_registry_single_source.py",
         "tests/pr169_dash1_ui1/test_ui1r2_next_step_router_generated.py",
+        "tests/pr169_dash1_ui1/test_ui1r2r5_owner_visual_qa_truth_repair.py",
         "tests/pr169_dash1_ui1/r2_contract_assertions.py",
+        "tests/pr168_rp5c/test_rp5c_input_integrity.py",
+        "docs/master_plan/generated/pr169_dash1/ui1_r2_r5/owner_visual_qa_truth_repair.generated.json",
+        "docs/master_plan/generated/pr169_dash1/ui1_r2_r5/centralization_manifest.generated.json",
         "tests/fail_closed/test_no_runtime_artifacts_strict.py",
         "tests/source_evidence/test_source_fact_binding_connector_semantic_readiness_static.py",
         "tools/run_validation_gates.py",
@@ -122,6 +129,8 @@ def test_pr169_dash1_allowed_paths_pass_on_real_branch(path: str) -> None:
     assert registry.is_pr_scoped_changed_path_allowed(PR169_DASH1_UI1_R2_R1_BRANCH, path)
     assert registry.is_pr_scoped_changed_path_allowed(PR169_DASH1_UI1_R2_R2_BRANCH, path)
     assert registry.is_pr_scoped_changed_path_allowed(PR169_DASH1_UI1_R2_R3_BRANCH, path)
+    assert registry.is_pr_scoped_changed_path_allowed(PR169_DASH1_UI1_R2_R4_BRANCH, path)
+    assert registry.is_pr_scoped_changed_path_allowed(PR169_DASH1_UI1_R2_R5_BRANCH, path)
     assert registry.is_pr_scoped_changed_path_allowed(FIXTURE_BRANCH, path)
 
 
@@ -150,6 +159,10 @@ def test_pr169_dash1_forbidden_paths_fail(path: str) -> None:
     )
     assert not registry.is_pr_scoped_changed_path_allowed(
         PR169_DASH1_UI1_R2_R3_BRANCH,
+        path,
+    )
+    assert not registry.is_pr_scoped_changed_path_allowed(
+        PR169_DASH1_UI1_R2_R5_BRANCH,
         path,
     )
 

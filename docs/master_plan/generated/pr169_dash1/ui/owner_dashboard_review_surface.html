@@ -216,7 +216,7 @@
       <section id="agents" class="section">
         <div class="section-head">
           <div>
-            <span class="eyebrow">PR165-D2 routed roles</span>
+            <span class="eyebrow">Agent roles routed</span>
             <h2>Agent Operations</h2>
           </div>
         </div>
@@ -294,20 +294,37 @@
     <div id="ownerSettingsBody" class="settings-body"></div>
   </aside>
 
-  <nav id="mobileBottomNav" class="mobile-bottom-nav" aria-label="Mobile bottom navigation">
-    <a href="#overview">Home</a>
-    <a href="#portfolio">Portfolio</a>
-    <a href="#trade-workbench">Trade Workbench</a>
-    <a href="#chat">Chat</a>
-    <a href="#decisions">Decisions</a>
-    <a href="#research">Research</a>
-    <a href="#edge-alpha">Edge/Alpha</a>
-    <a href="#agents">Agents</a>
-    <a href="#parameter-control">Parameters</a>
-    <a href="#quantum">Quantum</a>
-    <a href="#more">More</a>
-    <a href="#developer-mode">Developer</a>
+  <nav id="mobileBottomNav" class="mobile-bottom-nav" aria-label="Mobile bottom navigation" data-mobile-primary-count="5" data-mobile-navigation-model="OwnerMobileNavigationModelV1">
+    <a href="#overview" data-mobile-primary-tab="Home">Home</a>
+    <a href="#portfolio" data-mobile-primary-tab="Portfolio">Portfolio</a>
+    <a href="#trade-workbench" data-mobile-primary-tab="Trade">Trade</a>
+    <a href="#chat" data-mobile-primary-tab="Chat">Chat</a>
+    <button id="mobileMoreToggle" type="button" data-mobile-primary-tab="More" aria-expanded="false" aria-controls="mobileMoreSheet">More</button>
   </nav>
+
+  <aside id="mobileMoreSheet" class="mobile-more-sheet" aria-label="More dashboard destinations" aria-hidden="true" hidden>
+    <div class="drawer-head">
+      <div>
+        <span class="eyebrow">More destinations</span>
+        <h2>More</h2>
+      </div>
+      <button id="closeMobileMore" class="icon-command" type="button" aria-label="Close More destinations">Close</button>
+    </div>
+    <div class="mobile-more-grid">
+      <a href="#decisions" data-mobile-overflow-destination="Decision Queue">Decision Queue</a>
+      <a href="#research" data-mobile-overflow-destination="Research">Research</a>
+      <a href="#agents" data-mobile-overflow-destination="Agent Operations">Agent Operations</a>
+      <a href="#qku-formula" data-mobile-overflow-destination="QKU / Formula Routes">QKU / Formula Routes</a>
+      <a href="#quantum" data-mobile-overflow-destination="Quantum Control Center">Quantum Control Center</a>
+      <a href="#edge-alpha" data-mobile-overflow-destination="Edge / Alpha Board">Edge / Alpha Board</a>
+      <a href="#parameter-control" data-mobile-overflow-destination="Parameter Control">Parameter Control</a>
+      <a href="#more" data-mobile-overflow-destination="Reports / More">Reports / More</a>
+      <a href="#provider-stage" data-mobile-overflow-destination="Provider Stage Route Map">Provider Stage Route Map</a>
+      <a href="#developer-mode" data-mobile-overflow-destination="Developer Mode">Developer Mode</a>
+      <button id="mobileMoreSettings" type="button" data-mobile-overflow-destination="Settings">Settings</button>
+      <button id="mobileMoreTechnical" type="button" data-mobile-overflow-destination="Technical Details">Technical Details</button>
+    </div>
+  </aside>
 
   <script src="owner_dashboard_review_bootstrap.generated.js"></script>
   <script src="owner_dashboard_review_surface.js"></script>

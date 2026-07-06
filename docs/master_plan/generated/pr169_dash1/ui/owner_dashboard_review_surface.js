@@ -73,7 +73,8 @@ const DASHBOARD_DATA = window.QTT_OWNER_DASHBOARD_DATA || {
   ui1r2r3_education_drawers: { drawer_actions: [] },
   ui1r2r3_theme_interaction_accessibility: {},
   ui1r2r3_workbench_options_ranges: { range_policy: {}, option_catalog: {} },
-  ui1r2r4_semantic_bundle: { education_catalog: [], chat_qtt_guide_intents: [], field_semantics: [], agent_operations_projection: [], workflow_queue_projection: [], receipt_preview_projection: [] }
+  ui1r2r4_semantic_bundle: { education_catalog: [], chat_qtt_guide_intents: [], field_semantics: [], agent_operations_projection: [], workflow_queue_projection: [], receipt_preview_projection: [] },
+  ui1r2r5_visual_qa_truth_repair: { screenshot_proof_registry: [], owner_drawer_policy: {}, chart_tooltip_policy: {}, mobile_navigation_policy: {}, more_actions_policy: {} }
 };
 
 const RANGES = ["1D", "1W", "1M", "3M", "YTD", "1Y", "ALL"];
@@ -282,9 +283,20 @@ const DashboardSystem = (() => {
       .replace(/Review execution-adjusted trade metrics/g, "Trade Metrics")
       .replace(/Tell me what matters/g, "Key Insights")
       .replace(/Net Capital Cash Slot/g, "Net Capital")
-      .replace(/Today Result Slot/g, "Today's PnL")
-      .replace(/Week Result Slot/g, "Weekly PnL")
-      .replace(/Month Result Slot/g, "Monthly PnL");
+      .replace(/Today Result Slot/g, "Today")
+      .replace(/Week Result Slot/g, "Week")
+      .replace(/Month Result Slot/g, "Month")
+      .replace(/Provider Route:\s*Metrics1/gi, "Metrics provider pending")
+      .replace(/Provider Route:\s*Paper Loop/gi, "Paper receipts pending")
+      .replace(/Provider Route:\s*Agent Orch1/gi, "Agent runtime pending")
+      .replace(/Provider Route:/gi, "Provider pending:")
+      .replace(/PR165-D2 Routed Roles/gi, "Agent roles routed")
+      .replace(/AGENT_ORCH1_PROVIDER_PENDING/gi, "Agent runtime pending")
+      .replace(/SVC1_AGENTS_PAPER_LOOP_PROVIDER_PENDING/gi, "Paper receipts pending")
+      .replace(/PAPER_LOOP_OR_AGENT_ORCH_PROVIDER_PENDING/gi, "Workflow providers pending")
+      .replace(/LLM2_PROVIDER_PENDING/gi, "Research provider pending")
+      .replace(/No AGENT_ORCH\/SVC runtime attached/gi, "Agent runtime pending")
+      .replace(/Runtime side effect:\s*false/gi, "No live action was run");
     if (value.includes("::")) value = value.split("::").pop();
     value = value
       .replace(/runtime_side_effect/gi, "local preview safety")
@@ -385,7 +397,7 @@ const DashboardSystem = (() => {
     if (/^(Owner Decision|Actionable Card|QTT Workflow Item|Dashboard Evidence Row)$/i.test(title)) {
       return semanticFallback(row, fallback);
     }
-    return title;
+    return cleanTechnicalText(title);
   }
 
   function summary(row, fallback = "This item is connected to QTT technical evidence. Technical details are available below.") {
@@ -460,13 +472,23 @@ const DashboardSystem = (() => {
 
   function setActiveSurface(surfaceId, focusTargetId) {
     interactionState.activeSurface = surfaceId || "overview";
-    qsa(".rail a, .mobile-bottom-nav a").forEach((link) => {
+    hideAllChartTooltips();
+    closeMobileMore();
+    qsa(".rail a, .mobile-bottom-nav a, .mobile-more-grid a").forEach((link) => {
       const hrefSurface = (link.getAttribute("href") || "#overview").replace("#", "");
       const active = hrefSurface === interactionState.activeSurface;
       link.classList.toggle("is-active", active);
       if (active) link.setAttribute("aria-current", "page");
       else link.removeAttribute("aria-current");
     });
+    const moreButton = qs("#mobileMoreToggle");
+    if (moreButton) {
+      const overflowTargets = new Set(qsa(".mobile-more-grid a").map((link) => (link.getAttribute("href") || "").replace("#", "")));
+      const activeOverflow = overflowTargets.has(interactionState.activeSurface);
+      moreButton.classList.toggle("is-active", activeOverflow);
+      if (activeOverflow) moreButton.setAttribute("aria-current", "page");
+      else moreButton.removeAttribute("aria-current");
+    }
     const target = qs(`#${CSS.escape(focusTargetId || surfaceId || "overview")}`) || qs(`#${CSS.escape(surfaceId || "overview")}`);
     if (target) {
       target.setAttribute("tabindex", "-1");
@@ -668,7 +690,9 @@ function receiptCard(receipt) {
 function ownerControls(row, surface = "trade_workbench") {
   const guidance = DashboardSystem.guidanceFor(row, surface);
   const menu = DashboardSystem.menuFor(surface);
-  const options = asList(menu.options).slice(0, 7);
+  const r2r5Policy = DASHBOARD_DATA.ui1r2r5_visual_qa_truth_repair && DASHBOARD_DATA.ui1r2r5_visual_qa_truth_repair.more_actions_policy ? DASHBOARD_DATA.ui1r2r5_visual_qa_truth_repair.more_actions_policy : {};
+  const actionCap = Number(r2r5Policy.normal_owner_card_action_cap || 5);
+  const options = asList(menu.options).slice(0, Math.max(1, actionCap));
   const cardId = idOf(row, surface);
   const primary = options.find((option) => option.state === "ENABLED_LOCAL_PREVIEW") || options[0] || {
     owner_label: "Send to Trade Workbench",
@@ -676,7 +700,7 @@ function ownerControls(row, surface = "trade_workbench") {
     state: "ENABLED_LOCAL_PREVIEW"
   };
   const rowText = `${surface} ${row ? JSON.stringify(row).slice(0, 1600) : ""}`.toLowerCase();
-  const chartCapable = surface === "chart_frame" || Boolean(row && (row.chart_id || row.chart_kind || row.data_chart_render_state));
+  const chartCapable = surface === "chart_frame";
   const tcaCapable = /tca|cost|fee|spread|slippage|latency|fill|trade|candidate|workbench|edge|alpha/.test(rowText);
   const qkuCapable = /qku|formula|stack|quantum|trade|candidate|gap|route/.test(rowText);
   const drawerButtons = [
@@ -684,12 +708,28 @@ function ownerControls(row, surface = "trade_workbench") {
     { kind: "learn", labelText: "Learn", applicable: true },
     { kind: "why", labelText: "Why?", applicable: true },
     { kind: "chart_drilldown", labelText: "Open chart drilldown", applicable: chartCapable },
-    { kind: "tca_breakdown", labelText: "Show TCA / cost breakdown", applicable: tcaCapable },
-    { kind: "qku_formula_routes", labelText: "Show QKU/formula routes", applicable: qkuCapable },
+    { kind: "tca_breakdown", labelText: "Show TCA / cost breakdown", applicable: tcaCapable && ["chart_frame", "trade_workbench"].includes(surface) },
+    { kind: "qku_formula_routes", labelText: "Show QKU/formula routes", applicable: qkuCapable && ["chart_frame", "trade_workbench", "qku_formula"].includes(surface) },
     { kind: "technical_details", labelText: "Technical Details", applicable: true }
   ].filter((item) => item.applicable);
+  const visibleDrawerButtons = drawerButtons.slice(0, Math.max(1, actionCap));
+  const visibleOptionButtons = options
+    .filter((option) => option !== primary)
+    .filter((option) => option.state === "ENABLED_LOCAL_PREVIEW" || option.state === "PROVIDER_PENDING")
+    .filter((option) => {
+      const optionText = `${option.owner_label || ""} ${option.next_step_id || ""}`.toLowerCase();
+      if (!chartCapable && /chart|drilldown/.test(optionText)) return false;
+      if (!(tcaCapable && ["chart_frame", "trade_workbench"].includes(surface)) && /tca|cost/.test(optionText)) return false;
+      if (!(qkuCapable && ["chart_frame", "trade_workbench", "qku_formula"].includes(surface)) && /qku|formula/.test(optionText)) return false;
+      return true;
+    })
+    .slice(0, Math.max(0, actionCap - visibleDrawerButtons.length));
+  const rawRecommendedLabel = menu.recommended_action_label || guidance.recommended;
+  const recommendedLabel = (!chartCapable && /chart|drilldown/i.test(rawRecommendedLabel))
+    ? "Review local context"
+    : rawRecommendedLabel;
   return `
-    <div class="owner-card-controls" data-card-context="${safe(cardId)}" data-default-card-contract="one-primary-plus-more-actions" data-selected-card-id="${safe(cardId)}">
+    <div class="owner-card-controls" data-card-context="${safe(cardId)}" data-default-card-contract="one-primary-plus-more-actions" data-selected-card-id="${safe(cardId)}" data-owner-more-actions-policy="OwnerMoreActionsApplicabilityPolicyV1">
       <button
         class="menu-option action-primary"
         type="button"
@@ -699,11 +739,11 @@ function ownerControls(row, surface = "trade_workbench") {
         data-action-state="${safe(primary.state)}">
         ${safe(primary.owner_label)}
       </button>
-      <details class="next-action-menu" data-owner-next-action-menu="${safe(surface)}" data-secondary-actions-collapsed="true">
+      <details class="next-action-menu" data-owner-next-action-menu="${safe(surface)}" data-secondary-actions-collapsed="true" data-r2r5-action-cap="owner-contextual">
         <summary>More actions</summary>
         <div class="action-menu-body">
-          <p><strong>Recommended:</strong> ${safe(menu.recommended_action_label || guidance.recommended)}</p>
-          ${drawerButtons.map(({ kind, labelText }) => `
+          <p><strong>Recommended:</strong> ${safe(recommendedLabel)}</p>
+          ${visibleDrawerButtons.map(({ kind, labelText }) => `
             <button
               class="menu-option action-secondary"
               type="button"
@@ -715,7 +755,7 @@ function ownerControls(row, surface = "trade_workbench") {
               ${safe(labelText)}
             </button>
           `).join("")}
-          ${options.filter((option) => option !== primary).map((option) => `
+          ${visibleOptionButtons.map((option) => `
             <button
               class="menu-option action-secondary ${option.state === "PROVIDER_PENDING" ? "is-provider-pending" : ""} ${option.state === "ENABLED_LOCAL_PREVIEW" ? "" : "is-disabled"}"
               type="button"
@@ -826,48 +866,38 @@ function centralEducationEntry(kind) {
 
 function drawerSectionsFromEducation(kind, guidance) {
   const entry = centralEducationEntry(kind);
-  const sectionsByKind = {
-    explain: [
-      ["What this means", entry.what_it_means || entry.plain_english_summary],
-      ["How to read it", guidance.summary],
-      ["What is missing", guidance.missing],
-      ["What owner can do next", entry.what_owner_can_do_next || guidance.recommended],
-    ],
-    learn: [
-      ["Concept", entry.plain_english_summary],
-      ["Why it matters", entry.why_it_matters],
-      ["Authority boundary", entry.authority_boundary_copy],
-    ],
-    why: [
-      ["Why this matters", entry.why_it_matters],
-      ["Risk and route impact", guidance.risk],
-      ["Provider boundary", entry.provider_pending_copy],
-    ],
-    chart_drilldown: [
-      ["Chart drilldown", entry.plain_english_summary],
-      ["Data integrity", entry.provider_pending_copy],
-      ["Owner action", entry.what_owner_can_do_next],
-    ],
-    tca_breakdown: [
-      ["TCA / cost", entry.plain_english_summary],
-      ["What it covers", entry.what_it_means],
-      ["Owner action", entry.what_owner_can_do_next],
-    ],
-    qku_formula_routes: [
-      ["QKU / formula route", entry.plain_english_summary],
-      ["Immutable vs mutable", entry.what_it_means],
-      ["Route/gap status", entry.provider_pending_copy],
-    ],
-    technical_details: [
-      ["Technical summary", entry.plain_english_summary],
-      ["Raw selected context", "Raw refs, registry evidence, provider routes, validation refs, and debug fields are shown only here or in Developer mode."],
-      ["Authority", entry.authority_boundary_copy],
-    ],
-  };
-  return sectionsByKind[kind] || sectionsByKind.explain;
+  const meaning = entry.what_it_means || entry.plain_english_summary || guidance.summary;
+  const missing = guidance.missing || "Provider receipts and raw technical refs stay unavailable until the matching provider stage exists.";
+  const next = entry.what_owner_can_do_next || guidance.recommended;
+  const provider = entry.provider_pending_copy || "No live provider, agent, replay, paper, connector, online search, or order-release work runs here.";
+  return [
+    ["What this means", meaning],
+    ["Why it matters", entry.why_it_matters || guidance.why],
+    ["What you can do next", next],
+    ["What is missing", missing],
+    ["Provider boundary", provider],
+  ];
+}
+
+function rawTechnicalPayloadHtml({ kind, selectedCardId, selectedActionId, contentSignature, educationEntry, row }) {
+  return `
+    <div class="drawer-block technical-detail-block" data-technical-payload="true" data-technical-details-expanded="${kind === "technical_details" ? "true" : "false"}">
+      <h3>Technical Details payload</h3>
+      <div class="preview-grid">
+        <span>Selected card: ${safe(selectedCardId)}</span>
+        <span>Selected action: ${safe(selectedActionId)}</span>
+        <span>Drawer kind: ${safe(kind)}</span>
+        <span>Content signature: ${safe(contentSignature)}</span>
+        <span>Education: ${safe(educationEntry.education_id || "central catalog")}</span>
+        <span>Runtime side effect: false</span>
+      </div>
+      ${badges(row)}
+    </div>
+  `;
 }
 
 function openDrawer(title, kicker, row = {}, kind = "general") {
+  hideAllChartTooltips();
   const drawer = qs("#drilldownDrawer");
   const guidance = DashboardSystem.guidanceFor(row, kind);
   const rows = technicalRows(row);
@@ -885,17 +915,11 @@ function openDrawer(title, kicker, row = {}, kind = "general") {
   drawer.dataset.runtimeSideEffectAllowed = "false";
   qs("#drawerTitle").textContent = title || educationEntry.owner_title || guidance.title;
   qs("#drawerKicker").textContent = kicker || "Evidence and routing";
+  const technicalPayload = rawTechnicalPayloadHtml({ kind, selectedCardId, selectedActionId, contentSignature, educationEntry, row });
   qs("#drawerBody").innerHTML = `
-    <div class="drawer-block" data-drilldown-kind="${safe(kind)}" data-selected-card-id="${safe(selectedCardId)}" data-selected-action-id="${safe(selectedActionId)}" data-content-signature="${safe(contentSignature)}" data-central-education-id="${safe(educationEntry.education_id || "")}">
-      <h3>Drawer payload</h3>
-      <div class="preview-grid">
-        <span>Selected card: ${safe(selectedCardId)}</span>
-        <span>Selected action: ${safe(selectedActionId)}</span>
-        <span>Drawer kind: ${safe(kind)}</span>
-        <span>Content signature: ${safe(contentSignature)}</span>
-        <span>Education: ${safe(educationEntry.education_id || "central catalog")}</span>
-        <span>Runtime side effect: false</span>
-      </div>
+    <div class="drawer-block owner-education-block" data-drilldown-kind="${safe(kind)}" data-selected-card-id="${safe(selectedCardId)}" data-selected-action-id="${safe(selectedActionId)}" data-content-signature="${safe(contentSignature)}" data-central-education-id="${safe(educationEntry.education_id || "")}" data-owner-drawer-primary-sections="true">
+      <h3>${safe(educationEntry.owner_title || guidance.title)}</h3>
+      <p>${safe(educationEntry.plain_english_summary || guidance.summary)}</p>
       ${badges(row)}
     </div>
     ${sections.map(([heading, text]) => `
@@ -930,12 +954,13 @@ function openDrawer(title, kicker, row = {}, kind = "general") {
       <h3>Evidence and routing summary</h3>
       ${kind === "technical_details" && rows.length ? rows.slice(0, 12).map(([key, value]) => `<p><strong>${safe(key)}:</strong> ${safe(value)}</p>`).join("") : "<p>Raw refs stay in Technical Details. Owner education views keep plain-English copy.</p>"}
     </div>
-    <div class="drawer-block">
-      <details>
-        <summary>Open raw technical data</summary>
-        <pre>${kind === "technical_details" ? safe(JSON.stringify(row, null, 2)) : "Open Technical Details for raw refs."}</pre>
+    ${kind === "technical_details" ? technicalPayload : `
+      <details class="drawer-block technical-detail-block" data-technical-details-collapsed="true">
+        <summary>Technical Details</summary>
+        ${technicalPayload}
+        <pre>${safe(JSON.stringify(row, null, 2))}</pre>
       </details>
-    </div>
+    `}
   `;
   drawer.classList.add("open");
   drawer.setAttribute("aria-hidden", "false");
@@ -1233,6 +1258,7 @@ function renderRanges() {
   `).join("");
   qsa("#rangeButtons button").forEach((button) => {
     button.addEventListener("click", () => {
+      hideAllChartTooltips();
       qsa("#rangeButtons button").forEach((item) => {
         item.classList.toggle("active", item === button);
         item.setAttribute("aria-pressed", item === button ? "true" : "false");
@@ -1371,12 +1397,12 @@ function renderChartPanel(row, index) {
       <div class="mini-range" role="group" aria-label="${safe(title)} local range controls">
         ${(row.supported_time_ranges || RANGES).slice(0, 7).map((range, i) => `<button class="seg-button ${i === 0 ? "active" : ""}" type="button" data-local-range="${safe(range)}" aria-pressed="${i === 0 ? "true" : "false"}">${safe(range)}</button>`).join("")}
       </div>
-      <div class="chart-canvas provider-frame" role="img" tabindex="0" aria-label="${safe(title)} interactive chart contract" data-chart-interaction="OwnerChartInteractionPolicyV1" data-selected-range="${safe((row.supported_time_ranges || RANGES)[0] || "1D")}">
+      <div class="chart-canvas provider-frame" role="img" tabindex="0" aria-label="${safe(title)} interactive chart contract" data-chart-interaction="OwnerChartInteractionPolicyV1" data-selected-range="${safe((row.supported_time_ranges || RANGES)[0] || "1D")}" data-tooltip-state="hidden">
         ${chartSvg(row, index)}
         <div class="chart-interaction-layer" aria-hidden="true"></div>
         <div class="chart-crosshair"></div>
         <div class="chart-focus-point"></div>
-        <div class="chart-tooltip" role="status">
+        <div class="chart-tooltip" role="status" data-chart-tooltip-visible="false" aria-hidden="true">
           <strong>${safe(title)}</strong><br>
           Range: <span data-chart-tooltip-range>${safe((row.supported_time_ranges || RANGES)[0] || "1D")}</span><br>
           Time bucket: <span data-chart-tooltip-bucket>Day 12</span><br>
@@ -1402,6 +1428,21 @@ function renderChartPanel(row, index) {
   `;
 }
 
+function hideChartTooltip(canvas) {
+  if (!canvas) return;
+  canvas.classList.remove("is-focused");
+  canvas.dataset.tooltipState = "hidden";
+  const tooltip = qs(".chart-tooltip", canvas);
+  if (tooltip) {
+    tooltip.dataset.chartTooltipVisible = "false";
+    tooltip.setAttribute("aria-hidden", "true");
+  }
+}
+
+function hideAllChartTooltips(root = document) {
+  qsa(".chart-canvas[data-chart-interaction]", root).forEach((canvas) => hideChartTooltip(canvas));
+}
+
 function updateChartFocus(canvas, clientX) {
   const rect = canvas.getBoundingClientRect();
   const points = chartPointsFor();
@@ -1410,6 +1451,7 @@ function updateChartFocus(canvas, clientX) {
   const xPercent = (nearest.x / 420) * 100;
   const yPercent = (nearest.y / 220) * 100;
   canvas.classList.add("is-focused");
+  canvas.dataset.tooltipState = "visible";
   const crosshair = qs(".chart-crosshair", canvas);
   const focus = qs(".chart-focus-point", canvas);
   const tooltip = qs(".chart-tooltip", canvas);
@@ -1420,6 +1462,8 @@ function updateChartFocus(canvas, clientX) {
     focus.style.top = `${yPercent}%`;
   }
   if (tooltip) {
+    tooltip.dataset.chartTooltipVisible = "true";
+    tooltip.setAttribute("aria-hidden", "false");
     qs("[data-chart-tooltip-range]", tooltip).textContent = range;
     qs("[data-chart-tooltip-bucket]", tooltip).textContent = nearest.bucket;
   }
@@ -1429,7 +1473,10 @@ function wireChartInteractions(root = document) {
   qsa(".chart-canvas[data-chart-interaction]", root).forEach((canvas) => {
     if (canvas.dataset.chartWired === "true") return;
     canvas.dataset.chartWired = "true";
+    canvas.dataset.tooltipState = "hidden";
     canvas.addEventListener("mousemove", (event) => updateChartFocus(canvas, event.clientX));
+    canvas.addEventListener("mouseleave", () => hideChartTooltip(canvas));
+    canvas.addEventListener("pointerleave", () => hideChartTooltip(canvas));
     canvas.addEventListener("touchstart", (event) => {
       const touch = event.touches[0];
       if (touch) updateChartFocus(canvas, touch.clientX);
@@ -1438,7 +1485,12 @@ function wireChartInteractions(root = document) {
       const rect = canvas.getBoundingClientRect();
       updateChartFocus(canvas, rect.left + rect.width * 0.5);
     });
+    canvas.addEventListener("blur", () => hideChartTooltip(canvas));
     canvas.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        hideChartTooltip(canvas);
+        return;
+      }
       if (!["ArrowLeft", "ArrowRight"].includes(event.key)) return;
       event.preventDefault();
       const rect = canvas.getBoundingClientRect();
@@ -1474,13 +1526,14 @@ function renderCharts() {
   qsa(".mini-range button").forEach((button) => {
     button.addEventListener("click", (event) => {
       event.stopPropagation();
+      const panel = event.currentTarget.closest(".chart-panel");
+      const canvas = qs(".chart-canvas", panel);
+      hideChartTooltip(canvas);
       const group = event.currentTarget.closest(".mini-range");
       qsa("button", group).forEach((item) => {
         item.classList.toggle("active", item === event.currentTarget);
         item.setAttribute("aria-pressed", item === event.currentTarget ? "true" : "false");
       });
-      const panel = event.currentTarget.closest(".chart-panel");
-      const canvas = qs(".chart-canvas", panel);
       const rangeLabel = qs("[data-selected-range-label]", panel);
       if (canvas) canvas.dataset.selectedRange = event.currentTarget.dataset.localRange;
       if (rangeLabel) rangeLabel.textContent = event.currentTarget.dataset.localRange;
@@ -2446,6 +2499,53 @@ function setSettingsCenter(open) {
   }
 }
 
+function setMobileMore(open) {
+  const panel = qs("#mobileMoreSheet");
+  const toggle = qs("#mobileMoreToggle");
+  if (!panel || !toggle) return;
+  panel.hidden = !open;
+  panel.classList.toggle("open", Boolean(open));
+  panel.setAttribute("aria-hidden", open ? "false" : "true");
+  toggle.setAttribute("aria-expanded", open ? "true" : "false");
+  if (open) {
+    hideAllChartTooltips();
+    const first = qs("a, button", panel);
+    if (first) first.focus();
+  }
+}
+
+function closeMobileMore() {
+  setMobileMore(false);
+}
+
+function initMobileMore() {
+  const toggle = qs("#mobileMoreToggle");
+  const close = qs("#closeMobileMore");
+  const settings = qs("#mobileMoreSettings");
+  const technical = qs("#mobileMoreTechnical");
+  const panel = qs("#mobileMoreSheet");
+  if (!toggle || !panel) return;
+  toggle.addEventListener("click", (event) => {
+    event.preventDefault();
+    setMobileMore(toggle.getAttribute("aria-expanded") !== "true");
+  });
+  if (close) close.addEventListener("click", closeMobileMore);
+  qsa("a[data-mobile-overflow-destination]", panel).forEach((link) => {
+    link.addEventListener("click", () => {
+      const surface = (link.getAttribute("href") || "#more").replace("#", "");
+      DashboardSystem.setActiveSurface(surface, surface);
+    });
+  });
+  if (settings) settings.addEventListener("click", () => {
+    closeMobileMore();
+    setSettingsCenter(true);
+  });
+  if (technical) technical.addEventListener("click", () => {
+    closeMobileMore();
+    openDrawer("Dashboard technical details", "Renderer, not execution authority", DASHBOARD_DATA.authority_boundary || {}, "technical_details");
+  });
+}
+
 function renderChatAndTrade() {
   const examples = asList(DASHBOARD_DATA.ui1r1_chat_examples && DASHBOARD_DATA.ui1r1_chat_examples.examples);
   const presets = chatPresetRows();
@@ -2567,7 +2667,7 @@ function renderChatAndTrade() {
     const ownerLabel = field.owner_label || label(fieldId);
     const hidden = field.shown_when_field ? 'data-hidden-until-other="true"' : "";
     const state = field.interaction_state || (field.required ? "input_required" : "optional_input");
-    const fieldAttrs = `data-workbench-field-shell="${safe(fieldId)}" data-interaction-state="${safe(state)}" data-field-initial-state="${safe(state)}" data-required="${field.required ? "true" : "false"}" data-source-category="${safe(field.source_category || "safe_ui_default")}" data-authority="${safe(field.authority || "local_preview_guardrail")}" ${hidden} data-shown-when-field="${safe(field.shown_when_field || "")}" data-shown-when-value="${safe(field.shown_when_value || "")}"`;
+    const fieldAttrs = `data-workbench-field-shell="${safe(fieldId)}" data-interaction-state="${safe(state)}" data-field-initial-state="${safe(state)}" data-owner-color-proof="${safe(state)}" data-required="${field.required ? "true" : "false"}" data-source-category="${safe(field.source_category || "safe_ui_default")}" data-authority="${safe(field.authority || "local_preview_guardrail")}" ${hidden} data-shown-when-field="${safe(field.shown_when_field || "")}" data-shown-when-value="${safe(field.shown_when_value || "")}"`;
     const labelHeader = `<span class="workbench-label-text">${safe(ownerLabel)}</span>${interactionBadge(state)}${field.source_category === "candidate_owner_custom" ? badge("candidate / local preview only", "gray") : ""}`;
     if (field.input_kind === "select" && field.option_source && options[field.option_source]) {
       return `
@@ -2699,6 +2799,7 @@ function updateWorkbenchFieldStates(values) {
     const required = shell.dataset.required === "true";
     const nextState = visible && value ? "review_required" : required ? "input_required" : "optional_input";
     shell.dataset.interactionState = nextState;
+    shell.dataset.ownerColorProof = nextState;
     shell.setAttribute("aria-label", `${label(fieldId)} ${label(nextState)}`);
     const badgeNode = qs("[data-interaction-badge]", shell);
     if (badgeNode) {
@@ -2816,7 +2917,7 @@ function renderAgentsAndContracts() {
         <span>Quarantine: provider-pending</span>
         <span>Receipts: provider-pending</span>
       </div>
-      ${badges({ provider_stage: "AGENT_ORCH1_PROVIDER_PENDING", authority_boundary_ref: authorityBoundaryRef }, ["PR165-D2 refs or gaps"])}
+      ${badges({ provider_stage: "AGENT_ORCH1_PROVIDER_PENDING", authority_boundary_ref: authorityBoundaryRef }, ["Agent role refs or gaps"])}
     </article>
     ${agentRows.slice(0, 14).map((row) => `
       <article class="card agent-card" data-objection-type="${safe(row.objection_type || "")}" data-agent-row-id="${safe(row.agent_id || row.row_id || "")}" data-interaction-state="provider_pending">
@@ -2828,7 +2929,7 @@ function renderAgentsAndContracts() {
           <span>Trust/KPI: ${safe(row.trust_score || "provider-pending")}</span>
           <span>Quarantine: ${safe(row.quarantine_state || "provider-pending")}</span>
           <span>Receipt: ${safe(row.last_receipt || row.receipt_preview || "provider-pending")}</span>
-          <span>Blocked: ${safe(row.blocked_reason || "provider-pending")}</span>
+          <span>Blocked: ${safe(label(row.blocked_reason || "provider-pending"))}</span>
         </div>
         ${row.objection_type ? `<div class="bar-row"><span>Objection</span><div class="bar-track"><div class="bar-fill" style="--bar-width:66%;--bar-color:var(--qtt-orange)"></div></div><span>routed</span></div>` : ""}
         ${badges(row, ["provider pending", "no fake agent activity"])}
@@ -2844,7 +2945,7 @@ function renderAgentsAndContracts() {
   qs("#qttTeamWorkflowQueue").innerHTML = `
     <article class="wide-card monitoring-shell-card" data-workflow-queue-shell="OwnerWorkflowQueueStateV1" data-interaction-state="provider_pending">
       <h3>QTT Team Workflow Queue</h3>
-      <p>All current and upcoming workflows stay local/static/provider-pending here. Responsible, supporting, and escalation agents are tags for later orchestration, not running tasks.</p>
+      <p>provider-pending / not running. Responsible agents, supporting agents, escalation, and Workflow stages are shown as route tags only; no fake runtime queue.</p>
       ${badges({ provider_stage: "SVC1_AGENTS_PAPER_LOOP_PROVIDER_PENDING", authority_boundary_ref: authorityBoundaryRef }, ["team queue shell"])}
     </article>
     ${workflowRows.map((row) => `
@@ -2874,7 +2975,7 @@ function renderAgentsAndContracts() {
   qs("#auditReceiptPreview").innerHTML = `
     <article class="wide-card monitoring-shell-card" data-receipt-preview-shell="OwnerReceiptPreviewStateV1" data-interaction-state="provider_pending">
       <h3>Audit Trail / Receipts Preview</h3>
-      <p>Proof slots for later runtime, agent, memory, paper, no-trade, risk, TCA, and owner-action receipts. No fake timestamps, fake paper/live values, fake agent actions, or order receipts are created.</p>
+      <p>provider-pending / no fake receipts. Proof slots for later runtime, agent, memory, paper, no-trade, risk, TCA, and owner-action receipts. No fake timestamps, fake paper/live values, fake agent actions, or order receipts are created.</p>
       ${badges({ provider_stage: "SVC1_AGENTS_PAPER_LOOP_PROVIDER_PENDING", authority_boundary_ref: authorityBoundaryRef }, ["receipt preview only"])}
     </article>
     ${receiptRows.map((row) => `
@@ -3077,7 +3178,7 @@ function applySearch() {
 }
 
 function wireNavigation() {
-  const links = [...qsa(".mobile-bottom-nav a"), ...qsa(".rail a")];
+  const links = [...qsa(".mobile-bottom-nav a"), ...qsa(".rail a"), ...qsa(".mobile-more-grid a")];
   links.forEach((link) => {
     link.addEventListener("click", () => {
       const surface = (link.getAttribute("href") || "#overview").replace("#", "");
@@ -3091,6 +3192,9 @@ function wireNavigation() {
 function repairStaticShellCopy() {
   const overviewEyebrow = qs("#overview .section-head .eyebrow");
   if (overviewEyebrow) overviewEyebrow.textContent = "Guided owner mode - local previews";
+  document.body.dataset.ownerCopyCleanup = "r2-r5";
+  const agentEyebrow = qs("#agents .section-head .eyebrow");
+  if (agentEyebrow) agentEyebrow.textContent = "Agent roles routed";
 }
 
 function render() {
@@ -3100,6 +3204,7 @@ function render() {
   initExperienceMode();
   initOptionsMenu();
   initTopPanels();
+  initMobileMore();
   initSidebar();
   repairStaticShellCopy();
   renderStatus();
@@ -3128,6 +3233,8 @@ function render() {
       closeOwnerOptions();
       setSettingsCenter(false);
       setQttGuide(false);
+      closeMobileMore();
+      hideAllChartTooltips();
     }
   });
 }

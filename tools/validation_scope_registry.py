@@ -38,6 +38,7 @@ PR169_DASH1_UI1_R2_R1_BRANCH = "pr169-dash1-ui1-r2-r1-interaction-v4"
 PR169_DASH1_UI1_R2_R2_BRANCH = "pr169-dash1-ui1-r2-r2-owner-product-ux"
 PR169_DASH1_UI1_R2_R3_BRANCH = "pr169-dash1-ui1-r2-r3-owner-product-polish"
 PR169_DASH1_UI1_R2_R4_BRANCH = "pr169-dash1-ui1-r2-r4-owner-visual-acceptance-agent-monitoring"
+PR169_DASH1_UI1_R2_R5_BRANCH = "pr169-dash1-ui1-r2-r5-owner-visual-qa-truth-repair"
 VALIDATION_FIXTURE_BRANCH = "pr-ci-fastfail-validation-context-preflight"
 
 _PR168_BRANCHES = frozenset(
@@ -74,6 +75,7 @@ _PR168_BRANCHES = frozenset(
         PR169_DASH1_UI1_R2_R2_BRANCH,
         PR169_DASH1_UI1_R2_R3_BRANCH,
         PR169_DASH1_UI1_R2_R4_BRANCH,
+        PR169_DASH1_UI1_R2_R5_BRANCH,
         VALIDATION_FIXTURE_BRANCH,
     }
 )
@@ -722,6 +724,7 @@ _PR169_DASH1_ALLOWED_EXACT_PATHS = frozenset(
         "tools/validation_scope_registry.py",
         "tools/validate_validation_scope_registry.py",
         "tests/fail_closed/test_no_runtime_artifacts_strict.py",
+        "tests/pr168_rp5c/test_rp5c_input_integrity.py",
         "tests/source_evidence/test_source_fact_binding_connector_semantic_readiness_static.py",
         "tests/tools/test_validation_scope_registry.py",
         "tests/tools/test_validation_inventory.py",
@@ -1639,6 +1642,7 @@ def explain_pr_scope_decision(branch: str, path: str) -> dict[str, object]:
         PR169_DASH1_UI1_R2_R2_BRANCH,
         PR169_DASH1_UI1_R2_R3_BRANCH,
         PR169_DASH1_UI1_R2_R4_BRANCH,
+        PR169_DASH1_UI1_R2_R5_BRANCH,
     }:
         dash1_decision = _pr169_dash1_scope_decision(branch_name, normalized)
         if dash1_decision:

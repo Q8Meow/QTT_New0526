@@ -18,6 +18,7 @@
   ],
   "drilldown_drawer_uses_bottom_sheet_on_mobile": true,
   "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config",
+  "long_labels_moved_to_more_overflow": true,
   "meta": {
     "agent_consumable_authority": false,
     "artifact_id": "UI1_MOBILE_NAVIGATION",
@@ -32,104 +33,210 @@
     "source_truth_authority": false,
     "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
   },
+  "mobile_bottom_navigation_no_overlap_policy": "five primary tabs plus More overflow sheet",
   "mobile_bottom_navigation_rendered": true,
+  "mobile_primary_tab_count": 5,
   "mode_theme_text_size_status_inside_options_menu": true,
+  "more_overflow_reuses_owner_surface_resolver": true,
+  "overflow_tab_labels": [
+    "Decision Queue",
+    "Research",
+    "Agent Operations",
+    "QKU / Formula Routes",
+    "Quantum Control Center",
+    "Edge / Alpha Board",
+    "Parameter Control",
+    "Provider Stage Route Map",
+    "Developer Mode"
+  ],
+  "overflow_tabs": [
+    {
+      "desktop_label": "Decision Queue",
+      "label": "Decisions",
+      "tab_id": "MOBILE_OVERFLOW_DECISIONS",
+      "target": "#decisions",
+      "uses_owner_action_registry": true,
+      "uses_owner_dashboard_state_model": true,
+      "uses_owner_surface_resolver": true
+    },
+    {
+      "desktop_label": "Research",
+      "label": "Research",
+      "tab_id": "MOBILE_OVERFLOW_RESEARCH",
+      "target": "#research",
+      "uses_owner_action_registry": true,
+      "uses_owner_dashboard_state_model": true,
+      "uses_owner_surface_resolver": true
+    },
+    {
+      "desktop_label": "Agent Operations",
+      "label": "Agents",
+      "tab_id": "MOBILE_OVERFLOW_AGENTS",
+      "target": "#agents",
+      "uses_owner_action_registry": true,
+      "uses_owner_dashboard_state_model": true,
+      "uses_owner_surface_resolver": true
+    },
+    {
+      "desktop_label": "QKU / Formula Routes",
+      "label": "QKU",
+      "tab_id": "MOBILE_OVERFLOW_QKU_FORMULA",
+      "target": "#qku-formula",
+      "uses_owner_action_registry": true,
+      "uses_owner_dashboard_state_model": true,
+      "uses_owner_surface_resolver": true
+    },
+    {
+      "desktop_label": "Quantum Control Center",
+      "label": "Quantum",
+      "tab_id": "MOBILE_OVERFLOW_QUANTUM",
+      "target": "#quantum",
+      "uses_owner_action_registry": true,
+      "uses_owner_dashboard_state_model": true,
+      "uses_owner_surface_resolver": true
+    },
+    {
+      "desktop_label": "Edge / Alpha Board",
+      "label": "Edge",
+      "tab_id": "MOBILE_OVERFLOW_EDGE_ALPHA",
+      "target": "#edge-alpha",
+      "uses_owner_action_registry": true,
+      "uses_owner_dashboard_state_model": true,
+      "uses_owner_surface_resolver": true
+    },
+    {
+      "desktop_label": "Parameter Control",
+      "label": "Parameters",
+      "tab_id": "MOBILE_OVERFLOW_PARAMETERS",
+      "target": "#parameter-control",
+      "uses_owner_action_registry": true,
+      "uses_owner_dashboard_state_model": true,
+      "uses_owner_surface_resolver": true
+    },
+    {
+      "desktop_label": "Provider Stage Route Map",
+      "label": "Provider",
+      "tab_id": "MOBILE_OVERFLOW_PROVIDER_STAGE",
+      "target": "#provider-stage",
+      "uses_owner_action_registry": true,
+      "uses_owner_dashboard_state_model": true,
+      "uses_owner_surface_resolver": true
+    },
+    {
+      "desktop_label": "Developer Mode",
+      "label": "Developer",
+      "tab_id": "MOBILE_OVERFLOW_DEVELOPER",
+      "target": "#developer-mode",
+      "uses_owner_action_registry": true,
+      "uses_owner_dashboard_state_model": true,
+      "uses_owner_surface_resolver": true
+    }
+  ],
+  "primary_tab_labels": [
+    "Home",
+    "Portfolio",
+    "Trade",
+    "Chat",
+    "More"
+  ],
+  "primary_tabs": [
+    {
+      "desktop_label": "Home",
+      "label": "Home",
+      "tab_id": "MOBILE_TAB_HOME",
+      "target": "#overview",
+      "uses_owner_action_registry": true,
+      "uses_owner_dashboard_state_model": true,
+      "uses_owner_surface_resolver": true
+    },
+    {
+      "desktop_label": "Portfolio",
+      "label": "Portfolio",
+      "tab_id": "MOBILE_TAB_PORTFOLIO",
+      "target": "#portfolio",
+      "uses_owner_action_registry": true,
+      "uses_owner_dashboard_state_model": true,
+      "uses_owner_surface_resolver": true
+    },
+    {
+      "desktop_label": "Trade Workbench",
+      "label": "Trade",
+      "tab_id": "MOBILE_TAB_TRADE",
+      "target": "#trade-workbench",
+      "uses_owner_action_registry": true,
+      "uses_owner_dashboard_state_model": true,
+      "uses_owner_surface_resolver": true
+    },
+    {
+      "desktop_label": "Chat",
+      "label": "Chat",
+      "tab_id": "MOBILE_TAB_CHAT",
+      "target": "#chat",
+      "uses_owner_action_registry": true,
+      "uses_owner_dashboard_state_model": true,
+      "uses_owner_surface_resolver": true
+    },
+    {
+      "desktop_label": "More",
+      "label": "More",
+      "tab_id": "MOBILE_TAB_MORE",
+      "target": "#more",
+      "uses_owner_action_registry": true,
+      "uses_owner_dashboard_state_model": true,
+      "uses_owner_surface_resolver": true
+    }
+  ],
+  "separate_mobile_state_model_created": false,
   "stable_tab_labels": [
     "Home",
     "Portfolio",
-    "Trade Workbench",
+    "Trade",
     "Chat",
-    "Decisions",
-    "Research",
-    "Edge / Alpha",
-    "Agents",
-    "Parameters",
-    "Quantum",
-    "More",
-    "Developer"
+    "More"
   ],
   "stale_data_banner_rendered_on_mobile_viewports": true,
   "tabs": [
     {
+      "desktop_label": "Home",
       "label": "Home",
       "tab_id": "MOBILE_TAB_HOME",
+      "target": "#overview",
       "uses_owner_action_registry": true,
       "uses_owner_dashboard_state_model": true,
       "uses_owner_surface_resolver": true
     },
     {
+      "desktop_label": "Portfolio",
       "label": "Portfolio",
       "tab_id": "MOBILE_TAB_PORTFOLIO",
+      "target": "#portfolio",
       "uses_owner_action_registry": true,
       "uses_owner_dashboard_state_model": true,
       "uses_owner_surface_resolver": true
     },
     {
-      "label": "Trade Workbench",
-      "tab_id": "MOBILE_TAB_TRADE_WORKBENCH",
+      "desktop_label": "Trade Workbench",
+      "label": "Trade",
+      "tab_id": "MOBILE_TAB_TRADE",
+      "target": "#trade-workbench",
       "uses_owner_action_registry": true,
       "uses_owner_dashboard_state_model": true,
       "uses_owner_surface_resolver": true
     },
     {
+      "desktop_label": "Chat",
       "label": "Chat",
       "tab_id": "MOBILE_TAB_CHAT",
+      "target": "#chat",
       "uses_owner_action_registry": true,
       "uses_owner_dashboard_state_model": true,
       "uses_owner_surface_resolver": true
     },
     {
-      "label": "Decisions",
-      "tab_id": "MOBILE_TAB_DECISIONS",
-      "uses_owner_action_registry": true,
-      "uses_owner_dashboard_state_model": true,
-      "uses_owner_surface_resolver": true
-    },
-    {
-      "label": "Research",
-      "tab_id": "MOBILE_TAB_RESEARCH",
-      "uses_owner_action_registry": true,
-      "uses_owner_dashboard_state_model": true,
-      "uses_owner_surface_resolver": true
-    },
-    {
-      "label": "Edge / Alpha",
-      "tab_id": "MOBILE_TAB_EDGE_ALPHA",
-      "uses_owner_action_registry": true,
-      "uses_owner_dashboard_state_model": true,
-      "uses_owner_surface_resolver": true
-    },
-    {
-      "label": "Agents",
-      "tab_id": "MOBILE_TAB_AGENTS",
-      "uses_owner_action_registry": true,
-      "uses_owner_dashboard_state_model": true,
-      "uses_owner_surface_resolver": true
-    },
-    {
-      "label": "Parameters",
-      "tab_id": "MOBILE_TAB_PARAMETERS",
-      "uses_owner_action_registry": true,
-      "uses_owner_dashboard_state_model": true,
-      "uses_owner_surface_resolver": true
-    },
-    {
-      "label": "Quantum",
-      "tab_id": "MOBILE_TAB_QUANTUM",
-      "uses_owner_action_registry": true,
-      "uses_owner_dashboard_state_model": true,
-      "uses_owner_surface_resolver": true
-    },
-    {
+      "desktop_label": "More",
       "label": "More",
       "tab_id": "MOBILE_TAB_MORE",
-      "uses_owner_action_registry": true,
-      "uses_owner_dashboard_state_model": true,
-      "uses_owner_surface_resolver": true
-    },
-    {
-      "label": "Developer",
-      "tab_id": "MOBILE_TAB_DEVELOPER",
+      "target": "#more",
       "uses_owner_action_registry": true,
       "uses_owner_dashboard_state_model": true,
       "uses_owner_surface_resolver": true

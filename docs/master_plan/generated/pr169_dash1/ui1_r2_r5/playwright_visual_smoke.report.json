@@ -1,0 +1,211 @@
+{
+  "artifact_id": "UI1R2R5_PLAYWRIGHT_VISUAL_SMOKE",
+  "checks": [
+    "r2r5_workbench_fields_and_other_targets_visible",
+    "r2r5_settings_color_binding_visible_on_workbench_field",
+    "r2r5_owner_drawer_payload_hidden_until_technical_details",
+    "r2r5_chart_tooltip_hides_on_mouseleave_escape_range_and_drawer",
+    "r2r5_owner_copy_and_more_actions_context_relevant",
+    "r2r5_workflow_queue_and_receipt_preview_targeted",
+    "r2r5_mobile_primary_nav_more_overflow_and_workbench_target"
+  ],
+  "console_breaking_errors": [],
+  "console_status": "PASS",
+  "external_network_requests": [],
+  "network_status": "PASS",
+  "no_console_breaking_errors": true,
+  "no_external_network_requests": true,
+  "order_authority_created": false,
+  "runtime_side_effect_allowed": false,
+  "screenshots": [
+    {
+      "order_authority_created": false,
+      "path": ".tmp/ui1r2r5_workbench_input_state_before_valid_entry_targeted.png",
+      "proof_selector_or_locator": "[data-workbench-field-shell='plain_english_detail'][data-interaction-state='input_required']",
+      "proof_text_or_state": "Plain-English detail",
+      "result": "PASS",
+      "runtime_side_effect_allowed": false,
+      "source_truth_created": false,
+      "tested_interaction": "workbench_input_state_before_valid_entry_targeted",
+      "viewport": "desktop"
+    },
+    {
+      "order_authority_created": false,
+      "path": ".tmp/ui1r2r5_workbench_input_state_after_valid_entry_targeted.png",
+      "proof_selector_or_locator": "[data-workbench-field-shell='plain_english_detail'][data-interaction-state='review_required']",
+      "proof_text_or_state": "Plain-English detail",
+      "result": "PASS",
+      "runtime_side_effect_allowed": false,
+      "source_truth_created": false,
+      "tested_interaction": "workbench_input_state_after_valid_entry_targeted",
+      "viewport": "desktop"
+    },
+    {
+      "order_authority_created": false,
+      "path": ".tmp/ui1r2r5_workbench_other_custom_market_field_targeted.png",
+      "proof_selector_or_locator": "[data-workbench-field-shell='custom_market_family'][data-other-visible='true']",
+      "proof_text_or_state": "Custom market family",
+      "result": "PASS",
+      "runtime_side_effect_allowed": false,
+      "source_truth_created": false,
+      "tested_interaction": "workbench_other_custom_market_field_targeted",
+      "viewport": "desktop"
+    },
+    {
+      "order_authority_created": false,
+      "path": ".tmp/ui1r2r5_workbench_other_custom_event_field_targeted.png",
+      "proof_selector_or_locator": "[data-workbench-field-shell='custom_event_category'][data-other-visible='true']",
+      "proof_text_or_state": "Custom event category",
+      "result": "PASS",
+      "runtime_side_effect_allowed": false,
+      "source_truth_created": false,
+      "tested_interaction": "workbench_other_custom_event_field_targeted",
+      "viewport": "desktop"
+    },
+    {
+      "order_authority_created": false,
+      "path": ".tmp/ui1r2r5_settings_color_applied_to_workbench_inputs_targeted.png",
+      "proof_selector_or_locator": "[data-workbench-field-shell='plain_english_detail'][data-owner-color-proof='input_required']",
+      "proof_text_or_state": "Plain-English detail",
+      "result": "PASS",
+      "runtime_side_effect_allowed": false,
+      "source_truth_created": false,
+      "tested_interaction": "settings_color_applied_to_workbench_inputs_targeted",
+      "viewport": "desktop"
+    },
+    {
+      "order_authority_created": false,
+      "path": ".tmp/ui1r2r5_owner_drawer_explain_no_raw_payload.png",
+      "proof_selector_or_locator": "#drilldownDrawer.open",
+      "proof_text_or_state": "What this means",
+      "result": "PASS",
+      "runtime_side_effect_allowed": false,
+      "source_truth_created": false,
+      "tested_interaction": "owner_drawer_explain_no_raw_payload",
+      "viewport": "desktop"
+    },
+    {
+      "order_authority_created": false,
+      "path": ".tmp/ui1r2r5_owner_drawer_technical_details_payload_expanded.png",
+      "proof_selector_or_locator": "#drilldownDrawer.open [data-technical-details-expanded='true']",
+      "proof_text_or_state": "Technical Details payload",
+      "result": "PASS",
+      "runtime_side_effect_allowed": false,
+      "source_truth_created": false,
+      "tested_interaction": "owner_drawer_technical_details_payload_expanded",
+      "viewport": "desktop"
+    },
+    {
+      "order_authority_created": false,
+      "path": ".tmp/ui1r2r5_chart_tooltip_visible_on_hover.png",
+      "proof_selector_or_locator": ".chart-canvas.is-focused [data-chart-tooltip-visible='true']",
+      "proof_text_or_state": "Value: provider receipts pending",
+      "result": "PASS",
+      "runtime_side_effect_allowed": false,
+      "source_truth_created": false,
+      "tested_interaction": "chart_tooltip_visible_on_hover",
+      "viewport": "desktop"
+    },
+    {
+      "order_authority_created": false,
+      "path": ".tmp/ui1r2r5_chart_tooltip_hidden_after_mouseleave.png",
+      "proof_selector_or_locator": ".chart-canvas[data-tooltip-state='hidden']",
+      "proof_text_or_state": "hidden",
+      "result": "PASS",
+      "runtime_side_effect_allowed": false,
+      "source_truth_created": false,
+      "tested_interaction": "chart_tooltip_hidden_after_mouseleave",
+      "viewport": "desktop"
+    },
+    {
+      "order_authority_created": false,
+      "path": ".tmp/ui1r2r5_chart_tooltip_hidden_after_escape.png",
+      "proof_selector_or_locator": ".chart-canvas[data-tooltip-state='hidden']",
+      "proof_text_or_state": "hidden",
+      "result": "PASS",
+      "runtime_side_effect_allowed": false,
+      "source_truth_created": false,
+      "tested_interaction": "chart_tooltip_hidden_after_escape",
+      "viewport": "desktop"
+    },
+    {
+      "order_authority_created": false,
+      "path": ".tmp/ui1r2r5_owner_copy_machine_labels_suppressed.png",
+      "proof_selector_or_locator": "body[data-owner-copy-cleanup='r2-r5']",
+      "proof_text_or_state": "Net Capital",
+      "result": "PASS",
+      "runtime_side_effect_allowed": false,
+      "source_truth_created": false,
+      "tested_interaction": "owner_copy_machine_labels_suppressed",
+      "viewport": "desktop"
+    },
+    {
+      "order_authority_created": false,
+      "path": ".tmp/ui1r2r5_more_actions_context_relevant.png",
+      "proof_selector_or_locator": "#overviewCards .next-action-menu[data-r2r5-action-cap='owner-contextual']",
+      "proof_text_or_state": "Explain",
+      "result": "PASS",
+      "runtime_side_effect_allowed": false,
+      "source_truth_created": false,
+      "tested_interaction": "more_actions_context_relevant",
+      "viewport": "desktop"
+    },
+    {
+      "order_authority_created": false,
+      "path": ".tmp/ui1r2r5_workflow_queue_targeted.png",
+      "proof_selector_or_locator": "#qttTeamWorkflowQueue [data-workflow-queue-shell='OwnerWorkflowQueueStateV1']",
+      "proof_text_or_state": "QTT Team Workflow Queue",
+      "result": "PASS",
+      "runtime_side_effect_allowed": false,
+      "source_truth_created": false,
+      "tested_interaction": "workflow_queue_targeted",
+      "viewport": "desktop"
+    },
+    {
+      "order_authority_created": false,
+      "path": ".tmp/ui1r2r5_receipt_preview_targeted.png",
+      "proof_selector_or_locator": "#auditReceiptPreview [data-receipt-preview-shell='OwnerReceiptPreviewStateV1']",
+      "proof_text_or_state": "Audit Trail / Receipts Preview",
+      "result": "PASS",
+      "runtime_side_effect_allowed": false,
+      "source_truth_created": false,
+      "tested_interaction": "receipt_preview_targeted",
+      "viewport": "desktop"
+    },
+    {
+      "order_authority_created": false,
+      "path": ".tmp/ui1r2r5_mobile_nav_no_overlap.png",
+      "proof_selector_or_locator": "#mobileBottomNav[data-mobile-primary-count='5']",
+      "proof_text_or_state": "Trade",
+      "result": "PASS",
+      "runtime_side_effect_allowed": false,
+      "source_truth_created": false,
+      "tested_interaction": "mobile_nav_no_overlap",
+      "viewport": "mobile_390x844"
+    },
+    {
+      "order_authority_created": false,
+      "path": ".tmp/ui1r2r5_mobile_more_overflow_open.png",
+      "proof_selector_or_locator": "#mobileMoreSheet.open",
+      "proof_text_or_state": "Decision Queue",
+      "result": "PASS",
+      "runtime_side_effect_allowed": false,
+      "source_truth_created": false,
+      "tested_interaction": "mobile_more_overflow_open",
+      "viewport": "mobile_390x844"
+    },
+    {
+      "order_authority_created": false,
+      "path": ".tmp/ui1r2r5_mobile_workbench_targeted_input_colors.png",
+      "proof_selector_or_locator": "[data-workbench-field-shell='plain_english_detail'][data-owner-color-proof='input_required']",
+      "proof_text_or_state": "Plain-English detail",
+      "result": "PASS",
+      "runtime_side_effect_allowed": false,
+      "source_truth_created": false,
+      "tested_interaction": "mobile_workbench_targeted_input_colors",
+      "viewport": "mobile_390x844"
+    }
+  ],
+  "source_truth_created": false,
+  "status": "PASS"
+}
