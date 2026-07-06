@@ -724,6 +724,7 @@ _PR169_DASH1_ALLOWED_EXACT_PATHS = frozenset(
         "tools/validation_scope_registry.py",
         "tools/validate_validation_scope_registry.py",
         "tests/fail_closed/test_no_runtime_artifacts_strict.py",
+        "tests/pr168_rp5c/test_rp5c_input_integrity.py",
         "tests/source_evidence/test_source_fact_binding_connector_semantic_readiness_static.py",
         "tests/tools/test_validation_scope_registry.py",
         "tests/tools/test_validation_inventory.py",

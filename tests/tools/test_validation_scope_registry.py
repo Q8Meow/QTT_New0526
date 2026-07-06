@@ -111,6 +111,7 @@ def test_pr168_allowed_paths_pass_on_real_branch(path: str) -> None:
         "tests/pr169_dash1_ui1/test_ui1r2_next_step_router_generated.py",
         "tests/pr169_dash1_ui1/test_ui1r2r5_owner_visual_qa_truth_repair.py",
         "tests/pr169_dash1_ui1/r2_contract_assertions.py",
+        "tests/pr168_rp5c/test_rp5c_input_integrity.py",
         "docs/master_plan/generated/pr169_dash1/ui1_r2_r5/owner_visual_qa_truth_repair.generated.json",
         "docs/master_plan/generated/pr169_dash1/ui1_r2_r5/centralization_manifest.generated.json",
         "tests/fail_closed/test_no_runtime_artifacts_strict.py",
