@@ -20,10 +20,14 @@ from tools.build_pr169_dash1_owner_dashboard_ui import (
     DISPLAY_TEXT_SIZES,
     ENTER_TO_SEND_STORAGE_KEY,
     MOBILE_TABS,
+    MOBILE_PRIMARY_TABS,
     OWNER_SETTINGS_SECTIONS,
     OWNER_SETTINGS_STORAGE_KEY,
     R2R4_MANIFEST_FILE,
     R2R4_SUBDIR_NAME,
+    R2R5_BUNDLE_FILE,
+    R2R5_MANIFEST_FILE,
+    R2R5_SUBDIR_NAME,
     THEME_MODES,
     REQUIRED_TOP_LEVEL_KEYS,
     SEMANTIC_COLORS,
@@ -161,9 +165,20 @@ def validate(base: Path) -> tuple[str, ...]:
 
     mobile = _read_json(ui_dir / "owner_dashboard_mobile_navigation.generated.json")
     labels = [tab["label"] for tab in mobile.get("tabs", [])]
-    for tab in MOBILE_TABS:
+    expected_primary = [tab[0] for tab in MOBILE_PRIMARY_TABS]
+    for tab in expected_primary:
         if tab not in labels:
             failures.append(f"mobile_tab_missing:{tab}")
+    if mobile.get("mobile_primary_tab_count") != 5:
+        failures.append("mobile_primary_tab_count_bad")
+    if mobile.get("long_labels_moved_to_more_overflow") is not True:
+        failures.append("mobile_long_labels_not_overflowed")
+    if mobile.get("separate_mobile_state_model_created") is not False:
+        failures.append("mobile_separate_state_created")
+    overflow_labels = set(mobile.get("overflow_tab_labels", []))
+    for tab in {"Decision Queue", "Research", "Agent Operations", "QKU / Formula Routes", "Quantum Control Center", "Developer Mode"}:
+        if tab not in overflow_labels:
+            failures.append(f"mobile_overflow_tab_missing:{tab}")
     if mobile.get("touch_targets_minimum_px", 0) < 44:
         failures.append("mobile_touch_targets_too_small")
 
@@ -1379,6 +1394,163 @@ def validate(base: Path) -> tuple[str, ...]:
             if r2r4.get("no_runtime_authority", {}).get(key) is not True:
                 failures.append(f"ui1r2r4_no_runtime_boundary_missing:{key}")
 
+    r2r5_bundle_path = base / R2R5_SUBDIR_NAME / R2R5_BUNDLE_FILE
+    r2r5_manifest_path = base / R2R5_SUBDIR_NAME / R2R5_MANIFEST_FILE
+    if not r2r5_bundle_path.exists():
+        failures.append("ui1r2r5_bundle_missing")
+    if not r2r5_manifest_path.exists():
+        failures.append("ui1r2r5_manifest_missing")
+    if r2r5_bundle_path.exists() and r2r5_manifest_path.exists():
+        r2r5 = _read_json(r2r5_bundle_path)
+        r2r5_manifest = _read_json(r2r5_manifest_path)
+        boot_r2r5 = data.get("ui1r2r5_visual_qa_truth_repair", {})
+        if boot_r2r5.get("central_bundle_id") != "OwnerUXSemanticBundleV1":
+            failures.append("ui1r2r5_boot_projection_missing")
+        if r2r5_manifest.get("manifest_id") != "UI1R2R5_CENTRALIZATION_MANIFEST":
+            failures.append("ui1r2r5_manifest_id_bad")
+        if r2r5.get("owned_generated_prefix") != f"docs/master_plan/generated/pr169_dash1/{R2R5_SUBDIR_NAME}/":
+            failures.append("ui1r2r5_owned_prefix_bad")
+        if r2r5.get("one_builder") != "tools/build_pr169_dash1_owner_dashboard_ui.py":
+            failures.append("ui1r2r5_one_builder_bad")
+        if r2r5.get("one_validator") != "tools/validate_pr169_dash1_owner_dashboard_ui.py":
+            failures.append("ui1r2r5_one_validator_bad")
+        aliases = r2r5.get("alias_resolution_proof", {})
+        for alias in (
+            "OwnerEducationCopyMap",
+            "OwnerEducationCatalogV1",
+            "OwnerDefinitionGlossaryV1",
+            "OwnerCardEducationMapV1",
+            "OwnerChartInteractionPolicy",
+            "tooltip state policy",
+            "OwnerMobileNavigationModel",
+            "mobile overflow policy",
+            "OwnerScreenshotProofRegistry",
+            "Playwright proof target registry",
+        ):
+            if alias not in aliases:
+                failures.append(f"ui1r2r5_alias_missing:{alias}")
+        if len(set(aliases.values())) > 5:
+            failures.append("ui1r2r5_aliases_scattered")
+        required_concepts = {
+            "R2-R5 central builder",
+            "R2-R5 central validator",
+            "central owner UX semantic bundle",
+            "OwnerDashboardStateV1 / current equivalent",
+            "OwnerActionRegistry / current equivalent",
+            "OwnerReadableCopyMap / owner-copy suppression map / machine-label translation map",
+            "OwnerChartInteractionPolicy / tooltip state policy / chart hover policy",
+            "OwnerMobileNavigationModel / mobile overflow policy / More drawer routing",
+            "OwnerScreenshotProofRegistry / Playwright proof target registry / visual QA target registry",
+            "Workbench field semantics / current equivalent",
+            "Drawer payload / technical details policy / current equivalent",
+            "More Actions applicability policy / current equivalent",
+            "Agent Operations projection / current equivalent",
+            "Workflow Queue projection / current equivalent",
+            "Receipt Preview projection / current equivalent",
+        }
+        mapped = {row.get("conceptual_system") for row in r2r5.get("phase0_current_equivalent_mapping", [])}
+        for concept in sorted(required_concepts - mapped):
+            failures.append(f"ui1r2r5_mapping_missing:{concept}")
+
+        screenshot_rows = r2r5.get("screenshot_proof_registry", [])
+        required_screenshots = {
+            ".tmp/ui1r2r5_workbench_input_state_before_valid_entry_targeted.png",
+            ".tmp/ui1r2r5_workbench_input_state_after_valid_entry_targeted.png",
+            ".tmp/ui1r2r5_workbench_other_custom_market_field_targeted.png",
+            ".tmp/ui1r2r5_workbench_other_custom_event_field_targeted.png",
+            ".tmp/ui1r2r5_settings_color_applied_to_workbench_inputs_targeted.png",
+            ".tmp/ui1r2r5_owner_drawer_explain_no_raw_payload.png",
+            ".tmp/ui1r2r5_owner_drawer_technical_details_payload_expanded.png",
+            ".tmp/ui1r2r5_mobile_nav_no_overlap.png",
+            ".tmp/ui1r2r5_mobile_more_overflow_open.png",
+            ".tmp/ui1r2r5_chart_tooltip_visible_on_hover.png",
+            ".tmp/ui1r2r5_chart_tooltip_hidden_after_mouseleave.png",
+            ".tmp/ui1r2r5_chart_tooltip_hidden_after_escape.png",
+            ".tmp/ui1r2r5_owner_copy_machine_labels_suppressed.png",
+            ".tmp/ui1r2r5_more_actions_context_relevant.png",
+            ".tmp/ui1r2r5_workflow_queue_targeted.png",
+            ".tmp/ui1r2r5_receipt_preview_targeted.png",
+            ".tmp/ui1r2r5_mobile_workbench_targeted_input_colors.png",
+        }
+        present_screenshots = {row.get("screenshot_path") for row in screenshot_rows}
+        for path in sorted(required_screenshots - present_screenshots):
+            failures.append(f"ui1r2r5_screenshot_proof_missing:{path}")
+        for index, row in enumerate(screenshot_rows):
+            for key in (
+                "screenshot_path",
+                "surface_id",
+                "target_feature_id",
+                "proof_selector_or_locator",
+                "proof_text_or_state",
+                "required_viewport",
+                "pre_screenshot_actions",
+                "post_action_assertions",
+                "owner_visible_expected_content",
+                "forbidden_visible_content",
+                "lifecycle_state",
+                "timing_state_or_snapshot_state",
+                "downstream_owner_or_consumer",
+                "activation_state_or_provider_stage",
+                "authority_boundary",
+                "upstream_ref_or_provider_pending",
+                "downstream_ref_or_provider_pending",
+                "runtime_side_effect_allowed",
+                "source_truth_created",
+                "order_authority_created",
+            ):
+                if key not in row:
+                    failures.append(f"ui1r2r5_screenshot_row_field_missing:{index}:{key}")
+            if row.get("runtime_side_effect_allowed") is not False:
+                failures.append(f"ui1r2r5_screenshot_runtime_allowed:{index}")
+
+        drawer_policy = r2r5.get("owner_drawer_policy", {})
+        if drawer_policy.get("raw_payload_visible_before_technical_details_expansion") is not False:
+            failures.append("ui1r2r5_drawer_raw_payload_visible")
+        for section in ("What this means", "Why it matters", "What you can do next", "What is missing", "Provider boundary"):
+            if section not in drawer_policy.get("primary_owner_sections_required", []):
+                failures.append(f"ui1r2r5_drawer_section_missing:{section}")
+        tooltip_policy = r2r5.get("chart_tooltip_policy", {})
+        for trigger in ("pointer_leave_plot_or_card", "blur", "Escape", "range_change", "surface_navigation", "drawer_open"):
+            if tooltip_policy.get(trigger) not in {"hide tooltip", "hide transient tooltip"}:
+                failures.append(f"ui1r2r5_tooltip_hide_trigger_bad:{trigger}")
+        if tooltip_policy.get("hover_alone_pins_tooltip") is not False:
+            failures.append("ui1r2r5_hover_pins_tooltip")
+        mobile_policy = r2r5.get("mobile_navigation_policy", {})
+        if mobile_policy.get("primary_tabs") != ["Home", "Portfolio", "Trade", "Chat", "More"]:
+            failures.append("ui1r2r5_mobile_primary_tabs_bad")
+        if mobile_policy.get("separate_mobile_system_created") is not False:
+            failures.append("ui1r2r5_mobile_separate_system")
+        more_policy = r2r5.get("more_actions_policy", {})
+        if more_policy.get("normal_owner_card_action_cap", 99) > 5:
+            failures.append("ui1r2r5_more_actions_cap_bad")
+        if more_policy.get("chart_drilldown_hidden_on_non_chart_cards") is not True:
+            failures.append("ui1r2r5_chart_action_not_hidden")
+        copy_rows = {row.get("machine_label"): row for row in r2r5.get("owner_copy_suppression_map", [])}
+        for raw in ("Net Capital Cash Slot", "Today Result Slot", "Provider Route: Metrics1", "PR165-D2 Routed Roles", "No AGENT_ORCH/SVC runtime attached", "Runtime side effect: false"):
+            if raw not in copy_rows:
+                failures.append(f"ui1r2r5_copy_suppression_missing:{raw}")
+        for row in r2r5.get("changed_file_ownership_audit", []):
+            for key in (
+                "file_path",
+                "change_type",
+                "owned_prefix_or_allowed_shared_reason",
+                "producer",
+                "consumer",
+                "validator_or_test_coverage",
+                "runtime_authority_change",
+                "source_truth_change",
+                "order_authority_change",
+                "orphan_risk",
+            ):
+                if key not in row:
+                    failures.append(f"ui1r2r5_changed_file_field_missing:{row.get('file_path')}:{key}")
+            if row.get("runtime_authority_change") is not False or row.get("source_truth_change") is not False or row.get("order_authority_change") is not False:
+                failures.append(f"ui1r2r5_changed_file_authority_bad:{row.get('file_path')}")
+        if r2r5.get("currentization_preflight", {}).get("new_exact_path_playwright_script_added") is not False:
+            failures.append("ui1r2r5_new_playwright_exact_path_added")
+        if r2r5.get("currentization_preflight", {}).get("wildcard_allowlists_added") is not False:
+            failures.append("ui1r2r5_wildcard_allowlist_added")
+
     for snippet in (
         "data-qtt-guide-composer=\"shared-chat-action-state\"",
         "data-qtt-guide-send=\"shared-chat-submit\"",
@@ -1390,6 +1562,17 @@ def validate(base: Path) -> tuple[str, ...]:
         "data-agent-operations-shell=\"OwnerAgentOperationsProjectionV1\"",
         "data-workflow-queue-shell=\"OwnerWorkflowQueueStateV1\"",
         "data-receipt-preview-shell=\"OwnerReceiptPreviewStateV1\"",
+        "data-owner-drawer-primary-sections=\"true\"",
+        "data-technical-details-expanded=",
+        "data-mobile-primary-count=\"5\"",
+        "data-mobile-navigation-model=\"OwnerMobileNavigationModelV1\"",
+        "data-mobile-overflow-destination=\"Decision Queue\"",
+        "data-r2r5-action-cap=\"owner-contextual\"",
+        "data-owner-color-proof",
+        "data-tooltip-state=\"hidden\"",
+        "hideChartTooltip",
+        "hideAllChartTooltips",
+        "pointerleave",
         "candidate_owner_custom",
         "local_preview_guardrail",
         "Ask QTT anything about this screen, trade, QKU, formula, risk, or next step",

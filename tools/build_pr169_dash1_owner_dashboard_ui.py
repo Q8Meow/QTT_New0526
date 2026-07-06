@@ -33,6 +33,9 @@ ENTER_TO_SEND_STORAGE_KEY = "qtt_owner_dashboard_enter_to_send_enabled"
 OWNER_SETTINGS_STORAGE_KEY = "qtt_owner_dashboard_owner_settings_v1"
 R2R4_SUBDIR_NAME = "ui1_r2_r4"
 R2R4_MANIFEST_FILE = "centralization_manifest.generated.json"
+R2R5_SUBDIR_NAME = "ui1_r2_r5"
+R2R5_BUNDLE_FILE = "owner_visual_qa_truth_repair.generated.json"
+R2R5_MANIFEST_FILE = "centralization_manifest.generated.json"
 VALIDATION_REF = "tools/validate_pr169_dash1_owner_dashboard_ui.py"
 R1_GENERATED_FROM = (
     "PR169-DASH1 artifacts + PR169-DASH1-UI1 boot data + "
@@ -195,16 +198,29 @@ NAV_AREAS = (
 MOBILE_TABS = (
     "Home",
     "Portfolio",
-    "Trade Workbench",
+    "Trade",
     "Chat",
-    "Decisions",
-    "Research",
-    "Edge / Alpha",
-    "Agents",
-    "Parameters",
-    "Quantum",
     "More",
-    "Developer",
+)
+
+MOBILE_PRIMARY_TABS = (
+    ("Home", "Home", "#overview", "MOBILE_TAB_HOME"),
+    ("Portfolio", "Portfolio", "#portfolio", "MOBILE_TAB_PORTFOLIO"),
+    ("Trade", "Trade Workbench", "#trade-workbench", "MOBILE_TAB_TRADE"),
+    ("Chat", "Chat", "#chat", "MOBILE_TAB_CHAT"),
+    ("More", "More", "#more", "MOBILE_TAB_MORE"),
+)
+
+MOBILE_OVERFLOW_TABS = (
+    ("Decision Queue", "Decisions", "#decisions", "MOBILE_OVERFLOW_DECISIONS"),
+    ("Research", "Research", "#research", "MOBILE_OVERFLOW_RESEARCH"),
+    ("Agent Operations", "Agents", "#agents", "MOBILE_OVERFLOW_AGENTS"),
+    ("QKU / Formula Routes", "QKU", "#qku-formula", "MOBILE_OVERFLOW_QKU_FORMULA"),
+    ("Quantum Control Center", "Quantum", "#quantum", "MOBILE_OVERFLOW_QUANTUM"),
+    ("Edge / Alpha Board", "Edge", "#edge-alpha", "MOBILE_OVERFLOW_EDGE_ALPHA"),
+    ("Parameter Control", "Parameters", "#parameter-control", "MOBILE_OVERFLOW_PARAMETERS"),
+    ("Provider Stage Route Map", "Provider", "#provider-stage", "MOBILE_OVERFLOW_PROVIDER_STAGE"),
+    ("Developer Mode", "Developer", "#developer-mode", "MOBILE_OVERFLOW_DEVELOPER"),
 )
 
 THEME_MODES = (
@@ -1360,6 +1376,30 @@ def _build_theme_contract() -> dict[str, Any]:
 
 
 def _build_mobile_navigation() -> dict[str, Any]:
+    primary_tabs = [
+        {
+            "tab_id": tab_id,
+            "label": label,
+            "desktop_label": desktop_label,
+            "target": target,
+            "uses_owner_dashboard_state_model": True,
+            "uses_owner_action_registry": True,
+            "uses_owner_surface_resolver": True,
+        }
+        for label, desktop_label, target, tab_id in MOBILE_PRIMARY_TABS
+    ]
+    overflow_tabs = [
+        {
+            "tab_id": tab_id,
+            "label": short_label,
+            "desktop_label": desktop_label,
+            "target": target,
+            "uses_owner_dashboard_state_model": True,
+            "uses_owner_action_registry": True,
+            "uses_owner_surface_resolver": True,
+        }
+        for desktop_label, short_label, target, tab_id in MOBILE_OVERFLOW_TABS
+    ]
     return {
         "meta": _ui_meta({"artifact_id": "UI1_MOBILE_NAVIGATION"}),
         "generated_from": GENERATED_FROM_UI1,
@@ -1379,21 +1419,21 @@ def _build_mobile_navigation() -> dict[str, Any]:
         ],
         "mode_theme_text_size_status_inside_options_menu": True,
         "mobile_bottom_navigation_rendered": True,
+        "mobile_bottom_navigation_no_overlap_policy": "five primary tabs plus More overflow sheet",
         "touch_targets_minimum_px": 44,
-        "tabs": [
-            {
-                "tab_id": f"MOBILE_TAB_{_anchor(tab).upper().replace('-', '_')}",
-                "label": tab,
-                "uses_owner_dashboard_state_model": True,
-                "uses_owner_action_registry": True,
-                "uses_owner_surface_resolver": True,
-            }
-            for tab in MOBILE_TABS
-        ],
-        "stable_tab_labels": list(MOBILE_TABS),
+        "tabs": primary_tabs,
+        "primary_tabs": primary_tabs,
+        "overflow_tabs": overflow_tabs,
+        "primary_tab_labels": [row["label"] for row in primary_tabs],
+        "overflow_tab_labels": [row["desktop_label"] for row in overflow_tabs],
+        "stable_tab_labels": [row["label"] for row in primary_tabs],
         "uses_same_OwnerDashboardStateV1": True,
-        "chat_tab_rendered_in_mobile_navigation": "Chat" in MOBILE_TABS,
-        "trade_workbench_tab_rendered_in_mobile_navigation": "Trade Workbench" in MOBILE_TABS,
+        "chat_tab_rendered_in_mobile_navigation": "Chat" in [row["label"] for row in primary_tabs],
+        "trade_workbench_tab_rendered_in_mobile_navigation": "Trade" in [row["label"] for row in primary_tabs],
+        "long_labels_moved_to_more_overflow": True,
+        "more_overflow_reuses_owner_surface_resolver": True,
+        "separate_mobile_state_model_created": False,
+        "mobile_primary_tab_count": len(primary_tabs),
         "stale_data_banner_rendered_on_mobile_viewports": True,
         "drilldown_drawer_uses_bottom_sheet_on_mobile": True,
     }
@@ -5582,6 +5622,342 @@ def _build_ui1r2r4_semantic_bundle(
     }
 
 
+def _build_ui1r2r5_visual_qa_truth_repair(r2r4_bundle: dict[str, Any]) -> dict[str, Any]:
+    builder_ref = "tools/build_pr169_dash1_owner_dashboard_ui.py"
+    validator_ref = VALIDATION_REF
+    renderer_ref = "docs/master_plan/generated/pr169_dash1/ui/owner_dashboard_review_surface.js"
+    tests_ref = "tests/pr169_dash1_ui1/test_ui1r2r5_owner_visual_qa_truth_repair.py"
+    playwright_ref = "tools/playwright_pr169_dash1_ui1_r2_r4_visual_smoke.py --suite r2-r5"
+    bundle_ref = f"docs/master_plan/generated/pr169_dash1/{R2R5_SUBDIR_NAME}/{R2R5_BUNDLE_FILE}"
+    manifest_ref = f"docs/master_plan/generated/pr169_dash1/{R2R5_SUBDIR_NAME}/{R2R5_MANIFEST_FILE}"
+
+    conceptual_rows = [
+        ("R2-R5 central builder", builder_ref, "PR169Dash1UIBuilder"),
+        ("R2-R5 central validator", validator_ref, "PR169Dash1UIValidator"),
+        ("central owner UX semantic bundle", bundle_ref, "OwnerUXSemanticBundleV1"),
+        ("OwnerDashboardStateV1 / current equivalent", "docs/master_plan/generated/pr169_dash1/ui/owner_dashboard_state_model.generated.json", "OwnerDashboardStateV1"),
+        ("OwnerSurfaceResolver / current equivalent", "src/qtt/dashboard/owner_surface_resolver.py", "OwnerSurfaceResolver"),
+        ("OwnerActionRegistry / current equivalent", "docs/master_plan/generated/pr169_dash1/owner_action_registry.generated.jsonl", "OwnerActionRegistryV1"),
+        ("OwnerEducationCopyMap / OwnerEducationCatalogV1 / OwnerDefinitionGlossaryV1 / OwnerCardEducationMapV1", "docs/master_plan/generated/pr169_dash1/ui/ui1r2r3_education_drawers.generated.json", "OwnerEducationCopyMapV1"),
+        ("OwnerReadableCopyMap / owner-copy suppression map / machine-label translation map", "docs/master_plan/generated/pr169_dash1/ui/ui1r2_copy_map.generated.json", "OwnerReadableCopyMapV1"),
+        ("OwnerSettingsV1 / current equivalent", "docs/master_plan/generated/pr169_dash1/ui/ui1r2r3_owner_settings.generated.json", "OwnerSettingsV1"),
+        ("OwnerOptionCatalog / current equivalent", "docs/master_plan/generated/pr169_dash1/ui/ui1r2r3_workbench_options_ranges.generated.json", "OwnerInputOptionCatalogV1"),
+        ("OwnerInteractionStateModel / current equivalent", "docs/master_plan/generated/pr169_dash1/ui/ui1r2r3_theme_interaction_accessibility.report.json", "OwnerInteractionStateModelV1"),
+        ("OwnerChartInteractionPolicy / tooltip state policy / chart hover policy", bundle_ref, "OwnerChartInteractionPolicyV1"),
+        ("OwnerMobileNavigationModel / mobile overflow policy / More drawer routing", "docs/master_plan/generated/pr169_dash1/ui/owner_dashboard_mobile_navigation.generated.json", "OwnerMobileNavigationModelV1"),
+        ("OwnerScreenshotProofRegistry / Playwright proof target registry / visual QA target registry", bundle_ref, "OwnerScreenshotProofRegistryV1"),
+        ("Workbench field semantics / current equivalent", "docs/master_plan/generated/pr169_dash1/ui/owner_dashboard_trade_workbench.generated.json", "OwnerWorkbenchFieldSemanticsV1"),
+        ("Drawer payload / technical details policy / current equivalent", bundle_ref, "OwnerDrawerTechnicalDetailsPolicyV1"),
+        ("More Actions applicability policy / current equivalent", "docs/master_plan/generated/pr169_dash1/ui/ui1r2_action_menu.generated.json", "OwnerMoreActionsApplicabilityPolicyV1"),
+        ("Agent Operations projection / current equivalent", "docs/master_plan/generated/pr169_dash1/ui/ui1r2r4_owner_semantic_bundle.generated.json", "OwnerAgentOperationsProjectionV1"),
+        ("Workflow Queue projection / current equivalent", "docs/master_plan/generated/pr169_dash1/ui/ui1r2r4_owner_semantic_bundle.generated.json", "OwnerWorkflowQueueStateV1"),
+        ("Receipt Preview projection / current equivalent", "docs/master_plan/generated/pr169_dash1/ui/ui1r2r4_owner_semantic_bundle.generated.json", "OwnerReceiptPreviewStateV1"),
+        ("PR152/currentization report and validation inventory / current equivalent", "tools/currentize_pr152_after_generated_artifacts.py", "PR152CurrentizationHelper"),
+        ("no-runtime/source guard exact-path allowlist / current equivalent", "tools/validate_no_runtime_artifacts.py", "NoRuntimeSourceGuard"),
+        ("RP5C deterministic branch allowlist / current equivalent", "tools/run_validation_gates.py", "DeterministicBranchAllowlist"),
+    ]
+    phase0_mapping = [
+        {
+            **_lifecycle_fields(f"ui1r2r5_mapping::{index}", upstream=path, downstream=renderer_ref),
+            "conceptual_system": conceptual,
+            "actual_repo_path_or_current_equivalent": path,
+            "current_equivalent_id": current_id,
+            "builder_consumer": builder_ref,
+            "validator_consumer": validator_ref,
+            "ui_consumer": renderer_ref,
+            "test_consumer": tests_ref,
+            "playwright_proof": playwright_ref,
+            "created_or_extended": "extended" if path == bundle_ref else "current_equivalent",
+            "reason_if_created": (
+                "Single compact R2-R5 visual-QA truth-repair projection under the owned generated prefix."
+                if path == bundle_ref
+                else "Existing current equivalent extended through the central PR169 UI builder/validator path."
+            ),
+        }
+        for index, (conceptual, path, current_id) in enumerate(conceptual_rows, start=1)
+    ]
+
+    def proof(
+        name: str,
+        surface_id: str,
+        feature_id: str,
+        selector: str,
+        proof_text: str,
+        viewport: str,
+        actions: list[str],
+        expected: list[str],
+        forbidden: list[str] | None = None,
+    ) -> dict[str, Any]:
+        return {
+            **_lifecycle_fields(f"screenshot_proof::{name}", upstream=bundle_ref, downstream=playwright_ref, provider_stage="UI1_R2_R5_LOCAL_VISUAL_QA"),
+            "screenshot_path": f".tmp/ui1r2r5_{name}.png",
+            "surface_id": surface_id,
+            "target_feature_id": feature_id,
+            "proof_selector_or_locator": selector,
+            "proof_text_or_state": proof_text,
+            "required_viewport": viewport,
+            "pre_screenshot_actions": actions,
+            "post_action_assertions": [
+                "target locator visible",
+                "target locator intersects viewport",
+                "owner-visible proof text/state asserted before screenshot",
+            ],
+            "owner_visible_expected_content": expected,
+            "forbidden_visible_content": forbidden or [],
+        }
+
+    screenshot_registry = [
+        proof("workbench_input_state_before_valid_entry_targeted", "trade-workbench", "plain_english_detail.input_required", "[data-workbench-field-shell='plain_english_detail'][data-interaction-state='input_required']", "Plain-English detail + Input required", "desktop", ["navigate:trade-workbench", "scroll:plain_english_detail"], ["Plain-English detail", "Input required", "candidate / local preview only"], ["Owner Home"]),
+        proof("workbench_input_state_after_valid_entry_targeted", "trade-workbench", "plain_english_detail.review_required", "[data-workbench-field-shell='plain_english_detail'][data-interaction-state='review_required']", "Plain-English detail + Review required", "desktop", ["navigate:trade-workbench", "fill:plain_english_detail", "assert:review_required"], ["Plain-English detail", "Review required"], ["Owner Home"]),
+        proof("workbench_other_custom_market_field_targeted", "trade-workbench", "custom_market_family.other_visible", "[data-workbench-field-shell='custom_market_family'][data-other-visible='true']", "Custom market family + candidate_owner_custom", "desktop", ["navigate:trade-workbench", "select:market_family=other"], ["Custom market family", "candidate / local preview only"], ["Owner Home"]),
+        proof("workbench_other_custom_event_field_targeted", "trade-workbench", "custom_event_category.other_visible", "[data-workbench-field-shell='custom_event_category'][data-other-visible='true']", "Custom event category + candidate_owner_custom", "desktop", ["navigate:trade-workbench", "select:event_category=other"], ["Custom event category", "candidate / local preview only"], ["Owner Home"]),
+        proof("settings_color_applied_to_workbench_inputs_targeted", "trade-workbench", "owner_settings_input_color_binding", "[data-workbench-field-shell='plain_english_detail'][data-owner-color-proof='input_required']", "CSS border uses --owner-input-required", "desktop", ["open:settings:Colors", "set:input_required_color", "navigate:trade-workbench"], ["Plain-English detail", "Input required"], ["Owner Home"]),
+        proof("owner_drawer_explain_no_raw_payload", "overview", "drawer.owner_education_primary", "#drilldownDrawer.open", "What this means / Why it matters / What you can do next / What is missing / Provider boundary", "desktop", ["open:first_overview_more_actions", "click:Explain"], ["What this means", "Why it matters", "What you can do next", "What is missing", "Provider boundary"], ["Drawer payload", "Selected card:", "Selected action:", "Runtime side effect:"]),
+        proof("owner_drawer_technical_details_payload_expanded", "overview", "drawer.technical_details_payload", "#drilldownDrawer.open [data-technical-details-expanded='true']", "Technical Details payload + Selected card + Selected action", "desktop", ["open:first_overview_more_actions", "click:Technical Details"], ["Technical Details payload", "Selected card:", "Selected action:", "Runtime side effect: false"], []),
+        proof("mobile_nav_no_overlap", "mobile-navigation", "mobile.primary_no_overlap", "#mobileBottomNav[data-mobile-primary-count='5']", "Home / Portfolio / Trade / Chat / More", "mobile_390x844", ["viewport:mobile", "assert:five_primary_tabs"], ["Home", "Portfolio", "Trade", "Chat", "More"], ["Trade Workbench", "Decision Queue", "Quantum Control Center"]),
+        proof("mobile_more_overflow_open", "mobile-navigation", "mobile.more_overflow", "#mobileMoreSheet.open [data-mobile-overflow-destination]", "More overflow destinations visible", "mobile_390x844", ["viewport:mobile", "tap:More"], ["Decision Queue", "Research", "Agent Operations", "QKU / Formula Routes", "Settings"], []),
+        proof("chart_tooltip_visible_on_hover", "portfolio", "chart.tooltip_visible_hover", ".chart-canvas.is-focused [data-chart-tooltip-visible='true']", "provider receipts pending tooltip", "desktop", ["navigate:portfolio", "hover:first_chart_point"], ["Value: provider receipts pending"], []),
+        proof("chart_tooltip_hidden_after_mouseleave", "portfolio", "chart.tooltip_hidden_mouseleave", ".chart-canvas[data-tooltip-state='hidden']", "tooltip hidden after pointer leaves", "desktop", ["navigate:portfolio", "hover:first_chart_point", "mouse:leave_chart"], ["Data integrity: provider_pending_no_value"], ["Value: provider receipts pending"]),
+        proof("chart_tooltip_hidden_after_escape", "portfolio", "chart.tooltip_hidden_escape", ".chart-canvas[data-tooltip-state='hidden']", "tooltip hidden after Escape", "desktop", ["navigate:portfolio", "hover:first_chart_point", "press:Escape"], ["Data integrity: provider_pending_no_value"], ["Value: provider receipts pending"]),
+        proof("owner_copy_machine_labels_suppressed", "overview", "owner_copy.primary_suppression", "body[data-owner-copy-cleanup='r2-r5']", "primary owner content uses translated labels", "desktop", ["navigate:overview", "assert:primary_owner_copy"], ["Net Capital", "Today", "Provider pending", "Agent runtime pending"], ["Net Capital Cash Slot", "Today Result Slot", "Provider Route:", "No AGENT_ORCH/SVC runtime attached"]),
+        proof("more_actions_context_relevant", "overview", "more_actions.context_relevant", "#overviewCards .next-action-menu[data-r2r5-action-cap='owner-contextual']", "More actions capped and context-relevant", "desktop", ["navigate:overview", "open:first_more_actions"], ["Explain", "Learn", "Why?", "Technical Details"], ["Open chart drilldown", "Show TCA / cost breakdown"]),
+        proof("workflow_queue_targeted", "agents", "workflow_queue.distinct_surface", "#qttTeamWorkflowQueue [data-workflow-queue-shell='OwnerWorkflowQueueStateV1']", "QTT Team Workflow Queue", "desktop", ["navigate:agents", "scroll:workflow_queue"], ["QTT Team Workflow Queue", "provider-pending / not running", "Workflow stages"], ["Agent Operations shell only"]),
+        proof("receipt_preview_targeted", "agents", "receipt_preview.distinct_surface", "#auditReceiptPreview [data-receipt-preview-shell='OwnerReceiptPreviewStateV1']", "Audit Trail / Receipts Preview", "desktop", ["navigate:agents", "scroll:receipt_preview"], ["Audit Trail / Receipts Preview", "provider-pending / no fake receipts", "No fake timestamps"], ["Agent Operations shell only"]),
+        proof("mobile_workbench_targeted_input_colors", "trade-workbench", "mobile.workbench_input_colors", "[data-workbench-field-shell='plain_english_detail'][data-owner-color-proof='input_required']", "mobile Workbench field colors", "mobile_390x844", ["viewport:mobile", "tap:Trade", "scroll:plain_english_detail"], ["Plain-English detail", "Input required"], []),
+    ]
+
+    owner_drawer_policy = {
+        **_lifecycle_fields("policy::owner_drawer_payload_hiding", upstream="ui1r2r3_education_drawers.generated.json", downstream=renderer_ref),
+        "primary_owner_sections_required": [
+            "What this means",
+            "Why it matters",
+            "What you can do next",
+            "What is missing",
+            "Provider boundary",
+        ],
+        "raw_payload_visible_before_technical_details_expansion": False,
+        "technical_details_or_developer_may_show_raw_payload": True,
+        "forbidden_primary_owner_strings": [
+            "Drawer payload",
+            "Selected card:",
+            "Selected action:",
+            "OWNER_ACTION_",
+            "drawer_kind",
+            "content_signature",
+            "Runtime side effect:",
+        ],
+    }
+    chart_tooltip_policy = {
+        **_lifecycle_fields("policy::chart_tooltip_dismissal", upstream="ui1r2r3_chart_policy.report.json", downstream=renderer_ref),
+        "policy_id": "OwnerChartInteractionPolicyV1",
+        "hover_enter_plot": "show transient tooltip",
+        "pointer_move_inside_plot": "update nearest point",
+        "pointer_leave_plot_or_card": "hide tooltip",
+        "blur": "hide tooltip",
+        "Escape": "hide tooltip",
+        "range_change": "hide tooltip",
+        "surface_navigation": "hide tooltip",
+        "drawer_open": "hide transient tooltip",
+        "hover_alone_pins_tooltip": False,
+        "fake_chart_values_created": False,
+    }
+    mobile_navigation_policy = {
+        **_lifecycle_fields("policy::mobile_navigation_overflow", upstream="owner_dashboard_mobile_navigation.generated.json", downstream=renderer_ref),
+        "policy_id": "OwnerMobileNavigationModelV1",
+        "primary_tabs": [row[0] for row in MOBILE_PRIMARY_TABS],
+        "overflow_destinations": [row[0] for row in MOBILE_OVERFLOW_TABS] + ["Settings", "Technical Details"],
+        "max_primary_tabs": 5,
+        "separate_mobile_system_created": False,
+        "non_overlap_asserted_at_viewport": "390x844",
+    }
+    more_actions_policy = {
+        **_lifecycle_fields("policy::more_actions_context_relevance", upstream="ui1r2_action_menu.generated.json", downstream=renderer_ref),
+        "policy_id": "OwnerMoreActionsApplicabilityPolicyV1",
+        "normal_owner_card_action_cap": 5,
+        "chart_drilldown_hidden_on_non_chart_cards": True,
+        "tca_hidden_on_non_tca_cards": True,
+        "technical_actions_primary_owner_menu": False,
+        "provider_pending_actions_concise_education": True,
+    }
+    owner_copy_suppression_map = [
+        {
+            **_lifecycle_fields(f"copy_suppression::{index}", upstream="ui1r2_copy_map.generated.json", downstream=renderer_ref),
+            "machine_label": machine,
+            "owner_primary_label": owner,
+            "technical_details_preserved": True,
+        }
+        for index, (machine, owner) in enumerate(
+            [
+                ("Net Capital Cash Slot", "Net Capital"),
+                ("Today Result Slot", "Today"),
+                ("Week Result Slot", "Week"),
+                ("Month Result Slot", "Month"),
+                ("Provider Route: Metrics1", "Metrics provider pending"),
+                ("Provider Route: Paper Loop", "Paper receipts pending"),
+                ("Provider Route: Agent Orch1", "Agent runtime pending"),
+                ("PR165-D2 Routed Roles", "Agent roles routed"),
+                ("No AGENT_ORCH/SVC runtime attached", "Agent runtime pending"),
+                ("Runtime side effect: false", "No live action was run"),
+                ("Selected card", "Technical Details only"),
+                ("Selected action", "Technical Details only"),
+            ],
+            start=1,
+        )
+    ]
+    semantic_groups = [
+        "screenshot_proof_targets",
+        "drawer_payload_policy",
+        "mobile_navigation_policy",
+        "chart_tooltip_policy",
+        "workbench_field_proof_targets",
+        "owner_copy_suppression_policy",
+        "more_actions_applicability_policy",
+        "workflow_queue_projection",
+        "receipt_preview_projection",
+        "changed_file_ownership_audit",
+    ]
+    manifest_rows = [
+        {
+            **_lifecycle_fields(f"r2r5_centralization::{group}", upstream="canonical surface registry -> OwnerDashboardStateV1 -> OwnerActionRegistry -> OwnerUXSemanticBundleV1", downstream=renderer_ref, provider_stage="UI1_R2_R5_LOCAL_PROVIDER_PENDING"),
+            "semantic_group": group,
+            "central_owner_file_or_current_equivalent": bundle_ref,
+            "builder_consumer": builder_ref,
+            "validator_consumer": validator_ref,
+            "ui_consumer": renderer_ref,
+            "playwright_proof_ref": playwright_ref,
+            "upstream_source_ref_or_provider_pending": "canonical surface registry -> OwnerDashboardStateV1 -> OwnerActionRegistry -> OwnerUXSemanticBundleV1",
+            "downstream_consumer_ref_or_provider_pending": "renderer, validator, tests, Playwright proof runner",
+        }
+        for group in semantic_groups
+    ]
+    changed_file_rows = [
+        "tools/build_pr169_dash1_owner_dashboard_ui.py",
+        "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+        "tools/playwright_pr169_dash1_ui1_r2_r4_visual_smoke.py",
+        "docs/master_plan/generated/pr169_dash1/ui/owner_dashboard_review_surface.html",
+        "docs/master_plan/generated/pr169_dash1/ui/owner_dashboard_review_surface.css",
+        "docs/master_plan/generated/pr169_dash1/ui/owner_dashboard_review_surface.js",
+        "docs/master_plan/generated/pr169_dash1/ui/owner_dashboard_review_data.generated.json",
+        "docs/master_plan/generated/pr169_dash1/ui/owner_dashboard_review_bootstrap.generated.js",
+        "docs/master_plan/generated/pr169_dash1/ui/owner_dashboard_mobile_navigation.generated.json",
+        f"docs/master_plan/generated/pr169_dash1/{R2R5_SUBDIR_NAME}/{R2R5_BUNDLE_FILE}",
+        f"docs/master_plan/generated/pr169_dash1/{R2R5_SUBDIR_NAME}/{R2R5_MANIFEST_FILE}",
+        f"docs/master_plan/generated/pr169_dash1/{R2R5_SUBDIR_NAME}/playwright_visual_smoke.report.json",
+        "tests/pr169_dash1_ui1/test_ui1r2r5_owner_visual_qa_truth_repair.py",
+        "tools/validation_scope_registry.py",
+        "tests/tools/test_validation_scope_registry.py",
+    ]
+    changed_file_ownership_audit = [
+        {
+            **_lifecycle_fields(f"changed_file::{index}", upstream="PR169_DASH1_UI1_R2_R5_prompt", downstream="PR body + local validation"),
+            "file_path": path,
+            "change_type": "generated" if "/generated/" in path.replace("\\", "/") else "source_or_test",
+            "owned_prefix_or_allowed_shared_reason": (
+                "owned R2-R5 generated prefix"
+                if f"/{R2R5_SUBDIR_NAME}/" in path.replace("\\", "/")
+                else "allowed shared current-equivalent consumed by central PR169 UI builder/validator/renderer/test path"
+            ),
+            "producer": builder_ref if "playwright_visual_smoke.report.json" not in path else playwright_ref,
+            "consumer": "renderer/validator/tests/Playwright/PR body",
+            "validator_or_test_coverage": tests_ref,
+            "playwright_proof_or_not_applicable": playwright_ref if path.endswith((".js", ".css", ".html", ".json", ".py")) else "not_applicable",
+            "runtime_authority_change": False,
+            "source_truth_change": False,
+            "order_authority_change": False,
+            "orphan_risk": "low: routed through central UI builder/validator/test path",
+        }
+        for index, path in enumerate(changed_file_rows, start=1)
+    ]
+    centralization_manifest = {
+        "meta": _ui_meta({"artifact_id": "UI1R2R5_CENTRALIZATION_MANIFEST"}),
+        "manifest_id": "UI1R2R5_CENTRALIZATION_MANIFEST",
+        "phase0_current_equivalent_mapping": phase0_mapping,
+        "semantic_groups": manifest_rows,
+        "rows": manifest_rows,
+    }
+    return {
+        "meta": _ui_meta({"artifact_id": "UI1R2R5_OWNER_VISUAL_QA_TRUTH_REPAIR"}),
+        "central_bundle_id": "OwnerUXSemanticBundleV1",
+        "source_of_truth_precedence": [
+            "canonical dashboard surface registry/current equivalent",
+            "OwnerDashboardStateV1/current equivalent",
+            "OwnerActionRegistry/current equivalent",
+            "central owner UX semantic bundle/current equivalent",
+            "generated R2-R5 projections under owned prefix/current equivalent",
+            "renderers / validators / tests / Playwright",
+        ],
+        "alias_resolution_proof": {
+            "OwnerEducationCopyMap": "OwnerEducationCopyMapV1",
+            "OwnerEducationCatalogV1": "OwnerEducationCopyMapV1",
+            "OwnerDefinitionGlossaryV1": "OwnerEducationCopyMapV1",
+            "OwnerCardEducationMapV1": "OwnerEducationCopyMapV1",
+            "OwnerReadableCopyMap": "OwnerReadableCopyMapV1",
+            "owner-copy suppression map": "OwnerReadableCopyMapV1",
+            "OwnerChartInteractionPolicy": "OwnerChartInteractionPolicyV1",
+            "tooltip state policy": "OwnerChartInteractionPolicyV1",
+            "OwnerMobileNavigationModel": "OwnerMobileNavigationModelV1",
+            "mobile overflow policy": "OwnerMobileNavigationModelV1",
+            "OwnerScreenshotProofRegistry": "OwnerScreenshotProofRegistryV1",
+            "Playwright proof target registry": "OwnerScreenshotProofRegistryV1",
+        },
+        "phase0_current_equivalent_mapping": phase0_mapping,
+        "centralization_manifest": centralization_manifest,
+        "owned_generated_prefix": f"docs/master_plan/generated/pr169_dash1/{R2R5_SUBDIR_NAME}/",
+        "one_builder": builder_ref,
+        "one_validator": validator_ref,
+        "r2r4_current_bundle_ref": "docs/master_plan/generated/pr169_dash1/ui/ui1r2r4_owner_semantic_bundle.generated.json",
+        "screenshot_proof_registry": screenshot_registry,
+        "owner_drawer_policy": owner_drawer_policy,
+        "chart_tooltip_policy": chart_tooltip_policy,
+        "mobile_navigation_policy": mobile_navigation_policy,
+        "more_actions_policy": more_actions_policy,
+        "owner_copy_suppression_map": owner_copy_suppression_map,
+        "workbench_field_semantics_ref": "docs/master_plan/generated/pr169_dash1/ui/owner_dashboard_trade_workbench.generated.json",
+        "agent_operations_projection_ref": "docs/master_plan/generated/pr169_dash1/ui/ui1r2r4_owner_semantic_bundle.generated.json",
+        "workflow_queue_projection_ref": "docs/master_plan/generated/pr169_dash1/ui/ui1r2r4_owner_semantic_bundle.generated.json",
+        "receipt_preview_projection_ref": "docs/master_plan/generated/pr169_dash1/ui/ui1r2r4_owner_semantic_bundle.generated.json",
+        "changed_file_ownership_audit": changed_file_ownership_audit,
+        "broad_pr169_ui_generated_artifact_justification": [
+            {
+                "shared_artifact_path": "docs/master_plan/generated/pr169_dash1/ui/owner_dashboard_review_data.generated.json",
+                "why_r2r5_subprefix_was_not_sufficient": "The existing static renderer consumes one central boot payload.",
+                "central_builder_owns_it": builder_ref,
+                "validator_checks_it": validator_ref,
+                "ui_consumes_it": renderer_ref,
+                "test_consumes_it": tests_ref,
+                "unrelated_generated_churn": False,
+            },
+            {
+                "shared_artifact_path": "docs/master_plan/generated/pr169_dash1/ui/owner_dashboard_review_bootstrap.generated.js",
+                "why_r2r5_subprefix_was_not_sufficient": "The existing HTML loads one bootstrap script for all central state projections.",
+                "central_builder_owns_it": builder_ref,
+                "validator_checks_it": validator_ref,
+                "ui_consumes_it": renderer_ref,
+                "test_consumes_it": tests_ref,
+                "unrelated_generated_churn": False,
+            },
+            {
+                "shared_artifact_path": "docs/master_plan/generated/pr169_dash1/ui/owner_dashboard_mobile_navigation.generated.json",
+                "why_r2r5_subprefix_was_not_sufficient": "The existing mobile navigation projection is the current equivalent for desktop/mobile surface routing.",
+                "central_builder_owns_it": builder_ref,
+                "validator_checks_it": validator_ref,
+                "ui_consumes_it": renderer_ref,
+                "test_consumes_it": tests_ref,
+                "unrelated_generated_churn": False,
+            },
+        ],
+        "no_runtime_authority": r2r4_bundle.get("no_runtime_authority", {}),
+        "currentization_preflight": {
+            **_lifecycle_fields("currentization_preflight", upstream="tools/currentize_pr152_after_generated_artifacts.py", downstream="validation gates"),
+            "new_exact_path_playwright_script_added": False,
+            "stable_runner_extended_with_suite_arg": True,
+            "wildcard_allowlists_added": False,
+            "generated_inventory_change_requires_pr152_currentization": True,
+        },
+        "no_productivity_by_count_claim": "Success is target-accurate proof, owner-readable UI, central consumption, validation, no-orphan routing, and preserved authority boundaries.",
+    }
+
+
 def _build_review_data(base: Path, master_plan: Path) -> tuple[dict[str, Any], dict[str, Any]]:
     resolver = OwnerSurfaceResolver(base)
     registry_rows = resolver.registry.rows
@@ -5648,6 +6024,7 @@ def _build_review_data(base: Path, master_plan: Path) -> tuple[dict[str, Any], d
         chat_route_map=chat_route_map,
         r2_artifacts=r2_artifacts,
     )
+    r2r5_bundle = _build_ui1r2r5_visual_qa_truth_repair(r2r4_bundle)
     charts = {
         "chart_contracts": chart_contracts,
         "interactive_chart_registry": interactive_charts,
@@ -5914,6 +6291,7 @@ def _build_review_data(base: Path, master_plan: Path) -> tuple[dict[str, Any], d
         "ui1r2r3_online_owner_copy_audit": r2_artifacts["ui1r2r3_online_owner_copy_audit.report.json"],
         "ui1r2r3_playwright": r2_artifacts["ui1r2r3_playwright.report.json"],
         "ui1r2r4_semantic_bundle": r2r4_bundle,
+        "ui1r2r5_visual_qa_truth_repair": r2r5_bundle,
     }
     for key in REQUIRED_TOP_LEVEL_KEYS:
         review_data.setdefault(key, {})
@@ -6113,6 +6491,12 @@ def build_ui(base: Path, repo_root: Path) -> dict[str, Any]:
         r2r4_dir / R2R4_MANIFEST_FILE,
         review_data["ui1r2r4_semantic_bundle"]["centralization_manifest"],
     )
+    r2r5_dir = base / R2R5_SUBDIR_NAME
+    _write_json(r2r5_dir / R2R5_BUNDLE_FILE, review_data["ui1r2r5_visual_qa_truth_repair"])
+    _write_json(
+        r2r5_dir / R2R5_MANIFEST_FILE,
+        review_data["ui1r2r5_visual_qa_truth_repair"]["centralization_manifest"],
+    )
     return {
         "artifact_id": "UI1_OWNER_DASHBOARD_BUILD_SUMMARY",
         "status": "BUILT",
@@ -6121,6 +6505,8 @@ def build_ui(base: Path, repo_root: Path) -> dict[str, Any]:
         "boot_js": repo_posix(ui_dir / BOOT_JS),
         "generated_ui_artifact_count": len(UI_ARTIFACT_FILES) + 2,
         "r2r4_manifest": repo_posix(r2r4_dir / R2R4_MANIFEST_FILE),
+        "r2r5_bundle": repo_posix(r2r5_dir / R2R5_BUNDLE_FILE),
+        "r2r5_manifest": repo_posix(r2r5_dir / R2R5_MANIFEST_FILE),
         "registry_row_count": review_data["meta"]["registry_row_count"],
         "decision_queue_count": review_data["meta"]["decision_queue_count"],
         "actionable_card_count": review_data["meta"]["actionable_card_count"],
