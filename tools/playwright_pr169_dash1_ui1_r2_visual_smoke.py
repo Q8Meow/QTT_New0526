@@ -142,7 +142,10 @@ def run(repo: Path) -> None:
         _assert_visible(page, "body[data-experience-mode='GUIDED_OWNER']")
         _assert_visible(page, "#ownerCoachPanel")
         _assert_visible(page, "[data-owner-next-action-menu]")
+        _choose_mode(page, "DEVELOPER")
+        _assert_visible(page, "body[data-experience-mode='DEVELOPER']")
         _assert_visible(page, "#developerMode details:not([open])")
+        _choose_mode(page, "GUIDED_OWNER")
         _assert_owner_text_clean(page)
         _screenshot(page, repo, "home_guided")
 
@@ -154,7 +157,7 @@ def run(repo: Path) -> None:
 
         _assert_visible(page, "#overviewCards .owner-hero-card")
         _screenshot(page, repo, "card_collapsed")
-        page.locator("#overviewCards .owner-hero-card details.learning-details summary").first.click()
+        page.locator("#overviewCards .owner-hero-card details.next-action-menu summary").first.click()
         _screenshot(page, repo, "card_expanded")
 
         _open_menu(page, "#tradeWorkbench [data-owner-next-action-menu]")
@@ -218,7 +221,8 @@ def run(repo: Path) -> None:
         page.locator("#ownerGlossary details[data-glossary-term='TCA'] summary").click()
         _screenshot(page, repo, "glossary")
 
-        page.locator("a[href='#provider-stage']").first.click()
+        _choose_mode(page, "DEVELOPER")
+        page.evaluate("document.querySelector('#provider-stage').scrollIntoView({block: 'start'})")
         _open_menu(page, "#providerStageRoutes [data-owner-next-action-menu]")
         page.locator("#providerStageRoutes [data-next-step-id='NEXT_STEP_DISABLED_PROVIDER_PENDING_EDUCATION']").first.click()
         _assert_visible(page, "[data-local-receipt-preview='DisabledActionEducationPreviewV1']")
@@ -228,7 +232,7 @@ def run(repo: Path) -> None:
 
         _choose_mode(page, "DEVELOPER")
         _assert_visible(page, "body[data-experience-mode='DEVELOPER']")
-        page.locator("a[href='#developer-mode']").first.click()
+        page.evaluate("document.querySelector('#developer-mode').scrollIntoView({block: 'start'})")
         page.locator("#developerMode summary").click()
         _assert_visible(page, "#developerMode .developer-card")
         _screenshot(page, repo, "developer")

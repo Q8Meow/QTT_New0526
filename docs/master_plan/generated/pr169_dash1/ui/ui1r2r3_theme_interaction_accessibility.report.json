@@ -1,0 +1,84 @@
+{
+  "contrast_validation_status": "PASS",
+  "interaction_state_model_id": "OwnerInteractionStateModelV1",
+  "interaction_states": [
+    {
+      "aria_label_required": true,
+      "badge_required": true,
+      "color_not_only_signal": true,
+      "color_token": "--owner-input-required",
+      "state": "input_required"
+    },
+    {
+      "aria_label_required": true,
+      "badge_required": true,
+      "color_not_only_signal": true,
+      "color_token": "--owner-review-required",
+      "state": "review_required"
+    },
+    {
+      "aria_label_required": true,
+      "badge_required": true,
+      "color_not_only_signal": true,
+      "color_token": "--owner-optional-input",
+      "state": "optional_input"
+    },
+    {
+      "aria_label_required": true,
+      "badge_required": true,
+      "color_not_only_signal": true,
+      "color_token": "--owner-provider-pending",
+      "state": "provider_pending"
+    },
+    {
+      "aria_label_required": true,
+      "badge_required": true,
+      "color_not_only_signal": true,
+      "color_token": "--owner-info-only",
+      "state": "info_only"
+    },
+    {
+      "aria_label_required": true,
+      "badge_required": true,
+      "color_not_only_signal": true,
+      "color_token": "--owner-technical-only",
+      "state": "technical_only"
+    },
+    {
+      "aria_label_required": true,
+      "badge_required": true,
+      "color_not_only_signal": true,
+      "color_token": "--owner-high-confirmation",
+      "state": "high_confirmation"
+    }
+  ],
+  "meta": {
+    "agent_consumable_authority": false,
+    "artifact_id": "UI1R2R3_THEME_INTERACTION_ACCESSIBILITY",
+    "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+    "connector_access_allowed": false,
+    "credential_access_allowed": false,
+    "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config + PR169-DASH1 artifacts + PR169-DASH1-UI1/R1 boot data + OwnerPresentationLayer / OwnerGuidancePolicy config + PR169-DASH1-UI1-R2-R3 OwnerSettingsV1 product polish config",
+    "manual_edit_allowed": false,
+    "order_execution_allowed": false,
+    "runtime_side_effect_allowed": false,
+    "runtime_truth_authority": false,
+    "source_truth_authority": false,
+    "ui1r2r3_generated_from": "OwnerDashboardStateV1 + OwnerSurfaceResolver + OwnerActionRegistry + OwnerPresentationLayer + OwnerNextStepRouter + OwnerSettingsV1 + central owner UX semantic bundle",
+    "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+  },
+  "no_component_hardcoded_color_logic": true,
+  "owner_highlight_colors_editable": true,
+  "supported_theme_presets": [
+    "DARK",
+    "LIGHT",
+    "DARK_PRO",
+    "MIDNIGHT_BLUE",
+    "SLATE",
+    "LIGHT_PRO",
+    "LOW_GLARE",
+    "HIGH_CONTRAST",
+    "CUSTOM"
+  ],
+  "theme_token_source": "owner_dashboard_theme_contract.generated.json"
+}

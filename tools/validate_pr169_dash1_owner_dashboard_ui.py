@@ -20,6 +20,9 @@ from tools.build_pr169_dash1_owner_dashboard_ui import (
     DISPLAY_TEXT_SIZES,
     ENTER_TO_SEND_STORAGE_KEY,
     MOBILE_TABS,
+    OWNER_SETTINGS_SECTIONS,
+    OWNER_SETTINGS_STORAGE_KEY,
+    THEME_MODES,
     REQUIRED_TOP_LEVEL_KEYS,
     SEMANTIC_COLORS,
     TECHNICAL_DETAILS_STORAGE_KEY,
@@ -145,8 +148,8 @@ def validate(base: Path) -> tuple[str, ...]:
             failures.append(f"state_model_contract_missing:{key}")
 
     theme = _read_json(ui_dir / "owner_dashboard_theme_contract.generated.json")
-    if set(theme.get("supported_modes", [])) != {"DARK", "LIGHT"}:
-        failures.append("theme_modes_not_dark_light")
+    if not {"DARK", "LIGHT", "DARK_PRO", "MIDNIGHT_BLUE", "SLATE", "LIGHT_PRO", "LOW_GLARE", "HIGH_CONTRAST", "CUSTOM"} <= set(theme.get("supported_modes", [])):
+        failures.append("theme_modes_missing_r2r3_presets")
     if theme.get("localStorage_key") != THEME_STORAGE_KEY:
         failures.append("theme_storage_key_bad")
     if set(theme.get("semantic_colors", {}).values()) != set(SEMANTIC_COLORS.values()):
@@ -245,6 +248,11 @@ def validate(base: Path) -> tuple[str, ...]:
         "LIGHT",
         "mobile-bottom-nav",
         "drilldownDrawer",
+        "ownerSettingsCenter",
+        "OwnerSettingsV1",
+        "OwnerSearchIndexV1",
+        "OwnerChartInteractionPolicyV1",
+        "data-chat-preset-dropdown",
     ):
         if snippet not in combined:
             failures.append(f"required_ui_snippet_missing:{snippet}")
@@ -1018,6 +1026,137 @@ def validate(base: Path) -> tuple[str, ...]:
         failures.append("ui1r2r2_evidence_spine_not_preserved")
     if evidence_r2r2.get("no_fake_runtime_output") is not True or evidence_r2r2.get("no_fake_quantum_advantage") is not True:
         failures.append("ui1r2r2_fake_evidence_guard_missing")
+
+    owner_settings = _read_json(ui_dir / "ui1r2r3_owner_settings.generated.json")
+    if owner_settings.get("settings_model_id") != "OwnerSettingsV1":
+        failures.append("ui1r2r3_owner_settings_model_bad")
+    if owner_settings.get("settings_center_id") != "OwnerSettingsCenter":
+        failures.append("ui1r2r3_settings_center_missing")
+    if owner_settings.get("localStorage_key") != OWNER_SETTINGS_STORAGE_KEY:
+        failures.append("ui1r2r3_owner_settings_storage_key_bad")
+    present_sections = {row.get("owner_label") for row in owner_settings.get("sections", [])}
+    if set(OWNER_SETTINGS_SECTIONS) - present_sections:
+        failures.append("ui1r2r3_settings_sections_missing")
+    if owner_settings.get("trading_preferences_preview_only") is not True:
+        failures.append("ui1r2r3_trading_preferences_not_preview_only")
+    allowed_r2r3_keys = set(owner_settings.get("allowed_localStorage_keys", []))
+    for key in {
+        OWNER_SETTINGS_STORAGE_KEY,
+        THEME_STORAGE_KEY,
+        EXPERIENCE_MODE_STORAGE_KEY,
+        GUIDANCE_DENSITY_STORAGE_KEY,
+        TEXT_SIZE_STORAGE_KEY,
+        TECHNICAL_DETAILS_STORAGE_KEY,
+        ENTER_TO_SEND_STORAGE_KEY,
+    }:
+        if key not in allowed_r2r3_keys:
+            failures.append(f"ui1r2r3_settings_key_missing:{key}")
+
+    navigation = _read_json(ui_dir / "ui1r2r3_navigation_sidebar_search.report.json")
+    if navigation.get("collapsible_sidebar") is not True:
+        failures.append("ui1r2r3_sidebar_not_collapsible")
+    if navigation.get("developer_nav_hidden_outside_developer_or_technical_details") is not True:
+        failures.append("ui1r2r3_developer_nav_not_hidden")
+    top_results = navigation.get("required_top_results", {})
+    for query in ("chat", "agent", "workbench", "qku", "formula", "portfolio", "decision", "research", "quantum"):
+        if query not in top_results:
+            failures.append(f"ui1r2r3_search_top_result_missing:{query}")
+
+    copy_actions = _read_json(ui_dir / "ui1r2r3_owner_copy_card_audience_actions.report.json")
+    if copy_actions.get("all_cards_have_audience_classification") is not True:
+        failures.append("ui1r2r3_card_audience_missing")
+    default_card = copy_actions.get("default_owner_card_contract", {})
+    if default_card.get("one_primary_action") is not True or default_card.get("more_actions_menu") is not True:
+        failures.append("ui1r2r3_default_card_action_declutter_bad")
+
+    chat_guide = _read_json(ui_dir / "ui1r2r3_chat_guide.report.json")
+    if len(chat_guide.get("chat_presets", [])) < 8:
+        failures.append("ui1r2r3_chat_presets_missing")
+    if chat_guide.get("qtt_guide_reuses_chat_state") is not True or chat_guide.get("qtt_guide_second_transcript_store_created") is not False:
+        failures.append("ui1r2r3_qtt_guide_state_bad")
+
+    chart_policy = _read_json(ui_dir / "ui1r2r3_chart_policy.report.json")
+    for key in (
+        "hover_touch_focus_enabled",
+        "nearest_point_highlight",
+        "crosshair_or_vertical_guide",
+        "tooltip_value_panel",
+        "axis_labels_units_ticks_or_pending_placeholders",
+        "selected_range_state",
+        "no_fake_PnL_cash_fill_order_live_values",
+    ):
+        if chart_policy.get(key) is not True:
+            failures.append(f"ui1r2r3_chart_policy_missing:{key}")
+
+    drawers = _read_json(ui_dir / "ui1r2r3_education_drawers.generated.json")
+    drawer_kinds = {row.get("drawer_kind") for row in drawers.get("drawer_actions", [])}
+    if {"explain", "learn", "why", "chart_drilldown", "tca_breakdown", "technical_details"} - drawer_kinds:
+        failures.append("ui1r2r3_drawer_kinds_missing")
+    signatures = [row.get("content_signature") for row in drawers.get("drawer_actions", [])]
+    if len(signatures) != len(set(signatures)):
+        failures.append("ui1r2r3_drawer_signatures_not_unique")
+
+    theme_interaction = _read_json(ui_dir / "ui1r2r3_theme_interaction_accessibility.report.json")
+    if set(THEME_MODES) - set(theme_interaction.get("supported_theme_presets", [])):
+        failures.append("ui1r2r3_theme_presets_missing")
+    if theme_interaction.get("owner_highlight_colors_editable") is not True or theme_interaction.get("contrast_validation_status") != "PASS":
+        failures.append("ui1r2r3_theme_interaction_accessibility_bad")
+
+    workbench_r2r3 = _read_json(ui_dir / "ui1r2r3_workbench_options_ranges.generated.json")
+    if workbench_r2r3.get("all_options_have_source_category") is not True or workbench_r2r3.get("all_numeric_ranges_have_source_category") is not True:
+        failures.append("ui1r2r3_workbench_source_categories_bad")
+    for option_source in ("market_family", "event_category", "specific_event_route", "venue", "duration_unit"):
+        if option_source not in workbench_r2r3.get("option_catalog", {}):
+            failures.append(f"ui1r2r3_workbench_option_source_missing:{option_source}")
+    for range_id in ("max_budget", "max_loss", "target_price_probability", "hold_duration", "portfolio_exposure"):
+        if range_id not in workbench_r2r3.get("range_policy", {}):
+            failures.append(f"ui1r2r3_workbench_range_missing:{range_id}")
+
+    no_scattering = _read_json(ui_dir / "ui1r2r3_no_runtime_no_scattering.report.json")
+    for key in (
+        "no_SVC1_runtime",
+        "no_live_LLM",
+        "no_real_QTT_agent_execution",
+        "no_real_replay_paper_live_execution",
+        "no_connector_private_or_cash_account_reads",
+        "no_source_truth_acceptance",
+        "no_direct_venue_submit",
+        "no_Execution_Router_release",
+        "no_QTT_SHA_or_AtomicRows_hash_authority",
+        "no_profit_guarantee",
+        "no_new_QKU_formula_materialization_engine",
+        "no_separate_workbench_option_arrays",
+        "no_separate_chat_preset_arrays",
+        "no_second_settings_store",
+        "renderer_consumes_central_tokens_options_ranges_copy_actions",
+    ):
+        if no_scattering.get(key) is not True:
+            failures.append(f"ui1r2r3_no_scattering_guard_missing:{key}")
+
+    online_audit = _read_json(ui_dir / "ui1r2r3_online_owner_copy_audit.report.json")
+    if online_audit.get("source_truth_created") is not False or online_audit.get("forbidden_owner_facing_machine_labels_absent_from_guided_advanced") is not True:
+        failures.append("ui1r2r3_online_or_copy_audit_bad")
+
+    for snippet in (
+        "OWNER_SETTINGS_STORAGE_KEY",
+        "OwnerSettings",
+        "data-settings-center=\"OwnerSettingsV1\"",
+        "data-owner-setting",
+        "data-chat-preset-dropdown=\"OwnerOptionCatalogV1.chat_presets\"",
+        "data-qtt-guide-route=\"existing-chat-action-system\"",
+        "data-owner-drawer-action",
+        "data-content-signature",
+        "data-chart-interaction=\"OwnerChartInteractionPolicyV1\"",
+        "provider_pending_no_value",
+        "data-workbench-inline-validation",
+        "data-source-category",
+        "data-default-card-contract=\"one-primary-plus-more-actions\"",
+        "data-secondary-actions-collapsed=\"true\"",
+        "ownerSearchResults",
+        "sidebarCollapseToggle",
+    ):
+        if snippet not in combined:
+            failures.append(f"ui1r2r3_renderer_snippet_missing:{snippet}")
 
     return tuple(failures)
 

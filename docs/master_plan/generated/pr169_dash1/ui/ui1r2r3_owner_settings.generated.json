@@ -1,0 +1,217 @@
+{
+  "allowed_localStorage_keys": [
+    "qtt_owner_dashboard_owner_settings_v1",
+    "qtt_owner_dashboard_theme",
+    "qtt_owner_dashboard_experience_mode",
+    "qtt_owner_dashboard_guidance_density",
+    "qtt_owner_dashboard_text_size",
+    "qtt_owner_dashboard_technical_details_open",
+    "qtt_owner_dashboard_enter_to_send_enabled"
+  ],
+  "controls": [
+    {
+      "control_id": "settings_appearance",
+      "owner_label": "Appearance",
+      "section": "Appearance",
+      "writes_owner_settings_v1": true
+    },
+    {
+      "control_id": "settings_colors",
+      "owner_label": "Colors",
+      "section": "Colors",
+      "writes_owner_settings_v1": true
+    },
+    {
+      "control_id": "settings_layout",
+      "owner_label": "Layout",
+      "section": "Layout",
+      "writes_owner_settings_v1": true
+    },
+    {
+      "control_id": "settings_charts",
+      "owner_label": "Charts",
+      "section": "Charts",
+      "writes_owner_settings_v1": true
+    },
+    {
+      "control_id": "settings_workbench",
+      "owner_label": "Workbench",
+      "section": "Workbench",
+      "writes_owner_settings_v1": true
+    },
+    {
+      "control_id": "settings_chat",
+      "owner_label": "Chat",
+      "section": "Chat",
+      "writes_owner_settings_v1": true
+    },
+    {
+      "control_id": "settings_dashboard",
+      "owner_label": "Dashboard",
+      "section": "Dashboard",
+      "writes_owner_settings_v1": true
+    },
+    {
+      "control_id": "settings_trading-preferences",
+      "owner_label": "Trading Preferences",
+      "section": "Trading Preferences",
+      "writes_owner_settings_v1": true
+    },
+    {
+      "control_id": "settings_accessibility",
+      "owner_label": "Accessibility",
+      "section": "Accessibility",
+      "writes_owner_settings_v1": true
+    },
+    {
+      "control_id": "settings_keyboard-shortcuts",
+      "owner_label": "Keyboard Shortcuts",
+      "section": "Keyboard Shortcuts",
+      "writes_owner_settings_v1": true
+    },
+    {
+      "control_id": "settings_about",
+      "owner_label": "About",
+      "section": "About",
+      "writes_owner_settings_v1": true
+    }
+  ],
+  "defaults": {
+    "card_density": "comfortable",
+    "chart_axis_labels": true,
+    "chart_crosshair": true,
+    "chart_default_timeframe": "1M",
+    "chart_grid_lines": true,
+    "chart_tooltips": true,
+    "chat_enter_to_send": false,
+    "chat_prompt_suggestions": true,
+    "dashboard_default_experience_mode": "GUIDED_OWNER",
+    "dashboard_show_beginner_tips": true,
+    "dashboard_show_technical_cards": false,
+    "density": "comfortable",
+    "high_contrast": false,
+    "input_required_color": "#F59E0B",
+    "keyboard_focus_visible": true,
+    "provider_pending_color": "#64748B",
+    "qtt_guide_collapsed": true,
+    "reduced_motion": false,
+    "review_required_color": "#2563EB",
+    "sidebar_collapsed": false,
+    "success_color": "#16A34A",
+    "text_size": "default",
+    "theme_preset": "DARK_PRO",
+    "trading_default_execution_preference": "maker_first_preview",
+    "trading_default_hold_style": "event_resolution_or_provider_pending",
+    "trading_default_market": "prediction_market",
+    "trading_default_portfolio_objective": "preserve_capital_and_improve_net_cash_preview",
+    "trading_default_position_size_style": "small_preview",
+    "trading_default_risk_profile": "conservative_preview",
+    "trading_default_venue": "qtt_decide",
+    "warning_high_confirmation_color": "#F97316",
+    "workbench_preferred_hold_unit": "days",
+    "workbench_preferred_maker_taker": "maker_first_taker_fallback",
+    "workbench_preferred_market": "prediction_market",
+    "workbench_preferred_objective": "maximize_expected_net_cash",
+    "workbench_preferred_venue": "qtt_decide"
+  },
+  "focus_restored_on_close": true,
+  "forbidden_localStorage_categories": [
+    "trade_state",
+    "order_state",
+    "cash_account_state",
+    "private_data",
+    "source_truth",
+    "credentials",
+    "approval_receipts",
+    "runtime_receipts",
+    "live_status",
+    "connector_state"
+  ],
+  "legacy_alias_localStorage_keys": [
+    "qtt_owner_dashboard_theme",
+    "qtt_owner_dashboard_experience_mode",
+    "qtt_owner_dashboard_guidance_density",
+    "qtt_owner_dashboard_text_size",
+    "qtt_owner_dashboard_technical_details_open",
+    "qtt_owner_dashboard_enter_to_send_enabled"
+  ],
+  "localStorage_key": "qtt_owner_dashboard_owner_settings_v1",
+  "meta": {
+    "agent_consumable_authority": false,
+    "artifact_id": "UI1R2R3_OWNER_SETTINGS",
+    "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+    "connector_access_allowed": false,
+    "credential_access_allowed": false,
+    "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config + PR169-DASH1 artifacts + PR169-DASH1-UI1/R1 boot data + OwnerPresentationLayer / OwnerGuidancePolicy config + PR169-DASH1-UI1-R2-R3 OwnerSettingsV1 product polish config",
+    "manual_edit_allowed": false,
+    "order_execution_allowed": false,
+    "runtime_side_effect_allowed": false,
+    "runtime_truth_authority": false,
+    "source_truth_authority": false,
+    "ui1r2r3_generated_from": "OwnerDashboardStateV1 + OwnerSurfaceResolver + OwnerActionRegistry + OwnerPresentationLayer + OwnerNextStepRouter + OwnerSettingsV1 + central owner UX semantic bundle",
+    "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+  },
+  "no_source_truth_or_order_authority": true,
+  "preference_manager_id": "OwnerUIPreferenceServiceV1",
+  "sections": [
+    {
+      "controls_read_write_owner_settings_v1": true,
+      "owner_label": "Appearance",
+      "section_id": "appearance"
+    },
+    {
+      "controls_read_write_owner_settings_v1": true,
+      "owner_label": "Colors",
+      "section_id": "colors"
+    },
+    {
+      "controls_read_write_owner_settings_v1": true,
+      "owner_label": "Layout",
+      "section_id": "layout"
+    },
+    {
+      "controls_read_write_owner_settings_v1": true,
+      "owner_label": "Charts",
+      "section_id": "charts"
+    },
+    {
+      "controls_read_write_owner_settings_v1": true,
+      "owner_label": "Workbench",
+      "section_id": "workbench"
+    },
+    {
+      "controls_read_write_owner_settings_v1": true,
+      "owner_label": "Chat",
+      "section_id": "chat"
+    },
+    {
+      "controls_read_write_owner_settings_v1": true,
+      "owner_label": "Dashboard",
+      "section_id": "dashboard"
+    },
+    {
+      "controls_read_write_owner_settings_v1": true,
+      "owner_label": "Trading Preferences",
+      "section_id": "trading-preferences"
+    },
+    {
+      "controls_read_write_owner_settings_v1": true,
+      "owner_label": "Accessibility",
+      "section_id": "accessibility"
+    },
+    {
+      "controls_read_write_owner_settings_v1": true,
+      "owner_label": "Keyboard Shortcuts",
+      "section_id": "keyboard-shortcuts"
+    },
+    {
+      "controls_read_write_owner_settings_v1": true,
+      "owner_label": "About",
+      "section_id": "about"
+    }
+  ],
+  "settings_center_id": "OwnerSettingsCenter",
+  "settings_model_id": "OwnerSettingsV1",
+  "single_safe_persistence_adapter": true,
+  "trading_preferences_preview_only": true
+}

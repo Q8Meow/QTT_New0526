@@ -17,10 +17,41 @@
   "execution_router_release_required": true,
   "field_catalog": [
     {
+      "field_id": "market_family",
+      "input_kind": "select",
+      "interaction_state": "input_required",
+      "option_source": "market_family",
+      "owner_label": "Market family",
+      "required": true,
+      "source_category": "safe_ui_default"
+    },
+    {
+      "field_id": "event_category",
+      "input_kind": "select",
+      "interaction_state": "input_required",
+      "option_source": "event_category",
+      "owner_label": "Event category",
+      "required": true,
+      "source_category": "safe_ui_default"
+    },
+    {
       "field_id": "market_event",
+      "input_kind": "select",
+      "interaction_state": "input_required",
+      "option_source": "specific_event_route",
+      "owner_label": "Specific event",
+      "required": true,
+      "source_category": "provider_pending"
+    },
+    {
+      "field_id": "custom_event",
       "input_kind": "text",
-      "owner_label": "Market / event",
-      "required": true
+      "interaction_state": "optional_input",
+      "owner_label": "Custom event",
+      "required": false,
+      "shown_when_field": "market_event",
+      "shown_when_value": "other",
+      "source_category": "candidate_owner_custom"
     },
     {
       "field_id": "venue",
@@ -28,6 +59,16 @@
       "option_source": "venue",
       "owner_label": "Venue",
       "required": true
+    },
+    {
+      "field_id": "custom_venue",
+      "input_kind": "text",
+      "interaction_state": "optional_input",
+      "owner_label": "Custom venue",
+      "required": false,
+      "shown_when_field": "venue",
+      "shown_when_value": "other",
+      "source_category": "candidate_owner_custom"
     },
     {
       "field_id": "side",
@@ -47,18 +88,39 @@
       "field_id": "max_budget",
       "input_kind": "number",
       "owner_label": "Max budget",
-      "required": true
+      "range_policy_id": "max_budget",
+      "required": true,
+      "unit": "USD preview"
     },
     {
       "field_id": "max_loss",
       "input_kind": "number",
       "owner_label": "Max loss",
-      "required": true
+      "range_policy_id": "max_loss",
+      "required": true,
+      "unit": "USD preview"
+    },
+    {
+      "field_id": "portfolio_exposure",
+      "input_kind": "number",
+      "owner_label": "Portfolio exposure",
+      "range_policy_id": "portfolio_exposure",
+      "required": false,
+      "unit": "% preview"
     },
     {
       "field_id": "hold_duration",
-      "input_kind": "text",
+      "input_kind": "number",
       "owner_label": "Hold duration",
+      "range_policy_id": "hold_duration",
+      "required": true,
+      "unit": "duration"
+    },
+    {
+      "field_id": "duration_unit",
+      "input_kind": "select",
+      "option_source": "duration_unit",
+      "owner_label": "Duration unit",
       "required": true
     },
     {
@@ -97,15 +159,35 @@
     },
     {
       "field_id": "target_price_probability",
-      "input_kind": "text",
+      "input_kind": "number",
       "owner_label": "Optional target price/probability",
-      "required": false
+      "range_policy_id": "target_price_probability",
+      "required": false,
+      "unit": "% or cents preview"
     },
     {
       "field_id": "stop_exit_preference",
-      "input_kind": "text",
-      "owner_label": "Optional stop/exit preference",
-      "required": false
+      "input_kind": "number",
+      "owner_label": "Optional stop/exit threshold",
+      "range_policy_id": "stop_exit_threshold",
+      "required": false,
+      "unit": "% or cents preview"
+    },
+    {
+      "field_id": "latency_budget",
+      "input_kind": "number",
+      "owner_label": "Latency budget",
+      "range_policy_id": "latency_budget",
+      "required": false,
+      "unit": "milliseconds preview"
+    },
+    {
+      "field_id": "max_spread",
+      "input_kind": "number",
+      "owner_label": "Max spread",
+      "range_policy_id": "max_spread",
+      "required": false,
+      "unit": "cents or bps preview"
     },
     {
       "field_id": "source_family",
@@ -113,6 +195,24 @@
       "option_source": "source_family",
       "owner_label": "Source family",
       "required": false
+    },
+    {
+      "field_id": "custom_source_family",
+      "input_kind": "text",
+      "interaction_state": "optional_input",
+      "owner_label": "Custom source family",
+      "required": false,
+      "shown_when_field": "source_family",
+      "shown_when_value": "other",
+      "source_category": "candidate_owner_custom"
+    },
+    {
+      "field_id": "notes",
+      "input_kind": "textarea",
+      "interaction_state": "optional_input",
+      "owner_label": "Notes",
+      "required": false,
+      "source_category": "candidate_owner_custom"
     },
     {
       "field_id": "route_selector",
@@ -177,13 +277,19 @@
       "Execution_Router_provider_pending_route"
     ],
     "selected_fields_from_field_catalog": [
+      "market_family",
+      "event_category",
       "market_event",
+      "custom_event",
       "venue",
+      "custom_venue",
       "side",
       "objective",
       "max_budget",
       "max_loss",
+      "portfolio_exposure",
       "hold_duration",
+      "duration_unit",
       "urgency",
       "entry_preference",
       "exit_preference",
@@ -191,7 +297,11 @@
       "source_thesis_url",
       "target_price_probability",
       "stop_exit_preference",
+      "latency_budget",
+      "max_spread",
       "source_family",
+      "custom_source_family",
+      "notes",
       "route_selector"
     ]
   },
@@ -239,287 +349,590 @@
   ],
   "no_trade_first_class_candidate": true,
   "option_catalog": {
+    "duration_unit": [
+      {
+        "authority_level": "local_ui_preference_or_candidate_only",
+        "option_id": "minutes",
+        "owner_label": "minutes",
+        "runtime_side_effect_allowed": false,
+        "source_category": "safe_ui_default"
+      },
+      {
+        "authority_level": "local_ui_preference_or_candidate_only",
+        "option_id": "hours",
+        "owner_label": "hours",
+        "runtime_side_effect_allowed": false,
+        "source_category": "safe_ui_default"
+      },
+      {
+        "authority_level": "local_ui_preference_or_candidate_only",
+        "option_id": "days",
+        "owner_label": "days",
+        "runtime_side_effect_allowed": false,
+        "source_category": "safe_ui_default"
+      },
+      {
+        "authority_level": "local_ui_preference_or_candidate_only",
+        "option_id": "until_resolution",
+        "owner_label": "until resolution",
+        "runtime_side_effect_allowed": false,
+        "source_category": "provider_pending"
+      }
+    ],
     "entry_preference": [
       {
+        "authority_level": "local_ui_preference_or_candidate_only",
         "option_id": "maker_only",
         "owner_label": "maker-only",
-        "runtime_side_effect_allowed": false
+        "runtime_side_effect_allowed": false,
+        "source_category": "safe_ui_default"
       },
       {
+        "authority_level": "local_ui_preference_or_candidate_only",
+        "option_id": "maker_first",
+        "owner_label": "maker-first",
+        "runtime_side_effect_allowed": false,
+        "source_category": "safe_ui_default"
+      },
+      {
+        "authority_level": "local_ui_preference_or_candidate_only",
         "option_id": "taker_allowed_preview",
         "owner_label": "taker-allowed preview",
-        "runtime_side_effect_allowed": false
+        "runtime_side_effect_allowed": false,
+        "source_category": "safe_ui_default"
       },
       {
+        "authority_level": "local_ui_preference_or_candidate_only",
         "option_id": "price_threshold",
         "owner_label": "price threshold",
-        "runtime_side_effect_allowed": false
+        "runtime_side_effect_allowed": false,
+        "source_category": "safe_ui_default"
       },
       {
+        "authority_level": "local_ui_preference_or_candidate_only",
         "option_id": "wait_for_spread_improvement",
         "owner_label": "wait for spread improvement",
-        "runtime_side_effect_allowed": false
+        "runtime_side_effect_allowed": false,
+        "source_category": "safe_ui_default"
       },
       {
+        "authority_level": "local_ui_preference_or_candidate_only",
         "option_id": "qtt_decide",
         "owner_label": "let QTT decide",
-        "runtime_side_effect_allowed": false
+        "runtime_side_effect_allowed": false,
+        "source_category": "safe_ui_default"
+      }
+    ],
+    "event_category": [
+      {
+        "authority_level": "local_ui_preference_or_candidate_only",
+        "option_id": "politics_elections",
+        "owner_label": "Politics / Elections",
+        "runtime_side_effect_allowed": false,
+        "source_category": "safe_ui_default"
+      },
+      {
+        "authority_level": "local_ui_preference_or_candidate_only",
+        "option_id": "economics_rates_inflation",
+        "owner_label": "Economics / Rates / Inflation",
+        "runtime_side_effect_allowed": false,
+        "source_category": "safe_ui_default"
+      },
+      {
+        "authority_level": "local_ui_preference_or_candidate_only",
+        "option_id": "weather_climate",
+        "owner_label": "Weather / Climate",
+        "runtime_side_effect_allowed": false,
+        "source_category": "safe_ui_default"
+      },
+      {
+        "authority_level": "local_ui_preference_or_candidate_only",
+        "option_id": "sports",
+        "owner_label": "Sports",
+        "runtime_side_effect_allowed": false,
+        "source_category": "safe_ui_default"
+      },
+      {
+        "authority_level": "local_ui_preference_or_candidate_only",
+        "option_id": "crypto_financial_markets",
+        "owner_label": "Crypto / Financial Markets",
+        "runtime_side_effect_allowed": false,
+        "source_category": "safe_ui_default"
+      },
+      {
+        "authority_level": "local_ui_preference_or_candidate_only",
+        "option_id": "geopolitics",
+        "owner_label": "Geopolitics",
+        "runtime_side_effect_allowed": false,
+        "source_category": "safe_ui_default"
+      },
+      {
+        "authority_level": "local_ui_preference_or_candidate_only",
+        "option_id": "entertainment_culture",
+        "owner_label": "Entertainment / Culture",
+        "runtime_side_effect_allowed": false,
+        "source_category": "safe_ui_default"
+      },
+      {
+        "authority_level": "local_ui_preference_or_candidate_only",
+        "option_id": "technology_ai",
+        "owner_label": "Technology / AI",
+        "runtime_side_effect_allowed": false,
+        "source_category": "safe_ui_default"
+      },
+      {
+        "authority_level": "local_ui_preference_or_candidate_only",
+        "option_id": "public_health",
+        "owner_label": "Public Health",
+        "runtime_side_effect_allowed": false,
+        "source_category": "safe_ui_default"
+      },
+      {
+        "authority_level": "local_ui_preference_or_candidate_only",
+        "option_id": "other",
+        "owner_label": "Other",
+        "runtime_side_effect_allowed": false,
+        "source_category": "candidate_owner_custom"
       }
     ],
     "exit_preference": [
       {
+        "authority_level": "local_ui_preference_or_candidate_only",
         "option_id": "hold_to_resolution_preview",
         "owner_label": "hold to resolution preview",
-        "runtime_side_effect_allowed": false
+        "runtime_side_effect_allowed": false,
+        "source_category": "safe_ui_default"
       },
       {
+        "authority_level": "local_ui_preference_or_candidate_only",
         "option_id": "time_based_exit_preview",
         "owner_label": "time-based exit preview",
-        "runtime_side_effect_allowed": false
+        "runtime_side_effect_allowed": false,
+        "source_category": "safe_ui_default"
       },
       {
+        "authority_level": "local_ui_preference_or_candidate_only",
         "option_id": "target_price_exit_preview",
         "owner_label": "target-price exit preview",
-        "runtime_side_effect_allowed": false
+        "runtime_side_effect_allowed": false,
+        "source_category": "safe_ui_default"
       },
       {
+        "authority_level": "local_ui_preference_or_candidate_only",
         "option_id": "stop_invalid_thesis_exit_preview",
         "owner_label": "stop/invalid-thesis exit preview",
-        "runtime_side_effect_allowed": false
+        "runtime_side_effect_allowed": false,
+        "source_category": "safe_ui_default"
       },
       {
+        "authority_level": "local_ui_preference_or_candidate_only",
         "option_id": "qtt_decide",
         "owner_label": "let QTT decide",
-        "runtime_side_effect_allowed": false
+        "runtime_side_effect_allowed": false,
+        "source_category": "safe_ui_default"
       }
     ],
     "maker_taker_preference": [
       {
+        "authority_level": "local_ui_preference_or_candidate_only",
         "option_id": "maker_only",
         "owner_label": "maker-only",
-        "runtime_side_effect_allowed": false
+        "runtime_side_effect_allowed": false,
+        "source_category": "safe_ui_default"
       },
       {
+        "authority_level": "local_ui_preference_or_candidate_only",
         "option_id": "maker_first_taker_fallback",
         "owner_label": "maker-first, taker fallback",
-        "runtime_side_effect_allowed": false
+        "runtime_side_effect_allowed": false,
+        "source_category": "safe_ui_default"
       },
       {
+        "authority_level": "local_ui_preference_or_candidate_only",
         "option_id": "taker_allowed_preview",
         "owner_label": "taker-allowed preview",
-        "runtime_side_effect_allowed": false
+        "runtime_side_effect_allowed": false,
+        "source_category": "safe_ui_default"
       },
       {
+        "authority_level": "local_ui_preference_or_candidate_only",
         "option_id": "split_policy_preview",
         "owner_label": "split policy preview",
-        "runtime_side_effect_allowed": false
+        "runtime_side_effect_allowed": false,
+        "source_category": "safe_ui_default"
       },
       {
+        "authority_level": "local_ui_preference_or_candidate_only",
         "option_id": "qtt_decide",
         "owner_label": "let QTT decide",
-        "runtime_side_effect_allowed": false
+        "runtime_side_effect_allowed": false,
+        "source_category": "safe_ui_default"
+      }
+    ],
+    "market_family": [
+      {
+        "authority_level": "local_ui_preference_or_candidate_only",
+        "option_id": "prediction_market",
+        "owner_label": "Prediction Market",
+        "runtime_side_effect_allowed": false,
+        "source_category": "safe_ui_default"
+      },
+      {
+        "authority_level": "local_ui_preference_or_candidate_only",
+        "option_id": "financial_market",
+        "owner_label": "Financial Market",
+        "runtime_side_effect_allowed": false,
+        "source_category": "master_plan_static_value"
+      },
+      {
+        "authority_level": "local_ui_preference_or_candidate_only",
+        "option_id": "sports_market",
+        "owner_label": "Sports Market",
+        "runtime_side_effect_allowed": false,
+        "source_category": "master_plan_static_value"
+      },
+      {
+        "authority_level": "local_ui_preference_or_candidate_only",
+        "option_id": "crypto_market",
+        "owner_label": "Crypto Market",
+        "runtime_side_effect_allowed": false,
+        "source_category": "master_plan_static_value"
+      },
+      {
+        "authority_level": "local_ui_preference_or_candidate_only",
+        "option_id": "other",
+        "owner_label": "Other",
+        "runtime_side_effect_allowed": false,
+        "source_category": "candidate_owner_custom"
       }
     ],
     "objective": [
       {
+        "authority_level": "local_ui_preference_or_candidate_only",
         "option_id": "maximize_expected_net_cash",
-        "owner_label": "maximize expected net cash",
-        "runtime_side_effect_allowed": false
+        "owner_label": "max expected net cash",
+        "runtime_side_effect_allowed": false,
+        "source_category": "safe_ui_default"
       },
       {
+        "authority_level": "local_ui_preference_or_candidate_only",
         "option_id": "preserve_capital",
         "owner_label": "preserve capital",
-        "runtime_side_effect_allowed": false
+        "runtime_side_effect_allowed": false,
+        "source_category": "safe_ui_default"
       },
       {
+        "authority_level": "local_ui_preference_or_candidate_only",
         "option_id": "minimize_drawdown",
         "owner_label": "minimize drawdown",
-        "runtime_side_effect_allowed": false
+        "runtime_side_effect_allowed": false,
+        "source_category": "safe_ui_default"
       },
       {
+        "authority_level": "local_ui_preference_or_candidate_only",
         "option_id": "improve_diversification",
         "owner_label": "improve diversification",
-        "runtime_side_effect_allowed": false
+        "runtime_side_effect_allowed": false,
+        "source_category": "safe_ui_default"
       },
       {
+        "authority_level": "local_ui_preference_or_candidate_only",
         "option_id": "minimize_latency",
         "owner_label": "minimize latency",
-        "runtime_side_effect_allowed": false
+        "runtime_side_effect_allowed": false,
+        "source_category": "safe_ui_default"
       },
       {
+        "authority_level": "local_ui_preference_or_candidate_only",
         "option_id": "maximize_fill_quality",
         "owner_label": "maximize fill quality",
-        "runtime_side_effect_allowed": false
+        "runtime_side_effect_allowed": false,
+        "source_category": "safe_ui_default"
       },
       {
+        "authority_level": "local_ui_preference_or_candidate_only",
         "option_id": "qtt_decide",
         "owner_label": "let QTT decide",
-        "runtime_side_effect_allowed": false
+        "runtime_side_effect_allowed": false,
+        "source_category": "safe_ui_default"
       }
     ],
     "route_selector": [
       {
+        "authority_level": "local_ui_preference_or_candidate_only",
         "option_id": "check_trade",
         "owner_label": "Check trade",
-        "runtime_side_effect_allowed": false
+        "runtime_side_effect_allowed": false,
+        "source_category": "safe_ui_default"
       },
       {
+        "authority_level": "local_ui_preference_or_candidate_only",
         "option_id": "research_source",
         "owner_label": "Research source",
-        "runtime_side_effect_allowed": false
+        "runtime_side_effect_allowed": false,
+        "source_category": "safe_ui_default"
       },
       {
+        "authority_level": "local_ui_preference_or_candidate_only",
         "option_id": "compare_qku_formula_stacks",
         "owner_label": "Compare QKU/formula stacks",
-        "runtime_side_effect_allowed": false
+        "runtime_side_effect_allowed": false,
+        "source_category": "safe_ui_default"
       },
       {
+        "authority_level": "local_ui_preference_or_candidate_only",
         "option_id": "explain_no_trade",
         "owner_label": "Explain no-trade",
-        "runtime_side_effect_allowed": false
+        "runtime_side_effect_allowed": false,
+        "source_category": "safe_ui_default"
       },
       {
+        "authority_level": "local_ui_preference_or_candidate_only",
         "option_id": "tune_parameters",
         "owner_label": "Tune parameters",
-        "runtime_side_effect_allowed": false
+        "runtime_side_effect_allowed": false,
+        "source_category": "safe_ui_default"
       },
       {
+        "authority_level": "local_ui_preference_or_candidate_only",
         "option_id": "show_agent_disagreement",
         "owner_label": "Show agent disagreement",
-        "runtime_side_effect_allowed": false
+        "runtime_side_effect_allowed": false,
+        "source_category": "safe_ui_default"
       },
       {
+        "authority_level": "local_ui_preference_or_candidate_only",
         "option_id": "replay_preview_route",
         "owner_label": "Replay preview route",
-        "runtime_side_effect_allowed": false
+        "runtime_side_effect_allowed": false,
+        "source_category": "provider_pending"
       },
       {
+        "authority_level": "local_ui_preference_or_candidate_only",
         "option_id": "paper_preview_route",
         "owner_label": "Paper preview route",
-        "runtime_side_effect_allowed": false
+        "runtime_side_effect_allowed": false,
+        "source_category": "provider_pending"
       }
     ],
     "side": [
       {
+        "authority_level": "local_ui_preference_or_candidate_only",
         "option_id": "yes",
         "owner_label": "YES",
-        "runtime_side_effect_allowed": false
+        "runtime_side_effect_allowed": false,
+        "source_category": "safe_ui_default"
       },
       {
+        "authority_level": "local_ui_preference_or_candidate_only",
         "option_id": "no",
         "owner_label": "NO",
-        "runtime_side_effect_allowed": false
+        "runtime_side_effect_allowed": false,
+        "source_category": "safe_ui_default"
       },
       {
+        "authority_level": "local_ui_preference_or_candidate_only",
         "option_id": "buy",
         "owner_label": "BUY",
-        "runtime_side_effect_allowed": false
+        "runtime_side_effect_allowed": false,
+        "source_category": "safe_ui_default"
       },
       {
+        "authority_level": "local_ui_preference_or_candidate_only",
         "option_id": "sell",
         "owner_label": "SELL",
-        "runtime_side_effect_allowed": false
+        "runtime_side_effect_allowed": false,
+        "source_category": "safe_ui_default"
       },
       {
+        "authority_level": "local_ui_preference_or_candidate_only",
         "option_id": "open",
         "owner_label": "OPEN",
-        "runtime_side_effect_allowed": false
+        "runtime_side_effect_allowed": false,
+        "source_category": "safe_ui_default"
       },
       {
+        "authority_level": "local_ui_preference_or_candidate_only",
         "option_id": "close",
         "owner_label": "CLOSE",
-        "runtime_side_effect_allowed": false
+        "runtime_side_effect_allowed": false,
+        "source_category": "safe_ui_default"
       },
       {
+        "authority_level": "local_ui_preference_or_candidate_only",
         "option_id": "qtt_decide",
         "owner_label": "Let QTT decide",
-        "runtime_side_effect_allowed": false
+        "runtime_side_effect_allowed": false,
+        "source_category": "safe_ui_default"
       }
     ],
     "source_family": [
       {
+        "authority_level": "local_ui_preference_or_candidate_only",
         "option_id": "owner_thesis",
         "owner_label": "owner thesis",
-        "runtime_side_effect_allowed": false
+        "runtime_side_effect_allowed": false,
+        "source_category": "safe_ui_default"
       },
       {
+        "authority_level": "local_ui_preference_or_candidate_only",
         "option_id": "url_article_news",
         "owner_label": "URL / article / news",
-        "runtime_side_effect_allowed": false
+        "runtime_side_effect_allowed": false,
+        "source_category": "safe_ui_default"
       },
       {
+        "authority_level": "local_ui_preference_or_candidate_only",
         "option_id": "market_page",
         "owner_label": "market page",
-        "runtime_side_effect_allowed": false
+        "runtime_side_effect_allowed": false,
+        "source_category": "provider_pending"
       },
       {
+        "authority_level": "local_ui_preference_or_candidate_only",
         "option_id": "pdf_paper_dataset_note",
         "owner_label": "PDF / paper / dataset note",
-        "runtime_side_effect_allowed": false
+        "runtime_side_effect_allowed": false,
+        "source_category": "safe_ui_default"
       },
       {
+        "authority_level": "local_ui_preference_or_candidate_only",
         "option_id": "formula_algorithm_note",
         "owner_label": "formula / algorithm note",
-        "runtime_side_effect_allowed": false
+        "runtime_side_effect_allowed": false,
+        "source_category": "safe_ui_default"
       },
       {
+        "authority_level": "local_ui_preference_or_candidate_only",
+        "option_id": "dataset",
+        "owner_label": "dataset",
+        "runtime_side_effect_allowed": false,
+        "source_category": "safe_ui_default"
+      },
+      {
+        "authority_level": "local_ui_preference_or_candidate_only",
         "option_id": "social_public_post_research_signal_only",
         "owner_label": "social/public post as research signal only",
-        "runtime_side_effect_allowed": false
+        "runtime_side_effect_allowed": false,
+        "source_category": "safe_ui_default"
       },
       {
+        "authority_level": "local_ui_preference_or_candidate_only",
+        "option_id": "other",
+        "owner_label": "Other",
+        "runtime_side_effect_allowed": false,
+        "source_category": "candidate_owner_custom"
+      },
+      {
+        "authority_level": "local_ui_preference_or_candidate_only",
         "option_id": "none_yet",
         "owner_label": "none yet",
-        "runtime_side_effect_allowed": false
+        "runtime_side_effect_allowed": false,
+        "source_category": "safe_ui_default"
+      }
+    ],
+    "specific_event_route": [
+      {
+        "authority_level": "local_ui_preference_or_candidate_only",
+        "option_id": "paste_url",
+        "owner_label": "Paste market/event URL",
+        "runtime_side_effect_allowed": false,
+        "source_category": "safe_ui_default"
+      },
+      {
+        "authority_level": "local_ui_preference_or_candidate_only",
+        "option_id": "select_known_event_provider_pending",
+        "owner_label": "Select known event - provider pending",
+        "runtime_side_effect_allowed": false,
+        "source_category": "provider_pending"
+      },
+      {
+        "authority_level": "local_ui_preference_or_candidate_only",
+        "option_id": "describe_event",
+        "owner_label": "Describe event locally",
+        "runtime_side_effect_allowed": false,
+        "source_category": "safe_ui_default"
+      },
+      {
+        "authority_level": "local_ui_preference_or_candidate_only",
+        "option_id": "other",
+        "owner_label": "Other",
+        "runtime_side_effect_allowed": false,
+        "source_category": "candidate_owner_custom"
       }
     ],
     "urgency": [
       {
+        "authority_level": "local_ui_preference_or_candidate_only",
         "option_id": "passive_maker_preferred",
         "owner_label": "passive / maker-preferred",
-        "runtime_side_effect_allowed": false
+        "runtime_side_effect_allowed": false,
+        "source_category": "safe_ui_default"
       },
       {
+        "authority_level": "local_ui_preference_or_candidate_only",
         "option_id": "normal",
         "owner_label": "normal",
-        "runtime_side_effect_allowed": false
+        "runtime_side_effect_allowed": false,
+        "source_category": "safe_ui_default"
       },
       {
+        "authority_level": "local_ui_preference_or_candidate_only",
         "option_id": "urgent_preview",
         "owner_label": "urgent preview",
-        "runtime_side_effect_allowed": false
+        "runtime_side_effect_allowed": false,
+        "source_category": "safe_ui_default"
       },
       {
+        "authority_level": "local_ui_preference_or_candidate_only",
         "option_id": "wait_for_better_liquidity",
-        "owner_label": "wait for better liquidity",
-        "runtime_side_effect_allowed": false
+        "owner_label": "wait for liquidity",
+        "runtime_side_effect_allowed": false,
+        "source_category": "safe_ui_default"
       },
       {
+        "authority_level": "local_ui_preference_or_candidate_only",
         "option_id": "qtt_decide",
         "owner_label": "let QTT decide",
-        "runtime_side_effect_allowed": false
+        "runtime_side_effect_allowed": false,
+        "source_category": "safe_ui_default"
       }
     ],
     "venue": [
       {
+        "authority_level": "local_ui_preference_or_candidate_only",
         "option_id": "kalshi",
         "owner_label": "Kalshi",
-        "runtime_side_effect_allowed": false
+        "runtime_side_effect_allowed": false,
+        "source_category": "master_plan_static_value"
       },
       {
+        "authority_level": "local_ui_preference_or_candidate_only",
         "option_id": "polymarket",
         "owner_label": "Polymarket",
-        "runtime_side_effect_allowed": false
+        "runtime_side_effect_allowed": false,
+        "source_category": "master_plan_static_value"
       },
       {
+        "authority_level": "local_ui_preference_or_candidate_only",
         "option_id": "forecastex_ibkr",
         "owner_label": "FORECASTEX_IBKR",
-        "runtime_side_effect_allowed": false
+        "runtime_side_effect_allowed": false,
+        "source_category": "master_plan_static_value"
       },
       {
+        "authority_level": "local_ui_preference_or_candidate_only",
         "option_id": "qtt_decide",
         "owner_label": "Let QTT decide",
-        "runtime_side_effect_allowed": false
+        "runtime_side_effect_allowed": false,
+        "source_category": "safe_ui_default"
+      },
+      {
+        "authority_level": "local_ui_preference_or_candidate_only",
+        "option_id": "other",
+        "owner_label": "Other",
+        "runtime_side_effect_allowed": false,
+        "source_category": "candidate_owner_custom"
       }
     ]
   },
@@ -538,6 +951,88 @@
   "owner_trade_intent_object": "OwnerTradeIntentV1",
   "primary_owner_button": "CHECK_TRADE_WITH_QTT_AGENTS",
   "profit_guarantee": false,
+  "range_policy": {
+    "hold_duration": {
+      "authority_level": "local_preview_guardrail",
+      "dependency": "Exact maximum needs event close/resolution provider data.",
+      "max": "event_close_or_resolution_provider_pending",
+      "min": 1,
+      "reason": "Rejects impossible durations without inventing venue rules.",
+      "recommended_range": "Use hours or days unless a known event close is available.",
+      "source_category": "safe_ui_default",
+      "unit": "minutes / hours / days / until resolution"
+    },
+    "latency_budget": {
+      "authority_level": "dependency_explanation_only",
+      "dependency": "Exact latency policy belongs to later runtime stages.",
+      "max": "provider_pending_latency_policy",
+      "min": 1,
+      "reason": "Positive numeric sanity guard only.",
+      "recommended_range": "Provider-pending until execution policy exists.",
+      "source_category": "provider_pending",
+      "unit": "milliseconds preview"
+    },
+    "max_budget": {
+      "authority_level": "local_preview_guardrail",
+      "dependency": "Exact maximum needs account/cash provider, which this UI PR cannot read.",
+      "max": "provider_pending_account_cash",
+      "min": 1,
+      "reason": "Budget must be positive and remains local preview.",
+      "recommended_range": "Start small until provider receipts and account limits exist.",
+      "source_category": "safe_ui_default",
+      "unit": "USD preview"
+    },
+    "max_loss": {
+      "authority_level": "local_preview_guardrail",
+      "dependency": "Max budget must be entered first.",
+      "max": "max_budget",
+      "min": 1,
+      "reason": "Loss cannot exceed budget in local preview.",
+      "recommended_range": "Less than or equal to max budget.",
+      "source_category": "safe_ui_default",
+      "unit": "USD preview"
+    },
+    "max_spread": {
+      "authority_level": "dependency_explanation_only",
+      "dependency": "Exact spread constraints require venue/provider artifacts.",
+      "max": "provider_pending_venue_tick_fee_policy",
+      "min": 0,
+      "reason": "Non-negative sanity guard only.",
+      "recommended_range": "Depends on venue tick and liquidity.",
+      "source_category": "provider_pending",
+      "unit": "cents or bps preview"
+    },
+    "portfolio_exposure": {
+      "authority_level": "local_preview_guardrail",
+      "dependency": "Exact exposure needs account/portfolio provider.",
+      "max": 100,
+      "min": 0,
+      "reason": "Local UI rejects impossible percentages only.",
+      "recommended_range": "Provider-pending until account exposure is available.",
+      "source_category": "safe_ui_default",
+      "unit": "% preview"
+    },
+    "stop_exit_threshold": {
+      "authority_level": "local_preview_guardrail",
+      "dependency": "Venue tick and exit rule authority are provider-pending.",
+      "max": 100,
+      "min": 0,
+      "reason": "Local sanity bound only.",
+      "recommended_range": "Keep in the same unit as target price/probability.",
+      "source_category": "safe_ui_default",
+      "unit": "% or cents preview"
+    },
+    "target_price_probability": {
+      "authority_level": "local_preview_guardrail",
+      "dependency": "Venue tick and price unit are provider-pending unless an accepted artifact supplies them.",
+      "max": 100,
+      "min": 0,
+      "reason": "Local sanity bound only.",
+      "recommended_range": "Binary prediction-market values stay within 0-100.",
+      "source_category": "safe_ui_default",
+      "unit": "% or cents preview"
+    }
+  },
   "route_chain": [
     "OwnerTradeIntentV1",
     "OwnerTradeCheckRequestV1",

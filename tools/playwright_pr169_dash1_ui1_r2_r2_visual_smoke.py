@@ -47,6 +47,15 @@ def _click_visible(page: Page, selector: str) -> None:
     page.locator(f"{selector}:visible").first.click()
 
 
+def _tap_visible(page: Page, selector: str) -> None:
+    target = page.locator(f"{selector}:visible").first
+    target.wait_for(state="visible", timeout=10_000)
+    box = target.bounding_box()
+    if not box:
+        raise AssertionError(f"missing visible box for {selector}")
+    page.touchscreen.tap(box["x"] + box["width"] / 2, box["y"] + box["height"] / 2)
+
+
 def _write_report(
     repo: Path,
     rows: list[dict[str, Any]],
@@ -104,7 +113,7 @@ def run(repo: Path) -> None:
         assert page.locator("#experienceModeSwitch:visible").count() == 1
         assert page.locator("[data-text-size-choice='extra_large']:visible").count() == 1
         _screenshot(page, repo, "mobile_menu_open_controls_visible", screenshots, "mobile")
-        page.locator("[data-text-size-choice='extra_large']").click()
+        _tap_visible(page, "[data-text-size-choice='extra_large']")
         assert page.locator("html").get_attribute("data-text-size") == "extra_large"
         _screenshot(page, repo, "mobile_text_extra_large", screenshots, "mobile")
         checks.append("menu_opens_text_size_extra_large_applies")
@@ -131,7 +140,8 @@ def run(repo: Path) -> None:
         page.locator("[data-workbench-field='side']").select_option("yes")
         page.locator("[data-workbench-field='max_budget']").fill("50")
         page.locator("[data-workbench-field='max_loss']").fill("20")
-        page.locator("[data-workbench-field='hold_duration']").fill("through resolution")
+        page.locator("[data-workbench-field='hold_duration']").fill("48")
+        page.locator("[data-workbench-field='duration_unit']").select_option("hours")
         _screenshot(page, repo, "workbench_dropdown_open", screenshots, "mobile")
         _assert_visible(page, "#tradePlanCandidatePreview")
         assert "Runtime work" in page.locator("#workbenchPreviewGrid").inner_text(timeout=10_000)

@@ -1,0 +1,51 @@
+{
+  "all_cards_have_audience_classification": true,
+  "card_audience_classes": [
+    "owner_facing",
+    "developer_facing",
+    "agent_facing",
+    "system_registry",
+    "technical_evidence"
+  ],
+  "centralized_copy_adapter": true,
+  "copy_replacements": {
+    "DAG / Data Route Map": "Developer-only Technical Details",
+    "Dash1 Card": "translated owner title or Developer-only",
+    "Guided Owner Coach": "QTT Coach",
+    "Month Result Slot": "Monthly PnL",
+    "Net Capital Cash Slot": "Net Capital",
+    "Provider Stage Route Map": "Developer-only Technical Details",
+    "Review execution-adjusted trade metrics": "Trade Metrics",
+    "Tell me what matters": "Key Insights",
+    "Today Result Slot": "Today's PnL",
+    "Week Result Slot": "Weekly PnL"
+  },
+  "default_owner_card_contract": {
+    "more_actions_menu": true,
+    "one_primary_action": true,
+    "selected_card_expands_complete_actions": true,
+    "technical_details_secondary": true
+  },
+  "meta": {
+    "agent_consumable_authority": false,
+    "artifact_id": "UI1R2R3_OWNER_COPY_CARD_AUDIENCE_ACTIONS",
+    "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+    "connector_access_allowed": false,
+    "credential_access_allowed": false,
+    "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config + PR169-DASH1 artifacts + PR169-DASH1-UI1/R1 boot data + OwnerPresentationLayer / OwnerGuidancePolicy config + PR169-DASH1-UI1-R2-R3 OwnerSettingsV1 product polish config",
+    "manual_edit_allowed": false,
+    "order_execution_allowed": false,
+    "runtime_side_effect_allowed": false,
+    "runtime_truth_authority": false,
+    "source_truth_authority": false,
+    "ui1r2r3_generated_from": "OwnerDashboardStateV1 + OwnerSurfaceResolver + OwnerActionRegistry + OwnerPresentationLayer + OwnerNextStepRouter + OwnerSettingsV1 + central owner UX semantic bundle",
+    "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+  },
+  "owner_readable_copy_map_ref": "ui1r2_copy_map.generated.json",
+  "status_drawer_owner_summary": [
+    "Local Preview",
+    "Review Only",
+    "No Live Trading",
+    "No Account Access"
+  ]
+}

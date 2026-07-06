@@ -1,6 +1,7 @@
 {
   "action_registry_ref": "OwnerActionRegistryV1",
   "allowed_non_secret_preference_keys": [
+    "qtt_owner_dashboard_owner_settings_v1",
     "qtt_owner_dashboard_theme",
     "qtt_owner_dashboard_experience_mode",
     "qtt_owner_dashboard_guidance_density",
@@ -34,11 +35,14 @@
   "one_display_preference_model": true,
   "one_owner_action_grammar": true,
   "one_owner_agent_conversation_model": true,
+  "one_owner_settings_object": true,
   "one_resolver_or_API_path": true,
   "one_source_agnostic_research_intake_model": true,
   "one_trade_workbench_model": true,
   "one_widget_chart_action_chat_manifest": true,
+  "owner_settings_model_ref": "OwnerSettingsV1",
   "resolver_ref": "OwnerSurfaceResolver",
+  "settings_center_ref": "OwnerSettingsCenter",
   "state_model_id": "OwnerDashboardStateV1",
   "technical_details_state_owned_by": "OwnerDashboardStateV1.display_preferences.technical_details_open",
   "text_size_state_owned_by": "OwnerDashboardStateV1.display_preferences.text_size",
