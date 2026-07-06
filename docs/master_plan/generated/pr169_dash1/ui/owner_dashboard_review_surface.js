@@ -72,7 +72,8 @@ const DASHBOARD_DATA = window.QTT_OWNER_DASHBOARD_DATA || {
   ui1r2r3_chart_policy: {},
   ui1r2r3_education_drawers: { drawer_actions: [] },
   ui1r2r3_theme_interaction_accessibility: {},
-  ui1r2r3_workbench_options_ranges: { range_policy: {}, option_catalog: {} }
+  ui1r2r3_workbench_options_ranges: { range_policy: {}, option_catalog: {} },
+  ui1r2r4_semantic_bundle: { education_catalog: [], chat_qtt_guide_intents: [], field_semantics: [], agent_operations_projection: [], workflow_queue_projection: [], receipt_preview_projection: [] }
 };
 
 const RANGES = ["1D", "1W", "1M", "3M", "YTD", "1Y", "ALL"];
@@ -630,7 +631,8 @@ function interactionBadge(state) {
     provider_pending: "Provider pending",
     info_only: "Info",
     technical_only: "Technical",
-    high_confirmation: "High confirmation"
+    high_confirmation: "High confirmation",
+    success: "Success"
   };
   return `<span class="badge interaction-state-badge" data-interaction-badge="${safe(state)}" aria-label="${safe(labels[state] || state)}">${safe(labels[state] || state)}</span>`;
 }
@@ -673,14 +675,19 @@ function ownerControls(row, surface = "trade_workbench") {
     next_step_id: "NEXT_STEP_SEND_TO_TRADE_WORKBENCH",
     state: "ENABLED_LOCAL_PREVIEW"
   };
+  const rowText = `${surface} ${row ? JSON.stringify(row).slice(0, 1600) : ""}`.toLowerCase();
+  const chartCapable = surface === "chart_frame" || Boolean(row && (row.chart_id || row.chart_kind || row.data_chart_render_state));
+  const tcaCapable = /tca|cost|fee|spread|slippage|latency|fill|trade|candidate|workbench|edge|alpha/.test(rowText);
+  const qkuCapable = /qku|formula|stack|quantum|trade|candidate|gap|route/.test(rowText);
   const drawerButtons = [
-    ["explain", "Explain"],
-    ["learn", "Learn"],
-    ["why", "Why?"],
-    ["chart_drilldown", "Open chart drilldown"],
-    ["tca_breakdown", "Show TCA / cost breakdown"],
-    ["technical_details", "Technical Details"]
-  ];
+    { kind: "explain", labelText: "Explain", applicable: true },
+    { kind: "learn", labelText: "Learn", applicable: true },
+    { kind: "why", labelText: "Why?", applicable: true },
+    { kind: "chart_drilldown", labelText: "Open chart drilldown", applicable: chartCapable },
+    { kind: "tca_breakdown", labelText: "Show TCA / cost breakdown", applicable: tcaCapable },
+    { kind: "qku_formula_routes", labelText: "Show QKU/formula routes", applicable: qkuCapable },
+    { kind: "technical_details", labelText: "Technical Details", applicable: true }
+  ].filter((item) => item.applicable);
   return `
     <div class="owner-card-controls" data-card-context="${safe(cardId)}" data-default-card-contract="one-primary-plus-more-actions" data-selected-card-id="${safe(cardId)}">
       <button
@@ -696,13 +703,14 @@ function ownerControls(row, surface = "trade_workbench") {
         <summary>More actions</summary>
         <div class="action-menu-body">
           <p><strong>Recommended:</strong> ${safe(menu.recommended_action_label || guidance.recommended)}</p>
-          ${drawerButtons.map(([kind, labelText]) => `
+          ${drawerButtons.map(({ kind, labelText }) => `
             <button
               class="menu-option action-secondary"
               type="button"
               data-owner-drawer-action="${safe(kind)}"
               data-selected-card-id="${safe(cardId)}"
               data-selected-surface-id="${safe(surface)}"
+              data-action-applicability="applicable"
               data-runtime-side-effect-allowed="false">
               ${safe(labelText)}
             </button>
@@ -715,6 +723,7 @@ function ownerControls(row, surface = "trade_workbench") {
               data-local-receipt-preview="${safe(option.next_step_id)}"
               data-action-state="${safe(option.state)}"
               ${option.state === "PROVIDER_PENDING" ? 'data-provider-pending-action="true"' : ""}
+              ${option.state !== "ENABLED_LOCAL_PREVIEW" ? `data-disabled-action-education="${safe(option.safe_alternative_action || "Open local preview or Technical Details.")}"` : ""}
               aria-disabled="false">
               ${safe(option.owner_label)}
             </button>
@@ -787,6 +796,77 @@ function technicalRows(row) {
   return keys.filter((key) => row[key]).map((key) => [label(key), label(row[key])]);
 }
 
+function centralEducationEntry(kind) {
+  const education = asList(DASHBOARD_DATA.ui1r2r4_semantic_bundle && DASHBOARD_DATA.ui1r2r4_semantic_bundle.education_catalog);
+  const byId = new Map(education.map((row) => [row.education_id, row]));
+  const educationId = {
+    explain: "education.explain",
+    learn: "education.learn",
+    why: "education.why",
+    chart_drilldown: "education.chart_drilldown",
+    tca_breakdown: "education.tca_cost",
+    qku_formula_routes: "education.qku_formula_routes",
+    qku: "education.qku_formula_routes",
+    technical_details: "education.technical_details",
+    disabled_action: "education.disabled_action",
+    provider_pending: "education.provider_pending",
+  }[kind] || "education.explain";
+  return byId.get(educationId) || {
+    education_id: educationId,
+    owner_title: titleCase(String(kind || "explain").replace(/_/g, " ")),
+    plain_english_summary: "Central education entry is provider-pending in this local bundle.",
+    what_it_means: "The selected item stays local preview only.",
+    why_it_matters: "Provider evidence is required before QTT can treat it as runtime truth.",
+    what_owner_can_do_next: "Open a local preview or Technical Details.",
+    provider_pending_copy: "No live runtime work runs here.",
+    authority_boundary_copy: "Local UI preview only.",
+    technical_detail_ref: "ui1r2r4_owner_semantic_bundle.generated.json",
+  };
+}
+
+function drawerSectionsFromEducation(kind, guidance) {
+  const entry = centralEducationEntry(kind);
+  const sectionsByKind = {
+    explain: [
+      ["What this means", entry.what_it_means || entry.plain_english_summary],
+      ["How to read it", guidance.summary],
+      ["What is missing", guidance.missing],
+      ["What owner can do next", entry.what_owner_can_do_next || guidance.recommended],
+    ],
+    learn: [
+      ["Concept", entry.plain_english_summary],
+      ["Why it matters", entry.why_it_matters],
+      ["Authority boundary", entry.authority_boundary_copy],
+    ],
+    why: [
+      ["Why this matters", entry.why_it_matters],
+      ["Risk and route impact", guidance.risk],
+      ["Provider boundary", entry.provider_pending_copy],
+    ],
+    chart_drilldown: [
+      ["Chart drilldown", entry.plain_english_summary],
+      ["Data integrity", entry.provider_pending_copy],
+      ["Owner action", entry.what_owner_can_do_next],
+    ],
+    tca_breakdown: [
+      ["TCA / cost", entry.plain_english_summary],
+      ["What it covers", entry.what_it_means],
+      ["Owner action", entry.what_owner_can_do_next],
+    ],
+    qku_formula_routes: [
+      ["QKU / formula route", entry.plain_english_summary],
+      ["Immutable vs mutable", entry.what_it_means],
+      ["Route/gap status", entry.provider_pending_copy],
+    ],
+    technical_details: [
+      ["Technical summary", entry.plain_english_summary],
+      ["Raw selected context", "Raw refs, registry evidence, provider routes, validation refs, and debug fields are shown only here or in Developer mode."],
+      ["Authority", entry.authority_boundary_copy],
+    ],
+  };
+  return sectionsByKind[kind] || sectionsByKind.explain;
+}
+
 function openDrawer(title, kicker, row = {}, kind = "general") {
   const drawer = qs("#drilldownDrawer");
   const guidance = DashboardSystem.guidanceFor(row, kind);
@@ -795,64 +875,25 @@ function openDrawer(title, kicker, row = {}, kind = "general") {
   const selectedCardId = idOf(row, "selected_card");
   const selectedActionId = drawerAction.action_id || `OWNER_ACTION_${String(kind).toUpperCase()}`;
   const contentSignature = `${drawerAction.content_signature || `ui1r2r3::${kind}`}::${selectedCardId}`;
-  const kindBlocks = {
-    explain: "This plain-English explanation describes the selected card, what it means, how to read it, what is missing, and the next safe local action.",
-    learn: "This lesson teaches the beginner concept behind the selected card without raw provider-route tags or registry identifiers.",
-    why: "This view explains why the selected card matters to trade decisions, risk, routing, evidence, no-trade comparison, or owner action.",
-    chart_drilldown: "The chart drilldown uses the selected chart context, selected range, axes, point focus, and provider-pending value policy. No fake trading values are added.",
-    tca_breakdown: "Cost breakdown covers fees, spread, slippage, latency drag, impact, opportunity cost, capacity dependency, and implementation shortfall. Missing values stay provider-pending.",
-    technical_details: "Technical references are available for this selected card only. Raw data stays collapsed until explicitly opened or Developer mode is selected. No raw JSONL scanning path is used by owner UI consumers.",
-    qku: "QKUs and formulas are immutable knowledge objects. QTT optimizes trade-plan variables and keeps computability gaps routed through the centralized resolver, with no raw JSONL scanning path."
-  };
-  const bodySections = {
-    explain: [
-      ["What this means", kindBlocks.explain],
-      ["How to read it", guidance.summary],
-      ["What is missing", guidance.missing],
-      ["What owner can do next", guidance.recommended],
-    ],
-    learn: [
-      ["Concept", kindBlocks.learn],
-      ["How QTT uses it", guidance.why],
-      ["Safe boundary", "This is local education only. It does not create source truth, risk-pass status, or order authority."],
-    ],
-    why: [
-      ["Why this matters", kindBlocks.why],
-      ["Risk and route impact", guidance.risk],
-      ["Evidence spine", "Execution-adjusted rank, TCA, no-trade, QKU/formula, agent, MEM1, quantum, and DAG refs remain routed or gap-routed."],
-    ],
-    chart_drilldown: [
-      ["Chart status", kindBlocks.chart_drilldown],
-      ["Selected range", "The selected range changes the local view state only. Provider receipts are required before financial values can appear."],
-      ["Tooltip policy", "Point focus may show local visual sample geometry or provider-pending status, never fake PnL, cash, fill, order, or live values."],
-    ],
-    tca_breakdown: [
-      ["TCA categories", kindBlocks.tca_breakdown],
-      ["Provider-pending fields", "Fee, spread, slippage, latency drag, impact, opportunity cost, fill, and capacity values require accepted provider evidence."],
-      ["Owner action", "Use the Workbench to capture limits and route a local preview only."],
-    ],
-    technical_details: [
-      ["Technical references", kindBlocks.technical_details],
-      ["Raw selected context", "Raw refs, registry evidence, provider routes, validation refs, and debug fields are shown only here or in Developer mode."],
-      ["Authority", "Runtime side effect allowed: false. This drawer does not call connectors, agents, replay, paper, live systems, or venues."],
-    ],
-  };
-  const sections = bodySections[kind] || bodySections.explain;
+  const educationEntry = centralEducationEntry(kind);
+  const sections = drawerSectionsFromEducation(kind, guidance);
   drawer.dataset.drawerKind = kind;
   drawer.dataset.selectedCardId = selectedCardId;
   drawer.dataset.selectedActionId = selectedActionId;
   drawer.dataset.contentSignature = contentSignature;
+  drawer.dataset.centralEducationId = educationEntry.education_id || "";
   drawer.dataset.runtimeSideEffectAllowed = "false";
-  qs("#drawerTitle").textContent = title || guidance.title;
+  qs("#drawerTitle").textContent = title || educationEntry.owner_title || guidance.title;
   qs("#drawerKicker").textContent = kicker || "Evidence and routing";
   qs("#drawerBody").innerHTML = `
-    <div class="drawer-block" data-drilldown-kind="${safe(kind)}" data-selected-card-id="${safe(selectedCardId)}" data-selected-action-id="${safe(selectedActionId)}" data-content-signature="${safe(contentSignature)}">
+    <div class="drawer-block" data-drilldown-kind="${safe(kind)}" data-selected-card-id="${safe(selectedCardId)}" data-selected-action-id="${safe(selectedActionId)}" data-content-signature="${safe(contentSignature)}" data-central-education-id="${safe(educationEntry.education_id || "")}">
       <h3>Drawer payload</h3>
       <div class="preview-grid">
         <span>Selected card: ${safe(selectedCardId)}</span>
         <span>Selected action: ${safe(selectedActionId)}</span>
         <span>Drawer kind: ${safe(kind)}</span>
         <span>Content signature: ${safe(contentSignature)}</span>
+        <span>Education: ${safe(educationEntry.education_id || "central catalog")}</span>
         <span>Runtime side effect: false</span>
       </div>
       ${badges(row)}
@@ -882,7 +923,7 @@ function openDrawer(title, kicker, row = {}, kind = "general") {
     <div class="drawer-block">
       <h3>Owner action available</h3>
       <p>${safe(guidance.recommended)}.</p>
-      ${ownerControls(row, kind === "chart_drilldown" ? "chart_frame" : kind === "qku" ? "qku_formula" : "trade_workbench")}
+      ${ownerControls(row, kind === "chart_drilldown" ? "chart_frame" : kind === "qku_formula_routes" ? "qku_formula" : "trade_workbench")}
     </div>
     ` : ""}
     <div class="drawer-block">
@@ -1627,52 +1668,217 @@ function renderQkuAndQuantum() {
 
 function inferIntentFamily(text) {
   const lower = text.toLowerCase();
+  if (/(search online|web search|look online|find online|search the web|browse|internet)/.test(lower)) return "ONLINE_RESEARCH_PROVIDER_PENDING_REQUEST";
+  if (/(agent operations|agent status|agent activity|what are agents doing|agent queue|agent tasks)/.test(lower)) return "AGENT_OPERATIONS_STATUS_REQUEST";
+  if (/(workflow queue|team queue|upcoming workflow|current workflow|task queue)/.test(lower)) return "WORKFLOW_QUEUE_STATUS_REQUEST";
+  if (/(missing evidence|evidence missing|what evidence|needs evidence|before evidence)/.test(lower)) return "EVIDENCE_MISSING_REQUEST";
+  if (/(workbench|prefill|fill the form|open the form)/.test(lower)) return "WORKBENCH_PREFILL_REQUEST";
+  if (/(which agent disagrees|agent disagrees|agent disagreement|agents disagree|risk objections|agent objection|objecting agent)/.test(lower)) return "AGENT_DISAGREEMENT_REQUEST";
+  if (/(variables would make|what variables|variable.*pass|pass replay|pass paper|tune|parameter)/.test(lower)) return "VARIABLE_SEARCH_REQUEST";
   if (lower.includes("no-trade") || lower.includes("no trade")) return "NO_TRADE_EXPLANATION_REQUEST";
-  if (/(https?:\/\/|www\.|\.pdf\b|dataset|paper|article|news|research|source|link|social|thread|post|screenshot)/i.test(text)) return "RESEARCH_ANALYSIS_REQUEST";
-  if ((lower.includes("formula") || lower.includes("algorithm")) && !lower.includes("qku")) return "FORMULA_EXTRACTION_REQUEST";
+  if (/(research this|check this article|source candidate|extract source|https?:\/\/|www\.|\.pdf\b|dataset|paper|article|news|research|source|link|social|thread|post|screenshot)/i.test(text)) return "RESEARCH_ANALYSIS_REQUEST";
+  if (/(find formulas|extract formula|formula.*source|algorithm.*source)/.test(lower)) return "FORMULA_QKU_EXTRACTION_PREVIEW_REQUEST";
+  if ((lower.includes("formula") || lower.includes("algorithm") || lower.includes("qku agents") || lower.includes("formula stacks")) && !lower.includes("online")) return "QKU_FORMULA_STACK_COMPARISON_REQUEST";
   if (lower.includes("qku") || lower.includes("stack")) return "QKU_MATERIALIZATION_REQUEST";
   if (lower.includes("quantum") || lower.includes("qubo") || lower.includes("qaoa") || lower.includes("vqe")) return "QUANTUM_STRUCTURE_MAPPING_REQUEST";
-  if (lower.includes("replay") && !lower.includes("paper")) return "REPLAY_PREVIEW_REQUEST";
-  if (lower.includes("paper") && !lower.includes("replay")) return "PAPER_PREVIEW_REQUEST";
-  if (lower.includes("agent") && (lower.includes("disagree") || lower.includes("object"))) return "AGENT_DISAGREEMENT_REQUEST";
+  if (lower.includes("replay") || lower.includes("paper")) return "REPLAY_PAPER_PREVIEW_REQUEST";
   if (lower.includes("cost") || lower.includes("tca") || lower.includes("slippage")) return "TCA_COST_EXPLANATION_REQUEST";
   if (lower.includes("risk") || lower.includes("capacity")) return "RISK_CAPACITY_EXPLANATION_REQUEST";
-  if (lower.includes("parameter") || lower.includes("variable") || lower.includes("pass replay") || lower.includes("pass paper")) return "PARAMETER_TUNING_REQUEST";
   if (lower.includes("edge") || lower.includes("alpha") || lower.includes("rank")) return "EDGE_ALPHA_REVIEW_REQUEST";
   if (lower.includes("live") || lower.includes("canary")) return "LIVE_CANARY_REVIEW_REQUEST_PREVIEW";
   if (lower.includes("kill")) return "KILL_SWITCH_REQUEST_PREVIEW";
-  if (lower.includes("trade") || lower.includes("market") || lower.includes("best")) return "TRADE_CHECK_REQUEST";
+  if (/(positive expected net|best trade|check this market|check.*trade|trade|market|best)/.test(lower)) return "TRADE_CHECK_REQUEST";
   return "UNKNOWN_OWNER_REQUEST_NEEDS_CLARIFICATION";
 }
 
 function targetWorkspaceForIntent(intentFamily) {
-  if (/TRADE|REPLAY|PAPER|NO_TRADE|PARAMETER|TCA|RISK|CAPACITY/.test(intentFamily)) return "Trade Workbench";
-  if (/RESEARCH|SOURCE|FORMULA|QKU|QUANTUM/.test(intentFamily)) return "Research Intake";
-  if (/AGENT/.test(intentFamily)) return "Agents";
+  if (/TRADE|REPLAY|PAPER|NO_TRADE|VARIABLE|PARAMETER|TCA|RISK|CAPACITY|WORKBENCH/.test(intentFamily)) return "Trade Workbench";
+  if (/RESEARCH|SOURCE|FORMULA|QKU|QUANTUM|ONLINE/.test(intentFamily)) return "Research Intake";
+  if (/AGENT_OPERATIONS|AGENT_DISAGREEMENT/.test(intentFamily)) return "Agent Operations";
+  if (/WORKFLOW_QUEUE/.test(intentFamily)) return "QTT Team Workflow Queue";
   if (/EDGE|ALPHA/.test(intentFamily)) return "Edge / Alpha Board";
   return "Owner Home";
+}
+
+function localIntentResponse(intentFamily) {
+  const boundary = "No online search, live LLM, real agent task, connector read, replay, paper, live execution, venue submit, or Execution Router release happened.";
+  const responses = {
+    TRADE_CHECK_REQUEST: {
+      title: "Trade-check preview",
+      summary: "QTT can open Trade Workbench and turn the owner idea into a local TradePlanCandidateV1 preview with TCA, no-trade, QKU/formula, risk, capacity, and route-gap checks.",
+      route: "Trade Workbench -> TradePlanCandidateV1 -> no-trade comparator -> TCA/cost and QKU/formula route preview.",
+      next: "Open or prefill Trade Workbench, then add the missing market/event, side, budget, and plain-English detail.",
+      provider: "AGENT_ORCH / PAPER_LOOP later",
+    },
+    RESEARCH_ANALYSIS_REQUEST: {
+      title: "Research intake preview",
+      summary: "This source can become a candidate/provisional research input. QTT will not accept source truth, connector semantics, replay evidence, or live readiness here.",
+      route: "Research Intake -> SourceCandidateV1 -> FormulaExtractionCandidateV1 / QKU route gaps.",
+      next: "Keep the source candidate provisional and route it to Research Intake.",
+      provider: "LLM2 / source-evidence providers later",
+    },
+    ONLINE_RESEARCH_PROVIDER_PENDING_REQUEST: {
+      title: "Online research provider-pending preview",
+      summary: "QTT can show the future online-research route, including URL/snippet/timestamp/dedup/formula extraction lanes, but this local UI does not search the web.",
+      route: "OwnerOnlineResearchRequestPreview -> LLM2 provider-pending research/source candidate lane.",
+      next: "Keep the request as a local provider-pending preview until an online research provider exists.",
+      provider: "LLM2 later",
+    },
+    FORMULA_QKU_EXTRACTION_PREVIEW_REQUEST: {
+      title: "Formula/QKU extraction preview",
+      summary: "QTT can route source text toward formula, variable, assumption, dataset, and QKU extraction lanes without materializing formulas or QKUs here.",
+      route: "Source candidate -> FormulaExtractionCandidateV1 -> QKU/formula route-gap review.",
+      next: "Open QKU/formula routes or Research Intake as a local preview.",
+      provider: "LLM2 / READINESS1 later",
+    },
+    QKU_FORMULA_STACK_COMPARISON_REQUEST: {
+      title: "QKU/formula route preview",
+      summary: "QTT can show which immutable QKU/formula stack route would be compared and where provider-pending gaps remain. It does not create or repair formulas into profit.",
+      route: "QKU / Formula Routes -> responsible agent route refs or PR165-D2 gap.",
+      next: "Open QKU/formula routes or Technical Details.",
+      provider: "READINESS1 / AGENT_ORCH later",
+    },
+    QKU_MATERIALIZATION_REQUEST: {
+      title: "QKU route preview",
+      summary: "QTT can show computability and route/gap status for QKUs without creating a new QKU engine.",
+      route: "QKU / Formula Routes -> no-orphan route/gap projection.",
+      next: "Open QKU/formula routes.",
+      provider: "READINESS1 later",
+    },
+    AGENT_DISAGREEMENT_REQUEST: {
+      title: "Agent disagreement preview",
+      summary: "QTT would route objections into risk, TCA, source, memory/regime, no-trade, QKU/formula, and missing-evidence categories. No agent is running.",
+      route: "Agent Operations -> objection categories -> Workbench or Technical Details.",
+      next: "Open Agent Operations or review risk/TCA/no-trade gaps.",
+      provider: "AGENT_ORCH later",
+    },
+    NO_TRADE_EXPLANATION_REQUEST: {
+      title: "No-trade explanation preview",
+      summary: "No-trade is a first-class comparator. QTT can explain which mutable trade variables may need retesting without changing immutable QKUs or formulas.",
+      route: "No-trade comparator -> variable retune route -> replay/paper request preview.",
+      next: "Open the no-trade explanation or Workbench variable fields.",
+      provider: "PRETRADE / PAPER_LOOP later",
+    },
+    VARIABLE_SEARCH_REQUEST: {
+      title: "Variable sensitivity preview",
+      summary: "QTT can preview mutable variables such as size, venue, entry, hold duration, maker/taker policy, liquidity, spread, latency, and exposure. Formulas remain immutable.",
+      route: "TradePlanCandidateV1 mutable variables -> replay/paper provider-pending request.",
+      next: "Fill Workbench constraints and request a local replay/paper preview.",
+      provider: "PAPER_LOOP later",
+    },
+    REPLAY_PAPER_PREVIEW_REQUEST: {
+      title: "Replay/paper request preview",
+      summary: "QTT can create a local request-preview route for replay or paper. It does not run replay, paper, fills, PnL, or order simulation here.",
+      route: "Workbench -> ReplayRequestPreviewV1 / PaperRequestPreviewV1 -> provider-pending receipt slots.",
+      next: "Open Trade Workbench and inspect missing receipt classes.",
+      provider: "PAPER_LOOP later",
+    },
+    WORKBENCH_PREFILL_REQUEST: {
+      title: "Workbench prefill preview",
+      summary: "QTT can focus or prefill the existing Workbench from the selected card/chat context through OwnerNextStepRouter.",
+      route: "Chat / Ask QTT -> OwnerNextStepRouter -> Trade Workbench.",
+      next: "Open Trade Workbench and confirm required fields.",
+      provider: "UI1 local only",
+    },
+    EVIDENCE_MISSING_REQUEST: {
+      title: "Missing evidence preview",
+      summary: "QTT can show missing source, TCA, risk, replay, paper, capacity, memory, quantum, and receipt gaps without fabricating evidence.",
+      route: "Evidence-spine route/gap projection -> Technical Details or Workbench.",
+      next: "Open Technical Details, receipt preview, or Workbench.",
+      provider: "source/TCA/risk/PAPER providers later",
+    },
+    AGENT_OPERATIONS_STATUS_REQUEST: {
+      title: "Agent Operations preview",
+      summary: "QTT can show where agent duty, KPI, trust, current/upcoming tasks, quarantine, and receipts will appear. All values are provider-pending.",
+      route: "Agent Operations -> PR165-D2 duty refs or explicit gap routes.",
+      next: "Open Agent Operations.",
+      provider: "AGENT_ORCH later",
+    },
+    WORKFLOW_QUEUE_STATUS_REQUEST: {
+      title: "QTT Team Workflow Queue preview",
+      summary: "QTT can show current/upcoming workflow lanes tagged by responsible/supporting agents. No workflow engine or scheduler is running.",
+      route: "Workflow Queue -> responsible agent -> current/next provider-pending stage.",
+      next: "Open QTT Team Workflow Queue.",
+      provider: "SVC1 / AGENT_ORCH / PAPER_LOOP later",
+    },
+    TCA_COST_EXPLANATION_REQUEST: {
+      title: "TCA / cost preview",
+      summary: "QTT can route fees, spread, slippage, latency, fill, capacity, and implementation shortfall as provider-pending TCA checks.",
+      route: "TCA / cost breakdown -> Workbench constraints.",
+      next: "Open TCA / cost breakdown or Workbench.",
+      provider: "PRETRADE / PAPER_LOOP later",
+    },
+    RISK_CAPACITY_EXPLANATION_REQUEST: {
+      title: "Risk and capacity preview",
+      summary: "QTT can explain risk/capacity/crowding gaps and safe local alternatives without risk-pass truth.",
+      route: "Risk route -> capacity/crowding -> no-trade comparator.",
+      next: "Open risk/TCA/no-trade details.",
+      provider: "PRETRADE / AGENT_ORCH later",
+    },
+    EDGE_ALPHA_REVIEW_REQUEST: {
+      title: "Edge review preview",
+      summary: "QTT can show execution-adjusted ranking concepts and missing evidence routes without claiming a profitable edge.",
+      route: "Edge / Alpha Board -> TCA/FDR/capacity/no-trade route gaps.",
+      next: "Open Edge / Alpha Board or Workbench.",
+      provider: "PR165 scoring provider stages later",
+    },
+    LIVE_CANARY_REVIEW_REQUEST_PREVIEW: {
+      title: "Live-canary review preview",
+      summary: "QTT can prepare an owner review preview only. It cannot submit, release, or call the Execution Router.",
+      route: "OwnerLiveCanaryReviewRequestPreview -> Execution Router provider-pending boundary.",
+      next: "Review authority boundary or disabled-action education.",
+      provider: "LIVE_PILOT / LAUNCH later",
+    },
+    KILL_SWITCH_REQUEST_PREVIEW: {
+      title: "Kill-switch preview",
+      summary: "QTT can show a local kill-switch review route, but no runtime kill-switch or order action is created.",
+      route: "OwnerKillSwitchRequestPreview -> governance route.",
+      next: "Open high-confirmation preview details.",
+      provider: "SVC1 / governance runtime later",
+    },
+    UNKNOWN_OWNER_REQUEST_NEEDS_CLARIFICATION: {
+      title: "Clarify request",
+      summary: "I need a market, trade idea, source link, formula, or research question to route this. You can also ask about an agent objection, no-trade question, or workflow area.",
+      route: "Clarification chips -> Chat / Workbench / Research / Agent Operations.",
+      next: "Choose one clarification chip.",
+      provider: "UI1 local only",
+    },
+  };
+  const response = responses[intentFamily] || responses.UNKNOWN_OWNER_REQUEST_NEEDS_CLARIFICATION;
+  return { ...response, boundary };
 }
 
 function buildOwnerIntentPreview(rawText) {
   const text = String(rawText || "").trim();
   const intentFamily = inferIntentFamily(text);
   const targetWorkspace = targetWorkspaceForIntent(intentFamily);
-  const previewObjects = intentFamily.includes("RESEARCH")
-    ? ["OwnerMessagePreviewV1", "OwnerPlainEnglishIntentPreviewV1", "OwnerResearchSubmissionPreviewV1", "SourceCandidatePreviewV1", "FormulaExtractionCandidatePreviewV1"]
-    : intentFamily.includes("QKU") || intentFamily.includes("FORMULA")
+  const previewObjects = intentFamily.includes("ONLINE")
+    ? ["OwnerMessagePreviewV1", "OwnerPlainEnglishIntentPreviewV1", "OwnerOnlineResearchRequestPreview", "OwnerSourceCandidateExtractionPreview", "OwnerFormulaQKUExtractionPreview"]
+    : intentFamily.includes("RESEARCH") || intentFamily.includes("SOURCE")
+      ? ["OwnerMessagePreviewV1", "OwnerPlainEnglishIntentPreviewV1", "OwnerResearchSubmissionPreviewV1", "SourceCandidatePreviewV1", "FormulaExtractionCandidatePreviewV1"]
+      : intentFamily.includes("QKU") || intentFamily.includes("FORMULA")
       ? ["OwnerMessagePreviewV1", "OwnerPlainEnglishIntentPreviewV1", "QKUCandidateMaterializationPreviewV1", "QuantumStructureMappingPreviewV1"]
       : intentFamily.includes("NO_TRADE")
         ? ["OwnerMessagePreviewV1", "OwnerPlainEnglishIntentPreviewV1", "NoTradeReoptimizationRequestPreviewV1", "TradePlanCandidatePreviewV1"]
-        : ["OwnerMessagePreviewV1", "OwnerPlainEnglishIntentPreviewV1", "OwnerTradeIntentPreviewV1", "OwnerTradeCheckRequestPreviewV1", "ReplayPaperRequestPreviewV1"];
+        : intentFamily.includes("AGENT")
+          ? ["OwnerMessagePreviewV1", "OwnerPlainEnglishIntentPreviewV1", "OwnerAgentOperationsPreviewV1", "OwnerAgentDisagreementPreviewV1"]
+          : intentFamily.includes("WORKFLOW")
+            ? ["OwnerMessagePreviewV1", "OwnerPlainEnglishIntentPreviewV1", "OwnerWorkflowQueuePreviewV1"]
+            : ["OwnerMessagePreviewV1", "OwnerPlainEnglishIntentPreviewV1", "OwnerTradeIntentPreviewV1", "OwnerTradeCheckRequestPreviewV1", "ReplayPaperRequestPreviewV1"];
   const unknown = intentFamily === "UNKNOWN_OWNER_REQUEST_NEEDS_CLARIFICATION";
+  const response = localIntentResponse(intentFamily);
   return {
     object_type: "OwnerPlainEnglishIntentPreviewV1",
     intent_id: `LOCAL_PREVIEW_${Date.now()}`,
     thread_id: targetWorkspace === "Research Intake" ? "OWNER_THREAD_RESEARCH_INTAKE" : "OWNER_THREAD_TRADE_WORKBENCH",
     raw_owner_text_excerpt: text.slice(0, 140),
-    plain_english_summary: unknown
-      ? "I need a market, trade idea, source link, formula, or research question to route this."
-      : label(intentFamily),
+    response_title: response.title,
+    plain_english_summary: response.summary,
+    what_happened_now: `Created a local ${response.title.toLowerCase()} in the shared Chat / Ask QTT state.`,
+    what_will_not_happen_now: response.boundary,
+    which_route_opens_next: response.route,
+    later_provider_stage: response.provider,
+    next_safe_local_action: response.next,
     intent_family: intentFamily,
     confidence_label: unknown ? "Needs clarification" : text.length > 18 ? "High confidence local preview" : "Medium confidence local preview",
     clarifying_question_if_needed: unknown
@@ -1689,6 +1895,7 @@ function buildOwnerIntentPreview(rawText) {
     PR165_D2_agent_role_refs_or_gap: ["PR165_D2_AgentDutySourceCrosswalk.report.json"],
     QKU_formula_refs_or_gap: ["owner_qku_formula_candidate_route_view.generated.jsonl"],
     LLM_view_refs_or_provider_route: ["owner_llm_view_projection.generated.jsonl"],
+    TradePlanCandidate_ref_or_gap: "TradePlanCandidateV1::provider_pending_or_local_preview",
     runtime_side_effect: false,
     runtime_side_effect_allowed: false
   };
@@ -1699,7 +1906,7 @@ function renderIntentReceipt(preview) {
   DashboardSystem.interactionState.chatMessages.push(preview);
   receipt.innerHTML = `
     <article class="card receipt-card" data-preview-object="OwnerPlainEnglishIntentPreviewV1" data-intent-family="${safe(preview.intent_family)}" data-runtime-side-effect-allowed="false">
-      <h3>Local chat route preview</h3>
+      <h3>${safe(preview.response_title || "Local chat route preview")}</h3>
       <div class="chat-bubble owner-bubble">
         <strong>Owner</strong>
         <p>${safe(preview.raw_owner_text_excerpt)}</p>
@@ -1707,8 +1914,9 @@ function renderIntentReceipt(preview) {
       <div class="chat-bubble qtt-bubble">
         <strong>QTT preview</strong>
         <p>${safe(preview.plain_english_summary)}</p>
-        <p>I would route it to ${safe(preview.target_workspace)} and show which agents, QKUs, formula routes, and evidence receipts are needed later.</p>
-        <p>What will not happen now: no live LLM call, no agent task, no connector read, no replay, no paper run, and no order submission.</p>
+        <p><strong>What happened now:</strong> ${safe(preview.what_happened_now)}</p>
+        <p><strong>Route opened next:</strong> ${safe(preview.which_route_opens_next)}</p>
+        <p><strong>What will not happen now:</strong> ${safe(preview.what_will_not_happen_now)}</p>
       </div>
       ${preview.suggested_chips && preview.suggested_chips.length ? `
         <div class="chip-row clarification-chip-row" data-unknown-intent-chips="OwnerNextStepRouter">
@@ -1719,6 +1927,8 @@ function renderIntentReceipt(preview) {
         <span>Preview objects: ${safe(label(preview.structured_request_preview_refs))}</span>
         <span>Confidence: ${safe(preview.confidence_label)}</span>
         <span>Next: ${safe(preview.clarifying_question_if_needed)}</span>
+        <span>Provider stage: ${safe(preview.later_provider_stage)}</span>
+        <span>Safe action: ${safe(preview.next_safe_local_action)}</span>
         <span>Receipt: OwnerChatRouteReceiptPreviewV1</span>
         <span>Agent response: provider-pending</span>
         <span>Runtime side effect: false</span>
@@ -1956,6 +2166,12 @@ function renderQttGuideBody() {
     <article class="card" data-qtt-guide-local-only="true" data-reuses-chat-state="true" data-second-chat-store-created="false">
       <h3>Ask QTT</h3>
       <p>Local guide only. It fills the existing chat composer or opens the Workbench through OwnerNextStepRouter; no live LLM, agent task, replay, paper, live execution, source truth, or order authority is created.</p>
+      <label class="field-label" for="qttGuideComposer">Ask QTT anything about this screen, trade, QKU, formula, risk, or next step...</label>
+      <div class="qtt-guide-composer-row" data-qtt-guide-composer="shared-chat-action-state">
+        <textarea id="qttGuideComposer" rows="4" aria-label="Ask QTT anything about this screen, trade, QKU, formula, risk, or next step" placeholder="Ask QTT anything about this screen, trade, QKU, formula, risk, or next step..."></textarea>
+        <button id="qttGuideSend" class="primary-command" type="button" data-qtt-guide-send="shared-chat-submit">Send</button>
+      </div>
+      <p id="qttGuideComposerHint" class="inline-validation" hidden></p>
       <label class="field-label" for="qttGuidePresetSelect">Preset prompt</label>
       <select id="qttGuidePresetSelect" data-guide-preset-select="true">
         <option value="">Select a preset prompt...</option>
@@ -1970,7 +2186,33 @@ function renderQttGuideBody() {
     </article>
   `;
   qs("#qttGuidePresetSelect", body).addEventListener("change", (event) => {
-    if (event.currentTarget.value) fillChatComposer(event.currentTarget.value);
+    const value = event.currentTarget.value;
+    const guideInput = qs("#qttGuideComposer", body);
+    if (value && guideInput) guideInput.value = value;
+    if (value) fillChatComposer(value);
+  });
+  qs("#qttGuideSend", body).addEventListener("click", () => {
+    const guideInput = qs("#qttGuideComposer", body);
+    const hint = qs("#qttGuideComposerHint", body);
+    const text = guideInput ? guideInput.value.trim() : "";
+    if (!text) {
+      if (hint) {
+        hint.hidden = false;
+        hint.textContent = "Type a plain-English QTT question before creating a local preview.";
+      }
+      if (guideInput) guideInput.focus();
+      return;
+    }
+    fillChatComposer(text);
+    const preview = buildOwnerIntentPreview(text);
+    preview.input_event_type = "QTT_GUIDE_SEND";
+    renderIntentReceipt(preview);
+    if (hint) {
+      hint.hidden = false;
+      hint.textContent = "Sent through the shared Chat / Ask QTT local preview path.";
+    }
+    if (guideInput) guideInput.value = "";
+    DashboardSystem.setActiveSurface("chat", "chatReceiptPreview");
   });
   qsa("[data-guide-prompt]", body).forEach((button) => {
     button.addEventListener("click", () => {
@@ -1988,6 +2230,8 @@ function renderQttGuideBody() {
                 : prompt === "Prepare replay/paper preview"
                   ? "Route this candidate to replay/paper preview."
                   : "Explain this screen in plain English.";
+      const guideInput = qs("#qttGuideComposer", body);
+      if (guideInput) guideInput.value = mapped;
       fillChatComposer(mapped);
       if (/trade|replay|paper/i.test(mapped)) DashboardSystem.setActiveSurface("chat", "ownerChatInput");
     });
@@ -2037,6 +2281,7 @@ function settingControlHtml(sectionLabel) {
       <select data-owner-setting="${safe(key)}">
         ${options.map(([value, text]) => `<option value="${safe(value)}" ${OwnerSettings.get(key) === value ? "selected" : ""}>${safe(text)}</option>`).join("")}
       </select>
+      ${options.some(([value]) => value === "other") ? `<input type="text" data-owner-setting="${safe(key)}_custom" data-settings-other-field="${safe(key)}" value="${safe(OwnerSettings.get(`${key}_custom`) || "")}" placeholder="Custom ${safe(labelText.toLowerCase())}" aria-label="Custom ${safe(labelText)} candidate local preview" hidden><span class="source-category-hint" data-settings-other-copy="${safe(key)}" hidden>candidate_owner_custom / local_preview_guardrail only</span>` : ""}
     </label>
   `;
   const checkbox = (key, labelText) => `
@@ -2165,7 +2410,21 @@ function renderSettingsCenter(activeSection = "Appearance") {
       if (key === "dashboard_default_experience_mode") setExperienceMode(value, false);
       if (key === "chat_enter_to_send") setEnterToSend(value, false);
       if (key === "sidebar_collapsed") setSidebarCollapsed(value, false);
+      updateSettingsOtherFields(body);
     });
+  });
+  updateSettingsOtherFields(body);
+}
+
+function updateSettingsOtherFields(root = document) {
+  qsa("[data-settings-other-field]", root).forEach((customField) => {
+    const sourceKey = customField.dataset.settingsOtherField;
+    const source = qs(`[data-owner-setting="${CSS.escape(sourceKey)}"]`, root);
+    const visible = source && source.value === "other";
+    customField.hidden = !visible;
+    customField.setAttribute("aria-hidden", visible ? "false" : "true");
+    const copy = qs(`[data-settings-other-copy="${CSS.escape(sourceKey)}"]`, root);
+    if (copy) copy.hidden = !visible;
   });
 }
 
@@ -2284,10 +2543,11 @@ function renderChatAndTrade() {
     if (field.field_id === "duration_unit") return OwnerSettings.get("workbench_preferred_hold_unit") || "days";
     if (field.field_id === "maker_taker_preference") return OwnerSettings.get("workbench_preferred_maker_taker") || "maker_first_taker_fallback";
     if (field.field_id === "objective") return OwnerSettings.get("workbench_preferred_objective") || "maximize_expected_net_cash";
+    if (field.field_id === "plain_english_detail") return "";
     if (field.field_id === "max_budget") return "";
     if (field.field_id === "max_loss") return "";
     if (field.field_id === "hold_duration") return "";
-    if (field.field_id === "source_thesis_url") return "Paste a thesis, market page, article, paper, formula, dataset, or trade idea.";
+    if (field.field_id === "source_thesis_url") return "";
     return "";
   };
   const hintHtml = (field) => {
@@ -2307,9 +2567,11 @@ function renderChatAndTrade() {
     const ownerLabel = field.owner_label || label(fieldId);
     const hidden = field.shown_when_field ? 'data-hidden-until-other="true"' : "";
     const state = field.interaction_state || (field.required ? "input_required" : "optional_input");
+    const fieldAttrs = `data-workbench-field-shell="${safe(fieldId)}" data-interaction-state="${safe(state)}" data-field-initial-state="${safe(state)}" data-required="${field.required ? "true" : "false"}" data-source-category="${safe(field.source_category || "safe_ui_default")}" data-authority="${safe(field.authority || "local_preview_guardrail")}" ${hidden} data-shown-when-field="${safe(field.shown_when_field || "")}" data-shown-when-value="${safe(field.shown_when_value || "")}"`;
+    const labelHeader = `<span class="workbench-label-text">${safe(ownerLabel)}</span>${interactionBadge(state)}${field.source_category === "candidate_owner_custom" ? badge("candidate / local preview only", "gray") : ""}`;
     if (field.input_kind === "select" && field.option_source && options[field.option_source]) {
       return `
-        <label class="workbench-field" data-workbench-field-shell="${safe(fieldId)}" data-interaction-state="${safe(state)}" ${hidden} data-shown-when-field="${safe(field.shown_when_field || "")}" data-shown-when-value="${safe(field.shown_when_value || "")}">${safe(ownerLabel)}
+        <label class="workbench-field" ${fieldAttrs}>${labelHeader}
           <select data-workbench-field="${safe(fieldId)}" data-trade-variable-field="${safe(fieldId)}" aria-label="${safe(ownerLabel)}">
             ${asList(options[field.option_source]).map((option) => `<option value="${safe(option.option_id)}" data-source-category="${safe(option.source_category || "safe_ui_default")}" ${defaultValueFor(field) === option.option_id ? "selected" : ""}>${safe(option.owner_label)}</option>`).join("")}
           </select>
@@ -2319,15 +2581,15 @@ function renderChatAndTrade() {
     }
     if (field.input_kind === "textarea") {
       return `
-        <label class="workbench-field" data-workbench-field-shell="${safe(fieldId)}" data-interaction-state="${safe(state)}" ${hidden} data-shown-when-field="${safe(field.shown_when_field || "")}" data-shown-when-value="${safe(field.shown_when_value || "")}">${safe(ownerLabel)}
-          <textarea data-workbench-field="${safe(fieldId)}" data-trade-variable-field="${safe(fieldId)}" aria-label="${safe(ownerLabel)}">${safe(defaultValueFor(field))}</textarea>
+        <label class="workbench-field" ${fieldAttrs}>${labelHeader}
+          <textarea data-workbench-field="${safe(fieldId)}" data-trade-variable-field="${safe(fieldId)}" aria-label="${safe(ownerLabel)}" placeholder="${safe(fieldId === "plain_english_detail" ? "Describe the trade idea, risk question, source, or next step in normal English." : "Paste a thesis, market page, article, paper, formula, dataset, or trade idea.")}">${safe(defaultValueFor(field))}</textarea>
           ${hintHtml(field)}
         </label>
       `;
     }
     const type = field.input_kind === "number" ? "number" : "text";
     return `
-      <label class="workbench-field" data-workbench-field-shell="${safe(fieldId)}" data-interaction-state="${safe(state)}" ${hidden} data-shown-when-field="${safe(field.shown_when_field || "")}" data-shown-when-value="${safe(field.shown_when_value || "")}">${safe(ownerLabel)}
+      <label class="workbench-field" ${fieldAttrs}>${labelHeader}
         <input type="${safe(type)}" data-workbench-field="${safe(fieldId)}" data-trade-variable-field="${safe(fieldId)}" value="${safe(defaultValueFor(field))}" aria-label="${safe(ownerLabel)}">
         ${hintHtml(field)}
       </label>
@@ -2420,6 +2682,36 @@ function updateOtherFields() {
     const sourceField = qs(`[data-workbench-field="${CSS.escape(source)}"]`);
     const visible = sourceField && sourceField.value === expected;
     shell.dataset.otherVisible = visible ? "true" : "false";
+    shell.setAttribute("aria-hidden", visible ? "false" : "true");
+  });
+}
+
+function updateWorkbenchFieldStates(values) {
+  qsa("[data-workbench-field-shell]").forEach((shell) => {
+    const fieldId = shell.dataset.workbenchFieldShell;
+    const initial = shell.dataset.fieldInitialState || "optional_input";
+    if (initial === "provider_pending" || initial === "technical_only") {
+      shell.dataset.interactionState = initial;
+      return;
+    }
+    const visible = shell.dataset.hiddenUntilOther === "true" ? shell.dataset.otherVisible === "true" : true;
+    const value = String(values[fieldId] || "").trim();
+    const required = shell.dataset.required === "true";
+    const nextState = visible && value ? "review_required" : required ? "input_required" : "optional_input";
+    shell.dataset.interactionState = nextState;
+    shell.setAttribute("aria-label", `${label(fieldId)} ${label(nextState)}`);
+    const badgeNode = qs("[data-interaction-badge]", shell);
+    if (badgeNode) {
+      const badgeLabel = {
+        input_required: "Input needed",
+        review_required: "Review",
+        optional_input: "Optional",
+        provider_pending: "Provider pending",
+      }[nextState] || label(nextState);
+      badgeNode.dataset.interactionBadge = nextState;
+      badgeNode.textContent = badgeLabel;
+      badgeNode.setAttribute("aria-label", badgeLabel);
+    }
   });
 }
 
@@ -2445,9 +2737,12 @@ function validateWorkbenchValues(values) {
   if (values.hold_duration && (!Number.isFinite(hold) || hold <= 0)) messages.push("Hold duration must be positive.");
   if (Number.isFinite(hold) && durationUnit === "minutes" && hold < 1) messages.push("Hold duration below one minute is rejected by local preview guardrails.");
   if (Number.isFinite(hold) && durationUnit === "days" && hold > 3650) messages.push("Hold duration is too large for local preview; exact event close/resolution is provider-pending.");
+  if (values.market_family === "other" && !String(values.custom_market_family || "").trim()) messages.push("Other market family needs a candidate custom market family.");
+  if (values.event_category === "other" && !String(values.custom_event_category || "").trim()) messages.push("Other event category needs a candidate custom event category.");
   if (values.market_event === "other" && !String(values.custom_event || "").trim()) messages.push("Other event needs a candidate custom event description.");
   if (values.venue === "other" && !String(values.custom_venue || "").trim()) messages.push("Other venue remains candidate-only and needs a custom venue label.");
   if (values.source_family === "other" && !String(values.custom_source_family || "").trim()) messages.push("Other source family remains candidate-only and needs a custom source label.");
+  if (values.route_selector === "other" && !String(values.custom_route_type || "").trim()) messages.push("Other route type needs a candidate custom route type.");
   return messages;
 }
 
@@ -2455,6 +2750,7 @@ function updateWorkbenchPreview() {
   const values = workbenchValues();
   DashboardSystem.interactionState.workbenchPreview = values;
   updateOtherFields();
+  updateWorkbenchFieldStates(values);
   const validation = qs("#workbenchRangeValidation");
   const validationMessages = validateWorkbenchValues(values);
   if (validation) {
@@ -2468,6 +2764,7 @@ function updateWorkbenchPreview() {
     ["Venue", optionLabel("venue", values.venue || "qtt_decide")],
     ["Side", optionLabel("side", values.side || "qtt_decide")],
     ["Objective", optionLabel("objective", values.objective || "qtt_decide")],
+    ["Plain-English detail", values.plain_english_detail || "needs owner input"],
     ["Max budget", values.max_budget || "needs owner input"],
     ["Max loss", values.max_loss || "needs owner input"],
     ["Portfolio exposure", values.portfolio_exposure ? `${values.portfolio_exposure}% preview` : "provider-pending account exposure"],
@@ -2477,6 +2774,12 @@ function updateWorkbenchPreview() {
     ["Exit", optionLabel("exit_preference", values.exit_preference || "qtt_decide")],
     ["Maker/taker", optionLabel("maker_taker_preference", values.maker_taker_preference || "qtt_decide")],
     ["Source/thesis", values.source_thesis_url || "candidate/provisional input"],
+    ["Custom market family", values.custom_market_family || "candidate only if Other selected"],
+    ["Custom event category", values.custom_event_category || "candidate only if Other selected"],
+    ["Custom event / market / URL", values.custom_event || "candidate only if Other selected"],
+    ["Custom venue", values.custom_venue || "candidate only if Other selected"],
+    ["Custom source family", values.custom_source_family || "candidate only if Other selected"],
+    ["Custom route type", values.custom_route_type || "candidate only if Other selected"],
     ["No-trade comparator", "shown as first-class local preview"],
     ["What would make this pass", "smaller size, different venue, maker-only, better liquidity, or later timing may be retested later"],
     ["Runtime work", "none"],
@@ -2493,24 +2796,104 @@ function wireWorkbenchForm() {
 }
 
 function renderAgentsAndContracts() {
+  const r2r4 = DASHBOARD_DATA.ui1r2r4_semantic_bundle || {};
+  const authorityBoundaryRef = (DASHBOARD_DATA.authority_boundary && DASHBOARD_DATA.authority_boundary.UI1_authority_boundary_ref) || "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE";
   const disagreement = asList(DASHBOARD_DATA.ui1r1_agent_disagreement && DASHBOARD_DATA.ui1r1_agent_disagreement.rows);
-  const agentRows = [
+  const centralAgentRows = asList(r2r4.agent_operations_projection);
+  const agentRows = centralAgentRows.length ? centralAgentRows : [
     ...disagreement,
     ...asList(DASHBOARD_DATA.agent_performance),
     ...asList(DASHBOARD_DATA.widget_manifest).filter((row) => /Agent|KPI|Trust|Quarantine|Replacement|Reroute/i.test(label(row.widget_title || row.widget_id))).slice(0, 12)
   ];
-  qs("#agentOperations").innerHTML = agentRows.slice(0, 14).map((row) => `
-    <article class="card agent-card" data-objection-type="${safe(row.objection_type || "")}">
-      <h3>${safe(DashboardSystem.ownerTitle(row, "Agent route"))}</h3>
-      <p>${safe(DashboardSystem.summary(row, "Agent role refs or explicit gap routes are rendered. No fake agent claim is made."))}</p>
-      ${row.objection_type ? `<div class="bar-row"><span>Objection</span><div class="bar-track"><div class="bar-fill" style="--bar-width:66%;--bar-color:var(--qtt-orange)"></div></div><span>routed</span></div>` : ""}
-      ${badges(row, row.objection_type ? ["no fake agent claim"] : [])}
-      ${ownerControls(row, "agent_disagreement")}
+  qs("#agentOperations").innerHTML = `
+    <article class="wide-card monitoring-shell-card" data-agent-operations-shell="OwnerAgentOperationsProjectionV1" data-interaction-state="provider_pending">
+      <h3>Agent Operations</h3>
+      <p>Provider-pending monitoring shell for duty, KPI, trust, current task, upcoming task queue, missed duty, quarantine, reroute, replacement, permission-change, and receipt preview. No real-time agent activity is running in this UI.</p>
+      <div class="preview-grid">
+        <span>Duty board: provider-pending</span>
+        <span>KPI board: provider-pending</span>
+        <span>Trust scores: provider-pending</span>
+        <span>Quarantine: provider-pending</span>
+        <span>Receipts: provider-pending</span>
+      </div>
+      ${badges({ provider_stage: "AGENT_ORCH1_PROVIDER_PENDING", authority_boundary_ref: authorityBoundaryRef }, ["PR165-D2 refs or gaps"])}
     </article>
-  `).join("");
+    ${agentRows.slice(0, 14).map((row) => `
+      <article class="card agent-card" data-objection-type="${safe(row.objection_type || "")}" data-agent-row-id="${safe(row.agent_id || row.row_id || "")}" data-interaction-state="provider_pending">
+        <h3>${safe(row.agent_role || DashboardSystem.ownerTitle(row, "Agent route"))}</h3>
+        <p>${safe(row.agent_status || DashboardSystem.summary(row, "Agent role refs or explicit gap routes are rendered. No fake agent claim is made."))}</p>
+        <div class="preview-grid">
+          <span>Current task: ${safe(row.current_task_id || "provider-pending")}</span>
+          <span>Upcoming queue: ${safe(row.queue_lane || "provider-pending")}</span>
+          <span>Trust/KPI: ${safe(row.trust_score || "provider-pending")}</span>
+          <span>Quarantine: ${safe(row.quarantine_state || "provider-pending")}</span>
+          <span>Receipt: ${safe(row.last_receipt || row.receipt_preview || "provider-pending")}</span>
+          <span>Blocked: ${safe(row.blocked_reason || "provider-pending")}</span>
+        </div>
+        ${row.objection_type ? `<div class="bar-row"><span>Objection</span><div class="bar-track"><div class="bar-fill" style="--bar-width:66%;--bar-color:var(--qtt-orange)"></div></div><span>routed</span></div>` : ""}
+        ${badges(row, ["provider pending", "no fake agent activity"])}
+        ${ownerControls(row, "agent_disagreement")}
+      </article>
+    `).join("")}
+  `;
   qsa("#agentOperations .card").forEach((card, index) => {
-    card.__qttRow = agentRows[index];
-    card.addEventListener("click", () => openDrawer(DashboardSystem.ownerTitle(agentRows[index]), "Agent Operations", agentRows[index]));
+    card.__qttRow = agentRows[index] || {};
+    card.addEventListener("click", () => openDrawer(DashboardSystem.ownerTitle(agentRows[index] || {}, "Agent Operations"), "Agent Operations", agentRows[index] || {}, "why"));
+  });
+  const workflowRows = asList(r2r4.workflow_queue_projection);
+  qs("#qttTeamWorkflowQueue").innerHTML = `
+    <article class="wide-card monitoring-shell-card" data-workflow-queue-shell="OwnerWorkflowQueueStateV1" data-interaction-state="provider_pending">
+      <h3>QTT Team Workflow Queue</h3>
+      <p>All current and upcoming workflows stay local/static/provider-pending here. Responsible, supporting, and escalation agents are tags for later orchestration, not running tasks.</p>
+      ${badges({ provider_stage: "SVC1_AGENTS_PAPER_LOOP_PROVIDER_PENDING", authority_boundary_ref: authorityBoundaryRef }, ["team queue shell"])}
+    </article>
+    ${workflowRows.map((row) => `
+      <article class="card workflow-card" data-workflow-id="${safe(row.workflow_id)}" data-interaction-state="provider_pending">
+        <h3>${safe(label(row.current_stage || row.workflow_id))}</h3>
+        <p>${safe(row.market_venue_event || "Market / venue / event provider-pending")}</p>
+        <div class="preview-grid">
+          <span>Responsible: ${safe(row.responsible_agent || "provider-pending")}</span>
+          <span>Supporting: ${safe(row.backup_agent || "provider-pending")}</span>
+          <span>Escalation: ${safe(row.escalation || "Commander/Governance")}</span>
+          <span>Current stage: ${safe(row.current_stage || "Queued")}</span>
+          <span>Next stage: ${safe(row.next_stage || "provider-pending")}</span>
+          <span>Latest receipt: ${safe(row.latest_receipt || "provider-pending")}</span>
+          <span>TCA: ${safe(row.TCA_status || "provider-pending")}</span>
+          <span>Risk: ${safe(row.risk_status || "provider-pending")}</span>
+          <span>No-trade: ${safe(row.no_trade_status || "provider-pending")}</span>
+        </div>
+        ${ownerControls(row, "provider_pending")}
+      </article>
+    `).join("")}
+  `;
+  qsa("#qttTeamWorkflowQueue .card").forEach((card, index) => {
+    card.__qttRow = workflowRows[index] || {};
+    card.addEventListener("click", () => openDrawer(DashboardSystem.ownerTitle(workflowRows[index] || {}, "Workflow queue"), "QTT Team Workflow Queue", workflowRows[index] || {}, "why"));
+  });
+  const receiptRows = asList(r2r4.receipt_preview_projection);
+  qs("#auditReceiptPreview").innerHTML = `
+    <article class="wide-card monitoring-shell-card" data-receipt-preview-shell="OwnerReceiptPreviewStateV1" data-interaction-state="provider_pending">
+      <h3>Audit Trail / Receipts Preview</h3>
+      <p>Proof slots for later runtime, agent, memory, paper, no-trade, risk, TCA, and owner-action receipts. No fake timestamps, fake paper/live values, fake agent actions, or order receipts are created.</p>
+      ${badges({ provider_stage: "SVC1_AGENTS_PAPER_LOOP_PROVIDER_PENDING", authority_boundary_ref: authorityBoundaryRef }, ["receipt preview only"])}
+    </article>
+    ${receiptRows.map((row) => `
+      <article class="card receipt-preview-card" data-receipt-class="${safe(row.receipt_class)}" data-interaction-state="provider_pending">
+        <h3>${safe(row.receipt_class)}</h3>
+        <p>${safe(row.owner_visible_status || "Provider-pending preview label only.")}</p>
+        <div class="preview-grid">
+          <span>Proof state: ${safe(row.proof_state || "provider-pending")}</span>
+          <span>Fake receipt: false</span>
+          <span>Fake timestamp: false</span>
+          <span>Paper/live values: false</span>
+        </div>
+        ${ownerControls(row, "provider_pending")}
+      </article>
+    `).join("")}
+  `;
+  qsa("#auditReceiptPreview .card").forEach((card, index) => {
+    card.__qttRow = receiptRows[index] || {};
+    card.addEventListener("click", () => openDrawer(DashboardSystem.ownerTitle(receiptRows[index] || {}, "Receipt preview"), "Audit Trail / Receipts Preview", receiptRows[index] || {}, "learn"));
   });
   qs("#llmPanel").innerHTML = `
     <h3>QTT reasoning route</h3>

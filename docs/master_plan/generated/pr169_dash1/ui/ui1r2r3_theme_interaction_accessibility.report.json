@@ -50,6 +50,13 @@
       "color_not_only_signal": true,
       "color_token": "--owner-high-confirmation",
       "state": "high_confirmation"
+    },
+    {
+      "aria_label_required": true,
+      "badge_required": true,
+      "color_not_only_signal": true,
+      "color_token": "--owner-success",
+      "state": "success"
     }
   ],
   "meta": {

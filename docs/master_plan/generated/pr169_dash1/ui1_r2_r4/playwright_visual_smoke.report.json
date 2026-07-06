@@ -1,0 +1,239 @@
+{
+  "artifact_id": "UI1R2R4_PLAYWRIGHT_VISUAL_SMOKE",
+  "checks": [
+    "workbench_input_states_and_other_fields",
+    "settings_color_and_checkbox_density",
+    "qtt_guide_composer_shared_chat_path",
+    "chat_intent_responses_distinct",
+    "card_actions_distinct_and_invalid_hidden",
+    "agent_workflow_receipt_shells",
+    "mobile_qtt_guide_and_workbench_colors"
+  ],
+  "console_breaking_errors": [],
+  "console_status": "PASS",
+  "external_network_requests": [],
+  "network_status": "PASS",
+  "no_console_breaking_errors": true,
+  "no_external_network_requests": true,
+  "runtime_side_effect_allowed": false,
+  "screenshots": [
+    {
+      "path": ".tmp/ui1r2r4_workbench_input_state_before_valid_entry.png",
+      "result": "PASS",
+      "runtime_side_effect_allowed": false,
+      "tested_interaction": "workbench_input_state_before_valid_entry",
+      "viewport": "desktop"
+    },
+    {
+      "path": ".tmp/ui1r2r4_workbench_input_state_after_valid_entry.png",
+      "result": "PASS",
+      "runtime_side_effect_allowed": false,
+      "tested_interaction": "workbench_input_state_after_valid_entry",
+      "viewport": "desktop"
+    },
+    {
+      "path": ".tmp/ui1r2r4_workbench_other_custom_market_field.png",
+      "result": "PASS",
+      "runtime_side_effect_allowed": false,
+      "tested_interaction": "workbench_other_custom_market_field",
+      "viewport": "desktop"
+    },
+    {
+      "path": ".tmp/ui1r2r4_workbench_other_custom_event_field.png",
+      "result": "PASS",
+      "runtime_side_effect_allowed": false,
+      "tested_interaction": "workbench_other_custom_event_field",
+      "viewport": "desktop"
+    },
+    {
+      "path": ".tmp/ui1r2r4_checkbox_compact_visual_size.png",
+      "result": "PASS",
+      "runtime_side_effect_allowed": false,
+      "tested_interaction": "checkbox_compact_visual_size",
+      "viewport": "desktop"
+    },
+    {
+      "path": ".tmp/ui1r2r4_settings_color_applied_to_workbench_inputs.png",
+      "result": "PASS",
+      "runtime_side_effect_allowed": false,
+      "tested_interaction": "settings_color_applied_to_workbench_inputs",
+      "viewport": "desktop"
+    },
+    {
+      "path": ".tmp/ui1r2r4_qtt_guide_composer_empty.png",
+      "result": "PASS",
+      "runtime_side_effect_allowed": false,
+      "tested_interaction": "qtt_guide_composer_empty",
+      "viewport": "desktop"
+    },
+    {
+      "path": ".tmp/ui1r2r4_qtt_guide_composer_after_send.png",
+      "result": "PASS",
+      "runtime_side_effect_allowed": false,
+      "tested_interaction": "qtt_guide_composer_after_send",
+      "viewport": "desktop"
+    },
+    {
+      "path": ".tmp/ui1r2r4_qtt_guide_online_search_provider_pending.png",
+      "result": "PASS",
+      "runtime_side_effect_allowed": false,
+      "tested_interaction": "qtt_guide_online_search_provider_pending",
+      "viewport": "desktop"
+    },
+    {
+      "path": ".tmp/ui1r2r4_chat_trade_check_response_distinct.png",
+      "result": "PASS",
+      "runtime_side_effect_allowed": false,
+      "tested_interaction": "chat_trade_check_response_distinct",
+      "viewport": "desktop"
+    },
+    {
+      "path": ".tmp/ui1r2r4_chat_agent_disagreement_response_distinct.png",
+      "result": "PASS",
+      "runtime_side_effect_allowed": false,
+      "tested_interaction": "chat_agent_disagreement_response_distinct",
+      "viewport": "desktop"
+    },
+    {
+      "path": ".tmp/ui1r2r4_chat_research_response_distinct.png",
+      "result": "PASS",
+      "runtime_side_effect_allowed": false,
+      "tested_interaction": "chat_research_response_distinct",
+      "viewport": "desktop"
+    },
+    {
+      "path": ".tmp/ui1r2r4_plain_english_no_trade_response.png",
+      "result": "PASS",
+      "runtime_side_effect_allowed": false,
+      "tested_interaction": "plain_english_no_trade_response",
+      "viewport": "desktop"
+    },
+    {
+      "path": ".tmp/ui1r2r4_plain_english_formula_qku_route_response.png",
+      "result": "PASS",
+      "runtime_side_effect_allowed": false,
+      "tested_interaction": "plain_english_formula_qku_route_response",
+      "viewport": "desktop"
+    },
+    {
+      "path": ".tmp/ui1r2r4_invalid_chart_action_hidden_on_nonchart_card.png",
+      "result": "PASS",
+      "runtime_side_effect_allowed": false,
+      "tested_interaction": "invalid_chart_action_hidden_on_nonchart_card",
+      "viewport": "desktop"
+    },
+    {
+      "path": ".tmp/ui1r2r4_disabled_action_educates_with_safe_alternative.png",
+      "result": "PASS",
+      "runtime_side_effect_allowed": false,
+      "tested_interaction": "disabled_action_educates_with_safe_alternative",
+      "viewport": "desktop"
+    },
+    {
+      "path": ".tmp/ui1r2r4_card_explain_distinct.png",
+      "result": "PASS",
+      "runtime_side_effect_allowed": false,
+      "tested_interaction": "card_explain_distinct",
+      "viewport": "desktop"
+    },
+    {
+      "path": ".tmp/ui1r2r4_card_learn_distinct.png",
+      "result": "PASS",
+      "runtime_side_effect_allowed": false,
+      "tested_interaction": "card_learn_distinct",
+      "viewport": "desktop"
+    },
+    {
+      "path": ".tmp/ui1r2r4_card_why_distinct.png",
+      "result": "PASS",
+      "runtime_side_effect_allowed": false,
+      "tested_interaction": "card_why_distinct",
+      "viewport": "desktop"
+    },
+    {
+      "path": ".tmp/ui1r2r4_central_education_explain_learn_why.png",
+      "result": "PASS",
+      "runtime_side_effect_allowed": false,
+      "tested_interaction": "central_education_explain_learn_why",
+      "viewport": "desktop"
+    },
+    {
+      "path": ".tmp/ui1r2r4_central_education_disabled_action.png",
+      "result": "PASS",
+      "runtime_side_effect_allowed": false,
+      "tested_interaction": "central_education_disabled_action",
+      "viewport": "desktop"
+    },
+    {
+      "path": ".tmp/ui1r2r4_qku_formula_agent_route_gap_projection.png",
+      "result": "PASS",
+      "runtime_side_effect_allowed": false,
+      "tested_interaction": "qku_formula_agent_route_gap_projection",
+      "viewport": "desktop"
+    },
+    {
+      "path": ".tmp/ui1r2r4_central_workbench_field_help.png",
+      "result": "PASS",
+      "runtime_side_effect_allowed": false,
+      "tested_interaction": "central_workbench_field_help",
+      "viewport": "desktop"
+    },
+    {
+      "path": ".tmp/ui1r2r4_agent_operations_shell.png",
+      "result": "PASS",
+      "runtime_side_effect_allowed": false,
+      "tested_interaction": "agent_operations_shell",
+      "viewport": "desktop"
+    },
+    {
+      "path": ".tmp/ui1r2r4_agent_operations_provider_pending_details.png",
+      "result": "PASS",
+      "runtime_side_effect_allowed": false,
+      "tested_interaction": "agent_operations_provider_pending_details",
+      "viewport": "desktop"
+    },
+    {
+      "path": ".tmp/ui1r2r4_qtt_team_workflow_queue_shell.png",
+      "result": "PASS",
+      "runtime_side_effect_allowed": false,
+      "tested_interaction": "qtt_team_workflow_queue_shell",
+      "viewport": "desktop"
+    },
+    {
+      "path": ".tmp/ui1r2r4_workflow_card_agent_tags.png",
+      "result": "PASS",
+      "runtime_side_effect_allowed": false,
+      "tested_interaction": "workflow_card_agent_tags",
+      "viewport": "desktop"
+    },
+    {
+      "path": ".tmp/ui1r2r4_receipt_preview_provider_pending.png",
+      "result": "PASS",
+      "runtime_side_effect_allowed": false,
+      "tested_interaction": "receipt_preview_provider_pending",
+      "viewport": "desktop"
+    },
+    {
+      "path": ".tmp/ui1r2r4_owner_command_authority_preview_no_direct_submit.png",
+      "result": "PASS",
+      "runtime_side_effect_allowed": false,
+      "tested_interaction": "owner_command_authority_preview_no_direct_submit",
+      "viewport": "desktop"
+    },
+    {
+      "path": ".tmp/ui1r2r4_mobile_qtt_guide_composer.png",
+      "result": "PASS",
+      "runtime_side_effect_allowed": false,
+      "tested_interaction": "mobile_qtt_guide_composer",
+      "viewport": "mobile"
+    },
+    {
+      "path": ".tmp/ui1r2r4_mobile_workbench_input_colors.png",
+      "result": "PASS",
+      "runtime_side_effect_allowed": false,
+      "tested_interaction": "mobile_workbench_input_colors",
+      "viewport": "mobile"
+    }
+  ],
+  "status": "PASS"
+}

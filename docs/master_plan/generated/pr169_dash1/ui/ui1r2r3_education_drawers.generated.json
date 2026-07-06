@@ -67,6 +67,19 @@
       "technical_detail_ref_or_none": null
     },
     {
+      "action_id": "OWNER_ACTION_QKU_FORMULA_ROUTES",
+      "content_signature": "ui1r2r3::qku_formula_routes::selected-card-specific",
+      "drawer_kind": "qku_formula_routes",
+      "interaction_state": "info_only",
+      "next_focus_target_or_none": "drilldownDrawer",
+      "owner_label": "Show QKU/formula routes",
+      "primary_or_secondary": "secondary",
+      "runtime_side_effect_allowed": false,
+      "selected_card_id": "runtime_selected_card_id",
+      "selected_surface_id": "runtime_selected_surface_id",
+      "technical_detail_ref_or_none": null
+    },
+    {
       "action_id": "OWNER_ACTION_TECHNICAL_DETAILS",
       "content_signature": "ui1r2r3::technical_details::selected-card-specific",
       "drawer_kind": "technical_details",

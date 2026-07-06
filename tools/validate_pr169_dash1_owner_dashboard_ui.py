@@ -22,6 +22,8 @@ from tools.build_pr169_dash1_owner_dashboard_ui import (
     MOBILE_TABS,
     OWNER_SETTINGS_SECTIONS,
     OWNER_SETTINGS_STORAGE_KEY,
+    R2R4_MANIFEST_FILE,
+    R2R4_SUBDIR_NAME,
     THEME_MODES,
     REQUIRED_TOP_LEVEL_KEYS,
     SEMANTIC_COLORS,
@@ -1157,6 +1159,246 @@ def validate(base: Path) -> tuple[str, ...]:
     ):
         if snippet not in combined:
             failures.append(f"ui1r2r3_renderer_snippet_missing:{snippet}")
+
+    r2r4_bundle_path = ui_dir / "ui1r2r4_owner_semantic_bundle.generated.json"
+    r2r4_manifest_path = base / R2R4_SUBDIR_NAME / R2R4_MANIFEST_FILE
+    if not r2r4_bundle_path.exists():
+        failures.append("ui1r2r4_semantic_bundle_missing")
+    if not r2r4_manifest_path.exists():
+        failures.append("ui1r2r4_centralization_manifest_missing")
+    if r2r4_bundle_path.exists() and r2r4_manifest_path.exists():
+        r2r4 = _read_json(r2r4_bundle_path)
+        r2r4_manifest = _read_json(r2r4_manifest_path)
+        if r2r4_manifest.get("manifest_id") != "UI1R2R4_CENTRALIZATION_MANIFEST":
+            failures.append("ui1r2r4_manifest_id_bad")
+        required_concepts = {
+            "OwnerDashboardStateV1",
+            "OwnerSurfaceResolver",
+            "OwnerActionRegistry",
+            "OwnerPresentationLayer",
+            "OwnerSettingsV1",
+            "OwnerEducationCopyMap / OwnerEducationCatalog",
+            "OwnerOptionCatalog",
+            "OwnerRangeHintPolicy",
+            "OwnerInteractionStateModel / ThemeTokens",
+            "OwnerSearchIndex",
+            "OwnerNextStepRouter",
+            "QTT Guide / Chat central state",
+            "Workbench local preview model",
+            "Agent Operations projection",
+            "Workflow Queue projection",
+            "Receipt Preview projection",
+            "Owner command preview route",
+            "Online research provider-pending preview route",
+            "QKU/formula/agent route-gap projection",
+            "central owner UX semantic bundle",
+        }
+        mapped_concepts = {row.get("conceptual_system") for row in r2r4.get("phase0_current_equivalent_mapping", [])}
+        for concept in sorted(required_concepts - mapped_concepts):
+            failures.append(f"ui1r2r4_mapping_missing:{concept}")
+        if r2r4.get("single_settings_key") != OWNER_SETTINGS_STORAGE_KEY:
+            failures.append("ui1r2r4_single_settings_key_bad")
+        if r2r4.get("owned_generated_prefix") != f"docs/master_plan/generated/pr169_dash1/{R2R4_SUBDIR_NAME}/":
+            failures.append("ui1r2r4_owned_prefix_bad")
+        if r2r4.get("central_bundle_id") != "OwnerUXSemanticBundleV1":
+            failures.append("ui1r2r4_bundle_id_bad")
+
+        states = {row.get("state_id") for row in r2r4.get("interaction_states", [])}
+        for state in {"input_required", "review_required", "optional_input", "provider_pending", "high_confirmation", "success"}:
+            if state not in states:
+                failures.append(f"ui1r2r4_interaction_state_missing:{state}")
+
+        fields = {row.get("field_id"): row for row in r2r4.get("field_semantics", [])}
+        for field_id in (
+            "plain_english_detail",
+            "max_budget",
+            "custom_market_family",
+            "custom_event_category",
+            "custom_event",
+            "custom_venue",
+            "custom_source_family",
+            "custom_route_type",
+        ):
+            if field_id not in fields:
+                failures.append(f"ui1r2r4_field_missing:{field_id}")
+        for field_id in ("custom_market_family", "custom_event_category", "custom_event", "custom_venue", "custom_source_family", "custom_route_type"):
+            row = fields.get(field_id, {})
+            if row.get("source_category") != "candidate_owner_custom" or row.get("authority") != "local_preview_guardrail":
+                failures.append(f"ui1r2r4_custom_field_authority_bad:{field_id}")
+            for guard in ("source_truth", "connector_semantics", "replay_paper_evidence", "live_readiness", "order_authority"):
+                if row.get(guard) is not False:
+                    failures.append(f"ui1r2r4_custom_field_guard_bad:{field_id}:{guard}")
+
+        education = {row.get("education_id"): row for row in r2r4.get("education_catalog", [])}
+        for education_id in {
+            "education.explain",
+            "education.learn",
+            "education.why",
+            "education.qku_formula_routes",
+            "education.tca_cost",
+            "education.no_trade",
+            "education.chart_drilldown",
+            "education.provider_pending",
+            "education.disabled_action",
+            "education.technical_details",
+            "education.workbench_field_help",
+            "education.workflow_queue",
+            "education.receipts",
+            "education.risk_quantum",
+        }:
+            if education_id not in education:
+                failures.append(f"ui1r2r4_education_missing:{education_id}")
+        for education_id, row in education.items():
+            for key in (
+                "owner_title",
+                "plain_english_summary",
+                "what_it_means",
+                "why_it_matters",
+                "what_owner_can_do_next",
+                "provider_pending_copy",
+                "technical_detail_ref",
+                "related_agent_roles",
+                "related_QKU_or_formula_route_refs_or_gap",
+                "authority_boundary_copy",
+            ):
+                if key not in row:
+                    failures.append(f"ui1r2r4_education_field_missing:{education_id}:{key}")
+
+        required_intents = {
+            "trade_check",
+            "research_link",
+            "formula_qku_search",
+            "agent_disagreement_risk",
+            "no_trade_explanation",
+            "replay_paper_preview",
+            "workbench_prefill",
+            "evidence_missing",
+            "agent_operations_status",
+            "workflow_queue_status",
+            "online_research_provider_pending",
+            "source_candidate_extraction_preview",
+            "formula_qku_extraction_preview",
+            "variable_search_preview",
+            "unknown_clarification",
+        }
+        present_intents = {row.get("intent_id") for row in r2r4.get("chat_qtt_guide_intents", [])}
+        for intent in sorted(required_intents - present_intents):
+            failures.append(f"ui1r2r4_intent_missing:{intent}")
+
+        row_like_groups = (
+            "phase0_current_equivalent_mapping",
+            "centralization_manifest",
+            "field_semantics",
+            "education_catalog",
+            "drawer_action_semantics",
+            "chat_qtt_guide_intents",
+            "workbench_prefill_and_input_states",
+            "agent_operations_projection",
+            "workflow_queue_projection",
+            "receipt_preview_projection",
+            "online_research_provider_pending_preview",
+            "owner_command_preview_actions",
+            "qku_formula_agent_route_gap_projection",
+        )
+        for group in row_like_groups:
+            rows = r2r4.get(group, [])
+            if isinstance(rows, dict):
+                rows = rows.get("semantic_groups", [])
+            for index, row in enumerate(rows):
+                if not isinstance(row, dict):
+                    continue
+                for key in (
+                    "lifecycle_state",
+                    "timing_state_or_snapshot_state",
+                    "downstream_owner_or_consumer",
+                    "activation_state_or_provider_stage",
+                    "authority_boundary",
+                    "upstream_ref_or_provider_pending",
+                    "downstream_ref_or_provider_pending",
+                    "runtime_side_effect_allowed",
+                    "source_truth_created",
+                    "order_authority_created",
+                ):
+                    if key not in row:
+                        failures.append(f"ui1r2r4_row_field_missing:{group}:{index}:{key}")
+                if row.get("runtime_side_effect_allowed") is not False:
+                    failures.append(f"ui1r2r4_runtime_side_effect_allowed:{group}:{index}")
+                if row.get("source_truth_created") is not False:
+                    failures.append(f"ui1r2r4_source_truth_created:{group}:{index}")
+                if row.get("order_authority_created") is not False:
+                    failures.append(f"ui1r2r4_order_authority_created:{group}:{index}")
+
+        if not r2r4.get("agent_operations_projection"):
+            failures.append("ui1r2r4_agent_operations_empty")
+        if not r2r4.get("workflow_queue_projection"):
+            failures.append("ui1r2r4_workflow_queue_empty")
+        receipt_classes = {row.get("receipt_class") for row in r2r4.get("receipt_preview_projection", [])}
+        for receipt_class in {
+            "RuntimeTaskReceiptV1",
+            "AgentDecisionReceiptV1",
+            "MemoryUpdateReceiptV1",
+            "PaperOrderIntentV1",
+            "PaperFillSimulationReceiptV1",
+            "NoTradeDecisionReceiptV1",
+            "RiskGateReceiptV1",
+            "TCAMetricReceiptV1",
+            "OwnerActionReceiptV1",
+        }:
+            if receipt_class not in receipt_classes:
+                failures.append(f"ui1r2r4_receipt_class_missing:{receipt_class}")
+
+        if r2r4.get("thin_module_import_graph", {}).get("renderer_imports_thin_feature_modules") is not False:
+            failures.append("ui1r2r4_renderer_imports_thin_modules")
+        anti_scatter = r2r4.get("anti_scatter_discovery_policy", {})
+        for key in (
+            "component_local_education_paragraphs",
+            "component_local_dropdown_option_arrays",
+            "component_local_chat_preset_arrays",
+            "component_local_action_applicability_maps",
+            "component_local_theme_color_literals",
+            "component_local_localStorage_writes",
+            "component_local_agent_roster_rows",
+            "component_local_workflow_stage_arrays",
+            "component_local_receipt_class_definitions",
+        ):
+            if anti_scatter.get(key) is not False:
+                failures.append(f"ui1r2r4_antiscatter_bad:{key}")
+        for key in (
+            "no_SVC1_runtime",
+            "no_live_LLM",
+            "no_online_search_runtime",
+            "no_real_QTT_agent_execution",
+            "no_real_replay_paper_live_execution",
+            "no_connector_private_cash_reads",
+            "no_source_truth_acceptance",
+            "no_direct_venue_submit",
+            "no_Execution_Router_release",
+            "no_QTT_SHA_or_AtomicRows_hash_authority",
+            "no_profit_guarantee",
+        ):
+            if r2r4.get("no_runtime_authority", {}).get(key) is not True:
+                failures.append(f"ui1r2r4_no_runtime_boundary_missing:{key}")
+
+    for snippet in (
+        "data-qtt-guide-composer=\"shared-chat-action-state\"",
+        "data-qtt-guide-send=\"shared-chat-submit\"",
+        "data-settings-other-field",
+        "data-field-initial-state",
+        "data-action-applicability",
+        "data-disabled-action-education",
+        "data-central-education-id",
+        "data-agent-operations-shell=\"OwnerAgentOperationsProjectionV1\"",
+        "data-workflow-queue-shell=\"OwnerWorkflowQueueStateV1\"",
+        "data-receipt-preview-shell=\"OwnerReceiptPreviewStateV1\"",
+        "candidate_owner_custom",
+        "local_preview_guardrail",
+        "Ask QTT anything about this screen, trade, QKU, formula, risk, or next step",
+        "QTT Team Workflow Queue",
+        "Audit Trail / Receipts Preview",
+        "No online search, live LLM, real agent task, connector read, replay, paper, live execution, venue submit, or Execution Router release happened.",
+    ):
+        if snippet not in combined:
+            failures.append(f"ui1r2r4_renderer_snippet_missing:{snippet}")
 
     return tuple(failures)
 
