@@ -5843,10 +5843,13 @@ def _build_ui1r2r5_visual_qa_truth_repair(r2r4_bundle: dict[str, Any]) -> dict[s
         f"docs/master_plan/generated/pr169_dash1/{R2R5_SUBDIR_NAME}/{R2R5_BUNDLE_FILE}",
         f"docs/master_plan/generated/pr169_dash1/{R2R5_SUBDIR_NAME}/{R2R5_MANIFEST_FILE}",
         f"docs/master_plan/generated/pr169_dash1/{R2R5_SUBDIR_NAME}/playwright_visual_smoke.report.json",
+        "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
         "tests/pr169_dash1_ui1/test_ui1r2r5_owner_visual_qa_truth_repair.py",
         "tools/validation_scope_registry.py",
         "tests/tools/test_validation_scope_registry.py",
     ]
+    currentization_report_path = "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json"
+    currentization_ref = "tools/currentize_pr152_after_generated_artifacts.py"
     changed_file_ownership_audit = [
         {
             **_lifecycle_fields(f"changed_file::{index}", upstream="PR169_DASH1_UI1_R2_R5_prompt", downstream="PR body + local validation"),
@@ -5855,12 +5858,28 @@ def _build_ui1r2r5_visual_qa_truth_repair(r2r4_bundle: dict[str, Any]) -> dict[s
             "owned_prefix_or_allowed_shared_reason": (
                 "owned R2-R5 generated prefix"
                 if f"/{R2R5_SUBDIR_NAME}/" in path.replace("\\", "/")
+                else "allowed shared PR152 currentization report consumed by PR152/PR162 validators"
+                if path == currentization_report_path
                 else "allowed shared current-equivalent consumed by central PR169 UI builder/validator/renderer/test path"
             ),
-            "producer": builder_ref if "playwright_visual_smoke.report.json" not in path else playwright_ref,
-            "consumer": "renderer/validator/tests/Playwright/PR body",
-            "validator_or_test_coverage": tests_ref,
-            "playwright_proof_or_not_applicable": playwright_ref if path.endswith((".js", ".css", ".html", ".json", ".py")) else "not_applicable",
+            "producer": (
+                currentization_ref
+                if path == currentization_report_path
+                else playwright_ref
+                if "playwright_visual_smoke.report.json" in path
+                else builder_ref
+            ),
+            "consumer": (
+                "tools/validate_grand_global_debug_logical_consistency_audit.py + tools/validate_pr162_safe_nonlive_replay_paper_data_adapter_quantum_forward_bridge.py"
+                if path == currentization_report_path
+                else "renderer/validator/tests/Playwright/PR body"
+            ),
+            "validator_or_test_coverage": (
+                "tools/validate_grand_global_debug_logical_consistency_audit.py + tools/validate_pr162_safe_nonlive_replay_paper_data_adapter_quantum_forward_bridge.py"
+                if path == currentization_report_path
+                else tests_ref
+            ),
+            "playwright_proof_or_not_applicable": "not_applicable" if path == currentization_report_path else playwright_ref if path.endswith((".js", ".css", ".html", ".json", ".py")) else "not_applicable",
             "runtime_authority_change": False,
             "source_truth_change": False,
             "order_authority_change": False,
