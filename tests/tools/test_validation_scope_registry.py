@@ -56,6 +56,8 @@ PR169_DASH1_UI1_BRANCH = registry.PR169_DASH1_UI1_BRANCH
 PR169_DASH1_UI1_R1_BRANCH = registry.PR169_DASH1_UI1_R1_BRANCH
 PR169_DASH1_UI1_R2_BRANCH = registry.PR169_DASH1_UI1_R2_BRANCH
 PR169_DASH1_UI1_R2_R1_BRANCH = registry.PR169_DASH1_UI1_R2_R1_BRANCH
+PR169_DASH1_UI1_R2_R2_BRANCH = registry.PR169_DASH1_UI1_R2_R2_BRANCH
+PR169_DASH1_UI1_R2_R3_BRANCH = registry.PR169_DASH1_UI1_R2_R3_BRANCH
 FIXTURE_BRANCH = registry.VALIDATION_FIXTURE_BRANCH
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
@@ -95,6 +97,7 @@ def test_pr168_allowed_paths_pass_on_real_branch(path: str) -> None:
         "tools/build_pr169_dash1_owner_dashboard.py",
         "tools/build_pr169_dash1_owner_dashboard_ui.py",
         "tools/playwright_pr169_dash1_ui1_r2_visual_smoke.py",
+        "tools/playwright_pr169_dash1_ui1_r2_r3_visual_smoke.py",
         "tools/pr168_rp5c_config.py",
         "tools/validate_pr169_dash1_owner_dashboard.py",
         "tools/validate_pr169_dash1_owner_dashboard_ui.py",
@@ -117,6 +120,8 @@ def test_pr169_dash1_allowed_paths_pass_on_real_branch(path: str) -> None:
     assert registry.is_pr_scoped_changed_path_allowed(PR169_DASH1_UI1_R1_BRANCH, path)
     assert registry.is_pr_scoped_changed_path_allowed(PR169_DASH1_UI1_R2_BRANCH, path)
     assert registry.is_pr_scoped_changed_path_allowed(PR169_DASH1_UI1_R2_R1_BRANCH, path)
+    assert registry.is_pr_scoped_changed_path_allowed(PR169_DASH1_UI1_R2_R2_BRANCH, path)
+    assert registry.is_pr_scoped_changed_path_allowed(PR169_DASH1_UI1_R2_R3_BRANCH, path)
     assert registry.is_pr_scoped_changed_path_allowed(FIXTURE_BRANCH, path)
 
 
@@ -141,6 +146,10 @@ def test_pr169_dash1_forbidden_paths_fail(path: str) -> None:
     )
     assert not registry.is_pr_scoped_changed_path_allowed(
         PR169_DASH1_UI1_R2_R1_BRANCH,
+        path,
+    )
+    assert not registry.is_pr_scoped_changed_path_allowed(
+        PR169_DASH1_UI1_R2_R3_BRANCH,
         path,
     )
 

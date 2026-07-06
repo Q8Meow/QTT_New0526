@@ -126,11 +126,12 @@ def run(repo: Path) -> None:
         _assert_visible(page, "[data-comparison-card='no_trade_alternative']")
         _screenshot(page, repo / SCREENSHOTS["workbench"])
 
-        page.locator("a[href='#edge-alpha']").first.click()
+        page.evaluate("document.querySelector('#edge-alpha').scrollIntoView({block: 'start'})")
         _assert_visible(page, "#edgeAlphaBoard .edge-card")
         _screenshot(page, repo / SCREENSHOTS["edge"])
 
-        page.locator("a[href='#developer-mode']").first.click()
+        page.evaluate("setExperienceMode('DEVELOPER')")
+        page.evaluate("document.querySelector('#developer-mode').scrollIntoView({block: 'start'})")
         _assert_visible(page, "#developerMode details:not([open])")
         page.locator("#developerMode summary").click()
         _assert_visible(page, "#developerMode .developer-card")

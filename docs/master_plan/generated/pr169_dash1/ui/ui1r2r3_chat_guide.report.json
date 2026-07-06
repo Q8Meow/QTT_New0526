@@ -1,0 +1,98 @@
+{
+  "chat_presets": [
+    {
+      "option_id": "check_positive_net_cash_trade",
+      "owner_label": "Check this market for a positive expected net-cash trade.",
+      "selection_auto_submits": false,
+      "selection_fills_composer": true,
+      "source_category": "safe_ui_default"
+    },
+    {
+      "option_id": "research_link_formula_qku",
+      "owner_label": "Research this link and find useful formulas or QKUs.",
+      "selection_auto_submits": false,
+      "selection_fills_composer": true,
+      "source_category": "safe_ui_default"
+    },
+    {
+      "option_id": "compare_formula_stacks",
+      "owner_label": "Compare the best formula stacks for this event.",
+      "selection_auto_submits": false,
+      "selection_fills_composer": true,
+      "source_category": "safe_ui_default"
+    },
+    {
+      "option_id": "explain_no_trade",
+      "owner_label": "Explain why no-trade won.",
+      "selection_auto_submits": false,
+      "selection_fills_composer": true,
+      "source_category": "safe_ui_default"
+    },
+    {
+      "option_id": "missing_evidence_before_replay_paper",
+      "owner_label": "Find what evidence is missing before replay/paper.",
+      "selection_auto_submits": false,
+      "selection_fills_composer": true,
+      "source_category": "safe_ui_default"
+    },
+    {
+      "option_id": "agent_variable_objections",
+      "owner_label": "Ask the agents which variable matters most.",
+      "selection_auto_submits": false,
+      "selection_fills_composer": true,
+      "source_category": "safe_ui_default"
+    },
+    {
+      "option_id": "agent_disagreement_risk",
+      "owner_label": "Show agent disagreement and risk objections.",
+      "selection_auto_submits": false,
+      "selection_fills_composer": true,
+      "source_category": "safe_ui_default"
+    },
+    {
+      "option_id": "route_replay_paper_preview",
+      "owner_label": "Route this candidate to replay/paper preview.",
+      "selection_auto_submits": false,
+      "selection_fills_composer": true,
+      "source_category": "safe_ui_default"
+    },
+    {
+      "option_id": "live_canary_review_preview",
+      "owner_label": "Prepare a live-canary review preview without submitting anything.",
+      "selection_auto_submits": false,
+      "selection_fills_composer": true,
+      "source_category": "safe_ui_default"
+    }
+  ],
+  "live_LLM_call_allowed": false,
+  "meta": {
+    "agent_consumable_authority": false,
+    "artifact_id": "UI1R2R3_CHAT_GUIDE",
+    "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+    "connector_access_allowed": false,
+    "credential_access_allowed": false,
+    "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config + PR169-DASH1 artifacts + PR169-DASH1-UI1/R1 boot data + OwnerPresentationLayer / OwnerGuidancePolicy config + PR169-DASH1-UI1-R2-R3 OwnerSettingsV1 product polish config",
+    "manual_edit_allowed": false,
+    "order_execution_allowed": false,
+    "runtime_side_effect_allowed": false,
+    "runtime_truth_authority": false,
+    "source_truth_authority": false,
+    "ui1r2r3_generated_from": "OwnerDashboardStateV1 + OwnerSurfaceResolver + OwnerActionRegistry + OwnerPresentationLayer + OwnerNextStepRouter + OwnerSettingsV1 + central owner UX semantic bundle",
+    "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+  },
+  "preset_catalog_owner": "OwnerOptionCatalogV1.chat_presets",
+  "qtt_guide_prompts": [
+    "Check a trade",
+    "Research a link",
+    "Find formulas/QKUs",
+    "Explain this screen",
+    "Why no-trade?",
+    "Show risk objections",
+    "Prepare replay/paper preview"
+  ],
+  "qtt_guide_reuses_action_registry": true,
+  "qtt_guide_reuses_chat_state": true,
+  "qtt_guide_second_transcript_store_created": false,
+  "real_agent_execution_allowed": false,
+  "replay_paper_live_execution_allowed": false
+}

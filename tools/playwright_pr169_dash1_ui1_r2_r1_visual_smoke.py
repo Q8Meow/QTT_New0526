@@ -238,7 +238,7 @@ def run(repo: Path) -> None:
 
         _open_menu(page, "#tradeWorkbench [data-owner-next-action-menu]")
         _click_visible(page, "#tradeWorkbench [data-next-step-id='NEXT_STEP_SHOW_TCA_COST_BREAKDOWN']")
-        _assert_visible(page, "#drilldownDrawer[data-drawer-kind='tca'][aria-hidden='false']")
+        _assert_visible(page, "#drilldownDrawer[data-drawer-kind='tca_breakdown'][aria-hidden='false']")
         assert "fees" in page.locator("#drawerBody").inner_text(timeout=10_000).lower()
         _screenshot(page, repo, "dropdown_to_tca", screenshots)
         _screenshot(page, repo, "evidence_spine_drilldown", screenshots)
@@ -246,17 +246,17 @@ def run(repo: Path) -> None:
 
         _open_menu(page, "#tradeWorkbench [data-owner-next-action-menu]")
         _click_visible(page, "#tradeWorkbench [data-next-step-id='NEXT_STEP_EXPLAIN_NO_TRADE']")
-        _assert_visible(page, "#drilldownDrawer[data-drawer-kind='no-trade'][aria-hidden='false']")
+        _assert_visible(page, "#drilldownDrawer[data-drawer-kind='why'][aria-hidden='false']")
         assert "reoptimization" in page.locator("#drawerBody").inner_text(timeout=10_000).lower()
         _screenshot(page, repo, "dropdown_to_no_trade", screenshots)
         _close_drawer(page)
 
         _open_menu(page, "#tradeWorkbench [data-owner-next-action-menu]")
         _click_visible(page, "#tradeWorkbench [data-next-step-id='NEXT_STEP_SHOW_QKU_FORMULA_ROUTES']")
-        _assert_visible(page, "#drilldownDrawer[data-drawer-kind='qku'][aria-hidden='false']")
+        _assert_visible(page, "#drilldownDrawer[data-drawer-kind='technical_details'][aria-hidden='false']")
         qku_text = page.locator("#drawerBody").inner_text(timeout=10_000)
         assert "QKU/formula refs or explicit gap route" in qku_text
-        assert "no raw JSONL scanning path" in qku_text
+        assert "no raw jsonl scanning path" in qku_text.lower()
         _screenshot(page, repo, "dropdown_to_qku", screenshots)
         _close_drawer(page)
         checks.append("tca_no_trade_qku_drilldowns_with_evidence_spine")

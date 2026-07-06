@@ -1,0 +1,28 @@
+{
+  "active_navigation_state_ref": "OwnerDashboardStateV1.active_surface",
+  "central_bundle_id": "OwnerUXSemanticBundleV1",
+  "education_drawer_ref": "ui1r2r3_education_drawers.generated.json",
+  "meta": {
+    "agent_consumable_authority": false,
+    "artifact_id": "UI1R2R3_OWNER_PRODUCT_POLISH",
+    "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+    "connector_access_allowed": false,
+    "credential_access_allowed": false,
+    "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config + PR169-DASH1 artifacts + PR169-DASH1-UI1/R1 boot data + OwnerPresentationLayer / OwnerGuidancePolicy config + PR169-DASH1-UI1-R2-R3 OwnerSettingsV1 product polish config",
+    "manual_edit_allowed": false,
+    "order_execution_allowed": false,
+    "runtime_side_effect_allowed": false,
+    "runtime_truth_authority": false,
+    "source_truth_authority": false,
+    "ui1r2r3_generated_from": "OwnerDashboardStateV1 + OwnerSurfaceResolver + OwnerActionRegistry + OwnerPresentationLayer + OwnerNextStepRouter + OwnerSettingsV1 + central owner UX semantic bundle",
+    "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+  },
+  "no_new_QKU_formula_materialization_engine": true,
+  "no_runtime_authority": true,
+  "option_catalog_ref": "ui1r2r3_workbench_options_ranges.generated.json",
+  "owner_search_index_ref": "ui1r2r3_navigation_sidebar_search.report.json",
+  "owner_settings_ref": "ui1r2r3_owner_settings.generated.json",
+  "qku_formula_agent_route_visibility_only": true,
+  "renderer_thin_consumers_only": true,
+  "theme_token_ref": "owner_dashboard_theme_contract.generated.json"
+}

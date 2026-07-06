@@ -4,7 +4,20 @@ const GUIDANCE_DENSITY_STORAGE_KEY = "qtt_owner_dashboard_guidance_density";
 const TEXT_SIZE_STORAGE_KEY = "qtt_owner_dashboard_text_size";
 const TECHNICAL_DETAILS_STORAGE_KEY = "qtt_owner_dashboard_technical_details_open";
 const ENTER_TO_SEND_STORAGE_KEY = "qtt_owner_dashboard_enter_to_send_enabled";
+const OWNER_SETTINGS_STORAGE_KEY = "qtt_owner_dashboard_owner_settings_v1";
 const TEXT_SIZE_VALUES = ["small", "default", "large", "extra_large"];
+const THEME_VALUES = ["DARK", "LIGHT", "DARK_PRO", "MIDNIGHT_BLUE", "SLATE", "LIGHT_PRO", "LOW_GLARE", "HIGH_CONTRAST", "CUSTOM"];
+const THEME_TO_DATASET = {
+  DARK: "dark",
+  LIGHT: "light",
+  DARK_PRO: "dark",
+  MIDNIGHT_BLUE: "midnight_blue",
+  SLATE: "slate",
+  LIGHT_PRO: "light",
+  LOW_GLARE: "low_glare",
+  HIGH_CONTRAST: "high_contrast",
+  CUSTOM: "dark"
+};
 
 // Source-level validator anchors: DashboardSystem, OwnerDashboardStateV1,
 // OwnerSurfaceResolver, OwnerActionRegistry, OwnerNextStepRouter.
@@ -52,7 +65,14 @@ const DASHBOARD_DATA = window.QTT_OWNER_DASHBOARD_DATA || {
   ui1r2_next_step: { rows: [] },
   ui1r2r2_display_preferences: {},
   ui1r2r2_workbench_form: { field_catalog: [], option_catalog: {}, local_preview_output: {} },
-  ui1r2r2_chat_intent_preview: {}
+  ui1r2r2_chat_intent_preview: {},
+  ui1r2r3_owner_settings: { defaults: {}, sections: [] },
+  ui1r2r3_navigation_sidebar_search: { ranked_search_index: [] },
+  ui1r2r3_chat_guide: { chat_presets: [], qtt_guide_prompts: [] },
+  ui1r2r3_chart_policy: {},
+  ui1r2r3_education_drawers: { drawer_actions: [] },
+  ui1r2r3_theme_interaction_accessibility: {},
+  ui1r2r3_workbench_options_ranges: { range_policy: {}, option_catalog: {} }
 };
 
 const RANGES = ["1D", "1W", "1M", "3M", "YTD", "1Y", "ALL"];
@@ -107,6 +127,113 @@ function titleCase(text) {
     .join(" ");
 }
 
+const OwnerSettings = (() => {
+  const defaults = {
+    theme_preset: "DARK_PRO",
+    text_size: "default",
+    sidebar_collapsed: false,
+    input_required_color: "#F59E0B",
+    review_required_color: "#2563EB",
+    warning_high_confirmation_color: "#F97316",
+    provider_pending_color: "#64748B",
+    success_color: "#16A34A",
+    high_contrast: false,
+    chart_default_timeframe: "1M",
+    chart_crosshair: true,
+    chart_tooltips: true,
+    chart_grid_lines: true,
+    chart_axis_labels: true,
+    workbench_preferred_market: "prediction_market",
+    workbench_preferred_venue: "qtt_decide",
+    workbench_preferred_hold_unit: "days",
+    workbench_preferred_maker_taker: "maker_first_taker_fallback",
+    workbench_preferred_objective: "maximize_expected_net_cash",
+    chat_enter_to_send: false,
+    chat_prompt_suggestions: true,
+    qtt_guide_collapsed: true,
+    dashboard_default_experience_mode: "GUIDED_OWNER",
+    trading_default_market: "prediction_market",
+    trading_default_venue: "qtt_decide",
+    trading_default_risk_profile: "conservative_preview",
+    trading_default_position_size_style: "small_preview",
+    trading_default_hold_style: "event_resolution_or_provider_pending",
+    trading_default_execution_preference: "maker_first_preview",
+    trading_default_portfolio_objective: "preserve_capital_and_improve_net_cash_preview",
+    keyboard_focus_visible: true,
+    reduced_motion: false,
+    ...(DASHBOARD_DATA.ui1r2r3_owner_settings && DASHBOARD_DATA.ui1r2r3_owner_settings.defaults ? DASHBOARD_DATA.ui1r2r3_owner_settings.defaults : {})
+  };
+  let settings = { ...defaults };
+
+  function read() {
+    try {
+      const raw = localStorage.getItem(OWNER_SETTINGS_STORAGE_KEY);
+      if (raw) settings = { ...defaults, ...JSON.parse(raw) };
+    } catch {
+      settings = { ...defaults, ...(window.__QTT_IN_SESSION_OWNER_SETTINGS || {}) };
+    }
+    try {
+      const legacyTheme = localStorage.getItem(THEME_STORAGE_KEY);
+      if (legacyTheme && !localStorage.getItem(OWNER_SETTINGS_STORAGE_KEY)) {
+        settings.theme_preset = legacyTheme === "LIGHT" ? "LIGHT_PRO" : legacyTheme;
+      }
+      const legacyText = localStorage.getItem(TEXT_SIZE_STORAGE_KEY);
+      if (legacyText && TEXT_SIZE_VALUES.includes(legacyText) && !localStorage.getItem(OWNER_SETTINGS_STORAGE_KEY)) {
+        settings.text_size = legacyText;
+      }
+      const legacyMode = localStorage.getItem(EXPERIENCE_MODE_STORAGE_KEY);
+      if (legacyMode && !localStorage.getItem(OWNER_SETTINGS_STORAGE_KEY)) settings.dashboard_default_experience_mode = legacyMode;
+      const legacyEnter = localStorage.getItem(ENTER_TO_SEND_STORAGE_KEY);
+      if (legacyEnter && !localStorage.getItem(OWNER_SETTINGS_STORAGE_KEY)) settings.chat_enter_to_send = legacyEnter === "true";
+    } catch {
+      // In-session fallbacks are enough for local static preview.
+    }
+    return settings;
+  }
+
+  function persist() {
+    try {
+      localStorage.setItem(OWNER_SETTINGS_STORAGE_KEY, JSON.stringify(settings));
+      localStorage.setItem(THEME_STORAGE_KEY, settings.theme_preset === "LIGHT_PRO" ? "LIGHT" : settings.theme_preset === "DARK_PRO" ? "DARK" : settings.theme_preset);
+      localStorage.setItem(TEXT_SIZE_STORAGE_KEY, settings.text_size);
+      localStorage.setItem(EXPERIENCE_MODE_STORAGE_KEY, settings.dashboard_default_experience_mode);
+      localStorage.setItem(GUIDANCE_DENSITY_STORAGE_KEY, "COLLAPSED_DEFAULT");
+      localStorage.setItem(TECHNICAL_DETAILS_STORAGE_KEY, settings.technical_details_open ? "true" : "false");
+      localStorage.setItem(ENTER_TO_SEND_STORAGE_KEY, settings.chat_enter_to_send ? "true" : "false");
+    } catch {
+      window.__QTT_IN_SESSION_OWNER_SETTINGS = { ...settings };
+    }
+  }
+
+  function get(key) {
+    return settings[key];
+  }
+
+  function set(key, value, persistNow = true) {
+    settings[key] = value;
+    applyCssSettings();
+    if (persistNow) persist();
+    return settings;
+  }
+
+  function applyCssSettings() {
+    const root = document.documentElement;
+    root.style.setProperty("--owner-input-required", settings.input_required_color);
+    root.style.setProperty("--owner-review-required", settings.review_required_color);
+    root.style.setProperty("--owner-high-confirmation", settings.warning_high_confirmation_color);
+    root.style.setProperty("--owner-provider-pending", settings.provider_pending_color);
+    root.style.setProperty("--owner-success", settings.success_color);
+    root.dataset.textSize = TEXT_SIZE_VALUES.includes(settings.text_size) ? settings.text_size : "default";
+    if (settings.high_contrast) {
+      root.dataset.theme = "high_contrast";
+    }
+    document.body.dataset.sidebarCollapsed = settings.sidebar_collapsed ? "true" : "false";
+  }
+
+  read();
+  return { defaults, read, get, set, persist, applyCssSettings };
+})();
+
 const DashboardSystem = (() => {
   const copyRows = asList(DASHBOARD_DATA.ui1r2_copy_map && DASHBOARD_DATA.ui1r2_copy_map.rows);
   const exactCopy = new Map(copyRows.map((row) => [String(row.technical_pattern_or_exact_id), row]));
@@ -116,12 +243,17 @@ const DashboardSystem = (() => {
   const menuByWidget = new Map(menuRows.map((row) => [row.widget_id, row]));
   const modeRows = asList(DASHBOARD_DATA.ui1r2r1_mode_policy && DASHBOARD_DATA.ui1r2r1_mode_policy.rows);
   const modeById = new Map(modeRows.map((row) => [row.mode_id, row]));
+  const drawerRows = asList(DASHBOARD_DATA.ui1r2r3_education_drawers && DASHBOARD_DATA.ui1r2r3_education_drawers.drawer_actions);
+  const drawerByKind = new Map(drawerRows.map((row) => [row.drawer_kind, row]));
   const interactionState = {
     receipts: [],
     chatMessages: [],
     chatEnterToSend: false,
     optionsMenuOpen: false,
+    settingsOpen: false,
+    qttGuideOpen: false,
     textSize: "default",
+    activeSurface: "overview",
     guided: {},
     workbenchContext: null,
     workbenchPreview: {}
@@ -144,6 +276,14 @@ const DashboardSystem = (() => {
     if (value.includes(".jsonl")) return "Technical evidence source";
     if (value.startsWith("DASH1_FEATURE_")) return "Dashboard feature route";
     if (value.includes("OWNER_DASHBOARD_PACKET_V1")) return "Owner review packet";
+    value = value
+      .replace(/Guided Owner Coach/g, "QTT Coach")
+      .replace(/Review execution-adjusted trade metrics/g, "Trade Metrics")
+      .replace(/Tell me what matters/g, "Key Insights")
+      .replace(/Net Capital Cash Slot/g, "Net Capital")
+      .replace(/Today Result Slot/g, "Today's PnL")
+      .replace(/Week Result Slot/g, "Weekly PnL")
+      .replace(/Month Result Slot/g, "Monthly PnL");
     if (value.includes("::")) value = value.split("::").pop();
     value = value
       .replace(/runtime_side_effect/gi, "local preview safety")
@@ -308,6 +448,32 @@ const DashboardSystem = (() => {
     return nextById.get(id);
   }
 
+  function drawerAction(kind) {
+    return drawerByKind.get(kind) || {
+      action_id: `OWNER_ACTION_${String(kind || "general").toUpperCase()}`,
+      drawer_kind: kind || "general",
+      content_signature: `ui1r2r3::${kind || "general"}::fallback`,
+      runtime_side_effect_allowed: false
+    };
+  }
+
+  function setActiveSurface(surfaceId, focusTargetId) {
+    interactionState.activeSurface = surfaceId || "overview";
+    qsa(".rail a, .mobile-bottom-nav a").forEach((link) => {
+      const hrefSurface = (link.getAttribute("href") || "#overview").replace("#", "");
+      const active = hrefSurface === interactionState.activeSurface;
+      link.classList.toggle("is-active", active);
+      if (active) link.setAttribute("aria-current", "page");
+      else link.removeAttribute("aria-current");
+    });
+    const target = qs(`#${CSS.escape(focusTargetId || surfaceId || "overview")}`) || qs(`#${CSS.escape(surfaceId || "overview")}`);
+    if (target) {
+      target.setAttribute("tabindex", "-1");
+      target.scrollIntoView({ behavior: "smooth", block: "start" });
+      target.focus({ preventScroll: true });
+    }
+  }
+
   function localReceipt(route, context, text) {
     const receipt = {
       interaction_id: `UI1R2R1_LOCAL_${Date.now()}_${interactionState.receipts.length + 1}`,
@@ -343,11 +509,14 @@ const DashboardSystem = (() => {
         const prefill = qs("#tradeWorkbenchPrefill");
         if (prefill) prefill.textContent = `Prefilled local context: ${ownerTitle(context, "selected card")}. Missing owner input: confirm market, side, size, and objective before any later provider can act.`;
         const marketInput = qs('[data-workbench-field="market_event"]');
+        const customEventInput = qs('[data-workbench-field="custom_event"]');
         const sourceInput = qs('[data-workbench-field="source_thesis_url"]');
         if (marketInput && context && context.raw_owner_text_excerpt) {
-          marketInput.value = context.raw_owner_text_excerpt;
+          marketInput.value = "other";
+          if (customEventInput) customEventInput.value = context.raw_owner_text_excerpt;
         } else if (marketInput && context) {
-          marketInput.value = ownerTitle(context, "selected dashboard item");
+          marketInput.value = "other";
+          if (customEventInput) customEventInput.value = ownerTitle(context, "selected dashboard item");
         }
         if (sourceInput && context && context.raw_owner_text_excerpt) {
           sourceInput.value = context.raw_owner_text_excerpt;
@@ -368,42 +537,46 @@ const DashboardSystem = (() => {
       }
       localReceipt(route, context, "Trade Workbench is open with selected local context. QTT needs the owner to confirm the objective or add a plain-English trade idea.");
       location.hash = "trade-workbench";
+      setActiveSurface("trade-workbench", "tradeWorkbench");
       return;
     }
     if (nextStepId === "NEXT_STEP_CHECK_TRADE_WITH_QTT_AGENTS") {
       showGuidedWorkflow("CHECK_TRADE", context);
       localReceipt(route, context, "Guided Check Trade is open at the next needed owner input. No agent task runs.");
       location.hash = "trade-workbench";
+      setActiveSurface("trade-workbench", "guidedWorkflowPanel");
       return;
     }
     if (nextStepId === "NEXT_STEP_REQUEST_REPLAY_PREVIEW" || nextStepId === "NEXT_STEP_REQUEST_PAPER_PREVIEW") {
       localReceipt(route, context, `${route.owner_label} receipt preview created. The dashboard did not run replay or paper execution.`);
       location.hash = "trade-workbench";
+      setActiveSurface("trade-workbench", "routePreviewPanel");
       return;
     }
     if (nextStepId === "NEXT_STEP_SHOW_QKU_FORMULA_ROUTES") {
-      openDrawer("QKU and formula routes", "Knowledge and formula route drawer", context, "qku");
+      openDrawer("QKU and formula routes", "QKU/formula refs or explicit gap route; no raw JSONL scanning path", context, "technical_details");
       location.hash = "qku-formula";
+      setActiveSurface("qku-formula", "qkuFormulaRoutes");
       return;
     }
     if (nextStepId === "NEXT_STEP_EXPLAIN_NO_TRADE") {
-      openDrawer("No-trade explanation", "Comparator and reoptimization choices", context, "no-trade");
+      openDrawer("No-trade explanation", "Comparator and reoptimization choices", context, "why");
       return;
     }
     if (nextStepId === "NEXT_STEP_SHOW_TCA_COST_BREAKDOWN") {
-      openDrawer("TCA / cost breakdown", "Fees, spread, slippage, latency, impact, and opportunity cost", context, "tca");
+      openDrawer("TCA / cost breakdown", "Fees, spread, slippage, latency, impact, and opportunity cost", context, "tca_breakdown");
       return;
     }
     if (nextStepId === "NEXT_STEP_OPEN_CHART_DRILLDOWN") {
-      openDrawer("Chart drilldown", "Current chart context", context, "chart");
+      openDrawer("Chart drilldown", "Current chart context", context, "chart_drilldown");
       return;
     }
     if (nextStepId === "NEXT_STEP_OPEN_TECHNICAL_DETAILS") {
-      openDrawer(ownerTitle(context), "Technical details for selected item", context, "technical");
+      openDrawer(ownerTitle(context), "Technical details for selected item", context, "technical_details");
       return;
     }
     if (nextStepId === "NEXT_STEP_DISABLED_PROVIDER_PENDING_EDUCATION") {
-      openDrawer("Why this action is not available yet", "Disabled action education", context, "disabled");
+      openDrawer("Why this action is not available yet", "Disabled action education", context, "why");
       localReceipt(route, context, "Safe alternative preview created. No live order, connector call, private read, agent task, replay, or paper run occurs.");
     }
   }
@@ -419,6 +592,8 @@ const DashboardSystem = (() => {
     menuFor,
     nextStep,
     modePolicy,
+    drawerAction,
+    setActiveSurface,
     routeAction,
     localReceipt,
     interactionState
@@ -437,14 +612,38 @@ function badge(text, tone = "gray") {
   return `<span class="badge ${tone}">${safe(label(text))}</span>`;
 }
 
+function interactionStateFor(row) {
+  const text = `${row ? Object.values(row).slice(0, 16).join(" ") : ""}`.toLowerCase();
+  if (/high|kill|emergency|override|risk|loss/.test(text)) return "high_confirmation";
+  if (/needs owner|owner input|required|missing/.test(text)) return "input_required";
+  if (/review|decision|queue/.test(text)) return "review_required";
+  if (/provider|pending|route|gap/.test(text)) return "provider_pending";
+  if (/technical|registry|dag|developer/.test(text)) return "technical_only";
+  return "info_only";
+}
+
+function interactionBadge(state) {
+  const labels = {
+    input_required: "Input required",
+    review_required: "Review required",
+    optional_input: "Optional input",
+    provider_pending: "Provider pending",
+    info_only: "Info",
+    technical_only: "Technical",
+    high_confirmation: "High confirmation"
+  };
+  return `<span class="badge interaction-state-badge" data-interaction-badge="${safe(state)}" aria-label="${safe(labels[state] || state)}">${safe(labels[state] || state)}</span>`;
+}
+
 function badges(row, extra = []) {
+  const state = interactionStateFor(row);
   const values = [
     DashboardSystem.status(row),
     row && row.provider_stage ? `Provider route: ${label(row.provider_stage)}` : "",
     row && row.authority_boundary_ref ? "Safety boundary set" : "",
     ...extra
   ].filter(Boolean);
-  return `<div class="badge-row">${values.slice(0, 5).map((value) => badge(value, DashboardSystem.toneFor(value))).join("")}</div>`;
+  return `<div class="badge-row">${interactionBadge(state)}${values.slice(0, 4).map((value) => badge(value, DashboardSystem.toneFor(value))).join("")}</div>`;
 }
 
 function receiptCard(receipt) {
@@ -468,15 +667,49 @@ function ownerControls(row, surface = "trade_workbench") {
   const guidance = DashboardSystem.guidanceFor(row, surface);
   const menu = DashboardSystem.menuFor(surface);
   const options = asList(menu.options).slice(0, 7);
+  const cardId = idOf(row, surface);
+  const primary = options.find((option) => option.state === "ENABLED_LOCAL_PREVIEW") || options[0] || {
+    owner_label: "Send to Trade Workbench",
+    next_step_id: "NEXT_STEP_SEND_TO_TRADE_WORKBENCH",
+    state: "ENABLED_LOCAL_PREVIEW"
+  };
+  const drawerButtons = [
+    ["explain", "Explain"],
+    ["learn", "Learn"],
+    ["why", "Why?"],
+    ["chart_drilldown", "Open chart drilldown"],
+    ["tca_breakdown", "Show TCA / cost breakdown"],
+    ["technical_details", "Technical Details"]
+  ];
   return `
-    <div class="owner-card-controls" data-card-context="${safe(idOf(row, surface))}">
-      <details class="next-action-menu" data-owner-next-action-menu="${safe(surface)}">
-        <summary>What can I do next?</summary>
+    <div class="owner-card-controls" data-card-context="${safe(cardId)}" data-default-card-contract="one-primary-plus-more-actions" data-selected-card-id="${safe(cardId)}">
+      <button
+        class="menu-option action-primary"
+        type="button"
+        data-primary-card-action="true"
+        data-next-step-id="${safe(primary.next_step_id)}"
+        data-local-receipt-preview="${safe(primary.next_step_id)}"
+        data-action-state="${safe(primary.state)}">
+        ${safe(primary.owner_label)}
+      </button>
+      <details class="next-action-menu" data-owner-next-action-menu="${safe(surface)}" data-secondary-actions-collapsed="true">
+        <summary>More actions</summary>
         <div class="action-menu-body">
           <p><strong>Recommended:</strong> ${safe(menu.recommended_action_label || guidance.recommended)}</p>
-          ${options.map((option, index) => `
+          ${drawerButtons.map(([kind, labelText]) => `
             <button
-              class="menu-option ${index === 0 && option.state === "ENABLED_LOCAL_PREVIEW" ? "action-primary" : "action-secondary"} ${option.state === "PROVIDER_PENDING" ? "is-provider-pending" : ""} ${option.state === "ENABLED_LOCAL_PREVIEW" ? "" : "is-disabled"}"
+              class="menu-option action-secondary"
+              type="button"
+              data-owner-drawer-action="${safe(kind)}"
+              data-selected-card-id="${safe(cardId)}"
+              data-selected-surface-id="${safe(surface)}"
+              data-runtime-side-effect-allowed="false">
+              ${safe(labelText)}
+            </button>
+          `).join("")}
+          ${options.filter((option) => option !== primary).map((option) => `
+            <button
+              class="menu-option action-secondary ${option.state === "PROVIDER_PENDING" ? "is-provider-pending" : ""} ${option.state === "ENABLED_LOCAL_PREVIEW" ? "" : "is-disabled"}"
               type="button"
               data-next-step-id="${safe(option.next_step_id)}"
               data-local-receipt-preview="${safe(option.next_step_id)}"
@@ -488,19 +721,6 @@ function ownerControls(row, surface = "trade_workbench") {
           `).join("")}
         </div>
       </details>
-      <details class="learning-details">
-        <summary>Learn</summary>
-        <p>${safe(guidance.why)}</p>
-      </details>
-      <details class="learning-details">
-        <summary>Why?</summary>
-        <p>${safe(guidance.risk)}</p>
-      </details>
-      <details class="learning-details">
-        <summary>Explain</summary>
-        <p>${safe(guidance.missing)}</p>
-      </details>
-      <button class="text-command technical-compact-control" type="button" data-next-step-id="NEXT_STEP_OPEN_TECHNICAL_DETAILS" data-local-receipt-preview="TechnicalDetailsOpenPreviewV1">Technical Details</button>
     </div>
   `;
 }
@@ -515,6 +735,19 @@ function wireNextActions(root = document) {
       const card = event.currentTarget.closest(".card, .chart-panel, .route-card, .wide-card, .timeline-step, tr");
       const context = card && card.__qttRow ? card.__qttRow : { title: card ? card.textContent.slice(0, 120) : "selected dashboard item" };
       DashboardSystem.routeAction(event.currentTarget.dataset.nextStepId, context);
+    });
+  });
+  qsa("[data-owner-drawer-action]", root).forEach((button) => {
+    if (button.dataset.drawerActionWired === "true") return;
+    button.dataset.drawerActionWired = "true";
+    button.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      const card = event.currentTarget.closest(".card, .chart-panel, .route-card, .wide-card, .timeline-step, tr");
+      const context = card && card.__qttRow ? card.__qttRow : { title: card ? card.textContent.slice(0, 120) : "selected dashboard item" };
+      const kind = event.currentTarget.dataset.ownerDrawerAction;
+      const title = event.currentTarget.textContent.trim();
+      openDrawer(title, "Card-specific owner education", context, kind);
     });
   });
   qsa("details", root).forEach((detail) => {
@@ -558,23 +791,78 @@ function openDrawer(title, kicker, row = {}, kind = "general") {
   const drawer = qs("#drilldownDrawer");
   const guidance = DashboardSystem.guidanceFor(row, kind);
   const rows = technicalRows(row);
+  const drawerAction = DashboardSystem.drawerAction(kind);
+  const selectedCardId = idOf(row, "selected_card");
+  const selectedActionId = drawerAction.action_id || `OWNER_ACTION_${String(kind).toUpperCase()}`;
+  const contentSignature = `${drawerAction.content_signature || `ui1r2r3::${kind}`}::${selectedCardId}`;
   const kindBlocks = {
-    "no-trade": "No-trade is a comparator and reoptimization route. It is not a dead end. Local routes include smaller size, different venue, maker-only, later timing, different stack, better liquidity window, and different hold duration.",
-    tca: "Cost breakdown covers fees, spread, slippage, latency, impact, opportunity cost, capital lock, implementation shortfall, and net-of-friction basis when provider evidence exists. Missing values stay provider-pending.",
-    chart: "The chart drilldown uses the selected chart context, provider state, and explanation control. No fake values are added.",
-    qku: "QKUs and formulas are immutable knowledge objects. QTT optimizes trade-plan variables and keeps computability gaps routed through the centralized resolver, with no raw JSONL scanning path.",
-    disabled: "This action is blocked or provider-pending. The safe alternative is a local route preview or technical details; no provider call or venue submit runs now.",
-    technical: "Technical references are available for this selected card only. Raw data stays collapsed until explicitly opened or Developer mode is selected."
+    explain: "This plain-English explanation describes the selected card, what it means, how to read it, what is missing, and the next safe local action.",
+    learn: "This lesson teaches the beginner concept behind the selected card without raw provider-route tags or registry identifiers.",
+    why: "This view explains why the selected card matters to trade decisions, risk, routing, evidence, no-trade comparison, or owner action.",
+    chart_drilldown: "The chart drilldown uses the selected chart context, selected range, axes, point focus, and provider-pending value policy. No fake trading values are added.",
+    tca_breakdown: "Cost breakdown covers fees, spread, slippage, latency drag, impact, opportunity cost, capacity dependency, and implementation shortfall. Missing values stay provider-pending.",
+    technical_details: "Technical references are available for this selected card only. Raw data stays collapsed until explicitly opened or Developer mode is selected. No raw JSONL scanning path is used by owner UI consumers.",
+    qku: "QKUs and formulas are immutable knowledge objects. QTT optimizes trade-plan variables and keeps computability gaps routed through the centralized resolver, with no raw JSONL scanning path."
   };
+  const bodySections = {
+    explain: [
+      ["What this means", kindBlocks.explain],
+      ["How to read it", guidance.summary],
+      ["What is missing", guidance.missing],
+      ["What owner can do next", guidance.recommended],
+    ],
+    learn: [
+      ["Concept", kindBlocks.learn],
+      ["How QTT uses it", guidance.why],
+      ["Safe boundary", "This is local education only. It does not create source truth, risk-pass status, or order authority."],
+    ],
+    why: [
+      ["Why this matters", kindBlocks.why],
+      ["Risk and route impact", guidance.risk],
+      ["Evidence spine", "Execution-adjusted rank, TCA, no-trade, QKU/formula, agent, MEM1, quantum, and DAG refs remain routed or gap-routed."],
+    ],
+    chart_drilldown: [
+      ["Chart status", kindBlocks.chart_drilldown],
+      ["Selected range", "The selected range changes the local view state only. Provider receipts are required before financial values can appear."],
+      ["Tooltip policy", "Point focus may show local visual sample geometry or provider-pending status, never fake PnL, cash, fill, order, or live values."],
+    ],
+    tca_breakdown: [
+      ["TCA categories", kindBlocks.tca_breakdown],
+      ["Provider-pending fields", "Fee, spread, slippage, latency drag, impact, opportunity cost, fill, and capacity values require accepted provider evidence."],
+      ["Owner action", "Use the Workbench to capture limits and route a local preview only."],
+    ],
+    technical_details: [
+      ["Technical references", kindBlocks.technical_details],
+      ["Raw selected context", "Raw refs, registry evidence, provider routes, validation refs, and debug fields are shown only here or in Developer mode."],
+      ["Authority", "Runtime side effect allowed: false. This drawer does not call connectors, agents, replay, paper, live systems, or venues."],
+    ],
+  };
+  const sections = bodySections[kind] || bodySections.explain;
   drawer.dataset.drawerKind = kind;
+  drawer.dataset.selectedCardId = selectedCardId;
+  drawer.dataset.selectedActionId = selectedActionId;
+  drawer.dataset.contentSignature = contentSignature;
+  drawer.dataset.runtimeSideEffectAllowed = "false";
   qs("#drawerTitle").textContent = title || guidance.title;
   qs("#drawerKicker").textContent = kicker || "Evidence and routing";
   qs("#drawerBody").innerHTML = `
-    <div class="drawer-block" data-drilldown-kind="${safe(kind)}">
-      <h3>What this means</h3>
-      <p>${safe(kindBlocks[kind] || guidance.summary)}</p>
+    <div class="drawer-block" data-drilldown-kind="${safe(kind)}" data-selected-card-id="${safe(selectedCardId)}" data-selected-action-id="${safe(selectedActionId)}" data-content-signature="${safe(contentSignature)}">
+      <h3>Drawer payload</h3>
+      <div class="preview-grid">
+        <span>Selected card: ${safe(selectedCardId)}</span>
+        <span>Selected action: ${safe(selectedActionId)}</span>
+        <span>Drawer kind: ${safe(kind)}</span>
+        <span>Content signature: ${safe(contentSignature)}</span>
+        <span>Runtime side effect: false</span>
+      </div>
       ${badges(row)}
     </div>
+    ${sections.map(([heading, text]) => `
+      <div class="drawer-block ${kind === "technical_details" ? "technical-detail-block" : "owner-education-block"}">
+        <h3>${safe(heading)}</h3>
+        <p>${safe(text)}</p>
+      </div>
+    `).join("")}
     <div class="drawer-block evidence-spine-block">
       <h3>Selected context carried forward</h3>
       <div class="preview-grid">
@@ -586,6 +874,7 @@ function openDrawer(title, kicker, row = {}, kind = "general") {
         <span>DAG: upstream/downstream route ref</span>
       </div>
     </div>
+    ${kind !== "technical_details" ? `
     <div class="drawer-block">
       <h3>Current status</h3>
       <p>${safe(guidance.status)}. ${safe(guidance.risk)}</p>
@@ -593,28 +882,17 @@ function openDrawer(title, kicker, row = {}, kind = "general") {
     <div class="drawer-block">
       <h3>Owner action available</h3>
       <p>${safe(guidance.recommended)}.</p>
-      ${ownerControls(row, kind === "chart" ? "chart_frame" : kind === "qku" ? "qku_formula" : kind === "disabled" ? "provider_pending" : "trade_workbench")}
+      ${ownerControls(row, kind === "chart_drilldown" ? "chart_frame" : kind === "qku" ? "qku_formula" : "trade_workbench")}
     </div>
-    <div class="drawer-block">
-      <h3>Why this matters for trading</h3>
-      <p>${safe(guidance.why)}</p>
-    </div>
-    <div class="drawer-block">
-      <h3>What is missing</h3>
-      <p>${safe(guidance.missing)}</p>
-    </div>
-    <div class="drawer-block">
-      <h3>Which QTT routes are involved</h3>
-      <p>${safe(guidance.agents)}</p>
-    </div>
+    ` : ""}
     <div class="drawer-block">
       <h3>Evidence and routing summary</h3>
-      ${rows.length ? rows.slice(0, 10).map(([key, value]) => `<p><strong>${safe(key)}:</strong> ${safe(value)}</p>`).join("") : "<p>Technical evidence is available when a provider route supplies it.</p>"}
+      ${kind === "technical_details" && rows.length ? rows.slice(0, 12).map(([key, value]) => `<p><strong>${safe(key)}:</strong> ${safe(value)}</p>`).join("") : "<p>Raw refs stay in Technical Details. Owner education views keep plain-English copy.</p>"}
     </div>
     <div class="drawer-block">
       <details>
         <summary>Open raw technical data</summary>
-        <pre>${safe(JSON.stringify(row, null, 2))}</pre>
+        <pre>${kind === "technical_details" ? safe(JSON.stringify(row, null, 2)) : "Open Technical Details for raw refs."}</pre>
       </details>
     </div>
   `;
@@ -668,27 +946,36 @@ function initOptionsMenu() {
 }
 
 function setTheme(mode, persist = true) {
-  const normalized = mode === "LIGHT" ? "light" : "dark";
+  const choice = THEME_VALUES.includes(mode) ? mode : "DARK_PRO";
+  const normalized = THEME_TO_DATASET[choice] || "dark";
   document.documentElement.dataset.theme = normalized;
   qsa("[data-theme-choice]").forEach((button) => {
-    button.setAttribute("aria-pressed", button.dataset.themeChoice === mode ? "true" : "false");
+    button.setAttribute("aria-pressed", button.dataset.themeChoice === choice ? "true" : "false");
   });
+  if (choice === "HIGH_CONTRAST") OwnerSettings.set("high_contrast", true, false);
+  else OwnerSettings.set("high_contrast", false, false);
   if (!persist) return;
-  try {
-    localStorage.setItem(THEME_STORAGE_KEY, mode === "LIGHT" ? "LIGHT" : "DARK");
-  } catch {
-    window.__QTT_IN_SESSION_THEME = mode === "LIGHT" ? "LIGHT" : "DARK";
-  }
+  OwnerSettings.set("theme_preset", choice);
+}
+
+function initTopPanels() {
+  const settingsToggle = qs("#ownerSettingsToggle");
+  const settingsClose = qs("#closeOwnerSettings");
+  const settingsShortcut = qs("#ownerOptionsSettingsShortcut");
+  const guideToggle = qs("#qttGuideToggle");
+  const guideClose = qs("#closeQttGuide");
+  if (settingsToggle) settingsToggle.addEventListener("click", () => setSettingsCenter(settingsToggle.getAttribute("aria-expanded") !== "true"));
+  if (settingsShortcut) settingsShortcut.addEventListener("click", () => {
+    closeOwnerOptions();
+    setSettingsCenter(true);
+  });
+  if (settingsClose) settingsClose.addEventListener("click", () => setSettingsCenter(false));
+  if (guideToggle) guideToggle.addEventListener("click", () => setQttGuide(guideToggle.getAttribute("aria-expanded") !== "true"));
+  if (guideClose) guideClose.addEventListener("click", () => setQttGuide(false));
 }
 
 function initTheme() {
-  let saved = "DARK";
-  try {
-    const stored = localStorage.getItem(THEME_STORAGE_KEY);
-    saved = stored === "LIGHT" ? "LIGHT" : "DARK";
-  } catch {
-    saved = window.__QTT_IN_SESSION_THEME || "DARK";
-  }
+  const saved = THEME_VALUES.includes(OwnerSettings.get("theme_preset")) ? OwnerSettings.get("theme_preset") : "DARK_PRO";
   setTheme(saved, false);
   qsa("[data-theme-choice]").forEach((button) => {
     button.addEventListener("click", () => {
@@ -706,21 +993,11 @@ function setTextSize(size, persist = true) {
     button.setAttribute("aria-pressed", button.dataset.textSizeChoice === normalized ? "true" : "false");
   });
   if (!persist) return;
-  try {
-    localStorage.setItem(TEXT_SIZE_STORAGE_KEY, normalized);
-  } catch {
-    window.__QTT_IN_SESSION_TEXT_SIZE = normalized;
-  }
+  OwnerSettings.set("text_size", normalized);
 }
 
 function initTextSize() {
-  let saved = "default";
-  try {
-    const stored = localStorage.getItem(TEXT_SIZE_STORAGE_KEY);
-    saved = TEXT_SIZE_VALUES.includes(stored) ? stored : "default";
-  } catch {
-    saved = window.__QTT_IN_SESSION_TEXT_SIZE || "default";
-  }
+  const saved = TEXT_SIZE_VALUES.includes(OwnerSettings.get("text_size")) ? OwnerSettings.get("text_size") : "default";
   setTextSize(saved, false);
   qsa("[data-text-size-choice]").forEach((button) => {
     button.addEventListener("click", () => {
@@ -758,22 +1035,12 @@ function setExperienceMode(mode, persist = true) {
     button.setAttribute("aria-pressed", button.dataset.modeChoice === normalized ? "true" : "false");
   });
   if (!persist) return;
-  try {
-    localStorage.setItem(EXPERIENCE_MODE_STORAGE_KEY, normalized);
-    localStorage.setItem(GUIDANCE_DENSITY_STORAGE_KEY, "COLLAPSED_DEFAULT");
-  } catch {
-    window.__QTT_IN_SESSION_MODE = normalized;
-  }
+  OwnerSettings.set("dashboard_default_experience_mode", normalized);
 }
 
 function initExperienceMode() {
-  let saved = "GUIDED_OWNER";
-  try {
-    const stored = localStorage.getItem(EXPERIENCE_MODE_STORAGE_KEY);
-    saved = ["GUIDED_OWNER", "ADVANCED_OWNER", "DEVELOPER"].includes(stored) ? stored : "GUIDED_OWNER";
-  } catch {
-    saved = window.__QTT_IN_SESSION_MODE || "GUIDED_OWNER";
-  }
+  const stored = OwnerSettings.get("dashboard_default_experience_mode");
+  const saved = ["GUIDED_OWNER", "ADVANCED_OWNER", "DEVELOPER"].includes(stored) ? stored : "GUIDED_OWNER";
   setExperienceMode(saved, false);
   qsa("[data-mode-choice]").forEach((button) => {
     button.addEventListener("click", () => {
@@ -786,6 +1053,8 @@ function initExperienceMode() {
 function renderStatus() {
   const status = DASHBOARD_DATA.status_strip || {};
   const meta = DASHBOARD_DATA.meta || {};
+  const statusGrid = qs("#statusGrid");
+  if (!statusGrid) return;
   const tiles = [
     ["Experience", "Guided by default"],
     ["Data source", "Generated dashboard evidence"],
@@ -794,7 +1063,7 @@ function renderStatus() {
     ["Private data", "No account or cash reads"],
     ["Snapshot", status.boot_data_generated_timestamp || meta.generated_at || "Generated boot data"]
   ];
-  qs("#statusGrid").innerHTML = tiles.map(([name, value]) => `
+  statusGrid.innerHTML = tiles.map(([name, value]) => `
     <div class="status-tile">
       <span class="eyebrow">${safe(name)}</span>
       <span class="value">${safe(label(value))}</span>
@@ -806,7 +1075,7 @@ function renderCoach() {
   const coach = qs("#ownerCoachPanel");
   coach.innerHTML = `
     <article class="card coach-card">
-      <h3>Guided Owner Coach</h3>
+      <h3>QTT Coach</h3>
       <p>QTT will show the next safe local step, explain missing evidence, and keep long lessons collapsed until you ask.</p>
       <div class="coach-actions">
         <button class="primary-command" type="button" data-next-step-id="NEXT_STEP_CHECK_TRADE_WITH_QTT_AGENTS" data-local-receipt-preview="OwnerTradeCheckRequestPreviewV1">Start guided trade check</button>
@@ -827,7 +1096,7 @@ function renderCoach() {
       </div>
     </article>
     <article class="card mode-policy-card mode-only advanced-mode-panel" data-mode-panel="ADVANCED_OWNER" hidden>
-      <h3>Review execution-adjusted trade metrics</h3>
+      <h3>Trade Metrics</h3>
       <p>Advanced owner view: denser readable metrics without raw registry rows.</p>
       <div class="advanced-metric-grid">
         ${[
@@ -861,9 +1130,9 @@ function renderCoach() {
   const matters = qs("#tellMattersPanel");
   matters.innerHTML = `
     <article class="card">
-      <h3>Tell me what matters</h3>
+      <h3>Key Insights</h3>
       <p>Hidden until clicked. The summary uses local dashboard evidence only.</p>
-      <button id="tellMattersButton" class="primary-command" type="button">Tell me what matters</button>
+      <button id="tellMattersButton" class="primary-command" type="button">Show key insights</button>
       <div id="tellMattersOutput" class="coach-output" hidden>
         <p>The main owner decision is to review provider-pending evidence before treating any candidate as tradable.</p>
         <p>Most important missing evidence: replay, paper, cost, capacity, and private account receipts are not present in this UI.</p>
@@ -929,13 +1198,49 @@ function renderRanges() {
       });
       qsa(".chart-panel").forEach((panel) => {
         panel.dataset.range = button.dataset.range;
+        const canvas = qs(".chart-canvas", panel);
+        const rangeLabel = qs("[data-selected-range-label]", panel);
+        if (canvas) canvas.dataset.selectedRange = button.dataset.range;
+        if (rangeLabel) rangeLabel.textContent = button.dataset.range;
       });
     });
   });
 }
 
+function setSidebarCollapsed(collapsed, persist = true) {
+  const value = Boolean(collapsed);
+  document.body.dataset.sidebarCollapsed = value ? "true" : "false";
+  const toggle = qs("#sidebarCollapseToggle");
+  if (toggle) {
+    toggle.setAttribute("aria-expanded", value ? "false" : "true");
+    toggle.setAttribute("aria-label", value ? "Expand sidebar" : "Collapse sidebar");
+    toggle.textContent = value ? "Expand" : "Collapse";
+  }
+  if (persist) OwnerSettings.set("sidebar_collapsed", value);
+}
+
+function initSidebar() {
+  setSidebarCollapsed(OwnerSettings.get("sidebar_collapsed") === true, false);
+  const toggle = qs("#sidebarCollapseToggle");
+  if (toggle) {
+    toggle.addEventListener("click", () => setSidebarCollapsed(document.body.dataset.sidebarCollapsed !== "true"));
+  }
+}
+
 function legendHtml() {
   return `<div class="legend">${SEMANTIC_LEGEND.map(([name, color]) => `<span><i style="--legend-color:${color}"></i>${safe(name)}</span>`).join("")}</div>`;
+}
+
+function chartPointsFor() {
+  return [
+    { x: 42, y: 156, bucket: "Day 1" },
+    { x: 98, y: 126, bucket: "Day 5" },
+    { x: 154, y: 138, bucket: "Day 9" },
+    { x: 210, y: 88, bucket: "Day 12" },
+    { x: 266, y: 106, bucket: "Day 16" },
+    { x: 322, y: 72, bucket: "Day 21" },
+    { x: 382, y: 92, bucket: "Day 26" }
+  ];
 }
 
 function chartSvg(row, index) {
@@ -1015,15 +1320,35 @@ function renderChartPanel(row, index) {
   const sourceRef = row.data_chart_source_ref || row.source_artifact_ref || label(row.source_artifact_refs);
   const providerStage = row.data_provider_stage || row.provider_stage || row.dataset_provider_stage || "PRETRADE1";
   return `
-    <article class="chart-panel" data-search="${safe(title)}" data-chart-id="${safe(chartId)}" data-chart-kind="${safe(kind)}" data-chart-render-state="${safe(renderState)}" data-chart-source-ref="${safe(sourceRef)}" data-provider-stage="${safe(providerStage)}" data-authority-boundary="${safe(row.data_authority_boundary || row.authority_boundary || row.authority_boundary_ref || "")}">
+    <article class="chart-panel" data-search="${safe(title)}" data-chart-id="${safe(chartId)}" data-chart-kind="${safe(kind)}" data-chart-render-state="${safe(renderState)}" data-chart-source-ref="${safe(sourceRef)}" data-provider-stage="${safe(providerStage)}" data-authority-boundary="${safe(row.data_authority_boundary || row.authority_boundary || row.authority_boundary_ref || "")}" data-interaction-state="provider_pending" data-chart-data-integrity="provider_pending_no_value">
       <h3>${safe(title)}</h3>
       <p>${safe(DashboardSystem.summary(row, "Waiting for provider receipts. No fake values are shown."))}</p>
+      <div class="chart-axis-labels" aria-label="${safe(title)} axis labels">
+        <span>X-axis: selected time bucket</span>
+        <span>Y-axis: provider-pending net cash / state value</span>
+      </div>
       <div class="mini-range" role="group" aria-label="${safe(title)} local range controls">
         ${(row.supported_time_ranges || RANGES).slice(0, 7).map((range, i) => `<button class="seg-button ${i === 0 ? "active" : ""}" type="button" data-local-range="${safe(range)}" aria-pressed="${i === 0 ? "true" : "false"}">${safe(range)}</button>`).join("")}
       </div>
-      <div class="chart-canvas provider-frame" role="img" aria-label="${safe(title)} chart contract">
+      <div class="chart-canvas provider-frame" role="img" tabindex="0" aria-label="${safe(title)} interactive chart contract" data-chart-interaction="OwnerChartInteractionPolicyV1" data-selected-range="${safe((row.supported_time_ranges || RANGES)[0] || "1D")}">
         ${chartSvg(row, index)}
+        <div class="chart-interaction-layer" aria-hidden="true"></div>
+        <div class="chart-crosshair"></div>
+        <div class="chart-focus-point"></div>
+        <div class="chart-tooltip" role="status">
+          <strong>${safe(title)}</strong><br>
+          Range: <span data-chart-tooltip-range>${safe((row.supported_time_ranges || RANGES)[0] || "1D")}</span><br>
+          Time bucket: <span data-chart-tooltip-bucket>Day 12</span><br>
+          Value: provider receipts pending<br>
+          Unit: net cash/state value unavailable until receipt-backed<br>
+          Status: no fake PnL, cash, fill, order, or live values shown
+        </div>
         <div class="provider-overlay">Waiting for provider receipts. No fake values rendered.</div>
+      </div>
+      <div class="chart-value-panel" data-chart-value-panel="provider_pending_no_value">
+        <span>Selected range: <strong data-selected-range-label>${safe((row.supported_time_ranges || RANGES)[0] || "1D")}</strong></span>
+        <span>Data integrity: provider_pending_no_value</span>
+        <span>Ticks: local visual sample geometry only; financial values require receipts.</span>
       </div>
       ${legendHtml()}
       <details class="chart-explainer">
@@ -1034,6 +1359,54 @@ function renderChartPanel(row, index) {
       ${ownerControls(row, "chart_frame")}
     </article>
   `;
+}
+
+function updateChartFocus(canvas, clientX) {
+  const rect = canvas.getBoundingClientRect();
+  const points = chartPointsFor();
+  const localX = ((clientX - rect.left) / Math.max(rect.width, 1)) * 420;
+  const nearest = points.reduce((best, point) => Math.abs(point.x - localX) < Math.abs(best.x - localX) ? point : best, points[0]);
+  const xPercent = (nearest.x / 420) * 100;
+  const yPercent = (nearest.y / 220) * 100;
+  canvas.classList.add("is-focused");
+  const crosshair = qs(".chart-crosshair", canvas);
+  const focus = qs(".chart-focus-point", canvas);
+  const tooltip = qs(".chart-tooltip", canvas);
+  const range = canvas.dataset.selectedRange || "1M";
+  if (crosshair) crosshair.style.left = `${xPercent}%`;
+  if (focus) {
+    focus.style.left = `${xPercent}%`;
+    focus.style.top = `${yPercent}%`;
+  }
+  if (tooltip) {
+    qs("[data-chart-tooltip-range]", tooltip).textContent = range;
+    qs("[data-chart-tooltip-bucket]", tooltip).textContent = nearest.bucket;
+  }
+}
+
+function wireChartInteractions(root = document) {
+  qsa(".chart-canvas[data-chart-interaction]", root).forEach((canvas) => {
+    if (canvas.dataset.chartWired === "true") return;
+    canvas.dataset.chartWired = "true";
+    canvas.addEventListener("mousemove", (event) => updateChartFocus(canvas, event.clientX));
+    canvas.addEventListener("touchstart", (event) => {
+      const touch = event.touches[0];
+      if (touch) updateChartFocus(canvas, touch.clientX);
+    }, { passive: true });
+    canvas.addEventListener("focus", () => {
+      const rect = canvas.getBoundingClientRect();
+      updateChartFocus(canvas, rect.left + rect.width * 0.5);
+    });
+    canvas.addEventListener("keydown", (event) => {
+      if (!["ArrowLeft", "ArrowRight"].includes(event.key)) return;
+      event.preventDefault();
+      const rect = canvas.getBoundingClientRect();
+      const current = Number(canvas.dataset.keyboardPoint || "3");
+      const next = Math.max(0, Math.min(chartPointsFor().length - 1, current + (event.key === "ArrowRight" ? 1 : -1)));
+      canvas.dataset.keyboardPoint = String(next);
+      updateChartFocus(canvas, rect.left + (chartPointsFor()[next].x / 420) * rect.width);
+    });
+  });
 }
 
 function renderCharts() {
@@ -1055,7 +1428,7 @@ function renderCharts() {
   qs("#chartGrid").innerHTML = rows.map(renderChartPanel).join("");
   qsa("#chartGrid .chart-panel").forEach((panel, index) => {
     panel.__qttRow = rows[index];
-    panel.addEventListener("click", () => openDrawer(DashboardSystem.ownerTitle(rows[index]), "Chart drilldown", rows[index], "chart"));
+    panel.addEventListener("click", () => openDrawer(DashboardSystem.ownerTitle(rows[index]), "Chart drilldown", rows[index], "chart_drilldown"));
   });
   qsa(".mini-range button").forEach((button) => {
     button.addEventListener("click", (event) => {
@@ -1065,8 +1438,14 @@ function renderCharts() {
         item.classList.toggle("active", item === event.currentTarget);
         item.setAttribute("aria-pressed", item === event.currentTarget ? "true" : "false");
       });
+      const panel = event.currentTarget.closest(".chart-panel");
+      const canvas = qs(".chart-canvas", panel);
+      const rangeLabel = qs("[data-selected-range-label]", panel);
+      if (canvas) canvas.dataset.selectedRange = event.currentTarget.dataset.localRange;
+      if (rangeLabel) rangeLabel.textContent = event.currentTarget.dataset.localRange;
     });
   });
+  wireChartInteractions(qs("#chartGrid"));
 }
 
 function renderPacketAndQueue() {
@@ -1226,7 +1605,7 @@ function renderQkuAndQuantum() {
     ${ownerControls(DASHBOARD_DATA.agent_qku_access_resolver || {}, "qku_formula")}
   `;
   qs("#agentQkuResolver").__qttRow = DASHBOARD_DATA.agent_qku_access_resolver || {};
-  qs("#agentQkuResolver").addEventListener("click", () => openDrawer("Central QKU and formula access path", "Resolver path", DASHBOARD_DATA.agent_qku_access_resolver || {}, "qku"));
+  qs("#agentQkuResolver").addEventListener("click", () => openDrawer("Central QKU and formula access path", "Resolver path", DASHBOARD_DATA.agent_qku_access_resolver || {}, "why"));
 
   const quantumRows = [
     ...asList(DASHBOARD_DATA.quantum_readiness),
@@ -1242,7 +1621,7 @@ function renderQkuAndQuantum() {
   `).join("");
   qsa("#quantumCenter .card").forEach((card, index) => {
     card.__qttRow = quantumRows[index];
-    card.addEventListener("click", () => openDrawer(DashboardSystem.ownerTitle(quantumRows[index]), "Quantum Control Center", quantumRows[index], "qku"));
+    card.addEventListener("click", () => openDrawer(DashboardSystem.ownerTitle(quantumRows[index]), "Quantum Control Center", quantumRows[index], "why"));
   });
 }
 
@@ -1406,6 +1785,7 @@ function submitOwnerChat(source = "BUTTON_SUBMIT") {
   const preview = buildOwnerIntentPreview(raw);
   preview.input_event_type = source;
   renderIntentReceipt(preview);
+  DashboardSystem.setActiveSurface("chat", "chatReceiptPreview");
   input.value = "";
   input.focus();
   return preview;
@@ -1418,20 +1798,11 @@ function setEnterToSend(enabled, persist = true) {
     input.checked = value;
   });
   if (!persist) return;
-  try {
-    localStorage.setItem(ENTER_TO_SEND_STORAGE_KEY, value ? "true" : "false");
-  } catch {
-    window.__QTT_IN_SESSION_ENTER_TO_SEND = value ? "true" : "false";
-  }
+  OwnerSettings.set("chat_enter_to_send", value);
 }
 
 function initEnterToSendPreference(root = document) {
-  let saved = false;
-  try {
-    saved = localStorage.getItem(ENTER_TO_SEND_STORAGE_KEY) === "true";
-  } catch {
-    saved = window.__QTT_IN_SESSION_ENTER_TO_SEND === "true";
-  }
+  const saved = OwnerSettings.get("chat_enter_to_send") === true;
   setEnterToSend(saved, false);
   qsa("[data-enter-to-send-setting]", root).forEach((input) => {
     input.addEventListener("change", (event) => {
@@ -1559,9 +1930,266 @@ function wireGuidedWorkflow(panel, workflowId) {
   });
 }
 
+function chatPresetRows() {
+  const rows = asList(DASHBOARD_DATA.ui1r2r3_chat_guide && DASHBOARD_DATA.ui1r2r3_chat_guide.chat_presets);
+  if (rows.length) return rows;
+  return asList(DASHBOARD_DATA.ui1r1_chat_contract && DASHBOARD_DATA.ui1r1_chat_contract.prompt_chips).map((chip, index) => ({
+    option_id: `legacy_prompt_${index + 1}`,
+    owner_label: chip,
+    source_category: "safe_ui_default",
+  }));
+}
+
+function fillChatComposer(text) {
+  const input = qs("#ownerChatInput");
+  if (!input) return;
+  input.value = text;
+  input.focus();
+  DashboardSystem.setActiveSurface("chat", "ownerChatInput");
+}
+
+function renderQttGuideBody() {
+  const prompts = asList(DASHBOARD_DATA.ui1r2r3_chat_guide && DASHBOARD_DATA.ui1r2r3_chat_guide.qtt_guide_prompts);
+  const body = qs("#qttGuideBody");
+  if (!body) return;
+  body.innerHTML = `
+    <article class="card" data-qtt-guide-local-only="true" data-reuses-chat-state="true" data-second-chat-store-created="false">
+      <h3>Ask QTT</h3>
+      <p>Local guide only. It fills the existing chat composer or opens the Workbench through OwnerNextStepRouter; no live LLM, agent task, replay, paper, live execution, source truth, or order authority is created.</p>
+      <label class="field-label" for="qttGuidePresetSelect">Preset prompt</label>
+      <select id="qttGuidePresetSelect" data-guide-preset-select="true">
+        <option value="">Select a preset prompt...</option>
+        ${chatPresetRows().map((row) => `<option value="${safe(row.owner_label)}">${safe(row.owner_label)}</option>`).join("")}
+      </select>
+      <div class="qtt-guide-actions">
+        ${(prompts.length ? prompts : ["Check a trade", "Research a link", "Find formulas/QKUs", "Explain this screen", "Why no-trade?", "Show risk objections", "Prepare replay/paper preview"]).map((prompt) => `
+          <button class="qtt-guide-prompt" type="button" data-guide-prompt="${safe(prompt)}">${safe(prompt)}</button>
+        `).join("")}
+      </div>
+      ${badge("same chat/action state", "blue")} ${badge("local preview only", "red")}
+    </article>
+  `;
+  qs("#qttGuidePresetSelect", body).addEventListener("change", (event) => {
+    if (event.currentTarget.value) fillChatComposer(event.currentTarget.value);
+  });
+  qsa("[data-guide-prompt]", body).forEach((button) => {
+    button.addEventListener("click", () => {
+      const prompt = button.dataset.guidePrompt || "Explain this screen";
+      const mapped = prompt === "Check a trade"
+        ? "Check this market for a positive expected net-cash trade."
+        : prompt === "Research a link"
+          ? "Research this link and find useful formulas or QKUs."
+          : prompt === "Find formulas/QKUs"
+            ? "Compare the best formula stacks for this event."
+            : prompt === "Why no-trade?"
+              ? "Explain why no-trade won."
+              : prompt === "Show risk objections"
+                ? "Show agent disagreement and risk objections."
+                : prompt === "Prepare replay/paper preview"
+                  ? "Route this candidate to replay/paper preview."
+                  : "Explain this screen in plain English.";
+      fillChatComposer(mapped);
+      if (/trade|replay|paper/i.test(mapped)) DashboardSystem.setActiveSurface("chat", "ownerChatInput");
+    });
+  });
+}
+
+function setQttGuide(open) {
+  const panel = qs("#qttGuidePanel");
+  const toggle = qs("#qttGuideToggle");
+  if (!panel || !toggle) return;
+  DashboardSystem.interactionState.qttGuideOpen = Boolean(open);
+  panel.hidden = !open;
+  panel.classList.toggle("open", Boolean(open));
+  panel.setAttribute("aria-hidden", open ? "false" : "true");
+  toggle.setAttribute("aria-expanded", open ? "true" : "false");
+  OwnerSettings.set("qtt_guide_collapsed", !open);
+  if (open) {
+    renderQttGuideBody();
+    const first = qs("button, select, input, textarea", panel);
+    if (first) first.focus();
+  } else {
+    toggle.focus({ preventScroll: true });
+  }
+}
+
+function settingsSections() {
+  const sections = asList(DASHBOARD_DATA.ui1r2r3_owner_settings && DASHBOARD_DATA.ui1r2r3_owner_settings.sections);
+  if (sections.length) return sections;
+  return ["Appearance", "Colors", "Layout", "Charts", "Workbench", "Chat", "Dashboard", "Trading Preferences", "Accessibility", "Keyboard Shortcuts", "About"].map((labelText) => ({
+    section_id: labelText.toLowerCase().replace(/\s+/g, "-"),
+    owner_label: labelText
+  }));
+}
+
+function settingControlHtml(sectionLabel) {
+  const themeOptions = [
+    ["DARK_PRO", "Dark Pro"],
+    ["MIDNIGHT_BLUE", "Midnight Blue"],
+    ["SLATE", "Slate"],
+    ["LIGHT_PRO", "Light Pro"],
+    ["LOW_GLARE", "Low Glare"],
+    ["HIGH_CONTRAST", "High Contrast"],
+    ["CUSTOM", "Custom"],
+  ];
+  const select = (key, labelText, options) => `
+    <label>${safe(labelText)}
+      <select data-owner-setting="${safe(key)}">
+        ${options.map(([value, text]) => `<option value="${safe(value)}" ${OwnerSettings.get(key) === value ? "selected" : ""}>${safe(text)}</option>`).join("")}
+      </select>
+    </label>
+  `;
+  const checkbox = (key, labelText) => `
+    <label class="compact-toggle"><input type="checkbox" data-owner-setting="${safe(key)}" ${OwnerSettings.get(key) ? "checked" : ""}> ${safe(labelText)}</label>
+  `;
+  const color = (key, labelText) => `
+    <label>${safe(labelText)}
+      <input type="color" data-owner-setting="${safe(key)}" value="${safe(OwnerSettings.get(key) || "#2563EB")}">
+    </label>
+  `;
+  const text = (key, labelText) => `
+    <label>${safe(labelText)}
+      <input type="text" data-owner-setting="${safe(key)}" value="${safe(OwnerSettings.get(key) || "")}">
+    </label>
+  `;
+  if (sectionLabel === "Appearance") {
+    return select("theme_preset", "Theme preset", themeOptions)
+      + select("text_size", "Text size", TEXT_SIZE_VALUES.map((value) => [value, titleCase(value.replace("_", " "))]))
+      + select("density", "Density", [["compact", "Compact"], ["comfortable", "Comfortable"]])
+      + checkbox("reduced_motion", "Reduced motion");
+  }
+  if (sectionLabel === "Colors") {
+    return color("input_required_color", "Input required")
+      + color("review_required_color", "Review required")
+      + color("warning_high_confirmation_color", "Warning / high confirmation")
+      + color("provider_pending_color", "Provider pending")
+      + color("success_color", "Success")
+      + checkbox("high_contrast", "High contrast mode");
+  }
+  if (sectionLabel === "Layout") {
+    return checkbox("sidebar_collapsed", "Collapse sidebar")
+      + select("card_density", "Card density", [["compact", "Compact"], ["comfortable", "Comfortable"]])
+      + select("dashboard_default_experience_mode", "Default experience mode", [["GUIDED_OWNER", "Guided"], ["ADVANCED_OWNER", "Advanced"], ["DEVELOPER", "Developer"]])
+      + checkbox("dashboard_show_beginner_tips", "Show beginner tips");
+  }
+  if (sectionLabel === "Charts") {
+    return select("chart_default_timeframe", "Default timeframe", RANGES.map((value) => [value, value]))
+      + checkbox("chart_crosshair", "Crosshair")
+      + checkbox("chart_tooltips", "Tooltips")
+      + checkbox("chart_grid_lines", "Grid lines")
+      + checkbox("chart_axis_labels", "Axis labels");
+  }
+  if (sectionLabel === "Workbench") {
+    return select("workbench_preferred_market", "Preferred market", [["prediction_market", "Prediction Market"], ["other", "Other"]])
+      + select("workbench_preferred_venue", "Preferred venue", [["qtt_decide", "Let QTT decide"], ["kalshi", "Kalshi"], ["polymarket", "Polymarket"], ["forecastex_ibkr", "FORECASTEX_IBKR"], ["other", "Other"]])
+      + select("workbench_preferred_hold_unit", "Preferred hold unit", [["minutes", "minutes"], ["hours", "hours"], ["days", "days"], ["until_resolution", "until resolution"]])
+      + select("workbench_preferred_maker_taker", "Maker/taker", [["maker_only", "maker-only"], ["maker_first_taker_fallback", "maker-first, taker fallback"], ["qtt_decide", "let QTT decide"]])
+      + select("workbench_preferred_objective", "Objective", [["maximize_expected_net_cash", "max expected net cash"], ["preserve_capital", "preserve capital"], ["improve_diversification", "improve diversification"], ["qtt_decide", "let QTT decide"]]);
+  }
+  if (sectionLabel === "Chat") {
+    return checkbox("chat_enter_to_send", "Enter to send")
+      + checkbox("chat_prompt_suggestions", "Show prompt suggestions")
+      + checkbox("qtt_guide_collapsed", "QTT Guide collapsed");
+  }
+  if (sectionLabel === "Dashboard") {
+    return checkbox("dashboard_show_beginner_tips", "Show beginner tips")
+      + checkbox("dashboard_show_technical_cards", "Show technical cards in Developer")
+      + select("dashboard_default_experience_mode", "Default mode", [["GUIDED_OWNER", "Guided"], ["ADVANCED_OWNER", "Advanced"], ["DEVELOPER", "Developer"]]);
+  }
+  if (sectionLabel === "Trading Preferences") {
+    return `
+      <p class="inline-validation">Preview/prefill only. These values do not create source truth, connector semantics, risk-pass truth, replay/paper evidence, live readiness, order authority, or Execution Router authority.</p>
+      ${select("trading_default_market", "Default market", [["prediction_market", "Prediction Market"], ["other", "Other"]])}
+      ${select("trading_default_venue", "Default venue", [["qtt_decide", "Let QTT decide"], ["kalshi", "Kalshi"], ["polymarket", "Polymarket"], ["forecastex_ibkr", "FORECASTEX_IBKR"], ["other", "Other"]])}
+      ${select("trading_default_risk_profile", "Risk profile", [["conservative_preview", "Conservative preview"], ["balanced_preview", "Balanced preview"], ["owner_custom_candidate", "Owner custom candidate"]])}
+      ${select("trading_default_execution_preference", "Execution preference", [["maker_first_preview", "maker-first preview"], ["maker_only", "maker-only"], ["qtt_decide", "let QTT decide"]])}
+      ${text("trading_default_portfolio_objective", "Portfolio objective")}
+    `;
+  }
+  if (sectionLabel === "Accessibility") {
+    return checkbox("high_contrast", "High contrast")
+      + checkbox("keyboard_focus_visible", "Keyboard focus visible")
+      + checkbox("reduced_motion", "Reduced motion")
+      + checkbox("large_touch_targets", "Large touch targets");
+  }
+  if (sectionLabel === "Keyboard Shortcuts") {
+    return `
+      <div class="preview-grid">
+        <span>Enter: newline by default</span>
+        <span>Ctrl+Enter: Send</span>
+        <span>Shift+Enter: newline</span>
+        <span>Escape: close drawers/settings/menus</span>
+      </div>
+      ${checkbox("chat_enter_to_send", "Optional Enter-to-send")}
+    `;
+  }
+  return `
+    <div class="preview-grid">
+      <span>Dashboard: local static review surface</span>
+      <span>Status: Local Preview / Review Only</span>
+      <span>No Live Trading</span>
+      <span>No Account Access</span>
+      <span>Settings persistence: ${safe(OWNER_SETTINGS_STORAGE_KEY)}</span>
+    </div>
+  `;
+}
+
+function renderSettingsCenter(activeSection = "Appearance") {
+  const body = qs("#ownerSettingsBody");
+  if (!body) return;
+  const sections = settingsSections();
+  body.innerHTML = `
+    <div class="settings-tabs" role="tablist" aria-label="Settings sections">
+      ${sections.map((section) => `
+        <button class="settings-tab-button" type="button" role="tab" aria-selected="${section.owner_label === activeSection ? "true" : "false"}" data-settings-tab="${safe(section.owner_label)}">${safe(section.owner_label)}</button>
+      `).join("")}
+    </div>
+    <section class="settings-section-panel" role="tabpanel" data-settings-section="${safe(activeSection)}">
+      <h3>${safe(activeSection)}</h3>
+      <div class="settings-control-grid">
+        ${settingControlHtml(activeSection)}
+      </div>
+    </section>
+  `;
+  qsa("[data-settings-tab]", body).forEach((button) => {
+    button.addEventListener("click", () => renderSettingsCenter(button.dataset.settingsTab));
+  });
+  qsa("[data-owner-setting]", body).forEach((control) => {
+    control.addEventListener("change", (event) => {
+      const target = event.currentTarget;
+      const key = target.dataset.ownerSetting;
+      const value = target.type === "checkbox" ? target.checked : target.value;
+      OwnerSettings.set(key, value);
+      if (key === "theme_preset") setTheme(value, false);
+      if (key === "text_size") setTextSize(value, false);
+      if (key === "dashboard_default_experience_mode") setExperienceMode(value, false);
+      if (key === "chat_enter_to_send") setEnterToSend(value, false);
+      if (key === "sidebar_collapsed") setSidebarCollapsed(value, false);
+    });
+  });
+}
+
+function setSettingsCenter(open) {
+  const panel = qs("#ownerSettingsCenter");
+  const toggle = qs("#ownerSettingsToggle");
+  if (!panel || !toggle) return;
+  DashboardSystem.interactionState.settingsOpen = Boolean(open);
+  panel.hidden = !open;
+  panel.classList.toggle("open", Boolean(open));
+  panel.setAttribute("aria-hidden", open ? "false" : "true");
+  toggle.setAttribute("aria-expanded", open ? "true" : "false");
+  if (open) {
+    renderSettingsCenter("Appearance");
+    const first = qs("button, input, select, textarea", panel);
+    if (first) first.focus();
+  } else {
+    toggle.focus({ preventScroll: true });
+  }
+}
+
 function renderChatAndTrade() {
-  const chatContract = DASHBOARD_DATA.ui1r1_chat_contract || {};
   const examples = asList(DASHBOARD_DATA.ui1r1_chat_examples && DASHBOARD_DATA.ui1r1_chat_examples.examples);
+  const presets = chatPresetRows();
   qs("#chatWorkspace").innerHTML = `
     <article class="card chat-composer-card" data-chat-composer="owner-plain-english" data-chat-runtime-side-effect="false" data-chat-enter-to-send-default="false" data-intent-parser="local-preview" data-provider-stage="LLM1">
       <h3>Coach conversation</h3>
@@ -1583,9 +2211,11 @@ function renderChatAndTrade() {
         <button id="chatAttachmentPreview" type="button">File preview</button>
         <label class="compact-toggle"><input id="chatEnterToSendToggle" type="checkbox" data-enter-to-send-setting="optional"> Enter to send</label>
       </div>
-      <div class="chip-row prompt-chip-row">
-        ${asList(chatContract.prompt_chips).map((chip) => `<button class="chip" type="button" data-chat-chip="${safe(chip)}">${safe(chip)}</button>`).join("")}
-      </div>
+      <label class="field-label" for="chatPresetSelect">Preset prompt</label>
+      <select id="chatPresetSelect" data-chat-preset-dropdown="OwnerOptionCatalogV1.chat_presets">
+        <option value="">Select a preset prompt...</option>
+        ${presets.map((row) => `<option value="${safe(row.owner_label)}" data-source-category="${safe(row.source_category || "safe_ui_default")}">${safe(row.owner_label)}</option>`).join("")}
+      </select>
       ${badge("no runtime side effect", "red")} ${badge("local preview parser", "blue")}
     </article>
     <div id="chatReceiptPreview" class="chat-receipt-column"></div>
@@ -1600,11 +2230,14 @@ function renderChatAndTrade() {
       ${ownerControls({}, "decision_queue")}
     </article>
   `;
-  qsa("[data-chat-chip]").forEach((chip) => {
-    chip.addEventListener("click", () => {
-      qs("#ownerChatInput").value = chip.dataset.chatChip;
-      qs("#ownerChatInput").focus();
-    });
+  qs("#chatPresetSelect").addEventListener("change", (event) => {
+    if (!event.currentTarget.value) return;
+    fillChatComposer(event.currentTarget.value);
+    const hint = qs("#chatSubmitHint");
+    if (hint) {
+      hint.hidden = false;
+      hint.textContent = "Preset filled the composer. Edit it, then use Send or Ctrl+Enter to create a local preview.";
+    }
   });
   qs("#ownerChatInput").addEventListener("keydown", (event) => {
     if (event.key !== "Enter") return;
@@ -1634,6 +2267,7 @@ function renderChatAndTrade() {
   const workbench = Object.keys(r2r2Workbench).length ? r2r2Workbench : (DASHBOARD_DATA.trade_workbench || DASHBOARD_DATA.ui1r1_order_sim || {});
   const fields = asList(workbench.field_catalog).length ? asList(workbench.field_catalog) : asList(workbench.owner_input_fields);
   const options = workbench.option_catalog || {};
+  const rangePolicy = workbench.range_policy || (DASHBOARD_DATA.ui1r2r3_workbench_options_ranges && DASHBOARD_DATA.ui1r2r3_workbench_options_ranges.range_policy) || {};
   const buttons = [
     { label: "Check trade", next_step_id: "NEXT_STEP_CHECK_TRADE_WITH_QTT_AGENTS" },
     { label: "Request replay preview", next_step_id: "NEXT_STEP_REQUEST_REPLAY_PREVIEW" },
@@ -1644,36 +2278,58 @@ function renderChatAndTrade() {
   ];
   const comparisons = asList((DASHBOARD_DATA.ui1r1_order_sim || {}).comparison_cards);
   const defaultValueFor = (field) => {
-    if (field.field_id === "market_event") return "Describe the market or event";
+    if (field.field_id === "market_event") return "describe_event";
+    if (field.field_id === "market_family") return OwnerSettings.get("workbench_preferred_market") || "prediction_market";
+    if (field.field_id === "venue") return OwnerSettings.get("workbench_preferred_venue") || "qtt_decide";
+    if (field.field_id === "duration_unit") return OwnerSettings.get("workbench_preferred_hold_unit") || "days";
+    if (field.field_id === "maker_taker_preference") return OwnerSettings.get("workbench_preferred_maker_taker") || "maker_first_taker_fallback";
+    if (field.field_id === "objective") return OwnerSettings.get("workbench_preferred_objective") || "maximize_expected_net_cash";
     if (field.field_id === "max_budget") return "";
     if (field.field_id === "max_loss") return "";
     if (field.field_id === "hold_duration") return "";
     if (field.field_id === "source_thesis_url") return "Paste a thesis, market page, article, paper, formula, dataset, or trade idea.";
     return "";
   };
+  const hintHtml = (field) => {
+    const policy = rangePolicy[field.range_policy_id || field.field_id] || {};
+    const source = field.source_category || policy.source_category || "safe_ui_default";
+    const unit = field.unit || policy.unit || "local preview";
+    const min = policy.min === undefined ? "provider-pending" : policy.min;
+    const max = policy.max === undefined ? "provider-pending" : policy.max;
+    const dependency = policy.dependency || "Exact provider/venue bounds are pending.";
+    return `
+      <p class="range-hint" data-range-policy-id="${safe(field.range_policy_id || field.field_id)}">Unit: ${safe(unit)}. Min: ${safe(min)}. Max: ${safe(max)}. ${safe(dependency)}</p>
+      <p class="source-category-hint" data-source-category="${safe(source)}">Source category: ${safe(source)}. Authority: ${safe(policy.authority_level || "local_preview_guardrail")}</p>
+    `;
+  };
   const fieldHtml = (field) => {
     const fieldId = field.field_id || field.id || "owner_input";
     const ownerLabel = field.owner_label || label(fieldId);
+    const hidden = field.shown_when_field ? 'data-hidden-until-other="true"' : "";
+    const state = field.interaction_state || (field.required ? "input_required" : "optional_input");
     if (field.input_kind === "select" && field.option_source && options[field.option_source]) {
       return `
-        <label>${safe(ownerLabel)}
+        <label class="workbench-field" data-workbench-field-shell="${safe(fieldId)}" data-interaction-state="${safe(state)}" ${hidden} data-shown-when-field="${safe(field.shown_when_field || "")}" data-shown-when-value="${safe(field.shown_when_value || "")}">${safe(ownerLabel)}
           <select data-workbench-field="${safe(fieldId)}" data-trade-variable-field="${safe(fieldId)}" aria-label="${safe(ownerLabel)}">
-            ${asList(options[field.option_source]).map((option) => `<option value="${safe(option.option_id)}">${safe(option.owner_label)}</option>`).join("")}
+            ${asList(options[field.option_source]).map((option) => `<option value="${safe(option.option_id)}" data-source-category="${safe(option.source_category || "safe_ui_default")}" ${defaultValueFor(field) === option.option_id ? "selected" : ""}>${safe(option.owner_label)}</option>`).join("")}
           </select>
+          ${hintHtml(field)}
         </label>
       `;
     }
     if (field.input_kind === "textarea") {
       return `
-        <label>${safe(ownerLabel)}
+        <label class="workbench-field" data-workbench-field-shell="${safe(fieldId)}" data-interaction-state="${safe(state)}" ${hidden} data-shown-when-field="${safe(field.shown_when_field || "")}" data-shown-when-value="${safe(field.shown_when_value || "")}">${safe(ownerLabel)}
           <textarea data-workbench-field="${safe(fieldId)}" data-trade-variable-field="${safe(fieldId)}" aria-label="${safe(ownerLabel)}">${safe(defaultValueFor(field))}</textarea>
+          ${hintHtml(field)}
         </label>
       `;
     }
     const type = field.input_kind === "number" ? "number" : "text";
     return `
-      <label>${safe(ownerLabel)}
+      <label class="workbench-field" data-workbench-field-shell="${safe(fieldId)}" data-interaction-state="${safe(state)}" ${hidden} data-shown-when-field="${safe(field.shown_when_field || "")}" data-shown-when-value="${safe(field.shown_when_value || "")}">${safe(ownerLabel)}
         <input type="${safe(type)}" data-workbench-field="${safe(fieldId)}" data-trade-variable-field="${safe(fieldId)}" value="${safe(defaultValueFor(field))}" aria-label="${safe(ownerLabel)}">
+        ${hintHtml(field)}
       </label>
     `;
   };
@@ -1692,6 +2348,7 @@ function renderChatAndTrade() {
       </div>
       <div class="workbench-fields">
         ${fields.map(fieldHtml).join("")}
+        <div id="workbenchRangeValidation" class="range-validation-panel" data-workbench-inline-validation="true" hidden></div>
       </div>
       <div class="chip-row action-row">
         ${buttons.map((row) => `<button class="chip" type="button" data-next-step-id="${safe(row.next_step_id)}" data-local-receipt-preview="TradePlanCandidatePreviewV1">${safe(row.label)}</button>`).join("")}
@@ -1717,7 +2374,7 @@ function renderChatAndTrade() {
     `).join("")}
     <article class="card">
       <h3>No-trade reoptimization paths</h3>
-      <p>No-trade is a comparator. QTT can preview reoptimization routes without changing immutable QKUs or formulas.</p>
+      <p>No-trade is a comparator and reoptimization route. QTT can preview reoptimization routes without changing immutable QKUs or formulas.</p>
       ${badge("no-trade is comparator", "blue")}
       ${ownerControls(workbench, "trade_workbench")}
     </article>
@@ -1756,9 +2413,54 @@ function optionLabel(fieldId, value) {
   return option ? option.owner_label : value;
 }
 
+function updateOtherFields() {
+  qsa("[data-hidden-until-other='true']").forEach((shell) => {
+    const source = shell.dataset.shownWhenField;
+    const expected = shell.dataset.shownWhenValue || "other";
+    const sourceField = qs(`[data-workbench-field="${CSS.escape(source)}"]`);
+    const visible = sourceField && sourceField.value === expected;
+    shell.dataset.otherVisible = visible ? "true" : "false";
+  });
+}
+
+function validateWorkbenchValues(values) {
+  const messages = [];
+  const budget = Number(values.max_budget);
+  const loss = Number(values.max_loss);
+  const exposure = Number(values.portfolio_exposure);
+  const hold = Number(values.hold_duration);
+  const durationUnit = values.duration_unit || "days";
+  const target = Number(values.target_price_probability);
+  const stop = Number(values.stop_exit_preference);
+  const latency = Number(values.latency_budget);
+  const spread = Number(values.max_spread);
+  if (values.max_budget && (!Number.isFinite(budget) || budget <= 0)) messages.push("Max budget must be a positive local-preview number.");
+  if (values.max_loss && (!Number.isFinite(loss) || loss <= 0)) messages.push("Max loss must be a positive local-preview number.");
+  if (Number.isFinite(budget) && Number.isFinite(loss) && loss > budget) messages.push("Max loss must be less than or equal to max budget.");
+  if (values.portfolio_exposure && (!Number.isFinite(exposure) || exposure < 0 || exposure > 100)) messages.push("Portfolio exposure preview must be between 0 and 100%.");
+  if (values.target_price_probability && (!Number.isFinite(target) || target < 0 || target > 100)) messages.push("Target price/probability preview must stay within 0-100.");
+  if (values.stop_exit_preference && (!Number.isFinite(stop) || stop < 0 || stop > 100)) messages.push("Stop/exit threshold preview must stay within 0-100.");
+  if (values.latency_budget && (!Number.isFinite(latency) || latency <= 0)) messages.push("Latency budget must be positive when shown.");
+  if (values.max_spread && (!Number.isFinite(spread) || spread < 0)) messages.push("Max spread cannot be negative.");
+  if (values.hold_duration && (!Number.isFinite(hold) || hold <= 0)) messages.push("Hold duration must be positive.");
+  if (Number.isFinite(hold) && durationUnit === "minutes" && hold < 1) messages.push("Hold duration below one minute is rejected by local preview guardrails.");
+  if (Number.isFinite(hold) && durationUnit === "days" && hold > 3650) messages.push("Hold duration is too large for local preview; exact event close/resolution is provider-pending.");
+  if (values.market_event === "other" && !String(values.custom_event || "").trim()) messages.push("Other event needs a candidate custom event description.");
+  if (values.venue === "other" && !String(values.custom_venue || "").trim()) messages.push("Other venue remains candidate-only and needs a custom venue label.");
+  if (values.source_family === "other" && !String(values.custom_source_family || "").trim()) messages.push("Other source family remains candidate-only and needs a custom source label.");
+  return messages;
+}
+
 function updateWorkbenchPreview() {
   const values = workbenchValues();
   DashboardSystem.interactionState.workbenchPreview = values;
+  updateOtherFields();
+  const validation = qs("#workbenchRangeValidation");
+  const validationMessages = validateWorkbenchValues(values);
+  if (validation) {
+    validation.hidden = validationMessages.length === 0;
+    validation.innerHTML = validationMessages.map((message) => `<div>${safe(message)}</div>`).join("");
+  }
   const grid = qs("#workbenchPreviewGrid");
   if (!grid) return;
   const summaryRows = [
@@ -1768,7 +2470,8 @@ function updateWorkbenchPreview() {
     ["Objective", optionLabel("objective", values.objective || "qtt_decide")],
     ["Max budget", values.max_budget || "needs owner input"],
     ["Max loss", values.max_loss || "needs owner input"],
-    ["Hold duration", values.hold_duration || "needs owner input"],
+    ["Portfolio exposure", values.portfolio_exposure ? `${values.portfolio_exposure}% preview` : "provider-pending account exposure"],
+    ["Hold duration", values.hold_duration ? `${values.hold_duration} ${optionLabel("duration_unit", values.duration_unit || "days")}` : "needs owner input; exact max depends on event close/resolution"],
     ["Urgency", optionLabel("urgency", values.urgency || "normal")],
     ["Entry", optionLabel("entry_preference", values.entry_preference || "qtt_decide")],
     ["Exit", optionLabel("exit_preference", values.exit_preference || "qtt_decide")],
@@ -1816,7 +2519,7 @@ function renderAgentsAndContracts() {
     ${ownerControls(DASHBOARD_DATA.authority_boundary || {}, "provider_pending")}
   `;
   qs("#llmPanel").__qttRow = DASHBOARD_DATA.authority_boundary || {};
-  qs("#llmPanel").addEventListener("click", () => openDrawer("QTT reasoning route", "Authority boundary", DASHBOARD_DATA.authority_boundary || {}, "disabled"));
+  qs("#llmPanel").addEventListener("click", () => openDrawer("QTT reasoning route", "Authority boundary", DASHBOARD_DATA.authority_boundary || {}, "why"));
 }
 
 function renderDeveloperMode() {
@@ -1851,7 +2554,7 @@ function renderDeveloperMode() {
   `;
   qsa("#developerMode .card").forEach((card, index) => {
     card.__qttRow = diagnostics[index] || dev;
-    card.addEventListener("click", () => openDrawer(card.querySelector("h3").textContent, "Developer Mode", diagnostics[index] || dev, "technical"));
+    card.addEventListener("click", () => openDrawer(card.querySelector("h3").textContent, "Developer Mode", diagnostics[index] || dev, "technical_details"));
   });
 }
 
@@ -1908,7 +2611,7 @@ function renderProviderAndMore() {
   `).join("");
   qsa("#providerStageRoutes .route-card").forEach((card, index) => {
     card.__qttRow = routes[index];
-    card.addEventListener("click", () => openDrawer(DashboardSystem.ownerTitle(routes[index]), "Provider Stage Route Map", routes[index], "disabled"));
+    card.addEventListener("click", () => openDrawer(DashboardSystem.ownerTitle(routes[index]), "Provider Stage Route Map", routes[index], "technical_details"));
   });
 
   const contracts = [
@@ -1932,18 +2635,61 @@ function renderProviderAndMore() {
   `).join("");
   qsa("#systemContracts .card").forEach((card, index) => {
     card.__qttRow = contracts[index][1] || {};
-    card.addEventListener("click", () => openDrawer(contracts[index][0], "Workflow status", contracts[index][1] || {}, "disabled"));
+    card.addEventListener("click", () => openDrawer(contracts[index][0], "Workflow status", contracts[index][1] || {}, "technical_details"));
   });
   renderAutonomyAndGlossary();
   const dagRows = asList(DASHBOARD_DATA.dag && DASHBOARD_DATA.dag.rows);
   renderTable("#dagRouteMap", dagRows.slice(0, 20), ["node_id", "source_artifact_ref", "downstream_consumer_ref", "authority_boundary_ref"], "Workflow route map", "provider_pending");
 }
 
+function searchRowsFor(query) {
+  const rows = asList(DASHBOARD_DATA.ui1r2r3_navigation_sidebar_search && DASHBOARD_DATA.ui1r2r3_navigation_sidebar_search.ranked_search_index);
+  const mode = document.body.dataset.experienceMode || "GUIDED_OWNER";
+  const normalized = String(query || "").trim().toLowerCase();
+  if (!normalized) return [];
+  return rows
+    .filter((row) => !row.developer_only || mode === "DEVELOPER" || normalized.includes("developer"))
+    .map((row) => {
+      const aliases = asList(row.query_aliases).map((item) => String(item).toLowerCase());
+      const exact = aliases.includes(normalized) || String(row.owner_title || "").toLowerCase() === normalized;
+      const alias = aliases.some((item) => item.includes(normalized) || normalized.includes(item));
+      const title = String(row.owner_title || "").toLowerCase().includes(normalized);
+      const score = exact ? 100 : alias ? 80 : title ? 60 : 0;
+      return { ...row, score };
+    })
+    .filter((row) => row.score > 0)
+    .sort((a, b) => b.score - a.score || Number(a.rank || 9) - Number(b.rank || 9))
+    .slice(0, 5);
+}
+
 function applySearch() {
-  const query = qs("#globalSearch").value.trim().toLowerCase();
-  qsa("[data-search], .card, .route-card, .timeline-step, .chart-panel").forEach((el) => {
-    const text = el.textContent.toLowerCase();
-    el.classList.toggle("hidden-by-filter", query.length > 0 && !text.includes(query));
+  const input = qs("#globalSearch");
+  const results = qs("#ownerSearchResults");
+  if (!input || !results) return;
+  const query = input.value.trim();
+  const rows = searchRowsFor(query);
+  if (!query) {
+    results.innerHTML = "";
+    return;
+  }
+  if (!rows.length) {
+    results.innerHTML = `<div class="search-result-button" role="status"><strong>No matching dashboard item</strong><span>Try Chat / Ask QTT, Trade Workbench, Research, Portfolio, Agent Operations, or QKU / Formula Routes.</span></div>`;
+    return;
+  }
+  results.innerHTML = rows.map((row, index) => `
+    <button class="search-result-button" type="button" data-search-result-index="${index}" data-target-surface="${safe(row.target_surface_id)}" data-target-card="${safe(row.target_card_id)}">
+      <strong>${safe(row.owner_title)}</strong>
+      <span>${safe(row.reason)}</span>
+    </button>
+  `).join("");
+  qsa("[data-search-result-index]", results).forEach((button) => {
+    button.addEventListener("click", () => {
+      const targetSurface = button.dataset.targetSurface || "overview";
+      const targetCard = button.dataset.targetCard || targetSurface;
+      DashboardSystem.setActiveSurface(targetSurface, targetCard);
+      location.hash = targetSurface;
+      results.dataset.lastSelectedTarget = `${targetSurface}:${targetCard}`;
+    });
   });
 }
 
@@ -1951,10 +2697,12 @@ function wireNavigation() {
   const links = [...qsa(".mobile-bottom-nav a"), ...qsa(".rail a")];
   links.forEach((link) => {
     link.addEventListener("click", () => {
-      links.forEach((item) => item.removeAttribute("aria-current"));
-      link.setAttribute("aria-current", "page");
+      const surface = (link.getAttribute("href") || "#overview").replace("#", "");
+      DashboardSystem.setActiveSurface(surface, surface);
     });
   });
+  const current = (location.hash || "#overview").replace("#", "");
+  DashboardSystem.setActiveSurface(current || "overview", current || "overview");
 }
 
 function repairStaticShellCopy() {
@@ -1963,10 +2711,13 @@ function repairStaticShellCopy() {
 }
 
 function render() {
+  OwnerSettings.applyCssSettings();
   initTheme();
   initTextSize();
   initExperienceMode();
   initOptionsMenu();
+  initTopPanels();
+  initSidebar();
   repairStaticShellCopy();
   renderStatus();
   renderCoach();
@@ -1987,11 +2738,13 @@ function render() {
   wireNextActions(document);
   qs("#globalSearch").addEventListener("input", applySearch);
   qs("#closeDrawer").addEventListener("click", closeDrawer);
-  qs("#openGlobalDrilldown").addEventListener("click", () => openDrawer("Dashboard technical details", "Renderer, not execution authority", DASHBOARD_DATA.authority_boundary || {}, "technical"));
+  qs("#openGlobalDrilldown").addEventListener("click", () => openDrawer("Dashboard technical details", "Renderer, not execution authority", DASHBOARD_DATA.authority_boundary || {}, "technical_details"));
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape") {
       closeDrawer();
       closeOwnerOptions();
+      setSettingsCenter(false);
+      setQttGuide(false);
     }
   });
 }

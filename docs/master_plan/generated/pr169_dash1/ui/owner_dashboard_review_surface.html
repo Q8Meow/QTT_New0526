@@ -11,7 +11,11 @@
     <div class="brand-block compact-brand">
       <h1>QTT</h1>
     </div>
-    <button id="ownerOptionsToggle" class="menu-trigger" type="button" aria-label="Open dashboard options" aria-expanded="false" aria-controls="ownerOptionsPanel">&#9776;</button>
+    <div class="topbar-actions">
+      <button id="qttGuideToggle" class="icon-command compact-top-command" type="button" aria-label="Open QTT Guide" aria-expanded="false" aria-controls="qttGuidePanel">Ask QTT</button>
+      <button id="ownerSettingsToggle" class="icon-command compact-top-command" type="button" aria-label="Open Settings" aria-expanded="false" aria-controls="ownerSettingsCenter">&#9881;</button>
+      <button id="ownerOptionsToggle" class="menu-trigger" type="button" aria-label="Open dashboard options" aria-expanded="false" aria-controls="ownerOptionsPanel">&#9776;</button>
+    </div>
   </header>
 
   <div id="ownerOptionsBackdrop" class="owner-options-backdrop" hidden></div>
@@ -20,6 +24,16 @@
       <h2>Options</h2>
       <button id="ownerOptionsClose" class="icon-command" type="button" aria-label="Close dashboard options">Close</button>
     </div>
+    <section class="owner-options-section owner-menu-status" aria-label="Owner status">
+      <h3>Status</h3>
+      <div class="owner-status-list" data-owner-status-summary="local-preview">
+        <span>&#10003; Local Preview</span>
+        <span>&#10003; Review Only</span>
+        <span>&#10003; No Live Trading</span>
+        <span>&#10003; No Account Access</span>
+      </div>
+      <button id="ownerOptionsSettingsShortcut" class="primary-command" type="button">Open Settings</button>
+    </section>
     <section class="owner-options-section" aria-label="Experience mode">
       <h3>Experience mode</h3>
       <div id="experienceModeSwitch" class="mode-switch" role="group" aria-label="Experience mode switch" data-experience-mode="GUIDED_OWNER">
@@ -31,8 +45,11 @@
     <section class="owner-options-section" aria-label="Theme">
       <h3>Theme</h3>
       <div class="theme-switch" role="group" aria-label="Theme switch">
-        <button id="themeDark" class="seg-button" type="button" data-theme-choice="DARK">Dark</button>
-        <button id="themeLight" class="seg-button" type="button" data-theme-choice="LIGHT">Light</button>
+        <button class="seg-button" type="button" data-theme-choice="DARK">Dark</button>
+        <button class="seg-button" type="button" data-theme-choice="LIGHT">Light</button>
+        <button id="themeDark" class="seg-button" type="button" data-theme-choice="DARK_PRO">Dark Pro</button>
+        <button id="themeLight" class="seg-button" type="button" data-theme-choice="LIGHT_PRO">Light Pro</button>
+        <button class="seg-button" type="button" data-theme-choice="HIGH_CONTRAST">High Contrast</button>
       </div>
     </section>
     <section class="owner-options-section" aria-label="Text size">
@@ -44,10 +61,6 @@
         <button class="seg-button" type="button" data-text-size-choice="extra_large" aria-pressed="false">Extra Large</button>
       </div>
     </section>
-    <section class="owner-options-section owner-menu-status" aria-label="Preview and runtime status">
-      <h3>Preview/runtime status</h3>
-      <div id="statusGrid" class="status-grid"></div>
-    </section>
     <section class="owner-options-section" aria-label="Composer preference">
       <label class="compact-toggle"><input id="menuEnterToSendToggle" type="checkbox" data-enter-to-send-setting="optional"> Enter to send</label>
       <button id="openGlobalDrilldown" class="icon-command" type="button" aria-label="Open dashboard technical details">Technical Details</button>
@@ -56,33 +69,32 @@
 
   <div class="layout-shell">
     <nav class="rail" aria-label="Dashboard sections">
-      <a href="#overview">Overview</a>
-      <a href="#portfolio">Portfolio &amp; PnL</a>
-      <a href="#trade-workbench">Trade Workbench</a>
-      <a href="#chat">Chat</a>
-      <a href="#decisions">Decision Queue</a>
-      <a href="#research">Research Intake</a>
-      <a href="#edge-alpha">Edge / Alpha Board</a>
-      <a href="#parameter-control">Parameter Control</a>
-      <a href="#agents">Agent Operations</a>
-      <a href="#qku-formula">QKU / Formula / Stack Routes</a>
-      <a href="#quantum">Quantum Control Center</a>
-      <a href="#actionable-cards">Actionable Cards</a>
-      <a href="#provider-stage">Provider Stage Route Map</a>
-      <a href="#more">DAG / Data Route Map</a>
-      <a href="#developer-mode">Developer Mode</a>
+      <button id="sidebarCollapseToggle" class="sidebar-collapse-toggle" type="button" aria-label="Collapse sidebar" aria-expanded="true" aria-controls="workspace">Collapse</button>
+      <a href="#overview" data-nav-surface="overview" data-nav-icon="O"><span class="nav-icon">O</span><span class="nav-label">Overview</span></a>
+      <a href="#portfolio" data-nav-surface="portfolio" data-nav-icon="P"><span class="nav-icon">P</span><span class="nav-label">Portfolio</span></a>
+      <a href="#trade-workbench" data-nav-surface="trade-workbench" data-nav-icon="W"><span class="nav-icon">W</span><span class="nav-label">Trade Workbench</span></a>
+      <a href="#chat" data-nav-surface="chat" data-nav-icon="C"><span class="nav-icon">C</span><span class="nav-label">Chat / Ask QTT</span></a>
+      <a href="#decisions" data-nav-surface="decisions" data-nav-icon="D"><span class="nav-icon">D</span><span class="nav-label">Decision Queue</span></a>
+      <a href="#research" data-nav-surface="research" data-nav-icon="R"><span class="nav-icon">R</span><span class="nav-label">Research</span></a>
+      <a href="#agents" data-nav-surface="agents" data-nav-icon="A"><span class="nav-icon">A</span><span class="nav-label">Agent Operations</span></a>
+      <a href="#qku-formula" data-nav-surface="qku-formula" data-nav-icon="Q"><span class="nav-icon">Q</span><span class="nav-label">QKU / Formula Routes</span></a>
+      <a href="#quantum" data-nav-surface="quantum" data-nav-icon="K"><span class="nav-icon">K</span><span class="nav-label">Quantum Control Center</span></a>
+      <a href="#more" data-nav-surface="more" data-nav-icon="M"><span class="nav-icon">M</span><span class="nav-label">Reports / More</span></a>
+      <a class="technical-nav" href="#provider-stage" data-nav-surface="provider-stage" data-nav-icon="T"><span class="nav-icon">T</span><span class="nav-label">Provider Stage Route Map</span></a>
+      <a class="technical-nav" href="#developer-mode" data-nav-surface="developer-mode" data-nav-icon="X"><span class="nav-icon">X</span><span class="nav-label">Developer Mode</span></a>
     </nav>
 
     <main class="workspace" id="workspace">
       <section id="overview" class="section">
         <div class="section-head">
           <div>
-            <span class="eyebrow">OWNER MODE · LOCAL STATIC REQUEST PREVIEWS</span>
+            <span class="eyebrow">Owner mode - local static request previews</span>
             <h2>Owner Home</h2>
           </div>
           <div class="search-row">
-            <label for="globalSearch">Search / filter / sort</label>
-            <input id="globalSearch" type="search" placeholder="Filter cards, routes, actions, agents">
+            <label for="globalSearch">Search destinations</label>
+            <input id="globalSearch" type="search" placeholder="Search chat, agent, workbench, QKU, portfolio">
+            <div id="ownerSearchResults" class="owner-search-results" data-owner-search-index="OwnerSearchIndexV1" aria-live="polite"></div>
           </div>
         </div>
         <div id="ownerCoachPanel" class="coach-panel"></div>
@@ -256,6 +268,28 @@
       <button id="closeDrawer" class="icon-command" type="button" aria-label="Close drilldown">Close</button>
     </div>
     <div id="drawerBody" class="drawer-body"></div>
+  </aside>
+
+  <aside id="qttGuidePanel" class="qtt-guide-panel" aria-label="QTT Guide" aria-hidden="true" hidden>
+    <div class="drawer-head">
+      <div>
+        <span class="eyebrow">Local guide shell</span>
+        <h2>QTT Guide</h2>
+      </div>
+      <button id="closeQttGuide" class="icon-command" type="button" aria-label="Close QTT Guide">Close</button>
+    </div>
+    <div id="qttGuideBody" class="drawer-body" data-qtt-guide-route="existing-chat-action-system"></div>
+  </aside>
+
+  <aside id="ownerSettingsCenter" class="settings-center" data-settings-center="OwnerSettingsV1" aria-label="Settings" aria-hidden="true" hidden>
+    <div class="drawer-head">
+      <div>
+        <span class="eyebrow">OwnerSettingsV1</span>
+        <h2>Settings</h2>
+      </div>
+      <button id="closeOwnerSettings" class="icon-command" type="button" aria-label="Close Settings">Close</button>
+    </div>
+    <div id="ownerSettingsBody" class="settings-body"></div>
   </aside>
 
   <nav id="mobileBottomNav" class="mobile-bottom-nav" aria-label="Mobile bottom navigation">

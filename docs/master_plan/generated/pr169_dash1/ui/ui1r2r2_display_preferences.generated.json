@@ -1,5 +1,6 @@
 {
   "allowed_localStorage_keys": [
+    "qtt_owner_dashboard_owner_settings_v1",
     "qtt_owner_dashboard_theme",
     "qtt_owner_dashboard_experience_mode",
     "qtt_owner_dashboard_guidance_density",
@@ -88,7 +89,14 @@
   "theme": {
     "allowed": [
       "DARK",
-      "LIGHT"
+      "LIGHT",
+      "DARK_PRO",
+      "MIDNIGHT_BLUE",
+      "SLATE",
+      "LIGHT_PRO",
+      "LOW_GLARE",
+      "HIGH_CONTRAST",
+      "CUSTOM"
     ],
     "default": "DARK",
     "localStorage_key": "qtt_owner_dashboard_theme"

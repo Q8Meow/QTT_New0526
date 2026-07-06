@@ -8,6 +8,7 @@ from tools.build_pr169_dash1_owner_dashboard_ui import (
     ENTER_TO_SEND_STORAGE_KEY,
     EXPERIENCE_MODE_STORAGE_KEY,
     GUIDANCE_DENSITY_STORAGE_KEY,
+    OWNER_SETTINGS_STORAGE_KEY,
     TECHNICAL_DETAILS_STORAGE_KEY,
     TEXT_SIZE_STORAGE_KEY,
     THEME_STORAGE_KEY,
@@ -216,6 +217,7 @@ def assert_source_agnostic_candidate_only() -> None:
 def assert_preferences_no_private_state() -> None:
     report = ui_doc("ui1r2r2_preference_storage_guard.report.json")
     assert set(report["allowed_localStorage_keys"]) == {
+        OWNER_SETTINGS_STORAGE_KEY,
         THEME_STORAGE_KEY,
         EXPERIENCE_MODE_STORAGE_KEY,
         GUIDANCE_DENSITY_STORAGE_KEY,

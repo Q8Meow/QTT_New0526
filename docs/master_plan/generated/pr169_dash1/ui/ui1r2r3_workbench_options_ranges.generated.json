@@ -1,9 +1,8 @@
 {
-  "all_selectors_use_central_option_catalog": true,
-  "all_workbench_actions_route_through_owner_next_step_router": true,
+  "all_numeric_ranges_have_source_category": true,
+  "all_options_have_source_category": true,
   "central_option_catalog_id": "OwnerInputOptionCatalogV1",
-  "direct_venue_submit_allowed": false,
-  "execution_router_release_allowed": false,
+  "custom_other_candidate_only": true,
   "field_catalog": [
     {
       "field_id": "market_family",
@@ -211,112 +210,22 @@
       "required": true
     }
   ],
-  "local_preview_output": {
-    "forbidden_claims": [
-      "real expected profit",
-      "real fill probability",
-      "paper pass",
-      "replay pass",
-      "live readiness",
-      "cash availability",
-      "source truth",
-      "live order eligibility"
-    ],
-    "mutable_variable_fields": [
-      "market",
-      "venue",
-      "stack",
-      "side",
-      "entry",
-      "size",
-      "hold_duration",
-      "exit_rule",
-      "maker_taker_split",
-      "cancel_replace_interval",
-      "liquidity_filter",
-      "spread_filter",
-      "depth_filter",
-      "latency_budget",
-      "portfolio_exposure",
-      "order_policy",
-      "scenario_path"
-    ],
-    "no_runtime_side_effect_state": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
-    "no_trade_reoptimization_options": [
-      "smaller size",
-      "different venue",
-      "maker-only",
-      "different hold duration",
-      "different stack",
-      "better liquidity window",
-      "later timing"
-    ],
-    "owner_intent_summary": "Owner trade idea becomes a local candidate preview only.",
-    "preview_object_type": "TradePlanCandidatePreviewV1",
-    "route_previews": [
-      "no_trade_comparator_preview",
-      "TCA_cost_route_preview",
-      "QKU_formula_stack_route_preview",
-      "risk_capacity_route_preview",
-      "portfolio_marginal_utility_route_preview",
-      "champion_challenger_route_preview",
-      "agent_disagreement_route_preview",
-      "replay_preview_route",
-      "paper_preview_route",
-      "Execution_Router_provider_pending_route"
-    ],
-    "selected_fields_from_field_catalog": [
-      "market_family",
-      "event_category",
-      "market_event",
-      "custom_event",
-      "venue",
-      "custom_venue",
-      "side",
-      "objective",
-      "max_budget",
-      "max_loss",
-      "portfolio_exposure",
-      "hold_duration",
-      "duration_unit",
-      "urgency",
-      "entry_preference",
-      "exit_preference",
-      "maker_taker_preference",
-      "source_thesis_url",
-      "target_price_probability",
-      "stop_exit_preference",
-      "latency_budget",
-      "max_spread",
-      "source_family",
-      "custom_source_family",
-      "notes",
-      "route_selector"
-    ]
-  },
-  "local_status_strip": [
-    "local preview only",
-    "provider pending",
-    "needs owner input",
-    "candidate/provisional input",
-    "no runtime side effect",
-    "technical details available"
-  ],
   "meta": {
     "agent_consumable_authority": false,
-    "artifact_id": "UI1R2R2_WORKBENCH_FORM",
+    "artifact_id": "UI1R2R3_WORKBENCH_OPTIONS_RANGES",
     "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
     "connector_access_allowed": false,
     "credential_access_allowed": false,
-    "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config + PR169-DASH1 artifacts + PR169-DASH1-UI1/R1 boot data + OwnerPresentationLayer / OwnerGuidancePolicy config + PR169-DASH1-UI1-R2-R2 owner product UX repair config",
+    "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config + PR169-DASH1 artifacts + PR169-DASH1-UI1/R1 boot data + OwnerPresentationLayer / OwnerGuidancePolicy config + PR169-DASH1-UI1-R2-R3 OwnerSettingsV1 product polish config",
     "manual_edit_allowed": false,
     "order_execution_allowed": false,
     "runtime_side_effect_allowed": false,
     "runtime_truth_authority": false,
     "source_truth_authority": false,
-    "ui1r2r2_generated_from": "OwnerDashboardStateV1 + OwnerSurfaceResolver + OwnerActionRegistry + OwnerPresentationLayer + OwnerNextStepRouter + shared widget/chart/action/chat manifests",
+    "ui1r2r3_generated_from": "OwnerDashboardStateV1 + OwnerSurfaceResolver + OwnerActionRegistry + OwnerPresentationLayer + OwnerNextStepRouter + OwnerSettingsV1 + central owner UX semantic bundle",
     "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
   },
+  "no_connector_semantics_or_order_authority": true,
   "option_catalog": {
     "duration_unit": [
       {
@@ -905,7 +814,94 @@
       }
     ]
   },
-  "runtime_side_effect_allowed": false,
-  "workbench_id": "OWNER_TRADE_WORKBENCH",
-  "workbench_state_owner": "OwnerDashboardStateV1.trade_workbench"
+  "range_policy": {
+    "hold_duration": {
+      "authority_level": "local_preview_guardrail",
+      "dependency": "Exact maximum needs event close/resolution provider data.",
+      "max": "event_close_or_resolution_provider_pending",
+      "min": 1,
+      "reason": "Rejects impossible durations without inventing venue rules.",
+      "recommended_range": "Use hours or days unless a known event close is available.",
+      "source_category": "safe_ui_default",
+      "unit": "minutes / hours / days / until resolution"
+    },
+    "latency_budget": {
+      "authority_level": "dependency_explanation_only",
+      "dependency": "Exact latency policy belongs to later runtime stages.",
+      "max": "provider_pending_latency_policy",
+      "min": 1,
+      "reason": "Positive numeric sanity guard only.",
+      "recommended_range": "Provider-pending until execution policy exists.",
+      "source_category": "provider_pending",
+      "unit": "milliseconds preview"
+    },
+    "max_budget": {
+      "authority_level": "local_preview_guardrail",
+      "dependency": "Exact maximum needs account/cash provider, which this UI PR cannot read.",
+      "max": "provider_pending_account_cash",
+      "min": 1,
+      "reason": "Budget must be positive and remains local preview.",
+      "recommended_range": "Start small until provider receipts and account limits exist.",
+      "source_category": "safe_ui_default",
+      "unit": "USD preview"
+    },
+    "max_loss": {
+      "authority_level": "local_preview_guardrail",
+      "dependency": "Max budget must be entered first.",
+      "max": "max_budget",
+      "min": 1,
+      "reason": "Loss cannot exceed budget in local preview.",
+      "recommended_range": "Less than or equal to max budget.",
+      "source_category": "safe_ui_default",
+      "unit": "USD preview"
+    },
+    "max_spread": {
+      "authority_level": "dependency_explanation_only",
+      "dependency": "Exact spread constraints require venue/provider artifacts.",
+      "max": "provider_pending_venue_tick_fee_policy",
+      "min": 0,
+      "reason": "Non-negative sanity guard only.",
+      "recommended_range": "Depends on venue tick and liquidity.",
+      "source_category": "provider_pending",
+      "unit": "cents or bps preview"
+    },
+    "portfolio_exposure": {
+      "authority_level": "local_preview_guardrail",
+      "dependency": "Exact exposure needs account/portfolio provider.",
+      "max": 100,
+      "min": 0,
+      "reason": "Local UI rejects impossible percentages only.",
+      "recommended_range": "Provider-pending until account exposure is available.",
+      "source_category": "safe_ui_default",
+      "unit": "% preview"
+    },
+    "stop_exit_threshold": {
+      "authority_level": "local_preview_guardrail",
+      "dependency": "Venue tick and exit rule authority are provider-pending.",
+      "max": 100,
+      "min": 0,
+      "reason": "Local sanity bound only.",
+      "recommended_range": "Keep in the same unit as target price/probability.",
+      "source_category": "safe_ui_default",
+      "unit": "% or cents preview"
+    },
+    "target_price_probability": {
+      "authority_level": "local_preview_guardrail",
+      "dependency": "Venue tick and price unit are provider-pending unless an accepted artifact supplies them.",
+      "max": 100,
+      "min": 0,
+      "reason": "Local sanity bound only.",
+      "recommended_range": "Binary prediction-market values stay within 0-100.",
+      "source_category": "safe_ui_default",
+      "unit": "% or cents preview"
+    }
+  },
+  "source_categories_allowed": [
+    "existing_registry_value",
+    "master_plan_static_value",
+    "safe_ui_default",
+    "candidate_owner_custom",
+    "provider_pending"
+  ],
+  "unknown_bounds_are_dependencies_not_truth": true
 }

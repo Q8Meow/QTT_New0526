@@ -1,0 +1,111 @@
+{
+  "action_semantics_owner": "OwnerActionSemanticsMapV1",
+  "drawer_actions": [
+    {
+      "action_id": "OWNER_ACTION_EXPLAIN",
+      "content_signature": "ui1r2r3::explain::selected-card-specific",
+      "drawer_kind": "explain",
+      "interaction_state": "info_only",
+      "next_focus_target_or_none": "drilldownDrawer",
+      "owner_label": "Explain",
+      "primary_or_secondary": "secondary",
+      "runtime_side_effect_allowed": false,
+      "selected_card_id": "runtime_selected_card_id",
+      "selected_surface_id": "runtime_selected_surface_id",
+      "technical_detail_ref_or_none": null
+    },
+    {
+      "action_id": "OWNER_ACTION_LEARN",
+      "content_signature": "ui1r2r3::learn::selected-card-specific",
+      "drawer_kind": "learn",
+      "interaction_state": "info_only",
+      "next_focus_target_or_none": "drilldownDrawer",
+      "owner_label": "Learn",
+      "primary_or_secondary": "secondary",
+      "runtime_side_effect_allowed": false,
+      "selected_card_id": "runtime_selected_card_id",
+      "selected_surface_id": "runtime_selected_surface_id",
+      "technical_detail_ref_or_none": null
+    },
+    {
+      "action_id": "OWNER_ACTION_WHY",
+      "content_signature": "ui1r2r3::why::selected-card-specific",
+      "drawer_kind": "why",
+      "interaction_state": "info_only",
+      "next_focus_target_or_none": "drilldownDrawer",
+      "owner_label": "Why?",
+      "primary_or_secondary": "secondary",
+      "runtime_side_effect_allowed": false,
+      "selected_card_id": "runtime_selected_card_id",
+      "selected_surface_id": "runtime_selected_surface_id",
+      "technical_detail_ref_or_none": null
+    },
+    {
+      "action_id": "OWNER_ACTION_CHART_DRILLDOWN",
+      "content_signature": "ui1r2r3::chart_drilldown::selected-card-specific",
+      "drawer_kind": "chart_drilldown",
+      "interaction_state": "info_only",
+      "next_focus_target_or_none": "drilldownDrawer",
+      "owner_label": "Open chart drilldown",
+      "primary_or_secondary": "secondary",
+      "runtime_side_effect_allowed": false,
+      "selected_card_id": "runtime_selected_card_id",
+      "selected_surface_id": "runtime_selected_surface_id",
+      "technical_detail_ref_or_none": null
+    },
+    {
+      "action_id": "OWNER_ACTION_TCA_BREAKDOWN",
+      "content_signature": "ui1r2r3::tca_breakdown::selected-card-specific",
+      "drawer_kind": "tca_breakdown",
+      "interaction_state": "info_only",
+      "next_focus_target_or_none": "drilldownDrawer",
+      "owner_label": "Show TCA / cost breakdown",
+      "primary_or_secondary": "secondary",
+      "runtime_side_effect_allowed": false,
+      "selected_card_id": "runtime_selected_card_id",
+      "selected_surface_id": "runtime_selected_surface_id",
+      "technical_detail_ref_or_none": null
+    },
+    {
+      "action_id": "OWNER_ACTION_TECHNICAL_DETAILS",
+      "content_signature": "ui1r2r3::technical_details::selected-card-specific",
+      "drawer_kind": "technical_details",
+      "interaction_state": "technical_only",
+      "next_focus_target_or_none": "drilldownDrawer",
+      "owner_label": "Technical Details",
+      "primary_or_secondary": "secondary",
+      "runtime_side_effect_allowed": false,
+      "selected_card_id": "runtime_selected_card_id",
+      "selected_surface_id": "runtime_selected_surface_id",
+      "technical_detail_ref_or_none": "raw refs only"
+    }
+  ],
+  "drawers_card_specific": true,
+  "education_copy_map_id": "OwnerEducationCopyMapV1",
+  "meta": {
+    "agent_consumable_authority": false,
+    "artifact_id": "UI1R2R3_EDUCATION_DRAWERS",
+    "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+    "connector_access_allowed": false,
+    "credential_access_allowed": false,
+    "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config + PR169-DASH1 artifacts + PR169-DASH1-UI1/R1 boot data + OwnerPresentationLayer / OwnerGuidancePolicy config + PR169-DASH1-UI1-R2-R3 OwnerSettingsV1 product polish config",
+    "manual_edit_allowed": false,
+    "order_execution_allowed": false,
+    "runtime_side_effect_allowed": false,
+    "runtime_truth_authority": false,
+    "source_truth_authority": false,
+    "ui1r2r3_generated_from": "OwnerDashboardStateV1 + OwnerSurfaceResolver + OwnerActionRegistry + OwnerPresentationLayer + OwnerNextStepRouter + OwnerSettingsV1 + central owner UX semantic bundle",
+    "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+  },
+  "owner_actions_are_not_aliases": true,
+  "raw_refs_limited_to_technical_details": true,
+  "required_payload_fields": [
+    "selected_card_id",
+    "selected_action_id",
+    "drawer_kind",
+    "content_signature",
+    "owner_title",
+    "technical_detail_ref",
+    "runtime_side_effect_allowed"
+  ]
+}

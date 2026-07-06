@@ -1,0 +1,240 @@
+{
+  "active_surface_state_owner": "OwnerDashboardStateV1.active_surface",
+  "collapsed_state_persists_only_ui_preference": true,
+  "collapsible_sidebar": true,
+  "developer_nav": [
+    {
+      "owner_label": "Provider Stage Route Map",
+      "surface_id": "provider-stage",
+      "target": "#provider-stage"
+    },
+    {
+      "owner_label": "DAG / Data Route Map",
+      "surface_id": "more",
+      "target": "#more"
+    },
+    {
+      "owner_label": "Developer Mode",
+      "surface_id": "developer-mode",
+      "target": "#developer-mode"
+    }
+  ],
+  "developer_nav_hidden_outside_developer_or_technical_details": true,
+  "meta": {
+    "agent_consumable_authority": false,
+    "artifact_id": "UI1R2R3_NAVIGATION_SIDEBAR_SEARCH",
+    "authority_boundary_ref": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",
+    "connector_access_allowed": false,
+    "credential_access_allowed": false,
+    "generated_from": "owner_dashboard_surface_registry.jsonl + generated DASH1 artifacts + UI1 builder config + PR169-DASH1 artifacts + PR169-DASH1-UI1/R1 boot data + OwnerPresentationLayer / OwnerGuidancePolicy config + PR169-DASH1-UI1-R2-R3 OwnerSettingsV1 product polish config",
+    "manual_edit_allowed": false,
+    "order_execution_allowed": false,
+    "runtime_side_effect_allowed": false,
+    "runtime_truth_authority": false,
+    "source_truth_authority": false,
+    "ui1r2r3_generated_from": "OwnerDashboardStateV1 + OwnerSurfaceResolver + OwnerActionRegistry + OwnerPresentationLayer + OwnerNextStepRouter + OwnerSettingsV1 + central owner UX semantic bundle",
+    "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
+  },
+  "owner_nav": [
+    {
+      "icon_label": "O",
+      "owner_label": "Overview",
+      "surface_id": "overview",
+      "target": "#overview"
+    },
+    {
+      "icon_label": "P",
+      "owner_label": "Portfolio",
+      "surface_id": "portfolio",
+      "target": "#portfolio"
+    },
+    {
+      "icon_label": "W",
+      "owner_label": "Trade Workbench",
+      "surface_id": "trade-workbench",
+      "target": "#trade-workbench"
+    },
+    {
+      "icon_label": "C",
+      "owner_label": "Chat / Ask QTT",
+      "surface_id": "chat",
+      "target": "#chat"
+    },
+    {
+      "icon_label": "R",
+      "owner_label": "Research",
+      "surface_id": "research",
+      "target": "#research"
+    },
+    {
+      "icon_label": "D",
+      "owner_label": "Decision Queue",
+      "surface_id": "decisions",
+      "target": "#decisions"
+    },
+    {
+      "icon_label": "A",
+      "owner_label": "Agent Operations",
+      "surface_id": "agents",
+      "target": "#agents"
+    },
+    {
+      "icon_label": "Q",
+      "owner_label": "QKU / Formula Routes",
+      "surface_id": "qku-formula",
+      "target": "#qku-formula"
+    },
+    {
+      "icon_label": "K",
+      "owner_label": "Quantum Control Center",
+      "surface_id": "quantum",
+      "target": "#quantum"
+    },
+    {
+      "icon_label": "M",
+      "owner_label": "Reports / More",
+      "surface_id": "more",
+      "target": "#more"
+    }
+  ],
+  "ranked_search_index": [
+    {
+      "owner_title": "Chat / Ask QTT composer",
+      "query_aliases": [
+        "chat",
+        "ask qtt",
+        "composer",
+        "prompt",
+        "preset"
+      ],
+      "rank": 1,
+      "reason": "Matches the owner-visible chat destination and composer controls.",
+      "target_card_id": "ownerChatInput",
+      "target_surface_id": "chat"
+    },
+    {
+      "owner_title": "Agent Operations",
+      "query_aliases": [
+        "agent",
+        "agents",
+        "agent pods",
+        "agent disagreement",
+        "objections"
+      ],
+      "rank": 1,
+      "reason": "Shows agent pods, disagreement, and risk objections without real agent execution.",
+      "target_card_id": "agentOperations",
+      "target_surface_id": "agents"
+    },
+    {
+      "owner_title": "Trade Workbench",
+      "query_aliases": [
+        "workbench",
+        "trade",
+        "check trade",
+        "trade check"
+      ],
+      "rank": 1,
+      "reason": "Opens the guided local trade intent form.",
+      "target_card_id": "tradeWorkbench",
+      "target_surface_id": "trade-workbench"
+    },
+    {
+      "owner_title": "QKU / Formula Routes",
+      "query_aliases": [
+        "qku",
+        "formula",
+        "stack",
+        "formula routes"
+      ],
+      "rank": 1,
+      "reason": "Shows immutable QKU/formula route and gap metadata only.",
+      "target_card_id": "qkuFormulaRoutes",
+      "target_surface_id": "qku-formula"
+    },
+    {
+      "owner_title": "Portfolio & PnL",
+      "query_aliases": [
+        "portfolio",
+        "pnl",
+        "capital",
+        "net capital",
+        "equity"
+      ],
+      "rank": 1,
+      "reason": "Opens portfolio cards and chart frames without fake provider values.",
+      "target_card_id": "portfolio",
+      "target_surface_id": "portfolio"
+    },
+    {
+      "owner_title": "Decision Queue",
+      "query_aliases": [
+        "decision",
+        "queue",
+        "review"
+      ],
+      "rank": 1,
+      "reason": "Opens the owner review queue.",
+      "target_card_id": "decisionQueue",
+      "target_surface_id": "decisions"
+    },
+    {
+      "owner_title": "Research Intake",
+      "query_aliases": [
+        "research",
+        "source",
+        "link",
+        "paper"
+      ],
+      "rank": 1,
+      "reason": "Routes source candidates as provisional research only.",
+      "target_card_id": "researchPipeline",
+      "target_surface_id": "research"
+    },
+    {
+      "owner_title": "Quantum Control Center",
+      "query_aliases": [
+        "quantum",
+        "qubo",
+        "bqm",
+        "cqm",
+        "qaoa",
+        "vqe"
+      ],
+      "rank": 1,
+      "reason": "Shows quantum structural readiness routes without backend execution.",
+      "target_card_id": "quantumCenter",
+      "target_surface_id": "quantum"
+    },
+    {
+      "developer_only": true,
+      "owner_title": "Developer / Technical Details",
+      "query_aliases": [
+        "developer",
+        "provider stage",
+        "dag",
+        "data route",
+        "raw refs"
+      ],
+      "rank": 9,
+      "reason": "Developer-only raw evidence and route maps.",
+      "target_card_id": "developerMode",
+      "target_surface_id": "developer-mode"
+    }
+  ],
+  "required_top_results": {
+    "agent": "Agent Operations",
+    "chat": "Chat / Ask QTT composer",
+    "decision": "Decision Queue",
+    "formula": "QKU / Formula Routes",
+    "portfolio": "Portfolio & PnL",
+    "qku": "QKU / Formula Routes",
+    "quantum": "Quantum Control Center",
+    "research": "Research Intake",
+    "workbench": "Trade Workbench"
+  },
+  "search_index_owner": "OwnerSearchIndexV1",
+  "search_results_ranked_destinations": true,
+  "search_selection_scrolls_focuses_target": true,
+  "sidebar_state_owner": "OwnerSettingsV1.sidebar_collapsed"
+}
