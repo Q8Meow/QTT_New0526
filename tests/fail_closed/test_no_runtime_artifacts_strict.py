@@ -766,6 +766,7 @@ def test_scanner_scans_tests_py_for_real_runtime_code(tmp_path):
         "playwright_pr169_dash1_ui1_r2_r1_visual_smoke.py",
         "playwright_pr169_dash1_ui1_r2_r2_visual_smoke.py",
         "playwright_pr169_dash1_ui1_r2_r3_visual_smoke.py",
+        "playwright_pr169_dash1_ui1_r2_r4_visual_smoke.py",
     ],
 )
 def test_scanner_allows_exact_local_visual_qa_browser_automation_path(tmp_path, script_name):

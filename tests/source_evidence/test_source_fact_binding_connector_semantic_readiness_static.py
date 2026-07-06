@@ -205,6 +205,7 @@ def test_validator_blocks_atomicrows_bundle_hash_creation_or_mutation(tmp_path):
         "playwright_pr169_dash1_ui1_r2_r1_visual_smoke.py",
         "playwright_pr169_dash1_ui1_r2_r2_visual_smoke.py",
         "playwright_pr169_dash1_ui1_r2_r3_visual_smoke.py",
+        "playwright_pr169_dash1_ui1_r2_r4_visual_smoke.py",
     ],
 )
 def test_python_usage_scan_allows_exact_local_visual_qa_playwright_path(tmp_path, script_name):

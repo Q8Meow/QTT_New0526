@@ -195,6 +195,7 @@ LOCAL_VISUAL_QA_BROWSER_AUTOMATION_ALLOWED_PATHS = {
     pathlib.PurePosixPath("tools/playwright_pr169_dash1_ui1_r2_r1_visual_smoke.py"),
     pathlib.PurePosixPath("tools/playwright_pr169_dash1_ui1_r2_r2_visual_smoke.py"),
     pathlib.PurePosixPath("tools/playwright_pr169_dash1_ui1_r2_r3_visual_smoke.py"),
+    pathlib.PurePosixPath("tools/playwright_pr169_dash1_ui1_r2_r4_visual_smoke.py"),
 }
 
 
