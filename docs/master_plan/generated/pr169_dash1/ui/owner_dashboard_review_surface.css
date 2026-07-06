@@ -819,9 +819,14 @@ body:not([data-experience-mode="DEVELOPER"]) #developer-mode {
 [data-interaction-state="info_only"] { border-left-color: var(--owner-info-only); }
 [data-interaction-state="technical_only"] { border-left-color: var(--owner-technical-only); }
 [data-interaction-state="high_confirmation"] { border-left-color: var(--owner-high-confirmation); }
+[data-interaction-state="success"] { border-left-color: var(--owner-success); }
 
 .interaction-state-badge {
   border-color: currentColor;
+  font-size: 11px;
+  line-height: 1;
+  padding: 4px 7px;
+  width: fit-content;
 }
 
 .wide-card {
@@ -1234,9 +1239,32 @@ body:not([data-experience-mode="DEVELOPER"]) #developer-mode {
 }
 
 .compact-toggle input {
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  flex: 0 0 20px;
   accent-color: var(--qtt-blue);
+}
+
+.settings-control-grid .compact-toggle {
+  min-height: 44px;
+  display: inline-flex;
+  grid-template-columns: none;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  padding: 8px 10px;
+}
+
+.settings-control-grid .compact-toggle input[type="checkbox"],
+.control-row .compact-toggle input[type="checkbox"],
+.chat-composer-card .compact-toggle input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  max-width: 20px;
+  padding: 0;
+  margin: 0;
 }
 
 .control-row select,
@@ -1318,8 +1346,14 @@ body:not([data-experience-mode="DEVELOPER"]) #developer-mode {
   font-weight: 800;
 }
 
+.workbench-label-text {
+  color: var(--qtt-text);
+  font-weight: 850;
+}
+
 .workbench-field {
   border: 1px solid var(--qtt-border);
+  border-left-width: 5px;
   border-radius: 8px;
   padding: 8px;
   background: color-mix(in srgb, var(--qtt-bg-panel), var(--qtt-bg-card) 45%);
@@ -1601,6 +1635,24 @@ th {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
+}
+
+.qtt-guide-composer-row {
+  display: grid;
+  gap: 8px;
+  margin: 8px 0 12px;
+}
+
+.qtt-guide-composer-row textarea {
+  min-height: 96px;
+  width: 100%;
+  border: 1px solid var(--owner-input-required);
+  border-left-width: 5px;
+  border-radius: 8px;
+  background: var(--qtt-bg-panel);
+  color: var(--qtt-text);
+  padding: 10px;
+  resize: vertical;
 }
 
 .settings-control-grid label {

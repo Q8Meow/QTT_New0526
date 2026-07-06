@@ -26,6 +26,22 @@
       "source_category": "safe_ui_default"
     },
     {
+      "authority": "local_preview_guardrail",
+      "connector_semantics": false,
+      "field_id": "custom_market_family",
+      "input_kind": "text",
+      "interaction_state": "optional_input",
+      "live_readiness": false,
+      "order_authority": false,
+      "owner_label": "Custom market family",
+      "replay_paper_evidence": false,
+      "required": false,
+      "shown_when_field": "market_family",
+      "shown_when_value": "other",
+      "source_category": "candidate_owner_custom",
+      "source_truth": false
+    },
+    {
       "field_id": "event_category",
       "input_kind": "select",
       "interaction_state": "input_required",
@@ -35,178 +51,259 @@
       "source_category": "safe_ui_default"
     },
     {
+      "authority": "local_preview_guardrail",
+      "connector_semantics": false,
+      "field_id": "custom_event_category",
+      "input_kind": "text",
+      "interaction_state": "optional_input",
+      "live_readiness": false,
+      "order_authority": false,
+      "owner_label": "Custom event category",
+      "replay_paper_evidence": false,
+      "required": false,
+      "shown_when_field": "event_category",
+      "shown_when_value": "other",
+      "source_category": "candidate_owner_custom",
+      "source_truth": false
+    },
+    {
       "field_id": "market_event",
       "input_kind": "select",
       "interaction_state": "input_required",
       "option_source": "specific_event_route",
-      "owner_label": "Specific event",
+      "owner_label": "Event / market / URL",
       "required": true,
       "source_category": "provider_pending"
     },
     {
+      "authority": "local_preview_guardrail",
+      "connector_semantics": false,
       "field_id": "custom_event",
       "input_kind": "text",
       "interaction_state": "optional_input",
-      "owner_label": "Custom event",
+      "live_readiness": false,
+      "order_authority": false,
+      "owner_label": "Custom event / market / URL",
+      "replay_paper_evidence": false,
       "required": false,
       "shown_when_field": "market_event",
       "shown_when_value": "other",
-      "source_category": "candidate_owner_custom"
+      "source_category": "candidate_owner_custom",
+      "source_truth": false
     },
     {
       "field_id": "venue",
       "input_kind": "select",
+      "interaction_state": "input_required",
       "option_source": "venue",
       "owner_label": "Venue",
-      "required": true
+      "required": true,
+      "source_category": "safe_ui_default"
     },
     {
+      "authority": "local_preview_guardrail",
+      "connector_semantics": false,
       "field_id": "custom_venue",
       "input_kind": "text",
       "interaction_state": "optional_input",
+      "live_readiness": false,
+      "order_authority": false,
       "owner_label": "Custom venue",
+      "replay_paper_evidence": false,
       "required": false,
       "shown_when_field": "venue",
       "shown_when_value": "other",
-      "source_category": "candidate_owner_custom"
+      "source_category": "candidate_owner_custom",
+      "source_truth": false
     },
     {
       "field_id": "side",
       "input_kind": "select",
+      "interaction_state": "input_required",
       "option_source": "side",
       "owner_label": "Side",
-      "required": true
+      "required": true,
+      "source_category": "safe_ui_default"
     },
     {
       "field_id": "objective",
       "input_kind": "select",
+      "interaction_state": "input_required",
       "option_source": "objective",
       "owner_label": "Objective",
-      "required": true
+      "required": true,
+      "source_category": "safe_ui_default"
+    },
+    {
+      "authority": "local_preview_guardrail",
+      "field_id": "plain_english_detail",
+      "input_kind": "textarea",
+      "interaction_state": "input_required",
+      "owner_label": "Plain-English detail",
+      "required": true,
+      "source_category": "candidate_owner_custom"
     },
     {
       "field_id": "max_budget",
       "input_kind": "number",
-      "owner_label": "Max budget",
+      "interaction_state": "input_required",
+      "owner_label": "Max budget or hold duration",
       "range_policy_id": "max_budget",
       "required": true,
+      "source_category": "safe_ui_default",
       "unit": "USD preview"
     },
     {
       "field_id": "max_loss",
       "input_kind": "number",
+      "interaction_state": "input_required",
       "owner_label": "Max loss",
       "range_policy_id": "max_loss",
       "required": true,
+      "source_category": "safe_ui_default",
       "unit": "USD preview"
     },
     {
       "field_id": "portfolio_exposure",
       "input_kind": "number",
+      "interaction_state": "optional_input",
       "owner_label": "Portfolio exposure",
       "range_policy_id": "portfolio_exposure",
       "required": false,
+      "source_category": "safe_ui_default",
       "unit": "% preview"
     },
     {
       "field_id": "hold_duration",
       "input_kind": "number",
+      "interaction_state": "input_required",
       "owner_label": "Hold duration",
       "range_policy_id": "hold_duration",
       "required": true,
+      "source_category": "safe_ui_default",
       "unit": "duration"
     },
     {
       "field_id": "duration_unit",
       "input_kind": "select",
+      "interaction_state": "input_required",
       "option_source": "duration_unit",
       "owner_label": "Duration unit",
-      "required": true
+      "required": true,
+      "source_category": "safe_ui_default"
     },
     {
       "field_id": "urgency",
       "input_kind": "select",
+      "interaction_state": "input_required",
       "option_source": "urgency",
       "owner_label": "Urgency",
-      "required": true
+      "required": true,
+      "source_category": "safe_ui_default"
     },
     {
       "field_id": "entry_preference",
       "input_kind": "select",
+      "interaction_state": "input_required",
       "option_source": "entry_preference",
       "owner_label": "Entry preference",
-      "required": true
+      "required": true,
+      "source_category": "safe_ui_default"
     },
     {
       "field_id": "exit_preference",
       "input_kind": "select",
+      "interaction_state": "input_required",
       "option_source": "exit_preference",
       "owner_label": "Exit preference",
-      "required": true
+      "required": true,
+      "source_category": "safe_ui_default"
     },
     {
       "field_id": "maker_taker_preference",
       "input_kind": "select",
+      "interaction_state": "input_required",
       "option_source": "maker_taker_preference",
       "owner_label": "Maker/taker preference",
-      "required": true
+      "required": true,
+      "source_category": "safe_ui_default"
     },
     {
+      "authority": "local_preview_guardrail",
       "field_id": "source_thesis_url",
       "input_kind": "textarea",
+      "interaction_state": "optional_input",
       "owner_label": "Source / thesis / URL",
-      "required": true
+      "required": false,
+      "source_category": "candidate_owner_custom"
     },
     {
       "field_id": "target_price_probability",
       "input_kind": "number",
+      "interaction_state": "optional_input",
       "owner_label": "Optional target price/probability",
       "range_policy_id": "target_price_probability",
       "required": false,
+      "source_category": "safe_ui_default",
       "unit": "% or cents preview"
     },
     {
       "field_id": "stop_exit_preference",
       "input_kind": "number",
+      "interaction_state": "optional_input",
       "owner_label": "Optional stop/exit threshold",
       "range_policy_id": "stop_exit_threshold",
       "required": false,
+      "source_category": "safe_ui_default",
       "unit": "% or cents preview"
     },
     {
       "field_id": "latency_budget",
       "input_kind": "number",
+      "interaction_state": "provider_pending",
       "owner_label": "Latency budget",
       "range_policy_id": "latency_budget",
       "required": false,
+      "source_category": "provider_pending",
       "unit": "milliseconds preview"
     },
     {
       "field_id": "max_spread",
       "input_kind": "number",
+      "interaction_state": "provider_pending",
       "owner_label": "Max spread",
       "range_policy_id": "max_spread",
       "required": false,
+      "source_category": "provider_pending",
       "unit": "cents or bps preview"
     },
     {
       "field_id": "source_family",
       "input_kind": "select",
+      "interaction_state": "optional_input",
       "option_source": "source_family",
       "owner_label": "Source family",
-      "required": false
+      "required": false,
+      "source_category": "safe_ui_default"
     },
     {
+      "authority": "local_preview_guardrail",
+      "connector_semantics": false,
       "field_id": "custom_source_family",
       "input_kind": "text",
       "interaction_state": "optional_input",
+      "live_readiness": false,
+      "order_authority": false,
       "owner_label": "Custom source family",
+      "replay_paper_evidence": false,
       "required": false,
       "shown_when_field": "source_family",
       "shown_when_value": "other",
-      "source_category": "candidate_owner_custom"
+      "source_category": "candidate_owner_custom",
+      "source_truth": false
     },
     {
+      "authority": "local_preview_guardrail",
       "field_id": "notes",
       "input_kind": "textarea",
       "interaction_state": "optional_input",
@@ -217,9 +314,27 @@
     {
       "field_id": "route_selector",
       "input_kind": "select",
+      "interaction_state": "input_required",
       "option_source": "route_selector",
-      "owner_label": "Route",
-      "required": true
+      "owner_label": "Route type",
+      "required": true,
+      "source_category": "safe_ui_default"
+    },
+    {
+      "authority": "local_preview_guardrail",
+      "connector_semantics": false,
+      "field_id": "custom_route_type",
+      "input_kind": "text",
+      "interaction_state": "optional_input",
+      "live_readiness": false,
+      "order_authority": false,
+      "owner_label": "Custom route type",
+      "replay_paper_evidence": false,
+      "required": false,
+      "shown_when_field": "route_selector",
+      "shown_when_value": "other",
+      "source_category": "candidate_owner_custom",
+      "source_truth": false
     }
   ],
   "local_preview_output": {
@@ -278,13 +393,16 @@
     ],
     "selected_fields_from_field_catalog": [
       "market_family",
+      "custom_market_family",
       "event_category",
+      "custom_event_category",
       "market_event",
       "custom_event",
       "venue",
       "custom_venue",
       "side",
       "objective",
+      "plain_english_detail",
       "max_budget",
       "max_loss",
       "portfolio_exposure",
@@ -302,7 +420,8 @@
       "source_family",
       "custom_source_family",
       "notes",
-      "route_selector"
+      "route_selector",
+      "custom_route_type"
     ]
   },
   "local_static_preview_only": true,
@@ -713,6 +832,13 @@
         "owner_label": "Paper preview route",
         "runtime_side_effect_allowed": false,
         "source_category": "provider_pending"
+      },
+      {
+        "authority_level": "local_ui_preference_or_candidate_only",
+        "option_id": "other",
+        "owner_label": "Other",
+        "runtime_side_effect_allowed": false,
+        "source_category": "candidate_owner_custom"
       }
     ],
     "side": [

@@ -31,6 +31,8 @@ TEXT_SIZE_STORAGE_KEY = "qtt_owner_dashboard_text_size"
 TECHNICAL_DETAILS_STORAGE_KEY = "qtt_owner_dashboard_technical_details_open"
 ENTER_TO_SEND_STORAGE_KEY = "qtt_owner_dashboard_enter_to_send_enabled"
 OWNER_SETTINGS_STORAGE_KEY = "qtt_owner_dashboard_owner_settings_v1"
+R2R4_SUBDIR_NAME = "ui1_r2_r4"
+R2R4_MANIFEST_FILE = "centralization_manifest.generated.json"
 VALIDATION_REF = "tools/validate_pr169_dash1_owner_dashboard_ui.py"
 R1_GENERATED_FROM = (
     "PR169-DASH1 artifacts + PR169-DASH1-UI1 boot data + "
@@ -158,6 +160,7 @@ REQUIRED_TOP_LEVEL_KEYS = (
     "ui1r2r3_no_runtime_no_scattering",
     "ui1r2r3_online_owner_copy_audit",
     "ui1r2r3_playwright",
+    "ui1r2r4_semantic_bundle",
 )
 
 NAV_AREAS = (
@@ -238,6 +241,7 @@ INTERACTION_STATES = (
     "info_only",
     "technical_only",
     "high_confirmation",
+    "success",
 )
 
 OPTION_SOURCE_CATEGORIES = (
@@ -696,6 +700,7 @@ UI_ARTIFACT_FILES = (
     "ui1r2r3_no_runtime_no_scattering.report.json",
     "ui1r2r3_online_owner_copy_audit.report.json",
     "ui1r2r3_playwright.report.json",
+    "ui1r2r4_owner_semantic_bundle.generated.json",
 )
 
 
@@ -716,6 +721,28 @@ def _ui_meta(extra: dict[str, Any] | None = None) -> dict[str, Any]:
     if extra:
         payload.update(extra)
     return payload
+
+
+def _lifecycle_fields(
+    row_id: str,
+    *,
+    downstream: str = "owner_dashboard_review_surface.js",
+    provider_stage: str = "UI1",
+    upstream: str = "owner_dashboard_surface_registry.jsonl",
+) -> dict[str, Any]:
+    return {
+        "row_id": row_id,
+        "lifecycle_state": "LOCAL_STATIC_PREVIEW",
+        "timing_state_or_snapshot_state": "STATIC_GENERATED_BOOT_DATA",
+        "downstream_owner_or_consumer": downstream,
+        "activation_state_or_provider_stage": provider_stage,
+        "authority_boundary": AUTHORITY_BOUNDARY,
+        "upstream_ref_or_provider_pending": upstream,
+        "downstream_ref_or_provider_pending": downstream,
+        "runtime_side_effect_allowed": False,
+        "source_truth_created": False,
+        "order_authority_created": False,
+    }
 
 
 def _ui1r1_meta(artifact_id: str, extra: dict[str, Any] | None = None) -> dict[str, Any]:
@@ -1677,6 +1704,7 @@ def _build_trade_workbench(action_rows: list[dict[str, Any]]) -> dict[str, Any]:
             ("show_agent_disagreement", "Show agent disagreement", "safe_ui_default"),
             ("replay_preview_route", "Replay preview route", "provider_pending"),
             ("paper_preview_route", "Paper preview route", "provider_pending"),
+            ("other", "Other", "candidate_owner_custom"),
         ],
         "duration_unit": [
             ("minutes", "minutes", "safe_ui_default"),
@@ -1685,33 +1713,46 @@ def _build_trade_workbench(action_rows: list[dict[str, Any]]) -> dict[str, Any]:
             ("until_resolution", "until resolution", "provider_pending"),
         ],
     }
+    custom_guardrail = {
+        "source_category": "candidate_owner_custom",
+        "authority": "local_preview_guardrail",
+        "source_truth": False,
+        "connector_semantics": False,
+        "replay_paper_evidence": False,
+        "live_readiness": False,
+        "order_authority": False,
+    }
     field_catalog = [
         {"field_id": "market_family", "owner_label": "Market family", "input_kind": "select", "option_source": "market_family", "required": True, "source_category": "safe_ui_default", "interaction_state": "input_required"},
+        {"field_id": "custom_market_family", "owner_label": "Custom market family", "input_kind": "text", "required": False, "shown_when_field": "market_family", "shown_when_value": "other", "interaction_state": "optional_input", **custom_guardrail},
         {"field_id": "event_category", "owner_label": "Event category", "input_kind": "select", "option_source": "event_category", "required": True, "source_category": "safe_ui_default", "interaction_state": "input_required"},
-        {"field_id": "market_event", "owner_label": "Specific event", "input_kind": "select", "option_source": "specific_event_route", "required": True, "source_category": "provider_pending", "interaction_state": "input_required"},
-        {"field_id": "custom_event", "owner_label": "Custom event", "input_kind": "text", "required": False, "shown_when_field": "market_event", "shown_when_value": "other", "source_category": "candidate_owner_custom", "interaction_state": "optional_input"},
-        {"field_id": "venue", "owner_label": "Venue", "input_kind": "select", "option_source": "venue", "required": True},
-        {"field_id": "custom_venue", "owner_label": "Custom venue", "input_kind": "text", "required": False, "shown_when_field": "venue", "shown_when_value": "other", "source_category": "candidate_owner_custom", "interaction_state": "optional_input"},
-        {"field_id": "side", "owner_label": "Side", "input_kind": "select", "option_source": "side", "required": True},
-        {"field_id": "objective", "owner_label": "Objective", "input_kind": "select", "option_source": "objective", "required": True},
-        {"field_id": "max_budget", "owner_label": "Max budget", "input_kind": "number", "required": True, "unit": "USD preview", "range_policy_id": "max_budget"},
-        {"field_id": "max_loss", "owner_label": "Max loss", "input_kind": "number", "required": True, "unit": "USD preview", "range_policy_id": "max_loss"},
-        {"field_id": "portfolio_exposure", "owner_label": "Portfolio exposure", "input_kind": "number", "required": False, "unit": "% preview", "range_policy_id": "portfolio_exposure"},
-        {"field_id": "hold_duration", "owner_label": "Hold duration", "input_kind": "number", "required": True, "unit": "duration", "range_policy_id": "hold_duration"},
-        {"field_id": "duration_unit", "owner_label": "Duration unit", "input_kind": "select", "option_source": "duration_unit", "required": True},
-        {"field_id": "urgency", "owner_label": "Urgency", "input_kind": "select", "option_source": "urgency", "required": True},
-        {"field_id": "entry_preference", "owner_label": "Entry preference", "input_kind": "select", "option_source": "entry_preference", "required": True},
-        {"field_id": "exit_preference", "owner_label": "Exit preference", "input_kind": "select", "option_source": "exit_preference", "required": True},
-        {"field_id": "maker_taker_preference", "owner_label": "Maker/taker preference", "input_kind": "select", "option_source": "maker_taker_preference", "required": True},
-        {"field_id": "source_thesis_url", "owner_label": "Source / thesis / URL", "input_kind": "textarea", "required": True},
-        {"field_id": "target_price_probability", "owner_label": "Optional target price/probability", "input_kind": "number", "required": False, "unit": "% or cents preview", "range_policy_id": "target_price_probability"},
-        {"field_id": "stop_exit_preference", "owner_label": "Optional stop/exit threshold", "input_kind": "number", "required": False, "unit": "% or cents preview", "range_policy_id": "stop_exit_threshold"},
-        {"field_id": "latency_budget", "owner_label": "Latency budget", "input_kind": "number", "required": False, "unit": "milliseconds preview", "range_policy_id": "latency_budget"},
-        {"field_id": "max_spread", "owner_label": "Max spread", "input_kind": "number", "required": False, "unit": "cents or bps preview", "range_policy_id": "max_spread"},
-        {"field_id": "source_family", "owner_label": "Source family", "input_kind": "select", "option_source": "source_family", "required": False},
-        {"field_id": "custom_source_family", "owner_label": "Custom source family", "input_kind": "text", "required": False, "shown_when_field": "source_family", "shown_when_value": "other", "source_category": "candidate_owner_custom", "interaction_state": "optional_input"},
-        {"field_id": "notes", "owner_label": "Notes", "input_kind": "textarea", "required": False, "source_category": "candidate_owner_custom", "interaction_state": "optional_input"},
-        {"field_id": "route_selector", "owner_label": "Route", "input_kind": "select", "option_source": "route_selector", "required": True},
+        {"field_id": "custom_event_category", "owner_label": "Custom event category", "input_kind": "text", "required": False, "shown_when_field": "event_category", "shown_when_value": "other", "interaction_state": "optional_input", **custom_guardrail},
+        {"field_id": "market_event", "owner_label": "Event / market / URL", "input_kind": "select", "option_source": "specific_event_route", "required": True, "source_category": "provider_pending", "interaction_state": "input_required"},
+        {"field_id": "custom_event", "owner_label": "Custom event / market / URL", "input_kind": "text", "required": False, "shown_when_field": "market_event", "shown_when_value": "other", "interaction_state": "optional_input", **custom_guardrail},
+        {"field_id": "venue", "owner_label": "Venue", "input_kind": "select", "option_source": "venue", "required": True, "source_category": "safe_ui_default", "interaction_state": "input_required"},
+        {"field_id": "custom_venue", "owner_label": "Custom venue", "input_kind": "text", "required": False, "shown_when_field": "venue", "shown_when_value": "other", "interaction_state": "optional_input", **custom_guardrail},
+        {"field_id": "side", "owner_label": "Side", "input_kind": "select", "option_source": "side", "required": True, "source_category": "safe_ui_default", "interaction_state": "input_required"},
+        {"field_id": "objective", "owner_label": "Objective", "input_kind": "select", "option_source": "objective", "required": True, "source_category": "safe_ui_default", "interaction_state": "input_required"},
+        {"field_id": "plain_english_detail", "owner_label": "Plain-English detail", "input_kind": "textarea", "required": True, "source_category": "candidate_owner_custom", "authority": "local_preview_guardrail", "interaction_state": "input_required"},
+        {"field_id": "max_budget", "owner_label": "Max budget or hold duration", "input_kind": "number", "required": True, "unit": "USD preview", "range_policy_id": "max_budget", "source_category": "safe_ui_default", "interaction_state": "input_required"},
+        {"field_id": "max_loss", "owner_label": "Max loss", "input_kind": "number", "required": True, "unit": "USD preview", "range_policy_id": "max_loss", "source_category": "safe_ui_default", "interaction_state": "input_required"},
+        {"field_id": "portfolio_exposure", "owner_label": "Portfolio exposure", "input_kind": "number", "required": False, "unit": "% preview", "range_policy_id": "portfolio_exposure", "source_category": "safe_ui_default", "interaction_state": "optional_input"},
+        {"field_id": "hold_duration", "owner_label": "Hold duration", "input_kind": "number", "required": True, "unit": "duration", "range_policy_id": "hold_duration", "source_category": "safe_ui_default", "interaction_state": "input_required"},
+        {"field_id": "duration_unit", "owner_label": "Duration unit", "input_kind": "select", "option_source": "duration_unit", "required": True, "source_category": "safe_ui_default", "interaction_state": "input_required"},
+        {"field_id": "urgency", "owner_label": "Urgency", "input_kind": "select", "option_source": "urgency", "required": True, "source_category": "safe_ui_default", "interaction_state": "input_required"},
+        {"field_id": "entry_preference", "owner_label": "Entry preference", "input_kind": "select", "option_source": "entry_preference", "required": True, "source_category": "safe_ui_default", "interaction_state": "input_required"},
+        {"field_id": "exit_preference", "owner_label": "Exit preference", "input_kind": "select", "option_source": "exit_preference", "required": True, "source_category": "safe_ui_default", "interaction_state": "input_required"},
+        {"field_id": "maker_taker_preference", "owner_label": "Maker/taker preference", "input_kind": "select", "option_source": "maker_taker_preference", "required": True, "source_category": "safe_ui_default", "interaction_state": "input_required"},
+        {"field_id": "source_thesis_url", "owner_label": "Source / thesis / URL", "input_kind": "textarea", "required": False, "source_category": "candidate_owner_custom", "authority": "local_preview_guardrail", "interaction_state": "optional_input"},
+        {"field_id": "target_price_probability", "owner_label": "Optional target price/probability", "input_kind": "number", "required": False, "unit": "% or cents preview", "range_policy_id": "target_price_probability", "source_category": "safe_ui_default", "interaction_state": "optional_input"},
+        {"field_id": "stop_exit_preference", "owner_label": "Optional stop/exit threshold", "input_kind": "number", "required": False, "unit": "% or cents preview", "range_policy_id": "stop_exit_threshold", "source_category": "safe_ui_default", "interaction_state": "optional_input"},
+        {"field_id": "latency_budget", "owner_label": "Latency budget", "input_kind": "number", "required": False, "unit": "milliseconds preview", "range_policy_id": "latency_budget", "source_category": "provider_pending", "interaction_state": "provider_pending"},
+        {"field_id": "max_spread", "owner_label": "Max spread", "input_kind": "number", "required": False, "unit": "cents or bps preview", "range_policy_id": "max_spread", "source_category": "provider_pending", "interaction_state": "provider_pending"},
+        {"field_id": "source_family", "owner_label": "Source family", "input_kind": "select", "option_source": "source_family", "required": False, "source_category": "safe_ui_default", "interaction_state": "optional_input"},
+        {"field_id": "custom_source_family", "owner_label": "Custom source family", "input_kind": "text", "required": False, "shown_when_field": "source_family", "shown_when_value": "other", "interaction_state": "optional_input", **custom_guardrail},
+        {"field_id": "notes", "owner_label": "Notes", "input_kind": "textarea", "required": False, "source_category": "candidate_owner_custom", "authority": "local_preview_guardrail", "interaction_state": "optional_input"},
+        {"field_id": "route_selector", "owner_label": "Route type", "input_kind": "select", "option_source": "route_selector", "required": True, "source_category": "safe_ui_default", "interaction_state": "input_required"},
+        {"field_id": "custom_route_type", "owner_label": "Custom route type", "input_kind": "text", "required": False, "shown_when_field": "route_selector", "shown_when_value": "other", "interaction_state": "optional_input", **custom_guardrail},
     ]
     range_policy = {
         "max_budget": {
@@ -4659,6 +4700,7 @@ def _build_ui1r2r3_artifacts(
         "why",
         "chart_drilldown",
         "tca_breakdown",
+        "qku_formula_routes",
         "technical_details",
     ]
     drawer_actions = [
@@ -4670,6 +4712,7 @@ def _build_ui1r2r3_artifacts(
                 "why": "Why?",
                 "chart_drilldown": "Open chart drilldown",
                 "tca_breakdown": "Show TCA / cost breakdown",
+                "qku_formula_routes": "Show QKU/formula routes",
                 "technical_details": "Technical Details",
             }[kind],
             "drawer_kind": kind,
@@ -5001,6 +5044,544 @@ def _build_ui1r2r3_artifacts(
     }
 
 
+def _build_ui1r2r4_semantic_bundle(
+    *,
+    trade_workbench: dict[str, Any],
+    next_step: dict[str, Any],
+    chat_route_map: dict[str, Any],
+    r2_artifacts: dict[str, dict[str, Any]],
+) -> dict[str, Any]:
+    builder_ref = "tools/build_pr169_dash1_owner_dashboard_ui.py"
+    validator_ref = VALIDATION_REF
+    renderer_ref = "docs/master_plan/generated/pr169_dash1/ui/owner_dashboard_review_surface.js"
+    tests_ref = "tests/pr169_dash1_ui1/test_ui1r2r4_owner_visual_acceptance.py"
+    playwright_ref = "tools/playwright_pr169_dash1_ui1_r2_r4_visual_smoke.py"
+    conceptual_rows = [
+        ("OwnerDashboardStateV1", "docs/master_plan/generated/pr169_dash1/ui/owner_dashboard_state_model.generated.json", "OwnerDashboardStateV1"),
+        ("OwnerSurfaceResolver", "src/qtt/dashboard/owner_surface_resolver.py", "OwnerSurfaceResolver"),
+        ("OwnerActionRegistry", "docs/master_plan/generated/pr169_dash1/owner_action_registry.generated.jsonl", "OwnerActionRegistryV1"),
+        ("OwnerPresentationLayer", "docs/master_plan/generated/pr169_dash1/ui/ui1r2_copy_map.generated.json", "OwnerPresentationLayer"),
+        ("OwnerSettingsV1", "docs/master_plan/generated/pr169_dash1/ui/ui1r2r3_owner_settings.generated.json", "OwnerSettingsV1"),
+        ("OwnerEducationCopyMap / OwnerEducationCatalog", "docs/master_plan/generated/pr169_dash1/ui/ui1r2r3_education_drawers.generated.json", "OwnerEducationCopyMapV1"),
+        ("OwnerOptionCatalog", "docs/master_plan/generated/pr169_dash1/ui/ui1r2r3_workbench_options_ranges.generated.json", "OwnerInputOptionCatalogV1"),
+        ("OwnerRangeHintPolicy", "docs/master_plan/generated/pr169_dash1/ui/ui1r2r3_workbench_options_ranges.generated.json", "OwnerRangeHintPolicyV1"),
+        ("OwnerInteractionStateModel / ThemeTokens", "docs/master_plan/generated/pr169_dash1/ui/ui1r2r3_theme_interaction_accessibility.report.json", "OwnerInteractionStateModelV1"),
+        ("OwnerSearchIndex", "docs/master_plan/generated/pr169_dash1/ui/ui1r2r3_navigation_sidebar_search.report.json", "OwnerSearchIndexV1"),
+        ("OwnerNextStepRouter", "docs/master_plan/generated/pr169_dash1/ui/ui1r2r1_next_step.generated.json", "OwnerNextStepRouter"),
+        ("QTT Guide / Chat central state", "docs/master_plan/generated/pr169_dash1/ui/owner_dashboard_conversation_state.generated.json", "OwnerConversationStateV1"),
+        ("Workbench local preview model", "docs/master_plan/generated/pr169_dash1/ui/owner_dashboard_trade_workbench.generated.json", "OwnerTradeWorkbenchV1"),
+        ("Agent Operations projection", "docs/master_plan/generated/pr169_dash1/ui/ui1r2r4_owner_semantic_bundle.generated.json", "OwnerAgentOperationsProjectionV1"),
+        ("Workflow Queue projection", "docs/master_plan/generated/pr169_dash1/ui/ui1r2r4_owner_semantic_bundle.generated.json", "OwnerWorkflowQueueStateV1"),
+        ("Receipt Preview projection", "docs/master_plan/generated/pr169_dash1/ui/ui1r2r4_owner_semantic_bundle.generated.json", "OwnerReceiptPreviewStateV1"),
+        ("Owner command preview route", "docs/master_plan/generated/pr169_dash1/ui/owner_dashboard_owner_trading_command_contract.generated.json", "OwnerCommandPreviewRouteV1"),
+        ("Online research provider-pending preview route", "docs/master_plan/generated/pr169_dash1/ui/owner_dashboard_chat_route_map.generated.json", "OwnerOnlineResearchRequestPreviewV1"),
+        ("QKU/formula/agent route-gap projection", "docs/master_plan/generated/pr169_dash1/ui/owner_dashboard_qku_formula_computability_matrix.generated.json", "OwnerQKUFormulaAgentRouteGapProjectionV1"),
+        ("central owner UX semantic bundle", "docs/master_plan/generated/pr169_dash1/ui/ui1r2r4_owner_semantic_bundle.generated.json", "OwnerUXSemanticBundleV1"),
+    ]
+    mapping_table = [
+        {
+            **_lifecycle_fields(f"ui1r2r4_mapping::{index}", upstream=path, downstream=renderer_ref),
+            "conceptual_system": conceptual,
+            "actual_repo_path_or_current_equivalent": path,
+            "builder_consumer": builder_ref,
+            "validator_consumer": validator_ref,
+            "renderer_consumer": renderer_ref,
+            "test_consumer": tests_ref,
+            "playwright_proof": playwright_ref,
+            "created_or_extended": "extended" if "ui1r2r4" in path else "current_equivalent",
+            "reason_if_created": (
+                "Single central R2-R4 semantic-bundle entry point for owner visual-acceptance repairs."
+                if "ui1r2r4" in path
+                else "Existing current equivalent extended through the central R2-R4 semantic bundle; no parallel system created."
+            ),
+            "current_equivalent_id": current_id,
+        }
+        for index, (conceptual, path, current_id) in enumerate(conceptual_rows, start=1)
+    ]
+    education_topics = [
+        ("education.explain", "Explain", "Explains what the selected card means for QTT decision-making.", "Use it to decide whether to review evidence, open Workbench, or inspect missing provider routes."),
+        ("education.learn", "Learn", "Teaches the beginner concept behind the selected card without raw refs.", "Use it when a term such as QKU, TCA, no-trade, capacity, FDR, or quantum readiness needs context."),
+        ("education.why", "Why?", "Shows why the card matters for risk, evidence, routing, no-trade, owner action, or later agent review.", "Use it before treating any preview as actionable."),
+        ("education.qku_formula_routes", "QKU / formula routes", "QKUs and formulas are immutable; the mutable object is TradePlanCandidateV1.", "Use it to inspect route/gap status without creating a formula engine."),
+        ("education.tca_cost", "TCA / cost", "Costs include fees, spread, slippage, latency, impact, opportunity cost, fill, capacity, and implementation shortfall.", "Use it to avoid ranking gross edge without execution costs."),
+        ("education.no_trade", "No-trade", "No-trade is a first-class comparator and reoptimization route.", "Use it to explore mutable trade variables without mutating QKUs or formulas."),
+        ("education.chart_drilldown", "Chart drilldown", "Chart drilldowns use selected chart context, range, axes, point focus, and provider-pending value policy.", "Use it to inspect chart frames without accepting fake PnL, cash, fill, order, or live values."),
+        ("education.provider_pending", "Provider pending", "The dashboard has a routed slot, but no runtime/provider receipt exists in this UI PR.", "Use the local preview or technical details as the safe alternative."),
+        ("education.disabled_action", "Disabled action", "Visible blocked actions explain why runtime, online research, replay, paper, live, or Execution Router work is unavailable.", "Use the local preview route instead."),
+        ("education.technical_details", "Technical Details", "Technical Details preserve raw refs, provider routes, registry evidence, and debug fields for the selected card.", "Use it when owner-readable education is not enough and raw IDs are needed."),
+        ("education.workbench_field_help", "Workbench field help", "Owner fields collect candidate/provisional local input with badges and range guardrails.", "Fill required fields to move a field from input-required to review."),
+        ("education.workflow_queue", "Workflow queue", "Shows where team workflows and responsible agents will appear once providers attach.", "Use it to see current/upcoming provider-pending stages."),
+        ("education.receipts", "Receipt classes", "Receipt classes are proof slots only; no fake runtime receipts are created.", "Use it to learn which proof object later stages must produce."),
+        ("education.risk_quantum", "Risk / TCA / capacity / FDR / quantum", "Evidence-spine dimensions stay routed or gap-routed.", "Use Technical Details only when raw refs are needed."),
+    ]
+    education_catalog = [
+        {
+            **_lifecycle_fields(topic_id, upstream="ui1r2_education.generated.json", downstream=renderer_ref),
+            "education_id": topic_id,
+            "surface_id": "owner_dashboard_review_surface_static_local",
+            "card_type": "selected_card_context",
+            "action_id": topic_id.split(".")[-1],
+            "owner_title": title,
+            "plain_english_summary": summary,
+            "what_it_means": summary,
+            "why_it_matters": why,
+            "what_owner_can_do_next": "Open the relevant local preview, fill required owner input, or inspect Technical Details for raw refs.",
+            "provider_pending_copy": "No live provider, agent, replay, paper, connector, online search, or order-release work runs here.",
+            "technical_detail_ref": "ui1r2r4_owner_semantic_bundle.generated.json",
+            "related_agent_roles": ["dashboard_agent", "risk_manager_agent", "governance_agent", "commander_agent"],
+            "related_QKU_or_formula_route_refs_or_gap": ["owner_qku_formula_candidate_route_view.generated.jsonl", "provider_pending_or_actionable_gap"],
+            "authority_boundary_copy": "Local UI preview only; source truth and order authority are not created.",
+        }
+        for topic_id, title, summary, why in education_topics
+    ]
+    field_rows = []
+    for field in trade_workbench.get("field_catalog", []):
+        row_id = f"field::{field.get('field_id', 'unknown')}"
+        field_rows.append(
+            {
+                **_lifecycle_fields(row_id, upstream="owner_dashboard_trade_workbench.generated.json", downstream=renderer_ref),
+                "field_id": field.get("field_id"),
+                "owner_label": field.get("owner_label"),
+                "input_kind": field.get("input_kind"),
+                "required": field.get("required", False),
+                "interaction_state": field.get("interaction_state", "input_required" if field.get("required") else "optional_input"),
+                "option_source": field.get("option_source"),
+                "shown_when_field": field.get("shown_when_field"),
+                "shown_when_value": field.get("shown_when_value"),
+                "source_category": field.get("source_category", "safe_ui_default"),
+                "authority": field.get("authority", "local_preview_guardrail"),
+                "candidate_owner_custom": field.get("source_category") == "candidate_owner_custom",
+                "source_truth": field.get("source_truth", False),
+                "connector_semantics": field.get("connector_semantics", False),
+                "replay_paper_evidence": field.get("replay_paper_evidence", False),
+                "live_readiness": field.get("live_readiness", False),
+                "order_authority": field.get("order_authority", False),
+                "central_education_id": "education.workbench_field_help",
+            }
+        )
+    intent_specs = [
+        ("trade_check", "Trade-check preview", "Open Trade Workbench and route a TradePlanCandidateV1 preview with no-trade comparator and TCA/cost gaps."),
+        ("research_link", "Research/source candidate preview", "Treat source input as candidate/provisional and route to research intake without source truth."),
+        ("formula_qku_search", "QKU/formula route preview", "Show immutable QKU/formula route or explicit provider-pending gap."),
+        ("agent_disagreement_risk", "Agent disagreement preview", "Route objections to risk, TCA, source, memory, no-trade, and QKU/formula categories."),
+        ("no_trade_explanation", "No-trade explanation preview", "Explain why no-trade can win and which mutable variables could be retested later."),
+        ("replay_paper_preview", "Replay/paper request preview", "Create only a local request preview; no replay or paper execution runs."),
+        ("workbench_prefill", "Workbench prefill", "Fill or focus Workbench fields through OwnerNextStepRouter."),
+        ("evidence_missing", "Missing evidence preview", "List missing source, TCA, risk, replay, paper, capacity, memory, and receipt gaps."),
+        ("agent_operations_status", "Agent Operations status preview", "Open provider-pending agent duty/KPI/trust/task/receipt shell."),
+        ("workflow_queue_status", "Workflow Queue status preview", "Open team workflow queue shell tagged by responsible/supporting agents."),
+        ("online_research_provider_pending", "Online research provider-pending preview", "Show what LLM2/search providers will capture later without network fetches."),
+        ("source_candidate_extraction_preview", "Source extraction preview", "Preview URL/snippet/timestamp/dedup/formula extraction lanes without fake results."),
+        ("formula_qku_extraction_preview", "Formula/QKU extraction preview", "Preview formula/QKU extraction route without materializing QKUs or formulas."),
+        ("variable_search_preview", "Variable search preview", "Search mutable trade variables only; immutable QKUs/formulas are not changed."),
+        ("unknown_clarification", "Clarification", "Ask a concise question instead of returning the same generic paragraph."),
+    ]
+    plain_english_examples = [
+        "Can QTT check this market and find the best trade?",
+        "Research this article and tell me if it creates a prediction-market edge.",
+        "Ask the QKU agents to compare the best formula stacks for this event.",
+        "Why did no-trade win here?",
+        "What variables would make this trade pass replay and paper?",
+        "Show me which agent disagrees and why.",
+    ]
+    chat_intents = [
+        {
+            **_lifecycle_fields(f"intent::{intent_id}", upstream="owner_dashboard_chat_route_map.generated.json", downstream=renderer_ref, provider_stage="UI1"),
+            "intent_id": intent_id,
+            "owner_title": title,
+            "plain_english_summary": summary,
+            "responsible_agents_or_gap": ["dashboard_agent", "research_agent", "risk_manager_agent", "commander_agent", "PR165_D2_gap_route"],
+            "next_safe_local_action": "Open Workbench, Research Intake, Agent Operations, Workflow Queue, QKU/formula routes, or a clarification chip.",
+            "what_will_not_happen_now": "No online search, live LLM, real agent task, connector read, replay, paper, live execution, venue submit, or Execution Router release.",
+            "route_refs_or_gap": ["owner_dashboard_chat_route_map.generated.json", "ui1r2r1_next_step.generated.json", "provider_pending_or_actionable_gap"],
+        }
+        for intent_id, title, summary in intent_specs
+    ]
+    agent_roles = [
+        ("research_agent", "Research intake and source-candidate routing", "Research Intake"),
+        ("source_evidence_agent", "Source evidence classification and candidate/provisional handling", "Source Evidence"),
+        ("qku_formula_agent", "QKU/formula stack route review", "QKU / Formula Selection"),
+        ("risk_manager_agent", "Risk, TCA, capacity, no-trade, and quarantine objections", "Risk Review"),
+        ("paper_replay_agent", "Replay/paper request preview lanes", "Replay Queue"),
+        ("commander_agent", "Escalation, governance, and owner-required decisions", "Owner Review"),
+    ]
+    agent_rows = [
+        {
+            **_lifecycle_fields(f"agent_ops::{agent_id}", upstream="PR165_D2_AgentDutySourceCrosswalk.report.json", downstream=renderer_ref, provider_stage="AGENT_ORCH1_PROVIDER_PENDING"),
+            "agent_id": agent_id,
+            "agent_role": role,
+            "agent_status": "provider-pending, not running",
+            "current_task_id": "provider-pending",
+            "current_workflow_id": "provider-pending",
+            "current_trade_candidate_id": "TradePlanCandidateV1::provider_pending",
+            "responsible_QKU_refs": ["QKU_REF::provider_pending_or_gap"],
+            "formula_stack_refs": ["FORMULA_STACK_REF::provider_pending_or_gap"],
+            "venue_market_event": "provider-pending",
+            "started_at": "provider-pending",
+            "expected_finish_time": "provider-pending",
+            "blocked_reason": "No AGENT_ORCH/SVC runtime attached in this UI PR.",
+            "next_action": "Use local preview or wait for provider receipt lane.",
+            "last_receipt": "provider-pending",
+            "trust_score": "provider-pending",
+            "risk_level": "provider-pending",
+            "queue_lane": lane,
+            "quarantine_state": "provider-pending",
+            "receipt_preview": "AgentDecisionReceiptV1 provider-pending",
+        }
+        for agent_id, role, lane in agent_roles
+    ]
+    workflow_specs = [
+        ("workflow_research_intake", "Research Intake", "Source Evidence", "research_agent", "source_evidence_agent"),
+        ("workflow_qku_formula_selection", "QKU / Formula Selection", "Simulation", "qku_formula_agent", "risk_manager_agent"),
+        ("workflow_tca_risk_review", "TCA / Cost", "Risk Review", "risk_manager_agent", "commander_agent"),
+        ("workflow_no_trade_reoptimization", "No-Trade Comparator", "Replay Queue", "risk_manager_agent", "paper_replay_agent"),
+        ("workflow_replay_paper_preview", "Replay Queue", "Paper Queue", "paper_replay_agent", "commander_agent"),
+        ("workflow_live_review_preview", "Live Canary Queue", "Waiting for owner", "commander_agent", "governance_agent"),
+    ]
+    workflow_rows = [
+        {
+            **_lifecycle_fields(workflow_id, upstream="ui1r2r1_next_step.generated.json", downstream=renderer_ref, provider_stage="PAPER_LOOP_OR_AGENT_ORCH_PROVIDER_PENDING"),
+            "workflow_id": workflow_id,
+            "trade_plan_candidate_id": "TradePlanCandidateV1::provider_pending",
+            "market_venue_event": "provider-pending",
+            "responsible_agent": responsible,
+            "backup_agent": supporting,
+            "agent_pod": "QTT team provider-pending",
+            "current_stage": current,
+            "next_stage": next_stage,
+            "blocking_evidence": "provider-pending receipts",
+            "QKU_formula_stack": "route or provider-pending gap",
+            "TCA_status": "provider-pending",
+            "risk_status": "provider-pending",
+            "latency_status": "provider-pending",
+            "capacity_crowding_status": "provider-pending",
+            "no_trade_status": "comparator route visible",
+            "owner_action_required": "provider-pending or local review",
+            "latest_receipt": "provider-pending",
+            "escalation": "Commander/Governance",
+        }
+        for workflow_id, current, next_stage, responsible, supporting in workflow_specs
+    ]
+    receipt_classes = [
+        "RuntimeTaskReceiptV1",
+        "AgentDecisionReceiptV1",
+        "MemoryUpdateReceiptV1",
+        "PaperOrderIntentV1",
+        "PaperFillSimulationReceiptV1",
+        "NoTradeDecisionReceiptV1",
+        "RiskGateReceiptV1",
+        "TCAMetricReceiptV1",
+        "OwnerActionReceiptV1",
+    ]
+    receipt_rows = [
+        {
+            **_lifecycle_fields(f"receipt::{receipt_class}", upstream="provider_pending_receipt_lane", downstream=renderer_ref, provider_stage="SVC1_AGENTS_PAPER_LOOP_PROVIDER_PENDING"),
+            "receipt_class": receipt_class,
+            "proof_state": "provider-pending preview label only",
+            "fake_receipt_created": False,
+            "fake_timestamp_created": False,
+            "paper_or_live_value_created": False,
+            "owner_visible_status": "Not available until the matching provider/runtime stage supplies a real receipt.",
+        }
+        for receipt_class in receipt_classes
+    ]
+    owner_command_previews = [
+        "OwnerTradeIntentPreview",
+        "OwnerTradeCheckRequestPreview",
+        "OwnerReplayPaperRequestPreview",
+        "OwnerLiveCanaryReviewRequestPreview",
+        "OwnerExecutionRouterSubmitRequestPreview",
+        "OwnerKillSwitchRequestPreview",
+        "OwnerRollbackRequestPreview",
+        "OwnerPauseNewTradesRequestPreview",
+        "OwnerVetoRouteRequestPreview",
+        "OwnerResearchSubmissionPreview",
+    ]
+    owner_command_rows = [
+        {
+            **_lifecycle_fields(f"owner_command::{command}", upstream="owner_dashboard_owner_trading_command_contract.generated.json", downstream=renderer_ref),
+            "preview_action_family": command,
+            "command_family": command,
+            "allowed_now": "local request or approval-preview only",
+            "forbidden_now": "no direct venue submit, no real order release, no credential use, no private/cash read, no live execution",
+            "owner_authority_boundary_summary": "No direct order authority; Execution Router release remains downstream provider authority.",
+            "routes_through": "OwnerActionRegistry + OwnerNextStepRouter",
+            "route_components": ["OwnerActionRegistry", "OwnerNextStepRouter", "OwnerDashboardStateV1"],
+        }
+        for command in owner_command_previews
+    ]
+    online_preview = [
+        {
+            **_lifecycle_fields("online_research_provider_pending_preview", upstream="owner_dashboard_chat_route_map.generated.json", downstream=renderer_ref, provider_stage="LLM2_PROVIDER_PENDING"),
+            "request_text": "owner plain-English source or online-search request",
+            "source_family": "owner_requested_online_research",
+            "candidate_lane": "research/provisional",
+            "later_provider_stage": "LLM2_PROVIDER_PENDING",
+            "responsible_agents": ["research_agent", "source_evidence_agent", "qku_formula_agent", "LLM_critic_provider_pending"],
+            "will_capture_later": ["URLs", "snippets", "source timestamps", "duplicate claims", "formulas", "variables", "assumptions", "datasets", "parameter ranges"],
+            "will_not_happen_now": "online search, accepted source truth, connector binding, replay/paper, live trading, order release, fake URLs, fake snippets, fake timestamps",
+            "fake_urls_snippets_timestamps_created": False,
+        },
+        {
+            **_lifecycle_fields("formula_qku_extraction_provider_pending_preview", upstream="owner_dashboard_chat_route_map.generated.json", downstream=renderer_ref, provider_stage="LLM2_FORMULA_QKU_EXTRACTION_PROVIDER_PENDING"),
+            "request_text": "owner asks QTT to find formulas or QKUs from a source",
+            "source_family": "owner_requested_formula_qku_extraction",
+            "candidate_lane": "formula_qku/provisional",
+            "later_provider_stage": "LLM2_FORMULA_QKU_EXTRACTION_PROVIDER_PENDING",
+            "responsible_agents": ["qku_formula_agent", "source_evidence_agent", "risk_manager_agent", "LLM_critic_provider_pending"],
+            "will_capture_later": ["candidate formulas", "variables", "assumptions", "datasets", "parameter ranges", "duplicate claims"],
+            "will_not_happen_now": "online search, formula materialization, QKU creation, accepted source truth, replay/paper, live trading, order release, fake URLs, fake snippets, fake timestamps",
+            "fake_urls_snippets_timestamps_created": False,
+        },
+    ]
+    route_gap_rows = [
+        {
+            **_lifecycle_fields(f"route_gap::{idx}", upstream=ref, downstream=renderer_ref, provider_stage="READINESS1_PROVIDER_PENDING"),
+            "owner_visible_id": f"ui1r2r4_route_gap_{idx}",
+            "surface_id": surface,
+            "card_id_or_workflow_id": card_id,
+            "source_artifact_ref_or_provider_pending": ref,
+            "qku_refs_or_gap": "QKU_REF::provider_pending_or_gap",
+            "formula_refs_or_gap": "FORMULA_STACK_REF::provider_pending_or_gap",
+            "trade_plan_candidate_ref_or_gap": "TradePlanCandidateV1::provider_pending",
+            "responsible_agent_refs_or_PR165_D2_gap": ["PR165_D2_AgentDutySourceCrosswalk.report.json", "provider_pending_or_gap"],
+            "supporting_agent_refs_or_gap": ["dashboard_agent", "governance_agent", "commander_agent"],
+            "upstream_ref": ref,
+            "downstream_consumer_ref": renderer_ref,
+            "provider_stage": "READINESS1_PROVIDER_PENDING",
+            "actionable_gap_code_if_blocked": "PROVIDER_PENDING_OR_EXPLICIT_GAP",
+            "immutable_law": "QKUs/formulas remain immutable; TradePlanCandidateV1 is the mutable optimization object.",
+            "runtime_side_effect_allowed": False,
+            "source_truth_created": False,
+            "order_authority_created": False,
+        }
+        for idx, (surface, card_id, ref) in enumerate(
+            [
+                ("trade-workbench", "tradeWorkbench", "owner_dashboard_trade_workbench.generated.json"),
+                ("chat", "chatReceiptPreview", "owner_dashboard_chat_route_map.generated.json"),
+                ("agents", "agentOperations", "PR165_D2_AgentDutySourceCrosswalk.report.json"),
+                ("workflow-queue", "qttTeamWorkflowQueue", "ui1r2r4_owner_semantic_bundle.generated.json"),
+                ("receipts", "auditReceiptPreview", "ui1r2r4_owner_semantic_bundle.generated.json"),
+            ],
+            start=1,
+        )
+    ]
+    drawer_action_rows = [
+        {
+            **_lifecycle_fields(
+                f"drawer_action::{row.get('drawer_kind', index)}",
+                upstream="ui1r2r3_education_drawers.generated.json",
+                downstream=renderer_ref,
+            ),
+            **row,
+        }
+        for index, row in enumerate(r2_artifacts["ui1r2r3_education_drawers.generated.json"].get("drawer_actions", []), start=1)
+    ]
+    screenshot_paths = [
+        ".tmp/ui1r2r4_settings_color_applied_to_workbench_inputs.png",
+        ".tmp/ui1r2r4_checkbox_compact_visual_size.png",
+        ".tmp/ui1r2r4_workbench_other_custom_market_field.png",
+        ".tmp/ui1r2r4_workbench_other_custom_event_field.png",
+        ".tmp/ui1r2r4_workbench_input_state_before_valid_entry.png",
+        ".tmp/ui1r2r4_workbench_input_state_after_valid_entry.png",
+        ".tmp/ui1r2r4_qtt_guide_composer_empty.png",
+        ".tmp/ui1r2r4_qtt_guide_composer_after_send.png",
+        ".tmp/ui1r2r4_chat_trade_check_response_distinct.png",
+        ".tmp/ui1r2r4_chat_agent_disagreement_response_distinct.png",
+        ".tmp/ui1r2r4_chat_research_response_distinct.png",
+        ".tmp/ui1r2r4_card_explain_distinct.png",
+        ".tmp/ui1r2r4_card_learn_distinct.png",
+        ".tmp/ui1r2r4_card_why_distinct.png",
+        ".tmp/ui1r2r4_invalid_chart_action_hidden_on_nonchart_card.png",
+        ".tmp/ui1r2r4_agent_operations_shell.png",
+        ".tmp/ui1r2r4_agent_operations_provider_pending_details.png",
+        ".tmp/ui1r2r4_qtt_team_workflow_queue_shell.png",
+        ".tmp/ui1r2r4_workflow_card_agent_tags.png",
+        ".tmp/ui1r2r4_receipt_preview_provider_pending.png",
+        ".tmp/ui1r2r4_central_education_explain_learn_why.png",
+        ".tmp/ui1r2r4_central_education_disabled_action.png",
+        ".tmp/ui1r2r4_central_workbench_field_help.png",
+        ".tmp/ui1r2r4_mobile_qtt_guide_composer.png",
+        ".tmp/ui1r2r4_mobile_workbench_input_colors.png",
+        ".tmp/ui1r2r4_qtt_guide_online_search_provider_pending.png",
+        ".tmp/ui1r2r4_plain_english_no_trade_response.png",
+        ".tmp/ui1r2r4_plain_english_formula_qku_route_response.png",
+        ".tmp/ui1r2r4_disabled_action_educates_with_safe_alternative.png",
+        ".tmp/ui1r2r4_qku_formula_agent_route_gap_projection.png",
+        ".tmp/ui1r2r4_owner_command_authority_preview_no_direct_submit.png",
+    ]
+    semantic_groups = [
+        "settings_preferences",
+        "interaction_states",
+        "control_density",
+        "options_and_other_fields",
+        "numeric_range_help",
+        "education_definitions",
+        "drawer_action_semantics",
+        "chat_qtt_guide_intents",
+        "workbench_prefill_and_input_states",
+        "agent_operations_projection",
+        "workflow_queue_projection",
+        "receipt_preview_projection",
+        "online_research_provider_pending_preview",
+        "owner_command_preview_actions",
+        "qku_formula_agent_route_gap_projection",
+    ]
+    manifest_rows = [
+        {
+            **_lifecycle_fields(f"centralization::{group}", upstream="OwnerUXSemanticBundleV1", downstream=renderer_ref),
+            "semantic_group": group,
+            "central_owner_file_or_current_equivalent": "docs/master_plan/generated/pr169_dash1/ui/ui1r2r4_owner_semantic_bundle.generated.json",
+            "builder_consumer": builder_ref,
+            "validator_consumer": validator_ref,
+            "ui_consumer": renderer_ref,
+            "playwright_proof_ref": playwright_ref,
+            "upstream_source_ref_or_provider_pending": "canonical surface registry -> OwnerDashboardStateV1 -> OwnerActionRegistry -> OwnerUXSemanticBundleV1",
+            "downstream_consumer_ref_or_provider_pending": "owner dashboard renderer, tests, Playwright",
+            "lifecycle_state": "LOCAL_STATIC_PREVIEW",
+            "timing_state_or_snapshot_state": "STATIC_GENERATED_BOOT_DATA",
+            "activation_state_or_provider_stage": "UI1_R2_R4_LOCAL_PROVIDER_PENDING",
+            "authority_boundary": AUTHORITY_BOUNDARY,
+        }
+        for group in semantic_groups
+    ]
+    centralization_manifest = {
+        "meta": _ui_meta({"artifact_id": "UI1R2R4_CENTRALIZATION_MANIFEST"}),
+        "manifest_id": "UI1R2R4_CENTRALIZATION_MANIFEST",
+        "phase0_current_equivalent_mapping": mapping_table,
+        "semantic_groups": manifest_rows,
+        "rows": manifest_rows,
+    }
+    return {
+        "meta": _ui_meta({"artifact_id": "UI1R2R4_OWNER_SEMANTIC_BUNDLE"}),
+        "central_bundle_id": "OwnerUXSemanticBundleV1",
+        "source_of_truth_precedence": [
+            "canonical dashboard surface registry/current equivalent",
+            "OwnerDashboardStateV1/current equivalent",
+            "OwnerActionRegistry/current equivalent",
+            "central owner UX semantic bundle/current equivalent",
+            "generated projections under owned prefix",
+            "renderers / tests / Playwright",
+        ],
+        "single_settings_key": OWNER_SETTINGS_STORAGE_KEY,
+        "legacy_preference_key_migration_only": {
+            "compatibility_keys": [
+                THEME_STORAGE_KEY,
+                EXPERIENCE_MODE_STORAGE_KEY,
+                GUIDANCE_DENSITY_STORAGE_KEY,
+                TEXT_SIZE_STORAGE_KEY,
+                TECHNICAL_DETAILS_STORAGE_KEY,
+                ENTER_TO_SEND_STORAGE_KEY,
+            ],
+            "central_manager": "OwnerSettings",
+            "primary_storage_key": OWNER_SETTINGS_STORAGE_KEY,
+            "no_new_component_local_keys": True,
+        },
+        "phase0_current_equivalent_mapping": mapping_table,
+        "centralization_manifest": centralization_manifest,
+        "interaction_states": [
+            {
+                **_lifecycle_fields(f"interaction::{state}", upstream="ui1r2r3_theme_interaction_accessibility.report.json", downstream=renderer_ref),
+                "state_id": state,
+                "state": state,
+                "color_token": f"--owner-{state.replace('_', '-')}",
+                "badge_required": True,
+                "aria_label_required": True,
+                "color_not_only_signal": True,
+            }
+            for state in INTERACTION_STATES
+        ],
+        "control_density": {
+            **_lifecycle_fields("control_density::checkbox", upstream="ui1r2r3_owner_settings.generated.json", downstream=renderer_ref),
+            "visible_checkbox_box_px": "18-22",
+            "touch_target_px": 44,
+            "central_density_token": "OwnerControlDensityV1.compact_visible_accessible_target",
+        },
+        "field_semantics": field_rows,
+        "education_catalog": education_catalog,
+        "drawer_action_semantics": drawer_action_rows,
+        "chat_qtt_guide_intents": chat_intents,
+        "plain_english_examples": plain_english_examples,
+        "chat_route_map_ref": "owner_dashboard_chat_route_map.generated.json",
+        "next_step_rows_ref": "ui1r2r1_next_step.generated.json",
+        "workbench_prefill_and_input_states": {
+            **_lifecycle_fields("workbench_prefill_and_input_states", upstream="owner_dashboard_trade_workbench.generated.json", downstream=renderer_ref),
+            "field_rows": field_rows,
+            "state_progression": "input_required -> review_required after valid owner input; optional_input remains optional; provider_pending remains provider_pending.",
+            "plain_english_detail_required": True,
+            "max_budget_or_hold_duration_required": True,
+        },
+        "agent_operations_projection": agent_rows,
+        "workflow_queue_projection": workflow_rows,
+        "receipt_preview_projection": receipt_rows,
+        "online_research_provider_pending_preview": online_preview,
+        "owner_command_preview_actions": owner_command_rows,
+        "qku_formula_agent_route_gap_projection": route_gap_rows,
+        "thin_module_import_graph": {
+            **_lifecycle_fields("thin_module_import_graph", upstream=builder_ref, downstream=renderer_ref),
+            "thin_modules_added": False,
+            "renderer_imports_thin_feature_modules": False,
+            "renderer_consumes_central_bundle": True,
+            "renderer_consumes": "central generated OwnerDashboardStateV1 + ui1r2r4 semantic bundle projection only",
+        },
+        "anti_scatter_discovery_policy": {
+            **_lifecycle_fields("anti_scatter_discovery_policy", upstream=validator_ref, downstream=tests_ref),
+            "no_component_local_education_options_ranges_theme_chat_agent_workflow_receipt_semantics": True,
+            "component_local_education_paragraphs": False,
+            "component_local_dropdown_option_arrays": False,
+            "component_local_chat_preset_arrays": False,
+            "component_local_action_applicability_maps": False,
+            "component_local_workbench_range_rules": False,
+            "component_local_theme_color_literals": False,
+            "component_local_localStorage_writes": False,
+            "component_local_agent_roster_rows": False,
+            "component_local_workflow_stage_arrays": False,
+            "component_local_receipt_class_definitions": False,
+            "component_local_provider_pending_copy": False,
+            "allowed_central_files": [
+                builder_ref,
+                validator_ref,
+                "docs/master_plan/generated/pr169_dash1/ui/ui1r2r4_owner_semantic_bundle.generated.json",
+                f"docs/master_plan/generated/pr169_dash1/{R2R4_SUBDIR_NAME}/{R2R4_MANIFEST_FILE}",
+            ],
+        },
+        "owned_generated_prefix": f"docs/master_plan/generated/pr169_dash1/{R2R4_SUBDIR_NAME}/",
+        "broad_pr169_ui_generated_artifact_justification": [
+            {
+                "shared_artifact_path": "docs/master_plan/generated/pr169_dash1/ui/owner_dashboard_review_data.generated.json",
+                "why_r2r4_subprefix_was_not_sufficient": "The existing renderer boot contract consumes this central read model.",
+                "central_builder_owns_it": builder_ref,
+                "validator_checks_it": validator_ref,
+                "ui_consumes_it": renderer_ref,
+                "unrelated_generated_churn": False,
+            },
+            {
+                "shared_artifact_path": "docs/master_plan/generated/pr169_dash1/ui/owner_dashboard_review_bootstrap.generated.js",
+                "why_r2r4_subprefix_was_not_sufficient": "The static HTML loads one bootstrap payload for the existing dashboard state.",
+                "central_builder_owns_it": builder_ref,
+                "validator_checks_it": validator_ref,
+                "ui_consumes_it": renderer_ref,
+                "unrelated_generated_churn": False,
+            },
+        ],
+        "playwright_screenshots": screenshot_paths,
+        "no_runtime_authority": {
+            "no_SVC1_runtime": True,
+            "no_live_LLM": True,
+            "no_online_search_runtime": True,
+            "no_real_QTT_agent_execution": True,
+            "no_real_replay_paper_live_execution": True,
+            "no_replay_paper_live_execution": True,
+            "no_connector_private_cash_reads": True,
+            "no_source_truth_acceptance": True,
+            "no_direct_venue_submit": True,
+            "no_Execution_Router_release": True,
+            "no_QTT_SHA_or_AtomicRows_hash_authority": True,
+            "no_profit_guarantee": True,
+        },
+    }
+
+
 def _build_review_data(base: Path, master_plan: Path) -> tuple[dict[str, Any], dict[str, Any]]:
     resolver = OwnerSurfaceResolver(base)
     registry_rows = resolver.registry.rows
@@ -5061,6 +5642,12 @@ def _build_review_data(base: Path, master_plan: Path) -> tuple[dict[str, Any], d
         base_ref=_repo_ref(base),
     )
     r2_artifacts = _build_ui1r2_artifacts(widget_manifest, trade_workbench)
+    r2r4_bundle = _build_ui1r2r4_semantic_bundle(
+        trade_workbench=trade_workbench,
+        next_step=r2_artifacts["ui1r2r1_next_step.generated.json"],
+        chat_route_map=chat_route_map,
+        r2_artifacts=r2_artifacts,
+    )
     charts = {
         "chart_contracts": chart_contracts,
         "interactive_chart_registry": interactive_charts,
@@ -5326,6 +5913,7 @@ def _build_review_data(base: Path, master_plan: Path) -> tuple[dict[str, Any], d
         "ui1r2r3_no_runtime_no_scattering": r2_artifacts["ui1r2r3_no_runtime_no_scattering.report.json"],
         "ui1r2r3_online_owner_copy_audit": r2_artifacts["ui1r2r3_online_owner_copy_audit.report.json"],
         "ui1r2r3_playwright": r2_artifacts["ui1r2r3_playwright.report.json"],
+        "ui1r2r4_semantic_bundle": r2r4_bundle,
     }
     for key in REQUIRED_TOP_LEVEL_KEYS:
         review_data.setdefault(key, {})
@@ -5495,6 +6083,7 @@ def _build_review_data(base: Path, master_plan: Path) -> tuple[dict[str, Any], d
             "manual_edit_allowed": False,
             "post_launch_one_place_modification_workflow_preserved": True,
         },
+        "ui1r2r4_owner_semantic_bundle.generated.json": r2r4_bundle,
     }
     artifacts.update(contract_views)
     artifacts.update(r1_artifacts)
@@ -5519,6 +6108,11 @@ def build_ui(base: Path, repo_root: Path) -> dict[str, Any]:
         if payload is None:
             payload = {"meta": _ui_meta({"artifact_id": f"UI1_{Path(file_name).stem.upper()}"})}
         _write_json(ui_dir / file_name, payload)
+    r2r4_dir = base / R2R4_SUBDIR_NAME
+    _write_json(
+        r2r4_dir / R2R4_MANIFEST_FILE,
+        review_data["ui1r2r4_semantic_bundle"]["centralization_manifest"],
+    )
     return {
         "artifact_id": "UI1_OWNER_DASHBOARD_BUILD_SUMMARY",
         "status": "BUILT",
@@ -5526,6 +6120,7 @@ def build_ui(base: Path, repo_root: Path) -> dict[str, Any]:
         "boot_json": repo_posix(ui_dir / BOOT_JSON),
         "boot_js": repo_posix(ui_dir / BOOT_JS),
         "generated_ui_artifact_count": len(UI_ARTIFACT_FILES) + 2,
+        "r2r4_manifest": repo_posix(r2r4_dir / R2R4_MANIFEST_FILE),
         "registry_row_count": review_data["meta"]["registry_row_count"],
         "decision_queue_count": review_data["meta"]["decision_queue_count"],
         "actionable_card_count": review_data["meta"]["actionable_card_count"],
