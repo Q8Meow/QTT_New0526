@@ -2,6 +2,7 @@ from pathlib import Path
 
 from tools import run_validation_gates as runner
 from tools import validation_inventory as inventory
+from tools import changed_area_validation_router as router
 from tools.changed_area_validation_router import (
     RouterInput,
     build_router_result,
@@ -225,7 +226,21 @@ def test_router_output_is_deterministic():
     assert first.to_json_dict() == second.to_json_dict()
 
 
-def test_pr152_decision_triggers_for_generated_report_count_changes():
+def test_pr152_decision_is_clean_after_currentization_counts_match():
+    result = _pull_request_result(
+        "docs/master_plan/generated/PR208_CIRuntimeRationalizationSummary.report.json"
+    )
+
+    assert result.pr152_currentization_required is False
+    assert "matches filesystem counts" in result.pr152_currentization_reason
+
+
+def test_pr152_decision_triggers_when_currentization_report_is_stale(monkeypatch):
+    monkeypatch.setattr(
+        router,
+        "_pr152_currentization_report_matches_filesystem",
+        lambda _repo_root: False,
+    )
     result = _pull_request_result(
         "docs/master_plan/generated/PR208_CIRuntimeRationalizationSummary.report.json"
     )

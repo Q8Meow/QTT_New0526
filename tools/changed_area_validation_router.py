@@ -220,6 +220,49 @@ def _is_pr152_tracked(path: str) -> bool:
     )
 
 
+def _current_pr152_inventory_counts(repo_root: Path) -> dict[str, int]:
+    generated_root = repo_root / "docs/master_plan/generated"
+    tests_root = repo_root / "tests"
+    tools_root = repo_root / "tools"
+    return {
+        "generated_report_count": sum(1 for path in generated_root.rglob("*") if path.is_file())
+        if generated_root.exists()
+        else 0,
+        "test_file_count": sum(1 for path in tests_root.rglob("*.py") if path.is_file())
+        if tests_root.exists()
+        else 0,
+        "validator_tool_count": sum(
+            1
+            for path in tools_root.glob("validate_*.py")
+            if path.is_file()
+        )
+        if tools_root.exists()
+        else 0,
+    }
+
+
+def _pr152_currentization_report_matches_filesystem(repo_root: Path) -> bool:
+    report_path = (
+        repo_root
+        / "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json"
+    )
+    if not report_path.exists():
+        return False
+    try:
+        report = json.loads(report_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return False
+    current = _current_pr152_inventory_counts(repo_root)
+    generated = report.get("generated_report_consistency_audit", {})
+    tests = report.get("schema_fixture_test_consistency_audit", {})
+    validators = report.get("validator_tool_registry_audit", {})
+    return (
+        generated.get("generated_report_count") == current["generated_report_count"]
+        and tests.get("test_file_count") == current["test_file_count"]
+        and validators.get("validator_tool_count") == current["validator_tool_count"]
+    )
+
+
 def _classify_changed_files(
     changed_files: Sequence[str],
 ) -> tuple[
@@ -353,12 +396,15 @@ def build_router_result(router_input: RouterInput) -> RouterResult:
         validator_id: "unaffected by changed-area router; still runs on main/nightly/manual full"
         for validator_id in skipped
     }
-    pr152_required = any(_is_pr152_tracked(path) for path in changed_files)
-    pr152_reason = (
-        "PR152-tracked generated report/tool inventory changed"
-        if pr152_required
-        else "No PR152-tracked file, generated report count, or currentization tool changed"
-    )
+    pr152_tracked_changed = any(_is_pr152_tracked(path) for path in changed_files)
+    pr152_clean = _pr152_currentization_report_matches_filesystem(router_input.repo_root)
+    pr152_required = pr152_tracked_changed and not pr152_clean
+    if pr152_required:
+        pr152_reason = "PR152-tracked generated report/tool inventory changed"
+    elif pr152_tracked_changed:
+        pr152_reason = "PR152-tracked inventory changed and currentization report matches filesystem counts"
+    else:
+        pr152_reason = "No PR152-tracked file, generated report count, or currentization tool changed"
     cross_platform_required = bool(
         touched_generated_reports
         or any(by_id[validator_id].cross_platform_sensitive for validator_id in required)

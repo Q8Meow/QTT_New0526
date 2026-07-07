@@ -1,0 +1,24 @@
+{
+  "acceptance_state": "PASS",
+  "allowed_paths": [
+    "tools/build_pr169_readiness1.py",
+    "tools/validate_pr169_readiness1.py",
+    "tests/pr169_readiness1/test_pr169_readiness1.py",
+    "src/qtt/readiness/pr169_readiness1_resolvers.py::READINESS1_PREFIX_ONLY"
+  ],
+  "authoritative_source": "docs/master_plan/generated/pr169_readiness1/agent_readiness_registry.jsonl",
+  "blocked_paths": [],
+  "builder_name": "tools/build_pr169_readiness1.py",
+  "generated_from": "docs/master_plan/generated/pr169_readiness1/agent_readiness_registry.jsonl",
+  "manual_edit_allowed": false,
+  "prompt_version": "v4.3.1",
+  "report_type": "NO_RAW_JSONL_RUNTIME_SCAN_REPORT",
+  "result": "PASS",
+  "scanned_paths": [
+    "tools/build_pr169_readiness1.py",
+    "tools/validate_pr169_readiness1.py",
+    "src/qtt/readiness/pr169_readiness1_resolvers.py",
+    "tests/pr169_readiness1/test_pr169_readiness1.py"
+  ],
+  "validator_name": "tools/validate_pr169_readiness1.py"
+}
