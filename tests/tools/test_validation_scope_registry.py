@@ -60,6 +60,7 @@ PR169_DASH1_UI1_R2_R2_BRANCH = registry.PR169_DASH1_UI1_R2_R2_BRANCH
 PR169_DASH1_UI1_R2_R3_BRANCH = registry.PR169_DASH1_UI1_R2_R3_BRANCH
 PR169_DASH1_UI1_R2_R4_BRANCH = registry.PR169_DASH1_UI1_R2_R4_BRANCH
 PR169_DASH1_UI1_R2_R5_BRANCH = registry.PR169_DASH1_UI1_R2_R5_BRANCH
+PR169_DASH1_UI1_R2_R6_BRANCH = registry.PR169_DASH1_UI1_R2_R6_BRANCH
 FIXTURE_BRANCH = registry.VALIDATION_FIXTURE_BRANCH
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
@@ -114,6 +115,10 @@ def test_pr168_allowed_paths_pass_on_real_branch(path: str) -> None:
         "tests/pr168_rp5c/test_rp5c_input_integrity.py",
         "docs/master_plan/generated/pr169_dash1/ui1_r2_r5/owner_visual_qa_truth_repair.generated.json",
         "docs/master_plan/generated/pr169_dash1/ui1_r2_r5/centralization_manifest.generated.json",
+        "docs/master_plan/generated/pr169_dash1/ui1_r2r6/truth.generated.json",
+        "docs/master_plan/generated/pr169_dash1/ui1_r2r6/centralization_manifest.json",
+        "docs/master_plan/generated/pr169_dash1/ui1_r2r6/playwright_visual_smoke.report.json",
+        "tests/pr169_dash1_ui1/test_ui1r2r6_truth.py",
         "tests/fail_closed/test_no_runtime_artifacts_strict.py",
         "tests/source_evidence/test_source_fact_binding_connector_semantic_readiness_static.py",
         "tools/run_validation_gates.py",
@@ -131,6 +136,7 @@ def test_pr169_dash1_allowed_paths_pass_on_real_branch(path: str) -> None:
     assert registry.is_pr_scoped_changed_path_allowed(PR169_DASH1_UI1_R2_R3_BRANCH, path)
     assert registry.is_pr_scoped_changed_path_allowed(PR169_DASH1_UI1_R2_R4_BRANCH, path)
     assert registry.is_pr_scoped_changed_path_allowed(PR169_DASH1_UI1_R2_R5_BRANCH, path)
+    assert registry.is_pr_scoped_changed_path_allowed(PR169_DASH1_UI1_R2_R6_BRANCH, path)
     assert registry.is_pr_scoped_changed_path_allowed(FIXTURE_BRANCH, path)
 
 
@@ -163,6 +169,10 @@ def test_pr169_dash1_forbidden_paths_fail(path: str) -> None:
     )
     assert not registry.is_pr_scoped_changed_path_allowed(
         PR169_DASH1_UI1_R2_R5_BRANCH,
+        path,
+    )
+    assert not registry.is_pr_scoped_changed_path_allowed(
+        PR169_DASH1_UI1_R2_R6_BRANCH,
         path,
     )
 

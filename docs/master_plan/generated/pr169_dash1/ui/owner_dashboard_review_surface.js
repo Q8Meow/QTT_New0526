@@ -16,7 +16,7 @@ const THEME_TO_DATASET = {
   LIGHT_PRO: "light",
   LOW_GLARE: "low_glare",
   HIGH_CONTRAST: "high_contrast",
-  CUSTOM: "dark"
+  CUSTOM: "custom"
 };
 
 // Source-level validator anchors: DashboardSystem, OwnerDashboardStateV1,
@@ -74,7 +74,8 @@ const DASHBOARD_DATA = window.QTT_OWNER_DASHBOARD_DATA || {
   ui1r2r3_theme_interaction_accessibility: {},
   ui1r2r3_workbench_options_ranges: { range_policy: {}, option_catalog: {} },
   ui1r2r4_semantic_bundle: { education_catalog: [], chat_qtt_guide_intents: [], field_semantics: [], agent_operations_projection: [], workflow_queue_projection: [], receipt_preview_projection: [] },
-  ui1r2r5_visual_qa_truth_repair: { screenshot_proof_registry: [], owner_drawer_policy: {}, chart_tooltip_policy: {}, mobile_navigation_policy: {}, more_actions_policy: {} }
+  ui1r2r5_visual_qa_truth_repair: { screenshot_proof_registry: [], owner_drawer_policy: {}, chart_tooltip_policy: {}, mobile_navigation_policy: {}, more_actions_policy: {} },
+  ui1r2r6_truth_repair: { control_effect_proof_matrix: [], screenshot_proof_registry: [], chart_registration_policy: {}, market_taxonomy_contract: {} }
 };
 
 const RANGES = ["1D", "1W", "1M", "3M", "YTD", "1Y", "ALL"];
@@ -129,6 +130,43 @@ function titleCase(text) {
     .join(" ");
 }
 
+function normalizeHex(value, fallback) {
+  const text = String(value || "").trim();
+  return /^#[0-9a-f]{6}$/i.test(text) ? text.toUpperCase() : fallback;
+}
+
+function hexToRgb(value) {
+  const hex = normalizeHex(value, "#000000").slice(1);
+  return {
+    r: parseInt(hex.slice(0, 2), 16),
+    g: parseInt(hex.slice(2, 4), 16),
+    b: parseInt(hex.slice(4, 6), 16)
+  };
+}
+
+function relativeLuminance(hex) {
+  const rgb = hexToRgb(hex);
+  const linear = [rgb.r, rgb.g, rgb.b].map((channel) => {
+    const value = channel / 255;
+    return value <= 0.03928 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
+  });
+  return 0.2126 * linear[0] + 0.7152 * linear[1] + 0.0722 * linear[2];
+}
+
+function contrastRatio(a, b) {
+  const l1 = relativeLuminance(a);
+  const l2 = relativeLuminance(b);
+  const lighter = Math.max(l1, l2);
+  const darker = Math.min(l1, l2);
+  return (lighter + 0.05) / (darker + 0.05);
+}
+
+function readableTextFor(background, preferred = "#F8FAFC") {
+  const preferredText = normalizeHex(preferred, "#F8FAFC");
+  if (contrastRatio(background, preferredText) >= 4.5) return preferredText;
+  return contrastRatio(background, "#F8FAFC") >= contrastRatio(background, "#0F172A") ? "#F8FAFC" : "#0F172A";
+}
+
 const OwnerSettings = (() => {
   const defaults = {
     theme_preset: "DARK_PRO",
@@ -139,6 +177,17 @@ const OwnerSettings = (() => {
     warning_high_confirmation_color: "#F97316",
     provider_pending_color: "#64748B",
     success_color: "#16A34A",
+    custom_page_background_color: "#05070A",
+    custom_surface_background_color: "#0B0F14",
+    custom_card_background_color: "#101722",
+    custom_primary_text_color: "#F8FAFC",
+    custom_accent_color: "#22C55E",
+    custom_input_background_color: "#0B0F14",
+    custom_chart_axis_color: "#94A3B8",
+    custom_chart_grid_color: "#334155",
+    custom_chart_tooltip_color: "#0F172A",
+    density: "comfortable",
+    card_density: "comfortable",
     high_contrast: false,
     chart_default_timeframe: "1M",
     chart_crosshair: true,
@@ -220,16 +269,52 @@ const OwnerSettings = (() => {
 
   function applyCssSettings() {
     const root = document.documentElement;
+    const density = ["compact", "comfortable"].includes(settings.density) ? settings.density : "comfortable";
+    const cardDensity = ["compact", "comfortable"].includes(settings.card_density) ? settings.card_density : density;
     root.style.setProperty("--owner-input-required", settings.input_required_color);
     root.style.setProperty("--owner-review-required", settings.review_required_color);
     root.style.setProperty("--owner-high-confirmation", settings.warning_high_confirmation_color);
     root.style.setProperty("--owner-provider-pending", settings.provider_pending_color);
     root.style.setProperty("--owner-success", settings.success_color);
+    root.style.setProperty("--owner-chart-axis", normalizeHex(settings.custom_chart_axis_color, "#94A3B8"));
+    root.style.setProperty("--owner-chart-grid", normalizeHex(settings.custom_chart_grid_color, "#334155"));
+    root.style.setProperty("--owner-chart-tooltip", normalizeHex(settings.custom_chart_tooltip_color, "#0F172A"));
     root.dataset.textSize = TEXT_SIZE_VALUES.includes(settings.text_size) ? settings.text_size : "default";
-    if (settings.high_contrast) {
+    root.dataset.ownerDensity = density;
+    if (document.body) {
+      document.body.dataset.ownerDensity = density;
+      document.body.dataset.cardDensity = cardDensity;
+      document.body.dataset.ownerDensityPolicy = "OwnerDensityPolicyV1";
+      document.body.dataset.ownerThemeRegistry = "OwnerThemeTokenRegistryV1";
+    }
+    if (settings.theme_preset === "CUSTOM" && !settings.high_contrast) {
+      const page = normalizeHex(settings.custom_page_background_color, "#05070A");
+      const panel = normalizeHex(settings.custom_surface_background_color, "#0B0F14");
+      const card = normalizeHex(settings.custom_card_background_color, "#101722");
+      const preferredText = normalizeHex(settings.custom_primary_text_color, "#F8FAFC");
+      const readableText = readableTextFor(card, preferredText);
+      const accent = normalizeHex(settings.custom_accent_color, "#22C55E");
+      root.dataset.theme = "custom";
+      root.style.setProperty("--qtt-bg", page);
+      root.style.setProperty("--qtt-bg-panel", panel);
+      root.style.setProperty("--qtt-bg-card", card);
+      root.style.setProperty("--qtt-soft", panel);
+      root.style.setProperty("--qtt-hover", card);
+      root.style.setProperty("--qtt-text", readableText);
+      root.style.setProperty("--qtt-muted", readableText === "#0F172A" ? "#334155" : "#CBD5E1");
+      root.style.setProperty("--qtt-border", contrastRatio(card, readableText) >= 7 ? readableText : "#64748B");
+      root.style.setProperty("--qtt-green", accent);
+      root.style.setProperty("--qtt-blue", accent);
+      root.style.setProperty("--owner-contrast-corrected-text", readableText);
+      root.style.setProperty("--owner-custom-input-bg", normalizeHex(settings.custom_input_background_color, panel));
+    } else if (settings.high_contrast) {
+      ["--qtt-bg", "--qtt-bg-panel", "--qtt-bg-card", "--qtt-soft", "--qtt-hover", "--qtt-text", "--qtt-muted", "--qtt-border", "--qtt-green", "--qtt-blue", "--owner-contrast-corrected-text", "--owner-custom-input-bg"].forEach((name) => root.style.removeProperty(name));
       root.dataset.theme = "high_contrast";
+    } else {
+      ["--qtt-bg", "--qtt-bg-panel", "--qtt-bg-card", "--qtt-soft", "--qtt-hover", "--qtt-text", "--qtt-muted", "--qtt-border", "--qtt-green", "--qtt-blue", "--owner-contrast-corrected-text", "--owner-custom-input-bg"].forEach((name) => root.style.removeProperty(name));
     }
     document.body.dataset.sidebarCollapsed = settings.sidebar_collapsed ? "true" : "false";
+    applyChartSettings();
   }
 
   read();
@@ -718,6 +803,7 @@ function ownerControls(row, surface = "trade_workbench") {
     .filter((option) => option.state === "ENABLED_LOCAL_PREVIEW" || option.state === "PROVIDER_PENDING")
     .filter((option) => {
       const optionText = `${option.owner_label || ""} ${option.next_step_id || ""}`.toLowerCase();
+      if (/technical details|open technical details/.test(optionText)) return false;
       if (!chartCapable && /chart|drilldown/.test(optionText)) return false;
       if (!(tcaCapable && ["chart_frame", "trade_workbench"].includes(surface)) && /tca|cost/.test(optionText)) return false;
       if (!(qkuCapable && ["chart_frame", "trade_workbench", "qku_formula"].includes(surface)) && /qku|formula/.test(optionText)) return false;
@@ -739,7 +825,7 @@ function ownerControls(row, surface = "trade_workbench") {
         data-action-state="${safe(primary.state)}">
         ${safe(primary.owner_label)}
       </button>
-      <details class="next-action-menu" data-owner-next-action-menu="${safe(surface)}" data-secondary-actions-collapsed="true" data-r2r5-action-cap="owner-contextual">
+      <details class="next-action-menu" data-owner-next-action-menu="${safe(surface)}" data-secondary-actions-collapsed="true" data-r2r5-action-cap="owner-contextual" data-action-alias-policy="OwnerActionRegistryAliasPolicyV1">
         <summary>More actions</summary>
         <div class="action-menu-body">
           <p><strong>Recommended:</strong> ${safe(recommendedLabel)}</p>
@@ -1018,10 +1104,10 @@ function setTheme(mode, persist = true) {
   qsa("[data-theme-choice]").forEach((button) => {
     button.setAttribute("aria-pressed", button.dataset.themeChoice === choice ? "true" : "false");
   });
-  if (choice === "HIGH_CONTRAST") OwnerSettings.set("high_contrast", true, false);
-  else OwnerSettings.set("high_contrast", false, false);
-  if (!persist) return;
-  OwnerSettings.set("theme_preset", choice);
+  OwnerSettings.set("theme_preset", choice, false);
+  OwnerSettings.set("high_contrast", choice === "HIGH_CONTRAST", false);
+  OwnerSettings.applyCssSettings();
+  if (persist) OwnerSettings.persist();
 }
 
 function initTopPanels() {
@@ -1216,7 +1302,7 @@ function renderOverview() {
   const home = DASHBOARD_DATA.ui1r1_home || {};
   const heroCards = asList(home.hero_cards);
   qs("#overviewCards").innerHTML = heroCards.map((row) => `
-    <article class="metric-card card owner-hero-card" tabindex="0" data-search="${safe(DashboardSystem.ownerTitle(row))}">
+    <article class="metric-card card owner-hero-card" tabindex="0" data-search="${safe(DashboardSystem.ownerTitle(row))}" data-owner-theme-consumer="custom-theme-token" data-owner-density-policy="OwnerDensityPolicyV1">
       <span class="eyebrow">${safe(DashboardSystem.status(row))}</span>
       <span class="value">${safe(DashboardSystem.ownerTitle(row, "Owner status"))}</span>
       <p>${safe(DashboardSystem.summary(row))}</p>
@@ -1317,6 +1403,9 @@ function chartSvg(row, index) {
     const labels = ["gross", "fee", "spread", "slippage", "impact", "latency", "net"];
     return `
       <svg class="chart-svg" viewBox="0 0 420 220" role="img" aria-label="${safe(title)} waterfall frame">
+        <line x1="36" y1="144" x2="392" y2="144" class="grid-line"></line>
+        <line x1="36" y1="106" x2="392" y2="106" class="grid-line"></line>
+        <line x1="36" y1="68" x2="392" y2="68" class="grid-line"></line>
         <line x1="36" y1="182" x2="392" y2="182" class="axis"></line>
         <line x1="36" y1="28" x2="36" y2="182" class="axis"></line>
         ${labels.map((name, i) => {
@@ -1324,7 +1413,7 @@ function chartSvg(row, index) {
           const h = [92, 36, 44, 52, 48, 38, 62][i];
           const y = 182 - h;
           const cls = i === 0 || i === 6 ? "bar-positive" : "bar-negative";
-          return `<rect x="${x}" y="${y}" width="30" height="${h}" class="${cls}"><title>${safe(name)} pending component</title></rect><text x="${x + 15}" y="204" text-anchor="middle">${safe(name)}</text>`;
+          return `<rect x="${x}" y="${y}" width="30" height="${h}" class="${cls}"><title>${safe(name)} pending component</title></rect><text class="axis-label" x="${x + 15}" y="204" text-anchor="middle">${safe(name)}</text>`;
         }).join("")}
       </svg>
     `;
@@ -1368,13 +1457,16 @@ function chartSvg(row, index) {
   }
   return `
     <svg class="chart-svg" viewBox="0 0 420 220" role="img" aria-label="${safe(title)} line frame">
+      <line x1="36" y1="144" x2="392" y2="144" class="grid-line"></line>
+      <line x1="36" y1="106" x2="392" y2="106" class="grid-line"></line>
+      <line x1="36" y1="68" x2="392" y2="68" class="grid-line"></line>
       <line x1="36" y1="182" x2="392" y2="182" class="axis"></line>
       <line x1="36" y1="28" x2="36" y2="182" class="axis"></line>
       <polyline points="42,156 98,126 154,138 210,88 266,106 322,72 382,92" class="series-line"></polyline>
       <polyline points="42,174 98,164 154,168 210,142 266,150 322,132 382,136" class="series-line muted-line"></polyline>
       ${[["42","156"],["98","126"],["154","138"],["210","88"],["266","106"],["322","72"],["382","92"]].map(([x, y], i) => `<circle cx="${x}" cy="${y}" r="5" class="series-point"><title>${safe(title)} route point ${i + 1}</title></circle>`).join("")}
-      <text x="36" y="206">time</text>
-      <text x="12" y="34">state</text>
+      <text class="axis-label" x="36" y="206">time</text>
+      <text class="axis-label" x="12" y="34">state</text>
     </svg>
   `;
 }
@@ -1386,8 +1478,14 @@ function renderChartPanel(row, index) {
   const renderState = row.data_chart_render_state || row.chart_render_state || "PROVIDER_PENDING_VISUAL_FRAME";
   const sourceRef = row.data_chart_source_ref || row.source_artifact_ref || label(row.source_artifact_refs);
   const providerStage = row.data_provider_stage || row.provider_stage || row.dataset_provider_stage || "PRETRADE1";
+  const registered = row.chart_registered !== false;
+  const axisEnabled = OwnerSettings.get("chart_axis_labels") !== false;
+  const crosshairEnabled = OwnerSettings.get("chart_crosshair") !== false;
+  const gridEnabled = OwnerSettings.get("chart_grid_lines") !== false;
+  const tooltipsEnabled = OwnerSettings.get("chart_tooltips") !== false;
+  const interactionAttr = registered ? 'data-chart-interaction="OwnerChartInteractionPolicyV1" data-chart-setting-policy="OwnerChartSettingPolicyV1"' : 'data-chart-setting-policy="OwnerChartSettingPolicyV1"';
   return `
-    <article class="chart-panel" data-search="${safe(title)}" data-chart-id="${safe(chartId)}" data-chart-kind="${safe(kind)}" data-chart-render-state="${safe(renderState)}" data-chart-source-ref="${safe(sourceRef)}" data-provider-stage="${safe(providerStage)}" data-authority-boundary="${safe(row.data_authority_boundary || row.authority_boundary || row.authority_boundary_ref || "")}" data-interaction-state="provider_pending" data-chart-data-integrity="provider_pending_no_value">
+    <article class="chart-panel" data-search="${safe(title)}" data-chart-id="${safe(chartId)}" data-chart-kind="${safe(kind)}" data-chart-render-state="${safe(renderState)}" data-chart-source-ref="${safe(sourceRef)}" data-provider-stage="${safe(providerStage)}" data-authority-boundary="${safe(row.data_authority_boundary || row.authority_boundary || row.authority_boundary_ref || "")}" data-interaction-state="provider_pending" data-chart-data-integrity="provider_pending_no_value" data-chart-registered="${registered ? "true" : "false"}" data-axis-labels-enabled="${axisEnabled ? "true" : "false"}" data-crosshair-enabled="${crosshairEnabled ? "true" : "false"}" data-grid-lines-enabled="${gridEnabled ? "true" : "false"}" data-tooltips-enabled="${tooltipsEnabled ? "true" : "false"}">
       <h3>${safe(title)}</h3>
       <p>${safe(DashboardSystem.summary(row, "Waiting for provider receipts. No fake values are shown."))}</p>
       <div class="chart-axis-labels" aria-label="${safe(title)} axis labels">
@@ -1397,9 +1495,9 @@ function renderChartPanel(row, index) {
       <div class="mini-range" role="group" aria-label="${safe(title)} local range controls">
         ${(row.supported_time_ranges || RANGES).slice(0, 7).map((range, i) => `<button class="seg-button ${i === 0 ? "active" : ""}" type="button" data-local-range="${safe(range)}" aria-pressed="${i === 0 ? "true" : "false"}">${safe(range)}</button>`).join("")}
       </div>
-      <div class="chart-canvas provider-frame" role="img" tabindex="0" aria-label="${safe(title)} interactive chart contract" data-chart-interaction="OwnerChartInteractionPolicyV1" data-selected-range="${safe((row.supported_time_ranges || RANGES)[0] || "1D")}" data-tooltip-state="hidden">
+      <div class="chart-canvas provider-frame" role="img" tabindex="0" aria-label="${safe(title)} interactive chart contract" ${interactionAttr} data-chart-registered="${registered ? "true" : "false"}" data-axis-labels-enabled="${axisEnabled ? "true" : "false"}" data-crosshair-enabled="${crosshairEnabled ? "true" : "false"}" data-grid-lines-enabled="${gridEnabled ? "true" : "false"}" data-tooltips-enabled="${tooltipsEnabled ? "true" : "false"}" data-selected-range="${safe((row.supported_time_ranges || RANGES)[0] || "1D")}" data-tooltip-state="hidden">
         ${chartSvg(row, index)}
-        <div class="chart-interaction-layer" aria-hidden="true"></div>
+        ${registered ? `<div class="chart-interaction-layer" aria-hidden="true"></div>
         <div class="chart-crosshair"></div>
         <div class="chart-focus-point"></div>
         <div class="chart-tooltip" role="status" data-chart-tooltip-visible="false" aria-hidden="true">
@@ -1409,7 +1507,7 @@ function renderChartPanel(row, index) {
           Value: provider receipts pending<br>
           Unit: net cash/state value unavailable until receipt-backed<br>
           Status: no fake PnL, cash, fill, order, or live values shown
-        </div>
+        </div>` : `<div class="non-chart-tooltip-policy" data-non-chart-tooltip-policy="no_chart_point_tooltip_non_chart_visual">No chart point tooltip on this provider-pending visual.</div>`}
         <div class="provider-overlay">Waiting for provider receipts. No fake values rendered.</div>
       </div>
       <div class="chart-value-panel" data-chart-value-panel="provider_pending_no_value">
@@ -1422,8 +1520,8 @@ function renderChartPanel(row, index) {
         <summary>Explain this chart</summary>
         <p>This chart shows the local route and visual frame. If it moves up or down later, QTT should compare costs, risk, capacity, and missing data before recommending a next step.</p>
       </details>
-      ${badges(row, ["chart drilldown"])}
-      ${ownerControls(row, "chart_frame")}
+      ${badges(row, [registered ? "chart drilldown" : "No chart point tooltip"])}
+      ${ownerControls(row, registered ? "chart_frame" : "portfolio")}
     </article>
   `;
 }
@@ -1440,10 +1538,39 @@ function hideChartTooltip(canvas) {
 }
 
 function hideAllChartTooltips(root = document) {
-  qsa(".chart-canvas[data-chart-interaction]", root).forEach((canvas) => hideChartTooltip(canvas));
+  qsa(".chart-canvas[data-chart-interaction][data-chart-registered='true']", root).forEach((canvas) => hideChartTooltip(canvas));
+}
+
+function applyChartSettings(root = document) {
+  const axisEnabled = OwnerSettings.get("chart_axis_labels") !== false;
+  const crosshairEnabled = OwnerSettings.get("chart_crosshair") !== false;
+  const gridEnabled = OwnerSettings.get("chart_grid_lines") !== false;
+  const tooltipsEnabled = OwnerSettings.get("chart_tooltips") !== false;
+  qsa(".chart-panel", root).forEach((panel) => {
+    panel.dataset.axisLabelsEnabled = axisEnabled ? "true" : "false";
+    panel.dataset.crosshairEnabled = crosshairEnabled ? "true" : "false";
+    panel.dataset.gridLinesEnabled = gridEnabled ? "true" : "false";
+    panel.dataset.tooltipsEnabled = tooltipsEnabled ? "true" : "false";
+  });
+  qsa(".chart-canvas", root).forEach((canvas) => {
+    canvas.dataset.axisLabelsEnabled = axisEnabled ? "true" : "false";
+    canvas.dataset.crosshairEnabled = crosshairEnabled ? "true" : "false";
+    canvas.dataset.gridLinesEnabled = gridEnabled ? "true" : "false";
+    canvas.dataset.tooltipsEnabled = tooltipsEnabled ? "true" : "false";
+    if (!tooltipsEnabled) {
+      const tooltip = qs(".chart-tooltip", canvas);
+      if (tooltip) {
+        tooltip.dataset.chartTooltipVisible = "false";
+        tooltip.setAttribute("aria-hidden", "true");
+      }
+    }
+  });
 }
 
 function updateChartFocus(canvas, clientX) {
+  if (!canvas || canvas.dataset.chartRegistered !== "true") return;
+  const tooltipsEnabled = canvas.dataset.tooltipsEnabled !== "false";
+  const crosshairEnabled = canvas.dataset.crosshairEnabled !== "false";
   const rect = canvas.getBoundingClientRect();
   const points = chartPointsFor();
   const localX = ((clientX - rect.left) / Math.max(rect.width, 1)) * 420;
@@ -1456,21 +1583,23 @@ function updateChartFocus(canvas, clientX) {
   const focus = qs(".chart-focus-point", canvas);
   const tooltip = qs(".chart-tooltip", canvas);
   const range = canvas.dataset.selectedRange || "1M";
-  if (crosshair) crosshair.style.left = `${xPercent}%`;
+  if (crosshair && crosshairEnabled) crosshair.style.left = `${xPercent}%`;
   if (focus) {
     focus.style.left = `${xPercent}%`;
     focus.style.top = `${yPercent}%`;
   }
   if (tooltip) {
-    tooltip.dataset.chartTooltipVisible = "true";
-    tooltip.setAttribute("aria-hidden", "false");
-    qs("[data-chart-tooltip-range]", tooltip).textContent = range;
-    qs("[data-chart-tooltip-bucket]", tooltip).textContent = nearest.bucket;
+    tooltip.dataset.chartTooltipVisible = tooltipsEnabled ? "true" : "false";
+    tooltip.setAttribute("aria-hidden", tooltipsEnabled ? "false" : "true");
+    if (tooltipsEnabled) {
+      qs("[data-chart-tooltip-range]", tooltip).textContent = range;
+      qs("[data-chart-tooltip-bucket]", tooltip).textContent = nearest.bucket;
+    }
   }
 }
 
 function wireChartInteractions(root = document) {
-  qsa(".chart-canvas[data-chart-interaction]", root).forEach((canvas) => {
+  qsa(".chart-canvas[data-chart-interaction][data-chart-registered='true']", root).forEach((canvas) => {
     if (canvas.dataset.chartWired === "true") return;
     canvas.dataset.chartWired = "true";
     canvas.dataset.tooltipState = "hidden";
@@ -1521,7 +1650,13 @@ function renderCharts() {
   qs("#chartGrid").innerHTML = rows.map(renderChartPanel).join("");
   qsa("#chartGrid .chart-panel").forEach((panel, index) => {
     panel.__qttRow = rows[index];
-    panel.addEventListener("click", () => openDrawer(DashboardSystem.ownerTitle(rows[index]), "Chart drilldown", rows[index], "chart_drilldown"));
+    const registered = rows[index] && rows[index].chart_registered !== false;
+    panel.addEventListener("click", () => openDrawer(
+      DashboardSystem.ownerTitle(rows[index]),
+      registered ? "Chart drilldown" : "Provider-pending visual",
+      rows[index],
+      registered ? "chart_drilldown" : "explain"
+    ));
   });
   qsa(".mini-range button").forEach((button) => {
     button.addEventListener("click", (event) => {
@@ -1539,6 +1674,7 @@ function renderCharts() {
       if (rangeLabel) rangeLabel.textContent = event.currentTarget.dataset.localRange;
     });
   });
+  applyChartSettings(qs("#chartGrid"));
   wireChartInteractions(qs("#chartGrid"));
 }
 
@@ -2319,6 +2455,75 @@ function settingsSections() {
   }));
 }
 
+function centralWorkbenchCatalog() {
+  const r2r2 = DASHBOARD_DATA.ui1r2r2_workbench_form || {};
+  const current = Object.keys(r2r2).length ? r2r2 : (DASHBOARD_DATA.trade_workbench || {});
+  return current.option_catalog || {};
+}
+
+function workbenchOptionRows(source) {
+  return asList(centralWorkbenchCatalog()[source]);
+}
+
+function workbenchOptionPairs(source, fallbackPairs = []) {
+  const rows = workbenchOptionRows(source);
+  if (!rows.length) return fallbackPairs;
+  return rows.map((row) => [row.option_id, row.owner_label]);
+}
+
+const MARKET_FAMILY_FALLBACK_OPTIONS = [
+  ["prediction_market", "Prediction Market"],
+  ["equities_stocks", "Equities / Stocks"],
+  ["crypto_spot_derivatives", "Crypto Spot & Derivatives"],
+  ["listed_options", "Listed Options"],
+  ["futures_commodities", "Futures & Commodities"],
+  ["fx_macro", "FX / Macro"],
+  ["fixed_income_rfq", "Fixed Income / RFQ"],
+  ["repo_securities_financing", "Repo / Securities Financing"],
+  ["cross_market_hedged_overlay", "Cross-Market / Hedged Overlay"],
+  ["other", "Other / Owner-Defined"]
+];
+
+function customThemeEditorHtml() {
+  if (OwnerSettings.get("theme_preset") !== "CUSTOM") return "";
+  const colorToken = (key, labelText, fallback) => `
+    <label>${safe(labelText)}
+      <input type="color" data-owner-setting="${safe(key)}" value="${safe(normalizeHex(OwnerSettings.get(key), fallback))}">
+    </label>
+  `;
+  const page = normalizeHex(OwnerSettings.get("custom_page_background_color"), "#05070A");
+  const card = normalizeHex(OwnerSettings.get("custom_card_background_color"), "#101722");
+  const preferred = normalizeHex(OwnerSettings.get("custom_primary_text_color"), "#F8FAFC");
+  const corrected = readableTextFor(card, preferred);
+  return `
+    <div class="custom-theme-editor" data-custom-theme-editor="OwnerCustomThemeTokenEditorV1" data-theme-token-registry="OwnerThemeTokenRegistryV1">
+      <p class="inline-validation">Custom theme uses the color tokens selected here. Text is auto-corrected if contrast would be unreadable.</p>
+      <div class="custom-theme-preview" data-owner-theme-consumer="custom-theme-token" style="--preview-page:${safe(page)};--preview-card:${safe(card)};--preview-text:${safe(corrected)};">
+        <span>Preview card</span>
+        <strong>Provider pending</strong>
+      </div>
+      <div class="contrast-state" data-contrast-guard="OwnerThemeTokenRegistryV1">
+        Contrast guard: ${safe(contrastRatio(card, corrected).toFixed(2))}:1 readable text token
+      </div>
+      ${colorToken("custom_page_background_color", "Page background", "#05070A")}
+      ${colorToken("custom_surface_background_color", "Surface / panel", "#0B0F14")}
+      ${colorToken("custom_card_background_color", "Surface / card", "#101722")}
+      ${colorToken("custom_primary_text_color", "Primary text or auto text mode", "#F8FAFC")}
+      ${colorToken("custom_accent_color", "Accent", "#22C55E")}
+      ${colorToken("custom_input_background_color", "Input background", "#0B0F14")}
+      ${colorToken("input_required_color", "Input required", "#F59E0B")}
+      ${colorToken("review_required_color", "Review required", "#2563EB")}
+      ${colorToken("warning_high_confirmation_color", "Warning / high confirmation", "#F97316")}
+      ${colorToken("provider_pending_color", "Provider pending", "#64748B")}
+      ${colorToken("success_color", "Success", "#16A34A")}
+      ${colorToken("custom_chart_axis_color", "Chart axis", "#94A3B8")}
+      ${colorToken("custom_chart_grid_color", "Chart grid", "#334155")}
+      ${colorToken("custom_chart_tooltip_color", "Chart tooltip", "#0F172A")}
+      <button class="text-command" type="button" data-custom-theme-reset="true">Reset custom colors</button>
+    </div>
+  `;
+}
+
 function settingControlHtml(sectionLabel) {
   const themeOptions = [
     ["DARK_PRO", "Dark Pro"],
@@ -2352,16 +2557,19 @@ function settingControlHtml(sectionLabel) {
   `;
   if (sectionLabel === "Appearance") {
     return select("theme_preset", "Theme preset", themeOptions)
+      + customThemeEditorHtml()
       + select("text_size", "Text size", TEXT_SIZE_VALUES.map((value) => [value, titleCase(value.replace("_", " "))]))
       + select("density", "Density", [["compact", "Compact"], ["comfortable", "Comfortable"]])
       + checkbox("reduced_motion", "Reduced motion");
   }
   if (sectionLabel === "Colors") {
-    return color("input_required_color", "Input required")
+    return `<p class="inline-validation">Custom theme uses the color tokens selected here when Theme preset is Custom.</p>`
+      + color("input_required_color", "Input required")
       + color("review_required_color", "Review required")
       + color("warning_high_confirmation_color", "Warning / high confirmation")
       + color("provider_pending_color", "Provider pending")
       + color("success_color", "Success")
+      + customThemeEditorHtml()
       + checkbox("high_contrast", "High contrast mode");
   }
   if (sectionLabel === "Layout") {
@@ -2378,7 +2586,7 @@ function settingControlHtml(sectionLabel) {
       + checkbox("chart_axis_labels", "Axis labels");
   }
   if (sectionLabel === "Workbench") {
-    return select("workbench_preferred_market", "Preferred market", [["prediction_market", "Prediction Market"], ["other", "Other"]])
+    return select("workbench_preferred_market", "Preferred market", workbenchOptionPairs("market_family", MARKET_FAMILY_FALLBACK_OPTIONS))
       + select("workbench_preferred_venue", "Preferred venue", [["qtt_decide", "Let QTT decide"], ["kalshi", "Kalshi"], ["polymarket", "Polymarket"], ["forecastex_ibkr", "FORECASTEX_IBKR"], ["other", "Other"]])
       + select("workbench_preferred_hold_unit", "Preferred hold unit", [["minutes", "minutes"], ["hours", "hours"], ["days", "days"], ["until_resolution", "until resolution"]])
       + select("workbench_preferred_maker_taker", "Maker/taker", [["maker_only", "maker-only"], ["maker_first_taker_fallback", "maker-first, taker fallback"], ["qtt_decide", "let QTT decide"]])
@@ -2397,7 +2605,7 @@ function settingControlHtml(sectionLabel) {
   if (sectionLabel === "Trading Preferences") {
     return `
       <p class="inline-validation">Preview/prefill only. These values do not create source truth, connector semantics, risk-pass truth, replay/paper evidence, live readiness, order authority, or Execution Router authority.</p>
-      ${select("trading_default_market", "Default market", [["prediction_market", "Prediction Market"], ["other", "Other"]])}
+      ${select("trading_default_market", "Default market", workbenchOptionPairs("market_family", MARKET_FAMILY_FALLBACK_OPTIONS))}
       ${select("trading_default_venue", "Default venue", [["qtt_decide", "Let QTT decide"], ["kalshi", "Kalshi"], ["polymarket", "Polymarket"], ["forecastex_ibkr", "FORECASTEX_IBKR"], ["other", "Other"]])}
       ${select("trading_default_risk_profile", "Risk profile", [["conservative_preview", "Conservative preview"], ["balanced_preview", "Balanced preview"], ["owner_custom_candidate", "Owner custom candidate"]])}
       ${select("trading_default_execution_preference", "Execution preference", [["maker_first_preview", "maker-first preview"], ["maker_only", "maker-only"], ["qtt_decide", "let QTT decide"]])}
@@ -2463,7 +2671,33 @@ function renderSettingsCenter(activeSection = "Appearance") {
       if (key === "dashboard_default_experience_mode") setExperienceMode(value, false);
       if (key === "chat_enter_to_send") setEnterToSend(value, false);
       if (key === "sidebar_collapsed") setSidebarCollapsed(value, false);
+      if (key === "density") OwnerSettings.set("card_density", value, false);
+      if (/^chart_/.test(key)) applyChartSettings();
+      if (key === "theme_preset" || key.startsWith("custom_") || key.endsWith("_color")) renderSettingsCenter(activeSection);
       updateSettingsOtherFields(body);
+    });
+  });
+  qsa("[data-custom-theme-reset]", body).forEach((button) => {
+    button.addEventListener("click", () => {
+      const resets = {
+        custom_page_background_color: "#05070A",
+        custom_surface_background_color: "#0B0F14",
+        custom_card_background_color: "#101722",
+        custom_primary_text_color: "#F8FAFC",
+        custom_accent_color: "#22C55E",
+        custom_input_background_color: "#0B0F14",
+        input_required_color: "#F59E0B",
+        review_required_color: "#2563EB",
+        warning_high_confirmation_color: "#F97316",
+        provider_pending_color: "#64748B",
+        success_color: "#16A34A",
+        custom_chart_axis_color: "#94A3B8",
+        custom_chart_grid_color: "#334155",
+        custom_chart_tooltip_color: "#0F172A"
+      };
+      Object.entries(resets).forEach(([key, value]) => OwnerSettings.set(key, value, false));
+      OwnerSettings.persist();
+      renderSettingsCenter(activeSection);
     });
   });
   updateSettingsOtherFields(body);
@@ -2667,7 +2901,12 @@ function renderChatAndTrade() {
     const ownerLabel = field.owner_label || label(fieldId);
     const hidden = field.shown_when_field ? 'data-hidden-until-other="true"' : "";
     const state = field.interaction_state || (field.required ? "input_required" : "optional_input");
-    const fieldAttrs = `data-workbench-field-shell="${safe(fieldId)}" data-interaction-state="${safe(state)}" data-field-initial-state="${safe(state)}" data-owner-color-proof="${safe(state)}" data-required="${field.required ? "true" : "false"}" data-source-category="${safe(field.source_category || "safe_ui_default")}" data-authority="${safe(field.authority || "local_preview_guardrail")}" ${hidden} data-shown-when-field="${safe(field.shown_when_field || "")}" data-shown-when-value="${safe(field.shown_when_value || "")}"`;
+    const r2r6Proof = ["market_family", "custom_market_family"].includes(fieldId)
+      ? 'data-r2r6-proof="market-other-group"'
+      : ["event_category", "custom_event_category"].includes(fieldId)
+        ? 'data-r2r6-proof="event-other-group"'
+        : "";
+    const fieldAttrs = `data-workbench-field-shell="${safe(fieldId)}" data-interaction-state="${safe(state)}" data-field-initial-state="${safe(state)}" data-owner-color-proof="${safe(state)}" data-required="${field.required ? "true" : "false"}" data-source-category="${safe(field.source_category || "safe_ui_default")}" data-authority="${safe(field.authority || "local_preview_guardrail")}" ${hidden} data-shown-when-field="${safe(field.shown_when_field || "")}" data-shown-when-value="${safe(field.shown_when_value || "")}" ${r2r6Proof}`;
     const labelHeader = `<span class="workbench-label-text">${safe(ownerLabel)}</span>${interactionBadge(state)}${field.source_category === "candidate_owner_custom" ? badge("candidate / local preview only", "gray") : ""}`;
     if (field.input_kind === "select" && field.option_source && options[field.option_source]) {
       return `
@@ -2708,7 +2947,8 @@ function renderChatAndTrade() {
         <span>TCA/no-trade/capacity/FDR/marginal-utility/regime/quantum route: provider-pending or gap route</span>
         <span>PR165-D2 agent role refs: routed or explicit gap</span>
       </div>
-      <div class="workbench-fields">
+      <div id="workbenchMarketFamilyStatus" class="inline-validation market-family-status" data-owner-workbench-catalog="OwnerWorkbenchOptionCatalogV1" data-market-family-status="stage1_default">Prediction Market: Stage-1 default. QTT can prepare local prediction-market trade-check previews.</div>
+      <div class="workbench-fields" data-owner-density-policy="OwnerDensityPolicyV1">
         ${fields.map(fieldHtml).join("")}
         <div id="workbenchRangeValidation" class="range-validation-panel" data-workbench-inline-validation="true" hidden></div>
       </div>
@@ -2770,9 +3010,40 @@ function optionLabel(fieldId, value) {
   const workbench = DASHBOARD_DATA.ui1r2r2_workbench_form || DASHBOARD_DATA.trade_workbench || {};
   const fields = asList(workbench.field_catalog);
   const field = fields.find((row) => row.field_id === fieldId) || {};
-  const options = asList((workbench.option_catalog || {})[field.option_source]);
+  const options = field.option_source ? workbenchOptionRows(field.option_source) : [];
   const option = options.find((row) => row.option_id === value);
   return option ? option.owner_label : value;
+}
+
+function optionRowFor(fieldId, value) {
+  const workbench = DASHBOARD_DATA.ui1r2r2_workbench_form || DASHBOARD_DATA.trade_workbench || {};
+  const field = asList(workbench.field_catalog).find((row) => row.field_id === fieldId) || {};
+  return workbenchOptionRows(field.option_source).find((row) => row.option_id === value) || {};
+}
+
+function marketFamilyStatus(values) {
+  const marketRow = optionRowFor("market_family", values.market_family || "prediction_market");
+  const eventRow = optionRowFor("event_category", values.event_category || "politics_elections");
+  const marketLabel = marketRow.owner_label || "Prediction Market";
+  if ((values.market_family || "prediction_market") === "prediction_market") {
+    const eventCopy = eventRow.owner_label === "Sports"
+      ? "Sports is an event category under Prediction Market, not a Market Family."
+      : `${eventRow.owner_label || "Event category"} is routed as a prediction-market event category.`;
+    return {
+      tone: "blue",
+      text: `Prediction Market: Stage-1 default. QTT can prepare local prediction-market trade-check previews. ${eventCopy}`
+    };
+  }
+  if (values.market_family === "other") {
+    return {
+      tone: "gray",
+      text: "Other / Owner-Defined: candidate/provisional local preview only. It creates no source truth, connector semantics, replay/paper evidence, live readiness, or order authority."
+    };
+  }
+  return {
+    tone: "orange",
+    text: `${marketLabel}: Expansion-stage market sleeve. Research/intake only until connector, market data, execution, fee/tick/slippage, cash/settlement, risk, replay, and owner gates are green.`
+  };
 }
 
 function updateOtherFields() {
@@ -2858,9 +3129,22 @@ function updateWorkbenchPreview() {
     validation.hidden = validationMessages.length === 0;
     validation.innerHTML = validationMessages.map((message) => `<div>${safe(message)}</div>`).join("");
   }
+  const marketStatus = marketFamilyStatus(values);
+  const marketStatusNode = qs("#workbenchMarketFamilyStatus");
+  if (marketStatusNode) {
+    marketStatusNode.dataset.marketFamilyStatus = values.market_family === "other"
+      ? "candidate_provisional"
+      : values.market_family && values.market_family !== "prediction_market"
+        ? "expansion_dormant_research_only"
+        : "stage1_default";
+    marketStatusNode.dataset.statusTone = marketStatus.tone;
+    marketStatusNode.textContent = marketStatus.text;
+  }
   const grid = qs("#workbenchPreviewGrid");
   if (!grid) return;
   const summaryRows = [
+    ["Market Family", optionLabel("market_family", values.market_family || "prediction_market")],
+    ["Event Category", optionLabel("event_category", values.event_category || "politics_elections")],
     ["Market/event", values.market_event || "needs owner input"],
     ["Venue", optionLabel("venue", values.venue || "qtt_decide")],
     ["Side", optionLabel("side", values.side || "qtt_decide")],

@@ -28,6 +28,9 @@ from tools.build_pr169_dash1_owner_dashboard_ui import (
     R2R5_BUNDLE_FILE,
     R2R5_MANIFEST_FILE,
     R2R5_SUBDIR_NAME,
+    R2R6_BUNDLE_FILE,
+    R2R6_MANIFEST_FILE,
+    R2R6_SUBDIR_NAME,
     THEME_MODES,
     REQUIRED_TOP_LEVEL_KEYS,
     SEMANTIC_COLORS,
@@ -1550,6 +1553,333 @@ def validate(base: Path) -> tuple[str, ...]:
             failures.append("ui1r2r5_new_playwright_exact_path_added")
         if r2r5.get("currentization_preflight", {}).get("wildcard_allowlists_added") is not False:
             failures.append("ui1r2r5_wildcard_allowlist_added")
+
+    r2r6_bundle_path = base / R2R6_SUBDIR_NAME / R2R6_BUNDLE_FILE
+    r2r6_manifest_path = base / R2R6_SUBDIR_NAME / R2R6_MANIFEST_FILE
+    if not r2r6_bundle_path.exists():
+        failures.append("ui1r2r6_bundle_missing")
+    if not r2r6_manifest_path.exists():
+        failures.append("ui1r2r6_manifest_missing")
+    if r2r6_bundle_path.exists() and r2r6_manifest_path.exists():
+        r2r6 = _read_json(r2r6_bundle_path)
+        r2r6_manifest = _read_json(r2r6_manifest_path)
+        boot_r2r6 = data.get("ui1r2r6_truth_repair", {})
+        if boot_r2r6.get("central_bundle_id") != "OwnerUXSemanticBundleV1":
+            failures.append("ui1r2r6_boot_projection_missing")
+        if r2r6_manifest.get("manifest_id") != "UI1R2R6_CENTRALIZATION_MANIFEST":
+            failures.append("ui1r2r6_manifest_id_bad")
+        if r2r6.get("owned_generated_prefix") != f"docs/master_plan/generated/pr169_dash1/{R2R6_SUBDIR_NAME}/":
+            failures.append("ui1r2r6_owned_prefix_bad")
+        if r2r6.get("single_settings_key") != OWNER_SETTINGS_STORAGE_KEY:
+            failures.append("ui1r2r6_settings_key_bad")
+        if r2r6.get("one_builder") != "tools/build_pr169_dash1_owner_dashboard_ui.py":
+            failures.append("ui1r2r6_one_builder_bad")
+        if r2r6.get("one_validator") != "tools/validate_pr169_dash1_owner_dashboard_ui.py":
+            failures.append("ui1r2r6_one_validator_bad")
+
+        required_domains = {
+            "settings/preferences",
+            "custom theme tokens",
+            "density policy",
+            "chart registration",
+            "chart axis/crosshair/grid/tooltip policy",
+            "Workbench market-family options",
+            "Workbench event-category options",
+            "Other/custom field policy",
+            "More Actions aliases",
+            "screenshot proof targets",
+            "owner readable copy / education",
+            "mobile navigation / More overflow",
+            "Workflow Queue projection",
+            "Receipt Preview projection",
+        }
+        mapped_domains = {row.get("conceptual_domain") for row in r2r6.get("phase0_current_equivalent_mapping", [])}
+        for domain in sorted(required_domains - mapped_domains):
+            failures.append(f"ui1r2r6_mapping_missing:{domain}")
+        for row in r2r6.get("phase0_current_equivalent_mapping", []):
+            for key in (
+                "canonical_source_or_current_equivalent",
+                "central_bundle_consumer",
+                "builder_consumer",
+                "validator_consumer",
+                "renderer_consumer",
+                "test_consumer",
+                "playwright_proof",
+                "created_or_extended",
+            ):
+                if not row.get(key):
+                    failures.append(f"ui1r2r6_mapping_field_missing:{row.get('conceptual_domain')}:{key}")
+
+        alias_values = r2r6.get("alias_resolution_proof", {})
+        for alias in (
+            "OwnerSettingsV1",
+            "settings schema",
+            "OwnerThemeTokenRegistry",
+            "theme presets",
+            "custom token editor",
+            "OwnerDensityPolicy",
+            "layout density tokens",
+            "ChartSpecificationRegistry",
+            "tooltip policy",
+            "chart setting toggles",
+            "OwnerWorkbenchOptionCatalog",
+            "market-family dropdowns",
+            "event-category dropdowns",
+            "OwnerActionRegistry",
+            "More Actions aliases",
+            "OwnerScreenshotProofRegistry",
+        ):
+            if alias not in alias_values:
+                failures.append(f"ui1r2r6_alias_missing:{alias}")
+
+        control_rows = {row.get("setting_id"): row for row in r2r6.get("control_effect_proof_matrix", [])}
+        required_controls = {
+            "custom_theme_selected",
+            "density_compact",
+            "density_comfortable",
+            "chart_axis_labels_enabled",
+            "chart_crosshair_enabled",
+            "chart_grid_lines_enabled",
+            "chart_tooltips_enabled",
+            "workbench_market_family_selected",
+            "workbench_event_category_selected",
+        }
+        for setting_id in sorted(required_controls - set(control_rows)):
+            failures.append(f"ui1r2r6_control_row_missing:{setting_id}")
+        for setting_id, row in control_rows.items():
+            for key in (
+                "owner_label",
+                "central_setting_key",
+                "central_registry_consumer",
+                "renderer_consumer",
+                "visible_effect_selector",
+                "visible_effect_description",
+                "computed_style_or_dom_assertion",
+                "screenshot_path",
+                "runtime_side_effect_allowed",
+            ):
+                if key not in row:
+                    failures.append(f"ui1r2r6_control_field_missing:{setting_id}:{key}")
+            if row.get("runtime_side_effect_allowed") is not False:
+                failures.append(f"ui1r2r6_control_runtime_allowed:{setting_id}")
+
+        required_screenshots = {
+            ".tmp/r2r6_mobile_wb.png",
+            ".tmp/r2r6_queue.png",
+            ".tmp/r2r6_receipts.png",
+            ".tmp/r2r6_other_market.png",
+            ".tmp/r2r6_other_event.png",
+            ".tmp/r2r6_more_actions.png",
+            ".tmp/r2r6_color_proof.png",
+            ".tmp/r2r6_theme_custom.png",
+            ".tmp/r2r6_theme_applied.png",
+            ".tmp/r2r6_density.png",
+            ".tmp/r2r6_chart_axis.png",
+            ".tmp/r2r6_chart_crosshair.png",
+            ".tmp/r2r6_chart_grid.png",
+            ".tmp/r2r6_chart_tooltip.png",
+            ".tmp/r2r6_no_tooltips.png",
+            ".tmp/r2r6_market_catalog.png",
+        }
+        screenshot_rows = r2r6.get("screenshot_proof_registry", [])
+        present_screenshots = {row.get("screenshot_path") for row in screenshot_rows}
+        for path in sorted(required_screenshots - present_screenshots):
+            failures.append(f"ui1r2r6_screenshot_missing:{path}")
+        for index, row in enumerate(screenshot_rows):
+            for key in (
+                "screenshot_path",
+                "surface_id",
+                "target_feature_id",
+                "proof_selector_or_locator",
+                "proof_text_or_state",
+                "required_viewport",
+                "pre_screenshot_actions",
+                "post_action_assertions",
+                "owner_visible_expected_content",
+                "forbidden_visible_content",
+                "min_bounding_box_width_px",
+                "min_bounding_box_height_px",
+                "must_not_be_obstructed_by_selectors",
+                "must_not_be_clipped_sliver_flag",
+                "runtime_side_effect_allowed",
+                "source_truth_created",
+                "order_authority_created",
+            ):
+                if key not in row:
+                    failures.append(f"ui1r2r6_screenshot_field_missing:{index}:{key}")
+            if row.get("runtime_side_effect_allowed") is not False:
+                failures.append(f"ui1r2r6_screenshot_runtime_allowed:{index}")
+
+        chart_policy = r2r6.get("chart_registration_policy", {})
+        if chart_policy.get("registered_chart_tooltips_only") is not True:
+            failures.append("ui1r2r6_chart_tooltip_not_registration_gated")
+        if chart_policy.get("generic_card_svg_tooltips_allowed") is not False:
+            failures.append("ui1r2r6_generic_svg_tooltips_allowed")
+        expected_non_chart = {
+            "capital_allocation_by_market",
+            "exposure_by_venue",
+            "edge_alpha_scoreboard_visual",
+            "agent_disagreement_visual",
+            "DAG_route_graph_visual",
+        }
+        if expected_non_chart - set(chart_policy.get("non_chart_visual_ids", [])):
+            failures.append("ui1r2r6_non_chart_visual_ids_missing")
+        chart_rows_by_id = {row.get("chart_id"): row for row in chart_manifest.get("charts", [])}
+        for chart_id in expected_non_chart:
+            row = chart_rows_by_id.get(chart_id, {})
+            if row.get("chart_registered") is not False or row.get("chart_tooltip_registered") is not False:
+                failures.append(f"ui1r2r6_non_chart_registered:{chart_id}")
+        for chart_id, row in chart_rows_by_id.items():
+            if row.get("chart_registered") is True and row.get("tooltip_policy") != "registered_chart_tooltip":
+                failures.append(f"ui1r2r6_registered_chart_tooltip_policy_bad:{chart_id}")
+
+        market_contract = r2r6.get("market_taxonomy_contract", {})
+        market_rows = market_contract.get("market_family_rows", [])
+        market_labels = {row.get("owner_label") for row in market_rows}
+        for label in market_contract.get("required_market_family_labels", []):
+            if label not in market_labels:
+                failures.append(f"ui1r2r6_market_label_missing:{label}")
+        for label in market_contract.get("forbidden_market_family_labels", []):
+            if label in market_labels:
+                failures.append(f"ui1r2r6_forbidden_market_label_present:{label}")
+        event_labels = {row.get("owner_label") for row in market_contract.get("event_category_rows", [])}
+        if "Sports" not in event_labels:
+            failures.append("ui1r2r6_sports_event_category_missing")
+        if market_contract.get("sports_event_category_only") is not True:
+            failures.append("ui1r2r6_sports_not_event_category_only")
+        for row in market_rows:
+            for key in (
+                "market_family_id",
+                "owner_visible_label",
+                "canonical_market_sleeve",
+                "stage1_enabled",
+                "activation_state",
+                "lifecycle_state",
+                "timing_state_or_snapshot_state",
+                "upstream_source_ref_or_master_plan_static_ref",
+                "downstream_consumer_ref",
+                "pr164_review_consumer_ref_or_gap",
+                "pr165_scoring_consumer_ref_or_gap",
+                "responsible_agent_role_refs_or_gap",
+                "venue_options_ref_or_gap",
+                "event_category_options_ref_or_gap",
+                "provider_pending_copy",
+                "authority_boundary",
+                "runtime_side_effect_allowed",
+                "source_truth_created",
+                "order_authority_created",
+            ):
+                if key not in row:
+                    failures.append(f"ui1r2r6_market_row_field_missing:{row.get('option_id')}:{key}")
+            if row.get("runtime_side_effect_allowed") is not False or row.get("source_truth_created") is not False or row.get("order_authority_created") is not False:
+                failures.append(f"ui1r2r6_market_row_authority_bad:{row.get('option_id')}")
+
+        theme_truth = r2r6.get("theme_truth_contract", {})
+        if theme_truth.get("custom_visible") is not True or theme_truth.get("custom_editor_required") is not True:
+            failures.append("ui1r2r6_custom_theme_contract_bad")
+        if not theme_truth.get("custom_token_controls"):
+            failures.append("ui1r2r6_custom_theme_controls_missing")
+        if theme_truth.get("custom_tokens_consumed_by_real_surface") is not True:
+            failures.append("ui1r2r6_custom_theme_not_consumed")
+        density_truth = r2r6.get("density_truth_contract", {})
+        if density_truth.get("policy_id") != "OwnerDensityPolicyV1":
+            failures.append("ui1r2r6_density_policy_bad")
+        for token in ("--qtt-card-padding", "--qtt-card-gap", "--qtt-row-gap", "--qtt-control-height", "--qtt-section-padding"):
+            if token not in density_truth.get("tokens", []):
+                failures.append(f"ui1r2r6_density_token_missing:{token}")
+
+        manifest_rows = r2r6_manifest.get("rows", [])
+        manifest_domains = {row.get("semantic_domain") for row in manifest_rows}
+        for domain in sorted(required_domains - manifest_domains):
+            failures.append(f"ui1r2r6_manifest_domain_missing:{domain}")
+        for row in manifest_rows:
+            for key in (
+                "artifact_path",
+                "semantic_domain",
+                "producer",
+                "central_source",
+                "renderer_consumer",
+                "validator_or_test_consumer",
+                "playwright_proof_or_na",
+                "upstream_ref_or_provider_pending_gap",
+                "downstream_ref_or_provider_pending_gap",
+                "lifecycle_state",
+                "timing_state_or_snapshot_state",
+                "activation_state_or_provider_stage",
+                "authority_boundary",
+                "runtime_side_effect_allowed",
+                "source_truth_created",
+                "order_authority_created",
+                "orphan_risk",
+            ):
+                if key not in row:
+                    failures.append(f"ui1r2r6_manifest_field_missing:{row.get('semantic_domain')}:{key}")
+            if row.get("runtime_side_effect_allowed") is not False or row.get("source_truth_created") is not False or row.get("order_authority_created") is not False:
+                failures.append(f"ui1r2r6_manifest_authority_bad:{row.get('semantic_domain')}")
+        for row in r2r6.get("changed_file_ownership_audit", []):
+            for key in (
+                "file_path",
+                "change_type",
+                "owned_prefix_or_allowed_shared_reason",
+                "producer",
+                "consumer",
+                "validator_or_test_coverage",
+                "playwright_proof_or_not_applicable",
+                "runtime_authority_change",
+                "source_truth_change",
+                "order_authority_change",
+                "orphan_risk",
+            ):
+                if key not in row:
+                    failures.append(f"ui1r2r6_changed_file_field_missing:{row.get('file_path')}:{key}")
+            if row.get("runtime_authority_change") is not False or row.get("source_truth_change") is not False or row.get("order_authority_change") is not False:
+                failures.append(f"ui1r2r6_changed_file_authority_bad:{row.get('file_path')}")
+        if r2r6.get("currentization_preflight", {}).get("new_exact_path_playwright_script_added") is not False:
+            failures.append("ui1r2r6_new_playwright_exact_path_added")
+        if r2r6.get("currentization_preflight", {}).get("wildcard_allowlists_added") is not False:
+            failures.append("ui1r2r6_wildcard_allowlist_added")
+        for key in (
+            "no_SVC1_runtime",
+            "no_live_LLM",
+            "no_online_search_runtime",
+            "no_real_QTT_agent_execution",
+            "no_real_replay_paper_live_execution",
+            "no_connector_private_cash_reads",
+            "no_source_truth_acceptance",
+            "no_direct_venue_submit",
+            "no_Execution_Router_release",
+            "no_QTT_SHA_or_AtomicRows_hash_authority",
+            "no_profit_guarantee",
+        ):
+            if r2r6.get("no_runtime_authority", {}).get(key) is not True:
+                failures.append(f"ui1r2r6_no_runtime_boundary_missing:{key}")
+
+    for snippet in (
+        "data-custom-theme-editor=\"OwnerCustomThemeTokenEditorV1\"",
+        "data-owner-theme-consumer=\"custom-theme-token\"",
+        "data-owner-density-policy=\"OwnerDensityPolicyV1\"",
+        "data-action-alias-policy=\"OwnerActionRegistryAliasPolicyV1\"",
+        "data-chart-registered=",
+        "data-axis-labels-enabled=",
+        "data-crosshair-enabled=",
+        "data-grid-lines-enabled=",
+        "data-tooltips-enabled=",
+        "OwnerChartSettingPolicyV1",
+        "OwnerThemeTokenRegistryV1",
+        "OwnerDensityPolicyV1",
+        "OwnerWorkbenchOptionCatalogV1",
+        "Other / Owner-Defined",
+        "Equities / Stocks",
+        "Expansion-stage market sleeve",
+        "No chart point tooltip",
+        "--qtt-card-padding",
+        "--qtt-card-gap",
+        "--qtt-row-gap",
+        "--qtt-control-height",
+        "--qtt-section-padding",
+    ):
+        if snippet not in combined:
+            failures.append(f"ui1r2r6_renderer_snippet_missing:{snippet}")
 
     for snippet in (
         "data-qtt-guide-composer=\"shared-chat-action-state\"",

@@ -74,6 +74,19 @@ def test_rp5c_builder_accepts_dash1_ui1_r2_r5_pull_request_merge_context() -> No
     builder._ensure_allowed_build_branch(_preflight(effective))
 
 
+def test_rp5c_builder_accepts_dash1_ui1_r2_r6_pull_request_merge_context() -> None:
+    branch = "pr169-ui1-r2r6"
+    effective = builder._effective_branch_name(
+        "",
+        branch,
+        "266/merge",
+        github_actions=True,
+    )
+
+    assert effective == branch
+    builder._ensure_allowed_build_branch(_preflight(effective))
+
+
 def test_rp5c_builder_rejects_arbitrary_branch_context() -> None:
     with pytest.raises(RuntimeError, match=BRANCH_NAME):
         builder._ensure_allowed_build_branch(_preflight("feature/not-rp5c"))
