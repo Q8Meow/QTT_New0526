@@ -1,0 +1,201 @@
+{
+  "artifact_id": "UI1R2R6_PLAYWRIGHT_VISUAL_SMOKE",
+  "checks": [
+    "r2r6_custom_theme_editor_and_real_surface_token_consumption",
+    "r2r6_settings_color_token_consumed_by_workbench_field",
+    "r2r6_density_compact_comfortable_measurable_on_card_and_workbench",
+    "r2r6_chart_settings_and_non_chart_tooltip_gating",
+    "r2r6_workbench_market_catalog_event_category_and_other_routes",
+    "r2r6_more_actions_technical_alias_deduped",
+    "r2r6_workflow_queue_and_receipts_unobstructed",
+    "r2r6_mobile_workbench_not_clipped_sliver"
+  ],
+  "console_breaking_errors": [],
+  "console_status": "PASS",
+  "external_network_requests": [],
+  "network_status": "PASS",
+  "no_console_breaking_errors": true,
+  "no_external_network_requests": true,
+  "order_authority_created": false,
+  "runtime_side_effect_allowed": false,
+  "screenshots": [
+    {
+      "order_authority_created": false,
+      "path": ".tmp/r2r6_theme_custom.png",
+      "proof_selector_or_locator": "[data-custom-theme-editor='OwnerCustomThemeTokenEditorV1']",
+      "proof_text_or_state": "Custom theme uses the color tokens selected here.",
+      "result": "PASS",
+      "runtime_side_effect_allowed": false,
+      "source_truth_created": false,
+      "tested_interaction": "theme_custom",
+      "viewport": "desktop"
+    },
+    {
+      "order_authority_created": false,
+      "path": ".tmp/r2r6_theme_applied.png",
+      "proof_selector_or_locator": ".owner-hero-card[data-owner-theme-consumer='custom-theme-token']",
+      "proof_text_or_state": "custom token changed computed background",
+      "result": "PASS",
+      "runtime_side_effect_allowed": false,
+      "source_truth_created": false,
+      "tested_interaction": "theme_applied",
+      "viewport": "desktop"
+    },
+    {
+      "order_authority_created": false,
+      "path": ".tmp/r2r6_color_proof.png",
+      "proof_selector_or_locator": "[data-workbench-field-shell='plain_english_detail'][data-owner-color-proof='input_required']",
+      "proof_text_or_state": "Plain-English detail",
+      "result": "PASS",
+      "runtime_side_effect_allowed": false,
+      "source_truth_created": false,
+      "tested_interaction": "color_proof",
+      "viewport": "desktop"
+    },
+    {
+      "order_authority_created": false,
+      "path": ".tmp/r2r6_density.png",
+      "proof_selector_or_locator": "[data-workbench-field-shell='plain_english_detail']",
+      "proof_text_or_state": "compact card and field padding computed smaller than comfortable",
+      "result": "PASS",
+      "runtime_side_effect_allowed": false,
+      "source_truth_created": false,
+      "tested_interaction": "density",
+      "viewport": "desktop"
+    },
+    {
+      "order_authority_created": false,
+      "path": ".tmp/r2r6_chart_axis.png",
+      "proof_selector_or_locator": ".chart-panel[data-chart-registered='true'][data-axis-labels-enabled='false']",
+      "proof_text_or_state": "false",
+      "result": "PASS",
+      "runtime_side_effect_allowed": false,
+      "source_truth_created": false,
+      "tested_interaction": "chart_axis",
+      "viewport": "desktop"
+    },
+    {
+      "order_authority_created": false,
+      "path": ".tmp/r2r6_chart_grid.png",
+      "proof_selector_or_locator": ".chart-panel[data-chart-registered='true'][data-grid-lines-enabled='false']",
+      "proof_text_or_state": "false",
+      "result": "PASS",
+      "runtime_side_effect_allowed": false,
+      "source_truth_created": false,
+      "tested_interaction": "chart_grid",
+      "viewport": "desktop"
+    },
+    {
+      "order_authority_created": false,
+      "path": ".tmp/r2r6_chart_crosshair.png",
+      "proof_selector_or_locator": ".chart-canvas[data-chart-registered='true'][data-crosshair-enabled='true'].is-focused",
+      "proof_text_or_state": "true",
+      "result": "PASS",
+      "runtime_side_effect_allowed": false,
+      "source_truth_created": false,
+      "tested_interaction": "chart_crosshair",
+      "viewport": "desktop"
+    },
+    {
+      "order_authority_created": false,
+      "path": ".tmp/r2r6_chart_tooltip.png",
+      "proof_selector_or_locator": ".chart-canvas[data-tooltips-enabled='true'] [data-chart-tooltip-visible='true']",
+      "proof_text_or_state": "Value: provider receipts pending",
+      "result": "PASS",
+      "runtime_side_effect_allowed": false,
+      "source_truth_created": false,
+      "tested_interaction": "chart_tooltip",
+      "viewport": "desktop"
+    },
+    {
+      "order_authority_created": false,
+      "path": ".tmp/r2r6_no_tooltips.png",
+      "proof_selector_or_locator": ".chart-panel[data-chart-registered='false']",
+      "proof_text_or_state": "false",
+      "result": "PASS",
+      "runtime_side_effect_allowed": false,
+      "source_truth_created": false,
+      "tested_interaction": "no_tooltips",
+      "viewport": "desktop"
+    },
+    {
+      "order_authority_created": false,
+      "path": ".tmp/r2r6_market_catalog.png",
+      "proof_selector_or_locator": "[data-workbench-field-shell='market_family']",
+      "proof_text_or_state": "Equities / Stocks",
+      "result": "PASS",
+      "runtime_side_effect_allowed": false,
+      "source_truth_created": false,
+      "tested_interaction": "market_catalog",
+      "viewport": "desktop"
+    },
+    {
+      "order_authority_created": false,
+      "path": ".tmp/r2r6_other_market.png",
+      "proof_selector_or_locator": "[data-workbench-field-shell='market_family'] | [data-workbench-field-shell='custom_market_family'][data-other-visible='true']",
+      "proof_text_or_state": "Custom market family",
+      "result": "PASS",
+      "runtime_side_effect_allowed": false,
+      "source_truth_created": false,
+      "tested_interaction": "other_market",
+      "viewport": "desktop"
+    },
+    {
+      "order_authority_created": false,
+      "path": ".tmp/r2r6_other_event.png",
+      "proof_selector_or_locator": "[data-workbench-field-shell='event_category'] | [data-workbench-field-shell='custom_event_category'][data-other-visible='true']",
+      "proof_text_or_state": "Custom event category",
+      "result": "PASS",
+      "runtime_side_effect_allowed": false,
+      "source_truth_created": false,
+      "tested_interaction": "other_event",
+      "viewport": "desktop"
+    },
+    {
+      "order_authority_created": false,
+      "path": ".tmp/r2r6_more_actions.png",
+      "proof_selector_or_locator": "#overviewCards .next-action-menu[data-action-alias-policy='OwnerActionRegistryAliasPolicyV1']",
+      "proof_text_or_state": "Technical Details",
+      "result": "PASS",
+      "runtime_side_effect_allowed": false,
+      "source_truth_created": false,
+      "tested_interaction": "more_actions",
+      "viewport": "desktop"
+    },
+    {
+      "order_authority_created": false,
+      "path": ".tmp/r2r6_queue.png",
+      "proof_selector_or_locator": "#qttTeamWorkflowQueue [data-workflow-queue-shell='OwnerWorkflowQueueStateV1']",
+      "proof_text_or_state": "QTT Team Workflow Queue",
+      "result": "PASS",
+      "runtime_side_effect_allowed": false,
+      "source_truth_created": false,
+      "tested_interaction": "queue",
+      "viewport": "desktop"
+    },
+    {
+      "order_authority_created": false,
+      "path": ".tmp/r2r6_receipts.png",
+      "proof_selector_or_locator": "#auditReceiptPreview [data-receipt-preview-shell='OwnerReceiptPreviewStateV1']",
+      "proof_text_or_state": "Audit Trail / Receipts Preview",
+      "result": "PASS",
+      "runtime_side_effect_allowed": false,
+      "source_truth_created": false,
+      "tested_interaction": "receipts",
+      "viewport": "desktop"
+    },
+    {
+      "order_authority_created": false,
+      "path": ".tmp/r2r6_mobile_wb.png",
+      "proof_selector_or_locator": "[data-workbench-field-shell='plain_english_detail'][data-owner-color-proof='input_required']",
+      "proof_text_or_state": "Plain-English detail",
+      "result": "PASS",
+      "runtime_side_effect_allowed": false,
+      "source_truth_created": false,
+      "tested_interaction": "mobile_wb",
+      "viewport": "mobile_390x844"
+    }
+  ],
+  "source_truth_created": false,
+  "status": "PASS"
+}

@@ -1,17 +1,5 @@
 {
-  "checks": [
-    "sidebar_collapses_and_hides_developer_nav_in_guided",
-    "ranked_search_focuses_targets",
-    "chat_preset_dropdown_and_guide_local_only",
-    "chart_drawers_have_distinct_payloads",
-    "workbench_selectors_other_fields_and_ranges",
-    "settings_center_owner_settings",
-    "owner_copy_and_card_declutter",
-    "mobile_sidebar_workbench_chart"
-  ],
-  "console_breaking_errors": [],
-  "console_status": "PASS",
-  "external_network_requests": [],
+  "console_status": "PENDING_LOCAL_RUN",
   "meta": {
     "agent_consumable_authority": false,
     "artifact_id": "UI1R2R3_PLAYWRIGHT_REPORT",
@@ -27,243 +15,43 @@
     "ui1r2r3_generated_from": "OwnerDashboardStateV1 + OwnerSurfaceResolver + OwnerActionRegistry + OwnerPresentationLayer + OwnerNextStepRouter + OwnerSettingsV1 + central owner UX semantic bundle",
     "validation_ref": "tools/validate_pr169_dash1_owner_dashboard_ui.py"
   },
-  "network_status": "PASS",
-  "no_console_breaking_errors": true,
-  "no_external_network_requests": true,
+  "network_status": "PENDING_LOCAL_RUN",
   "runtime_side_effect_allowed": false,
   "screenshots": [
-    {
-      "path": ".tmp/ui1r2r3_sidebar_expanded.png",
-      "result": "PASS",
-      "runtime_side_effect_allowed": false,
-      "tested_interaction": "sidebar_expanded",
-      "viewport": "desktop"
-    },
-    {
-      "path": ".tmp/ui1r2r3_developer_nav_hidden_in_guided.png",
-      "result": "PASS",
-      "runtime_side_effect_allowed": false,
-      "tested_interaction": "developer_nav_hidden_in_guided",
-      "viewport": "desktop"
-    },
-    {
-      "path": ".tmp/ui1r2r3_sidebar_collapsed.png",
-      "result": "PASS",
-      "runtime_side_effect_allowed": false,
-      "tested_interaction": "sidebar_collapsed",
-      "viewport": "desktop"
-    },
-    {
-      "path": ".tmp/ui1r2r3_search_chat_result.png",
-      "result": "PASS",
-      "runtime_side_effect_allowed": false,
-      "tested_interaction": "search_chat_result",
-      "viewport": "desktop"
-    },
-    {
-      "path": ".tmp/ui1r2r3_search_agent_result.png",
-      "result": "PASS",
-      "runtime_side_effect_allowed": false,
-      "tested_interaction": "search_agent_result",
-      "viewport": "desktop"
-    },
-    {
-      "path": ".tmp/ui1r2r3_search_result_scroll_focus_target.png",
-      "result": "PASS",
-      "runtime_side_effect_allowed": false,
-      "tested_interaction": "search_result_scroll_focus_target",
-      "viewport": "desktop"
-    },
-    {
-      "path": ".tmp/ui1r2r3_action_to_workbench_active_nav.png",
-      "result": "PASS",
-      "runtime_side_effect_allowed": false,
-      "tested_interaction": "action_to_workbench_active_nav",
-      "viewport": "desktop"
-    },
-    {
-      "path": ".tmp/ui1r2r3_chat_preset_dropdown.png",
-      "result": "PASS",
-      "runtime_side_effect_allowed": false,
-      "tested_interaction": "chat_preset_dropdown",
-      "viewport": "desktop"
-    },
-    {
-      "path": ".tmp/ui1r2r3_qtt_guide_panel.png",
-      "result": "PASS",
-      "runtime_side_effect_allowed": false,
-      "tested_interaction": "qtt_guide_panel",
-      "viewport": "desktop"
-    },
-    {
-      "path": ".tmp/ui1r2r3_chart_hover_tooltip.png",
-      "result": "PASS",
-      "runtime_side_effect_allowed": false,
-      "tested_interaction": "chart_hover_tooltip",
-      "viewport": "desktop"
-    },
-    {
-      "path": ".tmp/ui1r2r3_chart_tooltip_provider_pending_no_fake_value.png",
-      "result": "PASS",
-      "runtime_side_effect_allowed": false,
-      "tested_interaction": "chart_tooltip_provider_pending_no_fake_value",
-      "viewport": "desktop"
-    },
-    {
-      "path": ".tmp/ui1r2r3_chart_drilldown_distinct.png",
-      "result": "PASS",
-      "runtime_side_effect_allowed": false,
-      "tested_interaction": "chart_drilldown_distinct",
-      "viewport": "desktop"
-    },
-    {
-      "path": ".tmp/ui1r2r3_tca_breakdown_distinct.png",
-      "result": "PASS",
-      "runtime_side_effect_allowed": false,
-      "tested_interaction": "tca_breakdown_distinct",
-      "viewport": "desktop"
-    },
-    {
-      "path": ".tmp/ui1r2r3_explain_card_specific.png",
-      "result": "PASS",
-      "runtime_side_effect_allowed": false,
-      "tested_interaction": "explain_card_specific",
-      "viewport": "desktop"
-    },
-    {
-      "path": ".tmp/ui1r2r3_technical_details_raw_refs.png",
-      "result": "PASS",
-      "runtime_side_effect_allowed": false,
-      "tested_interaction": "technical_details_raw_refs",
-      "viewport": "desktop"
-    },
-    {
-      "path": ".tmp/ui1r2r3_drawer_payloads_distinct.png",
-      "result": "PASS",
-      "runtime_side_effect_allowed": false,
-      "tested_interaction": "drawer_payloads_distinct",
-      "viewport": "desktop"
-    },
-    {
-      "path": ".tmp/ui1r2r3_workbench_guided_selectors.png",
-      "result": "PASS",
-      "runtime_side_effect_allowed": false,
-      "tested_interaction": "workbench_guided_selectors",
-      "viewport": "desktop"
-    },
-    {
-      "path": ".tmp/ui1r2r3_workbench_other_custom_field.png",
-      "result": "PASS",
-      "runtime_side_effect_allowed": false,
-      "tested_interaction": "workbench_other_custom_field",
-      "viewport": "desktop"
-    },
-    {
-      "path": ".tmp/ui1r2r3_workbench_numeric_range_hints.png",
-      "result": "PASS",
-      "runtime_side_effect_allowed": false,
-      "tested_interaction": "workbench_numeric_range_hints",
-      "viewport": "desktop"
-    },
-    {
-      "path": ".tmp/ui1r2r3_input_required_color_state.png",
-      "result": "PASS",
-      "runtime_side_effect_allowed": false,
-      "tested_interaction": "input_required_color_state",
-      "viewport": "desktop"
-    },
-    {
-      "path": ".tmp/ui1r2r3_workbench_invalid_range_guidance.png",
-      "result": "PASS",
-      "runtime_side_effect_allowed": false,
-      "tested_interaction": "workbench_invalid_range_guidance",
-      "viewport": "desktop"
-    },
-    {
-      "path": ".tmp/ui1r2r3_settings_center_open.png",
-      "result": "PASS",
-      "runtime_side_effect_allowed": false,
-      "tested_interaction": "settings_center_open",
-      "viewport": "desktop"
-    },
-    {
-      "path": ".tmp/ui1r2r3_settings_appearance_tab.png",
-      "result": "PASS",
-      "runtime_side_effect_allowed": false,
-      "tested_interaction": "settings_appearance_tab",
-      "viewport": "desktop"
-    },
-    {
-      "path": ".tmp/ui1r2r3_theme_picker_presets.png",
-      "result": "PASS",
-      "runtime_side_effect_allowed": false,
-      "tested_interaction": "theme_picker_presets",
-      "viewport": "desktop"
-    },
-    {
-      "path": ".tmp/ui1r2r3_high_contrast_theme.png",
-      "result": "PASS",
-      "runtime_side_effect_allowed": false,
-      "tested_interaction": "high_contrast_theme",
-      "viewport": "desktop"
-    },
-    {
-      "path": ".tmp/ui1r2r3_settings_trading_preferences_preview_only.png",
-      "result": "PASS",
-      "runtime_side_effect_allowed": false,
-      "tested_interaction": "settings_trading_preferences_preview_only",
-      "viewport": "desktop"
-    },
-    {
-      "path": ".tmp/ui1r2r3_options_status_simplified.png",
-      "result": "PASS",
-      "runtime_side_effect_allowed": false,
-      "tested_interaction": "options_status_simplified",
-      "viewport": "desktop"
-    },
-    {
-      "path": ".tmp/ui1r2r3_owner_copy_cleanup.png",
-      "result": "PASS",
-      "runtime_side_effect_allowed": false,
-      "tested_interaction": "owner_copy_cleanup",
-      "viewport": "desktop"
-    },
-    {
-      "path": ".tmp/ui1r2r3_default_card_action_menu_collapsed.png",
-      "result": "PASS",
-      "runtime_side_effect_allowed": false,
-      "tested_interaction": "default_card_action_menu_collapsed",
-      "viewport": "desktop"
-    },
-    {
-      "path": ".tmp/ui1r2r3_default_card_more_actions_menu.png",
-      "result": "PASS",
-      "runtime_side_effect_allowed": false,
-      "tested_interaction": "default_card_more_actions_menu",
-      "viewport": "desktop"
-    },
-    {
-      "path": ".tmp/ui1r2r3_selected_card_action_menu_expanded.png",
-      "result": "PASS",
-      "runtime_side_effect_allowed": false,
-      "tested_interaction": "selected_card_action_menu_expanded",
-      "viewport": "desktop"
-    },
-    {
-      "path": ".tmp/ui1r2r3_mobile_collapsed_sidebar_and_workbench.png",
-      "result": "PASS",
-      "runtime_side_effect_allowed": false,
-      "tested_interaction": "mobile_collapsed_sidebar_and_workbench",
-      "viewport": "mobile"
-    },
-    {
-      "path": ".tmp/ui1r2r3_mobile_chart_tooltip_or_value_panel.png",
-      "result": "PASS",
-      "runtime_side_effect_allowed": false,
-      "tested_interaction": "mobile_chart_tooltip_or_value_panel",
-      "viewport": "mobile"
-    }
+    ".tmp/ui1r2r3_sidebar_expanded.png",
+    ".tmp/ui1r2r3_sidebar_collapsed.png",
+    ".tmp/ui1r2r3_developer_nav_hidden_in_guided.png",
+    ".tmp/ui1r2r3_search_chat_result.png",
+    ".tmp/ui1r2r3_search_agent_result.png",
+    ".tmp/ui1r2r3_action_to_workbench_active_nav.png",
+    ".tmp/ui1r2r3_chat_preset_dropdown.png",
+    ".tmp/ui1r2r3_qtt_guide_panel.png",
+    ".tmp/ui1r2r3_chart_hover_tooltip.png",
+    ".tmp/ui1r2r3_chart_drilldown_distinct.png",
+    ".tmp/ui1r2r3_tca_breakdown_distinct.png",
+    ".tmp/ui1r2r3_explain_card_specific.png",
+    ".tmp/ui1r2r3_technical_details_raw_refs.png",
+    ".tmp/ui1r2r3_workbench_guided_selectors.png",
+    ".tmp/ui1r2r3_workbench_other_custom_field.png",
+    ".tmp/ui1r2r3_workbench_numeric_range_hints.png",
+    ".tmp/ui1r2r3_input_required_color_state.png",
+    ".tmp/ui1r2r3_theme_picker_presets.png",
+    ".tmp/ui1r2r3_high_contrast_theme.png",
+    ".tmp/ui1r2r3_settings_center_open.png",
+    ".tmp/ui1r2r3_settings_appearance_tab.png",
+    ".tmp/ui1r2r3_settings_trading_preferences_preview_only.png",
+    ".tmp/ui1r2r3_mobile_collapsed_sidebar_and_workbench.png",
+    ".tmp/ui1r2r3_mobile_chart_tooltip_or_value_panel.png",
+    ".tmp/ui1r2r3_owner_copy_cleanup.png",
+    ".tmp/ui1r2r3_options_status_simplified.png",
+    ".tmp/ui1r2r3_default_card_action_menu_collapsed.png",
+    ".tmp/ui1r2r3_selected_card_action_menu_expanded.png",
+    ".tmp/ui1r2r3_drawer_payloads_distinct.png",
+    ".tmp/ui1r2r3_default_card_more_actions_menu.png",
+    ".tmp/ui1r2r3_chart_tooltip_provider_pending_no_fake_value.png",
+    ".tmp/ui1r2r3_search_result_scroll_focus_target.png",
+    ".tmp/ui1r2r3_workbench_invalid_range_guidance.png"
   ],
   "script": "tools/playwright_pr169_dash1_ui1_r2_r3_visual_smoke.py",
-  "status": "PASS"
+  "status": "PENDING_LOCAL_RUN"
 }

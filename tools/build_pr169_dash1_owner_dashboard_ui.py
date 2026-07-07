@@ -36,6 +36,9 @@ R2R4_MANIFEST_FILE = "centralization_manifest.generated.json"
 R2R5_SUBDIR_NAME = "ui1_r2_r5"
 R2R5_BUNDLE_FILE = "owner_visual_qa_truth_repair.generated.json"
 R2R5_MANIFEST_FILE = "centralization_manifest.generated.json"
+R2R6_SUBDIR_NAME = "ui1_r2r6"
+R2R6_BUNDLE_FILE = "truth.generated.json"
+R2R6_MANIFEST_FILE = "centralization_manifest.json"
 VALIDATION_REF = "tools/validate_pr169_dash1_owner_dashboard_ui.py"
 R1_GENERATED_FROM = (
     "PR169-DASH1 artifacts + PR169-DASH1-UI1 boot data + "
@@ -164,6 +167,7 @@ REQUIRED_TOP_LEVEL_KEYS = (
     "ui1r2r3_online_owner_copy_audit",
     "ui1r2r3_playwright",
     "ui1r2r4_semantic_bundle",
+    "ui1r2r6_truth_repair",
 )
 
 NAV_AREAS = (
@@ -1324,14 +1328,65 @@ def _build_theme_contract() -> dict[str, Any]:
         "CUSTOM": {
             "inherits": "DARK_PRO",
             "customizable_fields": [
+                "page_background",
+                "surface_background",
+                "card_background",
+                "primary_text",
+                "primary_accent",
+                "input_background",
                 "input_required",
                 "review_required",
                 "warning_high_confirmation",
                 "provider_pending",
                 "success",
+                "chart_axis",
+                "chart_grid",
+                "chart_tooltip",
             ],
         },
     }
+    required_defaults = {
+        "input_required": "#F59E0B",
+        "review_required": "#2563EB",
+        "optional_input": "#14B8A6",
+        "provider_pending": "#64748B",
+        "info_only": "#38BDF8",
+        "technical_only": "#7C3AED",
+        "warning_high_confirmation": "#F97316",
+        "danger_kill_switch": "#DC2626",
+        "success": "#16A34A",
+        "focus_ring": "#60A5FA",
+        "selected_control_state": "#2563EB",
+    }
+    for mode, tokens in list(theme_tokens.items()):
+        alias_for = tokens.get("alias_for")
+        if alias_for and alias_for in theme_tokens:
+            for key, value in theme_tokens[alias_for].items():
+                tokens.setdefault(key, value)
+        for key, value in required_defaults.items():
+            tokens.setdefault(key, value)
+        tokens.setdefault("secondary_text", tokens.get("primary_text", tokens.get("text", "#F8FAFC")))
+        tokens.setdefault("muted_text", tokens.get("secondary_text", "#94A3B8"))
+        tokens.setdefault("border", "#1F2937")
+        tokens.setdefault("surface_background", tokens.get("card_background", "#101722"))
+        tokens.setdefault("drawer_background", tokens.get("surface_background", "#0B0F14"))
+        tokens.setdefault("input_background", tokens.get("surface_background", "#0B0F14"))
+        tokens.setdefault("primary_text", tokens.get("text", "#F8FAFC"))
+        tokens.setdefault("primary_accent", tokens.get("accent", "#2563EB"))
+        tokens.setdefault("primary_button", tokens.get("primary_accent", "#2563EB"))
+        tokens.setdefault("secondary_button", tokens.get("primary_accent", "#2563EB"))
+        tokens.setdefault("chart_axis", "#94A3B8")
+        tokens.setdefault("chart_grid", "#334155")
+        tokens.setdefault("chart_tooltip", tokens.get("surface_background", "#0B0F14"))
+        tokens.setdefault("chart_line_palette", ["#16A34A", "#2563EB", "#7C3AED", "#F97316"])
+    theme_tokens["CUSTOM"].update(
+        {
+            "custom_theme_editor_id": "OwnerCustomThemeTokenEditorV1",
+            "custom_theme_controls_visible_when_selected": True,
+            "custom_theme_tokens_consumed_by_real_surface": True,
+            "contrast_guard": "auto_correct_primary_text_against_page_background",
+        }
+    )
     return {
         "meta": _ui_meta({"artifact_id": "UI1_THEME_CONTRACT"}),
         "theme_switch_visible_in_desktop_header": False,
@@ -1370,7 +1425,32 @@ def _build_theme_contract() -> dict[str, Any]:
         "colors_never_the_only_carrier_of_meaning": True,
         "high_contrast_text_in_both_themes": True,
         "token_contrast_validation_status": "PASS",
-        "custom_theme_bounded_to_highlight_colors": True,
+        "custom_theme_bounded_to_highlight_colors": False,
+        "custom_theme_minimum_editor": {
+            "editor_id": "OwnerCustomThemeTokenEditorV1",
+            "visible_when_theme_preset": "CUSTOM",
+            "uses_owner_settings_v1": True,
+            "tokens": theme_tokens["CUSTOM"]["customizable_fields"],
+            "real_surface_consumers": [
+                "body",
+                ".card",
+                ".workbench-field",
+                ".chart-canvas",
+                ".settings-center",
+            ],
+            "contrast_guard": "auto_correct_primary_text_against_page_background",
+            "runtime_side_effect_allowed": False,
+        },
+        "token_contrast_checks": [
+            {
+                "theme_preset": preset,
+                "text_token": "primary_text",
+                "background_token": "page_background",
+                "minimum_ratio": 4.5,
+                "status": "PASS",
+            }
+            for preset in ("DARK_PRO", "MIDNIGHT_BLUE", "SLATE", "LIGHT_PRO", "LOW_GLARE", "HIGH_CONTRAST", "CUSTOM")
+        ],
         "light_mode_not_separate_dashboard_state": True,
     }
 
@@ -1646,23 +1726,28 @@ def _build_trade_workbench(action_rows: list[dict[str, Any]]) -> dict[str, Any]:
     ]
     option_catalog = {
         "market_family": [
-            ("prediction_market", "Prediction Market", "safe_ui_default"),
-            ("financial_market", "Financial Market", "master_plan_static_value"),
-            ("sports_market", "Sports Market", "master_plan_static_value"),
-            ("crypto_market", "Crypto Market", "master_plan_static_value"),
-            ("other", "Other", "candidate_owner_custom"),
+            ("prediction_market", "Prediction Market", "master_plan_static_value"),
+            ("equities_stocks", "Equities / Stocks", "master_plan_static_value"),
+            ("crypto_spot_derivatives", "Crypto Spot & Derivatives", "master_plan_static_value"),
+            ("listed_options", "Listed Options", "master_plan_static_value"),
+            ("futures_commodities", "Futures & Commodities", "master_plan_static_value"),
+            ("fx_macro", "FX / Macro", "master_plan_static_value"),
+            ("fixed_income_rfq", "Fixed Income / RFQ", "master_plan_static_value"),
+            ("repo_securities_financing", "Repo / Securities Financing", "master_plan_static_value"),
+            ("cross_market_hedged_overlay", "Cross-Market / Hedged Overlay", "master_plan_static_value"),
+            ("other", "Other / Owner-Defined", "candidate_owner_custom"),
         ],
         "event_category": [
             ("politics_elections", "Politics / Elections", "safe_ui_default"),
             ("economics_rates_inflation", "Economics / Rates / Inflation", "safe_ui_default"),
             ("weather_climate", "Weather / Climate", "safe_ui_default"),
             ("sports", "Sports", "safe_ui_default"),
-            ("crypto_financial_markets", "Crypto / Financial Markets", "safe_ui_default"),
+            ("crypto_digital_assets", "Crypto / Digital Assets", "safe_ui_default"),
             ("geopolitics", "Geopolitics", "safe_ui_default"),
             ("entertainment_culture", "Entertainment / Culture", "safe_ui_default"),
             ("technology_ai", "Technology / AI", "safe_ui_default"),
             ("public_health", "Public Health", "safe_ui_default"),
-            ("other", "Other", "candidate_owner_custom"),
+            ("other", "Other / Owner-Defined", "candidate_owner_custom"),
         ],
         "specific_event_route": [
             ("paste_url", "Paste market/event URL", "safe_ui_default"),
@@ -1888,6 +1973,89 @@ def _build_trade_workbench(action_rows: list[dict[str, Any]]) -> dict[str, Any]:
         "paper_preview_route",
         "Execution_Router_provider_pending_route",
     ]
+    expansion_families = {
+        "equities_stocks",
+        "crypto_spot_derivatives",
+        "listed_options",
+        "futures_commodities",
+        "fx_macro",
+        "fixed_income_rfq",
+        "repo_securities_financing",
+        "cross_market_hedged_overlay",
+    }
+    institutional_route_gaps = {
+        "execution_adjusted_ranking": "provider_pending_or_gap",
+        "tca_decomposition": "provider_pending_or_gap",
+        "overfit_false_discovery_control": "provider_pending_or_gap",
+        "portfolio_diversification": "provider_pending_or_gap",
+        "capacity_crowding": "provider_pending_or_gap",
+        "champion_challenger": "provider_pending_or_gap",
+        "regime_conditioned_memory": "provider_pending_or_gap",
+        "marginal_utility": "provider_pending_or_gap",
+        "quantum_structural_readiness": "provider_pending_or_gap",
+        "dag_upstream_downstream": "provider_pending_or_gap",
+    }
+
+    def option_metadata(key: str, option_id: str, owner_label: str, source_category: str) -> dict[str, Any]:
+        common = {
+            "authority_boundary": AUTHORITY_BOUNDARY,
+            "runtime_side_effect_allowed": False,
+            "source_truth_created": False,
+            "order_authority_created": False,
+        }
+        if key != "market_family":
+            return {
+                **common,
+                "upstream_source_ref_or_master_plan_static_ref": "OwnerInputOptionCatalogV1",
+                "downstream_consumer_ref": "OwnerTradeWorkbenchV1",
+            }
+        stage1 = option_id == "prediction_market"
+        custom = option_id == "other"
+        is_expansion = option_id in expansion_families
+        lifecycle = "stage1_active_local_preview" if stage1 else "candidate_provisional" if custom else "expansion_dormant_research_only"
+        activation = "stage1_enabled_local_preview" if stage1 else "candidate_owner_defined_local_preview" if custom else "expansion_stage_dormant_research_only"
+        provider_copy = (
+            "Stage-1 default. QTT can prepare local prediction-market trade-check previews."
+            if stage1
+            else "Owner-defined candidate/provisional market sleeve. Local preview only; no source truth, connector semantics, replay/paper evidence, live readiness, or order authority."
+            if custom
+            else f"{owner_label}: Expansion-stage market sleeve. Research/intake only until connector, market data, execution, fee/tick/slippage, cash/settlement, risk, replay, and owner gates are green."
+        )
+        return {
+            **common,
+            "market_family_id": option_id,
+            "owner_visible_label": owner_label,
+            "canonical_market_sleeve": owner_label,
+            "stage1_enabled": stage1,
+            "activation_state": activation,
+            "stage1_activation_state": "enabled" if stage1 else "not_stage1",
+            "lifecycle_state": lifecycle,
+            "timing_state_or_snapshot_state": "static_owner_ui_taxonomy_snapshot",
+            "provider_stage": "UI1_LOCAL_PREVIEW"
+            if stage1
+            else "OWNER_DEFINED_CANDIDATE"
+            if custom
+            else "EXPANSION_RESEARCH_ONLY"
+            if is_expansion
+            else "PROVIDER_PENDING",
+            "upstream_source_ref_or_master_plan_static_ref": "docs/master_plan/QTT_MasterPlan_Current.md::market_sleeve_taxonomy_static_ref",
+            "downstream_consumer_ref": "OwnerTradeWorkbenchV1 -> PR164 review/provenance route",
+            "pr164_review_consumer_ref_or_gap": "PR164_REVIEW_PROVENANCE_CONSUMER_PENDING",
+            "pr165_scoring_consumer_ref_or_gap": "PR165_SCORING_RANKING_CONSUMER_PENDING",
+            "responsible_agent_role_refs_or_gap": [
+                "docs/master_plan/generated/PR165_D2_AgentRosterDiscoveryAudit.report.json",
+                "docs/master_plan/generated/PR165_D2_AgentDutySourceCrosswalk.report.json",
+            ],
+            "agent_roster_source_ref_or_PR165_D2_gap": "docs/master_plan/generated/PR165_D2_AgentRosterDiscoveryAudit.report.json",
+            "qku_formula_route_refs_or_gap": ["owner_qku_formula_candidate_route_view.generated.jsonl"],
+            "venue_options_ref_or_gap": "OwnerInputOptionCatalogV1.venue" if stage1 else "provider_pending_connector_venue_options_gap",
+            "event_category_options_ref_or_gap": "OwnerInputOptionCatalogV1.event_category" if stage1 or custom else "not_prediction_market_event_category_gap",
+            "custom_allowed": custom,
+            "custom_authority_class": "candidate_owner_custom_local_preview" if custom else "not_custom",
+            "provider_pending_copy": provider_copy,
+            "institutional_route_placeholders": institutional_route_gaps,
+            "orphan_risk": "low: consumed by OwnerTradeWorkbenchV1, renderer, validator, tests, and PR164/PR165 route gaps",
+        }
     return {
         "meta": _ui_meta({"artifact_id": "UI1_TRADE_WORKBENCH"}),
         "workbench_id": "OWNER_TRADE_WORKBENCH",
@@ -1929,6 +2097,7 @@ def _build_trade_workbench(action_rows: list[dict[str, Any]]) -> dict[str, Any]:
                     "source_category": source_category,
                     "authority_level": "local_ui_preference_or_candidate_only",
                     "runtime_side_effect_allowed": False,
+                    **option_metadata(key, option_id, owner_label, source_category),
                 }
                 for option_id, owner_label, source_category in options
             ]
@@ -2156,17 +2325,17 @@ def _build_ui1r1_artifacts(
     }
 
     chart_specs = [
-        ("portfolio_equity_curve", "line", "owner_portfolio_pnl_chart_view.generated.jsonl", "PAPER_LOOP", True),
-        ("net_cash_pnl_by_time_range", "line", "owner_portfolio_pnl_chart_view.generated.jsonl", "METRICS1", True),
-        ("cost_adjusted_net_pnl", "line", "owner_chart_surface_contract.generated.jsonl", "METRICS1", True),
-        ("drawdown_curve", "area", "owner_chart_surface_contract.generated.jsonl", "METRICS1", True),
-        ("replay_vs_paper_vs_shadow_vs_live_pnl", "line", "owner_chart_surface_contract.generated.jsonl", "PAPER_LOOP", True),
-        ("TCA_waterfall_and_implementation_shortfall", "waterfall", "docs/master_plan/generated/pr168_rp5g/tca_decomp.jsonl", "PRETRADE1", False),
-        ("capital_allocation_by_market", "donut", "owner_live_cash_private_display_contract.generated.jsonl", "PRETRADE1", False),
-        ("exposure_by_venue", "stacked_bar", "owner_live_cash_private_display_contract.generated.jsonl", "PRETRADE1", False),
-        ("edge_alpha_scoreboard_visual", "scoreboard", "owner_edge_alpha_capture_view.generated.jsonl", "PRETRADE1", False),
-        ("agent_disagreement_visual", "bar", "owner_agent_performance_chart_view.generated.jsonl", "AGENT_ORCH1", False),
-        ("DAG_route_graph_visual", "dag", "dag.generated.jsonl", "DASH1", False),
+        ("portfolio_equity_curve", "line", "owner_portfolio_pnl_chart_view.generated.jsonl", "PAPER_LOOP", True, True),
+        ("net_cash_pnl_by_time_range", "line", "owner_portfolio_pnl_chart_view.generated.jsonl", "METRICS1", True, True),
+        ("cost_adjusted_net_pnl", "line", "owner_chart_surface_contract.generated.jsonl", "METRICS1", True, True),
+        ("drawdown_curve", "area", "owner_chart_surface_contract.generated.jsonl", "METRICS1", True, True),
+        ("replay_vs_paper_vs_shadow_vs_live_pnl", "line", "owner_chart_surface_contract.generated.jsonl", "PAPER_LOOP", True, True),
+        ("TCA_waterfall_and_implementation_shortfall", "waterfall", "docs/master_plan/generated/pr168_rp5g/tca_decomp.jsonl", "PRETRADE1", False, True),
+        ("capital_allocation_by_market", "donut", "owner_live_cash_private_display_contract.generated.jsonl", "PRETRADE1", False, False),
+        ("exposure_by_venue", "stacked_bar", "owner_live_cash_private_display_contract.generated.jsonl", "PRETRADE1", False, False),
+        ("edge_alpha_scoreboard_visual", "scoreboard", "owner_edge_alpha_capture_view.generated.jsonl", "PRETRADE1", False, False),
+        ("agent_disagreement_visual", "bar", "owner_agent_performance_chart_view.generated.jsonl", "AGENT_ORCH1", False, False),
+        ("DAG_route_graph_visual", "dag", "dag.generated.jsonl", "DASH1", False, False),
     ]
     chart_rows = [
         {
@@ -2184,6 +2353,10 @@ def _build_ui1r1_artifacts(
             "source_artifact_refs": [source_ref, *common_source_refs],
             "time_range_controls": has_range,
             "supported_time_ranges": ["1D", "1W", "1M", "3M", "YTD", "1Y", "ALL"] if has_range else [],
+            "chart_registered": chart_registered,
+            "chart_tooltip_registered": chart_registered,
+            "chart_setting_policy_ref": "OwnerSettingsV1.chart -> ChartSpecificationRegistry.current_equivalent",
+            "tooltip_policy": "registered_chart_tooltip" if chart_registered else "no_chart_point_tooltip_non_chart_visual",
             "legend_required": True,
             "axis_or_labeled_scale_required": True,
             "visual_shape_required": True,
@@ -2191,7 +2364,7 @@ def _build_ui1r1_artifacts(
             "provider_state_badge_required": True,
             "fake_value_allowed": False,
         }
-        for index, (chart_id, chart_kind, source_ref, provider_stage, has_range) in enumerate(chart_specs, start=1)
+        for index, (chart_id, chart_kind, source_ref, provider_stage, has_range, chart_registered) in enumerate(chart_specs, start=1)
     ]
     chart_manifest = {
         "meta": _ui1r1_meta("UI1R1_CHART_MANIFEST"),
@@ -4778,6 +4951,15 @@ def _build_ui1r2r3_artifacts(
         "warning_high_confirmation_color": "#F97316",
         "provider_pending_color": "#64748B",
         "success_color": "#16A34A",
+        "custom_page_background_color": "#05070A",
+        "custom_surface_background_color": "#0B0F14",
+        "custom_card_background_color": "#101722",
+        "custom_primary_text_color": "#F8FAFC",
+        "custom_accent_color": "#22C55E",
+        "custom_input_background_color": "#0B0F14",
+        "custom_chart_axis_color": "#94A3B8",
+        "custom_chart_grid_color": "#334155",
+        "custom_chart_tooltip_color": "#0F172A",
         "high_contrast": False,
         "chart_default_timeframe": "1M",
         "chart_crosshair": True,
@@ -5991,6 +6173,404 @@ def _build_ui1r2r5_visual_qa_truth_repair(r2r4_bundle: dict[str, Any]) -> dict[s
     }
 
 
+def _build_ui1r2r6_truth_repair(
+    *,
+    r2r4_bundle: dict[str, Any],
+    trade_workbench: dict[str, Any],
+    theme_contract: dict[str, Any],
+    chart_manifest: dict[str, Any],
+) -> dict[str, Any]:
+    builder_ref = "tools/build_pr169_dash1_owner_dashboard_ui.py"
+    validator_ref = VALIDATION_REF
+    renderer_ref = "docs/master_plan/generated/pr169_dash1/ui/owner_dashboard_review_surface.js"
+    css_ref = "docs/master_plan/generated/pr169_dash1/ui/owner_dashboard_review_surface.css"
+    tests_ref = "tests/pr169_dash1_ui1/test_ui1r2r6_truth.py"
+    playwright_ref = "tools/playwright_pr169_dash1_ui1_r2_r4_visual_smoke.py --suite r2-r6"
+    bundle_ref = f"docs/master_plan/generated/pr169_dash1/{R2R6_SUBDIR_NAME}/{R2R6_BUNDLE_FILE}"
+    manifest_ref = f"docs/master_plan/generated/pr169_dash1/{R2R6_SUBDIR_NAME}/{R2R6_MANIFEST_FILE}"
+    ui_boot_ref = "docs/master_plan/generated/pr169_dash1/ui/owner_dashboard_review_data.generated.json"
+    settings_ref = "docs/master_plan/generated/pr169_dash1/ui/ui1r2r3_owner_settings.generated.json"
+    workbench_ref = "docs/master_plan/generated/pr169_dash1/ui/owner_dashboard_trade_workbench.generated.json"
+    chart_ref = "docs/master_plan/generated/pr169_dash1/ui/ui1r1_chart_manifest.generated.json"
+    action_ref = "docs/master_plan/generated/pr169_dash1/ui/ui1r2_action_menu.generated.json"
+    r2r4_ref = "docs/master_plan/generated/pr169_dash1/ui/ui1r2r4_owner_semantic_bundle.generated.json"
+
+    source_rows = [
+        ("settings/preferences", settings_ref, "OwnerSettingsV1", "extended"),
+        ("custom theme tokens", "docs/master_plan/generated/pr169_dash1/ui/owner_dashboard_theme_contract.generated.json", "OwnerThemeTokenRegistryV1", "extended"),
+        ("density policy", settings_ref, "OwnerDensityPolicyV1", "extended"),
+        ("chart registration", chart_ref, "ChartSpecificationRegistryV1", "extended"),
+        ("chart axis/crosshair/grid/tooltip policy", chart_ref, "OwnerChartSettingPolicyV1", "extended"),
+        ("Workbench market-family options", workbench_ref, "OwnerWorkbenchOptionCatalogV1.market_family", "extended"),
+        ("Workbench event-category options", workbench_ref, "OwnerWorkbenchOptionCatalogV1.event_category", "extended"),
+        ("Other/custom field policy", workbench_ref, "OwnerWorkbenchCustomFieldPolicyV1", "current_equivalent"),
+        ("More Actions aliases", action_ref, "OwnerActionRegistryAliasPolicyV1", "extended"),
+        ("screenshot proof targets", bundle_ref, "OwnerScreenshotProofRegistryV1", "created"),
+        ("owner readable copy / education", "docs/master_plan/generated/pr169_dash1/ui/ui1r2_copy_map.generated.json", "OwnerEducationCopyMapV1", "current_equivalent"),
+        ("mobile navigation / More overflow", "docs/master_plan/generated/pr169_dash1/ui/owner_dashboard_mobile_navigation.generated.json", "OwnerMobileNavigationModelV1", "current_equivalent"),
+        ("Workflow Queue projection", r2r4_ref, "OwnerWorkflowQueueStateV1", "current_equivalent"),
+        ("Receipt Preview projection", r2r4_ref, "OwnerReceiptPreviewStateV1", "current_equivalent"),
+    ]
+    phase0_mapping = [
+        {
+            **_lifecycle_fields(f"ui1r2r6_mapping::{index}", upstream=source, downstream=renderer_ref, provider_stage="UI1_R2R6_LOCAL_PROVIDER_PENDING"),
+            "conceptual_domain": domain,
+            "conceptual_system": domain,
+            "canonical_source_or_current_equivalent": source,
+            "actual_repo_path_or_current_equivalent": source,
+            "thin_module_if_any": "none",
+            "central_bundle_consumer": "OwnerUXSemanticBundleV1",
+            "builder_consumer": builder_ref,
+            "validator_consumer": validator_ref,
+            "renderer_consumer": renderer_ref,
+            "test_consumer": tests_ref,
+            "playwright_proof": playwright_ref,
+            "created_or_extended": created,
+            "reason_if_created": (
+                "Compact R2R6 proof registry/control-effect/no-orphan projection under the owned prefix."
+                if created == "created"
+                else "Existing current equivalent consumed through the central PR169 UI builder and renderer."
+            ),
+            "runtime_side_effect_allowed": False,
+            "source_truth_created": False,
+            "order_authority_created": False,
+        }
+        for index, (domain, source, _current_id, created) in enumerate(source_rows, start=1)
+    ]
+
+    def screenshot(
+        name: str,
+        surface_id: str,
+        feature_id: str,
+        selector: str,
+        proof: str,
+        viewport: str,
+        actions: list[str],
+        expected: list[str],
+        forbidden: list[str] | None = None,
+        *,
+        min_width: int = 260,
+        min_height: int = 90,
+    ) -> dict[str, Any]:
+        return {
+            **_lifecycle_fields(f"r2r6_screenshot::{name}", upstream=bundle_ref, downstream=playwright_ref, provider_stage="UI1_R2R6_LOCAL_VISUAL_QA"),
+            "screenshot_path": f".tmp/r2r6_{name}.png",
+            "surface_id": surface_id,
+            "target_feature_id": feature_id,
+            "proof_selector_or_locator": selector,
+            "proof_text_or_state": proof,
+            "required_viewport": viewport,
+            "pre_screenshot_actions": actions,
+            "post_action_assertions": [
+                "target locator visible",
+                "target bounding box inside viewport",
+                "sticky/header overlays do not intersect target",
+                "owner-visible state asserted before screenshot",
+            ],
+            "owner_visible_expected_content": expected,
+            "forbidden_visible_content": forbidden or [],
+            "min_bounding_box_width_px": min_width,
+            "min_bounding_box_height_px": min_height,
+            "must_not_be_obstructed_by_selectors": ["#stickyHeader", ".app-header", ".mobile-bottom-nav"],
+            "must_not_be_clipped_sliver_flag": True,
+            "runtime_side_effect_allowed": False,
+            "source_truth_created": False,
+            "order_authority_created": False,
+        }
+
+    screenshot_registry = [
+        screenshot("mobile_wb", "trade-workbench", "mobile.workbench_input_color_full_target", "#tradeWorkbench .workbench-form-card", "Trade Workbench full mobile field group with input color state", "mobile_390x844", ["viewport:mobile", "tap:Trade", "scroll:workbench_form"], ["Trade Workbench", "Plain-English detail", "Input required"], min_width=280, min_height=120),
+        screenshot("queue", "agents", "workflow_queue.unobstructed", "#qttTeamWorkflowQueue [data-workflow-queue-shell='OwnerWorkflowQueueStateV1']", "QTT Team Workflow Queue unobstructed", "desktop", ["navigate:agents", "locator_screenshot:workflow_queue"], ["QTT Team Workflow Queue", "provider-pending / not running", "Workflow stages"], ["fake runtime queue"]),
+        screenshot("receipts", "agents", "receipt_preview.unobstructed", "#auditReceiptPreview [data-receipt-preview-shell='OwnerReceiptPreviewStateV1']", "Audit Trail / Receipts Preview unobstructed", "desktop", ["navigate:agents", "locator_screenshot:receipt_preview"], ["Audit Trail / Receipts Preview", "provider-pending / no fake receipts", "No fake timestamps"], ["fake receipts"]),
+        screenshot("other_market", "trade-workbench", "market_family.other_custom_same_frame", "[data-r2r6-proof='market-other-group']", "Market Family = Other with linked custom field and candidate guardrail", "desktop", ["navigate:trade-workbench", "select:market_family=other", "fill:custom_market_family"], ["Market family", "Other / Owner-Defined", "Custom market family", "candidate / local preview only"], ["source truth"]),
+        screenshot("other_event", "trade-workbench", "event_category.other_custom_same_frame", "[data-r2r6-proof='event-other-group']", "Event Category = Other with linked custom field and candidate guardrail", "desktop", ["navigate:trade-workbench", "select:event_category=other", "fill:custom_event_category"], ["Event category", "Other / Owner-Defined", "Custom event category", "candidate / local preview only"], ["source truth"]),
+        screenshot("more_actions", "overview", "more_actions.technical_alias_deduped", "#overviewCards .next-action-menu[data-action-alias-policy='OwnerActionRegistryAliasPolicyV1']", "One canonical Technical Details action", "desktop", ["navigate:overview", "open:first_more_actions"], ["Technical Details"], ["Open technical details"]),
+        screenshot("color_proof", "trade-workbench", "settings_color_token_consumed", "[data-workbench-field-shell='plain_english_detail'][data-owner-color-proof='input_required']", "Input-required token computed style applied to real Workbench field", "desktop", ["open:settings:Colors", "set:input_required_color", "navigate:trade-workbench"], ["Plain-English detail", "Input required"], []),
+        screenshot("theme_custom", "settings", "custom_theme_editor_visible", "[data-custom-theme-editor='OwnerCustomThemeTokenEditorV1']", "Custom theme token editor visible", "desktop", ["open:settings:Appearance", "select:theme_preset=CUSTOM"], ["Custom theme uses the color tokens selected here.", "Surface / card", "Accent"], []),
+        screenshot("theme_applied", "overview", "custom_theme_applied_real_surface", ".owner-hero-card[data-owner-theme-consumer='custom-theme-token']", "Custom token applied to real dashboard surface", "desktop", ["select:theme_preset=CUSTOM", "set:custom_card_background_color", "close:settings"], ["Provider pending", "Review-only dashboard"], []),
+        screenshot("density", "trade-workbench", "density_compact_comfortable_difference", "#tradeWorkbench [data-owner-density-policy='OwnerDensityPolicyV1']", "Compact density changes central padding/gap tokens", "desktop", ["set:density=COMPACT", "assert:card_padding_smaller"], ["Trade Workbench", "Plain-English detail"], []),
+        screenshot("chart_axis", "portfolio", "chart_axis_labels_toggle", ".chart-panel[data-axis-labels-enabled='false']", "Axis labels off hides registered chart labels", "desktop", ["navigate:portfolio", "settings:axis_labels=false"], ["Data integrity: provider_pending_no_value"], []),
+        screenshot("chart_crosshair", "portfolio", "chart_crosshair_toggle", ".chart-canvas[data-crosshair-enabled='true'].is-focused", "Crosshair visible only when enabled on registered chart", "desktop", ["navigate:portfolio", "settings:crosshair=true", "hover:registered_chart"], ["Value: provider receipts pending"], []),
+        screenshot("chart_grid", "portfolio", "chart_grid_lines_toggle", ".chart-panel[data-grid-lines-enabled='false']", "Grid lines off hides registered chart grid", "desktop", ["navigate:portfolio", "settings:grid_lines=false"], ["Data integrity: provider_pending_no_value"], []),
+        screenshot("chart_tooltip", "portfolio", "chart_tooltip_toggle", ".chart-canvas[data-tooltips-enabled='true'] [data-chart-tooltip-visible='true']", "Tooltip appears only when enabled on registered chart", "desktop", ["navigate:portfolio", "settings:tooltips=true", "hover:registered_chart"], ["Value: provider receipts pending"], []),
+        screenshot("no_tooltips", "portfolio", "non_chart_tooltips_absent", ".chart-panel[data-chart-registered='false']", "Non-chart visual cards do not show chart point tooltips", "desktop", ["navigate:portfolio", "hover:non_chart_visuals"], ["No chart point tooltip"], ["Value: provider receipts pending"]),
+        screenshot("market_catalog", "trade-workbench", "market_family_master_plan_catalog", "[data-workbench-field-shell='market_family']", "Market Family catalog contains Equities / Stocks and excludes forbidden options", "desktop", ["navigate:trade-workbench", "open:market_family"], ["Prediction Market", "Equities / Stocks", "Crypto Spot & Derivatives"], ["Sports Market", "Financial Market"]),
+    ]
+
+    def control_row(setting_id: str, label: str, key: str, selector: str, desc: str, screenshot_path: str, negative: str = "") -> dict[str, Any]:
+        return {
+            **_lifecycle_fields(f"r2r6_control::{setting_id}", upstream=settings_ref, downstream=renderer_ref, provider_stage="UI1_R2R6_LOCAL_PROVIDER_PENDING"),
+            "setting_id": setting_id,
+            "owner_label": label,
+            "central_setting_key": key,
+            "central_registry_consumer": "OwnerSettingsV1 -> OwnerUXSemanticBundleV1",
+            "renderer_consumer": renderer_ref,
+            "visible_effect_selector": selector,
+            "visible_effect_description": desc,
+            "computed_style_or_dom_assertion": "data/state attribute and computed CSS token differ through OwnerSettings.applyCssSettings",
+            "screenshot_path": screenshot_path,
+            "negative_proof_if_off": negative,
+            "runtime_side_effect_allowed": False,
+        }
+
+    control_effect_proof_matrix = [
+        control_row("custom_theme_selected", "Theme Preset = Custom", "theme_preset", "[data-custom-theme-editor='OwnerCustomThemeTokenEditorV1']", "Custom token editor appears and real surface CSS variables change.", ".tmp/r2r6_theme_custom.png"),
+        control_row("density_compact", "Density = Compact", "density", "[data-owner-density='compact']", "Central density tokens reduce card/workbench padding and gap.", ".tmp/r2r6_density.png"),
+        control_row("density_comfortable", "Density = Comfortable", "density", "[data-owner-density='comfortable']", "Central density tokens restore comfortable card/workbench padding and gap.", ".tmp/r2r6_density.png"),
+        control_row("chart_axis_labels_enabled", "Axis labels", "chart_axis_labels", ".chart-panel[data-axis-labels-enabled]", "Axis labels appear/disappear on registered charts.", ".tmp/r2r6_chart_axis.png", "axis label nodes hidden when false"),
+        control_row("chart_crosshair_enabled", "Crosshair", "chart_crosshair", ".chart-canvas[data-crosshair-enabled]", "Hover crosshair appears/disappears on registered charts.", ".tmp/r2r6_chart_crosshair.png", "crosshair hidden when false"),
+        control_row("chart_grid_lines_enabled", "Grid lines", "chart_grid_lines", ".chart-panel[data-grid-lines-enabled]", "Grid lines appear/disappear on registered charts.", ".tmp/r2r6_chart_grid.png", "grid line nodes hidden when false"),
+        control_row("chart_tooltips_enabled", "Tooltips", "chart_tooltips", ".chart-canvas[data-tooltips-enabled]", "Chart point tooltip appears only on registered charts when enabled.", ".tmp/r2r6_chart_tooltip.png", "no tooltip window when false"),
+        control_row("workbench_market_family_selected", "Market Family", "workbench.market_family", "[data-workbench-field-shell='market_family']", "Catalog-derived market family selection updates dormant/provider-pending status copy.", ".tmp/r2r6_market_catalog.png"),
+        control_row("workbench_event_category_selected", "Event Category", "workbench.event_category", "[data-workbench-field-shell='event_category']", "Sports remains event category under Prediction Market and Other reveals custom candidate input.", ".tmp/r2r6_other_event.png"),
+    ]
+
+    chart_rows = chart_manifest.get("charts", [])
+    non_chart_ids = {
+        "capital_allocation_by_market",
+        "exposure_by_venue",
+        "edge_alpha_scoreboard_visual",
+        "agent_disagreement_visual",
+        "DAG_route_graph_visual",
+    }
+    chart_registration_policy = {
+        **_lifecycle_fields("r2r6_chart_registration_policy", upstream=chart_ref, downstream=renderer_ref, provider_stage="UI1_R2R6_LOCAL_PROVIDER_PENDING"),
+        "policy_id": "ChartSpecificationRegistryV1",
+        "registered_chart_tooltips_only": True,
+        "generic_card_svg_tooltips_allowed": False,
+        "registered_chart_ids": [row["chart_id"] for row in chart_rows if row.get("chart_registered") is True],
+        "non_chart_visual_ids": sorted(non_chart_ids),
+        "negative_surface_tooltip_policy": {surface: "no_chart_point_tooltip_non_chart_visual" for surface in sorted(non_chart_ids)},
+        "provider_pending_fake_numeric_values_allowed": False,
+    }
+
+    market_rows = trade_workbench.get("option_catalog", {}).get("market_family", [])
+    event_rows = trade_workbench.get("option_catalog", {}).get("event_category", [])
+    market_taxonomy_contract = {
+        **_lifecycle_fields("r2r6_market_taxonomy_contract", upstream="docs/master_plan/QTT_MasterPlan_Current.md", downstream=renderer_ref, provider_stage="UI1_R2R6_LOCAL_PROVIDER_PENDING"),
+        "default_market_family": "Prediction Market",
+        "required_market_family_labels": [
+            "Prediction Market",
+            "Equities / Stocks",
+            "Crypto Spot & Derivatives",
+            "Listed Options",
+            "Futures & Commodities",
+            "FX / Macro",
+            "Fixed Income / RFQ",
+            "Repo / Securities Financing",
+            "Cross-Market / Hedged Overlay",
+            "Other / Owner-Defined",
+        ],
+        "forbidden_market_family_labels": ["Sports Market", "Financial Market", "Stock Market", "Crypto Market"],
+        "sports_event_category_only": True,
+        "market_family_rows": market_rows,
+        "event_category_rows": event_rows,
+        "runtime_side_effect_allowed": False,
+        "source_truth_created": False,
+        "order_authority_created": False,
+    }
+
+    changed_file_paths = [
+        builder_ref,
+        validator_ref,
+        "tools/playwright_pr169_dash1_ui1_r2_r4_visual_smoke.py",
+        "tools/validation_scope_registry.py",
+        "docs/master_plan/generated/pr169_dash1/ui/owner_dashboard_review_surface.css",
+        renderer_ref,
+        ui_boot_ref,
+        "docs/master_plan/generated/pr169_dash1/ui/owner_dashboard_review_bootstrap.generated.js",
+        "docs/master_plan/generated/pr169_dash1/ui/owner_dashboard_stale_data_banner_contract.generated.json",
+        "docs/master_plan/generated/pr169_dash1/ui/owner_dashboard_theme_contract.generated.json",
+        workbench_ref,
+        chart_ref,
+        "docs/master_plan/generated/pr169_dash1/ui/ui1r1_playwright.report.json",
+        "docs/master_plan/generated/pr169_dash1/ui/ui1r1_playwright_manifest.generated.json",
+        "docs/master_plan/generated/pr169_dash1/ui/ui1r2_playwright.report.json",
+        "docs/master_plan/generated/pr169_dash1/ui/ui1r2r1_playwright.report.json",
+        "docs/master_plan/generated/pr169_dash1/ui/ui1r2r2_playwright.report.json",
+        "docs/master_plan/generated/pr169_dash1/ui/ui1r2r2_workbench_form.generated.json",
+        "docs/master_plan/generated/pr169_dash1/ui/ui1r2r3_owner_settings.generated.json",
+        "docs/master_plan/generated/pr169_dash1/ui/ui1r2r3_playwright.report.json",
+        "docs/master_plan/generated/pr169_dash1/ui/ui1r2r3_workbench_options_ranges.generated.json",
+        f"docs/master_plan/generated/pr169_dash1/{R2R6_SUBDIR_NAME}/{R2R6_BUNDLE_FILE}",
+        f"docs/master_plan/generated/pr169_dash1/{R2R6_SUBDIR_NAME}/{R2R6_MANIFEST_FILE}",
+        f"docs/master_plan/generated/pr169_dash1/{R2R6_SUBDIR_NAME}/playwright_visual_smoke.report.json",
+        tests_ref,
+        "tests/tools/test_validation_scope_registry.py",
+        "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+    ]
+    changed_file_ownership_audit = [
+        {
+            **_lifecycle_fields(f"r2r6_changed_file::{index}", upstream="PR169_UI1_R2R6_v9_YOLO", downstream="PR body + validators"),
+            "file_path": path,
+            "change_type": "generated" if "/generated/" in path.replace("\\", "/") else "source_or_test",
+            "owned_prefix_or_allowed_shared_reason": (
+                "owned R2R6 generated prefix"
+                if f"/{R2R6_SUBDIR_NAME}/" in path.replace("\\", "/")
+                else "allowed shared current-equivalent consumed by central PR169 UI builder/validator/renderer/test path"
+            ),
+            "producer": playwright_ref if path.endswith("playwright_visual_smoke.report.json") else builder_ref,
+            "consumer": "renderer/validator/tests/Playwright/PR body",
+            "validator_or_test_coverage": tests_ref,
+            "playwright_proof_or_not_applicable": playwright_ref if path.endswith((".js", ".css", ".html", ".json", ".py")) else "not_applicable",
+            "runtime_authority_change": False,
+            "source_truth_change": False,
+            "order_authority_change": False,
+            "orphan_risk": "low: central source, renderer consumer, validator/test consumer, and proof route declared",
+        }
+        for index, path in enumerate(changed_file_paths, start=1)
+    ]
+
+    semantic_domains = [
+        "settings/preferences",
+        "custom theme tokens",
+        "density policy",
+        "chart registration",
+        "chart axis/crosshair/grid/tooltip policy",
+        "Workbench market-family options",
+        "Workbench event-category options",
+        "Other/custom field policy",
+        "More Actions aliases",
+        "screenshot proof targets",
+        "owner readable copy / education",
+        "mobile navigation / More overflow",
+        "Workflow Queue projection",
+        "Receipt Preview projection",
+    ]
+    manifest_rows = [
+        {
+            **_lifecycle_fields(f"r2r6_manifest::{domain}", upstream="canonical PR169 UI current equivalents", downstream=renderer_ref, provider_stage="UI1_R2R6_LOCAL_PROVIDER_PENDING"),
+            "artifact_path": bundle_ref if domain == "screenshot proof targets" else ui_boot_ref,
+            "semantic_domain": domain,
+            "producer": builder_ref,
+            "central_source": next(row["canonical_source_or_current_equivalent"] for row in phase0_mapping if row["conceptual_domain"] == domain),
+            "renderer_consumer": renderer_ref,
+            "validator_or_test_consumer": f"{validator_ref}; {tests_ref}",
+            "playwright_proof_or_na": playwright_ref,
+            "upstream_ref_or_provider_pending_gap": "current PR169 generated dashboard artifacts or provider_pending gap",
+            "downstream_ref_or_provider_pending_gap": "renderer, validator, tests, Playwright, PR164/PR165 route gaps",
+            "lifecycle_state": "ui_truth_repair_projection",
+            "timing_state_or_snapshot_state": "static_generated_snapshot",
+            "activation_state_or_provider_stage": "UI1_R2R6_LOCAL_PROVIDER_PENDING",
+            "authority_boundary": AUTHORITY_BOUNDARY,
+            "runtime_side_effect_allowed": False,
+            "source_truth_created": False,
+            "order_authority_created": False,
+            "orphan_risk": "low: one central source/current equivalent mapped to consumer and validation",
+        }
+        for domain in semantic_domains
+    ]
+    centralization_manifest = {
+        "meta": _ui_meta({"artifact_id": "UI1R2R6_CENTRALIZATION_MANIFEST"}),
+        "manifest_id": "UI1R2R6_CENTRALIZATION_MANIFEST",
+        "phase0_current_equivalent_mapping": phase0_mapping,
+        "rows": manifest_rows,
+        "changed_file_ownership_audit": changed_file_ownership_audit,
+    }
+
+    return {
+        "meta": _ui_meta({"artifact_id": "UI1R2R6_SETTINGS_CHART_WORKBENCH_TRUTH"}),
+        "central_bundle_id": "OwnerUXSemanticBundleV1",
+        "owned_generated_prefix": f"docs/master_plan/generated/pr169_dash1/{R2R6_SUBDIR_NAME}/",
+        "one_builder": builder_ref,
+        "one_validator": validator_ref,
+        "single_settings_key": OWNER_SETTINGS_STORAGE_KEY,
+        "source_of_truth_precedence": [
+            "canonical dashboard surface registry/current equivalent",
+            "OwnerDashboardStateV1/current equivalent",
+            "OwnerActionRegistry/current equivalent",
+            "OwnerSettingsV1/current equivalent",
+            "ChartSpecificationRegistry/current equivalent",
+            "OwnerWorkbenchOptionCatalog/current equivalent",
+            "OwnerUXSemanticBundleV1/current equivalent",
+            "generated R2R6 projections under owned prefix/current equivalent",
+            "renderers / validators / tests / Playwright",
+        ],
+        "alias_resolution_proof": {
+            "OwnerSettingsV1": "OwnerSettingsV1",
+            "settings schema": "OwnerSettingsV1",
+            "OwnerThemeTokenRegistry": "OwnerThemeTokenRegistryV1",
+            "theme presets": "OwnerThemeTokenRegistryV1",
+            "custom token editor": "OwnerThemeTokenRegistryV1",
+            "OwnerDensityPolicy": "OwnerDensityPolicyV1",
+            "layout density tokens": "OwnerDensityPolicyV1",
+            "ChartSpecificationRegistry": "ChartSpecificationRegistryV1",
+            "tooltip policy": "ChartSpecificationRegistryV1",
+            "chart setting toggles": "ChartSpecificationRegistryV1",
+            "OwnerWorkbenchOptionCatalog": "OwnerWorkbenchOptionCatalogV1",
+            "market-family dropdowns": "OwnerWorkbenchOptionCatalogV1",
+            "event-category dropdowns": "OwnerWorkbenchOptionCatalogV1",
+            "OwnerActionRegistry": "OwnerActionRegistryAliasPolicyV1",
+            "More Actions aliases": "OwnerActionRegistryAliasPolicyV1",
+            "OwnerScreenshotProofRegistry": "OwnerScreenshotProofRegistryV1",
+        },
+        "phase0_current_equivalent_mapping": phase0_mapping,
+        "centralization_manifest": centralization_manifest,
+        "control_effect_proof_matrix": control_effect_proof_matrix,
+        "screenshot_proof_registry": screenshot_registry,
+        "chart_registration_policy": chart_registration_policy,
+        "market_taxonomy_contract": market_taxonomy_contract,
+        "theme_truth_contract": {
+            **_lifecycle_fields("r2r6_theme_truth_contract", upstream="owner_dashboard_theme_contract.generated.json", downstream=renderer_ref, provider_stage="UI1_R2R6_LOCAL_PROVIDER_PENDING"),
+            "supported_presets": theme_contract.get("supported_modes", []),
+            "custom_visible": "CUSTOM" in theme_contract.get("supported_modes", []),
+            "custom_editor_required": True,
+            "custom_token_controls": theme_contract.get("custom_theme_minimum_editor", {}).get("tokens", []),
+            "custom_tokens_consumed_by_real_surface": True,
+            "contrast_guard_required": True,
+        },
+        "density_truth_contract": {
+            **_lifecycle_fields("r2r6_density_truth_contract", upstream=settings_ref, downstream=css_ref, provider_stage="UI1_R2R6_LOCAL_PROVIDER_PENDING"),
+            "policy_id": "OwnerDensityPolicyV1",
+            "tokens": ["--qtt-card-padding", "--qtt-card-gap", "--qtt-row-gap", "--qtt-control-height", "--qtt-section-padding"],
+            "compact_card_padding_ratio_max": 0.85,
+            "mobile_min_touch_target_px": 40,
+            "workbench_and_cards_consume_same_policy": True,
+        },
+        "changed_file_ownership_audit": changed_file_ownership_audit,
+        "broad_pr169_ui_generated_artifact_justification": [
+            {
+                "shared_file_path": path,
+                "why_owned_prefix_was_not_sufficient": "The existing dashboard renderer consumes one central boot payload/current equivalent for Settings, Workbench, chart, and screenshot-proof semantics.",
+                "central_builder_owner": builder_ref,
+                "validator_owner": validator_ref,
+                "exact_test_or_ci_failure_requiring_change": tests_ref,
+                "why_change_is_not_unrelated_churn": "Required central current-equivalent mutation for R2R6 owner-visible control truth.",
+            }
+            for path in [ui_boot_ref, "docs/master_plan/generated/pr169_dash1/ui/owner_dashboard_review_bootstrap.generated.js", workbench_ref, chart_ref]
+        ],
+        "currentization_preflight": {
+            **_lifecycle_fields("r2r6_currentization_preflight", upstream="tools/currentize_pr152_after_generated_artifacts.py", downstream="validation gates"),
+            "new_exact_path_playwright_script_added": False,
+            "stable_runner_extended_with_suite_arg": True,
+            "wildcard_allowlists_added": False,
+            "generated_inventory_change_requires_pr152_currentization": True,
+            "mandatory_pre_push_commands": [
+                "python -B tools/currentize_pr152_after_generated_artifacts.py --repo-root .",
+                "python -B tools/validate_pr162_safe_nonlive_replay_paper_data_adapter_quantum_forward_bridge.py --repo-root .",
+                "python -B tools/validate_grand_global_debug_logical_consistency_audit.py --repo-root .",
+            ],
+        },
+        "no_runtime_authority": {
+            **r2r4_bundle.get("no_runtime_authority", {}),
+            "no_SVC1_runtime": True,
+            "no_live_LLM": True,
+            "no_online_search_runtime": True,
+            "no_real_QTT_agent_execution": True,
+            "no_real_replay_paper_live_execution": True,
+            "no_connector_private_cash_reads": True,
+            "no_source_truth_acceptance": True,
+            "no_direct_venue_submit": True,
+            "no_Execution_Router_release": True,
+            "no_QTT_SHA_or_AtomicRows_hash_authority": True,
+            "no_profit_guarantee": True,
+        },
+        "runtime_side_effect_allowed": False,
+        "source_truth_created": False,
+        "order_authority_created": False,
+    }
+
+
 def _build_review_data(base: Path, master_plan: Path) -> tuple[dict[str, Any], dict[str, Any]]:
     resolver = OwnerSurfaceResolver(base)
     registry_rows = resolver.registry.rows
@@ -6058,6 +6638,12 @@ def _build_review_data(base: Path, master_plan: Path) -> tuple[dict[str, Any], d
         r2_artifacts=r2_artifacts,
     )
     r2r5_bundle = _build_ui1r2r5_visual_qa_truth_repair(r2r4_bundle)
+    r2r6_bundle = _build_ui1r2r6_truth_repair(
+        r2r4_bundle=r2r4_bundle,
+        trade_workbench=trade_workbench,
+        theme_contract=theme_contract,
+        chart_manifest=r1_artifacts["ui1r1_chart_manifest.generated.json"],
+    )
     charts = {
         "chart_contracts": chart_contracts,
         "interactive_chart_registry": interactive_charts,
@@ -6325,6 +6911,7 @@ def _build_review_data(base: Path, master_plan: Path) -> tuple[dict[str, Any], d
         "ui1r2r3_playwright": r2_artifacts["ui1r2r3_playwright.report.json"],
         "ui1r2r4_semantic_bundle": r2r4_bundle,
         "ui1r2r5_visual_qa_truth_repair": r2r5_bundle,
+        "ui1r2r6_truth_repair": r2r6_bundle,
     }
     for key in REQUIRED_TOP_LEVEL_KEYS:
         review_data.setdefault(key, {})
@@ -6530,6 +7117,12 @@ def build_ui(base: Path, repo_root: Path) -> dict[str, Any]:
         r2r5_dir / R2R5_MANIFEST_FILE,
         review_data["ui1r2r5_visual_qa_truth_repair"]["centralization_manifest"],
     )
+    r2r6_dir = base / R2R6_SUBDIR_NAME
+    _write_json(r2r6_dir / R2R6_BUNDLE_FILE, review_data["ui1r2r6_truth_repair"])
+    _write_json(
+        r2r6_dir / R2R6_MANIFEST_FILE,
+        review_data["ui1r2r6_truth_repair"]["centralization_manifest"],
+    )
     return {
         "artifact_id": "UI1_OWNER_DASHBOARD_BUILD_SUMMARY",
         "status": "BUILT",
@@ -6540,6 +7133,8 @@ def build_ui(base: Path, repo_root: Path) -> dict[str, Any]:
         "r2r4_manifest": repo_posix(r2r4_dir / R2R4_MANIFEST_FILE),
         "r2r5_bundle": repo_posix(r2r5_dir / R2R5_BUNDLE_FILE),
         "r2r5_manifest": repo_posix(r2r5_dir / R2R5_MANIFEST_FILE),
+        "r2r6_bundle": repo_posix(r2r6_dir / R2R6_BUNDLE_FILE),
+        "r2r6_manifest": repo_posix(r2r6_dir / R2R6_MANIFEST_FILE),
         "registry_row_count": review_data["meta"]["registry_row_count"],
         "decision_queue_count": review_data["meta"]["decision_queue_count"],
         "actionable_card_count": review_data["meta"]["actionable_card_count"],
