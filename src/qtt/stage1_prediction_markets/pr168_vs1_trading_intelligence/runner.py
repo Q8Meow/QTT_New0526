@@ -574,7 +574,15 @@ def discover_reading_inputs() -> tuple[list[dict[str, Any]], list[dict[str, Any]
     )
     crosswalk_rows: list[dict[str, Any]] = []
     for category, tokens in discovery_patterns.items():
-        matches = [rel_ref(p) for p in all_docs if all(token in p.name.lower() for token in tokens)]
+        matches = [
+            rel_ref(p)
+            for p in all_docs
+            if all(token in p.name.lower() for token in tokens)
+            and (
+                category != "COMMAND_ACTION_MATRIX"
+                or p.name.lower().endswith(".report.json")
+            )
+        ]
         status = "FOUND" if matches else "NOT_FOUND_NON_BLOCKING_FOR_VS1"
         crosswalk_rows.append(
             with_common(

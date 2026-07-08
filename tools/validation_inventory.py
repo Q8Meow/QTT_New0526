@@ -398,7 +398,9 @@ def _pr_globs(stem: str) -> tuple[str, ...]:
             [
                 "docs/master_plan/generated/pr169_svc1/**",
                 "src/qtt/service/**",
+                "src/qtt/stage1_prediction_markets/pr168_vs1_trading_intelligence/runner.py",
                 "tests/pr169_svc1/**",
+                "tools/pr168_rp5c_config.py",
             ]
         )
     if token == "pr169_dash1":
@@ -818,7 +820,9 @@ def _specific_pr_token_for_path(path: str) -> str | None:
     if (
         path.startswith("docs/master_plan/generated/pr169_svc1/")
         or path.startswith("src/qtt/service/")
+        or path == "src/qtt/stage1_prediction_markets/pr168_vs1_trading_intelligence/runner.py"
         or path.startswith("tests/pr169_svc1/")
+        or path == "tools/pr168_rp5c_config.py"
         or "pr169_svc1" in PurePosixPath(path).name.lower()
     ):
         return "pr169_svc1"
