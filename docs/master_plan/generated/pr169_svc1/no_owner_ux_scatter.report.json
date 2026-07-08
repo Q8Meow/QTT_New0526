@@ -1,0 +1,19 @@
+{
+  "acceptance_state": "PASS",
+  "builder_name": "tools/build_pr169_svc1.py",
+  "canonical_registry_ref": "docs/master_plan/generated/pr169_svc1/service_registry.jsonl",
+  "generated_from": "docs/master_plan/generated/pr169_svc1/service_registry.jsonl",
+  "manual_edit_allowed": false,
+  "no_mobile_only_fork": true,
+  "no_renderer_only_chart_semantics": true,
+  "no_renderer_only_owner_action_semantics": true,
+  "no_telegram_only_governance": true,
+  "owner_chart_manifest_exists_or_current_equivalent": true,
+  "owner_copy_map_exists": true,
+  "owner_mode_technical_disclosure_exists": true,
+  "owner_ux_semantics_route_through_central_bundle": true,
+  "owner_widget_manifest_exists_or_current_equivalent": true,
+  "projection_version": "PR169-SVC1-v1.4",
+  "raw_refs_hidden_behind_developer_mode": true,
+  "validator_name": "tools/validate_pr169_svc1.py"
+}

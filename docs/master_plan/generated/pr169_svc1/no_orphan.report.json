@@ -1,0 +1,16 @@
+{
+  "acceptance_state": "PASS",
+  "builder_name": "tools/build_pr169_svc1.py",
+  "canonical_registry_ref": "docs/master_plan/generated/pr169_svc1/service_registry.jsonl",
+  "generated_from": "docs/master_plan/generated/pr169_svc1/service_registry.jsonl",
+  "manual_edit_allowed": false,
+  "orphan_count": 0,
+  "orphan_statuses": [
+    "NOT_ORPHAN"
+  ],
+  "projection_file_count": 84,
+  "projection_version": "PR169-SVC1-v1.4",
+  "registry_row_count": 1188,
+  "required_route_proof": "producer, registry source, validator, owner/service consumer, downstream route, agent route, authority state",
+  "validator_name": "tools/validate_pr169_svc1.py"
+}

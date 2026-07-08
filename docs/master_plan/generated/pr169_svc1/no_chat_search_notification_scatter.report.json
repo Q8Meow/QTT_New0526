@@ -1,0 +1,16 @@
+{
+  "acceptance_state": "PASS",
+  "builder_name": "tools/build_pr169_svc1.py",
+  "canonical_registry_ref": "docs/master_plan/generated/pr169_svc1/service_registry.jsonl",
+  "generated_from": "docs/master_plan/generated/pr169_svc1/service_registry.jsonl",
+  "layout_profile_routes_exist": true,
+  "manual_edit_allowed": false,
+  "no_separate_chat_truth": true,
+  "notification_tier_policy_exists": true,
+  "owner_conversation_routes_exist": true,
+  "owner_search_index_routes_exist": true,
+  "plain_english_intent_routes_exist": true,
+  "projection_version": "PR169-SVC1-v1.4",
+  "stale_data_banner_views_exist": true,
+  "validator_name": "tools/validate_pr169_svc1.py"
+}

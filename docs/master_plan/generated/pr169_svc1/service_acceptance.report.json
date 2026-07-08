@@ -1,0 +1,14 @@
+{
+  "acceptance_criteria_state": "PASS",
+  "acceptance_state": "PASS",
+  "builder_name": "tools/build_pr169_svc1.py",
+  "canonical_registry_ref": "docs/master_plan/generated/pr169_svc1/service_registry.jsonl",
+  "created_execution_authority": false,
+  "created_profit_claim": false,
+  "created_runtime_behavior": false,
+  "created_source_truth": false,
+  "generated_from": "docs/master_plan/generated/pr169_svc1/service_registry.jsonl",
+  "manual_edit_allowed": false,
+  "projection_version": "PR169-SVC1-v1.4",
+  "validator_name": "tools/validate_pr169_svc1.py"
+}

@@ -192,6 +192,8 @@ def validator_id_for_command(command: Sequence[str], phase: str) -> str:
 
 
 def _pr_token(stem: str) -> str | None:
+    if "pr169_svc1" in stem:
+        return "pr169_svc1"
     if "pr169_pretrade1" in stem:
         return "pr169_pretrade1"
     if "pr169_readiness1" in stem:
@@ -391,6 +393,14 @@ def _pr_globs(stem: str) -> tuple[str, ...]:
                 "tests/pr169_pretrade1/**",
             ]
         )
+    if token == "pr169_svc1":
+        globs.extend(
+            [
+                "docs/master_plan/generated/pr169_svc1/**",
+                "src/qtt/service/**",
+                "tests/pr169_svc1/**",
+            ]
+        )
     if token == "pr169_dash1":
         globs.extend(
             [
@@ -558,6 +568,8 @@ def _output_globs(script_name: str, stem: str) -> tuple[str, ...]:
             globs.append("docs/master_plan/generated/pr169_readiness1/**")
         if token == "pr169_pretrade1":
             globs.append("docs/master_plan/generated/pr169_pretrade1/**")
+        if token == "pr169_svc1":
+            globs.append("docs/master_plan/generated/pr169_svc1/**")
     return tuple(globs)
 
 
@@ -803,6 +815,13 @@ def entries_matching_path(path: str) -> tuple[ValidatorInventoryEntry, ...]:
 
 
 def _specific_pr_token_for_path(path: str) -> str | None:
+    if (
+        path.startswith("docs/master_plan/generated/pr169_svc1/")
+        or path.startswith("src/qtt/service/")
+        or path.startswith("tests/pr169_svc1/")
+        or "pr169_svc1" in PurePosixPath(path).name.lower()
+    ):
+        return "pr169_svc1"
     if (
         path.startswith("docs/master_plan/generated/pr169_pretrade1/")
         or path.startswith("src/qtt/pretrade/")

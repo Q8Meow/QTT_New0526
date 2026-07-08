@@ -1,0 +1,16 @@
+{
+  "acceptance_state": "PASS",
+  "builder_name": "tools/build_pr169_svc1.py",
+  "canonical_registry_ref": "docs/master_plan/generated/pr169_svc1/service_registry.jsonl",
+  "contract_sample_rows_labeled_as_contract_only": true,
+  "fake_live_receipt_created": false,
+  "fake_memory_update_receipt_created": false,
+  "fake_paper_fill_receipt_created": false,
+  "fake_private_cash_receipt_created": false,
+  "fake_runtime_receipt_created": false,
+  "fake_runtime_timestamp_created": false,
+  "generated_from": "docs/master_plan/generated/pr169_svc1/service_registry.jsonl",
+  "manual_edit_allowed": false,
+  "projection_version": "PR169-SVC1-v1.4",
+  "validator_name": "tools/validate_pr169_svc1.py"
+}
