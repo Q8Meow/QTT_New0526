@@ -40,6 +40,7 @@ PR169_DASH1_UI1_R2_R3_BRANCH = "pr169-dash1-ui1-r2-r3-owner-product-polish"
 PR169_DASH1_UI1_R2_R4_BRANCH = "pr169-dash1-ui1-r2-r4-owner-visual-acceptance-agent-monitoring"
 PR169_DASH1_UI1_R2_R5_BRANCH = "pr169-dash1-ui1-r2-r5-owner-visual-qa-truth-repair"
 PR169_DASH1_UI1_R2_R6_BRANCH = "pr169-ui1-r2r6"
+PR169_READINESS1_BRANCH = "pr169-readiness1"
 VALIDATION_FIXTURE_BRANCH = "pr-ci-fastfail-validation-context-preflight"
 
 _PR168_BRANCHES = frozenset(
@@ -78,6 +79,7 @@ _PR168_BRANCHES = frozenset(
         PR169_DASH1_UI1_R2_R4_BRANCH,
         PR169_DASH1_UI1_R2_R5_BRANCH,
         PR169_DASH1_UI1_R2_R6_BRANCH,
+        PR169_READINESS1_BRANCH,
         VALIDATION_FIXTURE_BRANCH,
     }
 )
@@ -743,6 +745,33 @@ _PR169_DASH1_ALLOWED_PATTERNS = (
     "tests/pr169_dash1_ui1/**",
 )
 
+_PR169_READINESS1_ALLOWED_EXACT_PATHS = frozenset(
+    {
+        "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+        "src/qtt/readiness/__init__.py",
+        "src/qtt/readiness/pr169_readiness1_resolvers.py",
+        "tools/build_pr169_readiness1.py",
+        "tools/validate_pr169_readiness1.py",
+        "tools/changed_area_validation_router.py",
+        "tools/run_validation_gates.py",
+        "tools/validation_inventory.py",
+        "tools/validation_scope_registry.py",
+        "tools/validate_validation_scope_registry.py",
+        "tests/pr169_readiness1/test_pr169_readiness1.py",
+        "tests/tools/test_validation_scope_registry.py",
+        "tests/tools/test_validation_inventory.py",
+        "tests/tools/test_changed_area_validation_router.py",
+        "tests/fail_closed/test_run_validation_gates.py",
+    }
+)
+
+_PR169_READINESS1_ALLOWED_PATTERNS = (
+    "docs/master_plan/generated/pr169_readiness1/**",
+    "src/qtt/readiness/**",
+    "tools/*pr169_readiness1*.py",
+    "tests/pr169_readiness1/**",
+)
+
 _FORBIDDEN_EXACT_PATHS = frozenset(
     {
         "docs/master_plan/QTT_MasterPlan_Current.md",
@@ -1304,6 +1333,29 @@ def _pr168_mem1_scope_decision(branch_name: str, normalized: str) -> dict[str, o
     return None
 
 
+def _pr169_readiness1_scope_decision(branch_name: str, normalized: str) -> dict[str, object] | None:
+    if normalized in _PR169_READINESS1_ALLOWED_EXACT_PATHS:
+        return {
+            "allowed": True,
+            "branch": branch_name,
+            "normalized_path": normalized,
+            "pr_id": "PR169-READINESS1",
+            "matched_rule": f"exact:{normalized}",
+            "reason": "registered_exact_path",
+        }
+    for pattern in _PR169_READINESS1_ALLOWED_PATTERNS:
+        if fnmatchcase(normalized, pattern):
+            return {
+                "allowed": True,
+                "branch": branch_name,
+                "normalized_path": normalized,
+                "pr_id": "PR169-READINESS1",
+                "matched_rule": f"pattern:{pattern}",
+                "reason": "registered_pattern",
+            }
+    return None
+
+
 def _pr169_dash1_scope_decision(branch_name: str, normalized: str) -> dict[str, object] | None:
     if normalized in _PR169_DASH1_ALLOWED_EXACT_PATHS:
         return {
@@ -1635,6 +1687,19 @@ def explain_pr_scope_decision(branch: str, path: str) -> dict[str, object]:
             "reason": "path_not_registered_for_pr_scope",
         }
 
+    if branch_name == PR169_READINESS1_BRANCH:
+        readiness1_decision = _pr169_readiness1_scope_decision(branch_name, normalized)
+        if readiness1_decision:
+            return readiness1_decision
+        return {
+            "allowed": False,
+            "branch": branch_name,
+            "normalized_path": normalized,
+            "pr_id": "PR169-READINESS1",
+            "matched_rule": "no_pr169_readiness1_scope_rule",
+            "reason": "path_not_registered_for_pr_scope",
+        }
+
     if branch_name in {
         PR169_DASH1_BRANCH,
         PR169_DASH1_UI1_BRANCH,
@@ -1726,6 +1791,9 @@ def explain_pr_scope_decision(branch: str, path: str) -> dict[str, object]:
         mem1_decision = _pr168_mem1_scope_decision(branch_name, normalized)
         if mem1_decision:
             return mem1_decision
+        readiness1_decision = _pr169_readiness1_scope_decision(branch_name, normalized)
+        if readiness1_decision:
+            return readiness1_decision
         dash1_decision = _pr169_dash1_scope_decision(branch_name, normalized)
         if dash1_decision:
             return dash1_decision

@@ -1,0 +1,15 @@
+{
+  "acceptance_state": "PASS",
+  "authoritative_source": "docs/master_plan/generated/pr169_readiness1/agent_readiness_registry.jsonl",
+  "builder_name": "tools/build_pr169_readiness1.py",
+  "downstream_note_only_row_count": 0,
+  "generated_from": "docs/master_plan/generated/pr169_readiness1/agent_readiness_registry.jsonl",
+  "manual_edit_allowed": false,
+  "metadata_only_row_count": 0,
+  "planning_only_row_count": 0,
+  "prompt_version": "v4.3.1",
+  "report_type": "NO_PLACEHOLDER_MATERIALIZATION_REPORT",
+  "scoped_gap_rows_are_actionable": true,
+  "solver_label_only_row_count": 0,
+  "validator_name": "tools/validate_pr169_readiness1.py"
+}

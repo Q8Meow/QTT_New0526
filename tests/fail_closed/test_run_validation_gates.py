@@ -275,6 +275,41 @@ def test_runner_pr169_dash1_branch_scope_keeps_only_dash1_deterministic_commands
     )
 
 
+def test_runner_pr169_readiness1_branch_scope_keeps_only_readiness1_deterministic_commands(
+    monkeypatch,
+    tmp_path,
+):
+    monkeypatch.setattr(
+        runner,
+        "_current_git_branch",
+        lambda _repo_root: runner.PR169_READINESS1_BRANCH,
+    )
+    assert runner._pr169_readiness1_local_branch_scope_active(
+        repo_root=REPO_ROOT,
+        phase=runner.DETERMINISTIC_VALIDATORS_PHASE,
+        validation_mode="auto",
+        changed_files=(),
+        force_full=False,
+        manual_mode="",
+    )
+
+    commands = runner.build_phase_commands(
+        runner.DETERMINISTIC_VALIDATORS_PHASE,
+        tmp_path / "validation",
+        tmp_path / "pytest",
+    )
+    kept = runner._filter_commands_for_pr169_readiness1_local_branch_scope(commands)
+
+    assert [Path(command[1]).name for command in kept] == [
+        "build_pr169_readiness1.py",
+        "validate_pr169_readiness1.py",
+    ]
+    assert all(
+        any("pr169_readiness1" in part for part in command)
+        for command in kept
+    )
+
+
 def test_run_validation_gates_direct_script_imports_router_without_pythonpath():
     completed = subprocess.run(
         [
@@ -1283,6 +1318,26 @@ def _expected_commands(
             ".",
             "--base",
             str(validation_dir / "master_plan_generated" / "pr169_dash1"),
+            "--timeout-ms",
+            "3600000",
+        ],
+        [
+            python_executable,
+            str(Path("tools") / "build_pr169_readiness1.py"),
+            "--repo-root",
+            ".",
+            "--out-dir",
+            str(validation_dir / "master_plan_generated" / "pr169_readiness1"),
+            "--timeout-ms",
+            "3600000",
+        ],
+        [
+            python_executable,
+            str(Path("tools") / "validate_pr169_readiness1.py"),
+            "--repo-root",
+            ".",
+            "--artifact-dir",
+            str(validation_dir / "master_plan_generated" / "pr169_readiness1"),
             "--timeout-ms",
             "3600000",
         ],
@@ -3169,6 +3224,7 @@ def test_runner_splits_pytest_shard_2_longest_group_deterministically():
         ("tests/pr168_vs2",),
         ("tests/pr168_mem1",),
         ("tests/pr169_dash1",),
+        ("tests/pr169_readiness1",),
         ("tests/pr169_dash1_ui1",),
     ]
     assert all(command.reason for command in commands)

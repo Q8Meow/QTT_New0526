@@ -166,6 +166,38 @@ def test_pr169_dash1_paths_match_only_dash1_validators():
         assert "validate_pr168_vs2_paper_intent_candidates" not in matching_ids
 
 
+def test_inventory_has_pr169_readiness1_entries():
+    entries = inventory.inventory_by_id()
+    build_entry = entries["build_pr169_readiness1"]
+    validate_entry = entries["validate_pr169_readiness1"]
+
+    for entry in (build_entry, validate_entry):
+        assert entry.owner_pr_or_feature == "PR169_READINESS1"
+        assert "docs/master_plan/generated/pr169_readiness1/**" in entry.output_globs
+        assert "src/qtt/readiness/**" in entry.required_when_files_match
+        assert "tests/pr169_readiness1/**" in entry.required_when_files_match
+
+    assert "tools/build_pr169_readiness1.py" in build_entry.tool_globs
+    assert "tools/validate_pr169_readiness1.py" in validate_entry.tool_globs
+
+
+def test_pr169_readiness1_paths_match_only_readiness1_validators():
+    paths = (
+        "docs/master_plan/generated/pr169_readiness1/agent_readiness_registry.jsonl",
+        "src/qtt/readiness/pr169_readiness1_resolvers.py",
+        "tests/pr169_readiness1/test_pr169_readiness1.py",
+        "tools/validate_pr169_readiness1.py",
+    )
+
+    for path in paths:
+        matching_ids = {entry.validator_id for entry in inventory.entries_matching_path(path)}
+        assert "build_pr169_readiness1" in matching_ids
+        assert "validate_pr169_readiness1" in matching_ids
+        assert "build_pr169_dash1_owner_dashboard" not in matching_ids
+        assert "validate_pr169_dash1_owner_dashboard" not in matching_ids
+        assert "validate_pr168_mem1_condition_scoped_memory" not in matching_ids
+
+
 def test_inventory_has_pr168_data1_entry():
     entry = inventory.inventory_by_id()["validate_pr168_data1_public_market_data_snapshots"]
 

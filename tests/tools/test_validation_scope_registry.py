@@ -61,6 +61,7 @@ PR169_DASH1_UI1_R2_R3_BRANCH = registry.PR169_DASH1_UI1_R2_R3_BRANCH
 PR169_DASH1_UI1_R2_R4_BRANCH = registry.PR169_DASH1_UI1_R2_R4_BRANCH
 PR169_DASH1_UI1_R2_R5_BRANCH = registry.PR169_DASH1_UI1_R2_R5_BRANCH
 PR169_DASH1_UI1_R2_R6_BRANCH = registry.PR169_DASH1_UI1_R2_R6_BRANCH
+PR169_READINESS1_BRANCH = registry.PR169_READINESS1_BRANCH
 FIXTURE_BRANCH = registry.VALIDATION_FIXTURE_BRANCH
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
@@ -175,6 +176,40 @@ def test_pr169_dash1_forbidden_paths_fail(path: str) -> None:
         PR169_DASH1_UI1_R2_R6_BRANCH,
         path,
     )
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        "docs/master_plan/generated/pr169_readiness1/agent_readiness_registry.jsonl",
+        "docs/master_plan/generated/pr169_readiness1/owner_three_question_coverage.report.json",
+        "src/qtt/readiness/pr169_readiness1_resolvers.py",
+        "tools/build_pr169_readiness1.py",
+        "tools/validate_pr169_readiness1.py",
+        "tools/changed_area_validation_router.py",
+        "tests/pr169_readiness1/test_pr169_readiness1.py",
+        "tools/run_validation_gates.py",
+        "tools/validation_inventory.py",
+        "tools/validation_scope_registry.py",
+    ],
+)
+def test_pr169_readiness1_allowed_paths_pass_on_real_branch(path: str) -> None:
+    assert registry.is_pr_scoped_changed_path_allowed(PR169_READINESS1_BRANCH, path)
+    assert registry.is_pr_scoped_changed_path_allowed(FIXTURE_BRANCH, path)
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        "src/qtt/live_connectors/order_client.py",
+        "private_state/account_snapshot.json",
+        "cash/account.json",
+        "docs/master_plan/QTT_MasterPlan_Current.md",
+        "docs/master_plan/generated/pr169_dash1/owner_action_registry.generated.jsonl",
+    ],
+)
+def test_pr169_readiness1_forbidden_paths_fail(path: str) -> None:
+    assert not registry.is_pr_scoped_changed_path_allowed(PR169_READINESS1_BRANCH, path)
 
 
 @pytest.mark.parametrize(

@@ -106,6 +106,13 @@ PR169_DASH1_DETERMINISTIC_SCRIPT_NAMES = frozenset(
         "validate_pr169_dash1_owner_dashboard.py",
     }
 )
+PR169_READINESS1_BRANCH = "pr169-readiness1"
+PR169_READINESS1_DETERMINISTIC_SCRIPT_NAMES = frozenset(
+    {
+        "build_pr169_readiness1.py",
+        "validate_pr169_readiness1.py",
+    }
+)
 ORDERED_PHASES = (
     FAST_PREFLIGHT_PHASE,
     DETERMINISTIC_VALIDATORS_PHASE,
@@ -598,6 +605,12 @@ PYTEST_SHARD_COMMANDS: dict[str, tuple[PytestShardCommand, ...]] = {
         PytestShardCommand(
             paths=("tests/pr169_dash1",),
             reason="PR169-DASH1 owner dashboard command-plane contract tests",
+            runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
+            historical_runtime_seconds=5.0,
+        ),
+        PytestShardCommand(
+            paths=("tests/pr169_readiness1",),
+            reason="PR169-READINESS1 centralized readiness contract tests",
             runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
             historical_runtime_seconds=5.0,
         ),
@@ -3536,6 +3549,26 @@ def build_validation_commands(
             "--timeout-ms",
             "3600000",
         ],
+        [
+            sys.executable,
+            _path("tools", "build_pr169_readiness1.py"),
+            "--repo-root",
+            ".",
+            "--out-dir",
+            "docs/master_plan/generated/pr169_readiness1",
+            "--timeout-ms",
+            "3600000",
+        ],
+        [
+            sys.executable,
+            _path("tools", "validate_pr169_readiness1.py"),
+            "--repo-root",
+            ".",
+            "--artifact-dir",
+            "docs/master_plan/generated/pr169_readiness1",
+            "--timeout-ms",
+            "3600000",
+        ],
         *[
             [sys.executable, _path("tools", f"validate_pr168_rank_{name}.py")]
             for name in (
@@ -5925,6 +5958,81 @@ def _write_rp5g_local_branch_scope_report(
     )
 
 
+def _pr169_readiness1_local_branch_scope_active(
+    *,
+    repo_root: pathlib.Path,
+    phase: str,
+    validation_mode: str,
+    changed_files: Sequence[str],
+    force_full: bool,
+    manual_mode: str,
+) -> bool:
+    if phase != DETERMINISTIC_VALIDATORS_PHASE:
+        return False
+    if validation_mode != "auto" or changed_files or force_full or manual_mode:
+        return False
+    return _current_git_branch(repo_root) == PR169_READINESS1_BRANCH
+
+
+def _filter_commands_for_pr169_readiness1_local_branch_scope(
+    commands: Sequence[Sequence[str]],
+) -> list[list[str]]:
+    kept = [
+        list(command)
+        for command in commands
+        if _command_script_name(command) in PR169_READINESS1_DETERMINISTIC_SCRIPT_NAMES
+    ]
+    skipped = [
+        _command_script_name(command)
+        for command in commands
+        if _command_script_name(command) not in PR169_READINESS1_DETERMINISTIC_SCRIPT_NAMES
+    ]
+    if skipped:
+        print(
+            "QTT_PR169_READINESS1_LOCAL_BRANCH_SCOPE_SKIPPED "
+            f"phase={DETERMINISTIC_VALIDATORS_PHASE} "
+            f"scripts={','.join(sorted(name for name in skipped if name))}",
+            flush=True,
+        )
+    return kept
+
+
+def _write_pr169_readiness1_local_branch_scope_report(
+    router_report_path: pathlib.Path | None,
+    *,
+    repo_root: pathlib.Path,
+    kept_commands: Sequence[Sequence[str]],
+) -> None:
+    if router_report_path is None:
+        return
+    if not router_report_path.is_absolute():
+        router_report_path = repo_root / router_report_path
+    router_report_path.parent.mkdir(parents=True, exist_ok=True)
+    router_report_path.write_text(
+        json.dumps(
+            {
+                "routing_policy": "PR169_READINESS1_LOCAL_BRANCH_AFFECTED_SCOPE",
+                "branch": PR169_READINESS1_BRANCH,
+                "phase": DETERMINISTIC_VALIDATORS_PHASE,
+                "full_validation_required": False,
+                "required_scripts": [
+                    _command_script_name(command) for command in kept_commands
+                ],
+                "reason": (
+                    "Local deterministic-validators on PR169-READINESS1 validates "
+                    "the branch-owned readiness builder/validator pair. Upstream "
+                    "RP5G/RANK4/QOPT1/VS2/MEM1 and PR169 owner UI artifacts remain "
+                    "read-only inputs."
+                ),
+            },
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+
 def _pr169_dash1_local_branch_scope_active(
     *,
     repo_root: pathlib.Path,
@@ -6165,6 +6273,27 @@ def main(argv: Sequence[str] | None = None) -> int:
                     )
                     print(
                         "QTT_RP5G_LOCAL_BRANCH_SCOPE_MODE "
+                        f"phase={args.phase} full_validation_required=False",
+                        flush=True,
+                    )
+                elif _pr169_readiness1_local_branch_scope_active(
+                    repo_root=repo_root,
+                    phase=args.phase,
+                    validation_mode=args.validation_mode,
+                    changed_files=args.changed_file,
+                    force_full=args.force_full,
+                    manual_mode=args.manual_mode,
+                ):
+                    commands = _filter_commands_for_pr169_readiness1_local_branch_scope(
+                        commands
+                    )
+                    _write_pr169_readiness1_local_branch_scope_report(
+                        args.router_report,
+                        repo_root=repo_root,
+                        kept_commands=commands,
+                    )
+                    print(
+                        "QTT_PR169_READINESS1_LOCAL_BRANCH_SCOPE_MODE "
                         f"phase={args.phase} full_validation_required=False",
                         flush=True,
                     )
