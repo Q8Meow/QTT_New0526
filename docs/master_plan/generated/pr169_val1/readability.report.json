@@ -1,0 +1,219 @@
+{
+  "agent_orch_generated_semantic_change": false,
+  "agent_orch_generated_semantic_diff_count": 0,
+  "artifact_upload_download_minutes_or_unknown": null,
+  "baseline_slowest_phase": "deterministic-validators",
+  "baseline_slowest_phase_minutes_or_unknown": 45.00866666666667,
+  "baseline_timing_source": "GitHub Actions job logs for QTT Validation PR270 pull_request Validation Shard (tools-generated-artifacts)",
+  "baseline_workflow_ref": "PR270 pull_request run 29013998571 and post-merge main run 29016781546",
+  "coverage_parity_state": "pass",
+  "critical_files": [
+    {
+      "hidden_bidi_control_chars": [],
+      "line_count": 184,
+      "many_defs_or_classes_on_one_line": false,
+      "max_line_length": 138,
+      "minified": false,
+      "pass": true,
+      "path": ".github/workflows/qtt_validation.yml",
+      "semicolon_statement_lines": 0
+    },
+    {
+      "hidden_bidi_control_chars": [],
+      "line_count": 6668,
+      "many_defs_or_classes_on_one_line": false,
+      "max_line_length": 137,
+      "minified": false,
+      "pass": true,
+      "path": "tools/run_validation_gates.py",
+      "semicolon_statement_lines": 0
+    },
+    {
+      "hidden_bidi_control_chars": [],
+      "line_count": 43,
+      "many_defs_or_classes_on_one_line": false,
+      "max_line_length": 72,
+      "minified": false,
+      "pass": true,
+      "path": "tools/build_pr169_val1.py",
+      "semicolon_statement_lines": 0
+    },
+    {
+      "hidden_bidi_control_chars": [],
+      "line_count": 516,
+      "many_defs_or_classes_on_one_line": false,
+      "max_line_length": 102,
+      "minified": false,
+      "pass": true,
+      "path": "tools/validate_pr169_val1.py",
+      "semicolon_statement_lines": 0
+    },
+    {
+      "hidden_bidi_control_chars": [],
+      "line_count": 1844,
+      "many_defs_or_classes_on_one_line": false,
+      "max_line_length": 247,
+      "minified": false,
+      "pass": true,
+      "path": "tools/build_pr169_agent_orch1.py",
+      "semicolon_statement_lines": 0
+    },
+    {
+      "hidden_bidi_control_chars": [],
+      "line_count": 512,
+      "many_defs_or_classes_on_one_line": false,
+      "max_line_length": 168,
+      "minified": false,
+      "pass": true,
+      "path": "tools/validate_pr169_agent_orch1.py",
+      "semicolon_statement_lines": 0
+    },
+    {
+      "hidden_bidi_control_chars": [],
+      "line_count": 371,
+      "many_defs_or_classes_on_one_line": false,
+      "max_line_length": 120,
+      "minified": false,
+      "pass": true,
+      "path": "src/qtt/agents/pr169_agent_orch1_resolvers.py",
+      "semicolon_statement_lines": 0
+    },
+    {
+      "hidden_bidi_control_chars": [],
+      "line_count": 1,
+      "many_defs_or_classes_on_one_line": false,
+      "max_line_length": 30,
+      "minified": false,
+      "pass": true,
+      "path": "tests/pr169_agent_orch1/__init__.py",
+      "semicolon_statement_lines": 0
+    },
+    {
+      "hidden_bidi_control_chars": [],
+      "line_count": 17,
+      "many_defs_or_classes_on_one_line": false,
+      "max_line_length": 73,
+      "minified": false,
+      "pass": true,
+      "path": "tests/pr169_agent_orch1/conftest.py",
+      "semicolon_statement_lines": 0
+    },
+    {
+      "hidden_bidi_control_chars": [],
+      "line_count": 54,
+      "many_defs_or_classes_on_one_line": false,
+      "max_line_length": 77,
+      "minified": false,
+      "pass": true,
+      "path": "tests/pr169_agent_orch1/test_dag_task_receipts.py",
+      "semicolon_statement_lines": 0
+    },
+    {
+      "hidden_bidi_control_chars": [],
+      "line_count": 56,
+      "many_defs_or_classes_on_one_line": false,
+      "max_line_length": 85,
+      "minified": false,
+      "pass": true,
+      "path": "tests/pr169_agent_orch1/test_no_authority.py",
+      "semicolon_statement_lines": 0
+    },
+    {
+      "hidden_bidi_control_chars": [],
+      "line_count": 71,
+      "many_defs_or_classes_on_one_line": false,
+      "max_line_length": 168,
+      "minified": false,
+      "pass": true,
+      "path": "tests/pr169_agent_orch1/test_no_orphan_raw_scan.py",
+      "semicolon_statement_lines": 0
+    },
+    {
+      "hidden_bidi_control_chars": [],
+      "line_count": 82,
+      "many_defs_or_classes_on_one_line": false,
+      "max_line_length": 112,
+      "minified": false,
+      "pass": true,
+      "path": "tests/pr169_agent_orch1/test_qku_formula_mem_routes.py",
+      "semicolon_statement_lines": 0
+    },
+    {
+      "hidden_bidi_control_chars": [],
+      "line_count": 58,
+      "many_defs_or_classes_on_one_line": false,
+      "max_line_length": 107,
+      "minified": false,
+      "pass": true,
+      "path": "tests/pr169_agent_orch1/test_registry_projection_integrity.py",
+      "semicolon_statement_lines": 0
+    },
+    {
+      "hidden_bidi_control_chars": [],
+      "line_count": 47,
+      "many_defs_or_classes_on_one_line": false,
+      "max_line_length": 88,
+      "minified": false,
+      "pass": true,
+      "path": "tests/pr169_agent_orch1/test_resolvers.py",
+      "semicolon_statement_lines": 0
+    }
+  ],
+  "dropped_selector_count": 0,
+  "duplicate_selector_count": 0,
+  "fail_closed_reasons": [],
+  "generated_at_utc": "2026-07-09T19:45:48.198368Z",
+  "hidden_bidi_control_guard_enabled": true,
+  "hidden_test_deselection_created": false,
+  "job_duration_minutes_or_unknown": 47.833333333333336,
+  "new_shard_command_ranges": {
+    "deterministic-validators-a": {
+      "command_count": 64,
+      "end_command_index": 64,
+      "start_command_index": 1
+    },
+    "deterministic-validators-b": {
+      "command_count": 55,
+      "end_command_index": 119,
+      "start_command_index": 65
+    },
+    "deterministic-validators-c": {
+      "command_count": 215,
+      "end_command_index": 334,
+      "start_command_index": 120
+    }
+  },
+  "new_shard_count": 3,
+  "new_shard_phases": [
+    "deterministic-validators-a",
+    "deterministic-validators-b",
+    "deterministic-validators-c"
+  ],
+  "old_phase_to_new_phase_map": {
+    "deterministic-validators": [
+      "deterministic-validators-a",
+      "deterministic-validators-b",
+      "deterministic-validators-c"
+    ]
+  },
+  "paper_live_execution_change": false,
+  "pass": true,
+  "producer": "tools/build_pr169_val1.py",
+  "python_readability_fixed": false,
+  "qku_formula_semantic_change": false,
+  "qtt_sha_authority_change": false,
+  "queue_wait_minutes_or_unknown": null,
+  "readability_guard_enabled": true,
+  "report_id": "pr169_val1_readability",
+  "runtime_authority_change": false,
+  "setup_dependency_minutes_or_unknown": 2.35,
+  "source_truth_change": false,
+  "timing_artifact_aggregation_enabled": true,
+  "timing_artifact_upload_enabled": true,
+  "trading_semantic_change": false,
+  "validation_command_minutes_or_unknown": 45.00866666666667,
+  "validation_weakened": false,
+  "validator": "tools/validate_pr169_val1.py",
+  "workflow_wall_clock_minutes_or_unknown": 50.75,
+  "workflow_yaml_readability_fixed": false
+}

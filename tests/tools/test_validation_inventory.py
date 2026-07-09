@@ -263,6 +263,18 @@ def test_pr169_agent_orch1_paths_match_agent_orch1_validators():
         assert "validate_pr169_agent_orch1" in matching_ids
 
 
+def test_inventory_has_pr169_val1_entry():
+    entry = inventory.inventory_by_id()["validate_pr169_val1"]
+
+    assert entry.phase == "deterministic-validators-c"
+    assert entry.owner_pr_or_feature == "PR169_VAL1"
+    assert "docs/master_plan/generated/pr169_val1/**" in entry.output_globs
+    assert ".github/workflows/qtt_validation.yml" in entry.required_when_files_match
+    assert "tools/build_pr169_val1.py" in entry.required_when_files_match
+    assert "tools/validate_pr169_val1.py" in entry.tool_globs
+    assert "tests/tools/test_validation_shard_partition.py" in entry.required_when_files_match
+
+
 def test_inventory_has_pr168_data1_entry():
     entry = inventory.inventory_by_id()["validate_pr168_data1_public_market_data_snapshots"]
 
@@ -541,12 +553,13 @@ def test_inventory_knows_every_pytest_shard_phase_job():
         inventory.phase_job_id(phase)
         for phase in (
             runner.FAST_PREFLIGHT_PHASE,
-            runner.DETERMINISTIC_VALIDATORS_PHASE,
+            *runner.DETERMINISTIC_VALIDATOR_SHARD_PHASES,
             *runner.PYTEST_SHARD_PHASES,
             runner.POST_VALIDATION_PHASE,
         )
     }
     assert phase_jobs == {inventory.VALIDATION_MATRIX_JOB_ID}
+    assert runner.DETERMINISTIC_VALIDATORS_PHASE not in inventory.PHASE_JOB_IDS
 
 
 def test_inventory_path_globs_are_posix():

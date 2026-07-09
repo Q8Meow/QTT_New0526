@@ -192,6 +192,8 @@ def validator_id_for_command(command: Sequence[str], phase: str) -> str:
 
 
 def _pr_token(stem: str) -> str | None:
+    if "pr169_val1" in stem:
+        return "pr169_val1"
     if "pr169_agent_orch1" in stem:
         return "pr169_agent_orch1"
     if "pr169_svc1" in stem:
@@ -413,6 +415,23 @@ def _pr_globs(stem: str) -> tuple[str, ...]:
                 "tests/pr169_agent_orch1/**",
             ]
         )
+    if token == "pr169_val1":
+        globs.extend(
+            [
+                ".github/workflows/qtt_validation.yml",
+                "docs/master_plan/generated/pr169_val1/**",
+                "tests/fail_closed/test_run_validation_gates.py",
+                "tests/tools/test_qtt_validation_workflow_matrix.py",
+                "tests/tools/test_validation_readability_guard.py",
+                "tests/tools/test_validation_shard_partition.py",
+                "tests/tools/test_validation_timing_artifacts.py",
+                "tools/build_pr169_val1.py",
+                "tools/run_validation_gates.py",
+                "tools/validate_idempotence_runtime_containment.py",
+                "tools/validate_pr169_val1.py",
+                "tools/validation_inventory.py",
+            ]
+        )
     if token == "pr169_dash1":
         globs.extend(
             [
@@ -584,6 +603,8 @@ def _output_globs(script_name: str, stem: str) -> tuple[str, ...]:
             globs.append("docs/master_plan/generated/pr169_svc1/**")
         if token == "pr169_agent_orch1":
             globs.append("docs/master_plan/generated/pr169_agent_orch1/**")
+        if token == "pr169_val1":
+            globs.append("docs/master_plan/generated/pr169_val1/**")
     return tuple(globs)
 
 
@@ -829,6 +850,21 @@ def entries_matching_path(path: str) -> tuple[ValidatorInventoryEntry, ...]:
 
 
 def _specific_pr_token_for_path(path: str) -> str | None:
+    if (
+        path.startswith("docs/master_plan/generated/pr169_val1/")
+        or path
+        in {
+            "tests/fail_closed/test_run_validation_gates.py",
+            "tests/tools/test_qtt_validation_workflow_matrix.py",
+            "tests/tools/test_validation_readability_guard.py",
+            "tests/tools/test_validation_shard_partition.py",
+            "tests/tools/test_validation_timing_artifacts.py",
+        }
+        or path == "tools/run_validation_gates.py"
+        or path == "tools/validate_idempotence_runtime_containment.py"
+        or "pr169_val1" in PurePosixPath(path).name.lower()
+    ):
+        return "pr169_val1"
     if (
         path.startswith("docs/master_plan/generated/pr169_agent_orch1/")
         or path.startswith("src/qtt/agents/")

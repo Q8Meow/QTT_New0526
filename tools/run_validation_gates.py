@@ -45,6 +45,16 @@ PR152_BUILD_REPORT_CACHE_KIND = "qtt_pr152_build_report"
 PR152_BUILD_REPORT_CACHE_SCHEMA_VERSION = 1
 FAST_PREFLIGHT_PHASE = "fast-preflight"
 DETERMINISTIC_VALIDATORS_PHASE = "deterministic-validators"
+DETERMINISTIC_VALIDATOR_SHARD_PHASES = (
+    "deterministic-validators-a",
+    "deterministic-validators-b",
+    "deterministic-validators-c",
+)
+DETERMINISTIC_VALIDATOR_SHARD_COMMAND_RANGES = {
+    "deterministic-validators-a": (1, 64),
+    "deterministic-validators-b": (65, 119),
+    "deterministic-validators-c": (120, 334),
+}
 PYTEST_SHARD_PHASES = (
     "pytest-shard-1",
     "pytest-shard-2",
@@ -140,7 +150,17 @@ ORDERED_PHASES = (
     *PYTEST_SHARD_PHASES,
     POST_VALIDATION_PHASE,
 )
+ORDERED_PHASES = tuple(
+    shard_phase
+    for phase in ORDERED_PHASES
+    for shard_phase in (
+        DETERMINISTIC_VALIDATOR_SHARD_PHASES
+        if phase == DETERMINISTIC_VALIDATORS_PHASE
+        else (phase,)
+    )
+)
 VALIDATION_PHASES = (*ORDERED_PHASES, ALL_PHASE)
+VALIDATION_PHASES = (*ORDERED_PHASES, DETERMINISTIC_VALIDATORS_PHASE, ALL_PHASE)
 PYTEST_SHARD_RUNTIME_BUDGETS = {
     phase: {
         "target_seconds": PYTEST_SHARD_TARGET_SECONDS,
@@ -5198,6 +5218,12 @@ def build_validation_commands(
         ],
         [
             sys.executable,
+            _path("tools", "validate_pr169_val1.py"),
+            "--repo-root",
+            ".",
+        ],
+        [
+            sys.executable,
             _path("tools", "validate_no_runtime_artifacts.py"),
             "--repo-root",
             ".",
@@ -5309,6 +5335,18 @@ def build_deterministic_validator_commands(
     ]
 
 
+def build_deterministic_validator_shard_commands(
+    phase: str,
+    validation_dir: pathlib.Path | str | None = None,
+    pytest_basetemp: pathlib.Path | str | None = None,
+) -> list[list[str]]:
+    if phase not in DETERMINISTIC_VALIDATOR_SHARD_COMMAND_RANGES:
+        raise ValueError(f"unknown deterministic validator shard phase: {phase}")
+    commands = build_deterministic_validator_commands(validation_dir, pytest_basetemp)
+    start_index, end_index = DETERMINISTIC_VALIDATOR_SHARD_COMMAND_RANGES[phase]
+    return commands[start_index - 1 : end_index]
+
+
 def _build_pytest_command(
     command: PytestShardCommand,
     pytest_basetemp: pathlib.Path,
@@ -5374,6 +5412,12 @@ def build_phase_commands(
         return build_fast_preflight_commands()
     if phase == DETERMINISTIC_VALIDATORS_PHASE:
         return build_deterministic_validator_commands(validation_dir, pytest_basetemp)
+    if phase in DETERMINISTIC_VALIDATOR_SHARD_PHASES:
+        return build_deterministic_validator_shard_commands(
+            phase,
+            validation_dir,
+            pytest_basetemp,
+        )
     if phase in PYTEST_SHARD_PHASES:
         return build_pytest_shard_commands(phase, pytest_basetemp)
     if phase == POST_VALIDATION_PHASE:
@@ -5817,6 +5861,48 @@ def _router_result_for_current_context(
         manual_mode=manual_mode,
     )
     return build_router_result(router_input)
+
+
+def _write_json_report(
+    report_path: pathlib.Path | None,
+    *,
+    repo_root: pathlib.Path,
+    payload: dict[str, object],
+) -> None:
+    if report_path is None:
+        return
+    if not report_path.is_absolute():
+        report_path = repo_root / report_path
+    report_path.parent.mkdir(parents=True, exist_ok=True)
+    report_path.write_text(
+        json.dumps(payload, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+
+def _write_full_validation_router_report(
+    router_report_path: pathlib.Path | None,
+    *,
+    repo_root: pathlib.Path,
+    phase: str,
+    commands: Sequence[Sequence[str]],
+) -> None:
+    _write_json_report(
+        router_report_path,
+        repo_root=repo_root,
+        payload={
+            "routing_policy": "FULL_VALIDATION_NO_CHANGED_AREA_FILTER",
+            "phase": phase,
+            "full_validation_required": True,
+            "full_validation_reason": "changed-area routing inactive for this context",
+            "required_command_count": len(commands),
+            "required_scripts": [
+                _command_script_name(command) for command in commands
+            ],
+            "skipped_validators": [],
+            "fail_closed_reasons": [],
+        },
+    )
 
 
 def _current_git_branch(repo_root: pathlib.Path) -> str:
@@ -6555,6 +6641,13 @@ def main(argv: Sequence[str] | None = None) -> int:
                             phase=args.phase,
                             router_result=router_result,
                         )
+                else:
+                    _write_full_validation_router_report(
+                        args.router_report,
+                        repo_root=repo_root,
+                        phase=args.phase,
+                        commands=commands,
+                    )
                 if _run_commands_accepts_repo_root():
                     return run_commands(
                         commands,

@@ -333,6 +333,15 @@ def _runner_shards() -> tuple[str, ...]:
         return REQUIRED_PYTEST_SHARDS
 
 
+def _runner_deterministic_shards() -> tuple[str, ...]:
+    try:
+        from tools import run_validation_gates as runner
+
+        return tuple(runner.DETERMINISTIC_VALIDATOR_SHARD_PHASES)
+    except Exception:
+        return ("deterministic-validators",)
+
+
 def _active_inventory_entries(entries: Iterable[Mapping[str, Any]]) -> list[Mapping[str, Any]]:
     return [entry for entry in entries if not entry.get("removed_with_reason")]
 
@@ -560,7 +569,7 @@ def _validate_workflow(
         failures.append(_failure("WORKFLOW_MATRIX_FAIL_FAST_NOT_FALSE", job="validation_shards"))
     for phase in (
         "fast-preflight",
-        "deterministic-validators",
+        *_runner_deterministic_shards(),
         *REQUIRED_PYTEST_SHARDS,
         "post-validation",
     ):
