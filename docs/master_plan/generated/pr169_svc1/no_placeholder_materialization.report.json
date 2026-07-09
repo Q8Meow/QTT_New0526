@@ -1,0 +1,12 @@
+{
+  "acceptance_state": "PASS",
+  "builder_name": "tools/build_pr169_svc1.py",
+  "canonical_registry_ref": "docs/master_plan/generated/pr169_svc1/service_registry.jsonl",
+  "generated_from": "docs/master_plan/generated/pr169_svc1/service_registry.jsonl",
+  "manual_edit_allowed": false,
+  "metadata_only_row_count": 0,
+  "placeholder_only_row_count": 0,
+  "projection_version": "PR169-SVC1-v1.4",
+  "rows_have_owner_copy_and_routes": true,
+  "validator_name": "tools/validate_pr169_svc1.py"
+}

@@ -1,0 +1,20 @@
+{
+  "acceptance_state": "PASS",
+  "allowed_paths": [
+    "tools/build_pr169_svc1.py",
+    "tools/validate_pr169_svc1.py",
+    "tests/pr169_svc1/test_pr169_svc1.py"
+  ],
+  "blocked_paths": [],
+  "builder_name": "tools/build_pr169_svc1.py",
+  "canonical_registry_ref": "docs/master_plan/generated/pr169_svc1/service_registry.jsonl",
+  "generated_from": "docs/master_plan/generated/pr169_svc1/service_registry.jsonl",
+  "manual_edit_allowed": false,
+  "projection_version": "PR169-SVC1-v1.4",
+  "resolver_reads_svc1_only": true,
+  "result": "PASS",
+  "scanned_paths": [
+    "src/qtt/service/pr169_svc1_resolvers.py"
+  ],
+  "validator_name": "tools/validate_pr169_svc1.py"
+}

@@ -1361,6 +1361,26 @@ def _expected_commands(
             "--timeout-ms",
             "3600000",
         ],
+        [
+            python_executable,
+            str(Path("tools") / "build_pr169_svc1.py"),
+            "--repo-root",
+            ".",
+            "--out-dir",
+            str(validation_dir / "master_plan_generated" / "pr169_svc1"),
+            "--timeout-ms",
+            "3600000",
+        ],
+        [
+            python_executable,
+            str(Path("tools") / "validate_pr169_svc1.py"),
+            "--repo-root",
+            ".",
+            "--artifact-dir",
+            str(validation_dir / "master_plan_generated" / "pr169_svc1"),
+            "--timeout-ms",
+            "3600000",
+        ],
         *[
             [
                 python_executable,
@@ -3246,6 +3266,7 @@ def test_runner_splits_pytest_shard_2_longest_group_deterministically():
         ("tests/pr169_dash1",),
         ("tests/pr169_readiness1",),
         ("tests/pr169_pretrade1",),
+        ("tests/pr169_svc1",),
         ("tests/pr169_dash1_ui1",),
     ]
     assert all(command.reason for command in commands)

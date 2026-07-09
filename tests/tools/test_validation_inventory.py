@@ -198,6 +198,42 @@ def test_pr169_readiness1_paths_match_only_readiness1_validators():
         assert "validate_pr168_mem1_condition_scoped_memory" not in matching_ids
 
 
+def test_inventory_has_pr169_svc1_entries():
+    entries = inventory.inventory_by_id()
+    build_entry = entries["build_pr169_svc1"]
+    validate_entry = entries["validate_pr169_svc1"]
+
+    for entry in (build_entry, validate_entry):
+        assert entry.owner_pr_or_feature == "PR169_SVC1"
+        assert "docs/master_plan/generated/pr169_svc1/**" in entry.output_globs
+        assert "src/qtt/service/**" in entry.required_when_files_match
+        assert "tests/pr169_svc1/**" in entry.required_when_files_match
+        assert (
+            "src/qtt/stage1_prediction_markets/"
+            "pr168_vs1_trading_intelligence/runner.py"
+        ) in entry.required_when_files_match
+        assert "tools/pr168_rp5c_config.py" in entry.required_when_files_match
+
+    assert "tools/build_pr169_svc1.py" in build_entry.tool_globs
+    assert "tools/validate_pr169_svc1.py" in validate_entry.tool_globs
+
+
+def test_pr169_svc1_paths_match_svc1_validators():
+    paths = (
+        "docs/master_plan/generated/pr169_svc1/service_registry.jsonl",
+        "src/qtt/service/pr169_svc1_resolvers.py",
+        "tests/pr169_svc1/test_pr169_svc1.py",
+        "tools/validate_pr169_svc1.py",
+        "src/qtt/stage1_prediction_markets/pr168_vs1_trading_intelligence/runner.py",
+        "tools/pr168_rp5c_config.py",
+    )
+
+    for path in paths:
+        matching_ids = {entry.validator_id for entry in inventory.entries_matching_path(path)}
+        assert "build_pr169_svc1" in matching_ids
+        assert "validate_pr169_svc1" in matching_ids
+
+
 def test_inventory_has_pr168_data1_entry():
     entry = inventory.inventory_by_id()["validate_pr168_data1_public_market_data_snapshots"]
 

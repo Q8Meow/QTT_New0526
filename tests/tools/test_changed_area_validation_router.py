@@ -131,6 +131,20 @@ def test_pr168_rp3_validator_tool_maps_to_owner_validator():
     assert "tools/validate_pr168_rp3.py" not in result.unknown_files
 
 
+def test_pr169_svc1_shared_ci_repair_paths_map_to_svc1_validators():
+    paths = (
+        "src/qtt/stage1_prediction_markets/pr168_vs1_trading_intelligence/runner.py",
+        "tools/pr168_rp5c_config.py",
+    )
+    result = _pull_request_result(*paths)
+
+    assert "build_pr169_svc1" in result.required_validators
+    assert "validate_pr169_svc1" in result.required_validators
+    assert result.fail_closed_reasons == ()
+    for path in paths:
+        assert path not in result.unknown_files
+
+
 def test_pr168_rp5d_r1_generated_output_routes_only_to_rp5d_r1_owner():
     result = _pull_request_result(
         "docs/master_plan/generated/pr168_rp5d_r1/agent_consume.jsonl"

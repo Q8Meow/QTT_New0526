@@ -120,6 +120,13 @@ PR169_PRETRADE1_DETERMINISTIC_SCRIPT_NAMES = frozenset(
         "validate_pr169_pretrade1.py",
     }
 )
+PR169_SVC1_BRANCH = "pr169-svc1"
+PR169_SVC1_DETERMINISTIC_SCRIPT_NAMES = frozenset(
+    {
+        "build_pr169_svc1.py",
+        "validate_pr169_svc1.py",
+    }
+)
 ORDERED_PHASES = (
     FAST_PREFLIGHT_PHASE,
     DETERMINISTIC_VALIDATORS_PHASE,
@@ -624,6 +631,12 @@ PYTEST_SHARD_COMMANDS: dict[str, tuple[PytestShardCommand, ...]] = {
         PytestShardCommand(
             paths=("tests/pr169_pretrade1",),
             reason="PR169-PRETRADE1 pretrade reality-model and no-submit packet tests",
+            runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
+            historical_runtime_seconds=5.0,
+        ),
+        PytestShardCommand(
+            paths=("tests/pr169_svc1",),
+            reason="PR169-SVC1 dashboard read-model service contract tests",
             runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
             historical_runtime_seconds=5.0,
         ),
@@ -3599,6 +3612,26 @@ def build_validation_commands(
             ".",
             "--artifact-dir",
             "docs/master_plan/generated/pr169_pretrade1",
+            "--timeout-ms",
+            "3600000",
+        ],
+        [
+            sys.executable,
+            _path("tools", "build_pr169_svc1.py"),
+            "--repo-root",
+            ".",
+            "--out-dir",
+            "docs/master_plan/generated/pr169_svc1",
+            "--timeout-ms",
+            "3600000",
+        ],
+        [
+            sys.executable,
+            _path("tools", "validate_pr169_svc1.py"),
+            "--repo-root",
+            ".",
+            "--artifact-dir",
+            "docs/master_plan/generated/pr169_svc1",
             "--timeout-ms",
             "3600000",
         ],

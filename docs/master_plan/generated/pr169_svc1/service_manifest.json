@@ -1,0 +1,948 @@
+{
+  "acceptance_state": "PASS",
+  "baseline_consumed": {
+    "MEM1_consumed_upstream_only": true,
+    "PR267_READINESS1_commit": "8349a2f08ab5024f36f4a6c5dba3aee76da5b3d8",
+    "PR268_PRETRADE1_commit": "fc0f72088aeb70f7a3aa835dd5e86561a5a89d02"
+  },
+  "builder_name": "tools/build_pr169_svc1.py",
+  "canonical_registry_ref": "docs/master_plan/generated/pr169_svc1/service_registry.jsonl",
+  "generated_artifacts": [
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/service_registry.jsonl",
+      "row_count": 1188
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/read_model_snapshots.generated.jsonl",
+      "row_count": 135
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/read_model_snapshot_index.generated.jsonl",
+      "row_count": 135
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/read_model_store_contracts.generated.jsonl",
+      "row_count": 5
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/snapshot_delta_policy.generated.jsonl",
+      "row_count": 1
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/provider_state_staleness_policy.generated.jsonl",
+      "row_count": 1
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/event_stream_contracts.generated.jsonl",
+      "row_count": 28
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/event_stream_cursor_policy.generated.jsonl",
+      "row_count": 28
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/audit_receipt_stream.generated.jsonl",
+      "row_count": 28
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/owner_action_requests.generated.jsonl",
+      "row_count": 44
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/owner_action_receipts.generated.jsonl",
+      "row_count": 44
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/action_eligibility.generated.jsonl",
+      "row_count": 44
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/action_denied_reasons.generated.jsonl",
+      "row_count": 44
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/action_confirmation_policy.generated.jsonl",
+      "row_count": 44
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/action_request_dedupe_policy.generated.jsonl",
+      "row_count": 44
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/action_risk_class_policy.generated.jsonl",
+      "row_count": 44
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/session_policy.generated.jsonl",
+      "row_count": 1
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/auth_boundary.generated.jsonl",
+      "row_count": 1
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/owner_permission_preview.generated.jsonl",
+      "row_count": 1
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/owner_ux_semantic_routes.generated.jsonl",
+      "row_count": 1
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/owner_copy_map.generated.jsonl",
+      "row_count": 1
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/owner_widget_manifest.generated.jsonl",
+      "row_count": 1
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/owner_chart_manifest.generated.jsonl",
+      "row_count": 16
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/owner_mode_technical_disclosure.generated.jsonl",
+      "row_count": 1
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/professional_provider_pending_frames.generated.jsonl",
+      "row_count": 1
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/pretrade_view_routes.generated.jsonl",
+      "row_count": 5
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/readiness_view_routes.generated.jsonl",
+      "row_count": 5
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/agent_workflow_queue_views.generated.jsonl",
+      "row_count": 5
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/owner_decision_queue_views.generated.jsonl",
+      "row_count": 5
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/qku_formula_compute_route_views.generated.jsonl",
+      "row_count": 5
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/agent_llm_task_route_views.generated.jsonl",
+      "row_count": 5
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/llm_grounding_route_views.generated.jsonl",
+      "row_count": 5
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/telegram_mobile_surface_routes.generated.jsonl",
+      "row_count": 5
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/command_action_matrix_bindings.generated.jsonl",
+      "row_count": 44
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/action_route_to_agent_responsibility.generated.jsonl",
+      "row_count": 44
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/downstream_dag_route_views.generated.jsonl",
+      "row_count": 5
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/source_candidate_lane_views.generated.jsonl",
+      "row_count": 5
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/no_trade_explanation_views.generated.jsonl",
+      "row_count": 5
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/tca_decomposition_views.generated.jsonl",
+      "row_count": 5
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/execution_adjusted_ranking_views.generated.jsonl",
+      "row_count": 5
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/overfit_fdr_control_views.generated.jsonl",
+      "row_count": 5
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/portfolio_diversification_views.generated.jsonl",
+      "row_count": 5
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/capacity_crowding_views.generated.jsonl",
+      "row_count": 5
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/champion_challenger_views.generated.jsonl",
+      "row_count": 5
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/regime_memory_prior_views.generated.jsonl",
+      "row_count": 5
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/marginal_utility_views.generated.jsonl",
+      "row_count": 5
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/quantum_structural_readiness_views.generated.jsonl",
+      "row_count": 5
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/scenario_ladder_views.generated.jsonl",
+      "row_count": 5
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/calibration_views.generated.jsonl",
+      "row_count": 5
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/owner_guidance_cards.generated.jsonl",
+      "row_count": 5
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/provider_pending_routes.generated.jsonl",
+      "row_count": 5
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/hotpath_snapshot_handoff_views.generated.jsonl",
+      "row_count": 5
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/metrics_capture_route_views.generated.jsonl",
+      "row_count": 5
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/shadow_live_dryrun_route_views.generated.jsonl",
+      "row_count": 5
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/agent_operations_views.generated.jsonl",
+      "row_count": 5
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/team_workflow_queue_views.generated.jsonl",
+      "row_count": 5
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/owner_agent_state_views.generated.jsonl",
+      "row_count": 5
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/owner_workflow_queue_state_views.generated.jsonl",
+      "row_count": 5
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/owner_receipt_preview_views.generated.jsonl",
+      "row_count": 5
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/owner_audit_trail_views.generated.jsonl",
+      "row_count": 5
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/execution_live_status_preview_views.generated.jsonl",
+      "row_count": 5
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/no_trade_reoptimization_views.generated.jsonl",
+      "row_count": 5
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/owner_next_step_routes.generated.jsonl",
+      "row_count": 44
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/surface_parity_routes.generated.jsonl",
+      "row_count": 5
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/artifact_value_route_map.generated.jsonl",
+      "row_count": 5
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/market_venue_expansion_socket_routes.generated.jsonl",
+      "row_count": 5
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/qku_formula_intake_route_views.generated.jsonl",
+      "row_count": 5
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/plugin_qmap_allowlist_route_views.generated.jsonl",
+      "row_count": 5
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/reality_model_installation_socket_views.generated.jsonl",
+      "row_count": 5
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/cross_surface_state_contract.generated.jsonl",
+      "row_count": 5
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/owner_conversation_views.generated.jsonl",
+      "row_count": 5
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/owner_plain_english_intent_routes.generated.jsonl",
+      "row_count": 45
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/owner_chat_route_previews.generated.jsonl",
+      "row_count": 45
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/owner_research_intake_routes.generated.jsonl",
+      "row_count": 5
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/owner_trade_intent_routes.generated.jsonl",
+      "row_count": 5
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/owner_search_index_routes.generated.jsonl",
+      "row_count": 5
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/owner_mode_policy.generated.jsonl",
+      "row_count": 1
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/owner_layout_profile_routes.generated.jsonl",
+      "row_count": 7
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/owner_notification_tier_policy.generated.jsonl",
+      "row_count": 5
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/owner_stale_data_banner_views.generated.jsonl",
+      "row_count": 5
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/mobile_app_shell_contract_views.generated.jsonl",
+      "row_count": 5
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/mobile_navigation_contract_views.generated.jsonl",
+      "row_count": 5
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/trade_workbench_route_views.generated.jsonl",
+      "row_count": 5
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/execution_ladder_stage_views.generated.jsonl",
+      "row_count": 5
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/ui_visual_qa_handoff_views.generated.jsonl",
+      "row_count": 5
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/service_manifest.json",
+      "row_count": 1
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/no_orphan.report.json",
+      "row_count": 1
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/no_raw_jsonl_scan.report.json",
+      "row_count": 1
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/no_direct_submit_authority.report.json",
+      "row_count": 1
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/no_runtime_execution.report.json",
+      "row_count": 1
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/no_fake_receipts.report.json",
+      "row_count": 1
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/no_placeholder_materialization.report.json",
+      "row_count": 1
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/no_owner_ux_scatter.report.json",
+      "row_count": 1
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/no_agent_workflow_scatter.report.json",
+      "row_count": 1
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/no_market_expansion_scatter.report.json",
+      "row_count": 1
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/no_chat_search_notification_scatter.report.json",
+      "row_count": 1
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/owned_prefix_scope.report.json",
+      "row_count": 1
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/no_profit_claim.report.json",
+      "row_count": 1
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/service_quality_gates.report.json",
+      "row_count": 1
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/service_acceptance.report.json",
+      "row_count": 1
+    }
+  ],
+  "generated_from": "docs/master_plan/generated/pr169_svc1/service_registry.jsonl",
+  "generated_prefix": "docs/master_plan/generated/pr169_svc1",
+  "json_artifacts": [
+    "service_manifest.json",
+    "no_orphan.report.json",
+    "no_raw_jsonl_scan.report.json",
+    "no_direct_submit_authority.report.json",
+    "no_runtime_execution.report.json",
+    "no_fake_receipts.report.json",
+    "no_placeholder_materialization.report.json",
+    "no_owner_ux_scatter.report.json",
+    "no_agent_workflow_scatter.report.json",
+    "no_market_expansion_scatter.report.json",
+    "no_chat_search_notification_scatter.report.json",
+    "owned_prefix_scope.report.json",
+    "no_profit_claim.report.json",
+    "service_quality_gates.report.json",
+    "service_acceptance.report.json"
+  ],
+  "jsonl_artifacts": [
+    "service_registry.jsonl",
+    "read_model_snapshots.generated.jsonl",
+    "read_model_snapshot_index.generated.jsonl",
+    "read_model_store_contracts.generated.jsonl",
+    "snapshot_delta_policy.generated.jsonl",
+    "provider_state_staleness_policy.generated.jsonl",
+    "event_stream_contracts.generated.jsonl",
+    "event_stream_cursor_policy.generated.jsonl",
+    "audit_receipt_stream.generated.jsonl",
+    "owner_action_requests.generated.jsonl",
+    "owner_action_receipts.generated.jsonl",
+    "action_eligibility.generated.jsonl",
+    "action_denied_reasons.generated.jsonl",
+    "action_confirmation_policy.generated.jsonl",
+    "action_request_dedupe_policy.generated.jsonl",
+    "action_risk_class_policy.generated.jsonl",
+    "session_policy.generated.jsonl",
+    "auth_boundary.generated.jsonl",
+    "owner_permission_preview.generated.jsonl",
+    "owner_ux_semantic_routes.generated.jsonl",
+    "owner_copy_map.generated.jsonl",
+    "owner_widget_manifest.generated.jsonl",
+    "owner_chart_manifest.generated.jsonl",
+    "owner_mode_technical_disclosure.generated.jsonl",
+    "professional_provider_pending_frames.generated.jsonl",
+    "pretrade_view_routes.generated.jsonl",
+    "readiness_view_routes.generated.jsonl",
+    "agent_workflow_queue_views.generated.jsonl",
+    "owner_decision_queue_views.generated.jsonl",
+    "qku_formula_compute_route_views.generated.jsonl",
+    "agent_llm_task_route_views.generated.jsonl",
+    "llm_grounding_route_views.generated.jsonl",
+    "telegram_mobile_surface_routes.generated.jsonl",
+    "command_action_matrix_bindings.generated.jsonl",
+    "action_route_to_agent_responsibility.generated.jsonl",
+    "downstream_dag_route_views.generated.jsonl",
+    "source_candidate_lane_views.generated.jsonl",
+    "no_trade_explanation_views.generated.jsonl",
+    "tca_decomposition_views.generated.jsonl",
+    "execution_adjusted_ranking_views.generated.jsonl",
+    "overfit_fdr_control_views.generated.jsonl",
+    "portfolio_diversification_views.generated.jsonl",
+    "capacity_crowding_views.generated.jsonl",
+    "champion_challenger_views.generated.jsonl",
+    "regime_memory_prior_views.generated.jsonl",
+    "marginal_utility_views.generated.jsonl",
+    "quantum_structural_readiness_views.generated.jsonl",
+    "scenario_ladder_views.generated.jsonl",
+    "calibration_views.generated.jsonl",
+    "owner_guidance_cards.generated.jsonl",
+    "provider_pending_routes.generated.jsonl",
+    "hotpath_snapshot_handoff_views.generated.jsonl",
+    "metrics_capture_route_views.generated.jsonl",
+    "shadow_live_dryrun_route_views.generated.jsonl",
+    "agent_operations_views.generated.jsonl",
+    "team_workflow_queue_views.generated.jsonl",
+    "owner_agent_state_views.generated.jsonl",
+    "owner_workflow_queue_state_views.generated.jsonl",
+    "owner_receipt_preview_views.generated.jsonl",
+    "owner_audit_trail_views.generated.jsonl",
+    "execution_live_status_preview_views.generated.jsonl",
+    "no_trade_reoptimization_views.generated.jsonl",
+    "owner_next_step_routes.generated.jsonl",
+    "surface_parity_routes.generated.jsonl",
+    "artifact_value_route_map.generated.jsonl",
+    "market_venue_expansion_socket_routes.generated.jsonl",
+    "qku_formula_intake_route_views.generated.jsonl",
+    "plugin_qmap_allowlist_route_views.generated.jsonl",
+    "reality_model_installation_socket_views.generated.jsonl",
+    "cross_surface_state_contract.generated.jsonl",
+    "owner_conversation_views.generated.jsonl",
+    "owner_plain_english_intent_routes.generated.jsonl",
+    "owner_chat_route_previews.generated.jsonl",
+    "owner_research_intake_routes.generated.jsonl",
+    "owner_trade_intent_routes.generated.jsonl",
+    "owner_search_index_routes.generated.jsonl",
+    "owner_mode_policy.generated.jsonl",
+    "owner_layout_profile_routes.generated.jsonl",
+    "owner_notification_tier_policy.generated.jsonl",
+    "owner_stale_data_banner_views.generated.jsonl",
+    "mobile_app_shell_contract_views.generated.jsonl",
+    "mobile_navigation_contract_views.generated.jsonl",
+    "trade_workbench_route_views.generated.jsonl",
+    "execution_ladder_stage_views.generated.jsonl",
+    "ui_visual_qa_handoff_views.generated.jsonl"
+  ],
+  "manual_edit_allowed": false,
+  "phase0_decisions": [
+    "stale roadmap items ignored",
+    "exact PR is PR169-SVC1",
+    "READINESS1 and PRETRADE1 are consumed, not redone",
+    "MEM1 is prior-only upstream infrastructure",
+    "service_registry.jsonl is the canonical SVC1 source",
+    "one builder, one validator, one resolver module",
+    "no raw upstream JSONL runtime scan",
+    "no QTT SHA or AtomicRows hash authority",
+    "no replay/paper/shadow/live/order execution",
+    "owner actions are request, preview, review, and audit routes only",
+    "owner trading-command authority is preserved without direct venue submit",
+    "all lifecycle/timing/provider/freshness/authority fields are materialized",
+    "pretrade_exec_ladder_handoff.generated.jsonl is the current equivalent for execution ladder handoff",
+    "PR152 currentization runs after the final file set"
+  ],
+  "phase0_mapping": [
+    {
+      "agent_consumer_route": "PR169-AGENT-ORCH1 provider-pending route",
+      "authority_risk": "validated no direct submit/release/execution",
+      "builder_or_owner_module": "tools/build_pr169_svc1.py",
+      "compact_validation_risk": "single validator with explicit projection checks",
+      "connector_private_cash_risk": "no connector/private/cash reads",
+      "current_equivalent_path_or_absent": "docs/master_plan/generated/pr169_readiness1/agent_readiness_registry.jsonl",
+      "expected_source_or_artifact": "agent_readiness_registry.jsonl",
+      "fake_receipt_risk": "contract receipt classes only",
+      "fake_runtime_state_risk": "static contract states only",
+      "field_naming_lifecycle_risk": "registry schema includes lifecycle/timing/provider/freshness",
+      "hotpath_consumer_route": "PR170-HOTPATH1 precomputed snapshot route",
+      "institutional_control_route_risk": "views route upstream refs or scoped gaps",
+      "latency_path_risk": "control-plane only, precomputed snapshot route",
+      "live_dryrun_consumer_route": "PR170-LIVE-DRYRUN1 route only",
+      "llm_consumer_route": "PR169-LLM1/2 grounding route only",
+      "mem1_redo_risk": "MEM1 prior route only",
+      "metrics_consumer_route": "PR170-METRICS1 route only",
+      "mobile_surface_consumer": "PR170-MOBILE1 shared state contract",
+      "mutation_reason": "SVC1 consumes upstream; it does not mutate READINESS1, PRETRADE1, or MEM1.",
+      "mutation_required": false,
+      "orphan_risk": "validated by no_orphan.report.json",
+      "owned_prefix_scope_risk": "generated artifacts under pr169_svc1 only",
+      "owner_action_bypass_risk": "OwnerNextStepRouter review routes only",
+      "owner_surface_consumer": "OwnerDashboardStateV1 / OwnerSurfaceResolver",
+      "owner_ux_scattering_risk": "central owner UX semantic projections",
+      "paper_loop_consumer_route": "PR169-PAPER-LOOP provider-pending route",
+      "plugin_qmap_allow_consumer_route": "PR174-PLUGIN1/QMAP1/ALLOW1 route only",
+      "postlaunch_consumer_route": "PR173-POSTLAUNCH route only",
+      "provider_stale_state_risk": "provider-pending/stale banner rows",
+      "qku_formula_route_risk": "immutable QKU/formula route views only",
+      "quantum_route_risk": "no backend or advantage claim",
+      "raw_jsonl_scan_risk": "resolver reads only SVC1 fixed files",
+      "runtime_agent_risk": "no runtime agent execution",
+      "runtime_execution_risk": "no replay/paper/shadow/live execution",
+      "runtime_llm_risk": "no runtime LLM calls",
+      "semantic_domain": "READINESS1",
+      "shadow_consumer_route": "PR170-LIVE-DRYRUN1 shadow route only",
+      "shared_currentization_risk": "PR152 runs after final file set",
+      "source_truth_risk": "candidate/provisional only",
+      "svc1_consumption_plan": "consume declared generated artifacts only",
+      "svc1_projection_plan": "derive projection rows from service_registry.jsonl",
+      "telegram_surface_consumer": "PR169-TG1 shared mirror contract",
+      "upstream_PR_or_source": "PR267 / PR169-READINESS1",
+      "validator_or_test_consumer": "tools/validate_pr169_svc1.py"
+    },
+    {
+      "agent_consumer_route": "PR169-AGENT-ORCH1 provider-pending route",
+      "authority_risk": "validated no direct submit/release/execution",
+      "builder_or_owner_module": "tools/build_pr169_svc1.py",
+      "compact_validation_risk": "single validator with explicit projection checks",
+      "connector_private_cash_risk": "no connector/private/cash reads",
+      "current_equivalent_path_or_absent": "docs/master_plan/generated/pr169_pretrade1/pretrade_decision_registry.jsonl",
+      "expected_source_or_artifact": "pretrade_decision_registry.jsonl",
+      "fake_receipt_risk": "contract receipt classes only",
+      "fake_runtime_state_risk": "static contract states only",
+      "field_naming_lifecycle_risk": "registry schema includes lifecycle/timing/provider/freshness",
+      "hotpath_consumer_route": "PR170-HOTPATH1 precomputed snapshot route",
+      "institutional_control_route_risk": "views route upstream refs or scoped gaps",
+      "latency_path_risk": "control-plane only, precomputed snapshot route",
+      "live_dryrun_consumer_route": "PR170-LIVE-DRYRUN1 route only",
+      "llm_consumer_route": "PR169-LLM1/2 grounding route only",
+      "mem1_redo_risk": "MEM1 prior route only",
+      "metrics_consumer_route": "PR170-METRICS1 route only",
+      "mobile_surface_consumer": "PR170-MOBILE1 shared state contract",
+      "mutation_reason": "SVC1 consumes upstream; it does not mutate READINESS1, PRETRADE1, or MEM1.",
+      "mutation_required": false,
+      "orphan_risk": "validated by no_orphan.report.json",
+      "owned_prefix_scope_risk": "generated artifacts under pr169_svc1 only",
+      "owner_action_bypass_risk": "OwnerNextStepRouter review routes only",
+      "owner_surface_consumer": "OwnerDashboardStateV1 / OwnerSurfaceResolver",
+      "owner_ux_scattering_risk": "central owner UX semantic projections",
+      "paper_loop_consumer_route": "PR169-PAPER-LOOP provider-pending route",
+      "plugin_qmap_allow_consumer_route": "PR174-PLUGIN1/QMAP1/ALLOW1 route only",
+      "postlaunch_consumer_route": "PR173-POSTLAUNCH route only",
+      "provider_stale_state_risk": "provider-pending/stale banner rows",
+      "qku_formula_route_risk": "immutable QKU/formula route views only",
+      "quantum_route_risk": "no backend or advantage claim",
+      "raw_jsonl_scan_risk": "resolver reads only SVC1 fixed files",
+      "runtime_agent_risk": "no runtime agent execution",
+      "runtime_execution_risk": "no replay/paper/shadow/live execution",
+      "runtime_llm_risk": "no runtime LLM calls",
+      "semantic_domain": "PRETRADE1",
+      "shadow_consumer_route": "PR170-LIVE-DRYRUN1 shadow route only",
+      "shared_currentization_risk": "PR152 runs after final file set",
+      "source_truth_risk": "candidate/provisional only",
+      "svc1_consumption_plan": "consume declared generated artifacts only",
+      "svc1_projection_plan": "derive projection rows from service_registry.jsonl",
+      "telegram_surface_consumer": "PR169-TG1 shared mirror contract",
+      "upstream_PR_or_source": "PR268 / PR169-PRETRADE1",
+      "validator_or_test_consumer": "tools/validate_pr169_svc1.py"
+    },
+    {
+      "agent_consumer_route": "PR169-AGENT-ORCH1 provider-pending route",
+      "authority_risk": "validated no direct submit/release/execution",
+      "builder_or_owner_module": "tools/build_pr169_svc1.py",
+      "compact_validation_risk": "single validator with explicit projection checks",
+      "connector_private_cash_risk": "no connector/private/cash reads",
+      "current_equivalent_path_or_absent": "docs/master_plan/generated/pr169_pretrade1/pretrade_exec_ladder_handoff.generated.jsonl",
+      "expected_source_or_artifact": "pretrade_execution_ladder_handoff.generated.jsonl",
+      "fake_receipt_risk": "contract receipt classes only",
+      "fake_runtime_state_risk": "static contract states only",
+      "field_naming_lifecycle_risk": "registry schema includes lifecycle/timing/provider/freshness",
+      "hotpath_consumer_route": "PR170-HOTPATH1 precomputed snapshot route",
+      "institutional_control_route_risk": "views route upstream refs or scoped gaps",
+      "latency_path_risk": "control-plane only, precomputed snapshot route",
+      "live_dryrun_consumer_route": "PR170-LIVE-DRYRUN1 route only",
+      "llm_consumer_route": "PR169-LLM1/2 grounding route only",
+      "mem1_redo_risk": "MEM1 prior route only",
+      "metrics_consumer_route": "PR170-METRICS1 route only",
+      "mobile_surface_consumer": "PR170-MOBILE1 shared state contract",
+      "mutation_reason": "SVC1 consumes upstream; it does not mutate READINESS1, PRETRADE1, or MEM1.",
+      "mutation_required": false,
+      "orphan_risk": "validated by no_orphan.report.json",
+      "owned_prefix_scope_risk": "generated artifacts under pr169_svc1 only",
+      "owner_action_bypass_risk": "OwnerNextStepRouter review routes only",
+      "owner_surface_consumer": "OwnerDashboardStateV1 / OwnerSurfaceResolver",
+      "owner_ux_scattering_risk": "central owner UX semantic projections",
+      "paper_loop_consumer_route": "PR169-PAPER-LOOP provider-pending route",
+      "plugin_qmap_allow_consumer_route": "PR174-PLUGIN1/QMAP1/ALLOW1 route only",
+      "postlaunch_consumer_route": "PR173-POSTLAUNCH route only",
+      "provider_stale_state_risk": "provider-pending/stale banner rows",
+      "qku_formula_route_risk": "immutable QKU/formula route views only",
+      "quantum_route_risk": "no backend or advantage claim",
+      "raw_jsonl_scan_risk": "resolver reads only SVC1 fixed files",
+      "runtime_agent_risk": "no runtime agent execution",
+      "runtime_execution_risk": "no replay/paper/shadow/live execution",
+      "runtime_llm_risk": "no runtime LLM calls",
+      "semantic_domain": "PRETRADE1_EXECUTION_LADDER",
+      "shadow_consumer_route": "PR170-LIVE-DRYRUN1 shadow route only",
+      "shared_currentization_risk": "PR152 runs after final file set",
+      "source_truth_risk": "candidate/provisional only",
+      "svc1_consumption_plan": "consume declared generated artifacts only",
+      "svc1_projection_plan": "derive projection rows from service_registry.jsonl",
+      "telegram_surface_consumer": "PR169-TG1 shared mirror contract",
+      "upstream_PR_or_source": "PR268 current equivalent",
+      "validator_or_test_consumer": "tools/validate_pr169_svc1.py"
+    },
+    {
+      "agent_consumer_route": "PR169-AGENT-ORCH1 provider-pending route",
+      "authority_risk": "validated no direct submit/release/execution",
+      "builder_or_owner_module": "tools/build_pr169_svc1.py",
+      "compact_validation_risk": "single validator with explicit projection checks",
+      "connector_private_cash_risk": "no connector/private/cash reads",
+      "current_equivalent_path_or_absent": "src/qtt/dashboard/owner_action_registry.py",
+      "expected_source_or_artifact": "OwnerActionRegistry",
+      "fake_receipt_risk": "contract receipt classes only",
+      "fake_runtime_state_risk": "static contract states only",
+      "field_naming_lifecycle_risk": "registry schema includes lifecycle/timing/provider/freshness",
+      "hotpath_consumer_route": "PR170-HOTPATH1 precomputed snapshot route",
+      "institutional_control_route_risk": "views route upstream refs or scoped gaps",
+      "latency_path_risk": "control-plane only, precomputed snapshot route",
+      "live_dryrun_consumer_route": "PR170-LIVE-DRYRUN1 route only",
+      "llm_consumer_route": "PR169-LLM1/2 grounding route only",
+      "mem1_redo_risk": "MEM1 prior route only",
+      "metrics_consumer_route": "PR170-METRICS1 route only",
+      "mobile_surface_consumer": "PR170-MOBILE1 shared state contract",
+      "mutation_reason": "SVC1 consumes upstream; it does not mutate READINESS1, PRETRADE1, or MEM1.",
+      "mutation_required": false,
+      "orphan_risk": "validated by no_orphan.report.json",
+      "owned_prefix_scope_risk": "generated artifacts under pr169_svc1 only",
+      "owner_action_bypass_risk": "OwnerNextStepRouter review routes only",
+      "owner_surface_consumer": "OwnerDashboardStateV1 / OwnerSurfaceResolver",
+      "owner_ux_scattering_risk": "central owner UX semantic projections",
+      "paper_loop_consumer_route": "PR169-PAPER-LOOP provider-pending route",
+      "plugin_qmap_allow_consumer_route": "PR174-PLUGIN1/QMAP1/ALLOW1 route only",
+      "postlaunch_consumer_route": "PR173-POSTLAUNCH route only",
+      "provider_stale_state_risk": "provider-pending/stale banner rows",
+      "qku_formula_route_risk": "immutable QKU/formula route views only",
+      "quantum_route_risk": "no backend or advantage claim",
+      "raw_jsonl_scan_risk": "resolver reads only SVC1 fixed files",
+      "runtime_agent_risk": "no runtime agent execution",
+      "runtime_execution_risk": "no replay/paper/shadow/live execution",
+      "runtime_llm_risk": "no runtime LLM calls",
+      "semantic_domain": "DASHBOARD_ACTIONS",
+      "shadow_consumer_route": "PR170-LIVE-DRYRUN1 shadow route only",
+      "shared_currentization_risk": "PR152 runs after final file set",
+      "source_truth_risk": "candidate/provisional only",
+      "svc1_consumption_plan": "consume declared generated artifacts only",
+      "svc1_projection_plan": "derive projection rows from service_registry.jsonl",
+      "telegram_surface_consumer": "PR169-TG1 shared mirror contract",
+      "upstream_PR_or_source": "existing dashboard pattern",
+      "validator_or_test_consumer": "tools/validate_pr169_svc1.py"
+    },
+    {
+      "agent_consumer_route": "PR169-AGENT-ORCH1 provider-pending route",
+      "authority_risk": "validated no direct submit/release/execution",
+      "builder_or_owner_module": "tools/build_pr169_svc1.py",
+      "compact_validation_risk": "single validator with explicit projection checks",
+      "connector_private_cash_risk": "no connector/private/cash reads",
+      "current_equivalent_path_or_absent": "src/qtt/dashboard/owner_surface_resolver.py",
+      "expected_source_or_artifact": "OwnerSurfaceResolver",
+      "fake_receipt_risk": "contract receipt classes only",
+      "fake_runtime_state_risk": "static contract states only",
+      "field_naming_lifecycle_risk": "registry schema includes lifecycle/timing/provider/freshness",
+      "hotpath_consumer_route": "PR170-HOTPATH1 precomputed snapshot route",
+      "institutional_control_route_risk": "views route upstream refs or scoped gaps",
+      "latency_path_risk": "control-plane only, precomputed snapshot route",
+      "live_dryrun_consumer_route": "PR170-LIVE-DRYRUN1 route only",
+      "llm_consumer_route": "PR169-LLM1/2 grounding route only",
+      "mem1_redo_risk": "MEM1 prior route only",
+      "metrics_consumer_route": "PR170-METRICS1 route only",
+      "mobile_surface_consumer": "PR170-MOBILE1 shared state contract",
+      "mutation_reason": "SVC1 consumes upstream; it does not mutate READINESS1, PRETRADE1, or MEM1.",
+      "mutation_required": false,
+      "orphan_risk": "validated by no_orphan.report.json",
+      "owned_prefix_scope_risk": "generated artifacts under pr169_svc1 only",
+      "owner_action_bypass_risk": "OwnerNextStepRouter review routes only",
+      "owner_surface_consumer": "OwnerDashboardStateV1 / OwnerSurfaceResolver",
+      "owner_ux_scattering_risk": "central owner UX semantic projections",
+      "paper_loop_consumer_route": "PR169-PAPER-LOOP provider-pending route",
+      "plugin_qmap_allow_consumer_route": "PR174-PLUGIN1/QMAP1/ALLOW1 route only",
+      "postlaunch_consumer_route": "PR173-POSTLAUNCH route only",
+      "provider_stale_state_risk": "provider-pending/stale banner rows",
+      "qku_formula_route_risk": "immutable QKU/formula route views only",
+      "quantum_route_risk": "no backend or advantage claim",
+      "raw_jsonl_scan_risk": "resolver reads only SVC1 fixed files",
+      "runtime_agent_risk": "no runtime agent execution",
+      "runtime_execution_risk": "no replay/paper/shadow/live execution",
+      "runtime_llm_risk": "no runtime LLM calls",
+      "semantic_domain": "DASHBOARD_SURFACES",
+      "shadow_consumer_route": "PR170-LIVE-DRYRUN1 shadow route only",
+      "shared_currentization_risk": "PR152 runs after final file set",
+      "source_truth_risk": "candidate/provisional only",
+      "svc1_consumption_plan": "consume declared generated artifacts only",
+      "svc1_projection_plan": "derive projection rows from service_registry.jsonl",
+      "telegram_surface_consumer": "PR169-TG1 shared mirror contract",
+      "upstream_PR_or_source": "existing dashboard pattern",
+      "validator_or_test_consumer": "tools/validate_pr169_svc1.py"
+    },
+    {
+      "agent_consumer_route": "PR169-AGENT-ORCH1 provider-pending route",
+      "authority_risk": "validated no direct submit/release/execution",
+      "builder_or_owner_module": "tools/build_pr169_svc1.py",
+      "compact_validation_risk": "single validator with explicit projection checks",
+      "connector_private_cash_risk": "no connector/private/cash reads",
+      "current_equivalent_path_or_absent": "src/qtt/dashboard/owner_dashboard_projection_builder.py",
+      "expected_source_or_artifact": "DashboardReadModelBuilder",
+      "fake_receipt_risk": "contract receipt classes only",
+      "fake_runtime_state_risk": "static contract states only",
+      "field_naming_lifecycle_risk": "registry schema includes lifecycle/timing/provider/freshness",
+      "hotpath_consumer_route": "PR170-HOTPATH1 precomputed snapshot route",
+      "institutional_control_route_risk": "views route upstream refs or scoped gaps",
+      "latency_path_risk": "control-plane only, precomputed snapshot route",
+      "live_dryrun_consumer_route": "PR170-LIVE-DRYRUN1 route only",
+      "llm_consumer_route": "PR169-LLM1/2 grounding route only",
+      "mem1_redo_risk": "MEM1 prior route only",
+      "metrics_consumer_route": "PR170-METRICS1 route only",
+      "mobile_surface_consumer": "PR170-MOBILE1 shared state contract",
+      "mutation_reason": "SVC1 consumes upstream; it does not mutate READINESS1, PRETRADE1, or MEM1.",
+      "mutation_required": false,
+      "orphan_risk": "validated by no_orphan.report.json",
+      "owned_prefix_scope_risk": "generated artifacts under pr169_svc1 only",
+      "owner_action_bypass_risk": "OwnerNextStepRouter review routes only",
+      "owner_surface_consumer": "OwnerDashboardStateV1 / OwnerSurfaceResolver",
+      "owner_ux_scattering_risk": "central owner UX semantic projections",
+      "paper_loop_consumer_route": "PR169-PAPER-LOOP provider-pending route",
+      "plugin_qmap_allow_consumer_route": "PR174-PLUGIN1/QMAP1/ALLOW1 route only",
+      "postlaunch_consumer_route": "PR173-POSTLAUNCH route only",
+      "provider_stale_state_risk": "provider-pending/stale banner rows",
+      "qku_formula_route_risk": "immutable QKU/formula route views only",
+      "quantum_route_risk": "no backend or advantage claim",
+      "raw_jsonl_scan_risk": "resolver reads only SVC1 fixed files",
+      "runtime_agent_risk": "no runtime agent execution",
+      "runtime_execution_risk": "no replay/paper/shadow/live execution",
+      "runtime_llm_risk": "no runtime LLM calls",
+      "semantic_domain": "DASHBOARD_STATE",
+      "shadow_consumer_route": "PR170-LIVE-DRYRUN1 shadow route only",
+      "shared_currentization_risk": "PR152 runs after final file set",
+      "source_truth_risk": "candidate/provisional only",
+      "svc1_consumption_plan": "consume declared generated artifacts only",
+      "svc1_projection_plan": "derive projection rows from service_registry.jsonl",
+      "telegram_surface_consumer": "PR169-TG1 shared mirror contract",
+      "upstream_PR_or_source": "existing dashboard pattern",
+      "validator_or_test_consumer": "tools/validate_pr169_svc1.py"
+    },
+    {
+      "agent_consumer_route": "PR169-AGENT-ORCH1 provider-pending route",
+      "authority_risk": "validated no direct submit/release/execution",
+      "builder_or_owner_module": "tools/build_pr169_svc1.py",
+      "compact_validation_risk": "single validator with explicit projection checks",
+      "connector_private_cash_risk": "no connector/private/cash reads",
+      "current_equivalent_path_or_absent": "docs/master_plan/generated/pr168_mem1/",
+      "expected_source_or_artifact": "condition-scoped memory",
+      "fake_receipt_risk": "contract receipt classes only",
+      "fake_runtime_state_risk": "static contract states only",
+      "field_naming_lifecycle_risk": "registry schema includes lifecycle/timing/provider/freshness",
+      "hotpath_consumer_route": "PR170-HOTPATH1 precomputed snapshot route",
+      "institutional_control_route_risk": "views route upstream refs or scoped gaps",
+      "latency_path_risk": "control-plane only, precomputed snapshot route",
+      "live_dryrun_consumer_route": "PR170-LIVE-DRYRUN1 route only",
+      "llm_consumer_route": "PR169-LLM1/2 grounding route only",
+      "mem1_redo_risk": "MEM1 prior route only",
+      "metrics_consumer_route": "PR170-METRICS1 route only",
+      "mobile_surface_consumer": "PR170-MOBILE1 shared state contract",
+      "mutation_reason": "SVC1 consumes upstream; it does not mutate READINESS1, PRETRADE1, or MEM1.",
+      "mutation_required": false,
+      "orphan_risk": "validated by no_orphan.report.json",
+      "owned_prefix_scope_risk": "generated artifacts under pr169_svc1 only",
+      "owner_action_bypass_risk": "OwnerNextStepRouter review routes only",
+      "owner_surface_consumer": "OwnerDashboardStateV1 / OwnerSurfaceResolver",
+      "owner_ux_scattering_risk": "central owner UX semantic projections",
+      "paper_loop_consumer_route": "PR169-PAPER-LOOP provider-pending route",
+      "plugin_qmap_allow_consumer_route": "PR174-PLUGIN1/QMAP1/ALLOW1 route only",
+      "postlaunch_consumer_route": "PR173-POSTLAUNCH route only",
+      "provider_stale_state_risk": "provider-pending/stale banner rows",
+      "qku_formula_route_risk": "immutable QKU/formula route views only",
+      "quantum_route_risk": "no backend or advantage claim",
+      "raw_jsonl_scan_risk": "resolver reads only SVC1 fixed files",
+      "runtime_agent_risk": "no runtime agent execution",
+      "runtime_execution_risk": "no replay/paper/shadow/live execution",
+      "runtime_llm_risk": "no runtime LLM calls",
+      "semantic_domain": "MEM1",
+      "shadow_consumer_route": "PR170-LIVE-DRYRUN1 shadow route only",
+      "shared_currentization_risk": "PR152 runs after final file set",
+      "source_truth_risk": "candidate/provisional only",
+      "svc1_consumption_plan": "consume declared generated artifacts only",
+      "svc1_projection_plan": "derive projection rows from service_registry.jsonl",
+      "telegram_surface_consumer": "PR169-TG1 shared mirror contract",
+      "upstream_PR_or_source": "PR168-MEM1 consume only",
+      "validator_or_test_consumer": "tools/validate_pr169_svc1.py"
+    }
+  ],
+  "projection_files": [
+    "action_confirmation_policy.generated.jsonl",
+    "action_denied_reasons.generated.jsonl",
+    "action_eligibility.generated.jsonl",
+    "action_request_dedupe_policy.generated.jsonl",
+    "action_risk_class_policy.generated.jsonl",
+    "action_route_to_agent_responsibility.generated.jsonl",
+    "agent_llm_task_route_views.generated.jsonl",
+    "agent_operations_views.generated.jsonl",
+    "agent_workflow_queue_views.generated.jsonl",
+    "artifact_value_route_map.generated.jsonl",
+    "audit_receipt_stream.generated.jsonl",
+    "auth_boundary.generated.jsonl",
+    "calibration_views.generated.jsonl",
+    "capacity_crowding_views.generated.jsonl",
+    "champion_challenger_views.generated.jsonl",
+    "command_action_matrix_bindings.generated.jsonl",
+    "cross_surface_state_contract.generated.jsonl",
+    "downstream_dag_route_views.generated.jsonl",
+    "event_stream_contracts.generated.jsonl",
+    "event_stream_cursor_policy.generated.jsonl",
+    "execution_adjusted_ranking_views.generated.jsonl",
+    "execution_ladder_stage_views.generated.jsonl",
+    "execution_live_status_preview_views.generated.jsonl",
+    "hotpath_snapshot_handoff_views.generated.jsonl",
+    "llm_grounding_route_views.generated.jsonl",
+    "marginal_utility_views.generated.jsonl",
+    "market_venue_expansion_socket_routes.generated.jsonl",
+    "metrics_capture_route_views.generated.jsonl",
+    "mobile_app_shell_contract_views.generated.jsonl",
+    "mobile_navigation_contract_views.generated.jsonl",
+    "no_trade_explanation_views.generated.jsonl",
+    "no_trade_reoptimization_views.generated.jsonl",
+    "overfit_fdr_control_views.generated.jsonl",
+    "owner_action_receipts.generated.jsonl",
+    "owner_action_requests.generated.jsonl",
+    "owner_agent_state_views.generated.jsonl",
+    "owner_audit_trail_views.generated.jsonl",
+    "owner_chart_manifest.generated.jsonl",
+    "owner_chat_route_previews.generated.jsonl",
+    "owner_conversation_views.generated.jsonl",
+    "owner_copy_map.generated.jsonl",
+    "owner_decision_queue_views.generated.jsonl",
+    "owner_guidance_cards.generated.jsonl",
+    "owner_layout_profile_routes.generated.jsonl",
+    "owner_mode_policy.generated.jsonl",
+    "owner_mode_technical_disclosure.generated.jsonl",
+    "owner_next_step_routes.generated.jsonl",
+    "owner_notification_tier_policy.generated.jsonl",
+    "owner_permission_preview.generated.jsonl",
+    "owner_plain_english_intent_routes.generated.jsonl",
+    "owner_receipt_preview_views.generated.jsonl",
+    "owner_research_intake_routes.generated.jsonl",
+    "owner_search_index_routes.generated.jsonl",
+    "owner_stale_data_banner_views.generated.jsonl",
+    "owner_trade_intent_routes.generated.jsonl",
+    "owner_ux_semantic_routes.generated.jsonl",
+    "owner_widget_manifest.generated.jsonl",
+    "owner_workflow_queue_state_views.generated.jsonl",
+    "plugin_qmap_allowlist_route_views.generated.jsonl",
+    "portfolio_diversification_views.generated.jsonl",
+    "pretrade_view_routes.generated.jsonl",
+    "professional_provider_pending_frames.generated.jsonl",
+    "provider_pending_routes.generated.jsonl",
+    "provider_state_staleness_policy.generated.jsonl",
+    "qku_formula_compute_route_views.generated.jsonl",
+    "qku_formula_intake_route_views.generated.jsonl",
+    "quantum_structural_readiness_views.generated.jsonl",
+    "read_model_snapshot_index.generated.jsonl",
+    "read_model_snapshots.generated.jsonl",
+    "read_model_store_contracts.generated.jsonl",
+    "readiness_view_routes.generated.jsonl",
+    "reality_model_installation_socket_views.generated.jsonl",
+    "regime_memory_prior_views.generated.jsonl",
+    "scenario_ladder_views.generated.jsonl",
+    "session_policy.generated.jsonl",
+    "shadow_live_dryrun_route_views.generated.jsonl",
+    "snapshot_delta_policy.generated.jsonl",
+    "source_candidate_lane_views.generated.jsonl",
+    "surface_parity_routes.generated.jsonl",
+    "tca_decomposition_views.generated.jsonl",
+    "team_workflow_queue_views.generated.jsonl",
+    "telegram_mobile_surface_routes.generated.jsonl",
+    "trade_workbench_route_views.generated.jsonl",
+    "ui_visual_qa_handoff_views.generated.jsonl"
+  ],
+  "projection_version": "PR169-SVC1-v1.4",
+  "prompt_version": "v1.4",
+  "validator_name": "tools/validate_pr169_svc1.py"
+}
