@@ -841,6 +841,7 @@ _PR169_AGENT_ORCH1_ALLOWED_EXACT_PATHS = frozenset(
         "src/qtt/agents/pr169_agent_orch1_resolvers.py",
         "tools/build_pr169_agent_orch1.py",
         "tools/validate_pr169_agent_orch1.py",
+        "tools/pr168_rp5c_config.py",
         "tools/changed_area_validation_router.py",
         "tools/run_validation_gates.py",
         "tools/validation_inventory.py",
