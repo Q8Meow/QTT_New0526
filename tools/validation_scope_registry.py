@@ -44,6 +44,7 @@ PR169_READINESS1_BRANCH = "pr169-readiness1"
 PR169_PRETRADE1_BRANCH = "pr169-pretrade1"
 PR169_SVC1_BRANCH = "pr169-svc1"
 PR169_AGENT_ORCH1_BRANCH = "pr169-agent-orch1"
+PR169_VAL1_BRANCH = "pr169-val1"
 VALIDATION_FIXTURE_BRANCH = "pr-ci-fastfail-validation-context-preflight"
 
 _PR168_BRANCHES = frozenset(
@@ -86,6 +87,7 @@ _PR168_BRANCHES = frozenset(
         PR169_PRETRADE1_BRANCH,
         PR169_SVC1_BRANCH,
         PR169_AGENT_ORCH1_BRANCH,
+        PR169_VAL1_BRANCH,
         VALIDATION_FIXTURE_BRANCH,
     }
 )
@@ -869,6 +871,35 @@ _PR169_AGENT_ORCH1_ALLOWED_PATTERNS = (
     "tests/pr169_agent_orch1/**",
 )
 
+_PR169_VAL1_ALLOWED_EXACT_PATHS = frozenset(
+    {
+        ".github/workflows/qtt_validation.yml",
+        "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+        "docs/master_plan/generated/pr169_val1/acceptance.report.json",
+        "docs/master_plan/generated/pr169_val1/manifest.json",
+        "docs/master_plan/generated/pr169_val1/parity.report.json",
+        "docs/master_plan/generated/pr169_val1/readability.report.json",
+        "docs/master_plan/generated/pr169_val1/shards.report.json",
+        "docs/master_plan/generated/pr169_val1/timing.report.json",
+        "tests/fail_closed/test_run_validation_gates.py",
+        "tests/tools/test_qtt_validation_workflow_matrix.py",
+        "tests/tools/test_validation_inventory.py",
+        "tests/tools/test_validation_readability_guard.py",
+        "tests/tools/test_validation_scope_registry.py",
+        "tests/tools/test_validation_shard_partition.py",
+        "tests/tools/test_validation_timing_artifacts.py",
+        "tools/build_pr169_val1.py",
+        "tools/pr168_rp5c_config.py",
+        "tools/run_validation_gates.py",
+        "tools/validate_idempotence_runtime_containment.py",
+        "tools/validate_pr169_val1.py",
+        "tools/validation_inventory.py",
+        "tools/validation_scope_registry.py",
+    }
+)
+
+_PR169_VAL1_ALLOWED_PATTERNS: tuple[str, ...] = ()
+
 _FORBIDDEN_EXACT_PATHS = frozenset(
     {
         "docs/master_plan/QTT_MasterPlan_Current.md",
@@ -1528,6 +1559,29 @@ def _pr169_agent_orch1_scope_decision(branch_name: str, normalized: str) -> dict
     return None
 
 
+def _pr169_val1_scope_decision(branch_name: str, normalized: str) -> dict[str, object] | None:
+    if normalized in _PR169_VAL1_ALLOWED_EXACT_PATHS:
+        return {
+            "allowed": True,
+            "branch": branch_name,
+            "normalized_path": normalized,
+            "pr_id": "PR169-VAL1",
+            "matched_rule": f"exact:{normalized}",
+            "reason": "registered_exact_path",
+        }
+    for pattern in _PR169_VAL1_ALLOWED_PATTERNS:
+        if fnmatchcase(normalized, pattern):
+            return {
+                "allowed": True,
+                "branch": branch_name,
+                "normalized_path": normalized,
+                "pr_id": "PR169-VAL1",
+                "matched_rule": f"pattern:{pattern}",
+                "reason": "registered_pattern",
+            }
+    return None
+
+
 def _pr169_dash1_scope_decision(branch_name: str, normalized: str) -> dict[str, object] | None:
     if normalized in _PR169_DASH1_ALLOWED_EXACT_PATHS:
         return {
@@ -1908,6 +1962,19 @@ def explain_pr_scope_decision(branch: str, path: str) -> dict[str, object]:
             "normalized_path": normalized,
             "pr_id": "PR169-AGENT-ORCH1",
             "matched_rule": "no_pr169_agent_orch1_scope_rule",
+            "reason": "path_not_registered_for_pr_scope",
+        }
+
+    if branch_name == PR169_VAL1_BRANCH:
+        val1_decision = _pr169_val1_scope_decision(branch_name, normalized)
+        if val1_decision:
+            return val1_decision
+        return {
+            "allowed": False,
+            "branch": branch_name,
+            "normalized_path": normalized,
+            "pr_id": "PR169-VAL1",
+            "matched_rule": "no_pr169_val1_scope_rule",
             "reason": "path_not_registered_for_pr_scope",
         }
 

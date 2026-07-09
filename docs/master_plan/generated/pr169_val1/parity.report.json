@@ -1,0 +1,70 @@
+{
+  "added_selector_count": 0,
+  "agent_orch_generated_semantic_change": false,
+  "agent_orch_generated_semantic_diff_count": 0,
+  "artifact_upload_download_minutes_or_unknown": null,
+  "baseline_slowest_phase": "deterministic-validators",
+  "baseline_slowest_phase_minutes_or_unknown": 45.00866666666667,
+  "baseline_timing_source": "GitHub Actions job logs for QTT Validation PR270 pull_request Validation Shard (tools-generated-artifacts)",
+  "baseline_workflow_ref": "PR270 pull_request run 29013998571 and post-merge main run 29016781546",
+  "coverage_parity_state": "pass",
+  "dropped_selector_count": 0,
+  "duplicate_selector_count": 0,
+  "fail_closed_reasons": [],
+  "generated_at_utc": "2026-07-09T19:45:48.198368Z",
+  "hidden_bidi_control_guard_enabled": true,
+  "hidden_test_deselection_created": false,
+  "job_duration_minutes_or_unknown": 47.833333333333336,
+  "new_command_digest": "4bbd19623e37d6b12ff974d21f62633329e725fb49557d01f43da86eb09df0e8",
+  "new_shard_command_ranges": {
+    "deterministic-validators-a": {
+      "command_count": 64,
+      "end_command_index": 64,
+      "start_command_index": 1
+    },
+    "deterministic-validators-b": {
+      "command_count": 55,
+      "end_command_index": 119,
+      "start_command_index": 65
+    },
+    "deterministic-validators-c": {
+      "command_count": 215,
+      "end_command_index": 334,
+      "start_command_index": 120
+    }
+  },
+  "new_shard_count": 3,
+  "new_shard_phases": [
+    "deterministic-validators-a",
+    "deterministic-validators-b",
+    "deterministic-validators-c"
+  ],
+  "old_command_digest": "4bbd19623e37d6b12ff974d21f62633329e725fb49557d01f43da86eb09df0e8",
+  "old_phase_to_new_phase_map": {
+    "deterministic-validators": [
+      "deterministic-validators-a",
+      "deterministic-validators-b",
+      "deterministic-validators-c"
+    ]
+  },
+  "paper_live_execution_change": false,
+  "pass": true,
+  "producer": "tools/build_pr169_val1.py",
+  "python_readability_fixed": false,
+  "qku_formula_semantic_change": false,
+  "qtt_sha_authority_change": false,
+  "queue_wait_minutes_or_unknown": null,
+  "readability_guard_enabled": true,
+  "report_id": "pr169_val1_parity",
+  "runtime_authority_change": false,
+  "setup_dependency_minutes_or_unknown": 2.35,
+  "source_truth_change": false,
+  "timing_artifact_aggregation_enabled": true,
+  "timing_artifact_upload_enabled": true,
+  "trading_semantic_change": false,
+  "validation_command_minutes_or_unknown": 45.00866666666667,
+  "validation_weakened": false,
+  "validator": "tools/validate_pr169_val1.py",
+  "workflow_wall_clock_minutes_or_unknown": 50.75,
+  "workflow_yaml_readability_fixed": false
+}

@@ -65,6 +65,7 @@ PR169_READINESS1_BRANCH = registry.PR169_READINESS1_BRANCH
 PR169_PRETRADE1_BRANCH = registry.PR169_PRETRADE1_BRANCH
 PR169_SVC1_BRANCH = registry.PR169_SVC1_BRANCH
 PR169_AGENT_ORCH1_BRANCH = registry.PR169_AGENT_ORCH1_BRANCH
+PR169_VAL1_BRANCH = registry.PR169_VAL1_BRANCH
 FIXTURE_BRANCH = registry.VALIDATION_FIXTURE_BRANCH
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
@@ -326,6 +327,46 @@ def test_pr169_agent_orch1_allowed_paths_pass_on_real_branch(path: str) -> None:
 )
 def test_pr169_agent_orch1_forbidden_paths_fail(path: str) -> None:
     assert not registry.is_pr_scoped_changed_path_allowed(PR169_AGENT_ORCH1_BRANCH, path)
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        ".github/workflows/qtt_validation.yml",
+        "docs/master_plan/generated/pr169_val1/manifest.json",
+        "docs/master_plan/generated/pr169_val1/shards.report.json",
+        "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+        "tools/build_pr169_val1.py",
+        "tools/pr168_rp5c_config.py",
+        "tools/validate_pr169_val1.py",
+        "tools/run_validation_gates.py",
+        "tools/validation_inventory.py",
+        "tools/validation_scope_registry.py",
+        "tools/validate_idempotence_runtime_containment.py",
+        "tests/tools/test_qtt_validation_workflow_matrix.py",
+        "tests/tools/test_validation_readability_guard.py",
+        "tests/tools/test_validation_shard_partition.py",
+        "tests/tools/test_validation_timing_artifacts.py",
+        "tests/tools/test_validation_inventory.py",
+        "tests/fail_closed/test_run_validation_gates.py",
+    ],
+)
+def test_pr169_val1_allowed_paths_pass_on_real_branch(path: str) -> None:
+    assert registry.is_pr_scoped_changed_path_allowed(PR169_VAL1_BRANCH, path)
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        "docs/master_plan/QTT_MasterPlan_Current.md",
+        "docs/master_plan/generated/pr169_agent_orch1/registry.jsonl",
+        "src/qtt/agents/pr169_agent_orch1_resolvers.py",
+        "src/qtt/live_connectors/fake.py",
+        "docs/master_plan/generated/pr169_val1/future_hint.jsonl",
+    ],
+)
+def test_pr169_val1_forbidden_paths_fail(path: str) -> None:
+    assert not registry.is_pr_scoped_changed_path_allowed(PR169_VAL1_BRANCH, path)
 
 
 @pytest.mark.parametrize(

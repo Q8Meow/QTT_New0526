@@ -2921,6 +2921,12 @@ def _expected_commands(
         ],
         [
             python_executable,
+            str(Path("tools") / "validate_pr169_val1.py"),
+            "--repo-root",
+            ".",
+        ],
+        [
+            python_executable,
             str(Path("tools") / "validate_no_runtime_artifacts.py"),
             "--repo-root",
             ".",
@@ -3025,14 +3031,17 @@ def test_runner_assigns_canonical_non_pytest_commands_to_one_phase(monkeypatch):
         for command in canonical_commands
         if not runner._command_uses_pytest_helper(command)
     ]
-    phase_non_pytest = (
-        runner.build_phase_commands(runner.FAST_PREFLIGHT_PHASE, validation_dir, pytest_basetemp)
-        + runner.build_phase_commands(
-            runner.DETERMINISTIC_VALIDATORS_PHASE,
+    phase_non_pytest = runner.build_phase_commands(
+        runner.FAST_PREFLIGHT_PHASE,
+        validation_dir,
+        pytest_basetemp,
+    )
+    for phase in runner.DETERMINISTIC_VALIDATOR_SHARD_PHASES:
+        phase_non_pytest += runner.build_phase_commands(
+            phase,
             validation_dir,
             pytest_basetemp,
         )
-    )
 
     for command in canonical_non_pytest:
         assert phase_non_pytest.count(command) == 1
@@ -3065,6 +3074,16 @@ def test_runner_deterministic_phase_moves_preflight_validator_out_of_long_phase(
     assert set(fast_names) == runner.FAST_PREFLIGHT_SCRIPT_NAMES
     assert "validate_grand_global_debug_logical_consistency_audit.py" in fast_names
     assert "validate_grand_global_debug_logical_consistency_audit.py" not in deterministic_names
+
+
+def test_runner_keeps_deterministic_alias_out_of_ordered_ci_phases():
+    assert runner.DETERMINISTIC_VALIDATORS_PHASE in runner.VALIDATION_PHASES
+    assert runner.DETERMINISTIC_VALIDATORS_PHASE not in runner.ORDERED_PHASES
+    assert tuple(runner.DETERMINISTIC_VALIDATOR_SHARD_PHASES) == (
+        "deterministic-validators-a",
+        "deterministic-validators-b",
+        "deterministic-validators-c",
+    )
 
 
 def test_runner_pytest_shards_cover_each_test_file_once():
@@ -11676,8 +11695,14 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
     assert "          python -m pip install pytest\n" in shard_block
     for phase in runner.ORDERED_PHASES:
         assert f"          - phase: {phase}\n" in shard_block
+    assert "          - phase: deterministic-validators\n" not in shard_block
     assert "--phase ${{ matrix.phase }}" in shard_block
     assert "--timing-report .tmp/qtt-validation-timing/${{ matrix.phase }}.json" in shard_block
+    assert "--router-report .tmp/qtt-validation-router/${{ matrix.phase }}.json" in shard_block
+    assert "uses: actions/upload-artifact@v4" in shard_block
+    assert "validation-timing-${{ matrix.phase }}" in shard_block
+    assert "validation-router-${{ matrix.phase }}" in shard_block
+    assert shard_block.count("if: ${{ always() }}") >= 2
     assert "Run canonical validation gates" not in workflow
 
 
@@ -11687,6 +11712,9 @@ def test_github_workflow_aggregate_depends_on_validation_shard_matrix():
 
     assert "      - validation_shards\n" in validation_block
     assert "    if: ${{ always() }}\n" in validation_block
+    assert "uses: actions/download-artifact@v4" in validation_block
+    assert "pattern: validation-*" in validation_block
+    assert "tools/validate_pr169_val1.py" in validation_block
     assert 'if result != "success":' in validation_block
     assert "raise SystemExit(1)" in validation_block
 
