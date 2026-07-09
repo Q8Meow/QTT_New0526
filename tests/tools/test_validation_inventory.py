@@ -234,6 +234,35 @@ def test_pr169_svc1_paths_match_svc1_validators():
         assert "validate_pr169_svc1" in matching_ids
 
 
+def test_inventory_has_pr169_agent_orch1_entries():
+    entries = inventory.inventory_by_id()
+    build_entry = entries["build_pr169_agent_orch1"]
+    validate_entry = entries["validate_pr169_agent_orch1"]
+
+    for entry in (build_entry, validate_entry):
+        assert entry.owner_pr_or_feature == "PR169_AGENT_ORCH1"
+        assert "docs/master_plan/generated/pr169_agent_orch1/**" in entry.output_globs
+        assert "src/qtt/agents/**" in entry.required_when_files_match
+        assert "tests/pr169_agent_orch1/**" in entry.required_when_files_match
+
+    assert "tools/build_pr169_agent_orch1.py" in build_entry.tool_globs
+    assert "tools/validate_pr169_agent_orch1.py" in validate_entry.tool_globs
+
+
+def test_pr169_agent_orch1_paths_match_agent_orch1_validators():
+    paths = (
+        "docs/master_plan/generated/pr169_agent_orch1/registry.jsonl",
+        "src/qtt/agents/pr169_agent_orch1_resolvers.py",
+        "tests/pr169_agent_orch1/test_registry_projection_integrity.py",
+        "tools/validate_pr169_agent_orch1.py",
+    )
+
+    for path in paths:
+        matching_ids = {entry.validator_id for entry in inventory.entries_matching_path(path)}
+        assert "build_pr169_agent_orch1" in matching_ids
+        assert "validate_pr169_agent_orch1" in matching_ids
+
+
 def test_inventory_has_pr168_data1_entry():
     entry = inventory.inventory_by_id()["validate_pr168_data1_public_market_data_snapshots"]
 

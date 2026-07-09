@@ -43,6 +43,7 @@ PR169_DASH1_UI1_R2_R6_BRANCH = "pr169-ui1-r2r6"
 PR169_READINESS1_BRANCH = "pr169-readiness1"
 PR169_PRETRADE1_BRANCH = "pr169-pretrade1"
 PR169_SVC1_BRANCH = "pr169-svc1"
+PR169_AGENT_ORCH1_BRANCH = "pr169-agent-orch1"
 VALIDATION_FIXTURE_BRANCH = "pr-ci-fastfail-validation-context-preflight"
 
 _PR168_BRANCHES = frozenset(
@@ -84,6 +85,7 @@ _PR168_BRANCHES = frozenset(
         PR169_READINESS1_BRANCH,
         PR169_PRETRADE1_BRANCH,
         PR169_SVC1_BRANCH,
+        PR169_AGENT_ORCH1_BRANCH,
         VALIDATION_FIXTURE_BRANCH,
     }
 )
@@ -832,6 +834,41 @@ _PR169_SVC1_ALLOWED_PATTERNS = (
     "tests/pr169_svc1/**",
 )
 
+_PR169_AGENT_ORCH1_ALLOWED_EXACT_PATHS = frozenset(
+    {
+        "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+        "src/qtt/agents/__init__.py",
+        "src/qtt/agents/pr169_agent_orch1_resolvers.py",
+        "tools/build_pr169_agent_orch1.py",
+        "tools/validate_pr169_agent_orch1.py",
+        "tools/pr168_rp5c_config.py",
+        "tools/changed_area_validation_router.py",
+        "tools/run_validation_gates.py",
+        "tools/validation_inventory.py",
+        "tools/validation_scope_registry.py",
+        "tools/validate_validation_scope_registry.py",
+        "tests/pr169_agent_orch1/__init__.py",
+        "tests/pr169_agent_orch1/conftest.py",
+        "tests/pr169_agent_orch1/test_registry_projection_integrity.py",
+        "tests/pr169_agent_orch1/test_dag_task_receipts.py",
+        "tests/pr169_agent_orch1/test_no_authority.py",
+        "tests/pr169_agent_orch1/test_qku_formula_mem_routes.py",
+        "tests/pr169_agent_orch1/test_no_orphan_raw_scan.py",
+        "tests/pr169_agent_orch1/test_resolvers.py",
+        "tests/tools/test_validation_scope_registry.py",
+        "tests/tools/test_validation_inventory.py",
+        "tests/tools/test_changed_area_validation_router.py",
+        "tests/fail_closed/test_run_validation_gates.py",
+    }
+)
+
+_PR169_AGENT_ORCH1_ALLOWED_PATTERNS = (
+    "docs/master_plan/generated/pr169_agent_orch1/**",
+    "src/qtt/agents/**",
+    "tools/*pr169_agent_orch1*.py",
+    "tests/pr169_agent_orch1/**",
+)
+
 _FORBIDDEN_EXACT_PATHS = frozenset(
     {
         "docs/master_plan/QTT_MasterPlan_Current.md",
@@ -868,6 +905,12 @@ _FORBIDDEN_NAME_TOKENS = (
     "qtt-checksum",
     "qtt_global_digest",
     "qtt-global-digest",
+)
+
+_FORBIDDEN_TOKEN_EXACT_PROOF_REPORT_EXCEPTIONS = frozenset(
+    {
+        "docs/master_plan/generated/pr169_agent_orch1/no_qtt_sha.report.json",
+    }
 )
 
 
@@ -1462,6 +1505,29 @@ def _pr169_svc1_scope_decision(branch_name: str, normalized: str) -> dict[str, o
     return None
 
 
+def _pr169_agent_orch1_scope_decision(branch_name: str, normalized: str) -> dict[str, object] | None:
+    if normalized in _PR169_AGENT_ORCH1_ALLOWED_EXACT_PATHS:
+        return {
+            "allowed": True,
+            "branch": branch_name,
+            "normalized_path": normalized,
+            "pr_id": "PR169-AGENT-ORCH1",
+            "matched_rule": f"exact:{normalized}",
+            "reason": "registered_exact_path",
+        }
+    for pattern in _PR169_AGENT_ORCH1_ALLOWED_PATTERNS:
+        if fnmatchcase(normalized, pattern):
+            return {
+                "allowed": True,
+                "branch": branch_name,
+                "normalized_path": normalized,
+                "pr_id": "PR169-AGENT-ORCH1",
+                "matched_rule": f"pattern:{pattern}",
+                "reason": "registered_pattern",
+            }
+    return None
+
+
 def _pr169_dash1_scope_decision(branch_name: str, normalized: str) -> dict[str, object] | None:
     if normalized in _PR169_DASH1_ALLOWED_EXACT_PATHS:
         return {
@@ -1832,6 +1898,19 @@ def explain_pr_scope_decision(branch: str, path: str) -> dict[str, object]:
             "reason": "path_not_registered_for_pr_scope",
         }
 
+    if branch_name == PR169_AGENT_ORCH1_BRANCH:
+        agent_orch1_decision = _pr169_agent_orch1_scope_decision(branch_name, normalized)
+        if agent_orch1_decision:
+            return agent_orch1_decision
+        return {
+            "allowed": False,
+            "branch": branch_name,
+            "normalized_path": normalized,
+            "pr_id": "PR169-AGENT-ORCH1",
+            "matched_rule": "no_pr169_agent_orch1_scope_rule",
+            "reason": "path_not_registered_for_pr_scope",
+        }
+
     if branch_name in {
         PR169_DASH1_BRANCH,
         PR169_DASH1_UI1_BRANCH,
@@ -1932,6 +2011,9 @@ def explain_pr_scope_decision(branch: str, path: str) -> dict[str, object]:
         svc1_decision = _pr169_svc1_scope_decision(branch_name, normalized)
         if svc1_decision:
             return svc1_decision
+        agent_orch1_decision = _pr169_agent_orch1_scope_decision(branch_name, normalized)
+        if agent_orch1_decision:
+            return agent_orch1_decision
         dash1_decision = _pr169_dash1_scope_decision(branch_name, normalized)
         if dash1_decision:
             return dash1_decision
@@ -1967,6 +2049,8 @@ def explain_pr_scope_decision(branch: str, path: str) -> dict[str, object]:
 
 def _forbidden_reason(normalized: str) -> str | None:
     lowered = normalized.lower()
+    if lowered in _FORBIDDEN_TOKEN_EXACT_PROOF_REPORT_EXCEPTIONS:
+        return None
     if lowered.startswith("docs/master_plan/generated/pr168_vs2/no_private_state.") or lowered in {
         "docs/master_plan/generated/pr168_vs2/no_private_state.jsonl",
         "docs/master_plan/generated/pr168_vs2/no_private_state.manifest.json",

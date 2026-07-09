@@ -857,13 +857,13 @@
   },
   "completed_pr_artifact_audit": {
     "completed_pr_surface_count": 44,
-    "generated_report_count": 12730,
+    "generated_report_count": 12826,
     "missing_expected_surface_findings": [],
     "pr_identity_roster_consumed": true,
     "roadmap_controller_consumed": true,
     "schema_file_count": 192,
-    "test_file_count": 2754,
-    "validator_tool_count": 293,
+    "test_file_count": 2762,
+    "validator_tool_count": 294,
     "visible_recent_pr_reports": [
       "docs/master_plan/generated/PR149_AtomicRowsSemanticValueMaterializationImplementationBridge.report.json",
       "docs/master_plan/generated/PR150_SourceBackedClassicalQuantumParameterDefaultTargetMatrix.report.json",
@@ -887,7 +887,7 @@
   },
   "generated_report_consistency_audit": {
     "deterministic_consistency_status": "PASS",
-    "generated_report_count": 12730,
+    "generated_report_count": 12826,
     "json_parse_failure_count": 0,
     "json_parse_failure_paths": []
   },
@@ -1183,7 +1183,7 @@
     "fixture_file_count": 258,
     "schema_file_count": 192,
     "status": "PASS",
-    "test_file_count": 2754
+    "test_file_count": 2762
   },
   "source_evidence_boundary_audit": {
     "audit_domain": "SOURCE_EVIDENCE_BOUNDARY",
@@ -1312,7 +1312,7 @@
       "network_surface_findings": [],
       "network_surface_status": "PASS"
     },
-    "validator_tool_count": 293
+    "validator_tool_count": 294
   },
   "warning_findings": [],
   "whole_repo_inventory_audit": {
@@ -1329,21 +1329,21 @@
       "tests",
       "tools"
     ],
-    "audited_text_file_count": 21254,
+    "audited_text_file_count": 21362,
     "category_counts": {
       "ATOMICROWS": 61,
       "CONFIG": 4,
-      "GENERATED_REPORT": 12730,
+      "GENERATED_REPORT": 12826,
       "MASTER_PLAN": 31,
       "NON_TEXT": 1,
       "OTHER": 3,
       "ROADMAP": 42,
       "SCHEMA": 2109,
-      "SOURCE": 2485,
+      "SOURCE": 2487,
       "SOURCE_EVIDENCE": 59,
-      "TEST": 3013,
-      "TOOL": 423,
-      "VALIDATOR_TOOL": 293,
+      "TEST": 3021,
+      "TOOL": 424,
+      "VALIDATOR_TOOL": 294,
       "WORKFLOW": 1
     },
     "deterministic_inventory_policy": "tracked files from git ls-files -z with normalized POSIX ordering",
@@ -1355,6 +1355,6 @@
       ".pytest_cache"
     ],
     "sk\u0069pped_local_runtime_path_count": 0,
-    "tracked_file_count": 21255
+    "tracked_file_count": 21363
   }
 }
