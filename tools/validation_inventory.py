@@ -192,6 +192,8 @@ def validator_id_for_command(command: Sequence[str], phase: str) -> str:
 
 
 def _pr_token(stem: str) -> str | None:
+    if "pr169_qku_formula_exp1" in stem:
+        return "pr169_qku_formula_exp1"
     if "pr169_val1" in stem:
         return "pr169_val1"
     if "pr169_agent_orch1" in stem:
@@ -413,6 +415,16 @@ def _pr_globs(stem: str) -> tuple[str, ...]:
                 "docs/master_plan/generated/pr169_agent_orch1/**",
                 "src/qtt/agents/**",
                 "tests/pr169_agent_orch1/**",
+            ]
+        )
+    if token == "pr169_qku_formula_exp1":
+        globs.extend(
+            [
+                "docs/master_plan/generated/pr169_qku_formula_exp1/**",
+                "src/qtt/stage1_prediction_markets/pr169_qku_formula_exp1/**",
+                "tests/pr169_qku_formula_exp1/**",
+                "tools/build_pr169_qku_formula_exp1.py",
+                "tools/validate_pr169_qku_formula_exp1.py",
             ]
         )
     if token == "pr169_val1":
