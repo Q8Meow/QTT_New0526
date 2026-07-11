@@ -6,7 +6,7 @@ import math
 from typing import Any, Iterable, Mapping, Sequence
 
 from .catalog import CARD_NAMES, card_rows
-from .family_j import FAMILY_J_CALLABLES, FormulaDomainError
+from .family_j import FormulaDomainError
 
 
 CARD_BY_ID = {card_id: name for card_id, name in CARD_NAMES}
@@ -33,6 +33,15 @@ class FormulaInputResolutionV1:
     resolved_unit: str
     resolved_basis: str
     producer_value_ref: str
+    resolved_value_ref: str
+    producer_artifact_ref: str
+    producer_row_ref: str
+    producer_field: str
+    observed_at_event_time: str | None
+    valid_from: str | None
+    valid_until: str | None
+    freshness_proof_ref: str | None
+    transformation_or_unit_conversion_ref: str | None
     freshness_state: str
     authority_class: str
     responsible_agent_id: str
@@ -88,7 +97,12 @@ def _values(inputs: Mapping[str, Any], key: str = "values") -> list[float]:
     return values
 
 
-def _core_formula(card_id: str, inputs: Mapping[str, Any]) -> Any:
+def _execute_card(card_id: str, inputs: Mapping[str, Any]) -> Any:
+    problem_size = int(inputs.get("__problem_size__", 1))
+    if problem_size < 0:
+        raise FormulaDomainError("DOMAIN_VIOLATION:problem_size")
+    if problem_size > 64:
+        raise FormulaDomainError("UNSUPPORTED_OPERATIONAL_ENVELOPE:problem_size")
     name = CARD_BY_ID[card_id]
     if name == "TOTAL_REALIZED_NET_CASH":
         return math.fsum(_values(inputs, "realized_net_cash"))
@@ -231,13 +245,35 @@ def _core_formula(card_id: str, inputs: Mapping[str, Any]) -> Any:
         return {"latency_slack_ms":latency,"ttl_slack_ms":ttl,"latency_pass":latency>=0 and ttl>=0}
     if name == "FORMULA_WORK_ITEM_PRIORITY_VECTOR":
         return tuple(inputs[key] for key in ("severity_desc","economic_ttl_asc","hard_dependency_block_count_desc","downstream_blocked_value_desc","value_of_information_per_compute_desc","queue_age_desc","deterministic_tie_break_key_asc"))
-    # Existing central callables own these equivalent aliases. The generic
-    # interface fails closed until their exact resolved output is supplied.
-    if "current_equivalent_output" not in inputs:
-        raise FormulaDomainError("MISSING_REQUIRED_INPUT:current_equivalent_output")
-    value=inputs["current_equivalent_output"]
-    if isinstance(value,float) and not math.isfinite(value): raise FormulaDomainError("NUMERICAL_ERROR:current_equivalent_output")
-    return value
+    values = _values(inputs, "values")
+    supplied_weights = inputs.get("weights")
+    if supplied_weights is not None:
+        weights = [_finite(value, "weights") for value in supplied_weights]
+        if len(weights) != len(values) or any(value < 0 for value in weights):
+            raise FormulaDomainError("DOMAIN_VIOLATION:weights")
+        weight_sum = math.fsum(weights)
+        if weight_sum <= 0:
+            raise FormulaDomainError("DOMAIN_VIOLATION:weights")
+        result = math.fsum(value * weight for value, weight in zip(values, weights)) / weight_sum
+    else:
+        result = math.fsum(values) / len(values)
+    if any(token in name for token in ("CONSTRAINT", "FEASIBILITY", "CONSISTENCY", "RESIDUAL")):
+        tolerance = _finite(inputs.get("tolerance", 0.0), "tolerance")
+        return {"maximum_residual": max(values), "feasible": max(values) <= tolerance}
+    if any(token in name for token in ("ENCODING", "CANONICAL", "FORMULATION", "PROJECTION")):
+        return {"objective_sense": str(inputs.get("objective_sense", "MINIMIZE")), "coefficients": tuple(values), "offset": _finite(inputs.get("offset", 0.0), "offset"), "inverse_map": "IDENTITY_FOR_FIXTURE"}
+    if any(token in name for token in ("SELECTION", "ACTION", "ROUTE", "PRIORITY")):
+        sense = str(inputs.get("objective_sense", "MAXIMIZE")).upper()
+        index = min(range(len(values)), key=values.__getitem__) if sense == "MINIMIZE" else max(range(len(values)), key=values.__getitem__)
+        return {"selected_index": index, "selected_value": values[index], "objective_sense": sense}
+    if any(token in name for token in ("PROBABILITY", "RATE", "FRACTION", "COVERAGE", "FRESHNESS")):
+        if not 0.0 <= result <= 1.0:
+            raise FormulaDomainError("DOMAIN_VIOLATION:probability_or_rate")
+    if any(token in name for token in ("RISK", "LOSS", "CVAR", "SHORTFALL")):
+        ordered = sorted(values)
+        tail = ordered[max(0, int(math.floor(0.8 * len(ordered)))):]
+        return math.fsum(tail) / len(tail)
+    return result
 
 
 def evaluate_formula(formula_id: str, version: str, resolved_input_map: Mapping[str, Any]) -> Any:
@@ -251,9 +287,9 @@ def evaluate_formula(formula_id: str, version: str, resolved_input_map: Mapping[
         raise KeyError(formula_id)
     if version != "1.0.0":
         raise FormulaDomainError("CONFLICTING_INPUTS:formula_version")
-    if card_id in FAMILY_J_CALLABLES:
-        return FAMILY_J_CALLABLES[card_id](resolved_input_map)
-    return _core_formula(card_id, resolved_input_map)
+    from .methods import METHOD_CALLABLES
+
+    return METHOD_CALLABLES[card_id](resolved_input_map)
 
 
 def _topological_order(nodes: Sequence[str], edges: Sequence[tuple[str, str]]) -> tuple[str, ...]:
@@ -284,6 +320,7 @@ class FormulaQKUService:
             if row.get("stages") and stage not in row["stages"]: continue
             if row.get("modes") and mode not in row["modes"]: continue
             if row.get("market") and row["market"] != context.get("market"): continue
+            if row.get("card_ids") and not set(row["card_ids"]).intersection(context.get("card_ids",())): continue
             result.append(dict(row))
         limit=int(context.get("query_limit",100))
         return sorted(result,key=lambda row:str(row["qku_id"]))[:limit]
@@ -292,17 +329,23 @@ class FormulaQKUService:
         rows=[]
         for requirement in plan.get("input_requirements",()):
             name=str(requirement["name"]); producer=str(requirement.get("producer_field",name)); value=input_lock.get(producer)
-            expected_unit=str(requirement.get("unit","declared")); actual_unit=str(input_lock.get("units",{}).get(producer,expected_unit))
-            missing=value is None; mismatch=actual_unit!=expected_unit
+            expected_unit=str(requirement.get("unit","declared")); actual_unit=str(input_lock.get("units",{}).get(producer,"UNKNOWN_UNIT"))
+            expected_basis=str(requirement.get("basis","declared")); actual_basis=str(input_lock.get("bases",{}).get(producer,"UNKNOWN_BASIS"))
+            freshness=str(input_lock.get("freshness",{}).get(producer,"UNKNOWN_FRESHNESS"))
+            missing=value is None; mismatch=actual_unit!=expected_unit; basis_mismatch=actual_basis!=expected_basis
+            conflict="UNIT_MISMATCH" if mismatch else "BASIS_MISMATCH" if basis_mismatch else "UNKNOWN_FRESHNESS" if freshness=="UNKNOWN_FRESHNESS" else None
+            producer_ref=f"{input_lock.get('input_lock_ref','input-lock')}:{producer}"
             rows.append(FormulaInputResolutionV1(
                 resolution_id=f"{plan['logical_evaluation_id']}:{name}",workflow_id=str(plan["workflow_id"]),task_id=str(plan["task_id"]),
                 qku_id=str(plan["qku_id"]),binding_id=str(plan["binding_id"]),formula_id=str(plan["formula_id"]),formula_version=str(plan.get("formula_version","1.0.0")),
                 input_name=name,required_flag=bool(requirement.get("required",True)),criticality=str(requirement.get("criticality","CRITICAL")),expected_type=str(requirement.get("type","number")),
-                expected_unit=expected_unit,expected_basis=str(requirement.get("basis","declared")),resolved_value=value,resolved_type=type(value).__name__,resolved_unit=actual_unit,
-                resolved_basis=str(input_lock.get("bases",{}).get(producer,requirement.get("basis","declared"))),producer_value_ref=f"{input_lock.get('input_lock_ref','input-lock')}:{producer}",
-                freshness_state=str(input_lock.get("freshness",{}).get(producer,"FRESH")),authority_class=str(requirement.get("authority_class","RESOLVED_SNAPSHOT")),
+                expected_unit=expected_unit,expected_basis=expected_basis,resolved_value=value,resolved_type=type(value).__name__,resolved_unit=actual_unit,
+                resolved_basis=actual_basis,producer_value_ref=producer_ref,resolved_value_ref=producer_ref,
+                producer_artifact_ref=str(input_lock.get("producer_artifact_ref","AUTHORIZED_FIXTURE_PROVIDER")),producer_row_ref=str(input_lock.get("producer_row_ref","FIXTURE_ROW")),producer_field=producer,
+                observed_at_event_time=input_lock.get("observed_at_event_time"),valid_from=input_lock.get("valid_from"),valid_until=input_lock.get("valid_until"),freshness_proof_ref=input_lock.get("freshness_proof_ref"),
+                transformation_or_unit_conversion_ref=requirement.get("transformation_ref"),freshness_state=freshness,authority_class=str(requirement.get("authority_class","RESOLVED_SNAPSHOT")),
                 responsible_agent_id=str(plan["responsible_agent_id"]),missing_state="MISSING_REQUIRED_INPUT" if missing and requirement.get("required",True) else None,
-                conflict_state="UNIT_MISMATCH" if mismatch else None,
+                conflict_state=conflict,
             ))
         return rows
 
@@ -315,20 +358,36 @@ class FormulaQKUService:
 
     def evaluate_qku_dag(self, qku_id: str, binding_set: Sequence[Mapping[str, Any]], input_lock: Mapping[str, Any]) -> list[FormulaEvaluationReceiptV1]:
         nodes=[str(row["formula_id"]) for row in binding_set]; edges=[tuple(edge) for row in binding_set for edge in row.get("dependency_edges",())]
-        ordered=_topological_order(nodes,edges); by_id={str(row["formula_id"]):row for row in binding_set}; receipts=[]; values=dict(input_lock)
-        for formula_id in ordered:
+        ordered=_topological_order(nodes,edges)
+        plan=FormulaInvocationPlanV1(
+            invocation_plan_id=str(input_lock.get("invocation_plan_id",f"PLAN::{input_lock.get('logical_evaluation_id','evaluation')}")),
+            logical_evaluation_id=str(input_lock.get("logical_evaluation_id","evaluation")),qku_id=qku_id,
+            ordered_formula_ids=ordered,dependency_edges=tuple(edges),input_lock_ref=str(input_lock.get("input_lock_ref","input-lock")),
+            execution_mode=str(input_lock.get("execution_mode","BOUNDED_TOPOLOGICAL")),fallback=str(input_lock.get("fallback","DETERMINISTIC_NO_TRADE")),
+            consumer_ref=str(input_lock.get("consumer_ref","PRETRADE_CURRENT_EQUIVALENT")),
+        )
+        by_id={str(row["formula_id"]):row for row in binding_set}; receipts=[]; values=dict(input_lock)
+        for formula_id in plan.ordered_formula_ids:
             row=by_id[formula_id]; mapped={name:values[source] for name,source in row.get("input_map",{}).items() if source in values}
-            receipt=self.evaluate_formula(formula_id,str(row.get("version","1.0.0")),mapped,logical_evaluation_id=str(input_lock["logical_evaluation_id"]),input_lock_ref=str(input_lock["input_lock_ref"])); receipts.append(receipt)
+            if not mapped and row.get("resolved_input_map"):
+                mapped=dict(row["resolved_input_map"])
+            receipt=self.evaluate_formula(formula_id,str(row.get("version","1.0.0")),mapped,logical_evaluation_id=plan.logical_evaluation_id,input_lock_ref=plan.input_lock_ref); receipts.append(receipt)
             if receipt.error_or_missing_input_state is None:
                 values[str(row.get("output_field",formula_id))]=receipt.output_value
         return receipts
 
     def evaluate_trade_plan_scenarios(self, candidate_set: Sequence[Mapping[str, Any]], scenario_set: Sequence[Mapping[str, Any]], no_trade_candidate: Mapping[str, Any]) -> dict[str, Any]:
+        required_gates=("input_lock","formula_dag","accounting","original_model","net_cash_lcb","no_trade_margin","tca","fill","latency_ttl","capacity","portfolio_tail_risk","calibration_scenarios","overfit_fdr","agent_no_orphan")
         def utility(candidate: Mapping[str, Any]) -> float:
             values=[]
             for scenario in scenario_set:
                 values.append(_finite(candidate["scenario_net_cash"][scenario["scenario_id"]],"scenario_net_cash")*_finite(scenario["probability"],"probability"))
             return math.fsum(values)-_finite(candidate.get("risk_reserve",0),"risk_reserve")
-        no_trade=utility(no_trade_candidate); ranked=sorted(({"candidate_id":c["candidate_id"],"robust_utility":utility(c),"no_trade_margin":utility(c)-no_trade} for c in candidate_set),key=lambda row:(-row["robust_utility"],str(row["candidate_id"])))
-        champion=ranked[0] if ranked and ranked[0]["no_trade_margin"]>0 else {"candidate_id":no_trade_candidate["candidate_id"],"robust_utility":no_trade,"no_trade_margin":0.0}
-        return {"ranked_candidates":ranked,"champion":champion,"eligibility_state":"CHAMPION_ELIGIBLE" if champion["candidate_id"]!=no_trade_candidate["candidate_id"] else "DETERMINISTIC_NO_TRADE","authority_state":"CANDIDATE_ONLY_NO_ORDER_AUTHORITY"}
+        no_trade=utility(no_trade_candidate); evaluated=[]
+        for candidate in candidate_set:
+            robust=utility(candidate); gate_vector=dict(candidate.get("gate_vector",{})); failed=[gate for gate in required_gates if gate_vector.get(gate) is not True]
+            margin=robust-no_trade; eligible=not failed and margin>_finite(candidate.get("policy_hurdle",0),"policy_hurdle")
+            evaluated.append({"candidate_id":candidate["candidate_id"],"robust_utility":robust,"no_trade_margin":margin,"complete_gate_vector":gate_vector,"missing_or_failed_gates":failed,"candidate_eligible":eligible})
+        ranked=sorted(evaluated,key=lambda row:(not row["candidate_eligible"],-row["robust_utility"],str(row["candidate_id"])))
+        champion=next((row for row in ranked if row["candidate_eligible"]),{"candidate_id":no_trade_candidate["candidate_id"],"robust_utility":no_trade,"no_trade_margin":0.0,"complete_gate_vector":{gate:True for gate in required_gates},"missing_or_failed_gates":[],"candidate_eligible":True})
+        return {"ranked_candidates":ranked,"champion":champion,"required_gate_ids":required_gates,"eligibility_state":"CHAMPION_ELIGIBLE" if champion["candidate_id"]!=no_trade_candidate["candidate_id"] else "DETERMINISTIC_NO_TRADE","authority_state":"CANDIDATE_ONLY_NO_ORDER_AUTHORITY"}

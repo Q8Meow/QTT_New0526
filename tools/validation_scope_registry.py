@@ -45,6 +45,7 @@ PR169_PRETRADE1_BRANCH = "pr169-pretrade1"
 PR169_SVC1_BRANCH = "pr169-svc1"
 PR169_AGENT_ORCH1_BRANCH = "pr169-agent-orch1"
 PR169_QKU_FORMULA_EXP1_BRANCH = "pr169-qku-formula-exp1"
+PR169_QKU_FORMULA_EXP1_REPAIR_BRANCH = "pr169-qku-formula-exp1-r1"
 PR169_VAL1_BRANCH = "pr169-val1"
 VALIDATION_FIXTURE_BRANCH = "pr-ci-fastfail-validation-context-preflight"
 
@@ -89,6 +90,7 @@ _PR168_BRANCHES = frozenset(
         PR169_SVC1_BRANCH,
         PR169_AGENT_ORCH1_BRANCH,
         PR169_QKU_FORMULA_EXP1_BRANCH,
+        PR169_QKU_FORMULA_EXP1_REPAIR_BRANCH,
         PR169_VAL1_BRANCH,
         VALIDATION_FIXTURE_BRANCH,
     }
@@ -2010,7 +2012,7 @@ def explain_pr_scope_decision(branch: str, path: str) -> dict[str, object]:
             "reason": "path_not_registered_for_pr_scope",
         }
 
-    if branch_name == PR169_QKU_FORMULA_EXP1_BRANCH:
+    if branch_name in {PR169_QKU_FORMULA_EXP1_BRANCH, PR169_QKU_FORMULA_EXP1_REPAIR_BRANCH}:
         qku_formula_decision = _pr169_qku_formula_exp1_scope_decision(branch_name, normalized)
         if qku_formula_decision:
             return qku_formula_decision

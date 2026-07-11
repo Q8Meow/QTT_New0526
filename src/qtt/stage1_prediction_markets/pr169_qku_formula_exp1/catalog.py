@@ -128,12 +128,21 @@ J_IMPLEMENTATIONS = {
 }
 
 EXACT_REUSE_ALIASES = {
-    "B11": "FORMULA::ORDERBOOK_IMBALANCE",
-    "B12": "FORMULA::DEPTH_WEIGHTED_MID_PRICE",
-    "C01": "FORMULA::BRIER_SCORE",
-    "C02": "FORMULA::LOG_LOSS",
-    "D10": "FORMULA::CAPITAL_UTILIZATION",
-    "F08": "FORMULA::ONE_HOT_PENALTY",
+    "B11": "PR168_GFP2R_FORMULA_ORDERBOOK_IMBALANCE",
+    "B12": "PR162D_R2A::DEPTH_WEIGHTED_MID_PRICE",
+    "C01": "FORM_MAP3_CALIB_BRIER_001",
+    "C02": "FORM_MAP3_CALIB_LOGLOSS_001",
+    "D10": "PR162D_R2A::CAPITAL_UTILIZATION",
+    "F08": "PR162D_R2A::ONE_HOT_PENALTY",
+}
+
+EXACT_TARGET_CALLABLES = {
+    "B11": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.formula_seed_library:compute_orderbook_imbalance",
+    "B12": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.formula_seed_library:compute_depth_weighted_mid_price",
+    "C01": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.formula_seed_library:compute_brier_score",
+    "C02": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.formula_seed_library:compute_log_loss",
+    "D10": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.formula_seed_library:compute_capital_utilization",
+    "F08": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.formula_seed_library:compute_one_hot_penalty",
 }
 
 
@@ -153,6 +162,26 @@ class Card:
     objective_sense: str
     unit_policy_ref: str
     error_taxonomy_ref: str
+    actual_callable_or_solver_ref: str
+    alias_target_formula_id: str | None
+    alias_target_version: str | None
+    alias_target_callable_ref: str | None
+    implementation_state: str
+    runtime_context_state: str
+    supported_input_domain: str
+    supported_problem_size_or_scaling_class: str
+    applicability_predicate: str
+    eligible_stages: tuple[str, ...]
+    eligible_modes: tuple[str, ...]
+    trigger_or_scheduling_rule: str
+    required_input_provider_classes: tuple[str, ...]
+    latency_update_class: str
+    timeout_memory_class: str
+    execution_lane: str
+    deterministic_or_seed_contract: str
+    failure_no_trade_fallback: str
+    canonical_consumer_class: str
+    output_consumer_fields: tuple[str, ...]
     no_order_authority: bool = True
     no_connector_read: bool = True
     no_profit_guarantee: bool = True
@@ -164,24 +193,30 @@ def _card(card_id: str, semantic_key: str) -> Card:
         disposition = "CREATE_NEW_EXECUTABLE_FORMULA_OR_PROCEDURE"
         implementation = "SOLVER_CERTIFICATE_PROCEDURE" if card_id in {"J06", "J07", "J08"} else "DETERMINISTIC_PROCEDURE"
         canonical = f"QTT_FORMULA::{semantic_key}"
-        callable_ref = (
-            "src.qtt.stage1_prediction_markets.pr169_qku_formula_exp1.family_j:"
-            + J_IMPLEMENTATIONS[card_id]
-        )
+        callable_ref = f"src.qtt.stage1_prediction_markets.pr169_qku_formula_exp1.methods:compute_{card_id}"
     elif card_id in EXACT_REUSE_ALIASES:
-        disposition = "REUSE_EXACT"
+        disposition = "REUSE_EXISTING_EXECUTABLE"
         implementation = "DIRECT_PURE_FORMULA"
         canonical = EXACT_REUSE_ALIASES[card_id]
-        callable_ref = "src.qtt.stage1_prediction_markets.pr169_qku_formula_exp1.runtime:evaluate_formula"
+        callable_ref = f"src.qtt.stage1_prediction_markets.pr169_qku_formula_exp1.methods:compute_{card_id}"
     else:
-        disposition = "REUSE_EQUIVALENT_ALIAS"
+        disposition = "CREATE_NEW_EXECUTABLE_FORMULA_OR_PROCEDURE"
         implementation = (
             "DETERMINISTIC_PROCEDURE" if family in {"I"} else
             "OPTIMIZATION_PROBLEM_BUILDER" if semantic_key.endswith(("OBJECTIVE", "ALLOCATION", "PROJECTION")) else
             "DIRECT_PURE_FORMULA"
         )
         canonical = f"QTT_FORMULA::{semantic_key}"
-        callable_ref = "src.qtt.stage1_prediction_markets.pr169_qku_formula_exp1.runtime:evaluate_formula"
+        callable_ref = f"src.qtt.stage1_prediction_markets.pr169_qku_formula_exp1.methods:compute_{card_id}"
+    lane = (
+        "CENTRAL_ACCESS_OR_ORCHESTRATION"
+        if family == "I"
+        else "QMAP_QBENCH_BATCH"
+        if family in {"F", "J"}
+        else "EVIDENCE_OR_GOVERNANCE_BATCH"
+        if family == "C"
+        else "PRETRADE_BATCH_OR_HOTPATH_CANDIDATE"
+    )
     return Card(
         card_id=card_id,
         semantic_key=semantic_key,
@@ -197,6 +232,26 @@ def _card(card_id: str, semantic_key: str) -> Card:
         objective_sense="DECLARED_BY_CARD_OR_NOT_APPLICABLE",
         unit_policy_ref="CentralUnitBasisNumericPolicyV1",
         error_taxonomy_ref="FormulaErrorTaxonomyV1",
+        actual_callable_or_solver_ref=callable_ref,
+        alias_target_formula_id=EXACT_REUSE_ALIASES.get(card_id),
+        alias_target_version="1.0.0" if card_id in EXACT_REUSE_ALIASES else None,
+        alias_target_callable_ref=EXACT_TARGET_CALLABLES.get(card_id),
+        implementation_state="EXECUTABLE",
+        runtime_context_state="EXECUTABLE_REQUIRES_DECLARED_INPUTS",
+        supported_input_domain="FINITE_TYPED_CARD_CONTRACT",
+        supported_problem_size_or_scaling_class="BOUNDED_SCALAR_VECTOR_OR_SMALL_EXACT_MAX_64",
+        applicability_predicate=f"context.card_id == '{card_id}' and context.authority != 'ORDER_RELEASE'",
+        eligible_stages=("RESEARCH", "PRETRADE", "REPLAY", "PAPER_PREPARATION", "QMAP", "QBENCH"),
+        eligible_modes=("OFFLINE", "REPLAY", "PAPER", "SHADOW_COMPARISON", "LIVE_DRYRUN_CANDIDATE"),
+        trigger_or_scheduling_rule=f"ON_APPLICABLE_CONTEXT_OR_DEPENDENCY_CHANGE::{card_id}",
+        required_input_provider_classes=("RESOLVED_INPUT_LOCK", "CANONICAL_FORMULA_DEPENDENCY"),
+        latency_update_class="BATCH_OR_PRECOMPUTE" if lane != "PRETRADE_BATCH_OR_HOTPATH_CANDIDATE" else "EVENT_DRIVEN_BATCH_HOTPATH_CANDIDATE",
+        timeout_memory_class="BOUNDED_5S_64_ITEMS",
+        execution_lane=lane,
+        deterministic_or_seed_contract="DETERMINISTIC_OR_EXPLICIT_SEED",
+        failure_no_trade_fallback="TYPED_FAILURE_THEN_DETERMINISTIC_NO_TRADE_OR_GOVERNED_FALLBACK",
+        canonical_consumer_class="SYSTEM_PROCEDURE_CONSUMER" if family == "I" else "QKU_DAG_APPLICABLE",
+        output_consumer_fields=("formula_evaluation_receipt", "readiness_state", "pretrade_decision_input"),
     )
 
 

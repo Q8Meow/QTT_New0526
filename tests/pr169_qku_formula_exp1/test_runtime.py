@@ -9,8 +9,8 @@ def test_bounded_query_input_resolution_and_stable_retry_identity() -> None:
     service=FormulaQKUService([{"qku_id":"QKU-B","agent_duties":["risk"],"stages":["PRETRADE"],"modes":["SHADOW"],"market":"synthetic"},{"qku_id":"QKU-A","agent_duties":["risk"],"stages":["PRETRADE"],"modes":["SHADOW"],"market":"synthetic"}])
     rows=service.query_applicable_qkus({"market":"synthetic","query_limit":1},"risk","PRETRADE","SHADOW")
     assert [row["qku_id"] for row in rows]==["QKU-A"]
-    plan={"logical_evaluation_id":"eval-1","workflow_id":"wf","task_id":"task","qku_id":"QKU-A","binding_id":"bind","formula_id":"C01","responsible_agent_id":"risk_manager_agent","input_requirements":[{"name":"probabilities","unit":"probability","producer_field":"p"}]}
-    resolved=service.resolve_formula_inputs(plan,{"input_lock_ref":"lock","p":[0.5],"units":{"p":"probability"}})
+    plan={"logical_evaluation_id":"eval-1","workflow_id":"wf","task_id":"task","qku_id":"QKU-A","binding_id":"bind","formula_id":"C01","responsible_agent_id":"risk_manager_agent","input_requirements":[{"name":"probabilities","unit":"probability","basis":"calibrated_binary","producer_field":"p"}]}
+    resolved=service.resolve_formula_inputs(plan,{"input_lock_ref":"lock","p":[0.5],"units":{"p":"probability"},"bases":{"p":"calibrated_binary"},"freshness":{"p":"FRESH"}})
     assert resolved[0].missing_state is None and resolved[0].conflict_state is None
     first=service.evaluate_formula("C01","1.0.0",{"probabilities":[0.5],"outcomes":[1]},logical_evaluation_id="eval-1",input_lock_ref="lock",attempt_number=1)
     retry=service.evaluate_formula("C01","1.0.0",{"probabilities":[0.5],"outcomes":[1]},logical_evaluation_id="eval-1",input_lock_ref="lock",attempt_number=2)

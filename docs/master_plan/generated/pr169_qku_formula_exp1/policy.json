@@ -16,6 +16,11 @@
     "LIVE_DRYRUN",
     "POSTLAUNCH"
   ],
+  "owner_merge_gate": {
+    "merge_attempt_count": 0,
+    "received": false,
+    "required": true
+  },
   "permanent_laws": [
     "IMMUTABLE_FORMULA_AND_QKU_SEMANTICS",
     "TRADE_PLAN_CANDIDATE_IS_MUTABLE_OPTIMIZATION_OBJECT",
@@ -30,6 +35,7 @@
     "SHADOW_IS_OBSERVATION_NOT_EXECUTION_AUTHORITY",
     "EXECUTION_ROUTER_IS_FINAL_REAL_ORDER_RELEASE_AUTHORITY"
   ],
+  "schema_version": "2.0.0",
   "short_horizon_fields": [
     "strategy_mode",
     "parent_campaign_id",

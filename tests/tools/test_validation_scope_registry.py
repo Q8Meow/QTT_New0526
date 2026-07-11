@@ -66,6 +66,7 @@ PR169_PRETRADE1_BRANCH = registry.PR169_PRETRADE1_BRANCH
 PR169_SVC1_BRANCH = registry.PR169_SVC1_BRANCH
 PR169_AGENT_ORCH1_BRANCH = registry.PR169_AGENT_ORCH1_BRANCH
 PR169_QKU_FORMULA_EXP1_BRANCH = registry.PR169_QKU_FORMULA_EXP1_BRANCH
+PR169_QKU_FORMULA_EXP1_REPAIR_BRANCH = registry.PR169_QKU_FORMULA_EXP1_REPAIR_BRANCH
 PR169_VAL1_BRANCH = registry.PR169_VAL1_BRANCH
 
 
@@ -89,6 +90,7 @@ PR169_VAL1_BRANCH = registry.PR169_VAL1_BRANCH
 )
 def test_pr169_qku_formula_exp1_allowed_paths_are_narrow(path: str) -> None:
     assert registry.is_pr_scoped_changed_path_allowed(PR169_QKU_FORMULA_EXP1_BRANCH, path)
+    assert registry.is_pr_scoped_changed_path_allowed(PR169_QKU_FORMULA_EXP1_REPAIR_BRANCH, path)
 
 
 @pytest.mark.parametrize(
@@ -103,6 +105,7 @@ def test_pr169_qku_formula_exp1_allowed_paths_are_narrow(path: str) -> None:
 )
 def test_pr169_qku_formula_exp1_forbidden_paths_fail_closed(path: str) -> None:
     assert not registry.is_pr_scoped_changed_path_allowed(PR169_QKU_FORMULA_EXP1_BRANCH, path)
+    assert not registry.is_pr_scoped_changed_path_allowed(PR169_QKU_FORMULA_EXP1_REPAIR_BRANCH, path)
 
 
 @pytest.mark.parametrize(

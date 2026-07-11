@@ -23,14 +23,14 @@ def test_j01_zero_radius_nominal_and_radius_monotonic() -> None:
 
 @pytest.mark.parametrize("violations", [[-1,-1,-1],[1,-1,-1]])
 def test_j02_zero_violations_never_means_zero_risk(violations: list[float]) -> None:
-    result=chance_constrained_feasibility({"constraint_residuals":violations,"target_violation_probability":0.9,"confidence_level":0.95,"confidence_method":"EXACT_BINOMIAL_IID"})
+    result=chance_constrained_feasibility({"constraint_residuals":violations,"target_violation_probability":0.9,"confidence_level":0.95,"confidence_method":"EXACT_BINOMIAL_IID","threshold_provenance":"fixture-policy"})
     assert result["violation_probability_upper_confidence_bound"]>0
     assert 0<=result["estimated_violation_probability"]<=1
 
 
 def test_j02_rejects_iid_method_for_clustered_rows() -> None:
     with pytest.raises(FormulaDomainError,match="DEPENDENT_SAMPLE_METHOD_REQUIRED"):
-        chance_constrained_feasibility({"constraint_residuals":[-1,-1],"cluster_ids":["campaign","campaign"],"target_violation_probability":0.1,"confidence_level":0.95,"confidence_method":"EXACT_BINOMIAL_IID"})
+        chance_constrained_feasibility({"constraint_residuals":[-1,-1],"cluster_ids":["campaign","campaign"],"target_violation_probability":0.1,"confidence_level":0.95,"confidence_method":"EXACT_BINOMIAL_IID","threshold_provenance":"fixture-policy"})
 
 
 def test_j03_seeded_shift_test_detects_separation() -> None:
@@ -55,17 +55,17 @@ def test_j05_likelihood_ratio_identity_and_support() -> None:
     assert result["weight_effective_sample_size"]==pytest.approx(4)
 
 
-@pytest.mark.parametrize("sense,primal,dual,gap",[("MINIMIZE",10,9,1),("MAXIMIZE",9,10,1)])
-def test_j06_objective_sense_safe_gap(sense: str, primal: float, dual: float, gap: float) -> None:
-    result=primal_dual_optimality_certificate({"objective_sense":sense,"primal_feasible_value":primal,"dual_bound":dual,"same_formulation_input_lock_proof":"same-lock"})
-    assert result["absolute_gap"]==gap
+@pytest.mark.parametrize("sense,constraint_sense",[("MINIMIZE",">="),("MAXIMIZE","<=")])
+def test_j06_objective_sense_safe_gap(sense: str, constraint_sense: str) -> None:
+    result=primal_dual_optimality_certificate({"objective_sense":sense,"objective_coefficients":[1,1],"constraint_matrix":[[1,1]],"constraint_senses":[constraint_sense],"constraint_rhs":[1],"primal_solution":[1,0],"dual_solution":[1],"input_lock_ref":"same-lock","dual_input_lock_ref":"same-lock","formulation_ref":"same-form","dual_formulation_ref":"same-form"})
+    assert result["absolute_gap"]==0
     assert result["certificate_state"]=="VALID"
 
 
 def test_j07_distortion_margin_certificate_passes_and_fails_closed() -> None:
-    base={"linear":[-2.02,1.01],"quadratic":{"0,1":0.19},"offset":0,"prune_threshold":0.01,"quantization_step":0.1,"penalty_sufficiency_revalidated":True,"original_model_feasibility_preserved":True,"inverse_economic_map_ref":"identity"}
-    passed=certified_qubo_sparsification_quantization({**base,"relevant_decision_margin":1})
-    failed=certified_qubo_sparsification_quantization({**base,"relevant_decision_margin":0.01})
+    base={"linear":[-2.02,1.01],"quadratic":{"0,1":0.19},"offset":0,"prune_threshold":0.01,"quantization_step":0.1,"candidate_assignments":{"champion":[1,0],"runner_up":[0,0],"no_trade":[0,0]},"penalty_terms":[],"feasibility_constraints":[],"inverse_economic_map":{"scale":1,"offset":0}}
+    passed=certified_qubo_sparsification_quantization(base)
+    failed=certified_qubo_sparsification_quantization({**base,"linear":[-0.02,0.01]})
     assert passed["certificate_state"]=="VALID"
     assert passed["exhaustive_observed_maximum_distortion"]<=passed["maximum_objective_distortion_bound"]+1e-9
     assert failed["certificate_state"]=="REJECT_NO_CHANGE"
