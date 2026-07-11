@@ -43,6 +43,12 @@ def test_rp5c_builder_accepts_pr169_formula_expansion_after_fail_closed_proof() 
     builder._ensure_allowed_build_branch(_preflight(branch))
 
 
+def test_rp5c_builder_accepts_pr169_formula_expansion_repair_after_ci_proof() -> None:
+    branch = "pr169-qku-formula-exp1-r1"
+    assert branch in ALLOWED_BUILD_BRANCH_NAMES
+    builder._ensure_allowed_build_branch(_preflight(branch))
+
+
 def test_rp5c_builder_accepts_github_actions_main_detached_head_context() -> None:
     effective = builder._effective_branch_name(
         "",
