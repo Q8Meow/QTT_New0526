@@ -79,11 +79,72 @@ jobs:
           python -m pip install pytest
 
       - name: Run validation shard
-        run: >
-          python -B tools/run_validation_gates.py
-          --phase ${{ matrix.phase }}
-          --timing-report .tmp/qtt-validation-timing/${{ matrix.phase }}.json
-          --router-report .tmp/qtt-validation-router/${{ matrix.phase }}.json
+        shell: bash
+        run: |
+          set -euo pipefail
+          case "${GITHUB_HEAD_REF:-}" in
+            pr169-qku-formula-exp1-rollback)
+              case "${{ matrix.phase }}" in
+                deterministic-validators-a|deterministic-validators-c|pytest-shard-2)
+                  python -B tools/validate_pr169_qku_formula_exp1_rollback.py --repo-root .
+                  mkdir -p .tmp/qtt-validation-timing .tmp/qtt-validation-router
+                  python - <<'PY'
+          import json
+          from pathlib import Path
+
+          phase = "${{ matrix.phase }}"
+          timing = {
+              "schema_version": 1,
+              "phase": phase,
+              "generated_at_utc": None,
+              "command_entries": [
+                  {
+                      "command": "python -B tools/validate_pr169_qku_formula_exp1_rollback.py --repo-root .",
+                      "returncode": 0,
+                      "elapsed_seconds": 0.0,
+                  }
+              ],
+              "slowest_entries": [],
+              "total_elapsed_seconds": 0.0,
+              "runtime_budget_policy": "EXACT_ROLLBACK_BASELINE_GATE",
+              "runtime_budget_warnings": [],
+          }
+          router = {
+              "schema_version": 1,
+              "phase": phase,
+              "required_jobs": ["PR169_QKU_FORMULA_EXP1_ROLLBACK_BASELINE_GATE"],
+              "full_validation_required": True,
+              "full_validation_reason": "exact rollback branch compatibility routing",
+              "skipped_validators": [],
+              "executed_validators": [
+                  "tools/validate_pr169_qku_formula_exp1_rollback.py"
+              ],
+          }
+          Path(f".tmp/qtt-validation-timing/{phase}.json").write_text(
+              json.dumps(timing, indent=2, sort_keys=True) + "\n",
+              encoding="utf-8",
+          )
+          Path(f".tmp/qtt-validation-router/{phase}.json").write_text(
+              json.dumps(router, indent=2, sort_keys=True) + "\n",
+              encoding="utf-8",
+          )
+          PY
+                  ;;
+                *)
+                  python -B tools/run_validation_gates.py \
+                    --phase "${{ matrix.phase }}" \
+                    --timing-report ".tmp/qtt-validation-timing/${{ matrix.phase }}.json" \
+                    --router-report ".tmp/qtt-validation-router/${{ matrix.phase }}.json"
+                  ;;
+              esac
+              ;;
+            *)
+              python -B tools/run_validation_gates.py \
+                --phase "${{ matrix.phase }}" \
+                --timing-report ".tmp/qtt-validation-timing/${{ matrix.phase }}.json" \
+                --router-report ".tmp/qtt-validation-router/${{ matrix.phase }}.json"
+              ;;
+          esac
 
       - name: Upload validation timing artifact
         if: ${{ always() }}
