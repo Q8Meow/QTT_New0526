@@ -1076,6 +1076,43 @@ def build_rows() -> dict[str, list[dict[str, Any]]]:
         "formula_selection": build_governance_rows(materialization, "formula_selection"),
     }
     rows["lifecycle_dag"] = build_lifecycle_rows(rows)
+    requirements_path=REPO_ROOT/"docs/master_plan/generated/pr169_qku_formula_exp1/requirements.jsonl"
+    bindings_path=REPO_ROOT/"docs/master_plan/generated/pr169_qku_formula_exp1/bindings.jsonl"
+    if requirements_path.is_file() and bindings_path.is_file():
+        requirements={row["card_id"]:row for row in (json.loads(line) for line in requirements_path.read_text(encoding="utf-8").splitlines() if line.strip())}
+        pr169_rows=[]
+        for index,binding in enumerate((json.loads(line) for line in bindings_path.read_text(encoding="utf-8").splitlines() if line.strip()),start=1):
+            requirement=requirements[binding["card_id"]]; qku_id=binding.get("qku_id")
+            pr169_rows.append(_route(
+                "MAP3_PR169_EXECUTABLE_FORMULA_DEPENDENCY_CURRENTIZATION",
+                formula_dependency_row_id=f"MAP3_PR169_FORMULA_DEPENDENCY_{index:06d}",
+                formula_id=requirement["canonical_formula_or_procedure_id"],
+                formula_variant_id=f"PR169::{binding['card_id']}::1.0.0",
+                formula_family=requirement["formula_family"],
+                qku_id_if_available=qku_id,
+                safe_formula_expression_or_semantic_definition=requirement["semantic_key"],
+                formula_expression_ref=requirement["canonical_operator_registry_row_ref"],
+                canonical_callable_ref=requirement["actual_callable_or_solver_ref"],
+                numeric_authority_chain_id=requirement["numeric_authority_chain_id"],
+                depends_on_formula_ids=[],
+                depends_on_input_ids=[f"{binding['card_id']}::{name}" for name in requirement["typed_input_field_schema"]] or [f"{binding['card_id']}::NO_REQUIRED_INPUTS"],
+                depends_on_source_ids=[f"CARD_DERIVATION::{binding['card_id']}"],
+                depends_on_qku_ids=[qku_id] if qku_id else [],
+                depends_on_system_consumer_ids=[binding["system_consumer_id"]] if binding.get("system_consumer_id") else [],
+                depends_on_data_family_ids=[requirement["formula_family"]],
+                depends_on_unit_normalization_refs=[requirement["unit_policy_ref"]],
+                depends_on_quantum_components=["declared_formulation"] if requirement["formula_family"] in {"F","J"} else [],
+                dependency_direction="FORMULA_DEPENDS_ON_TYPED_INPUT_AND_CANONICAL_CONSUMER",
+                dependency_reason="PR169 executable closure and many-to-many strategy membership",
+                dependency_missing_flag=False,
+                repair_route_if_dependency_missing=None,
+                candidate_only_flag=False,
+                accepted_truth_flag=False,
+                not_profit_proof_flag=True,
+                champion_allowed_flag=False,
+                live_candidate_allowed_flag=False,
+            ))
+        rows["formula_dependency"].extend(pr169_rows)
     return rows
 
 

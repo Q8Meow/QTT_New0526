@@ -807,7 +807,7 @@
     "pretrade_owner_next_step_handoff.generated.jsonl": 55,
     "pretrade_owner_view_handoff.generated.jsonl": 5,
     "pretrade_parameter_operability.generated.jsonl": 40,
-    "pretrade_qku_formula_compute_map.generated.jsonl": 5,
+    "pretrade_qku_formula_compute_map.generated.jsonl": 218,
     "pretrade_quantum_readiness_handoff.generated.jsonl": 5,
     "pretrade_recovery_frontiers.generated.jsonl": 5,
     "pretrade_risk_envelopes.generated.jsonl": 5,

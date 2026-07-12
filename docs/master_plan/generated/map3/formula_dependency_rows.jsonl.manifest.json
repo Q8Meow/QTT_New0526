@@ -47,7 +47,7 @@
     "PR168_RP2_MAP2_identity_gap"
   ],
   "report_version": "PR168-MAP3-v4.0",
-  "row_count": 47,
+  "row_count": 794,
   "row_shard_ref": "docs/master_plan/generated/map3/formula_dependency_rows.jsonl",
   "source_refs": [],
   "source_truth_acceptance_created_flag": false,

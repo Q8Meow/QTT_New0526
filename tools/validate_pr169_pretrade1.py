@@ -334,6 +334,11 @@ def _validate_projection_metadata(rows_by_file: dict[str, list[dict[str, Any]]])
         _assert(rows, f"{name} has no rows")
         expected_projection = _projection_name(name)
         for row in rows:
+            if row.get("row_kind") == "PR169_FORMULA_OWNER_EXTENSION_V1":
+                _assert(bool(row.get("pretrade_projection_id")), f"{name} PR169 formula extension missing pretrade id")
+                _assert(bool(row.get("provider_field_maps")), f"{name} PR169 formula extension missing provider maps")
+                _assert(row.get("order_authority_created") is False, f"{name} PR169 formula extension widened authority")
+                continue
             _assert(row.get("generated_from") == REGISTRY_REF, f"{name} row missing generated_from")
             _assert(row.get("manual_edit_allowed") is False, f"{name} row allows manual edits")
             _assert(row.get("authoritative_source") == REGISTRY_REF, f"{name} row missing authoritative_source")

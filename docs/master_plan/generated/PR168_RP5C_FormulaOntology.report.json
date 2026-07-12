@@ -10,7 +10,7 @@
   "dormant_qku_global_ban_count": 0,
   "formula_expression_mutation_count": 0,
   "formula_identity_deleted_count": 0,
-  "formula_ontology_row_count": 10188,
+  "formula_ontology_row_count": 10935,
   "formula_profit_ranking_count": 0,
   "generated_path_case_collision_count": 0,
   "global_formula_ban_count": 0,
@@ -188,8 +188,21 @@
       "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000257"
     },
     {
-      "formula_id": "FORM_MAP3_CALIB_ECE_001",
+      "formula_id": "FORM_MAP3_CALIB_BRIER_001",
       "identity_row_id": "RP5C_IDENTITY_00000024",
+      "no_authority_statement": "RP5C is immutable identity, provenance, classification, and derived routing preparation only. It creates no live/order/source-truth/champion/launch/quantum/hash authority and does not mutate formulas or delete identities.",
+      "ontology_category": "calibration",
+      "ontology_role_registry_refs": [
+        "RP5C_ONTOLOGY_ROLE_0002"
+      ],
+      "ontology_subcategory": "calibration",
+      "qku_id": null,
+      "row_id": "RP5C_FORMULA_ONTOLOGY_00000009",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000007"
+    },
+    {
+      "formula_id": "FORM_MAP3_CALIB_ECE_001",
+      "identity_row_id": "RP5C_IDENTITY_00000026",
       "no_authority_statement": "RP5C is immutable identity, provenance, classification, and derived routing preparation only. It creates no live/order/source-truth/champion/launch/quantum/hash authority and does not mutate formulas or delete identities.",
       "ontology_category": "unknown_needs_review",
       "ontology_role_registry_refs": [
@@ -197,34 +210,8 @@
       ],
       "ontology_subcategory": "unknown_needs_review",
       "qku_id": null,
-      "row_id": "RP5C_FORMULA_ONTOLOGY_00000009",
-      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000239"
-    },
-    {
-      "formula_id": "FORM_MAP3_CALIB_ECE_001",
-      "identity_row_id": "RP5C_IDENTITY_00000027",
-      "no_authority_statement": "RP5C is immutable identity, provenance, classification, and derived routing preparation only. It creates no live/order/source-truth/champion/launch/quantum/hash authority and does not mutate formulas or delete identities.",
-      "ontology_category": "calibration",
-      "ontology_role_registry_refs": [
-        "RP5C_ONTOLOGY_ROLE_0002"
-      ],
-      "ontology_subcategory": "calibration",
-      "qku_id": null,
       "row_id": "RP5C_FORMULA_ONTOLOGY_00000010",
-      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000001"
-    },
-    {
-      "formula_id": "FORM_MAP3_CALIB_ECE_001",
-      "identity_row_id": "RP5C_IDENTITY_00000028",
-      "no_authority_statement": "RP5C is immutable identity, provenance, classification, and derived routing preparation only. It creates no live/order/source-truth/champion/launch/quantum/hash authority and does not mutate formulas or delete identities.",
-      "ontology_category": "calibration",
-      "ontology_role_registry_refs": [
-        "RP5C_ONTOLOGY_ROLE_0002"
-      ],
-      "ontology_subcategory": "calibration",
-      "qku_id": null,
-      "row_id": "RP5C_FORMULA_ONTOLOGY_00000011",
-      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000011"
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000239"
     },
     {
       "formula_id": "FORM_MAP3_CALIB_ECE_001",
@@ -236,12 +223,25 @@
       ],
       "ontology_subcategory": "calibration",
       "qku_id": null,
-      "row_id": "RP5C_FORMULA_ONTOLOGY_00000012",
-      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000015"
+      "row_id": "RP5C_FORMULA_ONTOLOGY_00000011",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000001"
     },
     {
       "formula_id": "FORM_MAP3_CALIB_ECE_001",
-      "identity_row_id": "RP5C_IDENTITY_00000036",
+      "identity_row_id": "RP5C_IDENTITY_00000030",
+      "no_authority_statement": "RP5C is immutable identity, provenance, classification, and derived routing preparation only. It creates no live/order/source-truth/champion/launch/quantum/hash authority and does not mutate formulas or delete identities.",
+      "ontology_category": "calibration",
+      "ontology_role_registry_refs": [
+        "RP5C_ONTOLOGY_ROLE_0002"
+      ],
+      "ontology_subcategory": "calibration",
+      "qku_id": null,
+      "row_id": "RP5C_FORMULA_ONTOLOGY_00000012",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000011"
+    },
+    {
+      "formula_id": "FORM_MAP3_CALIB_ECE_001",
+      "identity_row_id": "RP5C_IDENTITY_00000031",
       "no_authority_statement": "RP5C is immutable identity, provenance, classification, and derived routing preparation only. It creates no live/order/source-truth/champion/launch/quantum/hash authority and does not mutate formulas or delete identities.",
       "ontology_category": "calibration",
       "ontology_role_registry_refs": [
@@ -250,11 +250,11 @@
       "ontology_subcategory": "calibration",
       "qku_id": null,
       "row_id": "RP5C_FORMULA_ONTOLOGY_00000013",
-      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000257"
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000015"
     },
     {
-      "formula_id": "FORM_MAP3_CALIB_LOGLOSS_001",
-      "identity_row_id": "RP5C_IDENTITY_00000041",
+      "formula_id": "FORM_MAP3_CALIB_ECE_001",
+      "identity_row_id": "RP5C_IDENTITY_00000038",
       "no_authority_statement": "RP5C is immutable identity, provenance, classification, and derived routing preparation only. It creates no live/order/source-truth/champion/launch/quantum/hash authority and does not mutate formulas or delete identities.",
       "ontology_category": "calibration",
       "ontology_role_registry_refs": [
@@ -263,24 +263,11 @@
       "ontology_subcategory": "calibration",
       "qku_id": null,
       "row_id": "RP5C_FORMULA_ONTOLOGY_00000014",
-      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000001"
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000257"
     },
     {
       "formula_id": "FORM_MAP3_CALIB_LOGLOSS_001",
       "identity_row_id": "RP5C_IDENTITY_00000043",
-      "no_authority_statement": "RP5C is immutable identity, provenance, classification, and derived routing preparation only. It creates no live/order/source-truth/champion/launch/quantum/hash authority and does not mutate formulas or delete identities.",
-      "ontology_category": "unknown_needs_review",
-      "ontology_role_registry_refs": [
-        "RP5C_ONTOLOGY_ROLE_0014"
-      ],
-      "ontology_subcategory": "unknown_needs_review",
-      "qku_id": null,
-      "row_id": "RP5C_FORMULA_ONTOLOGY_00000015",
-      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000015"
-    },
-    {
-      "formula_id": "FORM_MAP3_CALIB_LOGLOSS_001",
-      "identity_row_id": "RP5C_IDENTITY_00000054",
       "no_authority_statement": "RP5C is immutable identity, provenance, classification, and derived routing preparation only. It creates no live/order/source-truth/champion/launch/quantum/hash authority and does not mutate formulas or delete identities.",
       "ontology_category": "calibration",
       "ontology_role_registry_refs": [
@@ -288,12 +275,12 @@
       ],
       "ontology_subcategory": "calibration",
       "qku_id": null,
-      "row_id": "RP5C_FORMULA_ONTOLOGY_00000016",
-      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000269"
+      "row_id": "RP5C_FORMULA_ONTOLOGY_00000015",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000001"
     },
     {
-      "formula_id": "FORM_MAP3_DWAVE_001",
-      "identity_row_id": "RP5C_IDENTITY_00000055",
+      "formula_id": "FORM_MAP3_CALIB_LOGLOSS_001",
+      "identity_row_id": "RP5C_IDENTITY_00000045",
       "no_authority_statement": "RP5C is immutable identity, provenance, classification, and derived routing preparation only. It creates no live/order/source-truth/champion/launch/quantum/hash authority and does not mutate formulas or delete identities.",
       "ontology_category": "unknown_needs_review",
       "ontology_role_registry_refs": [
@@ -301,25 +288,38 @@
       ],
       "ontology_subcategory": "unknown_needs_review",
       "qku_id": null,
+      "row_id": "RP5C_FORMULA_ONTOLOGY_00000016",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000015"
+    },
+    {
+      "formula_id": "FORM_MAP3_CALIB_LOGLOSS_001",
+      "identity_row_id": "RP5C_IDENTITY_00000056",
+      "no_authority_statement": "RP5C is immutable identity, provenance, classification, and derived routing preparation only. It creates no live/order/source-truth/champion/launch/quantum/hash authority and does not mutate formulas or delete identities.",
+      "ontology_category": "calibration",
+      "ontology_role_registry_refs": [
+        "RP5C_ONTOLOGY_ROLE_0002"
+      ],
+      "ontology_subcategory": "calibration",
+      "qku_id": null,
       "row_id": "RP5C_FORMULA_ONTOLOGY_00000017",
-      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000161"
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000269"
+    },
+    {
+      "formula_id": "FORM_MAP3_CALIB_LOGLOSS_001",
+      "identity_row_id": "RP5C_IDENTITY_00000057",
+      "no_authority_statement": "RP5C is immutable identity, provenance, classification, and derived routing preparation only. It creates no live/order/source-truth/champion/launch/quantum/hash authority and does not mutate formulas or delete identities.",
+      "ontology_category": "unknown_needs_review",
+      "ontology_role_registry_refs": [
+        "RP5C_ONTOLOGY_ROLE_0014"
+      ],
+      "ontology_subcategory": "unknown_needs_review",
+      "qku_id": null,
+      "row_id": "RP5C_FORMULA_ONTOLOGY_00000018",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000007"
     },
     {
       "formula_id": "FORM_MAP3_DWAVE_001",
       "identity_row_id": "RP5C_IDENTITY_00000059",
-      "no_authority_statement": "RP5C is immutable identity, provenance, classification, and derived routing preparation only. It creates no live/order/source-truth/champion/launch/quantum/hash authority and does not mutate formulas or delete identities.",
-      "ontology_category": "quantum_objective_constraint",
-      "ontology_role_registry_refs": [
-        "RP5C_ONTOLOGY_ROLE_0011"
-      ],
-      "ontology_subcategory": "quantum_objective",
-      "qku_id": null,
-      "row_id": "RP5C_FORMULA_ONTOLOGY_00000018",
-      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000011"
-    },
-    {
-      "formula_id": "FORM_MAP3_DWAVE_001",
-      "identity_row_id": "RP5C_IDENTITY_00000060",
       "no_authority_statement": "RP5C is immutable identity, provenance, classification, and derived routing preparation only. It creates no live/order/source-truth/champion/launch/quantum/hash authority and does not mutate formulas or delete identities.",
       "ontology_category": "unknown_needs_review",
       "ontology_role_registry_refs": [
@@ -328,24 +328,24 @@
       "ontology_subcategory": "unknown_needs_review",
       "qku_id": null,
       "row_id": "RP5C_FORMULA_ONTOLOGY_00000019",
-      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000015"
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000161"
     },
     {
       "formula_id": "FORM_MAP3_DWAVE_001",
-      "identity_row_id": "RP5C_IDENTITY_00000066",
+      "identity_row_id": "RP5C_IDENTITY_00000063",
       "no_authority_statement": "RP5C is immutable identity, provenance, classification, and derived routing preparation only. It creates no live/order/source-truth/champion/launch/quantum/hash authority and does not mutate formulas or delete identities.",
-      "ontology_category": "calibration",
+      "ontology_category": "quantum_objective_constraint",
       "ontology_role_registry_refs": [
-        "RP5C_ONTOLOGY_ROLE_0002"
+        "RP5C_ONTOLOGY_ROLE_0011"
       ],
-      "ontology_subcategory": "calibration",
+      "ontology_subcategory": "quantum_objective",
       "qku_id": null,
       "row_id": "RP5C_FORMULA_ONTOLOGY_00000020",
-      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000257"
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000011"
     },
     {
-      "formula_id": "FORM_MAP3_DWAVE_002",
-      "identity_row_id": "RP5C_IDENTITY_00000071",
+      "formula_id": "FORM_MAP3_DWAVE_001",
+      "identity_row_id": "RP5C_IDENTITY_00000064",
       "no_authority_statement": "RP5C is immutable identity, provenance, classification, and derived routing preparation only. It creates no live/order/source-truth/champion/launch/quantum/hash authority and does not mutate formulas or delete identities.",
       "ontology_category": "unknown_needs_review",
       "ontology_role_registry_refs": [
@@ -354,24 +354,24 @@
       "ontology_subcategory": "unknown_needs_review",
       "qku_id": null,
       "row_id": "RP5C_FORMULA_ONTOLOGY_00000021",
-      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000161"
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000015"
     },
     {
-      "formula_id": "FORM_MAP3_DWAVE_002",
-      "identity_row_id": "RP5C_IDENTITY_00000072",
+      "formula_id": "FORM_MAP3_DWAVE_001",
+      "identity_row_id": "RP5C_IDENTITY_00000070",
       "no_authority_statement": "RP5C is immutable identity, provenance, classification, and derived routing preparation only. It creates no live/order/source-truth/champion/launch/quantum/hash authority and does not mutate formulas or delete identities.",
-      "ontology_category": "quantum_objective_constraint",
+      "ontology_category": "calibration",
       "ontology_role_registry_refs": [
-        "RP5C_ONTOLOGY_ROLE_0011"
+        "RP5C_ONTOLOGY_ROLE_0002"
       ],
-      "ontology_subcategory": "quantum_objective",
+      "ontology_subcategory": "calibration",
       "qku_id": null,
       "row_id": "RP5C_FORMULA_ONTOLOGY_00000022",
-      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000011"
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000257"
     },
     {
       "formula_id": "FORM_MAP3_DWAVE_002",
-      "identity_row_id": "RP5C_IDENTITY_00000073",
+      "identity_row_id": "RP5C_IDENTITY_00000075",
       "no_authority_statement": "RP5C is immutable identity, provenance, classification, and derived routing preparation only. It creates no live/order/source-truth/champion/launch/quantum/hash authority and does not mutate formulas or delete identities.",
       "ontology_category": "unknown_needs_review",
       "ontology_role_registry_refs": [
@@ -380,11 +380,11 @@
       "ontology_subcategory": "unknown_needs_review",
       "qku_id": null,
       "row_id": "RP5C_FORMULA_ONTOLOGY_00000023",
-      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000015"
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000161"
     },
     {
       "formula_id": "FORM_MAP3_DWAVE_002",
-      "identity_row_id": "RP5C_IDENTITY_00000083",
+      "identity_row_id": "RP5C_IDENTITY_00000076",
       "no_authority_statement": "RP5C is immutable identity, provenance, classification, and derived routing preparation only. It creates no live/order/source-truth/champion/launch/quantum/hash authority and does not mutate formulas or delete identities.",
       "ontology_category": "quantum_objective_constraint",
       "ontology_role_registry_refs": [
@@ -393,11 +393,11 @@
       "ontology_subcategory": "quantum_objective",
       "qku_id": null,
       "row_id": "RP5C_FORMULA_ONTOLOGY_00000024",
-      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000269"
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000011"
     },
     {
-      "formula_id": "FORM_MAP3_FDR_BH_001",
-      "identity_row_id": "RP5C_IDENTITY_00000084",
+      "formula_id": "FORM_MAP3_DWAVE_002",
+      "identity_row_id": "RP5C_IDENTITY_00000077",
       "no_authority_statement": "RP5C is immutable identity, provenance, classification, and derived routing preparation only. It creates no live/order/source-truth/champion/launch/quantum/hash authority and does not mutate formulas or delete identities.",
       "ontology_category": "unknown_needs_review",
       "ontology_role_registry_refs": [
@@ -406,7 +406,7 @@
       "ontology_subcategory": "unknown_needs_review",
       "qku_id": null,
       "row_id": "RP5C_FORMULA_ONTOLOGY_00000025",
-      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000239"
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000015"
     }
   ],
   "report_version": "PR168-RP5C-v1.0",

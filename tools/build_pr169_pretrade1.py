@@ -2897,6 +2897,11 @@ def build(repo_root: Path, out_dir: Path) -> None:
     ctx = _load_context(repo_root)
     registry = _build_registry(ctx)
     artifact_rows = _artifact_rows(registry, ctx)
+    from pr169_formula_owner_rows import rows as pr169_formula_rows
+    artifact_rows["pretrade_qku_formula_compute_map.generated.jsonl"] = [
+        *artifact_rows["pretrade_qku_formula_compute_map.generated.jsonl"],
+        *pr169_formula_rows(repo_root, "PRETRADE"),
+    ]
     reports = _reports(registry, artifact_rows)
     if out_dir.exists():
         shutil.rmtree(out_dir)

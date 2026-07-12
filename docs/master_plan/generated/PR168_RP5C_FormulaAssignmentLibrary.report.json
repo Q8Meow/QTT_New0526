@@ -8,7 +8,7 @@
   "deleted_file_count": 0,
   "dormant_qku_deleted_count": 0,
   "dormant_qku_global_ban_count": 0,
-  "formula_assignment_row_count": 427,
+  "formula_assignment_row_count": 1115,
   "formula_expression_mutation_count": 0,
   "formula_identity_deleted_count": 0,
   "formula_profit_ranking_count": 0,
@@ -85,12 +85,12 @@
   "records": [
     {
       "derived_route_resolution_refs": [
-        "RP5C_ROUTE_RESOLUTION_00009763"
+        "RP5C_ROUTE_RESOLUTION_00009822"
       ],
       "formula_assignment_row_id": "RP5C_FORMULA_ASSIGNMENT_00000001",
       "formula_id": "PR168_GFP_FORMULA_ADVERSE_SELECTION",
       "formula_variant_id": null,
-      "identity_row_id": "RP5C_IDENTITY_00182105",
+      "identity_row_id": "RP5C_IDENTITY_00182223",
       "no_authority_statement": "RP5C is immutable identity, provenance, classification, and derived routing preparation only. It creates no live/order/source-truth/champion/launch/quantum/hash authority and does not mutate formulas or delete identities.",
       "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000001",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
@@ -99,12 +99,12 @@
     },
     {
       "derived_route_resolution_refs": [
-        "RP5C_ROUTE_RESOLUTION_00009764"
+        "RP5C_ROUTE_RESOLUTION_00009823"
       ],
       "formula_assignment_row_id": "RP5C_FORMULA_ASSIGNMENT_00000002",
       "formula_id": "PR168_GFP_FORMULA_ADVERSE_SELECTION",
       "formula_variant_id": null,
-      "identity_row_id": "RP5C_IDENTITY_00182106",
+      "identity_row_id": "RP5C_IDENTITY_00182224",
       "no_authority_statement": "RP5C is immutable identity, provenance, classification, and derived routing preparation only. It creates no live/order/source-truth/champion/launch/quantum/hash authority and does not mutate formulas or delete identities.",
       "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000001",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
@@ -113,12 +113,12 @@
     },
     {
       "derived_route_resolution_refs": [
-        "RP5C_ROUTE_RESOLUTION_00009765"
+        "RP5C_ROUTE_RESOLUTION_00009824"
       ],
       "formula_assignment_row_id": "RP5C_FORMULA_ASSIGNMENT_00000003",
       "formula_id": "PR168_GFP_FORMULA_BINARY_CONTRACT_EXPECTED_VALUE",
       "formula_variant_id": null,
-      "identity_row_id": "RP5C_IDENTITY_00182112",
+      "identity_row_id": "RP5C_IDENTITY_00182230",
       "no_authority_statement": "RP5C is immutable identity, provenance, classification, and derived routing preparation only. It creates no live/order/source-truth/champion/launch/quantum/hash authority and does not mutate formulas or delete identities.",
       "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000001",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
@@ -127,12 +127,12 @@
     },
     {
       "derived_route_resolution_refs": [
-        "RP5C_ROUTE_RESOLUTION_00009766"
+        "RP5C_ROUTE_RESOLUTION_00009825"
       ],
       "formula_assignment_row_id": "RP5C_FORMULA_ASSIGNMENT_00000004",
       "formula_id": "PR168_GFP_FORMULA_BINARY_CONTRACT_EXPECTED_VALUE",
       "formula_variant_id": null,
-      "identity_row_id": "RP5C_IDENTITY_00182113",
+      "identity_row_id": "RP5C_IDENTITY_00182231",
       "no_authority_statement": "RP5C is immutable identity, provenance, classification, and derived routing preparation only. It creates no live/order/source-truth/champion/launch/quantum/hash authority and does not mutate formulas or delete identities.",
       "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000001",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
@@ -141,12 +141,12 @@
     },
     {
       "derived_route_resolution_refs": [
-        "RP5C_ROUTE_RESOLUTION_00009767"
+        "RP5C_ROUTE_RESOLUTION_00009826"
       ],
       "formula_assignment_row_id": "RP5C_FORMULA_ASSIGNMENT_00000005",
       "formula_id": "PR168_GFP_FORMULA_BQM_OBJECTIVE",
       "formula_variant_id": null,
-      "identity_row_id": "RP5C_IDENTITY_00182119",
+      "identity_row_id": "RP5C_IDENTITY_00182237",
       "no_authority_statement": "RP5C is immutable identity, provenance, classification, and derived routing preparation only. It creates no live/order/source-truth/champion/launch/quantum/hash authority and does not mutate formulas or delete identities.",
       "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000001",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
@@ -155,12 +155,12 @@
     },
     {
       "derived_route_resolution_refs": [
-        "RP5C_ROUTE_RESOLUTION_00009768"
+        "RP5C_ROUTE_RESOLUTION_00009827"
       ],
       "formula_assignment_row_id": "RP5C_FORMULA_ASSIGNMENT_00000006",
       "formula_id": "PR168_GFP_FORMULA_BQM_OBJECTIVE",
       "formula_variant_id": null,
-      "identity_row_id": "RP5C_IDENTITY_00182120",
+      "identity_row_id": "RP5C_IDENTITY_00182238",
       "no_authority_statement": "RP5C is immutable identity, provenance, classification, and derived routing preparation only. It creates no live/order/source-truth/champion/launch/quantum/hash authority and does not mutate formulas or delete identities.",
       "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000001",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
@@ -169,12 +169,12 @@
     },
     {
       "derived_route_resolution_refs": [
-        "RP5C_ROUTE_RESOLUTION_00009769"
+        "RP5C_ROUTE_RESOLUTION_00009828"
       ],
       "formula_assignment_row_id": "RP5C_FORMULA_ASSIGNMENT_00000007",
       "formula_id": "PR168_GFP_FORMULA_CAPACITY_CROWDING",
       "formula_variant_id": null,
-      "identity_row_id": "RP5C_IDENTITY_00182126",
+      "identity_row_id": "RP5C_IDENTITY_00182244",
       "no_authority_statement": "RP5C is immutable identity, provenance, classification, and derived routing preparation only. It creates no live/order/source-truth/champion/launch/quantum/hash authority and does not mutate formulas or delete identities.",
       "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000001",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
@@ -183,12 +183,12 @@
     },
     {
       "derived_route_resolution_refs": [
-        "RP5C_ROUTE_RESOLUTION_00009770"
+        "RP5C_ROUTE_RESOLUTION_00009829"
       ],
       "formula_assignment_row_id": "RP5C_FORMULA_ASSIGNMENT_00000008",
       "formula_id": "PR168_GFP_FORMULA_CAPACITY_CROWDING",
       "formula_variant_id": null,
-      "identity_row_id": "RP5C_IDENTITY_00182127",
+      "identity_row_id": "RP5C_IDENTITY_00182245",
       "no_authority_statement": "RP5C is immutable identity, provenance, classification, and derived routing preparation only. It creates no live/order/source-truth/champion/launch/quantum/hash authority and does not mutate formulas or delete identities.",
       "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000001",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
@@ -197,12 +197,12 @@
     },
     {
       "derived_route_resolution_refs": [
-        "RP5C_ROUTE_RESOLUTION_00009771"
+        "RP5C_ROUTE_RESOLUTION_00009830"
       ],
       "formula_assignment_row_id": "RP5C_FORMULA_ASSIGNMENT_00000009",
       "formula_id": "PR168_GFP_FORMULA_CLASSICAL_FALLBACK_OBJECTIVE",
       "formula_variant_id": null,
-      "identity_row_id": "RP5C_IDENTITY_00182133",
+      "identity_row_id": "RP5C_IDENTITY_00182251",
       "no_authority_statement": "RP5C is immutable identity, provenance, classification, and derived routing preparation only. It creates no live/order/source-truth/champion/launch/quantum/hash authority and does not mutate formulas or delete identities.",
       "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000001",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
@@ -211,12 +211,12 @@
     },
     {
       "derived_route_resolution_refs": [
-        "RP5C_ROUTE_RESOLUTION_00009772"
+        "RP5C_ROUTE_RESOLUTION_00009831"
       ],
       "formula_assignment_row_id": "RP5C_FORMULA_ASSIGNMENT_00000010",
       "formula_id": "PR168_GFP_FORMULA_CLASSICAL_FALLBACK_OBJECTIVE",
       "formula_variant_id": null,
-      "identity_row_id": "RP5C_IDENTITY_00182134",
+      "identity_row_id": "RP5C_IDENTITY_00182252",
       "no_authority_statement": "RP5C is immutable identity, provenance, classification, and derived routing preparation only. It creates no live/order/source-truth/champion/launch/quantum/hash authority and does not mutate formulas or delete identities.",
       "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000001",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
@@ -225,12 +225,12 @@
     },
     {
       "derived_route_resolution_refs": [
-        "RP5C_ROUTE_RESOLUTION_00009773"
+        "RP5C_ROUTE_RESOLUTION_00009832"
       ],
       "formula_assignment_row_id": "RP5C_FORMULA_ASSIGNMENT_00000011",
       "formula_id": "PR168_GFP_FORMULA_CQM_OBJECTIVE",
       "formula_variant_id": null,
-      "identity_row_id": "RP5C_IDENTITY_00182140",
+      "identity_row_id": "RP5C_IDENTITY_00182258",
       "no_authority_statement": "RP5C is immutable identity, provenance, classification, and derived routing preparation only. It creates no live/order/source-truth/champion/launch/quantum/hash authority and does not mutate formulas or delete identities.",
       "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000001",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
@@ -239,12 +239,12 @@
     },
     {
       "derived_route_resolution_refs": [
-        "RP5C_ROUTE_RESOLUTION_00009774"
+        "RP5C_ROUTE_RESOLUTION_00009833"
       ],
       "formula_assignment_row_id": "RP5C_FORMULA_ASSIGNMENT_00000012",
       "formula_id": "PR168_GFP_FORMULA_CQM_OBJECTIVE",
       "formula_variant_id": null,
-      "identity_row_id": "RP5C_IDENTITY_00182141",
+      "identity_row_id": "RP5C_IDENTITY_00182259",
       "no_authority_statement": "RP5C is immutable identity, provenance, classification, and derived routing preparation only. It creates no live/order/source-truth/champion/launch/quantum/hash authority and does not mutate formulas or delete identities.",
       "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000001",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
@@ -253,12 +253,12 @@
     },
     {
       "derived_route_resolution_refs": [
-        "RP5C_ROUTE_RESOLUTION_00009775"
+        "RP5C_ROUTE_RESOLUTION_00009834"
       ],
       "formula_assignment_row_id": "RP5C_FORMULA_ASSIGNMENT_00000013",
       "formula_id": "PR168_GFP_FORMULA_DQM_OBJECTIVE",
       "formula_variant_id": null,
-      "identity_row_id": "RP5C_IDENTITY_00182147",
+      "identity_row_id": "RP5C_IDENTITY_00182265",
       "no_authority_statement": "RP5C is immutable identity, provenance, classification, and derived routing preparation only. It creates no live/order/source-truth/champion/launch/quantum/hash authority and does not mutate formulas or delete identities.",
       "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000001",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
@@ -267,12 +267,12 @@
     },
     {
       "derived_route_resolution_refs": [
-        "RP5C_ROUTE_RESOLUTION_00009776"
+        "RP5C_ROUTE_RESOLUTION_00009835"
       ],
       "formula_assignment_row_id": "RP5C_FORMULA_ASSIGNMENT_00000014",
       "formula_id": "PR168_GFP_FORMULA_DQM_OBJECTIVE",
       "formula_variant_id": null,
-      "identity_row_id": "RP5C_IDENTITY_00182148",
+      "identity_row_id": "RP5C_IDENTITY_00182266",
       "no_authority_statement": "RP5C is immutable identity, provenance, classification, and derived routing preparation only. It creates no live/order/source-truth/champion/launch/quantum/hash authority and does not mutate formulas or delete identities.",
       "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000001",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
@@ -281,12 +281,12 @@
     },
     {
       "derived_route_resolution_refs": [
-        "RP5C_ROUTE_RESOLUTION_00009777"
+        "RP5C_ROUTE_RESOLUTION_00009836"
       ],
       "formula_assignment_row_id": "RP5C_FORMULA_ASSIGNMENT_00000015",
       "formula_id": "PR168_GFP_FORMULA_EXECUTION_ADJUSTED_EDGE",
       "formula_variant_id": null,
-      "identity_row_id": "RP5C_IDENTITY_00182154",
+      "identity_row_id": "RP5C_IDENTITY_00182272",
       "no_authority_statement": "RP5C is immutable identity, provenance, classification, and derived routing preparation only. It creates no live/order/source-truth/champion/launch/quantum/hash authority and does not mutate formulas or delete identities.",
       "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000001",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
@@ -295,12 +295,12 @@
     },
     {
       "derived_route_resolution_refs": [
-        "RP5C_ROUTE_RESOLUTION_00009778"
+        "RP5C_ROUTE_RESOLUTION_00009837"
       ],
       "formula_assignment_row_id": "RP5C_FORMULA_ASSIGNMENT_00000016",
       "formula_id": "PR168_GFP_FORMULA_EXECUTION_ADJUSTED_EDGE",
       "formula_variant_id": null,
-      "identity_row_id": "RP5C_IDENTITY_00182155",
+      "identity_row_id": "RP5C_IDENTITY_00182273",
       "no_authority_statement": "RP5C is immutable identity, provenance, classification, and derived routing preparation only. It creates no live/order/source-truth/champion/launch/quantum/hash authority and does not mutate formulas or delete identities.",
       "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000001",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
@@ -309,12 +309,12 @@
     },
     {
       "derived_route_resolution_refs": [
-        "RP5C_ROUTE_RESOLUTION_00009779"
+        "RP5C_ROUTE_RESOLUTION_00009838"
       ],
       "formula_assignment_row_id": "RP5C_FORMULA_ASSIGNMENT_00000017",
       "formula_id": "PR168_GFP_FORMULA_EXPECTED_VALUE",
       "formula_variant_id": null,
-      "identity_row_id": "RP5C_IDENTITY_00182161",
+      "identity_row_id": "RP5C_IDENTITY_00182279",
       "no_authority_statement": "RP5C is immutable identity, provenance, classification, and derived routing preparation only. It creates no live/order/source-truth/champion/launch/quantum/hash authority and does not mutate formulas or delete identities.",
       "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000001",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
@@ -323,12 +323,12 @@
     },
     {
       "derived_route_resolution_refs": [
-        "RP5C_ROUTE_RESOLUTION_00009780"
+        "RP5C_ROUTE_RESOLUTION_00009839"
       ],
       "formula_assignment_row_id": "RP5C_FORMULA_ASSIGNMENT_00000018",
       "formula_id": "PR168_GFP_FORMULA_EXPECTED_VALUE",
       "formula_variant_id": null,
-      "identity_row_id": "RP5C_IDENTITY_00182162",
+      "identity_row_id": "RP5C_IDENTITY_00182280",
       "no_authority_statement": "RP5C is immutable identity, provenance, classification, and derived routing preparation only. It creates no live/order/source-truth/champion/launch/quantum/hash authority and does not mutate formulas or delete identities.",
       "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000001",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
@@ -337,12 +337,12 @@
     },
     {
       "derived_route_resolution_refs": [
-        "RP5C_ROUTE_RESOLUTION_00009781"
+        "RP5C_ROUTE_RESOLUTION_00009840"
       ],
       "formula_assignment_row_id": "RP5C_FORMULA_ASSIGNMENT_00000019",
       "formula_id": "PR168_GFP_FORMULA_EXPLICIT_FEE_COST",
       "formula_variant_id": null,
-      "identity_row_id": "RP5C_IDENTITY_00182168",
+      "identity_row_id": "RP5C_IDENTITY_00182286",
       "no_authority_statement": "RP5C is immutable identity, provenance, classification, and derived routing preparation only. It creates no live/order/source-truth/champion/launch/quantum/hash authority and does not mutate formulas or delete identities.",
       "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000001",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
@@ -351,12 +351,12 @@
     },
     {
       "derived_route_resolution_refs": [
-        "RP5C_ROUTE_RESOLUTION_00009782"
+        "RP5C_ROUTE_RESOLUTION_00009841"
       ],
       "formula_assignment_row_id": "RP5C_FORMULA_ASSIGNMENT_00000020",
       "formula_id": "PR168_GFP_FORMULA_EXPLICIT_FEE_COST",
       "formula_variant_id": null,
-      "identity_row_id": "RP5C_IDENTITY_00182169",
+      "identity_row_id": "RP5C_IDENTITY_00182287",
       "no_authority_statement": "RP5C is immutable identity, provenance, classification, and derived routing preparation only. It creates no live/order/source-truth/champion/launch/quantum/hash authority and does not mutate formulas or delete identities.",
       "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000001",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
@@ -365,12 +365,12 @@
     },
     {
       "derived_route_resolution_refs": [
-        "RP5C_ROUTE_RESOLUTION_00009783"
+        "RP5C_ROUTE_RESOLUTION_00009842"
       ],
       "formula_assignment_row_id": "RP5C_FORMULA_ASSIGNMENT_00000021",
       "formula_id": "PR168_GFP_FORMULA_GROSS_EDGE",
       "formula_variant_id": null,
-      "identity_row_id": "RP5C_IDENTITY_00182175",
+      "identity_row_id": "RP5C_IDENTITY_00182293",
       "no_authority_statement": "RP5C is immutable identity, provenance, classification, and derived routing preparation only. It creates no live/order/source-truth/champion/launch/quantum/hash authority and does not mutate formulas or delete identities.",
       "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000001",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
@@ -379,12 +379,12 @@
     },
     {
       "derived_route_resolution_refs": [
-        "RP5C_ROUTE_RESOLUTION_00009784"
+        "RP5C_ROUTE_RESOLUTION_00009843"
       ],
       "formula_assignment_row_id": "RP5C_FORMULA_ASSIGNMENT_00000022",
       "formula_id": "PR168_GFP_FORMULA_GROSS_EDGE",
       "formula_variant_id": null,
-      "identity_row_id": "RP5C_IDENTITY_00182176",
+      "identity_row_id": "RP5C_IDENTITY_00182294",
       "no_authority_statement": "RP5C is immutable identity, provenance, classification, and derived routing preparation only. It creates no live/order/source-truth/champion/launch/quantum/hash authority and does not mutate formulas or delete identities.",
       "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000001",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
@@ -393,12 +393,12 @@
     },
     {
       "derived_route_resolution_refs": [
-        "RP5C_ROUTE_RESOLUTION_00009785"
+        "RP5C_ROUTE_RESOLUTION_00009844"
       ],
       "formula_assignment_row_id": "RP5C_FORMULA_ASSIGNMENT_00000023",
       "formula_id": "PR168_GFP_FORMULA_IMPLEMENTATION_SHORTFALL",
       "formula_variant_id": null,
-      "identity_row_id": "RP5C_IDENTITY_00182182",
+      "identity_row_id": "RP5C_IDENTITY_00182300",
       "no_authority_statement": "RP5C is immutable identity, provenance, classification, and derived routing preparation only. It creates no live/order/source-truth/champion/launch/quantum/hash authority and does not mutate formulas or delete identities.",
       "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000001",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
@@ -407,12 +407,12 @@
     },
     {
       "derived_route_resolution_refs": [
-        "RP5C_ROUTE_RESOLUTION_00009786"
+        "RP5C_ROUTE_RESOLUTION_00009845"
       ],
       "formula_assignment_row_id": "RP5C_FORMULA_ASSIGNMENT_00000024",
       "formula_id": "PR168_GFP_FORMULA_IMPLEMENTATION_SHORTFALL",
       "formula_variant_id": null,
-      "identity_row_id": "RP5C_IDENTITY_00182183",
+      "identity_row_id": "RP5C_IDENTITY_00182301",
       "no_authority_statement": "RP5C is immutable identity, provenance, classification, and derived routing preparation only. It creates no live/order/source-truth/champion/launch/quantum/hash authority and does not mutate formulas or delete identities.",
       "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000001",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
@@ -421,12 +421,12 @@
     },
     {
       "derived_route_resolution_refs": [
-        "RP5C_ROUTE_RESOLUTION_00009787"
+        "RP5C_ROUTE_RESOLUTION_00009846"
       ],
       "formula_assignment_row_id": "RP5C_FORMULA_ASSIGNMENT_00000025",
       "formula_id": "PR168_GFP_FORMULA_ISING_OBJECTIVE",
       "formula_variant_id": null,
-      "identity_row_id": "RP5C_IDENTITY_00182189",
+      "identity_row_id": "RP5C_IDENTITY_00182307",
       "no_authority_statement": "RP5C is immutable identity, provenance, classification, and derived routing preparation only. It creates no live/order/source-truth/champion/launch/quantum/hash authority and does not mutate formulas or delete identities.",
       "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000001",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",

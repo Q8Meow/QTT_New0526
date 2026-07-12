@@ -44,7 +44,7 @@
   "qtt_sha_authority_flag": false,
   "quantum_advantage_claim_flag": false,
   "quantum_backend_execution_flag": false,
-  "row_count": 324,
+  "row_count": 329,
   "row_id": "GAP_FAMILY_MANIFEST",
   "run_id": "PR168_RP5D_R1_DETERMINISTIC_RUN_20260628T000000Z",
   "schema_version": "PR168-RP5D-R1-v1.0",

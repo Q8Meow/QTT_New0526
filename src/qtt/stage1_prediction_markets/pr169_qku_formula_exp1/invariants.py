@@ -62,7 +62,19 @@ def quantum_output_cannot_bypass_execution_router(row: Mapping[str, Any]) -> boo
     return _require(not row.get("quantum_direct_order_release") and row.get("authority_state") in {"CANDIDATE_ONLY","EVIDENCE_ONLY"}, STABLE_VALIDATOR_RULE_IDS[10])
 
 
-RULE_FUNCTIONS: dict[str, Callable[[Mapping[str, Any]], bool]] = {rule_id: globals()[rule_id] for rule_id in STABLE_VALIDATOR_RULE_IDS}
+RULE_FUNCTIONS: dict[str, Callable[[Mapping[str, Any]], bool]] = {
+    "midpoint_or_last_trade_cannot_create_realized_profit": midpoint_or_last_trade_cannot_create_realized_profit,
+    "exit_profit_remains_projected_until_exit_fill": exit_profit_remains_projected_until_exit_fill,
+    "spread_slippage_impact_cannot_be_double_counted": spread_slippage_impact_cannot_be_double_counted,
+    "one_positive_trade_cannot_authorize_unrestricted_scaling": one_positive_trade_cannot_authorize_unrestricted_scaling,
+    "hold_until_breakeven_cannot_be_the_default_loss_policy": hold_until_breakeven_cannot_be_the_default_loss_policy,
+    "reentry_requires_a_new_positive_edge_determination": reentry_requires_a_new_positive_edge_determination,
+    "campaign_children_share_aggregate_capacity_and_exposure": campaign_children_share_aggregate_capacity_and_exposure,
+    "trade_frequency_cannot_be_used_as_an_objective_without_net_cash_utility": trade_frequency_cannot_be_used_as_an_objective_without_net_cash_utility,
+    "fixed_seven_day_duration_cannot_be_universal": fixed_seven_day_duration_cannot_be_universal,
+    "paper_loop_cannot_submit_live_orders": paper_loop_cannot_submit_live_orders,
+    "quantum_output_cannot_bypass_execution_router": quantum_output_cannot_bypass_execution_router,
+}
 
 
 def valid_fixture(rule_id: str) -> dict[str, Any]:

@@ -1989,6 +1989,23 @@ def _reports(registry_rows: list[dict[str, Any]], rows_by_file: dict[str, list[d
 def build(repo_root: Path, out_dir: Path) -> None:
     ctx = _load_context(repo_root)
     registry_rows = _build_registry(ctx)
+    from pr169_formula_owner_rows import materialize_from_template, rows as pr169_formula_rows
+    template = next(
+        row
+        for row in registry_rows
+        if row["projection_file"] == "qku_formula_compute_route_views.generated.jsonl"
+    )
+    extensions = [
+        materialize_from_template(
+            template,
+            extension,
+            "RP5G_CAND_0001",
+            f"PR169_FORMULA_{extension['card_id']}",
+        )
+        for extension in pr169_formula_rows(repo_root, "SVC")
+    ]
+    registry_rows = [*registry_rows, *extensions]
+    registry_rows.sort(key=lambda row: (str(row["projection_file"]), str(row["registry_row_id"])))
     rows_by_file = _projection_rows(registry_rows)
     reports = _reports(registry_rows, rows_by_file)
     if out_dir.exists():

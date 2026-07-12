@@ -86,7 +86,7 @@
   "records": [
     {
       "available_on_demand_count": 1471,
-      "default_compute_count": 290,
+      "default_compute_count": 978,
       "downstream_consumer_refs": [
         "VS1-TradingIntelligence",
         "PR168-RP5D"
@@ -102,7 +102,7 @@
     },
     {
       "available_on_demand_count": 1471,
-      "default_compute_count": 223,
+      "default_compute_count": 911,
       "downstream_consumer_refs": [
         "VS1-TradingIntelligence",
         "PR168-RP5D"
@@ -118,7 +118,7 @@
     },
     {
       "available_on_demand_count": 1471,
-      "default_compute_count": 235,
+      "default_compute_count": 923,
       "downstream_consumer_refs": [
         "VS1-TradingIntelligence",
         "PR168-RP5D"

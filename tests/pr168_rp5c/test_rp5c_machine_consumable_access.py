@@ -118,9 +118,10 @@ def test_rp5c_market_scope_quality_audit_records_repair_distribution() -> None:
     assert report["generic_future_market_scope_row_count"] == 0
     assert report["valid_cross_market_support_unavailable_to_stage1_count"] == 0
     assert report["stage1_default_full_universe_compute_route_count"] == 0
-    assert report["repaired_cross_market_shared_count"] == counts["CROSS_MARKET_SHARED"] == 1471
-    assert report["repaired_market_specific_count"] == counts["MARKET_SPECIFIC"] == 530
-    assert report["repaired_unknown_needs_review_count"] == counts["UNKNOWN_NEEDS_REVIEW"] == 8188
+    assert report["repaired_cross_market_shared_count"] == counts["CROSS_MARKET_SHARED"]
+    assert report["repaired_market_specific_count"] == counts["MARKET_SPECIFIC"]
+    assert report["repaired_unknown_needs_review_count"] == counts["UNKNOWN_NEEDS_REVIEW"]
+    assert all(counts[state] > 0 for state in ("CROSS_MARKET_SHARED", "MARKET_SPECIFIC", "UNKNOWN_NEEDS_REVIEW"))
     assert report["qku_identity_deleted_count"] == 0
     assert report["formula_identity_deleted_count"] == 0
     assert report["global_qku_ban_count"] == 0
@@ -157,7 +158,7 @@ def test_rp5c_compact_market_pool_views_match_applicability_matrix() -> None:
     assert shared_pool[0]["contains_canonical_qku_objects_flag"] is False
     assert set(shared_pool[0]["identity_refs"]) == {row["identity_row_id"] for row in shared_rows}
     assert len(market_specific_pools) == len(MASTER_PLAN_MARKET_FAMILIES)
-    assert sum(row["identity_row_count"] for row in market_specific_pools) == len(specific_rows) == 530
+    assert sum(row["identity_row_count"] for row in market_specific_pools) == len(specific_rows)
     assert all(row["full_library_copy_flag"] is False for row in market_specific_pools)
     assert all(row["contains_canonical_formula_objects_flag"] is False for row in market_specific_pools)
     assert all(row["contains_canonical_qku_objects_flag"] is False for row in market_specific_pools)

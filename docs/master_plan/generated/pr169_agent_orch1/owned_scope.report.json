@@ -55,7 +55,7 @@
   "pass": true,
   "projection_version": "PR169-AGENT-ORCH1-v2.2",
   "report_name": "owned_scope",
-  "row_count": 461,
+  "row_count": 674,
   "shared_currentization_required": "validated_after_final_file_set",
   "validator": "tools/validate_pr169_agent_orch1.py"
 }

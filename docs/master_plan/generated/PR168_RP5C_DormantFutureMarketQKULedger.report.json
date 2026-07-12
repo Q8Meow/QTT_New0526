@@ -6,7 +6,7 @@
   "connector_semantic_binding_count": 0,
   "created_at_utc": "2026-06-25T00:00:00Z",
   "deleted_file_count": 0,
-  "dormant_future_market_qku_ledger_row_count": 8188,
+  "dormant_future_market_qku_ledger_row_count": 8247,
   "dormant_future_market_qku_preserved_not_deleted_or_banned_flag": true,
   "dormant_qku_deleted_count": 0,
   "dormant_qku_global_ban_count": 0,
@@ -363,10 +363,7 @@
     {
       "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
-        "NEEDS_FAMILY_CLASSIFICATION",
-        "NEEDS_FORMULA_EXPRESSION_REF",
-        "NEEDS_MARKET_SCOPE_CLASSIFICATION",
-        "NEEDS_ONTOLOGY_CLASSIFICATION"
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION"
       ],
       "deleted_flag": false,
       "derived_route_resolution_refs": [
@@ -378,7 +375,7 @@
       "downstream_pr_refs": [
         "PR168-RP5D"
       ],
-      "formula_id": "FORM_MAP3_CALIB_ECE_001",
+      "formula_id": "FORM_MAP3_CALIB_BRIER_001",
       "future_market_reactivation_requires_central_classification_update_flag": true,
       "global_ban_flag": false,
       "identity_row_id": "RP5C_IDENTITY_00000024",
@@ -399,7 +396,10 @@
     {
       "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
-        "NEEDS_MARKET_SCOPE_CLASSIFICATION"
+        "NEEDS_FAMILY_CLASSIFICATION",
+        "NEEDS_FORMULA_EXPRESSION_REF",
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION",
+        "NEEDS_ONTOLOGY_CLASSIFICATION"
       ],
       "deleted_flag": false,
       "derived_route_resolution_refs": [
@@ -414,7 +414,7 @@
       "formula_id": "FORM_MAP3_CALIB_ECE_001",
       "future_market_reactivation_requires_central_classification_update_flag": true,
       "global_ban_flag": false,
-      "identity_row_id": "RP5C_IDENTITY_00000027",
+      "identity_row_id": "RP5C_IDENTITY_00000026",
       "market_family_refs": [],
       "market_scope": "unknown_needs_review",
       "notes": "Future/non-Stage-1 market identity remains immutable and routed, but is not in the Stage-1 default computation seed.",
@@ -447,7 +447,7 @@
       "formula_id": "FORM_MAP3_CALIB_ECE_001",
       "future_market_reactivation_requires_central_classification_update_flag": true,
       "global_ban_flag": false,
-      "identity_row_id": "RP5C_IDENTITY_00000028",
+      "identity_row_id": "RP5C_IDENTITY_00000029",
       "market_family_refs": [],
       "market_scope": "unknown_needs_review",
       "notes": "Future/non-Stage-1 market identity remains immutable and routed, but is not in the Stage-1 default computation seed.",
@@ -465,7 +465,6 @@
     {
       "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
-        "NEEDS_FORMULA_EXPRESSION_REF",
         "NEEDS_MARKET_SCOPE_CLASSIFICATION"
       ],
       "deleted_flag": false,
@@ -481,7 +480,7 @@
       "formula_id": "FORM_MAP3_CALIB_ECE_001",
       "future_market_reactivation_requires_central_classification_update_flag": true,
       "global_ban_flag": false,
-      "identity_row_id": "RP5C_IDENTITY_00000029",
+      "identity_row_id": "RP5C_IDENTITY_00000030",
       "market_family_refs": [],
       "market_scope": "unknown_needs_review",
       "notes": "Future/non-Stage-1 market identity remains immutable and routed, but is not in the Stage-1 default computation seed.",
@@ -515,7 +514,7 @@
       "formula_id": "FORM_MAP3_CALIB_ECE_001",
       "future_market_reactivation_requires_central_classification_update_flag": true,
       "global_ban_flag": false,
-      "identity_row_id": "RP5C_IDENTITY_00000036",
+      "identity_row_id": "RP5C_IDENTITY_00000031",
       "market_family_refs": [],
       "market_scope": "unknown_needs_review",
       "notes": "Future/non-Stage-1 market identity remains immutable and routed, but is not in the Stage-1 default computation seed.",
@@ -533,6 +532,7 @@
     {
       "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
+        "NEEDS_FORMULA_EXPRESSION_REF",
         "NEEDS_MARKET_SCOPE_CLASSIFICATION"
       ],
       "deleted_flag": false,
@@ -545,10 +545,10 @@
       "downstream_pr_refs": [
         "PR168-RP5D"
       ],
-      "formula_id": "FORM_MAP3_CALIB_LOGLOSS_001",
+      "formula_id": "FORM_MAP3_CALIB_ECE_001",
       "future_market_reactivation_requires_central_classification_update_flag": true,
       "global_ban_flag": false,
-      "identity_row_id": "RP5C_IDENTITY_00000041",
+      "identity_row_id": "RP5C_IDENTITY_00000038",
       "market_family_refs": [],
       "market_scope": "unknown_needs_review",
       "notes": "Future/non-Stage-1 market identity remains immutable and routed, but is not in the Stage-1 default computation seed.",
@@ -566,9 +566,7 @@
     {
       "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
-        "NEEDS_FORMULA_EXPRESSION_REF",
-        "NEEDS_MARKET_SCOPE_CLASSIFICATION",
-        "NEEDS_ONTOLOGY_CLASSIFICATION"
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION"
       ],
       "deleted_flag": false,
       "derived_route_resolution_refs": [
@@ -602,7 +600,8 @@
       "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
         "NEEDS_FORMULA_EXPRESSION_REF",
-        "NEEDS_MARKET_SCOPE_CLASSIFICATION"
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION",
+        "NEEDS_ONTOLOGY_CLASSIFICATION"
       ],
       "deleted_flag": false,
       "derived_route_resolution_refs": [
@@ -617,7 +616,7 @@
       "formula_id": "FORM_MAP3_CALIB_LOGLOSS_001",
       "future_market_reactivation_requires_central_classification_update_flag": true,
       "global_ban_flag": false,
-      "identity_row_id": "RP5C_IDENTITY_00000054",
+      "identity_row_id": "RP5C_IDENTITY_00000045",
       "market_family_refs": [],
       "market_scope": "unknown_needs_review",
       "notes": "Future/non-Stage-1 market identity remains immutable and routed, but is not in the Stage-1 default computation seed.",
@@ -635,10 +634,8 @@
     {
       "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
-        "NEEDS_FAMILY_CLASSIFICATION",
         "NEEDS_FORMULA_EXPRESSION_REF",
-        "NEEDS_MARKET_SCOPE_CLASSIFICATION",
-        "NEEDS_ONTOLOGY_CLASSIFICATION"
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION"
       ],
       "deleted_flag": false,
       "derived_route_resolution_refs": [
@@ -650,10 +647,10 @@
       "downstream_pr_refs": [
         "PR168-RP5D"
       ],
-      "formula_id": "FORM_MAP3_DWAVE_001",
+      "formula_id": "FORM_MAP3_CALIB_LOGLOSS_001",
       "future_market_reactivation_requires_central_classification_update_flag": true,
       "global_ban_flag": false,
-      "identity_row_id": "RP5C_IDENTITY_00000055",
+      "identity_row_id": "RP5C_IDENTITY_00000056",
       "market_family_refs": [],
       "market_scope": "unknown_needs_review",
       "notes": "Future/non-Stage-1 market identity remains immutable and routed, but is not in the Stage-1 default computation seed.",
@@ -671,6 +668,41 @@
     {
       "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION",
+        "NEEDS_ONTOLOGY_CLASSIFICATION"
+      ],
+      "deleted_flag": false,
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000018"
+      ],
+      "dormant_does_not_mean_deleted_banned_or_unimportant_flag": true,
+      "dormant_future_market_qku_row_id": "RP5C_DORMANT_FUTURE_MARKET_QKU_00000018",
+      "dormant_preserved_flag": true,
+      "downstream_pr_refs": [
+        "PR168-RP5D"
+      ],
+      "formula_id": "FORM_MAP3_CALIB_LOGLOSS_001",
+      "future_market_reactivation_requires_central_classification_update_flag": true,
+      "global_ban_flag": false,
+      "identity_row_id": "RP5C_IDENTITY_00000057",
+      "market_family_refs": [],
+      "market_scope": "unknown_needs_review",
+      "notes": "Future/non-Stage-1 market identity remains immutable and routed, but is not in the Stage-1 default computation seed.",
+      "platform_applicability_states": [
+        "UNKNOWN_PLATFORM_SCOPE_NEEDS_REVIEW"
+      ],
+      "preserved_in_universal_library_flag": true,
+      "qku_id": null,
+      "stage1_activation_view_refs": [
+        "RP5C_STAGE1_ACTIVATION_00000018"
+      ],
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
+      "stage_access_mode": "UNKNOWN_NEEDS_REVIEW"
+    },
+    {
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
+      "blocker_codes": [
+        "NEEDS_FAMILY_CLASSIFICATION",
         "NEEDS_FORMULA_EXPRESSION_REF",
         "NEEDS_MARKET_SCOPE_CLASSIFICATION",
         "NEEDS_ONTOLOGY_CLASSIFICATION"
@@ -680,7 +712,7 @@
         "RP5C_ROUTE_RESOLUTION_00000019"
       ],
       "dormant_does_not_mean_deleted_banned_or_unimportant_flag": true,
-      "dormant_future_market_qku_row_id": "RP5C_DORMANT_FUTURE_MARKET_QKU_00000018",
+      "dormant_future_market_qku_row_id": "RP5C_DORMANT_FUTURE_MARKET_QKU_00000019",
       "dormant_preserved_flag": true,
       "downstream_pr_refs": [
         "PR168-RP5D"
@@ -688,7 +720,7 @@
       "formula_id": "FORM_MAP3_DWAVE_001",
       "future_market_reactivation_requires_central_classification_update_flag": true,
       "global_ban_flag": false,
-      "identity_row_id": "RP5C_IDENTITY_00000060",
+      "identity_row_id": "RP5C_IDENTITY_00000059",
       "market_family_refs": [],
       "market_scope": "unknown_needs_review",
       "notes": "Future/non-Stage-1 market identity remains immutable and routed, but is not in the Stage-1 default computation seed.",
@@ -706,7 +738,6 @@
     {
       "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
-        "NEEDS_FAMILY_CLASSIFICATION",
         "NEEDS_FORMULA_EXPRESSION_REF",
         "NEEDS_MARKET_SCOPE_CLASSIFICATION",
         "NEEDS_ONTOLOGY_CLASSIFICATION"
@@ -716,15 +747,15 @@
         "RP5C_ROUTE_RESOLUTION_00000021"
       ],
       "dormant_does_not_mean_deleted_banned_or_unimportant_flag": true,
-      "dormant_future_market_qku_row_id": "RP5C_DORMANT_FUTURE_MARKET_QKU_00000019",
+      "dormant_future_market_qku_row_id": "RP5C_DORMANT_FUTURE_MARKET_QKU_00000020",
       "dormant_preserved_flag": true,
       "downstream_pr_refs": [
         "PR168-RP5D"
       ],
-      "formula_id": "FORM_MAP3_DWAVE_002",
+      "formula_id": "FORM_MAP3_DWAVE_001",
       "future_market_reactivation_requires_central_classification_update_flag": true,
       "global_ban_flag": false,
-      "identity_row_id": "RP5C_IDENTITY_00000071",
+      "identity_row_id": "RP5C_IDENTITY_00000064",
       "market_family_refs": [],
       "market_scope": "unknown_needs_review",
       "notes": "Future/non-Stage-1 market identity remains immutable and routed, but is not in the Stage-1 default computation seed.",
@@ -742,6 +773,7 @@
     {
       "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
+        "NEEDS_FAMILY_CLASSIFICATION",
         "NEEDS_FORMULA_EXPRESSION_REF",
         "NEEDS_MARKET_SCOPE_CLASSIFICATION",
         "NEEDS_ONTOLOGY_CLASSIFICATION"
@@ -751,7 +783,7 @@
         "RP5C_ROUTE_RESOLUTION_00000023"
       ],
       "dormant_does_not_mean_deleted_banned_or_unimportant_flag": true,
-      "dormant_future_market_qku_row_id": "RP5C_DORMANT_FUTURE_MARKET_QKU_00000020",
+      "dormant_future_market_qku_row_id": "RP5C_DORMANT_FUTURE_MARKET_QKU_00000021",
       "dormant_preserved_flag": true,
       "downstream_pr_refs": [
         "PR168-RP5D"
@@ -759,7 +791,7 @@
       "formula_id": "FORM_MAP3_DWAVE_002",
       "future_market_reactivation_requires_central_classification_update_flag": true,
       "global_ban_flag": false,
-      "identity_row_id": "RP5C_IDENTITY_00000073",
+      "identity_row_id": "RP5C_IDENTITY_00000075",
       "market_family_refs": [],
       "market_scope": "unknown_needs_review",
       "notes": "Future/non-Stage-1 market identity remains immutable and routed, but is not in the Stage-1 default computation seed.",
@@ -777,7 +809,6 @@
     {
       "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
-        "NEEDS_FAMILY_CLASSIFICATION",
         "NEEDS_FORMULA_EXPRESSION_REF",
         "NEEDS_MARKET_SCOPE_CLASSIFICATION",
         "NEEDS_ONTOLOGY_CLASSIFICATION"
@@ -787,15 +818,15 @@
         "RP5C_ROUTE_RESOLUTION_00000025"
       ],
       "dormant_does_not_mean_deleted_banned_or_unimportant_flag": true,
-      "dormant_future_market_qku_row_id": "RP5C_DORMANT_FUTURE_MARKET_QKU_00000021",
+      "dormant_future_market_qku_row_id": "RP5C_DORMANT_FUTURE_MARKET_QKU_00000022",
       "dormant_preserved_flag": true,
       "downstream_pr_refs": [
         "PR168-RP5D"
       ],
-      "formula_id": "FORM_MAP3_FDR_BH_001",
+      "formula_id": "FORM_MAP3_DWAVE_002",
       "future_market_reactivation_requires_central_classification_update_flag": true,
       "global_ban_flag": false,
-      "identity_row_id": "RP5C_IDENTITY_00000084",
+      "identity_row_id": "RP5C_IDENTITY_00000077",
       "market_family_refs": [],
       "market_scope": "unknown_needs_review",
       "notes": "Future/non-Stage-1 market identity remains immutable and routed, but is not in the Stage-1 default computation seed.",
@@ -813,39 +844,8 @@
     {
       "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
-        "NEEDS_MARKET_SCOPE_CLASSIFICATION"
-      ],
-      "deleted_flag": false,
-      "derived_route_resolution_refs": [
-        "RP5C_ROUTE_RESOLUTION_00000026"
-      ],
-      "dormant_does_not_mean_deleted_banned_or_unimportant_flag": true,
-      "dormant_future_market_qku_row_id": "RP5C_DORMANT_FUTURE_MARKET_QKU_00000022",
-      "dormant_preserved_flag": true,
-      "downstream_pr_refs": [
-        "PR168-RP5D"
-      ],
-      "formula_id": "FORM_MAP3_FDR_BH_001",
-      "future_market_reactivation_requires_central_classification_update_flag": true,
-      "global_ban_flag": false,
-      "identity_row_id": "RP5C_IDENTITY_00000087",
-      "market_family_refs": [],
-      "market_scope": "unknown_needs_review",
-      "notes": "Future/non-Stage-1 market identity remains immutable and routed, but is not in the Stage-1 default computation seed.",
-      "platform_applicability_states": [
-        "UNKNOWN_PLATFORM_SCOPE_NEEDS_REVIEW"
-      ],
-      "preserved_in_universal_library_flag": true,
-      "qku_id": null,
-      "stage1_activation_view_refs": [
-        "RP5C_STAGE1_ACTIVATION_00000026"
-      ],
-      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
-      "stage_access_mode": "UNKNOWN_NEEDS_REVIEW"
-    },
-    {
-      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
-      "blocker_codes": [
+        "NEEDS_FAMILY_CLASSIFICATION",
+        "NEEDS_FORMULA_EXPRESSION_REF",
         "NEEDS_MARKET_SCOPE_CLASSIFICATION",
         "NEEDS_ONTOLOGY_CLASSIFICATION"
       ],
@@ -880,9 +880,7 @@
     {
       "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
-        "NEEDS_FORMULA_EXPRESSION_REF",
-        "NEEDS_MARKET_SCOPE_CLASSIFICATION",
-        "NEEDS_ONTOLOGY_CLASSIFICATION"
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION"
       ],
       "deleted_flag": false,
       "derived_route_resolution_refs": [
@@ -897,7 +895,7 @@
       "formula_id": "FORM_MAP3_FDR_BH_001",
       "future_market_reactivation_requires_central_classification_update_flag": true,
       "global_ban_flag": false,
-      "identity_row_id": "RP5C_IDENTITY_00000089",
+      "identity_row_id": "RP5C_IDENTITY_00000091",
       "market_family_refs": [],
       "market_scope": "unknown_needs_review",
       "notes": "Future/non-Stage-1 market identity remains immutable and routed, but is not in the Stage-1 default computation seed.",
@@ -915,8 +913,8 @@
     {
       "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
-        "NEEDS_FORMULA_EXPRESSION_REF",
-        "NEEDS_MARKET_SCOPE_CLASSIFICATION"
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION",
+        "NEEDS_ONTOLOGY_CLASSIFICATION"
       ],
       "deleted_flag": false,
       "derived_route_resolution_refs": [
@@ -931,7 +929,7 @@
       "formula_id": "FORM_MAP3_FDR_BH_001",
       "future_market_reactivation_requires_central_classification_update_flag": true,
       "global_ban_flag": false,
-      "identity_row_id": "RP5C_IDENTITY_00000096",
+      "identity_row_id": "RP5C_IDENTITY_00000092",
       "market_family_refs": [],
       "market_scope": "unknown_needs_review",
       "notes": "Future/non-Stage-1 market identity remains immutable and routed, but is not in the Stage-1 default computation seed.",

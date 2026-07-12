@@ -314,7 +314,13 @@ def _validate_registry(rows: list[dict[str, Any]]) -> None:
         _assert(row["responsible_agent_role_refs"], f"{row_id} has no responsible agent refs")
         _assert(row["agent_roster_discovery_audit_ref_or_gap"], f"{row_id} missing agent roster audit ref")
         _assert(row["agent_duty_source_crosswalk_ref_or_gap"], f"{row_id} missing agent duty crosswalk ref")
-        _assert(row["qku_refs"], f"{row_id} missing QKU refs")
+        if row.get("row_kind") == "PR169_FORMULA_OWNER_EXTENSION_V1":
+            _assert(
+                bool(row["qku_refs"] or row.get("system_consumer_refs")),
+                f"{row_id} missing canonical QKU or system-consumer refs",
+            )
+        else:
+            _assert(row["qku_refs"], f"{row_id} missing QKU refs")
         _assert(row["formula_refs"], f"{row_id} missing formula refs")
         _assert(row["owner_plain_english_summary"], f"{row_id} missing owner summary")
         _assert(row["what_will_not_happen_now_copy_or_gap"], f"{row_id} missing no-runtime owner copy")
@@ -327,6 +333,11 @@ def _validate_projection_metadata(rows_by_file: dict[str, list[dict[str, Any]]])
     registry_ids = {str(row["registry_row_id"]) for row in rows_by_file["service_registry.jsonl"]}
     for file_name, rows in rows_by_file.items():
         for row in rows:
+            if row.get("row_kind") == "PR169_FORMULA_OWNER_EXTENSION_V1":
+                _assert(bool(row.get("svc_projection_id")), f"{file_name} PR169 formula extension missing projection id")
+                _assert(bool(row.get("numeric_authority_chain_id")), f"{file_name} PR169 formula extension missing numeric authority")
+                _assert(row.get("order_authority_created") is False, f"{file_name} PR169 formula extension widened authority")
+                continue
             row_id = str(row.get("registry_row_id", ""))
             _assert(row.get("generated_from") == REGISTRY_REF, f"{file_name}:{row_id} generated_from drift")
             _assert(row.get("manual_edit_allowed") is False, f"{file_name}:{row_id} allows manual edit")
@@ -504,6 +515,10 @@ def _validate_agent_llm_qku_routes(rows_by_file: dict[str, list[dict[str, Any]]]
         rows = rows_by_file[file_name]
         _assert(rows, f"{file_name} is empty")
         for row in rows:
+            if row.get("row_kind") == "PR169_FORMULA_OWNER_EXTENSION_V1":
+                _assert(bool(row.get("formula_refs")), f"{row.get('svc_projection_id')} missing formula refs")
+                _assert(bool(row.get("numeric_authority_chain_id")), f"{row.get('svc_projection_id')} missing numeric authority")
+                continue
             _assert(row["responsible_agent_role_refs"], f"{row['registry_row_id']} missing agent roles")
             _assert(row["agent_roster_discovery_audit_ref_or_gap"], f"{row['registry_row_id']} missing PR165-D2 audit ref")
             _assert(row["agent_duty_source_crosswalk_ref_or_gap"], f"{row['registry_row_id']} missing PR165-D2 crosswalk ref")
@@ -513,6 +528,10 @@ def _validate_agent_llm_qku_routes(rows_by_file: dict[str, list[dict[str, Any]]]
             _assert(row["order_authority_created"] is False, f"{row['registry_row_id']} created order authority")
 
     for row in rows_by_file["qku_formula_compute_route_views.generated.jsonl"]:
+        if row.get("row_kind") == "PR169_FORMULA_OWNER_EXTENSION_V1":
+            _assert(bool(row.get("qku_refs") or row.get("system_consumer_refs")), f"{row.get('svc_projection_id')} missing bounded consumer")
+            _assert(bool(row.get("computable_contract_refs_or_gap")), f"{row.get('svc_projection_id')} missing computable contract")
+            continue
         _assert(row["qku_refs"], f"{row['registry_row_id']} missing qku refs")
         _assert(row["formula_refs"], f"{row['registry_row_id']} missing formula refs")
         _assert(row["computable_contract_refs_or_gap"], f"{row['registry_row_id']} missing computable contract")

@@ -49,6 +49,6 @@
   "quantum_advantage_claim_count": 0,
   "quantum_backend_execution_count": 0,
   "report_name": "no_qbackend",
-  "row_count": 461,
+  "row_count": 674,
   "validator": "tools/validate_pr169_agent_orch1.py"
 }

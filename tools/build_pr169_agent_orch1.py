@@ -1820,6 +1820,19 @@ def build(repo_root: Path, out_dir: Path) -> None:
 
     ctx = _load_context(root)
     registry_rows = _build_registry(ctx)
+    from pr169_formula_owner_rows import materialize_from_template, rows as pr169_formula_rows
+    template = next(row for row in registry_rows if row["projection_file"] == "formula_tasks.jsonl")
+    extensions = [
+        materialize_from_template(
+            template,
+            extension,
+            "RP5G_CAND_0001",
+            f"PR169_FORMULA_{extension['card_id']}",
+        )
+        for extension in pr169_formula_rows(root, "AGENT_ORCH")
+    ]
+    registry_rows = [*registry_rows, *extensions]
+    registry_rows.sort(key=lambda row: (str(row["projection_file"]), str(row["row_id"])))
     rows_by_file = _projection_rows(registry_rows)
     reports = _build_reports(registry_rows, rows_by_file)
 

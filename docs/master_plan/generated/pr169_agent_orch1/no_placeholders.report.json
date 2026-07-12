@@ -48,7 +48,7 @@
   "placeholder_only_row_count": 0,
   "projection_version": "PR169-AGENT-ORCH1-v2.2",
   "report_name": "no_placeholders",
-  "row_count": 461,
+  "row_count": 674,
   "scoped_gap_rows_are_routed": true,
   "validator": "tools/validate_pr169_agent_orch1.py"
 }

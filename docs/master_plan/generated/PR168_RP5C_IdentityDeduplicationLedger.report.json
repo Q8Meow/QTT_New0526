@@ -5,10 +5,10 @@
   "champion_authority_created_count": 0,
   "connector_semantic_binding_count": 0,
   "created_at_utc": "2026-06-25T00:00:00Z",
-  "dedupe_group_count": 10189,
-  "dedupe_member_occurrence_count": 183802,
+  "dedupe_group_count": 10936,
+  "dedupe_member_occurrence_count": 185296,
   "dedupe_status_counts": {
-    "CANONICAL_REPRESENTATIVE_PRESERVED": 9949,
+    "CANONICAL_REPRESENTATIVE_PRESERVED": 10696,
     "UNIQUE_PRESERVED": 240
   },
   "deleted_file_count": 0,
@@ -63,7 +63,7 @@
     "stage1_default_full_universe_compute_route_count": 0,
     "trade_simulation_count": 0
   },
-  "immutable_library_identity_row_count": 10189,
+  "immutable_library_identity_row_count": 10936,
   "launch_readiness_authority_created_count": 0,
   "live_order_authority_created_count": 0,
   "logical_report_id": "PR168_RP5C_IdentityDeduplicationLedger",
@@ -194,10 +194,24 @@
       "row_id": "RP5C_DEDUP_00000007"
     },
     {
-      "canonical_identity_row_id": "RP5C_IDENTITY_00000007",
+      "canonical_identity_row_id": "RP5C_IDENTITY_00000024",
       "dedupe_status": "CANONICAL_REPRESENTATIVE_PRESERVED",
       "dedupe_without_deletion_flag": true,
       "duplicate_group_id": "RP5C_DUP_GROUP_00000008",
+      "duplicate_member_count": 2,
+      "duplicate_member_identity_row_ids": [
+        "RP5C_IDENTITY_00000024",
+        "RP5C_IDENTITY_00000025"
+      ],
+      "global_ban_flag": false,
+      "notes": "Duplicate grouping preserves every original identity row and only changes review priority.",
+      "row_id": "RP5C_DEDUP_00000008"
+    },
+    {
+      "canonical_identity_row_id": "RP5C_IDENTITY_00000007",
+      "dedupe_status": "CANONICAL_REPRESENTATIVE_PRESERVED",
+      "dedupe_without_deletion_flag": true,
+      "duplicate_group_id": "RP5C_DUP_GROUP_00000009",
       "duplicate_member_count": 3,
       "duplicate_member_identity_row_ids": [
         "RP5C_IDENTITY_00000007",
@@ -206,32 +220,16 @@
       ],
       "global_ban_flag": false,
       "notes": "Duplicate grouping preserves every original identity row and only changes review priority.",
-      "row_id": "RP5C_DEDUP_00000008"
-    },
-    {
-      "canonical_identity_row_id": "RP5C_IDENTITY_00000027",
-      "dedupe_status": "CANONICAL_REPRESENTATIVE_PRESERVED",
-      "dedupe_without_deletion_flag": true,
-      "duplicate_group_id": "RP5C_DUP_GROUP_00000009",
-      "duplicate_member_count": 2,
-      "duplicate_member_identity_row_ids": [
-        "RP5C_IDENTITY_00000027",
-        "RP5C_IDENTITY_00000031"
-      ],
-      "global_ban_flag": false,
-      "notes": "Duplicate grouping preserves every original identity row and only changes review priority.",
       "row_id": "RP5C_DEDUP_00000009"
     },
     {
-      "canonical_identity_row_id": "RP5C_IDENTITY_00000028",
+      "canonical_identity_row_id": "RP5C_IDENTITY_00000029",
       "dedupe_status": "CANONICAL_REPRESENTATIVE_PRESERVED",
       "dedupe_without_deletion_flag": true,
       "duplicate_group_id": "RP5C_DUP_GROUP_00000010",
-      "duplicate_member_count": 4,
+      "duplicate_member_count": 2,
       "duplicate_member_identity_row_ids": [
-        "RP5C_IDENTITY_00000028",
-        "RP5C_IDENTITY_00000030",
-        "RP5C_IDENTITY_00000032",
+        "RP5C_IDENTITY_00000029",
         "RP5C_IDENTITY_00000033"
       ],
       "global_ban_flag": false,
@@ -239,65 +237,63 @@
       "row_id": "RP5C_DEDUP_00000010"
     },
     {
-      "canonical_identity_row_id": "RP5C_IDENTITY_00000029",
+      "canonical_identity_row_id": "RP5C_IDENTITY_00000030",
       "dedupe_status": "CANONICAL_REPRESENTATIVE_PRESERVED",
       "dedupe_without_deletion_flag": true,
       "duplicate_group_id": "RP5C_DUP_GROUP_00000011",
-      "duplicate_member_count": 5,
+      "duplicate_member_count": 4,
       "duplicate_member_identity_row_ids": [
-        "RP5C_IDENTITY_00000029",
+        "RP5C_IDENTITY_00000030",
+        "RP5C_IDENTITY_00000032",
         "RP5C_IDENTITY_00000034",
-        "RP5C_IDENTITY_00000035",
-        "RP5C_IDENTITY_00000038",
-        "RP5C_IDENTITY_00000039"
+        "RP5C_IDENTITY_00000035"
       ],
       "global_ban_flag": false,
       "notes": "Duplicate grouping preserves every original identity row and only changes review priority.",
       "row_id": "RP5C_DEDUP_00000011"
     },
     {
-      "canonical_identity_row_id": "RP5C_IDENTITY_00000036",
+      "canonical_identity_row_id": "RP5C_IDENTITY_00000031",
       "dedupe_status": "CANONICAL_REPRESENTATIVE_PRESERVED",
       "dedupe_without_deletion_flag": true,
       "duplicate_group_id": "RP5C_DUP_GROUP_00000012",
-      "duplicate_member_count": 3,
+      "duplicate_member_count": 5,
       "duplicate_member_identity_row_ids": [
+        "RP5C_IDENTITY_00000031",
         "RP5C_IDENTITY_00000036",
         "RP5C_IDENTITY_00000037",
-        "RP5C_IDENTITY_00000040"
+        "RP5C_IDENTITY_00000040",
+        "RP5C_IDENTITY_00000041"
       ],
       "global_ban_flag": false,
       "notes": "Duplicate grouping preserves every original identity row and only changes review priority.",
       "row_id": "RP5C_DEDUP_00000012"
     },
     {
-      "canonical_identity_row_id": "RP5C_IDENTITY_00000024",
+      "canonical_identity_row_id": "RP5C_IDENTITY_00000038",
       "dedupe_status": "CANONICAL_REPRESENTATIVE_PRESERVED",
       "dedupe_without_deletion_flag": true,
       "duplicate_group_id": "RP5C_DUP_GROUP_00000013",
       "duplicate_member_count": 3,
       "duplicate_member_identity_row_ids": [
-        "RP5C_IDENTITY_00000024",
-        "RP5C_IDENTITY_00000025",
-        "RP5C_IDENTITY_00000026"
+        "RP5C_IDENTITY_00000038",
+        "RP5C_IDENTITY_00000039",
+        "RP5C_IDENTITY_00000042"
       ],
       "global_ban_flag": false,
       "notes": "Duplicate grouping preserves every original identity row and only changes review priority.",
       "row_id": "RP5C_DEDUP_00000013"
     },
     {
-      "canonical_identity_row_id": "RP5C_IDENTITY_00000041",
+      "canonical_identity_row_id": "RP5C_IDENTITY_00000026",
       "dedupe_status": "CANONICAL_REPRESENTATIVE_PRESERVED",
       "dedupe_without_deletion_flag": true,
       "duplicate_group_id": "RP5C_DUP_GROUP_00000014",
-      "duplicate_member_count": 6,
+      "duplicate_member_count": 3,
       "duplicate_member_identity_row_ids": [
-        "RP5C_IDENTITY_00000041",
-        "RP5C_IDENTITY_00000042",
-        "RP5C_IDENTITY_00000044",
-        "RP5C_IDENTITY_00000045",
-        "RP5C_IDENTITY_00000046",
-        "RP5C_IDENTITY_00000047"
+        "RP5C_IDENTITY_00000026",
+        "RP5C_IDENTITY_00000027",
+        "RP5C_IDENTITY_00000028"
       ],
       "global_ban_flag": false,
       "notes": "Duplicate grouping preserves every original identity row and only changes review priority.",
@@ -308,153 +304,159 @@
       "dedupe_status": "CANONICAL_REPRESENTATIVE_PRESERVED",
       "dedupe_without_deletion_flag": true,
       "duplicate_group_id": "RP5C_DUP_GROUP_00000015",
-      "duplicate_member_count": 7,
+      "duplicate_member_count": 6,
       "duplicate_member_identity_row_ids": [
         "RP5C_IDENTITY_00000043",
+        "RP5C_IDENTITY_00000044",
+        "RP5C_IDENTITY_00000046",
+        "RP5C_IDENTITY_00000047",
         "RP5C_IDENTITY_00000048",
-        "RP5C_IDENTITY_00000049",
-        "RP5C_IDENTITY_00000050",
-        "RP5C_IDENTITY_00000051",
-        "RP5C_IDENTITY_00000052",
-        "RP5C_IDENTITY_00000053"
+        "RP5C_IDENTITY_00000049"
       ],
       "global_ban_flag": false,
       "notes": "Duplicate grouping preserves every original identity row and only changes review priority.",
       "row_id": "RP5C_DEDUP_00000015"
     },
     {
-      "canonical_identity_row_id": "RP5C_IDENTITY_00000054",
-      "dedupe_status": "UNIQUE_PRESERVED",
+      "canonical_identity_row_id": "RP5C_IDENTITY_00000045",
+      "dedupe_status": "CANONICAL_REPRESENTATIVE_PRESERVED",
       "dedupe_without_deletion_flag": true,
       "duplicate_group_id": "RP5C_DUP_GROUP_00000016",
-      "duplicate_member_count": 1,
+      "duplicate_member_count": 7,
       "duplicate_member_identity_row_ids": [
-        "RP5C_IDENTITY_00000054"
+        "RP5C_IDENTITY_00000045",
+        "RP5C_IDENTITY_00000050",
+        "RP5C_IDENTITY_00000051",
+        "RP5C_IDENTITY_00000052",
+        "RP5C_IDENTITY_00000053",
+        "RP5C_IDENTITY_00000054",
+        "RP5C_IDENTITY_00000055"
       ],
       "global_ban_flag": false,
       "notes": "Duplicate grouping preserves every original identity row and only changes review priority.",
       "row_id": "RP5C_DEDUP_00000016"
     },
     {
-      "canonical_identity_row_id": "RP5C_IDENTITY_00000059",
-      "dedupe_status": "CANONICAL_REPRESENTATIVE_PRESERVED",
+      "canonical_identity_row_id": "RP5C_IDENTITY_00000056",
+      "dedupe_status": "UNIQUE_PRESERVED",
       "dedupe_without_deletion_flag": true,
       "duplicate_group_id": "RP5C_DUP_GROUP_00000017",
-      "duplicate_member_count": 4,
+      "duplicate_member_count": 1,
       "duplicate_member_identity_row_ids": [
-        "RP5C_IDENTITY_00000059",
-        "RP5C_IDENTITY_00000061",
-        "RP5C_IDENTITY_00000062",
-        "RP5C_IDENTITY_00000063"
+        "RP5C_IDENTITY_00000056"
       ],
       "global_ban_flag": false,
       "notes": "Duplicate grouping preserves every original identity row and only changes review priority.",
       "row_id": "RP5C_DEDUP_00000017"
     },
     {
-      "canonical_identity_row_id": "RP5C_IDENTITY_00000060",
+      "canonical_identity_row_id": "RP5C_IDENTITY_00000057",
       "dedupe_status": "CANONICAL_REPRESENTATIVE_PRESERVED",
       "dedupe_without_deletion_flag": true,
       "duplicate_group_id": "RP5C_DUP_GROUP_00000018",
-      "duplicate_member_count": 5,
+      "duplicate_member_count": 2,
       "duplicate_member_identity_row_ids": [
-        "RP5C_IDENTITY_00000060",
-        "RP5C_IDENTITY_00000064",
-        "RP5C_IDENTITY_00000065",
-        "RP5C_IDENTITY_00000068",
-        "RP5C_IDENTITY_00000069"
+        "RP5C_IDENTITY_00000057",
+        "RP5C_IDENTITY_00000058"
       ],
       "global_ban_flag": false,
       "notes": "Duplicate grouping preserves every original identity row and only changes review priority.",
       "row_id": "RP5C_DEDUP_00000018"
     },
     {
-      "canonical_identity_row_id": "RP5C_IDENTITY_00000066",
+      "canonical_identity_row_id": "RP5C_IDENTITY_00000063",
       "dedupe_status": "CANONICAL_REPRESENTATIVE_PRESERVED",
       "dedupe_without_deletion_flag": true,
       "duplicate_group_id": "RP5C_DUP_GROUP_00000019",
-      "duplicate_member_count": 3,
+      "duplicate_member_count": 4,
       "duplicate_member_identity_row_ids": [
+        "RP5C_IDENTITY_00000063",
+        "RP5C_IDENTITY_00000065",
         "RP5C_IDENTITY_00000066",
-        "RP5C_IDENTITY_00000067",
-        "RP5C_IDENTITY_00000070"
+        "RP5C_IDENTITY_00000067"
       ],
       "global_ban_flag": false,
       "notes": "Duplicate grouping preserves every original identity row and only changes review priority.",
       "row_id": "RP5C_DEDUP_00000019"
     },
     {
-      "canonical_identity_row_id": "RP5C_IDENTITY_00000055",
+      "canonical_identity_row_id": "RP5C_IDENTITY_00000064",
       "dedupe_status": "CANONICAL_REPRESENTATIVE_PRESERVED",
       "dedupe_without_deletion_flag": true,
       "duplicate_group_id": "RP5C_DUP_GROUP_00000020",
-      "duplicate_member_count": 4,
+      "duplicate_member_count": 5,
       "duplicate_member_identity_row_ids": [
-        "RP5C_IDENTITY_00000055",
-        "RP5C_IDENTITY_00000056",
-        "RP5C_IDENTITY_00000057",
-        "RP5C_IDENTITY_00000058"
+        "RP5C_IDENTITY_00000064",
+        "RP5C_IDENTITY_00000068",
+        "RP5C_IDENTITY_00000069",
+        "RP5C_IDENTITY_00000072",
+        "RP5C_IDENTITY_00000073"
       ],
       "global_ban_flag": false,
       "notes": "Duplicate grouping preserves every original identity row and only changes review priority.",
       "row_id": "RP5C_DEDUP_00000020"
     },
     {
-      "canonical_identity_row_id": "RP5C_IDENTITY_00000072",
+      "canonical_identity_row_id": "RP5C_IDENTITY_00000070",
       "dedupe_status": "CANONICAL_REPRESENTATIVE_PRESERVED",
       "dedupe_without_deletion_flag": true,
       "duplicate_group_id": "RP5C_DUP_GROUP_00000021",
-      "duplicate_member_count": 4,
+      "duplicate_member_count": 3,
       "duplicate_member_identity_row_ids": [
-        "RP5C_IDENTITY_00000072",
-        "RP5C_IDENTITY_00000074",
-        "RP5C_IDENTITY_00000075",
-        "RP5C_IDENTITY_00000076"
+        "RP5C_IDENTITY_00000070",
+        "RP5C_IDENTITY_00000071",
+        "RP5C_IDENTITY_00000074"
       ],
       "global_ban_flag": false,
       "notes": "Duplicate grouping preserves every original identity row and only changes review priority.",
       "row_id": "RP5C_DEDUP_00000021"
     },
     {
-      "canonical_identity_row_id": "RP5C_IDENTITY_00000073",
+      "canonical_identity_row_id": "RP5C_IDENTITY_00000059",
       "dedupe_status": "CANONICAL_REPRESENTATIVE_PRESERVED",
       "dedupe_without_deletion_flag": true,
       "duplicate_group_id": "RP5C_DUP_GROUP_00000022",
-      "duplicate_member_count": 7,
+      "duplicate_member_count": 4,
       "duplicate_member_identity_row_ids": [
-        "RP5C_IDENTITY_00000073",
-        "RP5C_IDENTITY_00000077",
-        "RP5C_IDENTITY_00000078",
-        "RP5C_IDENTITY_00000079",
-        "RP5C_IDENTITY_00000080",
-        "RP5C_IDENTITY_00000081",
-        "RP5C_IDENTITY_00000082"
+        "RP5C_IDENTITY_00000059",
+        "RP5C_IDENTITY_00000060",
+        "RP5C_IDENTITY_00000061",
+        "RP5C_IDENTITY_00000062"
       ],
       "global_ban_flag": false,
       "notes": "Duplicate grouping preserves every original identity row and only changes review priority.",
       "row_id": "RP5C_DEDUP_00000022"
     },
     {
-      "canonical_identity_row_id": "RP5C_IDENTITY_00000083",
-      "dedupe_status": "UNIQUE_PRESERVED",
+      "canonical_identity_row_id": "RP5C_IDENTITY_00000076",
+      "dedupe_status": "CANONICAL_REPRESENTATIVE_PRESERVED",
       "dedupe_without_deletion_flag": true,
       "duplicate_group_id": "RP5C_DUP_GROUP_00000023",
-      "duplicate_member_count": 1,
+      "duplicate_member_count": 4,
       "duplicate_member_identity_row_ids": [
-        "RP5C_IDENTITY_00000083"
+        "RP5C_IDENTITY_00000076",
+        "RP5C_IDENTITY_00000078",
+        "RP5C_IDENTITY_00000079",
+        "RP5C_IDENTITY_00000080"
       ],
       "global_ban_flag": false,
       "notes": "Duplicate grouping preserves every original identity row and only changes review priority.",
       "row_id": "RP5C_DEDUP_00000023"
     },
     {
-      "canonical_identity_row_id": "RP5C_IDENTITY_00000071",
-      "dedupe_status": "UNIQUE_PRESERVED",
+      "canonical_identity_row_id": "RP5C_IDENTITY_00000077",
+      "dedupe_status": "CANONICAL_REPRESENTATIVE_PRESERVED",
       "dedupe_without_deletion_flag": true,
       "duplicate_group_id": "RP5C_DUP_GROUP_00000024",
-      "duplicate_member_count": 1,
+      "duplicate_member_count": 7,
       "duplicate_member_identity_row_ids": [
-        "RP5C_IDENTITY_00000071"
+        "RP5C_IDENTITY_00000077",
+        "RP5C_IDENTITY_00000081",
+        "RP5C_IDENTITY_00000082",
+        "RP5C_IDENTITY_00000083",
+        "RP5C_IDENTITY_00000084",
+        "RP5C_IDENTITY_00000085",
+        "RP5C_IDENTITY_00000086"
       ],
       "global_ban_flag": false,
       "notes": "Duplicate grouping preserves every original identity row and only changes review priority.",
@@ -462,13 +464,12 @@
     },
     {
       "canonical_identity_row_id": "RP5C_IDENTITY_00000087",
-      "dedupe_status": "CANONICAL_REPRESENTATIVE_PRESERVED",
+      "dedupe_status": "UNIQUE_PRESERVED",
       "dedupe_without_deletion_flag": true,
       "duplicate_group_id": "RP5C_DUP_GROUP_00000025",
-      "duplicate_member_count": 2,
+      "duplicate_member_count": 1,
       "duplicate_member_identity_row_ids": [
-        "RP5C_IDENTITY_00000087",
-        "RP5C_IDENTITY_00000091"
+        "RP5C_IDENTITY_00000087"
       ],
       "global_ban_flag": false,
       "notes": "Duplicate grouping preserves every original identity row and only changes review priority.",

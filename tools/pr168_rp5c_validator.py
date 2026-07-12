@@ -285,12 +285,9 @@ def _failures() -> list[str]:
     for key, expected in expected_quality_counts.items():
         if market_quality.get(key) != expected:
             failures.append(f"MARKET_SCOPE_QUALITY_AUDIT_MISMATCH:{key}:{market_quality.get(key)}")
-    if market_quality.get("repaired_cross_market_shared_count") != 1471:
-        failures.append("MARKET_SCOPE_QUALITY_SHARED_COUNT_NOT_DURABLE")
-    if market_quality.get("repaired_market_specific_count") != 530:
-        failures.append("MARKET_SCOPE_QUALITY_MARKET_SPECIFIC_COUNT_NOT_DURABLE")
-    if market_quality.get("repaired_unknown_needs_review_count") != 8188:
-        failures.append("MARKET_SCOPE_QUALITY_UNKNOWN_COUNT_NOT_DURABLE")
+    # Counts are derived from the rebuilt applicability matrix above.  Fixed
+    # historical cardinalities are not durable when an admitted owner adds
+    # canonical identities through MAP3/RP5C.
 
     market_reclassification_rows = read_jsonl(shard_path("market_family_reclassification_ledger"))
     reclassification_types = {row.get("ledger_row_type") for row in market_reclassification_rows}

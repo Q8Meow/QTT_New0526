@@ -49,6 +49,6 @@
   "projection_version": "PR169-AGENT-ORCH1-v2.2",
   "provider_call_count": 0,
   "report_name": "no_llm_runtime",
-  "row_count": 461,
+  "row_count": 674,
   "validator": "tools/validate_pr169_agent_orch1.py"
 }

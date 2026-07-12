@@ -6,9 +6,9 @@
   "connector_semantic_binding_count": 0,
   "created_at_utc": "2026-06-25T00:00:00Z",
   "deleted_file_count": 0,
-  "dormant_future_market_row_count": 8188,
+  "dormant_future_market_row_count": 8247,
   "dormant_market_scope_counts": {
-    "unknown_needs_review": 8188
+    "unknown_needs_review": 8247
   },
   "dormant_qku_deleted_count": 0,
   "dormant_qku_global_ban_count": 0,
@@ -113,8 +113,8 @@
       "default_compute_from_universal_library_flag": false,
       "deleted_flag": false,
       "derived_from_classification_registry_refs": [
-        "RP5C_FAMILY_00093",
-        "RP5C_FAMILY_00206",
+        "RP5C_FAMILY_00103",
+        "RP5C_FAMILY_00233",
         "RP5C_MARKET_SCOPE_0011",
         "RP5C_ONTOLOGY_ROLE_0014"
       ],
@@ -180,8 +180,8 @@
       "default_compute_from_universal_library_flag": false,
       "deleted_flag": false,
       "derived_from_classification_registry_refs": [
-        "RP5C_FAMILY_00036",
-        "RP5C_FAMILY_00153",
+        "RP5C_FAMILY_00042",
+        "RP5C_FAMILY_00176",
         "RP5C_MARKET_SCOPE_0011",
         "RP5C_ONTOLOGY_ROLE_0014"
       ],
@@ -247,8 +247,8 @@
       "default_compute_from_universal_library_flag": false,
       "deleted_flag": false,
       "derived_from_classification_registry_refs": [
-        "RP5C_FAMILY_00037",
-        "RP5C_FAMILY_00154",
+        "RP5C_FAMILY_00043",
+        "RP5C_FAMILY_00177",
         "RP5C_MARKET_SCOPE_0011",
         "RP5C_ONTOLOGY_ROLE_0014"
       ],
@@ -315,8 +315,8 @@
       "default_compute_from_universal_library_flag": false,
       "deleted_flag": false,
       "derived_from_classification_registry_refs": [
-        "RP5C_FAMILY_00093",
-        "RP5C_FAMILY_00206",
+        "RP5C_FAMILY_00103",
+        "RP5C_FAMILY_00233",
         "RP5C_MARKET_SCOPE_0011",
         "RP5C_ONTOLOGY_ROLE_0014"
       ],
@@ -380,8 +380,8 @@
       "default_compute_from_universal_library_flag": false,
       "deleted_flag": false,
       "derived_from_classification_registry_refs": [
-        "RP5C_FAMILY_00007",
-        "RP5C_FAMILY_00126",
+        "RP5C_FAMILY_00010",
+        "RP5C_FAMILY_00147",
         "RP5C_MARKET_SCOPE_0011",
         "RP5C_ONTOLOGY_ROLE_0002"
       ],
@@ -445,8 +445,8 @@
       "default_compute_from_universal_library_flag": false,
       "deleted_flag": false,
       "derived_from_classification_registry_refs": [
-        "RP5C_FAMILY_00007",
-        "RP5C_FAMILY_00126",
+        "RP5C_FAMILY_00010",
+        "RP5C_FAMILY_00147",
         "RP5C_MARKET_SCOPE_0011",
         "RP5C_ONTOLOGY_ROLE_0002"
       ],
@@ -511,8 +511,8 @@
       "default_compute_from_universal_library_flag": false,
       "deleted_flag": false,
       "derived_from_classification_registry_refs": [
-        "RP5C_FAMILY_00092",
-        "RP5C_FAMILY_00205",
+        "RP5C_FAMILY_00102",
+        "RP5C_FAMILY_00232",
         "RP5C_MARKET_SCOPE_0011",
         "RP5C_ONTOLOGY_ROLE_0002"
       ],
@@ -577,8 +577,8 @@
       "default_compute_from_universal_library_flag": false,
       "deleted_flag": false,
       "derived_from_classification_registry_refs": [
-        "RP5C_FAMILY_00008",
-        "RP5C_FAMILY_00127",
+        "RP5C_FAMILY_00011",
+        "RP5C_FAMILY_00148",
         "RP5C_MARKET_SCOPE_0011",
         "RP5C_ONTOLOGY_ROLE_0002"
       ],
@@ -633,6 +633,71 @@
     },
     {
       "agent_responsibility_group_refs": [
+        "RP5C_RESP_GROUP_0002"
+      ],
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
+      "blocker_codes": [
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION"
+      ],
+      "default_compute_from_universal_library_flag": false,
+      "deleted_flag": false,
+      "derived_from_classification_registry_refs": [
+        "RP5C_FAMILY_00008",
+        "RP5C_FAMILY_00145",
+        "RP5C_MARKET_SCOPE_0011",
+        "RP5C_ONTOLOGY_ROLE_0002"
+      ],
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000009"
+      ],
+      "downstream_agent_refs": [
+        "governance_agent",
+        "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D"
+      ],
+      "formula_family": "c",
+      "formula_id": "FORM_MAP3_CALIB_BRIER_001",
+      "global_ban_flag": false,
+      "identity_row_id": "RP5C_IDENTITY_00000024",
+      "identity_type": "FORMULA",
+      "immutable_qku_formula_library_ref": "docs/master_plan/generated/rp5c/immutable_qku_formula_library.jsonl",
+      "market_family": "unknown_needs_review",
+      "market_family_refs": [],
+      "market_scope": "unknown_needs_review",
+      "market_scope_or_platform_creates_trading_authority_flag": false,
+      "notes": "Stage-1 active universe overlay derived from market scope, platform applicability, ontology, family, and central route rules.",
+      "ontology_category": "calibration",
+      "platform_applicability_registry_refs": [
+        "RP5C_PLATFORM_APPLICABILITY_0008"
+      ],
+      "platform_applicability_states": [
+        "UNKNOWN_PLATFORM_SCOPE_NEEDS_REVIEW"
+      ],
+      "qku_family": "qku_c",
+      "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000009"
+      ],
+      "route_rule_refs": [
+        "RP5C_ROUTE_RULE_0002"
+      ],
+      "stage1_activation_row_id": "RP5C_STAGE1_ACTIVATION_00000009",
+      "stage1_active_candidate_flag": false,
+      "stage1_agents_must_not_default_compute_full_universe_flag": true,
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
+      "stage1_classification_states": [
+        "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW"
+      ],
+      "stage1_dormant_future_market_flag": true,
+      "stage1_seed_inclusion_flag": false,
+      "stage1_supporting_market_agnostic_flag": false,
+      "stage_access_mode": "UNKNOWN_NEEDS_REVIEW",
+      "universal_library_identity_ref": "RP5C_IDENTITY_00000024"
+    },
+    {
+      "agent_responsibility_group_refs": [
         "RP5C_RESP_GROUP_0014"
       ],
       "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
@@ -645,13 +710,13 @@
       "default_compute_from_universal_library_flag": false,
       "deleted_flag": false,
       "derived_from_classification_registry_refs": [
-        "RP5C_FAMILY_00093",
-        "RP5C_FAMILY_00206",
+        "RP5C_FAMILY_00103",
+        "RP5C_FAMILY_00233",
         "RP5C_MARKET_SCOPE_0011",
         "RP5C_ONTOLOGY_ROLE_0014"
       ],
       "derived_route_resolution_refs": [
-        "RP5C_ROUTE_RESOLUTION_00000009"
+        "RP5C_ROUTE_RESOLUTION_00000010"
       ],
       "downstream_agent_refs": [
         "governance_agent",
@@ -663,7 +728,7 @@
       "formula_family": "unknown_needs_review",
       "formula_id": "FORM_MAP3_CALIB_ECE_001",
       "global_ban_flag": false,
-      "identity_row_id": "RP5C_IDENTITY_00000024",
+      "identity_row_id": "RP5C_IDENTITY_00000026",
       "identity_type": "FORMULA",
       "immutable_qku_formula_library_ref": "docs/master_plan/generated/rp5c/immutable_qku_formula_library.jsonl",
       "market_family": "unknown_needs_review",
@@ -681,75 +746,10 @@
       "qku_family": "qku_unknown_needs_review",
       "qku_id": null,
       "qku_market_applicability_matrix_refs": [
-        "RP5C_QKU_MARKET_APPLICABILITY_00000009"
-      ],
-      "route_rule_refs": [
-        "RP5C_ROUTE_RULE_0014"
-      ],
-      "stage1_activation_row_id": "RP5C_STAGE1_ACTIVATION_00000009",
-      "stage1_active_candidate_flag": false,
-      "stage1_agents_must_not_default_compute_full_universe_flag": true,
-      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
-      "stage1_classification_states": [
-        "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW"
-      ],
-      "stage1_dormant_future_market_flag": true,
-      "stage1_seed_inclusion_flag": false,
-      "stage1_supporting_market_agnostic_flag": false,
-      "stage_access_mode": "UNKNOWN_NEEDS_REVIEW",
-      "universal_library_identity_ref": "RP5C_IDENTITY_00000024"
-    },
-    {
-      "agent_responsibility_group_refs": [
-        "RP5C_RESP_GROUP_0002"
-      ],
-      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
-      "blocker_codes": [
-        "NEEDS_MARKET_SCOPE_CLASSIFICATION"
-      ],
-      "default_compute_from_universal_library_flag": false,
-      "deleted_flag": false,
-      "derived_from_classification_registry_refs": [
-        "RP5C_FAMILY_00007",
-        "RP5C_FAMILY_00126",
-        "RP5C_MARKET_SCOPE_0011",
-        "RP5C_ONTOLOGY_ROLE_0002"
-      ],
-      "derived_route_resolution_refs": [
-        "RP5C_ROUTE_RESOLUTION_00000010"
-      ],
-      "downstream_agent_refs": [
-        "governance_agent",
-        "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
-      ],
-      "downstream_pr_refs": [
-        "PR168-RP5D"
-      ],
-      "formula_family": "calibration_and_scoring",
-      "formula_id": "FORM_MAP3_CALIB_ECE_001",
-      "global_ban_flag": false,
-      "identity_row_id": "RP5C_IDENTITY_00000027",
-      "identity_type": "FORMULA",
-      "immutable_qku_formula_library_ref": "docs/master_plan/generated/rp5c/immutable_qku_formula_library.jsonl",
-      "market_family": "unknown_needs_review",
-      "market_family_refs": [],
-      "market_scope": "unknown_needs_review",
-      "market_scope_or_platform_creates_trading_authority_flag": false,
-      "notes": "Stage-1 active universe overlay derived from market scope, platform applicability, ontology, family, and central route rules.",
-      "ontology_category": "calibration",
-      "platform_applicability_registry_refs": [
-        "RP5C_PLATFORM_APPLICABILITY_0008"
-      ],
-      "platform_applicability_states": [
-        "UNKNOWN_PLATFORM_SCOPE_NEEDS_REVIEW"
-      ],
-      "qku_family": "qku_calibration_and_scoring",
-      "qku_id": null,
-      "qku_market_applicability_matrix_refs": [
         "RP5C_QKU_MARKET_APPLICABILITY_00000010"
       ],
       "route_rule_refs": [
-        "RP5C_ROUTE_RULE_0002"
+        "RP5C_ROUTE_RULE_0014"
       ],
       "stage1_activation_row_id": "RP5C_STAGE1_ACTIVATION_00000010",
       "stage1_active_candidate_flag": false,
@@ -762,7 +762,7 @@
       "stage1_seed_inclusion_flag": false,
       "stage1_supporting_market_agnostic_flag": false,
       "stage_access_mode": "UNKNOWN_NEEDS_REVIEW",
-      "universal_library_identity_ref": "RP5C_IDENTITY_00000027"
+      "universal_library_identity_ref": "RP5C_IDENTITY_00000026"
     },
     {
       "agent_responsibility_group_refs": [
@@ -775,8 +775,8 @@
       "default_compute_from_universal_library_flag": false,
       "deleted_flag": false,
       "derived_from_classification_registry_refs": [
-        "RP5C_FAMILY_00007",
-        "RP5C_FAMILY_00126",
+        "RP5C_FAMILY_00010",
+        "RP5C_FAMILY_00147",
         "RP5C_MARKET_SCOPE_0011",
         "RP5C_ONTOLOGY_ROLE_0002"
       ],
@@ -793,7 +793,7 @@
       "formula_family": "calibration_and_scoring",
       "formula_id": "FORM_MAP3_CALIB_ECE_001",
       "global_ban_flag": false,
-      "identity_row_id": "RP5C_IDENTITY_00000028",
+      "identity_row_id": "RP5C_IDENTITY_00000029",
       "identity_type": "FORMULA",
       "immutable_qku_formula_library_ref": "docs/master_plan/generated/rp5c/immutable_qku_formula_library.jsonl",
       "market_family": "unknown_needs_review",
@@ -827,7 +827,7 @@
       "stage1_seed_inclusion_flag": false,
       "stage1_supporting_market_agnostic_flag": false,
       "stage_access_mode": "UNKNOWN_NEEDS_REVIEW",
-      "universal_library_identity_ref": "RP5C_IDENTITY_00000028"
+      "universal_library_identity_ref": "RP5C_IDENTITY_00000029"
     },
     {
       "agent_responsibility_group_refs": [
@@ -835,14 +835,13 @@
       ],
       "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
-        "NEEDS_FORMULA_EXPRESSION_REF",
         "NEEDS_MARKET_SCOPE_CLASSIFICATION"
       ],
       "default_compute_from_universal_library_flag": false,
       "deleted_flag": false,
       "derived_from_classification_registry_refs": [
-        "RP5C_FAMILY_00092",
-        "RP5C_FAMILY_00205",
+        "RP5C_FAMILY_00010",
+        "RP5C_FAMILY_00147",
         "RP5C_MARKET_SCOPE_0011",
         "RP5C_ONTOLOGY_ROLE_0002"
       ],
@@ -856,10 +855,10 @@
       "downstream_pr_refs": [
         "PR168-RP5D"
       ],
-      "formula_family": "unit_dimension_invariant",
+      "formula_family": "calibration_and_scoring",
       "formula_id": "FORM_MAP3_CALIB_ECE_001",
       "global_ban_flag": false,
-      "identity_row_id": "RP5C_IDENTITY_00000029",
+      "identity_row_id": "RP5C_IDENTITY_00000030",
       "identity_type": "FORMULA",
       "immutable_qku_formula_library_ref": "docs/master_plan/generated/rp5c/immutable_qku_formula_library.jsonl",
       "market_family": "unknown_needs_review",
@@ -874,7 +873,7 @@
       "platform_applicability_states": [
         "UNKNOWN_PLATFORM_SCOPE_NEEDS_REVIEW"
       ],
-      "qku_family": "qku_unit_dimension_invariant",
+      "qku_family": "qku_calibration_and_scoring",
       "qku_id": null,
       "qku_market_applicability_matrix_refs": [
         "RP5C_QKU_MARKET_APPLICABILITY_00000012"
@@ -893,7 +892,7 @@
       "stage1_seed_inclusion_flag": false,
       "stage1_supporting_market_agnostic_flag": false,
       "stage_access_mode": "UNKNOWN_NEEDS_REVIEW",
-      "universal_library_identity_ref": "RP5C_IDENTITY_00000029"
+      "universal_library_identity_ref": "RP5C_IDENTITY_00000030"
     },
     {
       "agent_responsibility_group_refs": [
@@ -907,8 +906,8 @@
       "default_compute_from_universal_library_flag": false,
       "deleted_flag": false,
       "derived_from_classification_registry_refs": [
-        "RP5C_FAMILY_00008",
-        "RP5C_FAMILY_00127",
+        "RP5C_FAMILY_00102",
+        "RP5C_FAMILY_00232",
         "RP5C_MARKET_SCOPE_0011",
         "RP5C_ONTOLOGY_ROLE_0002"
       ],
@@ -922,10 +921,10 @@
       "downstream_pr_refs": [
         "PR168-RP5D"
       ],
-      "formula_family": "calibration_or_lcb_component",
+      "formula_family": "unit_dimension_invariant",
       "formula_id": "FORM_MAP3_CALIB_ECE_001",
       "global_ban_flag": false,
-      "identity_row_id": "RP5C_IDENTITY_00000036",
+      "identity_row_id": "RP5C_IDENTITY_00000031",
       "identity_type": "FORMULA",
       "immutable_qku_formula_library_ref": "docs/master_plan/generated/rp5c/immutable_qku_formula_library.jsonl",
       "market_family": "unknown_needs_review",
@@ -940,7 +939,7 @@
       "platform_applicability_states": [
         "UNKNOWN_PLATFORM_SCOPE_NEEDS_REVIEW"
       ],
-      "qku_family": "qku_calibration_or_lcb_component",
+      "qku_family": "qku_unit_dimension_invariant",
       "qku_id": null,
       "qku_market_applicability_matrix_refs": [
         "RP5C_QKU_MARKET_APPLICABILITY_00000013"
@@ -959,7 +958,7 @@
       "stage1_seed_inclusion_flag": false,
       "stage1_supporting_market_agnostic_flag": false,
       "stage_access_mode": "UNKNOWN_NEEDS_REVIEW",
-      "universal_library_identity_ref": "RP5C_IDENTITY_00000036"
+      "universal_library_identity_ref": "RP5C_IDENTITY_00000031"
     },
     {
       "agent_responsibility_group_refs": [
@@ -967,13 +966,14 @@
       ],
       "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
+        "NEEDS_FORMULA_EXPRESSION_REF",
         "NEEDS_MARKET_SCOPE_CLASSIFICATION"
       ],
       "default_compute_from_universal_library_flag": false,
       "deleted_flag": false,
       "derived_from_classification_registry_refs": [
-        "RP5C_FAMILY_00007",
-        "RP5C_FAMILY_00126",
+        "RP5C_FAMILY_00011",
+        "RP5C_FAMILY_00148",
         "RP5C_MARKET_SCOPE_0011",
         "RP5C_ONTOLOGY_ROLE_0002"
       ],
@@ -987,10 +987,10 @@
       "downstream_pr_refs": [
         "PR168-RP5D"
       ],
-      "formula_family": "calibration_and_scoring",
-      "formula_id": "FORM_MAP3_CALIB_LOGLOSS_001",
+      "formula_family": "calibration_or_lcb_component",
+      "formula_id": "FORM_MAP3_CALIB_ECE_001",
       "global_ban_flag": false,
-      "identity_row_id": "RP5C_IDENTITY_00000041",
+      "identity_row_id": "RP5C_IDENTITY_00000038",
       "identity_type": "FORMULA",
       "immutable_qku_formula_library_ref": "docs/master_plan/generated/rp5c/immutable_qku_formula_library.jsonl",
       "market_family": "unknown_needs_review",
@@ -1005,7 +1005,7 @@
       "platform_applicability_states": [
         "UNKNOWN_PLATFORM_SCOPE_NEEDS_REVIEW"
       ],
-      "qku_family": "qku_calibration_and_scoring",
+      "qku_family": "qku_calibration_or_lcb_component",
       "qku_id": null,
       "qku_market_applicability_matrix_refs": [
         "RP5C_QKU_MARKET_APPLICABILITY_00000014"
@@ -1024,7 +1024,72 @@
       "stage1_seed_inclusion_flag": false,
       "stage1_supporting_market_agnostic_flag": false,
       "stage_access_mode": "UNKNOWN_NEEDS_REVIEW",
-      "universal_library_identity_ref": "RP5C_IDENTITY_00000041"
+      "universal_library_identity_ref": "RP5C_IDENTITY_00000038"
+    },
+    {
+      "agent_responsibility_group_refs": [
+        "RP5C_RESP_GROUP_0002"
+      ],
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
+      "blocker_codes": [
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION"
+      ],
+      "default_compute_from_universal_library_flag": false,
+      "deleted_flag": false,
+      "derived_from_classification_registry_refs": [
+        "RP5C_FAMILY_00010",
+        "RP5C_FAMILY_00147",
+        "RP5C_MARKET_SCOPE_0011",
+        "RP5C_ONTOLOGY_ROLE_0002"
+      ],
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000015"
+      ],
+      "downstream_agent_refs": [
+        "governance_agent",
+        "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D"
+      ],
+      "formula_family": "calibration_and_scoring",
+      "formula_id": "FORM_MAP3_CALIB_LOGLOSS_001",
+      "global_ban_flag": false,
+      "identity_row_id": "RP5C_IDENTITY_00000043",
+      "identity_type": "FORMULA",
+      "immutable_qku_formula_library_ref": "docs/master_plan/generated/rp5c/immutable_qku_formula_library.jsonl",
+      "market_family": "unknown_needs_review",
+      "market_family_refs": [],
+      "market_scope": "unknown_needs_review",
+      "market_scope_or_platform_creates_trading_authority_flag": false,
+      "notes": "Stage-1 active universe overlay derived from market scope, platform applicability, ontology, family, and central route rules.",
+      "ontology_category": "calibration",
+      "platform_applicability_registry_refs": [
+        "RP5C_PLATFORM_APPLICABILITY_0008"
+      ],
+      "platform_applicability_states": [
+        "UNKNOWN_PLATFORM_SCOPE_NEEDS_REVIEW"
+      ],
+      "qku_family": "qku_calibration_and_scoring",
+      "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000015"
+      ],
+      "route_rule_refs": [
+        "RP5C_ROUTE_RULE_0002"
+      ],
+      "stage1_activation_row_id": "RP5C_STAGE1_ACTIVATION_00000015",
+      "stage1_active_candidate_flag": false,
+      "stage1_agents_must_not_default_compute_full_universe_flag": true,
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
+      "stage1_classification_states": [
+        "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW"
+      ],
+      "stage1_dormant_future_market_flag": true,
+      "stage1_seed_inclusion_flag": false,
+      "stage1_supporting_market_agnostic_flag": false,
+      "stage_access_mode": "UNKNOWN_NEEDS_REVIEW",
+      "universal_library_identity_ref": "RP5C_IDENTITY_00000043"
     },
     {
       "agent_responsibility_group_refs": [
@@ -1039,13 +1104,13 @@
       "default_compute_from_universal_library_flag": false,
       "deleted_flag": false,
       "derived_from_classification_registry_refs": [
-        "RP5C_FAMILY_00092",
-        "RP5C_FAMILY_00205",
+        "RP5C_FAMILY_00102",
+        "RP5C_FAMILY_00232",
         "RP5C_MARKET_SCOPE_0011",
         "RP5C_ONTOLOGY_ROLE_0014"
       ],
       "derived_route_resolution_refs": [
-        "RP5C_ROUTE_RESOLUTION_00000015"
+        "RP5C_ROUTE_RESOLUTION_00000016"
       ],
       "downstream_agent_refs": [
         "governance_agent",
@@ -1057,7 +1122,7 @@
       "formula_family": "unit_dimension_invariant",
       "formula_id": "FORM_MAP3_CALIB_LOGLOSS_001",
       "global_ban_flag": false,
-      "identity_row_id": "RP5C_IDENTITY_00000043",
+      "identity_row_id": "RP5C_IDENTITY_00000045",
       "identity_type": "FORMULA",
       "immutable_qku_formula_library_ref": "docs/master_plan/generated/rp5c/immutable_qku_formula_library.jsonl",
       "market_family": "unknown_needs_review",
@@ -1075,12 +1140,12 @@
       "qku_family": "qku_unit_dimension_invariant",
       "qku_id": null,
       "qku_market_applicability_matrix_refs": [
-        "RP5C_QKU_MARKET_APPLICABILITY_00000015"
+        "RP5C_QKU_MARKET_APPLICABILITY_00000016"
       ],
       "route_rule_refs": [
         "RP5C_ROUTE_RULE_0014"
       ],
-      "stage1_activation_row_id": "RP5C_STAGE1_ACTIVATION_00000015",
+      "stage1_activation_row_id": "RP5C_STAGE1_ACTIVATION_00000016",
       "stage1_active_candidate_flag": false,
       "stage1_agents_must_not_default_compute_full_universe_flag": true,
       "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
@@ -1091,7 +1156,7 @@
       "stage1_seed_inclusion_flag": false,
       "stage1_supporting_market_agnostic_flag": false,
       "stage_access_mode": "UNKNOWN_NEEDS_REVIEW",
-      "universal_library_identity_ref": "RP5C_IDENTITY_00000043"
+      "universal_library_identity_ref": "RP5C_IDENTITY_00000045"
     },
     {
       "agent_responsibility_group_refs": [
@@ -1105,13 +1170,13 @@
       "default_compute_from_universal_library_flag": false,
       "deleted_flag": false,
       "derived_from_classification_registry_refs": [
-        "RP5C_FAMILY_00008",
-        "RP5C_FAMILY_00127",
+        "RP5C_FAMILY_00011",
+        "RP5C_FAMILY_00148",
         "RP5C_MARKET_SCOPE_0011",
         "RP5C_ONTOLOGY_ROLE_0002"
       ],
       "derived_route_resolution_refs": [
-        "RP5C_ROUTE_RESOLUTION_00000016"
+        "RP5C_ROUTE_RESOLUTION_00000017"
       ],
       "downstream_agent_refs": [
         "governance_agent",
@@ -1123,7 +1188,7 @@
       "formula_family": "calibration_or_lcb_component",
       "formula_id": "FORM_MAP3_CALIB_LOGLOSS_001",
       "global_ban_flag": false,
-      "identity_row_id": "RP5C_IDENTITY_00000054",
+      "identity_row_id": "RP5C_IDENTITY_00000056",
       "identity_type": "FORMULA",
       "immutable_qku_formula_library_ref": "docs/master_plan/generated/rp5c/immutable_qku_formula_library.jsonl",
       "market_family": "unknown_needs_review",
@@ -1141,12 +1206,12 @@
       "qku_family": "qku_calibration_or_lcb_component",
       "qku_id": null,
       "qku_market_applicability_matrix_refs": [
-        "RP5C_QKU_MARKET_APPLICABILITY_00000016"
+        "RP5C_QKU_MARKET_APPLICABILITY_00000017"
       ],
       "route_rule_refs": [
         "RP5C_ROUTE_RULE_0002"
       ],
-      "stage1_activation_row_id": "RP5C_STAGE1_ACTIVATION_00000016",
+      "stage1_activation_row_id": "RP5C_STAGE1_ACTIVATION_00000017",
       "stage1_active_candidate_flag": false,
       "stage1_agents_must_not_default_compute_full_universe_flag": true,
       "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
@@ -1157,7 +1222,73 @@
       "stage1_seed_inclusion_flag": false,
       "stage1_supporting_market_agnostic_flag": false,
       "stage_access_mode": "UNKNOWN_NEEDS_REVIEW",
-      "universal_library_identity_ref": "RP5C_IDENTITY_00000054"
+      "universal_library_identity_ref": "RP5C_IDENTITY_00000056"
+    },
+    {
+      "agent_responsibility_group_refs": [
+        "RP5C_RESP_GROUP_0014"
+      ],
+      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
+      "blocker_codes": [
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION",
+        "NEEDS_ONTOLOGY_CLASSIFICATION"
+      ],
+      "default_compute_from_universal_library_flag": false,
+      "deleted_flag": false,
+      "derived_from_classification_registry_refs": [
+        "RP5C_FAMILY_00008",
+        "RP5C_FAMILY_00145",
+        "RP5C_MARKET_SCOPE_0011",
+        "RP5C_ONTOLOGY_ROLE_0014"
+      ],
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000018"
+      ],
+      "downstream_agent_refs": [
+        "governance_agent",
+        "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D"
+      ],
+      "formula_family": "c",
+      "formula_id": "FORM_MAP3_CALIB_LOGLOSS_001",
+      "global_ban_flag": false,
+      "identity_row_id": "RP5C_IDENTITY_00000057",
+      "identity_type": "FORMULA",
+      "immutable_qku_formula_library_ref": "docs/master_plan/generated/rp5c/immutable_qku_formula_library.jsonl",
+      "market_family": "unknown_needs_review",
+      "market_family_refs": [],
+      "market_scope": "unknown_needs_review",
+      "market_scope_or_platform_creates_trading_authority_flag": false,
+      "notes": "Stage-1 active universe overlay derived from market scope, platform applicability, ontology, family, and central route rules.",
+      "ontology_category": "unknown_needs_review",
+      "platform_applicability_registry_refs": [
+        "RP5C_PLATFORM_APPLICABILITY_0008"
+      ],
+      "platform_applicability_states": [
+        "UNKNOWN_PLATFORM_SCOPE_NEEDS_REVIEW"
+      ],
+      "qku_family": "qku_c",
+      "qku_id": null,
+      "qku_market_applicability_matrix_refs": [
+        "RP5C_QKU_MARKET_APPLICABILITY_00000018"
+      ],
+      "route_rule_refs": [
+        "RP5C_ROUTE_RULE_0014"
+      ],
+      "stage1_activation_row_id": "RP5C_STAGE1_ACTIVATION_00000018",
+      "stage1_active_candidate_flag": false,
+      "stage1_agents_must_not_default_compute_full_universe_flag": true,
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
+      "stage1_classification_states": [
+        "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW"
+      ],
+      "stage1_dormant_future_market_flag": true,
+      "stage1_seed_inclusion_flag": false,
+      "stage1_supporting_market_agnostic_flag": false,
+      "stage_access_mode": "UNKNOWN_NEEDS_REVIEW",
+      "universal_library_identity_ref": "RP5C_IDENTITY_00000057"
     },
     {
       "agent_responsibility_group_refs": [
@@ -1173,13 +1304,13 @@
       "default_compute_from_universal_library_flag": false,
       "deleted_flag": false,
       "derived_from_classification_registry_refs": [
-        "RP5C_FAMILY_00093",
-        "RP5C_FAMILY_00206",
+        "RP5C_FAMILY_00103",
+        "RP5C_FAMILY_00233",
         "RP5C_MARKET_SCOPE_0011",
         "RP5C_ONTOLOGY_ROLE_0014"
       ],
       "derived_route_resolution_refs": [
-        "RP5C_ROUTE_RESOLUTION_00000017"
+        "RP5C_ROUTE_RESOLUTION_00000019"
       ],
       "downstream_agent_refs": [
         "governance_agent",
@@ -1191,7 +1322,7 @@
       "formula_family": "unknown_needs_review",
       "formula_id": "FORM_MAP3_DWAVE_001",
       "global_ban_flag": false,
-      "identity_row_id": "RP5C_IDENTITY_00000055",
+      "identity_row_id": "RP5C_IDENTITY_00000059",
       "identity_type": "FORMULA",
       "immutable_qku_formula_library_ref": "docs/master_plan/generated/rp5c/immutable_qku_formula_library.jsonl",
       "market_family": "unknown_needs_review",
@@ -1207,137 +1338,6 @@
         "UNKNOWN_PLATFORM_SCOPE_NEEDS_REVIEW"
       ],
       "qku_family": "qku_unknown_needs_review",
-      "qku_id": null,
-      "qku_market_applicability_matrix_refs": [
-        "RP5C_QKU_MARKET_APPLICABILITY_00000017"
-      ],
-      "route_rule_refs": [
-        "RP5C_ROUTE_RULE_0014"
-      ],
-      "stage1_activation_row_id": "RP5C_STAGE1_ACTIVATION_00000017",
-      "stage1_active_candidate_flag": false,
-      "stage1_agents_must_not_default_compute_full_universe_flag": true,
-      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
-      "stage1_classification_states": [
-        "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW"
-      ],
-      "stage1_dormant_future_market_flag": true,
-      "stage1_seed_inclusion_flag": false,
-      "stage1_supporting_market_agnostic_flag": false,
-      "stage_access_mode": "UNKNOWN_NEEDS_REVIEW",
-      "universal_library_identity_ref": "RP5C_IDENTITY_00000055"
-    },
-    {
-      "agent_responsibility_group_refs": [
-        "RP5C_RESP_GROUP_0011"
-      ],
-      "applicability_mode": "CROSS_MARKET_SHARED",
-      "blocker_codes": [],
-      "default_compute_from_universal_library_flag": false,
-      "deleted_flag": false,
-      "derived_from_classification_registry_refs": [
-        "RP5C_FAMILY_00043",
-        "RP5C_FAMILY_00160",
-        "RP5C_MARKET_SCOPE_0002",
-        "RP5C_ONTOLOGY_ROLE_0011"
-      ],
-      "derived_route_resolution_refs": [
-        "RP5C_ROUTE_RESOLUTION_00000018"
-      ],
-      "downstream_agent_refs": [
-        "governance_agent",
-        "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
-      ],
-      "downstream_pr_refs": [
-        "PR168-RP5D"
-      ],
-      "formula_family": "formulaplugincontractv1",
-      "formula_id": "FORM_MAP3_DWAVE_001",
-      "global_ban_flag": false,
-      "identity_row_id": "RP5C_IDENTITY_00000059",
-      "identity_type": "FORMULA",
-      "immutable_qku_formula_library_ref": "docs/master_plan/generated/rp5c/immutable_qku_formula_library.jsonl",
-      "market_family": "market_agnostic",
-      "market_family_refs": [],
-      "market_scope": "market_agnostic",
-      "market_scope_or_platform_creates_trading_authority_flag": false,
-      "notes": "Stage-1 active universe overlay derived from market scope, platform applicability, ontology, family, and central route rules.",
-      "ontology_category": "quantum_objective_constraint",
-      "platform_applicability_registry_refs": [
-        "RP5C_PLATFORM_APPLICABILITY_0004"
-      ],
-      "platform_applicability_states": [
-        "THREE_PLATFORM_COMMON"
-      ],
-      "qku_family": "qku_formulaplugincontractv1",
-      "qku_id": null,
-      "qku_market_applicability_matrix_refs": [
-        "RP5C_QKU_MARKET_APPLICABILITY_00000018"
-      ],
-      "route_rule_refs": [
-        "RP5C_ROUTE_RULE_0011"
-      ],
-      "stage1_activation_row_id": "RP5C_STAGE1_ACTIVATION_00000018",
-      "stage1_active_candidate_flag": false,
-      "stage1_agents_must_not_default_compute_full_universe_flag": true,
-      "stage1_classification_state": "STAGE1_PREDICTION_MARKET_SUPPORTING_MARKET_AGNOSTIC",
-      "stage1_classification_states": [
-        "STAGE1_PREDICTION_MARKET_SUPPORTING_MARKET_AGNOSTIC",
-        "THREE_PLATFORM_COMMON"
-      ],
-      "stage1_dormant_future_market_flag": false,
-      "stage1_seed_inclusion_flag": false,
-      "stage1_supporting_market_agnostic_flag": true,
-      "stage_access_mode": "AVAILABLE_ON_DEMAND",
-      "universal_library_identity_ref": "RP5C_IDENTITY_00000059"
-    },
-    {
-      "agent_responsibility_group_refs": [
-        "RP5C_RESP_GROUP_0014"
-      ],
-      "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
-      "blocker_codes": [
-        "NEEDS_FORMULA_EXPRESSION_REF",
-        "NEEDS_MARKET_SCOPE_CLASSIFICATION",
-        "NEEDS_ONTOLOGY_CLASSIFICATION"
-      ],
-      "default_compute_from_universal_library_flag": false,
-      "deleted_flag": false,
-      "derived_from_classification_registry_refs": [
-        "RP5C_FAMILY_00092",
-        "RP5C_FAMILY_00205",
-        "RP5C_MARKET_SCOPE_0011",
-        "RP5C_ONTOLOGY_ROLE_0014"
-      ],
-      "derived_route_resolution_refs": [
-        "RP5C_ROUTE_RESOLUTION_00000019"
-      ],
-      "downstream_agent_refs": [
-        "governance_agent",
-        "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
-      ],
-      "downstream_pr_refs": [
-        "PR168-RP5D"
-      ],
-      "formula_family": "unit_dimension_invariant",
-      "formula_id": "FORM_MAP3_DWAVE_001",
-      "global_ban_flag": false,
-      "identity_row_id": "RP5C_IDENTITY_00000060",
-      "identity_type": "FORMULA",
-      "immutable_qku_formula_library_ref": "docs/master_plan/generated/rp5c/immutable_qku_formula_library.jsonl",
-      "market_family": "unknown_needs_review",
-      "market_family_refs": [],
-      "market_scope": "unknown_needs_review",
-      "market_scope_or_platform_creates_trading_authority_flag": false,
-      "notes": "Stage-1 active universe overlay derived from market scope, platform applicability, ontology, family, and central route rules.",
-      "ontology_category": "unknown_needs_review",
-      "platform_applicability_registry_refs": [
-        "RP5C_PLATFORM_APPLICABILITY_0008"
-      ],
-      "platform_applicability_states": [
-        "UNKNOWN_PLATFORM_SCOPE_NEEDS_REVIEW"
-      ],
-      "qku_family": "qku_unit_dimension_invariant",
       "qku_id": null,
       "qku_market_applicability_matrix_refs": [
         "RP5C_QKU_MARKET_APPLICABILITY_00000019"
@@ -1356,23 +1356,21 @@
       "stage1_seed_inclusion_flag": false,
       "stage1_supporting_market_agnostic_flag": false,
       "stage_access_mode": "UNKNOWN_NEEDS_REVIEW",
-      "universal_library_identity_ref": "RP5C_IDENTITY_00000060"
+      "universal_library_identity_ref": "RP5C_IDENTITY_00000059"
     },
     {
       "agent_responsibility_group_refs": [
-        "RP5C_RESP_GROUP_0002"
+        "RP5C_RESP_GROUP_0011"
       ],
       "applicability_mode": "CROSS_MARKET_SHARED",
-      "blocker_codes": [
-        "NEEDS_FORMULA_EXPRESSION_REF"
-      ],
+      "blocker_codes": [],
       "default_compute_from_universal_library_flag": false,
       "deleted_flag": false,
       "derived_from_classification_registry_refs": [
-        "RP5C_FAMILY_00071",
-        "RP5C_FAMILY_00185",
+        "RP5C_FAMILY_00049",
+        "RP5C_FAMILY_00183",
         "RP5C_MARKET_SCOPE_0002",
-        "RP5C_ONTOLOGY_ROLE_0002"
+        "RP5C_ONTOLOGY_ROLE_0011"
       ],
       "derived_route_resolution_refs": [
         "RP5C_ROUTE_RESOLUTION_00000020"
@@ -1384,10 +1382,10 @@
       "downstream_pr_refs": [
         "PR168-RP5D"
       ],
-      "formula_family": "quantum_objective_coefficient",
+      "formula_family": "formulaplugincontractv1",
       "formula_id": "FORM_MAP3_DWAVE_001",
       "global_ban_flag": false,
-      "identity_row_id": "RP5C_IDENTITY_00000066",
+      "identity_row_id": "RP5C_IDENTITY_00000063",
       "identity_type": "FORMULA",
       "immutable_qku_formula_library_ref": "docs/master_plan/generated/rp5c/immutable_qku_formula_library.jsonl",
       "market_family": "market_agnostic",
@@ -1395,20 +1393,20 @@
       "market_scope": "market_agnostic",
       "market_scope_or_platform_creates_trading_authority_flag": false,
       "notes": "Stage-1 active universe overlay derived from market scope, platform applicability, ontology, family, and central route rules.",
-      "ontology_category": "calibration",
+      "ontology_category": "quantum_objective_constraint",
       "platform_applicability_registry_refs": [
         "RP5C_PLATFORM_APPLICABILITY_0004"
       ],
       "platform_applicability_states": [
         "THREE_PLATFORM_COMMON"
       ],
-      "qku_family": "qku_quantum_objective_coefficient",
+      "qku_family": "qku_formulaplugincontractv1",
       "qku_id": null,
       "qku_market_applicability_matrix_refs": [
         "RP5C_QKU_MARKET_APPLICABILITY_00000020"
       ],
       "route_rule_refs": [
-        "RP5C_ROUTE_RULE_0002"
+        "RP5C_ROUTE_RULE_0011"
       ],
       "stage1_activation_row_id": "RP5C_STAGE1_ACTIVATION_00000020",
       "stage1_active_candidate_flag": false,
@@ -1422,7 +1420,7 @@
       "stage1_seed_inclusion_flag": false,
       "stage1_supporting_market_agnostic_flag": true,
       "stage_access_mode": "AVAILABLE_ON_DEMAND",
-      "universal_library_identity_ref": "RP5C_IDENTITY_00000066"
+      "universal_library_identity_ref": "RP5C_IDENTITY_00000063"
     },
     {
       "agent_responsibility_group_refs": [
@@ -1430,7 +1428,6 @@
       ],
       "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
-        "NEEDS_FAMILY_CLASSIFICATION",
         "NEEDS_FORMULA_EXPRESSION_REF",
         "NEEDS_MARKET_SCOPE_CLASSIFICATION",
         "NEEDS_ONTOLOGY_CLASSIFICATION"
@@ -1438,8 +1435,8 @@
       "default_compute_from_universal_library_flag": false,
       "deleted_flag": false,
       "derived_from_classification_registry_refs": [
-        "RP5C_FAMILY_00093",
-        "RP5C_FAMILY_00206",
+        "RP5C_FAMILY_00102",
+        "RP5C_FAMILY_00232",
         "RP5C_MARKET_SCOPE_0011",
         "RP5C_ONTOLOGY_ROLE_0014"
       ],
@@ -1453,10 +1450,10 @@
       "downstream_pr_refs": [
         "PR168-RP5D"
       ],
-      "formula_family": "unknown_needs_review",
-      "formula_id": "FORM_MAP3_DWAVE_002",
+      "formula_family": "unit_dimension_invariant",
+      "formula_id": "FORM_MAP3_DWAVE_001",
       "global_ban_flag": false,
-      "identity_row_id": "RP5C_IDENTITY_00000071",
+      "identity_row_id": "RP5C_IDENTITY_00000064",
       "identity_type": "FORMULA",
       "immutable_qku_formula_library_ref": "docs/master_plan/generated/rp5c/immutable_qku_formula_library.jsonl",
       "market_family": "unknown_needs_review",
@@ -1471,7 +1468,7 @@
       "platform_applicability_states": [
         "UNKNOWN_PLATFORM_SCOPE_NEEDS_REVIEW"
       ],
-      "qku_family": "qku_unknown_needs_review",
+      "qku_family": "qku_unit_dimension_invariant",
       "qku_id": null,
       "qku_market_applicability_matrix_refs": [
         "RP5C_QKU_MARKET_APPLICABILITY_00000021"
@@ -1490,21 +1487,23 @@
       "stage1_seed_inclusion_flag": false,
       "stage1_supporting_market_agnostic_flag": false,
       "stage_access_mode": "UNKNOWN_NEEDS_REVIEW",
-      "universal_library_identity_ref": "RP5C_IDENTITY_00000071"
+      "universal_library_identity_ref": "RP5C_IDENTITY_00000064"
     },
     {
       "agent_responsibility_group_refs": [
-        "RP5C_RESP_GROUP_0011"
+        "RP5C_RESP_GROUP_0002"
       ],
       "applicability_mode": "CROSS_MARKET_SHARED",
-      "blocker_codes": [],
+      "blocker_codes": [
+        "NEEDS_FORMULA_EXPRESSION_REF"
+      ],
       "default_compute_from_universal_library_flag": false,
       "deleted_flag": false,
       "derived_from_classification_registry_refs": [
-        "RP5C_FAMILY_00070",
-        "RP5C_FAMILY_00184",
+        "RP5C_FAMILY_00081",
+        "RP5C_FAMILY_00212",
         "RP5C_MARKET_SCOPE_0002",
-        "RP5C_ONTOLOGY_ROLE_0011"
+        "RP5C_ONTOLOGY_ROLE_0002"
       ],
       "derived_route_resolution_refs": [
         "RP5C_ROUTE_RESOLUTION_00000022"
@@ -1516,10 +1515,10 @@
       "downstream_pr_refs": [
         "PR168-RP5D"
       ],
-      "formula_family": "quantum_forward_optimization",
-      "formula_id": "FORM_MAP3_DWAVE_002",
+      "formula_family": "quantum_objective_coefficient",
+      "formula_id": "FORM_MAP3_DWAVE_001",
       "global_ban_flag": false,
-      "identity_row_id": "RP5C_IDENTITY_00000072",
+      "identity_row_id": "RP5C_IDENTITY_00000070",
       "identity_type": "FORMULA",
       "immutable_qku_formula_library_ref": "docs/master_plan/generated/rp5c/immutable_qku_formula_library.jsonl",
       "market_family": "market_agnostic",
@@ -1527,20 +1526,20 @@
       "market_scope": "market_agnostic",
       "market_scope_or_platform_creates_trading_authority_flag": false,
       "notes": "Stage-1 active universe overlay derived from market scope, platform applicability, ontology, family, and central route rules.",
-      "ontology_category": "quantum_objective_constraint",
+      "ontology_category": "calibration",
       "platform_applicability_registry_refs": [
         "RP5C_PLATFORM_APPLICABILITY_0004"
       ],
       "platform_applicability_states": [
         "THREE_PLATFORM_COMMON"
       ],
-      "qku_family": "qku_quantum_forward_optimization",
+      "qku_family": "qku_quantum_objective_coefficient",
       "qku_id": null,
       "qku_market_applicability_matrix_refs": [
         "RP5C_QKU_MARKET_APPLICABILITY_00000022"
       ],
       "route_rule_refs": [
-        "RP5C_ROUTE_RULE_0011"
+        "RP5C_ROUTE_RULE_0002"
       ],
       "stage1_activation_row_id": "RP5C_STAGE1_ACTIVATION_00000022",
       "stage1_active_candidate_flag": false,
@@ -1554,7 +1553,7 @@
       "stage1_seed_inclusion_flag": false,
       "stage1_supporting_market_agnostic_flag": true,
       "stage_access_mode": "AVAILABLE_ON_DEMAND",
-      "universal_library_identity_ref": "RP5C_IDENTITY_00000072"
+      "universal_library_identity_ref": "RP5C_IDENTITY_00000070"
     },
     {
       "agent_responsibility_group_refs": [
@@ -1562,6 +1561,7 @@
       ],
       "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
+        "NEEDS_FAMILY_CLASSIFICATION",
         "NEEDS_FORMULA_EXPRESSION_REF",
         "NEEDS_MARKET_SCOPE_CLASSIFICATION",
         "NEEDS_ONTOLOGY_CLASSIFICATION"
@@ -1569,8 +1569,8 @@
       "default_compute_from_universal_library_flag": false,
       "deleted_flag": false,
       "derived_from_classification_registry_refs": [
-        "RP5C_FAMILY_00092",
-        "RP5C_FAMILY_00205",
+        "RP5C_FAMILY_00103",
+        "RP5C_FAMILY_00233",
         "RP5C_MARKET_SCOPE_0011",
         "RP5C_ONTOLOGY_ROLE_0014"
       ],
@@ -1584,10 +1584,10 @@
       "downstream_pr_refs": [
         "PR168-RP5D"
       ],
-      "formula_family": "unit_dimension_invariant",
+      "formula_family": "unknown_needs_review",
       "formula_id": "FORM_MAP3_DWAVE_002",
       "global_ban_flag": false,
-      "identity_row_id": "RP5C_IDENTITY_00000073",
+      "identity_row_id": "RP5C_IDENTITY_00000075",
       "identity_type": "FORMULA",
       "immutable_qku_formula_library_ref": "docs/master_plan/generated/rp5c/immutable_qku_formula_library.jsonl",
       "market_family": "unknown_needs_review",
@@ -1602,7 +1602,7 @@
       "platform_applicability_states": [
         "UNKNOWN_PLATFORM_SCOPE_NEEDS_REVIEW"
       ],
-      "qku_family": "qku_unit_dimension_invariant",
+      "qku_family": "qku_unknown_needs_review",
       "qku_id": null,
       "qku_market_applicability_matrix_refs": [
         "RP5C_QKU_MARKET_APPLICABILITY_00000023"
@@ -1621,21 +1621,19 @@
       "stage1_seed_inclusion_flag": false,
       "stage1_supporting_market_agnostic_flag": false,
       "stage_access_mode": "UNKNOWN_NEEDS_REVIEW",
-      "universal_library_identity_ref": "RP5C_IDENTITY_00000073"
+      "universal_library_identity_ref": "RP5C_IDENTITY_00000075"
     },
     {
       "agent_responsibility_group_refs": [
         "RP5C_RESP_GROUP_0011"
       ],
       "applicability_mode": "CROSS_MARKET_SHARED",
-      "blocker_codes": [
-        "NEEDS_FORMULA_EXPRESSION_REF"
-      ],
+      "blocker_codes": [],
       "default_compute_from_universal_library_flag": false,
       "deleted_flag": false,
       "derived_from_classification_registry_refs": [
-        "RP5C_FAMILY_00071",
-        "RP5C_FAMILY_00185",
+        "RP5C_FAMILY_00080",
+        "RP5C_FAMILY_00211",
         "RP5C_MARKET_SCOPE_0002",
         "RP5C_ONTOLOGY_ROLE_0011"
       ],
@@ -1649,10 +1647,10 @@
       "downstream_pr_refs": [
         "PR168-RP5D"
       ],
-      "formula_family": "quantum_objective_coefficient",
+      "formula_family": "quantum_forward_optimization",
       "formula_id": "FORM_MAP3_DWAVE_002",
       "global_ban_flag": false,
-      "identity_row_id": "RP5C_IDENTITY_00000083",
+      "identity_row_id": "RP5C_IDENTITY_00000076",
       "identity_type": "FORMULA",
       "immutable_qku_formula_library_ref": "docs/master_plan/generated/rp5c/immutable_qku_formula_library.jsonl",
       "market_family": "market_agnostic",
@@ -1667,7 +1665,7 @@
       "platform_applicability_states": [
         "THREE_PLATFORM_COMMON"
       ],
-      "qku_family": "qku_quantum_objective_coefficient",
+      "qku_family": "qku_quantum_forward_optimization",
       "qku_id": null,
       "qku_market_applicability_matrix_refs": [
         "RP5C_QKU_MARKET_APPLICABILITY_00000024"
@@ -1687,7 +1685,7 @@
       "stage1_seed_inclusion_flag": false,
       "stage1_supporting_market_agnostic_flag": true,
       "stage_access_mode": "AVAILABLE_ON_DEMAND",
-      "universal_library_identity_ref": "RP5C_IDENTITY_00000083"
+      "universal_library_identity_ref": "RP5C_IDENTITY_00000076"
     },
     {
       "agent_responsibility_group_refs": [
@@ -1695,7 +1693,6 @@
       ],
       "applicability_mode": "UNKNOWN_NEEDS_REVIEW",
       "blocker_codes": [
-        "NEEDS_FAMILY_CLASSIFICATION",
         "NEEDS_FORMULA_EXPRESSION_REF",
         "NEEDS_MARKET_SCOPE_CLASSIFICATION",
         "NEEDS_ONTOLOGY_CLASSIFICATION"
@@ -1703,8 +1700,8 @@
       "default_compute_from_universal_library_flag": false,
       "deleted_flag": false,
       "derived_from_classification_registry_refs": [
-        "RP5C_FAMILY_00093",
-        "RP5C_FAMILY_00206",
+        "RP5C_FAMILY_00102",
+        "RP5C_FAMILY_00232",
         "RP5C_MARKET_SCOPE_0011",
         "RP5C_ONTOLOGY_ROLE_0014"
       ],
@@ -1718,10 +1715,10 @@
       "downstream_pr_refs": [
         "PR168-RP5D"
       ],
-      "formula_family": "unknown_needs_review",
-      "formula_id": "FORM_MAP3_FDR_BH_001",
+      "formula_family": "unit_dimension_invariant",
+      "formula_id": "FORM_MAP3_DWAVE_002",
       "global_ban_flag": false,
-      "identity_row_id": "RP5C_IDENTITY_00000084",
+      "identity_row_id": "RP5C_IDENTITY_00000077",
       "identity_type": "FORMULA",
       "immutable_qku_formula_library_ref": "docs/master_plan/generated/rp5c/immutable_qku_formula_library.jsonl",
       "market_family": "unknown_needs_review",
@@ -1736,7 +1733,7 @@
       "platform_applicability_states": [
         "UNKNOWN_PLATFORM_SCOPE_NEEDS_REVIEW"
       ],
-      "qku_family": "qku_unknown_needs_review",
+      "qku_family": "qku_unit_dimension_invariant",
       "qku_id": null,
       "qku_market_applicability_matrix_refs": [
         "RP5C_QKU_MARKET_APPLICABILITY_00000025"
@@ -1755,7 +1752,7 @@
       "stage1_seed_inclusion_flag": false,
       "stage1_supporting_market_agnostic_flag": false,
       "stage_access_mode": "UNKNOWN_NEEDS_REVIEW",
-      "universal_library_identity_ref": "RP5C_IDENTITY_00000084"
+      "universal_library_identity_ref": "RP5C_IDENTITY_00000077"
     }
   ],
   "report_version": "PR168-RP5C-v1.0",
@@ -1765,13 +1762,13 @@
   "silent_skipped_input_artifact_count": 0,
   "source_truth_authority_created_count": 0,
   "stack_combination_materialization_count": 0,
-  "stage1_activation_row_count": 10189,
+  "stage1_activation_row_count": 10936,
   "stage1_agent_computation_universe_seed_is_default_stage1_seed": true,
   "stage1_agents_must_not_default_compute_full_universe": true,
   "stage1_classification_state_counts": {
-    "STAGE1_PREDICTION_MARKET_ACTIVE_CANDIDATE": 530,
+    "STAGE1_PREDICTION_MARKET_ACTIVE_CANDIDATE": 1218,
     "STAGE1_PREDICTION_MARKET_SUPPORTING_MARKET_AGNOSTIC": 1471,
-    "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW": 8188
+    "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW": 8247
   },
   "stage1_classification_states": [
     "STAGE1_PREDICTION_MARKET_ACTIVE_CANDIDATE",
@@ -1786,11 +1783,11 @@
     "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW"
   ],
   "stage1_default_full_universe_compute_route_count": 0,
-  "stage1_prediction_market_qku_activation_view_row_count": 10189,
+  "stage1_prediction_market_qku_activation_view_row_count": 10936,
   "stage1_seed_market_scope_counts": {
     "market_agnostic": 1471,
-    "prediction_market": 530
+    "prediction_market": 1218
   },
-  "stage1_seed_row_count": 2001,
+  "stage1_seed_row_count": 2689,
   "trade_simulation_count": 0
 }

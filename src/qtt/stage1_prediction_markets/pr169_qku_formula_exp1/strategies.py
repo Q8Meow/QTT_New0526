@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Any
 
 from .policy import STRATEGY_TEMPLATES
+from .catalog import CARD_NAMES
 
 
 STRATEGY_IDS = (
@@ -54,26 +55,112 @@ _SETS = (
 "F33 F34 F35 F46 G09 G10 G11 G12 G13 H10 H11 H12 H13 I07 I08 I09 J03 J06",
 )
 
-_QKUS = {
-    "SH":"QKU_PMKT_EDGE_EXPECTED_VALUE_AND_PAYOFF",
-    "PM":"QKU_PMKT_EDGE_MARKET_IMPLIED_PROBABILITY_AND_PARITY",
-    "PF":"QKU_PMKT_EDGE_PORTFOLIO_AND_MARGINAL_UTILITY",
-    "LM":"QKU_PMKT_EDGE_REGIME_AND_SCENARIO_LADDER",
-    "QPM":"QKU_PMKT_EDGE_QUANTUM_FORWARD_OPTIMIZATION",
+# The 38 mappings resolve repository-owned RP5C identities individually.  They
+# are deliberately not inferred from a formula family and the unique identity
+# count is derived by the builder/validator.
+_STRATEGY_QKUS = (
+    "QKU_PMKT_EDGE_EXPECTED_VALUE_AND_PAYOFF_019",
+    "QKU_PMKT_EDGE_FILL_LATENCY_CAPACITY_007",
+    "QKU_PMKT_EDGE_FILL_LATENCY_CAPACITY_012",
+    "QKU_PMKT_EDGE_FILL_LATENCY_CAPACITY_018",
+    "QKU_PMKT_EDGE_FILL_LATENCY_CAPACITY_023",
+    "QKU_PMKT_EDGE_FILL_LATENCY_CAPACITY_024",
+    "QKU_PMKT_EDGE_FILL_LATENCY_CAPACITY_029",
+    "QKU_PMKT_EDGE_ORDERBOOK_MICROSTRUCTURE_003",
+    "QKU_PMKT_EDGE_MARKET_IMPLIED_PROBABILITY_AND_PARITY_001",
+    "QKU_PMKT_EDGE_MARKET_IMPLIED_PROBABILITY_AND_PARITY_002",
+    "QKU_PMKT_EDGE_MARKET_IMPLIED_PROBABILITY_AND_PARITY_014",
+    "QKU_PMKT_EDGE_MARKET_IMPLIED_PROBABILITY_AND_PARITY_021",
+    "QKU_PMKT_EDGE_MARKET_IMPLIED_PROBABILITY_AND_PARITY_022",
+    "QKU_PMKT_EDGE_VENUE_MECHANICS_CONSTRAINTS_010",
+    "QKU_PMKT_EDGE_VENUE_MECHANICS_CONSTRAINTS_017",
+    "QKU_PMKT_EDGE_PORTFOLIO_AND_MARGINAL_UTILITY_036",
+    "QKU_PMKT_EDGE_PORTFOLIO_AND_MARGINAL_UTILITY_037",
+    "QKU_PMKT_EDGE_PORTFOLIO_AND_MARGINAL_UTILITY_038",
+    "QKU_PMKT_EDGE_PORTFOLIO_AND_MARGINAL_UTILITY_039",
+    "QKU_PMKT_EDGE_FDR_AND_OVERFIT_CONTROLS_033",
+    "QKU_PMKT_EDGE_FDR_AND_OVERFIT_CONTROLS_034",
+    "QKU_PMKT_EDGE_REGIME_AND_SCENARIO_LADDER_006",
+    "QKU_PMKT_EDGE_REGIME_AND_SCENARIO_LADDER_008",
+    "QKU_PMKT_EDGE_REGIME_AND_SCENARIO_LADDER_040",
+    "QKU_PMKT_EDGE_TRADE_PRICE_HISTORY_FEATURES_004",
+    "QKU_PMKT_EDGE_TRADE_PRICE_HISTORY_FEATURES_005",
+    "QKU_PMKT_EDGE_TRADE_PRICE_HISTORY_FEATURES_013",
+    "QKU_PMKT_EDGE_QUANTUM_FORWARD_OPTIMIZATION_041",
+    "QKU_PMKT_EDGE_QUANTUM_FORWARD_OPTIMIZATION_042",
+    "QKU_PMKT_EDGE_QUANTUM_FORWARD_OPTIMIZATION_043",
+    "QKU_PMKT_EDGE_QUANTUM_FORWARD_OPTIMIZATION_044",
+    "QKU_PMKT_EDGE_CALIBRATION_AND_SCORING_030",
+    "QKU_PMKT_EDGE_CALIBRATION_AND_SCORING_031",
+    "QKU_PMKT_EDGE_CALIBRATION_AND_SCORING_032",
+    "QKU_PMKT_EDGE_SOURCE_EVIDENCE_AND_DATA_QUALITY_045",
+    "QKU_PMKT_EDGE_SOURCE_EVIDENCE_AND_DATA_QUALITY_046",
+    "QKU_PMKT_EDGE_SOURCE_EVIDENCE_AND_DATA_QUALITY_047",
+    "QKU_PMKT_EDGE_FDR_AND_OVERFIT_CONTROLS_035",
+)
+
+_SEMANTIC_KEY = dict(CARD_NAMES)
+
+# Card-level data dependencies.  A strategy includes an edge only when both
+# nodes are present; otherwise the input is resolved from the typed PRETRADE
+# snapshot.  This is deliberately not an adjacency chain.
+_CARD_DEPENDENCIES: dict[str, tuple[str, ...]] = {
+    "A05": ("A03",), "A06": ("A05",), "A07": ("A05",),
+    "A08": ("A23", "A24"), "A11": ("A09", "A10"),
+    "A12": ("A03", "A11", "B09"), "A13": ("A11",),
+    "A21": ("A15", "A16"), "A22": ("A05", "A25"),
+    "A25": ("A03", "A05"), "A27": ("A05", "B07", "B09"),
+    "A28": ("A27",), "A29": ("C08", "C09", "C21"),
+    "A33": ("A03", "B09", "B14"),
+    "B02": ("B01",), "B08": ("B03",), "B10": ("B09",),
+    "B15": ("A33", "B09", "B10"), "B16": ("B10", "B15"),
+    "B19": ("B17",),
+    "C09": ("C08",), "C19": ("A25",), "C20": ("C19",),
+    "C21": ("A03",), "C24": ("C19",),
+    "D11": ("A25",), "D12": ("A23", "D11"),
+    "D14": ("A07",), "D20": ("C19",), "D26": ("A25", "D11"),
+    "D27": ("A25",), "D29": ("D11",), "D30": ("D21",),
+    "E10": ("B09", "B10"), "E11": ("E10",), "E12": ("E01", "E02", "E05", "E07", "E08", "E11"),
+    "F02": ("F01",), "F03": ("F01",), "F04": ("F03",),
+    "F05": ("F03",), "F06": ("F03",), "F07": ("F03",),
+    "F08": ("F07",), "F09": ("F07",), "F10": ("F03",),
+    "F11": ("F03",), "F12": ("F03",), "F13": ("F03",), "F14": ("F03",),
+    "F29": ("F03",), "F30": ("F18", "F19", "F29"),
+    "F31": ("F32",), "F32": ("F25", "F29"),
+    "F33": ("F32",), "F34": ("F32",), "F35": ("F32", "F46"),
+    "G10": ("G09",), "G13": ("F46",), "G14": ("D29",),
+    "H02": ("H01",), "H09": ("H08",), "H10": ("F25",),
+    "H11": ("F46",), "H13": ("F46", "I07", "I08", "I09"),
+    "I06": ("I05",), "I09": ("I07", "I08"),
+    "J01": ("D16",), "J02": ("B09",), "J03": ("D27",),
+    "J04": ("D29",), "J06": ("F03",), "J07": ("F03", "F06", "F07", "J06"),
+    "J08": ("F03", "J06"),
 }
 
 
 def strategy_rows() -> list[dict[str, Any]]:
     rows=[]
-    for strategy_id,name,encoded in zip(STRATEGY_IDS,STRATEGY_TEMPLATES,_SETS,strict=True):
+    for strategy_id,name,encoded,qku_id in zip(STRATEGY_IDS,STRATEGY_TEMPLATES,_SETS,_STRATEGY_QKUS,strict=True):
         cards=encoded.split()
-        edges=[[cards[index-1],cards[index]] for index in range(1,len(cards))]
+        card_set=set(cards)
+        edges=sorted([
+            [dependency,card]
+            for card in cards
+            for dependency in _CARD_DEPENDENCIES.get(card,())
+            if dependency in card_set
+        ])
         prefix="QPM" if strategy_id.startswith("QPM") else strategy_id[:2]
         rows.append({
-            "strategy_template_id":strategy_id,"exact_source_name":name,"canonical_QKU_or_current_equivalent_ref":_QKUS[prefix],
+            "strategy_template_id":strategy_id,"exact_source_name":name,"canonical_QKU_or_current_equivalent_ref":qku_id,
             "formula_DAG_refs":cards,"dependency_edges":edges,
-            "input_maps":{card:{"fixture_input":f"authorized_fixture::{card}"} for card in cards},
-            "output_maps":{card:f"receipt::{strategy_id}::{card}" for card in cards},
+            "input_maps":{
+                card:({
+                    f"upstream_{dependency.lower()}":f"node::{strategy_id}::{dependency}::{_SEMANTIC_KEY[dependency].lower()}"
+                    for dependency in _CARD_DEPENDENCIES.get(card,()) if dependency in card_set
+                } or {"typed_provider_input":f"PRETRADE_SNAPSHOT::{strategy_id}::{card}::{_SEMANTIC_KEY[card].lower()}"})
+                for card in cards
+            },
+            "output_maps":{card:f"node::{strategy_id}::{card}::{_SEMANTIC_KEY[card].lower()}" for card in cards},
             "applicability_predicate":f"context.strategy_template_id == '{strategy_id}'",
             "state_barriers":["INPUT_LOCK","SEED_IF_STOCHASTIC","NO_TRADE_GATE"],
             "fallback_path":"DETERMINISTIC_NO_TRADE_THEN_BOUNDED_RECOVERY",
@@ -90,5 +177,5 @@ def strategy_rows() -> list[dict[str, Any]]:
     return rows
 
 
-if len(STRATEGY_IDS)!=38 or len(_SETS)!=38:
+if len(STRATEGY_IDS)!=38 or len(_SETS)!=38 or len(_STRATEGY_QKUS)!=38:
     raise RuntimeError("strategy closure must contain 38 table-driven DAGs")

@@ -10,7 +10,7 @@
   "generated_artifacts": [
     {
       "artifact_ref": "docs/master_plan/generated/pr169_svc1/service_registry.jsonl",
-      "row_count": 1188
+      "row_count": 1401
     },
     {
       "artifact_ref": "docs/master_plan/generated/pr169_svc1/read_model_snapshots.generated.jsonl",
@@ -126,7 +126,7 @@
     },
     {
       "artifact_ref": "docs/master_plan/generated/pr169_svc1/qku_formula_compute_route_views.generated.jsonl",
-      "row_count": 5
+      "row_count": 218
     },
     {
       "artifact_ref": "docs/master_plan/generated/pr169_svc1/agent_llm_task_route_views.generated.jsonl",

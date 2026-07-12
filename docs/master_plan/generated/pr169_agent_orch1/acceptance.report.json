@@ -53,7 +53,7 @@
   "quantum_backend_execution_created": false,
   "registry_canonical": true,
   "report_name": "acceptance",
-  "row_count": 461,
+  "row_count": 674,
   "runtime_llm_provider_calls_created": false,
   "svc1_readiness1_pretrade1_mem1_consumed_not_redone": true,
   "validator": "tools/validate_pr169_agent_orch1.py"

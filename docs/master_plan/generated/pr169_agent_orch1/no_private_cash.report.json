@@ -49,6 +49,6 @@
   "private_cash_read_count": 0,
   "projection_version": "PR169-AGENT-ORCH1-v2.2",
   "report_name": "no_private_cash",
-  "row_count": 461,
+  "row_count": 674,
   "validator": "tools/validate_pr169_agent_orch1.py"
 }

@@ -1,0 +1,4886 @@
+[
+  {
+    "card_id": "A01",
+    "expected": {
+      "decimal": "1.30"
+    },
+    "inputs": {
+      "realized_net_cash": [
+        "1.10",
+        "-0.20",
+        "0.40"
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "TOTAL_REALIZED_NET_CASH"
+  },
+  {
+    "card_id": "A02",
+    "expected": {
+      "decimal": "2.5"
+    },
+    "inputs": {
+      "entry_cash": 7,
+      "exit_or_settlement_cash": 10,
+      "unique_costs": [
+        1
+      ],
+      "unique_rebates": [
+        0.5
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "BRANCH_NET_CASH"
+  },
+  {
+    "card_id": "A03",
+    "expected": {
+      "decimal": "1.25"
+    },
+    "inputs": {
+      "branch_net_cash": [
+        -1,
+        2
+      ],
+      "probabilities": [
+        0.25,
+        0.75
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "EXPECTED_NET_CASH_SCENARIO"
+  },
+  {
+    "card_id": "A04",
+    "expected": {
+      "lower_bound": {
+        "decimal": "-1"
+      },
+      "upper_bound": {
+        "decimal": "2"
+      }
+    },
+    "inputs": {
+      "admissible_expected_net_cash": [
+        -1,
+        0.5,
+        2
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "ROBUST_NET_CASH_INTERVAL"
+  },
+  {
+    "card_id": "A05",
+    "expected": {
+      "method": "DEPENDENCE_AWARE_BOOTSTRAP",
+      "net_cash_lcb": {
+        "decimal": "-1"
+      },
+      "net_cash_ucb": {
+        "decimal": "2"
+      }
+    },
+    "inputs": {
+      "confidence_method": "DEPENDENCE_AWARE_BOOTSTRAP",
+      "estimator_samples": [
+        -1,
+        0,
+        1,
+        2,
+        3
+      ],
+      "lower_quantile": 0.2,
+      "upper_quantile": 0.8
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "NET_CASH_LCB_UCB"
+  },
+  {
+    "card_id": "A06",
+    "expected": {
+      "decimal": "0.5"
+    },
+    "inputs": {
+      "expected_holding_seconds": 4,
+      "net_cash_lcb": 2
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "NET_CASH_VELOCITY"
+  },
+  {
+    "card_id": "A07",
+    "expected": {
+      "decimal": "0.1"
+    },
+    "inputs": {
+      "capital_at_risk": 5,
+      "expected_holding_seconds": 4,
+      "net_cash_lcb": 2
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "CAPITAL_TIME_EFFICIENCY"
+  },
+  {
+    "card_id": "A08",
+    "expected": {
+      "decimal": "2"
+    },
+    "inputs": {
+      "capital_opportunity_cost_hurdle": 1.5,
+      "deployed_capital": 1000,
+      "minimum_profit_bps": 10,
+      "owner_minimum_cash_profit": 1,
+      "risk_reserve_hurdle": 1.25,
+      "round_trip_cost_uncertainty_hurdle": 2
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "REQUIRED_EXIT_PROFIT"
+  },
+  {
+    "card_id": "A09",
+    "expected": {
+      "fillable_quantity": {
+        "decimal": "3"
+      },
+      "gross_cash": {
+        "decimal": "1.7"
+      },
+      "vwap": {
+        "decimal": "0.5666666666666666666666666667"
+      }
+    },
+    "inputs": {
+      "levels": [
+        {
+          "price": 0.6,
+          "quantity": 2
+        },
+        {
+          "price": 0.5,
+          "quantity": 2
+        }
+      ],
+      "quantity": 3
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "DEPTH_WALK_SELL_PROCEEDS"
+  },
+  {
+    "card_id": "A10",
+    "expected": {
+      "fillable_quantity": {
+        "decimal": "3"
+      },
+      "gross_cash": {
+        "decimal": "1.3"
+      },
+      "vwap": {
+        "decimal": "0.4333333333333333333333333333"
+      }
+    },
+    "inputs": {
+      "levels": [
+        {
+          "price": 0.4,
+          "quantity": 2
+        },
+        {
+          "price": 0.5,
+          "quantity": 2
+        }
+      ],
+      "quantity": 3
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "DEPTH_WALK_BUY_COST"
+  },
+  {
+    "card_id": "A11",
+    "expected": {
+      "accounting_class": "PROJECTED_EXECUTABLE_NET_CASH",
+      "executable_exit_net_cash": {
+        "decimal": "2.4"
+      },
+      "fillable_quantity": {
+        "decimal": "3"
+      }
+    },
+    "inputs": {
+      "earned_rebates": 0.1,
+      "executable_liquidation_cash": 10,
+      "fillable_quantity": 3,
+      "position_cash_basis": 7,
+      "remaining_unique_cash_costs": 0.2,
+      "unique_exit_fees": 0.5
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "EXECUTABLE_EXIT_NET_CASH"
+  },
+  {
+    "card_id": "A12",
+    "expected": {
+      "branch_distribution": [
+        {
+          "decimal": "2"
+        },
+        {
+          "decimal": "1"
+        },
+        {
+          "decimal": "-0.5"
+        }
+      ],
+      "fill_adjusted_net_cash": {
+        "decimal": "1.20"
+      }
+    },
+    "inputs": {
+      "fill_branch_net_cash": [
+        2,
+        1,
+        -0.5
+      ],
+      "fill_branch_probabilities": [
+        0.5,
+        0.3,
+        0.2
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "FILL_ADJUSTED_EXECUTABLE_NET_CASH"
+  },
+  {
+    "card_id": "A13",
+    "expected": {
+      "partial_harvest_action_value": {
+        "decimal": "2.25"
+      },
+      "partial_harvest_cash": {
+        "decimal": "1.5"
+      },
+      "realized_cash_excludes_continuation": true,
+      "residual_continuation_value": {
+        "decimal": "0.75"
+      }
+    },
+    "inputs": {
+      "harvested_quantity_net_cash": 1.5,
+      "residual_position_continuation_value": 0.75
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "PARTIAL_HARVEST_NET_CASH"
+  },
+  {
+    "card_id": "A14",
+    "expected": {
+      "amount": {
+        "decimal": "1.25"
+      },
+      "pnl_state": "PROJECTED_EXECUTABLE_NET_CASH"
+    },
+    "inputs": {
+      "amount": 1.25,
+      "executable_quote_available": true,
+      "exit_fill_final": false,
+      "ledger_reconciled": false,
+      "settlement_final": false
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "PNL_STATE_CLASSIFICATION"
+  },
+  {
+    "card_id": "A15",
+    "expected": {
+      "decimal": "8.5"
+    },
+    "inputs": {
+      "executable_liquidation_cash": 10,
+      "immediate_exit_costs": 1,
+      "residual_obligations": 0.5
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "EXIT_NOW_VALUE"
+  },
+  {
+    "card_id": "A16",
+    "expected": {
+      "decimal": "6.50"
+    },
+    "inputs": {
+      "capital_lock_cost": 0.5,
+      "future_liquidation_or_settlement_cash": [
+        9,
+        11,
+        12
+      ],
+      "model_risk_reserve": 0.25,
+      "remaining_costs": 1,
+      "tail_risk_reserve": 0.75
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "CONTINUE_HOLDING_VALUE"
+  },
+  {
+    "card_id": "A17",
+    "expected": {
+      "decimal": "6.00"
+    },
+    "inputs": {
+      "capital_lock_cost": 0.25,
+      "remaining_fees": 0.5,
+      "resolution_risk_reserve": 0.75,
+      "settlement_cash_scenarios": [
+        8,
+        10,
+        12
+      ],
+      "settlement_delay_risk": 0.5
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "HOLD_TO_SETTLEMENT_VALUE"
+  },
+  {
+    "card_id": "A18",
+    "expected": {
+      "decimal": "10.25"
+    },
+    "inputs": {
+      "basis_risk_reserve": 0.5,
+      "executable_combined_cash_after_hedge": 12,
+      "incremental_costs": 1,
+      "residual_exposure_cost": 0.25
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "HEDGE_OFFSET_VALUE"
+  },
+  {
+    "card_id": "A19",
+    "expected": {
+      "decimal": "10"
+    },
+    "inputs": {
+      "exit_now_value": 8,
+      "incremental_switching_costs": 1,
+      "opposite_position_robust_value": 3
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "REVERSE_VALUE"
+  },
+  {
+    "card_id": "A20",
+    "expected": {
+      "action_value_vector": {
+        "EXIT": {
+          "decimal": "2"
+        },
+        "HOLD": {
+          "decimal": "1"
+        },
+        "NO_ACTION": {
+          "decimal": "0"
+        }
+      },
+      "policy_authority": false,
+      "selected_action_candidate": "EXIT",
+      "selected_value": {
+        "decimal": "2"
+      }
+    },
+    "inputs": {
+      "action_values": {
+        "EXIT": 2,
+        "HOLD": 1,
+        "NO_ACTION": 0
+      }
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "FORWARD_ACTION_VALUE"
+  },
+  {
+    "card_id": "A21",
+    "expected": {
+      "exit_trigger": true,
+      "margin": {
+        "decimal": "0.5"
+      }
+    },
+    "inputs": {
+      "continuation_hysteresis": 0.5,
+      "continue_value": 2,
+      "exit_now_value": 3
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "CONTINUATION_HYSTERESIS"
+  },
+  {
+    "card_id": "A22",
+    "expected": {
+      "margin": {
+        "decimal": "1"
+      },
+      "reentry_allowed": true
+    },
+    "inputs": {
+      "cooldown_complete": true,
+      "exit_hurdle": 1,
+      "fresh_state_change": true,
+      "new_entry_hurdle": 2,
+      "new_entry_net_cash_lcb": 3
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "REENTRY_EDGE_HURDLE"
+  },
+  {
+    "card_id": "A23",
+    "expected": {
+      "decimal": "1"
+    },
+    "inputs": {
+      "best_alternative_robust_utility": 3,
+      "current_position_robust_utility": 2
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "CAPITAL_OPPORTUNITY_COST"
+  },
+  {
+    "card_id": "A24",
+    "expected": {
+      "component_ids": [
+        "model",
+        "tail"
+      ],
+      "risk_reserve": {
+        "decimal": "1.5"
+      }
+    },
+    "inputs": {
+      "reserve_components": [
+        {
+          "amount": 1,
+          "component_id": "tail"
+        },
+        {
+          "amount": 0.5,
+          "component_id": "model"
+        }
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "RISK_RESERVE_HURDLE"
+  },
+  {
+    "card_id": "A25",
+    "expected": {
+      "decimal": "2"
+    },
+    "inputs": {
+      "candidate_robust_utility": 3,
+      "no_trade_robust_utility": 1
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "NO_TRADE_MARGIN"
+  },
+  {
+    "card_id": "A26",
+    "expected": {
+      "capital_seconds": {
+        "decimal": "150"
+      },
+      "drawdown": {
+        "decimal": "0.5"
+      },
+      "fees": {
+        "decimal": "0.75"
+      },
+      "gross_cash": {
+        "decimal": "15"
+      },
+      "impact": {
+        "decimal": "0.3"
+      },
+      "realized_net_cash": {
+        "decimal": "3"
+      },
+      "rebates": {
+        "decimal": "0.1"
+      },
+      "unique_economic_event_count": 2
+    },
+    "inputs": {
+      "child_rows": [
+        {
+          "capital_seconds": 100,
+          "drawdown": 0,
+          "economic_event_id": "fill-1",
+          "fees": 0.5,
+          "gross_cash": 10,
+          "impact": 0.2,
+          "realized_net_cash": 2,
+          "rebates": 0.1
+        },
+        {
+          "capital_seconds": 50,
+          "drawdown": 0.5,
+          "economic_event_id": "fill-2",
+          "fees": 0.25,
+          "gross_cash": 5,
+          "impact": 0.1,
+          "realized_net_cash": 1,
+          "rebates": 0
+        }
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "CAMPAIGN_CASH_AGGREGATES"
+  },
+  {
+    "card_id": "A27",
+    "expected": {
+      "marginal_utility": [
+        {
+          "decimal": "0.6"
+        },
+        {
+          "decimal": "0.2"
+        }
+      ],
+      "robust_utility_frontier": [
+        {
+          "decimal": "1"
+        },
+        {
+          "decimal": "1.6"
+        },
+        {
+          "decimal": "1.8"
+        }
+      ],
+      "size_ladder": [
+        {
+          "decimal": "1"
+        },
+        {
+          "decimal": "2"
+        },
+        {
+          "decimal": "3"
+        }
+      ]
+    },
+    "inputs": {
+      "robust_utilities": [
+        1,
+        1.6,
+        1.8
+      ],
+      "size_ladder": [
+        1,
+        2,
+        3
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "CAMPAIGN_CAPACITY_FRONTIER"
+  },
+  {
+    "card_id": "A28",
+    "expected": {
+      "decimal": "1"
+    },
+    "inputs": {
+      "candidate_additions": [
+        {
+          "additional_size": 1,
+          "constraints_satisfied": true,
+          "marginal_net_cash_lcb": 0.5
+        },
+        {
+          "additional_size": 2,
+          "constraints_satisfied": true,
+          "marginal_net_cash_lcb": -0.1
+        }
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "CAMPAIGN_REMAINING_CAPACITY"
+  },
+  {
+    "card_id": "A29",
+    "expected": {
+      "evidence_time": 10,
+      "stop": true,
+      "stop_reason": "SUCCESS"
+    },
+    "inputs": {
+      "evidence_time": 10,
+      "indicators": {
+        "EXPIRY": false,
+        "FAILURE": false,
+        "FUTILITY": false,
+        "INVALIDATION": false,
+        "OWNER_STOP": false,
+        "SUCCESS": true
+      }
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "EVIDENCE_STOP_STATISTICS"
+  },
+  {
+    "card_id": "A30",
+    "expected": {
+      "binding_version": "SYNTHETIC_FIXTURE_V1",
+      "fee": {
+        "decimal": "0.0480"
+      },
+      "fee_rule": "P_X_ONE_MINUS_P"
+    },
+    "inputs": {
+      "fee_rate": 0.02,
+      "fee_rule": "P_X_ONE_MINUS_P",
+      "fee_schedule_version": "SYNTHETIC_FIXTURE_V1",
+      "price": 0.4,
+      "quantity": 10
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "VENUE_FEE_GENERIC"
+  },
+  {
+    "card_id": "A31",
+    "expected": {
+      "decimal": "0.0480"
+    },
+    "inputs": {
+      "fee_rate": 0.02,
+      "price": 0.4,
+      "shares": 10
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "FEE_CURVE_PRODUCT"
+  },
+  {
+    "card_id": "A32",
+    "expected": {
+      "decimal": "4.0"
+    },
+    "inputs": {
+      "own_fee_equivalent": 2,
+      "rebate_pool": 10,
+      "total_fee_equivalent": 5
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "MAKER_REBATE_SHARE"
+  },
+  {
+    "card_id": "A33",
+    "expected": {
+      "decimal": "0.20"
+    },
+    "inputs": {
+      "adverse_selection_reserve": 0.1,
+      "branch_net_cash": [
+        2,
+        -1
+      ],
+      "branch_probabilities": [
+        0.5,
+        0.5
+      ],
+      "inventory_reserve": 0.1,
+      "latency_model_reserve": 0.05,
+      "model_reserve": 0.05
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "NET_QUOTE_UTILITY"
+  },
+  {
+    "card_id": "B01",
+    "expected": {
+      "decimal": "0.63"
+    },
+    "inputs": {
+      "average_fill_price": 0.55,
+      "decision_price": 0.5,
+      "explicit_fees": 0.1,
+      "filled_quantity": 10,
+      "opportunity_cost_unfilled": 0.05,
+      "rebates": 0.02,
+      "side_sign": 1
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "IMPLEMENTATION_SHORTFALL"
+  },
+  {
+    "card_id": "B02",
+    "expected": {
+      "components": {
+        "delay_cost": {
+          "decimal": "0.1"
+        },
+        "fees": {
+          "decimal": "0.1"
+        },
+        "market_impact": {
+          "decimal": "0.3"
+        },
+        "negative_rebates": {
+          "decimal": "-0.02"
+        },
+        "opportunity_cost": {
+          "decimal": "0.05"
+        },
+        "residual": {
+          "decimal": "0"
+        },
+        "spread_cost": {
+          "decimal": "0.2"
+        }
+      },
+      "reconciliation_residual": {
+        "decimal": "0.00"
+      },
+      "total_execution_cost": {
+        "decimal": "0.73"
+      }
+    },
+    "inputs": {
+      "components": {
+        "delay_cost": 0.1,
+        "fees": 0.1,
+        "market_impact": 0.3,
+        "negative_rebates": -0.02,
+        "opportunity_cost": 0.05,
+        "residual": 0,
+        "spread_cost": 0.2
+      },
+      "total_execution_cost": 0.73
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "TCA_DECOMPOSITION_RECONCILIATION"
+  },
+  {
+    "card_id": "B03",
+    "expected": {
+      "effective_arrival_price": {
+        "decimal": "0.5166666666666666666666666667"
+      },
+      "effective_arrival_time": 10.2,
+      "fillable_quantity": {
+        "decimal": "3"
+      }
+    },
+    "inputs": {
+      "arrival_book_levels": [
+        {
+          "price": 0.5,
+          "quantity": 2
+        },
+        {
+          "price": 0.55,
+          "quantity": 2
+        }
+      ],
+      "arrival_latency_seconds": 0.2,
+      "decision_time": 10,
+      "quantity": 3
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "EFFECTIVE_ARRIVAL_PRICE"
+  },
+  {
+    "card_id": "B04",
+    "expected": {
+      "decimal": "0.10"
+    },
+    "inputs": {
+      "fill_price": 0.55,
+      "future_reference_price": 0.5,
+      "side_sign": 1
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "REALIZED_SPREAD"
+  },
+  {
+    "card_id": "B05",
+    "expected": {
+      "decimal": "-0.05"
+    },
+    "inputs": {
+      "fill_price": 0.55,
+      "future_reference_price": 0.5,
+      "side_sign": 1
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "SIGNED_MARKOUT"
+  },
+  {
+    "card_id": "B06",
+    "expected": {
+      "decimal": "0.50"
+    },
+    "inputs": {
+      "fill_price": 0.55,
+      "quantity": 10,
+      "reference_price": 0.5,
+      "side_sign": 1
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "SPREAD_COST"
+  },
+  {
+    "card_id": "B07",
+    "expected": {
+      "decimal": "0.50"
+    },
+    "inputs": {
+      "depth_walk_vwap": 0.55,
+      "quantity": 10,
+      "side_sign": 1,
+      "top_of_book_price": 0.5
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "DEPTH_IMPACT"
+  },
+  {
+    "card_id": "B08",
+    "expected": {
+      "decimal": "0.5"
+    },
+    "inputs": {
+      "robust_value_at_arrival": 1.5,
+      "robust_value_at_decision": 2
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "LATENCY_DECAY_COST"
+  },
+  {
+    "card_id": "B09",
+    "expected": 0.2591817793182821,
+    "inputs": {
+      "hazard_increments": [
+        0.1,
+        0.2
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "FILL_SURVIVAL_HAZARD"
+  },
+  {
+    "card_id": "B10",
+    "expected": {
+      "expected_fill_quantity": {
+        "decimal": "1.666666666666666666666666667"
+      },
+      "fill_probability": {
+        "decimal": "0.6666666666666666666666666667"
+      }
+    },
+    "inputs": {
+      "depletion_scenarios": [
+        3,
+        6,
+        10
+      ],
+      "order_remaining": 4,
+      "queue_ahead": 5
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "QUEUE_AHEAD_DEPLETION"
+  },
+  {
+    "card_id": "B11",
+    "expected": 0.2,
+    "inputs": {
+      "ask_size": 40,
+      "bid_size": 60
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "ORDERBOOK_IMBALANCE"
+  },
+  {
+    "card_id": "B12",
+    "expected": 0.46,
+    "inputs": {
+      "ask_size": 40,
+      "best_ask": 0.5,
+      "best_bid": 0.4,
+      "bid_size": 60
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "MICROPRICE"
+  },
+  {
+    "card_id": "B13",
+    "expected": {
+      "decimal": "3"
+    },
+    "inputs": {
+      "book_events": [
+        {
+          "ask_price": 0.5,
+          "ask_quantity": 8,
+          "bid_price": 0.4,
+          "bid_quantity": 10
+        },
+        {
+          "ask_price": 0.5,
+          "ask_quantity": 7,
+          "bid_price": 0.4,
+          "bid_quantity": 12
+        }
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "ORDER_FLOW_IMBALANCE"
+  },
+  {
+    "card_id": "B14",
+    "expected": {
+      "integrated_kernel_spectral_radius": 0.2,
+      "intensity": 0.1735758882342885
+    },
+    "inputs": {
+      "baseline_intensity": 0.1,
+      "evaluation_time": 2,
+      "events": [
+        {
+          "alpha": 0.2,
+          "beta": 1.0,
+          "event_time": 1
+        }
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "HAWKES_INTENSITY_CANDIDATE"
+  },
+  {
+    "card_id": "B15",
+    "expected": {
+      "routes": [
+        {
+          "route_id": "MAKER",
+          "utility": {
+            "decimal": "0.70"
+          }
+        },
+        {
+          "route_id": "TAKER",
+          "utility": {
+            "decimal": "0.5"
+          }
+        }
+      ],
+      "selected_route": "MAKER"
+    },
+    "inputs": {
+      "route_branches": [
+        {
+          "adverse_selection_reserve": 0.1,
+          "branch_net_cash": [
+            2,
+            -0.5
+          ],
+          "inventory_reserve": 0.1,
+          "latency_reserve": 0.05,
+          "model_reserve": 0.05,
+          "probabilities": [
+            0.6,
+            0.4
+          ],
+          "route_id": "MAKER"
+        },
+        {
+          "adverse_selection_reserve": 0,
+          "branch_net_cash": [
+            0.5
+          ],
+          "inventory_reserve": 0,
+          "latency_reserve": 0,
+          "model_reserve": 0,
+          "probabilities": [
+            1
+          ],
+          "route_id": "TAKER"
+        }
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "MAKER_TAKER_ROUTE_UTILITY"
+  },
+  {
+    "card_id": "B16",
+    "expected": {
+      "decimal": "0.4"
+    },
+    "inputs": {
+      "cancel_replace_cost": 0.1,
+      "keep_existing_order_utility": 1.5,
+      "new_order_after_priority_loss_utility": 2
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "CANCEL_REPLACE_VALUE"
+  },
+  {
+    "card_id": "B17",
+    "expected": {
+      "decimal": "0.490"
+    },
+    "inputs": {
+      "inventory": 2,
+      "reference_price": 0.5,
+      "risk_aversion": 0.1,
+      "variance_horizon": 0.05
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "AVELLANEDA_STOIKOV_RESERVATION_PRICE"
+  },
+  {
+    "card_id": "B18",
+    "expected": 0.49040164169432,
+    "inputs": {
+      "kappa": 2,
+      "risk_aversion": 0.1,
+      "variance_horizon": 0.05
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "AVELLANEDA_STOIKOV_HALF_SPREAD"
+  },
+  {
+    "card_id": "B19",
+    "expected": {
+      "decimal": "-0.010"
+    },
+    "inputs": {
+      "inventory": 2,
+      "risk_aversion": 0.1,
+      "variance_horizon": 0.05
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "INVENTORY_SKEW"
+  },
+  {
+    "card_id": "B20",
+    "expected": {
+      "remaining_tokens": 27.0,
+      "request_feasible": true
+    },
+    "inputs": {
+      "available_tokens": 20,
+      "capacity": 100,
+      "elapsed_seconds": 2,
+      "refill_rate": 5,
+      "request_cost": 3
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "RATE_LIMIT_BUDGET"
+  },
+  {
+    "card_id": "B21",
+    "expected": {
+      "remaining_limit": {
+        "decimal": "3"
+      },
+      "rolling_usage": {
+        "decimal": "7"
+      }
+    },
+    "inputs": {
+      "rolling_limit": 10,
+      "window_fills": [
+        {
+          "matched_contracts": 3
+        },
+        {
+          "matched_contracts": 4
+        }
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "ORDER_GROUP_ROLLING_USAGE"
+  },
+  {
+    "card_id": "C01",
+    "expected": 0.039999999999999994,
+    "inputs": {
+      "outcomes": [
+        0,
+        1
+      ],
+      "probabilities": [
+        0.2,
+        0.8
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "BRIER_SCORE"
+  },
+  {
+    "card_id": "C02",
+    "expected": 0.2231435513142097,
+    "inputs": {
+      "outcomes": [
+        0,
+        1
+      ],
+      "probabilities": [
+        0.2,
+        0.8
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "LOG_LOSS"
+  },
+  {
+    "card_id": "C03",
+    "expected": 0.25,
+    "inputs": {
+      "bins": [
+        [
+          0,
+          0.5
+        ],
+        [
+          0.5,
+          1
+        ]
+      ],
+      "outcomes": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "probabilities": [
+        0.1,
+        0.4,
+        0.6,
+        0.9
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "EXPECTED_CALIBRATION_ERROR"
+  },
+  {
+    "card_id": "C04",
+    "expected": {
+      "intercept": 3.0622346572499006e-13,
+      "slope": 35.9965029501523
+    },
+    "inputs": {
+      "outcomes": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "probabilities": [
+        0.2,
+        0.4,
+        0.6,
+        0.8
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "CALIBRATION_SLOPE_INTERCEPT"
+  },
+  {
+    "card_id": "C05",
+    "expected": 2.6666666666666665,
+    "inputs": {
+      "weights": [
+        1,
+        2,
+        1
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "WEIGHTED_EFFECTIVE_SAMPLE_SIZE"
+  },
+  {
+    "card_id": "C06",
+    "expected": {
+      "evidence_effective_sample_size": 62.814070351758794,
+      "raw_effective_sample_size": 62.814070351758794,
+      "truncation_rule": "FINITE_LAG_2"
+    },
+    "inputs": {
+      "autocorrelations": [
+        0.2,
+        0.1
+      ],
+      "sample_count": 100,
+      "truncation_rule": "FINITE_LAG_2"
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "AUTOCORRELATION_EFFECTIVE_SAMPLE_SIZE"
+  },
+  {
+    "card_id": "C07",
+    "expected": {
+      "effective_cluster_count": 2.5714285714285716,
+      "physical_cluster_count": 3
+    },
+    "inputs": {
+      "cluster_weights": [
+        [
+          1,
+          1
+        ],
+        [
+          1
+        ],
+        [
+          1,
+          1,
+          1
+        ]
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "CLUSTER_EVENT_EFFECTIVE_SAMPLE_SIZE"
+  },
+  {
+    "card_id": "C08",
+    "expected": {
+      "lower_confidence_bound": -1.0,
+      "resampling_plan": "EVENT_CLUSTER_BOOTSTRAP",
+      "seed": 7
+    },
+    "inputs": {
+      "alpha": 0.2,
+      "bootstrap_statistics": [
+        -1,
+        0,
+        0.5,
+        1,
+        2
+      ],
+      "resampling_plan": "EVENT_CLUSTER_BOOTSTRAP",
+      "seed": 7
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "DEPENDENCE_AWARE_BOOTSTRAP_LCB"
+  },
+  {
+    "card_id": "C09",
+    "expected": {
+      "e_value": 2.64,
+      "e_value_path": [
+        1.2,
+        1.32,
+        2.64
+      ],
+      "family": "FIXED_BETTING_E_PROCESS",
+      "reject": false
+    },
+    "inputs": {
+      "alpha": 0.1,
+      "e_process_family": "FIXED_BETTING_E_PROCESS",
+      "e_value_increments": [
+        1.2,
+        1.1,
+        2.0
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "ANYTIME_EVIDENCE_PROCESS"
+  },
+  {
+    "card_id": "C10",
+    "expected": {
+      "cutoff": 0.03,
+      "selected_indices": [
+        0,
+        2
+      ]
+    },
+    "inputs": {
+      "p_values": [
+        0.01,
+        0.2,
+        0.03
+      ],
+      "q": 0.1
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "BENJAMINI_HOCHBERG_FDR"
+  },
+  {
+    "card_id": "C11",
+    "expected": {
+      "cutoff": 0.03,
+      "selected_indices": [
+        0,
+        2
+      ]
+    },
+    "inputs": {
+      "p_values": [
+        0.01,
+        0.2,
+        0.03
+      ],
+      "q": 0.1
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "BENJAMINI_YEKUTIEL_FDR"
+  },
+  {
+    "card_id": "C12",
+    "expected": 0.9999986367476719,
+    "inputs": {
+      "kurtosis": 3,
+      "reference_sharpe": 0,
+      "sample_count": 100,
+      "sharpe": 0.5,
+      "skewness": 0
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "PROBABILISTIC_SHARPE_RATIO"
+  },
+  {
+    "card_id": "C13",
+    "expected": {
+      "deflated_sharpe_ratio": 0.9587364228302591,
+      "selection_bias_benchmark": 0.31491966026915
+    },
+    "inputs": {
+      "effective_sample_length": 100,
+      "effective_trial_count": 10,
+      "kurtosis": 3,
+      "sharpe": 0.5,
+      "skewness": 0,
+      "trial_sharpe_variance": 0.04
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "DEFLATED_SHARPE_RATIO"
+  },
+  {
+    "card_id": "C14",
+    "expected": {
+      "partition_count": 4,
+      "probability_of_backtest_overfitting": 0.5
+    },
+    "inputs": {
+      "oos_rank_logits": [
+        -1,
+        0.5,
+        -0.2,
+        1
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "PBO_CSCV"
+  },
+  {
+    "card_id": "C15",
+    "expected": {
+      "common_resample_count": 4,
+      "observed_statistic": 2.0,
+      "p_value": 0.4,
+      "procedure": "WHITE_REALITY_CHECK"
+    },
+    "inputs": {
+      "bootstrap_max_statistics": [
+        0.5,
+        1,
+        1.5,
+        2.5
+      ],
+      "observed_max_statistic": 2
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "WHITE_REALITY_CHECK"
+  },
+  {
+    "card_id": "C16",
+    "expected": {
+      "common_resample_count": 4,
+      "observed_statistic": 2.0,
+      "p_value": 0.4,
+      "procedure": "HANSEN_SPA"
+    },
+    "inputs": {
+      "bootstrap_max_statistics": [
+        0.5,
+        1,
+        1.5,
+        2.5
+      ],
+      "observed_max_statistic": 2
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "HANSEN_SPA"
+  },
+  {
+    "card_id": "C17",
+    "expected": {
+      "monotone_adjusted_p_values": [
+        0.01,
+        0.03,
+        0.04
+      ],
+      "rejected_count": 3
+    },
+    "inputs": {
+      "alpha": 0.05,
+      "stepdown_p_values": [
+        0.01,
+        0.04,
+        0.03
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "STEPM_MULTIPLE_COMPARISON"
+  },
+  {
+    "card_id": "C18",
+    "expected": {
+      "elimination_rule": "MAX_T",
+      "superior_model_set": [
+        "b",
+        "c"
+      ]
+    },
+    "inputs": {
+      "alpha": 0.05,
+      "elimination_rule": "MAX_T",
+      "equal_predictive_ability_p_values": [
+        0.01,
+        0.2,
+        0.1
+      ],
+      "model_ids": [
+        "a",
+        "b",
+        "c"
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "MODEL_CONFIDENCE_SET"
+  },
+  {
+    "card_id": "C19",
+    "expected": {
+      "lower_confidence_bound": 0.1,
+      "mean_delta": 0.275,
+      "promote": true
+    },
+    "inputs": {
+      "alpha": 0.25,
+      "paired_utility_deltas": [
+        0.2,
+        0.3,
+        0.1,
+        0.5
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "PAIRED_CHALLENGER_DELTA"
+  },
+  {
+    "card_id": "C20",
+    "expected": {
+      "median_kendall_tau": 0.33333333333333326,
+      "pair_count": 3
+    },
+    "inputs": {
+      "rankings": [
+        [
+          "a",
+          "b",
+          "c"
+        ],
+        [
+          "a",
+          "c",
+          "b"
+        ],
+        [
+          "a",
+          "b",
+          "c"
+        ]
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "RANK_STABILITY"
+  },
+  {
+    "card_id": "C21",
+    "expected": {
+      "probability_positive_net_cash": 0.75,
+      "wilson_interval": [
+        0.300641842582402,
+        0.9544127391902995
+      ]
+    },
+    "inputs": {
+      "alpha": 0.05,
+      "net_cash_samples": [
+        1,
+        -1,
+        2,
+        3
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "PROBABILITY_OF_POSITIVE_NET_CASH"
+  },
+  {
+    "card_id": "C22",
+    "expected": 14,
+    "inputs": {
+      "confidence_target": 0.95,
+      "kurtosis": 3,
+      "reference_sharpe": 0,
+      "sharpe": 0.5,
+      "skewness": 0
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "MINIMUM_TRACK_RECORD_LENGTH"
+  },
+  {
+    "card_id": "C23",
+    "expected": {
+      "coverage_target": 0.8,
+      "prediction_interval": [
+        0.19999999999999996,
+        1.0
+      ],
+      "quantile": 0.4
+    },
+    "inputs": {
+      "alpha": 0.2,
+      "nonconformity_scores": [
+        0.1,
+        0.2,
+        0.3,
+        0.4
+      ],
+      "point_prediction": 0.6
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "CONFORMAL_INTERVAL_CANDIDATE"
+  },
+  {
+    "card_id": "C24",
+    "expected": {
+      "effective_trial_count": 2.3333333333333335,
+      "raw_trial_count": 4
+    },
+    "inputs": {
+      "dependence_eigenvalues": [
+        2,
+        1,
+        0.5
+      ],
+      "raw_trial_count": 4
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "TRIAL_FAMILY_EFFECTIVE_COUNT"
+  },
+  {
+    "card_id": "C25",
+    "expected": {
+      "differential_sharpe": 0.6875,
+      "innovation_a": 0.1,
+      "innovation_b": -0.009999999999999995,
+      "updated_mean": 0.11000000000000001,
+      "updated_second_moment": 0.049
+    },
+    "inputs": {
+      "eta": 0.1,
+      "previous_mean": 0.1,
+      "previous_second_moment": 0.05,
+      "return_value": 0.2
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "DIFFERENTIAL_SHARPE"
+  },
+  {
+    "card_id": "D01",
+    "expected": 5.0,
+    "inputs": {
+      "alpha": 0.8,
+      "losses": [
+        1,
+        2,
+        5
+      ],
+      "weights": [
+        0.2,
+        0.3,
+        0.5
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "FINANCIAL_LOSS_CVAR"
+  },
+  {
+    "card_id": "D02",
+    "expected": {
+      "robust_cvar": 6.0,
+      "stress_values": [
+        5.0,
+        6.0
+      ]
+    },
+    "inputs": {
+      "alpha": 0.8,
+      "weighted_loss_scenarios": [
+        {
+          "losses": [
+            1,
+            2,
+            5
+          ],
+          "weights": [
+            0.2,
+            0.3,
+            0.5
+          ]
+        },
+        {
+          "losses": [
+            2,
+            3,
+            6
+          ],
+          "weights": [
+            0.2,
+            0.3,
+            0.5
+          ]
+        }
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "ROBUST_CVAR"
+  },
+  {
+    "card_id": "D03",
+    "expected": 0.10640000000000001,
+    "inputs": {
+      "covariance": [
+        [
+          0.04,
+          0.01
+        ],
+        [
+          0.01,
+          0.09
+        ]
+      ],
+      "expected_returns": [
+        0.1,
+        0.2
+      ],
+      "risk_aversion": 1,
+      "weights": [
+        0.6,
+        0.4
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "MEAN_VARIANCE_UTILITY"
+  },
+  {
+    "card_id": "D04",
+    "expected": {
+      "component_risk_contribution": [
+        0.09165151389911678,
+        0.09165151389911678
+      ],
+      "euler_residual": -5.551115123125783e-17,
+      "marginal_risk_contribution": [
+        0.15275252316519464,
+        0.22912878474779194
+      ],
+      "portfolio_volatility": 0.18330302779823363
+    },
+    "inputs": {
+      "covariance": [
+        [
+          0.04,
+          0.01
+        ],
+        [
+          0.01,
+          0.09
+        ]
+      ],
+      "weights": [
+        0.6,
+        0.4
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "MARGINAL_RISK_CONTRIBUTION"
+  },
+  {
+    "card_id": "D05",
+    "expected": 0.38,
+    "inputs": {
+      "shares": [
+        0.5,
+        0.3,
+        0.2
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "EXPOSURE_HERFINDAHL"
+  },
+  {
+    "card_id": "D06",
+    "expected": {
+      "effective_count": 2.8000940728538315,
+      "entropy": 1.0296530140645737
+    },
+    "inputs": {
+      "shares": [
+        0.5,
+        0.3,
+        0.2
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "DIVERSIFICATION_ENTROPY"
+  },
+  {
+    "card_id": "D07",
+    "expected": 0.12,
+    "inputs": {
+      "pair_interactions": [
+        {
+          "coefficient": 1,
+          "correlation": 0.5,
+          "weight_a": 0.6,
+          "weight_b": 0.4
+        }
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "CORRELATION_INTERACTION_PENALTY"
+  },
+  {
+    "card_id": "D08",
+    "expected": {
+      "applied_fraction": 0.25,
+      "owner_cap": 0.5,
+      "robust_kelly_fraction": 0.5
+    },
+    "inputs": {
+      "owner_cap": 0.5,
+      "probabilities": [
+        0.2,
+        0.5,
+        0.3
+      ],
+      "return_scenarios": [
+        -0.5,
+        0.2,
+        0.5
+      ],
+      "shrink_factor": 0.5
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "FRACTIONAL_KELLY_ROBUST"
+  },
+  {
+    "card_id": "D09",
+    "expected": 3.0,
+    "inputs": {
+      "equity": [
+        10,
+        12,
+        9,
+        11
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "MAX_DRAWDOWN"
+  },
+  {
+    "card_id": "D10",
+    "expected": 0.4,
+    "inputs": {
+      "capital_budget": 5,
+      "capital_used": 2
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "CAPITAL_UTILIZATION"
+  },
+  {
+    "card_id": "D11",
+    "expected": {
+      "decimal": "1"
+    },
+    "inputs": {
+      "current_portfolio_utility": 2,
+      "portfolio_utility_with_candidate": 3
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "PORTFOLIO_MARGINAL_UTILITY"
+  },
+  {
+    "card_id": "D12",
+    "expected": {
+      "decimal": "0.75"
+    },
+    "inputs": {
+      "current_position_continuation_value": 2,
+      "new_opportunity_marginal_utility": 3,
+      "switching_cost": 0.25
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "CAPITAL_TIME_ROTATION"
+  },
+  {
+    "card_id": "D13",
+    "expected": 8.0,
+    "inputs": {
+      "payoff_sensitivities": [
+        1,
+        -0.5
+      ],
+      "positions": [
+        10,
+        4
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "EVENT_EXPOSURE_NETTING"
+  },
+  {
+    "card_id": "D14",
+    "expected": {
+      "constraint_residuals": [
+        -2.0,
+        -2.0
+      ],
+      "feasible": true,
+      "used_capital": [
+        10.0,
+        8.0
+      ]
+    },
+    "inputs": {
+      "budgets": [
+        12,
+        10
+      ],
+      "capital_buckets": [
+        [
+          {
+            "capital": 10,
+            "weight": 1
+          }
+        ],
+        [
+          {
+            "capital": 5,
+            "weight": 1
+          },
+          {
+            "capital": 3,
+            "weight": 1
+          }
+        ]
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "TIME_BUCKET_CAPITAL"
+  },
+  {
+    "card_id": "D15",
+    "expected": 2.2193628577791373,
+    "inputs": {
+      "losses": [
+        1,
+        2,
+        3
+      ],
+      "probabilities": [
+        0.2,
+        0.5,
+        0.3
+      ],
+      "theta": 0.5
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "ENTROPIC_RISK_CANDIDATE"
+  },
+  {
+    "card_id": "D16",
+    "expected": {
+      "robust_utility": 0.6000000000000001,
+      "worst_scenario_utility": 1.0
+    },
+    "inputs": {
+      "capital_lock_penalty": 0.1,
+      "model_risk_penalty": 0.1,
+      "scenario_utilities": [
+        1,
+        2,
+        3
+      ],
+      "tail_penalty": 0.2
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "DISTRIBUTIONALLY_ROBUST_UTILITY"
+  },
+  {
+    "card_id": "D17",
+    "expected": [
+      false,
+      -1.0,
+      0.5,
+      -0.1,
+      0.2
+    ],
+    "inputs": {
+      "capital_time_efficiency": 0.1,
+      "hard_constraints": [
+        true,
+        true
+      ],
+      "net_cash_lcb": 1,
+      "tail_loss": 0.5,
+      "turnover_compute_burden": 0.2
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "LEXICOGRAPHIC_ECONOMIC_OBJECTIVE"
+  },
+  {
+    "card_id": "D18",
+    "expected": {
+      "id": "a",
+      "primary_objective": 2,
+      "risk": 0.5
+    },
+    "inputs": {
+      "candidates": [
+        {
+          "id": "a",
+          "primary_objective": 2,
+          "risk": 0.5
+        },
+        {
+          "id": "b",
+          "primary_objective": 3,
+          "risk": 2
+        }
+      ],
+      "epsilon_bounds": {
+        "risk": 1
+      }
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "EPSILON_CONSTRAINED_PARETO"
+  },
+  {
+    "card_id": "D19",
+    "expected": 1.6,
+    "inputs": {
+      "effective_sample_size": 3,
+      "prior_mean": 1,
+      "prior_strength": 2,
+      "sample_mean": 2
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "CONDITION_SCOPED_SHRINKAGE"
+  },
+  {
+    "card_id": "D20",
+    "expected": {
+      "decimal": "0.5"
+    },
+    "inputs": {
+      "champion_utility": 3,
+      "selected_utility": 2.5
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "CHAMPION_CHALLENGER_REGRET"
+  },
+  {
+    "card_id": "D21",
+    "expected": 0.9,
+    "inputs": {
+      "compute_and_delay_cost": 0.1,
+      "conditional_action_utilities": [
+        [
+          1,
+          2
+        ],
+        [
+          3,
+          1
+        ]
+      ],
+      "current_action_utilities": [
+        1,
+        1.5
+      ],
+      "outcome_probabilities": [
+        0.5,
+        0.5
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "VALUE_OF_INFORMATION"
+  },
+  {
+    "card_id": "D22",
+    "expected": {
+      "cost": 0.25,
+      "coverage_diversity_value": 0.5,
+      "expected_economic_improvement": 2.0,
+      "expected_information_gain": 1.0
+    },
+    "inputs": {
+      "cost": 0.25,
+      "coverage_diversity_value": 0.5,
+      "expected_economic_improvement": 2,
+      "expected_information_gain": 1
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "EXPERIMENT_DESIGN_UTILITY"
+  },
+  {
+    "card_id": "D23",
+    "expected": 1.1333333333333333,
+    "inputs": {
+      "behavior_probabilities": [
+        0.5,
+        0.5,
+        0.5
+      ],
+      "rewards": [
+        1,
+        0,
+        2
+      ],
+      "target_probabilities": [
+        0.5,
+        0.4,
+        0.6
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "IPS_OFF_POLICY_VALUE"
+  },
+  {
+    "card_id": "D24",
+    "expected": 1.1333333333333333,
+    "inputs": {
+      "behavior_probabilities": [
+        0.5,
+        0.5,
+        0.5
+      ],
+      "rewards": [
+        1,
+        0,
+        2
+      ],
+      "target_probabilities": [
+        0.5,
+        0.4,
+        0.6
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "SNIPS_OFF_POLICY_VALUE"
+  },
+  {
+    "card_id": "D25",
+    "expected": 1.1466666666666667,
+    "inputs": {
+      "behavior_probabilities": [
+        0.5,
+        0.5,
+        0.5
+      ],
+      "reward_model_observed_action": [
+        0.8,
+        0.2,
+        1.5
+      ],
+      "reward_model_target_policy": [
+        0.9,
+        0.3,
+        1.6
+      ],
+      "rewards": [
+        1,
+        0,
+        2
+      ],
+      "target_probabilities": [
+        0.5,
+        0.4,
+        0.6
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "DOUBLY_ROBUST_POLICY_VALUE"
+  },
+  {
+    "card_id": "D26",
+    "expected": {
+      "frontier": [
+        {
+          "change_cost": 1,
+          "constraints_satisfied": true,
+          "id": "smaller",
+          "net_cash_lcb": 1.5
+        }
+      ],
+      "state": "RECOVERY_CANDIDATE"
+    },
+    "inputs": {
+      "candidate_changes": [
+        {
+          "change_cost": 1,
+          "constraints_satisfied": true,
+          "id": "smaller",
+          "net_cash_lcb": 1.5
+        },
+        {
+          "change_cost": 2,
+          "constraints_satisfied": true,
+          "id": "venue",
+          "net_cash_lcb": 2
+        }
+      ],
+      "no_trade_hurdle": 1
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "NO_TRADE_RECOVERY_DISTANCE"
+  },
+  {
+    "card_id": "D27",
+    "expected": {
+      "robustness_weighted": 0.5,
+      "worst_regime_utility": 0.5
+    },
+    "inputs": {
+      "regimes": [
+        {
+          "feasible": true,
+          "hurdle": 1,
+          "utility_lcb": 2,
+          "weight": 0.5
+        },
+        {
+          "feasible": true,
+          "hurdle": 1,
+          "utility_lcb": 0.5,
+          "weight": 0.5
+        }
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "REGIME_ROBUSTNESS"
+  },
+  {
+    "card_id": "D28",
+    "expected": {
+      "components": [
+        {
+          "delta": 1.0,
+          "hard_veto": false,
+          "metric": "cash"
+        },
+        {
+          "delta": 1.0,
+          "hard_veto": true,
+          "metric": "authority"
+        }
+      ],
+      "hard_veto": true
+    },
+    "inputs": {
+      "comparisons": [
+        {
+          "hard_veto": false,
+          "kind": "numeric",
+          "left": 2,
+          "metric": "cash",
+          "right": 1,
+          "scale": 1
+        },
+        {
+          "hard_veto": true,
+          "kind": "categorical",
+          "left": "ALLOW",
+          "metric": "authority",
+          "right": "BLOCK"
+        }
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "AGENT_DISAGREEMENT_VECTOR"
+  },
+  {
+    "card_id": "D29",
+    "expected": true,
+    "inputs": {
+      "left": [
+        2.0,
+        1.0
+      ],
+      "right": [
+        1.0,
+        2.0
+      ],
+      "senses": [
+        "MAXIMIZE",
+        "MINIMIZE"
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "PARETO_DOMINANCE"
+  },
+  {
+    "card_id": "D30",
+    "expected": {
+      "selected_experiment_id": "a",
+      "voi_per_resource": 2.0
+    },
+    "inputs": {
+      "experiments": [
+        {
+          "eligible": true,
+          "expected_marginal_voi": 2,
+          "experiment_id": "a",
+          "resource_cost": 1
+        },
+        {
+          "eligible": true,
+          "expected_marginal_voi": 3,
+          "experiment_id": "b",
+          "resource_cost": 2
+        }
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "ADAPTIVE_SEARCH_BUDGET"
+  },
+  {
+    "card_id": "E01",
+    "expected": {
+      "decimal": "0.5"
+    },
+    "inputs": {
+      "all_unique_costs": 0.2,
+      "atomicity_partial_fill_reserve": 0.3,
+      "executable_acquisition_costs": [
+        4,
+        5
+      ],
+      "guaranteed_payout": 10
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "COMPLETE_SET_BUY_MARGIN"
+  },
+  {
+    "card_id": "E02",
+    "expected": {
+      "decimal": "0.5"
+    },
+    "inputs": {
+      "all_unique_costs": 0.2,
+      "borrow_token_inventory_reserve": 0.3,
+      "executable_sale_proceeds": [
+        6,
+        5
+      ],
+      "guaranteed_liability": 10
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "COMPLETE_SET_SELL_MARGIN"
+  },
+  {
+    "card_id": "E03",
+    "expected": 0.0,
+    "inputs": {
+      "probabilities": [
+        0.4,
+        0.6
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "OUTCOME_SUM_CONSISTENCY"
+  },
+  {
+    "card_id": "E04",
+    "expected": 0.0,
+    "inputs": {
+      "probabilities": [
+        0.4,
+        0.6
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "COMPLEMENT_CONSISTENCY"
+  },
+  {
+    "card_id": "E05",
+    "expected": -0.3,
+    "inputs": {
+      "probability_subset": 0.3,
+      "probability_superset": 0.6
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "LOGICAL_IMPLICATION"
+  },
+  {
+    "card_id": "E06",
+    "expected": -0.2,
+    "inputs": {
+      "probability_a": 0.4,
+      "probability_b": 0.5,
+      "probability_intersection": 0.2
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "INTERSECTION_BOUND"
+  },
+  {
+    "card_id": "E07",
+    "expected": -0.3,
+    "inputs": {
+      "probability_subset": 0.3,
+      "probability_superset": 0.6
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "DATE_MONOTONICITY"
+  },
+  {
+    "card_id": "E08",
+    "expected": -0.3,
+    "inputs": {
+      "probability_subset": 0.3,
+      "probability_superset": 0.6
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "SUBSET_SUPERSET"
+  },
+  {
+    "card_id": "E09",
+    "expected": {
+      "decimal": "1.0"
+    },
+    "inputs": {
+      "asynchronous_fill_reserve": 0.2,
+      "basis_settlement_reserve": 0.1,
+      "cheap_venue_buy_cost": 8,
+      "fees": 0.5,
+      "rich_venue_sale_proceeds": 10,
+      "transfer_finality_reserve": 0.2
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "CROSS_VENUE_PARITY_MARGIN"
+  },
+  {
+    "card_id": "E10",
+    "expected": {
+      "joint_model": "EMPIRICAL_JOINT",
+      "observation_count": 4,
+      "simultaneous_fill_probability": 0.75
+    },
+    "inputs": {
+      "joint_all_fill_observations": [
+        true,
+        false,
+        true,
+        true
+      ],
+      "joint_dependence_model": "EMPIRICAL_JOINT"
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "SIMULTANEOUS_FILL_PROBABILITY"
+  },
+  {
+    "card_id": "E11",
+    "expected": {
+      "decimal": "1.5"
+    },
+    "inputs": {
+      "capital_lock_reserve": 0.1,
+      "fill_adjusted_net_cash": 2,
+      "partial_fill_reserve": 0.1,
+      "settlement_reserve": 0.1,
+      "tail_reserve": 0.2
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "BASKET_EXECUTABLE_UTILITY"
+  },
+  {
+    "card_id": "E12",
+    "expected": {
+      "constraints": [
+        "capital",
+        "joint_fill",
+        "settlement"
+      ],
+      "decision_variables": [
+        "leg_a",
+        "leg_b"
+      ],
+      "no_trade_alternative": true,
+      "objective": "MAXIMIZE_WORST_CASE_EXECUTABLE_BASKET_NET_CASH",
+      "semantic_payoff_proof_refs": [
+        "synthetic-proof"
+      ],
+      "solver_lane": "BOUNDED_CLASSICAL_OR_QMAP_CANDIDATE"
+    },
+    "inputs": {
+      "constraints": [
+        "capital",
+        "joint_fill",
+        "settlement"
+      ],
+      "decision_variables": [
+        "leg_a",
+        "leg_b"
+      ],
+      "semantic_payoff_proof_refs": [
+        "synthetic-proof"
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "LOGICAL_ARBITRAGE_HYPERGRAPH_OBJECTIVE"
+  },
+  {
+    "card_id": "F01",
+    "expected": {
+      "hard_constraints": [
+        "capital",
+        "one_policy"
+      ],
+      "linear_utility_coefficients": [
+        1.65,
+        0.75
+      ],
+      "no_trade_variable": "x_no_trade",
+      "objective_sense": "MAXIMIZE",
+      "quadratic_interactions": {
+        "0,1": 0.2
+      }
+    },
+    "inputs": {
+      "hard_constraints": [
+        "capital",
+        "one_policy"
+      ],
+      "interaction_coefficients": {
+        "0,1": 0.2
+      },
+      "inventory_penalties": [
+        0.1,
+        0.1
+      ],
+      "net_cash_lcbs": [
+        2,
+        1
+      ],
+      "no_trade_variable": "x_no_trade",
+      "tail_penalties": [
+        0.2,
+        0.1
+      ],
+      "turnover_penalties": [
+        0.05,
+        0.05
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "DISCRETE_TRADE_ALTERNATIVE_SELECTION"
+  },
+  {
+    "card_id": "F02",
+    "expected": {
+      "coefficient_map_ref": "synthetic-map",
+      "robust_objective": 0.6000000000000001
+    },
+    "inputs": {
+      "capital_lock_penalty": 0.1,
+      "coefficient_map_ref": "synthetic-map",
+      "model_risk_penalty": 0.1,
+      "scenario_profit_values": [
+        1,
+        2,
+        3
+      ],
+      "tail_penalty": 0.2
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "QUANTUM_ROBUST_ECONOMIC_OBJECTIVE"
+  },
+  {
+    "card_id": "F03",
+    "expected": {
+      "coefficient_convention": "LINEAR_PLUS_STRICT_UPPER_TRIANGULAR",
+      "linear": [
+        1.0,
+        -2.0
+      ],
+      "objective_sense": "MINIMIZE",
+      "offset": 0.25,
+      "quadratic_upper": {
+        "0,1": 0.5
+      },
+      "vartype": "BINARY"
+    },
+    "inputs": {
+      "linear": [
+        1.0,
+        -2.0
+      ],
+      "offset": 0.25,
+      "quadratic_upper": {
+        "0,1": 0.5
+      }
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "QUBO_CANONICAL"
+  },
+  {
+    "card_id": "F04",
+    "expected": {
+      "linear": {
+        "0": 1,
+        "1": -2
+      },
+      "offset": 0.25,
+      "quadratic": {
+        "0,1": 0.5
+      },
+      "vartype": "BINARY"
+    },
+    "inputs": {
+      "linear": {
+        "0": 1,
+        "1": -2
+      },
+      "offset": 0.25,
+      "quadratic": {
+        "0,1": 0.5
+      },
+      "vartype": "BINARY"
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "BQM_CANONICAL"
+  },
+  {
+    "card_id": "F05",
+    "expected": {
+      "J": {
+        "0,1": 0.125
+      },
+      "binary_to_spin": "x=(1-s)/2",
+      "h": [
+        -0.625,
+        0.875
+      ],
+      "offset": -0.125
+    },
+    "inputs": {
+      "linear": [
+        1,
+        -2
+      ],
+      "offset": 0.25,
+      "quadratic_upper": {
+        "0,1": 0.5
+      }
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "QUBO_TO_ISING"
+  },
+  {
+    "card_id": "F06",
+    "expected": {
+      "inverse_map": {
+        "centering_constant": 0.25,
+        "scale": 2.0
+      },
+      "linear_scaled": [
+        0.5,
+        -1.0
+      ],
+      "offset_scaled": 0.0,
+      "quadratic_scaled": {
+        "0,1": 0.25
+      }
+    },
+    "inputs": {
+      "centering_constant": 0.25,
+      "linear": [
+        1.0,
+        -2.0
+      ],
+      "offset": 0.25,
+      "quadratic_upper": {
+        "0,1": 0.5
+      },
+      "scale": 2.0
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "COEFFICIENT_SCALING"
+  },
+  {
+    "card_id": "F07",
+    "expected": {
+      "penalty": 3.0,
+      "strict_lower_bound": 2.0,
+      "sufficient": true
+    },
+    "inputs": {
+      "minimum_positive_violation": 1,
+      "objective_improvement_bound": 2,
+      "penalty": 3
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "PENALTY_SUFFICIENCY"
+  },
+  {
+    "card_id": "F08",
+    "expected": 0.0,
+    "inputs": {
+      "lambda_onehot": 2.0,
+      "selections": [
+        1.0,
+        0.0,
+        0.0
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "ONE_HOT_CONSTRAINT"
+  },
+  {
+    "card_id": "F09",
+    "expected": {
+      "feasible_mixer_compatible": true,
+      "residual": 0,
+      "satisfied": true
+    },
+    "inputs": {
+      "cardinality": 2,
+      "selections": [
+        1,
+        0,
+        1
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "FIXED_CARDINALITY_CONSTRAINT"
+  },
+  {
+    "card_id": "F10",
+    "expected": {
+      "decoded_value": 3,
+      "weights": [
+        1,
+        2,
+        2
+      ]
+    },
+    "inputs": {
+      "bits": [
+        1,
+        0,
+        1
+      ],
+      "lower": 0,
+      "upper": 5
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "BOUNDED_BINARY_ENCODING"
+  },
+  {
+    "card_id": "F11",
+    "expected": {
+      "decoded_value": 2,
+      "monotonic_valid": true
+    },
+    "inputs": {
+      "bits": [
+        1,
+        1,
+        0
+      ],
+      "lower": 0
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "UNARY_ENCODING"
+  },
+  {
+    "card_id": "F12",
+    "expected": {
+      "decoded_value": 5,
+      "state_count": 6
+    },
+    "inputs": {
+      "digits": [
+        1,
+        2
+      ],
+      "lower": 0,
+      "radices": [
+        2,
+        3
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "MIXED_RADIX_ENCODING"
+  },
+  {
+    "card_id": "F13",
+    "expected": {
+      "gray_code": 2,
+      "inverse_binary_index": 3
+    },
+    "inputs": {
+      "binary_index": 3,
+      "domain_size": 8
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "GRAY_CODE_ENCODING"
+  },
+  {
+    "card_id": "F14",
+    "expected": {
+      "bits": [
+        1,
+        1,
+        0
+      ],
+      "decoded_state": 2,
+      "monotonic_valid": true
+    },
+    "inputs": {
+      "state": 2,
+      "state_count": 4
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "DOMAIN_WALL_ENCODING"
+  },
+  {
+    "card_id": "F15",
+    "expected": {
+      "economic_units": false,
+      "expectation": 2.3,
+      "objective_sense": "MINIMIZE"
+    },
+    "inputs": {
+      "energies": [
+        1,
+        2,
+        3
+      ],
+      "objective_sense": "MINIMIZE",
+      "sample_probabilities": [
+        0.2,
+        0.3,
+        0.5
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "QAOA_EXPECTATION"
+  },
+  {
+    "card_id": "F16",
+    "expected": [
+      0.2003348423231196,
+      1.0471975511965979,
+      2.9412578112666736
+    ],
+    "inputs": {
+      "epsilon": 0.01,
+      "relaxation_values": [
+        0,
+        0.25,
+        1
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "WARM_START_QAOA_ANGLE"
+  },
+  {
+    "card_id": "F17",
+    "expected": 1.5,
+    "inputs": {
+      "alpha": 0.5,
+      "objective_sense": "MINIMIZE",
+      "sampled_objectives": [
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "VARIATIONAL_CVAR_AGGREGATOR"
+  },
+  {
+    "card_id": "F18",
+    "expected": [
+      0.6666666666666666,
+      0.6666666666666666
+    ],
+    "inputs": {
+      "feasible_samples": [
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          0,
+          1
+        ]
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "SAMPLE_SELECTION_MARGINAL"
+  },
+  {
+    "card_id": "F19",
+    "expected": {
+      "0,1": 0.3333333333333333
+    },
+    "inputs": {
+      "feasible_samples": [
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          0,
+          1
+        ]
+      ],
+      "pairs": [
+        [
+          0,
+          1
+        ]
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "SAMPLE_PAIRWISE_COSELECTION"
+  },
+  {
+    "card_id": "F20",
+    "expected": 1.0296530140645737,
+    "inputs": {
+      "probabilities": [
+        0.2,
+        0.3,
+        0.5
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "SOLUTION_ENTROPY"
+  },
+  {
+    "card_id": "F21",
+    "expected": 0.6666666666666666,
+    "inputs": {
+      "bitstrings": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "HAMMING_DIVERSITY"
+  },
+  {
+    "card_id": "F22",
+    "expected": {
+      "clusters": [
+        [
+          0,
+          1
+        ]
+      ],
+      "near_optimal_cluster_count": 1
+    },
+    "inputs": {
+      "distance_tolerance": 1,
+      "samples": [
+        {
+          "bits": [
+            0,
+            0
+          ],
+          "utility": 2
+        },
+        {
+          "bits": [
+            0,
+            1
+          ],
+          "utility": 1.9
+        },
+        {
+          "bits": [
+            1,
+            1
+          ],
+          "utility": 1
+        }
+      ],
+      "utility_tolerance": 0.2
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "NEAR_OPTIMAL_CLUSTER_COUNT"
+  },
+  {
+    "card_id": "F23",
+    "expected": 0.3333333333333333,
+    "inputs": {
+      "left": [
+        "a",
+        "b"
+      ],
+      "right": [
+        "b",
+        "c"
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "SELECTION_OVERLAP"
+  },
+  {
+    "card_id": "F24",
+    "expected": {
+      "improvement_gap": -1.0,
+      "objective_sense": "MINIMIZE",
+      "raw_gap": 1.0,
+      "suboptimality_gap": 1.0
+    },
+    "inputs": {
+      "objective_candidate": 3.0,
+      "objective_classical_champion": 2.0,
+      "objective_sense": "MINIMIZE"
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "OBJECTIVE_GAP"
+  },
+  {
+    "card_id": "F25",
+    "expected": 1.0,
+    "inputs": {
+      "__problem_size__": 2,
+      "left": 2.0,
+      "right": 1.0
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "ECONOMIC_UTILITY_GAP"
+  },
+  {
+    "card_id": "F26",
+    "expected": {
+      "residual_deltas": [
+        -0.1,
+        0.1
+      ],
+      "status_disagreements": [
+        false,
+        true
+      ]
+    },
+    "inputs": {
+      "residuals_a": [
+        0,
+        0.1
+      ],
+      "residuals_b": [
+        0.1,
+        0
+      ],
+      "status_a": [
+        "PASS",
+        "FAIL"
+      ],
+      "status_b": [
+        "PASS",
+        "PASS"
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "CONSTRAINT_DISAGREEMENT"
+  },
+  {
+    "card_id": "F27",
+    "expected": {
+      "components": [
+        1.0,
+        0.5
+      ],
+      "distance": 1.5
+    },
+    "inputs": {
+      "exposure_a": [
+        1,
+        2
+      ],
+      "exposure_b": [
+        0,
+        1
+      ],
+      "scales": [
+        1,
+        2
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "PORTFOLIO_EXPOSURE_DISAGREEMENT"
+  },
+  {
+    "card_id": "F28",
+    "expected": {
+      "horizon": 0.5,
+      "market": 0,
+      "policy": 1,
+      "side": 1,
+      "size": 0.5,
+      "venue": 1
+    },
+    "inputs": {
+      "plan_a": {
+        "horizon": 10,
+        "market": "m",
+        "policy": "maker",
+        "side": "YES",
+        "size": 2,
+        "venue": "v1"
+      },
+      "plan_b": {
+        "horizon": 20,
+        "market": "m",
+        "policy": "taker",
+        "side": "NO",
+        "size": 1,
+        "venue": "v2"
+      },
+      "size_scale": 2,
+      "time_scale": 20
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "TRADE_PLAN_DISAGREEMENT"
+  },
+  {
+    "card_id": "F29",
+    "expected": [
+      0.5,
+      0.5
+    ],
+    "inputs": {
+      "coefficients": [
+        0,
+        1,
+        2
+      ],
+      "utilities": [
+        1,
+        1.5,
+        2
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "COEFFICIENT_STRESS_SENSITIVITY"
+  },
+  {
+    "card_id": "F30",
+    "expected": {
+      "backend_seed_disagreement": 0.2,
+      "infeasible_rate": 0.1,
+      "maximum_coefficient_sensitivity": 0.5,
+      "one_minus_selection_consensus": 0.2,
+      "utility_standard_deviation": 0.3,
+      "worst_utility_drop": 0.4
+    },
+    "inputs": {
+      "backend_seed_disagreement": 0.2,
+      "infeasible_rate": 0.1,
+      "maximum_coefficient_sensitivity": 0.5,
+      "one_minus_selection_consensus": 0.2,
+      "utility_standard_deviation": 0.3,
+      "worst_utility_drop": 0.4
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "QUANTUM_SOLUTION_FRAGILITY"
+  },
+  {
+    "card_id": "F31",
+    "expected": 0.5,
+    "inputs": {
+      "regimes": [
+        {
+          "original_model_feasible": true,
+          "qeu_lcb": 1,
+          "weight": 0.5
+        },
+        {
+          "original_model_feasible": true,
+          "qeu_lcb": -1,
+          "weight": 0.5
+        }
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "QUANTUM_REGIME_ROBUSTNESS"
+  },
+  {
+    "card_id": "F32",
+    "expected": {
+      "decimal": "0.5"
+    },
+    "inputs": {
+      "compute_cost": 0.2,
+      "infeasibility_penalty": 0,
+      "instability_penalty": 0.1,
+      "latency_cost": 0.1,
+      "model_risk_reserve": 0.1,
+      "utility_classical": 2,
+      "utility_quantum": 3
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "QUANTUM_ECONOMIC_UTILITY"
+  },
+  {
+    "card_id": "F33",
+    "expected": {
+      "decimal": "0.5"
+    },
+    "inputs": {
+      "expected_economic_improvement": 2,
+      "qpu_monetary_cost": 4
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "QPU_IMPROVEMENT_PER_COST"
+  },
+  {
+    "card_id": "F34",
+    "expected": {
+      "decimal": "0.5"
+    },
+    "inputs": {
+      "expected_economic_improvement": 2,
+      "total_end_to_end_seconds": 4
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "QPU_IMPROVEMENT_PER_SECOND"
+  },
+  {
+    "card_id": "F35",
+    "expected": {
+      "decimal": "2.2"
+    },
+    "inputs": {
+      "compute_cost": 0.5,
+      "expected_decision_improvement": 2,
+      "expiry_risk": 0.1,
+      "information_gain": 1,
+      "opportunity_cost_of_waiting": 0.2
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "QUANTUM_VALUE_OF_INFORMATION"
+  },
+  {
+    "card_id": "F36",
+    "expected": {
+      "normalized_expectation": 0.5,
+      "original_unit_expectation": 5.0
+    },
+    "inputs": {
+      "inverse_offset": 0,
+      "inverse_scale": 10,
+      "normalized_values": [
+        0.2,
+        0.8
+      ],
+      "probabilities": [
+        0.5,
+        0.5
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "QAE_NORMALIZED_EXPECTATION"
+  },
+  {
+    "card_id": "F37",
+    "expected": 0.8,
+    "inputs": {
+      "losses": [
+        1,
+        2,
+        3
+      ],
+      "probabilities": [
+        0.2,
+        0.5,
+        0.3
+      ],
+      "threshold": 2
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "QAE_TAIL_PROBABILITY"
+  },
+  {
+    "card_id": "F38",
+    "expected": 3.0,
+    "inputs": {
+      "alpha": 0.8,
+      "eta_candidates": [
+        1,
+        2,
+        3
+      ],
+      "losses": [
+        1,
+        2,
+        3
+      ],
+      "probabilities": [
+        0.2,
+        0.5,
+        0.3
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "QAE_CVAR_CANDIDATE"
+  },
+  {
+    "card_id": "F39",
+    "expected": 0.75,
+    "inputs": {
+      "denominator": 4,
+      "numerator": 3
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "FEASIBLE_SAMPLE_RATE"
+  },
+  {
+    "card_id": "F40",
+    "expected": {
+      "chain_break_fraction": 0.25,
+      "observed_sample_chain_pairs": 4,
+      "per_sample_fraction": [
+        0.5,
+        0.0
+      ]
+    },
+    "inputs": {
+      "sample_chain_broken": [
+        [
+          false,
+          true
+        ],
+        [
+          false,
+          false
+        ]
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "CHAIN_BREAK_FRACTION"
+  },
+  {
+    "card_id": "F41",
+    "expected": {
+      "seconds": 5.0,
+      "state": "OBSERVED"
+    },
+    "inputs": {
+      "records": [
+        {
+          "original_model_feasible": false,
+          "timestamp": 12
+        },
+        {
+          "original_model_feasible": true,
+          "timestamp": 15
+        }
+      ],
+      "time_basis": 10
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "TIME_TO_FIRST_FEASIBLE"
+  },
+  {
+    "card_id": "F42",
+    "expected": {
+      "seconds": 5.0,
+      "state": "OBSERVED"
+    },
+    "inputs": {
+      "records": [
+        {
+          "original_model_feasible": true,
+          "timestamp": 12,
+          "utility": 1
+        },
+        {
+          "original_model_feasible": true,
+          "timestamp": 15,
+          "utility": 2
+        }
+      ],
+      "time_basis": 10
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "TIME_TO_BEST"
+  },
+  {
+    "card_id": "F43",
+    "expected": {
+      "feasible_rate_range": [
+        false,
+        true
+      ],
+      "selection_consensus": 0.6666666666666666,
+      "utility_standard_deviation": 0.408248290463863
+    },
+    "inputs": {
+      "runs": [
+        {
+          "feasible": true,
+          "selection": [
+            1,
+            0
+          ],
+          "utility": 1
+        },
+        {
+          "feasible": true,
+          "selection": [
+            1,
+            1
+          ],
+          "utility": 2
+        },
+        {
+          "feasible": false,
+          "selection": [
+            0,
+            1
+          ],
+          "utility": 1.5
+        }
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "EMBEDDING_GAUGE_STABILITY"
+  },
+  {
+    "card_id": "F44",
+    "expected": {
+      "decimal": "1"
+    },
+    "inputs": {
+      "best_reverse_utility": 3,
+      "initial_incumbent_utility": 2
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "REVERSE_ANNEAL_IMPROVEMENT"
+  },
+  {
+    "card_id": "F45",
+    "expected": {
+      "decimal": "0.5"
+    },
+    "inputs": {
+      "postprocessed_utility": 3,
+      "raw_decoded_utility": 2.5
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "POSTPROCESSING_IMPROVEMENT"
+  },
+  {
+    "card_id": "F46",
+    "expected": {
+      "depth": 100.0,
+      "embedding_chains": 5.0,
+      "logical_qubits": 10.0,
+      "monetary_cost": 0.0,
+      "physical_qubits": 20.0,
+      "preparation_seconds": 1.0,
+      "queue_seconds": 2.0,
+      "shots_or_reads": 1000.0,
+      "two_qubit_gates": 50.0,
+      "wall_seconds": 5.0
+    },
+    "inputs": {
+      "depth": 100,
+      "embedding_chains": 5,
+      "logical_qubits": 10,
+      "monetary_cost": 0,
+      "physical_qubits": 20,
+      "preparation_seconds": 1,
+      "queue_seconds": 2,
+      "shots_or_reads": 1000,
+      "two_qubit_gates": 50,
+      "wall_seconds": 5
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "QUANTUM_RESOURCE_ESTIMATE"
+  },
+  {
+    "card_id": "G01",
+    "expected": [
+      [
+        1.875,
+        0.375
+      ],
+      [
+        0.375,
+        1.125
+      ]
+    ],
+    "inputs": {
+      "sample_covariance": [
+        [
+          2,
+          0.5
+        ],
+        [
+          0.5,
+          1
+        ]
+      ],
+      "shrinkage_intensity": 0.25,
+      "target_covariance": [
+        [
+          1.5,
+          0
+        ],
+        [
+          0,
+          1.5
+        ]
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "SHRINKAGE_COVARIANCE"
+  },
+  {
+    "card_id": "G02",
+    "expected": {
+      "component_cvar": [
+        2.4,
+        1.6
+      ],
+      "euler_residual": 0.0,
+      "portfolio_cvar": 4.0
+    },
+    "inputs": {
+      "alpha": 0.8,
+      "asset_loss_contributions": [
+        [
+          0.6,
+          0.4
+        ],
+        [
+          2.4,
+          1.6
+        ],
+        [
+          1.2,
+          0.8
+        ]
+      ],
+      "portfolio_weights": [
+        0.6,
+        0.4
+      ],
+      "scenario_losses": [
+        1,
+        4,
+        2
+      ],
+      "scenario_probabilities": [
+        0.3,
+        0.2,
+        0.5
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "COMPONENT_CVAR"
+  },
+  {
+    "card_id": "G03",
+    "expected": {
+      "budget_residuals": [
+        0.09999999999999998,
+        -0.09999999999999998
+      ],
+      "objective": 0.01999999999999999
+    },
+    "inputs": {
+      "component_risk_contributions": [
+        0.6,
+        0.4
+      ],
+      "risk_budgets": [
+        0.5,
+        0.5
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "RISK_BUDGET_PARITY_OBJECTIVE"
+  },
+  {
+    "card_id": "G04",
+    "expected": {
+      "impact_price_fraction": {
+        "decimal": "0.0010"
+      },
+      "participation_fraction": {
+        "decimal": "0.01"
+      }
+    },
+    "inputs": {
+      "daily_volume": "10000",
+      "impact_coefficient": "0.5",
+      "quantity": "100",
+      "volatility": "0.02"
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "SQUARE_ROOT_MARKET_IMPACT_CANDIDATE"
+  },
+  {
+    "card_id": "G05",
+    "expected": {
+      "cost_variance": 0.44,
+      "expected_cost": 0.5,
+      "mean_variance_objective": 0.72
+    },
+    "inputs": {
+      "cost_covariance": [
+        [
+          0.04,
+          0.01
+        ],
+        [
+          0.01,
+          0.09
+        ]
+      ],
+      "expected_unit_costs": [
+        0.1,
+        0.2
+      ],
+      "risk_aversion": 0.5,
+      "schedule_quantities": [
+        1,
+        2
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "EXECUTION_SCHEDULE_MEAN_VARIANCE"
+  },
+  {
+    "card_id": "G06",
+    "expected": {
+      "drift_statistic": 2.1500000000000004,
+      "negative_cusum": 0.0,
+      "positive_cusum": 2.1500000000000004
+    },
+    "inputs": {
+      "allowance": 0.05,
+      "observations": [
+        0,
+        0.1,
+        1,
+        1.2
+      ],
+      "reference_mean": 0
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "CUSUM_DRIFT_STATISTIC"
+  },
+  {
+    "card_id": "G07",
+    "expected": {
+      "log_normalizer": -1.3798854930417226,
+      "posterior_weights": [
+        0.2689414213699951,
+        0.7310585786300049
+      ]
+    },
+    "inputs": {
+      "log_model_evidence": [
+        -2,
+        -1
+      ],
+      "prior_weights": [
+        0.5,
+        0.5
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "BAYESIAN_MODEL_AVERAGING_WEIGHT"
+  },
+  {
+    "card_id": "G08",
+    "expected": {
+      "allocation": [
+        0.11731042782619838,
+        0.8668133321973349,
+        0.015876239976466765
+      ],
+      "temperature": 0.5
+    },
+    "inputs": {
+      "temperature": 0.5,
+      "utilities": [
+        1,
+        2,
+        0
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "ENTROPY_REGULARIZED_ALLOCATION"
+  },
+  {
+    "card_id": "G09",
+    "expected": {
+      "success_rate": 0.75,
+      "successful_valid_runs": 3,
+      "valid_runs": 4
+    },
+    "inputs": {
+      "successful_valid_runs": 3,
+      "valid_runs": 4
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "OPTIMIZATION_TARGET_SUCCESS_RATE"
+  },
+  {
+    "card_id": "G10",
+    "expected": {
+      "required_runs": 5,
+      "state": "FINITE_TTS",
+      "time_to_solution": 10.0
+    },
+    "inputs": {
+      "p_success": 0.5,
+      "p_target": 0.95,
+      "run_seconds": 2
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "QUANTUM_TIME_TO_SOLUTION"
+  },
+  {
+    "card_id": "G11",
+    "expected": {
+      "additional_shots_multiplier": 2.0,
+      "variance_overhead": 2.0
+    },
+    "inputs": {
+      "mitigated_estimator_variance": 2,
+      "raw_estimator_variance": 1
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "MITIGATION_VARIANCE_OVERHEAD"
+  },
+  {
+    "card_id": "G12",
+    "expected": {
+      "shot_allocation": [
+        5,
+        5
+      ],
+      "total_shots": 10
+    },
+    "inputs": {
+      "per_shot_costs": [
+        1,
+        4
+      ],
+      "stratum_standard_deviations": [
+        1,
+        2
+      ],
+      "total_shots": 10
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "NEYMAN_SHOT_ALLOCATION"
+  },
+  {
+    "card_id": "G13",
+    "expected": {
+      "drift_vector": [
+        0.05,
+        0.09999999999999998
+      ],
+      "l2_drift": 0.11180339887498947,
+      "max_abs_drift": 0.09999999999999998
+    },
+    "inputs": {
+      "baseline_calibration": [
+        0.05,
+        0.2
+      ],
+      "current_calibration": [
+        0.1,
+        0.3
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "BACKEND_CALIBRATION_DRIFT_VECTOR"
+  },
+  {
+    "card_id": "G14",
+    "expected": {
+      "hypervolume_improvement": 0.5,
+      "oriented_reference_point": [
+        0.0,
+        0.0
+      ],
+      "reference_point_valid": true
+    },
+    "inputs": {
+      "candidate": [
+        2.0,
+        0.5
+      ],
+      "frontier": [
+        [
+          1.0,
+          1.0
+        ]
+      ],
+      "objective_senses": [
+        "MAXIMIZE",
+        "MAXIMIZE"
+      ],
+      "reference_point": [
+        0.0,
+        0.0
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "PARETO_HYPERVOLUME_IMPROVEMENT"
+  },
+  {
+    "card_id": "H01",
+    "expected": {
+      "constraint_residual": 0.0,
+      "projected_probabilities": [
+        0.25000000000000006,
+        0.75,
+        0.3
+      ],
+      "squared_distance": 0.005000000000000009
+    },
+    "inputs": {
+      "equality_groups": [
+        {
+          "indices": [
+            0,
+            1
+          ],
+          "target_sum": 1.0
+        }
+      ],
+      "raw_probabilities": [
+        0.2,
+        0.7,
+        0.3
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "COHERENT_PROBABILITY_QP_PROJECTION"
+  },
+  {
+    "card_id": "H02",
+    "expected": {
+      "nondecreasing": true,
+      "projected_probabilities": [
+        0.2,
+        0.5,
+        0.5,
+        0.8
+      ]
+    },
+    "inputs": {
+      "probabilities": [
+        0.2,
+        0.6,
+        0.4,
+        0.8
+      ],
+      "weights": [
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "DATE_LADDER_ISOTONIC_PROJECTION"
+  },
+  {
+    "card_id": "H03",
+    "expected": {
+      "break_even_probability": {
+        "decimal": "0.2"
+      },
+      "cashflow_residual": {
+        "decimal": "0.0"
+      }
+    },
+    "inputs": {
+      "failure_branch_net_cash": "-2",
+      "success_branch_net_cash": "8"
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "EXECUTABLE_BREAK_EVEN_PROBABILITY"
+  },
+  {
+    "card_id": "H04",
+    "expected": {
+      "edge_lcb": 0.04999999999999993,
+      "paired_edge_samples": [
+        0.04999999999999993,
+        0.19999999999999996,
+        0.20000000000000007
+      ],
+      "sample_count": 3
+    },
+    "inputs": {
+      "break_even_probabilities": [
+        0.5,
+        0.55,
+        0.6
+      ],
+      "calibrated_probabilities": [
+        0.7,
+        0.6,
+        0.8
+      ],
+      "lower_quantile": 0.1
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "CALIBRATED_EXECUTABLE_EDGE_LCB"
+  },
+  {
+    "card_id": "H05",
+    "expected": 5.0,
+    "inputs": {
+      "alpha": 0.8,
+      "losses": [
+        1,
+        2,
+        5
+      ],
+      "weights": [
+        0.2,
+        0.3,
+        0.5
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "LIQUIDITY_ADJUSTED_CVAR"
+  },
+  {
+    "card_id": "H06",
+    "expected": {
+      "scenario_regrets": [
+        1.0,
+        0.5,
+        1.0
+      ],
+      "worst_case_regret": 1.0
+    },
+    "inputs": {
+      "best_available_utilities": [
+        2,
+        2.5,
+        1
+      ],
+      "candidate_utilities": [
+        1,
+        2,
+        0
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "WORST_CASE_REGRET"
+  },
+  {
+    "card_id": "H07",
+    "expected": {
+      "competing_event_probability": 0.24750000000000005,
+      "fill_cumulative_incidence": [
+        0.2,
+        0.395
+      ],
+      "terminal_survival": 0.3575
+    },
+    "inputs": {
+      "competing_hazards": {
+        "adverse": [
+          0.05,
+          0.05
+        ],
+        "cancel": [
+          0.1,
+          0.1
+        ]
+      },
+      "fill_hazards": [
+        0.2,
+        0.3
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "COMPETING_RISKS_FILL_CIF"
+  },
+  {
+    "card_id": "H08",
+    "expected": {
+      "equivalent": true,
+      "maximum_objective_residual": 0.0,
+      "residuals": [
+        0.0,
+        0.0
+      ]
+    },
+    "inputs": {
+      "inverse_mapped_objective_values": [
+        1,
+        2
+      ],
+      "offset": 1,
+      "original_objective_values": [
+        3,
+        5
+      ],
+      "positive_scale": 2,
+      "tolerance": 1e-09
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "FORMULATION_EQUIVALENCE_RESIDUAL"
+  },
+  {
+    "card_id": "H09",
+    "expected": {
+      "penalty_dominance_ratio": 1.2,
+      "sufficiency_proven": true
+    },
+    "inputs": {
+      "maximum_feasible_objective_range": 10,
+      "minimum_infeasible_penalty": 12
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "PENALTY_DOMINANCE_RATIO"
+  },
+  {
+    "card_id": "H10",
+    "expected": {
+      "classical_presolve_contribution": {
+        "decimal": "1"
+      },
+      "postprocessing_contribution": {
+        "decimal": "0.1"
+      },
+      "qpu_search_contribution": {
+        "decimal": "0.5"
+      },
+      "repair_contribution": {
+        "decimal": "0.2"
+      },
+      "total_improvement": {
+        "decimal": "0.8"
+      }
+    },
+    "inputs": {
+      "classical_presolve_utility": "1",
+      "postprocessed_utility": "1.8",
+      "qpu_search_utility": "1.5",
+      "repair_utility": "1.7"
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "QUANTUM_CONTRIBUTION_ATTRIBUTION"
+  },
+  {
+    "card_id": "H11",
+    "expected": {
+      "comparable_weight": 2.0,
+      "component_distances": [
+        0.25,
+        1.0
+      ],
+      "distance": 0.625
+    },
+    "inputs": {
+      "features": [
+        {
+          "kind": "numeric",
+          "left": 1,
+          "range": 4,
+          "right": 2,
+          "valid": true,
+          "weight": 1
+        },
+        {
+          "kind": "categorical",
+          "left": "a",
+          "right": "b",
+          "valid": true,
+          "weight": 1
+        }
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "PROBLEM_FINGERPRINT_DISTANCE"
+  },
+  {
+    "card_id": "H12",
+    "expected": {
+      "component_snr": [
+        3.0,
+        2.4003967925959158
+      ],
+      "mean_gradient": [
+        1.5,
+        1.8333333333333333
+      ],
+      "sample_variance": [
+        0.25,
+        0.5833333333333334
+      ],
+      "state": "FINITE"
+    },
+    "inputs": {
+      "gradient_samples": [
+        [
+          1,
+          2
+        ],
+        [
+          2,
+          1
+        ],
+        [
+          1.5,
+          2.5
+        ]
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "VARIATIONAL_GRADIENT_SNR"
+  },
+  {
+    "card_id": "H13",
+    "expected": {
+      "expired_count": 2,
+      "expiry_probability": 0.5,
+      "sample_count": 4
+    },
+    "inputs": {
+      "economic_ttl_seconds": 3,
+      "end_to_end_latency_samples": [
+        1,
+        2,
+        4,
+        8
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "QPU_RESULT_EXPIRY_PROBABILITY"
+  },
+  {
+    "card_id": "H14",
+    "expected": {
+      "decimal": "0.0"
+    },
+    "inputs": {
+      "branch_net_cash": 2.5,
+      "entry_cash": 7,
+      "exit_or_settlement_cash": 10,
+      "unique_costs": [
+        1
+      ],
+      "unique_rebates": [
+        0.5
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "SCENARIO_CASHFLOW_RECONCILIATION_RESIDUAL"
+  },
+  {
+    "card_id": "I01",
+    "expected": {
+      "bounded": true,
+      "count": 1,
+      "qku_ids": [
+        "Q2"
+      ]
+    },
+    "inputs": {
+      "access_policy_qkus": [
+        "Q1",
+        "Q2"
+      ],
+      "agent_duty_qkus": [
+        "Q2",
+        "Q4"
+      ],
+      "stage_qkus": [
+        "Q1",
+        "Q2",
+        "Q3"
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "AGENT_STAGE_QKU_UNIVERSE"
+  },
+  {
+    "card_id": "I02",
+    "expected": {
+      "count": 1,
+      "excluded_nonexecutable": [
+        "Q1"
+      ],
+      "qku_ids": [
+        "Q2"
+      ]
+    },
+    "inputs": {
+      "agent_stage_qkus": [
+        "Q1",
+        "Q2"
+      ],
+      "executable_qkus": [
+        "Q2",
+        "Q3"
+      ],
+      "input_ready_qkus": [
+        "Q2"
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "AGENT_EXECUTABLE_QKU_UNIVERSE"
+  },
+  {
+    "card_id": "I03",
+    "expected": {
+      "bounded": true,
+      "count": 1,
+      "qku_ids": [
+        "Q2"
+      ]
+    },
+    "inputs": {
+      "agent_executable_qkus": [
+        "Q1",
+        "Q2"
+      ],
+      "capacity_applicable_qkus": [
+        "Q2",
+        "Q3"
+      ],
+      "market_applicable_qkus": [
+        "Q2"
+      ],
+      "mode_applicable_qkus": [
+        "Q1",
+        "Q2"
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "CONTEXT_CANDIDATE_QKU_UNIVERSE"
+  },
+  {
+    "card_id": "I04",
+    "expected": {
+      "coverage": 1.0,
+      "coverage_state": "REQUIRED_INPUTS_EVALUATED",
+      "critical_missing_count": 0,
+      "missing_fields": []
+    },
+    "inputs": {
+      "requirements": [
+        {
+          "critical": true,
+          "name": "x",
+          "required": true,
+          "resolved_valid": true
+        }
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "FORMULA_INPUT_RESOLUTION_COVERAGE"
+  },
+  {
+    "card_id": "I05",
+    "expected": {
+      "comparable_weight": 2.0,
+      "component_distances": [
+        0.25,
+        0.0
+      ],
+      "distance": 0.125,
+      "similarity": 0.875
+    },
+    "inputs": {
+      "fields": [
+        {
+          "kind": "numeric",
+          "left": 1,
+          "range": 4,
+          "right": 2,
+          "valid": true,
+          "weight": 1
+        },
+        {
+          "kind": "categorical",
+          "left": "a",
+          "right": "a",
+          "valid": true,
+          "weight": 1
+        }
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "CONTEXT_RECIPE_SIMILARITY"
+  },
+  {
+    "card_id": "I06",
+    "expected": {
+      "prior_vector": {
+        "historical_utility": 0.7,
+        "recency": 0.8,
+        "similarity": 0.9
+      },
+      "scalar_prior": 0.79,
+      "scalar_state": "POLICY_COEFFICIENTS_APPLIED"
+    },
+    "inputs": {
+      "policy_coefficients": {
+        "historical_utility": 0.4,
+        "recency": 0.3,
+        "similarity": 0.3
+      },
+      "prior_components": {
+        "historical_utility": 0.7,
+        "recency": 0.8,
+        "similarity": 0.9
+      }
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "RECIPE_PRIOR_UTILITY"
+  },
+  {
+    "card_id": "I07",
+    "expected": {
+      "fresh": true,
+      "freshness_state": "FRESH",
+      "result_freshness": 0.5,
+      "result_remaining_ttl": 10.0
+    },
+    "inputs": {
+      "reference_time": 10,
+      "windows": [
+        {
+          "valid_from": 0,
+          "valid_until": 20
+        }
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "FORMULA_RESULT_FRESHNESS"
+  },
+  {
+    "card_id": "I08",
+    "expected": {
+      "components": {
+        "feature_snapshot_ms": 1.0,
+        "formula_compute_ms": 2.0
+      },
+      "reconciliation_residual": 0.0,
+      "total_decision_latency_ms": 3.0
+    },
+    "inputs": {
+      "components": {
+        "feature_snapshot_ms": 1,
+        "formula_compute_ms": 2
+      }
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "END_TO_END_DECISION_LATENCY"
+  },
+  {
+    "card_id": "I09",
+    "expected": {
+      "latency_pass": true,
+      "latency_slack_ms": 7.0,
+      "ttl_slack_ms": 17.0
+    },
+    "inputs": {
+      "input_lock_time_ms": 10,
+      "latency_budget_ms": 10,
+      "min_material_valid_until_ms": 30,
+      "total_decision_latency_ms": 3
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "LATENCY_BUDGET_SLACK"
+  },
+  {
+    "card_id": "I10",
+    "expected": [
+      1,
+      2,
+      0,
+      3,
+      4,
+      5,
+      "A"
+    ],
+    "inputs": {
+      "deterministic_tie_break_key_asc": "A",
+      "downstream_blocked_value_desc": 3,
+      "economic_ttl_asc": 2,
+      "hard_dependency_block_count_desc": 0,
+      "queue_age_desc": 5,
+      "severity_desc": 1,
+      "value_of_information_per_compute_desc": 4
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "FORMULA_WORK_ITEM_PRIORITY_VECTOR"
+  },
+  {
+    "card_id": "J01",
+    "expected": {
+      "LCB_or_bound": 0.45,
+      "ambiguity_radius": 0.2,
+      "feasibility_state": "ORIGINAL_MODEL_FEASIBLE",
+      "no_trade_margin": 0.45,
+      "nominal_utility": 0.65,
+      "numerical_state": "VALID",
+      "radius_sensitivity_ref": [
+        {
+          "ambiguity_radius": 0.0,
+          "robust_utility": 0.65
+        },
+        {
+          "ambiguity_radius": 0.1,
+          "robust_utility": 0.55
+        },
+        {
+          "ambiguity_radius": 0.2,
+          "robust_utility": 0.45
+        }
+      ],
+      "robust_loss": -0.45,
+      "robust_utility": 0.45,
+      "transport_metric": "DECLARED_FINITE_COST_MATRIX",
+      "worst_case_distribution_or_dual_receipt": {
+        "certificate_type": "FINITE_SUPPORT_KANTOROVICH_DUAL",
+        "dual_candidate_count": 4,
+        "dual_lambda": 1.0,
+        "duality_state": "EXACT_PIECEWISE_LINEAR_DUAL",
+        "transport_cost_matrix": [
+          [
+            0.0,
+            1.0,
+            1.0
+          ],
+          [
+            1.0,
+            0.0,
+            1.4
+          ],
+          [
+            1.0,
+            1.4,
+            0.0
+          ]
+        ]
+      }
+    },
+    "inputs": {
+      "ambiguity_radius": 0.2,
+      "no_trade_utility": 0.0,
+      "sensitivity_radii": [
+        0.0,
+        0.1,
+        0.2
+      ],
+      "support": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0
+        ]
+      ],
+      "transport_cost_matrix": [
+        [
+          0.0,
+          1.0,
+          1.0
+        ],
+        [
+          1.0,
+          0.0,
+          1.4
+        ],
+        [
+          1.0,
+          1.4,
+          0.0
+        ]
+      ],
+      "transport_metric": "DECLARED_FINITE_COST_MATRIX",
+      "utilities": [
+        0.0,
+        1.0,
+        0.5
+      ],
+      "weights": [
+        0.2,
+        0.5,
+        0.3
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "WASSERSTEIN_ROBUST_UTILITY"
+  },
+  {
+    "card_id": "J02",
+    "expected": {
+      "confidence_level": 0.8,
+      "confidence_method": "EXACT_BINOMIAL_IID",
+      "constraint_id": "fill_ttl",
+      "constraint_residual_or_shortfall": 0.2,
+      "effective_sample_support": 4,
+      "estimated_violation_probability": 0.25,
+      "feasibility_state": "FEASIBLE",
+      "missing_assumption_state": null,
+      "sample_support": 4,
+      "target_violation_probability": 0.6,
+      "threshold_provenance": "FIXTURE_POLICY",
+      "violation_probability_upper_confidence_bound": 0.5824535745243333
+    },
+    "inputs": {
+      "confidence_level": 0.8,
+      "confidence_method": "EXACT_BINOMIAL_IID",
+      "constraint_id": "fill_ttl",
+      "constraint_residuals": [
+        -1.0,
+        -0.5,
+        0.2,
+        -0.1
+      ],
+      "target_violation_probability": 0.6,
+      "threshold_provenance": "FIXTURE_POLICY"
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "CHANCE_CONSTRAINED_FEASIBILITY"
+  },
+  {
+    "card_id": "J03",
+    "expected": {
+      "affected_formula_QKU_memory_backend_refs": [],
+      "confidence_state": "SHIFT_DETECTED",
+      "deterministic_action_route": "AGENT_ORCH_RETEST",
+      "drift_severity": "RETEST_REQUIRED",
+      "drift_state": true,
+      "effect_magnitude": 1.56409487935959,
+      "effective_sample_support": 8,
+      "kernel_or_metric_id": "RBF",
+      "kernel_or_metric_version": "1.0.0",
+      "multiple_testing_family_ref": "FIXTURE_SHIFT_FAMILY",
+      "p_value_or_e_value": 0.03125,
+      "sample_support": 8,
+      "seed": 7,
+      "shift_method": "MMD_RBF_IID_PERMUTATION",
+      "shift_statistic": 1.56409487935959,
+      "shift_test_id": "shift",
+      "venue_regime_event_scope": "DECLARED_FIXTURE_SCOPE"
+    },
+    "inputs": {
+      "alpha": 0.1,
+      "bandwidth": 0.5,
+      "current_samples": [
+        [
+          1.0
+        ],
+        [
+          1.1
+        ],
+        [
+          1.2
+        ],
+        [
+          1.3
+        ]
+      ],
+      "permutations": 31,
+      "reference_samples": [
+        [
+          0.0
+        ],
+        [
+          0.1
+        ],
+        [
+          0.2
+        ],
+        [
+          0.3
+        ]
+      ],
+      "resampling_method": "IID_PERMUTATION",
+      "seed": 7,
+      "trial_family_id": "FIXTURE_SHIFT_FAMILY"
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "DISTRIBUTION_SHIFT_TEST"
+  },
+  {
+    "card_id": "J04",
+    "expected": {
+      "condition_number": 2.1201782856412494,
+      "eigenvalues": [
+        0.9614835202865497,
+        2.0385164817134505
+      ],
+      "jitter_provenance": "NUMERICAL_FIXTURE",
+      "jitter_value": 1e-09,
+      "kernel_PSD_state": "PSD_VALID",
+      "log_determinant_diversity": 0.6729444747730382,
+      "marginal_logdet_gain": 0.6729444747730382,
+      "minimum_eigenvalue": 0.9614835202865497,
+      "numerical_failure_state": null,
+      "opportunity_cost_ref": "FIXTURE_OPPORTUNITY",
+      "raw_economic_utility_ref": "FIXTURE_UTILITY"
+    },
+    "inputs": {
+      "jitter": 1e-09,
+      "jitter_provenance": "NUMERICAL_FIXTURE",
+      "kernel": [
+        [
+          2.0,
+          0.2
+        ],
+        [
+          0.2,
+          1.0
+        ]
+      ],
+      "opportunity_cost_ref": "FIXTURE_OPPORTUNITY",
+      "raw_economic_utility_ref": "FIXTURE_UTILITY",
+      "tolerance": 1e-12
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "LOG_DETERMINANT_DIVERSITY"
+  },
+  {
+    "card_id": "J05",
+    "expected": {
+      "baseline_comparator_delta": 0.0,
+      "baseline_comparator_state": "TARGET_DISTRIBUTION_CRUDE_MONTE_CARLO",
+      "baseline_monte_carlo_estimate": 0.5,
+      "confidence_interval": [
+        -0.06580326380583323,
+        1.0658032638058332
+      ],
+      "estimator_bias_class": "UNBIASED_FIXED_PROPOSAL",
+      "estimator_variance": 0.08333333333333333,
+      "failure_diagnostics": [],
+      "log_likelihood_ratio_summary": {
+        "maximum": 0.0,
+        "minimum": 0.0
+      },
+      "maximum_normalized_weight": 0.25,
+      "proposal_distribution_ref": "proposal",
+      "self_normalized_IS_estimate": 0.5,
+      "support_state": "ABSOLUTE_CONTINUITY_VALIDATED",
+      "target_distribution_ref": "target",
+      "unnormalized_IS_estimate": 0.5,
+      "weight_concentration": 0.25,
+      "weight_effective_sample_size": 4.0
+    },
+    "inputs": {
+      "log_proposal_density": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "log_target_density": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "outcomes": [
+        0.0,
+        1.0,
+        1.0,
+        0.0
+      ],
+      "seed": 11,
+      "target_samples": [
+        0.0,
+        1.0,
+        1.0,
+        0.0
+      ]
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "RARE_EVENT_IMPORTANCE_SAMPLING"
+  },
+  {
+    "card_id": "J06",
+    "expected": {
+      "KKT_residual_ref": "RECOMPUTED_LINEAR_MODEL_RESIDUALS",
+      "absolute_gap": 0.0,
+      "certificate_state": "VALID",
+      "complementarity_residual": 0.0,
+      "dual_bound": 1.0,
+      "dual_feasibility_residual": 0.0,
+      "evidence_refs": [],
+      "objective_sense": "MINIMIZE",
+      "primal_feasibility_residual": 0.0,
+      "primal_feasible_value": 1.0,
+      "relative_gap": 0.0,
+      "same_formulation_input_lock_proof": {
+        "formulation_ref": "FORM-1",
+        "input_lock_ref": "LOCK-1"
+      },
+      "solver_stop_or_comparator_decision": "GAP_WITHIN_TOLERANCE"
+    },
+    "inputs": {
+      "constraint_matrix": [
+        [
+          1.0,
+          1.0
+        ]
+      ],
+      "constraint_rhs": [
+        1.0
+      ],
+      "constraint_senses": [
+        ">="
+      ],
+      "dual_bound": 1.0,
+      "dual_formulation_ref": "FORM-1",
+      "dual_input_lock_ref": "LOCK-1",
+      "dual_solution": [
+        1.0
+      ],
+      "formulation_ref": "FORM-1",
+      "input_lock_ref": "LOCK-1",
+      "objective_coefficients": [
+        1.0,
+        2.0
+      ],
+      "objective_sense": "MINIMIZE",
+      "primal_solution": [
+        1.0,
+        0.0
+      ],
+      "tolerance": 1e-09
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "PRIMAL_DUAL_OPTIMALITY_CERTIFICATE"
+  },
+  {
+    "card_id": "J07",
+    "expected": {
+      "backend_scale_map": {
+        "scale": 1.0
+      },
+      "certificate_state": "VALID",
+      "champion_identity_invariant": true,
+      "coefficient_dynamic_range_after": 10.0,
+      "coefficient_dynamic_range_before": 10.631578947368421,
+      "decision_margin_to_two_bound_ratio": 25.24999999999998,
+      "economic_utility_sign_invariant": true,
+      "exhaustive_observed_maximum_distortion": 0.020000000000000018,
+      "inverse_economic_map_ref": {
+        "offset": 0.0,
+        "scale": 1.0
+      },
+      "maximum_objective_distortion_bound": 0.040000000000000036,
+      "no_trade_decision_invariant": true,
+      "original_model_feasibility_preserved": true,
+      "penalty_sufficiency_revalidated": true,
+      "rejected_reason": null,
+      "relevant_decision_margin": 2.02,
+      "removed_coefficient_terms": [],
+      "rounded_coefficient_terms": [
+        "linear:0",
+        "linear:1",
+        "quadratic:0,1"
+      ],
+      "source_candidate_objectives": {
+        "champion": -2.02,
+        "no_trade": 0.0,
+        "runner_up": 0.0
+      },
+      "source_formulation_ref": null,
+      "transformed_candidate_objectives": {
+        "champion": -2.0,
+        "no_trade": 0.0,
+        "runner_up": 0.0
+      },
+      "transformed_formulation_ref": null
+    },
+    "inputs": {
+      "candidate_assignments": {
+        "champion": [
+          1,
+          0
+        ],
+        "no_trade": [
+          0,
+          0
+        ],
+        "runner_up": [
+          0,
+          0
+        ]
+      },
+      "exhaustive_variable_limit": 16,
+      "feasibility_constraints": [],
+      "inverse_economic_map": {
+        "offset": 0.0,
+        "scale": 1.0
+      },
+      "linear": [
+        -2.02,
+        1.01
+      ],
+      "offset": 0.0,
+      "penalty_terms": [],
+      "prune_threshold": 0.01,
+      "quadratic": {
+        "0,1": 0.19
+      },
+      "quantization_step": 0.1
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "CERTIFIED_QUBO_SPARSIFICATION_QUANTIZATION"
+  },
+  {
+    "card_id": "J08",
+    "expected": {
+      "canonical_representative_policy": "LEXICOGRAPHIC_MINIMUM_ORBIT_MEMBER",
+      "failure_reason": null,
+      "group_closure_size": 2,
+      "inverse_expansion_map": {
+        "00": [
+          "00"
+        ],
+        "01": [
+          "01",
+          "10"
+        ],
+        "11": [
+          "11"
+        ]
+      },
+      "inverse_mapped_solution_ref": [
+        "00",
+        "01",
+        "11"
+      ],
+      "optimum_equivalence_preserved": true,
+      "orbit_membership_map": {
+        "00": "00",
+        "01": "01",
+        "10": "01",
+        "11": "11"
+      },
+      "original_model_feasibility_state": "VALID",
+      "proof_state": "VALID",
+      "reduced_constraint_count": 3,
+      "reduced_formulation_ref": "FORM-REDUCED",
+      "reduced_variable_count": 2,
+      "representative_per_feasible_orbit_proof": true,
+      "source_formulation_ref": "FORM-ORIGINAL",
+      "symmetry_breaking_constraints": [
+        {
+          "allowed_bitstrings": [
+            "00",
+            "01",
+            "11"
+          ],
+          "kind": "CANONICAL_REPRESENTATIVE_MEMBERSHIP"
+        }
+      ],
+      "symmetry_group_or_automorphism_ref": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ]
+      ]
+    },
+    "inputs": {
+      "feasible_values": {
+        "00": true,
+        "01": true,
+        "10": true,
+        "11": true
+      },
+      "generators": [
+        [
+          1,
+          0
+        ]
+      ],
+      "objective_sense": "MINIMIZE",
+      "objective_values": {
+        "00": 0.0,
+        "01": 1.0,
+        "10": 1.0,
+        "11": 2.0
+      },
+      "reduced_formulation_ref": "FORM-REDUCED",
+      "source_formulation_ref": "FORM-ORIGINAL",
+      "variable_count": 2
+    },
+    "proof_class": "FIXED_INTERNAL_DERIVATION_VECTOR",
+    "semantic_key": "SYMMETRY_BREAKING_ORBIT_REDUCTION"
+  }
+]

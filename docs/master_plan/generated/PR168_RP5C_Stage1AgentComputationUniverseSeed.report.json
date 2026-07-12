@@ -94,13 +94,13 @@
       "derived_from_classification_and_routing_surfaces_flag": true,
       "derived_from_stage1_activation_view_flag": true,
       "derived_route_resolution_refs": [
-        "RP5C_ROUTE_RESOLUTION_00000018"
+        "RP5C_ROUTE_RESOLUTION_00000020"
       ],
       "downstream_pr_refs": [
         "PR168-RP5D"
       ],
       "formula_id": "FORM_MAP3_DWAVE_001",
-      "identity_row_id": "RP5C_IDENTITY_00000059",
+      "identity_row_id": "RP5C_IDENTITY_00000063",
       "market_family_refs": [],
       "market_scope": "market_agnostic",
       "market_scope_or_platform_creates_trading_authority_flag": false,
@@ -119,12 +119,12 @@
         "RP5C_ROUTE_RULE_0011"
       ],
       "stage1_activation_view_refs": [
-        "RP5C_STAGE1_ACTIVATION_00000018"
+        "RP5C_STAGE1_ACTIVATION_00000020"
       ],
       "stage1_agent_computation_seed_row_id": "RP5C_STAGE1_AGENT_SEED_00000001",
       "stage1_classification_state": "STAGE1_PREDICTION_MARKET_SUPPORTING_MARKET_AGNOSTIC",
       "stage_access_mode": "AVAILABLE_ON_DEMAND",
-      "universal_library_identity_ref": "RP5C_IDENTITY_00000059"
+      "universal_library_identity_ref": "RP5C_IDENTITY_00000063"
     },
     {
       "agent_responsibility_group_refs": [
@@ -139,13 +139,13 @@
       "derived_from_classification_and_routing_surfaces_flag": true,
       "derived_from_stage1_activation_view_flag": true,
       "derived_route_resolution_refs": [
-        "RP5C_ROUTE_RESOLUTION_00000020"
+        "RP5C_ROUTE_RESOLUTION_00000022"
       ],
       "downstream_pr_refs": [
         "PR168-RP5D"
       ],
       "formula_id": "FORM_MAP3_DWAVE_001",
-      "identity_row_id": "RP5C_IDENTITY_00000066",
+      "identity_row_id": "RP5C_IDENTITY_00000070",
       "market_family_refs": [],
       "market_scope": "market_agnostic",
       "market_scope_or_platform_creates_trading_authority_flag": false,
@@ -164,12 +164,12 @@
         "RP5C_ROUTE_RULE_0002"
       ],
       "stage1_activation_view_refs": [
-        "RP5C_STAGE1_ACTIVATION_00000020"
+        "RP5C_STAGE1_ACTIVATION_00000022"
       ],
       "stage1_agent_computation_seed_row_id": "RP5C_STAGE1_AGENT_SEED_00000002",
       "stage1_classification_state": "STAGE1_PREDICTION_MARKET_SUPPORTING_MARKET_AGNOSTIC",
       "stage_access_mode": "AVAILABLE_ON_DEMAND",
-      "universal_library_identity_ref": "RP5C_IDENTITY_00000066"
+      "universal_library_identity_ref": "RP5C_IDENTITY_00000070"
     },
     {
       "agent_responsibility_group_refs": [
@@ -182,58 +182,13 @@
       "derived_from_classification_and_routing_surfaces_flag": true,
       "derived_from_stage1_activation_view_flag": true,
       "derived_route_resolution_refs": [
-        "RP5C_ROUTE_RESOLUTION_00000022"
-      ],
-      "downstream_pr_refs": [
-        "PR168-RP5D"
-      ],
-      "formula_id": "FORM_MAP3_DWAVE_002",
-      "identity_row_id": "RP5C_IDENTITY_00000072",
-      "market_family_refs": [],
-      "market_scope": "market_agnostic",
-      "market_scope_or_platform_creates_trading_authority_flag": false,
-      "no_ranking_flag": true,
-      "no_stack_generation_flag": true,
-      "no_trade_simulation_flag": true,
-      "notes": "Default Stage-1 computation seed; Stage-1 agents must start here, not from the full universal immutable library.",
-      "platform_applicability_registry_refs": [
-        "RP5C_PLATFORM_APPLICABILITY_0004"
-      ],
-      "platform_applicability_states": [
-        "THREE_PLATFORM_COMMON"
-      ],
-      "qku_id": null,
-      "route_rule_refs": [
-        "RP5C_ROUTE_RULE_0011"
-      ],
-      "stage1_activation_view_refs": [
-        "RP5C_STAGE1_ACTIVATION_00000022"
-      ],
-      "stage1_agent_computation_seed_row_id": "RP5C_STAGE1_AGENT_SEED_00000003",
-      "stage1_classification_state": "STAGE1_PREDICTION_MARKET_SUPPORTING_MARKET_AGNOSTIC",
-      "stage_access_mode": "AVAILABLE_ON_DEMAND",
-      "universal_library_identity_ref": "RP5C_IDENTITY_00000072"
-    },
-    {
-      "agent_responsibility_group_refs": [
-        "RP5C_RESP_GROUP_0011"
-      ],
-      "applicability_mode": "CROSS_MARKET_SHARED",
-      "blocker_codes": [
-        "NEEDS_FORMULA_EXPRESSION_REF"
-      ],
-      "default_compute_from_universal_library_flag": false,
-      "default_stage1_computation_seed_flag": true,
-      "derived_from_classification_and_routing_surfaces_flag": true,
-      "derived_from_stage1_activation_view_flag": true,
-      "derived_route_resolution_refs": [
         "RP5C_ROUTE_RESOLUTION_00000024"
       ],
       "downstream_pr_refs": [
         "PR168-RP5D"
       ],
       "formula_id": "FORM_MAP3_DWAVE_002",
-      "identity_row_id": "RP5C_IDENTITY_00000083",
+      "identity_row_id": "RP5C_IDENTITY_00000076",
       "market_family_refs": [],
       "market_scope": "market_agnostic",
       "market_scope_or_platform_creates_trading_authority_flag": false,
@@ -254,10 +209,55 @@
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000024"
       ],
+      "stage1_agent_computation_seed_row_id": "RP5C_STAGE1_AGENT_SEED_00000003",
+      "stage1_classification_state": "STAGE1_PREDICTION_MARKET_SUPPORTING_MARKET_AGNOSTIC",
+      "stage_access_mode": "AVAILABLE_ON_DEMAND",
+      "universal_library_identity_ref": "RP5C_IDENTITY_00000076"
+    },
+    {
+      "agent_responsibility_group_refs": [
+        "RP5C_RESP_GROUP_0011"
+      ],
+      "applicability_mode": "CROSS_MARKET_SHARED",
+      "blocker_codes": [
+        "NEEDS_FORMULA_EXPRESSION_REF"
+      ],
+      "default_compute_from_universal_library_flag": false,
+      "default_stage1_computation_seed_flag": true,
+      "derived_from_classification_and_routing_surfaces_flag": true,
+      "derived_from_stage1_activation_view_flag": true,
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000026"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D"
+      ],
+      "formula_id": "FORM_MAP3_DWAVE_002",
+      "identity_row_id": "RP5C_IDENTITY_00000087",
+      "market_family_refs": [],
+      "market_scope": "market_agnostic",
+      "market_scope_or_platform_creates_trading_authority_flag": false,
+      "no_ranking_flag": true,
+      "no_stack_generation_flag": true,
+      "no_trade_simulation_flag": true,
+      "notes": "Default Stage-1 computation seed; Stage-1 agents must start here, not from the full universal immutable library.",
+      "platform_applicability_registry_refs": [
+        "RP5C_PLATFORM_APPLICABILITY_0004"
+      ],
+      "platform_applicability_states": [
+        "THREE_PLATFORM_COMMON"
+      ],
+      "qku_id": null,
+      "route_rule_refs": [
+        "RP5C_ROUTE_RULE_0011"
+      ],
+      "stage1_activation_view_refs": [
+        "RP5C_STAGE1_ACTIVATION_00000026"
+      ],
       "stage1_agent_computation_seed_row_id": "RP5C_STAGE1_AGENT_SEED_00000004",
       "stage1_classification_state": "STAGE1_PREDICTION_MARKET_SUPPORTING_MARKET_AGNOSTIC",
       "stage_access_mode": "AVAILABLE_ON_DEMAND",
-      "universal_library_identity_ref": "RP5C_IDENTITY_00000083"
+      "universal_library_identity_ref": "RP5C_IDENTITY_00000087"
     },
     {
       "agent_responsibility_group_refs": [
@@ -265,107 +265,6 @@
       ],
       "applicability_mode": "MARKET_SPECIFIC",
       "blocker_codes": [
-        "NEEDS_PLATFORM_SOURCE_BINDING"
-      ],
-      "default_compute_from_universal_library_flag": false,
-      "default_stage1_computation_seed_flag": true,
-      "derived_from_classification_and_routing_surfaces_flag": true,
-      "derived_from_stage1_activation_view_flag": true,
-      "derived_route_resolution_refs": [
-        "RP5C_ROUTE_RESOLUTION_00000045"
-      ],
-      "downstream_pr_refs": [
-        "PR168-RP5D"
-      ],
-      "formula_id": "FORM_MAP3_FORECASTEX_001",
-      "identity_row_id": "RP5C_IDENTITY_00000163",
-      "market_family_refs": [
-        "PREDICTION_MARKETS"
-      ],
-      "market_scope": "prediction_market",
-      "market_scope_or_platform_creates_trading_authority_flag": false,
-      "no_ranking_flag": true,
-      "no_stack_generation_flag": true,
-      "no_trade_simulation_flag": true,
-      "notes": "Default Stage-1 computation seed; Stage-1 agents must start here, not from the full universal immutable library.",
-      "platform_applicability_registry_refs": [
-        "RP5C_PLATFORM_APPLICABILITY_0003",
-        "RP5C_PLATFORM_APPLICABILITY_0006"
-      ],
-      "platform_applicability_states": [
-        "FORECASTEX_IBKR_APPLICABLE",
-        "PLATFORM_SPECIFIC_NEEDS_SOURCE_BINDING"
-      ],
-      "qku_id": null,
-      "route_rule_refs": [
-        "RP5C_ROUTE_RULE_0013"
-      ],
-      "stage1_activation_view_refs": [
-        "RP5C_STAGE1_ACTIVATION_00000045"
-      ],
-      "stage1_agent_computation_seed_row_id": "RP5C_STAGE1_AGENT_SEED_00000005",
-      "stage1_classification_state": "STAGE1_PREDICTION_MARKET_ACTIVE_CANDIDATE",
-      "stage_access_mode": "DEFAULT_COMPUTE",
-      "universal_library_identity_ref": "RP5C_IDENTITY_00000163"
-    },
-    {
-      "agent_responsibility_group_refs": [
-        "RP5C_RESP_GROUP_0014"
-      ],
-      "applicability_mode": "MARKET_SPECIFIC",
-      "blocker_codes": [
-        "NEEDS_FORMULA_EXPRESSION_REF",
-        "NEEDS_ONTOLOGY_CLASSIFICATION",
-        "NEEDS_PLATFORM_SOURCE_BINDING"
-      ],
-      "default_compute_from_universal_library_flag": false,
-      "default_stage1_computation_seed_flag": true,
-      "derived_from_classification_and_routing_surfaces_flag": true,
-      "derived_from_stage1_activation_view_flag": true,
-      "derived_route_resolution_refs": [
-        "RP5C_ROUTE_RESOLUTION_00000046"
-      ],
-      "downstream_pr_refs": [
-        "PR168-RP5D"
-      ],
-      "formula_id": "FORM_MAP3_FORECASTEX_001",
-      "identity_row_id": "RP5C_IDENTITY_00000164",
-      "market_family_refs": [
-        "PREDICTION_MARKETS"
-      ],
-      "market_scope": "prediction_market",
-      "market_scope_or_platform_creates_trading_authority_flag": false,
-      "no_ranking_flag": true,
-      "no_stack_generation_flag": true,
-      "no_trade_simulation_flag": true,
-      "notes": "Default Stage-1 computation seed; Stage-1 agents must start here, not from the full universal immutable library.",
-      "platform_applicability_registry_refs": [
-        "RP5C_PLATFORM_APPLICABILITY_0003",
-        "RP5C_PLATFORM_APPLICABILITY_0006"
-      ],
-      "platform_applicability_states": [
-        "FORECASTEX_IBKR_APPLICABLE",
-        "PLATFORM_SPECIFIC_NEEDS_SOURCE_BINDING"
-      ],
-      "qku_id": null,
-      "route_rule_refs": [
-        "RP5C_ROUTE_RULE_0014"
-      ],
-      "stage1_activation_view_refs": [
-        "RP5C_STAGE1_ACTIVATION_00000046"
-      ],
-      "stage1_agent_computation_seed_row_id": "RP5C_STAGE1_AGENT_SEED_00000006",
-      "stage1_classification_state": "STAGE1_PREDICTION_MARKET_ACTIVE_CANDIDATE",
-      "stage_access_mode": "DEFAULT_COMPUTE",
-      "universal_library_identity_ref": "RP5C_IDENTITY_00000164"
-    },
-    {
-      "agent_responsibility_group_refs": [
-        "RP5C_RESP_GROUP_0002"
-      ],
-      "applicability_mode": "MARKET_SPECIFIC",
-      "blocker_codes": [
-        "NEEDS_FORMULA_EXPRESSION_REF",
         "NEEDS_PLATFORM_SOURCE_BINDING"
       ],
       "default_compute_from_universal_library_flag": false,
@@ -379,7 +278,108 @@
         "PR168-RP5D"
       ],
       "formula_id": "FORM_MAP3_FORECASTEX_001",
-      "identity_row_id": "RP5C_IDENTITY_00000170",
+      "identity_row_id": "RP5C_IDENTITY_00000167",
+      "market_family_refs": [
+        "PREDICTION_MARKETS"
+      ],
+      "market_scope": "prediction_market",
+      "market_scope_or_platform_creates_trading_authority_flag": false,
+      "no_ranking_flag": true,
+      "no_stack_generation_flag": true,
+      "no_trade_simulation_flag": true,
+      "notes": "Default Stage-1 computation seed; Stage-1 agents must start here, not from the full universal immutable library.",
+      "platform_applicability_registry_refs": [
+        "RP5C_PLATFORM_APPLICABILITY_0003",
+        "RP5C_PLATFORM_APPLICABILITY_0006"
+      ],
+      "platform_applicability_states": [
+        "FORECASTEX_IBKR_APPLICABLE",
+        "PLATFORM_SPECIFIC_NEEDS_SOURCE_BINDING"
+      ],
+      "qku_id": null,
+      "route_rule_refs": [
+        "RP5C_ROUTE_RULE_0013"
+      ],
+      "stage1_activation_view_refs": [
+        "RP5C_STAGE1_ACTIVATION_00000047"
+      ],
+      "stage1_agent_computation_seed_row_id": "RP5C_STAGE1_AGENT_SEED_00000005",
+      "stage1_classification_state": "STAGE1_PREDICTION_MARKET_ACTIVE_CANDIDATE",
+      "stage_access_mode": "DEFAULT_COMPUTE",
+      "universal_library_identity_ref": "RP5C_IDENTITY_00000167"
+    },
+    {
+      "agent_responsibility_group_refs": [
+        "RP5C_RESP_GROUP_0014"
+      ],
+      "applicability_mode": "MARKET_SPECIFIC",
+      "blocker_codes": [
+        "NEEDS_FORMULA_EXPRESSION_REF",
+        "NEEDS_ONTOLOGY_CLASSIFICATION",
+        "NEEDS_PLATFORM_SOURCE_BINDING"
+      ],
+      "default_compute_from_universal_library_flag": false,
+      "default_stage1_computation_seed_flag": true,
+      "derived_from_classification_and_routing_surfaces_flag": true,
+      "derived_from_stage1_activation_view_flag": true,
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000048"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D"
+      ],
+      "formula_id": "FORM_MAP3_FORECASTEX_001",
+      "identity_row_id": "RP5C_IDENTITY_00000168",
+      "market_family_refs": [
+        "PREDICTION_MARKETS"
+      ],
+      "market_scope": "prediction_market",
+      "market_scope_or_platform_creates_trading_authority_flag": false,
+      "no_ranking_flag": true,
+      "no_stack_generation_flag": true,
+      "no_trade_simulation_flag": true,
+      "notes": "Default Stage-1 computation seed; Stage-1 agents must start here, not from the full universal immutable library.",
+      "platform_applicability_registry_refs": [
+        "RP5C_PLATFORM_APPLICABILITY_0003",
+        "RP5C_PLATFORM_APPLICABILITY_0006"
+      ],
+      "platform_applicability_states": [
+        "FORECASTEX_IBKR_APPLICABLE",
+        "PLATFORM_SPECIFIC_NEEDS_SOURCE_BINDING"
+      ],
+      "qku_id": null,
+      "route_rule_refs": [
+        "RP5C_ROUTE_RULE_0014"
+      ],
+      "stage1_activation_view_refs": [
+        "RP5C_STAGE1_ACTIVATION_00000048"
+      ],
+      "stage1_agent_computation_seed_row_id": "RP5C_STAGE1_AGENT_SEED_00000006",
+      "stage1_classification_state": "STAGE1_PREDICTION_MARKET_ACTIVE_CANDIDATE",
+      "stage_access_mode": "DEFAULT_COMPUTE",
+      "universal_library_identity_ref": "RP5C_IDENTITY_00000168"
+    },
+    {
+      "agent_responsibility_group_refs": [
+        "RP5C_RESP_GROUP_0002"
+      ],
+      "applicability_mode": "MARKET_SPECIFIC",
+      "blocker_codes": [
+        "NEEDS_FORMULA_EXPRESSION_REF",
+        "NEEDS_PLATFORM_SOURCE_BINDING"
+      ],
+      "default_compute_from_universal_library_flag": false,
+      "default_stage1_computation_seed_flag": true,
+      "derived_from_classification_and_routing_surfaces_flag": true,
+      "derived_from_stage1_activation_view_flag": true,
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000049"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D"
+      ],
+      "formula_id": "FORM_MAP3_FORECASTEX_001",
+      "identity_row_id": "RP5C_IDENTITY_00000174",
       "market_family_refs": [
         "PREDICTION_MARKETS"
       ],
@@ -402,12 +402,12 @@
         "RP5C_ROUTE_RULE_0002"
       ],
       "stage1_activation_view_refs": [
-        "RP5C_STAGE1_ACTIVATION_00000047"
+        "RP5C_STAGE1_ACTIVATION_00000049"
       ],
       "stage1_agent_computation_seed_row_id": "RP5C_STAGE1_AGENT_SEED_00000007",
       "stage1_classification_state": "STAGE1_PREDICTION_MARKET_ACTIVE_CANDIDATE",
       "stage_access_mode": "DEFAULT_COMPUTE",
-      "universal_library_identity_ref": "RP5C_IDENTITY_00000170"
+      "universal_library_identity_ref": "RP5C_IDENTITY_00000174"
     },
     {
       "agent_responsibility_group_refs": [
@@ -420,13 +420,13 @@
       "derived_from_classification_and_routing_surfaces_flag": true,
       "derived_from_stage1_activation_view_flag": true,
       "derived_route_resolution_refs": [
-        "RP5C_ROUTE_RESOLUTION_00000048"
+        "RP5C_ROUTE_RESOLUTION_00000050"
       ],
       "downstream_pr_refs": [
         "PR168-RP5D"
       ],
       "formula_id": "FORM_MAP3_IBKR_001",
-      "identity_row_id": "RP5C_IDENTITY_00000175",
+      "identity_row_id": "RP5C_IDENTITY_00000179",
       "market_family_refs": [],
       "market_scope": "market_agnostic",
       "market_scope_or_platform_creates_trading_authority_flag": false,
@@ -445,12 +445,12 @@
         "RP5C_ROUTE_RULE_0013"
       ],
       "stage1_activation_view_refs": [
-        "RP5C_STAGE1_ACTIVATION_00000048"
+        "RP5C_STAGE1_ACTIVATION_00000050"
       ],
       "stage1_agent_computation_seed_row_id": "RP5C_STAGE1_AGENT_SEED_00000008",
       "stage1_classification_state": "STAGE1_PREDICTION_MARKET_SUPPORTING_MARKET_AGNOSTIC",
       "stage_access_mode": "AVAILABLE_ON_DEMAND",
-      "universal_library_identity_ref": "RP5C_IDENTITY_00000175"
+      "universal_library_identity_ref": "RP5C_IDENTITY_00000179"
     },
     {
       "agent_responsibility_group_refs": [
@@ -463,13 +463,13 @@
       "derived_from_classification_and_routing_surfaces_flag": true,
       "derived_from_stage1_activation_view_flag": true,
       "derived_route_resolution_refs": [
-        "RP5C_ROUTE_RESOLUTION_00000051"
+        "RP5C_ROUTE_RESOLUTION_00000053"
       ],
       "downstream_pr_refs": [
         "PR168-RP5D"
       ],
       "formula_id": "FORM_MAP3_IBKR_002",
-      "identity_row_id": "RP5C_IDENTITY_00000187",
+      "identity_row_id": "RP5C_IDENTITY_00000191",
       "market_family_refs": [],
       "market_scope": "market_agnostic",
       "market_scope_or_platform_creates_trading_authority_flag": false,
@@ -488,12 +488,12 @@
         "RP5C_ROUTE_RULE_0013"
       ],
       "stage1_activation_view_refs": [
-        "RP5C_STAGE1_ACTIVATION_00000051"
+        "RP5C_STAGE1_ACTIVATION_00000053"
       ],
       "stage1_agent_computation_seed_row_id": "RP5C_STAGE1_AGENT_SEED_00000009",
       "stage1_classification_state": "STAGE1_PREDICTION_MARKET_SUPPORTING_MARKET_AGNOSTIC",
       "stage_access_mode": "AVAILABLE_ON_DEMAND",
-      "universal_library_identity_ref": "RP5C_IDENTITY_00000187"
+      "universal_library_identity_ref": "RP5C_IDENTITY_00000191"
     },
     {
       "agent_responsibility_group_refs": [
@@ -509,13 +509,13 @@
       "derived_from_classification_and_routing_surfaces_flag": true,
       "derived_from_stage1_activation_view_flag": true,
       "derived_route_resolution_refs": [
-        "RP5C_ROUTE_RESOLUTION_00000055"
+        "RP5C_ROUTE_RESOLUTION_00000057"
       ],
       "downstream_pr_refs": [
         "PR168-RP5D"
       ],
       "formula_id": "FORM_MAP3_KALSHI_CANDLES_001",
-      "identity_row_id": "RP5C_IDENTITY_00000202",
+      "identity_row_id": "RP5C_IDENTITY_00000206",
       "market_family_refs": [
         "PREDICTION_MARKETS"
       ],
@@ -538,12 +538,12 @@
         "RP5C_ROUTE_RULE_0014"
       ],
       "stage1_activation_view_refs": [
-        "RP5C_STAGE1_ACTIVATION_00000055"
+        "RP5C_STAGE1_ACTIVATION_00000057"
       ],
       "stage1_agent_computation_seed_row_id": "RP5C_STAGE1_AGENT_SEED_00000010",
       "stage1_classification_state": "STAGE1_PREDICTION_MARKET_ACTIVE_CANDIDATE",
       "stage_access_mode": "DEFAULT_COMPUTE",
-      "universal_library_identity_ref": "RP5C_IDENTITY_00000202"
+      "universal_library_identity_ref": "RP5C_IDENTITY_00000206"
     },
     {
       "agent_responsibility_group_refs": [
@@ -560,13 +560,13 @@
       "derived_from_classification_and_routing_surfaces_flag": true,
       "derived_from_stage1_activation_view_flag": true,
       "derived_route_resolution_refs": [
-        "RP5C_ROUTE_RESOLUTION_00000056"
+        "RP5C_ROUTE_RESOLUTION_00000058"
       ],
       "downstream_pr_refs": [
         "PR168-RP5D"
       ],
       "formula_id": "FORM_MAP3_KALSHI_CANDLES_001",
-      "identity_row_id": "RP5C_IDENTITY_00000203",
+      "identity_row_id": "RP5C_IDENTITY_00000207",
       "market_family_refs": [
         "PREDICTION_MARKETS"
       ],
@@ -589,12 +589,12 @@
         "RP5C_ROUTE_RULE_0014"
       ],
       "stage1_activation_view_refs": [
-        "RP5C_STAGE1_ACTIVATION_00000056"
+        "RP5C_STAGE1_ACTIVATION_00000058"
       ],
       "stage1_agent_computation_seed_row_id": "RP5C_STAGE1_AGENT_SEED_00000011",
       "stage1_classification_state": "STAGE1_PREDICTION_MARKET_ACTIVE_CANDIDATE",
       "stage_access_mode": "DEFAULT_COMPUTE",
-      "universal_library_identity_ref": "RP5C_IDENTITY_00000203"
+      "universal_library_identity_ref": "RP5C_IDENTITY_00000207"
     },
     {
       "agent_responsibility_group_refs": [
@@ -609,13 +609,13 @@
       "derived_from_classification_and_routing_surfaces_flag": true,
       "derived_from_stage1_activation_view_flag": true,
       "derived_route_resolution_refs": [
-        "RP5C_ROUTE_RESOLUTION_00000057"
+        "RP5C_ROUTE_RESOLUTION_00000059"
       ],
       "downstream_pr_refs": [
         "PR168-RP5D"
       ],
       "formula_id": "FORM_MAP3_KALSHI_CANDLES_001",
-      "identity_row_id": "RP5C_IDENTITY_00000205",
+      "identity_row_id": "RP5C_IDENTITY_00000209",
       "market_family_refs": [
         "PREDICTION_MARKETS"
       ],
@@ -638,12 +638,12 @@
         "RP5C_ROUTE_RULE_0009"
       ],
       "stage1_activation_view_refs": [
-        "RP5C_STAGE1_ACTIVATION_00000057"
+        "RP5C_STAGE1_ACTIVATION_00000059"
       ],
       "stage1_agent_computation_seed_row_id": "RP5C_STAGE1_AGENT_SEED_00000012",
       "stage1_classification_state": "STAGE1_PREDICTION_MARKET_ACTIVE_CANDIDATE",
       "stage_access_mode": "DEFAULT_COMPUTE",
-      "universal_library_identity_ref": "RP5C_IDENTITY_00000205"
+      "universal_library_identity_ref": "RP5C_IDENTITY_00000209"
     },
     {
       "agent_responsibility_group_refs": [
@@ -659,13 +659,13 @@
       "derived_from_classification_and_routing_surfaces_flag": true,
       "derived_from_stage1_activation_view_flag": true,
       "derived_route_resolution_refs": [
-        "RP5C_ROUTE_RESOLUTION_00000058"
+        "RP5C_ROUTE_RESOLUTION_00000060"
       ],
       "downstream_pr_refs": [
         "PR168-RP5D"
       ],
       "formula_id": "FORM_MAP3_KALSHI_CANDLES_001",
-      "identity_row_id": "RP5C_IDENTITY_00000211",
+      "identity_row_id": "RP5C_IDENTITY_00000215",
       "market_family_refs": [
         "PREDICTION_MARKETS"
       ],
@@ -688,112 +688,12 @@
         "RP5C_ROUTE_RULE_0002"
       ],
       "stage1_activation_view_refs": [
-        "RP5C_STAGE1_ACTIVATION_00000058"
+        "RP5C_STAGE1_ACTIVATION_00000060"
       ],
       "stage1_agent_computation_seed_row_id": "RP5C_STAGE1_AGENT_SEED_00000013",
       "stage1_classification_state": "STAGE1_PREDICTION_MARKET_ACTIVE_CANDIDATE",
       "stage_access_mode": "DEFAULT_COMPUTE",
-      "universal_library_identity_ref": "RP5C_IDENTITY_00000211"
-    },
-    {
-      "agent_responsibility_group_refs": [
-        "RP5C_RESP_GROUP_0009"
-      ],
-      "applicability_mode": "MARKET_SPECIFIC",
-      "blocker_codes": [
-        "NEEDS_PLATFORM_SOURCE_BINDING"
-      ],
-      "default_compute_from_universal_library_flag": false,
-      "default_stage1_computation_seed_flag": true,
-      "derived_from_classification_and_routing_surfaces_flag": true,
-      "derived_from_stage1_activation_view_flag": true,
-      "derived_route_resolution_refs": [
-        "RP5C_ROUTE_RESOLUTION_00000060"
-      ],
-      "downstream_pr_refs": [
-        "PR168-RP5D"
-      ],
-      "formula_id": "FORM_MAP3_KALSHI_CANDLES_002",
-      "identity_row_id": "RP5C_IDENTITY_00000219",
-      "market_family_refs": [
-        "PREDICTION_MARKETS"
-      ],
-      "market_scope": "prediction_market",
-      "market_scope_or_platform_creates_trading_authority_flag": false,
-      "no_ranking_flag": true,
-      "no_stack_generation_flag": true,
-      "no_trade_simulation_flag": true,
-      "notes": "Default Stage-1 computation seed; Stage-1 agents must start here, not from the full universal immutable library.",
-      "platform_applicability_registry_refs": [
-        "RP5C_PLATFORM_APPLICABILITY_0001",
-        "RP5C_PLATFORM_APPLICABILITY_0006"
-      ],
-      "platform_applicability_states": [
-        "KALSHI_APPLICABLE",
-        "PLATFORM_SPECIFIC_NEEDS_SOURCE_BINDING"
-      ],
-      "qku_id": null,
-      "route_rule_refs": [
-        "RP5C_ROUTE_RULE_0009"
-      ],
-      "stage1_activation_view_refs": [
-        "RP5C_STAGE1_ACTIVATION_00000060"
-      ],
-      "stage1_agent_computation_seed_row_id": "RP5C_STAGE1_AGENT_SEED_00000014",
-      "stage1_classification_state": "STAGE1_PREDICTION_MARKET_ACTIVE_CANDIDATE",
-      "stage_access_mode": "DEFAULT_COMPUTE",
-      "universal_library_identity_ref": "RP5C_IDENTITY_00000219"
-    },
-    {
-      "agent_responsibility_group_refs": [
-        "RP5C_RESP_GROUP_0014"
-      ],
-      "applicability_mode": "MARKET_SPECIFIC",
-      "blocker_codes": [
-        "NEEDS_FORMULA_EXPRESSION_REF",
-        "NEEDS_ONTOLOGY_CLASSIFICATION",
-        "NEEDS_PLATFORM_SOURCE_BINDING"
-      ],
-      "default_compute_from_universal_library_flag": false,
-      "default_stage1_computation_seed_flag": true,
-      "derived_from_classification_and_routing_surfaces_flag": true,
-      "derived_from_stage1_activation_view_flag": true,
-      "derived_route_resolution_refs": [
-        "RP5C_ROUTE_RESOLUTION_00000061"
-      ],
-      "downstream_pr_refs": [
-        "PR168-RP5D"
-      ],
-      "formula_id": "FORM_MAP3_KALSHI_CANDLES_002",
-      "identity_row_id": "RP5C_IDENTITY_00000220",
-      "market_family_refs": [
-        "PREDICTION_MARKETS"
-      ],
-      "market_scope": "prediction_market",
-      "market_scope_or_platform_creates_trading_authority_flag": false,
-      "no_ranking_flag": true,
-      "no_stack_generation_flag": true,
-      "no_trade_simulation_flag": true,
-      "notes": "Default Stage-1 computation seed; Stage-1 agents must start here, not from the full universal immutable library.",
-      "platform_applicability_registry_refs": [
-        "RP5C_PLATFORM_APPLICABILITY_0001",
-        "RP5C_PLATFORM_APPLICABILITY_0006"
-      ],
-      "platform_applicability_states": [
-        "KALSHI_APPLICABLE",
-        "PLATFORM_SPECIFIC_NEEDS_SOURCE_BINDING"
-      ],
-      "qku_id": null,
-      "route_rule_refs": [
-        "RP5C_ROUTE_RULE_0014"
-      ],
-      "stage1_activation_view_refs": [
-        "RP5C_STAGE1_ACTIVATION_00000061"
-      ],
-      "stage1_agent_computation_seed_row_id": "RP5C_STAGE1_AGENT_SEED_00000015",
-      "stage1_classification_state": "STAGE1_PREDICTION_MARKET_ACTIVE_CANDIDATE",
-      "stage_access_mode": "DEFAULT_COMPUTE",
-      "universal_library_identity_ref": "RP5C_IDENTITY_00000220"
+      "universal_library_identity_ref": "RP5C_IDENTITY_00000215"
     },
     {
       "agent_responsibility_group_refs": [
@@ -814,7 +714,7 @@
         "PR168-RP5D"
       ],
       "formula_id": "FORM_MAP3_KALSHI_CANDLES_002",
-      "identity_row_id": "RP5C_IDENTITY_00000222",
+      "identity_row_id": "RP5C_IDENTITY_00000223",
       "market_family_refs": [
         "PREDICTION_MARKETS"
       ],
@@ -839,10 +739,110 @@
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000062"
       ],
+      "stage1_agent_computation_seed_row_id": "RP5C_STAGE1_AGENT_SEED_00000014",
+      "stage1_classification_state": "STAGE1_PREDICTION_MARKET_ACTIVE_CANDIDATE",
+      "stage_access_mode": "DEFAULT_COMPUTE",
+      "universal_library_identity_ref": "RP5C_IDENTITY_00000223"
+    },
+    {
+      "agent_responsibility_group_refs": [
+        "RP5C_RESP_GROUP_0014"
+      ],
+      "applicability_mode": "MARKET_SPECIFIC",
+      "blocker_codes": [
+        "NEEDS_FORMULA_EXPRESSION_REF",
+        "NEEDS_ONTOLOGY_CLASSIFICATION",
+        "NEEDS_PLATFORM_SOURCE_BINDING"
+      ],
+      "default_compute_from_universal_library_flag": false,
+      "default_stage1_computation_seed_flag": true,
+      "derived_from_classification_and_routing_surfaces_flag": true,
+      "derived_from_stage1_activation_view_flag": true,
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000063"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D"
+      ],
+      "formula_id": "FORM_MAP3_KALSHI_CANDLES_002",
+      "identity_row_id": "RP5C_IDENTITY_00000224",
+      "market_family_refs": [
+        "PREDICTION_MARKETS"
+      ],
+      "market_scope": "prediction_market",
+      "market_scope_or_platform_creates_trading_authority_flag": false,
+      "no_ranking_flag": true,
+      "no_stack_generation_flag": true,
+      "no_trade_simulation_flag": true,
+      "notes": "Default Stage-1 computation seed; Stage-1 agents must start here, not from the full universal immutable library.",
+      "platform_applicability_registry_refs": [
+        "RP5C_PLATFORM_APPLICABILITY_0001",
+        "RP5C_PLATFORM_APPLICABILITY_0006"
+      ],
+      "platform_applicability_states": [
+        "KALSHI_APPLICABLE",
+        "PLATFORM_SPECIFIC_NEEDS_SOURCE_BINDING"
+      ],
+      "qku_id": null,
+      "route_rule_refs": [
+        "RP5C_ROUTE_RULE_0014"
+      ],
+      "stage1_activation_view_refs": [
+        "RP5C_STAGE1_ACTIVATION_00000063"
+      ],
+      "stage1_agent_computation_seed_row_id": "RP5C_STAGE1_AGENT_SEED_00000015",
+      "stage1_classification_state": "STAGE1_PREDICTION_MARKET_ACTIVE_CANDIDATE",
+      "stage_access_mode": "DEFAULT_COMPUTE",
+      "universal_library_identity_ref": "RP5C_IDENTITY_00000224"
+    },
+    {
+      "agent_responsibility_group_refs": [
+        "RP5C_RESP_GROUP_0009"
+      ],
+      "applicability_mode": "MARKET_SPECIFIC",
+      "blocker_codes": [
+        "NEEDS_PLATFORM_SOURCE_BINDING"
+      ],
+      "default_compute_from_universal_library_flag": false,
+      "default_stage1_computation_seed_flag": true,
+      "derived_from_classification_and_routing_surfaces_flag": true,
+      "derived_from_stage1_activation_view_flag": true,
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000064"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D"
+      ],
+      "formula_id": "FORM_MAP3_KALSHI_CANDLES_002",
+      "identity_row_id": "RP5C_IDENTITY_00000226",
+      "market_family_refs": [
+        "PREDICTION_MARKETS"
+      ],
+      "market_scope": "prediction_market",
+      "market_scope_or_platform_creates_trading_authority_flag": false,
+      "no_ranking_flag": true,
+      "no_stack_generation_flag": true,
+      "no_trade_simulation_flag": true,
+      "notes": "Default Stage-1 computation seed; Stage-1 agents must start here, not from the full universal immutable library.",
+      "platform_applicability_registry_refs": [
+        "RP5C_PLATFORM_APPLICABILITY_0001",
+        "RP5C_PLATFORM_APPLICABILITY_0006"
+      ],
+      "platform_applicability_states": [
+        "KALSHI_APPLICABLE",
+        "PLATFORM_SPECIFIC_NEEDS_SOURCE_BINDING"
+      ],
+      "qku_id": null,
+      "route_rule_refs": [
+        "RP5C_ROUTE_RULE_0009"
+      ],
+      "stage1_activation_view_refs": [
+        "RP5C_STAGE1_ACTIVATION_00000064"
+      ],
       "stage1_agent_computation_seed_row_id": "RP5C_STAGE1_AGENT_SEED_00000016",
       "stage1_classification_state": "STAGE1_PREDICTION_MARKET_ACTIVE_CANDIDATE",
       "stage_access_mode": "DEFAULT_COMPUTE",
-      "universal_library_identity_ref": "RP5C_IDENTITY_00000222"
+      "universal_library_identity_ref": "RP5C_IDENTITY_00000226"
     },
     {
       "agent_responsibility_group_refs": [
@@ -858,13 +858,13 @@
       "derived_from_classification_and_routing_surfaces_flag": true,
       "derived_from_stage1_activation_view_flag": true,
       "derived_route_resolution_refs": [
-        "RP5C_ROUTE_RESOLUTION_00000063"
+        "RP5C_ROUTE_RESOLUTION_00000065"
       ],
       "downstream_pr_refs": [
         "PR168-RP5D"
       ],
       "formula_id": "FORM_MAP3_KALSHI_CANDLES_002",
-      "identity_row_id": "RP5C_IDENTITY_00000228",
+      "identity_row_id": "RP5C_IDENTITY_00000232",
       "market_family_refs": [
         "PREDICTION_MARKETS"
       ],
@@ -887,12 +887,12 @@
         "RP5C_ROUTE_RULE_0002"
       ],
       "stage1_activation_view_refs": [
-        "RP5C_STAGE1_ACTIVATION_00000063"
+        "RP5C_STAGE1_ACTIVATION_00000065"
       ],
       "stage1_agent_computation_seed_row_id": "RP5C_STAGE1_AGENT_SEED_00000017",
       "stage1_classification_state": "STAGE1_PREDICTION_MARKET_ACTIVE_CANDIDATE",
       "stage_access_mode": "DEFAULT_COMPUTE",
-      "universal_library_identity_ref": "RP5C_IDENTITY_00000228"
+      "universal_library_identity_ref": "RP5C_IDENTITY_00000232"
     },
     {
       "agent_responsibility_group_refs": [
@@ -900,106 +900,6 @@
       ],
       "applicability_mode": "MARKET_SPECIFIC",
       "blocker_codes": [
-        "NEEDS_PLATFORM_SOURCE_BINDING"
-      ],
-      "default_compute_from_universal_library_flag": false,
-      "default_stage1_computation_seed_flag": true,
-      "derived_from_classification_and_routing_surfaces_flag": true,
-      "derived_from_stage1_activation_view_flag": true,
-      "derived_route_resolution_refs": [
-        "RP5C_ROUTE_RESOLUTION_00000064"
-      ],
-      "downstream_pr_refs": [
-        "PR168-RP5D"
-      ],
-      "formula_id": "FORM_MAP3_KALSHI_FEE_001",
-      "identity_row_id": "RP5C_IDENTITY_00000233",
-      "market_family_refs": [
-        "PREDICTION_MARKETS"
-      ],
-      "market_scope": "prediction_market",
-      "market_scope_or_platform_creates_trading_authority_flag": false,
-      "no_ranking_flag": true,
-      "no_stack_generation_flag": true,
-      "no_trade_simulation_flag": true,
-      "notes": "Default Stage-1 computation seed; Stage-1 agents must start here, not from the full universal immutable library.",
-      "platform_applicability_registry_refs": [
-        "RP5C_PLATFORM_APPLICABILITY_0001",
-        "RP5C_PLATFORM_APPLICABILITY_0006"
-      ],
-      "platform_applicability_states": [
-        "KALSHI_APPLICABLE",
-        "PLATFORM_SPECIFIC_NEEDS_SOURCE_BINDING"
-      ],
-      "qku_id": null,
-      "route_rule_refs": [
-        "RP5C_ROUTE_RULE_0004"
-      ],
-      "stage1_activation_view_refs": [
-        "RP5C_STAGE1_ACTIVATION_00000064"
-      ],
-      "stage1_agent_computation_seed_row_id": "RP5C_STAGE1_AGENT_SEED_00000018",
-      "stage1_classification_state": "STAGE1_PREDICTION_MARKET_ACTIVE_CANDIDATE",
-      "stage_access_mode": "DEFAULT_COMPUTE",
-      "universal_library_identity_ref": "RP5C_IDENTITY_00000233"
-    },
-    {
-      "agent_responsibility_group_refs": [
-        "RP5C_RESP_GROUP_0004"
-      ],
-      "applicability_mode": "MARKET_SPECIFIC",
-      "blocker_codes": [
-        "NEEDS_FORMULA_EXPRESSION_REF",
-        "NEEDS_PLATFORM_SOURCE_BINDING"
-      ],
-      "default_compute_from_universal_library_flag": false,
-      "default_stage1_computation_seed_flag": true,
-      "derived_from_classification_and_routing_surfaces_flag": true,
-      "derived_from_stage1_activation_view_flag": true,
-      "derived_route_resolution_refs": [
-        "RP5C_ROUTE_RESOLUTION_00000065"
-      ],
-      "downstream_pr_refs": [
-        "PR168-RP5D"
-      ],
-      "formula_id": "FORM_MAP3_KALSHI_FEE_001",
-      "identity_row_id": "RP5C_IDENTITY_00000235",
-      "market_family_refs": [
-        "PREDICTION_MARKETS"
-      ],
-      "market_scope": "prediction_market",
-      "market_scope_or_platform_creates_trading_authority_flag": false,
-      "no_ranking_flag": true,
-      "no_stack_generation_flag": true,
-      "no_trade_simulation_flag": true,
-      "notes": "Default Stage-1 computation seed; Stage-1 agents must start here, not from the full universal immutable library.",
-      "platform_applicability_registry_refs": [
-        "RP5C_PLATFORM_APPLICABILITY_0001",
-        "RP5C_PLATFORM_APPLICABILITY_0006"
-      ],
-      "platform_applicability_states": [
-        "KALSHI_APPLICABLE",
-        "PLATFORM_SPECIFIC_NEEDS_SOURCE_BINDING"
-      ],
-      "qku_id": null,
-      "route_rule_refs": [
-        "RP5C_ROUTE_RULE_0004"
-      ],
-      "stage1_activation_view_refs": [
-        "RP5C_STAGE1_ACTIVATION_00000065"
-      ],
-      "stage1_agent_computation_seed_row_id": "RP5C_STAGE1_AGENT_SEED_00000019",
-      "stage1_classification_state": "STAGE1_PREDICTION_MARKET_ACTIVE_CANDIDATE",
-      "stage_access_mode": "DEFAULT_COMPUTE",
-      "universal_library_identity_ref": "RP5C_IDENTITY_00000235"
-    },
-    {
-      "agent_responsibility_group_refs": [
-        "RP5C_RESP_GROUP_0004"
-      ],
-      "applicability_mode": "MARKET_SPECIFIC",
-      "blocker_codes": [
-        "NEEDS_FORMULA_EXPRESSION_REF",
         "NEEDS_PLATFORM_SOURCE_BINDING"
       ],
       "default_compute_from_universal_library_flag": false,
@@ -1013,7 +913,7 @@
         "PR168-RP5D"
       ],
       "formula_id": "FORM_MAP3_KALSHI_FEE_001",
-      "identity_row_id": "RP5C_IDENTITY_00000246",
+      "identity_row_id": "RP5C_IDENTITY_00000237",
       "market_family_refs": [
         "PREDICTION_MARKETS"
       ],
@@ -1038,17 +938,68 @@
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000066"
       ],
-      "stage1_agent_computation_seed_row_id": "RP5C_STAGE1_AGENT_SEED_00000020",
+      "stage1_agent_computation_seed_row_id": "RP5C_STAGE1_AGENT_SEED_00000018",
       "stage1_classification_state": "STAGE1_PREDICTION_MARKET_ACTIVE_CANDIDATE",
       "stage_access_mode": "DEFAULT_COMPUTE",
-      "universal_library_identity_ref": "RP5C_IDENTITY_00000246"
+      "universal_library_identity_ref": "RP5C_IDENTITY_00000237"
     },
     {
       "agent_responsibility_group_refs": [
-        "RP5C_RESP_GROUP_0003"
+        "RP5C_RESP_GROUP_0004"
       ],
       "applicability_mode": "MARKET_SPECIFIC",
       "blocker_codes": [
+        "NEEDS_FORMULA_EXPRESSION_REF",
+        "NEEDS_PLATFORM_SOURCE_BINDING"
+      ],
+      "default_compute_from_universal_library_flag": false,
+      "default_stage1_computation_seed_flag": true,
+      "derived_from_classification_and_routing_surfaces_flag": true,
+      "derived_from_stage1_activation_view_flag": true,
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000067"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D"
+      ],
+      "formula_id": "FORM_MAP3_KALSHI_FEE_001",
+      "identity_row_id": "RP5C_IDENTITY_00000239",
+      "market_family_refs": [
+        "PREDICTION_MARKETS"
+      ],
+      "market_scope": "prediction_market",
+      "market_scope_or_platform_creates_trading_authority_flag": false,
+      "no_ranking_flag": true,
+      "no_stack_generation_flag": true,
+      "no_trade_simulation_flag": true,
+      "notes": "Default Stage-1 computation seed; Stage-1 agents must start here, not from the full universal immutable library.",
+      "platform_applicability_registry_refs": [
+        "RP5C_PLATFORM_APPLICABILITY_0001",
+        "RP5C_PLATFORM_APPLICABILITY_0006"
+      ],
+      "platform_applicability_states": [
+        "KALSHI_APPLICABLE",
+        "PLATFORM_SPECIFIC_NEEDS_SOURCE_BINDING"
+      ],
+      "qku_id": null,
+      "route_rule_refs": [
+        "RP5C_ROUTE_RULE_0004"
+      ],
+      "stage1_activation_view_refs": [
+        "RP5C_STAGE1_ACTIVATION_00000067"
+      ],
+      "stage1_agent_computation_seed_row_id": "RP5C_STAGE1_AGENT_SEED_00000019",
+      "stage1_classification_state": "STAGE1_PREDICTION_MARKET_ACTIVE_CANDIDATE",
+      "stage_access_mode": "DEFAULT_COMPUTE",
+      "universal_library_identity_ref": "RP5C_IDENTITY_00000239"
+    },
+    {
+      "agent_responsibility_group_refs": [
+        "RP5C_RESP_GROUP_0004"
+      ],
+      "applicability_mode": "MARKET_SPECIFIC",
+      "blocker_codes": [
+        "NEEDS_FORMULA_EXPRESSION_REF",
         "NEEDS_PLATFORM_SOURCE_BINDING"
       ],
       "default_compute_from_universal_library_flag": false,
@@ -1061,7 +1012,7 @@
       "downstream_pr_refs": [
         "PR168-RP5D"
       ],
-      "formula_id": "FORM_MAP3_KALSHI_ORDERBOOK_001",
+      "formula_id": "FORM_MAP3_KALSHI_FEE_001",
       "identity_row_id": "RP5C_IDENTITY_00000250",
       "market_family_refs": [
         "PREDICTION_MARKETS"
@@ -1082,12 +1033,12 @@
       ],
       "qku_id": null,
       "route_rule_refs": [
-        "RP5C_ROUTE_RULE_0003"
+        "RP5C_ROUTE_RULE_0004"
       ],
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000068"
       ],
-      "stage1_agent_computation_seed_row_id": "RP5C_STAGE1_AGENT_SEED_00000021",
+      "stage1_agent_computation_seed_row_id": "RP5C_STAGE1_AGENT_SEED_00000020",
       "stage1_classification_state": "STAGE1_PREDICTION_MARKET_ACTIVE_CANDIDATE",
       "stage_access_mode": "DEFAULT_COMPUTE",
       "universal_library_identity_ref": "RP5C_IDENTITY_00000250"
@@ -1105,13 +1056,13 @@
       "derived_from_classification_and_routing_surfaces_flag": true,
       "derived_from_stage1_activation_view_flag": true,
       "derived_route_resolution_refs": [
-        "RP5C_ROUTE_RESOLUTION_00000069"
+        "RP5C_ROUTE_RESOLUTION_00000070"
       ],
       "downstream_pr_refs": [
         "PR168-RP5D"
       ],
       "formula_id": "FORM_MAP3_KALSHI_ORDERBOOK_001",
-      "identity_row_id": "RP5C_IDENTITY_00000251",
+      "identity_row_id": "RP5C_IDENTITY_00000254",
       "market_family_refs": [
         "PREDICTION_MARKETS"
       ],
@@ -1134,62 +1085,12 @@
         "RP5C_ROUTE_RULE_0003"
       ],
       "stage1_activation_view_refs": [
-        "RP5C_STAGE1_ACTIVATION_00000069"
-      ],
-      "stage1_agent_computation_seed_row_id": "RP5C_STAGE1_AGENT_SEED_00000022",
-      "stage1_classification_state": "STAGE1_PREDICTION_MARKET_ACTIVE_CANDIDATE",
-      "stage_access_mode": "DEFAULT_COMPUTE",
-      "universal_library_identity_ref": "RP5C_IDENTITY_00000251"
-    },
-    {
-      "agent_responsibility_group_refs": [
-        "RP5C_RESP_GROUP_0005"
-      ],
-      "applicability_mode": "MARKET_SPECIFIC",
-      "blocker_codes": [
-        "NEEDS_FORMULA_EXPRESSION_REF",
-        "NEEDS_PLATFORM_SOURCE_BINDING"
-      ],
-      "default_compute_from_universal_library_flag": false,
-      "default_stage1_computation_seed_flag": true,
-      "derived_from_classification_and_routing_surfaces_flag": true,
-      "derived_from_stage1_activation_view_flag": true,
-      "derived_route_resolution_refs": [
-        "RP5C_ROUTE_RESOLUTION_00000070"
-      ],
-      "downstream_pr_refs": [
-        "PR168-RP5D"
-      ],
-      "formula_id": "FORM_MAP3_KALSHI_ORDERBOOK_001",
-      "identity_row_id": "RP5C_IDENTITY_00000252",
-      "market_family_refs": [
-        "PREDICTION_MARKETS"
-      ],
-      "market_scope": "prediction_market",
-      "market_scope_or_platform_creates_trading_authority_flag": false,
-      "no_ranking_flag": true,
-      "no_stack_generation_flag": true,
-      "no_trade_simulation_flag": true,
-      "notes": "Default Stage-1 computation seed; Stage-1 agents must start here, not from the full universal immutable library.",
-      "platform_applicability_registry_refs": [
-        "RP5C_PLATFORM_APPLICABILITY_0001",
-        "RP5C_PLATFORM_APPLICABILITY_0006"
-      ],
-      "platform_applicability_states": [
-        "KALSHI_APPLICABLE",
-        "PLATFORM_SPECIFIC_NEEDS_SOURCE_BINDING"
-      ],
-      "qku_id": null,
-      "route_rule_refs": [
-        "RP5C_ROUTE_RULE_0005"
-      ],
-      "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000070"
       ],
-      "stage1_agent_computation_seed_row_id": "RP5C_STAGE1_AGENT_SEED_00000023",
+      "stage1_agent_computation_seed_row_id": "RP5C_STAGE1_AGENT_SEED_00000021",
       "stage1_classification_state": "STAGE1_PREDICTION_MARKET_ACTIVE_CANDIDATE",
       "stage_access_mode": "DEFAULT_COMPUTE",
-      "universal_library_identity_ref": "RP5C_IDENTITY_00000252"
+      "universal_library_identity_ref": "RP5C_IDENTITY_00000254"
     },
     {
       "agent_responsibility_group_refs": [
@@ -1197,7 +1098,6 @@
       ],
       "applicability_mode": "MARKET_SPECIFIC",
       "blocker_codes": [
-        "NEEDS_FORMULA_EXPRESSION_REF",
         "NEEDS_PLATFORM_SOURCE_BINDING"
       ],
       "default_compute_from_universal_library_flag": false,
@@ -1211,7 +1111,7 @@
         "PR168-RP5D"
       ],
       "formula_id": "FORM_MAP3_KALSHI_ORDERBOOK_001",
-      "identity_row_id": "RP5C_IDENTITY_00000259",
+      "identity_row_id": "RP5C_IDENTITY_00000255",
       "market_family_refs": [
         "PREDICTION_MARKETS"
       ],
@@ -1236,10 +1136,60 @@
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000071"
       ],
-      "stage1_agent_computation_seed_row_id": "RP5C_STAGE1_AGENT_SEED_00000024",
+      "stage1_agent_computation_seed_row_id": "RP5C_STAGE1_AGENT_SEED_00000022",
       "stage1_classification_state": "STAGE1_PREDICTION_MARKET_ACTIVE_CANDIDATE",
       "stage_access_mode": "DEFAULT_COMPUTE",
-      "universal_library_identity_ref": "RP5C_IDENTITY_00000259"
+      "universal_library_identity_ref": "RP5C_IDENTITY_00000255"
+    },
+    {
+      "agent_responsibility_group_refs": [
+        "RP5C_RESP_GROUP_0005"
+      ],
+      "applicability_mode": "MARKET_SPECIFIC",
+      "blocker_codes": [
+        "NEEDS_FORMULA_EXPRESSION_REF",
+        "NEEDS_PLATFORM_SOURCE_BINDING"
+      ],
+      "default_compute_from_universal_library_flag": false,
+      "default_stage1_computation_seed_flag": true,
+      "derived_from_classification_and_routing_surfaces_flag": true,
+      "derived_from_stage1_activation_view_flag": true,
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000072"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D"
+      ],
+      "formula_id": "FORM_MAP3_KALSHI_ORDERBOOK_001",
+      "identity_row_id": "RP5C_IDENTITY_00000256",
+      "market_family_refs": [
+        "PREDICTION_MARKETS"
+      ],
+      "market_scope": "prediction_market",
+      "market_scope_or_platform_creates_trading_authority_flag": false,
+      "no_ranking_flag": true,
+      "no_stack_generation_flag": true,
+      "no_trade_simulation_flag": true,
+      "notes": "Default Stage-1 computation seed; Stage-1 agents must start here, not from the full universal immutable library.",
+      "platform_applicability_registry_refs": [
+        "RP5C_PLATFORM_APPLICABILITY_0001",
+        "RP5C_PLATFORM_APPLICABILITY_0006"
+      ],
+      "platform_applicability_states": [
+        "KALSHI_APPLICABLE",
+        "PLATFORM_SPECIFIC_NEEDS_SOURCE_BINDING"
+      ],
+      "qku_id": null,
+      "route_rule_refs": [
+        "RP5C_ROUTE_RULE_0005"
+      ],
+      "stage1_activation_view_refs": [
+        "RP5C_STAGE1_ACTIVATION_00000072"
+      ],
+      "stage1_agent_computation_seed_row_id": "RP5C_STAGE1_AGENT_SEED_00000023",
+      "stage1_classification_state": "STAGE1_PREDICTION_MARKET_ACTIVE_CANDIDATE",
+      "stage_access_mode": "DEFAULT_COMPUTE",
+      "universal_library_identity_ref": "RP5C_IDENTITY_00000256"
     },
     {
       "agent_responsibility_group_refs": [
@@ -1247,6 +1197,7 @@
       ],
       "applicability_mode": "MARKET_SPECIFIC",
       "blocker_codes": [
+        "NEEDS_FORMULA_EXPRESSION_REF",
         "NEEDS_PLATFORM_SOURCE_BINDING"
       ],
       "default_compute_from_universal_library_flag": false,
@@ -1259,8 +1210,8 @@
       "downstream_pr_refs": [
         "PR168-RP5D"
       ],
-      "formula_id": "FORM_MAP3_KALSHI_ORDERBOOK_002",
-      "identity_row_id": "RP5C_IDENTITY_00000267",
+      "formula_id": "FORM_MAP3_KALSHI_ORDERBOOK_001",
+      "identity_row_id": "RP5C_IDENTITY_00000263",
       "market_family_refs": [
         "PREDICTION_MARKETS"
       ],
@@ -1285,10 +1236,59 @@
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000073"
       ],
+      "stage1_agent_computation_seed_row_id": "RP5C_STAGE1_AGENT_SEED_00000024",
+      "stage1_classification_state": "STAGE1_PREDICTION_MARKET_ACTIVE_CANDIDATE",
+      "stage_access_mode": "DEFAULT_COMPUTE",
+      "universal_library_identity_ref": "RP5C_IDENTITY_00000263"
+    },
+    {
+      "agent_responsibility_group_refs": [
+        "RP5C_RESP_GROUP_0003"
+      ],
+      "applicability_mode": "MARKET_SPECIFIC",
+      "blocker_codes": [
+        "NEEDS_PLATFORM_SOURCE_BINDING"
+      ],
+      "default_compute_from_universal_library_flag": false,
+      "default_stage1_computation_seed_flag": true,
+      "derived_from_classification_and_routing_surfaces_flag": true,
+      "derived_from_stage1_activation_view_flag": true,
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000075"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D"
+      ],
+      "formula_id": "FORM_MAP3_KALSHI_ORDERBOOK_002",
+      "identity_row_id": "RP5C_IDENTITY_00000271",
+      "market_family_refs": [
+        "PREDICTION_MARKETS"
+      ],
+      "market_scope": "prediction_market",
+      "market_scope_or_platform_creates_trading_authority_flag": false,
+      "no_ranking_flag": true,
+      "no_stack_generation_flag": true,
+      "no_trade_simulation_flag": true,
+      "notes": "Default Stage-1 computation seed; Stage-1 agents must start here, not from the full universal immutable library.",
+      "platform_applicability_registry_refs": [
+        "RP5C_PLATFORM_APPLICABILITY_0001",
+        "RP5C_PLATFORM_APPLICABILITY_0006"
+      ],
+      "platform_applicability_states": [
+        "KALSHI_APPLICABLE",
+        "PLATFORM_SPECIFIC_NEEDS_SOURCE_BINDING"
+      ],
+      "qku_id": null,
+      "route_rule_refs": [
+        "RP5C_ROUTE_RULE_0003"
+      ],
+      "stage1_activation_view_refs": [
+        "RP5C_STAGE1_ACTIVATION_00000075"
+      ],
       "stage1_agent_computation_seed_row_id": "RP5C_STAGE1_AGENT_SEED_00000025",
       "stage1_classification_state": "STAGE1_PREDICTION_MARKET_ACTIVE_CANDIDATE",
       "stage_access_mode": "DEFAULT_COMPUTE",
-      "universal_library_identity_ref": "RP5C_IDENTITY_00000267"
+      "universal_library_identity_ref": "RP5C_IDENTITY_00000271"
     }
   ],
   "report_version": "PR168-RP5C-v1.0",
@@ -1298,7 +1298,7 @@
   "silent_skipped_input_artifact_count": 0,
   "source_truth_authority_created_count": 0,
   "stack_combination_materialization_count": 0,
-  "stage1_agent_computation_universe_seed_row_count": 2001,
+  "stage1_agent_computation_universe_seed_row_count": 2689,
   "stage1_agents_must_not_default_compute_full_universe": true,
   "stage1_default_full_universe_compute_route_count": 0,
   "trade_simulation_count": 0

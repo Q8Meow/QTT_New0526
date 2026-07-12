@@ -100,7 +100,7 @@
   "retained_grid_count": 5,
   "row_id": "RP5F_RUN_RECEIPT",
   "rp5c_vs1_rp5d_rp5e_rp5d_r1_consumed_flag": true,
-  "rp5d_adapter_queue_rows": 35877,
+  "rp5d_adapter_queue_rows": 47429,
   "rp5d_prior_replay_paper_executable_now_rows": 0,
   "rp5d_r1_new_replay_paper_executable_now_count": 5,
   "rp5d_r1_promoted_overlay_rows": 5,

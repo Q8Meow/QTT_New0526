@@ -69,7 +69,7 @@
     "fallback_tasks.jsonl": 5,
     "fdr_tasks.jsonl": 5,
     "formula_intake.jsonl": 5,
-    "formula_tasks.jsonl": 5,
+    "formula_tasks.jsonl": 218,
     "graph_quality.jsonl": 5,
     "graph_routes.jsonl": 5,
     "graph_tasks.jsonl": 5,
@@ -102,7 +102,7 @@
     "rank_tasks.jsonl": 5,
     "readiness_bindings.jsonl": 5,
     "reality_tasks.jsonl": 5,
-    "registry.jsonl": 461,
+    "registry.jsonl": 674,
     "retest_tasks.jsonl": 5,
     "retry_policy.jsonl": 1,
     "role_map.jsonl": 14,
@@ -127,6 +127,6 @@
   },
   "projection_version": "PR169-AGENT-ORCH1-v2.2",
   "report_name": "no_orphan",
-  "row_count": 461,
+  "row_count": 674,
   "validator": "tools/validate_pr169_agent_orch1.py"
 }

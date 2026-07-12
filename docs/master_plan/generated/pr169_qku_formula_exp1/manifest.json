@@ -23,13 +23,13 @@
   "parallel_registry_count": 0,
   "previous_schema_version": "1.0.0",
   "row_counts": {
-    "bindings.jsonl": 213,
+    "bindings.jsonl": 747,
     "family_j_receipts.jsonl": 8,
-    "integration.jsonl": 213,
+    "integration.jsonl": 647,
     "objects.jsonl": 233,
     "reading.jsonl": 19,
     "requirements.jsonl": 213,
-    "sources.jsonl": 8,
+    "sources.jsonl": 221,
     "strategies.jsonl": 38,
     "tool_manifest.jsonl": 5,
     "validator_rules.jsonl": 11

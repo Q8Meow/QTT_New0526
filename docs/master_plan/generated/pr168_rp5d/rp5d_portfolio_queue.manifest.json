@@ -15,7 +15,7 @@
   "pr_id": "PR168_RP5D",
   "producer_agent": "GovernanceAgent",
   "report_version": "PR168-RP5D-v1.0",
-  "row_count": 1658,
+  "row_count": 2304,
   "row_count_within_bound_flag": true,
   "run_id": "PR168_RP5D_DETERMINISTIC_RUN_20260627T000000Z",
   "schema_version_name": "Rp5dPortfolioQueueV1",

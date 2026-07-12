@@ -8,7 +8,7 @@
   "deleted_file_count": 0,
   "dormant_qku_deleted_count": 0,
   "dormant_qku_global_ban_count": 0,
-  "family_registry_row_count": 207,
+  "family_registry_row_count": 234,
   "formula_expression_mutation_count": 0,
   "formula_identity_deleted_count": 0,
   "formula_profit_ranking_count": 0,
@@ -85,7 +85,16 @@
   "records": [
     {
       "dependency_type_refs": [
-        "governance_dependency",
+        "calibration_dependency",
+        "capacity_dependency",
+        "exit_timing_dependency",
+        "fill_liquidity_dependency",
+        "market_data_dependency",
+        "portfolio_risk_dependency",
+        "quantum_objective_dependency",
+        "regime_scenario_dependency",
+        "signal_dependency",
+        "tca_dependency",
         "unknown_needs_review"
       ],
       "downstream_pr_refs": [
@@ -94,6 +103,159 @@
         "RANK4"
       ],
       "family_row_id": "RP5C_FAMILY_00001",
+      "family_type": "formula_family",
+      "formula_family": "a",
+      "formula_refs": [
+        "QTT_FORMULA::BRANCH_NET_CASH",
+        "QTT_FORMULA::CAMPAIGN_CAPACITY_FRONTIER",
+        "QTT_FORMULA::CAMPAIGN_CASH_AGGREGATES",
+        "QTT_FORMULA::CAMPAIGN_REMAINING_CAPACITY",
+        "QTT_FORMULA::CAPITAL_OPPORTUNITY_COST",
+        "QTT_FORMULA::CAPITAL_TIME_EFFICIENCY",
+        "QTT_FORMULA::CONTINUATION_HYSTERESIS",
+        "QTT_FORMULA::CONTINUE_HOLDING_VALUE",
+        "QTT_FORMULA::DEPTH_WALK_BUY_COST",
+        "QTT_FORMULA::DEPTH_WALK_SELL_PROCEEDS",
+        "QTT_FORMULA::EVIDENCE_STOP_STATISTICS",
+        "QTT_FORMULA::EXECUTABLE_EXIT_NET_CASH",
+        "QTT_FORMULA::EXIT_NOW_VALUE",
+        "QTT_FORMULA::EXPECTED_NET_CASH_SCENARIO",
+        "QTT_FORMULA::FEE_CURVE_PRODUCT",
+        "QTT_FORMULA::FILL_ADJUSTED_EXECUTABLE_NET_CASH",
+        "QTT_FORMULA::FORWARD_ACTION_VALUE",
+        "QTT_FORMULA::HEDGE_OFFSET_VALUE",
+        "QTT_FORMULA::HOLD_TO_SETTLEMENT_VALUE",
+        "QTT_FORMULA::MAKER_REBATE_SHARE",
+        "QTT_FORMULA::NET_CASH_LCB_UCB",
+        "QTT_FORMULA::NET_CASH_VELOCITY",
+        "QTT_FORMULA::NET_QUOTE_UTILITY",
+        "QTT_FORMULA::NO_TRADE_MARGIN",
+        "QTT_FORMULA::PARTIAL_HARVEST_NET_CASH",
+        "QTT_FORMULA::PNL_STATE_CLASSIFICATION",
+        "QTT_FORMULA::REENTRY_EDGE_HURDLE",
+        "QTT_FORMULA::REQUIRED_EXIT_PROFIT",
+        "QTT_FORMULA::REVERSE_VALUE",
+        "QTT_FORMULA::RISK_RESERVE_HURDLE",
+        "QTT_FORMULA::ROBUST_NET_CASH_INTERVAL",
+        "QTT_FORMULA::TOTAL_REALIZED_NET_CASH",
+        "QTT_FORMULA::VENUE_FEE_GENERIC"
+      ],
+      "formula_subfamily": "a",
+      "formula_variant_refs": [
+        "PR169::A01::1.0.0",
+        "PR169::A02::1.0.0",
+        "PR169::A03::1.0.0",
+        "PR169::A04::1.0.0",
+        "PR169::A05::1.0.0",
+        "PR169::A06::1.0.0",
+        "PR169::A07::1.0.0",
+        "PR169::A08::1.0.0",
+        "PR169::A09::1.0.0",
+        "PR169::A10::1.0.0",
+        "PR169::A11::1.0.0",
+        "PR169::A12::1.0.0",
+        "PR169::A13::1.0.0",
+        "PR169::A14::1.0.0",
+        "PR169::A15::1.0.0",
+        "PR169::A16::1.0.0",
+        "PR169::A17::1.0.0",
+        "PR169::A18::1.0.0",
+        "PR169::A19::1.0.0",
+        "PR169::A20::1.0.0",
+        "PR169::A21::1.0.0",
+        "PR169::A22::1.0.0",
+        "PR169::A23::1.0.0",
+        "PR169::A24::1.0.0",
+        "PR169::A25::1.0.0",
+        "PR169::A26::1.0.0",
+        "PR169::A27::1.0.0",
+        "PR169::A28::1.0.0",
+        "PR169::A29::1.0.0",
+        "PR169::A30::1.0.0",
+        "PR169::A31::1.0.0",
+        "PR169::A32::1.0.0",
+        "PR169::A33::1.0.0"
+      ],
+      "market_scope_refs": [
+        "prediction_market",
+        "unknown_needs_review"
+      ],
+      "notes": "Central family row generated from immutable library classifications.",
+      "ontology_category_refs": [
+        "calibration",
+        "capacity_crowding",
+        "exit_timing",
+        "fill_queue_liquidity",
+        "market_implied_probability",
+        "portfolio_risk",
+        "quantum_objective_constraint",
+        "regime_scenario",
+        "signal_probability",
+        "tca_cost",
+        "unknown_needs_review"
+      ],
+      "qku_family": null,
+      "qku_refs": [
+        "QKU_PMKT_EDGE_CALIBRATION_AND_SCORING_030",
+        "QKU_PMKT_EDGE_CALIBRATION_AND_SCORING_031",
+        "QKU_PMKT_EDGE_EXPECTED_VALUE_AND_PAYOFF_019",
+        "QKU_PMKT_EDGE_FDR_AND_OVERFIT_CONTROLS_033",
+        "QKU_PMKT_EDGE_FDR_AND_OVERFIT_CONTROLS_034",
+        "QKU_PMKT_EDGE_FILL_LATENCY_CAPACITY_007",
+        "QKU_PMKT_EDGE_FILL_LATENCY_CAPACITY_012",
+        "QKU_PMKT_EDGE_FILL_LATENCY_CAPACITY_018",
+        "QKU_PMKT_EDGE_FILL_LATENCY_CAPACITY_023",
+        "QKU_PMKT_EDGE_FILL_LATENCY_CAPACITY_024",
+        "QKU_PMKT_EDGE_FILL_LATENCY_CAPACITY_029",
+        "QKU_PMKT_EDGE_MARKET_IMPLIED_PROBABILITY_AND_PARITY_001",
+        "QKU_PMKT_EDGE_MARKET_IMPLIED_PROBABILITY_AND_PARITY_002",
+        "QKU_PMKT_EDGE_MARKET_IMPLIED_PROBABILITY_AND_PARITY_014",
+        "QKU_PMKT_EDGE_MARKET_IMPLIED_PROBABILITY_AND_PARITY_021",
+        "QKU_PMKT_EDGE_MARKET_IMPLIED_PROBABILITY_AND_PARITY_022",
+        "QKU_PMKT_EDGE_ORDERBOOK_MICROSTRUCTURE_003",
+        "QKU_PMKT_EDGE_PORTFOLIO_AND_MARGINAL_UTILITY_036",
+        "QKU_PMKT_EDGE_PORTFOLIO_AND_MARGINAL_UTILITY_037",
+        "QKU_PMKT_EDGE_PORTFOLIO_AND_MARGINAL_UTILITY_038",
+        "QKU_PMKT_EDGE_PORTFOLIO_AND_MARGINAL_UTILITY_039",
+        "QKU_PMKT_EDGE_QUANTUM_FORWARD_OPTIMIZATION_041",
+        "QKU_PMKT_EDGE_QUANTUM_FORWARD_OPTIMIZATION_042",
+        "QKU_PMKT_EDGE_QUANTUM_FORWARD_OPTIMIZATION_043",
+        "QKU_PMKT_EDGE_QUANTUM_FORWARD_OPTIMIZATION_044",
+        "QKU_PMKT_EDGE_REGIME_AND_SCENARIO_LADDER_006",
+        "QKU_PMKT_EDGE_REGIME_AND_SCENARIO_LADDER_008",
+        "QKU_PMKT_EDGE_REGIME_AND_SCENARIO_LADDER_040",
+        "QKU_PMKT_EDGE_TRADE_PRICE_HISTORY_FEATURES_004",
+        "QKU_PMKT_EDGE_TRADE_PRICE_HISTORY_FEATURES_005",
+        "QKU_PMKT_EDGE_TRADE_PRICE_HISTORY_FEATURES_013",
+        "QKU_PMKT_EDGE_VENUE_MECHANICS_CONSTRAINTS_010",
+        "QKU_PMKT_EDGE_VENUE_MECHANICS_CONSTRAINTS_017"
+      ],
+      "qku_subfamily": null,
+      "route_rule_refs": [
+        "RP5C_ROUTE_RULE_0001",
+        "RP5C_ROUTE_RULE_0002",
+        "RP5C_ROUTE_RULE_0003",
+        "RP5C_ROUTE_RULE_0004",
+        "RP5C_ROUTE_RULE_0005",
+        "RP5C_ROUTE_RULE_0007",
+        "RP5C_ROUTE_RULE_0008",
+        "RP5C_ROUTE_RULE_0009",
+        "RP5C_ROUTE_RULE_0010",
+        "RP5C_ROUTE_RULE_0011",
+        "RP5C_ROUTE_RULE_0014"
+      ]
+    },
+    {
+      "dependency_type_refs": [
+        "governance_dependency",
+        "unknown_needs_review"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D",
+        "PR168-RP5E",
+        "RANK4"
+      ],
+      "family_row_id": "RP5C_FAMILY_00002",
       "family_type": "formula_family",
       "formula_family": "adverse_selection",
       "formula_refs": [
@@ -121,6 +283,119 @@
     },
     {
       "dependency_type_refs": [
+        "fill_liquidity_dependency",
+        "market_data_dependency",
+        "portfolio_risk_dependency",
+        "quantum_objective_dependency",
+        "regime_scenario_dependency",
+        "signal_dependency",
+        "tca_dependency"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D",
+        "PR168-RP5E",
+        "RANK4"
+      ],
+      "family_row_id": "RP5C_FAMILY_00003",
+      "family_type": "formula_family",
+      "formula_family": "b",
+      "formula_refs": [
+        "PR162D_R2A::DEPTH_WEIGHTED_MID_PRICE",
+        "PR168_GFP2R_FORMULA_ORDERBOOK_IMBALANCE",
+        "QTT_FORMULA::AVELLANEDA_STOIKOV_HALF_SPREAD",
+        "QTT_FORMULA::AVELLANEDA_STOIKOV_RESERVATION_PRICE",
+        "QTT_FORMULA::CANCEL_REPLACE_VALUE",
+        "QTT_FORMULA::DEPTH_IMPACT",
+        "QTT_FORMULA::EFFECTIVE_ARRIVAL_PRICE",
+        "QTT_FORMULA::FILL_SURVIVAL_HAZARD",
+        "QTT_FORMULA::HAWKES_INTENSITY_CANDIDATE",
+        "QTT_FORMULA::IMPLEMENTATION_SHORTFALL",
+        "QTT_FORMULA::INVENTORY_SKEW",
+        "QTT_FORMULA::LATENCY_DECAY_COST",
+        "QTT_FORMULA::MAKER_TAKER_ROUTE_UTILITY",
+        "QTT_FORMULA::ORDER_FLOW_IMBALANCE",
+        "QTT_FORMULA::ORDER_GROUP_ROLLING_USAGE",
+        "QTT_FORMULA::QUEUE_AHEAD_DEPLETION",
+        "QTT_FORMULA::RATE_LIMIT_BUDGET",
+        "QTT_FORMULA::REALIZED_SPREAD",
+        "QTT_FORMULA::SIGNED_MARKOUT",
+        "QTT_FORMULA::SPREAD_COST",
+        "QTT_FORMULA::TCA_DECOMPOSITION_RECONCILIATION"
+      ],
+      "formula_subfamily": "b",
+      "formula_variant_refs": [
+        "PR169::B01::1.0.0",
+        "PR169::B02::1.0.0",
+        "PR169::B03::1.0.0",
+        "PR169::B04::1.0.0",
+        "PR169::B05::1.0.0",
+        "PR169::B06::1.0.0",
+        "PR169::B07::1.0.0",
+        "PR169::B08::1.0.0",
+        "PR169::B09::1.0.0",
+        "PR169::B10::1.0.0",
+        "PR169::B11::1.0.0",
+        "PR169::B12::1.0.0",
+        "PR169::B13::1.0.0",
+        "PR169::B14::1.0.0",
+        "PR169::B15::1.0.0",
+        "PR169::B16::1.0.0",
+        "PR169::B17::1.0.0",
+        "PR169::B18::1.0.0",
+        "PR169::B19::1.0.0",
+        "PR169::B20::1.0.0",
+        "PR169::B21::1.0.0"
+      ],
+      "market_scope_refs": [
+        "prediction_market"
+      ],
+      "notes": "Central family row generated from immutable library classifications.",
+      "ontology_category_refs": [
+        "fill_queue_liquidity",
+        "market_implied_probability",
+        "portfolio_risk",
+        "quantum_objective_constraint",
+        "regime_scenario",
+        "signal_probability",
+        "tca_cost"
+      ],
+      "qku_family": null,
+      "qku_refs": [
+        "QKU_PMKT_EDGE_EXPECTED_VALUE_AND_PAYOFF_019",
+        "QKU_PMKT_EDGE_FDR_AND_OVERFIT_CONTROLS_034",
+        "QKU_PMKT_EDGE_FILL_LATENCY_CAPACITY_007",
+        "QKU_PMKT_EDGE_FILL_LATENCY_CAPACITY_012",
+        "QKU_PMKT_EDGE_FILL_LATENCY_CAPACITY_018",
+        "QKU_PMKT_EDGE_FILL_LATENCY_CAPACITY_023",
+        "QKU_PMKT_EDGE_FILL_LATENCY_CAPACITY_024",
+        "QKU_PMKT_EDGE_FILL_LATENCY_CAPACITY_029",
+        "QKU_PMKT_EDGE_MARKET_IMPLIED_PROBABILITY_AND_PARITY_001",
+        "QKU_PMKT_EDGE_MARKET_IMPLIED_PROBABILITY_AND_PARITY_002",
+        "QKU_PMKT_EDGE_MARKET_IMPLIED_PROBABILITY_AND_PARITY_014",
+        "QKU_PMKT_EDGE_MARKET_IMPLIED_PROBABILITY_AND_PARITY_021",
+        "QKU_PMKT_EDGE_MARKET_IMPLIED_PROBABILITY_AND_PARITY_022",
+        "QKU_PMKT_EDGE_ORDERBOOK_MICROSTRUCTURE_003",
+        "QKU_PMKT_EDGE_PORTFOLIO_AND_MARGINAL_UTILITY_038",
+        "QKU_PMKT_EDGE_QUANTUM_FORWARD_OPTIMIZATION_042",
+        "QKU_PMKT_EDGE_QUANTUM_FORWARD_OPTIMIZATION_043",
+        "QKU_PMKT_EDGE_REGIME_AND_SCENARIO_LADDER_008",
+        "QKU_PMKT_EDGE_TRADE_PRICE_HISTORY_FEATURES_013",
+        "QKU_PMKT_EDGE_VENUE_MECHANICS_CONSTRAINTS_010",
+        "QKU_PMKT_EDGE_VENUE_MECHANICS_CONSTRAINTS_017"
+      ],
+      "qku_subfamily": null,
+      "route_rule_refs": [
+        "RP5C_ROUTE_RULE_0001",
+        "RP5C_ROUTE_RULE_0003",
+        "RP5C_ROUTE_RULE_0004",
+        "RP5C_ROUTE_RULE_0005",
+        "RP5C_ROUTE_RULE_0008",
+        "RP5C_ROUTE_RULE_0009",
+        "RP5C_ROUTE_RULE_0011"
+      ]
+    },
+    {
+      "dependency_type_refs": [
         "calibration_dependency"
       ],
       "downstream_pr_refs": [
@@ -128,7 +403,7 @@
         "PR168-RP5E",
         "RANK4"
       ],
-      "family_row_id": "RP5C_FAMILY_00002",
+      "family_row_id": "RP5C_FAMILY_00004",
       "family_type": "formula_family",
       "formula_family": "bayesian_shrinkage_calibration",
       "formula_refs": [
@@ -162,7 +437,7 @@
         "PR168-RP5E",
         "RANK4"
       ],
-      "family_row_id": "RP5C_FAMILY_00003",
+      "family_row_id": "RP5C_FAMILY_00005",
       "family_type": "formula_family",
       "formula_family": "binary_contract_expected_value",
       "formula_refs": [
@@ -197,7 +472,7 @@
         "PR168-RP5E",
         "RANK4"
       ],
-      "family_row_id": "RP5C_FAMILY_00004",
+      "family_row_id": "RP5C_FAMILY_00006",
       "family_type": "formula_family",
       "formula_family": "bqm_objective",
       "formula_refs": [
@@ -231,7 +506,7 @@
         "PR168-RP5E",
         "RANK4"
       ],
-      "family_row_id": "RP5C_FAMILY_00005",
+      "family_row_id": "RP5C_FAMILY_00007",
       "family_type": "formula_family",
       "formula_family": "break_even_and_required_edge",
       "formula_refs": [
@@ -266,6 +541,110 @@
     },
     {
       "dependency_type_refs": [
+        "calibration_dependency",
+        "fill_liquidity_dependency",
+        "regime_scenario_dependency",
+        "signal_dependency",
+        "unknown_needs_review"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D",
+        "PR168-RP5E",
+        "RANK4"
+      ],
+      "family_row_id": "RP5C_FAMILY_00008",
+      "family_type": "formula_family",
+      "formula_family": "c",
+      "formula_refs": [
+        "FORM_MAP3_CALIB_BRIER_001",
+        "FORM_MAP3_CALIB_LOGLOSS_001",
+        "QTT_FORMULA::ANYTIME_EVIDENCE_PROCESS",
+        "QTT_FORMULA::AUTOCORRELATION_EFFECTIVE_SAMPLE_SIZE",
+        "QTT_FORMULA::BENJAMINI_HOCHBERG_FDR",
+        "QTT_FORMULA::BENJAMINI_YEKUTIEL_FDR",
+        "QTT_FORMULA::CALIBRATION_SLOPE_INTERCEPT",
+        "QTT_FORMULA::CLUSTER_EVENT_EFFECTIVE_SAMPLE_SIZE",
+        "QTT_FORMULA::CONFORMAL_INTERVAL_CANDIDATE",
+        "QTT_FORMULA::DEFLATED_SHARPE_RATIO",
+        "QTT_FORMULA::DEPENDENCE_AWARE_BOOTSTRAP_LCB",
+        "QTT_FORMULA::DIFFERENTIAL_SHARPE",
+        "QTT_FORMULA::EXPECTED_CALIBRATION_ERROR",
+        "QTT_FORMULA::HANSEN_SPA",
+        "QTT_FORMULA::MINIMUM_TRACK_RECORD_LENGTH",
+        "QTT_FORMULA::MODEL_CONFIDENCE_SET",
+        "QTT_FORMULA::PAIRED_CHALLENGER_DELTA",
+        "QTT_FORMULA::PBO_CSCV",
+        "QTT_FORMULA::PROBABILISTIC_SHARPE_RATIO",
+        "QTT_FORMULA::PROBABILITY_OF_POSITIVE_NET_CASH",
+        "QTT_FORMULA::RANK_STABILITY",
+        "QTT_FORMULA::STEPM_MULTIPLE_COMPARISON",
+        "QTT_FORMULA::TRIAL_FAMILY_EFFECTIVE_COUNT",
+        "QTT_FORMULA::WEIGHTED_EFFECTIVE_SAMPLE_SIZE",
+        "QTT_FORMULA::WHITE_REALITY_CHECK"
+      ],
+      "formula_subfamily": "c",
+      "formula_variant_refs": [
+        "PR169::C01::1.0.0",
+        "PR169::C02::1.0.0",
+        "PR169::C03::1.0.0",
+        "PR169::C04::1.0.0",
+        "PR169::C05::1.0.0",
+        "PR169::C06::1.0.0",
+        "PR169::C07::1.0.0",
+        "PR169::C08::1.0.0",
+        "PR169::C09::1.0.0",
+        "PR169::C10::1.0.0",
+        "PR169::C11::1.0.0",
+        "PR169::C12::1.0.0",
+        "PR169::C13::1.0.0",
+        "PR169::C14::1.0.0",
+        "PR169::C15::1.0.0",
+        "PR169::C16::1.0.0",
+        "PR169::C17::1.0.0",
+        "PR169::C18::1.0.0",
+        "PR169::C19::1.0.0",
+        "PR169::C20::1.0.0",
+        "PR169::C21::1.0.0",
+        "PR169::C22::1.0.0",
+        "PR169::C23::1.0.0",
+        "PR169::C24::1.0.0",
+        "PR169::C25::1.0.0"
+      ],
+      "market_scope_refs": [
+        "prediction_market",
+        "unknown_needs_review"
+      ],
+      "notes": "Central family row generated from immutable library classifications.",
+      "ontology_category_refs": [
+        "calibration",
+        "fill_queue_liquidity",
+        "regime_scenario",
+        "signal_probability",
+        "unknown_needs_review"
+      ],
+      "qku_family": null,
+      "qku_refs": [
+        "QKU_PMKT_EDGE_CALIBRATION_AND_SCORING_030",
+        "QKU_PMKT_EDGE_EXPECTED_VALUE_AND_PAYOFF_019",
+        "QKU_PMKT_EDGE_FILL_LATENCY_CAPACITY_012",
+        "QKU_PMKT_EDGE_FILL_LATENCY_CAPACITY_024",
+        "QKU_PMKT_EDGE_FILL_LATENCY_CAPACITY_029",
+        "QKU_PMKT_EDGE_ORDERBOOK_MICROSTRUCTURE_003",
+        "QKU_PMKT_EDGE_REGIME_AND_SCENARIO_LADDER_006",
+        "QKU_PMKT_EDGE_TRADE_PRICE_HISTORY_FEATURES_004",
+        "QKU_PMKT_EDGE_TRADE_PRICE_HISTORY_FEATURES_005"
+      ],
+      "qku_subfamily": null,
+      "route_rule_refs": [
+        "RP5C_ROUTE_RULE_0001",
+        "RP5C_ROUTE_RULE_0002",
+        "RP5C_ROUTE_RULE_0005",
+        "RP5C_ROUTE_RULE_0009",
+        "RP5C_ROUTE_RULE_0014"
+      ]
+    },
+    {
+      "dependency_type_refs": [
         "calibration_dependency"
       ],
       "downstream_pr_refs": [
@@ -273,7 +652,7 @@
         "PR168-RP5E",
         "RANK4"
       ],
-      "family_row_id": "RP5C_FAMILY_00006",
+      "family_row_id": "RP5C_FAMILY_00009",
       "family_type": "formula_family",
       "formula_family": "calibration",
       "formula_refs": [],
@@ -935,7 +1314,7 @@
         "PR168-RP5E",
         "RANK4"
       ],
-      "family_row_id": "RP5C_FAMILY_00007",
+      "family_row_id": "RP5C_FAMILY_00010",
       "family_type": "formula_family",
       "formula_family": "calibration_and_scoring",
       "formula_refs": [
@@ -978,7 +1357,7 @@
         "PR168-RP5E",
         "RANK4"
       ],
-      "family_row_id": "RP5C_FAMILY_00008",
+      "family_row_id": "RP5C_FAMILY_00011",
       "family_type": "formula_family",
       "formula_family": "calibration_or_lcb_component",
       "formula_refs": [
@@ -1015,7 +1394,7 @@
         "PR168-RP5E",
         "RANK4"
       ],
-      "family_row_id": "RP5C_FAMILY_00009",
+      "family_row_id": "RP5C_FAMILY_00012",
       "family_type": "formula_family",
       "formula_family": "candidatepacketv1",
       "formula_refs": [
@@ -1079,7 +1458,7 @@
         "PR168-RP5E",
         "RANK4"
       ],
-      "family_row_id": "RP5C_FAMILY_00010",
+      "family_row_id": "RP5C_FAMILY_00013",
       "family_type": "formula_family",
       "formula_family": "capacity",
       "formula_refs": [
@@ -1116,7 +1495,7 @@
         "PR168-RP5E",
         "RANK4"
       ],
-      "family_row_id": "RP5C_FAMILY_00011",
+      "family_row_id": "RP5C_FAMILY_00014",
       "family_type": "formula_family",
       "formula_family": "capacity_crowding",
       "formula_refs": [
@@ -1150,7 +1529,7 @@
         "PR168-RP5E",
         "RANK4"
       ],
-      "family_row_id": "RP5C_FAMILY_00012",
+      "family_row_id": "RP5C_FAMILY_00015",
       "family_type": "formula_family",
       "formula_family": "champion_challenger_arbitration",
       "formula_refs": [
@@ -1185,7 +1564,7 @@
         "PR168-RP5E",
         "RANK4"
       ],
-      "family_row_id": "RP5C_FAMILY_00013",
+      "family_row_id": "RP5C_FAMILY_00016",
       "family_type": "formula_family",
       "formula_family": "classical_fallback",
       "formula_refs": [],
@@ -1251,7 +1630,7 @@
         "PR168-RP5E",
         "RANK4"
       ],
-      "family_row_id": "RP5C_FAMILY_00014",
+      "family_row_id": "RP5C_FAMILY_00017",
       "family_type": "formula_family",
       "formula_family": "classical_fallback_objective",
       "formula_refs": [
@@ -1284,7 +1663,7 @@
         "PR168-RP5E",
         "RANK4"
       ],
-      "family_row_id": "RP5C_FAMILY_00015",
+      "family_row_id": "RP5C_FAMILY_00018",
       "family_type": "formula_family",
       "formula_family": "conformal_lcb_or_uncertainty_ranking",
       "formula_refs": [
@@ -1319,7 +1698,7 @@
         "PR168-RP5E",
         "RANK4"
       ],
-      "family_row_id": "RP5C_FAMILY_00016",
+      "family_row_id": "RP5C_FAMILY_00019",
       "family_type": "formula_family",
       "formula_family": "cqm_objective",
       "formula_refs": [
@@ -1345,6 +1724,144 @@
     },
     {
       "dependency_type_refs": [
+        "calibration_dependency",
+        "fill_liquidity_dependency",
+        "governance_dependency",
+        "portfolio_risk_dependency",
+        "quantum_objective_dependency",
+        "regime_scenario_dependency",
+        "signal_dependency",
+        "unknown_needs_review"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D",
+        "PR168-RP5E",
+        "RANK4"
+      ],
+      "family_row_id": "RP5C_FAMILY_00020",
+      "family_type": "formula_family",
+      "formula_family": "d",
+      "formula_refs": [
+        "PR162D_R2A::CAPITAL_UTILIZATION",
+        "QTT_FORMULA::ADAPTIVE_SEARCH_BUDGET",
+        "QTT_FORMULA::AGENT_DISAGREEMENT_VECTOR",
+        "QTT_FORMULA::CAPITAL_TIME_ROTATION",
+        "QTT_FORMULA::CHAMPION_CHALLENGER_REGRET",
+        "QTT_FORMULA::CONDITION_SCOPED_SHRINKAGE",
+        "QTT_FORMULA::CORRELATION_INTERACTION_PENALTY",
+        "QTT_FORMULA::DISTRIBUTIONALLY_ROBUST_UTILITY",
+        "QTT_FORMULA::DIVERSIFICATION_ENTROPY",
+        "QTT_FORMULA::DOUBLY_ROBUST_POLICY_VALUE",
+        "QTT_FORMULA::ENTROPIC_RISK_CANDIDATE",
+        "QTT_FORMULA::EPSILON_CONSTRAINED_PARETO",
+        "QTT_FORMULA::EVENT_EXPOSURE_NETTING",
+        "QTT_FORMULA::EXPERIMENT_DESIGN_UTILITY",
+        "QTT_FORMULA::EXPOSURE_HERFINDAHL",
+        "QTT_FORMULA::FINANCIAL_LOSS_CVAR",
+        "QTT_FORMULA::FRACTIONAL_KELLY_ROBUST",
+        "QTT_FORMULA::IPS_OFF_POLICY_VALUE",
+        "QTT_FORMULA::LEXICOGRAPHIC_ECONOMIC_OBJECTIVE",
+        "QTT_FORMULA::MARGINAL_RISK_CONTRIBUTION",
+        "QTT_FORMULA::MAX_DRAWDOWN",
+        "QTT_FORMULA::MEAN_VARIANCE_UTILITY",
+        "QTT_FORMULA::NO_TRADE_RECOVERY_DISTANCE",
+        "QTT_FORMULA::PARETO_DOMINANCE",
+        "QTT_FORMULA::PORTFOLIO_MARGINAL_UTILITY",
+        "QTT_FORMULA::REGIME_ROBUSTNESS",
+        "QTT_FORMULA::ROBUST_CVAR",
+        "QTT_FORMULA::SNIPS_OFF_POLICY_VALUE",
+        "QTT_FORMULA::TIME_BUCKET_CAPITAL",
+        "QTT_FORMULA::VALUE_OF_INFORMATION"
+      ],
+      "formula_subfamily": "d",
+      "formula_variant_refs": [
+        "PR169::D01::1.0.0",
+        "PR169::D02::1.0.0",
+        "PR169::D03::1.0.0",
+        "PR169::D04::1.0.0",
+        "PR169::D05::1.0.0",
+        "PR169::D06::1.0.0",
+        "PR169::D07::1.0.0",
+        "PR169::D08::1.0.0",
+        "PR169::D09::1.0.0",
+        "PR169::D10::1.0.0",
+        "PR169::D11::1.0.0",
+        "PR169::D12::1.0.0",
+        "PR169::D13::1.0.0",
+        "PR169::D14::1.0.0",
+        "PR169::D15::1.0.0",
+        "PR169::D16::1.0.0",
+        "PR169::D17::1.0.0",
+        "PR169::D18::1.0.0",
+        "PR169::D19::1.0.0",
+        "PR169::D20::1.0.0",
+        "PR169::D21::1.0.0",
+        "PR169::D22::1.0.0",
+        "PR169::D23::1.0.0",
+        "PR169::D24::1.0.0",
+        "PR169::D25::1.0.0",
+        "PR169::D26::1.0.0",
+        "PR169::D27::1.0.0",
+        "PR169::D28::1.0.0",
+        "PR169::D29::1.0.0",
+        "PR169::D30::1.0.0"
+      ],
+      "market_scope_refs": [
+        "prediction_market",
+        "unknown_needs_review"
+      ],
+      "notes": "Central family row generated from immutable library classifications.",
+      "ontology_category_refs": [
+        "calibration",
+        "fill_queue_liquidity",
+        "governance_source_risk",
+        "portfolio_risk",
+        "quantum_objective_constraint",
+        "regime_scenario",
+        "signal_probability",
+        "unknown_needs_review"
+      ],
+      "qku_family": null,
+      "qku_refs": [
+        "QKU_PMKT_EDGE_CALIBRATION_AND_SCORING_030",
+        "QKU_PMKT_EDGE_CALIBRATION_AND_SCORING_031",
+        "QKU_PMKT_EDGE_EXPECTED_VALUE_AND_PAYOFF_019",
+        "QKU_PMKT_EDGE_FDR_AND_OVERFIT_CONTROLS_033",
+        "QKU_PMKT_EDGE_FDR_AND_OVERFIT_CONTROLS_034",
+        "QKU_PMKT_EDGE_FILL_LATENCY_CAPACITY_007",
+        "QKU_PMKT_EDGE_FILL_LATENCY_CAPACITY_012",
+        "QKU_PMKT_EDGE_FILL_LATENCY_CAPACITY_023",
+        "QKU_PMKT_EDGE_FILL_LATENCY_CAPACITY_024",
+        "QKU_PMKT_EDGE_FILL_LATENCY_CAPACITY_029",
+        "QKU_PMKT_EDGE_ORDERBOOK_MICROSTRUCTURE_003",
+        "QKU_PMKT_EDGE_PORTFOLIO_AND_MARGINAL_UTILITY_036",
+        "QKU_PMKT_EDGE_PORTFOLIO_AND_MARGINAL_UTILITY_037",
+        "QKU_PMKT_EDGE_PORTFOLIO_AND_MARGINAL_UTILITY_038",
+        "QKU_PMKT_EDGE_PORTFOLIO_AND_MARGINAL_UTILITY_039",
+        "QKU_PMKT_EDGE_QUANTUM_FORWARD_OPTIMIZATION_042",
+        "QKU_PMKT_EDGE_QUANTUM_FORWARD_OPTIMIZATION_043",
+        "QKU_PMKT_EDGE_QUANTUM_FORWARD_OPTIMIZATION_044",
+        "QKU_PMKT_EDGE_REGIME_AND_SCENARIO_LADDER_006",
+        "QKU_PMKT_EDGE_REGIME_AND_SCENARIO_LADDER_008",
+        "QKU_PMKT_EDGE_REGIME_AND_SCENARIO_LADDER_040",
+        "QKU_PMKT_EDGE_SOURCE_EVIDENCE_AND_DATA_QUALITY_045",
+        "QKU_PMKT_EDGE_TRADE_PRICE_HISTORY_FEATURES_005",
+        "QKU_PMKT_EDGE_TRADE_PRICE_HISTORY_FEATURES_013"
+      ],
+      "qku_subfamily": null,
+      "route_rule_refs": [
+        "RP5C_ROUTE_RULE_0001",
+        "RP5C_ROUTE_RULE_0002",
+        "RP5C_ROUTE_RULE_0005",
+        "RP5C_ROUTE_RULE_0008",
+        "RP5C_ROUTE_RULE_0009",
+        "RP5C_ROUTE_RULE_0011",
+        "RP5C_ROUTE_RULE_0013",
+        "RP5C_ROUTE_RULE_0014"
+      ]
+    },
+    {
+      "dependency_type_refs": [
         "quantum_objective_dependency"
       ],
       "downstream_pr_refs": [
@@ -1352,7 +1869,7 @@
         "PR168-RP5E",
         "RANK4"
       ],
-      "family_row_id": "RP5C_FAMILY_00017",
+      "family_row_id": "RP5C_FAMILY_00021",
       "family_type": "formula_family",
       "formula_family": "dqm_objective",
       "formula_refs": [
@@ -1378,6 +1895,80 @@
     },
     {
       "dependency_type_refs": [
+        "fill_liquidity_dependency",
+        "market_data_dependency",
+        "quantum_objective_dependency",
+        "signal_dependency"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D",
+        "PR168-RP5E",
+        "RANK4"
+      ],
+      "family_row_id": "RP5C_FAMILY_00022",
+      "family_type": "formula_family",
+      "formula_family": "e",
+      "formula_refs": [
+        "QTT_FORMULA::BASKET_EXECUTABLE_UTILITY",
+        "QTT_FORMULA::COMPLEMENT_CONSISTENCY",
+        "QTT_FORMULA::COMPLETE_SET_BUY_MARGIN",
+        "QTT_FORMULA::COMPLETE_SET_SELL_MARGIN",
+        "QTT_FORMULA::CROSS_VENUE_PARITY_MARGIN",
+        "QTT_FORMULA::DATE_MONOTONICITY",
+        "QTT_FORMULA::INTERSECTION_BOUND",
+        "QTT_FORMULA::LOGICAL_ARBITRAGE_HYPERGRAPH_OBJECTIVE",
+        "QTT_FORMULA::LOGICAL_IMPLICATION",
+        "QTT_FORMULA::OUTCOME_SUM_CONSISTENCY",
+        "QTT_FORMULA::SIMULTANEOUS_FILL_PROBABILITY",
+        "QTT_FORMULA::SUBSET_SUPERSET"
+      ],
+      "formula_subfamily": "e",
+      "formula_variant_refs": [
+        "PR169::E01::1.0.0",
+        "PR169::E02::1.0.0",
+        "PR169::E03::1.0.0",
+        "PR169::E04::1.0.0",
+        "PR169::E05::1.0.0",
+        "PR169::E06::1.0.0",
+        "PR169::E07::1.0.0",
+        "PR169::E08::1.0.0",
+        "PR169::E09::1.0.0",
+        "PR169::E10::1.0.0",
+        "PR169::E11::1.0.0",
+        "PR169::E12::1.0.0"
+      ],
+      "market_scope_refs": [
+        "prediction_market"
+      ],
+      "notes": "Central family row generated from immutable library classifications.",
+      "ontology_category_refs": [
+        "fill_queue_liquidity",
+        "market_implied_probability",
+        "quantum_objective_constraint",
+        "signal_probability"
+      ],
+      "qku_family": null,
+      "qku_refs": [
+        "QKU_PMKT_EDGE_FDR_AND_OVERFIT_CONTROLS_033",
+        "QKU_PMKT_EDGE_MARKET_IMPLIED_PROBABILITY_AND_PARITY_001",
+        "QKU_PMKT_EDGE_MARKET_IMPLIED_PROBABILITY_AND_PARITY_002",
+        "QKU_PMKT_EDGE_MARKET_IMPLIED_PROBABILITY_AND_PARITY_014",
+        "QKU_PMKT_EDGE_MARKET_IMPLIED_PROBABILITY_AND_PARITY_021",
+        "QKU_PMKT_EDGE_MARKET_IMPLIED_PROBABILITY_AND_PARITY_022",
+        "QKU_PMKT_EDGE_QUANTUM_FORWARD_OPTIMIZATION_041",
+        "QKU_PMKT_EDGE_VENUE_MECHANICS_CONSTRAINTS_010",
+        "QKU_PMKT_EDGE_VENUE_MECHANICS_CONSTRAINTS_017"
+      ],
+      "qku_subfamily": null,
+      "route_rule_refs": [
+        "RP5C_ROUTE_RULE_0001",
+        "RP5C_ROUTE_RULE_0003",
+        "RP5C_ROUTE_RULE_0005",
+        "RP5C_ROUTE_RULE_0011"
+      ]
+    },
+    {
+      "dependency_type_refs": [
         "governance_dependency",
         "signal_dependency"
       ],
@@ -1386,7 +1977,7 @@
         "PR168-RP5E",
         "RANK4"
       ],
-      "family_row_id": "RP5C_FAMILY_00018",
+      "family_row_id": "RP5C_FAMILY_00023",
       "family_type": "formula_family",
       "formula_family": "execution_adjusted_edge",
       "formula_refs": [
@@ -1423,7 +2014,7 @@
         "PR168-RP5E",
         "RANK4"
       ],
-      "family_row_id": "RP5C_FAMILY_00019",
+      "family_row_id": "RP5C_FAMILY_00024",
       "family_type": "formula_family",
       "formula_family": "expected_gross_pnl",
       "formula_refs": [
@@ -1490,7 +2081,7 @@
         "PR168-RP5E",
         "RANK4"
       ],
-      "family_row_id": "RP5C_FAMILY_00020",
+      "family_row_id": "RP5C_FAMILY_00025",
       "family_type": "formula_family",
       "formula_family": "expected_shortfall_cvar",
       "formula_refs": [
@@ -1514,205 +2105,6 @@
       "qku_subfamily": null,
       "route_rule_refs": [
         "RP5C_ROUTE_RULE_0013",
-        "RP5C_ROUTE_RULE_0014"
-      ]
-    },
-    {
-      "dependency_type_refs": [
-        "governance_dependency",
-        "unknown_needs_review"
-      ],
-      "downstream_pr_refs": [
-        "PR168-RP5D",
-        "PR168-RP5E",
-        "RANK4"
-      ],
-      "family_row_id": "RP5C_FAMILY_00021",
-      "family_type": "formula_family",
-      "formula_family": "expected_value",
-      "formula_refs": [
-        "PR168_GFP_FORMULA_CANDIDATE_EXPECTED_VALUE_01",
-        "PR168_GFP_FORMULA_EXPECTED_VALUE"
-      ],
-      "formula_subfamily": "expected_value",
-      "formula_variant_refs": [],
-      "market_scope_refs": [
-        "market_agnostic",
-        "unknown_needs_review"
-      ],
-      "notes": "Central family row generated from immutable library classifications.",
-      "ontology_category_refs": [
-        "governance_source_risk",
-        "unknown_needs_review"
-      ],
-      "qku_family": null,
-      "qku_refs": [],
-      "qku_subfamily": null,
-      "route_rule_refs": [
-        "RP5C_ROUTE_RULE_0013",
-        "RP5C_ROUTE_RULE_0014"
-      ]
-    },
-    {
-      "dependency_type_refs": [
-        "signal_dependency",
-        "unknown_needs_review"
-      ],
-      "downstream_pr_refs": [
-        "PR168-RP5D",
-        "PR168-RP5E",
-        "RANK4"
-      ],
-      "family_row_id": "RP5C_FAMILY_00022",
-      "family_type": "formula_family",
-      "formula_family": "expected_value_and_payoff",
-      "formula_refs": [
-        "FORM_MAP3_PM_EV_001"
-      ],
-      "formula_subfamily": "expected_value_and_payoff",
-      "formula_variant_refs": [
-        "FVAR_FORM_MAP3_PM_EV_001_BASE"
-      ],
-      "market_scope_refs": [
-        "prediction_market",
-        "unknown_needs_review"
-      ],
-      "notes": "Central family row generated from immutable library classifications.",
-      "ontology_category_refs": [
-        "signal_probability",
-        "unknown_needs_review"
-      ],
-      "qku_family": null,
-      "qku_refs": [
-        "QKU_PMKT_EDGE_EXPECTED_VALUE_AND_PAYOFF",
-        "QKU_PMKT_EDGE_EXPECTED_VALUE_AND_PAYOFF_019"
-      ],
-      "qku_subfamily": null,
-      "route_rule_refs": [
-        "RP5C_ROUTE_RULE_0001",
-        "RP5C_ROUTE_RULE_0014"
-      ]
-    },
-    {
-      "dependency_type_refs": [
-        "tca_dependency"
-      ],
-      "downstream_pr_refs": [
-        "PR168-RP5D",
-        "PR168-RP5E",
-        "RANK4"
-      ],
-      "family_row_id": "RP5C_FAMILY_00023",
-      "family_type": "formula_family",
-      "formula_family": "explicit_fee_cost",
-      "formula_refs": [
-        "PR168_GFP_FORMULA_CANDIDATE_EXPLICIT_FEE_COST_01",
-        "PR168_GFP_FORMULA_CANDIDATE_EXPLICIT_FEE_COST_02",
-        "PR168_GFP_FORMULA_EXPLICIT_FEE_COST"
-      ],
-      "formula_subfamily": "explicit_fee_cost",
-      "formula_variant_refs": [],
-      "market_scope_refs": [
-        "market_agnostic",
-        "unknown_needs_review"
-      ],
-      "notes": "Central family row generated from immutable library classifications.",
-      "ontology_category_refs": [
-        "tca_cost"
-      ],
-      "qku_family": null,
-      "qku_refs": [],
-      "qku_subfamily": null,
-      "route_rule_refs": [
-        "RP5C_ROUTE_RULE_0004"
-      ]
-    },
-    {
-      "dependency_type_refs": [
-        "calibration_dependency",
-        "signal_dependency",
-        "unknown_needs_review"
-      ],
-      "downstream_pr_refs": [
-        "PR168-RP5D",
-        "PR168-RP5E",
-        "RANK4"
-      ],
-      "family_row_id": "RP5C_FAMILY_00024",
-      "family_type": "formula_family",
-      "formula_family": "fdr_and_overfit_controls",
-      "formula_refs": [
-        "FORM_MAP3_FDR_BH_001",
-        "FORM_MAP3_FDR_CPCV_001",
-        "FORM_MAP3_FDR_DSR_001"
-      ],
-      "formula_subfamily": "fdr_and_overfit_controls",
-      "formula_variant_refs": [
-        "FVAR_FORM_MAP3_FDR_BH_001_BASE",
-        "FVAR_FORM_MAP3_FDR_CPCV_001_BASE",
-        "FVAR_FORM_MAP3_FDR_DSR_001_BASE"
-      ],
-      "market_scope_refs": [
-        "prediction_market",
-        "unknown_needs_review"
-      ],
-      "notes": "Central family row generated from immutable library classifications.",
-      "ontology_category_refs": [
-        "calibration",
-        "signal_probability",
-        "unknown_needs_review"
-      ],
-      "qku_family": null,
-      "qku_refs": [
-        "QKU_PMKT_EDGE_FDR_AND_OVERFIT_CONTROLS",
-        "QKU_PMKT_EDGE_FDR_AND_OVERFIT_CONTROLS_033",
-        "QKU_PMKT_EDGE_FDR_AND_OVERFIT_CONTROLS_034",
-        "QKU_PMKT_EDGE_FDR_AND_OVERFIT_CONTROLS_035"
-      ],
-      "qku_subfamily": null,
-      "route_rule_refs": [
-        "RP5C_ROUTE_RULE_0001",
-        "RP5C_ROUTE_RULE_0002",
-        "RP5C_ROUTE_RULE_0014"
-      ]
-    },
-    {
-      "dependency_type_refs": [
-        "unknown_needs_review"
-      ],
-      "downstream_pr_refs": [
-        "PR168-RP5D",
-        "PR168-RP5E",
-        "RANK4"
-      ],
-      "family_row_id": "RP5C_FAMILY_00025",
-      "family_type": "formula_family",
-      "formula_family": "fill",
-      "formula_refs": [
-        "FORM_MAP3_FILL_001",
-        "PR168_GFP2R_FORMULA_FILLABLE_SIZE_AT_EDGE_BAND",
-        "PR168_GFP2R_FORMULA_FILLABLE_SIZE_AT_PRICE_BAND"
-      ],
-      "formula_subfamily": "fill",
-      "formula_variant_refs": [
-        "gfp2r_formula_variant_00005",
-        "gfp2r_formula_variant_00006",
-        "gfp2r_formula_variant_00025",
-        "gfp2r_formula_variant_00026",
-        "gfp2r_formula_variant_00045",
-        "gfp2r_formula_variant_00046"
-      ],
-      "market_scope_refs": [
-        "unknown_needs_review"
-      ],
-      "notes": "Central family row generated from immutable library classifications.",
-      "ontology_category_refs": [
-        "unknown_needs_review"
-      ],
-      "qku_family": null,
-      "qku_refs": [],
-      "qku_subfamily": null,
-      "route_rule_refs": [
         "RP5C_ROUTE_RULE_0014"
       ]
     }

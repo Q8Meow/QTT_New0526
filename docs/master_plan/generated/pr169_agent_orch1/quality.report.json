@@ -50,7 +50,7 @@
   "projection_version": "PR169-AGENT-ORCH1-v2.2",
   "report_name": "quality",
   "required_generated_basename_max_chars": 56,
-  "row_count": 461,
+  "row_count": 674,
   "superseded_content_check": {
     "superseded_uploaded_text_classified": false,
     "superseded_uploaded_text_preserved": false,

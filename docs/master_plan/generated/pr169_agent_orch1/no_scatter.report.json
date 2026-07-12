@@ -50,7 +50,7 @@
   "projection_version": "PR169-AGENT-ORCH1-v2.2",
   "report_name": "no_scatter",
   "resolver_count": 1,
-  "row_count": 461,
+  "row_count": 674,
   "validator": "tools/validate_pr169_agent_orch1.py",
   "validator_count": 1
 }

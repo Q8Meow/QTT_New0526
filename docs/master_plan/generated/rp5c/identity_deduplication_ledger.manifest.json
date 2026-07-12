@@ -24,7 +24,7 @@
   },
   "physical_filename": "docs/master_plan/generated/rp5c/identity_deduplication_ledger.manifest.json",
   "report_version": "PR168-RP5C-v1.0",
-  "row_count": 10189,
+  "row_count": 10936,
   "row_count_within_bound_flag": true,
   "row_refs_limited": [
     "RP5C_DEDUP_00000001",

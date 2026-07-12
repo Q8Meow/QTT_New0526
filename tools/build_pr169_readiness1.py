@@ -2501,6 +2501,11 @@ def build(repo_root: Path, out_dir: Path) -> None:
         "candidate_external_info_lanes.generated.jsonl": _candidate_external_info_rows(registry),
         "readiness_gap_ledger.generated.jsonl": _gap_rows(registry),
     }
+    from pr169_formula_owner_rows import rows as pr169_formula_rows
+    artifact_rows["qku_formula_agent_compute_map.generated.jsonl"] = [
+        *artifact_rows["qku_formula_agent_compute_map.generated.jsonl"],
+        *pr169_formula_rows(repo_root, "READINESS"),
+    ]
     reports = _reports(registry, artifact_rows)
     reports["readiness_manifest.json"] = _manifest(artifact_rows, reports)
 

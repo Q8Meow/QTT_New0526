@@ -1,4 +1,6 @@
-from ._helpers import read_json, read_jsonl
+import json
+
+from ._helpers import REPO_ROOT, read_json, read_jsonl
 
 
 def test_reading_receipts_cover_required_baseline_inputs() -> None:
@@ -12,6 +14,12 @@ def test_reading_receipts_cover_required_baseline_inputs() -> None:
     assert all(row["exists_flag"] is True for row in read_rows)
 
     receipt = read_json("run_receipt.report.json")
-    assert receipt["universal_coverage_row_count"] == 10189
+    rp5d_receipt = json.loads(
+        (
+            REPO_ROOT
+            / "docs/master_plan/generated/pr168_rp5d/rp5d_run_receipt.report.json"
+        ).read_text(encoding="utf-8")
+    )
+    assert receipt["universal_coverage_row_count"] == rp5d_receipt["universal_coverage_row_count"]
     assert receipt["schedulable_after_adapter_count"] == 52
-    assert receipt["adapter_queue_row_count"] == 35877
+    assert receipt["adapter_queue_row_count"] == rp5d_receipt["adapter_queue_row_count"]

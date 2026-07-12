@@ -57,7 +57,7 @@
     "stage1_default_full_universe_compute_route_count": 0,
     "trade_simulation_count": 0
   },
-  "identity_provenance_tier_row_count": 10189,
+  "identity_provenance_tier_row_count": 10936,
   "launch_readiness_authority_created_count": 0,
   "live_order_authority_created_count": 0,
   "logical_report_id": "PR168_RP5C_IdentityProvenanceTier",
@@ -194,29 +194,18 @@
       "primary_provenance_tier": "UPSTREAM_FORMULA_QKU_REGISTRY",
       "raw_legacy_decision_authority_allowed_flag": false,
       "row_id": "RP5C_PROVENANCE_00000009",
-      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000239",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000007",
       "tier_order": 8
     },
     {
       "all_provenance_tiers": [
         "UPSTREAM_FORMULA_QKU_REGISTRY"
       ],
-      "identity_row_id": "RP5C_IDENTITY_00000027",
+      "identity_row_id": "RP5C_IDENTITY_00000026",
       "primary_provenance_tier": "UPSTREAM_FORMULA_QKU_REGISTRY",
       "raw_legacy_decision_authority_allowed_flag": false,
       "row_id": "RP5C_PROVENANCE_00000010",
-      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000001",
-      "tier_order": 8
-    },
-    {
-      "all_provenance_tiers": [
-        "UPSTREAM_FORMULA_QKU_REGISTRY"
-      ],
-      "identity_row_id": "RP5C_IDENTITY_00000028",
-      "primary_provenance_tier": "UPSTREAM_FORMULA_QKU_REGISTRY",
-      "raw_legacy_decision_authority_allowed_flag": false,
-      "row_id": "RP5C_PROVENANCE_00000011",
-      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000011",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000239",
       "tier_order": 8
     },
     {
@@ -226,7 +215,29 @@
       "identity_row_id": "RP5C_IDENTITY_00000029",
       "primary_provenance_tier": "UPSTREAM_FORMULA_QKU_REGISTRY",
       "raw_legacy_decision_authority_allowed_flag": false,
+      "row_id": "RP5C_PROVENANCE_00000011",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000001",
+      "tier_order": 8
+    },
+    {
+      "all_provenance_tiers": [
+        "UPSTREAM_FORMULA_QKU_REGISTRY"
+      ],
+      "identity_row_id": "RP5C_IDENTITY_00000030",
+      "primary_provenance_tier": "UPSTREAM_FORMULA_QKU_REGISTRY",
+      "raw_legacy_decision_authority_allowed_flag": false,
       "row_id": "RP5C_PROVENANCE_00000012",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000011",
+      "tier_order": 8
+    },
+    {
+      "all_provenance_tiers": [
+        "UPSTREAM_FORMULA_QKU_REGISTRY"
+      ],
+      "identity_row_id": "RP5C_IDENTITY_00000031",
+      "primary_provenance_tier": "UPSTREAM_FORMULA_QKU_REGISTRY",
+      "raw_legacy_decision_authority_allowed_flag": false,
+      "row_id": "RP5C_PROVENANCE_00000013",
       "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000015",
       "tier_order": 8
     },
@@ -234,22 +245,11 @@
       "all_provenance_tiers": [
         "UPSTREAM_FORMULA_QKU_REGISTRY"
       ],
-      "identity_row_id": "RP5C_IDENTITY_00000036",
-      "primary_provenance_tier": "UPSTREAM_FORMULA_QKU_REGISTRY",
-      "raw_legacy_decision_authority_allowed_flag": false,
-      "row_id": "RP5C_PROVENANCE_00000013",
-      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000257",
-      "tier_order": 8
-    },
-    {
-      "all_provenance_tiers": [
-        "UPSTREAM_FORMULA_QKU_REGISTRY"
-      ],
-      "identity_row_id": "RP5C_IDENTITY_00000041",
+      "identity_row_id": "RP5C_IDENTITY_00000038",
       "primary_provenance_tier": "UPSTREAM_FORMULA_QKU_REGISTRY",
       "raw_legacy_decision_authority_allowed_flag": false,
       "row_id": "RP5C_PROVENANCE_00000014",
-      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000001",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000257",
       "tier_order": 8
     },
     {
@@ -260,6 +260,17 @@
       "primary_provenance_tier": "UPSTREAM_FORMULA_QKU_REGISTRY",
       "raw_legacy_decision_authority_allowed_flag": false,
       "row_id": "RP5C_PROVENANCE_00000015",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000001",
+      "tier_order": 8
+    },
+    {
+      "all_provenance_tiers": [
+        "UPSTREAM_FORMULA_QKU_REGISTRY"
+      ],
+      "identity_row_id": "RP5C_IDENTITY_00000045",
+      "primary_provenance_tier": "UPSTREAM_FORMULA_QKU_REGISTRY",
+      "raw_legacy_decision_authority_allowed_flag": false,
+      "row_id": "RP5C_PROVENANCE_00000016",
       "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000015",
       "tier_order": 8
     },
@@ -267,10 +278,10 @@
       "all_provenance_tiers": [
         "UPSTREAM_FORMULA_QKU_REGISTRY"
       ],
-      "identity_row_id": "RP5C_IDENTITY_00000054",
+      "identity_row_id": "RP5C_IDENTITY_00000056",
       "primary_provenance_tier": "UPSTREAM_FORMULA_QKU_REGISTRY",
       "raw_legacy_decision_authority_allowed_flag": false,
-      "row_id": "RP5C_PROVENANCE_00000016",
+      "row_id": "RP5C_PROVENANCE_00000017",
       "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000269",
       "tier_order": 8
     },
@@ -278,11 +289,11 @@
       "all_provenance_tiers": [
         "UPSTREAM_FORMULA_QKU_REGISTRY"
       ],
-      "identity_row_id": "RP5C_IDENTITY_00000055",
+      "identity_row_id": "RP5C_IDENTITY_00000057",
       "primary_provenance_tier": "UPSTREAM_FORMULA_QKU_REGISTRY",
       "raw_legacy_decision_authority_allowed_flag": false,
-      "row_id": "RP5C_PROVENANCE_00000017",
-      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000161",
+      "row_id": "RP5C_PROVENANCE_00000018",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000007",
       "tier_order": 8
     },
     {
@@ -292,40 +303,7 @@
       "identity_row_id": "RP5C_IDENTITY_00000059",
       "primary_provenance_tier": "UPSTREAM_FORMULA_QKU_REGISTRY",
       "raw_legacy_decision_authority_allowed_flag": false,
-      "row_id": "RP5C_PROVENANCE_00000018",
-      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000011",
-      "tier_order": 8
-    },
-    {
-      "all_provenance_tiers": [
-        "UPSTREAM_FORMULA_QKU_REGISTRY"
-      ],
-      "identity_row_id": "RP5C_IDENTITY_00000060",
-      "primary_provenance_tier": "UPSTREAM_FORMULA_QKU_REGISTRY",
-      "raw_legacy_decision_authority_allowed_flag": false,
       "row_id": "RP5C_PROVENANCE_00000019",
-      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000015",
-      "tier_order": 8
-    },
-    {
-      "all_provenance_tiers": [
-        "UPSTREAM_FORMULA_QKU_REGISTRY"
-      ],
-      "identity_row_id": "RP5C_IDENTITY_00000066",
-      "primary_provenance_tier": "UPSTREAM_FORMULA_QKU_REGISTRY",
-      "raw_legacy_decision_authority_allowed_flag": false,
-      "row_id": "RP5C_PROVENANCE_00000020",
-      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000257",
-      "tier_order": 8
-    },
-    {
-      "all_provenance_tiers": [
-        "UPSTREAM_FORMULA_QKU_REGISTRY"
-      ],
-      "identity_row_id": "RP5C_IDENTITY_00000071",
-      "primary_provenance_tier": "UPSTREAM_FORMULA_QKU_REGISTRY",
-      "raw_legacy_decision_authority_allowed_flag": false,
-      "row_id": "RP5C_PROVENANCE_00000021",
       "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000161",
       "tier_order": 8
     },
@@ -333,10 +311,10 @@
       "all_provenance_tiers": [
         "UPSTREAM_FORMULA_QKU_REGISTRY"
       ],
-      "identity_row_id": "RP5C_IDENTITY_00000072",
+      "identity_row_id": "RP5C_IDENTITY_00000063",
       "primary_provenance_tier": "UPSTREAM_FORMULA_QKU_REGISTRY",
       "raw_legacy_decision_authority_allowed_flag": false,
-      "row_id": "RP5C_PROVENANCE_00000022",
+      "row_id": "RP5C_PROVENANCE_00000020",
       "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000011",
       "tier_order": 8
     },
@@ -344,10 +322,10 @@
       "all_provenance_tiers": [
         "UPSTREAM_FORMULA_QKU_REGISTRY"
       ],
-      "identity_row_id": "RP5C_IDENTITY_00000073",
+      "identity_row_id": "RP5C_IDENTITY_00000064",
       "primary_provenance_tier": "UPSTREAM_FORMULA_QKU_REGISTRY",
       "raw_legacy_decision_authority_allowed_flag": false,
-      "row_id": "RP5C_PROVENANCE_00000023",
+      "row_id": "RP5C_PROVENANCE_00000021",
       "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000015",
       "tier_order": 8
     },
@@ -355,22 +333,44 @@
       "all_provenance_tiers": [
         "UPSTREAM_FORMULA_QKU_REGISTRY"
       ],
-      "identity_row_id": "RP5C_IDENTITY_00000083",
+      "identity_row_id": "RP5C_IDENTITY_00000070",
       "primary_provenance_tier": "UPSTREAM_FORMULA_QKU_REGISTRY",
       "raw_legacy_decision_authority_allowed_flag": false,
-      "row_id": "RP5C_PROVENANCE_00000024",
-      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000269",
+      "row_id": "RP5C_PROVENANCE_00000022",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000257",
       "tier_order": 8
     },
     {
       "all_provenance_tiers": [
         "UPSTREAM_FORMULA_QKU_REGISTRY"
       ],
-      "identity_row_id": "RP5C_IDENTITY_00000084",
+      "identity_row_id": "RP5C_IDENTITY_00000075",
+      "primary_provenance_tier": "UPSTREAM_FORMULA_QKU_REGISTRY",
+      "raw_legacy_decision_authority_allowed_flag": false,
+      "row_id": "RP5C_PROVENANCE_00000023",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000161",
+      "tier_order": 8
+    },
+    {
+      "all_provenance_tiers": [
+        "UPSTREAM_FORMULA_QKU_REGISTRY"
+      ],
+      "identity_row_id": "RP5C_IDENTITY_00000076",
+      "primary_provenance_tier": "UPSTREAM_FORMULA_QKU_REGISTRY",
+      "raw_legacy_decision_authority_allowed_flag": false,
+      "row_id": "RP5C_PROVENANCE_00000024",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000011",
+      "tier_order": 8
+    },
+    {
+      "all_provenance_tiers": [
+        "UPSTREAM_FORMULA_QKU_REGISTRY"
+      ],
+      "identity_row_id": "RP5C_IDENTITY_00000077",
       "primary_provenance_tier": "UPSTREAM_FORMULA_QKU_REGISTRY",
       "raw_legacy_decision_authority_allowed_flag": false,
       "row_id": "RP5C_PROVENANCE_00000025",
-      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000239",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000015",
       "tier_order": 8
     }
   ],

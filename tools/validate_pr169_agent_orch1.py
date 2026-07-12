@@ -305,6 +305,11 @@ def _validate_projection_derivation(
         if file_name == "registry.jsonl":
             continue
         for row in rows:
+            if row.get("row_kind") == "PR169_FORMULA_OWNER_EXTENSION_V1":
+                _assert(bool(row.get("formula_task_id")), f"{file_name} PR169 formula extension missing task id", failures)
+                _assert(bool(row.get("numeric_authority_chain_id")), f"{file_name} PR169 formula extension missing numeric authority", failures)
+                _assert(row.get("order_authority_created") is False, f"{file_name} PR169 formula extension widened authority", failures)
+                continue
             row_id = str(row.get("source_registry_row_id") or "")
             _assert(row_id in registry_by_id, f"{file_name} row not derived from registry: {row_id}", failures)
             source = registry_by_id.get(row_id, {})
@@ -316,6 +321,11 @@ def _validate_projection_derivation(
 def _validate_qku_formula(rows_by_file: Mapping[str, Sequence[Mapping[str, Any]]], failures: list[str]) -> None:
     for file_name in ("qku_tasks.jsonl", "formula_tasks.jsonl", "access_proof.jsonl", "library_receipts.jsonl"):
         for row in rows_by_file[file_name]:
+            if row.get("row_kind") == "PR169_FORMULA_OWNER_EXTENSION_V1":
+                _assert(bool(row.get("selected_qku_refs")), f"{file_name} PR169 formula extension missing bounded consumer", failures)
+                _assert(bool(row.get("selected_formula_refs")), f"{file_name} PR169 formula extension missing formula", failures)
+                _assert(row.get("full_library_access_used") is False, f"{file_name} PR169 formula extension used full library", failures)
+                continue
             row_id = row.get("row_id")
             _assert(bool(row.get("stage_profile_ref_or_gap")), f"{file_name} {row_id} missing stage profile", failures)
             _assert(bool(row.get("market_applicability_ref_or_gap")), f"{file_name} {row_id} missing market applicability", failures)

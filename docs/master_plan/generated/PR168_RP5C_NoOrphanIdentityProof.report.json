@@ -6,7 +6,7 @@
   "connector_semantic_binding_count": 0,
   "created_at_utc": "2026-06-25T00:00:00Z",
   "deleted_file_count": 0,
-  "dormant_future_market_row_count": 8188,
+  "dormant_future_market_row_count": 8247,
   "dormant_qku_deleted_count": 0,
   "dormant_qku_global_ban_count": 0,
   "formula_expression_mutation_count": 0,
@@ -67,7 +67,7 @@
   "moved_file_count": 0,
   "mutable_agent_ownership_embedded_as_identity_authority_count": 0,
   "no_authority_statement": "RP5C is immutable identity, provenance, classification, and derived routing preparation only. It creates no live/order/source-truth/champion/launch/quantum/hash authority and does not mutate formulas or delete identities.",
-  "no_orphan_identity_row_count": 10189,
+  "no_orphan_identity_row_count": 10936,
   "non_prediction_market_qku_stage1_active_count": 0,
   "orphan_generated_shard_count": 0,
   "orphan_identity_count": 0,
@@ -77,7 +77,7 @@
   "physical_filename": "PR168_RP5C_NoOrphanIdentityProof.report.json",
   "private_state_fetch_count": 0,
   "qku_identity_deleted_count": 0,
-  "qku_market_applicability_matrix_row_count": 10189,
+  "qku_market_applicability_matrix_row_count": 10936,
   "qopt_batch_count": 0,
   "qtt_sha_or_atomicrows_hash_authority_count": 0,
   "quantum_advantage_claim_count": 0,
@@ -93,8 +93,8 @@
         "NEEDS_ONTOLOGY_CLASSIFICATION"
       ],
       "classification_registry_refs": [
-        "RP5C_FAMILY_00093",
-        "RP5C_FAMILY_00206",
+        "RP5C_FAMILY_00103",
+        "RP5C_FAMILY_00233",
         "RP5C_MARKET_SCOPE_0011",
         "RP5C_ONTOLOGY_ROLE_0014"
       ],
@@ -142,8 +142,8 @@
         "NEEDS_ONTOLOGY_CLASSIFICATION"
       ],
       "classification_registry_refs": [
-        "RP5C_FAMILY_00036",
-        "RP5C_FAMILY_00153",
+        "RP5C_FAMILY_00042",
+        "RP5C_FAMILY_00176",
         "RP5C_MARKET_SCOPE_0011",
         "RP5C_ONTOLOGY_ROLE_0014"
       ],
@@ -191,8 +191,8 @@
         "NEEDS_ONTOLOGY_CLASSIFICATION"
       ],
       "classification_registry_refs": [
-        "RP5C_FAMILY_00037",
-        "RP5C_FAMILY_00154",
+        "RP5C_FAMILY_00043",
+        "RP5C_FAMILY_00177",
         "RP5C_MARKET_SCOPE_0011",
         "RP5C_ONTOLOGY_ROLE_0014"
       ],
@@ -241,8 +241,8 @@
         "NEEDS_ONTOLOGY_CLASSIFICATION"
       ],
       "classification_registry_refs": [
-        "RP5C_FAMILY_00093",
-        "RP5C_FAMILY_00206",
+        "RP5C_FAMILY_00103",
+        "RP5C_FAMILY_00233",
         "RP5C_MARKET_SCOPE_0011",
         "RP5C_ONTOLOGY_ROLE_0014"
       ],
@@ -288,8 +288,8 @@
         "NEEDS_MARKET_SCOPE_CLASSIFICATION"
       ],
       "classification_registry_refs": [
-        "RP5C_FAMILY_00007",
-        "RP5C_FAMILY_00126",
+        "RP5C_FAMILY_00010",
+        "RP5C_FAMILY_00147",
         "RP5C_MARKET_SCOPE_0011",
         "RP5C_ONTOLOGY_ROLE_0002"
       ],
@@ -335,8 +335,8 @@
         "NEEDS_MARKET_SCOPE_CLASSIFICATION"
       ],
       "classification_registry_refs": [
-        "RP5C_FAMILY_00007",
-        "RP5C_FAMILY_00126",
+        "RP5C_FAMILY_00010",
+        "RP5C_FAMILY_00147",
         "RP5C_MARKET_SCOPE_0011",
         "RP5C_ONTOLOGY_ROLE_0002"
       ],
@@ -383,8 +383,8 @@
         "NEEDS_MARKET_SCOPE_CLASSIFICATION"
       ],
       "classification_registry_refs": [
-        "RP5C_FAMILY_00092",
-        "RP5C_FAMILY_00205",
+        "RP5C_FAMILY_00102",
+        "RP5C_FAMILY_00232",
         "RP5C_MARKET_SCOPE_0011",
         "RP5C_ONTOLOGY_ROLE_0002"
       ],
@@ -431,8 +431,8 @@
         "NEEDS_MARKET_SCOPE_CLASSIFICATION"
       ],
       "classification_registry_refs": [
-        "RP5C_FAMILY_00008",
-        "RP5C_FAMILY_00127",
+        "RP5C_FAMILY_00011",
+        "RP5C_FAMILY_00148",
         "RP5C_MARKET_SCOPE_0011",
         "RP5C_ONTOLOGY_ROLE_0002"
       ],
@@ -475,16 +475,13 @@
     },
     {
       "blocker_codes": [
-        "NEEDS_FAMILY_CLASSIFICATION",
-        "NEEDS_FORMULA_EXPRESSION_REF",
-        "NEEDS_MARKET_SCOPE_CLASSIFICATION",
-        "NEEDS_ONTOLOGY_CLASSIFICATION"
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION"
       ],
       "classification_registry_refs": [
-        "RP5C_FAMILY_00093",
-        "RP5C_FAMILY_00206",
+        "RP5C_FAMILY_00008",
+        "RP5C_FAMILY_00145",
         "RP5C_MARKET_SCOPE_0011",
-        "RP5C_ONTOLOGY_ROLE_0014"
+        "RP5C_ONTOLOGY_ROLE_0002"
       ],
       "derived_route_resolution_refs": [
         "RP5C_ROUTE_RESOLUTION_00000009"
@@ -509,14 +506,14 @@
       ],
       "row_id": "RP5C_NO_ORPHAN_IDENTITY_00000009",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
-      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000239",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000007",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000009"
       ],
       "stage1_agent_computation_universe_seed_refs": [],
       "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
       "upstream_refs": [
-        "docs/master_plan/generated/rank3/rank_score_lineage_rows.jsonl"
+        "docs/master_plan/generated/map3/formula_dependency_rows.jsonl"
       ],
       "validator_refs": [
         "governance_agent",
@@ -525,13 +522,16 @@
     },
     {
       "blocker_codes": [
-        "NEEDS_MARKET_SCOPE_CLASSIFICATION"
+        "NEEDS_FAMILY_CLASSIFICATION",
+        "NEEDS_FORMULA_EXPRESSION_REF",
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION",
+        "NEEDS_ONTOLOGY_CLASSIFICATION"
       ],
       "classification_registry_refs": [
-        "RP5C_FAMILY_00007",
-        "RP5C_FAMILY_00126",
+        "RP5C_FAMILY_00103",
+        "RP5C_FAMILY_00233",
         "RP5C_MARKET_SCOPE_0011",
-        "RP5C_ONTOLOGY_ROLE_0002"
+        "RP5C_ONTOLOGY_ROLE_0014"
       ],
       "derived_route_resolution_refs": [
         "RP5C_ROUTE_RESOLUTION_00000010"
@@ -549,21 +549,21 @@
         "PR168-RP5E",
         "RANK4"
       ],
-      "identity_row_id": "RP5C_IDENTITY_00000027",
+      "identity_row_id": "RP5C_IDENTITY_00000026",
       "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
       "platform_applicability_registry_refs": [
         "RP5C_PLATFORM_APPLICABILITY_0008"
       ],
       "row_id": "RP5C_NO_ORPHAN_IDENTITY_00000010",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
-      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000001",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000239",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000010"
       ],
       "stage1_agent_computation_universe_seed_refs": [],
       "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
       "upstream_refs": [
-        "docs/master_plan/generated/map3/calibration_formula_rows.jsonl"
+        "docs/master_plan/generated/rank3/rank_score_lineage_rows.jsonl"
       ],
       "validator_refs": [
         "governance_agent",
@@ -575,8 +575,8 @@
         "NEEDS_MARKET_SCOPE_CLASSIFICATION"
       ],
       "classification_registry_refs": [
-        "RP5C_FAMILY_00007",
-        "RP5C_FAMILY_00126",
+        "RP5C_FAMILY_00010",
+        "RP5C_FAMILY_00147",
         "RP5C_MARKET_SCOPE_0011",
         "RP5C_ONTOLOGY_ROLE_0002"
       ],
@@ -596,21 +596,21 @@
         "PR168-RP5E",
         "RANK4"
       ],
-      "identity_row_id": "RP5C_IDENTITY_00000028",
+      "identity_row_id": "RP5C_IDENTITY_00000029",
       "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
       "platform_applicability_registry_refs": [
         "RP5C_PLATFORM_APPLICABILITY_0008"
       ],
       "row_id": "RP5C_NO_ORPHAN_IDENTITY_00000011",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
-      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000011",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000001",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000011"
       ],
       "stage1_agent_computation_universe_seed_refs": [],
       "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
       "upstream_refs": [
-        "docs/master_plan/generated/map3/formula_factory_rows.jsonl"
+        "docs/master_plan/generated/map3/calibration_formula_rows.jsonl"
       ],
       "validator_refs": [
         "governance_agent",
@@ -619,12 +619,11 @@
     },
     {
       "blocker_codes": [
-        "NEEDS_FORMULA_EXPRESSION_REF",
         "NEEDS_MARKET_SCOPE_CLASSIFICATION"
       ],
       "classification_registry_refs": [
-        "RP5C_FAMILY_00092",
-        "RP5C_FAMILY_00205",
+        "RP5C_FAMILY_00010",
+        "RP5C_FAMILY_00147",
         "RP5C_MARKET_SCOPE_0011",
         "RP5C_ONTOLOGY_ROLE_0002"
       ],
@@ -644,21 +643,21 @@
         "PR168-RP5E",
         "RANK4"
       ],
-      "identity_row_id": "RP5C_IDENTITY_00000029",
+      "identity_row_id": "RP5C_IDENTITY_00000030",
       "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
       "platform_applicability_registry_refs": [
         "RP5C_PLATFORM_APPLICABILITY_0008"
       ],
       "row_id": "RP5C_NO_ORPHAN_IDENTITY_00000012",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
-      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000015",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000011",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000012"
       ],
       "stage1_agent_computation_universe_seed_refs": [],
       "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
       "upstream_refs": [
-        "docs/master_plan/generated/map3/formula_invariant_rows.jsonl"
+        "docs/master_plan/generated/map3/formula_factory_rows.jsonl"
       ],
       "validator_refs": [
         "governance_agent",
@@ -671,8 +670,8 @@
         "NEEDS_MARKET_SCOPE_CLASSIFICATION"
       ],
       "classification_registry_refs": [
-        "RP5C_FAMILY_00008",
-        "RP5C_FAMILY_00127",
+        "RP5C_FAMILY_00102",
+        "RP5C_FAMILY_00232",
         "RP5C_MARKET_SCOPE_0011",
         "RP5C_ONTOLOGY_ROLE_0002"
       ],
@@ -692,21 +691,21 @@
         "PR168-RP5E",
         "RANK4"
       ],
-      "identity_row_id": "RP5C_IDENTITY_00000036",
+      "identity_row_id": "RP5C_IDENTITY_00000031",
       "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
       "platform_applicability_registry_refs": [
         "RP5C_PLATFORM_APPLICABILITY_0008"
       ],
       "row_id": "RP5C_NO_ORPHAN_IDENTITY_00000013",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
-      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000257",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000015",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000013"
       ],
       "stage1_agent_computation_universe_seed_refs": [],
       "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
       "upstream_refs": [
-        "docs/master_plan/generated/rp3/formula_exec_receipt_rows.jsonl"
+        "docs/master_plan/generated/map3/formula_invariant_rows.jsonl"
       ],
       "validator_refs": [
         "governance_agent",
@@ -715,11 +714,12 @@
     },
     {
       "blocker_codes": [
+        "NEEDS_FORMULA_EXPRESSION_REF",
         "NEEDS_MARKET_SCOPE_CLASSIFICATION"
       ],
       "classification_registry_refs": [
-        "RP5C_FAMILY_00007",
-        "RP5C_FAMILY_00126",
+        "RP5C_FAMILY_00011",
+        "RP5C_FAMILY_00148",
         "RP5C_MARKET_SCOPE_0011",
         "RP5C_ONTOLOGY_ROLE_0002"
       ],
@@ -739,21 +739,21 @@
         "PR168-RP5E",
         "RANK4"
       ],
-      "identity_row_id": "RP5C_IDENTITY_00000041",
+      "identity_row_id": "RP5C_IDENTITY_00000038",
       "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
       "platform_applicability_registry_refs": [
         "RP5C_PLATFORM_APPLICABILITY_0008"
       ],
       "row_id": "RP5C_NO_ORPHAN_IDENTITY_00000014",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
-      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000001",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000257",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000014"
       ],
       "stage1_agent_computation_universe_seed_refs": [],
       "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
       "upstream_refs": [
-        "docs/master_plan/generated/map3/calibration_formula_rows.jsonl"
+        "docs/master_plan/generated/rp3/formula_exec_receipt_rows.jsonl"
       ],
       "validator_refs": [
         "governance_agent",
@@ -762,15 +762,13 @@
     },
     {
       "blocker_codes": [
-        "NEEDS_FORMULA_EXPRESSION_REF",
-        "NEEDS_MARKET_SCOPE_CLASSIFICATION",
-        "NEEDS_ONTOLOGY_CLASSIFICATION"
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION"
       ],
       "classification_registry_refs": [
-        "RP5C_FAMILY_00092",
-        "RP5C_FAMILY_00205",
+        "RP5C_FAMILY_00010",
+        "RP5C_FAMILY_00147",
         "RP5C_MARKET_SCOPE_0011",
-        "RP5C_ONTOLOGY_ROLE_0014"
+        "RP5C_ONTOLOGY_ROLE_0002"
       ],
       "derived_route_resolution_refs": [
         "RP5C_ROUTE_RESOLUTION_00000015"
@@ -795,14 +793,14 @@
       ],
       "row_id": "RP5C_NO_ORPHAN_IDENTITY_00000015",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
-      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000015",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000001",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000015"
       ],
       "stage1_agent_computation_universe_seed_refs": [],
       "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
       "upstream_refs": [
-        "docs/master_plan/generated/map3/formula_invariant_rows.jsonl"
+        "docs/master_plan/generated/map3/calibration_formula_rows.jsonl"
       ],
       "validator_refs": [
         "governance_agent",
@@ -812,13 +810,14 @@
     {
       "blocker_codes": [
         "NEEDS_FORMULA_EXPRESSION_REF",
-        "NEEDS_MARKET_SCOPE_CLASSIFICATION"
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION",
+        "NEEDS_ONTOLOGY_CLASSIFICATION"
       ],
       "classification_registry_refs": [
-        "RP5C_FAMILY_00008",
-        "RP5C_FAMILY_00127",
+        "RP5C_FAMILY_00102",
+        "RP5C_FAMILY_00232",
         "RP5C_MARKET_SCOPE_0011",
-        "RP5C_ONTOLOGY_ROLE_0002"
+        "RP5C_ONTOLOGY_ROLE_0014"
       ],
       "derived_route_resolution_refs": [
         "RP5C_ROUTE_RESOLUTION_00000016"
@@ -836,21 +835,21 @@
         "PR168-RP5E",
         "RANK4"
       ],
-      "identity_row_id": "RP5C_IDENTITY_00000054",
+      "identity_row_id": "RP5C_IDENTITY_00000045",
       "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
       "platform_applicability_registry_refs": [
         "RP5C_PLATFORM_APPLICABILITY_0008"
       ],
       "row_id": "RP5C_NO_ORPHAN_IDENTITY_00000016",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
-      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000269",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000015",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000016"
       ],
       "stage1_agent_computation_universe_seed_refs": [],
       "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
       "upstream_refs": [
-        "docs/master_plan/generated/rp3/formula_to_pnl_map_rows.jsonl"
+        "docs/master_plan/generated/map3/formula_invariant_rows.jsonl"
       ],
       "validator_refs": [
         "governance_agent",
@@ -859,16 +858,14 @@
     },
     {
       "blocker_codes": [
-        "NEEDS_FAMILY_CLASSIFICATION",
         "NEEDS_FORMULA_EXPRESSION_REF",
-        "NEEDS_MARKET_SCOPE_CLASSIFICATION",
-        "NEEDS_ONTOLOGY_CLASSIFICATION"
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION"
       ],
       "classification_registry_refs": [
-        "RP5C_FAMILY_00093",
-        "RP5C_FAMILY_00206",
+        "RP5C_FAMILY_00011",
+        "RP5C_FAMILY_00148",
         "RP5C_MARKET_SCOPE_0011",
-        "RP5C_ONTOLOGY_ROLE_0014"
+        "RP5C_ONTOLOGY_ROLE_0002"
       ],
       "derived_route_resolution_refs": [
         "RP5C_ROUTE_RESOLUTION_00000017"
@@ -886,16 +883,114 @@
         "PR168-RP5E",
         "RANK4"
       ],
-      "identity_row_id": "RP5C_IDENTITY_00000055",
+      "identity_row_id": "RP5C_IDENTITY_00000056",
       "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
       "platform_applicability_registry_refs": [
         "RP5C_PLATFORM_APPLICABILITY_0008"
       ],
       "row_id": "RP5C_NO_ORPHAN_IDENTITY_00000017",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
-      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000161",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000269",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000017"
+      ],
+      "stage1_agent_computation_universe_seed_refs": [],
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
+      "upstream_refs": [
+        "docs/master_plan/generated/rp3/formula_to_pnl_map_rows.jsonl"
+      ],
+      "validator_refs": [
+        "governance_agent",
+        "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
+      ]
+    },
+    {
+      "blocker_codes": [
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION",
+        "NEEDS_ONTOLOGY_CLASSIFICATION"
+      ],
+      "classification_registry_refs": [
+        "RP5C_FAMILY_00008",
+        "RP5C_FAMILY_00145",
+        "RP5C_MARKET_SCOPE_0011",
+        "RP5C_ONTOLOGY_ROLE_0014"
+      ],
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000018"
+      ],
+      "dormant_future_market_qku_ledger_refs": [
+        "RP5C_DORMANT_FUTURE_MARKET_QKU_00000018"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D",
+        "PR168-RP5E",
+        "RANK4"
+      ],
+      "downstream_refs": [
+        "PR168-RP5D",
+        "PR168-RP5E",
+        "RANK4"
+      ],
+      "identity_row_id": "RP5C_IDENTITY_00000057",
+      "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
+      "platform_applicability_registry_refs": [
+        "RP5C_PLATFORM_APPLICABILITY_0008"
+      ],
+      "row_id": "RP5C_NO_ORPHAN_IDENTITY_00000018",
+      "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000007",
+      "stage1_activation_view_refs": [
+        "RP5C_STAGE1_ACTIVATION_00000018"
+      ],
+      "stage1_agent_computation_universe_seed_refs": [],
+      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
+      "upstream_refs": [
+        "docs/master_plan/generated/map3/formula_dependency_rows.jsonl"
+      ],
+      "validator_refs": [
+        "governance_agent",
+        "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
+      ]
+    },
+    {
+      "blocker_codes": [
+        "NEEDS_FAMILY_CLASSIFICATION",
+        "NEEDS_FORMULA_EXPRESSION_REF",
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION",
+        "NEEDS_ONTOLOGY_CLASSIFICATION"
+      ],
+      "classification_registry_refs": [
+        "RP5C_FAMILY_00103",
+        "RP5C_FAMILY_00233",
+        "RP5C_MARKET_SCOPE_0011",
+        "RP5C_ONTOLOGY_ROLE_0014"
+      ],
+      "derived_route_resolution_refs": [
+        "RP5C_ROUTE_RESOLUTION_00000019"
+      ],
+      "dormant_future_market_qku_ledger_refs": [
+        "RP5C_DORMANT_FUTURE_MARKET_QKU_00000019"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D",
+        "PR168-RP5E",
+        "RANK4"
+      ],
+      "downstream_refs": [
+        "PR168-RP5D",
+        "PR168-RP5E",
+        "RANK4"
+      ],
+      "identity_row_id": "RP5C_IDENTITY_00000059",
+      "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
+      "platform_applicability_registry_refs": [
+        "RP5C_PLATFORM_APPLICABILITY_0008"
+      ],
+      "row_id": "RP5C_NO_ORPHAN_IDENTITY_00000019",
+      "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000161",
+      "stage1_activation_view_refs": [
+        "RP5C_STAGE1_ACTIVATION_00000019"
       ],
       "stage1_agent_computation_universe_seed_refs": [],
       "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
@@ -910,13 +1005,13 @@
     {
       "blocker_codes": [],
       "classification_registry_refs": [
-        "RP5C_FAMILY_00043",
-        "RP5C_FAMILY_00160",
+        "RP5C_FAMILY_00049",
+        "RP5C_FAMILY_00183",
         "RP5C_MARKET_SCOPE_0002",
         "RP5C_ONTOLOGY_ROLE_0011"
       ],
       "derived_route_resolution_refs": [
-        "RP5C_ROUTE_RESOLUTION_00000018"
+        "RP5C_ROUTE_RESOLUTION_00000020"
       ],
       "dormant_future_market_qku_ledger_refs": [],
       "downstream_pr_refs": [
@@ -929,16 +1024,16 @@
         "PR168-RP5E",
         "RANK4"
       ],
-      "identity_row_id": "RP5C_IDENTITY_00000059",
+      "identity_row_id": "RP5C_IDENTITY_00000063",
       "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
       "platform_applicability_registry_refs": [
         "RP5C_PLATFORM_APPLICABILITY_0004"
       ],
-      "row_id": "RP5C_NO_ORPHAN_IDENTITY_00000018",
+      "row_id": "RP5C_NO_ORPHAN_IDENTITY_00000020",
       "rp5d_handoff_state": "READY_FOR_RP5D_EXECUTABILITY_CLASSIFICATION",
       "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000011",
       "stage1_activation_view_refs": [
-        "RP5C_STAGE1_ACTIVATION_00000018"
+        "RP5C_STAGE1_ACTIVATION_00000020"
       ],
       "stage1_agent_computation_universe_seed_refs": [
         "RP5C_STAGE1_AGENT_SEED_00000001"
@@ -959,16 +1054,16 @@
         "NEEDS_ONTOLOGY_CLASSIFICATION"
       ],
       "classification_registry_refs": [
-        "RP5C_FAMILY_00092",
-        "RP5C_FAMILY_00205",
+        "RP5C_FAMILY_00102",
+        "RP5C_FAMILY_00232",
         "RP5C_MARKET_SCOPE_0011",
         "RP5C_ONTOLOGY_ROLE_0014"
       ],
       "derived_route_resolution_refs": [
-        "RP5C_ROUTE_RESOLUTION_00000019"
+        "RP5C_ROUTE_RESOLUTION_00000021"
       ],
       "dormant_future_market_qku_ledger_refs": [
-        "RP5C_DORMANT_FUTURE_MARKET_QKU_00000018"
+        "RP5C_DORMANT_FUTURE_MARKET_QKU_00000020"
       ],
       "downstream_pr_refs": [
         "PR168-RP5D",
@@ -980,16 +1075,16 @@
         "PR168-RP5E",
         "RANK4"
       ],
-      "identity_row_id": "RP5C_IDENTITY_00000060",
+      "identity_row_id": "RP5C_IDENTITY_00000064",
       "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
       "platform_applicability_registry_refs": [
         "RP5C_PLATFORM_APPLICABILITY_0008"
       ],
-      "row_id": "RP5C_NO_ORPHAN_IDENTITY_00000019",
+      "row_id": "RP5C_NO_ORPHAN_IDENTITY_00000021",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
       "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000015",
       "stage1_activation_view_refs": [
-        "RP5C_STAGE1_ACTIVATION_00000019"
+        "RP5C_STAGE1_ACTIVATION_00000021"
       ],
       "stage1_agent_computation_universe_seed_refs": [],
       "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
@@ -1006,13 +1101,13 @@
         "NEEDS_FORMULA_EXPRESSION_REF"
       ],
       "classification_registry_refs": [
-        "RP5C_FAMILY_00071",
-        "RP5C_FAMILY_00185",
+        "RP5C_FAMILY_00081",
+        "RP5C_FAMILY_00212",
         "RP5C_MARKET_SCOPE_0002",
         "RP5C_ONTOLOGY_ROLE_0002"
       ],
       "derived_route_resolution_refs": [
-        "RP5C_ROUTE_RESOLUTION_00000020"
+        "RP5C_ROUTE_RESOLUTION_00000022"
       ],
       "dormant_future_market_qku_ledger_refs": [],
       "downstream_pr_refs": [
@@ -1025,16 +1120,16 @@
         "PR168-RP5E",
         "RANK4"
       ],
-      "identity_row_id": "RP5C_IDENTITY_00000066",
+      "identity_row_id": "RP5C_IDENTITY_00000070",
       "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
       "platform_applicability_registry_refs": [
         "RP5C_PLATFORM_APPLICABILITY_0004"
       ],
-      "row_id": "RP5C_NO_ORPHAN_IDENTITY_00000020",
+      "row_id": "RP5C_NO_ORPHAN_IDENTITY_00000022",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
       "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000257",
       "stage1_activation_view_refs": [
-        "RP5C_STAGE1_ACTIVATION_00000020"
+        "RP5C_STAGE1_ACTIVATION_00000022"
       ],
       "stage1_agent_computation_universe_seed_refs": [
         "RP5C_STAGE1_AGENT_SEED_00000002"
@@ -1056,16 +1151,16 @@
         "NEEDS_ONTOLOGY_CLASSIFICATION"
       ],
       "classification_registry_refs": [
-        "RP5C_FAMILY_00093",
-        "RP5C_FAMILY_00206",
+        "RP5C_FAMILY_00103",
+        "RP5C_FAMILY_00233",
         "RP5C_MARKET_SCOPE_0011",
         "RP5C_ONTOLOGY_ROLE_0014"
       ],
       "derived_route_resolution_refs": [
-        "RP5C_ROUTE_RESOLUTION_00000021"
+        "RP5C_ROUTE_RESOLUTION_00000023"
       ],
       "dormant_future_market_qku_ledger_refs": [
-        "RP5C_DORMANT_FUTURE_MARKET_QKU_00000019"
+        "RP5C_DORMANT_FUTURE_MARKET_QKU_00000021"
       ],
       "downstream_pr_refs": [
         "PR168-RP5D",
@@ -1077,16 +1172,16 @@
         "PR168-RP5E",
         "RANK4"
       ],
-      "identity_row_id": "RP5C_IDENTITY_00000071",
+      "identity_row_id": "RP5C_IDENTITY_00000075",
       "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
       "platform_applicability_registry_refs": [
         "RP5C_PLATFORM_APPLICABILITY_0008"
       ],
-      "row_id": "RP5C_NO_ORPHAN_IDENTITY_00000021",
+      "row_id": "RP5C_NO_ORPHAN_IDENTITY_00000023",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
       "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000161",
       "stage1_activation_view_refs": [
-        "RP5C_STAGE1_ACTIVATION_00000021"
+        "RP5C_STAGE1_ACTIVATION_00000023"
       ],
       "stage1_agent_computation_universe_seed_refs": [],
       "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
@@ -1101,13 +1196,13 @@
     {
       "blocker_codes": [],
       "classification_registry_refs": [
-        "RP5C_FAMILY_00070",
-        "RP5C_FAMILY_00184",
+        "RP5C_FAMILY_00080",
+        "RP5C_FAMILY_00211",
         "RP5C_MARKET_SCOPE_0002",
         "RP5C_ONTOLOGY_ROLE_0011"
       ],
       "derived_route_resolution_refs": [
-        "RP5C_ROUTE_RESOLUTION_00000022"
+        "RP5C_ROUTE_RESOLUTION_00000024"
       ],
       "dormant_future_market_qku_ledger_refs": [],
       "downstream_pr_refs": [
@@ -1120,16 +1215,16 @@
         "PR168-RP5E",
         "RANK4"
       ],
-      "identity_row_id": "RP5C_IDENTITY_00000072",
+      "identity_row_id": "RP5C_IDENTITY_00000076",
       "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
       "platform_applicability_registry_refs": [
         "RP5C_PLATFORM_APPLICABILITY_0004"
       ],
-      "row_id": "RP5C_NO_ORPHAN_IDENTITY_00000022",
+      "row_id": "RP5C_NO_ORPHAN_IDENTITY_00000024",
       "rp5d_handoff_state": "READY_FOR_RP5D_EXECUTABILITY_CLASSIFICATION",
       "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000011",
       "stage1_activation_view_refs": [
-        "RP5C_STAGE1_ACTIVATION_00000022"
+        "RP5C_STAGE1_ACTIVATION_00000024"
       ],
       "stage1_agent_computation_universe_seed_refs": [
         "RP5C_STAGE1_AGENT_SEED_00000003"
@@ -1150,105 +1245,8 @@
         "NEEDS_ONTOLOGY_CLASSIFICATION"
       ],
       "classification_registry_refs": [
-        "RP5C_FAMILY_00092",
-        "RP5C_FAMILY_00205",
-        "RP5C_MARKET_SCOPE_0011",
-        "RP5C_ONTOLOGY_ROLE_0014"
-      ],
-      "derived_route_resolution_refs": [
-        "RP5C_ROUTE_RESOLUTION_00000023"
-      ],
-      "dormant_future_market_qku_ledger_refs": [
-        "RP5C_DORMANT_FUTURE_MARKET_QKU_00000020"
-      ],
-      "downstream_pr_refs": [
-        "PR168-RP5D",
-        "PR168-RP5E",
-        "RANK4"
-      ],
-      "downstream_refs": [
-        "PR168-RP5D",
-        "PR168-RP5E",
-        "RANK4"
-      ],
-      "identity_row_id": "RP5C_IDENTITY_00000073",
-      "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
-      "platform_applicability_registry_refs": [
-        "RP5C_PLATFORM_APPLICABILITY_0008"
-      ],
-      "row_id": "RP5C_NO_ORPHAN_IDENTITY_00000023",
-      "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
-      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000015",
-      "stage1_activation_view_refs": [
-        "RP5C_STAGE1_ACTIVATION_00000023"
-      ],
-      "stage1_agent_computation_universe_seed_refs": [],
-      "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
-      "upstream_refs": [
-        "docs/master_plan/generated/map3/formula_invariant_rows.jsonl"
-      ],
-      "validator_refs": [
-        "governance_agent",
-        "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
-      ]
-    },
-    {
-      "blocker_codes": [
-        "NEEDS_FORMULA_EXPRESSION_REF"
-      ],
-      "classification_registry_refs": [
-        "RP5C_FAMILY_00071",
-        "RP5C_FAMILY_00185",
-        "RP5C_MARKET_SCOPE_0002",
-        "RP5C_ONTOLOGY_ROLE_0011"
-      ],
-      "derived_route_resolution_refs": [
-        "RP5C_ROUTE_RESOLUTION_00000024"
-      ],
-      "dormant_future_market_qku_ledger_refs": [],
-      "downstream_pr_refs": [
-        "PR168-RP5D",
-        "PR168-RP5E",
-        "RANK4"
-      ],
-      "downstream_refs": [
-        "PR168-RP5D",
-        "PR168-RP5E",
-        "RANK4"
-      ],
-      "identity_row_id": "RP5C_IDENTITY_00000083",
-      "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
-      "platform_applicability_registry_refs": [
-        "RP5C_PLATFORM_APPLICABILITY_0004"
-      ],
-      "row_id": "RP5C_NO_ORPHAN_IDENTITY_00000024",
-      "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
-      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000269",
-      "stage1_activation_view_refs": [
-        "RP5C_STAGE1_ACTIVATION_00000024"
-      ],
-      "stage1_agent_computation_universe_seed_refs": [
-        "RP5C_STAGE1_AGENT_SEED_00000004"
-      ],
-      "stage1_classification_state": "STAGE1_PREDICTION_MARKET_SUPPORTING_MARKET_AGNOSTIC",
-      "upstream_refs": [
-        "docs/master_plan/generated/rp3/formula_to_pnl_map_rows.jsonl"
-      ],
-      "validator_refs": [
-        "governance_agent",
-        "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"
-      ]
-    },
-    {
-      "blocker_codes": [
-        "NEEDS_FAMILY_CLASSIFICATION",
-        "NEEDS_FORMULA_EXPRESSION_REF",
-        "NEEDS_MARKET_SCOPE_CLASSIFICATION",
-        "NEEDS_ONTOLOGY_CLASSIFICATION"
-      ],
-      "classification_registry_refs": [
-        "RP5C_FAMILY_00093",
-        "RP5C_FAMILY_00206",
+        "RP5C_FAMILY_00102",
+        "RP5C_FAMILY_00232",
         "RP5C_MARKET_SCOPE_0011",
         "RP5C_ONTOLOGY_ROLE_0014"
       ],
@@ -1256,7 +1254,7 @@
         "RP5C_ROUTE_RESOLUTION_00000025"
       ],
       "dormant_future_market_qku_ledger_refs": [
-        "RP5C_DORMANT_FUTURE_MARKET_QKU_00000021"
+        "RP5C_DORMANT_FUTURE_MARKET_QKU_00000022"
       ],
       "downstream_pr_refs": [
         "PR168-RP5D",
@@ -1268,21 +1266,21 @@
         "PR168-RP5E",
         "RANK4"
       ],
-      "identity_row_id": "RP5C_IDENTITY_00000084",
+      "identity_row_id": "RP5C_IDENTITY_00000077",
       "no_orphan_status": "NO_ORPHAN_IDENTITY_ROUTED",
       "platform_applicability_registry_refs": [
         "RP5C_PLATFORM_APPLICABILITY_0008"
       ],
       "row_id": "RP5C_NO_ORPHAN_IDENTITY_00000025",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
-      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000239",
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000015",
       "stage1_activation_view_refs": [
         "RP5C_STAGE1_ACTIVATION_00000025"
       ],
       "stage1_agent_computation_universe_seed_refs": [],
       "stage1_classification_state": "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW",
       "upstream_refs": [
-        "docs/master_plan/generated/rank3/rank_score_lineage_rows.jsonl"
+        "docs/master_plan/generated/map3/formula_invariant_rows.jsonl"
       ],
       "validator_refs": [
         "governance_agent",
@@ -1297,9 +1295,9 @@
   "silent_skipped_input_artifact_count": 0,
   "source_truth_authority_created_count": 0,
   "stack_combination_materialization_count": 0,
-  "stage1_activation_view_row_count": 10189,
+  "stage1_activation_view_row_count": 10936,
   "stage1_default_full_universe_compute_route_count": 0,
-  "stage1_seed_row_count": 2001,
+  "stage1_seed_row_count": 2689,
   "stage_agent_resolver_row_count": 24,
   "trade_simulation_count": 0
 }

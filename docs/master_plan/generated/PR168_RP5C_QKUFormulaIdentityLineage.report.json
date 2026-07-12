@@ -57,7 +57,7 @@
     "stage1_default_full_universe_compute_route_count": 0,
     "trade_simulation_count": 0
   },
-  "identity_lineage_row_count": 183802,
+  "identity_lineage_row_count": 185296,
   "launch_readiness_authority_created_count": 0,
   "live_order_authority_created_count": 0,
   "logical_report_id": "PR168_RP5C_QKUFormulaIdentityLineage",
@@ -416,8 +416,8 @@
       "provenance_tier": "UPSTREAM_FORMULA_QKU_REGISTRY",
       "row_id": "RP5C_LIN_00000024",
       "rp5d_handoff_state": "NEEDS_RP5D_EXECUTABILITY_REVIEW",
-      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000239",
-      "source_line_or_json_path": "jsonl[2]"
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000007",
+      "source_line_or_json_path": "jsonl[318]"
     },
     {
       "canonical_identity_row_id": "RP5C_IDENTITY_00000024",
@@ -430,8 +430,8 @@
       "provenance_tier": "UPSTREAM_FORMULA_QKU_REGISTRY",
       "row_id": "RP5C_LIN_00000025",
       "rp5d_handoff_state": "DUPLICATE_PRESERVED_LOW_PRIORITY",
-      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000265",
-      "source_line_or_json_path": "jsonl[2]"
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000149",
+      "source_line_or_json_path": "records[318]"
     }
   ],
   "report_version": "PR168-RP5C-v1.0",

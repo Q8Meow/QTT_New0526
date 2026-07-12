@@ -22,16 +22,16 @@
     "generated_path_count": 114
   },
   "dedupe_counts": {
-    "CANONICAL_REPRESENTATIVE_PRESERVED": 9949,
+    "CANONICAL_REPRESENTATIVE_PRESERVED": 10696,
     "UNIQUE_PRESERVED": 240
   },
   "deleted_file_count": 0,
-  "derived_route_resolution_count": 10189,
+  "derived_route_resolution_count": 10936,
   "derived_views_duplicate_canonical_object_count": 0,
   "dormant_qku_deleted_count": 0,
   "dormant_qku_global_ban_count": 0,
   "family_registry_counts": {
-    "qku_formula_family_registry_row_count": 207
+    "qku_formula_family_registry_row_count": 234
   },
   "formula_expression_mutation_count": 0,
   "formula_identity_deleted_count": 0,
@@ -85,7 +85,7 @@
   },
   "independent_full_library_copy_count": 0,
   "input_artifact_counts": {
-    "discovery_elapsed_seconds_rounded": 0.035,
+    "discovery_elapsed_seconds_rounded": 0.037,
     "found_input_artifact_count": 272,
     "input_artifact_count": 272,
     "inspected_input_roots": [
@@ -99,12 +99,12 @@
   },
   "launch_readiness_authority_created_count": 0,
   "library_row_counts": {
-    "duplicate_preserved_occurrence_count": 173613,
-    "extracted_identity_occurrence_count": 183802,
-    "formula_assignment_row_count": 427,
-    "immutable_formula_library_row_count": 824,
-    "immutable_qku_formula_library_row_count": 10189,
-    "immutable_qku_library_row_count": 9791
+    "duplicate_preserved_occurrence_count": 174360,
+    "extracted_identity_occurrence_count": 185296,
+    "formula_assignment_row_count": 1115,
+    "immutable_formula_library_row_count": 1571,
+    "immutable_qku_formula_library_row_count": 10936,
+    "immutable_qku_library_row_count": 10479
   },
   "live_order_authority_created_count": 0,
   "logical_report_id": "PR168_RP5C_FinalSummary",
@@ -135,8 +135,8 @@
     "stage_available_on_demand_count_max": 1471,
     "stage_available_on_demand_count_min": 1471,
     "stage_computation_universe_view_count": 3,
-    "stage_default_compute_count_max": 290,
-    "stage_default_compute_count_min": 223
+    "stage_default_compute_count_max": 978,
+    "stage_default_compute_count_min": 911
   },
   "manual_per_qku_hardcoded_agent_assignment_count": 0,
   "market_family_reclassification_ledger_row_count": 5,
@@ -151,8 +151,8 @@
     "prior_unknown_needs_review_count": 267,
     "qku_identity_deleted_count": 0,
     "repaired_cross_market_shared_count": 1471,
-    "repaired_market_specific_count": 530,
-    "repaired_unknown_needs_review_count": 8188,
+    "repaired_market_specific_count": 1218,
+    "repaired_unknown_needs_review_count": 8247,
     "repo_financing_default_used_without_repo_specific_evidence_count": 0,
     "stage1_default_full_universe_compute_route_count": 0,
     "valid_cross_market_support_unavailable_to_stage1_count": 0
@@ -169,7 +169,7 @@
   "no_global_ban_proof": {
     "global_formula_ban_count": 0,
     "global_qku_ban_count": 0,
-    "proof_row_count": 10189
+    "proof_row_count": 10936
   },
   "no_orphan_generated_surface_proof": {
     "orphan_generated_shard_count": 0,
@@ -177,7 +177,7 @@
   },
   "no_orphan_identity_proof": {
     "orphan_identity_count": 0,
-    "proof_row_count": 10189
+    "proof_row_count": 10936
   },
   "no_orphan_source_artifact_proof": {
     "orphan_source_artifact_count": 0,
@@ -186,7 +186,7 @@
   "non_prediction_market_qku_stage1_active_count": 0,
   "only_four_authoritative_central_layers_flag": true,
   "ontology_registry_counts": {
-    "formula_ontology_row_count": 10188,
+    "formula_ontology_row_count": 10935,
     "ontology_role_registry_row_count": 14
   },
   "orphan_generated_shard_count": 0,
@@ -203,7 +203,7 @@
     "CANDIDATE_PACKET_IDENTITY_SURFACE": 135,
     "GENERATED_REPORT_HISTORICAL_EVIDENCE": 3,
     "RP5B_SEMANTIC_SUPERSESSION_INPUT": 2,
-    "UPSTREAM_FORMULA_QKU_REGISTRY": 10048
+    "UPSTREAM_FORMULA_QKU_REGISTRY": 10795
   },
   "qku_identity_deleted_count": 0,
   "qopt_batch_count": 0,
@@ -235,16 +235,16 @@
       "generated_path_count": 114
     },
     "dedupe_counts": {
-      "CANONICAL_REPRESENTATIVE_PRESERVED": 9949,
+      "CANONICAL_REPRESENTATIVE_PRESERVED": 10696,
       "UNIQUE_PRESERVED": 240
     },
     "deleted_file_count": 0,
-    "derived_route_resolution_count": 10189,
+    "derived_route_resolution_count": 10936,
     "derived_views_duplicate_canonical_object_count": 0,
     "dormant_qku_deleted_count": 0,
     "dormant_qku_global_ban_count": 0,
     "family_registry_counts": {
-      "qku_formula_family_registry_row_count": 207
+      "qku_formula_family_registry_row_count": 234
     },
     "formula_expression_mutation_count": 0,
     "formula_identity_deleted_count": 0,
@@ -255,7 +255,7 @@
     "global_qku_ban_count": 0,
     "independent_full_library_copy_count": 0,
     "input_artifact_counts": {
-      "discovery_elapsed_seconds_rounded": 0.035,
+      "discovery_elapsed_seconds_rounded": 0.037,
       "found_input_artifact_count": 272,
       "input_artifact_count": 272,
       "inspected_input_roots": [
@@ -269,12 +269,12 @@
     },
     "launch_readiness_authority_created_count": 0,
     "library_row_counts": {
-      "duplicate_preserved_occurrence_count": 173613,
-      "extracted_identity_occurrence_count": 183802,
-      "formula_assignment_row_count": 427,
-      "immutable_formula_library_row_count": 824,
-      "immutable_qku_formula_library_row_count": 10189,
-      "immutable_qku_library_row_count": 9791
+      "duplicate_preserved_occurrence_count": 174360,
+      "extracted_identity_occurrence_count": 185296,
+      "formula_assignment_row_count": 1115,
+      "immutable_formula_library_row_count": 1571,
+      "immutable_qku_formula_library_row_count": 10936,
+      "immutable_qku_library_row_count": 10479
     },
     "live_order_authority_created_count": 0,
     "machine_consumable_library_access_summary": {
@@ -304,8 +304,8 @@
       "stage_available_on_demand_count_max": 1471,
       "stage_available_on_demand_count_min": 1471,
       "stage_computation_universe_view_count": 3,
-      "stage_default_compute_count_max": 290,
-      "stage_default_compute_count_min": 223
+      "stage_default_compute_count_max": 978,
+      "stage_default_compute_count_min": 911
     },
     "manual_per_qku_hardcoded_agent_assignment_count": 0,
     "market_family_reclassification_ledger_row_count": 5,
@@ -320,8 +320,8 @@
       "prior_unknown_needs_review_count": 267,
       "qku_identity_deleted_count": 0,
       "repaired_cross_market_shared_count": 1471,
-      "repaired_market_specific_count": 530,
-      "repaired_unknown_needs_review_count": 8188,
+      "repaired_market_specific_count": 1218,
+      "repaired_unknown_needs_review_count": 8247,
       "repo_financing_default_used_without_repo_specific_evidence_count": 0,
       "stage1_default_full_universe_compute_route_count": 0,
       "valid_cross_market_support_unavailable_to_stage1_count": 0
@@ -337,7 +337,7 @@
     "no_global_ban_proof": {
       "global_formula_ban_count": 0,
       "global_qku_ban_count": 0,
-      "proof_row_count": 10189
+      "proof_row_count": 10936
     },
     "no_orphan_generated_surface_proof": {
       "orphan_generated_shard_count": 0,
@@ -345,7 +345,7 @@
     },
     "no_orphan_identity_proof": {
       "orphan_identity_count": 0,
-      "proof_row_count": 10189
+      "proof_row_count": 10936
     },
     "no_orphan_source_artifact_proof": {
       "orphan_source_artifact_count": 0,
@@ -354,7 +354,7 @@
     "non_prediction_market_qku_stage1_active_count": 0,
     "only_four_authoritative_central_layers_flag": true,
     "ontology_registry_counts": {
-      "formula_ontology_row_count": 10188,
+      "formula_ontology_row_count": 10935,
       "ontology_role_registry_row_count": 14
     },
     "orphan_generated_shard_count": 0,
@@ -370,7 +370,7 @@
       "CANDIDATE_PACKET_IDENTITY_SURFACE": 135,
       "GENERATED_REPORT_HISTORICAL_EVIDENCE": 3,
       "RP5B_SEMANTIC_SUPERSESSION_INPUT": 2,
-      "UPSTREAM_FORMULA_QKU_REGISTRY": 10048
+      "UPSTREAM_FORMULA_QKU_REGISTRY": 10795
     },
     "qku_identity_deleted_count": 0,
     "qopt_batch_count": 0,
@@ -380,21 +380,21 @@
     "rank4_ranking_count": 0,
     "raw_legacy_direct_agent_consumer_count": 0,
     "repaired_cross_market_shared_count": 1471,
-    "repaired_market_specific_count": 530,
-    "repaired_unknown_needs_review_count": 8188,
+    "repaired_market_specific_count": 1218,
+    "repaired_unknown_needs_review_count": 8247,
     "repo_financing_default_used_without_repo_specific_evidence_count": 0,
     "routing_rule_count": 14,
     "rp5c_status": "PASS",
     "rp5d_handoff_counts": {
-      "NEEDS_RP5D_EXECUTABILITY_REVIEW": 8403,
-      "READY_FOR_RP5D_EXECUTABILITY_CLASSIFICATION": 1786
+      "NEEDS_RP5D_EXECUTABILITY_REVIEW": 8462,
+      "READY_FOR_RP5D_EXECUTABILITY_CLASSIFICATION": 2474
     },
     "runtime_cash_receipt_count": 0,
     "runtime_stack_generation_count": 0,
     "scan_performance": {
-      "elapsed_seconds_rounded": 12.469,
-      "records_scanned_count": 184786,
-      "records_with_identity_count": 182801
+      "elapsed_seconds_rounded": 13.129,
+      "records_scanned_count": 186280,
+      "records_with_identity_count": 184295
     },
     "shared_cross_market_support_pool_row_count": 1,
     "silent_skipped_input_artifact_count": 0,
@@ -409,9 +409,9 @@
     "source_truth_authority_created_count": 0,
     "stack_combination_materialization_count": 0,
     "stage1_active_universe_summary": {
-      "dormant_future_market_row_count": 8188,
+      "dormant_future_market_row_count": 8247,
       "dormant_market_scope_counts": {
-        "unknown_needs_review": 8188
+        "unknown_needs_review": 8247
       },
       "dormant_qku_deleted_count": 0,
       "dormant_qku_global_ban_count": 0,
@@ -429,13 +429,13 @@
         "NOT_STAGE1_PLATFORM_APPLICABLE",
         "UNKNOWN_PLATFORM_SCOPE_NEEDS_REVIEW"
       ],
-      "stage1_activation_row_count": 10189,
+      "stage1_activation_row_count": 10936,
       "stage1_agent_computation_universe_seed_is_default_stage1_seed": true,
       "stage1_agents_must_not_default_compute_full_universe": true,
       "stage1_classification_state_counts": {
-        "STAGE1_PREDICTION_MARKET_ACTIVE_CANDIDATE": 530,
+        "STAGE1_PREDICTION_MARKET_ACTIVE_CANDIDATE": 1218,
         "STAGE1_PREDICTION_MARKET_SUPPORTING_MARKET_AGNOSTIC": 1471,
-        "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW": 8188
+        "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW": 8247
       },
       "stage1_classification_states": [
         "STAGE1_PREDICTION_MARKET_ACTIVE_CANDIDATE",
@@ -452,31 +452,31 @@
       "stage1_default_full_universe_compute_route_count": 0,
       "stage1_seed_market_scope_counts": {
         "market_agnostic": 1471,
-        "prediction_market": 530
+        "prediction_market": 1218
       },
-      "stage1_seed_row_count": 2001
+      "stage1_seed_row_count": 2689
     },
     "stage1_default_full_universe_compute_route_count": 0,
     "trade_simulation_count": 0,
     "valid_cross_market_support_unavailable_to_stage1_count": 0
   },
   "repaired_cross_market_shared_count": 1471,
-  "repaired_market_specific_count": 530,
-  "repaired_unknown_needs_review_count": 8188,
+  "repaired_market_specific_count": 1218,
+  "repaired_unknown_needs_review_count": 8247,
   "repo_financing_default_used_without_repo_specific_evidence_count": 0,
   "report_version": "PR168-RP5C-v1.0",
   "routing_rule_count": 14,
   "rp5c_status": "PASS",
   "rp5d_handoff_counts": {
-    "NEEDS_RP5D_EXECUTABILITY_REVIEW": 8403,
-    "READY_FOR_RP5D_EXECUTABILITY_CLASSIFICATION": 1786
+    "NEEDS_RP5D_EXECUTABILITY_REVIEW": 8462,
+    "READY_FOR_RP5D_EXECUTABILITY_CLASSIFICATION": 2474
   },
   "runtime_cash_receipt_count": 0,
   "runtime_stack_generation_count": 0,
   "scan_performance": {
-    "elapsed_seconds_rounded": 12.469,
-    "records_scanned_count": 184786,
-    "records_with_identity_count": 182801
+    "elapsed_seconds_rounded": 13.129,
+    "records_scanned_count": 186280,
+    "records_with_identity_count": 184295
   },
   "shared_cross_market_support_pool_row_count": 1,
   "silent_skipped_input_artifact_count": 0,
@@ -491,9 +491,9 @@
   "source_truth_authority_created_count": 0,
   "stack_combination_materialization_count": 0,
   "stage1_active_universe_summary": {
-    "dormant_future_market_row_count": 8188,
+    "dormant_future_market_row_count": 8247,
     "dormant_market_scope_counts": {
-      "unknown_needs_review": 8188
+      "unknown_needs_review": 8247
     },
     "dormant_qku_deleted_count": 0,
     "dormant_qku_global_ban_count": 0,
@@ -511,13 +511,13 @@
       "NOT_STAGE1_PLATFORM_APPLICABLE",
       "UNKNOWN_PLATFORM_SCOPE_NEEDS_REVIEW"
     ],
-    "stage1_activation_row_count": 10189,
+    "stage1_activation_row_count": 10936,
     "stage1_agent_computation_universe_seed_is_default_stage1_seed": true,
     "stage1_agents_must_not_default_compute_full_universe": true,
     "stage1_classification_state_counts": {
-      "STAGE1_PREDICTION_MARKET_ACTIVE_CANDIDATE": 530,
+      "STAGE1_PREDICTION_MARKET_ACTIVE_CANDIDATE": 1218,
       "STAGE1_PREDICTION_MARKET_SUPPORTING_MARKET_AGNOSTIC": 1471,
-      "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW": 8188
+      "UNKNOWN_MARKET_SCOPE_NEEDS_REVIEW": 8247
     },
     "stage1_classification_states": [
       "STAGE1_PREDICTION_MARKET_ACTIVE_CANDIDATE",
@@ -534,9 +534,9 @@
     "stage1_default_full_universe_compute_route_count": 0,
     "stage1_seed_market_scope_counts": {
       "market_agnostic": 1471,
-      "prediction_market": 530
+      "prediction_market": 1218
     },
-    "stage1_seed_row_count": 2001
+    "stage1_seed_row_count": 2689
   },
   "stage1_default_full_universe_compute_route_count": 0,
   "trade_simulation_count": 0,

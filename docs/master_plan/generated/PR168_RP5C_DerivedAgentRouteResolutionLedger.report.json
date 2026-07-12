@@ -6,7 +6,7 @@
   "connector_semantic_binding_count": 0,
   "created_at_utc": "2026-06-25T00:00:00Z",
   "deleted_file_count": 0,
-  "derived_route_resolution_row_count": 10189,
+  "derived_route_resolution_row_count": 10936,
   "dormant_qku_deleted_count": 0,
   "dormant_qku_global_ban_count": 0,
   "formula_expression_mutation_count": 0,
@@ -429,13 +429,11 @@
     },
     {
       "blocker_codes": [
-        "NEEDS_FAMILY_CLASSIFICATION",
-        "NEEDS_FORMULA_EXPRESSION_REF",
-        "NEEDS_MARKET_SCOPE_CLASSIFICATION",
-        "NEEDS_ONTOLOGY_CLASSIFICATION"
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION"
       ],
       "downstream_agent_refs_derived": [
-        "RP5DExecutabilityAgent"
+        "RP5DExecutabilityAgent",
+        "TradePlanSimulationAgent"
       ],
       "downstream_pr_refs": [
         "PR168-RP5D",
@@ -450,9 +448,53 @@
         "research_agent"
       ],
       "primary_responsibility_group_refs": [
-        "RP5C_RESP_GROUP_0014"
+        "RP5C_RESP_GROUP_0002"
       ],
       "route_resolution_id": "RP5C_ROUTE_RESOLUTION_00000009",
+      "route_resolution_state": "ROUTE_RESOLVED_FROM_PR165_D2_AGENT_DUTY",
+      "route_rule_match_basis": {
+        "dependency_type": "calibration_dependency",
+        "formula_family": "c",
+        "market_scope": "unknown_needs_review",
+        "ontology_category": "calibration",
+        "qku_family": "qku_c"
+      },
+      "route_rule_refs": [
+        "RP5C_ROUTE_RULE_0002"
+      ],
+      "secondary_responsibility_group_refs": [],
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000007",
+      "unresolved_reason": null,
+      "validator_agent_refs_derived": [
+        "governance_agent"
+      ]
+    },
+    {
+      "blocker_codes": [
+        "NEEDS_FAMILY_CLASSIFICATION",
+        "NEEDS_FORMULA_EXPRESSION_REF",
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION",
+        "NEEDS_ONTOLOGY_CLASSIFICATION"
+      ],
+      "downstream_agent_refs_derived": [
+        "RP5DExecutabilityAgent"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D",
+        "PR168-RP5E",
+        "RANK4",
+        "QOPT"
+      ],
+      "identity_row_id": "RP5C_IDENTITY_00000026",
+      "notes": "Derived from central route rulebook; no manual per-QKU assignment.",
+      "owning_agent_refs_derived": [
+        "governance_agent",
+        "research_agent"
+      ],
+      "primary_responsibility_group_refs": [
+        "RP5C_RESP_GROUP_0014"
+      ],
+      "route_resolution_id": "RP5C_ROUTE_RESOLUTION_00000010",
       "route_resolution_state": "ROUTE_RESOLVED_FROM_PR165_D2_AGENT_DUTY",
       "route_rule_match_basis": {
         "dependency_type": "unknown_needs_review",
@@ -485,7 +527,7 @@
         "RANK4",
         "QOPT"
       ],
-      "identity_row_id": "RP5C_IDENTITY_00000027",
+      "identity_row_id": "RP5C_IDENTITY_00000029",
       "notes": "Derived from central route rulebook; no manual per-QKU assignment.",
       "owning_agent_refs_derived": [
         "governance_agent",
@@ -494,7 +536,7 @@
       "primary_responsibility_group_refs": [
         "RP5C_RESP_GROUP_0002"
       ],
-      "route_resolution_id": "RP5C_ROUTE_RESOLUTION_00000010",
+      "route_resolution_id": "RP5C_ROUTE_RESOLUTION_00000011",
       "route_resolution_state": "ROUTE_RESOLVED_FROM_PR165_D2_AGENT_DUTY",
       "route_rule_match_basis": {
         "dependency_type": "calibration_dependency",
@@ -527,7 +569,7 @@
         "RANK4",
         "QOPT"
       ],
-      "identity_row_id": "RP5C_IDENTITY_00000028",
+      "identity_row_id": "RP5C_IDENTITY_00000030",
       "notes": "Derived from central route rulebook; no manual per-QKU assignment.",
       "owning_agent_refs_derived": [
         "governance_agent",
@@ -536,7 +578,7 @@
       "primary_responsibility_group_refs": [
         "RP5C_RESP_GROUP_0002"
       ],
-      "route_resolution_id": "RP5C_ROUTE_RESOLUTION_00000011",
+      "route_resolution_id": "RP5C_ROUTE_RESOLUTION_00000012",
       "route_resolution_state": "ROUTE_RESOLVED_FROM_PR165_D2_AGENT_DUTY",
       "route_rule_match_basis": {
         "dependency_type": "calibration_dependency",
@@ -570,7 +612,7 @@
         "RANK4",
         "QOPT"
       ],
-      "identity_row_id": "RP5C_IDENTITY_00000029",
+      "identity_row_id": "RP5C_IDENTITY_00000031",
       "notes": "Derived from central route rulebook; no manual per-QKU assignment.",
       "owning_agent_refs_derived": [
         "governance_agent",
@@ -579,7 +621,7 @@
       "primary_responsibility_group_refs": [
         "RP5C_RESP_GROUP_0002"
       ],
-      "route_resolution_id": "RP5C_ROUTE_RESOLUTION_00000012",
+      "route_resolution_id": "RP5C_ROUTE_RESOLUTION_00000013",
       "route_resolution_state": "ROUTE_RESOLVED_FROM_PR165_D2_AGENT_DUTY",
       "route_rule_match_basis": {
         "dependency_type": "calibration_dependency",
@@ -613,7 +655,7 @@
         "RANK4",
         "QOPT"
       ],
-      "identity_row_id": "RP5C_IDENTITY_00000036",
+      "identity_row_id": "RP5C_IDENTITY_00000038",
       "notes": "Derived from central route rulebook; no manual per-QKU assignment.",
       "owning_agent_refs_derived": [
         "governance_agent",
@@ -622,7 +664,7 @@
       "primary_responsibility_group_refs": [
         "RP5C_RESP_GROUP_0002"
       ],
-      "route_resolution_id": "RP5C_ROUTE_RESOLUTION_00000013",
+      "route_resolution_id": "RP5C_ROUTE_RESOLUTION_00000014",
       "route_resolution_state": "ROUTE_RESOLVED_FROM_PR165_D2_AGENT_DUTY",
       "route_rule_match_basis": {
         "dependency_type": "calibration_dependency",
@@ -655,7 +697,7 @@
         "RANK4",
         "QOPT"
       ],
-      "identity_row_id": "RP5C_IDENTITY_00000041",
+      "identity_row_id": "RP5C_IDENTITY_00000043",
       "notes": "Derived from central route rulebook; no manual per-QKU assignment.",
       "owning_agent_refs_derived": [
         "governance_agent",
@@ -664,7 +706,7 @@
       "primary_responsibility_group_refs": [
         "RP5C_RESP_GROUP_0002"
       ],
-      "route_resolution_id": "RP5C_ROUTE_RESOLUTION_00000014",
+      "route_resolution_id": "RP5C_ROUTE_RESOLUTION_00000015",
       "route_resolution_state": "ROUTE_RESOLVED_FROM_PR165_D2_AGENT_DUTY",
       "route_rule_match_basis": {
         "dependency_type": "calibration_dependency",
@@ -698,7 +740,7 @@
         "RANK4",
         "QOPT"
       ],
-      "identity_row_id": "RP5C_IDENTITY_00000043",
+      "identity_row_id": "RP5C_IDENTITY_00000045",
       "notes": "Derived from central route rulebook; no manual per-QKU assignment.",
       "owning_agent_refs_derived": [
         "governance_agent",
@@ -707,7 +749,7 @@
       "primary_responsibility_group_refs": [
         "RP5C_RESP_GROUP_0014"
       ],
-      "route_resolution_id": "RP5C_ROUTE_RESOLUTION_00000015",
+      "route_resolution_id": "RP5C_ROUTE_RESOLUTION_00000016",
       "route_resolution_state": "ROUTE_RESOLVED_FROM_PR165_D2_AGENT_DUTY",
       "route_rule_match_basis": {
         "dependency_type": "unknown_needs_review",
@@ -741,7 +783,7 @@
         "RANK4",
         "QOPT"
       ],
-      "identity_row_id": "RP5C_IDENTITY_00000054",
+      "identity_row_id": "RP5C_IDENTITY_00000056",
       "notes": "Derived from central route rulebook; no manual per-QKU assignment.",
       "owning_agent_refs_derived": [
         "governance_agent",
@@ -750,7 +792,7 @@
       "primary_responsibility_group_refs": [
         "RP5C_RESP_GROUP_0002"
       ],
-      "route_resolution_id": "RP5C_ROUTE_RESOLUTION_00000016",
+      "route_resolution_id": "RP5C_ROUTE_RESOLUTION_00000017",
       "route_resolution_state": "ROUTE_RESOLVED_FROM_PR165_D2_AGENT_DUTY",
       "route_rule_match_basis": {
         "dependency_type": "calibration_dependency",
@@ -764,6 +806,48 @@
       ],
       "secondary_responsibility_group_refs": [],
       "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000269",
+      "unresolved_reason": null,
+      "validator_agent_refs_derived": [
+        "governance_agent"
+      ]
+    },
+    {
+      "blocker_codes": [
+        "NEEDS_MARKET_SCOPE_CLASSIFICATION",
+        "NEEDS_ONTOLOGY_CLASSIFICATION"
+      ],
+      "downstream_agent_refs_derived": [
+        "RP5DExecutabilityAgent"
+      ],
+      "downstream_pr_refs": [
+        "PR168-RP5D",
+        "PR168-RP5E",
+        "RANK4",
+        "QOPT"
+      ],
+      "identity_row_id": "RP5C_IDENTITY_00000057",
+      "notes": "Derived from central route rulebook; no manual per-QKU assignment.",
+      "owning_agent_refs_derived": [
+        "governance_agent",
+        "research_agent"
+      ],
+      "primary_responsibility_group_refs": [
+        "RP5C_RESP_GROUP_0014"
+      ],
+      "route_resolution_id": "RP5C_ROUTE_RESOLUTION_00000018",
+      "route_resolution_state": "ROUTE_RESOLVED_FROM_PR165_D2_AGENT_DUTY",
+      "route_rule_match_basis": {
+        "dependency_type": "unknown_needs_review",
+        "formula_family": "c",
+        "market_scope": "unknown_needs_review",
+        "ontology_category": "unknown_needs_review",
+        "qku_family": "qku_c"
+      },
+      "route_rule_refs": [
+        "RP5C_ROUTE_RULE_0014"
+      ],
+      "secondary_responsibility_group_refs": [],
+      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000007",
       "unresolved_reason": null,
       "validator_agent_refs_derived": [
         "governance_agent"
@@ -785,7 +869,7 @@
         "RANK4",
         "QOPT"
       ],
-      "identity_row_id": "RP5C_IDENTITY_00000055",
+      "identity_row_id": "RP5C_IDENTITY_00000059",
       "notes": "Derived from central route rulebook; no manual per-QKU assignment.",
       "owning_agent_refs_derived": [
         "governance_agent",
@@ -794,7 +878,7 @@
       "primary_responsibility_group_refs": [
         "RP5C_RESP_GROUP_0014"
       ],
-      "route_resolution_id": "RP5C_ROUTE_RESOLUTION_00000017",
+      "route_resolution_id": "RP5C_ROUTE_RESOLUTION_00000019",
       "route_resolution_state": "ROUTE_RESOLVED_FROM_PR165_D2_AGENT_DUTY",
       "route_rule_match_basis": {
         "dependency_type": "unknown_needs_review",
@@ -825,7 +909,7 @@
         "RANK4",
         "QOPT"
       ],
-      "identity_row_id": "RP5C_IDENTITY_00000059",
+      "identity_row_id": "RP5C_IDENTITY_00000063",
       "notes": "Derived from central route rulebook; no manual per-QKU assignment.",
       "owning_agent_refs_derived": [
         "governance_agent",
@@ -835,7 +919,7 @@
       "primary_responsibility_group_refs": [
         "RP5C_RESP_GROUP_0011"
       ],
-      "route_resolution_id": "RP5C_ROUTE_RESOLUTION_00000018",
+      "route_resolution_id": "RP5C_ROUTE_RESOLUTION_00000020",
       "route_resolution_state": "ROUTE_RESOLVED_FROM_PR165_D2_AGENT_DUTY",
       "route_rule_match_basis": {
         "dependency_type": "quantum_objective_dependency",
@@ -869,7 +953,7 @@
         "RANK4",
         "QOPT"
       ],
-      "identity_row_id": "RP5C_IDENTITY_00000060",
+      "identity_row_id": "RP5C_IDENTITY_00000064",
       "notes": "Derived from central route rulebook; no manual per-QKU assignment.",
       "owning_agent_refs_derived": [
         "governance_agent",
@@ -878,7 +962,7 @@
       "primary_responsibility_group_refs": [
         "RP5C_RESP_GROUP_0014"
       ],
-      "route_resolution_id": "RP5C_ROUTE_RESOLUTION_00000019",
+      "route_resolution_id": "RP5C_ROUTE_RESOLUTION_00000021",
       "route_resolution_state": "ROUTE_RESOLVED_FROM_PR165_D2_AGENT_DUTY",
       "route_rule_match_basis": {
         "dependency_type": "unknown_needs_review",
@@ -911,7 +995,7 @@
         "RANK4",
         "QOPT"
       ],
-      "identity_row_id": "RP5C_IDENTITY_00000066",
+      "identity_row_id": "RP5C_IDENTITY_00000070",
       "notes": "Derived from central route rulebook; no manual per-QKU assignment.",
       "owning_agent_refs_derived": [
         "governance_agent",
@@ -920,7 +1004,7 @@
       "primary_responsibility_group_refs": [
         "RP5C_RESP_GROUP_0002"
       ],
-      "route_resolution_id": "RP5C_ROUTE_RESOLUTION_00000020",
+      "route_resolution_id": "RP5C_ROUTE_RESOLUTION_00000022",
       "route_resolution_state": "ROUTE_RESOLVED_FROM_PR165_D2_AGENT_DUTY",
       "route_rule_match_basis": {
         "dependency_type": "calibration_dependency",
@@ -955,7 +1039,7 @@
         "RANK4",
         "QOPT"
       ],
-      "identity_row_id": "RP5C_IDENTITY_00000071",
+      "identity_row_id": "RP5C_IDENTITY_00000075",
       "notes": "Derived from central route rulebook; no manual per-QKU assignment.",
       "owning_agent_refs_derived": [
         "governance_agent",
@@ -964,7 +1048,7 @@
       "primary_responsibility_group_refs": [
         "RP5C_RESP_GROUP_0014"
       ],
-      "route_resolution_id": "RP5C_ROUTE_RESOLUTION_00000021",
+      "route_resolution_id": "RP5C_ROUTE_RESOLUTION_00000023",
       "route_resolution_state": "ROUTE_RESOLVED_FROM_PR165_D2_AGENT_DUTY",
       "route_rule_match_basis": {
         "dependency_type": "unknown_needs_review",
@@ -995,7 +1079,7 @@
         "RANK4",
         "QOPT"
       ],
-      "identity_row_id": "RP5C_IDENTITY_00000072",
+      "identity_row_id": "RP5C_IDENTITY_00000076",
       "notes": "Derived from central route rulebook; no manual per-QKU assignment.",
       "owning_agent_refs_derived": [
         "governance_agent",
@@ -1005,7 +1089,7 @@
       "primary_responsibility_group_refs": [
         "RP5C_RESP_GROUP_0011"
       ],
-      "route_resolution_id": "RP5C_ROUTE_RESOLUTION_00000022",
+      "route_resolution_id": "RP5C_ROUTE_RESOLUTION_00000024",
       "route_resolution_state": "ROUTE_RESOLVED_FROM_PR165_D2_AGENT_DUTY",
       "route_rule_match_basis": {
         "dependency_type": "quantum_objective_dependency",
@@ -1039,7 +1123,7 @@
         "RANK4",
         "QOPT"
       ],
-      "identity_row_id": "RP5C_IDENTITY_00000073",
+      "identity_row_id": "RP5C_IDENTITY_00000077",
       "notes": "Derived from central route rulebook; no manual per-QKU assignment.",
       "owning_agent_refs_derived": [
         "governance_agent",
@@ -1048,7 +1132,7 @@
       "primary_responsibility_group_refs": [
         "RP5C_RESP_GROUP_0014"
       ],
-      "route_resolution_id": "RP5C_ROUTE_RESOLUTION_00000023",
+      "route_resolution_id": "RP5C_ROUTE_RESOLUTION_00000025",
       "route_resolution_state": "ROUTE_RESOLVED_FROM_PR165_D2_AGENT_DUTY",
       "route_rule_match_basis": {
         "dependency_type": "unknown_needs_review",
@@ -1066,98 +1150,11 @@
       "validator_agent_refs_derived": [
         "governance_agent"
       ]
-    },
-    {
-      "blocker_codes": [
-        "NEEDS_FORMULA_EXPRESSION_REF"
-      ],
-      "downstream_agent_refs_derived": [
-        "QOPTAgent",
-        "ReplayPaperAgent"
-      ],
-      "downstream_pr_refs": [
-        "PR168-RP5D",
-        "PR168-RP5E",
-        "RANK4",
-        "QOPT"
-      ],
-      "identity_row_id": "RP5C_IDENTITY_00000083",
-      "notes": "Derived from central route rulebook; no manual per-QKU assignment.",
-      "owning_agent_refs_derived": [
-        "governance_agent",
-        "quantum_optimizer_agent",
-        "research_agent"
-      ],
-      "primary_responsibility_group_refs": [
-        "RP5C_RESP_GROUP_0011"
-      ],
-      "route_resolution_id": "RP5C_ROUTE_RESOLUTION_00000024",
-      "route_resolution_state": "ROUTE_RESOLVED_FROM_PR165_D2_AGENT_DUTY",
-      "route_rule_match_basis": {
-        "dependency_type": "quantum_objective_dependency",
-        "formula_family": "quantum_objective_coefficient",
-        "market_scope": "market_agnostic",
-        "ontology_category": "quantum_objective_constraint",
-        "qku_family": "qku_quantum_objective_coefficient"
-      },
-      "route_rule_refs": [
-        "RP5C_ROUTE_RULE_0011"
-      ],
-      "secondary_responsibility_group_refs": [],
-      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000269",
-      "unresolved_reason": null,
-      "validator_agent_refs_derived": [
-        "governance_agent"
-      ]
-    },
-    {
-      "blocker_codes": [
-        "NEEDS_FAMILY_CLASSIFICATION",
-        "NEEDS_FORMULA_EXPRESSION_REF",
-        "NEEDS_MARKET_SCOPE_CLASSIFICATION",
-        "NEEDS_ONTOLOGY_CLASSIFICATION"
-      ],
-      "downstream_agent_refs_derived": [
-        "RP5DExecutabilityAgent"
-      ],
-      "downstream_pr_refs": [
-        "PR168-RP5D",
-        "PR168-RP5E",
-        "RANK4",
-        "QOPT"
-      ],
-      "identity_row_id": "RP5C_IDENTITY_00000084",
-      "notes": "Derived from central route rulebook; no manual per-QKU assignment.",
-      "owning_agent_refs_derived": [
-        "governance_agent",
-        "research_agent"
-      ],
-      "primary_responsibility_group_refs": [
-        "RP5C_RESP_GROUP_0014"
-      ],
-      "route_resolution_id": "RP5C_ROUTE_RESOLUTION_00000025",
-      "route_resolution_state": "ROUTE_RESOLVED_FROM_PR165_D2_AGENT_DUTY",
-      "route_rule_match_basis": {
-        "dependency_type": "unknown_needs_review",
-        "formula_family": "unknown_needs_review",
-        "market_scope": "unknown_needs_review",
-        "ontology_category": "unknown_needs_review",
-        "qku_family": "qku_unknown_needs_review"
-      },
-      "route_rule_refs": [
-        "RP5C_ROUTE_RULE_0014"
-      ],
-      "secondary_responsibility_group_refs": [],
-      "source_artifact_row_id": "RP5C_SOURCE_ARTIFACT_000239",
-      "unresolved_reason": null,
-      "validator_agent_refs_derived": [
-        "governance_agent"
-      ]
     }
   ],
   "report_version": "PR168-RP5C-v1.0",
   "route_resolution_state_counts": {
-    "ROUTE_RESOLVED_FROM_PR165_D2_AGENT_DUTY": 10189
+    "ROUTE_RESOLVED_FROM_PR165_D2_AGENT_DUTY": 10936
   },
   "rows_ref": "docs/master_plan/generated/rp5c/derived_agent_route_resolution_ledger.jsonl",
   "runtime_cash_receipt_count": 0,

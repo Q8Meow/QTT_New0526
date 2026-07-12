@@ -96,16 +96,65 @@ def test_pr169_qku_formula_exp1_allowed_paths_are_narrow(path: str) -> None:
 @pytest.mark.parametrize(
     "path",
     [
+        "docs/master_plan/generated/PR168_MAP3_FormulaDependencyGraph.report.json",
+        "docs/master_plan/generated/map3/formula_dependency_rows.jsonl",
+        "docs/master_plan/generated/PR168_RP5C_FormulaAssignmentLibrary.report.json",
+        "docs/master_plan/generated/rp5c/formula_assignment_library.jsonl",
+        "docs/master_plan/generated/rp5a/agent_touchpoint_rows.jsonl",
+        "docs/master_plan/generated/rp5a/validation_time_risk_rows.jsonl",
+        "docs/master_plan/generated/pr168_vs1/selected_computable_qku_formula_bindings.jsonl",
+        "docs/master_plan/generated/pr168_vs1/vs1_run_receipt.report.json",
+        "docs/master_plan/generated/pr168_rp5d/rp5d_universal_coverage.jsonl",
+        "docs/master_plan/generated/pr168_rp5d_r1/exec_now_proof.jsonl",
+        "docs/master_plan/generated/pr168_rp5e/tmp_previews.jsonl",
+        "docs/master_plan/generated/pr168_rp5f/targets.jsonl",
+        "docs/master_plan/generated/pr169_readiness1/qku_formula_agent_compute_map.generated.jsonl",
+        "docs/master_plan/generated/pr169_pretrade1/pretrade_qku_formula_compute_map.generated.jsonl",
+        "docs/master_plan/generated/pr169_agent_orch1/formula_tasks.jsonl",
+        "docs/master_plan/generated/pr169_agent_orch1/registry.jsonl",
+        "docs/master_plan/generated/pr169_agent_orch1/acceptance.report.json",
+        "docs/master_plan/generated/pr169_svc1/qku_formula_compute_route_views.generated.jsonl",
+        "docs/master_plan/generated/pr169_svc1/service_registry.jsonl",
+        "docs/master_plan/generated/pr169_svc1/service_manifest.json",
+        "src/qtt/stage1_prediction_markets/pr162d_r2a_real_formulations/pr169_operator_registry.py",
+        "tools/pr169_formula_owner_rows.py",
+        "tests/pr168_rp5e/test_reading_inputs.py",
+    ],
+)
+def test_pr169_qku_formula_repair_allows_exact_shared_owner_currentization(path: str) -> None:
+    assert registry.is_pr_scoped_changed_path_allowed(PR169_QKU_FORMULA_EXP1_REPAIR_BRANCH, path)
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        "docs/master_plan/generated/map3/unrelated_rows.jsonl",
+        "docs/master_plan/generated/rp5c/unregistered_repair_copy.jsonl",
+        "tools/build_unrelated_owner.py",
+    ],
+)
+def test_pr169_qku_formula_repair_shared_owner_scope_stays_fail_closed(path: str) -> None:
+    assert not registry.is_pr_scoped_changed_path_allowed(PR169_QKU_FORMULA_EXP1_REPAIR_BRANCH, path)
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
         "src/qtt/live_connectors/order_client.py",
         "private_state/account_snapshot.json",
         "cash/account.json",
         "docs/master_plan/QTT_MasterPlan_Current.md",
-        "docs/master_plan/generated/pr169_svc1/service_registry.jsonl",
     ],
 )
 def test_pr169_qku_formula_exp1_forbidden_paths_fail_closed(path: str) -> None:
     assert not registry.is_pr_scoped_changed_path_allowed(PR169_QKU_FORMULA_EXP1_BRANCH, path)
     assert not registry.is_pr_scoped_changed_path_allowed(PR169_QKU_FORMULA_EXP1_REPAIR_BRANCH, path)
+
+
+def test_original_formula_branch_does_not_inherit_repair_shared_owner_scope() -> None:
+    path = "docs/master_plan/generated/pr169_svc1/service_registry.jsonl"
+    assert not registry.is_pr_scoped_changed_path_allowed(PR169_QKU_FORMULA_EXP1_BRANCH, path)
+    assert registry.is_pr_scoped_changed_path_allowed(PR169_QKU_FORMULA_EXP1_REPAIR_BRANCH, path)
 
 
 @pytest.mark.parametrize(
