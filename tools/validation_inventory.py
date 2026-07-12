@@ -424,6 +424,7 @@ def _pr_globs(stem: str) -> tuple[str, ...]:
                 "src/qtt/stage1_prediction_markets/pr169_qku_formula_exp1/**",
                 "tests/pr169_qku_formula_exp1/**",
                 "tools/build_pr169_qku_formula_exp1.py",
+                "tools/pr169_formula_owner_rows.py",
                 "tools/validate_pr169_qku_formula_exp1.py",
             ]
         )
