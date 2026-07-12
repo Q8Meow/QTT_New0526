@@ -45,6 +45,7 @@ PR169_PRETRADE1_BRANCH = "pr169-pretrade1"
 PR169_SVC1_BRANCH = "pr169-svc1"
 PR169_AGENT_ORCH1_BRANCH = "pr169-agent-orch1"
 PR169_VAL1_BRANCH = "pr169-val1"
+PR169_QKU_FORMULA_EXP1_ROLLBACK_BRANCH = "pr169-qku-formula-exp1-rollback"
 VALIDATION_FIXTURE_BRANCH = "pr-ci-fastfail-validation-context-preflight"
 
 _PR168_BRANCHES = frozenset(
@@ -88,6 +89,7 @@ _PR168_BRANCHES = frozenset(
         PR169_SVC1_BRANCH,
         PR169_AGENT_ORCH1_BRANCH,
         PR169_VAL1_BRANCH,
+        PR169_QKU_FORMULA_EXP1_ROLLBACK_BRANCH,
         VALIDATION_FIXTURE_BRANCH,
     }
 )
@@ -900,6 +902,48 @@ _PR169_VAL1_ALLOWED_EXACT_PATHS = frozenset(
 
 _PR169_VAL1_ALLOWED_PATTERNS: tuple[str, ...] = ()
 
+_PR169_QKU_FORMULA_EXP1_ROLLBACK_ALLOWED_EXACT_PATHS = frozenset(
+    {
+        "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+        "docs/master_plan/generated/pr169_qku_formula_exp1/acceptance.report.json",
+        "docs/master_plan/generated/pr169_qku_formula_exp1/bindings.jsonl",
+        "docs/master_plan/generated/pr169_qku_formula_exp1/family_j_receipts.jsonl",
+        "docs/master_plan/generated/pr169_qku_formula_exp1/integration.jsonl",
+        "docs/master_plan/generated/pr169_qku_formula_exp1/manifest.json",
+        "docs/master_plan/generated/pr169_qku_formula_exp1/objects.jsonl",
+        "docs/master_plan/generated/pr169_qku_formula_exp1/policy.json",
+        "docs/master_plan/generated/pr169_qku_formula_exp1/reading.jsonl",
+        "docs/master_plan/generated/pr169_qku_formula_exp1/requirements.jsonl",
+        "docs/master_plan/generated/pr169_qku_formula_exp1/sources.jsonl",
+        "docs/master_plan/generated/pr169_qku_formula_exp1/strategies.jsonl",
+        "docs/master_plan/generated/pr169_qku_formula_exp1/tool_manifest.jsonl",
+        "docs/master_plan/generated/pr169_qku_formula_exp1/validator_rules.jsonl",
+        "src/qtt/stage1_prediction_markets/pr169_qku_formula_exp1/__init__.py",
+        "src/qtt/stage1_prediction_markets/pr169_qku_formula_exp1/catalog.py",
+        "src/qtt/stage1_prediction_markets/pr169_qku_formula_exp1/family_j.py",
+        "src/qtt/stage1_prediction_markets/pr169_qku_formula_exp1/objects.py",
+        "src/qtt/stage1_prediction_markets/pr169_qku_formula_exp1/policy.py",
+        "src/qtt/stage1_prediction_markets/pr169_qku_formula_exp1/runtime.py",
+        "tests/fail_closed/test_run_validation_gates.py",
+        "tests/pr168_rp5b/test_deleted_manifest_matches_git_deletions.py",
+        "tests/pr168_rp5c/test_rp5c_input_integrity.py",
+        "tests/pr169_qku_formula_exp1/__init__.py",
+        "tests/pr169_qku_formula_exp1/test_contracts.py",
+        "tests/pr169_qku_formula_exp1/test_family_j.py",
+        "tests/pr169_qku_formula_exp1/test_runtime.py",
+        "tests/tools/test_validation_scope_registry.py",
+        "tools/build_pr169_qku_formula_exp1.py",
+        "tools/pr168_rp5b_validator.py",
+        "tools/pr168_rp5c_config.py",
+        "tools/run_validation_gates.py",
+        "tools/validate_pr169_qku_formula_exp1.py",
+        "tools/validation_inventory.py",
+        "tools/validation_scope_registry.py",
+    }
+)
+
+_PR169_QKU_FORMULA_EXP1_ROLLBACK_ALLOWED_PATTERNS: tuple[str, ...] = ()
+
 _FORBIDDEN_EXACT_PATHS = frozenset(
     {
         "docs/master_plan/QTT_MasterPlan_Current.md",
@@ -1582,6 +1626,32 @@ def _pr169_val1_scope_decision(branch_name: str, normalized: str) -> dict[str, o
     return None
 
 
+def _pr169_qku_formula_exp1_rollback_scope_decision(
+    branch_name: str,
+    normalized: str,
+) -> dict[str, object] | None:
+    if normalized in _PR169_QKU_FORMULA_EXP1_ROLLBACK_ALLOWED_EXACT_PATHS:
+        return {
+            "allowed": True,
+            "branch": branch_name,
+            "normalized_path": normalized,
+            "pr_id": "PR169-QKU-FORMULA-EXP1-ROLLBACK",
+            "matched_rule": f"exact:{normalized}",
+            "reason": "registered_exact_path",
+        }
+    for pattern in _PR169_QKU_FORMULA_EXP1_ROLLBACK_ALLOWED_PATTERNS:
+        if fnmatchcase(normalized, pattern):
+            return {
+                "allowed": True,
+                "branch": branch_name,
+                "normalized_path": normalized,
+                "pr_id": "PR169-QKU-FORMULA-EXP1-ROLLBACK",
+                "matched_rule": f"pattern:{pattern}",
+                "reason": "registered_pattern",
+            }
+    return None
+
+
 def _pr169_dash1_scope_decision(branch_name: str, normalized: str) -> dict[str, object] | None:
     if normalized in _PR169_DASH1_ALLOWED_EXACT_PATHS:
         return {
@@ -1975,6 +2045,22 @@ def explain_pr_scope_decision(branch: str, path: str) -> dict[str, object]:
             "normalized_path": normalized,
             "pr_id": "PR169-VAL1",
             "matched_rule": "no_pr169_val1_scope_rule",
+            "reason": "path_not_registered_for_pr_scope",
+        }
+
+    if branch_name == PR169_QKU_FORMULA_EXP1_ROLLBACK_BRANCH:
+        rollback_decision = _pr169_qku_formula_exp1_rollback_scope_decision(
+            branch_name,
+            normalized,
+        )
+        if rollback_decision:
+            return rollback_decision
+        return {
+            "allowed": False,
+            "branch": branch_name,
+            "normalized_path": normalized,
+            "pr_id": "PR169-QKU-FORMULA-EXP1-ROLLBACK",
+            "matched_rule": "no_pr169_qku_formula_exp1_rollback_scope_rule",
             "reason": "path_not_registered_for_pr_scope",
         }
 
