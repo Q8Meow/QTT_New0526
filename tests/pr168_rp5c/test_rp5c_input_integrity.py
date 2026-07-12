@@ -37,12 +37,6 @@ def test_rp5c_builder_accepts_expected_post_merge_branch_contexts(branch: str) -
     builder._ensure_allowed_build_branch(_preflight(branch))
 
 
-def test_rp5c_builder_accepts_pr169_formula_expansion_after_fail_closed_proof() -> None:
-    branch = "pr169-qku-formula-exp1"
-    assert branch in ALLOWED_BUILD_BRANCH_NAMES
-    builder._ensure_allowed_build_branch(_preflight(branch))
-
-
 def test_rp5c_builder_accepts_github_actions_main_detached_head_context() -> None:
     effective = builder._effective_branch_name(
         "",

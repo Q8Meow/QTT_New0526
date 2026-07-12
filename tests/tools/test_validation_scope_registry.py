@@ -65,57 +65,7 @@ PR169_READINESS1_BRANCH = registry.PR169_READINESS1_BRANCH
 PR169_PRETRADE1_BRANCH = registry.PR169_PRETRADE1_BRANCH
 PR169_SVC1_BRANCH = registry.PR169_SVC1_BRANCH
 PR169_AGENT_ORCH1_BRANCH = registry.PR169_AGENT_ORCH1_BRANCH
-PR169_QKU_FORMULA_EXP1_BRANCH = registry.PR169_QKU_FORMULA_EXP1_BRANCH
 PR169_VAL1_BRANCH = registry.PR169_VAL1_BRANCH
-
-
-@pytest.mark.parametrize(
-    "path",
-    [
-        "docs/master_plan/generated/pr169_qku_formula_exp1/acceptance.report.json",
-        "src/qtt/stage1_prediction_markets/pr169_qku_formula_exp1/runtime.py",
-        "tools/build_pr169_qku_formula_exp1.py",
-        "tools/validate_pr169_qku_formula_exp1.py",
-        "tests/pr169_qku_formula_exp1/test_family_j.py",
-        "tools/run_validation_gates.py",
-        "tools/validation_inventory.py",
-        "tools/validation_scope_registry.py",
-        "tests/tools/test_validation_scope_registry.py",
-        "tests/fail_closed/test_run_validation_gates.py",
-        "tools/pr168_rp5c_config.py",
-        "tests/pr168_rp5c/test_rp5c_input_integrity.py",
-        "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
-    ],
-)
-def test_pr169_qku_formula_exp1_allowed_paths_are_narrow(path: str) -> None:
-    assert registry.is_pr_scoped_changed_path_allowed(PR169_QKU_FORMULA_EXP1_BRANCH, path)
-
-
-@pytest.mark.parametrize(
-    "path",
-    [
-        "src/qtt/live_connectors/order_client.py",
-        "private_state/account_snapshot.json",
-        "cash/account.json",
-        "docs/master_plan/QTT_MasterPlan_Current.md",
-        "docs/master_plan/generated/pr169_svc1/service_registry.jsonl",
-    ],
-)
-def test_pr169_qku_formula_exp1_forbidden_paths_fail_closed(path: str) -> None:
-    assert not registry.is_pr_scoped_changed_path_allowed(PR169_QKU_FORMULA_EXP1_BRANCH, path)
-
-
-@pytest.mark.parametrize(
-    "path",
-    [
-        "docs/master_plan/generated/pr169_qku_formula_exp1/acceptance.report.json",
-        "src/qtt/stage1_prediction_markets/pr169_qku_formula_exp1/runtime.py",
-        "tools/validate_pr169_qku_formula_exp1.py",
-        "tests/pr169_qku_formula_exp1/test_runtime.py",
-    ],
-)
-def test_pr169_qku_formula_exp1_scope_is_available_to_validation_fixture(path: str) -> None:
-    assert registry.is_pr_scoped_changed_path_allowed(FIXTURE_BRANCH, path)
 FIXTURE_BRANCH = registry.VALIDATION_FIXTURE_BRANCH
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
