@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+from collections import Counter
 import subprocess
 from typing import Any
 
@@ -17,10 +18,25 @@ from tools.pr168_rp5b_config import (
     ZERO_DELETION_RESULT_NOTE,
     generated_ref,
     manifest_path_for_shard,
+    normalize_repo_path,
     report_path,
     shard_path,
 )
 from tools.pr168_rp5b_report_writer import read_json, read_jsonl
+
+
+def _deleted_files_from_git_output(args: list[str], output: str) -> set[str]:
+    deleted: set[str] = set()
+    for line in output.splitlines():
+        if not line:
+            continue
+        if args[1] == "diff" and line.startswith("D"):
+            parts = line.split(maxsplit=1)
+            if len(parts) == 2:
+                deleted.add(normalize_repo_path(parts[1]))
+        if args[1] == "status" and line[:2] in {" D", "D ", "DD"}:
+            deleted.add(normalize_repo_path(line[3:]))
+    return deleted
 
 
 def _git_deleted_files() -> set[str]:
@@ -40,17 +56,107 @@ def _git_deleted_files() -> set[str]:
         )
         if completed.returncode != 0:
             continue
-        for line in completed.stdout.splitlines():
-            line = line.strip()
-            if not line:
-                continue
-            if args[1] == "diff" and line.startswith("D"):
-                parts = line.split(maxsplit=1)
-                if len(parts) == 2:
-                    deleted.add(parts[1].replace("\\", "/"))
-            if args[1] == "status" and line[:2] in {" D", "D ", "DD"}:
-                deleted.add(line[3:].replace("\\", "/"))
+        deleted.update(_deleted_files_from_git_output(args, completed.stdout))
     return deleted
+
+
+def _deletion_failures(
+    candidate_rows: list[dict[str, Any]],
+    verification_rows: list[dict[str, Any]],
+    preservation_rows: list[dict[str, Any]],
+    deleted_rows: list[dict[str, Any]],
+    actual_deleted: set[str],
+) -> list[str]:
+    failures: list[str] = []
+    if len(candidate_rows) != len(verification_rows):
+        failures.append("CANDIDATE_VERIFICATION_COUNT_MISMATCH")
+
+    candidate_path_counts = Counter(
+        normalize_repo_path(str(row["file_path"])) for row in candidate_rows
+    )
+    verification_path_counts = Counter(
+        normalize_repo_path(str(row["file_path"])) for row in verification_rows
+    )
+    candidate_paths = set(candidate_path_counts)
+    verification_paths = set(verification_path_counts)
+    if candidate_paths != verification_paths:
+        failures.append(
+            "CANDIDATE_VERIFICATION_PATH_MISMATCH:"
+            f"candidate_only={sorted(candidate_paths - verification_paths)} "
+            f"verification_only={sorted(verification_paths - candidate_paths)}"
+        )
+    candidate_duplicates = sorted(
+        path for path, count in candidate_path_counts.items() if count != 1
+    )
+    verification_duplicates = sorted(
+        path for path, count in verification_path_counts.items() if count != 1
+    )
+    if candidate_duplicates:
+        failures.append(f"CANDIDATE_DUPLICATE_PATHS:{candidate_duplicates}")
+    if verification_duplicates:
+        failures.append(f"VERIFICATION_DUPLICATE_PATHS:{verification_duplicates}")
+    if candidate_path_counts != verification_path_counts:
+        failures.append(
+            "CANDIDATE_VERIFICATION_PATH_MULTIPLICITY_MISMATCH:"
+            f"candidate={sorted(candidate_path_counts.items())} "
+            f"verification={sorted(verification_path_counts.items())}"
+        )
+
+    for row in candidate_rows[:100]:
+        if row.get("rp5b_reverification_required_flag") is not True:
+            failures.append(f"CANDIDATE_REVERIFY_FLAG_FALSE:{row.get('file_path')}")
+
+    verification_by_file = {
+        normalize_repo_path(str(row["file_path"])): row for row in verification_rows
+    }
+    manifest_deleted = {
+        normalize_repo_path(str(row.get("file_path")))
+        for row in deleted_rows
+        if row.get("git_action") == "DELETE"
+    }
+    for row in verification_rows:
+        file_path = normalize_repo_path(str(row["file_path"]))
+        selected_for_deletion = (
+            row.get("final_action") in DELETE_ACTIONS or file_path in manifest_deleted
+        )
+        if (
+            row.get("rp5a_classification") in PROTECTED_CLASSIFICATIONS
+            and selected_for_deletion
+        ):
+            failures.append(f"PROTECTED_FILE_SELECTED_FOR_DELETE:{file_path}")
+        if selected_for_deletion and row.get(
+            "contains_unique_qku_formula_identity_now_flag"
+        ):
+            matching = [
+                preserve
+                for preserve in preservation_rows
+                if normalize_repo_path(str(preserve.get("source_file_path", ""))) == file_path
+            ]
+            if not matching:
+                failures.append(f"DELETED_IDENTITY_WITHOUT_PRESERVATION:{file_path}")
+        if selected_for_deletion and not row.get("safe_to_delete_now_flag"):
+            failures.append(f"DELETE_ACTION_WITHOUT_SAFE_FLAG:{file_path}")
+
+    governed_paths = candidate_paths | verification_paths
+    governed_actual_deleted = {
+        normalize_repo_path(path) for path in actual_deleted
+    } & governed_paths
+    if manifest_deleted != governed_actual_deleted:
+        failures.append(
+            "DELETED_MANIFEST_GIT_MISMATCH:"
+            f"manifest={sorted(manifest_deleted)} git={sorted(governed_actual_deleted)}"
+        )
+    for path in sorted(manifest_deleted):
+        source_row = verification_by_file.get(path, {})
+        if not source_row:
+            failures.append(f"DELETED_WITHOUT_VERIFICATION:{path}")
+            continue
+        if source_row.get("final_action") not in DELETE_ACTIONS:
+            failures.append(
+                f"DELETED_WITHOUT_DELETE_ACTION:{path}:"
+                f"{source_row.get('final_action')}"
+            )
+    return failures
 
 
 def _failures() -> list[str]:
@@ -101,30 +207,15 @@ def _failures() -> list[str]:
     final_summary = read_json(report_path("PR168_RP5B_FinalSummary.report.json"))
     no_raw_report = read_json(report_path("PR168_RP5B_NoRawLegacyDecisionAuthority.report.json"))
 
-    if len(candidate_rows) != len(verification_rows):
-        failures.append("CANDIDATE_VERIFICATION_COUNT_MISMATCH")
-    for row in candidate_rows[:100]:
-        if row.get("rp5b_reverification_required_flag") is not True:
-            failures.append(f"CANDIDATE_REVERIFY_FLAG_FALSE:{row.get('file_path')}")
-    verification_by_file = {row["file_path"]: row for row in verification_rows}
-    for row in verification_rows:
-        if row.get("rp5a_classification") in PROTECTED_CLASSIFICATIONS and row.get("final_action") in DELETE_ACTIONS:
-            failures.append(f"PROTECTED_FILE_SELECTED_FOR_DELETE:{row.get('file_path')}")
-        if row.get("final_action") in DELETE_ACTIONS and row.get("contains_unique_qku_formula_identity_now_flag"):
-            matching = [preserve for preserve in preservation_rows if preserve.get("source_file_path") == row.get("file_path")]
-            if not matching:
-                failures.append(f"DELETED_IDENTITY_WITHOUT_PRESERVATION:{row.get('file_path')}")
-        if row.get("final_action") in DELETE_ACTIONS and not row.get("safe_to_delete_now_flag"):
-            failures.append(f"DELETE_ACTION_WITHOUT_SAFE_FLAG:{row.get('file_path')}")
-
-    manifest_deleted = {row.get("file_path") for row in deleted_rows if row.get("git_action") == "DELETE"}
-    actual_deleted = _git_deleted_files()
-    if manifest_deleted != actual_deleted:
-        failures.append(f"DELETED_MANIFEST_GIT_MISMATCH:manifest={sorted(manifest_deleted)} git={sorted(actual_deleted)}")
-    for path in manifest_deleted:
-        source_row = verification_by_file.get(str(path), {})
-        if not source_row:
-            failures.append(f"DELETED_WITHOUT_VERIFICATION:{path}")
+    failures.extend(
+        _deletion_failures(
+            candidate_rows,
+            verification_rows,
+            preservation_rows,
+            deleted_rows,
+            _git_deleted_files(),
+        )
+    )
 
     if not keep_rows and verification_rows:
         failures.append("KEEP_REASON_LEDGER_EMPTY")

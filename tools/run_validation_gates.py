@@ -53,7 +53,7 @@ DETERMINISTIC_VALIDATOR_SHARD_PHASES = (
 DETERMINISTIC_VALIDATOR_SHARD_COMMAND_RANGES = {
     "deterministic-validators-a": (1, 64),
     "deterministic-validators-b": (65, 119),
-    "deterministic-validators-c": (120, 336),
+    "deterministic-validators-c": (120, 334),
 }
 PYTEST_SHARD_PHASES = (
     "pytest-shard-1",
@@ -672,12 +672,6 @@ PYTEST_SHARD_COMMANDS: dict[str, tuple[PytestShardCommand, ...]] = {
             reason="PR169-AGENT-ORCH1 deterministic agent orchestration contract tests",
             runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
             historical_runtime_seconds=5.0,
-        ),
-        PytestShardCommand(
-            paths=("tests/pr169_qku_formula_exp1",),
-            reason="PR169 executable formula/QKU expansion grouped tests",
-            runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
-            historical_runtime_seconds=2.0,
         ),
         PytestShardCommand(
             paths=("tests/pr169_dash1_ui1",),
@@ -3691,26 +3685,6 @@ def build_validation_commands(
             ".",
             "--artifact-dir",
             "docs/master_plan/generated/pr169_agent_orch1",
-            "--timeout-ms",
-            "3600000",
-        ],
-        [
-            sys.executable,
-            _path("tools", "build_pr169_qku_formula_exp1.py"),
-            "--repo-root",
-            ".",
-            "--out-dir",
-            str(validation_dir / "master_plan_generated" / "pr169_qku_formula_exp1"),
-            "--timeout-ms",
-            "3600000",
-        ],
-        [
-            sys.executable,
-            _path("tools", "validate_pr169_qku_formula_exp1.py"),
-            "--repo-root",
-            ".",
-            "--artifact-dir",
-            str(validation_dir / "master_plan_generated" / "pr169_qku_formula_exp1"),
             "--timeout-ms",
             "3600000",
         ],

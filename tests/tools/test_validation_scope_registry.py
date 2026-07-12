@@ -65,59 +65,56 @@ PR169_READINESS1_BRANCH = registry.PR169_READINESS1_BRANCH
 PR169_PRETRADE1_BRANCH = registry.PR169_PRETRADE1_BRANCH
 PR169_SVC1_BRANCH = registry.PR169_SVC1_BRANCH
 PR169_AGENT_ORCH1_BRANCH = registry.PR169_AGENT_ORCH1_BRANCH
-PR169_QKU_FORMULA_EXP1_BRANCH = registry.PR169_QKU_FORMULA_EXP1_BRANCH
 PR169_VAL1_BRANCH = registry.PR169_VAL1_BRANCH
-
-
-@pytest.mark.parametrize(
-    "path",
-    [
-        "docs/master_plan/generated/pr169_qku_formula_exp1/acceptance.report.json",
-        "src/qtt/stage1_prediction_markets/pr169_qku_formula_exp1/runtime.py",
-        "tools/build_pr169_qku_formula_exp1.py",
-        "tools/validate_pr169_qku_formula_exp1.py",
-        "tests/pr169_qku_formula_exp1/test_family_j.py",
-        "tools/run_validation_gates.py",
-        "tools/validation_inventory.py",
-        "tools/validation_scope_registry.py",
-        "tests/tools/test_validation_scope_registry.py",
-        "tests/fail_closed/test_run_validation_gates.py",
-        "tools/pr168_rp5c_config.py",
-        "tests/pr168_rp5c/test_rp5c_input_integrity.py",
-        "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
-    ],
-)
-def test_pr169_qku_formula_exp1_allowed_paths_are_narrow(path: str) -> None:
-    assert registry.is_pr_scoped_changed_path_allowed(PR169_QKU_FORMULA_EXP1_BRANCH, path)
-
-
-@pytest.mark.parametrize(
-    "path",
-    [
-        "src/qtt/live_connectors/order_client.py",
-        "private_state/account_snapshot.json",
-        "cash/account.json",
-        "docs/master_plan/QTT_MasterPlan_Current.md",
-        "docs/master_plan/generated/pr169_svc1/service_registry.jsonl",
-    ],
-)
-def test_pr169_qku_formula_exp1_forbidden_paths_fail_closed(path: str) -> None:
-    assert not registry.is_pr_scoped_changed_path_allowed(PR169_QKU_FORMULA_EXP1_BRANCH, path)
-
-
-@pytest.mark.parametrize(
-    "path",
-    [
-        "docs/master_plan/generated/pr169_qku_formula_exp1/acceptance.report.json",
-        "src/qtt/stage1_prediction_markets/pr169_qku_formula_exp1/runtime.py",
-        "tools/validate_pr169_qku_formula_exp1.py",
-        "tests/pr169_qku_formula_exp1/test_runtime.py",
-    ],
-)
-def test_pr169_qku_formula_exp1_scope_is_available_to_validation_fixture(path: str) -> None:
-    assert registry.is_pr_scoped_changed_path_allowed(FIXTURE_BRANCH, path)
+PR169_QKU_FORMULA_EXP1_ROLLBACK_BRANCH = registry.PR169_QKU_FORMULA_EXP1_ROLLBACK_BRANCH
 FIXTURE_BRANCH = registry.VALIDATION_FIXTURE_BRANCH
 REPO_ROOT = Path(__file__).resolve().parents[2]
+
+PR169_QKU_FORMULA_EXP1_PR272_PATHS = (
+    "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+    "docs/master_plan/generated/pr169_qku_formula_exp1/acceptance.report.json",
+    "docs/master_plan/generated/pr169_qku_formula_exp1/bindings.jsonl",
+    "docs/master_plan/generated/pr169_qku_formula_exp1/family_j_receipts.jsonl",
+    "docs/master_plan/generated/pr169_qku_formula_exp1/integration.jsonl",
+    "docs/master_plan/generated/pr169_qku_formula_exp1/manifest.json",
+    "docs/master_plan/generated/pr169_qku_formula_exp1/objects.jsonl",
+    "docs/master_plan/generated/pr169_qku_formula_exp1/policy.json",
+    "docs/master_plan/generated/pr169_qku_formula_exp1/reading.jsonl",
+    "docs/master_plan/generated/pr169_qku_formula_exp1/requirements.jsonl",
+    "docs/master_plan/generated/pr169_qku_formula_exp1/sources.jsonl",
+    "docs/master_plan/generated/pr169_qku_formula_exp1/strategies.jsonl",
+    "docs/master_plan/generated/pr169_qku_formula_exp1/tool_manifest.jsonl",
+    "docs/master_plan/generated/pr169_qku_formula_exp1/validator_rules.jsonl",
+    "src/qtt/stage1_prediction_markets/pr169_qku_formula_exp1/__init__.py",
+    "src/qtt/stage1_prediction_markets/pr169_qku_formula_exp1/catalog.py",
+    "src/qtt/stage1_prediction_markets/pr169_qku_formula_exp1/family_j.py",
+    "src/qtt/stage1_prediction_markets/pr169_qku_formula_exp1/objects.py",
+    "src/qtt/stage1_prediction_markets/pr169_qku_formula_exp1/policy.py",
+    "src/qtt/stage1_prediction_markets/pr169_qku_formula_exp1/runtime.py",
+    "tests/fail_closed/test_run_validation_gates.py",
+    "tests/pr168_rp5c/test_rp5c_input_integrity.py",
+    "tests/pr169_qku_formula_exp1/__init__.py",
+    "tests/pr169_qku_formula_exp1/test_contracts.py",
+    "tests/pr169_qku_formula_exp1/test_family_j.py",
+    "tests/pr169_qku_formula_exp1/test_runtime.py",
+    "tests/tools/test_validation_scope_registry.py",
+    "tools/build_pr169_qku_formula_exp1.py",
+    "tools/pr168_rp5c_config.py",
+    "tools/run_validation_gates.py",
+    "tools/validate_pr169_qku_formula_exp1.py",
+    "tools/validation_inventory.py",
+    "tools/validation_scope_registry.py",
+)
+
+PR169_QKU_FORMULA_EXP1_ROLLBACK_CORRECTION_PATHS = (
+    "tools/pr168_rp5b_validator.py",
+    "tests/pr168_rp5b/test_deleted_manifest_matches_git_deletions.py",
+)
+
+PR169_QKU_FORMULA_EXP1_ROLLBACK_ALLOWED_PATHS = (
+    *PR169_QKU_FORMULA_EXP1_PR272_PATHS,
+    *PR169_QKU_FORMULA_EXP1_ROLLBACK_CORRECTION_PATHS,
+)
 
 
 @pytest.mark.parametrize(
@@ -140,6 +137,91 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 )
 def test_pr168_allowed_paths_pass_on_real_branch(path: str) -> None:
     assert registry.is_pr_scoped_changed_path_allowed(PR168_BRANCH, path)
+
+
+def test_pr169_qku_formula_exp1_rollback_scope_is_exactly_owned_universe() -> None:
+    assert len(PR169_QKU_FORMULA_EXP1_PR272_PATHS) == 33
+    assert registry._PR169_QKU_FORMULA_EXP1_ROLLBACK_ALLOWED_PATTERNS == ()
+    assert registry._PR169_QKU_FORMULA_EXP1_ROLLBACK_ALLOWED_EXACT_PATHS == frozenset(
+        PR169_QKU_FORMULA_EXP1_ROLLBACK_ALLOWED_PATHS
+    )
+
+
+@pytest.mark.parametrize("path", PR169_QKU_FORMULA_EXP1_ROLLBACK_ALLOWED_PATHS)
+def test_pr169_qku_formula_exp1_rollback_owned_paths_are_allowed(path: str) -> None:
+    decision = registry.explain_pr_scope_decision(
+        PR169_QKU_FORMULA_EXP1_ROLLBACK_BRANCH,
+        path,
+    )
+    assert decision["allowed"] is True
+    assert decision["pr_id"] == "PR169-QKU-FORMULA-EXP1-ROLLBACK"
+    assert decision["matched_rule"] == f"exact:{path}"
+
+
+@pytest.mark.parametrize("path", PR169_QKU_FORMULA_EXP1_ROLLBACK_ALLOWED_PATHS)
+def test_pr169_qku_formula_exp1_rollback_paths_are_denied_on_other_branches(path: str) -> None:
+    for branch in ("feature/unrelated", "pr169-qku-formula-exp1"):
+        assert not registry.is_pr_scoped_changed_path_allowed(branch, path)
+
+
+def test_pr169_qku_formula_exp1_rollback_specific_path_is_not_exposed_to_fixture_branch() -> None:
+    assert not registry.is_pr_scoped_changed_path_allowed(
+        FIXTURE_BRANCH,
+        "src/qtt/stage1_prediction_markets/pr169_qku_formula_exp1/runtime.py",
+    )
+
+
+@pytest.mark.parametrize("path", PR169_QKU_FORMULA_EXP1_ROLLBACK_ALLOWED_PATHS)
+def test_pr169_qku_formula_exp1_rollback_windows_and_posix_paths_match(path: str) -> None:
+    windows_path = ".\\" + path.replace("/", "\\")
+    assert registry.normalize_changed_path(windows_path) == path
+    assert registry.is_pr_scoped_changed_path_allowed(
+        PR169_QKU_FORMULA_EXP1_ROLLBACK_BRANCH,
+        windows_path,
+    )
+    assert registry.is_pr_scoped_changed_path_allowed(
+        PR169_QKU_FORMULA_EXP1_ROLLBACK_BRANCH,
+        path,
+    )
+
+
+@pytest.mark.parametrize(
+    "branch",
+    [
+        "PR169-QKU-FORMULA-EXP1-ROLLBACK",
+        "xpr169-qku-formula-exp1-rollback",
+        "pr169-qku-formula-exp1-rollback-repair",
+        "pr169-qku-formula-exp1-rollback/child",
+    ],
+)
+def test_pr169_qku_formula_exp1_rollback_requires_exact_branch_identity(branch: str) -> None:
+    assert not registry.is_pr_scoped_changed_path_allowed(
+        branch,
+        PR169_QKU_FORMULA_EXP1_PR272_PATHS[0],
+    )
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        "docs/master_plan/generated/pr169_qku_formula_exp1/future.report.json",
+        "docs/master_plan/generated/pr169_qku_formula_exp1/nested/future.report.json",
+        "src/qtt/stage1_prediction_markets/pr169_qku_formula_exp1/future.py",
+        "tests/pr169_qku_formula_exp1/test_future.py",
+        "tools/validate_pr169_qku_formula_exp1_extra.py",
+        "docs/master_plan/generated/OtherGeneratedReport.report.json",
+        "src/qtt/stage1_prediction_markets/other_feature/report.py",
+        "tests/random/test_other.py",
+        "tools/random_tool.py",
+        "docs/master_plan/QTT_MasterPlan_Current.md",
+        "../docs/master_plan/generated/pr169_qku_formula_exp1/acceptance.report.json",
+    ],
+)
+def test_pr169_qku_formula_exp1_rollback_rejects_prefix_and_unrelated_leakage(path: str) -> None:
+    assert not registry.is_pr_scoped_changed_path_allowed(
+        PR169_QKU_FORMULA_EXP1_ROLLBACK_BRANCH,
+        path,
+    )
 
 
 @pytest.mark.parametrize(
