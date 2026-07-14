@@ -11,8 +11,8 @@ from typing import Any, Mapping
 
 import pytest
 
-from qtt.computation_control import QKUComputationControlPlaneV1
-from qtt.computation_control.control import (
+from src.qtt.computation_control import QKUComputationControlPlaneV1
+from src.qtt.computation_control.control import (
     REGISTRY_FILE,
     REGISTRY_MANIFEST,
     ComputationControlError,
@@ -25,7 +25,7 @@ from qtt.computation_control.control import (
     _validate_record_shape,
     _write_registry_layout,
 )
-from qtt.computation_control.models import ExpansionBatchV1
+from src.qtt.computation_control.models import ExpansionBatchV1
 
 
 def _requirement(target: str, producer: str, consumer: str, role: str) -> dict[str, Any]:
@@ -304,7 +304,7 @@ def _context() -> dict[str, Any]:
 
 
 def test_package_exports_one_runtime_object() -> None:
-    package = importlib.import_module("qtt.computation_control")
+    package = importlib.import_module("src.qtt.computation_control")
     assert package.__all__ == ["QKUComputationControlPlaneV1"]
 
 
@@ -2368,7 +2368,7 @@ def test_single_and_sharded_merge_base_registry_materialization(
     assert [row["canonical_component_id"] for row in builder_records] == [
         "QTT.COMP.TEST.ACCEPTED_BASE"
     ]
-    control_module = importlib.import_module("qtt.computation_control.control")
+    control_module = importlib.import_module("src.qtt.computation_control.control")
     validator_records = validator._load_accepted_base_records(
         control_module, repo_root, validator.Deadline(10_000)
     )
@@ -2450,7 +2450,7 @@ def test_invalid_merge_base_physical_layout_fails_closed(
         builder._read_accepted_registry_from_base(
             repo_root, builder._Deadline(10_000)
         )
-    control_module = importlib.import_module("qtt.computation_control.control")
+    control_module = importlib.import_module("src.qtt.computation_control.control")
     with pytest.raises(validator.InvariantError, match="ACCEPTED_BASE"):
         validator._load_accepted_base_records(
             control_module, repo_root, validator.Deadline(10_000)
