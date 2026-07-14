@@ -145,6 +145,39 @@ def test_pr169_svc1_shared_ci_repair_paths_map_to_svc1_validators():
         assert path not in result.unknown_files
 
 
+def test_pr169_qku_comp_control1_core_routes_control_and_four_generic_owner_pairs():
+    result = _pull_request_result("src/qtt/computation_control/control.py")
+
+    expected = {
+        "build_pr169_qku_comp_control1",
+        "validate_pr169_qku_comp_control1",
+        "build_pr169_readiness1",
+        "validate_pr169_readiness1",
+        "build_pr169_pretrade1",
+        "validate_pr169_pretrade1",
+        "build_pr169_svc1",
+        "validate_pr169_svc1",
+        "build_pr169_agent_orch1",
+        "validate_pr169_agent_orch1",
+    }
+    assert expected.issubset(set(result.required_validators))
+    assert result.fail_closed_reasons == ()
+    assert result.unknown_files == ()
+
+
+def test_pr169_qku_comp_control1_generated_layout_has_exact_owner():
+    result = _pull_request_result(
+        "docs/master_plan/generated/pr169_qku_comp_control1/registry.manifest.json",
+        "docs/master_plan/generated/pr169_qku_comp_control1/registry.part-rp5c-00000000-00024999.jsonl",
+        "docs/master_plan/generated/pr169_qku_comp_control1/acceptance.report.json",
+    )
+
+    assert "build_pr169_qku_comp_control1" in result.required_validators
+    assert "validate_pr169_qku_comp_control1" in result.required_validators
+    assert result.fail_closed_reasons == ()
+    assert result.unknown_files == ()
+
+
 def test_pr168_rp5d_r1_generated_output_routes_only_to_rp5d_r1_owner():
     result = _pull_request_result(
         "docs/master_plan/generated/pr168_rp5d_r1/agent_consume.jsonl"

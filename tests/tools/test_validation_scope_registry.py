@@ -67,6 +67,7 @@ PR169_SVC1_BRANCH = registry.PR169_SVC1_BRANCH
 PR169_AGENT_ORCH1_BRANCH = registry.PR169_AGENT_ORCH1_BRANCH
 PR169_VAL1_BRANCH = registry.PR169_VAL1_BRANCH
 PR169_QKU_FORMULA_EXP1_ROLLBACK_BRANCH = registry.PR169_QKU_FORMULA_EXP1_ROLLBACK_BRANCH
+PR169_QKU_COMP_CONTROL1_BRANCH = registry.PR169_QKU_COMP_CONTROL1_BRANCH
 FIXTURE_BRANCH = registry.VALIDATION_FIXTURE_BRANCH
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
@@ -145,6 +146,70 @@ def test_pr169_qku_formula_exp1_rollback_scope_is_exactly_owned_universe() -> No
     assert registry._PR169_QKU_FORMULA_EXP1_ROLLBACK_ALLOWED_EXACT_PATHS == frozenset(
         PR169_QKU_FORMULA_EXP1_ROLLBACK_ALLOWED_PATHS
     )
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        "src/qtt/computation_control/__init__.py",
+        "src/qtt/computation_control/models.py",
+        "src/qtt/computation_control/control.py",
+        "tools/build_pr169_qku_comp_control1.py",
+        "tools/validate_pr169_qku_comp_control1.py",
+        "tools/pr168_rp5c_config.py",
+        "tests/pr168_rp5c/test_rp5c_input_integrity.py",
+        "tests/pr169_qku_comp_control1/test_control1.py",
+        "docs/master_plan/generated/pr169_qku_comp_control1/registry.jsonl",
+        "docs/master_plan/generated/pr169_qku_comp_control1/registry.manifest.json",
+        "docs/master_plan/generated/pr169_qku_comp_control1/registry.part-rp5c-00000000-00024999.jsonl",
+        "docs/master_plan/generated/pr169_qku_comp_control1/acceptance.report.json",
+        "src/qtt/readiness/pr169_readiness1_resolvers.py",
+        "src/qtt/pretrade/pr169_pretrade1_resolvers.py",
+        "src/qtt/agents/pr169_agent_orch1_resolvers.py",
+        "src/qtt/service/pr169_svc1_resolvers.py",
+        "tools/run_validation_gates.py",
+        "tools/validation_inventory.py",
+        "tools/validation_scope_registry.py",
+        "tests/fail_closed/test_run_validation_gates.py",
+        "tests/tools/test_validation_inventory.py",
+        "tests/tools/test_validation_scope_registry.py",
+        "tests/tools/test_changed_area_validation_router.py",
+        "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+    ],
+)
+def test_pr169_qku_comp_control1_owned_paths_are_allowed(path: str) -> None:
+    decision = registry.explain_pr_scope_decision(PR169_QKU_COMP_CONTROL1_BRANCH, path)
+    assert decision["allowed"] is True
+    assert decision["pr_id"] == "PR169-QKU-COMP-CONTROL1"
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        "docs/master_plan/QTT_MasterPlan_Current.md",
+        ".codex_inputs/QTT_MasterPlan_Current.md",
+        "src/qtt/live_connectors/order_client.py",
+        "private_state/account_snapshot.json",
+        "cash/account.json",
+        ".github/workflows/qtt_validation.yml",
+        "src/qtt/stage1_prediction_markets/pr169_qku_formula_exp1/runtime.py",
+        "docs/master_plan/generated/pr169_qku_formula_exp1/requirements.jsonl",
+        "docs/master_plan/generated/pr169_qku_comp_control1_repair/registry.jsonl",
+    ],
+)
+def test_pr169_qku_comp_control1_forbidden_and_out_of_scope_paths_fail(path: str) -> None:
+    assert not registry.is_pr_scoped_changed_path_allowed(PR169_QKU_COMP_CONTROL1_BRANCH, path)
+
+
+def test_pr169_qku_comp_control1_requires_exact_branch_identity() -> None:
+    owned = "src/qtt/computation_control/control.py"
+    for branch in (
+        "PR169-QKU-COMP-CONTROL1",
+        "pr169-qku-comp-control1-repair",
+        "pr169-qku-comp-control1/child",
+        "xpr169-qku-comp-control1",
+    ):
+        assert not registry.is_pr_scoped_changed_path_allowed(branch, owned)
 
 
 @pytest.mark.parametrize("path", PR169_QKU_FORMULA_EXP1_ROLLBACK_ALLOWED_PATHS)

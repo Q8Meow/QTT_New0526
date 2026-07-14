@@ -6,6 +6,7 @@ from tools import build_pr168_rp5c_immutable_qku_formula_library as builder
 from tools.pr168_rp5c_config import (
     ALLOWED_BUILD_BRANCH_NAMES,
     BRANCH_NAME,
+    PR169_QKU_COMP_CONTROL1_VALIDATION_BRANCH_NAME,
     PR169_QKU_FORMULA_EXP1_ROLLBACK_VALIDATION_BRANCH_NAME,
 )
 
@@ -54,6 +55,19 @@ def test_rp5c_builder_accepts_exact_pr169_rollback_pull_request_context() -> Non
     builder._ensure_allowed_build_branch(_preflight(effective))
 
 
+def test_rp5c_builder_accepts_exact_pr169_qku_comp_control1_context() -> None:
+    branch = PR169_QKU_COMP_CONTROL1_VALIDATION_BRANCH_NAME
+    effective = builder._effective_branch_name(
+        "",
+        branch,
+        "275/merge",
+        github_actions=True,
+    )
+
+    assert effective == branch
+    builder._ensure_allowed_build_branch(_preflight(effective))
+
+
 @pytest.mark.parametrize(
     "branch",
     [
@@ -61,9 +75,13 @@ def test_rp5c_builder_accepts_exact_pr169_rollback_pull_request_context() -> Non
         "xpr169-qku-formula-exp1-rollback",
         "pr169-qku-formula-exp1-rollback-repair",
         "pr169-qku-formula-exp1",
+        "PR169-QKU-COMP-CONTROL1",
+        "xpr169-qku-comp-control1",
+        "pr169-qku-comp-control1-repair",
+        "pr169-qku-comp-control",
     ],
 )
-def test_rp5c_builder_rejects_pr169_rollback_branch_variants(branch: str) -> None:
+def test_rp5c_builder_rejects_pr169_validation_branch_variants(branch: str) -> None:
     with pytest.raises(RuntimeError, match=BRANCH_NAME):
         builder._ensure_allowed_build_branch(_preflight(branch))
 

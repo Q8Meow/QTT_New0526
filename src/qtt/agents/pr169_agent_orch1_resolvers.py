@@ -1,9 +1,15 @@
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass
 import json
 from pathlib import Path
 from typing import Any, Iterable
+
+try:
+    from qtt.computation_control import QKUComputationControlPlaneV1
+except ModuleNotFoundError:  # repository-root ``src.qtt`` test/import mode
+    from src.qtt.computation_control import QKUComputationControlPlaneV1
 
 
 GENERATED_PREFIX = Path("docs/master_plan/generated/pr169_agent_orch1")
@@ -215,6 +221,84 @@ class AgentPaperPrepTaskV1:
 @dataclass(frozen=True)
 class AgentHotpathPrepTaskV1:
     row: dict[str, Any]
+
+
+@dataclass(frozen=True)
+class AgentComputationCapabilityV1:
+    """Formula-agnostic capability envelope understood by the orchestration layer."""
+
+    operation: str
+    selector: str | Mapping[str, Any]
+    context: Mapping[str, Any]
+    input_contract: Mapping[str, Any]
+    policy: Mapping[str, Any]
+
+    @classmethod
+    def from_mapping(cls, value: Mapping[str, Any]) -> "AgentComputationCapabilityV1":
+        if not isinstance(value, Mapping):
+            raise TypeError("capability must be an AgentComputationCapabilityV1 or Mapping")
+        operation = str(value.get("operation", "")).lower()
+        selector = value.get("selector")
+        if not operation or not isinstance(selector, (str, Mapping)):
+            raise ValueError("capability requires operation and selector")
+        context = value.get("context") or {}
+        input_contract = value.get("input_contract") or {}
+        policy = value.get("policy") or {}
+        for name, payload in (
+            ("context", context),
+            ("input_contract", input_contract),
+            ("policy", policy),
+        ):
+            if not isinstance(payload, Mapping):
+                raise TypeError(f"capability {name} must be a Mapping")
+        return cls(
+            operation=operation,
+            selector=dict(selector) if isinstance(selector, Mapping) else selector,
+            context=dict(context),
+            input_contract=dict(input_contract),
+            policy=dict(policy),
+        )
+
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "operation": self.operation,
+            "selector": dict(self.selector) if isinstance(self.selector, Mapping) else self.selector,
+            "context": dict(self.context),
+            "input_contract": dict(self.input_contract),
+            "policy": dict(self.policy),
+        }
+
+
+def invoke_computation_capability(
+    control_plane: QKUComputationControlPlaneV1,
+    capability: AgentComputationCapabilityV1 | Mapping[str, Any],
+    *,
+    agent_id: str | None = None,
+) -> Any:
+    """Invoke an immutable generic capability through the one public object."""
+
+    request = (
+        capability
+        if isinstance(capability, AgentComputationCapabilityV1)
+        else AgentComputationCapabilityV1.from_mapping(capability)
+    )
+    operation = request.operation.lower()
+    if operation == "resolve":
+        return control_plane.resolve(request.selector, request.context, agent_id=agent_id)
+    if operation == "compute":
+        return control_plane.compute(
+            request.selector,
+            request.input_contract,
+            request.context,
+            agent_id=agent_id,
+            consumer=str(request.policy.get("consumer", "UNSPECIFIED")),
+            mode=str(request.policy.get("mode", "STATIC_VALIDATION")),
+        )
+    if operation == "status":
+        return control_plane.status(request.selector, request.context, agent_id=agent_id)
+    if operation == "explain":
+        return control_plane.explain(request.selector, request.context, agent_id=agent_id)
+    raise ValueError(f"unsupported computation capability operation: {request.operation}")
 
 
 class AgentOrchService:

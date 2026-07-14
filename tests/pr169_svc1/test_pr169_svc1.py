@@ -178,3 +178,70 @@ def test_pr169_svc1_resolver_contracts():
     parsed = api.parse_owner_plain_english_intent_preview("Why did no-trade win here?")
     assert parsed["intent_class"] == "NO_TRADE_EXPLANATION_REQUEST"
     assert parsed["parser_runtime"] == "DETERMINISTIC_ROUTE_PREVIEW_NO_LLM_CALL"
+
+
+class _FakeDTO:
+    def __init__(self, payload: dict) -> None:
+        self.payload = payload
+
+    def as_dict(self) -> dict:
+        return dict(self.payload)
+
+
+class _FakeComputationControlPlane:
+    def __init__(self) -> None:
+        self.calls: list[tuple] = []
+
+    @property
+    def registry(self):
+        raise AssertionError("the service view must not inspect registry internals")
+
+    @property
+    def physical_layout(self):
+        raise AssertionError("the service view must not inspect physical storage")
+
+    def resolve(self, selector, context=None, *, agent_id=None):
+        self.calls.append(("resolve", selector, context, agent_id))
+        return _FakeDTO({"component_id": selector["component_id"], "kind": selector["kind"]})
+
+    def status(self, selector, context=None, *, agent_id=None):
+        self.calls.append(("status", selector, context, agent_id))
+        return {"component_id": selector["component_id"], "state": "AVAILABLE"}
+
+    def explain(self, receipt_or_selector, context=None, *, agent_id=None):
+        self.calls.append(("explain", receipt_or_selector, context, agent_id))
+        return {"component_id": receipt_or_selector["component_id"], "reason": "READY"}
+
+
+class _DashboardComputationConsumer:
+    def __init__(self, service_api: resolvers.OwnerDashboardAPI) -> None:
+        self._service_api = service_api
+
+    def render(self, selector: dict, context: dict) -> dict:
+        return {
+            "search": self._service_api.search_computation(selector, context),
+            "status": self._service_api.computation_status(selector, context),
+            "explain": self._service_api.explain_computation(selector, context),
+        }
+
+
+def test_dashboard_consumes_svc_computation_view_with_future_selector_and_no_layout_knowledge():
+    fake = _FakeComputationControlPlane()
+    service_api = resolvers.OwnerDashboardAPI(
+        ARTIFACT_DIR,
+        computation_control=fake,
+    )
+    dashboard = _DashboardComputationConsumer(service_api)
+    selector = {"component_id": "FUTURE_COMPONENT_9300", "kind": "NEW_KIND"}
+    context = {"market_family": "future-market-family"}
+
+    rendered = dashboard.render(selector, context)
+
+    assert rendered["search"]["component_id"] == "FUTURE_COMPONENT_9300"
+    assert rendered["status"]["state"] == "AVAILABLE"
+    assert rendered["explain"]["reason"] == "READY"
+    assert [call[0] for call in fake.calls] == ["resolve", "status", "explain"]
+    serialized = json.dumps(rendered, sort_keys=True).lower()
+    assert "registry" not in serialized
+    assert "file" not in serialized
+    assert "layout" not in serialized

@@ -1,0 +1,639 @@
+{
+  "acceptance_diagnostics": {
+    "canonical_persistent_record_type_count": 1,
+    "connector_private_state_call_count": 0,
+    "embedded_bulk_evidence_payload_count": 0,
+    "live_execution_count": 0,
+    "logical_decision_computation_registry_count": 1,
+    "order_release_count": 0,
+    "paper_execution_count": 0,
+    "parallel_formula_library_count": 0,
+    "persisted_fixture_vector_count": 0,
+    "persistent_dag_registry_count": 0,
+    "persistent_duplicate_equivalence_registry_count": 0,
+    "persistent_registry_update_event_log_count": 0,
+    "profit_or_quantum_advantage_claim_count": 0,
+    "public_control_plane_facade_count_created_by_builder": 0,
+    "replay_execution_count": 0,
+    "runtime_direct_historical_library_access_count": 0,
+    "shadow_execution_count": 0
+  },
+  "builder": "tools/build_pr169_qku_comp_control1.py",
+  "builder_authored_overall_pass": false,
+  "counts": {
+    "base_registry_rows_loaded": 0,
+    "canonical_requirement_count": 3,
+    "decision_role_counts": {
+      "EXECUTABLE_ENTRY_ECONOMICS": 12,
+      "EXECUTABLE_EXIT_OR_SETTLEMENT": 33,
+      "EXPECTED_NET_CASH": 33,
+      "INTERNAL_SUPPORT": 10217,
+      "LIQUIDITY_FILL_CAPACITY_AND_ADVERSE_SELECTION": 38,
+      "NO_TRADE_OR_ALTERNATIVE_CAPITAL_USE": 30,
+      "PORTFOLIO_EVENT_VENUE_EXPOSURE": 40,
+      "PROBABILITY_FAIR_VALUE_UNCERTAINTY": 15,
+      "QUANTUM_MAPPING_OR_COMPARATOR": 83,
+      "RESEARCH_EVIDENCE_AND_MODEL_VALIDATION": 121,
+      "TCA_ACCOUNTING_AND_RECONCILIATION": 29
+    },
+    "exact_action_class_counts": {
+      "MISSING_IMPLEMENTATION": 2,
+      "MISSING_INDEPENDENT_ORACLE": 86,
+      "MISSING_INPUT_BINDING": 1,
+      "MISSING_ORIGINAL_ECONOMIC_MODEL_SPECIFICATION": 9,
+      "MISSING_QUANTUM_ORIGINAL_MODEL_LOCAL_PARITY": 9,
+      "MISSING_SEMANTIC_SPECIFICATION": 10402
+    },
+    "logical_registry_rows": 10513,
+    "origin_cohort_counts": {
+      "OWNER_REQUIREMENT_213": 213,
+      "POST_LAUNCH_EXPANSION_BATCH": 14,
+      "PR162D_IMPLEMENTATION_BACKED": 100,
+      "PR162E_Q_QUANTUM_MAPPING": 18,
+      "RP5C_BASELINE": 10189
+    },
+    "qku_role_binding_count": 9791,
+    "record_state_counts": {
+      "CANONICAL_ACCEPTED": 100,
+      "DORMANT_PRESERVED": 10089,
+      "PROVISIONAL": 324
+    }
+  },
+  "expansion_batches": [
+    {
+      "batch_id": "EXPANSION.RP5C.BASELINE",
+      "batch_origin": "RP5C_BASELINE",
+      "item_count": 10189,
+      "promotion_ceiling": "NOT_ELIGIBLE",
+      "source_classification": "OWNER_SUBMITTED",
+      "source_refs": [
+        "docs/master_plan/generated/rp5c/identity_deduplication_ledger.jsonl",
+        "docs/master_plan/generated/rp5c/immutable_formula_library.jsonl",
+        "docs/master_plan/generated/rp5c/immutable_qku_formula_library.jsonl",
+        "docs/master_plan/generated/rp5c/immutable_qku_library.jsonl",
+        "docs/master_plan/generated/rp5c/qku_formula_identity_lineage.jsonl"
+      ]
+    },
+    {
+      "batch_id": "EXPANSION.PR162D.EXPLICIT_IMPLEMENTATIONS",
+      "batch_origin": "PR162D_IMPLEMENTATION_BACKED",
+      "item_count": 100,
+      "promotion_ceiling": "STACK_READY",
+      "source_classification": "OWNER_SUBMITTED",
+      "source_refs": [
+        "src/qtt/stage1_prediction_markets/pr162d_r2a_real_formulations/algorithm_seed_library.py",
+        "src/qtt/stage1_prediction_markets/pr162d_r2a_real_formulations/formula_seed_library.py",
+        "src/qtt/stage1_prediction_markets/pr162d_r2a_real_formulations/quantum_seed_library.py"
+      ]
+    },
+    {
+      "batch_id": "EXPANSION.CONTROL1.SYNTHETIC.PROOF",
+      "batch_origin": "POST_LAUNCH_EXPANSION_BATCH",
+      "item_count": 18,
+      "promotion_ceiling": "STACK_READY",
+      "source_classification": "OWNER_SUBMITTED",
+      "source_refs": [
+        "src/qtt/stage1_prediction_markets/pr162d_r2a_real_formulations/quantum_seed_library.py",
+        "tests/pr169_qku_comp_control1/test_control1.py",
+        "tools/validate_pr169_qku_comp_control1.py"
+      ]
+    },
+    {
+      "batch_id": "EXPANSION.OWNER_REQUIREMENT.213",
+      "batch_origin": "OWNER_REQUIREMENT_213",
+      "item_count": 213,
+      "promotion_ceiling": "SPECIFIED",
+      "source_classification": "OWNER_SUBMITTED",
+      "source_refs": [
+        "OWNER_CONTROLLING_PROMPT_PR169_QKU_COMP_CONTROL1_V5_1#section-12",
+        "OWNER_PROVIDED_MASTER_PLAN_CURRENT#owner-requirement-doctrine",
+        "OWNER_SUPPLIED_213_REQUIREMENT_INVENTORY"
+      ]
+    }
+  ],
+  "expansion_compiler": {
+    "batch_summaries": [
+      {
+        "all_pairs_proof_attempted": false,
+        "batch_id": "EXPANSION.RP5C.BASELINE",
+        "bounded_candidate_bucket_count": 0,
+        "delta_counts": {
+          "added_binding_ids": 100,
+          "added_component_ids": 10189,
+          "affected_consumer_classes": 2,
+          "affected_dependent_ids": 0,
+          "changed_binding_ids": 0,
+          "changed_component_ids": 0,
+          "removed_binding_ids": 0,
+          "retired_component_ids": 0
+        },
+        "items_read": 10189,
+        "outcome_decision_counts": {
+          "DISTINCT": 10189
+        }
+      },
+      {
+        "all_pairs_proof_attempted": false,
+        "batch_id": "EXPANSION.PR162D.EXPLICIT_IMPLEMENTATIONS",
+        "bounded_candidate_bucket_count": 99,
+        "delta_counts": {
+          "added_binding_ids": 100,
+          "added_component_ids": 100,
+          "affected_consumer_classes": 2,
+          "affected_dependent_ids": 0,
+          "changed_binding_ids": 0,
+          "changed_component_ids": 0,
+          "removed_binding_ids": 0,
+          "retired_component_ids": 0
+        },
+        "items_read": 100,
+        "outcome_decision_counts": {
+          "DISTINCT": 100
+        }
+      },
+      {
+        "all_pairs_proof_attempted": false,
+        "batch_id": "EXPANSION.CONTROL1.SYNTHETIC.PROOF",
+        "bounded_candidate_bucket_count": 99,
+        "delta_counts": {
+          "added_binding_ids": 12,
+          "added_component_ids": 11,
+          "affected_consumer_classes": 2,
+          "affected_dependent_ids": 1,
+          "changed_binding_ids": 0,
+          "changed_component_ids": 3,
+          "removed_binding_ids": 0,
+          "retired_component_ids": 0
+        },
+        "items_read": 18,
+        "outcome_decision_counts": {
+          "DISTINCT": 11,
+          "EXISTING_ID_UPDATE": 5,
+          "FAMILY_COMPATIBLE_REUSED": 1,
+          "REUSED": 1
+        }
+      },
+      {
+        "all_pairs_proof_attempted": false,
+        "batch_id": "EXPANSION.OWNER_REQUIREMENT.213",
+        "bounded_candidate_bucket_count": 99,
+        "delta_counts": {
+          "added_binding_ids": 213,
+          "added_component_ids": 213,
+          "affected_consumer_classes": 2,
+          "affected_dependent_ids": 0,
+          "changed_binding_ids": 0,
+          "changed_component_ids": 0,
+          "removed_binding_ids": 0,
+          "retired_component_ids": 0
+        },
+        "items_read": 213,
+        "outcome_decision_counts": {
+          "DISTINCT": 213
+        }
+      }
+    ],
+    "continuing_intake_path_count": 1,
+    "parallel_merge_or_admission_path_count": 0
+  },
+  "implementation_registration": {
+    "control_native_implementation_append_count": 5,
+    "definition_inventory_counts": {
+      "ALGORITHM": 30,
+      "FORMULA": 61,
+      "QUANTUM_CALLABLE_FAMILY": 9
+    },
+    "ephemeral_fixture_validation": {
+      "closed_facade_leaf_fixture_field_names": {
+        "IMPLIED_PROBABILITY": [
+          "payout",
+          "price"
+        ],
+        "MID_PRICE": [
+          "best_ask",
+          "best_bid"
+        ],
+        "PROBABILITY_EDGE": [
+          "p_model",
+          "payout",
+          "price"
+        ],
+        "RELATIVE_SPREAD": [
+          "best_ask",
+          "best_bid"
+        ],
+        "SPREAD": [
+          "best_ask",
+          "best_bid"
+        ]
+      },
+      "closed_root_dependency_owned_input_count": 0,
+      "persisted_fixture_vector_count": 0,
+      "source_fixture_invocation_counts": {
+        "ALGORITHM": 30,
+        "FORMULA": 61,
+        "QUANTUM_CALLABLE_FAMILY": 9
+      },
+      "source_fixture_invocation_total": 100
+    },
+    "expected_algorithm_count": 30,
+    "expected_formula_count": 61,
+    "expected_quantum_callable_family_count": 9,
+    "explicit_allowlist_required": true,
+    "fixture_context_ready_component_ids": [
+      "QTT.COMP.FORMULA.IMPLIED_PROBABILITY",
+      "QTT.COMP.FORMULA.MID_PRICE",
+      "QTT.COMP.FORMULA.PROBABILITY_EDGE",
+      "QTT.COMP.FORMULA.RELATIVE_SPREAD",
+      "QTT.COMP.FORMULA.SPREAD"
+    ],
+    "persisted_fixture_vector_count": 0,
+    "source_fixture_is_independent_oracle": false,
+    "source_quantum_formulation_count": 25
+  },
+  "independent_validator": "tools/validate_pr169_qku_comp_control1.py",
+  "measurements": {
+    "shape_validation_ms": 6038.501,
+    "total_build_and_stage_ms": 128553.942
+  },
+  "overall_acceptance_authority": "INDEPENDENT_VALIDATOR_AND_OWNER_AUDIT_REQUIRED",
+  "owner_requirement_213": {
+    "coverage_denominator": 213,
+    "exact_action": "MISSING_SEMANTIC_SPECIFICATION_PER_CARD",
+    "inherited_prior_alias_or_pass_claim_count": 0,
+    "inherited_prior_implementation_claim_count": 0,
+    "inventory_count": 213,
+    "provisional_count": 213
+  },
+  "pr165_d2_agent_policy": {
+    "agent_ids": [
+      "commander_agent",
+      "connector_venue_readiness_future_consumer",
+      "dashboard_agent",
+      "governance_agent",
+      "parameter_selector_agent",
+      "quantum_optimizer_agent",
+      "research_agent",
+      "risk_manager_agent"
+    ],
+    "mode_ceiling": "FIXTURE_NONLIVE",
+    "order_release_authority_count": 0,
+    "policy_basis": "CLASSIFICATION_BASED_NO_PER_FORMULA_ROUTE",
+    "source_ref": "docs/master_plan/generated/PR165_D2_AgentRosterDiscoveryAudit.report.json",
+    "source_truth_authority_count": 0
+  },
+  "quantum": {
+    "callable_family_records": 9,
+    "distinct_original_economic_model_target_count": 9,
+    "encodes_or_maps_relation_count": 9,
+    "exact_action": "MISSING_QUANTUM_ORIGINAL_MODEL_LOCAL_PARITY_PER_CALLABLE_FAMILY",
+    "local_original_model_parity_claim_count": 0,
+    "maturity_ceiling": "SPECIFIED",
+    "qpu_backend_call_count": 0,
+    "quantum_advantage_claim_count": 0,
+    "source_formulations": 25
+  },
+  "registry_schema_version": "1.0",
+  "report_type": "PR169_QKU_COMP_CONTROL1_ACCEPTANCE_REPORT",
+  "requirements_compiled_dag": {
+    "canonical_requirement_count": 3,
+    "closed_fixture_roots": [
+      "QTT.COMP.FORMULA.PROBABILITY_EDGE",
+      "QTT.COMP.FORMULA.RELATIVE_SPREAD"
+    ],
+    "closed_fixture_upstreams": [
+      "QTT.COMP.FORMULA.IMPLIED_PROBABILITY",
+      "QTT.COMP.FORMULA.MID_PRICE",
+      "QTT.COMP.FORMULA.SPREAD"
+    ],
+    "cycle_count": 0,
+    "persistent_dag_written": false,
+    "source_local_selector_count": 0
+  },
+  "rp5c_baseline": {
+    "accepted_runtime_identity_authority_created": false,
+    "ambiguous_active_qku_context_count": 0,
+    "canonical_identity_records": 10189,
+    "direct_runtime_rp5c_access_created": false,
+    "expected_canonical_identity_records": 10189,
+    "incomplete_qku_role_active_runtime_root_count": 0,
+    "incomplete_qku_role_record_count": 9791,
+    "preserved_qku_role_binding_count": 9791,
+    "record_states": {
+      "DORMANT_PRESERVED": 10089,
+      "PROVISIONAL": 100
+    },
+    "selector_or_root_invented_for_incomplete_import_count": 0
+  },
+  "scale_probe": {
+    "exact_action": "RUN_WITH_SCALE_PROBE_RECORDS_AT_LEAST_10000_FOR_OPT_IN_PROBE",
+    "executed": false,
+    "requested_records": 0
+  },
+  "semantic_reuse": {
+    "direct_relation_counts": {
+      "ALIAS_OF": 2,
+      "DISTINCT_FROM": 22,
+      "ENCODES_OR_MAPS": 9,
+      "FAMILY_BINDING_OF": 6
+    },
+    "exact_duplicate_reuse_count": 1,
+    "provenance_only_reuse_count": 1,
+    "qku_role_proposal_rejected_without_synthetic_qku_count": 1,
+    "source_disposition_kind_count": 19,
+    "successor_claim_count": 0,
+    "synthetic_case_count": 11,
+    "synthetic_case_outcomes": [
+      {
+        "candidate": "QTT.COMP.EXPANSION.IMPLIED_PROBABILITY_DIRECT_ALIAS",
+        "canonical_target": "QTT.COMP.FORMULA.IMPLIED_PROBABILITY",
+        "case": "NAME_ALIAS",
+        "decision": "REUSED",
+        "new_record_count": 0
+      },
+      {
+        "candidate": "QTT.COMP.EXPANSION.SAFE_RATIO_FAMILY_BINDING",
+        "canonical_target": "QTT.COMP.FORMULA.NET_EDGE",
+        "case": "COMPATIBLE_FAMILY_MEMBER",
+        "decision": "FAMILY_COMPATIBLE_REUSED",
+        "new_record_count": 0
+      },
+      {
+        "candidate": "QTT.COMP.FORMULA.IMPLIED_PROBABILITY",
+        "canonical_target": "QTT.COMP.FORMULA.IMPLIED_PROBABILITY",
+        "case": "EXACT_DUPLICATE",
+        "decision": "EXISTING_ID_UPDATE",
+        "new_record_count": 0
+      },
+      {
+        "candidate": "QTT.COMP.FORMULA.IMPLIED_PROBABILITY",
+        "canonical_target": "QTT.COMP.FORMULA.IMPLIED_PROBABILITY",
+        "case": "NEW_BINDING",
+        "decision": "EXISTING_ID_UPDATE",
+        "new_record_count": 0
+      },
+      {
+        "candidate": "QTT.COMP.FORMULA.IMPLIED_PROBABILITY",
+        "canonical_target": "QTT.COMP.FORMULA.IMPLIED_PROBABILITY",
+        "case": "NEW_PARAMETER_POLICY",
+        "decision": "EXISTING_ID_UPDATE",
+        "new_record_count": 0
+      },
+      {
+        "candidate": "QTT.COMP.FORMULA.IMPLIED_PROBABILITY",
+        "canonical_target": "QTT.COMP.FORMULA.IMPLIED_PROBABILITY",
+        "case": "PROVENANCE_ONLY",
+        "decision": "EXISTING_ID_UPDATE",
+        "new_record_count": 0
+      },
+      {
+        "candidate": "QTT.COMP.QUANTUM.ANNEALING_CANDIDATE_SELECTION_SHAPE",
+        "canonical_target": "QTT.COMP.QUANTUM.ANNEALING_CANDIDATE_SELECTION_SHAPE",
+        "case": "QUANTUM_ENCODING_RELATION",
+        "decision": "EXISTING_ID_UPDATE",
+        "new_record_count": 0
+      },
+      {
+        "candidate": "QTT.COMP.RESEARCH.BOUNDED_PROBABILITY_DISTANCE",
+        "canonical_target": "QTT.COMP.RESEARCH.BOUNDED_PROBABILITY_DISTANCE",
+        "case": "TRUE_NEW",
+        "decision": "DISTINCT",
+        "new_record_count": 1
+      },
+      {
+        "candidate": "QTT.COMP.RESEARCH.SIGNED_PROBABILITY_DISTANCE",
+        "canonical_target": "QTT.COMP.RESEARCH.SIGNED_PROBABILITY_DISTANCE",
+        "case": "SIMILAR_BUT_DISTINCT",
+        "decision": "DISTINCT",
+        "new_record_count": 1
+      }
+    ],
+    "synthetic_pre_compiler_rejections": [
+      {
+        "case": "QKU_ROLE_ADDITION",
+        "decision": "REJECTED_BEFORE_ADMISSION",
+        "exact_reason": "MISSING_EXISTING_QKU_AUTHORITY_AND_DIRECT_ROLE_PROOF"
+      },
+      {
+        "case": "NEW_IMPLEMENTATION",
+        "decision": "REJECTED_BEFORE_ADMISSION",
+        "exact_reason": "NO_NEW_REVIEWED_IMPLEMENTATION_CODE_IN_THIS_BATCH"
+      }
+    ]
+  },
+  "source_closure": [
+    {
+      "accepted_sources": [
+        "docs/master_plan/generated/rp5c/identity_deduplication_ledger.jsonl",
+        "docs/master_plan/generated/rp5c/qku_formula_identity_lineage.jsonl",
+        "docs/master_plan/generated/rp5c/immutable_qku_library.jsonl",
+        "docs/master_plan/generated/rp5c/immutable_formula_library.jsonl",
+        "docs/master_plan/generated/rp5c/immutable_qku_formula_library.jsonl"
+      ],
+      "conflict_resolution": "baseline provenance, not continuing write or runtime authority",
+      "current_owner": "RP5C_IMMUTABLE_BASELINE",
+      "fields_consumed": [
+        "canonical_identity_row_id",
+        "identity_row_id",
+        "duplicate_group_id",
+        "duplicate_member_identity_row_ids",
+        "identity_type",
+        "qku_id",
+        "formula_id",
+        "formula_variant_id",
+        "formula_expression_ref",
+        "plugin_ref",
+        "source_artifact_row_id",
+        "source_line_or_json_path",
+        "market_family",
+        "ontology_category",
+        "stage1_seed_inclusion_flag",
+        "stage1_dormant_future_market_flag"
+      ],
+      "forbidden_mutation": "RP5C source rows remain immutable; ordinal source IDs are evidence, the structured six-field custody key preserves CONTROL1 continuity, and neither is semantic-equivalence or runtime authority",
+      "record_destination": "ComputationRecordV1 provenance/relations/uses/bindings",
+      "semantic_domain": "RP5C immutable identities, QKU roles, duplicate-member custody, lineage",
+      "use": "BUILD_TIME_ONLY"
+    },
+    {
+      "accepted_sources": [
+        "src/qtt/stage1_prediction_markets/pr162d_r2a_real_formulations/formula_seed_library.py",
+        "src/qtt/stage1_prediction_markets/pr162d_r2a_real_formulations/algorithm_seed_library.py",
+        "src/qtt/stage1_prediction_markets/pr162d_r2a_real_formulations/quantum_seed_library.py"
+      ],
+      "conflict_resolution": "source-derived fixtures are invocation evidence, not independent oracles",
+      "current_owner": "PR162D_R2A_REAL_FORMULATIONS",
+      "fields_consumed": [
+        "identity",
+        "expression_or_procedure_or_objective",
+        "explicit_callable_ref",
+        "typed_port_names",
+        "unit_hints",
+        "family_and_variant",
+        "latency_class",
+        "fixture_reference"
+      ],
+      "forbidden_mutation": "no caller-selected module path and no inherited live authority",
+      "record_destination": "ComputationRecordV1 definition/uses/fixture binding/provenance",
+      "semantic_domain": "PR162D formulas, deterministic algorithms, quantum shape callables",
+      "use": "BUILD_TIME_REGISTRATION_AND_RUNTIME_ALLOWLIST_REFERENCE"
+    },
+    {
+      "accepted_sources": [
+        "OWNER_SUPPLIED_213_REQUIREMENT_INVENTORY",
+        "MASTER_PLAN_OWNER_REQUIREMENT_DOCTRINE",
+        "CONTROL1_PROMPT_SECTION_12"
+      ],
+      "conflict_resolution": "reverted/closed PR is negative evidence and inventory custody only",
+      "current_owner": "OWNER_REQUIREMENT_INTAKE",
+      "fields_consumed": [
+        "card_id",
+        "family",
+        "requested_semantic_name"
+      ],
+      "forbidden_mutation": "no restored implementation, callable, alias, PASS, or route claim",
+      "record_destination": "provisional ComputationRecordV1 owner_requirement_crosswalk",
+      "semantic_domain": "owner-supplied 213 mathematical and procedural requests",
+      "use": "BUILD_TIME_ONLY_UNTIL_SPECIFICATION_CLOSES"
+    },
+    {
+      "accepted_sources": [
+        "docs/master_plan/generated/PR165_D2_AgentRosterDiscoveryAudit.report.json"
+      ],
+      "conflict_resolution": "classification policy, never per-formula routes",
+      "current_owner": "PR165_D2_AGENT_ROSTER",
+      "fields_consumed": [
+        "agent_id",
+        "agent_family",
+        "agent_role",
+        "authority_boundary"
+      ],
+      "forbidden_mutation": "no second roster and no permission expansion",
+      "record_destination": "bindings.agent_access_policy",
+      "semantic_domain": "PR165-D2 agent roster and duties",
+      "use": "BUILD_TIME_POLICY_DERIVATION"
+    },
+    {
+      "accepted_sources": [
+        "PR168_MAP3_CURRENT_EQUIVALENTS",
+        "PR168_RP5D_CURRENT_EQUIVALENTS",
+        "PR168_RP5D_R1_CURRENT_EQUIVALENTS",
+        "PR168_RP5E_CURRENT_EQUIVALENTS",
+        "PR162B_CURRENT_EQUIVALENTS",
+        "PR168_GFP_REAL_COMPUTATION_CURRENT_EQUIVALENT"
+      ],
+      "conflict_resolution": "not duplicated into this compact builder without direct semantic proof",
+      "current_owner": "EXISTING_HISTORICAL_AND_CURRENT_SOURCE_OWNERS",
+      "fields_consumed": [
+        "manifest_counts",
+        "current_owner",
+        "implementation_and_evidence_caveats"
+      ],
+      "forbidden_mutation": "no duplicate registry, copied graph, or unproven equivalence",
+      "record_destination": "acceptance limitations and exact later compiler intake action",
+      "semantic_domain": "MAP3/RP5D/R1/RP5E/PR162B/GFP source closure",
+      "use": "AUDIT_AND_CURRENT_OWNER_REFERENCE"
+    }
+  ],
+  "source_precedence_conflict_resolutions": [
+    {
+      "conflict": "RP5C described a permanent identity/write authority",
+      "resolution": "RP5C IDs and lineage are immutable baseline provenance inside the one CONTROL1 registry; runtime direct access is absent"
+    },
+    {
+      "conflict": "historical dedupe/family labels resemble semantic proof",
+      "resolution": "all RP5C groups remain provisional or dormant and explicitly lack CONTROL1 direct equivalence proof"
+    },
+    {
+      "conflict": "PR162D expected vectors are produced by source implementations",
+      "resolution": "fixture invocation is preserved but independent oracle remains REQUIRED except the five exact closed-stack arithmetic nodes"
+    },
+    {
+      "conflict": "reverted implementation claimed all 213 callable",
+      "resolution": "only owner card IDs/families/names survive; all 213 are provisional with MISSING_SEMANTIC_SPECIFICATION actions"
+    },
+    {
+      "conflict": "25 quantum rows share nine builder callables",
+      "resolution": "nine callable-family records preserve every source formulation role; no encoding is aliased to an original economic model"
+    }
+  ],
+  "storage": {
+    "active_physical_layout": "sharded",
+    "active_physical_layout_count": 1,
+    "index_build_ms": 3.971,
+    "logical_registry_rows": 10513,
+    "logical_registry_serialized_bytes": 123781050,
+    "maximum_record_serialized_bytes": 62172,
+    "policy_reasons": [
+      "ROW_COUNT",
+      "SERIALIZED_BYTES",
+      "DIFF_SIZE_BUDGET"
+    ],
+    "qtt_generated_hash_checksum_or_digest_count": 0,
+    "registry_files": [
+      "registry.manifest.json",
+      "registry.part-algorithm.jsonl",
+      "registry.part-formula.jsonl",
+      "registry.part-other-economic-model.jsonl",
+      "registry.part-other-research.jsonl",
+      "registry.part-owner-requirements.jsonl",
+      "registry.part-quantum.jsonl",
+      "registry.part-rp5c-00000000-00009999.jsonl",
+      "registry.part-rp5c-00010000-00019999.jsonl",
+      "registry.part-rp5c-00020000-00029999.jsonl",
+      "registry.part-rp5c-00030000-00039999.jsonl",
+      "registry.part-rp5c-00040000-00049999.jsonl",
+      "registry.part-rp5c-00050000-00059999.jsonl",
+      "registry.part-rp5c-00060000-00069999.jsonl",
+      "registry.part-rp5c-00070000-00079999.jsonl",
+      "registry.part-rp5c-00080000-00089999.jsonl",
+      "registry.part-rp5c-00090000-00099999.jsonl",
+      "registry.part-rp5c-00100000-00109999.jsonl",
+      "registry.part-rp5c-00110000-00119999.jsonl",
+      "registry.part-rp5c-00120000-00129999.jsonl",
+      "registry.part-rp5c-00130000-00139999.jsonl",
+      "registry.part-rp5c-00140000-00149999.jsonl",
+      "registry.part-rp5c-00150000-00159999.jsonl",
+      "registry.part-rp5c-00160000-00169999.jsonl",
+      "registry.part-rp5c-00170000-00179999.jsonl",
+      "registry.part-rp5c-00180000-00189999.jsonl"
+    ],
+    "shard_count": 25,
+    "simultaneous_full_and_sharded_layout_count": 0,
+    "storage_policy": {
+      "diff_size_budget_bytes": 8000000,
+      "max_record_serialized_bytes": 1000000,
+      "rp5c_rows_per_stable_partition": 10000,
+      "single_file_max_index_build_ms": 2500,
+      "single_file_max_load_ms": 2500,
+      "single_file_max_rows": 2500,
+      "single_file_max_serialized_bytes": 16000000,
+      "single_file_max_validation_ms": 10000
+    }
+  },
+  "transient_registry_update": {
+    "added_binding_ids_count": 425,
+    "added_component_ids_count": 10513,
+    "affected_consumer_classes": [
+      "CONTROL1_FACADE",
+      "CONTROL1_INDEPENDENT_VALIDATOR"
+    ],
+    "affected_dependent_ids_count": 0,
+    "changed_binding_ids_count": 0,
+    "changed_component_ids_count": 0,
+    "persistent_delta_written": false,
+    "registry_schema_version": "1.0",
+    "removed_binding_ids_count": 0,
+    "retired_component_ids_count": 0
+  },
+  "truthful_limitations": [
+    "RP5C baseline rows preserve identity and custody but generally lack complete computation semantics.",
+    "PR162D source callables commonly use Python float and require typed Decimal/accounting boundaries before financial use.",
+    "PR162D source-derived expected vectors are fixture invocation evidence, not independent production oracles.",
+    "Only implied-probability/probability-edge and mid/spread/relative-spread fixture subgraphs are closed here.",
+    "MAP3 labels, RP5D readiness tiers, R1 synthetic smoke values, and RP5E previews are not computation or equivalence proof.",
+    "GFP and PR162B remain current implementation owners requiring direct callable review and proof-backed semantic intake; they are not copied into a parallel formula library.",
+    "No replay, PAPER, shadow, dry-run, canary, live, private-state, connector, QPU, cash, fill, PnL, or order evidence is created.",
+    "No source record is promoted merely from a count, name, source ID, family label, or fixture result."
+  ]
+}

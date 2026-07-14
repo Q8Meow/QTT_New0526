@@ -53,7 +53,7 @@ DETERMINISTIC_VALIDATOR_SHARD_PHASES = (
 DETERMINISTIC_VALIDATOR_SHARD_COMMAND_RANGES = {
     "deterministic-validators-a": (1, 64),
     "deterministic-validators-b": (65, 119),
-    "deterministic-validators-c": (120, 334),
+    "deterministic-validators-c": (120, 336),
 }
 PYTEST_SHARD_PHASES = (
     "pytest-shard-1",
@@ -142,6 +142,13 @@ PR169_AGENT_ORCH1_DETERMINISTIC_SCRIPT_NAMES = frozenset(
     {
         "build_pr169_agent_orch1.py",
         "validate_pr169_agent_orch1.py",
+    }
+)
+PR169_QKU_COMP_CONTROL1_BRANCH = "pr169-qku-comp-control1"
+PR169_QKU_COMP_CONTROL1_DETERMINISTIC_SCRIPT_NAMES = frozenset(
+    {
+        "build_pr169_qku_comp_control1.py",
+        "validate_pr169_qku_comp_control1.py",
     }
 )
 ORDERED_PHASES = (
@@ -672,6 +679,15 @@ PYTEST_SHARD_COMMANDS: dict[str, tuple[PytestShardCommand, ...]] = {
             reason="PR169-AGENT-ORCH1 deterministic agent orchestration contract tests",
             runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
             historical_runtime_seconds=5.0,
+        ),
+        PytestShardCommand(
+            paths=("tests/pr169_qku_comp_control1",),
+            reason=(
+                "PR169-QKU-COMP-CONTROL1 decision-centric registry, indexed "
+                "subgraph execution, storage parity, and generic adapter tests"
+            ),
+            runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
+            historical_runtime_seconds=8.0,
         ),
         PytestShardCommand(
             paths=("tests/pr169_dash1_ui1",),
@@ -3687,6 +3703,30 @@ def build_validation_commands(
             "docs/master_plan/generated/pr169_agent_orch1",
             "--timeout-ms",
             "3600000",
+        ],
+        [
+            sys.executable,
+            _path("tools", "build_pr169_qku_comp_control1.py"),
+            "--repo-root",
+            ".",
+            "--out-dir",
+            "docs/master_plan/generated/pr169_qku_comp_control1",
+            "--timeout-ms",
+            "3600000",
+            "--scale-probe-records",
+            "0",
+        ],
+        [
+            sys.executable,
+            _path("tools", "validate_pr169_qku_comp_control1.py"),
+            "--repo-root",
+            ".",
+            "--artifact-dir",
+            "docs/master_plan/generated/pr169_qku_comp_control1",
+            "--timeout-ms",
+            "3600000",
+            "--scale-probe-records",
+            "10000",
         ],
         *[
             [sys.executable, _path("tools", f"validate_pr168_rank_{name}.py")]

@@ -1,9 +1,15 @@
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass
 import json
 from pathlib import Path
 from typing import Any, Iterable
+
+try:
+    from qtt.computation_control import QKUComputationControlPlaneV1
+except ModuleNotFoundError:  # repository-root ``src.qtt`` test/import mode
+    from src.qtt.computation_control import QKUComputationControlPlaneV1
 
 
 GENERATED_PREFIX = Path("docs/master_plan/generated/pr169_svc1")
@@ -242,6 +248,17 @@ class MarketVenueExpansionSocketViewV1(OwnerDashboardReadModelV1):
     pass
 
 
+def _public_payload(value: Any) -> dict[str, Any]:
+    if isinstance(value, Mapping):
+        return dict(value)
+    as_dict = getattr(value, "as_dict", None)
+    if callable(as_dict):
+        payload = as_dict()
+        if isinstance(payload, Mapping):
+            return dict(payload)
+    raise TypeError("computation control result does not expose a public mapping")
+
+
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[3]
 
@@ -267,10 +284,65 @@ def _read_jsonl(path: Path) -> tuple[dict[str, Any], ...]:
 
 
 class DashboardReadModelService:
-    def __init__(self, base_dir: Path | str | None = None) -> None:
+    def __init__(
+        self,
+        base_dir: Path | str | None = None,
+        *,
+        computation_control: QKUComputationControlPlaneV1 | None = None,
+    ) -> None:
         root = _repo_root()
         self.base_dir = (Path(base_dir) if base_dir is not None else root / GENERATED_PREFIX).resolve()
         self._cache: dict[str, tuple[dict[str, Any], ...]] = {}
+        self._computation_control = computation_control
+
+    def _require_computation_control(self) -> QKUComputationControlPlaneV1:
+        if self._computation_control is None:
+            raise RuntimeError("no computation control facade was injected")
+        return self._computation_control
+
+    def search_computation(
+        self,
+        selector: str | Mapping[str, Any],
+        context: Mapping[str, Any] | None = None,
+        *,
+        agent_id: str | None = None,
+    ) -> dict[str, Any]:
+        result = self._require_computation_control().resolve(
+            selector,
+            context,
+            agent_id=agent_id,
+        )
+        return _public_payload(result)
+
+    def computation_status(
+        self,
+        selector: str | Mapping[str, Any],
+        context: Mapping[str, Any] | None = None,
+        *,
+        agent_id: str | None = None,
+    ) -> dict[str, Any]:
+        return dict(
+            self._require_computation_control().status(
+                selector,
+                context,
+                agent_id=agent_id,
+            )
+        )
+
+    def explain_computation(
+        self,
+        receipt_or_selector: str | Mapping[str, Any],
+        context: Mapping[str, Any] | None = None,
+        *,
+        agent_id: str | None = None,
+    ) -> dict[str, Any]:
+        return dict(
+            self._require_computation_control().explain(
+                receipt_or_selector,
+                context,
+                agent_id=agent_id,
+            )
+        )
 
     def _path(self, file_name: str) -> Path:
         if file_name not in JSONL_FILES:

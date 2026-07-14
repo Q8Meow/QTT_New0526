@@ -46,6 +46,7 @@ PR169_SVC1_BRANCH = "pr169-svc1"
 PR169_AGENT_ORCH1_BRANCH = "pr169-agent-orch1"
 PR169_VAL1_BRANCH = "pr169-val1"
 PR169_QKU_FORMULA_EXP1_ROLLBACK_BRANCH = "pr169-qku-formula-exp1-rollback"
+PR169_QKU_COMP_CONTROL1_BRANCH = "pr169-qku-comp-control1"
 VALIDATION_FIXTURE_BRANCH = "pr-ci-fastfail-validation-context-preflight"
 
 _PR168_BRANCHES = frozenset(
@@ -90,6 +91,7 @@ _PR168_BRANCHES = frozenset(
         PR169_AGENT_ORCH1_BRANCH,
         PR169_VAL1_BRANCH,
         PR169_QKU_FORMULA_EXP1_ROLLBACK_BRANCH,
+        PR169_QKU_COMP_CONTROL1_BRANCH,
         VALIDATION_FIXTURE_BRANCH,
     }
 )
@@ -873,6 +875,39 @@ _PR169_AGENT_ORCH1_ALLOWED_PATTERNS = (
     "tests/pr169_agent_orch1/**",
 )
 
+_PR169_QKU_COMP_CONTROL1_ALLOWED_EXACT_PATHS = frozenset(
+    {
+        "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+        "src/qtt/computation_control/__init__.py",
+        "src/qtt/computation_control/models.py",
+        "src/qtt/computation_control/control.py",
+        "tools/build_pr169_qku_comp_control1.py",
+        "tools/validate_pr169_qku_comp_control1.py",
+        "tools/pr168_rp5c_config.py",
+        "tests/pr168_rp5c/test_rp5c_input_integrity.py",
+        "src/qtt/readiness/pr169_readiness1_resolvers.py",
+        "tests/pr169_readiness1/test_pr169_readiness1.py",
+        "src/qtt/pretrade/pr169_pretrade1_resolvers.py",
+        "tests/pr169_pretrade1/test_pr169_pretrade1.py",
+        "src/qtt/agents/pr169_agent_orch1_resolvers.py",
+        "tests/pr169_agent_orch1/test_resolvers.py",
+        "src/qtt/service/pr169_svc1_resolvers.py",
+        "tests/pr169_svc1/test_pr169_svc1.py",
+        "tools/run_validation_gates.py",
+        "tools/validation_inventory.py",
+        "tools/validation_scope_registry.py",
+        "tests/fail_closed/test_run_validation_gates.py",
+        "tests/tools/test_validation_inventory.py",
+        "tests/tools/test_validation_scope_registry.py",
+        "tests/tools/test_changed_area_validation_router.py",
+    }
+)
+
+_PR169_QKU_COMP_CONTROL1_ALLOWED_PATTERNS = (
+    "docs/master_plan/generated/pr169_qku_comp_control1/**",
+    "tests/pr169_qku_comp_control1/**",
+)
+
 _PR169_VAL1_ALLOWED_EXACT_PATHS = frozenset(
     {
         ".github/workflows/qtt_validation.yml",
@@ -1603,6 +1638,29 @@ def _pr169_agent_orch1_scope_decision(branch_name: str, normalized: str) -> dict
     return None
 
 
+def _pr169_qku_comp_control1_scope_decision(branch_name: str, normalized: str) -> dict[str, object] | None:
+    if normalized in _PR169_QKU_COMP_CONTROL1_ALLOWED_EXACT_PATHS:
+        return {
+            "allowed": True,
+            "branch": branch_name,
+            "normalized_path": normalized,
+            "pr_id": "PR169-QKU-COMP-CONTROL1",
+            "matched_rule": f"exact:{normalized}",
+            "reason": "registered_exact_path",
+        }
+    for pattern in _PR169_QKU_COMP_CONTROL1_ALLOWED_PATTERNS:
+        if fnmatchcase(normalized, pattern):
+            return {
+                "allowed": True,
+                "branch": branch_name,
+                "normalized_path": normalized,
+                "pr_id": "PR169-QKU-COMP-CONTROL1",
+                "matched_rule": f"pattern:{pattern}",
+                "reason": "registered_pattern",
+            }
+    return None
+
+
 def _pr169_val1_scope_decision(branch_name: str, normalized: str) -> dict[str, object] | None:
     if normalized in _PR169_VAL1_ALLOWED_EXACT_PATHS:
         return {
@@ -1980,6 +2038,19 @@ def explain_pr_scope_decision(branch: str, path: str) -> dict[str, object]:
             "normalized_path": normalized,
             "pr_id": "PR168-MEM1",
             "matched_rule": "no_pr168_mem1_scope_rule",
+            "reason": "path_not_registered_for_pr_scope",
+        }
+
+    if branch_name == PR169_QKU_COMP_CONTROL1_BRANCH:
+        control1_decision = _pr169_qku_comp_control1_scope_decision(branch_name, normalized)
+        if control1_decision:
+            return control1_decision
+        return {
+            "allowed": False,
+            "branch": branch_name,
+            "normalized_path": normalized,
+            "pr_id": "PR169-QKU-COMP-CONTROL1",
+            "matched_rule": "no_pr169_qku_comp_control1_scope_rule",
             "reason": "path_not_registered_for_pr_scope",
         }
 

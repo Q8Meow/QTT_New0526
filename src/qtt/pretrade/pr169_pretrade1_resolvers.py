@@ -1,9 +1,15 @@
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass
 import json
 from pathlib import Path
-from typing import Iterable
+from typing import Any, Iterable
+
+try:
+    from qtt.computation_control import QKUComputationControlPlaneV1
+except ModuleNotFoundError:  # repository-root ``src.qtt`` test/import mode
+    from src.qtt.computation_control import QKUComputationControlPlaneV1
 
 
 GENERATED_PREFIX = Path("docs/master_plan/generated/pr169_pretrade1")
@@ -75,6 +81,82 @@ class PreTradeRegistryView:
                 if key.endswith("_created") and value is False:
                     fields.add(key)
         return tuple(sorted(fields))
+
+
+_NO_ORDER_AUTHORITY_FIELDS = frozenset(
+    {
+        "submit_authority_created",
+        "order_authority_created",
+        "live_order_authority_created",
+        "venue_submit_created",
+        "execution_router_release_created",
+    }
+)
+
+
+def _public_mapping(value: Any) -> Mapping[str, Any] | None:
+    if isinstance(value, Mapping):
+        return value
+    as_dict = getattr(value, "as_dict", None)
+    if callable(as_dict):
+        payload = as_dict()
+        if isinstance(payload, Mapping):
+            return payload
+    return None
+
+
+def _assert_no_order_authority(value: Any) -> None:
+    def inspect(payload: Any) -> None:
+        if isinstance(payload, Mapping):
+            for key, nested in payload.items():
+                if str(key) in _NO_ORDER_AUTHORITY_FIELDS and nested is not False:
+                    raise RuntimeError(f"computation result widened pre-trade authority: {key}")
+                inspect(nested)
+        elif isinstance(payload, Iterable) and not isinstance(payload, (str, bytes)):
+            for nested in payload:
+                inspect(nested)
+
+    payload = _public_mapping(value)
+    if payload is not None:
+        inspect(payload)
+
+
+def resolve_computation(
+    control_plane: QKUComputationControlPlaneV1,
+    selector: str | Mapping[str, Any],
+    context: Mapping[str, Any] | None = None,
+    *,
+    agent_id: str | None = None,
+) -> Any:
+    """Delegate public resolution while retaining the pre-trade authority boundary."""
+
+    result = control_plane.resolve(selector, context, agent_id=agent_id)
+    _assert_no_order_authority(result)
+    return result
+
+
+def compute_computation(
+    control_plane: QKUComputationControlPlaneV1,
+    selector: str | Mapping[str, Any],
+    inputs: Mapping[str, Any],
+    context: Mapping[str, Any] | None = None,
+    *,
+    agent_id: str | None = None,
+    consumer: str = "PRETRADE",
+    mode: str = "STATIC_VALIDATION",
+) -> Any:
+    """Delegate public computation while retaining the pre-trade authority boundary."""
+
+    result = control_plane.compute(
+        selector,
+        inputs,
+        context,
+        agent_id=agent_id,
+        consumer=consumer,
+        mode=mode,
+    )
+    _assert_no_order_authority(result)
+    return result
 
 
 def load_registry(

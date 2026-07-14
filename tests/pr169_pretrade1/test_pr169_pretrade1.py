@@ -244,3 +244,92 @@ def test_pr169_pretrade1_quality_gates_report():
     assert market["acceptance_state"] == "PASS"
     assert market["runtime_connector_created"] is False
     assert market["orphan_market_route_count"] == 0
+
+
+class _FakeDTO:
+    def __init__(self, payload: dict) -> None:
+        self.payload = payload
+
+    def as_dict(self) -> dict:
+        return dict(self.payload)
+
+
+class _FakeComputationControlPlane:
+    def __init__(self) -> None:
+        self.calls: list[tuple] = []
+        self.widen_authority = False
+
+    @property
+    def physical_layout(self):
+        raise AssertionError("the pre-trade facade must not inspect physical storage")
+
+    def resolve(self, selector, context=None, *, agent_id=None):
+        self.calls.append(("resolve", selector, context, agent_id))
+        return _FakeDTO(
+            {
+                "selector": selector,
+                "order_authority_created": self.widen_authority,
+            }
+        )
+
+    def compute(
+        self,
+        selector,
+        inputs,
+        context=None,
+        *,
+        agent_id=None,
+        consumer="UNSPECIFIED",
+        mode="STATIC_VALIDATION",
+    ):
+        self.calls.append(
+            ("compute", selector, inputs, context, agent_id, consumer, mode)
+        )
+        return _FakeDTO(
+            {
+                "receipt_id": "receipt-future-1",
+                "submit_authority_created": self.widen_authority,
+                "order_authority_created": self.widen_authority,
+            }
+        )
+
+
+def test_pretrade_computation_facade_delegates_future_selectors_without_order_authority():
+    fake = _FakeComputationControlPlane()
+    selector = {"component_id": "FUTURE_COMPONENT_9100", "kind": "NEW_KIND"}
+    context = {"market_family": "future-market-family"}
+    inputs = {"observations": [1, 2, 3]}
+
+    resolved = resolvers.resolve_computation(
+        fake,
+        selector,
+        context,
+        agent_id="agent-next",
+    )
+    receipt = resolvers.compute_computation(
+        fake,
+        selector,
+        inputs,
+        context,
+        agent_id="agent-next",
+        consumer="PRETRADE_REVIEW",
+        mode="REPLAY",
+    )
+
+    assert resolved.as_dict()["selector"] == selector
+    assert resolved.as_dict()["order_authority_created"] is False
+    assert receipt.as_dict()["order_authority_created"] is False
+    assert fake.calls[0] == ("resolve", selector, context, "agent-next")
+    assert fake.calls[1] == (
+        "compute",
+        selector,
+        inputs,
+        context,
+        "agent-next",
+        "PRETRADE_REVIEW",
+        "REPLAY",
+    )
+
+    fake.widen_authority = True
+    with pytest.raises(RuntimeError, match="widened pre-trade authority"):
+        resolvers.compute_computation(fake, selector, inputs, context)

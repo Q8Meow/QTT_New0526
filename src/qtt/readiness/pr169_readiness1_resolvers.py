@@ -6,10 +6,16 @@ projections. It deliberately does not scan upstream generated JSONL at runtime.
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass
 import json
 from pathlib import Path
 from typing import Any, Iterable
+
+try:
+    from qtt.computation_control import QKUComputationControlPlaneV1
+except ModuleNotFoundError:  # repository-root ``src.qtt`` test/import mode
+    from src.qtt.computation_control import QKUComputationControlPlaneV1
 
 
 GENERATED_PREFIX = Path("docs/master_plan/generated/pr169_readiness1")
@@ -162,6 +168,142 @@ class ParameterOperabilityHandoffViewV1(ReadinessView):
 
 class OwnerEnablementHandoffViewV1(ReadinessView):
     pass
+
+
+_REGISTRY_UPDATE_FIELDS = frozenset(
+    {
+        "batch_id",
+        "registry_schema_version",
+        "added_component_ids",
+        "changed_component_ids",
+        "retired_component_ids",
+        "added_binding_ids",
+        "changed_binding_ids",
+        "removed_binding_ids",
+        "affected_dependent_ids",
+        "affected_consumer_classes",
+    }
+)
+_REGISTRY_UPDATE_ID_FIELDS = (
+    "added_component_ids",
+    "changed_component_ids",
+    "retired_component_ids",
+    "added_binding_ids",
+    "changed_binding_ids",
+    "removed_binding_ids",
+    "affected_dependent_ids",
+)
+_REGISTRY_UPDATE_ALIASES = {
+    "added": "added_component_ids",
+    "changed": "changed_component_ids",
+    "retired": "retired_component_ids",
+    "binding": "changed_binding_ids",
+    "affected_consumers": "affected_consumer_classes",
+}
+
+
+def _registry_update(update: Mapping[str, Any]) -> dict[str, Any]:
+    if not isinstance(update, Mapping):
+        raise TypeError("registry_update must be a transient Mapping")
+    unknown = set(update) - _REGISTRY_UPDATE_FIELDS - set(_REGISTRY_UPDATE_ALIASES)
+    if unknown:
+        raise ValueError(f"unsupported registry_update fields: {sorted(unknown)}")
+
+    normalized: dict[str, Any] = {
+        "batch_id": update.get("batch_id"),
+        "registry_schema_version": update.get("registry_schema_version"),
+    }
+    for field in (*_REGISTRY_UPDATE_ID_FIELDS, "affected_consumer_classes"):
+        source = update.get(field, ())
+        if not source:
+            for alias, canonical in _REGISTRY_UPDATE_ALIASES.items():
+                if canonical == field and alias in update:
+                    source = update[alias]
+                    break
+        if isinstance(source, (str, bytes)) or not isinstance(source, Iterable):
+            raise TypeError(f"registry_update field {field} must be an iterable of IDs")
+        normalized[field] = tuple(dict.fromkeys(str(value) for value in source))
+    return normalized
+
+
+def _selector_values(selector: str | Mapping[str, Any]) -> frozenset[str]:
+    if isinstance(selector, str):
+        return frozenset({selector})
+    if not isinstance(selector, Mapping):
+        raise TypeError("selector must be a string or Mapping")
+
+    values: set[str] = set()
+
+    def collect(value: Any) -> None:
+        if isinstance(value, str):
+            values.add(value)
+        elif isinstance(value, Mapping):
+            for nested in value.values():
+                collect(nested)
+        elif isinstance(value, Iterable) and not isinstance(value, (str, bytes)):
+            for nested in value:
+                collect(nested)
+
+    collect(selector)
+    return frozenset(values)
+
+
+def project_computation_status(
+    control_plane: QKUComputationControlPlaneV1,
+    selectors: str | Mapping[str, Any] | Iterable[str | Mapping[str, Any]],
+    context: Mapping[str, Any] | None = None,
+    *,
+    agent_id: str | None = None,
+    registry_update: Mapping[str, Any] | None = None,
+    consumer_class: str | None = None,
+) -> tuple[dict[str, Any], ...]:
+    """Project public status only for IDs/classes affected by a transient delta."""
+
+    update = _registry_update(registry_update) if registry_update is not None else None
+    affected_ids = (
+        frozenset(
+            value
+            for field in _REGISTRY_UPDATE_ID_FIELDS
+            for value in update[field]
+        )
+        if update is not None
+        else frozenset()
+    )
+    affected_consumers = (
+        frozenset(update["affected_consumer_classes"])
+        if update is not None
+        else frozenset()
+    )
+
+    selector_rows = (
+        (selectors,)
+        if isinstance(selectors, (str, Mapping))
+        else selectors
+    )
+    seen_selectors: set[str] = set()
+    projected: list[dict[str, Any]] = []
+    for selector in selector_rows:
+        selector_key = (
+            selector
+            if isinstance(selector, str)
+            else json.dumps(dict(selector), sort_keys=True, separators=(",", ":"), default=str)
+        )
+        if selector_key in seen_selectors:
+            continue
+        seen_selectors.add(selector_key)
+        if update is not None and not (_selector_values(selector) & affected_ids):
+            continue
+        if consumer_class is not None and affected_consumers and consumer_class not in affected_consumers:
+            continue
+        public_selector: str | dict[str, Any]
+        public_selector = dict(selector) if isinstance(selector, Mapping) else selector
+        projected.append(
+            {
+                "selector": public_selector,
+                "status": dict(control_plane.status(selector, context, agent_id=agent_id)),
+            }
+        )
+    return tuple(projected)
 
 
 @dataclass(frozen=True)

@@ -192,6 +192,8 @@ def validator_id_for_command(command: Sequence[str], phase: str) -> str:
 
 
 def _pr_token(stem: str) -> str | None:
+    if "pr169_qku_comp_control1" in stem:
+        return "pr169_qku_comp_control1"
     if "pr169_val1" in stem:
         return "pr169_val1"
     if "pr169_agent_orch1" in stem:
@@ -415,6 +417,43 @@ def _pr_globs(stem: str) -> tuple[str, ...]:
                 "tests/pr169_agent_orch1/**",
             ]
         )
+    if token == "pr169_qku_comp_control1":
+        globs.extend(
+            [
+                "docs/master_plan/generated/pr169_qku_comp_control1/**",
+                "src/qtt/computation_control/**",
+                "tests/pr169_qku_comp_control1/**",
+                "src/qtt/readiness/pr169_readiness1_resolvers.py",
+                "tests/pr169_readiness1/test_pr169_readiness1.py",
+                "src/qtt/pretrade/pr169_pretrade1_resolvers.py",
+                "tests/pr169_pretrade1/test_pr169_pretrade1.py",
+                "src/qtt/agents/pr169_agent_orch1_resolvers.py",
+                "tests/pr169_agent_orch1/test_resolvers.py",
+                "src/qtt/service/pr169_svc1_resolvers.py",
+                "tests/pr169_svc1/test_pr169_svc1.py",
+                "tools/run_validation_gates.py",
+                "tools/validation_inventory.py",
+                "tools/validation_scope_registry.py",
+                "tests/fail_closed/test_run_validation_gates.py",
+                "tests/tools/test_validation_inventory.py",
+                "tests/tools/test_validation_scope_registry.py",
+                "tests/tools/test_changed_area_validation_router.py",
+            ]
+        )
+    if token in {
+        "pr169_readiness1",
+        "pr169_pretrade1",
+        "pr169_svc1",
+        "pr169_agent_orch1",
+    }:
+        globs.extend(
+            [
+                "docs/master_plan/generated/pr169_qku_comp_control1/**",
+                "src/qtt/computation_control/**",
+                "tests/pr169_qku_comp_control1/**",
+                "tools/*pr169_qku_comp_control1*.py",
+            ]
+        )
     if token == "pr169_val1":
         globs.extend(
             [
@@ -554,13 +593,18 @@ def _output_globs(script_name: str, stem: str) -> tuple[str, ...]:
     if token is not None:
         tag = _pr_tag_from_token(token)
         lower = token.lower()
-        globs.extend(
-            [
-                f"docs/master_plan/generated/{tag}*.json",
-                f"docs/master_plan/generated/{tag}_*.report.json",
-                f"docs/master_plan/generated/{lower}*/**",
-            ]
-        )
+        if token == "pr169_qku_comp_control1":
+            # CONTROL1 has one exact owned generated root; do not make repair-
+            # copy or similarly prefixed output directories look authoritative.
+            globs.append("docs/master_plan/generated/pr169_qku_comp_control1/**")
+        else:
+            globs.extend(
+                [
+                    f"docs/master_plan/generated/{tag}*.json",
+                    f"docs/master_plan/generated/{tag}_*.report.json",
+                    f"docs/master_plan/generated/{lower}*/**",
+                ]
+            )
         if token == "pr168_rp2":
             globs.append("docs/master_plan/generated/rp2p/**")
         if token == "pr168_map3":
@@ -850,6 +894,13 @@ def entries_matching_path(path: str) -> tuple[ValidatorInventoryEntry, ...]:
 
 
 def _specific_pr_token_for_path(path: str) -> str | None:
+    if (
+        path.startswith("docs/master_plan/generated/pr169_qku_comp_control1/")
+        or path.startswith("src/qtt/computation_control/")
+        or path.startswith("tests/pr169_qku_comp_control1/")
+        or "pr169_qku_comp_control1" in PurePosixPath(path).name.lower()
+    ):
+        return "pr169_qku_comp_control1"
     if (
         path.startswith("docs/master_plan/generated/pr169_val1/")
         or path

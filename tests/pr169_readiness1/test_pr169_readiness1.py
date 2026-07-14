@@ -152,3 +152,62 @@ def test_pr169_readiness1_owner_three_question_report():
     assert report["q3_runtime_llm_call_created"] is False
     assert report["q3_live_execution_created"] is False
     assert report["q3_execution_router_release_created"] is False
+
+
+class _FakeComputationControlPlane:
+    def __init__(self) -> None:
+        self.calls: list[tuple] = []
+
+    @property
+    def registry_root(self):
+        raise AssertionError("the readiness facade must not inspect physical storage")
+
+    def status(self, selector, context=None, *, agent_id=None):
+        self.calls.append(("status", selector, context, agent_id))
+        return {"selector_seen": selector, "state": "READY"}
+
+
+def test_readiness_computation_status_delta_is_filtered_transient_and_idempotent():
+    fake = _FakeComputationControlPlane()
+    future_selector = {"component_id": "FUTURE_COMPONENT_9001", "kind": "NEW_KIND"}
+    unchanged_selector = {"component_id": "UNCHANGED_COMPONENT"}
+    update = {
+        "batch_id": "batch-9001",
+        "registry_schema_version": "v-next",
+        "added_component_ids": ["FUTURE_COMPONENT_9001"],
+        "changed_component_ids": [],
+        "retired_component_ids": [],
+        "added_binding_ids": [],
+        "changed_binding_ids": [],
+        "removed_binding_ids": [],
+        "affected_dependent_ids": [],
+        "affected_consumer_classes": ["READINESS_STATUS"],
+    }
+    original_update = json.loads(json.dumps(update))
+
+    first = resolvers.project_computation_status(
+        fake,
+        (future_selector, future_selector, unchanged_selector),
+        {"market_family": "future-market-family"},
+        registry_update=update,
+        consumer_class="READINESS_STATUS",
+    )
+    second = resolvers.project_computation_status(
+        fake,
+        (future_selector, future_selector, unchanged_selector),
+        {"market_family": "future-market-family"},
+        registry_update=update,
+        consumer_class="READINESS_STATUS",
+    )
+
+    assert first == second
+    assert [row["selector"] for row in first] == [future_selector]
+    assert update == original_update
+    assert [call[1] for call in fake.calls] == [future_selector, future_selector]
+
+    with pytest.raises(TypeError):
+        resolvers.project_computation_status(
+            fake,
+            (future_selector,),
+            registry_update=["not", "a", "mapping"],
+        )
