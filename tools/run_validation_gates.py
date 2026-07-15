@@ -3714,7 +3714,7 @@ def build_validation_commands(
             "--timeout-ms",
             "3600000",
             "--scale-probe-records",
-            "0",
+            "10000",
         ],
         [
             sys.executable,

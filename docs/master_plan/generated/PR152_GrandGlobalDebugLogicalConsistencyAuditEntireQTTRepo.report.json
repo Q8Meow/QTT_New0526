@@ -1316,7 +1316,7 @@
   },
   "warning_findings": [],
   "whole_repo_inventory_audit": {
-    "audited_non_text_file_count": 1,
+    "audited_non_text_file_count": 2,
     "audited_root_directories": [
       ".gitattributes",
       ".github",
@@ -1329,13 +1329,13 @@
       "tests",
       "tools"
     ],
-    "audited_text_file_count": 21407,
+    "audited_text_file_count": 21406,
     "category_counts": {
       "ATOMICROWS": 61,
       "CONFIG": 4,
-      "GENERATED_REPORT": 12859,
+      "GENERATED_REPORT": 12858,
       "MASTER_PLAN": 31,
-      "NON_TEXT": 1,
+      "NON_TEXT": 2,
       "OTHER": 3,
       "ROADMAP": 42,
       "SCHEMA": 2109,

@@ -9,9 +9,12 @@ from __future__ import annotations
 
 from collections import defaultdict, deque
 from collections.abc import Callable, Iterable, Mapping, Sequence
+from contextlib import contextmanager
 from dataclasses import dataclass, replace
 from datetime import datetime, timezone
-from decimal import Decimal, InvalidOperation, ROUND_HALF_EVEN
+from decimal import Context, Decimal, InvalidOperation, ROUND_HALF_EVEN, localcontext
+from functools import wraps
+import inspect
 import json
 import math
 import os
@@ -163,6 +166,48 @@ FORBIDDEN_PLACEHOLDER_TEXT = frozenset(
     {"TBD", "SCOPED_GAP", "future consumer", "metadata only", "solver compatible", "route later", "placeholder"}
 )
 
+# These values are evidence that a mandatory semantic field is still an
+# intake-time description rather than a complete computation specification.
+# The predicate below is the single build/runtime decision for specification
+# readiness; fixture availability is deliberately not part of it.
+_UNRESOLVED_SPECIFICATION_VALUES = frozenset(
+    {
+        "ANY",
+        "UNSPECIFIED",
+        "CONTROL_PLANE_TYPED_VALIDATION_REQUIRED",
+        "EXACT_RUNTIME_UNIT_REQUIRED",
+        "EXACT_RUNTIME_CONTRACT_REQUIRED",
+        "EXACT_UNIT_REQUIRED",
+        "REQUIRES_CONTEXT_CLASSIFICATION",
+    }
+)
+
+# A ``not_applicable`` declaration is semantic input, so an arbitrary string
+# supplied by a registry row cannot prove it.  These are the complete
+# source-code-owned proof rules used by CONTROL1 (the TEST entry exists only
+# for isolated in-memory contract tests and is never admitted by the builder).
+_SPECIFICATION_NOT_APPLICABLE_PROOF_REFS = frozenset(
+    {
+        "PURE_FORMULA_FAILS_CLOSED_WITHOUT_ALTERNATE_SEMANTICS",
+        "TEMPORARY_SCALE_COMPONENT_FAILS_CLOSED",
+        "TEST_COMPONENT_FAILS_CLOSED_WITHOUT_ALTERNATE_SEMANTICS",
+    }
+)
+_SPECIFICATION_SEMANTIC_FIELDS = (
+    "complete_mathematical_or_procedural_definition",
+    "input_schema",
+    "output_schema",
+    "units_and_bases",
+    "domain_and_boundary_behavior",
+    "state_and_time_semantics",
+    "missing_stale_nonfinite_behavior",
+    "precision_and_rounding",
+    "parameter_schema_and_default_provenance",
+    "requirements",
+    "classical_fallback",
+    "risk_materiality",
+)
+
 FORBIDDEN_CALLABLE_FRAGMENTS = (
     "eval(",
     "exec(",
@@ -188,6 +233,7 @@ MONEY_UNIT_TOKENS = frozenset(
 
 MODE_ORDER = MappingProxyType(
     {
+        "NOT_ELIGIBLE": 0,
         "STATIC_VALIDATION": 0,
         "TEST_VECTOR": 0,
         "FIXTURE_NONLIVE": 0,
@@ -199,6 +245,43 @@ MODE_ORDER = MappingProxyType(
         "NONLIVE_ONLY": 4,
         "CANARY": 5,
         "LIVE": 6,
+    }
+)
+
+# Registry policy is descriptive data and may only narrow these code-owned
+# PR165-D2 ceilings.  It can never mint a principal or expand an operation or
+# mode.  The connector entry is the current roster's non-runtime future
+# consumer and therefore remains status/explain-only.
+_TRUSTED_AGENT_OPERATION_CEILINGS: Mapping[str, frozenset[str]] = MappingProxyType(
+    {
+        "research_agent": frozenset({"status", "explain"}),
+        "parameter_selector_agent": frozenset(
+            {"resolve", "compute", "status", "explain"}
+        ),
+        "risk_manager_agent": frozenset(
+            {"resolve", "compute", "status", "explain"}
+        ),
+        "quantum_optimizer_agent": frozenset(
+            {"resolve", "compute", "status", "explain"}
+        ),
+        "commander_agent": frozenset(
+            {"resolve", "compute", "status", "explain"}
+        ),
+        "governance_agent": frozenset({"status", "explain"}),
+        "dashboard_agent": frozenset({"status", "explain"}),
+        "connector_venue_readiness_future_consumer": frozenset(
+            {"status", "explain"}
+        ),
+    }
+)
+_TRUSTED_AGENT_MODE_CEILINGS: Mapping[str, str] = MappingProxyType(
+    {
+        # PAPER is a capability ceiling, not evidence or authorization.  Each
+        # binding must still independently declare the mode, evidence state,
+        # activation, and authorization.  SHADOW/DRYRUN/CANARY/LIVE therefore
+        # cannot be introduced by registry policy in CONTROL1.
+        agent_id: "PAPER"
+        for agent_id in _TRUSTED_AGENT_OPERATION_CEILINGS
     }
 )
 
@@ -287,6 +370,7 @@ _BUILD_OWNED_IMPLEMENTATION_VERIFIERS: Mapping[
 
 PROMOTION_STATE_ORDER = MappingProxyType(
     {
+        "SPECIFICATION_REQUIRED": 0,
         "NOT_ELIGIBLE": 0,
         "SPECIFIED": 1,
         "VERIFIED": 2,
@@ -426,6 +510,603 @@ def _contains_forbidden_placeholder(value: Any) -> bool:
     if isinstance(value, (list, tuple)):
         return any(_contains_forbidden_placeholder(item) for item in value)
     return False
+
+
+def _explicit_not_applicable_with_proof(value: Any) -> bool:
+    if not isinstance(value, Mapping) or value.get("not_applicable") is not True:
+        return False
+    proof = value.get("proof_ref", value.get("proof"))
+    return (
+        isinstance(proof, str)
+        and proof.strip() in _SPECIFICATION_NOT_APPLICABLE_PROOF_REFS
+    )
+
+
+def _unresolved_specification_value(value: str) -> bool:
+    normalized = value.strip().upper()
+    if not normalized:
+        return True
+    if normalized in _UNRESOLVED_SPECIFICATION_VALUES:
+        return True
+    if normalized in {
+        "TBD",
+        "UNKNOWN",
+        "UNSPECIFIED",
+        "UNRESOLVED",
+        "NOT_RESOLVED",
+        "NOT_SPECIFIED",
+        "SPECIFICATION_REQUIRED",
+        "TO_BE_DETERMINED",
+    }:
+        return True
+    unresolved_tokens = {
+        token
+        for token in re.split(r"[^A-Z0-9]+", normalized)
+        if token
+    }
+    if unresolved_tokens.intersection(
+        {
+            "TBD",
+            "TBC",
+            "TODO",
+            "UNKNOWN",
+            "UNSPECIFIED",
+            "UNRESOLVED",
+            "PENDING",
+        }
+    ):
+        return True
+    if normalized.startswith(
+        ("TBD", "TBC", "TODO", "UNKNOWN", "UNSPECIFIED", "UNRESOLVED")
+    ):
+        return True
+    if "TO_BE_" in normalized:
+        return True
+    if normalized.startswith(
+        (
+            "MISSING_",
+            "REQUIRES_",
+            "SOURCE_DECLARED",
+            "SOURCE_IMPLEMENTATION",
+            "SOURCE_PROCEDURE",
+            "EXACT_RUNTIME",
+        )
+    ):
+        return True
+    if normalized.endswith("_REQUIRED") or "_REQUIRED_" in normalized:
+        return True
+    return "SOURCE_PROCEDURE_DECLARES_OTHERWISE" in normalized
+
+
+def _unresolved_specification_key(value: Any) -> bool:
+    normalized = str(value).strip().upper()
+    if not normalized:
+        return True
+    tokens = {
+        token for token in re.split(r"[^A-Z0-9]+", normalized) if token
+    }
+    return bool(
+        tokens.intersection(
+            {
+                "TBD",
+                "TBC",
+                "TODO",
+                "UNKNOWN",
+                "UNSPECIFIED",
+                "UNRESOLVED",
+                "PENDING",
+            }
+        )
+        or normalized.startswith(
+            ("TBD", "TBC", "TODO", "UNKNOWN", "UNSPECIFIED", "UNRESOLVED")
+        )
+        or "TO_BE_" in normalized
+    )
+
+
+def _specification_value_issues(value: Any, *, path: str) -> list[str]:
+    if value is None:
+        return [path]
+    if isinstance(value, str):
+        return [path] if _unresolved_specification_value(value) else []
+    if isinstance(value, Mapping):
+        if not value:
+            return [path]
+        if value.get("not_applicable") is True:
+            issues: list[str] = []
+            if not _explicit_not_applicable_with_proof(value):
+                issues.append(f"{path}.proof_ref")
+            for key, item in value.items():
+                if key == "not_applicable":
+                    continue
+                if _unresolved_specification_key(key):
+                    issues.append(f"{path}.{key}.__key__")
+                issues.extend(
+                    _specification_value_issues(item, path=f"{path}.{key}")
+                )
+            return issues
+        issues: list[str] = []
+        for key, item in value.items():
+            if _unresolved_specification_key(key):
+                issues.append(f"{path}.{key}.__key__")
+            issues.extend(
+                _specification_value_issues(item, path=f"{path}.{key}")
+            )
+        return issues
+    if isinstance(value, (list, tuple)):
+        if not value:
+            return [path]
+        issues = []
+        for index, item in enumerate(value):
+            issues.extend(
+                _specification_value_issues(item, path=f"{path}[{index}]")
+            )
+        return issues
+    return []
+
+
+def _schema_declared_type_family(value: Any) -> str | None:
+    """Map a closed, concrete schema type to its runtime validation family."""
+
+    if not isinstance(value, str) or _unresolved_specification_value(value):
+        return None
+    declared = value.strip().upper().replace(" ", "_")
+    if not declared:
+        return None
+    if "NUMERIC_OR_SEQUENCE" in declared:
+        return "NUMERIC_OR_SEQUENCE"
+    if "NUMERIC_OR_STRUCTURE" in declared:
+        return "NUMERIC_OR_STRUCTURE"
+    if any(token in declared for token in ("ARRAY", "LIST", "SEQUENCE", "TUPLE")):
+        return "SEQUENCE"
+    if any(
+        token in declared
+        for token in ("OBJECT", "MAPPING", "DICT", "RECORD", "STRUCTURE")
+    ):
+        return "MAPPING"
+    if "BOOL" in declared:
+        return "BOOLEAN"
+    if any(
+        token in declared
+        for token in (
+            "STRING",
+            "TEXT",
+            "IDENTIFIER",
+            "DATE",
+            "TIME",
+            "ENUM",
+            "CATEGORY",
+        )
+    ):
+        return "STRING"
+    if "INTEGER" in declared or declared == "INT":
+        return "INTEGER"
+    if any(
+        token in declared
+        for token in (
+            "NUMBER",
+            "NUMERIC",
+            "DECIMAL",
+            "FLOAT",
+            "REAL",
+            "PROBABILITY",
+            "PRICE",
+            "CURRENCY",
+            "CASH",
+            "QUANTITY",
+            "RATIO",
+            "RATE",
+            "SCORE",
+            "EDGE",
+            "FEE",
+            "COST",
+            "PNL",
+            "VALUE",
+        )
+    ):
+        return "NUMERIC"
+    return None
+
+
+def _specification_completeness_issues(
+    definition: Mapping[str, Any] | Any,
+) -> tuple[str, ...]:
+    """Return deterministic blockers for a complete computation meaning.
+
+    This is intentionally stricter than record-shape validation.  An
+    incomplete source-backed definition remains a valid inventory record, but
+    it cannot author specification PASS, CONTEXT_READY, or agent compute
+    eligibility.  Empty immediate requirements are valid (the component has
+    no upstream computation); empty input/output schemas require an explicit
+    zero-port proof.
+    """
+
+    if not isinstance(definition, Mapping):
+        return ("definition",)
+    issues: list[str] = []
+    for field_name in _SPECIFICATION_SEMANTIC_FIELDS:
+        if field_name not in definition:
+            issues.append(field_name)
+            continue
+        value = definition[field_name]
+        if field_name == "requirements":
+            if not isinstance(value, (list, tuple)):
+                issues.append(field_name)
+                continue
+            # An empty immediate-requirement set is a complete, meaningful
+            # declaration for a leaf computation.  Non-empty entries must be
+            # fully typed below.
+            for index, requirement in enumerate(value):
+                if not isinstance(requirement, Mapping):
+                    issues.append(f"requirements[{index}]")
+                    continue
+                missing = REQUIREMENT_REQUIRED_FIELDS - set(requirement)
+                issues.extend(
+                    f"requirements[{index}].{name}" for name in sorted(missing)
+                )
+                for key, item in requirement.items():
+                    # REQUIRED is the valid closed-world optionality enum, not
+                    # an unresolved semantic token.
+                    if key == "required_or_optional":
+                        continue
+                    if key == "fallback_component_id_or_null" and item is None:
+                        continue
+                    issues.extend(
+                        _specification_value_issues(
+                            item, path=f"requirements[{index}].{key}"
+                        )
+                    )
+            continue
+        if field_name in {"input_schema", "output_schema"}:
+            if not isinstance(value, (list, tuple)):
+                issues.append(field_name)
+                continue
+            if not value:
+                proof_name = (
+                    "zero_input_proof"
+                    if field_name == "input_schema"
+                    else "zero_output_proof"
+                )
+                proof = definition.get(proof_name)
+                if not isinstance(proof, str) or _unresolved_specification_value(
+                    proof
+                ):
+                    issues.append(field_name)
+                continue
+            for index, entry in enumerate(value):
+                if not isinstance(entry, Mapping):
+                    issues.append(f"{field_name}[{index}]")
+                    continue
+                for name in ("name", "type"):
+                    if name not in entry:
+                        issues.append(f"{field_name}[{index}].{name}")
+                if "type" in entry and _schema_declared_type_family(
+                    entry.get("type")
+                ) is None:
+                    issues.append(f"{field_name}[{index}].type")
+                if not any(
+                    name in entry for name in ("unit", "units", "unit_or_basis", "basis")
+                ):
+                    issues.append(f"{field_name}[{index}].unit_or_basis")
+                issues.extend(
+                    _specification_value_issues(
+                        entry, path=f"{field_name}[{index}]"
+                    )
+                )
+            continue
+        if field_name == "units_and_bases":
+            schema_names = {
+                str(entry.get("name"))
+                for schema_name in ("input_schema", "output_schema")
+                for entry in definition.get(schema_name, ())
+                if isinstance(entry, Mapping) and entry.get("name")
+            }
+            zero_port_proofs = all(
+                isinstance(definition.get(name), str)
+                and not _unresolved_specification_value(str(definition[name]))
+                for name in ("zero_input_proof", "zero_output_proof")
+            )
+            if (
+                not isinstance(value, Mapping)
+                or (bool(schema_names) and not value)
+                or (not schema_names and not value and not zero_port_proofs)
+            ):
+                issues.append(field_name)
+                continue
+            if not value and zero_port_proofs:
+                continue
+            issues.extend(
+                f"units_and_bases.{name}"
+                for name in sorted(schema_names - {str(key) for key in value})
+            )
+        if field_name == "parameter_schema_and_default_provenance":
+            if isinstance(value, (list, tuple)) and not value:
+                issues.append(field_name)
+                continue
+            declared_parameters = (
+                value.get("parameters") if isinstance(value, Mapping) else None
+            )
+            if (
+                isinstance(value, Mapping)
+                and isinstance(declared_parameters, (Mapping, list, tuple))
+                and not declared_parameters
+            ):
+                provenance = value.get("default_provenance")
+                if not isinstance(provenance, str) or _unresolved_specification_value(
+                    provenance
+                ):
+                    issues.append(f"{field_name}.default_provenance")
+                # A proven zero-parameter schema is complete; do not let the
+                # generic empty-container check turn it back into a blocker.
+                for key, item in value.items():
+                    if key == "parameters":
+                        continue
+                    issues.extend(
+                        _specification_value_issues(
+                            item, path=f"{field_name}.{key}"
+                        )
+                    )
+                continue
+        issues.extend(_specification_value_issues(value, path=field_name))
+    return tuple(sorted(set(issues)))
+
+
+def _input_source_binding_issues(
+    definition: Mapping[str, Any], binding: Mapping[str, Any]
+) -> tuple[str, ...]:
+    """Prove exact source coverage for every typed input port.
+
+    A compact mapping inherits type/unit from the canonical input schema.  A
+    verbose list must repeat those declarations exactly.  Both forms must
+    cover the input names one-for-one and provide a concrete source locator.
+    """
+
+    input_schema = definition.get("input_schema")
+    if not isinstance(input_schema, (list, tuple)):
+        return ("input_schema",)
+    schema_by_name: dict[str, Mapping[str, Any]] = {}
+    issues: list[str] = []
+    for index, entry in enumerate(input_schema):
+        if not isinstance(entry, Mapping):
+            issues.append(f"input_schema[{index}]")
+            continue
+        name = str(entry.get("name", "")).strip()
+        if not name:
+            issues.append(f"input_schema[{index}].name")
+            continue
+        if name in schema_by_name:
+            issues.append(f"input_schema[{index}].duplicate:{name}")
+        schema_by_name[name] = entry
+
+    configured = binding.get("input_source_bindings")
+    configured_by_name: dict[str, Any] = {}
+    if isinstance(configured, Mapping):
+        configured_by_name = {str(key): value for key, value in configured.items()}
+    elif isinstance(configured, (list, tuple)):
+        for index, entry in enumerate(configured):
+            if not isinstance(entry, Mapping):
+                issues.append(f"input_source_bindings[{index}]")
+                continue
+            declared_name = entry.get("input_name", entry.get("name"))
+            name = str(declared_name or "").strip()
+            if not name:
+                issues.append(f"input_source_bindings[{index}].input_name")
+                continue
+            if name in configured_by_name:
+                issues.append(f"input_source_bindings[{index}].duplicate:{name}")
+            configured_by_name[name] = entry
+    else:
+        return ("input_source_bindings",)
+
+    required_requirements_by_input: dict[str, list[Mapping[str, Any]]] = defaultdict(list)
+    requirements = definition.get("requirements", ())
+    if isinstance(requirements, (list, tuple)):
+        for requirement in requirements:
+            if not isinstance(requirement, Mapping):
+                continue
+            if str(requirement.get("required_or_optional", "REQUIRED")).upper() == "OPTIONAL":
+                continue
+            consumer_input = str(requirement.get("consumer_input_name", "")).strip()
+            if consumer_input:
+                required_requirements_by_input[consumer_input].append(requirement)
+
+    schema_names = set(schema_by_name)
+    configured_names = set(configured_by_name)
+    issues.extend(
+        f"input_source_bindings.missing:{name}"
+        for name in sorted(schema_names - configured_names)
+    )
+    issues.extend(
+        f"input_source_bindings.undeclared:{name}"
+        for name in sorted(configured_names - schema_names)
+    )
+    for name in sorted(schema_names & configured_names):
+        schema = schema_by_name[name]
+        configured_entry = configured_by_name[name]
+        source: Any = configured_entry
+        if isinstance(configured_entry, Mapping):
+            source = configured_entry.get(
+                "source",
+                configured_entry.get(
+                    "source_ref", configured_entry.get("binding_ref")
+                ),
+            )
+            declared_type = configured_entry.get("declared_type")
+            if declared_type is None or str(declared_type) != str(schema.get("type")):
+                issues.append(f"input_source_bindings.{name}.declared_type")
+            declared_unit = configured_entry.get(
+                "unit_or_basis",
+                configured_entry.get(
+                    "unit", configured_entry.get("basis")
+                ),
+            )
+            if declared_unit is None or str(declared_unit) != _schema_unit(schema):
+                issues.append(f"input_source_bindings.{name}.unit_or_basis")
+            requirements_for_input = required_requirements_by_input.get(name, ())
+            binding_state = str(configured_entry.get("binding_state", ""))
+            if requirements_for_input:
+                targets = {
+                    str(requirement.get("required_component_id_or_source_selector", ""))
+                    for requirement in requirements_for_input
+                }
+                if binding_state != "CANONICAL_REQUIREMENT_OUTPUT":
+                    issues.append(
+                        f"input_source_bindings.{name}.requirement_binding_state"
+                    )
+                if not isinstance(source, str) or source not in targets:
+                    issues.append(
+                        f"input_source_bindings.{name}.requirement_component"
+                    )
+                else:
+                    matching = [
+                        requirement
+                        for requirement in requirements_for_input
+                        if str(
+                            requirement.get(
+                                "required_component_id_or_source_selector", ""
+                            )
+                        )
+                        == source
+                    ]
+                    producer_output = str(
+                        configured_entry.get("producer_output_name", "")
+                    )
+                    if not any(
+                        producer_output
+                        == str(requirement.get("producer_output_name", ""))
+                        for requirement in matching
+                    ):
+                        issues.append(
+                            f"input_source_bindings.{name}.requirement_output"
+                        )
+            elif binding_state == "CANONICAL_REQUIREMENT_OUTPUT":
+                issues.append(
+                    f"input_source_bindings.{name}.unexpected_requirement_binding"
+                )
+        elif required_requirements_by_input.get(name):
+            issues.append(f"input_source_bindings.{name}.requirement_binding_shape")
+        if isinstance(source, str):
+            if _unresolved_specification_value(source):
+                issues.append(f"input_source_bindings.{name}.source_ref")
+        elif isinstance(source, (Mapping, list, tuple)):
+            source_issues = _specification_value_issues(
+                source, path=f"input_source_bindings.{name}.source_ref"
+            )
+            issues.extend(source_issues)
+        else:
+            issues.append(f"input_source_bindings.{name}.source_ref")
+    return tuple(sorted(set(issues)))
+
+
+def _agent_policy_operations(policy: Any) -> set[str]:
+    operations: set[str] = set()
+    if isinstance(policy, Mapping):
+        declared = policy.get(
+            "control_plane_operations", policy.get("allowed_operations")
+        )
+        if isinstance(declared, (list, tuple)):
+            operations.update(str(value) for value in declared)
+        for value in policy.values():
+            if isinstance(value, (Mapping, list, tuple)):
+                operations.update(_agent_policy_operations(value))
+    elif isinstance(policy, (list, tuple)):
+        for value in policy:
+            operations.update(_agent_policy_operations(value))
+    return operations
+
+
+def _validate_agent_access_policy(
+    policy: Any, *, component_id: str, binding_id: str
+) -> None:
+    if not isinstance(policy, Mapping):
+        raise ValueError(
+            f"INVALID_AGENT_ACCESS_POLICY: {component_id}: {binding_id}"
+        )
+    unknown_agents = sorted(
+        str(agent_id)
+        for agent_id in policy
+        if str(agent_id) not in _TRUSTED_AGENT_OPERATION_CEILINGS
+    )
+    if unknown_agents:
+        raise ValueError(
+            "UNTRUSTED_AGENT_POLICY_PRINCIPAL: "
+            f"{component_id}: {binding_id}: {unknown_agents}"
+        )
+    for raw_agent_id, raw_entry in policy.items():
+        agent_id = str(raw_agent_id)
+        if not isinstance(raw_entry, Mapping):
+            raise ValueError(
+                "INVALID_AGENT_POLICY_ENTRY: "
+                f"{component_id}: {binding_id}: {agent_id}"
+            )
+        operations = raw_entry.get(
+            "control_plane_operations", raw_entry.get("allowed_operations", ())
+        )
+        if not isinstance(operations, (list, tuple)):
+            raise ValueError(
+                "INVALID_AGENT_POLICY_OPERATIONS: "
+                f"{component_id}: {binding_id}: {agent_id}"
+            )
+        declared_operations = {str(value) for value in operations}
+        excess = sorted(
+            declared_operations - _TRUSTED_AGENT_OPERATION_CEILINGS[agent_id]
+        )
+        if excess:
+            raise ValueError(
+                "AGENT_POLICY_AUTHORITY_EXPANSION: "
+                f"{component_id}: {binding_id}: {agent_id}: {excess}"
+            )
+        ceiling = str(raw_entry.get("mode_ceiling", "STATIC_VALIDATION"))
+        declared_rank = MODE_ORDER.get(ceiling)
+        trusted_ceiling = _TRUSTED_AGENT_MODE_CEILINGS[agent_id]
+        trusted_rank = MODE_ORDER[trusted_ceiling]
+        if declared_rank is None or declared_rank > trusted_rank:
+            raise ValueError(
+                "AGENT_POLICY_MODE_EXPANSION: "
+                f"{component_id}: {binding_id}: {agent_id}: "
+                f"{ceiling}>{trusted_ceiling}"
+            )
+        if raw_entry.get("order_release_authority") is not False:
+            raise ValueError(
+                "AGENT_ORDER_AUTHORITY_FORBIDDEN: "
+                f"{component_id}: {binding_id}: {agent_id}"
+            )
+        if raw_entry.get("source_truth_authority") is not False:
+            raise ValueError(
+                "AGENT_SOURCE_TRUTH_AUTHORITY_FORBIDDEN: "
+                f"{component_id}: {binding_id}: {agent_id}"
+            )
+
+
+def _forbidden_mapping_key_paths(
+    value: Any,
+    *,
+    forbidden_keys: frozenset[str],
+    path: str = "record",
+) -> tuple[str, ...]:
+    """Return forbidden keys at any nesting depth without retaining lineage."""
+
+    found: list[str] = []
+    if isinstance(value, Mapping):
+        for key, item in value.items():
+            item_path = f"{path}.{key}"
+            if str(key) in forbidden_keys:
+                found.append(item_path)
+            found.extend(
+                _forbidden_mapping_key_paths(
+                    item, forbidden_keys=forbidden_keys, path=item_path
+                )
+            )
+    elif isinstance(value, (list, tuple)):
+        for index, item in enumerate(value):
+            found.extend(
+                _forbidden_mapping_key_paths(
+                    item,
+                    forbidden_keys=forbidden_keys,
+                    path=f"{path}[{index}]",
+                )
+            )
+    return tuple(found)
 
 
 def _validate_evidence_compact(evidence: Mapping[str, Any], *, path: str) -> None:
@@ -723,6 +1404,7 @@ def _validate_record_shape(
         raise ValueError(f"MISSING_DEFINITION_FIELDS: {component_id}: {missing_definition}")
     if _contains_forbidden_placeholder(record):
         raise ValueError(f"GENERIC_PLACEHOLDER_TERMINAL: {component_id}")
+    specification_issues = _specification_completeness_issues(definition)
     component_kind = str(definition.get("component_kind", ""))
     if component_kind not in ALLOWED_COMPONENT_KINDS:
         raise ValueError(f"INVALID_COMPONENT_KIND: {component_id}: {component_kind}")
@@ -825,6 +1507,22 @@ def _validate_record_shape(
         if not isinstance(qku_binding, Mapping):
             raise ValueError(f"INVALID_QKU_ROLE_BINDING: {component_id}")
     origins = {str(value) for value in record.get("origin_cohorts", ())}
+    if "RP5C_BASELINE" in origins:
+        forbidden_lineage_paths = _forbidden_mapping_key_paths(
+            record,
+            forbidden_keys=frozenset(
+                {
+                    "member_identity_row_ids",
+                    "identity_row_ids",
+                    "source_artifact_row_ids",
+                }
+            ),
+        )
+        if forbidden_lineage_paths:
+            raise ValueError(
+                "RP5C_RUNTIME_LINEAGE_ARRAY: "
+                f"{component_id}: {list(forbidden_lineage_paths)}"
+            )
     if "RP5C_BASELINE" in origins and qku_bindings:
         if record["record_state"] != "DORMANT_PRESERVED":
             raise ValueError(f"RP5C_QKU_ROLE_RUNTIME_ACTIVATION: {component_id}")
@@ -998,6 +1696,87 @@ def _validate_record_shape(
             raise ValueError(f"INVALID_EVIDENCE_STATE: {component_id}: {binding_id}")
         if readiness.get("authorization") not in {"NOT_ELIGIBLE", "ELIGIBLE", "ALLOW_PENDING", "AUTHORIZED"}:
             raise ValueError(f"INVALID_AUTHORIZATION_STATE: {component_id}: {binding_id}")
+        if readiness.get("specification") == "PASS" and specification_issues:
+            raise ValueError(
+                "FALSE_SPECIFICATION_PASS: "
+                f"{component_id}: {binding_id}: {list(specification_issues)}"
+            )
+        derived_state = str(binding.get("derived_state", ""))
+        allowed_derived_states = {
+            "SPECIFICATION_REQUIRED",
+            "SPECIFIED",
+            "VERIFIED",
+            "CONTEXT_READY",
+            "STACK_READY",
+            "EVIDENCED",
+            "AUTHORIZED",
+            "RETIRED",
+            "INVALID",
+        }
+        if derived_state not in allowed_derived_states:
+            raise ValueError(
+                f"INVALID_DERIVED_STATE: {component_id}: {binding_id}: {derived_state}"
+            )
+        if record["record_state"] in ACTIVE_RECORD_STATES:
+            if readiness.get("specification") == "INVALID":
+                raise ValueError(
+                    f"ACTIVE_INVALID_SPECIFICATION: {component_id}: {binding_id}"
+                )
+            specification_required = (
+                readiness.get("specification") == "REQUIRED"
+                or bool(specification_issues)
+            )
+            if specification_required and derived_state != "SPECIFICATION_REQUIRED":
+                raise ValueError(
+                    "FALSE_SPECIFIED_STATE: "
+                    f"{component_id}: {binding_id}: {derived_state}"
+                )
+            if not specification_required and derived_state == "SPECIFICATION_REQUIRED":
+                raise ValueError(
+                    "FALSE_SPECIFICATION_REQUIRED_STATE: "
+                    f"{component_id}: {binding_id}"
+                )
+        input_source_issues = _input_source_binding_issues(definition, binding)
+        typed_binding_ready_claim = any(
+            readiness.get(name) == "PASS"
+            for name in ("specification", "inputs", "context")
+        ) or binding.get("derived_state") in {
+            "CONTEXT_READY",
+            "STACK_READY",
+            "EVIDENCED",
+            "AUTHORIZED",
+        }
+        if typed_binding_ready_claim and input_source_issues:
+            raise ValueError(
+                "FALSE_TYPED_INPUT_SOURCE_BINDING: "
+                f"{component_id}: {binding_id}: {list(input_source_issues)}"
+            )
+        computation_ready = not specification_issues and not input_source_issues and all(
+            readiness.get(name) == "PASS" for name in READINESS_DIMENSIONS
+        )
+        _validate_agent_access_policy(
+            binding.get("agent_access_policy"),
+            component_id=component_id,
+            binding_id=binding_id,
+        )
+        declared_operations = _agent_policy_operations(
+            binding.get("agent_access_policy")
+        )
+        if declared_operations.intersection({"resolve", "compute"}) and not computation_ready:
+            raise ValueError(
+                "FALSE_AGENT_COMPUTE_ELIGIBILITY: "
+                f"{component_id}: {binding_id}: {sorted(declared_operations)}"
+            )
+        if binding.get("derived_state") in {
+            "CONTEXT_READY",
+            "STACK_READY",
+            "EVIDENCED",
+            "AUTHORIZED",
+        } and not computation_ready:
+            raise ValueError(
+                "FALSE_CONTEXT_READY: "
+                f"{component_id}: {binding_id}: {list(specification_issues)}"
+            )
         evidence = binding.get("evidence_summary", {})
         if not isinstance(evidence, Mapping):
             raise ValueError(f"INVALID_EVIDENCE_SUMMARY: {component_id}: {binding_id}")
@@ -1071,9 +1850,21 @@ def _stable_partition_name(component_id: str) -> tuple[str, str, str]:
     for prefix, token in categories:
         if component_id.startswith(prefix):
             return token, prefix, f"{prefix}\uffff"
-    suffix = component_id.removeprefix("QTT.COMP.").split(".", 1)[0].lower()
-    suffix = re.sub(r"[^a-z0-9-]+", "-", suffix).strip("-") or "other"
-    return f"other-{suffix}", f"QTT.COMP.{suffix.upper()}.", f"QTT.COMP.{suffix.upper()}.\uffff"
+    canonical_suffix = component_id.removeprefix("QTT.COMP.").split(".", 1)[0]
+    # Physical shard names are consumer-invisible and must remain stable across
+    # semantic currentization.  The pre-existing fallback shard was named
+    # ``other-research``; retain that reviewed filename for the CANDIDATE prefix
+    # while declaring and validating its exact QTT.COMP.CANDIDATE.* ID range.
+    # This prevents unrelated legacy validators and diffs from observing a
+    # delete/add churn merely because synthetic proof rows were removed.
+    if canonical_suffix == "CANDIDATE":
+        file_token = "research"
+    else:
+        file_token = re.sub(
+            r"[^a-z0-9-]+", "-", canonical_suffix.lower()
+        ).strip("-") or "other"
+    canonical_prefix = f"QTT.COMP.{canonical_suffix}."
+    return f"other-{file_token}", canonical_prefix, f"{canonical_prefix}\uffff"
 
 
 @dataclass(frozen=True)
@@ -1707,12 +2498,19 @@ def _decimal(value: Any, *, name: str) -> Decimal:
     return result
 
 
+_CONTROL_DECIMAL_CONTEXT = Context(prec=34, rounding=ROUND_HALF_EVEN)
+_CONTROL_MIN_RATIO_DENOMINATOR = Decimal("1e-9")
+
+
 def _native_decimal_implied_probability(inputs: dict[str, Any]) -> dict[str, Any]:
     price = _decimal(inputs["price"], name="price")
     payout = _decimal(inputs["payout"], name="payout")
-    if payout <= 0:
-        raise ComputationControlError("INVALID_DOMAIN", "payout must be positive")
-    value = price / payout
+    if payout < _CONTROL_MIN_RATIO_DENOMINATOR:
+        raise ComputationControlError(
+            "INVALID_DOMAIN", "payout must be at least 1e-9"
+        )
+    with localcontext(_CONTROL_DECIMAL_CONTEXT):
+        value = price / payout
     if value < 0 or value > 1:
         raise ComputationControlError("INVALID_DOMAIN", "implied probability must be in [0, 1]")
     return {"implied_probability": value}
@@ -1723,7 +2521,12 @@ def _native_decimal_probability_edge(inputs: dict[str, Any]) -> dict[str, Any]:
     implied = _decimal(inputs["implied_probability"], name="implied_probability")
     if not (Decimal("0") <= model <= Decimal("1")):
         raise ComputationControlError("INVALID_DOMAIN", "p_model must be in [0, 1]")
-    return {"probability_edge": model - implied}
+    if not (Decimal("0") <= implied <= Decimal("1")):
+        raise ComputationControlError(
+            "INVALID_DOMAIN", "implied_probability must be in [0, 1]"
+        )
+    with localcontext(_CONTROL_DECIMAL_CONTEXT):
+        return {"probability_edge": model - implied}
 
 
 def _native_decimal_mid_price(inputs: dict[str, Any]) -> dict[str, Any]:
@@ -1731,7 +2534,8 @@ def _native_decimal_mid_price(inputs: dict[str, Any]) -> dict[str, Any]:
     ask = _decimal(inputs["best_ask"], name="best_ask")
     if bid < 0 or ask < bid:
         raise ComputationControlError("INVALID_DOMAIN", "require 0 <= best_bid <= best_ask")
-    return {"mid_price": (bid + ask) / Decimal("2")}
+    with localcontext(_CONTROL_DECIMAL_CONTEXT):
+        return {"mid_price": (bid + ask) / Decimal("2")}
 
 
 def _native_decimal_spread(inputs: dict[str, Any]) -> dict[str, Any]:
@@ -1739,15 +2543,20 @@ def _native_decimal_spread(inputs: dict[str, Any]) -> dict[str, Any]:
     ask = _decimal(inputs["best_ask"], name="best_ask")
     if bid < 0 or ask < bid:
         raise ComputationControlError("INVALID_DOMAIN", "require 0 <= best_bid <= best_ask")
-    return {"spread": ask - bid}
+    with localcontext(_CONTROL_DECIMAL_CONTEXT):
+        return {"spread": ask - bid}
 
 
 def _native_decimal_relative_spread(inputs: dict[str, Any]) -> dict[str, Any]:
     spread = _decimal(inputs["spread"], name="spread")
     mid = _decimal(inputs["mid_price"], name="mid_price")
-    if spread < 0 or mid <= 0:
-        raise ComputationControlError("INVALID_DOMAIN", "require nonnegative spread and positive mid price")
-    return {"relative_spread": spread / mid}
+    if spread < 0 or mid < _CONTROL_MIN_RATIO_DENOMINATOR:
+        raise ComputationControlError(
+            "INVALID_DOMAIN",
+            "require nonnegative spread and mid_price at least 1e-9",
+        )
+    with localcontext(_CONTROL_DECIMAL_CONTEXT):
+        return {"relative_spread": spread / mid}
 
 
 def _native_stack_identity(inputs: dict[str, Any]) -> dict[str, Any]:
@@ -1769,8 +2578,347 @@ NATIVE_IMPLEMENTATIONS: Mapping[str, Callable[[dict[str, Any]], dict[str, Any]]]
 )
 
 
-def _default_implementation_allowlist() -> dict[str, Callable[[dict[str, Any]], dict[str, Any]]]:
+def _fixed_ref_aliases(module_ref: str, function_name: str) -> tuple[str, ...]:
+    """Return aliases only after a caller has matched an explicit module map."""
+
+    normalized_module = module_ref.replace("\\", "/")
+    exact_ref = f"{normalized_module}:{function_name}"
+    if normalized_module.endswith(".py"):
+        normalized_module = normalized_module[:-3].replace("/", ".")
+    if normalized_module.startswith("src.qtt."):
+        src_module = normalized_module
+        qtt_module = normalized_module.removeprefix("src.")
+    elif normalized_module.startswith("qtt."):
+        qtt_module = normalized_module
+        src_module = f"src.{normalized_module}"
+    else:
+        raise RuntimeError(f"FIXED_IMPLEMENTATION_MODULE_OUTSIDE_QTT: {module_ref}")
+    return tuple(
+        sorted(
+            {
+                exact_ref,
+                f"{src_module}:{function_name}",
+                f"{qtt_module}:{function_name}",
+            }
+        )
+    )
+
+
+def _kwargs_contract_is_direct(
+    implementation: Callable[..., Any], input_fields: Sequence[str]
+) -> bool:
+    """Return whether the declared fields can call the fixed function by keyword."""
+
+    signature = inspect.signature(implementation)
+    parameters = signature.parameters
+    if any(
+        parameter.kind is inspect.Parameter.POSITIONAL_ONLY
+        for parameter in parameters.values()
+    ):
+        return False
+    declared = set(input_fields)
+    accepts_arbitrary_keywords = any(
+        parameter.kind is inspect.Parameter.VAR_KEYWORD
+        for parameter in parameters.values()
+    )
+    accepted_keywords = {
+        name
+        for name, parameter in parameters.items()
+        if parameter.kind
+        in {inspect.Parameter.POSITIONAL_OR_KEYWORD, inspect.Parameter.KEYWORD_ONLY}
+    }
+    required_keywords = {
+        name
+        for name, parameter in parameters.items()
+        if parameter.kind
+        in {inspect.Parameter.POSITIONAL_OR_KEYWORD, inspect.Parameter.KEYWORD_ONLY}
+        and parameter.default is inspect.Parameter.empty
+    }
+    return required_keywords.issubset(declared) and (
+        accepts_arbitrary_keywords or declared.issubset(accepted_keywords)
+    )
+
+
+def _wrap_fixed_kwargs_implementation(
+    implementation: Callable[..., Any],
+    contracts: Sequence[Mapping[str, Any]],
+    *,
+    implementation_ref: str,
+) -> Callable[[dict[str, Any]], dict[str, Any]]:
+    """Adapt one fixed kwargs-style owner function to the facade ABI."""
+
+    frozen_contracts = tuple(
+        (
+            str(contract["source_identity"]),
+            tuple(str(value) for value in contract["input_fields"]),
+            tuple(str(value) for value in contract["output_fields"]),
+            bool(contract["direct_kwargs"]),
+        )
+        for contract in contracts
+    )
+
+    @wraps(implementation)
+    def invoke(inputs: dict[str, Any]) -> dict[str, Any]:
+        if not isinstance(inputs, Mapping):
+            raise ComputationControlError(
+                "INVALID_IMPLEMENTATION_INPUT", implementation_ref
+            )
+        supplied_fields = frozenset(str(key) for key in inputs)
+        matches = [
+            contract
+            for contract in frozen_contracts
+            if frozenset(contract[1]) == supplied_fields
+        ]
+        if len(matches) != 1:
+            raise ComputationControlError(
+                "SOURCE_INPUT_CONTRACT_NOT_RESOLVED",
+                f"{implementation_ref}: fields={sorted(supplied_fields)}",
+            )
+        source_identity, input_fields, output_fields, direct_kwargs = matches[0]
+        if not direct_kwargs:
+            raise ComputationControlError(
+                "SOURCE_KWARGS_ADAPTER_UNPROVEN", source_identity
+            )
+        result = implementation(**{name: inputs[name] for name in input_fields})
+        if isinstance(result, Mapping):
+            result_mapping = dict(result)
+            if set(output_fields).issubset(result_mapping):
+                # Preserve the owner's complete deterministic mapping, including
+                # bounded diagnostic fields beyond the declared required ports.
+                return result_mapping
+            if len(output_fields) == 1:
+                return {output_fields[0]: result_mapping}
+            raise ComputationControlError(
+                "SOURCE_OUTPUT_CONTRACT_MISMATCH",
+                f"{source_identity}: expected={list(output_fields)} "
+                f"actual={sorted(str(key) for key in result_mapping)}",
+            )
+        if len(output_fields) != 1:
+            raise ComputationControlError(
+                "SOURCE_OUTPUT_CONTRACT_MISMATCH",
+                f"{source_identity}: scalar result for {list(output_fields)}",
+            )
+        return {output_fields[0]: result}
+
+    return invoke
+
+
+def _register_fixed_source_owner_implementations(
+    allowlist: dict[str, Callable[[dict[str, Any]], dict[str, Any]]],
+) -> frozenset[str]:
+    """Register fixed PR162B/GFP sources without dynamic import or path choice."""
+
+    try:
+        from ..stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization import (
+            algorithm_registry as pr162b_algorithm_registry,
+            calibration_formulas as pr162b_calibration_formulas,
+            portfolio_objectives as pr162b_portfolio_objectives,
+            prediction_market_formulas as pr162b_prediction_market_formulas,
+            quantum_formulations as pr162b_quantum_formulations,
+            risk_position_sizing_formulas as pr162b_risk_position_sizing_formulas,
+            technical_feature_formulas as pr162b_technical_feature_formulas,
+        )
+        from ..stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization import (
+            formula_registry as pr162b_formula_registry,
+        )
+        from ..stage1_prediction_markets.pr168_gfp_real_computation import (
+            decision as gfp_decision,
+            execution_costs as gfp_execution_costs,
+            fill_queue_latency as gfp_fill_queue_latency,
+            formula_discovery as gfp_formula_discovery,
+            overfit_controls as gfp_overfit_controls,
+            pnl as gfp_pnl,
+            portfolio_utility as gfp_portfolio_utility,
+            prediction_market_math as gfp_prediction_market_math,
+            quantum_objectives as gfp_quantum_objectives,
+            tca as gfp_tca,
+        )
+    except ImportError:
+        # Minimal installations may intentionally omit historical source owners.
+        return frozenset()
+
+    pr162b_base = (
+        "src.qtt.stage1_prediction_markets."
+        "qku_formula_algorithm_solver_market_scope_materialization"
+    )
+    pr162b_modules: Mapping[str, Any] = MappingProxyType(
+        {
+            f"{pr162b_base}.algorithm_registry": pr162b_algorithm_registry,
+            f"{pr162b_base}.calibration_formulas": pr162b_calibration_formulas,
+            f"{pr162b_base}.portfolio_objectives": pr162b_portfolio_objectives,
+            f"{pr162b_base}.prediction_market_formulas": pr162b_prediction_market_formulas,
+            f"{pr162b_base}.quantum_formulations": pr162b_quantum_formulations,
+            f"{pr162b_base}.risk_position_sizing_formulas": (
+                pr162b_risk_position_sizing_formulas
+            ),
+            f"{pr162b_base}.technical_feature_formulas": (
+                pr162b_technical_feature_formulas
+            ),
+        }
+    )
+    gfp_base = "src/qtt/stage1_prediction_markets/pr168_gfp_real_computation"
+    gfp_modules: Mapping[str, Any] = MappingProxyType(
+        {
+            f"{gfp_base}/decision.py": gfp_decision,
+            f"{gfp_base}/execution_costs.py": gfp_execution_costs,
+            f"{gfp_base}/fill_queue_latency.py": gfp_fill_queue_latency,
+            f"{gfp_base}/overfit_controls.py": gfp_overfit_controls,
+            f"{gfp_base}/pnl.py": gfp_pnl,
+            f"{gfp_base}/portfolio_utility.py": gfp_portfolio_utility,
+            f"{gfp_base}/prediction_market_math.py": gfp_prediction_market_math,
+            f"{gfp_base}/quantum_objectives.py": gfp_quantum_objectives,
+            f"{gfp_base}/tca.py": gfp_tca,
+        }
+    )
+
+    formula_specs = list(pr162b_formula_registry.formula_specs())
+    algorithm_specs = list(pr162b_algorithm_registry.algorithm_specs())
+    gfp_rows = list(gfp_formula_discovery.selected_formula_records())
+    if len(formula_specs) != 61 or len(algorithm_specs) != 14:
+        raise RuntimeError(
+            "PR162B_STATIC_IMPLEMENTATION_SOURCE_COUNT_MISMATCH: "
+            f"formula={len(formula_specs)} algorithm={len(algorithm_specs)}"
+        )
+    if len(gfp_rows) != 35:
+        raise RuntimeError(
+            f"GFP_STATIC_IMPLEMENTATION_SOURCE_COUNT_MISMATCH: {len(gfp_rows)}"
+        )
+
+    grouped: dict[tuple[str, str], dict[str, Any]] = {}
+
+    def add_contract(
+        *,
+        source_identity: str,
+        module_ref: str,
+        function_name: str,
+        input_fields: Iterable[Any],
+        output_fields: Iterable[Any],
+        module_map: Mapping[str, Any],
+    ) -> None:
+        module_object = module_map.get(module_ref)
+        if module_object is None:
+            raise RuntimeError(
+                f"STATIC_IMPLEMENTATION_MODULE_NOT_ALLOWLISTED: {source_identity}: "
+                f"{module_ref}"
+            )
+        # The name is consumed only from the fixed source owner's Python spec
+        # and is resolved inside a statically imported module.  Registry or
+        # caller data cannot select a module or populate this table.
+        source_owned_callable_table = {
+            str(name): value
+            for name, value in vars(module_object).items()
+            if callable(value)
+        }
+        implementation = source_owned_callable_table.get(function_name)
+        if not callable(implementation):
+            raise RuntimeError(
+                f"STATIC_IMPLEMENTATION_FUNCTION_NOT_ALLOWLISTED: {source_identity}: "
+                f"{module_ref}:{function_name}"
+            )
+        typed_inputs = tuple(str(value) for value in input_fields)
+        typed_outputs = tuple(str(value) for value in output_fields)
+        if not typed_inputs or not typed_outputs:
+            raise RuntimeError(
+                f"STATIC_IMPLEMENTATION_PORTS_MISSING: {source_identity}"
+            )
+        key = (module_ref, function_name)
+        entry = grouped.setdefault(
+            key, {"implementation": implementation, "contracts": []}
+        )
+        if entry["implementation"] is not implementation:
+            raise RuntimeError(
+                f"STATIC_IMPLEMENTATION_OBJECT_CONFLICT: {module_ref}:{function_name}"
+            )
+        entry["contracts"].append(
+            {
+                "source_identity": source_identity,
+                "input_fields": typed_inputs,
+                "output_fields": typed_outputs,
+                "direct_kwargs": _kwargs_contract_is_direct(
+                    implementation, typed_inputs
+                ),
+            }
+        )
+
+    for spec in (*formula_specs, *algorithm_specs):
+        add_contract(
+            source_identity=str(
+                spec.get("formula_id") or spec.get("algorithm_id")
+            ),
+            module_ref=str(spec.get("implementation_module", "")),
+            function_name=str(spec.get("implementation_function", "")),
+            input_fields=spec.get("input_fields", ()),
+            output_fields=spec.get("output_fields", ()),
+            module_map=pr162b_modules,
+        )
+    pr162b_unique = sum(
+        1 for module_ref, _ in grouped if module_ref in pr162b_modules
+    )
+    if pr162b_unique != 75:
+        raise RuntimeError(
+            f"PR162B_STATIC_IMPLEMENTATION_UNIQUE_COUNT_MISMATCH: {pr162b_unique}"
+        )
+    pr162b_indirect_contracts = sorted(
+        str(contract["source_identity"])
+        for (module_ref, _), entry in grouped.items()
+        if module_ref in pr162b_modules
+        for contract in entry["contracts"]
+        if not contract["direct_kwargs"]
+    )
+    if pr162b_indirect_contracts:
+        raise RuntimeError(
+            "PR162B_STATIC_IMPLEMENTATION_KWARGS_CONTRACT_MISMATCH: "
+            + ", ".join(pr162b_indirect_contracts)
+        )
+
+    for row in gfp_rows:
+        input_schema = row.get("input_schema", {})
+        output_schema = row.get("output_schema", {})
+        if not isinstance(input_schema, Mapping) or not isinstance(
+            output_schema, Mapping
+        ):
+            raise RuntimeError(
+                f"GFP_STATIC_IMPLEMENTATION_SCHEMA_INVALID: {row.get('formula_id')}"
+            )
+        add_contract(
+            source_identity=str(row.get("formula_id", "")),
+            module_ref=str(row.get("computation_function_path", "")),
+            function_name=str(row.get("computation_function_name", "")),
+            input_fields=input_schema,
+            output_fields=output_schema,
+            module_map=gfp_modules,
+        )
+    gfp_unique = sum(1 for module_ref, _ in grouped if module_ref in gfp_modules)
+    if gfp_unique != 33:
+        raise RuntimeError(
+            f"GFP_STATIC_IMPLEMENTATION_UNIQUE_COUNT_MISMATCH: {gfp_unique}"
+        )
+
+    added_refs: set[str] = set()
+    for (module_ref, function_name), entry in sorted(grouped.items()):
+        aliases = _fixed_ref_aliases(module_ref, function_name)
+        wrapper = _wrap_fixed_kwargs_implementation(
+            entry["implementation"],
+            entry["contracts"],
+            implementation_ref=aliases[0],
+        )
+        for alias in aliases:
+            prior = allowlist.get(alias)
+            if prior is not None and prior is not wrapper:
+                raise RuntimeError(f"STATIC_IMPLEMENTATION_REF_COLLISION: {alias}")
+            allowlist[alias] = wrapper
+            added_refs.add(alias)
+    return frozenset(added_refs)
+
+
+def _default_implementation_registry() -> tuple[
+    dict[str, Callable[[dict[str, Any]], dict[str, Any]]], frozenset[str]
+]:
     allowlist = dict(NATIVE_IMPLEMENTATIONS)
+    trusted_memoizable = set(NATIVE_IMPLEMENTATIONS)
+    pr162d_implementations: list[
+        tuple[str, Callable[[dict[str, Any]], dict[str, Any]]]
+    ] = []
     try:
         from qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.algorithm_seed_library import algorithm_specs
         from qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.formula_seed_library import formula_specs
@@ -1790,23 +2938,44 @@ def _default_implementation_allowlist() -> dict[str, Callable[[dict[str, Any]], 
                 quantum_specs,
             )
         except ImportError:
-            # A small synthetic registry can still use injected/native callables.
-            return allowlist
+            # A small installation can still use native or independently
+            # available fixed-owner implementations.
+            formula_specs = algorithm_specs = quantum_specs = None
 
-    specs = [*formula_specs(), *algorithm_specs(), *quantum_specs()]
-    for spec in specs:
-        ref = str(spec.callable_ref)
-        callable_value = (
-            getattr(spec, "compute", None)
-            or getattr(spec, "implementation", None)
-            or getattr(spec, "build_shape", None)
+    if formula_specs and algorithm_specs and quantum_specs:
+        # The callable objects come directly from the fixed source-code-owned
+        # dataclass fields.  No registry row, caller string, or dynamic
+        # attribute name participates in dispatch construction.
+        pr162d_implementations.extend(
+            (str(spec.callable_ref), spec.compute) for spec in formula_specs()
         )
-        if callable(callable_value):
-            allowlist[ref] = callable_value
-            if ref.startswith("src."):
-                allowlist[ref.removeprefix("src.")] = callable_value
-            else:
-                allowlist[f"src.{ref}"] = callable_value
+        pr162d_implementations.extend(
+            (str(spec.callable_ref), spec.implementation)
+            for spec in algorithm_specs()
+        )
+        pr162d_implementations.extend(
+            (str(spec.callable_ref), spec.build_shape) for spec in quantum_specs()
+        )
+    for ref, callable_value in pr162d_implementations:
+        if not callable(callable_value):
+            raise RuntimeError(f"PR162D_SOURCE_OWNED_CALLABLE_INVALID: {ref}")
+        allowlist[ref] = callable_value
+        trusted_memoizable.add(ref)
+        if ref.startswith("src."):
+            alias = ref.removeprefix("src.")
+        else:
+            alias = f"src.{ref}"
+        allowlist[alias] = callable_value
+        trusted_memoizable.add(alias)
+
+    # These current-owner implementations are real and statically dispatchable,
+    # but their imported source inventories do not prove call-scoped memoization.
+    _register_fixed_source_owner_implementations(allowlist)
+    return allowlist, frozenset(trusted_memoizable)
+
+
+def _default_implementation_allowlist() -> dict[str, Callable[[dict[str, Any]], dict[str, Any]]]:
+    allowlist, _ = _default_implementation_registry()
     return allowlist
 
 
@@ -1815,8 +2984,14 @@ class _RegistryIndexes:
     records_by_key: Mapping[tuple[str, str], Mapping[str, Any]]
     record_keys_by_id: Mapping[str, tuple[tuple[str, str], ...]]
     direct_aliases: Mapping[str, tuple[str, str]]
+    # ``qku_*`` indexes are execution-capable roots.  The status mirrors also
+    # include explicitly non-executable STATUS_EXPLAIN_ONLY custody roots.
     qku_roots: Mapping[str, tuple[tuple[str, str], ...]]
     qku_context_roots: Mapping[tuple[str, str, str], tuple[tuple[str, str], ...]]
+    status_qku_roots: Mapping[str, tuple[tuple[str, str], ...]]
+    status_qku_context_roots: Mapping[
+        tuple[str, str, str], tuple[tuple[str, str], ...]
+    ]
     decision_role_candidates: Mapping[str, tuple[tuple[str, str], ...]]
     family_candidates: Mapping[str, tuple[tuple[str, str], ...]]
     bindings_by_record: Mapping[tuple[str, str], tuple[Mapping[str, Any], ...]]
@@ -1838,6 +3013,57 @@ class _RegistrySnapshot:
     built_at_monotonic: float
 
 
+class _RuntimeRequestAccess:
+    """Process-local observation of one facade request's index accesses."""
+
+    def __init__(self) -> None:
+        self.record_keys_examined: set[tuple[str, str]] = set()
+        self.record_lookup_count = 0
+        self.full_registry_iterations = 0
+
+
+class _InstrumentedRecordIndex(Mapping[tuple[str, str], Mapping[str, Any]]):
+    """Read-only index view that observes real lookup and iteration behavior."""
+
+    def __init__(
+        self,
+        source: Mapping[tuple[str, str], Mapping[str, Any]],
+        observer: Callable[[str, tuple[str, str] | None, bool], None],
+    ) -> None:
+        self.source = source
+        self._observer = observer
+
+    def __getitem__(self, key: tuple[str, str]) -> Mapping[str, Any]:
+        try:
+            value = self.source[key]
+        except KeyError:
+            self._observer("lookup", key, False)
+            raise
+        self._observer("lookup", key, True)
+        return value
+
+    def get(
+        self, key: tuple[str, str], default: Any = None
+    ) -> Mapping[str, Any] | Any:
+        try:
+            return self[key]
+        except KeyError:
+            return default
+
+    def __contains__(self, key: object) -> bool:
+        found = key in self.source
+        typed_key = key if isinstance(key, tuple) and len(key) == 2 else None
+        self._observer("lookup", typed_key, found)
+        return found
+
+    def __iter__(self):
+        self._observer("full_iteration", None, True)
+        return iter(self.source)
+
+    def __len__(self) -> int:
+        return len(self.source)
+
+
 def _freeze_tuple_mapping(mapping: Mapping[Any, Iterable[Any]]) -> Mapping[Any, tuple[Any, ...]]:
     return MappingProxyType(
         {
@@ -1851,6 +3077,54 @@ def _relation_type(relation: Mapping[str, Any]) -> str:
     return str(relation.get("relation_type", relation.get("type", relation.get("relation", ""))))
 
 
+def _qku_root_index_scopes(qku_binding: Mapping[str, Any]) -> tuple[bool, bool]:
+    """Return ``(execution, status)`` eligibility for one declared QKU root."""
+
+    runtime_eligibility = str(
+        qku_binding.get("runtime_root_eligibility", "ELIGIBLE")
+    ).strip().upper()
+    if runtime_eligibility in {"ELIGIBLE", "RUNTIME_ROOT_ELIGIBLE"}:
+        return True, True
+    if runtime_eligibility == "STATUS_EXPLAIN_ONLY":
+        return False, True
+    return False, False
+
+
+def _validate_qku_context_root_index(
+    records_by_key: Mapping[tuple[str, str], Mapping[str, Any]],
+    qku_context_roots: Mapping[
+        tuple[str, str, str], Iterable[tuple[str, str]]
+    ],
+    *,
+    status_only_capable: bool,
+) -> None:
+    """Reject ambiguous or inactive roots in one operation-scoped QKU index."""
+
+    ambiguity_code = (
+        "AMBIGUOUS_STATUS_QKU_CONTEXT"
+        if status_only_capable
+        else "AMBIGUOUS_ACTIVE_QKU_CONTEXT"
+    )
+    inactive_code = (
+        "STATUS_QKU_ROOT_NOT_ACTIVE"
+        if status_only_capable
+        else "QKU_ROOT_NOT_ACTIVE"
+    )
+    for qku_context, root_keys in qku_context_roots.items():
+        unique_roots = tuple(sorted(set(root_keys)))
+        if len(unique_roots) != 1:
+            raise ValueError(
+                f"{ambiguity_code}: "
+                f"{qku_context[0]}::{qku_context[1]}::{qku_context[2]} -> "
+                f"{unique_roots}"
+            )
+        root = records_by_key.get(unique_roots[0])
+        if root is None or root.get("record_state") not in ACTIVE_RECORD_STATES:
+            raise ValueError(
+                f"{inactive_code}: {qku_context[0]} -> {unique_roots[0]}"
+            )
+
+
 def _build_indexes(records: Iterable[Mapping[str, Any]]) -> _RegistryIndexes:
     """Build disposable indexes from logical registry truth."""
 
@@ -1859,6 +3133,10 @@ def _build_indexes(records: Iterable[Mapping[str, Any]]) -> _RegistryIndexes:
     aliases: dict[str, tuple[str, str]] = {}
     qku_roots: dict[str, list[tuple[str, str]]] = defaultdict(list)
     qku_context_roots: dict[tuple[str, str, str], list[tuple[str, str]]] = defaultdict(list)
+    status_qku_roots: dict[str, list[tuple[str, str]]] = defaultdict(list)
+    status_qku_context_roots: dict[
+        tuple[str, str, str], list[tuple[str, str]]
+    ] = defaultdict(list)
     roles: dict[str, list[tuple[str, str]]] = defaultdict(list)
     families: dict[str, list[tuple[str, str]]] = defaultdict(list)
     bindings: dict[tuple[str, str], tuple[Mapping[str, Any], ...]] = {}
@@ -1908,6 +3186,13 @@ def _build_indexes(records: Iterable[Mapping[str, Any]]) -> _RegistryIndexes:
         for qku_binding in runtime_qku_bindings:
             if not isinstance(qku_binding, Mapping):
                 continue
+            execution_eligible, status_eligible = _qku_root_index_scopes(
+                qku_binding
+            )
+            if not execution_eligible and not status_eligible:
+                # Provisional/source-custody QKU roles remain queryable in the
+                # record's uses block but cannot silently become runtime roots.
+                continue
             qku_id = str(qku_binding.get("qku_id", ""))
             if not qku_id:
                 continue
@@ -1915,14 +3200,17 @@ def _build_indexes(records: Iterable[Mapping[str, Any]]) -> _RegistryIndexes:
             root_keys = keys_by_id.get(root_id)
             # Forward references are resolved after all records have been read.
             root_key = (root_id, str(qku_binding.get("semantic_version", key[1])))
-            qku_roots[qku_id].append(root_key)
-            qku_context_roots[
-                (
-                    qku_id,
-                    str(qku_binding.get("role_or_decision_stage", "ANY")),
-                    str(qku_binding.get("market_family", "ANY")),
-                )
-            ].append(root_key)
+            context_key = (
+                qku_id,
+                str(qku_binding.get("role_or_decision_stage", "ANY")),
+                str(qku_binding.get("market_family", "ANY")),
+            )
+            if execution_eligible:
+                qku_roots[qku_id].append(root_key)
+                qku_context_roots[context_key].append(root_key)
+            if status_eligible:
+                status_qku_roots[qku_id].append(root_key)
+                status_qku_context_roots[context_key].append(root_key)
         record_bindings = tuple(record.get("bindings", ()))
         bindings[key] = record_bindings
         for binding in record_bindings:
@@ -1975,6 +3263,14 @@ def _build_indexes(records: Iterable[Mapping[str, Any]]) -> _RegistryIndexes:
         qku_context_roots[qku_context] = [
             resolved_qku_root(qku_context[0], key) for key in root_keys
         ]
+    for qku_id, root_keys in tuple(status_qku_roots.items()):
+        status_qku_roots[qku_id] = [
+            resolved_qku_root(qku_id, key) for key in root_keys
+        ]
+    for qku_context, root_keys in tuple(status_qku_context_roots.items()):
+        status_qku_context_roots[qku_context] = [
+            resolved_qku_root(qku_context[0], key) for key in root_keys
+        ]
 
     for alias, target_key in aliases.items():
         target = records_by_key.get(target_key)
@@ -1993,18 +3289,16 @@ def _build_indexes(records: Iterable[Mapping[str, Any]]) -> _RegistryIndexes:
         if alias in keys_by_id:
             raise ValueError(f"ALIAS_COLLIDES_WITH_CANONICAL_ID: {alias}")
 
-    for qku_context, root_keys in qku_context_roots.items():
-        unique_roots = tuple(sorted(set(root_keys)))
-        if len(unique_roots) != 1:
-            raise ValueError(
-                "AMBIGUOUS_ACTIVE_QKU_CONTEXT: "
-                f"{qku_context[0]}::{qku_context[1]}::{qku_context[2]} -> {unique_roots}"
-            )
-        root = records_by_key.get(unique_roots[0])
-        if root is None or root.get("record_state") not in ACTIVE_RECORD_STATES:
-            raise ValueError(
-                f"QKU_ROOT_NOT_ACTIVE: {qku_context[0]} -> {unique_roots[0]}"
-            )
+    _validate_qku_context_root_index(
+        records_by_key,
+        qku_context_roots,
+        status_only_capable=False,
+    )
+    _validate_qku_context_root_index(
+        records_by_key,
+        status_qku_context_roots,
+        status_only_capable=True,
+    )
 
     return _RegistryIndexes(
         records_by_key=MappingProxyType(records_by_key),
@@ -2012,6 +3306,8 @@ def _build_indexes(records: Iterable[Mapping[str, Any]]) -> _RegistryIndexes:
         direct_aliases=MappingProxyType(dict(sorted(aliases.items()))),
         qku_roots=_freeze_tuple_mapping(qku_roots),
         qku_context_roots=_freeze_tuple_mapping(qku_context_roots),
+        status_qku_roots=_freeze_tuple_mapping(status_qku_roots),
+        status_qku_context_roots=_freeze_tuple_mapping(status_qku_context_roots),
         decision_role_candidates=_freeze_tuple_mapping(roles),
         family_candidates=_freeze_tuple_mapping(families),
         bindings_by_record=MappingProxyType(dict(sorted(bindings.items(), key=lambda pair: pair[0]))),
@@ -2055,6 +3351,8 @@ def _index_signature(indexes: _RegistryIndexes) -> Any:
             "aliases": indexes.direct_aliases,
             "qku": indexes.qku_roots,
             "qku_context": indexes.qku_context_roots,
+            "status_qku": indexes.status_qku_roots,
+            "status_qku_context": indexes.status_qku_context_roots,
             "roles": indexes.decision_role_candidates,
             "families": indexes.family_candidates,
             "bindings": {
@@ -2086,6 +3384,12 @@ def _refresh_indexes_incrementally(
     qku_context_roots = {
         key: list(value) for key, value in base.qku_context_roots.items()
     }
+    status_qku_roots = {
+        key: list(value) for key, value in base.status_qku_roots.items()
+    }
+    status_qku_context_roots = {
+        key: list(value) for key, value in base.status_qku_context_roots.items()
+    }
     roles = {
         key: list(value) for key, value in base.decision_role_candidates.items()
     }
@@ -2114,7 +3418,15 @@ def _refresh_indexes_incrementally(
             mapping.pop(key, None)
 
     def resolved_root(
-        record: Mapping[str, Any], qku_binding: Mapping[str, Any]
+        record: Mapping[str, Any],
+        qku_binding: Mapping[str, Any],
+        *,
+        record_index: Mapping[
+            tuple[str, str], Mapping[str, Any]
+        ] = records_by_key,
+        id_index: Mapping[
+            str, Sequence[tuple[str, str]]
+        ] = keys_by_id,
     ) -> tuple[str, str]:
         root_id = str(
             qku_binding.get("stack_root_or_direct_component")
@@ -2124,9 +3436,9 @@ def _refresh_indexes_incrementally(
             root_id,
             str(qku_binding.get("semantic_version", record["semantic_version"])),
         )
-        if requested in records_by_key:
+        if requested in record_index:
             return requested
-        alternatives = keys_by_id.get(root_id, ())
+        alternatives = id_index.get(root_id, ())
         if len(alternatives) != 1:
             raise ValueError(
                 f"UNRESOLVED_QKU_ROOT: {qku_binding.get('qku_id')}: {requested}"
@@ -2163,15 +3475,29 @@ def _refresh_indexes_incrementally(
             for qku_binding in uses.get("qku_role_bindings", ()):
                 if not isinstance(qku_binding, Mapping) or not qku_binding.get("qku_id"):
                     continue
+                execution_eligible, status_eligible = _qku_root_index_scopes(
+                    qku_binding
+                )
+                if not execution_eligible and not status_eligible:
+                    continue
                 qku_id = str(qku_binding["qku_id"])
-                root_key = resolved_root(record, qku_binding)
-                discard(qku_roots, qku_id, root_key)
+                root_key = resolved_root(
+                    record,
+                    qku_binding,
+                    record_index=base.records_by_key,
+                    id_index=base.record_keys_by_id,
+                )
                 context_key = (
                     qku_id,
                     str(qku_binding.get("role_or_decision_stage", "ANY")),
                     str(qku_binding.get("market_family", "ANY")),
                 )
-                discard(qku_context_roots, context_key, root_key)
+                if execution_eligible:
+                    discard(qku_roots, qku_id, root_key)
+                    discard(qku_context_roots, context_key, root_key)
+                if status_eligible:
+                    discard(status_qku_roots, qku_id, root_key)
+                    discard(status_qku_context_roots, context_key, root_key)
         for binding in record.get("bindings", ()):
             for mode in binding.get("supported_modes", ()):
                 context_key = (
@@ -2267,17 +3593,26 @@ def _refresh_indexes_incrementally(
             for qku_binding in uses.get("qku_role_bindings", ()):
                 if not isinstance(qku_binding, Mapping) or not qku_binding.get("qku_id"):
                     continue
+                execution_eligible, status_eligible = _qku_root_index_scopes(
+                    qku_binding
+                )
+                if not execution_eligible and not status_eligible:
+                    continue
                 qku_id = str(qku_binding["qku_id"])
                 root_key = resolved_root(record, qku_binding)
-                qku_roots.setdefault(qku_id, []).append(root_key)
-                qku_context_roots.setdefault(
-                    (
-                        qku_id,
-                        str(qku_binding.get("role_or_decision_stage", "ANY")),
-                        str(qku_binding.get("market_family", "ANY")),
-                    ),
-                    [],
-                ).append(root_key)
+                context_key = (
+                    qku_id,
+                    str(qku_binding.get("role_or_decision_stage", "ANY")),
+                    str(qku_binding.get("market_family", "ANY")),
+                )
+                if execution_eligible:
+                    qku_roots.setdefault(qku_id, []).append(root_key)
+                    qku_context_roots.setdefault(context_key, []).append(root_key)
+                if status_eligible:
+                    status_qku_roots.setdefault(qku_id, []).append(root_key)
+                    status_qku_context_roots.setdefault(context_key, []).append(
+                        root_key
+                    )
         record_bindings = tuple(record.get("bindings", ()))
         bindings[key] = record_bindings
         for binding in record_bindings:
@@ -2324,12 +3659,25 @@ def _refresh_indexes_incrementally(
                 str(implementation["callable_or_solver_ref"]), []
             ).append(key)
 
+    _validate_qku_context_root_index(
+        records_by_key,
+        qku_context_roots,
+        status_only_capable=False,
+    )
+    _validate_qku_context_root_index(
+        records_by_key,
+        status_qku_context_roots,
+        status_only_capable=True,
+    )
+
     return _RegistryIndexes(
         records_by_key=MappingProxyType(dict(sorted(records_by_key.items()))),
         record_keys_by_id=_freeze_tuple_mapping(keys_by_id),
         direct_aliases=MappingProxyType(dict(sorted(aliases.items()))),
         qku_roots=_freeze_tuple_mapping(qku_roots),
         qku_context_roots=_freeze_tuple_mapping(qku_context_roots),
+        status_qku_roots=_freeze_tuple_mapping(status_qku_roots),
+        status_qku_context_roots=_freeze_tuple_mapping(status_qku_context_roots),
         decision_role_candidates=_freeze_tuple_mapping(roles),
         family_candidates=_freeze_tuple_mapping(families),
         bindings_by_record=MappingProxyType(dict(sorted(bindings.items()))),
@@ -3202,6 +4550,7 @@ def _canonicalize_requirements(
     for record in records:
         updated = _thaw(record)
         canonical_requirements: list[dict[str, Any]] = []
+        canonical_targets_by_consumer_input: dict[str, set[str]] = defaultdict(set)
         seen: set[Any] = set()
         for raw_requirement in updated["definition"].get("requirements", ()):
             requirement = dict(raw_requirement)
@@ -3221,12 +4570,43 @@ def _canonicalize_requirements(
                 requirement["fallback_component_id_or_null"] = selector_map.get(str(fallback), str(fallback))
             if target not in known_ids and requirement.get("required_or_optional") == "REQUIRED":
                 raise ValueError(f"UNRESOLVED_REQUIRED_REQUIREMENT: {updated['canonical_component_id']} -> {target}")
+            consumer_input = str(requirement.get("consumer_input_name", "")).strip()
+            if consumer_input:
+                canonical_targets_by_consumer_input[consumer_input].add(target)
             identity = _requirement_identity(requirement)
             if identity in seen:
                 continue
             seen.add(identity)
             canonical_requirements.append(requirement)
         updated["definition"]["requirements"] = sorted(canonical_requirements, key=_stable_json)
+        # Requirement-owned input bindings are a projection of definition
+        # requirements.  Rewrite that projection in the same transaction so
+        # no source-local selector survives canonicalization or becomes a
+        # second dependency authority.
+        for binding in updated.get("bindings", ()):
+            configured = binding.get("input_source_bindings")
+            if not isinstance(configured, list):
+                continue
+            for entry in configured:
+                if not isinstance(entry, dict):
+                    continue
+                input_name = str(
+                    entry.get("input_name", entry.get("name", ""))
+                ).strip()
+                targets = canonical_targets_by_consumer_input.get(input_name, set())
+                if (
+                    entry.get("binding_state") == "CANONICAL_REQUIREMENT_OUTPUT"
+                    and len(targets) == 1
+                ):
+                    target = next(iter(targets))
+                    if "source_ref" in entry:
+                        entry["source_ref"] = target
+                    elif "source" in entry:
+                        entry["source"] = target
+                    elif "binding_ref" in entry:
+                        entry["binding_ref"] = target
+                    else:
+                        entry["source_ref"] = target
         result.append(updated)
     _validate_requirement_graph(result)
     return result
@@ -3859,38 +5239,46 @@ def _validate_schema_value(
     if not spec:
         return
     declared = str(spec.get("type", "ANY")).upper().replace(" ", "_")
+    declared_family = _schema_declared_type_family(declared)
+    if declared_family is None:
+        raise ComputationControlError(
+            "UNSUPPORTED_SCHEMA_TYPE", f"{path}: {declared or '<empty>'}"
+        )
     valid = True
-    if declared not in {"", "ANY", "UNSPECIFIED"}:
-        if "NUMERIC_OR_SEQUENCE" in declared:
+    if declared_family == "NUMERIC_OR_SEQUENCE":
+        valid = (
+            not isinstance(value, bool)
+            and isinstance(value, (int, float, Decimal, list, tuple))
+        )
+    elif declared_family == "NUMERIC_OR_STRUCTURE":
+        valid = (
+            not isinstance(value, bool)
+            and isinstance(value, (int, float, Decimal, list, tuple, Mapping))
+        )
+    elif declared_family == "SEQUENCE":
+        valid = isinstance(value, (list, tuple))
+    elif declared_family == "MAPPING":
+        valid = isinstance(value, Mapping)
+    elif declared_family == "BOOLEAN":
+        valid = isinstance(value, bool)
+    elif declared_family == "STRING":
+        valid = isinstance(value, str)
+    elif declared_family == "INTEGER":
+        try:
+            numeric = Decimal(str(value))
             valid = (
                 not isinstance(value, bool)
-                and isinstance(value, (int, float, Decimal, list, tuple))
+                and numeric.is_finite()
+                and numeric == numeric.to_integral_value()
             )
-        elif "NUMERIC_OR_STRUCTURE" in declared:
-            valid = (
-                not isinstance(value, bool)
-                and isinstance(value, (int, float, Decimal, list, tuple, Mapping))
-            )
-        elif any(token in declared for token in ("ARRAY", "LIST", "SEQUENCE")):
-            valid = isinstance(value, (list, tuple))
-        elif any(token in declared for token in ("OBJECT", "MAPPING", "DICT", "RECORD", "STRUCTURE")):
-            valid = isinstance(value, Mapping)
-        elif "BOOL" in declared:
-            valid = isinstance(value, bool)
-        elif any(token in declared for token in ("STRING", "TEXT", "IDENTIFIER")):
-            valid = isinstance(value, str)
-        elif "INTEGER" in declared or declared == "INT":
-            try:
-                numeric = Decimal(str(value))
-                valid = not isinstance(value, bool) and numeric.is_finite() and numeric == numeric.to_integral_value()
-            except (InvalidOperation, ValueError, TypeError):
-                valid = False
-        elif any(token in declared for token in ("NUMBER", "NUMERIC", "DECIMAL", "FLOAT", "PROBABILITY")):
-            try:
-                numeric = Decimal(str(value))
-                valid = not isinstance(value, bool) and numeric.is_finite()
-            except (InvalidOperation, ValueError, TypeError):
-                valid = False
+        except (InvalidOperation, ValueError, TypeError):
+            valid = False
+    elif declared_family == "NUMERIC":
+        try:
+            numeric = Decimal(str(value))
+            valid = not isinstance(value, bool) and numeric.is_finite()
+        except (InvalidOperation, ValueError, TypeError):
+            valid = False
     if not valid:
         raise ComputationControlError(
             "TYPE_MISMATCH", f"{path}: expected {declared}, got {type(value).__name__}"
@@ -4101,25 +5489,13 @@ def _select_binding(
     )
     bindings: Iterable[Mapping[str, Any]] = record.get("bindings", ())
     if indexes is not None and record_key is not None:
-        requested_market = context.get("market")
-        requested_venue = context.get("venue")
-        requested_mode = str(context.get("mode", "STATIC_VALIDATION"))
-        if requested_market is not None and requested_venue is not None:
-            matching_ids: set[str] = set()
-            for market in (str(requested_market), "ANY", "ALL", "*"):
-                for venue in (str(requested_venue), "ANY", "ALL", "*"):
-                    for candidate_key, binding_id in indexes.context_binding_candidates.get(
-                        (market, venue, requested_mode), ()
-                    ):
-                        if candidate_key == record_key:
-                            matching_ids.add(str(binding_id))
-            bindings = tuple(
-                binding
-                for binding in indexes.bindings_by_record.get(record_key, ())
-                if str(binding.get("binding_id")) in matching_ids
-            )
-        else:
-            bindings = indexes.bindings_by_record.get(record_key, ())
+        # Root selection has already produced one exact record key.  Scanning
+        # the global market/venue/mode candidate bucket here would make an
+        # otherwise exact lookup grow with every unrelated record sharing the
+        # same context.  Score only the selected record's indexed bindings;
+        # ``_binding_compatibility_score`` still applies the complete context
+        # selector, requested binding, and mode checks below.
+        bindings = indexes.bindings_by_record.get(record_key, ())
     for binding in bindings:
         score = _binding_compatibility_score(binding, scoring_context)
         if score is not None:
@@ -4218,10 +5594,17 @@ def _derived_state(record: Mapping[str, Any], binding: Mapping[str, Any], *, pla
         return "INVALID"
     if record.get("record_state") in {"SUPERSEDED", "DORMANT_PRESERVED"} or binding.get("terminal_disposition_or_null"):
         return "RETIRED"
+    readiness = binding.get("readiness", {})
+    if readiness.get("specification") == "INVALID":
+        return "INVALID"
+    if (
+        readiness.get("specification") != "PASS"
+        or _specification_completeness_issues(record.get("definition", {}))
+    ):
+        return "SPECIFICATION_REQUIRED"
     if record.get("record_state") in {"PROVISIONAL", "UNDER_REVIEW"}:
         return "SPECIFIED"
-    readiness = binding.get("readiness", {})
-    if readiness.get("specification") != "PASS":
+    if _input_source_binding_issues(record.get("definition", {}), binding):
         return "SPECIFIED"
     if readiness.get("implementation") != "PASS" or readiness.get("oracle") != "PASS":
         return "SPECIFIED"
@@ -4455,6 +5838,17 @@ class _DecisionComputationRegistryV1:
             self._snapshot = replacement
 
 
+def _instrument_runtime_request(method: Callable[..., Any]) -> Callable[..., Any]:
+    """Publish measured index-access diagnostics for one public facade call."""
+
+    @wraps(method)
+    def wrapped(self: "QKUComputationControlPlaneV1", *args: Any, **kwargs: Any) -> Any:
+        with self._request_access_scope():
+            return method(self, *args, **kwargs)
+
+    return wrapped
+
+
 class QKUComputationControlPlaneV1:
     """The single public runtime object for decision computation."""
 
@@ -4476,6 +5870,8 @@ class QKUComputationControlPlaneV1:
             raise ValueError(
                 "memoization capability injection is limited to explicit in-memory validation registries"
             )
+        self._request_access_local = threading.local()
+        self._diagnostic_lock = threading.Lock()
         load_started = time.perf_counter()
         if records is not None:
             loaded_records = [dict(record) for record in records]
@@ -4496,9 +5892,10 @@ class QKUComputationControlPlaneV1:
             shard_count=int(layout_info["shard_count"]),
             registry_file_reads=int(layout_info["files_read"]),
         )
+        snapshot = self._instrument_snapshot(snapshot)
         self._registry = _DecisionComputationRegistryV1(snapshot)
-        trusted = _default_implementation_allowlist()
-        trusted_memoizable = set(trusted)
+        trusted, default_memoizable = _default_implementation_registry()
+        trusted_memoizable = set(default_memoizable)
         if implementation_allowlist:
             for ref, implementation in implementation_allowlist.items():
                 if not callable(implementation):
@@ -4525,6 +5922,8 @@ class QKUComputationControlPlaneV1:
             "unrelated_component_executions": 0,
             "requests": 0,
             "records_examined_last_request": 0,
+            "record_index_lookups_last_request": 0,
+            "full_registry_iterations_last_request": 0,
             "nodes_executed_last_request": 0,
             "shared_invocations_reused_last_request": 0,
             "implementation_call_counts": defaultdict(int),
@@ -4534,6 +5933,60 @@ class QKUComputationControlPlaneV1:
             "load_and_index_ms": (time.perf_counter() - load_started) * 1_000,
             "last_incremental_refresh": None,
         }
+
+    def _observe_runtime_record_access(
+        self,
+        event: str,
+        key: tuple[str, str] | None,
+        found: bool,
+    ) -> None:
+        probe = getattr(self._request_access_local, "probe", None)
+        if not isinstance(probe, _RuntimeRequestAccess):
+            return
+        if event == "full_iteration":
+            probe.full_registry_iterations += 1
+            return
+        probe.record_lookup_count += 1
+        if found and key is not None:
+            probe.record_keys_examined.add((str(key[0]), str(key[1])))
+
+    def _instrument_snapshot(self, snapshot: _RegistrySnapshot) -> _RegistrySnapshot:
+        source = snapshot.indexes.records_by_key
+        if isinstance(source, _InstrumentedRecordIndex):
+            source = source.source
+        indexes = replace(
+            snapshot.indexes,
+            records_by_key=_InstrumentedRecordIndex(
+                source, self._observe_runtime_record_access
+            ),
+        )
+        return replace(snapshot, indexes=indexes)
+
+    @contextmanager
+    def _request_access_scope(self):
+        existing = getattr(self._request_access_local, "probe", None)
+        if isinstance(existing, _RuntimeRequestAccess):
+            yield existing
+            return
+        probe = _RuntimeRequestAccess()
+        self._request_access_local.probe = probe
+        try:
+            yield probe
+        finally:
+            del self._request_access_local.probe
+            with self._diagnostic_lock:
+                self._diagnostic_state["records_examined_last_request"] = len(
+                    probe.record_keys_examined
+                )
+                self._diagnostic_state["record_index_lookups_last_request"] = (
+                    probe.record_lookup_count
+                )
+                self._diagnostic_state["full_registry_iterations_last_request"] = (
+                    probe.full_registry_iterations
+                )
+                self._diagnostic_state["per_request_full_registry_iterations"] += (
+                    probe.full_registry_iterations
+                )
 
     def _next_request_id(self, generation: int) -> str:
         with self._counter_lock:
@@ -4618,8 +6071,20 @@ class QKUComputationControlPlaneV1:
         snapshot: _RegistrySnapshot,
         selector: str | Mapping[str, Any],
         context: Mapping[str, Any],
+        *,
+        operation: str,
     ) -> tuple[str, str]:
         indexes = snapshot.indexes
+        if operation in {"status", "explain"}:
+            qku_roots = indexes.status_qku_roots
+            qku_context_roots = indexes.status_qku_context_roots
+        elif operation in {"resolve", "compute"}:
+            qku_roots = indexes.qku_roots
+            qku_context_roots = indexes.qku_context_roots
+        else:
+            raise ComputationControlError(
+                "UNSUPPORTED_CONTROL_PLANE_OPERATION", operation
+            )
         semantic_version: str | None = None
         candidate_keys: tuple[tuple[str, str], ...] = ()
         if isinstance(selector, Mapping):
@@ -4635,9 +6100,9 @@ class QKUComputationControlPlaneV1:
                 qku_id = str(selector["qku_id"])
                 role = str(selector.get("role_or_decision_stage", context.get("role_or_decision_stage", "ANY")))
                 market = str(selector.get("market_family", context.get("market_family", "ANY")))
-                candidate_keys = indexes.qku_context_roots.get((qku_id, role, market), ())
+                candidate_keys = qku_context_roots.get((qku_id, role, market), ())
                 if not candidate_keys:
-                    candidate_keys = indexes.qku_roots.get(qku_id, ())
+                    candidate_keys = qku_roots.get(qku_id, ())
             elif selector.get("decision_role"):
                 candidate_keys = indexes.decision_role_candidates.get(str(selector["decision_role"]), ())
             elif selector.get("family"):
@@ -4651,8 +6116,8 @@ class QKUComputationControlPlaneV1:
                 candidate_keys = indexes.record_keys_by_id[text]
             elif text in indexes.direct_aliases:
                 candidate_keys = (indexes.direct_aliases[text],)
-            elif text in indexes.qku_roots:
-                candidate_keys = indexes.qku_roots[text]
+            elif text in qku_roots:
+                candidate_keys = qku_roots[text]
             elif text in indexes.decision_role_candidates:
                 candidate_keys = indexes.decision_role_candidates[text]
             elif text in indexes.family_candidates:
@@ -4704,6 +6169,15 @@ class QKUComputationControlPlaneV1:
         # keeps status/resolve truthful while compute still fails closed.
         if agent_id is None:
             return
+        trusted_operations = _TRUSTED_AGENT_OPERATION_CEILINGS.get(agent_id)
+        if trusted_operations is None:
+            raise ComputationControlError(
+                "AGENT_ACCESS_DENIED", f"{agent_id} is not a PR165-D2 principal"
+            )
+        if operation not in trusted_operations:
+            raise ComputationControlError(
+                "AGENT_OPERATION_DENIED", f"{agent_id}: {operation}"
+            )
         policy = binding.get("agent_access_policy", {})
         entry = policy.get(agent_id) if isinstance(policy, Mapping) else None
         if not isinstance(entry, Mapping):
@@ -4712,9 +6186,16 @@ class QKUComputationControlPlaneV1:
         if operation not in {str(value) for value in operations}:
             raise ComputationControlError("AGENT_OPERATION_DENIED", f"{agent_id}: {operation}")
         ceiling = str(entry.get("mode_ceiling", "STATIC_VALIDATION"))
+        trusted_ceiling = _TRUSTED_AGENT_MODE_CEILINGS[agent_id]
         requested_rank = MODE_ORDER.get(mode)
         ceiling_rank = MODE_ORDER.get(ceiling)
-        if requested_rank is None or ceiling_rank is None or requested_rank > ceiling_rank:
+        trusted_rank = MODE_ORDER[trusted_ceiling]
+        if (
+            requested_rank is None
+            or ceiling_rank is None
+            or ceiling_rank > trusted_rank
+            or requested_rank > min(ceiling_rank, trusted_rank)
+        ):
             raise ComputationControlError("AGENT_MODE_ESCALATION", f"{agent_id}: {mode} exceeds {ceiling}")
 
     def _resolve_on_snapshot(
@@ -4727,7 +6208,12 @@ class QKUComputationControlPlaneV1:
         operation: str,
         _fallback_validation_stack: tuple[str, ...] = (),
     ) -> ResolvedDecisionPlanV1:
-        root_key = self._record_key_from_selector(snapshot, selector, context)
+        root_key = self._record_key_from_selector(
+            snapshot,
+            selector,
+            context,
+            operation=operation,
+        )
         if root_key[0] in _fallback_validation_stack:
             raise ComputationControlError(
                 "FALLBACK_CYCLE",
@@ -4769,7 +6255,20 @@ class QKUComputationControlPlaneV1:
                 operation=operation,
                 mode=node_mode,
             )
-            implementation_version, callable_ref, implementation = _selected_implementation(record, binding)
+            try:
+                implementation_version, callable_ref, implementation = (
+                    _selected_implementation(record, binding)
+                )
+            except ComputationControlError as exc:
+                if operation not in {"status", "explain"} or exc.code != "MISSING_IMPLEMENTATION":
+                    raise
+                # Status/explain must be able to report an incomplete source
+                # record's exact implementation blocker.  Resolve/compute
+                # continue to fail closed on this same inconsistency.
+                implementation_version = "UNAVAILABLE"
+                callable_ref = ""
+                implementation = MappingProxyType({})
+                blockers.append(f"MISSING_IMPLEMENTATION: {key[0]}@{key[1]}")
             memoizable = bool(
                 implementation.get(
                     "memoizable", implementation.get("memoizable_flag", False)
@@ -4962,9 +6461,6 @@ class QKUComputationControlPlaneV1:
             )
         else:
             plan_id = self._next_request_id(snapshot.generation)
-            self._diagnostic_state["records_examined_last_request"] = len(
-                resolved_nodes
-            )
         fallback_descriptors: list[dict[str, Any]] = [
             {
                 "consumer_component_id": node.canonical_component_id,
@@ -5050,6 +6546,7 @@ class QKUComputationControlPlaneV1:
             fallback_paths=tuple(fallback_descriptors),
         )
 
+    @_instrument_runtime_request
     def resolve(
         self,
         selector: str | Mapping[str, Any],
@@ -5142,6 +6639,7 @@ class QKUComputationControlPlaneV1:
         _validate_schema_value(value, expected_spec, path=name)
         return value, unit, lineage
 
+    @_instrument_runtime_request
     def compute(
         self,
         selector: str | Mapping[str, Any],
@@ -5811,6 +7309,7 @@ class QKUComputationControlPlaneV1:
             no_order_authority=True,
         )
 
+    @_instrument_runtime_request
     def status(
         self,
         selector: str | Mapping[str, Any],
@@ -5854,6 +7353,7 @@ class QKUComputationControlPlaneV1:
             "no_order_authority": True,
         }
 
+    @_instrument_runtime_request
     def explain(
         self,
         receipt_or_selector: ComputationReceiptV1 | str | Mapping[str, Any],
@@ -6000,6 +7500,7 @@ class QKUComputationControlPlaneV1:
     ) -> dict[str, Any]:
         base = self._registry.pin()
         replacement, stats = _apply_registry_update(base, delta, candidate_records)
+        replacement = self._instrument_snapshot(replacement)
         self._registry.swap(base.generation, replacement)
         self._diagnostic_state["last_incremental_refresh"] = stats
         self._diagnostic_state["registry_rows"] = len(replacement.records)

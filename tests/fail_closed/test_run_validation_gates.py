@@ -1415,7 +1415,7 @@ def _expected_commands(
             "--timeout-ms",
             "3600000",
             "--scale-probe-records",
-            "0",
+            "10000",
         ],
         [
             python_executable,
