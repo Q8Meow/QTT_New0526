@@ -1041,17 +1041,6 @@ PYTEST_SHARD_COMMANDS: dict[str, tuple[PytestShardCommand, ...]] = {
         ),
         PytestShardCommand(
             paths=(
-                "tests/agent_algorithm",
-                "tests/agents",
-                "tests/algorithms",
-                "tests/connectors",
-            ),
-            reason="Shard 4 residual tests, subprocess group 1",
-            runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
-            historical_runtime_seconds=8.0,
-        ),
-        PytestShardCommand(
-            paths=(
                 "tests/core",
                 "tests/dashboard",
                 "tests/edge",
@@ -1103,6 +1092,20 @@ PYTEST_SHARD_COMMANDS: dict[str, tuple[PytestShardCommand, ...]] = {
             reason="Shard 4 source-evidence residual tests, subprocess group 6",
             runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
             historical_runtime_seconds=10.0,
+        ),
+        PytestShardCommand(
+            paths=(
+                "tests/agent_algorithm",
+                "tests/agents",
+                "tests/algorithms",
+                "tests/connectors",
+            ),
+            reason=(
+                "Shard 8 generated-report-writing residual tests, terminal "
+                "subprocess group"
+            ),
+            runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
+            historical_runtime_seconds=8.0,
         ),
     ),
 }

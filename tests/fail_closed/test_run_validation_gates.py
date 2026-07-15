@@ -3718,12 +3718,6 @@ def test_runner_splits_pytest_shard_8_residual_tests_deterministically():
         (runner.PR162E_TEST_ROOT,),
         (runner.ISOLATED_SOURCE_EVIDENCE_PYTEST,),
         (
-            "tests/agent_algorithm",
-            "tests/agents",
-            "tests/algorithms",
-            "tests/connectors",
-        ),
-        (
             "tests/core",
             "tests/dashboard",
             "tests/edge",
@@ -3750,6 +3744,12 @@ def test_runner_splits_pytest_shard_8_residual_tests_deterministically():
             "tests/venue_neutral_prediction_adapter",
         ),
         ("tests/source_evidence",),
+        (
+            "tests/agent_algorithm",
+            "tests/agents",
+            "tests/algorithms",
+            "tests/connectors",
+        ),
     ]
     assert commands[0].bounded_idempotence is True
     assert commands[1].ignores == (idempotence_path,)
@@ -3763,7 +3763,13 @@ def test_runner_splits_pytest_shard_8_residual_tests_deterministically():
     assert commands[9].ignores == (pr167_idempotence_path,)
     assert commands[10].bounded_idempotence is True
     assert commands[11].ignores == (pr162e_idempotence_path,)
-    assert commands[-1].ignores == (runner.ISOLATED_SOURCE_EVIDENCE_PYTEST,)
+    assert commands[-2].ignores == (runner.ISOLATED_SOURCE_EVIDENCE_PYTEST,)
+    assert commands[-1].paths == (
+        "tests/agent_algorithm",
+        "tests/agents",
+        "tests/algorithms",
+        "tests/connectors",
+    )
     assert all(command.reason for command in commands)
     assert ("tests",) not in [command.paths for command in commands]
 
@@ -3779,7 +3785,7 @@ def test_runner_splits_pytest_shard_8_residual_tests_deterministically():
     )
     assert (
         "tests/global_debug/test_grand_global_debug_logical_consistency_audit.py"
-        in runner._pytest_files_for_command(commands[15], REPO_ROOT)
+        in runner._pytest_files_for_command(commands[14], REPO_ROOT)
     )
 
 
