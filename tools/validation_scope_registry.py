@@ -47,6 +47,7 @@ PR169_AGENT_ORCH1_BRANCH = "pr169-agent-orch1"
 PR169_VAL1_BRANCH = "pr169-val1"
 PR169_QKU_FORMULA_EXP1_ROLLBACK_BRANCH = "pr169-qku-formula-exp1-rollback"
 VALIDATION_FIXTURE_BRANCH = "pr-ci-fastfail-validation-context-preflight"
+ST12A_BRANCH = "agent/st12a-contract-envelope"
 
 _PR168_BRANCHES = frozenset(
     {
@@ -91,9 +92,92 @@ _PR168_BRANCHES = frozenset(
         PR169_VAL1_BRANCH,
         PR169_QKU_FORMULA_EXP1_ROLLBACK_BRANCH,
         VALIDATION_FIXTURE_BRANCH,
+        ST12A_BRANCH,
     }
 )
 _VALIDATION_CONTEXT_BRANCHES = frozenset({VALIDATION_FIXTURE_BRANCH})
+
+ST12A_ALLOWED_EXACT_PATHS = frozenset(
+    {
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/__init__.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/authority.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/bindings.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/context.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/dependency_graph.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/errors.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/identity_adapter.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/implementation_registry.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/models.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/oracle_contracts.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/parameter_policy.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/plugin_adapter.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/protocols.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/quantum_adapter.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/serialization.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/source_policy.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/source_rights.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/specification.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/validation.py",
+        "tests/fail_closed/test_run_validation_gates.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/architecture/test_canonical_owner_uniqueness.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/architecture/test_consume_not_rebuild.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/architecture/test_contextual_computability.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/architecture/test_contract_envelope_completeness.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/architecture/test_control_plane_boundary.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/architecture/test_cross_platform_paths.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/architecture/test_current_repository_reconciliation.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/architecture/test_dependency_graph_soundness.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/architecture/test_generated_artifact_ownership.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/architecture/test_identity_plane_binding.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/architecture/test_mode_evidence_orthogonality.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/architecture/test_no_orphan_consumers.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/architecture/test_operation_contract_closure.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/architecture/test_repository_file_closure.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/architecture/test_route_not_runtime.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/architecture/test_schema_cross_consistency.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/architecture/test_snapshot_boundary.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/architecture/test_step12_tranche_readiness.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/architecture/test_tranche_dag_closure.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/architecture/test_transaction_boundary.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/operations/test_configuration_control.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/operations/test_health_readiness.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/operations/test_lifecycle_supervision.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/operations/test_runtime_topology.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/quantum/test_constraint_mapping.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/quantum/test_consume_existing_mapper.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/quantum/test_model_semantics.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/quantum/test_objective_sense_and_scale.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/quantum/test_problem_shape_classification.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/quantum/test_variable_encoding.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/security/test_authentication_binding.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/security/test_authorization_least_privilege.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/security/test_default_deny_capabilities.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/security/test_deserialization_safety.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/security/test_input_validation.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/security/test_secret_isolation.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/security/test_threat_model_completeness.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/source/test_all_29_revalidated.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/source/test_conflict_resolution.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/source/test_effective_epoch.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/source/test_fact_atomicity.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/source/test_source_precedence.py",
+        "tests/tools/test_changed_area_validation_router.py",
+        "tests/tools/test_validation_inventory.py",
+        "tests/tools/test_validation_scope_registry.py",
+        "tools/build_qku_computation_control_plane.py",
+        "tools/changed_area_validation_router.py",
+        "tools/independent_validate_qku_computation_control_plane.py",
+        "tools/independent_validate_qku_computation_control_plane_architecture.py",
+        "tools/independent_validate_qku_computation_control_plane_operations.py",
+        "tools/independent_validate_qku_computation_control_plane_quantum.py",
+        "tools/independent_validate_qku_computation_control_plane_security.py",
+        "tools/independent_validate_qku_computation_control_plane_source.py",
+        "tools/run_validation_gates.py",
+        "tools/validate_qku_computation_control_plane.py",
+        "tools/validation_inventory.py",
+        "tools/validation_scope_registry.py",
+    }
+)
 
 _PR168_ALLOWED_EXACT_PATHS = frozenset(
     {
@@ -1678,6 +1762,15 @@ def _pr169_dash1_scope_decision(branch_name: str, normalized: str) -> dict[str, 
 def explain_pr_scope_decision(branch: str, path: str) -> dict[str, object]:
     normalized = normalize_changed_path(path)
     branch_name = str(branch).strip()
+    if branch_name == ST12A_BRANCH and normalized in ST12A_ALLOWED_EXACT_PATHS:
+        return {
+            "allowed": True,
+            "branch": branch_name,
+            "normalized_path": normalized,
+            "pr_id": "ST12-TRANCHE-A",
+            "matched_rule": f"exact:{normalized}",
+            "reason": "registered_exact_path",
+        }
     forbidden_reason = _forbidden_reason(normalized)
     if forbidden_reason:
         return {
@@ -1687,6 +1780,15 @@ def explain_pr_scope_decision(branch: str, path: str) -> dict[str, object]:
             "pr_id": None,
             "matched_rule": forbidden_reason,
             "reason": "forbidden_path",
+        }
+    if branch_name == ST12A_BRANCH:
+        return {
+            "allowed": False,
+            "branch": branch_name,
+            "normalized_path": normalized,
+            "pr_id": "ST12-TRANCHE-A",
+            "matched_rule": "no_st12a_exact_scope_rule",
+            "reason": "path_not_registered_for_pr_scope",
         }
     if branch_name not in _PR168_BRANCHES:
         return {

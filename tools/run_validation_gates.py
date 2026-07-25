@@ -53,7 +53,7 @@ DETERMINISTIC_VALIDATOR_SHARD_PHASES = (
 DETERMINISTIC_VALIDATOR_SHARD_COMMAND_RANGES = {
     "deterministic-validators-a": (1, 64),
     "deterministic-validators-b": (65, 119),
-    "deterministic-validators-c": (120, 334),
+    "deterministic-validators-c": (120, 340),
 }
 PYTEST_SHARD_PHASES = (
     "pytest-shard-1",
@@ -244,6 +244,9 @@ PR162E_Q_TEST_ROOT = (
 PR162E_TEST_ROOT = "tests/pr162e"
 PR167_TEST_ROOT = (
     "tests/stage1_prediction_markets/pr167_open_trade_simulator_integration"
+)
+ST12A_TEST_ROOT = (
+    "tests/stage1_prediction_markets/qku_computation_control_plane"
 )
 PR166_SM2_PYTEST_FILE_GROUPS = (
     (
@@ -1087,6 +1090,12 @@ PYTEST_SHARD_COMMANDS: dict[str, tuple[PytestShardCommand, ...]] = {
             reason="Shard 4 source-evidence residual tests, subprocess group 6",
             runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
             historical_runtime_seconds=10.0,
+        ),
+        PytestShardCommand(
+            paths=(ST12A_TEST_ROOT,),
+            reason="ST12 Tranche-A exact 42-file domain test group",
+            runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
+            historical_runtime_seconds=1.0,
         ),
     ),
 }
@@ -5214,6 +5223,28 @@ def build_validation_commands(
                 "master_plan",
                 "generated",
                 "FirstCodingPRHandoff.packet.json",
+            ),
+        ],
+        *[
+            [
+                sys.executable,
+                _path("tools", "validate_qku_computation_control_plane.py"),
+                "--domain",
+                domain,
+            ]
+            for domain in (
+                "architecture",
+                "operations",
+                "quantum",
+                "security",
+                "source",
+            )
+        ],
+        [
+            sys.executable,
+            _path(
+                "tools",
+                "independent_validate_qku_computation_control_plane.py",
             ),
         ],
         [

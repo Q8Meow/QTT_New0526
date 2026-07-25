@@ -2919,6 +2919,31 @@ def _expected_commands(
                 / "FirstCodingPRHandoff.packet.json"
             ),
         ],
+        *[
+            [
+                python_executable,
+                str(
+                    Path("tools")
+                    / "validate_qku_computation_control_plane.py"
+                ),
+                "--domain",
+                domain,
+            ]
+            for domain in (
+                "architecture",
+                "operations",
+                "quantum",
+                "security",
+                "source",
+            )
+        ],
+        [
+            python_executable,
+            str(
+                Path("tools")
+                / "independent_validate_qku_computation_control_plane.py"
+            ),
+        ],
         [
             python_executable,
             str(Path("tools") / "validate_pr169_val1.py"),
@@ -2996,6 +3021,26 @@ def test_runner_builds_expected_command_sequence(monkeypatch):
     monkeypatch.setattr(runner.sys, "executable", python_executable)
 
     assert runner.build_validation_commands() == _expected_commands(python_executable)
+
+
+def test_runner_registers_one_qku_primary_dispatch_and_independent_system():
+    commands = runner.build_deterministic_validator_commands()
+    qku_commands = [
+        command
+        for command in commands
+        if any("qku_computation_control_plane.py" in part for part in command)
+    ]
+    assert [command[-1] for command in qku_commands[:5]] == [
+        "architecture",
+        "operations",
+        "quantum",
+        "security",
+        "source",
+    ]
+    assert sum(
+        "independent_validate_qku_computation_control_plane.py" in command[1]
+        for command in qku_commands
+    ) == 1
 
 
 def test_runner_phase_manifest_covers_full_validation_plan(monkeypatch):
@@ -3717,6 +3762,7 @@ def test_runner_splits_pytest_shard_8_residual_tests_deterministically():
             "tests/venue_neutral_prediction_adapter",
         ),
         ("tests/source_evidence",),
+        (runner.ST12A_TEST_ROOT,),
     ]
     assert commands[0].bounded_idempotence is True
     assert commands[1].ignores == (idempotence_path,)
@@ -3730,7 +3776,8 @@ def test_runner_splits_pytest_shard_8_residual_tests_deterministically():
     assert commands[9].ignores == (pr167_idempotence_path,)
     assert commands[10].bounded_idempotence is True
     assert commands[11].ignores == (pr162e_idempotence_path,)
-    assert commands[-1].ignores == (runner.ISOLATED_SOURCE_EVIDENCE_PYTEST,)
+    assert commands[-2].ignores == (runner.ISOLATED_SOURCE_EVIDENCE_PYTEST,)
+    assert commands[-1].paths == (runner.ST12A_TEST_ROOT,)
     assert all(command.reason for command in commands)
     assert ("tests",) not in [command.paths for command in commands]
 

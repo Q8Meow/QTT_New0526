@@ -147,6 +147,62 @@ def test_pr169_qku_formula_exp1_rollback_scope_is_exactly_owned_universe() -> No
     )
 
 
+def test_st12a_scope_is_exactly_the_frozen_77_path_allowlist() -> None:
+    assert registry.ST12A_BRANCH == "agent/st12a-contract-envelope"
+    assert len(registry.ST12A_ALLOWED_EXACT_PATHS) == 77
+    assert all(
+        registry.explain_pr_scope_decision(
+            registry.ST12A_BRANCH,
+            path,
+        )
+        == {
+            "allowed": True,
+            "branch": registry.ST12A_BRANCH,
+            "normalized_path": path,
+            "pr_id": "ST12-TRANCHE-A",
+            "matched_rule": f"exact:{path}",
+            "reason": "registered_exact_path",
+        }
+        for path in registry.ST12A_ALLOWED_EXACT_PATHS
+    )
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/runtime.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/math/math_01.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/test_extra.py",
+        "tools/validate_qku_computation_control_plane_extra.py",
+        "docs/master_plan/QTT_MasterPlan_Current.md",
+        ".tmp/qku-output.json",
+    ],
+)
+def test_st12a_scope_rejects_prefix_wildcards_and_unowned_paths(path: str) -> None:
+    assert not registry.is_pr_scoped_changed_path_allowed(
+        registry.ST12A_BRANCH,
+        path,
+    )
+
+
+def test_st12a_scope_requires_exact_branch_and_normalizes_windows_paths() -> None:
+    path = (
+        "tests/stage1_prediction_markets/qku_computation_control_plane/"
+        "security/test_secret_isolation.py"
+    )
+    windows_path = ".\\" + path.replace("/", "\\")
+    assert registry.is_pr_scoped_changed_path_allowed(
+        registry.ST12A_BRANCH,
+        windows_path,
+    )
+    for branch in (
+        "agent/st12a-contract-envelope-2",
+        "ST12-TRANCHE-A",
+        "feature/st12a",
+    ):
+        assert not registry.is_pr_scoped_changed_path_allowed(branch, path)
+
+
 @pytest.mark.parametrize("path", PR169_QKU_FORMULA_EXP1_ROLLBACK_ALLOWED_PATHS)
 def test_pr169_qku_formula_exp1_rollback_owned_paths_are_allowed(path: str) -> None:
     decision = registry.explain_pr_scope_decision(

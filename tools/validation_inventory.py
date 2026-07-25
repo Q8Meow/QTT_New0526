@@ -14,6 +14,7 @@ if str(REPO_ROOT) not in sys.path:
 
 from tools import run_validation_gates as runner
 from tools.repo_path_refs import normalize_repo_ref
+from tools.validation_scope_registry import ST12A_ALLOWED_EXACT_PATHS
 
 
 FAST_UNIVERSAL_PREFLIGHT = "FAST_UNIVERSAL_PREFLIGHT"
@@ -188,6 +189,12 @@ def validator_id_for_command(command: Sequence[str], phase: str) -> str:
     script_name = _script_name_from_canonical(canonical)
     if script_name == runner.PYTEST_FRESH_BASETEMP_SCRIPT:
         return _pytest_validator_id(canonical, phase)
+    if script_name == "validate_qku_computation_control_plane.py":
+        domain_index = canonical.index("--domain")
+        return (
+            "validate_qku_computation_control_plane_"
+            f"{canonical[domain_index + 1]}"
+        )
     return PurePosixPath(script_name).stem
 
 
@@ -265,6 +272,8 @@ def _pr_tag_from_token(token: str) -> str:
 
 
 def _owner_pr_or_feature(stem: str) -> str:
+    if "qku_computation_control_plane" in stem:
+        return "ST12-TRANCHE-A"
     token = _pr_token(stem)
     if token is not None:
         return _pr_tag_from_token(token)
@@ -289,6 +298,8 @@ def _owner_pr_or_feature(stem: str) -> str:
 
 def _owner_domain(stem: str, command: Sequence[str]) -> str:
     haystack = " ".join(command).lower()
+    if "qku_computation_control_plane" in haystack:
+        return "QKU computation control plane"
     if (
         "qtt_authority_reason_code_registry" in stem
         or "qtt_authority_reason_code_registry" in haystack
@@ -447,6 +458,8 @@ def _pr_globs(stem: str) -> tuple[str, ...]:
 def _domain_globs(stem: str, command: Sequence[str]) -> tuple[str, ...]:
     haystack = " ".join(command).lower()
     globs: list[str] = []
+    if "qku_computation_control_plane" in haystack:
+        globs.extend(sorted(ST12A_ALLOWED_EXACT_PATHS))
     if "atomicrows" in haystack:
         globs.extend(
             [

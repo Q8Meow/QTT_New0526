@@ -15,6 +15,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from tools.repo_path_refs import normalize_repo_ref
+from tools.validation_scope_registry import ST12A_ALLOWED_EXACT_PATHS
 from tools.validation_inventory import (
     FAST_UNIVERSAL_PREFLIGHT,
     GENERATED_REPORT_GLOBS,
@@ -31,6 +32,16 @@ from tools import run_validation_gates as runner
 
 ROUTING_POLICY_VERSION = 1
 FORCE_FULL_FLAG_NAME = "QTT_FORCE_FULL_VALIDATION"
+QKU_VALIDATOR_IDS = frozenset(
+    {
+        "validate_qku_computation_control_plane_architecture",
+        "validate_qku_computation_control_plane_operations",
+        "validate_qku_computation_control_plane_quantum",
+        "validate_qku_computation_control_plane_security",
+        "validate_qku_computation_control_plane_source",
+        "independent_validate_qku_computation_control_plane",
+    }
+)
 
 
 @dataclass(frozen=True)
@@ -220,21 +231,52 @@ def _is_pr152_tracked(path: str) -> bool:
     )
 
 
+def _is_qku_control_plane_path(path: str) -> bool:
+    return normalize_repo_ref(path) in ST12A_ALLOWED_EXACT_PATHS
+
+
 def _current_pr152_inventory_counts(repo_root: Path) -> dict[str, int]:
     generated_root = repo_root / "docs/master_plan/generated"
     tests_root = repo_root / "tests"
     tools_root = repo_root / "tools"
+    # PR152's already-certified denominator predates the exact new Tranche-A
+    # files. Preserve that baseline universe while routing the new universe
+    # through its own centralized validators.
+    tranche_a_new_test_paths = {
+        path
+        for path in ST12A_ALLOWED_EXACT_PATHS
+        if path.startswith(
+            "tests/stage1_prediction_markets/"
+            "qku_computation_control_plane/"
+        )
+    }
+    tranche_a_new_validator_paths = {
+        "tools/validate_qku_computation_control_plane.py"
+    }
+
+    def _is_preserved_pr152_test(path: Path) -> bool:
+        relative = path.relative_to(repo_root).as_posix()
+        return relative not in tranche_a_new_test_paths
+
+    def _is_preserved_pr152_validator(path: Path) -> bool:
+        relative = path.relative_to(repo_root).as_posix()
+        return relative not in tranche_a_new_validator_paths
+
     return {
         "generated_report_count": sum(1 for path in generated_root.rglob("*") if path.is_file())
         if generated_root.exists()
         else 0,
-        "test_file_count": sum(1 for path in tests_root.rglob("*.py") if path.is_file())
+        "test_file_count": sum(
+            1
+            for path in tests_root.rglob("*.py")
+            if path.is_file() and _is_preserved_pr152_test(path)
+        )
         if tests_root.exists()
         else 0,
         "validator_tool_count": sum(
             1
             for path in tools_root.glob("validate_*.py")
-            if path.is_file()
+            if path.is_file() and _is_preserved_pr152_validator(path)
         )
         if tools_root.exists()
         else 0,
@@ -283,9 +325,23 @@ def _classify_changed_files(
     tests: list[str] = []
     domains: set[str] = set()
     fail_closed: list[str] = []
+    qku_entries = {
+        entry.validator_id: entry
+        for entry in validation_inventory()
+        if entry.validator_id in QKU_VALIDATOR_IDS
+    }
 
     for path in changed_files:
-        matches = entries_matching_path(path)
+        matches_by_id = {
+            entry.validator_id: entry
+            for entry in entries_matching_path(path)
+        }
+        if _is_qku_control_plane_path(path):
+            matches_by_id.update(qku_entries)
+        matches = tuple(
+            matches_by_id[validator_id]
+            for validator_id in sorted(matches_by_id)
+        )
         if matches:
             validator_ids = tuple(sorted(entry.validator_id for entry in matches))
             classified[path] = validator_ids
@@ -358,6 +414,16 @@ def build_router_result(router_input: RouterInput) -> RouterResult:
         touched_domains,
         fail_closed_reasons,
     ) = _classify_changed_files(changed_files)
+    routing_failures = set(fail_closed_reasons)
+    for path in changed_files:
+        if _is_qku_control_plane_path(path):
+            routed = set(classified_files.get(path, ()))
+            missing = sorted(QKU_VALIDATOR_IDS - routed)
+            if missing:
+                routing_failures.add(
+                    f"QKU_VALIDATION_ROUTE_INCOMPLETE: {path}: {missing}"
+                )
+    fail_closed_reasons = tuple(sorted(routing_failures))
 
     full_reason = _full_validation_reason(
         router_input,
