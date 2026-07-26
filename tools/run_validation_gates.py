@@ -1127,6 +1127,13 @@ TRACKED_GENERATED_PATH_PREFIXES = (
     "docs/master_plan/source_evidence/generated/",
     "docs/roadmap/generated/",
 )
+VALIDATION_WORKSPACE_OUTPUT_PATH_PREFIXES = (".tmp/",)
+WINDOWS_FORBIDDEN_PATH_CHARACTERS = frozenset('<>:"|?*')
+WINDOWS_RESERVED_PATH_NAMES = frozenset(
+    {"AUX", "CON", "NUL", "PRN"}
+    | {f"COM{index}" for index in range(1, 10)}
+    | {f"LPT{index}" for index in range(1, 10)}
+)
 VOLATILE_GENERATED_REPORT_CURRENTNESS_FIELDS = frozenset(
     {
         "branch",
@@ -1762,10 +1769,42 @@ def _normal_path_text(value: pathlib.Path | str) -> str:
     return str(value).replace("\\", "/")
 
 
+def _is_portable_relative_repo_path(value: pathlib.Path | str) -> bool:
+    normalized = _normal_path_text(value)
+    segments = normalized.split("/")
+    return (
+        not pathlib.PurePosixPath(normalized).is_absolute()
+        and not pathlib.PureWindowsPath(normalized).drive
+        and all(
+            segment not in {"", ".", ".."}
+            and not segment.endswith((" ", "."))
+            and not any(
+                character in WINDOWS_FORBIDDEN_PATH_CHARACTERS
+                or ord(character) < 32
+                for character in segment
+            )
+            and segment.rstrip(" .").split(".", 1)[0].upper()
+            not in WINDOWS_RESERVED_PATH_NAMES
+            for segment in segments
+        )
+    )
+
+
 def _is_tracked_generated_output_path(value: pathlib.Path | str) -> bool:
     normalized = _normal_path_text(value)
     return any(
         normalized.startswith(prefix) for prefix in TRACKED_GENERATED_PATH_PREFIXES
+    )
+
+
+def _is_validation_workspace_output_path(value: pathlib.Path | str) -> bool:
+    normalized = _normal_path_text(value)
+    return (
+        any(
+            normalized.startswith(prefix)
+            for prefix in VALIDATION_WORKSPACE_OUTPUT_PATH_PREFIXES
+        )
+        and _is_portable_relative_repo_path(normalized)
     )
 
 
@@ -2449,6 +2488,9 @@ def _restore_untracked_gate_side_effects(
         _untracked_paths(repo_root) - initially_untracked_paths,
         key=lambda item: (item.casefold(), item),
     )
+    new_paths = [
+        path for path in new_paths if not _is_validation_workspace_output_path(path)
+    ]
     unexpected_paths = [
         path for path in new_paths if not _is_tracked_generated_output_path(path)
     ]

@@ -5233,12 +5233,16 @@ def test_runner_restores_new_generated_untracked_outputs_at_terminal_boundaries(
             "docs/master_plan/generated/pr168_gfp_shards/"
             "GeneratedDuringGate.report.shard_0001.json"
         )
+        new_workspace_output_rel = (
+            ".tmp/qtt_stack_runs/deterministic_run/manifest.json"
+        )
         paths = {
             relative: repo_root / relative
             for relative in (
                 preexisting_generated_rel,
                 preexisting_other_rel,
                 new_generated_rel,
+                new_workspace_output_rel,
             )
         }
         for relative in (preexisting_generated_rel, preexisting_other_rel):
@@ -5253,6 +5257,11 @@ def test_runner_restores_new_generated_untracked_outputs_at_terminal_boundaries(
         def fake_run(command, **kwargs):
             paths[new_generated_rel].parent.mkdir(parents=True, exist_ok=True)
             paths[new_generated_rel].write_text("generated\n", encoding="utf-8")
+            paths[new_workspace_output_rel].parent.mkdir(parents=True, exist_ok=True)
+            paths[new_workspace_output_rel].write_text(
+                "workspace output\n",
+                encoding="utf-8",
+            )
             return Completed(command_returncode)
 
         monkeypatch.setattr(runner, "_tracked_modified_paths", lambda repo_root: set())
@@ -5272,6 +5281,9 @@ def test_runner_restores_new_generated_untracked_outputs_at_terminal_boundaries(
             "preserve\n"
         )
         assert not paths[new_generated_rel].exists()
+        assert paths[new_workspace_output_rel].read_text(encoding="utf-8") == (
+            "workspace output\n"
+        )
 
 
 def test_runner_fails_closed_without_removing_new_untracked_output_outside_prefix(
@@ -5346,6 +5358,27 @@ def test_generated_gate_output_path_rejects_nonportable_or_escaping_paths(
     assert valid_path == (
         tmp_path / "docs" / "master_plan" / "generated" / "Valid.report.json"
     ).resolve()
+
+
+@pytest.mark.parametrize(
+    ("path_text", "expected"),
+    (
+        (".tmp/qtt_stack_runs/run/manifest.json", True),
+        (r".tmp\qtt-validation-timing\phase.json", True),
+        (".tmp-other/output.json", False),
+        (".tmp/../output.json", False),
+        (".tmp/CON.json", False),
+        (".tmp/name?.json", False),
+        (".tmp/trailing./output.json", False),
+        (r"C:\repo\.tmp\output.json", False),
+        (r"\\server\share\.tmp\output.json", False),
+    ),
+)
+def test_validation_workspace_output_path_uses_exact_cross_platform_boundary(
+    path_text,
+    expected,
+):
+    assert runner._is_validation_workspace_output_path(path_text) is expected
 
 
 def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_pytest(
