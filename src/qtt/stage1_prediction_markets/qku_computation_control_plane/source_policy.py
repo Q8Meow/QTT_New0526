@@ -12,20 +12,39 @@ from typing import Mapping
 from .errors import ReasonCode, SourcePolicyError
 
 
+class AtomicFactTerminalStateV1(StrEnum):
+    PASS_RECONFIRMED_DIRECT_PRIMARY_OR_PRIMARY_METHOD_SOURCE = (
+        "PASS_RECONFIRMED_DIRECT_PRIMARY_OR_PRIMARY_METHOD_SOURCE"
+    )
+
+
+class ClaimBindingTerminalStateV1(StrEnum):
+    COMPLETE_TERMINAL_EXACT_CLAIM_BINDING = (
+        "COMPLETE_TERMINAL_EXACT_CLAIM_BINDING"
+    )
+
+
+class PrimarySourceCompletenessV1(StrEnum):
+    COMPLETE_PRIMARY_SOURCE = "COMPLETE_PRIMARY_SOURCE"
+
+
 @dataclass(frozen=True, slots=True)
 class AtomicSourceFactV1:
     atomic_fact_id: str
     fact: str
-    result: str
+    result: AtomicFactTerminalStateV1
 
     def __post_init__(self) -> None:
-        if any(
-            not isinstance(value, str) or not value
-            for value in (self.atomic_fact_id, self.fact, self.result)
+        if (
+            not isinstance(self.atomic_fact_id, str)
+            or not self.atomic_fact_id
+            or not isinstance(self.fact, str)
+            or not self.fact
+            or not isinstance(self.result, AtomicFactTerminalStateV1)
         ):
             raise SourcePolicyError(
                 ReasonCode.SOURCE_EPOCH_MISSING,
-                "atomic source facts require exact nonempty text fields",
+                "atomic source facts require the exact typed terminal result",
             )
 
 
@@ -55,7 +74,8 @@ class SourceStateV1:
     implementation_binding: tuple[str, ...]
     failure_reason_code: str
     recheck_triggers: tuple[str, ...]
-    research_completeness_state: str
+    research_completeness_state: ClaimBindingTerminalStateV1
+    primary_source_completeness_state: PrimarySourceCompletenessV1
     provider_connection_or_effect_authorized: bool
     runtime_online_research_allowed: bool
     codex_online_research_allowed: bool
@@ -82,7 +102,6 @@ class SourceStateV1:
             "source_class",
             "ttl",
             "failure_reason_code",
-            "research_completeness_state",
             "original_row_json",
         )
         if any(
@@ -147,8 +166,14 @@ class SourceStateV1:
                 f"source state exercises unauthorized effects: {self.source_state_id}",
             )
         if (
-            self.research_completeness_state
-            != "COMPLETE_TERMINAL_EXACT_CLAIM_BINDING"
+            not isinstance(
+                self.research_completeness_state,
+                ClaimBindingTerminalStateV1,
+            )
+            or not isinstance(
+                self.primary_source_completeness_state,
+                PrimarySourceCompletenessV1,
+            )
             or self.conflict_resolution_state
             != "TERMINAL_OWNER_SIDE_SOURCE_CONFLICT_RESOLUTION_COMPLETE"
             or self.future_fact_exclusion_state
@@ -187,7 +212,11 @@ class SourceStateV1:
                 ReasonCode.SOURCE_CONFLICT,
                 f"duplicate atomic fact id in {self.source_state_id}",
             )
-        if any("PASS" not in fact.result for fact in self.atomic_facts):
+        if any(
+            fact.result
+            is not AtomicFactTerminalStateV1.PASS_RECONFIRMED_DIRECT_PRIMARY_OR_PRIMARY_METHOD_SOURCE
+            for fact in self.atomic_facts
+        ):
             raise SourcePolicyError(
                 ReasonCode.SOURCE_CONFLICT,
                 f"non-passing atomic fact in {self.source_state_id}",
@@ -3800,7 +3829,7 @@ def _source_record(row: object) -> SourceStateV1:
         AtomicSourceFactV1(
             atomic_fact_id=str(item["atomic_fact_id"]),
             fact=str(item["fact"]),
-            result=str(item["result"]),
+            result=AtomicFactTerminalStateV1(str(item["result"])),
         )
         for item in atomic_rows
     )
@@ -3837,7 +3866,12 @@ def _source_record(row: object) -> SourceStateV1:
         recheck_triggers=tuple(
             str(value) for value in specification["recheck_triggers"]
         ),
-        research_completeness_state=str(row["research_completeness_state"]),
+        research_completeness_state=ClaimBindingTerminalStateV1(
+            str(row["research_completeness_state"])
+        ),
+        primary_source_completeness_state=PrimarySourceCompletenessV1(
+            str(certified["research_completeness_state"])
+        ),
         provider_connection_or_effect_authorized=row[
             "provider_connection_or_effect_authorized"
         ],
@@ -4034,7 +4068,12 @@ def validate_effective_epoch(
                 ReasonCode.SOURCE_EPOCH_STALE,
                 f"{source_state_id} is not effective at the requested time",
             )
-    if "COMPLETE" not in source.research_completeness_state:
+    if (
+        source.research_completeness_state
+        is not ClaimBindingTerminalStateV1.COMPLETE_TERMINAL_EXACT_CLAIM_BINDING
+        or source.primary_source_completeness_state
+        is not PrimarySourceCompletenessV1.COMPLETE_PRIMARY_SOURCE
+    ):
         raise SourcePolicyError(
             ReasonCode.SOURCE_EPOCH_STALE,
             f"{source_state_id} is not terminally currentized",

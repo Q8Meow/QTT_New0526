@@ -20,6 +20,15 @@ SOURCE_POLICY = (
 )
 BINDINGS = SOURCE_POLICY.with_name("bindings.py")
 SUCCESS_MARKER = "QKU_SOURCE_INDEPENDENTLY_VALIDATED"
+ATOMIC_TERMINALS = {
+    "PASS_RECONFIRMED_DIRECT_PRIMARY_OR_PRIMARY_METHOD_SOURCE",
+}
+CLAIM_BINDING_TERMINALS = {
+    "COMPLETE_TERMINAL_EXACT_CLAIM_BINDING",
+}
+PRIMARY_SOURCE_TERMINALS = {
+    "COMPLETE_PRIMARY_SOURCE",
+}
 
 
 def _literal(tree: ast.Module, name: str) -> str:
@@ -71,9 +80,11 @@ def main() -> int:
             or row.get("provider_connection_or_effect_authorized") is not False
             or row.get("runtime_online_research_allowed") is not False
             or row.get("codex_online_research_allowed") is not False
-            or not isinstance(row.get("research_completeness_state"), str)
-            or not row["research_completeness_state"].startswith("COMPLETE_")
+            or row.get("research_completeness_state")
+            not in CLAIM_BINDING_TERMINALS
             or not isinstance(certified, dict)
+            or certified.get("research_completeness_state")
+            not in PRIMARY_SOURCE_TERMINALS
             or certified.get("active_runtime_authority") is not False
             or certified.get("all_atomic_facts_pass") is not True
             or certified.get("conflict_resolution_state")
@@ -84,8 +95,7 @@ def main() -> int:
                 not isinstance(fact, dict)
                 or not isinstance(fact.get("atomic_fact_id"), str)
                 or not fact["atomic_fact_id"]
-                or not isinstance(fact.get("result"), str)
-                or "PASS" not in fact["result"]
+                or fact.get("result") not in ATOMIC_TERMINALS
                 for fact in atomic_facts
             )
             or not isinstance(specification, dict)
@@ -98,6 +108,36 @@ def main() -> int:
             )
     if len({row["stable_source_identity"] for row in source_rows}) != 29:
         failures.append("certified stable source identities are not unique")
+    adversarial_atomic = (
+        "BYPASS_RECONFIRMED_DIRECT_PRIMARY_OR_PRIMARY_METHOD_SOURCE",
+        "NOT_PASS",
+        "PASSIVE",
+        "PASS_RECONFIRMED_DIRECT_PRIMARY_OR_PRIMARY_METHOD_SOURCE_SUFFIX",
+    )
+    adversarial_complete = (
+        "COMPLETE_",
+        "COMPLETE_TERMINAL_EXACT_CLAIM_BINDING_SUFFIX",
+        "COMPLETE_PRIMARY_SOURCE_SUFFIX",
+    )
+    if any(value in ATOMIC_TERMINALS for value in adversarial_atomic) or any(
+        value in CLAIM_BINDING_TERMINALS or value in PRIMARY_SOURCE_TERMINALS
+        for value in adversarial_complete
+    ):
+        failures.append("source terminal allowlists accept lookalike values")
+    source_text = SOURCE_POLICY.read_text(encoding="utf-8")
+    for class_name, exact_value in (
+        (
+            "AtomicFactTerminalStateV1",
+            "PASS_RECONFIRMED_DIRECT_PRIMARY_OR_PRIMARY_METHOD_SOURCE",
+        ),
+        (
+            "ClaimBindingTerminalStateV1",
+            "COMPLETE_TERMINAL_EXACT_CLAIM_BINDING",
+        ),
+        ("PrimarySourceCompletenessV1", "COMPLETE_PRIMARY_SOURCE"),
+    ):
+        if class_name not in source_text or exact_value not in source_text:
+            failures.append(f"typed source terminal enum missing: {class_name}")
     if any(
         row.get("runtime_effect_authorized") is not False
         or not isinstance(row.get("exact_facts"), dict)
@@ -163,7 +203,7 @@ def main() -> int:
         print("\n".join(failures), file=sys.stderr)
         return 1
     print(
-        f"{SUCCESS_MARKER} closure_controls=5 source_rows={len(source_rows)} "
+        f"{SUCCESS_MARKER} source_rows={len(source_rows)} "
         f"overlays={len(overlays)} binding_rules=1"
     )
     return 0

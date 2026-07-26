@@ -144,6 +144,11 @@ PR169_AGENT_ORCH1_DETERMINISTIC_SCRIPT_NAMES = frozenset(
         "validate_pr169_agent_orch1.py",
     }
 )
+OWNER_VALIDATION_READ_ONLY_UPSTREAM_BUILDER_SCRIPT_NAMES = frozenset(
+    {
+        "build_pr168_rp5c_immutable_qku_formula_library.py",
+    }
+)
 ORDERED_PHASES = (
     FAST_PREFLIGHT_PHASE,
     DETERMINISTIC_VALIDATORS_PHASE,
@@ -2379,6 +2384,99 @@ def _tracked_modified_paths(repo_root: pathlib.Path) -> set[str]:
         for path in stdout.splitlines()
         if path.strip()
     }
+
+
+def _untracked_paths(repo_root: pathlib.Path) -> set[str]:
+    returncode, stdout, stderr = _git_stdout(
+        repo_root,
+        ["status", "--porcelain=v1", "-z", "--untracked-files=all"],
+    )
+    if returncode != 0:
+        detail = stderr.strip() or stdout.strip() or "git status failed"
+        raise RuntimeError(detail)
+    return {
+        path
+        for code, path in _status_paths_from_porcelain(stdout)
+        if code == "??"
+    }
+
+
+def _generated_gate_output_path(
+    repo_root: pathlib.Path,
+    path_text: str,
+) -> pathlib.Path:
+    normalized = _normal_path_text(path_text)
+    segments = normalized.split("/")
+    windows_path = pathlib.PureWindowsPath(normalized)
+    windows_forbidden = '<>:"|?*'
+    windows_reserved = {"AUX", "CON", "NUL", "PRN"}
+    windows_reserved.update(f"COM{index}" for index in range(1, 10))
+    windows_reserved.update(f"LPT{index}" for index in range(1, 10))
+    unsafe_segment = any(
+        not segment
+        or segment in {".", ".."}
+        or segment.endswith((" ", "."))
+        or any(character in windows_forbidden or ord(character) < 32 for character in segment)
+        or segment.rstrip(" .").split(".", 1)[0].upper() in windows_reserved
+        for segment in segments
+    )
+    if (
+        not _is_tracked_generated_output_path(normalized)
+        or pathlib.PurePosixPath(normalized).is_absolute()
+        or bool(windows_path.drive)
+        or unsafe_segment
+    ):
+        raise RuntimeError(
+            "VALIDATION_GATE_UNSAFE_GENERATED_OUTPUT_PATH: "
+            f"{normalized or '<empty>'}"
+        )
+
+    resolved_root = repo_root.resolve()
+    resolved_path = resolved_root.joinpath(*segments).resolve()
+    if not _path_is_relative_to(resolved_path, resolved_root):
+        raise RuntimeError(
+            "VALIDATION_GATE_UNSAFE_GENERATED_OUTPUT_PATH: "
+            f"{normalized}"
+        )
+    return resolved_path
+
+
+def _restore_untracked_gate_side_effects(
+    repo_root: pathlib.Path,
+    initially_untracked_paths: set[str],
+) -> tuple[str, ...]:
+    new_paths = sorted(
+        _untracked_paths(repo_root) - initially_untracked_paths,
+        key=lambda item: (item.casefold(), item),
+    )
+    unexpected_paths = [
+        path for path in new_paths if not _is_tracked_generated_output_path(path)
+    ]
+    generated_paths = [
+        path for path in new_paths if _is_tracked_generated_output_path(path)
+    ]
+    resolved_generated_paths = [
+        (path, _generated_gate_output_path(repo_root, path))
+        for path in generated_paths
+    ]
+
+    restored: list[str] = []
+    for path_text, path in resolved_generated_paths:
+        if path.is_symlink() or path.is_file():
+            path.unlink()
+            restored.append(path_text)
+        elif path.exists():
+            raise RuntimeError(
+                "VALIDATION_GATE_GENERATED_OUTPUT_NOT_FILE: "
+                f"{path_text}"
+            )
+
+    if unexpected_paths:
+        raise RuntimeError(
+            "VALIDATION_GATE_UNTRACKED_OUTPUT_OUTSIDE_GENERATED_PREFIX: "
+            + ",".join(unexpected_paths)
+        )
+    return tuple(restored)
 
 
 def _modified_file_snapshots(
@@ -5727,6 +5825,11 @@ def run_commands(
     total_started = time.perf_counter()
 
     def finish(returncode: int) -> int:
+        try:
+            restore_gate_side_effects()
+        except RuntimeError as exc:
+            print(str(exc), file=sys.stderr, flush=True)
+            returncode = 1
         total_elapsed_seconds = time.perf_counter() - total_started
         _print_timing_summary(
             timing_entries,
@@ -5752,12 +5855,14 @@ def run_commands(
 
     initially_modified_paths: set[str] = set()
     initially_modified_snapshots: dict[str, bytes | None] = {}
+    initially_untracked_paths: set[str] = set()
     if cleanup_repo_root is not None:
         initially_modified_paths = _tracked_modified_paths(cleanup_repo_root)
         initially_modified_snapshots = _modified_file_snapshots(
             cleanup_repo_root,
             initially_modified_paths,
         )
+        initially_untracked_paths = _untracked_paths(cleanup_repo_root)
 
     def restore_gate_side_effects() -> None:
         if cleanup_repo_root is None:
@@ -5769,6 +5874,10 @@ def run_commands(
         _restore_modified_file_snapshots(
             cleanup_repo_root,
             initially_modified_snapshots,
+        )
+        _restore_untracked_gate_side_effects(
+            cleanup_repo_root,
+            initially_untracked_paths,
         )
 
     for command_index, command in enumerate(commands, start=1):
@@ -5947,6 +6056,36 @@ def _current_git_branch(repo_root: pathlib.Path) -> str:
     if completed.returncode == 0:
         return completed.stdout.strip() or os.environ.get("GITHUB_HEAD_REF", "").strip()
     return os.environ.get("GITHUB_HEAD_REF", "").strip()
+
+
+def _filter_foreign_branch_guarded_builders_for_owner_validation(
+    commands: Sequence[Sequence[str]],
+    *,
+    branch: str,
+) -> list[list[str]]:
+    from tools.ci_branch_context import is_owner_authorized_validation_branch
+
+    if not is_owner_authorized_validation_branch(branch):
+        return [list(command) for command in commands]
+
+    kept: list[list[str]] = []
+    read_only_upstream_builders: list[str] = []
+    for command in commands:
+        command_list = list(command)
+        script_name = _command_script_name(command_list)
+        if script_name not in OWNER_VALIDATION_READ_ONLY_UPSTREAM_BUILDER_SCRIPT_NAMES:
+            kept.append(command_list)
+            continue
+        read_only_upstream_builders.append(script_name)
+
+    if read_only_upstream_builders:
+        print(
+            "QTT_OWNER_AUTHORIZED_VALIDATION_UPSTREAM_BUILDERS_READ_ONLY "
+            f"branch={branch} "
+            f"scripts={','.join(sorted(read_only_upstream_builders))}",
+            flush=True,
+        )
+    return kept
 
 
 def _rp5d_r1_local_branch_scope_active(
@@ -6507,6 +6646,14 @@ def main(argv: Sequence[str] | None = None) -> int:
                     args.phase,
                     pathlib.Path(temp_dir),
                     pathlib.Path(pytest_temp_dir),
+                )
+                from tools.ci_branch_context import current_branch_context
+
+                commands = (
+                    _filter_foreign_branch_guarded_builders_for_owner_validation(
+                        commands,
+                        branch=current_branch_context(repo_root).branch,
+                    )
                 )
                 router_result = None
                 if _rp5d_r1_local_branch_scope_active(

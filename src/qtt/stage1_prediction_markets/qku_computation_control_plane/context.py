@@ -53,6 +53,40 @@ def exact_decimal(value: Decimal | str | int, *, field_name: str = "value") -> D
     return result
 
 
+def canonical_probability_decimal(
+    value: Decimal | str | int | float,
+    *,
+    field_name: str = "probability",
+) -> Decimal:
+    """Convert a probability without weakening the general Decimal boundary.
+
+    Python floats are accepted only on explicitly declared probability surfaces.
+    Their canonical value is constructed from Python's shortest round-trip text;
+    ``Decimal(float)`` is never used.
+    """
+
+    if isinstance(value, bool) or not isinstance(value, Decimal | str | int | float):
+        raise NumericDomainError(
+            ReasonCode.INVALID_NUMERIC_INPUT,
+            f"{field_name} must be a Decimal, canonical string, integer, or float",
+        )
+    if isinstance(value, float):
+        if value != value or value in (float("inf"), float("-inf")):
+            raise NumericDomainError(
+                ReasonCode.NONFINITE_NUMERIC_INPUT,
+                f"{field_name} must be finite",
+            )
+        result = exact_decimal(repr(value), field_name=field_name)
+    else:
+        result = exact_decimal(value, field_name=field_name)
+    if result < Decimal(0) or result > Decimal(1):
+        raise NumericDomainError(
+            ReasonCode.OUT_OF_DOMAIN,
+            f"{field_name} must be in [0, 1]",
+        )
+    return result
+
+
 def finite_float(
     value: float | int | str | Decimal,
     *,

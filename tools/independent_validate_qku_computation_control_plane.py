@@ -56,7 +56,7 @@ def main() -> int:
         print(f"independent domains failed: {failed}", file=sys.stderr)
         return 1
     print(
-        f"{SUCCESS_MARKER} domains={len(results)} closure_controls=42"
+        f"{SUCCESS_MARKER} domains={len(results)}"
     )
     return 0
 

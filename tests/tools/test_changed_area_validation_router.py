@@ -289,6 +289,25 @@ def test_pr152_decision_is_clean_after_currentization_counts_match():
     assert "matches filesystem counts" in result.pr152_currentization_reason
 
 
+def test_pr152_inventory_counts_include_current_tracked_surfaces(tmp_path):
+    paths = (
+        tmp_path / "docs/master_plan/generated/Current.report.json",
+        tmp_path
+        / "tests/stage1_prediction_markets/qku_computation_control_plane"
+        / "architecture/test_current_surface.py",
+        tmp_path / "tools/validate_qku_computation_control_plane.py",
+    )
+    for path in paths:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("{}\n" if path.suffix == ".json" else "# tracked\n", encoding="utf-8")
+
+    assert router._current_pr152_inventory_counts(tmp_path) == {
+        "generated_report_count": 1,
+        "test_file_count": 1,
+        "validator_tool_count": 1,
+    }
+
+
 def test_pr152_decision_triggers_when_currentization_report_is_stale(monkeypatch):
     monkeypatch.setattr(
         router,

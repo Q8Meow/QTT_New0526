@@ -6,6 +6,7 @@ from __future__ import annotations
 import ast
 from pathlib import Path
 import sys
+import unicodedata
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -30,6 +31,63 @@ FORBIDDEN_ATTRIBUTE_CALLS = {
     ("pickle", "loads"),
 }
 SUCCESS_MARKER = "QKU_SECURITY_INDEPENDENTLY_VALIDATED"
+SECRET_TERMS = frozenset(
+    {
+        "apikey",
+        "apisecret",
+        "authorization",
+        "bearer",
+        "password",
+        "passphrase",
+        "accesstoken",
+        "refreshtoken",
+        "sessiontoken",
+        "cookie",
+        "credential",
+        "privatekey",
+        "secret",
+        "seedphrase",
+        "walletsecret",
+    }
+)
+ALLOWED_SECRET_LOOKALIKES = frozenset(
+    {"tokencount", "tokenbudget", "credentialstate"}
+)
+
+
+def _normalize_key(value: str) -> str:
+    normalized = unicodedata.normalize("NFKC", value).casefold()
+    return "".join(character for character in normalized if character.isalnum())
+
+
+def _independent_secret_match(value: str) -> bool:
+    normalized = _normalize_key(value)
+    if normalized in ALLOWED_SECRET_LOOKALIKES:
+        return False
+    return (
+        normalized == "token"
+        or normalized.endswith("token")
+        or any(term in normalized for term in SECRET_TERMS)
+    )
+
+
+def _function_uses_name(
+    tree: ast.Module,
+    function_name: str,
+    consumed_name: str,
+) -> bool:
+    function = next(
+        (
+            node
+            for node in tree.body
+            if isinstance(node, ast.FunctionDef) and node.name == function_name
+        ),
+        None,
+    )
+    return function is not None and any(
+        isinstance(node, ast.Name) and node.id == consumed_name
+        for node in ast.walk(function)
+    )
 
 
 def main() -> int:
@@ -79,6 +137,9 @@ def main() -> int:
     serialization_tree = ast.parse(
         (PACKAGE / "serialization.py").read_text(encoding="utf-8")
     )
+    source_rights_tree = ast.parse(
+        (PACKAGE / "source_rights.py").read_text(encoding="utf-8")
+    )
     function = next(
         (
             node
@@ -124,10 +185,72 @@ def main() -> int:
             "relative-path safety lacks structural traversal, drive, "
             "segment, or reserved-name checks"
         )
+    serialization_classes = {
+        node.name
+        for node in serialization_tree.body
+        if isinstance(node, ast.ClassDef)
+    }
+    serialization_assignments = {
+        target.id
+        for node in serialization_tree.body
+        if isinstance(node, ast.Assign)
+        for target in node.targets
+        if isinstance(target, ast.Name)
+    }
+    source_rights_imports = {
+        alias.name
+        for node in source_rights_tree.body
+        if isinstance(node, ast.ImportFrom)
+        and node.module == "serialization"
+        for alias in node.names
+    }
+    if (
+        "SecretKeyPolicyV1" not in serialization_classes
+        or "SECRET_KEY_POLICY" not in serialization_assignments
+        or "SECRET_KEY_POLICY" not in source_rights_imports
+        or not _function_uses_name(
+            serialization_tree,
+            "_check_key",
+            "SECRET_KEY_POLICY",
+        )
+        or not _function_uses_name(
+            source_rights_tree,
+            "reject_secret_material",
+            "SECRET_KEY_POLICY",
+        )
+    ):
+        failures.append(
+            "serialization and source rights do not consume one secret policy"
+        )
+    secret_variants = (
+        "API-KEY",
+        "api.secret",
+        "Authorization",
+        "bearer_token",
+        "password",
+        "pass phrase",
+        "access-token",
+        "refresh_token",
+        "SESSION.TOKEN",
+        "cookie",
+        "credential",
+        "private/key",
+        "seed_phrase",
+        "wallet-secret",
+    )
+    allowed_variants = ("token_count", "token-budget", "credential.state")
+    if not all(_independent_secret_match(value) for value in secret_variants):
+        failures.append("independent secret-key normalization misses a class")
+    if any(_independent_secret_match(value) for value in allowed_variants):
+        failures.append("independent secret-key normalization has a false positive")
+    serialization_text = (PACKAGE / "serialization.py").read_text(encoding="utf-8")
+    for term in SECRET_TERMS | ALLOWED_SECRET_LOOKALIKES:
+        if f'"{term}"' not in serialization_text:
+            failures.append(f"central secret policy term is absent: {term}")
     if failures:
         print("\n".join(failures), file=sys.stderr)
         return 1
-    print(f"{SUCCESS_MARKER} closure_controls=7 tranche_a_controls=7")
+    print(SUCCESS_MARKER)
     return 0
 
 

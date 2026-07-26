@@ -795,8 +795,8 @@ _GOLDEN_VECTOR_ROWS_JSON = r'''
     "brier_score": "0.09"
   },
   "inputs": {
-    "outcome": 1,
-    "probability": "0.70"
+    "p": "0.70",
+    "y": 1
   },
   "math_spec_ref": "MATH-08",
   "oracle_ref": "ORACLE::MATH-08",
@@ -814,8 +814,8 @@ _GOLDEN_VECTOR_ROWS_JSON = r'''
   },
   "inputs": {
     "clip_epsilon": 1e-15,
-    "outcome": 1,
-    "probability": 0.7
+    "p": 0.7,
+    "y": 1
   },
   "math_spec_ref": "MATH-09",
   "oracle_ref": "ORACLE::MATH-09",
@@ -857,13 +857,13 @@ _GOLDEN_VECTOR_ROWS_JSON = r'''
 {
   "comparison_policy": "ABS_TOL_1E-12",
   "expected": {
-    "lower": 0.49015684672072335,
-    "upper": 0.9433190520193067
+    "lower": 0.49016247153664183,
+    "upper": 0.9433178485456247
   },
   "inputs": {
     "successes": 8,
     "trials": 10,
-    "z": 1.96
+    "confidence": 0.95
   },
   "math_spec_ref": "MATH-11",
   "oracle_ref": "ORACLE::MATH-11",
@@ -935,7 +935,7 @@ _GOLDEN_VECTOR_ROWS_JSON = r'''
     "same_seed_reproducible": true
   },
   "inputs": {
-    "mean_block_length": 2,
+    "expected_block_length": 2,
     "replicates": 64,
     "seed": 1401,
     "series": [
@@ -958,22 +958,22 @@ _GOLDEN_VECTOR_ROWS_JSON = r'''
 {
   "comparison_policy": "ABS_TOL_1E-15",
   "expected": {
-    "p_value": 1.0,
-    "reject": false
+    "p_value": 0.0,
+    "reject": true
   },
   "inputs": {
-    "differentials": [
+    "loss_differentials": [
       [
-        0,
-        0,
-        0,
-        0
+        1
       ],
       [
-        0,
-        0,
-        0,
-        0
+        1
+      ],
+      [
+        1
+      ],
+      [
+        1
       ]
     ],
     "replicates": 64,

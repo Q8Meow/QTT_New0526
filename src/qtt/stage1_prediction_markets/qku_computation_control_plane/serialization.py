@@ -3,29 +3,77 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from dataclasses import fields, is_dataclass
-from datetime import datetime
+from dataclasses import dataclass, fields, is_dataclass
+from datetime import datetime, timedelta
 from decimal import Decimal
 from enum import Enum
 import json
 from pathlib import PureWindowsPath
+import unicodedata
 from typing import Any
 
 from .errors import ReasonCode, SerializationSafetyError
 
 
-_SECRET_TOKENS = frozenset(
-    {
-        "api_key",
-        "apikey",
-        "authorization",
-        "cookie",
-        "credential",
-        "private_key",
-        "secret",
-        "seed_phrase",
-        "wallet",
-    }
+@dataclass(frozen=True, slots=True)
+class SecretKeyPolicyV1:
+    """Immutable field-name policy shared by every secret-rejection surface."""
+
+    forbidden_normalized_terms: frozenset[str]
+    allowed_normalized_names: frozenset[str]
+
+    @staticmethod
+    def normalize(field_name: str) -> str:
+        if not isinstance(field_name, str) or not field_name:
+            return ""
+        normalized = unicodedata.normalize("NFKC", field_name).casefold()
+        return "".join(character for character in normalized if character.isalnum())
+
+    def is_secret_key(self, field_name: str) -> bool:
+        normalized = self.normalize(field_name)
+        if not normalized or normalized in self.allowed_normalized_names:
+            return False
+        if normalized == "token" or normalized.endswith("token"):
+            return True
+        return any(
+            term in normalized for term in self.forbidden_normalized_terms
+        )
+
+    def reject(self, field_name: str) -> None:
+        if self.is_secret_key(field_name):
+            raise SerializationSafetyError(
+                ReasonCode.SECRET_MATERIAL_REJECTED,
+                "secret-bearing field name is rejected",
+            )
+
+
+SECRET_KEY_POLICY = SecretKeyPolicyV1(
+    forbidden_normalized_terms=frozenset(
+        {
+            "apikey",
+            "apisecret",
+            "authorization",
+            "bearer",
+            "password",
+            "passphrase",
+            "accesstoken",
+            "refreshtoken",
+            "sessiontoken",
+            "cookie",
+            "credential",
+            "privatekey",
+            "secret",
+            "seedphrase",
+            "walletsecret",
+        }
+    ),
+    allowed_normalized_names=frozenset(
+        {
+            "tokencount",
+            "tokenbudget",
+            "credentialstate",
+        }
+    ),
 )
 _WINDOWS_RESERVED_NAMES = frozenset(
     {
@@ -72,16 +120,7 @@ def validate_relative_path(path: str) -> str:
 
 
 def _check_key(key: str) -> None:
-    lowered = key.casefold()
-    secret_token_field = lowered == "token" or lowered.endswith("_token")
-    if (
-        any(token in lowered for token in _SECRET_TOKENS)
-        or secret_token_field
-    ):
-        raise SerializationSafetyError(
-            ReasonCode.SECRET_MATERIAL_REJECTED,
-            f"secret-bearing field names are rejected: {key}",
-        )
+    SECRET_KEY_POLICY.reject(key)
 
 
 def _check_path_value(key: str, value: Any) -> None:
@@ -126,6 +165,8 @@ def _json_value(value: Any) -> Any:
                 "naive datetimes are forbidden",
             )
         return value.isoformat()
+    if isinstance(value, timedelta):
+        return value.total_seconds()
     if isinstance(value, Enum):
         return value.value
     if is_dataclass(value) and not isinstance(value, type):

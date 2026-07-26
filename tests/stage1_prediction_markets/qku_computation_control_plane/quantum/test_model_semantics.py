@@ -14,11 +14,10 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.implementat
 
 
 def test_qubo_and_ising_semantics_have_assignment_energy_parity() -> None:
-    reversed_term = QuboUpperTermV1(1, 0, 0.5)
-    assert (reversed_term.i, reversed_term.j) == (0, 1)
+    upper_term = QuboUpperTermV1(0, 1, 0.5)
     qubo = QuboModelV1(
         (1.0, 2.0),
-        (reversed_term,),
+        (upper_term,),
         0.1,
         ObjectiveScalingReceiptV1(
             "fixture-objective",
@@ -51,3 +50,12 @@ def test_qubo_and_ising_semantics_have_assignment_energy_parity() -> None:
         qubo.energy((True, 0))
     with pytest.raises(NumericDomainError):
         ising.energy((True, -1))
+    with pytest.raises(NumericDomainError):
+        QuboUpperTermV1(1, 0, 0.5)
+    with pytest.raises(NumericDomainError):
+        QuboModelV1(
+            (1.0, 2.0),
+            (upper_term, QuboUpperTermV1(0, 1, 0.25)),
+            0.1,
+            qubo.scaling_receipt,
+        )

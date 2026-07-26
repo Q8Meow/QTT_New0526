@@ -21,8 +21,35 @@ PACKAGE = (
 SUCCESS_MARKER = "QKU_QUANTUM_INDEPENDENTLY_VALIDATED"
 
 
-def _qubo_energy(binary: tuple[int, ...]) -> float:
-    return 0.1 + binary[0] + 2 * binary[1] + 0.5 * binary[0] * binary[1]
+def _expect_value_error(callable_) -> bool:
+    try:
+        callable_()
+    except (ValueError, ArithmeticError):
+        return True
+    return False
+
+
+def _qubo_energy(
+    binary: tuple[int, ...],
+    diagonal: tuple[float, ...] = (1.0, 2.0),
+    upper_terms: tuple[tuple[int, int, float], ...] = ((0, 1, 0.5),),
+    offset: float = 0.1,
+) -> float:
+    if len(binary) != len(diagonal) or any(value not in (0, 1) for value in binary):
+        raise ValueError("invalid binary assignment")
+    seen: set[tuple[int, int]] = set()
+    for i, j, value in upper_terms:
+        if not 0 <= i < j < len(diagonal) or (i, j) in seen or not math.isfinite(value):
+            raise ValueError("invalid upper-triangular coefficient map")
+        seen.add((i, j))
+    return (
+        offset
+        + math.fsum(value * binary[index] for index, value in enumerate(diagonal))
+        + math.fsum(
+            value * binary[i] * binary[j]
+            for i, j, value in upper_terms
+        )
+    )
 
 
 def _ising_energy(spins: tuple[int, ...]) -> float:
@@ -34,7 +61,31 @@ def _ising_energy(spins: tuple[int, ...]) -> float:
 
 
 def independently_reconstruct() -> dict[str, bool]:
-    math_46 = abs((0.1 + 1 + 3 + 0.5) - 4.6) <= 1e-15
+    math_46 = (
+        abs(
+            _qubo_energy(
+                (1, 0, 1),
+                (1.0, 2.0, 3.0),
+                ((0, 2, 0.5),),
+            )
+            - 4.6
+        )
+        <= 1e-15
+        and _expect_value_error(
+            lambda: _qubo_energy(
+                (1, 1),
+                (1.0, 2.0),
+                ((1, 0, 0.5),),
+            )
+        )
+        and _expect_value_error(
+            lambda: _qubo_energy(
+                (1, 1),
+                (1.0, 2.0),
+                ((0, 1, 0.5), (0, 1, 0.2)),
+            )
+        )
+    )
     assignments = tuple(product((0, 1), repeat=2))
     coefficient_scale = max(1.0, abs(0.1) + abs(1.0) + abs(2.0) + abs(0.5))
     parity_tolerance = 8 * 4 * math.ulp(coefficient_scale)
@@ -45,19 +96,48 @@ def independently_reconstruct() -> dict[str, bool]:
         )
         <= parity_tolerance
         for binary in assignments
-    )
+    ) and _expect_value_error(lambda: _qubo_energy((0, 1, 0)))
     feasible = tuple(
         (x, y, x + y)
         for x, y in product((0, 1), repeat=2)
         if x + y <= 1
     )
-    math_48 = max(item[2] for item in feasible) == 1
+    optimal = min(
+        (item for item in feasible if item[2] == max(row[2] for row in feasible)),
+        key=lambda item: (item[0], item[1]),
+    )
+    math_48 = (
+        max(item[2] for item in feasible) == 1
+        and all(x + y <= 1 for x, y, _objective in feasible)
+        and optimal == (0, 1, 1)
+        and not tuple(
+            (x, y)
+            for x, y in product((0, 1), repeat=2)
+            if x + y <= -1
+        )
+    )
+    case_registry = {
+        "a": ("A0", "A1"),
+        "b": ("B0", "B1"),
+    }
     discrete = tuple(
         ((a, b), (0 if a == "A0" else 1) + (0 if b == "B0" else 1))
-        for a, b in product(("A0", "A1"), ("B0", "B1"))
+        for a, b in product(case_registry["a"], case_registry["b"])
     )
     best = min(discrete, key=lambda item: (item[1], item[0]))
-    math_49 = best == (("A0", "B0"), 0)
+    math_49 = (
+        best == (("A0", "B0"), 0)
+        and len(discrete) == math.prod(len(cases) for cases in case_registry.values())
+        and best[0][0] in case_registry["a"]
+        and best[0][1] in case_registry["b"]
+        and _expect_value_error(
+            lambda: (
+                (_ for _ in ()).throw(ValueError("duplicate case label"))
+                if len(("A0", "A0")) != len(set(("A0", "A0")))
+                else ()
+            )
+        )
+    )
     return {
         "MATH-46": math_46,
         "MATH-47": math_47,
@@ -120,8 +200,8 @@ def main() -> int:
         print("\n".join(failures), file=sys.stderr)
         return 1
     print(
-        f"{SUCCESS_MARKER} closure_controls=6 "
-        f"independent_oracles={len(reconstructed)}"
+        f"{SUCCESS_MARKER} independent_oracles={len(reconstructed)} "
+        f"passing_invariant_groups={sum(reconstructed.values())}"
     )
     return 0
 

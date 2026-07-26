@@ -12,8 +12,8 @@ def test_builder_is_in_memory_and_creates_no_generated_truth() -> None:
     assert payload["contract_only"] is True
     assert payload["runtime_effect_authorized"] is False
     assert "output_path" not in payload
-    assert payload["coverage_denominators"]["total_rows"] == 311
-    assert payload["physical_path_denominators"]["total_paths"] == 77
+    assert payload["executed_coverage_rows"]["total_rows"] == 311
+    assert payload["coverage_manifest_schema"] == "TrancheACoverageManifestV1"
     assert resolve_output_path(".tmp/st12a-builder/result.json") == (
         REPO_ROOT / ".tmp/st12a-builder/result.json"
     ).resolve()

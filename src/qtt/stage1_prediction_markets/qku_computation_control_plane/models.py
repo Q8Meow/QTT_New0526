@@ -2,12 +2,18 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, fields as dataclass_fields
+from datetime import datetime
+from decimal import Decimal
 from enum import Enum, StrEnum
+import re
 from types import MappingProxyType
-from typing import Mapping, TypeVar
+from typing import TYPE_CHECKING, ClassVar, Mapping, TypeVar
 
 from .errors import ContractValidationError, ReasonCode
+
+if TYPE_CHECKING:
+    from .context import ComputationContextKeyV1
 
 
 def _required(value: str, field_name: str) -> None:
@@ -125,11 +131,201 @@ class HealthState(StrEnum):
 
 
 class OperationCapabilityClass(StrEnum):
-    NONE_CONTRACT_ONLY = "NONE_CONTRACT_ONLY"
+    CONTRACT_DEFINITION_ONLY = "CONTRACT_DEFINITION_ONLY"
 
 
 class OperationSideEffectClass(StrEnum):
-    NONE = "NONE"
+    PURE_OR_APPEND_ONLY_NON_PROVIDER_EFFECT = (
+        "PURE_OR_APPEND_ONLY_NON_PROVIDER_EFFECT"
+    )
+
+
+class OperationStatusV1(StrEnum):
+    SUCCEEDED = "SUCCEEDED"
+    BLOCKED = "BLOCKED"
+    REJECTED = "REJECTED"
+
+
+class OperationBlockerCodeV1(StrEnum):
+    INVALID_REQUEST = "INVALID_REQUEST"
+    AUTHORITY_DENIED = "AUTHORITY_DENIED"
+    IDENTITY_UNVERIFIED = "IDENTITY_UNVERIFIED"
+    SPECIFICATION_INCOMPLETE = "SPECIFICATION_INCOMPLETE"
+    FIXTURE_UNAVAILABLE = "FIXTURE_UNAVAILABLE"
+    CONTEXT_BINDING_INVALID = "CONTEXT_BINDING_INVALID"
+    CONTEXT_STALE = "CONTEXT_STALE"
+    STACK_INCOMPLETE = "STACK_INCOMPLETE"
+    DEPENDENCY_UNRESOLVED = "DEPENDENCY_UNRESOLVED"
+    ORACLE_UNAVAILABLE = "ORACLE_UNAVAILABLE"
+    RUNTIME_EFFECT_FORBIDDEN = "RUNTIME_EFFECT_FORBIDDEN"
+
+
+class TypedValueKindV1(StrEnum):
+    TEXT = "TEXT"
+    DECIMAL = "DECIMAL"
+    FLOAT64 = "FLOAT64"
+    INTEGER = "INTEGER"
+    BOOLEAN = "BOOLEAN"
+
+
+@dataclass(frozen=True, slots=True)
+class TypedValueV1:
+    name: str
+    kind: TypedValueKindV1
+    value: str | Decimal | float | int | bool
+    unit: str
+    basis: str
+
+    def __post_init__(self) -> None:
+        _required(self.name, "name")
+        _typed_enum(self.kind, TypedValueKindV1, "kind")
+        _required(self.unit, "unit")
+        _required(self.basis, "basis")
+        valid = (
+            self.kind is TypedValueKindV1.TEXT
+            and isinstance(self.value, str)
+            or self.kind is TypedValueKindV1.DECIMAL
+            and isinstance(self.value, Decimal)
+            and not isinstance(self.value, bool)
+            and self.value.is_finite()
+            or self.kind is TypedValueKindV1.FLOAT64
+            and isinstance(self.value, float)
+            and self.value == self.value
+            and self.value not in (float("inf"), float("-inf"))
+            or self.kind is TypedValueKindV1.INTEGER
+            and isinstance(self.value, int)
+            and not isinstance(self.value, bool)
+            or self.kind is TypedValueKindV1.BOOLEAN
+            and type(self.value) is bool
+        )
+        if not valid:
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                f"{self.name} does not match typed value kind {self.kind.value}",
+            )
+
+
+@dataclass(frozen=True, slots=True)
+class TypedValueRecordV1:
+    fields: tuple[TypedValueV1, ...]
+
+    def __post_init__(self) -> None:
+        if (
+            not isinstance(self.fields, tuple)
+            or not self.fields
+            or any(not isinstance(value, TypedValueV1) for value in self.fields)
+            or len({value.name for value in self.fields}) != len(self.fields)
+        ):
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "typed records require a nonempty unique TypedValueV1 tuple",
+            )
+
+
+class ComputabilityClassV1(StrEnum):
+    SPECIFICATION_COMPUTABLE = "SPECIFICATION_COMPUTABLE"
+    FIXTURE_COMPUTABLE = "FIXTURE_COMPUTABLE"
+    CONTEXT_COMPUTABLE = "CONTEXT_COMPUTABLE"
+    STACK_COMPUTABLE = "STACK_COMPUTABLE"
+
+
+class ComputabilityBlockerCodeV1(StrEnum):
+    SPECIFICATION_SEMANTICS_INCOMPLETE = "SPECIFICATION_SEMANTICS_INCOMPLETE"
+    IMPLEMENTATION_CALLABLE_MISSING = "IMPLEMENTATION_CALLABLE_MISSING"
+    INDEPENDENT_ORACLE_MISSING = "INDEPENDENT_ORACLE_MISSING"
+    INDEPENDENT_VECTOR_MISSING = "INDEPENDENT_VECTOR_MISSING"
+    CONTEXT_BINDING_MISMATCH = "CONTEXT_BINDING_MISMATCH"
+    SOURCE_EPOCH_MISMATCH = "SOURCE_EPOCH_MISMATCH"
+    UNIT_OR_BASIS_MISMATCH = "UNIT_OR_BASIS_MISMATCH"
+    CONTEXT_STALE = "CONTEXT_STALE"
+    PARAMETER_BINDING_MISMATCH = "PARAMETER_BINDING_MISMATCH"
+    AUTHORITY_ENVELOPE_INVALID = "AUTHORITY_ENVELOPE_INVALID"
+    DEPENDENCY_CLOSURE_INCOMPLETE = "DEPENDENCY_CLOSURE_INCOMPLETE"
+    FALLBACK_CLOSURE_INCOMPLETE = "FALLBACK_CLOSURE_INCOMPLETE"
+    ORPHAN_CONSUMER = "ORPHAN_CONSUMER"
+
+
+class ComputabilityTerminalRouteV1(StrEnum):
+    CONTRACT_ONLY_COMPUTATION = "CONTRACT_ONLY_COMPUTATION"
+    SPECIFICATION_OWNER_REVIEW = "SPECIFICATION_OWNER_REVIEW"
+    FIXTURE_MATERIALIZATION = "FIXTURE_MATERIALIZATION"
+    CONTEXT_REBINDING = "CONTEXT_REBINDING"
+    STACK_CLOSURE = "STACK_CLOSURE"
+
+
+@dataclass(frozen=True, slots=True)
+class ComputabilityStateResultV1:
+    state: ComputabilityClassV1
+    computable: bool
+    blocker_codes: tuple[ComputabilityBlockerCodeV1, ...]
+    dependency_receipt_refs: tuple[str, ...]
+    oracle_receipt_refs: tuple[str, ...]
+    terminal_route: ComputabilityTerminalRouteV1
+    no_authority_flag: bool = True
+
+    def __post_init__(self) -> None:
+        _typed_enum(self.state, ComputabilityClassV1, "state")
+        _exact_bool(self.computable, "computable")
+        if (
+            not isinstance(self.blocker_codes, tuple)
+            or any(
+                not isinstance(value, ComputabilityBlockerCodeV1)
+                for value in self.blocker_codes
+            )
+            or len(set(self.blocker_codes)) != len(self.blocker_codes)
+        ):
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "computability blocker codes must be a unique typed tuple",
+            )
+        for name in ("dependency_receipt_refs", "oracle_receipt_refs"):
+            values = _text_tuple(getattr(self, name), name)
+            if len(set(values)) != len(values):
+                raise ContractValidationError(
+                    ReasonCode.INVALID_CONTRACT,
+                    f"{name} must be unique",
+                )
+        _typed_enum(
+            self.terminal_route,
+            ComputabilityTerminalRouteV1,
+            "terminal_route",
+        )
+        _exact_bool(self.no_authority_flag, "no_authority_flag")
+        if not self.no_authority_flag:
+            raise ContractValidationError(
+                ReasonCode.CAPABILITY_DENIED,
+                "computability state cannot create authority",
+            )
+        if self.computable == bool(self.blocker_codes):
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "computable states have no blockers and blocked states require blockers",
+            )
+
+
+@dataclass(frozen=True, slots=True)
+class ContextualComputabilityResolutionV1:
+    specification: ComputabilityStateResultV1
+    fixture: ComputabilityStateResultV1
+    context: ComputabilityStateResultV1
+    stack: ComputabilityStateResultV1
+
+    def __post_init__(self) -> None:
+        expected = (
+            ComputabilityClassV1.SPECIFICATION_COMPUTABLE,
+            ComputabilityClassV1.FIXTURE_COMPUTABLE,
+            ComputabilityClassV1.CONTEXT_COMPUTABLE,
+            ComputabilityClassV1.STACK_COMPUTABLE,
+        )
+        values = (self.specification, self.fixture, self.context, self.stack)
+        if any(
+            not isinstance(value, ComputabilityStateResultV1)
+            for value in values
+        ) or tuple(value.state for value in values) != expected:
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "computability resolution must carry the four independent states",
+            )
 
 
 @dataclass(frozen=True, slots=True)
@@ -787,145 +983,945 @@ class FallbackEnvelopeV1:
             )
 
 
-@dataclass(frozen=True, slots=True)
+_TRACEPARENT_RE = re.compile(
+    r"^00-(?P<trace>[0-9a-f]{32})-(?P<span>[0-9a-f]{16})-(?P<flags>[0-9a-f]{2})$"
+)
+_TRACESTATE_KEY_RE = re.compile(
+    r"^(?:[a-z][_0-9a-z\-\*/]{0,255}|"
+    r"[a-z0-9][_0-9a-z\-\*/]{0,240}@[a-z][_0-9a-z\-\*/]{0,13})$"
+)
+
+
+def _validate_timestamp(value: object, field_name: str) -> None:
+    if not isinstance(value, datetime) or value.tzinfo is None:
+        raise ContractValidationError(
+            ReasonCode.INVALID_CONTRACT,
+            f"{field_name} must be a timezone-aware datetime",
+        )
+
+
+def _validate_trace_context(
+    traceparent: object,
+    tracestate: object,
+) -> tuple[str, str]:
+    if not isinstance(traceparent, str):
+        raise ContractValidationError(
+            ReasonCode.INVALID_CONTRACT,
+            "traceparent must be W3C trace-context text",
+        )
+    match = _TRACEPARENT_RE.fullmatch(traceparent)
+    if (
+        match is None
+        or match.group("trace") == "0" * 32
+        or match.group("span") == "0" * 16
+    ):
+        raise ContractValidationError(
+            ReasonCode.INVALID_CONTRACT,
+            "traceparent must be a valid W3C version-00 value",
+        )
+    if not isinstance(tracestate, str) or len(tracestate) > 512:
+        raise ContractValidationError(
+            ReasonCode.INVALID_CONTRACT,
+            "tracestate must be text bounded to 512 characters",
+        )
+    if tracestate:
+        members = tracestate.split(",")
+        if len(members) > 32 or any(
+            member != member.strip() or "=" not in member for member in members
+        ):
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "tracestate must contain at most 32 canonical members",
+            )
+        keys: list[str] = []
+        for member in members:
+            key, value = member.split("=", 1)
+            if (
+                _TRACESTATE_KEY_RE.fullmatch(key) is None
+                or not value
+                or len(value) > 256
+                or value[0] == " "
+                or value[-1] == " "
+                or any(
+                    ord(character) < 0x20
+                    or ord(character) > 0x7E
+                    or character in ",="
+                    for character in value
+                )
+            ):
+                raise ContractValidationError(
+                    ReasonCode.INVALID_CONTRACT,
+                    "tracestate contains a noncanonical W3C member",
+                )
+            keys.append(key)
+        if len(keys) != len(set(keys)):
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "tracestate member keys must be unique",
+            )
+    return match.group("trace"), match.group("span")
+
+
+def _validate_unique_text(values: object, field_name: str, *, nonempty: bool = False) -> None:
+    typed = _text_tuple(values, field_name, require_nonempty=nonempty)
+    if len(typed) != len(set(typed)):
+        raise ContractValidationError(
+            ReasonCode.INVALID_CONTRACT,
+            f"{field_name} must not contain duplicates",
+        )
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
 class OperationRequestEnvelopeV1:
-    operation_id: str
-    request_contract: str
     request_id: str
-    contract_version: str
-    payload_json: str
+    operation_name: str
+    requested_at: datetime
+    principal_id: str
+    capability_bundle_id: str
+    context: ComputationContextKeyV1
+    idempotency_key: str
+    traceparent: str
+    tracestate: str
+    EXPECTED_OPERATION_NAME: ClassVar[str] = ""
 
     def __post_init__(self) -> None:
         for name in (
-            "operation_id",
-            "request_contract",
             "request_id",
-            "contract_version",
-            "payload_json",
+            "principal_id",
+            "capability_bundle_id",
+            "idempotency_key",
         ):
             _required(getattr(self, name), name)
-        from .serialization import deterministic_json, safe_json_loads
-
-        payload = safe_json_loads(self.payload_json)
-        if not isinstance(payload, dict):
+        if self.operation_name != self.EXPECTED_OPERATION_NAME:
             raise ContractValidationError(
                 ReasonCode.INVALID_CONTRACT,
-                "operation request payload must encode an object",
+                "operation_name must exactly equal the certified operation name",
             )
-        if self.payload_json != deterministic_json(payload):
+        _validate_timestamp(self.requested_at, "requested_at")
+        from .context import ComputationContextKeyV1
+
+        if not isinstance(self.context, ComputationContextKeyV1):
             raise ContractValidationError(
                 ReasonCode.INVALID_CONTRACT,
-                "operation request payload must use deterministic JSON",
+                "context must be a typed ComputationContextKeyV1",
+            )
+        trace_id, span_id = _validate_trace_context(
+            self.traceparent,
+            self.tracestate,
+        )
+        if (
+            len(self.idempotency_key) > 256
+            or self.idempotency_key == self.request_id
+            or self.idempotency_key == self.traceparent
+            or (
+                bool(self.tracestate)
+                and self.idempotency_key == self.tracestate
+            )
+            or trace_id in self.idempotency_key.casefold()
+            or span_id in self.idempotency_key.casefold()
+        ):
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "economic idempotency must be distinct from request and trace correlation",
+            )
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class ResolveIdentityRequestV1(OperationRequestEnvelopeV1):
+    identity_query: TypedValueRecordV1
+    EXPECTED_OPERATION_NAME: ClassVar[str] = "resolve_identity"
+
+    def __post_init__(self) -> None:
+        OperationRequestEnvelopeV1.__post_init__(self)
+        if not isinstance(self.identity_query, TypedValueRecordV1):
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "identity_query must be a typed record",
+            )
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class ResolveContextualComputabilityRequestV1(OperationRequestEnvelopeV1):
+    component_id: str
+    required_computability_classes: tuple[ComputabilityClassV1, ...]
+    EXPECTED_OPERATION_NAME: ClassVar[str] = "resolve_contextual_computability"
+
+    def __post_init__(self) -> None:
+        OperationRequestEnvelopeV1.__post_init__(self)
+        _required(self.component_id, "component_id")
+        if (
+            not isinstance(self.required_computability_classes, tuple)
+            or not self.required_computability_classes
+            or any(
+                not isinstance(value, ComputabilityClassV1)
+                for value in self.required_computability_classes
+            )
+            or len(set(self.required_computability_classes))
+            != len(self.required_computability_classes)
+        ):
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "required computability classes must be a unique typed tuple",
+            )
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class ResolveApplicableStackRequestV1(OperationRequestEnvelopeV1):
+    trade_plan_candidate_id: str
+    required_launch_roles: tuple[str, ...]
+    EXPECTED_OPERATION_NAME: ClassVar[str] = "resolve_applicable_stack"
+
+    def __post_init__(self) -> None:
+        OperationRequestEnvelopeV1.__post_init__(self)
+        _required(self.trade_plan_candidate_id, "trade_plan_candidate_id")
+        _validate_unique_text(
+            self.required_launch_roles,
+            "required_launch_roles",
+            nonempty=True,
+        )
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class ResolveRequiredInputsRequestV1(OperationRequestEnvelopeV1):
+    component_ids: tuple[str, ...]
+    include_optional: bool
+    EXPECTED_OPERATION_NAME: ClassVar[str] = "resolve_required_inputs"
+
+    def __post_init__(self) -> None:
+        OperationRequestEnvelopeV1.__post_init__(self)
+        _validate_unique_text(self.component_ids, "component_ids", nonempty=True)
+        _exact_bool(self.include_optional, "include_optional")
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class ComputeComponentRequestV1(OperationRequestEnvelopeV1):
+    component_id: str
+    input_values: TypedValueRecordV1
+    expected_output_schema_ref: str
+    EXPECTED_OPERATION_NAME: ClassVar[str] = "compute_component"
+
+    def __post_init__(self) -> None:
+        OperationRequestEnvelopeV1.__post_init__(self)
+        _required(self.component_id, "component_id")
+        _required(self.expected_output_schema_ref, "expected_output_schema_ref")
+        if not isinstance(self.input_values, TypedValueRecordV1):
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "input_values must be a typed record",
+            )
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class ComputeStackRequestV1(OperationRequestEnvelopeV1):
+    stack_id: str
+    component_ids: tuple[str, ...]
+    input_values: TypedValueRecordV1
+    EXPECTED_OPERATION_NAME: ClassVar[str] = "compute_stack"
+
+    def __post_init__(self) -> None:
+        OperationRequestEnvelopeV1.__post_init__(self)
+        _required(self.stack_id, "stack_id")
+        _validate_unique_text(self.component_ids, "component_ids", nonempty=True)
+        if not isinstance(self.input_values, TypedValueRecordV1):
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "input_values must be a typed record",
+            )
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class CompareWithNoTradeRequestV1(OperationRequestEnvelopeV1):
+    trade_plan_candidate_id: str
+    no_trade_candidate_id: str
+    comparison_basis: str
+    EXPECTED_OPERATION_NAME: ClassVar[str] = "compare_with_no_trade"
+
+    def __post_init__(self) -> None:
+        OperationRequestEnvelopeV1.__post_init__(self)
+        for name in (
+            "trade_plan_candidate_id",
+            "no_trade_candidate_id",
+            "comparison_basis",
+        ):
+            _required(getattr(self, name), name)
+        if self.trade_plan_candidate_id == self.no_trade_candidate_id:
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "trade and no-trade candidates must be distinct",
+            )
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class EvaluateTradePlanRequestV1(OperationRequestEnvelopeV1):
+    trade_plan_candidate_id: str
+    stack_id: str
+    accounting_tca_view_ref: str
+    risk_cash_state_ref: str
+    no_trade_candidate_id: str
+    EXPECTED_OPERATION_NAME: ClassVar[str] = "evaluate_trade_plan"
+
+    def __post_init__(self) -> None:
+        OperationRequestEnvelopeV1.__post_init__(self)
+        for name in (
+            "trade_plan_candidate_id",
+            "stack_id",
+            "accounting_tca_view_ref",
+            "risk_cash_state_ref",
+            "no_trade_candidate_id",
+        ):
+            _required(getattr(self, name), name)
+        if self.trade_plan_candidate_id == self.no_trade_candidate_id:
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "trade-plan evaluation requires a distinct no-trade comparator",
+            )
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class GetSnapshotViewRequestV1(OperationRequestEnvelopeV1):
+    snapshot_id: str
+    view_class: str
+    include_value_lineage: bool
+    EXPECTED_OPERATION_NAME: ClassVar[str] = "get_snapshot_view"
+
+    def __post_init__(self) -> None:
+        OperationRequestEnvelopeV1.__post_init__(self)
+        _required(self.snapshot_id, "snapshot_id")
+        _required(self.view_class, "view_class")
+        _exact_bool(self.include_value_lineage, "include_value_lineage")
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class ExplainResolutionRequestV1(OperationRequestEnvelopeV1):
+    resolution_receipt_id: str
+    explanation_scope: str
+    max_evidence_items: int
+    EXPECTED_OPERATION_NAME: ClassVar[str] = "explain_resolution"
+
+    def __post_init__(self) -> None:
+        OperationRequestEnvelopeV1.__post_init__(self)
+        _required(self.resolution_receipt_id, "resolution_receipt_id")
+        _required(self.explanation_scope, "explanation_scope")
+        if (
+            isinstance(self.max_evidence_items, bool)
+            or not isinstance(self.max_evidence_items, int)
+            or self.max_evidence_items <= 0
+            or self.max_evidence_items > 10_000
+        ):
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "max_evidence_items must be an integer in [1, 10000]",
+            )
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class SubmitCandidateProposalRequestV1(OperationRequestEnvelopeV1):
+    candidate_kind: str
+    proposed_specification: TypedValueRecordV1
+    source_candidate_refs: tuple[str, ...]
+    requested_owner_review: bool
+    EXPECTED_OPERATION_NAME: ClassVar[str] = "submit_candidate_proposal"
+
+    def __post_init__(self) -> None:
+        OperationRequestEnvelopeV1.__post_init__(self)
+        _required(self.candidate_kind, "candidate_kind")
+        if not isinstance(self.proposed_specification, TypedValueRecordV1):
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "proposed_specification must be a typed record",
+            )
+        _validate_unique_text(
+            self.source_candidate_refs,
+            "source_candidate_refs",
+            nonempty=True,
+        )
+        _exact_bool(self.requested_owner_review, "requested_owner_review")
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class RequestMaterializationWorkOrderRequestV1(OperationRequestEnvelopeV1):
+    missing_contract_ids: tuple[str, ...]
+    reason_codes: tuple[OperationBlockerCodeV1, ...]
+    priority: str
+    requested_owner: str
+    EXPECTED_OPERATION_NAME: ClassVar[str] = "request_materialization_work_order"
+
+    def __post_init__(self) -> None:
+        OperationRequestEnvelopeV1.__post_init__(self)
+        _validate_unique_text(
+            self.missing_contract_ids,
+            "missing_contract_ids",
+            nonempty=True,
+        )
+        if (
+            not isinstance(self.reason_codes, tuple)
+            or not self.reason_codes
+            or any(
+                not isinstance(value, OperationBlockerCodeV1)
+                for value in self.reason_codes
+            )
+            or len(set(self.reason_codes)) != len(self.reason_codes)
+        ):
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "reason_codes must be a nonempty unique typed blocker tuple",
+            )
+        _required(self.priority, "priority")
+        _required(self.requested_owner, "requested_owner")
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class CompileReplayPaperCohortRequestV1(OperationRequestEnvelopeV1):
+    template_ids: tuple[str, ...]
+    requested_lanes: tuple[str, ...]
+    input_lock_id: str
+    campaign_execution_requested: bool
+    EXPECTED_OPERATION_NAME: ClassVar[str] = "compile_replay_paper_cohort"
+
+    def __post_init__(self) -> None:
+        OperationRequestEnvelopeV1.__post_init__(self)
+        _validate_unique_text(self.template_ids, "template_ids", nonempty=True)
+        _validate_unique_text(
+            self.requested_lanes,
+            "requested_lanes",
+            nonempty=True,
+        )
+        if not set(self.requested_lanes) <= {"REPLAY", "PAPER"}:
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "requested_lanes must use only the REPLAY/PAPER contract labels",
+            )
+        _required(self.input_lock_id, "input_lock_id")
+        _exact_bool(
+            self.campaign_execution_requested,
+            "campaign_execution_requested",
+        )
+        if self.campaign_execution_requested:
+            raise ContractValidationError(
+                ReasonCode.RUNTIME_EFFECT_FORBIDDEN,
+                "Tranche A may define a cohort but cannot execute a campaign",
+            )
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class RegisterReplayPaperResultRequestV1(OperationRequestEnvelopeV1):
+    cohort_instance_id: str
+    lane: str
+    input_lock_id: str
+    result_packet: TypedValueRecordV1
+    EXPECTED_OPERATION_NAME: ClassVar[str] = "register_replay_paper_result"
+
+    def __post_init__(self) -> None:
+        OperationRequestEnvelopeV1.__post_init__(self)
+        _required(self.cohort_instance_id, "cohort_instance_id")
+        _required(self.input_lock_id, "input_lock_id")
+        if self.lane not in {"REPLAY", "PAPER"}:
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "lane must be an exact REPLAY or PAPER contract label",
+            )
+        if not isinstance(self.result_packet, TypedValueRecordV1):
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "result_packet must be a typed pre-existing result record",
+            )
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class BuildEvidenceBundleRequestV1(OperationRequestEnvelopeV1):
+    component_id: str
+    input_lock_id: str
+    evidence_record_refs: tuple[str, ...]
+    required_lanes: tuple[str, ...]
+    EXPECTED_OPERATION_NAME: ClassVar[str] = "build_evidence_bundle"
+
+    def __post_init__(self) -> None:
+        OperationRequestEnvelopeV1.__post_init__(self)
+        _required(self.component_id, "component_id")
+        _required(self.input_lock_id, "input_lock_id")
+        _validate_unique_text(
+            self.evidence_record_refs,
+            "evidence_record_refs",
+            nonempty=True,
+        )
+        _validate_unique_text(
+            self.required_lanes,
+            "required_lanes",
+            nonempty=True,
+        )
+        if not set(self.required_lanes) <= {"REPLAY", "PAPER"}:
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "required_lanes must use only REPLAY/PAPER contract labels",
             )
 
 
 @dataclass(frozen=True, slots=True)
-class OperationResponseEnvelopeV1:
-    operation_id: str
-    response_contract: str
-    request_id: str
-    result_json: str
+class _TypedOperationResultV1:
+    result_id: str
+    terminal_route: str
+    evidence_refs: tuple[str, ...]
+    no_authority_flag: bool = True
 
     def __post_init__(self) -> None:
-        for name in (
-            "operation_id",
-            "response_contract",
-            "request_id",
-            "result_json",
-        ):
-            _required(getattr(self, name), name)
-        from .serialization import deterministic_json, safe_json_loads
+        _required(self.result_id, "result_id")
+        _required(self.terminal_route, "terminal_route")
+        _validate_unique_text(self.evidence_refs, "evidence_refs")
+        _exact_bool(self.no_authority_flag, "no_authority_flag")
+        if not self.no_authority_flag:
+            raise ContractValidationError(
+                ReasonCode.CAPABILITY_DENIED,
+                "operation results cannot create authority",
+            )
 
-        result = safe_json_loads(self.result_json)
-        if not isinstance(result, dict):
+
+@dataclass(frozen=True, slots=True)
+class IdentityResolutionV1(_TypedOperationResultV1):
+    pass
+
+
+@dataclass(frozen=True, slots=True)
+class StackResolutionV1(_TypedOperationResultV1):
+    pass
+
+
+@dataclass(frozen=True, slots=True)
+class InputResolutionV1(_TypedOperationResultV1):
+    pass
+
+
+@dataclass(frozen=True, slots=True)
+class ComponentResultV1(_TypedOperationResultV1):
+    pass
+
+
+@dataclass(frozen=True, slots=True)
+class StackResultV1(_TypedOperationResultV1):
+    pass
+
+
+@dataclass(frozen=True, slots=True)
+class NoTradeComparisonV1(_TypedOperationResultV1):
+    pass
+
+
+@dataclass(frozen=True, slots=True)
+class TradePlanEvaluationV1(_TypedOperationResultV1):
+    pass
+
+
+@dataclass(frozen=True, slots=True)
+class SnapshotViewV1(_TypedOperationResultV1):
+    pass
+
+
+@dataclass(frozen=True, slots=True)
+class ResolutionExplanationV1(_TypedOperationResultV1):
+    pass
+
+
+@dataclass(frozen=True, slots=True)
+class CandidateProposalV1(_TypedOperationResultV1):
+    pass
+
+
+@dataclass(frozen=True, slots=True)
+class MaterializationWorkOrderV1(_TypedOperationResultV1):
+    pass
+
+
+@dataclass(frozen=True, slots=True)
+class ReplayPaperCohortCompilationV1(_TypedOperationResultV1):
+    pass
+
+
+@dataclass(frozen=True, slots=True)
+class ReplayPaperResultRegistrationV1(_TypedOperationResultV1):
+    pass
+
+
+@dataclass(frozen=True, slots=True)
+class EvidenceBundleResultV1(_TypedOperationResultV1):
+    pass
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class OperationResponseEnvelopeV1:
+    response_id: str
+    operation_name: str
+    request_id: str
+    completed_at: datetime
+    status: OperationStatusV1
+    context: ComputationContextKeyV1
+    warnings: tuple[str, ...]
+    blocker_codes: tuple[OperationBlockerCodeV1, ...]
+    receipt_refs: tuple[str, ...]
+    traceparent: str
+    tracestate: str
+    EXPECTED_OPERATION_NAME: ClassVar[str] = ""
+
+    def __post_init__(self) -> None:
+        _required(self.response_id, "response_id")
+        _required(self.request_id, "request_id")
+        if self.operation_name != self.EXPECTED_OPERATION_NAME:
             raise ContractValidationError(
                 ReasonCode.INVALID_CONTRACT,
-                "operation response result must encode an object",
+                "operation_name must exactly equal the certified operation name",
             )
-        if self.result_json != deterministic_json(result):
+        _validate_timestamp(self.completed_at, "completed_at")
+        _typed_enum(self.status, OperationStatusV1, "status")
+        from .context import ComputationContextKeyV1
+
+        if not isinstance(self.context, ComputationContextKeyV1):
             raise ContractValidationError(
                 ReasonCode.INVALID_CONTRACT,
-                "operation response result must use deterministic JSON",
+                "context must be a typed ComputationContextKeyV1",
             )
+        _validate_unique_text(self.warnings, "warnings")
+        _validate_unique_text(self.receipt_refs, "receipt_refs")
+        if (
+            not isinstance(self.blocker_codes, tuple)
+            or any(
+                not isinstance(value, OperationBlockerCodeV1)
+                for value in self.blocker_codes
+            )
+            or len(set(self.blocker_codes)) != len(self.blocker_codes)
+        ):
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "blocker_codes must be a unique typed tuple",
+            )
+        if (
+            self.status is OperationStatusV1.SUCCEEDED
+            and self.blocker_codes
+        ) or (
+            self.status is not OperationStatusV1.SUCCEEDED
+            and not self.blocker_codes
+        ):
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "response status and typed blocker codes are inconsistent",
+            )
+        _validate_trace_context(self.traceparent, self.tracestate)
+
+
+def _validate_response_result(value: object, expected: type[object], name: str) -> None:
+    if not isinstance(value, expected):
+        raise ContractValidationError(
+            ReasonCode.INVALID_CONTRACT,
+            f"{name} must be a typed {expected.__name__}",
+        )
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class ResolveIdentityResponseV1(OperationResponseEnvelopeV1):
+    identity_resolution: IdentityResolutionV1
+    EXPECTED_OPERATION_NAME: ClassVar[str] = "resolve_identity"
+
+    def __post_init__(self) -> None:
+        OperationResponseEnvelopeV1.__post_init__(self)
+        _validate_response_result(
+            self.identity_resolution,
+            IdentityResolutionV1,
+            "identity_resolution",
+        )
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class ResolveContextualComputabilityResponseV1(OperationResponseEnvelopeV1):
+    computability: ContextualComputabilityResolutionV1
+    EXPECTED_OPERATION_NAME: ClassVar[str] = "resolve_contextual_computability"
+
+    def __post_init__(self) -> None:
+        OperationResponseEnvelopeV1.__post_init__(self)
+        _validate_response_result(
+            self.computability,
+            ContextualComputabilityResolutionV1,
+            "computability",
+        )
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class ResolveApplicableStackResponseV1(OperationResponseEnvelopeV1):
+    stack_resolution: StackResolutionV1
+    EXPECTED_OPERATION_NAME: ClassVar[str] = "resolve_applicable_stack"
+
+    def __post_init__(self) -> None:
+        OperationResponseEnvelopeV1.__post_init__(self)
+        _validate_response_result(
+            self.stack_resolution,
+            StackResolutionV1,
+            "stack_resolution",
+        )
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class ResolveRequiredInputsResponseV1(OperationResponseEnvelopeV1):
+    input_resolution: InputResolutionV1
+    EXPECTED_OPERATION_NAME: ClassVar[str] = "resolve_required_inputs"
+
+    def __post_init__(self) -> None:
+        OperationResponseEnvelopeV1.__post_init__(self)
+        _validate_response_result(
+            self.input_resolution,
+            InputResolutionV1,
+            "input_resolution",
+        )
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class ComputeComponentResponseV1(OperationResponseEnvelopeV1):
+    component_result: ComponentResultV1
+    EXPECTED_OPERATION_NAME: ClassVar[str] = "compute_component"
+
+    def __post_init__(self) -> None:
+        OperationResponseEnvelopeV1.__post_init__(self)
+        _validate_response_result(
+            self.component_result,
+            ComponentResultV1,
+            "component_result",
+        )
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class ComputeStackResponseV1(OperationResponseEnvelopeV1):
+    stack_result: StackResultV1
+    EXPECTED_OPERATION_NAME: ClassVar[str] = "compute_stack"
+
+    def __post_init__(self) -> None:
+        OperationResponseEnvelopeV1.__post_init__(self)
+        _validate_response_result(self.stack_result, StackResultV1, "stack_result")
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class CompareWithNoTradeResponseV1(OperationResponseEnvelopeV1):
+    comparison: NoTradeComparisonV1
+    EXPECTED_OPERATION_NAME: ClassVar[str] = "compare_with_no_trade"
+
+    def __post_init__(self) -> None:
+        OperationResponseEnvelopeV1.__post_init__(self)
+        _validate_response_result(
+            self.comparison,
+            NoTradeComparisonV1,
+            "comparison",
+        )
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class EvaluateTradePlanResponseV1(OperationResponseEnvelopeV1):
+    evaluation: TradePlanEvaluationV1
+    EXPECTED_OPERATION_NAME: ClassVar[str] = "evaluate_trade_plan"
+
+    def __post_init__(self) -> None:
+        OperationResponseEnvelopeV1.__post_init__(self)
+        _validate_response_result(
+            self.evaluation,
+            TradePlanEvaluationV1,
+            "evaluation",
+        )
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class GetSnapshotViewResponseV1(OperationResponseEnvelopeV1):
+    snapshot_view: SnapshotViewV1
+    EXPECTED_OPERATION_NAME: ClassVar[str] = "get_snapshot_view"
+
+    def __post_init__(self) -> None:
+        OperationResponseEnvelopeV1.__post_init__(self)
+        _validate_response_result(
+            self.snapshot_view,
+            SnapshotViewV1,
+            "snapshot_view",
+        )
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class ExplainResolutionResponseV1(OperationResponseEnvelopeV1):
+    explanation: ResolutionExplanationV1
+    EXPECTED_OPERATION_NAME: ClassVar[str] = "explain_resolution"
+
+    def __post_init__(self) -> None:
+        OperationResponseEnvelopeV1.__post_init__(self)
+        _validate_response_result(
+            self.explanation,
+            ResolutionExplanationV1,
+            "explanation",
+        )
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class SubmitCandidateProposalResponseV1(OperationResponseEnvelopeV1):
+    proposal: CandidateProposalV1
+    EXPECTED_OPERATION_NAME: ClassVar[str] = "submit_candidate_proposal"
+
+    def __post_init__(self) -> None:
+        OperationResponseEnvelopeV1.__post_init__(self)
+        _validate_response_result(
+            self.proposal,
+            CandidateProposalV1,
+            "proposal",
+        )
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class RequestMaterializationWorkOrderResponseV1(OperationResponseEnvelopeV1):
+    work_order: MaterializationWorkOrderV1
+    EXPECTED_OPERATION_NAME: ClassVar[str] = "request_materialization_work_order"
+
+    def __post_init__(self) -> None:
+        OperationResponseEnvelopeV1.__post_init__(self)
+        _validate_response_result(
+            self.work_order,
+            MaterializationWorkOrderV1,
+            "work_order",
+        )
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class CompileReplayPaperCohortResponseV1(OperationResponseEnvelopeV1):
+    cohort_compilation: ReplayPaperCohortCompilationV1
+    EXPECTED_OPERATION_NAME: ClassVar[str] = "compile_replay_paper_cohort"
+
+    def __post_init__(self) -> None:
+        OperationResponseEnvelopeV1.__post_init__(self)
+        _validate_response_result(
+            self.cohort_compilation,
+            ReplayPaperCohortCompilationV1,
+            "cohort_compilation",
+        )
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class RegisterReplayPaperResultResponseV1(OperationResponseEnvelopeV1):
+    registration: ReplayPaperResultRegistrationV1
+    EXPECTED_OPERATION_NAME: ClassVar[str] = "register_replay_paper_result"
+
+    def __post_init__(self) -> None:
+        OperationResponseEnvelopeV1.__post_init__(self)
+        _validate_response_result(
+            self.registration,
+            ReplayPaperResultRegistrationV1,
+            "registration",
+        )
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class BuildEvidenceBundleResponseV1(OperationResponseEnvelopeV1):
+    evidence_bundle: EvidenceBundleResultV1
+    EXPECTED_OPERATION_NAME: ClassVar[str] = "build_evidence_bundle"
+
+    def __post_init__(self) -> None:
+        OperationResponseEnvelopeV1.__post_init__(self)
+        _validate_response_result(
+            self.evidence_bundle,
+            EvidenceBundleResultV1,
+            "evidence_bundle",
+        )
 
 
 @dataclass(frozen=True, slots=True)
 class OperationFailureEnvelopeV1:
     operation_id: str
-    failure_contract: str
+    operation_name: str
     request_id: str
-    reason_code: ReasonCode
-    detail: str
+    blocker_codes: tuple[OperationBlockerCodeV1, ...]
+    receipt_refs: tuple[str, ...]
 
     def __post_init__(self) -> None:
-        for name in (
-            "operation_id",
-            "failure_contract",
-            "request_id",
-            "detail",
-        ):
+        for name in ("operation_id", "operation_name", "request_id"):
             _required(getattr(self, name), name)
-        _typed_enum(self.reason_code, ReasonCode, "reason_code")
+        if (
+            not isinstance(self.blocker_codes, tuple)
+            or not self.blocker_codes
+            or any(
+                not isinstance(value, OperationBlockerCodeV1)
+                for value in self.blocker_codes
+            )
+            or len(set(self.blocker_codes)) != len(self.blocker_codes)
+        ):
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "operation failure requires typed unique blocker codes",
+            )
+        _validate_unique_text(self.receipt_refs, "receipt_refs")
 
 
 @dataclass(frozen=True, slots=True)
 class OperationContractV1:
     operation_id: str
-    input_contract: str
-    output_contract: str
-    failure_contract: str
+    operation_name: str
+    owner: str
+    request_type: str
+    response_type: str
+    schema_version: str
+    request_fields: tuple[ContractFieldV1, ...]
+    response_fields: tuple[ContractFieldV1, ...]
+    request_model: type[OperationRequestEnvelopeV1]
+    response_model: type[OperationResponseEnvelopeV1]
+    resolver_name: str | None = None
     runtime_effect_authorized: bool = False
-    request_fields: tuple[ContractFieldV1, ...] = ()
-    response_fields: tuple[ContractFieldV1, ...] = ()
-    failure_reason_codes: tuple[ReasonCode, ...] = ()
+    provider_effect_authorized: bool = False
     capability_class: OperationCapabilityClass = (
-        OperationCapabilityClass.NONE_CONTRACT_ONLY
+        OperationCapabilityClass.CONTRACT_DEFINITION_ONLY
     )
-    side_effect_class: OperationSideEffectClass = OperationSideEffectClass.NONE
+    side_effect_class: OperationSideEffectClass = (
+        OperationSideEffectClass.PURE_OR_APPEND_ONLY_NON_PROVIDER_EFFECT
+    )
     metadata: Mapping[str, str] = field(default_factory=immutable_mapping)
 
     def __post_init__(self) -> None:
-        _exact_bool(
-            self.runtime_effect_authorized, "runtime_effect_authorized"
-        )
-        if self.runtime_effect_authorized:
-            raise ContractValidationError(
-                ReasonCode.RUNTIME_EFFECT_FORBIDDEN,
-                "Tranche A operation contracts are data-only",
-            )
         for name in (
             "operation_id",
-            "input_contract",
-            "output_contract",
-            "failure_contract",
+            "operation_name",
+            "owner",
+            "request_type",
+            "response_type",
+            "schema_version",
         ):
             _required(getattr(self, name), name)
-        for name in ("request_fields", "response_fields"):
+        if self.schema_version != "1.4.0":
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "certified operation schema version must be 1.4.0",
+            )
+        if (
+            not isinstance(self.request_model, type)
+            or not issubclass(self.request_model, OperationRequestEnvelopeV1)
+            or self.request_model is OperationRequestEnvelopeV1
+            or not isinstance(self.response_model, type)
+            or not issubclass(self.response_model, OperationResponseEnvelopeV1)
+            or self.response_model is OperationResponseEnvelopeV1
+            or self.request_type != self.request_model.__name__
+            or self.response_type != self.response_model.__name__
+            or self.request_model.EXPECTED_OPERATION_NAME != self.operation_name
+            or self.response_model.EXPECTED_OPERATION_NAME != self.operation_name
+        ):
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "operation model lineage does not match its certified schema",
+            )
+        for name, model in (
+            ("request_fields", self.request_model),
+            ("response_fields", self.response_model),
+        ):
             values = getattr(self, name)
             if (
                 not isinstance(values, tuple)
                 or not values
                 or any(not isinstance(value, ContractFieldV1) for value in values)
                 or len({value.name for value in values}) != len(values)
+                or tuple(value.name for value in values)
+                != tuple(value.name for value in dataclass_fields(model))
+                or any(not value.required for value in values)
             ):
                 raise ContractValidationError(
                     ReasonCode.INCOMPLETE_CONTRACT,
-                    f"{name} must be a nonempty unique typed schema",
+                    f"{name} must exactly match the typed top-level model",
                 )
-        if (
-            not isinstance(self.failure_reason_codes, tuple)
-            or not self.failure_reason_codes
-            or any(
-                not isinstance(reason, ReasonCode)
-                for reason in self.failure_reason_codes
-            )
-            or len(set(self.failure_reason_codes))
-            != len(self.failure_reason_codes)
-        ):
-            raise ContractValidationError(
-                ReasonCode.INCOMPLETE_CONTRACT,
-                "failure_reason_codes must be a nonempty typed tuple",
-            )
+        if self.resolver_name is not None:
+            _required(self.resolver_name, "resolver_name")
+        for name in ("runtime_effect_authorized", "provider_effect_authorized"):
+            _exact_bool(getattr(self, name), name)
         _typed_enum(
             self.capability_class,
             OperationCapabilityClass,
@@ -937,74 +1933,133 @@ class OperationContractV1:
             "side_effect_class",
         )
         if (
-            self.capability_class
-            is not OperationCapabilityClass.NONE_CONTRACT_ONLY
-            or self.side_effect_class is not OperationSideEffectClass.NONE
+            self.runtime_effect_authorized
+            or self.provider_effect_authorized
+            or self.capability_class
+            is not OperationCapabilityClass.CONTRACT_DEFINITION_ONLY
+            or self.side_effect_class
+            is not OperationSideEffectClass.PURE_OR_APPEND_ONLY_NON_PROVIDER_EFFECT
         ):
             raise ContractValidationError(
-                ReasonCode.CAPABILITY_DENIED,
-                "Tranche A operation schemas cannot carry effect capabilities",
+                ReasonCode.RUNTIME_EFFECT_FORBIDDEN,
+                "Tranche A operation schemas cannot authorize runtime/provider effects",
             )
         object.__setattr__(self, "metadata", immutable_mapping(self.metadata))
 
-    def bind_request(
-        self,
-        *,
-        request_id: str,
-        contract_version: str,
-        payload_json: str,
-    ) -> OperationRequestEnvelopeV1:
-        return OperationRequestEnvelopeV1(
-            operation_id=self.operation_id,
-            request_contract=self.input_contract,
-            request_id=request_id,
-            contract_version=contract_version,
-            payload_json=payload_json,
-        )
+    @property
+    def input_contract(self) -> str:
+        return self.request_type
+
+    @property
+    def output_contract(self) -> str:
+        return self.response_type
+
+    @property
+    def failure_contract(self) -> str:
+        return self.response_type
+
+    def bind_request(self, **values: object) -> OperationRequestEnvelopeV1:
+        expected = tuple(field.name for field in self.request_fields)
+        if set(values) != set(expected):
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "operation request has missing or extra top-level fields",
+            )
+        request = self.request_model(**values)
+        if request.operation_name != self.operation_name:
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "operation request name does not match the registry",
+            )
+        return request
 
     def bind_response(
         self,
         request: OperationRequestEnvelopeV1,
-        *,
-        result_json: str,
+        **values: object,
     ) -> OperationResponseEnvelopeV1:
-        if (
-            not isinstance(request, OperationRequestEnvelopeV1)
-            or request.operation_id != self.operation_id
-            or request.request_contract != self.input_contract
-        ):
+        expected = tuple(field.name for field in self.response_fields)
+        if set(values) != set(expected):
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "operation response has missing or extra top-level fields",
+            )
+        if not isinstance(request, self.request_model):
             raise ContractValidationError(
                 ReasonCode.INVALID_CONTRACT,
                 "operation response request lineage does not match the contract",
             )
-        return OperationResponseEnvelopeV1(
-            operation_id=self.operation_id,
-            response_contract=self.output_contract,
-            request_id=request.request_id,
-            result_json=result_json,
-        )
-
-    def bind_failure(
-        self,
-        request: OperationRequestEnvelopeV1,
-        *,
-        reason_code: ReasonCode,
-        detail: str,
-    ) -> OperationFailureEnvelopeV1:
+        response = self.response_model(**values)
         if (
-            not isinstance(request, OperationRequestEnvelopeV1)
-            or request.operation_id != self.operation_id
-            or request.request_contract != self.input_contract
-            or reason_code not in self.failure_reason_codes
+            response.operation_name != self.operation_name
+            or response.request_id != request.request_id
+            or response.traceparent != request.traceparent
+            or response.tracestate != request.tracestate
+            or response.context != request.context
+            or response.completed_at < request.requested_at
         ):
             raise ContractValidationError(
                 ReasonCode.INVALID_CONTRACT,
-                "operation failure lineage or reason is not allowlisted",
+                "operation response correlation does not match the request",
             )
-        return OperationFailureEnvelopeV1(
-            operation_id=self.operation_id,
-            failure_contract=self.failure_contract,
-            request_id=request.request_id,
-            reason_code=reason_code,
-            detail=detail,
-        )
+        return response
+
+    def request_json(self, request: OperationRequestEnvelopeV1) -> str:
+        if not isinstance(request, self.request_model):
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "request does not match the certified operation type",
+            )
+        from .serialization import deterministic_json
+
+        return deterministic_json(request)
+
+    def response_json(self, response: OperationResponseEnvelopeV1) -> str:
+        if not isinstance(response, self.response_model):
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "response does not match the certified operation type",
+            )
+        from .serialization import deterministic_json
+
+        return deterministic_json(response)
+
+    def validate_request_json(
+        self,
+        request: OperationRequestEnvelopeV1,
+        text: str,
+    ) -> None:
+        from .serialization import safe_json_loads
+
+        decoded = safe_json_loads(text)
+        if (
+            not isinstance(decoded, dict)
+            or tuple(sorted(decoded)) != tuple(
+                sorted(field.name for field in self.request_fields)
+            )
+            or text != self.request_json(request)
+        ):
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "request JSON is not the exact deterministic operation schema",
+            )
+
+    def validate_response_json(
+        self,
+        response: OperationResponseEnvelopeV1,
+        text: str,
+    ) -> None:
+        from .serialization import safe_json_loads
+
+        decoded = safe_json_loads(text)
+        if (
+            not isinstance(decoded, dict)
+            or tuple(sorted(decoded)) != tuple(
+                sorted(field.name for field in self.response_fields)
+            )
+            or text != self.response_json(response)
+        ):
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "response JSON is not the exact deterministic operation schema",
+            )

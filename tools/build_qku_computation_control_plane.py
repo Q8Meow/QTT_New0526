@@ -19,6 +19,7 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane import (  #
     PARAMETER_POLICIES,
     SOURCE_CLAIM_BINDING_RULES,
     SOURCE_CURRENTIZATION_OVERLAYS,
+    build_tranche_a_coverage_manifest,
     deterministic_json,
     validate_relative_path,
 )
@@ -31,6 +32,7 @@ def build_payload() -> dict[str, object]:
     """Return the centralized registry envelope without creating runtime state."""
 
     math_ids = tuple(IMPLEMENTATION_REGISTRY)
+    manifest = build_tranche_a_coverage_manifest()
     return {
         "schema": "QKUComputationControlPlaneBuildV1",
         "contract_only": True,
@@ -43,24 +45,8 @@ def build_payload() -> dict[str, object]:
         "certified_source_state_count": len(CERTIFIED_SOURCE_STATES),
         "source_overlay_count": len(SOURCE_CURRENTIZATION_OVERLAYS),
         "source_claim_binding_rule_count": len(SOURCE_CLAIM_BINDING_RULES),
-        "coverage_denominators": {
-            "closure_rows": 42,
-            "repository_dispositions": 19,
-            "parameter_policy_rows": 135,
-            "mathematical_specifications": 19,
-            "independent_oracle_specifications": 19,
-            "golden_vectors_and_invariants": 19,
-            "test_rows": 47,
-            "validation_command_rows": 10,
-            "source_claim_binding_rules": 1,
-            "total_rows": 311,
-        },
-        "physical_path_denominators": {
-            "production_core_paths": 19,
-            "test_paths": 46,
-            "tool_paths": 12,
-            "total_paths": 77,
-        },
+        "coverage_manifest_schema": "TrancheACoverageManifestV1",
+        "executed_coverage_rows": dict(manifest.executed_counts),
     }
 
 

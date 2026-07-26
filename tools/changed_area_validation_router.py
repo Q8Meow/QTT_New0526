@@ -239,44 +239,18 @@ def _current_pr152_inventory_counts(repo_root: Path) -> dict[str, int]:
     generated_root = repo_root / "docs/master_plan/generated"
     tests_root = repo_root / "tests"
     tools_root = repo_root / "tools"
-    # PR152's already-certified denominator predates the exact new Tranche-A
-    # files. Preserve that baseline universe while routing the new universe
-    # through its own centralized validators.
-    tranche_a_new_test_paths = {
-        path
-        for path in ST12A_ALLOWED_EXACT_PATHS
-        if path.startswith(
-            "tests/stage1_prediction_markets/"
-            "qku_computation_control_plane/"
-        )
-    }
-    tranche_a_new_validator_paths = {
-        "tools/validate_qku_computation_control_plane.py"
-    }
-
-    def _is_preserved_pr152_test(path: Path) -> bool:
-        relative = path.relative_to(repo_root).as_posix()
-        return relative not in tranche_a_new_test_paths
-
-    def _is_preserved_pr152_validator(path: Path) -> bool:
-        relative = path.relative_to(repo_root).as_posix()
-        return relative not in tranche_a_new_validator_paths
 
     return {
         "generated_report_count": sum(1 for path in generated_root.rglob("*") if path.is_file())
         if generated_root.exists()
         else 0,
         "test_file_count": sum(
-            1
-            for path in tests_root.rglob("*.py")
-            if path.is_file() and _is_preserved_pr152_test(path)
+            1 for path in tests_root.rglob("*.py") if path.is_file()
         )
         if tests_root.exists()
         else 0,
         "validator_tool_count": sum(
-            1
-            for path in tools_root.glob("validate_*.py")
-            if path.is_file() and _is_preserved_pr152_validator(path)
+            1 for path in tools_root.glob("validate_*.py") if path.is_file()
         )
         if tools_root.exists()
         else 0,

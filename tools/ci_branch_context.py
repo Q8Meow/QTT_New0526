@@ -142,6 +142,11 @@ VALIDATION_EXECUTION_BRANCHES = frozenset(
         PR152_HELPER_CLI_TEMP_REPO_GIT_STATUS_REPAIR_BRANCH,
     }
 )
+OWNER_AUTHORIZED_VALIDATION_BRANCHES = frozenset(
+    {
+        "agent/st12a-contract-envelope",
+    }
+)
 IDEMPOTENCE_RUNTIME_CONTAINMENT_HARDENING_BRANCH = (
     "hardening/all-idempotence-runtime-containment-audit"
 )
@@ -2642,6 +2647,7 @@ def is_branch_allowed_for_upstream_pr_gate(
         is_idempotence_runtime_containment_hardening_branch(normalized)
         or is_validation_infrastructure_branch(normalized)
         or is_validation_execution_branch(normalized)
+        or is_owner_authorized_validation_branch(normalized)
     ):
         return True
     if normalized == "main":
@@ -2675,6 +2681,7 @@ def is_pull_request_detached_head_context_allowed_for_upstream_pr_gate(
         is_idempotence_runtime_containment_hardening_branch(normalized)
         or is_validation_infrastructure_branch(normalized)
         or is_validation_execution_branch(normalized)
+        or is_owner_authorized_validation_branch(normalized)
         or normalized in policy.allowed_branches
         or normalized in policy.local_repair_branches_requiring_ancestry
         or normalized in policy.detached_head_ref_branches
@@ -2716,6 +2723,13 @@ def is_validation_infrastructure_branch(branch: str) -> bool:
 def is_validation_execution_branch(branch: str) -> bool:
     normalized = normalize_branch_context(branch)
     return normalized in VALIDATION_EXECUTION_BRANCHES
+
+
+def is_owner_authorized_validation_branch(branch: str) -> bool:
+    """Recognize an exact validation-only branch without roadmap authority."""
+
+    normalized = normalize_branch_context(branch)
+    return normalized in OWNER_AUTHORIZED_VALIDATION_BRANCHES
 
 
 def is_validation_infrastructure_changed_path(branch: str, path: str) -> bool:
@@ -3326,6 +3340,7 @@ def is_downstream_or_main_validation_branch(
     return (
         is_idempotence_runtime_containment_hardening_branch(branch)
         or is_validation_execution_branch(branch)
+        or is_owner_authorized_validation_branch(branch)
         or is_main_cumulative_branch(branch)
         or is_downstream_roadmap_branch(
             branch,
@@ -3342,7 +3357,10 @@ def is_pr_or_later_branch(
     allow_main: bool = True,
     allow_repair: bool = True,
 ) -> bool:
-    if is_idempotence_runtime_containment_hardening_branch(branch):
+    if (
+        is_idempotence_runtime_containment_hardening_branch(branch)
+        or is_owner_authorized_validation_branch(branch)
+    ):
         return True
     if allow_main and is_main_cumulative_branch(branch):
         return True

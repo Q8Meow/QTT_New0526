@@ -3,15 +3,21 @@
 from __future__ import annotations
 
 import ast
+from collections import Counter
 from dataclasses import dataclass, fields
+from datetime import UTC, datetime, timedelta
 from decimal import Decimal
+from enum import StrEnum
 from itertools import product
 import json
 import math
 from pathlib import Path
+from types import MappingProxyType
 from typing import Callable
 
 from .authority import CapabilityEnvelopeV1, assert_no_effect_authority
+from .bindings import SOURCE_CLAIM_BINDING_RULES
+from .context import ComputationContextKeyV1
 from .errors import ComputationControlPlaneError, ContractValidationError, ReasonCode
 from .implementation_registry import (
     DiscreteLinearBiasV1,
@@ -20,6 +26,7 @@ from .implementation_registry import (
     load_legacy_formula_comparators,
     LinearTermV1,
     ObjectiveScalingReceiptV1,
+    QuantityAndFrictionTermsV1,
     QuadraticConstraintV1,
     QuadraticVariableV1,
     QuboModelV1,
@@ -30,24 +37,58 @@ from .implementation_registry import (
 from .identity_adapter import RP5CIdentityAdapterV1
 from .models import (
     BenchmarkSignConvention,
+    BuildEvidenceBundleRequestV1,
+    BuildEvidenceBundleResponseV1,
+    CompareWithNoTradeRequestV1,
+    CompareWithNoTradeResponseV1,
+    CompileReplayPaperCohortRequestV1,
+    CompileReplayPaperCohortResponseV1,
+    ComputeComponentRequestV1,
+    ComputeComponentResponseV1,
+    ComputeStackRequestV1,
+    ComputeStackResponseV1,
     ComputationExecutionReceiptV1,
     ConfigurationEnvelopeV1,
     ContractFieldV1,
+    EvaluateTradePlanRequestV1,
+    EvaluateTradePlanResponseV1,
+    ExplainResolutionRequestV1,
+    ExplainResolutionResponseV1,
     FallbackEnvelopeV1,
     FormulaRuntimeSnapshotV1,
+    GetSnapshotViewRequestV1,
+    GetSnapshotViewResponseV1,
     HealthEnvelopeV1,
     HealthState,
+    IdentityResolutionV1,
     LatencyHotPathSnapshotBoundaryAdapterV1,
     ObjectiveSense,
     OperationCapabilityClass,
     OperationContractV1,
-    OperationFailureEnvelopeV1,
+    OperationStatusV1,
     OperationRequestEnvelopeV1,
     OperationResponseEnvelopeV1,
     OperationSideEffectClass,
+    RegisterReplayPaperResultRequestV1,
+    RegisterReplayPaperResultResponseV1,
+    RequestMaterializationWorkOrderRequestV1,
+    RequestMaterializationWorkOrderResponseV1,
+    ResolveApplicableStackRequestV1,
+    ResolveApplicableStackResponseV1,
+    ResolveContextualComputabilityRequestV1,
+    ResolveContextualComputabilityResponseV1,
+    ResolveIdentityRequestV1,
+    ResolveIdentityResponseV1,
+    ResolveRequiredInputsRequestV1,
+    ResolveRequiredInputsResponseV1,
     SnapshotState,
+    SubmitCandidateProposalRequestV1,
+    SubmitCandidateProposalResponseV1,
     SupervisionEnvelopeV1,
     TransactionEnvelopeV1,
+    TypedValueKindV1,
+    TypedValueRecordV1,
+    TypedValueV1,
     VariableDomain,
 )
 from .oracle_contracts import GOLDEN_VECTOR_BY_MATH_ID, ORACLE_BY_MATH_ID
@@ -65,6 +106,7 @@ from .source_policy import (
     SourceRevalidationSchedulerAdapterV1,
     classify_trade_lifecycle,
 )
+from .specification import MATH_IO_CONTRACTS
 
 
 PRODUCTION_CORE_PATHS = (
@@ -124,139 +166,373 @@ MATH_IDS = (
     "MATH-49",
 )
 
+TRANCHE_A_CONTROL_ROWS = (
+    ("ST11-ARCHITECTURE::001", "architecture", "canonical-owner-uniqueness"),
+    ("ST11-ARCHITECTURE::002", "architecture", "control-plane-boundary"),
+    ("ST11-ARCHITECTURE::003", "architecture", "identity-plane-binding"),
+    ("ST11-ARCHITECTURE::004", "architecture", "contract-envelope-completeness"),
+    ("ST11-ARCHITECTURE::005", "architecture", "operation-contract-closure"),
+    ("ST11-ARCHITECTURE::006", "architecture", "contextual-computability"),
+    ("ST11-ARCHITECTURE::007", "architecture", "dependency-graph-soundness"),
+    ("ST11-ARCHITECTURE::008", "architecture", "mode-evidence-orthogonality"),
+    ("ST11-ARCHITECTURE::009", "architecture", "repository-file-closure"),
+    ("ST11-ARCHITECTURE::010", "architecture", "tranche-dag-closure"),
+    ("ST11-ARCHITECTURE::011", "architecture", "generated-artifact-ownership"),
+    ("ST11-ARCHITECTURE::012", "architecture", "consume-not-rebuild"),
+    ("ST11-ARCHITECTURE::013", "architecture", "route-not-runtime"),
+    ("ST11-ARCHITECTURE::014", "architecture", "snapshot-boundary"),
+    ("ST11-ARCHITECTURE::015", "architecture", "transaction-boundary"),
+    ("ST11-ARCHITECTURE::016", "architecture", "schema-cross-consistency"),
+    ("ST11-ARCHITECTURE::017", "architecture", "cross-platform-paths"),
+    ("ST11-ARCHITECTURE::018", "architecture", "no-orphan-consumers"),
+    (
+        "ST11-ARCHITECTURE::019",
+        "architecture",
+        "current-repository-reconciliation",
+    ),
+    ("ST11-ARCHITECTURE::020", "architecture", "step12-tranche-readiness"),
+    ("ST11-OPERATIONS::001", "operations", "runtime-topology"),
+    ("ST11-OPERATIONS::002", "operations", "configuration-control"),
+    ("ST11-OPERATIONS::003", "operations", "health-readiness"),
+    ("ST11-OPERATIONS::004", "operations", "lifecycle-supervision"),
+    ("ST11-QUANTUM::001", "quantum", "consume-existing-mapper"),
+    ("ST11-QUANTUM::002", "quantum", "problem-shape-classification"),
+    ("ST11-QUANTUM::003", "quantum", "model-semantics"),
+    ("ST11-QUANTUM::004", "quantum", "objective-sense-and-scale"),
+    ("ST11-QUANTUM::005", "quantum", "variable-encoding"),
+    ("ST11-QUANTUM::006", "quantum", "constraint-mapping"),
+    ("ST11-SECURITY::001", "security", "threat-model-completeness"),
+    ("ST11-SECURITY::002", "security", "default-deny-capabilities"),
+    ("ST11-SECURITY::003", "security", "authentication-binding"),
+    ("ST11-SECURITY::004", "security", "authorization-least-privilege"),
+    ("ST11-SECURITY::005", "security", "secret-isolation"),
+    ("ST11-SECURITY::006", "security", "input-validation"),
+    ("ST11-SECURITY::007", "security", "deserialization-safety"),
+    ("ST11-SOURCE::001", "source", "all-29-revalidated"),
+    ("ST11-SOURCE::002", "source", "source-precedence"),
+    ("ST11-SOURCE::003", "source", "effective-epoch"),
+    ("ST11-SOURCE::004", "source", "fact-atomicity"),
+    ("ST11-SOURCE::005", "source", "conflict-resolution"),
+)
+
+INDEPENDENT_VALIDATOR_BY_DOMAIN = MappingProxyType(
+    {
+        domain: (
+            "tools/independent_validate_qku_computation_control_plane_"
+            f"{domain}.py"
+        )
+        for domain in ("architecture", "operations", "quantum", "security", "source")
+    }
+)
+
+_SHARED_VALIDATION_TEST_ROWS = (
+    (
+        "RUN_VALIDATION_GATES",
+        "architecture",
+        "tests/fail_closed/test_run_validation_gates.py",
+    ),
+    (
+        "CHANGED_AREA_VALIDATION_ROUTER",
+        "architecture",
+        "tests/tools/test_changed_area_validation_router.py",
+    ),
+    (
+        "VALIDATION_INVENTORY",
+        "architecture",
+        "tests/tools/test_validation_inventory.py",
+    ),
+    (
+        "VALIDATION_SCOPE_REGISTRY",
+        "architecture",
+        "tests/tools/test_validation_scope_registry.py",
+    ),
+    (
+        "CI_BRANCH_CONTEXT",
+        "architecture",
+        "tests/tools/test_ci_branch_context.py",
+    ),
+)
+
 REPO_ROOT = Path(__file__).resolve().parents[4]
 
-TRANCHE_A_OPERATION_CONTRACTS = tuple(
-    OperationContractV1(
-        operation_id,
-        request_contract,
-        response_contract,
-        failure_contract,
-        request_fields=(
-            ContractFieldV1("request_id", "str"),
-            ContractFieldV1("contract_version", "str"),
-            ContractFieldV1("payload_json", f"{request_contract}DataV1"),
-        ),
-        response_fields=(
-            ContractFieldV1("request_id", "str"),
-            ContractFieldV1("result_json", f"{response_contract}DataV1"),
-        ),
-        failure_reason_codes=(failure_reason,),
-    )
-    for (
-        operation_id,
-        request_contract,
-        response_contract,
-        failure_contract,
-        failure_reason,
-    ) in (
-        (
-            "RESOLVE_IDENTITY",
-            "ResolveIdentityRequestV1",
-            "ResolveIdentityResponseV1",
-            "ResolveIdentityFailureV1",
-            ReasonCode.OWNER_DATA_MISSING,
-        ),
-        (
-            "RESOLVE_PARAMETER_POLICY",
-            "ResolveParameterPolicyRequestV1",
-            "ResolveParameterPolicyResponseV1",
-            "ResolveParameterPolicyFailureV1",
-            ReasonCode.PARAMETER_OUT_OF_POLICY,
-        ),
-        (
-            "RESOLVE_BINDING_PROFILE",
-            "ResolveBindingProfileRequestV1",
-            "ResolveBindingProfileResponseV1",
-            "ResolveBindingProfileFailureV1",
-            ReasonCode.INVALID_CONTRACT,
-        ),
-        (
-            "COMPILE_DEPENDENCY_DAG",
-            "CompileDependencyDagRequestV1",
-            "CompileDependencyDagResponseV1",
-            "CompileDependencyDagFailureV1",
-            ReasonCode.DEPENDENCY_CYCLE,
-        ),
-        (
-            "RESOLVE_IMPLEMENTATION",
-            "ResolveImplementationRequestV1",
-            "ResolveImplementationResponseV1",
-            "ResolveImplementationFailureV1",
-            ReasonCode.UNKNOWN_IMPLEMENTATION,
-        ),
-        (
-            "VALIDATE_NUMERIC_CONTEXT",
-            "ValidateNumericContextRequestV1",
-            "ValidateNumericContextResponseV1",
-            "ValidateNumericContextFailureV1",
-            ReasonCode.INVALID_NUMERIC_INPUT,
-        ),
-        (
-            "VALIDATE_SOURCE_POLICY",
-            "ValidateSourcePolicyRequestV1",
-            "ValidateSourcePolicyResponseV1",
-            "ValidateSourcePolicyFailureV1",
-            ReasonCode.SOURCE_CONFLICT,
-        ),
-        (
-            "VALIDATE_SOURCE_RIGHTS",
-            "ValidateSourceRightsRequestV1",
-            "ValidateSourceRightsResponseV1",
-            "ValidateSourceRightsFailureV1",
-            ReasonCode.SOURCE_RIGHTS_BLOCKED,
-        ),
-        (
-            "VALIDATE_ORACLE_CONTRACT",
-            "ValidateOracleContractRequestV1",
-            "ValidateOracleContractResponseV1",
-            "ValidateOracleContractFailureV1",
-            ReasonCode.ORACLE_NOT_INDEPENDENT,
-        ),
-        (
-            "VALIDATE_GOLDEN_VECTOR",
-            "ValidateGoldenVectorRequestV1",
-            "ValidateGoldenVectorResponseV1",
-            "ValidateGoldenVectorFailureV1",
-            ReasonCode.VALIDATION_FAILED,
-        ),
-        (
-            "COMPILE_SPECIFICATION_ENVELOPE",
-            "CompileSpecificationEnvelopeRequestV1",
-            "CompileSpecificationEnvelopeResponseV1",
-            "CompileSpecificationEnvelopeFailureV1",
-            ReasonCode.INCOMPLETE_CONTRACT,
-        ),
-        (
-            "VALIDATE_SNAPSHOT",
-            "ValidateSnapshotRequestV1",
-            "ValidateSnapshotResponseV1",
-            "ValidateSnapshotFailureV1",
-            ReasonCode.STALE_CONTEXT,
-        ),
-        (
-            "VALIDATE_TRANSACTION",
-            "ValidateTransactionRequestV1",
-            "ValidateTransactionResponseV1",
-            "ValidateTransactionFailureV1",
-            ReasonCode.PATH_UNSAFE,
-        ),
-        (
-            "DESCRIBE_RUNTIME_BOUNDARIES",
-            "DescribeRuntimeBoundariesRequestV1",
-            "DescribeRuntimeBoundariesResponseV1",
-            "DescribeRuntimeBoundariesFailureV1",
-            ReasonCode.RUNTIME_EFFECT_FORBIDDEN,
-        ),
-        (
-            "VALIDATE_AUTHORITY_ENVELOPE",
-            "ValidateAuthorityEnvelopeRequestV1",
-            "ValidateAuthorityEnvelopeResponseV1",
-            "ValidateAuthorityEnvelopeFailureV1",
-            ReasonCode.CAPABILITY_DENIED,
-        ),
-    )
+_COMMON_OPERATION_REQUEST_FIELDS = (
+    ("request_id", "str"),
+    ("operation_name", "CertifiedOperationNameV1"),
+    ("requested_at", "TimezoneAwareDateTimeV1"),
+    ("principal_id", "str"),
+    ("capability_bundle_id", "str"),
+    ("context", "ComputationContextKeyV1"),
+    ("idempotency_key", "EconomicIdempotencyKeyV1"),
+    ("traceparent", "W3CTraceparentV1"),
+    ("tracestate", "W3CTracestateV1"),
 )
+_COMMON_OPERATION_RESPONSE_FIELDS = (
+    ("response_id", "str"),
+    ("operation_name", "CertifiedOperationNameV1"),
+    ("request_id", "str"),
+    ("completed_at", "TimezoneAwareDateTimeV1"),
+    ("status", "OperationStatusV1"),
+    ("context", "ComputationContextKeyV1"),
+    ("warnings", "tuple[str,...]"),
+    ("blocker_codes", "tuple[OperationBlockerCodeV1,...]"),
+    ("receipt_refs", "tuple[str,...]"),
+    ("traceparent", "W3CTraceparentV1"),
+    ("tracestate", "W3CTracestateV1"),
+)
+
+
+def _operation_contract(
+    operation_id: str,
+    operation_name: str,
+    owner: str,
+    request_model: type[OperationRequestEnvelopeV1],
+    response_model: type[OperationResponseEnvelopeV1],
+    request_tail: tuple[tuple[str, str], ...],
+    response_tail: tuple[str, str],
+    resolver_name: str | None = None,
+) -> OperationContractV1:
+    return OperationContractV1(
+        operation_id=operation_id,
+        operation_name=operation_name,
+        owner=owner,
+        request_type=request_model.__name__,
+        response_type=response_model.__name__,
+        schema_version="1.4.0",
+        request_fields=tuple(
+            ContractFieldV1(name, type_name)
+            for name, type_name in (
+                *_COMMON_OPERATION_REQUEST_FIELDS,
+                *request_tail,
+            )
+        ),
+        response_fields=tuple(
+            ContractFieldV1(name, type_name)
+            for name, type_name in (
+                *_COMMON_OPERATION_RESPONSE_FIELDS,
+                response_tail,
+            )
+        ),
+        request_model=request_model,
+        response_model=response_model,
+        resolver_name=resolver_name,
+        metadata={
+            "tranche": "ST12-TRANCHE-A",
+            "execution_state": "CONTRACT_DEFINITION_ONLY",
+        },
+    )
+
+
+_OPERATION_ROWS = (
+    _operation_contract(
+        "ST10-OP::01",
+        "resolve_identity",
+        "UnifiedCanonicalIdentityPlaneV1",
+        ResolveIdentityRequestV1,
+        ResolveIdentityResponseV1,
+        (("identity_query", "TypedValueRecordV1"),),
+        ("identity_resolution", "IdentityResolutionV1"),
+    ),
+    _operation_contract(
+        "ST10-OP::02",
+        "resolve_contextual_computability",
+        "QKUComputationControlPlaneV1",
+        ResolveContextualComputabilityRequestV1,
+        ResolveContextualComputabilityResponseV1,
+        (
+            ("component_id", "str"),
+            (
+                "required_computability_classes",
+                "tuple[ComputabilityClassV1,...]",
+            ),
+        ),
+        ("computability", "ContextualComputabilityResolutionV1"),
+        "ContextualComputabilityResolverV1.resolve",
+    ),
+    _operation_contract(
+        "ST10-OP::03",
+        "resolve_applicable_stack",
+        "QKUComputationControlPlaneV1",
+        ResolveApplicableStackRequestV1,
+        ResolveApplicableStackResponseV1,
+        (
+            ("trade_plan_candidate_id", "str"),
+            ("required_launch_roles", "tuple[str,...]"),
+        ),
+        ("stack_resolution", "StackResolutionV1"),
+    ),
+    _operation_contract(
+        "ST10-OP::04",
+        "resolve_required_inputs",
+        "QKUComputationControlPlaneV1",
+        ResolveRequiredInputsRequestV1,
+        ResolveRequiredInputsResponseV1,
+        (
+            ("component_ids", "tuple[str,...]"),
+            ("include_optional", "bool"),
+        ),
+        ("input_resolution", "InputResolutionV1"),
+    ),
+    _operation_contract(
+        "ST10-OP::05",
+        "compute_component",
+        "QKUComputationControlPlaneV1",
+        ComputeComponentRequestV1,
+        ComputeComponentResponseV1,
+        (
+            ("component_id", "str"),
+            ("input_values", "TypedValueRecordV1"),
+            ("expected_output_schema_ref", "str"),
+        ),
+        ("component_result", "ComponentResultV1"),
+    ),
+    _operation_contract(
+        "ST10-OP::06",
+        "compute_stack",
+        "QKUComputationControlPlaneV1",
+        ComputeStackRequestV1,
+        ComputeStackResponseV1,
+        (
+            ("stack_id", "str"),
+            ("component_ids", "tuple[str,...]"),
+            ("input_values", "TypedValueRecordV1"),
+        ),
+        ("stack_result", "StackResultV1"),
+    ),
+    _operation_contract(
+        "ST10-OP::07",
+        "compare_with_no_trade",
+        "QKUComputationControlPlaneV1",
+        CompareWithNoTradeRequestV1,
+        CompareWithNoTradeResponseV1,
+        (
+            ("trade_plan_candidate_id", "str"),
+            ("no_trade_candidate_id", "str"),
+            ("comparison_basis", "str"),
+        ),
+        ("comparison", "NoTradeComparisonV1"),
+    ),
+    _operation_contract(
+        "ST10-OP::08",
+        "evaluate_trade_plan",
+        "QKUComputationControlPlaneV1",
+        EvaluateTradePlanRequestV1,
+        EvaluateTradePlanResponseV1,
+        (
+            ("trade_plan_candidate_id", "str"),
+            ("stack_id", "str"),
+            ("accounting_tca_view_ref", "str"),
+            ("risk_cash_state_ref", "str"),
+            ("no_trade_candidate_id", "str"),
+        ),
+        ("evaluation", "TradePlanEvaluationV1"),
+    ),
+    _operation_contract(
+        "ST10-OP::09",
+        "get_snapshot_view",
+        "QKUComputationControlPlaneV1",
+        GetSnapshotViewRequestV1,
+        GetSnapshotViewResponseV1,
+        (
+            ("snapshot_id", "str"),
+            ("view_class", "str"),
+            ("include_value_lineage", "bool"),
+        ),
+        ("snapshot_view", "SnapshotViewV1"),
+    ),
+    _operation_contract(
+        "ST10-OP::10",
+        "explain_resolution",
+        "QKUComputationControlPlaneV1",
+        ExplainResolutionRequestV1,
+        ExplainResolutionResponseV1,
+        (
+            ("resolution_receipt_id", "str"),
+            ("explanation_scope", "str"),
+            ("max_evidence_items", "int"),
+        ),
+        ("explanation", "ResolutionExplanationV1"),
+    ),
+    _operation_contract(
+        "ST10-OP::11",
+        "submit_candidate_proposal",
+        "QKUComputationControlPlaneV1",
+        SubmitCandidateProposalRequestV1,
+        SubmitCandidateProposalResponseV1,
+        (
+            ("candidate_kind", "str"),
+            ("proposed_specification", "TypedValueRecordV1"),
+            ("source_candidate_refs", "tuple[str,...]"),
+            ("requested_owner_review", "bool"),
+        ),
+        ("proposal", "CandidateProposalV1"),
+    ),
+    _operation_contract(
+        "ST10-OP::12",
+        "request_materialization_work_order",
+        "QKUComputationControlPlaneV1",
+        RequestMaterializationWorkOrderRequestV1,
+        RequestMaterializationWorkOrderResponseV1,
+        (
+            ("missing_contract_ids", "tuple[str,...]"),
+            ("reason_codes", "tuple[OperationBlockerCodeV1,...]"),
+            ("priority", "str"),
+            ("requested_owner", "str"),
+        ),
+        ("work_order", "MaterializationWorkOrderV1"),
+    ),
+    _operation_contract(
+        "ST10-OP::13",
+        "compile_replay_paper_cohort",
+        "ReplayPaperCohortCompilerV1",
+        CompileReplayPaperCohortRequestV1,
+        CompileReplayPaperCohortResponseV1,
+        (
+            ("template_ids", "tuple[str,...]"),
+            ("requested_lanes", "tuple[str,...]"),
+            ("input_lock_id", "str"),
+            ("campaign_execution_requested", "bool"),
+        ),
+        ("cohort_compilation", "ReplayPaperCohortCompilationV1"),
+    ),
+    _operation_contract(
+        "ST10-OP::14",
+        "register_replay_paper_result",
+        "ComputationEvidenceServiceV1",
+        RegisterReplayPaperResultRequestV1,
+        RegisterReplayPaperResultResponseV1,
+        (
+            ("cohort_instance_id", "str"),
+            ("lane", "str"),
+            ("input_lock_id", "str"),
+            ("result_packet", "TypedValueRecordV1"),
+        ),
+        ("registration", "ReplayPaperResultRegistrationV1"),
+    ),
+    _operation_contract(
+        "ST10-OP::15",
+        "build_evidence_bundle",
+        "ComputationEvidenceServiceV1",
+        BuildEvidenceBundleRequestV1,
+        BuildEvidenceBundleResponseV1,
+        (
+            ("component_id", "str"),
+            ("input_lock_id", "str"),
+            ("evidence_record_refs", "tuple[str,...]"),
+            ("required_lanes", "tuple[str,...]"),
+        ),
+        ("evidence_bundle", "EvidenceBundleResultV1"),
+    ),
+)
+
+OPERATION_SCHEMA_REGISTRY = MappingProxyType(
+    {operation.operation_id: operation for operation in _OPERATION_ROWS}
+)
+if len(OPERATION_SCHEMA_REGISTRY) != len(_OPERATION_ROWS):
+    raise ContractValidationError(
+        ReasonCode.INVALID_CONTRACT,
+        "certified operation ids must be unique",
+    )
+TRANCHE_A_OPERATION_CONTRACTS = tuple(OPERATION_SCHEMA_REGISTRY.values())
 
 
 @dataclass(frozen=True, slots=True)
@@ -282,6 +558,445 @@ class ValidationReportV1:
                 ReasonCode.VALIDATION_FAILED,
                 "; ".join(f"{item.check_id}: {item.detail}" for item in failed),
             )
+
+
+class CoverageTerminalStatusV1(StrEnum):
+    PASS = "PASS"
+    FAIL = "FAIL"
+
+
+@dataclass(frozen=True, slots=True)
+class CoverageRowV1:
+    row_id: str
+    category: str
+    domain: str
+    predicate: str
+    subject_ref: str
+    test_path: str
+    independent_validator: str
+    terminal_status: CoverageTerminalStatusV1
+    owner: str
+    producer: str
+    consumer_refs: tuple[str, ...]
+    no_orphan_disposition: str
+
+    def __post_init__(self) -> None:
+        for name in (
+            "row_id",
+            "category",
+            "domain",
+            "predicate",
+            "subject_ref",
+            "test_path",
+            "independent_validator",
+            "owner",
+            "producer",
+            "no_orphan_disposition",
+        ):
+            value = getattr(self, name)
+            if not isinstance(value, str) or not value:
+                raise ContractValidationError(
+                    ReasonCode.INCOMPLETE_CONTRACT,
+                    f"coverage row {name} must be nonempty text",
+                )
+        validate_relative_path(self.test_path)
+        validate_relative_path(self.independent_validator)
+        if not isinstance(self.terminal_status, CoverageTerminalStatusV1):
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "coverage terminal status must be typed",
+            )
+        if (
+            not isinstance(self.consumer_refs, tuple)
+            or not self.consumer_refs
+            or any(
+                not isinstance(value, str) or not value
+                for value in self.consumer_refs
+            )
+            or len(self.consumer_refs) != len(set(self.consumer_refs))
+        ):
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                f"coverage row has no exact consumer route: {self.row_id}",
+            )
+
+
+@dataclass(frozen=True, slots=True)
+class TrancheACoverageManifestV1:
+    rows: tuple[CoverageRowV1, ...]
+
+    def __post_init__(self) -> None:
+        if (
+            not isinstance(self.rows, tuple)
+            or not self.rows
+            or any(not isinstance(row, CoverageRowV1) for row in self.rows)
+        ):
+            raise ContractValidationError(
+                ReasonCode.INCOMPLETE_CONTRACT,
+                "coverage manifest requires typed immutable rows",
+            )
+        row_ids = tuple(row.row_id for row in self.rows)
+        if len(row_ids) != len(set(row_ids)):
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "coverage manifest contains duplicate row identities",
+            )
+
+    @property
+    def executed_counts(self) -> MappingProxyType:
+        counts = Counter(
+            row.category
+            for row in self.rows
+            if row.terminal_status is CoverageTerminalStatusV1.PASS
+        )
+        counts["total_rows"] = sum(counts.values())
+        return MappingProxyType(dict(sorted(counts.items())))
+
+
+@dataclass(frozen=True, slots=True)
+class _CoverageBlueprintV1:
+    row_id: str
+    category: str
+    domain: str
+    predicate: str
+    subject_ref: str
+    test_path: str
+    independent_validator: str
+    owner: str = "QKUComputationControlPlaneV1"
+    producer: str = "TrancheACoverageManifestV1"
+    consumer_refs: tuple[str, ...] = (
+        "QKU_COMPUTATION_CONTROL_PLANE_PRIMARY_VALIDATION",
+        "QKU_COMPUTATION_CONTROL_PLANE_INDEPENDENT_VALIDATION",
+    )
+    no_orphan_disposition: str = "VALIDATED_AND_CONSUMED"
+
+
+def _control_test_path(domain: str, predicate: str) -> str:
+    return (
+        "tests/stage1_prediction_markets/qku_computation_control_plane/"
+        f"{domain}/test_{predicate.replace('-', '_')}.py"
+    )
+
+
+def _coverage_blueprint() -> tuple[_CoverageBlueprintV1, ...]:
+    rows: list[_CoverageBlueprintV1] = []
+    for control_id, domain, predicate in TRANCHE_A_CONTROL_ROWS:
+        rows.append(
+            _CoverageBlueprintV1(
+                row_id=control_id,
+                category="closure_rows",
+                domain=domain,
+                predicate=predicate,
+                subject_ref=control_id,
+                test_path=_control_test_path(domain, predicate),
+                independent_validator=INDEPENDENT_VALIDATOR_BY_DOMAIN[domain],
+            )
+        )
+    for index, path in enumerate(PRODUCTION_CORE_PATHS, 1):
+        rows.append(
+            _CoverageBlueprintV1(
+                row_id=f"ST12A-REPOSITORY::{index:02d}",
+                category="repository_dispositions",
+                domain="architecture",
+                predicate="owned-production-path-present-and-consumed",
+                subject_ref=path,
+                test_path=_control_test_path(
+                    "architecture",
+                    "repository-file-closure",
+                ),
+                independent_validator=INDEPENDENT_VALIDATOR_BY_DOMAIN[
+                    "architecture"
+                ],
+            )
+        )
+    for policy in PARAMETER_POLICIES:
+        rows.append(
+            _CoverageBlueprintV1(
+                row_id=policy.parameter_id,
+                category="parameter_policy_rows",
+                domain="architecture",
+                predicate="parameter-policy-resolves-exact-certified-row",
+                subject_ref=policy.parameter_id,
+                test_path=_control_test_path(
+                    "architecture",
+                    "step12-tranche-readiness",
+                ),
+                independent_validator=INDEPENDENT_VALIDATOR_BY_DOMAIN[
+                    "architecture"
+                ],
+            )
+        )
+    for math_id in MATH_IDS:
+        domain = "quantum" if math_id in {"MATH-46", "MATH-47", "MATH-48", "MATH-49"} else "architecture"
+        validator = INDEPENDENT_VALIDATOR_BY_DOMAIN[domain]
+        rows.append(
+            _CoverageBlueprintV1(
+                row_id=f"ST12A-MATH-SPEC::{math_id}",
+                category="mathematical_specifications",
+                domain=domain,
+                predicate="implementation-and-typed-io-contract-closed",
+                subject_ref=math_id,
+                test_path=_control_test_path(
+                    "architecture",
+                    "schema-cross-consistency",
+                ),
+                independent_validator=validator,
+            )
+        )
+        oracle = ORACLE_BY_MATH_ID[math_id]
+        rows.append(
+            _CoverageBlueprintV1(
+                row_id=f"ST12A-ORACLE::{oracle.oracle_id}",
+                category="independent_oracle_specifications",
+                domain=domain,
+                predicate="independent-oracle-lineage-closed",
+                subject_ref=oracle.oracle_id,
+                test_path=_control_test_path(
+                    "architecture",
+                    "no-orphan-consumers",
+                ),
+                independent_validator=validator,
+            )
+        )
+        vector = GOLDEN_VECTOR_BY_MATH_ID[math_id]
+        rows.append(
+            _CoverageBlueprintV1(
+                row_id=f"ST12A-VECTOR::{vector.vector_id}",
+                category="golden_vectors_and_invariants",
+                domain=domain,
+                predicate="golden-vector-lineage-and-comparison-closed",
+                subject_ref=vector.vector_id,
+                test_path=_control_test_path(
+                    "architecture",
+                    "schema-cross-consistency",
+                ),
+                independent_validator=validator,
+            )
+        )
+    for control_id, domain, predicate in TRANCHE_A_CONTROL_ROWS:
+        path = _control_test_path(domain, predicate)
+        rows.append(
+            _CoverageBlueprintV1(
+                row_id=f"ST12A-TEST::{control_id}",
+                category="test_rows",
+                domain=domain,
+                predicate="certified-domain-test-path-present",
+                subject_ref=path,
+                test_path=path,
+                independent_validator=INDEPENDENT_VALIDATOR_BY_DOMAIN[domain],
+            )
+        )
+    for row_name, domain, test_path in _SHARED_VALIDATION_TEST_ROWS:
+        validator = INDEPENDENT_VALIDATOR_BY_DOMAIN[domain]
+        rows.append(
+            _CoverageBlueprintV1(
+                row_id=f"ST12A-TEST::SHARED::{row_name}",
+                category="test_rows",
+                domain=domain,
+                predicate="shared-centralized-validation-test-present",
+                subject_ref=test_path,
+                test_path=test_path,
+                independent_validator=validator,
+            )
+        )
+    for domain, validator in INDEPENDENT_VALIDATOR_BY_DOMAIN.items():
+        primary_path = "tools/validate_qku_computation_control_plane.py"
+        rows.extend(
+            (
+                _CoverageBlueprintV1(
+                    row_id=f"ST12A-COMMAND::PRIMARY::{domain}",
+                    category="validation_command_rows",
+                    domain=domain,
+                    predicate=(
+                        "python -B tools/validate_qku_computation_control_plane.py "
+                        f"--domain {domain}"
+                    ),
+                    subject_ref=primary_path,
+                    test_path=primary_path,
+                    independent_validator=validator,
+                ),
+                _CoverageBlueprintV1(
+                    row_id=f"ST12A-COMMAND::INDEPENDENT::{domain}",
+                    category="validation_command_rows",
+                    domain=domain,
+                    predicate=f"python -B {validator}",
+                    subject_ref=validator,
+                    test_path=validator,
+                    independent_validator=validator,
+                ),
+            )
+        )
+    for rule in SOURCE_CLAIM_BINDING_RULES:
+        rows.append(
+            _CoverageBlueprintV1(
+                row_id=rule.binding_rule_id,
+                category="source_claim_binding_rules",
+                domain="source",
+                predicate="exact-source-claim-binding-fail-closed",
+                subject_ref=rule.binding_rule_id,
+                test_path=_control_test_path("source", "fact-atomicity"),
+                independent_validator=INDEPENDENT_VALIDATOR_BY_DOMAIN["source"],
+            )
+        )
+    return tuple(rows)
+
+
+def _coverage_predicate_passes(
+    row: _CoverageBlueprintV1,
+    *,
+    domain_results: dict[str, bool] | None = None,
+) -> bool:
+    if not (REPO_ROOT / row.test_path).is_file():
+        return False
+    if not (REPO_ROOT / row.independent_validator).is_file():
+        return False
+    if row.category == "closure_rows":
+        if domain_results is None:
+            return validate_domain(row.domain).passed
+        return domain_results[row.domain]
+    if row.category == "repository_dispositions":
+        return (
+            row.subject_ref in PRODUCTION_CORE_PATHS
+            and (REPO_ROOT / row.subject_ref).is_file()
+        )
+    if row.category == "parameter_policy_rows":
+        try:
+            resolved = ParameterPolicyResolverV1.resolve(row.subject_ref)
+        except ComputationControlPlaneError:
+            return False
+        return resolved.parameter_id == row.subject_ref and resolved.used_day1_seed
+    if row.category == "mathematical_specifications":
+        return (
+            row.subject_ref in IMPLEMENTATION_REGISTRY
+            and row.subject_ref in MATH_IO_CONTRACTS
+            and callable(IMPLEMENTATION_REGISTRY[row.subject_ref].callable)
+        )
+    if row.category == "independent_oracle_specifications":
+        return any(
+            oracle.oracle_id == row.subject_ref
+            and oracle.math_spec_id in IMPLEMENTATION_REGISTRY
+            and not oracle.production_import_allowed
+            and not oracle.primary_validator_import_allowed
+            for oracle in ORACLE_BY_MATH_ID.values()
+        )
+    if row.category == "golden_vectors_and_invariants":
+        return any(
+            vector.vector_id == row.subject_ref
+            and vector.math_spec_id in IMPLEMENTATION_REGISTRY
+            and vector.oracle_id
+            == ORACLE_BY_MATH_ID[vector.math_spec_id].oracle_id
+            and not vector.production_import_allowed
+            for vector in GOLDEN_VECTOR_BY_MATH_ID.values()
+        )
+    if row.category in {"test_rows", "validation_command_rows"}:
+        return True
+    if row.category == "source_claim_binding_rules":
+        return any(
+            rule.binding_rule_id == row.subject_ref
+            and not rule.source_pack_as_primary_allowed
+            and not rule.broad_regex_or_alias_matching_allowed
+            and not rule.codex_source_selection_allowed
+            for rule in SOURCE_CLAIM_BINDING_RULES
+        )
+    return False
+
+
+def build_tranche_a_coverage_manifest(
+    *,
+    predicate_overrides: MappingProxyType | dict[str, bool] | None = None,
+) -> TrancheACoverageManifestV1:
+    overrides = {} if predicate_overrides is None else dict(predicate_overrides)
+    blueprint = _coverage_blueprint()
+    domain_results = {
+        domain: validate_domain(domain).passed
+        for domain in INDEPENDENT_VALIDATOR_BY_DOMAIN
+    }
+    unexpected_overrides = set(overrides) - {row.row_id for row in blueprint}
+    if unexpected_overrides:
+        raise ContractValidationError(
+            ReasonCode.INVALID_CONTRACT,
+            f"coverage override has unexpected rows: {sorted(unexpected_overrides)!r}",
+        )
+    rows = tuple(
+        CoverageRowV1(
+            row_id=row.row_id,
+            category=row.category,
+            domain=row.domain,
+            predicate=row.predicate,
+            subject_ref=row.subject_ref,
+            test_path=row.test_path,
+            independent_validator=row.independent_validator,
+            terminal_status=(
+                CoverageTerminalStatusV1.PASS
+                if overrides.get(
+                    row.row_id,
+                    _coverage_predicate_passes(
+                        row,
+                        domain_results=domain_results,
+                    ),
+                )
+                else CoverageTerminalStatusV1.FAIL
+            ),
+            owner=row.owner,
+            producer=row.producer,
+            consumer_refs=row.consumer_refs,
+            no_orphan_disposition=row.no_orphan_disposition,
+        )
+        for row in blueprint
+    )
+    return validate_tranche_a_coverage_manifest(rows)
+
+
+def validate_tranche_a_coverage_manifest(
+    rows: tuple[CoverageRowV1, ...] | TrancheACoverageManifestV1,
+) -> TrancheACoverageManifestV1:
+    manifest = rows if isinstance(rows, TrancheACoverageManifestV1) else TrancheACoverageManifestV1(rows)
+    expected = _coverage_blueprint()
+    domain_results = {
+        domain: validate_domain(domain).passed
+        for domain in INDEPENDENT_VALIDATOR_BY_DOMAIN
+    }
+    expected_ids = tuple(row.row_id for row in expected)
+    actual_ids = tuple(row.row_id for row in manifest.rows)
+    if actual_ids != expected_ids:
+        missing = tuple(row_id for row_id in expected_ids if row_id not in actual_ids)
+        unexpected = tuple(row_id for row_id in actual_ids if row_id not in expected_ids)
+        raise ContractValidationError(
+            ReasonCode.INVALID_CONTRACT,
+            "coverage closure mismatch: "
+            f"missing={missing!r}; unexpected={unexpected!r}",
+        )
+    for actual, blueprint in zip(manifest.rows, expected, strict=True):
+        for name in (
+            "row_id",
+            "category",
+            "domain",
+            "predicate",
+            "subject_ref",
+            "test_path",
+            "independent_validator",
+            "owner",
+            "producer",
+            "consumer_refs",
+            "no_orphan_disposition",
+        ):
+            if getattr(actual, name) != getattr(blueprint, name):
+                raise ContractValidationError(
+                    ReasonCode.INVALID_CONTRACT,
+                    f"coverage row metadata changed: {actual.row_id}:{name}",
+                )
+        if (
+            actual.terminal_status is not CoverageTerminalStatusV1.PASS
+            or not _coverage_predicate_passes(
+                blueprint,
+                domain_results=domain_results,
+            )
+        ):
+            raise ContractValidationError(
+                ReasonCode.VALIDATION_FAILED,
+                f"coverage predicate failed: {actual.row_id}:{actual.predicate}",
+            )
+    return manifest
 
 
 def _check(check_id: str, condition: bool, detail: str) -> ValidationCheckV1:
@@ -315,24 +1030,25 @@ def validate_operation_contract_closure(
 ) -> tuple[OperationContractV1, ...]:
     if (
         not isinstance(operations, tuple)
-        or len(operations) != 15
+        or len(operations) != len(TRANCHE_A_OPERATION_CONTRACTS)
         or any(
             not isinstance(operation, OperationContractV1)
             for operation in operations
         )
+        or operations != TRANCHE_A_OPERATION_CONTRACTS
     ):
         raise ContractValidationError(
             ReasonCode.INVALID_CONTRACT,
-            "operation closure requires exactly 15 typed contracts",
+            "operation closure must exactly equal the certified typed roster",
         )
     for attribute in (
         "operation_id",
-        "input_contract",
-        "output_contract",
-        "failure_contract",
+        "operation_name",
+        "request_type",
+        "response_type",
     ):
         values = tuple(getattr(operation, attribute) for operation in operations)
-        if len(set(values)) != 15:
+        if len(set(values)) != len(operations):
             raise ContractValidationError(
                 ReasonCode.INVALID_CONTRACT,
                 f"operation closure has a collision in {attribute}",
@@ -340,14 +1056,16 @@ def validate_operation_contract_closure(
     for operation in operations:
         if (
             operation.runtime_effect_authorized
+            or operation.provider_effect_authorized
             or operation.capability_class
-            is not OperationCapabilityClass.NONE_CONTRACT_ONLY
-            or operation.side_effect_class is not OperationSideEffectClass.NONE
+            is not OperationCapabilityClass.CONTRACT_DEFINITION_ONLY
+            or operation.side_effect_class
+            is not OperationSideEffectClass.PURE_OR_APPEND_ONLY_NON_PROVIDER_EFFECT
+            or operation.schema_version != "1.4.0"
             or tuple(field.name for field in operation.request_fields)
-            != ("request_id", "contract_version", "payload_json")
+            != tuple(field.name for field in fields(operation.request_model))
             or tuple(field.name for field in operation.response_fields)
-            != ("request_id", "result_json")
-            or not operation.failure_reason_codes
+            != tuple(field.name for field in fields(operation.response_model))
         ):
             raise ContractValidationError(
                 ReasonCode.RUNTIME_EFFECT_FORBIDDEN,
@@ -398,19 +1116,55 @@ def _contract_only_models_are_valid() -> bool:
         '{"contract_only":true}',
     )
     operation = TRANCHE_A_OPERATION_CONTRACTS[0]
+    moment = datetime(2026, 7, 24, 12, tzinfo=UTC)
+    operation_context = ComputationContextKeyV1(
+        "ST12A_OPERATION_CONTEXT",
+        moment,
+        moment,
+        "ST10-SOURCE::01",
+        "input-v1",
+        timedelta(minutes=1),
+    )
     request = operation.bind_request(
         request_id="ST12A_OPERATION_REQUEST",
-        contract_version="1.0",
-        payload_json='{"formula_id":"FORMULA_QKU"}',
+        operation_name="resolve_identity",
+        requested_at=moment,
+        principal_id="ST12A_PRINCIPAL",
+        capability_bundle_id="ST12A_DEFAULT_DENY_BUNDLE",
+        context=operation_context,
+        idempotency_key="ECONOMIC::ST12A_OPERATION_REQUEST",
+        traceparent="00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01",
+        tracestate="",
+        identity_query=TypedValueRecordV1(
+            (
+                TypedValueV1(
+                    "formula_id",
+                    TypedValueKindV1.TEXT,
+                    "FORMULA_QKU",
+                    "identifier",
+                    "RP5C",
+                ),
+            )
+        ),
     )
     response = operation.bind_response(
         request,
-        result_json='{"contract_only":true}',
-    )
-    failure = operation.bind_failure(
-        request,
-        reason_code=operation.failure_reason_codes[0],
-        detail="fixture-only fail-closed envelope",
+        response_id="ST12A_OPERATION_RESPONSE",
+        operation_name="resolve_identity",
+        request_id=request.request_id,
+        completed_at=moment,
+        status=OperationStatusV1.SUCCEEDED,
+        context=operation_context,
+        warnings=(),
+        blocker_codes=(),
+        receipt_refs=("RP5C_IDENTITY_00000001",),
+        traceparent=request.traceparent,
+        tracestate=request.tracestate,
+        identity_resolution=IdentityResolutionV1(
+            "RP5C_IDENTITY_00000001",
+            "RETURN_CANONICAL_IDENTITY_VIEW",
+            ("RP5C_IDENTITY_00000001",),
+        ),
     )
     validate_snapshot_contract(snapshot)
     validate_transaction_contract(transaction)
@@ -424,7 +1178,8 @@ def _contract_only_models_are_valid() -> bool:
         and not transaction.committed
         and isinstance(request, OperationRequestEnvelopeV1)
         and isinstance(response, OperationResponseEnvelopeV1)
-        and isinstance(failure, OperationFailureEnvelopeV1)
+        and operation.request_json(request)
+        and operation.response_json(response)
         and not any(
             (
                 receipt.provider_effect,
@@ -815,15 +1570,21 @@ def evaluate_golden_vector(math_id: str) -> dict[str, object]:
         return {"expected_net_cash": str(result.normalize())}
     if math_id == "MATH-07":
         result = call(
-            values["probabilities"], values["payoffs"], values["quantity"],
-            values["acquisition_cost"], values["fees"], values["expected_slippage"],
-            values["expected_impact"],
+            values["probabilities"],
+            values["payoffs"],
+            QuantityAndFrictionTermsV1(
+                Decimal(str(values["quantity"])),
+                Decimal(str(values["acquisition_cost"])),
+                Decimal(str(values["fees"])),
+                Decimal(str(values["expected_slippage"])),
+                Decimal(str(values["expected_impact"])),
+            ),
         )
         return {"expected_net_cash": str(result.normalize())}
     if math_id == "MATH-08":
-        return {"brier_score": str(Decimal(str(call(values["probability"], values["outcome"]))).normalize())}
+        return {"brier_score": str(Decimal(str(call(values["p"], values["y"]))).normalize())}
     if math_id == "MATH-09":
-        return {"log_loss": call(values["probability"], values["outcome"], clip_epsilon=values["clip_epsilon"])}
+        return {"log_loss": call(values["p"], values["y"], clip_epsilon=values["clip_epsilon"])}
     if math_id == "MATH-10":
         ordered_bins = tuple(
             sorted(values["bins"], key=lambda item: item["mean_confidence"])
@@ -853,7 +1614,11 @@ def evaluate_golden_vector(math_id: str) -> dict[str, object]:
         )
         return {"ece": call(probabilities, outcomes, edges)}
     if math_id == "MATH-11":
-        result = call(values["successes"], values["trials"], z=values["z"])
+        result = call(
+            values["successes"],
+            values["trials"],
+            confidence=values["confidence"],
+        )
         return {"lower": result.lower, "upper": result.upper}
     if math_id in {"MATH-12", "MATH-13"}:
         result = call(values["p_values"], values["q"])
@@ -864,13 +1629,13 @@ def evaluate_golden_vector(math_id: str) -> dict[str, object]:
     if math_id == "MATH-14":
         result = call(
             values["series"],
-            values["mean_block_length"],
+            values["expected_block_length"],
             seed=values["seed"],
             replicates=values["replicates"],
         )
         second = call(
             values["series"],
-            values["mean_block_length"],
+            values["expected_block_length"],
             seed=values["seed"],
             replicates=values["replicates"],
         )
@@ -880,7 +1645,7 @@ def evaluate_golden_vector(math_id: str) -> dict[str, object]:
         }
     if math_id == "MATH-15":
         result = call(
-            values["differentials"],
+            values["loss_differentials"],
             sign_convention=(
                 BenchmarkSignConvention.BENCHMARK_LOSS_MINUS_CANDIDATE_LOSS
             ),

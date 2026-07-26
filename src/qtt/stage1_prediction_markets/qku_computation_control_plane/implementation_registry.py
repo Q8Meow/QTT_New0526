@@ -12,7 +12,12 @@ from statistics import NormalDist
 from types import MappingProxyType
 from typing import Callable, Mapping, Sequence
 
-from .context import decimal_context_v1, exact_decimal, finite_float
+from .context import (
+    canonical_probability_decimal,
+    decimal_context_v1,
+    exact_decimal,
+    finite_float,
+)
 from .errors import ContractValidationError, NumericDomainError, ReasonCode
 from .models import (
     BenchmarkSignConvention,
@@ -23,6 +28,7 @@ from .models import (
 
 
 DecimalInput = Decimal | str | int
+PROBABILITY_NORMALIZATION_ULP_MULTIPLIER = 8
 
 
 def _fail(message: str, reason: ReasonCode = ReasonCode.OUT_OF_DOMAIN) -> None:
@@ -37,10 +43,125 @@ def _probability(value: object, *, field_name: str) -> float:
 
 
 def _probability_decimal(value: object, *, field_name: str) -> Decimal:
-    result = exact_decimal(value, field_name=field_name)  # type: ignore[arg-type]
-    if not Decimal(0) <= result <= Decimal(1):
-        _fail(f"{field_name} must be in [0, 1]")
-    return result
+    return canonical_probability_decimal(value, field_name=field_name)  # type: ignore[arg-type]
+
+
+@dataclass(frozen=True, slots=True)
+class ProbabilityNormalizationReceiptV1:
+    original_sum: Decimal
+    tolerance: Decimal
+    normalization_applied: bool
+    canonical_decimal_vector: tuple[Decimal, ...]
+    normalized_decimal_vector: tuple[Decimal, ...]
+
+    def __post_init__(self) -> None:
+        for name in ("original_sum", "tolerance"):
+            value = getattr(self, name)
+            if not isinstance(value, Decimal) or not value.is_finite():
+                raise ContractValidationError(
+                    ReasonCode.INVALID_CONTRACT,
+                    f"{name} must be a finite Decimal",
+                )
+        if type(self.normalization_applied) is not bool:
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "normalization_applied must be an exact boolean",
+            )
+        for name in ("canonical_decimal_vector", "normalized_decimal_vector"):
+            values = getattr(self, name)
+            if (
+                not isinstance(values, tuple)
+                or not values
+                or any(
+                    not isinstance(value, Decimal)
+                    or not value.is_finite()
+                    or value < 0
+                    or value > 1
+                    for value in values
+                )
+            ):
+                raise ContractValidationError(
+                    ReasonCode.INVALID_CONTRACT,
+                    f"{name} must be a nonempty finite probability tuple",
+                )
+        if len(self.canonical_decimal_vector) != len(
+            self.normalized_decimal_vector
+        ):
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "probability normalization vectors must be aligned",
+            )
+        if self.tolerance <= 0:
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "probability normalization tolerance must be positive",
+            )
+
+
+@dataclass(frozen=True, slots=True)
+class QuantityAndFrictionTermsV1:
+    quantity: Decimal
+    acquisition_cost: Decimal
+    fees: Decimal
+    expected_slippage: Decimal
+    expected_impact: Decimal
+
+    def __post_init__(self) -> None:
+        for name in (
+            "quantity",
+            "acquisition_cost",
+            "fees",
+            "expected_slippage",
+            "expected_impact",
+        ):
+            value = _nonnegative(
+                exact_decimal(getattr(self, name), field_name=name),
+                field_name=name,
+            )
+            object.__setattr__(self, name, value)
+
+
+def normalize_probability_vector(
+    probabilities: Sequence[object],
+) -> ProbabilityNormalizationReceiptV1:
+    """Validate and canonically normalize a declared float64 probability vector."""
+
+    if isinstance(probabilities, (str, bytes)) or not isinstance(
+        probabilities, Sequence
+    ) or not probabilities:
+        _fail("probabilities must be a nonempty declared sequence")
+    float_probabilities = tuple(
+        _probability(value, field_name=f"probabilities[{index}]")
+        for index, value in enumerate(probabilities)
+    )
+    original_float_sum = math.fsum(float_probabilities)
+    tolerance_float = (
+        PROBABILITY_NORMALIZATION_ULP_MULTIPLIER
+        * math.ulp(1.0)
+        * len(float_probabilities)
+    )
+    if (
+        not math.isfinite(original_float_sum)
+        or abs(original_float_sum - 1.0) > tolerance_float
+    ):
+        _fail("probabilities must sum to one within the declared tolerance")
+    canonical = tuple(
+        _probability_decimal(value, field_name=f"probabilities[{index}]")
+        for index, value in enumerate(probabilities)
+    )
+    with localcontext(decimal_context_v1()):
+        canonical_sum = sum(canonical, Decimal(0))
+        tolerance = Decimal(repr(tolerance_float))
+        if canonical_sum <= 0 or abs(canonical_sum - Decimal(1)) > tolerance:
+            _fail("probabilities must sum to one within the declared tolerance")
+        normalized = tuple(value / canonical_sum for value in canonical)
+    return ProbabilityNormalizationReceiptV1(
+        original_sum=Decimal(repr(original_float_sum)),
+        tolerance=Decimal(repr(tolerance_float)),
+        normalization_applied=canonical_sum != Decimal(1),
+        canonical_decimal_vector=canonical,
+        normalized_decimal_vector=normalized,
+    )
 
 
 def _cash(value: object, *, field_name: str) -> Decimal:
@@ -216,58 +337,42 @@ def compute_math_06_binary_contract_expected_net_cash(
 def compute_math_07_multi_outcome_expected_net_cash(
     probabilities: Sequence[object],
     payoffs: Sequence[DecimalInput],
-    quantity: DecimalInput,
-    acquisition_cost: DecimalInput,
-    fees: DecimalInput,
-    expected_slippage: DecimalInput,
-    expected_impact: DecimalInput,
+    quantity_and_friction_terms: QuantityAndFrictionTermsV1,
 ) -> Decimal:
     if not probabilities or len(probabilities) != len(payoffs):
         _fail("probability and payoff vectors must be nonempty and aligned")
-    float_probabilities = [
-        _probability(value, field_name=f"probabilities[{index}]")
-        for index, value in enumerate(probabilities)
-    ]
-    tolerance = 8 * math.ulp(1.0) * len(float_probabilities)
-    if abs(math.fsum(float_probabilities) - 1.0) > tolerance:
-        _fail("probabilities must sum to one within the declared tolerance")
-    decimal_probabilities = [
-        _probability_decimal(value, field_name=f"probabilities[{index}]")
-        for index, value in enumerate(probabilities)
-    ]
+    if not isinstance(quantity_and_friction_terms, QuantityAndFrictionTermsV1):
+        _fail(
+            "quantity_and_friction_terms must be a typed Decimal record",
+            ReasonCode.INVALID_CONTRACT,
+        )
+    normalization = normalize_probability_vector(probabilities)
     decimal_payoffs = [
         _cash(value, field_name=f"payoffs[{index}]")
         for index, value in enumerate(payoffs)
     ]
-    quantity_value = _nonnegative(
-        exact_decimal(quantity, field_name="quantity"), field_name="quantity"
+    friction = (
+        quantity_and_friction_terms.acquisition_cost,
+        quantity_and_friction_terms.fees,
+        quantity_and_friction_terms.expected_slippage,
+        quantity_and_friction_terms.expected_impact,
     )
-    friction = [
-        _nonnegative(
-            _cash(acquisition_cost, field_name="acquisition_cost"),
-            field_name="acquisition_cost",
-        ),
-        _nonnegative(_cash(fees, field_name="fees"), field_name="fees"),
-        _nonnegative(
-            _cash(expected_slippage, field_name="expected_slippage"),
-            field_name="expected_slippage",
-        ),
-        _nonnegative(
-            _cash(expected_impact, field_name="expected_impact"),
-            field_name="expected_impact",
-        ),
-    ]
     with localcontext(decimal_context_v1()):
         expected_payoff = sum(
-            (
+            sorted(
                 probability * payoff
                 for probability, payoff in zip(
-                    decimal_probabilities, decimal_payoffs, strict=True
+                    normalization.normalized_decimal_vector,
+                    decimal_payoffs,
+                    strict=True,
                 )
             ),
             Decimal(0),
         )
-        return quantity_value * expected_payoff - sum(friction, Decimal(0))
+        return (
+            quantity_and_friction_terms.quantity * expected_payoff
+            - sum(friction, Decimal(0))
+        )
 
 
 def _vector(value: object, *, field_name: str) -> tuple[object, ...]:
@@ -277,9 +382,11 @@ def _vector(value: object, *, field_name: str) -> tuple[object, ...]:
 
 
 def compute_math_08_brier_score(
-    probability: object,
-    outcome: object,
+    p: object,
+    y: object,
 ) -> float:
+    probability = p
+    outcome = y
     if isinstance(probability, Sequence) and not isinstance(probability, (str, bytes)):
         probabilities = _vector(probability, field_name="probability")
         outcomes = _vector(outcome, field_name="outcome")
@@ -347,11 +454,13 @@ def compute_math_08_brier_score(
 
 
 def compute_math_09_log_loss(
-    probability: object,
-    outcome: object,
+    p: object,
+    y: object,
     *,
     clip_epsilon: object = math.ulp(1.0),
 ) -> float:
+    probability = p
+    outcome = y
     epsilon = finite_float(clip_epsilon, field_name="clip_epsilon")
     if not 0 < epsilon < 0.5:
         _fail("clip_epsilon must be in (0, 0.5)")
@@ -497,7 +606,6 @@ def compute_math_11_wilson_score_interval(
     trials: int,
     *,
     confidence: object = 0.95,
-    z: object | None = None,
 ) -> WilsonIntervalV1:
     if (
         isinstance(successes, bool)
@@ -511,10 +619,8 @@ def compute_math_11_wilson_score_interval(
     confidence_value = _probability(confidence, field_name="confidence")
     if confidence_value in (0.0, 1.0):
         _fail("confidence must be in (0, 1)")
-    z_value = (
-        finite_float(z, field_name="z")
-        if z is not None
-        else NormalDist().inv_cdf(1.0 - (1.0 - confidence_value) / 2.0)
+    z_value = NormalDist().inv_cdf(
+        1.0 - (1.0 - confidence_value) / 2.0
     )
     if z_value <= 0:
         _fail("z must be positive")
@@ -698,7 +804,7 @@ class BootstrapMeanIntervalV1:
 
 def compute_math_14_stationary_bootstrap_mean_interval(
     series: Sequence[object],
-    mean_block_length: object,
+    expected_block_length: object,
     *,
     seed: int,
     replicates: int = 1000,
@@ -710,7 +816,10 @@ def compute_math_14_stationary_bootstrap_mean_interval(
     )
     if len(values) < 2:
         _fail("series length must be at least two")
-    block = finite_float(mean_block_length, field_name="mean_block_length")
+    block = finite_float(
+        expected_block_length,
+        field_name="expected_block_length",
+    )
     if not 1.0 <= block <= len(values):
         _fail("mean block length must be in [1, series length]")
     if isinstance(seed, bool) or not isinstance(seed, int):
@@ -762,7 +871,7 @@ class RealityCheckResultV1:
 
 
 def compute_math_15_white_reality_check(
-    differentials: Sequence[Sequence[object]],
+    loss_differentials: Sequence[Sequence[object]],
     *,
     sign_convention: BenchmarkSignConvention | None = None,
     seed: int,
@@ -772,14 +881,17 @@ def compute_math_15_white_reality_check(
 ) -> RealityCheckResultV1:
     if not isinstance(sign_convention, BenchmarkSignConvention):
         _fail("benchmark sign convention must be explicitly declared")
-    if not differentials:
+    if not loss_differentials:
         _fail("time-by-candidate differential matrix must be nonempty")
     time_rows = tuple(
         tuple(
-            finite_float(value, field_name=f"differentials[{row}][{column}]")
+            finite_float(
+                value,
+                field_name=f"loss_differentials[{row}][{column}]",
+            )
             for column, value in enumerate(time_row)
         )
-        for row, time_row in enumerate(differentials)
+        for row, time_row in enumerate(loss_differentials)
     )
     length = len(time_rows)
     candidate_count = len(time_rows[0])
@@ -789,6 +901,8 @@ def compute_math_15_white_reality_check(
         or any(len(time_row) != candidate_count for time_row in time_rows)
     ):
         _fail("differentials must have shape [time,candidate] with time >= 2")
+    if not any(value != 0.0 for time_row in time_rows for value in time_row):
+        _fail("all-zero loss differentials are statistically uninformative")
     candidates = tuple(
         tuple(time_rows[row][column] for row in range(length))
         for column in range(candidate_count)
@@ -849,13 +963,9 @@ class QuboUpperTermV1:
             or not isinstance(self.j, int)
             or self.i < 0
             or self.j < 0
-            or self.i == self.j
+            or self.i >= self.j
         ):
-            _fail("QUBO interactions require distinct nonnegative integer indices")
-        if self.i > self.j:
-            original_i = self.i
-            object.__setattr__(self, "i", self.j)
-            object.__setattr__(self, "j", original_i)
+            _fail("QUBO interactions require exact upper-triangular indices i < j")
         object.__setattr__(self, "value", finite_float(self.value, field_name="value"))
 
 
@@ -904,19 +1014,22 @@ class QuboModelV1:
             not isinstance(term, QuboUpperTermV1) for term in self.upper_terms
         ):
             _fail("QUBO upper terms must be typed immutable values")
-        combined: dict[tuple[int, int], float] = {}
+        seen: set[tuple[int, int]] = set()
         for term in self.upper_terms:
             if term.j >= len(diagonal):
                 _fail("QUBO upper term references an unknown variable")
             key = (term.i, term.j)
-            combined[key] = combined.get(key, 0.0) + term.value
+            if key in seen:
+                _fail("QUBO upper-triangular coefficients must be unique")
+            seen.add(key)
         object.__setattr__(
             self,
             "upper_terms",
             tuple(
-                QuboUpperTermV1(i, j, value)
-                for (i, j), value in sorted(combined.items())
-                if value != 0.0
+                sorted(
+                    self.upper_terms,
+                    key=lambda term: (term.i, term.j),
+                )
             ),
         )
 

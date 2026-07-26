@@ -162,10 +162,12 @@ ST12A_ALLOWED_EXACT_PATHS = frozenset(
         "tests/stage1_prediction_markets/qku_computation_control_plane/source/test_fact_atomicity.py",
         "tests/stage1_prediction_markets/qku_computation_control_plane/source/test_source_precedence.py",
         "tests/tools/test_changed_area_validation_router.py",
+        "tests/tools/test_ci_branch_context.py",
         "tests/tools/test_validation_inventory.py",
         "tests/tools/test_validation_scope_registry.py",
         "tools/build_qku_computation_control_plane.py",
         "tools/changed_area_validation_router.py",
+        "tools/ci_branch_context.py",
         "tools/independent_validate_qku_computation_control_plane.py",
         "tools/independent_validate_qku_computation_control_plane_architecture.py",
         "tools/independent_validate_qku_computation_control_plane_operations.py",
@@ -176,6 +178,11 @@ ST12A_ALLOWED_EXACT_PATHS = frozenset(
         "tools/validate_qku_computation_control_plane.py",
         "tools/validation_inventory.py",
         "tools/validation_scope_registry.py",
+    }
+)
+ST12A_SHARED_CURRENTIZATION_EXACT_PATHS = frozenset(
+    {
+        "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
     }
 )
 
@@ -1770,6 +1777,42 @@ def explain_pr_scope_decision(branch: str, path: str) -> dict[str, object]:
             "pr_id": "ST12-TRANCHE-A",
             "matched_rule": f"exact:{normalized}",
             "reason": "registered_exact_path",
+        }
+    if (
+        branch_name == ST12A_BRANCH
+        and normalized in ST12A_SHARED_CURRENTIZATION_EXACT_PATHS
+    ):
+        return {
+            "allowed": True,
+            "branch": branch_name,
+            "normalized_path": normalized,
+            "pr_id": "ST12-TRANCHE-A",
+            "matched_rule": f"shared_currentization_exact:{normalized}",
+            "reason": "registered_shared_currentization_exact_path",
+        }
+    if (
+        is_validation_context_branch(branch_name)
+        and normalized in ST12A_ALLOWED_EXACT_PATHS
+    ):
+        return {
+            "allowed": True,
+            "branch": branch_name,
+            "normalized_path": normalized,
+            "pr_id": "ST12-TRANCHE-A",
+            "matched_rule": f"validation_context_exact:{normalized}",
+            "reason": "registered_validation_context_exact_path",
+        }
+    if (
+        is_validation_context_branch(branch_name)
+        and normalized in ST12A_SHARED_CURRENTIZATION_EXACT_PATHS
+    ):
+        return {
+            "allowed": True,
+            "branch": branch_name,
+            "normalized_path": normalized,
+            "pr_id": "ST12-TRANCHE-A",
+            "matched_rule": f"validation_context_shared_currentization_exact:{normalized}",
+            "reason": "registered_validation_context_shared_currentization_exact_path",
         }
     forbidden_reason = _forbidden_reason(normalized)
     if forbidden_reason:

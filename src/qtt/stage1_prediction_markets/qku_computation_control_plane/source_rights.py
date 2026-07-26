@@ -3,8 +3,14 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from collections.abc import Mapping, Sequence
 
-from .errors import ReasonCode, SourcePolicyError
+from .errors import (
+    ReasonCode,
+    SerializationSafetyError,
+    SourcePolicyError,
+)
+from .serialization import SECRET_KEY_POLICY
 
 
 @dataclass(frozen=True, slots=True)
@@ -55,26 +61,47 @@ class SourceRightsV1:
             )
 
 
-def reject_secret_material(field_name: str, value: object) -> None:
+def reject_secret_material(
+    field_name: str,
+    value: object,
+    *,
+    _depth: int = 0,
+) -> None:
     if not isinstance(field_name, str) or not field_name:
         raise SourcePolicyError(
             ReasonCode.INVALID_CONTRACT,
             "secret-material field name must be nonempty text",
         )
-    lowered = field_name.casefold()
-    forbidden = (
-        "api_key",
-        "authorization",
-        "cookie",
-        "credential",
-        "password",
-        "private_key",
-        "secret",
-        "token",
-        "wallet",
-    )
-    if any(token in lowered for token in forbidden) or value is not None:
+    if _depth > 64:
+        raise SourcePolicyError(
+            ReasonCode.INVALID_CONTRACT,
+            "source metadata nesting exceeds the accepted limit",
+        )
+    try:
+        SECRET_KEY_POLICY.reject(field_name)
+    except SerializationSafetyError as exc:
         raise SourcePolicyError(
             ReasonCode.SECRET_MATERIAL_REJECTED,
             "secret or credential material is not accepted by Tranche A",
-        )
+        ) from exc
+    if isinstance(value, Mapping):
+        for nested_name, nested_value in value.items():
+            if not isinstance(nested_name, str):
+                raise SourcePolicyError(
+                    ReasonCode.INVALID_CONTRACT,
+                    "source metadata field names must be text",
+                )
+            reject_secret_material(
+                nested_name,
+                nested_value,
+                _depth=_depth + 1,
+            )
+    elif isinstance(value, Sequence) and not isinstance(
+        value, str | bytes | bytearray
+    ):
+        for nested_value in value:
+            reject_secret_material(
+                "source_metadata",
+                nested_value,
+                _depth=_depth + 1,
+            )

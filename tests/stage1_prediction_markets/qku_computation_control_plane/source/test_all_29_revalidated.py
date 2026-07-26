@@ -7,9 +7,11 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors impo
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.source_policy import (
     CERTIFIED_SOURCE_STATES,
+    ClaimBindingTerminalStateV1,
     FAK_FOK_RESPONSE_CONTRACT,
     POLYMARKET_ENDPOINT_LIMITS,
     POLYMARKET_SIGNER_BUCKETS,
+    PrimarySourceCompletenessV1,
     SOURCE_CURRENTIZATION_OVERLAYS,
     SourceRevalidationSchedulerAdapterV1,
 )
@@ -20,7 +22,9 @@ def test_all_29_certified_source_states_are_terminally_materialized() -> None:
     assert len({row.source_state_id for row in CERTIFIED_SOURCE_STATES}) == 29
     assert all(
         row.research_completeness_state
-        == "COMPLETE_TERMINAL_EXACT_CLAIM_BINDING"
+        is ClaimBindingTerminalStateV1.COMPLETE_TERMINAL_EXACT_CLAIM_BINDING
+        and row.primary_source_completeness_state
+        is PrimarySourceCompletenessV1.COMPLETE_PRIMARY_SOURCE
         for row in CERTIFIED_SOURCE_STATES
     )
     assert len(SOURCE_CURRENTIZATION_OVERLAYS) == 7

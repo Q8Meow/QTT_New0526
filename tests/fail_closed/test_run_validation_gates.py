@@ -310,6 +310,82 @@ def test_runner_pr169_readiness1_branch_scope_keeps_only_readiness1_deterministi
     )
 
 
+def test_owner_authorized_validation_branch_keeps_all_non_guarded_commands(
+    capsys,
+):
+    branch = "agent/st12a-contract-envelope"
+    commands = [
+        ["python", "tools/build_pr168_rp5c_immutable_qku_formula_library.py"],
+        ["python", "tools/build_qku_computation_control_plane.py"],
+        [
+            "python",
+            "tools/build_pr169_readiness1.py",
+            "--out-dir",
+            ".tmp/pr169_readiness1",
+        ],
+        [
+            "python",
+            "tools/build_pr169_svc1.py",
+            "--out-dir",
+            "docs/master_plan/generated",
+        ],
+        ["python", "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"],
+        ["python", "tools/run_pr168_vs1_trading_intelligence_slice.py"],
+    ]
+
+    kept = runner._filter_foreign_branch_guarded_builders_for_owner_validation(
+        commands,
+        branch=branch,
+    )
+    kept_names = [runner._command_script_name(command) for command in kept]
+
+    assert kept_names == [
+        "build_qku_computation_control_plane.py",
+        "build_pr169_readiness1.py",
+        "build_pr169_svc1.py",
+        "validate_pr168_rp5c_immutable_qku_formula_library.py",
+        "run_pr168_vs1_trading_intelligence_slice.py",
+    ]
+    assert all(
+        runner._command_script_name(command) in kept_names
+        for command in commands
+        if runner._command_script_name(command).startswith("validate_")
+    )
+    output = capsys.readouterr().out
+    assert "QTT_OWNER_AUTHORIZED_VALIDATION_UPSTREAM_BUILDERS_READ_ONLY" in output
+    assert "build_pr168_rp5c_immutable_qku_formula_library.py" in output
+
+    assert runner._filter_foreign_branch_guarded_builders_for_owner_validation(
+        commands,
+        branch=f"{branch}-copy",
+    ) == commands
+
+
+def test_owner_authorized_validation_phase_omits_no_validator(tmp_path):
+    validation_root = tmp_path / "validation"
+    commands = runner.build_phase_commands(
+        "deterministic-validators-c",
+        validation_root,
+        tmp_path / "pytest",
+    )
+    kept = runner._filter_foreign_branch_guarded_builders_for_owner_validation(
+        commands,
+        branch="agent/st12a-contract-envelope",
+    )
+    original_validator_names = {
+        runner._command_script_name(command)
+        for command in commands
+        if runner._command_script_name(command).startswith("validate_")
+    }
+    kept_names = {runner._command_script_name(command) for command in kept}
+
+    assert original_validator_names <= kept_names
+    assert "build_pr168_rp5c_immutable_qku_formula_library.py" not in kept_names
+    assert "validate_pr168_rp5c_immutable_qku_formula_library.py" in kept_names
+    assert "build_pr169_readiness1.py" in kept_names
+    assert "validate_pr169_readiness1.py" in kept_names
+
+
 def test_run_validation_gates_direct_script_imports_router_without_pythonpath():
     completed = subprocess.run(
         [
@@ -5132,6 +5208,146 @@ def test_runner_ignores_volatile_branch_context_when_comparing_temp_report(
     assert exit_code == 0
 
 
+@pytest.mark.parametrize(
+    ("command_returncode", "expected_returncode"),
+    ((0, 0), (7, 7)),
+)
+def test_runner_restores_new_generated_untracked_outputs_at_terminal_boundaries(
+    monkeypatch,
+    command_returncode,
+    expected_returncode,
+):
+    class Completed:
+        def __init__(self, returncode: int):
+            self.returncode = returncode
+            self.stdout = ""
+            self.stderr = ""
+
+    with tempfile.TemporaryDirectory(prefix="qtt_gate_containment_") as temp_dir:
+        repo_root = Path(temp_dir)
+        preexisting_generated_rel = (
+            "docs/master_plan/generated/Preexisting.report.json"
+        )
+        preexisting_other_rel = "local-notes.txt"
+        new_generated_rel = (
+            "docs/master_plan/generated/pr168_gfp_shards/"
+            "GeneratedDuringGate.report.shard_0001.json"
+        )
+        paths = {
+            relative: repo_root / relative
+            for relative in (
+                preexisting_generated_rel,
+                preexisting_other_rel,
+                new_generated_rel,
+            )
+        }
+        for relative in (preexisting_generated_rel, preexisting_other_rel):
+            paths[relative].parent.mkdir(parents=True, exist_ok=True)
+            paths[relative].write_text("preserve\n", encoding="utf-8")
+
+        def current_untracked(_repo_root):
+            return {
+                relative for relative, path in paths.items() if path.is_file()
+            }
+
+        def fake_run(command, **kwargs):
+            paths[new_generated_rel].parent.mkdir(parents=True, exist_ok=True)
+            paths[new_generated_rel].write_text("generated\n", encoding="utf-8")
+            return Completed(command_returncode)
+
+        monkeypatch.setattr(runner, "_tracked_modified_paths", lambda repo_root: set())
+        monkeypatch.setattr(runner, "_untracked_paths", current_untracked)
+        monkeypatch.setattr(runner.subprocess, "run", fake_run)
+
+        exit_code = runner.run_commands(
+            [["python", "tools/example_gate.py"]],
+            repo_root=repo_root,
+        )
+
+        assert exit_code == expected_returncode
+        assert paths[preexisting_generated_rel].read_text(encoding="utf-8") == (
+            "preserve\n"
+        )
+        assert paths[preexisting_other_rel].read_text(encoding="utf-8") == (
+            "preserve\n"
+        )
+        assert not paths[new_generated_rel].exists()
+
+
+def test_runner_fails_closed_without_removing_new_untracked_output_outside_prefix(
+    monkeypatch,
+    capsys,
+):
+    class Completed:
+        returncode = 0
+        stdout = ""
+        stderr = ""
+
+    with tempfile.TemporaryDirectory(prefix="qtt_gate_containment_") as temp_dir:
+        repo_root = Path(temp_dir)
+        preexisting_rel = "preexisting.txt"
+        unexpected_rel = "unexpected.txt"
+        paths = {
+            relative: repo_root / relative
+            for relative in (preexisting_rel, unexpected_rel)
+        }
+        paths[preexisting_rel].write_text("preserve\n", encoding="utf-8")
+
+        def current_untracked(_repo_root):
+            return {
+                relative for relative, path in paths.items() if path.is_file()
+            }
+
+        def fake_run(command, **kwargs):
+            paths[unexpected_rel].write_text("diagnostic\n", encoding="utf-8")
+            return Completed()
+
+        monkeypatch.setattr(runner, "_tracked_modified_paths", lambda repo_root: set())
+        monkeypatch.setattr(runner, "_untracked_paths", current_untracked)
+        monkeypatch.setattr(runner.subprocess, "run", fake_run)
+
+        exit_code = runner.run_commands(
+            [["python", "tools/example_gate.py"]],
+            repo_root=repo_root,
+        )
+
+        assert exit_code == 1
+        assert paths[preexisting_rel].read_text(encoding="utf-8") == "preserve\n"
+        assert paths[unexpected_rel].read_text(encoding="utf-8") == "diagnostic\n"
+        assert (
+            "VALIDATION_GATE_UNTRACKED_OUTPUT_OUTSIDE_GENERATED_PREFIX: "
+            "unexpected.txt"
+        ) in capsys.readouterr().err
+
+
+@pytest.mark.parametrize(
+    "path_text",
+    (
+        "docs/master_plan/generated/../outside.json",
+        r"docs\master_plan\generated\CON.json",
+        r"C:\repo\docs\master_plan\generated\output.json",
+        r"\\server\share\docs\master_plan\generated\output.json",
+    ),
+)
+def test_generated_gate_output_path_rejects_nonportable_or_escaping_paths(
+    tmp_path,
+    path_text,
+):
+    with pytest.raises(
+        RuntimeError,
+        match="VALIDATION_GATE_UNSAFE_GENERATED_OUTPUT_PATH",
+    ):
+        runner._generated_gate_output_path(tmp_path, path_text)
+
+    valid_path = runner._generated_gate_output_path(
+        tmp_path,
+        r"docs\master_plan\generated\Valid.report.json",
+    )
+    assert valid_path == (
+        tmp_path / "docs" / "master_plan" / "generated" / "Valid.report.json"
+    ).resolve()
+
+
 def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_pytest(
     monkeypatch,
     capsys,
@@ -5164,6 +5380,7 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
             "\n".join([*intended_repair_paths, *generated_side_effect_paths]) + "\n",
             "\n".join(intended_repair_paths) + "\n",
             "\n".join([*intended_repair_paths, *generated_side_effect_paths]) + "\n",
+            "\n".join(intended_repair_paths) + "\n",
         ]
     )
     events: list[tuple[str, list[str]]] = []
@@ -5192,6 +5409,7 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
         return Completed()
 
     monkeypatch.setattr(runner.subprocess, "run", fake_run)
+    monkeypatch.setattr(runner, "_untracked_paths", lambda repo_root: set())
     monkeypatch.setattr(
         runner,
         "_routed_generated_output_currentness_failures",
@@ -5213,7 +5431,7 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
     )
     assert exit_code == 0
     assert events[0] == ls_files_event
-    assert events.count(ls_files_event) == 7
+    assert events.count(ls_files_event) == 8
     assert restore_event in events
     assert events.count(restore_event) == 4
     assert "tools/run_validation_gates.py" not in restore_event[1]
@@ -5235,10 +5453,11 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
     assert events[restore_indices[0] + 1] == ("gate", pr142_command)
     assert events[restore_indices[1] + 1] == ("gate", pr143_command)
     assert events[restore_indices[2] - 2] == ("gate", commands[-2])
-    assert events[-3:] == [
+    assert events[-4:] == [
         ("gate", commands[-1]),
         ls_files_event,
         restore_event,
+        ls_files_event,
     ]
     assert capsys.readouterr().out.splitlines()[-1] == runner.SUCCESS_MARKER
 
@@ -5260,7 +5479,7 @@ def test_runner_preserves_initially_modified_files_after_final_pytest(
         report_path = repo_root / report_rel
         report_path.parent.mkdir(parents=True)
         report_path.write_text("updated\n", encoding="utf-8")
-        modified_sets = iter([{report_rel}, {report_rel}, set()])
+        modified_sets = iter([{report_rel}, {report_rel}, set(), {report_rel}])
 
         def fake_run(command: list[str], **kwargs) -> Completed:
             report_path.write_text("head\n", encoding="utf-8")
@@ -5269,6 +5488,7 @@ def test_runner_preserves_initially_modified_files_after_final_pytest(
         monkeypatch.setattr(
             runner, "_tracked_modified_paths", lambda repo_root: next(modified_sets)
         )
+        monkeypatch.setattr(runner, "_untracked_paths", lambda repo_root: set())
         monkeypatch.setattr(runner.subprocess, "run", fake_run)
         monkeypatch.setattr(
             runner,
