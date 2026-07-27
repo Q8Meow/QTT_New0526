@@ -193,7 +193,33 @@ def _log_phase(phase: str, *, files_processed: int = 0, matched_files: int = 0, 
     )
 
 
-def _collect_preflight(existing_path: Path) -> dict[str, Any]:
+def _load_committed_preflight_owner(existing_path: Path) -> dict[str, Any]:
+    try:
+        payload = read_json(existing_path)
+    except Exception as exc:
+        raise RuntimeError("RP5A_PREFLIGHT_COMMITTED_LOAD_FAILED") from exc
+    if not isinstance(payload, Mapping):
+        raise RuntimeError("RP5A_PREFLIGHT_COMMITTED_PAYLOAD_INVALID")
+    records = payload.get("records")
+    if not isinstance(records, Mapping):
+        raise RuntimeError("RP5A_PREFLIGHT_COMMITTED_RECORDS_INVALID")
+    committed_records = dict(records)
+    closure_field = "pr240_closed_not_merged_preflight_passed"
+    if (
+        committed_records.get(closure_field) is not True
+        or (
+            closure_field in payload
+            and payload.get(closure_field) is not True
+        )
+    ):
+        raise RuntimeError("RP5A_PREFLIGHT_COMMITTED_PR240_CLOSURE_INVALID")
+    return committed_records
+
+
+def _collect_preflight(existing_path: Path, *, offline: bool) -> dict[str, Any]:
+    if offline:
+        return _load_committed_preflight_owner(existing_path)
+
     current_branch = _run_text(["git", "branch", "--show-current"])
     origin_main_head = _run_text(["git", "rev-parse", "origin/main"])
     status_short = _run_text(["git", "status", "--short", "--untracked-files=all"])
@@ -201,8 +227,7 @@ def _collect_preflight(existing_path: Path) -> dict[str, Any]:
     open_prs = _run_json(["gh", "pr", "list", "--state", "open", "--limit", "50", "--json", "number,title,headRefName"])
     latest_main = _run_json(["gh", "run", "list", "--branch", "main", "--limit", "1", "--json", "status,conclusion,databaseId,headSha,displayTitle"])
     if pr240 is None and existing_path.is_file():
-        existing = read_json(existing_path)
-        return dict(existing.get("records") or existing)
+        return _load_committed_preflight_owner(existing_path)
     open_prs_filtered = []
     if isinstance(open_prs, list):
         open_prs_filtered = [row for row in open_prs if isinstance(row, dict) and row.get("headRefName") != BRANCH_NAME]
@@ -1236,7 +1261,10 @@ def build_all(*, offline: bool = True, quick_selftest: bool = False) -> dict[str
     _log_phase("start", started_at=timer.started_at)
     phase = timer.start_phase()
     existing_preflight = report_path("PR168_RP5A_Preflight.report.json")
-    preflight = _collect_preflight(existing_preflight)
+    preflight = _collect_preflight(
+        existing_preflight,
+        offline=offline,
+    )
     crosswalk_status = pr165_d2_crosswalk_status(REPO_ROOT)
     timer.mark("preflight_and_crosswalk", phase)
     _write_checkpoint("preflight_and_crosswalk", pr240_ok=preflight.get("pr240_closed_not_merged_preflight_passed"))
@@ -1515,7 +1543,7 @@ def build_all(*, offline: bool = True, quick_selftest: bool = False) -> dict[str
 
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--offline", action="store_true", help="Do not use public web or online docs; GitHub PR metadata may fall back to committed rows if unavailable.")
+    parser.add_argument("--offline", action="store_true", help="Use committed RP5A preflight and PR-metadata owners; do not invoke GitHub CLI metadata paths.")
     parser.add_argument("--quick-selftest", action="store_true", help="Run a small bounded scan to prove report generation without exhaustive coverage.")
     parser.add_argument(
         "--validation-scope-evidence-only",

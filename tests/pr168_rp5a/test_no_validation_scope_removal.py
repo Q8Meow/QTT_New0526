@@ -39,6 +39,196 @@ def test_no_validation_scope_removal(monkeypatch) -> None:
         } == persisted_evidence
 
     repo_root = Path(__file__).resolve().parents[2]
+    committed_preflight_path = report_path("PR168_RP5A_Preflight.report.json")
+    original_preflight_read_json = builder.read_json
+    committed_preflight_report = builder.read_json(committed_preflight_path)
+    forbidden_preflight_calls = []
+
+    def forbidden_preflight_call(name):
+        def fail(*args, **kwargs):
+            forbidden_preflight_calls.append((name, args, kwargs))
+            raise AssertionError(f"offline preflight called {name}")
+
+        return fail
+
+    with monkeypatch.context() as offline_preflight_patch:
+        for owner, name in (
+            (builder, "_run_text"),
+            (builder, "_run_json"),
+            (builder.subprocess, "run"),
+        ):
+            offline_preflight_patch.setattr(
+                owner, name, forbidden_preflight_call(name)
+            )
+        offline_preflight = builder._collect_preflight(
+            committed_preflight_path, offline=True
+        )
+    assert offline_preflight == dict(committed_preflight_report["records"])
+    assert (
+        offline_preflight["pr240_closed_not_merged_preflight_passed"] is True
+    )
+    assert forbidden_preflight_calls == []
+
+    preflight_mutation_cases = (
+        ([], "RP5A_PREFLIGHT_COMMITTED_PAYLOAD_INVALID"),
+        ({"records": []}, "RP5A_PREFLIGHT_COMMITTED_RECORDS_INVALID"),
+        (
+            {
+                "pr240_closed_not_merged_preflight_passed": True,
+                "records": {"pr240_closed_not_merged_preflight_passed": False},
+            },
+            "RP5A_PREFLIGHT_COMMITTED_PR240_CLOSURE_INVALID",
+        ),
+        (
+            {
+                "pr240_closed_not_merged_preflight_passed": False,
+                "records": {"pr240_closed_not_merged_preflight_passed": True},
+            },
+            "RP5A_PREFLIGHT_COMMITTED_PR240_CLOSURE_INVALID",
+        ),
+    )
+    with monkeypatch.context() as preflight_mutation_patch:
+        for payload, expected_error in preflight_mutation_cases:
+            preflight_mutation_patch.setattr(
+                builder,
+                "read_json",
+                lambda path, value=payload: (
+                    copy.deepcopy(value)
+                    if path == committed_preflight_path
+                    else original_preflight_read_json(path)
+                ),
+            )
+            try:
+                builder._load_committed_preflight_owner(
+                    committed_preflight_path
+                )
+            except RuntimeError as exc:
+                assert str(exc) == expected_error
+            else:
+                raise AssertionError(
+                    f"committed preflight mutation accepted:{expected_error}"
+                )
+
+    online_text_calls = []
+    online_json_calls = []
+    committed_preflight_loader_calls = []
+    synthetic_origin_main = "synthetic-origin-main"
+    live_pr240 = {
+        "number": 240,
+        "state": "CLOSED",
+        "mergedAt": None,
+        "headRefName": builder.PR240_HEAD_REF,
+    }
+    live_main_run = {
+        "status": "completed",
+        "conclusion": "success",
+        "headSha": synthetic_origin_main,
+    }
+    online_text_results = {
+        ("git", "branch", "--show-current"): ST12A_BRANCH,
+        ("git", "rev-parse", "origin/main"): synthetic_origin_main,
+        (
+            "git",
+            "status",
+            "--short",
+            "--untracked-files=all",
+        ): "",
+    }
+    online_json_results = {
+        (
+            "gh",
+            "pr",
+            "view",
+            "240",
+            "--json",
+            (
+                "number,state,mergedAt,headRefName,headRefOid,"
+                "baseRefName,mergeable"
+            ),
+        ): live_pr240,
+        (
+            "gh",
+            "pr",
+            "list",
+            "--state",
+            "open",
+            "--limit",
+            "50",
+            "--json",
+            "number,title,headRefName",
+        ): [],
+        (
+            "gh",
+            "run",
+            "list",
+            "--branch",
+            "main",
+            "--limit",
+            "1",
+            "--json",
+            "status,conclusion,databaseId,headSha,displayTitle",
+        ): [live_main_run],
+    }
+
+    def online_text(args):
+        online_text_calls.append(tuple(args))
+        return online_text_results[tuple(args)]
+
+    def online_json(args):
+        online_json_calls.append(tuple(args))
+        return copy.deepcopy(online_json_results[tuple(args)])
+
+    def reject_committed_preflight_loader(path):
+        committed_preflight_loader_calls.append(path)
+        return {}
+
+    with monkeypatch.context() as online_preflight_patch:
+        online_preflight_patch.setattr(builder, "_run_text", online_text)
+        online_preflight_patch.setattr(builder, "_run_json", online_json)
+        online_preflight_patch.setattr(
+            builder,
+            "_load_committed_preflight_owner",
+            reject_committed_preflight_loader,
+        )
+        online_preflight = builder._collect_preflight(
+            committed_preflight_path, offline=False
+        )
+    assert online_text_calls == list(online_text_results)
+    assert online_json_calls == list(online_json_results)
+    assert committed_preflight_loader_calls == []
+    assert online_preflight["current_branch"] == ST12A_BRANCH
+    assert online_preflight["origin_main_head"] == synthetic_origin_main
+    assert (
+        online_preflight["git_status_short_after_rp5a_edits"]
+        == "<clean>"
+    )
+    assert online_preflight["latest_main_run_state"] == live_main_run
+    assert online_preflight["open_prs_excluding_rp5a_branch"] == []
+    assert (
+        online_preflight["pr240_closed_not_merged_preflight_passed"] is True
+    )
+
+    class _PreflightDispatchSentinel(Exception):
+        pass
+
+    preflight_dispatches = []
+
+    def preflight_dispatch_spy(path, *, offline):
+        preflight_dispatches.append((path, offline))
+        raise _PreflightDispatchSentinel
+
+    with monkeypatch.context() as build_dispatch_patch:
+        build_dispatch_patch.setattr(builder, "_collect_preflight", preflight_dispatch_spy)
+        try:
+            builder.build_all(offline=True)
+        except _PreflightDispatchSentinel:
+            pass
+        else:
+            raise AssertionError(
+                "build_all did not dispatch through preflight"
+            )
+    assert preflight_dispatches == [(committed_preflight_path, True)]
+
     live_evidence = _validation_scope_delta()
     branch = current_branch_context(repo_root).branch
     assert validator._validation_scope_failures(
