@@ -47,6 +47,47 @@ def test_inventory_has_pr208_validation_infrastructure_entries():
         assert entry.cross_platform_sensitive is True
 
 
+def test_inventory_has_centralized_qku_validation_entries():
+    entries = inventory.inventory_by_id()
+    expected = {
+        "validate_qku_computation_control_plane_architecture",
+        "validate_qku_computation_control_plane_operations",
+        "validate_qku_computation_control_plane_quantum",
+        "validate_qku_computation_control_plane_security",
+        "validate_qku_computation_control_plane_source",
+        "independent_validate_qku_computation_control_plane",
+    }
+    assert expected <= set(entries)
+    for validator_id in expected:
+        entry = entries[validator_id]
+        assert entry.owner_pr_or_feature == "ST12-TRANCHE-A"
+        assert entry.owner_domain == "QKU computation control plane"
+        assert inventory.ST12A_ALLOWED_EXACT_PATHS <= set(
+            entry.required_when_files_match
+        )
+        assert not any(
+            "*" in path for path in entry.required_when_files_match
+        )
+
+
+def test_qku_paths_route_to_primary_and_independent_validation():
+    matching_ids = {
+        entry.validator_id
+        for entry in inventory.entries_matching_path(
+            "src/qtt/stage1_prediction_markets/"
+            "qku_computation_control_plane/implementation_registry.py"
+        )
+    }
+    assert {
+        "validate_qku_computation_control_plane_architecture",
+        "validate_qku_computation_control_plane_operations",
+        "validate_qku_computation_control_plane_quantum",
+        "validate_qku_computation_control_plane_security",
+        "validate_qku_computation_control_plane_source",
+        "independent_validate_qku_computation_control_plane",
+    } <= matching_ids
+
+
 def test_inventory_has_qtt_authority_reason_code_registry_entry():
     entry = inventory.inventory_by_id()["validate_qtt_authority_reason_code_registry"]
 

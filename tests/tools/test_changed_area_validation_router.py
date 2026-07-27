@@ -201,6 +201,46 @@ def test_validation_infrastructure_change_forces_full_validation():
     assert len(result.required_validators) > 100
 
 
+def test_qku_control_plane_change_routes_all_central_validators():
+    path = (
+        "src/qtt/stage1_prediction_markets/"
+        "qku_computation_control_plane/models.py"
+    )
+    result = _pull_request_result(path)
+
+    assert router.QKU_VALIDATOR_IDS <= set(result.required_validators)
+    assert path not in result.unknown_files
+    assert result.fail_closed_reasons == ()
+    assert "QKU computation control plane" in result.touched_domains
+    assert result.full_validation_required is True
+
+
+def test_qku_shared_integration_paths_use_the_exact_allowlist() -> None:
+    result = build_router_result(
+        RouterInput(
+            repo_root=REPO_ROOT,
+            changed_files=tuple(sorted(inventory.ST12A_ALLOWED_EXACT_PATHS)),
+            workflow_event_name="pull_request",
+            is_pull_request=True,
+            current_branch="feature/small-pr",
+        )
+    )
+    for path in inventory.ST12A_ALLOWED_EXACT_PATHS:
+        assert router.QKU_VALIDATOR_IDS <= set(result.classified_files[path])
+    assert result.fail_closed_reasons == ()
+
+    unallowlisted = (
+        "src/qtt/stage1_prediction_markets/"
+        "qku_computation_control_plane/runtime.py"
+    )
+    unallowlisted_result = _pull_request_result(unallowlisted)
+    assert unallowlisted_result.unknown_files == (unallowlisted,)
+    assert unallowlisted_result.full_validation_required is True
+    assert unallowlisted_result.full_validation_reason == (
+        "unknown changed files force full validation"
+    )
+
+
 def test_qtt_authority_registry_change_routes_to_owner_validator():
     result = _pull_request_result("tools/qtt_authority_reason_code_registry.py")
 
@@ -247,6 +287,25 @@ def test_pr152_decision_is_clean_after_currentization_counts_match():
 
     assert result.pr152_currentization_required is False
     assert "matches filesystem counts" in result.pr152_currentization_reason
+
+
+def test_pr152_inventory_counts_include_current_tracked_surfaces(tmp_path):
+    paths = (
+        tmp_path / "docs/master_plan/generated/Current.report.json",
+        tmp_path
+        / "tests/stage1_prediction_markets/qku_computation_control_plane"
+        / "architecture/test_current_surface.py",
+        tmp_path / "tools/validate_qku_computation_control_plane.py",
+    )
+    for path in paths:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("{}\n" if path.suffix == ".json" else "# tracked\n", encoding="utf-8")
+
+    assert router._current_pr152_inventory_counts(tmp_path) == {
+        "generated_report_count": 1,
+        "test_file_count": 1,
+        "validator_tool_count": 1,
+    }
 
 
 def test_pr152_decision_triggers_when_currentization_report_is_stale(monkeypatch):

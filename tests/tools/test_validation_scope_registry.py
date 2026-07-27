@@ -147,6 +147,179 @@ def test_pr169_qku_formula_exp1_rollback_scope_is_exactly_owned_universe() -> No
     )
 
 
+def test_st12a_scope_is_exactly_the_authorized_path_allowlist() -> None:
+    assert registry.ST12A_BRANCH == "agent/st12a-contract-envelope"
+    assert len(registry.ST12A_ALLOWED_EXACT_PATHS) == 79
+    assert {
+        "tests/tools/test_ci_branch_context.py",
+        "tools/ci_branch_context.py",
+    } <= registry.ST12A_ALLOWED_EXACT_PATHS
+    assert all(
+        registry.explain_pr_scope_decision(
+            registry.ST12A_BRANCH,
+            path,
+        )
+        == {
+            "allowed": True,
+            "branch": registry.ST12A_BRANCH,
+            "normalized_path": path,
+            "pr_id": "ST12-TRANCHE-A",
+            "matched_rule": f"exact:{path}",
+            "reason": "registered_exact_path",
+        }
+        for path in registry.ST12A_ALLOWED_EXACT_PATHS
+    )
+
+
+def test_st12a_shared_currentization_scope_is_separate_and_exact() -> None:
+    paths = frozenset(
+        {
+            (
+                "docs/master_plan/generated/"
+                "PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json"
+            ),
+            (
+                "docs/master_plan/generated/"
+                "PR168_RP5A_FinalSummary.report.json"
+            ),
+            (
+                "docs/master_plan/generated/"
+                "PR168_RP5A_NoDeletionProof.report.json"
+            ),
+            "tests/pr168_rp5a/test_no_validation_scope_removal.py",
+            "tools/build_pr168_rp5a_legacy_semantic_audit.py",
+            "tools/pr168_rp5a_validator.py",
+        }
+    )
+    assert registry.ST12A_SHARED_CURRENTIZATION_EXACT_PATHS == paths
+    for path in paths:
+        assert path not in registry.ST12A_ALLOWED_EXACT_PATHS
+        assert registry.explain_pr_scope_decision(
+            registry.ST12A_BRANCH,
+            path,
+        ) == {
+            "allowed": True,
+            "branch": registry.ST12A_BRANCH,
+            "normalized_path": path,
+            "pr_id": "ST12-TRANCHE-A",
+            "matched_rule": f"shared_currentization_exact:{path}",
+            "reason": "registered_shared_currentization_exact_path",
+        }
+        assert registry.explain_pr_scope_decision(
+            FIXTURE_BRANCH,
+            path,
+        ) == {
+            "allowed": True,
+            "branch": FIXTURE_BRANCH,
+            "normalized_path": path,
+            "pr_id": "ST12-TRANCHE-A",
+            "matched_rule": (
+                "validation_context_shared_currentization_exact:"
+                f"{path}"
+            ),
+            "reason": (
+                "registered_validation_context_shared_currentization_exact_path"
+            ),
+        }
+        windows_path = ".\\" + path.replace("/", "\\")
+        assert registry.is_pr_scoped_changed_path_allowed(
+            registry.ST12A_BRANCH,
+            windows_path,
+        )
+        assert registry.is_pr_scoped_changed_path_allowed(
+            FIXTURE_BRANCH,
+            windows_path,
+        )
+        assert not registry.is_pr_scoped_changed_path_allowed(
+            registry.ST12A_BRANCH,
+            f"{path}.copy",
+        )
+        assert not registry.is_pr_scoped_changed_path_allowed(
+            FIXTURE_BRANCH,
+            f"{path}.copy",
+        )
+
+
+@pytest.mark.parametrize("path", sorted(registry.ST12A_ALLOWED_EXACT_PATHS))
+def test_st12a_exact_scope_is_consumable_by_validation_context(path: str) -> None:
+    decision = registry.explain_pr_scope_decision(FIXTURE_BRANCH, path)
+    assert decision == {
+        "allowed": True,
+        "branch": FIXTURE_BRANCH,
+        "normalized_path": path,
+        "pr_id": "ST12-TRANCHE-A",
+        "matched_rule": f"validation_context_exact:{path}",
+        "reason": "registered_validation_context_exact_path",
+    }
+    windows_path = ".\\" + path.replace("/", "\\")
+    assert registry.is_pr_scoped_changed_path_allowed(FIXTURE_BRANCH, windows_path)
+
+
+@pytest.mark.parametrize(
+    ("branch", "path"),
+    [
+        (
+            "pr-ci-fastfail-validation-context-preflight-copy",
+            "tools/ci_branch_context.py",
+        ),
+        (
+            FIXTURE_BRANCH,
+            "src/qtt/stage1_prediction_markets/qku_computation_control_plane/runtime.py",
+        ),
+        (
+            FIXTURE_BRANCH,
+            "docs/master_plan/QTT_MasterPlan_Current.md",
+        ),
+        (
+            registry.ST12A_BRANCH,
+            "docs/master_plan/generated/"
+            "PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json.copy",
+        ),
+    ],
+)
+def test_st12a_validation_context_scope_remains_exact(
+    branch: str,
+    path: str,
+) -> None:
+    assert not registry.is_pr_scoped_changed_path_allowed(branch, path)
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/runtime.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/math/math_01.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/test_extra.py",
+        "tools/validate_qku_computation_control_plane_extra.py",
+        "docs/master_plan/QTT_MasterPlan_Current.md",
+        ".tmp/qku-output.json",
+    ],
+)
+def test_st12a_scope_rejects_prefix_wildcards_and_unowned_paths(path: str) -> None:
+    assert not registry.is_pr_scoped_changed_path_allowed(
+        registry.ST12A_BRANCH,
+        path,
+    )
+
+
+def test_st12a_scope_requires_exact_branch_and_normalizes_windows_paths() -> None:
+    path = (
+        "tests/stage1_prediction_markets/qku_computation_control_plane/"
+        "security/test_secret_isolation.py"
+    )
+    windows_path = ".\\" + path.replace("/", "\\")
+    assert registry.is_pr_scoped_changed_path_allowed(
+        registry.ST12A_BRANCH,
+        windows_path,
+    )
+    for branch in (
+        "agent/st12a-contract-envelope-2",
+        "ST12-TRANCHE-A",
+        "feature/st12a",
+    ):
+        assert not registry.is_pr_scoped_changed_path_allowed(branch, path)
+
+
 @pytest.mark.parametrize("path", PR169_QKU_FORMULA_EXP1_ROLLBACK_ALLOWED_PATHS)
 def test_pr169_qku_formula_exp1_rollback_owned_paths_are_allowed(path: str) -> None:
     decision = registry.explain_pr_scope_decision(

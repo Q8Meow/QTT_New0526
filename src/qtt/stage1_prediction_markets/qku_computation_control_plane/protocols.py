@@ -1,0 +1,350 @@
+"""Data-only Protocol surfaces for later authorized runtime owners."""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Protocol, runtime_checkable
+
+from .errors import OwnerAdapterError, ReasonCode
+from .models import (
+    ConfigurationEnvelopeV1,
+    FallbackEnvelopeV1,
+    HealthEnvelopeV1,
+    OperationContractV1,
+    SupervisionEnvelopeV1,
+)
+
+
+@runtime_checkable
+class ServiceBoundaryProtocolV1(Protocol):
+    """Describes a service contract; it does not start or operate a service."""
+
+    def describe_operation(self, operation_id: str) -> OperationContractV1: ...
+
+
+@runtime_checkable
+class ConfigurationBoundaryProtocolV1(Protocol):
+    def describe_configuration(self) -> ConfigurationEnvelopeV1: ...
+
+
+@runtime_checkable
+class HealthBoundaryProtocolV1(Protocol):
+    def describe_health(self) -> HealthEnvelopeV1: ...
+
+
+@runtime_checkable
+class SupervisionBoundaryProtocolV1(Protocol):
+    def describe_supervision(self) -> SupervisionEnvelopeV1: ...
+
+
+@runtime_checkable
+class FallbackBoundaryProtocolV1(Protocol):
+    def describe_fallback(self, reason_code: str) -> FallbackEnvelopeV1: ...
+
+
+@runtime_checkable
+class ReadinessProjectionProtocolV1(Protocol):
+    def describe_readiness_route(self, qku_id: str) -> OperationContractV1: ...
+
+
+@runtime_checkable
+class PretradeProjectionProtocolV1(Protocol):
+    def describe_pretrade_route(self, qku_id: str) -> OperationContractV1: ...
+
+
+@runtime_checkable
+class OwnerReadModelProjectionProtocolV1(Protocol):
+    def describe_read_model_route(self, qku_id: str) -> OperationContractV1: ...
+
+
+@runtime_checkable
+class AgentDagProjectionProtocolV1(Protocol):
+    def describe_agent_dag_route(self, qku_id: str) -> OperationContractV1: ...
+
+
+@dataclass(frozen=True, slots=True)
+class OwnerProjectionViewV1:
+    owner_id: str
+    authority_domain: str
+    source_path: str
+    source_version: str
+    consume_interfaces: tuple[str, ...]
+    row_count: int
+    identity_refs: tuple[str, ...]
+    projection_mutation_allowed: bool = False
+    runtime_effect_allowed: bool = False
+
+    def __post_init__(self) -> None:
+        for name in (
+            "owner_id",
+            "authority_domain",
+            "source_path",
+            "source_version",
+        ):
+            value = getattr(self, name)
+            if not isinstance(value, str) or not value:
+                raise OwnerAdapterError(
+                    ReasonCode.OWNER_DATA_MALFORMED,
+                    f"{name} is required for an owner projection view",
+                )
+        for name in ("consume_interfaces", "identity_refs"):
+            values = getattr(self, name)
+            if (
+                not isinstance(values, tuple)
+                or not values
+                or any(not isinstance(value, str) or not value for value in values)
+                or len(set(values)) != len(values)
+            ):
+                raise OwnerAdapterError(
+                    ReasonCode.OWNER_DATA_MALFORMED,
+                    f"{name} must contain unique nonempty owner lineage strings",
+                )
+        if (
+            isinstance(self.row_count, bool)
+            or not isinstance(self.row_count, int)
+            or self.row_count <= 0
+        ):
+            raise OwnerAdapterError(
+                ReasonCode.OWNER_DATA_MALFORMED,
+                "owner projection row_count must be positive",
+            )
+        if (
+            type(self.projection_mutation_allowed) is not bool
+            or type(self.runtime_effect_allowed) is not bool
+        ):
+            raise OwnerAdapterError(
+                ReasonCode.OWNER_DATA_MALFORMED,
+                "owner projection authority flags must be booleans",
+            )
+        if self.projection_mutation_allowed or self.runtime_effect_allowed:
+            raise OwnerAdapterError(
+                ReasonCode.CAPABILITY_DENIED,
+                "Tranche A owner views cannot mutate projections or exercise effects",
+            )
+        from .serialization import validate_relative_path
+
+        validate_relative_path(self.source_path)
+
+
+def _validated_rows(
+    rows: object,
+    *,
+    owner_id: str,
+) -> tuple[dict[str, object], ...]:
+    if not isinstance(rows, tuple) or not rows:
+        raise OwnerAdapterError(
+            ReasonCode.OWNER_DATA_MISSING,
+            f"{owner_id} returned no typed projection rows",
+        )
+    if any(not isinstance(row, dict) for row in rows):
+        raise OwnerAdapterError(
+            ReasonCode.OWNER_DATA_MALFORMED,
+            f"{owner_id} returned a non-object projection row",
+        )
+    typed_rows = rows
+    forbidden = sorted(
+        {
+            key
+            for row in typed_rows
+            for key, value in row.items()
+            if isinstance(key, str) and key.endswith("_created") and value is True
+        }
+    )
+    if forbidden:
+        raise OwnerAdapterError(
+            ReasonCode.OWNER_DATA_CONTRADICTORY,
+            f"{owner_id} reports exercised effects: {forbidden}",
+        )
+    return typed_rows
+
+
+def _single_projection_version(
+    rows: tuple[dict[str, object], ...],
+    *,
+    owner_id: str,
+) -> str:
+    versions = {
+        value
+        for row in rows
+        for key in ("projection_version", "version")
+        if isinstance((value := row.get(key)), str) and value
+    }
+    if len(versions) != 1:
+        raise OwnerAdapterError(
+            ReasonCode.OWNER_DATA_CONTRADICTORY,
+            f"{owner_id} must expose exactly one projection version",
+        )
+    return versions.pop()
+
+
+class ExistingOwnerProjectionAdapterV1:
+    """Explicit read-only consumption of the four current projection owners."""
+
+    def __init__(self, repo_root: str | Path) -> None:
+        self._repo_root = Path(repo_root).resolve()
+
+    def load_readiness(self) -> OwnerProjectionViewV1:
+        from src.qtt.readiness.pr169_readiness1_resolvers import (
+            load_agent_universe,
+            load_formula_resolver,
+            load_qku_resolver,
+            load_registry,
+        )
+
+        try:
+            registry = _validated_rows(
+                load_registry(repo_root=self._repo_root).rows,
+                owner_id="READINESS1",
+            )
+            agents = _validated_rows(
+                load_agent_universe(repo_root=self._repo_root).rows,
+                owner_id="READINESS1",
+            )
+            qku_rows = _validated_rows(
+                load_qku_resolver(repo_root=self._repo_root).rows,
+                owner_id="READINESS1",
+            )
+            formula_rows = _validated_rows(
+                load_formula_resolver(repo_root=self._repo_root).rows,
+                owner_id="READINESS1",
+            )
+        except (OSError, KeyError, TypeError, ValueError) as exc:
+            if isinstance(exc, OwnerAdapterError):
+                raise
+            raise OwnerAdapterError(
+                ReasonCode.OWNER_DATA_MISSING,
+                "READINESS1 projection interfaces could not be consumed",
+            ) from exc
+        if registry != qku_rows or registry != formula_rows:
+            raise OwnerAdapterError(
+                ReasonCode.OWNER_DATA_CONTRADICTORY,
+                "READINESS1 identity resolvers do not share canonical rows",
+            )
+        version = _single_projection_version(
+            registry + agents, owner_id="READINESS1"
+        )
+        return OwnerProjectionViewV1(
+            owner_id="READINESS1",
+            authority_domain="READINESS_PROJECTION",
+            source_path="src/qtt/readiness/pr169_readiness1_resolvers.py",
+            source_version=version,
+            consume_interfaces=(
+                "load_registry",
+                "load_agent_universe",
+                "load_qku_resolver",
+                "load_formula_resolver",
+            ),
+            row_count=len(registry) + len(agents),
+            identity_refs=(
+                "CandidateReadinessResolverV1",
+                "Stage1AgentComputationUniverseV1",
+                "QKUAccessResolverV1",
+                "FormulaAccessResolverV1",
+            ),
+        )
+
+    def load_pretrade(self) -> OwnerProjectionViewV1:
+        from src.qtt.pretrade.pr169_pretrade1_resolvers import load_registry
+
+        try:
+            rows = _validated_rows(
+                load_registry(repo_root=self._repo_root).rows,
+                owner_id="PRETRADE1",
+            )
+        except (OSError, KeyError, TypeError, ValueError) as exc:
+            if isinstance(exc, OwnerAdapterError):
+                raise
+            raise OwnerAdapterError(
+                ReasonCode.OWNER_DATA_MISSING,
+                "PRETRADE1 registry could not be consumed",
+            ) from exc
+        return OwnerProjectionViewV1(
+            owner_id="PRETRADE1",
+            authority_domain="PRETRADE_REALITY_AND_DECISION_PROJECTION",
+            source_path="src/qtt/pretrade/pr169_pretrade1_resolvers.py",
+            source_version=_single_projection_version(
+                rows, owner_id="PRETRADE1"
+            ),
+            consume_interfaces=("load_registry",),
+            row_count=len(rows),
+            identity_refs=("PreTradeRegistryView",),
+        )
+
+    def load_svc(self) -> OwnerProjectionViewV1:
+        from src.qtt.service.pr169_svc1_resolvers import DashboardReadModelService
+
+        base_dir = self._repo_root / "docs/master_plan/generated/pr169_svc1"
+        try:
+            service = DashboardReadModelService(base_dir)
+            manifest = service.load_service_manifest()
+            rows = _validated_rows(
+                service.list_read_model_snapshots(), owner_id="SVC1"
+            )
+        except (OSError, KeyError, TypeError, ValueError) as exc:
+            if isinstance(exc, OwnerAdapterError):
+                raise
+            raise OwnerAdapterError(
+                ReasonCode.OWNER_DATA_MISSING,
+                "SVC1 read-model service could not be consumed",
+            ) from exc
+        if not isinstance(manifest, dict):
+            raise OwnerAdapterError(
+                ReasonCode.OWNER_DATA_MALFORMED,
+                "SVC1 manifest must be an object",
+            )
+        version = manifest.get("projection_version")
+        if (
+            manifest.get("acceptance_state") != "PASS"
+            or not isinstance(version, str)
+            or not version
+            or manifest.get("manual_edit_allowed") is not False
+        ):
+            raise OwnerAdapterError(
+                ReasonCode.OWNER_DATA_STALE,
+                "SVC1 manifest lineage or acceptance state is invalid",
+            )
+        return OwnerProjectionViewV1(
+            owner_id="SVC1",
+            authority_domain="OWNER_READ_MODEL_AND_ACTION_PROJECTION",
+            source_path="src/qtt/service/pr169_svc1_resolvers.py",
+            source_version=version,
+            consume_interfaces=("DashboardReadModelService",),
+            row_count=len(rows),
+            identity_refs=("read_model_snapshots.generated.jsonl",),
+        )
+
+    def load_agent_orch(self) -> OwnerProjectionViewV1:
+        from src.qtt.agents.pr169_agent_orch1_resolvers import AgentOrchService
+
+        try:
+            service = AgentOrchService(repo_root=self._repo_root)
+            manifest = service.load_manifest()
+            rows = _validated_rows(service.list_dags(), owner_id="AGENT_ORCH1")
+        except (OSError, KeyError, TypeError, ValueError) as exc:
+            if isinstance(exc, OwnerAdapterError):
+                raise
+            raise OwnerAdapterError(
+                ReasonCode.OWNER_DATA_MISSING,
+                "AGENT_ORCH1 task/DAG projection could not be consumed",
+            ) from exc
+        if not isinstance(manifest, dict):
+            raise OwnerAdapterError(
+                ReasonCode.OWNER_DATA_MALFORMED,
+                "AGENT_ORCH1 manifest must be an object",
+            )
+        version = manifest.get("manifest_version")
+        if not isinstance(version, str) or not version:
+            raise OwnerAdapterError(
+                ReasonCode.OWNER_DATA_STALE,
+                "AGENT_ORCH1 manifest version is missing",
+            )
+        return OwnerProjectionViewV1(
+            owner_id="AGENT_ORCH1",
+            authority_domain="AGENT_TASK_AND_DAG_PROJECTION",
+            source_path="src/qtt/agents/pr169_agent_orch1_resolvers.py",
+            source_version=version,
+            consume_interfaces=("AgentOrchService",),
+            row_count=len(rows),
+            identity_refs=("dag.jsonl",),
+        )

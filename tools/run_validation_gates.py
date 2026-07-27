@@ -12,6 +12,7 @@ import sys
 import tempfile
 import inspect
 import json
+import ntpath
 import os
 import time
 from typing import Sequence
@@ -53,7 +54,7 @@ DETERMINISTIC_VALIDATOR_SHARD_PHASES = (
 DETERMINISTIC_VALIDATOR_SHARD_COMMAND_RANGES = {
     "deterministic-validators-a": (1, 64),
     "deterministic-validators-b": (65, 119),
-    "deterministic-validators-c": (120, 334),
+    "deterministic-validators-c": (120, 340),
 }
 PYTEST_SHARD_PHASES = (
     "pytest-shard-1",
@@ -142,6 +143,11 @@ PR169_AGENT_ORCH1_DETERMINISTIC_SCRIPT_NAMES = frozenset(
     {
         "build_pr169_agent_orch1.py",
         "validate_pr169_agent_orch1.py",
+    }
+)
+OWNER_VALIDATION_READ_ONLY_UPSTREAM_BUILDER_SCRIPT_NAMES = frozenset(
+    {
+        "build_pr168_rp5c_immutable_qku_formula_library.py",
     }
 )
 ORDERED_PHASES = (
@@ -244,6 +250,9 @@ PR162E_Q_TEST_ROOT = (
 PR162E_TEST_ROOT = "tests/pr162e"
 PR167_TEST_ROOT = (
     "tests/stage1_prediction_markets/pr167_open_trade_simulator_integration"
+)
+ST12A_TEST_ROOT = (
+    "tests/stage1_prediction_markets/qku_computation_control_plane"
 )
 PR166_SM2_PYTEST_FILE_GROUPS = (
     (
@@ -1088,6 +1097,12 @@ PYTEST_SHARD_COMMANDS: dict[str, tuple[PytestShardCommand, ...]] = {
             runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
             historical_runtime_seconds=10.0,
         ),
+        PytestShardCommand(
+            paths=(ST12A_TEST_ROOT,),
+            reason="ST12 Tranche-A exact 42-file domain test group",
+            runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
+            historical_runtime_seconds=1.0,
+        ),
     ),
 }
 PRE_VALIDATION_FINALIZATION_GUIDANCE = (
@@ -1113,6 +1128,7 @@ TRACKED_GENERATED_PATH_PREFIXES = (
     "docs/master_plan/source_evidence/generated/",
     "docs/roadmap/generated/",
 )
+VALIDATION_WORKSPACE_OUTPUT_PATH_PREFIXES = (".tmp/",)
 VOLATILE_GENERATED_REPORT_CURRENTNESS_FIELDS = frozenset(
     {
         "branch",
@@ -1748,10 +1764,48 @@ def _normal_path_text(value: pathlib.Path | str) -> str:
     return str(value).replace("\\", "/")
 
 
+def _is_windows_reserved_segment(segment: str) -> bool:
+    return (
+        ntpath.isreserved(segment)
+        or ":" in segment
+        or segment.endswith((" ", "."))
+        or any(
+            ord(character) < 32 or ord(character) == 127
+            for character in segment
+        )
+        or segment.rstrip(" .").split(".", 1)[0].casefold() == "clock$"
+    )
+
+
+def _is_portable_relative_repo_path(value: pathlib.Path | str) -> bool:
+    normalized = _normal_path_text(value)
+    segments = normalized.split("/")
+    return (
+        not pathlib.PurePosixPath(normalized).is_absolute()
+        and not pathlib.PureWindowsPath(normalized).drive
+        and all(
+            segment not in {"", ".", ".."}
+            and not _is_windows_reserved_segment(segment)
+            for segment in segments
+        )
+    )
+
+
 def _is_tracked_generated_output_path(value: pathlib.Path | str) -> bool:
     normalized = _normal_path_text(value)
     return any(
         normalized.startswith(prefix) for prefix in TRACKED_GENERATED_PATH_PREFIXES
+    )
+
+
+def _is_validation_workspace_output_path(value: pathlib.Path | str) -> bool:
+    normalized = _normal_path_text(value)
+    return (
+        any(
+            normalized.startswith(prefix)
+            for prefix in VALIDATION_WORKSPACE_OUTPUT_PATH_PREFIXES
+        )
+        and _is_portable_relative_repo_path(normalized)
     )
 
 
@@ -2370,6 +2424,87 @@ def _tracked_modified_paths(repo_root: pathlib.Path) -> set[str]:
         for path in stdout.splitlines()
         if path.strip()
     }
+
+
+def _untracked_paths(repo_root: pathlib.Path) -> set[str]:
+    returncode, stdout, stderr = _git_stdout(
+        repo_root,
+        ["status", "--porcelain=v1", "-z", "--untracked-files=all"],
+    )
+    if returncode != 0:
+        detail = stderr.strip() or stdout.strip() or "git status failed"
+        raise RuntimeError(detail)
+    return {
+        path
+        for code, path in _status_paths_from_porcelain(stdout)
+        if code == "??"
+    }
+
+
+def _generated_gate_output_path(
+    repo_root: pathlib.Path,
+    path_text: str,
+) -> pathlib.Path:
+    normalized = _normal_path_text(path_text)
+    segments = normalized.split("/")
+    if (
+        not _is_tracked_generated_output_path(normalized)
+        or not _is_portable_relative_repo_path(normalized)
+    ):
+        raise RuntimeError(
+            "VALIDATION_GATE_UNSAFE_GENERATED_OUTPUT_PATH: "
+            f"{normalized or '<empty>'}"
+        )
+
+    resolved_root = repo_root.resolve()
+    resolved_path = resolved_root.joinpath(*segments).resolve()
+    if not _path_is_relative_to(resolved_path, resolved_root):
+        raise RuntimeError(
+            "VALIDATION_GATE_UNSAFE_GENERATED_OUTPUT_PATH: "
+            f"{normalized}"
+        )
+    return resolved_path
+
+
+def _restore_untracked_gate_side_effects(
+    repo_root: pathlib.Path,
+    initially_untracked_paths: set[str],
+) -> tuple[str, ...]:
+    new_paths = sorted(
+        _untracked_paths(repo_root) - initially_untracked_paths,
+        key=lambda item: (item.casefold(), item),
+    )
+    new_paths = [
+        path for path in new_paths if not _is_validation_workspace_output_path(path)
+    ]
+    unexpected_paths = [
+        path for path in new_paths if not _is_tracked_generated_output_path(path)
+    ]
+    generated_paths = [
+        path for path in new_paths if _is_tracked_generated_output_path(path)
+    ]
+    resolved_generated_paths = [
+        (path, _generated_gate_output_path(repo_root, path))
+        for path in generated_paths
+    ]
+
+    restored: list[str] = []
+    for path_text, path in resolved_generated_paths:
+        if path.is_symlink() or path.is_file():
+            path.unlink()
+            restored.append(path_text)
+        elif path.exists():
+            raise RuntimeError(
+                "VALIDATION_GATE_GENERATED_OUTPUT_NOT_FILE: "
+                f"{path_text}"
+            )
+
+    if unexpected_paths:
+        raise RuntimeError(
+            "VALIDATION_GATE_UNTRACKED_OUTPUT_OUTSIDE_GENERATED_PREFIX: "
+            + ",".join(unexpected_paths)
+        )
+    return tuple(restored)
 
 
 def _modified_file_snapshots(
@@ -5216,6 +5351,28 @@ def build_validation_commands(
                 "FirstCodingPRHandoff.packet.json",
             ),
         ],
+        *[
+            [
+                sys.executable,
+                _path("tools", "validate_qku_computation_control_plane.py"),
+                "--domain",
+                domain,
+            ]
+            for domain in (
+                "architecture",
+                "operations",
+                "quantum",
+                "security",
+                "source",
+            )
+        ],
+        [
+            sys.executable,
+            _path(
+                "tools",
+                "independent_validate_qku_computation_control_plane.py",
+            ),
+        ],
         [
             sys.executable,
             _path("tools", "validate_pr169_val1.py"),
@@ -5696,6 +5853,11 @@ def run_commands(
     total_started = time.perf_counter()
 
     def finish(returncode: int) -> int:
+        try:
+            restore_gate_side_effects()
+        except RuntimeError as exc:
+            print(str(exc), file=sys.stderr, flush=True)
+            returncode = 1
         total_elapsed_seconds = time.perf_counter() - total_started
         _print_timing_summary(
             timing_entries,
@@ -5721,12 +5883,14 @@ def run_commands(
 
     initially_modified_paths: set[str] = set()
     initially_modified_snapshots: dict[str, bytes | None] = {}
+    initially_untracked_paths: set[str] = set()
     if cleanup_repo_root is not None:
         initially_modified_paths = _tracked_modified_paths(cleanup_repo_root)
         initially_modified_snapshots = _modified_file_snapshots(
             cleanup_repo_root,
             initially_modified_paths,
         )
+        initially_untracked_paths = _untracked_paths(cleanup_repo_root)
 
     def restore_gate_side_effects() -> None:
         if cleanup_repo_root is None:
@@ -5738,6 +5902,10 @@ def run_commands(
         _restore_modified_file_snapshots(
             cleanup_repo_root,
             initially_modified_snapshots,
+        )
+        _restore_untracked_gate_side_effects(
+            cleanup_repo_root,
+            initially_untracked_paths,
         )
 
     for command_index, command in enumerate(commands, start=1):
@@ -5916,6 +6084,36 @@ def _current_git_branch(repo_root: pathlib.Path) -> str:
     if completed.returncode == 0:
         return completed.stdout.strip() or os.environ.get("GITHUB_HEAD_REF", "").strip()
     return os.environ.get("GITHUB_HEAD_REF", "").strip()
+
+
+def _filter_foreign_branch_guarded_builders_for_owner_validation(
+    commands: Sequence[Sequence[str]],
+    *,
+    branch: str,
+) -> list[list[str]]:
+    from tools.ci_branch_context import is_owner_authorized_validation_branch
+
+    if not is_owner_authorized_validation_branch(branch):
+        return [list(command) for command in commands]
+
+    kept: list[list[str]] = []
+    read_only_upstream_builders: list[str] = []
+    for command in commands:
+        command_list = list(command)
+        script_name = _command_script_name(command_list)
+        if script_name not in OWNER_VALIDATION_READ_ONLY_UPSTREAM_BUILDER_SCRIPT_NAMES:
+            kept.append(command_list)
+            continue
+        read_only_upstream_builders.append(script_name)
+
+    if read_only_upstream_builders:
+        print(
+            "QTT_OWNER_AUTHORIZED_VALIDATION_UPSTREAM_BUILDERS_READ_ONLY "
+            f"branch={branch} "
+            f"scripts={','.join(sorted(read_only_upstream_builders))}",
+            flush=True,
+        )
+    return kept
 
 
 def _rp5d_r1_local_branch_scope_active(
@@ -6476,6 +6674,14 @@ def main(argv: Sequence[str] | None = None) -> int:
                     args.phase,
                     pathlib.Path(temp_dir),
                     pathlib.Path(pytest_temp_dir),
+                )
+                from tools.ci_branch_context import current_branch_context
+
+                commands = (
+                    _filter_foreign_branch_guarded_builders_for_owner_validation(
+                        commands,
+                        branch=current_branch_context(repo_root).branch,
+                    )
                 )
                 router_result = None
                 if _rp5d_r1_local_branch_scope_active(

@@ -862,8 +862,8 @@
     "pr_identity_roster_consumed": true,
     "roadmap_controller_consumed": true,
     "schema_file_count": 192,
-    "test_file_count": 2766,
-    "validator_tool_count": 295,
+    "test_file_count": 2808,
+    "validator_tool_count": 296,
     "visible_recent_pr_reports": [
       "docs/master_plan/generated/PR149_AtomicRowsSemanticValueMaterializationImplementationBridge.report.json",
       "docs/master_plan/generated/PR150_SourceBackedClassicalQuantumParameterDefaultTargetMatrix.report.json",
@@ -1183,7 +1183,7 @@
     "fixture_file_count": 258,
     "schema_file_count": 192,
     "status": "PASS",
-    "test_file_count": 2766
+    "test_file_count": 2808
   },
   "source_evidence_boundary_audit": {
     "audit_domain": "SOURCE_EVIDENCE_BOUNDARY",
@@ -1312,7 +1312,7 @@
       "network_surface_findings": [],
       "network_surface_status": "PASS"
     },
-    "validator_tool_count": 295
+    "validator_tool_count": 296
   },
   "warning_findings": [],
   "whole_repo_inventory_audit": {
@@ -1329,7 +1329,7 @@
       "tests",
       "tools"
     ],
-    "audited_text_file_count": 21374,
+    "audited_text_file_count": 21443,
     "category_counts": {
       "ATOMICROWS": 61,
       "CONFIG": 4,
@@ -1339,11 +1339,11 @@
       "OTHER": 3,
       "ROADMAP": 42,
       "SCHEMA": 2109,
-      "SOURCE": 2487,
+      "SOURCE": 2506,
       "SOURCE_EVIDENCE": 59,
-      "TEST": 3025,
-      "TOOL": 425,
-      "VALIDATOR_TOOL": 295,
+      "TEST": 3067,
+      "TOOL": 432,
+      "VALIDATOR_TOOL": 296,
       "WORKFLOW": 1
     },
     "deterministic_inventory_policy": "tracked files from git ls-files -z with normalized POSIX ordering",
@@ -1355,6 +1355,6 @@
       ".pytest_cache"
     ],
     "sk\u0069pped_local_runtime_path_count": 0,
-    "tracked_file_count": 21375
+    "tracked_file_count": 21444
   }
 }
