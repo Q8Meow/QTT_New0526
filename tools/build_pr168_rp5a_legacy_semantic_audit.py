@@ -10,7 +10,9 @@ from pathlib import Path
 import subprocess
 import sys
 import time
+import types
 from typing import Any, Sequence
+import uuid
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
@@ -70,6 +72,40 @@ from tools.pr168_rp5a_report_writer import read_json, read_jsonl, write_json, wr
 from tools.pr168_rp5a_row_field_hit_index import LAST_ROW_FIELD_STATS, build_row_field_hits
 from tools.pr168_rp5a_term_taxonomy import TERM_BY_ID, severities_from_ids, taxonomy_rows
 from tools.pr168_rp5a_validation_dependency_graph import build_validation_dependency_rows, build_validation_time_risk_rows
+from tools import run_validation_gates as current_validation_runner
+from tools.validation_inventory import (
+    canonical_command,
+    validate_inventory,
+    validator_id_for_command,
+)
+
+
+VALIDATION_SCOPE_COMPARISON_MODE = (
+    "BASE_REF_TO_EFFECTIVE_WORKTREE_PHASE_COMMAND_INVENTORY"
+)
+VALIDATION_SCOPE_BASELINE_REF = "origin/main"
+VALIDATION_SCOPE_RUNNER_PATH = "tools/run_validation_gates.py"
+VALIDATION_SCOPE_VALIDATION_DIR = Path(
+    ".tmp/st12a-rp5a-semantic-currentization/validation-inventory"
+)
+VALIDATION_SCOPE_PYTEST_BASETEMP = (
+    VALIDATION_SCOPE_VALIDATION_DIR / "pytest"
+)
+VALIDATION_SCOPE_EVIDENCE_FIELDS = (
+    "validation_scope_comparison_mode",
+    "validation_scope_baseline_ref",
+    "validation_scope_baseline_command_count",
+    "validation_scope_current_command_count",
+    "validation_scope_added_count",
+    "validation_scope_removed_count",
+    "validation_scope_removed_refs",
+    "current_validation_inventory_failure_count",
+    "current_validation_inventory_failures",
+    "validation_scope_changed_flag",
+    "no_legacy_scope_removal_flag",
+    "validation_scope_change_type",
+)
+ValidationScopeSignature = tuple[str, str, tuple[str, ...]]
 
 
 def _run_text(args: list[str]) -> str:
@@ -425,15 +461,172 @@ def _status_rows() -> list[str]:
     return [line for line in text.splitlines() if line.strip()]
 
 
-def _validation_scope_removed_count() -> int:
-    text = _run_text(["git", "diff", "--", "tools/validation_scope_registry.py", "tools/validation_inventory.py", "tools/run_validation_gates.py"])
-    count = 0
-    for line in text.splitlines():
-        if line.startswith("---") or line.startswith("+++"):
-            continue
-        if line.startswith("-") and "RP5A" not in line and "pr168-rp5a" not in line:
-            count += 1
-    return 0 if count == 0 else count
+def _validation_scope_counter(
+    manifest: Sequence[dict[str, object]],
+) -> Counter[ValidationScopeSignature]:
+    counter: Counter[ValidationScopeSignature] = Counter()
+    for phase_record in manifest:
+        phase = str(phase_record["phase"])
+        commands = phase_record["commands"]
+        if not isinstance(commands, list):
+            raise RuntimeError(
+                "RP5A_VALIDATION_SCOPE_MANIFEST_COMMANDS_NOT_A_LIST:"
+                f"{phase}"
+            )
+        for command in commands:
+            if not isinstance(command, list):
+                raise RuntimeError(
+                    "RP5A_VALIDATION_SCOPE_COMMAND_NOT_A_LIST:"
+                    f"{phase}"
+                )
+            signature = (
+                phase,
+                validator_id_for_command(command, phase),
+                canonical_command(command),
+            )
+            counter[signature] += 1
+    return counter
+
+
+def _validation_scope_counter_delta(
+    baseline: Counter[ValidationScopeSignature],
+    current: Counter[ValidationScopeSignature],
+) -> tuple[
+    Counter[ValidationScopeSignature],
+    Counter[ValidationScopeSignature],
+]:
+    return baseline - current, current - baseline
+
+
+def _validation_scope_refs(
+    counter: Counter[ValidationScopeSignature],
+) -> list[dict[str, object]]:
+    return [
+        {
+            "phase": phase,
+            "validator_id": validator_id,
+            "canonical_command": list(command),
+            "multiplicity": multiplicity,
+        }
+        for (phase, validator_id, command), multiplicity in sorted(
+            counter.items()
+        )
+    ]
+
+
+def _baseline_phase_manifest() -> list[dict[str, object]]:
+    completed = subprocess.run(
+        [
+            "git",
+            "show",
+            f"{VALIDATION_SCOPE_BASELINE_REF}:{VALIDATION_SCOPE_RUNNER_PATH}",
+        ],
+        cwd=REPO_ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
+    if completed.returncode != 0 or not completed.stdout:
+        detail = completed.stderr.strip() or "baseline runner source is empty"
+        raise RuntimeError(
+            "RP5A_VALIDATION_SCOPE_BASELINE_READ_FAILED:"
+            f"{VALIDATION_SCOPE_BASELINE_REF}:{VALIDATION_SCOPE_RUNNER_PATH}:"
+            f"{detail}"
+        )
+
+    module_name = f"_qtt_rp5a_baseline_runner_{uuid.uuid4().hex}"
+    baseline_module = types.ModuleType(module_name)
+    baseline_module.__file__ = str(REPO_ROOT / VALIDATION_SCOPE_RUNNER_PATH)
+    sys.modules[module_name] = baseline_module
+    try:
+        exec(
+            compile(
+                completed.stdout,
+                baseline_module.__file__,
+                "exec",
+            ),
+            baseline_module.__dict__,
+        )
+        build_manifest = getattr(
+            baseline_module,
+            "build_phase_manifest",
+            None,
+        )
+        if not callable(build_manifest):
+            raise RuntimeError(
+                "RP5A_VALIDATION_SCOPE_BASELINE_MANIFEST_BUILDER_MISSING:"
+                f"{VALIDATION_SCOPE_BASELINE_REF}:{VALIDATION_SCOPE_RUNNER_PATH}"
+            )
+        return build_manifest(
+            VALIDATION_SCOPE_VALIDATION_DIR,
+            VALIDATION_SCOPE_PYTEST_BASETEMP,
+        )
+    except Exception as exc:
+        if isinstance(exc, RuntimeError) and str(exc).startswith(
+            "RP5A_VALIDATION_SCOPE_"
+        ):
+            raise
+        raise RuntimeError(
+            "RP5A_VALIDATION_SCOPE_BASELINE_LOAD_FAILED:"
+            f"{VALIDATION_SCOPE_BASELINE_REF}:{VALIDATION_SCOPE_RUNNER_PATH}"
+        ) from exc
+    finally:
+        sys.modules.pop(module_name, None)
+
+
+def _validation_scope_delta() -> dict[str, object]:
+    baseline_counter = _validation_scope_counter(
+        _baseline_phase_manifest()
+    )
+    current_counter = _validation_scope_counter(
+        current_validation_runner.build_phase_manifest(
+            VALIDATION_SCOPE_VALIDATION_DIR,
+            VALIDATION_SCOPE_PYTEST_BASETEMP,
+        )
+    )
+    removed, added = _validation_scope_counter_delta(
+        baseline_counter,
+        current_counter,
+    )
+    current_inventory_failures = list(validate_inventory())
+    removed_count = sum(removed.values())
+    added_count = sum(added.values())
+    return {
+        "validation_scope_comparison_mode": (
+            VALIDATION_SCOPE_COMPARISON_MODE
+        ),
+        "validation_scope_baseline_ref": VALIDATION_SCOPE_BASELINE_REF,
+        "validation_scope_baseline_command_count": sum(
+            baseline_counter.values()
+        ),
+        "validation_scope_current_command_count": sum(
+            current_counter.values()
+        ),
+        "validation_scope_added_count": added_count,
+        "validation_scope_removed_count": removed_count,
+        "validation_scope_removed_refs": _validation_scope_refs(removed),
+        "current_validation_inventory_failure_count": len(
+            current_inventory_failures
+        ),
+        "current_validation_inventory_failures": (
+            current_inventory_failures
+        ),
+        "validation_scope_changed_flag": bool(added or removed),
+        "validation_scope_change_type": (
+            "SEMANTIC_COMMAND_REMOVAL_DETECTED"
+            if removed
+            else (
+                "SEMANTIC_COMMAND_ADDITION_ONLY"
+                if added
+                else "NONE"
+            )
+        ),
+        "no_legacy_scope_removal_flag": (
+            removed_count == 0 and not current_inventory_failures
+        ),
+    }
 
 
 _ALLOWED_CURRENTIZATION_ARTIFACT_PATHS = frozenset(
@@ -471,28 +664,22 @@ def _no_deletion_proof(baseline_status_rows: list[str] | None = None) -> dict[st
     deleted = [line for line in rows if _status_code(line) == "D" or "D" in line[:2]]
     moved = [line for line in rows if "R" in line[:2]]
     legacy_modified = []
-    validation_scope_changed = False
     for line in rows:
         path = _status_path(line)
-        if path in {"tools/validation_scope_registry.py", "tools/validation_inventory.py", "tools/run_validation_gates.py"} or path.startswith("tests/tools/test_validation_") or path == "tests/fail_closed/test_run_validation_gates.py":
-            validation_scope_changed = True
         if (
             _is_legacy_generated_artifact_path(path)
             and _status_code(line) in {"M", "A"}
             and path not in baseline_legacy_modified
         ):
             legacy_modified.append(path)
-    validation_scope_removed = _validation_scope_removed_count()
+    validation_scope_delta = _validation_scope_delta()
     return {
         **FORBIDDEN_OPERATION_COUNTERS,
         "deleted_file_count": len(deleted),
         "moved_file_count": len(moved),
         "archived_file_count": 0,
         "legacy_artifact_content_modified_count": len(legacy_modified),
-        "validation_scope_changed_flag": validation_scope_changed,
-        "validation_scope_change_type": "ADD_RP5A_SCOPE_ONLY" if validation_scope_changed else "NONE",
-        "no_legacy_scope_removal_flag": validation_scope_removed == 0,
-        "validation_scope_removed_count": validation_scope_removed,
+        **validation_scope_delta,
         "runtime_stack_generation_count": 0,
         "trade_simulation_count": 0,
         "formula_reclaim_count": 0,
@@ -572,8 +759,10 @@ def _report_summary_counts(file_rows: list[dict[str, object]], hit_rows: list[di
         "unclear_do_not_delete_count": class_counts["UNCLEAR_DO_NOT_DELETE"],
         **{key: no_delete.get(key, value) for key, value in FORBIDDEN_OPERATION_COUNTERS.items()},
         "legacy_artifact_content_modified_count": no_delete["legacy_artifact_content_modified_count"],
-        "validation_scope_changed_flag": no_delete["validation_scope_changed_flag"],
-        "validation_scope_removed_count": no_delete["validation_scope_removed_count"],
+        **{
+            field: no_delete[field]
+            for field in VALIDATION_SCOPE_EVIDENCE_FIELDS
+        },
         "live_order_authority_created_count": 0,
         "source_truth_authority_created_count": 0,
         "quantum_backend_execution_count": 0,

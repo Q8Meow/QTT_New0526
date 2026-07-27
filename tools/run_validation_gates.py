@@ -12,6 +12,7 @@ import sys
 import tempfile
 import inspect
 import json
+import ntpath
 import os
 import time
 from typing import Sequence
@@ -1128,12 +1129,6 @@ TRACKED_GENERATED_PATH_PREFIXES = (
     "docs/roadmap/generated/",
 )
 VALIDATION_WORKSPACE_OUTPUT_PATH_PREFIXES = (".tmp/",)
-WINDOWS_FORBIDDEN_PATH_CHARACTERS = frozenset('<>:"|?*')
-WINDOWS_RESERVED_PATH_NAMES = frozenset(
-    {"AUX", "CON", "NUL", "PRN"}
-    | {f"COM{index}" for index in range(1, 10)}
-    | {f"LPT{index}" for index in range(1, 10)}
-)
 VOLATILE_GENERATED_REPORT_CURRENTNESS_FIELDS = frozenset(
     {
         "branch",
@@ -1769,6 +1764,19 @@ def _normal_path_text(value: pathlib.Path | str) -> str:
     return str(value).replace("\\", "/")
 
 
+def _is_windows_reserved_segment(segment: str) -> bool:
+    return (
+        ntpath.isreserved(segment)
+        or ":" in segment
+        or segment.endswith((" ", "."))
+        or any(
+            ord(character) < 32 or ord(character) == 127
+            for character in segment
+        )
+        or segment.rstrip(" .").split(".", 1)[0].casefold() == "clock$"
+    )
+
+
 def _is_portable_relative_repo_path(value: pathlib.Path | str) -> bool:
     normalized = _normal_path_text(value)
     segments = normalized.split("/")
@@ -1777,14 +1785,7 @@ def _is_portable_relative_repo_path(value: pathlib.Path | str) -> bool:
         and not pathlib.PureWindowsPath(normalized).drive
         and all(
             segment not in {"", ".", ".."}
-            and not segment.endswith((" ", "."))
-            and not any(
-                character in WINDOWS_FORBIDDEN_PATH_CHARACTERS
-                or ord(character) < 32
-                for character in segment
-            )
-            and segment.rstrip(" .").split(".", 1)[0].upper()
-            not in WINDOWS_RESERVED_PATH_NAMES
+            and not _is_windows_reserved_segment(segment)
             for segment in segments
         )
     )

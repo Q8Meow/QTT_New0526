@@ -5360,25 +5360,36 @@ def test_generated_gate_output_path_rejects_nonportable_or_escaping_paths(
     ).resolve()
 
 
-@pytest.mark.parametrize(
-    ("path_text", "expected"),
-    (
+def test_validation_workspace_output_path_uses_exact_cross_platform_boundary():
+    cases = (
         (".tmp/qtt_stack_runs/run/manifest.json", True),
         (r".tmp\qtt-validation-timing\phase.json", True),
+        (".tmp/CONTEXT.json", True),
+        (".tmp/CONIN$foo.json", True),
+        (".tmp/CONOUT$foo.json", True),
+        (".tmp/CLOCKWORK.json", True),
+        (".tmp/COM10.json", True),
+        (".tmp/LPT10.json", True),
         (".tmp-other/output.json", False),
         (".tmp/../output.json", False),
         (".tmp/CON.json", False),
-        (".tmp/name?.json", False),
+        (".tmp/CONIN$.json", False),
+        (".tmp/CONOUT$.json", False),
+        (".tmp/CLOCK$.json", False),
         (".tmp/trailing./output.json", False),
         (r"C:\repo\.tmp\output.json", False),
         (r"\\server\share\.tmp\output.json", False),
-    ),
-)
-def test_validation_workspace_output_path_uses_exact_cross_platform_boundary(
-    path_text,
-    expected,
-):
-    assert runner._is_validation_workspace_output_path(path_text) is expected
+        (".tmp/a:b", False),
+        (".tmp/\x7fcontrol.json", False),
+        *(
+            (f".tmp/name{character}.json", False)
+            for character in '<>:"|?*'
+        ),
+    )
+    for path_text, expected in cases:
+        assert (
+            runner._is_validation_workspace_output_path(path_text) is expected
+        ), path_text
 
 
 def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_pytest(

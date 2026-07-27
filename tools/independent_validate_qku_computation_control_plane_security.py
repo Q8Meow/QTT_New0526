@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import ast
+import ntpath
 from pathlib import Path
 import sys
 import unicodedata
@@ -76,7 +77,18 @@ def _function_uses_name(
     function_name: str,
     consumed_name: str,
 ) -> bool:
-    function = next(
+    function = _find_function(tree, function_name)
+    return function is not None and any(
+        isinstance(node, ast.Name) and node.id == consumed_name
+        for node in ast.walk(function)
+    )
+
+
+def _find_function(
+    tree: ast.Module,
+    function_name: str,
+) -> ast.FunctionDef | None:
+    return next(
         (
             node
             for node in tree.body
@@ -84,8 +96,158 @@ def _function_uses_name(
         ),
         None,
     )
+
+
+def _directly_imports_module(tree: ast.Module, module_name: str) -> bool:
+    return any(
+        isinstance(node, ast.Import)
+        and any(alias.name == module_name for alias in node.names)
+        for node in tree.body
+    )
+
+
+def _function_calls_name(
+    function: ast.FunctionDef | None,
+    function_name: str,
+) -> bool:
     return function is not None and any(
-        isinstance(node, ast.Name) and node.id == consumed_name
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id == function_name
+        for node in ast.walk(function)
+    )
+
+
+def _helper_calls_ntpath_isreserved(
+    function: ast.FunctionDef | None,
+) -> bool:
+    return function is not None and any(
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Attribute)
+        and node.func.attr == "isreserved"
+        and isinstance(node.func.value, ast.Name)
+        and node.func.value.id == "ntpath"
+        for node in ast.walk(function)
+    )
+
+
+def _helper_enforces_colon_denial(
+    function: ast.FunctionDef | None,
+) -> bool:
+    return function is not None and any(
+        isinstance(node, ast.Compare)
+        and isinstance(node.left, ast.Constant)
+        and node.left.value == ":"
+        and len(node.ops) == 1
+        and isinstance(node.ops[0], ast.In)
+        and len(node.comparators) == 1
+        and isinstance(node.comparators[0], ast.Name)
+        and node.comparators[0].id == "segment"
+        for node in ast.walk(function)
+    )
+
+
+def _helper_enforces_control_characters(
+    function: ast.FunctionDef | None,
+) -> bool:
+    if function is None:
+        return False
+    for generator in (
+        node for node in ast.walk(function) if isinstance(node, ast.GeneratorExp)
+    ):
+        if len(generator.generators) != 1:
+            continue
+        comprehension = generator.generators[0]
+        if (
+            not isinstance(comprehension.target, ast.Name)
+            or not isinstance(comprehension.iter, ast.Name)
+            or comprehension.iter.id != "segment"
+        ):
+            continue
+        character_name = comprehension.target.id
+        comparisons = (
+            node
+            for node in ast.walk(generator.elt)
+            if isinstance(node, ast.Compare)
+        )
+        comparison_pairs = []
+        for comparison in comparisons:
+            if (
+                len(comparison.ops) != 1
+                or len(comparison.comparators) != 1
+                or not isinstance(comparison.left, ast.Call)
+                or not isinstance(comparison.left.func, ast.Name)
+                or comparison.left.func.id != "ord"
+                or len(comparison.left.args) != 1
+                or not isinstance(comparison.left.args[0], ast.Name)
+                or comparison.left.args[0].id != character_name
+                or not isinstance(comparison.comparators[0], ast.Constant)
+            ):
+                continue
+            comparison_pairs.append(
+                (
+                    type(comparison.ops[0]),
+                    comparison.comparators[0].value,
+                )
+            )
+        if (ast.Lt, 32) in comparison_pairs and (ast.Eq, 127) in comparison_pairs:
+            return True
+    return False
+
+
+def _is_clock_base_expression(node: ast.AST) -> bool:
+    if (
+        not isinstance(node, ast.Call)
+        or node.args
+        or node.keywords
+        or not isinstance(node.func, ast.Attribute)
+        or node.func.attr != "casefold"
+        or not isinstance(node.func.value, ast.Subscript)
+    ):
+        return False
+    base_subscript = node.func.value
+    if not isinstance(base_subscript.slice, ast.Constant):
+        return False
+    if base_subscript.slice.value != 0:
+        return False
+    split_call = base_subscript.value
+    if (
+        not isinstance(split_call, ast.Call)
+        or split_call.keywords
+        or not isinstance(split_call.func, ast.Attribute)
+        or split_call.func.attr != "split"
+        or len(split_call.args) != 2
+        or not isinstance(split_call.args[0], ast.Constant)
+        or split_call.args[0].value != "."
+        or not isinstance(split_call.args[1], ast.Constant)
+        or split_call.args[1].value != 1
+    ):
+        return False
+    rstrip_call = split_call.func.value
+    return (
+        isinstance(rstrip_call, ast.Call)
+        and not rstrip_call.keywords
+        and isinstance(rstrip_call.func, ast.Attribute)
+        and rstrip_call.func.attr == "rstrip"
+        and isinstance(rstrip_call.func.value, ast.Name)
+        and rstrip_call.func.value.id == "segment"
+        and len(rstrip_call.args) == 1
+        and isinstance(rstrip_call.args[0], ast.Constant)
+        and rstrip_call.args[0].value == " ."
+    )
+
+
+def _helper_enforces_exact_clock_base(
+    function: ast.FunctionDef | None,
+) -> bool:
+    return function is not None and any(
+        isinstance(node, ast.Compare)
+        and _is_clock_base_expression(node.left)
+        and len(node.ops) == 1
+        and isinstance(node.ops[0], ast.Eq)
+        and len(node.comparators) == 1
+        and isinstance(node.comparators[0], ast.Constant)
+        and node.comparators[0].value == "clock$"
         for node in ast.walk(function)
     )
 
@@ -140,23 +302,16 @@ def main() -> int:
     source_rights_tree = ast.parse(
         (PACKAGE / "source_rights.py").read_text(encoding="utf-8")
     )
-    function = next(
-        (
-            node
-            for node in serialization_tree.body
-            if isinstance(node, ast.FunctionDef)
-            and node.name == "validate_relative_path"
-        ),
-        None,
+    function = _find_function(serialization_tree, "validate_relative_path")
+    segment_helper = _find_function(
+        serialization_tree,
+        "_is_windows_reserved_segment",
     )
-    reserved_assignment = any(
-        isinstance(node, ast.Assign)
-        and any(
-            isinstance(target, ast.Name)
-            and target.id == "_WINDOWS_RESERVED_NAMES"
-            for target in node.targets
-        )
-        for node in serialization_tree.body
+    obsolete_reserved_table_present = any(
+        isinstance(node, ast.Name)
+        and isinstance(node.ctx, ast.Store)
+        and node.id == "_WINDOWS_RESERVED_NAMES"
+        for node in ast.walk(serialization_tree)
     )
     call_attributes = {
         node.func.attr
@@ -176,14 +331,95 @@ def main() -> int:
     }
     if (
         function is None
-        or not reserved_assignment
         or not {"replace", "split", "is_absolute"} <= call_attributes
-        or not {"", ".", "..", ":"} <= constants
+        or not {"", ".", ".."} <= constants
         or "drive" not in attribute_names
+        or not _function_calls_name(function, "_is_windows_reserved_segment")
     ):
         failures.append(
             "relative-path safety lacks structural traversal, drive, "
             "segment, or reserved-name checks"
+        )
+    if not _directly_imports_module(serialization_tree, "ntpath"):
+        failures.append("serialization.py does not directly import ntpath")
+    if segment_helper is None:
+        failures.append(
+            "serialization.py does not define _is_windows_reserved_segment"
+        )
+    if not _helper_calls_ntpath_isreserved(segment_helper):
+        failures.append(
+            "_is_windows_reserved_segment does not call ntpath.isreserved"
+        )
+    if not _helper_enforces_colon_denial(segment_helper):
+        failures.append(
+            "_is_windows_reserved_segment lacks structural colon denial"
+        )
+    if not _helper_enforces_control_characters(segment_helper):
+        failures.append(
+            "_is_windows_reserved_segment lacks structural control/DEL denial"
+        )
+    if not _helper_enforces_exact_clock_base(segment_helper):
+        failures.append(
+            "_is_windows_reserved_segment lacks exact case-insensitive CLOCK$ denial"
+        )
+    if obsolete_reserved_table_present:
+        failures.append("obsolete manual _WINDOWS_RESERVED_NAMES table remains")
+    invalid_segments = (
+        "NUL.txt",
+        "COM1",
+        "CONIN$.txt",
+        "CONOUT$.txt",
+        "CLOCK$.txt",
+        "clock$.txt",
+        "trailing.",
+        "trailing ",
+        "a:b",
+        "\x1fcontrol",
+        "\x7fcontrol",
+        *(f"name{character}.json" for character in '<>:"|?*'),
+    )
+    valid_segments = (
+        "β–contract.json",
+        "contract.json",
+        "CONTEXT.json",
+        "CONIN$foo.txt",
+        "CONOUT$foo.txt",
+        "CLOCKWORK.txt",
+        "COM10.txt",
+        "LPT10.txt",
+    )
+    independent_segment_results = {
+        segment: (
+            ntpath.isreserved(segment)
+            or ":" in segment
+            or segment.endswith((" ", "."))
+            or any(
+                ord(character) < 32 or ord(character) == 127
+                for character in segment
+            )
+            or segment.rstrip(" .").split(".", 1)[0].casefold() == "clock$"
+        )
+        for segment in (*invalid_segments, *valid_segments)
+    }
+    independently_accepted_invalid = [
+        segment
+        for segment in invalid_segments
+        if not independent_segment_results[segment]
+    ]
+    independently_rejected_valid = [
+        segment
+        for segment in valid_segments
+        if independent_segment_results[segment]
+    ]
+    if independently_accepted_invalid:
+        failures.append(
+            "independent Windows path matrix accepted invalid segments: "
+            + repr(independently_accepted_invalid)
+        )
+    if independently_rejected_valid:
+        failures.append(
+            "independent Windows path matrix rejected valid segments: "
+            + repr(independently_rejected_valid)
         )
     serialization_classes = {
         node.name

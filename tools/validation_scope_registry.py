@@ -183,6 +183,11 @@ ST12A_ALLOWED_EXACT_PATHS = frozenset(
 ST12A_SHARED_CURRENTIZATION_EXACT_PATHS = frozenset(
     {
         "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+        "docs/master_plan/generated/PR168_RP5A_FinalSummary.report.json",
+        "docs/master_plan/generated/PR168_RP5A_NoDeletionProof.report.json",
+        "tests/pr168_rp5a/test_no_validation_scope_removal.py",
+        "tools/build_pr168_rp5a_legacy_semantic_audit.py",
+        "tools/pr168_rp5a_validator.py",
     }
 )
 
@@ -1813,6 +1818,20 @@ def explain_pr_scope_decision(branch: str, path: str) -> dict[str, object]:
             "pr_id": "ST12-TRANCHE-A",
             "matched_rule": f"validation_context_shared_currentization_exact:{normalized}",
             "reason": "registered_validation_context_shared_currentization_exact_path",
+        }
+    if (
+        is_validation_context_branch(branch_name)
+        and normalized.endswith(".copy")
+        and normalized.removesuffix(".copy")
+        in ST12A_SHARED_CURRENTIZATION_EXACT_PATHS
+    ):
+        return {
+            "allowed": False,
+            "branch": branch_name,
+            "normalized_path": normalized,
+            "pr_id": "ST12-TRANCHE-A",
+            "matched_rule": "no_shared_currentization_exact_near_name",
+            "reason": "path_not_registered_for_pr_scope",
         }
     forbidden_reason = _forbidden_reason(normalized)
     if forbidden_reason:

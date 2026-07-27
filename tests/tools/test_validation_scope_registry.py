@@ -172,32 +172,72 @@ def test_st12a_scope_is_exactly_the_authorized_path_allowlist() -> None:
 
 
 def test_st12a_shared_currentization_scope_is_separate_and_exact() -> None:
-    path = (
-        "docs/master_plan/generated/"
-        "PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json"
+    paths = frozenset(
+        {
+            (
+                "docs/master_plan/generated/"
+                "PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json"
+            ),
+            (
+                "docs/master_plan/generated/"
+                "PR168_RP5A_FinalSummary.report.json"
+            ),
+            (
+                "docs/master_plan/generated/"
+                "PR168_RP5A_NoDeletionProof.report.json"
+            ),
+            "tests/pr168_rp5a/test_no_validation_scope_removal.py",
+            "tools/build_pr168_rp5a_legacy_semantic_audit.py",
+            "tools/pr168_rp5a_validator.py",
+        }
     )
-    assert registry.ST12A_SHARED_CURRENTIZATION_EXACT_PATHS == frozenset({path})
-    assert path not in registry.ST12A_ALLOWED_EXACT_PATHS
-    assert registry.explain_pr_scope_decision(registry.ST12A_BRANCH, path) == {
-        "allowed": True,
-        "branch": registry.ST12A_BRANCH,
-        "normalized_path": path,
-        "pr_id": "ST12-TRANCHE-A",
-        "matched_rule": f"shared_currentization_exact:{path}",
-        "reason": "registered_shared_currentization_exact_path",
-    }
-    assert registry.explain_pr_scope_decision(FIXTURE_BRANCH, path) == {
-        "allowed": True,
-        "branch": FIXTURE_BRANCH,
-        "normalized_path": path,
-        "pr_id": "ST12-TRANCHE-A",
-        "matched_rule": f"validation_context_shared_currentization_exact:{path}",
-        "reason": "registered_validation_context_shared_currentization_exact_path",
-    }
-    assert registry.is_pr_scoped_changed_path_allowed(
-        registry.ST12A_BRANCH,
-        ".\\" + path.replace("/", "\\"),
-    )
+    assert registry.ST12A_SHARED_CURRENTIZATION_EXACT_PATHS == paths
+    for path in paths:
+        assert path not in registry.ST12A_ALLOWED_EXACT_PATHS
+        assert registry.explain_pr_scope_decision(
+            registry.ST12A_BRANCH,
+            path,
+        ) == {
+            "allowed": True,
+            "branch": registry.ST12A_BRANCH,
+            "normalized_path": path,
+            "pr_id": "ST12-TRANCHE-A",
+            "matched_rule": f"shared_currentization_exact:{path}",
+            "reason": "registered_shared_currentization_exact_path",
+        }
+        assert registry.explain_pr_scope_decision(
+            FIXTURE_BRANCH,
+            path,
+        ) == {
+            "allowed": True,
+            "branch": FIXTURE_BRANCH,
+            "normalized_path": path,
+            "pr_id": "ST12-TRANCHE-A",
+            "matched_rule": (
+                "validation_context_shared_currentization_exact:"
+                f"{path}"
+            ),
+            "reason": (
+                "registered_validation_context_shared_currentization_exact_path"
+            ),
+        }
+        windows_path = ".\\" + path.replace("/", "\\")
+        assert registry.is_pr_scoped_changed_path_allowed(
+            registry.ST12A_BRANCH,
+            windows_path,
+        )
+        assert registry.is_pr_scoped_changed_path_allowed(
+            FIXTURE_BRANCH,
+            windows_path,
+        )
+        assert not registry.is_pr_scoped_changed_path_allowed(
+            registry.ST12A_BRANCH,
+            f"{path}.copy",
+        )
+        assert not registry.is_pr_scoped_changed_path_allowed(
+            FIXTURE_BRANCH,
+            f"{path}.copy",
+        )
 
 
 @pytest.mark.parametrize("path", sorted(registry.ST12A_ALLOWED_EXACT_PATHS))

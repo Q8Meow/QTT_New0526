@@ -8,6 +8,7 @@ from datetime import datetime, timedelta
 from decimal import Decimal
 from enum import Enum
 import json
+import ntpath
 from pathlib import PureWindowsPath
 import unicodedata
 from typing import Any
@@ -75,25 +76,23 @@ SECRET_KEY_POLICY = SecretKeyPolicyV1(
         }
     ),
 )
-_WINDOWS_RESERVED_NAMES = frozenset(
-    {
-        "AUX",
-        "CLOCK$",
-        "CON",
-        "NUL",
-        "PRN",
-        *(f"COM{index}" for index in range(1, 10)),
-        *(f"LPT{index}" for index in range(1, 10)),
-    }
-)
+
+
+def _is_windows_reserved_segment(segment: str) -> bool:
+    return (
+        ntpath.isreserved(segment)
+        or ":" in segment
+        or segment.endswith((" ", "."))
+        or any(
+            ord(character) < 32 or ord(character) == 127
+            for character in segment
+        )
+        or segment.rstrip(" .").split(".", 1)[0].casefold() == "clock$"
+    )
 
 
 def validate_relative_path(path: str) -> str:
-    if (
-        not isinstance(path, str)
-        or not path
-        or any(ord(character) < 32 or ord(character) == 127 for character in path)
-    ):
+    if not isinstance(path, str) or not path:
         raise SerializationSafetyError(
             ReasonCode.PATH_UNSAFE, "path must be a nonempty text value"
         )
@@ -105,12 +104,7 @@ def validate_relative_path(path: str) -> str:
         or windows.is_absolute()
         or windows.drive
         or any(part in {"", ".", ".."} for part in parts)
-        or any(
-            ":" in part
-            or part.endswith((" ", "."))
-            or part.split(".", 1)[0].upper() in _WINDOWS_RESERVED_NAMES
-            for part in parts
-        )
+        or any(_is_windows_reserved_segment(part) for part in parts)
     ):
         raise SerializationSafetyError(
             ReasonCode.PATH_UNSAFE,
