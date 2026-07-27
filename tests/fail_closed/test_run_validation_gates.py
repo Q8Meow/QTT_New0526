@@ -5332,32 +5332,55 @@ def test_runner_fails_closed_without_removing_new_untracked_output_outside_prefi
         ) in capsys.readouterr().err
 
 
-@pytest.mark.parametrize(
-    "path_text",
-    (
-        "docs/master_plan/generated/../outside.json",
-        r"docs\master_plan\generated\CON.json",
-        r"C:\repo\docs\master_plan\generated\output.json",
-        r"\\server\share\docs\master_plan\generated\output.json",
-    ),
-)
 def test_generated_gate_output_path_rejects_nonportable_or_escaping_paths(
     tmp_path,
-    path_text,
 ):
-    with pytest.raises(
-        RuntimeError,
-        match="VALIDATION_GATE_UNSAFE_GENERATED_OUTPUT_PATH",
-    ):
-        runner._generated_gate_output_path(tmp_path, path_text)
-
-    valid_path = runner._generated_gate_output_path(
-        tmp_path,
-        r"docs\master_plan\generated\Valid.report.json",
+    invalid_paths = (
+        "docs/master_plan/generated/../outside.json",
+        "/docs/master_plan/generated/output.json",
+        r"docs\master_plan\generated\CON.json",
+        r"docs\master_plan\generated\CONIN$.json",
+        r"docs\master_plan\generated\CONOUT$.json",
+        r"docs\master_plan\generated\CLOCK$.json",
+        "docs/master_plan/generated/" + chr(127) + "control.json",
+        "docs/master_plan/generated/output.json:stream",
+        *(
+            f"docs/master_plan/generated/invalid{character}name.json"
+            for character in '<>:"|?*'
+        ),
+        "docs/master_plan/generated/trailing-space.json ",
+        "docs/master_plan/generated/trailing-dot.json.",
+        r"C:\repo\docs\master_plan\generated\output.json",
+        r"\\server\share\docs\master_plan\generated\output.json",
     )
-    assert valid_path == (
-        tmp_path / "docs" / "master_plan" / "generated" / "Valid.report.json"
-    ).resolve()
+    for path_text in invalid_paths:
+        with pytest.raises(
+            RuntimeError,
+            match="VALIDATION_GATE_UNSAFE_GENERATED_OUTPUT_PATH",
+        ):
+            runner._generated_gate_output_path(tmp_path, path_text)
+
+    valid_paths = (
+        "CONTEXT.json",
+        "CONIN$foo.json",
+        "CONOUT$foo.json",
+        "CLOCKWORK.json",
+        "COM10.json",
+        "LPT10.json",
+        "Unicode-\N{SNOWMAN}.json",
+    )
+    for filename in valid_paths:
+        path_text = f"docs/master_plan/generated/{filename}"
+        assert runner._generated_gate_output_path(
+            tmp_path,
+            path_text,
+        ) == (
+            tmp_path
+            / "docs"
+            / "master_plan"
+            / "generated"
+            / filename
+        ).resolve()
 
 
 def test_validation_workspace_output_path_uses_exact_cross_platform_boundary():

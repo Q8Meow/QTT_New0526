@@ -5,17 +5,30 @@ from __future__ import annotations
 
 from collections import Counter
 from pathlib import Path
-from typing import Any
+from typing import Any, Mapping
 
 from tools.build_pr168_rp5a_legacy_semantic_audit import (
-    VALIDATION_SCOPE_BASELINE_REF,
-    VALIDATION_SCOPE_COMPARISON_MODE,
     VALIDATION_SCOPE_EVIDENCE_FIELDS,
+    VALIDATION_SCOPE_EVIDENCE_SCHEMA_VERSION,
+    VALIDATION_SCOPE_MAIN_BASELINE_LABEL,
+    VALIDATION_SCOPE_MAIN_COMPARISON_MODE,
+    VALIDATION_SCOPE_MERGE_BASELINE_LABEL,
+    VALIDATION_SCOPE_MERGE_BASE_COMPARISON_MODE,
+    VALIDATION_SCOPE_SNAPSHOT_CONTEXT,
     _validation_scope_delta,
 )
+from tools.ci_branch_context import current_branch_context
 from tools.pr168_rp5a_config import (
     CHECKPOINT_PATH,
     DELETE_CLASSIFICATIONS,
+    FILE_KIND_CURRENTIZATION,
+    FILE_KIND_DOC,
+    FILE_KIND_GENERATED_REPORT,
+    FILE_KIND_GENERATED_SHARD,
+    FILE_KIND_MANIFEST,
+    FILE_KIND_TEST_SOURCE,
+    FILE_KIND_TOOL_SOURCE,
+    FILE_KIND_VALIDATOR,
     FORBIDDEN_OPERATION_COUNTERS,
     HARD_FAIL_PHYSICAL_PATH_LENGTH,
     MAX_CONSUMER_REFS_PER_FILE,
@@ -35,10 +48,43 @@ from tools.pr168_rp5a_config import (
     shard_path,
 )
 from tools.pr168_rp5a_report_writer import read_json, read_jsonl
+from tools.validation_scope_registry import ST12A_BRANCH
 
 VALIDATION_SCOPE_CHANGE_TYPES = frozenset(
-    {"SEMANTIC_COMMAND_ADDITION_ONLY", "NONE"}
+    {
+        "SEMANTIC_COMMAND_ADDITION_ONLY",
+        "SEMANTIC_COMMAND_REMOVAL_DETECTED",
+        "NONE",
+    }
 )
+_DELETE_CLASSIFICATION_SUMMARY_FIELDS = {
+    "DELETE_FROM_ACTIVE_TREE_SAFE": (
+        "delete_from_active_tree_safe_draft_count"
+    ),
+    "DELETE_AFTER_QKU_FORMULA_IDENTITY_RECLAIM": (
+        "delete_after_qku_formula_identity_reclaim_count"
+    ),
+    "KEEP_ACTIVE_CONSUMER": "keep_active_consumer_count",
+    "KEEP_UNIQUE_QKU_FORMULA_SOURCE": (
+        "keep_unique_qku_formula_source_count"
+    ),
+    "KEEP_TEST_FIXTURE": "keep_test_fixture_count",
+    "KEEP_VALIDATION_DEPENDENCY": "keep_validation_dependency_count",
+    "KEEP_LEGACY_SUMMARY_ONLY": "keep_legacy_summary_only_count",
+    "ARCHIVE_NO_VALIDATION_SCAN": "archive_no_validation_scan_count",
+    "REWRITE_CONSUMER_FIRST": "rewrite_consumer_first_count",
+    "UNCLEAR_DO_NOT_DELETE": "unclear_do_not_delete_count",
+}
+_FILE_KIND_SUMMARY_FIELDS = {
+    FILE_KIND_GENERATED_REPORT: "generated_reports_with_stale_terms_count",
+    FILE_KIND_GENERATED_SHARD: "generated_shards_with_stale_terms_count",
+    FILE_KIND_TOOL_SOURCE: "tools_with_stale_terms_count",
+    FILE_KIND_TEST_SOURCE: "tests_with_stale_terms_count",
+    FILE_KIND_VALIDATOR: "validators_with_stale_terms_count",
+    FILE_KIND_DOC: "docs_with_stale_terms_count",
+    FILE_KIND_CURRENTIZATION: "currentization_with_stale_terms_count",
+    FILE_KIND_MANIFEST: "manifests_with_stale_terms_count",
+}
 
 
 def _is_integer(value: object, *, minimum: int) -> bool:
@@ -67,6 +113,307 @@ def _removed_ref_multiplicity(value: object) -> int | None:
     ):
         return None
     return int(value["multiplicity"])
+
+
+def _scope_payload_failures(
+    payload: Mapping[str, object],
+    *,
+    prefix: str,
+) -> list[str]:
+    failures: list[str] = []
+    if (
+        payload.get("validation_scope_evidence_schema_version")
+        != VALIDATION_SCOPE_EVIDENCE_SCHEMA_VERSION
+    ):
+        failures.append(f"{prefix}_EVIDENCE_SCHEMA_VERSION_INVALID")
+    if (
+        payload.get("validation_scope_snapshot_context")
+        != VALIDATION_SCOPE_SNAPSHOT_CONTEXT
+    ):
+        failures.append(f"{prefix}_SNAPSHOT_CONTEXT_INVALID")
+
+    comparison_mode = payload.get("validation_scope_comparison_mode")
+    baseline_label = payload.get("validation_scope_baseline_ref")
+    expected_labels = {
+        VALIDATION_SCOPE_MAIN_COMPARISON_MODE: (
+            VALIDATION_SCOPE_MAIN_BASELINE_LABEL
+        ),
+        VALIDATION_SCOPE_MERGE_BASE_COMPARISON_MODE: (
+            VALIDATION_SCOPE_MERGE_BASELINE_LABEL
+        ),
+    }
+    if comparison_mode not in expected_labels:
+        failures.append(f"{prefix}_COMPARISON_MODE_INVALID")
+    elif baseline_label != expected_labels[comparison_mode]:
+        failures.append(f"{prefix}_BASELINE_LABEL_INVALID")
+
+    baseline_count = payload.get(
+        "validation_scope_baseline_command_count"
+    )
+    current_count = payload.get(
+        "validation_scope_current_command_count"
+    )
+    added_count = payload.get("validation_scope_added_count")
+    removed_count = payload.get("validation_scope_removed_count")
+    for field, value, minimum in (
+        ("BASELINE_COMMAND_COUNT", baseline_count, 1),
+        ("CURRENT_COMMAND_COUNT", current_count, 1),
+        ("ADDED_COUNT", added_count, 0),
+        ("REMOVED_COUNT", removed_count, 0),
+    ):
+        if not _is_integer(value, minimum=minimum):
+            failures.append(f"{prefix}_{field}_INVALID")
+    if all(
+        (
+            _is_integer(baseline_count, minimum=1),
+            _is_integer(current_count, minimum=1),
+            _is_integer(added_count, minimum=0),
+            _is_integer(removed_count, minimum=0),
+        )
+    ) and baseline_count - removed_count + added_count != current_count:
+        failures.append(f"{prefix}_COMMAND_COUNT_DELTA_INCOHERENT")
+
+    removed_refs = payload.get("validation_scope_removed_refs")
+    if not isinstance(removed_refs, list):
+        failures.append(f"{prefix}_REMOVED_REFS_INVALID")
+        removed_refs = []
+    removed_ref_multiplicities = [
+        _removed_ref_multiplicity(value) for value in removed_refs
+    ]
+    if any(value is None for value in removed_ref_multiplicities):
+        failures.append(f"{prefix}_REMOVED_REF_SIGNATURE_INVALID")
+    represented_removed_count = sum(
+        value
+        for value in removed_ref_multiplicities
+        if value is not None
+    )
+    if (
+        _is_integer(removed_count, minimum=0)
+        and represented_removed_count != removed_count
+    ):
+        failures.append(f"{prefix}_REMOVED_REF_COUNT_MISMATCH")
+
+    inventory_failures = payload.get(
+        "current_validation_inventory_failures"
+    )
+    inventory_failure_count = payload.get(
+        "current_validation_inventory_failure_count"
+    )
+    if not isinstance(inventory_failures, list) or any(
+        not isinstance(value, str) for value in inventory_failures
+    ):
+        failures.append(f"{prefix}_INVENTORY_FAILURES_INVALID")
+        inventory_failures = []
+    if not _is_integer(inventory_failure_count, minimum=0):
+        failures.append(f"{prefix}_INVENTORY_FAILURE_COUNT_INVALID")
+    elif inventory_failure_count != len(inventory_failures):
+        failures.append(f"{prefix}_INVENTORY_FAILURE_COUNT_MISMATCH")
+
+    expected_changed_flag = bool(
+        (_is_integer(added_count, minimum=0) and added_count > 0)
+        or (_is_integer(removed_count, minimum=0) and removed_count > 0)
+    )
+    if (
+        not isinstance(payload.get("validation_scope_changed_flag"), bool)
+        or payload.get("validation_scope_changed_flag")
+        is not expected_changed_flag
+    ):
+        failures.append(f"{prefix}_CHANGED_FLAG_INCOHERENT")
+
+    change_type = payload.get("validation_scope_change_type")
+    if change_type not in VALIDATION_SCOPE_CHANGE_TYPES:
+        failures.append(f"{prefix}_CHANGE_TYPE_INVALID")
+    expected_change_type = (
+        "SEMANTIC_COMMAND_REMOVAL_DETECTED"
+        if _is_integer(removed_count, minimum=0) and removed_count > 0
+        else (
+            "SEMANTIC_COMMAND_ADDITION_ONLY"
+            if _is_integer(added_count, minimum=0) and added_count > 0
+            else "NONE"
+        )
+    )
+    if (
+        change_type in VALIDATION_SCOPE_CHANGE_TYPES
+        and change_type != expected_change_type
+    ):
+        failures.append(f"{prefix}_CHANGE_TYPE_INCOHERENT")
+
+    expected_no_removal = bool(
+        _is_integer(removed_count, minimum=0)
+        and removed_count == 0
+        and isinstance(inventory_failures, list)
+        and not inventory_failures
+    )
+    if (
+        not isinstance(payload.get("no_legacy_scope_removal_flag"), bool)
+        or payload.get("no_legacy_scope_removal_flag")
+        is not expected_no_removal
+    ):
+        failures.append(f"{prefix}_NO_REMOVAL_FLAG_INCOHERENT")
+    return failures
+
+
+def _validation_scope_failures(
+    no_delete: Mapping[str, object],
+    final_summary: Mapping[str, object],
+    live_validation_scope: Mapping[str, object] | None,
+    branch: str,
+) -> list[str]:
+    failures: list[str] = []
+    no_delete_records = no_delete.get("records")
+    final_summary_records = final_summary.get("records")
+    if not isinstance(no_delete_records, dict):
+        failures.append("VALIDATION_SCOPE_NO_DELETION_RECORDS_INVALID")
+        no_delete_records = {}
+    if not isinstance(final_summary_records, dict):
+        failures.append("VALIDATION_SCOPE_FINAL_SUMMARY_RECORDS_INVALID")
+        final_summary_records = {}
+
+    locations = (
+        ("NO_DELETION_TOP", no_delete),
+        ("NO_DELETION_RECORDS", no_delete_records),
+        ("FINAL_SUMMARY_TOP", final_summary),
+        ("FINAL_SUMMARY_RECORDS", final_summary_records),
+    )
+    for field in VALIDATION_SCOPE_EVIDENCE_FIELDS:
+        canonical_value = no_delete.get(field)
+        for location, payload in locations:
+            if field not in payload:
+                failures.append(
+                    "VALIDATION_SCOPE_EVIDENCE_MISSING:"
+                    f"{location}:{field}"
+                )
+            elif (
+                field in no_delete
+                and payload[field] != canonical_value
+            ):
+                failures.append(
+                    "VALIDATION_SCOPE_EVIDENCE_PERSISTED_MISMATCH:"
+                    f"{location}:{field}"
+                )
+
+    if all(field in no_delete for field in VALIDATION_SCOPE_EVIDENCE_FIELDS):
+        persisted = {
+            field: no_delete[field]
+            for field in VALIDATION_SCOPE_EVIDENCE_FIELDS
+        }
+        failures.extend(
+            _scope_payload_failures(persisted, prefix="PERSISTED_SCOPE")
+        )
+        persisted_removed_refs = persisted.get(
+            "validation_scope_removed_refs"
+        )
+        persisted_inventory_failures = persisted.get(
+            "current_validation_inventory_failures"
+        )
+        if persisted.get("validation_scope_removed_count") != 0:
+            failures.append("PERSISTED_VALIDATION_SCOPE_REMOVED")
+        if persisted_removed_refs != []:
+            failures.append(
+                "PERSISTED_VALIDATION_SCOPE_REMOVED_REFS_PRESENT"
+            )
+        if (
+            persisted.get(
+                "current_validation_inventory_failure_count"
+            )
+            != 0
+        ):
+            failures.append(
+                "PERSISTED_VALIDATION_INVENTORY_FAILURE_COUNT_NONZERO"
+            )
+        if persisted_inventory_failures != []:
+            failures.append("PERSISTED_VALIDATION_INVENTORY_FAILED")
+        if persisted.get("no_legacy_scope_removal_flag") is not True:
+            failures.append(
+                "PERSISTED_NO_LEGACY_SCOPE_REMOVAL_FLAG_FALSE"
+            )
+    else:
+        persisted = None
+
+    if live_validation_scope is not None:
+        failures.extend(
+            _scope_payload_failures(
+                live_validation_scope,
+                prefix="LIVE_SCOPE",
+            )
+        )
+        expected_mode, expected_label = (
+            (
+                VALIDATION_SCOPE_MAIN_COMPARISON_MODE,
+                VALIDATION_SCOPE_MAIN_BASELINE_LABEL,
+            )
+            if branch == "main"
+            else (
+                VALIDATION_SCOPE_MERGE_BASE_COMPARISON_MODE,
+                VALIDATION_SCOPE_MERGE_BASELINE_LABEL,
+            )
+        )
+        if (
+            live_validation_scope.get("validation_scope_comparison_mode")
+            != expected_mode
+        ):
+            failures.append("LIVE_VALIDATION_SCOPE_CONTEXT_MODE_INVALID")
+        if (
+            live_validation_scope.get("validation_scope_baseline_ref")
+            != expected_label
+        ):
+            failures.append("LIVE_VALIDATION_SCOPE_CONTEXT_LABEL_INVALID")
+        if live_validation_scope.get("validation_scope_removed_count") != 0:
+            failures.append("LIVE_VALIDATION_SCOPE_REMOVED")
+        if live_validation_scope.get("validation_scope_removed_refs") != []:
+            failures.append(
+                "LIVE_VALIDATION_SCOPE_REMOVED_REFS_PRESENT"
+            )
+        if (
+            live_validation_scope.get(
+                "current_validation_inventory_failure_count"
+            )
+            != 0
+        ):
+            failures.append(
+                "LIVE_VALIDATION_INVENTORY_FAILURE_COUNT_NONZERO"
+            )
+        if (
+            live_validation_scope.get(
+                "current_validation_inventory_failures"
+            )
+            != []
+        ):
+            failures.append("LIVE_VALIDATION_INVENTORY_FAILED")
+        if (
+            live_validation_scope.get("no_legacy_scope_removal_flag")
+            is not True
+        ):
+            failures.append("LIVE_NO_LEGACY_SCOPE_REMOVAL_FLAG_FALSE")
+        if branch == ST12A_BRANCH and persisted is not None:
+            for field in VALIDATION_SCOPE_EVIDENCE_FIELDS:
+                if persisted[field] != live_validation_scope.get(field):
+                    failures.append(
+                        "VALIDATION_SCOPE_EVIDENCE_LIVE_MISMATCH:"
+                        f"ST12A:{field}"
+                    )
+    return failures
+
+
+def _final_summary_count_failures(
+    final_summary: Mapping[str, object],
+    final_summary_records: Mapping[str, object],
+    field: str,
+    expected: int,
+    failure_code: str,
+) -> list[str]:
+    failures: list[str] = []
+    if final_summary.get(field) != expected:
+        failures.append(
+            f"{failure_code}:TOP:{field}:"
+            f"{final_summary.get(field)}:{expected}"
+        )
+    if final_summary_records.get(field) != expected:
+        failures.append(
+            f"{failure_code}:RECORDS:{field}:"
+            f"{final_summary_records.get(field)}:{expected}"
+        )
+    return failures
 
 
 def _failures() -> list[str]:
@@ -113,18 +460,18 @@ def _failures() -> list[str]:
     consumer_rows = read_jsonl(shard_path("consumer_graph_rows"))
     validation_rows = read_jsonl(shard_path("validation_dependency_rows"))
     identity_rows = read_jsonl(shard_path("qku_formula_identity_dependency_rows"))
+    custody_rows = read_jsonl(shard_path("identity_custody_rows"))
     agent_rows = read_jsonl(shard_path("agent_touchpoint_rows"))
+    blast_rows = read_jsonl(shard_path("blast_radius_rows"))
+    validation_time_rows = read_jsonl(
+        shard_path("validation_time_risk_rows")
+    )
     delete_rows = read_jsonl(shard_path("delete_eligibility_rows"))
     consistency = read_json(report_path("PR168_RP5A_CrossGraphConsistency.report.json"))
     no_delete = read_json(report_path("PR168_RP5A_NoDeletionProof.report.json"))
     final_summary = read_json(report_path("PR168_RP5A_FinalSummary.report.json"))
-    no_delete_records = no_delete.get("records")
     final_summary_records = final_summary.get("records")
-    if not isinstance(no_delete_records, dict):
-        failures.append("VALIDATION_SCOPE_NO_DELETION_RECORDS_INVALID")
-        no_delete_records = {}
     if not isinstance(final_summary_records, dict):
-        failures.append("VALIDATION_SCOPE_FINAL_SUMMARY_RECORDS_INVALID")
         final_summary_records = {}
     try:
         live_validation_scope = _validation_scope_delta()
@@ -134,30 +481,24 @@ def _failures() -> list[str]:
             f"{type(exc).__name__}:{exc}"
         )
         live_validation_scope = None
-    for field in VALIDATION_SCOPE_EVIDENCE_FIELDS:
-        locations = (
-            ("NO_DELETION_TOP", no_delete),
-            ("NO_DELETION_RECORDS", no_delete_records),
-            ("FINAL_SUMMARY_TOP", final_summary),
-            ("FINAL_SUMMARY_RECORDS", final_summary_records),
+    failures.extend(
+        _validation_scope_failures(
+            no_delete,
+            final_summary,
+            live_validation_scope,
+            current_branch_context(Path(__file__).resolve().parents[1]).branch,
         )
-        for location, payload in locations:
-            if field not in payload:
-                failures.append(
-                    "VALIDATION_SCOPE_EVIDENCE_MISSING:"
-                    f"{location}:{field}"
-                )
-            elif (
-                live_validation_scope is not None
-                and payload[field] != live_validation_scope[field]
-            ):
-                failures.append(
-                    "VALIDATION_SCOPE_EVIDENCE_LIVE_MISMATCH:"
-                    f"{location}:{field}"
-                )
+    )
     path_audit = read_json(report_path("PR168_RP5A_PathAudit.report.json"))
+    input_report = read_json(report_path("PR168_RP5A_Input.report.json"))
     performance = read_json(report_path("PR168_RP5A_ScanPerformance.report.json"))
+    legacy_pr = read_json(
+        report_path("PR168_RP5A_LegacyPRSemanticAudit.report.json")
+    )
     pr165 = read_json(report_path("PR168_RP5A_AgentCrosswalkTouchpoints.report.json"))
+    delete_manifest = read_json(
+        manifest_path_for_shard(shard_path("delete_eligibility_rows"))
+    )
     budget_exhausted = performance.get("scan_budget_status") == "SCAN_BUDGET_EXHAUSTED"
 
     if not file_rows and not budget_exhausted:
@@ -219,78 +560,6 @@ def _failures() -> list[str]:
             failures.append(f"NO_DELETION_FORBIDDEN_COUNTER:{key}:{no_delete.get(key)}")
         if final_summary.get(key) != expected:
             failures.append(f"FINAL_FORBIDDEN_COUNTER:{key}:{final_summary.get(key)}")
-    if no_delete.get("validation_scope_comparison_mode") != VALIDATION_SCOPE_COMPARISON_MODE:
-        failures.append("VALIDATION_SCOPE_COMPARISON_MODE_INVALID")
-    if no_delete.get("validation_scope_baseline_ref") != VALIDATION_SCOPE_BASELINE_REF:
-        failures.append("VALIDATION_SCOPE_BASELINE_REF_INVALID")
-    baseline_command_count = no_delete.get("validation_scope_baseline_command_count")
-    current_command_count = no_delete.get("validation_scope_current_command_count")
-    added_count = no_delete.get("validation_scope_added_count")
-    removed_count = no_delete.get("validation_scope_removed_count")
-    if not _is_integer(baseline_command_count, minimum=1):
-        failures.append("VALIDATION_SCOPE_BASELINE_COMMAND_COUNT_INVALID")
-    if not _is_integer(current_command_count, minimum=1):
-        failures.append("VALIDATION_SCOPE_CURRENT_COMMAND_COUNT_INVALID")
-    if not _is_integer(added_count, minimum=0):
-        failures.append("VALIDATION_SCOPE_ADDED_COUNT_INVALID")
-    if not _is_integer(removed_count, minimum=0):
-        failures.append("VALIDATION_SCOPE_REMOVED_COUNT_INVALID")
-    removed_refs = no_delete.get("validation_scope_removed_refs")
-    if not isinstance(removed_refs, list):
-        failures.append("VALIDATION_SCOPE_REMOVED_REFS_INVALID")
-        removed_refs = []
-    removed_ref_multiplicities = [
-        _removed_ref_multiplicity(value) for value in removed_refs
-    ]
-    if any(value is None for value in removed_ref_multiplicities):
-        failures.append("VALIDATION_SCOPE_REMOVED_REF_SIGNATURE_INVALID")
-    represented_removed_count = sum(
-        value
-        for value in removed_ref_multiplicities
-        if value is not None
-    )
-    if (
-        _is_integer(removed_count, minimum=0)
-        and represented_removed_count != removed_count
-    ):
-        failures.append("VALIDATION_SCOPE_REMOVED_REF_COUNT_MISMATCH")
-    inventory_failures = no_delete.get("current_validation_inventory_failures")
-    inventory_failure_count = no_delete.get(
-        "current_validation_inventory_failure_count"
-    )
-    if not isinstance(inventory_failures, list) or any(
-        not isinstance(value, str) for value in inventory_failures
-    ):
-        failures.append("CURRENT_VALIDATION_INVENTORY_FAILURES_INVALID")
-        inventory_failures = []
-    if not _is_integer(inventory_failure_count, minimum=0):
-        failures.append("CURRENT_VALIDATION_INVENTORY_FAILURE_COUNT_INVALID")
-    elif inventory_failure_count != len(inventory_failures):
-        failures.append("CURRENT_VALIDATION_INVENTORY_FAILURE_COUNT_MISMATCH")
-    if inventory_failures:
-        failures.append("CURRENT_VALIDATION_INVENTORY_FAILED")
-    if removed_refs:
-        failures.append("VALIDATION_SCOPE_REMOVED_REFS_PRESENT")
-    if no_delete.get("validation_scope_removed_count") != 0:
-        failures.append("VALIDATION_SCOPE_REMOVED")
-    if not no_delete.get("no_legacy_scope_removal_flag"):
-        failures.append("NO_LEGACY_SCOPE_REMOVAL_FLAG_FALSE")
-    change_type = no_delete.get("validation_scope_change_type")
-    if change_type not in VALIDATION_SCOPE_CHANGE_TYPES:
-        failures.append("BAD_VALIDATION_SCOPE_CHANGE_TYPE")
-    expected_change_type = (
-        "SEMANTIC_COMMAND_ADDITION_ONLY"
-        if _is_integer(added_count, minimum=0) and added_count > 0
-        else "NONE"
-    )
-    if change_type in VALIDATION_SCOPE_CHANGE_TYPES and change_type != expected_change_type:
-        failures.append("VALIDATION_SCOPE_CHANGE_TYPE_COUNT_MISMATCH")
-    expected_changed_flag = bool(
-        (_is_integer(added_count, minimum=0) and added_count > 0)
-        or (_is_integer(removed_count, minimum=0) and removed_count > 0)
-    )
-    if no_delete.get("validation_scope_changed_flag") is not expected_changed_flag:
-        failures.append("VALIDATION_SCOPE_CHANGED_FLAG_MISMATCH")
 
     if not pr165.get("documented_equivalent_crosswalk_present"):
         failures.append("PR165_D2_AGENT_CROSSWALK_MISSING")
@@ -302,10 +571,157 @@ def _failures() -> list[str]:
         if len(str(row.get("matched_text_short", ""))) > 200:
             failures.append(f"HIT_TEXT_TOO_LONG:{row.get('row_id')}")
 
-    if final_summary.get("files_with_stale_terms_count") != len(file_rows):
-        failures.append("FINAL_FILE_COUNT_MISMATCH")
-    if final_summary.get("row_field_semantic_hit_count") != len(hit_rows):
-        failures.append("FINAL_HIT_COUNT_MISMATCH")
+    input_files_scanned = input_report.get("files_scanned_count")
+    performance_files_scanned = performance.get("files_scanned_count")
+    if (
+        not _is_integer(input_files_scanned, minimum=0)
+        or not _is_integer(performance_files_scanned, minimum=0)
+    ):
+        failures.append("FILES_SCANNED_DETAILED_OWNER_COUNT_INVALID")
+    else:
+        if input_files_scanned != performance_files_scanned:
+            failures.append(
+                "FILES_SCANNED_DETAILED_OWNER_COUNT_MISMATCH:"
+                f"{input_files_scanned}:{performance_files_scanned}"
+            )
+        failures.extend(
+            _final_summary_count_failures(
+                final_summary,
+                final_summary_records,
+                "files_scanned_count",
+                input_files_scanned,
+                "FINAL_FILES_SCANNED_COUNT_MISMATCH",
+            )
+        )
+
+    for field in (
+        "github_prs_scanned_count",
+        "github_prs_with_stale_terms_count",
+    ):
+        expected = legacy_pr.get(field)
+        if not _is_integer(expected, minimum=0):
+            failures.append(
+                f"LEGACY_PR_DETAILED_OWNER_COUNT_INVALID:{field}"
+            )
+            continue
+        failures.extend(
+            _final_summary_count_failures(
+                final_summary,
+                final_summary_records,
+                field,
+                expected,
+                "FINAL_LEGACY_PR_COUNT_MISMATCH",
+            )
+        )
+
+    file_kind_counts = Counter(
+        str(row.get("file_kind")) for row in file_rows
+    )
+    independently_derived_counts = {
+        "stale_term_taxonomy_count": len(term_rows),
+        "files_with_stale_terms_count": len(file_rows),
+        **{
+            summary_field: file_kind_counts[file_kind]
+            for file_kind, summary_field
+            in _FILE_KIND_SUMMARY_FIELDS.items()
+        },
+        "row_field_semantic_hit_count": len(hit_rows),
+        "consumer_graph_row_count": len(consumer_rows),
+        "active_consumer_file_count": len(
+            {
+                row["file_path"]
+                for row in consumer_rows
+                if row.get("active_consumer_flag")
+            }
+        ),
+        "validation_dependency_row_count": len(validation_rows),
+        "validation_dependent_file_count": len(
+            {
+                row["file_path_or_prefix"]
+                for row in validation_rows
+                if row.get("validation_dependency_type") != "NONE"
+            }
+        ),
+        "qku_formula_identity_dependency_file_count": len(
+            [row for row in identity_rows if row.get("identity_count")]
+        ),
+        "identity_custody_row_count": len(custody_rows),
+        "agent_touchpoint_file_count": len(
+            {
+                row["file_path"]
+                for row in agent_rows
+                if row.get("active_agent_touchpoint_flag")
+            }
+        ),
+        "blast_radius_row_count": len(blast_rows),
+        "validation_time_risk_row_count": len(validation_time_rows),
+    }
+    for field, expected in independently_derived_counts.items():
+        failures.extend(
+            _final_summary_count_failures(
+                final_summary,
+                final_summary_records,
+                field,
+                expected,
+                "FINAL_DETAILED_ROW_COUNT_MISMATCH",
+            )
+        )
+
+    delete_classification_counts = Counter(
+        str(row.get("classification")) for row in delete_rows
+    )
+    for classification, field in (
+        _DELETE_CLASSIFICATION_SUMMARY_FIELDS.items()
+    ):
+        failures.extend(
+            _final_summary_count_failures(
+                final_summary,
+                final_summary_records,
+                field,
+                delete_classification_counts[classification],
+                "FINAL_DELETE_CLASSIFICATION_COUNT_MISMATCH",
+            )
+        )
+    delete_manifest_row_count = delete_manifest.get("row_count")
+    if not _is_integer(delete_manifest_row_count, minimum=0):
+        failures.append("DELETE_MANIFEST_ROW_COUNT_INVALID")
+    else:
+        for location, payload in (
+            ("TOP", final_summary),
+            ("RECORDS", final_summary_records),
+        ):
+            values = [
+                payload.get(field)
+                for field
+                in _DELETE_CLASSIFICATION_SUMMARY_FIELDS.values()
+            ]
+            if not all(
+                _is_integer(value, minimum=0) for value in values
+            ):
+                failures.append(
+                    "FINAL_DELETE_CLASSIFICATION_TOTAL_INVALID:"
+                    f"{location}"
+                )
+            elif sum(values) != delete_manifest_row_count:
+                failures.append(
+                    "FINAL_DELETE_CLASSIFICATION_TOTAL_MISMATCH:"
+                    f"{location}:{sum(values)}:"
+                    f"{delete_manifest_row_count}"
+                )
+
+    for field in FORBIDDEN_OPERATION_COUNTERS:
+        expected = no_delete.get(field)
+        if _is_integer(expected, minimum=0):
+            failures.extend(
+                _final_summary_count_failures(
+                    final_summary,
+                    final_summary_records,
+                    field,
+                    expected,
+                    "FINAL_NO_DELETION_COUNTER_MISMATCH",
+                )
+            )
+
     if final_summary.get("deleted_file_count") != 0 or final_summary.get("moved_file_count") != 0:
         failures.append("FINAL_DELETE_MOVE_NONZERO")
     if performance.get("max_line_hits_per_file") != MAX_LINE_HITS_PER_FILE:

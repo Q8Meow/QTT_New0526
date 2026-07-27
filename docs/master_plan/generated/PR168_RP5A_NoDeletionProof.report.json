@@ -49,13 +49,15 @@
     "trade_simulation_refs": [],
     "validation_scope_added_count": 7,
     "validation_scope_baseline_command_count": 419,
-    "validation_scope_baseline_ref": "origin/main",
+    "validation_scope_baseline_ref": "merge-base(HEAD,origin/main)",
     "validation_scope_change_type": "SEMANTIC_COMMAND_ADDITION_ONLY",
     "validation_scope_changed_flag": true,
-    "validation_scope_comparison_mode": "BASE_REF_TO_EFFECTIVE_WORKTREE_PHASE_COMMAND_INVENTORY",
+    "validation_scope_comparison_mode": "MERGE_BASE_TO_EFFECTIVE_WORKTREE_PHASE_COMMAND_INVENTORY",
     "validation_scope_current_command_count": 426,
+    "validation_scope_evidence_schema_version": 2,
     "validation_scope_removed_count": 0,
-    "validation_scope_removed_refs": []
+    "validation_scope_removed_refs": [],
+    "validation_scope_snapshot_context": "ST12A_BRANCH_MERGE_BASE_DELTA"
   },
   "report_version": "PR168-RP5A-v2.0",
   "runtime_stack_generation_count": 0,
@@ -65,11 +67,13 @@
   "trade_simulation_refs": [],
   "validation_scope_added_count": 7,
   "validation_scope_baseline_command_count": 419,
-  "validation_scope_baseline_ref": "origin/main",
+  "validation_scope_baseline_ref": "merge-base(HEAD,origin/main)",
   "validation_scope_change_type": "SEMANTIC_COMMAND_ADDITION_ONLY",
   "validation_scope_changed_flag": true,
-  "validation_scope_comparison_mode": "BASE_REF_TO_EFFECTIVE_WORKTREE_PHASE_COMMAND_INVENTORY",
+  "validation_scope_comparison_mode": "MERGE_BASE_TO_EFFECTIVE_WORKTREE_PHASE_COMMAND_INVENTORY",
   "validation_scope_current_command_count": 426,
+  "validation_scope_evidence_schema_version": 2,
   "validation_scope_removed_count": 0,
-  "validation_scope_removed_refs": []
+  "validation_scope_removed_refs": [],
+  "validation_scope_snapshot_context": "ST12A_BRANCH_MERGE_BASE_DELTA"
 }

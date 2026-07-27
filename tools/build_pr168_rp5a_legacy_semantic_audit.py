@@ -11,7 +11,7 @@ import subprocess
 import sys
 import time
 import types
-from typing import Any, Sequence
+from typing import Any, Mapping, Sequence
 import uuid
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -68,11 +68,20 @@ from tools.pr168_rp5a_git_grep_scanner import file_inventory_rows, scan_files_fo
 from tools.pr168_rp5a_identity_custody import build_identity_custody_rows
 from tools.pr168_rp5a_identity_dependency import build_identity_dependency_rows, scan_identity_occurrences
 from tools.pr168_rp5a_pr_metadata_scanner import fetch_pr_metadata_rows
-from tools.pr168_rp5a_report_writer import read_json, read_jsonl, write_json, write_report, write_shard
+from tools.pr168_rp5a_report_writer import (
+    read_json,
+    read_jsonl,
+    report_payload,
+    write_json,
+    write_report,
+    write_shard,
+)
 from tools.pr168_rp5a_row_field_hit_index import LAST_ROW_FIELD_STATS, build_row_field_hits
 from tools.pr168_rp5a_term_taxonomy import TERM_BY_ID, severities_from_ids, taxonomy_rows
 from tools.pr168_rp5a_validation_dependency_graph import build_validation_dependency_rows, build_validation_time_risk_rows
+from tools.ci_branch_context import current_branch_context
 from tools import run_validation_gates as current_validation_runner
+from tools.validation_scope_registry import ST12A_BRANCH
 from tools.validation_inventory import (
     canonical_command,
     validate_inventory,
@@ -80,10 +89,16 @@ from tools.validation_inventory import (
 )
 
 
-VALIDATION_SCOPE_COMPARISON_MODE = (
-    "BASE_REF_TO_EFFECTIVE_WORKTREE_PHASE_COMMAND_INVENTORY"
+VALIDATION_SCOPE_EVIDENCE_SCHEMA_VERSION = 2
+VALIDATION_SCOPE_SNAPSHOT_CONTEXT = "ST12A_BRANCH_MERGE_BASE_DELTA"
+VALIDATION_SCOPE_MAIN_COMPARISON_MODE = (
+    "FIRST_PARENT_TO_EFFECTIVE_WORKTREE_PHASE_COMMAND_INVENTORY"
 )
-VALIDATION_SCOPE_BASELINE_REF = "origin/main"
+VALIDATION_SCOPE_MERGE_BASE_COMPARISON_MODE = (
+    "MERGE_BASE_TO_EFFECTIVE_WORKTREE_PHASE_COMMAND_INVENTORY"
+)
+VALIDATION_SCOPE_MAIN_BASELINE_LABEL = "first-parent(HEAD)"
+VALIDATION_SCOPE_MERGE_BASELINE_LABEL = "merge-base(HEAD,origin/main)"
 VALIDATION_SCOPE_RUNNER_PATH = "tools/run_validation_gates.py"
 VALIDATION_SCOPE_VALIDATION_DIR = Path(
     ".tmp/st12a-rp5a-semantic-currentization/validation-inventory"
@@ -92,6 +107,8 @@ VALIDATION_SCOPE_PYTEST_BASETEMP = (
     VALIDATION_SCOPE_VALIDATION_DIR / "pytest"
 )
 VALIDATION_SCOPE_EVIDENCE_FIELDS = (
+    "validation_scope_evidence_schema_version",
+    "validation_scope_snapshot_context",
     "validation_scope_comparison_mode",
     "validation_scope_baseline_ref",
     "validation_scope_baseline_command_count",
@@ -514,12 +531,34 @@ def _validation_scope_refs(
     ]
 
 
-def _baseline_phase_manifest() -> list[dict[str, object]]:
+def _validation_scope_baseline() -> tuple[str, str, str]:
+    branch = current_branch_context(REPO_ROOT).branch
+    if branch == "main":
+        git_args = ["git", "rev-parse", "HEAD^1"]
+        semantic_label = VALIDATION_SCOPE_MAIN_BASELINE_LABEL
+        comparison_mode = VALIDATION_SCOPE_MAIN_COMPARISON_MODE
+    else:
+        git_args = ["git", "merge-base", "HEAD", "origin/main"]
+        semantic_label = VALIDATION_SCOPE_MERGE_BASELINE_LABEL
+        comparison_mode = VALIDATION_SCOPE_MERGE_BASE_COMPARISON_MODE
+    internal_ref = _run_text(git_args)
+    if not internal_ref:
+        raise RuntimeError(
+            "RP5A_VALIDATION_SCOPE_BASELINE_RESOLVE_FAILED:"
+            f"{semantic_label}"
+        )
+    return internal_ref, semantic_label, comparison_mode
+
+
+def _baseline_phase_manifest(
+    internal_ref: str,
+    semantic_label: str,
+) -> list[dict[str, object]]:
     completed = subprocess.run(
         [
             "git",
             "show",
-            f"{VALIDATION_SCOPE_BASELINE_REF}:{VALIDATION_SCOPE_RUNNER_PATH}",
+            f"{internal_ref}:{VALIDATION_SCOPE_RUNNER_PATH}",
         ],
         cwd=REPO_ROOT,
         check=False,
@@ -532,7 +571,7 @@ def _baseline_phase_manifest() -> list[dict[str, object]]:
         detail = completed.stderr.strip() or "baseline runner source is empty"
         raise RuntimeError(
             "RP5A_VALIDATION_SCOPE_BASELINE_READ_FAILED:"
-            f"{VALIDATION_SCOPE_BASELINE_REF}:{VALIDATION_SCOPE_RUNNER_PATH}:"
+            f"{semantic_label}:{VALIDATION_SCOPE_RUNNER_PATH}:"
             f"{detail}"
         )
 
@@ -557,7 +596,7 @@ def _baseline_phase_manifest() -> list[dict[str, object]]:
         if not callable(build_manifest):
             raise RuntimeError(
                 "RP5A_VALIDATION_SCOPE_BASELINE_MANIFEST_BUILDER_MISSING:"
-                f"{VALIDATION_SCOPE_BASELINE_REF}:{VALIDATION_SCOPE_RUNNER_PATH}"
+                f"{semantic_label}:{VALIDATION_SCOPE_RUNNER_PATH}"
             )
         return build_manifest(
             VALIDATION_SCOPE_VALIDATION_DIR,
@@ -570,15 +609,20 @@ def _baseline_phase_manifest() -> list[dict[str, object]]:
             raise
         raise RuntimeError(
             "RP5A_VALIDATION_SCOPE_BASELINE_LOAD_FAILED:"
-            f"{VALIDATION_SCOPE_BASELINE_REF}:{VALIDATION_SCOPE_RUNNER_PATH}"
+            f"{semantic_label}:{VALIDATION_SCOPE_RUNNER_PATH}"
         ) from exc
     finally:
         sys.modules.pop(module_name, None)
 
 
 def _validation_scope_delta() -> dict[str, object]:
+    (
+        internal_ref,
+        semantic_label,
+        comparison_mode,
+    ) = _validation_scope_baseline()
     baseline_counter = _validation_scope_counter(
-        _baseline_phase_manifest()
+        _baseline_phase_manifest(internal_ref, semantic_label)
     )
     current_counter = _validation_scope_counter(
         current_validation_runner.build_phase_manifest(
@@ -594,10 +638,14 @@ def _validation_scope_delta() -> dict[str, object]:
     removed_count = sum(removed.values())
     added_count = sum(added.values())
     return {
-        "validation_scope_comparison_mode": (
-            VALIDATION_SCOPE_COMPARISON_MODE
+        "validation_scope_evidence_schema_version": (
+            VALIDATION_SCOPE_EVIDENCE_SCHEMA_VERSION
         ),
-        "validation_scope_baseline_ref": VALIDATION_SCOPE_BASELINE_REF,
+        "validation_scope_snapshot_context": (
+            VALIDATION_SCOPE_SNAPSHOT_CONTEXT
+        ),
+        "validation_scope_comparison_mode": comparison_mode,
+        "validation_scope_baseline_ref": semantic_label,
         "validation_scope_baseline_command_count": sum(
             baseline_counter.values()
         ),
@@ -719,55 +767,285 @@ def _path_audit_rows(extra_owned_paths: list[str]) -> list[dict[str, object]]:
     return rows
 
 
-def _report_summary_counts(file_rows: list[dict[str, object]], hit_rows: list[dict[str, object]], pr_rows: list[dict[str, object]], consumer_rows: list[dict[str, object]], validation_rows: list[dict[str, object]], identity_rows: list[dict[str, object]], custody_rows: list[dict[str, object]], agent_rows: list[dict[str, object]], blast_rows: list[dict[str, object]], validation_time_rows: list[dict[str, object]], delete_rows: list[dict[str, object]], no_delete: dict[str, object], files_scanned: list[str]) -> dict[str, object]:
+_FILE_KIND_SUMMARY_FIELDS = {
+    FILE_KIND_GENERATED_REPORT: "generated_reports_with_stale_terms_count",
+    FILE_KIND_GENERATED_SHARD: "generated_shards_with_stale_terms_count",
+    FILE_KIND_TOOL_SOURCE: "tools_with_stale_terms_count",
+    FILE_KIND_TEST_SOURCE: "tests_with_stale_terms_count",
+    FILE_KIND_VALIDATOR: "validators_with_stale_terms_count",
+    FILE_KIND_DOC: "docs_with_stale_terms_count",
+    FILE_KIND_CURRENTIZATION: "currentization_with_stale_terms_count",
+    FILE_KIND_MANIFEST: "manifests_with_stale_terms_count",
+}
+_DELETE_CLASSIFICATION_SUMMARY_FIELDS = {
+    "DELETE_FROM_ACTIVE_TREE_SAFE": (
+        "delete_from_active_tree_safe_draft_count"
+    ),
+    "DELETE_AFTER_QKU_FORMULA_IDENTITY_RECLAIM": (
+        "delete_after_qku_formula_identity_reclaim_count"
+    ),
+    "KEEP_ACTIVE_CONSUMER": "keep_active_consumer_count",
+    "KEEP_UNIQUE_QKU_FORMULA_SOURCE": (
+        "keep_unique_qku_formula_source_count"
+    ),
+    "KEEP_TEST_FIXTURE": "keep_test_fixture_count",
+    "KEEP_VALIDATION_DEPENDENCY": "keep_validation_dependency_count",
+    "KEEP_LEGACY_SUMMARY_ONLY": "keep_legacy_summary_only_count",
+    "ARCHIVE_NO_VALIDATION_SCAN": "archive_no_validation_scan_count",
+    "REWRITE_CONSUMER_FIRST": "rewrite_consumer_first_count",
+    "UNCLEAR_DO_NOT_DELETE": "unclear_do_not_delete_count",
+}
+
+
+def _required_summary_count(
+    owner: Mapping[str, object],
+    field: str,
+    owner_name: str,
+) -> int:
+    value = owner.get(field)
+    if (
+        not isinstance(value, int)
+        or isinstance(value, bool)
+        or value < 0
+    ):
+        raise RuntimeError(
+            f"RP5A_SUMMARY_OWNER_COUNT_INVALID:{owner_name}:{field}"
+        )
+    return value
+
+
+def _report_summary_counts(
+    *,
+    input_summary: Mapping[str, object],
+    performance_summary: Mapping[str, object],
+    legacy_pr_summary: Mapping[str, object],
+    term_rows: Sequence[Mapping[str, object]],
+    file_rows: Sequence[Mapping[str, object]],
+    hit_rows: Sequence[Mapping[str, object]],
+    consumer_rows: Sequence[Mapping[str, object]],
+    validation_rows: Sequence[Mapping[str, object]],
+    identity_rows: Sequence[Mapping[str, object]],
+    custody_rows: Sequence[Mapping[str, object]],
+    agent_rows: Sequence[Mapping[str, object]],
+    blast_rows: Sequence[Mapping[str, object]],
+    validation_time_rows: Sequence[Mapping[str, object]],
+    delete_rows: Sequence[Mapping[str, object]],
+    delete_manifest: Mapping[str, object],
+    no_delete: Mapping[str, object],
+) -> dict[str, object]:
+    input_files_scanned = _required_summary_count(
+        input_summary,
+        "files_scanned_count",
+        "Input",
+    )
+    performance_files_scanned = _required_summary_count(
+        performance_summary,
+        "files_scanned_count",
+        "ScanPerformance",
+    )
+    if input_files_scanned != performance_files_scanned:
+        raise RuntimeError(
+            "RP5A_SUMMARY_FILES_SCANNED_OWNER_MISMATCH:"
+            f"{input_files_scanned}:{performance_files_scanned}"
+        )
+    github_prs_scanned = _required_summary_count(
+        legacy_pr_summary,
+        "github_prs_scanned_count",
+        "LegacyPRSemanticAudit",
+    )
+    github_prs_with_stale_terms = _required_summary_count(
+        legacy_pr_summary,
+        "github_prs_with_stale_terms_count",
+        "LegacyPRSemanticAudit",
+    )
     kind_counts = Counter(str(row["file_kind"]) for row in file_rows)
     class_counts = Counter(str(row["classification"]) for row in delete_rows)
+    unexpected_classes = sorted(
+        set(class_counts) - set(_DELETE_CLASSIFICATION_SUMMARY_FIELDS)
+    )
+    if unexpected_classes:
+        raise RuntimeError(
+            "RP5A_SUMMARY_DELETE_CLASSIFICATION_UNKNOWN:"
+            f"{unexpected_classes}"
+        )
+    delete_manifest_count = _required_summary_count(
+        delete_manifest,
+        "row_count",
+        "delete_eligibility_rows.manifest",
+    )
+    if delete_manifest_count != len(delete_rows):
+        raise RuntimeError(
+            "RP5A_SUMMARY_DELETE_MANIFEST_ROW_COUNT_MISMATCH:"
+            f"{delete_manifest_count}:{len(delete_rows)}"
+        )
+    classification_counts = {
+        summary_field: class_counts[classification]
+        for classification, summary_field
+        in _DELETE_CLASSIFICATION_SUMMARY_FIELDS.items()
+    }
+    if sum(classification_counts.values()) != delete_manifest_count:
+        raise RuntimeError(
+            "RP5A_SUMMARY_DELETE_CLASSIFICATION_TOTAL_MISMATCH:"
+            f"{sum(classification_counts.values())}:{delete_manifest_count}"
+        )
     return {
         "pr240_closed_not_merged_preflight_passed": True,
-        "stale_term_taxonomy_count": len(TERM_BY_ID),
-        "github_prs_scanned_count": len(pr_rows),
-        "github_prs_with_stale_terms_count": len([row for row in pr_rows if row.get("matched_terms")]),
-        "files_scanned_count": len(files_scanned),
+        "stale_term_taxonomy_count": len(term_rows),
+        "github_prs_scanned_count": github_prs_scanned,
+        "github_prs_with_stale_terms_count": (
+            github_prs_with_stale_terms
+        ),
+        "files_scanned_count": input_files_scanned,
         "files_with_stale_terms_count": len(file_rows),
-        "generated_reports_with_stale_terms_count": kind_counts[FILE_KIND_GENERATED_REPORT],
-        "generated_shards_with_stale_terms_count": kind_counts[FILE_KIND_GENERATED_SHARD],
-        "tools_with_stale_terms_count": kind_counts[FILE_KIND_TOOL_SOURCE],
-        "tests_with_stale_terms_count": kind_counts[FILE_KIND_TEST_SOURCE],
-        "validators_with_stale_terms_count": kind_counts[FILE_KIND_VALIDATOR],
-        "docs_with_stale_terms_count": kind_counts[FILE_KIND_DOC],
-        "currentization_with_stale_terms_count": kind_counts[FILE_KIND_CURRENTIZATION],
-        "manifests_with_stale_terms_count": kind_counts[FILE_KIND_MANIFEST],
+        **{
+            summary_field: kind_counts[file_kind]
+            for file_kind, summary_field in _FILE_KIND_SUMMARY_FIELDS.items()
+        },
         "row_field_semantic_hit_count": len(hit_rows),
         "consumer_graph_row_count": len(consumer_rows),
-        "active_consumer_file_count": len({row["file_path"] for row in consumer_rows if row.get("active_consumer_flag")}),
+        "active_consumer_file_count": len(
+            {
+                row["file_path"]
+                for row in consumer_rows
+                if row.get("active_consumer_flag")
+            }
+        ),
         "validation_dependency_row_count": len(validation_rows),
-        "validation_dependent_file_count": len({row["file_path_or_prefix"] for row in validation_rows if row.get("validation_dependency_type") != "NONE"}),
-        "qku_formula_identity_dependency_file_count": len([row for row in identity_rows if row.get("identity_count")]),
+        "validation_dependent_file_count": len(
+            {
+                row["file_path_or_prefix"]
+                for row in validation_rows
+                if row.get("validation_dependency_type") != "NONE"
+            }
+        ),
+        "qku_formula_identity_dependency_file_count": len(
+            [row for row in identity_rows if row.get("identity_count")]
+        ),
         "identity_custody_row_count": len(custody_rows),
-        "agent_touchpoint_file_count": len({row["file_path"] for row in agent_rows if row.get("active_agent_touchpoint_flag")}),
+        "agent_touchpoint_file_count": len(
+            {
+                row["file_path"]
+                for row in agent_rows
+                if row.get("active_agent_touchpoint_flag")
+            }
+        ),
         "blast_radius_row_count": len(blast_rows),
         "validation_time_risk_row_count": len(validation_time_rows),
-        "delete_from_active_tree_safe_draft_count": class_counts["DELETE_FROM_ACTIVE_TREE_SAFE"],
-        "delete_after_qku_formula_identity_reclaim_count": class_counts["DELETE_AFTER_QKU_FORMULA_IDENTITY_RECLAIM"],
-        "keep_active_consumer_count": class_counts["KEEP_ACTIVE_CONSUMER"],
-        "keep_unique_qku_formula_source_count": class_counts["KEEP_UNIQUE_QKU_FORMULA_SOURCE"],
-        "keep_test_fixture_count": class_counts["KEEP_TEST_FIXTURE"],
-        "keep_validation_dependency_count": class_counts["KEEP_VALIDATION_DEPENDENCY"],
-        "keep_legacy_summary_only_count": class_counts["KEEP_LEGACY_SUMMARY_ONLY"],
-        "archive_no_validation_scan_count": class_counts["ARCHIVE_NO_VALIDATION_SCAN"],
-        "rewrite_consumer_first_count": class_counts["REWRITE_CONSUMER_FIRST"],
-        "unclear_do_not_delete_count": class_counts["UNCLEAR_DO_NOT_DELETE"],
-        **{key: no_delete.get(key, value) for key, value in FORBIDDEN_OPERATION_COUNTERS.items()},
-        "legacy_artifact_content_modified_count": no_delete["legacy_artifact_content_modified_count"],
+        **classification_counts,
+        **{
+            key: _required_summary_count(
+                no_delete,
+                key,
+                "NoDeletionProof",
+            )
+            for key in FORBIDDEN_OPERATION_COUNTERS
+        },
         **{
             field: no_delete[field]
             for field in VALIDATION_SCOPE_EVIDENCE_FIELDS
         },
-        "live_order_authority_created_count": 0,
-        "source_truth_authority_created_count": 0,
-        "quantum_backend_execution_count": 0,
-        "qtt_sha_or_atomicrows_hash_authority_count": 0,
     }
+
+
+_REPORT_PAYLOAD_METADATA_FIELDS = frozenset(
+    {
+        "logical_report_id",
+        "physical_filename",
+        "report_version",
+        "created_at_utc",
+        "audit_only_flag",
+        "records",
+        "rows_ref",
+        "manifest_ref",
+    }
+)
+_VALIDATION_SCOPE_EVIDENCE_ONLY_REPORTS = (
+    "PR168_RP5A_NoDeletionProof.report.json",
+    "PR168_RP5A_FinalSummary.report.json",
+)
+
+
+def _persisted_report_summary_counts(
+    no_delete: Mapping[str, object],
+) -> dict[str, object]:
+    delete_shard = shard_path("delete_eligibility_rows")
+    return _report_summary_counts(
+        input_summary=read_json(
+            report_path("PR168_RP5A_Input.report.json")
+        ),
+        performance_summary=read_json(
+            report_path("PR168_RP5A_ScanPerformance.report.json")
+        ),
+        legacy_pr_summary=read_json(
+            report_path("PR168_RP5A_LegacyPRSemanticAudit.report.json")
+        ),
+        term_rows=read_jsonl(shard_path("term_taxonomy_rows")),
+        file_rows=read_jsonl(shard_path("legacy_file_semantic_rows")),
+        hit_rows=read_jsonl(shard_path("row_field_semantic_hit_rows")),
+        consumer_rows=read_jsonl(shard_path("consumer_graph_rows")),
+        validation_rows=read_jsonl(
+            shard_path("validation_dependency_rows")
+        ),
+        identity_rows=read_jsonl(
+            shard_path("qku_formula_identity_dependency_rows")
+        ),
+        custody_rows=read_jsonl(shard_path("identity_custody_rows")),
+        agent_rows=read_jsonl(shard_path("agent_touchpoint_rows")),
+        blast_rows=read_jsonl(shard_path("blast_radius_rows")),
+        validation_time_rows=read_jsonl(
+            shard_path("validation_time_risk_rows")
+        ),
+        delete_rows=read_jsonl(delete_shard),
+        delete_manifest=read_json(
+            manifest_path_for_shard(delete_shard)
+        ),
+        no_delete=no_delete,
+    )
+
+
+def _validation_scope_evidence_only_payloads(
+) -> dict[str, dict[str, Any]]:
+    no_delete_report = read_json(
+        report_path("PR168_RP5A_NoDeletionProof.report.json")
+    )
+    no_delete_summary = {
+        key: value
+        for key, value in no_delete_report.items()
+        if key not in _REPORT_PAYLOAD_METADATA_FIELDS
+    }
+    no_delete_summary.update(_validation_scope_delta())
+    summary_counts = _persisted_report_summary_counts(no_delete_summary)
+    return {
+        "PR168_RP5A_NoDeletionProof.report.json": report_payload(
+            "PR168_RP5A_NoDeletionProof.report.json",
+            summary=no_delete_summary,
+            records=no_delete_summary,
+        ),
+        "PR168_RP5A_FinalSummary.report.json": report_payload(
+            "PR168_RP5A_FinalSummary.report.json",
+            summary=summary_counts,
+            records=summary_counts,
+        ),
+    }
+
+
+def currentize_validation_scope_evidence_only(
+) -> dict[str, dict[str, Any]]:
+    branch = current_branch_context(REPO_ROOT).branch
+    if branch != ST12A_BRANCH:
+        raise RuntimeError(
+            "RP5A_VALIDATION_SCOPE_EVIDENCE_ONLY_BRANCH_INVALID:"
+            f"{branch}"
+        )
+    payloads = _validation_scope_evidence_only_payloads()
+    if tuple(payloads) != _VALIDATION_SCOPE_EVIDENCE_ONLY_REPORTS:
+        raise RuntimeError(
+            "RP5A_VALIDATION_SCOPE_EVIDENCE_ONLY_PATH_SET_INVALID"
+        )
+    for report_name, payload in payloads.items():
+        write_json(report_path(report_name), payload)
+    print("PR168_RP5A_VALIDATION_SCOPE_EVIDENCE_CURRENTIZED")
+    return payloads
 
 
 def _quick_selftest_files(files: list[str]) -> list[str]:
@@ -977,7 +1255,46 @@ def build_all(*, offline: bool = True, quick_selftest: bool = False) -> dict[str
         shard = shard_path(key)
         return generated_ref(shard), generated_ref(manifest_path_for_shard(shard))
 
-    summary_counts = _report_summary_counts(file_rows, hit_rows, pr_rows, consumer_rows, validation_rows, identity_rows, custody_rows, agent_rows, blast_rows, validation_time_rows, delete_rows, no_delete, files)
+    persisted_summary_rows = {
+        key: read_jsonl(shard_path(key))
+        for key in (
+            "term_taxonomy_rows",
+            "legacy_file_semantic_rows",
+            "row_field_semantic_hit_rows",
+            "consumer_graph_rows",
+            "validation_dependency_rows",
+            "qku_formula_identity_dependency_rows",
+            "identity_custody_rows",
+            "agent_touchpoint_rows",
+            "blast_radius_rows",
+            "validation_time_risk_rows",
+            "delete_eligibility_rows",
+        )
+    }
+    summary_counts = _report_summary_counts(
+        input_summary={"files_scanned_count": len(files)},
+        performance_summary=performance_report,
+        legacy_pr_summary=pr_summary,
+        term_rows=persisted_summary_rows["term_taxonomy_rows"],
+        file_rows=persisted_summary_rows["legacy_file_semantic_rows"],
+        hit_rows=persisted_summary_rows["row_field_semantic_hit_rows"],
+        consumer_rows=persisted_summary_rows["consumer_graph_rows"],
+        validation_rows=persisted_summary_rows[
+            "validation_dependency_rows"
+        ],
+        identity_rows=persisted_summary_rows[
+            "qku_formula_identity_dependency_rows"
+        ],
+        custody_rows=persisted_summary_rows["identity_custody_rows"],
+        agent_rows=persisted_summary_rows["agent_touchpoint_rows"],
+        blast_rows=persisted_summary_rows["blast_radius_rows"],
+        validation_time_rows=persisted_summary_rows[
+            "validation_time_risk_rows"
+        ],
+        delete_rows=persisted_summary_rows["delete_eligibility_rows"],
+        delete_manifest=shard_material["delete_eligibility_rows"][1],
+        no_delete=no_delete,
+    )
     summary_counts["pr240_closed_not_merged_preflight_passed"] = bool(pr_summary.get("pr240_closed_not_merged_preflight_passed") and preflight.get("pr240_closed_not_merged_preflight_passed"))
 
     write_report("PR168_RP5A_Input.report.json", summary={"files_scanned_count": len(files), "scan_excludes_rp5a_outputs_flag": True}, rows_ref=refs("input_rows")[0], manifest_ref=refs("input_rows")[1], records=input_rows)
@@ -1029,11 +1346,22 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--offline", action="store_true", help="Do not use public web or online docs; GitHub PR metadata may fall back to committed rows if unavailable.")
     parser.add_argument("--quick-selftest", action="store_true", help="Run a small bounded scan to prove report generation without exhaustive coverage.")
+    parser.add_argument(
+        "--validation-scope-evidence-only",
+        action="store_true",
+        help=(
+            "Currentize only persisted RP5A validation-scope and "
+            "FinalSummary evidence from committed detailed owners."
+        ),
+    )
     return parser.parse_args(argv)
 
 
 def main(argv: Sequence[str] | None = None) -> int:
     args = parse_args(argv)
+    if args.validation_scope_evidence_only:
+        currentize_validation_scope_evidence_only()
+        return 0
     build_all(offline=bool(args.offline), quick_selftest=bool(args.quick_selftest))
     return 0
 

@@ -2447,24 +2447,9 @@ def _generated_gate_output_path(
 ) -> pathlib.Path:
     normalized = _normal_path_text(path_text)
     segments = normalized.split("/")
-    windows_path = pathlib.PureWindowsPath(normalized)
-    windows_forbidden = '<>:"|?*'
-    windows_reserved = {"AUX", "CON", "NUL", "PRN"}
-    windows_reserved.update(f"COM{index}" for index in range(1, 10))
-    windows_reserved.update(f"LPT{index}" for index in range(1, 10))
-    unsafe_segment = any(
-        not segment
-        or segment in {".", ".."}
-        or segment.endswith((" ", "."))
-        or any(character in windows_forbidden or ord(character) < 32 for character in segment)
-        or segment.rstrip(" .").split(".", 1)[0].upper() in windows_reserved
-        for segment in segments
-    )
     if (
         not _is_tracked_generated_output_path(normalized)
-        or pathlib.PurePosixPath(normalized).is_absolute()
-        or bool(windows_path.drive)
-        or unsafe_segment
+        or not _is_portable_relative_repo_path(normalized)
     ):
         raise RuntimeError(
             "VALIDATION_GATE_UNSAFE_GENERATED_OUTPUT_PATH: "
