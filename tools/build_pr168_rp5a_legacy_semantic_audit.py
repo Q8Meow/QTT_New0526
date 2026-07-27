@@ -963,6 +963,173 @@ _VALIDATION_SCOPE_EVIDENCE_ONLY_REPORTS = (
     "PR168_RP5A_NoDeletionProof.report.json",
     "PR168_RP5A_FinalSummary.report.json",
 )
+_PR_METADATA_COMMITTED_FALLBACK_SOURCE = (
+    "existing_committed_rows_fallback"
+)
+_PR_METADATA_REQUIRED_SUMMARY_FIELDS = (
+    "github_prs_scanned_count",
+    "github_prs_with_stale_terms_count",
+    "pr240_closed_not_merged_preflight_passed",
+)
+
+
+def _validated_pr_metadata_owner(
+    rows: object,
+    summary: object,
+    *,
+    owner: str,
+) -> tuple[list[dict[str, object]], dict[str, object]]:
+    if (
+        not isinstance(rows, list)
+        or any(not isinstance(row, dict) for row in rows)
+    ):
+        raise RuntimeError(
+            f"RP5A_PR_METADATA_{owner}_ROWS_INVALID"
+        )
+    if not isinstance(summary, Mapping):
+        raise RuntimeError(
+            f"RP5A_PR_METADATA_{owner}_SUMMARY_INVALID"
+        )
+
+    counts: dict[str, int] = {}
+    for field, label in (
+        ("github_prs_scanned_count", "SCANNED_COUNT"),
+        ("github_prs_with_stale_terms_count", "STALE_COUNT"),
+    ):
+        value = summary.get(field)
+        if (
+            not isinstance(value, int)
+            or isinstance(value, bool)
+            or value < 0
+        ):
+            raise RuntimeError(
+                f"RP5A_PR_METADATA_{owner}_{label}_INVALID"
+            )
+        counts[field] = value
+
+    scanned_count = counts["github_prs_scanned_count"]
+    stale_count = counts["github_prs_with_stale_terms_count"]
+    if scanned_count < stale_count:
+        raise RuntimeError(
+            f"RP5A_PR_METADATA_{owner}_SCANNED_BELOW_STALE"
+        )
+    matched_row_count = sum(
+        bool(row.get("matched_terms")) for row in rows
+    )
+    if stale_count != matched_row_count:
+        raise RuntimeError(
+            f"RP5A_PR_METADATA_{owner}_STALE_ROW_COUNT_MISMATCH"
+        )
+    if (
+        summary.get("pr240_closed_not_merged_preflight_passed")
+        is not True
+    ):
+        raise RuntimeError(
+            f"RP5A_PR_METADATA_{owner}_PR240_CLOSURE_INVALID"
+        )
+    return rows, dict(summary)
+
+
+def _load_committed_pr_metadata_owner(
+    existing_rows_path: Path,
+    existing_report_path: Path,
+) -> tuple[list[dict[str, object]], dict[str, object]]:
+    try:
+        rows = read_jsonl(existing_rows_path)
+    except Exception as exc:
+        raise RuntimeError(
+            "RP5A_PR_METADATA_COMMITTED_ROWS_LOAD_FAILED"
+        ) from exc
+    try:
+        manifest = read_json(
+            manifest_path_for_shard(existing_rows_path)
+        )
+    except Exception as exc:
+        raise RuntimeError(
+            "RP5A_PR_METADATA_COMMITTED_MANIFEST_LOAD_FAILED"
+        ) from exc
+    try:
+        report = read_json(existing_report_path)
+    except Exception as exc:
+        raise RuntimeError(
+            "RP5A_PR_METADATA_COMMITTED_REPORT_LOAD_FAILED"
+        ) from exc
+
+    if not isinstance(manifest, Mapping):
+        raise RuntimeError(
+            "RP5A_PR_METADATA_COMMITTED_MANIFEST_INVALID"
+        )
+    manifest_count = manifest.get("row_count")
+    if (
+        not isinstance(manifest_count, int)
+        or isinstance(manifest_count, bool)
+        or manifest_count < 0
+    ):
+        raise RuntimeError(
+            "RP5A_PR_METADATA_COMMITTED_MANIFEST_ROW_COUNT_INVALID"
+        )
+    if not isinstance(rows, list) or manifest_count != len(rows):
+        raise RuntimeError(
+            "RP5A_PR_METADATA_COMMITTED_MANIFEST_ROW_COUNT_MISMATCH"
+        )
+    if not isinstance(report, Mapping):
+        raise RuntimeError(
+            "RP5A_PR_METADATA_COMMITTED_REPORT_INVALID"
+        )
+    summary = {
+        key: value
+        for key, value in report.items()
+        if key not in _REPORT_PAYLOAD_METADATA_FIELDS
+    }
+    return _validated_pr_metadata_owner(
+        rows,
+        summary,
+        owner="COMMITTED",
+    )
+
+
+def _resolve_pr_metadata(
+    *,
+    offline: bool,
+    existing_rows_path: Path,
+    existing_report_path: Path,
+) -> tuple[list[dict[str, object]], dict[str, object]]:
+    if offline:
+        return _load_committed_pr_metadata_owner(
+            existing_rows_path,
+            existing_report_path,
+        )
+
+    live_rows, live_summary = fetch_pr_metadata_rows(
+        existing_rows_path
+    )
+    if not isinstance(live_summary, Mapping):
+        raise RuntimeError(
+            "RP5A_PR_METADATA_LIVE_SUMMARY_INVALID"
+        )
+    if (
+        live_summary.get("github_metadata_source")
+        == _PR_METADATA_COMMITTED_FALLBACK_SOURCE
+    ):
+        return _load_committed_pr_metadata_owner(
+            existing_rows_path,
+            existing_report_path,
+        )
+    missing_fields = [
+        field
+        for field in _PR_METADATA_REQUIRED_SUMMARY_FIELDS
+        if field not in live_summary
+    ]
+    if missing_fields:
+        raise RuntimeError(
+            "RP5A_PR_METADATA_LIVE_SUMMARY_INCOMPLETE:"
+            + ",".join(missing_fields)
+        )
+    return _validated_pr_metadata_owner(
+        live_rows,
+        live_summary,
+        owner="LIVE",
+    )
 
 
 def _persisted_report_summary_counts(
@@ -1106,9 +1273,13 @@ def build_all(*, offline: bool = True, quick_selftest: bool = False) -> dict[str
 
     phase = timer.start_phase()
     pr_existing_rows = SHARD_ROOT / ROW_SHARDS["legacy_pr_semantic_rows"]
-    pr_rows, pr_summary = fetch_pr_metadata_rows(pr_existing_rows)
-    if not pr_summary.get("pr240_closed_not_merged_preflight_passed"):
-        pr_summary["pr240_closed_not_merged_preflight_passed"] = bool(preflight.get("pr240_closed_not_merged_preflight_passed"))
+    pr_rows, pr_summary = _resolve_pr_metadata(
+        offline=offline,
+        existing_rows_path=pr_existing_rows,
+        existing_report_path=report_path(
+            "PR168_RP5A_LegacyPRSemanticAudit.report.json"
+        ),
+    )
     timer.mark("github_pr_metadata", phase)
     _write_checkpoint("github_pr_metadata", pr_rows_count=len(pr_rows))
     _log_phase("github_pr_metadata", files_processed=len(files), matched_files=len(matched_files), started_at=timer.started_at)

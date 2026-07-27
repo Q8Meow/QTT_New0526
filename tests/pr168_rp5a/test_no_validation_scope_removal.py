@@ -239,6 +239,269 @@ def test_no_validation_scope_removal(monkeypatch) -> None:
         for report_name, payload in evidence_only_payloads.items()
     )
 
+    committed_rows_path = builder.shard_path(
+        "legacy_pr_semantic_rows"
+    )
+    committed_manifest_path = builder.manifest_path_for_shard(
+        committed_rows_path
+    )
+    committed_report_path = report_path(
+        "PR168_RP5A_LegacyPRSemanticAudit.report.json"
+    )
+    original_builder_read_json = builder.read_json
+    original_builder_read_jsonl = builder.read_jsonl
+    committed_rows = original_builder_read_jsonl(
+        committed_rows_path
+    )
+    committed_manifest = original_builder_read_json(
+        committed_manifest_path
+    )
+    committed_report = original_builder_read_json(
+        committed_report_path
+    )
+    committed_summary = {
+        key: value
+        for key, value in committed_report.items()
+        if key not in builder._REPORT_PAYLOAD_METADATA_FIELDS
+    }
+    offline_rows, offline_summary = builder._resolve_pr_metadata(
+        offline=True,
+        existing_rows_path=committed_rows_path,
+        existing_report_path=committed_report_path,
+    )
+    assert offline_rows == committed_rows
+    assert offline_summary == committed_summary
+    assert (
+        len(offline_rows)
+        == committed_manifest["row_count"]
+        == sum(
+            bool(row.get("matched_terms"))
+            for row in offline_rows
+        )
+        == offline_summary["github_prs_with_stale_terms_count"]
+    )
+    assert (
+        offline_summary["github_prs_scanned_count"]
+        >= offline_summary["github_prs_with_stale_terms_count"]
+    )
+    assert (
+        offline_summary[
+            "pr240_closed_not_merged_preflight_passed"
+        ]
+        is True
+    )
+
+    fallback_fetch_calls = []
+    filtered_fallback_rows = committed_rows[:3]
+    monkeypatch.setattr(
+        builder,
+        "fetch_pr_metadata_rows",
+        lambda path: (
+            fallback_fetch_calls.append(path)
+            or (
+                filtered_fallback_rows,
+                {
+                    "github_metadata_source": (
+                        "existing_committed_rows_fallback"
+                    ),
+                    "github_prs_scanned_count": len(
+                        filtered_fallback_rows
+                    ),
+                },
+            )
+        ),
+    )
+    fallback_rows, fallback_summary = builder._resolve_pr_metadata(
+        offline=False,
+        existing_rows_path=committed_rows_path,
+        existing_report_path=committed_report_path,
+    )
+    assert fallback_fetch_calls == [committed_rows_path]
+    assert fallback_rows == committed_rows
+    assert fallback_summary == committed_summary
+
+    mutation_cases = []
+    bad_manifest = copy.deepcopy(committed_manifest)
+    bad_manifest["row_count"] += 1
+    mutation_cases.append(
+        (
+            "manifest-row-count",
+            committed_rows,
+            bad_manifest,
+            committed_report,
+            (
+                "RP5A_PR_METADATA_COMMITTED_"
+                "MANIFEST_ROW_COUNT_MISMATCH"
+            ),
+        )
+    )
+    missing_stale_report = copy.deepcopy(committed_report)
+    missing_stale_report.pop(
+        "github_prs_with_stale_terms_count"
+    )
+    mutation_cases.append(
+        (
+            "missing-stale-count",
+            committed_rows,
+            committed_manifest,
+            missing_stale_report,
+            "RP5A_PR_METADATA_COMMITTED_STALE_COUNT_INVALID",
+        )
+    )
+    scanned_below_stale_report = copy.deepcopy(committed_report)
+    scanned_below_stale_report["github_prs_scanned_count"] = (
+        committed_report["github_prs_with_stale_terms_count"] - 1
+    )
+    mutation_cases.append(
+        (
+            "scanned-below-stale",
+            committed_rows,
+            committed_manifest,
+            scanned_below_stale_report,
+            "RP5A_PR_METADATA_COMMITTED_SCANNED_BELOW_STALE",
+        )
+    )
+    stale_row_mismatch_report = copy.deepcopy(committed_report)
+    stale_row_mismatch_report[
+        "github_prs_with_stale_terms_count"
+    ] -= 1
+    mutation_cases.append(
+        (
+            "stale-row-mismatch",
+            committed_rows,
+            committed_manifest,
+            stale_row_mismatch_report,
+            (
+                "RP5A_PR_METADATA_COMMITTED_"
+                "STALE_ROW_COUNT_MISMATCH"
+            ),
+        )
+    )
+    pr240_false_report = copy.deepcopy(committed_report)
+    pr240_false_report[
+        "pr240_closed_not_merged_preflight_passed"
+    ] = False
+    mutation_cases.append(
+        (
+            "pr240-closure-false",
+            committed_rows,
+            committed_manifest,
+            pr240_false_report,
+            "RP5A_PR_METADATA_COMMITTED_PR240_CLOSURE_INVALID",
+        )
+    )
+    for (
+        mutation_label,
+        mutation_rows,
+        mutation_manifest,
+        mutation_report,
+        expected_error,
+    ) in mutation_cases:
+        monkeypatch.setattr(
+            builder,
+            "read_jsonl",
+            lambda path, payload=mutation_rows: (
+                copy.deepcopy(payload)
+                if path == committed_rows_path
+                else original_builder_read_jsonl(path)
+            ),
+        )
+        monkeypatch.setattr(
+            builder,
+            "read_json",
+            lambda path,
+            manifest_payload=mutation_manifest,
+            report_payload=mutation_report: (
+                copy.deepcopy(manifest_payload)
+                if path == committed_manifest_path
+                else (
+                    copy.deepcopy(report_payload)
+                    if path == committed_report_path
+                    else original_builder_read_json(path)
+                )
+            ),
+        )
+        try:
+            builder._load_committed_pr_metadata_owner(
+                committed_rows_path,
+                committed_report_path,
+            )
+        except RuntimeError as exc:
+            assert str(exc) == expected_error, mutation_label
+        else:
+            raise AssertionError(
+                "committed metadata mutation accepted:"
+                f"{mutation_label}"
+            )
+    monkeypatch.setattr(
+        builder,
+        "read_json",
+        original_builder_read_json,
+    )
+    monkeypatch.setattr(
+        builder,
+        "read_jsonl",
+        original_builder_read_jsonl,
+    )
+
+    complete_live_rows = [
+        {"pr_number": 999, "matched_terms": ["stale-term"]},
+        {"pr_number": 240, "matched_terms": []},
+    ]
+    complete_live_summary = {
+        "github_metadata_source": "gh_pr_list",
+        "github_prs_scanned_count": 9,
+        "github_prs_with_stale_terms_count": 1,
+        "pr240_closed_not_merged_preflight_passed": True,
+    }
+    monkeypatch.setattr(
+        builder,
+        "fetch_pr_metadata_rows",
+        lambda _path: (
+            copy.deepcopy(complete_live_rows),
+            copy.deepcopy(complete_live_summary),
+        ),
+    )
+    resolved_live_rows, resolved_live_summary = (
+        builder._resolve_pr_metadata(
+            offline=False,
+            existing_rows_path=committed_rows_path,
+            existing_report_path=committed_report_path,
+        )
+    )
+    assert resolved_live_rows == complete_live_rows
+    assert resolved_live_summary == complete_live_summary
+
+    incomplete_live_summary = copy.deepcopy(
+        complete_live_summary
+    )
+    incomplete_live_summary.pop(
+        "github_prs_with_stale_terms_count"
+    )
+    monkeypatch.setattr(
+        builder,
+        "fetch_pr_metadata_rows",
+        lambda _path: (
+            copy.deepcopy(complete_live_rows),
+            copy.deepcopy(incomplete_live_summary),
+        ),
+    )
+    try:
+        builder._resolve_pr_metadata(
+            offline=False,
+            existing_rows_path=committed_rows_path,
+            existing_report_path=committed_report_path,
+        )
+    except RuntimeError as exc:
+        assert str(exc) == (
+            "RP5A_PR_METADATA_LIVE_SUMMARY_INCOMPLETE:"
+            "github_prs_with_stale_terms_count"
+        )
+    else:
+        raise AssertionError(
+            "unexpected incomplete live metadata was accepted"
+        )
+
     original_read_json = validator.read_json
     input_path = report_path("PR168_RP5A_Input.report.json")
     mutated_input = original_read_json(input_path)
