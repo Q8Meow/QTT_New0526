@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import datetime
+from hashlib import sha256
 import json
 
-from .errors import ContractValidationError, ReasonCode
+from .errors import ContractValidationError, ReasonCode, SourcePolicyError
 from .models import ComputationBindingProfileV1, SourceBindingV1, UnitBindingV1
 
 
@@ -277,6 +279,166 @@ if (
         "A/B source rules must preserve A and form a ten-identity union",
     )
 
+_EXACT_RETAINED_SOURCE_STATE_RULE_REFS = (
+    ("ST12-SOURCE-RULE::007", "ST10-SOURCE::07"),
+    ("ST12-SOURCE-RULE::021", "ST10-SOURCE::21"),
+    ("ST12-SOURCE-RULE::022", "ST10-SOURCE::22"),
+    ("ST12-SOURCE-RULE::023", "ST10-SOURCE::23"),
+    ("ST12-SOURCE-RULE::024", "ST10-SOURCE::24"),
+    ("ST12-SOURCE-RULE::025", "ST10-SOURCE::25"),
+    ("ST12-SOURCE-RULE::026", "ST10-SOURCE::26"),
+    ("ST12-SOURCE-RULE::027", "ST10-SOURCE::27"),
+    ("ST12-SOURCE-RULE::028", "ST10-SOURCE::28"),
+    ("ST12-SOURCE-RULE::029", "ST10-SOURCE::29"),
+)
+
+
+def get_source_claim_binding_rule(
+    binding_rule_id: str,
+) -> SourceClaimBindingRuleV1:
+    """Resolve one exact retained rule without aliases or caller-selected claims."""
+
+    if not isinstance(binding_rule_id, str) or not binding_rule_id:
+        raise ContractValidationError(
+            ReasonCode.SOURCE_CLAIM_BINDING_MISMATCH,
+            "source-claim binding identity must be nonempty text",
+        )
+    certified = tuple(
+        rule
+        for rule in SOURCE_CLAIM_BINDING_RULES
+        if rule.binding_rule_id == binding_rule_id
+    )
+    if certified:
+        if len(certified) != 1:
+            raise ContractValidationError(
+                ReasonCode.SOURCE_CONFLICT,
+                f"duplicate source-claim binding: {binding_rule_id}",
+            )
+        return certified[0]
+
+    retained_source_state_refs = tuple(
+        source_state_id
+        for rule_id, source_state_id in _EXACT_RETAINED_SOURCE_STATE_RULE_REFS
+        if rule_id == binding_rule_id
+    )
+    if retained_source_state_refs:
+        if len(retained_source_state_refs) != 1:
+            raise ContractValidationError(
+                ReasonCode.SOURCE_CONFLICT,
+                f"duplicate retained source-state rule: {binding_rule_id}",
+            )
+        from .source_policy import get_source_state
+
+        source = get_source_state(retained_source_state_refs[0])
+        return SourceClaimBindingRuleV1(
+            binding_rule_id=binding_rule_id,
+            rule_class="EXACT_SOURCE_STATE_ATOMIC_FACT_BINDING",
+            claim_selector="EXACT_ATOMIC_FACT_ID_MEMBERSHIP_ONLY",
+            source_identity_ref=source.stable_source_identity,
+            source_state_ref=source.source_state_id,
+            exact_claims=source.exact_claims,
+            permitted_consumers=(
+                "SOURCE_CURRENTIZATION_OWNER",
+                "EXACT_PARAMETER_OR_MATH_CONSUMERS_LISTED_BY_EVIDENCE_ADJUDICATION",
+            ),
+            research_completeness_state="COMPLETE_TERMINAL_EXACT_RULE",
+        )
+
+    from .specification import TRANCHE_B_MATH_SPECIFICATIONS
+
+    matches: list[SourceClaimBindingRuleV1] = []
+    for specification in TRANCHE_B_MATH_SPECIFICATIONS:
+        row = json.loads(specification.original_row_json)
+        declared_refs = tuple(row["source_claim_binding_rule_refs"])
+        if binding_rule_id not in declared_refs:
+            continue
+        formal_ref = str(row["formal_derivation_ref"])
+        method_ref = (
+            f"METHOD::{specification.math_spec_id}::{specification.name}"
+        )
+        source_refs = tuple(row["source_identity_refs"])
+        if method_ref not in source_refs or formal_ref not in source_refs:
+            raise ContractValidationError(
+                ReasonCode.SOURCE_CLAIM_BINDING_MISMATCH,
+                f"{binding_rule_id} lacks its exact retained method lineage",
+            )
+        matches.append(
+            SourceClaimBindingRuleV1(
+                binding_rule_id=binding_rule_id,
+                rule_class=(
+                    "EXACT_MATHEMATICAL_METHOD_OR_FORMAL_DERIVATION_BINDING"
+                ),
+                claim_selector="EXACT_MATH_SPEC_ID_ONLY",
+                source_identity_ref=method_ref,
+                source_state_ref=None,
+                exact_claims=(
+                    "Complete procedure, domains, assumptions, precision, and "
+                    f"oracle obligations for {specification.math_spec_id} "
+                    f"{specification.name}.",
+                ),
+                permitted_consumers=(specification.math_spec_id,),
+                research_completeness_state="COMPLETE_TERMINAL_EXACT_RULE",
+                formal_derivation_ref=formal_ref,
+                math_spec_ref=specification.math_spec_id,
+            )
+        )
+    if len(matches) != 1:
+        raise ContractValidationError(
+            ReasonCode.SOURCE_CLAIM_BINDING_MISMATCH,
+            f"source-claim rule does not resolve exactly: {binding_rule_id}",
+        )
+    return matches[0]
+
+
+@dataclass(frozen=True, slots=True)
+class CanonicalSourceBindingReceiptV1:
+    receipt_id: str
+    component_id: str
+    input_field_id: str
+    binding_rule_id: str
+    source_state_id: str
+    stable_source_identity: str
+    effective_epoch: str
+    rights_state: str
+    freshness_policy: str
+    exact_claim_refs: tuple[str, ...]
+    consumer_ref: str
+    terminal_route: str
+    no_authority_flag: bool = True
+
+    def __post_init__(self) -> None:
+        for name in (
+            "receipt_id",
+            "component_id",
+            "input_field_id",
+            "binding_rule_id",
+            "source_state_id",
+            "stable_source_identity",
+            "effective_epoch",
+            "rights_state",
+            "freshness_policy",
+            "consumer_ref",
+            "terminal_route",
+        ):
+            value = getattr(self, name)
+            if not isinstance(value, str) or not value:
+                raise ContractValidationError(
+                    ReasonCode.INVALID_CONTRACT,
+                    f"canonical source receipt {name} is required",
+                )
+        if (
+            not isinstance(self.exact_claim_refs, tuple)
+            or not self.exact_claim_refs
+            or any(not isinstance(value, str) or not value for value in self.exact_claim_refs)
+            or len(set(self.exact_claim_refs)) != len(self.exact_claim_refs)
+            or type(self.no_authority_flag) is not bool
+            or not self.no_authority_flag
+        ):
+            raise ContractValidationError(
+                ReasonCode.CAPABILITY_DENIED,
+                "canonical source receipt claims must be exact and no-authority",
+            )
+
 
 class BindingResolverV1:
     """Build immutable profiles without connecting to a provider or private state."""
@@ -346,3 +508,150 @@ class BindingResolverV1:
             venue_scope=tuple(sorted(set(venue_scope))),
             portfolio_scope="NO_PRIVATE_STATE",
         )
+
+    @staticmethod
+    def resolve_canonical_source_input(
+        *,
+        component_id: str,
+        input_field_id: str,
+        source_state_id: str,
+        allowed_binding_rule_ids: tuple[str, ...],
+        context_source_epoch_id: str,
+        as_of: datetime,
+        asserted_source_identity: str | None = None,
+        asserted_source_epoch_id: str | None = None,
+        asserted_rights_state: str | None = None,
+    ) -> tuple[SourceBindingV1, CanonicalSourceBindingReceiptV1]:
+        from .source_policy import validate_effective_epoch
+
+        if (
+            not isinstance(allowed_binding_rule_ids, tuple)
+            or not allowed_binding_rule_ids
+            or any(
+                not isinstance(value, str) or not value
+                for value in allowed_binding_rule_ids
+            )
+            or len(set(allowed_binding_rule_ids))
+            != len(allowed_binding_rule_ids)
+        ):
+            raise ContractValidationError(
+                ReasonCode.SOURCE_BINDING_REQUIRED,
+                f"{component_id}.{input_field_id} has no exact source rule",
+            )
+        try:
+            source = validate_effective_epoch(source_state_id, as_of=as_of)
+        except SourcePolicyError as exc:
+            reason = (
+                ReasonCode.SOURCE_BINDING_REQUIRED
+                if exc.reason_code is ReasonCode.SOURCE_EPOCH_MISSING
+                else exc.reason_code
+            )
+            raise ContractValidationError(
+                reason,
+                f"{component_id}.{input_field_id} canonical source lookup failed",
+            ) from exc
+        matching_rules = tuple(
+            rule
+            for rule in (
+                get_source_claim_binding_rule(rule_id)
+                for rule_id in allowed_binding_rule_ids
+            )
+            if rule.source_state_ref == source.source_state_id
+            and rule.source_identity_ref == source.stable_source_identity
+        )
+        if len(matching_rules) != 1:
+            raise ContractValidationError(
+                ReasonCode.SOURCE_CLAIM_BINDING_MISMATCH,
+                f"{component_id}.{input_field_id} does not resolve one source rule",
+            )
+        rule = matching_rules[0]
+        consumer_is_exact = component_id in rule.permitted_consumers
+        consumer_is_adjudicated = (
+            "EXACT_PARAMETER_OR_MATH_CONSUMERS_LISTED_BY_EVIDENCE_ADJUDICATION"
+            in rule.permitted_consumers
+        )
+        if not (consumer_is_exact or consumer_is_adjudicated):
+            raise ContractValidationError(
+                ReasonCode.SOURCE_CLAIM_BINDING_MISMATCH,
+                f"{component_id} is outside {rule.binding_rule_id} consumer scope",
+            )
+        assertions = (
+            (
+                asserted_source_identity,
+                source.stable_source_identity,
+                "source identity",
+            ),
+            (
+                asserted_source_epoch_id,
+                source.epoch,
+                "source epoch",
+            ),
+            (
+                asserted_rights_state,
+                source.rights_and_use_state,
+                "rights state",
+            ),
+        )
+        for asserted, canonical, label in assertions:
+            if asserted is not None and asserted != canonical:
+                raise ContractValidationError(
+                    ReasonCode.SOURCE_CONFLICT,
+                    f"caller {label} assertion differs from canonical state",
+                )
+        if (
+            source.epoch != context_source_epoch_id
+            or source.availability_state != "CURRENT_AVAILABLE"
+        ):
+            raise ContractValidationError(
+                ReasonCode.SOURCE_EPOCH_STALE,
+                f"{source.source_state_id} is not current for the computation context",
+            )
+        binding = SourceBindingV1(
+            source_state_id=source.source_state_id,
+            stable_source_identity=source.stable_source_identity,
+            effective_epoch=source.epoch,
+            rights_state=source.rights_and_use_state,
+            freshness_policy=source.ttl,
+        )
+        BindingResolverV1.build(
+            binding_id=(
+                f"ST12B-CANONICAL-SOURCE::{component_id}::{input_field_id}"
+            ),
+            version="1.0.0",
+            inputs=(),
+            sources=(binding,),
+        )
+        digest = "|".join(
+            (
+                component_id,
+                input_field_id,
+                rule.binding_rule_id,
+                source.source_state_id,
+                source.epoch,
+                source.rights_and_use_state,
+                source.ttl,
+            )
+        )
+        receipt = CanonicalSourceBindingReceiptV1(
+            receipt_id=(
+                "SOURCE-BINDING::"
+                + sha256(digest.encode("utf-8")).hexdigest()
+            ),
+            component_id=component_id,
+            input_field_id=input_field_id,
+            binding_rule_id=rule.binding_rule_id,
+            source_state_id=source.source_state_id,
+            stable_source_identity=source.stable_source_identity,
+            effective_epoch=source.epoch,
+            rights_state=source.rights_and_use_state,
+            freshness_policy=source.ttl,
+            exact_claim_refs=tuple(
+                f"{rule.binding_rule_id}::CLAIM::{index:02d}"
+                for index, _ in enumerate(rule.exact_claims, start=1)
+            ),
+            consumer_ref=component_id,
+            terminal_route=(
+                "QKUComputationControlPlaneServiceV1::CANONICAL_SOURCE_INPUT"
+            ),
+        )
+        return binding, receipt

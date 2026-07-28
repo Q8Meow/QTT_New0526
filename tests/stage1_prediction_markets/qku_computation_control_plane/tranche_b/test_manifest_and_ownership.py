@@ -11,6 +11,7 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.bindings im
     SOURCE_CLAIM_BINDING_RULES,
     TRANCHE_A_SOURCE_CLAIM_BINDING_RULES,
     TRANCHE_B_SOURCE_CLAIM_BINDING_RULES,
+    get_source_claim_binding_rule,
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import (
     ContractValidationError,
@@ -29,6 +30,7 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.parameter_p
     STEP12_PARAMETER_POLICIES,
     TRANCHE_A_PARAMETER_POLICIES,
     TRANCHE_B_PARAMETER_POLICIES,
+    get_parameter_policy,
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.service import (
     AGENT_DUTY_ROUTES,
@@ -36,7 +38,14 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.service imp
     TRANCHE_B_SERVICE_BINDINGS,
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.specification import (
+    COMPONENT_EXECUTION_REQUIREMENTS,
+    RequirementResolutionStateV1,
     TRANCHE_B_MATH_SPECIFICATIONS,
+)
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.stack_resolver import (
+    DEFAULT_REGISTERED_STACK_TEMPLATES,
+    MARKET_PROBABILITY_EDGE_TEMPLATE,
+    TRANCHE_B_COMPONENT_ONLY_IDS,
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.validation import (
     TRANCHE_A_OPERATION_CONTRACTS,
@@ -141,7 +150,9 @@ def test_exact_eight_production_dispositions_exist_without_ninth_module() -> Non
     assert declared == EXPECTED_PRODUCTION_BASENAMES
 
 
-def test_44_certified_test_rows_map_to_five_coherent_modules() -> None:
+def test_44_certified_rows_map_to_four_declared_plus_supplemental_oracle_module(
+    tranche_b_manifest,
+) -> None:
     assert len({row.test_id for row in TRANCHE_B_TEST_ROWS}) == 44
     mapped = {row.mapped_test_path for row in TRANCHE_B_TEST_ROWS}
     expected = {
@@ -177,6 +188,101 @@ def test_44_certified_test_rows_map_to_five_coherent_modules() -> None:
             "tranche_b/test_math_oracle_vectors.py"
         ),
     }
+    supplemental_oracle_path = (
+        "tests/stage1_prediction_markets/qku_computation_control_plane/"
+        "tranche_b/test_math_oracle_vectors.py"
+    )
+    assert sum(
+        row.test_path == supplemental_oracle_path
+        for row in tranche_b_manifest.rows
+    ) == 434
+
+    assert DEFAULT_REGISTERED_STACK_TEMPLATES == (
+        MARKET_PROBABILITY_EDGE_TEMPLATE,
+    )
+    template = MARKET_PROBABILITY_EDGE_TEMPLATE
+    assert template.template_id == (
+        "ST12B::TEMPLATE::MARKET_PROBABILITY_EDGE"
+    )
+    assert template.component_ids == ("MATH-01", "MATH-02")
+    assert template.component_role_bindings == (
+        ("MATH-01", "market_implied_probability"),
+        ("MATH-02", "edge_probability"),
+    )
+    assert len(template.edges) == 1
+    edge = template.edges[0]
+    assert (
+        edge.upstream_id,
+        edge.upstream_output_field,
+        edge.downstream_id,
+        edge.downstream_input_field,
+    ) == (
+        "MATH-01",
+        "p_market",
+        "MATH-02",
+        "market_implied_probability",
+    )
+    assert len(TRANCHE_B_COMPONENT_ONLY_IDS) == 28
+    assert set(TRANCHE_B_COMPONENT_ONLY_IDS) == (
+        set(TRANCHE_B_MATH_IDS) - {"MATH-01", "MATH-02"}
+    )
+
+    assert len(COMPONENT_EXECUTION_REQUIREMENTS) == 30
+    assert {
+        row.certified_math_id for row in COMPONENT_EXECUTION_REQUIREMENTS
+    } == set(TRANCHE_B_MATH_IDS)
+    assert len(
+        {
+            row.canonical_component_id
+            for row in COMPONENT_EXECUTION_REQUIREMENTS
+        }
+    ) == 30
+    requirement_states = Counter(
+        row.terminal_requirement_resolution_state
+        for row in COMPONENT_EXECUTION_REQUIREMENTS
+    )
+    assert requirement_states == Counter(
+        {
+            RequirementResolutionStateV1.EXACT_REQUIREMENTS: 6,
+            RequirementResolutionStateV1.EXPLICITLY_CERTIFIED_EMPTY_REQUIREMENTS: 24,
+        }
+    )
+    assert all(
+        all(
+            isinstance(parameter_id, str)
+            for parameter_id in row.required_parameter_policy_ids
+        )
+        and all(
+            isinstance(rule_ref, str)
+            for rule_ref in row.source_claim_binding_rule_refs
+        )
+        for row in COMPONENT_EXECUTION_REQUIREMENTS
+    )
+    assert all(
+        get_source_claim_binding_rule(rule_ref).binding_rule_id == rule_ref
+        for row in COMPONENT_EXECUTION_REQUIREMENTS
+        for rule_ref in row.source_claim_binding_rule_refs
+    )
+    source_rule_refs = tuple(
+        rule_ref
+        for row in COMPONENT_EXECUTION_REQUIREMENTS
+        for rule_ref in row.source_claim_binding_rule_refs
+    )
+    assert len(source_rule_refs) == 41
+    assert len(set(source_rule_refs)) == 35
+    assert all(
+        get_parameter_policy(parameter_id).parameter_id == parameter_id
+        for row in COMPONENT_EXECUTION_REQUIREMENTS
+        for parameter_id in row.required_parameter_policy_ids
+    )
+    assert all(
+        tuple(
+            binding.parameter_policy_id
+            for binding in row.parameter_application_bindings
+        )
+        == row.required_parameter_policy_ids
+        for row in COMPONENT_EXECUTION_REQUIREMENTS
+    )
 
 
 def test_b_manifest_executes_exact_rows_and_eight_derived_proofs(

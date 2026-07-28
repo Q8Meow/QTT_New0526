@@ -74,13 +74,16 @@ from .models import (
     HealthEnvelopeV1,
     HealthState,
     IdentityResolutionV1,
+    InputOriginV1,
     LatencyHotPathSnapshotBoundaryAdapterV1,
     ObjectiveSense,
     OperationCapabilityClass,
     OperationContractV1,
+    ComputationReadinessStateV1,
     OperationStatusV1,
     OperationRequestEnvelopeV1,
     OperationResponseEnvelopeV1,
+    ParameterApplicationTargetV1,
     OperationSideEffectClass,
     RegisterReplayPaperResultRequestV1,
     RegisterReplayPaperResultResponseV1,
@@ -114,7 +117,11 @@ from .parameter_policy import (
     PARAMETER_POLICIES,
     STEP12_PARAMETER_POLICIES,
     TRANCHE_B_PARAMETER_POLICIES,
+    ParameterPolicyRecordV1,
+    ParameterResolutionStateV1,
     ParameterPolicyResolverV1,
+    ResolvedParameterV1,
+    get_parameter_policy,
 )
 from .plugin_adapter import PR162EPluginAdapterV1
 from .protocols import ExistingOwnerProjectionAdapterV1
@@ -886,6 +893,79 @@ def _coverage_blueprint() -> tuple[_CoverageBlueprintV1, ...]:
     return tuple(rows)
 
 
+def _parameter_resolution_matches_policy(
+    policy: ParameterPolicyRecordV1,
+    resolved: ResolvedParameterV1,
+) -> bool:
+    common = (
+        resolved.parameter_id == policy.parameter_id
+        and resolved.parameter_audit_id == policy.parameter_audit_id
+        and resolved.parameter_symbol == policy.parameter_symbol
+        and resolved.unit_or_basis == policy.effective_unit_or_basis
+        and resolved.resolution_class == policy.effective_resolution_class
+        and resolved.authority_class
+        == policy.effective_default_authority_class
+        and resolved.fallback
+        == policy.effective_fallback_behavior_when_value_unavailable
+        and resolved.owner_editability
+        == policy.effective_owner_dashboard_editability_class
+        and resolved.implementation_resolution_kind
+        == policy.implementation_resolution_kind
+        and resolved.launch_computability_state
+        == policy.launch_computability_state
+        and resolved.missing_stale_invalid_behavior
+        == policy.missing_stale_invalid_behavior
+        and resolved.precision_and_rounding_policy
+        == policy.precision_and_rounding_policy
+    )
+    if not common:
+        return False
+    kind = policy.implementation_resolution_kind
+    if kind == "STATIC_OR_DETERMINISTIC_RULE":
+        return (
+            resolved.computable
+            and resolved.value is not None
+            and resolved.typed_effective_value is not None
+            and resolved.blocker_reason_code is None
+            and resolved.resolution_state
+            in {
+                ParameterResolutionStateV1.RESOLVED_TYPED_VALUE,
+                ParameterResolutionStateV1.RESOLVED_SYMBOLIC_CONTROL,
+            }
+        )
+    if kind == "RUNTIME_TYPED_BINDING":
+        return (
+            not resolved.computable
+            and resolved.value is None
+            and resolved.resolution_state
+            is ParameterResolutionStateV1.BLOCKED_RUNTIME_BINDING_REQUIRED
+            and resolved.blocker_reason_code
+            is ReasonCode.PARAMETER_RUNTIME_BINDING_REQUIRED
+        )
+    if kind == "EXPLICIT_FAIL_CLOSED_POLICY":
+        return (
+            not resolved.computable
+            and resolved.value is None
+            and resolved.resolution_state
+            is ParameterResolutionStateV1.EXPLICIT_FAIL_CLOSED
+            and resolved.blocker_reason_code
+            is ReasonCode.PARAMETER_EXPLICIT_FAIL_CLOSED
+        )
+    if kind in {
+        "OFFLINE_CALIBRATION_OR_BOUNDED_OPTIMIZATION",
+        "OFFLINE_CALIBRATION_REQUIRED",
+    }:
+        return (
+            not resolved.computable
+            and resolved.value is None
+            and resolved.resolution_state
+            is ParameterResolutionStateV1.BLOCKED_FAIL_CLOSED
+            and resolved.blocker_reason_code
+            is ReasonCode.PARAMETER_CALIBRATION_REQUIRED
+        )
+    return False
+
+
 def _coverage_predicate_passes(
     row: _CoverageBlueprintV1,
     *,
@@ -906,10 +986,16 @@ def _coverage_predicate_passes(
         )
     if row.category == "parameter_policy_rows":
         try:
-            resolved = ParameterPolicyResolverV1.resolve(row.subject_ref)
+            policy = get_parameter_policy(row.subject_ref)
+            resolved = ParameterPolicyResolverV1.resolve(
+                row.subject_ref,
+                application_target=(
+                    ParameterApplicationTargetV1.SERVICE_LIMIT
+                ),
+            )
         except ComputationControlPlaneError:
             return False
-        return resolved.parameter_id == row.subject_ref and resolved.used_day1_seed
+        return _parameter_resolution_matches_policy(policy, resolved)
     if row.category == "mathematical_specifications":
         return (
             row.subject_ref in IMPLEMENTATION_REGISTRY
@@ -1874,10 +1960,7 @@ def _tranche_b_real_numeric_proofs() -> tuple[tuple[str, bool], ...]:
                 parameter_policy_ref="ComputationContextKeyV1::maximum_age",
                 stale_behavior="FAIL_CLOSED_OR_REGISTERED_FALLBACK",
             ),
-            source_identity="CERTIFIED_ST12B_INTEGRATION_VECTOR",
-            source_state_id=f"STATE::{context_key.input_version}",
-            source_epoch_id=context_key.source_epoch_id,
-            rights_state="CERTIFIED_TEST_INPUT",
+            origin=InputOriginV1.OWNER_SUPPLIED_PURE_COMPUTATION_INPUT,
             value_lineage_ref=(
                 f"VALUE::{context_key.input_version}::{value.name}"
             ),
@@ -1887,6 +1970,9 @@ def _tranche_b_real_numeric_proofs() -> tuple[tuple[str, bool], ...]:
             rounding_policy="NO_IMPLICIT_QUANTIZATION",
             producer_ref="TrancheBCoverageManifestV1",
             consumer_refs=("QKUComputationControlPlaneServiceV1",),
+            pure_computation_authority_ref=(
+                "ST12B_CERTIFIED_TEST_FIXTURE"
+            ),
         )
 
     def component(
@@ -1993,9 +2079,12 @@ def _tranche_b_real_numeric_proofs() -> tuple[tuple[str, bool], ...]:
             owner_intent_ref=f"OWNER-INTENT::{suffix}",
             input_lock_ref=f"INPUT-LOCK::{suffix}",
             source_readiness_receipt_refs=(
-                f"SOURCE-READINESS::{suffix}",
+                f"PURE-COMPUTATION::{suffix}",
             ),
             consumer_refs=("READINESS1", "PRETRADE1", "SVC1", "AGENT-ORCH1"),
+            input_readiness_state=(
+                ComputationReadinessStateV1.PURE_COMPUTATION_ONLY
+            ),
         )
         return service.compute_stack(
             request,
@@ -2008,6 +2097,9 @@ def _tranche_b_real_numeric_proofs() -> tuple[tuple[str, bool], ...]:
     service = QKUComputationControlPlaneServiceV1(
         repo_root=REPO_ROOT,
         identity_views=(),
+        pure_computation_authority_refs=(
+            "ST12B_CERTIFIED_TEST_FIXTURE",
+        ),
     )
     component_base = component(service, Decimal("0.47"), "BASE")
     component_mutated = component(service, Decimal("0.52"), "MUTATION")
@@ -2549,24 +2641,12 @@ def _no_dynamic_import_or_unsafe_deserialization() -> bool:
 
 
 def _parameter_seed_resolution_valid() -> bool:
-    for policy in PARAMETER_POLICIES:
-        resolved = ParameterPolicyResolverV1.resolve(policy.parameter_id)
-        if (
-            resolved.parameter_id != policy.parameter_id
-            or resolved.parameter_audit_id != policy.parameter_audit_id
-            or resolved.parameter_symbol != policy.parameter_symbol
-            or resolved.value
-            != policy.effective_day1_seed_value_or_resolution_rule
-            or resolved.unit_or_basis != policy.effective_unit_or_basis
-            or resolved.resolution_class != policy.effective_resolution_class
-            or resolved.authority_class
-            != policy.effective_default_authority_class
-            or resolved.fallback
-            != policy.effective_fallback_behavior_when_value_unavailable
-            or resolved.owner_editability
-            != policy.effective_owner_dashboard_editability_class
-            or not resolved.used_day1_seed
-        ):
+    for policy in STEP12_PARAMETER_POLICIES:
+        resolved = ParameterPolicyResolverV1.resolve(
+            policy.parameter_id,
+            application_target=ParameterApplicationTargetV1.SERVICE_LIMIT,
+        )
+        if not _parameter_resolution_matches_policy(policy, resolved):
             return False
     return True
 

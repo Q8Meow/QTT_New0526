@@ -11,7 +11,11 @@ from typing import Callable, Mapping
 from .authority import CapabilityEnvelopeV1, assert_no_effect_authority
 from .context import ComputationContextKeyV1
 from .dependency_graph import CompiledDependencyGraphV1
-from .errors import ContractValidationError, ReasonCode
+from .errors import (
+    ComputationControlPlaneError,
+    ContractValidationError,
+    ReasonCode,
+)
 from .identity_adapter import IdentityViewV1
 from .models import (
     ComputabilityBlockerCodeV1,
@@ -19,6 +23,8 @@ from .models import (
     ComputabilityStateResultV1,
     ComputabilityTerminalRouteV1,
     ComputationBindingProfileV1,
+    InputOriginV1,
+    ParameterApplicationTargetV1,
     ComputationImplementationV1,
     ContextualComputabilityResolutionV1,
     GoldenVectorV1,
@@ -724,6 +730,635 @@ if (
         ReasonCode.INVALID_CONTRACT,
         "math I/O identities must be unique",
     )
+
+
+class RequirementResolutionStateV1(StrEnum):
+    EXACT_REQUIREMENTS = "EXACT_REQUIREMENTS"
+    EXPLICITLY_CERTIFIED_EMPTY_REQUIREMENTS = (
+        "EXPLICITLY_CERTIFIED_EMPTY_REQUIREMENTS"
+    )
+    UNRESOLVED_REQUIREMENTS_FAIL_CLOSED = (
+        "UNRESOLVED_REQUIREMENTS_FAIL_CLOSED"
+    )
+
+
+@dataclass(frozen=True, slots=True)
+class ParameterApplicationBindingV1:
+    parameter_policy_id: str
+    primary_target: ParameterApplicationTargetV1
+    secondary_validation_targets: tuple[ParameterApplicationTargetV1, ...] = ()
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.parameter_policy_id, str) or not self.parameter_policy_id:
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "parameter application requires an exact policy identity",
+            )
+        if not isinstance(self.primary_target, ParameterApplicationTargetV1):
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "parameter application target must be typed",
+            )
+        if (
+            not isinstance(self.secondary_validation_targets, tuple)
+            or any(
+                not isinstance(value, ParameterApplicationTargetV1)
+                for value in self.secondary_validation_targets
+            )
+            or len(set(self.secondary_validation_targets))
+            != len(self.secondary_validation_targets)
+            or self.primary_target
+            is ParameterApplicationTargetV1.RECEIPT_ONLY_NONMATERIAL
+        ):
+            raise ContractValidationError(
+                ReasonCode.PARAMETER_APPLICATION_UNBOUND,
+                "material parameter applications must be exact and behavioral",
+            )
+
+
+@dataclass(frozen=True, slots=True)
+class ExecutionControlBindingV1:
+    control_name: str
+    owner_rule_ref: str
+    required_from_caller: bool
+    fixed_default: str | None
+    caller_override_allowed: bool
+    application_target: ParameterApplicationTargetV1 = (
+        ParameterApplicationTargetV1.EXECUTION_CONTROL
+    )
+
+    def __post_init__(self) -> None:
+        if (
+            not isinstance(self.control_name, str)
+            or not self.control_name
+            or not isinstance(self.owner_rule_ref, str)
+            or not self.owner_rule_ref
+            or type(self.required_from_caller) is not bool
+            or type(self.caller_override_allowed) is not bool
+            or not isinstance(self.application_target, ParameterApplicationTargetV1)
+            or self.application_target
+            is not ParameterApplicationTargetV1.EXECUTION_CONTROL
+            or (
+                self.fixed_default is not None
+                and (
+                    not isinstance(self.fixed_default, str)
+                    or not self.fixed_default
+                )
+            )
+            or (self.required_from_caller and self.fixed_default is not None)
+        ):
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "execution-control ownership must be exact and non-conflicting",
+            )
+
+
+@dataclass(frozen=True, slots=True)
+class ComponentExecutionRequirementV1:
+    canonical_component_id: str
+    certified_math_id: str
+    per_input_accepted_origin_classes: tuple[
+        tuple[str, tuple[InputOriginV1, ...]], ...
+    ]
+    per_input_source_claim_binding_rule_refs: tuple[
+        tuple[str, tuple[str, ...]], ...
+    ]
+    source_claim_binding_rule_refs: tuple[str, ...]
+    required_parameter_policy_ids: tuple[str, ...]
+    parameter_application_bindings: tuple[ParameterApplicationBindingV1, ...]
+    execution_control_bindings: tuple[ExecutionControlBindingV1, ...]
+    allowed_computation_modes: tuple[str, ...]
+    consumer_scope: tuple[str, ...]
+    registered_failure_fallback_route: str
+    terminal_requirement_resolution_state: RequirementResolutionStateV1
+    terminal_resolution_evidence_refs: tuple[str, ...]
+    missing_owner_refs: tuple[str, ...] = ()
+
+    def __post_init__(self) -> None:
+        for name in (
+            "canonical_component_id",
+            "certified_math_id",
+            "registered_failure_fallback_route",
+        ):
+            value = getattr(self, name)
+            if not isinstance(value, str) or not value:
+                raise ContractValidationError(
+                    ReasonCode.INCOMPLETE_CONTRACT,
+                    f"component requirement {name} is required",
+                )
+        if not isinstance(
+            self.terminal_requirement_resolution_state,
+            RequirementResolutionStateV1,
+        ):
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "component requirement resolution state must be typed",
+            )
+        if (
+            not isinstance(self.per_input_accepted_origin_classes, tuple)
+            or not self.per_input_accepted_origin_classes
+            or any(
+                not isinstance(item, tuple)
+                or len(item) != 2
+                or not isinstance(item[0], str)
+                or not item[0]
+                or not isinstance(item[1], tuple)
+                or not item[1]
+                or any(not isinstance(origin, InputOriginV1) for origin in item[1])
+                or len(set(item[1])) != len(item[1])
+                for item in self.per_input_accepted_origin_classes
+            )
+        ):
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "per-input origins must be exact typed tuples",
+            )
+        input_names = tuple(
+            item[0] for item in self.per_input_accepted_origin_classes
+        )
+        if len(set(input_names)) != len(input_names):
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "component requirement input identities must be unique",
+            )
+        source_input_names = tuple(
+            item[0] for item in self.per_input_source_claim_binding_rule_refs
+        )
+        if (
+            not isinstance(
+                self.per_input_source_claim_binding_rule_refs,
+                tuple,
+            )
+            or source_input_names != input_names
+            or any(
+                not isinstance(item[1], tuple)
+                or any(not isinstance(ref, str) or not ref for ref in item[1])
+                or len(set(item[1])) != len(item[1])
+                for item in self.per_input_source_claim_binding_rule_refs
+            )
+        ):
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "per-input source rules must align exactly with input origins",
+            )
+        for name in (
+            "source_claim_binding_rule_refs",
+            "required_parameter_policy_ids",
+            "allowed_computation_modes",
+            "consumer_scope",
+            "terminal_resolution_evidence_refs",
+            "missing_owner_refs",
+        ):
+            values = getattr(self, name)
+            if (
+                not isinstance(values, tuple)
+                or any(not isinstance(value, str) or not value for value in values)
+                or len(set(values)) != len(values)
+            ):
+                raise ContractValidationError(
+                    ReasonCode.INVALID_CONTRACT,
+                    f"{name} must be a unique immutable text tuple",
+                )
+        application_ids = tuple(
+            item.parameter_policy_id
+            for item in self.parameter_application_bindings
+        )
+        unresolved = (
+            self.terminal_requirement_resolution_state
+            is RequirementResolutionStateV1.UNRESOLVED_REQUIREMENTS_FAIL_CLOSED
+        )
+        if (
+            not isinstance(self.parameter_application_bindings, tuple)
+            or any(
+                not isinstance(item, ParameterApplicationBindingV1)
+                for item in self.parameter_application_bindings
+            )
+            or len(set(application_ids)) != len(application_ids)
+            or (
+                not unresolved
+                and application_ids != self.required_parameter_policy_ids
+            )
+            or (
+                unresolved
+                and not set(application_ids)
+                <= set(self.required_parameter_policy_ids)
+            )
+        ):
+            raise ContractValidationError(
+                ReasonCode.PARAMETER_APPLICATION_UNBOUND,
+                "required parameters need one ordered primary application",
+            )
+        if (
+            not isinstance(self.execution_control_bindings, tuple)
+            or any(
+                not isinstance(item, ExecutionControlBindingV1)
+                for item in self.execution_control_bindings
+            )
+            or len(
+                {
+                    item.control_name
+                    for item in self.execution_control_bindings
+                }
+            )
+            != len(self.execution_control_bindings)
+        ):
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "execution-control bindings must be unique typed rows",
+            )
+        if unresolved != bool(self.missing_owner_refs):
+            raise ContractValidationError(
+                ReasonCode.EXECUTION_REQUIREMENTS_UNRESOLVED,
+                "unresolved requirements must name their exact missing owner refs",
+            )
+        if (
+            self.terminal_requirement_resolution_state
+            is RequirementResolutionStateV1.EXPLICITLY_CERTIFIED_EMPTY_REQUIREMENTS
+            and (
+                self.required_parameter_policy_ids
+                or any(
+                    refs
+                    for _, refs in self.per_input_source_claim_binding_rule_refs
+                )
+            )
+        ):
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "explicitly empty runtime requirements cannot contain bindings",
+            )
+
+    def accepted_origins_for(self, input_field_id: str) -> tuple[InputOriginV1, ...]:
+        try:
+            return dict(self.per_input_accepted_origin_classes)[input_field_id]
+        except KeyError as exc:
+            raise ContractValidationError(
+                ReasonCode.REQUIRED_INPUT_MISSING,
+                f"unknown requirement input: {input_field_id}",
+            ) from exc
+
+    def source_rules_for(self, input_field_id: str) -> tuple[str, ...]:
+        try:
+            return dict(self.per_input_source_claim_binding_rule_refs)[
+                input_field_id
+            ]
+        except KeyError as exc:
+            raise ContractValidationError(
+                ReasonCode.SOURCE_BINDING_REQUIRED,
+                f"unknown source-requirement input: {input_field_id}",
+            ) from exc
+
+
+_EXACT_EXTERNAL_SOURCE_RULE_REFS: Mapping[str, tuple[str, str]] = (
+    MappingProxyType(
+        {
+            "VENUE::ST10-SOURCE_02::KALSHI_ORDERBOOK_RESPONSES": (
+                "ST12-SOURCE-RULE::002",
+                "ST10-SOURCE::02",
+            ),
+            "VENUE::ST10-SOURCE_07::POLYMARKET_GLOBAL_GET_ORDER_BOOK": (
+                "ST12-SOURCE-RULE::007",
+                "ST10-SOURCE::07",
+            ),
+        }
+    )
+)
+_EXACT_METHOD_SOURCE_RULE_REFS: Mapping[str, tuple[str, str]] = (
+    MappingProxyType(
+        {
+            "METHOD::ST10-SOURCE_21::BENJAMINI_AND_HOCHBERG_FALSE_DISCOVERY_RATE": (
+                "ST12-SOURCE-RULE::021",
+                "ST10-SOURCE::21",
+            ),
+            "METHOD::ST10-SOURCE_22::BENJAMINI_AND_YEKUTIELI_FDR_UNDER_DEPENDENCY": (
+                "ST12-SOURCE-RULE::022",
+                "ST10-SOURCE::22",
+            ),
+            "METHOD::ST10-SOURCE_23::WILSON_SCORE_INTERVAL": (
+                "ST12-SOURCE-RULE::023",
+                "ST10-SOURCE::23",
+            ),
+            "METHOD::ST10-SOURCE_24::POLITIS_AND_ROMANO_STATIONARY_BOOTSTRAP": (
+                "ST12-SOURCE-RULE::024",
+                "ST10-SOURCE::24",
+            ),
+            "METHOD::ST10-SOURCE_25::WHITE_REALITY_CHECK_FOR_DATA_SNOOPING": (
+                "ST12-SOURCE-RULE::025",
+                "ST10-SOURCE::25",
+            ),
+            "METHOD::ST10-SOURCE_26::HANSEN_TEST_FOR_SUPERIOR_PREDICTIVE_ABILITY": (
+                "ST12-SOURCE-RULE::026",
+                "ST10-SOURCE::26",
+            ),
+            "METHOD::ST10-SOURCE_27::BAILEY_ET_AL_PROBABILITY_OF_BACKTEST_OVERFITTING": (
+                "ST12-SOURCE-RULE::027",
+                "ST10-SOURCE::27",
+            ),
+            "METHOD::ST10-SOURCE_28::BAILEY_AND_LOPEZ_DE_PRADO_DEFLATED_SHARPE_RATIO": (
+                "ST12-SOURCE-RULE::028",
+                "ST10-SOURCE::28",
+            ),
+            "METHOD::ST10-SOURCE_29::BAILEY_AND_LOPEZ_DE_PRADO_THE_SHARPE_RATIO_EFFICIENT_FRONTIER": (
+                "ST12-SOURCE-RULE::029",
+                "ST10-SOURCE::29",
+            ),
+        }
+    )
+)
+_MATERIAL_PARAMETER_APPLICATIONS: Mapping[
+    str,
+    tuple[
+        ParameterApplicationTargetV1,
+        tuple[ParameterApplicationTargetV1, ...],
+    ],
+] = MappingProxyType(
+    {
+        "ST10-PARAM::2212": (
+            ParameterApplicationTargetV1.PRE_CALL_ADMISSION_GUARD,
+            (ParameterApplicationTargetV1.POST_CALL_OUTPUT_VALIDATOR,),
+        ),
+        "ST10-PARAM::2213": (
+            ParameterApplicationTargetV1.PRE_CALL_ADMISSION_GUARD,
+            (ParameterApplicationTargetV1.POST_CALL_OUTPUT_VALIDATOR,),
+        ),
+    }
+)
+
+
+def _execution_control_bindings(
+    row: dict[str, object],
+) -> tuple[ExecutionControlBindingV1, ...]:
+    math_id = str(row["math_spec_id"])
+    seed_policy = str(row["deterministic_seed_policy"])
+    defaults = row["day1_defaults"]
+    if not isinstance(defaults, dict):
+        raise ContractValidationError(
+            ReasonCode.OWNER_DATA_MALFORMED,
+            f"{math_id} day-one defaults must be an exact object",
+        )
+    controls: list[ExecutionControlBindingV1] = []
+    if (
+        math_id in {"MATH-14", "MATH-15", "MATH-16"}
+        and "RUNTIME_SEED_EXPLICIT_IN_RECEIPT_WHEN_STOCHASTIC"
+        in seed_policy
+    ):
+        controls.append(
+            ExecutionControlBindingV1(
+                control_name="seed",
+                owner_rule_ref=f"{math_id}::deterministic_seed_policy",
+                required_from_caller=True,
+                fixed_default=None,
+                caller_override_allowed=True,
+            )
+        )
+    repetitions = defaults.get("repetitions")
+    if isinstance(repetitions, int) and not isinstance(repetitions, bool):
+        controls.append(
+            ExecutionControlBindingV1(
+                control_name="replicates",
+                owner_rule_ref=f"{math_id}::day1_defaults.repetitions",
+                required_from_caller=False,
+                fixed_default=str(repetitions),
+                caller_override_allowed=False,
+            )
+        )
+    alpha = defaults.get("alpha")
+    if isinstance(alpha, int | float) and not isinstance(alpha, bool):
+        controls.append(
+            ExecutionControlBindingV1(
+                control_name="alpha",
+                owner_rule_ref=f"{math_id}::day1_defaults.alpha",
+                required_from_caller=False,
+                fixed_default=str(alpha),
+                caller_override_allowed=False,
+            )
+        )
+    return tuple(controls)
+
+
+def _build_component_execution_requirements(
+) -> tuple[ComponentExecutionRequirementV1, ...]:
+    from .bindings import get_source_claim_binding_rule
+    from .parameter_policy import (
+        TRANCHE_B_PARAMETER_POLICIES,
+        get_parameter_policy,
+    )
+
+    requirements: list[ComponentExecutionRequirementV1] = []
+    for row in _TRANCHE_B_MATH_ROWS:
+        math_id = str(row["math_spec_id"])
+        name = str(row["name"])
+        io_contract = MATH_IO_CONTRACTS[math_id]
+        source_identities = tuple(str(value) for value in row["source_identity_refs"])
+        external_rule_refs: list[str] = []
+        lineage_rule_refs: list[str] = []
+        missing: list[str] = []
+        exact_nonexternal_identities = {
+            str(row["formal_derivation_ref"]),
+            f"METHOD::{math_id}::{name}",
+            "LIBRARY::DWAVE_OCEAN_9_4_0",
+            "LIBRARY::QISKIT_OPTIMIZATION_0_7_0",
+        }
+        for source_identity in source_identities:
+            if source_identity in _EXACT_EXTERNAL_SOURCE_RULE_REFS:
+                external_rule_refs.append(
+                    _EXACT_EXTERNAL_SOURCE_RULE_REFS[source_identity][0]
+                )
+            elif source_identity in _EXACT_METHOD_SOURCE_RULE_REFS:
+                lineage_rule_refs.append(
+                    _EXACT_METHOD_SOURCE_RULE_REFS[source_identity][0]
+                )
+            elif source_identity not in exact_nonexternal_identities:
+                missing.append(f"SOURCE_REF_CROSSWALK::{source_identity}")
+        external_rules = tuple(dict.fromkeys(external_rule_refs))
+        declared_rules = tuple(
+            str(value) for value in row["source_claim_binding_rule_refs"]
+        )
+        all_source_rules = tuple(
+            dict.fromkeys(
+                (*declared_rules, *lineage_rule_refs, *external_rules)
+            )
+        )
+        origins: list[tuple[str, tuple[InputOriginV1, ...]]] = []
+        source_rules_by_input: list[tuple[str, tuple[str, ...]]] = []
+        for field in io_contract.inputs:
+            accepted: list[InputOriginV1] = []
+            if external_rules:
+                accepted.append(InputOriginV1.CANONICAL_SOURCE_STATE)
+            if (
+                math_id == "MATH-02"
+                and field.name == "market_implied_probability"
+            ):
+                accepted.append(InputOriginV1.IN_PROCESS_DERIVED_VALUE)
+            accepted.append(
+                InputOriginV1.OWNER_SUPPLIED_PURE_COMPUTATION_INPUT
+            )
+            origins.append((field.name, tuple(accepted)))
+            source_rules_by_input.append((field.name, external_rules))
+
+        formal_ref = str(row["formal_derivation_ref"])
+        parameter_ids = tuple(
+            sorted(
+                policy.parameter_id
+                for policy in TRANCHE_B_PARAMETER_POLICIES
+                if formal_ref in policy.effective_source_state_refs
+            )
+        )
+        applications: list[ParameterApplicationBindingV1] = []
+        for parameter_id in parameter_ids:
+            application = _MATERIAL_PARAMETER_APPLICATIONS.get(parameter_id)
+            if application is None:
+                missing.append(f"PARAMETER_APPLICATION::{parameter_id}")
+                continue
+            primary, secondary = application
+            applications.append(
+                ParameterApplicationBindingV1(
+                    parameter_policy_id=parameter_id,
+                    primary_target=primary,
+                    secondary_validation_targets=secondary,
+                )
+            )
+        for rule_id in all_source_rules:
+            try:
+                rule = get_source_claim_binding_rule(rule_id)
+            except ComputationControlPlaneError:
+                missing.append(f"SOURCE_CLAIM_RULE::{rule_id}")
+            else:
+                if rule.math_spec_ref is not None and rule.math_spec_ref != math_id:
+                    missing.append(
+                        f"SOURCE_CLAIM_CONSUMER::{rule_id}::{math_id}"
+                    )
+        for parameter_id in parameter_ids:
+            try:
+                get_parameter_policy(parameter_id)
+            except ComputationControlPlaneError:
+                missing.append(f"PARAMETER_POLICY::{parameter_id}")
+
+        if missing:
+            state = (
+                RequirementResolutionStateV1.UNRESOLVED_REQUIREMENTS_FAIL_CLOSED
+            )
+        elif external_rules or parameter_ids or any(
+            InputOriginV1.IN_PROCESS_DERIVED_VALUE in accepted
+            for _, accepted in origins
+        ):
+            state = RequirementResolutionStateV1.EXACT_REQUIREMENTS
+        else:
+            state = (
+                RequirementResolutionStateV1.EXPLICITLY_CERTIFIED_EMPTY_REQUIREMENTS
+            )
+        requirements.append(
+            ComponentExecutionRequirementV1(
+                canonical_component_id=f"{math_id}::{name}",
+                certified_math_id=math_id,
+                per_input_accepted_origin_classes=tuple(origins),
+                per_input_source_claim_binding_rule_refs=tuple(
+                    source_rules_by_input
+                ),
+                source_claim_binding_rule_refs=all_source_rules,
+                required_parameter_policy_ids=parameter_ids,
+                parameter_application_bindings=tuple(applications),
+                execution_control_bindings=_execution_control_bindings(row),
+                allowed_computation_modes=(
+                    "CONTRACT_ONLY",
+                    "REPLAY",
+                    "PAPER",
+                ),
+                consumer_scope=(
+                    "QKUComputationControlPlaneServiceV1",
+                    "READINESS1",
+                    "PRETRADE1",
+                    "SVC1",
+                    "AGENT-ORCH1",
+                ),
+                registered_failure_fallback_route=(
+                    "FALLBACK::NO_EFFECT_FAIL_CLOSED"
+                ),
+                terminal_requirement_resolution_state=state,
+                terminal_resolution_evidence_refs=(
+                    formal_ref,
+                    (
+                        f"CERTIFIED_RUNTIME_REQUIREMENTS::{math_id}"
+                        if state
+                        is RequirementResolutionStateV1.EXACT_REQUIREMENTS
+                        else (
+                            f"CERTIFIED_EMPTY_REQUIREMENTS::{math_id}"
+                            if state
+                            is RequirementResolutionStateV1.EXPLICITLY_CERTIFIED_EMPTY_REQUIREMENTS
+                            else f"UNRESOLVED_REQUIREMENTS::{math_id}"
+                        )
+                    ),
+                ),
+                missing_owner_refs=tuple(dict.fromkeys(missing)),
+            )
+        )
+    return tuple(requirements)
+
+
+COMPONENT_EXECUTION_REQUIREMENTS = _build_component_execution_requirements()
+COMPONENT_EXECUTION_REQUIREMENT_BY_MATH_ID: Mapping[
+    str, ComponentExecutionRequirementV1
+] = MappingProxyType(
+    {
+        requirement.certified_math_id: requirement
+        for requirement in COMPONENT_EXECUTION_REQUIREMENTS
+    }
+)
+if (
+    len(COMPONENT_EXECUTION_REQUIREMENTS) != 30
+    or len(COMPONENT_EXECUTION_REQUIREMENT_BY_MATH_ID) != 30
+    or len(
+        {
+            requirement.canonical_component_id
+            for requirement in COMPONENT_EXECUTION_REQUIREMENTS
+        }
+    )
+    != 30
+    or set(COMPONENT_EXECUTION_REQUIREMENT_BY_MATH_ID)
+    != {row.math_spec_id for row in TRANCHE_B_MATH_SPECIFICATIONS}
+    or any(
+        tuple(
+            field.name
+            for field in MATH_IO_CONTRACTS[
+                requirement.certified_math_id
+            ].inputs
+        )
+        != tuple(
+            field_name
+            for field_name, _ in requirement.per_input_accepted_origin_classes
+        )
+        for requirement in COMPONENT_EXECUTION_REQUIREMENTS
+    )
+):
+    raise ContractValidationError(
+        ReasonCode.EXECUTION_REQUIREMENTS_UNRESOLVED,
+        "component execution requirements must cover the exact 30-row universe",
+    )
+
+
+def get_component_execution_requirement(
+    canonical_component_id: str,
+) -> ComponentExecutionRequirementV1:
+    if not isinstance(canonical_component_id, str) or not canonical_component_id:
+        raise ContractValidationError(
+            ReasonCode.EXECUTION_REQUIREMENTS_UNRESOLVED,
+            "component requirement identity must be nonempty text",
+        )
+    direct = COMPONENT_EXECUTION_REQUIREMENT_BY_MATH_ID.get(
+        canonical_component_id
+    )
+    if direct is not None:
+        return direct
+    exact = tuple(
+        requirement
+        for requirement in COMPONENT_EXECUTION_REQUIREMENTS
+        if requirement.canonical_component_id == canonical_component_id
+    )
+    if len(exact) != 1:
+        raise ContractValidationError(
+            ReasonCode.EXECUTION_REQUIREMENTS_UNRESOLVED,
+            f"unknown component execution requirement: {canonical_component_id}",
+        )
+    return exact[0]
 
 
 @dataclass(frozen=True, slots=True)

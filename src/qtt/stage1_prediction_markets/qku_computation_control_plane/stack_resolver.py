@@ -16,8 +16,12 @@ from .dependency_graph import (
 )
 from .errors import ReasonCode, StackResolutionError
 from .fallback import REGISTERED_FALLBACK_RESOLVER
-from .implementation_registry import IMPLEMENTATION_REGISTRY
-from .models import DependencyEdgeV1, DependencyNodeV1
+from .implementation_registry import IMPLEMENTATION_REGISTRY, TRANCHE_B_MATH_IDS
+from .models import (
+    ComputationReadinessStateV1,
+    DependencyEdgeV1,
+    DependencyNodeV1,
+)
 from .specification import MATH_IO_CONTRACTS
 
 
@@ -252,6 +256,7 @@ class StackApplicabilityContextV1:
     input_lock_ref: str
     source_readiness_receipt_refs: tuple[str, ...]
     consumer_refs: tuple[str, ...]
+    input_readiness_state: ComputationReadinessStateV1
 
     def __post_init__(self) -> None:
         for name in (
@@ -275,10 +280,35 @@ class StackApplicabilityContextV1:
             "consumer_refs",
         ):
             _unique_text_tuple(getattr(self, name), name)
+        if not isinstance(
+            self.input_readiness_state,
+            ComputationReadinessStateV1,
+        ) or self.input_readiness_state is ComputationReadinessStateV1.BLOCKED:
+            raise StackResolutionError(
+                ReasonCode.INVALID_CONTRACT,
+                "stack applicability readiness must be explicitly nonblocked",
+            )
         if self.mode not in {"CONTRACT_ONLY", "REPLAY", "PAPER"}:
             raise StackResolutionError(
                 ReasonCode.CAPABILITY_DENIED,
                 "Tranche B stack applicability excludes live, shadow, and canary modes",
+            )
+        pure = self.venue == "OWNER_SUPPLIED_PURE_COMPUTATION"
+        if (
+            pure
+            and (
+                self.mode != "CONTRACT_ONLY"
+                or self.input_readiness_state
+                is not ComputationReadinessStateV1.PURE_COMPUTATION_ONLY
+            )
+        ) or (
+            not pure
+            and self.input_readiness_state
+            is not ComputationReadinessStateV1.SOURCE_CONTEXT_COMPUTABLE
+        ):
+            raise StackResolutionError(
+                ReasonCode.INPUT_ORIGIN_NOT_AUTHORIZED,
+                "pure computation cannot establish source, replay, or PAPER readiness",
             )
 
 
@@ -677,3 +707,38 @@ MARKET_PROBABILITY_EDGE_TEMPLATE = RegisteredStackTemplateV1(
 )
 
 DEFAULT_REGISTERED_STACK_TEMPLATES = (MARKET_PROBABILITY_EDGE_TEMPLATE,)
+_REGISTERED_STACK_COMPONENT_IDS = frozenset(
+    component_id
+    for template in DEFAULT_REGISTERED_STACK_TEMPLATES
+    for component_id in template.component_ids
+)
+TRANCHE_B_COMPONENT_ONLY_IDS = tuple(
+    sorted(set(TRANCHE_B_MATH_IDS) - _REGISTERED_STACK_COMPONENT_IDS)
+)
+if (
+    len(DEFAULT_REGISTERED_STACK_TEMPLATES) != 1
+    or MARKET_PROBABILITY_EDGE_TEMPLATE.template_id
+    != "ST12B::TEMPLATE::MARKET_PROBABILITY_EDGE"
+    or MARKET_PROBABILITY_EDGE_TEMPLATE.component_ids
+    != ("MATH-01", "MATH-02")
+    or len(MARKET_PROBABILITY_EDGE_TEMPLATE.edges) != 1
+    or MARKET_PROBABILITY_EDGE_TEMPLATE.edges[0].upstream_id != "MATH-01"
+    or MARKET_PROBABILITY_EDGE_TEMPLATE.edges[0].downstream_id != "MATH-02"
+    or MARKET_PROBABILITY_EDGE_TEMPLATE.edges[0].upstream_output_field
+    != "p_market"
+    or MARKET_PROBABILITY_EDGE_TEMPLATE.edges[0].downstream_input_field
+    != "market_implied_probability"
+    or _REGISTERED_STACK_COMPONENT_IDS != {"MATH-01", "MATH-02"}
+    or len(TRANCHE_B_COMPONENT_ONLY_IDS) != 28
+    or set(TRANCHE_B_COMPONENT_ONLY_IDS) & _REGISTERED_STACK_COMPONENT_IDS
+    or (
+        set(TRANCHE_B_COMPONENT_ONLY_IDS)
+        | _REGISTERED_STACK_COMPONENT_IDS
+    )
+    != set(TRANCHE_B_MATH_IDS)
+):
+    raise StackResolutionError(
+        ReasonCode.OWNER_DATA_CONTRADICTORY,
+        "Tranche-B owner adjudication requires one MATH-01 to MATH-02 stack "
+        "and exactly 28 component-only identities",
+    )

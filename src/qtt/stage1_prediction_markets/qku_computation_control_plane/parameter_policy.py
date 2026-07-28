@@ -3,14 +3,30 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import datetime, timedelta
 from decimal import Decimal
+from enum import StrEnum
+from hashlib import sha256
 import json
 import re
 from types import MappingProxyType
 from typing import Mapping
 
-from .context import exact_decimal
-from .errors import NumericDomainError, ParameterPolicyError, ReasonCode
+from .context import ComputationContextKeyV1, exact_decimal, parse_utc
+from .errors import (
+    ComputationControlPlaneError,
+    NumericDomainError,
+    ParameterPolicyError,
+    ReasonCode,
+    SourcePolicyError,
+)
+from .freshness import FreshnessPolicyV1, FreshnessResolverV1
+from .models import (
+    CERTIFIED_TEST_FIXTURE_AUTHORITY_REF,
+    ParameterApplicationTargetV1,
+    TypedValueV1,
+    validate_pure_computation_authority_refs,
+)
 
 
 TRANCHE_PARAMETER_COUNTS = MappingProxyType(
@@ -251,30 +267,271 @@ class ParameterPolicyRecordV1:
             )
 
 
+class ParameterResolutionStateV1(StrEnum):
+    RESOLVED_TYPED_VALUE = "RESOLVED_TYPED_VALUE"
+    RESOLVED_SYMBOLIC_CONTROL = "RESOLVED_SYMBOLIC_CONTROL"
+    BLOCKED_RUNTIME_BINDING_REQUIRED = "BLOCKED_RUNTIME_BINDING_REQUIRED"
+    BLOCKED_FAIL_CLOSED = "BLOCKED_FAIL_CLOSED"
+    EXPLICIT_FAIL_CLOSED = "EXPLICIT_FAIL_CLOSED"
+
+
+class RuntimeParameterBindingOriginV1(StrEnum):
+    CANONICAL_SOURCE_SNAPSHOT = "CANONICAL_SOURCE_SNAPSHOT"
+    CERTIFIED_CONTRACT_FIXTURE = "CERTIFIED_CONTRACT_FIXTURE"
+
+
+@dataclass(frozen=True, slots=True)
+class PriceGridIntervalV1:
+    lower: Decimal
+    upper: Decimal
+    step: Decimal
+
+    def __post_init__(self) -> None:
+        lower = exact_decimal(self.lower, field_name="price_grid.lower")
+        upper = exact_decimal(self.upper, field_name="price_grid.upper")
+        step = exact_decimal(self.step, field_name="price_grid.step")
+        if lower < 0 or upper <= lower or step <= 0:
+            raise ParameterPolicyError(
+                ReasonCode.PARAMETER_OUT_OF_POLICY,
+                "price-grid intervals require 0 <= lower < upper and step > 0",
+            )
+        if (upper - lower) % step != 0:
+            raise ParameterPolicyError(
+                ReasonCode.PARAMETER_OUT_OF_POLICY,
+                "price-grid interval span must be an exact multiple of its step",
+            )
+        object.__setattr__(self, "lower", lower)
+        object.__setattr__(self, "upper", upper)
+        object.__setattr__(self, "step", step)
+
+    def permits(self, value: Decimal, *, include_upper: bool) -> bool:
+        if value < self.lower or (
+            value > self.upper
+            if include_upper
+            else value >= self.upper
+        ):
+            return False
+        return (value - self.lower) % self.step == 0
+
+
+@dataclass(frozen=True, slots=True)
+class ActiveMarketPriceGridV1:
+    market_id: str
+    venue: str
+    payout: Decimal
+    intervals: tuple[PriceGridIntervalV1, ...]
+
+    def __post_init__(self) -> None:
+        if (
+            not isinstance(self.market_id, str)
+            or not self.market_id
+            or not isinstance(self.venue, str)
+            or not self.venue
+            or not isinstance(self.intervals, tuple)
+            or not self.intervals
+            or any(
+                not isinstance(value, PriceGridIntervalV1)
+                for value in self.intervals
+            )
+        ):
+            raise ParameterPolicyError(
+                ReasonCode.PARAMETER_OUT_OF_POLICY,
+                "active market price grid must be a typed nonempty snapshot",
+            )
+        payout = exact_decimal(self.payout, field_name="price_grid.payout")
+        if payout <= 0 or self.intervals[-1].upper != payout:
+            raise ParameterPolicyError(
+                ReasonCode.PARAMETER_OUT_OF_POLICY,
+                "active market grid must terminate exactly at payout",
+            )
+        if self.intervals[0].lower != 0 or any(
+            left.upper != right.lower
+            for left, right in zip(
+                self.intervals,
+                self.intervals[1:],
+                strict=False,
+            )
+        ):
+            raise ParameterPolicyError(
+                ReasonCode.PARAMETER_OUT_OF_POLICY,
+                "active market price-grid intervals must be ordered and contiguous",
+            )
+        object.__setattr__(self, "payout", payout)
+
+    def permits(self, value: object) -> bool:
+        numeric = exact_decimal(value, field_name="market_price")
+        return any(
+            interval.permits(
+                numeric,
+                include_upper=index == len(self.intervals) - 1,
+            )
+            for index, interval in enumerate(self.intervals)
+        )
+
+
+@dataclass(frozen=True, slots=True)
+class ActiveMarketPriceStructureV1:
+    market_id: str
+    structure_class: str
+    intervals: tuple[PriceGridIntervalV1, ...]
+
+    def __post_init__(self) -> None:
+        if (
+            not isinstance(self.market_id, str)
+            or not self.market_id
+            or not isinstance(self.structure_class, str)
+            or not self.structure_class
+            or not isinstance(self.intervals, tuple)
+            or not self.intervals
+            or any(
+                not isinstance(value, PriceGridIntervalV1)
+                for value in self.intervals
+            )
+        ):
+            raise ParameterPolicyError(
+                ReasonCode.PARAMETER_OUT_OF_POLICY,
+                "active price-level structure must be an exact typed snapshot",
+            )
+
+
+RuntimeParameterControlV1 = (
+    TypedValueV1 | ActiveMarketPriceGridV1 | ActiveMarketPriceStructureV1
+)
+
+
+@dataclass(frozen=True, slots=True)
+class RuntimeParameterBindingV1:
+    binding_id: str
+    parameter_id: str
+    parameter_symbol: str
+    typed_control: RuntimeParameterControlV1
+    origin: RuntimeParameterBindingOriginV1
+    source_snapshot_ref: str
+    source_epoch_id: str
+    observed_time: datetime
+    source_available_time: datetime
+    effective_time: datetime
+    as_of_time: datetime
+    scope_refs: tuple[str, ...]
+    unit_or_basis: str
+    freshness_policy: FreshnessPolicyV1
+    source_state_id: str | None = None
+    fixture_authority_ref: str | None = None
+
+    def __post_init__(self) -> None:
+        for name in (
+            "binding_id",
+            "parameter_id",
+            "parameter_symbol",
+            "source_snapshot_ref",
+            "source_epoch_id",
+            "unit_or_basis",
+        ):
+            value = getattr(self, name)
+            if not isinstance(value, str) or not value:
+                raise ParameterPolicyError(
+                    ReasonCode.INVALID_CONTRACT,
+                    f"runtime parameter binding {name} is required",
+                )
+        if not isinstance(
+            self.typed_control,
+            TypedValueV1
+            | ActiveMarketPriceGridV1
+            | ActiveMarketPriceStructureV1,
+        ) or not isinstance(self.origin, RuntimeParameterBindingOriginV1):
+            raise ParameterPolicyError(
+                ReasonCode.INVALID_CONTRACT,
+                "runtime parameter binding value and origin must be typed",
+            )
+        for name in (
+            "observed_time",
+            "source_available_time",
+            "effective_time",
+            "as_of_time",
+        ):
+            object.__setattr__(
+                self,
+                name,
+                parse_utc(getattr(self, name), field_name=name),
+            )
+        if (
+            not isinstance(self.scope_refs, tuple)
+            or not self.scope_refs
+            or any(not isinstance(value, str) or not value for value in self.scope_refs)
+            or len(set(self.scope_refs)) != len(self.scope_refs)
+            or not isinstance(self.freshness_policy, FreshnessPolicyV1)
+        ):
+            raise ParameterPolicyError(
+                ReasonCode.INVALID_CONTRACT,
+                "runtime parameter scope and freshness must be exact",
+            )
+        canonical = (
+            self.origin
+            is RuntimeParameterBindingOriginV1.CANONICAL_SOURCE_SNAPSHOT
+        )
+        if canonical != (
+            isinstance(self.source_state_id, str)
+            and bool(self.source_state_id)
+            and self.fixture_authority_ref is None
+        ):
+            raise ParameterPolicyError(
+                ReasonCode.INVALID_CONTRACT,
+                "canonical runtime bindings require only a source-state pointer",
+            )
+        if not canonical and (
+            self.source_state_id is not None
+            or self.fixture_authority_ref
+            != CERTIFIED_TEST_FIXTURE_AUTHORITY_REF
+        ):
+            raise ParameterPolicyError(
+                ReasonCode.CAPABILITY_DENIED,
+                "fixture runtime bindings require exact certified fixture authority",
+            )
+
+
 @dataclass(frozen=True, slots=True)
 class ResolvedParameterV1:
+    receipt_id: str
     parameter_id: str
     parameter_audit_id: str
     parameter_symbol: str
-    value: str
+    value: str | Decimal | int | bool | RuntimeParameterControlV1 | None
+    typed_effective_value: (
+        str | Decimal | int | bool | RuntimeParameterControlV1 | None
+    )
     unit_or_basis: str
     resolution_class: str
     authority_class: str
     fallback: str
     owner_editability: str
     used_day1_seed: bool
+    implementation_resolution_kind: str
+    launch_computability_state: str
+    missing_stale_invalid_behavior: str
+    precision_and_rounding_policy: tuple[tuple[str, str], ...]
+    resolution_state: ParameterResolutionStateV1
+    effective_source_state_refs: tuple[str, ...]
+    effective_time: datetime | None
+    source_epoch_id: str | None
+    binding_receipt_refs: tuple[str, ...]
+    application_target: ParameterApplicationTargetV1
+    secondary_application_targets: tuple[ParameterApplicationTargetV1, ...]
+    blocker_reason_code: ReasonCode | None = None
 
     def __post_init__(self) -> None:
         for name in (
+            "receipt_id",
             "parameter_id",
             "parameter_audit_id",
             "parameter_symbol",
-            "value",
             "unit_or_basis",
             "resolution_class",
             "authority_class",
             "fallback",
             "owner_editability",
+            "implementation_resolution_kind",
+            "launch_computability_state",
+            "missing_stale_invalid_behavior",
         ):
             value = getattr(self, name)
             if not isinstance(value, str) or not value:
@@ -282,11 +539,68 @@ class ResolvedParameterV1:
                     ReasonCode.PARAMETER_OUT_OF_POLICY,
                     f"resolved parameter {name} must be nonempty text",
                 )
-        if type(self.used_day1_seed) is not bool:
+        if (
+            type(self.used_day1_seed) is not bool
+            or not isinstance(self.resolution_state, ParameterResolutionStateV1)
+            or not isinstance(
+                self.application_target,
+                ParameterApplicationTargetV1,
+            )
+        ):
             raise ParameterPolicyError(
                 ReasonCode.PARAMETER_OUT_OF_POLICY,
-                "used_day1_seed must be a boolean",
+                "resolved parameter terminal fields must be typed",
             )
+        for name, values in (
+            ("effective_source_state_refs", self.effective_source_state_refs),
+            ("binding_receipt_refs", self.binding_receipt_refs),
+        ):
+            if (
+                not isinstance(values, tuple)
+                or any(not isinstance(value, str) or not value for value in values)
+                or len(set(values)) != len(values)
+            ):
+                raise ParameterPolicyError(
+                    ReasonCode.PARAMETER_OUT_OF_POLICY,
+                    f"{name} must be a unique immutable text tuple",
+                )
+        if (
+            not isinstance(self.secondary_application_targets, tuple)
+            or any(
+                not isinstance(value, ParameterApplicationTargetV1)
+                for value in self.secondary_application_targets
+            )
+            or len(set(self.secondary_application_targets))
+            != len(self.secondary_application_targets)
+        ):
+            raise ParameterPolicyError(
+                ReasonCode.PARAMETER_OUT_OF_POLICY,
+                "secondary parameter applications must be unique typed targets",
+            )
+        if self.effective_time is not None:
+            object.__setattr__(
+                self,
+                "effective_time",
+                parse_utc(self.effective_time, field_name="effective_time"),
+            )
+        blocked = self.resolution_state in {
+            ParameterResolutionStateV1.BLOCKED_RUNTIME_BINDING_REQUIRED,
+            ParameterResolutionStateV1.BLOCKED_FAIL_CLOSED,
+            ParameterResolutionStateV1.EXPLICIT_FAIL_CLOSED,
+        }
+        if (
+            blocked != (self.blocker_reason_code is not None)
+            or blocked != (self.value is None)
+            or blocked != (self.typed_effective_value is None)
+        ):
+            raise ParameterPolicyError(
+                ReasonCode.PARAMETER_OUT_OF_POLICY,
+                "parameter value, terminal state, and blocker must agree",
+            )
+
+    @property
+    def computable(self) -> bool:
+        return self.blocker_reason_code is None
 
 
 _PARAMETER_ROWS_JSON = r'''
@@ -7456,7 +7770,7 @@ def _numeric_grid_values(text: str) -> frozenset[Decimal]:
 def _validate_numeric_override(
     policy: ParameterPolicyRecordV1,
     candidate: str | int | Decimal,
-) -> str:
+) -> Decimal | int:
     try:
         numeric = exact_decimal(candidate, field_name=policy.parameter_id)
     except NumericDomainError as exc:
@@ -7494,23 +7808,132 @@ def _validate_numeric_override(
             ReasonCode.PARAMETER_OUT_OF_POLICY,
             f"{policy.parameter_id} is outside its exact numeric grid",
         )
-    return str(candidate)
+    if "INTEGER" in resolution:
+        return int(numeric)
+    return numeric
 
 
 class ParameterPolicyResolverV1:
     @staticmethod
-    def resolve(
-        parameter_id: str,
+    def _result(
+        policy: ParameterPolicyRecordV1,
         *,
-        candidate: str | int | Decimal | None = None,
+        value: str | Decimal | int | bool | RuntimeParameterControlV1 | None,
+        used_day1_seed: bool,
+        resolution_state: ParameterResolutionStateV1,
+        application_target: ParameterApplicationTargetV1,
+        secondary_application_targets: tuple[
+            ParameterApplicationTargetV1, ...
+        ],
+        effective_source_state_refs: tuple[str, ...] | None = None,
+        effective_time: datetime | None = None,
+        source_epoch_id: str | None = None,
+        binding_receipt_refs: tuple[str, ...] = (),
+        blocker_reason_code: ReasonCode | None = None,
     ) -> ResolvedParameterV1:
-        policy = get_parameter_policy(parameter_id)
+        public_value = value
+        if (
+            value is not None
+            and policy.step12_primary_tranche_id == "ST12-TRANCHE-A"
+            and resolution_state
+            in {
+                ParameterResolutionStateV1.RESOLVED_TYPED_VALUE,
+                ParameterResolutionStateV1.RESOLVED_SYMBOLIC_CONTROL,
+            }
+        ):
+            public_value = (
+                policy.effective_day1_seed_value_or_resolution_rule
+                if used_day1_seed
+                else str(value)
+            )
+        receipt_material = "|".join(
+            (
+                policy.parameter_id,
+                resolution_state.value,
+                "" if public_value is None else str(public_value),
+                "" if value is None else str(value),
+                application_target.value,
+                ""
+                if blocker_reason_code is None
+                else blocker_reason_code.value,
+                *binding_receipt_refs,
+            )
+        )
+        return ResolvedParameterV1(
+            receipt_id=(
+                "PARAMETER::"
+                + sha256(receipt_material.encode("utf-8")).hexdigest()
+            ),
+            parameter_id=policy.parameter_id,
+            parameter_audit_id=policy.parameter_audit_id,
+            parameter_symbol=policy.parameter_symbol,
+            value=public_value,
+            typed_effective_value=value,
+            unit_or_basis=policy.effective_unit_or_basis,
+            resolution_class=policy.effective_resolution_class,
+            authority_class=policy.effective_default_authority_class,
+            fallback=policy.effective_fallback_behavior_when_value_unavailable,
+            owner_editability=policy.effective_owner_dashboard_editability_class,
+            used_day1_seed=used_day1_seed,
+            implementation_resolution_kind=(
+                policy.implementation_resolution_kind
+            ),
+            launch_computability_state=policy.launch_computability_state,
+            missing_stale_invalid_behavior=(
+                policy.missing_stale_invalid_behavior
+            ),
+            precision_and_rounding_policy=(
+                policy.precision_and_rounding_policy
+            ),
+            resolution_state=resolution_state,
+            effective_source_state_refs=(
+                policy.effective_source_state_refs
+                if effective_source_state_refs is None
+                else effective_source_state_refs
+            ),
+            effective_time=effective_time,
+            source_epoch_id=source_epoch_id,
+            binding_receipt_refs=binding_receipt_refs,
+            application_target=application_target,
+            secondary_application_targets=secondary_application_targets,
+            blocker_reason_code=blocker_reason_code,
+        )
+
+    @classmethod
+    def _blocked(
+        cls,
+        policy: ParameterPolicyRecordV1,
+        *,
+        reason: ReasonCode,
+        state: ParameterResolutionStateV1,
+        application_target: ParameterApplicationTargetV1,
+        secondary_application_targets: tuple[
+            ParameterApplicationTargetV1, ...
+        ],
+        binding_receipt_refs: tuple[str, ...] = (),
+    ) -> ResolvedParameterV1:
+        return cls._result(
+            policy,
+            value=None,
+            used_day1_seed=False,
+            resolution_state=state,
+            application_target=application_target,
+            secondary_application_targets=secondary_application_targets,
+            binding_receipt_refs=binding_receipt_refs,
+            blocker_reason_code=reason,
+        )
+
+    @staticmethod
+    def _static_value(
+        policy: ParameterPolicyRecordV1,
+        candidate: str | int | Decimal | None,
+    ) -> tuple[str | Decimal | int, bool, ParameterResolutionStateV1]:
         seed = policy.effective_day1_seed_value_or_resolution_rule
         if candidate is None:
             if "NO_DEFAULT_REQUIRES_CALIBRATION" in seed:
                 raise ParameterPolicyError(
                     ReasonCode.PARAMETER_CALIBRATION_REQUIRED,
-                    f"{parameter_id} requires typed calibration; no default exists",
+                    f"{policy.parameter_id} requires typed calibration; no default exists",
                 )
             value = seed
             used_seed = True
@@ -7523,36 +7946,466 @@ class ParameterPolicyResolverV1:
                 )
             value = str(candidate)
             used_seed = value == seed
-            allowed = _simple_enum_values(
-                policy.effective_reference_range_or_structural_constraint
-            )
-            if allowed and value not in allowed:
+
+        allowed = _simple_enum_values(
+            policy.effective_reference_range_or_structural_constraint
+        )
+        numeric_resolution = any(
+            token in policy.effective_resolution_class
+            for token in ("INTEGER", "NUMERIC", "DECIMAL", "FLOAT")
+        )
+        if allowed and (candidate is not None or value in allowed):
+            if value not in allowed:
                 raise ParameterPolicyError(
                     ReasonCode.PARAMETER_OUT_OF_POLICY,
                     f"{value!r} is outside {policy.parameter_id}'s enum",
                 )
-            if (
-                not allowed
-                and any(
+            return (
+                value,
+                used_seed,
+                ParameterResolutionStateV1.RESOLVED_SYMBOLIC_CONTROL,
+            )
+        if numeric_resolution:
+            try:
+                numeric_value = _validate_numeric_override(policy, value)
+            except ParameterPolicyError:
+                if candidate is not None or not any(
                     token in policy.effective_resolution_class
-                    for token in ("INTEGER", "NUMERIC")
+                    for token in ("RULE", "GRID", "DERIVED", "OR_")
+                ):
+                    raise
+            else:
+                return (
+                    numeric_value,
+                    used_seed,
+                    ParameterResolutionStateV1.RESOLVED_TYPED_VALUE,
+                )
+        if candidate is not None and value != seed:
+            raise ParameterPolicyError(
+                ReasonCode.PARAMETER_OUT_OF_POLICY,
+                "complex policy overrides require a later typed owner contract",
+            )
+        return (
+            value,
+            used_seed,
+            ParameterResolutionStateV1.RESOLVED_SYMBOLIC_CONTROL,
+        )
+
+    @classmethod
+    def _runtime_binding(
+        cls,
+        policy: ParameterPolicyRecordV1,
+        *,
+        binding: RuntimeParameterBindingV1 | None,
+        context: ComputationContextKeyV1 | None,
+        application_target: ParameterApplicationTargetV1,
+        secondary_application_targets: tuple[
+            ParameterApplicationTargetV1, ...
+        ],
+        required_scope_refs: tuple[str, ...],
+        required_source_claim_binding_rule_ids: tuple[str, ...],
+        admitted_fixture_authority_refs: tuple[str, ...],
+        computation_mode: str,
+    ) -> ResolvedParameterV1:
+        if (
+            application_target
+            is ParameterApplicationTargetV1.RECEIPT_ONLY_NONMATERIAL
+        ):
+            return cls._blocked(
+                policy,
+                reason=ReasonCode.PARAMETER_APPLICATION_UNBOUND,
+                state=ParameterResolutionStateV1.BLOCKED_FAIL_CLOSED,
+                application_target=application_target,
+                secondary_application_targets=secondary_application_targets,
+            )
+        if binding is None or context is None:
+            return cls._blocked(
+                policy,
+                reason=ReasonCode.PARAMETER_RUNTIME_BINDING_REQUIRED,
+                state=(
+                    ParameterResolutionStateV1.BLOCKED_RUNTIME_BINDING_REQUIRED
+                ),
+                application_target=application_target,
+                secondary_application_targets=secondary_application_targets,
+            )
+        if (
+            not isinstance(binding, RuntimeParameterBindingV1)
+            or not isinstance(context, ComputationContextKeyV1)
+            or binding.parameter_id != policy.parameter_id
+            or binding.parameter_symbol != policy.parameter_symbol
+            or binding.unit_or_basis != policy.effective_unit_or_basis
+            or binding.as_of_time != context.as_of
+            or binding.source_epoch_id != context.source_epoch_id
+            or binding.observed_time > context.as_of
+            or binding.source_available_time > context.as_of
+            or binding.effective_time > context.as_of
+            or not set(required_scope_refs) <= set(binding.scope_refs)
+        ):
+            return cls._blocked(
+                policy,
+                reason=ReasonCode.PARAMETER_RUNTIME_BINDING_REQUIRED,
+                state=(
+                    ParameterResolutionStateV1.BLOCKED_RUNTIME_BINDING_REQUIRED
+                ),
+                application_target=application_target,
+                secondary_application_targets=secondary_application_targets,
+                binding_receipt_refs=(
+                    binding.binding_id
+                    if isinstance(binding, RuntimeParameterBindingV1)
+                    else "INVALID_RUNTIME_BINDING",
+                ),
+            )
+        if (
+            binding.origin
+            is RuntimeParameterBindingOriginV1.CERTIFIED_CONTRACT_FIXTURE
+            and (
+                computation_mode != "CONTRACT_ONLY"
+                or binding.fixture_authority_ref
+                not in admitted_fixture_authority_refs
+            )
+        ):
+            return cls._blocked(
+                policy,
+                reason=ReasonCode.CAPABILITY_DENIED,
+                state=ParameterResolutionStateV1.BLOCKED_FAIL_CLOSED,
+                application_target=application_target,
+                secondary_application_targets=secondary_application_targets,
+                binding_receipt_refs=(binding.binding_id,),
+            )
+
+        effective_source_refs = policy.effective_source_state_refs
+        if (
+            binding.origin
+            is RuntimeParameterBindingOriginV1.CANONICAL_SOURCE_SNAPSHOT
+        ):
+            from .bindings import get_source_claim_binding_rule
+            from .source_policy import validate_effective_epoch
+
+            assert binding.source_state_id is not None
+            try:
+                source = validate_effective_epoch(
+                    binding.source_state_id,
+                    as_of=context.as_of,
+                )
+            except SourcePolicyError:
+                return cls._blocked(
+                    policy,
+                    reason=ReasonCode.PARAMETER_RUNTIME_BINDING_REQUIRED,
+                    state=(
+                        ParameterResolutionStateV1.BLOCKED_RUNTIME_BINDING_REQUIRED
+                    ),
+                    application_target=application_target,
+                    secondary_application_targets=secondary_application_targets,
+                    binding_receipt_refs=(binding.binding_id,),
+                )
+            try:
+                matching_source_rules = tuple(
+                    rule
+                    for rule in (
+                        get_source_claim_binding_rule(rule_id)
+                        for rule_id in required_source_claim_binding_rule_ids
+                    )
+                    if rule.source_state_ref == source.source_state_id
+                    and rule.source_identity_ref
+                    == source.stable_source_identity
+                )
+            except ComputationControlPlaneError:
+                matching_source_rules = ()
+            if len(matching_source_rules) != 1:
+                return cls._blocked(
+                    policy,
+                    reason=ReasonCode.PARAMETER_RUNTIME_BINDING_REQUIRED,
+                    state=(
+                        ParameterResolutionStateV1.BLOCKED_RUNTIME_BINDING_REQUIRED
+                    ),
+                    application_target=application_target,
+                    secondary_application_targets=secondary_application_targets,
+                    binding_receipt_refs=(binding.binding_id,),
+                )
+            source_rule = matching_source_rules[0]
+            if not (
+                set(required_scope_refs) & set(source_rule.permitted_consumers)
+                or (
+                    "EXACT_PARAMETER_OR_MATH_CONSUMERS_LISTED_BY_EVIDENCE_ADJUDICATION"
+                    in source_rule.permitted_consumers
                 )
             ):
-                value = _validate_numeric_override(policy, candidate)
-            elif not allowed and value != seed:
+                return cls._blocked(
+                    policy,
+                    reason=ReasonCode.PARAMETER_RUNTIME_BINDING_REQUIRED,
+                    state=(
+                        ParameterResolutionStateV1.BLOCKED_RUNTIME_BINDING_REQUIRED
+                    ),
+                    application_target=application_target,
+                    secondary_application_targets=secondary_application_targets,
+                    binding_receipt_refs=(binding.binding_id,),
+                )
+            ttl_match = re.fullmatch(r"P(\d+)D", source.ttl)
+            expected_ttl = (
+                None
+                if ttl_match is None
+                else timedelta(days=int(ttl_match.group(1)))
+            )
+            if (
+                source.epoch != context.source_epoch_id
+                or expected_ttl is None
+                or binding.freshness_policy.ttl != expected_ttl
+            ):
+                return cls._blocked(
+                    policy,
+                    reason=ReasonCode.PARAMETER_RUNTIME_BINDING_REQUIRED,
+                    state=(
+                        ParameterResolutionStateV1.BLOCKED_RUNTIME_BINDING_REQUIRED
+                    ),
+                    application_target=application_target,
+                    secondary_application_targets=secondary_application_targets,
+                    binding_receipt_refs=(binding.binding_id,),
+                )
+            effective_source_refs = tuple(
+                dict.fromkeys(
+                    (
+                        *policy.effective_source_state_refs,
+                        source_rule.binding_rule_id,
+                        source.source_state_id,
+                    )
+                )
+            )
+        freshness = FreshnessResolverV1.resolve_field(
+            subject_id=policy.parameter_id,
+            observed_time=binding.observed_time,
+            as_of_time=context.as_of,
+            policy=binding.freshness_policy,
+        )
+        if not freshness.fresh:
+            return cls._blocked(
+                policy,
+                reason=ReasonCode.PARAMETER_RUNTIME_BINDING_REQUIRED,
+                state=(
+                    ParameterResolutionStateV1.BLOCKED_RUNTIME_BINDING_REQUIRED
+                ),
+                application_target=application_target,
+                secondary_application_targets=secondary_application_targets,
+                binding_receipt_refs=(
+                    binding.binding_id,
+                    freshness.receipt_id,
+                ),
+            )
+
+        expected_control_type: type[object] = TypedValueV1
+        if policy.parameter_id == "ST10-PARAM::2212":
+            expected_control_type = ActiveMarketPriceGridV1
+        elif policy.parameter_id == "ST10-PARAM::2213":
+            expected_control_type = ActiveMarketPriceStructureV1
+        if not isinstance(binding.typed_control, expected_control_type):
+            return cls._blocked(
+                policy,
+                reason=ReasonCode.PARAMETER_RUNTIME_BINDING_REQUIRED,
+                state=(
+                    ParameterResolutionStateV1.BLOCKED_RUNTIME_BINDING_REQUIRED
+                ),
+                application_target=application_target,
+                secondary_application_targets=secondary_application_targets,
+                binding_receipt_refs=(
+                    binding.binding_id,
+                    freshness.receipt_id,
+                ),
+            )
+        return cls._result(
+            policy,
+            value=binding.typed_control,
+            used_day1_seed=False,
+            resolution_state=ParameterResolutionStateV1.RESOLVED_TYPED_VALUE,
+            application_target=application_target,
+            secondary_application_targets=secondary_application_targets,
+            effective_source_state_refs=effective_source_refs,
+            effective_time=binding.effective_time,
+            source_epoch_id=binding.source_epoch_id,
+            binding_receipt_refs=(
+                binding.binding_id,
+                binding.source_snapshot_ref,
+                freshness.receipt_id,
+            ),
+        )
+
+    @staticmethod
+    def resolve(
+        parameter_id: str,
+        *,
+        candidate: str | int | Decimal | None = None,
+        runtime_binding: RuntimeParameterBindingV1 | None = None,
+        context: ComputationContextKeyV1 | None = None,
+        application_target: ParameterApplicationTargetV1 = (
+            ParameterApplicationTargetV1.RECEIPT_ONLY_NONMATERIAL
+        ),
+        secondary_application_targets: tuple[
+            ParameterApplicationTargetV1, ...
+        ] = (),
+        required_scope_refs: tuple[str, ...] = (),
+        required_source_claim_binding_rule_ids: tuple[str, ...] = (),
+        admitted_fixture_authority_refs: tuple[str, ...] = (),
+        computation_mode: str = "CONTRACT_ONLY",
+    ) -> ResolvedParameterV1:
+        policy = get_parameter_policy(parameter_id)
+        validated_fixture_authority_refs = (
+            validate_pure_computation_authority_refs(
+                admitted_fixture_authority_refs
+            )
+        )
+        if (
+            not isinstance(application_target, ParameterApplicationTargetV1)
+            or not isinstance(secondary_application_targets, tuple)
+            or any(
+                not isinstance(value, ParameterApplicationTargetV1)
+                for value in secondary_application_targets
+            )
+            or len(set(secondary_application_targets))
+            != len(secondary_application_targets)
+            or not isinstance(required_scope_refs, tuple)
+            or any(
+                not isinstance(value, str) or not value
+                for value in required_scope_refs
+            )
+            or len(set(required_scope_refs)) != len(required_scope_refs)
+            or not isinstance(
+                required_source_claim_binding_rule_ids,
+                tuple,
+            )
+            or any(
+                not isinstance(value, str) or not value
+                for value in required_source_claim_binding_rule_ids
+            )
+            or len(set(required_source_claim_binding_rule_ids))
+            != len(required_source_claim_binding_rule_ids)
+            or computation_mode not in {"CONTRACT_ONLY", "REPLAY", "PAPER"}
+        ):
+            raise ParameterPolicyError(
+                ReasonCode.INVALID_CONTRACT,
+                "parameter resolution scope and applications must be exact",
+            )
+        legacy_tranche_a_call = (
+            policy.step12_primary_tranche_id == "ST12-TRANCHE-A"
+            and runtime_binding is None
+            and context is None
+            and application_target
+            is ParameterApplicationTargetV1.RECEIPT_ONLY_NONMATERIAL
+            and not secondary_application_targets
+            and not required_scope_refs
+            and not required_source_claim_binding_rule_ids
+            and not validated_fixture_authority_refs
+            and computation_mode == "CONTRACT_ONLY"
+        )
+        if legacy_tranche_a_call:
+            if candidate is None:
+                typed_value: str | Decimal | int = (
+                    policy.effective_day1_seed_value_or_resolution_rule
+                )
+                if policy.implementation_resolution_kind == (
+                    "STATIC_OR_DETERMINISTIC_RULE"
+                ):
+                    typed_value, _, _ = (
+                        ParameterPolicyResolverV1._static_value(
+                            policy,
+                            None,
+                        )
+                    )
+                used_seed = True
+            else:
+                typed_value, used_seed, _ = (
+                    ParameterPolicyResolverV1._static_value(
+                        policy,
+                        candidate,
+                    )
+                )
+            return ParameterPolicyResolverV1._result(
+                policy,
+                value=typed_value,
+                used_day1_seed=used_seed,
+                resolution_state=(
+                    ParameterResolutionStateV1.RESOLVED_SYMBOLIC_CONTROL
+                    if isinstance(typed_value, str)
+                    else ParameterResolutionStateV1.RESOLVED_TYPED_VALUE
+                ),
+                application_target=application_target,
+                secondary_application_targets=(),
+            )
+        kind = policy.implementation_resolution_kind
+        if kind == "STATIC_OR_DETERMINISTIC_RULE":
+            if runtime_binding is not None:
                 raise ParameterPolicyError(
                     ReasonCode.PARAMETER_OUT_OF_POLICY,
-                    "complex policy overrides require a later typed owner contract",
+                    "static parameters cannot consume runtime binding assertions",
                 )
-        return ResolvedParameterV1(
-            parameter_id=policy.parameter_id,
-            parameter_audit_id=policy.parameter_audit_id,
-            parameter_symbol=policy.parameter_symbol,
-            value=value,
-            unit_or_basis=policy.effective_unit_or_basis,
-            resolution_class=policy.effective_resolution_class,
-            authority_class=policy.effective_default_authority_class,
-            fallback=policy.effective_fallback_behavior_when_value_unavailable,
-            owner_editability=policy.effective_owner_dashboard_editability_class,
-            used_day1_seed=used_seed,
+            value, used_seed, state = ParameterPolicyResolverV1._static_value(
+                policy,
+                candidate,
+            )
+            return ParameterPolicyResolverV1._result(
+                policy,
+                value=value,
+                used_day1_seed=used_seed,
+                resolution_state=state,
+                application_target=application_target,
+                secondary_application_targets=(
+                    secondary_application_targets
+                ),
+            )
+        if kind == "RUNTIME_TYPED_BINDING":
+            if candidate is not None:
+                raise ParameterPolicyError(
+                    ReasonCode.PARAMETER_NOT_EDITABLE,
+                    "runtime typed bindings cannot be replaced by scalar overrides",
+                )
+            return ParameterPolicyResolverV1._runtime_binding(
+                policy,
+                binding=runtime_binding,
+                context=context,
+                application_target=application_target,
+                secondary_application_targets=(
+                    secondary_application_targets
+                ),
+                required_scope_refs=required_scope_refs,
+                required_source_claim_binding_rule_ids=(
+                    required_source_claim_binding_rule_ids
+                ),
+                admitted_fixture_authority_refs=(
+                    validated_fixture_authority_refs
+                ),
+                computation_mode=computation_mode,
+            )
+        if kind == "EXPLICIT_FAIL_CLOSED_POLICY":
+            if candidate is not None or runtime_binding is not None:
+                raise ParameterPolicyError(
+                    ReasonCode.PARAMETER_NOT_EDITABLE,
+                    "explicit fail-closed policies cannot be overridden",
+                )
+            return ParameterPolicyResolverV1._blocked(
+                policy,
+                reason=ReasonCode.PARAMETER_EXPLICIT_FAIL_CLOSED,
+                state=ParameterResolutionStateV1.EXPLICIT_FAIL_CLOSED,
+                application_target=application_target,
+                secondary_application_targets=(
+                    secondary_application_targets
+                ),
+            )
+        if kind in {
+            "OFFLINE_CALIBRATION_OR_BOUNDED_OPTIMIZATION",
+            "OFFLINE_CALIBRATION_REQUIRED",
+        }:
+            if candidate is not None or runtime_binding is not None:
+                raise ParameterPolicyError(
+                    ReasonCode.PARAMETER_NOT_EDITABLE,
+                    "offline calibration policies cannot consume runtime overrides",
+                )
+            return ParameterPolicyResolverV1._blocked(
+                policy,
+                reason=ReasonCode.PARAMETER_CALIBRATION_REQUIRED,
+                state=ParameterResolutionStateV1.BLOCKED_FAIL_CLOSED,
+                application_target=application_target,
+                secondary_application_targets=(
+                    secondary_application_targets
+                ),
+            )
+        raise ParameterPolicyError(
+            ReasonCode.PARAMETER_OUT_OF_POLICY,
+            f"unsupported implementation resolution kind: {kind}",
         )

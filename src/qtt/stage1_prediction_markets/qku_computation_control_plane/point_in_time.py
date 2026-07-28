@@ -6,6 +6,8 @@ from dataclasses import dataclass
 from datetime import datetime
 from enum import StrEnum
 from hashlib import sha256
+from types import MappingProxyType
+from typing import Mapping
 
 from .context import ComputationContextKeyV1, parse_utc
 from .errors import PointInTimeError, ReasonCode
@@ -26,6 +28,34 @@ class PointInTimeStateV1(StrEnum):
     UNAVAILABLE_AT_DECISION = "UNAVAILABLE_AT_DECISION"
     REVISION_LEAKAGE_BLOCKED = "REVISION_LEAKAGE_BLOCKED"
     EPOCH_MISMATCH_BLOCKED = "EPOCH_MISMATCH_BLOCKED"
+
+
+POINT_IN_TIME_FIELD_CLASS_POLICY: Mapping[
+    PointInTimeFieldClassV1, tuple[str, ...]
+] = MappingProxyType(
+    {
+        PointInTimeFieldClassV1.OBSERVATION: (
+            "OBSERVED_BY_AS_OF",
+            "NO_FUTURE_KNOWLEDGE_FROM_EFFECTIVE_SEMANTICS",
+        ),
+        PointInTimeFieldClassV1.SCHEDULED_EFFECTIVE_FACT: (
+            "OBSERVED_AND_AVAILABLE_BY_AS_OF",
+            "FUTURE_EFFECTIVE_ALLOWED",
+        ),
+        PointInTimeFieldClassV1.REVISION: (
+            "REVISION_OBSERVED_AND_AVAILABLE_BY_AS_OF",
+            "NO_BACKWARD_REVISION_LEAKAGE",
+        ),
+        PointInTimeFieldClassV1.EVENT_OUTCOME: (
+            "OBSERVED_BY_AS_OF",
+            "EFFECTIVE_BY_AS_OF",
+        ),
+        PointInTimeFieldClassV1.SETTLEMENT: (
+            "OBSERVED_BY_AS_OF",
+            "EFFECTIVE_BY_AS_OF",
+        ),
+    }
+)
 
 
 def _required_text(value: object, field_name: str) -> str:
@@ -179,11 +209,18 @@ class PointInTimeResolverV1:
                 "context must be ComputationContextKeyV1",
             )
 
-        blockers: list[ReasonCode] = []
-        state = PointInTimeStateV1.AVAILABLE
+        violations: list[
+            tuple[int, PointInTimeStateV1, ReasonCode, str]
+        ] = []
         if evidence.source_epoch_id != context.source_epoch_id:
-            blockers.append(ReasonCode.SOURCE_EPOCH_MISSING)
-            state = PointInTimeStateV1.EPOCH_MISMATCH_BLOCKED
+            violations.append(
+                (
+                    1,
+                    PointInTimeStateV1.EPOCH_MISMATCH_BLOCKED,
+                    ReasonCode.SOURCE_EPOCH_MISSING,
+                    "CONTEXT_SOURCE_EPOCH_MISMATCH",
+                )
+            )
 
         availability_times = (
             evidence.source_available_time,
@@ -195,21 +232,96 @@ class PointInTimeResolverV1:
             evidence.as_of_time != context.as_of
             or any(moment > context.as_of for moment in availability_times)
         ):
-            blockers.append(ReasonCode.POINT_IN_TIME_UNAVAILABLE)
-            state = PointInTimeStateV1.UNAVAILABLE_AT_DECISION
+            violations.append(
+                (
+                    4,
+                    PointInTimeStateV1.UNAVAILABLE_AT_DECISION,
+                    ReasonCode.POINT_IN_TIME_UNAVAILABLE,
+                    "GENERIC_UNAVAILABLE_AT_DECISION_TIMESTAMP",
+                )
+            )
 
-        if evidence.field_class in {
-            PointInTimeFieldClassV1.REVISION,
+        field_policy = POINT_IN_TIME_FIELD_CLASS_POLICY[evidence.field_class]
+        if evidence.field_class is PointInTimeFieldClassV1.OBSERVATION:
+            if (
+                evidence.observed_time > context.as_of
+                or evidence.effective_time > context.as_of
+            ):
+                violations.append(
+                    (
+                        3,
+                        PointInTimeStateV1.UNAVAILABLE_AT_DECISION,
+                        ReasonCode.POINT_IN_TIME_UNAVAILABLE,
+                        (
+                            field_policy[0]
+                            if evidence.observed_time > context.as_of
+                            else field_policy[1]
+                        ),
+                    )
+                )
+        elif (
+            evidence.field_class
+            is PointInTimeFieldClassV1.SCHEDULED_EFFECTIVE_FACT
+        ):
+            if evidence.observed_time > context.as_of:
+                violations.append(
+                    (
+                        3,
+                        PointInTimeStateV1.UNAVAILABLE_AT_DECISION,
+                        ReasonCode.POINT_IN_TIME_UNAVAILABLE,
+                        field_policy[0],
+                    )
+                )
+        elif evidence.field_class is PointInTimeFieldClassV1.REVISION:
+            if (
+                evidence.observed_time > context.as_of
+                or evidence.source_available_time > context.as_of
+                or evidence.strategy_available_time > context.as_of
+            ):
+                violations.append(
+                    (
+                        2,
+                        PointInTimeStateV1.REVISION_LEAKAGE_BLOCKED,
+                        ReasonCode.REVISION_LEAKAGE,
+                        field_policy[0],
+                    )
+                )
+        elif evidence.field_class in {
             PointInTimeFieldClassV1.EVENT_OUTCOME,
             PointInTimeFieldClassV1.SETTLEMENT,
         } and (
-            evidence.source_available_time > context.as_of
+            evidence.observed_time > context.as_of
+            or evidence.effective_time > context.as_of
+            or evidence.source_available_time > context.as_of
             or evidence.strategy_available_time > context.as_of
         ):
-            blockers.append(ReasonCode.REVISION_LEAKAGE)
-            state = PointInTimeStateV1.REVISION_LEAKAGE_BLOCKED
+            violations.append(
+                (
+                    2,
+                    PointInTimeStateV1.REVISION_LEAKAGE_BLOCKED,
+                    ReasonCode.REVISION_LEAKAGE,
+                    (
+                        field_policy[0]
+                        if evidence.observed_time > context.as_of
+                        else field_policy[1]
+                    ),
+                )
+            )
 
-        blockers = list(dict.fromkeys(blockers))
+        ranked = tuple(
+            sorted(
+                violations,
+                key=lambda item: (item[0], item[3], item[2].value),
+            )
+        )
+        state = (
+            PointInTimeStateV1.AVAILABLE
+            if not ranked
+            else ranked[0][1]
+        )
+        blockers = tuple(
+            dict.fromkeys(item[2] for item in ranked)
+        )
         digest_material = "|".join(
             (
                 evidence.evidence_id,
@@ -228,7 +340,7 @@ class PointInTimeResolverV1:
             as_of_time=context.as_of,
             source_epoch_id=evidence.source_epoch_id,
             source_revision_id=evidence.source_revision_id,
-            blocker_codes=tuple(blockers),
+            blocker_codes=blockers,
             terminal_route=(
                 "QKUComputationControlPlaneV1"
                 if not blockers

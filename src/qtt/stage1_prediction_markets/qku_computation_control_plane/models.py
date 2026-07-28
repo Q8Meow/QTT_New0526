@@ -10,7 +10,7 @@ import re
 from types import MappingProxyType
 from typing import TYPE_CHECKING, ClassVar, Mapping, TypeVar
 
-from .errors import ContractValidationError, ReasonCode
+from .errors import AuthorityDeniedError, ContractValidationError, ReasonCode
 
 if TYPE_CHECKING:
     from .context import ComputationContextKeyV1
@@ -168,9 +168,68 @@ class OperationBlockerCodeV1(StrEnum):
     OUTPUT_INVALID = "OUTPUT_INVALID"
     REQUEST_BOUND_EXCEEDED = "REQUEST_BOUND_EXCEEDED"
     BACKPRESSURE_FAIL_CLOSED = "BACKPRESSURE_FAIL_CLOSED"
+    SOURCE_BINDING_INVALID = "SOURCE_BINDING_INVALID"
+    INPUT_ORIGIN_NOT_AUTHORIZED = "INPUT_ORIGIN_NOT_AUTHORIZED"
+    EXECUTION_REQUIREMENTS_UNRESOLVED = "EXECUTION_REQUIREMENTS_UNRESOLVED"
+    PARAMETER_REQUIREMENT_MISMATCH = "PARAMETER_REQUIREMENT_MISMATCH"
+    PARAMETER_RUNTIME_BINDING_REQUIRED = "PARAMETER_RUNTIME_BINDING_REQUIRED"
+    PARAMETER_APPLICATION_UNBOUND = "PARAMETER_APPLICATION_UNBOUND"
+    STACK_NOT_APPLICABLE = "STACK_NOT_APPLICABLE"
+    POINT_IN_TIME_LEAKAGE = "POINT_IN_TIME_LEAKAGE"
     DOWNSTREAM_PREREQUISITE_UNAVAILABLE = (
         "DOWNSTREAM_PREREQUISITE_UNAVAILABLE"
     )
+
+
+CERTIFIED_TEST_FIXTURE_AUTHORITY_REF = "ST12B_CERTIFIED_TEST_FIXTURE"
+OWNER_CONTRACT_ONLY_PURE_COMPUTATION_AUTHORITY_REF = (
+    "OWNER_AUTHORIZATION::CONTRACT_ONLY_PURE_COMPUTATION"
+)
+_PURE_COMPUTATION_AUTHORITY_REFS = frozenset(
+    {
+        CERTIFIED_TEST_FIXTURE_AUTHORITY_REF,
+        OWNER_CONTRACT_ONLY_PURE_COMPUTATION_AUTHORITY_REF,
+    }
+)
+
+
+def validate_pure_computation_authority_refs(
+    authority_refs: tuple[str, ...],
+) -> tuple[str, ...]:
+    if (
+        not isinstance(authority_refs, tuple)
+        or any(not isinstance(value, str) or not value for value in authority_refs)
+        or len(set(authority_refs)) != len(authority_refs)
+        or not set(authority_refs) <= _PURE_COMPUTATION_AUTHORITY_REFS
+    ):
+        raise AuthorityDeniedError(
+            ReasonCode.CAPABILITY_DENIED,
+            "pure-computation authority must be an exact owner or fixture ref",
+        )
+    return authority_refs
+
+
+class InputOriginV1(StrEnum):
+    CANONICAL_SOURCE_STATE = "CANONICAL_SOURCE_STATE"
+    IN_PROCESS_DERIVED_VALUE = "IN_PROCESS_DERIVED_VALUE"
+    OWNER_SUPPLIED_PURE_COMPUTATION_INPUT = (
+        "OWNER_SUPPLIED_PURE_COMPUTATION_INPUT"
+    )
+
+
+class ComputationReadinessStateV1(StrEnum):
+    SOURCE_CONTEXT_COMPUTABLE = "SOURCE_CONTEXT_COMPUTABLE"
+    PURE_COMPUTATION_ONLY = "PURE_COMPUTATION_ONLY"
+    BLOCKED = "BLOCKED"
+
+
+class ParameterApplicationTargetV1(StrEnum):
+    CALLABLE_ARGUMENT = "CALLABLE_ARGUMENT"
+    EXECUTION_CONTROL = "EXECUTION_CONTROL"
+    PRE_CALL_ADMISSION_GUARD = "PRE_CALL_ADMISSION_GUARD"
+    POST_CALL_OUTPUT_VALIDATOR = "POST_CALL_OUTPUT_VALIDATOR"
+    SERVICE_LIMIT = "SERVICE_LIMIT"
+    RECEIPT_ONLY_NONMATERIAL = "RECEIPT_ONLY_NONMATERIAL"
 
 
 class TypedValueKindV1(StrEnum):
@@ -322,6 +381,9 @@ class ContextualComputabilityResolutionV1:
     fixture: ComputabilityStateResultV1
     context: ComputabilityStateResultV1
     stack: ComputabilityStateResultV1
+    readiness_state: ComputationReadinessStateV1 = (
+        ComputationReadinessStateV1.BLOCKED
+    )
 
     def __post_init__(self) -> None:
         expected = (
@@ -339,6 +401,11 @@ class ContextualComputabilityResolutionV1:
                 ReasonCode.INVALID_CONTRACT,
                 "computability resolution must carry the four independent states",
             )
+        _typed_enum(
+            self.readiness_state,
+            ComputationReadinessStateV1,
+            "readiness_state",
+        )
 
 
 @dataclass(frozen=True, slots=True)

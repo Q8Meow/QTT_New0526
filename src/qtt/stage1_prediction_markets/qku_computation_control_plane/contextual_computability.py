@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from hashlib import sha256
 
 from .authority import assert_no_effect_authority
@@ -14,12 +14,13 @@ from .input_resolver import InputResolutionReceiptV1
 from .models import (
     ComputabilityBlockerCodeV1,
     ComputabilityClassV1,
+    ComputationReadinessStateV1,
     ComputabilityStateResultV1,
     ComputabilityTerminalRouteV1,
     ContextualComputabilityResolutionV1,
 )
 from .oracle_contracts import get_golden_vector, get_oracle
-from .parameter_policy import ParameterPolicyResolverV1
+from .parameter_policy import ResolvedParameterV1
 from .point_in_time import PointInTimeStateV1
 from .specification import (
     FormulaExecutionContractV1,
@@ -38,6 +39,7 @@ class EvidenceDerivedComputabilityReceiptV1:
     derived_predicates: tuple[tuple[str, bool], ...]
     evidence_refs: tuple[str, ...]
     blocker_reason_codes: tuple[ReasonCode, ...]
+    readiness_state: ComputationReadinessStateV1
     producer_ref: str
     consumer_refs: tuple[str, ...]
     terminal_route: str
@@ -70,6 +72,11 @@ class EvidenceDerivedComputabilityReceiptV1:
             != len(self.derived_predicates)
         ):
             raise ValueError("derived computability predicates must be unique typed pairs")
+        if not isinstance(
+            self.readiness_state,
+            ComputationReadinessStateV1,
+        ) or self.resolution.readiness_state is not self.readiness_state:
+            raise ValueError("computability readiness must be explicitly typed")
 
 
 class EvidenceDerivedContextualComputabilityResolverV1:
@@ -80,6 +87,7 @@ class EvidenceDerivedContextualComputabilityResolverV1:
         *,
         contract: FormulaExecutionContractV1,
         input_resolution: InputResolutionReceiptV1,
+        parameter_resolutions: tuple[ResolvedParameterV1, ...] = (),
         stack_resolution: ApplicableStackResolutionReceiptV1 | None = None,
         consumer_refs: tuple[str, ...] = (
             "READINESS1",
@@ -100,6 +108,23 @@ class EvidenceDerivedContextualComputabilityResolverV1:
             != contract.parameter_policy_refs
         ):
             raise ValueError("contract and input-resolution identity lineage differs")
+        if (
+            not isinstance(parameter_resolutions, tuple)
+            or any(
+                not isinstance(value, ResolvedParameterV1)
+                for value in parameter_resolutions
+            )
+            or len(
+                {
+                    value.parameter_id
+                    for value in parameter_resolutions
+                }
+            )
+            != len(parameter_resolutions)
+        ):
+            raise ValueError(
+                "parameter resolutions must be unique typed receipts"
+            )
         if stack_resolution is not None and (
             not isinstance(stack_resolution, ApplicableStackResolutionReceiptV1)
             or math_id not in stack_resolution.component_ids
@@ -132,7 +157,9 @@ class EvidenceDerivedContextualComputabilityResolverV1:
             for row in required_rows
         )
         source_epoch_exact = bool(required_rows) and all(
-            row.source_epoch_id == contract.context_key.source_epoch_id
+            row.point_in_time_receipt is not None
+            and row.point_in_time_receipt.source_epoch_id
+            == contract.context_key.source_epoch_id
             for row in required_rows
         )
         units_and_basis_exact = bool(required_rows) and all(
@@ -154,19 +181,27 @@ class EvidenceDerivedContextualComputabilityResolverV1:
             for row in required_rows
         )
 
-        parameter_bindings_exact = True
-        parameter_receipt_refs: list[str] = []
+        parameter_by_id = {
+            value.parameter_id: value for value in parameter_resolutions
+        }
+        parameter_bindings_exact = (
+            tuple(parameter_by_id) == contract.parameter_policy_refs
+            and all(value.computable for value in parameter_resolutions)
+            and input_resolution.parameter_resolution_receipt_refs
+            == tuple(value.receipt_id for value in parameter_resolutions)
+        )
+        parameter_receipt_refs = [
+            value.receipt_id for value in parameter_resolutions
+        ]
         blocker_reasons: list[ReasonCode] = list(input_resolution.blocker_codes)
         for parameter_id in contract.parameter_policy_refs:
-            try:
-                resolved = ParameterPolicyResolverV1.resolve(parameter_id)
-            except ComputationControlPlaneError as exc:
-                parameter_bindings_exact = False
-                blocker_reasons.append(exc.reason_code)
-            else:
-                parameter_receipt_refs.append(
-                    f"PARAMETER::{resolved.parameter_id}::{resolved.value}"
+            resolved = parameter_by_id.get(parameter_id)
+            if resolved is None:
+                blocker_reasons.append(
+                    ReasonCode.PARAMETER_RUNTIME_BINDING_REQUIRED
                 )
+            elif resolved.blocker_reason_code is not None:
+                blocker_reasons.append(resolved.blocker_reason_code)
 
         implementation_registered = (
             math_id in IMPLEMENTATION_REGISTRY
@@ -319,6 +354,10 @@ class EvidenceDerivedContextualComputabilityResolverV1:
         if not authority_envelope_valid:
             blocker_reasons.append(ReasonCode.CAPABILITY_DENIED)
         aggregate = tuple(dict.fromkeys(blocker_reasons))
+        low_level = replace(
+            low_level,
+            readiness_state=input_resolution.source_readiness_state,
+        )
         evidence_refs = tuple(
             dict.fromkeys(
                 (
@@ -351,10 +390,21 @@ class EvidenceDerivedContextualComputabilityResolverV1:
             derived_predicates=derived,
             evidence_refs=evidence_refs,
             blocker_reason_codes=aggregate,
+            readiness_state=input_resolution.source_readiness_state,
             producer_ref="EvidenceDerivedContextualComputabilityResolverV1",
             consumer_refs=consumer_refs,
             terminal_route=(
-                "QKUComputationControlPlaneServiceV1::PURE_COMPUTATION"
+                (
+                    "QKUComputationControlPlaneServiceV1::"
+                    "SOURCE_CONTEXT_COMPUTATION"
+                )
+                if low_level.stack.computable
+                and input_resolution.source_readiness_state
+                is ComputationReadinessStateV1.SOURCE_CONTEXT_COMPUTABLE
+                else (
+                    "QKUComputationControlPlaneServiceV1::"
+                    "PURE_COMPUTATION_ONLY"
+                )
                 if low_level.stack.computable
                 else "AGENT-ORCH1::TYPED_REMEDIATION_DAG"
             ),

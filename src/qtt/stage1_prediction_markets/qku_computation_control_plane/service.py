@@ -2,15 +2,15 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from decimal import Decimal
 from hashlib import sha256
 from pathlib import Path
 from types import MappingProxyType
 from typing import Mapping
 
-from .bindings import BindingResolverV1
-from .context import canonical_probability_decimal, finite_float
+from .bindings import BindingResolverV1, get_source_claim_binding_rule
+from .context import canonical_probability_decimal, exact_decimal, finite_float
 from .contextual_computability import (
     EvidenceDerivedComputabilityReceiptV1,
     EvidenceDerivedContextualComputabilityResolverV1,
@@ -20,6 +20,7 @@ from .errors import (
     ComputationControlPlaneError,
     ComputationServiceError,
     ReasonCode,
+    StackResolutionError,
 )
 from .fallback import (
     FallbackResolutionReceiptV1,
@@ -52,6 +53,7 @@ from .input_resolver import (
     ContextualInputValueV1,
     InputResolutionReceiptV1,
     RequiredInputResolverV1,
+    compiled_dependency_edge_ref_v1,
 )
 from .models import (
     BuildEvidenceBundleRequestV1,
@@ -62,6 +64,8 @@ from .models import (
     CompileReplayPaperCohortRequestV1,
     CompileReplayPaperCohortResponseV1,
     ComponentResultV1,
+    ComputationBindingProfileV1,
+    ComputationReadinessStateV1,
     ComputationExecutionReceiptV1,
     ComputabilityClassV1,
     ComputeComponentRequestV1,
@@ -77,6 +81,7 @@ from .models import (
     GetSnapshotViewRequestV1,
     GetSnapshotViewResponseV1,
     IdentityResolutionV1,
+    InputOriginV1,
     InputResolutionV1,
     MaterializationWorkOrderV1,
     NoTradeComparisonV1,
@@ -85,6 +90,7 @@ from .models import (
     OperationRequestEnvelopeV1,
     OperationResponseEnvelopeV1,
     OperationStatusV1,
+    ParameterApplicationTargetV1,
     RegisterReplayPaperResultRequestV1,
     RegisterReplayPaperResultResponseV1,
     ReplayPaperCohortCompilationV1,
@@ -111,8 +117,16 @@ from .models import (
     TypedValueV1,
     UnitBindingV1,
     VariableDomain,
+    SourceBindingV1,
 )
 from .oracle_contracts import get_golden_vector, get_oracle
+from .parameter_policy import (
+    ActiveMarketPriceGridV1,
+    ActiveMarketPriceStructureV1,
+    ParameterPolicyResolverV1,
+    ResolvedParameterV1,
+    RuntimeParameterBindingV1,
+)
 from .point_in_time import (
     PointInTimeEvidenceV1,
     PointInTimeFieldClassV1,
@@ -120,15 +134,19 @@ from .point_in_time import (
 from .serialization import deterministic_json, safe_json_loads
 from .specification import (
     CertifiedMathIdentityRefV1,
+    ComponentExecutionRequirementV1,
     ComputationContractCompilerV1,
     FormulaExecutionContractV1,
     MATH_IO_CONTRACTS,
+    RequirementResolutionStateV1,
+    get_component_execution_requirement,
 )
 from .stack_resolver import (
     ApplicableStackResolutionReceiptV1,
     ApplicableStackResolverV1,
     StackApplicabilityContextV1,
 )
+from .source_policy import validate_effective_epoch
 from .unit_conversion import (
     EMPTY_UNIT_CONVERSION_REGISTRY,
     UnitConversionRegistryV1,
@@ -188,11 +206,16 @@ class TrancheBComputationExecutionReceiptV1(ComputationExecutionReceiptV1):
     point_in_time_receipt_refs: tuple[str, ...] = ()
     freshness_receipt_refs: tuple[str, ...] = ()
     conversion_receipt_refs: tuple[str, ...] = ()
+    canonical_source_binding_receipt_refs: tuple[str, ...] = ()
+    parameter_resolution_receipt_refs: tuple[str, ...] = ()
     dependency_receipt_refs: tuple[str, ...] = ()
     fallback_receipt_ref: str | None = None
     deadline_receipt_ref: str | None = None
     consumer_refs: tuple[str, ...] = ()
     terminal_route: str = ""
+    readiness_state: ComputationReadinessStateV1 = (
+        ComputationReadinessStateV1.PURE_COMPUTATION_ONLY
+    )
 
     def __post_init__(self) -> None:
         ComputationExecutionReceiptV1.__post_init__(self)
@@ -209,6 +232,8 @@ class TrancheBComputationExecutionReceiptV1(ComputationExecutionReceiptV1):
             "point_in_time_receipt_refs",
             "freshness_receipt_refs",
             "conversion_receipt_refs",
+            "canonical_source_binding_receipt_refs",
+            "parameter_resolution_receipt_refs",
             "dependency_receipt_refs",
             "consumer_refs",
         ):
@@ -222,6 +247,17 @@ class TrancheBComputationExecutionReceiptV1(ComputationExecutionReceiptV1):
                     ReasonCode.INVALID_CONTRACT,
                     f"{name} must be a unique immutable text tuple",
                 )
+        if (
+            not isinstance(
+                self.readiness_state,
+                ComputationReadinessStateV1,
+            )
+            or self.readiness_state is ComputationReadinessStateV1.BLOCKED
+        ):
+            raise ComputationServiceError(
+                ReasonCode.INVALID_CONTRACT,
+                "successful execution receipts require nonblocked readiness",
+            )
         if self.deadline_receipt_ref is not None:
             _required_text(self.deadline_receipt_ref, "deadline_receipt_ref")
 
@@ -230,11 +266,15 @@ class TrancheBComputationExecutionReceiptV1(ComputationExecutionReceiptV1):
 class ComponentComputationResultV1(ComponentResultV1):
     component_id: str = ""
     output_values: TypedValueRecordV1 | None = None
+    parameter_resolutions: tuple[ResolvedParameterV1, ...] = ()
     input_resolution_receipt: InputResolutionReceiptV1 | None = None
     computability_receipt: EvidenceDerivedComputabilityReceiptV1 | None = None
     execution_receipt: TrancheBComputationExecutionReceiptV1 | None = None
     fallback_receipt: FallbackResolutionReceiptV1 | None = None
     blocker_reason_codes: tuple[ReasonCode, ...] = ()
+    readiness_state: ComputationReadinessStateV1 = (
+        ComputationReadinessStateV1.BLOCKED
+    )
 
     def __post_init__(self) -> None:
         ComponentResultV1.__post_init__(self)
@@ -246,6 +286,40 @@ class ComponentComputationResultV1(ComponentResultV1):
             raise ComputationServiceError(
                 ReasonCode.INVALID_CONTRACT,
                 "component output must be a typed record",
+            )
+        if (
+            not isinstance(self.parameter_resolutions, tuple)
+            or any(
+                not isinstance(value, ResolvedParameterV1)
+                for value in self.parameter_resolutions
+            )
+            or len(
+                {
+                    value.parameter_id
+                    for value in self.parameter_resolutions
+                }
+            )
+            != len(self.parameter_resolutions)
+        ):
+            raise ComputationServiceError(
+                ReasonCode.INVALID_CONTRACT,
+                "component parameter resolutions must be unique typed receipts",
+            )
+        parameter_receipt_refs = tuple(
+            value.receipt_id for value in self.parameter_resolutions
+        )
+        if (
+            self.input_resolution_receipt is not None
+            and self.input_resolution_receipt.parameter_resolution_receipt_refs
+            != parameter_receipt_refs
+        ) or (
+            self.execution_receipt is not None
+            and self.execution_receipt.parameter_resolution_receipt_refs
+            != parameter_receipt_refs
+        ):
+            raise ComputationServiceError(
+                ReasonCode.INVALID_CONTRACT,
+                "component parameter rows and receipt references must agree",
             )
         if (
             not isinstance(self.blocker_reason_codes, tuple)
@@ -270,6 +344,30 @@ class ComponentComputationResultV1(ComponentResultV1):
                 ReasonCode.INVALID_CONTRACT,
                 "component output presence must equal execution-receipt presence",
             )
+        if (
+            not isinstance(
+                self.readiness_state,
+                ComputationReadinessStateV1,
+            )
+            or (
+                self.execution_receipt is None
+                and self.readiness_state
+                is not ComputationReadinessStateV1.BLOCKED
+            )
+            or (
+                self.execution_receipt is not None
+                and (
+                    self.readiness_state
+                    is ComputationReadinessStateV1.BLOCKED
+                    or self.execution_receipt.readiness_state
+                    is not self.readiness_state
+                )
+            )
+        ):
+            raise ComputationServiceError(
+                ReasonCode.INVALID_CONTRACT,
+                "component execution and readiness state must agree",
+            )
 
 
 @dataclass(frozen=True, slots=True)
@@ -284,6 +382,7 @@ class StackExecutionReceiptV1:
     fallback_receipt_ref: str | None
     consumer_refs: tuple[str, ...]
     terminal_route: str
+    readiness_state: ComputationReadinessStateV1
     provider_effect: bool = False
     private_state_effect: bool = False
     replay_or_paper_execution_effect: bool = False
@@ -339,19 +438,86 @@ class StackExecutionReceiptV1:
                 ReasonCode.RUNTIME_EFFECT_FORBIDDEN,
                 "stack receipts must preserve every prohibited effect at zero",
             )
+        if (
+            not isinstance(
+                self.readiness_state,
+                ComputationReadinessStateV1,
+            )
+            or self.readiness_state is ComputationReadinessStateV1.BLOCKED
+        ):
+            raise ComputationServiceError(
+                ReasonCode.INVALID_CONTRACT,
+                "successful stack receipts require nonblocked readiness",
+            )
+
+
+@dataclass(frozen=True, slots=True)
+class StackNoSelectionReceiptV1:
+    receipt_id: str
+    trade_plan_candidate_id: str
+    blocker_reason_code: ReasonCode
+    retained_evidence_refs: tuple[str, ...]
+    terminal_route: str
+    selected_stack_id: None = None
+    provider_effect: bool = False
+    private_state_effect: bool = False
+    replay_or_paper_execution_effect: bool = False
+    qpu_effect: bool = False
+    mode_or_grant_effect: bool = False
+    order_release_effect: bool = False
+
+    def __post_init__(self) -> None:
+        for name in (
+            "receipt_id",
+            "trade_plan_candidate_id",
+            "terminal_route",
+        ):
+            _required_text(getattr(self, name), name)
+        if (
+            self.blocker_reason_code is not ReasonCode.STACK_NOT_APPLICABLE
+            or not isinstance(self.retained_evidence_refs, tuple)
+            or any(
+                not isinstance(value, str) or not value
+                for value in self.retained_evidence_refs
+            )
+            or len(set(self.retained_evidence_refs))
+            != len(self.retained_evidence_refs)
+            or self.selected_stack_id is not None
+            or any(
+                (
+                    self.provider_effect,
+                    self.private_state_effect,
+                    self.replay_or_paper_execution_effect,
+                    self.qpu_effect,
+                    self.mode_or_grant_effect,
+                    self.order_release_effect,
+                )
+            )
+        ):
+            raise ComputationServiceError(
+                ReasonCode.RUNTIME_EFFECT_FORBIDDEN,
+                "no-selection receipt must be exact, typed, and zero-effect",
+            )
 
 
 @dataclass(frozen=True, slots=True)
 class StackComputationResultV1(StackResultV1):
-    selected_stack_id: str = ""
+    selected_stack_id: str | None = None
     component_results: tuple[ComponentComputationResultV1, ...] = ()
     output_values: TypedValueRecordV1 | None = None
     execution_receipt: StackExecutionReceiptV1 | None = None
     blocker_reason_codes: tuple[ReasonCode, ...] = ()
+    stack_resolution_receipt: (
+        ApplicableStackResolutionReceiptV1 | StackNoSelectionReceiptV1 | None
+    ) = None
+    readiness_state: ComputationReadinessStateV1 = (
+        ComputationReadinessStateV1.BLOCKED
+    )
 
     def __post_init__(self) -> None:
         StackResultV1.__post_init__(self)
-        _required_text(self.selected_stack_id, "selected_stack_id")
+        if self.selected_stack_id is not None:
+            _required_text(self.selected_stack_id, "selected_stack_id")
         if (
             not isinstance(self.component_results, tuple)
             or any(
@@ -394,28 +560,77 @@ class StackComputationResultV1(StackResultV1):
                 ReasonCode.INVALID_CONTRACT,
                 "stack output presence must equal execution-receipt presence",
             )
+        no_selection = self.selected_stack_id is None
+        if (
+            not isinstance(
+                self.readiness_state,
+                ComputationReadinessStateV1,
+            )
+            or (
+                self.execution_receipt is None
+                and self.readiness_state
+                is not ComputationReadinessStateV1.BLOCKED
+            )
+            or (
+                self.execution_receipt is not None
+                and (
+                    self.readiness_state
+                    is ComputationReadinessStateV1.BLOCKED
+                    or self.execution_receipt.readiness_state
+                    is not self.readiness_state
+                )
+            )
+            or (
+                no_selection
+                and not isinstance(
+                    self.stack_resolution_receipt,
+                    StackNoSelectionReceiptV1,
+                )
+            )
+        ):
+            raise ComputationServiceError(
+                ReasonCode.INVALID_CONTRACT,
+                "stack selection, receipt, execution, and readiness must agree",
+            )
 
 
 @dataclass(frozen=True, slots=True)
 class DetailedStackResolutionV1(StackResolutionV1):
-    selected_stack_id: str = ""
+    selected_stack_id: str | None = None
     component_ids: tuple[str, ...] = ()
     topological_order: tuple[str, ...] = ()
-    resolution_receipt: ApplicableStackResolutionReceiptV1 | None = None
+    resolution_receipt: (
+        ApplicableStackResolutionReceiptV1 | StackNoSelectionReceiptV1 | None
+    ) = None
+    blocker_reason_codes: tuple[ReasonCode, ...] = ()
 
     def __post_init__(self) -> None:
         StackResolutionV1.__post_init__(self)
-        _required_text(self.selected_stack_id, "selected_stack_id")
-        if (
-            not self.component_ids
-            or self.component_ids != self.topological_order
-            or not isinstance(
-                self.resolution_receipt,
-                ApplicableStackResolutionReceiptV1,
+        if self.selected_stack_id is None:
+            valid = (
+                not self.component_ids
+                and not self.topological_order
+                and isinstance(
+                    self.resolution_receipt,
+                    StackNoSelectionReceiptV1,
+                )
+                and self.blocker_reason_codes
+                == (ReasonCode.STACK_NOT_APPLICABLE,)
             )
-            or self.resolution_receipt.selected_stack_id
-            != self.selected_stack_id
-        ):
+        else:
+            _required_text(self.selected_stack_id, "selected_stack_id")
+            valid = (
+                bool(self.component_ids)
+                and self.component_ids == self.topological_order
+                and isinstance(
+                    self.resolution_receipt,
+                    ApplicableStackResolutionReceiptV1,
+                )
+                and self.resolution_receipt.selected_stack_id
+                == self.selected_stack_id
+                and not self.blocker_reason_codes
+            )
+        if not valid:
             raise ComputationServiceError(
                 ReasonCode.INVALID_CONTRACT,
                 "detailed stack resolution must equal its typed resolver receipt",
@@ -627,7 +842,31 @@ _REASON_TO_OPERATION_BLOCKER = {
         OperationBlockerCodeV1.POINT_IN_TIME_UNAVAILABLE
     ),
     ReasonCode.REVISION_LEAKAGE: (
-        OperationBlockerCodeV1.POINT_IN_TIME_UNAVAILABLE
+        OperationBlockerCodeV1.POINT_IN_TIME_LEAKAGE
+    ),
+    ReasonCode.SOURCE_EPOCH_MISSING: (
+        OperationBlockerCodeV1.SOURCE_BINDING_INVALID
+    ),
+    ReasonCode.SOURCE_EPOCH_STALE: (
+        OperationBlockerCodeV1.SOURCE_BINDING_INVALID
+    ),
+    ReasonCode.SOURCE_CONFLICT: (
+        OperationBlockerCodeV1.SOURCE_BINDING_INVALID
+    ),
+    ReasonCode.SOURCE_RIGHTS_BLOCKED: (
+        OperationBlockerCodeV1.SOURCE_BINDING_INVALID
+    ),
+    ReasonCode.SOURCE_BINDING_REQUIRED: (
+        OperationBlockerCodeV1.SOURCE_BINDING_INVALID
+    ),
+    ReasonCode.SOURCE_CLAIM_BINDING_MISMATCH: (
+        OperationBlockerCodeV1.SOURCE_BINDING_INVALID
+    ),
+    ReasonCode.INPUT_ORIGIN_NOT_AUTHORIZED: (
+        OperationBlockerCodeV1.INPUT_ORIGIN_NOT_AUTHORIZED
+    ),
+    ReasonCode.DERIVED_LINEAGE_INVALID: (
+        OperationBlockerCodeV1.INPUT_ORIGIN_NOT_AUTHORIZED
     ),
     ReasonCode.FIELD_STALE: OperationBlockerCodeV1.CONTEXT_STALE,
     ReasonCode.FRESHNESS_UNKNOWN: OperationBlockerCodeV1.FRESHNESS_UNKNOWN,
@@ -656,9 +895,32 @@ _REASON_TO_OPERATION_BLOCKER = {
     ReasonCode.NONFINITE_NUMERIC_INPUT: OperationBlockerCodeV1.INPUT_INVALID,
     ReasonCode.OUT_OF_DOMAIN: OperationBlockerCodeV1.INPUT_INVALID,
     ReasonCode.PARAMETER_CALIBRATION_REQUIRED: (
-        OperationBlockerCodeV1.DEPENDENCY_UNRESOLVED
+        OperationBlockerCodeV1.PARAMETER_RUNTIME_BINDING_REQUIRED
     ),
-    ReasonCode.STACK_NOT_APPLICABLE: OperationBlockerCodeV1.STACK_INCOMPLETE,
+    ReasonCode.EXECUTION_REQUIREMENTS_UNRESOLVED: (
+        OperationBlockerCodeV1.EXECUTION_REQUIREMENTS_UNRESOLVED
+    ),
+    ReasonCode.PARAMETER_ASSERTION_MISMATCH: (
+        OperationBlockerCodeV1.PARAMETER_REQUIREMENT_MISMATCH
+    ),
+    ReasonCode.PARAMETER_RUNTIME_BINDING_REQUIRED: (
+        OperationBlockerCodeV1.PARAMETER_RUNTIME_BINDING_REQUIRED
+    ),
+    ReasonCode.PARAMETER_APPLICATION_UNBOUND: (
+        OperationBlockerCodeV1.PARAMETER_APPLICATION_UNBOUND
+    ),
+    ReasonCode.PARAMETER_EXPLICIT_FAIL_CLOSED: (
+        OperationBlockerCodeV1.PARAMETER_RUNTIME_BINDING_REQUIRED
+    ),
+    ReasonCode.PARAMETER_NOT_EDITABLE: (
+        OperationBlockerCodeV1.PARAMETER_REQUIREMENT_MISMATCH
+    ),
+    ReasonCode.PARAMETER_OUT_OF_POLICY: (
+        OperationBlockerCodeV1.PARAMETER_REQUIREMENT_MISMATCH
+    ),
+    ReasonCode.STACK_NOT_APPLICABLE: (
+        OperationBlockerCodeV1.STACK_NOT_APPLICABLE
+    ),
     ReasonCode.STACK_NOT_COMPUTABLE: OperationBlockerCodeV1.STACK_INCOMPLETE,
     ReasonCode.REQUEST_LIMIT_EXCEEDED: (
         OperationBlockerCodeV1.REQUEST_BOUND_EXCEEDED
@@ -732,15 +994,143 @@ def _structured_rows(value: object, field_name: str) -> list[object]:
     return value
 
 
+def _math_36_runtime_controls(
+    parameter_resolutions: tuple[ResolvedParameterV1, ...],
+) -> tuple[ActiveMarketPriceGridV1, ActiveMarketPriceStructureV1]:
+    by_id = {
+        value.parameter_id: value for value in parameter_resolutions
+    }
+    tick = by_id.get("ST10-PARAM::2212")
+    structure = by_id.get("ST10-PARAM::2213")
+    if (
+        tick is None
+        or structure is None
+        or not tick.computable
+        or not structure.computable
+        or not isinstance(tick.value, ActiveMarketPriceGridV1)
+        or not isinstance(structure.value, ActiveMarketPriceStructureV1)
+        or tick.application_target
+        is not ParameterApplicationTargetV1.PRE_CALL_ADMISSION_GUARD
+        or structure.application_target
+        is not ParameterApplicationTargetV1.PRE_CALL_ADMISSION_GUARD
+        or ParameterApplicationTargetV1.POST_CALL_OUTPUT_VALIDATOR
+        not in tick.secondary_application_targets
+        or ParameterApplicationTargetV1.POST_CALL_OUTPUT_VALIDATOR
+        not in structure.secondary_application_targets
+        or tick.value.market_id != structure.value.market_id
+        or tick.value.intervals != structure.value.intervals
+        or structure.value.structure_class
+        != "KALSHI_ACTIVE_MARKET_OBJECT_PRICE_LEVEL_STRUCTURE"
+    ):
+        raise ComputationServiceError(
+            ReasonCode.PARAMETER_APPLICATION_UNBOUND,
+            "MATH-36 requires exact tick and price-structure controls",
+        )
+    return tick.value, structure.value
+
+
+def _math_36_ladder(
+    value: object,
+    *,
+    field_name: str,
+) -> tuple[Decimal, ...]:
+    raw_values = (
+        tuple(value)
+        if isinstance(value, list | tuple)
+        else (value,)
+    )
+    if not raw_values:
+        raise ComputationServiceError(
+            ReasonCode.OUT_OF_DOMAIN,
+            f"{field_name} ladder cannot be empty",
+        )
+    try:
+        levels = tuple(
+            exact_decimal(item, field_name=f"{field_name}[{index}]")
+            for index, item in enumerate(raw_values)
+        )
+    except ComputationControlPlaneError as exc:
+        raise ComputationServiceError(
+            exc.reason_code,
+            f"{field_name} contains an invalid price level",
+        ) from exc
+    if len(levels) > 1 and any(
+        left >= right
+        for left, right in zip(levels, levels[1:], strict=False)
+    ):
+        raise ComputationServiceError(
+            ReasonCode.OUT_OF_DOMAIN,
+            f"{field_name} must be a strictly ascending unique bid ladder",
+        )
+    return levels
+
+
+def _validate_math_36_pre_call(
+    arguments: Mapping[str, object],
+    parameter_resolutions: tuple[ResolvedParameterV1, ...],
+) -> None:
+    grid, _ = _math_36_runtime_controls(parameter_resolutions)
+    payout = exact_decimal(arguments["payout"], field_name="payout")
+    yes_levels = _math_36_ladder(
+        arguments["yes_bids"],
+        field_name="yes_bids",
+    )
+    no_levels = _math_36_ladder(
+        arguments["no_bids"],
+        field_name="no_bids",
+    )
+    if payout != grid.payout or any(
+        not grid.permits(value)
+        for value in (*yes_levels, *no_levels, payout)
+    ):
+        raise ComputationServiceError(
+            ReasonCode.PARAMETER_OUT_OF_POLICY,
+            "MATH-36 bids or payout are outside the active market grid",
+        )
+
+
+def _validate_math_36_post_call(
+    output: object,
+    parameter_resolutions: tuple[ResolvedParameterV1, ...],
+) -> None:
+    grid, _ = _math_36_runtime_controls(parameter_resolutions)
+    required_fields = (
+        "yes_best_bid",
+        "no_best_bid",
+        "yes_implied_ask",
+        "no_implied_ask",
+        "payout",
+    )
+    if any(not hasattr(output, name) for name in required_fields):
+        raise ComputationServiceError(
+            ReasonCode.OUTPUT_SCHEMA_MISMATCH,
+            "MATH-36 output lacks its certified Decimal touch fields",
+        )
+    values = tuple(
+        exact_decimal(getattr(output, name), field_name=name)
+        for name in required_fields
+    )
+    if values[-1] != grid.payout or any(
+        not grid.permits(value) for value in values
+    ):
+        raise ComputationServiceError(
+            ReasonCode.PARAMETER_OUT_OF_POLICY,
+            "MATH-36 output violates the active market domain or grid",
+        )
+
+
 def _invoke_registered_callable(
     component_id: str,
     arguments: Mapping[str, object],
     controls: ComponentExecutionControlsV1,
+    parameter_resolutions: tuple[ResolvedParameterV1, ...] = (),
 ) -> object:
     """Map certified schema names to the exact registered callable boundary."""
 
     callable_ = get_math_callable(component_id)
     values = dict(arguments)
+    if component_id == "MATH-36":
+        _validate_math_36_pre_call(values, parameter_resolutions)
     if component_id == "MATH-07":
         friction = values["quantity_and_friction_terms"]
         if not isinstance(friction, dict):
@@ -1027,7 +1417,10 @@ def _invoke_registered_callable(
                 for row in biases.get("pairwise_biases", [])
             ),
         }
-    return callable_(**values)
+    result = callable_(**values)
+    if component_id == "MATH-36":
+        _validate_math_36_post_call(result, parameter_resolutions)
+    return result
 
 
 def _typed_output(
@@ -1412,10 +1805,49 @@ def _component_contract(
     component_id: str,
     context,
     *,
+    contextual_evidence: tuple[ContextualInputValueV1, ...] = (),
     dependency_graph: CompiledDependencyGraphV1 | None = None,
-    parameter_ids: tuple[str, ...] = (),
-) -> FormulaExecutionContractV1:
+) -> tuple[
+    FormulaExecutionContractV1,
+    ComputationBindingProfileV1,
+    ComponentExecutionRequirementV1,
+]:
+    requirement = get_component_execution_requirement(component_id)
     io_contract = MATH_IO_CONTRACTS[component_id]
+    canonical_source_bindings: list[SourceBindingV1] = []
+    for evidence in contextual_evidence:
+        if (
+            evidence.origin is not InputOriginV1.CANONICAL_SOURCE_STATE
+            or evidence.source_state_id is None
+        ):
+            continue
+        try:
+            source = validate_effective_epoch(
+                evidence.source_state_id,
+                as_of=context.as_of,
+            )
+        except ComputationControlPlaneError:
+            continue
+        if source.epoch != context.source_epoch_id:
+            continue
+        canonical_source_bindings.append(
+            SourceBindingV1(
+                source_state_id=source.source_state_id,
+                stable_source_identity=source.stable_source_identity,
+                effective_epoch=source.epoch,
+                rights_state=source.rights_and_use_state,
+                freshness_policy=source.ttl,
+            )
+        )
+    source_bindings = tuple(
+        sorted(
+            {
+                binding.source_state_id: binding
+                for binding in canonical_source_bindings
+            }.values(),
+            key=lambda binding: binding.source_state_id,
+        )
+    )
     binding = BindingResolverV1.build(
         binding_id=f"ST12B-BINDING::{component_id}::{context.context_id}",
         version="1.1R1",
@@ -1423,7 +1855,7 @@ def _component_contract(
             UnitBindingV1(field.name, field.unit, field.basis)
             for field in io_contract.inputs
         ),
-        sources=(),
+        sources=source_bindings,
         venue_scope=(),
     )
     identity = CertifiedMathIdentityRefV1(
@@ -1435,7 +1867,7 @@ def _component_contract(
         ),
     )
     implementation = get_math_implementation(component_id).contract
-    return ComputationContractCompilerV1.compile(
+    contract = ComputationContractCompilerV1.compile(
         identity_binding=identity,
         implementation=implementation,
         binding=binding,
@@ -1443,9 +1875,142 @@ def _component_contract(
         oracle=get_oracle(component_id),
         golden_vector=get_golden_vector(component_id),
         context=context,
-        parameter_ids=parameter_ids,
+        parameter_ids=requirement.required_parameter_policy_ids,
         consumer_refs=_DOWNSTREAM_CONSUMERS,
     )
+    return contract, binding, requirement
+
+
+def _resolve_component_parameters(
+    *,
+    requirement: ComponentExecutionRequirementV1,
+    context,
+    parameter_ids_assertion: tuple[str, ...] | None,
+    runtime_parameter_bindings: tuple[RuntimeParameterBindingV1, ...],
+    admitted_fixture_authority_refs: tuple[str, ...],
+    mode: str,
+) -> tuple[tuple[ResolvedParameterV1, ...], tuple[ReasonCode, ...]]:
+    reasons: list[ReasonCode] = []
+    required_ids = requirement.required_parameter_policy_ids
+    if (
+        requirement.terminal_requirement_resolution_state
+        is RequirementResolutionStateV1.UNRESOLVED_REQUIREMENTS_FAIL_CLOSED
+    ):
+        return (), (ReasonCode.EXECUTION_REQUIREMENTS_UNRESOLVED,)
+    if (
+        parameter_ids_assertion is not None
+        and parameter_ids_assertion != required_ids
+    ):
+        reasons.append(ReasonCode.PARAMETER_ASSERTION_MISMATCH)
+    if (
+        not isinstance(runtime_parameter_bindings, tuple)
+        or any(
+            not isinstance(value, RuntimeParameterBindingV1)
+            for value in runtime_parameter_bindings
+        )
+        or len(
+            {
+                value.parameter_id
+                for value in runtime_parameter_bindings
+            }
+        )
+        != len(runtime_parameter_bindings)
+        or not {
+            value.parameter_id
+            for value in runtime_parameter_bindings
+        }
+        <= set(required_ids)
+    ):
+        reasons.append(ReasonCode.PARAMETER_ASSERTION_MISMATCH)
+    runtime_by_id = {
+        value.parameter_id: value for value in runtime_parameter_bindings
+    }
+    application_by_id = {
+        value.parameter_policy_id: value
+        for value in requirement.parameter_application_bindings
+    }
+    runtime_source_rule_ids = tuple(
+        rule_id
+        for rule_id in requirement.source_claim_binding_rule_refs
+        if get_source_claim_binding_rule(rule_id).source_state_ref is not None
+    )
+    resolutions: list[ResolvedParameterV1] = []
+    for parameter_id in required_ids:
+        application = application_by_id.get(parameter_id)
+        if application is None:
+            reasons.append(ReasonCode.PARAMETER_APPLICATION_UNBOUND)
+            continue
+        try:
+            resolved = ParameterPolicyResolverV1.resolve(
+                parameter_id,
+                runtime_binding=runtime_by_id.get(parameter_id),
+                context=context,
+                application_target=application.primary_target,
+                secondary_application_targets=(
+                    application.secondary_validation_targets
+                ),
+                required_scope_refs=(
+                    requirement.certified_math_id,
+                    "QKUComputationControlPlaneServiceV1",
+                ),
+                required_source_claim_binding_rule_ids=(
+                    runtime_source_rule_ids
+                ),
+                admitted_fixture_authority_refs=(
+                    admitted_fixture_authority_refs
+                ),
+                computation_mode=mode,
+            )
+        except ComputationControlPlaneError as exc:
+            reasons.append(exc.reason_code)
+        else:
+            resolutions.append(resolved)
+            if resolved.blocker_reason_code is not None:
+                reasons.append(resolved.blocker_reason_code)
+    return tuple(resolutions), tuple(dict.fromkeys(reasons))
+
+
+def _effective_execution_controls(
+    component_id: str,
+    supplied: ComponentExecutionControlsV1,
+    requirement: ComponentExecutionRequirementV1,
+) -> tuple[ComponentExecutionControlsV1, tuple[ReasonCode, ...]]:
+    values = {
+        name: getattr(supplied, name)
+        for name in (
+            "seed",
+            "replicates",
+            "confidence",
+            "alpha",
+            "mean_block_length",
+        )
+    }
+    laws = {
+        value.control_name: value
+        for value in requirement.execution_control_bindings
+    }
+    reasons: list[ReasonCode] = []
+    for name, value in values.items():
+        if value is not None and name not in laws:
+            reasons.append(ReasonCode.PARAMETER_NOT_EDITABLE)
+    for name, law in laws.items():
+        supplied_value = values[name]
+        if law.required_from_caller and supplied_value is None:
+            reasons.append(ReasonCode.PARAMETER_CALIBRATION_REQUIRED)
+            continue
+        if law.fixed_default is None:
+            continue
+        default: int | float
+        if name in {"seed", "replicates"}:
+            default = int(law.fixed_default)
+        else:
+            default = float(law.fixed_default)
+        if supplied_value is not None and supplied_value != default:
+            reasons.append(ReasonCode.PARAMETER_NOT_EDITABLE)
+        values[name] = default
+    if reasons:
+        return supplied, tuple(dict.fromkeys(reasons))
+    return replace(supplied, **values), ()
 
 
 def _identity_snapshot(repo_root: Path) -> tuple[IdentityViewV1, ...]:
@@ -1501,6 +2066,7 @@ class QKUComputationControlPlaneServiceV1:
             EMPTY_UNIT_CONVERSION_REGISTRY
         ),
         identity_views: tuple[IdentityViewV1, ...] | None = None,
+        pure_computation_authority_refs: tuple[str, ...] = (),
     ) -> None:
         root = Path(repo_root).resolve()
         if not root.is_dir():
@@ -1511,7 +2077,13 @@ class QKUComputationControlPlaneServiceV1:
         self._repo_root = root
         self._stack_resolver = ApplicableStackResolverV1(repo_root=root)
         self._input_resolver = RequiredInputResolverV1(
-            conversion_registry=conversion_registry
+            conversion_registry=conversion_registry,
+            admitted_pure_computation_authority_refs=(
+                pure_computation_authority_refs
+            ),
+        )
+        self._pure_computation_authority_refs = (
+            pure_computation_authority_refs
         )
         views = (
             _identity_snapshot(root)
@@ -1688,13 +2260,37 @@ class QKUComputationControlPlaneServiceV1:
         contextual_evidence: tuple[ContextualInputValueV1, ...],
         dependency_graph: CompiledDependencyGraphV1 | None = None,
         dependency_refs: tuple[str, ...] = (),
-        parameter_ids: tuple[str, ...] = (),
-    ) -> tuple[FormulaExecutionContractV1, InputResolutionReceiptV1]:
-        contract = _component_contract(
+        parameter_ids: tuple[str, ...] | None = None,
+        runtime_parameter_bindings: tuple[
+            RuntimeParameterBindingV1, ...
+        ] = (),
+        mode: str = "CONTRACT_ONLY",
+    ) -> tuple[
+        FormulaExecutionContractV1,
+        InputResolutionReceiptV1,
+        ComponentExecutionRequirementV1,
+        tuple[ResolvedParameterV1, ...],
+    ]:
+        contract, binding_profile, requirement = _component_contract(
             component_id,
             context,
+            contextual_evidence=contextual_evidence,
             dependency_graph=dependency_graph,
-            parameter_ids=parameter_ids,
+        )
+        parameter_resolutions, parameter_reasons = (
+            _resolve_component_parameters(
+                requirement=requirement,
+                context=context,
+                parameter_ids_assertion=parameter_ids,
+                runtime_parameter_bindings=runtime_parameter_bindings,
+                admitted_fixture_authority_refs=(
+                    self._pure_computation_authority_refs
+                ),
+                mode=mode,
+            )
+        )
+        parameter_receipt_refs = tuple(
+            value.receipt_id for value in parameter_resolutions
         )
         if supplied_values is None:
             receipt = self._input_resolver.unresolved_requirements(
@@ -1702,6 +2298,9 @@ class QKUComputationControlPlaneServiceV1:
                 context=context,
                 dependency_refs=dependency_refs,
                 parameter_policy_refs=parameter_ids,
+                parameter_resolution_receipt_refs=(
+                    parameter_receipt_refs
+                ),
                 downstream_consumer_refs=_DOWNSTREAM_CONSUMERS,
             )
         else:
@@ -1711,10 +2310,51 @@ class QKUComputationControlPlaneServiceV1:
                 supplied_values=supplied_values,
                 contextual_evidence=contextual_evidence,
                 formula_contract=contract,
+                binding_profile=binding_profile,
+                compiled_dependency_graph=dependency_graph,
                 dependency_refs=dependency_refs,
+                parameter_resolution_receipt_refs=(
+                    parameter_receipt_refs
+                ),
                 downstream_consumer_refs=_DOWNSTREAM_CONSUMERS,
+                mode=mode,
+                authority=contract.authority_envelope,
             )
-        return contract, receipt
+        if parameter_reasons:
+            blockers = tuple(
+                dict.fromkeys(
+                    (*receipt.blocker_codes, *parameter_reasons)
+                )
+            )
+            details = tuple(
+                dict.fromkeys(
+                    (
+                        *receipt.blocker_detail_refs,
+                        *requirement.missing_owner_refs,
+                        *(
+                            f"PARAMETER::{reason.value}"
+                            for reason in parameter_reasons
+                        ),
+                    )
+                )
+            )
+            receipt = replace(
+                receipt,
+                receipt_id=_id(
+                    "INPUT",
+                    receipt.receipt_id,
+                    *(reason.value for reason in parameter_reasons),
+                ),
+                blocker_codes=blockers,
+                blocker_detail_refs=details,
+                source_readiness_state=(
+                    ComputationReadinessStateV1.BLOCKED
+                ),
+                terminal_route=(
+                    requirement.registered_failure_fallback_route
+                ),
+            )
+        return contract, receipt, requirement, parameter_resolutions
 
     def resolve_required_inputs(
         self,
@@ -1737,7 +2377,7 @@ class QKUComputationControlPlaneServiceV1:
         receipts: list[InputResolutionReceiptV1] = []
         reasons: list[ReasonCode] = []
         for component_id in request.component_ids:
-            _, receipt = self._resolve_inputs(
+            _, receipt, _, _ = self._resolve_inputs(
                 component_id=component_id,
                 context=request.context,
                 supplied_values=values.get(component_id),
@@ -1778,13 +2418,22 @@ class QKUComputationControlPlaneServiceV1:
         supplied_values: TypedValueRecordV1 | None = None,
         contextual_evidence: tuple[ContextualInputValueV1, ...] = (),
         stack_resolution: ApplicableStackResolutionReceiptV1 | None = None,
+        parameter_ids: tuple[str, ...] | None = None,
+        runtime_parameter_bindings: tuple[
+            RuntimeParameterBindingV1, ...
+        ] = (),
     ) -> ResolveContextualComputabilityResponseV1:
         if not isinstance(request, ResolveContextualComputabilityRequestV1):
             raise ComputationServiceError(
                 ReasonCode.INVALID_CONTRACT,
                 "computability resolution requires its exact typed request",
             )
-        contract, input_receipt = self._resolve_inputs(
+        (
+            contract,
+            input_receipt,
+            _,
+            parameter_resolutions,
+        ) = self._resolve_inputs(
             component_id=request.component_id,
             context=request.context,
             supplied_values=supplied_values,
@@ -1799,10 +2448,13 @@ class QKUComputationControlPlaneServiceV1:
                 if stack_resolution is None
                 else (stack_resolution.receipt_id,)
             ),
+            parameter_ids=parameter_ids,
+            runtime_parameter_bindings=runtime_parameter_bindings,
         )
         receipt = EvidenceDerivedContextualComputabilityResolverV1.resolve(
             contract=contract,
             input_resolution=input_receipt,
+            parameter_resolutions=parameter_resolutions,
             stack_resolution=stack_resolution,
             consumer_refs=_DOWNSTREAM_CONSUMERS,
         )
@@ -1858,7 +2510,31 @@ class QKUComputationControlPlaneServiceV1:
                 ReasonCode.INVALID_CONTRACT,
                 "stack request and typed applicability evidence must be exact",
             )
-        receipt = self._stack_resolver.resolve(applicability)
+        receipt = self._resolve_stack_public_domain(applicability)
+        if isinstance(receipt, StackNoSelectionReceiptV1):
+            result = DetailedStackResolutionV1(
+                result_id=_result_id(request),
+                terminal_route=receipt.terminal_route,
+                evidence_refs=(receipt.receipt_id,),
+                selected_stack_id=None,
+                component_ids=(),
+                topological_order=(),
+                resolution_receipt=receipt,
+                blocker_reason_codes=(
+                    ReasonCode.STACK_NOT_APPLICABLE,
+                ),
+            )
+            return ResolveApplicableStackResponseV1(
+                **_response_common(
+                    request,
+                    status=OperationStatusV1.BLOCKED,
+                    blockers=(
+                        OperationBlockerCodeV1.STACK_NOT_APPLICABLE,
+                    ),
+                    receipt_refs=(receipt.receipt_id,),
+                ),
+                stack_resolution=result,
+            )
         result = DetailedStackResolutionV1(
             result_id=_result_id(request),
             terminal_route=receipt.terminal_route,
@@ -1882,6 +2558,50 @@ class QKUComputationControlPlaneServiceV1:
             stack_resolution=result,
         )
 
+    def _resolve_stack_public_domain(
+        self,
+        applicability: StackApplicabilityContextV1,
+    ) -> ApplicableStackResolutionReceiptV1 | StackNoSelectionReceiptV1:
+        try:
+            return self._stack_resolver.resolve(applicability)
+        except StackResolutionError as exc:
+            if exc.reason_code is not ReasonCode.STACK_NOT_APPLICABLE:
+                raise
+            material = "|".join(
+                (
+                    applicability.trade_plan_candidate_id,
+                    applicability.context_key.stable_key,
+                    applicability.venue,
+                    applicability.market_family,
+                    applicability.market_category,
+                    applicability.mode,
+                    exc.reason_code.value,
+                )
+            )
+            return StackNoSelectionReceiptV1(
+                receipt_id=(
+                    "STACK-NO-SELECTION::"
+                    + sha256(material.encode("utf-8")).hexdigest()
+                ),
+                trade_plan_candidate_id=(
+                    applicability.trade_plan_candidate_id
+                ),
+                blocker_reason_code=ReasonCode.STACK_NOT_APPLICABLE,
+                retained_evidence_refs=tuple(
+                    dict.fromkeys(
+                        (
+                            applicability.owner_intent_ref,
+                            applicability.input_lock_ref,
+                            *applicability.source_readiness_receipt_refs,
+                            f"RP5E::{self._stack_resolver.rp5e_snapshot.run_id}",
+                        )
+                    )
+                ),
+                terminal_route=(
+                    "AGENT-ORCH1::STACK_MATERIALIZATION_OR_NO_TRADE"
+                ),
+            )
+
     def _compute_component_result(
         self,
         request: ComputeComponentRequestV1,
@@ -1891,11 +2611,19 @@ class QKUComputationControlPlaneServiceV1:
         dependency_graph: CompiledDependencyGraphV1 | None = None,
         stack_resolution: ApplicableStackResolutionReceiptV1 | None = None,
         dependency_refs: tuple[str, ...] = (),
-        parameter_ids: tuple[str, ...] = (),
+        parameter_ids: tuple[str, ...] | None = None,
+        runtime_parameter_bindings: tuple[
+            RuntimeParameterBindingV1, ...
+        ] = (),
         deadline_budget: DeadlineBudgetV1 | None = None,
         mode: str = "CONTRACT_ONLY",
     ) -> ComponentComputationResultV1:
-        contract, input_receipt = self._resolve_inputs(
+        (
+            contract,
+            input_receipt,
+            requirement,
+            parameter_resolutions,
+        ) = self._resolve_inputs(
             component_id=request.component_id,
             context=request.context,
             supplied_values=request.input_values,
@@ -1903,16 +2631,25 @@ class QKUComputationControlPlaneServiceV1:
             dependency_graph=dependency_graph,
             dependency_refs=dependency_refs,
             parameter_ids=parameter_ids,
+            runtime_parameter_bindings=runtime_parameter_bindings,
+            mode=mode,
         )
         computability = (
             EvidenceDerivedContextualComputabilityResolverV1.resolve(
                 contract=contract,
                 input_resolution=input_receipt,
+                parameter_resolutions=parameter_resolutions,
                 stack_resolution=stack_resolution,
                 consumer_refs=_DOWNSTREAM_CONSUMERS,
             )
         )
         reasons: list[ReasonCode] = list(input_receipt.blocker_codes)
+        effective_controls, control_reasons = _effective_execution_controls(
+            request.component_id,
+            controls,
+            requirement,
+        )
+        reasons.extend(control_reasons)
         if request.expected_output_schema_ref != output_schema_ref(
             request.component_id
         ):
@@ -1960,6 +2697,7 @@ class QKUComputationControlPlaneServiceV1:
                 ),
                 evidence_refs=evidence_refs,
                 component_id=request.component_id,
+                parameter_resolutions=parameter_resolutions,
                 input_resolution_receipt=input_receipt,
                 computability_receipt=computability,
                 fallback_receipt=fallback,
@@ -1970,7 +2708,8 @@ class QKUComputationControlPlaneServiceV1:
             raw_output = _invoke_registered_callable(
                 request.component_id,
                 input_receipt.arguments,
-                controls,
+                effective_controls,
+                parameter_resolutions,
             )
             output_values = _typed_output(request.component_id, raw_output)
             if deadline_budget is not None:
@@ -2015,6 +2754,7 @@ class QKUComputationControlPlaneServiceV1:
                 ),
                 evidence_refs=evidence_refs,
                 component_id=request.component_id,
+                parameter_resolutions=parameter_resolutions,
                 input_resolution_receipt=input_receipt,
                 computability_receipt=computability,
                 fallback_receipt=fallback,
@@ -2053,6 +2793,13 @@ class QKUComputationControlPlaneServiceV1:
                 for row in input_receipt.inputs
                 if row.conversion_receipt is not None
             ),
+            canonical_source_binding_receipt_refs=tuple(
+                value.receipt_id
+                for value in input_receipt.canonical_source_binding_receipts
+            ),
+            parameter_resolution_receipt_refs=tuple(
+                value.receipt_id for value in parameter_resolutions
+            ),
             dependency_receipt_refs=dependency_refs,
             deadline_receipt_ref=(
                 None
@@ -2061,8 +2808,18 @@ class QKUComputationControlPlaneServiceV1:
             ),
             consumer_refs=_DOWNSTREAM_CONSUMERS,
             terminal_route=(
-                "QKUComputationControlPlaneServiceV1::PURE_COMPONENT_RESULT"
+                (
+                    "QKUComputationControlPlaneServiceV1::"
+                    "SOURCE_CONTEXT_COMPONENT_RESULT"
+                )
+                if input_receipt.source_readiness_state
+                is ComputationReadinessStateV1.SOURCE_CONTEXT_COMPUTABLE
+                else (
+                    "QKUComputationControlPlaneServiceV1::"
+                    "PURE_COMPUTATION_ONLY_COMPONENT_RESULT"
+                )
             ),
+            readiness_state=input_receipt.source_readiness_state,
         )
         return ComponentComputationResultV1(
             result_id=_id(
@@ -2079,9 +2836,11 @@ class QKUComputationControlPlaneServiceV1:
             ),
             component_id=request.component_id,
             output_values=output_values,
+            parameter_resolutions=parameter_resolutions,
             input_resolution_receipt=input_receipt,
             computability_receipt=computability,
             execution_receipt=execution,
+            readiness_state=input_receipt.source_readiness_state,
         )
 
     def compute_component(
@@ -2090,7 +2849,10 @@ class QKUComputationControlPlaneServiceV1:
         *,
         contextual_evidence: tuple[ContextualInputValueV1, ...],
         controls: ComponentExecutionControlsV1 = ComponentExecutionControlsV1(),
-        parameter_ids: tuple[str, ...] = (),
+        parameter_ids: tuple[str, ...] | None = None,
+        runtime_parameter_bindings: tuple[
+            RuntimeParameterBindingV1, ...
+        ] = (),
         deadline_budget: DeadlineBudgetV1 | None = None,
         mode: str = "CONTRACT_ONLY",
     ) -> ComputeComponentResponseV1:
@@ -2108,6 +2870,7 @@ class QKUComputationControlPlaneServiceV1:
             contextual_evidence=contextual_evidence,
             controls=controls,
             parameter_ids=parameter_ids,
+            runtime_parameter_bindings=runtime_parameter_bindings,
             deadline_budget=deadline_budget,
             mode=mode,
         )
@@ -2239,10 +3002,11 @@ class QKUComputationControlPlaneServiceV1:
             else min(value for value in ttl_values if value is not None)
         )
         execution_ref = upstream_result.execution_receipt.receipt_id
+        compiled_edge_ref = compiled_dependency_edge_ref_v1(edge)
         edge_ref = (
             f"EDGE::{edge.upstream_id}.{edge.upstream_output_field}->"
             f"{edge.downstream_id}.{edge.downstream_input_field}::"
-            f"{conversion_class}::{execution_ref}"
+            f"{conversion_class}::{compiled_edge_ref}::{execution_ref}"
         )
         pit = PointInTimeEvidenceV1(
             evidence_id=edge_ref,
@@ -2268,16 +3032,10 @@ class QKUComputationControlPlaneServiceV1:
             parameter_policy_ref="DERIVED_FROM_MATERIAL_UPSTREAM_TTL_POLICIES",
             stale_behavior="FAIL_CLOSED_OR_REGISTERED_FALLBACK",
         )
-        evidence = ContextualInputValueV1(
+        evidence = ContextualInputValueV1._from_service_derived(
             typed_value=routed_value,
             point_in_time=pit,
             freshness_policy=freshness,
-            source_identity=(
-                "QKUComputationControlPlaneServiceV1::REGISTERED_CALLABLE_OUTPUT"
-            ),
-            source_state_id=execution_ref,
-            source_epoch_id=context.source_epoch_id,
-            rights_state="IN_PROCESS_DERIVED_NO_RIGHTS_EXPANSION",
             value_lineage_ref=edge_ref,
             precision_policy=conversion_class,
             rounding_policy="NO_IMPLICIT_QUANTIZATION",
@@ -2286,6 +3044,10 @@ class QKUComputationControlPlaneServiceV1:
                 edge.downstream_id,
                 "QKUComputationControlPlaneServiceV1",
             ),
+            upstream_execution_receipt_ref=execution_ref,
+            upstream_component_id=edge.upstream_id,
+            compiled_dependency_edge_ref=compiled_edge_ref,
+            lineage_readiness_state=upstream_result.readiness_state,
             fallback_ref="FALLBACK::NO_EFFECT_FAIL_CLOSED",
         )
         return routed_value, evidence, edge_ref
@@ -2300,6 +3062,9 @@ class QKUComputationControlPlaneServiceV1:
             str, ComponentExecutionControlsV1
         ] | None = None,
         parameter_ids_by_component: Mapping[str, tuple[str, ...]] | None = None,
+        runtime_parameter_bindings_by_component: Mapping[
+            str, tuple[RuntimeParameterBindingV1, ...]
+        ] | None = None,
         deadline_budget: DeadlineBudgetV1 | None = None,
     ) -> ComputeStackResponseV1:
         if (
@@ -2312,9 +3077,68 @@ class QKUComputationControlPlaneServiceV1:
                 ReasonCode.INVALID_CONTRACT,
                 "compute_stack requires exact typed request, context, and evidence",
             )
-        stack_resolution = self._stack_resolver.resolve(applicability)
+        public_resolution = self._resolve_stack_public_domain(applicability)
+        if isinstance(public_resolution, StackNoSelectionReceiptV1):
+            reasons = (ReasonCode.STACK_NOT_APPLICABLE,)
+            result = StackComputationResultV1(
+                result_id=_id(
+                    "STACK-RESULT",
+                    request.idempotency_key,
+                    public_resolution.receipt_id,
+                ),
+                terminal_route=public_resolution.terminal_route,
+                evidence_refs=(public_resolution.receipt_id,),
+                selected_stack_id=None,
+                blocker_reason_codes=reasons,
+                stack_resolution_receipt=public_resolution,
+            )
+            return ComputeStackResponseV1(
+                **_response_common(
+                    request,
+                    status=OperationStatusV1.BLOCKED,
+                    blockers=(
+                        OperationBlockerCodeV1.STACK_NOT_APPLICABLE,
+                    ),
+                    receipt_refs=(public_resolution.receipt_id,),
+                ),
+                stack_result=result,
+            )
+        stack_resolution = public_resolution
         template = self._stack_resolver.template(stack_resolution.template_id)
         initial_reasons: list[ReasonCode] = []
+        if parameter_ids_by_component is not None and (
+            not isinstance(parameter_ids_by_component, Mapping)
+            or not set(parameter_ids_by_component)
+            <= set(stack_resolution.component_ids)
+            or any(
+                not isinstance(component_id, str)
+                or not isinstance(assertion, tuple)
+                or any(
+                    not isinstance(parameter_id, str) or not parameter_id
+                    for parameter_id in assertion
+                )
+                for component_id, assertion
+                in parameter_ids_by_component.items()
+            )
+        ):
+            initial_reasons.append(ReasonCode.PARAMETER_ASSERTION_MISMATCH)
+        if runtime_parameter_bindings_by_component is not None and (
+            not isinstance(runtime_parameter_bindings_by_component, Mapping)
+            or not set(runtime_parameter_bindings_by_component)
+            <= set(stack_resolution.component_ids)
+        ):
+            initial_reasons.append(ReasonCode.PARAMETER_ASSERTION_MISMATCH)
+        actual_input_readiness = (
+            ComputationReadinessStateV1.PURE_COMPUTATION_ONLY
+            if any(
+                value.origin
+                is InputOriginV1.OWNER_SUPPLIED_PURE_COMPUTATION_INPUT
+                for value in contextual_evidence
+            )
+            else ComputationReadinessStateV1.SOURCE_CONTEXT_COMPUTABLE
+        )
+        if actual_input_readiness is not applicability.input_readiness_state:
+            initial_reasons.append(ReasonCode.INPUT_ORIGIN_NOT_AUTHORIZED)
         if request.stack_id not in {
             stack_resolution.template_id,
             stack_resolution.selected_stack_id,
@@ -2373,6 +3197,7 @@ class QKUComputationControlPlaneServiceV1:
                     )
                 ),
                 selected_stack_id=stack_resolution.selected_stack_id,
+                stack_resolution_receipt=stack_resolution,
                 blocker_reason_codes=reasons,
             )
             blockers = _operation_blockers(reasons)
@@ -2388,6 +3213,9 @@ class QKUComputationControlPlaneServiceV1:
 
         controls_map = controls_by_component or {}
         parameter_map = parameter_ids_by_component or {}
+        runtime_parameter_map = (
+            runtime_parameter_bindings_by_component or {}
+        )
         external_values = {
             field.name: field for field in request.input_values.fields
         }
@@ -2452,7 +3280,15 @@ class QKUComputationControlPlaneServiceV1:
                     stack_resolution.receipt_id,
                     *incoming_edge_refs,
                 ),
-                parameter_ids=parameter_map.get(component_id, ()),
+                parameter_ids=(
+                    parameter_map[component_id]
+                    if component_id in parameter_map
+                    else None
+                ),
+                runtime_parameter_bindings=runtime_parameter_map.get(
+                    component_id,
+                    (),
+                ),
                 deadline_budget=deadline_budget,
                 mode=applicability.mode,
             )
@@ -2526,6 +3362,7 @@ class QKUComputationControlPlaneServiceV1:
                 evidence_refs=evidence_refs,
                 selected_stack_id=stack_resolution.selected_stack_id,
                 component_results=tuple(component_results),
+                stack_resolution_receipt=stack_resolution,
                 blocker_reason_codes=reasons,
             )
             return ComputeStackResponseV1(
@@ -2574,6 +3411,7 @@ class QKUComputationControlPlaneServiceV1:
                     ),
                     selected_stack_id=stack_resolution.selected_stack_id,
                     component_results=tuple(component_results),
+                    stack_resolution_receipt=stack_resolution,
                     blocker_reason_codes=reasons,
                 )
                 return ComputeStackResponseV1(
@@ -2619,8 +3457,18 @@ class QKUComputationControlPlaneServiceV1:
             fallback_receipt_ref=None,
             consumer_refs=_DOWNSTREAM_CONSUMERS,
             terminal_route=(
-                "QKUComputationControlPlaneServiceV1::PURE_STACK_RESULT"
+                (
+                    "QKUComputationControlPlaneServiceV1::"
+                    "SOURCE_CONTEXT_STACK_RESULT"
+                )
+                if final_result.readiness_state
+                is ComputationReadinessStateV1.SOURCE_CONTEXT_COMPUTABLE
+                else (
+                    "QKUComputationControlPlaneServiceV1::"
+                    "PURE_COMPUTATION_ONLY_STACK_RESULT"
+                )
             ),
+            readiness_state=final_result.readiness_state,
         )
         stack_result = StackComputationResultV1(
             result_id=_id(
@@ -2638,6 +3486,8 @@ class QKUComputationControlPlaneServiceV1:
             component_results=tuple(component_results),
             output_values=final_result.output_values,
             execution_receipt=stack_receipt,
+            stack_resolution_receipt=stack_resolution,
+            readiness_state=final_result.readiness_state,
         )
         return ComputeStackResponseV1(
             **_response_common(
