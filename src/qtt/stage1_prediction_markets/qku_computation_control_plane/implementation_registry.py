@@ -1,11 +1,11 @@
-"""Single allowlisted registry for all 19 Tranche-A mathematical callables."""
+"""Single allowlisted registry for the immutable Step-12 mathematical callables."""
 
 from __future__ import annotations
 
 from bisect import bisect_right
 from dataclasses import dataclass
 from decimal import Decimal, localcontext
-from itertools import product
+from itertools import combinations, product
 import math
 from random import Random
 from statistics import NormalDist
@@ -946,6 +946,766 @@ def compute_math_15_white_reality_check(
         p_value=p_value,
         reject=p_value <= alpha_value,
         seed=seed,
+    )
+
+
+def _finite_vector(values: Sequence[object], *, field_name: str) -> tuple[float, ...]:
+    if (
+        isinstance(values, (str, bytes))
+        or not isinstance(values, Sequence)
+        or not values
+    ):
+        _fail(f"{field_name} must be a nonempty declared sequence")
+    return tuple(
+        finite_float(value, field_name=f"{field_name}[{index}]")
+        for index, value in enumerate(values)
+    )
+
+
+def _sample_standard_deviation(values: Sequence[float], *, field_name: str) -> float:
+    if len(values) < 2:
+        _fail(f"{field_name} requires at least two observations")
+    mean = math.fsum(values) / len(values)
+    variance = math.fsum((value - mean) ** 2 for value in values) / (
+        len(values) - 1
+    )
+    if variance <= 0.0 or not math.isfinite(variance):
+        _fail(f"{field_name} requires positive finite sample variance")
+    return math.sqrt(variance)
+
+
+@dataclass(frozen=True, slots=True)
+class HansenSPAResultV1:
+    statistic: float
+    p_value: float
+    reject: bool
+    seed: int
+    candidate_count: int
+    observation_count: int
+
+    def __post_init__(self) -> None:
+        object.__setattr__(
+            self, "statistic", finite_float(self.statistic, field_name="statistic")
+        )
+        object.__setattr__(
+            self, "p_value", _probability(self.p_value, field_name="p_value")
+        )
+        if type(self.reject) is not bool:
+            _fail("SPA rejection state must be an exact boolean")
+        for name in ("seed", "candidate_count", "observation_count"):
+            value = getattr(self, name)
+            if isinstance(value, bool) or not isinstance(value, int):
+                _fail(f"{name} must be an exact integer")
+        if self.candidate_count <= 0 or self.observation_count < 2:
+            _fail("SPA result dimensions are invalid")
+
+
+def compute_math_16_hansen_spa(
+    loss_differentials: Sequence[Sequence[object]] | None = None,
+    *,
+    differentials: Sequence[Sequence[object]] | None = None,
+    seed: int,
+    replicates: int = 1000,
+    mean_block_length: object = 2,
+    alpha: object = 0.05,
+) -> HansenSPAResultV1:
+    """Compute a seed-controlled SPA max statistic with common bootstrap draws."""
+
+    if (loss_differentials is None) == (differentials is None):
+        _fail("supply exactly one declared SPA differential matrix")
+    source = loss_differentials if loss_differentials is not None else differentials
+    assert source is not None
+    if isinstance(source, (str, bytes)) or not isinstance(source, Sequence) or not source:
+        _fail("SPA differentials must be a nonempty [time,candidate] matrix")
+    rows = tuple(
+        _finite_vector(row, field_name=f"loss_differentials[{index}]")
+        for index, row in enumerate(source)
+    )
+    observations = len(rows)
+    candidates = len(rows[0])
+    if observations < 2 or any(len(row) != candidates for row in rows):
+        _fail("SPA differentials must have aligned [time,candidate] shape")
+    if isinstance(seed, bool) or not isinstance(seed, int):
+        _fail("SPA seed must be an explicit integer")
+    if (
+        isinstance(replicates, bool)
+        or not isinstance(replicates, int)
+        or replicates <= 0
+    ):
+        _fail("SPA replicates must be a positive integer")
+    block = finite_float(mean_block_length, field_name="mean_block_length")
+    if not 1.0 <= block <= observations:
+        _fail("SPA mean block length must be in [1, observation count]")
+    alpha_value = _probability(alpha, field_name="alpha")
+    if alpha_value in (0.0, 1.0):
+        _fail("SPA alpha must be in (0,1)")
+    columns = tuple(
+        tuple(rows[row][column] for row in range(observations))
+        for column in range(candidates)
+    )
+    if not any(value != 0.0 for row in rows for value in row):
+        return HansenSPAResultV1(
+            statistic=0.0,
+            p_value=1.0,
+            reject=False,
+            seed=seed,
+            candidate_count=candidates,
+            observation_count=observations,
+        )
+    means = tuple(math.fsum(column) / observations for column in columns)
+    standard_deviations = tuple(
+        _sample_standard_deviation(column, field_name=f"candidate[{index}]")
+        for index, column in enumerate(columns)
+    )
+    observed = max(
+        0.0,
+        *(
+            math.sqrt(observations) * mean / deviation
+            for mean, deviation in zip(
+                means, standard_deviations, strict=True
+            )
+        ),
+    )
+    rng = Random(seed)
+    exceedances = 0
+    for _ in range(replicates):
+        indices = _stationary_indices(observations, block, rng)
+        bootstrap_statistic = max(
+            0.0,
+            *(
+                math.sqrt(observations)
+                * (
+                    math.fsum(column[index] for index in indices)
+                    / observations
+                    - max(mean, 0.0)
+                )
+                / deviation
+                for column, mean, deviation in zip(
+                    columns, means, standard_deviations, strict=True
+                )
+            ),
+        )
+        if bootstrap_statistic >= observed:
+            exceedances += 1
+    p_value = exceedances / replicates
+    return HansenSPAResultV1(
+        statistic=observed,
+        p_value=p_value,
+        reject=p_value <= alpha_value,
+        seed=seed,
+        candidate_count=candidates,
+        observation_count=observations,
+    )
+
+
+@dataclass(frozen=True, slots=True)
+class ProbabilisticSharpeResultV1:
+    psr: float
+    z_score: float
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "psr", _probability(self.psr, field_name="psr"))
+        object.__setattr__(
+            self, "z_score", finite_float(self.z_score, field_name="z_score")
+        )
+
+
+def compute_math_17_probabilistic_sharpe_ratio(
+    sharpe_hat: object,
+    sharpe_ref: object,
+    n: int,
+    skewness: object,
+    kurtosis: object,
+) -> ProbabilisticSharpeResultV1:
+    observed = finite_float(sharpe_hat, field_name="sharpe_hat")
+    reference = finite_float(sharpe_ref, field_name="sharpe_ref")
+    skew = finite_float(skewness, field_name="skewness")
+    non_excess_kurtosis = finite_float(kurtosis, field_name="kurtosis")
+    if isinstance(n, bool) or not isinstance(n, int) or n <= 1:
+        _fail("PSR observation count must be an integer greater than one")
+    denominator_squared = (
+        1.0
+        - skew * observed
+        + ((non_excess_kurtosis - 1.0) / 4.0) * observed * observed
+    )
+    if denominator_squared <= 0.0 or not math.isfinite(denominator_squared):
+        _fail("PSR denominator must be positive and finite")
+    z_score = (
+        (observed - reference)
+        * math.sqrt(n - 1)
+        / math.sqrt(denominator_squared)
+    )
+    return ProbabilisticSharpeResultV1(
+        psr=NormalDist().cdf(z_score),
+        z_score=z_score,
+    )
+
+
+@dataclass(frozen=True, slots=True)
+class DeflatedSharpeResultV1:
+    dsr: float
+    reference_sharpe: float
+    effective_trial_count: float
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "dsr", _probability(self.dsr, field_name="dsr"))
+        object.__setattr__(
+            self,
+            "reference_sharpe",
+            finite_float(self.reference_sharpe, field_name="reference_sharpe"),
+        )
+        count = finite_float(
+            self.effective_trial_count, field_name="effective_trial_count"
+        )
+        if count < 1.0:
+            _fail("effective_trial_count must be at least one")
+        object.__setattr__(self, "effective_trial_count", count)
+
+
+def compute_math_18_deflated_sharpe_ratio(
+    trial_sharpes: Sequence[object],
+    effective_trial_count: object,
+    candidate_moments: Mapping[str, object],
+) -> DeflatedSharpeResultV1:
+    sharpes = _finite_vector(trial_sharpes, field_name="trial_sharpes")
+    if not isinstance(candidate_moments, Mapping):
+        _fail("candidate_moments must be a typed mapping")
+    required = {"sharpe_hat", "n", "skewness", "kurtosis"}
+    if set(candidate_moments) < required:
+        _fail("candidate_moments is missing required PSR fields")
+    effective = finite_float(
+        effective_trial_count, field_name="effective_trial_count"
+    )
+    if effective < 1.0:
+        _fail("effective_trial_count must be at least one")
+    trial_std = (
+        0.0
+        if len(sharpes) == 1
+        else _sample_standard_deviation(sharpes, field_name="trial_sharpes")
+    )
+    if effective == 1.0 or trial_std == 0.0:
+        reference = 0.0
+    else:
+        euler_mascheroni = 0.5772156649015329
+        first = NormalDist().inv_cdf(1.0 - 1.0 / effective)
+        second = NormalDist().inv_cdf(
+            1.0 - 1.0 / (effective * math.e)
+        )
+        reference = trial_std * (
+            (1.0 - euler_mascheroni) * first
+            + euler_mascheroni * second
+        )
+    n = candidate_moments["n"]
+    if isinstance(n, bool) or not isinstance(n, int):
+        _fail("candidate_moments.n must be an integer")
+    psr = compute_math_17_probabilistic_sharpe_ratio(
+        candidate_moments["sharpe_hat"],
+        reference,
+        n,
+        candidate_moments["skewness"],
+        candidate_moments["kurtosis"],
+    )
+    return DeflatedSharpeResultV1(
+        dsr=psr.psr,
+        reference_sharpe=reference,
+        effective_trial_count=effective,
+    )
+
+
+@dataclass(frozen=True, slots=True)
+class PBOResultV1:
+    pbo: float
+    split_oos_relative_ranks: tuple[float, ...]
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "pbo", _probability(self.pbo, field_name="pbo"))
+        ranks = tuple(
+            _probability(value, field_name=f"split_oos_relative_ranks[{index}]")
+            for index, value in enumerate(self.split_oos_relative_ranks)
+        )
+        if not ranks:
+            _fail("PBO requires at least one split rank")
+        object.__setattr__(self, "split_oos_relative_ranks", ranks)
+
+
+def compute_math_19_probability_of_backtest_overfitting(
+    performance_matrix: Sequence[Sequence[object]] | None = None,
+    S: int | None = None,
+    *,
+    split_oos_relative_ranks: Sequence[object] | None = None,
+) -> PBOResultV1:
+    if split_oos_relative_ranks is not None:
+        if performance_matrix is not None or S is not None:
+            _fail("PBO sufficient-statistic and full-matrix paths are exclusive")
+        ranks = _finite_vector(
+            split_oos_relative_ranks,
+            field_name="split_oos_relative_ranks",
+        )
+        if any(rank <= 0.0 or rank >= 1.0 for rank in ranks):
+            _fail("PBO relative ranks must be strictly inside (0,1)")
+    else:
+        if (
+            performance_matrix is None
+            or isinstance(performance_matrix, (str, bytes))
+            or not isinstance(performance_matrix, Sequence)
+            or not performance_matrix
+            or isinstance(S, bool)
+            or not isinstance(S, int)
+            or S < 2
+            or S % 2
+        ):
+            _fail("PBO requires a matrix and an even partition count >= 2")
+        rows = tuple(
+            _finite_vector(row, field_name=f"performance_matrix[{index}]")
+            for index, row in enumerate(performance_matrix)
+        )
+        trial_count = len(rows[0])
+        if trial_count < 2 or any(len(row) != trial_count for row in rows):
+            _fail("PBO matrix must be aligned with at least two trials")
+        if S > len(rows):
+            _fail("PBO partition count cannot exceed observation count")
+        blocks = tuple(
+            tuple(
+                range(
+                    (index * len(rows)) // S,
+                    ((index + 1) * len(rows)) // S,
+                )
+            )
+            for index in range(S)
+        )
+        derived: list[float] = []
+        all_blocks = frozenset(range(S))
+        for train_blocks in combinations(range(S), S // 2):
+            test_blocks = tuple(sorted(all_blocks - frozenset(train_blocks)))
+            train_indices = tuple(
+                index for block in train_blocks for index in blocks[block]
+            )
+            test_indices = tuple(
+                index for block in test_blocks for index in blocks[block]
+            )
+            in_sample = tuple(
+                math.fsum(rows[index][trial] for index in train_indices)
+                / len(train_indices)
+                for trial in range(trial_count)
+            )
+            winner = max(
+                range(trial_count), key=lambda trial: (in_sample[trial], -trial)
+            )
+            out_of_sample = tuple(
+                math.fsum(rows[index][trial] for index in test_indices)
+                / len(test_indices)
+                for trial in range(trial_count)
+            )
+            position = sorted(
+                range(trial_count),
+                key=lambda trial: (out_of_sample[trial], trial),
+            ).index(winner)
+            derived.append((position + 1) / (trial_count + 1))
+        ranks = tuple(derived)
+    pbo = sum(rank <= 0.5 for rank in ranks) / len(ranks)
+    return PBOResultV1(pbo=pbo, split_oos_relative_ranks=tuple(ranks))
+
+
+@dataclass(frozen=True, slots=True)
+class PurgedSplitResultV1:
+    training_indices: tuple[int, ...]
+    test_indices: tuple[int, ...]
+    purged_indices: tuple[int, ...]
+    embargoed_indices: tuple[int, ...]
+
+    def __post_init__(self) -> None:
+        for name in (
+            "training_indices",
+            "test_indices",
+            "purged_indices",
+            "embargoed_indices",
+        ):
+            values = getattr(self, name)
+            if (
+                not isinstance(values, tuple)
+                or any(
+                    isinstance(value, bool)
+                    or not isinstance(value, int)
+                    or value < 0
+                    for value in values
+                )
+                or len(values) != len(set(values))
+            ):
+                _fail(f"{name} must be a unique nonnegative integer tuple")
+        if set(self.training_indices) & set(self.test_indices):
+            _fail("purged training and test indices must be disjoint")
+
+
+def compute_math_20_purged_kfold_with_embargo(
+    sample_intervals: Sequence[Sequence[object]],
+    *,
+    test_indices: Sequence[int],
+    embargo_horizon: object,
+) -> PurgedSplitResultV1:
+    if (
+        isinstance(sample_intervals, (str, bytes))
+        or not isinstance(sample_intervals, Sequence)
+        or not sample_intervals
+    ):
+        _fail("sample_intervals must be a nonempty ordered sequence")
+    intervals: list[tuple[float, float]] = []
+    for index, interval in enumerate(sample_intervals):
+        if (
+            isinstance(interval, (str, bytes))
+            or not isinstance(interval, Sequence)
+            or len(interval) != 2
+        ):
+            _fail(f"sample_intervals[{index}] must be [start,end]")
+        start = finite_float(interval[0], field_name=f"interval[{index}].start")
+        end = finite_float(interval[1], field_name=f"interval[{index}].end")
+        if end < start:
+            _fail("sample interval end cannot precede start")
+        intervals.append((start, end))
+    if (
+        isinstance(test_indices, (str, bytes))
+        or not isinstance(test_indices, Sequence)
+        or not test_indices
+        or any(
+            isinstance(index, bool)
+            or not isinstance(index, int)
+            or index < 0
+            or index >= len(intervals)
+            for index in test_indices
+        )
+        or len(set(test_indices)) != len(test_indices)
+    ):
+        _fail("test_indices must be a unique known integer sequence")
+    embargo = finite_float(embargo_horizon, field_name="embargo_horizon")
+    if embargo < 0.0:
+        _fail("embargo_horizon cannot be negative")
+    test_set = frozenset(test_indices)
+    test_intervals = tuple(intervals[index] for index in test_indices)
+    purged: list[int] = []
+    embargoed: list[int] = []
+    training: list[int] = []
+    for index, (start, end) in enumerate(intervals):
+        if index in test_set:
+            continue
+        if any(start <= test_end and end >= test_start for test_start, test_end in test_intervals):
+            purged.append(index)
+        elif any(
+            test_end < start < test_end + embargo
+            for _test_start, test_end in test_intervals
+        ):
+            embargoed.append(index)
+        else:
+            training.append(index)
+    return PurgedSplitResultV1(
+        training_indices=tuple(training),
+        test_indices=tuple(sorted(test_set)),
+        purged_indices=tuple(purged),
+        embargoed_indices=tuple(embargoed),
+    )
+
+
+@dataclass(frozen=True, slots=True)
+class CPCVResultV1:
+    test_group_paths: tuple[tuple[int, ...], ...]
+    split_count: int
+    every_split_purged_and_embargoed: bool
+    no_post_hoc_path_selection: bool = True
+
+    def __post_init__(self) -> None:
+        if (
+            not isinstance(self.test_group_paths, tuple)
+            or not self.test_group_paths
+            or any(
+                not isinstance(path, tuple)
+                or not path
+                or any(
+                    isinstance(value, bool)
+                    or not isinstance(value, int)
+                    or value < 0
+                    for value in path
+                )
+                for path in self.test_group_paths
+            )
+        ):
+            _fail("CPCV paths must be nonempty immutable integer groups")
+        if (
+            isinstance(self.split_count, bool)
+            or not isinstance(self.split_count, int)
+            or self.split_count != len(self.test_group_paths)
+        ):
+            _fail("CPCV split_count must equal the enumerated path count")
+        if (
+            type(self.every_split_purged_and_embargoed) is not bool
+            or type(self.no_post_hoc_path_selection) is not bool
+            or not self.every_split_purged_and_embargoed
+            or not self.no_post_hoc_path_selection
+        ):
+            _fail("CPCV must preserve purge/embargo and no-selection invariants")
+
+
+def compute_math_21_combinatorial_purged_cross_validation(
+    N_groups: int,
+    k_test_groups: int,
+) -> CPCVResultV1:
+    if (
+        isinstance(N_groups, bool)
+        or not isinstance(N_groups, int)
+        or N_groups < 2
+        or isinstance(k_test_groups, bool)
+        or not isinstance(k_test_groups, int)
+        or not 1 <= k_test_groups < N_groups
+    ):
+        _fail("CPCV requires integer 1 <= k_test_groups < N_groups")
+    paths = tuple(combinations(range(N_groups), k_test_groups))
+    return CPCVResultV1(
+        test_group_paths=paths,
+        split_count=len(paths),
+        every_split_purged_and_embargoed=True,
+    )
+
+
+@dataclass(frozen=True, slots=True)
+class DoublyRobustResultV1:
+    dr_estimate: float
+    importance_weights: tuple[float, ...]
+    effective_sample_size: float
+
+    def __post_init__(self) -> None:
+        object.__setattr__(
+            self,
+            "dr_estimate",
+            finite_float(self.dr_estimate, field_name="dr_estimate"),
+        )
+        weights = _finite_vector(
+            self.importance_weights, field_name="importance_weights"
+        )
+        if any(weight < 0.0 for weight in weights):
+            _fail("importance weights must be nonnegative")
+        object.__setattr__(self, "importance_weights", weights)
+        ess = finite_float(
+            self.effective_sample_size, field_name="effective_sample_size"
+        )
+        if ess <= 0.0:
+            _fail("effective sample size must be positive")
+        object.__setattr__(self, "effective_sample_size", ess)
+
+
+def _effective_sample_size(weights: Sequence[float]) -> float:
+    total = math.fsum(weights)
+    squared = math.fsum(weight * weight for weight in weights)
+    if total <= 0.0 or squared <= 0.0:
+        _fail("importance weights require positive total and squared mass")
+    return total * total / squared
+
+
+def compute_math_22_doubly_robust_off_policy_evaluation(
+    samples: Sequence[Mapping[str, object]],
+) -> DoublyRobustResultV1:
+    if (
+        isinstance(samples, (str, bytes))
+        or not isinstance(samples, Sequence)
+        or not samples
+    ):
+        _fail("DR OPE requires nonempty typed samples")
+    values: list[float] = []
+    weights: list[float] = []
+    required = {"mu_logged", "pi_logged", "pi_q_sum", "q_logged", "reward"}
+    for index, sample in enumerate(samples):
+        if not isinstance(sample, Mapping) or set(sample) < required:
+            _fail(f"samples[{index}] is missing a DR field")
+        mu = _probability(sample["mu_logged"], field_name=f"samples[{index}].mu")
+        pi = _probability(sample["pi_logged"], field_name=f"samples[{index}].pi")
+        if mu <= 0.0 and pi > 0.0:
+            _fail("DR target action lacks positive behavior-policy support")
+        q_sum = finite_float(
+            sample["pi_q_sum"], field_name=f"samples[{index}].pi_q_sum"
+        )
+        q_logged = finite_float(
+            sample["q_logged"], field_name=f"samples[{index}].q_logged"
+        )
+        reward = finite_float(
+            sample["reward"], field_name=f"samples[{index}].reward"
+        )
+        weight = 0.0 if pi == 0.0 else pi / mu
+        weights.append(weight)
+        values.append(q_sum + weight * (reward - q_logged))
+    return DoublyRobustResultV1(
+        dr_estimate=math.fsum(values) / len(values),
+        importance_weights=tuple(weights),
+        effective_sample_size=_effective_sample_size(weights),
+    )
+
+
+def _aligned_weights_and_rewards(
+    weights: Sequence[object],
+    rewards: Sequence[object],
+) -> tuple[tuple[float, ...], tuple[float, ...]]:
+    weight_values = _finite_vector(weights, field_name="weights")
+    reward_values = _finite_vector(rewards, field_name="rewards")
+    if len(weight_values) != len(reward_values):
+        _fail("importance weights and rewards must be aligned")
+    if any(weight < 0.0 for weight in weight_values):
+        _fail("importance weights must be nonnegative")
+    return weight_values, reward_values
+
+
+def compute_math_23_inverse_propensity_score_ope(
+    weights: Sequence[object],
+    rewards: Sequence[object],
+) -> float:
+    weight_values, reward_values = _aligned_weights_and_rewards(weights, rewards)
+    return math.fsum(
+        weight * reward
+        for weight, reward in zip(weight_values, reward_values, strict=True)
+    ) / len(weight_values)
+
+
+def compute_math_24_self_normalized_ips(
+    weights: Sequence[object],
+    rewards: Sequence[object],
+) -> float:
+    weight_values, reward_values = _aligned_weights_and_rewards(weights, rewards)
+    denominator = math.fsum(weight_values)
+    if denominator <= 0.0:
+        _fail("SNIPS requires positive total weight")
+    numerator = math.fsum(
+        weight * reward
+        for weight, reward in zip(weight_values, reward_values, strict=True)
+    )
+    _effective_sample_size(weight_values)
+    return numerator / denominator
+
+
+@dataclass(frozen=True, slots=True)
+class SwitchOPEResultV1:
+    switch_value: float
+    selected_tau: float
+    importance_corrected_indices: tuple[int, ...]
+    direct_model_indices: tuple[int, ...]
+
+    def __post_init__(self) -> None:
+        object.__setattr__(
+            self,
+            "switch_value",
+            finite_float(self.switch_value, field_name="switch_value"),
+        )
+        tau = finite_float(self.selected_tau, field_name="selected_tau")
+        if tau <= 0.0:
+            _fail("selected_tau must be positive")
+        object.__setattr__(self, "selected_tau", tau)
+        for name in ("importance_corrected_indices", "direct_model_indices"):
+            values = getattr(self, name)
+            if (
+                not isinstance(values, tuple)
+                or any(
+                    isinstance(value, bool)
+                    or not isinstance(value, int)
+                    or value < 0
+                    for value in values
+                )
+                or len(values) != len(set(values))
+            ):
+                _fail(f"{name} must be a unique nonnegative integer tuple")
+        if set(self.importance_corrected_indices) & set(self.direct_model_indices):
+            _fail("SWITCH OPE index partitions must be disjoint")
+
+
+def compute_math_25_switch_ope(
+    weights: Sequence[object],
+    rewards: Sequence[object],
+    direct_estimates: Sequence[object],
+    tau: object,
+) -> SwitchOPEResultV1:
+    weight_values, reward_values = _aligned_weights_and_rewards(weights, rewards)
+    direct_values = _finite_vector(direct_estimates, field_name="direct_estimates")
+    if len(direct_values) != len(weight_values):
+        _fail("SWITCH direct estimates must align with logged rows")
+    threshold = finite_float(tau, field_name="tau")
+    if threshold <= 0.0:
+        _fail("SWITCH tau must be positive")
+    importance = tuple(
+        index for index, weight in enumerate(weight_values) if weight <= threshold
+    )
+    direct = tuple(
+        index for index, weight in enumerate(weight_values) if weight > threshold
+    )
+    contributions = tuple(
+        weight_values[index] * reward_values[index]
+        if index in importance
+        else direct_values[index]
+        for index in range(len(weight_values))
+    )
+    return SwitchOPEResultV1(
+        switch_value=math.fsum(contributions) / len(contributions),
+        selected_tau=threshold,
+        importance_corrected_indices=importance,
+        direct_model_indices=direct,
+    )
+
+
+@dataclass(frozen=True, slots=True)
+class KalshiBinaryBookTouchesV1:
+    yes_best_bid: Decimal
+    no_best_bid: Decimal
+    yes_implied_ask: Decimal
+    no_implied_ask: Decimal
+    payout: Decimal
+
+    def __post_init__(self) -> None:
+        payout = exact_decimal(self.payout, field_name="payout")
+        if payout <= 0:
+            _fail("book payout must be positive")
+        object.__setattr__(self, "payout", payout)
+        for name in (
+            "yes_best_bid",
+            "no_best_bid",
+            "yes_implied_ask",
+            "no_implied_ask",
+        ):
+            value = exact_decimal(getattr(self, name), field_name=name)
+            if value < 0 or value > payout:
+                _fail(f"{name} must be inside the payout domain")
+            object.__setattr__(self, name, value)
+
+
+def _best_bid(
+    value: DecimalInput | Sequence[DecimalInput],
+    *,
+    field_name: str,
+) -> Decimal:
+    if isinstance(value, Sequence) and not isinstance(value, (str, bytes)):
+        if not value:
+            _fail(f"{field_name} ladder cannot be empty")
+        levels = tuple(
+            exact_decimal(level, field_name=f"{field_name}[{index}]")
+            for index, level in enumerate(value)
+        )
+        return max(levels)
+    return exact_decimal(value, field_name=field_name)  # type: ignore[arg-type]
+
+
+def compute_math_36_kalshi_binary_book_transform(
+    yes_bids: DecimalInput | Sequence[DecimalInput],
+    no_bids: DecimalInput | Sequence[DecimalInput],
+    payout: DecimalInput,
+) -> KalshiBinaryBookTouchesV1:
+    payout_value = exact_decimal(payout, field_name="payout")
+    if payout_value <= 0:
+        _fail("payout must be positive")
+    yes_best = _best_bid(yes_bids, field_name="yes_bids")
+    no_best = _best_bid(no_bids, field_name="no_bids")
+    if (
+        yes_best < 0
+        or no_best < 0
+        or yes_best > payout_value
+        or no_best > payout_value
+    ):
+        _fail("binary book bid levels must lie in [0,payout]")
+    return KalshiBinaryBookTouchesV1(
+        yes_best_bid=yes_best,
+        no_best_bid=no_best,
+        yes_implied_ask=payout_value - no_best,
+        no_implied_ask=payout_value - yes_best,
+        payout=payout_value,
     )
 
 
@@ -2149,6 +2909,177 @@ _MATH_SPECIFICATION_METADATA: Mapping[str, MathSpecificationMetadataV1] = (
                 ),
                 "Hansen SPA and unadjusted best-candidate statistic",
             ),
+            "MATH-16": _metadata(
+                "studentized maximum of positive benchmark loss differentials "
+                "with bootstrap null centering",
+                (
+                    "Require at least five material candidates by master-plan gate.",
+                    "Reject zero or nonfinite studentization variance except the "
+                    "certified all-zero null structural invariant.",
+                ),
+                (
+                    "Estimate candidate-specific variance consistently.",
+                    "Apply SPA null recentering.",
+                    "Use common bootstrap draws.",
+                    "Report statistic and p-value.",
+                ),
+                "White Reality Check",
+            ),
+            "MATH-17": _metadata(
+                "PSR=Phi((SR_hat-SR_ref)*sqrt(n-1)/"
+                "sqrt(1-gamma3*SR_hat+((gamma4-1)/4)*SR_hat^2))",
+                (
+                    "Require n>1 and positive finite denominator.",
+                    "Annualization basis must match SR_hat and SR_ref.",
+                ),
+                (
+                    "Compute denominator term.",
+                    "Standardize Sharpe difference.",
+                    "Apply standard normal CDF.",
+                ),
+                "Block-bootstrap Sharpe uncertainty",
+            ),
+            "MATH-18": _metadata(
+                "DSR=PSR(SR_hat, SR_ref=E[max Sharpe under N_eff trials]); "
+                "expected-max threshold uses trial Sharpe variance and "
+                "extreme-value approximation",
+                (
+                    "Require effective trial count >= 1 and full material trial "
+                    "inventory.",
+                    "Never use only the winning trials.",
+                ),
+                (
+                    "Estimate cross-trial Sharpe variance.",
+                    "Compute expected maximum reference threshold using "
+                    "Euler-Mascheroni extreme-value approximation.",
+                    "Call MATH-17 using that threshold.",
+                ),
+                "Raw PSR against fixed reference Sharpe",
+            ),
+            "MATH-19": _metadata(
+                "PBO = fraction of CSCV splits for which logit(relative OOS "
+                "rank of IS winner) <= 0",
+                (
+                    "Require S even, adequate observations per block and full "
+                    "material trial inventory.",
+                    "No random subset of combinations.",
+                ),
+                (
+                    "Partition time into S contiguous blocks.",
+                    "Enumerate every S/2 training-block combination.",
+                    "Select IS winner.",
+                    "Rank its OOS performance and compute logit.",
+                    "PBO is the nonpositive-logit fraction.",
+                ),
+                "DSR with effective trials",
+            ),
+            "MATH-20": _metadata(
+                "remove training samples whose information/label intervals "
+                "overlap the validation interval; embargo samples inside "
+                "declared post-validation look-forward horizon",
+                (
+                    "No arbitrary percentage embargo.",
+                    "Reject missing interval metadata for overlapping labels.",
+                ),
+                (
+                    "Construct validation intervals.",
+                    "Purge every overlapping training interval.",
+                    "Apply exact embargo after each validation interval.",
+                    "Record removed indices and reasons.",
+                ),
+                "Walk-forward for non-overlapping labels",
+            ),
+            "MATH-21": _metadata(
+                "enumerate declared combinations of test groups; purge interval "
+                "overlap and embargo each test path; aggregate path-wise results "
+                "without post-hoc path selection",
+                (
+                    "Require 1 <= k < N and sufficient support per path.",
+                    "No cherry-picking paths.",
+                ),
+                (
+                    "Partition chronologically.",
+                    "Enumerate group combinations.",
+                    "Apply MATH-20 purge and embargo to each path.",
+                    "Aggregate all paths with declared statistic.",
+                ),
+                "Purged K-fold and walk-forward",
+            ),
+            "MATH-22": _metadata(
+                "DR_i=sum_a pi(a|x_i) qhat(x_i,a) + "
+                "[pi(a_i|x_i)/mu(a_i|x_i)] * [r_i-qhat(x_i,a_i)]; "
+                "estimate=mean_i DR_i",
+                (
+                    "Require mu>0 wherever pi>0.",
+                    "Reject unsupported target action.",
+                    "Record weight distribution and effective sample size.",
+                ),
+                (
+                    "Cross-fit qhat so each row is predicted out of fold.",
+                    "Compute target-policy direct term.",
+                    "Add importance residual correction.",
+                    "Average and bootstrap by dependence unit.",
+                ),
+                "IPS, SNIPS and SWITCH",
+            ),
+            "MATH-23": _metadata(
+                "IPS=mean_i [pi(a_i|x_i)/mu(a_i|x_i)] r_i",
+                (
+                    "Require positive logged propensity and support.",
+                    "Any clipping must be parameterized and separately reported.",
+                ),
+                (
+                    "Compute exact importance weights.",
+                    "Multiply observed reward.",
+                    "Average and return weight diagnostics.",
+                ),
+                "DR and SNIPS",
+            ),
+            "MATH-24": _metadata(
+                "SNIPS=sum_i w_i r_i / sum_i w_i",
+                (
+                    "Require nonnegative finite weights and positive total weight.",
+                ),
+                (
+                    "Compute numerator and denominator with compensated summation.",
+                    "Divide and report effective sample size.",
+                    "Reject a nonpositive or nonfinite normalized-weight "
+                    "denominator.",
+                ),
+                "DR and IPS",
+            ),
+            "MATH-25": _metadata(
+                "use importance correction when w_i <= tau and direct "
+                "reward-model estimate when w_i > tau; tau selected by nested "
+                "offline estimated-MSE validation",
+                (
+                    "Require predeclared grid and support.",
+                    "No selection on final evaluation outcomes.",
+                ),
+                (
+                    "For each tau, compute nested validation bias/variance or "
+                    "estimated-MSE criterion.",
+                    "Select minimum criterion with smallest-tau deterministic "
+                    "tie-break.",
+                    "Refit on full outer training data and evaluate held-out data.",
+                ),
+                "DR, IPS and SNIPS",
+            ),
+            "MATH-36": _metadata(
+                "for unit payout, implied opposite ask = 1 - "
+                "opposite_side_best_bid; generalized ask = payout - opposite_bid",
+                (
+                    "Reject missing payout basis, invalid levels or "
+                    "sequence-stale book.",
+                ),
+                (
+                    "Parse both ladders.",
+                    "Take highest bid as last level.",
+                    "Derive opposite ask only when payout identity is verified.",
+                    "Record derivation provenance.",
+                ),
+                "Direct executable ask if future provider schema supplies it",
+            ),
             "MATH-46": _metadata(
                 "E(x)=c + sum_i Q_ii x_i + sum_{i<j} Q_ij x_i x_j, "
                 "x_i in {0,1}",
@@ -2357,6 +3288,84 @@ _ENTRIES = (
         seed_required=True,
     ),
     _record(
+        "MATH-16",
+        "HANSEN_SPA",
+        "MODEL_RISK",
+        "compute_math_16_hansen_spa",
+        compute_math_16_hansen_spa,
+        seed_required=True,
+    ),
+    _record(
+        "MATH-17",
+        "PROBABILISTIC_SHARPE_RATIO",
+        "MODEL_RISK",
+        "compute_math_17_probabilistic_sharpe_ratio",
+        compute_math_17_probabilistic_sharpe_ratio,
+    ),
+    _record(
+        "MATH-18",
+        "DEFLATED_SHARPE_RATIO",
+        "MODEL_RISK",
+        "compute_math_18_deflated_sharpe_ratio",
+        compute_math_18_deflated_sharpe_ratio,
+    ),
+    _record(
+        "MATH-19",
+        "PROBABILITY_OF_BACKTEST_OVERFITTING",
+        "MODEL_RISK",
+        "compute_math_19_probability_of_backtest_overfitting",
+        compute_math_19_probability_of_backtest_overfitting,
+    ),
+    _record(
+        "MATH-20",
+        "PURGED_KFOLD_WITH_EMBARGO",
+        "VALIDATION",
+        "compute_math_20_purged_kfold_with_embargo",
+        compute_math_20_purged_kfold_with_embargo,
+    ),
+    _record(
+        "MATH-21",
+        "COMBINATORIAL_PURGED_CROSS_VALIDATION",
+        "VALIDATION",
+        "compute_math_21_combinatorial_purged_cross_validation",
+        compute_math_21_combinatorial_purged_cross_validation,
+    ),
+    _record(
+        "MATH-22",
+        "DOUBLY_ROBUST_OFF_POLICY_EVALUATION",
+        "OFF_POLICY_EVALUATION",
+        "compute_math_22_doubly_robust_off_policy_evaluation",
+        compute_math_22_doubly_robust_off_policy_evaluation,
+    ),
+    _record(
+        "MATH-23",
+        "INVERSE_PROPENSITY_SCORE_OPE",
+        "OFF_POLICY_EVALUATION",
+        "compute_math_23_inverse_propensity_score_ope",
+        compute_math_23_inverse_propensity_score_ope,
+    ),
+    _record(
+        "MATH-24",
+        "SELF_NORMALIZED_IPS",
+        "OFF_POLICY_EVALUATION",
+        "compute_math_24_self_normalized_ips",
+        compute_math_24_self_normalized_ips,
+    ),
+    _record(
+        "MATH-25",
+        "SWITCH_OPE",
+        "OFF_POLICY_EVALUATION",
+        "compute_math_25_switch_ope",
+        compute_math_25_switch_ope,
+    ),
+    _record(
+        "MATH-36",
+        "KALSHI_BINARY_BOOK_TRANSFORM",
+        "PROVIDER_MARKET_DATA",
+        "compute_math_36_kalshi_binary_book_transform",
+        compute_math_36_kalshi_binary_book_transform,
+    ),
+    _record(
         "MATH-46",
         "QUBO_UPPER_TRIANGULAR_CONVENTION",
         "QUANTUM_MAPPING",
@@ -2389,14 +3398,32 @@ _ENTRIES = (
 IMPLEMENTATION_REGISTRY: Mapping[str, MathImplementationRecordV1] = MappingProxyType(
     {entry.contract.math_spec_id: entry for entry in _ENTRIES}
 )
+TRANCHE_A_MATH_IDS = (
+    *(f"MATH-{index:02d}" for index in range(1, 16)),
+    "MATH-46",
+    "MATH-47",
+    "MATH-48",
+    "MATH-49",
+)
+TRANCHE_B_MATH_IDS = (
+    *(f"MATH-{index:02d}" for index in range(1, 26)),
+    "MATH-36",
+    "MATH-46",
+    "MATH-47",
+    "MATH-48",
+    "MATH-49",
+)
 if (
-    len(_ENTRIES) != 19
-    or len(IMPLEMENTATION_REGISTRY) != 19
-    or tuple(_MATH_SPECIFICATION_METADATA) != tuple(IMPLEMENTATION_REGISTRY)
+    len(_ENTRIES) != 30
+    or len(IMPLEMENTATION_REGISTRY) != 30
+    or set(_MATH_SPECIFICATION_METADATA) != set(IMPLEMENTATION_REGISTRY)
+    or len(TRANCHE_A_MATH_IDS) != 19
+    or len(TRANCHE_B_MATH_IDS) != 30
+    or not set(TRANCHE_A_MATH_IDS) < set(TRANCHE_B_MATH_IDS)
 ):
     raise ContractValidationError(
         ReasonCode.INVALID_CONTRACT,
-        "the centralized math registry must contain 19 unique implementations",
+        "the centralized registry must contain the 30 unique A/B implementations",
     )
 
 

@@ -296,6 +296,17 @@ def _class_fields(tree: ast.Module, name: str) -> tuple[str, ...]:
     return ()
 
 
+def _class_methods(tree: ast.Module, name: str) -> tuple[str, ...]:
+    for node in tree.body:
+        if isinstance(node, ast.ClassDef) and node.name == name:
+            return tuple(
+                statement.name
+                for statement in node.body
+                if isinstance(statement, ast.FunctionDef)
+            )
+    return ()
+
+
 def _parse_operation_rows(tree: ast.Module) -> tuple[tuple[object, ...], ...]:
     value = _assignment(tree, "_OPERATION_ROWS")
     if not isinstance(value, ast.Tuple):
@@ -406,9 +417,63 @@ def main() -> int:
         ):
             if required not in model_text and required not in validation_text:
                 failures.append(f"operation invariant is absent: {required}")
+    service = parsed.get("service.py")
+    if service is None:
+        failures.append("the exact Tranche-B pure in-process service is absent")
+    else:
+        service_rows = _assignment(service, "_SERVICE_BINDING_ROWS")
+        try:
+            parsed_service_rows = (
+                ast.literal_eval(service_rows)
+                if service_rows is not None
+                else ()
+            )
+        except (ValueError, TypeError):
+            parsed_service_rows = ()
+        expected_service_rows = tuple(
+            (row[0], row[1])
+            for row in EXPECTED_ROWS
+        )
+        if (
+            not isinstance(parsed_service_rows, tuple)
+            or len(parsed_service_rows) != 15
+            or tuple(
+                (row[0], row[1])
+                for row in parsed_service_rows
+                if isinstance(row, tuple) and len(row) == 4
+            )
+            != expected_service_rows
+        ):
+            failures.append(
+                "Tranche-B service bindings do not match the 15 frozen operations"
+            )
+        methods = set(
+            _class_methods(service, "QKUComputationControlPlaneServiceV1")
+        )
+        missing_methods = {
+            str(row[1]) for row in EXPECTED_ROWS
+        } - methods
+        if missing_methods:
+            failures.append(
+                f"pure service methods are absent: {sorted(missing_methods)}"
+            )
+        service_text = (PACKAGE / "service.py").read_text(encoding="utf-8")
+        for required in (
+            "pure_in_process: bool = True",
+            "external_or_durable_effect_allowed: bool = False",
+            "NO_PROVIDER_EFFECT",
+            "NO_PRIVATE_STATE_EFFECT",
+            "NO_REPLAY_PAPER_EXECUTION_EFFECT",
+            "NO_QPU_EFFECT",
+            "NO_MODE_OR_GRANT_EFFECT",
+            "NO_ORDER_RELEASE_EFFECT",
+        ):
+            if required not in service_text:
+                failures.append(
+                    f"Tranche-B service boundary is absent: {required}"
+                )
     forbidden_files = {
         "runtime.py",
-        "service.py",
         "supervision.py",
         "backup.py",
         "database.py",

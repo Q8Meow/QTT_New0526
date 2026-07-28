@@ -54,7 +54,7 @@ DETERMINISTIC_VALIDATOR_SHARD_PHASES = (
 DETERMINISTIC_VALIDATOR_SHARD_COMMAND_RANGES = {
     "deterministic-validators-a": (1, 64),
     "deterministic-validators-b": (65, 119),
-    "deterministic-validators-c": (120, 340),
+    "deterministic-validators-c": (120, None),
 }
 PYTEST_SHARD_PHASES = (
     "pytest-shard-1",
@@ -253,6 +253,56 @@ PR167_TEST_ROOT = (
 )
 ST12A_TEST_ROOT = (
     "tests/stage1_prediction_markets/qku_computation_control_plane"
+)
+ST12B_CERTIFIED_VALIDATION_COMMAND_SPECS = (
+    (
+        "independent_validate_qku_computation_control_plane_latency.py",
+        (),
+    ),
+    (
+        "independent_validate_qku_computation_control_plane_model_risk.py",
+        (),
+    ),
+    (
+        "independent_validate_qku_computation_control_plane_operations.py",
+        (),
+    ),
+    (
+        "independent_validate_qku_computation_control_plane_quantum.py",
+        (),
+    ),
+    (
+        "independent_validate_qku_computation_control_plane_security.py",
+        (),
+    ),
+    (
+        "independent_validate_qku_computation_control_plane_source.py",
+        (),
+    ),
+    (
+        "validate_qku_computation_control_plane.py",
+        ("--domain", "latency"),
+    ),
+    (
+        "validate_qku_computation_control_plane.py",
+        ("--domain", "model_risk"),
+    ),
+    (
+        "validate_qku_computation_control_plane.py",
+        ("--domain", "operations"),
+    ),
+    (
+        "validate_qku_computation_control_plane.py",
+        ("--domain", "quantum"),
+    ),
+    (
+        "validate_qku_computation_control_plane.py",
+        ("--domain", "security"),
+    ),
+    (
+        "validate_qku_computation_control_plane.py",
+        ("--domain", "source"),
+    ),
 )
 PR166_SM2_PYTEST_FILE_GROUPS = (
     (
@@ -5351,19 +5401,20 @@ def build_validation_commands(
                 "FirstCodingPRHandoff.packet.json",
             ),
         ],
+        [
+            sys.executable,
+            _path("tools", "validate_qku_computation_control_plane.py"),
+            "--domain",
+            "architecture",
+        ],
         *[
             [
                 sys.executable,
-                _path("tools", "validate_qku_computation_control_plane.py"),
-                "--domain",
-                domain,
+                _path("tools", script_name),
+                *arguments,
             ]
-            for domain in (
-                "architecture",
-                "operations",
-                "quantum",
-                "security",
-                "source",
+            for script_name, arguments in (
+                ST12B_CERTIFIED_VALIDATION_COMMAND_SPECS
             )
         ],
         [

@@ -26,7 +26,7 @@ PACKAGE = (
     / "stage1_prediction_markets"
     / "qku_computation_control_plane"
 )
-PRODUCTION_NAMES = (
+TRANCHE_A_PRODUCTION_NAMES = (
     "__init__.py",
     "models.py",
     "errors.py",
@@ -47,6 +47,17 @@ PRODUCTION_NAMES = (
     "validation.py",
     "source_rights.py",
 )
+TRANCHE_B_PRODUCTION_NAMES = (
+    "contextual_computability.py",
+    "fallback.py",
+    "freshness.py",
+    "input_resolver.py",
+    "point_in_time.py",
+    "service.py",
+    "stack_resolver.py",
+    "unit_conversion.py",
+)
+PRODUCTION_NAMES = (*TRANCHE_A_PRODUCTION_NAMES, *TRANCHE_B_PRODUCTION_NAMES)
 EXPECTED_MATH_IDS = tuple(f"MATH-{value:02d}" for value in range(1, 16))
 EXPECTED_ALL_MATH_IDS = (
     *EXPECTED_MATH_IDS,
@@ -656,8 +667,17 @@ def main() -> int:
     actual_names = tuple(
         path.name for path in sorted(PACKAGE.glob("*.py"), key=lambda item: item.name)
     )
-    if set(actual_names) != set(PRODUCTION_NAMES) or len(actual_names) != 19:
-        failures.append("production core is not the exact 19-file centralized set")
+    if (
+        len(TRANCHE_A_PRODUCTION_NAMES) != 19
+        or len(TRANCHE_B_PRODUCTION_NAMES) != 8
+        or set(TRANCHE_A_PRODUCTION_NAMES) & set(TRANCHE_B_PRODUCTION_NAMES)
+        or set(actual_names) != set(PRODUCTION_NAMES)
+        or len(actual_names) != 27
+    ):
+        failures.append(
+            "production core is not the preserved 19-file Tranche-A set "
+            "plus the exact eight-file Tranche-B set"
+        )
     for name in PRODUCTION_NAMES:
         path = PACKAGE / name
         if not path.is_file():

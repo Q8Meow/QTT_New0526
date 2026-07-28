@@ -51,18 +51,37 @@ def test_inventory_has_centralized_qku_validation_entries():
     entries = inventory.inventory_by_id()
     expected = {
         "validate_qku_computation_control_plane_architecture",
+        "validate_qku_computation_control_plane_latency",
+        "validate_qku_computation_control_plane_model_risk",
         "validate_qku_computation_control_plane_operations",
         "validate_qku_computation_control_plane_quantum",
         "validate_qku_computation_control_plane_security",
         "validate_qku_computation_control_plane_source",
         "independent_validate_qku_computation_control_plane",
+        "independent_validate_qku_computation_control_plane_latency",
+        "independent_validate_qku_computation_control_plane_model_risk",
+        "independent_validate_qku_computation_control_plane_operations",
+        "independent_validate_qku_computation_control_plane_quantum",
+        "independent_validate_qku_computation_control_plane_security",
+        "independent_validate_qku_computation_control_plane_source",
     }
     assert expected <= set(entries)
     for validator_id in expected:
         entry = entries[validator_id]
-        assert entry.owner_pr_or_feature == "ST12-TRANCHE-A"
+        assert entry.owner_pr_or_feature in {
+            "ST12-TRANCHE-A",
+            "ST12-TRANCHE-A+ST12-TRANCHE-B",
+        }
+        if validator_id != "validate_qku_computation_control_plane_architecture":
+            assert (
+                entry.owner_pr_or_feature
+                == "ST12-TRANCHE-A+ST12-TRANCHE-B"
+            )
         assert entry.owner_domain == "QKU computation control plane"
         assert inventory.ST12A_ALLOWED_EXACT_PATHS <= set(
+            entry.required_when_files_match
+        )
+        assert inventory.ST12B_ALLOWED_EXACT_PATHS <= set(
             entry.required_when_files_match
         )
         assert not any(
@@ -80,11 +99,19 @@ def test_qku_paths_route_to_primary_and_independent_validation():
     }
     assert {
         "validate_qku_computation_control_plane_architecture",
+        "validate_qku_computation_control_plane_latency",
+        "validate_qku_computation_control_plane_model_risk",
         "validate_qku_computation_control_plane_operations",
         "validate_qku_computation_control_plane_quantum",
         "validate_qku_computation_control_plane_security",
         "validate_qku_computation_control_plane_source",
         "independent_validate_qku_computation_control_plane",
+        "independent_validate_qku_computation_control_plane_latency",
+        "independent_validate_qku_computation_control_plane_model_risk",
+        "independent_validate_qku_computation_control_plane_operations",
+        "independent_validate_qku_computation_control_plane_quantum",
+        "independent_validate_qku_computation_control_plane_security",
+        "independent_validate_qku_computation_control_plane_source",
     } <= matching_ids
 
 

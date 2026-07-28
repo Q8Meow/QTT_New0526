@@ -158,6 +158,19 @@ class OperationBlockerCodeV1(StrEnum):
     DEPENDENCY_UNRESOLVED = "DEPENDENCY_UNRESOLVED"
     ORACLE_UNAVAILABLE = "ORACLE_UNAVAILABLE"
     RUNTIME_EFFECT_FORBIDDEN = "RUNTIME_EFFECT_FORBIDDEN"
+    POINT_IN_TIME_UNAVAILABLE = "POINT_IN_TIME_UNAVAILABLE"
+    FRESHNESS_UNKNOWN = "FRESHNESS_UNKNOWN"
+    INPUT_MISSING = "INPUT_MISSING"
+    INPUT_INVALID = "INPUT_INVALID"
+    UNIT_OR_BASIS_INCOMPATIBLE = "UNIT_OR_BASIS_INCOMPATIBLE"
+    FALLBACK_UNAVAILABLE = "FALLBACK_UNAVAILABLE"
+    DEADLINE_EXHAUSTED = "DEADLINE_EXHAUSTED"
+    OUTPUT_INVALID = "OUTPUT_INVALID"
+    REQUEST_BOUND_EXCEEDED = "REQUEST_BOUND_EXCEEDED"
+    BACKPRESSURE_FAIL_CLOSED = "BACKPRESSURE_FAIL_CLOSED"
+    DOWNSTREAM_PREREQUISITE_UNAVAILABLE = (
+        "DOWNSTREAM_PREREQUISITE_UNAVAILABLE"
+    )
 
 
 class TypedValueKindV1(StrEnum):
@@ -630,12 +643,29 @@ class DependencyNodeV1:
     output_unit: str
     timing_class: str
     material: bool = True
+    output_basis: str = "declared"
+    output_field_ids: tuple[str, ...] = ("value",)
+    consumer_refs: tuple[str, ...] = ("QKUComputationControlPlaneV1",)
+    registered_fallback_ref: str = "FALLBACK::NO_EFFECT_FAIL_CLOSED"
 
     def __post_init__(self) -> None:
         _required(self.node_id, "node_id")
         _required(self.output_unit, "output_unit")
         _required(self.timing_class, "timing_class")
+        _required(self.output_basis, "output_basis")
+        _required(self.registered_fallback_ref, "registered_fallback_ref")
         _exact_bool(self.material, "material")
+        for name in ("output_field_ids", "consumer_refs"):
+            values = _text_tuple(
+                getattr(self, name),
+                name,
+                require_nonempty=True,
+            )
+            if len(set(values)) != len(values):
+                raise ContractValidationError(
+                    ReasonCode.INVALID_CONTRACT,
+                    f"{name} must contain unique values",
+                )
 
 
 @dataclass(frozen=True, slots=True)
@@ -645,6 +675,11 @@ class DependencyEdgeV1:
     supplied_unit: str
     required_unit: str
     timing_class: str
+    upstream_output_field: str = "value"
+    downstream_input_field: str = "value"
+    supplied_basis: str = "declared"
+    required_basis: str = "declared"
+    material: bool = True
 
     def __post_init__(self) -> None:
         for name in (
@@ -653,8 +688,13 @@ class DependencyEdgeV1:
             "supplied_unit",
             "required_unit",
             "timing_class",
+            "upstream_output_field",
+            "downstream_input_field",
+            "supplied_basis",
+            "required_basis",
         ):
             _required(getattr(self, name), name)
+        _exact_bool(self.material, "material")
         if self.upstream_id == self.downstream_id:
             raise ContractValidationError(
                 ReasonCode.DEPENDENCY_CYCLE, "self-dependencies are forbidden"

@@ -241,6 +241,36 @@ def test_qku_shared_integration_paths_use_the_exact_allowlist() -> None:
     )
 
 
+def test_st12b_paths_route_every_certified_primary_and_independent_validator() -> None:
+    path = (
+        "src/qtt/stage1_prediction_markets/"
+        "qku_computation_control_plane/service.py"
+    )
+    result = _pull_request_result(path)
+    assert router.QKU_VALIDATOR_IDS <= set(result.required_validators)
+    assert result.classified_files[path]
+    assert result.unknown_files == ()
+    assert result.fail_closed_reasons == ()
+
+    all_paths = build_router_result(
+        RouterInput(
+            repo_root=REPO_ROOT,
+            changed_files=tuple(
+                sorted(inventory.ST12B_ALLOWED_EXACT_PATHS)
+            ),
+            workflow_event_name="pull_request",
+            is_pull_request=True,
+            current_branch="agent/st12b-contextual-computability",
+        )
+    )
+    assert all_paths.unknown_files == ()
+    assert all_paths.fail_closed_reasons == ()
+    for allowed_path in inventory.ST12B_ALLOWED_EXACT_PATHS:
+        assert router.QKU_VALIDATOR_IDS <= set(
+            all_paths.classified_files[allowed_path]
+        )
+
+
 def test_qtt_authority_registry_change_routes_to_owner_validator():
     result = _pull_request_result("tools/qtt_authority_reason_code_registry.py")
 

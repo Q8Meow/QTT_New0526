@@ -14,7 +14,10 @@ if str(REPO_ROOT) not in sys.path:
 
 from tools import run_validation_gates as runner
 from tools.repo_path_refs import normalize_repo_ref
-from tools.validation_scope_registry import ST12A_ALLOWED_EXACT_PATHS
+from tools.validation_scope_registry import (
+    ST12A_ALLOWED_EXACT_PATHS,
+    ST12B_ALLOWED_EXACT_PATHS,
+)
 
 
 FAST_UNIVERSAL_PREFLIGHT = "FAST_UNIVERSAL_PREFLIGHT"
@@ -271,8 +274,28 @@ def _pr_tag_from_token(token: str) -> str:
     return token.upper().replace("PR", "PR", 1)
 
 
-def _owner_pr_or_feature(stem: str) -> str:
+def _owner_pr_or_feature(
+    stem: str,
+    command: Sequence[str],
+) -> str:
     if "qku_computation_control_plane" in stem:
+        if (
+            "latency" in stem
+            or "model_risk" in stem
+            or (
+                "--domain" in command
+                and "architecture" not in command
+            )
+            or stem
+            in {
+                "independent_validate_qku_computation_control_plane",
+                "independent_validate_qku_computation_control_plane_operations",
+                "independent_validate_qku_computation_control_plane_quantum",
+                "independent_validate_qku_computation_control_plane_security",
+                "independent_validate_qku_computation_control_plane_source",
+            }
+        ):
+            return "ST12-TRANCHE-A+ST12-TRANCHE-B"
         return "ST12-TRANCHE-A"
     token = _pr_token(stem)
     if token is not None:
@@ -459,7 +482,12 @@ def _domain_globs(stem: str, command: Sequence[str]) -> tuple[str, ...]:
     haystack = " ".join(command).lower()
     globs: list[str] = []
     if "qku_computation_control_plane" in haystack:
-        globs.extend(sorted(ST12A_ALLOWED_EXACT_PATHS))
+        globs.extend(
+            sorted(
+                ST12A_ALLOWED_EXACT_PATHS
+                | ST12B_ALLOWED_EXACT_PATHS
+            )
+        )
     if "atomicrows" in haystack:
         globs.extend(
             [
@@ -790,7 +818,7 @@ def _entry_for_command(command: Sequence[str], phase: str) -> ValidatorInventory
         phase=phase,
         validator_class=classes,
         owner_domain=_owner_domain(stem, canonical),
-        owner_pr_or_feature=_owner_pr_or_feature(stem),
+        owner_pr_or_feature=_owner_pr_or_feature(stem, canonical),
         input_globs=input_globs,
         output_globs=output_globs,
         generated_report_globs=generated_report_globs,

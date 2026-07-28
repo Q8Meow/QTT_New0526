@@ -15,6 +15,9 @@ class UnitConversionV1:
     supplied_unit: str
     required_unit: str
     factor: Decimal
+    supplied_basis: str = "declared"
+    required_basis: str = "declared"
+    conversion_id: str = "UnitConversionV1"
 
     def __post_init__(self) -> None:
         if (
@@ -22,10 +25,16 @@ class UnitConversionV1:
             or not self.supplied_unit
             or not isinstance(self.required_unit, str)
             or not self.required_unit
+            or not isinstance(self.supplied_basis, str)
+            or not self.supplied_basis
+            or not isinstance(self.required_basis, str)
+            or not self.required_basis
+            or not isinstance(self.conversion_id, str)
+            or not self.conversion_id
         ):
             raise DependencyGraphError(
                 ReasonCode.DEPENDENCY_UNIT_MISMATCH,
-                "conversion units are required",
+                "conversion identity, units, and bases are required",
             )
         value = exact_decimal(self.factor, field_name="factor")
         if value <= 0:
@@ -120,7 +129,11 @@ class CompiledDependencyGraphV1:
         while changed:
             changed = False
             for edge in self.edges:
-                if edge.upstream_id in impacted and edge.downstream_id not in impacted:
+                if (
+                    edge.material
+                    and edge.upstream_id in impacted
+                    and edge.downstream_id not in impacted
+                ):
                     impacted.add(edge.downstream_id)
                     changed = True
         return tuple(item for item in self.topological_order if item in impacted)
@@ -168,7 +181,13 @@ class DependencyGraphCompilerV1:
                 ReasonCode.INVALID_CONTRACT, "dependency node ids must be unique"
             )
         conversion_keys = {
-            (item.supplied_unit, item.required_unit) for item in conversions
+            (
+                item.supplied_unit,
+                item.required_unit,
+                item.supplied_basis,
+                item.required_basis,
+            )
+            for item in conversions
         }
         if len(conversion_keys) != len(conversions):
             raise DependencyGraphError(
@@ -177,27 +196,50 @@ class DependencyGraphCompilerV1:
             )
         outgoing: dict[str, list[str]] = {node_id: [] for node_id in by_id}
         indegree = {node_id: 0 for node_id in by_id}
-        seen_edges: set[tuple[str, str]] = set()
+        seen_edges: set[tuple[str, str, str, str]] = set()
         for edge in edges:
             if edge.upstream_id not in by_id or edge.downstream_id not in by_id:
                 raise DependencyGraphError(
                     ReasonCode.DEPENDENCY_UNKNOWN,
                     f"edge references an unknown node: {edge}",
                 )
-            key = (edge.upstream_id, edge.downstream_id)
+            key = (
+                edge.upstream_id,
+                edge.upstream_output_field,
+                edge.downstream_id,
+                edge.downstream_input_field,
+            )
             if key in seen_edges:
                 raise DependencyGraphError(
                     ReasonCode.INVALID_CONTRACT, f"duplicate dependency edge: {key}"
                 )
             seen_edges.add(key)
             if (
-                edge.supplied_unit != edge.required_unit
-                and (edge.supplied_unit, edge.required_unit) not in conversion_keys
+                by_id[edge.upstream_id].output_unit != edge.supplied_unit
+                or by_id[edge.upstream_id].output_basis != edge.supplied_basis
             ):
                 raise DependencyGraphError(
                     ReasonCode.DEPENDENCY_UNIT_MISMATCH,
-                    f"no declared conversion for {edge.supplied_unit} -> "
-                    f"{edge.required_unit}",
+                    "edge supplied unit/basis differs from its upstream node",
+                )
+            conversion_key = (
+                edge.supplied_unit,
+                edge.required_unit,
+                edge.supplied_basis,
+                edge.required_basis,
+            )
+            if (
+                (
+                    edge.supplied_unit != edge.required_unit
+                    or edge.supplied_basis != edge.required_basis
+                )
+                and conversion_key not in conversion_keys
+            ):
+                raise DependencyGraphError(
+                    ReasonCode.DEPENDENCY_UNIT_MISMATCH,
+                    "no declared conversion for "
+                    f"{edge.supplied_unit}/{edge.supplied_basis} -> "
+                    f"{edge.required_unit}/{edge.required_basis}",
                 )
             upstream_timing = by_id[edge.upstream_id].timing_class
             downstream_timing = edge.timing_class

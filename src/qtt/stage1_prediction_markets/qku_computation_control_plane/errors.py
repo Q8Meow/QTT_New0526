@@ -1,4 +1,4 @@
-"""Fail-closed errors for the Tranche-A computation control plane."""
+"""Fail-closed errors for the Step-12 computation control plane."""
 
 from __future__ import annotations
 
@@ -38,6 +38,29 @@ class ReasonCode(StrEnum):
     RUNTIME_EFFECT_FORBIDDEN = "ST12A_RUNTIME_EFFECT_FORBIDDEN"
     ORACLE_NOT_INDEPENDENT = "ST12A_ORACLE_NOT_INDEPENDENT"
     VALIDATION_FAILED = "ST12A_VALIDATION_FAILED"
+    POINT_IN_TIME_UNAVAILABLE = "ST12B_POINT_IN_TIME_UNAVAILABLE"
+    REVISION_LEAKAGE = "ST12B_REVISION_LEAKAGE"
+    FRESHNESS_UNKNOWN = "ST12B_FRESHNESS_UNKNOWN"
+    FIELD_STALE = "ST12B_FIELD_STALE"
+    DEADLINE_EXHAUSTED = "ST12B_DEADLINE_EXHAUSTED"
+    UNIT_CONVERSION_UNKNOWN = "ST12B_UNIT_CONVERSION_UNKNOWN"
+    UNIT_CONVERSION_AMBIGUOUS = "ST12B_UNIT_CONVERSION_AMBIGUOUS"
+    UNIT_CONVERSION_CYCLE = "ST12B_UNIT_CONVERSION_CYCLE"
+    BASIS_CONVERSION_FORBIDDEN = "ST12B_BASIS_CONVERSION_FORBIDDEN"
+    PRECISION_BOUNDARY_INVALID = "ST12B_PRECISION_BOUNDARY_INVALID"
+    REQUIRED_INPUT_MISSING = "ST12B_REQUIRED_INPUT_MISSING"
+    REQUIRED_INPUT_STALE = "ST12B_REQUIRED_INPUT_STALE"
+    INPUT_TYPE_MISMATCH = "ST12B_INPUT_TYPE_MISMATCH"
+    FALLBACK_UNKNOWN = "ST12B_FALLBACK_UNKNOWN"
+    FALLBACK_INCOMPATIBLE = "ST12B_FALLBACK_INCOMPATIBLE"
+    FALLBACK_CYCLE = "ST12B_FALLBACK_CYCLE"
+    STACK_NOT_APPLICABLE = "ST12B_STACK_NOT_APPLICABLE"
+    STACK_NOT_COMPUTABLE = "ST12B_STACK_NOT_COMPUTABLE"
+    OUTPUT_SCHEMA_MISMATCH = "ST12B_OUTPUT_SCHEMA_MISMATCH"
+    RESPONSE_LIMIT_EXCEEDED = "ST12B_RESPONSE_LIMIT_EXCEEDED"
+    REQUEST_LIMIT_EXCEEDED = "ST12B_REQUEST_LIMIT_EXCEEDED"
+    BACKPRESSURE_FAIL_CLOSED = "ST12B_BACKPRESSURE_FAIL_CLOSED"
+    PARAMETER_CALIBRATION_REQUIRED = "ST12B_PARAMETER_CALIBRATION_REQUIRED"
 
 
 class ComputationControlPlaneError(ValueError):
@@ -78,3 +101,31 @@ class AuthorityDeniedError(ComputationControlPlaneError):
 
 class SerializationSafetyError(ComputationControlPlaneError):
     """A typed deterministic-serialization or relative-path safety violation."""
+
+
+class PointInTimeError(ComputationControlPlaneError):
+    """A typed point-in-time availability or revision-leakage violation."""
+
+
+class FreshnessError(ComputationControlPlaneError):
+    """A typed TTL, age, or monotonic-deadline violation."""
+
+
+class UnitConversionError(ComputationControlPlaneError):
+    """A typed unit, basis, currency, or precision conversion violation."""
+
+
+class InputResolutionError(ComputationControlPlaneError):
+    """A typed required-input materialization failure."""
+
+
+class FallbackResolutionError(ComputationControlPlaneError):
+    """A typed registered-fallback closure or compatibility failure."""
+
+
+class StackResolutionError(ComputationControlPlaneError):
+    """A typed stack applicability or closure failure."""
+
+
+class ComputationServiceError(ComputationControlPlaneError):
+    """A typed synchronous service request or execution failure."""

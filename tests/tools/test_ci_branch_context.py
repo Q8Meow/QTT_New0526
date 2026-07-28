@@ -81,6 +81,58 @@ def test_st12a_owner_authorized_branch_is_exactly_validation_only():
         assert not context.is_owner_authorized_validation_branch(adversarial)
 
 
+def test_st12b_owner_authorized_branch_is_exactly_validation_only():
+    branch = "agent/st12b-contextual-computability"
+    assert context.is_owner_authorized_validation_branch(branch)
+    assert context.roadmap_pr_number(branch) is None
+    assert context.is_branch_allowed_for_upstream_pr_gate(branch, "PR159R")
+    assert context.is_downstream_or_main_validation_branch(
+        branch,
+        after_pr=138,
+        allow_repair=False,
+    )
+    assert not context.is_main_cumulative_branch(branch)
+    assert not context.is_repair_branch(branch)
+    assert not context.is_downstream_roadmap_branch(
+        branch,
+        after_pr=1,
+        allow_repair=False,
+    )
+    for adversarial in (
+        "agent/st12b-contextual-computabilit",
+        "agent/st12b-contextual-computability-copy",
+        "agent/st12b-contextual-computability/",
+        "Agent/st12b-contextual-computability",
+    ):
+        assert not context.is_owner_authorized_validation_branch(adversarial)
+
+
+def test_st12b_pull_request_detached_context_uses_exact_github_head_ref(
+    monkeypatch,
+):
+    _clear_github_branch_context_env(monkeypatch)
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    monkeypatch.setenv("GITHUB_EVENT_NAME", "pull_request")
+    monkeypatch.setenv("GITHUB_REF", "refs/pull/999/merge")
+    monkeypatch.setenv("GITHUB_REF_NAME", "999/merge")
+    monkeypatch.setenv(
+        "GITHUB_HEAD_REF",
+        "agent/st12b-contextual-computability",
+    )
+    resolved = context.current_branch_context(
+        REPO_ROOT,
+        git_stdout=lambda *_args: (0, "HEAD", ""),
+    )
+    assert resolved.branch == "agent/st12b-contextual-computability"
+    assert resolved.source == "GITHUB_HEAD_REF"
+    assert (
+        context.is_pull_request_detached_head_context_allowed_for_upstream_pr_gate(
+            resolved.branch,
+            "PR160",
+        )
+    )
+
+
 def test_st12a_pull_request_detached_context_uses_exact_github_head_ref(
     monkeypatch,
 ):

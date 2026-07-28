@@ -6,6 +6,8 @@ from dataclasses import dataclass
 from enum import StrEnum
 import json
 from pathlib import Path
+from types import MappingProxyType
+from typing import Mapping
 
 from .errors import OwnerAdapterError, ReasonCode
 
@@ -172,3 +174,212 @@ class PR162EQuantumAdapterV1:
                 "PR162E-Q mapping identities must be nonempty and unique",
             )
         return tuple(sorted(views, key=lambda item: item.row_id))
+
+    def structural_readiness_requirements(
+        self,
+        model_kind: QuantumModelKind,
+    ) -> tuple["QuantumStructuralReadinessProjectionV1", ...]:
+        """Project exact Tranche-B closure requirements without backend work."""
+
+        mappings = self.load_mappings(model_kind)
+        mapping_refs = tuple(view.row_id for view in mappings)
+        math_refs = _MATH_REFS_BY_MODEL[model_kind]
+        oracle_refs = tuple(f"ORACLE::{math_id}" for math_id in math_refs)
+        return tuple(
+            QuantumStructuralReadinessProjectionV1(
+                projection_id=(
+                    f"ST12B-QUANTUM-STRUCTURAL::{model_kind.value}::"
+                    f"{closure_id.rsplit('::', 1)[-1]}"
+                ),
+                closure_id=closure_id,
+                control_slug=control_slug,
+                model_kind=model_kind,
+                mapping_owner="PR162E_Q_QUANTUM_AUTOMAPPER",
+                mapping_refs=mapping_refs,
+                source_schema=mappings[0].source_schema,
+                original_formulation_refs=math_refs,
+                objective_sense="EXACT_ORIGINAL_DECLARED_OBJECTIVE_SENSE_REQUIRED",
+                economic_scale=(
+                    "ORIGINAL_OBJECTIVE_SCALING_RECEIPT_AND_ECONOMIC_UNIT_REQUIRED"
+                ),
+                variable_domains="EXACT_ORIGINAL_VARIABLE_DOMAINS_REQUIRED",
+                hard_constraints=(
+                    "ALL_ORIGINAL_HARD_CONSTRAINTS_PRESERVED_AND_REVALIDATED"
+                ),
+                soft_preferences=(
+                    "EXPLICITLY_SEPARATED_FROM_HARD_CONSTRAINTS"
+                ),
+                mapping_family=model_kind.value,
+                converter_version=(
+                    f"PR162E-Q::{mappings[0].source_schema}"
+                ),
+                coefficient_scale_dynamic_range=(
+                    "TYPED_INSTANCE_SCALE_AND_DYNAMIC_RANGE_EVIDENCE_REQUIRED"
+                ),
+                penalty_adequacy=(
+                    "NO_UNIVERSAL_PENALTY;"
+                    "INSTANCE_SPECIFIC_DOMINANCE_EVIDENCE_REQUIRED"
+                ),
+                inverse_mapping=(
+                    "TYPED_INVERSE_MAPPING_TO_ORIGINAL_VARIABLES_REQUIRED"
+                ),
+                economic_interpret_back=(
+                    "ORIGINAL_UNITS_CANDIDATE_ID_AND_ECONOMIC_OUTPUT_REQUIRED"
+                ),
+                original_model_feasibility=(
+                    "INDEPENDENT_POST_INTERPRET_BACK_REVALIDATION_REQUIRED"
+                ),
+                independent_small_instance_oracle_refs=oracle_refs,
+                classical_fallback=(
+                    "DETERMINISTIC_SAME_FORMULATION_CLASSICAL_FALLBACK"
+                ),
+                no_trade_fallback="NO_TRADE",
+                maturity_state=(
+                    "STRUCTURAL_REQUIREMENTS_ONLY_NO_SIMULATOR_QPU_OR_ADVANTAGE_EVIDENCE"
+                ),
+                latency_ttl_compatibility=(
+                    "TYPED_CONTEXT_LATENCY_AND_TTL_EVIDENCE_REQUIRED"
+                ),
+                blocker_codes=(
+                    "ORIGINAL_FORMULATION_INSTANCE_EVIDENCE_REQUIRED",
+                ),
+                terminal_route=(
+                    "quantum_optimizer_agent::"
+                    "STRUCTURAL_EVIDENCE_OR_CLASSICAL_NO_TRADE"
+                ),
+            )
+            for closure_id, control_slug in _QUANTUM_CLOSURE_ROWS
+        )
+
+
+_QUANTUM_CLOSURE_ROWS = (
+    ("ST12-CLOSURE::ST11-QUANTUM::007", "penalty-adequacy"),
+    ("ST12-CLOSURE::ST11-QUANTUM::008", "converter-compatibility"),
+    ("ST12-CLOSURE::ST11-QUANTUM::009", "interpret-back"),
+    ("ST12-CLOSURE::ST11-QUANTUM::010", "original-model-feasibility"),
+    ("ST12-CLOSURE::ST11-QUANTUM::011", "same-formulation-comparator"),
+    ("ST12-CLOSURE::ST11-QUANTUM::012", "small-instance-oracle"),
+    ("ST12-CLOSURE::ST11-QUANTUM::013", "maturity-state-separation"),
+    ("ST12-CLOSURE::ST11-QUANTUM::014", "sample-frequency-boundary"),
+)
+
+_MATH_REFS_BY_MODEL: Mapping[
+    QuantumModelKind, tuple[str, ...]
+] = MappingProxyType(
+    {
+        QuantumModelKind.QUBO: ("MATH-46",),
+        QuantumModelKind.BQM: ("MATH-46",),
+        QuantumModelKind.ISING: ("MATH-46", "MATH-47"),
+        QuantumModelKind.CQM: ("MATH-48",),
+        QuantumModelKind.DQM: ("MATH-49",),
+        QuantumModelKind.QUADRATIC_PROGRAM: ("MATH-48",),
+    }
+)
+
+
+@dataclass(frozen=True, slots=True)
+class QuantumStructuralReadinessProjectionV1:
+    """Typed structural requirement; never simulator/QPU readiness."""
+
+    projection_id: str
+    closure_id: str
+    control_slug: str
+    model_kind: QuantumModelKind
+    mapping_owner: str
+    mapping_refs: tuple[str, ...]
+    source_schema: str
+    original_formulation_refs: tuple[str, ...]
+    objective_sense: str
+    economic_scale: str
+    variable_domains: str
+    hard_constraints: str
+    soft_preferences: str
+    mapping_family: str
+    converter_version: str
+    coefficient_scale_dynamic_range: str
+    penalty_adequacy: str
+    inverse_mapping: str
+    economic_interpret_back: str
+    original_model_feasibility: str
+    independent_small_instance_oracle_refs: tuple[str, ...]
+    classical_fallback: str
+    no_trade_fallback: str
+    maturity_state: str
+    latency_ttl_compatibility: str
+    blocker_codes: tuple[str, ...]
+    terminal_route: str
+    structural_requirements_complete: bool = True
+    simulator_execution: bool = False
+    qpu_execution: bool = False
+    quantum_advantage_claim: bool = False
+    order_effect: bool = False
+
+    def __post_init__(self) -> None:
+        for name in (
+            "projection_id",
+            "closure_id",
+            "control_slug",
+            "mapping_owner",
+            "source_schema",
+            "objective_sense",
+            "economic_scale",
+            "variable_domains",
+            "hard_constraints",
+            "soft_preferences",
+            "mapping_family",
+            "converter_version",
+            "coefficient_scale_dynamic_range",
+            "penalty_adequacy",
+            "inverse_mapping",
+            "economic_interpret_back",
+            "original_model_feasibility",
+            "classical_fallback",
+            "no_trade_fallback",
+            "maturity_state",
+            "latency_ttl_compatibility",
+            "terminal_route",
+        ):
+            if not isinstance(getattr(self, name), str) or not getattr(
+                self, name
+            ):
+                raise OwnerAdapterError(
+                    ReasonCode.OWNER_DATA_MALFORMED,
+                    f"quantum structural projection {name} is required",
+                )
+        for name in (
+            "mapping_refs",
+            "original_formulation_refs",
+            "independent_small_instance_oracle_refs",
+            "blocker_codes",
+        ):
+            values = getattr(self, name)
+            if (
+                not isinstance(values, tuple)
+                or not values
+                or any(not isinstance(value, str) or not value for value in values)
+                or len(values) != len(set(values))
+            ):
+                raise OwnerAdapterError(
+                    ReasonCode.OWNER_DATA_MALFORMED,
+                    f"quantum structural projection {name} must be exact and unique",
+                )
+        effect_flags = (
+            self.simulator_execution,
+            self.qpu_execution,
+            self.quantum_advantage_claim,
+            self.order_effect,
+        )
+        if (
+            not isinstance(self.model_kind, QuantumModelKind)
+            or self.mapping_owner != "PR162E_Q_QUANTUM_AUTOMAPPER"
+            or type(self.structural_requirements_complete) is not bool
+            or not self.structural_requirements_complete
+            or any(type(value) is not bool for value in effect_flags)
+            or any(effect_flags)
+            or (self.closure_id, self.control_slug)
+            not in _QUANTUM_CLOSURE_ROWS
+        ):
+            raise OwnerAdapterError(
+                ReasonCode.CAPABILITY_DENIED,
+                "quantum structural projection changed owner, closure, or effect boundary",
+            )

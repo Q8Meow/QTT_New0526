@@ -15,7 +15,10 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from tools.repo_path_refs import normalize_repo_ref
-from tools.validation_scope_registry import ST12A_ALLOWED_EXACT_PATHS
+from tools.validation_scope_registry import (
+    ST12A_ALLOWED_EXACT_PATHS,
+    ST12B_ALLOWED_EXACT_PATHS,
+)
 from tools.validation_inventory import (
     FAST_UNIVERSAL_PREFLIGHT,
     GENERATED_REPORT_GLOBS,
@@ -35,11 +38,19 @@ FORCE_FULL_FLAG_NAME = "QTT_FORCE_FULL_VALIDATION"
 QKU_VALIDATOR_IDS = frozenset(
     {
         "validate_qku_computation_control_plane_architecture",
+        "validate_qku_computation_control_plane_latency",
+        "validate_qku_computation_control_plane_model_risk",
         "validate_qku_computation_control_plane_operations",
         "validate_qku_computation_control_plane_quantum",
         "validate_qku_computation_control_plane_security",
         "validate_qku_computation_control_plane_source",
         "independent_validate_qku_computation_control_plane",
+        "independent_validate_qku_computation_control_plane_latency",
+        "independent_validate_qku_computation_control_plane_model_risk",
+        "independent_validate_qku_computation_control_plane_operations",
+        "independent_validate_qku_computation_control_plane_quantum",
+        "independent_validate_qku_computation_control_plane_security",
+        "independent_validate_qku_computation_control_plane_source",
     }
 )
 
@@ -232,7 +243,9 @@ def _is_pr152_tracked(path: str) -> bool:
 
 
 def _is_qku_control_plane_path(path: str) -> bool:
-    return normalize_repo_ref(path) in ST12A_ALLOWED_EXACT_PATHS
+    return normalize_repo_ref(path) in (
+        ST12A_ALLOWED_EXACT_PATHS | ST12B_ALLOWED_EXACT_PATHS
+    )
 
 
 def _current_pr152_inventory_counts(repo_root: Path) -> dict[str, int]:

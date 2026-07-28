@@ -359,6 +359,13 @@ def test_owner_authorized_validation_branch_keeps_all_non_guarded_commands(
         commands,
         branch=f"{branch}-copy",
     ) == commands
+    kept_b = runner._filter_foreign_branch_guarded_builders_for_owner_validation(
+        commands,
+        branch="agent/st12b-contextual-computability",
+    )
+    assert [
+        runner._command_script_name(command) for command in kept_b
+    ] == kept_names
 
 
 def test_owner_authorized_validation_phase_omits_no_validator(tmp_path):
@@ -384,6 +391,14 @@ def test_owner_authorized_validation_phase_omits_no_validator(tmp_path):
     assert "validate_pr168_rp5c_immutable_qku_formula_library.py" in kept_names
     assert "build_pr169_readiness1.py" in kept_names
     assert "validate_pr169_readiness1.py" in kept_names
+    kept_b = runner._filter_foreign_branch_guarded_builders_for_owner_validation(
+        commands,
+        branch="agent/st12b-contextual-computability",
+    )
+    kept_b_names = {
+        runner._command_script_name(command) for command in kept_b
+    }
+    assert original_validator_names <= kept_b_names
 
 
 def test_run_validation_gates_direct_script_imports_router_without_pythonpath():
@@ -2995,22 +3010,70 @@ def _expected_commands(
                 / "FirstCodingPRHandoff.packet.json"
             ),
         ],
+        [
+            python_executable,
+            str(
+                Path("tools")
+                / "validate_qku_computation_control_plane.py"
+            ),
+            "--domain",
+            "architecture",
+        ],
         *[
             [
                 python_executable,
-                str(
-                    Path("tools")
-                    / "validate_qku_computation_control_plane.py"
-                ),
-                "--domain",
-                domain,
+                str(Path("tools") / script_name),
+                *arguments,
             ]
-            for domain in (
-                "architecture",
-                "operations",
-                "quantum",
-                "security",
-                "source",
+            for script_name, arguments in (
+                (
+                    "independent_validate_qku_computation_control_plane_latency.py",
+                    (),
+                ),
+                (
+                    "independent_validate_qku_computation_control_plane_model_risk.py",
+                    (),
+                ),
+                (
+                    "independent_validate_qku_computation_control_plane_operations.py",
+                    (),
+                ),
+                (
+                    "independent_validate_qku_computation_control_plane_quantum.py",
+                    (),
+                ),
+                (
+                    "independent_validate_qku_computation_control_plane_security.py",
+                    (),
+                ),
+                (
+                    "independent_validate_qku_computation_control_plane_source.py",
+                    (),
+                ),
+                (
+                    "validate_qku_computation_control_plane.py",
+                    ("--domain", "latency"),
+                ),
+                (
+                    "validate_qku_computation_control_plane.py",
+                    ("--domain", "model_risk"),
+                ),
+                (
+                    "validate_qku_computation_control_plane.py",
+                    ("--domain", "operations"),
+                ),
+                (
+                    "validate_qku_computation_control_plane.py",
+                    ("--domain", "quantum"),
+                ),
+                (
+                    "validate_qku_computation_control_plane.py",
+                    ("--domain", "security"),
+                ),
+                (
+                    "validate_qku_computation_control_plane.py",
+                    ("--domain", "source"),
+                ),
             )
         ],
         [
@@ -3099,24 +3162,81 @@ def test_runner_builds_expected_command_sequence(monkeypatch):
     assert runner.build_validation_commands() == _expected_commands(python_executable)
 
 
-def test_runner_registers_one_qku_primary_dispatch_and_independent_system():
+def test_runner_registers_exact_st12b_commands_without_a_new_phase():
     commands = runner.build_deterministic_validator_commands()
     qku_commands = [
         command
         for command in commands
-        if any("qku_computation_control_plane.py" in part for part in command)
+        if any("qku_computation_control_plane" in part for part in command)
     ]
-    assert [command[-1] for command in qku_commands[:5]] == [
-        "architecture",
-        "operations",
-        "quantum",
-        "security",
-        "source",
-    ]
-    assert sum(
-        "independent_validate_qku_computation_control_plane.py" in command[1]
-        for command in qku_commands
-    ) == 1
+    expected_b = (
+        (
+            "independent_validate_qku_computation_control_plane_latency.py",
+            (),
+        ),
+        (
+            "independent_validate_qku_computation_control_plane_model_risk.py",
+            (),
+        ),
+        (
+            "independent_validate_qku_computation_control_plane_operations.py",
+            (),
+        ),
+        (
+            "independent_validate_qku_computation_control_plane_quantum.py",
+            (),
+        ),
+        (
+            "independent_validate_qku_computation_control_plane_security.py",
+            (),
+        ),
+        (
+            "independent_validate_qku_computation_control_plane_source.py",
+            (),
+        ),
+        (
+            "validate_qku_computation_control_plane.py",
+            ("--domain", "latency"),
+        ),
+        (
+            "validate_qku_computation_control_plane.py",
+            ("--domain", "model_risk"),
+        ),
+        (
+            "validate_qku_computation_control_plane.py",
+            ("--domain", "operations"),
+        ),
+        (
+            "validate_qku_computation_control_plane.py",
+            ("--domain", "quantum"),
+        ),
+        (
+            "validate_qku_computation_control_plane.py",
+            ("--domain", "security"),
+        ),
+        (
+            "validate_qku_computation_control_plane.py",
+            ("--domain", "source"),
+        ),
+    )
+    assert runner.ST12B_CERTIFIED_VALIDATION_COMMAND_SPECS == expected_b
+    assert Path(qku_commands[0][1]).name == (
+        "validate_qku_computation_control_plane.py"
+    )
+    assert qku_commands[0][2:] == ["--domain", "architecture"]
+    assert tuple(
+        (Path(command[1]).name, tuple(command[2:]))
+        for command in qku_commands[1:13]
+    ) == expected_b
+    assert Path(qku_commands[-1][1]).name == (
+        "independent_validate_qku_computation_control_plane.py"
+    )
+    assert len(qku_commands) == 14
+    assert set(runner.DETERMINISTIC_VALIDATOR_SHARD_PHASES) == {
+        "deterministic-validators-a",
+        "deterministic-validators-b",
+        "deterministic-validators-c",
+    }
 
 
 def test_runner_phase_manifest_covers_full_validation_plan(monkeypatch):

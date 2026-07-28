@@ -48,6 +48,7 @@ PR169_VAL1_BRANCH = "pr169-val1"
 PR169_QKU_FORMULA_EXP1_ROLLBACK_BRANCH = "pr169-qku-formula-exp1-rollback"
 VALIDATION_FIXTURE_BRANCH = "pr-ci-fastfail-validation-context-preflight"
 ST12A_BRANCH = "agent/st12a-contract-envelope"
+ST12B_BRANCH = "agent/st12b-contextual-computability"
 
 _PR168_BRANCHES = frozenset(
     {
@@ -93,6 +94,7 @@ _PR168_BRANCHES = frozenset(
         PR169_QKU_FORMULA_EXP1_ROLLBACK_BRANCH,
         VALIDATION_FIXTURE_BRANCH,
         ST12A_BRANCH,
+        ST12B_BRANCH,
     }
 )
 _VALIDATION_CONTEXT_BRANCHES = frozenset({VALIDATION_FIXTURE_BRANCH})
@@ -181,6 +183,65 @@ ST12A_ALLOWED_EXACT_PATHS = frozenset(
     }
 )
 ST12A_SHARED_CURRENTIZATION_EXACT_PATHS = frozenset(
+    {
+        "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+        "docs/master_plan/generated/PR168_RP5A_FinalSummary.report.json",
+        "docs/master_plan/generated/PR168_RP5A_NoDeletionProof.report.json",
+        "tests/pr168_rp5a/test_no_validation_scope_removal.py",
+        "tools/build_pr168_rp5a_legacy_semantic_audit.py",
+        "tools/pr168_rp5a_validator.py",
+    }
+)
+
+ST12B_ALLOWED_EXACT_PATHS = frozenset(
+    {
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/__init__.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/bindings.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/contextual_computability.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/dependency_graph.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/errors.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/fallback.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/freshness.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/implementation_registry.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/input_resolver.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/models.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/oracle_contracts.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/parameter_policy.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/point_in_time.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/quantum_adapter.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/service.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/specification.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/stack_resolver.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/unit_conversion.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/validation.py",
+        "tests/fail_closed/test_run_validation_gates.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/architecture/test_repository_file_closure.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/operations/test_runtime_topology.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/tranche_b/test_manifest_and_ownership.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/tranche_b/test_math_oracle_vectors.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/tranche_b/test_resolution_pipeline.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/tranche_b/test_service_operations.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/tranche_b/test_source_quantum_model_risk.py",
+        "tests/tools/test_changed_area_validation_router.py",
+        "tests/tools/test_ci_branch_context.py",
+        "tests/tools/test_validation_inventory.py",
+        "tests/tools/test_validation_scope_registry.py",
+        "tools/build_qku_computation_control_plane.py",
+        "tools/changed_area_validation_router.py",
+        "tools/ci_branch_context.py",
+        "tools/independent_validate_qku_computation_control_plane.py",
+        "tools/independent_validate_qku_computation_control_plane_architecture.py",
+        "tools/independent_validate_qku_computation_control_plane_latency.py",
+        "tools/independent_validate_qku_computation_control_plane_model_risk.py",
+        "tools/independent_validate_qku_computation_control_plane_operations.py",
+        "tools/independent_validate_qku_computation_control_plane_source.py",
+        "tools/run_validation_gates.py",
+        "tools/validate_qku_computation_control_plane.py",
+        "tools/validation_inventory.py",
+        "tools/validation_scope_registry.py",
+    }
+)
+ST12B_SHARED_CURRENTIZATION_EXACT_PATHS = frozenset(
     {
         "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
         "docs/master_plan/generated/PR168_RP5A_FinalSummary.report.json",
@@ -1774,6 +1835,27 @@ def _pr169_dash1_scope_decision(branch_name: str, normalized: str) -> dict[str, 
 def explain_pr_scope_decision(branch: str, path: str) -> dict[str, object]:
     normalized = normalize_changed_path(path)
     branch_name = str(branch).strip()
+    if branch_name == ST12B_BRANCH and normalized in ST12B_ALLOWED_EXACT_PATHS:
+        return {
+            "allowed": True,
+            "branch": branch_name,
+            "normalized_path": normalized,
+            "pr_id": "ST12-TRANCHE-B",
+            "matched_rule": f"exact:{normalized}",
+            "reason": "registered_exact_path",
+        }
+    if (
+        branch_name == ST12B_BRANCH
+        and normalized in ST12B_SHARED_CURRENTIZATION_EXACT_PATHS
+    ):
+        return {
+            "allowed": True,
+            "branch": branch_name,
+            "normalized_path": normalized,
+            "pr_id": "ST12-TRANCHE-B",
+            "matched_rule": f"shared_currentization_exact:{normalized}",
+            "reason": "registered_shared_currentization_exact_path",
+        }
     if branch_name == ST12A_BRANCH and normalized in ST12A_ALLOWED_EXACT_PATHS:
         return {
             "allowed": True,
@@ -1821,6 +1903,30 @@ def explain_pr_scope_decision(branch: str, path: str) -> dict[str, object]:
         }
     if (
         is_validation_context_branch(branch_name)
+        and normalized in ST12B_ALLOWED_EXACT_PATHS
+    ):
+        return {
+            "allowed": True,
+            "branch": branch_name,
+            "normalized_path": normalized,
+            "pr_id": "ST12-TRANCHE-B",
+            "matched_rule": f"validation_context_exact:{normalized}",
+            "reason": "registered_validation_context_exact_path",
+        }
+    if (
+        is_validation_context_branch(branch_name)
+        and normalized in ST12B_SHARED_CURRENTIZATION_EXACT_PATHS
+    ):
+        return {
+            "allowed": True,
+            "branch": branch_name,
+            "normalized_path": normalized,
+            "pr_id": "ST12-TRANCHE-B",
+            "matched_rule": f"validation_context_shared_currentization_exact:{normalized}",
+            "reason": "registered_validation_context_shared_currentization_exact_path",
+        }
+    if (
+        is_validation_context_branch(branch_name)
         and normalized.endswith(".copy")
         and normalized.removesuffix(".copy")
         in ST12A_SHARED_CURRENTIZATION_EXACT_PATHS
@@ -1850,6 +1956,15 @@ def explain_pr_scope_decision(branch: str, path: str) -> dict[str, object]:
             "normalized_path": normalized,
             "pr_id": "ST12-TRANCHE-A",
             "matched_rule": "no_st12a_exact_scope_rule",
+            "reason": "path_not_registered_for_pr_scope",
+        }
+    if branch_name == ST12B_BRANCH:
+        return {
+            "allowed": False,
+            "branch": branch_name,
+            "normalized_path": normalized,
+            "pr_id": "ST12-TRANCHE-B",
+            "matched_rule": "no_st12b_exact_scope_rule",
             "reason": "path_not_registered_for_pr_scope",
         }
     if branch_name not in _PR168_BRANCHES:

@@ -46,6 +46,35 @@ def _literal(tree: ast.Module, name: str) -> str:
     raise ValueError(f"missing literal {name}")
 
 
+def _assignment(tree: ast.Module, name: str) -> ast.expr | None:
+    for node in tree.body:
+        if isinstance(node, ast.Assign) and any(
+            isinstance(target, ast.Name) and target.id == name
+            for target in node.targets
+        ):
+            return node.value
+    return None
+
+
+def _source_rule_011(tree: ast.Module) -> dict[str, object] | None:
+    value = _assignment(tree, "SOURCE_RULE_011")
+    if (
+        not isinstance(value, ast.Call)
+        or not isinstance(value.func, ast.Name)
+        or value.func.id != "SourceClaimBindingRuleV1"
+    ):
+        return None
+    result: dict[str, object] = {}
+    for keyword in value.keywords:
+        if keyword.arg is None:
+            return None
+        try:
+            result[keyword.arg] = ast.literal_eval(keyword.value)
+        except (TypeError, ValueError):
+            return None
+    return result
+
+
 def main() -> int:
     failures: list[str] = []
     tree = ast.parse(
@@ -195,8 +224,79 @@ def main() -> int:
         if subject not in subjects:
             failures.append(f"dependency currentization missing: {subject}")
     bindings_text = BINDINGS.read_text(encoding="utf-8")
-    if bindings_text.count("ST12-SOURCE-RULE::011") != 1:
-        failures.append("source-claim binding rule 011 is not uniquely materialized")
+    bindings_tree = ast.parse(bindings_text, filename=str(BINDINGS))
+    try:
+        tranche_b_rules = json.loads(
+            _literal(
+                bindings_tree,
+                "_TRANCHE_B_SOURCE_CLAIM_BINDING_RULES_JSON",
+            )
+        )
+    except (ValueError, json.JSONDecodeError) as exc:
+        failures.append(f"Tranche-B source rules are unreadable: {exc}")
+        tranche_b_rules = []
+    rule_ids = tuple(
+        str(row.get("binding_rule_id"))
+        for row in tranche_b_rules
+        if isinstance(row, dict)
+    )
+    if (
+        not isinstance(tranche_b_rules, list)
+        or len(tranche_b_rules) != 10
+        or len(rule_ids) != 10
+        or len(set(rule_ids)) != 10
+        or rule_ids.count("ST12-SOURCE-RULE::011") != 1
+    ):
+        failures.append("the exact ten Tranche-B source rules differ")
+    for row in tranche_b_rules:
+        if (
+            not isinstance(row, dict)
+            or row.get("research_completeness_state")
+            != "COMPLETE_TERMINAL_EXACT_RULE"
+            or row.get("source_pack_as_primary_allowed") is not False
+            or row.get("broad_regex_or_alias_matching_allowed") is not False
+            or row.get("codex_source_selection_allowed") is not False
+            or not row.get("exact_claims")
+            or not row.get("permitted_consumers")
+        ):
+            failures.append(
+                "a Tranche-B source rule is nonterminal or permits source selection"
+            )
+    a_rule = _source_rule_011(bindings_tree)
+    b_rule = next(
+        (
+            row
+            for row in tranche_b_rules
+            if isinstance(row, dict)
+            and row.get("binding_rule_id") == "ST12-SOURCE-RULE::011"
+        ),
+        None,
+    )
+    exact_fields = (
+        "binding_rule_id",
+        "rule_class",
+        "claim_selector",
+        "source_identity_ref",
+        "source_state_ref",
+        "exact_claims",
+        "permitted_consumers",
+    )
+    if (
+        a_rule is None
+        or b_rule is None
+        or any(
+            a_rule.get(name)
+            != (
+                tuple(b_rule[name])
+                if name in {"exact_claims", "permitted_consumers"}
+                else b_rule[name]
+            )
+            for name in exact_fields
+        )
+    ):
+        failures.append(
+            "preserved Tranche-A rule 011 differs from the certified B reuse row"
+        )
     if "broad_regex_or_alias_matching_allowed: bool = False" not in bindings_text:
         failures.append("broad source matching is not default-denied")
     if failures:
@@ -204,7 +304,8 @@ def main() -> int:
         return 1
     print(
         f"{SUCCESS_MARKER} source_rows={len(source_rows)} "
-        f"overlays={len(overlays)} binding_rules=1"
+        f"overlays={len(overlays)} tranche_a_binding_rules=1 "
+        f"tranche_b_binding_rules={len(tranche_b_rules)}"
     )
     return 0
 
