@@ -38,6 +38,23 @@ class ReasonCode(StrEnum):
     RUNTIME_EFFECT_FORBIDDEN = "ST12A_RUNTIME_EFFECT_FORBIDDEN"
     ORACLE_NOT_INDEPENDENT = "ST12A_ORACLE_NOT_INDEPENDENT"
     VALIDATION_FAILED = "ST12A_VALIDATION_FAILED"
+    NO_APPLICABLE_STACK = "ST12B_NO_APPLICABLE_STACK"
+    INPUT_OWNER_MISSING = "ST12B_INPUT_OWNER_MISSING"
+    INPUT_OWNER_MISMATCH = "ST12B_INPUT_OWNER_MISMATCH"
+    INPUT_PACKET_MISMATCH = "ST12B_INPUT_PACKET_MISMATCH"
+    INPUT_SCHEMA_MISMATCH = "ST12B_INPUT_SCHEMA_MISMATCH"
+    INPUT_SCOPE_MISMATCH = "ST12B_INPUT_SCOPE_MISMATCH"
+    INPUT_VALUE_CONFLICT = "ST12B_INPUT_VALUE_CONFLICT"
+    POINT_IN_TIME_VIOLATION = "ST12B_POINT_IN_TIME_VIOLATION"
+    FRESHNESS_VIOLATION = "ST12B_FRESHNESS_VIOLATION"
+    PARAMETER_OWNER_MISSING = "ST12B_PARAMETER_OWNER_MISSING"
+    PARAMETER_BINDING_MISMATCH = "ST12B_PARAMETER_BINDING_MISMATCH"
+    UNIT_CONVERSION_FORBIDDEN = "ST12B_UNIT_CONVERSION_FORBIDDEN"
+    UNIT_CONVERSION_FAILED = "ST12B_UNIT_CONVERSION_FAILED"
+    DEPENDENCY_CLOSURE_FAILED = "ST12B_DEPENDENCY_CLOSURE_FAILED"
+    OUTPUT_SCHEMA_MISMATCH = "ST12B_OUTPUT_SCHEMA_MISMATCH"
+    FORMULA_EXECUTION_REJECTED = "ST12B_FORMULA_EXECUTION_REJECTED"
+    OPERATION_BLOCKED = "ST12B_OPERATION_BLOCKED"
 
 
 class ComputationControlPlaneError(ValueError):
@@ -78,3 +95,39 @@ class AuthorityDeniedError(ComputationControlPlaneError):
 
 class SerializationSafetyError(ComputationControlPlaneError):
     """A typed deterministic-serialization or relative-path safety violation."""
+
+
+class PointInTimeError(ComputationControlPlaneError):
+    """A deterministic point-in-time field-class law was violated."""
+
+
+class FreshnessError(ComputationControlPlaneError):
+    """An accepted owner packet is stale or lacks freshness lineage."""
+
+
+class InputAuthorityError(ComputationControlPlaneError):
+    """A value did not come from its frozen canonical owner interface."""
+
+
+class UnitConversionError(ComputationControlPlaneError):
+    """A conversion was missing, forbidden, or outside its exact domain."""
+
+
+class ContextualComputabilityError(ComputationControlPlaneError):
+    """A strict contextual-computability resolver could not close its state."""
+
+
+class StackResolutionError(ComputationControlPlaneError):
+    """The exact dependency stack could not be selected or closed."""
+
+
+class FormulaExecutionError(ComputationControlPlaneError):
+    """A registered formula rejected a typed execution request."""
+
+
+class OutputContractError(ComputationControlPlaneError):
+    """A formula result did not satisfy its frozen named-output contract."""
+
+
+class OperationBoundaryError(ComputationControlPlaneError):
+    """An expected typed failure reached the public operation boundary."""

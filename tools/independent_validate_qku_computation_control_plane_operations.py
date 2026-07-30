@@ -408,13 +408,53 @@ def main() -> int:
                 failures.append(f"operation invariant is absent: {required}")
     forbidden_files = {
         "runtime.py",
-        "service.py",
         "supervision.py",
         "backup.py",
         "database.py",
     }
     if forbidden_files & {path.name for path in PACKAGE.glob("*.py")}:
         failures.append("a later-tranche runtime module exists")
+    service = parsed.get("service.py")
+    if service is None:
+        failures.append("the centralized Tranche-B service extension is absent")
+    else:
+        service_class_nodes = tuple(
+            node for node in service.body if isinstance(node, ast.ClassDef)
+        )
+        service_classes = {node.name for node in service_class_nodes}
+        if service_classes != {"QKUComputationControlPlaneV1"}:
+            failures.append("the central service class roster is not exact")
+        else:
+            service_methods = {
+                node.name
+                for node in service_class_nodes[0].body
+                if isinstance(node, ast.FunctionDef)
+            }
+            expected_methods = {
+                "__post_init__",
+                *(str(row[1]) for row in EXPECTED_ROWS[:12]),
+            }
+            if service_methods != expected_methods:
+                failures.append(
+                    "the central service does not expose exactly operations 01..12"
+                )
+        if any(
+            isinstance(node, ast.ExceptHandler)
+            and isinstance(node.type, ast.Name)
+            and node.type.id in {"Exception", "BaseException"}
+            for node in ast.walk(service)
+        ):
+            failures.append("the central service catches an untyped broad exception")
+    validation_text = (PACKAGE / "validation.py").read_text(encoding="utf-8")
+    for required in (
+        "ST12B_CENTRAL_SERVICE_OPERATION_IDS = tuple(OPERATION_SCHEMA_REGISTRY)[:12]",
+        "tuple(OPERATION_SCHEMA_REGISTRY)[:8]",
+        "tuple(OPERATION_SCHEMA_REGISTRY)[8:10]",
+        "tuple(OPERATION_SCHEMA_REGISTRY)[10:12]",
+        "tuple(OPERATION_SCHEMA_REGISTRY)[12:]",
+    ):
+        if required not in validation_text:
+            failures.append(f"Tranche-B operation capability projection missing: {required}")
     if failures:
         print("\n".join(failures), file=sys.stderr)
         return 1

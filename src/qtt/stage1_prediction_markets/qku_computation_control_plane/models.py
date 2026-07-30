@@ -132,6 +132,9 @@ class HealthState(StrEnum):
 
 class OperationCapabilityClass(StrEnum):
     CONTRACT_DEFINITION_ONLY = "CONTRACT_DEFINITION_ONLY"
+    PURE_DETERMINISTIC_COMPUTATION = "PURE_DETERMINISTIC_COMPUTATION"
+    READ_ONLY_PROJECTION = "READ_ONLY_PROJECTION"
+    NO_EFFECT_RECORD = "NO_EFFECT_RECORD"
 
 
 class OperationSideEffectClass(StrEnum):
@@ -158,6 +161,21 @@ class OperationBlockerCodeV1(StrEnum):
     DEPENDENCY_UNRESOLVED = "DEPENDENCY_UNRESOLVED"
     ORACLE_UNAVAILABLE = "ORACLE_UNAVAILABLE"
     RUNTIME_EFFECT_FORBIDDEN = "RUNTIME_EFFECT_FORBIDDEN"
+    NO_APPLICABLE_STACK = "NO_APPLICABLE_STACK"
+    INPUT_OWNER_MISSING = "INPUT_OWNER_MISSING"
+    INPUT_OWNER_MISMATCH = "INPUT_OWNER_MISMATCH"
+    INPUT_PACKET_MISMATCH = "INPUT_PACKET_MISMATCH"
+    INPUT_SCHEMA_MISMATCH = "INPUT_SCHEMA_MISMATCH"
+    INPUT_SCOPE_MISMATCH = "INPUT_SCOPE_MISMATCH"
+    INPUT_VALUE_CONFLICT = "INPUT_VALUE_CONFLICT"
+    POINT_IN_TIME_VIOLATION = "POINT_IN_TIME_VIOLATION"
+    FRESHNESS_VIOLATION = "FRESHNESS_VIOLATION"
+    SOURCE_CONFLICT = "SOURCE_CONFLICT"
+    PARAMETER_OWNER_MISSING = "PARAMETER_OWNER_MISSING"
+    PARAMETER_BINDING_MISMATCH = "PARAMETER_BINDING_MISMATCH"
+    UNIT_CONVERSION_FAILED = "UNIT_CONVERSION_FAILED"
+    OUTPUT_SCHEMA_MISMATCH = "OUTPUT_SCHEMA_MISMATCH"
+    FORMULA_EXECUTION_REJECTED = "FORMULA_EXECUTION_REJECTED"
 
 
 class TypedValueKindV1(StrEnum):
@@ -243,6 +261,17 @@ class ComputabilityBlockerCodeV1(StrEnum):
     DEPENDENCY_CLOSURE_INCOMPLETE = "DEPENDENCY_CLOSURE_INCOMPLETE"
     FALLBACK_CLOSURE_INCOMPLETE = "FALLBACK_CLOSURE_INCOMPLETE"
     ORPHAN_CONSUMER = "ORPHAN_CONSUMER"
+    INPUT_OWNER_MISSING = "INPUT_OWNER_MISSING"
+    INPUT_OWNER_MISMATCH = "INPUT_OWNER_MISMATCH"
+    INPUT_PACKET_MISMATCH = "INPUT_PACKET_MISMATCH"
+    INPUT_SCHEMA_MISMATCH = "INPUT_SCHEMA_MISMATCH"
+    INPUT_SCOPE_MISMATCH = "INPUT_SCOPE_MISMATCH"
+    INPUT_VALUE_CONFLICT = "INPUT_VALUE_CONFLICT"
+    POINT_IN_TIME_VIOLATION = "POINT_IN_TIME_VIOLATION"
+    FRESHNESS_VIOLATION = "FRESHNESS_VIOLATION"
+    SOURCE_CONFLICT = "SOURCE_CONFLICT"
+    PARAMETER_OWNER_MISSING = "PARAMETER_OWNER_MISSING"
+    NO_APPLICABLE_STACK = "NO_APPLICABLE_STACK"
 
 
 class ComputabilityTerminalRouteV1(StrEnum):
@@ -251,6 +280,10 @@ class ComputabilityTerminalRouteV1(StrEnum):
     FIXTURE_MATERIALIZATION = "FIXTURE_MATERIALIZATION"
     CONTEXT_REBINDING = "CONTEXT_REBINDING"
     STACK_CLOSURE = "STACK_CLOSURE"
+    OWNER_PACKET_REFRESH = "OWNER_PACKET_REFRESH"
+    SOURCE_RECONCILIATION = "SOURCE_RECONCILIATION"
+    PARAMETER_OWNER_REFRESH = "PARAMETER_OWNER_REFRESH"
+    NO_RESULT_NO_TRADE = "NO_RESULT_NO_TRADE"
 
 
 @dataclass(frozen=True, slots=True)
@@ -1476,58 +1509,113 @@ class _TypedOperationResultV1:
 
 
 @dataclass(frozen=True, slots=True)
+class FrozenFormulaOutputV1:
+    """One version-pinned ST12B_OUTPUT_V3_4 result kept in native typed form."""
+
+    math_spec_id: str
+    implementation_id: str
+    mathematical_semantic_version: str
+    repository_specification_version: str
+    output_schema_ref: str
+    output_schema_version: str
+    output_name: str
+    value: object
+    context_id: str
+    receipt_refs: tuple[str, ...] = ()
+    no_authority_flag: bool = True
+
+    def __post_init__(self) -> None:
+        for name in (
+            "math_spec_id",
+            "implementation_id",
+            "mathematical_semantic_version",
+            "repository_specification_version",
+            "output_schema_ref",
+            "output_schema_version",
+            "output_name",
+            "context_id",
+        ):
+            _required(getattr(self, name), name)
+        if self.output_schema_version != "ST12B_OUTPUT_V3_4":
+            raise ContractValidationError(
+                ReasonCode.OUTPUT_SCHEMA_MISMATCH,
+                "formula outputs must use the exact frozen ST12B output version",
+            )
+        _validate_unique_text(self.receipt_refs, "receipt_refs")
+        _exact_bool(self.no_authority_flag, "no_authority_flag")
+        if not self.no_authority_flag:
+            raise ContractValidationError(
+                ReasonCode.CAPABILITY_DENIED,
+                "formula output envelopes cannot create authority",
+            )
+
+
+@dataclass(frozen=True, slots=True)
 class IdentityResolutionV1(_TypedOperationResultV1):
-    pass
+    identity_ref: str = ""
 
 
 @dataclass(frozen=True, slots=True)
 class StackResolutionV1(_TypedOperationResultV1):
-    pass
+    stack_id: str = ""
+    component_ids: tuple[str, ...] = ()
+    dependency_receipt_refs: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
 class InputResolutionV1(_TypedOperationResultV1):
-    pass
+    component_ids: tuple[str, ...] = ()
+    resolved_input_names: tuple[str, ...] = ()
+    owner_packet_refs: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
 class ComponentResultV1(_TypedOperationResultV1):
-    pass
+    component_id: str = ""
+    formula_output: FrozenFormulaOutputV1 | None = None
 
 
 @dataclass(frozen=True, slots=True)
 class StackResultV1(_TypedOperationResultV1):
-    pass
+    stack_id: str = ""
+    component_outputs: tuple[FrozenFormulaOutputV1, ...] = ()
+    conversion_receipt_refs: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
 class NoTradeComparisonV1(_TypedOperationResultV1):
-    pass
+    comparison_basis: str = ""
+    downstream_blocker_ref: str = ""
 
 
 @dataclass(frozen=True, slots=True)
 class TradePlanEvaluationV1(_TypedOperationResultV1):
-    pass
+    downstream_blocker_ref: str = ""
 
 
 @dataclass(frozen=True, slots=True)
 class SnapshotViewV1(_TypedOperationResultV1):
-    pass
+    snapshot_id: str = ""
+    view_class: str = ""
 
 
 @dataclass(frozen=True, slots=True)
 class ResolutionExplanationV1(_TypedOperationResultV1):
-    pass
+    blocker_codes: tuple[OperationBlockerCodeV1, ...] = ()
+    next_safe_route: str = ""
 
 
 @dataclass(frozen=True, slots=True)
 class CandidateProposalV1(_TypedOperationResultV1):
-    pass
+    candidate_id: str = ""
+    proposal_state: str = "NO_EFFECT_RECORD"
 
 
 @dataclass(frozen=True, slots=True)
 class MaterializationWorkOrderV1(_TypedOperationResultV1):
-    pass
+    work_order_id: str = ""
+    requested_owner: str = ""
+    work_order_state: str = "NO_EFFECT_RECORD"
 
 
 @dataclass(frozen=True, slots=True)

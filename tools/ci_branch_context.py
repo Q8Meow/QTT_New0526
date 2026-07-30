@@ -145,6 +145,7 @@ VALIDATION_EXECUTION_BRANCHES = frozenset(
 OWNER_AUTHORIZED_VALIDATION_BRANCHES = frozenset(
     {
         "agent/st12a-contract-envelope",
+        "agent/st12b-contextual-computability-v3",
     }
 )
 IDEMPOTENCE_RUNTIME_CONTAINMENT_HARDENING_BRANCH = (

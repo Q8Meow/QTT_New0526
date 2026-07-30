@@ -69,6 +69,54 @@ PR169_VAL1_BRANCH = registry.PR169_VAL1_BRANCH
 PR169_QKU_FORMULA_EXP1_ROLLBACK_BRANCH = registry.PR169_QKU_FORMULA_EXP1_ROLLBACK_BRANCH
 FIXTURE_BRANCH = registry.VALIDATION_FIXTURE_BRANCH
 REPO_ROOT = Path(__file__).resolve().parents[2]
+EXPECTED_ST12B_ALLOWED_EXACT_PATHS = frozenset(
+    {
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/contextual_computability.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/fallback.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/freshness.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/input_resolver.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/point_in_time.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/service.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/stack_resolver.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/unit_conversion.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/__init__.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/bindings.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/dependency_graph.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/errors.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/implementation_registry.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/models.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/oracle_contracts.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/parameter_policy.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/quantum_adapter.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/specification.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/validation.py",
+        "tests/fail_closed/test_run_validation_gates.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/architecture/test_repository_file_closure.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/operations/test_runtime_topology.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/tranche_b/test_manifest_and_ownership.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/tranche_b/test_math_oracle_vectors.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/tranche_b/test_resolution_pipeline.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/tranche_b/test_service_operations.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/tranche_b/test_source_quantum_model_risk.py",
+        "tests/tools/test_changed_area_validation_router.py",
+        "tests/tools/test_ci_branch_context.py",
+        "tests/tools/test_validation_inventory.py",
+        "tests/tools/test_validation_scope_registry.py",
+        "tools/build_qku_computation_control_plane.py",
+        "tools/changed_area_validation_router.py",
+        "tools/ci_branch_context.py",
+        "tools/independent_validate_qku_computation_control_plane_architecture.py",
+        "tools/independent_validate_qku_computation_control_plane_latency.py",
+        "tools/independent_validate_qku_computation_control_plane_model_risk.py",
+        "tools/independent_validate_qku_computation_control_plane_operations.py",
+        "tools/independent_validate_qku_computation_control_plane_source.py",
+        "tools/run_validation_gates.py",
+        "tools/validate_qku_computation_control_plane.py",
+        "tools/validation_inventory.py",
+        "tools/validation_scope_registry.py",
+        "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+    }
+)
 
 PR169_QKU_FORMULA_EXP1_PR272_PATHS = (
     "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
@@ -253,6 +301,142 @@ def test_st12a_exact_scope_is_consumable_by_validation_context(path: str) -> Non
     }
     windows_path = ".\\" + path.replace("/", "\\")
     assert registry.is_pr_scoped_changed_path_allowed(FIXTURE_BRANCH, windows_path)
+
+
+def test_st12b_exact_44_path_scope_matches_owner_freeze() -> None:
+    assert registry.ST12B_BRANCH == "agent/st12b-contextual-computability-v3"
+    assert registry.ST12B_ALLOWED_EXACT_PATHS == EXPECTED_ST12B_ALLOWED_EXACT_PATHS
+    assert len(registry.ST12B_ALLOWED_EXACT_PATHS) == 44
+
+
+def test_st12b_validation_context_routes_only_exclusive_exact_paths() -> None:
+    expected = frozenset(
+        {
+            "src/qtt/stage1_prediction_markets/qku_computation_control_plane/contextual_computability.py",
+            "src/qtt/stage1_prediction_markets/qku_computation_control_plane/fallback.py",
+            "src/qtt/stage1_prediction_markets/qku_computation_control_plane/freshness.py",
+            "src/qtt/stage1_prediction_markets/qku_computation_control_plane/input_resolver.py",
+            "src/qtt/stage1_prediction_markets/qku_computation_control_plane/point_in_time.py",
+            "src/qtt/stage1_prediction_markets/qku_computation_control_plane/service.py",
+            "src/qtt/stage1_prediction_markets/qku_computation_control_plane/stack_resolver.py",
+            "src/qtt/stage1_prediction_markets/qku_computation_control_plane/unit_conversion.py",
+            "tests/stage1_prediction_markets/qku_computation_control_plane/tranche_b/test_manifest_and_ownership.py",
+            "tests/stage1_prediction_markets/qku_computation_control_plane/tranche_b/test_math_oracle_vectors.py",
+            "tests/stage1_prediction_markets/qku_computation_control_plane/tranche_b/test_resolution_pipeline.py",
+            "tests/stage1_prediction_markets/qku_computation_control_plane/tranche_b/test_service_operations.py",
+            "tests/stage1_prediction_markets/qku_computation_control_plane/tranche_b/test_source_quantum_model_risk.py",
+            "tools/independent_validate_qku_computation_control_plane_latency.py",
+            "tools/independent_validate_qku_computation_control_plane_model_risk.py",
+        }
+    )
+    shared_pr152 = (
+        "docs/master_plan/generated/"
+        "PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json"
+    )
+    assert registry.ST12B_BRANCH == "agent/st12b-contextual-computability-v3"
+    assert registry.is_validation_context_branch(FIXTURE_BRANCH)
+    assert not registry.is_validation_context_branch(registry.ST12B_BRANCH)
+    assert not registry.is_validation_context_branch(f"{FIXTURE_BRANCH}-copy")
+    assert len(expected) == 15
+    assert registry.ST12B_VALIDATION_CONTEXT_EXACT_PATHS == expected
+    assert registry.ST12B_VALIDATION_CONTEXT_EXACT_PATHS == (
+        registry.ST12B_ALLOWED_EXACT_PATHS
+        - (
+            registry.ST12A_ALLOWED_EXACT_PATHS
+            | registry.ST12A_SHARED_CURRENTIZATION_EXACT_PATHS
+        )
+    )
+    assert shared_pr152 not in registry.ST12B_VALIDATION_CONTEXT_EXACT_PATHS
+    assert shared_pr152 in registry.ST12A_SHARED_CURRENTIZATION_EXACT_PATHS
+    assert registry.explain_pr_scope_decision(
+        FIXTURE_BRANCH,
+        shared_pr152,
+    ) == {
+        "allowed": True,
+        "branch": FIXTURE_BRANCH,
+        "normalized_path": shared_pr152,
+        "pr_id": "ST12-TRANCHE-A",
+        "matched_rule": (
+            "validation_context_shared_currentization_exact:"
+            f"{shared_pr152}"
+        ),
+        "reason": (
+            "registered_validation_context_shared_currentization_exact_path"
+        ),
+    }
+    for path in sorted(expected):
+        decision = {
+            "allowed": True,
+            "branch": FIXTURE_BRANCH,
+            "normalized_path": path,
+            "pr_id": "ST12-TRANCHE-B",
+            "matched_rule": f"validation_context_exact:{path}",
+            "reason": "registered_validation_context_exact_path",
+        }
+        assert registry.explain_pr_scope_decision(FIXTURE_BRANCH, path) == decision
+        windows_path = ".\\" + path.replace("/", "\\")
+        assert (
+            registry.explain_pr_scope_decision(FIXTURE_BRANCH, windows_path)
+            == decision
+        )
+        assert not registry.is_pr_scoped_changed_path_allowed(
+            FIXTURE_BRANCH,
+            f"{path}.copy",
+        )
+
+
+@pytest.mark.parametrize("path", sorted(EXPECTED_ST12B_ALLOWED_EXACT_PATHS))
+def test_st12b_exact_paths_and_windows_forms_are_allowed(path: str) -> None:
+    decision = registry.explain_pr_scope_decision(registry.ST12B_BRANCH, path)
+    assert decision == {
+        "allowed": True,
+        "branch": registry.ST12B_BRANCH,
+        "normalized_path": path,
+        "pr_id": "ST12-TRANCHE-B",
+        "matched_rule": f"exact:{path}",
+        "reason": "registered_exact_path",
+    }
+    windows_path = ".\\" + path.replace("/", "\\")
+    assert registry.is_pr_scoped_changed_path_allowed(
+        registry.ST12B_BRANCH,
+        windows_path,
+    )
+    assert not registry.is_pr_scoped_changed_path_allowed(
+        registry.ST12B_BRANCH,
+        f"{path}.copy",
+    )
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/runtime.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/math/math_01.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/test_extra.py",
+        "tools/validate_qku_computation_control_plane_extra.py",
+        "docs/master_plan/QTT_MasterPlan_Current.md",
+        ".tmp/qku-output.json",
+    ],
+)
+def test_st12b_scope_rejects_prefix_wildcards_and_unowned_paths(path: str) -> None:
+    assert not registry.is_pr_scoped_changed_path_allowed(
+        registry.ST12B_BRANCH,
+        path,
+    )
+
+
+def test_st12b_scope_requires_exact_branch() -> None:
+    path = (
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/"
+        "contextual_computability.py"
+    )
+    for branch in (
+        "agent/st12b-contextual-computability",
+        "agent/st12b-contextual-computability-v3-copy",
+        "agent/st12b-contextual-computability-v3/",
+        "Agent/st12b-contextual-computability-v3",
+    ):
+        assert not registry.is_pr_scoped_changed_path_allowed(branch, path)
 
 
 @pytest.mark.parametrize(

@@ -3022,6 +3022,20 @@ def _expected_commands(
         ],
         [
             python_executable,
+            str(
+                Path("tools")
+                / "independent_validate_qku_computation_control_plane_latency.py"
+            ),
+        ],
+        [
+            python_executable,
+            str(
+                Path("tools")
+                / "independent_validate_qku_computation_control_plane_model_risk.py"
+            ),
+        ],
+        [
+            python_executable,
             str(Path("tools") / "validate_pr169_val1.py"),
             "--repo-root",
             ".",
@@ -3099,12 +3113,15 @@ def test_runner_builds_expected_command_sequence(monkeypatch):
     assert runner.build_validation_commands() == _expected_commands(python_executable)
 
 
-def test_runner_registers_one_qku_primary_dispatch_and_independent_system():
+def test_runner_registers_qku_primary_and_independent_systems():
     commands = runner.build_deterministic_validator_commands()
     qku_commands = [
         command
         for command in commands
-        if any("qku_computation_control_plane.py" in part for part in command)
+        if any(
+            "qku_computation_control_plane" in part and part.endswith(".py")
+            for part in command
+        )
     ]
     assert [command[-1] for command in qku_commands[:5]] == [
         "architecture",
@@ -3113,10 +3130,11 @@ def test_runner_registers_one_qku_primary_dispatch_and_independent_system():
         "security",
         "source",
     ]
-    assert sum(
-        "independent_validate_qku_computation_control_plane.py" in command[1]
-        for command in qku_commands
-    ) == 1
+    assert {Path(command[1]).name for command in qku_commands[5:]} == {
+        "independent_validate_qku_computation_control_plane.py",
+        "independent_validate_qku_computation_control_plane_latency.py",
+        "independent_validate_qku_computation_control_plane_model_risk.py",
+    }
 
 
 def test_runner_phase_manifest_covers_full_validation_plan(monkeypatch):

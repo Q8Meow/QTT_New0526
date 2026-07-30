@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import ast
+from collections import Counter
 import json
 from pathlib import Path
 import sys
@@ -199,12 +200,102 @@ def main() -> int:
         failures.append("source-claim binding rule 011 is not uniquely materialized")
     if "broad_regex_or_alias_matching_allowed: bool = False" not in bindings_text:
         failures.append("broad source matching is not default-denied")
+    try:
+        bindings_tree = ast.parse(bindings_text, filename=str(BINDINGS))
+        primary_sources = json.loads(
+            _literal(bindings_tree, "_ST12B_PRIMARY_SOURCE_REGISTRY_JSON")
+        )
+        source_conflicts = json.loads(
+            _literal(bindings_tree, "_ST12B_SOURCE_CONFLICT_RESOLUTION_JSON")
+        )
+        source_currentizations = json.loads(
+            _literal(bindings_tree, "_ST12B_SOURCE_CURRENTIZATION_JSON")
+        )
+        numeric_authorities = json.loads(
+            _literal(bindings_tree, "_ST12B_NUMERIC_VALUE_AUTHORITY_JSON")
+        )
+        input_authorities = json.loads(
+            _literal(bindings_tree, "_ST12B_FORMULA_INPUT_AUTHORITY_JSON")
+        )
+        online_currentizations = json.loads(
+            _literal(bindings_tree, "_ST12B_ONLINE_CURRENTIZATION_JSON")
+        )
+    except (SyntaxError, ValueError, json.JSONDecodeError) as exc:
+        failures.append(f"v3.4 source/value literals could not be reconstructed: {exc}")
+        primary_sources = []
+        source_conflicts = []
+        source_currentizations = []
+        numeric_authorities = []
+        input_authorities = []
+        online_currentizations = []
+    if (
+        len(primary_sources) != 55
+        or Counter(
+            str(row.get("normalized_source_class"))
+            for row in primary_sources
+            if isinstance(row, dict)
+        )
+        != {
+            "EXTERNAL_PRIMARY_OR_OFFICIAL_SOURCE": 24,
+            "OWNER_FORMAL_DERIVATION": 30,
+            "OWNER_ARCHITECTURE_OR_POLICY": 1,
+        }
+        or len(
+            {
+                row.get("source_id")
+                for row in primary_sources
+                if isinstance(row, dict)
+            }
+        )
+        != 55
+    ):
+        failures.append("v3.4 primary-source population is not exact 24+30+1=55")
+    if (
+        len(source_conflicts) != 1
+        or not isinstance(source_conflicts[0], dict)
+        or len(source_conflicts[0].get("source_ids", ())) != 3
+        or source_conflicts[0].get("terminal_state")
+        != "RESOLVED_TO_RUNTIME_BINDING_REQUIRED"
+        or "builder fees remain separate and additive"
+        not in str(source_conflicts[0].get("resolution"))
+    ):
+        failures.append("v3.4 source conflict is not exact and fail-closed")
+    if (
+        len(source_currentizations) != 7
+        or len(online_currentizations) != 5
+        or any(
+            not isinstance(row, dict)
+            or row.get("live_refetch_state") != "SUCCEEDED_2026-07-29"
+            or row.get("retrieved_date") != "2026-07-29"
+            for row in online_currentizations
+        )
+    ):
+        failures.append("v3.4 currentization populations are not exact 7+5")
+    if (
+        len(input_authorities) != 142
+        or len(numeric_authorities) != 621
+        or Counter(
+            str(row.get("subject_kind"))
+            for row in numeric_authorities
+            if isinstance(row, dict)
+        )
+        != {"PARAMETER": 479, "FORMULA_INPUT": 142}
+        or any(
+            not isinstance(row, dict)
+            or row.get("source_semantics_do_not_authenticate_runtime_number")
+            is not True
+            for row in numeric_authorities
+        )
+    ):
+        failures.append("v3.4 numeric-value/source authority separation is not exact")
     if failures:
         print("\n".join(failures), file=sys.stderr)
         return 1
     print(
         f"{SUCCESS_MARKER} source_rows={len(source_rows)} "
-        f"overlays={len(overlays)} binding_rules=1"
+        f"overlays={len(overlays)} binding_rules=1 "
+        f"v34_primary_sources={len(primary_sources)} "
+        f"v34_numeric_authorities={len(numeric_authorities)}"
     )
     return 0
 

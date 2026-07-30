@@ -1,11 +1,11 @@
-"""Single allowlisted registry for all 19 Tranche-A mathematical callables."""
+"""Single registry for 19 preserved predecessors and 30 active v3.4 callables."""
 
 from __future__ import annotations
 
 from bisect import bisect_right
 from dataclasses import dataclass
 from decimal import Decimal, localcontext
-from itertools import product
+from itertools import combinations, product
 import math
 from random import Random
 from statistics import NormalDist
@@ -2417,3 +2417,2643 @@ def get_math_implementation(math_spec_id: str) -> MathImplementationRecordV1:
 
 def get_math_callable(math_spec_id: str) -> Callable[..., object]:
     return get_math_implementation(math_spec_id).callable
+
+
+# ST12-B v3.4 production procedures.  These consume only already-resolved typed
+# values; owner/PIT/freshness resolution remains outside formula mathematics.
+
+
+def _v34_list(value: object, name: str, *, minimum: int = 1) -> list[object]:
+    if (
+        isinstance(value, str | bytes)
+        or not isinstance(value, Sequence)
+        or len(value) < minimum
+    ):
+        _fail(f"{name} must be a sequence with at least {minimum} item(s)")
+    return list(value)
+
+
+def _v34_mapping(value: object, name: str) -> Mapping[str, object]:
+    if not isinstance(value, Mapping):
+        _fail(f"{name} must be a mapping")
+    return value
+
+
+def _v34_positive_int(value: object, name: str, minimum: int = 1) -> int:
+    if isinstance(value, bool) or not isinstance(value, int) or value < minimum:
+        _fail(f"{name} must be an integer >= {minimum}")
+    return value
+
+
+def _v34_mean(values: Sequence[float]) -> float:
+    if not values:
+        _fail("mean requires a nonempty sequence")
+    return math.fsum(values) / len(values)
+
+
+def _v34_sample_variance(values: Sequence[float]) -> float:
+    if len(values) < 2:
+        _fail("sample variance requires at least two values")
+    center = _v34_mean(values)
+    return math.fsum((value - center) ** 2 for value in values) / (
+        len(values) - 1
+    )
+
+
+def _v34_matrix(value: object, name: str) -> list[list[float]]:
+    rows = _v34_list(value, name)
+    if any(
+        isinstance(row, str | bytes) or not isinstance(row, Sequence) or not row
+        for row in rows
+    ):
+        _fail(f"{name} must be a nonempty rectangular matrix")
+    width = len(rows[0])  # type: ignore[arg-type]
+    if any(len(row) != width for row in rows):  # type: ignore[arg-type]
+        _fail(f"{name} must be rectangular")
+    return [
+        [
+            finite_float(item, field_name=f"{name}[{i}][{j}]")
+            for j, item in enumerate(row)  # type: ignore[union-attr]
+        ]
+        for i, row in enumerate(rows)
+    ]
+
+
+def _v34_probability_rows(
+    probability_rows: object,
+    outcome_indices: object,
+) -> tuple[list[list[float]], list[int]]:
+    rows = _v34_list(probability_rows, "probability_rows")
+    outcomes = _v34_list(outcome_indices, "outcome_indices")
+    if len(rows) != len(outcomes):
+        _fail("probability_rows and outcome_indices must align")
+    width: int | None = None
+    parsed: list[list[float]] = []
+    labels: list[int] = []
+    for row_index, raw_row in enumerate(rows):
+        raw = _v34_list(raw_row, f"probability_rows[{row_index}]", minimum=2)
+        if width is None:
+            width = len(raw)
+        elif len(raw) != width:
+            _fail("all probability rows must have the same class count")
+        probabilities = [
+            _probability(value, field_name=f"probability_rows[{row_index}][{j}]")
+            for j, value in enumerate(raw)
+        ]
+        if abs(math.fsum(probabilities) - 1.0) > (
+            PROBABILITY_NORMALIZATION_ULP_MULTIPLIER
+            * math.ulp(1.0)
+            * len(probabilities)
+        ):
+            _fail("each probability row must sum to one")
+        outcome = outcomes[row_index]
+        if (
+            isinstance(outcome, bool)
+            or not isinstance(outcome, int)
+            or not 0 <= outcome < len(probabilities)
+        ):
+            _fail("outcome index is outside the class domain")
+        parsed.append(probabilities)
+        labels.append(outcome)
+    return parsed, labels
+
+
+def compute_math_01_v34(
+    contract_price: DecimalInput,
+    payout_per_winning_contract: DecimalInput,
+) -> Decimal:
+    return compute_math_01_binary_implied_probability(
+        contract_price, payout_per_winning_contract
+    )
+
+
+def compute_math_02_v34(
+    calibrated_model_probability: object,
+    market_implied_probability: object,
+    calibration_state: str,
+) -> float:
+    if calibration_state != "CALIBRATED_FOR_DECLARED_CONTEXT":
+        _fail("calibration_state must be CALIBRATED_FOR_DECLARED_CONTEXT")
+    return compute_math_02_probability_edge(
+        calibrated_model_probability,
+        market_implied_probability,
+        calibrated=True,
+    )
+
+
+def _v34_book_state(
+    *,
+    same_instrument_snapshot: object,
+    snapshot_state: object,
+) -> None:
+    if same_instrument_snapshot is not True:
+        _fail("book fields must come from the same instrument snapshot")
+    if snapshot_state != "CURRENT_CONTIGUOUS_BOOK":
+        _fail("book snapshot must be current and contiguous")
+
+
+def compute_math_03_v34(
+    best_bid: DecimalInput,
+    best_ask: DecimalInput,
+    payout: DecimalInput,
+    same_instrument_snapshot: bool,
+    snapshot_state: str,
+) -> Decimal:
+    _v34_book_state(
+        same_instrument_snapshot=same_instrument_snapshot,
+        snapshot_state=snapshot_state,
+    )
+    return compute_math_03_orderbook_midpoint(
+        best_bid, best_ask, payout=payout, stale=False, auction_state=False
+    )
+
+
+def compute_math_04_v34(
+    best_bid: DecimalInput,
+    best_ask: DecimalInput,
+    payout: DecimalInput,
+    same_instrument_snapshot: bool,
+    snapshot_state: str,
+) -> Decimal:
+    _v34_book_state(
+        same_instrument_snapshot=same_instrument_snapshot,
+        snapshot_state=snapshot_state,
+    )
+    return compute_math_04_full_spread(
+        best_bid, best_ask, payout=payout, stale=False, auction_state=False
+    )
+
+
+def compute_math_05_v34(
+    best_bid: DecimalInput,
+    best_ask: DecimalInput,
+    payout: DecimalInput,
+    same_instrument_snapshot: bool,
+    snapshot_state: str,
+) -> dict[str, Decimal]:
+    midpoint = compute_math_03_v34(
+        best_bid,
+        best_ask,
+        payout,
+        same_instrument_snapshot,
+        snapshot_state,
+    )
+    spread = compute_math_04_v34(
+        best_bid,
+        best_ask,
+        payout,
+        same_instrument_snapshot,
+        snapshot_state,
+    )
+    if midpoint <= 0:
+        _fail("relative spread requires a positive midpoint")
+    with localcontext(decimal_context_v1()):
+        ratio = spread / midpoint
+        return {
+            "relative_spread_ratio": ratio,
+            "relative_spread_bps": ratio * Decimal(10_000),
+        }
+
+
+_SIGNED_CASHFLOW_BASIS = (
+    "SIGNED_TOTAL_ACCOUNT_CASHFLOW_EACH_EVENT_INCLUDED_EXACTLY_ONCE"
+)
+
+
+def _v34_named_costs(
+    *,
+    platform_fee_total: DecimalInput,
+    builder_fee_total: DecimalInput,
+    other_fee_total: DecimalInput,
+    expected_rebate_total: DecimalInput,
+    exit_slippage_reserve_total: DecimalInput,
+    market_impact_reserve_total: DecimalInput,
+    latency_adverse_selection_reserve_total: DecimalInput,
+    capital_time_cost_reserve_total: DecimalInput,
+) -> tuple[Decimal, Decimal]:
+    cost_values = tuple(
+        _nonnegative(_cash(value, field_name=name), field_name=name)
+        for name, value in (
+            ("platform_fee_total", platform_fee_total),
+            ("builder_fee_total", builder_fee_total),
+            ("other_fee_total", other_fee_total),
+            ("exit_slippage_reserve_total", exit_slippage_reserve_total),
+            ("market_impact_reserve_total", market_impact_reserve_total),
+            (
+                "latency_adverse_selection_reserve_total",
+                latency_adverse_selection_reserve_total,
+            ),
+            ("capital_time_cost_reserve_total", capital_time_cost_reserve_total),
+        )
+    )
+    rebate = _nonnegative(
+        _cash(expected_rebate_total, field_name="expected_rebate_total"),
+        field_name="expected_rebate_total",
+    )
+    return sum(cost_values, Decimal(0)), rebate
+
+
+def compute_math_06_binary_contract_expected_net_cash_v2(
+    p_win: object,
+    p_void: object,
+    fill_probability: object,
+    entry_trade_cashflow_total: DecimalInput,
+    win_terminal_cashflow_total: DecimalInput,
+    lose_terminal_cashflow_total: DecimalInput,
+    void_terminal_cashflow_total: DecimalInput,
+    no_fill_cashflow_total: DecimalInput,
+    platform_fee_total: DecimalInput,
+    builder_fee_total: DecimalInput,
+    other_fee_total: DecimalInput,
+    expected_rebate_total: DecimalInput,
+    exit_slippage_reserve_total: DecimalInput,
+    market_impact_reserve_total: DecimalInput,
+    latency_adverse_selection_reserve_total: DecimalInput,
+    capital_time_cost_reserve_total: DecimalInput,
+    cashflow_basis: str,
+) -> dict[str, Decimal]:
+    if cashflow_basis != _SIGNED_CASHFLOW_BASIS:
+        _fail("cashflow basis must be the exact signed total-account convention")
+    win = _probability_decimal(p_win, field_name="p_win")
+    void = _probability_decimal(p_void, field_name="p_void")
+    fill = _probability_decimal(fill_probability, field_name="fill_probability")
+    with localcontext(decimal_context_v1()):
+        lose = Decimal(1) - win - void
+        if lose < 0:
+            _fail("p_win + p_void may not exceed one")
+        entry = _cash(
+            entry_trade_cashflow_total, field_name="entry_trade_cashflow_total"
+        )
+        win_cash = _cash(
+            win_terminal_cashflow_total,
+            field_name="win_terminal_cashflow_total",
+        )
+        lose_cash = _cash(
+            lose_terminal_cashflow_total,
+            field_name="lose_terminal_cashflow_total",
+        )
+        void_cash = _cash(
+            void_terminal_cashflow_total,
+            field_name="void_terminal_cashflow_total",
+        )
+        no_fill = _cash(
+            no_fill_cashflow_total, field_name="no_fill_cashflow_total"
+        )
+        costs, rebate = _v34_named_costs(
+            platform_fee_total=platform_fee_total,
+            builder_fee_total=builder_fee_total,
+            other_fee_total=other_fee_total,
+            expected_rebate_total=expected_rebate_total,
+            exit_slippage_reserve_total=exit_slippage_reserve_total,
+            market_impact_reserve_total=market_impact_reserve_total,
+            latency_adverse_selection_reserve_total=(
+                latency_adverse_selection_reserve_total
+            ),
+            capital_time_cost_reserve_total=capital_time_cost_reserve_total,
+        )
+        terminal = win * win_cash + lose * lose_cash + void * void_cash
+        if_filled = entry + terminal - costs + rebate
+        expected = fill * if_filled + (Decimal(1) - fill) * no_fill
+        return {
+            "expected_net_cash": expected,
+            "expected_net_cash_if_filled": if_filled,
+            "expected_terminal_cashflow": terminal,
+            "p_lose": lose,
+        }
+
+
+def compute_math_07_multi_outcome_expected_net_cash_v2(
+    outcome_ids: Sequence[object],
+    outcome_probabilities: Sequence[object],
+    outcome_terminal_cashflow_totals: Sequence[DecimalInput],
+    probability_simplex_tolerance: DecimalInput,
+    fill_probability: object,
+    entry_trade_cashflow_total: DecimalInput,
+    no_fill_cashflow_total: DecimalInput,
+    platform_fee_total: DecimalInput,
+    builder_fee_total: DecimalInput,
+    other_fee_total: DecimalInput,
+    expected_rebate_total: DecimalInput,
+    exit_slippage_reserve_total: DecimalInput,
+    market_impact_reserve_total: DecimalInput,
+    latency_adverse_selection_reserve_total: DecimalInput,
+    capital_time_cost_reserve_total: DecimalInput,
+    cashflow_basis: str,
+) -> dict[str, object]:
+    if cashflow_basis != _SIGNED_CASHFLOW_BASIS:
+        _fail("cashflow basis must be the exact signed total-account convention")
+    ids = _v34_list(outcome_ids, "outcome_ids", minimum=2)
+    if (
+        any(not isinstance(value, str) or not value for value in ids)
+        or len(ids) != len(set(ids))
+    ):
+        _fail("outcome_ids must be unique nonempty text")
+    probabilities = _v34_list(
+        outcome_probabilities, "outcome_probabilities", minimum=2
+    )
+    cashflows = _v34_list(
+        outcome_terminal_cashflow_totals,
+        "outcome_terminal_cashflow_totals",
+        minimum=2,
+    )
+    if len(ids) != len(probabilities) or len(ids) != len(cashflows):
+        _fail("outcome IDs, probabilities, and cashflows must align")
+    decimal_probabilities = tuple(
+        _probability_decimal(value, field_name=f"outcome_probabilities[{index}]")
+        for index, value in enumerate(probabilities)
+    )
+    tolerance = exact_decimal(
+        probability_simplex_tolerance,
+        field_name="probability_simplex_tolerance",
+    )
+    if tolerance < 0:
+        _fail("probability simplex tolerance must be nonnegative")
+    with localcontext(decimal_context_v1()):
+        original_sum = sum(decimal_probabilities, Decimal(0))
+        if abs(original_sum - Decimal(1)) > tolerance or original_sum <= 0:
+            _fail("outcome probabilities are outside the declared simplex tolerance")
+        normalization_applied = original_sum != Decimal(1)
+        normalized = (
+            tuple(value / original_sum for value in decimal_probabilities)
+            if normalization_applied
+            else decimal_probabilities
+        )
+        terminals = tuple(
+            _cash(value, field_name=f"outcome_terminal_cashflow_totals[{index}]")
+            for index, value in enumerate(cashflows)
+        )
+        expected_terminal = sum(
+            (
+                probability * cashflow
+                for probability, cashflow in zip(
+                    normalized, terminals, strict=True
+                )
+            ),
+            Decimal(0),
+        )
+        costs, rebate = _v34_named_costs(
+            platform_fee_total=platform_fee_total,
+            builder_fee_total=builder_fee_total,
+            other_fee_total=other_fee_total,
+            expected_rebate_total=expected_rebate_total,
+            exit_slippage_reserve_total=exit_slippage_reserve_total,
+            market_impact_reserve_total=market_impact_reserve_total,
+            latency_adverse_selection_reserve_total=(
+                latency_adverse_selection_reserve_total
+            ),
+            capital_time_cost_reserve_total=capital_time_cost_reserve_total,
+        )
+        entry = _cash(
+            entry_trade_cashflow_total, field_name="entry_trade_cashflow_total"
+        )
+        no_fill = _cash(
+            no_fill_cashflow_total, field_name="no_fill_cashflow_total"
+        )
+        fill = _probability_decimal(fill_probability, field_name="fill_probability")
+        if_filled = entry + expected_terminal - costs + rebate
+        expected = fill * if_filled + (Decimal(1) - fill) * no_fill
+        return {
+            "expected_net_cash": expected,
+            "expected_net_cash_if_filled": if_filled,
+            "expected_terminal_cashflow": expected_terminal,
+            "outcome_ids": tuple(ids),
+            "normalized_probabilities": normalized,
+            "original_probability_sum": original_sum,
+            "normalization_applied": normalization_applied,
+        }
+
+
+def compute_math_08_v34(
+    probability_rows: Sequence[object],
+    outcome_indices: Sequence[object],
+) -> dict[str, object]:
+    rows, outcomes = _v34_probability_rows(probability_rows, outcome_indices)
+    per_observation = tuple(
+        compute_math_08_brier_score(
+            row,
+            tuple(1 if index == outcome else 0 for index in range(len(row))),
+        )
+        for row, outcome in zip(rows, outcomes, strict=True)
+    )
+    return {
+        "mean_brier_score": math.fsum(per_observation) / len(per_observation),
+        "per_observation": per_observation,
+    }
+
+
+def compute_math_09_v34(
+    probability_rows: Sequence[object],
+    outcome_indices: Sequence[object],
+    clip_epsilon: object,
+) -> dict[str, object]:
+    rows, outcomes = _v34_probability_rows(probability_rows, outcome_indices)
+    epsilon = finite_float(clip_epsilon, field_name="clip_epsilon")
+    if not 0.0 < epsilon < 0.5:
+        _fail("clip_epsilon must be in (0,0.5)")
+    per_observation = tuple(
+        -math.log(min(max(row[outcome], epsilon), 1.0 - epsilon))
+        for row, outcome in zip(rows, outcomes, strict=True)
+    )
+    return {
+        "mean_log_loss": math.fsum(per_observation) / len(per_observation),
+        "per_observation": per_observation,
+    }
+
+
+def _v34_type7(values: Sequence[float], probability: float) -> float:
+    return _percentile(values, probability)
+
+
+def compute_math_10_expected_calibration_error_v2(
+    probabilities: Sequence[object],
+    outcomes: Sequence[object],
+    bin_policy: str,
+    bin_count: int,
+) -> dict[str, object]:
+    raw_probabilities = _v34_list(probabilities, "probabilities")
+    raw_outcomes = _v34_list(outcomes, "outcomes")
+    if len(raw_probabilities) != len(raw_outcomes):
+        _fail("probabilities and outcomes must align")
+    ps = tuple(
+        _probability(value, field_name=f"probabilities[{index}]")
+        for index, value in enumerate(raw_probabilities)
+    )
+    ys: list[int] = []
+    for index, value in enumerate(raw_outcomes):
+        if isinstance(value, bool) or not isinstance(value, int) or value not in (0, 1):
+            _fail(f"outcomes[{index}] must be an integer 0 or 1")
+        ys.append(value)
+    count = _v34_positive_int(bin_count, "bin_count")
+    if bin_policy == "EQUAL_WIDTH":
+        edges = [index / count for index in range(count + 1)]
+    elif bin_policy == "EQUAL_FREQUENCY_TYPE7_COLLAPSE_DUPLICATES":
+        if count > len(ps):
+            _fail("equal-frequency bin_count may not exceed sample count")
+        raw_edges = [
+            _v34_type7(ps, index / count) for index in range(count + 1)
+        ]
+        raw_edges[0], raw_edges[-1] = 0.0, 1.0
+        edges = []
+        for edge in raw_edges:
+            if not edges or edge > edges[-1]:
+                edges.append(edge)
+        if len(edges) < 2:
+            edges = [0.0, 1.0]
+    else:
+        _fail("unsupported calibration bin policy")
+    bins: list[dict[str, object]] = []
+    expected = 0.0
+    for bin_index, (left, right) in enumerate(zip(edges, edges[1:])):
+        indices = [
+            index
+            for index, probability in enumerate(ps)
+            if left <= probability < right
+            or (
+                bin_index == len(edges) - 2
+                and left <= probability <= right
+            )
+        ]
+        inclusive = bin_index == len(edges) - 2
+        if not indices:
+            bins.append(
+                {
+                    "bin_index": bin_index,
+                    "left": left,
+                    "right": right,
+                    "right_inclusive": inclusive,
+                    "count": 0,
+                    "mean_confidence": None,
+                    "empirical_frequency": None,
+                    "absolute_gap": None,
+                }
+            )
+            continue
+        confidence = math.fsum(ps[index] for index in indices) / len(indices)
+        frequency = math.fsum(ys[index] for index in indices) / len(indices)
+        gap = abs(confidence - frequency)
+        expected += len(indices) / len(ps) * gap
+        bins.append(
+            {
+                "bin_index": bin_index,
+                "left": left,
+                "right": right,
+                "right_inclusive": inclusive,
+                "count": len(indices),
+                "mean_confidence": confidence,
+                "empirical_frequency": frequency,
+                "absolute_gap": gap,
+            }
+        )
+    if sum(int(row["count"]) for row in bins) != len(ps):
+        _fail("calibration bins did not cover every observation exactly once")
+    return {
+        "expected_calibration_error": expected,
+        "bin_policy": bin_policy,
+        "requested_bin_count": count,
+        "effective_edges": tuple(edges),
+        "bins": tuple(bins),
+    }
+
+
+def compute_math_11_v34(
+    successes: int,
+    trials: int,
+    confidence: object,
+) -> dict[str, float]:
+    interval = compute_math_11_wilson_score_interval(
+        successes, trials, confidence=confidence
+    )
+    return {"lower": interval.lower, "upper": interval.upper}
+
+
+def _v34_multiple_result(result: MultipleTestingResultV1) -> dict[str, object]:
+    return {
+        "largest_rank": result.largest_rank,
+        "rejected_original_indices": result.rejected_original_indices,
+        "adjusted_p_values": result.adjusted_p_values,
+        "correction": result.correction,
+    }
+
+
+def compute_math_12_v34(
+    p_values: Sequence[object],
+    q: object,
+) -> dict[str, object]:
+    return _v34_multiple_result(compute_math_12_benjamini_hochberg(p_values, q))
+
+
+def compute_math_13_v34(
+    p_values: Sequence[object],
+    q: object,
+) -> dict[str, object]:
+    return _v34_multiple_result(compute_math_13_benjamini_yekutieli(p_values, q))
+
+
+def compute_math_14_stationary_bootstrap_mean_interval_v2(
+    series: Sequence[object],
+    expected_block_length: object,
+    seed: int,
+    replicates: int,
+    confidence: object,
+    interval_method: str,
+) -> dict[str, object]:
+    if interval_method != "PERCENTILE_TYPE7":
+        _fail("only PERCENTILE_TYPE7 is frozen")
+    result = compute_math_14_stationary_bootstrap_mean_interval(
+        series,
+        expected_block_length,
+        seed=seed,
+        replicates=replicates,
+        confidence=confidence,
+    )
+    return {
+        "sample_mean": result.sample_mean,
+        "lower": result.lower,
+        "upper": result.upper,
+        "bootstrap_distribution": result.bootstrap_distribution,
+        "seed": result.seed,
+        "replicates": replicates,
+        "expected_block_length": result.mean_block_length,
+        "interval_method": interval_method,
+    }
+
+
+def _v34_differentials(
+    loss_differentials: object,
+    sign_convention: str,
+) -> list[list[float]]:
+    matrix = _v34_matrix(loss_differentials, "loss_differentials")
+    if (
+        sign_convention
+        == "BENCHMARK_LOSS_MINUS_CANDIDATE_LOSS_POSITIVE_IS_BETTER"
+    ):
+        return matrix
+    if (
+        sign_convention
+        == "CANDIDATE_LOSS_MINUS_BENCHMARK_LOSS_NEGATED_TO_POSITIVE_IS_BETTER"
+    ):
+        return [[-value for value in row] for row in matrix]
+    _fail("explicit frozen benchmark sign convention is required")
+
+
+def compute_math_15_white_reality_check_v2(
+    loss_differentials: Sequence[Sequence[object]],
+    sign_convention: str,
+    seed: int,
+    replicates: int,
+    expected_block_length: object,
+    alpha: object,
+) -> dict[str, object]:
+    matrix = _v34_differentials(loss_differentials, sign_convention)
+    observation_count, candidate_count = len(matrix), len(matrix[0])
+    if observation_count < 2 or candidate_count < 1:
+        _fail("White reality check matrix is too small")
+    if isinstance(seed, bool) or not isinstance(seed, int):
+        _fail("seed must be an explicit integer")
+    repetitions = _v34_positive_int(replicates, "replicates")
+    block = finite_float(
+        expected_block_length, field_name="expected_block_length"
+    )
+    if not 1.0 <= block <= observation_count:
+        _fail("expected_block_length must be in [1,n]")
+    alpha_value = finite_float(alpha, field_name="alpha")
+    if not 0.0 < alpha_value < 1.0:
+        _fail("alpha must be in (0,1)")
+    series = [
+        [matrix[row][column] for row in range(observation_count)]
+        for column in range(candidate_count)
+    ]
+    means = [_v34_mean(candidate) for candidate in series]
+    statistic = max(
+        0.0, max(math.sqrt(observation_count) * value for value in means)
+    )
+    if all(value == 0.0 for row in matrix for value in row):
+        simulated = [0.0] * repetitions
+        p_value = 1.0
+    else:
+        rng = Random(seed)
+        simulated = []
+        exceedances = 0
+        for _ in range(repetitions):
+            indices = _stationary_indices(observation_count, block, rng)
+            draw = max(
+                0.0,
+                max(
+                    math.sqrt(observation_count)
+                    * (
+                        math.fsum(candidate[index] for index in indices)
+                        / observation_count
+                        - center
+                    )
+                    for candidate, center in zip(series, means, strict=True)
+                ),
+            )
+            simulated.append(draw)
+            if draw >= statistic:
+                exceedances += 1
+        p_value = (1 + exceedances) / (repetitions + 1)
+    return {
+        "statistic": statistic,
+        "p_value": p_value,
+        "reject": p_value <= alpha_value,
+        "candidate_means": tuple(means),
+        "simulated_statistics": tuple(simulated),
+        "recenter_policy": (
+            "CENTER_EACH_COMPLETE_MATERIAL_CANDIDATE_AT_ITS_SAMPLE_MEAN"
+        ),
+    }
+
+
+def _v34_spa_long_run_variance(series: Sequence[float], block: float) -> float:
+    count = len(series)
+    center = _v34_mean(series)
+    demeaned = tuple(value - center for value in series)
+    restart_probability = 1.0 / block
+    variance = math.fsum(value * value for value in demeaned) / count
+    for lag in range(1, count):
+        weight = (1.0 - lag / count) * (
+            (1.0 - restart_probability) ** lag
+        ) + (lag / count) * (
+            (1.0 - restart_probability) ** (count - lag)
+        )
+        covariance = math.fsum(
+            demeaned[index] * demeaned[index + lag]
+            for index in range(count - lag)
+        ) / count
+        variance += 2.0 * weight * covariance
+    return max(0.0, variance)
+
+
+def compute_math_16_hansen_spa(
+    loss_differentials: Sequence[Sequence[object]],
+    sign_convention: str,
+    seed: int,
+    replicates: int,
+    expected_block_length: object,
+    alpha: object,
+    recenter_variant: str,
+) -> dict[str, object]:
+    matrix = _v34_differentials(loss_differentials, sign_convention)
+    count, candidate_count = len(matrix), len(matrix[0])
+    if count < 3 or candidate_count < 1:
+        _fail("Hansen SPA requires at least three observations")
+    if recenter_variant != "HANSEN_CONSISTENT_LOG_LOG_THRESHOLD":
+        _fail("only the frozen Hansen consistent recenter variant is accepted")
+    if isinstance(seed, bool) or not isinstance(seed, int):
+        _fail("seed must be an explicit integer")
+    repetitions = _v34_positive_int(replicates, "replicates")
+    block = finite_float(
+        expected_block_length, field_name="expected_block_length"
+    )
+    if not 1.0 <= block <= count:
+        _fail("expected_block_length must be in [1,n]")
+    alpha_value = finite_float(alpha, field_name="alpha")
+    if not 0.0 < alpha_value < 1.0:
+        _fail("alpha must be in (0,1)")
+    series = [
+        [matrix[row][column] for row in range(count)]
+        for column in range(candidate_count)
+    ]
+    means = [_v34_mean(candidate) for candidate in series]
+    variances = [
+        _v34_spa_long_run_variance(candidate, block) for candidate in series
+    ]
+    valid: list[bool] = []
+    standardized: list[float] = []
+    for index, (center, variance) in enumerate(
+        zip(means, variances, strict=True)
+    ):
+        if variance <= 0:
+            if center > 0:
+                _fail(
+                    f"candidate {index} has positive mean and zero long-run variance"
+                )
+            valid.append(False)
+            standardized.append(float("-inf"))
+            continue
+        threshold = -math.sqrt(
+            variance / count * 2.0 * math.log(math.log(count))
+        )
+        valid.append(center >= threshold)
+        standardized.append(math.sqrt(count) * center / math.sqrt(variance))
+    statistic = max(
+        0.0,
+        max((value for value in standardized if math.isfinite(value)), default=0.0),
+    )
+    recentered = [
+        center if admitted else 0.0
+        for center, admitted in zip(means, valid, strict=True)
+    ]
+    rng = Random(seed)
+    simulated: list[float] = []
+    exceedances = 0
+    for _ in range(repetitions):
+        indices = _stationary_indices(count, block, rng)
+        candidate_statistics = [
+            math.sqrt(count)
+            * (
+                math.fsum(candidate[index] for index in indices) / count - center
+            )
+            / math.sqrt(variance)
+            for candidate, center, variance in zip(
+                series, recentered, variances, strict=True
+            )
+            if variance > 0
+        ]
+        draw = max(0.0, max(candidate_statistics, default=0.0))
+        simulated.append(draw)
+        if draw >= statistic:
+            exceedances += 1
+    p_value = (1 + exceedances) / (repetitions + 1)
+    return {
+        "statistic": statistic,
+        "p_value": p_value,
+        "reject": p_value <= alpha_value,
+        "candidate_means": tuple(means),
+        "long_run_variances": tuple(variances),
+        "consistent_valid_columns": tuple(valid),
+        "simulated_statistics": tuple(simulated),
+        "recenter_variant": recenter_variant,
+    }
+
+
+def _v34_probabilistic_sharpe(
+    estimated_sharpe: object,
+    reference_sharpe: object,
+    independent_equivalent_observations: int,
+    sample_skewness: object,
+    sample_non_excess_kurtosis: object,
+) -> dict[str, float]:
+    estimate = finite_float(estimated_sharpe, field_name="estimated_sharpe")
+    reference = finite_float(reference_sharpe, field_name="reference_sharpe")
+    count = _v34_positive_int(
+        independent_equivalent_observations,
+        "independent_equivalent_observations",
+        minimum=2,
+    )
+    skewness = finite_float(sample_skewness, field_name="sample_skewness")
+    kurtosis = finite_float(
+        sample_non_excess_kurtosis,
+        field_name="sample_non_excess_kurtosis",
+    )
+    if kurtosis < 1.0:
+        _fail("sample non-excess kurtosis must be at least one")
+    denominator_squared = (
+        1.0
+        - skewness * estimate
+        + (kurtosis - 1.0) / 4.0 * estimate * estimate
+    )
+    if denominator_squared <= 0:
+        _fail("probabilistic Sharpe denominator must be positive")
+    z_score = (
+        (estimate - reference)
+        * math.sqrt(count - 1)
+        / math.sqrt(denominator_squared)
+    )
+    return {
+        "probabilistic_sharpe_ratio": NormalDist().cdf(z_score),
+        "z_score": z_score,
+    }
+
+
+def compute_math_17_probabilistic_sharpe_ratio(
+    estimated_sharpe: object,
+    reference_sharpe: object,
+    independent_equivalent_observations: int,
+    sample_skewness: object,
+    sample_non_excess_kurtosis: object,
+) -> dict[str, float]:
+    return _v34_probabilistic_sharpe(
+        estimated_sharpe,
+        reference_sharpe,
+        independent_equivalent_observations,
+        sample_skewness,
+        sample_non_excess_kurtosis,
+    )
+
+
+def compute_math_18_deflated_sharpe_ratio(
+    complete_material_trial_sharpes: Sequence[object],
+    effective_independent_trial_count: object,
+    candidate_estimated_sharpe: object,
+    candidate_independent_equivalent_observations: int,
+    candidate_sample_skewness: object,
+    candidate_sample_non_excess_kurtosis: object,
+) -> dict[str, float]:
+    raw = _v34_list(
+        complete_material_trial_sharpes,
+        "complete_material_trial_sharpes",
+        minimum=2,
+    )
+    sharpes = tuple(
+        finite_float(
+            value,
+            field_name=f"complete_material_trial_sharpes[{index}]",
+        )
+        for index, value in enumerate(raw)
+    )
+    effective_count = finite_float(
+        effective_independent_trial_count,
+        field_name="effective_independent_trial_count",
+    )
+    if not 1.0 < effective_count <= len(sharpes):
+        _fail(
+            "effective independent trial count must be in "
+            "(1, complete material trial count]"
+        )
+    trial_mean = _v34_mean(sharpes)
+    trial_variance = _v34_sample_variance(sharpes)
+    euler_mascheroni = 0.5772156649015329
+    expected_maximum = trial_mean + math.sqrt(trial_variance) * (
+        (1.0 - euler_mascheroni)
+        * NormalDist().inv_cdf(1.0 - 1.0 / effective_count)
+        + euler_mascheroni
+        * NormalDist().inv_cdf(1.0 - 1.0 / (effective_count * math.e))
+    )
+    psr = _v34_probabilistic_sharpe(
+        candidate_estimated_sharpe,
+        expected_maximum,
+        candidate_independent_equivalent_observations,
+        candidate_sample_skewness,
+        candidate_sample_non_excess_kurtosis,
+    )
+    return {
+        "deflated_sharpe_ratio": psr["probabilistic_sharpe_ratio"],
+        "expected_maximum_sharpe_threshold": expected_maximum,
+        "trial_mean_sharpe": trial_mean,
+        "trial_sharpe_variance": trial_variance,
+    }
+
+
+def _v34_contiguous_groups(length: int, group_count: int) -> list[list[int]]:
+    if length % group_count:
+        _fail(
+            "observation count must be divisible by the frozen exact group count"
+        )
+    width = length // group_count
+    return [
+        list(range(group * width, (group + 1) * width))
+        for group in range(group_count)
+    ]
+
+
+def _v34_stable_midranks(values: Sequence[float]) -> list[float]:
+    ordered = sorted(range(len(values)), key=lambda index: (values[index], index))
+    ranks = [0.0] * len(values)
+    cursor = 0
+    while cursor < len(ordered):
+        end = cursor + 1
+        while end < len(ordered) and values[ordered[end]] == values[ordered[cursor]]:
+            end += 1
+        midrank = ((cursor + 1) + end) / 2.0
+        for index in ordered[cursor:end]:
+            ranks[index] = midrank
+        cursor = end
+    return ranks
+
+
+def compute_math_19_probability_of_backtest_overfitting(
+    performance_matrix: Sequence[Sequence[object]],
+    strategy_ids: Sequence[str],
+    S: int,
+) -> dict[str, object]:
+    matrix = _v34_matrix(performance_matrix, "performance_matrix")
+    strategies = _v34_list(strategy_ids, "strategy_ids")
+    if (
+        len(strategies) != len(matrix[0])
+        or len(strategies) != len(set(strategies))
+        or any(not isinstance(value, str) or not value for value in strategies)
+    ):
+        _fail("strategy_ids must uniquely identify every matrix column")
+    group_count = _v34_positive_int(S, "S", minimum=2)
+    if group_count % 2:
+        _fail("S must be even")
+    groups = _v34_contiguous_groups(len(matrix), group_count)
+    split_rows: list[dict[str, object]] = []
+    logits: list[float] = []
+    for train_group_tuple in combinations(
+        range(group_count), group_count // 2
+    ):
+        train_groups = set(train_group_tuple)
+        train_indices = [
+            index for group in train_groups for index in groups[group]
+        ]
+        test_indices = [
+            index
+            for group in range(group_count)
+            if group not in train_groups
+            for index in groups[group]
+        ]
+        train_means = [
+            math.fsum(matrix[index][column] for index in train_indices)
+            / len(train_indices)
+            for column in range(len(strategies))
+        ]
+        best = max(train_means)
+        winner = min(
+            (
+                column
+                for column, value in enumerate(train_means)
+                if value == best
+            ),
+            key=lambda column: str(strategies[column]),
+        )
+        test_means = [
+            math.fsum(matrix[index][column] for index in test_indices)
+            / len(test_indices)
+            for column in range(len(strategies))
+        ]
+        ranks = _v34_stable_midranks(test_means)
+        relative_rank = ranks[winner] / (len(strategies) + 1.0)
+        logit = math.log(relative_rank / (1.0 - relative_rank))
+        logits.append(logit)
+        split_rows.append(
+            {
+                "train_groups": tuple(train_group_tuple),
+                "is_winner_strategy_id": strategies[winner],
+                "oos_midrank_worst_1_best_n": ranks[winner],
+                "relative_rank": relative_rank,
+                "logit": logit,
+            }
+        )
+    return {
+        "probability_of_backtest_overfitting": (
+            sum(value <= 0.0 for value in logits) / len(logits)
+        ),
+        "S": group_count,
+        "split_count": len(split_rows),
+        "logits": tuple(logits),
+        "splits": tuple(split_rows),
+    }
+
+
+def _v34_intervals(value: object) -> list[dict[str, object]]:
+    raw = _v34_list(value, "sample_intervals")
+    rows: list[dict[str, object]] = []
+    identifiers: set[str] = set()
+    for index, item in enumerate(raw):
+        row = _v34_mapping(item, f"sample_intervals[{index}]")
+        identifier = row.get("sample_id")
+        if (
+            not isinstance(identifier, str)
+            or not identifier
+            or identifier in identifiers
+        ):
+            _fail("sample_id must be unique nonempty text")
+        identifiers.add(identifier)
+        start = finite_float(
+            row.get("start"), field_name=f"sample_intervals[{index}].start"
+        )
+        end = finite_float(
+            row.get("end"), field_name=f"sample_intervals[{index}].end"
+        )
+        if not start < end:
+            _fail("half-open sample intervals require start < end")
+        rows.append({"sample_id": identifier, "start": start, "end": end})
+    return sorted(
+        rows,
+        key=lambda row: (
+            float(row["start"]),
+            float(row["end"]),
+            str(row["sample_id"]),
+        ),
+    )
+
+
+def _v34_balanced_blocks(length: int, count: int) -> list[list[int]]:
+    if not 2 <= count <= length:
+        _fail("fold/group count must be in [2,n]")
+    base, remainder = divmod(length, count)
+    blocks: list[list[int]] = []
+    cursor = 0
+    for index in range(count):
+        width = base + (1 if index < remainder else 0)
+        blocks.append(list(range(cursor, cursor + width)))
+        cursor += width
+    return blocks
+
+
+def _v34_overlap(
+    left: Mapping[str, object], right: Mapping[str, object]
+) -> bool:
+    return float(left["start"]) < float(right["end"]) and float(
+        right["start"]
+    ) < float(left["end"])
+
+
+def _v34_merged_intervals(
+    rows: Sequence[Mapping[str, object]],
+) -> list[tuple[float, float]]:
+    ordered = sorted((float(row["start"]), float(row["end"])) for row in rows)
+    merged: list[tuple[float, float]] = []
+    for start, end in ordered:
+        if not merged or start > merged[-1][1]:
+            merged.append((start, end))
+        else:
+            merged[-1] = (merged[-1][0], max(merged[-1][1], end))
+    return merged
+
+
+def _v34_purged_split(
+    intervals: Sequence[Mapping[str, object]],
+    test_indices: Sequence[int],
+    embargo_duration: float,
+) -> dict[str, object]:
+    test_set = set(test_indices)
+    test = [intervals[index] for index in test_indices]
+    merged = _v34_merged_intervals(test)
+    train: list[str] = []
+    purged: list[str] = []
+    embargoed: list[str] = []
+    for index, row in enumerate(intervals):
+        if index in test_set:
+            continue
+        identifier = str(row["sample_id"])
+        if any(_v34_overlap(row, test_row) for test_row in test):
+            purged.append(identifier)
+        elif any(
+            end
+            <= float(row["start"])
+            < end + embargo_duration
+            for _, end in merged
+        ):
+            embargoed.append(identifier)
+        else:
+            train.append(identifier)
+    return {
+        "test_sample_ids": tuple(str(row["sample_id"]) for row in test),
+        "train_sample_ids": tuple(train),
+        "purged_sample_ids": tuple(purged),
+        "embargoed_sample_ids": tuple(embargoed),
+        "merged_test_intervals": tuple(tuple(value) for value in merged),
+    }
+
+
+def compute_math_20_purged_kfold_with_embargo(
+    sample_intervals: Sequence[Mapping[str, object]],
+    folds: int,
+    embargo_duration: object,
+) -> dict[str, object]:
+    intervals = _v34_intervals(sample_intervals)
+    fold_count = _v34_positive_int(folds, "folds", minimum=2)
+    embargo = finite_float(embargo_duration, field_name="embargo_duration")
+    if embargo < 0:
+        _fail("embargo duration must be nonnegative event time")
+    blocks = _v34_balanced_blocks(len(intervals), fold_count)
+    results: list[dict[str, object]] = []
+    for fold_id, indices in enumerate(blocks):
+        row = _v34_purged_split(intervals, indices, embargo)
+        row["fold_id"] = fold_id
+        results.append(row)
+    return {
+        "ordered_sample_ids": tuple(str(row["sample_id"]) for row in intervals),
+        "interval_semantics": "HALF_OPEN_START_INCLUSIVE_END_EXCLUSIVE",
+        "embargo_basis": "TIME_DURATION_AFTER_MERGED_TEST_INTERVAL",
+        "folds": tuple(results),
+    }
+
+
+def _v34_set_partitions(
+    items: tuple[int, ...], block_size: int
+) -> list[tuple[tuple[int, ...], ...]]:
+    if not items:
+        return [tuple()]
+    first = items[0]
+    result: list[tuple[tuple[int, ...], ...]] = []
+    for rest in combinations(items[1:], block_size - 1):
+        block = tuple(sorted((first, *rest)))
+        remaining = tuple(item for item in items if item not in block)
+        for suffix in _v34_set_partitions(remaining, block_size):
+            result.append(tuple(sorted((block, *suffix))))
+    return sorted(set(result))
+
+
+def _v34_resolvable_paths(
+    group_count: int, test_group_count: int
+) -> list[list[tuple[int, ...]]]:
+    if group_count % test_group_count:
+        _fail("frozen CPCV exact-cover profile requires k to divide N")
+    splits = list(combinations(range(group_count), test_group_count))
+    split_set = set(splits)
+    partitions = _v34_set_partitions(
+        tuple(range(group_count)), test_group_count
+    )
+    target_count = math.comb(group_count - 1, test_group_count - 1)
+    candidates = {
+        split: tuple(partition for partition in partitions if split in partition)
+        for split in splits
+    }
+
+    def solve(
+        uncovered: frozenset[tuple[int, ...]],
+        chosen: tuple[tuple[tuple[int, ...], ...], ...],
+    ) -> tuple[tuple[tuple[int, ...], ...], ...] | None:
+        if not uncovered:
+            return chosen if len(chosen) == target_count else None
+        if len(chosen) >= target_count:
+            return None
+        pivot = min(
+            uncovered,
+            key=lambda split: (
+                sum(set(partition) <= uncovered for partition in candidates[split]),
+                split,
+            ),
+        )
+        for partition in candidates[pivot]:
+            members = frozenset(partition)
+            if members <= uncovered:
+                answer = solve(uncovered - members, (*chosen, partition))
+                if answer is not None:
+                    return answer
+        return None
+
+    solution = solve(frozenset(split_set), tuple())
+    if solution is None:
+        _fail("deterministic resolvable CPCV path design does not exist")
+    return [[tuple(block) for block in partition] for partition in solution]
+
+
+def compute_math_21_combinatorial_purged_cross_validation(
+    sample_intervals: Sequence[Mapping[str, object]],
+    N_groups: int,
+    k_test_groups: int,
+    embargo_duration: object,
+    aggregation_rule: str,
+) -> dict[str, object]:
+    intervals = _v34_intervals(sample_intervals)
+    group_count = _v34_positive_int(N_groups, "N_groups", minimum=2)
+    test_group_count = _v34_positive_int(
+        k_test_groups, "k_test_groups"
+    )
+    if (
+        not 1 <= test_group_count < group_count
+        or group_count > len(intervals)
+        or group_count > 8
+    ):
+        _fail("CPCV requires 1<=k<N<=sample_count and N<=8")
+    embargo = finite_float(embargo_duration, field_name="embargo_duration")
+    if embargo < 0:
+        _fail("embargo_duration must be nonnegative")
+    if not isinstance(aggregation_rule, str) or not aggregation_rule:
+        _fail("aggregation_rule must be an exact method token")
+    groups = _v34_balanced_blocks(len(intervals), group_count)
+    split_rows: list[dict[str, object]] = []
+    split_lookup: dict[tuple[int, ...], int] = {}
+    for split_id, group_tuple in enumerate(
+        combinations(range(group_count), test_group_count)
+    ):
+        test_indices = [index for group in group_tuple for index in groups[group]]
+        split = _v34_purged_split(intervals, test_indices, embargo)
+        split.update(
+            {"split_id": split_id, "test_groups": tuple(group_tuple)}
+        )
+        split_rows.append(split)
+        split_lookup[group_tuple] = split_id
+    path_partitions = _v34_resolvable_paths(group_count, test_group_count)
+    paths = tuple(
+        {
+            "path_id": path_id,
+            "split_ids": tuple(split_lookup[tuple(block)] for block in partition),
+            "test_group_partition": tuple(tuple(block) for block in partition),
+        }
+        for path_id, partition in enumerate(path_partitions)
+    )
+    expected_path_count = math.comb(group_count - 1, test_group_count - 1)
+    if (
+        len(paths) != expected_path_count
+        or sorted(
+            split_id for path in paths for split_id in path["split_ids"]
+        )
+        != list(range(len(split_rows)))
+    ):
+        _fail("CPCV path coverage invariant failed")
+    return {
+        "N_groups": group_count,
+        "k_test_groups": test_group_count,
+        "split_count": len(split_rows),
+        "expected_path_count": expected_path_count,
+        "path_count": len(paths),
+        "aggregation_rule": aggregation_rule,
+        "splits": tuple(split_rows),
+        "paths": paths,
+    }
+
+
+def _v34_logged_rows(value: object) -> list[dict[str, object]]:
+    raw_rows = _v34_list(value, "logged_rows")
+    rows: list[dict[str, object]] = []
+    for row_index, raw_row in enumerate(raw_rows):
+        row = _v34_mapping(raw_row, f"logged_rows[{row_index}]")
+        behavior_raw = _v34_list(
+            row.get("behavior_action_probabilities"),
+            f"logged_rows[{row_index}].behavior_action_probabilities",
+        )
+        target_raw = _v34_list(
+            row.get("target_action_probabilities"),
+            f"logged_rows[{row_index}].target_action_probabilities",
+        )
+        model_raw = _v34_list(
+            row.get("cross_fitted_reward_model_predictions"),
+            f"logged_rows[{row_index}].cross_fitted_reward_model_predictions",
+        )
+        if not len(behavior_raw) == len(target_raw) == len(model_raw):
+            _fail("behavior, target, and reward model vectors must align")
+        behavior = [
+            _probability(value, field_name=f"behavior[{index}]")
+            for index, value in enumerate(behavior_raw)
+        ]
+        target = [
+            _probability(value, field_name=f"target[{index}]")
+            for index, value in enumerate(target_raw)
+        ]
+        if (
+            abs(math.fsum(behavior) - 1.0) > 1e-12
+            or abs(math.fsum(target) - 1.0) > 1e-12
+            or any(
+                target_probability > 0 and behavior_probability <= 0
+                for behavior_probability, target_probability in zip(
+                    behavior, target, strict=True
+                )
+            )
+        ):
+            _fail("target/behavior policies violate simplex or support")
+        model = [
+            finite_float(value, field_name=f"reward_model[{index}]")
+            for index, value in enumerate(model_raw)
+        ]
+        action = row.get("logged_action_index")
+        fold_id = row.get("fold_id")
+        if (
+            isinstance(action, bool)
+            or not isinstance(action, int)
+            or not 0 <= action < len(behavior)
+            or isinstance(fold_id, bool)
+            or not isinstance(fold_id, int)
+            or fold_id < 0
+            or row.get("cross_fitted_prediction") is not True
+        ):
+            _fail("logged action/fold/cross-fit state is invalid")
+        rows.append(
+            {
+                "row_id": str(row.get("row_id")),
+                "behavior": behavior,
+                "target": target,
+                "model": model,
+                "action": action,
+                "reward": finite_float(
+                    row.get("reward"),
+                    field_name=f"logged_rows[{row_index}].reward",
+                ),
+                "fold_id": fold_id,
+            }
+        )
+    return rows
+
+
+def _v34_logged_row_terms(
+    row: Mapping[str, object],
+) -> tuple[float, float, float, float]:
+    action = int(row["action"])
+    behavior = row["behavior"]
+    target = row["target"]
+    model = row["model"]
+    assert isinstance(behavior, list)
+    assert isinstance(target, list)
+    assert isinstance(model, list)
+    mu = float(behavior[action])
+    pi = float(target[action])
+    if pi > 0 and mu <= 0:
+        _fail("logged row violates positivity")
+    weight = 0.0 if pi == 0 else pi / mu
+    direct = math.fsum(
+        float(probability) * float(prediction)
+        for probability, prediction in zip(target, model, strict=True)
+    )
+    reward = float(row["reward"])
+    residual = reward - float(model[action])
+    return direct, weight, residual, reward
+
+
+def _v34_effective_sample_size(weights: Sequence[float]) -> float:
+    total = math.fsum(weights)
+    squares = math.fsum(value * value for value in weights)
+    if total <= 0 or squares <= 0:
+        _fail("weights require positive total and squared total")
+    return total * total / squares
+
+
+def compute_math_22_doubly_robust_ope(
+    logged_rows: Sequence[Mapping[str, object]],
+) -> dict[str, object]:
+    rows = _v34_logged_rows(logged_rows)
+    values: list[float] = []
+    weights: list[float] = []
+    for row in rows:
+        direct, weight, residual, _ = _v34_logged_row_terms(row)
+        values.append(direct + weight * residual)
+        weights.append(weight)
+    return {
+        "doubly_robust_estimate": _v34_mean(values),
+        "row_values": tuple(values),
+        "importance_weights": tuple(weights),
+        "effective_sample_size": (
+            _v34_effective_sample_size(weights)
+            if any(weight > 0 for weight in weights)
+            else 0.0
+        ),
+        "clipping_applied": False,
+    }
+
+
+def compute_math_23_inverse_propensity_score_ope(
+    logged_rows: Sequence[Mapping[str, object]],
+) -> dict[str, object]:
+    rows = _v34_logged_rows(logged_rows)
+    values: list[float] = []
+    weights: list[float] = []
+    for row in rows:
+        _, weight, _, reward = _v34_logged_row_terms(row)
+        values.append(weight * reward)
+        weights.append(weight)
+    return {
+        "inverse_propensity_score_estimate": _v34_mean(values),
+        "row_values": tuple(values),
+        "importance_weights": tuple(weights),
+        "effective_sample_size": (
+            _v34_effective_sample_size(weights)
+            if any(weight > 0 for weight in weights)
+            else 0.0
+        ),
+        "clipping_applied": False,
+    }
+
+
+def compute_math_24_self_normalized_ips(
+    weights: Sequence[object],
+    rewards: Sequence[object],
+) -> dict[str, float]:
+    raw_weights = _v34_list(weights, "weights")
+    raw_rewards = _v34_list(rewards, "rewards")
+    if len(raw_weights) != len(raw_rewards):
+        _fail("weights and rewards must align")
+    parsed_weights = tuple(
+        finite_float(value, field_name=f"weights[{index}]")
+        for index, value in enumerate(raw_weights)
+    )
+    parsed_rewards = tuple(
+        finite_float(value, field_name=f"rewards[{index}]")
+        for index, value in enumerate(raw_rewards)
+    )
+    if any(value < 0 for value in parsed_weights):
+        _fail("importance weights must be nonnegative")
+    total = math.fsum(parsed_weights)
+    if total <= 0:
+        _fail("importance weights must have positive total")
+    return {
+        "self_normalized_ips_estimate": (
+            math.fsum(
+                weight * reward
+                for weight, reward in zip(
+                    parsed_weights, parsed_rewards, strict=True
+                )
+            )
+            / total
+        ),
+        "weight_sum": total,
+        "effective_sample_size": _v34_effective_sample_size(parsed_weights),
+    }
+
+
+def _v34_tau(value: object) -> float:
+    if value == "INF":
+        return math.inf
+    result = finite_float(value, field_name="tau")
+    if result < 0:
+        _fail("tau must be nonnegative")
+    return result
+
+
+def _v34_switch_value(row: Mapping[str, object], tau: float) -> float:
+    direct, weight, residual, _ = _v34_logged_row_terms(row)
+    return direct + (weight * residual if weight <= tau else 0.0)
+
+
+def _v34_switch_bias_bound(
+    rows: Sequence[Mapping[str, object]], tau: float, reward_range: float
+) -> float:
+    masses: list[float] = []
+    for row in rows:
+        behavior = row["behavior"]
+        target = row["target"]
+        assert isinstance(behavior, list)
+        assert isinstance(target, list)
+        mass = math.fsum(
+            float(pi)
+            for mu, pi in zip(behavior, target, strict=True)
+            if float(pi) > 0 and float(pi) / float(mu) > tau
+        )
+        masses.append(mass)
+    return reward_range * _v34_mean(masses)
+
+
+def compute_math_25_switch_ope(
+    logged_rows: Sequence[Mapping[str, object]],
+    tau_grid: Sequence[object],
+    outer_fold_count: int,
+    reward_lower_bound: object,
+    reward_upper_bound: object,
+) -> dict[str, object]:
+    rows = _v34_logged_rows(logged_rows)
+    lower = finite_float(
+        reward_lower_bound, field_name="reward_lower_bound"
+    )
+    upper = finite_float(
+        reward_upper_bound, field_name="reward_upper_bound"
+    )
+    if not lower < upper or any(
+        not lower <= float(row["reward"]) <= upper for row in rows
+    ):
+        _fail("reward bounds must be ordered and cover logged rewards")
+    fold_count = _v34_positive_int(
+        outer_fold_count, "outer_fold_count", minimum=2
+    )
+    if {int(row["fold_id"]) for row in rows} != set(range(fold_count)):
+        _fail("outer fold IDs must cover 0..outer_fold_count-1")
+    raw_taus = _v34_list(tau_grid, "tau_grid")
+    taus = [_v34_tau(value) for value in raw_taus]
+    if taus != sorted(set(taus)):
+        _fail("tau_grid must be unique and ascending")
+    fold_results: list[dict[str, object]] = []
+    held_out_values: list[float] = []
+    for fold in range(fold_count):
+        train = [row for row in rows if int(row["fold_id"]) != fold]
+        held = [row for row in rows if int(row["fold_id"]) == fold]
+        if len(train) < 2 or not held:
+            _fail("each outer fold needs training and held-out support")
+        criteria: list[dict[str, object]] = []
+        for tau in taus:
+            values = [_v34_switch_value(row, tau) for row in train]
+            variance_of_mean = _v34_sample_variance(values) / len(values)
+            bias = _v34_switch_bias_bound(train, tau, upper - lower)
+            criteria.append(
+                {
+                    "tau": "INF" if math.isinf(tau) else tau,
+                    "variance_of_mean": variance_of_mean,
+                    "bias_upper_bound": bias,
+                    "estimated_mse_upper_bound": (
+                        variance_of_mean + bias * bias
+                    ),
+                }
+            )
+        selected_index = min(
+            range(len(criteria)),
+            key=lambda index: (
+                float(criteria[index]["estimated_mse_upper_bound"]),
+                taus[index],
+            ),
+        )
+        selected_tau = taus[selected_index]
+        values = [_v34_switch_value(row, selected_tau) for row in held]
+        held_out_values.extend(values)
+        fold_results.append(
+            {
+                "outer_fold": fold,
+                "selected_tau": (
+                    "INF" if math.isinf(selected_tau) else selected_tau
+                ),
+                "criteria": tuple(criteria),
+                "held_out_row_values": tuple(values),
+            }
+        )
+    return {
+        "switch_ope_estimate": _v34_mean(held_out_values),
+        "held_out_row_values": tuple(held_out_values),
+        "outer_fold_results": tuple(fold_results),
+        "selection_rule": (
+            "MIN_ESTIMATED_MSE_UPPER_BOUND_THEN_SMALLEST_TAU"
+        ),
+        "clipping_applied": False,
+    }
+
+
+def _v34_on_price_grid(
+    value: Decimal, ranges: Sequence[Mapping[str, object]]
+) -> bool:
+    for index, row in enumerate(ranges):
+        minimum = exact_decimal(
+            row.get("minimum"), field_name=f"price_ranges[{index}].minimum"
+        )
+        maximum = exact_decimal(
+            row.get("maximum"), field_name=f"price_ranges[{index}].maximum"
+        )
+        step = exact_decimal(
+            row.get("step"), field_name=f"price_ranges[{index}].step"
+        )
+        if minimum > maximum or step <= 0:
+            _fail("price range minimum/maximum/step is invalid")
+        if minimum <= value <= maximum:
+            with localcontext(decimal_context_v1()):
+                return (value - minimum) % step == 0
+    return False
+
+
+def compute_math_36_kalshi_binary_book_transform(
+    yes_bids: Sequence[DecimalInput],
+    no_bids: Sequence[DecimalInput],
+    payout: DecimalInput,
+    book_sequence: int,
+    expected_sequence: int,
+    book_state: str,
+    price_ranges: Sequence[Mapping[str, object]],
+) -> dict[str, object]:
+    if (
+        isinstance(book_sequence, bool)
+        or not isinstance(book_sequence, int)
+        or isinstance(expected_sequence, bool)
+        or not isinstance(expected_sequence, int)
+        or book_sequence != expected_sequence
+        or book_state != "CURRENT_CONTIGUOUS_SNAPSHOT_PLUS_DELTAS"
+    ):
+        _fail("Kalshi book must be current, contiguous, and sequence-exact")
+    yes = tuple(
+        exact_decimal(value, field_name=f"yes_bids[{index}]")
+        for index, value in enumerate(_v34_list(yes_bids, "yes_bids"))
+    )
+    no = tuple(
+        exact_decimal(value, field_name=f"no_bids[{index}]")
+        for index, value in enumerate(_v34_list(no_bids, "no_bids"))
+    )
+    payout_value = exact_decimal(payout, field_name="payout")
+    if payout_value <= 0:
+        _fail("payout must be positive")
+    ranges = [
+        _v34_mapping(row, f"price_ranges[{index}]")
+        for index, row in enumerate(_v34_list(price_ranges, "price_ranges"))
+    ]
+    if any(
+        value < 0
+        or value > payout_value
+        or not _v34_on_price_grid(value, ranges)
+        for value in (*yes, *no)
+    ):
+        _fail("book price is outside the active market-specific grid")
+    best_yes = max(yes)
+    best_no = max(no)
+    with localcontext(decimal_context_v1()):
+        yes_ask = payout_value - best_no
+        no_ask = payout_value - best_yes
+    if (
+        not _v34_on_price_grid(yes_ask, ranges)
+        or not _v34_on_price_grid(no_ask, ranges)
+    ):
+        _fail("derived complements are outside the active price grid")
+    return {
+        "best_yes_bid": best_yes,
+        "best_no_bid": best_no,
+        "derived_yes_ask": yes_ask,
+        "derived_no_ask": no_ask,
+        "book_sequence": book_sequence,
+    }
+
+
+def _v34_binary_assignment(
+    value: object, variable_count: int, name: str
+) -> list[int]:
+    items = _v34_list(value, name, minimum=variable_count)
+    if len(items) != variable_count or any(
+        isinstance(item, bool)
+        or not isinstance(item, int)
+        or item not in (0, 1)
+        for item in items
+    ):
+        _fail(f"{name} must contain one binary integer per variable")
+    return [int(item) for item in items]
+
+
+def _v34_canonical_qubo(
+    *,
+    representation: str,
+    diagonal: Sequence[object],
+    upper_terms: Sequence[Mapping[str, object]],
+    full_symmetric_matrix: Sequence[Sequence[object]],
+    constant: object,
+) -> dict[str, object]:
+    raw_diagonal = _v34_list(diagonal, "diagonal")
+    diagonal_values = [
+        finite_float(value, field_name=f"diagonal[{index}]")
+        for index, value in enumerate(raw_diagonal)
+    ]
+    variable_count = len(diagonal_values)
+    interactions: dict[tuple[int, int], float] = {}
+    if representation == "CANONICAL_UPPER_TRIANGULAR":
+        if list(full_symmetric_matrix):
+            _fail("full_symmetric_matrix must be empty for canonical upper input")
+        for index, raw_term in enumerate(
+            _v34_list(upper_terms, "upper_terms", minimum=0)
+            if upper_terms
+            else []
+        ):
+            term = _v34_mapping(raw_term, f"upper_terms[{index}]")
+            i, j = term.get("i"), term.get("j")
+            if (
+                isinstance(i, bool)
+                or isinstance(j, bool)
+                or not isinstance(i, int)
+                or not isinstance(j, int)
+                or not 0 <= i < j < variable_count
+                or (i, j) in interactions
+            ):
+                _fail("upper terms require unique 0<=i<j<n identities")
+            interactions[(i, j)] = finite_float(
+                term.get("value"), field_name=f"upper_terms[{index}].value"
+            )
+    elif representation == "FULL_SYMMETRIC_ADAPTER_SUM_OFF_DIAGONAL_PAIRS":
+        if list(upper_terms):
+            _fail("upper_terms must be empty for the full-matrix adapter")
+        matrix = _v34_matrix(
+            full_symmetric_matrix, "full_symmetric_matrix"
+        )
+        if len(matrix) != variable_count or any(
+            len(row) != variable_count for row in matrix
+        ):
+            _fail("full_symmetric_matrix must be n by n")
+        for i in range(variable_count):
+            if matrix[i][i] != diagonal_values[i]:
+                _fail("full matrix diagonal must equal explicit diagonal")
+            for j in range(i + 1, variable_count):
+                interactions[(i, j)] = matrix[i][j] + matrix[j][i]
+    else:
+        _fail("unknown QUBO representation")
+    return {
+        "schema_version": "CANONICAL_QUBO_MODEL_V1",
+        "representation": "CANONICAL_UPPER_TRIANGULAR",
+        "variable_count": variable_count,
+        "diagonal": tuple(diagonal_values),
+        "upper_terms": tuple(
+            {"i": i, "j": j, "value": interactions[(i, j)]}
+            for i, j in sorted(interactions)
+        ),
+        "constant": finite_float(constant, field_name="constant"),
+    }
+
+
+def _v34_qubo_parts(
+    canonical: Mapping[str, object],
+) -> tuple[list[float], dict[tuple[int, int], float], float]:
+    if (
+        canonical.get("schema_version") != "CANONICAL_QUBO_MODEL_V1"
+        or canonical.get("representation") != "CANONICAL_UPPER_TRIANGULAR"
+    ):
+        _fail("canonical QUBO identity fields are inconsistent")
+    diagonal = [
+        finite_float(value, field_name=f"canonical.diagonal[{index}]")
+        for index, value in enumerate(
+            _v34_list(canonical.get("diagonal"), "canonical.diagonal")
+        )
+    ]
+    if canonical.get("variable_count") != len(diagonal):
+        _fail("canonical QUBO variable count differs from diagonal")
+    interactions: dict[tuple[int, int], float] = {}
+    raw_terms = canonical.get("upper_terms")
+    if not isinstance(raw_terms, Sequence) or isinstance(raw_terms, str | bytes):
+        _fail("canonical upper terms must be a sequence")
+    for index, raw_term in enumerate(raw_terms):
+        term = _v34_mapping(raw_term, f"canonical.upper_terms[{index}]")
+        i, j = term.get("i"), term.get("j")
+        if (
+            isinstance(i, bool)
+            or isinstance(j, bool)
+            or not isinstance(i, int)
+            or not isinstance(j, int)
+            or not 0 <= i < j < len(diagonal)
+            or (i, j) in interactions
+        ):
+            _fail("canonical upper interaction identity is invalid")
+        interactions[(i, j)] = finite_float(
+            term.get("value"),
+            field_name=f"canonical.upper_terms[{index}].value",
+        )
+    return (
+        diagonal,
+        interactions,
+        finite_float(canonical.get("constant"), field_name="canonical.constant"),
+    )
+
+
+def _v34_qubo_energy(
+    diagonal: Sequence[float],
+    interactions: Mapping[tuple[int, int], float],
+    constant: float,
+    assignment: Sequence[int],
+) -> float:
+    return (
+        constant
+        + math.fsum(
+            diagonal[index] * assignment[index]
+            for index in range(len(assignment))
+        )
+        + math.fsum(
+            coefficient * assignment[i] * assignment[j]
+            for (i, j), coefficient in interactions.items()
+        )
+    )
+
+
+def compute_math_46_qubo_upper_triangular_convention_v2(
+    representation: str,
+    diagonal: Sequence[object],
+    upper_terms: Sequence[Mapping[str, object]],
+    full_symmetric_matrix: Sequence[Sequence[object]],
+    constant: object,
+    binary_assignment: Sequence[int],
+) -> dict[str, object]:
+    canonical = _v34_canonical_qubo(
+        representation=representation,
+        diagonal=diagonal,
+        upper_terms=upper_terms,
+        full_symmetric_matrix=full_symmetric_matrix,
+        constant=constant,
+    )
+    diagonal_values, interactions, offset = _v34_qubo_parts(canonical)
+    assignment = _v34_binary_assignment(
+        binary_assignment, len(diagonal_values), "binary_assignment"
+    )
+    exhaustive = tuple(
+        {
+            "binary_assignment": tuple(bits),
+            "energy": _v34_qubo_energy(
+                diagonal_values, interactions, offset, bits
+            ),
+        }
+        for bits in product((0, 1), repeat=len(diagonal_values))
+    ) if len(diagonal_values) <= 12 else ()
+    return {
+        "canonical_qubo": canonical,
+        "binary_assignment": tuple(assignment),
+        "energy": _v34_qubo_energy(
+            diagonal_values, interactions, offset, assignment
+        ),
+        "exhaustive_assignments": exhaustive,
+    }
+
+
+def compute_math_47_qubo_to_ising_transform_v2(
+    representation: str,
+    diagonal: Sequence[object],
+    upper_terms: Sequence[Mapping[str, object]],
+    full_symmetric_matrix: Sequence[Sequence[object]],
+    constant: object,
+    binary_assignment: Sequence[int],
+) -> dict[str, object]:
+    canonical = _v34_canonical_qubo(
+        representation=representation,
+        diagonal=diagonal,
+        upper_terms=upper_terms,
+        full_symmetric_matrix=full_symmetric_matrix,
+        constant=constant,
+    )
+    diagonal_values, interactions, qubo_constant = _v34_qubo_parts(canonical)
+    assignment = _v34_binary_assignment(
+        binary_assignment, len(diagonal_values), "binary_assignment"
+    )
+    fields = tuple(
+        -diagonal_values[index] / 2.0
+        - math.fsum(
+            coefficient
+            for (i, j), coefficient in interactions.items()
+            if i == index or j == index
+        )
+        / 4.0
+        for index in range(len(diagonal_values))
+    )
+    couplers = {
+        key: coefficient / 4.0
+        for key, coefficient in interactions.items()
+    }
+    offset = (
+        qubo_constant
+        + math.fsum(diagonal_values) / 2.0
+        + math.fsum(interactions.values()) / 4.0
+    )
+
+    def ising_energy(spins: Sequence[int]) -> float:
+        return (
+            offset
+            + math.fsum(
+                fields[index] * spins[index]
+                for index in range(len(spins))
+            )
+            + math.fsum(
+                coefficient * spins[i] * spins[j]
+                for (i, j), coefficient in couplers.items()
+            )
+        )
+
+    spins = tuple(1 - 2 * value for value in assignment)
+    qubo_energy = _v34_qubo_energy(
+        diagonal_values, interactions, qubo_constant, assignment
+    )
+    transformed_energy = ising_energy(spins)
+    tolerance = 1e-10 * max(1.0, abs(qubo_energy), abs(transformed_energy))
+    if abs(qubo_energy - transformed_energy) > tolerance:
+        _fail("QUBO/Ising energy parity failed")
+    exhaustive: list[dict[str, object]] = []
+    if len(diagonal_values) <= 12:
+        for bits in product((0, 1), repeat=len(diagonal_values)):
+            spin_row = tuple(1 - 2 * value for value in bits)
+            qubo_row = _v34_qubo_energy(
+                diagonal_values, interactions, qubo_constant, bits
+            )
+            ising_row = ising_energy(spin_row)
+            if abs(qubo_row - ising_row) > 1e-10 * max(
+                1.0, abs(qubo_row), abs(ising_row)
+            ):
+                _fail("exhaustive QUBO/Ising parity failed")
+            exhaustive.append(
+                {
+                    "binary_assignment": tuple(bits),
+                    "spin_assignment": spin_row,
+                    "qubo_energy": qubo_row,
+                    "ising_energy": ising_row,
+                }
+            )
+    return {
+        "binary_to_spin_convention": (
+            "x_i=(1-s_i)/2; s=+1 maps to x=0 and s=-1 maps to x=1"
+        ),
+        "linear_fields_h": fields,
+        "couplers_J": tuple(
+            {"i": i, "j": j, "value": couplers[(i, j)]}
+            for i, j in sorted(couplers)
+        ),
+        "offset": offset,
+        "binary_assignment": tuple(assignment),
+        "spin_assignment": spins,
+        "qubo_energy": qubo_energy,
+        "ising_energy": transformed_energy,
+        "exhaustive_parity_rows": tuple(exhaustive),
+    }
+
+
+def _v34_cqm_variables(
+    model: Mapping[str, object],
+) -> tuple[dict[str, dict[str, object]], tuple[str, ...]]:
+    if model.get("schema_version") != "QTT_CQM_GRAMMAR_V1":
+        _fail("CQM model must use QTT_CQM_GRAMMAR_V1")
+    raw_variables = _v34_list(model.get("variables"), "model.variables")
+    registry: dict[str, dict[str, object]] = {}
+    order: list[str] = []
+    for index, raw_variable in enumerate(raw_variables):
+        variable = _v34_mapping(raw_variable, f"model.variables[{index}]")
+        identifier = variable.get("id")
+        kind = variable.get("type")
+        if (
+            not isinstance(identifier, str)
+            or not identifier
+            or identifier in registry
+            or kind not in {"BINARY", "INTEGER", "REAL"}
+        ):
+            _fail("CQM variable identity or type is invalid")
+        lower = finite_float(
+            variable.get("lower"), field_name=f"variables[{index}].lower"
+        )
+        upper = finite_float(
+            variable.get("upper"), field_name=f"variables[{index}].upper"
+        )
+        if lower > upper or kind == "BINARY" and (lower, upper) != (0.0, 1.0):
+            _fail("CQM variable bounds are invalid")
+        enumeration = [
+            finite_float(
+                value,
+                field_name=f"variables[{index}].enumeration_values",
+            )
+            for value in _v34_list(
+                variable.get("enumeration_values"),
+                f"variables[{index}].enumeration_values",
+            )
+        ]
+        if (
+            len(enumeration) != len(set(enumeration))
+            or any(value < lower or value > upper for value in enumeration)
+            or kind in {"BINARY", "INTEGER"}
+            and any(value != int(value) for value in enumeration)
+        ):
+            _fail("CQM enumeration values violate type or bounds")
+        if kind == "BINARY" and enumeration != [0.0, 1.0]:
+            _fail("binary enumeration must be exactly [0,1]")
+        if kind == "INTEGER":
+            if lower != int(lower) or upper != int(upper):
+                _fail("integer bounds must be integral")
+            if enumeration != [
+                float(value) for value in range(int(lower), int(upper) + 1)
+            ]:
+                _fail("integer enumeration must exhaust the declared domain")
+        registry[identifier] = {
+            "type": kind,
+            "lower": lower,
+            "upper": upper,
+            "unit": variable.get("unit"),
+            "enumeration_values": enumeration,
+        }
+        order.append(identifier)
+    return registry, tuple(order)
+
+
+def _v34_cqm_assignment(
+    value: object, registry: Mapping[str, Mapping[str, object]]
+) -> dict[str, float]:
+    raw = _v34_mapping(value, "assignment")
+    if set(raw) != set(registry):
+        _fail("CQM assignment must provide every variable exactly once")
+    assignment = {
+        key: finite_float(raw[key], field_name=f"assignment.{key}")
+        for key in raw
+    }
+    for key, item in assignment.items():
+        spec = registry[key]
+        if (
+            not float(spec["lower"]) <= item <= float(spec["upper"])
+            or spec["type"] in {"BINARY", "INTEGER"} and item != int(item)
+            or item not in spec["enumeration_values"]  # type: ignore[operator]
+        ):
+            _fail("CQM assignment violates bounds/type/enumeration")
+    return assignment
+
+
+def _v34_linear_expression(
+    value: object, assignment: Mapping[str, float], name: str
+) -> float:
+    coefficients = _v34_mapping(value, name)
+    if set(coefficients) - set(assignment):
+        _fail(f"{name} references an unknown variable")
+    return math.fsum(
+        finite_float(coefficient, field_name=f"{name}.{variable}")
+        * assignment[variable]
+        for variable, coefficient in coefficients.items()
+    )
+
+
+def _v34_quadratic_expression(
+    value: object, assignment: Mapping[str, float], name: str
+) -> float:
+    raw_terms = value
+    if (
+        isinstance(raw_terms, str | bytes)
+        or not isinstance(raw_terms, Sequence)
+    ):
+        _fail(f"{name} must be a sequence")
+    seen: set[tuple[str, str]] = set()
+    result = 0.0
+    for index, raw_term in enumerate(raw_terms):
+        term = _v34_mapping(raw_term, f"{name}[{index}]")
+        u, v = term.get("u"), term.get("v")
+        if (
+            not isinstance(u, str)
+            or not isinstance(v, str)
+            or u not in assignment
+            or v not in assignment
+            or tuple(sorted((u, v))) in seen
+        ):
+            _fail(f"{name} has an unknown or duplicate quadratic term")
+        seen.add(tuple(sorted((u, v))))
+        result += (
+            finite_float(
+                term.get("coefficient"),
+                field_name=f"{name}[{index}].coefficient",
+            )
+            * assignment[u]
+            * assignment[v]
+        )
+    return result
+
+
+def _v34_constraint_violation(sense: object, lhs: float, rhs: float) -> float:
+    if sense == "LE":
+        return max(0.0, lhs - rhs)
+    if sense == "GE":
+        return max(0.0, rhs - lhs)
+    if sense == "EQ":
+        return abs(lhs - rhs)
+    _fail("constraint sense must be LE, GE, or EQ")
+
+
+def _v34_evaluate_cqm(
+    model: Mapping[str, object], assignment: Mapping[str, float]
+) -> dict[str, object]:
+    sense = model.get("objective_sense")
+    if sense not in {"MINIMIZE", "MAXIMIZE"}:
+        _fail("objective_sense must be MINIMIZE or MAXIMIZE")
+    objective = (
+        finite_float(
+            model.get("objective_constant"), field_name="objective_constant"
+        )
+        + _v34_linear_expression(
+            model.get("objective_linear"), assignment, "objective_linear"
+        )
+        + _v34_quadratic_expression(
+            model.get("objective_quadratic"),
+            assignment,
+            "objective_quadratic",
+        )
+    )
+    constraints = model.get("constraints")
+    if isinstance(constraints, str | bytes) or not isinstance(
+        constraints, Sequence
+    ):
+        _fail("constraints must be a sequence")
+    tolerance = finite_float(
+        model.get("feasibility_tolerance"),
+        field_name="feasibility_tolerance",
+    )
+    if tolerance < 0:
+        _fail("feasibility_tolerance must be nonnegative")
+    seen: set[str] = set()
+    evaluations: list[dict[str, object]] = []
+    soft_penalty = 0.0
+    hard_violation_squared = 0.0
+    feasible = True
+    for index, raw_constraint in enumerate(constraints):
+        constraint = _v34_mapping(
+            raw_constraint, f"constraints[{index}]"
+        )
+        identifier = constraint.get("id")
+        if (
+            not isinstance(identifier, str)
+            or not identifier
+            or identifier in seen
+        ):
+            _fail("constraint identities must be unique nonempty text")
+        seen.add(identifier)
+        lhs = (
+            finite_float(
+                constraint.get("constant"),
+                field_name=f"constraints[{index}].constant",
+            )
+            + _v34_linear_expression(
+                constraint.get("linear"),
+                assignment,
+                f"constraints[{index}].linear",
+            )
+            + _v34_quadratic_expression(
+                constraint.get("quadratic"),
+                assignment,
+                f"constraints[{index}].quadratic",
+            )
+        )
+        rhs = finite_float(
+            constraint.get("rhs"),
+            field_name=f"constraints[{index}].rhs",
+        )
+        violation = _v34_constraint_violation(
+            constraint.get("sense"), lhs, rhs
+        )
+        hard = constraint.get("hard")
+        weight = finite_float(
+            constraint.get("soft_penalty_weight"),
+            field_name=f"constraints[{index}].soft_penalty_weight",
+        )
+        if type(hard) is not bool:
+            _fail("constraint hard flag must be an exact boolean")
+        if hard:
+            if weight != 0.0:
+                _fail("hard constraint must have zero soft penalty weight")
+            hard_violation_squared += violation * violation
+            feasible = feasible and violation <= tolerance
+        else:
+            if weight <= 0:
+                _fail("soft constraint requires positive penalty weight")
+            soft_penalty += weight * violation * violation
+        evaluations.append(
+            {
+                "id": identifier,
+                "lhs": lhs,
+                "sense": constraint.get("sense"),
+                "rhs": rhs,
+                "violation": violation,
+                "hard": hard,
+                "soft_penalty_weight": weight,
+            }
+        )
+    penalized = (
+        objective + soft_penalty
+        if sense == "MINIMIZE"
+        else objective - soft_penalty
+    )
+    return {
+        "raw_objective": objective,
+        "soft_penalty": soft_penalty,
+        "penalized_objective": penalized,
+        "original_model_feasible": feasible,
+        "hard_violation_squared": hard_violation_squared,
+        "constraint_evaluations": tuple(evaluations),
+    }
+
+
+def compute_math_48_constrained_quadratic_model_v2(
+    model: Mapping[str, object],
+    assignment: Mapping[str, object],
+) -> dict[str, object]:
+    model_row = _v34_mapping(model, "model")
+    registry, order = _v34_cqm_variables(model_row)
+    supplied = _v34_cqm_assignment(assignment, registry)
+    evaluated = _v34_evaluate_cqm(model_row, supplied)
+    total_states = math.prod(
+        len(registry[variable]["enumeration_values"])  # type: ignore[arg-type]
+        for variable in order
+    )
+    if total_states > 4096:
+        _fail("small exact CQM domain is limited to 4096 assignments")
+    all_rows: list[dict[str, object]] = []
+    for selected in product(
+        *(
+            registry[variable]["enumeration_values"]  # type: ignore[misc]
+            for variable in order
+        )
+    ):
+        candidate = dict(zip(order, selected, strict=True))
+        all_rows.append(
+            {
+                "assignment": candidate,
+                **_v34_evaluate_cqm(model_row, candidate),
+            }
+        )
+    feasible_rows = [
+        row for row in all_rows if row["original_model_feasible"]
+    ]
+    sense = str(model_row["objective_sense"])
+    if feasible_rows:
+        selector = min if sense == "MINIMIZE" else max
+        best = selector(
+            feasible_rows,
+            key=lambda row: float(row["penalized_objective"]),
+        )
+        small_exact_solution: dict[str, object] = {
+            "state": "EXACT_FEASIBLE_OPTIMUM",
+            "assignment": best["assignment"],
+            "raw_objective": best["raw_objective"],
+            "penalized_objective": best["penalized_objective"],
+            "feasible_assignment_count": len(feasible_rows),
+            "enumerated_assignment_count": len(all_rows),
+        }
+    else:
+        small_exact_solution = {
+            "state": "NO_FEASIBLE_ASSIGNMENT",
+            "assignment": None,
+            "raw_objective": None,
+            "penalized_objective": None,
+            "feasible_assignment_count": 0,
+            "enumerated_assignment_count": len(all_rows),
+        }
+    penalty_candidate = model_row.get("conversion_penalty_candidate")
+    if penalty_candidate is None:
+        adequacy: dict[str, object] = {
+            "state": "NOT_APPLICABLE_NATIVE_CQM_NO_CONVERSION_REQUESTED",
+            "penalty": None,
+            "converted_best_assignment": None,
+            "matches_native_feasible_optimum": None,
+        }
+    else:
+        penalty = finite_float(
+            penalty_candidate, field_name="conversion_penalty_candidate"
+        )
+        if penalty <= 0:
+            _fail("conversion penalty candidate must be positive")
+
+        def converted_score(row: Mapping[str, object]) -> float:
+            base = float(row["penalized_objective"])
+            if sense == "MAXIMIZE":
+                base = -base
+            return base + penalty * float(row["hard_violation_squared"])
+
+        converted_best = min(all_rows, key=converted_score)
+        native_assignment = small_exact_solution["assignment"]
+        adequate = (
+            converted_best["original_model_feasible"] is True
+            and native_assignment is not None
+            and converted_best["assignment"] == native_assignment
+        )
+        adequacy = {
+            "state": (
+                "ADEQUATE_FOR_EXACT_ENUMERATED_FIXTURE"
+                if adequate
+                else "INADEQUATE_FOR_EXACT_ENUMERATED_FIXTURE"
+            ),
+            "penalty": penalty,
+            "converted_best_assignment": converted_best["assignment"],
+            "matches_native_feasible_optimum": adequate,
+        }
+    return {
+        "schema_version": model_row["schema_version"],
+        "objective_sense": sense,
+        "raw_objective": evaluated["raw_objective"],
+        "soft_penalty": evaluated["soft_penalty"],
+        "penalized_objective": evaluated["penalized_objective"],
+        "original_model_feasible": evaluated["original_model_feasible"],
+        "constraint_evaluations": evaluated["constraint_evaluations"],
+        "assignment": supplied,
+        "interpret_back_state": (
+            "EXACT_ORIGINAL_VARIABLE_LABELS_AND_UNITS_PRESERVED"
+        ),
+        "small_exact_solution": small_exact_solution,
+        "conversion_penalty_adequacy": adequacy,
+    }
+
+
+def compute_math_49_discrete_quadratic_model_v2(
+    model: Mapping[str, object],
+    assignment: Mapping[str, object],
+) -> dict[str, object]:
+    model_row = _v34_mapping(model, "model")
+    if model_row.get("schema_version") != "QTT_DQM_GRAMMAR_V1":
+        _fail("DQM model must use QTT_DQM_GRAMMAR_V1")
+    variables = _v34_list(model_row.get("variables"), "model.variables")
+    registry: dict[str, tuple[str, ...]] = {}
+    for index, raw_variable in enumerate(variables):
+        variable = _v34_mapping(raw_variable, f"variables[{index}]")
+        identifier = variable.get("id")
+        cases = _v34_list(variable.get("cases"), f"variables[{index}].cases")
+        if (
+            not isinstance(identifier, str)
+            or not identifier
+            or identifier in registry
+            or len(cases) != len(set(cases))
+            or any(not isinstance(case, str) or not case for case in cases)
+        ):
+            _fail("DQM variable and case identities must be unique ordered text")
+        registry[identifier] = tuple(str(case) for case in cases)
+    selected = _v34_mapping(assignment, "assignment")
+    if set(selected) != set(registry) or any(
+        selected[variable] not in registry[variable] for variable in registry
+    ):
+        _fail("DQM assignment must select one known case per variable")
+    expected_linear = {
+        (variable, case)
+        for variable, cases in registry.items()
+        for case in cases
+    }
+    linear: dict[tuple[str, str], float] = {}
+    for index, raw_bias in enumerate(
+        _v34_list(model_row.get("linear_biases"), "linear_biases")
+    ):
+        bias = _v34_mapping(raw_bias, f"linear_biases[{index}]")
+        key = (bias.get("variable"), bias.get("case"))
+        if key not in expected_linear or key in linear:
+            _fail("DQM linear bias identity is duplicate or unknown")
+        linear[(str(key[0]), str(key[1]))] = finite_float(
+            bias.get("bias"), field_name=f"linear_biases[{index}].bias"
+        )
+    if set(linear) != expected_linear:
+        _fail("every DQM variable/case requires an explicit bias, including zero")
+    variable_order = {variable: index for index, variable in enumerate(registry)}
+    pairwise: dict[tuple[str, str, str, str], float] = {}
+    raw_pairwise = model_row.get("pairwise_biases")
+    if isinstance(raw_pairwise, str | bytes) or not isinstance(
+        raw_pairwise, Sequence
+    ):
+        _fail("pairwise_biases must be a sequence")
+    for index, raw_bias in enumerate(raw_pairwise):
+        bias = _v34_mapping(raw_bias, f"pairwise_biases[{index}]")
+        u, v = bias.get("u"), bias.get("v")
+        case_u, case_v = bias.get("case_u"), bias.get("case_v")
+        if (
+            not isinstance(u, str)
+            or not isinstance(v, str)
+            or u not in registry
+            or v not in registry
+            or u == v
+            or case_u not in registry[u]
+            or case_v not in registry[v]
+        ):
+            _fail("DQM pairwise bias references an unknown variable or case")
+        if variable_order[u] > variable_order[v]:
+            u, v = v, u
+            case_u, case_v = case_v, case_u
+        key = (u, str(case_u), v, str(case_v))
+        if key in pairwise:
+            _fail("DQM pairwise interaction is duplicated")
+        pairwise[key] = finite_float(
+            bias.get("bias"), field_name=f"pairwise_biases[{index}].bias"
+        )
+    constant = finite_float(model_row.get("constant"), field_name="constant")
+
+    def energy(candidate: Mapping[str, object]) -> float:
+        return (
+            constant
+            + math.fsum(
+                linear[(variable, str(candidate[variable]))]
+                for variable in registry
+            )
+            + math.fsum(
+                coefficient
+                for (u, case_u, v, case_v), coefficient in pairwise.items()
+                if candidate[u] == case_u and candidate[v] == case_v
+            )
+        )
+
+    total_states = math.prod(len(cases) for cases in registry.values())
+    if total_states > 4096:
+        _fail("small exact DQM domain is limited to 4096 assignments")
+    exhaustive = tuple(
+        {
+            "assignment": dict(zip(registry, cases, strict=True)),
+            "energy": energy(dict(zip(registry, cases, strict=True))),
+        }
+        for cases in product(*(registry[variable] for variable in registry))
+    )
+    return {
+        "schema_version": model_row["schema_version"],
+        "assignment": dict(selected),
+        "energy": energy(selected),
+        "exhaustive_assignments": exhaustive,
+        "interpret_back_state": (
+            "EXACT_ORDERED_VARIABLE_AND_CASE_LABELS_PRESERVED"
+        ),
+        "one_hot_expansion_applied": False,
+    }
+
+
+from .specification import (  # noqa: E402
+    FROZEN_FORMULA_INPUT_CONTRACTS,
+    FROZEN_FORMULA_REPOSITORY_DISPOSITIONS,
+    FROZEN_FORMULA_REQUIREMENTS,
+    validate_formula_output_v34,
+)
+
+
+PREDECESSOR_IMPLEMENTATION_REGISTRY = IMPLEMENTATION_REGISTRY
+PREDECESSOR_IMPLEMENTATION_VERSION_REGISTRY: Mapping[
+    str, MathImplementationRecordV1
+] = MappingProxyType(
+    {
+        row.contract.implementation_id: row
+        for row in PREDECESSOR_IMPLEMENTATION_REGISTRY.values()
+    }
+)
+
+
+_V34_INVOCATION_ADAPTERS: Mapping[str, Callable[..., object]] = MappingProxyType(
+    {
+        "MATH-01": compute_math_01_v34,
+        "MATH-02": compute_math_02_v34,
+        "MATH-03": compute_math_03_v34,
+        "MATH-04": compute_math_04_v34,
+        "MATH-05": compute_math_05_v34,
+        "MATH-06": compute_math_06_binary_contract_expected_net_cash_v2,
+        "MATH-07": compute_math_07_multi_outcome_expected_net_cash_v2,
+        "MATH-08": compute_math_08_v34,
+        "MATH-09": compute_math_09_v34,
+        "MATH-10": compute_math_10_expected_calibration_error_v2,
+        "MATH-11": compute_math_11_v34,
+        "MATH-12": compute_math_12_v34,
+        "MATH-13": compute_math_13_v34,
+        "MATH-14": compute_math_14_stationary_bootstrap_mean_interval_v2,
+        "MATH-15": compute_math_15_white_reality_check_v2,
+        "MATH-16": compute_math_16_hansen_spa,
+        "MATH-17": compute_math_17_probabilistic_sharpe_ratio,
+        "MATH-18": compute_math_18_deflated_sharpe_ratio,
+        "MATH-19": compute_math_19_probability_of_backtest_overfitting,
+        "MATH-20": compute_math_20_purged_kfold_with_embargo,
+        "MATH-21": compute_math_21_combinatorial_purged_cross_validation,
+        "MATH-22": compute_math_22_doubly_robust_ope,
+        "MATH-23": compute_math_23_inverse_propensity_score_ope,
+        "MATH-24": compute_math_24_self_normalized_ips,
+        "MATH-25": compute_math_25_switch_ope,
+        "MATH-36": compute_math_36_kalshi_binary_book_transform,
+        "MATH-46": compute_math_46_qubo_upper_triangular_convention_v2,
+        "MATH-47": compute_math_47_qubo_to_ising_transform_v2,
+        "MATH-48": compute_math_48_constrained_quadratic_model_v2,
+        "MATH-49": compute_math_49_discrete_quadratic_model_v2,
+    }
+)
+FORMULA_INVOCATION_ADAPTERS = _V34_INVOCATION_ADAPTERS
+
+
+def _v34_metadata(math_spec_id: str) -> MathSpecificationMetadataV1:
+    requirement = FROZEN_FORMULA_REQUIREMENTS[math_spec_id]
+    raw = requirement.raw
+    frozen_guards = tuple(
+        dict.fromkeys(
+            str(value)
+            for value in (
+                *raw["hard_mathematical_bounds"],
+                *raw["denominator_and_log_guards"],
+                str(raw["missing_stale_conflict_nonfinite_behavior"]),
+            )
+        )
+    )
+    guards = (
+        (
+            "Energy parity tolerance must be derived from coefficient scale "
+            "and float precision.",
+            *frozen_guards,
+        )
+        if math_spec_id == "MATH-47"
+        else frozen_guards
+    )
+    return MathSpecificationMetadataV1(
+        certified_formula=requirement.formula_or_procedure,
+        domain_and_fail_closed_guards=guards,
+        implementation_algorithm=tuple(
+            dict.fromkeys(str(value) for value in raw["algorithm_steps"])
+        ),
+        mandatory_comparator_or_reconciliation=str(
+            raw["comparator_and_reconciliation"]
+        ),
+        precision_and_rounding_policy=str(raw["precision_and_rounding"]),
+        optional_library_adapter_policy=(
+            "OPTIONAL_LIBRARY_ADAPTER_MUST_PRESERVE_FROZEN_SEMANTICS; "
+            "STANDARD_LIBRARY_PRODUCTION_PATH_IS_AUTHORITATIVE"
+        ),
+        tie_break_policy=(
+            "USE_ONLY_THE_EXPLICIT_FROZEN_TIE_BREAK_OR_STABLE_DECLARED_ORDER"
+        ),
+    )
+
+
+def _v34_active_record(math_spec_id: str) -> MathImplementationRecordV1:
+    requirement = FROZEN_FORMULA_REQUIREMENTS[math_spec_id]
+    disposition = FROZEN_FORMULA_REPOSITORY_DISPOSITIONS[math_spec_id]
+    if disposition.disposition == "REUSE_EXISTING_EXACT_VERSION":
+        predecessor = PREDECESSOR_IMPLEMENTATION_REGISTRY[math_spec_id]
+        contract = predecessor.contract
+        function = predecessor.callable
+    else:
+        function = _V34_INVOCATION_ADAPTERS[math_spec_id]
+        contract = ComputationImplementationV1(
+            implementation_id=disposition.implementation_target,
+            math_spec_id=math_spec_id,
+            callable_name=function.__name__,
+            specification_version=disposition.frozen_v3_4_version,
+            deterministic=True,
+            seed_required=math_spec_id in {"MATH-14", "MATH-15", "MATH-16"},
+        )
+    return MathImplementationRecordV1(
+        contract=contract,
+        name=requirement.name,
+        family=requirement.family,
+        callable=function,
+        golden_vector_id=f"VECTOR::{math_spec_id}::GOLDEN",
+        oracle_id=f"ORACLE::{math_spec_id}::V3_4",
+        specification_metadata=_v34_metadata(math_spec_id),
+    )
+
+
+_ACTIVE_V34_ENTRIES = tuple(
+    _v34_active_record(math_spec_id)
+    for math_spec_id in FROZEN_FORMULA_REQUIREMENTS
+)
+IMPLEMENTATION_REGISTRY = MappingProxyType(
+    {
+        entry.contract.math_spec_id: entry
+        for entry in _ACTIVE_V34_ENTRIES
+    }
+)
+IMPLEMENTATION_VERSION_REGISTRY: Mapping[
+    str, MathImplementationRecordV1
+] = MappingProxyType(
+    {
+        **PREDECESSOR_IMPLEMENTATION_VERSION_REGISTRY,
+        **{
+            entry.contract.implementation_id: entry
+            for entry in _ACTIVE_V34_ENTRIES
+        },
+    }
+)
+
+
+def get_math_implementation(
+    math_spec_id: str,
+    *,
+    implementation_id: str | None = None,
+) -> MathImplementationRecordV1:
+    if not isinstance(math_spec_id, str) or not math_spec_id:
+        raise ContractValidationError(
+            ReasonCode.UNKNOWN_IMPLEMENTATION,
+            "math specification identity must be nonempty text",
+        )
+    try:
+        row = (
+            IMPLEMENTATION_REGISTRY[math_spec_id]
+            if implementation_id is None
+            else IMPLEMENTATION_VERSION_REGISTRY[implementation_id]
+        )
+    except KeyError as exc:
+        raise ContractValidationError(
+            ReasonCode.UNKNOWN_IMPLEMENTATION,
+            f"math implementation is not allowlisted: "
+            f"{implementation_id or math_spec_id}",
+        ) from exc
+    if row.contract.math_spec_id != math_spec_id:
+        raise ContractValidationError(
+            ReasonCode.UNKNOWN_IMPLEMENTATION,
+            "requested implementation version belongs to another math identity",
+        )
+    return row
+
+
+def get_math_callable(
+    math_spec_id: str,
+    *,
+    implementation_id: str | None = None,
+) -> Callable[..., object]:
+    return get_math_implementation(
+        math_spec_id, implementation_id=implementation_id
+    ).callable
+
+
+def _v34_mutable_call_value(value: object) -> object:
+    if isinstance(value, Mapping):
+        return {
+            str(key): _v34_mutable_call_value(item)
+            for key, item in value.items()
+        }
+    if isinstance(value, tuple):
+        return [_v34_mutable_call_value(item) for item in value]
+    return value
+
+
+def invoke_formula_v34(
+    math_spec_id: str,
+    inputs: Mapping[str, object],
+) -> object:
+    """Invoke one active formula through the sole central adapter boundary."""
+
+    if math_spec_id not in IMPLEMENTATION_REGISTRY:
+        raise ContractValidationError(
+            ReasonCode.UNKNOWN_IMPLEMENTATION,
+            f"unknown active v3.4 formula: {math_spec_id}",
+        )
+    if not isinstance(inputs, Mapping):
+        raise ContractValidationError(
+            ReasonCode.INVALID_CONTRACT,
+            "formula inputs must be an exact named mapping",
+        )
+    declared = FROZEN_FORMULA_INPUT_CONTRACTS[
+        math_spec_id
+    ].declared_input_keys
+    if set(inputs) != set(declared):
+        missing = sorted(set(declared) - set(inputs))
+        extra = sorted(set(inputs) - set(declared))
+        raise ContractValidationError(
+            ReasonCode.INVALID_CONTRACT,
+            f"{math_spec_id} input identity mismatch; missing={missing}, extra={extra}",
+        )
+    call_inputs = {
+        name: _v34_mutable_call_value(inputs[name]) for name in declared
+    }
+    value = _V34_INVOCATION_ADAPTERS[math_spec_id](**call_inputs)
+    validate_formula_output_v34(math_spec_id, value)
+    return value
+
+
+if (
+    len(PREDECESSOR_IMPLEMENTATION_REGISTRY) != 19
+    or len(IMPLEMENTATION_REGISTRY) != 30
+    or len(IMPLEMENTATION_VERSION_REGISTRY) != 39
+    or tuple(IMPLEMENTATION_REGISTRY) != tuple(FROZEN_FORMULA_REQUIREMENTS)
+    or set(FORMULA_INVOCATION_ADAPTERS) != set(IMPLEMENTATION_REGISTRY)
+):
+    raise ContractValidationError(
+        ReasonCode.INVALID_CONTRACT,
+        "v3.4 requires 30 active routes and 39 preserved version records",
+    )
