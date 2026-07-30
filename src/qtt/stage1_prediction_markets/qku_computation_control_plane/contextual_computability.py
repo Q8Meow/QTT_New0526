@@ -6,10 +6,12 @@ from dataclasses import dataclass
 from typing import Mapping
 
 from .errors import (
+    ComputationControlPlaneError,
     FreshnessError,
     InputAuthorityError,
     PointInTimeError,
     ReasonCode,
+    StackResolutionError,
 )
 from .implementation_registry import IMPLEMENTATION_REGISTRY
 from .input_resolver import (
@@ -24,7 +26,6 @@ from .models import (
     ComputabilityTerminalRouteV1,
     ComputationExecutionContextV1,
     ContextualComputabilityResolutionV1,
-    ImplementationVersionPinV1,
 )
 from .oracle_contracts import (
     GOLDEN_VECTOR_BY_MATH_ID,
@@ -35,7 +36,11 @@ from .specification import (
     FROZEN_FORMULA_REQUIREMENTS,
     FROZEN_NAMED_OUTPUT_CONTRACTS,
 )
-from .stack_resolver import REGISTERED_FORMULA_STACKS
+from .stack_resolver import (
+    REGISTERED_FORMULA_STACKS,
+    _SelectedStackContextClosureV1,
+    _preflight_registered_stack_context_closure,
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -45,6 +50,7 @@ class ContextualComputabilitySnapshotV1:
     resolution: ContextualComputabilityResolutionV1
     input_resolution: FormulaInputResolutionV1 | None
     registered_stack_id: str | None
+    stack_closure: _SelectedStackContextClosureV1 | None = None
     no_authority_flag: bool = True
 
     def __post_init__(self) -> None:
@@ -61,6 +67,14 @@ class ContextualComputabilitySnapshotV1:
                 and self.input_resolution.execution_context
                 is not self.execution_context
             )
+            or (
+                self.stack_closure is not None
+                and (
+                    self.stack_closure.execution_context
+                    is not self.execution_context
+                    or self.stack_closure.no_authority_flag is not True
+                )
+            )
             or self.no_authority_flag is not True
         ):
             raise InputAuthorityError(
@@ -71,6 +85,25 @@ class ContextualComputabilitySnapshotV1:
     @property
     def context_id(self) -> str:
         return self.execution_context.context_id
+
+    @property
+    def receipt_refs(self) -> tuple[str, ...]:
+        return tuple(
+            dict.fromkeys(
+                (
+                    *(
+                        self.input_resolution.receipt_refs
+                        if self.input_resolution is not None
+                        else ()
+                    ),
+                    *(
+                        self.stack_closure.receipt_refs
+                        if self.stack_closure is not None
+                        else ()
+                    ),
+                )
+            )
+        )
 
 
 def _state(
@@ -92,9 +125,29 @@ def _state(
 
 
 def _context_blocker(
-    exc: InputAuthorityError | PointInTimeError | FreshnessError,
+    failure: ReasonCode | ComputationControlPlaneError,
 ) -> tuple[ComputabilityBlockerCodeV1, ComputabilityTerminalRouteV1]:
-    code = exc.reason_code.value
+    reason_code = (
+        failure
+        if isinstance(failure, ReasonCode)
+        else failure.reason_code
+    )
+    code = reason_code.value
+    if reason_code is ReasonCode.NO_APPLICABLE_STACK:
+        return (
+            ComputabilityBlockerCodeV1.NO_APPLICABLE_STACK,
+            ComputabilityTerminalRouteV1.NO_RESULT_NO_TRADE,
+        )
+    if reason_code is ReasonCode.DEPENDENCY_CLOSURE_FAILED:
+        return (
+            ComputabilityBlockerCodeV1.DEPENDENCY_CLOSURE_INCOMPLETE,
+            ComputabilityTerminalRouteV1.STACK_CLOSURE,
+        )
+    if reason_code is ReasonCode.UNKNOWN_IMPLEMENTATION:
+        return (
+            ComputabilityBlockerCodeV1.IMPLEMENTATION_CALLABLE_MISSING,
+            ComputabilityTerminalRouteV1.FIXTURE_MATERIALIZATION,
+        )
     if code.endswith("INPUT_OWNER_MISSING"):
         return (
             ComputabilityBlockerCodeV1.INPUT_OWNER_MISSING,
@@ -187,7 +240,39 @@ class FrozenContextualComputabilityResolverV1:
             )
         )
 
+        stack_closure: _SelectedStackContextClosureV1 | None = None
+        stack_preflight_failure: ReasonCode | None = None
+        if (
+            required_stack_id is not None
+            and context_admission_blocker is None
+            and stack_admission_blocker is None
+        ):
+            selected_stack = REGISTERED_FORMULA_STACKS.get(required_stack_id)
+            if selected_stack is None:
+                stack_preflight_failure = ReasonCode.NO_APPLICABLE_STACK
+            else:
+                try:
+                    stack_closure = (
+                        _preflight_registered_stack_context_closure(
+                            stack_id=required_stack_id,
+                            stack_version=(
+                                context.dependency_graph_version or ""
+                            ),
+                            component_ids=selected_stack.component_ids,
+                            context=context,
+                            owner_registry=owner_registry,
+                        )
+                    )
+                except StackResolutionError as exc:
+                    stack_preflight_failure = exc.reason_code
+
+        component_closure = (
+            stack_closure.component_for(math_spec_id)
+            if stack_closure is not None
+            else None
+        )
         input_resolution: FormulaInputResolutionV1 | None = None
+        context_receipts: tuple[str, ...] = ()
         context_blockers: tuple[ComputabilityBlockerCodeV1, ...] = (
             (context_admission_blocker,)
             if context_admission_blocker is not None
@@ -195,25 +280,67 @@ class FrozenContextualComputabilityResolverV1:
         )
         context_route = ComputabilityTerminalRouteV1.CONTRACT_ONLY_COMPUTATION
         if specification_closed and not context_blockers:
-            try:
-                input_resolution = FormulaInputResolverV1.resolve(
-                    math_spec_id,
-                    context=context,
-                    owner_registry=owner_registry,
-                    caller_assertions=caller_assertions,
-                )
-            except (InputAuthorityError, PointInTimeError, FreshnessError) as exc:
-                blocker, context_route = _context_blocker(exc)
-                context_blockers = (blocker,)
+            if component_closure is not None:
+                context_receipts = component_closure.receipt_refs
+                if component_closure.blocker_reasons:
+                    dispositions = tuple(
+                        _context_blocker(reason)
+                        for reason in component_closure.blocker_reasons
+                    )
+                    context_blockers = tuple(
+                        dict.fromkeys(
+                            blocker for blocker, _route in dispositions
+                        )
+                    )
+                    context_route = dispositions[0][1]
+                elif not component_closure.dependency_producible_input_refs:
+                    try:
+                        input_resolution = FormulaInputResolverV1.resolve(
+                            math_spec_id,
+                            context=context,
+                            owner_registry=owner_registry,
+                            caller_assertions=caller_assertions,
+                        )
+                        context_receipts = input_resolution.receipt_refs
+                    except (
+                        InputAuthorityError,
+                        PointInTimeError,
+                        FreshnessError,
+                    ) as exc:
+                        blocker, context_route = _context_blocker(exc)
+                        context_blockers = (blocker,)
+            else:
+                try:
+                    input_resolution = FormulaInputResolverV1.resolve(
+                        math_spec_id,
+                        context=context,
+                        owner_registry=owner_registry,
+                        caller_assertions=caller_assertions,
+                    )
+                    context_receipts = input_resolution.receipt_refs
+                except (
+                    InputAuthorityError,
+                    PointInTimeError,
+                    FreshnessError,
+                ) as exc:
+                    blocker, context_route = _context_blocker(exc)
+                    context_blockers = (blocker,)
         elif not specification_closed:
             context_blockers = (
                 ComputabilityBlockerCodeV1.SPECIFICATION_SEMANTICS_INCOMPLETE,
             )
-            context_route = ComputabilityTerminalRouteV1.SPECIFICATION_OWNER_REVIEW
+            context_route = (
+                ComputabilityTerminalRouteV1.SPECIFICATION_OWNER_REVIEW
+            )
         else:
             context_route = ComputabilityTerminalRouteV1.CONTEXT_REBINDING
 
         registered_stack_id: str | None = None
+        stack_receipts = (
+            stack_closure.receipt_refs
+            if stack_closure is not None
+            else ()
+        )
         stack_blockers: tuple[ComputabilityBlockerCodeV1, ...] = ()
         stack_route = ComputabilityTerminalRouteV1.CONTRACT_ONLY_COMPUTATION
         if stack_admission_blocker is not None:
@@ -227,40 +354,39 @@ class FrozenContextualComputabilityResolverV1:
         elif required_stack_id is None:
             stack_blockers = (ComputabilityBlockerCodeV1.NO_APPLICABLE_STACK,)
             stack_route = ComputabilityTerminalRouteV1.NO_RESULT_NO_TRADE
-        elif context_blockers:
-            stack_blockers = context_blockers
-            stack_route = context_route
+        elif stack_preflight_failure is not None:
+            blocker, stack_route = _context_blocker(
+                stack_preflight_failure
+            )
+            stack_blockers = (blocker,)
+        elif stack_closure is None:
+            stack_blockers = (
+                context_blockers
+                if context_blockers
+                else (ComputabilityBlockerCodeV1.NO_APPLICABLE_STACK,)
+            )
+            stack_route = (
+                context_route
+                if context_blockers
+                else ComputabilityTerminalRouteV1.NO_RESULT_NO_TRADE
+            )
+        elif component_closure is None:
+            stack_blockers = (ComputabilityBlockerCodeV1.NO_APPLICABLE_STACK,)
+            stack_route = ComputabilityTerminalRouteV1.NO_RESULT_NO_TRADE
+        elif stack_closure.full_stack_blocker_reasons:
+            dispositions = tuple(
+                _context_blocker(reason)
+                for reason in stack_closure.full_stack_blocker_reasons
+            )
+            stack_blockers = tuple(
+                dict.fromkeys(blocker for blocker, _route in dispositions)
+            )
+            stack_route = dispositions[0][1]
         else:
-            stack = REGISTERED_FORMULA_STACKS.get(required_stack_id)
-            if (
-                stack is None
-                or context.dependency_graph_id != required_stack_id
-                or math_spec_id not in stack.component_ids
-            ):
-                stack_blockers = (
-                    ComputabilityBlockerCodeV1.NO_APPLICABLE_STACK,
-                )
-                stack_route = ComputabilityTerminalRouteV1.NO_RESULT_NO_TRADE
-            elif (
-                context.dependency_graph_version != stack.stack_version
-                or context.implementation_versions
-                != tuple(
-                    ImplementationVersionPinV1(
-                        math_spec_id=component_id,
-                        implementation_id=IMPLEMENTATION_REGISTRY[
-                            component_id
-                        ].contract.implementation_id,
-                    )
-                    for component_id in stack.component_ids
-                )
-            ):
-                stack_blockers = (
-                    ComputabilityBlockerCodeV1.CONTEXT_BINDING_MISMATCH,
-                )
-                stack_route = ComputabilityTerminalRouteV1.CONTEXT_REBINDING
-            else:
-                registered_stack_id = stack.stack_id
-                stack_route = ComputabilityTerminalRouteV1.CONTRACT_ONLY_COMPUTATION
+            registered_stack_id = stack_closure.stack_id
+            stack_route = (
+                ComputabilityTerminalRouteV1.CONTRACT_ONLY_COMPUTATION
+            )
 
         resolution = ContextualComputabilityResolutionV1(
             specification=_state(
@@ -289,21 +415,13 @@ class FrozenContextualComputabilityResolverV1:
             context=_state(
                 ComputabilityClassV1.CONTEXT_COMPUTABLE,
                 context_blockers,
-                receipts=(
-                    input_resolution.receipt_refs
-                    if input_resolution is not None
-                    else ()
-                ),
+                receipts=context_receipts,
                 route=context_route,
             ),
             stack=_state(
                 ComputabilityClassV1.STACK_COMPUTABLE,
                 stack_blockers,
-                receipts=(
-                    input_resolution.receipt_refs
-                    if input_resolution is not None and not stack_blockers
-                    else ()
-                ),
+                receipts=stack_receipts,
                 route=stack_route,
             ),
         )
@@ -313,4 +431,5 @@ class FrozenContextualComputabilityResolverV1:
             resolution=resolution,
             input_resolution=input_resolution,
             registered_stack_id=registered_stack_id,
+            stack_closure=stack_closure,
         )

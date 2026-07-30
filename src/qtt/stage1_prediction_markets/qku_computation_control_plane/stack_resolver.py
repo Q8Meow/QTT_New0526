@@ -8,23 +8,43 @@ from decimal import Decimal
 from types import MappingProxyType
 from typing import Mapping
 
+from .bindings import (
+    FORMULA_INPUT_AUTHORITY_BY_MATH_ID,
+    FormulaInputAdmissionClassV1,
+    FormulaInputAuthorityBindingV1,
+)
 from .dependency_graph import (
     FROZEN_DEPENDENCY_RELATIONSHIPS,
     FrozenDependencyKindV1,
+    FrozenDependencyRelationshipV1,
 )
-from .errors import ReasonCode, StackResolutionError
+from .errors import (
+    FreshnessError,
+    InputAuthorityError,
+    PointInTimeError,
+    ReasonCode,
+    StackResolutionError,
+)
 from .implementation_registry import IMPLEMENTATION_REGISTRY, invoke_formula_v34
 from .input_resolver import (
     CanonicalOwnerPacketRegistryV1,
     FormulaInputResolutionV1,
     FormulaInputResolverV1,
     OwnerValuePacketV1,
+    _resolve_formula_input_binding,
+    _validate_formula_input_context,
 )
 from .models import (
     ComputationExecutionContextV1,
     ImplementationVersionPinV1,
 )
+from .oracle_contracts import GOLDEN_VECTOR_BY_MATH_ID, ORACLE_BY_MATH_ID
 from .point_in_time import PointInTimeClocksV1
+from .specification import (
+    FROZEN_FORMULA_INPUT_CONTRACTS,
+    FROZEN_FORMULA_REQUIREMENTS,
+    FROZEN_NAMED_OUTPUT_CONTRACTS,
+)
 from .unit_conversion import (
     ConversionIdentityV1,
     UnitBasisDescriptorV1,
@@ -71,6 +91,140 @@ REGISTERED_FORMULA_STACKS: Mapping[str, RegisteredFormulaStackV1] = (
         }
     )
 )
+
+
+@dataclass(frozen=True, slots=True)
+class _StackComponentContextClosureV1:
+    math_spec_id: str
+    blocker_reasons: tuple[ReasonCode, ...]
+    resolved_external_input_receipt_refs: tuple[str, ...]
+    dependency_producible_input_refs: tuple[str, ...]
+    dependency_edge_refs: tuple[str, ...]
+    no_authority_flag: bool = True
+
+    def __post_init__(self) -> None:
+        if (
+            not self.math_spec_id
+            or not isinstance(self.blocker_reasons, tuple)
+            or any(
+                not isinstance(reason, ReasonCode)
+                for reason in self.blocker_reasons
+            )
+            or len(set(self.blocker_reasons)) != len(self.blocker_reasons)
+            or any(
+                not isinstance(ref, str) or not ref
+                for refs in (
+                    self.resolved_external_input_receipt_refs,
+                    self.dependency_producible_input_refs,
+                    self.dependency_edge_refs,
+                )
+                for ref in refs
+            )
+            or self.no_authority_flag is not True
+        ):
+            raise StackResolutionError(
+                ReasonCode.DEPENDENCY_CLOSURE_FAILED,
+                "component context-preflight closure is malformed",
+            )
+
+    @property
+    def context_computable(self) -> bool:
+        return not self.blocker_reasons
+
+    @property
+    def receipt_refs(self) -> tuple[str, ...]:
+        return tuple(
+            dict.fromkeys(
+                (
+                    *self.resolved_external_input_receipt_refs,
+                    *self.dependency_producible_input_refs,
+                    *self.dependency_edge_refs,
+                )
+            )
+        )
+
+
+@dataclass(frozen=True, slots=True)
+class _SelectedStackContextClosureV1:
+    execution_context: ComputationExecutionContextV1
+    stack_id: str
+    stack_version: str
+    component_ids: tuple[str, ...]
+    component_closures: tuple[_StackComponentContextClosureV1, ...]
+    full_stack_blocker_reasons: tuple[ReasonCode, ...]
+    resolved_external_input_receipt_refs: tuple[str, ...]
+    dependency_producible_input_refs: tuple[str, ...]
+    dependency_edge_refs: tuple[str, ...]
+    no_authority_flag: bool = True
+
+    def __post_init__(self) -> None:
+        if (
+            not isinstance(
+                self.execution_context, ComputationExecutionContextV1
+            )
+            or self.execution_context.dependency_graph_id != self.stack_id
+            or self.execution_context.dependency_graph_version
+            != self.stack_version
+            or tuple(
+                closure.math_spec_id for closure in self.component_closures
+            )
+            != self.component_ids
+            or tuple(
+                dict.fromkeys(
+                    reason
+                    for closure in self.component_closures
+                    for reason in closure.blocker_reasons
+                )
+            )
+            != self.full_stack_blocker_reasons
+            or any(
+                closure.no_authority_flag is not True
+                for closure in self.component_closures
+            )
+            or self.no_authority_flag is not True
+        ):
+            raise StackResolutionError(
+                ReasonCode.DEPENDENCY_CLOSURE_FAILED,
+                "selected-stack context-preflight closure is malformed",
+            )
+
+    @property
+    def stack_computable(self) -> bool:
+        return not self.full_stack_blocker_reasons
+
+    @property
+    def closure_ref(self) -> str:
+        return (
+            f"NO_EXECUTION_STACK_CLOSURE::{self.stack_id}::"
+            f"{self.stack_version}::{self.execution_context.context_id}::"
+            f"{self.execution_context.scope.input_snapshot_id}::"
+            f"{self.execution_context.input_version}"
+        )
+
+    @property
+    def receipt_refs(self) -> tuple[str, ...]:
+        return tuple(
+            dict.fromkeys(
+                (
+                    self.closure_ref,
+                    *self.resolved_external_input_receipt_refs,
+                    *self.dependency_producible_input_refs,
+                    *self.dependency_edge_refs,
+                )
+            )
+        )
+
+    def component_for(
+        self, math_spec_id: str
+    ) -> _StackComponentContextClosureV1 | None:
+        return next(
+            (
+                closure
+                for closure in self.component_closures
+                if closure.math_spec_id == math_spec_id
+            ),
+            None,
+        )
 
 
 @dataclass(frozen=True, slots=True)
@@ -389,6 +543,246 @@ class ApplicableStackResolverV1:
                 )
             ),
         )
+
+
+def _registered_data_flow_edge_for_binding(
+    *,
+    stack: RegisteredFormulaStackV1,
+    component_ids: tuple[str, ...],
+    consumer_index: int,
+    binding: FormulaInputAuthorityBindingV1,
+) -> FrozenDependencyRelationshipV1 | None:
+    candidates = tuple(
+        edge
+        for edge in FROZEN_DEPENDENCY_RELATIONSHIPS.values()
+        if (
+            edge.kind is FrozenDependencyKindV1.DATA_FLOW_EDGE
+            and edge.consumer_math_spec_id == binding.math_spec_id
+            and edge.consumer_input_field == binding.input_name
+        )
+    )
+    if not candidates:
+        return None
+    if len(candidates) != 1:
+        raise StackResolutionError(
+            ReasonCode.DEPENDENCY_CLOSURE_FAILED,
+            f"{binding.binding_id} has ambiguous registered data-flow edges",
+        )
+    edge = candidates[0]
+    producer_index = (
+        component_ids.index(edge.producer_math_spec_id)
+        if edge.producer_math_spec_id in component_ids
+        else -1
+    )
+    producer_output = FROZEN_NAMED_OUTPUT_CONTRACTS.get(
+        edge.producer_math_spec_id
+    )
+    consumer_input = FROZEN_FORMULA_INPUT_CONTRACTS.get(
+        edge.consumer_math_spec_id
+    )
+    expected_owner = (
+        f"QKUComputationControlPlaneV1.{edge.producer_math_spec_id}"
+    )
+    expected_packet_type = (
+        f"ComputationExecutionReceiptV1::{edge.producer_math_spec_id}"
+    )
+    expected_schema_id = f"{expected_packet_type}::SCHEMA"
+    expected_receipt_type = f"{expected_packet_type}ReceiptV1"
+    expected_lineage = (
+        f"{expected_owner} -> {expected_packet_type}.output."
+        f"{edge.producer_output_field} -> {edge.consumer_math_spec_id}."
+        f"{edge.consumer_input_field}"
+    )
+    try:
+        conversion = ConversionIdentityV1(edge.conversion_ref)
+    except ValueError as exc:
+        raise StackResolutionError(
+            ReasonCode.DEPENDENCY_CLOSURE_FAILED,
+            f"{edge.edge_id} has no registered conversion identity",
+        ) from exc
+    if (
+        edge.edge_id != stack.data_edge_id
+        or producer_index < 0
+        or producer_index >= consumer_index
+        or producer_output is None
+        or producer_output.schema_id != edge.producer_output_schema_ref
+        or producer_output.output_name != edge.producer_output_field
+        or consumer_input is None
+        or edge.consumer_input_field
+        not in consumer_input.declared_input_keys
+        or edge.producer_version_ref != "FROZEN_V3_4"
+        or edge.consumer_version_ref != "FROZEN_V3_4"
+        or edge.terminal_state != "EXACT_EDGE_CLOSED"
+        or edge.point_in_time_rule != "SAME_CONTEXT_SNAPSHOT"
+        or conversion
+        is not ConversionIdentityV1.DECIMAL_PROBABILITY_TO_FINITE_FLOAT64
+        or binding.admission_class
+        is not FormulaInputAdmissionClassV1.EXACT_REGISTERED_UPSTREAM_RECEIPT_REQUIRED_BEFORE_CONTEXTUAL_COMPUTABILITY
+        or binding.accepted_upstream_owner_id != expected_owner
+        or binding.accepted_packet_or_snapshot_type != expected_packet_type
+        or binding.schema_id != expected_schema_id
+        or binding.schema_version != "1.0.0"
+        or binding.exact_field_path
+        != f"output.{edge.producer_output_field}"
+        or binding.producer_receipt_type != expected_receipt_type
+        or binding.source_state_and_claim_lineage != expected_lineage
+    ):
+        raise StackResolutionError(
+            ReasonCode.DEPENDENCY_CLOSURE_FAILED,
+            f"{binding.binding_id} is not supplied by the exact selected data edge",
+        )
+    return edge
+
+
+def _preflight_registered_stack_context_closure(
+    *,
+    stack_id: str,
+    stack_version: str,
+    component_ids: tuple[str, ...],
+    context: ComputationExecutionContextV1,
+    owner_registry: CanonicalOwnerPacketRegistryV1,
+) -> _SelectedStackContextClosureV1:
+    """Resolve full-stack input/dependency closure without invoking a formula."""
+
+    stack = ApplicableStackResolverV1.resolve(
+        stack_id=stack_id,
+        stack_version=stack_version,
+        component_ids=component_ids,
+    )
+    expected_pins = tuple(
+        ImplementationVersionPinV1(
+            math_spec_id=component_id,
+            implementation_id=IMPLEMENTATION_REGISTRY[
+                component_id
+            ].contract.implementation_id,
+        )
+        for component_id in component_ids
+        if component_id in IMPLEMENTATION_REGISTRY
+    )
+    if (
+        len(expected_pins) != len(component_ids)
+        or context.implementation_versions != expected_pins
+    ):
+        raise StackResolutionError(
+            ReasonCode.DEPENDENCY_CLOSURE_FAILED,
+            "stack preflight implementation pins are incomplete or altered",
+        )
+    global_blocker: ReasonCode | None = None
+    try:
+        context = _validate_formula_input_context(context)
+    except (InputAuthorityError, PointInTimeError, FreshnessError) as exc:
+        global_blocker = exc.reason_code
+    empty_assertions: Mapping[str, object] = MappingProxyType({})
+    component_closures: list[_StackComponentContextClosureV1] = []
+    for consumer_index, component_id in enumerate(component_ids):
+        blockers: list[ReasonCode] = (
+            [global_blocker] if global_blocker is not None else []
+        )
+        external_receipts: list[str] = []
+        dependency_inputs: list[str] = []
+        dependency_edges: list[str] = []
+        bindings = FORMULA_INPUT_AUTHORITY_BY_MATH_ID.get(component_id)
+        input_contract = FROZEN_FORMULA_INPUT_CONTRACTS.get(component_id)
+        component_contracts_closed = (
+            component_id in FROZEN_FORMULA_REQUIREMENTS
+            and bindings is not None
+            and input_contract is not None
+            and component_id in FROZEN_NAMED_OUTPUT_CONTRACTS
+            and component_id in IMPLEMENTATION_REGISTRY
+            and component_id in ORACLE_BY_MATH_ID
+            and component_id in GOLDEN_VECTOR_BY_MATH_ID
+            and tuple(binding.input_name for binding in bindings)
+            == input_contract.declared_input_keys
+        )
+        if not component_contracts_closed:
+            blockers.append(ReasonCode.DEPENDENCY_CLOSURE_FAILED)
+        elif global_blocker is None:
+            assert bindings is not None
+            for binding in bindings:
+                try:
+                    edge = _registered_data_flow_edge_for_binding(
+                        stack=stack,
+                        component_ids=component_ids,
+                        consumer_index=consumer_index,
+                        binding=binding,
+                    )
+                    if edge is not None:
+                        dependency_inputs.append(binding.binding_id)
+                        dependency_edges.append(edge.edge_id)
+                        continue
+                    resolved = _resolve_formula_input_binding(
+                        component_id,
+                        binding=binding,
+                        context=context,
+                        owner_registry=owner_registry,
+                        caller_assertions=empty_assertions,
+                    )
+                except (
+                    InputAuthorityError,
+                    PointInTimeError,
+                    FreshnessError,
+                    StackResolutionError,
+                ) as exc:
+                    blockers.append(exc.reason_code)
+                    continue
+                external_receipts.extend(
+                    (
+                        resolved.producer_receipt_id,
+                        resolved.point_in_time_receipt.receipt_id,
+                        resolved.freshness_receipt.receipt_id,
+                    )
+                )
+        component_closures.append(
+            _StackComponentContextClosureV1(
+                math_spec_id=component_id,
+                blocker_reasons=tuple(dict.fromkeys(blockers)),
+                resolved_external_input_receipt_refs=tuple(
+                    dict.fromkeys(external_receipts)
+                ),
+                dependency_producible_input_refs=tuple(
+                    dict.fromkeys(dependency_inputs)
+                ),
+                dependency_edge_refs=tuple(
+                    dict.fromkeys(dependency_edges)
+                ),
+            )
+        )
+    full_stack_blockers = tuple(
+        dict.fromkeys(
+            reason
+            for closure in component_closures
+            for reason in closure.blocker_reasons
+        )
+    )
+    return _SelectedStackContextClosureV1(
+        execution_context=context,
+        stack_id=stack.stack_id,
+        stack_version=stack.stack_version,
+        component_ids=stack.component_ids,
+        component_closures=tuple(component_closures),
+        full_stack_blocker_reasons=full_stack_blockers,
+        resolved_external_input_receipt_refs=tuple(
+            dict.fromkeys(
+                ref
+                for closure in component_closures
+                for ref in closure.resolved_external_input_receipt_refs
+            )
+        ),
+        dependency_producible_input_refs=tuple(
+            dict.fromkeys(
+                ref
+                for closure in component_closures
+                for ref in closure.dependency_producible_input_refs
+            )
+        ),
+        dependency_edge_refs=tuple(
+            dict.fromkeys(
+                ref
+                for closure in component_closures
+                for ref in closure.dependency_edge_refs
+            )
+        ),
+    )
 
 
 if (

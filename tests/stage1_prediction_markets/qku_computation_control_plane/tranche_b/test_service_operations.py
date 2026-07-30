@@ -26,6 +26,7 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.input_resol
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.models import (
     CompareWithNoTradeRequestV1,
+    ComputabilityBlockerCodeV1,
     ComputabilityClassV1,
     ComputationExecutionContextV1,
     ComputationScopeV1,
@@ -41,6 +42,7 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.models impo
     RequestMaterializationWorkOrderRequestV1,
     ResolveApplicableStackRequestV1,
     ResolveContextualComputabilityRequestV1,
+    ResolveContextualComputabilityResponseV1,
     ResolveIdentityRequestV1,
     ResolveRequiredInputsRequestV1,
     SubmitCandidateProposalRequestV1,
@@ -403,6 +405,125 @@ def test_service_plan_and_stack_admission_matrix(
         counted_invoke,
     )
 
+    stack_context = _context(
+        component_ids=("MATH-01", "MATH-02"),
+        dependency_graph_id=STACK_ID,
+    )
+    external_packets = _packets(stack_context)
+    derived_binding_id = "FIVAB::MATH-02::market_implied_probability"
+    assert all(
+        derived_binding_id not in packet.authorized_binding_ids
+        for packet in external_packets
+    )
+
+    def contextual_response(
+        component_id: str,
+        packets: tuple[OwnerValuePacketV1, ...],
+    ) -> ResolveContextualComputabilityResponseV1:
+        contextual_service = QKUComputationControlPlaneV1(
+            CanonicalOwnerPacketRegistryV1(packets)
+        )
+        return contextual_service.resolve_contextual_computability(
+            ResolveContextualComputabilityRequestV1(
+                **_common(
+                    "resolve_contextual_computability",
+                    context=stack_context,
+                ),
+                component_id=component_id,
+                required_computability_classes=tuple(
+                    ComputabilityClassV1
+                ),
+            )
+        )
+
+    invocations.clear()
+    exact_contextual = tuple(
+        contextual_response(component_id, external_packets)
+        for component_id in ("MATH-01", "MATH-02")
+    )
+    assert all(
+        response.computability.context.computable
+        and response.computability.stack.computable
+        for response in exact_contextual
+    )
+    assert all(
+        any(
+            ref.startswith("NO_EXECUTION_STACK_CLOSURE::")
+            for ref in response.receipt_refs
+        )
+        for response in exact_contextual
+    )
+    math_02_contextual = exact_contextual[1]
+    assert derived_binding_id in (
+        math_02_contextual.computability.context.dependency_receipt_refs
+    )
+    assert (
+        "EDGE::MATH-01::MATH-02"
+        in math_02_contextual.computability.context.dependency_receipt_refs
+    )
+    assert invocations == []
+
+    calibrated_binding_id = (
+        "FIVAB::MATH-02::calibrated_model_probability"
+    )
+    missing_downstream_packets = tuple(
+        packet
+        for packet in external_packets
+        if calibrated_binding_id not in packet.authorized_binding_ids
+    )
+    invocations.clear()
+    missing_downstream = contextual_response(
+        "MATH-01", missing_downstream_packets
+    )
+    assert missing_downstream.computability.context.computable
+    assert not missing_downstream.computability.stack.computable
+    assert missing_downstream.computability.stack.blocker_codes == (
+        ComputabilityBlockerCodeV1.INPUT_OWNER_MISSING,
+    )
+    assert invocations == []
+
+    calibrated_packet = next(
+        packet
+        for packet in external_packets
+        if calibrated_binding_id in packet.authorized_binding_ids
+    )
+    downstream_packet_cases = (
+        (
+            replace(
+                calibrated_packet,
+                scope=replace(
+                    stack_context.scope,
+                    market_scope_id="MARKET::WRONG",
+                ),
+            ),
+            ComputabilityBlockerCodeV1.INPUT_SCOPE_MISMATCH,
+        ),
+        (
+            replace(
+                calibrated_packet,
+                ttl=timedelta(microseconds=1),
+            ),
+            ComputabilityBlockerCodeV1.FRESHNESS_VIOLATION,
+        ),
+    )
+    for replacement_packet, expected_blocker in downstream_packet_cases:
+        variant_packets = tuple(
+            replacement_packet
+            if packet.packet_id == calibrated_packet.packet_id
+            else packet
+            for packet in external_packets
+        )
+        invocations.clear()
+        downstream_rejected = contextual_response(
+            "MATH-01", variant_packets
+        )
+        assert downstream_rejected.computability.context.computable
+        assert not downstream_rejected.computability.stack.computable
+        assert expected_blocker in (
+            downstream_rejected.computability.stack.blocker_codes
+        )
+        assert invocations == []
+
     component_context = _context()
     component = service.compute_component(
         ComputeComponentRequestV1(
@@ -414,10 +535,6 @@ def test_service_plan_and_stack_admission_matrix(
     )
     assert invocations == ["MATH-01"]
 
-    stack_context = _context(
-        component_ids=("MATH-01", "MATH-02"),
-        dependency_graph_id=STACK_ID,
-    )
     invocations.clear()
     stack = service.compute_stack(
         ComputeStackRequestV1(
@@ -670,17 +787,6 @@ def test_execution_context_propagates_through_stack(
         output.no_authority_flag
         for output in response.stack_result.component_outputs
     )
-    effect_counts = {
-        "provider": 0,
-        "private_state": 0,
-        "replay_or_paper": 0,
-        "llm": 0,
-        "simulator_or_qpu": 0,
-        "mode_or_allow": 0,
-        "order": 0,
-        "capital": 0,
-    }
-    assert set(effect_counts.values()) == {0}
 
 
 def test_downstream_routes_views_and_no_effect_records_are_typed() -> None:

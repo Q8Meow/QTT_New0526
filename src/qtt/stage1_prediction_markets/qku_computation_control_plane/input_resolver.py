@@ -710,6 +710,131 @@ def _admit_formula_input_binding(
     )
 
 
+def _validate_formula_input_context(
+    context: ComputationExecutionContextV1,
+) -> ComputationExecutionContextV1:
+    context = _require_execution_context(context)
+    FreshnessResolverV1.assert_context_current(context)
+    return context
+
+
+def _resolve_formula_input_binding(
+    math_spec_id: str,
+    *,
+    binding: FormulaInputAuthorityBindingV1,
+    context: ComputationExecutionContextV1,
+    owner_registry: CanonicalOwnerPacketRegistryV1,
+    caller_assertions: Mapping[str, object],
+) -> ResolvedFormulaInputV1:
+    """Apply the sole owner/schema/scope/PIT/freshness/value admission body."""
+
+    packet = owner_registry.packet_for(
+        context=context,
+        binding_id=binding.binding_id,
+    )
+    _admit_formula_input_binding(binding, packet)
+    if packet.owner_id != binding.accepted_upstream_owner_id:
+        raise InputAuthorityError(
+            ReasonCode.INPUT_OWNER_MISMATCH,
+            f"{binding.binding_id} packet owner is not canonical",
+        )
+    if packet.packet_type != binding.accepted_packet_or_snapshot_type:
+        raise InputAuthorityError(
+            ReasonCode.INPUT_PACKET_MISMATCH,
+            f"{binding.binding_id} packet type is not accepted",
+        )
+    if (
+        packet.schema_id != binding.schema_id
+        or packet.schema_version != binding.schema_version
+    ):
+        raise InputAuthorityError(
+            ReasonCode.INPUT_SCHEMA_MISMATCH,
+            f"{binding.binding_id} schema identity/version differs",
+        )
+    if (
+        packet.context_id != context.context_id
+        or packet.scope != context.scope
+        or packet.input_version != context.input_version
+    ):
+        raise InputAuthorityError(
+            ReasonCode.INPUT_SCOPE_MISMATCH,
+            f"{binding.binding_id} packet execution scope differs",
+        )
+    if packet.producer_receipt_type != binding.producer_receipt_type:
+        raise InputAuthorityError(
+            ReasonCode.INPUT_PACKET_MISMATCH,
+            f"{binding.binding_id} producer receipt type differs",
+        )
+    if packet.source_conflict:
+        raise InputAuthorityError(
+            ReasonCode.SOURCE_CONFLICT,
+            f"{binding.binding_id} owner packet has an unresolved conflict",
+        )
+    if (
+        packet.source_state_and_claim_lineage
+        != binding.source_state_and_claim_lineage
+    ):
+        raise InputAuthorityError(
+            ReasonCode.INPUT_PACKET_MISMATCH,
+            f"{binding.binding_id} source/state/claim lineage differs",
+        )
+    raw_value = _extract(packet.values, binding.exact_field_path)
+    value = _parse_typed(raw_value, binding)
+    if binding.input_name in caller_assertions:
+        assertion = _parse_typed(
+            caller_assertions[binding.input_name], binding
+        )
+        if not _canonical_equal(value, assertion):
+            raise InputAuthorityError(
+                ReasonCode.INPUT_VALUE_CONFLICT,
+                f"caller comparison assertion differs for {binding.binding_id}",
+            )
+    semantics = str(
+        next(
+            row["point_in_time_semantics"]
+            for row in FROZEN_FORMULA_REQUIREMENTS[math_spec_id].raw[
+                "typed_inputs"
+            ]
+            if row["name"] == binding.input_name
+        )
+    )
+    pit = PointInTimePolicyV1.validate(
+        receipt_id=f"PIT::{packet.packet_id}::{binding.binding_id}",
+        field_class=classify_point_in_time_semantics(semantics),
+        clocks=packet.clocks,
+        context=context,
+        prior_revision_available_time=packet.prior_revision_available_time,
+    )
+    require_sequence, require_revision = _sequence_revision_requirements(
+        binding.provider_native_sequence_or_revision
+    )
+    freshness = FreshnessResolverV1.validate(
+        receipt_id=f"FRESHNESS::{packet.packet_id}::{binding.binding_id}",
+        clocks=packet.clocks,
+        context=context,
+        packet_source_epoch_id=packet.source_epoch_id,
+        policy=FreshnessPolicyV1(
+            ttl=packet.ttl,
+            require_provider_sequence=require_sequence,
+            require_revision=require_revision,
+        ),
+        provider_sequence=packet.provider_sequence,
+        revision=packet.revision,
+    )
+    return ResolvedFormulaInputV1(
+        binding_id=binding.binding_id,
+        math_spec_id=math_spec_id,
+        input_name=binding.input_name,
+        value=value,
+        owner_id=packet.owner_id,
+        packet_id=packet.packet_id,
+        field_path=binding.exact_field_path,
+        point_in_time_receipt=pit,
+        freshness_receipt=freshness,
+        producer_receipt_id=packet.producer_receipt_id,
+    )
+
+
 def _admit_runtime_parameter_binding(binding: object) -> None:
     raw = getattr(binding, "raw", None)
     exact_fields = (
@@ -749,8 +874,7 @@ class FormulaInputResolverV1:
         owner_registry: CanonicalOwnerPacketRegistryV1,
         caller_assertions: Mapping[str, object] | None = None,
     ) -> FormulaInputResolutionV1:
-        context = _require_execution_context(context)
-        FreshnessResolverV1.assert_context_current(context)
+        context = _validate_formula_input_context(context)
         try:
             bindings = FORMULA_INPUT_AUTHORITY_BY_MATH_ID[math_spec_id]
         except KeyError as exc:
@@ -767,113 +891,13 @@ class FormulaInputResolverV1:
             )
         resolved: list[ResolvedFormulaInputV1] = []
         for binding in bindings:
-            packet = owner_registry.packet_for(
-                context=context,
-                binding_id=binding.binding_id,
-            )
-            _admit_formula_input_binding(binding, packet)
-            if packet.owner_id != binding.accepted_upstream_owner_id:
-                raise InputAuthorityError(
-                    ReasonCode.INPUT_OWNER_MISMATCH,
-                    f"{binding.binding_id} packet owner is not canonical",
-                )
-            if packet.packet_type != binding.accepted_packet_or_snapshot_type:
-                raise InputAuthorityError(
-                    ReasonCode.INPUT_PACKET_MISMATCH,
-                    f"{binding.binding_id} packet type is not accepted",
-                )
-            if (
-                packet.schema_id != binding.schema_id
-                or packet.schema_version != binding.schema_version
-            ):
-                raise InputAuthorityError(
-                    ReasonCode.INPUT_SCHEMA_MISMATCH,
-                    f"{binding.binding_id} schema identity/version differs",
-                )
-            if (
-                packet.context_id != context.context_id
-                or packet.scope != context.scope
-                or packet.input_version != context.input_version
-            ):
-                raise InputAuthorityError(
-                    ReasonCode.INPUT_SCOPE_MISMATCH,
-                    f"{binding.binding_id} packet execution scope differs",
-                )
-            if packet.producer_receipt_type != binding.producer_receipt_type:
-                raise InputAuthorityError(
-                    ReasonCode.INPUT_PACKET_MISMATCH,
-                    f"{binding.binding_id} producer receipt type differs",
-                )
-            if packet.source_conflict:
-                raise InputAuthorityError(
-                    ReasonCode.SOURCE_CONFLICT,
-                    f"{binding.binding_id} owner packet has an unresolved conflict",
-                )
-            if (
-                packet.source_state_and_claim_lineage
-                != binding.source_state_and_claim_lineage
-            ):
-                raise InputAuthorityError(
-                    ReasonCode.INPUT_PACKET_MISMATCH,
-                    f"{binding.binding_id} source/state/claim lineage differs",
-                )
-            raw_value = _extract(packet.values, binding.exact_field_path)
-            value = _parse_typed(raw_value, binding)
-            if binding.input_name in assertions:
-                assertion = _parse_typed(
-                    assertions[binding.input_name], binding
-                )
-                if not _canonical_equal(value, assertion):
-                    raise InputAuthorityError(
-                        ReasonCode.INPUT_VALUE_CONFLICT,
-                        f"caller comparison assertion differs for {binding.binding_id}",
-                    )
-            semantics = str(
-                next(
-                    row["point_in_time_semantics"]
-                    for row in FROZEN_FORMULA_REQUIREMENTS[math_spec_id].raw[
-                        "typed_inputs"
-                    ]
-                    if row["name"] == binding.input_name
-                )
-            )
-            pit = PointInTimePolicyV1.validate(
-                receipt_id=f"PIT::{packet.packet_id}::{binding.binding_id}",
-                field_class=classify_point_in_time_semantics(semantics),
-                clocks=packet.clocks,
-                context=context,
-                prior_revision_available_time=packet.prior_revision_available_time,
-            )
-            require_sequence, require_revision = (
-                _sequence_revision_requirements(
-                    binding.provider_native_sequence_or_revision
-                )
-            )
-            freshness = FreshnessResolverV1.validate(
-                receipt_id=f"FRESHNESS::{packet.packet_id}::{binding.binding_id}",
-                clocks=packet.clocks,
-                context=context,
-                packet_source_epoch_id=packet.source_epoch_id,
-                policy=FreshnessPolicyV1(
-                    ttl=packet.ttl,
-                    require_provider_sequence=require_sequence,
-                    require_revision=require_revision,
-                ),
-                provider_sequence=packet.provider_sequence,
-                revision=packet.revision,
-            )
             resolved.append(
-                ResolvedFormulaInputV1(
-                    binding_id=binding.binding_id,
-                    math_spec_id=math_spec_id,
-                    input_name=binding.input_name,
-                    value=value,
-                    owner_id=packet.owner_id,
-                    packet_id=packet.packet_id,
-                    field_path=binding.exact_field_path,
-                    point_in_time_receipt=pit,
-                    freshness_receipt=freshness,
-                    producer_receipt_id=packet.producer_receipt_id,
+                _resolve_formula_input_binding(
+                    math_spec_id,
+                    binding=binding,
+                    context=context,
+                    owner_registry=owner_registry,
+                    caller_assertions=assertions,
                 )
             )
         return FormulaInputResolutionV1(

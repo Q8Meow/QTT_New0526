@@ -525,11 +525,7 @@ class QKUComputationControlPlaneV1:
                 request,
                 status=status,
                 blocker_codes=blockers,
-                receipt_refs=(
-                    snapshot.input_resolution.receipt_refs
-                    if snapshot.input_resolution is not None
-                    else ()
-                ),
+                receipt_refs=snapshot.receipt_refs,
             ),
             computability=snapshot.resolution,
         )
