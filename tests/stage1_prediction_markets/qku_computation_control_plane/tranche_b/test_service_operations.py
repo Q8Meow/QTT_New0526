@@ -1,16 +1,24 @@
 import json
+from dataclasses import replace
 from datetime import UTC, datetime, timedelta
 from decimal import Decimal
 from pathlib import Path
 
+import pytest
+
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.bindings import (
     FORMULA_INPUT_AUTHORITY_BY_MATH_ID,
 )
-from src.qtt.stage1_prediction_markets.qku_computation_control_plane.context import (
-    ComputationContextKeyV1,
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import (
+    ContractValidationError,
+    ReasonCode,
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.identity_adapter import (
     RP5CIdentityAdapterV1,
+)
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.implementation_registry import (
+    IMPLEMENTATION_REGISTRY,
+    invoke_formula_v34,
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.input_resolver import (
     CanonicalOwnerPacketRegistryV1,
@@ -19,11 +27,14 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.input_resol
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.models import (
     CompareWithNoTradeRequestV1,
     ComputabilityClassV1,
+    ComputationExecutionContextV1,
+    ComputationScopeV1,
     ComputeComponentRequestV1,
     ComputeStackRequestV1,
     EvaluateTradePlanRequestV1,
     ExplainResolutionRequestV1,
     GetSnapshotViewRequestV1,
+    ImplementationVersionPinV1,
     OperationBlockerCodeV1,
     OperationCapabilityClass,
     OperationStatusV1,
@@ -45,7 +56,13 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.point_in_ti
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.service import (
     QKUComputationControlPlaneV1,
+    ST12B_FROZEN_PACKAGE_VERSION,
 )
+import src.qtt.stage1_prediction_markets.qku_computation_control_plane.service as service_module
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.stack_resolver import (
+    ApplicableStackResolverV1,
+)
+import src.qtt.stage1_prediction_markets.qku_computation_control_plane.stack_resolver as stack_resolver_module
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.validation import (
     ST12B_CENTRAL_SERVICE_OPERATION_IDS,
     ST12B_OPERATION_CAPABILITY_BY_ID,
@@ -56,21 +73,71 @@ AS_OF = datetime(2026, 7, 29, 20, 0, tzinfo=UTC)
 TRACEPARENT = (
     "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01"
 )
+STACK_ID = "STACK::MATH-01::MATH-02::V3_4"
 
 
-def _context() -> ComputationContextKeyV1:
-    return ComputationContextKeyV1(
+def _scope() -> ComputationScopeV1:
+    return ComputationScopeV1(
+        market_scope_id="MARKET::SERVICE",
+        venue_scope_id="VENUE::SERVICE",
+        event_scope_id="EVENT::SERVICE",
+        instrument_or_contract_scope_id="CONTRACT::SERVICE",
+        mode_context_id="MODE_CONTEXT::CONTRACT_ONLY",
+        input_snapshot_id="SNAPSHOT::SERVICE::V1",
+    )
+
+
+def _pins(
+    component_ids: tuple[str, ...],
+) -> tuple[ImplementationVersionPinV1, ...]:
+    return tuple(
+        ImplementationVersionPinV1(
+            math_spec_id=component_id,
+            implementation_id=IMPLEMENTATION_REGISTRY[
+                component_id
+            ].contract.implementation_id,
+        )
+        for component_id in component_ids
+    )
+
+
+def _context(
+    *,
+    component_ids: tuple[str, ...] = ("MATH-01",),
+    dependency_graph_id: str | None = None,
+    dependency_graph_version: str | None = None,
+    binding_profile_version: str = ST12B_FROZEN_PACKAGE_VERSION,
+    parameter_policy_version: str = ST12B_FROZEN_PACKAGE_VERSION,
+    implementation_versions: tuple[
+        ImplementationVersionPinV1, ...
+    ] | None = None,
+) -> ComputationExecutionContextV1:
+    return ComputationExecutionContextV1(
         context_id="CTX::SERVICE",
         as_of=AS_OF,
         observed_at=AS_OF - timedelta(seconds=1),
         source_epoch_id="EPOCH::SERVICE",
         input_version="V1",
         maximum_age=timedelta(days=1),
+        scope=_scope(),
+        binding_profile_version=binding_profile_version,
+        parameter_policy_version=parameter_policy_version,
+        implementation_versions=(
+            implementation_versions
+            if implementation_versions is not None
+            else _pins(component_ids)
+        ),
+        dependency_graph_id=dependency_graph_id,
+        dependency_graph_version=(
+            dependency_graph_version or "3.4"
+            if dependency_graph_id is not None
+            else None
+        ),
     )
 
 
 def _packets(
-    context: ComputationContextKeyV1,
+    context: ComputationExecutionContextV1,
 ) -> tuple[OwnerValuePacketV1, ...]:
     clocks = PointInTimeClocksV1(
         observed_time=AS_OF - timedelta(seconds=1),
@@ -97,7 +164,9 @@ def _packets(
                     schema_id=binding.schema_id,
                     schema_version=binding.schema_version,
                     context_id=context.context_id,
+                    scope=context.scope,
                     source_epoch_id=context.source_epoch_id,
+                    input_version=context.input_version,
                     clocks=clocks,
                     ttl=timedelta(days=1),
                     values={
@@ -116,14 +185,18 @@ def _packets(
     return tuple(packets)
 
 
-def _common(operation_name: str) -> dict[str, object]:
+def _common(
+    operation_name: str,
+    *,
+    context: ComputationExecutionContextV1 | None = None,
+) -> dict[str, object]:
     return {
         "request_id": f"REQUEST::{operation_name}",
         "operation_name": operation_name,
         "requested_at": AS_OF,
         "principal_id": "OWNER::TEST",
         "capability_bundle_id": "CAPABILITY::READ_ONLY_TEST",
-        "context": _context(),
+        "context": context or _context(),
         "idempotency_key": f"IDEMPOTENCY::{operation_name}",
         "traceparent": TRACEPARENT,
         "tracestate": "",
@@ -259,14 +332,26 @@ def test_identity_computability_stack_and_required_input_resolution() -> None:
     )
     computability = service.resolve_contextual_computability(
         ResolveContextualComputabilityRequestV1(
-            **_common("resolve_contextual_computability"),
+            **_common(
+                "resolve_contextual_computability",
+                context=_context(
+                    component_ids=("MATH-01", "MATH-02"),
+                    dependency_graph_id=STACK_ID,
+                ),
+            ),
             component_id="MATH-01",
             required_computability_classes=tuple(ComputabilityClassV1),
         )
     )
     stack = service.resolve_applicable_stack(
         ResolveApplicableStackRequestV1(
-            **_common("resolve_applicable_stack"),
+            **_common(
+                "resolve_applicable_stack",
+                context=_context(
+                    component_ids=("MATH-01", "MATH-02"),
+                    dependency_graph_id=STACK_ID,
+                ),
+            ),
             trade_plan_candidate_id="TRADE_PLAN::TEST",
             required_launch_roles=("MATH-01", "MATH-02"),
         )
@@ -297,24 +382,52 @@ def test_identity_computability_stack_and_required_input_resolution() -> None:
     assert len(required.input_resolution.resolved_input_names) == 2
 
 
-def test_component_and_stack_operations_return_frozen_typed_outputs() -> None:
+def test_service_plan_and_stack_admission_matrix(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     service = _service()
+    invocations: list[str] = []
+
+    def counted_invoke(math_spec_id: str, inputs: object) -> object:
+        invocations.append(math_spec_id)
+        return invoke_formula_v34(math_spec_id, inputs)  # type: ignore[arg-type]
+
+    monkeypatch.setattr(
+        service_module,
+        "invoke_formula_v34",
+        counted_invoke,
+    )
+    monkeypatch.setattr(
+        stack_resolver_module,
+        "invoke_formula_v34",
+        counted_invoke,
+    )
+
+    component_context = _context()
     component = service.compute_component(
         ComputeComponentRequestV1(
-            **_common("compute_component"),
+            **_common("compute_component", context=component_context),
             component_id="MATH-01",
             input_values=_component_record(),
             expected_output_schema_ref="MATH-01::OUTPUT",
         )
     )
+    assert invocations == ["MATH-01"]
+
+    stack_context = _context(
+        component_ids=("MATH-01", "MATH-02"),
+        dependency_graph_id=STACK_ID,
+    )
+    invocations.clear()
     stack = service.compute_stack(
         ComputeStackRequestV1(
-            **_common("compute_stack"),
-            stack_id="STACK::MATH-01::MATH-02::V3_4",
+            **_common("compute_stack", context=stack_context),
+            stack_id=STACK_ID,
             component_ids=("MATH-01", "MATH-02"),
             input_values=_stack_record(),
         )
     )
+    assert invocations == ["MATH-01", "MATH-02"]
 
     assert component.status is OperationStatusV1.SUCCEEDED
     assert component.component_result.formula_output is not None
@@ -325,6 +438,10 @@ def test_component_and_stack_operations_return_frozen_typed_outputs() -> None:
         component.component_result.formula_output.output_schema_version
         == "ST12B_OUTPUT_V3_4"
     )
+    assert (
+        component.component_result.formula_output.execution_context
+        is component_context
+    )
     assert stack.status is OperationStatusV1.SUCCEEDED
     assert tuple(
         output.value for output in stack.stack_result.component_outputs
@@ -334,6 +451,236 @@ def test_component_and_stack_operations_return_frozen_typed_outputs() -> None:
         output.no_authority_flag
         for output in stack.stack_result.component_outputs
     )
+    assert all(
+        output.execution_context is stack_context
+        for output in stack.stack_result.component_outputs
+    )
+    assert tuple(
+        (pin.math_spec_id, pin.implementation_id)
+        for pin in stack_context.implementation_versions
+    ) == (
+        ("MATH-01", "MATH-01::1.1R1"),
+        ("MATH-02", "MATH-02::1.1R1"),
+    )
+
+    wrong_pin = (
+        ImplementationVersionPinV1(
+            math_spec_id="MATH-01",
+            implementation_id="MATH-01::WRONG",
+        ),
+    )
+    component_mismatches = (
+        _context(implementation_versions=wrong_pin),
+        _context(component_ids=("MATH-01", "MATH-02")),
+        _context(binding_profile_version="3.5"),
+        _context(parameter_policy_version="3.5"),
+        _context(
+            component_ids=("MATH-01", "MATH-02"),
+            dependency_graph_id=STACK_ID,
+        ),
+    )
+    for mismatched_context in component_mismatches:
+        invocations.clear()
+        rejected = service.compute_component(
+            ComputeComponentRequestV1(
+                **_common(
+                    "compute_component",
+                    context=mismatched_context,
+                ),
+                component_id="MATH-01",
+                input_values=_component_record(),
+                expected_output_schema_ref="MATH-01::OUTPUT",
+            )
+        )
+        assert rejected.status is not OperationStatusV1.SUCCEEDED
+        assert rejected.component_result.formula_output is None
+        assert invocations == []
+
+    stack_mismatches = (
+        (
+            _context(
+                component_ids=("MATH-01",),
+                dependency_graph_id=STACK_ID,
+            ),
+            STACK_ID,
+            ("MATH-01", "MATH-02"),
+        ),
+        (
+            _context(
+                component_ids=("MATH-01", "MATH-02"),
+                dependency_graph_id="STACK::UNKNOWN",
+            ),
+            "STACK::UNKNOWN",
+            ("MATH-01", "MATH-02"),
+        ),
+        (
+            _context(
+                component_ids=("MATH-01", "MATH-02"),
+                dependency_graph_id=STACK_ID,
+                dependency_graph_version="9.9",
+            ),
+            STACK_ID,
+            ("MATH-01", "MATH-02"),
+        ),
+        (
+            _context(
+                component_ids=("MATH-02", "MATH-01"),
+                dependency_graph_id=STACK_ID,
+            ),
+            STACK_ID,
+            ("MATH-02", "MATH-01"),
+        ),
+        (
+            _context(
+                component_ids=("MATH-01", "MATH-02", "MATH-03"),
+                dependency_graph_id=STACK_ID,
+            ),
+            STACK_ID,
+            ("MATH-01", "MATH-02", "MATH-03"),
+        ),
+        (
+            stack_context,
+            "STACK::UNKNOWN",
+            ("MATH-01", "MATH-02"),
+        ),
+    )
+    for mismatched_context, stack_id, component_ids in stack_mismatches:
+        invocations.clear()
+        rejected = service.compute_stack(
+            ComputeStackRequestV1(
+                **_common(
+                    "compute_stack",
+                    context=mismatched_context,
+                ),
+                stack_id=stack_id,
+                component_ids=component_ids,
+                input_values=_stack_record(),
+            )
+        )
+        assert rejected.status is not OperationStatusV1.SUCCEEDED
+        assert rejected.stack_result.component_outputs == ()
+        assert invocations == []
+
+    invocations.clear()
+    with pytest.raises(ContractValidationError) as missing_graph:
+        ResolveContextualComputabilityRequestV1(
+            **_common("resolve_contextual_computability"),
+            component_id="MATH-01",
+            required_computability_classes=(
+                ComputabilityClassV1.STACK_COMPUTABLE,
+            ),
+        )
+    assert missing_graph.value.reason_code is ReasonCode.NO_APPLICABLE_STACK
+    assert invocations == []
+
+    exact_stack = service.resolve_applicable_stack(
+        ResolveApplicableStackRequestV1(
+            **_common(
+                "resolve_applicable_stack",
+                context=stack_context,
+            ),
+            trade_plan_candidate_id="TRADE_PLAN::EXACT",
+            required_launch_roles=("MATH-01", "MATH-02"),
+        )
+    )
+    unknown_stack = service.resolve_applicable_stack(
+        ResolveApplicableStackRequestV1(
+            **_common(
+                "resolve_applicable_stack",
+                context=_context(
+                    component_ids=("MATH-01", "MATH-02"),
+                    dependency_graph_id="STACK::UNKNOWN",
+                ),
+            ),
+            trade_plan_candidate_id="TRADE_PLAN::UNKNOWN",
+            required_launch_roles=("MATH-01", "MATH-02"),
+        )
+    )
+    assert exact_stack.status is OperationStatusV1.SUCCEEDED
+    assert exact_stack.stack_resolution.stack_id == STACK_ID
+    assert unknown_stack.status is not OperationStatusV1.SUCCEEDED
+    assert (
+        OperationBlockerCodeV1.NO_APPLICABLE_STACK
+        in unknown_stack.blocker_codes
+    )
+    assert invocations == []
+
+
+def test_execution_context_propagates_through_stack(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    service = _service()
+    context = _context(
+        component_ids=("MATH-01", "MATH-02"),
+        dependency_graph_id=STACK_ID,
+    )
+    captured = []
+    original_execute = ApplicableStackResolverV1.execute
+
+    def capture_execution(**kwargs: object) -> object:
+        execution = original_execute(**kwargs)  # type: ignore[arg-type]
+        captured.append(execution)
+        return execution
+
+    monkeypatch.setattr(
+        ApplicableStackResolverV1,
+        "execute",
+        staticmethod(capture_execution),
+    )
+    request = ComputeStackRequestV1(
+        **_common("compute_stack", context=context),
+        stack_id=STACK_ID,
+        component_ids=("MATH-01", "MATH-02"),
+        input_values=_stack_record(),
+    )
+    response = service.compute_stack(request)
+
+    assert response.status is OperationStatusV1.SUCCEEDED
+    assert len(captured) == 1
+    execution = captured[0]
+    assert request.context is context
+    assert execution.execution_context is context
+    assert all(
+        resolution.execution_context is context
+        for resolution in execution.component_inputs
+    )
+    assert execution.dependency_packet.scope is context.scope
+    assert execution.dependency_packet.context_id == context.context_id
+    assert execution.dependency_packet.clocks.as_of_time == context.as_of
+    assert (
+        execution.dependency_packet.source_epoch_id
+        == context.source_epoch_id
+    )
+    assert execution.dependency_packet.input_version == context.input_version
+    assert (
+        execution.dependency_packet.scope.input_snapshot_id
+        == context.scope.input_snapshot_id
+    )
+    assert execution.conversion_receipt.execution_context is context
+    assert execution.propagation_receipt.execution_context is context
+    assert all(
+        output.execution_context is context
+        for output in response.stack_result.component_outputs
+    )
+    assert response.context is context
+    assert execution.no_authority_flag is True
+    assert execution.conversion_receipt.no_authority_flag is True
+    assert execution.propagation_receipt.no_authority_flag is True
+    assert all(
+        output.no_authority_flag
+        for output in response.stack_result.component_outputs
+    )
+    effect_counts = {
+        "provider": 0,
+        "private_state": 0,
+        "replay_or_paper": 0,
+        "llm": 0,
+        "simulator_or_qpu": 0,
+        "mode_or_allow": 0,
+        "order": 0,
+        "capital": 0,
+    }
+    assert set(effect_counts.values()) == {0}
 
 
 def test_downstream_routes_views_and_no_effect_records_are_typed() -> None:

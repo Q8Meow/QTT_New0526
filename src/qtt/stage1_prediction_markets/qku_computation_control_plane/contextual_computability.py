@@ -5,7 +5,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Mapping
 
-from .context import ComputationContextKeyV1
 from .errors import (
     FreshnessError,
     InputAuthorityError,
@@ -23,7 +22,9 @@ from .models import (
     ComputabilityClassV1,
     ComputabilityStateResultV1,
     ComputabilityTerminalRouteV1,
+    ComputationExecutionContextV1,
     ContextualComputabilityResolutionV1,
+    ImplementationVersionPinV1,
 )
 from .oracle_contracts import (
     GOLDEN_VECTOR_BY_MATH_ID,
@@ -40,7 +41,7 @@ from .stack_resolver import REGISTERED_FORMULA_STACKS
 @dataclass(frozen=True, slots=True)
 class ContextualComputabilitySnapshotV1:
     math_spec_id: str
-    context_id: str
+    execution_context: ComputationExecutionContextV1
     resolution: ContextualComputabilityResolutionV1
     input_resolution: FormulaInputResolutionV1 | None
     registered_stack_id: str | None
@@ -49,9 +50,16 @@ class ContextualComputabilitySnapshotV1:
     def __post_init__(self) -> None:
         if (
             not self.math_spec_id
-            or not self.context_id
+            or not isinstance(
+                self.execution_context, ComputationExecutionContextV1
+            )
             or not isinstance(
                 self.resolution, ContextualComputabilityResolutionV1
+            )
+            or (
+                self.input_resolution is not None
+                and self.input_resolution.execution_context
+                is not self.execution_context
             )
             or self.no_authority_flag is not True
         ):
@@ -59,6 +67,10 @@ class ContextualComputabilitySnapshotV1:
                 ReasonCode.INVALID_CONTRACT,
                 "contextual computability snapshot is malformed",
             )
+
+    @property
+    def context_id(self) -> str:
+        return self.execution_context.context_id
 
 
 def _state(
@@ -138,11 +150,18 @@ class FrozenContextualComputabilityResolverV1:
     def resolve(
         math_spec_id: str,
         *,
-        context: ComputationContextKeyV1,
+        context: ComputationExecutionContextV1,
         owner_registry: CanonicalOwnerPacketRegistryV1,
         caller_assertions: Mapping[str, object] | None = None,
         required_stack_id: str | None = None,
+        context_admission_blocker: ComputabilityBlockerCodeV1 | None = None,
+        stack_admission_blocker: ComputabilityBlockerCodeV1 | None = None,
     ) -> ContextualComputabilitySnapshotV1:
+        if not isinstance(context, ComputationExecutionContextV1):
+            raise InputAuthorityError(
+                ReasonCode.INPUT_SCOPE_MISMATCH,
+                "contextual computability requires the execution-context subtype",
+            )
         specification_closed = (
             math_spec_id in FROZEN_FORMULA_REQUIREMENTS
             and math_spec_id in FROZEN_FORMULA_INPUT_CONTRACTS
@@ -169,9 +188,13 @@ class FrozenContextualComputabilityResolverV1:
         )
 
         input_resolution: FormulaInputResolutionV1 | None = None
-        context_blockers: tuple[ComputabilityBlockerCodeV1, ...] = ()
+        context_blockers: tuple[ComputabilityBlockerCodeV1, ...] = (
+            (context_admission_blocker,)
+            if context_admission_blocker is not None
+            else ()
+        )
         context_route = ComputabilityTerminalRouteV1.CONTRACT_ONLY_COMPUTATION
-        if specification_closed:
+        if specification_closed and not context_blockers:
             try:
                 input_resolution = FormulaInputResolverV1.resolve(
                     math_spec_id,
@@ -182,22 +205,59 @@ class FrozenContextualComputabilityResolverV1:
             except (InputAuthorityError, PointInTimeError, FreshnessError) as exc:
                 blocker, context_route = _context_blocker(exc)
                 context_blockers = (blocker,)
-        else:
+        elif not specification_closed:
             context_blockers = (
                 ComputabilityBlockerCodeV1.SPECIFICATION_SEMANTICS_INCOMPLETE,
             )
             context_route = ComputabilityTerminalRouteV1.SPECIFICATION_OWNER_REVIEW
+        else:
+            context_route = ComputabilityTerminalRouteV1.CONTEXT_REBINDING
 
         registered_stack_id: str | None = None
-        stack_blockers = context_blockers
-        stack_route = context_route
-        if not stack_blockers and required_stack_id is not None:
+        stack_blockers: tuple[ComputabilityBlockerCodeV1, ...] = ()
+        stack_route = ComputabilityTerminalRouteV1.CONTRACT_ONLY_COMPUTATION
+        if stack_admission_blocker is not None:
+            stack_blockers = (stack_admission_blocker,)
+            stack_route = (
+                ComputabilityTerminalRouteV1.NO_RESULT_NO_TRADE
+                if stack_admission_blocker
+                is ComputabilityBlockerCodeV1.NO_APPLICABLE_STACK
+                else ComputabilityTerminalRouteV1.STACK_CLOSURE
+            )
+        elif required_stack_id is None:
+            stack_blockers = (ComputabilityBlockerCodeV1.NO_APPLICABLE_STACK,)
+            stack_route = ComputabilityTerminalRouteV1.NO_RESULT_NO_TRADE
+        elif context_blockers:
+            stack_blockers = context_blockers
+            stack_route = context_route
+        else:
             stack = REGISTERED_FORMULA_STACKS.get(required_stack_id)
-            if stack is None or math_spec_id not in stack.component_ids:
+            if (
+                stack is None
+                or context.dependency_graph_id != required_stack_id
+                or math_spec_id not in stack.component_ids
+            ):
                 stack_blockers = (
                     ComputabilityBlockerCodeV1.NO_APPLICABLE_STACK,
                 )
                 stack_route = ComputabilityTerminalRouteV1.NO_RESULT_NO_TRADE
+            elif (
+                context.dependency_graph_version != stack.stack_version
+                or context.implementation_versions
+                != tuple(
+                    ImplementationVersionPinV1(
+                        math_spec_id=component_id,
+                        implementation_id=IMPLEMENTATION_REGISTRY[
+                            component_id
+                        ].contract.implementation_id,
+                    )
+                    for component_id in stack.component_ids
+                )
+            ):
+                stack_blockers = (
+                    ComputabilityBlockerCodeV1.CONTEXT_BINDING_MISMATCH,
+                )
+                stack_route = ComputabilityTerminalRouteV1.CONTEXT_REBINDING
             else:
                 registered_stack_id = stack.stack_id
                 stack_route = ComputabilityTerminalRouteV1.CONTRACT_ONLY_COMPUTATION
@@ -249,7 +309,7 @@ class FrozenContextualComputabilityResolverV1:
         )
         return ContextualComputabilitySnapshotV1(
             math_spec_id=math_spec_id,
-            context_id=context.context_id,
+            execution_context=context,
             resolution=resolution,
             input_resolution=input_resolution,
             registered_stack_id=registered_stack_id,

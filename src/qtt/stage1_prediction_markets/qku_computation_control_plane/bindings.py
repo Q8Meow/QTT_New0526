@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from enum import StrEnum
 import json
 from types import MappingProxyType
 from typing import Mapping
@@ -1022,6 +1023,16 @@ _ST12B_ONLINE_CURRENTIZATION_JSON = (
 # END GENERATED ST12B V3.4 OWNER-FROZEN DATA
 
 
+class FormulaInputAdmissionClassV1(StrEnum):
+    ACCEPTED_OWNER_PACKET_REQUIRED_BEFORE_CONTEXTUAL_COMPUTABILITY = (
+        "CONTRACT_AND_INDEPENDENT_ORACLE_FIXTURE_ONLY; "
+        "CONTEXT_COMPUTABLE_BLOCKED_UNTIL_ACCEPTED_OWNER_PACKET"
+    )
+    EXACT_REGISTERED_UPSTREAM_RECEIPT_REQUIRED_BEFORE_CONTEXTUAL_COMPUTABILITY = (
+        "CONTEXT_COMPUTABLE_ONLY_WHEN_EXACT_REGISTERED_UPSTREAM_RECEIPT_IS_ACCEPTED"
+    )
+
+
 @dataclass(frozen=True, slots=True)
 class FormulaInputAuthorityBindingV1:
     binding_id: str
@@ -1046,6 +1057,7 @@ class FormulaInputAuthorityBindingV1:
     freshness_and_ttl_rule: str
     failure_or_fallback: str
     current_admitted_mode: str
+    admission_class: FormulaInputAdmissionClassV1
     caller_assertion_equality_rule: str
     packet_or_snapshot_identity_resolution_law: str
     canonical_typed_value_extraction: str
@@ -1070,6 +1082,10 @@ class FormulaInputAuthorityBindingV1:
             )
             or not self.fixture_assertion_allowed
             or self.source_context_computable_from_caller_receipt_alone
+            or not isinstance(
+                self.admission_class, FormulaInputAdmissionClassV1
+            )
+            or self.admission_class.value != self.current_admitted_mode
         ):
             raise ContractValidationError(
                 ReasonCode.INVALID_CONTRACT,
@@ -1095,6 +1111,19 @@ def _formula_input_authority(row: object) -> FormulaInputAuthorityBindingV1:
         )
     frozen = _freeze_binding_value(row)
     assert isinstance(frozen, Mapping)
+    admitted_mode = row.get("current_admitted_mode")
+    if not isinstance(admitted_mode, str):
+        raise ContractValidationError(
+            ReasonCode.INVALID_CONTRACT,
+            "formula-input admitted mode must be exact frozen text",
+        )
+    try:
+        admission_class = FormulaInputAdmissionClassV1(admitted_mode)
+    except ValueError as exc:
+        raise ContractValidationError(
+            ReasonCode.INVALID_CONTRACT,
+            "formula-input admitted mode is not in the finite v3.4 projection",
+        ) from exc
     return FormulaInputAuthorityBindingV1(
         binding_id=str(row["binding_id"]),
         math_spec_id=str(row["math_spec_id"]),
@@ -1123,7 +1152,8 @@ def _formula_input_authority(row: object) -> FormulaInputAuthorityBindingV1:
         scope=str(row["scope"]),
         freshness_and_ttl_rule=str(row["freshness_and_ttl_rule"]),
         failure_or_fallback=str(row["failure_or_fallback"]),
-        current_admitted_mode=str(row["current_admitted_mode"]),
+        current_admitted_mode=admitted_mode,
+        admission_class=admission_class,
         caller_assertion_equality_rule=str(row["caller_assertion_equality_rule"]),
         packet_or_snapshot_identity_resolution_law=str(
             row["packet_or_snapshot_identity_resolution_law"]

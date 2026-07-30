@@ -11,14 +11,20 @@ from typing import Mapping
 
 from .bindings import (
     FORMULA_INPUT_AUTHORITY_BY_MATH_ID,
+    FormulaInputAdmissionClassV1,
     FormulaInputAuthorityBindingV1,
 )
 from .context import (
-    ComputationContextKeyV1,
     exact_decimal,
     finite_float,
 )
-from .errors import InputAuthorityError, NumericDomainError, ReasonCode
+from .errors import (
+    FreshnessError,
+    InputAuthorityError,
+    NumericDomainError,
+    PointInTimeError,
+    ReasonCode,
+)
 from .freshness import (
     FreshnessPolicyV1,
     FreshnessReceiptV1,
@@ -31,6 +37,7 @@ from .point_in_time import (
     PointInTimeReceiptV1,
     classify_point_in_time_semantics,
 )
+from .models import ComputationExecutionContextV1, ComputationScopeV1
 from .specification import FROZEN_FORMULA_REQUIREMENTS
 
 
@@ -62,7 +69,9 @@ class OwnerValuePacketV1:
     schema_id: str
     schema_version: str
     context_id: str
+    scope: ComputationScopeV1
     source_epoch_id: str
+    input_version: str
     clocks: PointInTimeClocksV1
     ttl: timedelta
     values: Mapping[str, object]
@@ -84,6 +93,7 @@ class OwnerValuePacketV1:
             self.schema_version,
             self.context_id,
             self.source_epoch_id,
+            self.input_version,
             self.producer_receipt_id,
             self.producer_receipt_type,
             self.source_state_and_claim_lineage,
@@ -92,6 +102,16 @@ class OwnerValuePacketV1:
             raise InputAuthorityError(
                 ReasonCode.INPUT_PACKET_MISMATCH,
                 "owner packet identity and lineage fields are required",
+            )
+        if type(self.scope) is not ComputationScopeV1:
+            raise InputAuthorityError(
+                ReasonCode.INPUT_SCOPE_MISMATCH,
+                "owner packet requires an exact ComputationScopeV1",
+            )
+        if self.input_version != self.input_version.strip():
+            raise InputAuthorityError(
+                ReasonCode.INPUT_SCOPE_MISMATCH,
+                "owner packet input_version must be canonical text",
             )
         if not isinstance(self.clocks, PointInTimeClocksV1):
             raise InputAuthorityError(
@@ -140,7 +160,7 @@ class ResolvedFormulaInputV1:
 @dataclass(frozen=True, slots=True)
 class FormulaInputResolutionV1:
     math_spec_id: str
-    context_id: str
+    execution_context: ComputationExecutionContextV1
     inputs: tuple[ResolvedFormulaInputV1, ...]
     authoritative_values: Mapping[str, object]
     packet_refs: tuple[str, ...]
@@ -149,7 +169,9 @@ class FormulaInputResolutionV1:
     def __post_init__(self) -> None:
         if (
             not self.math_spec_id
-            or not self.context_id
+            or not isinstance(
+                self.execution_context, ComputationExecutionContextV1
+            )
             or not self.inputs
             or len({row.input_name for row in self.inputs}) != len(self.inputs)
             or tuple(self.authoritative_values)
@@ -159,6 +181,10 @@ class FormulaInputResolutionV1:
                 ReasonCode.INPUT_VALUE_CONFLICT,
                 "resolved formula inputs are incomplete or out of declared order",
             )
+
+    @property
+    def context_id(self) -> str:
+        return self.execution_context.context_id
 
 
 @dataclass(frozen=True, slots=True)
@@ -194,14 +220,16 @@ class ResolvedRuntimeParameterValueV1:
 @dataclass(frozen=True, slots=True)
 class RuntimeParameterValueResolutionV1:
     parameter_id: str
-    context_id: str
+    execution_context: ComputationExecutionContextV1
     resolved: ResolvedRuntimeParameterValueV1
     receipt_refs: tuple[str, ...]
 
     def __post_init__(self) -> None:
         if (
             not self.parameter_id
-            or not self.context_id
+            or not isinstance(
+                self.execution_context, ComputationExecutionContextV1
+            )
             or self.resolved.parameter_id != self.parameter_id
             or self.receipt_refs
             != (
@@ -214,6 +242,10 @@ class RuntimeParameterValueResolutionV1:
                 ReasonCode.PARAMETER_BINDING_MISMATCH,
                 "runtime parameter resolution receipt is inconsistent",
             )
+
+    @property
+    def context_id(self) -> str:
+        return self.execution_context.context_id
 
 
 class CanonicalOwnerPacketRegistryV1:
@@ -229,16 +261,22 @@ class CanonicalOwnerPacketRegistryV1:
                 ReasonCode.INPUT_PACKET_MISMATCH,
                 "owner packet registry requires unique typed immutable packets",
             )
-        by_binding: dict[tuple[str, str], list[OwnerValuePacketV1]] = {}
+        by_binding: dict[tuple[object, ...], list[OwnerValuePacketV1]] = {}
+        by_context_binding: dict[
+            tuple[str, str], list[OwnerValuePacketV1]
+        ] = {}
         for packet in packets:
             for binding_id in packet.authorized_binding_ids:
                 by_binding.setdefault(
+                    self._packet_binding_key(packet, binding_id), []
+                ).append(packet)
+                by_context_binding.setdefault(
                     (packet.context_id, binding_id), []
                 ).append(packet)
         if any(len(rows) != 1 for rows in by_binding.values()):
             raise InputAuthorityError(
                 ReasonCode.INPUT_VALUE_CONFLICT,
-                "canonical registry has conflicting packets for one context/binding",
+                "canonical registry has conflicting packets for one exact scope/version binding",
             )
         self._packets = packets
         self._by_id = MappingProxyType(
@@ -246,6 +284,37 @@ class CanonicalOwnerPacketRegistryV1:
         )
         self._by_binding = MappingProxyType(
             {key: rows[0] for key, rows in by_binding.items()}
+        )
+        self._by_context_binding = MappingProxyType(
+            {key: tuple(rows) for key, rows in by_context_binding.items()}
+        )
+
+    @staticmethod
+    def _packet_binding_key(
+        packet: OwnerValuePacketV1,
+        binding_id: str,
+    ) -> tuple[object, ...]:
+        return (
+            packet.context_id,
+            packet.clocks.as_of_time,
+            packet.source_epoch_id,
+            packet.input_version,
+            packet.scope.identity_tuple,
+            binding_id,
+        )
+
+    @staticmethod
+    def _context_binding_key(
+        context: ComputationExecutionContextV1,
+        binding_id: str,
+    ) -> tuple[object, ...]:
+        return (
+            context.context_id,
+            context.as_of,
+            context.source_epoch_id,
+            context.input_version,
+            context.scope.identity_tuple,
+            binding_id,
         )
 
     @property
@@ -255,12 +324,47 @@ class CanonicalOwnerPacketRegistryV1:
     def packet_for(
         self,
         *,
-        context_id: str,
+        context: ComputationExecutionContextV1,
         binding_id: str,
     ) -> OwnerValuePacketV1:
+        if not isinstance(context, ComputationExecutionContextV1):
+            raise InputAuthorityError(
+                ReasonCode.INPUT_SCOPE_MISMATCH,
+                "packet lookup requires ComputationExecutionContextV1",
+            )
         try:
-            return self._by_binding[(context_id, binding_id)]
+            return self._by_binding[
+                self._context_binding_key(context, binding_id)
+            ]
         except KeyError as exc:
+            candidates = self._by_context_binding.get(
+                (context.context_id, binding_id), ()
+            )
+            if any(
+                packet.scope == context.scope
+                and packet.input_version == context.input_version
+                and packet.source_epoch_id == context.source_epoch_id
+                for packet in candidates
+            ):
+                raise PointInTimeError(
+                    ReasonCode.POINT_IN_TIME_VIOLATION,
+                    f"{binding_id} packet as_of differs from the execution context",
+                ) from exc
+            if any(
+                packet.scope == context.scope
+                and packet.input_version == context.input_version
+                and packet.clocks.as_of_time == context.as_of
+                for packet in candidates
+            ):
+                raise FreshnessError(
+                    ReasonCode.SOURCE_EPOCH_STALE,
+                    f"{binding_id} packet source epoch differs from the execution context",
+                ) from exc
+            if candidates:
+                raise InputAuthorityError(
+                    ReasonCode.INPUT_SCOPE_MISMATCH,
+                    f"{binding_id} packet scope or input version differs",
+                ) from exc
             raise InputAuthorityError(
                 ReasonCode.INPUT_OWNER_MISSING,
                 f"canonical owner packet is absent for {binding_id}",
@@ -573,6 +677,67 @@ def _parse_runtime_parameter_value(
     )
 
 
+def _require_execution_context(
+    context: object,
+) -> ComputationExecutionContextV1:
+    if not isinstance(context, ComputationExecutionContextV1):
+        raise InputAuthorityError(
+            ReasonCode.INPUT_SCOPE_MISMATCH,
+            "value resolution requires ComputationExecutionContextV1",
+        )
+    return context
+
+
+def _admit_formula_input_binding(
+    binding: FormulaInputAuthorityBindingV1,
+    packet: OwnerValuePacketV1,
+) -> None:
+    if (
+        binding.admission_class
+        is FormulaInputAdmissionClassV1.ACCEPTED_OWNER_PACKET_REQUIRED_BEFORE_CONTEXTUAL_COMPUTABILITY
+    ):
+        return
+    if (
+        binding.admission_class
+        is FormulaInputAdmissionClassV1.EXACT_REGISTERED_UPSTREAM_RECEIPT_REQUIRED_BEFORE_CONTEXTUAL_COMPUTABILITY
+        and packet.producer_receipt_id
+        and packet.producer_receipt_type
+    ):
+        return
+    raise InputAuthorityError(
+        ReasonCode.INPUT_PACKET_MISMATCH,
+        f"{binding.binding_id} lacks its exact typed admission precondition",
+    )
+
+
+def _admit_runtime_parameter_binding(binding: object) -> None:
+    raw = getattr(binding, "raw", None)
+    exact_fields = (
+        getattr(binding, "accepted_upstream_owner_id", None),
+        getattr(binding, "accepted_packet_or_snapshot_type", None),
+        getattr(binding, "schema_id", None),
+        getattr(binding, "schema_version", None),
+        getattr(binding, "producer_receipt_type", None),
+        raw.get("source_state_and_claim_lineage") if isinstance(raw, Mapping) else None,
+    )
+    if (
+        getattr(binding, "value_state", None) != "RUNTIME_BINDING_REQUIRED"
+        or not isinstance(raw, Mapping)
+        or raw.get("current_computation_admission")
+        != "BLOCKED_PENDING_ACCEPTED_UPSTREAM_VALUE_PACKET"
+        or any(
+            not isinstance(value, str)
+            or not value
+            or value != value.strip()
+            for value in exact_fields
+        )
+    ):
+        raise InputAuthorityError(
+            ReasonCode.PARAMETER_BINDING_MISMATCH,
+            "runtime parameter owner admission metadata is incomplete or altered",
+        )
+
+
 class FormulaInputResolverV1:
     """Resolve every value from the package-named owner, never from the request."""
 
@@ -580,10 +745,11 @@ class FormulaInputResolverV1:
     def resolve(
         math_spec_id: str,
         *,
-        context: ComputationContextKeyV1,
+        context: ComputationExecutionContextV1,
         owner_registry: CanonicalOwnerPacketRegistryV1,
         caller_assertions: Mapping[str, object] | None = None,
     ) -> FormulaInputResolutionV1:
+        context = _require_execution_context(context)
         FreshnessResolverV1.assert_context_current(context)
         try:
             bindings = FORMULA_INPUT_AUTHORITY_BY_MATH_ID[math_spec_id]
@@ -602,9 +768,10 @@ class FormulaInputResolverV1:
         resolved: list[ResolvedFormulaInputV1] = []
         for binding in bindings:
             packet = owner_registry.packet_for(
-                context_id=context.context_id,
+                context=context,
                 binding_id=binding.binding_id,
             )
+            _admit_formula_input_binding(binding, packet)
             if packet.owner_id != binding.accepted_upstream_owner_id:
                 raise InputAuthorityError(
                     ReasonCode.INPUT_OWNER_MISMATCH,
@@ -623,10 +790,14 @@ class FormulaInputResolverV1:
                     ReasonCode.INPUT_SCHEMA_MISMATCH,
                     f"{binding.binding_id} schema identity/version differs",
                 )
-            if packet.context_id != context.context_id:
+            if (
+                packet.context_id != context.context_id
+                or packet.scope != context.scope
+                or packet.input_version != context.input_version
+            ):
                 raise InputAuthorityError(
                     ReasonCode.INPUT_SCOPE_MISMATCH,
-                    f"{binding.binding_id} packet context differs",
+                    f"{binding.binding_id} packet execution scope differs",
                 )
             if packet.producer_receipt_type != binding.producer_receipt_type:
                 raise InputAuthorityError(
@@ -707,7 +878,7 @@ class FormulaInputResolverV1:
             )
         return FormulaInputResolutionV1(
             math_spec_id=math_spec_id,
-            context_id=context.context_id,
+            execution_context=context,
             inputs=tuple(resolved),
             authoritative_values=MappingProxyType(
                 {row.input_name: row.value for row in resolved}
@@ -732,10 +903,11 @@ class RuntimeParameterValueResolverV1:
     def resolve(
         parameter_id: str,
         *,
-        context: ComputationContextKeyV1,
+        context: ComputationExecutionContextV1,
         owner_registry: CanonicalOwnerPacketRegistryV1,
         caller_assertion: object | None = None,
     ) -> RuntimeParameterValueResolutionV1:
+        context = _require_execution_context(context)
         FreshnessResolverV1.assert_context_current(context)
         from .parameter_policy import (
             CUMULATIVE_PARAMETER_POLICIES,
@@ -750,8 +922,9 @@ class RuntimeParameterValueResolverV1:
                 ReasonCode.PARAMETER_OWNER_MISSING,
                 f"no runtime owner interface exists for {parameter_id}",
             ) from exc
+        _admit_runtime_parameter_binding(binding)
         packet = owner_registry.packet_for(
-            context_id=context.context_id,
+            context=context,
             binding_id=binding.binding_id,
         )
         if packet.owner_id != binding.accepted_upstream_owner_id:
@@ -772,10 +945,14 @@ class RuntimeParameterValueResolverV1:
                 ReasonCode.INPUT_SCHEMA_MISMATCH,
                 f"{parameter_id} schema identity/version differs",
             )
-        if packet.context_id != context.context_id:
+        if (
+            packet.context_id != context.context_id
+            or packet.scope != context.scope
+            or packet.input_version != context.input_version
+        ):
             raise InputAuthorityError(
                 ReasonCode.INPUT_SCOPE_MISMATCH,
-                f"{parameter_id} packet context differs",
+                f"{parameter_id} packet execution scope differs",
             )
         if packet.producer_receipt_type != binding.producer_receipt_type:
             raise InputAuthorityError(
@@ -851,7 +1028,7 @@ class RuntimeParameterValueResolverV1:
         )
         return RuntimeParameterValueResolutionV1(
             parameter_id=parameter_id,
-            context_id=context.context_id,
+            execution_context=context,
             resolved=resolved,
             receipt_refs=(
                 packet.producer_receipt_id,

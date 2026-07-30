@@ -14,7 +14,9 @@ from .errors import (
     ContractValidationError,
     InputAuthorityError,
     OwnerAdapterError,
+    ParameterPolicyError,
     ReasonCode,
+    StackResolutionError,
 )
 from .fallback import (
     EXPECTED_PUBLIC_OPERATION_ERRORS,
@@ -40,6 +42,7 @@ from .models import (
     ComputeStackResponseV1,
     ComputabilityBlockerCodeV1,
     ComputabilityClassV1,
+    ComputationExecutionContextV1,
     EvaluateTradePlanRequestV1,
     EvaluateTradePlanResponseV1,
     ExplainResolutionRequestV1,
@@ -49,6 +52,7 @@ from .models import (
     GetSnapshotViewResponseV1,
     IdentityResolutionV1,
     InputResolutionV1,
+    ImplementationVersionPinV1,
     MaterializationWorkOrderV1,
     NoTradeComparisonV1,
     OperationBlockerCodeV1,
@@ -126,7 +130,7 @@ def _frozen_output(
     math_spec_id: str,
     value: object,
     *,
-    context_id: str,
+    execution_context: ComputationExecutionContextV1,
     receipt_refs: tuple[str, ...],
 ) -> FrozenFormulaOutputV1:
     implementation = IMPLEMENTATION_REGISTRY[math_spec_id]
@@ -145,7 +149,7 @@ def _frozen_output(
         output_schema_version=schema.schema_version,
         output_name=schema.output_name,
         value=value,
-        context_id=context_id,
+        execution_context=execution_context,
         receipt_refs=receipt_refs,
     )
 
@@ -242,8 +246,133 @@ _COMPUTABILITY_TO_OPERATION_BLOCKER = MappingProxyType(
         ComputabilityBlockerCodeV1.NO_APPLICABLE_STACK: (
             OperationBlockerCodeV1.NO_APPLICABLE_STACK
         ),
+        ComputabilityBlockerCodeV1.CONTEXT_BINDING_MISMATCH: (
+            OperationBlockerCodeV1.CONTEXT_BINDING_INVALID
+        ),
+        ComputabilityBlockerCodeV1.PARAMETER_BINDING_MISMATCH: (
+            OperationBlockerCodeV1.PARAMETER_BINDING_MISMATCH
+        ),
+        ComputabilityBlockerCodeV1.DEPENDENCY_CLOSURE_INCOMPLETE: (
+            OperationBlockerCodeV1.DEPENDENCY_UNRESOLVED
+        ),
     }
 )
+
+
+ST12B_FROZEN_PACKAGE_VERSION = "3.4"
+
+
+def _contextual_admission_blockers(
+    exc: ComputationControlPlaneError,
+) -> tuple[
+    ComputabilityBlockerCodeV1 | None,
+    ComputabilityBlockerCodeV1 | None,
+]:
+    if exc.reason_code is ReasonCode.NO_APPLICABLE_STACK:
+        return None, ComputabilityBlockerCodeV1.NO_APPLICABLE_STACK
+    if exc.reason_code is ReasonCode.PARAMETER_BINDING_MISMATCH:
+        return ComputabilityBlockerCodeV1.PARAMETER_BINDING_MISMATCH, None
+    if exc.reason_code is ReasonCode.DEPENDENCY_CLOSURE_FAILED:
+        return ComputabilityBlockerCodeV1.DEPENDENCY_CLOSURE_INCOMPLETE, None
+    return ComputabilityBlockerCodeV1.CONTEXT_BINDING_MISMATCH, None
+
+
+def _admit_computation_plan(
+    *,
+    execution_context: ComputationExecutionContextV1,
+    ordered_component_ids: tuple[str, ...],
+    selected_stack_id: str | None,
+) -> None:
+    """The service's sole typed admission path for an exact computation plan."""
+
+    if not isinstance(execution_context, ComputationExecutionContextV1):
+        raise InputAuthorityError(
+            ReasonCode.INPUT_SCOPE_MISMATCH,
+            "computation admission requires the execution-context subtype",
+        )
+    if (
+        not isinstance(ordered_component_ids, tuple)
+        or not ordered_component_ids
+        or any(
+            not isinstance(component_id, str) or not component_id
+            for component_id in ordered_component_ids
+        )
+        or len(set(ordered_component_ids)) != len(ordered_component_ids)
+    ):
+        raise ContractValidationError(
+            ReasonCode.INVALID_CONTRACT,
+            "computation admission requires an ordered unique component tuple",
+        )
+    unknown = tuple(
+        component_id
+        for component_id in ordered_component_ids
+        if component_id not in IMPLEMENTATION_REGISTRY
+    )
+    if unknown:
+        raise ContractValidationError(
+            ReasonCode.UNKNOWN_IMPLEMENTATION,
+            f"unknown registered components: {unknown}",
+        )
+    if (
+        execution_context.binding_profile_version
+        != ST12B_FROZEN_PACKAGE_VERSION
+    ):
+        raise InputAuthorityError(
+            ReasonCode.INPUT_PACKET_MISMATCH,
+            "binding profile version differs from frozen package 3.4",
+        )
+    if (
+        execution_context.parameter_policy_version
+        != ST12B_FROZEN_PACKAGE_VERSION
+    ):
+        raise ParameterPolicyError(
+            ReasonCode.PARAMETER_BINDING_MISMATCH,
+            "parameter policy version differs from frozen package 3.4",
+        )
+    if selected_stack_id is None:
+        if (
+            execution_context.dependency_graph_id is not None
+            or execution_context.dependency_graph_version is not None
+        ):
+            raise StackResolutionError(
+                ReasonCode.NO_APPLICABLE_STACK,
+                "a standalone plan cannot carry a dependency graph",
+            )
+    else:
+        if execution_context.dependency_graph_id != selected_stack_id:
+            raise StackResolutionError(
+                ReasonCode.NO_APPLICABLE_STACK,
+                "selected stack differs from the execution-context graph",
+            )
+        try:
+            stack = REGISTERED_FORMULA_STACKS[selected_stack_id]
+        except KeyError as exc:
+            raise StackResolutionError(
+                ReasonCode.NO_APPLICABLE_STACK,
+                f"no registered stack exists for {selected_stack_id}",
+            ) from exc
+        if (
+            execution_context.dependency_graph_version != stack.stack_version
+            or ordered_component_ids != stack.component_ids
+        ):
+            raise StackResolutionError(
+                ReasonCode.NO_APPLICABLE_STACK,
+                "stack version or ordered component membership differs",
+            )
+    expected_pins = tuple(
+        ImplementationVersionPinV1(
+            math_spec_id=component_id,
+            implementation_id=IMPLEMENTATION_REGISTRY[
+                component_id
+            ].contract.implementation_id,
+        )
+        for component_id in ordered_component_ids
+    )
+    if execution_context.implementation_versions != expected_pins:
+        raise StackResolutionError(
+            ReasonCode.DEPENDENCY_CLOSURE_FAILED,
+            "implementation pins do not exactly match the operation plan",
+        )
 
 
 @dataclass(frozen=True, slots=True)
@@ -339,10 +468,34 @@ class QKUComputationControlPlaneV1:
     def resolve_contextual_computability(
         self, request: ResolveContextualComputabilityRequestV1
     ) -> ResolveContextualComputabilityResponseV1:
+        context = request.context
+        assert isinstance(context, ComputationExecutionContextV1)
+        context_admission_blocker = None
+        stack_admission_blocker = None
+        selected_stack_id = context.dependency_graph_id
+        ordered_component_ids = (request.component_id,)
+        if selected_stack_id in REGISTERED_FORMULA_STACKS:
+            ordered_component_ids = REGISTERED_FORMULA_STACKS[
+                selected_stack_id
+            ].component_ids
+        try:
+            _admit_computation_plan(
+                execution_context=context,
+                ordered_component_ids=ordered_component_ids,
+                selected_stack_id=selected_stack_id,
+            )
+        except EXPECTED_PUBLIC_OPERATION_ERRORS as exc:
+            (
+                context_admission_blocker,
+                stack_admission_blocker,
+            ) = _contextual_admission_blockers(exc)
         snapshot = FrozenContextualComputabilityResolverV1.resolve(
             request.component_id,
-            context=request.context,
+            context=context,
             owner_registry=self.owner_registry,
+            required_stack_id=selected_stack_id,
+            context_admission_blocker=context_admission_blocker,
+            stack_admission_blocker=stack_admission_blocker,
         )
         states = {
             state.state: state
@@ -386,8 +539,21 @@ class QKUComputationControlPlaneV1:
     ) -> ResolveApplicableStackResponseV1:
         component_ids = tuple(request.required_launch_roles)
         try:
+            context = request.context
+            assert isinstance(context, ComputationExecutionContextV1)
+            if context.dependency_graph_id is None:
+                raise StackResolutionError(
+                    ReasonCode.NO_APPLICABLE_STACK,
+                    "applicable-stack resolution requires a selected graph",
+                )
+            _admit_computation_plan(
+                execution_context=context,
+                ordered_component_ids=component_ids,
+                selected_stack_id=context.dependency_graph_id,
+            )
             stack = ApplicableStackResolverV1.resolve(
-                stack_id="STACK::MATH-01::MATH-02::V3_4",
+                stack_id=context.dependency_graph_id,
+                stack_version=context.dependency_graph_version or "",
                 component_ids=component_ids,
             )
         except EXPECTED_PUBLIC_OPERATION_ERRORS as exc:
@@ -430,10 +596,17 @@ class QKUComputationControlPlaneV1:
         packet_refs: list[str] = []
         receipt_refs: list[str] = []
         try:
+            context = request.context
+            assert isinstance(context, ComputationExecutionContextV1)
+            _admit_computation_plan(
+                execution_context=context,
+                ordered_component_ids=request.component_ids,
+                selected_stack_id=None,
+            )
             for component_id in request.component_ids:
                 resolved = FormulaInputResolverV1.resolve(
                     component_id,
-                    context=request.context,
+                    context=context,
                     owner_registry=self.owner_registry,
                 )
                 names.extend(
@@ -483,6 +656,13 @@ class QKUComputationControlPlaneV1:
         self, request: ComputeComponentRequestV1
     ) -> ComputeComponentResponseV1:
         try:
+            context = request.context
+            assert isinstance(context, ComputationExecutionContextV1)
+            _admit_computation_plan(
+                execution_context=context,
+                ordered_component_ids=(request.component_id,),
+                selected_stack_id=None,
+            )
             if request.component_id not in IMPLEMENTATION_REGISTRY:
                 raise ContractValidationError(
                     ReasonCode.UNKNOWN_IMPLEMENTATION,
@@ -496,7 +676,7 @@ class QKUComputationControlPlaneV1:
                 )
             resolved = FormulaInputResolverV1.resolve(
                 request.component_id,
-                context=request.context,
+                context=context,
                 owner_registry=self.owner_registry,
                 caller_assertions=_assertions(request.input_values),
             )
@@ -506,7 +686,7 @@ class QKUComputationControlPlaneV1:
             output = _frozen_output(
                 request.component_id,
                 value,
-                context_id=request.context.context_id,
+                execution_context=context,
                 receipt_refs=resolved.receipt_refs,
             )
         except EXPECTED_PUBLIC_OPERATION_ERRORS as exc:
@@ -532,34 +712,35 @@ class QKUComputationControlPlaneV1:
     def compute_stack(
         self, request: ComputeStackRequestV1
     ) -> ComputeStackResponseV1:
-        assertions = _assertions(request.input_values)
-        assertions_by_math: dict[str, dict[str, object]] = {
-            component_id: {} for component_id in request.component_ids
-        }
-        for name, value in assertions.items():
-            if "." not in name:
-                return _blocked_stack(
-                    request,
-                    ContractValidationError(
+        try:
+            context = request.context
+            assert isinstance(context, ComputationExecutionContextV1)
+            _admit_computation_plan(
+                execution_context=context,
+                ordered_component_ids=request.component_ids,
+                selected_stack_id=request.stack_id,
+            )
+            assertions = _assertions(request.input_values)
+            assertions_by_math: dict[str, dict[str, object]] = {
+                component_id: {} for component_id in request.component_ids
+            }
+            for name, value in assertions.items():
+                if "." not in name:
+                    raise ContractValidationError(
                         ReasonCode.INVALID_CONTRACT,
                         "stack assertions must use MATH-ID.input_name keys",
-                    ),
-                )
-            component_id, input_name = name.split(".", 1)
-            if component_id not in assertions_by_math:
-                return _blocked_stack(
-                    request,
-                    ContractValidationError(
+                    )
+                component_id, input_name = name.split(".", 1)
+                if component_id not in assertions_by_math:
+                    raise ContractValidationError(
                         ReasonCode.INVALID_CONTRACT,
                         f"stack assertion names unknown component {component_id}",
-                    ),
-                )
-            assertions_by_math[component_id][input_name] = value
-        try:
+                    )
+                assertions_by_math[component_id][input_name] = value
             execution = ApplicableStackResolverV1.execute(
                 stack_id=request.stack_id,
                 component_ids=request.component_ids,
-                context=request.context,
+                context=context,
                 owner_registry=self.owner_registry,
                 caller_assertions_by_math_id=MappingProxyType(
                     {
@@ -572,7 +753,7 @@ class QKUComputationControlPlaneV1:
                 _frozen_output(
                     component_id,
                     value,
-                    context_id=request.context.context_id,
+                    execution_context=context,
                     receipt_refs=resolution.receipt_refs,
                 )
                 for component_id, value, resolution in zip(

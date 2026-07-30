@@ -8,8 +8,9 @@ from enum import StrEnum
 from types import MappingProxyType
 from typing import Callable, Mapping
 
-from .context import ComputationContextKeyV1, finite_float
+from .context import finite_float
 from .errors import ReasonCode, UnitConversionError
+from .models import ComputationExecutionContextV1
 
 
 class ConversionIdentityV1(StrEnum):
@@ -46,21 +47,29 @@ class UnitConversionReceiptV1:
     source_value: object
     converted_value: object
     rounding_and_precision: str
-    context_id: str
+    execution_context: ComputationExecutionContextV1
     failure_disposition: str
+    no_authority_flag: bool = True
 
     def __post_init__(self) -> None:
         if (
             not self.receipt_id
             or self.conversion_version != "1.0.0"
             or not self.rounding_and_precision
-            or not self.context_id
+            or not isinstance(
+                self.execution_context, ComputationExecutionContextV1
+            )
             or not self.failure_disposition
+            or self.no_authority_flag is not True
         ):
             raise UnitConversionError(
                 ReasonCode.UNIT_CONVERSION_FAILED,
                 "conversion receipt is incomplete",
             )
+
+    @property
+    def context_id(self) -> str:
+        return self.execution_context.context_id
 
 
 def _decimal_probability_to_float64(value: object) -> float:
@@ -104,7 +113,7 @@ class UnitConversionOwnerV1:
         value: object,
         source: UnitBasisDescriptorV1,
         target: UnitBasisDescriptorV1,
-        context: ComputationContextKeyV1,
+        context: ComputationExecutionContextV1,
         receipt_id: str,
     ) -> tuple[object, UnitConversionReceiptV1]:
         if not isinstance(conversion_id, ConversionIdentityV1):
@@ -119,10 +128,10 @@ class UnitConversionOwnerV1:
                 ReasonCode.UNIT_CONVERSION_FAILED,
                 "typed source and target descriptors are required",
             )
-        if not isinstance(context, ComputationContextKeyV1):
+        if not isinstance(context, ComputationExecutionContextV1):
             raise UnitConversionError(
                 ReasonCode.UNIT_CONVERSION_FAILED,
-                "conversion requires the exact computation context",
+                "conversion requires the exact execution context",
             )
         if conversion_id is ConversionIdentityV1.DECIMAL_PROBABILITY_TO_FINITE_FLOAT64:
             expected_source = UnitBasisDescriptorV1(
@@ -155,7 +164,7 @@ class UnitConversionOwnerV1:
                 "EXACT_DECIMAL_TO_NEAREST_FINITE_IEEE754_BINARY64; "
                 "NO_PRECONVERSION_ROUNDING"
             ),
-            context_id=context.context_id,
+            execution_context=context,
             failure_disposition="DEPENDENCY_UNRESOLVED_BLOCK_CONTEXT_AND_STACK",
         )
         return converted, receipt

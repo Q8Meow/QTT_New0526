@@ -8,18 +8,21 @@ from decimal import Decimal
 from types import MappingProxyType
 from typing import Mapping
 
-from .context import ComputationContextKeyV1
 from .dependency_graph import (
     FROZEN_DEPENDENCY_RELATIONSHIPS,
     FrozenDependencyKindV1,
 )
 from .errors import ReasonCode, StackResolutionError
-from .implementation_registry import invoke_formula_v34
+from .implementation_registry import IMPLEMENTATION_REGISTRY, invoke_formula_v34
 from .input_resolver import (
     CanonicalOwnerPacketRegistryV1,
     FormulaInputResolutionV1,
     FormulaInputResolverV1,
     OwnerValuePacketV1,
+)
+from .models import (
+    ComputationExecutionContextV1,
+    ImplementationVersionPinV1,
 )
 from .point_in_time import PointInTimeClocksV1
 from .unit_conversion import (
@@ -83,9 +86,10 @@ class DependencyValuePropagationReceiptV1:
     consumer_input_field: str
     producer_value: Decimal
     consumer_value: float
-    context_id: str
+    execution_context: ComputationExecutionContextV1
     conversion_receipt_id: str
     mutation_propagates: bool = True
+    no_authority_flag: bool = True
 
     def __post_init__(self) -> None:
         if (
@@ -96,33 +100,65 @@ class DependencyValuePropagationReceiptV1:
             or self.consumer_input_field != "market_implied_probability"
             or not isinstance(self.producer_value, Decimal)
             or not isinstance(self.consumer_value, float)
-            or not self.context_id
+            or not isinstance(
+                self.execution_context, ComputationExecutionContextV1
+            )
             or not self.conversion_receipt_id
             or self.mutation_propagates is not True
+            or self.no_authority_flag is not True
         ):
             raise StackResolutionError(
                 ReasonCode.DEPENDENCY_CLOSURE_FAILED,
                 "data-flow propagation receipt is incomplete or fabricated",
             )
 
+    @property
+    def context_id(self) -> str:
+        return self.execution_context.context_id
+
 
 @dataclass(frozen=True, slots=True)
 class FormulaStackExecutionV1:
     stack: RegisteredFormulaStackV1
+    execution_context: ComputationExecutionContextV1
     component_inputs: tuple[FormulaInputResolutionV1, ...]
     component_outputs: tuple[object, ...]
+    dependency_packet: OwnerValuePacketV1
     conversion_receipt: UnitConversionReceiptV1
     propagation_receipt: DependencyValuePropagationReceiptV1
     receipt_refs: tuple[str, ...]
+    no_authority_flag: bool = True
 
     def __post_init__(self) -> None:
         if (
-            len(self.component_inputs) != 2
+            not isinstance(
+                self.execution_context, ComputationExecutionContextV1
+            )
+            or len(self.component_inputs) != 2
             or len(self.component_outputs) != 2
             or self.component_inputs[0].math_spec_id != "MATH-01"
             or self.component_inputs[1].math_spec_id != "MATH-02"
+            or not isinstance(self.dependency_packet, OwnerValuePacketV1)
+            or self.dependency_packet.context_id
+            != self.execution_context.context_id
+            or self.dependency_packet.clocks.as_of_time
+            != self.execution_context.as_of
+            or self.dependency_packet.source_epoch_id
+            != self.execution_context.source_epoch_id
+            or self.dependency_packet.input_version
+            != self.execution_context.input_version
+            or self.dependency_packet.scope != self.execution_context.scope
+            or any(
+                resolution.execution_context is not self.execution_context
+                for resolution in self.component_inputs
+            )
+            or self.conversion_receipt.execution_context
+            is not self.execution_context
+            or self.propagation_receipt.execution_context
+            is not self.execution_context
             or self.propagation_receipt.conversion_receipt_id
             != self.conversion_receipt.receipt_id
+            or self.no_authority_flag is not True
         ):
             raise StackResolutionError(
                 ReasonCode.DEPENDENCY_CLOSURE_FAILED,
@@ -137,6 +173,7 @@ class ApplicableStackResolverV1:
     def resolve(
         *,
         stack_id: str,
+        stack_version: str,
         component_ids: tuple[str, ...],
     ) -> RegisteredFormulaStackV1:
         try:
@@ -151,6 +188,11 @@ class ApplicableStackResolverV1:
                 ReasonCode.NO_APPLICABLE_STACK,
                 "requested component sequence differs from the exact registered stack",
             )
+        if stack_version != stack.stack_version:
+            raise StackResolutionError(
+                ReasonCode.NO_APPLICABLE_STACK,
+                "requested dependency graph version is not the registered stack version",
+            )
         return stack
 
     @staticmethod
@@ -158,15 +200,40 @@ class ApplicableStackResolverV1:
         *,
         stack_id: str,
         component_ids: tuple[str, ...],
-        context: ComputationContextKeyV1,
+        context: ComputationExecutionContextV1,
         owner_registry: CanonicalOwnerPacketRegistryV1,
         caller_assertions_by_math_id: Mapping[
             str, Mapping[str, object]
         ] | None = None,
     ) -> FormulaStackExecutionV1:
+        if (
+            not isinstance(context, ComputationExecutionContextV1)
+            or context.dependency_graph_id != stack_id
+            or context.dependency_graph_version is None
+        ):
+            raise StackResolutionError(
+                ReasonCode.NO_APPLICABLE_STACK,
+                "stack execution requires the exact context dependency graph",
+            )
         stack = ApplicableStackResolverV1.resolve(
-            stack_id=stack_id, component_ids=component_ids
+            stack_id=stack_id,
+            stack_version=context.dependency_graph_version,
+            component_ids=component_ids,
         )
+        expected_pins = tuple(
+            ImplementationVersionPinV1(
+                math_spec_id=component_id,
+                implementation_id=IMPLEMENTATION_REGISTRY[
+                    component_id
+                ].contract.implementation_id,
+            )
+            for component_id in stack.component_ids
+        )
+        if context.implementation_versions != expected_pins:
+            raise StackResolutionError(
+                ReasonCode.DEPENDENCY_CLOSURE_FAILED,
+                "stack implementation pins differ from the ordered registered components",
+            )
         assertions = caller_assertions_by_math_id or MappingProxyType({})
         unknown = set(assertions) - set(stack.component_ids)
         if unknown:
@@ -240,7 +307,9 @@ class ApplicableStackResolverV1:
             schema_id="ComputationExecutionReceiptV1::MATH-01::SCHEMA",
             schema_version="1.0.0",
             context_id=context.context_id,
+            scope=context.scope,
             source_epoch_id=context.source_epoch_id,
+            input_version=context.input_version,
             clocks=derived_clocks,
             ttl=min(
                 (packet.ttl for packet in source_packets),
@@ -281,8 +350,6 @@ class ApplicableStackResolverV1:
         math_02_output = invoke_formula_v34(
             "MATH-02", math_02_inputs.authoritative_values
         )
-        from .implementation_registry import IMPLEMENTATION_REGISTRY
-
         propagation = DependencyValuePropagationReceiptV1(
             receipt_id=f"PROPAGATION::{context.context_id}::MATH-01::MATH-02",
             edge_id=stack.data_edge_id,
@@ -299,13 +366,15 @@ class ApplicableStackResolverV1:
             consumer_input_field="market_implied_probability",
             producer_value=math_01_output,
             consumer_value=converted,
-            context_id=context.context_id,
+            execution_context=context,
             conversion_receipt_id=conversion_receipt.receipt_id,
         )
         return FormulaStackExecutionV1(
             stack=stack,
+            execution_context=context,
             component_inputs=(math_01_inputs, math_02_inputs),
             component_outputs=(math_01_output, math_02_output),
+            dependency_packet=dependency_packet,
             conversion_receipt=conversion_receipt,
             propagation_receipt=propagation,
             receipt_refs=tuple(

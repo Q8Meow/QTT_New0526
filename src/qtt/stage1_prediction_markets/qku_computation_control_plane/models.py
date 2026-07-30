@@ -8,12 +8,10 @@ from decimal import Decimal
 from enum import Enum, StrEnum
 import re
 from types import MappingProxyType
-from typing import TYPE_CHECKING, ClassVar, Mapping, TypeVar
+from typing import ClassVar, Mapping, TypeVar
 
+from .context import ComputationContextKeyV1
 from .errors import ContractValidationError, ReasonCode
-
-if TYPE_CHECKING:
-    from .context import ComputationContextKeyV1
 
 
 def _required(value: str, field_name: str) -> None:
@@ -21,6 +19,152 @@ def _required(value: str, field_name: str) -> None:
         raise ContractValidationError(
             ReasonCode.INCOMPLETE_CONTRACT, f"{field_name} is required"
         )
+
+
+def _canonical_text(value: object, field_name: str) -> str:
+    if (
+        not isinstance(value, str)
+        or not value
+        or value != value.strip()
+        or any(ord(character) < 0x20 for character in value)
+    ):
+        raise ContractValidationError(
+            ReasonCode.INVALID_CONTRACT,
+            f"{field_name} must be nonempty canonical text",
+        )
+    return value
+
+
+@dataclass(frozen=True, slots=True)
+class ComputationScopeV1:
+    """Exact economic/data scope; it creates no runtime or trading authority."""
+
+    market_scope_id: str
+    venue_scope_id: str
+    event_scope_id: str
+    instrument_or_contract_scope_id: str
+    mode_context_id: str
+    input_snapshot_id: str
+
+    def __post_init__(self) -> None:
+        for name in (
+            "market_scope_id",
+            "venue_scope_id",
+            "event_scope_id",
+            "instrument_or_contract_scope_id",
+            "mode_context_id",
+            "input_snapshot_id",
+        ):
+            _canonical_text(getattr(self, name), name)
+
+    @property
+    def identity_tuple(self) -> tuple[str, str, str, str, str, str]:
+        return (
+            self.market_scope_id,
+            self.venue_scope_id,
+            self.event_scope_id,
+            self.instrument_or_contract_scope_id,
+            self.mode_context_id,
+            self.input_snapshot_id,
+        )
+
+
+@dataclass(frozen=True, slots=True)
+class ImplementationVersionPinV1:
+    """One exact implementation identity for one declared mathematical ID."""
+
+    math_spec_id: str
+    implementation_id: str
+
+    def __post_init__(self) -> None:
+        _canonical_text(self.math_spec_id, "math_spec_id")
+        _canonical_text(self.implementation_id, "implementation_id")
+
+
+@dataclass(frozen=True, slots=True)
+class ComputationExecutionContextV1(ComputationContextKeyV1):
+    """One temporal, economic/data, and computation-plan execution identity."""
+
+    scope: ComputationScopeV1
+    binding_profile_version: str
+    parameter_policy_version: str
+    implementation_versions: tuple[ImplementationVersionPinV1, ...]
+    dependency_graph_id: str | None = None
+    dependency_graph_version: str | None = None
+
+    def __post_init__(self) -> None:
+        ComputationContextKeyV1.__post_init__(self)
+        if type(self.scope) is not ComputationScopeV1:
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "scope must be an exact ComputationScopeV1",
+            )
+        _canonical_text(
+            self.binding_profile_version,
+            "binding_profile_version",
+        )
+        _canonical_text(
+            self.parameter_policy_version,
+            "parameter_policy_version",
+        )
+        if (
+            not isinstance(self.implementation_versions, tuple)
+            or not self.implementation_versions
+            or any(
+                type(pin) is not ImplementationVersionPinV1
+                for pin in self.implementation_versions
+            )
+            or len(
+                {pin.math_spec_id for pin in self.implementation_versions}
+            )
+            != len(self.implementation_versions)
+            or len(
+                {pin.implementation_id for pin in self.implementation_versions}
+            )
+            != len(self.implementation_versions)
+        ):
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "implementation_versions must be ordered, nonempty, and unique",
+            )
+        graph_values = (
+            self.dependency_graph_id,
+            self.dependency_graph_version,
+        )
+        if (graph_values[0] is None) != (graph_values[1] is None):
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "dependency graph ID and version must be both present or both absent",
+            )
+        if graph_values[0] is not None:
+            _canonical_text(graph_values[0], "dependency_graph_id")
+            _canonical_text(graph_values[1], "dependency_graph_version")
+
+    @property
+    def execution_identity_tuple(self) -> tuple[object, ...]:
+        return (
+            self.context_id,
+            self.as_of,
+            self.observed_at,
+            self.source_epoch_id,
+            self.input_version,
+            self.maximum_age,
+            *self.scope.identity_tuple,
+            self.binding_profile_version,
+            self.parameter_policy_version,
+            tuple(
+                (pin.math_spec_id, pin.implementation_id)
+                for pin in self.implementation_versions
+            ),
+            self.dependency_graph_id,
+            self.dependency_graph_version,
+        )
+
+    @property
+    def stable_key(self) -> str:
+        """Diagnostic projection only; the typed object is semantic authority."""
+
+        return repr(self.execution_identity_tuple)
 
 
 def _exact_bool(value: object, field_name: str) -> None:
@@ -1104,6 +1248,14 @@ def _validate_unique_text(values: object, field_name: str, *, nonempty: bool = F
         )
 
 
+def _validate_execution_context(context: object) -> None:
+    if not isinstance(context, ComputationExecutionContextV1):
+        raise ContractValidationError(
+            ReasonCode.INVALID_CONTRACT,
+            "computation-plan operations require ComputationExecutionContextV1",
+        )
+
+
 @dataclass(frozen=True, slots=True, kw_only=True)
 class OperationRequestEnvelopeV1:
     request_id: str
@@ -1181,6 +1333,7 @@ class ResolveContextualComputabilityRequestV1(OperationRequestEnvelopeV1):
 
     def __post_init__(self) -> None:
         OperationRequestEnvelopeV1.__post_init__(self)
+        _validate_execution_context(self.context)
         _required(self.component_id, "component_id")
         if (
             not isinstance(self.required_computability_classes, tuple)
@@ -1196,6 +1349,15 @@ class ResolveContextualComputabilityRequestV1(OperationRequestEnvelopeV1):
                 ReasonCode.INVALID_CONTRACT,
                 "required computability classes must be a unique typed tuple",
             )
+        if (
+            ComputabilityClassV1.STACK_COMPUTABLE
+            in self.required_computability_classes
+            and self.context.dependency_graph_id is None
+        ):
+            raise ContractValidationError(
+                ReasonCode.NO_APPLICABLE_STACK,
+                "STACK_COMPUTABLE requires an exact selected dependency graph",
+            )
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)
@@ -1206,6 +1368,7 @@ class ResolveApplicableStackRequestV1(OperationRequestEnvelopeV1):
 
     def __post_init__(self) -> None:
         OperationRequestEnvelopeV1.__post_init__(self)
+        _validate_execution_context(self.context)
         _required(self.trade_plan_candidate_id, "trade_plan_candidate_id")
         _validate_unique_text(
             self.required_launch_roles,
@@ -1222,6 +1385,7 @@ class ResolveRequiredInputsRequestV1(OperationRequestEnvelopeV1):
 
     def __post_init__(self) -> None:
         OperationRequestEnvelopeV1.__post_init__(self)
+        _validate_execution_context(self.context)
         _validate_unique_text(self.component_ids, "component_ids", nonempty=True)
         _exact_bool(self.include_optional, "include_optional")
 
@@ -1235,6 +1399,7 @@ class ComputeComponentRequestV1(OperationRequestEnvelopeV1):
 
     def __post_init__(self) -> None:
         OperationRequestEnvelopeV1.__post_init__(self)
+        _validate_execution_context(self.context)
         _required(self.component_id, "component_id")
         _required(self.expected_output_schema_ref, "expected_output_schema_ref")
         if not isinstance(self.input_values, TypedValueRecordV1):
@@ -1253,6 +1418,7 @@ class ComputeStackRequestV1(OperationRequestEnvelopeV1):
 
     def __post_init__(self) -> None:
         OperationRequestEnvelopeV1.__post_init__(self)
+        _validate_execution_context(self.context)
         _required(self.stack_id, "stack_id")
         _validate_unique_text(self.component_ids, "component_ids", nonempty=True)
         if not isinstance(self.input_values, TypedValueRecordV1):
@@ -1520,7 +1686,7 @@ class FrozenFormulaOutputV1:
     output_schema_version: str
     output_name: str
     value: object
-    context_id: str
+    execution_context: ComputationExecutionContextV1
     receipt_refs: tuple[str, ...] = ()
     no_authority_flag: bool = True
 
@@ -1533,9 +1699,15 @@ class FrozenFormulaOutputV1:
             "output_schema_ref",
             "output_schema_version",
             "output_name",
-            "context_id",
         ):
             _required(getattr(self, name), name)
+        if not isinstance(
+            self.execution_context, ComputationExecutionContextV1
+        ):
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "formula output requires the exact execution context",
+            )
         if self.output_schema_version != "ST12B_OUTPUT_V3_4":
             raise ContractValidationError(
                 ReasonCode.OUTPUT_SCHEMA_MISMATCH,
@@ -1548,6 +1720,10 @@ class FrozenFormulaOutputV1:
                 ReasonCode.CAPABILITY_DENIED,
                 "formula output envelopes cannot create authority",
             )
+
+    @property
+    def context_id(self) -> str:
+        return self.execution_context.context_id
 
 
 @dataclass(frozen=True, slots=True)
