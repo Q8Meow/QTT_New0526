@@ -28,6 +28,7 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.models impo
     CompareWithNoTradeRequestV1,
     ComputabilityBlockerCodeV1,
     ComputabilityClassV1,
+    ComputabilityTerminalRouteV1,
     ComputationExecutionContextV1,
     ComputationScopeV1,
     ComputeComponentRequestV1,
@@ -460,6 +461,38 @@ def test_service_plan_and_stack_admission_matrix(
     assert (
         "EDGE::MATH-01::MATH-02"
         in math_02_contextual.computability.context.dependency_receipt_refs
+    )
+    assert invocations == []
+
+    upstream_binding_id = "FIVAB::MATH-01::contract_price"
+    missing_upstream_packets = tuple(
+        packet
+        for packet in external_packets
+        if upstream_binding_id not in packet.authorized_binding_ids
+    )
+    invocations.clear()
+    missing_upstream = contextual_response(
+        "MATH-02", missing_upstream_packets
+    )
+    assert not missing_upstream.computability.context.computable
+    assert missing_upstream.computability.context.blocker_codes == (
+        ComputabilityBlockerCodeV1.DEPENDENCY_CLOSURE_INCOMPLETE,
+    )
+    assert (
+        missing_upstream.computability.context.terminal_route
+        is ComputabilityTerminalRouteV1.STACK_CLOSURE
+    )
+    assert derived_binding_id not in (
+        missing_upstream.computability.context.dependency_receipt_refs
+    )
+    assert (
+        "EDGE::MATH-01::MATH-02"
+        in missing_upstream.computability.context.dependency_receipt_refs
+    )
+    assert not missing_upstream.computability.stack.computable
+    assert missing_upstream.computability.stack.blocker_codes == (
+        ComputabilityBlockerCodeV1.INPUT_OWNER_MISSING,
+        ComputabilityBlockerCodeV1.DEPENDENCY_CLOSURE_INCOMPLETE,
     )
     assert invocations == []
 

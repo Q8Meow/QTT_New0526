@@ -707,8 +707,25 @@ def _preflight_registered_stack_context_closure(
                         binding=binding,
                     )
                     if edge is not None:
-                        dependency_inputs.append(binding.binding_id)
                         dependency_edges.append(edge.edge_id)
+                        producer_closure = next(
+                            (
+                                closure
+                                for closure in component_closures
+                                if closure.math_spec_id
+                                == edge.producer_math_spec_id
+                            ),
+                            None,
+                        )
+                        if (
+                            producer_closure is None
+                            or not producer_closure.context_computable
+                        ):
+                            blockers.append(
+                                ReasonCode.DEPENDENCY_CLOSURE_FAILED
+                            )
+                            continue
+                        dependency_inputs.append(binding.binding_id)
                         continue
                     resolved = _resolve_formula_input_binding(
                         component_id,
