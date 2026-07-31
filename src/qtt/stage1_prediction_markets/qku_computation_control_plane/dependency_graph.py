@@ -4,6 +4,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from decimal import Decimal
+from enum import StrEnum
+from types import MappingProxyType
+from typing import Mapping
 
 from .context import exact_decimal
 from .errors import DependencyGraphError, ReasonCode
@@ -236,3 +239,199 @@ class DependencyGraphCompilerV1:
             topological_order=tuple(ordered),
             conversions=conversions,
         )
+
+
+class FrozenDependencyKindV1(StrEnum):
+    DATA_FLOW_EDGE = "DATA_FLOW_EDGE"
+    CALLABLE_OR_SUBROUTINE_DEPENDENCY = "CALLABLE_OR_SUBROUTINE_DEPENDENCY"
+    SHARED_POLICY_OR_METHOD_DEPENDENCY = "SHARED_POLICY_OR_METHOD_DEPENDENCY"
+
+
+@dataclass(frozen=True, slots=True)
+class FrozenDependencyRelationshipV1:
+    edge_id: str
+    kind: FrozenDependencyKindV1
+    producer_math_spec_id: str
+    consumer_math_spec_id: str
+    producer_output_field: str
+    producer_output_schema_ref: str
+    consumer_input_field: str | None
+    conversion_ref: str
+    point_in_time_rule: str
+    type_shape_unit_basis_rule: str
+    failure_route: str
+    consumer_call_site: str | None = None
+    producer_version_ref: str = "FROZEN_V3_4"
+    consumer_version_ref: str = "FROZEN_V3_4"
+    terminal_state: str = "EXACT_EDGE_CLOSED"
+
+    def __post_init__(self) -> None:
+        required = (
+            self.edge_id,
+            self.producer_math_spec_id,
+            self.consumer_math_spec_id,
+            self.producer_output_field,
+            self.producer_output_schema_ref,
+            self.conversion_ref,
+            self.point_in_time_rule,
+            self.type_shape_unit_basis_rule,
+            self.failure_route,
+        )
+        if any(not isinstance(value, str) or not value for value in required):
+            raise DependencyGraphError(
+                ReasonCode.DEPENDENCY_UNKNOWN,
+                "frozen dependency relationship is incomplete",
+            )
+        if self.kind is FrozenDependencyKindV1.DATA_FLOW_EDGE:
+            if not self.consumer_input_field or self.consumer_call_site is not None:
+                raise DependencyGraphError(
+                    ReasonCode.DEPENDENCY_UNKNOWN,
+                    "data flow requires one consumer field and no callable fiction",
+                )
+        elif not self.consumer_call_site or self.consumer_input_field is not None:
+            raise DependencyGraphError(
+                ReasonCode.DEPENDENCY_UNKNOWN,
+                "callable/policy lineage cannot invent a consumer data field",
+            )
+
+
+_FROZEN_DEPENDENCY_RELATIONSHIPS = (
+    FrozenDependencyRelationshipV1(
+        edge_id="EDGE::MATH-01::MATH-02",
+        kind=FrozenDependencyKindV1.DATA_FLOW_EDGE,
+        producer_math_spec_id="MATH-01",
+        consumer_math_spec_id="MATH-02",
+        producer_output_field="implied_probability",
+        producer_output_schema_ref="MATH-01::OUTPUT",
+        consumer_input_field="market_implied_probability",
+        conversion_ref="CONVERSION::DECIMAL_PROBABILITY_TO_FINITE_FLOAT64_V1",
+        point_in_time_rule="SAME_CONTEXT_SNAPSHOT",
+        type_shape_unit_basis_rule=(
+            "Decimal scalar probability -> float64 scalar probability through "
+            "EXACT_DECIMAL_TO_FINITE_FLOAT64_PROBABILITY_ADAPTER_V1"
+        ),
+        failure_route="DEPENDENCY_UNRESOLVED_BLOCK_CONTEXT_AND_STACK",
+    ),
+    FrozenDependencyRelationshipV1(
+        edge_id="EDGE::MATH-03::MATH-05",
+        kind=FrozenDependencyKindV1.CALLABLE_OR_SUBROUTINE_DEPENDENCY,
+        producer_math_spec_id="MATH-03",
+        consumer_math_spec_id="MATH-05",
+        producer_output_field="midpoint",
+        producer_output_schema_ref="MATH-03::OUTPUT",
+        consumer_input_field=None,
+        conversion_ref="NOT_APPLICABLE_WITH_TYPED_REASON",
+        point_in_time_rule="SAME_BOOK_SNAPSHOT",
+        type_shape_unit_basis_rule="NO_INTER_FORMULA_DATA_FIELD; procedure reuse only",
+        failure_route="SUBROUTINE_FAILURE_BLOCKS_MATH_05",
+        consumer_call_site=(
+            "MATH-05.relative_spread_from_raw_book invokes registered MATH-03 "
+            "procedure with its own best_bid,best_ask,payout inputs"
+        ),
+    ),
+    FrozenDependencyRelationshipV1(
+        edge_id="EDGE::MATH-04::MATH-05",
+        kind=FrozenDependencyKindV1.CALLABLE_OR_SUBROUTINE_DEPENDENCY,
+        producer_math_spec_id="MATH-04",
+        consumer_math_spec_id="MATH-05",
+        producer_output_field="full_spread",
+        producer_output_schema_ref="MATH-04::OUTPUT",
+        consumer_input_field=None,
+        conversion_ref="NOT_APPLICABLE_WITH_TYPED_REASON",
+        point_in_time_rule="SAME_BOOK_SNAPSHOT",
+        type_shape_unit_basis_rule="NO_INTER_FORMULA_DATA_FIELD; procedure reuse only",
+        failure_route="SUBROUTINE_FAILURE_BLOCKS_MATH_05",
+        consumer_call_site=(
+            "MATH-05.relative_spread_from_raw_book invokes registered MATH-04 "
+            "procedure with its own best_bid,best_ask,payout inputs"
+        ),
+    ),
+    FrozenDependencyRelationshipV1(
+        edge_id="EDGE::MATH-17::MATH-18",
+        kind=FrozenDependencyKindV1.CALLABLE_OR_SUBROUTINE_DEPENDENCY,
+        producer_math_spec_id="MATH-17",
+        consumer_math_spec_id="MATH-18",
+        producer_output_field="probabilistic_sharpe_ratio",
+        producer_output_schema_ref="MATH-17::OUTPUT",
+        consumer_input_field=None,
+        conversion_ref="NOT_APPLICABLE_WITH_TYPED_REASON",
+        point_in_time_rule="SAME_EVIDENCE_WINDOW_AND_SHARPE_BASIS",
+        type_shape_unit_basis_rule=(
+            "NO_INTER_FORMULA_DATA_FIELD; shared registered PSR procedure"
+        ),
+        failure_route="SUBROUTINE_FAILURE_BLOCKS_MATH_18",
+        consumer_call_site=(
+            "MATH-18 computes the same PSR normal-CDF subroutine against the "
+            "deflated reference threshold; no MATH-17 result packet is an input"
+        ),
+    ),
+    FrozenDependencyRelationshipV1(
+        edge_id="EDGE::MATH-20::MATH-21",
+        kind=FrozenDependencyKindV1.SHARED_POLICY_OR_METHOD_DEPENDENCY,
+        producer_math_spec_id="MATH-20",
+        consumer_math_spec_id="MATH-21",
+        producer_output_field="folds",
+        producer_output_schema_ref="MATH-20::OUTPUT",
+        consumer_input_field=None,
+        conversion_ref="NOT_APPLICABLE_WITH_TYPED_REASON",
+        point_in_time_rule="SAME_INTERVAL_LEDGER_AND_DECISION_TIME",
+        type_shape_unit_basis_rule=(
+            "SHARED_POLICY_ONLY; CPCV constructs its own split records from raw "
+            "intervals and group parameters"
+        ),
+        failure_route="POLICY_RESOLUTION_FAILURE_BLOCKS_MATH_21",
+        consumer_call_site=(
+            "MATH-21 applies the frozen MATH-20 half-open interval overlap, "
+            "purge, and time-duration embargo law to each CPCV split"
+        ),
+    ),
+    FrozenDependencyRelationshipV1(
+        edge_id="EDGE::MATH-46::MATH-47",
+        kind=FrozenDependencyKindV1.CALLABLE_OR_SUBROUTINE_DEPENDENCY,
+        producer_math_spec_id="MATH-46",
+        consumer_math_spec_id="MATH-47",
+        producer_output_field="canonical_qubo",
+        producer_output_schema_ref="MATH-46::OUTPUT",
+        consumer_input_field=None,
+        conversion_ref="MATH46RawQuboCanonicalizationAdapterV1",
+        point_in_time_rule="SAME_FORMULATION_VERSION_AND_OBJECTIVE_SCALE_RECEIPT",
+        type_shape_unit_basis_rule=(
+            "IMMUTABLE_RAW_FIELD_ADAPTER_OUTPUTS_CANONICAL_QUBO_MODEL_V1; "
+            "no undeclared data field"
+        ),
+        failure_route="DEPENDENCY_UNRESOLVED_BLOCK_CONTEXT_AND_STACK",
+        consumer_call_site=(
+            "MATH-47 invokes MATH46RawQuboCanonicalizationAdapterV1 over its "
+            "declared raw representation/diagonal/upper/full/constant inputs "
+            "before the Ising transform"
+        ),
+    ),
+)
+
+FROZEN_DEPENDENCY_RELATIONSHIPS: Mapping[
+    str, FrozenDependencyRelationshipV1
+] = MappingProxyType(
+    {edge.edge_id: edge for edge in _FROZEN_DEPENDENCY_RELATIONSHIPS}
+)
+if (
+    len(FROZEN_DEPENDENCY_RELATIONSHIPS) != 6
+    or sum(
+        edge.kind is FrozenDependencyKindV1.DATA_FLOW_EDGE
+        for edge in FROZEN_DEPENDENCY_RELATIONSHIPS.values()
+    )
+    != 1
+    or sum(
+        edge.kind is FrozenDependencyKindV1.CALLABLE_OR_SUBROUTINE_DEPENDENCY
+        for edge in FROZEN_DEPENDENCY_RELATIONSHIPS.values()
+    )
+    != 4
+    or sum(
+        edge.kind is FrozenDependencyKindV1.SHARED_POLICY_OR_METHOD_DEPENDENCY
+        for edge in FROZEN_DEPENDENCY_RELATIONSHIPS.values()
+    )
+    != 1
+):
+    raise DependencyGraphError(
+        ReasonCode.DEPENDENCY_UNKNOWN,
+        "v3.4 requires exactly 1 data, 4 callable, and 1 shared-policy relationship",
+    )

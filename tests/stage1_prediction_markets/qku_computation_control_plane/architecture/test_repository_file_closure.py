@@ -21,10 +21,18 @@ EXPECTED_PRODUCTION_FILES = {
     "serialization.py",
     "validation.py",
     "source_rights.py",
+    "contextual_computability.py",
+    "fallback.py",
+    "freshness.py",
+    "input_resolver.py",
+    "point_in_time.py",
+    "service.py",
+    "stack_resolver.py",
+    "unit_conversion.py",
 }
 
 
-def test_production_package_is_exactly_the_collapsed_19_files() -> None:
+def test_production_package_is_exactly_the_collapsed_27_files() -> None:
     root = Path(__file__).resolve().parents[4]
     package = (
         root

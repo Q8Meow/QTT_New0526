@@ -54,7 +54,7 @@ DETERMINISTIC_VALIDATOR_SHARD_PHASES = (
 DETERMINISTIC_VALIDATOR_SHARD_COMMAND_RANGES = {
     "deterministic-validators-a": (1, 64),
     "deterministic-validators-b": (65, 119),
-    "deterministic-validators-c": (120, 340),
+    "deterministic-validators-c": (120, None),
 }
 PYTEST_SHARD_PHASES = (
     "pytest-shard-1",
@@ -5371,6 +5371,20 @@ def build_validation_commands(
             _path(
                 "tools",
                 "independent_validate_qku_computation_control_plane.py",
+            ),
+        ],
+        [
+            sys.executable,
+            _path(
+                "tools",
+                "independent_validate_qku_computation_control_plane_latency.py",
+            ),
+        ],
+        [
+            sys.executable,
+            _path(
+                "tools",
+                "independent_validate_qku_computation_control_plane_model_risk.py",
             ),
         ],
         [

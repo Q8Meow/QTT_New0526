@@ -14,7 +14,10 @@ if str(REPO_ROOT) not in sys.path:
 
 from tools import run_validation_gates as runner
 from tools.repo_path_refs import normalize_repo_ref
-from tools.validation_scope_registry import ST12A_ALLOWED_EXACT_PATHS
+from tools.validation_scope_registry import (
+    ST12A_ALLOWED_EXACT_PATHS,
+    ST12B_ALLOWED_EXACT_PATHS,
+)
 
 
 FAST_UNIVERSAL_PREFLIGHT = "FAST_UNIVERSAL_PREFLIGHT"
@@ -81,6 +84,9 @@ GENERATED_REPORT_GLOBS = (
 )
 VALIDATION_MATRIX_JOB_ID = "validation_shards"
 PHASE_JOB_IDS = {phase: VALIDATION_MATRIX_JOB_ID for phase in runner.ORDERED_PHASES}
+QKU_ALLOWED_EXACT_PATHS = frozenset(
+    (*ST12A_ALLOWED_EXACT_PATHS, *ST12B_ALLOWED_EXACT_PATHS)
+)
 
 
 @dataclass(frozen=True)
@@ -272,6 +278,11 @@ def _pr_tag_from_token(token: str) -> str:
 
 
 def _owner_pr_or_feature(stem: str) -> str:
+    if stem in {
+        "independent_validate_qku_computation_control_plane_latency",
+        "independent_validate_qku_computation_control_plane_model_risk",
+    }:
+        return "ST12-TRANCHE-B"
     if "qku_computation_control_plane" in stem:
         return "ST12-TRANCHE-A"
     token = _pr_token(stem)
@@ -459,7 +470,7 @@ def _domain_globs(stem: str, command: Sequence[str]) -> tuple[str, ...]:
     haystack = " ".join(command).lower()
     globs: list[str] = []
     if "qku_computation_control_plane" in haystack:
-        globs.extend(sorted(ST12A_ALLOWED_EXACT_PATHS))
+        globs.extend(sorted(QKU_ALLOWED_EXACT_PATHS))
     if "atomicrows" in haystack:
         globs.extend(
             [

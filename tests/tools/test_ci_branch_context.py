@@ -48,40 +48,47 @@ def test_repair_and_main_cumulative_branch_classification():
     assert context.is_repair_branch("feature/non-downstream-validation") is False
 
 
-def test_st12a_owner_authorized_branch_is_exactly_validation_only():
-    branch = "agent/st12a-contract-envelope"
-    assert context.is_owner_authorized_validation_branch(branch)
-    assert context.roadmap_pr_number(branch) is None
-    assert context.is_branch_allowed_for_upstream_pr_gate(branch, "PR159R")
-    assert context.is_downstream_or_main_validation_branch(
-        branch,
-        after_pr=138,
-        allow_repair=False,
-    )
-    assert not context.is_main_cumulative_branch(branch)
-    assert not context.is_repair_branch(branch)
-    assert not context.is_downstream_roadmap_branch(
-        branch,
-        after_pr=1,
-        allow_repair=False,
-    )
-    assert context.is_pr_or_later_branch(
-        branch,
-        minimum_pr=1,
-        allow_main=False,
-        allow_repair=False,
-    )
+def test_st12_owner_authorized_branches_are_exactly_validation_only():
+    for branch in (
+        "agent/st12a-contract-envelope",
+        "agent/st12b-contextual-computability-v3",
+    ):
+        assert context.is_owner_authorized_validation_branch(branch)
+        assert context.roadmap_pr_number(branch) is None
+        assert context.is_branch_allowed_for_upstream_pr_gate(branch, "PR159R")
+        assert context.is_downstream_or_main_validation_branch(
+            branch,
+            after_pr=138,
+            allow_repair=False,
+        )
+        assert not context.is_main_cumulative_branch(branch)
+        assert not context.is_repair_branch(branch)
+        assert not context.is_downstream_roadmap_branch(
+            branch,
+            after_pr=1,
+            allow_repair=False,
+        )
+        assert context.is_pr_or_later_branch(
+            branch,
+            minimum_pr=1,
+            allow_main=False,
+            allow_repair=False,
+        )
     for adversarial in (
         "agent/st12a-contract-envelop",
         "agent/st12a-contract-envelope-copy",
         "agent/st12a-contract-envelope/",
         "Agent/st12a-contract-envelope",
+        "agent/st12b-contextual-computability",
+        "agent/st12b-contextual-computability-v3-copy",
+        "agent/st12b-contextual-computability-v3/",
+        "Agent/st12b-contextual-computability-v3",
         "agent/other",
     ):
         assert not context.is_owner_authorized_validation_branch(adversarial)
 
 
-def test_st12a_pull_request_detached_context_uses_exact_github_head_ref(
+def test_st12_pull_request_detached_context_uses_exact_github_head_ref(
     monkeypatch,
 ):
     _clear_github_branch_context_env(monkeypatch)
@@ -89,26 +96,30 @@ def test_st12a_pull_request_detached_context_uses_exact_github_head_ref(
     monkeypatch.setenv("GITHUB_EVENT_NAME", "pull_request")
     monkeypatch.setenv("GITHUB_REF", "refs/pull/276/merge")
     monkeypatch.setenv("GITHUB_REF_NAME", "276/merge")
-    monkeypatch.setenv("GITHUB_HEAD_REF", "agent/st12a-contract-envelope")
-    resolved = context.current_branch_context(
-        REPO_ROOT,
-        git_stdout=lambda *_args: (0, "HEAD", ""),
-    )
-    assert resolved.branch == "agent/st12a-contract-envelope"
-    assert resolved.source == "GITHUB_HEAD_REF"
-    assert context.github_actions_pull_request_detached_context_active(
-        branch_returncode=0,
-        branch="HEAD",
-    )
-    assert (
-        context.is_pull_request_detached_head_context_allowed_for_upstream_pr_gate(
-            context.github_actions_head_ref_branch_context(),
-            "PR160",
+    for branch in (
+        "agent/st12a-contract-envelope",
+        "agent/st12b-contextual-computability-v3",
+    ):
+        monkeypatch.setenv("GITHUB_HEAD_REF", branch)
+        resolved = context.current_branch_context(
+            REPO_ROOT,
+            git_stdout=lambda *_args: (0, "HEAD", ""),
         )
-    )
+        assert resolved.branch == branch
+        assert resolved.source == "GITHUB_HEAD_REF"
+        assert context.github_actions_pull_request_detached_context_active(
+            branch_returncode=0,
+            branch="HEAD",
+        )
+        assert (
+            context.is_pull_request_detached_head_context_allowed_for_upstream_pr_gate(
+                context.github_actions_head_ref_branch_context(),
+                "PR160",
+            )
+        )
     monkeypatch.setenv(
         "GITHUB_HEAD_REF",
-        "agent/st12a-contract-envelope-suffix",
+        "agent/st12b-contextual-computability-v3-suffix",
     )
     assert not (
         context.is_pull_request_detached_head_context_allowed_for_upstream_pr_gate(

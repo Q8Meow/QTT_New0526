@@ -215,17 +215,18 @@ def test_qku_control_plane_change_routes_all_central_validators():
     assert result.full_validation_required is True
 
 
-def test_qku_shared_integration_paths_use_the_exact_allowlist() -> None:
+def test_qku_shared_integration_paths_use_the_exact_allowlists() -> None:
     result = build_router_result(
         RouterInput(
             repo_root=REPO_ROOT,
-            changed_files=tuple(sorted(inventory.ST12A_ALLOWED_EXACT_PATHS)),
+            changed_files=tuple(sorted(inventory.QKU_ALLOWED_EXACT_PATHS)),
             workflow_event_name="pull_request",
             is_pull_request=True,
             current_branch="feature/small-pr",
         )
     )
-    for path in inventory.ST12A_ALLOWED_EXACT_PATHS:
+    assert len(inventory.ST12B_ALLOWED_EXACT_PATHS) == 44
+    for path in inventory.QKU_ALLOWED_EXACT_PATHS:
         assert router.QKU_VALIDATOR_IDS <= set(result.classified_files[path])
     assert result.fail_closed_reasons == ()
 

@@ -8,6 +8,7 @@ validator.
 from __future__ import annotations
 
 import ast
+from collections import Counter
 from decimal import Context, Decimal, ROUND_HALF_EVEN, localcontext
 import json
 import math
@@ -46,10 +47,26 @@ PRODUCTION_NAMES = (
     "serialization.py",
     "validation.py",
     "source_rights.py",
+    "contextual_computability.py",
+    "fallback.py",
+    "freshness.py",
+    "input_resolver.py",
+    "point_in_time.py",
+    "service.py",
+    "stack_resolver.py",
+    "unit_conversion.py",
 )
 EXPECTED_MATH_IDS = tuple(f"MATH-{value:02d}" for value in range(1, 16))
 EXPECTED_ALL_MATH_IDS = (
     *EXPECTED_MATH_IDS,
+    "MATH-46",
+    "MATH-47",
+    "MATH-48",
+    "MATH-49",
+)
+EXPECTED_ST12B_MATH_IDS = (
+    *(f"MATH-{value:02d}" for value in range(1, 26)),
+    "MATH-36",
     "MATH-46",
     "MATH-47",
     "MATH-48",
@@ -125,6 +142,212 @@ def _string_literal(tree: ast.Module, name: str) -> str:
         ):
             return node.value.value
     raise ValueError(f"missing string literal: {name}")
+
+
+def _json_rows(tree: ast.Module, name: str) -> list[dict[str, object]]:
+    value = json.loads(_string_literal(tree, name))
+    if not isinstance(value, list) or any(
+        not isinstance(row, dict) for row in value
+    ):
+        raise ValueError(f"{name} must be a JSON array of objects")
+    return value
+
+
+def _v34_frozen_literal_checks(failures: list[str]) -> None:
+    try:
+        trees = {
+            name: ast.parse(
+                (PACKAGE / name).read_text(encoding="utf-8"),
+                filename=str(PACKAGE / name),
+            )
+            for name in (
+                "specification.py",
+                "bindings.py",
+                "parameter_policy.py",
+                "oracle_contracts.py",
+                "quantum_adapter.py",
+                "validation.py",
+            )
+        }
+        requirements = _json_rows(
+            trees["specification.py"], "_ST12B_FORMULA_REQUIREMENTS_JSON"
+        )
+        input_contracts = _json_rows(
+            trees["specification.py"], "_ST12B_FORMULA_INPUT_CONTRACTS_JSON"
+        )
+        output_contracts = _json_rows(
+            trees["specification.py"], "_ST12B_FORMULA_OUTPUT_CONTRACTS_JSON"
+        )
+        formula_dispositions = _json_rows(
+            trees["specification.py"], "_ST12B_FORMULA_DISPOSITIONS_JSON"
+        )
+        formula_input_owners = _json_rows(
+            trees["bindings.py"], "_ST12B_FORMULA_INPUT_AUTHORITY_JSON"
+        )
+        primary_sources = _json_rows(
+            trees["bindings.py"], "_ST12B_PRIMARY_SOURCE_REGISTRY_JSON"
+        )
+        source_conflicts = _json_rows(
+            trees["bindings.py"], "_ST12B_SOURCE_CONFLICT_RESOLUTION_JSON"
+        )
+        source_currentizations = _json_rows(
+            trees["bindings.py"], "_ST12B_SOURCE_CURRENTIZATION_JSON"
+        )
+        numeric_authorities = _json_rows(
+            trees["bindings.py"], "_ST12B_NUMERIC_VALUE_AUTHORITY_JSON"
+        )
+        online_currentizations = _json_rows(
+            trees["bindings.py"], "_ST12B_ONLINE_CURRENTIZATION_JSON"
+        )
+        parameter_crosswalk = _json_rows(
+            trees["parameter_policy.py"], "_ST12B_PARAMETER_CROSSWALK_JSON"
+        )
+        parameter_applications = _json_rows(
+            trees["parameter_policy.py"], "_ST12B_PARAMETER_APPLICATION_JSON"
+        )
+        parameter_ultimate = _json_rows(
+            trees["parameter_policy.py"], "_ST12B_PARAMETER_ULTIMATE_JSON"
+        )
+        parameter_runtime = _json_rows(
+            trees["parameter_policy.py"],
+            "_ST12B_RUNTIME_PARAMETER_OWNER_JSON",
+        )
+        parameter_dispositions = _json_rows(
+            trees["parameter_policy.py"], "_ST12B_PARAMETER_DISPOSITION_JSON"
+        )
+        optimizer_currentizations = _json_rows(
+            trees["parameter_policy.py"],
+            "_ST12B_OPTIMIZER_DEFAULT_CURRENTIZATION_JSON",
+        )
+        oracles = _json_rows(
+            trees["oracle_contracts.py"], "_ST12B_ORACLE_CONTRACTS_JSON"
+        )
+        vectors = _json_rows(
+            trees["oracle_contracts.py"], "_ST12B_VECTOR_PACK_JSON"
+        )
+        properties = _json_rows(
+            trees["oracle_contracts.py"], "_ST12B_PROPERTY_PACK_JSON"
+        )
+        quantum = _json_rows(
+            trees["quantum_adapter.py"],
+            "_ST12B_QUANTUM_STRUCTURAL_READINESS_JSON",
+        )
+        agent_dag = _json_rows(
+            trees["validation.py"], "_ST12B_AGENT_CONSUMER_DAG_JSON"
+        )
+    except (OSError, SyntaxError, ValueError, json.JSONDecodeError) as exc:
+        failures.append(f"v3.4 frozen literals could not be reconstructed: {exc}")
+        return
+
+    formula_ids = tuple(str(row.get("math_spec_id")) for row in requirements)
+    if formula_ids != EXPECTED_ST12B_MATH_IDS:
+        failures.append("v3.4 formula requirement identities are not exact")
+    if any(
+        tuple(str(row.get("math_spec_id")) for row in rows)
+        != EXPECTED_ST12B_MATH_IDS
+        for rows in (
+            input_contracts,
+            output_contracts,
+            formula_dispositions,
+            oracles,
+        )
+    ):
+        failures.append("v3.4 formula/input/output/oracle identities are not aligned")
+    if (
+        len(output_contracts) != 30
+        or sum(len(row.get("members", ())) for row in output_contracts) != 130
+        or any(row.get("schema_version") != "ST12B_OUTPUT_V3_4" for row in output_contracts)
+    ):
+        failures.append("v3.4 named output closure is not 30 schemas/130 members")
+    if Counter(str(row.get("disposition")) for row in formula_dispositions) != {
+        "REUSE_EXISTING_EXACT_VERSION": 10,
+        "REGISTER_SEMANTIC_SUCCESSOR": 9,
+        "NEW_TRANCHE_B_IMPLEMENTATION": 11,
+    }:
+        failures.append("v3.4 formula repository dispositions are not 10/9/11")
+    if (
+        len(formula_input_owners) != 142
+        or len({row.get("binding_id") for row in formula_input_owners}) != 142
+    ):
+        failures.append("v3.4 formula-input owner denominator is not 142")
+    if (
+        len(primary_sources) != 55
+        or Counter(
+            str(row.get("normalized_source_class")) for row in primary_sources
+        )
+        != {
+            "EXTERNAL_PRIMARY_OR_OFFICIAL_SOURCE": 24,
+            "OWNER_FORMAL_DERIVATION": 30,
+            "OWNER_ARCHITECTURE_OR_POLICY": 1,
+        }
+        or len(source_conflicts) != 1
+        or len(source_currentizations) != 7
+        or len(online_currentizations) != 5
+    ):
+        failures.append("v3.4 source/currentization population is not exact")
+    if (
+        len(numeric_authorities) != 621
+        or Counter(str(row.get("subject_kind")) for row in numeric_authorities)
+        != {"PARAMETER": 479, "FORMULA_INPUT": 142}
+    ):
+        failures.append("v3.4 numeric-value authority population is not 479+142")
+
+    parameter_sets = tuple(
+        {str(row.get("parameter_id")) for row in rows}
+        for rows in (
+            parameter_crosswalk,
+            parameter_applications,
+            parameter_ultimate,
+            parameter_dispositions,
+            optimizer_currentizations,
+        )
+    )
+    if (
+        any(len(rows) != 479 for rows in parameter_sets)
+        or any(rows != parameter_sets[0] for rows in parameter_sets[1:])
+        or len(parameter_runtime) != 190
+        or not {
+            str(row.get("parameter_id")) for row in parameter_runtime
+        } <= parameter_sets[0]
+        or any(
+            row.get("generic_compiler_is_sole_terminal_consumer") is not False
+            for row in parameter_ultimate
+        )
+    ):
+        failures.append("v3.4 parameter owner/application closure is not exact")
+    if (
+        len(vectors) != 90
+        or Counter(str(row.get("math_spec_id")) for row in vectors)
+        != {math_id: 3 for math_id in EXPECTED_ST12B_MATH_IDS}
+        or len(properties) != 30
+        or tuple(str(row.get("math_spec_id")) for row in properties)
+        != EXPECTED_ST12B_MATH_IDS
+    ):
+        failures.append("v3.4 oracle/vector/property closure is not 30/90/30")
+    if (
+        tuple(str(row.get("math_spec_id")) for row in quantum)
+        != ("MATH-46", "MATH-47", "MATH-48", "MATH-49")
+        or any(row.get("qpu_or_simulator_authority") is not False for row in quantum)
+    ):
+        failures.append("v3.4 quantum structural readiness is not exact/no-QPU")
+    if (
+        len(agent_dag) != 1351
+        or len({row.get("edge_id") for row in agent_dag}) != 1351
+        or any(row.get("orphan_state") is not False for row in agent_dag)
+        or Counter(str(row.get("edge_kind")) for row in agent_dag)
+        != {
+            "FORMULA_SPECIFICATION_TO_CENTRAL_EXECUTION_CONTRACT": 30,
+            "NUMERIC_VALUE_OWNER_TO_FORMULA_INPUT": 142,
+            "DATA_FLOW_EDGE": 1,
+            "CALLABLE_OR_SUBROUTINE_DEPENDENCY": 4,
+            "SHARED_POLICY_OR_METHOD_DEPENDENCY": 1,
+            "PARAMETER_POLICY_TO_CENTRAL_COMPILER": 479,
+            "PARAMETER_POLICY_TO_ULTIMATE_BEHAVIOR_OR_HELD_OWNER": 479,
+            "RUNTIME_VALUE_OWNER_TO_PARAMETER_POLICY": 190,
+            "PARAMETER_TO_DIRECT_FORMULA_POLICY": 25,
+        }
+    ):
+        failures.append("v3.4 agent/consumer DAG is not the exact 1,351 routes")
 
 
 def _bh(p_values: tuple[float, ...], q: float, correction: float) -> tuple[int, ...]:
@@ -656,8 +879,8 @@ def main() -> int:
     actual_names = tuple(
         path.name for path in sorted(PACKAGE.glob("*.py"), key=lambda item: item.name)
     )
-    if set(actual_names) != set(PRODUCTION_NAMES) or len(actual_names) != 19:
-        failures.append("production core is not the exact 19-file centralized set")
+    if set(actual_names) != set(PRODUCTION_NAMES) or len(actual_names) != 27:
+        failures.append("production core is not the exact 27-file centralized set")
     for name in PRODUCTION_NAMES:
         path = PACKAGE / name
         if not path.is_file():
@@ -824,6 +1047,7 @@ def main() -> int:
         )
     ):
         failures.append("independent 135-row parameter reconstruction failed")
+    _v34_frozen_literal_checks(failures)
     reconstructed = independently_reconstruct()
     if tuple(reconstructed) != EXPECTED_MATH_IDS:
         failures.append("independent MATH-01..15 denominator mismatch")

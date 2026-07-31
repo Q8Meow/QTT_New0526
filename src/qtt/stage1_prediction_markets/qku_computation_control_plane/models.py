@@ -8,12 +8,10 @@ from decimal import Decimal
 from enum import Enum, StrEnum
 import re
 from types import MappingProxyType
-from typing import TYPE_CHECKING, ClassVar, Mapping, TypeVar
+from typing import ClassVar, Mapping, TypeVar
 
+from .context import ComputationContextKeyV1
 from .errors import ContractValidationError, ReasonCode
-
-if TYPE_CHECKING:
-    from .context import ComputationContextKeyV1
 
 
 def _required(value: str, field_name: str) -> None:
@@ -21,6 +19,152 @@ def _required(value: str, field_name: str) -> None:
         raise ContractValidationError(
             ReasonCode.INCOMPLETE_CONTRACT, f"{field_name} is required"
         )
+
+
+def _canonical_text(value: object, field_name: str) -> str:
+    if (
+        not isinstance(value, str)
+        or not value
+        or value != value.strip()
+        or any(ord(character) < 0x20 for character in value)
+    ):
+        raise ContractValidationError(
+            ReasonCode.INVALID_CONTRACT,
+            f"{field_name} must be nonempty canonical text",
+        )
+    return value
+
+
+@dataclass(frozen=True, slots=True)
+class ComputationScopeV1:
+    """Exact economic/data scope; it creates no runtime or trading authority."""
+
+    market_scope_id: str
+    venue_scope_id: str
+    event_scope_id: str
+    instrument_or_contract_scope_id: str
+    mode_context_id: str
+    input_snapshot_id: str
+
+    def __post_init__(self) -> None:
+        for name in (
+            "market_scope_id",
+            "venue_scope_id",
+            "event_scope_id",
+            "instrument_or_contract_scope_id",
+            "mode_context_id",
+            "input_snapshot_id",
+        ):
+            _canonical_text(getattr(self, name), name)
+
+    @property
+    def identity_tuple(self) -> tuple[str, str, str, str, str, str]:
+        return (
+            self.market_scope_id,
+            self.venue_scope_id,
+            self.event_scope_id,
+            self.instrument_or_contract_scope_id,
+            self.mode_context_id,
+            self.input_snapshot_id,
+        )
+
+
+@dataclass(frozen=True, slots=True)
+class ImplementationVersionPinV1:
+    """One exact implementation identity for one declared mathematical ID."""
+
+    math_spec_id: str
+    implementation_id: str
+
+    def __post_init__(self) -> None:
+        _canonical_text(self.math_spec_id, "math_spec_id")
+        _canonical_text(self.implementation_id, "implementation_id")
+
+
+@dataclass(frozen=True, slots=True)
+class ComputationExecutionContextV1(ComputationContextKeyV1):
+    """One temporal, economic/data, and computation-plan execution identity."""
+
+    scope: ComputationScopeV1
+    binding_profile_version: str
+    parameter_policy_version: str
+    implementation_versions: tuple[ImplementationVersionPinV1, ...]
+    dependency_graph_id: str | None = None
+    dependency_graph_version: str | None = None
+
+    def __post_init__(self) -> None:
+        ComputationContextKeyV1.__post_init__(self)
+        if type(self.scope) is not ComputationScopeV1:
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "scope must be an exact ComputationScopeV1",
+            )
+        _canonical_text(
+            self.binding_profile_version,
+            "binding_profile_version",
+        )
+        _canonical_text(
+            self.parameter_policy_version,
+            "parameter_policy_version",
+        )
+        if (
+            not isinstance(self.implementation_versions, tuple)
+            or not self.implementation_versions
+            or any(
+                type(pin) is not ImplementationVersionPinV1
+                for pin in self.implementation_versions
+            )
+            or len(
+                {pin.math_spec_id for pin in self.implementation_versions}
+            )
+            != len(self.implementation_versions)
+            or len(
+                {pin.implementation_id for pin in self.implementation_versions}
+            )
+            != len(self.implementation_versions)
+        ):
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "implementation_versions must be ordered, nonempty, and unique",
+            )
+        graph_values = (
+            self.dependency_graph_id,
+            self.dependency_graph_version,
+        )
+        if (graph_values[0] is None) != (graph_values[1] is None):
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "dependency graph ID and version must be both present or both absent",
+            )
+        if graph_values[0] is not None:
+            _canonical_text(graph_values[0], "dependency_graph_id")
+            _canonical_text(graph_values[1], "dependency_graph_version")
+
+    @property
+    def execution_identity_tuple(self) -> tuple[object, ...]:
+        return (
+            self.context_id,
+            self.as_of,
+            self.observed_at,
+            self.source_epoch_id,
+            self.input_version,
+            self.maximum_age,
+            *self.scope.identity_tuple,
+            self.binding_profile_version,
+            self.parameter_policy_version,
+            tuple(
+                (pin.math_spec_id, pin.implementation_id)
+                for pin in self.implementation_versions
+            ),
+            self.dependency_graph_id,
+            self.dependency_graph_version,
+        )
+
+    @property
+    def stable_key(self) -> str:
+        """Diagnostic projection only; the typed object is semantic authority."""
+
+        return repr(self.execution_identity_tuple)
 
 
 def _exact_bool(value: object, field_name: str) -> None:
@@ -132,6 +276,9 @@ class HealthState(StrEnum):
 
 class OperationCapabilityClass(StrEnum):
     CONTRACT_DEFINITION_ONLY = "CONTRACT_DEFINITION_ONLY"
+    PURE_DETERMINISTIC_COMPUTATION = "PURE_DETERMINISTIC_COMPUTATION"
+    READ_ONLY_PROJECTION = "READ_ONLY_PROJECTION"
+    NO_EFFECT_RECORD = "NO_EFFECT_RECORD"
 
 
 class OperationSideEffectClass(StrEnum):
@@ -158,6 +305,21 @@ class OperationBlockerCodeV1(StrEnum):
     DEPENDENCY_UNRESOLVED = "DEPENDENCY_UNRESOLVED"
     ORACLE_UNAVAILABLE = "ORACLE_UNAVAILABLE"
     RUNTIME_EFFECT_FORBIDDEN = "RUNTIME_EFFECT_FORBIDDEN"
+    NO_APPLICABLE_STACK = "NO_APPLICABLE_STACK"
+    INPUT_OWNER_MISSING = "INPUT_OWNER_MISSING"
+    INPUT_OWNER_MISMATCH = "INPUT_OWNER_MISMATCH"
+    INPUT_PACKET_MISMATCH = "INPUT_PACKET_MISMATCH"
+    INPUT_SCHEMA_MISMATCH = "INPUT_SCHEMA_MISMATCH"
+    INPUT_SCOPE_MISMATCH = "INPUT_SCOPE_MISMATCH"
+    INPUT_VALUE_CONFLICT = "INPUT_VALUE_CONFLICT"
+    POINT_IN_TIME_VIOLATION = "POINT_IN_TIME_VIOLATION"
+    FRESHNESS_VIOLATION = "FRESHNESS_VIOLATION"
+    SOURCE_CONFLICT = "SOURCE_CONFLICT"
+    PARAMETER_OWNER_MISSING = "PARAMETER_OWNER_MISSING"
+    PARAMETER_BINDING_MISMATCH = "PARAMETER_BINDING_MISMATCH"
+    UNIT_CONVERSION_FAILED = "UNIT_CONVERSION_FAILED"
+    OUTPUT_SCHEMA_MISMATCH = "OUTPUT_SCHEMA_MISMATCH"
+    FORMULA_EXECUTION_REJECTED = "FORMULA_EXECUTION_REJECTED"
 
 
 class TypedValueKindV1(StrEnum):
@@ -243,6 +405,17 @@ class ComputabilityBlockerCodeV1(StrEnum):
     DEPENDENCY_CLOSURE_INCOMPLETE = "DEPENDENCY_CLOSURE_INCOMPLETE"
     FALLBACK_CLOSURE_INCOMPLETE = "FALLBACK_CLOSURE_INCOMPLETE"
     ORPHAN_CONSUMER = "ORPHAN_CONSUMER"
+    INPUT_OWNER_MISSING = "INPUT_OWNER_MISSING"
+    INPUT_OWNER_MISMATCH = "INPUT_OWNER_MISMATCH"
+    INPUT_PACKET_MISMATCH = "INPUT_PACKET_MISMATCH"
+    INPUT_SCHEMA_MISMATCH = "INPUT_SCHEMA_MISMATCH"
+    INPUT_SCOPE_MISMATCH = "INPUT_SCOPE_MISMATCH"
+    INPUT_VALUE_CONFLICT = "INPUT_VALUE_CONFLICT"
+    POINT_IN_TIME_VIOLATION = "POINT_IN_TIME_VIOLATION"
+    FRESHNESS_VIOLATION = "FRESHNESS_VIOLATION"
+    SOURCE_CONFLICT = "SOURCE_CONFLICT"
+    PARAMETER_OWNER_MISSING = "PARAMETER_OWNER_MISSING"
+    NO_APPLICABLE_STACK = "NO_APPLICABLE_STACK"
 
 
 class ComputabilityTerminalRouteV1(StrEnum):
@@ -251,6 +424,10 @@ class ComputabilityTerminalRouteV1(StrEnum):
     FIXTURE_MATERIALIZATION = "FIXTURE_MATERIALIZATION"
     CONTEXT_REBINDING = "CONTEXT_REBINDING"
     STACK_CLOSURE = "STACK_CLOSURE"
+    OWNER_PACKET_REFRESH = "OWNER_PACKET_REFRESH"
+    SOURCE_RECONCILIATION = "SOURCE_RECONCILIATION"
+    PARAMETER_OWNER_REFRESH = "PARAMETER_OWNER_REFRESH"
+    NO_RESULT_NO_TRADE = "NO_RESULT_NO_TRADE"
 
 
 @dataclass(frozen=True, slots=True)
@@ -1071,6 +1248,14 @@ def _validate_unique_text(values: object, field_name: str, *, nonempty: bool = F
         )
 
 
+def _validate_execution_context(context: object) -> None:
+    if not isinstance(context, ComputationExecutionContextV1):
+        raise ContractValidationError(
+            ReasonCode.INVALID_CONTRACT,
+            "computation-plan operations require ComputationExecutionContextV1",
+        )
+
+
 @dataclass(frozen=True, slots=True, kw_only=True)
 class OperationRequestEnvelopeV1:
     request_id: str
@@ -1148,6 +1333,7 @@ class ResolveContextualComputabilityRequestV1(OperationRequestEnvelopeV1):
 
     def __post_init__(self) -> None:
         OperationRequestEnvelopeV1.__post_init__(self)
+        _validate_execution_context(self.context)
         _required(self.component_id, "component_id")
         if (
             not isinstance(self.required_computability_classes, tuple)
@@ -1163,6 +1349,15 @@ class ResolveContextualComputabilityRequestV1(OperationRequestEnvelopeV1):
                 ReasonCode.INVALID_CONTRACT,
                 "required computability classes must be a unique typed tuple",
             )
+        if (
+            ComputabilityClassV1.STACK_COMPUTABLE
+            in self.required_computability_classes
+            and self.context.dependency_graph_id is None
+        ):
+            raise ContractValidationError(
+                ReasonCode.NO_APPLICABLE_STACK,
+                "STACK_COMPUTABLE requires an exact selected dependency graph",
+            )
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)
@@ -1173,6 +1368,7 @@ class ResolveApplicableStackRequestV1(OperationRequestEnvelopeV1):
 
     def __post_init__(self) -> None:
         OperationRequestEnvelopeV1.__post_init__(self)
+        _validate_execution_context(self.context)
         _required(self.trade_plan_candidate_id, "trade_plan_candidate_id")
         _validate_unique_text(
             self.required_launch_roles,
@@ -1189,6 +1385,7 @@ class ResolveRequiredInputsRequestV1(OperationRequestEnvelopeV1):
 
     def __post_init__(self) -> None:
         OperationRequestEnvelopeV1.__post_init__(self)
+        _validate_execution_context(self.context)
         _validate_unique_text(self.component_ids, "component_ids", nonempty=True)
         _exact_bool(self.include_optional, "include_optional")
 
@@ -1202,6 +1399,7 @@ class ComputeComponentRequestV1(OperationRequestEnvelopeV1):
 
     def __post_init__(self) -> None:
         OperationRequestEnvelopeV1.__post_init__(self)
+        _validate_execution_context(self.context)
         _required(self.component_id, "component_id")
         _required(self.expected_output_schema_ref, "expected_output_schema_ref")
         if not isinstance(self.input_values, TypedValueRecordV1):
@@ -1220,6 +1418,7 @@ class ComputeStackRequestV1(OperationRequestEnvelopeV1):
 
     def __post_init__(self) -> None:
         OperationRequestEnvelopeV1.__post_init__(self)
+        _validate_execution_context(self.context)
         _required(self.stack_id, "stack_id")
         _validate_unique_text(self.component_ids, "component_ids", nonempty=True)
         if not isinstance(self.input_values, TypedValueRecordV1):
@@ -1476,58 +1675,123 @@ class _TypedOperationResultV1:
 
 
 @dataclass(frozen=True, slots=True)
+class FrozenFormulaOutputV1:
+    """One version-pinned ST12B_OUTPUT_V3_4 result kept in native typed form."""
+
+    math_spec_id: str
+    implementation_id: str
+    mathematical_semantic_version: str
+    repository_specification_version: str
+    output_schema_ref: str
+    output_schema_version: str
+    output_name: str
+    value: object
+    execution_context: ComputationExecutionContextV1
+    receipt_refs: tuple[str, ...] = ()
+    no_authority_flag: bool = True
+
+    def __post_init__(self) -> None:
+        for name in (
+            "math_spec_id",
+            "implementation_id",
+            "mathematical_semantic_version",
+            "repository_specification_version",
+            "output_schema_ref",
+            "output_schema_version",
+            "output_name",
+        ):
+            _required(getattr(self, name), name)
+        if not isinstance(
+            self.execution_context, ComputationExecutionContextV1
+        ):
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "formula output requires the exact execution context",
+            )
+        if self.output_schema_version != "ST12B_OUTPUT_V3_4":
+            raise ContractValidationError(
+                ReasonCode.OUTPUT_SCHEMA_MISMATCH,
+                "formula outputs must use the exact frozen ST12B output version",
+            )
+        _validate_unique_text(self.receipt_refs, "receipt_refs")
+        _exact_bool(self.no_authority_flag, "no_authority_flag")
+        if not self.no_authority_flag:
+            raise ContractValidationError(
+                ReasonCode.CAPABILITY_DENIED,
+                "formula output envelopes cannot create authority",
+            )
+
+    @property
+    def context_id(self) -> str:
+        return self.execution_context.context_id
+
+
+@dataclass(frozen=True, slots=True)
 class IdentityResolutionV1(_TypedOperationResultV1):
-    pass
+    identity_ref: str = ""
 
 
 @dataclass(frozen=True, slots=True)
 class StackResolutionV1(_TypedOperationResultV1):
-    pass
+    stack_id: str = ""
+    component_ids: tuple[str, ...] = ()
+    dependency_receipt_refs: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
 class InputResolutionV1(_TypedOperationResultV1):
-    pass
+    component_ids: tuple[str, ...] = ()
+    resolved_input_names: tuple[str, ...] = ()
+    owner_packet_refs: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
 class ComponentResultV1(_TypedOperationResultV1):
-    pass
+    component_id: str = ""
+    formula_output: FrozenFormulaOutputV1 | None = None
 
 
 @dataclass(frozen=True, slots=True)
 class StackResultV1(_TypedOperationResultV1):
-    pass
+    stack_id: str = ""
+    component_outputs: tuple[FrozenFormulaOutputV1, ...] = ()
+    conversion_receipt_refs: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
 class NoTradeComparisonV1(_TypedOperationResultV1):
-    pass
+    comparison_basis: str = ""
+    downstream_blocker_ref: str = ""
 
 
 @dataclass(frozen=True, slots=True)
 class TradePlanEvaluationV1(_TypedOperationResultV1):
-    pass
+    downstream_blocker_ref: str = ""
 
 
 @dataclass(frozen=True, slots=True)
 class SnapshotViewV1(_TypedOperationResultV1):
-    pass
+    snapshot_id: str = ""
+    view_class: str = ""
 
 
 @dataclass(frozen=True, slots=True)
 class ResolutionExplanationV1(_TypedOperationResultV1):
-    pass
+    blocker_codes: tuple[OperationBlockerCodeV1, ...] = ()
+    next_safe_route: str = ""
 
 
 @dataclass(frozen=True, slots=True)
 class CandidateProposalV1(_TypedOperationResultV1):
-    pass
+    candidate_id: str = ""
+    proposal_state: str = "NO_EFFECT_RECORD"
 
 
 @dataclass(frozen=True, slots=True)
 class MaterializationWorkOrderV1(_TypedOperationResultV1):
-    pass
+    work_order_id: str = ""
+    requested_owner: str = ""
+    work_order_state: str = "NO_EFFECT_RECORD"
 
 
 @dataclass(frozen=True, slots=True)
