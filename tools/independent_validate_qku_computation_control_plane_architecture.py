@@ -55,6 +55,17 @@ PRODUCTION_NAMES = (
     "service.py",
     "stack_resolver.py",
     "unit_conversion.py",
+    "accounting.py",
+    "economic_math.py",
+    "idempotency.py",
+    "lifecycle.py",
+    "migrations.py",
+    "outbox.py",
+    "persistence.py",
+    "receipts.py",
+    "rollback.py",
+    "sqlite_reference.py",
+    "transaction.py",
 )
 EXPECTED_MATH_IDS = tuple(f"MATH-{value:02d}" for value in range(1, 16))
 EXPECTED_ALL_MATH_IDS = (
@@ -876,11 +887,20 @@ def independently_reconstruct() -> dict[str, bool]:
 
 def main() -> int:
     failures: list[str] = []
-    actual_names = tuple(
-        path.name for path in sorted(PACKAGE.glob("*.py"), key=lambda item: item.name)
-    )
-    if set(actual_names) != set(PRODUCTION_NAMES) or len(actual_names) != 27:
-        failures.append("production core is not the exact 27-file centralized set")
+    expected_names = frozenset(PRODUCTION_NAMES)
+    actual_names = frozenset(path.name for path in PACKAGE.glob("*.py"))
+    if len(expected_names) != len(PRODUCTION_NAMES):
+        failures.append(
+            "independent production module roster contains duplicate names"
+        )
+    missing_names = tuple(sorted(expected_names - actual_names))
+    unexpected_names = tuple(sorted(actual_names - expected_names))
+    if missing_names or unexpected_names:
+        failures.append(
+            "production core differs from the exact independently declared "
+            f"centralized module roster: missing={missing_names!r} "
+            f"unexpected={unexpected_names!r}"
+        )
     for name in PRODUCTION_NAMES:
         path = PACKAGE / name
         if not path.is_file():

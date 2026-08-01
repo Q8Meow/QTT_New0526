@@ -13,12 +13,15 @@ if str(REPO_ROOT) not in sys.path:
 
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.validation import (  # noqa: E402
     compare_golden_vector,
+    compare_st12c_golden_vector,
     validate_domain,
 )
 
 
 DOMAIN_MATH_IDS = {
+    "accounting": tuple(f"MATH-{value:02d}" for value in range(26, 37)),
     "architecture": tuple(f"MATH-{value:02d}" for value in range(1, 16)),
+    "execution": ("MATH-37", "MATH-38"),
     "operations": (),
     "quantum": ("MATH-46", "MATH-47", "MATH-48", "MATH-49"),
     "security": (),
@@ -32,10 +35,15 @@ def main() -> int:
     parser.add_argument("--domain", choices=tuple(DOMAIN_MATH_IDS), required=True)
     args = parser.parse_args()
     report = validate_domain(args.domain)
+    comparator = (
+        compare_st12c_golden_vector
+        if args.domain in {"accounting", "execution"}
+        else compare_golden_vector
+    )
     failed_vectors = [
         math_id
         for math_id in DOMAIN_MATH_IDS[args.domain]
-        if not compare_golden_vector(math_id)
+        if not comparator(math_id)
     ]
     if failed_vectors:
         print(

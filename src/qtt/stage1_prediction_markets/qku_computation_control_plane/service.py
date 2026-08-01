@@ -27,6 +27,7 @@ from .implementation_registry import (
     invoke_formula_v34,
 )
 from .identity_adapter import RP5CIdentityAdapterV1
+from .persistence import PersistenceAdapterV1
 from .input_resolver import (
     CanonicalOwnerPacketRegistryV1,
     FormulaInputResolverV1,
@@ -381,6 +382,7 @@ class QKUComputationControlPlaneV1:
 
     owner_registry: CanonicalOwnerPacketRegistryV1
     identity_adapter: RP5CIdentityAdapterV1 | None = None
+    persistence_adapter: PersistenceAdapterV1 | None = None
 
     def __post_init__(self) -> None:
         if not isinstance(
@@ -388,10 +390,13 @@ class QKUComputationControlPlaneV1:
         ) or (
             self.identity_adapter is not None
             and not isinstance(self.identity_adapter, RP5CIdentityAdapterV1)
+        ) or (
+            self.persistence_adapter is not None
+            and not isinstance(self.persistence_adapter, PersistenceAdapterV1)
         ):
             raise ContractValidationError(
                 ReasonCode.INVALID_CONTRACT,
-                "service requires canonical packet and optional RP5C owner adapters",
+                "service requires canonical packet plus optional typed identity/persistence adapters",
             )
 
     def resolve_identity(

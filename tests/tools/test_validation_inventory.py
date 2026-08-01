@@ -4,6 +4,16 @@ from tools import run_validation_gates as runner
 from tools import validation_inventory as inventory
 
 
+EXPECTED_ST12C_QKU_VALIDATOR_IDS = frozenset(
+    {
+        "validate_qku_computation_control_plane_accounting",
+        "validate_qku_computation_control_plane_execution",
+        "independent_validate_qku_computation_control_plane_accounting",
+        "independent_validate_qku_computation_control_plane_execution",
+    }
+)
+
+
 def test_inventory_represents_every_run_validation_gate_command():
     rows = inventory.validation_inventory()
     ids = {entry.validator_id for entry in rows}
@@ -58,14 +68,27 @@ def test_inventory_has_centralized_qku_validation_entries():
         "validate_qku_computation_control_plane_quantum",
         "validate_qku_computation_control_plane_security",
         "validate_qku_computation_control_plane_source",
+        *EXPECTED_ST12C_QKU_VALIDATOR_IDS,
     }
+    assert inventory.ST12C_QKU_VALIDATOR_IDS == EXPECTED_ST12C_QKU_VALIDATOR_IDS
+    assert inventory.QKU_ALLOWED_EXACT_PATHS == frozenset(
+        (
+            *inventory.ST12A_ALLOWED_EXACT_PATHS,
+            *inventory.ST12B_ALLOWED_EXACT_PATHS,
+            *inventory.ST12C_ALLOWED_EXACT_PATHS,
+        )
+    )
     assert expected <= set(entries)
     for validator_id in expected:
         entry = entries[validator_id]
         expected_owner = (
-            "ST12-TRANCHE-B"
-            if validator_id.endswith(("_latency", "_model_risk"))
-            else "ST12-TRANCHE-A"
+            "ST12-TRANCHE-C"
+            if validator_id in EXPECTED_ST12C_QKU_VALIDATOR_IDS
+            else (
+                "ST12-TRANCHE-B"
+                if validator_id.endswith(("_latency", "_model_risk"))
+                else "ST12-TRANCHE-A"
+            )
         )
         assert entry.owner_pr_or_feature == expected_owner
         assert entry.owner_domain == "QKU computation control plane"
@@ -94,6 +117,7 @@ def test_qku_paths_route_to_primary_and_independent_validation():
         "validate_qku_computation_control_plane_quantum",
         "validate_qku_computation_control_plane_security",
         "validate_qku_computation_control_plane_source",
+        *EXPECTED_ST12C_QKU_VALIDATOR_IDS,
     } <= matching_ids
 
 

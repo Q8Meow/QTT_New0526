@@ -55,6 +55,26 @@ class ReasonCode(StrEnum):
     OUTPUT_SCHEMA_MISMATCH = "ST12B_OUTPUT_SCHEMA_MISMATCH"
     FORMULA_EXECUTION_REJECTED = "ST12B_FORMULA_EXECUTION_REJECTED"
     OPERATION_BLOCKED = "ST12B_OPERATION_BLOCKED"
+    ACCOUNTING_IMBALANCE = "ST12C_ACCOUNTING_IMBALANCE"
+    UNIT_BASIS_MISMATCH = "ST12C_UNIT_BASIS_MISMATCH"
+    QUANTIZATION_POLICY_MISSING = "ST12C_QUANTIZATION_POLICY_MISSING"
+    IDEMPOTENCY_CONFLICT = "ST12C_IDEMPOTENCY_CONFLICT"
+    IDEMPOTENCY_IN_PROGRESS = "ST12C_IDEMPOTENCY_IN_PROGRESS"
+    DUPLICATE_EVENT_CONFLICT = "ST12C_DUPLICATE_EVENT_CONFLICT"
+    PERSISTENCE_CONFLICT = "ST12C_PERSISTENCE_CONFLICT"
+    PERSISTENCE_UNAVAILABLE = "ST12C_PERSISTENCE_UNAVAILABLE"
+    SCHEMA_MISMATCH = "ST12C_SCHEMA_MISMATCH"
+    APPEND_ONLY_VIOLATION = "ST12C_APPEND_ONLY_VIOLATION"
+    TRANSACTION_STATE_INVALID = "ST12C_TRANSACTION_STATE_INVALID"
+    TRANSACTION_RETRY_EXHAUSTED = "ST12C_TRANSACTION_RETRY_EXHAUSTED"
+    REFERENCE_SQLITE_BUSY_BEFORE_SIDE_EFFECT = "REFERENCE_SQLITE_BUSY_BEFORE_SIDE_EFFECT"
+    ILLEGAL_STATE_TRANSITION = "ST12C_ILLEGAL_STATE_TRANSITION"
+    RECONCILIATION_REQUIRED = "ST12C_RECONCILIATION_REQUIRED"
+    REVERSAL_INVALID = "ST12C_REVERSAL_INVALID"
+    MODEL_ARTIFACT_REQUIRED = "ST12C_MODEL_ARTIFACT_REQUIRED"
+    RATE_LIMIT_BUDGET_REQUIRED = "ST12C_RATE_LIMIT_BUDGET_REQUIRED"
+    OUTBOX_DISPATCH_FORBIDDEN = "ST12C_OUTBOX_DISPATCH_FORBIDDEN"
+    SUBMIT_DISABLED = "ST12C_SUBMIT_DISABLED"
 
 
 class ComputationControlPlaneError(ValueError):
@@ -131,3 +151,23 @@ class OutputContractError(ComputationControlPlaneError):
 
 class OperationBoundaryError(ComputationControlPlaneError):
     """An expected typed failure reached the public operation boundary."""
+
+
+class AccountingContractError(ComputationControlPlaneError):
+    """A Tranche-C accounting, unit, cash, TCA, or reversal law failed."""
+
+
+class PersistenceContractError(ComputationControlPlaneError):
+    """A backend-neutral persistence or append-only law failed."""
+
+
+class IdempotencyContractError(ComputationControlPlaneError):
+    """An economic idempotency, duplicate, or replay law failed."""
+
+
+class TransactionContractError(ComputationControlPlaneError):
+    """A Tranche-C atomic unit-of-work law failed."""
+
+
+class LifecycleContractError(ComputationControlPlaneError):
+    """A no-write lifecycle, custody, freshness, or rate-budget law failed."""

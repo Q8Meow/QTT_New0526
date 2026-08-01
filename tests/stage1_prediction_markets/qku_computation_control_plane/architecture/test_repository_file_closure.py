@@ -29,10 +29,21 @@ EXPECTED_PRODUCTION_FILES = {
     "service.py",
     "stack_resolver.py",
     "unit_conversion.py",
+    "economic_math.py",
+    "receipts.py",
+    "persistence.py",
+    "migrations.py",
+    "outbox.py",
+    "transaction.py",
+    "idempotency.py",
+    "rollback.py",
+    "accounting.py",
+    "lifecycle.py",
+    "sqlite_reference.py",
 }
 
 
-def test_production_package_is_exactly_the_collapsed_27_files() -> None:
+def test_production_package_is_exactly_the_collapsed_38_files() -> None:
     root = Path(__file__).resolve().parents[4]
     package = (
         root

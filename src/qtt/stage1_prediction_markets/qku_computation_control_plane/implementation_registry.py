@@ -5057,3 +5057,103 @@ if (
         ReasonCode.INVALID_CONTRACT,
         "v3.4 requires 30 active routes and 39 preserved version records",
     )
+
+
+# Tranche-C overlay.  IMPLEMENTATION_REGISTRY intentionally remains the exact
+# 30-row v3.4 compatibility view consumed by the existing public surface.
+from .economic_math import TRANCHE_C_MATH_SPECIFICATIONS
+
+
+_ST12C_FORMULAS = {
+    "MATH-26": "E[posterior best utility] - current best utility - acquisition cost",
+    "MATH-27": "(b*p-(1-p))/b",
+    "MATH-28": "min(k*max(0,full_kelly), every approved cap)",
+    "MATH-29": "mu^T*w - lambda/2*w^T*Sigma*w - transaction_cost",
+    "MATH-30": "exact empirical Rockafellar-Uryasev CVaR",
+    "MATH-31": "probability-weighted worst-tail empirical loss",
+    "MATH-32": "signed_quantity*(execution-decision)+declared costs",
+    "MATH-33": "signed_quantity*(execution-midpoint_at_decision)",
+    "MATH-34": "contracts*fee_rate*price*(1-price)",
+    "MATH-35": "contracts*theta*price*(1-price)",
+    "MATH-36": "binary complement book transform with sequence and grid custody",
+    "MATH-37": "externally calibrated complete-fill probability by horizon",
+    "MATH-38": "sum(quantity*probability) over explicit fill distribution",
+}
+_ST12C_FAMILIES = {
+    "MATH-26": "RESEARCH_PRIORITIZATION",
+    "MATH-27": "POSITION_SIZING",
+    "MATH-28": "POSITION_SIZING",
+    "MATH-29": "PORTFOLIO",
+    "MATH-30": "RISK",
+    "MATH-31": "RISK",
+    "MATH-32": "TCA",
+    "MATH-33": "TCA",
+    "MATH-34": "PROVIDER_FEE",
+    "MATH-35": "PROVIDER_FEE",
+    "MATH-36": "PROVIDER_MARKET_DATA",
+    "MATH-37": "EXECUTION_MODEL",
+    "MATH-38": "EXECUTION_MODEL",
+}
+
+
+def _st12c_record(math_spec_id: str) -> MathImplementationRecordV1:
+    specification = TRANCHE_C_MATH_SPECIFICATIONS[math_spec_id]
+    implementation = (
+        IMPLEMENTATION_REGISTRY["MATH-36"].callable
+        if math_spec_id == "MATH-36"
+        else specification.implementation
+    )
+    return MathImplementationRecordV1(
+        contract=ComputationImplementationV1(
+            implementation_id=f"qku/economic_math.py::{math_spec_id}::ST12C-CURRENTIZED-1.0",
+            math_spec_id=math_spec_id,
+            callable_name=implementation.__name__,
+            specification_version="ST12C-CURRENTIZED-1.0",
+            deterministic=True,
+            seed_required=False,
+        ),
+        name=specification.name,
+        family=_ST12C_FAMILIES[math_spec_id],
+        callable=implementation,
+        golden_vector_id=f"GOLDEN::{math_spec_id}",
+        oracle_id=f"ORACLE::{math_spec_id}",
+        specification_metadata=MathSpecificationMetadataV1(
+            certified_formula=_ST12C_FORMULAS[math_spec_id],
+            domain_and_fail_closed_guards=(
+                "Reject missing, stale, invalid, nonfinite, unit-incompatible, or out-of-domain inputs",
+                "No provider, private-state, replay/PAPER, order, capital, LLM, or QPU effect",
+            ),
+            implementation_algorithm=(
+                "Convert financial inputs through the centralized exact Decimal authority",
+                "Apply the frozen deterministic formula and explicit domain guards",
+                "Quantize only at an explicitly supplied downstream field boundary",
+            ),
+            mandatory_comparator_or_reconciliation=f"ORACLE::{math_spec_id}",
+            precision_and_rounding_policy="DECIMAL_CONTEXT_PRECISION_34_ROUND_HALF_EVEN; NO_IMPLICIT_QUANTIZATION",
+            optional_library_adapter_policy="STANDARD_LIBRARY_ONLY; NO_NEW_DEPENDENCY",
+            tie_break_policy="STABLE_INPUT_ORDER_THEN_CANONICAL_ID_ASCENDING_UNLESS_STRONGER_EXISTING_INVARIANT",
+        ),
+    )
+
+
+TRANCHE_C_IMPLEMENTATION_REGISTRY: Mapping[str, MathImplementationRecordV1] = MappingProxyType(
+    {math_spec_id: _st12c_record(math_spec_id) for math_spec_id in TRANCHE_C_MATH_SPECIFICATIONS}
+)
+ST12C_CUMULATIVE_IMPLEMENTATION_REGISTRY: Mapping[str, MathImplementationRecordV1] = MappingProxyType(
+    {**IMPLEMENTATION_REGISTRY, **TRANCHE_C_IMPLEMENTATION_REGISTRY}
+)
+
+
+def get_tranche_c_math_implementation(math_spec_id: str) -> MathImplementationRecordV1:
+    try:
+        return TRANCHE_C_IMPLEMENTATION_REGISTRY[math_spec_id]
+    except KeyError as exc:
+        raise ContractValidationError(ReasonCode.UNKNOWN_IMPLEMENTATION, f"unknown Tranche-C math identity: {math_spec_id}") from exc
+
+
+if (
+    len(TRANCHE_C_IMPLEMENTATION_REGISTRY) != 13
+    or tuple(TRANCHE_C_IMPLEMENTATION_REGISTRY) != tuple(f"MATH-{number}" for number in range(26, 39))
+    or len(ST12C_CUMULATIVE_IMPLEMENTATION_REGISTRY) != 42
+):
+    raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "Tranche-C math implementation closure must be 13 with cumulative union 42")

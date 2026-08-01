@@ -18,11 +18,13 @@ from tools.repo_path_refs import normalize_repo_ref
 from tools.validation_scope_registry import (
     ST12A_ALLOWED_EXACT_PATHS,
     ST12B_ALLOWED_EXACT_PATHS,
+    ST12C_ALLOWED_EXACT_PATHS,
 )
 from tools.validation_inventory import (
     FAST_UNIVERSAL_PREFLIGHT,
     GENERATED_REPORT_GLOBS,
     PR152_TRACKED_GLOBS,
+    ST12C_QKU_VALIDATOR_IDS,
     VALIDATION_INFRASTRUCTURE_GLOBS,
     ValidatorInventoryEntry,
     entries_matching_path,
@@ -45,10 +47,15 @@ QKU_VALIDATOR_IDS = frozenset(
         "validate_qku_computation_control_plane_quantum",
         "validate_qku_computation_control_plane_security",
         "validate_qku_computation_control_plane_source",
+        *ST12C_QKU_VALIDATOR_IDS,
     }
 )
 QKU_ALLOWED_EXACT_PATHS = frozenset(
-    (*ST12A_ALLOWED_EXACT_PATHS, *ST12B_ALLOWED_EXACT_PATHS)
+    (
+        *ST12A_ALLOWED_EXACT_PATHS,
+        *ST12B_ALLOWED_EXACT_PATHS,
+        *ST12C_ALLOWED_EXACT_PATHS,
+    )
 )
 
 

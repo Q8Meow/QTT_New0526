@@ -146,6 +146,7 @@ OWNER_AUTHORIZED_VALIDATION_BRANCHES = frozenset(
     {
         "agent/st12a-contract-envelope",
         "agent/st12b-contextual-computability-v3",
+        "agent/st12c-deterministic-receipts-accounting-v1",
     }
 )
 IDEMPOTENCE_RUNTIME_CONTAINMENT_HARDENING_BRANCH = (

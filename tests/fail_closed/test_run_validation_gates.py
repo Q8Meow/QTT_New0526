@@ -3011,6 +3011,8 @@ def _expected_commands(
                 "quantum",
                 "security",
                 "source",
+                "accounting",
+                "execution",
             )
         ],
         [
@@ -3032,6 +3034,20 @@ def _expected_commands(
             str(
                 Path("tools")
                 / "independent_validate_qku_computation_control_plane_model_risk.py"
+            ),
+        ],
+        [
+            python_executable,
+            str(
+                Path("tools")
+                / "independent_validate_qku_computation_control_plane_accounting.py"
+            ),
+        ],
+        [
+            python_executable,
+            str(
+                Path("tools")
+                / "independent_validate_qku_computation_control_plane_execution.py"
             ),
         ],
         [
@@ -3123,17 +3139,21 @@ def test_runner_registers_qku_primary_and_independent_systems():
             for part in command
         )
     ]
-    assert [command[-1] for command in qku_commands[:5]] == [
+    assert [command[-1] for command in qku_commands[:7]] == [
         "architecture",
         "operations",
         "quantum",
         "security",
         "source",
+        "accounting",
+        "execution",
     ]
-    assert {Path(command[1]).name for command in qku_commands[5:]} == {
+    assert {Path(command[1]).name for command in qku_commands[7:]} == {
         "independent_validate_qku_computation_control_plane.py",
         "independent_validate_qku_computation_control_plane_latency.py",
         "independent_validate_qku_computation_control_plane_model_risk.py",
+        "independent_validate_qku_computation_control_plane_accounting.py",
+        "independent_validate_qku_computation_control_plane_execution.py",
     }
 
 
