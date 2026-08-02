@@ -26,6 +26,11 @@ from .receipts import (
     EconomicReceiptEventSpineV1,
     ValueLineageEdgeV1,
 )
+from .rollback import (
+    JournalReversalBundleV1,
+    ReversalHistoryViewV1,
+    ReversalReceiptV1,
+)
 from .serialization import deterministic_json
 
 
@@ -106,7 +111,14 @@ class PersistenceAdapterV1(ABC):
     def insert_outbox_intent(self, transaction: PersistenceTransactionV1, intent: OutboxIntentRecordV1) -> None: ...
 
     @abstractmethod
-    def insert_reversal_link(self, transaction: PersistenceTransactionV1, reversal: object) -> None: ...
+    def insert_reversal_link(self, transaction: PersistenceTransactionV1, reversal: ReversalReceiptV1) -> None: ...
+
+    @abstractmethod
+    def load_committed_reversal_history(
+        self,
+        transaction: PersistenceTransactionV1,
+        original_transaction_id: str,
+    ) -> ReversalHistoryViewV1: ...
 
     @abstractmethod
     def insert_reconciliation_break(self, transaction: PersistenceTransactionV1, reconciliation_break: ReconciliationBreakReceiptV1) -> None: ...
@@ -122,8 +134,14 @@ class PersistenceAdapterV1(ABC):
 
 
 class _InMemoryTransactionV1(PersistenceTransactionV1):
-    def __init__(self, adapter: "InMemoryPersistenceAdapterV1", working: dict[str, dict[str, object]]) -> None:
+    def __init__(
+        self,
+        adapter: "InMemoryPersistenceAdapterV1",
+        committed_snapshot: dict[str, dict[str, object]],
+        working: dict[str, dict[str, object]],
+    ) -> None:
         self._adapter = adapter
+        self._committed_snapshot = committed_snapshot
         self._working = working
         self._active = True
 
@@ -165,7 +183,14 @@ class InMemoryPersistenceAdapterV1(PersistenceAdapterV1):
         try:
             if self._active_transaction is not None and self._active_transaction.is_active:
                 raise TransactionContractError(ReasonCode.TRANSACTION_STATE_INVALID, "nested transactions are forbidden")
-            transaction = _InMemoryTransactionV1(self, {name: dict(rows) for name, rows in self._tables.items()})
+            committed_snapshot = {
+                name: dict(rows) for name, rows in self._tables.items()
+            }
+            transaction = _InMemoryTransactionV1(
+                self,
+                committed_snapshot,
+                {name: dict(rows) for name, rows in committed_snapshot.items()},
+            )
             self._active_transaction = transaction
             return transaction
         except Exception:
@@ -276,14 +301,98 @@ class InMemoryPersistenceAdapterV1(PersistenceAdapterV1):
             raise PersistenceContractError(ReasonCode.PERSISTENCE_CONFLICT, "outbox payload record is absent")
         self._insert(transaction, "outbox_intents", intent.outbox_intent_id, intent)
 
-    def insert_reversal_link(self, transaction: PersistenceTransactionV1, reversal: object) -> None:
-        reversal_id = getattr(reversal, "reversal_receipt_id", None)
-        original_ref = getattr(reversal, "original_event_or_transaction_ref", None)
-        reversal_transaction_ref = getattr(reversal, "reversal_transaction_ref", None)
+    def insert_reversal_link(self, transaction: PersistenceTransactionV1, reversal: ReversalReceiptV1) -> None:
+        if not isinstance(reversal, ReversalReceiptV1):
+            raise PersistenceContractError(
+                ReasonCode.REVERSAL_INVALID,
+                "reversal linkage must be a typed receipt",
+            )
+        reversal_id = reversal.reversal_receipt_id
+        original_ref = reversal.original_event_or_transaction_ref
+        reversal_transaction_ref = reversal.reversal_transaction_ref
         tx = self._transaction(transaction)
-        if not isinstance(reversal_id, str) or not self._record_exists(tx._working, original_ref) or reversal_transaction_ref not in tx._working["journal_transactions"]:
+        if not self._record_exists(tx._working, original_ref) or reversal_transaction_ref not in tx._working["journal_transactions"]:
             raise PersistenceContractError(ReasonCode.PERSISTENCE_CONFLICT, "reversal linkage records are absent")
         self._insert(transaction, "reversal_links", reversal_id, reversal)
+
+    def load_committed_reversal_history(
+        self,
+        transaction: PersistenceTransactionV1,
+        original_transaction_id: str,
+    ) -> ReversalHistoryViewV1:
+        tx = self._transaction(transaction)
+        snapshot = tx._committed_snapshot
+        original = snapshot["journal_transactions"].get(original_transaction_id)
+        if not isinstance(original, JournalTransactionV1):
+            raise PersistenceContractError(
+                ReasonCode.REVERSAL_INVALID,
+                "original journal is absent from the committed transaction snapshot",
+            )
+        try:
+            original_postings = tuple(
+                snapshot["journal_postings"][posting_ref]
+                for posting_ref in original.posting_refs
+            )
+        except KeyError as exc:
+            raise PersistenceContractError(
+                ReasonCode.REVERSAL_INVALID,
+                "original committed journal has a missing posting",
+            ) from exc
+        if any(not isinstance(row, JournalPostingV1) for row in original_postings):
+            raise PersistenceContractError(
+                ReasonCode.REVERSAL_INVALID,
+                "original committed posting is not typed",
+            )
+        links = sorted(
+            (
+                row
+                for row in snapshot["reversal_links"].values()
+                if isinstance(row, ReversalReceiptV1)
+                and row.original_event_or_transaction_ref
+                == original_transaction_id
+            ),
+            key=lambda row: (row.recorded_at, row.reversal_receipt_id),
+        )
+        bundles: list[JournalReversalBundleV1] = []
+        for link in links:
+            reversal_transaction = snapshot["journal_transactions"].get(
+                link.reversal_transaction_ref
+            )
+            if not isinstance(reversal_transaction, JournalTransactionV1):
+                raise PersistenceContractError(
+                    ReasonCode.REVERSAL_INVALID,
+                    "committed reversal link has no typed journal",
+                )
+            try:
+                reversal_postings = tuple(
+                    snapshot["journal_postings"][posting_ref]
+                    for posting_ref in reversal_transaction.posting_refs
+                )
+            except KeyError as exc:
+                raise PersistenceContractError(
+                    ReasonCode.REVERSAL_INVALID,
+                    "committed reversal journal has a missing posting",
+                ) from exc
+            if any(
+                not isinstance(row, JournalPostingV1)
+                for row in reversal_postings
+            ):
+                raise PersistenceContractError(
+                    ReasonCode.REVERSAL_INVALID,
+                    "committed reversal posting is not typed",
+                )
+            bundles.append(
+                JournalReversalBundleV1(
+                    reversal_transaction,
+                    reversal_postings,
+                    link,
+                )
+            )
+        return ReversalHistoryViewV1(
+            original,
+            original_postings,
+            tuple(bundles),
+        )
 
     def insert_reconciliation_break(self, transaction: PersistenceTransactionV1, reconciliation_break: ReconciliationBreakReceiptV1) -> None:
         self._insert(transaction, "reconciliation_breaks", reconciliation_break.break_receipt_id, reconciliation_break)

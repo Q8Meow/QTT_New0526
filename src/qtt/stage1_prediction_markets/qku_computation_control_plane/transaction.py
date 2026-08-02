@@ -15,7 +15,11 @@ from .lifecycle import StateTransitionReceiptV1
 from .outbox import OutboxIntentRecordV1
 from .persistence import PersistenceAdapterV1, PersistenceAvailabilityV1, PersistenceTransactionV1
 from .receipts import EconomicEventRecordV1, EconomicReceiptEventSpineV1, ValueLineageEdgeV1, validate_lineage_acyclic_v1
-from .rollback import ReversalReceiptV1
+from .rollback import (
+    JournalReversalBundleV1,
+    ReversalReceiptV1,
+    validate_reversal_bundle_against_history_v1,
+)
 
 
 class TransactionTerminalStateV1(StrEnum):
@@ -164,7 +168,15 @@ class TrancheCAtomicRecordSetV1:
         if self.result_record_ref not in identities:
             raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "idempotency result must bind a record in the same atomic set")
         if self.reversal_links:
-            if self.journal_transaction is None or any(row.reversal_transaction_ref != self.journal_transaction.journal_transaction_id for row in self.reversal_links):
+            if (
+                len(self.reversal_links) != 1
+                or self.journal_transaction is None
+                or any(
+                    row.reversal_transaction_ref
+                    != self.journal_transaction.journal_transaction_id
+                    for row in self.reversal_links
+                )
+            ):
                 raise ContractValidationError(ReasonCode.REVERSAL_INVALID, "reversal links require their exact atomic reversal journal")
         validate_lineage_acyclic_v1(self.value_lineage_edges)
 
@@ -232,6 +244,20 @@ class TrancheCUnitOfWorkV1:
                         unit_of_work_id=unit_of_work_id, state=TransactionTerminalStateV1.CONFLICT,
                         attempt=attempt, refs=(), claim_ref=claim.claim_ref, started_at=started_at,
                         completed_at=completed_at, failure_code=reason.value, retryable=False,
+                    )
+                if records.reversal_links:
+                    reversal = records.reversal_links[0]
+                    history = self._adapter.load_committed_reversal_history(
+                        transaction,
+                        reversal.original_event_or_transaction_ref,
+                    )
+                    validate_reversal_bundle_against_history_v1(
+                        history=history,
+                        proposed=JournalReversalBundleV1(
+                            records.journal_transaction,
+                            records.journal_postings,
+                            reversal,
+                        ),
                     )
                 if records.journal_transaction is not None:
                     AccountingAndTCAServiceV1.validate_journal(records.journal_transaction, records.journal_postings, accounts)

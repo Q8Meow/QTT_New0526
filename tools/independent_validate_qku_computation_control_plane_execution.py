@@ -117,15 +117,29 @@ def main() -> int:
         "insert_economic_event", "insert_journal_transaction", "insert_journal_posting",
         "insert_state_transition", "acquire_idempotency_claim", "bind_idempotency_result",
         "insert_outbox_intent", "insert_reversal_link", "insert_reconciliation_break",
-        "get_record", "get_idempotency_result", "reconstruct_as_of",
+        "load_committed_reversal_history", "get_record", "get_idempotency_result",
+        "reconstruct_as_of",
     }
     if persistence_methods != expected_methods:
         failures.append(f"typed persistence interface mismatch: {sorted(persistence_methods ^ expected_methods)}")
+    for module_name, class_name in (
+        ("persistence.py", "InMemoryPersistenceAdapterV1"),
+        ("sqlite_reference.py", "SQLiteReferenceAdapterV1"),
+    ):
+        if "load_committed_reversal_history" not in _class_methods(
+            trees[module_name],
+            class_name,
+        ):
+            failures.append(
+                f"{class_name}: committed reversal-history read contract missing"
+            )
     ordered = _call_order(trees["transaction.py"])
     required_order = (
-        "acquire_idempotency_claim", "insert_receipt_record", "insert_economic_event",
+        "acquire_idempotency_claim", "load_committed_reversal_history",
+        "insert_receipt_record", "insert_economic_event",
         "insert_value_lineage_edge", "insert_journal_transaction", "insert_journal_posting",
-        "insert_state_transition", "insert_outbox_intent", "bind_idempotency_result",
+        "insert_state_transition", "insert_outbox_intent", "insert_reversal_link",
+        "insert_reconciliation_break", "bind_idempotency_result",
     )
     positions = [ordered.index(name) if name in ordered else -1 for name in required_order]
     if -1 in positions or positions != sorted(positions):

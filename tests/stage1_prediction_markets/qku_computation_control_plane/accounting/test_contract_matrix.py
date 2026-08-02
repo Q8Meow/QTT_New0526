@@ -8,6 +8,10 @@ from tempfile import TemporaryDirectory
 
 import pytest
 
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane import (
+    implementation_registry as implementation_registry_module,
+)
+
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.accounting import (
     AccountingAmountV1,
     AccountingAndTCAServiceV1,
@@ -36,15 +40,18 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.context imp
     quantize_decimal_v1,
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.economic_math import (
+    ActivePriceGridRangeV1,
     BinaryBookSnapshotV1,
     FeeScheduleBindingV1,
     FillQuantityDistributionArtifactV1,
+    TRANCHE_C_MATH_SPECIFICATIONS,
     binary_book_implied_asks_v1,
     expected_partial_fill_quantity_v1,
     global_prediction_market_fee_v1,
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import (
     ComputationControlPlaneError,
+    ReasonCode,
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.idempotency import (
     IdempotencyClaimReceiptV1,
@@ -60,10 +67,19 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.persistence
     InMemoryPersistenceAdapterV1,
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.parameter_policy import (
+    TRANCHE_C_PARAMETER_ADMISSIBILITY_CLASSES,
     TRANCHE_C_PARAMETER_APPLICATION_BINDINGS,
     TRANCHE_C_PARAMETER_POLICIES,
+    TrancheCParameterEvidenceClassV1,
+    TrancheCParameterEvidenceV1,
     TrancheCExplicitParameterValueV1,
+    TrancheCParameterPolicyClassV1,
     resolve_tranche_c_parameter_v1,
+)
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.implementation_registry import (
+    IMPLEMENTATION_REGISTRY,
+    TRANCHE_C_IMPLEMENTATION_REGISTRY,
+    compute_math_36_kalshi_binary_book_transform,
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.outbox import (
     OutboxIntentRecordV1,
@@ -276,7 +292,14 @@ def test_accounting_contract_matrix(case) -> None:
         with pytest.raises(ComputationControlPlaneError):
             TCADecompositionV1("bad", "decision", ("fill",), "1", "0", "0", "1", "-.25", "0", "0", "0", "0", "2", attribution)
     elif slug == "unit-and-basis":
-        touches = binary_book_implied_asks_v1(snapshot=BinaryBookSnapshotV1("book", "sequence", "source", "USD", "PAYOUT", ("0.40", "0.42"), ("0.50", "0.56"), "1"))
+        touches = binary_book_implied_asks_v1(
+            snapshot=BinaryBookSnapshotV1(
+                "book", "sequence", "source", "USD", "PAYOUT",
+                ("0.40", "0.42"), ("0.50", "0.56"), "1", 5, 5,
+                "CURRENT_CONTIGUOUS_SNAPSHOT_PLUS_DELTAS",
+                (ActivePriceGridRangeV1("0.00", "1.00", "0.01"),),
+            )
+        )
         assert (touches.yes_implied_ask, touches.no_implied_ask) == (Decimal("0.44"), Decimal("0.58"))
         journal, postings = _journal()
         with pytest.raises(ComputationControlPlaneError):
@@ -307,30 +330,80 @@ def _atomic_records(*, credit: str = "1.00", claim_id: str = "claim-1", claim_ke
     return TrancheCAtomicRecordSetV1(claim, (spine,), (event,), (lineage,), journal, postings, transition, "receipt-1")
 
 
-def _reversal_atomic_records() -> TrancheCAtomicRecordSetV1:
-    original, original_postings = _journal()
+def _reversal_atomic_records(
+    *,
+    suffix: str = "atomic",
+    claim_key: str = "key-reversal",
+    request_token: str = "full",
+    requested_amount: str | None = None,
+    previously_reversed: str | None = None,
+    aggregate_version: int = 2,
+    original_transaction: JournalTransactionV1 | None = None,
+    original_postings: tuple[JournalPostingV1, ...] | None = None,
+    reversal_transaction_id: str | None = None,
+    remaining_override: str | None = None,
+) -> TrancheCAtomicRecordSetV1:
+    if original_transaction is None or original_postings is None:
+        original_transaction, original_postings = _journal()
+    event_id = f"event-reversal-{suffix}"
+    transaction_id = reversal_transaction_id or f"journal-reversal-{suffix}"
+    requested = (
+        None
+        if requested_amount is None
+        else {
+            posting.posting_id: requested_amount
+            for posting in original_postings
+        }
+    )
+    prior = (
+        {}
+        if previously_reversed is None
+        else {
+            posting.posting_id: previously_reversed
+            for posting in original_postings
+        }
+    )
     bundle = build_journal_reversal_v1(
-        original_transaction=original,
+        original_transaction=original_transaction,
         original_postings=original_postings,
-        reversal_receipt_id="reversal-atomic",
-        reversal_event_ref="event-reversal",
-        reversal_transaction_id="journal-reversal",
-        reversal_posting_ids=("reversal-debit", "reversal-credit"),
-        requested_amount_by_original_posting=None,
-        previously_reversed_by_original_posting={},
+        reversal_receipt_id=f"reversal-{suffix}",
+        reversal_event_ref=event_id,
+        reversal_transaction_id=transaction_id,
+        reversal_posting_ids=tuple(
+            f"reversal-{suffix}-{index}"
+            for index in range(len(original_postings))
+        ),
+        requested_amount_by_original_posting=requested,
+        previously_reversed_by_original_posting=prior,
         reason_code="CORRECTION",
         authority_ref="OWNER_FIXTURE",
         effective_at=NOW,
         recorded_at=NOW,
     )
+    reversal_receipt = bundle.receipt
+    if remaining_override is not None:
+        reversal_receipt = replace(
+            reversal_receipt,
+            remaining_reversible_amounts=tuple(
+                AccountingAmountV1(
+                    remaining_override,
+                    posting.currency_or_asset,
+                    posting.ledger_unit,
+                    posting.basis,
+                    posting.scale,
+                    "IDENTITY_FROM_ORIGINAL_POSTING",
+                )
+                for posting in original_postings
+            ),
+        )
     amount = TypedEconomicAmountV1("1.00", "USD", "USD", "SETTLED", 2, "TEST::CENT")
-    event = EconomicEventRecordV1("event-reversal", "CORRECTION", "AccountingAndTCAServiceV1", "aggregate-1", 2, NOW, NOW, ("journal-1",), (amount,), "OPEN", "OPEN", "DETERMINISTIC_FIXTURE")
-    spine = EconomicReceiptEventSpineV1("receipt-reversal", EconomicRecordTypeV1.ECONOMIC_EVENT, "1", "AccountingAndTCAServiceV1", "QKUComputationControlPlaneV1", "context", NOW, NOW, "cause-reversal", "correlation-reversal", "00-trace-reversal", "trace-state", 2, "aggregate-1", 2, "CONTRACT_ONLY", event)
-    transition = StateTransitionReceiptV1("transition-reversal", "aggregate-1", "POSITION_STATE_MACHINE_V1", "OPEN", "CORRECTION", "OPEN", TransitionDispositionV1.ACCEPTED, "event-identity-reversal", 1, 2, NOW, NOW, "CORRECTION", False)
-    claim = IdempotencyClaimReceiptV1("claim-reversal", "key-reversal", "REVERSAL", canonical_request_json_v1({"command": "reverse", "original": "journal-1"}), IdempotencyClaimStateV1.ACQUIRED, None, NOW, None, None)
+    event = EconomicEventRecordV1(event_id, "CORRECTION", "AccountingAndTCAServiceV1", "aggregate-1", aggregate_version, NOW, NOW, (original_transaction.journal_transaction_id,), (amount,), "OPEN", "OPEN", "DETERMINISTIC_FIXTURE")
+    spine = EconomicReceiptEventSpineV1(f"receipt-reversal-{suffix}", EconomicRecordTypeV1.ECONOMIC_EVENT, "1", "AccountingAndTCAServiceV1", "QKUComputationControlPlaneV1", "context", NOW, NOW, f"cause-reversal-{suffix}", f"correlation-reversal-{suffix}", f"00-trace-reversal-{suffix}", "trace-state", aggregate_version, "aggregate-1", aggregate_version, "CONTRACT_ONLY", event)
+    transition = StateTransitionReceiptV1(f"transition-reversal-{suffix}", "aggregate-1", "POSITION_STATE_MACHINE_V1", "OPEN", "CORRECTION", "OPEN", TransitionDispositionV1.ACCEPTED, f"event-identity-reversal-{suffix}", aggregate_version - 1, aggregate_version, NOW, NOW, "CORRECTION", False)
+    claim = IdempotencyClaimReceiptV1(f"claim-reversal-{suffix}", claim_key, "REVERSAL", canonical_request_json_v1({"command": "reverse", "original": original_transaction.journal_transaction_id, "request": request_token}), IdempotencyClaimStateV1.ACQUIRED, None, NOW, None, None)
     return TrancheCAtomicRecordSetV1(
         claim, (spine,), (event,), (), bundle.transaction, bundle.postings,
-        transition, "receipt-reversal", reversal_links=(bundle.receipt,),
+        transition, f"receipt-reversal-{suffix}", reversal_links=(reversal_receipt,),
     )
 
 
@@ -409,6 +482,404 @@ def test_reference_adapter_atomic_commit_rollback_and_replay(adapter_kind, refer
         rollback_adapter.close()
 
 
+REVERSAL_HISTORY_SCENARIOS = (
+    "full-then-full",
+    "partial-then-remainder",
+    "partial-then-over",
+    "same-key-replay",
+    "same-key-conflict",
+    "same-uow-original",
+    "receipt-remaining-mismatch",
+)
+
+
+@pytest.mark.parametrize("adapter_kind", ("memory", "sqlite"))
+@pytest.mark.parametrize("scenario", REVERSAL_HISTORY_SCENARIOS)
+def test_persisted_reversal_history_matrix(
+    adapter_kind, scenario, reference_directory
+) -> None:
+    adapter = (
+        InMemoryPersistenceAdapterV1()
+        if adapter_kind == "memory"
+        else SQLiteReferenceAdapterV1(
+            reference_directory / f"reversal-{scenario}.db",
+            busy_timeout_ms=0,
+            max_transaction_attempts=1,
+        )
+    )
+    unit = TrancheCUnitOfWorkV1(adapter, TransactionRetryPolicyV1(1))
+    if scenario == "same-uow-original":
+        original, original_postings = _journal()
+        before = deterministic_json(
+            adapter.reconstruct_as_of(
+                effective_cutoff=NOW,
+                recorded_cutoff=NOW,
+                aggregate_scope=(),
+            )
+        )
+        result = unit.execute(
+            unit_of_work_id="uow-same-uow",
+            records=_reversal_atomic_records(
+                suffix="same-uow",
+                original_transaction=original,
+                original_postings=original_postings,
+                reversal_transaction_id=original.journal_transaction_id,
+            ),
+            accounts=_accounts(),
+            started_at=NOW,
+            completed_at=NOW,
+        )
+        assert result.transaction_state is TransactionTerminalStateV1.ROLLED_BACK
+        assert result.failure_code == ReasonCode.REVERSAL_INVALID.value
+        assert deterministic_json(
+            adapter.reconstruct_as_of(
+                effective_cutoff=NOW,
+                recorded_cutoff=NOW,
+                aggregate_scope=(),
+            )
+        ) == before
+        assert adapter.get_record("journal-1") is None
+        if hasattr(adapter, "close"):
+            adapter.close()
+        return
+
+    original_result = unit.execute(
+        unit_of_work_id=f"uow-original-{scenario}",
+        records=_atomic_records(),
+        accounts=_accounts(),
+        started_at=NOW,
+        completed_at=NOW,
+    )
+    assert original_result.transaction_state is TransactionTerminalStateV1.COMMITTED
+
+    if scenario == "receipt-remaining-mismatch":
+        first_result = None
+        proposed = _reversal_atomic_records(
+            suffix="bad-remaining",
+            remaining_override="0.01",
+        )
+    else:
+        first_full = scenario == "full-then-full"
+        first_records = _reversal_atomic_records(
+            suffix="a",
+            claim_key="key-reversal-a",
+            request_token="full-a" if first_full else "partial-a",
+            requested_amount=None if first_full else "0.40",
+        )
+        first_result = unit.execute(
+            unit_of_work_id=f"uow-first-{scenario}",
+            records=first_records,
+            accounts=_accounts(),
+            started_at=NOW,
+            completed_at=NOW,
+        )
+        assert first_result.transaction_state is TransactionTerminalStateV1.COMMITTED
+        if scenario == "full-then-full":
+            proposed = _reversal_atomic_records(
+                suffix="b", request_token="full-b", aggregate_version=3
+            )
+        elif scenario == "partial-then-remainder":
+            proposed = _reversal_atomic_records(
+                suffix="b",
+                request_token="remainder-b",
+                requested_amount="0.60",
+                previously_reversed="0.40",
+                aggregate_version=3,
+            )
+        elif scenario == "partial-then-over":
+            proposed = _reversal_atomic_records(
+                suffix="b",
+                request_token="over-b",
+                requested_amount="0.70",
+                aggregate_version=3,
+            )
+        elif scenario == "same-key-replay":
+            proposed = _reversal_atomic_records(
+                suffix="b",
+                claim_key="key-reversal-a",
+                request_token="partial-a",
+                requested_amount="0.40",
+                aggregate_version=3,
+            )
+        else:
+            proposed = _reversal_atomic_records(
+                suffix="b",
+                claim_key="key-reversal-a",
+                request_token="conflicting-payload",
+                requested_amount="0.40",
+                aggregate_version=3,
+            )
+
+    before_second = deterministic_json(
+        adapter.reconstruct_as_of(
+            effective_cutoff=NOW,
+            recorded_cutoff=NOW,
+            aggregate_scope=(),
+        )
+    )
+    second_result = unit.execute(
+        unit_of_work_id=f"uow-second-{scenario}",
+        records=proposed,
+        accounts=_accounts(),
+        started_at=NOW,
+        completed_at=NOW,
+    )
+    if scenario == "partial-then-remainder":
+        assert second_result.transaction_state is TransactionTerminalStateV1.COMMITTED
+    elif scenario == "same-key-replay":
+        assert second_result.transaction_state is TransactionTerminalStateV1.COMMITTED
+        assert first_result is not None
+        assert second_result.committed_record_refs == first_result.committed_record_refs[:1]
+        assert deterministic_json(
+            adapter.reconstruct_as_of(
+                effective_cutoff=NOW,
+                recorded_cutoff=NOW,
+                aggregate_scope=(),
+            )
+        ) == before_second
+    elif scenario == "same-key-conflict":
+        assert second_result.transaction_state is TransactionTerminalStateV1.CONFLICT
+        assert second_result.failure_code == ReasonCode.IDEMPOTENCY_CONFLICT.value
+    else:
+        assert second_result.transaction_state is TransactionTerminalStateV1.ROLLED_BACK
+        assert second_result.failure_code == ReasonCode.REVERSAL_INVALID.value
+
+    if scenario not in {"partial-then-remainder", "same-key-replay"}:
+        assert deterministic_json(
+            adapter.reconstruct_as_of(
+                effective_cutoff=NOW,
+                recorded_cutoff=NOW,
+                aggregate_scope=(),
+            )
+        ) == before_second
+        assert adapter.get_record(proposed.reversal_links[0].reversal_receipt_id) is None
+        assert adapter.get_record(proposed.journal_transaction.journal_transaction_id) is None
+        assert all(
+            adapter.get_record(posting.posting_id) is None
+            for posting in proposed.journal_postings
+        )
+
+    history_transaction = adapter.begin_transaction()
+    history = adapter.load_committed_reversal_history(
+        history_transaction, "journal-1"
+    )
+    history_transaction.rollback()
+    assert all(
+        row.cumulative_reversed_amount.decimal
+        + row.remaining_reversible_amount.decimal
+        == row.original_posting.magnitude
+        for row in history.posting_history
+    )
+    if scenario in {"full-then-full", "partial-then-remainder"}:
+        assert all(
+            row.remaining_reversible_amount.decimal == 0
+            for row in history.posting_history
+        )
+    if hasattr(adapter, "close"):
+        adapter.close()
+
+
+def _binary_book_snapshot(**changes) -> BinaryBookSnapshotV1:
+    values = {
+        "snapshot_ref": "book-snapshot",
+        "sequence_ref": "sequence-5",
+        "source_binding_ref": "source-binding",
+        "unit": "USD",
+        "basis": "PAYOUT",
+        "yes_bids": ("0.40", "0.42"),
+        "no_bids": ("0.50", "0.56"),
+        "payout": "1.00",
+        "book_sequence": 5,
+        "expected_sequence": 5,
+        "book_state": "CURRENT_CONTIGUOUS_SNAPSHOT_PLUS_DELTAS",
+        "active_price_grid_ranges": (
+            ActivePriceGridRangeV1("0.00", "1.00", "0.01"),
+        ),
+    }
+    values.update(changes)
+    return BinaryBookSnapshotV1(**values)
+
+
+def test_math_36_canonical_snapshot_and_compatibility_matrix(monkeypatch) -> None:
+    assert TRANCHE_C_MATH_SPECIFICATIONS["MATH-36"].implementation is binary_book_implied_asks_v1
+    assert TRANCHE_C_IMPLEMENTATION_REGISTRY["MATH-36"].callable is binary_book_implied_asks_v1
+    assert IMPLEMENTATION_REGISTRY["MATH-36"].callable is compute_math_36_kalshi_binary_book_transform
+
+    snapshot = _binary_book_snapshot()
+    canonical = binary_book_implied_asks_v1(snapshot=snapshot)
+    calls: list[BinaryBookSnapshotV1] = []
+
+    def _canonical_spy(*, snapshot):
+        calls.append(snapshot)
+        return binary_book_implied_asks_v1(snapshot=snapshot)
+
+    monkeypatch.setattr(
+        implementation_registry_module,
+        "binary_book_implied_asks_v1",
+        _canonical_spy,
+    )
+    compatibility = compute_math_36_kalshi_binary_book_transform(
+        snapshot.yes_bids,
+        snapshot.no_bids,
+        snapshot.payout,
+        snapshot.book_sequence,
+        snapshot.expected_sequence,
+        snapshot.book_state,
+        ({"minimum": "0.00", "maximum": "1.00", "step": "0.01"},),
+    )
+    assert len(calls) == 1
+    assert compatibility == {
+        "best_yes_bid": Decimal("0.42"),
+        "best_no_bid": Decimal("0.56"),
+        "derived_yes_ask": canonical.yes_implied_ask,
+        "derived_no_ask": canonical.no_implied_ask,
+        "book_sequence": canonical.book_sequence,
+    }
+    assert (
+        canonical.snapshot_ref,
+        canonical.sequence_ref,
+        canonical.source_binding_ref,
+        canonical.book_sequence,
+    ) == (
+        snapshot.snapshot_ref,
+        snapshot.sequence_ref,
+        snapshot.source_binding_ref,
+        snapshot.book_sequence,
+    )
+    mutations = (
+        {"expected_sequence": 4},
+        {"book_state": "NONCONTIGUOUS"},
+        {"yes_bids": ("0.405", "0.42")},
+        {"payout": "1.005"},
+    )
+    for mutation in mutations:
+        with pytest.raises(ComputationControlPlaneError):
+            _binary_book_snapshot(**mutation)
+
+
+def _parameter_evidence(
+    parameter_id: str,
+    evidence_class: TrancheCParameterEvidenceClassV1,
+) -> TrancheCParameterEvidenceV1:
+    policy = TRANCHE_C_PARAMETER_POLICIES[parameter_id]
+    evidence_ref = f"evidence::{parameter_id}"
+    return TrancheCParameterEvidenceV1(
+        evidence_class=evidence_class,
+        evidence_ref=evidence_ref,
+        source_or_binding_refs=tuple(policy.raw["effective_source_state_refs"]),
+        declared_unit_or_basis=str(policy.raw["effective_unit_or_basis"]),
+        constraint_refs=(
+            policy.reference_range_or_constraint,
+            str(policy.raw["effective_bounded_search_space_or_fit_constraint"]),
+            str(policy.raw["effective_unit_or_basis"]),
+        ),
+    )
+
+
+PARAMETER_ADMISSIBILITY_CASES = (
+    "fixed-pass",
+    "fixed-alternate",
+    "singleton-pass",
+    "singleton-alternate",
+    "bounded-pass",
+    "bounded-outside",
+    "bounded-wrong-type",
+    "bounded-wrong-unit",
+    "source-pass",
+    "source-missing-evidence",
+    "calibration-pass",
+    "calibration-missing-evidence",
+    "unsupported-structural-constraint",
+)
+
+
+@pytest.mark.parametrize("case", PARAMETER_ADMISSIBILITY_CASES)
+def test_parameter_admissibility_matrix(case) -> None:
+    fixed_id = "ST10-PARAM::0115"
+    singleton_id = "ST10-PARAM::1544"
+    bounded_id = "ST10-PARAM::0064"
+    source_id = "ST10-PARAM::3277"
+    calibration_id = "ST10-PARAM::1531"
+    structural_id = "ST10-PARAM::3797"
+    parameter_id = {
+        "fixed-pass": fixed_id,
+        "fixed-alternate": fixed_id,
+        "singleton-pass": singleton_id,
+        "singleton-alternate": singleton_id,
+        "bounded-pass": bounded_id,
+        "bounded-outside": bounded_id,
+        "bounded-wrong-type": bounded_id,
+        "bounded-wrong-unit": bounded_id,
+        "source-pass": source_id,
+        "source-missing-evidence": source_id,
+        "calibration-pass": calibration_id,
+        "calibration-missing-evidence": calibration_id,
+        "unsupported-structural-constraint": structural_id,
+    }[case]
+    policy = TRANCHE_C_PARAMETER_POLICIES[parameter_id]
+    binding = TRANCHE_C_PARAMETER_APPLICATION_BINDINGS[parameter_id]
+    value: object = policy.day1_seed_or_resolution_rule
+    unit: str | None = None
+    evidence: TrancheCParameterEvidenceV1 | None = None
+    expected_pass = case.endswith("pass")
+    if case == "fixed-alternate":
+        value = "ALLOWED"
+    elif case == "singleton-pass":
+        value, unit = Decimal("1.0"), "gross leverage cap"
+    elif case == "singleton-alternate":
+        value, unit = Decimal("1.1"), "gross leverage cap"
+    elif case == "bounded-pass":
+        value, unit = Decimal("0.00"), "USD"
+    elif case == "bounded-outside":
+        value, unit = Decimal("-0.01"), "USD"
+    elif case == "bounded-wrong-type":
+        value, unit = "0.00", "USD"
+    elif case == "bounded-wrong-unit":
+        value, unit = Decimal("0.00"), "EUR"
+    elif case.startswith("source"):
+        unit = str(policy.raw["effective_unit_or_basis"])
+        if case == "source-pass":
+            evidence = _parameter_evidence(
+                parameter_id,
+                TrancheCParameterEvidenceClassV1.SOURCE_OR_RUNTIME_BINDING,
+            )
+    elif case.startswith("calibration"):
+        value = Decimal("0.05")
+        unit = str(policy.raw["effective_unit_or_basis"])
+        if case == "calibration-pass":
+            evidence = _parameter_evidence(
+                parameter_id,
+                TrancheCParameterEvidenceClassV1.CALIBRATED_ARTIFACT,
+            )
+    elif case == "unsupported-structural-constraint":
+        value = {"id_": "EXACT_CONTRACT_OR_PACKET_IDENTITY"}
+
+    explicit = TrancheCExplicitParameterValueV1(
+        parameter_id,
+        value,
+        policy.canonical_owner,
+        binding.active_stage1_value_authority,
+        evidence.evidence_ref if evidence is not None else f"packet::{case}",
+        unit,
+        evidence,
+    )
+    if not expected_pass:
+        with pytest.raises(ComputationControlPlaneError):
+            resolve_tranche_c_parameter_v1(
+                parameter_id, explicit_value=explicit
+            )
+        return
+    resolved = resolve_tranche_c_parameter_v1(
+        parameter_id, explicit_value=explicit
+    )
+    assert resolved.admissibility_receipt.terminal_state == "PASS"
+    assert (
+        resolved.value_or_rule
+        == resolved.admissibility_receipt.canonical_normalized_value
+    )
+    assert resolved.admissibility_receipt.policy_class is TRANCHE_C_PARAMETER_ADMISSIBILITY_CLASSES[parameter_id]
+
+
 def test_control_coverage_meta_matrix() -> None:
     validate_st12c_control_coverage_matrix()
     rows = ST12C_CONTROL_COVERAGE_MATRIX
@@ -424,6 +895,9 @@ def test_control_coverage_meta_matrix() -> None:
     assert (repo_root / "tools" / "independent_validate_qku_computation_control_plane_accounting.py").is_file()
     assert (repo_root / "tools" / "independent_validate_qku_computation_control_plane_execution.py").is_file()
     assert len(rows) + 2 == 27
+    assert len(TRANCHE_C_PARAMETER_ADMISSIBILITY_CLASSES) == 80
+    assert set(TRANCHE_C_PARAMETER_ADMISSIBILITY_CLASSES) == set(TRANCHE_C_PARAMETER_POLICIES)
+    assert set(TRANCHE_C_PARAMETER_ADMISSIBILITY_CLASSES.values()) == set(TrancheCParameterPolicyClassV1)
     source_bound = tuple(
         parameter_id
         for parameter_id, policy in TRANCHE_C_PARAMETER_POLICIES.items()
@@ -435,6 +909,10 @@ def test_control_coverage_meta_matrix() -> None:
             resolve_tranche_c_parameter_v1(parameter_id)
         policy = TRANCHE_C_PARAMETER_POLICIES[parameter_id]
         binding = TRANCHE_C_PARAMETER_APPLICATION_BINDINGS[parameter_id]
+        evidence = _parameter_evidence(
+            parameter_id,
+            TrancheCParameterEvidenceClassV1.SOURCE_OR_RUNTIME_BINDING,
+        )
         resolved = resolve_tranche_c_parameter_v1(
             parameter_id,
             explicit_value=TrancheCExplicitParameterValueV1(
@@ -442,10 +920,13 @@ def test_control_coverage_meta_matrix() -> None:
                 policy.day1_seed_or_resolution_rule,
                 policy.canonical_owner,
                 binding.active_stage1_value_authority,
-                f"injected-packet::{parameter_id}",
+                evidence.evidence_ref,
+                str(policy.raw["effective_unit_or_basis"]),
+                evidence,
             ),
         )
         assert resolved.authority_ref == binding.active_stage1_value_authority
+        assert resolved.admissibility_receipt.terminal_state == "PASS"
     dormant = next(
         parameter_id
         for parameter_id, policy in TRANCHE_C_PARAMETER_POLICIES.items()

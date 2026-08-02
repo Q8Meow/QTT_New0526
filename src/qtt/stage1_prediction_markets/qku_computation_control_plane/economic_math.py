@@ -235,6 +235,33 @@ class FillQuantityDistributionArtifactV1:
 
 
 @dataclass(frozen=True, slots=True)
+class ActivePriceGridRangeV1:
+    minimum: DecimalInput
+    maximum: DecimalInput
+    step: DecimalInput
+
+    def __post_init__(self) -> None:
+        minimum = _decimal(self.minimum, "price_grid.minimum")
+        maximum = _decimal(self.maximum, "price_grid.maximum")
+        step = _decimal(self.step, "price_grid.step")
+        if minimum < 0 or minimum > maximum or step <= 0:
+            raise NumericDomainError(
+                ReasonCode.OUT_OF_DOMAIN,
+                "active price-grid range is invalid",
+            )
+        object.__setattr__(self, "minimum", minimum)
+        object.__setattr__(self, "maximum", maximum)
+        object.__setattr__(self, "step", step)
+
+    def contains(self, value: Decimal) -> bool:
+        with localcontext(decimal_context_v1()):
+            return (
+                self.minimum <= value <= self.maximum
+                and (value - self.minimum) % self.step == 0
+            )
+
+
+@dataclass(frozen=True, slots=True)
 class BinaryBookSnapshotV1:
     snapshot_ref: str
     sequence_ref: str
@@ -244,6 +271,10 @@ class BinaryBookSnapshotV1:
     yes_bids: tuple[DecimalInput, ...]
     no_bids: tuple[DecimalInput, ...]
     payout: DecimalInput
+    book_sequence: int
+    expected_sequence: int
+    book_state: str
+    active_price_grid_ranges: tuple[ActivePriceGridRangeV1, ...]
 
     def __post_init__(self) -> None:
         for name in ("snapshot_ref", "sequence_ref", "source_binding_ref", "unit", "basis"):
@@ -252,10 +283,55 @@ class BinaryBookSnapshotV1:
         yes = _nonempty(self.yes_bids, "yes_bids")
         no = _nonempty(self.no_bids, "no_bids")
         payout = _decimal(self.payout, "payout")
+        if (
+            isinstance(self.book_sequence, bool)
+            or not isinstance(self.book_sequence, int)
+            or isinstance(self.expected_sequence, bool)
+            or not isinstance(self.expected_sequence, int)
+            or self.book_sequence != self.expected_sequence
+            or self.book_state != "CURRENT_CONTIGUOUS_SNAPSHOT_PLUS_DELTAS"
+        ):
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "binary book must be current, contiguous, and sequence-exact",
+            )
+        if (
+            not isinstance(self.active_price_grid_ranges, tuple)
+            or not self.active_price_grid_ranges
+            or any(
+                not isinstance(row, ActivePriceGridRangeV1)
+                for row in self.active_price_grid_ranges
+            )
+        ):
+            raise ContractValidationError(
+                ReasonCode.INCOMPLETE_CONTRACT,
+                "typed active price-grid ranges are required",
+            )
         if payout <= 0 or any(value < 0 or value > payout for value in (*yes, *no)):
             raise NumericDomainError(ReasonCode.OUT_OF_DOMAIN, "binary book levels must be within the positive payout")
         if any(left >= right for left, right in zip(yes, yes[1:])) or any(left >= right for left, right in zip(no, no[1:])):
             raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "binary book ladders must be strictly ascending with best bid last")
+        if any(
+            not any(price_range.contains(value) for price_range in self.active_price_grid_ranges)
+            for value in (*yes, *no)
+        ):
+            raise NumericDomainError(
+                ReasonCode.OUT_OF_DOMAIN,
+                "binary book bid is outside the active price grid",
+            )
+        with localcontext(decimal_context_v1()) as context:
+            complements = (
+                context.subtract(payout, no[-1]),
+                context.subtract(payout, yes[-1]),
+            )
+        if any(
+            not any(price_range.contains(value) for price_range in self.active_price_grid_ranges)
+            for value in complements
+        ):
+            raise NumericDomainError(
+                ReasonCode.OUT_OF_DOMAIN,
+                "binary book derived complement is outside the active price grid",
+            )
         object.__setattr__(self, "yes_bids", yes)
         object.__setattr__(self, "no_bids", no)
         object.__setattr__(self, "payout", payout)
@@ -264,6 +340,9 @@ class BinaryBookSnapshotV1:
 @dataclass(frozen=True, slots=True)
 class BinaryBookTouchesV1:
     snapshot_ref: str
+    sequence_ref: str
+    source_binding_ref: str
+    book_sequence: int
     yes_implied_ask: Decimal
     no_implied_ask: Decimal
     payout: Decimal
@@ -272,9 +351,14 @@ class BinaryBookTouchesV1:
     derivation_id: str = "MATH-36"
 
     def __post_init__(self) -> None:
-        for name in ("snapshot_ref", "unit", "basis", "derivation_id"):
+        for name in ("snapshot_ref", "sequence_ref", "source_binding_ref", "unit", "basis", "derivation_id"):
             if not isinstance(getattr(self, name), str) or not getattr(self, name).strip():
                 raise ContractValidationError(ReasonCode.INCOMPLETE_CONTRACT, f"book touch {name} is required")
+        if isinstance(self.book_sequence, bool) or not isinstance(self.book_sequence, int):
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "book touch sequence must be an integer",
+            )
         payout = _decimal(self.payout, "payout")
         yes = _decimal(self.yes_implied_ask, "yes_implied_ask")
         no = _decimal(self.no_implied_ask, "no_implied_ask")
@@ -548,6 +632,9 @@ def binary_book_implied_asks_v1(*, snapshot: BinaryBookSnapshotV1) -> BinaryBook
     with localcontext(decimal_context_v1()) as context:
         return BinaryBookTouchesV1(
             snapshot.snapshot_ref,
+            snapshot.sequence_ref,
+            snapshot.source_binding_ref,
+            snapshot.book_sequence,
             context.subtract(snapshot.payout, no),
             context.subtract(snapshot.payout, yes),
             snapshot.payout,

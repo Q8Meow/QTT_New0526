@@ -117,6 +117,12 @@ EXPECTED_ST12B_ALLOWED_EXACT_PATHS = frozenset(
         "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
     }
 )
+ST12C_PREDECESSOR_CURRENTIZATION_PATHS = frozenset(
+    {
+        "tests/stage1_prediction_markets/qku_computation_control_plane/operations/test_runtime_topology.py",
+        "tools/independent_validate_qku_computation_control_plane_operations.py",
+    }
+)
 EXPECTED_ST12C_ALLOWED_EXACT_PATHS = frozenset(
     {
         "src/qtt/stage1_prediction_markets/qku_computation_control_plane/__init__.py",
@@ -161,7 +167,7 @@ EXPECTED_ST12C_ALLOWED_EXACT_PATHS = frozenset(
         "tools/validation_scope_registry.py",
         "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
     }
-)
+) | ST12C_PREDECESSOR_CURRENTIZATION_PATHS
 
 PR169_QKU_FORMULA_EXP1_PR272_PATHS = (
     "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
@@ -484,12 +490,11 @@ def test_st12b_scope_requires_exact_branch() -> None:
         assert not registry.is_pr_scoped_changed_path_allowed(branch, path)
 
 
-def test_st12c_exact_41_path_scope_matches_owner_currentization() -> None:
+def test_st12c_exact_scope_matches_owner_currentization() -> None:
     assert registry.ST12C_BRANCH == (
         "agent/st12c-deterministic-receipts-accounting-v1"
     )
     assert registry.ST12C_ALLOWED_EXACT_PATHS == EXPECTED_ST12C_ALLOWED_EXACT_PATHS
-    assert len(registry.ST12C_ALLOWED_EXACT_PATHS) == 41
     assert not any("*" in path for path in registry.ST12C_ALLOWED_EXACT_PATHS)
     assert registry.ST12C_VALIDATION_CONTEXT_EXACT_PATHS == (
         registry.ST12C_ALLOWED_EXACT_PATHS
@@ -499,6 +504,16 @@ def test_st12c_exact_41_path_scope_matches_owner_currentization() -> None:
             | registry.ST12B_ALLOWED_EXACT_PATHS
         )
     )
+    assert ST12C_PREDECESSOR_CURRENTIZATION_PATHS <= (
+        registry.ST12C_ALLOWED_EXACT_PATHS
+    )
+    assert ST12C_PREDECESSOR_CURRENTIZATION_PATHS.isdisjoint(
+        registry.ST12C_VALIDATION_CONTEXT_EXACT_PATHS
+    )
+    for path in ST12C_PREDECESSOR_CURRENTIZATION_PATHS:
+        decision = registry.explain_pr_scope_decision(registry.ST12C_BRANCH, path)
+        assert decision["allowed"] is True
+        assert decision["pr_id"] == "ST12-TRANCHE-C"
     for path in registry.ST12C_VALIDATION_CONTEXT_EXACT_PATHS:
         decision = registry.explain_pr_scope_decision(FIXTURE_BRANCH, path)
         assert decision["allowed"] is True

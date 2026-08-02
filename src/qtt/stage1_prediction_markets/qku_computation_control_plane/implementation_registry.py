@@ -3976,27 +3976,6 @@ def compute_math_25_switch_ope(
     }
 
 
-def _v34_on_price_grid(
-    value: Decimal, ranges: Sequence[Mapping[str, object]]
-) -> bool:
-    for index, row in enumerate(ranges):
-        minimum = exact_decimal(
-            row.get("minimum"), field_name=f"price_ranges[{index}].minimum"
-        )
-        maximum = exact_decimal(
-            row.get("maximum"), field_name=f"price_ranges[{index}].maximum"
-        )
-        step = exact_decimal(
-            row.get("step"), field_name=f"price_ranges[{index}].step"
-        )
-        if minimum > maximum or step <= 0:
-            _fail("price range minimum/maximum/step is invalid")
-        if minimum <= value <= maximum:
-            with localcontext(decimal_context_v1()):
-                return (value - minimum) % step == 0
-    return False
-
-
 def compute_math_36_kalshi_binary_book_transform(
     yes_bids: Sequence[DecimalInput],
     no_bids: Sequence[DecimalInput],
@@ -4006,53 +3985,36 @@ def compute_math_36_kalshi_binary_book_transform(
     book_state: str,
     price_ranges: Sequence[Mapping[str, object]],
 ) -> dict[str, object]:
-    if (
-        isinstance(book_sequence, bool)
-        or not isinstance(book_sequence, int)
-        or isinstance(expected_sequence, bool)
-        or not isinstance(expected_sequence, int)
-        or book_sequence != expected_sequence
-        or book_state != "CURRENT_CONTIGUOUS_SNAPSHOT_PLUS_DELTAS"
-    ):
-        _fail("Kalshi book must be current, contiguous, and sequence-exact")
-    yes = tuple(
-        exact_decimal(value, field_name=f"yes_bids[{index}]")
-        for index, value in enumerate(_v34_list(yes_bids, "yes_bids"))
+    ranges = tuple(
+        ActivePriceGridRangeV1(
+            minimum=row.get("minimum"),
+            maximum=row.get("maximum"),
+            step=row.get("step"),
+        )
+        for index, raw_row in enumerate(_v34_list(price_ranges, "price_ranges"))
+        for row in (_v34_mapping(raw_row, f"price_ranges[{index}]"),)
     )
-    no = tuple(
-        exact_decimal(value, field_name=f"no_bids[{index}]")
-        for index, value in enumerate(_v34_list(no_bids, "no_bids"))
+    snapshot = BinaryBookSnapshotV1(
+        snapshot_ref=f"PREDECESSOR_COMPATIBILITY::MATH-36::{book_sequence}",
+        sequence_ref=f"PREDECESSOR_COMPATIBILITY::SEQUENCE::{book_sequence}",
+        source_binding_ref="PREDECESSOR_IMPLEMENTATION_REGISTRY::MATH-36",
+        unit="DECLARED_PAYOUT_UNIT",
+        basis="BINARY_CONTRACT_PAYOUT",
+        yes_bids=tuple(_v34_list(yes_bids, "yes_bids")),
+        no_bids=tuple(_v34_list(no_bids, "no_bids")),
+        payout=payout,
+        book_sequence=book_sequence,
+        expected_sequence=expected_sequence,
+        book_state=book_state,
+        active_price_grid_ranges=ranges,
     )
-    payout_value = exact_decimal(payout, field_name="payout")
-    if payout_value <= 0:
-        _fail("payout must be positive")
-    ranges = [
-        _v34_mapping(row, f"price_ranges[{index}]")
-        for index, row in enumerate(_v34_list(price_ranges, "price_ranges"))
-    ]
-    if any(
-        value < 0
-        or value > payout_value
-        or not _v34_on_price_grid(value, ranges)
-        for value in (*yes, *no)
-    ):
-        _fail("book price is outside the active market-specific grid")
-    best_yes = max(yes)
-    best_no = max(no)
-    with localcontext(decimal_context_v1()):
-        yes_ask = payout_value - best_no
-        no_ask = payout_value - best_yes
-    if (
-        not _v34_on_price_grid(yes_ask, ranges)
-        or not _v34_on_price_grid(no_ask, ranges)
-    ):
-        _fail("derived complements are outside the active price grid")
+    touches = binary_book_implied_asks_v1(snapshot=snapshot)
     return {
-        "best_yes_bid": best_yes,
-        "best_no_bid": best_no,
-        "derived_yes_ask": yes_ask,
-        "derived_no_ask": no_ask,
-        "book_sequence": book_sequence,
+        "best_yes_bid": snapshot.yes_bids[-1],
+        "best_no_bid": snapshot.no_bids[-1],
+        "derived_yes_ask": touches.yes_implied_ask,
+        "derived_no_ask": touches.no_implied_ask,
+        "book_sequence": touches.book_sequence,
     }
 
 
@@ -5061,7 +5023,12 @@ if (
 
 # Tranche-C overlay.  IMPLEMENTATION_REGISTRY intentionally remains the exact
 # 30-row v3.4 compatibility view consumed by the existing public surface.
-from .economic_math import TRANCHE_C_MATH_SPECIFICATIONS
+from .economic_math import (
+    ActivePriceGridRangeV1,
+    BinaryBookSnapshotV1,
+    TRANCHE_C_MATH_SPECIFICATIONS,
+    binary_book_implied_asks_v1,
+)
 
 
 _ST12C_FORMULAS = {
@@ -5098,11 +5065,7 @@ _ST12C_FAMILIES = {
 
 def _st12c_record(math_spec_id: str) -> MathImplementationRecordV1:
     specification = TRANCHE_C_MATH_SPECIFICATIONS[math_spec_id]
-    implementation = (
-        IMPLEMENTATION_REGISTRY["MATH-36"].callable
-        if math_spec_id == "MATH-36"
-        else specification.implementation
-    )
+    implementation = specification.implementation
     return MathImplementationRecordV1(
         contract=ComputationImplementationV1(
             implementation_id=f"qku/economic_math.py::{math_spec_id}::ST12C-CURRENTIZED-1.0",

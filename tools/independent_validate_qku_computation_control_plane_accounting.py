@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import ast
 import base64
+from collections import Counter
 from decimal import Context, Decimal, ROUND_HALF_EVEN, localcontext
 import json
 from pathlib import Path
@@ -105,6 +106,138 @@ def _source_safety(failures: list[str]) -> None:
         failures.append("a prohibited historical production path exists")
 
 
+def _class_and_function_names(path: Path) -> tuple[set[str], set[str]]:
+    tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+    return (
+        {node.name for node in tree.body if isinstance(node, ast.ClassDef)},
+        {node.name for node in tree.body if isinstance(node, ast.FunctionDef)},
+    )
+
+
+def _semantic_repair_closure(
+    failures: list[str], policies: tuple[dict[str, object], ...]
+) -> None:
+    rollback_classes, rollback_functions = _class_and_function_names(PACKAGE / "rollback.py")
+    if "ReversalHistoryViewV1" not in rollback_classes or "validate_reversal_bundle_against_history_v1" not in rollback_functions:
+        failures.append("persisted reversal history has no single typed semantic owner")
+    for filename, class_name in (
+        ("persistence.py", "PersistenceAdapterV1"),
+        ("persistence.py", "InMemoryPersistenceAdapterV1"),
+        ("sqlite_reference.py", "SQLiteReferenceAdapterV1"),
+    ):
+        tree = ast.parse((PACKAGE / filename).read_text(encoding="utf-8"), filename=filename)
+        owner = next(
+            (node for node in tree.body if isinstance(node, ast.ClassDef) and node.name == class_name),
+            None,
+        )
+        if owner is None or "load_committed_reversal_history" not in {
+            node.name for node in owner.body if isinstance(node, ast.FunctionDef)
+        }:
+            failures.append(f"{class_name} lacks the exact committed reversal-history query")
+    transaction_tree = ast.parse(
+        (PACKAGE / "transaction.py").read_text(encoding="utf-8"),
+        filename="transaction.py",
+    )
+    transaction_calls = {
+        node.func.attr
+        for node in ast.walk(transaction_tree)
+        if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
+    } | {
+        node.func.id
+        for node in ast.walk(transaction_tree)
+        if isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
+    }
+    if not {
+        "load_committed_reversal_history",
+        "validate_reversal_bundle_against_history_v1",
+    } <= transaction_calls:
+        failures.append("unit of work does not enforce persisted reversal history")
+
+    sqlite_tree = ast.parse(
+        (PACKAGE / "sqlite_reference.py").read_text(encoding="utf-8"),
+        filename="sqlite_reference.py",
+    )
+    public_sqlite = any(
+        isinstance(node, ast.Import)
+        and any(alias.name == "sqlite3" for alias in node.names)
+        for node in sqlite_tree.body
+    )
+    private_sqlite = any(
+        isinstance(node, ast.ImportFrom) and node.module == "_sqlite3"
+        for node in sqlite_tree.body
+    )
+    if not public_sqlite or private_sqlite:
+        failures.append("SQLite reference adapter does not use the public sqlite3 module exclusively")
+
+    parameter_classes, _ = _class_and_function_names(PACKAGE / "parameter_policy.py")
+    required_parameter_classes = {
+        "TrancheCParameterPolicyClassV1",
+        "TrancheCParameterEvidenceV1",
+        "TrancheCParameterAdmissibilityReceiptV1",
+    }
+    if not required_parameter_classes <= parameter_classes:
+        failures.append("centralized typed parameter admissibility contract is incomplete")
+    independently_classified: list[str] = []
+    for row in policies:
+        applicability = row.get("applicability_state")
+        resolution = row.get("effective_resolution_class")
+        if applicability == "DORMANT_FUTURE_MARKET_PRESERVED_FAIL_CLOSED":
+            policy_class = "NO_MACHINE_VERIFIABLE_OVERRIDE"
+        elif applicability == "SOURCE_BOUND_MUTABLE_VALUE":
+            policy_class = "SOURCE_OR_RUNTIME_BOUND"
+        elif applicability == "REFERENCE_SEED_REQUIRES_CONTEXT_AND_OWNER_BINDING":
+            policy_class = {
+                "RISK_POLICY_DERIVED": "CALIBRATION_REQUIRED",
+                "STATIC_NUMERIC_OR_OWNER_EDIT": "BOUNDED_NUMERIC",
+                "STATIC_NUMERIC": "FIXED_SINGLETON_NUMERIC",
+            }.get(resolution, "UNSUPPORTED")
+        elif resolution == "STATIC_MAP_REFERENCE":
+            policy_class = "TYPED_STRUCTURAL"
+        elif resolution in {
+            "STATIC_ENUM", "STATIC_RULE", "STATIC_FORMULA_RULE",
+            "STATIC_ENUM_OR_RULE", "FORMULA", "STATIC_POINTER_OR_CONNECTOR_RULE",
+            "STATIC_ENUM_OR_CONNECTOR_RULE",
+        }:
+            policy_class = "FIXED_SYMBOLIC_OR_ENUM"
+        else:
+            policy_class = "UNSUPPORTED"
+        independently_classified.append(policy_class)
+    expected_counts = {
+        "FIXED_SYMBOLIC_OR_ENUM": 59,
+        "FIXED_SINGLETON_NUMERIC": 1,
+        "BOUNDED_NUMERIC": 1,
+        "TYPED_STRUCTURAL": 1,
+        "SOURCE_OR_RUNTIME_BOUND": 2,
+        "CALIBRATION_REQUIRED": 2,
+        "NO_MACHINE_VERIFIABLE_OVERRIDE": 14,
+    }
+    if Counter(independently_classified) != Counter(expected_counts):
+        failures.append("independent 80-policy admissibility classification is not exact")
+
+    registry_tree = ast.parse(
+        (PACKAGE / "implementation_registry.py").read_text(encoding="utf-8"),
+        filename="implementation_registry.py",
+    )
+    compatibility = next(
+        node
+        for node in registry_tree.body
+        if isinstance(node, ast.FunctionDef)
+        and node.name == "compute_math_36_kalshi_binary_book_transform"
+    )
+    canonical_calls = [
+        node
+        for node in ast.walk(compatibility)
+        if isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id == "binary_book_implied_asks_v1"
+    ]
+    if len(canonical_calls) != 1 or any(
+        isinstance(node, ast.BinOp) and isinstance(node.op, ast.Sub)
+        for node in ast.walk(compatibility)
+    ):
+        failures.append("MATH-36 predecessor route is not a delegation-only adapter")
+
+
 def main() -> int:
     failures: list[str] = []
     _source_safety(failures)
@@ -128,6 +261,7 @@ def main() -> int:
         failures.append("oracle/vector identities are not MATH-26..38 exactly")
     if any(row.get("production_implementation_import_allowed") is not False for row in (*oracles, *vectors)):
         failures.append("oracle/vector production-import separation failed")
+    _semantic_repair_closure(failures, policies)
     actual = _golden_results()
     expected = {
         "MATH-26": Decimal(".15"), "MATH-27": Decimal(".20"), "MATH-28": Decimal(".10"),

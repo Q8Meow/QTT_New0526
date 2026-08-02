@@ -4,8 +4,10 @@
 from __future__ import annotations
 
 import ast
+from dataclasses import dataclass
 from pathlib import Path
 import sys
+from types import MappingProxyType
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -34,6 +36,30 @@ FORBIDDEN_CALL_NAMES = {
     "serve_forever",
     "start",
 }
+
+
+@dataclass(frozen=True, slots=True)
+class RuntimeTopologyExceptionV1:
+    """One exact non-production standard-library runtime exception."""
+
+    file_name: str
+    allowed_import: str
+    allowed_qualified_call: str
+    adapter_class_name: str
+    production_marker_name: str
+
+
+RUNTIME_TOPOLOGY_EXCEPTIONS = MappingProxyType(
+    {
+        "sqlite_reference.py": RuntimeTopologyExceptionV1(
+            file_name="sqlite_reference.py",
+            allowed_import="sqlite3",
+            allowed_qualified_call="sqlite3.connect",
+            adapter_class_name="SQLiteReferenceAdapterV1",
+            production_marker_name="is_production_adapter",
+        )
+    }
+)
 COMMON_REQUEST_FIELDS = (
     ("request_id", "str"),
     ("operation_name", "CertifiedOperationNameV1"),
@@ -329,31 +355,133 @@ def _parse_operation_rows(tree: ast.Module) -> tuple[tuple[object, ...], ...]:
     return tuple(rows)
 
 
+def _qualified_callable_name(node: ast.expr) -> str:
+    """Return the complete statically qualified name for a call target."""
+
+    if isinstance(node, ast.Name):
+        return node.id
+    if isinstance(node, ast.Attribute):
+        prefix = _qualified_callable_name(node.value)
+        return f"{prefix}.{node.attr}" if prefix else node.attr
+    return ""
+
+
+def _has_exact_false_marker(
+    tree: ast.Module,
+    *,
+    class_name: str,
+    marker_name: str,
+) -> bool:
+    matching_classes = tuple(
+        node
+        for node in tree.body
+        if isinstance(node, ast.ClassDef) and node.name == class_name
+    )
+    if len(matching_classes) != 1:
+        return False
+    marker_values: list[ast.expr] = []
+    for statement in matching_classes[0].body:
+        if isinstance(statement, ast.Assign) and any(
+            isinstance(target, ast.Name) and target.id == marker_name
+            for target in statement.targets
+        ):
+            marker_values.append(statement.value)
+        elif (
+            isinstance(statement, ast.AnnAssign)
+            and isinstance(statement.target, ast.Name)
+            and statement.target.id == marker_name
+        ):
+            marker_values.append(statement.value)
+    return (
+        len(marker_values) == 1
+        and isinstance(marker_values[0], ast.Constant)
+        and marker_values[0].value is False
+    )
+
+
+def _runtime_topology_failures(
+    file_name: str,
+    tree: ast.Module,
+) -> tuple[str, ...]:
+    policy = RUNTIME_TOPOLOGY_EXCEPTIONS.get(file_name)
+    failures: list[str] = []
+    permitted_import_count = 0
+    permitted_call_count = 0
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            for alias in node.names:
+                root = alias.name.split(".", 1)[0]
+                if root not in FORBIDDEN_IMPORT_ROOTS:
+                    continue
+                is_exact_exception = (
+                    policy is not None
+                    and len(node.names) == 1
+                    and alias.name == policy.allowed_import
+                    and alias.asname is None
+                )
+                if is_exact_exception:
+                    permitted_import_count += 1
+                else:
+                    failures.append(f"runtime import {alias.name}")
+        elif isinstance(node, ast.ImportFrom) and node.module:
+            root = node.module.split(".", 1)[0]
+            if root in FORBIDDEN_IMPORT_ROOTS:
+                failures.append(f"runtime import {node.module}")
+        elif isinstance(node, ast.Call):
+            qualified_name = _qualified_callable_name(node.func)
+            is_exact_exception = (
+                policy is not None
+                and qualified_name == policy.allowed_qualified_call
+            )
+            if is_exact_exception:
+                permitted_call_count += 1
+                continue
+            terminal_name = qualified_name.rsplit(".", 1)[-1]
+            if terminal_name in FORBIDDEN_CALL_NAMES:
+                failures.append(f"runtime call {qualified_name or terminal_name}")
+    if policy is not None:
+        if permitted_import_count != 1:
+            failures.append(
+                f"reference exception requires exactly one import {policy.allowed_import}"
+            )
+        if permitted_call_count != 1:
+            failures.append(
+                "reference exception requires exactly one call "
+                f"{policy.allowed_qualified_call}"
+            )
+        if not _has_exact_false_marker(
+            tree,
+            class_name=policy.adapter_class_name,
+            marker_name=policy.production_marker_name,
+        ):
+            failures.append(
+                f"{policy.adapter_class_name}.{policy.production_marker_name} "
+                "must be literal False"
+            )
+    return tuple(failures)
+
+
+def validate_runtime_topology_source(
+    *,
+    file_name: str,
+    source: str,
+) -> tuple[str, ...]:
+    """Validate a source fragment against the exact centralized runtime policy."""
+
+    tree = ast.parse(source, filename=file_name)
+    return _runtime_topology_failures(file_name, tree)
+
+
 def main() -> int:
     failures: list[str] = []
     parsed: dict[str, ast.Module] = {}
     for path in sorted(PACKAGE.glob("*.py"), key=lambda item: item.name):
         tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
         parsed[path.name] = tree
-        for node in ast.walk(tree):
-            if isinstance(node, ast.Import):
-                roots = {alias.name.split(".", 1)[0] for alias in node.names}
-                if roots & FORBIDDEN_IMPORT_ROOTS:
-                    failures.append(f"{path.name}: runtime import {sorted(roots)}")
-            elif isinstance(node, ast.ImportFrom) and node.module:
-                root = node.module.split(".", 1)[0]
-                if root in FORBIDDEN_IMPORT_ROOTS:
-                    failures.append(f"{path.name}: runtime import {root}")
-            elif isinstance(node, ast.Call):
-                name = (
-                    node.func.id
-                    if isinstance(node.func, ast.Name)
-                    else node.func.attr
-                    if isinstance(node.func, ast.Attribute)
-                    else ""
-                )
-                if name in FORBIDDEN_CALL_NAMES:
-                    failures.append(f"{path.name}: runtime call {name}")
+        failures.extend(
+            f"{path.name}: {failure}"
+            for failure in _runtime_topology_failures(path.name, tree)
+        )
     validation = parsed.get("validation.py")
     models = parsed.get("models.py")
     if validation is None or models is None:

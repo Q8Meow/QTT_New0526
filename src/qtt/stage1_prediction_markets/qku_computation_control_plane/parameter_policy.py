@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 import base64
 from decimal import Decimal
+from enum import StrEnum
 import json
 import re
 from types import MappingProxyType
@@ -15714,11 +15715,148 @@ ST12C_CUMULATIVE_PARAMETER_POLICIES: Mapping[str, object] = MappingProxyType(
 
 
 @dataclass(frozen=True, slots=True)
+class TrancheCParameterEvidenceV1:
+    evidence_class: "TrancheCParameterEvidenceClassV1"
+    evidence_ref: str
+    source_or_binding_refs: tuple[str, ...]
+    declared_unit_or_basis: str
+    constraint_refs: tuple[str, ...]
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.evidence_class, TrancheCParameterEvidenceClassV1):
+            raise ParameterPolicyError(
+                ReasonCode.PARAMETER_BINDING_MISMATCH,
+                "Tranche-C parameter evidence class must be typed",
+            )
+        if any(
+            not isinstance(value, str) or not value.strip()
+            for value in (self.evidence_ref, self.declared_unit_or_basis)
+        ):
+            raise ParameterPolicyError(
+                ReasonCode.PARAMETER_BINDING_MISMATCH,
+                "Tranche-C parameter evidence identity and unit are required",
+            )
+        for name in ("source_or_binding_refs", "constraint_refs"):
+            refs = getattr(self, name)
+            if (
+                not isinstance(refs, tuple)
+                or not refs
+                or any(not isinstance(ref, str) or not ref for ref in refs)
+                or len(refs) != len(set(refs))
+            ):
+                raise ParameterPolicyError(
+                    ReasonCode.PARAMETER_BINDING_MISMATCH,
+                    f"Tranche-C parameter evidence {name} must be exact and unique",
+                )
+
+
+class TrancheCParameterEvidenceClassV1(StrEnum):
+    DECLARED_TYPED_VALUE = "DECLARED_TYPED_VALUE"
+    SOURCE_OR_RUNTIME_BINDING = "SOURCE_OR_RUNTIME_BINDING"
+    CALIBRATED_ARTIFACT = "CALIBRATED_ARTIFACT"
+
+
+class TrancheCParameterPolicyClassV1(StrEnum):
+    FIXED_SYMBOLIC_OR_ENUM = "FIXED_SYMBOLIC_OR_ENUM"
+    FIXED_SINGLETON_NUMERIC = "FIXED_SINGLETON_NUMERIC"
+    BOUNDED_NUMERIC = "BOUNDED_NUMERIC"
+    TYPED_STRUCTURAL = "TYPED_STRUCTURAL"
+    SOURCE_OR_RUNTIME_BOUND = "SOURCE_OR_RUNTIME_BOUND"
+    CALIBRATION_REQUIRED = "CALIBRATION_REQUIRED"
+    NO_MACHINE_VERIFIABLE_OVERRIDE = "NO_MACHINE_VERIFIABLE_OVERRIDE"
+
+
+_FIXED_SYMBOLIC_RESOLUTION_CLASSES = frozenset(
+    {
+        "STATIC_ENUM",
+        "STATIC_RULE",
+        "STATIC_FORMULA_RULE",
+        "STATIC_ENUM_OR_RULE",
+        "FORMULA",
+        "STATIC_POINTER_OR_CONNECTOR_RULE",
+        "STATIC_ENUM_OR_CONNECTOR_RULE",
+    }
+)
+
+
+def _derive_tranche_c_policy_class_v1(
+    policy: TrancheCParameterPolicyV1,
+) -> TrancheCParameterPolicyClassV1:
+    if policy.applicability_state == "DORMANT_FUTURE_MARKET_PRESERVED_FAIL_CLOSED":
+        return TrancheCParameterPolicyClassV1.NO_MACHINE_VERIFIABLE_OVERRIDE
+    if policy.applicability_state == "SOURCE_BOUND_MUTABLE_VALUE":
+        if policy.resolution_class not in {"STATIC_ENUM", "STATIC_ENUM_OR_POINTER"}:
+            raise ParameterPolicyError(
+                ReasonCode.PARAMETER_OUT_OF_POLICY,
+                f"{policy.parameter_id} has unsupported source-bound constraint syntax",
+            )
+        return TrancheCParameterPolicyClassV1.SOURCE_OR_RUNTIME_BOUND
+    if policy.applicability_state == "REFERENCE_SEED_REQUIRES_CONTEXT_AND_OWNER_BINDING":
+        if policy.resolution_class == "RISK_POLICY_DERIVED":
+            return TrancheCParameterPolicyClassV1.CALIBRATION_REQUIRED
+        if policy.resolution_class == "STATIC_NUMERIC_OR_OWNER_EDIT":
+            return TrancheCParameterPolicyClassV1.BOUNDED_NUMERIC
+        if policy.resolution_class == "STATIC_NUMERIC":
+            return TrancheCParameterPolicyClassV1.FIXED_SINGLETON_NUMERIC
+        raise ParameterPolicyError(
+            ReasonCode.PARAMETER_OUT_OF_POLICY,
+            f"{policy.parameter_id} has unsupported reference-seed constraint syntax",
+        )
+    if policy.resolution_class == "STATIC_MAP_REFERENCE":
+        return TrancheCParameterPolicyClassV1.TYPED_STRUCTURAL
+    if policy.resolution_class in _FIXED_SYMBOLIC_RESOLUTION_CLASSES:
+        return TrancheCParameterPolicyClassV1.FIXED_SYMBOLIC_OR_ENUM
+    raise ParameterPolicyError(
+        ReasonCode.PARAMETER_OUT_OF_POLICY,
+        f"{policy.parameter_id} has no machine-verifiable admissibility class",
+    )
+
+
+TRANCHE_C_PARAMETER_ADMISSIBILITY_CLASSES: Mapping[
+    str, TrancheCParameterPolicyClassV1
+] = MappingProxyType(
+    {
+        parameter_id: _derive_tranche_c_policy_class_v1(policy)
+        for parameter_id, policy in TRANCHE_C_PARAMETER_POLICIES.items()
+    }
+)
+
+
+@dataclass(frozen=True, slots=True)
+class TrancheCParameterAdmissibilityReceiptV1:
+    parameter_id: str
+    policy_class: TrancheCParameterPolicyClassV1
+    canonical_normalized_value: object
+    authority_ref: str
+    source_or_binding_refs: tuple[str, ...]
+    constraint_refs_applied: tuple[str, ...]
+    terminal_state: str = "PASS"
+
+    def __post_init__(self) -> None:
+        if (
+            not self.parameter_id
+            or not isinstance(self.policy_class, TrancheCParameterPolicyClassV1)
+            or not self.authority_ref
+            or not self.source_or_binding_refs
+            or not self.constraint_refs_applied
+            or self.terminal_state != "PASS"
+        ):
+            raise ParameterPolicyError(
+                ReasonCode.PARAMETER_OUT_OF_POLICY,
+                "Tranche-C admissibility receipt is incomplete or nonterminal",
+            )
+        _reject_nonfinite_parameter_value(
+            self.parameter_id, self.canonical_normalized_value
+        )
+
+
+@dataclass(frozen=True, slots=True)
 class TrancheCParameterResolutionV1:
     parameter_id: str
     value_or_rule: object
     authority_ref: str
     application_binding: TrancheCParameterApplicationBindingV1
+    admissibility_receipt: TrancheCParameterAdmissibilityReceiptV1
 
 
 @dataclass(frozen=True, slots=True)
@@ -15728,6 +15866,8 @@ class TrancheCExplicitParameterValueV1:
     canonical_owner: str
     authority_ref: str
     source_packet_ref: str
+    declared_unit_or_basis: str | None = None
+    evidence: TrancheCParameterEvidenceV1 | None = None
 
     def __post_init__(self) -> None:
         if any(
@@ -15743,6 +15883,285 @@ class TrancheCExplicitParameterValueV1:
                 ReasonCode.PARAMETER_OWNER_MISSING,
                 "explicit Tranche-C parameter value requires complete owner and packet custody",
             )
+        if self.declared_unit_or_basis is not None and (
+            not isinstance(self.declared_unit_or_basis, str)
+            or not self.declared_unit_or_basis.strip()
+        ):
+            raise ParameterPolicyError(
+                ReasonCode.PARAMETER_BINDING_MISMATCH,
+                "explicit Tranche-C parameter unit/basis must be nonempty",
+            )
+        if self.evidence is not None and not isinstance(
+            self.evidence, TrancheCParameterEvidenceV1
+        ):
+            raise ParameterPolicyError(
+                ReasonCode.PARAMETER_BINDING_MISMATCH,
+                "explicit Tranche-C parameter evidence must be typed",
+            )
+
+
+_BOUNDED_NUMERIC_CONSTRAINT = re.compile(
+    r"^(?P<unit>.+?)\s+(?P<operator>>=|>|<=|<)\s+"
+    r"(?P<bound>[+-]?(?:\d+(?:\.\d*)?|\.\d+))$"
+)
+
+
+def _policy_refs_v1(policy: TrancheCParameterPolicyV1) -> tuple[str, ...]:
+    refs = policy.raw.get("effective_source_state_refs")
+    if (
+        not isinstance(refs, tuple)
+        or not refs
+        or any(not isinstance(ref, str) or not ref for ref in refs)
+    ):
+        raise ParameterPolicyError(
+            ReasonCode.PARAMETER_OUT_OF_POLICY,
+            f"{policy.parameter_id} has incomplete frozen source refs",
+        )
+    return refs
+
+
+def _constraint_refs_v1(policy: TrancheCParameterPolicyV1) -> tuple[str, ...]:
+    bounded = policy.raw.get("effective_bounded_search_space_or_fit_constraint")
+    unit = policy.raw.get("effective_unit_or_basis")
+    if not isinstance(bounded, str) or not bounded or not isinstance(unit, str) or not unit:
+        raise ParameterPolicyError(
+            ReasonCode.PARAMETER_OUT_OF_POLICY,
+            f"{policy.parameter_id} has incomplete frozen constraints",
+        )
+    return (policy.reference_range_or_constraint, bounded, unit)
+
+
+def _canonical_static_map_v1(policy: TrancheCParameterPolicyV1) -> Mapping[str, str]:
+    text = policy.day1_seed_or_resolution_rule.strip()
+    if not text.startswith("{") or not text.endswith("}"):
+        raise ParameterPolicyError(
+            ReasonCode.PARAMETER_OUT_OF_POLICY,
+            f"{policy.parameter_id} has unsupported structural constraint syntax",
+        )
+    pairs: dict[str, str] = {}
+    for item in text[1:-1].split(","):
+        parts = tuple(part.strip() for part in item.split("->"))
+        if (
+            len(parts) != 2
+            or not parts[0]
+            or not parts[1]
+            or parts[0] in pairs
+        ):
+            raise ParameterPolicyError(
+                ReasonCode.PARAMETER_OUT_OF_POLICY,
+                f"{policy.parameter_id} has unsupported structural constraint syntax",
+            )
+        pairs[parts[0]] = parts[1]
+    if not pairs:
+        raise ParameterPolicyError(
+            ReasonCode.PARAMETER_OUT_OF_POLICY,
+            f"{policy.parameter_id} has an empty structural contract",
+        )
+    return MappingProxyType(dict(sorted(pairs.items())))
+
+
+def _exact_numeric_v1(parameter_id: str, value: object) -> Decimal:
+    if isinstance(value, bool) or not isinstance(value, Decimal | int):
+        raise ParameterPolicyError(
+            ReasonCode.PARAMETER_OUT_OF_POLICY,
+            f"{parameter_id} requires an exact Decimal or integer",
+        )
+    try:
+        numeric = exact_decimal(value, field_name=parameter_id)
+    except NumericDomainError as exc:
+        raise ParameterPolicyError(
+            ReasonCode.PARAMETER_OUT_OF_POLICY,
+            f"{parameter_id} requires a finite exact number",
+        ) from exc
+    if not numeric.is_finite():
+        raise ParameterPolicyError(
+            ReasonCode.PARAMETER_OUT_OF_POLICY,
+            f"{parameter_id} requires a finite exact number",
+        )
+    return numeric
+
+
+def _validate_exact_evidence_v1(
+    *,
+    policy: TrancheCParameterPolicyV1,
+    explicit_value: TrancheCExplicitParameterValueV1,
+    evidence_class: TrancheCParameterEvidenceClassV1,
+) -> TrancheCParameterEvidenceV1:
+    evidence = explicit_value.evidence
+    expected_unit = str(policy.raw["effective_unit_or_basis"])
+    if (
+        not isinstance(evidence, TrancheCParameterEvidenceV1)
+        or evidence.evidence_class is not evidence_class
+        or evidence.evidence_ref != explicit_value.source_packet_ref
+        or evidence.source_or_binding_refs != _policy_refs_v1(policy)
+        or evidence.declared_unit_or_basis != expected_unit
+        or evidence.constraint_refs != _constraint_refs_v1(policy)
+        or explicit_value.declared_unit_or_basis != expected_unit
+    ):
+        raise ParameterPolicyError(
+            ReasonCode.PARAMETER_BINDING_MISMATCH,
+            f"{policy.parameter_id} requires its exact typed evidence binding",
+        )
+    return evidence
+
+
+def _admit_tranche_c_parameter_value_v1(
+    *,
+    policy: TrancheCParameterPolicyV1,
+    binding: TrancheCParameterApplicationBindingV1,
+    explicit_value: TrancheCExplicitParameterValueV1 | None,
+) -> TrancheCParameterAdmissibilityReceiptV1:
+    policy_class = TRANCHE_C_PARAMETER_ADMISSIBILITY_CLASSES[policy.parameter_id]
+    if policy_class is TrancheCParameterPolicyClassV1.NO_MACHINE_VERIFIABLE_OVERRIDE:
+        raise ParameterPolicyError(
+            ReasonCode.OPERATION_BLOCKED,
+            f"{policy.parameter_id} has no machine-verifiable Stage-1 override",
+        )
+    candidate = (
+        policy.day1_seed_or_resolution_rule
+        if explicit_value is None
+        else explicit_value.value
+    )
+    evidence_refs = _policy_refs_v1(policy)
+    if explicit_value is not None:
+        evidence_refs = (explicit_value.source_packet_ref, *evidence_refs)
+
+    if policy_class is TrancheCParameterPolicyClassV1.FIXED_SYMBOLIC_OR_ENUM:
+        if not isinstance(candidate, str) or candidate != policy.day1_seed_or_resolution_rule:
+            raise ParameterPolicyError(
+                ReasonCode.PARAMETER_OUT_OF_POLICY,
+                f"{policy.parameter_id} requires its exact canonical token or rule",
+            )
+        normalized: object = candidate
+    elif policy_class is TrancheCParameterPolicyClassV1.FIXED_SINGLETON_NUMERIC:
+        if explicit_value is None:
+            expected = exact_decimal(
+                policy.day1_seed_or_resolution_rule,
+                field_name=policy.parameter_symbol,
+            )
+            normalized = expected
+        else:
+            expected = exact_decimal(
+                policy.day1_seed_or_resolution_rule,
+                field_name=policy.parameter_symbol,
+            )
+            normalized = _exact_numeric_v1(policy.parameter_id, candidate)
+            if (
+                normalized != expected
+                or explicit_value.declared_unit_or_basis
+                != policy.raw["effective_unit_or_basis"]
+            ):
+                raise ParameterPolicyError(
+                    ReasonCode.PARAMETER_OUT_OF_POLICY,
+                    f"{policy.parameter_id} differs from its exact numeric singleton",
+                )
+    elif policy_class is TrancheCParameterPolicyClassV1.BOUNDED_NUMERIC:
+        match = _BOUNDED_NUMERIC_CONSTRAINT.fullmatch(
+            policy.reference_range_or_constraint.strip()
+        )
+        if match is None or match.group("unit") != policy.raw["effective_unit_or_basis"]:
+            raise ParameterPolicyError(
+                ReasonCode.PARAMETER_OUT_OF_POLICY,
+                f"{policy.parameter_id} has unsupported numeric constraint syntax",
+            )
+        if explicit_value is None:
+            raise ParameterPolicyError(
+                ReasonCode.PARAMETER_OWNER_MISSING,
+                f"{policy.parameter_id} requires an explicit bounded value",
+            )
+        if explicit_value.declared_unit_or_basis != match.group("unit"):
+            raise ParameterPolicyError(
+                ReasonCode.PARAMETER_BINDING_MISMATCH,
+                f"{policy.parameter_id} has the wrong declared unit/basis",
+            )
+        normalized = _exact_numeric_v1(policy.parameter_id, candidate)
+        bound = exact_decimal(match.group("bound"), field_name=policy.parameter_symbol)
+        admitted = {
+            ">=": normalized >= bound,
+            ">": normalized > bound,
+            "<=": normalized <= bound,
+            "<": normalized < bound,
+        }[match.group("operator")]
+        if not admitted:
+            raise ParameterPolicyError(
+                ReasonCode.PARAMETER_OUT_OF_POLICY,
+                f"{policy.parameter_id} is outside its exact numeric boundary",
+            )
+    elif policy_class is TrancheCParameterPolicyClassV1.TYPED_STRUCTURAL:
+        expected_map = _canonical_static_map_v1(policy)
+        if explicit_value is None:
+            normalized = expected_map
+        else:
+            if (
+                not isinstance(candidate, Mapping)
+                or any(
+                    not isinstance(key, str) or not isinstance(value, str)
+                    for key, value in candidate.items()
+                )
+                or dict(candidate) != dict(expected_map)
+            ):
+                raise ParameterPolicyError(
+                    ReasonCode.PARAMETER_OUT_OF_POLICY,
+                    f"{policy.parameter_id} violates its complete typed structure",
+                )
+            normalized = MappingProxyType(dict(sorted(candidate.items())))
+    elif policy_class is TrancheCParameterPolicyClassV1.SOURCE_OR_RUNTIME_BOUND:
+        if explicit_value is None:
+            raise ParameterPolicyError(
+                ReasonCode.PARAMETER_OWNER_MISSING,
+                f"{policy.parameter_id} requires an exact runtime binding",
+            )
+        evidence = _validate_exact_evidence_v1(
+            policy=policy,
+            explicit_value=explicit_value,
+            evidence_class=TrancheCParameterEvidenceClassV1.SOURCE_OR_RUNTIME_BINDING,
+        )
+        if not isinstance(candidate, str):
+            raise ParameterPolicyError(
+                ReasonCode.PARAMETER_OUT_OF_POLICY,
+                f"{policy.parameter_id} requires a canonical source-bound token",
+            )
+        allowed = _simple_enum_values(policy.reference_range_or_constraint)
+        if candidate != policy.day1_seed_or_resolution_rule and candidate not in allowed:
+            raise ParameterPolicyError(
+                ReasonCode.PARAMETER_OUT_OF_POLICY,
+                f"{policy.parameter_id} is outside its source-bound exact set",
+            )
+        normalized = candidate
+        evidence_refs = (evidence.evidence_ref, *evidence.source_or_binding_refs)
+    elif policy_class is TrancheCParameterPolicyClassV1.CALIBRATION_REQUIRED:
+        if explicit_value is None:
+            raise ParameterPolicyError(
+                ReasonCode.PARAMETER_OWNER_MISSING,
+                f"{policy.parameter_id} requires a calibrated artifact",
+            )
+        evidence = _validate_exact_evidence_v1(
+            policy=policy,
+            explicit_value=explicit_value,
+            evidence_class=TrancheCParameterEvidenceClassV1.CALIBRATED_ARTIFACT,
+        )
+        normalized = _exact_numeric_v1(policy.parameter_id, candidate)
+        if normalized < 0:
+            raise ParameterPolicyError(
+                ReasonCode.PARAMETER_OUT_OF_POLICY,
+                f"{policy.parameter_id} calibrated value must be nonnegative",
+            )
+        evidence_refs = (evidence.evidence_ref, *evidence.source_or_binding_refs)
+    else:  # pragma: no cover - import-time closure makes this unreachable
+        raise ParameterPolicyError(
+            ReasonCode.PARAMETER_OUT_OF_POLICY,
+            f"{policy.parameter_id} has unsupported admissibility semantics",
+        )
+
+    frozen_value = _freeze_parameter_value(normalized)
+    return TrancheCParameterAdmissibilityReceiptV1(
+        parameter_id=policy.parameter_id,
+        policy_class=policy_class,
+        canonical_normalized_value=frozen_value,
+        authority_ref=binding.active_stage1_value_authority,
+        source_or_binding_refs=evidence_refs,
+        constraint_refs_applied=_constraint_refs_v1(policy),
+    )
 
 
 def resolve_tranche_c_parameter_v1(
@@ -15777,13 +16196,17 @@ def resolve_tranche_c_parameter_v1(
             ReasonCode.PARAMETER_BINDING_MISMATCH,
             f"{parameter_id} explicit value is outside its exact owner/application binding",
         )
-    value = seed if explicit_value is None else explicit_value.value
-    _reject_nonfinite_parameter_value(parameter_id, value)
+    admissibility = _admit_tranche_c_parameter_value_v1(
+        policy=policy,
+        binding=binding,
+        explicit_value=explicit_value,
+    )
     return TrancheCParameterResolutionV1(
         parameter_id=parameter_id,
-        value_or_rule=_freeze_parameter_value(value),
+        value_or_rule=admissibility.canonical_normalized_value,
         authority_ref=(binding.active_stage1_value_authority if explicit_value is None else explicit_value.authority_ref),
         application_binding=binding,
+        admissibility_receipt=admissibility,
     )
 
 
@@ -15793,6 +16216,11 @@ if (
     or set(TRANCHE_C_PARAMETER_POLICIES) != set(TRANCHE_C_PARAMETER_APPLICATION_BINDINGS)
     or set(TRANCHE_C_PARAMETER_POLICIES) & set(CUMULATIVE_PARAMETER_POLICIES)
     or len(ST12C_CUMULATIVE_PARAMETER_POLICIES) != 559
+    or len(TRANCHE_C_PARAMETER_ADMISSIBILITY_CLASSES) != 80
+    or set(TRANCHE_C_PARAMETER_ADMISSIBILITY_CLASSES)
+    != set(TRANCHE_C_PARAMETER_POLICIES)
+    or set(TRANCHE_C_PARAMETER_ADMISSIBILITY_CLASSES.values())
+    != set(TrancheCParameterPolicyClassV1)
 ):
     raise ParameterPolicyError(
         ReasonCode.PARAMETER_BINDING_MISMATCH,

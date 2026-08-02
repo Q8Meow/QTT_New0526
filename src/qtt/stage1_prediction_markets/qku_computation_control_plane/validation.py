@@ -2150,6 +2150,7 @@ def evaluate_st12c_golden_vector(math_id: str) -> object:
 
     from .context import QuantizationPolicyV1, QuantizationRoundingV1
     from .economic_math import (
+        ActivePriceGridRangeV1,
         BinaryBookSnapshotV1,
         FeeScheduleBindingV1,
         FillQuantityDistributionArtifactV1,
@@ -2209,6 +2210,8 @@ def evaluate_st12c_golden_vector(math_id: str) -> object:
             snapshot=BinaryBookSnapshotV1(
                 "GOLDEN::BOOK", "GOLDEN::SEQUENCE", "GOLDEN::SOURCE", "USD", "PAYOUT",
                 (values["yes_best_bid"],), (values["no_best_bid"],), values["payout"],
+                1, 1, "CURRENT_CONTIGUOUS_SNAPSHOT_PLUS_DELTAS",
+                (ActivePriceGridRangeV1("0.00", "1.00", "0.01"),),
             )
         )
         return {"yes_implied_ask": touches.yes_implied_ask, "no_implied_ask": touches.no_implied_ask}
