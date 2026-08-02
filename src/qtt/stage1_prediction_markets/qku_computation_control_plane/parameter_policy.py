@@ -4,7 +4,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import base64
-from decimal import Decimal
+from datetime import datetime
+from decimal import Decimal, localcontext
 from enum import StrEnum
 import json
 import re
@@ -12,7 +13,7 @@ from types import MappingProxyType
 from typing import Mapping
 import zlib
 
-from .context import exact_decimal
+from .context import decimal_context_v1, exact_decimal, parse_utc
 from .errors import NumericDomainError, ParameterPolicyError, ReasonCode
 
 
@@ -15718,8 +15719,18 @@ ST12C_CUMULATIVE_PARAMETER_POLICIES: Mapping[str, object] = MappingProxyType(
 class TrancheCParameterEvidenceV1:
     evidence_class: "TrancheCParameterEvidenceClassV1"
     evidence_ref: str
+    family_evidence_binding_ref: str
+    value_source_class: str
     source_or_binding_refs: tuple[str, ...]
+    source_currentization_refs: tuple[str, ...]
+    active_scope_ref: str
+    source_epoch_ref: str
+    canonical_owner_ref: str
+    authority_ref: str
     declared_unit_or_basis: str
+    observed_at: datetime | str
+    evaluated_at: datetime | str
+    valid_until: datetime | str
     constraint_refs: tuple[str, ...]
 
     def __post_init__(self) -> None:
@@ -15730,13 +15741,26 @@ class TrancheCParameterEvidenceV1:
             )
         if any(
             not isinstance(value, str) or not value.strip()
-            for value in (self.evidence_ref, self.declared_unit_or_basis)
+            for value in (
+                self.evidence_ref,
+                self.family_evidence_binding_ref,
+                self.value_source_class,
+                self.active_scope_ref,
+                self.source_epoch_ref,
+                self.canonical_owner_ref,
+                self.authority_ref,
+                self.declared_unit_or_basis,
+            )
         ):
             raise ParameterPolicyError(
                 ReasonCode.PARAMETER_BINDING_MISMATCH,
-                "Tranche-C parameter evidence identity and unit are required",
+                "Tranche-C parameter evidence custody is incomplete",
             )
-        for name in ("source_or_binding_refs", "constraint_refs"):
+        for name in (
+            "source_or_binding_refs",
+            "source_currentization_refs",
+            "constraint_refs",
+        ):
             refs = getattr(self, name)
             if (
                 not isinstance(refs, tuple)
@@ -15748,6 +15772,93 @@ class TrancheCParameterEvidenceV1:
                     ReasonCode.PARAMETER_BINDING_MISMATCH,
                     f"Tranche-C parameter evidence {name} must be exact and unique",
                 )
+        observed = parse_utc(self.observed_at, field_name="observed_at")
+        evaluated = parse_utc(self.evaluated_at, field_name="evaluated_at")
+        valid_until = parse_utc(self.valid_until, field_name="valid_until")
+        if observed > evaluated or evaluated >= valid_until:
+            raise ParameterPolicyError(
+                ReasonCode.SOURCE_EPOCH_STALE,
+                "Tranche-C parameter evidence has an invalid validity interval",
+            )
+        object.__setattr__(self, "observed_at", observed)
+        object.__setattr__(self, "evaluated_at", evaluated)
+        object.__setattr__(self, "valid_until", valid_until)
+
+
+@dataclass(frozen=True, slots=True)
+class TrancheCDrawdownCalibrationArtifactV1:
+    calibration_bundle_ref: str
+    approved_sleeve_max_drawdown_budget: Decimal | str | int
+    warning_threshold: Decimal | str | int
+    freeze_threshold: Decimal | str | int
+    canonical_owner_ref: str
+    authority_ref: str
+    active_scope_ref: str
+    source_epoch_ref: str
+    observed_at: datetime | str
+    evaluated_at: datetime | str
+    valid_until: datetime | str
+
+    def __post_init__(self) -> None:
+        for name in (
+            "calibration_bundle_ref",
+            "canonical_owner_ref",
+            "authority_ref",
+            "active_scope_ref",
+            "source_epoch_ref",
+        ):
+            value = getattr(self, name)
+            if not isinstance(value, str) or not value.strip():
+                raise ParameterPolicyError(
+                    ReasonCode.PARAMETER_BINDING_MISMATCH,
+                    f"drawdown calibration {name} is required",
+                )
+        try:
+            budget = exact_decimal(
+                self.approved_sleeve_max_drawdown_budget,
+                field_name="approved_sleeve_max_drawdown_budget",
+            )
+            warning = exact_decimal(
+                self.warning_threshold,
+                field_name="warning_threshold",
+            )
+            freeze = exact_decimal(
+                self.freeze_threshold,
+                field_name="freeze_threshold",
+            )
+        except NumericDomainError as exc:
+            raise ParameterPolicyError(
+                ReasonCode.PARAMETER_OUT_OF_POLICY,
+                "drawdown calibration requires finite exact Decimal values",
+            ) from exc
+        with localcontext(decimal_context_v1()):
+            expected_warning = Decimal("0.50") * budget
+            expected_freeze = Decimal("1.00") * budget
+        if (
+            budget <= 0
+            or warning != expected_warning
+            or freeze != expected_freeze
+            or warning < 0
+            or warning >= freeze
+        ):
+            raise ParameterPolicyError(
+                ReasonCode.PARAMETER_OUT_OF_POLICY,
+                "drawdown calibration does not preserve the exact shared-budget formulas",
+            )
+        observed = parse_utc(self.observed_at, field_name="observed_at")
+        evaluated = parse_utc(self.evaluated_at, field_name="evaluated_at")
+        valid_until = parse_utc(self.valid_until, field_name="valid_until")
+        if observed > evaluated or evaluated >= valid_until:
+            raise ParameterPolicyError(
+                ReasonCode.SOURCE_EPOCH_STALE,
+                "drawdown calibration has an invalid validity interval",
+            )
+        object.__setattr__(self, "approved_sleeve_max_drawdown_budget", budget)
+        object.__setattr__(self, "warning_threshold", warning)
+        object.__setattr__(self, "freeze_threshold", freeze)
+        object.__setattr__(self, "observed_at", observed)
+        object.__setattr__(self, "evaluated_at", evaluated)
+        object.__setattr__(self, "valid_until", valid_until)
 
 
 class TrancheCParameterEvidenceClassV1(StrEnum):
@@ -15831,6 +15942,18 @@ class TrancheCParameterAdmissibilityReceiptV1:
     source_or_binding_refs: tuple[str, ...]
     constraint_refs_applied: tuple[str, ...]
     terminal_state: str = "PASS"
+    evidence_ref: str | None = None
+    evidence_class: TrancheCParameterEvidenceClassV1 | None = None
+    family_evidence_binding_ref: str | None = None
+    value_source_class: str | None = None
+    source_currentization_refs: tuple[str, ...] = ()
+    active_scope_ref: str | None = None
+    source_epoch_ref: str | None = None
+    observed_at: datetime | str | None = None
+    evaluated_at: datetime | str | None = None
+    resolution_at: datetime | str | None = None
+    valid_until: datetime | str | None = None
+    calibration_bundle_ref: str | None = None
 
     def __post_init__(self) -> None:
         if (
@@ -15848,6 +15971,108 @@ class TrancheCParameterAdmissibilityReceiptV1:
         _reject_nonfinite_parameter_value(
             self.parameter_id, self.canonical_normalized_value
         )
+        for name in ("source_or_binding_refs", "constraint_refs_applied"):
+            refs = getattr(self, name)
+            if (
+                not isinstance(refs, tuple)
+                or not refs
+                or any(not isinstance(ref, str) or not ref for ref in refs)
+                or len(refs) != len(set(refs))
+            ):
+                raise ParameterPolicyError(
+                    ReasonCode.PARAMETER_OUT_OF_POLICY,
+                    f"Tranche-C admissibility receipt {name} must be exact and unique",
+                )
+        dynamic = self.policy_class in {
+            TrancheCParameterPolicyClassV1.SOURCE_OR_RUNTIME_BOUND,
+            TrancheCParameterPolicyClassV1.CALIBRATION_REQUIRED,
+        }
+        dynamic_identities = (
+            self.evidence_ref,
+            self.family_evidence_binding_ref,
+            self.value_source_class,
+            self.active_scope_ref,
+            self.source_epoch_ref,
+        )
+        dynamic_times = (
+            self.observed_at,
+            self.evaluated_at,
+            self.resolution_at,
+            self.valid_until,
+        )
+        if dynamic:
+            expected_evidence_class = (
+                TrancheCParameterEvidenceClassV1.SOURCE_OR_RUNTIME_BINDING
+                if self.policy_class
+                is TrancheCParameterPolicyClassV1.SOURCE_OR_RUNTIME_BOUND
+                else TrancheCParameterEvidenceClassV1.CALIBRATED_ARTIFACT
+            )
+            if (
+                self.evidence_class is not expected_evidence_class
+                or any(
+                    not isinstance(value, str) or not value.strip()
+                    for value in dynamic_identities
+                )
+                or not isinstance(self.source_currentization_refs, tuple)
+                or not self.source_currentization_refs
+                or any(
+                    not isinstance(ref, str) or not ref
+                    for ref in self.source_currentization_refs
+                )
+                or len(self.source_currentization_refs)
+                != len(set(self.source_currentization_refs))
+                or any(value is None for value in dynamic_times)
+            ):
+                raise ParameterPolicyError(
+                    ReasonCode.PARAMETER_OUT_OF_POLICY,
+                    "dynamic Tranche-C admissibility receipt is incomplete",
+                )
+            observed = parse_utc(self.observed_at, field_name="observed_at")  # type: ignore[arg-type]
+            evaluated = parse_utc(self.evaluated_at, field_name="evaluated_at")  # type: ignore[arg-type]
+            resolution = parse_utc(self.resolution_at, field_name="resolution_at")  # type: ignore[arg-type]
+            valid_until = parse_utc(self.valid_until, field_name="valid_until")  # type: ignore[arg-type]
+            if not observed <= evaluated <= resolution < valid_until:
+                raise ParameterPolicyError(
+                    ReasonCode.SOURCE_EPOCH_STALE,
+                    "dynamic Tranche-C admissibility receipt is outside its evidence interval",
+                )
+            if (
+                self.policy_class
+                is TrancheCParameterPolicyClassV1.CALIBRATION_REQUIRED
+                and (
+                    not isinstance(self.calibration_bundle_ref, str)
+                    or not self.calibration_bundle_ref.strip()
+                    or self.calibration_bundle_ref != self.evidence_ref
+                )
+            ):
+                raise ParameterPolicyError(
+                    ReasonCode.PARAMETER_OUT_OF_POLICY,
+                    "calibrated admissibility receipt requires its bundle identity",
+                )
+            if (
+                self.policy_class
+                is TrancheCParameterPolicyClassV1.SOURCE_OR_RUNTIME_BOUND
+                and self.calibration_bundle_ref is not None
+            ):
+                raise ParameterPolicyError(
+                    ReasonCode.PARAMETER_OUT_OF_POLICY,
+                    "source-bound admissibility receipt cannot claim calibration custody",
+                )
+            object.__setattr__(self, "observed_at", observed)
+            object.__setattr__(self, "evaluated_at", evaluated)
+            object.__setattr__(self, "resolution_at", resolution)
+            object.__setattr__(self, "valid_until", valid_until)
+        elif (
+            any(value is not None for value in dynamic_identities)
+            or self.evidence_class is not None
+            or self.source_currentization_refs
+            or any(value is not None for value in dynamic_times)
+            or self.calibration_bundle_ref is not None
+        ):
+            raise ParameterPolicyError(
+                ReasonCode.PARAMETER_OUT_OF_POLICY,
+                "static Tranche-C admissibility receipt cannot claim dynamic evidence",
+            )
 
 
 @dataclass(frozen=True, slots=True)
@@ -15868,6 +16093,7 @@ class TrancheCExplicitParameterValueV1:
     source_packet_ref: str
     declared_unit_or_basis: str | None = None
     evidence: TrancheCParameterEvidenceV1 | None = None
+    drawdown_calibration_artifact: TrancheCDrawdownCalibrationArtifactV1 | None = None
 
     def __post_init__(self) -> None:
         if any(
@@ -15897,6 +16123,14 @@ class TrancheCExplicitParameterValueV1:
             raise ParameterPolicyError(
                 ReasonCode.PARAMETER_BINDING_MISMATCH,
                 "explicit Tranche-C parameter evidence must be typed",
+            )
+        if self.drawdown_calibration_artifact is not None and not isinstance(
+            self.drawdown_calibration_artifact,
+            TrancheCDrawdownCalibrationArtifactV1,
+        ):
+            raise ParameterPolicyError(
+                ReasonCode.PARAMETER_BINDING_MISMATCH,
+                "drawdown calibration artifact must be typed",
             )
 
 
@@ -15929,6 +16163,45 @@ def _constraint_refs_v1(policy: TrancheCParameterPolicyV1) -> tuple[str, ...]:
             f"{policy.parameter_id} has incomplete frozen constraints",
         )
     return (policy.reference_range_or_constraint, bounded, unit)
+
+
+def _source_currentization_refs_v1(
+    policy: TrancheCParameterPolicyV1,
+    binding: TrancheCParameterApplicationBindingV1,
+) -> tuple[str, ...]:
+    policy_refs = policy.raw.get("source_currentization_refs")
+    binding_refs = binding.raw.get("currentized_source_refs")
+    if (
+        not isinstance(policy_refs, tuple)
+        or not policy_refs
+        or any(not isinstance(ref, str) or not ref for ref in policy_refs)
+        or policy_refs != binding_refs
+    ):
+        raise ParameterPolicyError(
+            ReasonCode.PARAMETER_OUT_OF_POLICY,
+            f"{policy.parameter_id} has incomplete currentized source custody",
+        )
+    return policy_refs
+
+
+def _active_scope_ref_v1(policy: TrancheCParameterPolicyV1) -> str:
+    scope_ref = policy.raw.get("master_plan_section_id")
+    if not isinstance(scope_ref, str) or not scope_ref:
+        raise ParameterPolicyError(
+            ReasonCode.PARAMETER_OUT_OF_POLICY,
+            f"{policy.parameter_id} has no exact active scope",
+        )
+    return scope_ref
+
+
+def _source_epoch_ref_v1(policy: TrancheCParameterPolicyV1) -> str:
+    epoch_ref = policy.raw.get("currentization_version")
+    if not isinstance(epoch_ref, str) or not epoch_ref:
+        raise ParameterPolicyError(
+            ReasonCode.PARAMETER_OUT_OF_POLICY,
+            f"{policy.parameter_id} has no exact source epoch",
+        )
+    return epoch_ref
 
 
 def _canonical_static_map_v1(policy: TrancheCParameterPolicyV1) -> Mapping[str, str]:
@@ -15984,16 +16257,34 @@ def _exact_numeric_v1(parameter_id: str, value: object) -> Decimal:
 def _validate_exact_evidence_v1(
     *,
     policy: TrancheCParameterPolicyV1,
+    binding: TrancheCParameterApplicationBindingV1,
     explicit_value: TrancheCExplicitParameterValueV1,
     evidence_class: TrancheCParameterEvidenceClassV1,
-) -> TrancheCParameterEvidenceV1:
+    resolution_at: datetime | str | None,
+) -> tuple[TrancheCParameterEvidenceV1, datetime]:
     evidence = explicit_value.evidence
     expected_unit = str(policy.raw["effective_unit_or_basis"])
+    family_binding_ref = policy.raw.get("family_evidence_binding_ref")
+    value_source_class = policy.raw.get("effective_value_source_class")
+    if resolution_at is None:
+        raise ParameterPolicyError(
+            ReasonCode.PARAMETER_OWNER_MISSING,
+            f"{policy.parameter_id} requires an explicit resolution time",
+        )
+    resolution = parse_utc(resolution_at, field_name="resolution_at")
     if (
         not isinstance(evidence, TrancheCParameterEvidenceV1)
         or evidence.evidence_class is not evidence_class
         or evidence.evidence_ref != explicit_value.source_packet_ref
+        or evidence.family_evidence_binding_ref != family_binding_ref
+        or evidence.value_source_class != value_source_class
         or evidence.source_or_binding_refs != _policy_refs_v1(policy)
+        or evidence.source_currentization_refs
+        != _source_currentization_refs_v1(policy, binding)
+        or evidence.active_scope_ref != _active_scope_ref_v1(policy)
+        or evidence.source_epoch_ref != _source_epoch_ref_v1(policy)
+        or evidence.canonical_owner_ref != policy.canonical_owner
+        or evidence.authority_ref != binding.active_stage1_value_authority
         or evidence.declared_unit_or_basis != expected_unit
         or evidence.constraint_refs != _constraint_refs_v1(policy)
         or explicit_value.declared_unit_or_basis != expected_unit
@@ -16002,7 +16293,57 @@ def _validate_exact_evidence_v1(
             ReasonCode.PARAMETER_BINDING_MISMATCH,
             f"{policy.parameter_id} requires its exact typed evidence binding",
         )
-    return evidence
+    if not evidence.observed_at <= evidence.evaluated_at <= resolution < evidence.valid_until:
+        raise ParameterPolicyError(
+            ReasonCode.SOURCE_EPOCH_STALE,
+            f"{policy.parameter_id} evidence is stale or future-observed",
+        )
+    return evidence, resolution
+
+
+def _validate_drawdown_calibration_artifact_v1(
+    *,
+    policy: TrancheCParameterPolicyV1,
+    binding: TrancheCParameterApplicationBindingV1,
+    explicit_value: TrancheCExplicitParameterValueV1,
+    evidence: TrancheCParameterEvidenceV1,
+    resolution_at: datetime,
+) -> tuple[TrancheCDrawdownCalibrationArtifactV1, Decimal]:
+    artifact = explicit_value.drawdown_calibration_artifact
+    if (
+        policy.parameter_symbol not in {"dd_warn", "dd_freeze"}
+        or not isinstance(artifact, TrancheCDrawdownCalibrationArtifactV1)
+        or artifact.calibration_bundle_ref != explicit_value.source_packet_ref
+        or artifact.calibration_bundle_ref != evidence.evidence_ref
+        or artifact.canonical_owner_ref != policy.canonical_owner
+        or artifact.authority_ref != binding.active_stage1_value_authority
+        or artifact.active_scope_ref != evidence.active_scope_ref
+        or artifact.source_epoch_ref != evidence.source_epoch_ref
+        or artifact.observed_at != evidence.observed_at
+        or artifact.evaluated_at != evidence.evaluated_at
+        or artifact.valid_until != evidence.valid_until
+    ):
+        raise ParameterPolicyError(
+            ReasonCode.PARAMETER_BINDING_MISMATCH,
+            f"{policy.parameter_id} requires its complete shared drawdown bundle",
+        )
+    if not artifact.observed_at <= artifact.evaluated_at <= resolution_at < artifact.valid_until:
+        raise ParameterPolicyError(
+            ReasonCode.SOURCE_EPOCH_STALE,
+            f"{policy.parameter_id} drawdown bundle is stale or future-observed",
+        )
+    expected = (
+        artifact.warning_threshold
+        if policy.parameter_symbol == "dd_warn"
+        else artifact.freeze_threshold
+    )
+    candidate = _exact_numeric_v1(policy.parameter_id, explicit_value.value)
+    if candidate != expected:
+        raise ParameterPolicyError(
+            ReasonCode.PARAMETER_OUT_OF_POLICY,
+            f"{policy.parameter_id} does not equal its shared drawdown-bundle threshold",
+        )
+    return artifact, candidate
 
 
 def _admit_tranche_c_parameter_value_v1(
@@ -16010,6 +16351,7 @@ def _admit_tranche_c_parameter_value_v1(
     policy: TrancheCParameterPolicyV1,
     binding: TrancheCParameterApplicationBindingV1,
     explicit_value: TrancheCExplicitParameterValueV1 | None,
+    resolution_at: datetime | str | None,
 ) -> TrancheCParameterAdmissibilityReceiptV1:
     policy_class = TRANCHE_C_PARAMETER_ADMISSIBILITY_CLASSES[policy.parameter_id]
     if policy_class is TrancheCParameterPolicyClassV1.NO_MACHINE_VERIFIABLE_OVERRIDE:
@@ -16017,12 +16359,23 @@ def _admit_tranche_c_parameter_value_v1(
             ReasonCode.OPERATION_BLOCKED,
             f"{policy.parameter_id} has no machine-verifiable Stage-1 override",
         )
+    if (
+        explicit_value is not None
+        and explicit_value.drawdown_calibration_artifact is not None
+        and policy_class
+        is not TrancheCParameterPolicyClassV1.CALIBRATION_REQUIRED
+    ):
+        raise ParameterPolicyError(
+            ReasonCode.PARAMETER_BINDING_MISMATCH,
+            f"{policy.parameter_id} cannot claim drawdown calibration custody",
+        )
     candidate = (
         policy.day1_seed_or_resolution_rule
         if explicit_value is None
         else explicit_value.value
     )
     evidence_refs = _policy_refs_v1(policy)
+    dynamic_receipt_fields: dict[str, object] = {}
     if explicit_value is not None:
         evidence_refs = (explicit_value.source_packet_ref, *evidence_refs)
 
@@ -16111,10 +16464,12 @@ def _admit_tranche_c_parameter_value_v1(
                 ReasonCode.PARAMETER_OWNER_MISSING,
                 f"{policy.parameter_id} requires an exact runtime binding",
             )
-        evidence = _validate_exact_evidence_v1(
+        evidence, resolved_at = _validate_exact_evidence_v1(
             policy=policy,
+            binding=binding,
             explicit_value=explicit_value,
             evidence_class=TrancheCParameterEvidenceClassV1.SOURCE_OR_RUNTIME_BINDING,
+            resolution_at=resolution_at,
         )
         if not isinstance(candidate, str):
             raise ParameterPolicyError(
@@ -16129,24 +16484,54 @@ def _admit_tranche_c_parameter_value_v1(
             )
         normalized = candidate
         evidence_refs = (evidence.evidence_ref, *evidence.source_or_binding_refs)
+        dynamic_receipt_fields = {
+            "evidence_ref": evidence.evidence_ref,
+            "evidence_class": evidence.evidence_class,
+            "family_evidence_binding_ref": evidence.family_evidence_binding_ref,
+            "value_source_class": evidence.value_source_class,
+            "source_currentization_refs": evidence.source_currentization_refs,
+            "active_scope_ref": evidence.active_scope_ref,
+            "source_epoch_ref": evidence.source_epoch_ref,
+            "observed_at": evidence.observed_at,
+            "evaluated_at": evidence.evaluated_at,
+            "resolution_at": resolved_at,
+            "valid_until": evidence.valid_until,
+        }
     elif policy_class is TrancheCParameterPolicyClassV1.CALIBRATION_REQUIRED:
         if explicit_value is None:
             raise ParameterPolicyError(
                 ReasonCode.PARAMETER_OWNER_MISSING,
                 f"{policy.parameter_id} requires a calibrated artifact",
             )
-        evidence = _validate_exact_evidence_v1(
+        evidence, resolved_at = _validate_exact_evidence_v1(
             policy=policy,
+            binding=binding,
             explicit_value=explicit_value,
             evidence_class=TrancheCParameterEvidenceClassV1.CALIBRATED_ARTIFACT,
+            resolution_at=resolution_at,
         )
-        normalized = _exact_numeric_v1(policy.parameter_id, candidate)
-        if normalized < 0:
-            raise ParameterPolicyError(
-                ReasonCode.PARAMETER_OUT_OF_POLICY,
-                f"{policy.parameter_id} calibrated value must be nonnegative",
-            )
+        artifact, normalized = _validate_drawdown_calibration_artifact_v1(
+            policy=policy,
+            binding=binding,
+            explicit_value=explicit_value,
+            evidence=evidence,
+            resolution_at=resolved_at,
+        )
         evidence_refs = (evidence.evidence_ref, *evidence.source_or_binding_refs)
+        dynamic_receipt_fields = {
+            "evidence_ref": evidence.evidence_ref,
+            "evidence_class": evidence.evidence_class,
+            "family_evidence_binding_ref": evidence.family_evidence_binding_ref,
+            "value_source_class": evidence.value_source_class,
+            "source_currentization_refs": evidence.source_currentization_refs,
+            "active_scope_ref": evidence.active_scope_ref,
+            "source_epoch_ref": evidence.source_epoch_ref,
+            "observed_at": evidence.observed_at,
+            "evaluated_at": evidence.evaluated_at,
+            "resolution_at": resolved_at,
+            "valid_until": evidence.valid_until,
+            "calibration_bundle_ref": artifact.calibration_bundle_ref,
+        }
     else:  # pragma: no cover - import-time closure makes this unreachable
         raise ParameterPolicyError(
             ReasonCode.PARAMETER_OUT_OF_POLICY,
@@ -16161,6 +16546,7 @@ def _admit_tranche_c_parameter_value_v1(
         authority_ref=binding.active_stage1_value_authority,
         source_or_binding_refs=evidence_refs,
         constraint_refs_applied=_constraint_refs_v1(policy),
+        **dynamic_receipt_fields,
     )
 
 
@@ -16168,6 +16554,7 @@ def resolve_tranche_c_parameter_v1(
     parameter_id: str,
     *,
     explicit_value: TrancheCExplicitParameterValueV1 | None = None,
+    resolution_at: datetime | str | None = None,
 ) -> TrancheCParameterResolutionV1:
     policy = TRANCHE_C_PARAMETER_POLICIES.get(parameter_id)
     binding = TRANCHE_C_PARAMETER_APPLICATION_BINDINGS.get(parameter_id)
@@ -16200,6 +16587,7 @@ def resolve_tranche_c_parameter_v1(
         policy=policy,
         binding=binding,
         explicit_value=explicit_value,
+        resolution_at=resolution_at,
     )
     return TrancheCParameterResolutionV1(
         parameter_id=parameter_id,

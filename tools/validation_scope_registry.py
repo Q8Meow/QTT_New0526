@@ -248,6 +248,13 @@ ST12B_VALIDATION_CONTEXT_EXACT_PATHS = frozenset(
     )
 )
 
+ST12C_PREDECESSOR_CURRENTIZATION_EXACT_PATHS = frozenset(
+    {
+        "tests/atomicrows/test_source_backed_classical_quantum_parameter_default_target_matrix.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/operations/test_runtime_topology.py",
+        "tools/independent_validate_qku_computation_control_plane_operations.py",
+    }
+)
 ST12C_ALLOWED_EXACT_PATHS = frozenset(
     {
         "src/qtt/stage1_prediction_markets/qku_computation_control_plane/__init__.py",
@@ -276,7 +283,6 @@ ST12C_ALLOWED_EXACT_PATHS = frozenset(
         "tests/stage1_prediction_markets/qku_computation_control_plane/architecture/test_repository_file_closure.py",
         "tests/stage1_prediction_markets/qku_computation_control_plane/execution/__init__.py",
         "tests/stage1_prediction_markets/qku_computation_control_plane/execution/test_contract_matrix.py",
-        "tests/stage1_prediction_markets/qku_computation_control_plane/operations/test_runtime_topology.py",
         "tests/tools/test_changed_area_validation_router.py",
         "tests/tools/test_ci_branch_context.py",
         "tests/tools/test_validation_inventory.py",
@@ -287,20 +293,20 @@ ST12C_ALLOWED_EXACT_PATHS = frozenset(
         "tools/independent_validate_qku_computation_control_plane_architecture.py",
         "tools/independent_validate_qku_computation_control_plane_accounting.py",
         "tools/independent_validate_qku_computation_control_plane_execution.py",
-        "tools/independent_validate_qku_computation_control_plane_operations.py",
         "tools/run_validation_gates.py",
         "tools/validate_qku_computation_control_plane.py",
         "tools/validation_inventory.py",
         "tools/validation_scope_registry.py",
         "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
     }
-)
+) | ST12C_PREDECESSOR_CURRENTIZATION_EXACT_PATHS
 ST12C_VALIDATION_CONTEXT_EXACT_PATHS = frozenset(
     ST12C_ALLOWED_EXACT_PATHS
     - (
         ST12A_ALLOWED_EXACT_PATHS
         | ST12A_SHARED_CURRENTIZATION_EXACT_PATHS
         | ST12B_ALLOWED_EXACT_PATHS
+        | ST12C_PREDECESSOR_CURRENTIZATION_EXACT_PATHS
     )
 )
 
@@ -1975,6 +1981,23 @@ def explain_pr_scope_decision(branch: str, path: str) -> dict[str, object]:
             "pr_id": "ST12-TRANCHE-B",
             "matched_rule": f"validation_context_exact:{normalized}",
             "reason": "registered_validation_context_exact_path",
+        }
+    if (
+        is_validation_context_branch(branch_name)
+        and normalized in ST12C_PREDECESSOR_CURRENTIZATION_EXACT_PATHS
+    ):
+        return {
+            "allowed": True,
+            "branch": branch_name,
+            "normalized_path": normalized,
+            "pr_id": "ST12-TRANCHE-C",
+            "matched_rule": (
+                f"validation_context_predecessor_currentization_exact:{normalized}"
+            ),
+            "reason": (
+                "registered_validation_context_"
+                "predecessor_currentization_exact_path"
+            ),
         }
     if (
         is_validation_context_branch(branch_name)

@@ -114,8 +114,34 @@ def _class_and_function_names(path: Path) -> tuple[set[str], set[str]]:
     )
 
 
+def _class_node(tree: ast.Module, class_name: str) -> ast.ClassDef:
+    for node in tree.body:
+        if isinstance(node, ast.ClassDef) and node.name == class_name:
+            return node
+    raise ValueError(f"missing class {class_name}")
+
+
+def _annotated_fields(tree: ast.Module, class_name: str) -> set[str]:
+    return {
+        node.target.id
+        for node in _class_node(tree, class_name).body
+        if isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name)
+    }
+
+
+def _class_method_node(
+    tree: ast.Module, class_name: str, method_name: str
+) -> ast.FunctionDef:
+    owner = _class_node(tree, class_name)
+    for node in owner.body:
+        if isinstance(node, ast.FunctionDef) and node.name == method_name:
+            return node
+    raise ValueError(f"missing {class_name}.{method_name}")
+
+
 def _semantic_repair_closure(
-    failures: list[str], policies: tuple[dict[str, object], ...]
+    failures: list[str], policies: tuple[dict[str, object], ...],
+    bindings: tuple[dict[str, object], ...],
 ) -> None:
     rollback_classes, rollback_functions = _class_and_function_names(PACKAGE / "rollback.py")
     if "ReversalHistoryViewV1" not in rollback_classes or "validate_reversal_bundle_against_history_v1" not in rollback_functions:
@@ -169,14 +195,151 @@ def _semantic_repair_closure(
     if not public_sqlite or private_sqlite:
         failures.append("SQLite reference adapter does not use the public sqlite3 module exclusively")
 
-    parameter_classes, _ = _class_and_function_names(PACKAGE / "parameter_policy.py")
+    parameter_path = PACKAGE / "parameter_policy.py"
+    parameter_tree = ast.parse(
+        parameter_path.read_text(encoding="utf-8"),
+        filename="parameter_policy.py",
+    )
+    parameter_classes, parameter_functions = _class_and_function_names(parameter_path)
     required_parameter_classes = {
         "TrancheCParameterPolicyClassV1",
         "TrancheCParameterEvidenceV1",
         "TrancheCParameterAdmissibilityReceiptV1",
+        "TrancheCDrawdownCalibrationArtifactV1",
     }
     if not required_parameter_classes <= parameter_classes:
         failures.append("centralized typed parameter admissibility contract is incomplete")
+    if not {
+        "_validate_exact_evidence_v1",
+        "_validate_drawdown_calibration_artifact_v1",
+        "resolve_tranche_c_parameter_v1",
+    } <= parameter_functions:
+        failures.append("centralized dynamic parameter resolver path is incomplete")
+    required_evidence_fields = {
+        "evidence_ref", "evidence_class", "family_evidence_binding_ref",
+        "value_source_class", "source_or_binding_refs",
+        "source_currentization_refs", "active_scope_ref", "source_epoch_ref",
+        "canonical_owner_ref", "authority_ref", "declared_unit_or_basis",
+        "observed_at", "evaluated_at", "valid_until", "constraint_refs",
+    }
+    required_bundle_fields = {
+        "calibration_bundle_ref", "approved_sleeve_max_drawdown_budget",
+        "warning_threshold", "freeze_threshold", "canonical_owner_ref",
+        "authority_ref", "active_scope_ref", "source_epoch_ref",
+        "observed_at", "evaluated_at", "valid_until",
+    }
+    required_receipt_fields = {
+        "evidence_ref", "family_evidence_binding_ref", "value_source_class",
+        "source_currentization_refs", "active_scope_ref", "source_epoch_ref",
+        "observed_at", "evaluated_at", "resolution_at", "valid_until",
+        "calibration_bundle_ref",
+    }
+    try:
+        if not required_evidence_fields <= _annotated_fields(
+            parameter_tree, "TrancheCParameterEvidenceV1"
+        ):
+            failures.append("dynamic source/runtime evidence field closure is incomplete")
+        if required_bundle_fields != _annotated_fields(
+            parameter_tree, "TrancheCDrawdownCalibrationArtifactV1"
+        ):
+            failures.append("drawdown calibration bundle field closure is not exact")
+        if not required_receipt_fields <= _annotated_fields(
+            parameter_tree, "TrancheCParameterAdmissibilityReceiptV1"
+        ):
+            failures.append("dynamic admissibility receipt custody is incomplete")
+        bundle_post_init = _class_method_node(
+            parameter_tree,
+            "TrancheCDrawdownCalibrationArtifactV1",
+            "__post_init__",
+        )
+        bundle_constants = {
+            node.value
+            for node in ast.walk(bundle_post_init)
+            if isinstance(node, ast.Constant) and isinstance(node.value, str)
+        }
+        bundle_calls = {
+            node.func.id
+            for node in ast.walk(bundle_post_init)
+            if isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
+        }
+        bundle_attributes = {
+            node.attr for node in ast.walk(bundle_post_init)
+            if isinstance(node, ast.Attribute)
+        }
+        if (
+            not {"0.50", "1.00"} <= bundle_constants
+            or not {"decimal_context_v1", "exact_decimal"} <= bundle_calls
+            or not {
+                "approved_sleeve_max_drawdown_budget",
+                "warning_threshold",
+                "freeze_threshold",
+            } <= bundle_attributes
+        ):
+            failures.append("drawdown calibration formulas are not exact Decimal laws")
+    except ValueError as exc:
+        failures.append(str(exc))
+
+    binding_by_id = {row.get("parameter_id"): row for row in bindings}
+    source_rows = tuple(
+        row for row in policies
+        if row.get("applicability_state") == "SOURCE_BOUND_MUTABLE_VALUE"
+    )
+    required_source_fields = (
+        "family_evidence_binding_ref", "effective_value_source_class",
+        "effective_source_state_refs", "source_currentization_refs",
+        "effective_unit_or_basis", "master_plan_section_id",
+        "currentization_version",
+    )
+    if len(source_rows) != 2 or any(
+        any(not row.get(field) for field in required_source_fields)
+        or binding_by_id.get(row.get("parameter_id"), {}).get(
+            "active_stage1_value_authority"
+        ) is None
+        or binding_by_id.get(row.get("parameter_id"), {}).get(
+            "currentized_source_refs"
+        ) != row.get("source_currentization_refs")
+        for row in source_rows
+    ):
+        failures.append("source/runtime policy evidence custody is not exact for both rows")
+
+    drawdown_by_symbol = {
+        row.get("parameter_symbol"): row
+        for row in policies
+        if row.get("effective_resolution_class") == "RISK_POLICY_DERIVED"
+    }
+    expected_drawdown_rules = {
+        "dd_warn": "0.50 * approved_sleeve_max_drawdown_budget",
+        "dd_freeze": "1.00 * approved_sleeve_max_drawdown_budget",
+    }
+    if (
+        set(drawdown_by_symbol) != set(expected_drawdown_rules)
+        or any(
+            drawdown_by_symbol[symbol].get(
+                "effective_day1_seed_value_or_resolution_rule"
+            ) != rule
+            for symbol, rule in expected_drawdown_rules.items()
+        )
+        or len({
+            (
+                row.get("family_evidence_binding_ref"),
+                tuple(row.get("effective_source_state_refs", ())),
+                row.get("effective_unit_or_basis"),
+                row.get("canonical_owner"),
+            )
+            for row in drawdown_by_symbol.values()
+        }) != 1
+    ):
+        failures.append("frozen drawdown rows do not share the exact calibration family")
+    with localcontext(CONTEXT):
+        independent_budget = Decimal("0.20")
+        independent_warning = Decimal("0.50") * independent_budget
+        independent_freeze = Decimal("1.00") * independent_budget
+    if (
+        independent_warning != Decimal("0.10")
+        or independent_freeze != Decimal("0.20")
+        or not Decimal("0") <= independent_warning < independent_freeze
+    ):
+        failures.append("independent drawdown formula reconstruction failed")
     independently_classified: list[str] = []
     for row in policies:
         applicability = row.get("applicability_state")
@@ -237,6 +400,25 @@ def _semantic_repair_closure(
     ):
         failures.append("MATH-36 predecessor route is not a delegation-only adapter")
 
+    matrix_text = (
+        REPO_ROOT
+        / "tests"
+        / "stage1_prediction_markets"
+        / "qku_computation_control_plane"
+        / "accounting"
+        / "test_contract_matrix.py"
+    ).read_text(encoding="utf-8")
+    if not {
+        '"journal-link-bijection"',
+        "test_dynamic_parameter_evidence_compound_matrix",
+        "drawdown_calibration_artifact",
+    } <= {marker for marker in (
+        '"journal-link-bijection"',
+        "test_dynamic_parameter_evidence_compound_matrix",
+        "drawdown_calibration_artifact",
+    ) if marker in matrix_text}:
+        failures.append("central accounting matrix lacks compact residual semantic coverage")
+
 
 def main() -> int:
     failures: list[str] = []
@@ -261,7 +443,7 @@ def main() -> int:
         failures.append("oracle/vector identities are not MATH-26..38 exactly")
     if any(row.get("production_implementation_import_allowed") is not False for row in (*oracles, *vectors)):
         failures.append("oracle/vector production-import separation failed")
-    _semantic_repair_closure(failures, policies)
+    _semantic_repair_closure(failures, policies, bindings)
     actual = _golden_results()
     expected = {
         "MATH-26": Decimal(".15"), "MATH-27": Decimal(".20"), "MATH-28": Decimal(".10"),

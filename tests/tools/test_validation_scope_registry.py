@@ -119,6 +119,7 @@ EXPECTED_ST12B_ALLOWED_EXACT_PATHS = frozenset(
 )
 ST12C_PREDECESSOR_CURRENTIZATION_PATHS = frozenset(
     {
+        "tests/atomicrows/test_source_backed_classical_quantum_parameter_default_target_matrix.py",
         "tests/stage1_prediction_markets/qku_computation_control_plane/operations/test_runtime_topology.py",
         "tools/independent_validate_qku_computation_control_plane_operations.py",
     }
@@ -494,6 +495,9 @@ def test_st12c_exact_scope_matches_owner_currentization() -> None:
     assert registry.ST12C_BRANCH == (
         "agent/st12c-deterministic-receipts-accounting-v1"
     )
+    assert registry.ST12C_PREDECESSOR_CURRENTIZATION_EXACT_PATHS == (
+        ST12C_PREDECESSOR_CURRENTIZATION_PATHS
+    )
     assert registry.ST12C_ALLOWED_EXACT_PATHS == EXPECTED_ST12C_ALLOWED_EXACT_PATHS
     assert not any("*" in path for path in registry.ST12C_ALLOWED_EXACT_PATHS)
     assert registry.ST12C_VALIDATION_CONTEXT_EXACT_PATHS == (
@@ -502,6 +506,7 @@ def test_st12c_exact_scope_matches_owner_currentization() -> None:
             registry.ST12A_ALLOWED_EXACT_PATHS
             | registry.ST12A_SHARED_CURRENTIZATION_EXACT_PATHS
             | registry.ST12B_ALLOWED_EXACT_PATHS
+            | registry.ST12C_PREDECESSOR_CURRENTIZATION_EXACT_PATHS
         )
     )
     assert ST12C_PREDECESSOR_CURRENTIZATION_PATHS <= (
@@ -514,6 +519,43 @@ def test_st12c_exact_scope_matches_owner_currentization() -> None:
         decision = registry.explain_pr_scope_decision(registry.ST12C_BRANCH, path)
         assert decision["allowed"] is True
         assert decision["pr_id"] == "ST12-TRANCHE-C"
+    fixture_decisions = {
+        path: registry.explain_pr_scope_decision(FIXTURE_BRANCH, path)
+        for path in ST12C_PREDECESSOR_CURRENTIZATION_PATHS
+    }
+    assert all(decision["allowed"] is True for decision in fixture_decisions.values())
+    atomicrows_path = (
+        "tests/atomicrows/"
+        "test_source_backed_classical_quantum_parameter_default_target_matrix.py"
+    )
+    assert fixture_decisions[atomicrows_path] == {
+        "allowed": True,
+        "branch": FIXTURE_BRANCH,
+        "normalized_path": atomicrows_path,
+        "pr_id": "ST12-TRANCHE-C",
+        "matched_rule": (
+            "validation_context_predecessor_currentization_exact:"
+            f"{atomicrows_path}"
+        ),
+        "reason": (
+            "registered_validation_context_"
+            "predecessor_currentization_exact_path"
+        ),
+    }
+    for path in ST12C_PREDECESSOR_CURRENTIZATION_PATHS - {atomicrows_path}:
+        assert fixture_decisions[path] == {
+            "allowed": True,
+            "branch": FIXTURE_BRANCH,
+            "normalized_path": path,
+            "pr_id": "ST12-TRANCHE-A",
+            "matched_rule": f"validation_context_exact:{path}",
+            "reason": "registered_validation_context_exact_path",
+        }
+    for near_path in (f"{atomicrows_path}.copy", f"{atomicrows_path}.suffix"):
+        assert registry.explain_pr_scope_decision(
+            FIXTURE_BRANCH,
+            near_path,
+        )["allowed"] is False
     for path in registry.ST12C_VALIDATION_CONTEXT_EXACT_PATHS:
         decision = registry.explain_pr_scope_decision(FIXTURE_BRANCH, path)
         assert decision["allowed"] is True

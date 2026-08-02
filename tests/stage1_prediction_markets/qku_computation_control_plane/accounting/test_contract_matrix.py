@@ -70,6 +70,7 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.parameter_p
     TRANCHE_C_PARAMETER_ADMISSIBILITY_CLASSES,
     TRANCHE_C_PARAMETER_APPLICATION_BINDINGS,
     TRANCHE_C_PARAMETER_POLICIES,
+    TrancheCDrawdownCalibrationArtifactV1,
     TrancheCParameterEvidenceClassV1,
     TrancheCParameterEvidenceV1,
     TrancheCExplicitParameterValueV1,
@@ -118,6 +119,10 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.validation 
 
 
 NOW = datetime(2026, 1, 1, tzinfo=UTC)
+DYNAMIC_OBSERVED_AT = datetime(2026, 1, 1, 0, 0, tzinfo=UTC)
+DYNAMIC_EVALUATED_AT = datetime(2026, 1, 1, 0, 1, tzinfo=UTC)
+DYNAMIC_RESOLUTION_AT = datetime(2026, 1, 1, 0, 2, tzinfo=UTC)
+DYNAMIC_VALID_UNTIL = datetime(2026, 1, 1, 1, 0, tzinfo=UTC)
 ACCOUNTING_CASES = tuple(row for row in ST12C_CONTROL_COVERAGE_MATRIX if row.domain == "accounting")
 
 
@@ -490,6 +495,7 @@ REVERSAL_HISTORY_SCENARIOS = (
     "same-key-conflict",
     "same-uow-original",
     "receipt-remaining-mismatch",
+    "journal-link-bijection",
 )
 
 
@@ -551,6 +557,68 @@ def test_persisted_reversal_history_matrix(
         completed_at=NOW,
     )
     assert original_result.transaction_state is TransactionTerminalStateV1.COMMITTED
+
+    if scenario == "journal-link-bijection":
+        valid = _reversal_atomic_records(suffix="bijection")
+        assert valid.journal_transaction is not None
+        link = valid.reversal_links[0]
+        before = deterministic_json(
+            adapter.reconstruct_as_of(
+                effective_cutoff=NOW,
+                recorded_cutoff=NOW,
+                aggregate_scope=(),
+            )
+        )
+        mutations = (
+            {"reversal_links": ()},
+            {
+                "journal_transaction": replace(
+                    valid.journal_transaction,
+                    reversal_of_transaction_id=None,
+                )
+            },
+            {
+                "reversal_links": (
+                    replace(
+                        link,
+                        original_event_or_transaction_ref="journal-other",
+                    ),
+                )
+            },
+            {
+                "reversal_links": (
+                    replace(link, reversal_event_ref="event-other"),
+                )
+            },
+        )
+        for mutation in mutations:
+            with pytest.raises(ComputationControlPlaneError):
+                replace(valid, **mutation)
+            assert deterministic_json(
+                adapter.reconstruct_as_of(
+                    effective_cutoff=NOW,
+                    recorded_cutoff=NOW,
+                    aggregate_scope=(),
+                )
+            ) == before
+            assert (
+                adapter.get_idempotency_result(
+                    valid.idempotency_claim.idempotency_key
+                )
+                is None
+            )
+        unwritten_refs = (
+            *(record.record_id for record in valid.receipt_records),
+            *(event.economic_event_id for event in valid.economic_events),
+            valid.journal_transaction.journal_transaction_id,
+            *(posting.posting_id for posting in valid.journal_postings),
+            valid.state_transition.transition_id,
+            link.reversal_receipt_id,
+        )
+        assert all(adapter.get_record(ref) is None for ref in unwritten_refs)
+        if hasattr(adapter, "close"):
+            adapter.close()
+        return
 
     if scenario == "receipt-remaining-mismatch":
         first_result = None
@@ -760,20 +828,63 @@ def test_math_36_canonical_snapshot_and_compatibility_matrix(monkeypatch) -> Non
 def _parameter_evidence(
     parameter_id: str,
     evidence_class: TrancheCParameterEvidenceClassV1,
+    *,
+    evidence_ref: str | None = None,
+    **changes,
 ) -> TrancheCParameterEvidenceV1:
     policy = TRANCHE_C_PARAMETER_POLICIES[parameter_id]
-    evidence_ref = f"evidence::{parameter_id}"
-    return TrancheCParameterEvidenceV1(
-        evidence_class=evidence_class,
-        evidence_ref=evidence_ref,
-        source_or_binding_refs=tuple(policy.raw["effective_source_state_refs"]),
-        declared_unit_or_basis=str(policy.raw["effective_unit_or_basis"]),
-        constraint_refs=(
+    binding = TRANCHE_C_PARAMETER_APPLICATION_BINDINGS[parameter_id]
+    values = {
+        "evidence_class": evidence_class,
+        "evidence_ref": evidence_ref or f"evidence::{parameter_id}",
+        "family_evidence_binding_ref": str(
+            policy.raw["family_evidence_binding_ref"]
+        ),
+        "value_source_class": str(policy.raw["effective_value_source_class"]),
+        "source_or_binding_refs": tuple(
+            policy.raw["effective_source_state_refs"]
+        ),
+        "source_currentization_refs": tuple(
+            policy.raw["source_currentization_refs"]
+        ),
+        "active_scope_ref": str(policy.raw["master_plan_section_id"]),
+        "source_epoch_ref": str(policy.raw["currentization_version"]),
+        "canonical_owner_ref": policy.canonical_owner,
+        "authority_ref": binding.active_stage1_value_authority,
+        "declared_unit_or_basis": str(policy.raw["effective_unit_or_basis"]),
+        "observed_at": DYNAMIC_OBSERVED_AT,
+        "evaluated_at": DYNAMIC_EVALUATED_AT,
+        "valid_until": DYNAMIC_VALID_UNTIL,
+        "constraint_refs": (
             policy.reference_range_or_constraint,
             str(policy.raw["effective_bounded_search_space_or_fit_constraint"]),
             str(policy.raw["effective_unit_or_basis"]),
         ),
-    )
+    }
+    values.update(changes)
+    return TrancheCParameterEvidenceV1(**values)
+
+
+def _drawdown_calibration_artifact(
+    **changes,
+) -> TrancheCDrawdownCalibrationArtifactV1:
+    policy = TRANCHE_C_PARAMETER_POLICIES["ST10-PARAM::1531"]
+    binding = TRANCHE_C_PARAMETER_APPLICATION_BINDINGS["ST10-PARAM::1531"]
+    values = {
+        "calibration_bundle_ref": "calibration::drawdown-ra-11b",
+        "approved_sleeve_max_drawdown_budget": Decimal("0.10"),
+        "warning_threshold": Decimal("0.05"),
+        "freeze_threshold": Decimal("0.10"),
+        "canonical_owner_ref": policy.canonical_owner,
+        "authority_ref": binding.active_stage1_value_authority,
+        "active_scope_ref": str(policy.raw["master_plan_section_id"]),
+        "source_epoch_ref": str(policy.raw["currentization_version"]),
+        "observed_at": DYNAMIC_OBSERVED_AT,
+        "evaluated_at": DYNAMIC_EVALUATED_AT,
+        "valid_until": DYNAMIC_VALID_UNTIL,
+    }
+    values.update(changes)
+    return TrancheCDrawdownCalibrationArtifactV1(**values)
 
 
 PARAMETER_ADMISSIBILITY_CASES = (
@@ -821,6 +932,7 @@ def test_parameter_admissibility_matrix(case) -> None:
     value: object = policy.day1_seed_or_resolution_rule
     unit: str | None = None
     evidence: TrancheCParameterEvidenceV1 | None = None
+    calibration_artifact: TrancheCDrawdownCalibrationArtifactV1 | None = None
     expected_pass = case.endswith("pass")
     if case == "fixed-alternate":
         value = "ALLOWED"
@@ -847,30 +959,50 @@ def test_parameter_admissibility_matrix(case) -> None:
         value = Decimal("0.05")
         unit = str(policy.raw["effective_unit_or_basis"])
         if case == "calibration-pass":
+            calibration_artifact = _drawdown_calibration_artifact()
             evidence = _parameter_evidence(
                 parameter_id,
                 TrancheCParameterEvidenceClassV1.CALIBRATED_ARTIFACT,
+                evidence_ref=calibration_artifact.calibration_bundle_ref,
             )
     elif case == "unsupported-structural-constraint":
         value = {"id_": "EXACT_CONTRACT_OR_PACKET_IDENTITY"}
 
     explicit = TrancheCExplicitParameterValueV1(
-        parameter_id,
-        value,
-        policy.canonical_owner,
-        binding.active_stage1_value_authority,
-        evidence.evidence_ref if evidence is not None else f"packet::{case}",
-        unit,
-        evidence,
+        parameter_id=parameter_id,
+        value=value,
+        canonical_owner=policy.canonical_owner,
+        authority_ref=binding.active_stage1_value_authority,
+        source_packet_ref=(
+            evidence.evidence_ref
+            if evidence is not None
+            else f"packet::{case}"
+        ),
+        declared_unit_or_basis=unit,
+        evidence=evidence,
+        drawdown_calibration_artifact=calibration_artifact,
+    )
+    resolution_at = (
+        DYNAMIC_RESOLUTION_AT
+        if TRANCHE_C_PARAMETER_ADMISSIBILITY_CLASSES[parameter_id]
+        in {
+            TrancheCParameterPolicyClassV1.SOURCE_OR_RUNTIME_BOUND,
+            TrancheCParameterPolicyClassV1.CALIBRATION_REQUIRED,
+        }
+        else None
     )
     if not expected_pass:
         with pytest.raises(ComputationControlPlaneError):
             resolve_tranche_c_parameter_v1(
-                parameter_id, explicit_value=explicit
+                parameter_id,
+                explicit_value=explicit,
+                resolution_at=resolution_at,
             )
         return
     resolved = resolve_tranche_c_parameter_v1(
-        parameter_id, explicit_value=explicit
+        parameter_id,
+        explicit_value=explicit,
+        resolution_at=resolution_at,
     )
     assert resolved.admissibility_receipt.terminal_state == "PASS"
     assert (
@@ -878,6 +1010,191 @@ def test_parameter_admissibility_matrix(case) -> None:
         == resolved.admissibility_receipt.canonical_normalized_value
     )
     assert resolved.admissibility_receipt.policy_class is TRANCHE_C_PARAMETER_ADMISSIBILITY_CLASSES[parameter_id]
+
+
+def test_dynamic_parameter_evidence_compound_matrix() -> None:
+    source_ids = tuple(
+        parameter_id
+        for parameter_id, policy_class in
+        TRANCHE_C_PARAMETER_ADMISSIBILITY_CLASSES.items()
+        if policy_class
+        is TrancheCParameterPolicyClassV1.SOURCE_OR_RUNTIME_BOUND
+    )
+    assert len(source_ids) == 2
+    for parameter_id in source_ids:
+        policy = TRANCHE_C_PARAMETER_POLICIES[parameter_id]
+        binding = TRANCHE_C_PARAMETER_APPLICATION_BINDINGS[parameter_id]
+        evidence = _parameter_evidence(
+            parameter_id,
+            TrancheCParameterEvidenceClassV1.SOURCE_OR_RUNTIME_BINDING,
+        )
+        explicit = TrancheCExplicitParameterValueV1(
+            parameter_id=parameter_id,
+            value=policy.day1_seed_or_resolution_rule,
+            canonical_owner=policy.canonical_owner,
+            authority_ref=binding.active_stage1_value_authority,
+            source_packet_ref=evidence.evidence_ref,
+            declared_unit_or_basis=str(policy.raw["effective_unit_or_basis"]),
+            evidence=evidence,
+        )
+        resolved = resolve_tranche_c_parameter_v1(
+            parameter_id,
+            explicit_value=explicit,
+            resolution_at=DYNAMIC_RESOLUTION_AT,
+        )
+        receipt = resolved.admissibility_receipt
+        assert (
+            receipt.active_scope_ref,
+            receipt.source_epoch_ref,
+            receipt.family_evidence_binding_ref,
+            receipt.value_source_class,
+            receipt.resolution_at,
+        ) == (
+            evidence.active_scope_ref,
+            evidence.source_epoch_ref,
+            evidence.family_evidence_binding_ref,
+            evidence.value_source_class,
+            DYNAMIC_RESOLUTION_AT,
+        )
+        with pytest.raises(ComputationControlPlaneError):
+            resolve_tranche_c_parameter_v1(
+                parameter_id,
+                explicit_value=explicit,
+            )
+        future_observed = datetime(2026, 1, 1, 0, 3, tzinfo=UTC)
+        evidence_mutations = (
+            {"valid_until": DYNAMIC_RESOLUTION_AT},
+            {
+                "observed_at": future_observed,
+                "evaluated_at": future_observed,
+            },
+            {"active_scope_ref": "WRONG_SCOPE"},
+            {"source_epoch_ref": "WRONG_EPOCH"},
+            {"value_source_class": "WRONG_VALUE_SOURCE"},
+            {"family_evidence_binding_ref": "WRONG_FAMILY_BINDING"},
+            {"source_or_binding_refs": ("WRONG_SOURCE_STATE",)},
+            {"source_currentization_refs": ("WRONG_CURRENTIZATION",)},
+            {"authority_ref": "WRONG_AUTHORITY"},
+            {"canonical_owner_ref": "WRONG_OWNER"},
+            {"declared_unit_or_basis": "WRONG_UNIT"},
+        )
+        for mutation in evidence_mutations:
+            bad_evidence = replace(evidence, **mutation)
+            with pytest.raises(ComputationControlPlaneError):
+                resolve_tranche_c_parameter_v1(
+                    parameter_id,
+                    explicit_value=replace(explicit, evidence=bad_evidence),
+                    resolution_at=DYNAMIC_RESOLUTION_AT,
+                )
+        with pytest.raises(ComputationControlPlaneError):
+            resolve_tranche_c_parameter_v1(
+                parameter_id,
+                explicit_value=replace(explicit, value="AMBIGUOUS_TOKEN"),
+                resolution_at=DYNAMIC_RESOLUTION_AT,
+            )
+        with pytest.raises(ComputationControlPlaneError):
+            resolve_tranche_c_parameter_v1(
+                parameter_id,
+                explicit_value=replace(
+                    explicit,
+                    authority_ref="WRONG_AUTHORITY",
+                    declared_unit_or_basis="WRONG_UNIT",
+                ),
+                resolution_at=DYNAMIC_RESOLUTION_AT,
+            )
+
+    drawdown_bundle = _drawdown_calibration_artifact()
+    drawdown_resolutions = {}
+    for parameter_id, value in (
+        ("ST10-PARAM::1531", drawdown_bundle.warning_threshold),
+        ("ST10-PARAM::1532", drawdown_bundle.freeze_threshold),
+    ):
+        policy = TRANCHE_C_PARAMETER_POLICIES[parameter_id]
+        binding = TRANCHE_C_PARAMETER_APPLICATION_BINDINGS[parameter_id]
+        evidence = _parameter_evidence(
+            parameter_id,
+            TrancheCParameterEvidenceClassV1.CALIBRATED_ARTIFACT,
+            evidence_ref=drawdown_bundle.calibration_bundle_ref,
+        )
+        explicit = TrancheCExplicitParameterValueV1(
+            parameter_id=parameter_id,
+            value=value,
+            canonical_owner=policy.canonical_owner,
+            authority_ref=binding.active_stage1_value_authority,
+            source_packet_ref=evidence.evidence_ref,
+            declared_unit_or_basis=str(policy.raw["effective_unit_or_basis"]),
+            evidence=evidence,
+            drawdown_calibration_artifact=drawdown_bundle,
+        )
+        drawdown_resolutions[parameter_id] = resolve_tranche_c_parameter_v1(
+            parameter_id,
+            explicit_value=explicit,
+            resolution_at=DYNAMIC_RESOLUTION_AT,
+        )
+    assert drawdown_resolutions["ST10-PARAM::1531"].value_or_rule == Decimal("0.05")
+    assert drawdown_resolutions["ST10-PARAM::1532"].value_or_rule == Decimal("0.10")
+    assert {
+        resolution.admissibility_receipt.calibration_bundle_ref
+        for resolution in drawdown_resolutions.values()
+    } == {drawdown_bundle.calibration_bundle_ref}
+
+    warning_policy = TRANCHE_C_PARAMETER_POLICIES["ST10-PARAM::1531"]
+    warning_binding = TRANCHE_C_PARAMETER_APPLICATION_BINDINGS["ST10-PARAM::1531"]
+    warning_evidence = _parameter_evidence(
+        "ST10-PARAM::1531",
+        TrancheCParameterEvidenceClassV1.CALIBRATED_ARTIFACT,
+        evidence_ref=drawdown_bundle.calibration_bundle_ref,
+    )
+    warning_explicit = TrancheCExplicitParameterValueV1(
+        parameter_id="ST10-PARAM::1531",
+        value=drawdown_bundle.warning_threshold,
+        canonical_owner=warning_policy.canonical_owner,
+        authority_ref=warning_binding.active_stage1_value_authority,
+        source_packet_ref=warning_evidence.evidence_ref,
+        declared_unit_or_basis=str(
+            warning_policy.raw["effective_unit_or_basis"]
+        ),
+        evidence=warning_evidence,
+        drawdown_calibration_artifact=drawdown_bundle,
+    )
+    with pytest.raises(ComputationControlPlaneError):
+        resolve_tranche_c_parameter_v1(
+            "ST10-PARAM::1531",
+            explicit_value=replace(
+                warning_explicit,
+                drawdown_calibration_artifact=None,
+            ),
+            resolution_at=DYNAMIC_RESOLUTION_AT,
+        )
+    artifact_mutations = (
+        {"approved_sleeve_max_drawdown_budget": None},
+        {"approved_sleeve_max_drawdown_budget": 0.1},
+        {"approved_sleeve_max_drawdown_budget": Decimal("NaN")},
+        {"freeze_threshold": Decimal("Infinity")},
+        {"warning_threshold": Decimal("0.04")},
+        {"freeze_threshold": Decimal("0.09")},
+        {
+            "warning_threshold": Decimal("0.10"),
+            "freeze_threshold": Decimal("0.10"),
+        },
+        {"active_scope_ref": "WRONG_SCOPE"},
+        {"source_epoch_ref": "WRONG_EPOCH"},
+        {"canonical_owner_ref": "WRONG_OWNER"},
+        {"authority_ref": "WRONG_AUTHORITY"},
+        {"valid_until": DYNAMIC_RESOLUTION_AT},
+        {"calibration_bundle_ref": "calibration::mixed-bundle"},
+    )
+    for mutation in artifact_mutations:
+        with pytest.raises(ComputationControlPlaneError):
+            mutated_bundle = _drawdown_calibration_artifact(**mutation)
+            resolve_tranche_c_parameter_v1(
+                "ST10-PARAM::1531",
+                explicit_value=replace(
+                    warning_explicit,
+                    drawdown_calibration_artifact=mutated_bundle,
+                ),
+                resolution_at=DYNAMIC_RESOLUTION_AT,
+            )
 
 
 def test_control_coverage_meta_matrix() -> None:
@@ -924,6 +1241,7 @@ def test_control_coverage_meta_matrix() -> None:
                 str(policy.raw["effective_unit_or_basis"]),
                 evidence,
             ),
+            resolution_at=DYNAMIC_RESOLUTION_AT,
         )
         assert resolved.authority_ref == binding.active_stage1_value_authority
         assert resolved.admissibility_receipt.terminal_state == "PASS"

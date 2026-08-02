@@ -167,17 +167,34 @@ class TrancheCAtomicRecordSetV1:
             raise ContractValidationError(ReasonCode.PERSISTENCE_CONFLICT, "atomic record identities must be globally unique")
         if self.result_record_ref not in identities:
             raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "idempotency result must bind a record in the same atomic set")
-        if self.reversal_links:
+        journal_is_reversal = (
+            self.journal_transaction is not None
+            and self.journal_transaction.reversal_of_transaction_id is not None
+        )
+        reversal_link_count = len(self.reversal_links)
+        if (
+            reversal_link_count not in {0, 1}
+            or journal_is_reversal != (reversal_link_count == 1)
+        ):
+            raise ContractValidationError(
+                ReasonCode.REVERSAL_INVALID,
+                "typed reversal journal and exact reversal link must be bijective",
+            )
+        if journal_is_reversal:
+            assert self.journal_transaction is not None
+            reversal_link = self.reversal_links[0]
             if (
-                len(self.reversal_links) != 1
-                or self.journal_transaction is None
-                or any(
-                    row.reversal_transaction_ref
-                    != self.journal_transaction.journal_transaction_id
-                    for row in self.reversal_links
-                )
+                reversal_link.original_event_or_transaction_ref
+                != self.journal_transaction.reversal_of_transaction_id
+                or reversal_link.reversal_transaction_ref
+                != self.journal_transaction.journal_transaction_id
+                or reversal_link.reversal_event_ref
+                not in self.journal_transaction.economic_event_refs
             ):
-                raise ContractValidationError(ReasonCode.REVERSAL_INVALID, "reversal links require their exact atomic reversal journal")
+                raise ContractValidationError(
+                    ReasonCode.REVERSAL_INVALID,
+                    "reversal link does not close to its exact atomic reversal journal",
+                )
         validate_lineage_acyclic_v1(self.value_lineage_edges)
 
 
@@ -245,11 +262,33 @@ class TrancheCUnitOfWorkV1:
                         attempt=attempt, refs=(), claim_ref=claim.claim_ref, started_at=started_at,
                         completed_at=completed_at, failure_code=reason.value, retryable=False,
                     )
-                if records.reversal_links:
+                original_reversal_ref = (
+                    records.journal_transaction.reversal_of_transaction_id
+                    if records.journal_transaction is not None
+                    else None
+                )
+                if original_reversal_ref is not None:
+                    if len(records.reversal_links) != 1:
+                        raise ContractValidationError(
+                            ReasonCode.REVERSAL_INVALID,
+                            "typed reversal journal requires exactly one reversal link",
+                        )
                     reversal = records.reversal_links[0]
+                    if (
+                        reversal.original_event_or_transaction_ref
+                        != original_reversal_ref
+                        or reversal.reversal_transaction_ref
+                        != records.journal_transaction.journal_transaction_id
+                        or reversal.reversal_event_ref
+                        not in records.journal_transaction.economic_event_refs
+                    ):
+                        raise ContractValidationError(
+                            ReasonCode.REVERSAL_INVALID,
+                            "reversal admission does not close to the typed journal",
+                        )
                     history = self._adapter.load_committed_reversal_history(
                         transaction,
-                        reversal.original_event_or_transaction_ref,
+                        original_reversal_ref,
                     )
                     validate_reversal_bundle_against_history_v1(
                         history=history,
@@ -258,6 +297,11 @@ class TrancheCUnitOfWorkV1:
                             records.journal_postings,
                             reversal,
                         ),
+                    )
+                elif records.reversal_links:
+                    raise ContractValidationError(
+                        ReasonCode.REVERSAL_INVALID,
+                        "reversal link cannot exist without a typed reversal journal",
                     )
                 if records.journal_transaction is not None:
                     AccountingAndTCAServiceV1.validate_journal(records.journal_transaction, records.journal_postings, accounts)

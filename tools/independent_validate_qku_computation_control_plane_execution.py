@@ -47,6 +47,37 @@ def _assigned_tuple(tree: ast.Module, name: str) -> tuple[object, ...]:
     raise ValueError(f"missing tuple {name}")
 
 
+def _class_method_node(
+    tree: ast.Module, class_name: str, method_name: str
+) -> ast.FunctionDef:
+    for node in tree.body:
+        if isinstance(node, ast.ClassDef) and node.name == class_name:
+            for item in node.body:
+                if isinstance(item, ast.FunctionDef) and item.name == method_name:
+                    return item
+    raise ValueError(f"missing {class_name}.{method_name}")
+
+
+def _assigned_value(function: ast.FunctionDef, name: str) -> ast.expr:
+    for node in ast.walk(function):
+        if (
+            isinstance(node, ast.Assign)
+            and any(
+                isinstance(target, ast.Name) and target.id == name
+                for target in node.targets
+            )
+        ):
+            return node.value
+    raise ValueError(f"missing assignment {name}")
+
+
+def _attributes(node: ast.AST) -> set[str]:
+    return {
+        child.attr for child in ast.walk(node)
+        if isinstance(child, ast.Attribute)
+    }
+
+
 def _call_order(tree: ast.Module) -> tuple[str, ...]:
     for node in ast.walk(tree):
         if isinstance(node, ast.FunctionDef) and node.name == "execute":
@@ -133,6 +164,109 @@ def main() -> int:
             failures.append(
                 f"{class_name}: committed reversal-history read contract missing"
             )
+    try:
+        atomic_post_init = _class_method_node(
+            trees["transaction.py"],
+            "TrancheCAtomicRecordSetV1",
+            "__post_init__",
+        )
+        journal_is_reversal = _assigned_value(
+            atomic_post_init, "journal_is_reversal"
+        )
+        reversal_link_count = _assigned_value(
+            atomic_post_init, "reversal_link_count"
+        )
+        bijection_compare = any(
+            isinstance(node, ast.Compare)
+            and isinstance(node.left, ast.Name)
+            and node.left.id == "journal_is_reversal"
+            and any(
+                isinstance(child, ast.Name)
+                and child.id == "reversal_link_count"
+                for comparator in node.comparators
+                for child in ast.walk(comparator)
+            )
+            for node in ast.walk(atomic_post_init)
+        )
+        bounded_link_count = any(
+            isinstance(node, ast.Compare)
+            and isinstance(node.left, ast.Name)
+            and node.left.id == "reversal_link_count"
+            and any(isinstance(operator, ast.NotIn) for operator in node.ops)
+            for node in ast.walk(atomic_post_init)
+        )
+        if (
+            not {"journal_transaction", "reversal_of_transaction_id"}
+            <= _attributes(journal_is_reversal)
+            or "reversal_links" not in _attributes(reversal_link_count)
+            or not bijection_compare
+            or not bounded_link_count
+            or not {
+                "original_event_or_transaction_ref",
+                "reversal_transaction_ref",
+                "reversal_event_ref",
+                "economic_event_refs",
+            } <= _attributes(atomic_post_init)
+        ):
+            failures.append(
+                "atomic record set does not enforce reversal-journal/link bijection"
+            )
+
+        execute = _class_method_node(
+            trees["transaction.py"], "TrancheCUnitOfWorkV1", "execute"
+        )
+        original_reversal_ref = _assigned_value(execute, "original_reversal_ref")
+        history_calls = tuple(
+            node for node in ast.walk(execute)
+            if isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Attribute)
+            and node.func.attr == "load_committed_reversal_history"
+        )
+        history_uses_typed_ref = (
+            len(history_calls) == 1
+            and len(history_calls[0].args) >= 2
+            and isinstance(history_calls[0].args[1], ast.Name)
+            and history_calls[0].args[1].id == "original_reversal_ref"
+        )
+        typed_admission = any(
+            isinstance(node, ast.If)
+            and any(
+                isinstance(child, ast.Name)
+                and child.id == "original_reversal_ref"
+                for child in ast.walk(node.test)
+            )
+            for node in ast.walk(execute)
+        )
+        bool_link_gates = tuple(
+            node for node in ast.walk(execute)
+            if isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Name)
+            and node.func.id == "bool"
+            and any(
+                isinstance(child, ast.Attribute)
+                and child.attr == "reversal_links"
+                for child in ast.walk(node)
+            )
+        )
+        if (
+            not {"journal_transaction", "reversal_of_transaction_id"}
+            <= _attributes(original_reversal_ref)
+            or not typed_admission
+            or not history_uses_typed_ref
+            or bool_link_gates
+            or not {
+                "reversal_links",
+                "original_event_or_transaction_ref",
+                "reversal_transaction_ref",
+                "reversal_event_ref",
+                "economic_event_refs",
+            } <= _attributes(execute)
+        ):
+            failures.append(
+                "unit of work does not derive reversal history admission from the typed journal"
+            )
+    except ValueError as exc:
+        failures.append(str(exc))
     ordered = _call_order(trees["transaction.py"])
     required_order = (
         "acquire_idempotency_claim", "load_committed_reversal_history",
