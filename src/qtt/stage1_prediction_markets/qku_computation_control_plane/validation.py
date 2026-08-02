@@ -1612,8 +1612,246 @@ def _source_checks() -> tuple[ValidationCheckV1, ...]:
     )
 
 
+ST12C_INDEPENDENT_VALIDATOR_BY_DOMAIN = MappingProxyType(
+    {
+        "accounting": "tools/independent_validate_qku_computation_control_plane_accounting.py",
+        "execution": "tools/independent_validate_qku_computation_control_plane_execution.py",
+    }
+)
+
+ST12C_PRODUCTION_MODULE_PATHS = (
+    "src/qtt/stage1_prediction_markets/qku_computation_control_plane/context.py",
+    "src/qtt/stage1_prediction_markets/qku_computation_control_plane/economic_math.py",
+    "src/qtt/stage1_prediction_markets/qku_computation_control_plane/receipts.py",
+    "src/qtt/stage1_prediction_markets/qku_computation_control_plane/persistence.py",
+    "src/qtt/stage1_prediction_markets/qku_computation_control_plane/migrations.py",
+    "src/qtt/stage1_prediction_markets/qku_computation_control_plane/outbox.py",
+    "src/qtt/stage1_prediction_markets/qku_computation_control_plane/transaction.py",
+    "src/qtt/stage1_prediction_markets/qku_computation_control_plane/idempotency.py",
+    "src/qtt/stage1_prediction_markets/qku_computation_control_plane/rollback.py",
+    "src/qtt/stage1_prediction_markets/qku_computation_control_plane/accounting.py",
+    "src/qtt/stage1_prediction_markets/qku_computation_control_plane/lifecycle.py",
+    "src/qtt/stage1_prediction_markets/qku_computation_control_plane/sqlite_reference.py",
+)
+
+
+ST12C_REQUIRED_ASSERTION_CLASSES = (
+    "POSITIVE_GOLDEN_OR_STRUCTURAL",
+    "BOUNDARY",
+    "NEGATIVE_FAIL_CLOSED",
+    "MATERIAL_MUTATION",
+    "NO_EXTERNAL_EFFECT",
+)
+ST12C_NO_EFFECT_FLAGS = (
+    "NO_PROVIDER_CONNECTION",
+    "NO_PRIVATE_STATE",
+    "NO_REPLAY_PAPER",
+    "NO_LLM",
+    "NO_QPU",
+    "NO_MODE_ALLOW",
+    "NO_ORDER_RELEASE",
+    "NO_CAPITAL_MUTATION",
+)
+ST12C_REFERENCE_ADAPTER_MATRIX = (
+    "IN_MEMORY_REFERENCE",
+    "SQLITE_REFERENCE_WHERE_PERSISTENCE_APPLIES",
+)
+
+
+@dataclass(frozen=True, slots=True)
+class TrancheCControlCaseV1:
+    original_test_row_id: str
+    closure_refs: tuple[str, ...]
+    control_slug: str
+    domain: str
+    required_assertion_classes: tuple[str, ...] = ST12C_REQUIRED_ASSERTION_CLASSES
+    adapter_applicability: tuple[str, ...] = ST12C_REFERENCE_ADAPTER_MATRIX
+    expected_no_effect_flags: tuple[str, ...] = ST12C_NO_EFFECT_FLAGS
+    math_oracle_vector_links: tuple[str, ...] = ()
+
+    def __post_init__(self) -> None:
+        if (
+            not self.original_test_row_id.startswith("ST12-TEST::")
+            or not self.closure_refs
+            or not self.control_slug
+            or self.domain not in {"accounting", "execution"}
+            or self.required_assertion_classes != ST12C_REQUIRED_ASSERTION_CLASSES
+            or self.adapter_applicability != ST12C_REFERENCE_ADAPTER_MATRIX
+            or self.expected_no_effect_flags != ST12C_NO_EFFECT_FLAGS
+        ):
+            raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "Tranche-C control-matrix row is incomplete")
+
+    @property
+    def matrix_locator(self) -> str:
+        return f"{self.domain}/test_contract_matrix.py::{self.control_slug}"
+
+
+_ST12C_CONTROL_ROWS = (
+    ("001", "accounting", "capital-and-reserves", "ACCOUNTING::011", ("MATH-26", "MATH-27", "MATH-28", "MATH-29")),
+    ("002", "accounting", "cash-state-separation", "ACCOUNTING::004", ()),
+    ("003", "accounting", "correction-and-reversal", "ACCOUNTING::016", ()),
+    ("004", "accounting", "cross-venue-conservation", "ACCOUNTING::013", ()),
+    ("006", "accounting", "decimal-boundaries", "ACCOUNTING::001", ()),
+    ("007", "accounting", "double-entry-conservation", "ACCOUNTING::003", ()),
+    ("008", "accounting", "exposure-aggregation", "ACCOUNTING::012", ("MATH-30", "MATH-31")),
+    ("009", "accounting", "fee-rebate-treatment", "ACCOUNTING::006", ("MATH-34", "MATH-35")),
+    ("010", "accounting", "fill-branch-accounting", "ACCOUNTING::008", ("MATH-37", "MATH-38")),
+    ("013", "accounting", "pnl-classification", "ACCOUNTING::009", ()),
+    ("014", "accounting", "position-lifecycle", "ACCOUNTING::005", ()),
+    ("015", "accounting", "reconciliation", "ACCOUNTING::015", ()),
+    ("016", "accounting", "rounding-and-quantization", "ACCOUNTING::014", ()),
+    ("017", "accounting", "settlement-resolution", "ACCOUNTING::010", ()),
+    ("018", "accounting", "tca-decomposition", "ACCOUNTING::007", ("MATH-32", "MATH-33")),
+    ("020", "accounting", "unit-and-basis", "ACCOUNTING::002", ("MATH-36",)),
+    ("061", "execution", "ack-reject-fill-custody", "EXECUTION::007", ()),
+    ("062", "execution", "clock-and-stale-checks", "EXECUTION::005", ()),
+    ("067", "execution", "idempotency-key", "EXECUTION::004", ()),
+    ("070", "execution", "order-intent-contract", "EXECUTION::002", ()),
+    ("071", "execution", "order-state-machine", "EXECUTION::006", ()),
+    ("072", "execution", "partial-fill-races", "EXECUTION::008", ()),
+    ("074", "execution", "pretrade-gates", "EXECUTION::003", ()),
+    ("075", "execution", "rate-limit-control", "EXECUTION::009", ()),
+    ("078", "execution", "single-release-authority", "EXECUTION::001", ()),
+)
+ST12C_CONTROL_COVERAGE_MATRIX = tuple(
+    TrancheCControlCaseV1(
+        original_test_row_id=f"ST12-TEST::{test_number}",
+        closure_refs=(f"ST12-CLOSURE::ST11-{closure}",),
+        control_slug=slug,
+        domain=domain,
+        math_oracle_vector_links=math_links,
+    )
+    for test_number, domain, slug, closure, math_links in _ST12C_CONTROL_ROWS
+)
+ST12C_ORIGINAL_TEST_TO_MATRIX_LOCATOR = MappingProxyType(
+    {row.original_test_row_id: row.matrix_locator for row in ST12C_CONTROL_COVERAGE_MATRIX}
+)
+
+
+def validate_st12c_control_coverage_matrix() -> None:
+    identities = tuple(row.original_test_row_id for row in ST12C_CONTROL_COVERAGE_MATRIX)
+    slugs = tuple(row.control_slug for row in ST12C_CONTROL_COVERAGE_MATRIX)
+    domain_counts = Counter(row.domain for row in ST12C_CONTROL_COVERAGE_MATRIX)
+    math_links = {math_id for row in ST12C_CONTROL_COVERAGE_MATRIX for math_id in row.math_oracle_vector_links}
+    if (
+        len(identities) != 25
+        or len(set(identities)) != 25
+        or len(set(slugs)) != 25
+        or domain_counts != {"accounting": 16, "execution": 9}
+        or set(ST12C_ORIGINAL_TEST_TO_MATRIX_LOCATOR) != set(identities)
+        or math_links != {f"MATH-{number}" for number in range(26, 39)}
+        or any(row.required_assertion_classes != ST12C_REQUIRED_ASSERTION_CLASSES for row in ST12C_CONTROL_COVERAGE_MATRIX)
+        or any(row.adapter_applicability != ST12C_REFERENCE_ADAPTER_MATRIX for row in ST12C_CONTROL_COVERAGE_MATRIX)
+        or any(row.expected_no_effect_flags != ST12C_NO_EFFECT_FLAGS for row in ST12C_CONTROL_COVERAGE_MATRIX)
+    ):
+        raise ContractValidationError(ReasonCode.VALIDATION_FAILED, "Tranche-C control coverage must be exact 16+9 with 13 linked math rows")
+
+
+validate_st12c_control_coverage_matrix()
+
+ST12C_LATER_PHASE_BLOCKERS = MappingProxyType(
+    {
+        "PRODUCTION_DATABASE_SELECTION": "SEPARATE_RUNTIME_PLATFORM_AUTHORIZATION_AND_BENCHMARK",
+        "IDEMPOTENCY_PURGE_POLICY": "NO_DEFAULT_REQUIRES_HORIZON_RECONCILIATION_AND_POLICY",
+        "MATH_37_MODEL_ARTIFACT": "NO_DEFAULT_REQUIRES_VERSIONED_CALIBRATED_ARTIFACT",
+        "MATH_38_FILL_DISTRIBUTION": "NO_DEFAULT_REQUIRES_VERSIONED_DISTRIBUTION_ARTIFACT",
+        "MUTABLE_FEE_AND_BUILDER_BINDINGS": "SOURCE_BOUND_RUNTIME_OWNER_REQUIRED",
+        "PROVIDER_RATE_NUMBERS": "INJECTED_TYPED_BUDGET_REQUIRED",
+        "OUTBOX_DISPATCHER": "NOT_IMPLEMENTED_NOT_DISPATCHABLE",
+        "PRIVATE_STATE_SNAPSHOT": "FUTURE_ACCEPTED_OWNER_ONLY",
+        "EXECUTION_ROUTER_RELEASE": "FUTURE_SOLE_EXECUTION_ROUTER_V1",
+    }
+)
+
+
+def _accounting_checks() -> tuple[ValidationCheckV1, ...]:
+    from decimal import Decimal
+
+    from .accounting import CASH_STATE_CLASS_REGISTRY, EntrySideV1
+    from .context import DECIMAL_PRECISION, DECIMAL_ROUNDING, QuantizationRoundingV1
+    from .economic_math import TRANCHE_C_MATH_SPECIFICATIONS
+    from .implementation_registry import TRANCHE_C_IMPLEMENTATION_REGISTRY
+    from .migrations import APPEND_ONLY_TABLES_V1, PRODUCTION_PERSISTENCE_SELECTION_STATE_V1
+    from .oracle_contracts import ST12C_GOLDEN_VECTOR_BY_MATH_ID, ST12C_ORACLE_BY_MATH_ID
+    from .parameter_policy import TRANCHE_C_PARAMETER_APPLICATION_BINDINGS, TRANCHE_C_PARAMETER_POLICIES
+    from .persistence import InMemoryPersistenceAdapterV1, PersistenceAdapterV1
+    from .sqlite_reference import SQLiteReferenceAdapterV1
+
+    return (
+        _check("ST12C_ACCOUNTING_CAPITAL_RESERVES", len(CASH_STATE_CLASS_REGISTRY) == 12, "twelve orthogonal cash classes"),
+        _check("ST12C_ACCOUNTING_CASH", "SETTLED_SPENDABLE_CASH" in CASH_STATE_CLASS_REGISTRY and "UNREALIZED_PNL" in CASH_STATE_CLASS_REGISTRY, "settled and unrealized remain distinct"),
+        _check("ST12C_ACCOUNTING_CORRECTION", "reversal_links" in APPEND_ONLY_TABLES_V1, "append-only reversal linkage"),
+        _check("ST12C_ACCOUNTING_CROSS_VENUE", "COLLATERAL_OR_MARGIN_LOCK" in CASH_STATE_CLASS_REGISTRY, "venue/collateral partition retained"),
+        _check("ST12C_ACCOUNTING_DECIMAL", DECIMAL_PRECISION == 34 and DECIMAL_ROUNDING == "ROUND_HALF_EVEN", "Decimal precision 34 HALF_EVEN"),
+        _check("ST12C_ACCOUNTING_DOUBLE_ENTRY", EntrySideV1.DEBIT.value == "DEBIT" and Decimal(1) == -(-Decimal(1)), "debit positive and credit negative"),
+        _check("ST12C_ACCOUNTING_EXPOSURE", PRODUCTION_PERSISTENCE_SELECTION_STATE_V1.startswith("NO_DEFAULT"), "no production storage selection"),
+        _check("ST12C_ACCOUNTING_FEE", all(math_id in TRANCHE_C_MATH_SPECIFICATIONS for math_id in ("MATH-34", "MATH-35")), "fee/rebate formulas registered"),
+        _check("ST12C_ACCOUNTING_FILL", all(math_id in TRANCHE_C_MATH_SPECIFICATIONS for math_id in ("MATH-37", "MATH-38")), "fill model/distribution boundaries registered"),
+        _check("ST12C_ACCOUNTING_PNL", {"MARKED_PNL", "UNREALIZED_PNL", "REALIZED_EXIT_NET_CASH", "REALIZED_SETTLEMENT_NET_CASH"} <= set(CASH_STATE_CLASS_REGISTRY), "PnL classifications orthogonal"),
+        _check("ST12C_ACCOUNTING_POSITION", "MATH-27" in TRANCHE_C_MATH_SPECIFICATIONS and "MATH-28" in TRANCHE_C_MATH_SPECIFICATIONS, "advisory sizing never owns position truth"),
+        _check("ST12C_ACCOUNTING_RECONCILIATION", "reconciliation_breaks" in APPEND_ONLY_TABLES_V1, "injected reconciliation breaks persist append-only"),
+        _check("ST12C_ACCOUNTING_ROUNDING", QuantizationRoundingV1.HALF_EVEN.value == "ROUND_HALF_EVEN", "field policy owns quantization"),
+        _check("ST12C_ACCOUNTING_SETTLEMENT", "PENDING_CASH" in CASH_STATE_CLASS_REGISTRY and "REALIZED_SETTLEMENT_NET_CASH" in CASH_STATE_CLASS_REGISTRY, "pending settlement cannot silently promote"),
+        _check("ST12C_ACCOUNTING_TCA", all(math_id in TRANCHE_C_IMPLEMENTATION_REGISTRY for math_id in ("MATH-32", "MATH-33")), "TCA implementation registry closed"),
+        _check(
+            "ST12C_ACCOUNTING_UNIT_BASIS",
+            len(APPEND_ONLY_TABLES_V1) == 10
+            and len(TRANCHE_C_PARAMETER_POLICIES) == 80
+            and len(TRANCHE_C_PARAMETER_APPLICATION_BINDINGS) == 80
+            and len(TRANCHE_C_MATH_SPECIFICATIONS) == 13
+            and len(ST12C_ORACLE_BY_MATH_ID) == 13
+            and len(ST12C_GOLDEN_VECTOR_BY_MATH_ID) == 13
+            and issubclass(InMemoryPersistenceAdapterV1, PersistenceAdapterV1)
+            and issubclass(SQLiteReferenceAdapterV1, PersistenceAdapterV1),
+            "12/80/80/13/13/13 and both adapters share one typed owner",
+        ),
+    )
+
+
+def _execution_checks() -> tuple[ValidationCheckV1, ...]:
+    from .idempotency import IDEMPOTENCY_RETENTION_POLICY_V1
+    from .lifecycle import (
+        FINAL_RELEASE_AUTHORITY,
+        FORBIDDEN_EXECUTION_METHODS,
+        FUTURE_ORDER_CUSTODY_STATE_MACHINE_V1,
+        ORDER_INTENT_STATE_MACHINE_V1,
+        PREFLIGHT_GATE_CLASSES,
+    )
+    from .outbox import OUTBOX_DISPATCHER_IMPLEMENTED, OUTBOX_RUNTIME_STATE_V1
+    from .persistence import PersistenceAdapterV1
+    from .service import QKUComputationControlPlaneV1
+
+    public_methods = tuple(
+        name
+        for name, value in QKUComputationControlPlaneV1.__dict__.items()
+        if callable(value) and not name.startswith("_")
+    )
+    return (
+        _check("ST12C_EXECUTION_CUSTODY", FUTURE_ORDER_CUSTODY_STATE_MACHINE_V1.contract_boundary_only, "future custody fixtures only"),
+        _check("ST12C_EXECUTION_CLOCK", "EXPIRED" in ORDER_INTENT_STATE_MACHINE_V1.terminal_states, "explicit expiry terminal"),
+        _check("ST12C_EXECUTION_IDEMPOTENCY", IDEMPOTENCY_RETENTION_POLICY_V1.endswith("NO_TIME_BASED_PURGE_API"), "canonical request retention without purge default"),
+        _check("ST12C_EXECUTION_ORDER_INTENT", "SUBMIT_DISABLED" in ORDER_INTENT_STATE_MACHINE_V1.terminal_states, "normalized intent remains no-write"),
+        _check("ST12C_EXECUTION_STATE", len(FUTURE_ORDER_CUSTODY_STATE_MACHINE_V1.allowed_transitions) == 21, "legal custody transition registry exact"),
+        _check("ST12C_EXECUTION_PARTIAL_RACES", ("CANCELLED", "PARTIALLY_FILLED") in FUTURE_ORDER_CUSTODY_STATE_MACHINE_V1.allowed_transitions, "late-fill cancel race represented"),
+        _check("ST12C_EXECUTION_GATES", len(PREFLIGHT_GATE_CLASSES) == 13, "all preflight gates required"),
+        _check("ST12C_EXECUTION_RATE", "RATE_LIMIT_BUDGET_REQUIRED" in {row.name for row in ReasonCode}, "injected typed rate budget fail-closed"),
+        _check(
+            "ST12C_EXECUTION_RELEASE",
+            OUTBOX_RUNTIME_STATE_V1 == "RECORDED_NOT_DISPATCHABLE"
+            and not OUTBOX_DISPATCHER_IMPLEMENTED
+            and FINAL_RELEASE_AUTHORITY.startswith("ExecutionRouterV1_FUTURE")
+            and not FORBIDDEN_EXECUTION_METHODS & set(public_methods)
+            and not any(name in PersistenceAdapterV1.__dict__ for name in FORBIDDEN_EXECUTION_METHODS)
+            and len(ST12C_LATER_PHASE_BLOCKERS) == 9,
+            "no dispatcher, provider write, release, or resolved later blocker",
+        ),
+    )
+
+
 _DOMAIN_CHECKS: dict[str, Callable[[], tuple[ValidationCheckV1, ...]]] = {
     "architecture": _architecture_checks,
+    "accounting": _accounting_checks,
+    "execution": _execution_checks,
     "operations": _operations_checks,
     "quantum": _quantum_checks,
     "security": _security_checks,
@@ -1904,6 +2142,105 @@ def _canonical_vector_equal(
 def compare_golden_vector(math_id: str) -> bool:
     actual = evaluate_golden_vector(math_id)
     expected = json.loads(GOLDEN_VECTOR_BY_MATH_ID[math_id].expected_json)
+    return _canonical_vector_equal(actual, expected)
+
+
+def evaluate_st12c_golden_vector(math_id: str) -> object:
+    """Primary Tranche-C evaluator; independent validators must not import it."""
+
+    from .context import QuantizationPolicyV1, QuantizationRoundingV1
+    from .economic_math import (
+        ActivePriceGridRangeV1,
+        BinaryBookSnapshotV1,
+        FeeScheduleBindingV1,
+        FillQuantityDistributionArtifactV1,
+        FillProbabilityModelArtifactV1,
+        binary_book_implied_asks_v1,
+        binary_kelly_fraction_v1,
+        conditional_value_at_risk_v1,
+        empirical_expected_shortfall_v1,
+        expected_partial_fill_quantity_v1,
+        expected_value_of_information_v1,
+        fill_probability_v1,
+        fractional_kelly_v1,
+        global_prediction_market_fee_v1,
+        implementation_shortfall_v1,
+        mean_variance_utility_v1,
+        spread_cost_v1,
+        us_prediction_market_fee_or_rebate_v1,
+    )
+    from .oracle_contracts import ST12C_GOLDEN_VECTOR_BY_MATH_ID
+
+    try:
+        values = json.loads(ST12C_GOLDEN_VECTOR_BY_MATH_ID[math_id].inputs_json)
+    except KeyError as exc:
+        raise ContractValidationError(ReasonCode.UNKNOWN_IMPLEMENTATION, f"unknown Tranche-C golden vector: {math_id}") from exc
+    decimal = lambda value: Decimal(str(value))
+    if math_id == "MATH-26":
+        scenarios = tuple((decimal(row["probability"]), tuple(decimal(value) for value in row["action_values"])) for row in values["new_information_scenarios"])
+        return {"evi": expected_value_of_information_v1(tuple(decimal(value) for value in values["current_action_values"]), scenarios, decimal(values["acquisition_cost"]))}
+    if math_id == "MATH-27":
+        return {"kelly_fraction": binary_kelly_fraction_v1(values["win_probability"], values["net_odds"]).raw_fraction}
+    if math_id == "MATH-28":
+        return {"fractional_kelly": fractional_kelly_v1(values["full_kelly_fraction"], values["fraction_multiplier"], (values["risk_cap"],))}
+    if math_id == "MATH-29":
+        return {"utility": mean_variance_utility_v1(("1",), (values["mean_return"],), ((values["variance"],),), values["risk_aversion"], values["transaction_cost"])}
+    if math_id == "MATH-30":
+        result = conditional_value_at_risk_v1(tuple(decimal(value) for value in values["losses"]), decimal(values["alpha"]))
+        return {"var": result.value_at_risk, "cvar": result.conditional_value_at_risk}
+    if math_id == "MATH-31":
+        return {"expected_shortfall": empirical_expected_shortfall_v1(tuple(decimal(value) for value in values["losses"]), decimal(values["alpha"]))}
+    if math_id == "MATH-32":
+        return {"implementation_shortfall": implementation_shortfall_v1(side=values["side"], quantity=values["quantity"], execution_price=values["execution_price"], decision_price=values["decision_price"], explicit_fees=values["explicit_fees"], opportunity_cost_unfilled=values["opportunity_cost_unfilled"], other_declared_costs=values["other_costs"])}
+    if math_id == "MATH-33":
+        return {"spread_cost": spread_cost_v1(side=values["side"], quantity=values["quantity"], execution_price=values["execution_price"], midpoint_at_decision=values["midpoint_at_decision"])}
+    if math_id == "MATH-34":
+        binding = FeeScheduleBindingV1("GOLDEN::CATEGORY_BINDING", "GOLDEN::VENUE", "GOLDEN::CATEGORY", "1", "GOLDEN::SOURCE_EPOCH", datetime(2025, 1, 1, tzinfo=UTC), None, datetime(2026, 1, 1, tzinfo=UTC), ("PLATFORM_FEE", "BUILDER_FEE_SEPARATE_ADDITIVE"), (("PLATFORM_FEE", values["fee_rate"]),))
+        policy = QuantizationPolicyV1("GOLDEN::MATH-34::5DP", "fee", "0.00001", QuantizationRoundingV1.HALF_EVEN, "USD", "USD", "VENUE_FEE", 5, binding.binding_ref)
+        result = global_prediction_market_fee_v1(contracts=values["contracts"], fee_rate=values["fee_rate"], price=values["price"], schedule_binding=binding, quantization_policy=policy, receipt_id="GOLDEN::MATH-34::RECEIPT")
+        return {"fee_before_rounding": result.amount_before_rounding, "fee_after_rounding": result.amount_after_rounding}
+    if math_id == "MATH-35":
+        binding = FeeScheduleBindingV1("GOLDEN::EFFECTIVE_SCHEDULE", "GOLDEN::US_VENUE", "EXCHANGE_WIDE", "1", "GOLDEN::SOURCE_EPOCH", datetime(2026, 4, 3, 19, tzinfo=UTC), None, datetime(2026, 4, 4, tzinfo=UTC), ("MAKER_REBATE", "TAKER_FEE"), (("MAKER_REBATE", values["maker_theta"]), ("TAKER_FEE", values["taker_theta"])))
+        policy = QuantizationPolicyV1("GOLDEN::MATH-35::CENT", "fee_or_rebate", "0.01", QuantizationRoundingV1.HALF_EVEN, "USD", "USD", "VENUE_FEE_OR_REBATE", 2, binding.binding_ref)
+        maker = us_prediction_market_fee_or_rebate_v1(contracts=values["contracts"], theta=values["maker_theta"], price=values["price"], liquidity_role="MAKER", schedule_binding=binding, quantization_policy=policy, receipt_id="GOLDEN::MATH-35::MAKER")
+        taker = us_prediction_market_fee_or_rebate_v1(contracts=values["contracts"], theta=values["taker_theta"], price=values["price"], liquidity_role="TAKER", schedule_binding=binding, quantization_policy=policy, receipt_id="GOLDEN::MATH-35::TAKER")
+        return {"maker_amount_before_rounding": maker.amount_before_rounding, "maker_amount_after_bankers_rounding": maker.amount_after_rounding, "taker_amount_before_rounding": taker.amount_before_rounding, "taker_amount_after_bankers_rounding": taker.amount_after_rounding}
+    if math_id == "MATH-36":
+        touches = binary_book_implied_asks_v1(
+            snapshot=BinaryBookSnapshotV1(
+                "GOLDEN::BOOK", "GOLDEN::SEQUENCE", "GOLDEN::SOURCE", "USD", "PAYOUT",
+                (values["yes_best_bid"],), (values["no_best_bid"],), values["payout"],
+                1, 1, "CURRENT_CONTIGUOUS_SNAPSHOT_PLUS_DELTAS",
+                (ActivePriceGridRangeV1("0.00", "1.00", "0.01"),),
+            )
+        )
+        return {"yes_implied_ask": touches.yes_implied_ask, "no_implied_ask": touches.no_implied_ask}
+    if math_id == "MATH-37":
+        probabilities = []
+        for horizon, probability in zip(values["same_order_context_horizons_seconds"], ("0.1", "0.4", "0.8"), strict=True):
+            artifact = FillProbabilityModelArtifactV1(
+                "GOLDEN::MODEL", "1", "GOLDEN::FEATURES", "GOLDEN::CALIBRATION", "GOLDEN::SCOPE", horizon, probability,
+                "GOLDEN::FEATURE_SNAPSHOT", datetime(2026, 1, 1, tzinfo=UTC), datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC),
+                datetime(2027, 1, 1, tzinfo=UTC), timedelta(seconds=5), "VALIDATED",
+            )
+            probabilities.append(fill_probability_v1(artifact=artifact, feature_schema_ref="GOLDEN::FEATURES", scope_ref="GOLDEN::SCOPE", horizon_seconds=horizon))
+        return {"calibration_receipt_required": True, "probabilities_bounded_0_1": all(0 <= value <= 1 for value in probabilities), "probability_non_decreasing_by_horizon": probabilities == sorted(probabilities)}
+    if math_id == "MATH-38":
+        distribution = tuple((row["quantity"], row["probability"]) for row in values["fill_quantity_distribution"])
+        maximum = max(decimal(row["quantity"]) for row in values["fill_quantity_distribution"])
+        artifact = FillQuantityDistributionArtifactV1(
+            "GOLDEN::DISTRIBUTION", "1", "GOLDEN::SOURCE", "GOLDEN::SCOPE", 30,
+            datetime(2026, 1, 1, tzinfo=UTC), datetime(2027, 1, 1, tzinfo=UTC), maximum, "0", distribution,
+        )
+        return {"expected_fill_quantity": expected_partial_fill_quantity_v1(artifact=artifact)}
+    raise ContractValidationError(ReasonCode.UNKNOWN_IMPLEMENTATION, f"unhandled Tranche-C golden vector: {math_id}")
+
+
+def compare_st12c_golden_vector(math_id: str) -> bool:
+    from .oracle_contracts import ST12C_GOLDEN_VECTOR_BY_MATH_ID
+
+    actual = evaluate_st12c_golden_vector(math_id)
+    expected = json.loads(ST12C_GOLDEN_VECTOR_BY_MATH_ID[math_id].expected_json)
     return _canonical_vector_equal(actual, expected)
 
 

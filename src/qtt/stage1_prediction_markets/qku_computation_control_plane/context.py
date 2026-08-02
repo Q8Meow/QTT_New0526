@@ -10,15 +10,35 @@ from decimal import (
     DivisionByZero,
     FloatOperation,
     InvalidOperation,
+    localcontext,
     Overflow,
     ROUND_HALF_EVEN,
+    ROUND_CEILING,
+    ROUND_DOWN,
+    ROUND_FLOOR,
+    ROUND_HALF_DOWN,
+    ROUND_HALF_UP,
+    ROUND_UP,
 )
+from enum import StrEnum
 
 from .errors import ContractValidationError, NumericDomainError, ReasonCode
 
 
 DECIMAL_PRECISION = 34
 DECIMAL_ROUNDING = ROUND_HALF_EVEN
+
+
+class QuantizationRoundingV1(StrEnum):
+    """Allowlisted Decimal rounding modes; no module-local implicit default."""
+
+    HALF_EVEN = ROUND_HALF_EVEN
+    HALF_UP = ROUND_HALF_UP
+    HALF_DOWN = ROUND_HALF_DOWN
+    DOWN = ROUND_DOWN
+    UP = ROUND_UP
+    FLOOR = ROUND_FLOOR
+    CEILING = ROUND_CEILING
 
 
 def decimal_context_v1() -> Context:
@@ -130,6 +150,140 @@ def parse_utc(value: datetime | str, *, field_name: str) -> datetime:
             ReasonCode.INVALID_CONTRACT, f"{field_name} must be timezone-aware"
         )
     return parsed.astimezone(UTC)
+
+
+@dataclass(frozen=True, slots=True)
+class QuantizationPolicyV1:
+    """One field- and binding-specific quantization boundary."""
+
+    policy_id: str
+    field_id: str
+    increment: Decimal | str | int
+    rounding: QuantizationRoundingV1
+    unit: str
+    currency_or_asset: str
+    basis: str
+    scale: int
+    source_binding_ref: str
+
+    def __post_init__(self) -> None:
+        for name in (
+            "policy_id",
+            "field_id",
+            "unit",
+            "currency_or_asset",
+            "basis",
+            "source_binding_ref",
+        ):
+            value = getattr(self, name)
+            if not isinstance(value, str) or not value.strip():
+                raise ContractValidationError(
+                    ReasonCode.INCOMPLETE_CONTRACT,
+                    f"quantization {name} is required",
+                )
+        increment = exact_decimal(self.increment, field_name="increment")
+        if increment <= 0:
+            raise NumericDomainError(
+                ReasonCode.OUT_OF_DOMAIN,
+                "quantization increment must be positive",
+            )
+        if not isinstance(self.rounding, QuantizationRoundingV1):
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "rounding must be an allowlisted QuantizationRoundingV1",
+            )
+        if isinstance(self.scale, bool) or not isinstance(self.scale, int) or self.scale < 0:
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "quantization scale must be a nonnegative integer",
+            )
+        if increment.as_tuple().exponent != -self.scale:
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "quantization increment exponent must match declared scale",
+            )
+        object.__setattr__(self, "increment", increment)
+
+
+@dataclass(frozen=True, slots=True)
+class QuantizationReceiptV1:
+    receipt_id: str
+    policy_ref: str
+    field_id: str
+    pre_value: Decimal
+    post_value: Decimal
+    residual: Decimal
+    unit: str
+    currency_or_asset: str
+    basis: str
+    scale: int
+    rounding: QuantizationRoundingV1
+
+    def __post_init__(self) -> None:
+        for name in ("receipt_id", "policy_ref", "field_id", "unit", "currency_or_asset", "basis"):
+            value = getattr(self, name)
+            if not isinstance(value, str) or not value.strip():
+                raise ContractValidationError(
+                    ReasonCode.INCOMPLETE_CONTRACT,
+                    f"quantization receipt {name} is required",
+                )
+        pre = exact_decimal(self.pre_value, field_name="pre_value")
+        post = exact_decimal(self.post_value, field_name="post_value")
+        residual = exact_decimal(self.residual, field_name="residual")
+        if pre - post != residual:
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "quantization residual must equal pre_value - post_value",
+            )
+        if isinstance(self.scale, bool) or not isinstance(self.scale, int) or self.scale < 0:
+            raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "quantization receipt scale must be nonnegative integer")
+        if not isinstance(self.rounding, QuantizationRoundingV1):
+            raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "quantization receipt rounding must be allowlisted")
+        if post.as_tuple().exponent != -self.scale:
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "quantized value precision does not match the receipt scale",
+            )
+        object.__setattr__(self, "pre_value", pre)
+        object.__setattr__(self, "post_value", post)
+        object.__setattr__(self, "residual", residual)
+
+
+def quantize_decimal_v1(
+    value: Decimal | str | int,
+    *,
+    policy: QuantizationPolicyV1,
+    receipt_id: str,
+) -> QuantizationReceiptV1:
+    """Quantize exactly once through the declared typed policy."""
+
+    if not isinstance(policy, QuantizationPolicyV1):
+        raise ContractValidationError(
+            ReasonCode.QUANTIZATION_POLICY_MISSING,
+            "a typed quantization policy is required",
+        )
+    pre = exact_decimal(value, field_name=policy.field_id)
+    with localcontext(decimal_context_v1()) as context:
+        units = context.divide(pre, policy.increment)
+        rounded_units = units.to_integral_value(rounding=policy.rounding.value)
+        post = context.quantize(
+            context.multiply(rounded_units, policy.increment),
+            policy.increment,
+        )
+        residual = context.subtract(pre, post)
+    return QuantizationReceiptV1(
+        receipt_id=receipt_id,
+        policy_ref=policy.policy_id,
+        field_id=policy.field_id,
+        pre_value=pre,
+        post_value=post,
+        residual=residual,
+        unit=policy.unit,
+        currency_or_asset=policy.currency_or_asset,
+        basis=policy.basis,
+        scale=policy.scale,
+        rounding=policy.rounding,
+    )
 
 
 @dataclass(frozen=True, slots=True)

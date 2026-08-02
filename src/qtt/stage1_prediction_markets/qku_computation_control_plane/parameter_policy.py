@@ -3,13 +3,17 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from decimal import Decimal
+import base64
+from datetime import datetime
+from decimal import Decimal, localcontext
+from enum import StrEnum
 import json
 import re
 from types import MappingProxyType
 from typing import Mapping
+import zlib
 
-from .context import exact_decimal
+from .context import decimal_context_v1, exact_decimal, parse_utc
 from .errors import NumericDomainError, ParameterPolicyError, ReasonCode
 
 
@@ -15578,4 +15582,1035 @@ if (
     raise ParameterPolicyError(
         ReasonCode.PARAMETER_BINDING_MISMATCH,
         "v3.4 cumulative parameter closure must be exactly 135+344=479 and 190 runtime",
+    )
+
+
+# Tranche-C is retained as an exact currentized overlay so predecessor compatibility
+# views and their frozen 479-row denominator remain unchanged.
+_ST12C_POLICY_ARCHIVE_B85 = (
+    'c-rlq`EDaglBfUQrwHT%i`^MTB}q|N6=r}C8I+>Mt9U3gdoYL!kwJ-_yoyI=sv8Z=JM2E;Jjwpd+~Xj{J0+2n3}|#I$zUArZpRm9ZuXB4-eAyaH@v%cr#*gjM`Lg7fB5x7wPw|vj9dCtv@348ly@>;J{)~$c)flP2Y1~5_ntq*aaN<zpY+D<-o4dp)-qPrAAV~${M#fQ?GMN8R@-mlto|UGbQ_b=xZiwqhkgq`ZTAL~@#y31Q6GP=)!gdXyZ4j$5C5+04ZW^E_J?k{k9&P|t>)h*P29)0-S4^Il5XOczm596&i|~|l1Z~{Rjk6Vza|oi<Mh0{81}!re)rCAHt|`z=MIMb?qK}k*Ou2A`8dAc^nbWGTf67uPDj2sY&^JLr_=xLH)oE**Zt0f?gG!_6v}zKU>9qK{n^Uk|BLm4TdKH~dfxucsMvq8@nNZ6GfO$s%I8a;@=mp8+*<j%U8Vb+42M2O^6&bo{NYHQ7Y~)nm=(KfTb0bUnXB0LUu{#3aPS*ENqDObJWdCr)$>QAa6U67y1Sa~7E5lXl(j#*!3pul?{%kQXK}t}d+0aD?x;T*Hhj0y@!DPYZ<sWUpBn7ZhhP8WKaW26trm`JfAift%s!2yzV>L~;fMX9+iH(-BfZgh=(T$o+z+kx55H-Q9=mrmg~o8w@eK^}<8MaSdo+6ev2o`c-+k{Z?z?HUd&c;|H$1+G;Wyhn#_<a`y~iZ3ic5d<IupKTG#f6R9v96ym1@n+<gIGe&Dt5K>XeGEm9N>AB9`~9J$**M<xM(c*PDzV`a=>148RCa{K5WQh5$G<mzE}GG%gix)wZ)d&33hvuh-}bG~-jJ#-i!md5y2`o&Vr{YvW$OKlnX;=aZiI&1-kOJ9W#JlgAyGsyJ({gtJ~@mDrdb7b^x=ty($TEnBr~x+W&GR<W|v7h}=H_>3Oz`rfeV(&z=^9XwIRws6zMJZ}F>;gTL?>J$SdX5mQC0<tSLC+FZka64rZN)j`ysF-?)P5=q_u`;n1hF<TUX9r7R(il&MP##kY;~%Rg>7O%a4ktNy7_F;F-lh)K%a}!g?uZuehxpw6`fE1jCKFdAO4U-mlA)2!+(aKwE%iy;{oZcg`{VG!xl*N2&s*-LmA#stgGmqT9}j)!joNf%uW#ako4zp~`rfz;nPmx>`i)u*k?ip$XvGDy>|T{_X;6x|&tQptYd3kA`9jf+Sp|pYHhLzvoUd11R!n;NTIF&D=gYdRfu_#Y?lqy%S%`vh!$`EeZoBj7K0S=JIcX_VUDvd4ove+!jE`@dloCC-Qg3=`{XM2qXO4(X^jBOdW|JydCRiN>rwGx&2YM`Ken0kxm@A(1(XjFH&++)<NLiJ^5F*jwgSy`ED-Qbj=hq4A&58aoR_J)x@3@1G*YiIPLi?ix<CnoBEsc&h>1lmC8P6I}Qn>Y+b(y!_T%}ZS_098OFMNcqH{z?{s_ujD@$e43@dG^sjNsUC9OJ+L>;D-Qe+=niJqhJJ=27xGM$;d)?|X*VYZ~D#8&KR{r+<&LXH&lz#eUE1`S<;CoAeFzF)r9OI^Oq@I)G-&usVYW&-Ag@4Kj{>I{lFmtl=ZR0M>Dbrq66a2a|3yym7w^%^qEu4$}i^j0S!qv?4Tk@kbr`YBt(5%lam0G}@yPjR1xe3$fjUfV7*T3S})uHq~{C7*$6vWRjMulZP3`5a+CVzJ@dP`mT~QUJf{dmOj>K1-7tQ#5tgHa2S8#+*&Y`G+nm(s8pc?D|X(ts`{ghRd#At-YwK=R`J{a<ZF!D9W1}VkbL+R8V~C_T0I_|ma%%ud7esiU~otxI%MVuWk_*U7mkRFYxC65A+X@>5sO$4P63%`UPZicKm7WS5A4Zw+9Rm32fy)^hcR>jppyL|mXh0>bp2tw;f@~%w3_KZO*gRKJfg!cEdWnDKN+i7DmodAiPAB((v4lDxgdANt=XTU;Y)TUqXs&-E&Q-ps*x&!Iwo29@K1VzKB<_Yp0atWVn{A$H!|6w(8Y|@JpVQLT}-#&Y7M_R8TwkrMm~EUO&_`xdcw$hk7m*!N5kk3@iE4y+wNib0w)GT)}Q_f4c0HX+AXbD+?e6rdnBlQRA?Cuwu~$!k!ds{(@1Bq;F~{ApIkd!>=S)dUKfe)Z#ePaFj_d@qrsNM=)=3lI2vu73hOg4EYoi0lvy+j7Wo?Gyj6sMnfN8~3oW{EP))Y{DSY)ys*;YKlU-$>baX0}NKAi>sTo2PQpxiRd_f*~3S-`e;(eqw3kB+j%RObn&J{D)wwd|x&;Rj{H;pDIf+l;4ChSVZ0p+2M`RIlA&+y<9KVZ^vEDmh-hj)Cy=6Di3o?H7;#{XySe9dBS&4!a!gsWe`pwQnrs8NTl6nxF9Q(co=%JoY~hYK(Ly2Ol9c3|zYk@eFSG8pHo8!i+!YcAYP_Qo%rV%8~M3Dd00G+WQ?n}Qt@cj(743}+-%tC>eHTl=$}Q9PX~5g<ZMV0vm;B0N%xXh<Uq3keGe3%wl{I$6m=C-YfI3BJIPz|fw+P%<?ihEj>7z)(!$&jg0{6ozmdoPszFLGQv~c1QtWMn=9#AM4{rU?cw-iAa0QpB$jU6`7)2%nhc>DrV#UARDNv1atNed^VcEx4=H|I28LpHd^6S#l>j7m`}N4tC$bGvmE@ZODFHtz69eb#3RHb#PfED=WHeMoGpp|4928v+`-qeAdeu=j*;j1bOG|DP6T;kB7ZK(v;V1SN~IhApA)ZR-c86SG@wZ_{`ZhKJq|w^1Oks>^r5nxBDt9=@N#82MYqfr3a`Fv*U+Vf5&{O!Ujt8&KP$q8%h$e0IA{(P*;z+9U<@DCYb#s&v^y?(hFN|Kc%*J66s2LCM}D)o&~3>H*06+t1c(HP-XIX2uLPp=B|wA)?kW`{KqNr4V<1YOF94$BGXbJV<kJZOqJse<?{35r`%LL?If@A6^Dbrr`#oG6UZh(oeUgaIUPW{k&C*-o5|3THCidn$m|dt%N?BV!SYzeO*B1OMns#zzGgHe<m_(RFnB?G@gdLQnOfqxCG?TD~aaqF%ln9jU7)s6-C8nK9Vp?40lL96C0woYrZ{&}-TmY6F4reAI`%3aNC4PLY84WJPuHm-_<INc*rZLIi)%iD&vpinqXRGX_3#RM=rmQnjZ)0;!%%q!~Wd`%+WY;5=_}COF4wXl&NoYlAMQG)X(Mob9tt98uN}F{3J=GK#c7;@gRCY`%=jjEca&|1F5|j6okjnmtPlDY6=Kat|MS)<`OjrT!aR7HKw1mcYc+EbU!k>t(@K$qn`(V&MRh*iAN#5I~4VRO57Zgg$|Ff%^Qe`%)OK4`tL6?oE?=3LSQ&+GFPq62)m0LS1gZTvAU<_4wCWkf2V<)5|q$8yBc1S0+l5|o_;xfTxxKJ^IJAykq#+{3c1-NtmT-#@+wP#?Iwex;>;B$JsOYl*^Q!E*^dJ)c-QK}f#`XxrTR<GGcq($F2@jR{795Rhk>=47D4}%4{9r@#N2gVO(t=A+=YBu1O>jF{VQCZEnM_GXpKIpK+N5!N1!y(NKjvT;m@2G<}hoY|c<9{cPf;(`-J8<a^+{vhEm<EmX@SFaq)#>9z>I;PsSV&`B62ImH?j}TV`Uvb2f<%tVyKwcL(l`G{h-&vlrI;Mairq=a(~C_pIca<x*T)HlFa_j&1&4JZ9as=uoWr2$R;4b;<lN&pbL6%BHEAnQvrp!1P3lToNoyW<@#oLRU4Ey1-zML-30dtwvYQ)-+|<ym8EmpDw7o3w_-4o80QgG}`&$FBqn|#jkAD)f;PCOoTV^_10fy}jdok;yq=SpNKO?y5wf2t4ja|2;<Ti7}OrbZw*$`rzAvTg6lBdv_h#Uq1xR(dG<HXtg`q#&aljo{`U9ofU)TjvrJB8t9ZAdjQJF2au>}0f0`_Q0nr;U3ekzu|wFrWrG%!YE9jZfH=Z3H^R(8F#xRl~Zh;w*0;_jnDNAquf?%)qA;@)~%lHu9Ce(0|`ODu6QY`xp(f)e4<hj<-NL2xsEma+P|5C#i?8$y4=e*7)~-GoDPtVgy3G$*w3DSlvGrXn1WF!fl5);uPVLF6AK{y&mc4o2-;-s>s7-{m{y^y;0H;ED<c(7)w_6;yGQ=i$}i=B*VB4n7}x~4`jtU_J7dt^bg=JrWd10R{e~Jve$wyKK8?t>S@4tco`WwAoKuA%V0_4MKw(a`mMn%(YtG|^1}ua{-Ra+;^y)ti|D1O>-|jgOQlqYgL!S`bFO`B7oQDaveuWRJLB6jE7fbIBGMe78S}L76#u?PrbA5vQm?`@=cxrebN1Rhg?_)OXCmdFQQE9bs((MA<y>0&yzg$Ks>WFOgh7%PYb{Kdm8nT2Xb*DhR!`GQ=g=Kz=J5+YeZD$t4_>qX9XsIuoIuDn>^C|+K%`^by!GioK!(RwFy=5Y<~W115BkHg+3x*Kk%!U3g8dHt^_&pHi{c$2%=yX|I_C>o=s;t*!`63KDG&*-NJ89h`Q!L>em&{q;}fYT9f@-?De$qkEp&$chxVPyihFSefs1(QWZ@49YU}}OgtPI|L~&}(-IYThKVxefwT{VhaVT%p=nu#M@iw(h_=4uSYV!-kU|k&!V5p%M!Z-}Vz-$>+<Y`jgqEB`Xu2-jJ`rm@eFwaOCYGu41%ur6pGR&AgBEk%k#Ss@7Q0hZSLr7z{q;Y<+Aam>d>{Pbi%wvwTbJ=>cbJ*zlczM<(&7)rPjvsKt5B*LvP8l$f9&-g0!QcI1-|$*w>X50`nUFS%gcMs+k06kDc)FvoKZoA7N_!qU?QR=MTiPsbj3*3($~$**ZrBv1NXarbtQg!oWe?Hcy;{S+YdEr8sybY9*vgSlPBn;w_%(M<sdCEW?{yo$vvWC|QYuI91O2?#WUmWXTW-Edr7!2f6@UC}a7C86JL#IU;=D<@12v>}hSDWskGua&rAJt{+034`)5f$vHah+rMl_myBj@|3_nn$YH)zvm=VP#2RMks>A!^{x%wXHm=ozt1FTQt#ZD*^x>&zYzVjG+bcR2VVuqL~1_KDq2j=600Q+7K!K1oQFC?@$A5+&LfaAQLQ5${r-ZX+rJr}vwC!>-z}Za^{hvCWnwKQM$`CjpX1'
+    'a!t60Bft5*3G*E;(!;&rFU(`VwM7~mjE&9|zA0k81B41z5sSa-W}T{4DR4?|LB%UVXOq28DId2dDQ-VCg)bbedKI3+dkiy@Efx|I{|$IbJ8Kw3D46PX(XLhnsRXG6sRXI!Al1c6q`H`oRIHi=sw4uo2NcC6wdYaPX-X(6683XxRk}a9b{Yeo)|(^C)g~qiEL<F)fC@46A|pBJeeGfOk)jBqWt*cDMq!y_?UriSSogJSs~Em2g2TwO2EC{Ek5llY;#6<A(PpVAv8;U{su!8rw*Xp!beWNKg)+H5Y{eIp{n^gc53DDV;FjQ);MS|**7>Sltg}Z%xOFG2C9Jgvti|=b=dspVT39P4>C%C9Z&(W!@t*v<0JR3XR<<hGt%@VZbC;O1BDXMR`i8+qr_B-Ts#2<|9I&T(WEDGOJLOumwLeEOc?$zH<FVV?0~fT~1GIY98GQ>#rNrsmh>`(=&cz$BRE(d3(G!jmjuMU%j`}dqyIRgs$t86n20vV=D1j+~sola<I+0iaQ|GdEYd%(`W$V_?d1_9Vl>n{$9}Pd)XKzr6&o+svK8U0@I1n}$TWEu>MXHq&cP-kwJCec&mLSsMu|`H{al|K@-y%uc9DRZ5haI=GJ7X!T$h``HwC>spelqjnC-aQ(vv$qxtX<BRzOa)U_(g}rIT_)c_uN>B7JzX>83$&dYR$NQAHmV>n0NjDSEB<lFx415E9_+68|<W4!p?%a-k2C%a6nd0U`Mt-?HBuSyl4*lq)(59ede;yg|N^2EYMvq!d1^Zf2EA9A}ouA!URQH&u#&#6<a+hlk2ix<8Mf9La9+)f=fdO_K1CoC$6WBW(oOH*>*2+&Kear6CB!u*wU-c_>0$}cm@2@KB(#c7<fI>IGfb<D^RtL%Tnnk9HcA2RHbN9Ll1#7De)&H^)^Uq<!-0*izRjcCcR;Y-YW`A2}|u2OPw4qV5yUou+&_Zx=091y-$`3{c7Mu72St(HvM0n8xFfUhkQQzi=63CPVG8du|8RO)Oovx%YCCOx5b_8(4BS)1#||5J%c+)op#xwoQbIjPVEM#UVGBt5>bsFhV9;0!70Hh!70J1Cr;E-oVrLX!Kq>A?{E?xhF^uJgs1k4r_vV-c<NZ1H$@5{m5_oG`?JZ3s0iPZR}f{{^;%@o6hu)%9tl2#j^z2SKOEAKhgMQO%Emxt7fA(X<Bz!x@RaM9SoAL3`|A?JP1%7_%SJ{{8^YkcRX3b}wqCAo@=eXZv$OU41csKt(CmaADJ4{~KcPFh9c@{{Xi(8T9Q)#%lkE98V?QI#sO3&xVXPk%-<W|4l-<>6qi!4ho)nP;>({DWIaq}7vhq&xV93T6vN<5Kv6Dsy>P78TrBn6#X1Jae&Op4mA;xp^jQzfNM!7S~cxLv9kY|*F!^PFC2++vRqTLeA*~x-34QFX7(-0SVDbuhw1Vi%G@P@-jwqt75Fv;NTXseD`kZ0Tt`vfxj+au!+wZt3bJJ8l6JP>F8KtXi+UQf$kES5x<n^1Z3yGOQ~1{M;kJ-}c<xZ5KVU<3czw!{MlPP>B{3>IG7)T`E&&0GIDFN>FL24Mq1r2Vg&x86)1UBaop#<4f**2#+mlAvZewT`kfnNpqptcItvDivq__|QHB6-)=Js+f}z^zcR?HBC-ebtlV#A*LZNU~W~f)o314tVoDTh)RfRo_n>NsFKTwO6eHvUy?q%f>gUks?)OtNOf{5NEMU$V?nBYK`NMT6tyGa;%4Q;QJjXnCR*asTX5(@AHsO&H#}%sP*&KJN#oYoZ#?h{><~AN5MUy~#S}In+?#U}e9TKH3+G8W(+gc_!K6LMq;)6qE#OWlN~RK}ZIGu_=JM&YK_fvQK_5Y%w}w8)E79k88Ty3!#_bQJRGrYzuIcAuL8scYbLmtY7yGo(&%V%4um3d3O*uI#tQ2%y>O#>fap#~==sU+lL(1FxiQv%UKmj5I0Eek0tZK{?M8=WqA=(4j`I!lPI|+1=D4AN6n&dI`8jox45SmG&qovC5sF6k$tRR&p2qXw32z1a0lwOHI>17C{rUX{0EBqt;vs?Z-Pb}y$dv=kM5({%l=tN2^>|2QiN^o0TVF6ij1Al0eNDn9635m*i5BLtAtNa2}sPc=EAXTtFI|U%?r&6WLZ@+Ecp-%}@xq2SQ&>nqgy-R9IN-%)`-hw=IK{I&RPO%D;$4zwLMCRvh(ieK#1A5xQyuWx6hF5^D)&wzEbKte9a{dpqg9b}ROZgZZRAh*;C=HaAEjZPxbLr%rnnaoevjnpa8?#PUV%Eu$G7O|#uzG)xZV}FsN(}pjUC9Oen9dVv!LGU3bt>4kbL`@FMk9YbR&Im=v)SY55h2%T(!v$m`2076{X6#P{FsM_+3B|+fnAbweB6WB_lJ*L(3bY}NQr6JTlv>zbRV@~_TY#s&znl0QQ59i?V9)_Z`<@v9#$)G6R#|aYFHK9y~3PG2im=Wsu!Eyx4=#$gr*Y0CMUbXBUF>Q6*_T`EUP8}^#;2)d7(uYAQK?_X&^gY31p{BfQ;J{D!nB<COo!ZJeFFp3F<s4o1o$<;7rm0_bUe00w|ab;1&LUol4`%GL>@kSwom<XQdscXXP#A=E09s?+ow<d2s#)gcDx^?|c7ID0uN9376ZuVVc^PGM+m=1~J(WeQDvD6+BZWGgraeg1O5o7{>jFnX{EJbG8I#aBbF1Of`ZtKbOW=z-fkUdafCYi90uXU+NFIFP%rC3`pQ)2vK8j0bz9dC=xvU7@7+D!DPe&(d_Ft)OSi&X*0MUY9sI}rqD+r5AODx2BT&`C)hQPz2m(pI0~(i5j~;7HsvUKmbtWaq~tY#03%!_zrl~=$Hx#E-cz26k4*3cd@diG-_=dgNa2RO5#0=&>(|7o^n%7s=c#kSsYnSOUkFa^Yu6_K&j~KZVXjwb-n3DTaUrRfZK|Xu<3$1L*gdX3!6*Lk+2CoUG#v;Eg2!*}q9wf^LV+it>EP@+8H%4-<?DmtCq2HBQ@8sN&hals3HjIFn0W<C7-dFC@O<^<an;Z^+3b3QX9F5K@%swT9IxsEJ9|V#H2$CN=vxCm#Nfdbn2|k6I}OI1rqAZ@NjgoRTnIfx0-sI^J?slT1aP2V8sH^?(QJ>%hi>X}3nWzj55F-Pv*bZ+F;gR*4M!j`YV-&G_Uyn_oGBN|{%mKEm6&yHc!==fK2_f>R@^$a-kg(jKF{FQPMBiJB)v3lSc!SOflpTeM}%fiuKZ+I50)y;Ke9dh19Ou?aw;V)F#lm&TlBNdUJ^wd5O(l53wP{4cUTF-B8T@QE8~86=xBh8;gxY?j0VB}O3L8*en*(WUdK|*m^mWEj4qrCw{_=|b`Z)C%GfPsoTSg^Q^v{hnNUVd-lgvK-cZIv8{^%J?ZBZBAOe4*@9i<{8;n=0KfL3EHU|ln2f;o$r=s3+v8u@3#}<oX<eFWUN;k7br3Ec^fEHU#+Z%w5Ss^g_3*imf`tnA$z6ig(48N=_V4Yr2z*;E*rFUE!bb%Owm>omRX=(w)q$N}m3H@<OAZBkMCPM=jW>d9$EowUA<B%p6sfi%SW01Pp!hGPX5qCeuYWv#5<da^&x#0pBWNdW}0-}MSd(XJvK(2uQV}R_)kwM?$Z>$z1Mz%WMJ)M9uVIa1Y+=T_vX>QT%$NB8mtSk5I;ta!B{!*x-^-0$KMBX-im#vh_`~?;NsuPRYd3fkqJCnDFMc}5xg3^Fv-pPbkZ5YU`Rr#WRmCIXK(kN)(8wG8;2#z+I|8*&?Tyl!^G^NnVipsofj&7H!%v^Y*&!4Y|0mR%S!f8+m5M$71S7_~yLo~Q}Mm2~9yUJ~BD|Qa64PbOA<fcaY8Q85trP>R@7MDnj4-MKnZA|`SqvNl`Y$}ARm@TGxRMmPl5}A6XLb4T&$gY_UQ*LC3h>nr~97T3drv~6EruL20)_~@OD$<iXJfuS#7y=%+=ggDS>u?PQtko;968Tc*26Do+LW)=9`(p~M!liRnFF}^*^<Evqlyl)-Ua_AMNYcK;q4E=#!Qt!?Asi0ILzm{XJGvJv{5dSF=o}i}{x*KVZQef^mrALYhy502_cm!vMl557_I!;h8;WYr8;l<MV;sQzs4*@WQN4?3q>q~3^MlbnGRROJ#dh@2ogS&&90iYj8N(m+L4tQa-naWkOrg;kotB|x>BwMVf+%<I+V_(_d|KQUNYS7=Sma(DL9TflQ?zAAZ)DON{}f%)X^TEcz<@uGhgLrHw0ftmmfuJ0A47O)Na&pW^WTEo9uRS>QwNs`1RUzh4-`kVvw^tFNT!0{5B+<r+2P~sA@2F{#eBp)KR!<i;>J{$bZFWe#Ko*efP3HT>pgt>ys-LzPT(n${tCIZ88`*lr8sPP4JKLAz$j6!w+RMk9Ai`8IR1m^blL&HuE!D8JZCk83*wa-khlY-2ZaU^8F>xu(6HB_Rw~Yel6-j4Hc~IyxU^qagERX`+vX+)riEd%iqFUgCX-*Ql=Aavsamh(EOOA5djMdqaj7@em=z>Neg}P4C5S9mE%qE>_LPr+Wm%z<1O*y}qYq=t)f($W&qel#J(jR`I*y+qYrTXv33MJ3KgZOG8I%9`uEmX7_>%mE{2XiC`(!xY6<5EpnCM1$eUKs1!^Z135@J=Z=yHlqFW!kpj*UzD4SG#bS|Y4Fjj*1l6X^x`d2uZG8I$=F!Owlc&!;6RbYAF4HwT7*jmGA8`1R<E^__~bhi`#!Y*&}#G4!%FX?!LlGa}9=P7PlNLcc}%K-=MB-IQyGLf&7reWTX1;HL_8Kf?FAqBs2d0!&xMfgaAHM0Mqg{nKkJuYj;ZL9>iQ@1L(M^iIO3b<i7H)vAit<QB55SE^E5V;`y%?r8E~Jm2+IpfB=P$tm)i%IdCN5m5!qXwhcs)mkb0MW9ZgPM}VpZat_wSqXIu+HsBi4!fhYwi`lpLUcPOIxguxhv?FY6Ct{oz@G}y?M-n)2sf%KaEZ|2kWyD6>P@m>oc$U^2C3wmPq9CeM+`0rWpfe*9@Q2p{1KVRAoxcHeY82vg;AHtxpcBYLSi-W7wrsU3r;o&;b81w`}jL$x$;iYrVKv*C=Ut$9sP&szva(ifR7X0Xd+5gM?!jg'
+    'PkOsr7;laASb*21yjU<V8umG1Jp@qeWn1u1@K5kh@NYf*J6(x?r;G8AV|q%J2>=QJ?ic`5=L-NZDV1O1B7ZIbxGw<cMfskpElg<q;&thjddIga>6Fz$yW52v;xR}{DRY#%#*TD{=D<SYvkqsw5245mRFiq2Bz5x9c=Cs42g&E18H2hxEkZ1=I9acHZDmWJ+&oo3#7+{cazl2lK)c_v_7%YoIH}@X(YL`D6z&0zeTip+7Ey$yUbJd8yGTFLCQ$DI3gbgkSAQRfa95N6Hi$5Y#cP+7MG;EwQR06BfC7L5fG-b#=PLp5d@%r$`l7*N5)=d!1l%zKo-Ei@m`=;4!nn{&gR;HcR2YJu7C05~3k_os)MFzElie9VJnA+Cfgd>ykzpT#Ne|hdSnQBs{}E@Kmg*UM%KB~_4!p7La_HJeZYf(dmp1budylywRuo0MtWO9b+BHa(8*>hd>&LeWKIH=^7tbcV#1&9LB+N7vRNMnp+~f7}HfS=cw<SC&JSjXWJo)-Od9jiwFO~-snJ3Ag5uOyD+%Zp{F4!fQK9OC5F`++B3Qz7&NRdnp=ZM}9JrXXqaZeEQPnf@U>yd(nf%osJy@frl%!RFmz(#M3=WDW!?4aj7<gcZm6vhw&Ka7VO!K0*Z)k%Ipsf<`3AT<>a)}b(CbDLT-LBJ;@2lDeHLf{<3OKdHJuEsp8daS{rD(5hl1Jgm7hor#2A@drZg@0RBKgJhN`9T13FAB<Rwiu4KTn9&Um%!U##3^A9JYqAbf46p<4WUG#M4?2X#O)}N9mb`UICI1lCDK%>t%oGCf{B8OJI2KGMVY5(l6e}JdTH0OH<;Mrg2|!vQ>`~fjETrN4HHc%oEQ`{edJogq^W$`YN+-f`UYKaI4!SwcN2SnzZp=fzCqWc5g;5S4)tI`n{4s!h*jI81_0z~lw!@=Gq;30LCuk@Q_WbFY*b|=&lWE9@pWT?YP`}2l<^k|5mEA?QzUO%Z4@NDunXY1SnLQtvz>BH(Sr(JWv;0vx)h_?k76`?vKrn7FOuMzvA`l^7`8y-i9(7(ib9GnPl_vBcN`zD*q}%nOdwGpakr3ol3b9RdXkXb)VRP)!;8IvM3{6;1SOC@O+r;IcjjcSa@0}xnixWt(U0zjKA4gBB1RCfd2_~TmYEx*(Iq5R<AEUjLxNF{JbXua^Yep3!f^Z0f$=qF`i<0-3Cs7kuwu+c2klW2^Vh3OIBio-3k5sA2E*n2UNB8HT8s}tOtpjzAc(d-qH$TQ3Nqg3F1TQX_n*&JHibA&ui&%RozU6O(OE&4cE`o0nJ8`&l*7i&2s@9&P!-jp&|@qMI|qL3_02K6aJpSL3r=5od6PROzi{IWJ=CG8neMvCK*tRqoBI5ky$~wse}yv`N57~qWAuau+nJ;2S?02!lIsw0jBu6wM)eTs@h7@V+vDPq35_M4%kQ?wv9^sUtudmT0Xn=UET+yDz+&>b5>Kb!xdr}4)Dr5jurZxT?GhUmE*48htzJYuNuyLTqCRy-^t$bh^J1{;2qqS9V8&zRDghD)FyoX_+VE*hqSsXW6sbF@UYmGbG<xuw{qJV~PL(^wm&A+a7>z8r6{|OFW8(Rjo1<f?Xj69rkXfy!W)1<Na+%Ge8X1@VK>;7gZH>f1KyVL0aEp0c7wfj}1ei(A$2$7_*{}{GWJV%nY7ttW=E5>OJXnEdC?eQ-P*|tNTEcI$XZ1o`EaANMSP?79uz$c}lEpP!?IC<mj6n}a^@rx5Gr4c;(<5F4Q`Lo~VI9dQd`3Q0OZxqU@RVz|3=wCKi24SS7NMzep$=W84uutGSdrw5q%L$sB4<MadoRyw7htlvtagFU6T)iqSS@)fthRGjL*-BSm2AW4J%@4=@Sm?_@4~R&*Y-fe7fj%gl0W;cP`K6Iv3(AKE_{2`@2QP~SRn>3HBoX8J+9J1x2ZB(DN$NoEpk7z7^bjCJONAmB{hvOmK=Av4p@PzjQ~t^GjT2$0@ZzKRUOIQ+ymTewSUlyK5c^I3y<y26ZC%pxXUKzvK>BtzKC5+Y~qg?Yx2H9)b5s<xG=Tc4+!vhyd`Y+uEKWNq)`q>#0)JD{m0Y>h?&YG7v3E7o6pK$yyD(Tcuu)mOW7-Vx{STLUANJd%AU{5ToSH(Tj9E7B5^i<2Oz#Vl}a%&eUwT_cIV!7A8b<v7c5FRoP9QkkQ{8!Q%&XJ$8il9PTIsOYbs3v6|3xeZ(1lrHPjvjo@_JRIT(}Uw%>v7!X0+_&~`5vo6Ui+;AAQ#P+>h&t0M*QwnY8Jt7YBVFYjOsvkn@|DHoaO3FLQ~hr?U_WEC|7(r&OK&<%2O%@p)*Iq=p&5REwyjpk;WYrJaA?`7uoC9^#(+fAHWv*4&dUBQhJem}YLlbB#6uqISwiwgg)U$G@}r7BQ)c=L5AoEVO-gaO}G*v_&|%sZbwKW&6`5a4b?l5_-na}RghjERTxGu23&4IjnFo)F|9@F2CtHnn-jEe|^VM}7@MU+WdR0cEQDeqS*@_Uo2%=FAZxXSN1z_iKP!!kMy5Z<oQmWFmETvVi1LTnto5PD}jpiICjh<Xr|Yl*W(ozJb_!H>82Z-xy$(P8k$k;T6eMJ->M*&20s0o_eoC(z#VDK&z--Zf@I6{(8<SLL$iBq);2CESAcbb#ghkc5Sh9s>^1;!N*%yD_d}?Rp%00xN0h_XWdGKZVwVNUvh$9dP80&F)y}<PoJ+?ijN--%{#n?{A$FdQk`m(%*{*8`b}81h6d??!g@T?f@|+C%QBNNsw$2DuHV-$=zl1e+~ns{(d`%8e8=nV9bp$cVN0=V=7_1?cdVwcbjQM7!d<)NuGI0_{2g!j=Ja%DX_UX;)H9Jb&nTT#CSATK5OyY+lsl)d*ft$q6s0{<?e<0?jp;so<gm0Gh*-CEH5Apw&+tj~yzP-IEN&R{y>%%JxY_tN8jPw=5>o!9u3ji;wI^uxvlIE!o8Mj@q2im~v>X|Vr`Au3jPDi<M@{HS_Phy=35~rVjh(Hev9l$~mP+%vUEUlaJSKbG_6X0?iR2<YyGTe_EYtxfDJfsMH(=K5E90gFk$R?cTB8XCOomVOJYYmqHvysSPMF}B&2*~ck^0xD{dfLHkP;a*#0%Nrxk6~+AYo~{)jIYdpjM$prRJGaFqmrFn~I}^#!CopANtd6Gj%T-_BwYHm&eynpiO`LY}6K$Gj<|_;nr_NHmF+?9~tuSt`Q@gT8jG)aN&px!M!=+I{yVb*ZSQ)FY=BDYcf<H)07)!wksy89tVw4V-nE|%}-dI5*H7=#^<6gbtmr%yOhhd47+BJ2(gPq5(`{#OTu3}<*U?b;&eV=;hU4!=Bxb<dLa>0G7t9#vD)D}Avsq%9Gkp4D6`xjey5ghQ3MR;sxhM`w3X6DAJuub>j8)T+F6Hfk%oaAr|j0tS+Ym?jFZifqE@=3UEP}yQ@MT#NkN;i+I5NPsO-S%Wg{!7EoBsz30I8rVQ=-urAw!n#VrU;txHpzPw7jNRHoo2lTY?|=}(`Hqt+6Lx$vadsp>#i#ogJ#nyuJ5tP`S8CL&VA7()vyq+UCixL7#+Z;h%B5rdMcUyMw+iC;}8@4|xgKJtlq{qVP4m{fgC+o#AzreI<w`Kaocn+uY4F+LhMUZ?BzUUR3Gx|R1tOWJ!{LQ7AM2x;kSi(*p}oDy2vEiEBc@MM0nAihaISF&JaHTku8=-ok#d8JYDI5qQ;V|P%os^rOWa;MpYVU&Rr2@MRWK~AoroLqw%>KcLCF!Zn+PSvpB@D<-dULn*|o9gkjFaavEG~njjkmZh#@{LAw=zT|aM^A5rhOpx(YQ;@f6hA|)MYPq1NN<i)iC<0<#=nGDbk!B%=KOGjtGeo{5_od2;QdyL9Ot<#)r-3;odNA*_WXN~1CUzjw>hq<b^y{MdLSsLwZX-wF!K-nPIDDERh;TgFj;U>5TnU%%1;#w4*caTKj}}`u8|Rt6h<$fUC|d!3rCCUoAL{amVr%Xa5T%k{G1}B3qw*4G*5*}jI!?sXDu7^_x7Ee!eJL~+5>J%ui_^3I8m%a2DK4ngjXzZ$|WC=4VLvsBLlN|KY=(y{1+6sSV}+YtnZ3`l*_Y>erAsd>8IIr@jkP+4*kH7hUdw;d5nZhH~axS)bwKh$*Q06F!oT)1lgS7N%a)qyFVvh=<?9bD-DAMjXfAN6`8yROGn!>_(de!TzII|95a_M(N5e_QNNO$hNKFaF8A8X=eV-cvr$sk`jT{KylDoqdaYC}6-v;GYDX~MMwKeq=qe2L@(h(e!>fR~43$2;xVR98TAQI#!ccFCp|)!;mi#3lxODiqr0S*wq(tVP-X{ws2_*?72_?NFN=mJyq|`!6Qty_8lZ2Dr1}CNF7X&1NN(v{f%Sq|9aME6HmFk&)fMWhovW7Mi=)({df~RHGVY%hShHb>Ejs+X$@9@*{3-0y>cZ7=Y!kmvDR8KI~#CgbG0tq&4lk)I~GWvm)SLT;`Z}zsLFTtuA@R;NKzb0D!@efSOKmR}n04h?x&eCApqspX=^d7o3v-yzBhiA@ggIcLvavp2Z$7{ou9{1I`efPuuXk?(^CbsO~Q#tFwn$;{+<GV^!%O2~pSfi@<dF#`G(3Ki#*%Gz9sKtB3wNy^!0XBTps%`g8EMQ!};CnqYbL&-5!F`Bc%pH95WHZ&6nvZzj$xaRZJ7hVah6U7!x_)^2<aXzOy%a=!o9~M+)9F=wnO?AC3)<6#;&i)>Z=BX5nTW!U`^%20i{t`!Or1+_=y{xYo;sI`hC8RhNiS>$s5Uu|;$`KP-iIvS0~AL=aIJ$tO5@Q8`V#f;NCHQsCwP}L>jEtB5t&>=YqD*+K-bIEniJ*ltjZ0x-9Z7P(Gzd5!W%uOP*q)>u@es-IXqsF*PO=DRG&dt%yU0E(1|!vaKgNmB?}mySJ2YE{1T7l>}EIE>reb9yUAh-cOwXeY$p?T;>o_U@bgVEG-FkkNBrVV`;>5RP@Q9H;n7eY#^$luC<}oKfd&L>e>QnpC`NoB7R2}DUNTaccUWK#G>H6D`U7sH$?FB^7g)Nf9=QDxdC$v$FSzKtB0lBTEhE0!BSPZ4cJ;u!q`3t7q%z_@G2Tfkl{lTt'
+    'cqggk#mRFq9;nWOz~}1R5tSSkyXFQh>a%gPe25i2E)u)hh^7l@YtN}t`ou0|FxXeB&OrXlZ$`GH-ljm0vhq}(JQLZwsG^7(^`tZ*+2nMMsn}sK&Km<9?i4E<@&JwSZ?Kqn7pwpEuL%1zU{PqYaXo)DmJ%IHu`GDm^Tg+WO)x`{xI5{1oH+X%3Tcku@;s8>CKNzDO_+gLv{<Wk>I|;;Dw2i3LL^oH=cGU8uHd{X*!<99Srfy8(IBh~17uDS-fDF#Dtj6l3_jjC4|64yp^A5dJga^Se({jL3GAQCp#+cJ85R?F&74dv6jlantU!N2wQ0kF0V`(pEgb^6Jy+;3SQNT%LMZHqMr>4BkOEZHy6IsZXtO`tnE={iI*NuPuSX+OuT;n+Mx(ON(5B;hx%LmgX|{WKYTu~jepedAM5!sVsd_$-j95zvjNCV}VDz!JHfCULRMTjzO^j`ie`*F57&lKF)wj7G<-x0i@yVAmH;}8Kt`VdZ^JNt-ovS(paOj;P-cprvZiU+@!hi&lx9|9;9K2=tH+w`>8Nc<XtDJ<u7D!s@Mw}Q$1$7N#*8f*_Qn|DC8kAU3!2mY#v>T#7xqmP&mG&;Hw;;DkV>0446hVmGsIon(_PhZ$PmFN@<D{m#U=j>fA9$pXnxaUWmm`Br<&hB@JA>{NBHic@G)wYj41dt4Mln9z5v0~cs*}#>w1Pr&M+QqFB)xmrzMu3b9H0O=(zXY7b*P&>yc|`^+y8+?B;yX+=c_Ks3TK$DEuFSVnLLPlfI*E6VTLhnNYJ*X{~dVEArR6!d`|xPZ^3O32*A~;gUbY(fm85wA_0#W|C~t6NT!0{2MY5QiT5~_PR}Ra<J9r75bs*Vn>-idJ%sRQEAC-L&cjqZbSezW`UQRtmi&={qnlI~lU^;OC`*&O2Y5!$Z{Gv(hMXycTF~+C0V6CYAkb(6O%UcXZHU<HNyKwM;{KoW84JKEVvue3_j;*DuEvue#Ji7CFpLZZ#m!1+^qhATG(Y{3^H)3YBd9=Qy~yt(Z+Ryej)4_a#T+Yi{fauhT7RF4SH!|Z%?d7V9rT9I6ThJZq{WwK^A%f%>I1Zt&gSVElrtM7xTv47tu69J={k`q<obs?4p`*}gH4t|?_LCY)w+r;*<h7Yl74JTtFZ-kq<%ED0{L)?L=_O8omznP;!P2=cC`FT!B3;L8vO2O)~i~kdc}QtwGeYIX)So0@d6>{(F6N<3v{Ouk3er1dY)2ZF(E&saCA<pnZAYaaZZ;q&COrzN4OB6x#<m$rrs>5cMUjv7&PJAJcyioXQfM()4cR8LUKV6`L0i|3g}e=W<~<Z&;5cx!pJ`j)#=l-1yG$n*%zqZ=fvTQGa>5zC2F)pg5ev|mOo5P)9eq})IkGx+mmkW1^q&<_WztvJ2Bck7(X1FcfNM$l^<a?qc>i<(Oa~x-|gdi{hn?)p}X>7{+rMlbhtjSLG>{GAGohAvXN`bgG@@Gdhf9^n5rW~nKc^pY(2vWe_1KraOQ8uF7r4$Iake9{!92ye<N1oAarnrYNk})4%==n=Th6v2DO0rc2)<Vl_Z++P#HC9Gkmx=YX_T4Wd-K3*GE@%6aymXf=5L4p1@wEDjdbYp*#p&ySbF)VM!jIrN0|hZYV#`s>Ngp@v9%m@Mw>GliFh3_t<vDzekS@2-on@^qS;SDLhmb${b_gs<Krv!{`5K_=ClpRaevF&HJipr2NCB@OZWW9x<&X7+u|<UC2?$agWF`eVk0qC&%=0A}Qh6_2BVB;BlW5kh$YJ8GYtM*idLr4wag~w76Len-D^Zk^AG574;wcR4*bf)Ay*-s)~EYeybeb?`>$p35j)>w;HCjL`D}6>$eAEA;xz~j2XBp6$%x;V`iM=)BY?!=5mOvTlr{st7SWb+0CfMEDR|ODGVtLxif~mSjmtViy0Dbpb(@G<Q@`aD!qsxlM;Je10OHaf{%xg%^NeE{V7X0Lfuh3O=DGFuXa_82PhMS7mtj4JS-G&5KN>{q)zf3wc!PL!!Y9bY{|Uv%dwfHc8v`qSJ$-f->ED}$VFx&RC$%>+rp-ztD;J|tyb#=9jQ^j;liRhq(|ma8jijv^+8{+$j%KwPeEUiE?rPn38qtp=jG<=m|MU*bfwVim(1Kf&diN1umy`srO&EY7Sp-5s)8*!=~Rx8_C(EDbo}#p272v_s&PSGMZyzeOs9kbCyxC_Q-Y#KI$wyEk;~ysWf1?&%6|29-kZw>C8PL@mrCf3aXwriGoFU=(<!}q5}&M&AWtnUD2CX?9#V?0o~36X{!p{Uhb)xlcLV&&--(YwOu2?IxZkj^%S}z=eoV4(y@!5tYSZ#){78Eixo~<M_?bhZ!<btJeTKuW5{mVDT?zDo*Y3_;mccaaJ<VUNszN+_#1ze|ftOt3=jQnWb%vmV7k{6j`nZizyM}ptZs(DxyP`JjdJOX6UfPenKKB>!`3KnS%NzXr?BI_kcS`Dg+L5Qm-3T1O>3zr#y2#r%{i2{5&^qdu!0qo%y)1}!Do=?ZB>X6Pmbq^alt4#4F~TMDo1u5jV2G&4;OzT__{aoLz~{m{#BppR^U(K3bTdH8*L=Njl3I}3oIXj)e&KcAFr*U6Q+dO%w{IAxOCX`b@mN(qI#SknglYw<=m5JEZ4?|Bw!<O;Tp`KpKsK9?^wuE=I&c1_0Jrg-KoTzzhuB~|MtLo|7l7TEifaX5t9!z-h-wUR*_1hjg(NP$mnFB9Hb?E=Hrp9h^hVX&3hT4=d($@J$-3jkNJ~Mj&K(um%Fm_P{0o%W3Z%khafn1V8X{GGY_sxO+Ry|WhYzi?R$dBgNnx!xpXSwO*3WD?%#L@zuzFT8n=`S)n~UnuxpJQam{s~Hw&8or=yG0)XGOl>5>9<`M98VFA8zYAI|Qy)c<Z35u6?xur?xtMZ+x1bs$1v{hu)*x<Rh3a?*idz_NmDme)b=UqvU_8-it97o#E7?9k!PK%}~X&h;u2$$|+!&QBsRuA{Y7PF832htu3jZCDpU`vwBwgJe6EP!{^C_(C~URd?qw}AT+E*JBX@>x!J8wdtk616ECU-v5g@KwE^XpnZz!m?Ri*3_`exX0NIQHS$J4@_+9a^76wyGhXAnvu>i3E@j(Fb*-9WjTL{Dhy!#dy78n*7-Uk@wg3)tfIF%9@UJHg(0>cN9d=4LC{Q}ZW9||qZGWVLsL%+cv`m^Pv!#r~Wng<`nq-mea=ou2t)kZB&y5%hMFH?D#Z1;m5n5y^c=OBHvTCe0R^5&Tdtni3!QpuMVcrIH`1!+#0WV#*BA&*sql`Qgu$Rdx{na=%2KATORi)wBdBzzlBeh80y$&yrQ<dxEr6Fgn9^`LMx0j%Cnnn$hh*s=;wx7`AM^<44%f>iPR3ucOgeV(`A^XEe?^PGQ+Dd6uaWjn7kwx{g3`7?Re`FE6Nt^L!bw4Pc_>r$^-a;zoCdNoL2oGseIeQ}zQE!?Xq`dC^JA4*6Wc>7grheZ%g<+<>Zto*<7R3&Ucv1BL`yy$BOM|e1<gU4$c?Cy~0hLyhz?ZpP)nDpvw`;uRDzv_F$ps5f=chc3pTw5JdQR)@nzvvp(Zg5%cTuWT~u;bELx#KqLQ?^(OBhrhat*;k+F3jb`!V3hSmF{Ug8UrfTu0%q~bv*tYO6F!EXq05T=9m^7V5}o5riLnFF~5ma?4?zu5oA+Vb<4%POW0P!R`f$5%YuZeB~%>;)dC-2|7bjrVp2{ytlb2f3HI+Jg|fPR%8|jpLemzHU}G>lN5<?9;|^XhkAJokazR4Zk(;>`hL0CCLdHD0q#-eCo5ZiB8L~vMC4&88;C+%voz4gElSJ}FBG_xOcUm?#A4CLunuj5j)2;ztez$OzD74-5@A<_biY+RO8H-Po2y<0$R5fi(v>WrY5$n8DfQ7lD_!>cO;N1ruVV@jdE>Uaa5=9)#u3g1D-UYGhcyRBhTN1~Zgf66RT7uP2Xp*D9<q{{nO=k=2E_fX-gq)SnUxEOSW|u?w#q^>GKaP#!x*_2Bz;7J}E+ppH1*gwf0X|IxF}=dwPgbSKUBj*HmAyR2T(iftp4cuN9ED+~heOfpA%%q1Oh`!ha6`hFK@}3#>wDTTK85COg2ZZ-yq6$xdgUJH^yy+Q=Fyfgv4n{wOuU>{Q^ywzXf>4*T3wG;PmYCF4<u5INe^LEzjeZDGsgrpMzh^wzkdu3$8WyI5K0|uGC4d86$1$vc@34Z?Triy5aV?p<oFS<_;5hYs_M8^t2OesX(6om7sv1=5g`tHQ@PQbc={>(X2Xb9P||BajSa^1V~#P$pU9;sx2q${zK#jF{NxfkK9taLXja(mn_96Hrcs#;vF_HvJjd6q!E^o_Z0(S0+#58`v}`}ttis1y!O9reCQSn3_vpapY9_6qUVFVlAT}@ltbBZp?c0%Raz3agUmy@2PKlCuW6*(XGH0~oVQH54Ekn}N{jAm-z=L4gq(q}78a>6x$qmBM3<>HGa?K%k7;r6;9QE-!W=y9k_uS4^%3H^ylM;}QyxFDTJ#)l#K-xngQTBXX{U%T7TLR4zXnp~7KVDQt`{X!zDjD9Zx&2JI{ZP35Zt{ped7X~Qug@TqTvG$fN)_+b9sxDPplCA{&<2c8b!-lt208@C4H0RAUj#X)jnh#XGD7WPn=~qmIfkRxq=SPb-OX`+=npVD54day^fMp)E7ZrJ@3JoTM`NM!L!t4(<gP<6ru9+{6S-To3qM#nG`9v#G`SbMN#icg#pmLS&~vc1xj7B&JE{LoYlQ`uJG5G1ML}Lc-Z=6W`G6|k=MEWbQ4XvJH;k;yN2M6(KV-UnlmFR3!ZpR%JfvMepneBl1RojHtyagMIxw4L^?ow>x+tt0d4Nk<_iO>{vc(<_B=K5!Sa^6pc=$AtTEN367fA_auZ6@H2|?mRNW5lefoxCU9bir0LllEvk+iot@D<Qp6OXY6$=JFOC430R!G%fK-1V7FM7cCmQS9Y%uyanOptv{#i$}W1s!$hV=|U|j*{_z8U0jfoU3|%u><~%bdm468(y$La4ZEn*uq$L9W8q;_nM!3O!-mRJM6IplHi_BAca@mUF5*&Vo;hNgnL~9W+1ZkvE!o-2k@o!f'
+    'd;!v)r_vJQUCFb_a|!Vt)J9@x1t|Xh{bRi92=c7)k0WG?u?|)$j2X8>uez{K@Jb7Ui#J|7V_Vo=nn5OvxDnQL3#qztiYVQCYv)U4a@6ygy53u?j>y$HpaC8%(iUVYWsMR<D{5r_9Q9Ve6fR5oXx}kPEHlXo=N<;<s)d86pIHV+;TKbjVP{lZo}a#5PQDz|#vLB^0d>W`cSyD6XG+A@D}oE4WAPT8A|wtU=&{&as?AkO1y|p^DlEU~5%!sE%PM&~GkhG3`zBzc{f(;!VsC=qoA{<$<)Mw#g}StPGz0Uv4c(U4OpK;LBs39**wL$+^lsJ3lRp&o7}$5dRW9Q)zMVZH<l9C7oTO_6Z=V})%M_EG#<#5ZXeJGE)>IUiVj+l-lbgr7p5nRv>7UTZO)+YmK%=d6Y<*QAcOG!k8LX!`sa;=#e2I_B|1~<^_up{hzxmXWviBGOFu(_cYP83%$dhM@(*?Du&Jrij)m=%OJ?=HeQb|fUuyO~5k4UiIQ70vx-4t?|(t+%xvwmewNA!q%j+$`|4~YQIunc5-P!@-kH^LEr+YG6!AM_3zWL*v#B6*MdB$53CHY{=c2fz?7wUB-_grq|v85HS6P^&n;P2thO09};y`?0&pcy^yKRxalY-(db8+UN{B8k?MX(n1f&%?YwvFPBS|8hL<@<x=LGQ>@n9(|5~Sw~qZuvliX<t-ZVK-hV8boK0HvY>G;mqMJxP3IFL&SAf!LBGSv-)USWxPORpjQV#o4sc$6mzNjBlDN_%##}9yh!U272@bmMTxt%s9{t>aSgJr3+RV;-E?qPBFxleqiXksbw=URQYeBac$oAj!&(^An6>@fAi>c@Xh{0VOZXN9AX%DcbE>KOH5OQ80{{9Bc6xD=+;J-jED(*DyDmU?nT$Wmlp$-25<-#bI$dRO_<CGO(Mh8}fW3ZSC7r>#Jh65bdWVp;M6SI-DnM;|^NX9$KeKp~Xx#7dY8TxaK}$H}?Cg>O>N)rBXpO)+oc;7BWdlG+Jr87x9ZyrtrAhSI+Vb~Tu#oQa&U(x*I(n?kDU+h;1?xy6!n6b9x-%KY8Y&MxvTr`pwqyC=KtA2ao0)?*>(igqquQoPKnqJbyxTENzlVz_f5h)d_8TB%b<Rbo;)e&=L%$VppF+>xPw6&60`gxjg#gkNDBV9mh{;#T>`F9~4T<b```J&9EXAFn{LV9(-e6jSdL(8k&1Pu7GnTEBWIc}q``k_qz8U#&xGfEo?4Fxl)`z0f=#ER<dRV&wE*Xl*RoqsZ;khhYBsBGxzT=f{ILz5o8N|63jR+h6<N=I>`z$z95Rn%danW(J-9qe>5<YqfQ5h}xK>gJ;WlOyA490y5=hEd#RIBSIiUT_22$1hgVkI?wAC%zEJ%)_FR4d@>iQ@Xhn(L{4eXz_dp_*AH!D-*Nghu}i*ETvaR?wK`?+7^R9)tzTkrYxSCKMEdis*R&x#GOTX<VG>wJjv!5X9ol=~#e{H3-X&#ABcU56jsjFZY2~p`m=z^@Z$VquCDRVFnA8S;%J9R>{XAT6_ZHt2Y^gxA=iIe=3SSzOlF7@tq{N>;8!9PL(VVni@}6FlPCoBo(Ph!TGnRY81$9WNX00#DXlv<#kdq#BL8qTCG;_H0L~Fn(@Ti!WCa<CJr`_qa|D2$18LCfhUK1ub@%v(-)5IzkI$f}l4Fm6bteS*}W_XBGwjn{`d)MgQs^HOU;88lY2#?aqv_za@;(sg=r~LvWx;H``$T>?kvC-yu1GPxcgLx+NUN7eDYSpD(Pk#kzQ0PIWQL>lJk&7zctJiqHodlG24K~|O-rK;PNB~SV>KklWf_ioJ(AA<BRf09LMM)TBj~V26C4(F<W{^gAAOIo(nOzgdX=)L1oFrsZ(G&1EPs^sF{l<}412xpu?SyAEzQfPxe^(6#hJM$h;-^#u75bpx^Qq-uoBI%8@=$-GtJDR_`@CeiK%uI#vwaHx1P#UvR)5<RrU>_JR1giI+19=?911IYix=QUl#`%{W-M)(QiUbtvvf;RQ2Bua2o!Cp;A#0GZR`u83+;}Xf|))}P*@|Fa5d9MM%E%vpXQ#IfOQ*w^U1bv@KwR0>fSTIDj)&xnw}d)FtMJ>YVyK!26=ixo_Wy3P9L!ejqxJdt~VgV!^LfCE|}5hE5Iz6R0cBzKu$4-#ZoF!*5OiAo6-xW)(e!$M?S-#&tBEq!KzSbb9N|@QPk>CFiy>c^gmdT(f7)`w)V1@!g_d#g=E~)zFyv?1p_-gGH#tRdL@K_X=)3rveM}gvpH<H#@m9YTD#H`L3^i5iFD?OsQsUhcEXqmsM(%u+Io#mThajGoi;!?g71?5qP7E=YN46%9jc~Q={VrV%2%%)6K{iUGw&3zD<k}JKE_|9ju&A3MKUFU!$?D3$X2!e2^?w%LF)~A^&Fsf$l1Ecq``=NhpLir7O3eT`4EtPsH_KQ)R{QTTChDsp@g2GK`YCC0aw&^lxqJ}s#K|_T$P%6-vpbPG)+!bbYxeeNKr3c?M}jydk~g<jfsBo5av&i^7<jnP$0u<%Ik+P<D;A@RrP+sg9>Fn8w2lC3xNYC;l1l{aOf2LCK?%NKW-`MUZhr#ZtG6suRj-mm7WD}t7pOaNrDTT%;CtBMB-dHGSok(7pKCJ`;~yok~Q*L{?Fu}=1|tZ22ETelU1F100Ft3gWQ72d3pHy%l!ON`uzFe3%#QuStcrka}A&A^}KH3d*x=qTdV2Diw6Z@e~~S6Z?fWJDv|lcs3>nzJA_@Y@qjah!1R}-k)6uc!+SjxzYkogo<D&i2t4Sm8R;+YD@9egDa$Zv_J|OZ9$GGGBtaxeQQc{Z>IF)MoXuqte3L#ACJBZ8?Bq<CWM7yh2xP_LSIzcF*ERN=CT7JzuzjdgQy-w=4a+tYCzj4l9qA<2EebNi+jecrii7Q<6c<Wwnd%)zJ?+>x$U0T-5%$HcT~|u=D;gcDOGlYorP2+h$54hbtXiR@yh$5BsJ!RMR+Ltnb3X61%>8Rj^UI@E;c40Y=!;b?#zHuKa{XDl3SDTk3sts3*~XX~LSvnGa(3nmn#vy*SQXx6E&anpA^R7j(7xB2pB+A=SE2XUm^g=2&M1T;Oq*d72EjZ=8yPwtZ29mgw&fZ<R61j-h2Qa!K4rpB!)T~?)OeB1+Z0U1J(}um^V~9xe<<to#~Kh-cxRRHm1DJxqGpc>DT<VhOCal#0uq=KnA$B&rB6;T=EGDPZK(yOVlsa&Ftsl*1sm2>?Yg4gnMgh!4$&aS(4(vJsM{?P$HyRWe23y<c;gs2<lb`t75(F>pZ)FwMSIFc%V+D&;LX$ur<V)cW6qq>64DXU5z=`Vq;tNKbk0|i4z!Pej)2atLFYWV2z1V*c~?y2cUxRuKqv0JKD063J%c?5WAwE>7|`xd$UFT$%tz%f>6S-iPw)6Qn^R3#NrvqTu>n?m)gd!dW#e_@l*?hE8C}gU&Jt>}bOml<o?S9e+2&oxM@E?%d1a3bdVclj!NbKr3s*JWd+?+9KBtP!j}|Nu96~#K)JBUSbo6G}$)9yQO%}0@x-HL%6d~S5RaI2+mAsW@=j~mR)Z5w)b<o?F-Vc+#jeSmME9=~!Evj=L0U57!K{DCvBzv9Wgm{`bSwx5zQfxo2gQRB0KIavBy*M6{IYsdt^7eSXhMSXN)Z3SP1Ct|a*97u*4S92?<;_qSH76%sq1{I_=v{8Mn_Dp$id>?+2mM8(g&LbSm34zNF5xWM5+%_wiH>apW2u!ewxH+)Mx;R+&K-P}Emaa6+jVg4G_@!T@H8n|fN_bJEWkbAQbjD#)ElTs2E$h?@rGnSxuYr!m8o~QSvy~|wEyi=Yb#1JE81K$I9GAhzI!fzCeXBNXxe(}-V9g;0%6A7#2Log3b4Y^#ep_16SNYv613VIv|5>Xc)Bd{us23KH5Zd2a3yfHW4Jm?EXq7Qy^zeqxXfP&T)oS<Qn8jPlqIgTZ*isgw7e($**3%^1SA9`1SACXOayeXl7KE22A357NN`E`XAk%%dAxvs&Jxm#Dkkw~l2^BHJFk?hNDns|nPDhNHTf8QZ;z>F?fuW}y5fLC*n)R%<RR+uO`V>Vhe_qx=8}dG)2>QP{M;nI8NQk?F|pvQ5+30z*+C^csALD#>vPrF%A~!s1xb5Kw=h}>R>|%u**!HydFe$dglET+LKxFO=SiWwy^eA{#=~5px#hKGGK?4l)s7v(ug!tavJ)p!xos<7zD6^kl2xHDsrh;VwKjMVh3IxlbnDF0n?bg4jeDKJgQwQGsWr9vt?hp|g9X10wapzxIE6V!il$2`L4mIK63=44XDN5h95J2IM|#K&=7H;22!lyzYsaCj^F^(w(&y<@fu2bCFQgUK-at>U9|s)WWNHMhGk#!$i#34;x+Bs6c)<cORi8lSSYhH{%C`tht#1xN|A3J*%zszY<Aw=mm?FIuha9h(Q$sPjZ+;_oD4ctQRdCdod<p*TEhe&5IYRTu0Us18W{7Ye-HaTrgXb2k@{tNW@L^%7CKgD*{|c~v^$IT>6|^}55O(+%)Geukn^F$Xt)r^A)k=ArB-jr8S=<TPD*8oKPO*$*YIGN>a-v>`@H`$cA?ob9;$jYq@shmU%(dkd;fcVXr|+$7!9no?a>2r-jC-a1N_GtoHfc^jR;7-?LrChfj>2;_Rr-K_r2maxPG!1&zoUjjsg_$uT|og3otb_z^Jy?u{}e>sF{0k%P2dPt#h`Z>!TSsDc`$3CgEn$~;y9LMtSjRWlEEXAt|OA3BPAV2wBV0;5g)1bc|?owh?dw9FPMM+!B%|g3M1^N?2(VagXE9a1Y<}gW+{g$f(Y%BkZ~hr5>T4krKJ31D5*Ph@bo61*a#+O<2w6z<zQ)Tfd%Rm$vLUm%KH{j7El&YejlKGv9i0^#iH(FP~@JUIPqMiorI8ukatVSCy7O2!IOl91*fE5DvRtBA?v&CkbfPfD#U&1fQps-P4z@V37Zno(B;-H@?7_Dy~tr6cvG)b$ebx>5sqSkTnY4Kf~QD4QjO9OoudAb+*`r5oktXZV)oulq*05HW~W9UiX&`Z!RAw-NuWufNuX(SXj)k><YHO9kT^AArG67~5^~x#'
+    'Ih`gKk<*Ek4T+1slnvP@a#AtF*<hj3Z-t>ox>@rMr=q=cn5U5v{npU;VP?COk?A9kI%s~@=)>raa8mm4N$)dC-S&R;doY;(Pede@BdH>E@W`ta3@k>QwrG~g$Hbpk-2SYbrT=8%!529INP#h@SVzdx4We~Up8kcUfo0;{(%*FYIyF<Pu{Os}umT0+Dz-wLnr!9Ui^R{}uY<P+d`jf$tx5PEL}*WFPiRkQZ#&vsSsUfzVkPaVMJb>sptobtJ3C$kdZ(M#NBRF#hZq6'
+)
+_ST12C_BINDING_ARCHIVE_B85 = 'c-rmVTXUPb769P)^E3Qhr(m2o&Kt%gWfz-ljI)zDb4DYBh?#IJ7boeS^WV=Bc9V8bMS9|tgs|Sy8iNq}yd<H^-#zLU!G@8%pw~<$8yc33(6U%3Sy0^fPI{VdJI1M@Pszej9YZ6QP4vri)6fiuOpN)|n4b}AZeI01^k|xfflF6G2;b$WEEt^O+xPyO>oz&J;G5qaTLei=3YuNBBJZ92yO(F~$1g?kahIMnV_x7^2SqfyfrCDNxhaX8L}^)Uzw9P)ktHEXLmIP>Da~la3YL*Hf%D%Vr1!o5eCW9}PGY!RNRr!_WsoY>b(1nKg7{jEJx5a)EZYPwyO1GmaLT-l;2ds9^PE))Q#H+6&K-WYa5Nlb8mGE;rJ4FRM|5rJ7}lI<*4(jG&4DA%Ra>3u&cj`k3)M8Hs$<zzlFBS&kbtkuBY9G0E+ZN9t7}zR)t{*g`0lx>&ifa#bRZoJ;hYbTqYodR%LDl6U|<jV2|ec1GA!UMc@ma9Z+`mtetZl;l!h#VbZj$o_v9f>y%V2?Is4FyXkKL}WG~6t_E`k*ac?>}kfk%8Ur~_fkdY+G_(KmFS+O<U1PRY)TmM7X9AeC?o99`u)XCf;3&Ygs4w>qw>eA%7_4wqfvo9Q3>Q^~<aw18}@P{Mv`)HMfa8#6djKm2kGU_on1n!;D%w1O{B!pvQmgf&8QL|>}COi;+ea)Kcm&Dc=x@v2m;Ez9-hOJL~|NYnBXaY^N!NlRuO{{1h<cI=MbP~m=CQzhBnk7C-Zwgd_D!QcNxJCt(8L}!pC_<<LRdh(jP^wWu!*orF$7r!e7RaJYEaacF2t2|dN<hmZi;x78=n{!RO{B;e4XbSQk~X=R@}e;_=Ej15{nWB&OH<{iv6rUatdI|TpOwKslPGZE@M4YV{!upg6aArpK$)}5D((9llvP=61mTfV*WblFw?+7D{ZzO0xu%na4yV~&eNmMp{n8=oe7gIo+?@_XR`YtM>Xl6X@ucP!Je;Lt&8?ZWToBW^(D}bVS+?O^wF#5ph03aQq0B%jO0YLzUod}uUTTkL(Y7Z!=jXs`-v6aS(Hb#vEO?=ku`eX^Z%MwUUUG{pFpj(d6Gv(zO&?hnp(x>MdDR=hZlT07Z2G)T(<cmk=H9y@LvRf?dj`WvGyX<`S2x8vBUyTf(Fm=*yWrLwuJO-t`Eavq<b}MD*FL<C1ut0r71}~uXlpN9a!qGNdPm|`4d=m^QP?Vbkye@3kUl~8xl2<RGnA4t_fQ}97$Oy*GOp=BEaNOBfCjN37Q`aSW2pv97Jh{sU1vAgazZ0-p{b)cf?^;EP*i1%Pjp))S%xoWQAM{@$aN~9Xj}&|v_o(LD6;4j3#E=l8N11bK~W(|iUZtGMyF&9>tt-}P{gM=hXH}S?Y4MRUg}1^r4**aMf5IA@*Kgu&U+U6pbG)MOMpi;09^_rbaGY{A+~T(T{r86=e!u(FaznK5T2@rNi@@1>=LCvX>3$u47%1}A`q;Y!?B?<tPH-k3gtjqG!lB0v3PV%zHzs!gP;f$@diYwQX?d4*Fb;~onexsC<1F@DD2t7Y8N=zwsoo{c#s*6oPLMOCWEKvc{@vcP9~<MeTFN~jKzXyA|wa0PMuARvn5}Z0W#5AI>b69wmLtn6jUUi0H_QE0Mh~<Uy|NO`8Co*dL5<r0wGQr48`p#FH2Iwi)YThATwl!%%0Co@aigOFxtAz`T9Q0MPq0TjXmGkk=R%j$~@+kDYn&687kXD*|AtzngtP0LB$Q7p)+*$d}rhOXjVDn;LsU5Lub!+rpRJv?2ftH<{3{uLPKZ>?fKA@Cz@v=EwFKh#=2>2|B-`=XiL@yVEzgR#=nJuAqcmP<LtR(O>QJs4y8feOqZ~{CO%{B8*GouJfp$A4NiamApD_RH_;`HBH~8azlqx3Syffl`_fS(yWI>2qJ?Nv65SNLf{VZq*t=^BYK;tC9x62hPFAo%;tgL56|0V2X%2RH=d0gZ8*NJSsCLhvY90cl0wX3y%y$+sj}N4Y@~H`AhoYg-JiSnG5Et&g`1&BUSzm5sM^af5jak0&d92BCb6=c_-QvxCZ51F*nt*gD8e-yk<d$YJLPAIg>6ai4gpgo^IQEqxC0q;vY5qWSa4I)qb0}y%g>1w36Cship&52KqQ$Os59*hFS<<CO+G@w5SvjAo0+N&ktRozRZQ=*uRJi}sB`h$ZlbLFN)*bTg)&BJRSNiXBH@YtNmOMsAUN)-82<7KYmkFd6;^GT{{Do-v8&@=e?Sw?TMEYOgQ8Gxg7i7gfO2tmdcCl(C&W&Y3oLeQaM=C=}yunz970+&S{M<-?%y=Zw2wS=Eq7t=mgmR}TVsLD=#<5r<yF-f@77^l;-7$Ml9+1c5q1fSWtQJ;Ku`>oeO6F_!#lU`@f>}QP9r15rLqgtbnq*NKQnZRz(dw&O9SN<bMUGCf+q9Laet&&*APvNHu(z~@0S;S+FAs6{y3tKELez&UXc4$K;0Qw;hPYPBk|w`D#0`(ce!?IMaQF+h;!q>kD8Fu?J5*`{9nDGN`_M&7_`FusidE7sQ=PxA)R7|E7${9hmSS}jtD~({)kJl4EY;ZYgP6uHzdF`QaoS(2@SHa>m1rOz3qp_U?f%YFSeLzJdKT8whG#Q@LN+C{rK3)uWPOXoxbDeYw)dg;m!kFgmG%B^dZy4Ll(RF_nyBWt!u~k3Q@@0y?=Zs8rgdRVA^C8F@b?+q&36+$_gNrf-j@bV3^-E;Bf*P>G|7u34)4hgu9<?P%HG?GMDqCHNNpkzD#Js;e0S(53E~Y-ro|4-j;*){_F%1vX7C*e8gY<*LZe_^dKlfXjrInjQF9^`v51x}i2iOGW4N=(-i<rB#?`hntG{i!^-pzu(btwXbf@s-d{)iHC!=pe&tKm(W`^_l;hSv+RzD2mi@|HYL{Nsuf~gRE_mU!j|G5ofjH38^fkFNSEbsl|LK%(+Pk3$B7Gk)@H1hgoUVk)Fhdvq$MyjoS;)ku;kpY{O@0r7_nRf`IL%}<QDDfC!-ZdlqClFa6i*B(veu_nw+@cDsiggp&{!N{csC)lWSXEHa7#hPs_WVG0B<N8HJmRis4!fz|V50|(p|O38)m0Yb0$$DWwM<YMDnn&^C>skS+140FGBk!QvgfzRMuMs$R1<@IYYcs1KVYYV&aqrmwc7;j7VevdRc`V=3-p0LI^|<5dVK^tPEjTuQeIa4;0|FRjBdfG>l6511{8=5>OdXc(lLHg$F{(|42=H)KCSYm'
+
+
+def _decode_st12c_jsonl(payload: str) -> tuple[Mapping[str, object], ...]:
+    raw = zlib.decompress(base64.b85decode(payload.encode("ascii"))).decode("utf-8-sig")
+    return tuple(
+        _freeze_parameter_value(json.loads(line))
+        for line in raw.splitlines()
+        if line.strip()
+    )
+
+
+@dataclass(frozen=True, slots=True)
+class TrancheCParameterPolicyV1:
+    parameter_id: str
+    parameter_symbol: str
+    canonical_owner: str
+    applicability_state: str
+    resolution_class: str
+    day1_seed_or_resolution_rule: str
+    reference_range_or_constraint: str
+    missing_stale_invalid_behavior: str
+    implementation_targets: tuple[str, ...]
+    raw: Mapping[str, object]
+
+    def __post_init__(self) -> None:
+        if (
+            not self.parameter_id
+            or not self.parameter_symbol
+            or not self.canonical_owner
+            or not self.applicability_state
+            or not self.resolution_class
+            or not self.day1_seed_or_resolution_rule
+            or not self.reference_range_or_constraint
+            or not self.missing_stale_invalid_behavior
+            or not self.implementation_targets
+        ):
+            raise ParameterPolicyError(ReasonCode.INCOMPLETE_CONTRACT, "Tranche-C parameter row is incomplete")
+        if (
+            self.raw.get("no_silent_default") is not True
+            or self.raw.get("codex_online_research_allowed") is not False
+            or self.raw.get("provider_effect_authorized") is not False
+        ):
+            raise ParameterPolicyError(ReasonCode.PARAMETER_OUT_OF_POLICY, "Tranche-C parameter authority/no-effect law failed")
+
+
+@dataclass(frozen=True, slots=True)
+class TrancheCParameterApplicationBindingV1:
+    parameter_id: str
+    parameter_symbol: str
+    canonical_owner: str
+    applicability_state: str
+    active_stage1_value_authority: str
+    application_targets: tuple[str, ...]
+    consumer_classes: tuple[str, ...]
+    default_resolution: str
+    missing_or_stale_behavior: str
+    raw: Mapping[str, object]
+
+    def __post_init__(self) -> None:
+        if any(
+            not value
+            for value in (
+                self.parameter_id,
+                self.parameter_symbol,
+                self.canonical_owner,
+                self.applicability_state,
+                self.active_stage1_value_authority,
+                self.default_resolution,
+                self.missing_or_stale_behavior,
+            )
+        ) or not self.application_targets or not self.consumer_classes:
+            raise ParameterPolicyError(ReasonCode.INCOMPLETE_CONTRACT, "Tranche-C application binding is incomplete")
+
+
+_ST12C_POLICY_RAW_ROWS = _decode_st12c_jsonl(_ST12C_POLICY_ARCHIVE_B85)
+_ST12C_BINDING_RAW_ROWS = _decode_st12c_jsonl(_ST12C_BINDING_ARCHIVE_B85)
+
+TRANCHE_C_PARAMETER_POLICIES: Mapping[str, TrancheCParameterPolicyV1] = MappingProxyType(
+    {
+        str(row["parameter_id"]): TrancheCParameterPolicyV1(
+            parameter_id=str(row["parameter_id"]),
+            parameter_symbol=str(row["parameter_symbol"]),
+            canonical_owner=str(row["canonical_owner"]),
+            applicability_state=str(row["applicability_state"]),
+            resolution_class=str(row["effective_resolution_class"]),
+            day1_seed_or_resolution_rule=str(row["effective_day1_seed_value_or_resolution_rule"]),
+            reference_range_or_constraint=str(row["effective_reference_range_or_structural_constraint"]),
+            missing_stale_invalid_behavior=str(row["missing_stale_invalid_behavior"]),
+            implementation_targets=tuple(str(value) for value in row["implementation_targets"]),
+            raw=row,
+        )
+        for row in _ST12C_POLICY_RAW_ROWS
+    }
+)
+TRANCHE_C_PARAMETER_APPLICATION_BINDINGS: Mapping[
+    str, TrancheCParameterApplicationBindingV1
+] = MappingProxyType(
+    {
+        str(row["parameter_id"]): TrancheCParameterApplicationBindingV1(
+            parameter_id=str(row["parameter_id"]),
+            parameter_symbol=str(row["parameter_symbol"]),
+            canonical_owner=str(row["canonical_owner"]),
+            applicability_state=str(row["applicability_state"]),
+            active_stage1_value_authority=str(row["active_stage1_value_authority"]),
+            application_targets=tuple(str(value) for value in row["application_targets"]),
+            consumer_classes=tuple(str(value) for value in row["consumer_classes"]),
+            default_resolution=str(row["default_resolution"]),
+            missing_or_stale_behavior=str(row["missing_or_stale_behavior"]),
+            raw=row,
+        )
+        for row in _ST12C_BINDING_RAW_ROWS
+    }
+)
+
+ST12C_CUMULATIVE_PARAMETER_POLICIES: Mapping[str, object] = MappingProxyType(
+    {**CUMULATIVE_PARAMETER_POLICIES, **TRANCHE_C_PARAMETER_POLICIES}
+)
+
+
+@dataclass(frozen=True, slots=True)
+class TrancheCParameterEvidenceV1:
+    evidence_class: "TrancheCParameterEvidenceClassV1"
+    evidence_ref: str
+    family_evidence_binding_ref: str
+    value_source_class: str
+    source_or_binding_refs: tuple[str, ...]
+    source_currentization_refs: tuple[str, ...]
+    active_scope_ref: str
+    source_epoch_ref: str
+    canonical_owner_ref: str
+    authority_ref: str
+    declared_unit_or_basis: str
+    observed_at: datetime | str
+    evaluated_at: datetime | str
+    valid_until: datetime | str
+    constraint_refs: tuple[str, ...]
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.evidence_class, TrancheCParameterEvidenceClassV1):
+            raise ParameterPolicyError(
+                ReasonCode.PARAMETER_BINDING_MISMATCH,
+                "Tranche-C parameter evidence class must be typed",
+            )
+        if any(
+            not isinstance(value, str) or not value.strip()
+            for value in (
+                self.evidence_ref,
+                self.family_evidence_binding_ref,
+                self.value_source_class,
+                self.active_scope_ref,
+                self.source_epoch_ref,
+                self.canonical_owner_ref,
+                self.authority_ref,
+                self.declared_unit_or_basis,
+            )
+        ):
+            raise ParameterPolicyError(
+                ReasonCode.PARAMETER_BINDING_MISMATCH,
+                "Tranche-C parameter evidence custody is incomplete",
+            )
+        for name in (
+            "source_or_binding_refs",
+            "source_currentization_refs",
+            "constraint_refs",
+        ):
+            refs = getattr(self, name)
+            if (
+                not isinstance(refs, tuple)
+                or not refs
+                or any(not isinstance(ref, str) or not ref for ref in refs)
+                or len(refs) != len(set(refs))
+            ):
+                raise ParameterPolicyError(
+                    ReasonCode.PARAMETER_BINDING_MISMATCH,
+                    f"Tranche-C parameter evidence {name} must be exact and unique",
+                )
+        observed = parse_utc(self.observed_at, field_name="observed_at")
+        evaluated = parse_utc(self.evaluated_at, field_name="evaluated_at")
+        valid_until = parse_utc(self.valid_until, field_name="valid_until")
+        if observed > evaluated or evaluated >= valid_until:
+            raise ParameterPolicyError(
+                ReasonCode.SOURCE_EPOCH_STALE,
+                "Tranche-C parameter evidence has an invalid validity interval",
+            )
+        object.__setattr__(self, "observed_at", observed)
+        object.__setattr__(self, "evaluated_at", evaluated)
+        object.__setattr__(self, "valid_until", valid_until)
+
+
+@dataclass(frozen=True, slots=True)
+class TrancheCDrawdownCalibrationArtifactV1:
+    calibration_bundle_ref: str
+    approved_sleeve_max_drawdown_budget: Decimal | str | int
+    warning_threshold: Decimal | str | int
+    freeze_threshold: Decimal | str | int
+    canonical_owner_ref: str
+    authority_ref: str
+    active_scope_ref: str
+    source_epoch_ref: str
+    observed_at: datetime | str
+    evaluated_at: datetime | str
+    valid_until: datetime | str
+
+    def __post_init__(self) -> None:
+        for name in (
+            "calibration_bundle_ref",
+            "canonical_owner_ref",
+            "authority_ref",
+            "active_scope_ref",
+            "source_epoch_ref",
+        ):
+            value = getattr(self, name)
+            if not isinstance(value, str) or not value.strip():
+                raise ParameterPolicyError(
+                    ReasonCode.PARAMETER_BINDING_MISMATCH,
+                    f"drawdown calibration {name} is required",
+                )
+        try:
+            budget = exact_decimal(
+                self.approved_sleeve_max_drawdown_budget,
+                field_name="approved_sleeve_max_drawdown_budget",
+            )
+            warning = exact_decimal(
+                self.warning_threshold,
+                field_name="warning_threshold",
+            )
+            freeze = exact_decimal(
+                self.freeze_threshold,
+                field_name="freeze_threshold",
+            )
+        except NumericDomainError as exc:
+            raise ParameterPolicyError(
+                ReasonCode.PARAMETER_OUT_OF_POLICY,
+                "drawdown calibration requires finite exact Decimal values",
+            ) from exc
+        with localcontext(decimal_context_v1()):
+            expected_warning = Decimal("0.50") * budget
+            expected_freeze = Decimal("1.00") * budget
+        if (
+            budget <= 0
+            or warning != expected_warning
+            or freeze != expected_freeze
+            or warning < 0
+            or warning >= freeze
+        ):
+            raise ParameterPolicyError(
+                ReasonCode.PARAMETER_OUT_OF_POLICY,
+                "drawdown calibration does not preserve the exact shared-budget formulas",
+            )
+        observed = parse_utc(self.observed_at, field_name="observed_at")
+        evaluated = parse_utc(self.evaluated_at, field_name="evaluated_at")
+        valid_until = parse_utc(self.valid_until, field_name="valid_until")
+        if observed > evaluated or evaluated >= valid_until:
+            raise ParameterPolicyError(
+                ReasonCode.SOURCE_EPOCH_STALE,
+                "drawdown calibration has an invalid validity interval",
+            )
+        object.__setattr__(self, "approved_sleeve_max_drawdown_budget", budget)
+        object.__setattr__(self, "warning_threshold", warning)
+        object.__setattr__(self, "freeze_threshold", freeze)
+        object.__setattr__(self, "observed_at", observed)
+        object.__setattr__(self, "evaluated_at", evaluated)
+        object.__setattr__(self, "valid_until", valid_until)
+
+
+class TrancheCParameterEvidenceClassV1(StrEnum):
+    DECLARED_TYPED_VALUE = "DECLARED_TYPED_VALUE"
+    SOURCE_OR_RUNTIME_BINDING = "SOURCE_OR_RUNTIME_BINDING"
+    CALIBRATED_ARTIFACT = "CALIBRATED_ARTIFACT"
+
+
+class TrancheCParameterPolicyClassV1(StrEnum):
+    FIXED_SYMBOLIC_OR_ENUM = "FIXED_SYMBOLIC_OR_ENUM"
+    FIXED_SINGLETON_NUMERIC = "FIXED_SINGLETON_NUMERIC"
+    BOUNDED_NUMERIC = "BOUNDED_NUMERIC"
+    TYPED_STRUCTURAL = "TYPED_STRUCTURAL"
+    SOURCE_OR_RUNTIME_BOUND = "SOURCE_OR_RUNTIME_BOUND"
+    CALIBRATION_REQUIRED = "CALIBRATION_REQUIRED"
+    NO_MACHINE_VERIFIABLE_OVERRIDE = "NO_MACHINE_VERIFIABLE_OVERRIDE"
+
+
+_FIXED_SYMBOLIC_RESOLUTION_CLASSES = frozenset(
+    {
+        "STATIC_ENUM",
+        "STATIC_RULE",
+        "STATIC_FORMULA_RULE",
+        "STATIC_ENUM_OR_RULE",
+        "FORMULA",
+        "STATIC_POINTER_OR_CONNECTOR_RULE",
+        "STATIC_ENUM_OR_CONNECTOR_RULE",
+    }
+)
+
+
+def _derive_tranche_c_policy_class_v1(
+    policy: TrancheCParameterPolicyV1,
+) -> TrancheCParameterPolicyClassV1:
+    if policy.applicability_state == "DORMANT_FUTURE_MARKET_PRESERVED_FAIL_CLOSED":
+        return TrancheCParameterPolicyClassV1.NO_MACHINE_VERIFIABLE_OVERRIDE
+    if policy.applicability_state == "SOURCE_BOUND_MUTABLE_VALUE":
+        if policy.resolution_class not in {"STATIC_ENUM", "STATIC_ENUM_OR_POINTER"}:
+            raise ParameterPolicyError(
+                ReasonCode.PARAMETER_OUT_OF_POLICY,
+                f"{policy.parameter_id} has unsupported source-bound constraint syntax",
+            )
+        return TrancheCParameterPolicyClassV1.SOURCE_OR_RUNTIME_BOUND
+    if policy.applicability_state == "REFERENCE_SEED_REQUIRES_CONTEXT_AND_OWNER_BINDING":
+        if policy.resolution_class == "RISK_POLICY_DERIVED":
+            return TrancheCParameterPolicyClassV1.CALIBRATION_REQUIRED
+        if policy.resolution_class == "STATIC_NUMERIC_OR_OWNER_EDIT":
+            return TrancheCParameterPolicyClassV1.BOUNDED_NUMERIC
+        if policy.resolution_class == "STATIC_NUMERIC":
+            return TrancheCParameterPolicyClassV1.FIXED_SINGLETON_NUMERIC
+        raise ParameterPolicyError(
+            ReasonCode.PARAMETER_OUT_OF_POLICY,
+            f"{policy.parameter_id} has unsupported reference-seed constraint syntax",
+        )
+    if policy.resolution_class == "STATIC_MAP_REFERENCE":
+        return TrancheCParameterPolicyClassV1.TYPED_STRUCTURAL
+    if policy.resolution_class in _FIXED_SYMBOLIC_RESOLUTION_CLASSES:
+        return TrancheCParameterPolicyClassV1.FIXED_SYMBOLIC_OR_ENUM
+    raise ParameterPolicyError(
+        ReasonCode.PARAMETER_OUT_OF_POLICY,
+        f"{policy.parameter_id} has no machine-verifiable admissibility class",
+    )
+
+
+TRANCHE_C_PARAMETER_ADMISSIBILITY_CLASSES: Mapping[
+    str, TrancheCParameterPolicyClassV1
+] = MappingProxyType(
+    {
+        parameter_id: _derive_tranche_c_policy_class_v1(policy)
+        for parameter_id, policy in TRANCHE_C_PARAMETER_POLICIES.items()
+    }
+)
+
+
+@dataclass(frozen=True, slots=True)
+class TrancheCParameterAdmissibilityReceiptV1:
+    parameter_id: str
+    policy_class: TrancheCParameterPolicyClassV1
+    canonical_normalized_value: object
+    authority_ref: str
+    source_or_binding_refs: tuple[str, ...]
+    constraint_refs_applied: tuple[str, ...]
+    terminal_state: str = "PASS"
+    evidence_ref: str | None = None
+    evidence_class: TrancheCParameterEvidenceClassV1 | None = None
+    family_evidence_binding_ref: str | None = None
+    value_source_class: str | None = None
+    source_currentization_refs: tuple[str, ...] = ()
+    active_scope_ref: str | None = None
+    source_epoch_ref: str | None = None
+    observed_at: datetime | str | None = None
+    evaluated_at: datetime | str | None = None
+    resolution_at: datetime | str | None = None
+    valid_until: datetime | str | None = None
+    calibration_bundle_ref: str | None = None
+
+    def __post_init__(self) -> None:
+        if (
+            not self.parameter_id
+            or not isinstance(self.policy_class, TrancheCParameterPolicyClassV1)
+            or not self.authority_ref
+            or not self.source_or_binding_refs
+            or not self.constraint_refs_applied
+            or self.terminal_state != "PASS"
+        ):
+            raise ParameterPolicyError(
+                ReasonCode.PARAMETER_OUT_OF_POLICY,
+                "Tranche-C admissibility receipt is incomplete or nonterminal",
+            )
+        _reject_nonfinite_parameter_value(
+            self.parameter_id, self.canonical_normalized_value
+        )
+        for name in ("source_or_binding_refs", "constraint_refs_applied"):
+            refs = getattr(self, name)
+            if (
+                not isinstance(refs, tuple)
+                or not refs
+                or any(not isinstance(ref, str) or not ref for ref in refs)
+                or len(refs) != len(set(refs))
+            ):
+                raise ParameterPolicyError(
+                    ReasonCode.PARAMETER_OUT_OF_POLICY,
+                    f"Tranche-C admissibility receipt {name} must be exact and unique",
+                )
+        dynamic = self.policy_class in {
+            TrancheCParameterPolicyClassV1.SOURCE_OR_RUNTIME_BOUND,
+            TrancheCParameterPolicyClassV1.CALIBRATION_REQUIRED,
+        }
+        dynamic_identities = (
+            self.evidence_ref,
+            self.family_evidence_binding_ref,
+            self.value_source_class,
+            self.active_scope_ref,
+            self.source_epoch_ref,
+        )
+        dynamic_times = (
+            self.observed_at,
+            self.evaluated_at,
+            self.resolution_at,
+            self.valid_until,
+        )
+        if dynamic:
+            expected_evidence_class = (
+                TrancheCParameterEvidenceClassV1.SOURCE_OR_RUNTIME_BINDING
+                if self.policy_class
+                is TrancheCParameterPolicyClassV1.SOURCE_OR_RUNTIME_BOUND
+                else TrancheCParameterEvidenceClassV1.CALIBRATED_ARTIFACT
+            )
+            if (
+                self.evidence_class is not expected_evidence_class
+                or any(
+                    not isinstance(value, str) or not value.strip()
+                    for value in dynamic_identities
+                )
+                or not isinstance(self.source_currentization_refs, tuple)
+                or not self.source_currentization_refs
+                or any(
+                    not isinstance(ref, str) or not ref
+                    for ref in self.source_currentization_refs
+                )
+                or len(self.source_currentization_refs)
+                != len(set(self.source_currentization_refs))
+                or any(value is None for value in dynamic_times)
+            ):
+                raise ParameterPolicyError(
+                    ReasonCode.PARAMETER_OUT_OF_POLICY,
+                    "dynamic Tranche-C admissibility receipt is incomplete",
+                )
+            observed = parse_utc(self.observed_at, field_name="observed_at")  # type: ignore[arg-type]
+            evaluated = parse_utc(self.evaluated_at, field_name="evaluated_at")  # type: ignore[arg-type]
+            resolution = parse_utc(self.resolution_at, field_name="resolution_at")  # type: ignore[arg-type]
+            valid_until = parse_utc(self.valid_until, field_name="valid_until")  # type: ignore[arg-type]
+            if not observed <= evaluated <= resolution < valid_until:
+                raise ParameterPolicyError(
+                    ReasonCode.SOURCE_EPOCH_STALE,
+                    "dynamic Tranche-C admissibility receipt is outside its evidence interval",
+                )
+            if (
+                self.policy_class
+                is TrancheCParameterPolicyClassV1.CALIBRATION_REQUIRED
+                and (
+                    not isinstance(self.calibration_bundle_ref, str)
+                    or not self.calibration_bundle_ref.strip()
+                    or self.calibration_bundle_ref != self.evidence_ref
+                )
+            ):
+                raise ParameterPolicyError(
+                    ReasonCode.PARAMETER_OUT_OF_POLICY,
+                    "calibrated admissibility receipt requires its bundle identity",
+                )
+            if (
+                self.policy_class
+                is TrancheCParameterPolicyClassV1.SOURCE_OR_RUNTIME_BOUND
+                and self.calibration_bundle_ref is not None
+            ):
+                raise ParameterPolicyError(
+                    ReasonCode.PARAMETER_OUT_OF_POLICY,
+                    "source-bound admissibility receipt cannot claim calibration custody",
+                )
+            object.__setattr__(self, "observed_at", observed)
+            object.__setattr__(self, "evaluated_at", evaluated)
+            object.__setattr__(self, "resolution_at", resolution)
+            object.__setattr__(self, "valid_until", valid_until)
+        elif (
+            any(value is not None for value in dynamic_identities)
+            or self.evidence_class is not None
+            or self.source_currentization_refs
+            or any(value is not None for value in dynamic_times)
+            or self.calibration_bundle_ref is not None
+        ):
+            raise ParameterPolicyError(
+                ReasonCode.PARAMETER_OUT_OF_POLICY,
+                "static Tranche-C admissibility receipt cannot claim dynamic evidence",
+            )
+
+
+@dataclass(frozen=True, slots=True)
+class TrancheCParameterResolutionV1:
+    parameter_id: str
+    value_or_rule: object
+    authority_ref: str
+    application_binding: TrancheCParameterApplicationBindingV1
+    admissibility_receipt: TrancheCParameterAdmissibilityReceiptV1
+
+
+@dataclass(frozen=True, slots=True)
+class TrancheCExplicitParameterValueV1:
+    parameter_id: str
+    value: object
+    canonical_owner: str
+    authority_ref: str
+    source_packet_ref: str
+    declared_unit_or_basis: str | None = None
+    evidence: TrancheCParameterEvidenceV1 | None = None
+    drawdown_calibration_artifact: TrancheCDrawdownCalibrationArtifactV1 | None = None
+
+    def __post_init__(self) -> None:
+        if any(
+            not isinstance(value, str) or not value.strip()
+            for value in (
+                self.parameter_id,
+                self.canonical_owner,
+                self.authority_ref,
+                self.source_packet_ref,
+            )
+        ):
+            raise ParameterPolicyError(
+                ReasonCode.PARAMETER_OWNER_MISSING,
+                "explicit Tranche-C parameter value requires complete owner and packet custody",
+            )
+        if self.declared_unit_or_basis is not None and (
+            not isinstance(self.declared_unit_or_basis, str)
+            or not self.declared_unit_or_basis.strip()
+        ):
+            raise ParameterPolicyError(
+                ReasonCode.PARAMETER_BINDING_MISMATCH,
+                "explicit Tranche-C parameter unit/basis must be nonempty",
+            )
+        if self.evidence is not None and not isinstance(
+            self.evidence, TrancheCParameterEvidenceV1
+        ):
+            raise ParameterPolicyError(
+                ReasonCode.PARAMETER_BINDING_MISMATCH,
+                "explicit Tranche-C parameter evidence must be typed",
+            )
+        if self.drawdown_calibration_artifact is not None and not isinstance(
+            self.drawdown_calibration_artifact,
+            TrancheCDrawdownCalibrationArtifactV1,
+        ):
+            raise ParameterPolicyError(
+                ReasonCode.PARAMETER_BINDING_MISMATCH,
+                "drawdown calibration artifact must be typed",
+            )
+
+
+_BOUNDED_NUMERIC_CONSTRAINT = re.compile(
+    r"^(?P<unit>.+?)\s+(?P<operator>>=|>|<=|<)\s+"
+    r"(?P<bound>[+-]?(?:\d+(?:\.\d*)?|\.\d+))$"
+)
+
+
+def _policy_refs_v1(policy: TrancheCParameterPolicyV1) -> tuple[str, ...]:
+    refs = policy.raw.get("effective_source_state_refs")
+    if (
+        not isinstance(refs, tuple)
+        or not refs
+        or any(not isinstance(ref, str) or not ref for ref in refs)
+    ):
+        raise ParameterPolicyError(
+            ReasonCode.PARAMETER_OUT_OF_POLICY,
+            f"{policy.parameter_id} has incomplete frozen source refs",
+        )
+    return refs
+
+
+def _constraint_refs_v1(policy: TrancheCParameterPolicyV1) -> tuple[str, ...]:
+    bounded = policy.raw.get("effective_bounded_search_space_or_fit_constraint")
+    unit = policy.raw.get("effective_unit_or_basis")
+    if not isinstance(bounded, str) or not bounded or not isinstance(unit, str) or not unit:
+        raise ParameterPolicyError(
+            ReasonCode.PARAMETER_OUT_OF_POLICY,
+            f"{policy.parameter_id} has incomplete frozen constraints",
+        )
+    return (policy.reference_range_or_constraint, bounded, unit)
+
+
+def _source_currentization_refs_v1(
+    policy: TrancheCParameterPolicyV1,
+    binding: TrancheCParameterApplicationBindingV1,
+) -> tuple[str, ...]:
+    policy_refs = policy.raw.get("source_currentization_refs")
+    binding_refs = binding.raw.get("currentized_source_refs")
+    if (
+        not isinstance(policy_refs, tuple)
+        or not policy_refs
+        or any(not isinstance(ref, str) or not ref for ref in policy_refs)
+        or policy_refs != binding_refs
+    ):
+        raise ParameterPolicyError(
+            ReasonCode.PARAMETER_OUT_OF_POLICY,
+            f"{policy.parameter_id} has incomplete currentized source custody",
+        )
+    return policy_refs
+
+
+def _active_scope_ref_v1(policy: TrancheCParameterPolicyV1) -> str:
+    scope_ref = policy.raw.get("master_plan_section_id")
+    if not isinstance(scope_ref, str) or not scope_ref:
+        raise ParameterPolicyError(
+            ReasonCode.PARAMETER_OUT_OF_POLICY,
+            f"{policy.parameter_id} has no exact active scope",
+        )
+    return scope_ref
+
+
+def _source_epoch_ref_v1(policy: TrancheCParameterPolicyV1) -> str:
+    epoch_ref = policy.raw.get("currentization_version")
+    if not isinstance(epoch_ref, str) or not epoch_ref:
+        raise ParameterPolicyError(
+            ReasonCode.PARAMETER_OUT_OF_POLICY,
+            f"{policy.parameter_id} has no exact source epoch",
+        )
+    return epoch_ref
+
+
+def _canonical_static_map_v1(policy: TrancheCParameterPolicyV1) -> Mapping[str, str]:
+    text = policy.day1_seed_or_resolution_rule.strip()
+    if not text.startswith("{") or not text.endswith("}"):
+        raise ParameterPolicyError(
+            ReasonCode.PARAMETER_OUT_OF_POLICY,
+            f"{policy.parameter_id} has unsupported structural constraint syntax",
+        )
+    pairs: dict[str, str] = {}
+    for item in text[1:-1].split(","):
+        parts = tuple(part.strip() for part in item.split("->"))
+        if (
+            len(parts) != 2
+            or not parts[0]
+            or not parts[1]
+            or parts[0] in pairs
+        ):
+            raise ParameterPolicyError(
+                ReasonCode.PARAMETER_OUT_OF_POLICY,
+                f"{policy.parameter_id} has unsupported structural constraint syntax",
+            )
+        pairs[parts[0]] = parts[1]
+    if not pairs:
+        raise ParameterPolicyError(
+            ReasonCode.PARAMETER_OUT_OF_POLICY,
+            f"{policy.parameter_id} has an empty structural contract",
+        )
+    return MappingProxyType(dict(sorted(pairs.items())))
+
+
+def _exact_numeric_v1(parameter_id: str, value: object) -> Decimal:
+    if isinstance(value, bool) or not isinstance(value, Decimal | int):
+        raise ParameterPolicyError(
+            ReasonCode.PARAMETER_OUT_OF_POLICY,
+            f"{parameter_id} requires an exact Decimal or integer",
+        )
+    try:
+        numeric = exact_decimal(value, field_name=parameter_id)
+    except NumericDomainError as exc:
+        raise ParameterPolicyError(
+            ReasonCode.PARAMETER_OUT_OF_POLICY,
+            f"{parameter_id} requires a finite exact number",
+        ) from exc
+    if not numeric.is_finite():
+        raise ParameterPolicyError(
+            ReasonCode.PARAMETER_OUT_OF_POLICY,
+            f"{parameter_id} requires a finite exact number",
+        )
+    return numeric
+
+
+def _validate_exact_evidence_v1(
+    *,
+    policy: TrancheCParameterPolicyV1,
+    binding: TrancheCParameterApplicationBindingV1,
+    explicit_value: TrancheCExplicitParameterValueV1,
+    evidence_class: TrancheCParameterEvidenceClassV1,
+    resolution_at: datetime | str | None,
+) -> tuple[TrancheCParameterEvidenceV1, datetime]:
+    evidence = explicit_value.evidence
+    expected_unit = str(policy.raw["effective_unit_or_basis"])
+    family_binding_ref = policy.raw.get("family_evidence_binding_ref")
+    value_source_class = policy.raw.get("effective_value_source_class")
+    if resolution_at is None:
+        raise ParameterPolicyError(
+            ReasonCode.PARAMETER_OWNER_MISSING,
+            f"{policy.parameter_id} requires an explicit resolution time",
+        )
+    resolution = parse_utc(resolution_at, field_name="resolution_at")
+    if (
+        not isinstance(evidence, TrancheCParameterEvidenceV1)
+        or evidence.evidence_class is not evidence_class
+        or evidence.evidence_ref != explicit_value.source_packet_ref
+        or evidence.family_evidence_binding_ref != family_binding_ref
+        or evidence.value_source_class != value_source_class
+        or evidence.source_or_binding_refs != _policy_refs_v1(policy)
+        or evidence.source_currentization_refs
+        != _source_currentization_refs_v1(policy, binding)
+        or evidence.active_scope_ref != _active_scope_ref_v1(policy)
+        or evidence.source_epoch_ref != _source_epoch_ref_v1(policy)
+        or evidence.canonical_owner_ref != policy.canonical_owner
+        or evidence.authority_ref != binding.active_stage1_value_authority
+        or evidence.declared_unit_or_basis != expected_unit
+        or evidence.constraint_refs != _constraint_refs_v1(policy)
+        or explicit_value.declared_unit_or_basis != expected_unit
+    ):
+        raise ParameterPolicyError(
+            ReasonCode.PARAMETER_BINDING_MISMATCH,
+            f"{policy.parameter_id} requires its exact typed evidence binding",
+        )
+    if not evidence.observed_at <= evidence.evaluated_at <= resolution < evidence.valid_until:
+        raise ParameterPolicyError(
+            ReasonCode.SOURCE_EPOCH_STALE,
+            f"{policy.parameter_id} evidence is stale or future-observed",
+        )
+    return evidence, resolution
+
+
+def _validate_drawdown_calibration_artifact_v1(
+    *,
+    policy: TrancheCParameterPolicyV1,
+    binding: TrancheCParameterApplicationBindingV1,
+    explicit_value: TrancheCExplicitParameterValueV1,
+    evidence: TrancheCParameterEvidenceV1,
+    resolution_at: datetime,
+) -> tuple[TrancheCDrawdownCalibrationArtifactV1, Decimal]:
+    artifact = explicit_value.drawdown_calibration_artifact
+    if (
+        policy.parameter_symbol not in {"dd_warn", "dd_freeze"}
+        or not isinstance(artifact, TrancheCDrawdownCalibrationArtifactV1)
+        or artifact.calibration_bundle_ref != explicit_value.source_packet_ref
+        or artifact.calibration_bundle_ref != evidence.evidence_ref
+        or artifact.canonical_owner_ref != policy.canonical_owner
+        or artifact.authority_ref != binding.active_stage1_value_authority
+        or artifact.active_scope_ref != evidence.active_scope_ref
+        or artifact.source_epoch_ref != evidence.source_epoch_ref
+        or artifact.observed_at != evidence.observed_at
+        or artifact.evaluated_at != evidence.evaluated_at
+        or artifact.valid_until != evidence.valid_until
+    ):
+        raise ParameterPolicyError(
+            ReasonCode.PARAMETER_BINDING_MISMATCH,
+            f"{policy.parameter_id} requires its complete shared drawdown bundle",
+        )
+    if not artifact.observed_at <= artifact.evaluated_at <= resolution_at < artifact.valid_until:
+        raise ParameterPolicyError(
+            ReasonCode.SOURCE_EPOCH_STALE,
+            f"{policy.parameter_id} drawdown bundle is stale or future-observed",
+        )
+    expected = (
+        artifact.warning_threshold
+        if policy.parameter_symbol == "dd_warn"
+        else artifact.freeze_threshold
+    )
+    candidate = _exact_numeric_v1(policy.parameter_id, explicit_value.value)
+    if candidate != expected:
+        raise ParameterPolicyError(
+            ReasonCode.PARAMETER_OUT_OF_POLICY,
+            f"{policy.parameter_id} does not equal its shared drawdown-bundle threshold",
+        )
+    return artifact, candidate
+
+
+def _admit_tranche_c_parameter_value_v1(
+    *,
+    policy: TrancheCParameterPolicyV1,
+    binding: TrancheCParameterApplicationBindingV1,
+    explicit_value: TrancheCExplicitParameterValueV1 | None,
+    resolution_at: datetime | str | None,
+) -> TrancheCParameterAdmissibilityReceiptV1:
+    policy_class = TRANCHE_C_PARAMETER_ADMISSIBILITY_CLASSES[policy.parameter_id]
+    if policy_class is TrancheCParameterPolicyClassV1.NO_MACHINE_VERIFIABLE_OVERRIDE:
+        raise ParameterPolicyError(
+            ReasonCode.OPERATION_BLOCKED,
+            f"{policy.parameter_id} has no machine-verifiable Stage-1 override",
+        )
+    if (
+        explicit_value is not None
+        and explicit_value.drawdown_calibration_artifact is not None
+        and policy_class
+        is not TrancheCParameterPolicyClassV1.CALIBRATION_REQUIRED
+    ):
+        raise ParameterPolicyError(
+            ReasonCode.PARAMETER_BINDING_MISMATCH,
+            f"{policy.parameter_id} cannot claim drawdown calibration custody",
+        )
+    candidate = (
+        policy.day1_seed_or_resolution_rule
+        if explicit_value is None
+        else explicit_value.value
+    )
+    evidence_refs = _policy_refs_v1(policy)
+    dynamic_receipt_fields: dict[str, object] = {}
+    if explicit_value is not None:
+        evidence_refs = (explicit_value.source_packet_ref, *evidence_refs)
+
+    if policy_class is TrancheCParameterPolicyClassV1.FIXED_SYMBOLIC_OR_ENUM:
+        if not isinstance(candidate, str) or candidate != policy.day1_seed_or_resolution_rule:
+            raise ParameterPolicyError(
+                ReasonCode.PARAMETER_OUT_OF_POLICY,
+                f"{policy.parameter_id} requires its exact canonical token or rule",
+            )
+        normalized: object = candidate
+    elif policy_class is TrancheCParameterPolicyClassV1.FIXED_SINGLETON_NUMERIC:
+        if explicit_value is None:
+            expected = exact_decimal(
+                policy.day1_seed_or_resolution_rule,
+                field_name=policy.parameter_symbol,
+            )
+            normalized = expected
+        else:
+            expected = exact_decimal(
+                policy.day1_seed_or_resolution_rule,
+                field_name=policy.parameter_symbol,
+            )
+            normalized = _exact_numeric_v1(policy.parameter_id, candidate)
+            if (
+                normalized != expected
+                or explicit_value.declared_unit_or_basis
+                != policy.raw["effective_unit_or_basis"]
+            ):
+                raise ParameterPolicyError(
+                    ReasonCode.PARAMETER_OUT_OF_POLICY,
+                    f"{policy.parameter_id} differs from its exact numeric singleton",
+                )
+    elif policy_class is TrancheCParameterPolicyClassV1.BOUNDED_NUMERIC:
+        match = _BOUNDED_NUMERIC_CONSTRAINT.fullmatch(
+            policy.reference_range_or_constraint.strip()
+        )
+        if match is None or match.group("unit") != policy.raw["effective_unit_or_basis"]:
+            raise ParameterPolicyError(
+                ReasonCode.PARAMETER_OUT_OF_POLICY,
+                f"{policy.parameter_id} has unsupported numeric constraint syntax",
+            )
+        if explicit_value is None:
+            raise ParameterPolicyError(
+                ReasonCode.PARAMETER_OWNER_MISSING,
+                f"{policy.parameter_id} requires an explicit bounded value",
+            )
+        if explicit_value.declared_unit_or_basis != match.group("unit"):
+            raise ParameterPolicyError(
+                ReasonCode.PARAMETER_BINDING_MISMATCH,
+                f"{policy.parameter_id} has the wrong declared unit/basis",
+            )
+        normalized = _exact_numeric_v1(policy.parameter_id, candidate)
+        bound = exact_decimal(match.group("bound"), field_name=policy.parameter_symbol)
+        admitted = {
+            ">=": normalized >= bound,
+            ">": normalized > bound,
+            "<=": normalized <= bound,
+            "<": normalized < bound,
+        }[match.group("operator")]
+        if not admitted:
+            raise ParameterPolicyError(
+                ReasonCode.PARAMETER_OUT_OF_POLICY,
+                f"{policy.parameter_id} is outside its exact numeric boundary",
+            )
+    elif policy_class is TrancheCParameterPolicyClassV1.TYPED_STRUCTURAL:
+        expected_map = _canonical_static_map_v1(policy)
+        if explicit_value is None:
+            normalized = expected_map
+        else:
+            if (
+                not isinstance(candidate, Mapping)
+                or any(
+                    not isinstance(key, str) or not isinstance(value, str)
+                    for key, value in candidate.items()
+                )
+                or dict(candidate) != dict(expected_map)
+            ):
+                raise ParameterPolicyError(
+                    ReasonCode.PARAMETER_OUT_OF_POLICY,
+                    f"{policy.parameter_id} violates its complete typed structure",
+                )
+            normalized = MappingProxyType(dict(sorted(candidate.items())))
+    elif policy_class is TrancheCParameterPolicyClassV1.SOURCE_OR_RUNTIME_BOUND:
+        if explicit_value is None:
+            raise ParameterPolicyError(
+                ReasonCode.PARAMETER_OWNER_MISSING,
+                f"{policy.parameter_id} requires an exact runtime binding",
+            )
+        evidence, resolved_at = _validate_exact_evidence_v1(
+            policy=policy,
+            binding=binding,
+            explicit_value=explicit_value,
+            evidence_class=TrancheCParameterEvidenceClassV1.SOURCE_OR_RUNTIME_BINDING,
+            resolution_at=resolution_at,
+        )
+        if not isinstance(candidate, str):
+            raise ParameterPolicyError(
+                ReasonCode.PARAMETER_OUT_OF_POLICY,
+                f"{policy.parameter_id} requires a canonical source-bound token",
+            )
+        allowed = _simple_enum_values(policy.reference_range_or_constraint)
+        if candidate != policy.day1_seed_or_resolution_rule and candidate not in allowed:
+            raise ParameterPolicyError(
+                ReasonCode.PARAMETER_OUT_OF_POLICY,
+                f"{policy.parameter_id} is outside its source-bound exact set",
+            )
+        normalized = candidate
+        evidence_refs = (evidence.evidence_ref, *evidence.source_or_binding_refs)
+        dynamic_receipt_fields = {
+            "evidence_ref": evidence.evidence_ref,
+            "evidence_class": evidence.evidence_class,
+            "family_evidence_binding_ref": evidence.family_evidence_binding_ref,
+            "value_source_class": evidence.value_source_class,
+            "source_currentization_refs": evidence.source_currentization_refs,
+            "active_scope_ref": evidence.active_scope_ref,
+            "source_epoch_ref": evidence.source_epoch_ref,
+            "observed_at": evidence.observed_at,
+            "evaluated_at": evidence.evaluated_at,
+            "resolution_at": resolved_at,
+            "valid_until": evidence.valid_until,
+        }
+    elif policy_class is TrancheCParameterPolicyClassV1.CALIBRATION_REQUIRED:
+        if explicit_value is None:
+            raise ParameterPolicyError(
+                ReasonCode.PARAMETER_OWNER_MISSING,
+                f"{policy.parameter_id} requires a calibrated artifact",
+            )
+        evidence, resolved_at = _validate_exact_evidence_v1(
+            policy=policy,
+            binding=binding,
+            explicit_value=explicit_value,
+            evidence_class=TrancheCParameterEvidenceClassV1.CALIBRATED_ARTIFACT,
+            resolution_at=resolution_at,
+        )
+        artifact, normalized = _validate_drawdown_calibration_artifact_v1(
+            policy=policy,
+            binding=binding,
+            explicit_value=explicit_value,
+            evidence=evidence,
+            resolution_at=resolved_at,
+        )
+        evidence_refs = (evidence.evidence_ref, *evidence.source_or_binding_refs)
+        dynamic_receipt_fields = {
+            "evidence_ref": evidence.evidence_ref,
+            "evidence_class": evidence.evidence_class,
+            "family_evidence_binding_ref": evidence.family_evidence_binding_ref,
+            "value_source_class": evidence.value_source_class,
+            "source_currentization_refs": evidence.source_currentization_refs,
+            "active_scope_ref": evidence.active_scope_ref,
+            "source_epoch_ref": evidence.source_epoch_ref,
+            "observed_at": evidence.observed_at,
+            "evaluated_at": evidence.evaluated_at,
+            "resolution_at": resolved_at,
+            "valid_until": evidence.valid_until,
+            "calibration_bundle_ref": artifact.calibration_bundle_ref,
+        }
+    else:  # pragma: no cover - import-time closure makes this unreachable
+        raise ParameterPolicyError(
+            ReasonCode.PARAMETER_OUT_OF_POLICY,
+            f"{policy.parameter_id} has unsupported admissibility semantics",
+        )
+
+    frozen_value = _freeze_parameter_value(normalized)
+    return TrancheCParameterAdmissibilityReceiptV1(
+        parameter_id=policy.parameter_id,
+        policy_class=policy_class,
+        canonical_normalized_value=frozen_value,
+        authority_ref=binding.active_stage1_value_authority,
+        source_or_binding_refs=evidence_refs,
+        constraint_refs_applied=_constraint_refs_v1(policy),
+        **dynamic_receipt_fields,
+    )
+
+
+def resolve_tranche_c_parameter_v1(
+    parameter_id: str,
+    *,
+    explicit_value: TrancheCExplicitParameterValueV1 | None = None,
+    resolution_at: datetime | str | None = None,
+) -> TrancheCParameterResolutionV1:
+    policy = TRANCHE_C_PARAMETER_POLICIES.get(parameter_id)
+    binding = TRANCHE_C_PARAMETER_APPLICATION_BINDINGS.get(parameter_id)
+    if policy is None or binding is None:
+        raise ParameterPolicyError(ReasonCode.PARAMETER_UNKNOWN, f"unknown Tranche-C parameter: {parameter_id}")
+    if policy.applicability_state == "DORMANT_FUTURE_MARKET_PRESERVED_FAIL_CLOSED":
+        raise ParameterPolicyError(
+            ReasonCode.OPERATION_BLOCKED,
+            f"{parameter_id} is a preserved later-market contract and is not Stage-1 active",
+        )
+    seed = policy.day1_seed_or_resolution_rule
+    requires_explicit = (
+        binding.default_resolution.startswith("NO_GLOBAL_DEFAULT")
+        or binding.default_resolution == "CERTIFIED_DAY1_REFERENCE_SEED_NOT_AUTONOMOUS_LIVE_AUTHORITY"
+        or any(token in seed for token in ("NO_DEFAULT", "EXPLICIT_REQUIRED", "REQUIRES_CALIBRATION"))
+    )
+    if explicit_value is None and requires_explicit:
+        raise ParameterPolicyError(ReasonCode.PARAMETER_OWNER_MISSING, f"{parameter_id} has no silent default")
+    if explicit_value is not None and (
+        not isinstance(explicit_value, TrancheCExplicitParameterValueV1)
+        or explicit_value.parameter_id != parameter_id
+        or explicit_value.canonical_owner != policy.canonical_owner
+        or explicit_value.authority_ref != binding.active_stage1_value_authority
+    ):
+        raise ParameterPolicyError(
+            ReasonCode.PARAMETER_BINDING_MISMATCH,
+            f"{parameter_id} explicit value is outside its exact owner/application binding",
+        )
+    admissibility = _admit_tranche_c_parameter_value_v1(
+        policy=policy,
+        binding=binding,
+        explicit_value=explicit_value,
+        resolution_at=resolution_at,
+    )
+    return TrancheCParameterResolutionV1(
+        parameter_id=parameter_id,
+        value_or_rule=admissibility.canonical_normalized_value,
+        authority_ref=(binding.active_stage1_value_authority if explicit_value is None else explicit_value.authority_ref),
+        application_binding=binding,
+        admissibility_receipt=admissibility,
+    )
+
+
+if (
+    len(TRANCHE_C_PARAMETER_POLICIES) != 80
+    or len(TRANCHE_C_PARAMETER_APPLICATION_BINDINGS) != 80
+    or set(TRANCHE_C_PARAMETER_POLICIES) != set(TRANCHE_C_PARAMETER_APPLICATION_BINDINGS)
+    or set(TRANCHE_C_PARAMETER_POLICIES) & set(CUMULATIVE_PARAMETER_POLICIES)
+    or len(ST12C_CUMULATIVE_PARAMETER_POLICIES) != 559
+    or len(TRANCHE_C_PARAMETER_ADMISSIBILITY_CLASSES) != 80
+    or set(TRANCHE_C_PARAMETER_ADMISSIBILITY_CLASSES)
+    != set(TRANCHE_C_PARAMETER_POLICIES)
+    or set(TRANCHE_C_PARAMETER_ADMISSIBILITY_CLASSES.values())
+    != set(TrancheCParameterPolicyClassV1)
+):
+    raise ParameterPolicyError(
+        ReasonCode.PARAMETER_BINDING_MISMATCH,
+        "Tranche-C parameter closure must be exact 80/80 with cumulative compatibility view 559",
     )

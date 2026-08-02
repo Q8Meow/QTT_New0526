@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import base64
 import json
 from types import MappingProxyType
 from typing import Mapping
+import zlib
 
 from .errors import ContractValidationError, ReasonCode
 from .models import GoldenVectorV1, OracleContractV1
@@ -1690,3 +1692,92 @@ if (
         ReasonCode.ORACLE_NOT_INDEPENDENT,
         "v3.4 oracle closure requires 30 oracles, 90 vectors, and 30 properties",
     )
+
+
+# Exact frozen Tranche-C oracle/vector payloads are a data-only compatibility
+# overlay; predecessor ORACLE_BY_MATH_ID remains its exact 30-row view.
+_ST12C_ORACLE_ARCHIVE_B85 = 'c-rlqTXWht6vyB9Q+WK084Mw9coVirJTW#a+iBCzj>Z^~cx!Cdm$YoB-+hk^Nl3Ev!mzW{JueAZN79kbIlunv`0`neL|(@8Sj>2qhfyN<G8cu&@5D?Ud{(1uCO+{jP2yB=*%0Q@Ef13<`zQ_OVN!_J#_FLt7k^c8{-k}e4D-0iQohWRI9jO#l?*-ZyEfOUruWsBDn2bmRDv6KVNwZjhR5k0bPCf_IwJ03b<k<+{Vy#wPG@2%;71xsce88`<GG9&HsurM8q^FJ<-{>LeLJCsPfgCK7uY^0aNP4<21h(PA&mIczUCw5j%7zPFnr5(xKG$Q_3Hs9%o-DR&98`UnFM-r)1@AFT%Q}nwzqp3u1VEx=StY8n=FsZ+XXL5u`JZVdvy}#g;2^{q1<E%7-@H~>MU2{bXk>!@)4}Fs#M~|GK09JH?=9OaaKiToTaiM5epbRlwaF0Az3byRc*F4H5@6xM9h?VmM^L#Y$+nG79y{^wG@a|2qVD+Ev24)v(<8{NX)8S$f1ooZbA`vB3~&p5hd_#rhtRstWp*C{%zLq7-nT1W;q5Ee?qIWh>N104ctmZtDZ55XDubo(s`W5B^;~Zmlmh>Fl9WIW-w|Y7T{PMLDH=h*_swHY$y1--m|v)hun4e$mj8=5?qG_lo@gE+9q`dgE8?hwC*YRvIxstUO=90EVf#z^@j2?%x^?lY~}EKb>y;fU=t3}e@HLrW4dEvIs7~z%!IEKMh(l8nE-Z>*_08-kanIMFoVjYfn)i6XgQ|koJ+4a6$jf|Kys+iKqnM_I6h=9F?`wQ!aBd;k7F}BqKvKw-gJ*=59z<X*i9>hu7HJsiQd+k4h_pZUWECI*8vD2aQs>At&{IXl|N=7f0~86Iy?YDMl=x+Gf@=0&P#B|aK{sy`jq>WjV*`Rux4rmJ{j6_v+8R0pnR>7We{0m;JS<*z$#i#dlN2U=t=^j^QCp9ta`drVFmS_$A524h%`f*A<cf6W}dHi4b2D`^!KfI)YSBL=LqTMxOFYPl|@SlGcMr6?|}tHD|wbxc~nQZ;8B(5LIUKydhN1Hjb2&WnEDs4DL3~k<ooUO|0d$raWx^FV`6_Bj2{GKJ)eV%<vNI+cDJLVqC*Dm!@yTN8ThJs419%(?kK^9@($64XgfUGnk?@wscm0t`dR<9G0N^9jbXxTR@R8rQQIK^_XFVTodA5@JOI8%ZFi*TLUo65L%1CtZcSEqBUrwyLSk!cp|?4S*J`5ftI9Zu%QZ7QrzrQ3h<g$7Y$p-Vnn%PllzYcTEL3^OG-TT0nbu^L2Ss}6zOnpwQqOgdSI_<6r7ID9RtLRyr={M1LQRMK+k=0-&My9~TN=f`dP%71j*MEU>yT^6wZn6*$+`~0a!E#TqK+^vVAsT>SDJA}SYs64LvsN%EMeRPRUXoCZyM@5X{a}khB~Ue<0Ka<J!BiQ?eJ`CveLURbj`bPnLmQkY})M>&$f6An<{V<FU~_Q?#IRMPA+zv$Hgvcz9UB%ia&%LLhkU8YqI#8PzKS~EIGs&mRD2pQ3*Ci0v6y_I0Mg%vi@faRUZOzPayVo0<qUTAofu89Urw&=pomTYlr6=3cX_&dNp$T=7bO3z%hY4-*H=;5ImfhBIh}*W(FlzqqN)abYyI0^Hcx>#PfC(hzQcXKzgzhq$kY-=?MzN=Fkp>CGrq?cz7N*T3EXFwY&+0`r5he4&iR!5vAV!Vr6t54TgaQiNT&){6xxgNSsT`JZ{K5`F<!b!VduCa3R;Uq4P9M;aIUvVXf2NTxqdo{Swx-ndCW`mRqJZ$NP9%6DhqPrTaT6-ESVH`>0xfT~h8IxE8|CjQ?FOcRF}37GaDq{?B0ii%90c`x(XXw?Up}^)^dC!{S5zkcqy00@6wpFB(oxP_!Z^_u}Nv$N%@5_xS%FzRct&BN}Q$WF9i_@XTxUGqH*7U09mS;5_NjbuW)!8G@HKB@VY7xINq=j_-ZPgDN0G({%~MB$0@h<<?|nUag}t4X5%UWicRjD*yit<8`?H(qP4*_&Ag`TrMSxlTTN?X01#YX^i?3S-THwcfNn1ca-lR7_tDc12eCC!n|<VkAMAGnqOrtzFOs%<RYq6Bqx&d@Z@Z=N_F2j@Mrun@c_dUn>gB)4o{J7pETzD<wNs4P7?lCB}<}ySnera7m7&S4~aWpchGCz>kfMOE|+7*7ivBP90Km}fJ4pqQuF--Zos1W'
+_ST12C_VECTOR_ARCHIVE_B85 = 'c-rloZFAZ<5Xax&$M9<>;|Cm)ymO3uWsX44flhm!jz$=9(ZtxUB$Lw2efL|*(15YskPu1>GnomoR<gAF^B-xwdC)?_1RYZ{LQ@iogrSrXPS});w95xAOeQI2lqWGtlZb{h?NW2EZcxA1L8gCVI-0JLuPOA*?a7pCm&U2-{HJR)PBX#fRUCfFD5rwLFk!-lGSRg#V~oTC;ZU_qag-6T|74sxx^de0tZOm3M>HNMY=V^u4@nHuNu-q=w%G3+`dQE~Wyuf^X+*_L-V0_^W^IFYv&{N4%pUG|i#V(dF*1f#U%UOcC)OFPH(@x8$oz6IaJ`OydHL83{tIETYN@dxUtzUc%lF#XZU@;76!Zq&7JBP;-XQ<I-$lIuL2Jhi{1$rC>A8LBTR(8Sp05T=Mp-^_I!Plk0e|7ep9ursMNx7ueLuz#C%Ptshgo=wWaJ_uNK80K96Ax0hu6D)*YW#4>ifZUy9+b=v)5_CEZ+NGA7%nSH~nDX^#=j8wY%@#pzU`1FcD7VP2wzybZrg_g$r8Ve|i1$);k)@_U_=?58B@RJ{maoDM-!9px^SfP6?9^1;d-ZX?Z8!APD?!zx|KjIx$a;ItEvrhBI-SF#2uDVMj{$m(p$zdA*kZ0R{ez?*`sm`0)3j4U^a+k$*fqLj(N}uGdF%hZXp{BT+O%W0r>!j3L^Fwjziz5hxjr;Io$Vdrx8T<p4vcGu5d)!p-^!HxFEgn$OgsVpw0KL)9E?AWBD4wx<Qn-D|-j`Zz)g2Nf=}pau&gG|3`C(})tL>>L^IF)Rv|qXfRA{0@aUU4pBeg7bO`&JSEK&i6qt>R8!8F^)9tQd7=%uPK>$RDR=ZRZ1oV#}E^dv3P;cJg)c=MhmV9hGRYlCEx67(sT+F!Es3P!5h^GT+}0Qao~b-u@8b$0?GzDazttOYI5;9YEqZ62_a6}rG09sh^bGjxtl1x#qz+}baX9BIM0uzx~W^bU3mnxjoP59<^$FTwf>);D5(hjCMlD{hU4W={1ZUf`V+tSj5q{Vz>1@-J@saNV9f)6>dn1Kk5-5O^`HFT1&}Q~`R49V4h0u10iXc^g{;JA5r&k}`7X}MSt4O33Jq3%Czt~jXiUgFU!{aTm5$D0*oms`A<E)0jUqWCwNFgMEn%vK&#!#RFu<)guBIA-(~-Q-)!<|0F4DH@$+8YydaQjokUWLI4K(OT=&!1M*6y{BLvK7<98k?QxhsRF(SSiFbd)Akz5o<xL0sNyKbHi%o&@{AwaVTHt*YQ<19>_U^;5LP-hs9t7kuTk-k~e$H8=QJOyv`T@L0gN21~MdMB{%ILzZKxh|1<6fr0^2Y+uzR87P^h=igb7Jz4HENUAw15=-BGm3%bn`Dh%t;xx9QIAu`0?1j*aDB3`&j-0)M4mEbALsxG1FF&|J9*|TeNE3Vq7~u(UBIZmDaSYe^GCL<wZ6uGSE7t3XDKkl-O#UyKD*7DbM;exo4tr{W^T7-ltVq~m<b~Pd4MsV3PCa(cfy<k-HF>LI?L|7b6F92}R*G3LF4tAV*nAhbJ^r2FpZ_h$uCx22Wt=E4$l)-*%Ofc30%nA-H8dK9O27nIgOtNiEd@HN;!HeCGVz$8kOQq)HLPkD>We?^120jw&-USP`3zz<sTn*n^?Lg9N(IGNJy^cmeFXZZ__7v9bjWfifU5~j1^kAJbtc;d%gAzxIF-?rUtTZ;1DWdvGZe!>kbQtG2ZwJsG@Kztlw?>Muc#Eq6M_;pQfW{X-GwnYnZPAkp!&(w9o;snU;fmWqT0WE(X!n%%sR5x%Tr5-tI(%XfL>M}@DqsJK;@21Zm4YA;&1Ewr|)m1<y#lDl>a;{<il3l(TH-v=rGHRSm8fyie>TEYBp7F-Per@DOac5%2`j$R{#HvU0)w-A9%I3y%*KiKZ0(Pit8hmzuGSD31!>=1N4Q8?E'
+
+
+def _decode_st12c_rows(payload: str) -> tuple[dict[str, object], ...]:
+    text = zlib.decompress(base64.b85decode(payload.encode("ascii"))).decode("utf-8-sig")
+    return tuple(json.loads(line) for line in text.splitlines() if line.strip())
+
+
+_ST12C_ORACLE_ROWS = _decode_st12c_rows(_ST12C_ORACLE_ARCHIVE_B85)
+_ST12C_VECTOR_ROWS = _decode_st12c_rows(_ST12C_VECTOR_ARCHIVE_B85)
+
+
+def _st12c_oracle(row: Mapping[str, object]) -> OracleContractV1:
+    return OracleContractV1(
+        oracle_id=str(row["oracle_id"]),
+        math_spec_id=str(row["math_spec_ref"]),
+        oracle_version=str(row["oracle_version"]),
+        comparison_policy=str(row["comparison_policy"]),
+        expected_value_json=json.dumps(row["expected_value_or_invariant"], sort_keys=True, separators=(",", ":")),
+        independent_algorithm_steps=tuple(str(value) for value in row["independent_algorithm_steps"]),
+        production_import_allowed=False,
+        primary_validator_import_allowed=False,
+    )
+
+
+def _st12c_vector(row: Mapping[str, object], oracle: OracleContractV1) -> GoldenVectorV1:
+    seed = row["seed"]
+    return GoldenVectorV1(
+        vector_id=str(row["vector_id"]),
+        math_spec_id=str(row["math_spec_ref"]),
+        oracle_id=oracle.oracle_id,
+        vector_kind=str(row["vector_kind"]),
+        comparison_policy=str(row["comparison_policy"]),
+        inputs_json=json.dumps(row["inputs"], sort_keys=True, separators=(",", ":")),
+        expected_json=json.dumps(row["expected"], sort_keys=True, separators=(",", ":")),
+        seed=seed if isinstance(seed, int) and not isinstance(seed, bool) else None,
+        production_import_allowed=False,
+    )
+
+
+_ST12C_ORACLES = tuple(_st12c_oracle(row) for row in _ST12C_ORACLE_ROWS)
+_ST12C_ORACLE_BY_ID = {row.math_spec_id: row for row in _ST12C_ORACLES}
+ST12C_ORACLE_PACK = tuple(
+    OraclePackEntryV1(
+        oracle=oracle,
+        vector=_st12c_vector(
+            next(row for row in _ST12C_VECTOR_ROWS if row["math_spec_ref"] == oracle.math_spec_id),
+            oracle,
+        ),
+        oracle_row_json=json.dumps(
+            next(row for row in _ST12C_ORACLE_ROWS if row["math_spec_ref"] == oracle.math_spec_id),
+            sort_keys=True,
+            separators=(",", ":"),
+        ),
+        vector_row_json=json.dumps(
+            next(row for row in _ST12C_VECTOR_ROWS if row["math_spec_ref"] == oracle.math_spec_id),
+            sort_keys=True,
+            separators=(",", ":"),
+        ),
+    )
+    for oracle in _ST12C_ORACLES
+)
+ST12C_ORACLE_BY_MATH_ID: Mapping[str, OracleContractV1] = MappingProxyType(
+    {entry.oracle.math_spec_id: entry.oracle for entry in ST12C_ORACLE_PACK}
+)
+ST12C_GOLDEN_VECTOR_BY_MATH_ID: Mapping[str, GoldenVectorV1] = MappingProxyType(
+    {entry.vector.math_spec_id: entry.vector for entry in ST12C_ORACLE_PACK}
+)
+ST12C_CUMULATIVE_ORACLE_BY_MATH_ID: Mapping[str, OracleContractV1] = MappingProxyType(
+    {**ORACLE_BY_MATH_ID, **ST12C_ORACLE_BY_MATH_ID}
+)
+ST12C_CUMULATIVE_GOLDEN_VECTOR_BY_MATH_ID: Mapping[str, GoldenVectorV1] = MappingProxyType(
+    {**GOLDEN_VECTOR_BY_MATH_ID, **ST12C_GOLDEN_VECTOR_BY_MATH_ID}
+)
+
+if (
+    len(ST12C_ORACLE_PACK) != 13
+    or len(ST12C_ORACLE_BY_MATH_ID) != 13
+    or len(ST12C_GOLDEN_VECTOR_BY_MATH_ID) != 13
+    or tuple(ST12C_ORACLE_BY_MATH_ID) != tuple(f"MATH-{number}" for number in range(26, 39))
+    or len(ST12C_CUMULATIVE_ORACLE_BY_MATH_ID) != 42
+    or any(entry.oracle.production_import_allowed or entry.vector.production_import_allowed for entry in ST12C_ORACLE_PACK)
+):
+    raise ContractValidationError(ReasonCode.ORACLE_NOT_INDEPENDENT, "Tranche-C independent oracle/vector closure must be exact 13/13/13")

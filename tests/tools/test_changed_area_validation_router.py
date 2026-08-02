@@ -204,11 +204,12 @@ def test_validation_infrastructure_change_forces_full_validation():
 def test_qku_control_plane_change_routes_all_central_validators():
     path = (
         "src/qtt/stage1_prediction_markets/"
-        "qku_computation_control_plane/models.py"
+        "qku_computation_control_plane/accounting.py"
     )
     result = _pull_request_result(path)
 
     assert router.QKU_VALIDATOR_IDS <= set(result.required_validators)
+    assert inventory.ST12C_QKU_VALIDATOR_IDS <= set(result.required_validators)
     assert path not in result.unknown_files
     assert result.fail_closed_reasons == ()
     assert "QKU computation control plane" in result.touched_domains
@@ -225,9 +226,17 @@ def test_qku_shared_integration_paths_use_the_exact_allowlists() -> None:
             current_branch="feature/small-pr",
         )
     )
-    assert len(inventory.ST12B_ALLOWED_EXACT_PATHS) == 44
+    assert router.QKU_ALLOWED_EXACT_PATHS == inventory.QKU_ALLOWED_EXACT_PATHS
+    assert inventory.QKU_ALLOWED_EXACT_PATHS == frozenset(
+        (
+            *inventory.ST12A_ALLOWED_EXACT_PATHS,
+            *inventory.ST12B_ALLOWED_EXACT_PATHS,
+            *inventory.ST12C_ALLOWED_EXACT_PATHS,
+        )
+    )
     for path in inventory.QKU_ALLOWED_EXACT_PATHS:
         assert router.QKU_VALIDATOR_IDS <= set(result.classified_files[path])
+    assert result.unknown_files == ()
     assert result.fail_closed_reasons == ()
 
     unallowlisted = (

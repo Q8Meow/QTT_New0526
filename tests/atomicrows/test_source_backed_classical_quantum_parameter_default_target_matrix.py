@@ -40,6 +40,15 @@ from src.qtt.stage1_prediction_markets.source_backed_classical_quantum_parameter
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
+_TRANSIENT_INPUT_COPY_PATTERNS = (
+    "__pycache__",
+    ".pytest_cache",
+    "*.pyc",
+    "*.pyo",
+)
+_TRANSIENT_INPUT_COPY_IGNORE = shutil.ignore_patterns(
+    *_TRANSIENT_INPUT_COPY_PATTERNS
+)
 
 
 def _report() -> dict:
@@ -58,6 +67,10 @@ def _item_by_authority(authority_class: str) -> dict:
     raise AssertionError(authority_class)
 
 
+def _copy_input_directory(source: Path, target: Path) -> None:
+    shutil.copytree(source, target, ignore=_TRANSIENT_INPUT_COPY_IGNORE)
+
+
 def _copy_inputs(tmp_path: Path) -> Path:
     for rel_path in (*c.REQUIRED_UPSTREAM_ARTIFACTS, *c.OPTIONAL_CONTEXT_ARTIFACTS):
         source = REPO_ROOT / rel_path
@@ -65,7 +78,7 @@ def _copy_inputs(tmp_path: Path) -> Path:
             continue
         target = tmp_path / rel_path
         if source.is_dir():
-            shutil.copytree(source, target)
+            _copy_input_directory(source, target)
             continue
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_bytes(source.read_bytes())
@@ -243,6 +256,26 @@ def test_missing_and_malformed_upstream_fail_closed(tmp_path) -> None:
         failure.startswith("PR150_UPSTREAM_REPORT_PARSE_ERROR")
         for failure in parse_failures
     )
+
+    synthetic_source = tmp_path / "synthetic-source"
+    (synthetic_source / "__pycache__").mkdir(parents=True)
+    (synthetic_source / ".pytest_cache").mkdir()
+    (synthetic_source / "kept.py").write_text("KEPT = True\n", encoding="utf-8")
+    (synthetic_source / "__pycache__" / "ignored.cpython-test.pyc").write_bytes(
+        b"ignored"
+    )
+    (synthetic_source / ".pytest_cache" / "ignored").write_text(
+        "ignored", encoding="utf-8"
+    )
+    (synthetic_source / "ignored.pyo").write_bytes(b"ignored")
+    synthetic_target = tmp_path / "synthetic-target"
+    _copy_input_directory(synthetic_source, synthetic_target)
+
+    assert (synthetic_target / "kept.py").is_file()
+    assert not (synthetic_target / "__pycache__").exists()
+    assert not (synthetic_target / ".pytest_cache").exists()
+    assert not tuple(synthetic_target.rglob("*.pyc"))
+    assert not tuple(synthetic_target.rglob("*.pyo"))
 
 
 def test_validator_rejects_unauthorized_values_and_authority_misuse() -> None:

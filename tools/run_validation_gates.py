@@ -5364,6 +5364,8 @@ def build_validation_commands(
                 "quantum",
                 "security",
                 "source",
+                "accounting",
+                "execution",
             )
         ],
         [
@@ -5385,6 +5387,20 @@ def build_validation_commands(
             _path(
                 "tools",
                 "independent_validate_qku_computation_control_plane_model_risk.py",
+            ),
+        ],
+        [
+            sys.executable,
+            _path(
+                "tools",
+                "independent_validate_qku_computation_control_plane_accounting.py",
+            ),
+        ],
+        [
+            sys.executable,
+            _path(
+                "tools",
+                "independent_validate_qku_computation_control_plane_execution.py",
             ),
         ],
         [
