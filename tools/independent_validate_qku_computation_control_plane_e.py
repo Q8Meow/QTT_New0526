@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Independent static ST12-E validator; production values are never imported."""
+"""Independent behavioral and source-lineage validator for ST12-E."""
 
 from __future__ import annotations
 
@@ -8,7 +8,9 @@ from collections import Counter
 import json
 from pathlib import Path
 import re
+import subprocess
 import sys
+from typing import Any
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -20,83 +22,25 @@ ARTIFACTS = (
     REPO_ROOT
     / "docs/master_plan/generated/qku_control_plane/agent_capability"
 )
+MASTER_PLAN = REPO_ROOT / "docs/master_plan/QTT_MasterPlan_Current.md"
 SUCCESS_MARKER = "QKU_COMPUTATION_CONTROL_PLANE_E_INDEPENDENTLY_VALIDATED"
 DOMAIN_PREFIXES = {
     "agent": "ST12-CLOSURE::ST11-AGENT::",
     "llm": "ST12-CLOSURE::ST11-LLM::",
     "security": "ST12-CLOSURE::ST11-SECURITY::",
 }
-FORBIDDEN_PARALLEL_PATHS = (
-    "capability_adapter.py",
-    "agent_orch_adapter.py",
-    "capability_enforcement.py",
-    "principal_scope.py",
-    "operation_authorization.py",
-    "no_authority.py",
-    "direct_provider_guard.py",
-    "agent_parameter_capability.py",
+EXPECTED_CLOSURE_IDS = (
+    *(f"ST12-CLOSURE::ST11-AGENT::{index:03d}" for index in range(1, 18)),
+    *(f"ST12-CLOSURE::ST11-LLM::{index:03d}" for index in range(1, 4)),
+    *(f"ST12-CLOSURE::ST11-SECURITY::{index:03d}" for index in range(14, 17)),
 )
-FORBIDDEN_IMPORT_ROOTS = {
-    "anthropic",
-    "boto3",
-    "ccxt",
-    "cirq",
-    "dwave",
-    "ib_insync",
-    "openai",
-    "pennylane",
-    "qiskit",
-    "requests",
-    "robin_stocks",
-}
-REQUIRED_REASON_NAMES = {
-    "PRINCIPAL_UNKNOWN",
-    "PRINCIPAL_AMBIGUOUS",
-    "SOURCE_AGENT_ID_UNMAPPED",
-    "SOURCE_AGENT_ID_SCOPE_BROADER_THAN_CURRENT_DUTY",
-    "ROLE_MISMATCH",
-    "DUTY_MISMATCH",
-    "TASK_ENVELOPE_MISSING",
-    "TASK_ENVELOPE_STALE",
-    "TASK_SCOPE_MISMATCH",
-    "OPERATION_NOT_ALLOWED",
-    "QKU_SCOPE_MISMATCH",
-    "FORMULA_SCOPE_MISMATCH",
-    "DATA_SCOPE_MISMATCH",
-    "TOOL_SCOPE_MISMATCH",
-    "ACTION_SCOPE_MISMATCH",
-    "CONTEXT_SCOPE_MISMATCH",
-    "PARAMETER_SCOPE_MISMATCH",
-    "BUDGET_EXCEEDED",
-    "DEADLINE_EXCEEDED",
-    "RETRY_NOT_ALLOWED",
-    "IDEMPOTENCY_CONFLICT",
-    "SEGREGATION_OF_DUTIES_VIOLATION",
-    "SELF_PROMOTION_FORBIDDEN",
-    "SELF_QUARANTINE_RELEASE_FORBIDDEN",
-    "PEER_CHALLENGE_REQUIRED",
-    "TRUST_STATE_INSUFFICIENT",
-    "QUARANTINED",
-    "MEMORY_PRIOR_REVALIDATION_REQUIRED",
-    "LLM_ADVISORY_ONLY",
-    "LLM_TOOL_NOT_ALLOWED",
-    "UNTRUSTED_CONTENT_INSTRUCTION_REJECTED",
-    "DIRECT_PROVIDER_FORBIDDEN",
-    "PRIVATE_STATE_FORBIDDEN",
-    "SOURCE_TRUTH_FORBIDDEN",
-    "REPLAY_PAPER_EFFECT_FORBIDDEN",
-    "LLM_INFERENCE_FORBIDDEN",
-    "QPU_EFFECT_FORBIDDEN",
-    "MODE_ACTIVATION_FORBIDDEN",
-    "ORDER_RELEASE_FORBIDDEN",
-    "CAPITAL_EFFECT_FORBIDDEN",
-    "SAFETY_STATE_MISSING",
-    "SAFETY_STATE_STALE",
-    "SAFETY_STATE_CONFLICT",
-    "EXECUTION_ROUTER_BYPASS_FORBIDDEN",
-    "NO_TRADE_REOPTIMIZATION_REQUIRED",
-    "OWNER_REVIEW_REQUIRED",
-}
+EXPECTED_SEMANTIC_TEST_IDS = tuple(
+    f"ST12-TEST::{value:03d}"
+    for value in (
+        21, 22, 23, 24, 25, 29, 30, 31, 32, 33, 34, 35, 36,
+        37, 38, 39, 40, 101, 113, 114, 181, 187, 189, 222, 226, 230,
+    )
+)
 EXPECTED_NO_TRADE_VARIABLE_IDS = (
     "market",
     "venue",
@@ -164,6 +108,58 @@ REQUIRED_NO_EFFECT_FLAG_NAMES = {
     "merge_canary_live_or_launch_allowed",
     "llm_inference_allowed",
 }
+REQUIRED_EFFECT_DENIAL_REASONS = {
+    "DIRECT_PROVIDER_FORBIDDEN",
+    "PRIVATE_STATE_FORBIDDEN",
+    "SOURCE_TRUTH_FORBIDDEN",
+    "REPLAY_PAPER_EFFECT_FORBIDDEN",
+    "LLM_INFERENCE_FORBIDDEN",
+    "QPU_EFFECT_FORBIDDEN",
+    "MODE_ACTIVATION_FORBIDDEN",
+    "ORDER_RELEASE_FORBIDDEN",
+    "CAPITAL_EFFECT_FORBIDDEN",
+    "EXECUTION_ROUTER_BYPASS_FORBIDDEN",
+}
+FORBIDDEN_PARALLEL_PATHS = (
+    "capability_adapter.py",
+    "agent_orch_adapter.py",
+    "capability_enforcement.py",
+    "principal_scope.py",
+    "operation_authorization.py",
+    "no_authority.py",
+    "direct_provider_guard.py",
+    "agent_parameter_capability.py",
+)
+FORBIDDEN_IMPORT_ROOTS = {
+    "anthropic",
+    "boto3",
+    "ccxt",
+    "cirq",
+    "dwave",
+    "ib_insync",
+    "openai",
+    "pennylane",
+    "qiskit",
+    "requests",
+    "robin_stocks",
+}
+VALUE_BODY_FIELDS = {
+    "raw",
+    "day1_seed_or_resolution_rule",
+    "reference_range_or_structural_constraint",
+    "bounded_search_space_or_fit_constraint",
+    "unit_or_basis",
+    "precision_and_rounding_policy",
+    "runtime_resolution_procedure",
+    "fallback_behavior_when_value_unavailable",
+    "value_source_class",
+    "source_state_refs",
+}
+_UNIVERSE_LINE = re.compile(
+    r"\{\s*((?:AGENT_(?:RT|NL|OFF)_\d{2})"
+    r"(?:\s*,\s*AGENT_(?:RT|NL|OFF)_\d{2})*)\s*\}"
+)
+_PARAMETER_LINE = re.compile(r"`parameter_symbol`\s*:\s*`([^`]+)`")
 
 
 def _jsonl(path: Path) -> tuple[dict[str, object], ...]:
@@ -177,7 +173,56 @@ def _jsonl(path: Path) -> tuple[dict[str, object], ...]:
     return rows
 
 
-def _class_methods(tree: ast.Module, class_name: str) -> dict[str, ast.FunctionDef]:
+def _canonical_parameter_rows() -> tuple[
+    tuple[str, str, tuple[str, ...]], ...
+]:
+    rows: list[tuple[str, str, tuple[str, ...]]] = []
+    source_ids: tuple[str, ...] | None = None
+    awaiting_universe = False
+    for line in MASTER_PLAN.read_text(encoding="utf-8").splitlines():
+        if "Explicit agent-selection-universe binding" in line:
+            source_ids = None
+            awaiting_universe = True
+        if awaiting_universe and (match := _UNIVERSE_LINE.search(line)):
+            source_ids = tuple(value.strip() for value in match.group(1).split(","))
+            awaiting_universe = False
+        if match := _PARAMETER_LINE.search(line):
+            if source_ids is None:
+                raise ValueError("canonical parameter lacks a source universe")
+            rows.append(
+                (
+                    f"ST10-PARAM::{len(rows) + 1:04d}",
+                    match.group(1),
+                    source_ids,
+                )
+            )
+    return tuple(rows)
+
+
+def _assignment_literal(tree: ast.Module, name: str) -> Any:
+    for node in tree.body:
+        target: ast.expr | None = None
+        value: ast.expr | None = None
+        if isinstance(node, ast.Assign) and len(node.targets) == 1:
+            target, value = node.targets[0], node.value
+        elif isinstance(node, ast.AnnAssign):
+            target, value = node.target, node.value
+        if not isinstance(target, ast.Name) or target.id != name or value is None:
+            continue
+        if (
+            isinstance(value, ast.Call)
+            and isinstance(value.func, ast.Name)
+            and value.func.id == "MappingProxyType"
+            and len(value.args) == 1
+        ):
+            value = value.args[0]
+        return ast.literal_eval(value)
+    raise ValueError(f"literal declaration {name} is missing")
+
+
+def _class_methods(
+    tree: ast.Module, class_name: str
+) -> dict[str, ast.FunctionDef]:
     for node in tree.body:
         if isinstance(node, ast.ClassDef) and node.name == class_name:
             return {
@@ -188,44 +233,284 @@ def _class_methods(tree: ast.Module, class_name: str) -> dict[str, ast.FunctionD
     return {}
 
 
+def _source_universe_registry(
+    rows: tuple[tuple[str, str, tuple[str, ...]], ...]
+) -> tuple[
+    dict[str, dict[str, object]],
+    dict[tuple[str, ...], str],
+]:
+    counts = Counter(source_ids for _, _, source_ids in rows)
+    definitions: dict[str, dict[str, object]] = {}
+    refs: dict[tuple[str, ...], str] = {}
+    for index, source_ids in enumerate(sorted(counts), start=1):
+        ref = f"UPSTREAM_SOURCE_UNIVERSE::{index:03d}"
+        definitions[ref] = {
+            "source_agent_ids": list(source_ids),
+            "parameter_count": counts[source_ids],
+        }
+        refs[source_ids] = ref
+    return definitions, refs
+
+
+def _behavioral_probe() -> tuple[bool, str]:
+    probe = r"""
+from types import SimpleNamespace
+
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.agent_policy import (
+    AgentCapabilityDecisionStateV1,
+    AgentCapabilityDecisionV1,
+    POLICY_VERSION,
+)
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import (
+    AuthorityDeniedError,
+    ContractValidationError,
+    NoTradeReoptimizationRouteError,
+    ReasonCode,
+)
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.input_resolver import (
+    CanonicalOwnerPacketRegistryV1,
+)
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.service import (
+    QKUComputationControlPlaneV1,
+)
+
+
+class BodyTouched(Exception):
+    pass
+
+
+class ProbeRequest:
+    request_id = "REQUEST::INDEPENDENT::E"
+    operation_name = "resolve_identity"
+    principal_id = "OWNER::TEST"
+    capability_bundle_id = "CAPABILITY::READ_ONLY_TEST"
+    idempotency_key = "IDEMPOTENCY::INDEPENDENT::E"
+    context = SimpleNamespace(context_id="CTX::INDEPENDENT::E")
+
+    def __init__(self):
+        self.body_reads = 0
+
+    @property
+    def identity_query(self):
+        self.body_reads += 1
+        raise BodyTouched
+
+
+class Admission:
+    def __init__(self, decision):
+        self.decision = decision
+        self.calls = 0
+
+    def admit_operation(self, request):
+        self.calls += 1
+        return self.decision
+
+
+def decision(state, reasons, route):
+    return AgentCapabilityDecisionV1(
+        decision_id=f"DECISION::{state.value}",
+        request_id=ProbeRequest.request_id,
+        task_id="TASK::INDEPENDENT::E",
+        principal_id=ProbeRequest.principal_id,
+        current_agent_id="dashboard_agent",
+        source_agent_refs=("AGENT_RT_11",),
+        operation_id=ProbeRequest.operation_name,
+        policy_version=POLICY_VERSION,
+        decision_state=state,
+        reason_codes=reasons,
+        scope_refs=(
+            "qku_scope_refs=QKU::IMMUTABLE",
+            "formula_scope_refs=MATH-01",
+            "reoptimization_variable_id=market",
+        ),
+        idempotency_key=ProbeRequest.idempotency_key,
+        retry_disposition="NO_RETRY_AUTHORITY",
+        peer_sod_disposition="SOD_ENFORCED",
+        safety_state_disposition="NON_MATERIAL_LOCAL_NO_EFFECT",
+        terminal_route=route,
+        agent_orch_receipt_ref="AGENT_ORCH1::RECEIPT::REFERENCE_ONLY",
+        st12c_causation_correlation_refs=(
+            "OperationRequestEnvelopeV1.request_id=REQUEST::INDEPENDENT::E",
+            "OperationRequestEnvelopeV1.idempotency_key=IDEMPOTENCY::INDEPENDENT::E",
+        ),
+        evidence_refs=("INDEPENDENT_BEHAVIORAL_PROBE",),
+        alternative_route_refs=("OWNER_REVIEW_REQUIRED",),
+        disagreement_state="NONE_DECLARED",
+        confidence_state="INDEPENDENT_PROBE",
+        limitation_codes=(
+            "NO_PROVIDER_PRIVATE_STATE_ORDER_QPU_OR_RUNTIME_EFFECT",
+            "QKU_AND_FORMULA_IMMUTABLE",
+        ),
+    )
+
+
+registry = CanonicalOwnerPacketRegistryV1()
+try:
+    QKUComputationControlPlaneV1(
+        registry, agent_capability_resolver=None
+    )
+except ContractValidationError:
+    missing_closed = True
+else:
+    missing_closed = False
+
+class Malformed:
+    def admit_operation(self, request):
+        return object()
+
+malformed_request = ProbeRequest()
+try:
+    QKUComputationControlPlaneV1(
+        registry, agent_capability_resolver=Malformed()
+    ).resolve_identity(malformed_request)
+except AuthorityDeniedError:
+    malformed_closed = malformed_request.body_reads == 0
+else:
+    malformed_closed = False
+
+denied_request = ProbeRequest()
+try:
+    QKUComputationControlPlaneV1(
+        registry,
+        agent_capability_resolver=Admission(
+            decision(
+                AgentCapabilityDecisionStateV1.DENIED,
+                (ReasonCode.DIRECT_PROVIDER_FORBIDDEN,),
+                "DENY_TASK",
+            )
+        ),
+    ).resolve_identity(denied_request)
+except AuthorityDeniedError as exc:
+    denied_closed = (
+        not isinstance(exc, NoTradeReoptimizationRouteError)
+        and denied_request.body_reads == 0
+    )
+else:
+    denied_closed = False
+
+no_trade_packet = decision(
+    AgentCapabilityDecisionStateV1.NO_TRADE_REOPTIMIZATION_ROUTED,
+    (ReasonCode.NO_TRADE_REOPTIMIZATION_REQUIRED,),
+    "PRETRADE1_BOUNDED_TRADEPLAN_VARIABLE_REOPTIMIZATION",
+)
+no_trade_request = ProbeRequest()
+try:
+    QKUComputationControlPlaneV1(
+        registry,
+        agent_capability_resolver=Admission(no_trade_packet),
+    ).resolve_identity(no_trade_request)
+except NoTradeReoptimizationRouteError as exc:
+    no_trade_closed = (
+        exc.decision is no_trade_packet
+        and no_trade_request.body_reads == 0
+        and exc.decision.terminal_route
+        == "PRETRADE1_BOUNDED_TRADEPLAN_VARIABLE_REOPTIMIZATION"
+        and "formula_scope_refs=MATH-01" in exc.decision.scope_refs
+        and exc.decision.runtime_effect_authorized is False
+    )
+else:
+    no_trade_closed = False
+
+eligible_packet = decision(
+    AgentCapabilityDecisionStateV1.ELIGIBLE_FOR_NO_EFFECT_QKU_REQUEST,
+    (),
+    "QKUComputationControlPlaneV1_NO_EFFECT_REQUEST",
+)
+eligible_request = ProbeRequest()
+try:
+    QKUComputationControlPlaneV1(
+        registry,
+        agent_capability_resolver=Admission(eligible_packet),
+    ).resolve_identity(eligible_request)
+except BodyTouched:
+    eligible_proceeds = eligible_request.body_reads == 1
+else:
+    eligible_proceeds = False
+
+passed = (
+    missing_closed
+    and malformed_closed
+    and denied_closed
+    and no_trade_closed
+    and eligible_proceeds
+)
+if not passed:
+    raise SystemExit(
+        "behavioral probe failed "
+        f"missing={missing_closed} malformed={malformed_closed} "
+        f"denied={denied_closed} no_trade={no_trade_closed} "
+        f"eligible={eligible_proceeds}"
+    )
+print("BEHAVIORAL_PROBE_OK")
+"""
+    completed = subprocess.run(
+        [sys.executable, "-B", "-c", probe],
+        cwd=REPO_ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+        timeout=60,
+    )
+    detail = (completed.stdout + completed.stderr).strip()
+    return completed.returncode == 0, detail
+
+
 def validate_domain(domain: str) -> list[str]:
-    failures: list[str] = []
     if domain not in DOMAIN_PREFIXES:
         return [f"unknown E validation domain: {domain}"]
+    failures: list[str] = []
     try:
         manifest = json.loads(
             (ARTIFACTS / "manifest.json").read_text(encoding="utf-8")
         )
         policy = _jsonl(ARTIFACTS / "policy.jsonl")
         parameter_scope = _jsonl(ARTIFACTS / "parameter_scope.jsonl")
+        master_rows = _canonical_parameter_rows()
     except (OSError, ValueError, json.JSONDecodeError) as exc:
-        return [f"generated E policy cannot be loaded: {exc}"]
+        return [f"canonical or generated E data cannot be loaded: {exc}"]
+
+    policy_by_type = {
+        row_type: tuple(
+            row for row in policy if row.get("row_type") == row_type
+        )
+        for row_type in (
+            "CONTROL",
+            "IDENTITY_COMPATIBILITY",
+            "PARAMETER_CAPABILITY_BINDING",
+        )
+    }
+    controls = policy_by_type["CONTROL"]
+    identities = policy_by_type["IDENTITY_COMPATIBILITY"]
+    bindings = policy_by_type["PARAMETER_CAPABILITY_BINDING"]
+    row_ids = tuple(str(row.get("row_id") or "") for row in policy)
+    if (
+        any(not row_id for row_id in row_ids)
+        or len(row_ids) != len(set(row_ids))
+        or sum(len(rows) for rows in policy_by_type.values()) != len(policy)
+    ):
+        failures.append("policy row types or identities are missing or duplicated")
+
+    closure_ids = tuple(str(row.get("closure_id") or "") for row in controls)
+    semantic_test_ids = tuple(manifest.get("semantic_test_ids") or ())
+    if set(closure_ids) != set(EXPECTED_CLOSURE_IDS) or len(controls) != 23:
+        failures.append("semantic closure IDs differ from the exact 23-row set")
+    if (
+        set(semantic_test_ids) != set(EXPECTED_SEMANTIC_TEST_IDS)
+        or len(semantic_test_ids) != 26
+    ):
+        failures.append("semantic test IDs differ from the exact 26-row set")
+    domain_controls = tuple(
+        row
+        for row in controls
+        if str(row.get("closure_id") or "").startswith(DOMAIN_PREFIXES[domain])
+    )
+    if not domain_controls:
+        failures.append(f"{domain} has no relevant compact predicate rows")
+    if len({row.get("predicate_group") for row in controls}) <= 1:
+        failures.append("closure labels still relabel one shared Boolean")
 
     counts = manifest.get("counts")
-    if not isinstance(counts, dict):
-        return ["manifest counts owner is missing"]
-    typed_counts = {
-        key: value
-        for key, value in counts.items()
-        if isinstance(key, str)
-        and isinstance(value, int)
-        and not isinstance(value, bool)
-    }
-    if typed_counts != counts or any(value <= 0 for value in typed_counts.values()):
-        failures.append("manifest counts must be positive typed integers")
-
-    controls = tuple(row for row in policy if row.get("row_type") == "CONTROL")
-    bindings = tuple(
-        row
-        for row in policy
-        if row.get("row_type") == "PARAMETER_CAPABILITY_BINDING"
-    )
-    identities = tuple(
-        row
-        for row in policy
-        if row.get("row_type") == "IDENTITY_COMPATIBILITY"
-    )
-    derived = {
+    derived_counts = {
         "closure_controls": len(controls),
         "repository_dispositions": len(
             tuple(manifest.get("repository_disposition_ids") or ())
@@ -240,62 +525,313 @@ def validate_domain(domain: str) -> list[str]:
         "golden_vectors_and_invariants": len(
             tuple(manifest.get("reused_math_oracle_vector_refs") or ())
         ),
-        "semantic_test_rows": len(
-            tuple(manifest.get("semantic_test_ids") or ())
-        ),
+        "semantic_test_rows": len(semantic_test_ids),
         "validation_commands": len(
             tuple(manifest.get("validation_commands") or ())
         ),
-        "parameter_source_universe": len(parameter_scope),
+        "parameter_source_universe": len(master_rows),
     }
-    if derived != counts:
+    if counts != derived_counts:
         failures.append(
-            f"manifest-owned semantic counts differ from materialized rows: {derived}"
+            f"manifest counts differ from independent derivation: {derived_counts}"
         )
-    if manifest.get("policy_row_count") != len(policy):
-        failures.append("manifest policy-row count differs from policy.jsonl")
-    if manifest.get("identity_mapping_count") != len(identities):
-        failures.append("manifest identity count differs from policy.jsonl")
-    if manifest.get("parameter_scope_row_count") != len(parameter_scope):
-        failures.append("manifest scope count differs from parameter_scope.jsonl")
-    if (
-        manifest.get("runtime_effect_authorized") is not False
-        or manifest.get("manual_edit_allowed") is not False
-        or manifest.get("activation_state") != "NO_EFFECT_CONTRACT_ONLY"
-        or manifest.get("no_effect_profile_ref") != "TRANCHE_A_AUTHORITY"
-        or manifest.get("no_effect_authority_closed") is not True
-    ):
-        failures.append("manifest does not preserve the all-false no-effect boundary")
-    no_effect_flags = manifest.get("no_effect_authority_flags")
-    if (
-        not isinstance(no_effect_flags, dict)
-        or set(no_effect_flags) != REQUIRED_NO_EFFECT_FLAG_NAMES
-        or any(value is not False for value in no_effect_flags.values())
-    ):
-        failures.append("manifest no-effect view differs from TRANCHE_A_AUTHORITY")
-    if tuple(manifest.get("no_trade_reoptimization_variable_ids") or ()) != (
-        EXPECTED_NO_TRADE_VARIABLE_IDS
-    ):
-        failures.append("NO_TRADE variable scope is not the exact bounded E set")
-    if tuple(manifest.get("quantum_formulation_required_fields") or ()) != (
-        EXPECTED_QUANTUM_FORMULATION_FIELDS
-    ):
-        failures.append("quantum readiness is not coefficient-level complete")
-    if tuple(manifest.get("llm_advisory_task_fields") or ()) != (
-        EXPECTED_LLM_ADVISORY_TASK_FIELDS
-    ):
-        failures.append("LLM advisory schema is not the exact no-authority contract")
 
-    row_ids = [str(row.get("row_id") or "") for row in policy]
-    if any(not row_id for row_id in row_ids) or len(row_ids) != len(set(row_ids)):
-        failures.append("policy row identities are missing or duplicated")
-    domain_controls = tuple(
-        row
-        for row in controls
-        if str(row.get("closure_id") or "").startswith(DOMAIN_PREFIXES[domain])
+    parameter_tree = ast.parse(
+        (PACKAGE / "parameter_policy.py").read_text(encoding="utf-8"),
+        filename="parameter_policy.py",
     )
-    if not domain_controls:
-        failures.append(f"{domain} has no manifest-owned closure controls")
+    agent_tree = ast.parse(
+        (PACKAGE / "agent_policy.py").read_text(encoding="utf-8"),
+        filename="agent_policy.py",
+    )
+    try:
+        source_groups = _assignment_literal(
+            parameter_tree, "ST12E_SOURCE_AGENT_GROUPS"
+        )
+        e_references = _assignment_literal(
+            parameter_tree, "_ST12E_PARAMETER_CAPABILITY_REFERENCES"
+        )
+        exact_mapping_spec = _assignment_literal(
+            agent_tree, "_SOURCE_IDENTITY_SPEC"
+        )
+    except (ValueError, TypeError, SyntaxError) as exc:
+        failures.append(f"readable E source declarations cannot be parsed: {exc}")
+        source_groups = {}
+        e_references = ()
+        exact_mapping_spec = ()
+
+    source_ids = tuple(
+        sorted(
+            {
+                source_id
+                for _, _, row_source_ids in master_rows
+                for source_id in row_source_ids
+            }
+        )
+    )
+    exact_mapping_ids = {
+        str(row[0])
+        for row in exact_mapping_spec
+        if isinstance(row, tuple) and row
+    }
+    unmapped_ids = set(source_ids) - exact_mapping_ids
+    invented_mapping_ids = exact_mapping_ids - set(source_ids)
+    if (
+        len(master_rows) != 3810
+        or len(source_ids) != 25
+        or len(exact_mapping_ids) != 12
+        or len(unmapped_ids) != 13
+        or invented_mapping_ids
+    ):
+        failures.append(
+            "canonical source universe does not close at 3810/25/12/13 "
+            f"invented={sorted(invented_mapping_ids)}"
+        )
+
+    identity_by_source = {
+        str(row.get("source_agent_id") or ""): row for row in identities
+    }
+    if (
+        set(identity_by_source) != set(source_ids)
+        or len(identities) != 25
+        or manifest.get("source_identity_row_count") != 25
+        or manifest.get("exact_mapping_count") != 12
+        or manifest.get("unmapped_mapping_count") != 13
+        or set(manifest.get("unmapped_source_agent_ids") or ()) != unmapped_ids
+    ):
+        failures.append("generated compatibility map is not the exact 25/12/13 universe")
+    for source_id, row in identity_by_source.items():
+        is_unmapped = source_id in unmapped_ids
+        current_fields = (
+            "current_principal_refs",
+            "current_role_refs",
+            "current_duty_refs",
+            "current_scope",
+            "intersection_scope",
+        )
+        if is_unmapped:
+            if (
+                row.get("mapping_type") != "UNMAPPED"
+                or row.get("terminal_mapping_state")
+                != "UNMAPPED_CROSSWALK_REQUIRED_NO_AUTHORITY"
+                or any(row.get(field) for field in current_fields)
+                or row.get("activation_state") != "NO_EFFECT_CONTRACT_ONLY"
+            ):
+                failures.append(f"{source_id}: unmapped state invents authority")
+        else:
+            source_scope = set(row.get("source_scope") or ())
+            current_scope = set(row.get("current_scope") or ())
+            intersection = set(row.get("intersection_scope") or ())
+            if (
+                row.get("mapping_type")
+                not in {"EXACT_ONE_TO_ONE", "EXACT_SCOPED_MULTI_ROLE"}
+                or not row.get("current_principal_refs")
+                or not intersection
+                or not intersection <= source_scope & current_scope
+            ):
+                failures.append(f"{source_id}: exact mapping broadens or lacks scope")
+
+    expected_universe_defs, expected_universe_refs = (
+        _source_universe_registry(master_rows)
+    )
+    generated_universe_defs = manifest.get("exact_upstream_source_universes")
+    if (
+        generated_universe_defs != expected_universe_defs
+        or len(expected_universe_defs) != 67
+        or manifest.get("exact_upstream_source_universe_count") != 67
+        or manifest.get("exact_upstream_source_agent_id_count") != 25
+    ):
+        failures.append("exact 67-universe registry differs from canonical rows")
+
+    scope_by_id = {
+        str(row.get("parameter_id") or ""): row for row in parameter_scope
+    }
+    expected_parameter_ids = tuple(
+        f"ST10-PARAM::{index:04d}" for index in range(1, len(master_rows) + 1)
+    )
+    if (
+        tuple(scope_by_id) != expected_parameter_ids
+        or len(scope_by_id) != len(parameter_scope)
+    ):
+        failures.append("parameter scope row identities are not exact and ordered")
+
+    fully_mapped_count = 0
+    crosswalk_required_count = 0
+    source_set_rewrite_count = 0
+    for parameter_id, symbol, row_source_ids in master_rows:
+        generated = scope_by_id.get(parameter_id, {})
+        expected_ref = expected_universe_refs[row_source_ids]
+        actual_ref = str(generated.get("upstream_source_universe_ref") or "")
+        projected_source_ids = tuple(
+            (generated_universe_defs or {})
+            .get(actual_ref, {})
+            .get("source_agent_ids", ())
+        )
+        if (
+            generated.get("parameter_symbol") != symbol
+            or actual_ref != expected_ref
+            or projected_source_ids != row_source_ids
+        ):
+            source_set_rewrite_count += 1
+        mapped_subset = tuple(
+            source_id for source_id in row_source_ids if source_id in exact_mapping_ids
+        )
+        unmapped_subset = tuple(
+            source_id for source_id in row_source_ids if source_id in unmapped_ids
+        )
+        expected_mapped_refs = [
+            f"ST12E_IDENTITY::{source_id}" for source_id in mapped_subset
+        ] or ["ABSENT_NOT_APPLICABLE"]
+        expected_unmapped_refs = [
+            f"ST12E_IDENTITY::{source_id}" for source_id in unmapped_subset
+        ] or ["ABSENT_NOT_APPLICABLE"]
+        expected_state = (
+            "UPSTREAM_IDENTITY_CROSSWALK_REQUIRED"
+            if unmapped_subset
+            else "UPSTREAM_IDENTITY_FULLY_MAPPED"
+        )
+        if (
+            generated.get("mapped_compatibility_refs") != expected_mapped_refs
+            or generated.get("unmapped_compatibility_refs")
+            != expected_unmapped_refs
+            or generated.get("upstream_identity_mapping_state")
+            != expected_state
+        ):
+            failures.append(f"{parameter_id}: mapped/unmapped lineage subsets differ")
+            break
+        if unmapped_subset:
+            crosswalk_required_count += 1
+        else:
+            fully_mapped_count += 1
+    if (
+        source_set_rewrite_count != 0
+        or fully_mapped_count != 1721
+        or crosswalk_required_count != 2089
+        or manifest.get("fully_mapped_upstream_row_count") != 1721
+        or manifest.get("crosswalk_required_upstream_row_count") != 2089
+        or manifest.get("quota_reassignment_count") != 0
+        or manifest.get("nearest_universe_assignment_count") != 0
+        or manifest.get("source_set_rewrite_count") != 0
+    ):
+        failures.append(
+            "upstream projection violates exact preservation or 1721/2089 split "
+            f"rewrites={source_set_rewrite_count}"
+        )
+
+    canonical_symbols = {
+        parameter_id: symbol for parameter_id, symbol, _ in master_rows
+    }
+    e_reference_by_id = {
+        str(parameter_id): (str(symbol), str(group_id))
+        for parameter_id, symbol, group_id in e_references
+    }
+    binding_by_id = {
+        str(row.get("parameter_id") or ""): row for row in bindings
+    }
+    if (
+        len(e_reference_by_id) != 87
+        or set(binding_by_id) != set(e_reference_by_id)
+        or len(bindings) != 87
+    ):
+        failures.append("E capability binding registry is not the exact 87 rows")
+    e_source_sets = Counter(
+        tuple(source_groups[group_id])
+        for _, group_id in e_reference_by_id.values()
+        if group_id in source_groups
+    )
+    expected_e_universe_defs = {
+        f"ST12E_CERTIFIED_SOURCE_UNIVERSE::{index:03d}": {
+            "source_agent_ids": list(source_set),
+            "parameter_count": e_source_sets[source_set],
+            "authority_created": False,
+        }
+        for index, source_set in enumerate(sorted(e_source_sets), start=1)
+    }
+    expected_e_refs = {
+        tuple(spec["source_agent_ids"]): ref
+        for ref, spec in expected_e_universe_defs.items()
+    }
+    if (
+        manifest.get("st12e_certified_source_universes")
+        != expected_e_universe_defs
+        or len(expected_e_universe_defs) != 6
+    ):
+        failures.append("six-set E-certified distribution is not exact")
+
+    exact_e_count = 0
+    outside_e_count = 0
+    e_upstream_gap_count = 0
+    e_certified_unmapped_count = 0
+    for parameter_id, generated in scope_by_id.items():
+        if parameter_id in e_reference_by_id:
+            exact_e_count += 1
+            symbol, group_id = e_reference_by_id[parameter_id]
+            certified_ids = tuple(source_groups.get(group_id, ()))
+            if set(certified_ids) - exact_mapping_ids:
+                e_certified_unmapped_count += 1
+            binding = binding_by_id.get(parameter_id, {})
+            expected_value_ref = (
+                "QKUComputationControlPlaneV1."
+                f"ComputationParameterPolicyV1::{parameter_id}"
+            )
+            if (
+                canonical_symbols.get(parameter_id) != symbol
+                or generated.get("st12e_binding_state")
+                != "EXACT_ST12E_CAPABILITY_BINDING"
+                or generated.get(
+                    "st12e_certified_source_universe_ref_or_explicit_absence"
+                )
+                != expected_e_refs.get(certified_ids)
+                or binding.get("certified_source_universe_ref")
+                != expected_e_refs.get(certified_ids)
+                or binding.get("parameter_symbol") != symbol
+                or binding.get("value_policy_ref") != expected_value_ref
+                or generated.get("value_policy_ref") != expected_value_ref
+                or binding.get("capability_policy_ref")
+                != f"ST12E_CAPABILITY_POLICY::{group_id}"
+                or VALUE_BODY_FIELDS.intersection(binding)
+            ):
+                failures.append(f"{parameter_id}: E binding duplicates or loses value refs")
+                break
+            if (
+                generated.get("upstream_identity_mapping_state")
+                == "UPSTREAM_IDENTITY_CROSSWALK_REQUIRED"
+            ):
+                e_upstream_gap_count += 1
+        else:
+            outside_e_count += 1
+            if (
+                generated.get("st12e_binding_state")
+                != "OUTSIDE_ST12E_CAPABILITY_BINDING_SCOPE"
+                or generated.get(
+                    "st12e_capability_binding_ref_or_explicit_absence"
+                )
+                != "ABSENT_NOT_APPLICABLE"
+                or generated.get("terminal_route")
+                != "ST12E_CAPABILITY_BINDING_NOT_APPLICABLE"
+            ):
+                failures.append(
+                    f"{parameter_id}: outside-E state is mistaken for authority"
+                )
+                break
+    if (
+        exact_e_count != 87
+        or outside_e_count != 3723
+        or e_upstream_gap_count != 34
+        or e_certified_unmapped_count != 0
+        or manifest.get("exact_st12e_binding_count") != 87
+        or manifest.get("outside_st12e_binding_scope_count") != 3723
+        or manifest.get("exact_st12e_certified_mapping_count") != 87
+        or manifest.get("st12e_binding_with_unmapped_certified_id_count") != 0
+        or manifest.get("st12e_rows_with_upstream_crosswalk_gap") != 34
+        or manifest.get("st12e_rows_with_fully_mapped_upstream_lineage") != 53
+        or manifest.get("value_policy_ref_resolution_count") != 87
+        or manifest.get("duplicated_value_body_count") != 0
+    ):
+        failures.append(
+            "orthogonal E applicability does not close at 87/3723/34/53"
+        )
+
     required_lineage = {
         "semantic_owner",
         "implementation_owner",
@@ -305,115 +841,84 @@ def validate_domain(domain: str) -> list[str]:
         "current_principal_duty_policy_refs",
         "downstream_consumer_refs",
         "lifecycle_state",
-        "timing_or_snapshot_state",
         "activation_state",
         "terminal_route",
         "validator_ref",
     }
     for row in policy:
-        if not required_lineage <= set(row):
-            failures.append(f"{row.get('row_id')}: no-orphan lineage is incomplete")
-        if row.get("activation_state") != "NO_EFFECT_CONTRACT_ONLY":
-            failures.append(f"{row.get('row_id')}: activation state is not no-effect")
-    for row in bindings:
         if (
-            row.get("capability_binding_owner") != "AgentCapabilityResolverV1"
-            or row.get("formula_or_qku_mutation_authorized_by_st12e") is not False
-            or row.get("value_mutation_authorized_by_st12e") is not False
-            or row.get("no_trade_fallback_preserved") is not True
+            not required_lineage <= set(row)
+            or "timing_or_snapshot_state" not in row
+            or row.get("activation_state") != "NO_EFFECT_CONTRACT_ONLY"
         ):
-            failures.append(f"{row.get('row_id')}: E binding changes stronger semantics")
-
-    scope_ids = [str(row.get("parameter_id") or "") for row in parameter_scope]
-    expected_scope_ids = [
-        f"ST10-PARAM::{value:04d}" for value in range(1, len(parameter_scope) + 1)
-    ]
-    if scope_ids != expected_scope_ids or len(scope_ids) != len(set(scope_ids)):
-        failures.append("parameter scope is not one exact ordered contiguous universe")
-    universe_defs = manifest.get("source_universe_definitions")
-    if not isinstance(universe_defs, dict):
-        failures.append("source universe definitions are missing")
-        universe_defs = {}
-    distribution = Counter(
-        str(row.get("source_universe_id") or "") for row in parameter_scope
-    )
-    expected_distribution = {
-        str(universe_id): row.get("parameter_count")
-        for universe_id, row in universe_defs.items()
-        if isinstance(row, dict)
-    }
-    if dict(distribution) != expected_distribution:
-        failures.append("parameter scope distribution differs from manifest owner")
-    exact_binding_ids = {
-        str(row.get("parameter_id") or "") for row in bindings
-    }
-    exact_scope = tuple(
-        row
-        for row in parameter_scope
-        if row.get("mapping_state") == "EXACT_E_BINDING_CURRENT_SCOPE"
-    )
-    blocked_scope = tuple(
-        row
-        for row in parameter_scope
-        if row.get("mapping_state")
-        == "CERTIFIED_AGGREGATE_ONLY_PER_ROW_CURRENTIZATION_REQUIRED"
-    )
-    if (
-        {str(row.get("parameter_id") or "") for row in exact_scope}
-        != exact_binding_ids
-        or len(exact_scope) != len(bindings)
-        or len(blocked_scope) != len(parameter_scope) - len(bindings)
-        or manifest.get("parameter_scope_eligible_count") != len(exact_scope)
-        or manifest.get("parameter_scope_blocker_count") != len(blocked_scope)
-        or manifest.get("parameter_scope_distribution_is_aggregate_only") is not True
-    ):
-        failures.append("parameter scope eligibility/blocker accounting is not exact")
-    identity_sources = {
-        str(row.get("source_agent_id") or "") for row in identities
-    }
+            failures.append(f"{row.get('row_id')}: policy lineage is incomplete")
+            break
     for row in parameter_scope:
         if (
-            not row.get("current_principal_refs_or_gap")
-            or not set(row.get("source_agent_ids") or ()) <= identity_sources
+            not required_lineage - {"timing_or_snapshot_state"} <= set(row)
+            or "timing_state" not in row
             or row.get("activation_state") != "NO_EFFECT_CONTRACT_ONLY"
-            or not row.get("value_policy_ref")
-            or not row.get("downstream_consumer_refs")
-            or not row.get("validator_ref")
-            or not row.get("terminal_route")
-            or not row.get("semantic_owner")
-            or not row.get("implementation_owner")
-            or not row.get("producer_ref")
-            or not row.get("upstream_artifact_refs")
-            or not row.get("upstream_row_or_value_refs")
-            or not row.get("current_principal_duty_policy_refs")
         ):
             failures.append(
-                f"{row.get('parameter_id')}: compact scope or route closure is invalid"
+                f"{row.get('parameter_id')}: parameter lineage is incomplete"
             )
             break
-        mapping_state = row.get("mapping_state")
-        if mapping_state == "EXACT_E_BINDING_CURRENT_SCOPE":
-            if row.get("terminal_route") != "NO_EFFECT_QKU_REQUEST_OR_TYPED_DENIAL":
-                failures.append(
-                    f"{row.get('parameter_id')}: exact E scope has an invalid terminal route"
-                )
-                break
-        elif mapping_state == "CERTIFIED_AGGREGATE_ONLY_PER_ROW_CURRENTIZATION_REQUIRED":
-            if (
-                row.get("current_principal_refs_or_gap")
-                != ["PACKAGE_CURRENT_MAIN_SOURCE_UNIVERSE_ASSIGNMENT_GAP"]
-                or row.get("terminal_route")
-                != "SOURCE_UNIVERSE_PER_ROW_CURRENTIZATION_REVIEW_REQUIRED"
+
+    parameter_source = (PACKAGE / "parameter_policy.py").read_text(
+        encoding="utf-8"
+    )
+    validation_source = (PACKAGE / "validation.py").read_text(encoding="utf-8")
+    for tree, label in (
+        (parameter_tree, "parameter_policy.py"),
+        (
+            ast.parse(validation_source, filename="validation.py"),
+            "validation.py",
+        ),
+    ):
+        for node in ast.walk(tree):
+            assignment_name = ""
+            if isinstance(node, ast.Assign) and len(node.targets) == 1:
+                target = node.targets[0]
+                if isinstance(target, ast.Name):
+                    assignment_name = target.id
+            elif isinstance(node, ast.AnnAssign) and isinstance(
+                node.target, ast.Name
             ):
-                failures.append(
-                    f"{row.get('parameter_id')}: aggregate-only scope is not fail closed"
-                )
-                break
-        else:
-            failures.append(
-                f"{row.get('parameter_id')}: parameter scope has an unknown mapping state"
-            )
-            break
+                assignment_name = node.target.id
+            if assignment_name.startswith("_ST12E") and (
+                "B64" in assignment_name or "COMPRESSED" in assignment_name
+            ):
+                failures.append(f"{label}: opaque ST12-E payload exists")
+    if (
+        "_ST12E_SEMANTIC_ROWS_B64" in validation_source
+        or "_ST12E_PARAMETER_CAPABILITY_ROWS_B64" in parameter_source
+        or manifest.get("opaque_semantic_payload_count") != 0
+    ):
+        failures.append("opaque or value-bearing ST12-E payload remains")
+    binding_class = next(
+        (
+            node
+            for node in parameter_tree.body
+            if isinstance(node, ast.ClassDef)
+            and node.name == "ST12EParameterCapabilityBindingV1"
+        ),
+        None,
+    )
+    binding_fields = {
+        node.target.id
+        for node in (binding_class.body if binding_class is not None else ())
+        if isinstance(node, ast.AnnAssign)
+        and isinstance(node.target, ast.Name)
+    }
+    if binding_fields != {
+        "parameter_id",
+        "parameter_symbol",
+        "certified_source_agent_ids",
+        "value_policy_ref",
+        "capability_policy_ref",
+        "st12e_binding_state",
+    }:
+        failures.append("E binding class is not capability-reference-only")
 
     errors_tree = ast.parse(
         (PACKAGE / "errors.py").read_text(encoding="utf-8"),
@@ -427,45 +932,62 @@ def validate_domain(domain: str) -> list[str]:
         if isinstance(statement, ast.Assign)
         and len(statement.targets) == 1
         and isinstance(statement.targets[0], ast.Name)
-        for _ in (0,)
     }
-    # AnnAssign is not used by this enum, but keep the extraction explicit.
-    reason_names |= {
-        statement.target.id
-        for node in errors_tree.body
-        if isinstance(node, ast.ClassDef) and node.name == "ReasonCode"
-        for statement in node.body
-        if isinstance(statement, ast.AnnAssign)
-        and isinstance(statement.target, ast.Name)
-    }
-    if not REQUIRED_REASON_NAMES <= reason_names:
-        failures.append(
-            f"central reason enum is missing {sorted(REQUIRED_REASON_NAMES - reason_names)}"
-        )
+    if not REQUIRED_EFFECT_DENIAL_REASONS <= reason_names:
+        failures.append("central reason enum lacks an effect-denial boundary")
 
-    agent_path = PACKAGE / "agent_policy.py"
-    agent_tree = ast.parse(agent_path.read_text(encoding="utf-8"), filename=str(agent_path))
-    for node in ast.walk(agent_tree):
-        if isinstance(node, ast.Import):
-            roots = {alias.name.split(".", 1)[0] for alias in node.names}
-            if roots & FORBIDDEN_IMPORT_ROOTS:
-                failures.append(f"agent policy imports forbidden runtime provider {roots}")
-        elif isinstance(node, ast.ImportFrom) and node.module:
-            root = node.module.split(".", 1)[0]
-            if root in FORBIDDEN_IMPORT_ROOTS:
-                failures.append(f"agent policy imports forbidden runtime provider {root}")
-        elif isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute):
-            if node.func.attr in {"glob", "rglob"}:
-                failures.append("agent policy performs a raw runtime discovery scan")
-    resolver_methods = _class_methods(agent_tree, "AgentCapabilityResolverV1")
-    if not {"resolve", "admit_operation"} <= set(resolver_methods):
-        failures.append("central resolver lacks one admission path")
+    agent_source = (PACKAGE / "agent_policy.py").read_text(encoding="utf-8")
+    service_source = (PACKAGE / "service.py").read_text(encoding="utf-8")
+    service_tree = ast.parse(service_source, filename="service.py")
+    for tree, label in (
+        (agent_tree, "agent_policy.py"),
+        (service_tree, "service.py"),
+    ):
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Import):
+                roots = {alias.name.split(".", 1)[0] for alias in node.names}
+                if roots & FORBIDDEN_IMPORT_ROOTS:
+                    failures.append(f"{label}: forbidden provider import {roots}")
+            elif isinstance(node, ast.ImportFrom) and node.module:
+                root = node.module.split(".", 1)[0]
+                if root in FORBIDDEN_IMPORT_ROOTS:
+                    failures.append(f"{label}: forbidden provider import {root}")
+            elif (
+                label == "agent_policy.py"
+                and isinstance(node, ast.Call)
+                and isinstance(node.func, ast.Attribute)
+                and node.func.attr in {"glob", "rglob"}
+            ):
+                failures.append("agent policy performs a raw runtime library scan")
 
-    service_tree = ast.parse(
-        (PACKAGE / "service.py").read_text(encoding="utf-8"),
-        filename="service.py",
+    service_methods = _class_methods(
+        service_tree, "QKUComputationControlPlaneV1"
     )
-    service_methods = _class_methods(service_tree, "QKUComputationControlPlaneV1")
+    implemented_names = (
+        "resolve_identity",
+        "resolve_contextual_computability",
+        "resolve_applicable_stack",
+        "resolve_required_inputs",
+        "compute_component",
+        "compute_stack",
+        "compare_with_no_trade",
+        "evaluate_trade_plan",
+        "get_snapshot_view",
+        "explain_resolution",
+        "submit_candidate_proposal",
+        "request_materialization_work_order",
+    )
+    admission_counts = {
+        name: sum(
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Name)
+            and node.func.id == "_admit_agent_request"
+            for node in ast.walk(service_methods[name])
+        )
+        if name in service_methods
+        else 0
+        for name in implemented_names
+    }
     admission_helper = next(
         (
             node
@@ -475,68 +997,82 @@ def validate_domain(domain: str) -> list[str]:
         ),
         None,
     )
-    if admission_helper is None or not any(
-        isinstance(node, ast.Call)
-        and isinstance(node.func, ast.Attribute)
-        and node.func.attr == "admit_operation"
-        for node in ast.walk(admission_helper)
-    ):
-        failures.append("the one module-level E admission helper is absent")
-    implemented_names = tuple(
-        name
-        for name in manifest.get("implemented_operation_ids", ())
-        if isinstance(name, str)
-    )
-    if not implemented_names:
-        implemented_names = (
-            "resolve_identity",
-            "resolve_contextual_computability",
-            "resolve_applicable_stack",
-            "resolve_required_inputs",
-            "compute_component",
-            "compute_stack",
-            "compare_with_no_trade",
-            "evaluate_trade_plan",
-            "get_snapshot_view",
-            "explain_resolution",
-            "submit_candidate_proposal",
-            "request_materialization_work_order",
+    optional_bypass = admission_helper is None or any(
+        isinstance(node, ast.Compare)
+        and any(
+            isinstance(comparator, ast.Constant) and comparator.value is None
+            for comparator in node.comparators
         )
-    for name in implemented_names:
-        method = service_methods.get(name)
-        if method is None or not any(
-            isinstance(node, ast.Call)
-            and isinstance(node.func, ast.Name)
-            and node.func.id == "_admit_agent_request"
-            and tuple(
-                arg.id for arg in node.args if isinstance(arg, ast.Name)
-            )
-            == ("self", "request")
-            for node in ast.walk(method)
-        ):
-            failures.append(f"service operation lacks E admission: {name}")
-    held_names = {
-        "compile_replay_paper_cohort",
-        "register_replay_paper_result",
-        "build_evidence_bundle",
-    }
-    if held_names & set(service_methods):
-        failures.append("held replay/PAPER operations were implemented in E")
+        for node in ast.walk(admission_helper)
+    )
+    resolver_methods = _class_methods(agent_tree, "AgentCapabilityResolverV1")
+    resolver_admit = resolver_methods.get("admit_operation")
+    no_trade_collapsed = resolver_admit is None or any(
+        isinstance(node, ast.Raise) for node in ast.walk(resolver_admit)
+    )
+    if (
+        admission_counts != {name: 1 for name in implemented_names}
+        or optional_bypass
+        or no_trade_collapsed
+        or "raise NoTradeReoptimizationRouteError(decision)"
+        not in service_source
+        or "self.decision = decision"
+        not in (PACKAGE / "errors.py").read_text(encoding="utf-8")
+    ):
+        failures.append(
+            "mandatory admission or typed NO_TRADE control flow is incomplete"
+        )
 
+    no_effect_flags = manifest.get("no_effect_authority_flags")
+    if (
+        not isinstance(no_effect_flags, dict)
+        or set(no_effect_flags) != REQUIRED_NO_EFFECT_FLAG_NAMES
+        or any(value is not False for value in no_effect_flags.values())
+        or manifest.get("runtime_effect_authorized") is not False
+        or manifest.get("no_effect_authority_closed") is not True
+        or manifest.get("activation_state") != "NO_EFFECT_CONTRACT_ONLY"
+        or tuple(manifest.get("no_trade_reoptimization_variable_ids") or ())
+        != EXPECTED_NO_TRADE_VARIABLE_IDS
+        or tuple(manifest.get("quantum_formulation_required_fields") or ())
+        != EXPECTED_QUANTUM_FORMULATION_FIELDS
+        or tuple(manifest.get("llm_advisory_task_fields") or ())
+        != EXPECTED_LLM_ADVISORY_TASK_FIELDS
+    ):
+        failures.append("manifest no-effect, NO_TRADE, LLM, or quantum boundary drifts")
+
+    behavior_passed, behavior_detail = _behavioral_probe()
+    if not behavior_passed:
+        failures.append(f"service behavioral admission probe failed: {behavior_detail}")
+
+    if "_st12e_shared_state" in validation_source:
+        failures.append("primary validation still relabels one shared Boolean")
+    if "_st12e_predicate_matrix" not in validation_source:
+        failures.append("primary compact predicate matrix is missing")
+    physical_modules = tuple(
+        sorted(
+            (
+                REPO_ROOT
+                / "tests/stage1_prediction_markets/"
+                "qku_computation_control_plane/tranche_e"
+            ).glob("test_*_matrix.py")
+        )
+    )
+    if len(physical_modules) != 3:
+        failures.append("physical tranche-E matrix count is not exactly three")
     for name in FORBIDDEN_PARALLEL_PATHS:
         if (PACKAGE / name).exists():
             failures.append(f"parallel capability owner exists: {name}")
-    if domain == "llm":
-        source = agent_path.read_text(encoding="utf-8").casefold()
-        if "llm_inference_forbidden" not in source or "untrusted_content" not in source:
-            failures.append("LLM advisory/injection boundary is incomplete")
-    if domain == "security":
-        if not {
-            "SAFETY_STATE_MISSING",
-            "SAFETY_STATE_STALE",
-            "SAFETY_STATE_CONFLICT",
-        } <= reason_names:
-            failures.append("read-only safety-state denial reasons are incomplete")
+    if domain == "llm" and (
+        "llm_inference_forbidden" not in agent_source.casefold()
+        or "untrusted_content" not in agent_source.casefold()
+    ):
+        failures.append("LLM advisory and injection boundary is incomplete")
+    if domain == "security" and not {
+        "SAFETY_STATE_MISSING",
+        "SAFETY_STATE_STALE",
+        "SAFETY_STATE_CONFLICT",
+    } <= reason_names:
+        failures.append("safety-state fail-closed reasons are incomplete")
     return failures
 
 
@@ -545,8 +1081,8 @@ def main(domain: str | None = None) -> int:
     domains = tuple(DOMAIN_PREFIXES) if selected == "all" else (selected,)
     failures = [
         failure
-        for current in domains
-        for failure in validate_domain(current)
+        for current_domain in domains
+        for failure in validate_domain(current_domain)
     ]
     if failures:
         print("\n".join(dict.fromkeys(failures)), file=sys.stderr)
@@ -556,5 +1092,5 @@ def main(domain: str | None = None) -> int:
 
 
 if __name__ == "__main__":
-    requested = sys.argv[1] if len(sys.argv) > 1 else None
-    raise SystemExit(main(requested))
+    requested_domain = sys.argv[1] if len(sys.argv) > 1 else None
+    raise SystemExit(main(requested_domain))

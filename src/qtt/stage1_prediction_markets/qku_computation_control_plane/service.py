@@ -10,13 +10,21 @@ from .contextual_computability import (
     FrozenContextualComputabilityResolverV1,
 )
 from .errors import (
+    AuthorityDeniedError,
     ComputationControlPlaneError,
     ContractValidationError,
     InputAuthorityError,
+    NoTradeReoptimizationRouteError,
     OwnerAdapterError,
     ParameterPolicyError,
     ReasonCode,
     StackResolutionError,
+)
+from .agent_policy import (
+    AgentCapabilityDecisionStateV1,
+    AgentCapabilityDecisionV1,
+    INTERNAL_NO_EFFECT_ADMISSION_PROFILE,
+    POLICY_VERSION,
 )
 from .fallback import (
     EXPECTED_PUBLIC_OPERATION_ERRORS,
@@ -380,11 +388,47 @@ def _admit_computation_plan(
 def _admit_agent_request(
     service: "QKUComputationControlPlaneV1",
     request: OperationRequestEnvelopeV1,
-) -> None:
-    """One optional E boundary without widening the public service roster."""
+) -> AgentCapabilityDecisionV1:
+    """The single mandatory fail-closed admission path for all public methods."""
 
-    if service.agent_capability_resolver is not None:
-        service.agent_capability_resolver.admit_operation(request)
+    resolver = service.agent_capability_resolver
+    if not isinstance(resolver, AgentCapabilityAdmissionProtocolV1):
+        raise AuthorityDeniedError(
+            ReasonCode.TASK_ENVELOPE_MISSING,
+            "a typed ST12-E admission owner is required before operation work",
+        )
+    decision = resolver.admit_operation(request)
+    if not isinstance(decision, AgentCapabilityDecisionV1):
+        raise AuthorityDeniedError(
+            ReasonCode.TASK_ENVELOPE_MISSING,
+            "the admission owner returned no compatible typed decision",
+        )
+    if (
+        decision.request_id != request.request_id
+        or decision.principal_id != request.principal_id
+        or decision.operation_id != request.operation_name
+        or decision.idempotency_key != request.idempotency_key
+        or decision.policy_version != POLICY_VERSION
+        or decision.runtime_effect_authorized is not False
+    ):
+        raise AuthorityDeniedError(
+            ReasonCode.TASK_SCOPE_MISMATCH,
+            "the typed admission decision does not bind the exact request",
+        )
+    if decision.decision_state is (
+        AgentCapabilityDecisionStateV1.ELIGIBLE_FOR_NO_EFFECT_QKU_REQUEST
+    ):
+        return decision
+    if decision.decision_state is (
+        AgentCapabilityDecisionStateV1.NO_TRADE_REOPTIMIZATION_ROUTED
+    ):
+        raise NoTradeReoptimizationRouteError(decision)
+    reason = (
+        decision.reason_codes[0]
+        if decision.reason_codes
+        else ReasonCode.CAPABILITY_DENIED
+    )
+    raise AuthorityDeniedError(reason, decision.decision_id)
 
 
 @dataclass(frozen=True, slots=True)
@@ -394,7 +438,9 @@ class QKUComputationControlPlaneV1:
     owner_registry: CanonicalOwnerPacketRegistryV1
     identity_adapter: RP5CIdentityAdapterV1 | None = None
     persistence_adapter: PersistenceAdapterV1 | None = None
-    agent_capability_resolver: AgentCapabilityAdmissionProtocolV1 | None = None
+    agent_capability_resolver: AgentCapabilityAdmissionProtocolV1 = (
+        INTERNAL_NO_EFFECT_ADMISSION_PROFILE
+    )
 
     def __post_init__(self) -> None:
         if not isinstance(
@@ -405,16 +451,13 @@ class QKUComputationControlPlaneV1:
         ) or (
             self.persistence_adapter is not None
             and not isinstance(self.persistence_adapter, PersistenceAdapterV1)
-        ) or (
-            self.agent_capability_resolver is not None
-            and not isinstance(
-                self.agent_capability_resolver,
-                AgentCapabilityAdmissionProtocolV1,
-            )
+        ) or not isinstance(
+            self.agent_capability_resolver,
+            AgentCapabilityAdmissionProtocolV1,
         ):
             raise ContractValidationError(
                 ReasonCode.INVALID_CONTRACT,
-                "service requires canonical packet plus optional typed identity/persistence/capability adapters",
+                "service requires canonical packets and one typed admission owner",
             )
 
     def resolve_identity(

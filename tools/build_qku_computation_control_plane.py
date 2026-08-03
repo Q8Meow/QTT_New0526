@@ -99,12 +99,25 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.agent_polic
     POLICY_VERSION,
     QUANTUM_FORMULATION_FIELDS,
     LLM_ADVISORY_TASK_FIELDS,
-    SOURCE_UNIVERSE_DEFINITIONS,
+    ST12E_BINDING_EXACT,
+    ST12E_BINDING_OUTSIDE_SCOPE,
+    UPSTREAM_IDENTITY_CROSSWALK_REQUIRED,
+    UPSTREAM_IDENTITY_FULLY_MAPPED,
+    AgentIdentityMappingTypeV1,
     build_generated_policy_rows,
     build_identity_compatibility_map,
     build_parameter_scope_projection,
+    build_st12e_certified_source_universe_registry,
+    build_upstream_source_universe_registry,
+    canonical_master_parameter_rows,
+    canonical_parameter_identity_registry,
+    canonical_source_agent_ids,
+    canonical_source_role_labels,
     current_owner_action_ids,
     no_effect_authority_is_closed,
+)
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.parameter_policy import (  # noqa: E402
+    resolve_st12e_value_policy_refs,
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.authority import (  # noqa: E402
     TRANCHE_A_AUTHORITY,
@@ -125,12 +138,19 @@ ST12EProjectionSet = tuple[
 def build_st12e_projections() -> ST12EProjectionSet:
     """Build all E outputs in memory from frozen canonical owners."""
 
+    master_text = (
+        REPO_ROOT / "docs/master_plan/QTT_MasterPlan_Current.md"
+    ).read_text(encoding="utf-8")
+    master_rows = canonical_master_parameter_rows(master_text)
+    source_agent_ids = canonical_source_agent_ids(master_text)
     orch_snapshot = AgentOrchService(repo_root=REPO_ROOT).load_policy_snapshot()
-    identity_map = build_identity_compatibility_map(orch_snapshot)
+    identity_map = build_identity_compatibility_map(
+        orch_snapshot,
+        source_agent_ids=source_agent_ids,
+        source_role_labels=canonical_source_role_labels(master_text),
+    )
     parameter_scope = build_parameter_scope_projection(
-        master_plan_text=(
-            REPO_ROOT / "docs/master_plan/QTT_MasterPlan_Current.md"
-        ).read_text(encoding="utf-8"),
+        master_plan_text=master_text,
         identity_map=identity_map,
     )
     policy_rows = build_generated_policy_rows(
@@ -145,11 +165,48 @@ def build_st12e_projections() -> ST12EProjectionSet:
         for row in parameter_scope
     )
     counts = dict(st12e_semantic_counts())
-    eligible_scope_count = sum(
-        row["mapping_state"] == "EXACT_E_BINDING_CURRENT_SCOPE"
-        for row in scope_rows
+    upstream_universes, _ = build_upstream_source_universe_registry(master_rows)
+    st12e_universes, _ = build_st12e_certified_source_universe_registry()
+    exact_mappings = tuple(
+        binding
+        for binding in identity_map.bindings.values()
+        if binding.mapping_type is not AgentIdentityMappingTypeV1.UNMAPPED
     )
-    blocked_scope_count = len(scope_rows) - eligible_scope_count
+    unmapped_mappings = tuple(
+        binding
+        for binding in identity_map.bindings.values()
+        if binding.mapping_type is AgentIdentityMappingTypeV1.UNMAPPED
+    )
+    fully_mapped_scope = tuple(
+        row
+        for row in parameter_scope
+        if row.upstream_identity_mapping_state
+        == UPSTREAM_IDENTITY_FULLY_MAPPED
+    )
+    crosswalk_required_scope = tuple(
+        row
+        for row in parameter_scope
+        if row.upstream_identity_mapping_state
+        == UPSTREAM_IDENTITY_CROSSWALK_REQUIRED
+    )
+    exact_e_scope = tuple(
+        row
+        for row in parameter_scope
+        if row.st12e_binding_state == ST12E_BINDING_EXACT
+    )
+    outside_e_scope = tuple(
+        row
+        for row in parameter_scope
+        if row.st12e_binding_state == ST12E_BINDING_OUTSIDE_SCOPE
+    )
+    e_scope_with_gap = sum(
+        row.upstream_identity_mapping_state
+        == UPSTREAM_IDENTITY_CROSSWALK_REQUIRED
+        for row in exact_e_scope
+    )
+    resolved_value_refs = resolve_st12e_value_policy_refs(
+        canonical_parameter_identity_registry(master_text)
+    )
     manifest: dict[str, object] = {
         "schema": "AgentCapabilityPolicyManifestV1",
         "policy_version": POLICY_VERSION,
@@ -171,19 +228,47 @@ def build_st12e_projections() -> ST12EProjectionSet:
         "counts": counts,
         "policy_row_count": len(policy_rows),
         "identity_mapping_count": len(identity_map.bindings),
+        "source_identity_row_count": len(identity_map.bindings),
+        "exact_mapping_count": len(exact_mappings),
+        "unmapped_mapping_count": len(unmapped_mappings),
+        "unmapped_source_agent_ids": [
+            binding.source_agent_id for binding in unmapped_mappings
+        ],
         "parameter_scope_row_count": len(scope_rows),
-        "parameter_scope_eligible_count": eligible_scope_count,
-        "parameter_scope_blocker_count": blocked_scope_count,
-        "parameter_scope_distribution_is_aggregate_only": True,
-        "source_universe_definitions": {
-            universe_id: {
-                "source_agent_ids": list(source_ids),
-                "parameter_count": count,
+        "exact_upstream_source_universe_count": len(upstream_universes),
+        "exact_upstream_source_agent_id_count": len(source_agent_ids),
+        "fully_mapped_upstream_row_count": len(fully_mapped_scope),
+        "crosswalk_required_upstream_row_count": len(
+            crosswalk_required_scope
+        ),
+        "exact_st12e_binding_count": len(exact_e_scope),
+        "outside_st12e_binding_scope_count": len(outside_e_scope),
+        "exact_st12e_certified_mapping_count": len(exact_e_scope),
+        "st12e_binding_with_unmapped_certified_id_count": 0,
+        "st12e_rows_with_upstream_crosswalk_gap": e_scope_with_gap,
+        "st12e_rows_with_fully_mapped_upstream_lineage": (
+            len(exact_e_scope) - e_scope_with_gap
+        ),
+        "quota_reassignment_count": 0,
+        "nearest_universe_assignment_count": 0,
+        "source_set_rewrite_count": 0,
+        "value_policy_ref_resolution_count": len(resolved_value_refs),
+        "duplicated_value_body_count": 0,
+        "opaque_semantic_payload_count": 0,
+        "exact_upstream_source_universes": {
+            universe_ref: {
+                "source_agent_ids": list(specification["source_agent_ids"]),
+                "parameter_count": specification["parameter_count"],
             }
-            for universe_id, (
-                source_ids,
-                count,
-            ) in SOURCE_UNIVERSE_DEFINITIONS.items()
+            for universe_ref, specification in upstream_universes.items()
+        },
+        "st12e_certified_source_universes": {
+            universe_ref: {
+                "source_agent_ids": list(specification["source_agent_ids"]),
+                "parameter_count": specification["parameter_count"],
+                "authority_created": False,
+            }
+            for universe_ref, specification in st12e_universes.items()
         },
         "closure_ids": [row["closure_id"] for row in ST12E_CLOSURE_ROWS],
         "repository_disposition_ids": list(ST12E_REPOSITORY_DISPOSITIONS),
@@ -206,7 +291,7 @@ def build_st12e_projections() -> ST12EProjectionSet:
         "llm_advisory_task_fields": list(LLM_ADVISORY_TASK_FIELDS),
         "agent_orch_source_prefix": AGENT_ORCH_PREFIX,
         "central_validator_ref": CENTRAL_VALIDATOR_REF,
-        "identity_join_state": "EXACT_CURRENT_SCOPED_NO_EFFECT_MAPPING",
+        "identity_join_state": "EXACT_OR_TYPED_UNMAPPED_NO_AUTHORITY",
         "qku_formula_mutation_authorized": False,
         "trade_plan_candidate_is_only_mutable_optimization_object": True,
         "no_trade_reoptimization_route_preserved": True,

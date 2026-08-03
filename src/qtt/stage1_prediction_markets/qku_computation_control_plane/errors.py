@@ -172,6 +172,21 @@ class AuthorityDeniedError(ComputationControlPlaneError):
     """A typed denial at the default-deny capability boundary."""
 
 
+class NoTradeReoptimizationRouteError(AuthorityDeniedError):
+    """Typed no-effect control flow preserving the complete NO_TRADE packet."""
+
+    def __init__(self, decision: object) -> None:
+        self.decision = decision
+        decision_id = str(getattr(decision, "decision_id", "") or "MISSING")
+        terminal_route = str(
+            getattr(decision, "terminal_route", "") or "MISSING"
+        )
+        super().__init__(
+            ReasonCode.NO_TRADE_REOPTIMIZATION_REQUIRED,
+            f"{decision_id} routed to {terminal_route}",
+        )
+
+
 class SerializationSafetyError(ComputationControlPlaneError):
     """A typed deterministic-serialization or relative-path safety violation."""
 

@@ -52,6 +52,7 @@ from .errors import (
     FormulaExecutionError,
     FreshnessError,
     InputAuthorityError,
+    NoTradeReoptimizationRouteError,
     OperationBoundaryError,
     OutputContractError,
     PointInTimeError,
@@ -216,7 +217,6 @@ from .agent_policy import (
     AgentParameterScopeViewV1,
     AgentPrincipalBindingV1,
     AgentSafetyStateV1,
-    SOURCE_UNIVERSE_DEFINITIONS,
     build_identity_compatibility_map,
     build_parameter_scope_projection,
 )
@@ -619,6 +619,7 @@ __all__ += [
     "NamedOutputContractV1",
     "NamedOutputMemberV1",
     "NoTradeComparisonV1",
+    "NoTradeReoptimizationRouteError",
     "NUMERIC_VALUE_AUTHORITY_BINDINGS",
     "NumericValueAuthorityBindingV1",
     "OPTIMIZER_DEFAULT_CURRENTIZATIONS",

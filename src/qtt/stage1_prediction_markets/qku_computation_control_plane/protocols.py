@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Protocol, runtime_checkable
+from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 from .errors import OwnerAdapterError, ReasonCode
 from .models import (
@@ -14,6 +14,9 @@ from .models import (
     OperationContractV1,
     SupervisionEnvelopeV1,
 )
+
+if TYPE_CHECKING:
+    from .agent_policy import AgentCapabilityDecisionV1
 
 
 @runtime_checkable
@@ -67,7 +70,9 @@ class AgentDagProjectionProtocolV1(Protocol):
 class AgentCapabilityAdmissionProtocolV1(Protocol):
     """Typed no-effect admission hook; it does not grant runtime authority."""
 
-    def admit_operation(self, request: object) -> object: ...
+    def admit_operation(
+        self, request: object
+    ) -> "AgentCapabilityDecisionV1": ...
 
 
 @runtime_checkable

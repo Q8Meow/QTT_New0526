@@ -450,7 +450,8 @@ def test_independent_peer_challenge_uses_existing_identity_and_receipt() -> None
     peer_binding = next(
         binding
         for binding in snapshot.identity_map.bindings.values()
-        if "parameter_selector_agent" not in binding.current_principal_refs
+        if binding.current_principal_refs
+        and "parameter_selector_agent" not in binding.current_principal_refs
     )
     peer_receipt_ref = next(
         iter(snapshot.agent_orch_receipt_refs_by_candidate_id.values())

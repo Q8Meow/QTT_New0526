@@ -21,7 +21,10 @@ from src.qtt.dashboard.owner_action_registry import OwnerActionRegistry
 
 from .authority import TRANCHE_A_AUTHORITY
 from .errors import AuthorityDeniedError, ReasonCode
-from .parameter_policy import ST12E_PARAMETER_CAPABILITY_BINDINGS
+from .parameter_policy import (
+    ST12E_PARAMETER_CAPABILITY_BINDINGS,
+    resolve_st12e_value_policy_refs,
+)
 
 
 POLICY_VERSION = "ST12E_AGENT_CAPABILITY_POLICY_V1_1"
@@ -38,13 +41,14 @@ CURRENT_DUTY_REF = (
 )
 AGENT_ORCH_PREFIX = "docs/master_plan/generated/pr169_agent_orch1"
 MASTER_PARAMETER_SOURCE_REF = "docs/master_plan/QTT_MasterPlan_Current.md"
-PARAMETER_MAPPING_EXACT = "EXACT_E_BINDING_CURRENT_SCOPE"
-PARAMETER_MAPPING_BLOCKED = (
-    "CERTIFIED_AGGREGATE_ONLY_PER_ROW_CURRENTIZATION_REQUIRED"
+IDENTITY_MAPPING_EXACT = "EXACT_CURRENT_SCOPED_NO_EFFECT_MAPPING"
+IDENTITY_MAPPING_UNMAPPED = "UNMAPPED_CROSSWALK_REQUIRED_NO_AUTHORITY"
+UPSTREAM_IDENTITY_FULLY_MAPPED = "UPSTREAM_IDENTITY_FULLY_MAPPED"
+UPSTREAM_IDENTITY_CROSSWALK_REQUIRED = (
+    "UPSTREAM_IDENTITY_CROSSWALK_REQUIRED"
 )
-PARAMETER_MAPPING_BLOCKER_REF = (
-    "PACKAGE_CURRENT_MAIN_SOURCE_UNIVERSE_ASSIGNMENT_GAP"
-)
+ST12E_BINDING_EXACT = "EXACT_ST12E_CAPABILITY_BINDING"
+ST12E_BINDING_OUTSIDE_SCOPE = "OUTSIDE_ST12E_CAPABILITY_BINDING_SCOPE"
 
 IMPLEMENTED_OPERATION_IDS = (
     "resolve_identity",
@@ -381,11 +385,19 @@ class AgentPrincipalBindingV1:
     intersection_scope: tuple[str, ...]
     evidence_refs: tuple[str, ...]
     terminal_mapping_state: str
+    owner_review_currentization_route: str = (
+        "OWNER_REVIEW_SOURCE_IDENTITY_CROSSWALK"
+    )
+    activation_state: str = ACTIVATION_STATE
 
     def __post_init__(self) -> None:
         _required_text(self.source_agent_id, "source_agent_id")
         _required_text(self.source_role_label, "source_role_label")
         _required_text(self.terminal_mapping_state, "terminal_mapping_state")
+        _required_text(
+            self.owner_review_currentization_route,
+            "owner_review_currentization_route",
+        )
         if not isinstance(self.mapping_type, AgentIdentityMappingTypeV1):
             raise AuthorityDeniedError(
                 ReasonCode.PRINCIPAL_AMBIGUOUS,
@@ -443,6 +455,22 @@ class AgentPrincipalBindingV1:
                 ReasonCode.SOURCE_AGENT_ID_SCOPE_BROADER_THAN_CURRENT_DUTY,
                 f"{self.source_agent_id} mapping widens certified scope",
             )
+        if self.activation_state != ACTIVATION_STATE:
+            raise AuthorityDeniedError(
+                ReasonCode.SELF_PROMOTION_FORBIDDEN,
+                "identity compatibility cannot activate authority",
+            )
+        if (
+            self.mapping_type is AgentIdentityMappingTypeV1.UNMAPPED
+            and self.terminal_mapping_state != IDENTITY_MAPPING_UNMAPPED
+        ) or (
+            self.mapping_type is not AgentIdentityMappingTypeV1.UNMAPPED
+            and self.terminal_mapping_state != IDENTITY_MAPPING_EXACT
+        ):
+            raise AuthorityDeniedError(
+                ReasonCode.PRINCIPAL_AMBIGUOUS,
+                "identity mapping state does not match its typed disposition",
+            )
 
 
 @dataclass(frozen=True, slots=True)
@@ -462,18 +490,30 @@ class AgentIdentityCompatibilityMapV1:
             self, "bindings", MappingProxyType(dict(self.bindings))
         )
 
-    def resolve(self, source_agent_id: str) -> AgentPrincipalBindingV1:
+    def describe_for_lineage(
+        self, source_agent_id: str
+    ) -> AgentPrincipalBindingV1:
         try:
-            binding = self.bindings[source_agent_id]
+            return self.bindings[source_agent_id]
         except KeyError as exc:
             raise AuthorityDeniedError(
                 ReasonCode.SOURCE_AGENT_ID_UNMAPPED, source_agent_id
             ) from exc
+
+    def require_current_authority_mapping(
+        self, source_agent_id: str
+    ) -> AgentPrincipalBindingV1:
+        binding = self.describe_for_lineage(source_agent_id)
         if binding.mapping_type is AgentIdentityMappingTypeV1.UNMAPPED:
             raise AuthorityDeniedError(
                 ReasonCode.SOURCE_AGENT_ID_UNMAPPED, source_agent_id
             )
         return binding
+
+    def resolve(self, source_agent_id: str) -> AgentPrincipalBindingV1:
+        """Compatibility alias for the fail-closed authority lookup."""
+
+        return self.require_current_authority_mapping(source_agent_id)
 
 
 @dataclass(frozen=True, slots=True)
@@ -672,19 +712,21 @@ class AgentCapabilityPolicyRowV1:
 class AgentParameterScopeViewV1:
     parameter_id: str
     parameter_symbol: str
-    source_universe_id: str
-    source_agent_ids: tuple[str, ...]
-    current_principal_refs_or_gap: tuple[str, ...]
-    capability_policy_ref: str
+    upstream_source_universe_ref: str
+    upstream_identity_mapping_state: str
+    mapped_compatibility_refs: tuple[str, ...]
+    unmapped_compatibility_refs: tuple[str, ...]
+    current_principal_refs_or_exact_gap: tuple[str, ...]
     value_policy_ref: str
+    st12e_binding_state: str
+    st12e_capability_binding_ref_or_explicit_absence: str
+    st12e_certified_source_universe_ref_or_explicit_absence: str
+    st12e_current_principal_refs_or_explicit_absence: tuple[str, ...]
     lifecycle_state: str
     timing_state: str
     downstream_consumer_refs: tuple[str, ...]
     validator_ref: str
     terminal_route: str
-    upstream_source_agent_ids: tuple[str, ...]
-    normalization_basis: str
-    mapping_state: str
     semantic_owner: str
     implementation_owner: str
     producer_ref: str
@@ -697,25 +739,27 @@ class AgentParameterScopeViewV1:
         for name in (
             "parameter_id",
             "parameter_symbol",
-            "source_universe_id",
-            "capability_policy_ref",
+            "upstream_source_universe_ref",
+            "upstream_identity_mapping_state",
             "value_policy_ref",
+            "st12e_binding_state",
+            "st12e_capability_binding_ref_or_explicit_absence",
+            "st12e_certified_source_universe_ref_or_explicit_absence",
             "lifecycle_state",
             "timing_state",
             "validator_ref",
             "terminal_route",
-            "normalization_basis",
-            "mapping_state",
             "semantic_owner",
             "implementation_owner",
             "producer_ref",
         ):
             _required_text(getattr(self, name), name)
         for name in (
-            "source_agent_ids",
-            "current_principal_refs_or_gap",
+            "mapped_compatibility_refs",
+            "unmapped_compatibility_refs",
+            "current_principal_refs_or_exact_gap",
+            "st12e_current_principal_refs_or_explicit_absence",
             "downstream_consumer_refs",
-            "upstream_source_agent_ids",
             "upstream_artifact_refs",
             "upstream_row_or_value_refs",
             "current_principal_duty_policy_refs",
@@ -730,29 +774,51 @@ class AgentParameterScopeViewV1:
                 ReasonCode.SELF_PROMOTION_FORBIDDEN,
                 f"{self.parameter_id} has an effect-bearing activation state",
             )
-        if self.mapping_state == PARAMETER_MAPPING_EXACT:
-            if self.current_principal_refs_or_gap == (
-                PARAMETER_MAPPING_BLOCKER_REF,
-            ):
-                raise AuthorityDeniedError(
-                    ReasonCode.PARAMETER_SCOPE_MISMATCH,
-                    f"{self.parameter_id} exact scope contains a blocker",
-                )
-        elif self.mapping_state == PARAMETER_MAPPING_BLOCKED:
+        has_unmapped = self.unmapped_compatibility_refs != (EXPLICIT_ABSENCE,)
+        expected_upstream_state = (
+            UPSTREAM_IDENTITY_CROSSWALK_REQUIRED
+            if has_unmapped
+            else UPSTREAM_IDENTITY_FULLY_MAPPED
+        )
+        if self.upstream_identity_mapping_state != expected_upstream_state:
+            raise AuthorityDeniedError(
+                ReasonCode.PARAMETER_SCOPE_MISMATCH,
+                f"{self.parameter_id} has a mismatched upstream mapping state",
+            )
+        if self.st12e_binding_state == ST12E_BINDING_EXACT:
             if (
-                self.current_principal_refs_or_gap
-                != (PARAMETER_MAPPING_BLOCKER_REF,)
+                self.st12e_capability_binding_ref_or_explicit_absence
+                == EXPLICIT_ABSENCE
+                or self.st12e_certified_source_universe_ref_or_explicit_absence
+                == EXPLICIT_ABSENCE
+                or self.st12e_current_principal_refs_or_explicit_absence
+                == (EXPLICIT_ABSENCE,)
                 or self.terminal_route
-                != "SOURCE_UNIVERSE_PER_ROW_CURRENTIZATION_REVIEW_REQUIRED"
+                != "NO_EFFECT_QKU_REQUEST_OR_TYPED_DENIAL"
             ):
                 raise AuthorityDeniedError(
                     ReasonCode.PARAMETER_SCOPE_MISMATCH,
-                    f"{self.parameter_id} aggregate-only scope is not fail closed",
+                    f"{self.parameter_id} exact E binding is incomplete",
+                )
+        elif self.st12e_binding_state == ST12E_BINDING_OUTSIDE_SCOPE:
+            if (
+                self.st12e_capability_binding_ref_or_explicit_absence
+                != EXPLICIT_ABSENCE
+                or self.st12e_certified_source_universe_ref_or_explicit_absence
+                != EXPLICIT_ABSENCE
+                or self.st12e_current_principal_refs_or_explicit_absence
+                != (EXPLICIT_ABSENCE,)
+                or self.terminal_route
+                != "ST12E_CAPABILITY_BINDING_NOT_APPLICABLE"
+            ):
+                raise AuthorityDeniedError(
+                    ReasonCode.PARAMETER_SCOPE_MISMATCH,
+                    f"{self.parameter_id} outside-E state carries E authority",
                 )
         else:
             raise AuthorityDeniedError(
                 ReasonCode.PARAMETER_SCOPE_MISMATCH,
-                f"{self.parameter_id} has an unknown mapping state",
+                f"{self.parameter_id} has an unknown E binding state",
             )
 
 
@@ -859,6 +925,101 @@ class AgentCapabilityDecisionV1:
 
 
 @dataclass(frozen=True, slots=True)
+class InternalNoEffectAdmissionProfileV1:
+    """Explicit compatibility admission for the bounded internal test caller."""
+
+    principal_id: str = "OWNER::TEST"
+    capability_bundle_id: str = "CAPABILITY::READ_ONLY_TEST"
+    current_agent_id: str = "dashboard_agent"
+    source_agent_id: str = "AGENT_RT_11"
+    activation_state: str = ACTIVATION_STATE
+
+    def __post_init__(self) -> None:
+        if self.activation_state != ACTIVATION_STATE:
+            raise AuthorityDeniedError(
+                ReasonCode.SELF_PROMOTION_FORBIDDEN,
+                "internal admission profile cannot activate authority",
+            )
+
+    def admit_operation(self, request: object) -> AgentCapabilityDecisionV1:
+        request_id = str(getattr(request, "request_id", "") or "MISSING_REQUEST")
+        operation_id = str(
+            getattr(request, "operation_name", "") or "MISSING_OPERATION"
+        )
+        idempotency_key = str(
+            getattr(request, "idempotency_key", "") or "MISSING_IDEMPOTENCY"
+        )
+        context = getattr(request, "context", None)
+        context_ref = str(
+            getattr(context, "context_id", "") or "MISSING_CONTEXT"
+        )
+        request_principal = str(getattr(request, "principal_id", ""))
+        request_bundle = str(getattr(request, "capability_bundle_id", ""))
+        reasons: list[ReasonCode] = []
+        if request_principal != self.principal_id:
+            reasons.append(ReasonCode.PRINCIPAL_UNKNOWN)
+        if request_bundle != self.capability_bundle_id:
+            reasons.append(ReasonCode.TASK_ENVELOPE_MISSING)
+        if operation_id not in IMPLEMENTED_OPERATION_IDS:
+            reasons.append(ReasonCode.OPERATION_NOT_ALLOWED)
+        if context_ref == "MISSING_CONTEXT":
+            reasons.append(ReasonCode.CONTEXT_SCOPE_MISMATCH)
+        state = (
+            AgentCapabilityDecisionStateV1.DENIED
+            if reasons
+            else AgentCapabilityDecisionStateV1.ELIGIBLE_FOR_NO_EFFECT_QKU_REQUEST
+        )
+        return AgentCapabilityDecisionV1(
+            decision_id=f"ST12E_INTERNAL_DECISION::{request_id}::{operation_id}",
+            request_id=request_id,
+            task_id=f"ST12E_INTERNAL_TASK::{operation_id}",
+            principal_id=request_principal or "MISSING_PRINCIPAL",
+            current_agent_id=self.current_agent_id,
+            source_agent_refs=(self.source_agent_id,),
+            operation_id=operation_id,
+            policy_version=POLICY_VERSION,
+            decision_state=state,
+            reason_codes=tuple(dict.fromkeys(reasons)),
+            scope_refs=(
+                f"operation_id={operation_id}",
+                f"context_ref={context_ref}",
+                "internal_profile=READ_ONLY_NO_EFFECT",
+            ),
+            idempotency_key=idempotency_key,
+            retry_disposition="NO_RETRY_AUTHORITY",
+            peer_sod_disposition="INTERNAL_NO_EFFECT_PROFILE_ONLY",
+            safety_state_disposition="NON_MATERIAL_LOCAL_NO_EFFECT",
+            terminal_route=(
+                "QKUComputationControlPlaneV1_NO_EFFECT_REQUEST"
+                if not reasons
+                else "DENY_UNCONFIGURED_OR_NONINTERNAL_CALLER"
+            ),
+            agent_orch_receipt_ref=(
+                "AGENT_ORCH1_RECEIPT_EXPLICITLY_NOT_APPLICABLE_INTERNAL_NO_EFFECT"
+            ),
+            st12c_causation_correlation_refs=(
+                f"OperationRequestEnvelopeV1.request_id={request_id}",
+                f"OperationRequestEnvelopeV1.idempotency_key={idempotency_key}",
+            ),
+            evidence_refs=(
+                "InternalNoEffectAdmissionProfileV1",
+                "TRANCHE_A_AUTHORITY",
+            ),
+            alternative_route_refs=("DENY_TASK", "OWNER_REVIEW_REQUIRED"),
+            disagreement_state="NONE_DECLARED",
+            confidence_state="INTERNAL_NO_EFFECT_COMPATIBILITY_ONLY",
+            limitation_codes=(
+                "NO_PROVIDER_PRIVATE_STATE_ORDER_QPU_OR_RUNTIME_EFFECT",
+                "QKU_AND_FORMULA_IMMUTABLE",
+                "NOT_A_RUNTIME_PRINCIPAL_OR_AUTHORITY_GRANT",
+            ),
+        )
+
+
+INTERNAL_NO_EFFECT_ADMISSION_PROFILE = InternalNoEffectAdmissionProfileV1()
+
+
+@dataclass(frozen=True, slots=True)
 class AgentCapabilityPolicySnapshotV1:
     policy_version: str
     registry_version: str
@@ -904,89 +1065,6 @@ class AgentCapabilityPolicySnapshotV1:
                     f"capability snapshot {name} must be an indexed mapping",
                 )
             object.__setattr__(self, name, _freeze(value))
-
-
-SOURCE_UNIVERSE_DEFINITIONS: Mapping[
-    str, tuple[tuple[str, ...], int]
-] = MappingProxyType(
-    {
-        "SOURCE_UNIVERSE_RESEARCH": (
-            (
-                "AGENT_NL_02",
-                "AGENT_NL_05",
-                "AGENT_NL_10",
-                "AGENT_RT_07",
-                "AGENT_RT_11",
-                "AGENT_OFF_11",
-            ),
-            1808,
-        ),
-        "SOURCE_UNIVERSE_EXECUTION": (
-            (
-                "AGENT_NL_10",
-                "AGENT_RT_07",
-                "AGENT_RT_09",
-                "AGENT_RT_11",
-                "AGENT_RT_13",
-                "AGENT_OFF_11",
-            ),
-            704,
-        ),
-        "SOURCE_UNIVERSE_MODEL": (
-            (
-                "AGENT_NL_02",
-                "AGENT_NL_05",
-                "AGENT_NL_10",
-                "AGENT_RT_11",
-                "AGENT_OFF_07",
-                "AGENT_OFF_11",
-            ),
-            477,
-        ),
-        "SOURCE_UNIVERSE_GOVERNANCE": (
-            (
-                "AGENT_NL_05",
-                "AGENT_NL_10",
-                "AGENT_RT_07",
-                "AGENT_RT_11",
-                "AGENT_RT_13",
-                "AGENT_OFF_11",
-            ),
-            304,
-        ),
-        "SOURCE_UNIVERSE_REPLAY": (
-            (
-                "AGENT_NL_02",
-                "AGENT_NL_05",
-                "AGENT_NL_09",
-                "AGENT_NL_10",
-                "AGENT_OFF_11",
-                "AGENT_RT_11",
-            ),
-            194,
-        ),
-        "SOURCE_UNIVERSE_OWNER_CONTROL": (
-            (
-                "AGENT_RT_11",
-                "AGENT_RT_13",
-                "AGENT_NL_10",
-                "AGENT_OFF_11",
-            ),
-            170,
-        ),
-        "SOURCE_UNIVERSE_QUANTUM": (
-            (
-                "AGENT_OFF_01",
-                "AGENT_OFF_03",
-                "AGENT_OFF_07",
-                "AGENT_OFF_11",
-                "AGENT_NL_09",
-                "AGENT_NL_10",
-            ),
-            153,
-        ),
-    }
-)
 
 
 _SOURCE_IDENTITY_SPEC = (
@@ -1089,6 +1167,9 @@ _CURRENT_PRINCIPAL_ROLE_BY_ID: Mapping[str, str] = MappingProxyType(
 
 def build_identity_compatibility_map(
     orch_snapshot: AgentOrchPolicySnapshotV1,
+    *,
+    source_agent_ids: Iterable[str] | None = None,
+    source_role_labels: Mapping[str, str] | None = None,
 ) -> AgentIdentityCompatibilityMapV1:
     def unique_index(
         rows: Iterable[Mapping[str, Any]], key: str
@@ -1134,6 +1215,26 @@ def build_identity_compatibility_map(
             ReasonCode.SOURCE_AGENT_ID_SCOPE_BROADER_THAN_CURRENT_DUTY,
             "AGENT-ORCH1 policy snapshot is absent or broader than review-only",
         )
+    exact_source_ids = tuple(row[0] for row in _SOURCE_IDENTITY_SPEC)
+    complete_source_ids = tuple(
+        sorted(
+            set(exact_source_ids)
+            if source_agent_ids is None
+            else set(source_agent_ids)
+        )
+    )
+    if (
+        not set(exact_source_ids) <= set(complete_source_ids)
+        or any(
+            not re.fullmatch(r"AGENT_(?:RT|NL|OFF)_\d{2}", source_id)
+            for source_id in complete_source_ids
+        )
+    ):
+        raise AuthorityDeniedError(
+            ReasonCode.SOURCE_AGENT_ID_UNMAPPED,
+            "canonical source identity universe omits an authorized mapping",
+        )
+    role_labels = dict(source_role_labels or {})
     bindings: dict[str, AgentPrincipalBindingV1] = {}
     for source_id, label, principals, roles in _SOURCE_IDENTITY_SPEC:
         if not set(roles) <= set(role_rows) & set(duty_rows):
@@ -1220,7 +1321,23 @@ def build_identity_compatibility_map(
             current_scope=tuple(sorted(current_scope)),
             intersection_scope=tuple(sorted(intersection_scope)),
             evidence_refs=tuple(dict.fromkeys(evidence_refs)),
-            terminal_mapping_state="EXACT_CURRENT_SCOPED_NO_EFFECT_MAPPING",
+            terminal_mapping_state=IDENTITY_MAPPING_EXACT,
+        )
+    for source_id in sorted(set(complete_source_ids) - set(bindings)):
+        bindings[source_id] = AgentPrincipalBindingV1(
+            source_agent_id=source_id,
+            source_role_label=role_labels.get(source_id, EXPLICIT_ABSENCE),
+            mapping_type=AgentIdentityMappingTypeV1.UNMAPPED,
+            current_principal_refs=(),
+            current_role_refs=(),
+            current_duty_refs=(),
+            source_scope=("LINEAGE_ONLY_NO_AUTHORITY",),
+            current_scope=(),
+            intersection_scope=(),
+            evidence_refs=(
+                f"{MASTER_PARAMETER_SOURCE_REF}::source_agent_id={source_id}",
+            ),
+            terminal_mapping_state=IDENTITY_MAPPING_UNMAPPED,
         )
     return AgentIdentityCompatibilityMapV1(bindings)
 
@@ -1228,14 +1345,17 @@ def build_identity_compatibility_map(
 _UNIVERSE_LINE = re.compile(
     r"\{\s*((?:AGENT_(?:RT|NL|OFF)_\d{2})(?:\s*,\s*AGENT_(?:RT|NL|OFF)_\d{2})*)\s*\}"
 )
-_PARAMETER_LINE = re.compile(
-    r"`parameter_symbol`\s*:\s*`([^`]+)`"
+_PARAMETER_LINE = re.compile(r"`parameter_symbol`\s*:\s*`([^`]+)`")
+_SOURCE_ROLE_LINE = re.compile(
+    r"^#{5,6} .*?`(AGENT_(?:RT|NL|OFF)_\d{2})`\s+(?:\N{EM DASH}|-)\s+(.+?)\s*$"
 )
 
 
-def _master_parameter_rows(
+def canonical_master_parameter_rows(
     master_plan_text: str,
 ) -> tuple[tuple[str, str, tuple[str, ...]], ...]:
+    """Parse exact parameter identities and source sets from the canonical owner."""
+
     rows: list[tuple[str, str, tuple[str, ...]]] = []
     source_agents: tuple[str, ...] | None = None
     awaiting_universe = False
@@ -1268,14 +1388,101 @@ def _master_parameter_rows(
     return tuple(rows)
 
 
-def _universe_id_for_exact_agents(agents: Iterable[str]) -> str:
-    target = tuple(agents)
-    for universe_id, (source_ids, _) in SOURCE_UNIVERSE_DEFINITIONS.items():
-        if target == source_ids:
-            return universe_id
-    raise AuthorityDeniedError(
-        ReasonCode.PARAMETER_SCOPE_MISMATCH,
-        f"uncertified source universe: {target}",
+def _master_parameter_rows(
+    master_plan_text: str,
+) -> tuple[tuple[str, str, tuple[str, ...]], ...]:
+    """Compatibility view over the canonical parser."""
+
+    return canonical_master_parameter_rows(master_plan_text)
+
+
+def canonical_source_role_labels(
+    master_plan_text: str,
+) -> Mapping[str, str]:
+    labels = {
+        match.group(1): match.group(2)
+        for line in master_plan_text.splitlines()
+        if (match := _SOURCE_ROLE_LINE.match(line))
+    }
+    return MappingProxyType(dict(sorted(labels.items())))
+
+
+def canonical_parameter_identity_registry(
+    master_plan_text: str,
+) -> Mapping[str, str]:
+    return MappingProxyType(
+        {
+            parameter_id: symbol
+            for parameter_id, symbol, _ in canonical_master_parameter_rows(
+                master_plan_text
+            )
+        }
+    )
+
+
+def canonical_source_agent_ids(master_plan_text: str) -> tuple[str, ...]:
+    return tuple(
+        sorted(
+            {
+                source_agent_id
+                for _, _, source_agent_ids in canonical_master_parameter_rows(
+                    master_plan_text
+                )
+                for source_agent_id in source_agent_ids
+            }
+        )
+    )
+
+
+def build_upstream_source_universe_registry(
+    master_rows: Iterable[tuple[str, str, tuple[str, ...]]],
+) -> tuple[
+    Mapping[str, Mapping[str, object]],
+    Mapping[tuple[str, ...], str],
+]:
+    counts = Counter(source_ids for _, _, source_ids in master_rows)
+    definitions: dict[str, Mapping[str, object]] = {}
+    refs_by_source_set: dict[tuple[str, ...], str] = {}
+    for index, source_ids in enumerate(sorted(counts), start=1):
+        universe_ref = f"UPSTREAM_SOURCE_UNIVERSE::{index:03d}"
+        definitions[universe_ref] = MappingProxyType(
+            {
+                "source_agent_ids": source_ids,
+                "parameter_count": counts[source_ids],
+            }
+        )
+        refs_by_source_set[source_ids] = universe_ref
+    return (
+        MappingProxyType(definitions),
+        MappingProxyType(refs_by_source_set),
+    )
+
+
+def build_st12e_certified_source_universe_registry() -> tuple[
+    Mapping[str, Mapping[str, object]],
+    Mapping[tuple[str, ...], str],
+]:
+    """Deduplicate the audited E source sets without granting authority."""
+
+    counts = Counter(
+        binding.certified_source_agent_ids
+        for binding in ST12E_PARAMETER_CAPABILITY_BINDINGS.values()
+    )
+    definitions: dict[str, Mapping[str, object]] = {}
+    refs_by_source_set: dict[tuple[str, ...], str] = {}
+    for index, source_ids in enumerate(sorted(counts), start=1):
+        universe_ref = f"ST12E_CERTIFIED_SOURCE_UNIVERSE::{index:03d}"
+        definitions[universe_ref] = MappingProxyType(
+            {
+                "source_agent_ids": source_ids,
+                "parameter_count": counts[source_ids],
+                "authority_created": False,
+            }
+        )
+        refs_by_source_set[source_ids] = universe_ref
+    return (
+        MappingProxyType(definitions),
+        MappingProxyType(refs_by_source_set),
     )
 
 
@@ -1284,138 +1491,129 @@ def build_parameter_scope_projection(
     master_plan_text: str,
     identity_map: AgentIdentityCompatibilityMapV1,
 ) -> tuple[AgentParameterScopeViewV1, ...]:
-    """Normalize all master rows to certified universes with exact capacities."""
+    """Preserve exact upstream lineage and orthogonal E capability state."""
 
-    master_rows = _master_parameter_rows(master_plan_text)
-    quotas = {
-        universe_id: count
-        for universe_id, (_, count) in SOURCE_UNIVERSE_DEFINITIONS.items()
-    }
-    fixed: dict[str, str] = {}
-    for parameter_id, binding in ST12E_PARAMETER_CAPABILITY_BINDINGS.items():
-        universe_id = _universe_id_for_exact_agents(
-            binding.certified_source_agent_ids
-        )
-        fixed[parameter_id] = universe_id
-        quotas[universe_id] -= 1
-    if any(value < 0 for value in quotas.values()):
-        raise AuthorityDeniedError(
-            ReasonCode.PARAMETER_SCOPE_MISMATCH,
-            "E bindings exceed a certified source-universe capacity",
-        )
-
-    grouped: dict[tuple[str, ...], list[tuple[str, str]]] = {}
-    for parameter_id, symbol, upstream_agents in master_rows:
-        if parameter_id not in fixed:
-            grouped.setdefault(upstream_agents, []).append(
-                (parameter_id, symbol)
-            )
-
-    def preference(raw_agents: tuple[str, ...], universe_id: str) -> tuple[int, int, str]:
-        certified = SOURCE_UNIVERSE_DEFINITIONS[universe_id][0]
-        symmetric_difference = len(set(raw_agents) ^ set(certified))
-        intersection = len(set(raw_agents) & set(certified))
-        return (symmetric_difference, -intersection, universe_id)
-
-    allocations: dict[str, str] = dict(fixed)
-    ordered_groups = sorted(
-        grouped.items(),
-        key=lambda item: (
-            -(
-                sorted(
-                    preference(item[0], universe_id)
-                    for universe_id in SOURCE_UNIVERSE_DEFINITIONS
-                )[1][0]
-                - sorted(
-                    preference(item[0], universe_id)
-                    for universe_id in SOURCE_UNIVERSE_DEFINITIONS
-                )[0][0]
-            ),
-            item[0],
-        ),
+    master_rows = canonical_master_parameter_rows(master_plan_text)
+    canonical_identities = canonical_parameter_identity_registry(
+        master_plan_text
     )
-    for raw_agents, group_rows in ordered_groups:
-        remaining_rows = list(sorted(group_rows))
-        for universe_id in sorted(
-            SOURCE_UNIVERSE_DEFINITIONS,
-            key=lambda value: preference(raw_agents, value),
-        ):
-            if not remaining_rows or quotas[universe_id] <= 0:
-                continue
-            if not set(raw_agents) & set(
-                SOURCE_UNIVERSE_DEFINITIONS[universe_id][0]
-            ):
-                continue
-            take = min(len(remaining_rows), quotas[universe_id])
-            selected = remaining_rows[:take]
-            remaining_rows = remaining_rows[take:]
-            for parameter_id, _ in selected:
-                allocations[parameter_id] = universe_id
-            quotas[universe_id] -= take
-        if remaining_rows:
-            raise AuthorityDeniedError(
-                ReasonCode.PARAMETER_SCOPE_MISMATCH,
-                "certified source-universe capacities cannot close the master rows",
-            )
-    if any(quotas.values()) or len(allocations) != len(master_rows):
+    resolve_st12e_value_policy_refs(canonical_identities)
+    upstream_universes, universe_refs = (
+        build_upstream_source_universe_registry(master_rows)
+    )
+    del upstream_universes
+    _, st12e_universe_refs = build_st12e_certified_source_universe_registry()
+    canonical_source_ids = {
+        source_id
+        for _, _, source_ids in master_rows
+        for source_id in source_ids
+    }
+    if set(identity_map.bindings) != canonical_source_ids:
         raise AuthorityDeniedError(
-            ReasonCode.PARAMETER_SCOPE_MISMATCH,
-            "full parameter-to-agent universe does not match certified counts",
+            ReasonCode.SOURCE_AGENT_ID_UNMAPPED,
+            "identity compatibility map does not cover the exact source universe",
         )
 
     output: list[AgentParameterScopeViewV1] = []
-    for parameter_id, symbol, upstream_agents in master_rows:
-        universe_id = allocations[parameter_id]
-        source_agent_ids = SOURCE_UNIVERSE_DEFINITIONS[universe_id][0]
-        exact_e_binding = parameter_id in fixed
-        principals = (
-            tuple(
+    for parameter_id, symbol, upstream_source_ids in master_rows:
+        lineage_bindings = tuple(
+            identity_map.describe_for_lineage(source_id)
+            for source_id in upstream_source_ids
+        )
+        mapped_bindings = tuple(
+            binding
+            for binding in lineage_bindings
+            if binding.mapping_type is not AgentIdentityMappingTypeV1.UNMAPPED
+        )
+        unmapped_bindings = tuple(
+            binding
+            for binding in lineage_bindings
+            if binding.mapping_type is AgentIdentityMappingTypeV1.UNMAPPED
+        )
+        mapped_refs = tuple(
+            f"ST12E_IDENTITY::{binding.source_agent_id}"
+            for binding in mapped_bindings
+        ) or (EXPLICIT_ABSENCE,)
+        unmapped_refs = tuple(
+            f"ST12E_IDENTITY::{binding.source_agent_id}"
+            for binding in unmapped_bindings
+        ) or (EXPLICIT_ABSENCE,)
+        mapped_principals = tuple(
+            dict.fromkeys(
+                principal
+                for binding in mapped_bindings
+                for principal in binding.current_principal_refs
+            )
+        )
+        principal_refs_or_gap = (
+            *mapped_principals,
+            *(
+                f"IDENTITY_GAP::{binding.source_agent_id}"
+                for binding in unmapped_bindings
+            ),
+        ) or (EXPLICIT_ABSENCE,)
+        e_binding = ST12E_PARAMETER_CAPABILITY_BINDINGS.get(parameter_id)
+        if e_binding is None:
+            st12e_state = ST12E_BINDING_OUTSIDE_SCOPE
+            st12e_capability_ref = EXPLICIT_ABSENCE
+            st12e_universe_ref = EXPLICIT_ABSENCE
+            st12e_principals = (EXPLICIT_ABSENCE,)
+            terminal_route = "ST12E_CAPABILITY_BINDING_NOT_APPLICABLE"
+        else:
+            certified_bindings = tuple(
+                identity_map.require_current_authority_mapping(source_id)
+                for source_id in e_binding.certified_source_agent_ids
+            )
+            st12e_principals = tuple(
                 dict.fromkeys(
                     principal
-                    for source_id in source_agent_ids
-                    for principal in identity_map.resolve(
-                        source_id
-                    ).current_principal_refs
+                    for binding in certified_bindings
+                    for principal in binding.current_principal_refs
                 )
             )
-            if exact_e_binding
-            else (PARAMETER_MAPPING_BLOCKER_REF,)
-        )
+            st12e_state = ST12E_BINDING_EXACT
+            st12e_capability_ref = e_binding.capability_policy_ref
+            st12e_universe_ref = st12e_universe_refs[
+                e_binding.certified_source_agent_ids
+            ]
+            terminal_route = "NO_EFFECT_QKU_REQUEST_OR_TYPED_DENIAL"
+
+        upstream_universe_ref = universe_refs[upstream_source_ids]
         output.append(
             AgentParameterScopeViewV1(
                 parameter_id=parameter_id,
                 parameter_symbol=symbol,
-                source_universe_id=universe_id,
-                source_agent_ids=source_agent_ids,
-                current_principal_refs_or_gap=principals,
-                capability_policy_ref=f"ST12E_CAPABILITY_POLICY::{universe_id}",
+                upstream_source_universe_ref=upstream_universe_ref,
+                upstream_identity_mapping_state=(
+                    UPSTREAM_IDENTITY_CROSSWALK_REQUIRED
+                    if unmapped_bindings
+                    else UPSTREAM_IDENTITY_FULLY_MAPPED
+                ),
+                mapped_compatibility_refs=mapped_refs,
+                unmapped_compatibility_refs=unmapped_refs,
+                current_principal_refs_or_exact_gap=principal_refs_or_gap,
                 value_policy_ref=(
                     "QKUComputationControlPlaneV1."
                     f"ComputationParameterPolicyV1::{parameter_id}"
                 ),
-                lifecycle_state="CURRENT_NORMALIZED_SOURCE_SCOPE",
+                st12e_binding_state=st12e_state,
+                st12e_capability_binding_ref_or_explicit_absence=(
+                    st12e_capability_ref
+                ),
+                st12e_certified_source_universe_ref_or_explicit_absence=(
+                    st12e_universe_ref
+                ),
+                st12e_current_principal_refs_or_explicit_absence=(
+                    st12e_principals
+                ),
+                lifecycle_state="CURRENT_EXACT_UPSTREAM_LINEAGE",
                 timing_state="BUILD_TIME_FROZEN_TYPED_SNAPSHOT",
                 downstream_consumer_refs=(
                     "AgentCapabilityResolverV1",
                     "QKUComputationControlPlaneV1",
                 ),
                 validator_ref=CENTRAL_VALIDATOR_REF,
-                terminal_route=(
-                    "NO_EFFECT_QKU_REQUEST_OR_TYPED_DENIAL"
-                    if exact_e_binding
-                    else "SOURCE_UNIVERSE_PER_ROW_CURRENTIZATION_REVIEW_REQUIRED"
-                ),
-                upstream_source_agent_ids=upstream_agents,
-                normalization_basis=(
-                    "EXACT_E_BINDING"
-                    if exact_e_binding
-                    else "CERTIFIED_AGGREGATE_CAPACITY_PROJECTION_ONLY_NOT_PER_ROW_AUTHORITY"
-                ),
-                mapping_state=(
-                    PARAMETER_MAPPING_EXACT
-                    if exact_e_binding
-                    else PARAMETER_MAPPING_BLOCKED
-                ),
+                terminal_route=terminal_route,
                 semantic_owner="ComputationParameterPolicyV1",
                 implementation_owner="AgentCapabilityResolverV1",
                 producer_ref=(
@@ -1428,11 +1626,20 @@ def build_parameter_scope_projection(
                     CURRENT_DUTY_REF,
                     f"{AGENT_ORCH_PREFIX}/perm_scope.jsonl",
                 ),
-                upstream_row_or_value_refs=(parameter_id,),
-                current_principal_duty_policy_refs=(
-                    *principals,
-                    f"{AGENT_ORCH_PREFIX}/duty_map.jsonl",
-                    f"ST12E_CAPABILITY_POLICY::{universe_id}",
+                upstream_row_or_value_refs=(
+                    parameter_id,
+                    upstream_universe_ref,
+                ),
+                current_principal_duty_policy_refs=tuple(
+                    dict.fromkeys(
+                        (
+                            *mapped_refs,
+                            *unmapped_refs,
+                            *st12e_principals,
+                            f"{AGENT_ORCH_PREFIX}/duty_map.jsonl",
+                            st12e_capability_ref,
+                        )
+                    )
                 ),
             )
         )
@@ -1485,94 +1692,61 @@ class AgentCapabilityPolicyStoreV1:
             .splitlines()
             if line.strip()
         )
-        scope_rows = tuple(
+        scope_payloads = tuple(
             json.loads(line)
             for line in (artifact_dir / "parameter_scope.jsonl")
             .read_text(encoding="utf-8")
             .splitlines()
             if line.strip()
         )
+        master_plan_text = (root / MASTER_PARAMETER_SOURCE_REF).read_text(
+            encoding="utf-8"
+        )
+        master_rows = canonical_master_parameter_rows(master_plan_text)
+        canonical_source_ids = canonical_source_agent_ids(master_plan_text)
+        canonical_role_labels = canonical_source_role_labels(master_plan_text)
+        canonical_parameter_identities = canonical_parameter_identity_registry(
+            master_plan_text
+        )
+        resolve_st12e_value_policy_refs(canonical_parameter_identities)
+        upstream_universes, _ = build_upstream_source_universe_registry(
+            master_rows
+        )
+        st12e_universes, st12e_universe_refs = (
+            build_st12e_certified_source_universe_registry()
+        )
+
         orch_snapshot = AgentOrchService(repo_root=root).load_policy_snapshot()
-        identity_map = build_identity_compatibility_map(orch_snapshot)
+        identity_map = build_identity_compatibility_map(
+            orch_snapshot,
+            source_agent_ids=canonical_source_ids,
+            source_role_labels=canonical_role_labels,
+        )
+        expected_scope_rows = build_parameter_scope_projection(
+            master_plan_text=master_plan_text,
+            identity_map=identity_map,
+        )
+        expected_scope_payloads = {
+            row.parameter_id: _jsonable(
+                {
+                    name: getattr(row, name)
+                    for name in row.__dataclass_fields__
+                }
+            )
+            for row in expected_scope_rows
+        }
+        if {
+            str(row.get("parameter_id") or ""): row
+            for row in scope_payloads
+        } != expected_scope_payloads:
+            raise AuthorityDeniedError(
+                ReasonCode.PARAMETER_SCOPE_MISMATCH,
+                "generated parameter lineage differs from the canonical source rows",
+            )
         scope = {
-            str(row["parameter_id"]): AgentParameterScopeViewV1(
-                parameter_id=str(row["parameter_id"]),
-                parameter_symbol=str(row["parameter_symbol"]),
-                source_universe_id=str(row["source_universe_id"]),
-                source_agent_ids=tuple(row["source_agent_ids"]),
-                current_principal_refs_or_gap=tuple(
-                    row["current_principal_refs_or_gap"]
-                ),
-                capability_policy_ref=str(row["capability_policy_ref"]),
-                value_policy_ref=str(row["value_policy_ref"]),
-                lifecycle_state=str(row["lifecycle_state"]),
-                timing_state=str(row["timing_state"]),
-                downstream_consumer_refs=tuple(
-                    row["downstream_consumer_refs"]
-                ),
-                validator_ref=str(row["validator_ref"]),
-                terminal_route=str(row["terminal_route"]),
-                upstream_source_agent_ids=tuple(
-                    row["upstream_source_agent_ids"]
-                ),
-                normalization_basis=str(row["normalization_basis"]),
-                mapping_state=str(row["mapping_state"]),
-                semantic_owner=str(row["semantic_owner"]),
-                implementation_owner=str(row["implementation_owner"]),
-                producer_ref=str(row["producer_ref"]),
-                upstream_artifact_refs=tuple(
-                    row["upstream_artifact_refs"]
-                ),
-                upstream_row_or_value_refs=tuple(
-                    row["upstream_row_or_value_refs"]
-                ),
-                current_principal_duty_policy_refs=tuple(
-                    row["current_principal_duty_policy_refs"]
-                ),
-                activation_state=str(row["activation_state"]),
-            )
-            for row in scope_rows
+            row.parameter_id: row for row in expected_scope_rows
         }
-        task_rows = {
-            str(row["task_id"]): row
-            for row in orch_snapshot.task_envelope_rows
-        }
-        receipt_refs = {
-            str(row["candidate_id"]): str(row["row_id"])
-            for row in orch_snapshot.decision_receipt_rows
-        }
-        receipt_rows = {
-            str(row["row_id"]): row
-            for row in orch_snapshot.decision_receipt_rows
-        }
-        owner_action_ids = current_owner_action_ids()
-        policy_row_ids = tuple(str(row.get("row_id") or "") for row in policy_rows)
-        scope_mapping_exact = {
-            parameter_id
-            for parameter_id, row in scope.items()
-            if row.mapping_state == PARAMETER_MAPPING_EXACT
-        }
-        blocked_scope_is_closed = all(
-            row.mapping_state == PARAMETER_MAPPING_EXACT
-            or (
-                row.mapping_state == PARAMETER_MAPPING_BLOCKED
-                and row.current_principal_refs_or_gap
-                == (PARAMETER_MAPPING_BLOCKER_REF,)
-                and row.terminal_route
-                == "SOURCE_UNIVERSE_PER_ROW_CURRENTIZATION_REVIEW_REQUIRED"
-            )
-            for row in scope.values()
-        )
-        receipt_rows_are_no_effect = all(
-            row.get("object_type") == "AgentDecisionReceiptV1"
-            and row.get("object_version") == orch_snapshot.manifest_version
-            and row.get("runtime_side_effect_allowed") is False
-            and row.get("source_truth_created") is False
-            and row.get("live_execution_created") is False
-            and row.get("order_submission_created") is False
-            and row.get("fake_receipt_created") is False
-            for row in orch_snapshot.decision_receipt_rows
-        )
+
         control_rows = tuple(
             row for row in policy_rows if row.get("row_type") == "CONTROL"
         )
@@ -1586,6 +1760,78 @@ class AgentCapabilityPolicyStoreV1:
             for row in policy_rows
             if row.get("row_type") == "IDENTITY_COMPATIBILITY"
         )
+        generated_identity_rows = {
+            str(row.get("source_agent_id") or ""): row
+            for row in identity_rows
+        }
+        identity_field_names = tuple(AgentPrincipalBindingV1.__dataclass_fields__)
+        identity_rows_match = set(generated_identity_rows) == set(
+            identity_map.bindings
+        ) and all(
+            all(
+                generated_identity_rows[source_id].get(name)
+                == _jsonable(getattr(binding, name))
+                for name in identity_field_names
+            )
+            for source_id, binding in identity_map.bindings.items()
+        )
+
+        forbidden_value_body_fields = {
+            "raw",
+            "day1_seed_or_resolution_rule",
+            "reference_range_or_structural_constraint",
+            "bounded_search_space_or_fit_constraint",
+            "unit_or_basis",
+            "precision_and_rounding_policy",
+            "runtime_resolution_procedure",
+            "fallback_behavior_when_value_unavailable",
+            "value_source_class",
+            "source_state_refs",
+        }
+        generated_binding_rows = {
+            str(row.get("parameter_id") or ""): row
+            for row in binding_rows
+        }
+        bindings_are_reference_only = set(generated_binding_rows) == set(
+            ST12E_PARAMETER_CAPABILITY_BINDINGS
+        ) and all(
+            not forbidden_value_body_fields.intersection(row)
+            and row.get("parameter_symbol") == binding.parameter_symbol
+            and row.get("certified_source_universe_ref")
+            == st12e_universe_refs[binding.certified_source_agent_ids]
+            and row.get("value_policy_ref") == binding.value_policy_ref
+            and row.get("capability_policy_ref")
+            == binding.capability_policy_ref
+            and row.get("st12e_binding_state") == ST12E_BINDING_EXACT
+            for parameter_id, binding in ST12E_PARAMETER_CAPABILITY_BINDINGS.items()
+            for row in (generated_binding_rows.get(parameter_id, {}),)
+        )
+
+        task_rows = {
+            str(row["task_id"]): row
+            for row in orch_snapshot.task_envelope_rows
+        }
+        receipt_refs = {
+            str(row["candidate_id"]): str(row["row_id"])
+            for row in orch_snapshot.decision_receipt_rows
+        }
+        receipt_rows = {
+            str(row["row_id"]): row
+            for row in orch_snapshot.decision_receipt_rows
+        }
+        receipt_rows_are_no_effect = all(
+            row.get("object_type") == "AgentDecisionReceiptV1"
+            and row.get("object_version") == orch_snapshot.manifest_version
+            and row.get("runtime_side_effect_allowed") is False
+            and row.get("source_truth_created") is False
+            and row.get("live_execution_created") is False
+            and row.get("order_submission_created") is False
+            and row.get("fake_receipt_created") is False
+            for row in orch_snapshot.decision_receipt_rows
+        )
+
+        owner_action_ids = current_owner_action_ids()
+        policy_row_ids = tuple(str(row.get("row_id") or "") for row in policy_rows)
         reused_math = tuple(
             manifest.get("reused_math_oracle_vector_refs") or ()
         )
@@ -1604,22 +1850,48 @@ class AgentCapabilityPolicyStoreV1:
             "validation_commands": len(
                 tuple(manifest.get("validation_commands") or ())
             ),
-            "parameter_source_universe": len(scope_rows),
+            "parameter_source_universe": len(scope),
         }
-        source_universe_definitions = manifest.get(
-            "source_universe_definitions"
-        )
-        expected_scope_distribution = (
-            {
-                str(universe_id): specification.get("parameter_count")
-                for universe_id, specification in source_universe_definitions.items()
-                if isinstance(specification, Mapping)
+        expected_universe_payload = {
+            universe_ref: {
+                "source_agent_ids": list(specification["source_agent_ids"]),
+                "parameter_count": specification["parameter_count"],
             }
-            if isinstance(source_universe_definitions, Mapping)
-            else {}
+            for universe_ref, specification in upstream_universes.items()
+        }
+        expected_st12e_universe_payload = {
+            universe_ref: {
+                "source_agent_ids": list(specification["source_agent_ids"]),
+                "parameter_count": specification["parameter_count"],
+                "authority_created": False,
+            }
+            for universe_ref, specification in st12e_universes.items()
+        }
+        exact_mappings = sum(
+            binding.mapping_type is not AgentIdentityMappingTypeV1.UNMAPPED
+            for binding in identity_map.bindings.values()
         )
-        scope_distribution = Counter(
-            row.source_universe_id for row in scope.values()
+        unmapped_mappings = len(identity_map.bindings) - exact_mappings
+        fully_mapped_scope = sum(
+            row.upstream_identity_mapping_state
+            == UPSTREAM_IDENTITY_FULLY_MAPPED
+            for row in scope.values()
+        )
+        crosswalk_required_scope = len(scope) - fully_mapped_scope
+        exact_e_scope = tuple(
+            row
+            for row in scope.values()
+            if row.st12e_binding_state == ST12E_BINDING_EXACT
+        )
+        outside_e_scope = tuple(
+            row
+            for row in scope.values()
+            if row.st12e_binding_state == ST12E_BINDING_OUTSIDE_SCOPE
+        )
+        e_scope_with_gap = sum(
+            row.upstream_identity_mapping_state
+            == UPSTREAM_IDENTITY_CROSSWALK_REQUIRED
+            for row in exact_e_scope
         )
         required_lineage_fields = {
             "semantic_owner",
@@ -1644,44 +1916,58 @@ class AgentCapabilityPolicyStoreV1:
             name: getattr(TRANCHE_A_AUTHORITY, name)
             for name in TRANCHE_A_AUTHORITY.__dataclass_fields__
         }
+        manifest_counts_match = all(
+            manifest.get(field) == value
+            for field, value in {
+                "source_identity_row_count": len(identity_map.bindings),
+                "exact_mapping_count": exact_mappings,
+                "unmapped_mapping_count": unmapped_mappings,
+                "parameter_scope_row_count": len(scope),
+                "exact_upstream_source_universe_count": len(upstream_universes),
+                "exact_upstream_source_agent_id_count": len(canonical_source_ids),
+                "fully_mapped_upstream_row_count": fully_mapped_scope,
+                "crosswalk_required_upstream_row_count": crosswalk_required_scope,
+                "exact_st12e_binding_count": len(exact_e_scope),
+                "outside_st12e_binding_scope_count": len(outside_e_scope),
+                "exact_st12e_certified_mapping_count": len(exact_e_scope),
+                "st12e_binding_with_unmapped_certified_id_count": 0,
+                "st12e_rows_with_upstream_crosswalk_gap": e_scope_with_gap,
+                "st12e_rows_with_fully_mapped_upstream_lineage": (
+                    len(exact_e_scope) - e_scope_with_gap
+                ),
+                "quota_reassignment_count": 0,
+                "nearest_universe_assignment_count": 0,
+                "source_set_rewrite_count": 0,
+                "value_policy_ref_resolution_count": len(binding_rows),
+                "duplicated_value_body_count": 0,
+            }.items()
+        )
         if (
             manifest.get("policy_version") != POLICY_VERSION
             or manifest.get("activation_state") != ACTIVATION_STATE
             or manifest.get("runtime_effect_authorized") is not False
-            or manifest.get("registry_version")
-            != orch_snapshot.manifest_version
-            or tuple(manifest.get("owner_action_ids", ()))
-            != owner_action_ids
+            or manifest.get("registry_version") != orch_snapshot.manifest_version
+            or tuple(manifest.get("owner_action_ids", ())) != owner_action_ids
             or manifest.get("policy_row_count") != len(policy_rows)
-            or manifest.get("parameter_scope_row_count") != len(scope_rows)
             or len(policy_row_ids) != len(set(policy_row_ids))
             or not all(policy_row_ids)
             or manifest.get("counts") != derived_counts
             or len(control_rows) + len(binding_rows) + len(identity_rows)
             != len(policy_rows)
-            or len(identity_rows) != len(identity_map.bindings)
-            or {
-                str(row.get("parameter_id") or "") for row in binding_rows
-            }
-            != set(ST12E_PARAMETER_CAPABILITY_BINDINGS)
-            or len(scope) != len(scope_rows)
+            or not identity_rows_match
+            or not bindings_are_reference_only
+            or not manifest_counts_match
+            or manifest.get("exact_upstream_source_universes")
+            != expected_universe_payload
+            or manifest.get("st12e_certified_source_universes")
+            != expected_st12e_universe_payload
+            or "parameter_scope_distribution_is_aggregate_only" in manifest
             or len(task_rows) != len(orch_snapshot.task_envelope_rows)
             or len(receipt_refs) != len(orch_snapshot.decision_receipt_rows)
             or len(receipt_rows) != len(orch_snapshot.decision_receipt_rows)
-            or scope_mapping_exact
-            != set(ST12E_PARAMETER_CAPABILITY_BINDINGS)
-            or not blocked_scope_is_closed
             or not receipt_rows_are_no_effect
-            or dict(scope_distribution) != expected_scope_distribution
-            or manifest.get("parameter_scope_eligible_count")
-            != len(scope_mapping_exact)
-            or manifest.get("parameter_scope_blocker_count")
-            != len(scope) - len(scope_mapping_exact)
-            or manifest.get("parameter_scope_distribution_is_aggregate_only")
-            is not True
             or not policy_rows_are_closed
-            or manifest.get("no_effect_authority_flags")
-            != authority_flag_view
+            or manifest.get("no_effect_authority_flags") != authority_flag_view
             or manifest.get("no_effect_authority_closed") is not True
             or manifest.get("qku_formula_mutation_authorized") is not False
             or manifest.get(
@@ -1705,10 +1991,7 @@ class AgentCapabilityPolicyStoreV1:
             registry_version=orch_snapshot.manifest_version,
             identity_map=identity_map,
             policy_rows=MappingProxyType(
-                {
-                    str(row["row_id"]): _freeze(row)
-                    for row in policy_rows
-                }
+                {str(row["row_id"]): _freeze(row) for row in policy_rows}
             ),
             parameter_scope_rows=MappingProxyType(scope),
             agent_orch_task_rows=MappingProxyType(task_rows),
@@ -2084,13 +2367,18 @@ class AgentCapabilityResolverV1:
                     parameter_id
                 )
             )
+            capability_binding = ST12E_PARAMETER_CAPABILITY_BINDINGS.get(
+                parameter_id
+            )
             if (
                 parameter_scope is None
-                or parameter_scope.mapping_state != PARAMETER_MAPPING_EXACT
+                or capability_binding is None
+                or parameter_scope.st12e_binding_state
+                != ST12E_BINDING_EXACT
                 or not set(bundle.certified_source_agent_ids)
-                <= set(parameter_scope.source_agent_ids)
+                <= set(capability_binding.certified_source_agent_ids)
                 or bundle.current_agent_id
-                not in parameter_scope.current_principal_refs_or_gap
+                not in parameter_scope.st12e_current_principal_refs_or_explicit_absence
             ):
                 reasons.append(ReasonCode.PARAMETER_SCOPE_MISMATCH)
         if envelope["policy_version"] != POLICY_VERSION:
@@ -2529,13 +2817,6 @@ class AgentCapabilityResolverV1:
                 getattr(request, "idempotency_key", "")
             ),
         )
-        if not decision.eligible:
-            reason = (
-                decision.reason_codes[0]
-                if decision.reason_codes
-                else ReasonCode.CAPABILITY_DENIED
-            )
-            raise AuthorityDeniedError(reason, decision.decision_id)
         return decision
 
 
@@ -2544,48 +2825,72 @@ def build_generated_policy_rows(
     identity_map: AgentIdentityCompatibilityMapV1,
 ) -> tuple[dict[str, object], ...]:
     rows: list[dict[str, object]] = []
+    _, st12e_universe_refs = build_st12e_certified_source_universe_registry()
     for binding in identity_map.bindings.values():
-        rows.append(
-            {
-                "row_id": f"ST12E_IDENTITY::{binding.source_agent_id}",
-                "row_type": "IDENTITY_COMPATIBILITY",
-                **_jsonable(binding.__dict__ if hasattr(binding, "__dict__") else {
-                    name: getattr(binding, name)
-                    for name in binding.__dataclass_fields__
-                }),
-                "semantic_owner": "AGENT-ORCH1",
-                "implementation_owner": "AgentCapabilityResolverV1",
-                "producer_ref": CURRENT_ROSTER_REF,
-                "upstream_artifact_refs": [CURRENT_ROSTER_REF, CURRENT_DUTY_REF],
-                "upstream_row_or_value_refs": list(binding.evidence_refs),
-                "current_principal_duty_policy_refs": [
+        current_refs_or_gap = tuple(
+            dict.fromkeys(
+                (
                     *binding.current_principal_refs,
                     *binding.current_role_refs,
                     *binding.current_duty_refs,
                     *binding.intersection_scope,
+                )
+            )
+        ) or (f"IDENTITY_GAP::{binding.source_agent_id}",)
+        rows.append(
+            {
+                "row_id": f"ST12E_IDENTITY::{binding.source_agent_id}",
+                "row_type": "IDENTITY_COMPATIBILITY",
+                **_jsonable(
+                    {
+                        name: getattr(binding, name)
+                        for name in binding.__dataclass_fields__
+                    }
+                ),
+                "semantic_owner": "AgentIdentityCompatibilityMapV1",
+                "implementation_owner": "AgentCapabilityResolverV1",
+                "producer_ref": MASTER_PARAMETER_SOURCE_REF,
+                "upstream_artifact_refs": [
+                    MASTER_PARAMETER_SOURCE_REF,
+                    CURRENT_ROSTER_REF,
+                    CURRENT_DUTY_REF,
                 ],
+                "upstream_row_or_value_refs": list(binding.evidence_refs),
+                "current_principal_duty_policy_refs": list(
+                    current_refs_or_gap
+                ),
                 "downstream_consumer_refs": ["AgentCapabilityResolverV1"],
-                "lifecycle_state": "CURRENT_EXACT_SCOPED_MAPPING",
+                "lifecycle_state": (
+                    "CURRENT_EXACT_SCOPED_MAPPING"
+                    if binding.mapping_type
+                    is not AgentIdentityMappingTypeV1.UNMAPPED
+                    else "CURRENT_TYPED_UNMAPPED_LINEAGE"
+                ),
                 "timing_or_snapshot_state": "BUILD_TIME_FROZEN",
                 "activation_state": ACTIVATION_STATE,
-                "terminal_route": "NO_EFFECT_ELIGIBILITY_OR_TYPED_DENIAL",
+                "terminal_route": binding.terminal_mapping_state,
                 "validator_ref": CENTRAL_VALIDATOR_REF,
             }
         )
     for row in control_rows:
-        copied = _jsonable(row)
-        copied.update(
+        rows.append(
             {
                 "row_id": str(row["closure_id"]),
                 "row_type": "CONTROL",
-                "semantic_owner": "QKUComputationControlPlaneV1",
+                "closure_id": str(row["closure_id"]),
+                "control_id": str(row["control_id"]),
+                "domain": str(row["domain"]),
+                "control_slug": str(row["control_slug"]),
+                "predicate_group": str(row["predicate_group"]),
+                "semantic_owner": str(row["semantic_owner"]),
+                "validator_owner": str(row["validator_owner"]),
                 "implementation_owner": "AgentCapabilityResolverV1",
-                "producer_ref": "ST12E_AUDITED_APPENDIX_A",
-                "upstream_artifact_refs": list(row["canonical_existing_owner_refs"]),
+                "producer_ref": "ST12E_COMPACT_CLOSURE_REGISTRY",
+                "upstream_artifact_refs": [str(row["semantic_owner"])],
                 "upstream_row_or_value_refs": [str(row["control_id"])],
                 "current_principal_duty_policy_refs": [
                     "AgentCapabilityResolverV1",
-                    *list(row["canonical_existing_owner_refs"]),
+                    str(row["semantic_owner"]),
                 ],
                 "downstream_consumer_refs": [
                     "AgentCapabilityResolverV1",
@@ -2594,11 +2899,13 @@ def build_generated_policy_rows(
                 "lifecycle_state": "CURRENT_POLICY_CONTROL",
                 "timing_or_snapshot_state": "BUILD_TIME_FROZEN",
                 "activation_state": ACTIVATION_STATE,
-                "terminal_route": str(row["fallback"]),
+                "terminal_route": (
+                    "VALIDATE_NO_EFFECT_PREDICATE::"
+                    f"{row['predicate_group']}"
+                ),
                 "validator_ref": CENTRAL_VALIDATOR_REF,
             }
         )
-        rows.append(copied)
     for binding in ST12E_PARAMETER_CAPABILITY_BINDINGS.values():
         current_identity_refs = tuple(
             dict.fromkeys(
@@ -2613,23 +2920,30 @@ def build_generated_policy_rows(
                 )
             )
         )
-        copied = _jsonable(binding.raw)
-        copied.update(
+        rows.append(
             {
                 "row_id": f"ST12E_BINDING::{binding.parameter_id}",
                 "row_type": "PARAMETER_CAPABILITY_BINDING",
+                "parameter_id": binding.parameter_id,
+                "parameter_symbol": binding.parameter_symbol,
+                "certified_source_universe_ref": st12e_universe_refs[
+                    binding.certified_source_agent_ids
+                ],
+                "value_policy_ref": binding.value_policy_ref,
+                "capability_policy_ref": binding.capability_policy_ref,
+                "st12e_binding_state": binding.st12e_binding_state,
                 "semantic_owner": "ComputationParameterPolicyV1",
                 "implementation_owner": "AgentCapabilityResolverV1",
-                "producer_ref": "ST12E_AUDITED_APPENDIX_E",
-                "upstream_artifact_refs": list(
-                    binding.raw["source_state_refs"]
-                ),
-                "upstream_row_or_value_refs": [binding.parameter_id],
+                "producer_ref": "ST12E_COMPACT_CAPABILITY_BINDING_REGISTRY",
+                "upstream_artifact_refs": [MASTER_PARAMETER_SOURCE_REF],
+                "upstream_row_or_value_refs": [
+                    binding.parameter_id,
+                    binding.value_policy_ref,
+                ],
                 "current_principal_duty_policy_refs": [
-                    *binding.certified_source_agent_ids,
                     *current_identity_refs,
-                    str(binding.raw["capability_binding_owner"]),
-                    str(binding.raw["underlying_value_semantics_owner"]),
+                    binding.capability_policy_ref,
+                    binding.value_policy_ref,
                 ],
                 "downstream_consumer_refs": [
                     "AgentCapabilityResolverV1",
@@ -2642,7 +2956,6 @@ def build_generated_policy_rows(
                 "validator_ref": CENTRAL_VALIDATOR_REF,
             }
         )
-        rows.append(copied)
     return tuple(sorted(rows, key=lambda row: str(row["row_id"])))
 
 
