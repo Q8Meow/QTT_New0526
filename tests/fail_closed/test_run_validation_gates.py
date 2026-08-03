@@ -3013,6 +3013,8 @@ def _expected_commands(
                 "source",
                 "accounting",
                 "execution",
+                "agent",
+                "llm",
             )
         ],
         [
@@ -3049,6 +3051,14 @@ def _expected_commands(
                 Path("tools")
                 / "independent_validate_qku_computation_control_plane_execution.py"
             ),
+        ],
+        *[
+            [python_executable, str(Path("tools") / script_name)]
+            for script_name in (
+                "independent_validate_qku_computation_control_plane_agent.py",
+                "independent_validate_qku_computation_control_plane_llm.py",
+                "independent_validate_qku_computation_control_plane_security.py",
+            )
         ],
         [
             python_executable,
@@ -3139,7 +3149,7 @@ def test_runner_registers_qku_primary_and_independent_systems():
             for part in command
         )
     ]
-    assert [command[-1] for command in qku_commands[:7]] == [
+    assert [command[-1] for command in qku_commands[:9]] == [
         "architecture",
         "operations",
         "quantum",
@@ -3147,13 +3157,18 @@ def test_runner_registers_qku_primary_and_independent_systems():
         "source",
         "accounting",
         "execution",
+        "agent",
+        "llm",
     ]
-    assert {Path(command[1]).name for command in qku_commands[7:]} == {
+    assert {Path(command[1]).name for command in qku_commands[9:]} == {
         "independent_validate_qku_computation_control_plane.py",
         "independent_validate_qku_computation_control_plane_latency.py",
         "independent_validate_qku_computation_control_plane_model_risk.py",
         "independent_validate_qku_computation_control_plane_accounting.py",
         "independent_validate_qku_computation_control_plane_execution.py",
+        "independent_validate_qku_computation_control_plane_agent.py",
+        "independent_validate_qku_computation_control_plane_llm.py",
+        "independent_validate_qku_computation_control_plane_security.py",
     }
 
 

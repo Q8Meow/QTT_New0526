@@ -9,6 +9,10 @@ from pathlib import Path
 import sys
 import unicodedata
 
+from independent_validate_qku_computation_control_plane_e import (
+    validate_domain as validate_st12e_domain,
+)
+
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 PACKAGE = (
@@ -254,6 +258,7 @@ def _helper_enforces_exact_clock_base(
 
 def main() -> int:
     failures: list[str] = []
+    failures.extend(validate_st12e_domain("security"))
     authority_tree: ast.Module | None = None
     for path in sorted(PACKAGE.glob("*.py")):
         tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))

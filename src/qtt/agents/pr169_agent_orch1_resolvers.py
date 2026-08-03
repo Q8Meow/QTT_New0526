@@ -3,7 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 import json
 from pathlib import Path
-from typing import Any, Iterable
+from types import MappingProxyType
+from typing import Any, Iterable, Mapping
 
 
 GENERATED_PREFIX = Path("docs/master_plan/generated/pr169_agent_orch1")
@@ -90,6 +91,20 @@ JSONL_FILES = frozenset(
     }
 )
 
+POLICY_JSONL_FILES = (
+    "role_map.jsonl",
+    "duty_map.jsonl",
+    "perm_scope.jsonl",
+    "task_env.jsonl",
+    "capability_routes.jsonl",
+    "decision_receipts.jsonl",
+)
+
+PR165_POLICY_REPORTS = (
+    Path("docs/master_plan/generated/PR165_D2_AgentRosterDiscoveryAudit.report.json"),
+    Path("docs/master_plan/generated/PR165_D2_AgentDutySourceCrosswalk.report.json"),
+)
+
 
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[3]
@@ -104,6 +119,16 @@ def _read_jsonl(path: Path) -> tuple[dict[str, Any], ...]:
                 if isinstance(value, dict):
                     rows.append(value)
     return tuple(rows)
+
+
+def _freeze(value: Any) -> Any:
+    if isinstance(value, dict):
+        return MappingProxyType(
+            {str(key): _freeze(item) for key, item in sorted(value.items())}
+        )
+    if isinstance(value, list | tuple):
+        return tuple(_freeze(item) for item in value)
+    return value
 
 
 def _first(rows: Iterable[dict[str, Any]], key: str, value: str) -> dict[str, Any]:
@@ -217,22 +242,107 @@ class AgentHotpathPrepTaskV1:
     row: dict[str, Any]
 
 
+@dataclass(frozen=True)
+class AgentOrchPolicySnapshotV1:
+    """Frozen selected AGENT-ORCH1 policy views loaded once per service."""
+
+    manifest: Mapping[str, Any]
+    role_rows: tuple[Mapping[str, Any], ...]
+    duty_rows: tuple[Mapping[str, Any], ...]
+    permission_rows: tuple[Mapping[str, Any], ...]
+    task_envelope_rows: tuple[Mapping[str, Any], ...]
+    capability_route_rows: tuple[Mapping[str, Any], ...]
+    decision_receipt_rows: tuple[Mapping[str, Any], ...]
+    pr165_roster_rows: tuple[Mapping[str, Any], ...]
+    pr165_duty_source_rows: tuple[Mapping[str, Any], ...]
+
+    @property
+    def manifest_version(self) -> str:
+        return str(self.manifest.get("manifest_version") or "")
+
+
 class AgentOrchService:
     """Thin read API over AGENT-ORCH1 generated contract artifacts."""
 
     def __init__(self, artifact_dir: str | Path | None = None, repo_root: str | Path | None = None) -> None:
         root = Path(repo_root) if repo_root is not None else _repo_root()
+        self.repo_root = root.resolve()
         self.artifact_dir = Path(artifact_dir) if artifact_dir is not None else root / GENERATED_PREFIX
         if not self.artifact_dir.is_absolute():
             self.artifact_dir = root / self.artifact_dir
+        self._jsonl_cache: dict[str, tuple[dict[str, Any], ...]] = {}
+        self._manifest_cache: dict[str, Any] | None = None
+        self._report_cache: dict[Path, tuple[dict[str, Any], ...]] = {}
+        self._policy_snapshot_cache: AgentOrchPolicySnapshotV1 | None = None
 
     def _jsonl(self, file_name: str) -> tuple[dict[str, Any], ...]:
         if file_name not in JSONL_FILES:
             raise KeyError(file_name)
-        return _read_jsonl(self.artifact_dir / file_name)
+        if file_name not in self._jsonl_cache:
+            self._jsonl_cache[file_name] = _read_jsonl(
+                self.artifact_dir / file_name
+            )
+        return tuple(dict(row) for row in self._jsonl_cache[file_name])
 
     def load_manifest(self) -> dict[str, Any]:
-        return json.loads((self.artifact_dir / "manifest.json").read_text(encoding="utf-8"))
+        if self._manifest_cache is None:
+            value = json.loads(
+                (self.artifact_dir / "manifest.json").read_text(
+                    encoding="utf-8"
+                )
+            )
+            if not isinstance(value, dict):
+                raise TypeError("AGENT-ORCH1 manifest must be an object")
+            self._manifest_cache = value
+        return dict(self._manifest_cache)
+
+    def _report_rows(self, relative_path: Path) -> tuple[dict[str, Any], ...]:
+        if relative_path not in PR165_POLICY_REPORTS:
+            raise KeyError(str(relative_path))
+        if relative_path not in self._report_cache:
+            value = json.loads(
+                (self.repo_root / relative_path).read_text(encoding="utf-8")
+            )
+            if not isinstance(value, dict) or not isinstance(
+                value.get("records"), list
+            ):
+                raise TypeError(f"{relative_path} must own a records array")
+            rows = tuple(
+                row for row in value["records"] if isinstance(row, dict)
+            )
+            if len(rows) != len(value["records"]):
+                raise TypeError(f"{relative_path} contains a non-object row")
+            self._report_cache[relative_path] = rows
+        return tuple(dict(row) for row in self._report_cache[relative_path])
+
+    def load_policy_snapshot(self) -> AgentOrchPolicySnapshotV1:
+        """Load and freeze only the exact E admission views once."""
+
+        if self._policy_snapshot_cache is None:
+            selected = {
+                file_name: tuple(
+                    _freeze(row) for row in self._jsonl(file_name)
+                )
+                for file_name in POLICY_JSONL_FILES
+            }
+            self._policy_snapshot_cache = AgentOrchPolicySnapshotV1(
+                manifest=_freeze(self.load_manifest()),
+                role_rows=selected["role_map.jsonl"],
+                duty_rows=selected["duty_map.jsonl"],
+                permission_rows=selected["perm_scope.jsonl"],
+                task_envelope_rows=selected["task_env.jsonl"],
+                capability_route_rows=selected["capability_routes.jsonl"],
+                decision_receipt_rows=selected["decision_receipts.jsonl"],
+                pr165_roster_rows=tuple(
+                    _freeze(row)
+                    for row in self._report_rows(PR165_POLICY_REPORTS[0])
+                ),
+                pr165_duty_source_rows=tuple(
+                    _freeze(row)
+                    for row in self._report_rows(PR165_POLICY_REPORTS[1])
+                ),
+            )
+        return self._policy_snapshot_cache
 
     def list_dags(self) -> tuple[dict[str, Any], ...]:
         return self._jsonl("dag.jsonl")

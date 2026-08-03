@@ -28,6 +28,7 @@ from .implementation_registry import (
 )
 from .identity_adapter import RP5CIdentityAdapterV1
 from .persistence import PersistenceAdapterV1
+from .protocols import AgentCapabilityAdmissionProtocolV1
 from .input_resolver import (
     CanonicalOwnerPacketRegistryV1,
     FormulaInputResolverV1,
@@ -376,6 +377,16 @@ def _admit_computation_plan(
         )
 
 
+def _admit_agent_request(
+    service: "QKUComputationControlPlaneV1",
+    request: OperationRequestEnvelopeV1,
+) -> None:
+    """One optional E boundary without widening the public service roster."""
+
+    if service.agent_capability_resolver is not None:
+        service.agent_capability_resolver.admit_operation(request)
+
+
 @dataclass(frozen=True, slots=True)
 class QKUComputationControlPlaneV1:
     """One bounded service; it owns no provider, private state, LLM, or QPU."""
@@ -383,6 +394,7 @@ class QKUComputationControlPlaneV1:
     owner_registry: CanonicalOwnerPacketRegistryV1
     identity_adapter: RP5CIdentityAdapterV1 | None = None
     persistence_adapter: PersistenceAdapterV1 | None = None
+    agent_capability_resolver: AgentCapabilityAdmissionProtocolV1 | None = None
 
     def __post_init__(self) -> None:
         if not isinstance(
@@ -393,15 +405,22 @@ class QKUComputationControlPlaneV1:
         ) or (
             self.persistence_adapter is not None
             and not isinstance(self.persistence_adapter, PersistenceAdapterV1)
+        ) or (
+            self.agent_capability_resolver is not None
+            and not isinstance(
+                self.agent_capability_resolver,
+                AgentCapabilityAdmissionProtocolV1,
+            )
         ):
             raise ContractValidationError(
                 ReasonCode.INVALID_CONTRACT,
-                "service requires canonical packet plus optional typed identity/persistence adapters",
+                "service requires canonical packet plus optional typed identity/persistence/capability adapters",
             )
 
     def resolve_identity(
         self, request: ResolveIdentityRequestV1
     ) -> ResolveIdentityResponseV1:
+        _admit_agent_request(self, request)
         fields = {field.name: field.value for field in request.identity_query.fields}
         selectors = tuple(
             name
@@ -473,6 +492,7 @@ class QKUComputationControlPlaneV1:
     def resolve_contextual_computability(
         self, request: ResolveContextualComputabilityRequestV1
     ) -> ResolveContextualComputabilityResponseV1:
+        _admit_agent_request(self, request)
         context = request.context
         assert isinstance(context, ComputationExecutionContextV1)
         context_admission_blocker = None
@@ -538,6 +558,7 @@ class QKUComputationControlPlaneV1:
     def resolve_applicable_stack(
         self, request: ResolveApplicableStackRequestV1
     ) -> ResolveApplicableStackResponseV1:
+        _admit_agent_request(self, request)
         component_ids = tuple(request.required_launch_roles)
         try:
             context = request.context
@@ -593,6 +614,7 @@ class QKUComputationControlPlaneV1:
     def resolve_required_inputs(
         self, request: ResolveRequiredInputsRequestV1
     ) -> ResolveRequiredInputsResponseV1:
+        _admit_agent_request(self, request)
         names: list[str] = []
         packet_refs: list[str] = []
         receipt_refs: list[str] = []
@@ -656,6 +678,7 @@ class QKUComputationControlPlaneV1:
     def compute_component(
         self, request: ComputeComponentRequestV1
     ) -> ComputeComponentResponseV1:
+        _admit_agent_request(self, request)
         try:
             context = request.context
             assert isinstance(context, ComputationExecutionContextV1)
@@ -713,6 +736,7 @@ class QKUComputationControlPlaneV1:
     def compute_stack(
         self, request: ComputeStackRequestV1
     ) -> ComputeStackResponseV1:
+        _admit_agent_request(self, request)
         try:
             context = request.context
             assert isinstance(context, ComputationExecutionContextV1)
@@ -791,6 +815,7 @@ class QKUComputationControlPlaneV1:
     def compare_with_no_trade(
         self, request: CompareWithNoTradeRequestV1
     ) -> CompareWithNoTradeResponseV1:
+        _admit_agent_request(self, request)
         result = NoTradeComparisonV1(
             **_result_common(
                 request,
@@ -811,6 +836,7 @@ class QKUComputationControlPlaneV1:
     def evaluate_trade_plan(
         self, request: EvaluateTradePlanRequestV1
     ) -> EvaluateTradePlanResponseV1:
+        _admit_agent_request(self, request)
         result = TradePlanEvaluationV1(
             **_result_common(
                 request,
@@ -832,6 +858,7 @@ class QKUComputationControlPlaneV1:
     def get_snapshot_view(
         self, request: GetSnapshotViewRequestV1
     ) -> GetSnapshotViewResponseV1:
+        _admit_agent_request(self, request)
         try:
             packet = self.owner_registry.packet_by_id(request.snapshot_id)
         except InputAuthorityError as exc:
@@ -872,6 +899,7 @@ class QKUComputationControlPlaneV1:
     def explain_resolution(
         self, request: ExplainResolutionRequestV1
     ) -> ExplainResolutionResponseV1:
+        _admit_agent_request(self, request)
         result = ResolutionExplanationV1(
             **_result_common(
                 request,
@@ -888,6 +916,7 @@ class QKUComputationControlPlaneV1:
     def submit_candidate_proposal(
         self, request: SubmitCandidateProposalRequestV1
     ) -> SubmitCandidateProposalResponseV1:
+        _admit_agent_request(self, request)
         result = CandidateProposalV1(
             **_result_common(
                 request,
@@ -904,6 +933,7 @@ class QKUComputationControlPlaneV1:
     def request_materialization_work_order(
         self, request: RequestMaterializationWorkOrderRequestV1
     ) -> RequestMaterializationWorkOrderResponseV1:
+        _admit_agent_request(self, request)
         result = MaterializationWorkOrderV1(
             **_result_common(
                 request,

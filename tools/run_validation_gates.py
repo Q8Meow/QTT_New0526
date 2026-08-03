@@ -5366,6 +5366,8 @@ def build_validation_commands(
                 "source",
                 "accounting",
                 "execution",
+                "agent",
+                "llm",
             )
         ],
         [
@@ -5402,6 +5404,14 @@ def build_validation_commands(
                 "tools",
                 "independent_validate_qku_computation_control_plane_execution.py",
             ),
+        ],
+        *[
+            [sys.executable, _path("tools", script_name)]
+            for script_name in (
+                "independent_validate_qku_computation_control_plane_agent.py",
+                "independent_validate_qku_computation_control_plane_llm.py",
+                "independent_validate_qku_computation_control_plane_security.py",
+            )
         ],
         [
             sys.executable,

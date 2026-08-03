@@ -197,10 +197,32 @@ from .parameter_policy import (
     ResolvedParameterV1,
     RuntimeParameterOwnerBindingV1,
     SourceClaimJustificationV1,
+    ST12E_PARAMETER_CAPABILITY_BINDINGS,
+    ST12EParameterCapabilityBindingV1,
     get_parameter_policy,
+)
+from .agent_policy import (
+    ACTIVATION_STATE as ST12E_ACTIVATION_STATE,
+    AgentBoundaryStateViewV1,
+    AgentCapabilityBundleV1,
+    AgentCapabilityDecisionStateV1,
+    AgentCapabilityDecisionV1,
+    AgentCapabilityPolicyRowV1,
+    AgentCapabilityPolicySnapshotV1,
+    AgentCapabilityPolicyStoreV1,
+    AgentCapabilityResolverV1,
+    AgentIdentityCompatibilityMapV1,
+    AgentIdentityMappingTypeV1,
+    AgentParameterScopeViewV1,
+    AgentPrincipalBindingV1,
+    AgentSafetyStateV1,
+    SOURCE_UNIVERSE_DEFINITIONS,
+    build_identity_compatibility_map,
+    build_parameter_scope_projection,
 )
 from .plugin_adapter import PR162EPluginAdapterV1, PluginFamilyViewV1
 from .protocols import (
+    AgentCapabilityAdmissionProtocolV1,
     AgentDagProjectionProtocolV1,
     ConfigurationBoundaryProtocolV1,
     ExistingOwnerProjectionAdapterV1,
@@ -208,9 +230,12 @@ from .protocols import (
     HealthBoundaryProtocolV1,
     OwnerProjectionViewV1,
     OwnerReadModelProjectionProtocolV1,
+    MemoryPriorProjectionProtocolV1,
+    OwnerActionSemanticProtocolV1,
     PretradeProjectionProtocolV1,
     ReadinessProjectionProtocolV1,
     ServiceBoundaryProtocolV1,
+    SafetyStateProjectionProtocolV1,
     SupervisionBoundaryProtocolV1,
 )
 from .quantum_adapter import (

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Aggregate exactly five bounded independent domain validators."""
+"""Aggregate bounded independent validators through their central owners."""
 
 from __future__ import annotations
 
@@ -10,7 +10,7 @@ import sys
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-DOMAINS = ("architecture", "operations", "quantum", "security", "source")
+DOMAINS = ("architecture", "operations", "quantum", "security", "source", "e")
 SUCCESS_MARKER = "QKU_COMPUTATION_CONTROL_PLANE_INDEPENDENTLY_VALIDATED"
 
 

@@ -63,6 +63,34 @@ class AgentDagProjectionProtocolV1(Protocol):
     def describe_agent_dag_route(self, qku_id: str) -> OperationContractV1: ...
 
 
+@runtime_checkable
+class AgentCapabilityAdmissionProtocolV1(Protocol):
+    """Typed no-effect admission hook; it does not grant runtime authority."""
+
+    def admit_operation(self, request: object) -> object: ...
+
+
+@runtime_checkable
+class SafetyStateProjectionProtocolV1(Protocol):
+    """Read-only safety-state view owned outside ST12-E."""
+
+    def describe_safety_state(self, context_ref: str) -> object: ...
+
+
+@runtime_checkable
+class MemoryPriorProjectionProtocolV1(Protocol):
+    """MEM1 condition-scoped prior view requiring current revalidation."""
+
+    def describe_memory_prior(self, context_ref: str) -> object: ...
+
+
+@runtime_checkable
+class OwnerActionSemanticProtocolV1(Protocol):
+    """Read-only central owner action grammar shared by every surface."""
+
+    def describe_owner_action(self, action_id: str) -> object: ...
+
+
 @dataclass(frozen=True, slots=True)
 class OwnerProjectionViewV1:
     owner_id: str
