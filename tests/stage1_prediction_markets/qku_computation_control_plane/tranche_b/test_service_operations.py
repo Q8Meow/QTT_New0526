@@ -6,6 +6,11 @@ from pathlib import Path
 
 import pytest
 
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.agent_policy import (
+    POLICY_VERSION,
+    AgentCapabilityDecisionStateV1,
+    AgentCapabilityDecisionV1,
+)
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.bindings import (
     FORMULA_INPUT_AUTHORITY_BY_MATH_ID,
 )
@@ -77,6 +82,57 @@ TRACEPARENT = (
     "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01"
 )
 STACK_ID = "STACK::MATH-01::MATH-02::V3_4"
+
+
+class _ExplicitNoEffectTestAdmission:
+    """One explicit test-only admission double for legacy service matrices."""
+
+    def admit_operation(self, request: object) -> AgentCapabilityDecisionV1:
+        request_id = str(getattr(request, "request_id"))
+        operation_id = str(getattr(request, "operation_name"))
+        principal_id = str(getattr(request, "principal_id"))
+        idempotency_key = str(getattr(request, "idempotency_key"))
+        return AgentCapabilityDecisionV1(
+            decision_id=f"TEST_DECISION::{request_id}::{operation_id}",
+            request_id=request_id,
+            task_id=f"TEST_TASK::{request_id}",
+            principal_id=principal_id,
+            current_agent_id="dashboard_agent",
+            source_agent_refs=("AGENT_RT_11",),
+            operation_id=operation_id,
+            policy_version=POLICY_VERSION,
+            decision_state=(
+                AgentCapabilityDecisionStateV1.ELIGIBLE_FOR_NO_EFFECT_QKU_REQUEST
+            ),
+            reason_codes=(),
+            scope_refs=(
+                f"operation_id={operation_id}",
+                "test_fixture=EXPLICIT_NO_EFFECT_ADMISSION",
+            ),
+            idempotency_key=idempotency_key,
+            retry_disposition="NO_RETRY_AUTHORITY",
+            peer_sod_disposition="TEST_FIXTURE_NO_SELF_APPROVAL",
+            safety_state_disposition="NON_MATERIAL_LOCAL_NO_EFFECT",
+            terminal_route="QKUComputationControlPlaneV1_NO_EFFECT_REQUEST",
+            agent_orch_receipt_ref=(
+                f"AGENT_ORCH1::TEST_FIXTURE_RECEIPT::{request_id}"
+            ),
+            st12c_causation_correlation_refs=(
+                f"OperationRequestEnvelopeV1.request_id={request_id}",
+                f"OperationRequestEnvelopeV1.idempotency_key={idempotency_key}",
+            ),
+            evidence_refs=("EXPLICIT_TEST_FIXTURE",),
+            alternative_route_refs=("DENY_TASK",),
+            disagreement_state="NONE_DECLARED",
+            confidence_state="TEST_FIXTURE_ONLY",
+            limitation_codes=(
+                "NO_PROVIDER_PRIVATE_STATE_ORDER_QPU_OR_RUNTIME_EFFECT",
+                "QKU_AND_FORMULA_IMMUTABLE",
+            ),
+        )
+
+
+_EXPLICIT_NO_EFFECT_TEST_ADMISSION = _ExplicitNoEffectTestAdmission()
 
 
 def _scope() -> ComputationScopeV1:
@@ -281,6 +337,7 @@ def _service() -> QKUComputationControlPlaneV1:
     context = _context()
     return QKUComputationControlPlaneV1(
         CanonicalOwnerPacketRegistryV1(_packets(context)),
+        agent_capability_resolver=_EXPLICIT_NO_EFFECT_TEST_ADMISSION,
         identity_adapter=RP5CIdentityAdapterV1(repo_root),
     )
 
@@ -422,7 +479,8 @@ def test_service_plan_and_stack_admission_matrix(
         packets: tuple[OwnerValuePacketV1, ...],
     ) -> ResolveContextualComputabilityResponseV1:
         contextual_service = QKUComputationControlPlaneV1(
-            CanonicalOwnerPacketRegistryV1(packets)
+            CanonicalOwnerPacketRegistryV1(packets),
+            agent_capability_resolver=_EXPLICIT_NO_EFFECT_TEST_ADMISSION,
         )
         return contextual_service.resolve_contextual_computability(
             ResolveContextualComputabilityRequestV1(

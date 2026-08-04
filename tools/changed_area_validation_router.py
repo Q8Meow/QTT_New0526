@@ -19,12 +19,14 @@ from tools.validation_scope_registry import (
     ST12A_ALLOWED_EXACT_PATHS,
     ST12B_ALLOWED_EXACT_PATHS,
     ST12C_ALLOWED_EXACT_PATHS,
+    ST12E_ALLOWED_EXACT_PATHS,
 )
 from tools.validation_inventory import (
     FAST_UNIVERSAL_PREFLIGHT,
     GENERATED_REPORT_GLOBS,
     PR152_TRACKED_GLOBS,
     ST12C_QKU_VALIDATOR_IDS,
+    ST12E_QKU_VALIDATOR_IDS,
     VALIDATION_INFRASTRUCTURE_GLOBS,
     ValidatorInventoryEntry,
     entries_matching_path,
@@ -48,6 +50,7 @@ QKU_VALIDATOR_IDS = frozenset(
         "validate_qku_computation_control_plane_security",
         "validate_qku_computation_control_plane_source",
         *ST12C_QKU_VALIDATOR_IDS,
+        *ST12E_QKU_VALIDATOR_IDS,
     }
 )
 QKU_ALLOWED_EXACT_PATHS = frozenset(
@@ -55,6 +58,7 @@ QKU_ALLOWED_EXACT_PATHS = frozenset(
         *ST12A_ALLOWED_EXACT_PATHS,
         *ST12B_ALLOWED_EXACT_PATHS,
         *ST12C_ALLOWED_EXACT_PATHS,
+        *ST12E_ALLOWED_EXACT_PATHS,
     )
 )
 
@@ -170,17 +174,29 @@ def changed_files_from_git(
     if base_ref:
         bases.extend([base_ref, f"origin/{base_ref}", f"refs/remotes/origin/{base_ref}"])
     bases.extend(["origin/main", "main"])
+    cumulative: list[str] = []
     for base in dict.fromkeys(bases):
-        changed = _diff_name_only(root, base, head)
-        if changed:
-            return changed
-    rc, stdout, _stderr = _git_stdout(
-        root,
+        rc, stdout, _stderr = _git_stdout(
+            root,
+            [
+                "diff",
+                "--name-only",
+                "--diff-filter=ACMRTUXB",
+                f"{base}...{head}",
+            ],
+        )
+        if rc == 0:
+            cumulative.extend(stdout.splitlines())
+            break
+    for args in (
         ["diff", "--name-only", "--diff-filter=ACMRTUXB", "HEAD"],
-    )
-    if rc == 0:
-        return _normalize_changed_files(stdout.splitlines())
-    return ()
+        ["diff", "--cached", "--name-only", "--diff-filter=ACMRTUXB"],
+        ["ls-files", "--others", "--exclude-standard"],
+    ):
+        rc, stdout, _stderr = _git_stdout(root, args)
+        if rc == 0:
+            cumulative.extend(stdout.splitlines())
+    return _normalize_changed_files(cumulative)
 
 
 def router_input_from_environment(

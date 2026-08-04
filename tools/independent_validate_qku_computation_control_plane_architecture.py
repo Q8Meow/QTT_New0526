@@ -43,6 +43,7 @@ PRODUCTION_NAMES = (
     "dependency_graph.py",
     "oracle_contracts.py",
     "authority.py",
+    "agent_policy.py",
     "protocols.py",
     "serialization.py",
     "validation.py",

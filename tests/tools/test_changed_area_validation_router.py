@@ -232,11 +232,64 @@ def test_qku_shared_integration_paths_use_the_exact_allowlists() -> None:
             *inventory.ST12A_ALLOWED_EXACT_PATHS,
             *inventory.ST12B_ALLOWED_EXACT_PATHS,
             *inventory.ST12C_ALLOWED_EXACT_PATHS,
+            *inventory.ST12E_ALLOWED_EXACT_PATHS,
         )
     )
     for path in inventory.QKU_ALLOWED_EXACT_PATHS:
         assert router.QKU_VALIDATOR_IDS <= set(result.classified_files[path])
     assert result.unknown_files == ()
+    assert result.fail_closed_reasons == ()
+
+
+def test_local_git_change_collection_unions_all_four_surfaces(monkeypatch):
+    outputs = {
+        (
+            "diff",
+            "--name-only",
+            "--diff-filter=ACMRTUXB",
+            "origin/main...HEAD",
+        ): "committed.py\nshared.py\n",
+        (
+            "diff",
+            "--name-only",
+            "--diff-filter=ACMRTUXB",
+            "HEAD",
+        ): "unstaged.py\nshared.py\n",
+        (
+            "diff",
+            "--cached",
+            "--name-only",
+            "--diff-filter=ACMRTUXB",
+        ): "staged.py\n",
+        ("ls-files", "--others", "--exclude-standard"): "untracked.py\n",
+    }
+
+    monkeypatch.setattr(
+        router,
+        "_git_stdout",
+        lambda _root, args: (0, outputs[tuple(args)], ""),
+    )
+
+    assert router.changed_files_from_git(REPO_ROOT) == (
+        "committed.py",
+        "shared.py",
+        "staged.py",
+        "unstaged.py",
+        "untracked.py",
+    )
+
+
+def test_st12e_paths_route_all_six_e_validators() -> None:
+    path = (
+        "docs/master_plan/generated/qku_control_plane/"
+        "agent_capability/manifest.json"
+    )
+    result = _pull_request_result(path)
+
+    assert inventory.ST12E_QKU_VALIDATOR_IDS <= set(
+        result.required_validators
+    )
+    assert path not in result.unknown_files
     assert result.fail_closed_reasons == ()
 
     unallowlisted = (

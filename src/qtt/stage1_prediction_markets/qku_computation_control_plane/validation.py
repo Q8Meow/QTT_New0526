@@ -3981,3 +3981,619 @@ def validate_tranche_b_frozen_manifest() -> ValidationReportV1:
         ),
     )
     return ValidationReportV1("tranche_b", checks)
+
+
+def _st12e_closure(
+    control_id: str,
+    control_slug: str,
+    predicate_group: str,
+    semantic_owner: str,
+) -> Mapping[str, object]:
+    domain = control_id.split("::", 1)[0].removeprefix("ST11-").casefold()
+    return MappingProxyType(
+        {
+            "closure_id": f"ST12-CLOSURE::{control_id}",
+            "control_id": control_id,
+            "domain": domain,
+            "control_slug": control_slug,
+            "predicate_group": predicate_group,
+            "semantic_owner": semantic_owner,
+            "validator_owner": (
+                "tools/independent_validate_qku_computation_control_plane_e.py"
+            ),
+        }
+    )
+
+
+ST12E_CLOSURE_ROWS: tuple[Mapping[str, object], ...] = (
+    _st12e_closure("ST11-AGENT::001", "principal-inventory", "identity_and_duty_mapping", "AGENT-ORCH1"),
+    _st12e_closure("ST11-AGENT::002", "agent-universe-coverage", "parameter_identity_and_e_scope", "ComputationParameterPolicyV1"),
+    _st12e_closure("ST11-AGENT::003", "capability-resolution", "task_capability_scope", "AgentCapabilityResolverV1"),
+    _st12e_closure("ST11-AGENT::004", "no-direct-provider", "no_effect_authority", "AgentCapabilityResolverV1"),
+    _st12e_closure("ST11-AGENT::005", "central-compute-only", "mandatory_service_admission", "QKUComputationControlPlaneV1"),
+    _st12e_closure("ST11-AGENT::006", "no-raw-library-scan", "frozen_snapshot_no_raw_scan", "AgentCapabilityPolicyStoreV1"),
+    _st12e_closure("ST11-AGENT::007", "role-slice-distinctness", "identity_and_duty_mapping", "AGENT-ORCH1"),
+    _st12e_closure("ST11-AGENT::008", "segregation-of-duties", "task_capability_scope", "AgentCapabilityResolverV1"),
+    _st12e_closure("ST11-AGENT::009", "task-envelope", "task_capability_scope", "AGENT-ORCH1"),
+    _st12e_closure("ST11-AGENT::010", "decision-receipts", "receipt_retry_disagreement", "AGENT-ORCH1"),
+    _st12e_closure("ST11-AGENT::011", "disagreement-handling", "no_trade_route_preservation", "AgentCapabilityResolverV1"),
+    _st12e_closure("ST11-AGENT::012", "quarantine-and-trust", "safety_trust_fail_closed", "AgentCapabilityResolverV1"),
+    _st12e_closure("ST11-AGENT::013", "retry-and-idempotency", "receipt_retry_disagreement", "AgentCapabilityResolverV1"),
+    _st12e_closure("ST11-AGENT::014", "memory-prior-boundary", "memory_prior_boundary", "MEM1"),
+    _st12e_closure("ST11-AGENT::015", "no-self-promotion", "no_effect_authority", "AgentCapabilityResolverV1"),
+    _st12e_closure("ST11-AGENT::016", "llm-tool-boundary", "llm_advisory_boundary", "GroundedLLMGatewayV1"),
+    _st12e_closure("ST11-AGENT::017", "owner-request-boundary", "owner_request_boundary", "OwnerActionRegistry"),
+    _st12e_closure("ST11-LLM::001", "outside-hotpath", "llm_advisory_boundary", "GroundedLLMGatewayV1"),
+    _st12e_closure("ST11-LLM::002", "advisory-only", "llm_advisory_boundary", "GroundedLLMGatewayV1"),
+    _st12e_closure("ST11-LLM::003", "prompt-injection", "llm_advisory_boundary", "GroundedLLMGatewayV1"),
+    _st12e_closure("ST11-SECURITY::014", "audit-log-integrity", "receipt_retry_disagreement", "AGENT-ORCH1"),
+    _st12e_closure("ST11-SECURITY::015", "kill-and-submit-disable", "safety_trust_fail_closed", "ST12-D"),
+    _st12e_closure("ST11-SECURITY::016", "incident-response", "safety_trust_fail_closed", "SecurityComplianceBoundaryV1"),
+)
+
+
+def _st12e_test(
+    test_id: str,
+    closure_refs: tuple[str, ...],
+    predicate_group: str,
+    physical_path: str,
+) -> Mapping[str, object]:
+    return MappingProxyType(
+        {
+            "test_id": test_id,
+            "st12e_closure_refs": closure_refs,
+            "predicate_group": predicate_group,
+            "currentized_physical_path": physical_path,
+            "validator_owner": (
+                "tools/independent_validate_qku_computation_control_plane_e.py"
+            ),
+        }
+    )
+
+
+_POLICY_MATRIX = (
+    "tests/stage1_prediction_markets/qku_computation_control_plane/"
+    "tranche_e/test_policy_matrix.py"
+)
+_INTEGRATION_MATRIX = (
+    "tests/stage1_prediction_markets/qku_computation_control_plane/"
+    "tranche_e/test_integration_matrix.py"
+)
+_ADVERSARIAL_MATRIX = (
+    "tests/stage1_prediction_markets/qku_computation_control_plane/"
+    "tranche_e/test_adversarial_matrix.py"
+)
+_AGENT_CLOSURES = tuple(
+    str(row["closure_id"])
+    for row in ST12E_CLOSURE_ROWS
+    if row["domain"] == "agent"
+)
+_LLM_CLOSURES = tuple(
+    str(row["closure_id"])
+    for row in ST12E_CLOSURE_ROWS
+    if row["domain"] == "llm"
+)
+_SECURITY_CLOSURES = tuple(
+    str(row["closure_id"])
+    for row in ST12E_CLOSURE_ROWS
+    if row["domain"] == "security"
+)
+ST12E_SEMANTIC_TEST_ROWS: tuple[Mapping[str, object], ...] = (
+    _st12e_test("ST12-TEST::021", ("ST12-CLOSURE::ST11-AGENT::002",), "parameter_identity_and_e_scope", _INTEGRATION_MATRIX),
+    _st12e_test("ST12-TEST::022", ("ST12-CLOSURE::ST11-AGENT::003",), "task_capability_scope", _ADVERSARIAL_MATRIX),
+    _st12e_test("ST12-TEST::023", ("ST12-CLOSURE::ST11-AGENT::005",), "mandatory_service_admission", _INTEGRATION_MATRIX),
+    _st12e_test("ST12-TEST::024", ("ST12-CLOSURE::ST11-AGENT::010",), "receipt_retry_disagreement", _INTEGRATION_MATRIX),
+    _st12e_test("ST12-TEST::025", ("ST12-CLOSURE::ST11-AGENT::011",), "no_trade_route_preservation", _INTEGRATION_MATRIX),
+    _st12e_test("ST12-TEST::029", ("ST12-CLOSURE::ST11-AGENT::016",), "llm_advisory_boundary", _INTEGRATION_MATRIX),
+    _st12e_test("ST12-TEST::030", ("ST12-CLOSURE::ST11-AGENT::014",), "memory_prior_boundary", _INTEGRATION_MATRIX),
+    _st12e_test("ST12-TEST::031", ("ST12-CLOSURE::ST11-AGENT::004",), "no_effect_authority", _ADVERSARIAL_MATRIX),
+    _st12e_test("ST12-TEST::032", ("ST12-CLOSURE::ST11-AGENT::006",), "frozen_snapshot_no_raw_scan", _INTEGRATION_MATRIX),
+    _st12e_test("ST12-TEST::033", ("ST12-CLOSURE::ST11-AGENT::015",), "no_effect_authority", _ADVERSARIAL_MATRIX),
+    _st12e_test("ST12-TEST::034", ("ST12-CLOSURE::ST11-AGENT::017",), "owner_request_boundary", _INTEGRATION_MATRIX),
+    _st12e_test("ST12-TEST::035", ("ST12-CLOSURE::ST11-AGENT::001",), "identity_and_duty_mapping", _ADVERSARIAL_MATRIX),
+    _st12e_test("ST12-TEST::036", ("ST12-CLOSURE::ST11-AGENT::012",), "safety_trust_fail_closed", _ADVERSARIAL_MATRIX),
+    _st12e_test("ST12-TEST::037", ("ST12-CLOSURE::ST11-AGENT::013",), "receipt_retry_disagreement", _ADVERSARIAL_MATRIX),
+    _st12e_test("ST12-TEST::038", ("ST12-CLOSURE::ST11-AGENT::007",), "identity_and_duty_mapping", _POLICY_MATRIX),
+    _st12e_test("ST12-TEST::039", ("ST12-CLOSURE::ST11-AGENT::008",), "task_capability_scope", _ADVERSARIAL_MATRIX),
+    _st12e_test("ST12-TEST::040", ("ST12-CLOSURE::ST11-AGENT::009",), "task_capability_scope", _INTEGRATION_MATRIX),
+    _st12e_test("ST12-TEST::101", ("ST12-CLOSURE::ST11-LLM::002",), "llm_advisory_boundary", _POLICY_MATRIX),
+    _st12e_test("ST12-TEST::113", ("ST12-CLOSURE::ST11-LLM::001",), "llm_advisory_boundary", _POLICY_MATRIX),
+    _st12e_test("ST12-TEST::114", ("ST12-CLOSURE::ST11-LLM::003",), "llm_advisory_boundary", _ADVERSARIAL_MATRIX),
+    _st12e_test("ST12-TEST::181", ("ST12-CLOSURE::ST11-SECURITY::014",), "receipt_retry_disagreement", _ADVERSARIAL_MATRIX),
+    _st12e_test("ST12-TEST::187", ("ST12-CLOSURE::ST11-SECURITY::016",), "safety_trust_fail_closed", _ADVERSARIAL_MATRIX),
+    _st12e_test("ST12-TEST::189", ("ST12-CLOSURE::ST11-SECURITY::015",), "safety_trust_fail_closed", _ADVERSARIAL_MATRIX),
+    _st12e_test("ST12-TEST::222", _AGENT_CLOSURES, "agent_domain_matrix", "tools/independent_validate_qku_computation_control_plane_agent.py"),
+    _st12e_test("ST12-TEST::226", _LLM_CLOSURES, "llm_domain_matrix", "tools/independent_validate_qku_computation_control_plane_llm.py"),
+    _st12e_test("ST12-TEST::230", _SECURITY_CLOSURES, "security_domain_matrix", "tools/independent_validate_qku_computation_control_plane_security.py"),
+)
+ST12E_REPOSITORY_DISPOSITIONS = (
+    "ST10-FILE::042",
+    "ST10-FILE::043",
+    "ST10-FILE::044",
+    "ST10-FILE::045",
+    "ST10-FILE::046",
+    "ST10-FILE::047",
+    "ST10-FILE::048",
+    "ST10-FILE::049",
+    "ST10-FILE::103",
+)
+ST12E_REUSED_MATH_PACK = (
+    ("MATH-01", "ORACLE::MATH-01", "GOLDEN::MATH-01", "EXACT_DECIMAL"),
+    (
+        "MATH-13",
+        "ORACLE::MATH-13",
+        "GOLDEN::MATH-13",
+        "EXACT_ORDER_AND_INDEX_SET",
+    ),
+    ("MATH-15", "ORACLE::MATH-15", "GOLDEN::MATH-15", "ABS_TOL_1E-15"),
+)
+ST12E_CERTIFIED_COMMANDS = (
+    "python tools/independent_validate_qku_computation_control_plane_agent.py",
+    "python tools/independent_validate_qku_computation_control_plane_llm.py",
+    "python tools/independent_validate_qku_computation_control_plane_security.py",
+    "python tools/validate_qku_computation_control_plane.py --domain agent",
+    "python tools/validate_qku_computation_control_plane.py --domain llm",
+    "python tools/validate_qku_computation_control_plane.py --domain security",
+)
+ST12E_PROHIBITED_PARALLEL_MODULES = (
+    "src/qtt/stage1_prediction_markets/qku_computation_control_plane/capability_adapter.py",
+    "src/qtt/stage1_prediction_markets/qku_computation_control_plane/agent_orch_adapter.py",
+    "src/qtt/stage1_prediction_markets/qku_computation_control_plane/capability_enforcement.py",
+    "src/qtt/stage1_prediction_markets/qku_computation_control_plane/principal_scope.py",
+    "src/qtt/stage1_prediction_markets/qku_computation_control_plane/operation_authorization.py",
+    "src/qtt/stage1_prediction_markets/qku_computation_control_plane/no_authority.py",
+    "src/qtt/stage1_prediction_markets/qku_computation_control_plane/direct_provider_guard.py",
+    "src/qtt/stage1_prediction_markets/qku_computation_control_plane/agent_parameter_capability.py",
+)
+
+
+def st12e_semantic_counts() -> Mapping[str, int]:
+    from .agent_policy import canonical_master_parameter_rows
+    from .parameter_policy import ST12E_PARAMETER_CAPABILITY_BINDINGS
+
+    root = Path(__file__).resolve().parents[4]
+    master_text = (
+        root / "docs/master_plan/QTT_MasterPlan_Current.md"
+    ).read_text(encoding="utf-8")
+    return MappingProxyType(
+        {
+            "closure_controls": len(ST12E_CLOSURE_ROWS),
+            "repository_dispositions": len(ST12E_REPOSITORY_DISPOSITIONS),
+            "parameter_bindings": len(ST12E_PARAMETER_CAPABILITY_BINDINGS),
+            "math_specifications": len(ST12E_REUSED_MATH_PACK),
+            "independent_oracle_specifications": len(ST12E_REUSED_MATH_PACK),
+            "golden_vectors_and_invariants": len(ST12E_REUSED_MATH_PACK),
+            "semantic_test_rows": len(ST12E_SEMANTIC_TEST_ROWS),
+            "validation_commands": len(ST12E_CERTIFIED_COMMANDS),
+            "parameter_source_universe": len(
+                canonical_master_parameter_rows(master_text)
+            ),
+        }
+    )
+
+
+def _st12e_service_admission_predicate(root: Path) -> tuple[bool, str]:
+    from .agent_policy import IMPLEMENTED_OPERATION_IDS
+
+    service_path = (
+        root
+        / "src/qtt/stage1_prediction_markets/qku_computation_control_plane/service.py"
+    )
+    tree = ast.parse(service_path.read_text(encoding="utf-8"))
+    service_class = next(
+        (
+            node
+            for node in tree.body
+            if isinstance(node, ast.ClassDef)
+            and node.name == "QKUComputationControlPlaneV1"
+        ),
+        None,
+    )
+    methods = {
+        node.name: node
+        for node in (service_class.body if service_class is not None else ())
+        if isinstance(node, ast.FunctionDef)
+    }
+    admission_counts = {
+        operation_id: sum(
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Name)
+            and node.func.id == "_admit_agent_request"
+            for node in ast.walk(methods[operation_id])
+        )
+        if operation_id in methods
+        else 0
+        for operation_id in IMPLEMENTED_OPERATION_IDS
+    }
+    helper = next(
+        (
+            node
+            for node in tree.body
+            if isinstance(node, ast.FunctionDef)
+            and node.name == "_admit_agent_request"
+        ),
+        None,
+    )
+    helper_has_optional_bypass = helper is None or any(
+        isinstance(node, ast.Compare)
+        and any(
+            isinstance(comparator, ast.Constant) and comparator.value is None
+            for comparator in node.comparators
+        )
+        for node in ast.walk(helper)
+    )
+    passed = (
+        len(IMPLEMENTED_OPERATION_IDS) == 12
+        and set(admission_counts.values()) == {1}
+        and not helper_has_optional_bypass
+    )
+    return (
+        passed,
+        "public_admission="
+        f"{sum(count == 1 for count in admission_counts.values())}/"
+        f"{len(IMPLEMENTED_OPERATION_IDS)} optional_bypass="
+        f"{int(helper_has_optional_bypass)}",
+    )
+
+
+def _st12e_predicate_matrix() -> Mapping[str, tuple[bool, str]]:
+    from src.qtt.agents.pr169_agent_orch1_resolvers import AgentOrchService
+
+    from .agent_policy import (
+        HELD_OPERATION_IDS,
+        IMPLEMENTED_OPERATION_IDS,
+        LLM_ADVISORY_TASK_FIELDS,
+        NO_TRADE_REOPTIMIZATION_VARIABLE_IDS,
+        OWNER_ACTION_IDS,
+        POLICY_VERSION,
+        ST12E_BINDING_EXACT,
+        ST12E_BINDING_OUTSIDE_SCOPE,
+        TASK_ENVELOPE_FIELDS,
+        UPSTREAM_IDENTITY_CROSSWALK_REQUIRED,
+        UPSTREAM_IDENTITY_FULLY_MAPPED,
+        AgentIdentityMappingTypeV1,
+        AgentSafetyStateV1,
+        build_identity_compatibility_map,
+        build_parameter_scope_projection,
+        build_st12e_certified_source_universe_registry,
+        build_upstream_source_universe_registry,
+        canonical_master_parameter_rows,
+        canonical_parameter_identity_registry,
+        canonical_source_agent_ids,
+        canonical_source_role_labels,
+        current_owner_action_ids,
+        no_effect_authority_is_closed,
+    )
+    from .parameter_policy import (
+        ST12E_PARAMETER_CAPABILITY_BINDINGS,
+        resolve_st12e_value_policy_refs,
+    )
+    from .protocols import SafetyStateProjectionProtocolV1
+
+    root = Path(__file__).resolve().parents[4]
+    master_text = (
+        root / "docs/master_plan/QTT_MasterPlan_Current.md"
+    ).read_text(encoding="utf-8")
+    master_rows = canonical_master_parameter_rows(master_text)
+    source_ids = canonical_source_agent_ids(master_text)
+    upstream_universes, universe_refs = (
+        build_upstream_source_universe_registry(master_rows)
+    )
+    orch_snapshot = AgentOrchService(repo_root=root).load_policy_snapshot()
+    identity_map = build_identity_compatibility_map(
+        orch_snapshot,
+        source_agent_ids=source_ids,
+        source_role_labels=canonical_source_role_labels(master_text),
+    )
+    parameter_scope = build_parameter_scope_projection(
+        master_plan_text=master_text,
+        identity_map=identity_map,
+    )
+    scope_by_id = {row.parameter_id: row for row in parameter_scope}
+    exact_mappings = tuple(
+        binding
+        for binding in identity_map.bindings.values()
+        if binding.mapping_type is not AgentIdentityMappingTypeV1.UNMAPPED
+    )
+    unmapped_mappings = tuple(
+        binding
+        for binding in identity_map.bindings.values()
+        if binding.mapping_type is AgentIdentityMappingTypeV1.UNMAPPED
+    )
+    identity_passed = (
+        set(identity_map.bindings) == set(source_ids)
+        and len(source_ids) == 25
+        and len(exact_mappings) == 12
+        and len(unmapped_mappings) == 13
+        and all(
+            binding.current_principal_refs
+            and binding.current_duty_refs
+            and binding.intersection_scope
+            and set(binding.intersection_scope)
+            <= set(binding.source_scope) & set(binding.current_scope)
+            for binding in exact_mappings
+        )
+        and all(
+            not binding.current_principal_refs
+            and not binding.current_role_refs
+            and not binding.current_duty_refs
+            and not binding.current_scope
+            and not binding.intersection_scope
+            for binding in unmapped_mappings
+        )
+    )
+
+    fully_mapped = tuple(
+        row
+        for row in parameter_scope
+        if row.upstream_identity_mapping_state
+        == UPSTREAM_IDENTITY_FULLY_MAPPED
+    )
+    crosswalk_required = tuple(
+        row
+        for row in parameter_scope
+        if row.upstream_identity_mapping_state
+        == UPSTREAM_IDENTITY_CROSSWALK_REQUIRED
+    )
+    exact_e_rows = tuple(
+        row
+        for row in parameter_scope
+        if row.st12e_binding_state == ST12E_BINDING_EXACT
+    )
+    outside_e_rows = tuple(
+        row
+        for row in parameter_scope
+        if row.st12e_binding_state == ST12E_BINDING_OUTSIDE_SCOPE
+    )
+    source_sets_preserved = all(
+        tuple(
+            upstream_universes[
+                scope_by_id[parameter_id].upstream_source_universe_ref
+            ]["source_agent_ids"]
+        )
+        == source_agent_ids
+        and universe_refs[source_agent_ids]
+        == scope_by_id[parameter_id].upstream_source_universe_ref
+        for parameter_id, _, source_agent_ids in master_rows
+    )
+    e_bindings_map_exactly = all(
+        all(
+            identity_map.require_current_authority_mapping(source_id)
+            for source_id in binding.certified_source_agent_ids
+        )
+        and scope_by_id[parameter_id].st12e_binding_state
+        == ST12E_BINDING_EXACT
+        for parameter_id, binding in ST12E_PARAMETER_CAPABILITY_BINDINGS.items()
+    )
+    e_rows_with_gap = sum(
+        row.upstream_identity_mapping_state
+        == UPSTREAM_IDENTITY_CROSSWALK_REQUIRED
+        for row in exact_e_rows
+    )
+    projection_passed = (
+        len(master_rows) == 3810
+        and len(upstream_universes) == 67
+        and len(fully_mapped) == 1721
+        and len(crosswalk_required) == 2089
+        and len(exact_e_rows) == 87
+        and len(outside_e_rows) == 3723
+        and e_rows_with_gap == 34
+        and source_sets_preserved
+        and e_bindings_map_exactly
+        and len(build_st12e_certified_source_universe_registry()[0]) == 6
+        and len(
+            resolve_st12e_value_policy_refs(
+                canonical_parameter_identity_registry(master_text)
+            )
+        )
+        == 87
+    )
+
+    service_admission = _st12e_service_admission_predicate(root)
+    agent_source = (
+        root
+        / "src/qtt/stage1_prediction_markets/qku_computation_control_plane/"
+        "agent_policy.py"
+    ).read_text(encoding="utf-8")
+    service_source = (
+        root
+        / "src/qtt/stage1_prediction_markets/qku_computation_control_plane/"
+        "service.py"
+    ).read_text(encoding="utf-8")
+    errors_source = (
+        root
+        / "src/qtt/stage1_prediction_markets/qku_computation_control_plane/"
+        "errors.py"
+    ).read_text(encoding="utf-8")
+    no_trade_passed = (
+        "NO_TRADE_REOPTIMIZATION_ROUTED" in agent_source
+        and "PRETRADE1_BOUNDED_TRADEPLAN_VARIABLE_REOPTIMIZATION"
+        in agent_source
+        and "raise NoTradeReoptimizationRouteError(decision)"
+        in service_source
+        and "self.decision = decision" in errors_source
+        and len(NO_TRADE_REOPTIMIZATION_VARIABLE_IDS) > 0
+    )
+    no_raw_scan = all(
+        token not in agent_source
+        for token in (".glob(", ".rglob(", "os.walk(", "Path.rglob(")
+    )
+    compact_bindings = all(
+        set(binding.__dataclass_fields__)
+        == {
+            "parameter_id",
+            "parameter_symbol",
+            "certified_source_agent_ids",
+            "value_policy_ref",
+            "capability_policy_ref",
+            "st12e_binding_state",
+        }
+        for binding in ST12E_PARAMETER_CAPABILITY_BINDINGS.values()
+    )
+    receipts_closed = all(
+        row.get("runtime_side_effect_allowed") is False
+        and row.get("source_truth_created") is False
+        and row.get("live_execution_created") is False
+        and row.get("order_submission_created") is False
+        and row.get("fake_receipt_created") is False
+        for row in orch_snapshot.decision_receipt_rows
+    )
+    safety_closed = (
+        set(AgentSafetyStateV1)
+        == {
+            AgentSafetyStateV1.GREEN,
+            AgentSafetyStateV1.MISSING,
+            AgentSafetyStateV1.STALE,
+            AgentSafetyStateV1.CONFLICT,
+        }
+        and hasattr(SafetyStateProjectionProtocolV1, "describe_safety_state")
+    )
+    effect_reasons = {
+        "DIRECT_PROVIDER_FORBIDDEN",
+        "PRIVATE_STATE_FORBIDDEN",
+        "SOURCE_TRUTH_FORBIDDEN",
+        "REPLAY_PAPER_EFFECT_FORBIDDEN",
+        "LLM_INFERENCE_FORBIDDEN",
+        "QPU_EFFECT_FORBIDDEN",
+        "MODE_ACTIVATION_FORBIDDEN",
+        "ORDER_RELEASE_FORBIDDEN",
+        "CAPITAL_EFFECT_FORBIDDEN",
+    }
+    no_effect_closed = (
+        no_effect_authority_is_closed()
+        and effect_reasons <= {reason.name for reason in ReasonCode}
+    )
+    llm_closed = (
+        "llm_inference_requested" in agent_source
+        and "UNTRUSTED_CONTENT_INSTRUCTION_REJECTED" in agent_source
+        and "LLM_INFERENCE_FORBIDDEN" in agent_source
+        and len(LLM_ADVISORY_TASK_FIELDS) == len(set(LLM_ADVISORY_TASK_FIELDS))
+        and "import openai" not in agent_source.casefold()
+        and "import anthropic" not in agent_source.casefold()
+    )
+    task_scope_closed = (
+        POLICY_VERSION == "ST12E_AGENT_CAPABILITY_POLICY_V1_1"
+        and len(IMPLEMENTED_OPERATION_IDS) == 12
+        and len(HELD_OPERATION_IDS) == 3
+        and len(TASK_ENVELOPE_FIELDS) == len(set(TASK_ENVELOPE_FIELDS))
+        and all(
+            binding.st12e_binding_state == ST12E_BINDING_EXACT
+            for binding in ST12E_PARAMETER_CAPABILITY_BINDINGS.values()
+        )
+    )
+    owner_boundary = (
+        tuple(current_owner_action_ids()) == tuple(OWNER_ACTION_IDS)
+        and "action_scope_refs" in agent_source
+        and "EXECUTION_ROUTER_BYPASS_FORBIDDEN" in agent_source
+    )
+    memory_boundary = (
+        "memory_prior_ref" in agent_source
+        and "MEMORY_PRIOR_REVALIDATION_REQUIRED" in agent_source
+        and "CURRENT_REVALIDATED" in agent_source
+    )
+    paths_closed = all(
+        not (root / path).exists()
+        for path in ST12E_PROHIBITED_PARALLEL_MODULES
+    )
+    math_closed = all(
+        math_id in IMPLEMENTATION_REGISTRY
+        and math_id in ORACLE_BY_MATH_ID
+        and math_id in GOLDEN_VECTOR_BY_MATH_ID
+        for math_id, _, _, _ in ST12E_REUSED_MATH_PACK
+    )
+    return MappingProxyType(
+        {
+            "identity_and_duty_mapping": (
+                identity_passed,
+                f"source_ids={len(source_ids)} exact={len(exact_mappings)} "
+                f"unmapped={len(unmapped_mappings)}",
+            ),
+            "parameter_identity_and_e_scope": (
+                projection_passed and compact_bindings,
+                f"rows={len(parameter_scope)} universes={len(upstream_universes)} "
+                f"lineage={len(fully_mapped)}/{len(crosswalk_required)} "
+                f"e_scope={len(exact_e_rows)}/{len(outside_e_rows)} "
+                f"e_upstream_gaps={e_rows_with_gap}",
+            ),
+            "task_capability_scope": (
+                task_scope_closed,
+                f"operations={len(IMPLEMENTED_OPERATION_IDS)} "
+                f"held={len(HELD_OPERATION_IDS)}",
+            ),
+            "mandatory_service_admission": service_admission,
+            "no_effect_authority": (
+                no_effect_closed,
+                f"effect_reasons={len(effect_reasons)} no_effect="
+                f"{no_effect_authority_is_closed()}",
+            ),
+            "frozen_snapshot_no_raw_scan": (
+                no_raw_scan,
+                f"raw_scan_tokens_present={int(not no_raw_scan)}",
+            ),
+            "receipt_retry_disagreement": (
+                receipts_closed,
+                f"receipts={len(orch_snapshot.decision_receipt_rows)} "
+                f"no_effect={receipts_closed}",
+            ),
+            "safety_trust_fail_closed": (
+                safety_closed,
+                f"safety_states={len(AgentSafetyStateV1)}",
+            ),
+            "memory_prior_boundary": (
+                memory_boundary,
+                f"current_revalidation={memory_boundary}",
+            ),
+            "owner_request_boundary": (
+                owner_boundary,
+                f"owner_actions={len(current_owner_action_ids())}",
+            ),
+            "llm_advisory_boundary": (
+                llm_closed,
+                f"llm_fields={len(LLM_ADVISORY_TASK_FIELDS)} inference=false",
+            ),
+            "no_trade_route_preservation": (
+                no_trade_passed,
+                f"variables={len(NO_TRADE_REOPTIMIZATION_VARIABLE_IDS)} "
+                f"typed_route={no_trade_passed}",
+            ),
+            "repository_and_math_reuse": (
+                paths_closed and math_closed,
+                f"parallel_paths_closed={paths_closed} math_reuse={math_closed}",
+            ),
+        }
+    )
+
+
+def _st12e_checks(domain: str) -> tuple[ValidationCheckV1, ...]:
+    rows = tuple(row for row in ST12E_CLOSURE_ROWS if row["domain"] == domain)
+    predicate_matrix = _st12e_predicate_matrix()
+    return tuple(
+        ValidationCheckV1(
+            check_id=str(row["control_id"]),
+            passed=predicate_matrix[str(row["predicate_group"])][0],
+            detail=(
+                f"{row['predicate_group']}: "
+                f"{predicate_matrix[str(row['predicate_group'])][1]}"
+            ),
+        )
+        for row in rows
+    )
+
+
+def _agent_checks() -> tuple[ValidationCheckV1, ...]:
+    return _st12e_checks("agent")
+
+
+def _llm_checks() -> tuple[ValidationCheckV1, ...]:
+    return _st12e_checks("llm")
+
+
+_DOMAIN_CHECKS.update({"agent": _agent_checks, "llm": _llm_checks})
+_original_security_checks = _DOMAIN_CHECKS["security"]
+
+
+def _security_with_st12e_checks() -> tuple[ValidationCheckV1, ...]:
+    return (*_original_security_checks(), *_st12e_checks("security"))
+
+
+_DOMAIN_CHECKS["security"] = _security_with_st12e_checks

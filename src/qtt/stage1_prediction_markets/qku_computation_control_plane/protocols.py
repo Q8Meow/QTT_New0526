@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Protocol, runtime_checkable
+from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 from .errors import OwnerAdapterError, ReasonCode
 from .models import (
@@ -14,6 +14,9 @@ from .models import (
     OperationContractV1,
     SupervisionEnvelopeV1,
 )
+
+if TYPE_CHECKING:
+    from .agent_policy import AgentCapabilityDecisionV1
 
 
 @runtime_checkable
@@ -61,6 +64,36 @@ class OwnerReadModelProjectionProtocolV1(Protocol):
 @runtime_checkable
 class AgentDagProjectionProtocolV1(Protocol):
     def describe_agent_dag_route(self, qku_id: str) -> OperationContractV1: ...
+
+
+@runtime_checkable
+class AgentCapabilityAdmissionProtocolV1(Protocol):
+    """Typed no-effect admission hook; it does not grant runtime authority."""
+
+    def admit_operation(
+        self, request: object
+    ) -> "AgentCapabilityDecisionV1": ...
+
+
+@runtime_checkable
+class SafetyStateProjectionProtocolV1(Protocol):
+    """Read-only safety-state view owned outside ST12-E."""
+
+    def describe_safety_state(self, context_ref: str) -> object: ...
+
+
+@runtime_checkable
+class MemoryPriorProjectionProtocolV1(Protocol):
+    """MEM1 condition-scoped prior view requiring current revalidation."""
+
+    def describe_memory_prior(self, context_ref: str) -> object: ...
+
+
+@runtime_checkable
+class OwnerActionSemanticProtocolV1(Protocol):
+    """Read-only central owner action grammar shared by every surface."""
+
+    def describe_owner_action(self, action_id: str) -> object: ...
 
 
 @dataclass(frozen=True, slots=True)

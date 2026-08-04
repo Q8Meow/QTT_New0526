@@ -41,6 +41,15 @@ ST12_BRANCH_CASES = (
             "Agent/st12c-deterministic-receipts-accounting-v1",
         ),
     ),
+    (
+        "agent/st12e-capability-guard",
+        (
+            "agent/st12e-capability",
+            "agent/st12e-capability-guard-copy",
+            "agent/st12e-capability-guard/",
+            "Agent/st12e-capability-guard",
+        ),
+    ),
 )
 
 
@@ -82,7 +91,7 @@ def test_repair_and_main_cumulative_branch_classification():
 @pytest.mark.parametrize(
     ("branch", "adversarial_branches"),
     ST12_BRANCH_CASES,
-    ids=("st12a", "st12b", "st12c"),
+    ids=("st12a", "st12b", "st12c", "st12e"),
 )
 def test_st12_owner_authorized_branches_are_exactly_validation_only(
     branch: str,

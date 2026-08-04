@@ -20,8 +20,10 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.validation 
 
 DOMAIN_MATH_IDS = {
     "accounting": tuple(f"MATH-{value:02d}" for value in range(26, 37)),
+    "agent": (),
     "architecture": tuple(f"MATH-{value:02d}" for value in range(1, 16)),
     "execution": ("MATH-37", "MATH-38"),
+    "llm": (),
     "operations": (),
     "quantum": ("MATH-46", "MATH-47", "MATH-48", "MATH-49"),
     "security": (),

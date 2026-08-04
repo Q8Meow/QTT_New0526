@@ -169,6 +169,56 @@ EXPECTED_ST12C_ALLOWED_EXACT_PATHS = frozenset(
         "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
     }
 ) | ST12C_PREDECESSOR_CURRENTIZATION_PATHS
+ST12E_PREDECESSOR_CURRENTIZATION_PATHS = frozenset(
+    {
+        "tests/stage1_prediction_markets/"
+        "qku_computation_control_plane/"
+        "tranche_b/test_service_operations.py",
+    }
+)
+EXPECTED_ST12E_ALLOWED_EXACT_PATHS = frozenset(
+    {
+        "src/qtt/agents/pr169_agent_orch1_resolvers.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/__init__.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/agent_policy.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/errors.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/models.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/parameter_policy.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/protocols.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/service.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/validation.py",
+        "docs/master_plan/generated/qku_control_plane/agent_capability/manifest.json",
+        "docs/master_plan/generated/qku_control_plane/agent_capability/policy.jsonl",
+        "docs/master_plan/generated/qku_control_plane/agent_capability/parameter_scope.jsonl",
+        "tools/build_qku_computation_control_plane.py",
+        "tools/validate_qku_computation_control_plane.py",
+        "tools/independent_validate_qku_computation_control_plane_e.py",
+        "tools/independent_validate_qku_computation_control_plane_agent.py",
+        "tools/independent_validate_qku_computation_control_plane_llm.py",
+        "tools/independent_validate_qku_computation_control_plane_security.py",
+        "tools/independent_validate_qku_computation_control_plane.py",
+        "tools/independent_validate_qku_computation_control_plane_architecture.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/tranche_e/__init__.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/tranche_e/test_policy_matrix.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/tranche_e/test_integration_matrix.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/tranche_e/test_adversarial_matrix.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/architecture/test_consume_not_rebuild.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/architecture/test_repository_file_closure.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/architecture/test_operation_contract_closure.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/operations/test_runtime_topology.py",
+        "tests/fail_closed/test_run_validation_gates.py",
+        "tests/tools/test_ci_branch_context.py",
+        "tests/tools/test_validation_scope_registry.py",
+        "tests/tools/test_validation_inventory.py",
+        "tests/tools/test_changed_area_validation_router.py",
+        "tools/ci_branch_context.py",
+        "tools/validation_scope_registry.py",
+        "tools/validation_inventory.py",
+        "tools/changed_area_validation_router.py",
+        "tools/run_validation_gates.py",
+        "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+    }
+) | ST12E_PREDECESSOR_CURRENTIZATION_PATHS
 
 PR169_QKU_FORMULA_EXP1_PR272_PATHS = (
     "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
@@ -619,6 +669,101 @@ def test_st12c_exact_paths_and_windows_forms_are_allowed(path: str) -> None:
 def test_st12c_scope_rejects_unowned_paths_and_near_names(
     branch: str,
     path: str,
+) -> None:
+    assert not registry.is_pr_scoped_changed_path_allowed(branch, path)
+
+
+def test_st12e_scope_is_exactly_the_appendix_h_ledger() -> None:
+    assert registry.ST12E_BRANCH == "agent/st12e-capability-guard"
+    assert registry.ST12E_PREDECESSOR_CURRENTIZATION_EXACT_PATHS == (
+        ST12E_PREDECESSOR_CURRENTIZATION_PATHS
+    )
+    assert registry.ST12E_ALLOWED_EXACT_PATHS == (
+        EXPECTED_ST12E_ALLOWED_EXACT_PATHS
+    )
+    assert len(registry.ST12E_ALLOWED_EXACT_PATHS) == 40
+    assert registry.ST12E_PREDECESSOR_CURRENTIZATION_EXACT_PATHS <= (
+        registry.ST12E_ALLOWED_EXACT_PATHS
+    )
+    assert not any("*" in path for path in registry.ST12E_ALLOWED_EXACT_PATHS)
+
+
+def test_st12e_validation_context_routes_only_exclusive_exact_paths() -> None:
+    expected = registry.ST12E_ALLOWED_EXACT_PATHS - (
+        registry.ST12A_ALLOWED_EXACT_PATHS
+        | registry.ST12A_SHARED_CURRENTIZATION_EXACT_PATHS
+        | registry.ST12B_ALLOWED_EXACT_PATHS
+        | registry.ST12C_ALLOWED_EXACT_PATHS
+        | registry.ST12E_PREDECESSOR_CURRENTIZATION_EXACT_PATHS
+    )
+
+    assert len(expected) == 12
+    assert registry.ST12E_VALIDATION_CONTEXT_EXACT_PATHS == expected
+    assert registry.ST12E_PREDECESSOR_CURRENTIZATION_EXACT_PATHS.isdisjoint(
+        registry.ST12E_VALIDATION_CONTEXT_EXACT_PATHS
+    )
+    for path in expected:
+        assert registry.is_pr_scoped_changed_path_allowed(FIXTURE_BRANCH, path)
+        assert not registry.is_pr_scoped_changed_path_allowed(
+            f"{FIXTURE_BRANCH}-copy", path
+        )
+
+
+@pytest.mark.parametrize("path", sorted(EXPECTED_ST12E_ALLOWED_EXACT_PATHS))
+def test_st12e_exact_paths_and_windows_forms_are_allowed(path: str) -> None:
+    assert registry.explain_pr_scope_decision(registry.ST12E_BRANCH, path) == {
+        "allowed": True,
+        "branch": registry.ST12E_BRANCH,
+        "normalized_path": path,
+        "pr_id": "ST12-TRANCHE-E",
+        "matched_rule": f"exact:{path}",
+        "reason": "registered_exact_path",
+    }
+    windows_path = ".\\" + path.replace("/", "\\")
+    assert registry.is_pr_scoped_changed_path_allowed(
+        registry.ST12E_BRANCH, windows_path
+    )
+    assert not registry.is_pr_scoped_changed_path_allowed(
+        registry.ST12E_BRANCH, f"{path}.copy"
+    )
+
+
+@pytest.mark.parametrize(
+    ("branch", "path"),
+    (
+        (
+            registry.ST12E_BRANCH,
+            "src/qtt/stage1_prediction_markets/"
+            "qku_computation_control_plane/runtime.py",
+        ),
+        (
+            registry.ST12E_BRANCH,
+            "docs/master_plan/QTT_MasterPlan_Current.md",
+        ),
+        (
+            registry.ST12E_BRANCH,
+            "tests/stage1_prediction_markets/"
+            "qku_computation_control_plane/tranche_e/test_extra.py",
+        ),
+        (
+            "agent/st12e-capability",
+            "src/qtt/stage1_prediction_markets/"
+            "qku_computation_control_plane/agent_policy.py",
+        ),
+        (
+            "agent/st12e-capability-guard-copy",
+            "src/qtt/stage1_prediction_markets/"
+            "qku_computation_control_plane/agent_policy.py",
+        ),
+        (
+            "Agent/st12e-capability-guard",
+            "src/qtt/stage1_prediction_markets/"
+            "qku_computation_control_plane/agent_policy.py",
+        ),
+    ),
+)
+def test_st12e_scope_rejects_unowned_paths_and_near_branches(
+    branch: str, path: str
 ) -> None:
     assert not registry.is_pr_scoped_changed_path_allowed(branch, path)
 

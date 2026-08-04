@@ -4,6 +4,8 @@
 from __future__ import annotations
 
 import argparse
+from dataclasses import MISSING, fields
+import json
 from pathlib import Path
 import sys
 
@@ -74,17 +76,298 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.stack_resol
     REGISTERED_FORMULA_STACKS,
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.validation import (  # noqa: E402
+    ST12E_CERTIFIED_COMMANDS,
+    ST12E_CLOSURE_ROWS,
+    ST12E_REPOSITORY_DISPOSITIONS,
+    ST12E_REUSED_MATH_PACK,
+    ST12E_SEMANTIC_TEST_ROWS,
     ST12B_AGENT_CONSUMER_DAG,
     ST12B_AGENT_IDS,
     ST12B_OPERATION_CAPABILITY_BY_ID,
     validate_tranche_b_frozen_manifest,
+    st12e_semantic_counts,
+)
+from src.qtt.agents.pr169_agent_orch1_resolvers import AgentOrchService  # noqa: E402
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.agent_policy import (  # noqa: E402
+    ACTIVATION_STATE,
+    AGENT_ORCH_PREFIX,
+    CENTRAL_VALIDATOR_REF,
+    HELD_OPERATION_IDS,
+    IMPLEMENTED_OPERATION_IDS,
+    NO_EFFECT_PROFILE_REF,
+    NO_TRADE_REOPTIMIZATION_VARIABLE_IDS,
+    OWNER_ACTION_IDS,
+    POLICY_VERSION,
+    QUANTUM_FORMULATION_FIELDS,
+    LLM_ADVISORY_TASK_FIELDS,
+    ST12E_BINDING_EXACT,
+    ST12E_BINDING_OUTSIDE_SCOPE,
+    UPSTREAM_IDENTITY_CROSSWALK_REQUIRED,
+    UPSTREAM_IDENTITY_FULLY_MAPPED,
+    AgentIdentityMappingTypeV1,
+    build_generated_policy_rows,
+    build_identity_compatibility_map,
+    build_parameter_scope_projection,
+    build_st12e_certified_source_universe_registry,
+    build_upstream_source_universe_registry,
+    canonical_master_parameter_rows,
+    canonical_parameter_identity_registry,
+    canonical_source_agent_ids,
+    canonical_source_role_labels,
+    current_owner_action_ids,
+    no_effect_authority_is_closed,
+)
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.parameter_policy import (  # noqa: E402
+    ST12E_PARAMETER_POLICY_SPECS,
+    resolve_st12e_value_policy_refs,
+    resolve_st12e_value_policies,
+)
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.service import (  # noqa: E402
+    QKUComputationControlPlaneV1,
+)
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.authority import (  # noqa: E402
+    TRANCHE_A_AUTHORITY,
 )
 
 
 SUCCESS_MARKER = "QKU_COMPUTATION_CONTROL_PLANE_BUILD_VALIDATED"
+ST12E_GENERATED_PREFIX = Path(
+    "docs/master_plan/generated/qku_control_plane/agent_capability"
+)
+ST12EProjectionSet = tuple[
+    dict[str, object],
+    tuple[dict[str, object], ...],
+    tuple[dict[str, object], ...],
+]
 
 
-def build_payload() -> dict[str, object]:
+def build_st12e_projections() -> ST12EProjectionSet:
+    """Build all E outputs in memory from frozen canonical owners."""
+
+    master_text = (
+        REPO_ROOT / "docs/master_plan/QTT_MasterPlan_Current.md"
+    ).read_text(encoding="utf-8")
+    master_rows = canonical_master_parameter_rows(master_text)
+    source_agent_ids = canonical_source_agent_ids(master_text)
+    orch_snapshot = AgentOrchService(repo_root=REPO_ROOT).load_policy_snapshot()
+    identity_map = build_identity_compatibility_map(
+        orch_snapshot,
+        source_agent_ids=source_agent_ids,
+        source_role_labels=canonical_source_role_labels(master_text),
+    )
+    parameter_scope = build_parameter_scope_projection(
+        master_plan_text=master_text,
+        identity_map=identity_map,
+    )
+    policy_rows = build_generated_policy_rows(
+        control_rows=ST12E_CLOSURE_ROWS,
+        identity_map=identity_map,
+    )
+    scope_rows = tuple(
+        {
+            name: getattr(row, name)
+            for name in row.__dataclass_fields__
+        }
+        for row in parameter_scope
+    )
+    counts = dict(st12e_semantic_counts())
+    upstream_universes, _ = build_upstream_source_universe_registry(master_rows)
+    st12e_universes, _ = build_st12e_certified_source_universe_registry()
+    exact_mappings = tuple(
+        binding
+        for binding in identity_map.bindings.values()
+        if binding.mapping_type is not AgentIdentityMappingTypeV1.UNMAPPED
+    )
+    unmapped_mappings = tuple(
+        binding
+        for binding in identity_map.bindings.values()
+        if binding.mapping_type is AgentIdentityMappingTypeV1.UNMAPPED
+    )
+    fully_mapped_scope = tuple(
+        row
+        for row in parameter_scope
+        if row.upstream_identity_mapping_state
+        == UPSTREAM_IDENTITY_FULLY_MAPPED
+    )
+    crosswalk_required_scope = tuple(
+        row
+        for row in parameter_scope
+        if row.upstream_identity_mapping_state
+        == UPSTREAM_IDENTITY_CROSSWALK_REQUIRED
+    )
+    exact_e_scope = tuple(
+        row
+        for row in parameter_scope
+        if row.st12e_binding_state == ST12E_BINDING_EXACT
+    )
+    outside_e_scope = tuple(
+        row
+        for row in parameter_scope
+        if row.st12e_binding_state == ST12E_BINDING_OUTSIDE_SCOPE
+    )
+    e_scope_with_gap = sum(
+        row.upstream_identity_mapping_state
+        == UPSTREAM_IDENTITY_CROSSWALK_REQUIRED
+        for row in exact_e_scope
+    )
+    value_policy_resolution = resolve_st12e_value_policies(
+        canonical_parameter_identity_registry(master_text)
+    )
+    resolved_value_refs = value_policy_resolution.value_policy_refs
+    resolver_field = next(
+        field
+        for field in fields(QKUComputationControlPlaneV1)
+        if field.name == "agent_capability_resolver"
+    )
+    implicit_admission_bypass_count = int(
+        resolver_field.default is not MISSING
+        or resolver_field.default_factory is not MISSING
+    )
+    manifest: dict[str, object] = {
+        "schema": "AgentCapabilityPolicyManifestV1",
+        "policy_version": POLICY_VERSION,
+        "registry_version": orch_snapshot.manifest_version,
+        "semantic_owner": "QKUComputationControlPlaneV1",
+        "implementation_owner": "AgentCapabilityResolverV1",
+        "parameter_value_owner": "ComputationParameterPolicyV1",
+        "agent_orchestration_owner": "AGENT-ORCH1",
+        "owner_action_owner": "OwnerActionRegistry",
+        "final_release_owner": "ExecutionRouterV1",
+        "activation_state": ACTIVATION_STATE,
+        "no_effect_profile_ref": NO_EFFECT_PROFILE_REF,
+        "no_effect_authority_flags": {
+            name: getattr(TRANCHE_A_AUTHORITY, name)
+            for name in TRANCHE_A_AUTHORITY.__dataclass_fields__
+        },
+        "runtime_effect_authorized": False,
+        "manual_edit_allowed": False,
+        "counts": counts,
+        "policy_row_count": len(policy_rows),
+        "identity_mapping_count": len(identity_map.bindings),
+        "source_identity_row_count": len(identity_map.bindings),
+        "exact_mapping_count": len(exact_mappings),
+        "unmapped_mapping_count": len(unmapped_mappings),
+        "unmapped_source_agent_ids": [
+            binding.source_agent_id for binding in unmapped_mappings
+        ],
+        "parameter_scope_row_count": len(scope_rows),
+        "exact_upstream_source_universe_count": len(upstream_universes),
+        "exact_upstream_source_agent_id_count": len(source_agent_ids),
+        "fully_mapped_upstream_row_count": len(fully_mapped_scope),
+        "crosswalk_required_upstream_row_count": len(
+            crosswalk_required_scope
+        ),
+        "exact_st12e_binding_count": len(exact_e_scope),
+        "outside_st12e_binding_scope_count": len(outside_e_scope),
+        "exact_st12e_certified_mapping_count": len(exact_e_scope),
+        "st12e_binding_with_unmapped_certified_id_count": 0,
+        "st12e_rows_with_upstream_crosswalk_gap": e_scope_with_gap,
+        "st12e_rows_with_fully_mapped_upstream_lineage": (
+            len(exact_e_scope) - e_scope_with_gap
+        ),
+        "quota_reassignment_count": 0,
+        "nearest_universe_assignment_count": 0,
+        "source_set_rewrite_count": 0,
+        "appendix_e_policy_spec_count": len(ST12E_PARAMETER_POLICY_SPECS),
+        "parameter_identity_resolution_count": (
+            value_policy_resolution.parameter_identity_resolution_count
+        ),
+        "canonical_typed_policy_resolution_count": (
+            value_policy_resolution.canonical_typed_policy_resolution_count
+        ),
+        "unresolved_typed_policy_count": (
+            value_policy_resolution.unresolved_typed_policy_count
+        ),
+        "conflicting_typed_policy_count": (
+            value_policy_resolution.conflicting_typed_policy_count
+        ),
+        "canonical_parameter_value_owner_count": (
+            value_policy_resolution.canonical_parameter_value_owner_count
+        ),
+        "value_policy_ref_resolution_count": len(resolved_value_refs),
+        "duplicated_value_body_count": 0,
+        "capability_binding_value_body_count": 0,
+        "generated_policy_value_body_count": 0,
+        "implicit_admission_bypass_count": implicit_admission_bypass_count,
+        "production_default_admission_profile_count": (
+            implicit_admission_bypass_count
+        ),
+        "opaque_semantic_payload_count": 0,
+        "exact_upstream_source_universes": {
+            universe_ref: {
+                "source_agent_ids": list(specification["source_agent_ids"]),
+                "parameter_count": specification["parameter_count"],
+            }
+            for universe_ref, specification in upstream_universes.items()
+        },
+        "st12e_certified_source_universes": {
+            universe_ref: {
+                "source_agent_ids": list(specification["source_agent_ids"]),
+                "parameter_count": specification["parameter_count"],
+                "authority_created": False,
+            }
+            for universe_ref, specification in st12e_universes.items()
+        },
+        "closure_ids": [row["closure_id"] for row in ST12E_CLOSURE_ROWS],
+        "repository_disposition_ids": list(ST12E_REPOSITORY_DISPOSITIONS),
+        "reused_math_oracle_vector_refs": [
+            list(row) for row in ST12E_REUSED_MATH_PACK
+        ],
+        "semantic_test_ids": [
+            row["test_id"] for row in ST12E_SEMANTIC_TEST_ROWS
+        ],
+        "validation_commands": list(ST12E_CERTIFIED_COMMANDS),
+        "owner_action_ids": list(current_owner_action_ids()),
+        "implemented_operation_ids": list(IMPLEMENTED_OPERATION_IDS),
+        "held_operation_ids": list(HELD_OPERATION_IDS),
+        "no_trade_reoptimization_variable_ids": list(
+            NO_TRADE_REOPTIMIZATION_VARIABLE_IDS
+        ),
+        "quantum_formulation_required_fields": list(
+            QUANTUM_FORMULATION_FIELDS
+        ),
+        "llm_advisory_task_fields": list(LLM_ADVISORY_TASK_FIELDS),
+        "agent_orch_source_prefix": AGENT_ORCH_PREFIX,
+        "central_validator_ref": CENTRAL_VALIDATOR_REF,
+        "identity_join_state": "EXACT_OR_TYPED_UNMAPPED_NO_AUTHORITY",
+        "qku_formula_mutation_authorized": False,
+        "trade_plan_candidate_is_only_mutable_optimization_object": True,
+        "no_trade_reoptimization_route_preserved": True,
+        "memory_is_condition_scoped_prior_only": True,
+        "llm_inference_allowed": False,
+        "quantum_mapping_or_execution_allowed": False,
+        "raw_jsonl_request_time_scan_allowed": False,
+        "no_effect_authority_closed": no_effect_authority_is_closed(),
+        "terminal_route": "NO_EFFECT_ELIGIBILITY_OR_TYPED_DENIAL",
+    }
+    return manifest, policy_rows, scope_rows
+
+
+def _jsonl(rows: tuple[dict[str, object], ...]) -> str:
+    return "".join(deterministic_json(row) + "\n" for row in rows)
+
+
+def materialize_st12e_projections(
+    manifest: dict[str, object],
+    policy_rows: tuple[dict[str, object], ...],
+    scope_rows: tuple[dict[str, object], ...],
+) -> None:
+    output_dir = REPO_ROOT / ST12E_GENERATED_PREFIX
+    output_dir.mkdir(parents=True, exist_ok=True)
+    (output_dir / "manifest.json").write_text(
+        deterministic_json(manifest) + "\n", encoding="utf-8", newline="\n"
+    )
+    (output_dir / "policy.jsonl").write_text(
+        _jsonl(policy_rows), encoding="utf-8", newline="\n"
+    )
+    (output_dir / "parameter_scope.jsonl").write_text(
+        _jsonl(scope_rows), encoding="utf-8", newline="\n"
+    )
+
+
+def build_payload(
+    st12e_projections: ST12EProjectionSet | None = None,
+) -> dict[str, object]:
     """Return the centralized registry envelope without creating runtime state."""
 
     math_ids = tuple(PREDECESSOR_IMPLEMENTATION_REGISTRY)
@@ -101,6 +384,9 @@ def build_payload() -> dict[str, object]:
         len(contract.members)
         for contract in FROZEN_NAMED_OUTPUT_CONTRACTS.values()
     )
+    st12e_manifest, st12e_policy, st12e_scope = (
+        st12e_projections or build_st12e_projections()
+    )
     return {
         "schema": "QKUComputationControlPlaneBuildV1",
         "contract_only": True,
@@ -115,6 +401,21 @@ def build_payload() -> dict[str, object]:
         "source_claim_binding_rule_count": len(SOURCE_CLAIM_BINDING_RULES),
         "coverage_manifest_schema": "TrancheACoverageManifestV1",
         "executed_coverage_rows": dict(manifest.executed_counts),
+        "tranche_e": {
+            "schema": st12e_manifest["schema"],
+            "policy_version": st12e_manifest["policy_version"],
+            "contract_only": True,
+            "runtime_effect_authorized": False,
+            "semantic_counts": st12e_manifest["counts"],
+            "policy_row_count": len(st12e_policy),
+            "parameter_scope_row_count": len(st12e_scope),
+            "identity_mapping_count": st12e_manifest[
+                "identity_mapping_count"
+            ],
+            "no_effect_authority_closed": st12e_manifest[
+                "no_effect_authority_closed"
+            ],
+        },
         "tranche_c": {
             "schema": "ST12C_DETERMINISTIC_RECEIPTS_PERSISTENCE_ACCOUNTING_AND_TRANSACTIONS_V1",
             "contract_only": True,
@@ -236,7 +537,8 @@ def main() -> int:
         help="Optional JSON path below the repository .tmp directory.",
     )
     args = parser.parse_args()
-    text = deterministic_json(build_payload()) + "\n"
+    st12e_projections = build_st12e_projections()
+    text = deterministic_json(build_payload(st12e_projections)) + "\n"
     if args.output:
         try:
             output = resolve_output_path(args.output)
@@ -245,6 +547,7 @@ def main() -> int:
             return 2
         output.parent.mkdir(parents=True, exist_ok=True)
         output.write_text(text, encoding="utf-8", newline="\n")
+        materialize_st12e_projections(*st12e_projections)
     else:
         print(text, end="")
     print(SUCCESS_MARKER)

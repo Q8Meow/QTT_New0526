@@ -38,12 +38,13 @@ EXPECTED_PRODUCTION_FILES = {
     "idempotency.py",
     "rollback.py",
     "accounting.py",
+    "agent_policy.py",
     "lifecycle.py",
     "sqlite_reference.py",
 }
 
 
-def test_production_package_is_exactly_the_collapsed_38_files() -> None:
+def test_production_package_is_exactly_the_collapsed_39_files() -> None:
     root = Path(__file__).resolve().parents[4]
     package = (
         root
