@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections import Counter
 import json
+import re
 
 import pytest
 
@@ -16,8 +17,10 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.agent_polic
     UPSTREAM_IDENTITY_CROSSWALK_REQUIRED,
     UPSTREAM_IDENTITY_FULLY_MAPPED,
     AgentIdentityMappingTypeV1,
+    build_st12e_certified_source_universe_registry,
     build_upstream_source_universe_registry,
     canonical_master_parameter_rows,
+    stable_source_universe_ref,
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import (
     AuthorityDeniedError,
@@ -28,7 +31,11 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.implementat
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.parameter_policy import (
     ST12E_PARAMETER_CAPABILITY_BINDINGS,
+    ST12E_PARAMETER_POLICIES,
+    ST12E_PARAMETER_POLICY_SPECS,
+    get_parameter_policy,
     resolve_st12e_value_policy_refs,
+    resolve_st12e_value_policies,
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.validation import (
     ST12E_CERTIFIED_COMMANDS,
@@ -100,8 +107,18 @@ def test_manifest_owns_exact_semantic_and_identity_denominators() -> None:
     assert manifest["quota_reassignment_count"] == 0
     assert manifest["nearest_universe_assignment_count"] == 0
     assert manifest["source_set_rewrite_count"] == 0
+    assert manifest["appendix_e_policy_spec_count"] == 87
+    assert manifest["parameter_identity_resolution_count"] == 87
+    assert manifest["canonical_typed_policy_resolution_count"] == 87
+    assert manifest["unresolved_typed_policy_count"] == 0
+    assert manifest["conflicting_typed_policy_count"] == 0
+    assert manifest["canonical_parameter_value_owner_count"] == 1
     assert manifest["value_policy_ref_resolution_count"] == 87
     assert manifest["duplicated_value_body_count"] == 0
+    assert manifest["capability_binding_value_body_count"] == 0
+    assert manifest["generated_policy_value_body_count"] == 0
+    assert manifest["implicit_admission_bypass_count"] == 0
+    assert manifest["production_default_admission_profile_count"] == 0
     assert manifest["opaque_semantic_payload_count"] == 0
     assert "parameter_scope_distribution_is_aggregate_only" not in manifest
     assert manifest["runtime_effect_authorized"] is False
@@ -201,6 +218,10 @@ def test_all_3810_upstream_source_sets_and_partial_mappings_are_preserved() -> N
 
     assert len(master_rows) == len(generated_rows) == 3810
     assert len(universe_registry) == 67
+    assert all(
+        not re.fullmatch(r"UPSTREAM_SOURCE_UNIVERSE::\d+", ref)
+        for ref in universe_registry
+    )
     assert manifest["exact_upstream_source_universes"] == {
         ref: {
             "source_agent_ids": list(spec["source_agent_ids"]),
@@ -232,6 +253,29 @@ def test_all_3810_upstream_source_sets_and_partial_mappings_are_preserved() -> N
             else UPSTREAM_IDENTITY_FULLY_MAPPED
         )
 
+    sample_source_ids = master_rows[0][2]
+    sample_ref = universe_refs[sample_source_ids]
+    augmented_registry, augmented_refs = build_upstream_source_universe_registry(
+        (*master_rows, ("ST10-PARAM::UNRELATED", "unrelated", ("AGENT_RT_02",)))
+    )
+    assert augmented_refs[sample_source_ids] == sample_ref
+    assert sample_ref in augmented_registry
+
+    st12e_registry, st12e_refs = (
+        build_st12e_certified_source_universe_registry()
+    )
+    assert len(st12e_registry) == len(st12e_refs) == 6
+    assert all(
+        ref
+        == stable_source_universe_ref(
+            "ST12E_CERTIFIED_SOURCE_UNIVERSE", source_ids
+        )
+        and not re.fullmatch(
+            r"ST12E_CERTIFIED_SOURCE_UNIVERSE::\d+", ref
+        )
+        for source_ids, ref in st12e_refs.items()
+    )
+
 
 def test_e_binding_state_is_orthogonal_and_value_refs_are_canonical() -> None:
     master_text = (
@@ -243,6 +287,7 @@ def test_e_binding_state_is_orthogonal_and_value_refs_are_canonical() -> None:
             master_text
         )
     }
+    policy_resolution = resolve_st12e_value_policies(master_identities)
     resolved = resolve_st12e_value_policy_refs(master_identities)
     scope = policy_store().snapshot.parameter_scope_rows
     exact_rows = {
@@ -264,6 +309,13 @@ def test_e_binding_state_is_orthogonal_and_value_refs_are_canonical() -> None:
 
     assert set(exact_rows) == set(ST12E_PARAMETER_CAPABILITY_BINDINGS)
     assert len(exact_rows) == len(resolved) == 87
+    assert len(ST12E_PARAMETER_POLICY_SPECS) == 87
+    assert len(ST12E_PARAMETER_POLICIES) == 87
+    assert policy_resolution.parameter_identity_resolution_count == 87
+    assert policy_resolution.canonical_typed_policy_resolution_count == 87
+    assert policy_resolution.unresolved_typed_policy_count == 0
+    assert policy_resolution.conflicting_typed_policy_count == 0
+    assert policy_resolution.canonical_parameter_value_owner_count == 1
     assert len(outside_rows) == 3723
     assert len(exact_with_upstream_gap) == 34
     assert all(
@@ -280,6 +332,24 @@ def test_e_binding_state_is_orthogonal_and_value_refs_are_canonical() -> None:
         )
         for parameter_id, binding in ST12E_PARAMETER_CAPABILITY_BINDINGS.items()
     )
+    resolution_classes = {
+        spec.resolution_class for spec in ST12E_PARAMETER_POLICY_SPECS
+    }
+    resolved_classes = set()
+    for spec in ST12E_PARAMETER_POLICY_SPECS:
+        policy = get_parameter_policy(spec.parameter_id)
+        assert policy is ST12E_PARAMETER_POLICIES[spec.parameter_id]
+        assert policy.parameter_id == spec.parameter_id
+        assert policy.parameter_symbol == spec.parameter_symbol
+        assert policy.appendix_e_value_semantics is spec
+        assert policy.effective_day1_seed_value_or_resolution_rule
+        assert policy.effective_unit_or_basis
+        assert policy.effective_reference_range_or_structural_constraint
+        assert policy.precision_and_rounding_policy
+        assert policy.effective_fallback_behavior_when_value_unavailable
+        assert policy.effective_source_state_refs
+        resolved_classes.add(policy.effective_resolution_class)
+    assert resolved_classes == resolution_classes
 
 
 def test_e_policy_rows_are_reference_only_and_payloads_are_readable() -> None:

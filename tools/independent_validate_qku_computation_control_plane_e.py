@@ -14,6 +14,8 @@ from typing import Any
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 PACKAGE = (
     REPO_ROOT
     / "src/qtt/stage1_prediction_markets/qku_computation_control_plane"
@@ -155,11 +157,104 @@ VALUE_BODY_FIELDS = {
     "value_source_class",
     "source_state_refs",
 }
+EXPECTED_APPENDIX_E_SPEC_FIELDS = {
+    "bounded_search_space_or_fit_constraint",
+    "capability_binding_owner",
+    "capability_binding_rule",
+    "certified_source_agent_id_class",
+    "certified_source_agent_ids",
+    "certified_source_owner",
+    "current_agent_identity_resolution_rule",
+    "day1_seed_or_resolution_rule",
+    "default_authority_class",
+    "fallback_behavior_when_value_unavailable",
+    "family_evidence_binding_ref",
+    "formula_or_qku_mutation_authorized_by_st12e",
+    "implementation_resolution_kind",
+    "launch_computability_state",
+    "missing_stale_invalid_behavior",
+    "no_trade_fallback_preserved",
+    "parameter_audit_id",
+    "parameter_id",
+    "parameter_symbol",
+    "precision_and_rounding_policy",
+    "reference_range_or_structural_constraint",
+    "resolution_class",
+    "runtime_agent_selection_rule",
+    "runtime_parameter_key",
+    "runtime_resolution_procedure",
+    "source_state_refs",
+    "step12_implementation_route",
+    "underlying_value_semantics_owner",
+    "unit_or_basis",
+    "value_mutation_authorized_by_st12e",
+    "value_source_class",
+}
+MASTER_VALUE_FIELDS = {
+    "day1_seed_or_resolution_rule": "day1_seed_value_or_resolution_rule",
+    "reference_range_or_structural_constraint": (
+        "reference_range_or_structural_constraint"
+    ),
+    "bounded_search_space_or_fit_constraint": (
+        "bounded_search_space_or_fit_constraint"
+    ),
+    "unit_or_basis": "unit_or_basis",
+    "resolution_class": "resolution_class",
+    "value_source_class": "value_source_class",
+}
+EXPECTED_APPENDIX_E_MASTER_CURRENTIZATIONS = {
+    ("ST10-PARAM::0399", "bounded_search_space_or_fit_constraint"): (
+        "plugin may not go beyond read-only or triggered live-concurrent "
+        "shadow-comparison-only if the schema version is missing or incompatible",
+        "plugin may not go beyond read-only or applicable shadow-observe or "
+        "live-twin comparison-only if the schema version is missing or incompatible",
+    ),
+    ("ST10-PARAM::0541", "bounded_search_space_or_fit_constraint"): (
+        "no preset may enter triggered live-concurrent shadow comparison or live "
+        "solely from label strength without the full hidden-parent objective card, "
+        "comparator bundle, decision family, parameter pack, objective formula, "
+        "and extractability state",
+        "no preset may enter applicable shadow-observe or live-twin comparison or "
+        "live solely from label strength without the full hidden-parent objective "
+        "card, comparator bundle, decision family, parameter pack, objective "
+        "formula, and extractability state",
+    ),
+    ("ST10-PARAM::3078", "bounded_search_space_or_fit_constraint"): (
+        "remote-provider paths may not widen task scope outside the declared enum "
+        "without a new controlling-edition row",
+        "remote-provider paths may not widen task scope outside the declared enum "
+        "without a new canonical-version row",
+    ),
+    ("ST10-PARAM::3354", "reference_range_or_structural_constraint"): (
+        "{DIFFERENT_AGENT_ID_AND_DIFFERENT_REASONING_CHAIN_REQUIRED,"
+        "DIFFERENT_AGENT_ID_ONLY,"
+        "DIFFERENT_LANE_AND_AGENT_ID_REQUIRED_FOR_DIRECT_LIVE_EXCEPTION}",
+        "{DIFFERENT_AGENT_ID_AND_DIFFERENT_REASONING_CHAIN_REQUIRED,"
+        "DIFFERENT_AGENT_ID_ONLY,"
+        "DIFFERENT_LANE_AND_AGENT_ID_REQUIRED_FOR_HIGH_RISK_LIVE_CANDIDATE_REVIEW}",
+    ),
+    ("ST10-PARAM::3354", "bounded_search_space_or_fit_constraint"): (
+        "direct-live exception paths may not weaken below the declared stricter "
+        "independence class",
+        "high-risk live-candidate review paths may not weaken below the declared "
+        "stricter independence class",
+    ),
+    ("ST10-PARAM::3355", "bounded_search_space_or_fit_constraint"): (
+        "owner-declared exception lists remain research-only and may not silently "
+        "govern direct-live exception review",
+        "owner-declared exception lists remain research-only and may not silently "
+        "govern high-risk live-candidate review review",
+    ),
+}
 _UNIVERSE_LINE = re.compile(
     r"\{\s*((?:AGENT_(?:RT|NL|OFF)_\d{2})"
     r"(?:\s*,\s*AGENT_(?:RT|NL|OFF)_\d{2})*)\s*\}"
 )
 _PARAMETER_LINE = re.compile(r"`parameter_symbol`\s*:\s*`([^`]+)`")
+_MASTER_VALUE_LINE = re.compile(
+    r"^\s+- `([^`]+)`:\s*(?:`([^`]*)`|(.*?))\s*$"
+)
+_SOURCE_AGENT_TOKEN = re.compile(r"^AGENT_(RT|NL|OFF)_(\d{2})$")
 
 
 def _jsonl(path: Path) -> tuple[dict[str, object], ...]:
@@ -199,6 +294,27 @@ def _canonical_parameter_rows() -> tuple[
     return tuple(rows)
 
 
+def _canonical_parameter_semantics() -> dict[str, dict[str, str]]:
+    """Parse independently available canonical value fields by ST10 identity."""
+
+    rows: list[dict[str, str]] = []
+    current: dict[str, str] | None = None
+    for line in MASTER_PLAN.read_text(encoding="utf-8").splitlines():
+        if match := _PARAMETER_LINE.search(line):
+            current = {
+                "parameter_id": f"ST10-PARAM::{len(rows) + 1:04d}",
+                "parameter_symbol": match.group(1),
+            }
+            rows.append(current)
+            continue
+        if current is None or not (match := _MASTER_VALUE_LINE.match(line)):
+            continue
+        name = match.group(1)
+        value = match.group(2) if match.group(2) is not None else match.group(3)
+        current[name] = str(value).strip()
+    return {row["parameter_id"]: row for row in rows}
+
+
 def _assignment_literal(tree: ast.Module, name: str) -> Any:
     for node in tree.body:
         target: ast.expr | None = None
@@ -218,6 +334,40 @@ def _assignment_literal(tree: ast.Module, name: str) -> Any:
             value = value.args[0]
         return ast.literal_eval(value)
     raise ValueError(f"literal declaration {name} is missing")
+
+
+def _typed_call_rows(
+    tree: ast.Module,
+    assignment_name: str,
+    call_name: str,
+) -> tuple[dict[str, object], ...]:
+    assignment_value: ast.expr | None = None
+    for node in tree.body:
+        if (
+            isinstance(node, ast.AnnAssign)
+            and isinstance(node.target, ast.Name)
+            and node.target.id == assignment_name
+        ):
+            assignment_value = node.value
+            break
+    if not isinstance(assignment_value, ast.Tuple):
+        raise ValueError(f"typed declaration {assignment_name} is not a tuple")
+    rows: list[dict[str, object]] = []
+    for element in assignment_value.elts:
+        if (
+            not isinstance(element, ast.Call)
+            or not isinstance(element.func, ast.Name)
+            or element.func.id != call_name
+            or element.args
+        ):
+            raise ValueError(f"{assignment_name} contains a non-{call_name} row")
+        row: dict[str, object] = {}
+        for keyword in element.keywords:
+            if keyword.arg is None:
+                raise ValueError(f"{assignment_name} uses keyword expansion")
+            row[keyword.arg] = ast.literal_eval(keyword.value)
+        rows.append(row)
+    return tuple(rows)
 
 
 def _class_methods(
@@ -242,14 +392,29 @@ def _source_universe_registry(
     counts = Counter(source_ids for _, _, source_ids in rows)
     definitions: dict[str, dict[str, object]] = {}
     refs: dict[tuple[str, ...], str] = {}
-    for index, source_ids in enumerate(sorted(counts), start=1):
-        ref = f"UPSTREAM_SOURCE_UNIVERSE::{index:03d}"
+    for source_ids in sorted(counts):
+        ref = _stable_source_universe_ref(
+            "UPSTREAM_SOURCE_UNIVERSE", source_ids
+        )
         definitions[ref] = {
             "source_agent_ids": list(source_ids),
             "parameter_count": counts[source_ids],
         }
         refs[source_ids] = ref
     return definitions, refs
+
+
+def _stable_source_universe_ref(
+    namespace: str,
+    source_ids: tuple[str, ...],
+) -> str:
+    tokens: list[str] = []
+    for source_id in source_ids:
+        match = _SOURCE_AGENT_TOKEN.fullmatch(source_id)
+        if match is None:
+            raise ValueError(f"invalid source identity: {source_id}")
+        tokens.append(f"{match.group(1)}{match.group(2)}")
+    return f"{namespace}::{'-'.join(tokens)}"
 
 
 def _behavioral_probe() -> tuple[bool, str]:
@@ -346,13 +511,20 @@ def decision(state, reasons, route):
 
 registry = CanonicalOwnerPacketRegistryV1()
 try:
+    QKUComputationControlPlaneV1(registry)
+except TypeError:
+    omitted_closed = True
+else:
+    omitted_closed = False
+
+try:
     QKUComputationControlPlaneV1(
         registry, agent_capability_resolver=None
     )
 except ContractValidationError:
-    missing_closed = True
+    explicit_none_closed = True
 else:
-    missing_closed = False
+    explicit_none_closed = False
 
 class Malformed:
     def admit_operation(self, request):
@@ -369,21 +541,23 @@ else:
     malformed_closed = False
 
 denied_request = ProbeRequest()
+denied_admission = Admission(
+    decision(
+        AgentCapabilityDecisionStateV1.DENIED,
+        (ReasonCode.DIRECT_PROVIDER_FORBIDDEN,),
+        "DENY_TASK",
+    )
+)
 try:
     QKUComputationControlPlaneV1(
         registry,
-        agent_capability_resolver=Admission(
-            decision(
-                AgentCapabilityDecisionStateV1.DENIED,
-                (ReasonCode.DIRECT_PROVIDER_FORBIDDEN,),
-                "DENY_TASK",
-            )
-        ),
+        agent_capability_resolver=denied_admission,
     ).resolve_identity(denied_request)
 except AuthorityDeniedError as exc:
     denied_closed = (
         not isinstance(exc, NoTradeReoptimizationRouteError)
         and denied_request.body_reads == 0
+        and denied_admission.calls == 1
     )
 else:
     denied_closed = False
@@ -394,10 +568,11 @@ no_trade_packet = decision(
     "PRETRADE1_BOUNDED_TRADEPLAN_VARIABLE_REOPTIMIZATION",
 )
 no_trade_request = ProbeRequest()
+no_trade_admission = Admission(no_trade_packet)
 try:
     QKUComputationControlPlaneV1(
         registry,
-        agent_capability_resolver=Admission(no_trade_packet),
+        agent_capability_resolver=no_trade_admission,
     ).resolve_identity(no_trade_request)
 except NoTradeReoptimizationRouteError as exc:
     no_trade_closed = (
@@ -407,6 +582,7 @@ except NoTradeReoptimizationRouteError as exc:
         == "PRETRADE1_BOUNDED_TRADEPLAN_VARIABLE_REOPTIMIZATION"
         and "formula_scope_refs=MATH-01" in exc.decision.scope_refs
         and exc.decision.runtime_effect_authorized is False
+        and no_trade_admission.calls == 1
     )
 else:
     no_trade_closed = False
@@ -417,18 +593,22 @@ eligible_packet = decision(
     "QKUComputationControlPlaneV1_NO_EFFECT_REQUEST",
 )
 eligible_request = ProbeRequest()
+eligible_admission = Admission(eligible_packet)
 try:
     QKUComputationControlPlaneV1(
         registry,
-        agent_capability_resolver=Admission(eligible_packet),
+        agent_capability_resolver=eligible_admission,
     ).resolve_identity(eligible_request)
 except BodyTouched:
-    eligible_proceeds = eligible_request.body_reads == 1
+    eligible_proceeds = (
+        eligible_request.body_reads == 1 and eligible_admission.calls == 1
+    )
 else:
     eligible_proceeds = False
 
 passed = (
-    missing_closed
+    omitted_closed
+    and explicit_none_closed
     and malformed_closed
     and denied_closed
     and no_trade_closed
@@ -437,7 +617,8 @@ passed = (
 if not passed:
     raise SystemExit(
         "behavioral probe failed "
-        f"missing={missing_closed} malformed={malformed_closed} "
+        f"omitted={omitted_closed} none={explicit_none_closed} "
+        f"malformed={malformed_closed} "
         f"denied={denied_closed} no_trade={no_trade_closed} "
         f"eligible={eligible_proceeds}"
     )
@@ -466,6 +647,7 @@ def validate_domain(domain: str) -> list[str]:
         policy = _jsonl(ARTIFACTS / "policy.jsonl")
         parameter_scope = _jsonl(ARTIFACTS / "parameter_scope.jsonl")
         master_rows = _canonical_parameter_rows()
+        master_semantics = _canonical_parameter_semantics()
     except (OSError, ValueError, json.JSONDecodeError) as exc:
         return [f"canonical or generated E data cannot be loaded: {exc}"]
 
@@ -551,6 +733,11 @@ def validate_domain(domain: str) -> list[str]:
         e_references = _assignment_literal(
             parameter_tree, "_ST12E_PARAMETER_CAPABILITY_REFERENCES"
         )
+        appendix_e_specs = _typed_call_rows(
+            parameter_tree,
+            "ST12E_PARAMETER_POLICY_SPECS",
+            "ST12EParameterValueSemanticsV1",
+        )
         exact_mapping_spec = _assignment_literal(
             agent_tree, "_SOURCE_IDENTITY_SPEC"
         )
@@ -558,7 +745,81 @@ def validate_domain(domain: str) -> list[str]:
         failures.append(f"readable E source declarations cannot be parsed: {exc}")
         source_groups = {}
         e_references = ()
+        appendix_e_specs = ()
         exact_mapping_spec = ()
+
+    appendix_e_spec_by_id = {
+        str(row.get("parameter_id") or ""): row for row in appendix_e_specs
+    }
+    appendix_e_symbols = {
+        str(row.get("parameter_symbol") or "") for row in appendix_e_specs
+    }
+    malformed_appendix_e_specs = tuple(
+        str(row.get("parameter_id") or "MISSING")
+        for row in appendix_e_specs
+        if set(row) != EXPECTED_APPENDIX_E_SPEC_FIELDS
+        or row.get("underlying_value_semantics_owner")
+        != "QKUComputationControlPlaneV1.ComputationParameterPolicyV1"
+        or row.get("capability_binding_owner") != "AgentCapabilityResolverV1"
+        or row.get("value_mutation_authorized_by_st12e") is not False
+        or row.get("formula_or_qku_mutation_authorized_by_st12e") is not False
+        or row.get("no_trade_fallback_preserved") is not True
+        or not row.get("precision_and_rounding_policy")
+        or not row.get("runtime_resolution_procedure")
+        or not row.get("source_state_refs")
+    )
+    if (
+        len(appendix_e_specs) != 87
+        or len(appendix_e_spec_by_id) != 87
+        or len(appendix_e_symbols) != 87
+        or malformed_appendix_e_specs
+    ):
+        failures.append(
+            "readable Appendix-E policy specs are not exact typed 87-row closure "
+            f"malformed={malformed_appendix_e_specs[:3]}"
+        )
+
+    master_semantic_mismatches: list[str] = []
+    for parameter_id, spec in appendix_e_spec_by_id.items():
+        canonical = master_semantics.get(parameter_id, {})
+        if canonical.get("parameter_symbol") != spec.get("parameter_symbol"):
+            master_semantic_mismatches.append(parameter_id)
+            continue
+        for spec_field, master_field in MASTER_VALUE_FIELDS.items():
+            master_value = canonical.get(master_field)
+            spec_value = spec.get(spec_field)
+            authorized_currentization = (
+                EXPECTED_APPENDIX_E_MASTER_CURRENTIZATIONS.get(
+                    (parameter_id, spec_field)
+                )
+            )
+            if master_value != spec_value and authorized_currentization != (
+                master_value,
+                spec_value,
+            ):
+                master_semantic_mismatches.append(
+                    f"{parameter_id}:{spec_field}"
+                )
+                break
+    if master_semantic_mismatches:
+        failures.append(
+            "Appendix-E specs differ from canonical master semantic fields: "
+            f"{master_semantic_mismatches[:3]}"
+        )
+
+    polymarket_batch = appendix_e_spec_by_id.get("ST10-PARAM::2207", {})
+    if (
+        polymarket_batch.get("parameter_symbol") != "pm_batch_limit"
+        or polymarket_batch.get("day1_seed_or_resolution_rule")
+        != (
+            "15_FOR_CURRENT_PUBLIC_POLYMARKET_BATCH_ORDERS_CAP_UNLESS_A_NEWER_"
+            "OFFICIAL_CONNECTOR_RECEIPT_DECLARES_OTHERWISE"
+        )
+        or "FAIL_CLOSED" not in str(
+            polymarket_batch.get("fallback_behavior_when_value_unavailable")
+        )
+    ):
+        failures.append("Polymarket batch cap is not exact 15/receipt/fail-closed policy")
 
     source_ids = tuple(
         sorted(
@@ -642,6 +903,18 @@ def validate_domain(domain: str) -> list[str]:
         or manifest.get("exact_upstream_source_agent_id_count") != 25
     ):
         failures.append("exact 67-universe registry differs from canonical rows")
+    if any(
+        re.fullmatch(r"UPSTREAM_SOURCE_UNIVERSE::\d+", ref)
+        for ref in expected_universe_defs
+    ):
+        failures.append("upstream source-universe references remain ordinal")
+    sample_source_ids = master_rows[0][2]
+    sample_ref = expected_universe_refs[sample_source_ids]
+    augmented_defs, augmented_refs = _source_universe_registry(
+        (*master_rows, ("ST10-PARAM::UNRELATED", "unrelated", ("AGENT_RT_02",)))
+    )
+    if augmented_refs.get(sample_source_ids) != sample_ref or sample_ref not in augmented_defs:
+        failures.append("unrelated source-set addition renumbers an existing reference")
 
     scope_by_id = {
         str(row.get("parameter_id") or ""): row for row in parameter_scope
@@ -731,21 +1004,80 @@ def validate_domain(domain: str) -> list[str]:
     if (
         len(e_reference_by_id) != 87
         or set(binding_by_id) != set(e_reference_by_id)
+        or set(appendix_e_spec_by_id) != set(e_reference_by_id)
         or len(bindings) != 87
     ):
         failures.append("E capability binding registry is not the exact 87 rows")
+
+    typed_policy_resolution_count = 0
+    typed_policy_conflict_count = 0
+    typed_policy_unresolved_count = 0
+    typed_policy_owner_refs: set[str] = set()
+    try:
+        from src.qtt.stage1_prediction_markets.qku_computation_control_plane.parameter_policy import (
+            get_parameter_policy,
+        )
+
+        for parameter_id, (symbol, _) in e_reference_by_id.items():
+            try:
+                typed_policy = get_parameter_policy(parameter_id)
+            except Exception:
+                typed_policy_unresolved_count += 1
+                continue
+            semantics = getattr(typed_policy, "appendix_e_value_semantics", None)
+            expected_spec = appendix_e_spec_by_id.get(parameter_id, {})
+            if (
+                getattr(typed_policy, "parameter_id", None) != parameter_id
+                or getattr(typed_policy, "parameter_symbol", None) != symbol
+                or semantics is None
+                or any(
+                    getattr(semantics, field, object()) != expected_spec.get(field)
+                    for field in EXPECTED_APPENDIX_E_SPEC_FIELDS
+                )
+            ):
+                typed_policy_conflict_count += 1
+                continue
+            typed_policy_resolution_count += 1
+            typed_policy_owner_refs.add(
+                str(getattr(typed_policy, "canonical_owner", ""))
+            )
+    except Exception as exc:
+        failures.append(f"canonical typed policy accessor cannot load: {exc}")
+        typed_policy_unresolved_count = 87
+
+    if (
+        typed_policy_resolution_count != 87
+        or typed_policy_unresolved_count != 0
+        or typed_policy_conflict_count != 0
+        or typed_policy_owner_refs
+        != {"QKUComputationControlPlaneV1.ComputationParameterPolicyV1"}
+        or manifest.get("appendix_e_policy_spec_count") != 87
+        or manifest.get("parameter_identity_resolution_count") != 87
+        or manifest.get("canonical_typed_policy_resolution_count") != 87
+        or manifest.get("unresolved_typed_policy_count") != 0
+        or manifest.get("conflicting_typed_policy_count") != 0
+        or manifest.get("canonical_parameter_value_owner_count") != 1
+    ):
+        failures.append(
+            "canonical accessor does not close actual Appendix-E typed policies "
+            f"resolved={typed_policy_resolution_count} "
+            f"unresolved={typed_policy_unresolved_count} "
+            f"conflicting={typed_policy_conflict_count}"
+        )
     e_source_sets = Counter(
         tuple(source_groups[group_id])
         for _, group_id in e_reference_by_id.values()
         if group_id in source_groups
     )
     expected_e_universe_defs = {
-        f"ST12E_CERTIFIED_SOURCE_UNIVERSE::{index:03d}": {
+        _stable_source_universe_ref(
+            "ST12E_CERTIFIED_SOURCE_UNIVERSE", source_set
+        ): {
             "source_agent_ids": list(source_set),
             "parameter_count": e_source_sets[source_set],
             "authority_created": False,
         }
-        for index, source_set in enumerate(sorted(e_source_sets), start=1)
+        for source_set in sorted(e_source_sets)
     }
     expected_e_refs = {
         tuple(spec["source_agent_ids"]): ref
@@ -755,6 +1087,10 @@ def validate_domain(domain: str) -> list[str]:
         manifest.get("st12e_certified_source_universes")
         != expected_e_universe_defs
         or len(expected_e_universe_defs) != 6
+        or any(
+            re.fullmatch(r"ST12E_CERTIFIED_SOURCE_UNIVERSE::\d+", ref)
+            for ref in expected_e_universe_defs
+        )
     ):
         failures.append("six-set E-certified distribution is not exact")
 
@@ -827,6 +1163,8 @@ def validate_domain(domain: str) -> list[str]:
         or manifest.get("st12e_rows_with_fully_mapped_upstream_lineage") != 53
         or manifest.get("value_policy_ref_resolution_count") != 87
         or manifest.get("duplicated_value_body_count") != 0
+        or manifest.get("capability_binding_value_body_count") != 0
+        or manifest.get("generated_policy_value_body_count") != 0
     ):
         failures.append(
             "orthogonal E applicability does not close at 87/3723/34/53"
@@ -963,6 +1301,42 @@ def validate_domain(domain: str) -> list[str]:
     service_methods = _class_methods(
         service_tree, "QKUComputationControlPlaneV1"
     )
+    service_class = next(
+        (
+            node
+            for node in service_tree.body
+            if isinstance(node, ast.ClassDef)
+            and node.name == "QKUComputationControlPlaneV1"
+        ),
+        None,
+    )
+    resolver_fields = tuple(
+        node
+        for node in (service_class.body if service_class is not None else ())
+        if isinstance(node, ast.AnnAssign)
+        and isinstance(node.target, ast.Name)
+        and node.target.id == "agent_capability_resolver"
+    )
+    production_admission_profile_tokens = (
+        "InternalNoEffectAdmissionProfileV1",
+        "INTERNAL_NO_EFFECT_ADMISSION_PROFILE",
+        "OWNER::TEST",
+        "CAPABILITY::READ_ONLY_TEST",
+        "AGENT_ORCH1_RECEIPT_EXPLICITLY_NOT_APPLICABLE_INTERNAL_NO_EFFECT",
+    )
+    production_admission_default_exists = (
+        len(resolver_fields) != 1 or resolver_fields[0].value is not None
+    )
+    if (
+        production_admission_default_exists
+        or any(
+            token in agent_source or token in service_source
+            for token in production_admission_profile_tokens
+        )
+        or manifest.get("implicit_admission_bypass_count") != 0
+        or manifest.get("production_default_admission_profile_count") != 0
+    ):
+        failures.append("production service retains an implicit test admission path")
     implemented_names = (
         "resolve_identity",
         "resolve_contextual_computability",

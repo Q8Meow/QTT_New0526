@@ -38,6 +38,7 @@ from . import (
     TEST_PRINCIPAL_ID,
     make_resolver,
     policy_store,
+    repo_root,
     resolve_decision,
 )
 
@@ -121,6 +122,9 @@ def test_request_time_resolution_performs_no_file_reads(
 def test_service_requires_one_typed_admission_owner_and_no_none_bypass() -> None:
     registry = CanonicalOwnerPacketRegistryV1()
 
+    with pytest.raises(TypeError):
+        QKUComputationControlPlaneV1(registry)  # type: ignore[call-arg]
+
     with pytest.raises(ContractValidationError) as missing:
         QKUComputationControlPlaneV1(
             registry,
@@ -138,6 +142,22 @@ def test_service_requires_one_typed_admission_owner_and_no_none_bypass() -> None
         malformed.resolve_identity(request)  # type: ignore[arg-type]
     assert incompatible.value.reason_code is ReasonCode.TASK_ENVELOPE_MISSING
     assert request.operation_body_reads == 0
+
+    package = repo_root() / (
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane"
+    )
+    production_source = "\n".join(
+        (package / name).read_text(encoding="utf-8")
+        for name in ("agent_policy.py", "service.py")
+    )
+    assert "InternalNoEffectAdmissionProfileV1" not in production_source
+    assert "INTERNAL_NO_EFFECT_ADMISSION_PROFILE" not in production_source
+    assert "OWNER::TEST" not in production_source
+    assert "CAPABILITY::READ_ONLY_TEST" not in production_source
+    assert (
+        "AGENT_ORCH1_RECEIPT_EXPLICITLY_NOT_APPLICABLE_INTERNAL_NO_EFFECT"
+        not in production_source
+    )
 
 
 def test_all_twelve_public_operations_execute_exactly_one_central_admission() -> None:

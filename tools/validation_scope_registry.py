@@ -311,6 +311,13 @@ ST12C_VALIDATION_CONTEXT_EXACT_PATHS = frozenset(
     )
 )
 
+ST12E_PREDECESSOR_CURRENTIZATION_EXACT_PATHS = frozenset(
+    {
+        "tests/stage1_prediction_markets/"
+        "qku_computation_control_plane/"
+        "tranche_b/test_service_operations.py",
+    }
+)
 ST12E_ALLOWED_EXACT_PATHS = frozenset(
     {
         "src/qtt/agents/pr169_agent_orch1_resolvers.py",
@@ -353,7 +360,7 @@ ST12E_ALLOWED_EXACT_PATHS = frozenset(
         "tools/run_validation_gates.py",
         "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
     }
-)
+) | ST12E_PREDECESSOR_CURRENTIZATION_EXACT_PATHS
 ST12E_VALIDATION_CONTEXT_EXACT_PATHS = frozenset(
     ST12E_ALLOWED_EXACT_PATHS
     - (
@@ -361,6 +368,7 @@ ST12E_VALIDATION_CONTEXT_EXACT_PATHS = frozenset(
         | ST12A_SHARED_CURRENTIZATION_EXACT_PATHS
         | ST12B_ALLOWED_EXACT_PATHS
         | ST12C_ALLOWED_EXACT_PATHS
+        | ST12E_PREDECESSOR_CURRENTIZATION_EXACT_PATHS
     )
 )
 

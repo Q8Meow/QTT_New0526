@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+from dataclasses import MISSING, fields
 import json
 from pathlib import Path
 import sys
@@ -117,7 +118,12 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.agent_polic
     no_effect_authority_is_closed,
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.parameter_policy import (  # noqa: E402
+    ST12E_PARAMETER_POLICY_SPECS,
     resolve_st12e_value_policy_refs,
+    resolve_st12e_value_policies,
+)
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.service import (  # noqa: E402
+    QKUComputationControlPlaneV1,
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.authority import (  # noqa: E402
     TRANCHE_A_AUTHORITY,
@@ -204,8 +210,18 @@ def build_st12e_projections() -> ST12EProjectionSet:
         == UPSTREAM_IDENTITY_CROSSWALK_REQUIRED
         for row in exact_e_scope
     )
-    resolved_value_refs = resolve_st12e_value_policy_refs(
+    value_policy_resolution = resolve_st12e_value_policies(
         canonical_parameter_identity_registry(master_text)
+    )
+    resolved_value_refs = value_policy_resolution.value_policy_refs
+    resolver_field = next(
+        field
+        for field in fields(QKUComputationControlPlaneV1)
+        if field.name == "agent_capability_resolver"
+    )
+    implicit_admission_bypass_count = int(
+        resolver_field.default is not MISSING
+        or resolver_field.default_factory is not MISSING
     )
     manifest: dict[str, object] = {
         "schema": "AgentCapabilityPolicyManifestV1",
@@ -252,8 +268,30 @@ def build_st12e_projections() -> ST12EProjectionSet:
         "quota_reassignment_count": 0,
         "nearest_universe_assignment_count": 0,
         "source_set_rewrite_count": 0,
+        "appendix_e_policy_spec_count": len(ST12E_PARAMETER_POLICY_SPECS),
+        "parameter_identity_resolution_count": (
+            value_policy_resolution.parameter_identity_resolution_count
+        ),
+        "canonical_typed_policy_resolution_count": (
+            value_policy_resolution.canonical_typed_policy_resolution_count
+        ),
+        "unresolved_typed_policy_count": (
+            value_policy_resolution.unresolved_typed_policy_count
+        ),
+        "conflicting_typed_policy_count": (
+            value_policy_resolution.conflicting_typed_policy_count
+        ),
+        "canonical_parameter_value_owner_count": (
+            value_policy_resolution.canonical_parameter_value_owner_count
+        ),
         "value_policy_ref_resolution_count": len(resolved_value_refs),
         "duplicated_value_body_count": 0,
+        "capability_binding_value_body_count": 0,
+        "generated_policy_value_body_count": 0,
+        "implicit_admission_bypass_count": implicit_admission_bypass_count,
+        "production_default_admission_profile_count": (
+            implicit_admission_bypass_count
+        ),
         "opaque_semantic_payload_count": 0,
         "exact_upstream_source_universes": {
             universe_ref: {

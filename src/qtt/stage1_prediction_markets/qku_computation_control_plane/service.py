@@ -23,7 +23,6 @@ from .errors import (
 from .agent_policy import (
     AgentCapabilityDecisionStateV1,
     AgentCapabilityDecisionV1,
-    INTERNAL_NO_EFFECT_ADMISSION_PROFILE,
     POLICY_VERSION,
 )
 from .fallback import (
@@ -436,11 +435,9 @@ class QKUComputationControlPlaneV1:
     """One bounded service; it owns no provider, private state, LLM, or QPU."""
 
     owner_registry: CanonicalOwnerPacketRegistryV1
+    agent_capability_resolver: AgentCapabilityAdmissionProtocolV1
     identity_adapter: RP5CIdentityAdapterV1 | None = None
     persistence_adapter: PersistenceAdapterV1 | None = None
-    agent_capability_resolver: AgentCapabilityAdmissionProtocolV1 = (
-        INTERNAL_NO_EFFECT_ADMISSION_PROFILE
-    )
 
     def __post_init__(self) -> None:
         if not isinstance(

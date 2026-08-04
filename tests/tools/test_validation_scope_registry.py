@@ -169,6 +169,13 @@ EXPECTED_ST12C_ALLOWED_EXACT_PATHS = frozenset(
         "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
     }
 ) | ST12C_PREDECESSOR_CURRENTIZATION_PATHS
+ST12E_PREDECESSOR_CURRENTIZATION_PATHS = frozenset(
+    {
+        "tests/stage1_prediction_markets/"
+        "qku_computation_control_plane/"
+        "tranche_b/test_service_operations.py",
+    }
+)
 EXPECTED_ST12E_ALLOWED_EXACT_PATHS = frozenset(
     {
         "src/qtt/agents/pr169_agent_orch1_resolvers.py",
@@ -211,7 +218,7 @@ EXPECTED_ST12E_ALLOWED_EXACT_PATHS = frozenset(
         "tools/run_validation_gates.py",
         "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
     }
-)
+) | ST12E_PREDECESSOR_CURRENTIZATION_PATHS
 
 PR169_QKU_FORMULA_EXP1_PR272_PATHS = (
     "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
@@ -668,10 +675,16 @@ def test_st12c_scope_rejects_unowned_paths_and_near_names(
 
 def test_st12e_scope_is_exactly_the_appendix_h_ledger() -> None:
     assert registry.ST12E_BRANCH == "agent/st12e-capability-guard"
+    assert registry.ST12E_PREDECESSOR_CURRENTIZATION_EXACT_PATHS == (
+        ST12E_PREDECESSOR_CURRENTIZATION_PATHS
+    )
     assert registry.ST12E_ALLOWED_EXACT_PATHS == (
         EXPECTED_ST12E_ALLOWED_EXACT_PATHS
     )
-    assert len(registry.ST12E_ALLOWED_EXACT_PATHS) == 39
+    assert len(registry.ST12E_ALLOWED_EXACT_PATHS) == 40
+    assert registry.ST12E_PREDECESSOR_CURRENTIZATION_EXACT_PATHS <= (
+        registry.ST12E_ALLOWED_EXACT_PATHS
+    )
     assert not any("*" in path for path in registry.ST12E_ALLOWED_EXACT_PATHS)
 
 
@@ -681,10 +694,14 @@ def test_st12e_validation_context_routes_only_exclusive_exact_paths() -> None:
         | registry.ST12A_SHARED_CURRENTIZATION_EXACT_PATHS
         | registry.ST12B_ALLOWED_EXACT_PATHS
         | registry.ST12C_ALLOWED_EXACT_PATHS
+        | registry.ST12E_PREDECESSOR_CURRENTIZATION_EXACT_PATHS
     )
 
     assert len(expected) == 12
     assert registry.ST12E_VALIDATION_CONTEXT_EXACT_PATHS == expected
+    assert registry.ST12E_PREDECESSOR_CURRENTIZATION_EXACT_PATHS.isdisjoint(
+        registry.ST12E_VALIDATION_CONTEXT_EXACT_PATHS
+    )
     for path in expected:
         assert registry.is_pr_scoped_changed_path_allowed(FIXTURE_BRANCH, path)
         assert not registry.is_pr_scoped_changed_path_allowed(

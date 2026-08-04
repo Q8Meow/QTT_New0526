@@ -23,7 +23,9 @@ from .authority import TRANCHE_A_AUTHORITY
 from .errors import AuthorityDeniedError, ReasonCode
 from .parameter_policy import (
     ST12E_PARAMETER_CAPABILITY_BINDINGS,
+    ST12E_PARAMETER_POLICY_SPECS,
     resolve_st12e_value_policy_refs,
+    resolve_st12e_value_policies,
 )
 
 
@@ -925,101 +927,6 @@ class AgentCapabilityDecisionV1:
 
 
 @dataclass(frozen=True, slots=True)
-class InternalNoEffectAdmissionProfileV1:
-    """Explicit compatibility admission for the bounded internal test caller."""
-
-    principal_id: str = "OWNER::TEST"
-    capability_bundle_id: str = "CAPABILITY::READ_ONLY_TEST"
-    current_agent_id: str = "dashboard_agent"
-    source_agent_id: str = "AGENT_RT_11"
-    activation_state: str = ACTIVATION_STATE
-
-    def __post_init__(self) -> None:
-        if self.activation_state != ACTIVATION_STATE:
-            raise AuthorityDeniedError(
-                ReasonCode.SELF_PROMOTION_FORBIDDEN,
-                "internal admission profile cannot activate authority",
-            )
-
-    def admit_operation(self, request: object) -> AgentCapabilityDecisionV1:
-        request_id = str(getattr(request, "request_id", "") or "MISSING_REQUEST")
-        operation_id = str(
-            getattr(request, "operation_name", "") or "MISSING_OPERATION"
-        )
-        idempotency_key = str(
-            getattr(request, "idempotency_key", "") or "MISSING_IDEMPOTENCY"
-        )
-        context = getattr(request, "context", None)
-        context_ref = str(
-            getattr(context, "context_id", "") or "MISSING_CONTEXT"
-        )
-        request_principal = str(getattr(request, "principal_id", ""))
-        request_bundle = str(getattr(request, "capability_bundle_id", ""))
-        reasons: list[ReasonCode] = []
-        if request_principal != self.principal_id:
-            reasons.append(ReasonCode.PRINCIPAL_UNKNOWN)
-        if request_bundle != self.capability_bundle_id:
-            reasons.append(ReasonCode.TASK_ENVELOPE_MISSING)
-        if operation_id not in IMPLEMENTED_OPERATION_IDS:
-            reasons.append(ReasonCode.OPERATION_NOT_ALLOWED)
-        if context_ref == "MISSING_CONTEXT":
-            reasons.append(ReasonCode.CONTEXT_SCOPE_MISMATCH)
-        state = (
-            AgentCapabilityDecisionStateV1.DENIED
-            if reasons
-            else AgentCapabilityDecisionStateV1.ELIGIBLE_FOR_NO_EFFECT_QKU_REQUEST
-        )
-        return AgentCapabilityDecisionV1(
-            decision_id=f"ST12E_INTERNAL_DECISION::{request_id}::{operation_id}",
-            request_id=request_id,
-            task_id=f"ST12E_INTERNAL_TASK::{operation_id}",
-            principal_id=request_principal or "MISSING_PRINCIPAL",
-            current_agent_id=self.current_agent_id,
-            source_agent_refs=(self.source_agent_id,),
-            operation_id=operation_id,
-            policy_version=POLICY_VERSION,
-            decision_state=state,
-            reason_codes=tuple(dict.fromkeys(reasons)),
-            scope_refs=(
-                f"operation_id={operation_id}",
-                f"context_ref={context_ref}",
-                "internal_profile=READ_ONLY_NO_EFFECT",
-            ),
-            idempotency_key=idempotency_key,
-            retry_disposition="NO_RETRY_AUTHORITY",
-            peer_sod_disposition="INTERNAL_NO_EFFECT_PROFILE_ONLY",
-            safety_state_disposition="NON_MATERIAL_LOCAL_NO_EFFECT",
-            terminal_route=(
-                "QKUComputationControlPlaneV1_NO_EFFECT_REQUEST"
-                if not reasons
-                else "DENY_UNCONFIGURED_OR_NONINTERNAL_CALLER"
-            ),
-            agent_orch_receipt_ref=(
-                "AGENT_ORCH1_RECEIPT_EXPLICITLY_NOT_APPLICABLE_INTERNAL_NO_EFFECT"
-            ),
-            st12c_causation_correlation_refs=(
-                f"OperationRequestEnvelopeV1.request_id={request_id}",
-                f"OperationRequestEnvelopeV1.idempotency_key={idempotency_key}",
-            ),
-            evidence_refs=(
-                "InternalNoEffectAdmissionProfileV1",
-                "TRANCHE_A_AUTHORITY",
-            ),
-            alternative_route_refs=("DENY_TASK", "OWNER_REVIEW_REQUIRED"),
-            disagreement_state="NONE_DECLARED",
-            confidence_state="INTERNAL_NO_EFFECT_COMPATIBILITY_ONLY",
-            limitation_codes=(
-                "NO_PROVIDER_PRIVATE_STATE_ORDER_QPU_OR_RUNTIME_EFFECT",
-                "QKU_AND_FORMULA_IMMUTABLE",
-                "NOT_A_RUNTIME_PRINCIPAL_OR_AUTHORITY_GRANT",
-            ),
-        )
-
-
-INTERNAL_NO_EFFECT_ADMISSION_PROFILE = InternalNoEffectAdmissionProfileV1()
-
-
-@dataclass(frozen=True, slots=True)
 class AgentCapabilityPolicySnapshotV1:
     policy_version: str
     registry_version: str
@@ -1434,6 +1341,44 @@ def canonical_source_agent_ids(master_plan_text: str) -> tuple[str, ...]:
     )
 
 
+_SOURCE_AGENT_ID_TOKEN = re.compile(r"^AGENT_(RT|NL|OFF)_(\d{2})$")
+_SOURCE_UNIVERSE_NAMESPACES = frozenset(
+    {"UPSTREAM_SOURCE_UNIVERSE", "ST12E_CERTIFIED_SOURCE_UNIVERSE"}
+)
+
+
+def stable_source_universe_ref(
+    namespace: str,
+    source_agent_ids: tuple[str, ...],
+) -> str:
+    """Return an order-preserving readable identity for one exact source set."""
+
+    if namespace not in _SOURCE_UNIVERSE_NAMESPACES:
+        raise AuthorityDeniedError(
+            ReasonCode.SOURCE_AGENT_ID_UNMAPPED,
+            "source-universe namespace is not canonical",
+        )
+    if (
+        not isinstance(source_agent_ids, tuple)
+        or not source_agent_ids
+        or len(source_agent_ids) != len(set(source_agent_ids))
+    ):
+        raise AuthorityDeniedError(
+            ReasonCode.SOURCE_AGENT_ID_UNMAPPED,
+            "source universe must be a nonempty ordered unique tuple",
+        )
+    tokens: list[str] = []
+    for source_agent_id in source_agent_ids:
+        match = _SOURCE_AGENT_ID_TOKEN.fullmatch(source_agent_id)
+        if match is None:
+            raise AuthorityDeniedError(
+                ReasonCode.SOURCE_AGENT_ID_UNMAPPED,
+                f"source identity cannot form a stable reference: {source_agent_id}",
+            )
+        tokens.append(f"{match.group(1)}{match.group(2)}")
+    return f"{namespace}::{'-'.join(tokens)}"
+
+
 def build_upstream_source_universe_registry(
     master_rows: Iterable[tuple[str, str, tuple[str, ...]]],
 ) -> tuple[
@@ -1443,8 +1388,10 @@ def build_upstream_source_universe_registry(
     counts = Counter(source_ids for _, _, source_ids in master_rows)
     definitions: dict[str, Mapping[str, object]] = {}
     refs_by_source_set: dict[tuple[str, ...], str] = {}
-    for index, source_ids in enumerate(sorted(counts), start=1):
-        universe_ref = f"UPSTREAM_SOURCE_UNIVERSE::{index:03d}"
+    for source_ids in sorted(counts):
+        universe_ref = stable_source_universe_ref(
+            "UPSTREAM_SOURCE_UNIVERSE", source_ids
+        )
         definitions[universe_ref] = MappingProxyType(
             {
                 "source_agent_ids": source_ids,
@@ -1470,8 +1417,10 @@ def build_st12e_certified_source_universe_registry() -> tuple[
     )
     definitions: dict[str, Mapping[str, object]] = {}
     refs_by_source_set: dict[tuple[str, ...], str] = {}
-    for index, source_ids in enumerate(sorted(counts), start=1):
-        universe_ref = f"ST12E_CERTIFIED_SOURCE_UNIVERSE::{index:03d}"
+    for source_ids in sorted(counts):
+        universe_ref = stable_source_universe_ref(
+            "ST12E_CERTIFIED_SOURCE_UNIVERSE", source_ids
+        )
         definitions[universe_ref] = MappingProxyType(
             {
                 "source_agent_ids": source_ids,
@@ -1708,7 +1657,9 @@ class AgentCapabilityPolicyStoreV1:
         canonical_parameter_identities = canonical_parameter_identity_registry(
             master_plan_text
         )
-        resolve_st12e_value_policy_refs(canonical_parameter_identities)
+        value_policy_resolution = resolve_st12e_value_policies(
+            canonical_parameter_identities
+        )
         upstream_universes, _ = build_upstream_source_universe_registry(
             master_rows
         )
@@ -1938,8 +1889,30 @@ class AgentCapabilityPolicyStoreV1:
                 "quota_reassignment_count": 0,
                 "nearest_universe_assignment_count": 0,
                 "source_set_rewrite_count": 0,
+                "appendix_e_policy_spec_count": len(
+                    ST12E_PARAMETER_POLICY_SPECS
+                ),
+                "parameter_identity_resolution_count": (
+                    value_policy_resolution.parameter_identity_resolution_count
+                ),
+                "canonical_typed_policy_resolution_count": (
+                    value_policy_resolution.canonical_typed_policy_resolution_count
+                ),
+                "unresolved_typed_policy_count": (
+                    value_policy_resolution.unresolved_typed_policy_count
+                ),
+                "conflicting_typed_policy_count": (
+                    value_policy_resolution.conflicting_typed_policy_count
+                ),
+                "canonical_parameter_value_owner_count": (
+                    value_policy_resolution.canonical_parameter_value_owner_count
+                ),
                 "value_policy_ref_resolution_count": len(binding_rows),
                 "duplicated_value_body_count": 0,
+                "capability_binding_value_body_count": 0,
+                "generated_policy_value_body_count": 0,
+                "implicit_admission_bypass_count": 0,
+                "production_default_admission_profile_count": 0,
             }.items()
         )
         if (
