@@ -11,6 +11,7 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.agent_polic
     AgentCapabilityDecisionStateV1,
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import (
+    ContractValidationError,
     NoTradeReoptimizationRouteError,
     OwnerAdapterError,
     ReasonCode,
@@ -28,6 +29,7 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.mode_snapsh
     MODE_SNAPSHOT_CANDIDATE_KIND,
     MODE_SNAPSHOT_TRANSITIONS,
     ModeSnapshotCandidateInputsV1,
+    build_snapshot_transition_proposal,
     evaluate_mode_snapshot_candidate,
     pre_f_unavailable_reference,
     validate_current_kill_submit_state,
@@ -48,6 +50,12 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.models impo
     ST12FEvidenceStateV1,
     SubmitDisabledStateV1,
 )
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.receipts import (
+    EconomicReceiptEventSpineV1,
+    EconomicRecordTypeV1,
+    ModeSnapshotControlClassV1,
+    ModeSnapshotControlReceiptRecordV1,
+)
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.service import (
     QKUComputationControlPlaneV1,
 )
@@ -64,6 +72,77 @@ UTC = timezone.utc
 @lru_cache(maxsize=1)
 def _audit_bundle_fixture():
     return _build_st12d_audit_bundle()
+
+
+def _transition_receipt_proposal(
+    *,
+    transition_id: str,
+    request_id: str,
+    principal_id: str,
+    task_id: str,
+    capability_decision_ref: str,
+    context_ref: str,
+    snapshot_candidate_ref: str,
+    candidate_version: str,
+    expected_owner_state_ref: str,
+    effective_at: object,
+) -> EconomicReceiptEventSpineV1:
+    rule = next(
+        row for row in MODE_SNAPSHOT_TRANSITIONS if row.transition_id == transition_id
+    )
+    record_id = f"MODE-SNAPSHOT-CONTROL::{request_id}::{transition_id}"
+    payload = ModeSnapshotControlReceiptRecordV1(
+        control_receipt_id=record_id,
+        control_class=ModeSnapshotControlClassV1.MODE_SNAPSHOT_EVALUATION,
+        request_id=request_id,
+        task_id=task_id,
+        principal_id=principal_id,
+        capability_decision_ref=capability_decision_ref,
+        context_ref=context_ref,
+        snapshot_candidate_ref_or_explicit_absence=snapshot_candidate_ref,
+        mode_snapshot_decision_ref=f"MODE-SNAPSHOT-DECISION::{request_id}",
+        transition_proposal_ref=f"SNAPSHOT-TRANSITION::{request_id}::{transition_id}",
+        transition_id=transition_id,
+        source_state=rule.source_state,
+        destination_state=rule.destination_state,
+        target_candidate_version=candidate_version,
+        implementation_pin_refs=(),
+        parameter_value_refs=(),
+        source_epoch_refs=(f"SOURCE-EPOCH::{request_id}",),
+        predecessor_transition_receipt_refs=(),
+        state_before_refs=(
+            rule.source_state,
+            expected_owner_state_ref,
+            snapshot_candidate_ref,
+        ),
+        state_after_refs=(rule.destination_state, snapshot_candidate_ref),
+        typed_reason_codes=(rule.reason_code,),
+        fallback_route=rule.terminal_route,
+        owner_review_route="EXISTING_OWNER_ACTION_REVIEW",
+        latency_measurement_ref_or_explicit_absence=(
+            f"LATENCY-MEASUREMENT::{request_id}"
+        ),
+        owner_action_policy_ref="OWNER-ACTION-POLICY::CURRENT",
+    )
+    return EconomicReceiptEventSpineV1(
+        record_id=record_id,
+        record_type=EconomicRecordTypeV1.MODE_SNAPSHOT_CONTROL,
+        schema_version="ST12D_MODE_SNAPSHOT_CONTROL_V1",
+        semantic_owner="QKUComputationControlPlaneV1",
+        implementation_owner="QKUComputationControlPlaneV1",
+        context_ref=context_ref,
+        effective_at=effective_at,
+        recorded_at=effective_at,
+        causation_id=f"CAUSE::{request_id}::{transition_id}",
+        correlation_id=f"CORRELATION::{request_id}::{transition_id}",
+        traceparent=f"TRACEPARENT::{request_id}::{transition_id}",
+        tracestate="vendor=value",
+        sequence=0,
+        aggregate_id=f"MODE-SNAPSHOT::{request_id}",
+        aggregate_version=0,
+        authority_class="NO_EFFECT_MODE_SNAPSHOT_CONTROL_ONLY",
+        typed_payload=payload,
+    )
 
 
 def _inputs(
@@ -100,6 +179,22 @@ def _inputs(
             correlation_id="CORRELATION::D::EVIDENCE",
         )
     )
+    predecessor_proposal = (
+        _transition_receipt_proposal(
+            transition_id="T06",
+            request_id="REQUEST::D::1",
+            principal_id="parameter_selector_agent",
+            task_id="AGENT-ORCH1-TASK::D::1",
+            capability_decision_ref="ST12E-DECISION::D::1",
+            context_ref=bundle.execution_context.context_id,
+            snapshot_candidate_ref="SNAPSHOT-CANDIDATE::REQUEST::D::1",
+            candidate_version="SNAPSHOT-CANDIDATE-VERSION::1",
+            expected_owner_state_ref="OWNER-STATE::UNCHANGED::1",
+            effective_at=now,
+        )
+        if owner_confirmation
+        else None
+    )
     owner_action = OwnerActionConfirmationReceiptV1(
         receipt_ref="OWNER-ACTION-RECEIPT::D::1",
         owner_action_policy_ref="OWNER-ACTION-POLICY::CURRENT",
@@ -116,6 +211,17 @@ def _inputs(
         valid_until=now + timedelta(minutes=5),
         causation_id="CAUSE::D::OWNER-ACTION",
         correlation_id="CORRELATION::D::OWNER-ACTION",
+        predecessor_transition_id_or_explicit_absence=(
+            "T06" if owner_confirmation else "EXPLICIT_ABSENCE"
+        ),
+        predecessor_transition_receipt_ref_or_explicit_absence=(
+            predecessor_proposal.record_id
+            if owner_confirmation
+            else "EXPLICIT_ABSENCE"
+        ),
+        predecessor_transition_receipt_proposal_or_explicit_absence=(
+            predecessor_proposal
+        ),
     )
     return ModeSnapshotCandidateInputsV1(
         request_id="REQUEST::D::1",
@@ -134,6 +240,7 @@ def _inputs(
         binding_profile_ref=bundle.execution_context.binding_profile_version,
         parameter_policy_snapshot_ref=bundle.parameter_policy_snapshot_ref,
         parameter_value_refs=bundle.parameter_value_refs,
+        resolved_parameter_values=bundle.resolved_parameter_values,
         source_epoch_refs=bundle.source_epoch_refs,
         receipt_lineage_refs=(
             bundle.preflight_receipt_ref,
@@ -188,6 +295,18 @@ def _current_owner_registry(
         causation_id=f"CAUSE::D::SAFETY::{decision.request_id}",
         correlation_id=f"CORRELATION::D::SAFETY::{decision.request_id}",
     )
+    predecessor_proposal = _transition_receipt_proposal(
+        transition_id="T06",
+        request_id=decision.request_id,
+        principal_id=decision.principal_id,
+        task_id=decision.task_id,
+        capability_decision_ref=decision.decision_id,
+        context_ref=context.context_id,
+        snapshot_candidate_ref=f"SNAPSHOT-CANDIDATE::{decision.request_id}",
+        candidate_version=context.input_version,
+        expected_owner_state_ref="SVC1::CURRENT",
+        effective_at=context.as_of,
+    )
     owner_action = OwnerActionConfirmationReceiptV1(
         receipt_ref=f"OWNER-ACTION-RECEIPT::{decision.request_id}",
         owner_action_policy_ref="OWNER-ACTION-POLICY::CURRENT",
@@ -200,6 +319,13 @@ def _current_owner_registry(
         valid_until=context.as_of + timedelta(minutes=1),
         causation_id=f"CAUSE::D::OWNER::{decision.request_id}",
         correlation_id=f"CORRELATION::D::OWNER::{decision.request_id}",
+        predecessor_transition_id_or_explicit_absence="T06",
+        predecessor_transition_receipt_ref_or_explicit_absence=(
+            predecessor_proposal.record_id
+        ),
+        predecessor_transition_receipt_proposal_or_explicit_absence=(
+            predecessor_proposal
+        ),
     )
     clocks = base_registry.packets[0].clocks
     safety_packet = OwnerValuePacketV1(
@@ -322,6 +448,135 @@ def test_exact_orthogonal_registry_and_transition_matrix() -> None:
         )
         for row in MODE_SNAPSHOT_TRANSITIONS
     ) == expected_transitions
+    state_types = {
+        **{state.value: state for state in ModeEligibilityState},
+        **{state.value: state for state in AllowCandidateStateV1},
+        **{state.value: state for state in SnapshotCandidateStateV1},
+        **{state.value: state for state in SnapshotRollbackStateV1},
+        **{state.value: state for state in SnapshotRetirementStateV1},
+    }
+    for rule in MODE_SNAPSHOT_TRANSITIONS:
+        request_id = f"REQUEST::{rule.transition_id}"
+        principal_id = "parameter_selector_agent"
+        task_id = f"TASK::{rule.transition_id}"
+        capability_ref = f"CAPABILITY::{rule.transition_id}"
+        context_ref = f"CONTEXT::{rule.transition_id}"
+        source_candidate_ref = (
+            f"CURRENT-CANDIDATE::{rule.transition_id}"
+            if rule.transition_id in {"T13", "T14"}
+            else "EXPLICIT_ABSENCE"
+        )
+        source_candidate_version = (
+            f"CURRENT-VERSION::{rule.transition_id}"
+            if rule.transition_id in {"T13", "T14"}
+            else "EXPLICIT_ABSENCE"
+        )
+        target_candidate_ref = f"CANDIDATE::{rule.transition_id}"
+        target_candidate_version = f"VERSION::{rule.transition_id}"
+        predecessor_transition_id = (
+            "T06"
+            if rule.transition_id == "T07"
+            else "T12"
+            if rule.transition_id in {"T13", "T14"}
+            else None
+        )
+        predecessor_proposal = (
+            _transition_receipt_proposal(
+                transition_id=predecessor_transition_id,
+                request_id=request_id,
+                principal_id=principal_id,
+                task_id=task_id,
+                capability_decision_ref=capability_ref,
+                context_ref=context_ref,
+                snapshot_candidate_ref=(
+                    target_candidate_ref
+                    if rule.transition_id == "T07"
+                    else source_candidate_ref
+                ),
+                candidate_version=(
+                    target_candidate_version
+                    if rule.transition_id == "T07"
+                    else source_candidate_version
+                ),
+                expected_owner_state_ref="OWNER-STATE::UNCHANGED",
+                effective_at=_audit_bundle_fixture()[0].execution_context.as_of,
+            )
+            if predecessor_transition_id is not None
+            else None
+        )
+        predecessor_proposals = (
+            (predecessor_proposal,) if predecessor_proposal is not None else ()
+        )
+        proposal = build_snapshot_transition_proposal(
+            proposal_id=f"PROPOSAL::{rule.transition_id}",
+            request_id=request_id,
+            principal_id=principal_id,
+            task_id=task_id,
+            capability_decision_ref=capability_ref,
+            context_ref=context_ref,
+            source_candidate_ref_or_explicit_absence=source_candidate_ref,
+            target_candidate_ref=target_candidate_ref,
+            source_candidate_version_or_explicit_absence=source_candidate_version,
+            target_candidate_version=target_candidate_version,
+            transition_id=rule.transition_id,
+            expected_owner_state_ref="OWNER-STATE::UNCHANGED",
+            precondition_receipt_refs=(f"PRECONDITION::{rule.transition_id}",),
+            predecessor_transition_receipt_proposals=predecessor_proposals,
+            proposed_state=state_types[rule.destination_state],
+            causation_id=f"CAUSE::{rule.transition_id}",
+            correlation_id=f"CORRELATION::{rule.transition_id}",
+        )
+        assert (
+            proposal.source_state,
+            proposal.destination_state,
+            proposal.primary_reason_code,
+            proposal.predecessor_transition_receipt_refs,
+            proposal.no_mutation_flag,
+            proposal.no_activation_flag,
+            proposal.no_order_release_flag,
+        ) == (
+            rule.source_state,
+            rule.destination_state,
+            rule.reason_code,
+            tuple(row.record_id for row in predecessor_proposals),
+            True,
+            True,
+            True,
+        )
+        mutations = (
+            {"source_state": f"MUTATED::{rule.source_state}"},
+            {"destination_state": f"MUTATED::{rule.destination_state}"},
+            {
+                "primary_reason_code": ReasonCode.CONTRACT_OR_TYPE_INVALID,
+                "typed_reason_codes": (ReasonCode.CONTRACT_OR_TYPE_INVALID,),
+            },
+            {
+                "predecessor_transition_receipt_refs": (
+                    ("MODE-SNAPSHOT-CONTROL::MUTATED::T05",)
+                    if predecessor_proposals
+                    else ("TRANSITION-RECEIPT::INAPPLICABLE",)
+                )
+            },
+        )
+        for mutation in mutations:
+            with pytest.raises(ContractValidationError):
+                replace(proposal, **mutation)
+        if predecessor_proposals:
+            predecessor = predecessor_proposals[0]
+            mutated_predecessor = replace(
+                predecessor,
+                typed_payload=replace(
+                    predecessor.typed_payload,
+                    request_id=f"MUTATED::{request_id}",
+                ),
+            )
+            with pytest.raises(ContractValidationError):
+                replace(
+                    proposal,
+                    predecessor_transition_receipt_proposals=(
+                        mutated_predecessor,
+                    ),
+                )
 
 
 def test_policy_outcomes_are_typed_fail_closed_and_never_activate() -> None:
@@ -422,7 +677,9 @@ def test_policy_outcomes_are_typed_fail_closed_and_never_activate() -> None:
     ) == ()
 
 
-def test_pretrade_no_trade_routes_before_any_d_body_access() -> None:
+def test_pretrade_no_trade_routes_before_any_d_body_access(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     operation_id = "submit_candidate_proposal"
     no_trade = resolve_decision(
         make_resolver(
@@ -451,9 +708,13 @@ def test_pretrade_no_trade_routes_before_any_d_body_access() -> None:
     class _Resolver:
         calls = 0
 
-        def resolve_mode_snapshot_inputs(self, *_args: object):
+        def resolve_mode_snapshot_preconstruction_gate(self, *_args: object):
             self.calls += 1
             raise AssertionError("D body executed after typed NO_TRADE")
+
+        def enrich_mode_snapshot_candidate(self, *_args: object):
+            self.calls += 1
+            raise AssertionError("D enrichment executed after typed NO_TRADE")
 
     class _Probe:
         request_id = no_trade.request_id
@@ -527,24 +788,40 @@ def test_pretrade_no_trade_routes_before_any_d_body_access() -> None:
         def source_candidate_refs(self):
             raise AssertionError("candidate source body read after current safety block")
 
-    class _InjectedResolver:
-        def resolve_mode_snapshot_inputs(self, *_args: object):
-            return _inputs(kill_active=True)
-
-    injected_service = QKUComputationControlPlaneV1(
-        owner_registry,
-        agent_capability_resolver=_KillAdmission(),
-        mode_snapshot_input_resolver=_InjectedResolver(),
-    )
-    with pytest.raises(OwnerAdapterError):
-        injected_service.submit_candidate_proposal(
-            _KillBodyProbe()  # type: ignore[arg-type]
-        )
-
     current_resolver = CurrentModeSnapshotInputResolverV1(
         repo_root=Path(__file__).resolve().parents[3],
         owner_registry=owner_registry,
     )
+
+    class _GateThenExplode:
+        late_calls = 0
+
+        def __init__(self, registry: ExistingOwnerContractRegistryV1) -> None:
+            self.owner_registry = registry
+
+        def resolve_mode_snapshot_preconstruction_gate(self, *args: object):
+            return current_resolver.resolve_mode_snapshot_preconstruction_gate(*args)
+
+        def enrich_mode_snapshot_candidate(self, *_args: object):
+            self.late_calls += 1
+            raise AssertionError("late D owner/bundle resolution ran after T05")
+
+    gate_probe = _GateThenExplode(owner_registry)
+    def _forbid_hotpath_file_read(*_args: object, **_kwargs: object) -> str:
+        raise AssertionError("repository file read entered the T05 HOTPATH")
+
+    monkeypatch.setattr(Path, "read_text", _forbid_hotpath_file_read)
+    injected_service = QKUComputationControlPlaneV1(
+        owner_registry,
+        agent_capability_resolver=_KillAdmission(),
+        mode_snapshot_input_resolver=gate_probe,
+    )
+    injected_response = injected_service.submit_candidate_proposal(
+        _KillBodyProbe()  # type: ignore[arg-type]
+    )
+    assert injected_response.status is OperationStatusV1.BLOCKED
+    assert gate_probe.late_calls == 0
+
     kill_service = QKUComputationControlPlaneV1(
         owner_registry,
         agent_capability_resolver=_KillAdmission(),
@@ -582,6 +859,11 @@ def test_non_d_public_contract_and_existing_source_owners_remain_bounded() -> No
             owner_action_confirmation=replace(
                 _inputs().owner_action_confirmation,
                 state=OwnerActionConfirmationStateV1.ABSENT,
+                predecessor_transition_id_or_explicit_absence="EXPLICIT_ABSENCE",
+                predecessor_transition_receipt_ref_or_explicit_absence=(
+                    "EXPLICIT_ABSENCE"
+                ),
+                predecessor_transition_receipt_proposal_or_explicit_absence=None,
             ),
         )
     )

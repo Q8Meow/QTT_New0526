@@ -45,22 +45,21 @@ from .latency_policy import (
 from .mode_snapshot_policy import (
     MODE_SNAPSHOT_CANDIDATE_KIND,
     ModeSnapshotCandidateInputsV1,
+    ModeSnapshotPreconstructionGateV1,
     evaluate_mode_snapshot_candidate,
-    pre_f_unavailable_reference,
-    validate_current_kill_submit_state,
+    evaluate_mode_snapshot_preconstruction_gate,
 )
 from .identity_adapter import RP5CIdentityAdapterV1
-from .persistence import PersistenceAdapterV1
+from .persistence import PersistenceAdapterV1, PersistenceAvailabilityV1
 from .receipts import materialize_mode_snapshot_control_receipts
 from .protocols import (
     AgentCapabilityAdmissionProtocolV1,
     ModeSnapshotCandidateInputProtocolV1,
     ModeSnapshotOwnerProjectionProtocolV1,
-    OwnerProjectionViewV1,
+    PreloadedOwnerProjectionBundleV1,
 )
 from .input_resolver import (
     CanonicalOwnerPacketRegistryV1,
-    CurrentModeSnapshotInputResolverV1,
     FormulaInputResolverV1,
 )
 from .models import (
@@ -107,7 +106,6 @@ from .models import (
     ResolveRequiredInputsResponseV1,
     ResolutionExplanationV1,
     SnapshotViewV1,
-    ST12FEvidenceStateV1,
     StackResolutionV1,
     StackResultV1,
     SubmitCandidateProposalRequestV1,
@@ -569,86 +567,98 @@ def _submit_mode_snapshot_candidate(
     *,
     admission_ns: int,
 ) -> SubmitCandidateProposalResponseV1:
-    """Private D body under the existing admitted public operation."""
+    """Gate-first D body with one bounded full-latency finalization."""
 
     resolver = self.mode_snapshot_input_resolver
-    if (
-        type(resolver) is not CurrentModeSnapshotInputResolverV1
-        or resolver.owner_registry is not self.owner_registry
-    ):
+    if resolver is None or not isinstance(resolver, ModeSnapshotCandidateInputProtocolV1):
         raise OwnerAdapterError(
             ReasonCode.OWNER_DATA_MISSING,
-            "D requires the concrete current resolver bound to the service registry",
+            "D requires the exact gate-first input resolver protocol",
         )
-    stage_values = {name: 0 for name in (
-        "central_capability_admission_ns",
-        "request_validation_ns",
-        "identity_and_context_resolution_ns",
-        "parameter_and_source_binding_ns",
-        "snapshot_candidate_resolution_ns",
-        "formula_compute_ns",
-        "output_validation_ns",
-        "receipt_materialization_ns",
-        "owner_projection_ns",
-    )}
+    resolver_registry = getattr(resolver, "owner_registry", self.owner_registry)
+    if resolver_registry is not self.owner_registry:
+        raise OwnerAdapterError(
+            ReasonCode.OWNER_DATA_MALFORMED,
+            "D resolver and service must share one immutable owner registry",
+        )
+    stage_values = {
+        name: 0
+        for name in (
+            "central_capability_admission_ns",
+            "request_validation_ns",
+            "identity_and_context_resolution_ns",
+            "parameter_and_source_binding_ns",
+            "snapshot_candidate_resolution_ns",
+            "formula_compute_ns",
+            "output_validation_ns",
+            "receipt_materialization_ns",
+            "owner_projection_ns",
+        )
+    }
     stage_values["central_capability_admission_ns"] = admission_ns
+    measurement_ref = f"LATENCY-MEASUREMENT::{request.request_id}"
 
     identity_started = local_duration_now_ns()
-    inputs = resolver.resolve_mode_snapshot_inputs(
+    gate = resolver.resolve_mode_snapshot_preconstruction_gate(
         request,
         capability_decision,
     )
-    stage_values["identity_and_context_resolution_ns"] = (
+    stage_values["identity_and_context_resolution_ns"] += (
         local_duration_now_ns() - identity_started
     )
-    if type(inputs) is not ModeSnapshotCandidateInputsV1 or (
-        inputs.request_id != request.request_id
-        or inputs.principal_id != request.principal_id
-        or inputs.task_id != capability_decision.task_id
-        or inputs.current_agent_id != capability_decision.current_agent_id
-        or inputs.capability_decision_ref != capability_decision.decision_id
-        or inputs.context_ref != request.context.context_id
+    if type(gate) is not ModeSnapshotPreconstructionGateV1 or (
+        gate.request_id != request.request_id
+        or gate.principal_id != request.principal_id
+        or gate.task_id != capability_decision.task_id
+        or gate.current_agent_id != capability_decision.current_agent_id
+        or gate.capability_decision_ref != capability_decision.decision_id
+        or gate.context_ref != request.context.context_id
     ):
         raise ContractValidationError(
             ReasonCode.IDENTITY_OR_VERSION_UNRESOLVED,
-            "D resolved inputs do not bind the admitted request and task",
+            "D preconstruction gate does not bind the admitted request and task",
         )
 
-    measurement_ref = f"LATENCY-MEASUREMENT::{request.request_id}"
+    candidate_started = local_duration_now_ns()
+    mode_snapshot_result = evaluate_mode_snapshot_preconstruction_gate(
+        gate,
+        latency_measurement_ref=measurement_ref,
+    )
+    stage_values["snapshot_candidate_resolution_ns"] += (
+        local_duration_now_ns() - candidate_started
+    )
+    inputs: ModeSnapshotCandidateInputsV1 | None = None
     source_candidate_refs: tuple[str, ...] = ()
-    safety_blocked = bool(
-        validate_current_kill_submit_state(
-            inputs.kill_submit_state,
-            evaluated_at=inputs.evaluated_at,
+    if mode_snapshot_result is None:
+        binding_started = local_duration_now_ns()
+        owner_projections = self.mode_snapshot_projection_bundle
+        if type(owner_projections) is not PreloadedOwnerProjectionBundleV1:
+            raise OwnerAdapterError(
+                ReasonCode.OWNER_DATA_MISSING,
+                "nonterminal D enrichment requires one preloaded owner-projection bundle",
+            )
+        inputs = resolver.enrich_mode_snapshot_candidate(
+            request,
+            capability_decision,
+            gate,
+            owner_projections,
         )
-    )
-    expected_evidence = pre_f_unavailable_reference(
-        observed_at=request.context.as_of,
-        valid_until=request.context.as_of + request.context.maximum_age,
-        causation_id=inputs.causation_id,
-        correlation_id=inputs.correlation_id,
-    )
-    if (
-        inputs.evidence_reference != expected_evidence
-        or inputs.evidence_reference.evidence_state
-        is not ST12FEvidenceStateV1.EVIDENCE_UNAVAILABLE_F_NOT_IMPLEMENTED
-    ):
-        raise OwnerAdapterError(
-            ReasonCode.EVIDENCE_UNAVAILABLE_F_NOT_IMPLEMENTED,
-            "current pre-F D service accepts only the canonical unavailable reference",
+        stage_values["parameter_and_source_binding_ns"] += (
+            local_duration_now_ns() - binding_started
         )
-    evidence_blocked = (
-        inputs.evidence_reference.evidence_state
-        is ST12FEvidenceStateV1.EVIDENCE_UNAVAILABLE_F_NOT_IMPLEMENTED
-    )
-    if not safety_blocked and not evidence_blocked:
+        if type(inputs) is not ModeSnapshotCandidateInputsV1 or (
+            inputs.request_id != gate.request_id
+            or inputs.capability_decision_ref != gate.capability_decision_ref
+            or inputs.context_ref != gate.context_ref
+            or inputs.evidence_reference is not gate.evidence_reference
+            or inputs.kill_submit_state is not gate.kill_submit_state
+        ):
+            raise ContractValidationError(
+                ReasonCode.IDENTITY_OR_VERSION_UNRESOLVED,
+                "D enriched inputs do not preserve the exact early gate identity",
+            )
         validation_started = local_duration_now_ns()
         _validate_d_proposed_specification(request, inputs)
-        stage_values["request_validation_ns"] = (
-            local_duration_now_ns() - validation_started
-        )
-
-        binding_started = local_duration_now_ns()
         source_candidate_refs = request.source_candidate_refs
         usage = ResourceUsageV1(
             input_cardinality=len(request.proposed_specification.fields),
@@ -660,47 +670,36 @@ def _submit_mode_snapshot_candidate(
             bootstrap_repetitions=0,
             concurrency=1,
         )
-        resources_closed = not validate_resource_bounds(
-            usage,
-            self.resource_bounds_profile,
-        )
-        if not resources_closed:
+        if validate_resource_bounds(usage, self.resource_bounds_profile):
             raise ContractValidationError(
                 ReasonCode.RESOURCE_BOUND_EXCEEDED,
                 "D proposal body exceeds the exact owner-supplied resource bounds",
             )
+        stage_values["request_validation_ns"] += (
+            local_duration_now_ns() - validation_started
+        )
         inputs = replace(
             inputs,
             latency_profile_present=self.latency_budget_profile is not None,
             latency_measurement_ref_or_explicit_absence=measurement_ref,
         )
-        stage_values["parameter_and_source_binding_ns"] = (
-            local_duration_now_ns() - binding_started
-        )
-    else:
-        # Current safety and pre-F evidence blocks precede proposal/schema/body reads.
-        inputs = replace(
-            inputs,
-            latency_profile_present=self.latency_budget_profile is not None,
-            latency_measurement_ref_or_explicit_absence=measurement_ref,
+        candidate_started = local_duration_now_ns()
+        mode_snapshot_result = evaluate_mode_snapshot_candidate(inputs)
+        stage_values["snapshot_candidate_resolution_ns"] += (
+            local_duration_now_ns() - candidate_started
         )
 
-    candidate_started = local_duration_now_ns()
-    mode_snapshot_result = evaluate_mode_snapshot_candidate(inputs)
-    stage_values["snapshot_candidate_resolution_ns"] = (
-        local_duration_now_ns() - candidate_started
-    )
     output_started = local_duration_now_ns()
     if type(mode_snapshot_result) is not ModeSnapshotCandidateProposalResultV1:
         raise ContractValidationError(
             ReasonCode.CONTRACT_OR_TYPE_INVALID,
             "D policy returned no exact typed proposal result",
         )
-    stage_values["output_validation_ns"] = (
+    stage_values["output_validation_ns"] += (
         local_duration_now_ns() - output_started
     )
 
-    def materialize_measurement(
+    def build_measurement(
         result: ModeSnapshotCandidateProposalResultV1,
     ) -> LatencyMeasurementV1:
         decision = result.mode_snapshot_decision
@@ -719,73 +718,133 @@ def _submit_mode_snapshot_candidate(
                 success_or_blocker=decision.allow_candidate_state.value,
                 fallback_used=(
                     decision.fallback_route
-                    not in {
-                        "CONTINUE_NO_EFFECT",
-                        "RETURN_DECISION_NO_EFFECT",
-                    }
+                    not in {"CONTINUE_NO_EFFECT", "RETURN_DECISION_NO_EFFECT"}
                 ),
             ),
             rejection_count=(
                 0
-                if decision.allow_candidate_state.value
-                == "ELIGIBLE_NOT_ACTIVATED"
+                if decision.allow_candidate_state.value == "ELIGIBLE_NOT_ACTIVATED"
                 else 1
             ),
         )
 
-    measurement = materialize_measurement(mode_snapshot_result)
+    def build_surfaces(
+        result: ModeSnapshotCandidateProposalResultV1,
+    ) -> ModeSnapshotCandidateProposalResultV1:
+        projection = None
+        if inputs is not None:
+            projection_adapter = self.mode_snapshot_owner_projection_adapter
+            owner_projections = self.mode_snapshot_projection_bundle
+            if (
+                projection_adapter is None
+                or not isinstance(
+                    projection_adapter,
+                    ModeSnapshotOwnerProjectionProtocolV1,
+                )
+                or type(owner_projections) is not PreloadedOwnerProjectionBundleV1
+            ):
+                raise OwnerAdapterError(
+                    ReasonCode.OWNER_DATA_MISSING,
+                    "D final projection requires the injected adapter and preloaded bundle",
+                )
+            owner_started = local_duration_now_ns()
+            projection = projection_adapter.project_mode_snapshot(
+                result.mode_snapshot_decision,
+                inputs.evidence_reference,
+                inputs.kill_submit_state,
+                snapshot_version=inputs.candidate_version,
+                svc_view=owner_projections.svc,
+            )
+            stage_values["owner_projection_ns"] += (
+                local_duration_now_ns() - owner_started
+            )
+            result = replace(
+                result,
+                owner_projection_or_explicit_absence=projection,
+            )
+        receipt_started = local_duration_now_ns()
+        control_receipts = materialize_mode_snapshot_control_receipts(
+            result,
+            parameter_value_refs=(inputs.parameter_value_refs if inputs is not None else ()),
+            effective_at=request.requested_at,
+            recorded_at=request.requested_at,
+            traceparent=request.traceparent,
+            tracestate=request.tracestate,
+        )
+        stage_values["receipt_materialization_ns"] += (
+            local_duration_now_ns() - receipt_started
+        )
+        return replace(
+            result,
+            control_receipt_refs=tuple(row.record_id for row in control_receipts),
+            control_receipt_proposals=control_receipts,
+        )
+
+    # Pass 1: every executed stage, including projection and receipts, is complete.
+    mode_snapshot_result = build_surfaces(mode_snapshot_result)
+    measurement = build_measurement(mode_snapshot_result)
+    early_terminal = inputs is None
     latency_decision = evaluate_latency_profile(
         measurement,
         self.latency_budget_profile,
     )
-    if (
-        latency_decision.promotion_sensitive_allow_blocked
-        and inputs.latency_profile_present
-    ):
-        inputs = replace(inputs, latency_profile_present=False)
-        mode_snapshot_result = evaluate_mode_snapshot_candidate(inputs)
-        measurement = materialize_measurement(mode_snapshot_result)
-
-    owner_started = local_duration_now_ns()
-    from .protocols import ExistingOwnerProjectionAdapterV1
-
-    projection_adapter = ExistingOwnerProjectionAdapterV1(resolver.repo_root)
-    final_projection = projection_adapter.project_mode_snapshot(
-        mode_snapshot_result.mode_snapshot_decision,
-        inputs.evidence_reference,
-        inputs.kill_submit_state,
-        snapshot_version=inputs.candidate_version,
-        svc_view=projection_adapter.load_svc(),
+    latency_already_terminal = ReasonCode.LATENCY_PROFILE_REQUIRED in (
+        mode_snapshot_result.mode_snapshot_decision.reason_codes
     )
+    if (
+        not early_terminal
+        and latency_decision.promotion_sensitive_allow_blocked
+        and not latency_already_terminal
+    ):
+        # Pass 2: rebuild the terminal latency-blocked surfaces once. Durations
+        # accumulate monotonically and eligibility is never re-opened.
+        assert inputs is not None
+        inputs = replace(inputs, latency_profile_present=False)
+        candidate_started = local_duration_now_ns()
+        mode_snapshot_result = evaluate_mode_snapshot_candidate(inputs)
+        stage_values["snapshot_candidate_resolution_ns"] += (
+            local_duration_now_ns() - candidate_started
+        )
+        output_started = local_duration_now_ns()
+        if type(mode_snapshot_result) is not ModeSnapshotCandidateProposalResultV1:
+            raise ContractValidationError(
+                ReasonCode.CONTRACT_OR_TYPE_INVALID,
+                "latency finalization returned no exact typed proposal result",
+            )
+        stage_values["output_validation_ns"] += (
+            local_duration_now_ns() - output_started
+        )
+        mode_snapshot_result = build_surfaces(mode_snapshot_result)
+        measurement = build_measurement(mode_snapshot_result)
+
     mode_snapshot_result = replace(
         mode_snapshot_result,
-        owner_projection_or_explicit_absence=final_projection,
+        latency_measurement_or_explicit_absence=measurement,
     )
-    stage_values["owner_projection_ns"] = (
-        local_duration_now_ns() - owner_started
-    )
-    measurement = materialize_measurement(mode_snapshot_result)
+    control_receipts = mode_snapshot_result.control_receipt_proposals
+    if (
+        self.persistence_adapter is not None
+        and self.persistence_adapter.availability
+        is PersistenceAvailabilityV1.AVAILABLE_REFERENCE
+    ):
+        transaction = self.persistence_adapter.begin_transaction()
+        try:
+            for row in control_receipts:
+                self.persistence_adapter.insert_receipt_record(transaction, row)
+            transaction.commit()
+        except ComputationControlPlaneError:
+            transaction.rollback()
+            raise
+        if any(
+            self.persistence_adapter.get_record(row.record_id) != row
+            for row in control_receipts
+        ):
+            raise ContractValidationError(
+                ReasonCode.PERSISTENCE_CONFLICT,
+                "persisted D control receipt is not exactly resolvable",
+            )
 
-    receipt_started = local_duration_now_ns()
-    control_receipts = materialize_mode_snapshot_control_receipts(
-        mode_snapshot_result,
-        parameter_value_refs=inputs.parameter_value_refs,
-        effective_at=request.requested_at,
-        recorded_at=request.requested_at,
-        traceparent=request.traceparent,
-        tracestate=request.tracestate,
-    )
-    control_refs = tuple(row.record_id for row in control_receipts)
-    if control_refs != mode_snapshot_result.control_receipt_refs:
-        raise ContractValidationError(
-            ReasonCode.CONTRACT_OR_TYPE_INVALID,
-            "D response control refs differ from the emitted receipt spine",
-        )
-    stage_values["receipt_materialization_ns"] = (
-        local_duration_now_ns() - receipt_started
-    )
-    measurement = materialize_measurement(mode_snapshot_result)
-
+    control_refs = mode_snapshot_result.control_receipt_refs
     decision = mode_snapshot_result.mode_snapshot_decision
     succeeded = decision.allow_candidate_state.value == "ELIGIBLE_NOT_ACTIVATED"
     blocker = () if succeeded else (
@@ -793,12 +852,9 @@ def _submit_mode_snapshot_candidate(
         if decision.allow_candidate_state.value == "EVIDENCE_UNAVAILABLE"
         else OperationBlockerCodeV1.KILL_OR_SUBMIT_DISABLED
         if decision.reason_codes[0]
-        in {
-            ReasonCode.KILL_OR_SUBMIT_DISABLED,
-            ReasonCode.KILL_SUBMIT_DISABLED_OR_SAFETY_BLOCK,
-        }
+        in {ReasonCode.KILL_OR_SUBMIT_DISABLED, ReasonCode.KILL_SUBMIT_DISABLED_OR_SAFETY_BLOCK}
         else OperationBlockerCodeV1.LATENCY_PROFILE_REQUIRED
-        if decision.reason_codes[0] is ReasonCode.LATENCY_PROFILE_REQUIRED
+        if ReasonCode.LATENCY_PROFILE_REQUIRED in decision.reason_codes
         else OperationBlockerCodeV1.MODE_SNAPSHOT_BLOCKED,
     )
     proposal = CandidateProposalV1(
@@ -841,7 +897,7 @@ class QKUComputationControlPlaneV1:
     persistence_adapter: PersistenceAdapterV1 | None = None
     mode_snapshot_input_resolver: ModeSnapshotCandidateInputProtocolV1 | None = None
     mode_snapshot_owner_projection_adapter: ModeSnapshotOwnerProjectionProtocolV1 | None = None
-    mode_snapshot_svc_view: OwnerProjectionViewV1 | None = None
+    mode_snapshot_projection_bundle: PreloadedOwnerProjectionBundleV1 | None = None
     latency_budget_profile: LatencyBudgetProfileV1 | None = None
     resource_bounds_profile: ResourceBoundsProfileV1 | None = None
 
@@ -870,8 +926,9 @@ class QKUComputationControlPlaneV1:
                 ModeSnapshotOwnerProjectionProtocolV1,
             )
         ) or (
-            self.mode_snapshot_svc_view is not None
-            and type(self.mode_snapshot_svc_view) is not OwnerProjectionViewV1
+            self.mode_snapshot_projection_bundle is not None
+            and type(self.mode_snapshot_projection_bundle)
+            is not PreloadedOwnerProjectionBundleV1
         ) or (
             self.latency_budget_profile is not None
             and type(self.latency_budget_profile) is not LatencyBudgetProfileV1

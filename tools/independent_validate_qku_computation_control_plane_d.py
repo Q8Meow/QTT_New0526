@@ -134,6 +134,34 @@ EXPECTED_TEST_IDS = tuple(
         230,
     )
 )
+EXPECTED_SEMANTIC_CASE_OR_VALIDATOR_REFS = (
+    "ST11-EXECUTION::014",
+    "ST11-EXECUTION::013",
+    "ST11-EXECUTION::012",
+    "ST11-EXECUTION::010",
+    "ST11-EXECUTION::011",
+    "ST11-LATENCY::001",
+    "ST11-LATENCY::005",
+    "ST11-LATENCY::011",
+    "ST11-LATENCY::014",
+    "ST11-LATENCY::003",
+    "ST11-LATENCY::015",
+    "ST11-LATENCY::004",
+    "ST11-LATENCY::016",
+    "ST11-LATENCY::019",
+    "ST11-LATENCY::020",
+    "ST11-LATENCY::018",
+    "ST11-LATENCY::017",
+    "ST11-LATENCY::013",
+    "ST11-LATENCY::002",
+    "ST11-LATENCY::012",
+    "ST11-SECURITY::012",
+    "ST11-SECURITY::011",
+    "ST11-SECURITY::013",
+    "INDEPENDENT-EXECUTION-VALIDATOR",
+    "INDEPENDENT-LATENCY-VALIDATOR",
+    "INDEPENDENT-SECURITY-VALIDATOR",
+)
 EXPECTED_COMMANDS = (
     "python tools/independent_validate_qku_computation_control_plane_execution.py",
     "python tools/independent_validate_qku_computation_control_plane_latency.py",
@@ -142,6 +170,38 @@ EXPECTED_COMMANDS = (
     "python tools/validate_qku_computation_control_plane.py --domain latency",
     "python tools/validate_qku_computation_control_plane.py --domain security",
 )
+EXPECTED_RUNTIME_CONSUMERS = {
+    "OUTPUT::SNAPSHOT-CANDIDATE": (
+        "CandidateProposalV1.mode_snapshot_result.snapshot_candidate_or_explicit_absence",
+        "SubmitCandidateProposalResponseV1.proposal",
+    ),
+    "OUTPUT::MODE-DECISION": (
+        "SubmitCandidateProposalResponseV1.proposal",
+        "ModeSnapshotOwnerProjectionV1.decision_id",
+    ),
+    "OUTPUT::TRANSITION-PROPOSAL": (
+        "SubmitCandidateProposalResponseV1.proposal",
+        "EconomicReceiptEventSpineV1.ModeSnapshotControlReceiptRecordV1.transition_proposal_ref",
+    ),
+    "OUTPUT::PROPOSAL-RESULT": (
+        "SubmitCandidateProposalResponseV1.proposal.mode_snapshot_result",
+    ),
+    "OUTPUT::CONTROL-RECEIPT": (
+        "PersistenceAdapterV1.insert_receipt_record_when_AVAILABLE_REFERENCE",
+        "ModeSnapshotCandidateProposalResultV1.control_receipt_proposals",
+    ),
+    "OUTPUT::OWNER-PROJECTION": (
+        "ModeSnapshotCandidateProposalResultV1.owner_projection_or_explicit_absence",
+        "ExistingOwnerProjectionAdapterV1.project_mode_snapshot",
+    ),
+    "OUTPUT::LATENCY-MEASUREMENT": (
+        "ModeSnapshotCandidateProposalResultV1.latency_measurement_or_explicit_absence",
+        "ModeSnapshotControlReceiptRecordV1.latency_measurement_ref_or_explicit_absence",
+    ),
+    "OUTPUT::MATH-39-QUEUE-AHEAD": (
+        "ComputeComponentResponseV1.component_result",
+    ),
+}
 EXPECTED_PUBLIC_OPERATIONS = (
     "resolve_identity",
     "resolve_contextual_computability",
@@ -251,6 +311,15 @@ EXPECTED_CONTRACT_FIELDS = {
         "venue_semantic_binding_ref", "cross_venue_equivalence_ref", "observed_at",
         "valid_until", "policy_version", "causation_id", "correlation_id",
     ),
+    "OwnerActionConfirmationReceiptV1": (
+        "receipt_ref", "owner_action_policy_ref", "state", "principal_id",
+        "task_id", "capability_decision_ref", "context_ref", "observed_at",
+        "valid_until", "causation_id", "correlation_id",
+        "predecessor_transition_id_or_explicit_absence",
+        "predecessor_transition_receipt_ref_or_explicit_absence",
+        "predecessor_transition_receipt_proposal_or_explicit_absence",
+        "runtime_effect_authorized", "order_release_authorized",
+    ),
     "FormulaRuntimeSnapshotCandidateV1": (
         "snapshot_candidate_id", "request_id", "principal_id", "task_id",
         "capability_decision_ref", "computation_bundle_ref", "context_ref",
@@ -263,27 +332,48 @@ EXPECTED_CONTRACT_FIELDS = {
         "runtime_effect_authorized", "order_release_authorized", "activated",
     ),
     "SnapshotTransitionProposalV1": (
-        "proposal_id", "source_candidate_ref_or_explicit_absence", "target_candidate_ref",
+        "proposal_id", "request_id", "principal_id", "task_id",
+        "capability_decision_ref", "context_ref",
+        "source_candidate_ref_or_explicit_absence", "target_candidate_ref",
         "source_candidate_version_or_explicit_absence", "target_candidate_version",
-        "transition_id", "expected_owner_state_ref", "precondition_receipt_refs",
-        "proposed_state", "typed_reason_codes", "causation_id", "correlation_id",
+        "transition_id", "source_state", "destination_state",
+        "expected_owner_state_ref", "precondition_receipt_refs",
+        "predecessor_transition_receipt_refs",
+        "predecessor_transition_receipt_proposals", "proposed_state",
+        "primary_reason_code", "diagnostic_reason_codes", "typed_reason_codes",
+        "owner_confirmation_required", "causation_id", "correlation_id",
+        "no_mutation_flag", "no_activation_flag", "no_order_release_flag",
         "active_pointer_commit_allowed", "mutation_allowed",
         "runtime_effect_authorized", "order_release_authorized",
     ),
     "ModeSnapshotCandidateProposalResultV1": (
         "snapshot_candidate_or_explicit_absence", "mode_snapshot_decision",
         "snapshot_transition_proposal", "control_receipt_refs",
-        "owner_projection_or_explicit_absence", "no_authority_flag",
+        "owner_projection_or_explicit_absence",
+        "latency_measurement_or_explicit_absence", "control_receipt_proposals",
+        "no_authority_flag",
+    ),
+    "ResolvedSnapshotParameterValueV1": (
+        "parameter_id", "parameter_symbol", "resolved_value_ref",
+        "canonical_typed_value_or_explicit_unavailable", "value_kind",
+        "unit_or_basis", "resolution_state", "policy_ref",
+        "parameter_policy_set_version", "producer_receipt_refs",
+        "point_in_time_receipt_refs", "freshness_receipt_refs",
+        "source_epoch_refs", "observed_at_or_explicit_absence",
+        "valid_until_or_explicit_absence", "diagnostic_reason_codes",
+        "no_mutation_flag",
     ),
     "ModeSnapshotControlReceiptRecordV1": (
         "control_receipt_id", "control_class", "request_id", "task_id", "principal_id",
         "capability_decision_ref", "context_ref",
         "snapshot_candidate_ref_or_explicit_absence", "mode_snapshot_decision_ref",
-        "transition_proposal_ref", "implementation_pin_refs", "parameter_value_refs",
-        "source_epoch_refs", "state_before_refs", "state_after_refs",
+        "transition_proposal_ref", "transition_id", "source_state",
+        "destination_state", "target_candidate_version", "implementation_pin_refs",
+        "parameter_value_refs", "source_epoch_refs",
+        "predecessor_transition_receipt_refs", "state_before_refs", "state_after_refs",
         "typed_reason_codes", "fallback_route", "owner_review_route",
         "latency_measurement_ref_or_explicit_absence", "owner_action_policy_ref",
-        "no_order_authority_flag",
+        "no_mutation_flag", "no_activation_flag", "no_order_authority_flag",
     ),
 }
 REQUIRED_CONNECTIVITY_FIELDS = {
@@ -475,6 +565,45 @@ def _validate_denominators_and_artifact_identity() -> tuple[
         "AgentCapabilityDecisionV1.task_id",
         "AGENT_ORCH1.task_envelope.duty_ref",
     ] for row in runtime_rows), "agent-consumable D output lacks current principal/task/duty binding")
+    _require(
+        {
+            str(row.get("artifact_ref")): tuple(row.get("downstream_consumer_refs", ()))
+            for row in runtime_rows
+        }
+        == EXPECTED_RUNTIME_CONSUMERS,
+        "runtime outputs do not identify their exact operational consumers",
+    )
+    _require(
+        all(
+            row.get("consumer_acknowledgment_ref_or_explicit_absence")
+            != "EXPLICIT_ABSENCE"
+            and all(
+                "independent_validate" not in str(consumer)
+                for consumer in row.get("downstream_consumer_refs", ())
+            )
+            for row in runtime_rows
+        ),
+        "a validator is still represented as a runtime output consumer",
+    )
+    independently_connected = {
+        str(row.get("artifact_ref"))
+        for row in connectivity
+        if row.get("downstream_consumer_refs")
+        and (
+            row.get("artifact_or_row_class") != "runtime_no_effect_output"
+            or row.get("consumer_acknowledgment_ref_or_explicit_absence")
+            != "EXPLICIT_ABSENCE"
+        )
+        or row.get("terminal_disposition")
+        == "ROUTED_TO_NAMED_LATER_OWNER_WITH_NO_D_EFFECT"
+    }
+    independently_computed_orphans = set(member_refs) - independently_connected
+    _require(
+        not independently_computed_orphans
+        and summary.get("orphan_d_artifact_count")
+        == len(independently_computed_orphans),
+        "D orphan count is hard-coded or differs from resolvable connectivity",
+    )
 
     _require(tuple(row.get("component_ref") for row in computability) == EXPECTED_MATH_IDS, "four-component computability roster mismatch")
     for row in computability:
@@ -504,29 +633,48 @@ def _validate_denominators_and_artifact_identity() -> tuple[
         row for row in universe if row.get("input_class") == "semantic_test"
     )
     _require(tuple(row.get("member_ref") for row in semantic_rows) == EXPECTED_TEST_IDS, "26 semantic test identities mismatch")
-    semantic_predicate_refs = tuple(row["exact_fields_or_refs"][1] for row in semantic_rows)
+    semantic_mapped_refs = tuple(
+        row["exact_fields_or_refs"][1] for row in semantic_rows
+    )
     semantic_mutation_refs = tuple(
         row.get("mutation_test_ref_or_explicit_not_material")
         for row in semantic_rows
     )
+    mutation_by_control = {
+        str(row.get("control_id")): row.get("causal_mutation_ref")
+        for row in controls
+    }
     _require(
-        len(set(semantic_predicate_refs)) == 26
-        and len(set(semantic_mutation_refs)) == 26
-        and not (set(control_predicate_refs) & set(semantic_predicate_refs)),
-        "26 semantic identities lack unique executable predicates and mutations",
+        semantic_mapped_refs == EXPECTED_SEMANTIC_CASE_OR_VALIDATOR_REFS
+        and semantic_mutation_refs[:23]
+        == tuple(
+            mutation_by_control[control_id]
+            for control_id in EXPECTED_SEMANTIC_CASE_OR_VALIDATOR_REFS[:23]
+        )
+        and all(
+            str(value).startswith("EXPLICIT_NOT_MATERIAL_WITH_PROOF::INDEPENDENT-")
+            for value in semantic_mutation_refs[23:]
+        ),
+        "26 semantic identities are not aliases to 23 controls plus three validators",
     )
     _require(tuple(row["exact_fields_or_refs"][0] for row in universe if row.get("input_class") == "certified_command") == EXPECTED_COMMANDS, "six certified commands mismatch")
     _require(tuple(row.get("member_ref", "").rsplit("::", 1)[-1] for row in universe if row.get("input_class") == "math_component") == EXPECTED_MATH_IDS, "four math identities mismatch")
     _require(sum(row.get("input_class") == "independent_oracle" for row in universe) == 4, "four independent oracles missing")
     _require(sum(row.get("input_class") == "golden_vector" for row in universe) == 4, "four golden vectors missing")
     _require(
-        manifest.get("row_specific_predicate_count") == 49
-        and manifest.get("predicate_positive_pass_count") == 49
-        and manifest.get("predicate_causal_mutation_rejection_count") == 49
-        and summary.get("row_specific_predicate_count") == 49
-        and summary.get("predicate_positive_pass_count") == 49
-        and summary.get("predicate_causal_mutation_rejection_count") == 49,
-        "49 row-specific predicates are not positive and mutation-sensitive",
+        manifest.get("actual_control_mutation_case_count") == 23
+        and manifest.get("actual_control_positive_pass_count") == 23
+        and manifest.get("actual_control_mutation_rejection_count") == 23
+        and manifest.get("semantic_test_identity_count") == 26
+        and manifest.get("semantic_test_pass_count") == 26
+        and manifest.get("synthetic_override_mutation_count") == 0
+        and summary.get("actual_control_mutation_case_count") == 23
+        and summary.get("actual_control_positive_pass_count") == 23
+        and summary.get("actual_control_mutation_rejection_count") == 23
+        and summary.get("semantic_test_identity_count") == 26
+        and summary.get("semantic_test_pass_count") == 26
+        and summary.get("synthetic_override_mutation_count") == 0,
+        "23 actual control mutations or 26 semantic aliases are incomplete",
     )
 
     _recursive_effect_check(manifest, "manifest")
@@ -551,7 +699,8 @@ def _validate_denominators_and_artifact_identity() -> tuple[
 
 
 def _validate_contract_and_service_ast() -> None:
-    models = _source_tree("models.py")
+    models_source = (PACKAGE / "models.py").read_text(encoding="utf-8")
+    models = ast.parse(models_source, filename="models.py")
     receipts = _source_tree("receipts.py")
     for class_name, expected_fields in EXPECTED_CONTRACT_FIELDS.items():
         tree = receipts if class_name == "ModeSnapshotControlReceiptRecordV1" else models
@@ -578,11 +727,47 @@ def _validate_contract_and_service_ast() -> None:
         "CurrentModeSnapshotInputResolverV1",
     ):
         _class_node(input_resolver, class_name)
+    resolver_class = _class_node(input_resolver, "CurrentModeSnapshotInputResolverV1")
+    resolver_methods = {
+        node.name: node
+        for node in resolver_class.body
+        if isinstance(node, ast.FunctionDef)
+    }
+    early_resolver_source = ast.get_source_segment(
+        input_resolver_source,
+        resolver_methods["resolve_mode_snapshot_preconstruction_gate"],
+    ) or ""
+    enrichment_source = ast.get_source_segment(
+        input_resolver_source,
+        resolver_methods["enrich_mode_snapshot_candidate"],
+    ) or ""
     _require(
         "pre_f_unavailable_reference(" in input_resolver_source
-        and "preflight_snapshot_computation_bundle(" in input_resolver_source
-        and "ExistingOwnerProjectionAdapterV1(self._repo_root)" in input_resolver_source,
-        "current D resolver does not derive evidence, bundle, and owner views",
+        and "read_kill_submit_state(context)" in early_resolver_source
+        and "read_evidence_reference(" in early_resolver_source
+        and all(
+            token not in early_resolver_source
+            for token in (
+                "read_owner_action_confirmation",
+                "resolve_st12d_snapshot_parameter_values",
+                "FormulaInputResolverV1.resolve",
+                "preflight_snapshot_computation_bundle",
+                "owner_projections",
+            )
+        )
+        and all(
+            token in enrichment_source
+            for token in (
+                "read_owner_action_confirmation",
+                "resolve_st12d_snapshot_parameter_values",
+                "FormulaInputResolverV1.resolve",
+                "preflight_snapshot_computation_bundle",
+                "owner_projections.source_epoch_refs",
+            )
+        )
+        and "ExistingOwnerProjectionAdapterV1" not in input_resolver_source
+        and ".read_text(" not in input_resolver_source,
+        "current D resolver is not gate-first with preloaded projection custody",
     )
 
     decision_fields = _class_fields(_class_node(models, "ModeSnapshotDecisionV1"))
@@ -593,7 +778,11 @@ def _validate_contract_and_service_ast() -> None:
     for node, names, expected in (
         (candidate_node, ("runtime_effect_authorized", "order_release_authorized", "activated"), False),
         (transition_node, ("active_pointer_commit_allowed", "mutation_allowed", "runtime_effect_authorized", "order_release_authorized"), False),
-        (receipt_node, ("no_order_authority_flag",), True),
+        (
+            receipt_node,
+            ("no_mutation_flag", "no_activation_flag", "no_order_authority_flag"),
+            True,
+        ),
     ):
         defaults = {
             item.target.id: item.value
@@ -602,6 +791,17 @@ def _validate_contract_and_service_ast() -> None:
         }
         for name in names:
             _require(isinstance(defaults.get(name), ast.Constant) and defaults[name].value is expected, f"{node.name}.{name} default mismatch")
+    transition_defaults = {
+        item.target.id: item.value
+        for item in transition_node.body
+        if isinstance(item, ast.AnnAssign) and isinstance(item.target, ast.Name)
+    }
+    for name in ("no_mutation_flag", "no_activation_flag", "no_order_release_flag"):
+        _require(
+            isinstance(transition_defaults.get(name), ast.Constant)
+            and transition_defaults[name].value is True,
+            f"SnapshotTransitionProposalV1.{name} default mismatch",
+        )
 
     service = _source_tree("service.py")
     service_class = _class_node(service, "QKUComputationControlPlaneV1")
@@ -619,28 +819,94 @@ def _validate_contract_and_service_ast() -> None:
     discriminator_offset = service_text.index("request.candidate_kind", admission_offset)
     _require(admission_offset < discriminator_offset, "candidate kind is read before central admission")
     private_offset = service_text.index("def _submit_mode_snapshot_candidate")
-    safety_offset = service_text.index("validate_current_kill_submit_state", private_offset)
-    evidence_offset = service_text.index("expected_evidence = pre_f_unavailable_reference", private_offset)
-    schema_offset = service_text.index("_validate_d_proposed_specification(request, inputs)", private_offset)
-    body_source_offset = service_text.index("source_candidate_refs = request.source_candidate_refs", private_offset)
-    _require(
-        safety_offset < evidence_offset < schema_offset < body_source_offset,
-        "kill/submit and truthful pre-F evidence are not enforced before D schema/body reads",
+    private_node = next(
+        node
+        for node in service.body
+        if isinstance(node, ast.FunctionDef)
+        and node.name == "_submit_mode_snapshot_candidate"
     )
-    latency_offset = service_text.index("latency_decision = evaluate_latency_profile", private_offset)
-    projection_offset = service_text.index("final_projection = projection_adapter.project_mode_snapshot", private_offset)
-    projection_attach_offset = service_text.index("owner_projection_or_explicit_absence=final_projection", private_offset)
-    receipts_offset = service_text.index("materialize_mode_snapshot_control_receipts", private_offset)
-    _require(
-        latency_offset < projection_offset < projection_attach_offset < receipts_offset,
-        "final owner projection or receipts precede the final post-latency decision",
+    private_source = ast.get_source_segment(service_text, private_node) or ""
+    gate_offset = private_source.index(
+        "resolver.resolve_mode_snapshot_preconstruction_gate"
     )
-    private_source = service_text[private_offset:service_text.index("def _", private_offset + 5)]
+    early_policy_offset = private_source.index(
+        "evaluate_mode_snapshot_preconstruction_gate"
+    )
+    projection_bundle_offset = private_source.index(
+        "owner_projections = self.mode_snapshot_projection_bundle"
+    )
+    enrichment_offset = private_source.index(
+        "resolver.enrich_mode_snapshot_candidate"
+    )
+    schema_offset = private_source.index(
+        "_validate_d_proposed_specification(request, inputs)"
+    )
+    body_source_offset = private_source.index(
+        "source_candidate_refs = request.source_candidate_refs"
+    )
     _require(
-        "type(resolver) is not CurrentModeSnapshotInputResolverV1" in private_source
-        and "resolver.owner_registry is not self.owner_registry" in private_source
-        and "inputs.evidence_reference != expected_evidence" in private_source,
-        "service accepts injected D resolver/evidence authority",
+        gate_offset
+        < early_policy_offset
+        < projection_bundle_offset
+        < enrichment_offset
+        < schema_offset
+        < body_source_offset,
+        "T05/T03 do not short-circuit before D projection/enrichment/body work",
+    )
+    projection_offset = private_source.index(
+        "projection = projection_adapter.project_mode_snapshot"
+    )
+    projection_attach_offset = private_source.index(
+        "owner_projection_or_explicit_absence=projection"
+    )
+    receipts_offset = private_source.index(
+        "materialize_mode_snapshot_control_receipts"
+    )
+    pass_one_surface_offset = private_source.index(
+        "mode_snapshot_result = build_surfaces(mode_snapshot_result)"
+    )
+    pass_one_measurement_offset = private_source.index(
+        "measurement = build_measurement(mode_snapshot_result)",
+        pass_one_surface_offset,
+    )
+    latency_offset = private_source.index(
+        "latency_decision = evaluate_latency_profile",
+        pass_one_measurement_offset,
+    )
+    _require(
+        projection_offset < projection_attach_offset < receipts_offset
+        and pass_one_surface_offset < pass_one_measurement_offset < latency_offset
+        and private_source.count("evaluate_latency_profile(") == 1
+        and private_source.count(
+            "mode_snapshot_result = build_surfaces(mode_snapshot_result)"
+        )
+        == 2
+        and "not early_terminal" in private_source
+        and "latency_measurement_or_explicit_absence=measurement"
+        in private_source,
+        "D latency is not one bounded monotone two-pass nine-stage finalizer",
+    )
+    _require(
+        "not isinstance(resolver, ModeSnapshotCandidateInputProtocolV1)"
+        in private_source
+        and "resolver_registry is not self.owner_registry" in private_source
+        and "inputs.evidence_reference is not gate.evidence_reference"
+        in private_source
+        and "PreloadedOwnerProjectionBundleV1" in private_source
+        and "Path(" not in private_source
+        and ".read_text(" not in private_source
+        and "ExistingOwnerProjectionAdapterV1" not in private_source,
+        "service accepts unbound D authority or performs request-path repository reads",
+    )
+    _require(
+        "latency_measurement_or_explicit_absence=measurement"
+        in private_source
+        and "control_receipt_proposals=control_receipts" in private_source
+        and "PersistenceAvailabilityV1.AVAILABLE_REFERENCE" in private_source
+        and "insert_receipt_record(transaction, row)" in private_source
+        and "self.persistence_adapter.get_record(row.record_id) != row"
+        in private_source,
+        "emitted D latency/receipt refs are not typed-returned or persisted",
     )
     compute_start = service_text.index("    def compute_component(")
     compute_end = service_text.index("    def compute_stack(", compute_start)
@@ -659,6 +925,11 @@ def _validate_contract_and_service_ast() -> None:
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
     }
     executable_tokens = {
+        "evaluate_mode_snapshot_preconstruction_gate": (
+            "T03",
+            "T05",
+            "build_snapshot_transition_proposal",
+        ),
         "construct_snapshot_candidate": (
             "BUILT_IMMUTABLE",
             "SNAPSHOT_CANDIDATE_BUILT",
@@ -698,6 +969,7 @@ def _validate_contract_and_service_ast() -> None:
         "observed_owner_state_ref",
         "observed_current_candidate_ref",
         "observed_current_candidate_version",
+        "rollback_required_receipt_proposal",
     ):
         _require(field in rollback_kwonly, f"rollback race precondition missing: {field}")
     _require(
@@ -708,7 +980,9 @@ def _validate_contract_and_service_ast() -> None:
     _require(
         "primary_reason = rule.reason_code" in evaluate_source
         and "dict.fromkeys((primary_reason, decision_reason))" in evaluate_source
-        and "typed_reason_codes=decision_reasons" in evaluate_source,
+        and "build_snapshot_transition_proposal(" in evaluate_source
+        and "reason for reason in decision_reasons if reason is not rule.reason_code"
+        in evaluate_source,
         "canonical transition reason is not first with ordered diagnostics",
     )
     rollback_source = ast.get_source_segment(policy_source, functions["propose_rollback"]) or ""
@@ -717,6 +991,55 @@ def _validate_contract_and_service_ast() -> None:
         and "target.candidate.evaluated_at.isoformat" not in rollback_source,
         "rollback target version is derived from a timestamp rather than inventory identity",
     )
+    helper_source = ast.get_source_segment(
+        policy_source, functions["build_snapshot_transition_proposal"]
+    ) or ""
+    _require(
+        all(
+            token in helper_source
+            for token in (
+                "TRANSITION_BY_ID[transition_id]",
+                "predecessor_transition_receipt_proposals",
+                "source_state=rule.source_state",
+                "destination_state=rule.destination_state",
+                "primary_reason_code=rule.reason_code",
+                "owner_confirmation_required=rule.owner_confirmation_required",
+            )
+        )
+        and all(
+            "build_snapshot_transition_proposal(" in (
+                ast.get_source_segment(policy_source, functions[name]) or ""
+            )
+            for name in (
+                "evaluate_mode_snapshot_preconstruction_gate",
+                "evaluate_mode_snapshot_candidate",
+                "propose_snapshot_stale_or_rollback_required",
+                "propose_snapshot_retirement",
+                "propose_rollback",
+            )
+        ),
+        "runtime transition proposals do not share one exact precondition helper",
+    )
+    transition_source = ast.get_source_segment(models_source, transition_node) or ""
+    _require(
+        all(
+            token in transition_source
+            for token in (
+                'self.transition_id == "T07"',
+                'self.transition_id in {"T13", "T14"}',
+                "predecessor_payload.request_id != self.request_id",
+                "predecessor_payload.principal_id != self.principal_id",
+                "predecessor_payload.task_id != self.task_id",
+                "predecessor_payload.context_ref != self.context_ref",
+                "predecessor_payload.destination_state != rule.source_state",
+                "predecessor_payload.target_candidate_version",
+                "predecessor_payload.no_mutation_flag is not True",
+                "predecessor_payload.no_activation_flag is not True",
+                "predecessor_payload.no_order_authority_flag is not True",
+            )
+        ),
+        "typed predecessor receipts do not prove exact transition scope and no-effect state",
+    )
     receipts_source = (PACKAGE / "receipts.py").read_text(encoding="utf-8")
     materialize_start = receipts_source.index("def materialize_mode_snapshot_control_receipts")
     materialize_source = receipts_source[materialize_start:]
@@ -724,7 +1047,7 @@ def _validate_contract_and_service_ast() -> None:
         "MODE_SNAPSHOT_EVALUATION" in materialize_source
         and "snapshot_candidate_state is not SnapshotCandidateStateV1.ABSENT" in materialize_source
         and "SnapshotCandidateStateV1.REJECTED" in materialize_source
-        and "len(result.control_receipt_refs) != len(control_class_tuple)" in materialize_source,
+        and "result.control_receipt_refs != expected_refs" in materialize_source,
         "D receipt classes are not derived from actually executed stages",
     )
     _require(_git_path_changed("src/qtt/stage1_prediction_markets/qku_computation_control_plane/agent_policy.py") is False, "agent_policy.py edit count is nonzero")
@@ -900,6 +1223,29 @@ def _validate_repair_closure_sources() -> None:
         in parameter_source,
         "readable D parameter rows do not retain one canonical owner",
     )
+    _require(
+        all(
+            token in parameter_source
+            for token in (
+                "ST12D_PARAMETER_POLICY_SET_VERSION",
+                "ST12D_OWNER_RESOLVED_PARAMETER_IDS",
+                "def resolve_st12d_snapshot_parameter_values(",
+                "PointInTimePolicyV1.validate(",
+                "FreshnessResolverV1.validate(",
+                "producer_receipt_refs=(packet.producer_receipt_id,)",
+                "point_in_time_receipt_refs=(pit.receipt_id,)",
+                "freshness_receipt_refs=(freshness.receipt_id,)",
+                "source_epoch_refs=(packet.source_epoch_id,)",
+                'if parameter_id == "ST10-PARAM::3002"',
+                'if parameter_id == "ST10-PARAM::3003"',
+                'if parameter_id == "ST10-PARAM::3641"',
+                "tuple(row.parameter_id for row in result)",
+            )
+        )
+        and parameter_source.count('"ST10-PARAM::0764"') >= 2
+        and parameter_source.count('"ST10-PARAM::3639"') >= 2,
+        "D does not resolve the exact 21 typed value pins through owner/PIT/freshness custody",
+    )
     d_parameter_source = parameter_source[
         parameter_source.index("_ST12D_PARAMETER_ROW_001") :
     ]
@@ -912,15 +1258,36 @@ def _validate_repair_closure_sources() -> None:
     )
 
     validation_source = (PACKAGE / "validation.py").read_text(encoding="utf-8")
+    validation_tree = ast.parse(validation_source, filename="validation.py")
+    actual_case_fields = _class_fields(
+        _class_node(validation_tree, "ST12DActualControlMutationCaseV1")
+    )
+    forbidden_override_token = "owner_fact_" + "override"
+    synthetic_tuple_token = "CAUSAL_OWNER_FIELD_" + "MUTATION"
     _require(
-        "class ST12DPredicateSpecV1" in validation_source
-        and "ST12D_PREDICATE_SPECS = _build_st12d_predicate_specs()"
+        actual_case_fields
+        == (
+            "control_id",
+            "positive_typed_fixture_builder",
+            "actual_owner_or_input_mutation",
+            "canonical_observer",
+            "expected_positive_terminal_state",
+            "expected_negative_reason_or_terminal_state",
+            "mapped_semantic_test_ids",
+            "grouped_module",
+            "positive_fixture_ref",
+            "causal_mutation_ref",
+            "causal_owner_field_ref",
+        )
+        and "ST12D_ACTUAL_CONTROL_MUTATION_CASES = _build_st12d_actual_control_mutation_cases()"
         in validation_source
-        and "def adjudicate_st12d_predicate(" in validation_source
-        and "owner_fact_override" in validation_source
-        and "actual == spec.expected_owner_fact" in validation_source
-        and "_st12d_predicate_matrix" not in validation_source,
-        "D validation still uses broad shared booleans or lacks causal adjudication",
+        and "def run_st12d_actual_control_mutation_case(" in validation_source
+        and "case.actual_owner_or_input_mutation(positive_fixture)"
+        in validation_source
+        and "case.canonical_observer(mutated_fixture)" in validation_source
+        and forbidden_override_token not in validation_source
+        and synthetic_tuple_token not in validation_source,
+        "D validation lacks actual typed owner/input mutation adjudication",
     )
     grouped_tests = (
         REPO_ROOT
@@ -941,11 +1308,28 @@ def _validate_repair_closure_sources() -> None:
     )
     _require(
         test_function_count < 23
-        and "for semantic_id, predicate in ST12D_PREDICATE_SPECS.items()"
+        and "for control_id in ST12D_ACTUAL_CONTROL_MUTATION_CASES"
         in test_sources[1]
-        and "owner_fact_override=predicate.causal_mutation_fact"
+        and "run_st12d_actual_control_mutation_case(control_id)"
         in test_sources[1],
-        "grouped D tests expanded per ID or do not execute causal mutations",
+        "grouped D tests expanded per ID or do not execute actual control mutations",
+    )
+    _require(
+        all(
+            forbidden_override_token not in source
+            and synthetic_tuple_token not in source
+            for source in test_sources
+        ),
+        "synthetic comparison override pattern remains in D validation surfaces",
+    )
+    _require(
+        'packet_id="PACKET::D::UNRELATED"' in test_sources[1]
+        and '"SOURCE-EPOCH::D::UNRELATED" not in unrelated_enriched.source_epoch_refs'
+        in test_sources[1]
+        and "ReasonCode.SOURCE_EPOCH_STALE" in test_sources[1]
+        and 'monkeypatch.setattr(Path, "read_text"' in test_sources[0]
+        and 'monkeypatch.setattr(Path, "read_text"' in test_sources[1],
+        "D grouped tests do not prove consumed-only epochs and zero request file reads",
     )
 
     builder_source = (REPO_ROOT / "tools/build_qku_computation_control_plane.py").read_text(
@@ -969,15 +1353,25 @@ def _validate_repair_closure_sources() -> None:
         "generated D computability is hard-coded instead of centrally resolved",
     )
     _require(
-        "predicate_positive_pass_count = sum(" in builder_source
-        and "predicate_causal_mutation_rejection_count = sum(" in builder_source
-        and "adjudicate_st12d_predicate(" in builder_source,
-        "generated validation summary is not derived from actual predicate adjudication",
+        "control_mutation_results = tuple(" in builder_source
+        and "run_st12d_actual_control_mutation_case(control_id)"
+        in builder_source
+        and "actual_control_mutation_rejection_count = sum(" in builder_source
+        and '"synthetic_override_mutation_count": 0' in builder_source,
+        "generated validation summary is not derived from actual control mutations",
+    )
+    _require(
+        forbidden_override_token not in builder_source
+        and synthetic_tuple_token not in builder_source,
+        "generated builder retains a synthetic mutation override pattern",
     )
     stack_source = (PACKAGE / "stack_resolver.py").read_text(encoding="utf-8")
     _require(
         'ST12D_SNAPSHOT_COMPONENT_IDS = ("MATH-13", "MATH-14", "MATH-15", "MATH-39")'
         in stack_source
+        and "row.parameter_id for row in self.resolved_parameter_values"
+        in stack_source
+        and "ST12D_SNAPSHOT_PARAMETER_BINDING_IDS" in stack_source
         and "data_edge_refs: tuple[str, ...] = ()" in stack_source
         and "self.data_edge_refs != ()" in stack_source,
         "D snapshot bundle creates a fabricated executable stack/data edge",

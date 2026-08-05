@@ -22,7 +22,10 @@ from .models import (
 
 if TYPE_CHECKING:
     from .agent_policy import AgentCapabilityDecisionV1
-    from .mode_snapshot_policy import ModeSnapshotCandidateInputsV1
+    from .mode_snapshot_policy import (
+        ModeSnapshotCandidateInputsV1,
+        ModeSnapshotPreconstructionGateV1,
+    )
     from .models import ComputationExecutionContextV1
 
 
@@ -122,12 +125,20 @@ class OwnerActionConfirmationProtocolV1(Protocol):
 
 @runtime_checkable
 class ModeSnapshotCandidateInputProtocolV1(Protocol):
-    """Resolve exact precomputed D inputs after the central admission decision."""
+    """Resolve the early gate first, then enrich only a nonterminal gate."""
 
-    def resolve_mode_snapshot_inputs(
+    def resolve_mode_snapshot_preconstruction_gate(
         self,
         request: object,
         capability_decision: "AgentCapabilityDecisionV1",
+    ) -> "ModeSnapshotPreconstructionGateV1": ...
+
+    def enrich_mode_snapshot_candidate(
+        self,
+        request: object,
+        capability_decision: "AgentCapabilityDecisionV1",
+        preconstruction_gate: "ModeSnapshotPreconstructionGateV1",
+        owner_projections: "PreloadedOwnerProjectionBundleV1",
     ) -> "ModeSnapshotCandidateInputsV1": ...
 
 
@@ -231,6 +242,48 @@ class OwnerProjectionViewV1:
         from .serialization import validate_relative_path
 
         validate_relative_path(self.source_path)
+
+
+@dataclass(frozen=True, slots=True)
+class PreloadedOwnerProjectionBundleV1:
+    """Immutable four-owner projection bundle loaded outside the D request path."""
+
+    readiness: OwnerProjectionViewV1
+    pretrade: OwnerProjectionViewV1
+    svc: OwnerProjectionViewV1
+    agent_orch: OwnerProjectionViewV1
+
+    def __post_init__(self) -> None:
+        rows = (self.readiness, self.pretrade, self.svc, self.agent_orch)
+        if any(type(row) is not OwnerProjectionViewV1 for row in rows) or tuple(
+            row.owner_id for row in rows
+        ) != ("READINESS1", "PRETRADE1", "SVC1", "AGENT_ORCH1"):
+            raise OwnerAdapterError(
+                ReasonCode.OWNER_DATA_MALFORMED,
+                "preloaded D projections require the exact four current owner views",
+            )
+        if any(
+            row.projection_mutation_allowed or row.runtime_effect_allowed
+            for row in rows
+        ):
+            raise OwnerAdapterError(
+                ReasonCode.CAPABILITY_DENIED,
+                "preloaded owner projections must remain immutable and no-effect",
+            )
+
+    @property
+    def receipt_refs(self) -> tuple[str, ...]:
+        return tuple(
+            f"OWNER-PROJECTION-RECEIPT::{row.owner_id}::{row.source_version}"
+            for row in (self.readiness, self.pretrade, self.svc, self.agent_orch)
+        )
+
+    @property
+    def source_epoch_refs(self) -> tuple[str, ...]:
+        return tuple(
+            f"OWNER-PROJECTION-EPOCH::{row.owner_id}::{row.source_version}"
+            for row in (self.readiness, self.pretrade, self.svc, self.agent_orch)
+        )
 
 
 def _validated_rows(
@@ -453,6 +506,16 @@ class ExistingOwnerProjectionAdapterV1:
             consume_interfaces=("AgentOrchService",),
             row_count=len(rows),
             identity_refs=("dag.jsonl",),
+        )
+
+    def load_bundle(self) -> PreloadedOwnerProjectionBundleV1:
+        """Load once before request handling; request code consumes only this value."""
+
+        return PreloadedOwnerProjectionBundleV1(
+            readiness=self.load_readiness(),
+            pretrade=self.load_pretrade(),
+            svc=self.load_svc(),
+            agent_orch=self.load_agent_orch(),
         )
 
     def project_mode_snapshot(

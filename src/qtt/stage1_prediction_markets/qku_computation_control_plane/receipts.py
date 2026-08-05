@@ -231,9 +231,14 @@ class ModeSnapshotControlReceiptRecordV1:
     snapshot_candidate_ref_or_explicit_absence: str
     mode_snapshot_decision_ref: str
     transition_proposal_ref: str
+    transition_id: str
+    source_state: str
+    destination_state: str
+    target_candidate_version: str
     implementation_pin_refs: tuple[str, ...]
     parameter_value_refs: tuple[str, ...]
     source_epoch_refs: tuple[str, ...]
+    predecessor_transition_receipt_refs: tuple[str, ...]
     state_before_refs: tuple[str, ...]
     state_after_refs: tuple[str, ...]
     typed_reason_codes: tuple[ReasonCode, ...]
@@ -241,6 +246,8 @@ class ModeSnapshotControlReceiptRecordV1:
     owner_review_route: str
     latency_measurement_ref_or_explicit_absence: str
     owner_action_policy_ref: str
+    no_mutation_flag: bool = True
+    no_activation_flag: bool = True
     no_order_authority_flag: bool = True
 
     def __post_init__(self) -> None:
@@ -254,6 +261,10 @@ class ModeSnapshotControlReceiptRecordV1:
             "snapshot_candidate_ref_or_explicit_absence",
             "mode_snapshot_decision_ref",
             "transition_proposal_ref",
+            "transition_id",
+            "source_state",
+            "destination_state",
+            "target_candidate_version",
             "fallback_route",
             "owner_review_route",
             "latency_measurement_ref_or_explicit_absence",
@@ -265,13 +276,13 @@ class ModeSnapshotControlReceiptRecordV1:
                 ReasonCode.CONTRACT_OR_TYPE_INVALID,
                 "control_class must use the single D control-class enum",
             )
-        for name in (
-            "implementation_pin_refs",
-            "parameter_value_refs",
-            "source_epoch_refs",
-            "state_before_refs",
-            "state_after_refs",
-        ):
+        for name in ("implementation_pin_refs", "parameter_value_refs"):
+            _identifier_tuple(getattr(self, name), name)
+        _identifier_tuple(
+            self.predecessor_transition_receipt_refs,
+            "predecessor_transition_receipt_refs",
+        )
+        for name in ("source_epoch_refs", "state_before_refs", "state_after_refs"):
             _identifier_tuple(getattr(self, name), name, allow_empty=False)
         if (
             not isinstance(self.typed_reason_codes, tuple)
@@ -283,10 +294,14 @@ class ModeSnapshotControlReceiptRecordV1:
                 ReasonCode.CONTRACT_OR_TYPE_INVALID,
                 "typed_reason_codes must be a nonempty unique ReasonCode tuple",
             )
-        if self.no_order_authority_flag is not True:
+        if (
+            self.no_mutation_flag is not True
+            or self.no_activation_flag is not True
+            or self.no_order_authority_flag is not True
+        ):
             raise ContractValidationError(
                 ReasonCode.ORDER_RELEASE_FORBIDDEN,
-                "D control receipts must retain no-order authority",
+                "D control receipts must retain no-mutation/no-activation/no-order authority",
             )
 
 
@@ -306,7 +321,7 @@ def materialize_mode_snapshot_control_receipts(
             ReasonCode.CONTRACT_OR_TYPE_INVALID,
             "D receipt materialization requires an exact proposal result",
         )
-    _identifier_tuple(parameter_value_refs, "parameter_value_refs", allow_empty=False)
+    _identifier_tuple(parameter_value_refs, "parameter_value_refs")
     decision = result.mode_snapshot_decision
     proposal = result.snapshot_transition_proposal
     candidate = result.snapshot_candidate_or_explicit_absence
@@ -332,14 +347,23 @@ def materialize_mode_snapshot_control_receipts(
             ModeSnapshotControlClassV1.SNAPSHOT_CANDIDATE_VALIDATION
         )
     control_class_tuple = tuple(control_classes)
-    if len(result.control_receipt_refs) != len(control_class_tuple):
+    suffix_by_class = {
+        ModeSnapshotControlClassV1.MODE_SNAPSHOT_EVALUATION: "EVALUATION",
+        ModeSnapshotControlClassV1.SNAPSHOT_CANDIDATE_BUILD: "BUILD",
+        ModeSnapshotControlClassV1.SNAPSHOT_CANDIDATE_VALIDATION: "VALIDATION",
+    }
+    expected_refs = tuple(
+        f"MODE-SNAPSHOT-CONTROL::{decision.request_id}::{suffix_by_class[row]}"
+        for row in control_class_tuple
+    )
+    if result.control_receipt_refs and result.control_receipt_refs != expected_refs:
         raise ContractValidationError(
             ReasonCode.CONTRACT_OR_TYPE_INVALID,
-            "D result/control receipt cardinality differs",
+            "D result/control receipt identities differ from executed stages",
         )
     rows: list[EconomicReceiptEventSpineV1] = []
     for index, (receipt_ref, control_class) in enumerate(
-        zip(result.control_receipt_refs, control_class_tuple, strict=True)
+        zip(expected_refs, control_class_tuple, strict=True)
     ):
         payload = ModeSnapshotControlReceiptRecordV1(
             control_receipt_id=receipt_ref,
@@ -352,16 +376,33 @@ def materialize_mode_snapshot_control_receipts(
             snapshot_candidate_ref_or_explicit_absence=candidate_ref,
             mode_snapshot_decision_ref=decision.decision_id,
             transition_proposal_ref=proposal.proposal_id,
+            transition_id=proposal.transition_id,
+            source_state=proposal.source_state,
+            destination_state=proposal.destination_state,
+            target_candidate_version=proposal.target_candidate_version,
             implementation_pin_refs=implementation_refs,
             parameter_value_refs=parameter_value_refs,
             source_epoch_refs=decision.source_epoch_refs,
-            state_before_refs=(
-                proposal.expected_owner_state_ref,
-                proposal.source_candidate_ref_or_explicit_absence,
+            predecessor_transition_receipt_refs=(
+                proposal.predecessor_transition_receipt_refs
             ),
-            state_after_refs=(
-                proposal.target_candidate_ref,
-                proposal.proposed_state.value,
+            state_before_refs=tuple(
+                dict.fromkeys(
+                    (
+                        proposal.source_state,
+                        proposal.expected_owner_state_ref,
+                        proposal.source_candidate_ref_or_explicit_absence,
+                        *proposal.predecessor_transition_receipt_refs,
+                    )
+                )
+            ),
+            state_after_refs=tuple(
+                dict.fromkeys(
+                    (
+                        proposal.destination_state,
+                        proposal.target_candidate_ref,
+                    )
+                )
             ),
             typed_reason_codes=proposal.typed_reason_codes,
             fallback_route=decision.fallback_route,

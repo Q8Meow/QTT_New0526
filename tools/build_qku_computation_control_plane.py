@@ -79,9 +79,17 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.parameter_p
     OPTIMIZER_DEFAULT_CURRENTIZATIONS,
     RUNTIME_PARAMETER_OWNER_BINDINGS,
     ST12D_PARAMETER_APPLICATION_BINDINGS,
+    ST12D_OWNER_RESOLVED_PARAMETER_IDS,
+    ST12D_PARAMETER_VALUE_PACKET_SCHEMA_ID,
+    ST12D_PARAMETER_VALUE_PACKET_SCHEMA_VERSION,
+    ST12D_PARAMETER_VALUE_PACKET_TYPE,
     ST12D_PARAMETER_POLICIES,
     ST12D_SNAPSHOT_PARAMETER_BINDING_IDS,
+    resolve_st12d_snapshot_parameter_values,
     resolve_st12d_value_policy_refs,
+    st12d_snapshot_parameter_binding_id,
+    st12d_snapshot_parameter_field_path,
+    st12d_snapshot_parameter_source_lineage,
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.quantum_adapter import (  # noqa: E402
     QUANTUM_STRUCTURAL_READINESS_BY_MATH_ID,
@@ -109,11 +117,11 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.point_in_ti
     PointInTimeClocksV1,
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.validation import (  # noqa: E402
+    ST12D_ACTUAL_CONTROL_MUTATION_CASES,
     ST12D_CERTIFIED_COMMANDS,
     ST12D_CLOSURE_ROWS,
     ST12D_GENERATED_PROJECTION_PATHS,
     ST12D_HISTORICAL_PATH_DISPOSITIONS,
-    ST12D_PREDICATE_SPECS,
     ST12D_SEMANTIC_TEST_ROWS,
     ST12E_CERTIFIED_COMMANDS,
     ST12E_CLOSURE_ROWS,
@@ -124,7 +132,8 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.validation 
     ST12B_AGENT_IDS,
     ST12B_OPERATION_CAPABILITY_BY_ID,
     validate_tranche_b_frozen_manifest,
-    adjudicate_st12d_predicate,
+    adjudicate_st12d_semantic_test,
+    run_st12d_actual_control_mutation_case,
     st12e_semantic_counts,
     st12d_acceptance_counts,
 )
@@ -335,6 +344,66 @@ _ST12D_RUNTIME_OUTPUTS = (
     ("OUTPUT::LATENCY-MEASUREMENT", "LatencyMeasurementV1"),
     ("OUTPUT::MATH-39-QUEUE-AHEAD", "compute_math_39_queue_position_estimate"),
 )
+_ST12D_RUNTIME_OPERATIONAL_CONNECTIVITY = {
+    "OUTPUT::SNAPSHOT-CANDIDATE": (
+        (
+            "CandidateProposalV1.mode_snapshot_result.snapshot_candidate_or_explicit_absence",
+            "SubmitCandidateProposalResponseV1.proposal",
+        ),
+        "ModeSnapshotCandidateProposalResultV1.snapshot_candidate_or_explicit_absence",
+        "RETURNED_IN_TYPED_CANDIDATE_PROPOSAL_RESPONSE_NO_EFFECT",
+    ),
+    "OUTPUT::MODE-DECISION": (
+        (
+            "SubmitCandidateProposalResponseV1.proposal",
+            "ModeSnapshotOwnerProjectionV1.decision_id",
+        ),
+        "ModeSnapshotCandidateProposalResultV1.mode_snapshot_decision",
+        "RETURNED_IN_RESPONSE_AND_FINAL_OWNER_PROJECTION_NO_EFFECT",
+    ),
+    "OUTPUT::TRANSITION-PROPOSAL": (
+        (
+            "SubmitCandidateProposalResponseV1.proposal",
+            "EconomicReceiptEventSpineV1.ModeSnapshotControlReceiptRecordV1.transition_proposal_ref",
+        ),
+        "ModeSnapshotCandidateProposalResultV1.snapshot_transition_proposal",
+        "RETURNED_IN_RESPONSE_AND_CONTROL_RECEIPT_SPINE_NO_EFFECT",
+    ),
+    "OUTPUT::PROPOSAL-RESULT": (
+        ("SubmitCandidateProposalResponseV1.proposal.mode_snapshot_result",),
+        "SubmitCandidateProposalResponseV1.proposal.mode_snapshot_result",
+        "RETURNED_IN_TYPED_SUBMIT_CANDIDATE_RESPONSE_NO_EFFECT",
+    ),
+    "OUTPUT::CONTROL-RECEIPT": (
+        (
+            "PersistenceAdapterV1.insert_receipt_record_when_AVAILABLE_REFERENCE",
+            "ModeSnapshotCandidateProposalResultV1.control_receipt_proposals",
+        ),
+        "PersistenceAdapterV1.get_record_or_exact_returned_typed_proposal",
+        "PERSISTED_OR_RETURNED_AS_EXACT_TYPED_RECEIPT_PROPOSAL",
+    ),
+    "OUTPUT::OWNER-PROJECTION": (
+        (
+            "ModeSnapshotCandidateProposalResultV1.owner_projection_or_explicit_absence",
+            "ExistingOwnerProjectionAdapterV1.project_mode_snapshot",
+        ),
+        "ModeSnapshotCandidateProposalResultV1.owner_projection_or_explicit_absence",
+        "RETURNED_AND_PROJECTED_INTO_EXISTING_OWNER_SEMANTIC_FABRIC",
+    ),
+    "OUTPUT::LATENCY-MEASUREMENT": (
+        (
+            "ModeSnapshotCandidateProposalResultV1.latency_measurement_or_explicit_absence",
+            "ModeSnapshotControlReceiptRecordV1.latency_measurement_ref_or_explicit_absence",
+        ),
+        "exact_returned_LatencyMeasurementV1_or_existing_receipt_spine_ref",
+        "RETURNED_EXACT_MEASUREMENT_AND_REFERENCED_BY_RECEIPT_SPINE",
+    ),
+    "OUTPUT::MATH-39-QUEUE-AHEAD": (
+        ("ComputeComponentResponseV1.component_result",),
+        "ComputeComponentResponseV1.component_result",
+        "RETURNED_IN_EXISTING_COMPUTE_COMPONENT_RESPONSE_NO_EFFECT",
+    ),
+}
 
 
 def build_st12e_projections() -> ST12EProjectionSet:
@@ -569,26 +638,27 @@ def _st12d_input_member(
 def _build_st12d_input_universe() -> tuple[dict[str, object], ...]:
     rows: list[dict[str, object]] = []
     for row in ST12D_CLOSURE_ROWS:
-        predicate = ST12D_PREDICATE_SPECS[str(row["control_id"])]
+        case = ST12D_ACTUAL_CONTROL_MUTATION_CASES[str(row["control_id"])]
         rows.append(
             _st12d_input_member(
                 member_ref=str(row["closure_id"]),
                 input_class="closure_control",
-                semantic_owner_ref=predicate.owner_fact_source_ref,
-                producer_path_or_interface=predicate.grouped_module,
+                semantic_owner_ref=case.control_id,
+                producer_path_or_interface=case.grouped_module,
                 exact_fields_or_refs=(
                     str(row["control_id"]),
-                    predicate.predicate_ref,
-                    predicate.causal_owner_field_ref,
-                    predicate.expected_terminal_state,
+                    str(row["predicate_ref"]),
+                    case.causal_owner_field_ref,
+                    case.expected_positive_terminal_state,
+                    case.expected_negative_reason_or_terminal_state,
                 ),
                 downstream_predicate_or_field=(
-                    "adjudicate_st12d_predicate",
-                    predicate.predicate_ref,
-                    predicate.expected_terminal_state,
+                    "run_st12d_actual_control_mutation_case",
+                    str(row["predicate_ref"]),
+                    case.expected_positive_terminal_state,
                 ),
                 mutation_test_ref_or_explicit_not_material=(
-                    predicate.causal_mutation_ref
+                    case.causal_mutation_ref
                 ),
                 terminal_disposition="CONSUMED_BY_D_VALIDATION_OR_PROJECTION",
             )
@@ -700,26 +770,27 @@ def _build_st12d_input_universe() -> tuple[dict[str, object], ...]:
             )
         )
     for row in ST12D_SEMANTIC_TEST_ROWS:
-        predicate = ST12D_PREDICATE_SPECS[str(row["test_id"])]
+        mapped_ref = str(row["mapped_control_case_or_validator_ref"])
         rows.append(
             _st12d_input_member(
                 member_ref=str(row["test_id"]),
                 input_class="semantic_test",
-                semantic_owner_ref=predicate.owner_fact_source_ref,
-                producer_path_or_interface=predicate.grouped_module,
+                semantic_owner_ref=mapped_ref,
+                producer_path_or_interface=str(row["grouped_module"]),
                 exact_fields_or_refs=(
                     str(row["test_id"]),
-                    predicate.predicate_ref,
-                    predicate.causal_owner_field_ref,
-                    predicate.expected_terminal_state,
+                    mapped_ref,
+                    str(row["predicate_ref"]),
+                    str(row["causal_owner_field_ref"]),
+                    str(row["expected_terminal_state"]),
                 ),
                 downstream_predicate_or_field=(
-                    "adjudicate_st12d_predicate",
-                    predicate.predicate_ref,
-                    predicate.expected_terminal_state,
+                    "adjudicate_st12d_semantic_test",
+                    mapped_ref,
+                    str(row["expected_terminal_state"]),
                 ),
                 mutation_test_ref_or_explicit_not_material=(
-                    predicate.causal_mutation_ref
+                    str(row["causal_mutation_ref"])
                 ),
                 terminal_disposition="CONSUMED_BY_D_VALIDATION_OR_PROJECTION",
             )
@@ -1060,15 +1131,65 @@ def _build_st12d_audit_bundle() -> tuple[
                 revision=revision,
             )
         )
+    audit_parameter_values: dict[str, object] = {
+        "ST10-PARAM::0764": Decimal("0.04"),
+        "ST10-PARAM::0940": Decimal("0.03"),
+        "ST10-PARAM::1946": "OPEN_OR_CLOSE_FROM_PRETRADE_POSITION_SNAPSHOT",
+        "ST10-PARAM::2117": "BOLO::ST12D-AUDIT::1",
+        "ST10-PARAM::2157": "ETF-BASKET::ST12D-AUDIT::1",
+        "ST10-PARAM::3490": "FEE-TIER::ST12D-AUDIT::1",
+        "ST10-PARAM::3598": "BOOK-FRESHNESS::ST12D-AUDIT::CURRENT",
+        "ST10-PARAM::3639": Decimal("1.5"),
+    }
+    if set(audit_parameter_values) != set(ST12D_OWNER_RESOLVED_PARAMETER_IDS):
+        raise ValueError("ST12-D audit fixture must cover every owner-resolved parameter")
+    for parameter_id in ST12D_SNAPSHOT_PARAMETER_BINDING_IDS:
+        if parameter_id not in ST12D_OWNER_RESOLVED_PARAMETER_IDS:
+            continue
+        policy = ST12D_PARAMETER_POLICIES[parameter_id]
+        binding_id = st12d_snapshot_parameter_binding_id(parameter_id)
+        packets.append(
+            OwnerValuePacketV1(
+                packet_id=f"PACKET::ST12D-AUDIT::PARAMETER::{parameter_id}",
+                owner_id=policy.canonical_owner,
+                packet_type=ST12D_PARAMETER_VALUE_PACKET_TYPE,
+                schema_id=ST12D_PARAMETER_VALUE_PACKET_SCHEMA_ID,
+                schema_version=ST12D_PARAMETER_VALUE_PACKET_SCHEMA_VERSION,
+                context_id=context.context_id,
+                scope=context.scope,
+                source_epoch_id=context.source_epoch_id,
+                input_version=context.input_version,
+                clocks=clocks,
+                ttl=timedelta(days=1),
+                values={
+                    st12d_snapshot_parameter_field_path(parameter_id): (
+                        audit_parameter_values[parameter_id]
+                    )
+                },
+                authorized_binding_ids=(binding_id,),
+                producer_receipt_id=(
+                    f"RECEIPT::ST12D-AUDIT::PARAMETER::{parameter_id}"
+                ),
+                producer_receipt_type=ST12D_PARAMETER_VALUE_PACKET_TYPE,
+                source_state_and_claim_lineage=(
+                    st12d_snapshot_parameter_source_lineage(parameter_id)
+                ),
+                revision=1,
+            )
+        )
     registry = CanonicalOwnerPacketRegistryV1(tuple(packets))
-    policy_refs = resolve_st12d_value_policy_refs(
-        ST12D_SNAPSHOT_PARAMETER_BINDING_IDS
+    resolved_parameter_values = resolve_st12d_snapshot_parameter_values(
+        context=context,
+        owner_registry=registry,
     )
     bundle = preflight_snapshot_computation_bundle(
         context=context,
         owner_registry=registry,
         parameter_policy_snapshot_ref="ComputationParameterPolicyV1::3.4",
-        parameter_value_refs=tuple(policy_refs.values()),
+        parameter_value_refs=tuple(
+            row.resolved_value_ref for row in resolved_parameter_values
+        ),
+        resolved_parameter_values=resolved_parameter_values,
         source_epoch_refs=(context.source_epoch_id,),
     )
     return bundle, registry
@@ -1159,6 +1280,24 @@ def _build_st12d_connectivity(
         member_ref = str(item["member_ref"])
         input_class = str(item["input_class"])
         candidate_consumed = item["terminal_disposition"] == "CONSUMED_BY_D_CANDIDATE"
+        runtime_route = _ST12D_RUNTIME_OPERATIONAL_CONNECTIVITY.get(member_ref)
+        if runtime_route is not None:
+            downstream_consumer_refs, consumer_acknowledgment, terminal_route = (
+                runtime_route
+            )
+        elif candidate_consumed:
+            downstream_consumer_refs = (
+                "FormulaRuntimeSnapshotCandidateV1",
+                "ModeSnapshotDecisionV1",
+            )
+            consumer_acknowledgment = "EXPLICIT_ABSENCE"
+            terminal_route = "ADMIT_EXACT_PIN_OR_TYPED_BLOCKER"
+        else:
+            downstream_consumer_refs = (
+                "tools/independent_validate_qku_computation_control_plane_d.py",
+            )
+            consumer_acknowledgment = "EXPLICIT_ABSENCE"
+            terminal_route = "VALIDATE_OR_FAIL_CLOSED"
         rows.append(
             {
                 "semantic_ref": f"CONNECTIVITY::{member_ref}",
@@ -1197,15 +1336,9 @@ def _build_st12d_connectivity(
                 "downstream_D_contract_fields_affected": tuple(
                     item["downstream_predicate_or_field"]
                 ),
-                "downstream_consumer_refs": (
-                    ("FormulaRuntimeSnapshotCandidateV1", "ModeSnapshotDecisionV1")
-                    if candidate_consumed
-                    else (
-                        "tools/independent_validate_qku_computation_control_plane_d.py",
-                    )
-                ),
+                "downstream_consumer_refs": downstream_consumer_refs,
                 "consumer_acknowledgment_ref_or_explicit_absence": (
-                    "EXPLICIT_ABSENCE"
+                    consumer_acknowledgment
                 ),
                 "schema_ref": (
                     "DInputUniverseReceiptV1::BUILDER_AUDIT_SCHEMA"
@@ -1222,11 +1355,7 @@ def _build_st12d_connectivity(
                     else "EXPLICIT_ABSENCE"
                 ),
                 "terminal_disposition": str(item["terminal_disposition"]),
-                "terminal_route": (
-                    "ADMIT_EXACT_PIN_OR_TYPED_BLOCKER"
-                    if candidate_consumed
-                    else "VALIDATE_OR_FAIL_CLOSED"
-                ),
+                "terminal_route": terminal_route,
                 "consumption_status": "TERMINAL",
                 "runtime_effect_authorized": False,
                 "order_release_authorized": False,
@@ -1317,7 +1446,28 @@ def build_st12d_projections() -> ST12DProjectionSet:
         and "/" in str(row["producer_path_or_interface"])
         for row in material_universe
     )
-    connected_artifacts = {str(row["artifact_ref"]) for row in connectivity}
+    connected_artifacts = {
+        str(row["artifact_ref"])
+        for row in connectivity
+        if (
+            bool(row["downstream_consumer_refs"])
+            and (
+                row["artifact_or_row_class"] != "runtime_no_effect_output"
+                or (
+                    all(
+                        "independent_validate" not in str(consumer)
+                        for consumer in row["downstream_consumer_refs"]
+                    )
+                    and row[
+                        "consumer_acknowledgment_ref_or_explicit_absence"
+                    ]
+                    != "EXPLICIT_ABSENCE"
+                )
+            )
+        )
+        or row["terminal_disposition"]
+        == "ROUTED_TO_NAMED_LATER_OWNER_WITH_NO_D_EFFECT"
+    }
     orphan_count = len(
         {str(row["member_ref"]) for row in universe} - connected_artifacts
     )
@@ -1344,16 +1494,19 @@ def build_st12d_projections() -> ST12DProjectionSet:
         for row in rows
         if "order_release_authorized" in row
     )
-    predicate_positive_pass_count = sum(
-        adjudicate_st12d_predicate(semantic_id)
-        for semantic_id in ST12D_PREDICATE_SPECS
+    control_mutation_results = tuple(
+        run_st12d_actual_control_mutation_case(control_id)
+        for control_id in ST12D_ACTUAL_CONTROL_MUTATION_CASES
     )
-    predicate_causal_mutation_rejection_count = sum(
-        not adjudicate_st12d_predicate(
-            semantic_id,
-            owner_fact_override=predicate.causal_mutation_fact,
-        )
-        for semantic_id, predicate in ST12D_PREDICATE_SPECS.items()
+    actual_control_positive_pass_count = sum(
+        row.positive_passed for row in control_mutation_results
+    )
+    actual_control_mutation_rejection_count = sum(
+        row.actual_mutation_rejected for row in control_mutation_results
+    )
+    semantic_test_pass_count = sum(
+        adjudicate_st12d_semantic_test(str(row["test_id"]))
+        for row in ST12D_SEMANTIC_TEST_ROWS
     )
     current_public_methods = {
         name
@@ -1419,11 +1572,16 @@ def build_st12d_projections() -> ST12DProjectionSet:
         "parameter_value_owner_count": len(
             {row["canonical_value_owner"] for row in parameter_rows}
         ),
-        "row_specific_predicate_count": len(ST12D_PREDICATE_SPECS),
-        "predicate_positive_pass_count": predicate_positive_pass_count,
-        "predicate_causal_mutation_rejection_count": (
-            predicate_causal_mutation_rejection_count
+        "actual_control_mutation_case_count": len(
+            ST12D_ACTUAL_CONTROL_MUTATION_CASES
         ),
+        "actual_control_positive_pass_count": actual_control_positive_pass_count,
+        "actual_control_mutation_rejection_count": (
+            actual_control_mutation_rejection_count
+        ),
+        "semantic_test_identity_count": len(ST12D_SEMANTIC_TEST_ROWS),
+        "semantic_test_pass_count": semantic_test_pass_count,
+        "synthetic_override_mutation_count": 0,
         "new_public_operation_id_count": new_public_operation_count,
         "agent_policy_edit_count": 0,
         "active_pointer_commit_count": active_pointer_commit_count,
@@ -1458,11 +1616,16 @@ def build_st12d_projections() -> ST12DProjectionSet:
         "external_candidate_discovery_count": external_discovery_count,
         "conditional_merge_implementation_count": conditional_merge_count,
         "qtt_checksum_or_digest_authority_count": digest_authority_count,
-        "row_specific_predicate_count": len(ST12D_PREDICATE_SPECS),
-        "predicate_positive_pass_count": predicate_positive_pass_count,
-        "predicate_causal_mutation_rejection_count": (
-            predicate_causal_mutation_rejection_count
+        "actual_control_mutation_case_count": len(
+            ST12D_ACTUAL_CONTROL_MUTATION_CASES
         ),
+        "actual_control_positive_pass_count": actual_control_positive_pass_count,
+        "actual_control_mutation_rejection_count": (
+            actual_control_mutation_rejection_count
+        ),
+        "semantic_test_identity_count": len(ST12D_SEMANTIC_TEST_ROWS),
+        "semantic_test_pass_count": semantic_test_pass_count,
+        "synthetic_override_mutation_count": 0,
         "runtime_effect_authorized": False,
         "order_release_authorized": False,
     }

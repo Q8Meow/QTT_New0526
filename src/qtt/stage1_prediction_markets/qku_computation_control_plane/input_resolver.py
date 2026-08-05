@@ -1599,7 +1599,7 @@ class CurrentOwnerActionConfirmationAdapterV1:
 
 
 class CurrentModeSnapshotInputResolverV1:
-    """Concrete D resolver composed from separate exact current-owner adapters."""
+    """Gate-first D resolver; all repository projections are injected preloaded."""
 
     def __init__(
         self,
@@ -1621,20 +1621,12 @@ class CurrentModeSnapshotInputResolverV1:
     def repo_root(self) -> Path:
         return self._repo_root
 
-    def resolve_mode_snapshot_inputs(
-        self,
+    @staticmethod
+    def _admitted_context(
         request: object,
         capability_decision: object,
-    ) -> object:
+    ) -> tuple[object, ComputationExecutionContextV1, str, str]:
         from .agent_policy import AgentCapabilityDecisionV1
-        from .implementation_registry import ST12D_MATH_IMPLEMENTATION_REGISTRY
-        from .mode_snapshot_policy import ModeSnapshotCandidateInputsV1
-        from .parameter_policy import (
-            ST12D_SNAPSHOT_PARAMETER_BINDING_IDS,
-            resolve_st12d_value_policy_refs,
-        )
-        from .protocols import ExistingOwnerProjectionAdapterV1
-        from .stack_resolver import preflight_snapshot_computation_bundle
 
         context = getattr(request, "context", None)
         if (
@@ -1656,30 +1648,153 @@ class CurrentModeSnapshotInputResolverV1:
         causation_id, correlation_id = (
             capability_decision.st12c_causation_correlation_refs[:2]
         )
+        return capability_decision, context, causation_id, correlation_id
+
+    def resolve_mode_snapshot_preconstruction_gate(
+        self,
+        request: object,
+        capability_decision: object,
+    ) -> object:
+        from .mode_snapshot_policy import ModeSnapshotPreconstructionGateV1
+
+        decision, context, causation_id, correlation_id = self._admitted_context(
+            request,
+            capability_decision,
+        )
         safety = self._safety.read_kill_submit_state(context)
+        safety_packet = self._owner_registry.packet_for(
+            context=context,
+            binding_id=ST12D_SAFETY_BINDING_ID,
+        )
         evidence = self._evidence.read_evidence_reference(
             context,
             causation_id=causation_id,
             correlation_id=correlation_id,
         )
-        owner_action = self._owner_action.read_owner_action_confirmation(context)
-        projection_adapter = ExistingOwnerProjectionAdapterV1(self._repo_root)
-        readiness = projection_adapter.load_readiness()
-        pretrade = projection_adapter.load_pretrade()
-        svc = projection_adapter.load_svc()
-        agent_orch = projection_adapter.load_agent_orch()
-        policy_refs = resolve_st12d_value_policy_refs(
-            ST12D_SNAPSHOT_PARAMETER_BINDING_IDS
+        return ModeSnapshotPreconstructionGateV1(
+            request_id=decision.request_id,
+            principal_id=decision.principal_id,
+            task_id=decision.task_id,
+            current_agent_id=decision.current_agent_id,
+            capability_decision_ref=decision.decision_id,
+            context_ref=context.context_id,
+            current_mode=context.scope.mode_context_id,
+            requested_mode="HOTPATH_CANDIDATE_ONLY",
+            candidate_version=context.input_version,
+            evaluated_at=context.as_of,
+            expires_at=min(
+                context.as_of + context.maximum_age,
+                safety.valid_until,
+            ),
+            causation_id=causation_id,
+            correlation_id=correlation_id,
+            receipt_lineage_refs=tuple(
+                dict.fromkeys(
+                    (
+                        decision.agent_orch_receipt_ref,
+                        safety.state_ref,
+                        safety_packet.producer_receipt_id,
+                    )
+                )
+            ),
+            source_epoch_refs=(safety_packet.source_epoch_id,),
+            evidence_reference=evidence,
+            kill_submit_state=safety,
         )
-        parameter_value_refs = tuple(policy_refs[parameter_id] for parameter_id in policy_refs)
+
+    def enrich_mode_snapshot_candidate(
+        self,
+        request: object,
+        capability_decision: object,
+        preconstruction_gate: object,
+        owner_projections: object,
+    ) -> object:
+        from .implementation_registry import ST12D_MATH_IMPLEMENTATION_REGISTRY
+        from .mode_snapshot_policy import (
+            ModeSnapshotCandidateInputsV1,
+            ModeSnapshotPreconstructionGateV1,
+        )
+        from .parameter_policy import (
+            ST12D_PARAMETER_POLICY_SET_VERSION,
+            resolve_st12d_snapshot_parameter_values,
+        )
+        from .protocols import PreloadedOwnerProjectionBundleV1
+        from .stack_resolver import preflight_snapshot_computation_bundle
+        from .models import SnapshotParameterResolutionStateV1
+
+        decision, context, causation_id, correlation_id = self._admitted_context(
+            request,
+            capability_decision,
+        )
+        if (
+            type(preconstruction_gate) is not ModeSnapshotPreconstructionGateV1
+            or type(owner_projections) is not PreloadedOwnerProjectionBundleV1
+            or preconstruction_gate.request_id != decision.request_id
+            or preconstruction_gate.context_ref != context.context_id
+            or preconstruction_gate.causation_id != causation_id
+            or preconstruction_gate.correlation_id != correlation_id
+        ):
+            raise InputAuthorityError(
+                ReasonCode.INPUT_SCOPE_MISMATCH,
+                "D enrichment requires the admitted gate and one preloaded owner bundle",
+            )
+        owner_action = self._owner_action.read_owner_action_confirmation(context)
+        owner_action_packet = self._owner_registry.packet_for(
+            context=context,
+            binding_id=ST12D_OWNER_ACTION_BINDING_ID,
+        )
+        resolved_parameter_values = resolve_st12d_snapshot_parameter_values(
+            context=context,
+            owner_registry=self._owner_registry,
+        )
+        unavailable = tuple(
+            row
+            for row in resolved_parameter_values
+            if row.resolution_state
+            is SnapshotParameterResolutionStateV1.REQUIRED_OWNER_VALUE_UNAVAILABLE
+        )
+        if unavailable:
+            raise InputAuthorityError(
+                unavailable[0].diagnostic_reason_codes[0],
+                "D candidate construction is blocked by unresolved snapshot parameter values: "
+                + ", ".join(row.parameter_id for row in unavailable),
+            )
+        parameter_value_refs = tuple(
+            row.resolved_value_ref for row in resolved_parameter_values
+        )
         parameter_policy_snapshot_ref = (
-            f"ComputationParameterPolicyV1::{context.parameter_policy_version}"
+            f"ComputationParameterPolicyV1::{ST12D_PARAMETER_POLICY_SET_VERSION}"
+        )
+        formula_input_resolutions = tuple(
+            FormulaInputResolverV1.resolve(
+                math_id,
+                context=context,
+                owner_registry=self._owner_registry,
+            )
+            for math_id in ST12D_MATH_IMPLEMENTATION_REGISTRY
+        )
+        consumed_formula_epochs = tuple(
+            self._owner_registry.packet_by_id(packet_id).source_epoch_id
+            for resolution in formula_input_resolutions
+            for packet_id in resolution.packet_refs
         )
         source_epoch_refs = tuple(
             dict.fromkeys(
                 (
-                    context.source_epoch_id,
-                    *(packet.source_epoch_id for packet in self._owner_registry.packets),
+                    *consumed_formula_epochs,
+                    *(
+                        epoch
+                        for row in resolved_parameter_values
+                        for epoch in row.source_epoch_refs
+                    ),
+                    *preconstruction_gate.source_epoch_refs,
+                    owner_action_packet.source_epoch_id,
+                    (
+                        "EVIDENCE-EPOCH::"
+                        f"{preconstruction_gate.evidence_reference.policy_version}::"
+                        f"{preconstruction_gate.evidence_reference.evidence_state.value}"
+                    ),
+                    *owner_projections.source_epoch_refs,
                 )
             )
         )
@@ -1688,7 +1803,9 @@ class CurrentModeSnapshotInputResolverV1:
             owner_registry=self._owner_registry,
             parameter_policy_snapshot_ref=parameter_policy_snapshot_ref,
             parameter_value_refs=parameter_value_refs,
+            resolved_parameter_values=resolved_parameter_values,
             source_epoch_refs=source_epoch_refs,
+            formula_input_resolutions=formula_input_resolutions,
         )
         implementation_pins = tuple(
             ImplementationVersionPinV1(
@@ -1709,29 +1826,36 @@ class CurrentModeSnapshotInputResolverV1:
         receipt_lineage_refs = tuple(
             dict.fromkeys(
                 (
-                    capability_decision.agent_orch_receipt_ref,
-                    safety.state_ref,
+                    decision.agent_orch_receipt_ref,
+                    *preconstruction_gate.receipt_lineage_refs,
                     owner_action.receipt_ref,
+                    owner_action_packet.producer_receipt_id,
                     bundle.preflight_receipt_ref,
                     *bundle.receipt_refs,
-                    f"READINESS1::{readiness.source_version}",
-                    f"PRETRADE1::{pretrade.source_version}",
-                    f"SVC1::{svc.source_version}",
-                    f"AGENT-ORCH1::{agent_orch.source_version}",
+                    *(
+                        ref
+                        for row in resolved_parameter_values
+                        for ref in (
+                            *row.producer_receipt_refs,
+                            *row.point_in_time_receipt_refs,
+                            *row.freshness_receipt_refs,
+                        )
+                    ),
+                    *owner_projections.receipt_refs,
                 )
             )
         )
         expires_at = min(
             context.as_of + context.maximum_age,
-            safety.valid_until,
+            preconstruction_gate.kill_submit_state.valid_until,
             owner_action.valid_until,
         )
         return ModeSnapshotCandidateInputsV1(
-            request_id=capability_decision.request_id,
-            principal_id=capability_decision.principal_id,
-            task_id=capability_decision.task_id,
-            current_agent_id=capability_decision.current_agent_id,
-            capability_decision_ref=capability_decision.decision_id,
+            request_id=decision.request_id,
+            principal_id=decision.principal_id,
+            task_id=decision.task_id,
+            current_agent_id=decision.current_agent_id,
+            capability_decision_ref=decision.decision_id,
             computation_bundle_ref=bundle.bundle_ref,
             context_ref=context.context_id,
             formula_spec_refs=tuple(ST12D_MATH_IMPLEMENTATION_REGISTRY),
@@ -1741,22 +1865,29 @@ class CurrentModeSnapshotInputResolverV1:
             ),
             parameter_policy_snapshot_ref=parameter_policy_snapshot_ref,
             parameter_value_refs=parameter_value_refs,
+            resolved_parameter_values=resolved_parameter_values,
             source_epoch_refs=source_epoch_refs,
             receipt_lineage_refs=receipt_lineage_refs,
-            readiness_state_ref=f"READINESS1::{readiness.source_version}",
-            pretrade_state_ref=f"PRETRADE1::{pretrade.source_version}",
+            readiness_state_ref=(
+                f"READINESS1::{owner_projections.readiness.source_version}"
+            ),
+            pretrade_state_ref=(
+                f"PRETRADE1::{owner_projections.pretrade.source_version}"
+            ),
             owner_action_policy_ref=owner_action.owner_action_policy_ref,
             current_mode=context.scope.mode_context_id,
             requested_mode="HOTPATH_CANDIDATE_ONLY",
-            expected_owner_state_ref=f"SVC1::{svc.source_version}",
+            expected_owner_state_ref=(
+                f"SVC1::{owner_projections.svc.source_version}"
+            ),
             candidate_version=context.input_version,
             created_at=context.as_of,
             evaluated_at=context.as_of,
             expires_at=expires_at,
             causation_id=causation_id,
             correlation_id=correlation_id,
-            evidence_reference=evidence,
-            kill_submit_state=safety,
+            evidence_reference=preconstruction_gate.evidence_reference,
+            kill_submit_state=preconstruction_gate.kill_submit_state,
             computation_bundle_closure=bundle,
             owner_action_confirmation=owner_action,
         )

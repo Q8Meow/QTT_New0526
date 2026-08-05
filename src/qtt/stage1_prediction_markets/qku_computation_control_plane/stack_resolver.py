@@ -40,6 +40,8 @@ from .models import (
     ComputabilityTerminalRouteV1,
     ComputationExecutionContextV1,
     ImplementationVersionPinV1,
+    ResolvedSnapshotParameterValueV1,
+    SnapshotParameterResolutionStateV1,
 )
 from .oracle_contracts import GOLDEN_VECTOR_BY_MATH_ID, ORACLE_BY_MATH_ID
 from .point_in_time import PointInTimeClocksV1
@@ -168,12 +170,18 @@ class RegisteredSnapshotComputationBundleV1:
     component_closures: tuple[SnapshotBundleComponentClosureV1, ...]
     parameter_policy_snapshot_ref: str
     parameter_value_refs: tuple[str, ...]
+    resolved_parameter_values: tuple[ResolvedSnapshotParameterValueV1, ...]
     source_epoch_refs: tuple[str, ...]
     preflight_receipt_ref: str
     data_edge_refs: tuple[str, ...] = ()
     no_authority_flag: bool = True
 
     def __post_init__(self) -> None:
+        from .parameter_policy import (
+            ST12D_PARAMETER_POLICY_SET_VERSION,
+            ST12D_SNAPSHOT_PARAMETER_BINDING_IDS,
+        )
+
         if (
             self.bundle_ref != ST12D_SNAPSHOT_BUNDLE_ID
             or self.bundle_version != ST12D_SNAPSHOT_BUNDLE_VERSION
@@ -184,6 +192,27 @@ class RegisteredSnapshotComputationBundleV1:
             or not self.parameter_policy_snapshot_ref
             or not self.parameter_value_refs
             or len(self.parameter_value_refs) != len(set(self.parameter_value_refs))
+            or not isinstance(self.resolved_parameter_values, tuple)
+            or len(self.resolved_parameter_values) != 21
+            or tuple(
+                row.parameter_id for row in self.resolved_parameter_values
+            )
+            != ST12D_SNAPSHOT_PARAMETER_BINDING_IDS
+            or any(
+                row.parameter_policy_set_version
+                != ST12D_PARAMETER_POLICY_SET_VERSION
+                for row in self.resolved_parameter_values
+            )
+            or any(
+                type(row) is not ResolvedSnapshotParameterValueV1
+                or row.resolution_state
+                is SnapshotParameterResolutionStateV1.REQUIRED_OWNER_VALUE_UNAVAILABLE
+                for row in self.resolved_parameter_values
+            )
+            or self.parameter_value_refs
+            != tuple(
+                row.resolved_value_ref for row in self.resolved_parameter_values
+            )
             or not self.source_epoch_refs
             or len(self.source_epoch_refs) != len(set(self.source_epoch_refs))
             or not self.preflight_receipt_ref
@@ -934,7 +963,9 @@ def preflight_snapshot_computation_bundle(
     owner_registry: CanonicalOwnerPacketRegistryV1,
     parameter_policy_snapshot_ref: str,
     parameter_value_refs: tuple[str, ...],
+    resolved_parameter_values: tuple[ResolvedSnapshotParameterValueV1, ...],
     source_epoch_refs: tuple[str, ...],
+    formula_input_resolutions: tuple[FormulaInputResolutionV1, ...] | None = None,
 ) -> RegisteredSnapshotComputationBundleV1:
     """Close the distinct edge-free D bundle without invoking any formula."""
 
@@ -943,6 +974,10 @@ def preflight_snapshot_computation_bundle(
     from .oracle_contracts import (
         ST12D_GOLDEN_VECTOR_BY_MATH_ID,
         ST12D_ORACLE_BY_MATH_ID,
+    )
+    from .parameter_policy import (
+        ST12D_PARAMETER_POLICY_SET_VERSION,
+        ST12D_SNAPSHOT_PARAMETER_BINDING_IDS,
     )
     from .specification import (
         CURRENT_FORMULA_INPUT_CONTRACTS,
@@ -954,6 +989,33 @@ def preflight_snapshot_computation_bundle(
         raise StackResolutionError(
             ReasonCode.INPUT_SCOPE_MISMATCH,
             "D snapshot-bundle preflight requires an exact execution context",
+        )
+    if (
+        not isinstance(resolved_parameter_values, tuple)
+        or len(resolved_parameter_values) != 21
+        or tuple(row.parameter_id for row in resolved_parameter_values)
+        != ST12D_SNAPSHOT_PARAMETER_BINDING_IDS
+        or any(
+            row.parameter_policy_set_version
+            != ST12D_PARAMETER_POLICY_SET_VERSION
+            for row in resolved_parameter_values
+        )
+        or parameter_value_refs
+        != tuple(row.resolved_value_ref for row in resolved_parameter_values)
+    ):
+        raise StackResolutionError(
+            ReasonCode.PARAMETER_POLICY_OR_PIN_INVALID,
+            "D snapshot bundle requires exactly 21 resolved value identities",
+        )
+    if formula_input_resolutions is not None and (
+        not isinstance(formula_input_resolutions, tuple)
+        or tuple(row.math_spec_id for row in formula_input_resolutions)
+        != ST12D_SNAPSHOT_COMPONENT_IDS
+        or any(row.execution_context != context for row in formula_input_resolutions)
+    ):
+        raise StackResolutionError(
+            ReasonCode.DEPENDENCY_CLOSURE_FAILED,
+            "pre-resolved D formula inputs differ from the exact selected context",
         )
     expected_pins = tuple(
         ImplementationVersionPinV1(
@@ -1009,10 +1071,18 @@ def preflight_snapshot_computation_bundle(
                 ReasonCode.DEPENDENCY_CLOSURE_FAILED,
                 f"{math_id} current binding identities differ from its input contract",
             )
-        input_resolution = FormulaInputResolverV1.resolve(
-            math_id,
-            context=context,
-            owner_registry=owner_registry,
+        input_resolution = (
+            next(
+                row
+                for row in formula_input_resolutions
+                if row.math_spec_id == math_id
+            )
+            if formula_input_resolutions is not None
+            else FormulaInputResolverV1.resolve(
+                math_id,
+                context=context,
+                owner_registry=owner_registry,
+            )
         )
         specification_ref = (
             f"SPECIFICATION-OWNER-RECEIPT::{math_id}::"
@@ -1087,6 +1157,7 @@ def preflight_snapshot_computation_bundle(
         component_closures=tuple(closures),
         parameter_policy_snapshot_ref=parameter_policy_snapshot_ref,
         parameter_value_refs=parameter_value_refs,
+        resolved_parameter_values=resolved_parameter_values,
         source_epoch_refs=source_epoch_refs,
         preflight_receipt_ref=preflight_ref,
     )

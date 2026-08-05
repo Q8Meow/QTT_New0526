@@ -15,6 +15,10 @@ import zlib
 
 from .context import decimal_context_v1, exact_decimal, parse_utc
 from .errors import NumericDomainError, ParameterPolicyError, ReasonCode
+from .models import (
+    ResolvedSnapshotParameterValueV1,
+    SnapshotParameterResolutionStateV1,
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -22283,6 +22287,275 @@ def resolve_st12d_value_policy_refs(
             )
         resolved[parameter_id] = binding.authoritative_value_policy_ref
     return MappingProxyType(resolved)
+
+
+ST12D_PARAMETER_POLICY_SET_VERSION = "ST12D-PARAMETER-POLICY-SET-v1"
+ST12D_PARAMETER_VALUE_PACKET_TYPE = "ResolvedSnapshotParameterValueV1"
+ST12D_PARAMETER_VALUE_PACKET_SCHEMA_ID = (
+    "ComputationParameterPolicyV1::ResolvedSnapshotParameterValueV1::SCHEMA"
+)
+ST12D_PARAMETER_VALUE_PACKET_SCHEMA_VERSION = "1.0.0"
+
+ST12D_OWNER_RESOLVED_PARAMETER_IDS = frozenset(
+    {
+        "ST10-PARAM::0764",
+        "ST10-PARAM::0940",
+        "ST10-PARAM::1946",
+        "ST10-PARAM::2117",
+        "ST10-PARAM::2157",
+        "ST10-PARAM::3490",
+        "ST10-PARAM::3598",
+        "ST10-PARAM::3639",
+    }
+)
+
+
+def st12d_snapshot_parameter_binding_id(parameter_id: str) -> str:
+    if parameter_id not in ST12D_SNAPSHOT_PARAMETER_BINDING_IDS:
+        raise ParameterPolicyError(
+            ReasonCode.PARAMETER_UNKNOWN,
+            f"unknown D snapshot parameter binding: {parameter_id}",
+        )
+    return f"ST12D::PARAMETER-VALUE::{parameter_id}"
+
+
+def st12d_snapshot_parameter_field_path(parameter_id: str) -> str:
+    try:
+        symbol = ST12D_PARAMETER_POLICIES[parameter_id].parameter_symbol
+    except KeyError as exc:
+        raise ParameterPolicyError(
+            ReasonCode.PARAMETER_UNKNOWN,
+            f"unknown D snapshot parameter field: {parameter_id}",
+        ) from exc
+    return f"snapshot_parameter_values.{symbol}"
+
+
+def st12d_snapshot_parameter_source_lineage(parameter_id: str) -> str:
+    policy = ST12D_PARAMETER_POLICIES[parameter_id]
+    return (
+        f"{policy.canonical_owner} -> {parameter_id} -> "
+        "FormulaRuntimeSnapshotCandidateV1"
+    )
+
+
+def _st12d_parameter_value_kind(parameter_id: str, value: object) -> str:
+    if parameter_id in {"ST10-PARAM::0764", "ST10-PARAM::0940", "ST10-PARAM::3639"}:
+        return "DECIMAL"
+    if parameter_id in {"ST10-PARAM::2117", "ST10-PARAM::2157", "ST10-PARAM::3490"}:
+        return "TYPED_POINTER"
+    if type(value) is bool:
+        return "BOOLEAN"
+    if type(value) is int:
+        return "INTEGER"
+    return "CANONICAL_ENUM_OR_RULE"
+
+
+def _st12d_canonical_owner_value(parameter_id: str, value: object) -> object:
+    if parameter_id in {"ST10-PARAM::0764", "ST10-PARAM::0940", "ST10-PARAM::3639"}:
+        if type(value) is not Decimal or not value.is_finite() or value <= 0:
+            raise ParameterPolicyError(
+                ReasonCode.PARAMETER_OUT_OF_POLICY,
+                f"{parameter_id} owner value must be an exact positive Decimal",
+            )
+        return value
+    if not isinstance(value, str) or not value or value != value.strip():
+        raise ParameterPolicyError(
+            ReasonCode.PARAMETER_OUT_OF_POLICY,
+            f"{parameter_id} owner value must be exact canonical text",
+        )
+    return value
+
+
+def _st12d_static_policy_value(parameter_id: str) -> str | int | bool:
+    policy = ST12D_PARAMETER_POLICIES[parameter_id]
+    if policy.implementation_resolution_kind not in {
+        "STATIC_OR_DETERMINISTIC_RULE",
+        "EXPLICIT_FAIL_CLOSED_POLICY",
+    }:
+        raise ParameterPolicyError(
+            ReasonCode.PARAMETER_OWNER_MISSING,
+            f"{parameter_id} requires an exact current owner value packet",
+        )
+    if parameter_id == "ST10-PARAM::3002":
+        return False
+    if parameter_id == "ST10-PARAM::3003":
+        return True
+    if parameter_id == "ST10-PARAM::3641":
+        return 200
+    return policy.effective_day1_seed_value_or_resolution_rule
+
+
+def resolve_st12d_snapshot_parameter_values(
+    *,
+    context: object,
+    owner_registry: object,
+) -> tuple[ResolvedSnapshotParameterValueV1, ...]:
+    """Resolve all 21 D pins without confusing policy identity with value identity."""
+
+    from .context import ComputationContextKeyV1
+    from .errors import (
+        FreshnessError,
+        InputAuthorityError,
+        PointInTimeError,
+    )
+    from .freshness import FreshnessPolicyV1, FreshnessResolverV1
+    from .input_resolver import CanonicalOwnerPacketRegistryV1
+    from .point_in_time import PointInTimeFieldClassV1, PointInTimePolicyV1
+
+    if (
+        not isinstance(context, ComputationContextKeyV1)
+        or not isinstance(owner_registry, CanonicalOwnerPacketRegistryV1)
+    ):
+        raise ParameterPolicyError(
+            ReasonCode.PARAMETER_BINDING_MISMATCH,
+            "D value resolution requires the exact execution context and owner registry",
+        )
+    rows: list[ResolvedSnapshotParameterValueV1] = []
+    for parameter_id in ST12D_SNAPSHOT_PARAMETER_BINDING_IDS:
+        policy = ST12D_PARAMETER_POLICIES[parameter_id]
+        policy_ref = ST12D_PARAMETER_APPLICATION_BINDINGS[
+            parameter_id
+        ].authoritative_value_policy_ref
+        if parameter_id not in ST12D_OWNER_RESOLVED_PARAMETER_IDS:
+            value = _st12d_static_policy_value(parameter_id)
+            rows.append(
+                ResolvedSnapshotParameterValueV1(
+                    parameter_id=parameter_id,
+                    parameter_symbol=policy.parameter_symbol,
+                    resolved_value_ref=(
+                        f"RESOLVED-SNAPSHOT-PARAMETER::{parameter_id}::"
+                        f"{ST12D_PARAMETER_POLICY_SET_VERSION}"
+                    ),
+                    canonical_typed_value_or_explicit_unavailable=value,
+                    value_kind=_st12d_parameter_value_kind(parameter_id, value),
+                    unit_or_basis=policy.effective_unit_or_basis,
+                    resolution_state=(
+                        SnapshotParameterResolutionStateV1.DETERMINISTIC_POLICY_VALUE_MATERIALIZED
+                    ),
+                    policy_ref=policy_ref,
+                    parameter_policy_set_version=ST12D_PARAMETER_POLICY_SET_VERSION,
+                    producer_receipt_refs=(policy_ref,),
+                    point_in_time_receipt_refs=(),
+                    freshness_receipt_refs=(),
+                    source_epoch_refs=(
+                        f"PARAMETER-POLICY-EPOCH::{ST12D_PARAMETER_POLICY_SET_VERSION}",
+                    ),
+                    observed_at_or_explicit_absence="EXPLICIT_ABSENCE",
+                    valid_until_or_explicit_absence="EXPLICIT_ABSENCE",
+                )
+            )
+            continue
+        binding_id = st12d_snapshot_parameter_binding_id(parameter_id)
+        try:
+            packet = owner_registry.packet_for(
+                context=context,
+                binding_id=binding_id,
+            )
+            if (
+                packet.owner_id != policy.canonical_owner
+                or packet.packet_type != ST12D_PARAMETER_VALUE_PACKET_TYPE
+                or packet.schema_id != ST12D_PARAMETER_VALUE_PACKET_SCHEMA_ID
+                or packet.schema_version != ST12D_PARAMETER_VALUE_PACKET_SCHEMA_VERSION
+                or packet.producer_receipt_type
+                != ST12D_PARAMETER_VALUE_PACKET_TYPE
+                or packet.source_state_and_claim_lineage
+                != st12d_snapshot_parameter_source_lineage(parameter_id)
+                or packet.source_conflict
+            ):
+                raise InputAuthorityError(
+                    ReasonCode.PARAMETER_BINDING_MISMATCH,
+                    f"{parameter_id} owner value packet identity or lineage differs",
+                )
+            field_path = st12d_snapshot_parameter_field_path(parameter_id)
+            try:
+                raw_value = packet.values[field_path]
+            except KeyError as exc:
+                raise InputAuthorityError(
+                    ReasonCode.PARAMETER_BINDING_MISMATCH,
+                    f"{parameter_id} owner packet lacks its exact value field",
+                ) from exc
+            value = _st12d_canonical_owner_value(parameter_id, raw_value)
+            pit = PointInTimePolicyV1.validate(
+                receipt_id=f"PIT::{packet.packet_id}::{binding_id}",
+                field_class=PointInTimeFieldClassV1.OBSERVATION,
+                clocks=packet.clocks,
+                context=context,
+                prior_revision_available_time=packet.prior_revision_available_time,
+            )
+            freshness = FreshnessResolverV1.validate(
+                receipt_id=f"FRESHNESS::{packet.packet_id}::{binding_id}",
+                clocks=packet.clocks,
+                context=context,
+                packet_source_epoch_id=packet.source_epoch_id,
+                policy=FreshnessPolicyV1(ttl=packet.ttl),
+                provider_sequence=packet.provider_sequence,
+                revision=packet.revision,
+            )
+        except (
+            FreshnessError,
+            InputAuthorityError,
+            ParameterPolicyError,
+            PointInTimeError,
+        ) as exc:
+            reason = exc.reason_code
+            rows.append(
+                ResolvedSnapshotParameterValueV1(
+                    parameter_id=parameter_id,
+                    parameter_symbol=policy.parameter_symbol,
+                    resolved_value_ref=(
+                        f"RESOLVED-SNAPSHOT-PARAMETER::{parameter_id}::UNAVAILABLE"
+                    ),
+                    canonical_typed_value_or_explicit_unavailable=(
+                        f"EXPLICIT_UNAVAILABLE::{reason.value}"
+                    ),
+                    value_kind="EXPLICIT_UNAVAILABLE",
+                    unit_or_basis=policy.effective_unit_or_basis,
+                    resolution_state=(
+                        SnapshotParameterResolutionStateV1.REQUIRED_OWNER_VALUE_UNAVAILABLE
+                    ),
+                    policy_ref=policy_ref,
+                    parameter_policy_set_version=ST12D_PARAMETER_POLICY_SET_VERSION,
+                    producer_receipt_refs=(),
+                    point_in_time_receipt_refs=(),
+                    freshness_receipt_refs=(),
+                    source_epoch_refs=(),
+                    observed_at_or_explicit_absence="EXPLICIT_ABSENCE",
+                    valid_until_or_explicit_absence="EXPLICIT_ABSENCE",
+                    diagnostic_reason_codes=(reason,),
+                )
+            )
+            continue
+        rows.append(
+            ResolvedSnapshotParameterValueV1(
+                parameter_id=parameter_id,
+                parameter_symbol=policy.parameter_symbol,
+                resolved_value_ref=(
+                    f"RESOLVED-SNAPSHOT-PARAMETER::{parameter_id}::"
+                    f"{packet.producer_receipt_id}"
+                ),
+                canonical_typed_value_or_explicit_unavailable=value,
+                value_kind=_st12d_parameter_value_kind(parameter_id, value),
+                unit_or_basis=policy.effective_unit_or_basis,
+                resolution_state=SnapshotParameterResolutionStateV1.OWNER_VALUE_RESOLVED,
+                policy_ref=policy_ref,
+                parameter_policy_set_version=ST12D_PARAMETER_POLICY_SET_VERSION,
+                producer_receipt_refs=(packet.producer_receipt_id,),
+                point_in_time_receipt_refs=(pit.receipt_id,),
+                freshness_receipt_refs=(freshness.receipt_id,),
+                source_epoch_refs=(packet.source_epoch_id,),
+                observed_at_or_explicit_absence=packet.clocks.observed_time,
+                valid_until_or_explicit_absence=(
+                    packet.clocks.available_time + packet.ttl
+                ),
+            )
+        )
+    result = tuple(rows)
+    if tuple(row.parameter_id for row in result) != ST12D_SNAPSHOT_PARAMETER_BINDING_IDS:
+        raise ParameterPolicyError(
+            ReasonCode.PARAMETER_BINDING_MISMATCH,
+            "D snapshot parameter resolution order or denominator differs from the freeze",
+        )
+    return result
 
 
 if (

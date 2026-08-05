@@ -24,6 +24,7 @@ from .models import (
     ModeSnapshotOwnerProjectionV1,
     OwnerActionConfirmationReceiptV1,
     ReadOnlyKillSubmitStateV1,
+    ResolvedSnapshotParameterValueV1,
     SnapshotCandidateStateV1,
     SnapshotRetirementStateV1,
     SnapshotRollbackStateV1,
@@ -136,6 +137,175 @@ TRANSITION_BY_ID: Mapping[str, ModeSnapshotTransitionRuleV1] = MappingProxyType(
 )
 
 
+def build_snapshot_transition_proposal(
+    *,
+    proposal_id: str,
+    request_id: str,
+    principal_id: str,
+    task_id: str,
+    capability_decision_ref: str,
+    context_ref: str,
+    source_candidate_ref_or_explicit_absence: str,
+    target_candidate_ref: str,
+    source_candidate_version_or_explicit_absence: str,
+    target_candidate_version: str,
+    transition_id: str,
+    expected_owner_state_ref: str,
+    precondition_receipt_refs: tuple[str, ...],
+    predecessor_transition_receipt_proposals: tuple[object, ...] = (),
+    proposed_state: (
+        ModeEligibilityState
+        | AllowCandidateStateV1
+        | SnapshotCandidateStateV1
+        | SnapshotRollbackStateV1
+        | SnapshotRetirementStateV1
+    ),
+    diagnostic_reason_codes: tuple[ReasonCode, ...] = (),
+    causation_id: str,
+    correlation_id: str,
+) -> SnapshotTransitionProposalV1:
+    """Join every runtime proposal to the one frozen transition registry."""
+
+    try:
+        rule = TRANSITION_BY_ID[transition_id]
+    except KeyError as exc:
+        raise ContractValidationError(
+            ReasonCode.CONTRACT_OR_TYPE_INVALID,
+            f"unknown frozen D transition: {transition_id}",
+        ) from exc
+    if not isinstance(predecessor_transition_receipt_proposals, tuple):
+        raise ContractValidationError(
+            ReasonCode.CONTRACT_OR_TYPE_INVALID,
+            "predecessor receipt proposals must be an immutable tuple",
+        )
+    predecessor_transition_receipt_refs = tuple(
+        getattr(row, "record_id", "")
+        for row in predecessor_transition_receipt_proposals
+    )
+    diagnostics = tuple(
+        reason
+        for reason in dict.fromkeys(diagnostic_reason_codes)
+        if reason is not rule.reason_code
+    )
+    return SnapshotTransitionProposalV1(
+        proposal_id=proposal_id,
+        request_id=request_id,
+        principal_id=principal_id,
+        task_id=task_id,
+        capability_decision_ref=capability_decision_ref,
+        context_ref=context_ref,
+        source_candidate_ref_or_explicit_absence=(
+            source_candidate_ref_or_explicit_absence
+        ),
+        target_candidate_ref=target_candidate_ref,
+        source_candidate_version_or_explicit_absence=(
+            source_candidate_version_or_explicit_absence
+        ),
+        target_candidate_version=target_candidate_version,
+        transition_id=transition_id,
+        source_state=rule.source_state,
+        destination_state=rule.destination_state,
+        expected_owner_state_ref=expected_owner_state_ref,
+        precondition_receipt_refs=precondition_receipt_refs,
+        predecessor_transition_receipt_refs=(
+            predecessor_transition_receipt_refs
+        ),
+        predecessor_transition_receipt_proposals=(
+            predecessor_transition_receipt_proposals
+        ),
+        proposed_state=proposed_state,
+        primary_reason_code=rule.reason_code,
+        diagnostic_reason_codes=diagnostics,
+        typed_reason_codes=(rule.reason_code, *diagnostics),
+        owner_confirmation_required=rule.owner_confirmation_required,
+        causation_id=causation_id,
+        correlation_id=correlation_id,
+    )
+
+
+@dataclass(frozen=True, slots=True)
+class ModeSnapshotPreconstructionGateV1:
+    """Minimal exact state allowed before T05/T03 adjudication."""
+
+    request_id: str
+    principal_id: str
+    task_id: str
+    current_agent_id: str
+    capability_decision_ref: str
+    context_ref: str
+    current_mode: str
+    requested_mode: str
+    candidate_version: str
+    evaluated_at: datetime
+    expires_at: datetime
+    causation_id: str
+    correlation_id: str
+    receipt_lineage_refs: tuple[str, ...]
+    source_epoch_refs: tuple[str, ...]
+    evidence_reference: ST12FEvidenceReferenceV1
+    kill_submit_state: ReadOnlyKillSubmitStateV1
+
+    def __post_init__(self) -> None:
+        for name in (
+            "request_id",
+            "principal_id",
+            "task_id",
+            "current_agent_id",
+            "capability_decision_ref",
+            "context_ref",
+            "current_mode",
+            "requested_mode",
+            "candidate_version",
+            "causation_id",
+            "correlation_id",
+        ):
+            value = getattr(self, name)
+            if not isinstance(value, str) or not value.strip():
+                raise ContractValidationError(
+                    ReasonCode.CONTRACT_OR_TYPE_INVALID,
+                    "preconstruction gate identities must be canonical nonempty text",
+                )
+        for name in ("receipt_lineage_refs", "source_epoch_refs"):
+            value = getattr(self, name)
+            if (
+                not isinstance(value, tuple)
+                or not value
+                or any(not isinstance(item, str) or not item for item in value)
+                or len(value) != len(set(value))
+            ):
+                raise ContractValidationError(
+                    ReasonCode.INPUT_PACKET_MISMATCH,
+                    f"{name} must prove the exact consumed early-gate packet",
+                )
+        if (
+            type(self.evidence_reference) is not ST12FEvidenceReferenceV1
+            or type(self.kill_submit_state) is not ReadOnlyKillSubmitStateV1
+            or self.kill_submit_state.scope_ref != self.context_ref
+            or self.kill_submit_state.state_ref not in self.receipt_lineage_refs
+        ):
+            raise ContractValidationError(
+                ReasonCode.INPUT_PACKET_MISMATCH,
+                "preconstruction gate does not bind the exact safety/evidence state",
+            )
+        for name in ("evaluated_at", "expires_at"):
+            value = getattr(self, name)
+            if (
+                not isinstance(value, datetime)
+                or value.tzinfo is None
+                or value.utcoffset() is None
+                or value.utcoffset().total_seconds() != 0
+            ):
+                raise ContractValidationError(
+                    ReasonCode.CLOCK_DOMAIN_MISMATCH,
+                    f"{name} must be an aware UTC event timestamp",
+                )
+        if self.evaluated_at > self.expires_at:
+            raise ContractValidationError(
+                ReasonCode.POLICY_OR_SNAPSHOT_STALE,
+                "preconstruction gate expiry precedes evaluation",
+            )
+
+
 @dataclass(frozen=True, slots=True)
 class ModeSnapshotCandidateInputsV1:
     """Exact already-resolved inputs consumed after central E admission."""
@@ -152,6 +322,7 @@ class ModeSnapshotCandidateInputsV1:
     binding_profile_ref: str
     parameter_policy_snapshot_ref: str
     parameter_value_refs: tuple[str, ...]
+    resolved_parameter_values: tuple[ResolvedSnapshotParameterValueV1, ...]
     source_epoch_refs: tuple[str, ...]
     receipt_lineage_refs: tuple[str, ...]
     readiness_state_ref: str
@@ -234,6 +405,12 @@ class ModeSnapshotCandidateInputsV1:
             is not RegisteredSnapshotComputationBundleV1
             or type(self.owner_action_confirmation)
             is not OwnerActionConfirmationReceiptV1
+            or not isinstance(self.resolved_parameter_values, tuple)
+            or not self.resolved_parameter_values
+            or any(
+                type(row) is not ResolvedSnapshotParameterValueV1
+                for row in self.resolved_parameter_values
+            )
         ):
             raise ContractValidationError(
                 ReasonCode.PARAMETER_POLICY_OR_PIN_INVALID,
@@ -274,6 +451,11 @@ class ModeSnapshotCandidateInputsV1:
             or self.parameter_policy_snapshot_ref
             != bundle.parameter_policy_snapshot_ref
             or self.parameter_value_refs != bundle.parameter_value_refs
+            or self.resolved_parameter_values != bundle.resolved_parameter_values
+            or self.parameter_value_refs
+            != tuple(
+                row.resolved_value_ref for row in self.resolved_parameter_values
+            )
             or self.source_epoch_refs != bundle.source_epoch_refs
             or self.owner_action_policy_ref != owner_action.owner_action_policy_ref
             or owner_action.receipt_ref not in self.receipt_lineage_refs
@@ -300,6 +482,9 @@ class ModeSnapshotCandidateInputsV1:
             task_id=self.task_id,
             capability_decision_ref=self.capability_decision_ref,
             context_ref=self.context_ref,
+            request_id=self.request_id,
+            snapshot_candidate_ref=f"SNAPSHOT-CANDIDATE::{self.request_id}",
+            candidate_version=self.candidate_version,
         )
 
 
@@ -356,6 +541,119 @@ def pre_f_unavailable_reference(
         policy_version="ST12F-INTERFACE-ONLY-v1",
         causation_id=causation_id,
         correlation_id=correlation_id,
+        )
+
+
+def evaluate_mode_snapshot_preconstruction_gate(
+    gate: ModeSnapshotPreconstructionGateV1,
+    *,
+    latency_measurement_ref: str,
+) -> ModeSnapshotCandidateProposalResultV1 | None:
+    """Return T05/T03 before any candidate-enrichment dependency can run."""
+
+    if type(gate) is not ModeSnapshotPreconstructionGateV1:
+        raise ContractValidationError(
+            ReasonCode.CONTRACT_OR_TYPE_INVALID,
+            "early D adjudication requires the exact preconstruction gate",
+        )
+    safety_reasons = validate_current_kill_submit_state(
+        gate.kill_submit_state,
+        evaluated_at=gate.evaluated_at,
+    )
+    evidence_reason = _evidence_reason(
+        gate.evidence_reference,
+        evaluated_at=gate.evaluated_at,
+    )
+    if safety_reasons:
+        rule = TRANSITION_BY_ID["T05"]
+        diagnostic_reasons = tuple(
+            reason for reason in safety_reasons if reason is not rule.reason_code
+        )
+        eligibility = ModeEligibilityState.INELIGIBLE
+        allow_state = AllowCandidateStateV1.BLOCKED
+        owner_route = "EXISTING_SAFETY_OWNER_REVALIDATION"
+    elif evidence_reason is not None:
+        rule = TRANSITION_BY_ID[
+            "T03"
+            if evidence_reason is ReasonCode.EVIDENCE_UNAVAILABLE_F_NOT_IMPLEMENTED
+            else "T04"
+        ]
+        diagnostic_reasons = (
+            () if evidence_reason is rule.reason_code else (evidence_reason,)
+        )
+        eligibility = ModeEligibilityState.ELIGIBLE_FOR_ALLOW_CANDIDACY_NO_EFFECT
+        allow_state = (
+            AllowCandidateStateV1.EVIDENCE_UNAVAILABLE
+            if rule.transition_id == "T03"
+            else AllowCandidateStateV1.BLOCKED
+        )
+        owner_route = "ST12F_EVIDENCE_OWNER_REVALIDATION"
+    else:
+        return None
+    reasons = (rule.reason_code, *diagnostic_reasons)
+    decision = ModeSnapshotDecisionV1(
+        decision_id=f"MODE-SNAPSHOT-DECISION::{gate.request_id}",
+        request_id=gate.request_id,
+        task_id=gate.task_id,
+        principal_id=gate.principal_id,
+        current_agent_id=gate.current_agent_id,
+        capability_decision_ref=gate.capability_decision_ref,
+        computation_bundle_ref=EXPLICIT_ABSENCE,
+        context_ref=gate.context_ref,
+        parameter_policy_snapshot_ref=EXPLICIT_ABSENCE,
+        receipt_lineage_refs=gate.receipt_lineage_refs,
+        readiness_state_ref=EXPLICIT_ABSENCE,
+        pretrade_state_ref=EXPLICIT_ABSENCE,
+        evidence_state_ref=gate.evidence_reference.evidence_ref,
+        kill_state_ref=gate.kill_submit_state.state_ref,
+        submit_disabled_state_ref=gate.kill_submit_state.state_ref,
+        owner_action_policy_ref=EXPLICIT_ABSENCE,
+        current_mode=gate.current_mode,
+        requested_mode=gate.requested_mode,
+        mode_eligibility_state=eligibility,
+        allow_candidate_state=allow_state,
+        snapshot_candidate_state=SnapshotCandidateStateV1.ABSENT,
+        activation_precondition_state=(
+            ActivationPreconditionStateV1.PRECONDITIONS_INCOMPLETE
+        ),
+        rollback_state=SnapshotRollbackStateV1.NONE,
+        rollback_target_ref_or_explicit_absence=EXPLICIT_ABSENCE,
+        pin_policy_ref=PIN_POLICY_ID,
+        stale_state="CURRENT",
+        expires_at=gate.expires_at,
+        retirement_state=SnapshotRetirementStateV1.CURRENT,
+        implementation_pins=(),
+        source_epoch_refs=gate.source_epoch_refs,
+        reason_codes=reasons,
+        fallback_route=rule.terminal_route,
+        owner_review_route=owner_route,
+        no_trade_route=NO_TRADE_ROUTE,
+        latency_measurement_ref_or_explicit_absence=latency_measurement_ref,
+    )
+    proposal = build_snapshot_transition_proposal(
+        proposal_id=f"SNAPSHOT-TRANSITION::{gate.request_id}",
+        request_id=gate.request_id,
+        principal_id=gate.principal_id,
+        task_id=gate.task_id,
+        capability_decision_ref=gate.capability_decision_ref,
+        context_ref=gate.context_ref,
+        source_candidate_ref_or_explicit_absence=EXPLICIT_ABSENCE,
+        target_candidate_ref=EXPLICIT_ABSENCE,
+        source_candidate_version_or_explicit_absence=EXPLICIT_ABSENCE,
+        target_candidate_version=gate.candidate_version,
+        transition_id=rule.transition_id,
+        expected_owner_state_ref=EXPLICIT_ABSENCE,
+        precondition_receipt_refs=gate.receipt_lineage_refs,
+        proposed_state=allow_state,
+        diagnostic_reason_codes=diagnostic_reasons,
+        causation_id=gate.causation_id,
+        correlation_id=gate.correlation_id,
+    )
+    return ModeSnapshotCandidateProposalResultV1(
+        snapshot_candidate_or_explicit_absence=None,
+        mode_snapshot_decision=decision,
+        snapshot_transition_proposal=proposal,
+        control_receipt_refs=(),
     )
 
 
@@ -718,8 +1016,20 @@ def evaluate_mode_snapshot_candidate(
             inputs.latency_measurement_ref_or_explicit_absence
         ),
     )
-    transition = SnapshotTransitionProposalV1(
+    predecessor_proposals = (
+        (
+            inputs.owner_action_confirmation.predecessor_transition_receipt_proposal_or_explicit_absence,
+        )
+        if rule.transition_id == "T07"
+        else ()
+    )
+    transition = build_snapshot_transition_proposal(
         proposal_id=f"SNAPSHOT-TRANSITION::{inputs.request_id}",
+        request_id=inputs.request_id,
+        principal_id=inputs.principal_id,
+        task_id=inputs.task_id,
+        capability_decision_ref=inputs.capability_decision_ref,
+        context_ref=inputs.context_ref,
         source_candidate_ref_or_explicit_absence=(
             candidate.snapshot_candidate_id
             if snapshot_for_result is not None
@@ -742,28 +1052,23 @@ def evaluate_mode_snapshot_candidate(
             *inputs.receipt_lineage_refs,
             inputs.owner_action_policy_ref,
         ),
+        predecessor_transition_receipt_proposals=predecessor_proposals,
         proposed_state=(
             candidate.candidate_state
             if rule.transition_id == "T10" and candidate is not None
             else allow_state
         ),
-        typed_reason_codes=decision_reasons,
+        diagnostic_reason_codes=tuple(
+            reason for reason in decision_reasons if reason is not rule.reason_code
+        ),
         causation_id=inputs.causation_id,
         correlation_id=inputs.correlation_id,
     )
-    control_refs = [f"MODE-SNAPSHOT-CONTROL::{inputs.request_id}::EVALUATION"]
-    if candidate is not None:
-        control_refs.extend(
-            (
-                f"MODE-SNAPSHOT-CONTROL::{inputs.request_id}::BUILD",
-                f"MODE-SNAPSHOT-CONTROL::{inputs.request_id}::VALIDATION",
-            )
-        )
     return ModeSnapshotCandidateProposalResultV1(
         snapshot_candidate_or_explicit_absence=snapshot_for_result,
         mode_snapshot_decision=decision,
         snapshot_transition_proposal=transition,
-        control_receipt_refs=tuple(control_refs),
+        control_receipt_refs=(),
     )
 
 
@@ -787,6 +1092,7 @@ def propose_snapshot_stale_or_rollback_required(
 
     if (
         type(candidate) is not FormulaRuntimeSnapshotCandidateV1
+        or request_id != candidate.request_id
         or candidate.candidate_state is not SnapshotCandidateStateV1.VALIDATED_NO_EFFECT
         or type(critical_pins_current) is not bool
         or type(post_validation_defect_detected) is not bool
@@ -811,8 +1117,13 @@ def propose_snapshot_stale_or_rollback_required(
     reason_codes = (rule.reason_code,)
     if raced and not stale:
         reason_codes = (*reason_codes, ReasonCode.SNAPSHOT_PIN_CONFLICT)
-    return SnapshotTransitionProposalV1(
+    return build_snapshot_transition_proposal(
         proposal_id=f"SNAPSHOT-LIFECYCLE::{request_id}::{rule.transition_id}",
+        request_id=request_id,
+        principal_id=candidate.principal_id,
+        task_id=candidate.task_id,
+        capability_decision_ref=candidate.capability_decision_ref,
+        context_ref=candidate.context_ref,
         source_candidate_ref_or_explicit_absence=candidate.snapshot_candidate_id,
         target_candidate_ref=candidate.snapshot_candidate_id,
         source_candidate_version_or_explicit_absence=candidate_version,
@@ -825,7 +1136,7 @@ def propose_snapshot_stale_or_rollback_required(
             if stale
             else SnapshotCandidateStateV1.ROLLBACK_REQUIRED
         ),
-        typed_reason_codes=reason_codes,
+        diagnostic_reason_codes=tuple(reason_codes[1:]),
         causation_id=causation_id,
         correlation_id=correlation_id,
     )
@@ -851,6 +1162,10 @@ def validate_snapshot_new_use(
 def propose_snapshot_retirement(
     *,
     request_id: str,
+    principal_id: str,
+    task_id: str,
+    capability_decision_ref: str,
+    context_ref: str,
     candidate_ref: str,
     candidate_version: str,
     expected_owner_state_ref: str,
@@ -889,8 +1204,13 @@ def propose_snapshot_retirement(
         proposed_state = SnapshotRetirementStateV1.RETIRED
     else:
         return None
-    return SnapshotTransitionProposalV1(
+    return build_snapshot_transition_proposal(
         proposal_id=f"SNAPSHOT-RETIREMENT::{request_id}::{rule.transition_id}",
+        request_id=request_id,
+        principal_id=principal_id,
+        task_id=task_id,
+        capability_decision_ref=capability_decision_ref,
+        context_ref=context_ref,
         source_candidate_ref_or_explicit_absence=candidate_ref,
         target_candidate_ref=candidate_ref,
         source_candidate_version_or_explicit_absence=candidate_version,
@@ -899,7 +1219,6 @@ def propose_snapshot_retirement(
         expected_owner_state_ref=expected_owner_state_ref,
         precondition_receipt_refs=precondition_receipt_refs,
         proposed_state=proposed_state,
-        typed_reason_codes=(rule.reason_code,),
         causation_id=causation_id,
         correlation_id=correlation_id,
     )
@@ -936,6 +1255,10 @@ def select_prior_snapshot_candidate(
 def propose_rollback(
     *,
     request_id: str,
+    principal_id: str,
+    task_id: str,
+    capability_decision_ref: str,
+    context_ref: str,
     current_candidate_ref: str,
     current_candidate_version: str,
     expected_owner_state_ref: str,
@@ -943,6 +1266,7 @@ def propose_rollback(
     observed_current_candidate_ref: str,
     observed_current_candidate_version: str,
     candidates: tuple[PriorSnapshotCandidateV1, ...],
+    rollback_required_receipt_proposal: object,
     precondition_receipt_refs: tuple[str, ...],
     causation_id: str,
     correlation_id: str,
@@ -957,8 +1281,13 @@ def propose_rollback(
     reasons = (rule.reason_code,)
     if raced:
         reasons = (*reasons, ReasonCode.SNAPSHOT_PIN_CONFLICT)
-    return SnapshotTransitionProposalV1(
+    return build_snapshot_transition_proposal(
         proposal_id=f"SNAPSHOT-ROLLBACK::{request_id}",
+        request_id=request_id,
+        principal_id=principal_id,
+        task_id=task_id,
+        capability_decision_ref=capability_decision_ref,
+        context_ref=context_ref,
         source_candidate_ref_or_explicit_absence=current_candidate_ref,
         target_candidate_ref=(
             target.candidate.snapshot_candidate_id
@@ -972,12 +1301,15 @@ def propose_rollback(
         transition_id=rule.transition_id,
         expected_owner_state_ref=expected_owner_state_ref,
         precondition_receipt_refs=precondition_receipt_refs,
+        predecessor_transition_receipt_proposals=(
+            rollback_required_receipt_proposal,
+        ),
         proposed_state=(
             SnapshotRollbackStateV1.PROPOSED_PRIOR_IMMUTABLE_CANDIDATE
             if target is not None
             else SnapshotRollbackStateV1.BLOCKED_NO_VALID_PRIOR_CANDIDATE
         ),
-        typed_reason_codes=reasons,
+        diagnostic_reason_codes=tuple(reasons[1:]),
         causation_id=causation_id,
         correlation_id=correlation_id,
     )
