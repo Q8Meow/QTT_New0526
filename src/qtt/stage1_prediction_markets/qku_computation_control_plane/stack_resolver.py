@@ -35,6 +35,9 @@ from .input_resolver import (
     _validate_formula_input_context,
 )
 from .models import (
+    ComputabilityClassV1,
+    ComputabilityStateResultV1,
+    ComputabilityTerminalRouteV1,
     ComputationExecutionContextV1,
     ImplementationVersionPinV1,
 )
@@ -91,6 +94,129 @@ REGISTERED_FORMULA_STACKS: Mapping[str, RegisteredFormulaStackV1] = (
         }
     )
 )
+
+
+ST12D_SNAPSHOT_BUNDLE_ID = "SNAPSHOT-BUNDLE::ST12D::MATH-13-14-15-39"
+ST12D_SNAPSHOT_BUNDLE_VERSION = "ST12D-CURRENTIZED-1.0"
+ST12D_SNAPSHOT_COMPONENT_IDS = ("MATH-13", "MATH-14", "MATH-15", "MATH-39")
+
+
+@dataclass(frozen=True, slots=True)
+class SnapshotBundleComponentClosureV1:
+    """Four-dimensional closure for one member of the distinct D bundle."""
+
+    math_spec_id: str
+    dimension_receipts: tuple[ComputabilityStateResultV1, ...]
+    input_resolution: FormulaInputResolutionV1
+    specification_ref: str
+    implementation_ref: str
+    binding_refs: tuple[str, ...]
+    oracle_ref: str
+    vector_ref: str
+    no_authority_flag: bool = True
+
+    def __post_init__(self) -> None:
+        if (
+            self.math_spec_id not in ST12D_SNAPSHOT_COMPONENT_IDS
+            or tuple(row.state for row in self.dimension_receipts)
+            != tuple(ComputabilityClassV1)
+            or any(not row.computable for row in self.dimension_receipts)
+            or self.input_resolution.math_spec_id != self.math_spec_id
+            or not self.specification_ref
+            or not self.implementation_ref
+            or not self.binding_refs
+            or not self.oracle_ref
+            or not self.vector_ref
+            or self.no_authority_flag is not True
+        ):
+            raise StackResolutionError(
+                ReasonCode.DEPENDENCY_CLOSURE_FAILED,
+                "D snapshot component closure is incomplete or self-asserted",
+            )
+
+    @property
+    def receipt_refs(self) -> tuple[str, ...]:
+        return tuple(
+            dict.fromkeys(
+                (
+                    self.specification_ref,
+                    self.implementation_ref,
+                    *self.binding_refs,
+                    self.oracle_ref,
+                    self.vector_ref,
+                    *self.input_resolution.receipt_refs,
+                    *(
+                        ref
+                        for row in self.dimension_receipts
+                        for ref in (
+                            *row.dependency_receipt_refs,
+                            *row.oracle_receipt_refs,
+                        )
+                    ),
+                )
+            )
+        )
+
+
+@dataclass(frozen=True, slots=True)
+class RegisteredSnapshotComputationBundleV1:
+    """Selected D component bundle; it is not an executable data-flow stack."""
+
+    bundle_ref: str
+    bundle_version: str
+    execution_context: ComputationExecutionContextV1
+    component_closures: tuple[SnapshotBundleComponentClosureV1, ...]
+    parameter_policy_snapshot_ref: str
+    parameter_value_refs: tuple[str, ...]
+    source_epoch_refs: tuple[str, ...]
+    preflight_receipt_ref: str
+    data_edge_refs: tuple[str, ...] = ()
+    no_authority_flag: bool = True
+
+    def __post_init__(self) -> None:
+        if (
+            self.bundle_ref != ST12D_SNAPSHOT_BUNDLE_ID
+            or self.bundle_version != ST12D_SNAPSHOT_BUNDLE_VERSION
+            or not isinstance(self.execution_context, ComputationExecutionContextV1)
+            or tuple(row.math_spec_id for row in self.component_closures)
+            != ST12D_SNAPSHOT_COMPONENT_IDS
+            or any(row.no_authority_flag is not True for row in self.component_closures)
+            or not self.parameter_policy_snapshot_ref
+            or not self.parameter_value_refs
+            or len(self.parameter_value_refs) != len(set(self.parameter_value_refs))
+            or not self.source_epoch_refs
+            or len(self.source_epoch_refs) != len(set(self.source_epoch_refs))
+            or not self.preflight_receipt_ref
+            or self.data_edge_refs != ()
+            or self.no_authority_flag is not True
+        ):
+            raise StackResolutionError(
+                ReasonCode.DEPENDENCY_CLOSURE_FAILED,
+                "D snapshot bundle must be exact, receipt-backed, and edge-free",
+            )
+
+    @property
+    def all_four_dimensions_closed(self) -> bool:
+        return all(
+            row.computable
+            for component in self.component_closures
+            for row in component.dimension_receipts
+        )
+
+    @property
+    def receipt_refs(self) -> tuple[str, ...]:
+        return tuple(
+            dict.fromkeys(
+                (
+                    self.preflight_receipt_ref,
+                    *(
+                        ref
+                        for component in self.component_closures
+                        for ref in component.receipt_refs
+                    ),
+                )
+            )
+        )
 
 
 @dataclass(frozen=True, slots=True)
@@ -799,6 +925,170 @@ def _preflight_registered_stack_context_closure(
                 for ref in closure.dependency_edge_refs
             )
         ),
+    )
+
+
+def preflight_snapshot_computation_bundle(
+    *,
+    context: ComputationExecutionContextV1,
+    owner_registry: CanonicalOwnerPacketRegistryV1,
+    parameter_policy_snapshot_ref: str,
+    parameter_value_refs: tuple[str, ...],
+    source_epoch_refs: tuple[str, ...],
+) -> RegisteredSnapshotComputationBundleV1:
+    """Close the distinct edge-free D bundle without invoking any formula."""
+
+    from .bindings import CURRENT_FORMULA_INPUT_AUTHORITY_BY_MATH_ID
+    from .implementation_registry import ST12D_MATH_IMPLEMENTATION_REGISTRY
+    from .oracle_contracts import (
+        ST12D_GOLDEN_VECTOR_BY_MATH_ID,
+        ST12D_ORACLE_BY_MATH_ID,
+    )
+    from .specification import (
+        CURRENT_FORMULA_INPUT_CONTRACTS,
+        CURRENT_FORMULA_REQUIREMENTS,
+        CURRENT_NAMED_OUTPUT_CONTRACTS,
+    )
+
+    if not isinstance(context, ComputationExecutionContextV1):
+        raise StackResolutionError(
+            ReasonCode.INPUT_SCOPE_MISMATCH,
+            "D snapshot-bundle preflight requires an exact execution context",
+        )
+    expected_pins = tuple(
+        ImplementationVersionPinV1(
+            math_spec_id=math_id,
+            implementation_id=(
+                ST12D_MATH_IMPLEMENTATION_REGISTRY[math_id].contract.implementation_id
+            ),
+        )
+        for math_id in ST12D_SNAPSHOT_COMPONENT_IDS
+    )
+    if (
+        context.implementation_versions != expected_pins
+        or context.dependency_graph_id is not None
+        or context.dependency_graph_version is not None
+    ):
+        raise StackResolutionError(
+            ReasonCode.DEPENDENCY_CLOSURE_FAILED,
+            "D snapshot bundle requires exact pins and no fabricated dependency graph",
+        )
+    preflight_ref = (
+        f"SNAPSHOT-BUNDLE-PREFLIGHT::{context.context_id}::"
+        f"{context.input_version}::{context.source_epoch_id}"
+    )
+    closures: list[SnapshotBundleComponentClosureV1] = []
+    for math_id in ST12D_SNAPSHOT_COMPONENT_IDS:
+        requirement = CURRENT_FORMULA_REQUIREMENTS.get(math_id)
+        input_contract = CURRENT_FORMULA_INPUT_CONTRACTS.get(math_id)
+        output_contract = CURRENT_NAMED_OUTPUT_CONTRACTS.get(math_id)
+        implementation = ST12D_MATH_IMPLEMENTATION_REGISTRY.get(math_id)
+        bindings = CURRENT_FORMULA_INPUT_AUTHORITY_BY_MATH_ID.get(math_id)
+        oracle = ST12D_ORACLE_BY_MATH_ID.get(math_id)
+        vector = ST12D_GOLDEN_VECTOR_BY_MATH_ID.get(math_id)
+        if any(
+            value is None
+            for value in (
+                requirement,
+                input_contract,
+                output_contract,
+                implementation,
+                bindings,
+                oracle,
+                vector,
+            )
+        ):
+            raise StackResolutionError(
+                ReasonCode.DEPENDENCY_CLOSURE_FAILED,
+                f"{math_id} central specification/fixture owner lookup is incomplete",
+            )
+        assert bindings is not None
+        declared_raw = tuple(getattr(input_contract, "declared_input_keys"))
+        if tuple(getattr(binding, "input_name") for binding in bindings) != declared_raw:
+            raise StackResolutionError(
+                ReasonCode.DEPENDENCY_CLOSURE_FAILED,
+                f"{math_id} current binding identities differ from its input contract",
+            )
+        input_resolution = FormulaInputResolverV1.resolve(
+            math_id,
+            context=context,
+            owner_registry=owner_registry,
+        )
+        specification_ref = (
+            f"SPECIFICATION-OWNER-RECEIPT::{math_id}::"
+            f"{getattr(requirement, 'research_specification_version')}"
+        )
+        implementation_ref = (
+            f"IMPLEMENTATION-REGISTRY-RECEIPT::"
+            f"{implementation.contract.implementation_id}"
+        )
+        binding_refs = tuple(
+            f"BINDING-OWNER-RECEIPT::{getattr(binding, 'binding_id')}"
+            for binding in bindings
+        )
+        oracle_ref = f"ORACLE-OWNER-RECEIPT::{oracle.oracle_id}"
+        vector_ref = f"VECTOR-OWNER-RECEIPT::{vector.vector_id}"
+        component_bundle_ref = f"{preflight_ref}::{math_id}"
+        dimensions = (
+            ComputabilityStateResultV1(
+                state=ComputabilityClassV1.SPECIFICATION_COMPUTABLE,
+                computable=True,
+                blocker_codes=(),
+                dependency_receipt_refs=(
+                    specification_ref,
+                    f"OUTPUT-SCHEMA-OWNER-RECEIPT::{getattr(output_contract, 'schema_id')}",
+                ),
+                oracle_receipt_refs=(),
+                terminal_route=ComputabilityTerminalRouteV1.CONTRACT_ONLY_COMPUTATION,
+            ),
+            ComputabilityStateResultV1(
+                state=ComputabilityClassV1.FIXTURE_COMPUTABLE,
+                computable=True,
+                blocker_codes=(),
+                dependency_receipt_refs=(implementation_ref,),
+                oracle_receipt_refs=(oracle_ref, vector_ref),
+                terminal_route=ComputabilityTerminalRouteV1.CONTRACT_ONLY_COMPUTATION,
+            ),
+            ComputabilityStateResultV1(
+                state=ComputabilityClassV1.CONTEXT_COMPUTABLE,
+                computable=True,
+                blocker_codes=(),
+                dependency_receipt_refs=tuple(
+                    dict.fromkeys((*binding_refs, *input_resolution.receipt_refs))
+                ),
+                oracle_receipt_refs=(),
+                terminal_route=ComputabilityTerminalRouteV1.CONTRACT_ONLY_COMPUTATION,
+            ),
+            ComputabilityStateResultV1(
+                state=ComputabilityClassV1.STACK_COMPUTABLE,
+                computable=True,
+                blocker_codes=(),
+                dependency_receipt_refs=(component_bundle_ref,),
+                oracle_receipt_refs=(),
+                terminal_route=ComputabilityTerminalRouteV1.CONTRACT_ONLY_COMPUTATION,
+            ),
+        )
+        closures.append(
+            SnapshotBundleComponentClosureV1(
+                math_spec_id=math_id,
+                dimension_receipts=dimensions,
+                input_resolution=input_resolution,
+                specification_ref=specification_ref,
+                implementation_ref=implementation_ref,
+                binding_refs=binding_refs,
+                oracle_ref=oracle_ref,
+                vector_ref=vector_ref,
+            )
+        )
+    return RegisteredSnapshotComputationBundleV1(
+        bundle_ref=ST12D_SNAPSHOT_BUNDLE_ID,
+        bundle_version=ST12D_SNAPSHOT_BUNDLE_VERSION,
+        execution_context=context,
+        component_closures=tuple(closures),
+        parameter_policy_snapshot_ref=parameter_policy_snapshot_ref,
+        parameter_value_refs=parameter_value_refs,
+        source_epoch_refs=source_epoch_refs,
+        preflight_receipt_ref=preflight_ref,
     )
 
 

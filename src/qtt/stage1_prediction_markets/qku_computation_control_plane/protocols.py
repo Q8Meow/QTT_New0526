@@ -14,6 +14,7 @@ from .models import (
     OperationContractV1,
     ModeSnapshotDecisionV1,
     ModeSnapshotOwnerProjectionV1,
+    OwnerActionConfirmationReceiptV1,
     ReadOnlyKillSubmitStateV1,
     ST12FEvidenceReferenceV1,
     SupervisionEnvelopeV1,
@@ -22,6 +23,7 @@ from .models import (
 if TYPE_CHECKING:
     from .agent_policy import AgentCapabilityDecisionV1
     from .mode_snapshot_policy import ModeSnapshotCandidateInputsV1
+    from .models import ComputationExecutionContextV1
 
 
 @runtime_checkable
@@ -92,7 +94,7 @@ class ReadOnlyKillSubmitStateProtocolV1(Protocol):
     """Read exact current safety state; no set, clear, or override method exists."""
 
     def read_kill_submit_state(
-        self, context_ref: str
+        self, context: "ComputationExecutionContextV1"
     ) -> ReadOnlyKillSubmitStateV1: ...
 
 
@@ -101,8 +103,21 @@ class ST12FEvidenceReferenceProtocolV1(Protocol):
     """Read only a future-F reference state; D cannot produce evidence."""
 
     def read_evidence_reference(
-        self, context_ref: str
+        self,
+        context: "ComputationExecutionContextV1",
+        *,
+        causation_id: str,
+        correlation_id: str,
     ) -> ST12FEvidenceReferenceV1: ...
+
+
+@runtime_checkable
+class OwnerActionConfirmationProtocolV1(Protocol):
+    """Read one exact current owner-action receipt; no action method exists."""
+
+    def read_owner_action_confirmation(
+        self, context: "ComputationExecutionContextV1"
+    ) -> OwnerActionConfirmationReceiptV1: ...
 
 
 @runtime_checkable

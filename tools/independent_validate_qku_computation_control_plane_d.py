@@ -222,6 +222,25 @@ EXPECTED_TRANSITIONS = (
     ("T16", "DRAINING_PINNED_IN_FLIGHT_ONLY", "RETIRED", "RETIRED", "NO_NEW_USE", False),
     ("T17", "ANY", "BLOCKED", "NO_TRADE_REOPTIMIZATION_ROUTED", "ROUTE_TO_PRETRADE1_REOPTIMIZATION", False),
 )
+EXPECTED_TRANSITION_TRIGGERS = (
+    "capability denied or identity/policy mismatch",
+    "exact E decision, current inputs, kill clear",
+    "F evidence unavailable",
+    "policy/source/snapshot stale or conflicting",
+    "kill active or submit disabled",
+    "all automated gates pass but exact owner action absent",
+    "exact owner confirmation packet is valid",
+    "all pinned inputs resolve and candidate builds",
+    "schema, lineage, version, source, parameter, freshness and oracle checks pass",
+    "any candidate validation fails",
+    "critical source/policy/evidence/kill state expires",
+    "post-validation defect or conflict detected",
+    "prior candidate exists, validates and is not stale",
+    "no valid prior candidate",
+    "retirement declared",
+    "all in-flight references complete",
+    "PRETRADE1 returns typed NO_TRADE",
+)
 EXPECTED_CONTRACT_FIELDS = {
     "ReadOnlyKillSubmitStateV1": (
         "state_ref", "scope_ref", "kill_active", "submit_disabled", "observed_at",
@@ -253,7 +272,8 @@ EXPECTED_CONTRACT_FIELDS = {
     ),
     "ModeSnapshotCandidateProposalResultV1": (
         "snapshot_candidate_or_explicit_absence", "mode_snapshot_decision",
-        "snapshot_transition_proposal", "control_receipt_refs", "no_authority_flag",
+        "snapshot_transition_proposal", "control_receipt_refs",
+        "owner_projection_or_explicit_absence", "no_authority_flag",
     ),
     "ModeSnapshotControlReceiptRecordV1": (
         "control_receipt_id", "control_class", "request_id", "task_id", "principal_id",
@@ -390,6 +410,19 @@ def _validate_denominators_and_artifact_identity() -> tuple[
 
     _require(manifest.get("acceptance_counts") == EXPECTED_COUNTS, "frozen denominator mismatch")
     _require(tuple(row.get("closure_id") for row in controls) == EXPECTED_CLOSURE_IDS, "23 closure identities mismatch")
+    control_predicate_refs = tuple(row.get("predicate_ref") for row in controls)
+    control_mutation_refs = tuple(row.get("causal_mutation_ref") for row in controls)
+    _require(
+        len(set(control_predicate_refs)) == 23
+        and len(set(control_mutation_refs)) == 23
+        and all(
+            row.get("positive_fixture_ref")
+            and row.get("causal_owner_field_ref")
+            and row.get("expected_terminal_state")
+            for row in controls
+        ),
+        "23 controls lack unique row-specific predicates or causal mutations",
+    )
     _require(tuple(row.get("parameter_id") for row in parameters) == EXPECTED_PARAMETER_IDS, "28 parameter identities mismatch")
     _require(len({row.get("canonical_value_owner") for row in parameters}) == 1, "parameter-value owner is not unique")
     allowed_parameter_keys = {
@@ -412,6 +445,11 @@ def _validate_denominators_and_artifact_identity() -> tuple[
         for row in transitions
     )
     _require(actual_transitions == EXPECTED_TRANSITIONS, "exact 17-transition matrix mismatch")
+    _require(
+        tuple(row.get("trigger") for row in transitions)
+        == EXPECTED_TRANSITION_TRIGGERS,
+        "exact 17-transition trigger oracle mismatch",
+    )
 
     by_class = Counter(str(row.get("input_class")) for row in universe)
     _require(dict(sorted(by_class.items())) == EXPECTED_UNIVERSE_CLASS_COUNTS, "D input universe class enumeration mismatch")
@@ -446,11 +484,50 @@ def _validate_denominators_and_artifact_identity() -> tuple[
             "four-dimensional computability state mismatch",
         )
         _require(len(row.get("oracle_and_vector_refs", [])) == 2, "oracle/vector computability refs missing")
-    _require(tuple(row.get("member_ref") for row in universe if row.get("input_class") == "semantic_test") == EXPECTED_TEST_IDS, "26 semantic test identities mismatch")
+        _require(
+            len(row.get("dimension_producer_receipt_refs", [])) == 4
+            and all(
+                dimension.get("dependency_receipt_refs")
+                or dimension.get("oracle_receipt_refs")
+                for dimension in row.get("dimension_producer_receipt_refs", [])
+            ),
+            "computability dimension lacks actual central receipt refs",
+        )
+        _require(
+            row.get("selected_snapshot_bundle_ref")
+            == "SNAPSHOT-BUNDLE::ST12D::MATH-13-14-15-39"
+            and row.get("dependency_graph_ref")
+            == "EXPLICIT_ABSENCE_NO_FABRICATED_DATA_EDGE",
+            "D computability did not use the exact edge-free snapshot bundle",
+        )
+    semantic_rows = tuple(
+        row for row in universe if row.get("input_class") == "semantic_test"
+    )
+    _require(tuple(row.get("member_ref") for row in semantic_rows) == EXPECTED_TEST_IDS, "26 semantic test identities mismatch")
+    semantic_predicate_refs = tuple(row["exact_fields_or_refs"][1] for row in semantic_rows)
+    semantic_mutation_refs = tuple(
+        row.get("mutation_test_ref_or_explicit_not_material")
+        for row in semantic_rows
+    )
+    _require(
+        len(set(semantic_predicate_refs)) == 26
+        and len(set(semantic_mutation_refs)) == 26
+        and not (set(control_predicate_refs) & set(semantic_predicate_refs)),
+        "26 semantic identities lack unique executable predicates and mutations",
+    )
     _require(tuple(row["exact_fields_or_refs"][0] for row in universe if row.get("input_class") == "certified_command") == EXPECTED_COMMANDS, "six certified commands mismatch")
     _require(tuple(row.get("member_ref", "").rsplit("::", 1)[-1] for row in universe if row.get("input_class") == "math_component") == EXPECTED_MATH_IDS, "four math identities mismatch")
     _require(sum(row.get("input_class") == "independent_oracle" for row in universe) == 4, "four independent oracles missing")
     _require(sum(row.get("input_class") == "golden_vector" for row in universe) == 4, "four golden vectors missing")
+    _require(
+        manifest.get("row_specific_predicate_count") == 49
+        and manifest.get("predicate_positive_pass_count") == 49
+        and manifest.get("predicate_causal_mutation_rejection_count") == 49
+        and summary.get("row_specific_predicate_count") == 49
+        and summary.get("predicate_positive_pass_count") == 49
+        and summary.get("predicate_causal_mutation_rejection_count") == 49,
+        "49 row-specific predicates are not positive and mutation-sensitive",
+    )
 
     _recursive_effect_check(manifest, "manifest")
     _recursive_effect_check(summary, "summary")
@@ -479,6 +556,34 @@ def _validate_contract_and_service_ast() -> None:
     for class_name, expected_fields in EXPECTED_CONTRACT_FIELDS.items():
         tree = receipts if class_name == "ModeSnapshotControlReceiptRecordV1" else models
         _require(_class_fields(_class_node(tree, class_name)) == expected_fields, f"{class_name} field roster mismatch")
+
+    input_resolver = _source_tree("input_resolver.py")
+    input_resolver_source = (PACKAGE / "input_resolver.py").read_text(encoding="utf-8")
+    policy = _source_tree("mode_snapshot_policy.py")
+    policy_source = (PACKAGE / "mode_snapshot_policy.py").read_text(encoding="utf-8")
+    mode_input_fields = _class_fields(
+        _class_node(policy, "ModeSnapshotCandidateInputsV1")
+    )
+    _require(
+        "computation_bundle_closure" in mode_input_fields
+        and "owner_action_confirmation" in mode_input_fields
+        and "all_four_computability_dimensions_closed" not in mode_input_fields
+        and "owner_confirmation_present" not in mode_input_fields,
+        "D input authority still accepts caller booleans instead of exact owner receipts",
+    )
+    for class_name in (
+        "CurrentSafetyStateAdapterV1",
+        "CurrentPreFEvidenceAdapterV1",
+        "CurrentOwnerActionConfirmationAdapterV1",
+        "CurrentModeSnapshotInputResolverV1",
+    ):
+        _class_node(input_resolver, class_name)
+    _require(
+        "pre_f_unavailable_reference(" in input_resolver_source
+        and "preflight_snapshot_computation_bundle(" in input_resolver_source
+        and "ExistingOwnerProjectionAdapterV1(self._repo_root)" in input_resolver_source,
+        "current D resolver does not derive evidence, bundle, and owner views",
+    )
 
     decision_fields = _class_fields(_class_node(models, "ModeSnapshotDecisionV1"))
     _require(decision_fields[-3:] == ("runtime_effect_authorized", "active_pointer_commit_allowed", "order_release_authorized"), "decision effect boundary mismatch")
@@ -515,15 +620,39 @@ def _validate_contract_and_service_ast() -> None:
     _require(admission_offset < discriminator_offset, "candidate kind is read before central admission")
     private_offset = service_text.index("def _submit_mode_snapshot_candidate")
     safety_offset = service_text.index("validate_current_kill_submit_state", private_offset)
+    evidence_offset = service_text.index("expected_evidence = pre_f_unavailable_reference", private_offset)
     schema_offset = service_text.index("_validate_d_proposed_specification(request, inputs)", private_offset)
     body_source_offset = service_text.index("source_candidate_refs = request.source_candidate_refs", private_offset)
     _require(
-        safety_offset < schema_offset < body_source_offset,
-        "kill/submit state is not enforced before D schema/body reads",
+        safety_offset < evidence_offset < schema_offset < body_source_offset,
+        "kill/submit and truthful pre-F evidence are not enforced before D schema/body reads",
+    )
+    latency_offset = service_text.index("latency_decision = evaluate_latency_profile", private_offset)
+    projection_offset = service_text.index("final_projection = projection_adapter.project_mode_snapshot", private_offset)
+    projection_attach_offset = service_text.index("owner_projection_or_explicit_absence=final_projection", private_offset)
+    receipts_offset = service_text.index("materialize_mode_snapshot_control_receipts", private_offset)
+    _require(
+        latency_offset < projection_offset < projection_attach_offset < receipts_offset,
+        "final owner projection or receipts precede the final post-latency decision",
+    )
+    private_source = service_text[private_offset:service_text.index("def _", private_offset + 5)]
+    _require(
+        "type(resolver) is not CurrentModeSnapshotInputResolverV1" in private_source
+        and "resolver.owner_registry is not self.owner_registry" in private_source
+        and "inputs.evidence_reference != expected_evidence" in private_source,
+        "service accepts injected D resolver/evidence authority",
+    )
+    compute_start = service_text.index("    def compute_component(")
+    compute_end = service_text.index("    def compute_stack(", compute_start)
+    compute_source = service_text[compute_start:compute_end]
+    _require(
+        "CURRENT_IMPLEMENTATION_REGISTRY" in service_text
+        and "CURRENT_NAMED_OUTPUT_CONTRACTS" in compute_source
+        and "FormulaInputResolverV1.resolve" in compute_source
+        and "invoke_current_formula" in compute_source,
+        "MATH-39 cannot traverse the central compute-component path",
     )
 
-    policy = _source_tree("mode_snapshot_policy.py")
-    policy_source = (PACKAGE / "mode_snapshot_policy.py").read_text(encoding="utf-8")
     functions = {
         node.name: node
         for node in policy.body
@@ -575,16 +704,85 @@ def _validate_contract_and_service_ast() -> None:
         "NoTradeReoptimizationRouteError(decision)" in service_text,
         "T17 typed NO_TRADE route is not executable",
     )
+    evaluate_source = ast.get_source_segment(policy_source, functions["evaluate_mode_snapshot_candidate"]) or ""
+    _require(
+        "primary_reason = rule.reason_code" in evaluate_source
+        and "dict.fromkeys((primary_reason, decision_reason))" in evaluate_source
+        and "typed_reason_codes=decision_reasons" in evaluate_source,
+        "canonical transition reason is not first with ordered diagnostics",
+    )
+    rollback_source = ast.get_source_segment(policy_source, functions["propose_rollback"]) or ""
+    _require(
+        "target.candidate_version" in rollback_source
+        and "target.candidate.evaluated_at.isoformat" not in rollback_source,
+        "rollback target version is derived from a timestamp rather than inventory identity",
+    )
+    receipts_source = (PACKAGE / "receipts.py").read_text(encoding="utf-8")
+    materialize_start = receipts_source.index("def materialize_mode_snapshot_control_receipts")
+    materialize_source = receipts_source[materialize_start:]
+    _require(
+        "MODE_SNAPSHOT_EVALUATION" in materialize_source
+        and "snapshot_candidate_state is not SnapshotCandidateStateV1.ABSENT" in materialize_source
+        and "SnapshotCandidateStateV1.REJECTED" in materialize_source
+        and "len(result.control_receipt_refs) != len(control_class_tuple)" in materialize_source,
+        "D receipt classes are not derived from actually executed stages",
+    )
     _require(_git_path_changed("src/qtt/stage1_prediction_markets/qku_computation_control_plane/agent_policy.py") is False, "agent_policy.py edit count is nonzero")
 
 
 def _validate_math39_independently() -> None:
-    displayed = Decimal("100")
-    additions = Decimal("20")
-    cancellations = Decimal("10")
-    trades = Decimal("30")
-    independent_expected = max(Decimal(0), displayed + additions - cancellations - trades)
-    _require(independent_expected == Decimal("80"), "independent MATH-39 reconstruction failed")
+    oracle_tree = _source_tree("oracle_contracts.py")
+    vector_node = next(
+        node
+        for node in oracle_tree.body
+        if isinstance(node, ast.Assign)
+        and any(
+            isinstance(target, ast.Name)
+            and target.id == "_ST12D_MATH_39_VECTOR_ROW"
+            for target in node.targets
+        )
+    )
+    vector = ast.literal_eval(vector_node.value)
+    raw_inputs = vector["inputs"]
+    _require(
+        tuple(raw_inputs) == ("order_ack", "sequenced_book_events"),
+        "MATH-39 golden vector does not contain the exact two raw records",
+    )
+    ack = raw_inputs["order_ack"]
+    events = raw_inputs["sequenced_book_events"]
+    _require(
+        ack["matching_priority"] == "PRICE_TIME_FIFO"
+        and ack["unit"] == "units"
+        and ack["basis"] == "ACKNOWLEDGED_INSERTION_POINT"
+        and ack["venue_evidence_ref"],
+        "MATH-39 raw acknowledgement semantics mismatch",
+    )
+    sequences = tuple(row["sequence"] for row in events)
+    _require(
+        sequences == tuple(range(sequences[0], sequences[0] + len(sequences))),
+        "MATH-39 raw event sequence is not continuous",
+    )
+    quantities = {
+        "DISPLAYED_BEFORE_ORDER": Decimal(0),
+        "PRIOR_ADDITION": Decimal(0),
+        "PRIOR_CANCELLATION": Decimal(0),
+        "TRADE_AHEAD": Decimal(0),
+    }
+    for row in events:
+        quantity = Decimal(row["quantity"])
+        _require(quantity.is_finite() and quantity >= 0, "invalid raw quantity")
+        quantities[row["event_kind"]] += quantity
+    independent_expected = max(
+        Decimal(0),
+        quantities["DISPLAYED_BEFORE_ORDER"]
+        + quantities["PRIOR_ADDITION"]
+        - quantities["PRIOR_CANCELLATION"]
+        - quantities["TRADE_AHEAD"],
+    )
+    _require(
+        independent_expected == Decimal(vector["expected"]["queue_ahead"]) == Decimal("80"),
+        "independent raw-record MATH-39 reconstruction failed",
+    )
     _require(max(Decimal(0), Decimal("1") - Decimal("2") - Decimal("3")) == 0, "MATH-39 floor invariant failed")
 
     tree = _source_tree("implementation_registry.py")
@@ -601,8 +799,189 @@ def _validate_math39_independently() -> None:
         _require(token in (PACKAGE / "implementation_registry.py").read_text(encoding="utf-8"), f"MATH-39 invariant token missing: {token}")
     _require("eval(" not in source and "exec(" not in source, "MATH-39 uses dynamic execution")
     oracle_source = (PACKAGE / "oracle_contracts.py").read_text(encoding="utf-8")
-    for token in ('"displayed_quantity_before_order": "100"', '"net_prior_additions": "20"', '"observed_prior_cancellations": "10"', '"observed_trades_ahead": "30"', '"queue_ahead": "80"'):
-        _require(token in oracle_source, f"MATH-39 oracle/vector fixture mismatch: {token}")
+    oracle_function = next(
+        node
+        for node in oracle_tree.body
+        if isinstance(node, ast.FunctionDef)
+        and node.name == "independently_reconstruct_math_39_from_raw_records"
+    )
+    independent_source = ast.get_source_segment(oracle_source, oracle_function) or ""
+    _require(
+        "compute_math_39_queue_position_estimate" not in independent_source
+        and "implementation_registry" not in independent_source
+        and all(
+            token in independent_source
+            for token in (
+                "matching_priority",
+                "venue_evidence_ref",
+                "sequences",
+                "is_finite",
+            )
+        ),
+        "MATH-39 oracle is not an independent raw-record reconstruction",
+    )
+    bindings_source = (PACKAGE / "bindings.py").read_text(encoding="utf-8")
+    specification_source = (PACKAGE / "specification.py").read_text(encoding="utf-8")
+    resolver_source = (PACKAGE / "input_resolver.py").read_text(encoding="utf-8")
+    _require(
+        bindings_source.count("ST12DMath39RawInputBindingV1(") == 2
+        and all(
+            token in bindings_source
+            for token in (
+                "SelectedVenuePublicMarketDataOwnerV1",
+                "EconomicReceiptEventSpineV1",
+                "SequencedBookEventsPacketV1",
+                "OrderAcknowledgementReceiptV1",
+            )
+        ),
+        "MATH-39 does not have exactly two raw current-owner bindings",
+    )
+    _require(
+        "raw_owner_input_keys: tuple[str, ...]" in specification_source
+        and "derived_formula_input_keys: tuple[str, ...]" in specification_source
+        and '("sequenced_book_events", "order_ack")' in specification_source
+        and "ST12D_OUTPUT_V1" in specification_source,
+        "MATH-39 additive typed specification/output overlay is incomplete",
+    )
+    for token in (
+        "sequences != tuple(range(",
+        "ReasonCode.MATCHING_PRIORITY_UNKNOWN",
+        "ReasonCode.POINT_IN_TIME_VIOLATION",
+        "ReasonCode.UNIT_BASIS_OR_PRECISION_INVALID",
+        "ReasonCode.INPUT_SCOPE_MISMATCH",
+        "not value.is_finite()",
+    ):
+        _require(token in resolver_source, f"MATH-39 raw resolver guard missing: {token}")
+
+
+def _validate_repair_closure_sources() -> None:
+    parameter_source = (PACKAGE / "parameter_policy.py").read_text(encoding="utf-8")
+    parameter_tree = ast.parse(parameter_source, filename="parameter_policy.py")
+    readable_rows: list[dict[str, object]] = []
+    for node in parameter_tree.body:
+        target = (
+            node.targets[0]
+            if isinstance(node, ast.Assign) and len(node.targets) == 1
+            else node.target
+            if isinstance(node, ast.AnnAssign)
+            else None
+        )
+        if (
+            isinstance(target, ast.Name)
+            and target.id.startswith("_ST12D_PARAMETER_ROW_")
+        ):
+            value = ast.literal_eval(node.value)
+            _require(isinstance(value, dict), f"{target.id} is not a readable row")
+            readable_rows.append(value)
+    _require(len(readable_rows) == 28, "D parameter table is not exactly 28 readable rows")
+    _require(
+        tuple(row.get("id") for row in readable_rows)
+        == EXPECTED_PARAMETER_IDS,
+        "readable D parameter row ordering/identity mismatch",
+    )
+    _require(
+        all(
+            {
+                "id",
+                "sym",
+                "default",
+                "range",
+                "fallback",
+                "precision",
+                "procedure",
+                "src",
+                "app",
+                "snap",
+            }
+            <= set(row)
+            for row in readable_rows
+        )
+        and '"QKUComputationControlPlaneV1.ComputationParameterPolicyV1"'
+        in parameter_source,
+        "readable D parameter rows do not retain one canonical owner",
+    )
+    d_parameter_source = parameter_source[
+        parameter_source.index("_ST12D_PARAMETER_ROW_001") :
+    ]
+    _require(
+        all(
+            token not in d_parameter_source
+            for token in ("b85decode", "base64", "zlib", "marshal", "pickle")
+        ),
+        "D parameter rows remain hidden in an encoded/compressed archive",
+    )
+
+    validation_source = (PACKAGE / "validation.py").read_text(encoding="utf-8")
+    _require(
+        "class ST12DPredicateSpecV1" in validation_source
+        and "ST12D_PREDICATE_SPECS = _build_st12d_predicate_specs()"
+        in validation_source
+        and "def adjudicate_st12d_predicate(" in validation_source
+        and "owner_fact_override" in validation_source
+        and "actual == spec.expected_owner_fact" in validation_source
+        and "_st12d_predicate_matrix" not in validation_source,
+        "D validation still uses broad shared booleans or lacks causal adjudication",
+    )
+    grouped_tests = (
+        REPO_ROOT
+        / "tests/stage1_prediction_markets/qku_computation_control_plane/test_policy_state_matrix.py",
+        REPO_ROOT
+        / "tests/stage1_prediction_markets/qku_computation_control_plane/test_integration_snapshot_matrix.py",
+        REPO_ROOT
+        / "tests/stage1_prediction_markets/qku_computation_control_plane/test_adversarial_latency_security_matrix.py",
+    )
+    test_sources = tuple(path.read_text(encoding="utf-8") for path in grouped_tests)
+    test_function_count = sum(
+        sum(
+            isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+            and node.name.startswith("test_")
+            for node in ast.parse(source).body
+        )
+        for source in test_sources
+    )
+    _require(
+        test_function_count < 23
+        and "for semantic_id, predicate in ST12D_PREDICATE_SPECS.items()"
+        in test_sources[1]
+        and "owner_fact_override=predicate.causal_mutation_fact"
+        in test_sources[1],
+        "grouped D tests expanded per ID or do not execute causal mutations",
+    )
+
+    builder_source = (REPO_ROOT / "tools/build_qku_computation_control_plane.py").read_text(
+        encoding="utf-8"
+    )
+    builder_tree = ast.parse(builder_source, filename="build_qku_computation_control_plane.py")
+    computability_node = next(
+        node
+        for node in builder_tree.body
+        if isinstance(node, ast.FunctionDef)
+        and node.name == "_build_st12d_computability_rows"
+    )
+    computability_source = ast.get_source_segment(builder_source, computability_node) or ""
+    _require(
+        "_build_st12d_audit_bundle()" in computability_source
+        and "FrozenContextualComputabilityResolverV1.resolve" in computability_source
+        and "snapshot_bundle=bundle" in computability_source
+        and '"dimension_computable": tuple(row.computable for row in dimensions)'
+        in computability_source
+        and '"dimension_computable": (True' not in computability_source,
+        "generated D computability is hard-coded instead of centrally resolved",
+    )
+    _require(
+        "predicate_positive_pass_count = sum(" in builder_source
+        and "predicate_causal_mutation_rejection_count = sum(" in builder_source
+        and "adjudicate_st12d_predicate(" in builder_source,
+        "generated validation summary is not derived from actual predicate adjudication",
+    )
+    stack_source = (PACKAGE / "stack_resolver.py").read_text(encoding="utf-8")
+    _require(
+        'ST12D_SNAPSHOT_COMPONENT_IDS = ("MATH-13", "MATH-14", "MATH-15", "MATH-39")'
+        in stack_source
+        and "data_edge_refs: tuple[str, ...] = ()" in stack_source
+        and "self.data_edge_refs != ()" in stack_source,
+        "D snapshot bundle creates a fabricated executable stack/data edge",
+    )
 
 
 def _validate_no_metadata_only_or_scope_escape() -> None:
@@ -641,6 +1020,7 @@ def main() -> int:
         _validate_denominators_and_artifact_identity()
         _validate_contract_and_service_ast()
         _validate_math39_independently()
+        _validate_repair_closure_sources()
         _validate_no_metadata_only_or_scope_escape()
     except (OSError, ValueError, KeyError, TypeError, ValidationFailure) as exc:
         print(f"ST12D_INDEPENDENT_VALIDATION_FAILED::{exc}", file=sys.stderr)

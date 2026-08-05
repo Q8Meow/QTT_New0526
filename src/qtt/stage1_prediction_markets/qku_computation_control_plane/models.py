@@ -340,6 +340,12 @@ class ST12FEvidenceStateV1(StrEnum):
     EVIDENCE_INSUFFICIENT_FAIL_CLOSED = "EVIDENCE_INSUFFICIENT_FAIL_CLOSED"
 
 
+class OwnerActionConfirmationStateV1(StrEnum):
+    CONFIRMED_CURRENT = "CONFIRMED_CURRENT"
+    ABSENT = "ABSENT"
+    STALE_OR_CONFLICTING = "STALE_OR_CONFLICTING"
+
+
 class SnapshotRollbackStateV1(StrEnum):
     NONE = "NONE"
     PROPOSED_PRIOR_IMMUTABLE_CANDIDATE = (
@@ -1259,6 +1265,74 @@ class ST12FEvidenceReferenceV1:
 
 
 @dataclass(frozen=True, slots=True)
+class OwnerActionConfirmationReceiptV1:
+    """Exact current-owner action receipt; it grants no activation authority."""
+
+    receipt_ref: str
+    owner_action_policy_ref: str
+    state: OwnerActionConfirmationStateV1
+    principal_id: str
+    task_id: str
+    capability_decision_ref: str
+    context_ref: str
+    observed_at: datetime
+    valid_until: datetime
+    causation_id: str
+    correlation_id: str
+    runtime_effect_authorized: bool = False
+    order_release_authorized: bool = False
+
+    def __post_init__(self) -> None:
+        for name in (
+            "receipt_ref",
+            "owner_action_policy_ref",
+            "principal_id",
+            "task_id",
+            "capability_decision_ref",
+            "context_ref",
+            "causation_id",
+            "correlation_id",
+        ):
+            _canonical_text(getattr(self, name), name)
+        _typed_enum(self.state, OwnerActionConfirmationStateV1, "state")
+        observed = _utc_timestamp(self.observed_at, "observed_at")
+        valid_until = _utc_timestamp(self.valid_until, "valid_until")
+        if observed > valid_until:
+            raise ContractValidationError(
+                ReasonCode.POLICY_OR_SNAPSHOT_STALE,
+                "owner-action receipt validity cannot precede observation",
+            )
+        if self.causation_id == self.correlation_id:
+            raise ContractValidationError(
+                ReasonCode.CONTRACT_OR_TYPE_INVALID,
+                "owner-action causation and correlation identities must differ",
+            )
+        _must_be_false(self.runtime_effect_authorized, "runtime_effect_authorized")
+        _must_be_false(self.order_release_authorized, "order_release_authorized")
+
+    def is_current_for(
+        self,
+        *,
+        evaluated_at: datetime,
+        principal_id: str,
+        task_id: str,
+        capability_decision_ref: str,
+        context_ref: str,
+    ) -> bool:
+        """Return a derived fact only when the exact receipt identity is current."""
+
+        evaluated = _utc_timestamp(evaluated_at, "evaluated_at")
+        return (
+            self.state is OwnerActionConfirmationStateV1.CONFIRMED_CURRENT
+            and self.observed_at <= evaluated <= self.valid_until
+            and self.principal_id == principal_id
+            and self.task_id == task_id
+            and self.capability_decision_ref == capability_decision_ref
+            and self.context_ref == context_ref
+        )
+
+
+@dataclass(frozen=True, slots=True)
 class FormulaRuntimeSnapshotCandidateV1:
     """Deeply immutable, version-pinned ST12-D candidate; never active state."""
 
@@ -1532,6 +1606,7 @@ class ModeSnapshotCandidateProposalResultV1:
     mode_snapshot_decision: ModeSnapshotDecisionV1
     snapshot_transition_proposal: SnapshotTransitionProposalV1
     control_receipt_refs: tuple[str, ...]
+    owner_projection_or_explicit_absence: ModeSnapshotOwnerProjectionV1 | None = None
     no_authority_flag: bool = True
 
     def __post_init__(self) -> None:
@@ -1550,6 +1625,33 @@ class ModeSnapshotCandidateProposalResultV1:
                 "mode snapshot result requires exact decision and proposal contracts",
             )
         _validate_unique_text(self.control_receipt_refs, "control_receipt_refs", nonempty=True)
+        if (
+            self.owner_projection_or_explicit_absence is not None
+            and type(self.owner_projection_or_explicit_absence)
+            is not ModeSnapshotOwnerProjectionV1
+        ):
+            raise ContractValidationError(
+                ReasonCode.CONTRACT_OR_TYPE_INVALID,
+                "owner projection must be the exact final projection or explicit None",
+            )
+        if self.owner_projection_or_explicit_absence is not None:
+            projection = self.owner_projection_or_explicit_absence
+            decision = self.mode_snapshot_decision
+            if (
+                projection.decision_id != decision.decision_id
+                or projection.mode_eligibility_state
+                is not decision.mode_eligibility_state
+                or projection.allow_candidate_state is not decision.allow_candidate_state
+                or projection.snapshot_candidate_state
+                is not decision.snapshot_candidate_state
+                or projection.reason_codes != decision.reason_codes
+                or projection.fallback_route != decision.fallback_route
+                or projection.owner_review_route != decision.owner_review_route
+            ):
+                raise ContractValidationError(
+                    ReasonCode.CONTRACT_OR_TYPE_INVALID,
+                    "returned owner projection must describe the final decision exactly",
+                )
         _exact_bool(self.no_authority_flag, "no_authority_flag")
         if self.no_authority_flag is not True:
             raise ContractValidationError(
@@ -2478,10 +2580,13 @@ class FrozenFormulaOutputV1:
                 ReasonCode.INVALID_CONTRACT,
                 "formula output requires the exact execution context",
             )
-        if self.output_schema_version != "ST12B_OUTPUT_V3_4":
+        if self.output_schema_version not in {
+            "ST12B_OUTPUT_V3_4",
+            "ST12D_OUTPUT_V1",
+        }:
             raise ContractValidationError(
                 ReasonCode.OUTPUT_SCHEMA_MISMATCH,
-                "formula outputs must use the exact frozen ST12B output version",
+                "formula outputs must use an exact current output schema version",
             )
         _validate_unique_text(self.receipt_refs, "receipt_refs")
         _exact_bool(self.no_authority_flag, "no_authority_flag")

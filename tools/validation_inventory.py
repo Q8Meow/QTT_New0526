@@ -128,6 +128,7 @@ ST12D_QKU_VALIDATOR_IDS = frozenset(
         "independent_validate_qku_computation_control_plane_execution",
         "independent_validate_qku_computation_control_plane_latency",
         "independent_validate_qku_computation_control_plane_security",
+        "validate_qku_computation_control_plane_d",
         "validate_qku_computation_control_plane_execution",
         "validate_qku_computation_control_plane_latency",
         "validate_qku_computation_control_plane_security",
@@ -136,6 +137,7 @@ ST12D_QKU_VALIDATOR_IDS = frozenset(
 ST12D_EXCLUSIVE_QKU_VALIDATOR_IDS = frozenset(
     {
         "independent_validate_qku_computation_control_plane_d",
+        "validate_qku_computation_control_plane_d",
         "validate_qku_computation_control_plane_latency",
     }
 )

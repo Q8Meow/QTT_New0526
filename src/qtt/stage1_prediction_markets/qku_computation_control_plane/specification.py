@@ -1846,6 +1846,169 @@ MATH_IO_CONTRACTS = MappingProxyType(
 )
 
 
+@dataclass(frozen=True, slots=True)
+class ST12DMath39InputContractV1:
+    """Readable additive raw-owner and derived-formula input contract."""
+
+    math_spec_id: str = "MATH-39"
+    raw_owner_input_keys: tuple[str, ...] = (
+        "sequenced_book_events",
+        "order_ack",
+    )
+    derived_formula_input_keys: tuple[str, ...] = (
+        "displayed_quantity_before_order",
+        "net_prior_additions",
+        "observed_prior_cancellations",
+        "observed_trades_ahead",
+    )
+    schema_version: str = "ST12D_MATH39_INPUT_V1"
+
+    def __post_init__(self) -> None:
+        if (
+            self.math_spec_id != "MATH-39"
+            or self.raw_owner_input_keys
+            != ("sequenced_book_events", "order_ack")
+            or len(self.derived_formula_input_keys) != 4
+            or self.schema_version != "ST12D_MATH39_INPUT_V1"
+        ):
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "MATH-39 raw and derived input identities are frozen",
+            )
+
+    @property
+    def declared_input_keys(self) -> tuple[str, ...]:
+        return self.raw_owner_input_keys
+
+
+@dataclass(frozen=True, slots=True)
+class ST12DMath39OutputContractV1:
+    math_spec_id: str = "MATH-39"
+    schema_id: str = "MATH-39::OUTPUT"
+    schema_version: str = "ST12D_OUTPUT_V1"
+    output_name: str = "queue_ahead_estimate"
+    output_type: str = "Decimal string"
+    output_shape: str = "scalar"
+    unit: str = "units"
+    basis: str = "ACKNOWLEDGED_INSERTION_POINT"
+    domain: str = "finite Decimal >= 0"
+    precision: str = "DECIMAL_CONTEXT_PRECISION_34_ROUND_HALF_EVEN"
+    rounding: str = "NO_IMPLICIT_QUANTIZATION"
+    nullable: bool = False
+    optional: bool = False
+    members: tuple[NamedOutputMemberV1, ...] = ()
+
+    def __post_init__(self) -> None:
+        if (
+            self.schema_id != f"{self.math_spec_id}::OUTPUT"
+            or self.schema_version != "ST12D_OUTPUT_V1"
+            or self.output_name != "queue_ahead_estimate"
+            or self.unit != "units"
+            or self.basis != "ACKNOWLEDGED_INSERTION_POINT"
+            or self.nullable
+            or self.optional
+        ):
+            raise ContractValidationError(
+                ReasonCode.OUTPUT_SCHEMA_MISMATCH,
+                "MATH-39 output identity, unit, basis, and nullability are frozen",
+            )
+
+
+_ST12D_MATH39_RAW = MappingProxyType(
+    {
+        "math_spec_id": "MATH-39",
+        "name": "QUEUE_POSITION_ESTIMATE",
+        "family": "EXECUTION_MODEL",
+        "semantic_version": "1.1R1",
+        "specification_version": "ST12D-CURRENTIZED-1.0",
+        "formula_or_procedure": (
+            "max(0, displayed_quantity_before_order + net_prior_additions - "
+            "observed_prior_cancellations - observed_trades_ahead)"
+        ),
+        "typed_inputs": (
+            MappingProxyType(
+                {
+                    "name": "sequenced_book_events",
+                    "type": "typed event stream",
+                    "unit_or_basis": "quantity",
+                    "point_in_time_semantics": "NO_FUTURE_DATA",
+                }
+            ),
+            MappingProxyType(
+                {
+                    "name": "order_ack",
+                    "type": "typed timestamped record",
+                    "unit_or_basis": "event time",
+                    "point_in_time_semantics": "NO_FUTURE_DATA",
+                }
+            ),
+        ),
+        "guards": (
+            "SEQUENCE_CONTINUOUS",
+            "PRICE_TIME_PRIORITY_DECLARED",
+            "VENUE_EVIDENCE_REQUIRED",
+            "IDENTITY_UNIT_BASIS_EXACT",
+            "POINT_IN_TIME_AND_FRESHNESS_CURRENT",
+            "FINITE_NONNEGATIVE_QUANTITIES",
+        ),
+    }
+)
+
+ST12D_MATH39_REQUIREMENT = FrozenFormulaRequirementV1(
+    math_spec_id="MATH-39",
+    name="QUEUE_POSITION_ESTIMATE",
+    family="EXECUTION_MODEL",
+    mathematical_semantic_version="1.1R1",
+    research_specification_version="ST12D-CURRENTIZED-1.0",
+    formula_or_procedure=str(_ST12D_MATH39_RAW["formula_or_procedure"]),
+    parameter_policy_ids=(),
+    responsible_agents=("execution_optimization_agent",),
+    raw=_ST12D_MATH39_RAW,
+)
+ST12D_MATH39_INPUT_CONTRACT = ST12DMath39InputContractV1()
+ST12D_MATH39_OUTPUT_CONTRACT = ST12DMath39OutputContractV1()
+
+CURRENT_FORMULA_REQUIREMENTS: Mapping[str, object] = MappingProxyType(
+    {**FROZEN_FORMULA_REQUIREMENTS, "MATH-39": ST12D_MATH39_REQUIREMENT}
+)
+CURRENT_FORMULA_INPUT_CONTRACTS: Mapping[str, object] = MappingProxyType(
+    {**FROZEN_FORMULA_INPUT_CONTRACTS, "MATH-39": ST12D_MATH39_INPUT_CONTRACT}
+)
+CURRENT_NAMED_OUTPUT_CONTRACTS: Mapping[str, object] = MappingProxyType(
+    {**FROZEN_NAMED_OUTPUT_CONTRACTS, "MATH-39": ST12D_MATH39_OUTPUT_CONTRACT}
+)
+
+
+def get_current_formula_requirement(math_spec_id: str) -> object:
+    try:
+        return CURRENT_FORMULA_REQUIREMENTS[math_spec_id]
+    except KeyError as exc:
+        raise ContractValidationError(
+            ReasonCode.UNKNOWN_IMPLEMENTATION,
+            f"unknown current formula specification: {math_spec_id}",
+        ) from exc
+
+
+def get_current_formula_input_contract(math_spec_id: str) -> object:
+    try:
+        return CURRENT_FORMULA_INPUT_CONTRACTS[math_spec_id]
+    except KeyError as exc:
+        raise ContractValidationError(
+            ReasonCode.UNKNOWN_IMPLEMENTATION,
+            f"unknown current formula input contract: {math_spec_id}",
+        ) from exc
+
+
+def get_current_named_output_contract(math_spec_id: str) -> object:
+    try:
+        return CURRENT_NAMED_OUTPUT_CONTRACTS[math_spec_id]
+    except KeyError as exc:
+        raise ContractValidationError(
+            ReasonCode.OUTPUT_SCHEMA_MISMATCH,
+            f"unknown current formula output contract: {math_spec_id}",
+        ) from exc
+
+
 def _validate_named_output_value(
     value: object,
     type_name: str,
@@ -1939,6 +2102,24 @@ def validate_formula_output_v34(math_spec_id: str, value: object) -> None:
             value[member.name],
             member.type_name,
             field_name=f"{contract.output_name}.{member.name}",
+        )
+
+
+def validate_current_formula_output(math_spec_id: str, value: object) -> None:
+    """Validate predecessor outputs unchanged and the additive D scalar output."""
+
+    if math_spec_id != "MATH-39":
+        validate_formula_output_v34(math_spec_id, value)
+        return
+    if (
+        not isinstance(value, Decimal)
+        or isinstance(value, bool)
+        or not value.is_finite()
+        or value < 0
+    ):
+        raise ContractValidationError(
+            ReasonCode.OUTPUT_SCHEMA_MISMATCH,
+            "MATH-39 queue_ahead_estimate must be a finite nonnegative Decimal",
         )
 
 

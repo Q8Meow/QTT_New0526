@@ -376,8 +376,11 @@ ST12E_VALIDATION_CONTEXT_EXACT_PATHS = frozenset(
 ST12D_ALLOWED_EXACT_PATHS = frozenset(
     {
         "src/qtt/stage1_prediction_markets/qku_computation_control_plane/__init__.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/bindings.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/contextual_computability.py",
         "src/qtt/stage1_prediction_markets/qku_computation_control_plane/errors.py",
         "src/qtt/stage1_prediction_markets/qku_computation_control_plane/implementation_registry.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/input_resolver.py",
         "src/qtt/stage1_prediction_markets/qku_computation_control_plane/latency_policy.py",
         "src/qtt/stage1_prediction_markets/qku_computation_control_plane/mode_snapshot_policy.py",
         "src/qtt/stage1_prediction_markets/qku_computation_control_plane/models.py",
@@ -386,6 +389,8 @@ ST12D_ALLOWED_EXACT_PATHS = frozenset(
         "src/qtt/stage1_prediction_markets/qku_computation_control_plane/protocols.py",
         "src/qtt/stage1_prediction_markets/qku_computation_control_plane/receipts.py",
         "src/qtt/stage1_prediction_markets/qku_computation_control_plane/service.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/specification.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/stack_resolver.py",
         "src/qtt/stage1_prediction_markets/qku_computation_control_plane/validation.py",
         "tests/stage1_prediction_markets/qku_computation_control_plane/test_policy_state_matrix.py",
         "tests/stage1_prediction_markets/qku_computation_control_plane/test_integration_snapshot_matrix.py",
@@ -2157,6 +2162,18 @@ def explain_pr_scope_decision(branch: str, path: str) -> dict[str, object]:
             "branch": branch_name,
             "normalized_path": normalized,
             "pr_id": "ST12-TRANCHE-E",
+            "matched_rule": f"validation_context_exact:{normalized}",
+            "reason": "registered_validation_context_exact_path",
+        }
+    if (
+        is_validation_context_branch(branch_name)
+        and normalized in ST12D_VALIDATION_CONTEXT_EXACT_PATHS
+    ):
+        return {
+            "allowed": True,
+            "branch": branch_name,
+            "normalized_path": normalized,
+            "pr_id": "ST12-TRANCHE-D",
             "matched_rule": f"validation_context_exact:{normalized}",
             "reason": "registered_validation_context_exact_path",
         }

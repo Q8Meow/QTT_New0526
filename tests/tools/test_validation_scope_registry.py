@@ -223,8 +223,11 @@ EXPECTED_ST12E_ALLOWED_EXACT_PATHS = frozenset(
 EXPECTED_ST12D_ALLOWED_EXACT_PATHS = frozenset(
     {
         "src/qtt/stage1_prediction_markets/qku_computation_control_plane/__init__.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/bindings.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/contextual_computability.py",
         "src/qtt/stage1_prediction_markets/qku_computation_control_plane/errors.py",
         "src/qtt/stage1_prediction_markets/qku_computation_control_plane/implementation_registry.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/input_resolver.py",
         "src/qtt/stage1_prediction_markets/qku_computation_control_plane/latency_policy.py",
         "src/qtt/stage1_prediction_markets/qku_computation_control_plane/mode_snapshot_policy.py",
         "src/qtt/stage1_prediction_markets/qku_computation_control_plane/models.py",
@@ -233,6 +236,8 @@ EXPECTED_ST12D_ALLOWED_EXACT_PATHS = frozenset(
         "src/qtt/stage1_prediction_markets/qku_computation_control_plane/protocols.py",
         "src/qtt/stage1_prediction_markets/qku_computation_control_plane/receipts.py",
         "src/qtt/stage1_prediction_markets/qku_computation_control_plane/service.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/specification.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/stack_resolver.py",
         "src/qtt/stage1_prediction_markets/qku_computation_control_plane/validation.py",
         "tests/stage1_prediction_markets/qku_computation_control_plane/test_policy_state_matrix.py",
         "tests/stage1_prediction_markets/qku_computation_control_plane/test_integration_snapshot_matrix.py",
@@ -814,10 +819,10 @@ def test_st12e_scope_rejects_unowned_paths_and_near_branches(
     assert not registry.is_pr_scoped_changed_path_allowed(branch, path)
 
 
-def test_st12d_scope_is_exactly_the_41_writable_ledger_paths() -> None:
+def test_st12d_scope_is_exactly_the_46_writable_ledger_paths() -> None:
     assert registry.ST12D_BRANCH == "agent/st12d-mode-snapshot-boundary"
     assert registry.ST12D_ALLOWED_EXACT_PATHS == EXPECTED_ST12D_ALLOWED_EXACT_PATHS
-    assert len(registry.ST12D_ALLOWED_EXACT_PATHS) == 41
+    assert len(registry.ST12D_ALLOWED_EXACT_PATHS) == 46
     assert not any("*" in path for path in registry.ST12D_ALLOWED_EXACT_PATHS)
     assert registry.ST12D_VALIDATION_CONTEXT_EXACT_PATHS == (
         registry.ST12D_ALLOWED_EXACT_PATHS
@@ -829,6 +834,10 @@ def test_st12d_scope_is_exactly_the_41_writable_ledger_paths() -> None:
             | registry.ST12E_ALLOWED_EXACT_PATHS
         )
     )
+    for path in registry.ST12D_VALIDATION_CONTEXT_EXACT_PATHS:
+        decision = registry.explain_pr_scope_decision(FIXTURE_BRANCH, path)
+        assert decision["allowed"] is True
+        assert decision["pr_id"] == "ST12-TRANCHE-D"
 
 
 @pytest.mark.parametrize("path", sorted(EXPECTED_ST12D_ALLOWED_EXACT_PATHS))

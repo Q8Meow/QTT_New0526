@@ -9,10 +9,9 @@ from types import MappingProxyType
 
 import pytest
 
-from src.qtt.stage1_prediction_markets.qku_computation_control_plane.context import (
-    ComputationContextKeyV1,
-)
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import (
+    ComputationControlPlaneError,
+    InputAuthorityError,
     NumericDomainError,
     ReasonCode,
 )
@@ -39,6 +38,8 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.mode_snapsh
     validate_snapshot_new_use,
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.models import (
+    ComputeComponentRequestV1,
+    ImplementationVersionPinV1,
     LatencyBudgetProfileV1,
     OperationStatusV1,
     ResourceBoundsProfileV1,
@@ -68,17 +69,29 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.protocols i
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.receipts import (
     EconomicRecordTypeV1,
+    ModeSnapshotControlClassV1,
     ModeSnapshotControlReceiptRecordV1,
     materialize_mode_snapshot_control_receipts,
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.input_resolver import (
     CanonicalOwnerPacketRegistryV1,
+    CurrentModeSnapshotInputResolverV1,
+    FormulaInputResolverV1,
+)
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.bindings import (
+    FORMULA_INPUT_AUTHORITY_BINDINGS,
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.latency_policy import (
     STAGE_NAMES,
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.service import (
     QKUComputationControlPlaneV1,
+)
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.specification import (
+    FROZEN_FORMULA_REQUIREMENTS,
+)
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.stack_resolver import (
+    REGISTERED_FORMULA_STACKS,
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.serialization import (
     deterministic_json,
@@ -87,10 +100,14 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.validation 
     ST12D_CLOSURE_ROWS,
     ST12D_GENERATED_PROJECTION_PATHS,
     ST12D_HISTORICAL_PATH_DISPOSITIONS,
+    ST12D_PREDICATE_SPECS,
     ST12D_SEMANTIC_TEST_ROWS,
+    adjudicate_st12d_predicate,
     st12d_acceptance_counts,
 )
 from tests.stage1_prediction_markets.qku_computation_control_plane.test_policy_state_matrix import (
+    _audit_bundle_fixture,
+    _current_owner_registry,
     _inputs,
 )
 from tests.stage1_prediction_markets.qku_computation_control_plane.tranche_e import (
@@ -166,19 +183,22 @@ def test_candidate_rejection_and_rollback_are_atomic_proposals_only() -> None:
     rows = tuple(
         PriorSnapshotCandidateV1(
             candidate=candidate,
+            candidate_version=candidate_version,
             retirement_state=retirement,
             independently_valid=valid,
             all_required_pins_current=pins_current,
         )
-        for candidate, retirement, valid, pins_current in (
-            (older, SnapshotRetirementStateV1.CURRENT, True, True),
-            (tied_b, SnapshotRetirementStateV1.CURRENT, True, True),
-            (tied_a, SnapshotRetirementStateV1.CURRENT, True, True),
-            (current, SnapshotRetirementStateV1.RETIRED, True, True),
+        for candidate, candidate_version, retirement, valid, pins_current in (
+            (older, "SNAPSHOT-VERSION::OLDER", SnapshotRetirementStateV1.CURRENT, True, True),
+            (tied_b, "SNAPSHOT-VERSION::TIED-B", SnapshotRetirementStateV1.CURRENT, True, True),
+            (tied_a, "SNAPSHOT-VERSION::TIED-A2", SnapshotRetirementStateV1.CURRENT, True, True),
+            (current, "SNAPSHOT-VERSION::CURRENT-RETIRED", SnapshotRetirementStateV1.RETIRED, True, True),
         )
     )
     before = deterministic_json(current)
-    assert select_prior_snapshot_candidate(rows) is tied_a
+    selected = select_prior_snapshot_candidate(rows)
+    assert selected is rows[2]
+    assert selected.candidate is tied_a
     proposal = propose_rollback(
         request_id=inputs.request_id,
         current_candidate_ref=current.snapshot_candidate_id,
@@ -196,6 +216,8 @@ def test_candidate_rejection_and_rollback_are_atomic_proposals_only() -> None:
         SnapshotRollbackStateV1.PROPOSED_PRIOR_IMMUTABLE_CANDIDATE
     )
     assert proposal.target_candidate_ref == tied_a.snapshot_candidate_id
+    assert proposal.target_candidate_version == "SNAPSHOT-VERSION::TIED-A2"
+    assert proposal.target_candidate_version != tied_a.evaluated_at.isoformat()
     assert proposal.expected_owner_state_ref == "OWNER-STATE::EXPECTED"
     assert proposal.mutation_allowed is False
     assert proposal.active_pointer_commit_allowed is False
@@ -346,6 +368,213 @@ def test_parameter_math_oracle_and_source_semantics_close_under_existing_owners(
         )
     assert gap.value.reason_code is ReasonCode.SEQUENCE_GAP
 
+    bundle, owner_registry = _audit_bundle_fixture()
+    assert len(FROZEN_FORMULA_REQUIREMENTS) == 30
+    assert len(FORMULA_INPUT_AUTHORITY_BINDINGS) == 142
+    assert tuple(REGISTERED_FORMULA_STACKS) == (
+        "STACK::MATH-01::MATH-02::V3_4",
+    )
+    assert bundle.data_edge_refs == ()
+    assert bundle.all_four_dimensions_closed is True
+    assert tuple(row.math_spec_id for row in bundle.component_closures) == (
+        "MATH-13",
+        "MATH-14",
+        "MATH-15",
+        "MATH-39",
+    )
+    assert all(
+        len(component.dimension_receipts) == 4
+        and all(row.computable for row in component.dimension_receipts)
+        for component in bundle.component_closures
+    )
+
+    events_packet = next(
+        packet
+        for packet in owner_registry.packets
+        if "FIVAB::sequenced_book_events::MATH-39"
+        in packet.authorized_binding_ids
+    )
+    ack_packet = next(
+        packet
+        for packet in owner_registry.packets
+        if "FIVAB::order_ack::MATH-39" in packet.authorized_binding_ids
+    )
+    events = events_packet.values["book.sequenced_book_events"]
+    acknowledgement = ack_packet.values["execution.order_ack"]
+
+    def registry_with(replacement_packet):
+        return CanonicalOwnerPacketRegistryV1(
+            tuple(
+                replacement_packet
+                if packet.packet_id == replacement_packet.packet_id
+                else packet
+                for packet in owner_registry.packets
+            )
+        )
+
+    sequence_gap_events = (
+        events[0],
+        replace(events[1], sequence=events[1].sequence + 1),
+        *events[2:],
+    )
+    venue_mismatch_events = (
+        events[0],
+        replace(events[1], venue_evidence_ref="VENUE-EVIDENCE::MISMATCH"),
+        *events[2:],
+    )
+    raw_resolution_mutations = (
+        (
+            replace(
+                events_packet,
+                values={"book.sequenced_book_events": sequence_gap_events},
+            ),
+            ReasonCode.SEQUENCE_GAP,
+        ),
+        (
+            replace(
+                events_packet,
+                values={"book.sequenced_book_events": venue_mismatch_events},
+            ),
+            ReasonCode.INPUT_SCOPE_MISMATCH,
+        ),
+        (
+            replace(events_packet, ttl=timedelta(microseconds=1)),
+            ReasonCode.FRESHNESS_VIOLATION,
+        ),
+        (
+            replace(
+                ack_packet,
+                values={
+                    "execution.order_ack": replace(
+                        acknowledgement,
+                        available_at=bundle.execution_context.as_of
+                        + timedelta(seconds=1),
+                    )
+                },
+            ),
+            ReasonCode.POINT_IN_TIME_VIOLATION,
+        ),
+    )
+    for replacement_packet, expected_reason in raw_resolution_mutations:
+        with pytest.raises(ComputationControlPlaneError) as rejected:
+            FormulaInputResolverV1.resolve(
+                "MATH-39",
+                context=bundle.execution_context,
+                owner_registry=registry_with(replacement_packet),
+            )
+        assert rejected.value.reason_code is expected_reason
+
+    typed_record_mutations = (
+        (acknowledgement, {"matching_priority": "UNKNOWN"}, ReasonCode.MATCHING_PRIORITY_UNKNOWN),
+        (acknowledgement, {"basis": "UNKNOWN"}, ReasonCode.UNIT_BASIS_OR_PRECISION_INVALID),
+        (events[0], {"unit": "contracts"}, ReasonCode.UNIT_BASIS_OR_PRECISION_INVALID),
+        (events[0], {"quantity": Decimal("-1")}, ReasonCode.INPUT_VALUE_CONFLICT),
+        (events[0], {"quantity": Decimal("NaN")}, ReasonCode.INPUT_VALUE_CONFLICT),
+    )
+    for record, mutation, expected_reason in typed_record_mutations:
+        with pytest.raises(InputAuthorityError) as rejected:
+            replace(record, **mutation)
+        assert rejected.value.reason_code is expected_reason
+
+    math39_context = replace(
+        bundle.execution_context,
+        implementation_versions=tuple(
+            pin
+            for pin in bundle.execution_context.implementation_versions
+            if pin.math_spec_id == "MATH-39"
+        ),
+    )
+    operation_id = "compute_component"
+    admitted = resolve_decision(
+        make_resolver(
+            operation_id=operation_id,
+            envelope_overrides={
+                "context_ref": math39_context.context_id,
+                "idempotency_key": "IDEMPOTENCY::D::MATH39-SERVICE",
+                "formula_scope_refs": ("MATH-39",),
+                "implementation_version_requirements": (
+                    "MATH-39::1.1R1",
+                ),
+            },
+        ),
+        request_id="REQUEST::D::MATH39-SERVICE",
+        operation_id=operation_id,
+        context_ref=math39_context.context_id,
+        requested_scope_refs={
+            "qku_scope_refs": ("QKU::ST12E::TEST",),
+            "formula_scope_refs": ("MATH-39",),
+        },
+        request_idempotency_key="IDEMPOTENCY::D::MATH39-SERVICE",
+    )
+
+    class _Admission:
+        def admit_operation(self, _request: object):
+            return admitted
+
+    assertions = TypedValueRecordV1(
+        tuple(
+            TypedValueV1(
+                name=name,
+                kind=TypedValueKindV1.DECIMAL,
+                value=value,
+                unit="units",
+                basis="ACKNOWLEDGED_INSERTION_POINT",
+            )
+            for name, value in (
+                ("displayed_quantity_before_order", Decimal("100")),
+                ("net_prior_additions", Decimal("20")),
+                ("observed_prior_cancellations", Decimal("10")),
+                ("observed_trades_ahead", Decimal("30")),
+            )
+        )
+    )
+    component_service = QKUComputationControlPlaneV1(
+        owner_registry,
+        agent_capability_resolver=_Admission(),
+    )
+    component_request = ComputeComponentRequestV1(
+        request_id=admitted.request_id,
+        operation_name=operation_id,
+        requested_at=math39_context.as_of,
+        principal_id=admitted.principal_id,
+        capability_bundle_id="CAPABILITY::D::MATH39-SERVICE",
+        context=math39_context,
+        idempotency_key=admitted.idempotency_key,
+        traceparent="00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01",
+        tracestate="vendor=value",
+        component_id="MATH-39",
+        input_values=assertions,
+        expected_output_schema_ref="MATH-39::OUTPUT",
+    )
+    response = component_service.compute_component(component_request)
+    assert response.status is OperationStatusV1.SUCCEEDED
+    assert response.component_result.formula_output is not None
+    assert response.component_result.formula_output.value == Decimal("80")
+    assert response.component_result.formula_output.output_schema_version == (
+        "ST12D_OUTPUT_V1"
+    )
+    assert {
+        "RECEIPT::ST12D-AUDIT::MATH39-ACK",
+        "RECEIPT::ST12D-AUDIT::MATH39-BOOK",
+    }.issubset(response.receipt_refs)
+    pin_mismatch = component_service.compute_component(
+        replace(
+            component_request,
+            context=replace(
+                math39_context,
+                implementation_versions=(
+                    ImplementationVersionPinV1(
+                        math_spec_id="MATH-39",
+                        implementation_id="MATH-39::IMPLEMENTATION::MISMATCH",
+                    ),
+                ),
+            ),
+        )
+    )
+    assert pin_mismatch.status is OperationStatusV1.BLOCKED
+    assert pin_mismatch.component_result.formula_output is None
+    assert ReasonCode.DEPENDENCY_CLOSURE_FAILED.value in pin_mismatch.receipt_refs
+
 
 def test_receipt_spine_and_svc_projection_are_one_way_no_effect_views() -> None:
     inputs = _inputs()
@@ -358,7 +587,11 @@ def test_receipt_spine_and_svc_projection_are_one_way_no_effect_views() -> None:
         traceparent="00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01",
         tracestate="vendor=value",
     )
-    assert len(receipts) == 2
+    assert tuple(row.typed_payload.control_class for row in receipts) == (
+        ModeSnapshotControlClassV1.MODE_SNAPSHOT_EVALUATION,
+        ModeSnapshotControlClassV1.SNAPSHOT_CANDIDATE_BUILD,
+        ModeSnapshotControlClassV1.SNAPSHOT_CANDIDATE_VALIDATION,
+    )
     assert all(row.record_type is EconomicRecordTypeV1.MODE_SNAPSHOT_CONTROL for row in receipts)
     assert all(type(row.typed_payload) is ModeSnapshotControlReceiptRecordV1 for row in receipts)
     assert all(row.typed_payload.no_order_authority_flag is True for row in receipts)
@@ -403,14 +636,8 @@ def test_receipt_spine_and_svc_projection_are_one_way_no_effect_views() -> None:
     assert svc.projection_mutation_allowed is False
 
     operation_id = "submit_candidate_proposal"
-    context = ComputationContextKeyV1(
-        context_id="CONTEXT::D::SERVICE",
-        as_of=inputs.evaluated_at,
-        observed_at=inputs.evaluated_at - timedelta(seconds=1),
-        source_epoch_id="SOURCE-EPOCH::D::SERVICE",
-        input_version="D::SERVICE::V1",
-        maximum_age=timedelta(minutes=1),
-    )
+    bundle, _audit_registry = _audit_bundle_fixture()
+    context = bundle.execution_context
     admitted = resolve_decision(
         make_resolver(
             operation_id=operation_id,
@@ -428,72 +655,25 @@ def test_receipt_spine_and_svc_projection_are_one_way_no_effect_views() -> None:
         },
         request_idempotency_key="IDEMPOTENCY::D::SERVICE",
     )
-    resolved_inputs = replace(
-        inputs,
-        request_id=admitted.request_id,
-        principal_id=admitted.principal_id,
-        task_id=admitted.task_id,
-        current_agent_id=admitted.current_agent_id,
-        capability_decision_ref=admitted.decision_id,
-        context_ref=context.context_id,
-        kill_submit_state=replace(
-            inputs.kill_submit_state,
-            scope_ref=context.context_id,
-        ),
-    )
-
     class _Admission:
         def admit_operation(self, _request: object):
             return admitted
 
-    class _InputResolver:
-        def resolve_mode_snapshot_inputs(self, _request: object, _decision: object):
-            return resolved_inputs
-
-    proposal_values = (
-        ("candidate_contract_id", MODE_SNAPSHOT_CANDIDATE_KIND),
-        ("computation_bundle_ref", resolved_inputs.computation_bundle_ref),
-        ("context_ref", resolved_inputs.context_ref),
-        ("formula_spec_refs", ",".join(resolved_inputs.formula_spec_refs)),
-        (
-            "implementation_version_pins",
-            ",".join(
-                f"{pin.math_spec_id}={pin.implementation_id}"
-                for pin in resolved_inputs.implementation_version_pins
-            ),
-        ),
-        ("binding_profile_ref", resolved_inputs.binding_profile_ref),
-        (
-            "parameter_policy_snapshot_ref",
-            resolved_inputs.parameter_policy_snapshot_ref,
-        ),
-        ("parameter_value_refs", ",".join(resolved_inputs.parameter_value_refs)),
-        ("source_epoch_refs", ",".join(resolved_inputs.source_epoch_refs)),
-        ("receipt_lineage_refs", ",".join(resolved_inputs.receipt_lineage_refs)),
-        ("readiness_state_ref", resolved_inputs.readiness_state_ref),
-        ("pretrade_state_ref", resolved_inputs.pretrade_state_ref),
-        ("owner_action_policy_ref", resolved_inputs.owner_action_policy_ref),
-        ("current_mode", resolved_inputs.current_mode),
-        ("requested_mode", resolved_inputs.requested_mode),
-        ("expected_owner_state_ref", resolved_inputs.expected_owner_state_ref),
-        ("candidate_version", resolved_inputs.candidate_version),
-    )
     proposal_record = TypedValueRecordV1(
-        tuple(
+        (
             TypedValueV1(
-                name=name,
+                name="candidate_contract_id",
                 kind=TypedValueKindV1.TEXT,
-                value=value,
+                value=MODE_SNAPSHOT_CANDIDATE_KIND,
                 unit="identity",
                 basis="canonical",
-            )
-            for name, value in proposal_values
+            ),
         )
     )
     request = SubmitCandidateProposalRequestV1(
         request_id=admitted.request_id,
         operation_name=operation_id,
-        requested_at=inputs.evaluated_at,
+        requested_at=context.as_of,
         principal_id=admitted.principal_id,
         capability_bundle_id="CAPABILITY::D::SERVICE",
         context=context,
@@ -505,10 +685,15 @@ def test_receipt_spine_and_svc_projection_are_one_way_no_effect_views() -> None:
         source_candidate_refs=("SOURCE-CANDIDATE::D::SERVICE",),
         requested_owner_review=True,
     )
+    _bundle, owner_registry = _current_owner_registry(admitted)
+    current_resolver = CurrentModeSnapshotInputResolverV1(
+        repo_root=_repo_root(),
+        owner_registry=owner_registry,
+    )
     service = QKUComputationControlPlaneV1(
-        CanonicalOwnerPacketRegistryV1(),
+        owner_registry,
         agent_capability_resolver=_Admission(),
-        mode_snapshot_input_resolver=_InputResolver(),
+        mode_snapshot_input_resolver=current_resolver,
         latency_budget_profile=LatencyBudgetProfileV1(
             profile_id="LATENCY-PROFILE::D::SERVICE",
             component_budget_ns=tuple((name, 10**12) for name in STAGE_NAMES),
@@ -527,10 +712,28 @@ def test_receipt_spine_and_svc_projection_are_one_way_no_effect_views() -> None:
         ),
     )
     response = service.submit_candidate_proposal(request)
-    assert response.status is OperationStatusV1.SUCCEEDED
+    assert response.status is OperationStatusV1.BLOCKED
     assert response.proposal.mode_snapshot_result is not None
-    assert response.proposal.mode_snapshot_result.no_authority_flag is True
-    assert response.proposal.mode_snapshot_result.snapshot_transition_proposal.transition_id == "T07"
+    service_result = response.proposal.mode_snapshot_result
+    assert service_result.no_authority_flag is True
+    assert service_result.snapshot_transition_proposal.transition_id == "T03"
+    assert service_result.snapshot_candidate_or_explicit_absence is None
+    assert service_result.mode_snapshot_decision.reason_codes == (
+        ReasonCode.EVIDENCE_UNAVAILABLE_F_NOT_IMPLEMENTED,
+    )
+    assert len(service_result.control_receipt_refs) == 1
+    assert service_result.owner_projection_or_explicit_absence == owner_projection(
+        service_result.mode_snapshot_decision,
+        current_resolver.resolve_mode_snapshot_inputs(
+            request,
+            admitted,
+        ).evidence_reference,
+        current_resolver.resolve_mode_snapshot_inputs(
+            request,
+            admitted,
+        ).kill_submit_state,
+        snapshot_version=context.input_version,
+    )
 
     non_d = service.submit_candidate_proposal(
         replace(
@@ -566,6 +769,18 @@ def test_generated_d_universe_and_connectivity_are_terminal_reference_only() -> 
     assert len(ST12D_CLOSURE_ROWS) == 23
     assert len(ST12D_HISTORICAL_PATH_DISPOSITIONS) == 7
     assert len(ST12D_SEMANTIC_TEST_ROWS) == 26
+    assert len(ST12D_PREDICATE_SPECS) == 49
+    for semantic_id, predicate in ST12D_PREDICATE_SPECS.items():
+        assert predicate.predicate_ref
+        assert predicate.positive_fixture_ref
+        assert predicate.causal_mutation_ref
+        assert predicate.causal_owner_field_ref
+        assert predicate.expected_terminal_state
+        assert adjudicate_st12d_predicate(semantic_id)
+        assert not adjudicate_st12d_predicate(
+            semantic_id,
+            owner_fact_override=predicate.causal_mutation_fact,
+        )
     assert universe and connectivity
     assert all(row["terminal_disposition"] != "UNRESOLVED" for row in universe)
     assert all(row["consumption_status"] == "TERMINAL" for row in connectivity)

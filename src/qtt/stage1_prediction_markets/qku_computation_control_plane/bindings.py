@@ -1207,6 +1207,98 @@ if (
 
 
 @dataclass(frozen=True, slots=True)
+class ST12DMath39RawInputBindingV1:
+    """Additive raw packet binding consumed only by the MATH-39 resolver."""
+
+    binding_id: str
+    input_name: str
+    accepted_upstream_owner_id: str
+    accepted_packet_or_snapshot_type: str
+    schema_id: str
+    schema_version: str
+    exact_field_path: str
+    producer_receipt_type: str
+    source_state_and_claim_lineage: str
+    unit_or_basis: str
+    point_in_time_rule: str = "NO_FUTURE_DATA_AND_EXACT_CONTEXT_AS_OF"
+    freshness_rule: str = "OWNER_TTL_AND_SOURCE_EPOCH_MUST_BE_CURRENT"
+    caller_value_authority_allowed: bool = False
+
+    def __post_init__(self) -> None:
+        if (
+            self.binding_id != f"FIVAB::{self.input_name}::MATH-39"
+            or self.input_name not in {"sequenced_book_events", "order_ack"}
+            or self.schema_version != "1.0.0"
+            or not self.accepted_upstream_owner_id
+            or not self.accepted_packet_or_snapshot_type
+            or not self.schema_id
+            or not self.exact_field_path
+            or not self.producer_receipt_type
+            or not self.source_state_and_claim_lineage
+            or self.caller_value_authority_allowed
+        ):
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "MATH-39 raw input binding differs from the additive D owner law",
+            )
+
+
+ST12D_MATH39_RAW_INPUT_BINDINGS = (
+    ST12DMath39RawInputBindingV1(
+        binding_id="FIVAB::sequenced_book_events::MATH-39",
+        input_name="sequenced_book_events",
+        accepted_upstream_owner_id="SelectedVenuePublicMarketDataOwnerV1",
+        accepted_packet_or_snapshot_type="SequencedBookEventsPacketV1",
+        schema_id="SequencedBookEventsPacketV1::SCHEMA",
+        schema_version="1.0.0",
+        exact_field_path="book.sequenced_book_events",
+        producer_receipt_type="SequencedBookEventsReceiptV1",
+        source_state_and_claim_lineage=(
+            "SelectedVenuePublicMarketDataOwnerV1 -> sequence-continuous public "
+            "book events -> MATH-39 raw resolution"
+        ),
+        unit_or_basis="quantity units at acknowledged insertion point",
+    ),
+    ST12DMath39RawInputBindingV1(
+        binding_id="FIVAB::order_ack::MATH-39",
+        input_name="order_ack",
+        accepted_upstream_owner_id="EconomicReceiptEventSpineV1",
+        accepted_packet_or_snapshot_type="OrderAcknowledgementReceiptV1",
+        schema_id="OrderAcknowledgementReceiptV1::SCHEMA",
+        schema_version="1.0.0",
+        exact_field_path="execution.order_ack",
+        producer_receipt_type="ExecutionCustodyReceiptV1",
+        source_state_and_claim_lineage=(
+            "EconomicReceiptEventSpineV1 -> exact order acknowledgement custody "
+            "receipt -> MATH-39 insertion point"
+        ),
+        unit_or_basis="event time at acknowledged insertion point",
+    ),
+)
+ST12D_MATH39_RAW_INPUT_BINDING_BY_ID: Mapping[
+    str, ST12DMath39RawInputBindingV1
+] = MappingProxyType({row.binding_id: row for row in ST12D_MATH39_RAW_INPUT_BINDINGS})
+CURRENT_FORMULA_INPUT_AUTHORITY_BY_MATH_ID: Mapping[str, tuple[object, ...]] = (
+    MappingProxyType(
+        {
+            **FORMULA_INPUT_AUTHORITY_BY_MATH_ID,
+            "MATH-39": ST12D_MATH39_RAW_INPUT_BINDINGS,
+        }
+    )
+)
+
+
+def get_current_formula_input_bindings(math_spec_id: str) -> tuple[object, ...]:
+    try:
+        return CURRENT_FORMULA_INPUT_AUTHORITY_BY_MATH_ID[math_spec_id]
+    except KeyError as exc:
+        raise ContractValidationError(
+            ReasonCode.UNKNOWN_IMPLEMENTATION,
+            f"unknown current formula input binding set: {math_spec_id}",
+        ) from exc
+
+
+@dataclass(frozen=True, slots=True)
 class PrimarySourceRecordV1:
     source_id: str
     normalized_source_class: str

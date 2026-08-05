@@ -30,7 +30,9 @@ from .fallback import (
     PublicFallbackBoundaryV1,
 )
 from .implementation_registry import (
+    CURRENT_IMPLEMENTATION_REGISTRY,
     IMPLEMENTATION_REGISTRY,
+    invoke_current_formula,
     invoke_formula_v34,
 )
 from .latency_policy import (
@@ -44,6 +46,7 @@ from .mode_snapshot_policy import (
     MODE_SNAPSHOT_CANDIDATE_KIND,
     ModeSnapshotCandidateInputsV1,
     evaluate_mode_snapshot_candidate,
+    pre_f_unavailable_reference,
     validate_current_kill_submit_state,
 )
 from .identity_adapter import RP5CIdentityAdapterV1
@@ -57,6 +60,7 @@ from .protocols import (
 )
 from .input_resolver import (
     CanonicalOwnerPacketRegistryV1,
+    CurrentModeSnapshotInputResolverV1,
     FormulaInputResolverV1,
 )
 from .models import (
@@ -103,6 +107,7 @@ from .models import (
     ResolveRequiredInputsResponseV1,
     ResolutionExplanationV1,
     SnapshotViewV1,
+    ST12FEvidenceStateV1,
     StackResolutionV1,
     StackResultV1,
     SubmitCandidateProposalRequestV1,
@@ -111,6 +116,8 @@ from .models import (
     TypedValueRecordV1,
 )
 from .specification import (
+    CURRENT_FORMULA_REQUIREMENTS,
+    CURRENT_NAMED_OUTPUT_CONTRACTS,
     FROZEN_FORMULA_REQUIREMENTS,
     FROZEN_NAMED_OUTPUT_CONTRACTS,
 )
@@ -267,9 +274,9 @@ def _frozen_output(
     execution_context: ComputationExecutionContextV1,
     receipt_refs: tuple[str, ...],
 ) -> FrozenFormulaOutputV1:
-    implementation = IMPLEMENTATION_REGISTRY[math_spec_id]
-    requirement = FROZEN_FORMULA_REQUIREMENTS[math_spec_id]
-    schema = FROZEN_NAMED_OUTPUT_CONTRACTS[math_spec_id]
+    implementation = CURRENT_IMPLEMENTATION_REGISTRY[math_spec_id]
+    requirement = CURRENT_FORMULA_REQUIREMENTS[math_spec_id]
+    schema = CURRENT_NAMED_OUTPUT_CONTRACTS[math_spec_id]
     return FrozenFormulaOutputV1(
         math_spec_id=math_spec_id,
         implementation_id=implementation.contract.implementation_id,
@@ -440,7 +447,7 @@ def _admit_computation_plan(
     unknown = tuple(
         component_id
         for component_id in ordered_component_ids
-        if component_id not in IMPLEMENTATION_REGISTRY
+        if component_id not in CURRENT_IMPLEMENTATION_REGISTRY
     )
     if unknown:
         raise ContractValidationError(
@@ -496,7 +503,7 @@ def _admit_computation_plan(
     expected_pins = tuple(
         ImplementationVersionPinV1(
             math_spec_id=component_id,
-            implementation_id=IMPLEMENTATION_REGISTRY[
+            implementation_id=CURRENT_IMPLEMENTATION_REGISTRY[
                 component_id
             ].contract.implementation_id,
         )
@@ -565,10 +572,13 @@ def _submit_mode_snapshot_candidate(
     """Private D body under the existing admitted public operation."""
 
     resolver = self.mode_snapshot_input_resolver
-    if resolver is None:
+    if (
+        type(resolver) is not CurrentModeSnapshotInputResolverV1
+        or resolver.owner_registry is not self.owner_registry
+    ):
         raise OwnerAdapterError(
             ReasonCode.OWNER_DATA_MISSING,
-            "D requires an exact read-only current-owner input resolver",
+            "D requires the concrete current resolver bound to the service registry",
         )
     stage_values = {name: 0 for name in (
         "central_capability_admission_ns",
@@ -612,7 +622,26 @@ def _submit_mode_snapshot_candidate(
             evaluated_at=inputs.evaluated_at,
         )
     )
-    if not safety_blocked:
+    expected_evidence = pre_f_unavailable_reference(
+        observed_at=request.context.as_of,
+        valid_until=request.context.as_of + request.context.maximum_age,
+        causation_id=inputs.causation_id,
+        correlation_id=inputs.correlation_id,
+    )
+    if (
+        inputs.evidence_reference != expected_evidence
+        or inputs.evidence_reference.evidence_state
+        is not ST12FEvidenceStateV1.EVIDENCE_UNAVAILABLE_F_NOT_IMPLEMENTED
+    ):
+        raise OwnerAdapterError(
+            ReasonCode.EVIDENCE_UNAVAILABLE_F_NOT_IMPLEMENTED,
+            "current pre-F D service accepts only the canonical unavailable reference",
+        )
+    evidence_blocked = (
+        inputs.evidence_reference.evidence_state
+        is ST12FEvidenceStateV1.EVIDENCE_UNAVAILABLE_F_NOT_IMPLEMENTED
+    )
+    if not safety_blocked and not evidence_blocked:
         validation_started = local_duration_now_ns()
         _validate_d_proposed_specification(request, inputs)
         stage_values["request_validation_ns"] = (
@@ -635,12 +664,13 @@ def _submit_mode_snapshot_candidate(
             usage,
             self.resource_bounds_profile,
         )
+        if not resources_closed:
+            raise ContractValidationError(
+                ReasonCode.RESOURCE_BOUND_EXCEEDED,
+                "D proposal body exceeds the exact owner-supplied resource bounds",
+            )
         inputs = replace(
             inputs,
-            all_four_computability_dimensions_closed=(
-                inputs.all_four_computability_dimensions_closed
-                and resources_closed
-            ),
             latency_profile_present=self.latency_budget_profile is not None,
             latency_measurement_ref_or_explicit_absence=measurement_ref,
         )
@@ -648,9 +678,10 @@ def _submit_mode_snapshot_candidate(
             local_duration_now_ns() - binding_started
         )
     else:
-        # A current safety-owner block precedes all proposal/schema/body reads.
+        # Current safety and pre-F evidence blocks precede proposal/schema/body reads.
         inputs = replace(
             inputs,
+            latency_profile_present=self.latency_budget_profile is not None,
             latency_measurement_ref_or_explicit_absence=measurement_ref,
         )
 
@@ -667,34 +698,6 @@ def _submit_mode_snapshot_candidate(
         )
     stage_values["output_validation_ns"] = (
         local_duration_now_ns() - output_started
-    )
-
-    owner_started = local_duration_now_ns()
-    projection_adapter = self.mode_snapshot_owner_projection_adapter
-    if projection_adapter is not None and self.mode_snapshot_svc_view is not None:
-        projection_adapter.project_mode_snapshot(
-            mode_snapshot_result.mode_snapshot_decision,
-            inputs.evidence_reference,
-            inputs.kill_submit_state,
-            snapshot_version=inputs.candidate_version,
-            svc_view=self.mode_snapshot_svc_view,
-        )
-    stage_values["owner_projection_ns"] = (
-        local_duration_now_ns() - owner_started
-    )
-
-    receipt_started = local_duration_now_ns()
-    control_receipts = materialize_mode_snapshot_control_receipts(
-        mode_snapshot_result,
-        parameter_value_refs=inputs.parameter_value_refs,
-        effective_at=request.requested_at,
-        recorded_at=request.requested_at,
-        traceparent=request.traceparent,
-        tracestate=request.tracestate,
-    )
-    control_refs = tuple(row.record_id for row in control_receipts)
-    stage_values["receipt_materialization_ns"] = (
-        local_duration_now_ns() - receipt_started
     )
 
     def materialize_measurement(
@@ -741,16 +744,47 @@ def _submit_mode_snapshot_candidate(
     ):
         inputs = replace(inputs, latency_profile_present=False)
         mode_snapshot_result = evaluate_mode_snapshot_candidate(inputs)
-        control_receipts = materialize_mode_snapshot_control_receipts(
-            mode_snapshot_result,
-            parameter_value_refs=inputs.parameter_value_refs,
-            effective_at=request.requested_at,
-            recorded_at=request.requested_at,
-            traceparent=request.traceparent,
-            tracestate=request.tracestate,
-        )
-        control_refs = tuple(row.record_id for row in control_receipts)
         measurement = materialize_measurement(mode_snapshot_result)
+
+    owner_started = local_duration_now_ns()
+    from .protocols import ExistingOwnerProjectionAdapterV1
+
+    projection_adapter = ExistingOwnerProjectionAdapterV1(resolver.repo_root)
+    final_projection = projection_adapter.project_mode_snapshot(
+        mode_snapshot_result.mode_snapshot_decision,
+        inputs.evidence_reference,
+        inputs.kill_submit_state,
+        snapshot_version=inputs.candidate_version,
+        svc_view=projection_adapter.load_svc(),
+    )
+    mode_snapshot_result = replace(
+        mode_snapshot_result,
+        owner_projection_or_explicit_absence=final_projection,
+    )
+    stage_values["owner_projection_ns"] = (
+        local_duration_now_ns() - owner_started
+    )
+    measurement = materialize_measurement(mode_snapshot_result)
+
+    receipt_started = local_duration_now_ns()
+    control_receipts = materialize_mode_snapshot_control_receipts(
+        mode_snapshot_result,
+        parameter_value_refs=inputs.parameter_value_refs,
+        effective_at=request.requested_at,
+        recorded_at=request.requested_at,
+        traceparent=request.traceparent,
+        tracestate=request.tracestate,
+    )
+    control_refs = tuple(row.record_id for row in control_receipts)
+    if control_refs != mode_snapshot_result.control_receipt_refs:
+        raise ContractValidationError(
+            ReasonCode.CONTRACT_OR_TYPE_INVALID,
+            "D response control refs differ from the emitted receipt spine",
+        )
+    stage_values["receipt_materialization_ns"] = (
+        local_duration_now_ns() - receipt_started
+    )
+    measurement = materialize_measurement(mode_snapshot_result)
 
     decision = mode_snapshot_result.mode_snapshot_decision
     succeeded = decision.allow_candidate_state.value == "ELIGIBLE_NOT_ACTIVATED"
@@ -867,10 +901,10 @@ class QKUComputationControlPlaneV1:
             "component_id",
         }:
             candidate = fields[selectors[0]]
-            if isinstance(candidate, str) and candidate in IMPLEMENTATION_REGISTRY:
+            if isinstance(candidate, str) and candidate in CURRENT_IMPLEMENTATION_REGISTRY:
                 identity_ref = candidate
                 evidence_refs = (
-                    IMPLEMENTATION_REGISTRY[
+                    CURRENT_IMPLEMENTATION_REGISTRY[
                         candidate
                     ].contract.implementation_id,
                 )
@@ -1120,12 +1154,12 @@ class QKUComputationControlPlaneV1:
                 ordered_component_ids=(request.component_id,),
                 selected_stack_id=None,
             )
-            if request.component_id not in IMPLEMENTATION_REGISTRY:
+            if request.component_id not in CURRENT_IMPLEMENTATION_REGISTRY:
                 raise ContractValidationError(
                     ReasonCode.UNKNOWN_IMPLEMENTATION,
                     f"unknown registered component: {request.component_id}",
                 )
-            schema = FROZEN_NAMED_OUTPUT_CONTRACTS[request.component_id]
+            schema = CURRENT_NAMED_OUTPUT_CONTRACTS[request.component_id]
             if request.expected_output_schema_ref != schema.schema_id:
                 raise ContractValidationError(
                     ReasonCode.OUTPUT_SCHEMA_MISMATCH,
@@ -1137,8 +1171,14 @@ class QKUComputationControlPlaneV1:
                 owner_registry=self.owner_registry,
                 caller_assertions=_assertions(request.input_values),
             )
-            value = invoke_formula_v34(
-                request.component_id, resolved.authoritative_values
+            value = (
+                invoke_current_formula(
+                    request.component_id, resolved.authoritative_values
+                )
+                if request.component_id == "MATH-39"
+                else invoke_formula_v34(
+                    request.component_id, resolved.authoritative_values
+                )
             )
             output = _frozen_output(
                 request.component_id,

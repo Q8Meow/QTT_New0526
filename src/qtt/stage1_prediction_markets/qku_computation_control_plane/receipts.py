@@ -13,6 +13,7 @@ from .errors import ContractValidationError, ReasonCode
 from .models import (
     ComputationExecutionReceiptV1,
     ModeSnapshotCandidateProposalResultV1,
+    SnapshotCandidateStateV1,
 )
 
 
@@ -298,7 +299,7 @@ def materialize_mode_snapshot_control_receipts(
     traceparent: str,
     tracestate: str,
 ) -> tuple[EconomicReceiptEventSpineV1, ...]:
-    """Materialize two no-effect D payloads on the existing receipt spine."""
+    """Materialize only the D stages that were actually executed."""
 
     if type(result) is not ModeSnapshotCandidateProposalResultV1:
         raise ContractValidationError(
@@ -310,28 +311,35 @@ def materialize_mode_snapshot_control_receipts(
     proposal = result.snapshot_transition_proposal
     candidate = result.snapshot_candidate_or_explicit_absence
     candidate_ref = (
-        candidate.snapshot_candidate_id if candidate is not None else "EXPLICIT_ABSENCE"
+        candidate.snapshot_candidate_id
+        if candidate is not None
+        else proposal.target_candidate_ref
+        if decision.snapshot_candidate_state is not SnapshotCandidateStateV1.ABSENT
+        else "EXPLICIT_ABSENCE"
     )
     implementation_refs = tuple(
         f"{pin.math_spec_id}::{pin.implementation_id}"
         for pin in decision.implementation_pins
     )
-    control_classes = (
-        ModeSnapshotControlClassV1.MODE_SNAPSHOT_EVALUATION,
-        (
+    control_classes = [ModeSnapshotControlClassV1.MODE_SNAPSHOT_EVALUATION]
+    if decision.snapshot_candidate_state is not SnapshotCandidateStateV1.ABSENT:
+        control_classes.append(ModeSnapshotControlClassV1.SNAPSHOT_CANDIDATE_BUILD)
+    if decision.snapshot_candidate_state in {
+        SnapshotCandidateStateV1.VALIDATED_NO_EFFECT,
+        SnapshotCandidateStateV1.REJECTED,
+    }:
+        control_classes.append(
             ModeSnapshotControlClassV1.SNAPSHOT_CANDIDATE_VALIDATION
-            if candidate is not None
-            else ModeSnapshotControlClassV1.SNAPSHOT_CANDIDATE_BUILD
-        ),
-    )
-    if len(result.control_receipt_refs) != len(control_classes):
+        )
+    control_class_tuple = tuple(control_classes)
+    if len(result.control_receipt_refs) != len(control_class_tuple):
         raise ContractValidationError(
             ReasonCode.CONTRACT_OR_TYPE_INVALID,
             "D result/control receipt cardinality differs",
         )
     rows: list[EconomicReceiptEventSpineV1] = []
     for index, (receipt_ref, control_class) in enumerate(
-        zip(result.control_receipt_refs, control_classes, strict=True)
+        zip(result.control_receipt_refs, control_class_tuple, strict=True)
     ):
         payload = ModeSnapshotControlReceiptRecordV1(
             control_receipt_id=receipt_ref,

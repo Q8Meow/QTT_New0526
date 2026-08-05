@@ -3,16 +3,20 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import timedelta
+from datetime import datetime, timedelta
 from decimal import Decimal
+from enum import StrEnum
 import math
+from pathlib import Path
 from types import MappingProxyType
 from typing import Mapping
 
 from .bindings import (
+    CURRENT_FORMULA_INPUT_AUTHORITY_BY_MATH_ID,
     FORMULA_INPUT_AUTHORITY_BY_MATH_ID,
     FormulaInputAdmissionClassV1,
     FormulaInputAuthorityBindingV1,
+    ST12DMath39RawInputBindingV1,
 )
 from .context import (
     exact_decimal,
@@ -37,7 +41,14 @@ from .point_in_time import (
     PointInTimeReceiptV1,
     classify_point_in_time_semantics,
 )
-from .models import ComputationExecutionContextV1, ComputationScopeV1
+from .models import (
+    ComputationExecutionContextV1,
+    ComputationScopeV1,
+    ImplementationVersionPinV1,
+    OwnerActionConfirmationReceiptV1,
+    ReadOnlyKillSubmitStateV1,
+    ST12FEvidenceReferenceV1,
+)
 from .specification import FROZEN_FORMULA_REQUIREMENTS
 
 
@@ -185,6 +196,164 @@ class FormulaInputResolutionV1:
     @property
     def context_id(self) -> str:
         return self.execution_context.context_id
+
+
+class Math39BookEventKindV1(StrEnum):
+    DISPLAYED_BEFORE_ORDER = "DISPLAYED_BEFORE_ORDER"
+    PRIOR_ADDITION = "PRIOR_ADDITION"
+    PRIOR_CANCELLATION = "PRIOR_CANCELLATION"
+    TRADE_AHEAD = "TRADE_AHEAD"
+
+
+def _math39_utc(value: object, name: str) -> datetime:
+    if (
+        not isinstance(value, datetime)
+        or value.tzinfo is None
+        or value.utcoffset() is None
+        or value.utcoffset().total_seconds() != 0
+    ):
+        raise InputAuthorityError(
+            ReasonCode.POINT_IN_TIME_VIOLATION,
+            f"MATH-39 {name} must be an aware UTC timestamp",
+        )
+    return value
+
+
+def _math39_decimal(value: object, name: str, *, nonnegative: bool) -> Decimal:
+    if (
+        not isinstance(value, Decimal)
+        or isinstance(value, bool)
+        or not value.is_finite()
+        or nonnegative
+        and value < 0
+    ):
+        raise InputAuthorityError(
+            ReasonCode.INPUT_VALUE_CONFLICT,
+            f"MATH-39 {name} must be an exact finite"
+            + (" nonnegative" if nonnegative else "")
+            + " Decimal",
+        )
+    return value
+
+
+@dataclass(frozen=True, slots=True)
+class Math39OrderAcknowledgementV1:
+    order_id: str
+    venue_id: str
+    instrument_id: str
+    side: str
+    price: Decimal
+    acknowledged_at: datetime
+    available_at: datetime
+    matching_priority: str
+    venue_evidence_ref: str
+    unit: str
+    basis: str
+    producer_receipt_ref: str
+
+    def __post_init__(self) -> None:
+        for name in (
+            "order_id",
+            "venue_id",
+            "instrument_id",
+            "side",
+            "matching_priority",
+            "venue_evidence_ref",
+            "unit",
+            "basis",
+            "producer_receipt_ref",
+        ):
+            value = getattr(self, name)
+            if not isinstance(value, str) or not value or value != value.strip():
+                raise InputAuthorityError(
+                    ReasonCode.INPUT_PACKET_MISMATCH,
+                    f"MATH-39 acknowledgement {name} must be canonical text",
+                )
+        _math39_decimal(self.price, "acknowledgement price", nonnegative=True)
+        acknowledged = _math39_utc(self.acknowledged_at, "acknowledged_at")
+        available = _math39_utc(self.available_at, "ack available_at")
+        if acknowledged > available:
+            raise InputAuthorityError(
+                ReasonCode.POINT_IN_TIME_VIOLATION,
+                "MATH-39 acknowledgement cannot be available before its event time",
+            )
+        if self.matching_priority != "PRICE_TIME_FIFO":
+            raise InputAuthorityError(
+                ReasonCode.MATCHING_PRIORITY_UNKNOWN,
+                "MATH-39 acknowledgement lacks exact matching-priority evidence",
+            )
+        if self.unit != "units" or self.basis != "ACKNOWLEDGED_INSERTION_POINT":
+            raise InputAuthorityError(
+                ReasonCode.UNIT_BASIS_OR_PRECISION_INVALID,
+                "MATH-39 acknowledgement lacks exact unit/basis evidence",
+            )
+
+
+@dataclass(frozen=True, slots=True)
+class Math39SequencedBookEventV1:
+    event_id: str
+    sequence: int
+    event_kind: Math39BookEventKindV1
+    venue_id: str
+    instrument_id: str
+    side: str
+    price: Decimal
+    quantity: Decimal
+    event_time: datetime
+    available_at: datetime
+    priority_order_id: str
+    venue_evidence_ref: str
+    unit: str
+    basis: str
+    producer_receipt_ref: str
+    ahead_of_order: bool = True
+
+    def __post_init__(self) -> None:
+        for name in (
+            "event_id",
+            "venue_id",
+            "instrument_id",
+            "side",
+            "priority_order_id",
+            "venue_evidence_ref",
+            "unit",
+            "basis",
+            "producer_receipt_ref",
+        ):
+            value = getattr(self, name)
+            if not isinstance(value, str) or not value or value != value.strip():
+                raise InputAuthorityError(
+                    ReasonCode.INPUT_PACKET_MISMATCH,
+                    f"MATH-39 book event {name} must be canonical text",
+                )
+        if isinstance(self.sequence, bool) or not isinstance(self.sequence, int):
+            raise InputAuthorityError(
+                ReasonCode.SEQUENCE_GAP,
+                "MATH-39 sequence must be an exact integer",
+            )
+        if type(self.event_kind) is not Math39BookEventKindV1:
+            raise InputAuthorityError(
+                ReasonCode.INPUT_PACKET_MISMATCH,
+                "MATH-39 event kind must be the exact finite enum",
+            )
+        _math39_decimal(self.price, "event price", nonnegative=True)
+        _math39_decimal(self.quantity, "event quantity", nonnegative=True)
+        event_time = _math39_utc(self.event_time, "event_time")
+        available = _math39_utc(self.available_at, "event available_at")
+        if event_time > available:
+            raise InputAuthorityError(
+                ReasonCode.POINT_IN_TIME_VIOLATION,
+                "MATH-39 event cannot be available before occurrence",
+            )
+        if (
+            self.unit != "units"
+            or self.basis != "ACKNOWLEDGED_INSERTION_POINT"
+            or self.ahead_of_order is not True
+        ):
+            raise InputAuthorityError(
+                ReasonCode.UNIT_BASIS_OR_PRECISION_INVALID,
+                "MATH-39 events require exact ahead-of-order unit/basis custody",
+            )
 
 
 @dataclass(frozen=True, slots=True)
@@ -863,6 +1032,229 @@ def _admit_runtime_parameter_binding(binding: object) -> None:
         )
 
 
+def _resolve_math39_raw_packet(
+    binding: ST12DMath39RawInputBindingV1,
+    *,
+    context: ComputationExecutionContextV1,
+    owner_registry: CanonicalOwnerPacketRegistryV1,
+) -> tuple[OwnerValuePacketV1, PointInTimeReceiptV1, FreshnessReceiptV1]:
+    packet = owner_registry.packet_for(context=context, binding_id=binding.binding_id)
+    if packet.owner_id != binding.accepted_upstream_owner_id:
+        raise InputAuthorityError(
+            ReasonCode.INPUT_OWNER_MISMATCH,
+            f"{binding.binding_id} packet owner is not canonical",
+        )
+    if (
+        packet.packet_type != binding.accepted_packet_or_snapshot_type
+        or packet.schema_id != binding.schema_id
+        or packet.schema_version != binding.schema_version
+        or packet.producer_receipt_type != binding.producer_receipt_type
+        or packet.source_state_and_claim_lineage
+        != binding.source_state_and_claim_lineage
+    ):
+        raise InputAuthorityError(
+            ReasonCode.INPUT_PACKET_MISMATCH,
+            f"{binding.binding_id} packet/schema/lineage identity differs",
+        )
+    if packet.source_conflict:
+        raise InputAuthorityError(
+            ReasonCode.SOURCE_CONFLICT,
+            f"{binding.binding_id} has unresolved source conflict",
+        )
+    pit = PointInTimePolicyV1.validate(
+        receipt_id=f"PIT::{packet.packet_id}::{binding.binding_id}",
+        field_class=PointInTimeFieldClassV1.OBSERVATION,
+        clocks=packet.clocks,
+        context=context,
+        prior_revision_available_time=packet.prior_revision_available_time,
+    )
+    is_events = binding.input_name == "sequenced_book_events"
+    freshness = FreshnessResolverV1.validate(
+        receipt_id=f"FRESHNESS::{packet.packet_id}::{binding.binding_id}",
+        clocks=packet.clocks,
+        context=context,
+        packet_source_epoch_id=packet.source_epoch_id,
+        policy=FreshnessPolicyV1(
+            ttl=packet.ttl,
+            require_provider_sequence=is_events,
+            require_revision=not is_events,
+        ),
+        provider_sequence=packet.provider_sequence,
+        revision=packet.revision,
+    )
+    return packet, pit, freshness
+
+
+def resolve_math39_formula_inputs(
+    *,
+    context: ComputationExecutionContextV1,
+    owner_registry: CanonicalOwnerPacketRegistryV1,
+    caller_assertions: Mapping[str, object] | None = None,
+) -> FormulaInputResolutionV1:
+    """Resolve two raw owner packets into the four immutable Decimal terms."""
+
+    context = _validate_formula_input_context(context)
+    bindings = CURRENT_FORMULA_INPUT_AUTHORITY_BY_MATH_ID["MATH-39"]
+    if (
+        len(bindings) != 2
+        or any(type(row) is not ST12DMath39RawInputBindingV1 for row in bindings)
+    ):
+        raise InputAuthorityError(
+            ReasonCode.INPUT_SCHEMA_MISMATCH,
+            "MATH-39 requires exactly two additive raw bindings",
+        )
+    packet_rows = {
+        binding.input_name: _resolve_math39_raw_packet(
+            binding,
+            context=context,
+            owner_registry=owner_registry,
+        )
+        for binding in bindings
+        if isinstance(binding, ST12DMath39RawInputBindingV1)
+    }
+    events_packet, events_pit, events_freshness = packet_rows[
+        "sequenced_book_events"
+    ]
+    ack_packet, ack_pit, ack_freshness = packet_rows["order_ack"]
+    events = _extract(events_packet.values, "book.sequenced_book_events")
+    acknowledgement = _extract(ack_packet.values, "execution.order_ack")
+    if (
+        not isinstance(events, tuple)
+        or not events
+        or any(type(row) is not Math39SequencedBookEventV1 for row in events)
+        or type(acknowledgement) is not Math39OrderAcknowledgementV1
+    ):
+        raise InputAuthorityError(
+            ReasonCode.INPUT_SCHEMA_MISMATCH,
+            "MATH-39 raw packets require exact immutable typed event/ack records",
+        )
+    ack = acknowledgement
+    if (
+        ack.venue_id != context.scope.venue_scope_id
+        or ack.instrument_id != context.scope.instrument_or_contract_scope_id
+        or ack.producer_receipt_ref != ack_packet.producer_receipt_id
+    ):
+        raise InputAuthorityError(
+            ReasonCode.INPUT_SCOPE_MISMATCH,
+            "MATH-39 acknowledgement identity scope differs",
+        )
+    if ack.acknowledged_at > context.as_of or ack.available_at > context.as_of:
+        raise InputAuthorityError(
+            ReasonCode.POINT_IN_TIME_VIOLATION,
+            "MATH-39 acknowledgement is not available at the context as-of",
+        )
+    sequences = tuple(row.sequence for row in events)
+    if sequences != tuple(range(sequences[0], sequences[0] + len(sequences))):
+        raise InputAuthorityError(
+            ReasonCode.SEQUENCE_GAP,
+            "MATH-39 event stream contains a sequence gap or reorder",
+        )
+    if sum(
+        row.event_kind is Math39BookEventKindV1.DISPLAYED_BEFORE_ORDER
+        for row in events
+    ) != 1:
+        raise InputAuthorityError(
+            ReasonCode.INPUT_VALUE_CONFLICT,
+            "MATH-39 requires exactly one displayed insertion-point quantity",
+        )
+    for row in events:
+        if (
+            row.venue_id != ack.venue_id
+            or row.instrument_id != ack.instrument_id
+            or row.side != ack.side
+            or row.price != ack.price
+            or row.priority_order_id != ack.order_id
+            or row.venue_evidence_ref != ack.venue_evidence_ref
+            or row.producer_receipt_ref != events_packet.producer_receipt_id
+        ):
+            raise InputAuthorityError(
+                ReasonCode.INPUT_SCOPE_MISMATCH,
+                "MATH-39 event identity or venue-evidence custody differs",
+            )
+        if (
+            row.event_time > context.as_of
+            or row.available_at > context.as_of
+            or row.event_kind is Math39BookEventKindV1.DISPLAYED_BEFORE_ORDER
+            and row.event_time > ack.acknowledged_at
+            or row.event_kind is not Math39BookEventKindV1.DISPLAYED_BEFORE_ORDER
+            and row.event_time < ack.acknowledged_at
+        ):
+            raise InputAuthorityError(
+                ReasonCode.POINT_IN_TIME_VIOLATION,
+                "MATH-39 event temporal custody differs from acknowledgement",
+            )
+    by_kind = {
+        kind: sum(
+            (row.quantity for row in events if row.event_kind is kind),
+            start=Decimal(0),
+        )
+        for kind in Math39BookEventKindV1
+    }
+    values = MappingProxyType(
+        {
+            "displayed_quantity_before_order": by_kind[
+                Math39BookEventKindV1.DISPLAYED_BEFORE_ORDER
+            ],
+            "net_prior_additions": by_kind[Math39BookEventKindV1.PRIOR_ADDITION],
+            "observed_prior_cancellations": by_kind[
+                Math39BookEventKindV1.PRIOR_CANCELLATION
+            ],
+            "observed_trades_ahead": by_kind[Math39BookEventKindV1.TRADE_AHEAD],
+        }
+    )
+    assertions = caller_assertions or MappingProxyType({})
+    if set(assertions) - set(values):
+        raise InputAuthorityError(
+            ReasonCode.INPUT_VALUE_CONFLICT,
+            "MATH-39 caller assertions contain undeclared derived terms",
+        )
+    if any(
+        name in assertions and not _canonical_equal(value, assertions[name])
+        for name, value in values.items()
+    ):
+        raise InputAuthorityError(
+            ReasonCode.INPUT_VALUE_CONFLICT,
+            "MATH-39 caller assertion differs from raw owner reconstruction",
+        )
+    resolved = tuple(
+        ResolvedFormulaInputV1(
+            binding_id=f"DERIVED::MATH-39::{name}",
+            math_spec_id="MATH-39",
+            input_name=name,
+            value=value,
+            owner_id="QKUComputationControlPlaneV1",
+            packet_id=events_packet.packet_id,
+            field_path=f"derived.{name}",
+            point_in_time_receipt=events_pit,
+            freshness_receipt=events_freshness,
+            producer_receipt_id=events_packet.producer_receipt_id,
+        )
+        for name, value in values.items()
+    )
+    receipt_refs = tuple(
+        dict.fromkeys(
+            (
+                events_packet.producer_receipt_id,
+                events_pit.receipt_id,
+                events_freshness.receipt_id,
+                ack_packet.producer_receipt_id,
+                ack_pit.receipt_id,
+                ack_freshness.receipt_id,
+                *(row.producer_receipt_ref for row in events),
+                ack.producer_receipt_ref,
+            )
+        )
+    )
+    return FormulaInputResolutionV1(
+        math_spec_id="MATH-39",
+        execution_context=context,
+        inputs=resolved,
+        authoritative_values=values,
+        packet_refs=(events_packet.packet_id, ack_packet.packet_id),
+        receipt_refs=receipt_refs,
+    )
+
+
 class FormulaInputResolverV1:
     """Resolve every value from the package-named owner, never from the request."""
 
@@ -874,6 +1266,12 @@ class FormulaInputResolverV1:
         owner_registry: CanonicalOwnerPacketRegistryV1,
         caller_assertions: Mapping[str, object] | None = None,
     ) -> FormulaInputResolutionV1:
+        if math_spec_id == "MATH-39":
+            return resolve_math39_formula_inputs(
+                context=context,
+                owner_registry=owner_registry,
+                caller_assertions=caller_assertions,
+            )
         context = _validate_formula_input_context(context)
         try:
             bindings = FORMULA_INPUT_AUTHORITY_BY_MATH_ID[math_spec_id]
@@ -1059,4 +1457,306 @@ class RuntimeParameterValueResolverV1:
                 pit.receipt_id,
                 freshness.receipt_id,
             ),
+        )
+
+
+ST12D_SAFETY_BINDING_ID = "ST12D::SAFETY::KILL_SUBMIT"
+ST12D_OWNER_ACTION_BINDING_ID = "ST12D::OWNER_ACTION::CONFIRMATION"
+
+
+def _exact_d_owner_payload(
+    *,
+    registry: CanonicalOwnerPacketRegistryV1,
+    context: ComputationExecutionContextV1,
+    binding_id: str,
+    owner_id: str,
+    packet_type: str,
+    schema_id: str,
+    field_path: str,
+    payload_type: type[object],
+) -> object:
+    packet = registry.packet_for(context=context, binding_id=binding_id)
+    if (
+        packet.owner_id != owner_id
+        or packet.packet_type != packet_type
+        or packet.schema_id != schema_id
+        or packet.schema_version != "1.0.0"
+        or packet.source_conflict
+    ):
+        raise InputAuthorityError(
+            ReasonCode.INPUT_PACKET_MISMATCH,
+            f"{binding_id} canonical owner packet identity differs",
+        )
+    pit = PointInTimePolicyV1.validate(
+        receipt_id=f"PIT::{packet.packet_id}::{binding_id}",
+        field_class=PointInTimeFieldClassV1.OBSERVATION,
+        clocks=packet.clocks,
+        context=context,
+        prior_revision_available_time=packet.prior_revision_available_time,
+    )
+    FreshnessResolverV1.validate(
+        receipt_id=f"FRESHNESS::{packet.packet_id}::{binding_id}",
+        clocks=packet.clocks,
+        context=context,
+        packet_source_epoch_id=packet.source_epoch_id,
+        policy=FreshnessPolicyV1(ttl=packet.ttl),
+        provider_sequence=packet.provider_sequence,
+        revision=packet.revision,
+    )
+    payload = _extract(packet.values, field_path)
+    if type(payload) is not payload_type:
+        raise InputAuthorityError(
+            ReasonCode.INPUT_SCHEMA_MISMATCH,
+            f"{binding_id} payload is not {payload_type.__name__}",
+        )
+    if not pit.receipt_id:
+        raise InputAuthorityError(
+            ReasonCode.POINT_IN_TIME_VIOLATION,
+            f"{binding_id} produced no point-in-time receipt",
+        )
+    return payload
+
+
+class CurrentSafetyStateAdapterV1:
+    """Exact read-only adapter for the existing safety owner interface."""
+
+    def __init__(self, registry: CanonicalOwnerPacketRegistryV1) -> None:
+        if not isinstance(registry, CanonicalOwnerPacketRegistryV1):
+            raise InputAuthorityError(
+                ReasonCode.INPUT_OWNER_MISSING,
+                "current safety adapter requires the canonical packet registry",
+            )
+        self._registry = registry
+
+    def read_kill_submit_state(
+        self, context: ComputationExecutionContextV1
+    ) -> ReadOnlyKillSubmitStateV1:
+        payload = _exact_d_owner_payload(
+            registry=self._registry,
+            context=context,
+            binding_id=ST12D_SAFETY_BINDING_ID,
+            owner_id="SafetyStateProjectionProtocolV1",
+            packet_type="ReadOnlyKillSubmitStateV1",
+            schema_id="ReadOnlyKillSubmitStateV1::SCHEMA",
+            field_path="safety.kill_submit_state",
+            payload_type=ReadOnlyKillSubmitStateV1,
+        )
+        assert isinstance(payload, ReadOnlyKillSubmitStateV1)
+        if payload.scope_ref != context.context_id:
+            raise InputAuthorityError(
+                ReasonCode.INPUT_SCOPE_MISMATCH,
+                "safety state scope differs from the exact execution context",
+            )
+        return payload
+
+
+class CurrentPreFEvidenceAdapterV1:
+    """Truthful current evidence adapter: future F states remain interface-only."""
+
+    @staticmethod
+    def read_evidence_reference(
+        context: ComputationExecutionContextV1,
+        *,
+        causation_id: str,
+        correlation_id: str,
+    ) -> ST12FEvidenceReferenceV1:
+        from .mode_snapshot_policy import pre_f_unavailable_reference
+
+        return pre_f_unavailable_reference(
+            observed_at=context.as_of,
+            valid_until=context.as_of + context.maximum_age,
+            causation_id=causation_id,
+            correlation_id=correlation_id,
+        )
+
+
+class CurrentOwnerActionConfirmationAdapterV1:
+    """Exact read-only adapter for current owner-action confirmation receipts."""
+
+    def __init__(self, registry: CanonicalOwnerPacketRegistryV1) -> None:
+        if not isinstance(registry, CanonicalOwnerPacketRegistryV1):
+            raise InputAuthorityError(
+                ReasonCode.INPUT_OWNER_MISSING,
+                "owner-action adapter requires the canonical packet registry",
+            )
+        self._registry = registry
+
+    def read_owner_action_confirmation(
+        self, context: ComputationExecutionContextV1
+    ) -> OwnerActionConfirmationReceiptV1:
+        payload = _exact_d_owner_payload(
+            registry=self._registry,
+            context=context,
+            binding_id=ST12D_OWNER_ACTION_BINDING_ID,
+            owner_id="OwnerActionSemanticProtocolV1",
+            packet_type="OwnerActionConfirmationReceiptV1",
+            schema_id="OwnerActionConfirmationReceiptV1::SCHEMA",
+            field_path="owner_action.confirmation",
+            payload_type=OwnerActionConfirmationReceiptV1,
+        )
+        assert isinstance(payload, OwnerActionConfirmationReceiptV1)
+        return payload
+
+
+class CurrentModeSnapshotInputResolverV1:
+    """Concrete D resolver composed from separate exact current-owner adapters."""
+
+    def __init__(
+        self,
+        *,
+        repo_root: str | Path,
+        owner_registry: CanonicalOwnerPacketRegistryV1,
+    ) -> None:
+        self._repo_root = Path(repo_root).resolve()
+        self._owner_registry = owner_registry
+        self._safety = CurrentSafetyStateAdapterV1(owner_registry)
+        self._evidence = CurrentPreFEvidenceAdapterV1()
+        self._owner_action = CurrentOwnerActionConfirmationAdapterV1(owner_registry)
+
+    @property
+    def owner_registry(self) -> CanonicalOwnerPacketRegistryV1:
+        return self._owner_registry
+
+    @property
+    def repo_root(self) -> Path:
+        return self._repo_root
+
+    def resolve_mode_snapshot_inputs(
+        self,
+        request: object,
+        capability_decision: object,
+    ) -> object:
+        from .agent_policy import AgentCapabilityDecisionV1
+        from .implementation_registry import ST12D_MATH_IMPLEMENTATION_REGISTRY
+        from .mode_snapshot_policy import ModeSnapshotCandidateInputsV1
+        from .parameter_policy import (
+            ST12D_SNAPSHOT_PARAMETER_BINDING_IDS,
+            resolve_st12d_value_policy_refs,
+        )
+        from .protocols import ExistingOwnerProjectionAdapterV1
+        from .stack_resolver import preflight_snapshot_computation_bundle
+
+        context = getattr(request, "context", None)
+        if (
+            type(capability_decision) is not AgentCapabilityDecisionV1
+            or not isinstance(context, ComputationExecutionContextV1)
+            or getattr(request, "request_id", None) != capability_decision.request_id
+            or getattr(request, "principal_id", None)
+            != capability_decision.principal_id
+        ):
+            raise InputAuthorityError(
+                ReasonCode.INPUT_SCOPE_MISMATCH,
+                "current D resolution requires the exact admitted E identity/context",
+            )
+        if len(capability_decision.st12c_causation_correlation_refs) < 2:
+            raise InputAuthorityError(
+                ReasonCode.INPUT_PACKET_MISMATCH,
+                "admitted E decision lacks causation/correlation lineage",
+            )
+        causation_id, correlation_id = (
+            capability_decision.st12c_causation_correlation_refs[:2]
+        )
+        safety = self._safety.read_kill_submit_state(context)
+        evidence = self._evidence.read_evidence_reference(
+            context,
+            causation_id=causation_id,
+            correlation_id=correlation_id,
+        )
+        owner_action = self._owner_action.read_owner_action_confirmation(context)
+        projection_adapter = ExistingOwnerProjectionAdapterV1(self._repo_root)
+        readiness = projection_adapter.load_readiness()
+        pretrade = projection_adapter.load_pretrade()
+        svc = projection_adapter.load_svc()
+        agent_orch = projection_adapter.load_agent_orch()
+        policy_refs = resolve_st12d_value_policy_refs(
+            ST12D_SNAPSHOT_PARAMETER_BINDING_IDS
+        )
+        parameter_value_refs = tuple(policy_refs[parameter_id] for parameter_id in policy_refs)
+        parameter_policy_snapshot_ref = (
+            f"ComputationParameterPolicyV1::{context.parameter_policy_version}"
+        )
+        source_epoch_refs = tuple(
+            dict.fromkeys(
+                (
+                    context.source_epoch_id,
+                    *(packet.source_epoch_id for packet in self._owner_registry.packets),
+                )
+            )
+        )
+        bundle = preflight_snapshot_computation_bundle(
+            context=context,
+            owner_registry=self._owner_registry,
+            parameter_policy_snapshot_ref=parameter_policy_snapshot_ref,
+            parameter_value_refs=parameter_value_refs,
+            source_epoch_refs=source_epoch_refs,
+        )
+        implementation_pins = tuple(
+            ImplementationVersionPinV1(
+                math_spec_id=math_id,
+                implementation_id=(
+                    ST12D_MATH_IMPLEMENTATION_REGISTRY[
+                        math_id
+                    ].contract.implementation_id
+                ),
+            )
+            for math_id in ST12D_MATH_IMPLEMENTATION_REGISTRY
+        )
+        if context.implementation_versions != implementation_pins:
+            raise InputAuthorityError(
+                ReasonCode.INPUT_PACKET_MISMATCH,
+                "D execution context implementation pins differ from the selected bundle",
+            )
+        receipt_lineage_refs = tuple(
+            dict.fromkeys(
+                (
+                    capability_decision.agent_orch_receipt_ref,
+                    safety.state_ref,
+                    owner_action.receipt_ref,
+                    bundle.preflight_receipt_ref,
+                    *bundle.receipt_refs,
+                    f"READINESS1::{readiness.source_version}",
+                    f"PRETRADE1::{pretrade.source_version}",
+                    f"SVC1::{svc.source_version}",
+                    f"AGENT-ORCH1::{agent_orch.source_version}",
+                )
+            )
+        )
+        expires_at = min(
+            context.as_of + context.maximum_age,
+            safety.valid_until,
+            owner_action.valid_until,
+        )
+        return ModeSnapshotCandidateInputsV1(
+            request_id=capability_decision.request_id,
+            principal_id=capability_decision.principal_id,
+            task_id=capability_decision.task_id,
+            current_agent_id=capability_decision.current_agent_id,
+            capability_decision_ref=capability_decision.decision_id,
+            computation_bundle_ref=bundle.bundle_ref,
+            context_ref=context.context_id,
+            formula_spec_refs=tuple(ST12D_MATH_IMPLEMENTATION_REGISTRY),
+            implementation_version_pins=implementation_pins,
+            binding_profile_ref=(
+                f"ComputationBindingProfileV1::{context.binding_profile_version}"
+            ),
+            parameter_policy_snapshot_ref=parameter_policy_snapshot_ref,
+            parameter_value_refs=parameter_value_refs,
+            source_epoch_refs=source_epoch_refs,
+            receipt_lineage_refs=receipt_lineage_refs,
+            readiness_state_ref=f"READINESS1::{readiness.source_version}",
+            pretrade_state_ref=f"PRETRADE1::{pretrade.source_version}",
+            owner_action_policy_ref=owner_action.owner_action_policy_ref,
+            current_mode=context.scope.mode_context_id,
+            requested_mode="HOTPATH_CANDIDATE_ONLY",
+            expected_owner_state_ref=f"SVC1::{svc.source_version}",
+            candidate_version=context.input_version,
+            created_at=context.as_of,
+            evaluated_at=context.as_of,
+            expires_at=expires_at,
+            causation_id=causation_id,
+            correlation_id=correlation_id,
+            evidence_reference=evidence,
+            kill_submit_state=safety,
+            computation_bundle_closure=bundle,
+            owner_action_confirmation=owner_action,
         )

@@ -5241,6 +5241,54 @@ ST12D_CUMULATIVE_IMPLEMENTATION_REGISTRY: Mapping[
 ] = MappingProxyType(
     {**ST12C_CUMULATIVE_IMPLEMENTATION_REGISTRY, **TRANCHE_D_NEW_IMPLEMENTATION_REGISTRY}
 )
+CURRENT_IMPLEMENTATION_REGISTRY: Mapping[str, MathImplementationRecordV1] = (
+    MappingProxyType({**IMPLEMENTATION_REGISTRY, **TRANCHE_D_NEW_IMPLEMENTATION_REGISTRY})
+)
+
+
+def get_current_math_implementation(
+    math_spec_id: str,
+) -> MathImplementationRecordV1:
+    try:
+        return CURRENT_IMPLEMENTATION_REGISTRY[math_spec_id]
+    except KeyError as exc:
+        raise ContractValidationError(
+            ReasonCode.UNKNOWN_IMPLEMENTATION,
+            f"unknown current math identity: {math_spec_id}",
+        ) from exc
+
+
+def invoke_current_formula(
+    math_spec_id: str,
+    inputs: Mapping[str, object],
+) -> object:
+    """Central invocation boundary for v3.4 plus the additive MATH-39 route."""
+
+    if math_spec_id != "MATH-39":
+        return invoke_formula_v34(math_spec_id, inputs)
+    if not isinstance(inputs, Mapping):
+        raise ContractValidationError(
+            ReasonCode.INVALID_CONTRACT,
+            "MATH-39 inputs must be an exact named mapping",
+        )
+    declared = (
+        "displayed_quantity_before_order",
+        "net_prior_additions",
+        "observed_prior_cancellations",
+        "observed_trades_ahead",
+    )
+    if tuple(inputs) != declared:
+        raise ContractValidationError(
+            ReasonCode.INVALID_CONTRACT,
+            "MATH-39 derived input identity and order differ from the current contract",
+        )
+    value = _ST12D_MATH_39_RECORD.callable(
+        *(inputs[name] for name in declared)
+    )
+    from .specification import validate_current_formula_output
+
+    validate_current_formula_output(math_spec_id, value)
+    return value
 
 
 def get_tranche_d_math_implementation(

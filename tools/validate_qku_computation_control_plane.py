@@ -22,6 +22,7 @@ DOMAIN_MATH_IDS = {
     "accounting": tuple(f"MATH-{value:02d}" for value in range(26, 37)),
     "agent": (),
     "architecture": tuple(f"MATH-{value:02d}" for value in range(1, 16)),
+    "d": (),
     "execution": ("MATH-37", "MATH-38"),
     "llm": (),
     "latency": (),

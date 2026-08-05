@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import base64
+from decimal import Decimal
 import json
 from types import MappingProxyType
 from typing import Mapping
@@ -1808,10 +1809,44 @@ _ST12D_MATH_39_VECTOR_ROW = {
     "comparison_policy": "EXACT_DECIMAL",
     "expected": {"queue_ahead": "80"},
     "inputs": {
-        "displayed_quantity_before_order": "100",
-        "net_prior_additions": "20",
-        "observed_prior_cancellations": "10",
-        "observed_trades_ahead": "30",
+        "order_ack": {
+            "order_id": "ORDER::MATH39::1",
+            "venue_id": "VENUE::PUBLIC::1",
+            "instrument_id": "INSTRUMENT::MATH39::1",
+            "side": "BUY",
+            "price": "0.42",
+            "acknowledged_at": "2026-08-04T12:00:00+00:00",
+            "matching_priority": "PRICE_TIME_FIFO",
+            "venue_evidence_ref": "VENUE-EVIDENCE::MATH39::1",
+            "unit": "units",
+            "basis": "ACKNOWLEDGED_INSERTION_POINT",
+        },
+        "sequenced_book_events": [
+            {
+                "event_id": "EVENT::MATH39::100",
+                "sequence": 100,
+                "event_kind": "DISPLAYED_BEFORE_ORDER",
+                "quantity": "100",
+            },
+            {
+                "event_id": "EVENT::MATH39::101",
+                "sequence": 101,
+                "event_kind": "PRIOR_ADDITION",
+                "quantity": "20",
+            },
+            {
+                "event_id": "EVENT::MATH39::102",
+                "sequence": 102,
+                "event_kind": "PRIOR_CANCELLATION",
+                "quantity": "10",
+            },
+            {
+                "event_id": "EVENT::MATH39::103",
+                "sequence": 103,
+                "event_kind": "TRADE_AHEAD",
+                "quantity": "30",
+            },
+        ],
     },
     "math_spec_ref": "MATH-39",
     "oracle_ref": "ORACLE::MATH-39",
@@ -1820,6 +1855,78 @@ _ST12D_MATH_39_VECTOR_ROW = {
     "vector_id": "GOLDEN::MATH-39",
     "vector_kind": "NUMERIC_GOLDEN",
 }
+
+
+def independently_reconstruct_math_39_from_raw_records(
+    raw_inputs: Mapping[str, object],
+) -> Decimal:
+    """Independent raw-record oracle; it imports no production resolver/callable."""
+
+    if tuple(raw_inputs) != ("order_ack", "sequenced_book_events"):
+        raise ContractValidationError(
+            ReasonCode.ORACLE_NOT_INDEPENDENT,
+            "MATH-39 oracle requires the exact two raw owner records",
+        )
+    ack = raw_inputs["order_ack"]
+    events = raw_inputs["sequenced_book_events"]
+    if (
+        not isinstance(ack, Mapping)
+        or ack.get("matching_priority") != "PRICE_TIME_FIFO"
+        or ack.get("unit") != "units"
+        or ack.get("basis") != "ACKNOWLEDGED_INSERTION_POINT"
+        or not ack.get("venue_evidence_ref")
+        or not isinstance(events, list | tuple)
+        or not events
+    ):
+        raise ContractValidationError(
+            ReasonCode.ORACLE_NOT_INDEPENDENT,
+            "MATH-39 oracle raw acknowledgement or event stream is invalid",
+        )
+    sequences = tuple(
+        row.get("sequence") if isinstance(row, Mapping) else None for row in events
+    )
+    if (
+        any(isinstance(value, bool) or not isinstance(value, int) for value in sequences)
+        or sequences != tuple(range(sequences[0], sequences[0] + len(sequences)))
+    ):
+        raise ContractValidationError(
+            ReasonCode.SEQUENCE_GAP,
+            "MATH-39 oracle event sequence is not continuous",
+        )
+    quantities = {
+        "DISPLAYED_BEFORE_ORDER": Decimal(0),
+        "PRIOR_ADDITION": Decimal(0),
+        "PRIOR_CANCELLATION": Decimal(0),
+        "TRADE_AHEAD": Decimal(0),
+    }
+    for row in events:
+        assert isinstance(row, Mapping)
+        kind = row.get("event_kind")
+        if kind not in quantities:
+            raise ContractValidationError(
+                ReasonCode.ORACLE_NOT_INDEPENDENT,
+                "MATH-39 oracle encountered an unknown event kind",
+            )
+        try:
+            quantity = Decimal(str(row.get("quantity")))
+        except Exception as exc:
+            raise ContractValidationError(
+                ReasonCode.ORACLE_NOT_INDEPENDENT,
+                "MATH-39 oracle quantity is not an exact Decimal",
+            ) from exc
+        if not quantity.is_finite() or quantity < 0:
+            raise ContractValidationError(
+                ReasonCode.ORACLE_NOT_INDEPENDENT,
+                "MATH-39 oracle quantities must be finite and nonnegative",
+            )
+        quantities[str(kind)] += quantity
+    return max(
+        Decimal(0),
+        quantities["DISPLAYED_BEFORE_ORDER"]
+        + quantities["PRIOR_ADDITION"]
+        - quantities["PRIOR_CANCELLATION"]
+        - quantities["TRADE_AHEAD"],
+    )
 _ST12D_MATH_39_ORACLE = OracleContractV1(
     oracle_id="ORACLE::MATH-39",
     math_spec_id="MATH-39",
@@ -1898,6 +2005,10 @@ if (
     or len(ST12D_ORACLE_PACK) != 4
     or len(ST12D_CUMULATIVE_ORACLE_BY_MATH_ID) != 43
     or len(ST12D_CUMULATIVE_GOLDEN_VECTOR_BY_MATH_ID) != 43
+    or independently_reconstruct_math_39_from_raw_records(
+        _ST12D_MATH_39_VECTOR_ROW["inputs"]
+    )
+    != Decimal("80")
     or any(
         ST12D_ORACLE_BY_MATH_ID[math_id] is not ORACLE_BY_MATH_ID[math_id]
         or ST12D_GOLDEN_VECTOR_BY_MATH_ID[math_id]

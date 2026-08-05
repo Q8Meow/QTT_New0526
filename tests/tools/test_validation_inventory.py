@@ -28,6 +28,7 @@ EXPECTED_ST12D_QKU_VALIDATOR_IDS = frozenset(
         "independent_validate_qku_computation_control_plane_execution",
         "independent_validate_qku_computation_control_plane_latency",
         "independent_validate_qku_computation_control_plane_security",
+        "validate_qku_computation_control_plane_d",
         "validate_qku_computation_control_plane_execution",
         "validate_qku_computation_control_plane_latency",
         "validate_qku_computation_control_plane_security",
@@ -98,6 +99,7 @@ def test_inventory_has_centralized_qku_validation_entries():
     assert inventory.ST12D_QKU_VALIDATOR_IDS == EXPECTED_ST12D_QKU_VALIDATOR_IDS
     assert inventory.ST12D_EXCLUSIVE_QKU_VALIDATOR_IDS == {
         "independent_validate_qku_computation_control_plane_d",
+        "validate_qku_computation_control_plane_d",
         "validate_qku_computation_control_plane_latency",
     }
     assert inventory.ST12E_EXCLUSIVE_QKU_VALIDATOR_IDS == (

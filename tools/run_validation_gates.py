@@ -5367,6 +5367,7 @@ def build_validation_commands(
                 "accounting",
                 "execution",
                 "latency",
+                "d",
                 "agent",
                 "llm",
             )

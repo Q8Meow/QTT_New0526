@@ -1,25 +1,26 @@
 from __future__ import annotations
 
 from dataclasses import replace
-from datetime import datetime, timedelta, timezone
+from datetime import timedelta, timezone
+from functools import lru_cache
+from pathlib import Path
 
 import pytest
 
-from src.qtt.stage1_prediction_markets.qku_computation_control_plane.context import (
-    ComputationContextKeyV1,
-)
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.agent_policy import (
     AgentCapabilityDecisionStateV1,
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import (
     NoTradeReoptimizationRouteError,
+    OwnerAdapterError,
     ReasonCode,
-)
-from src.qtt.stage1_prediction_markets.qku_computation_control_plane.implementation_registry import (
-    ST12D_MATH_IMPLEMENTATION_REGISTRY,
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.input_resolver import (
     CanonicalOwnerPacketRegistryV1,
+    CurrentModeSnapshotInputResolverV1,
+    OwnerValuePacketV1,
+    ST12D_OWNER_ACTION_BINDING_ID,
+    ST12D_SAFETY_BINDING_ID,
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.mode_snapshot_policy import (
     D_MODE_STATE_REGISTRY,
@@ -34,9 +35,10 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.mode_snapsh
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.models import (
     ActivationPreconditionStateV1,
     AllowCandidateStateV1,
-    ImplementationVersionPinV1,
     KillStateV1,
     ModeEligibilityState,
+    OwnerActionConfirmationReceiptV1,
+    OwnerActionConfirmationStateV1,
     OperationStatusV1,
     ReadOnlyKillSubmitStateV1,
     SnapshotCandidateStateV1,
@@ -53,9 +55,15 @@ from tests.stage1_prediction_markets.qku_computation_control_plane.tranche_e imp
     make_resolver,
     resolve_decision,
 )
+from tools.build_qku_computation_control_plane import _build_st12d_audit_bundle
 
 
 UTC = timezone.utc
+
+
+@lru_cache(maxsize=1)
+def _audit_bundle_fixture():
+    return _build_st12d_audit_bundle()
 
 
 def _inputs(
@@ -64,11 +72,11 @@ def _inputs(
     kill_active: bool = False,
     submit_disabled: bool = False,
     owner_confirmation: bool = True,
-    computable: bool = True,
     latency_profile: bool = True,
     valid_until_delta: timedelta = timedelta(minutes=5),
 ) -> ModeSnapshotCandidateInputsV1:
-    now = datetime(2026, 8, 4, 12, 0, tzinfo=UTC)
+    bundle, _registry = _audit_bundle_fixture()
+    now = bundle.execution_context.as_of
     evidence = (
         pre_f_unavailable_reference(
             observed_at=now - timedelta(minutes=1),
@@ -92,32 +100,45 @@ def _inputs(
             correlation_id="CORRELATION::D::EVIDENCE",
         )
     )
-    math_ids = ("MATH-13", "MATH-14", "MATH-15", "MATH-39")
+    owner_action = OwnerActionConfirmationReceiptV1(
+        receipt_ref="OWNER-ACTION-RECEIPT::D::1",
+        owner_action_policy_ref="OWNER-ACTION-POLICY::CURRENT",
+        state=(
+            OwnerActionConfirmationStateV1.CONFIRMED_CURRENT
+            if owner_confirmation
+            else OwnerActionConfirmationStateV1.ABSENT
+        ),
+        principal_id="parameter_selector_agent",
+        task_id="AGENT-ORCH1-TASK::D::1",
+        capability_decision_ref="ST12E-DECISION::D::1",
+        context_ref=bundle.execution_context.context_id,
+        observed_at=now - timedelta(minutes=1),
+        valid_until=now + timedelta(minutes=5),
+        causation_id="CAUSE::D::OWNER-ACTION",
+        correlation_id="CORRELATION::D::OWNER-ACTION",
+    )
     return ModeSnapshotCandidateInputsV1(
         request_id="REQUEST::D::1",
         principal_id="parameter_selector_agent",
         task_id="AGENT-ORCH1-TASK::D::1",
         current_agent_id="parameter_selector_agent",
         capability_decision_ref="ST12E-DECISION::D::1",
-        computation_bundle_ref="COMPUTATION-BUNDLE::D::1",
-        context_ref="CONTEXT::D::1",
-        formula_spec_refs=math_ids,
-        implementation_version_pins=tuple(
-            ImplementationVersionPinV1(
-                math_spec_id=math_id,
-                implementation_id=(
-                    ST12D_MATH_IMPLEMENTATION_REGISTRY[
-                        math_id
-                    ].contract.implementation_id
-                ),
-            )
-            for math_id in math_ids
+        computation_bundle_ref=bundle.bundle_ref,
+        context_ref=bundle.execution_context.context_id,
+        formula_spec_refs=tuple(
+            row.math_spec_id for row in bundle.component_closures
         ),
-        binding_profile_ref="BINDING-PROFILE::D::1",
-        parameter_policy_snapshot_ref="PARAMETER-POLICY-SNAPSHOT::D::1",
-        parameter_value_refs=("PARAMETER-VALUE::D::1",),
-        source_epoch_refs=("SOURCE-EPOCH::D::1",),
-        receipt_lineage_refs=("RECEIPT::D::PRECONDITION::1",),
+        implementation_version_pins=(
+            bundle.execution_context.implementation_versions
+        ),
+        binding_profile_ref=bundle.execution_context.binding_profile_version,
+        parameter_policy_snapshot_ref=bundle.parameter_policy_snapshot_ref,
+        parameter_value_refs=bundle.parameter_value_refs,
+        source_epoch_refs=bundle.source_epoch_refs,
+        receipt_lineage_refs=(
+            bundle.preflight_receipt_ref,
+            owner_action.receipt_ref,
+        ),
         readiness_state_ref="READINESS::D::CURRENT",
         pretrade_state_ref="PRETRADE1::TRADE-CANDIDATE",
         owner_action_policy_ref="OWNER-ACTION-POLICY::CURRENT",
@@ -133,7 +154,7 @@ def _inputs(
         evidence_reference=evidence,
         kill_submit_state=ReadOnlyKillSubmitStateV1(
             state_ref="KILL-SUBMIT::READ-ONLY::1",
-            scope_ref="CONTEXT::D::1",
+            scope_ref=bundle.execution_context.context_id,
             kill_active=kill_active,
             submit_disabled=submit_disabled,
             observed_at=now - timedelta(minutes=1),
@@ -142,9 +163,85 @@ def _inputs(
             causation_id="CAUSE::D::SAFETY",
             correlation_id="CORRELATION::D::SAFETY",
         ),
-        all_four_computability_dimensions_closed=computable,
-        owner_confirmation_present=owner_confirmation,
+        computation_bundle_closure=bundle,
+        owner_action_confirmation=owner_action,
         latency_profile_present=latency_profile,
+    )
+
+
+def _current_owner_registry(
+    decision: object,
+    *,
+    kill_active: bool = False,
+    submit_disabled: bool = False,
+):
+    bundle, base_registry = _audit_bundle_fixture()
+    context = bundle.execution_context
+    safety = ReadOnlyKillSubmitStateV1(
+        state_ref=f"KILL-SUBMIT::READ-ONLY::{decision.request_id}",
+        scope_ref=context.context_id,
+        kill_active=kill_active,
+        submit_disabled=submit_disabled,
+        observed_at=context.as_of - timedelta(seconds=1),
+        valid_until=context.as_of + timedelta(minutes=1),
+        policy_version="SAFETY-OWNER::CURRENT",
+        causation_id=f"CAUSE::D::SAFETY::{decision.request_id}",
+        correlation_id=f"CORRELATION::D::SAFETY::{decision.request_id}",
+    )
+    owner_action = OwnerActionConfirmationReceiptV1(
+        receipt_ref=f"OWNER-ACTION-RECEIPT::{decision.request_id}",
+        owner_action_policy_ref="OWNER-ACTION-POLICY::CURRENT",
+        state=OwnerActionConfirmationStateV1.CONFIRMED_CURRENT,
+        principal_id=decision.principal_id,
+        task_id=decision.task_id,
+        capability_decision_ref=decision.decision_id,
+        context_ref=context.context_id,
+        observed_at=context.as_of - timedelta(seconds=1),
+        valid_until=context.as_of + timedelta(minutes=1),
+        causation_id=f"CAUSE::D::OWNER::{decision.request_id}",
+        correlation_id=f"CORRELATION::D::OWNER::{decision.request_id}",
+    )
+    clocks = base_registry.packets[0].clocks
+    safety_packet = OwnerValuePacketV1(
+        packet_id=f"PACKET::D::SAFETY::{decision.request_id}",
+        owner_id="SafetyStateProjectionProtocolV1",
+        packet_type="ReadOnlyKillSubmitStateV1",
+        schema_id="ReadOnlyKillSubmitStateV1::SCHEMA",
+        schema_version="1.0.0",
+        context_id=context.context_id,
+        scope=context.scope,
+        source_epoch_id=context.source_epoch_id,
+        input_version=context.input_version,
+        clocks=clocks,
+        ttl=timedelta(minutes=5),
+        values={"safety.kill_submit_state": safety},
+        authorized_binding_ids=(ST12D_SAFETY_BINDING_ID,),
+        producer_receipt_id=safety.state_ref,
+        producer_receipt_type="SafetyStateReceiptV1",
+        source_state_and_claim_lineage="SafetyStateProjectionProtocolV1 -> D gate",
+        revision=1,
+    )
+    owner_packet = OwnerValuePacketV1(
+        packet_id=f"PACKET::D::OWNER::{decision.request_id}",
+        owner_id="OwnerActionSemanticProtocolV1",
+        packet_type="OwnerActionConfirmationReceiptV1",
+        schema_id="OwnerActionConfirmationReceiptV1::SCHEMA",
+        schema_version="1.0.0",
+        context_id=context.context_id,
+        scope=context.scope,
+        source_epoch_id=context.source_epoch_id,
+        input_version=context.input_version,
+        clocks=clocks,
+        ttl=timedelta(minutes=5),
+        values={"owner_action.confirmation": owner_action},
+        authorized_binding_ids=(ST12D_OWNER_ACTION_BINDING_ID,),
+        producer_receipt_id=owner_action.receipt_ref,
+        producer_receipt_type="OwnerActionConfirmationReceiptV1",
+        source_state_and_claim_lineage="OwnerActionSemanticProtocolV1 -> D gate",
+        revision=1,
+    )
+    return bundle, CanonicalOwnerPacketRegistryV1(
+        (*base_registry.packets, safety_packet, owner_packet)
     )
 
 
@@ -194,6 +291,37 @@ def test_exact_orthogonal_registry_and_transition_matrix() -> None:
         False,
     )
     assert len(D_REQUIRED_PIN_DIMENSIONS) == 12
+    expected_transitions = (
+        ("T01", "CONTRACT_ONLY", "INELIGIBLE", "capability denied or identity/policy mismatch", ReasonCode.CAPABILITY_DENIED, "BLOCK", False),
+        ("T02", "CONTRACT_ONLY", "ELIGIBLE_FOR_ALLOW_CANDIDACY_NO_EFFECT", "exact E decision, current inputs, kill clear", ReasonCode.CENTRAL_ADMISSION_PASS, "CONTINUE_NO_EFFECT", False),
+        ("T03", "NOT_EVALUATED", "EVIDENCE_UNAVAILABLE", "F evidence unavailable", ReasonCode.EVIDENCE_UNAVAILABLE_F_NOT_IMPLEMENTED, "BLOCK", False),
+        ("T04", "NOT_EVALUATED", "BLOCKED", "policy/source/snapshot stale or conflicting", ReasonCode.POLICY_OR_SNAPSHOT_STALE, "REGISTERED_LOWER_SAFE_PATH_OR_NO_TRADE", False),
+        ("T05", "NOT_EVALUATED", "BLOCKED", "kill active or submit disabled", ReasonCode.KILL_OR_SUBMIT_DISABLED, "BLOCK", False),
+        ("T06", "NOT_EVALUATED", "OWNER_CONFIRMATION_REQUIRED", "all automated gates pass but exact owner action absent", ReasonCode.OWNER_CONFIRMATION_REQUIRED, "HOLD", False),
+        ("T07", "OWNER_CONFIRMATION_REQUIRED", "ELIGIBLE_NOT_ACTIVATED", "exact owner confirmation packet is valid", ReasonCode.ALLOW_ELIGIBLE_NOT_ACTIVATED, "RETURN_DECISION_NO_EFFECT", True),
+        ("T08", "ABSENT", "BUILT_IMMUTABLE", "all pinned inputs resolve and candidate builds", ReasonCode.SNAPSHOT_CANDIDATE_BUILT, "VALIDATE", False),
+        ("T09", "BUILT_IMMUTABLE", "VALIDATED_NO_EFFECT", "schema, lineage, version, source, parameter, freshness and oracle checks pass", ReasonCode.SNAPSHOT_CANDIDATE_VALID, "RETURN_PROPOSAL_NO_EFFECT", False),
+        ("T10", "BUILT_IMMUTABLE", "REJECTED", "any candidate validation fails", ReasonCode.SNAPSHOT_CANDIDATE_INVALID, "BLOCK", False),
+        ("T11", "VALIDATED_NO_EFFECT", "STALE", "critical source/policy/evidence/kill state expires", ReasonCode.SNAPSHOT_STALE, "BLOCK_NEW_USE", False),
+        ("T12", "VALIDATED_NO_EFFECT", "ROLLBACK_REQUIRED", "post-validation defect or conflict detected", ReasonCode.ROLLBACK_REQUIRED, "PROPOSE_PRIOR_CANDIDATE_NO_COMMIT", False),
+        ("T13", "ROLLBACK_REQUIRED", "PROPOSED_PRIOR_IMMUTABLE_CANDIDATE", "prior candidate exists, validates and is not stale", ReasonCode.ROLLBACK_PROPOSAL_VALID, "RETURN_PROPOSAL_NO_EFFECT", False),
+        ("T14", "ROLLBACK_REQUIRED", "BLOCKED_NO_VALID_PRIOR_CANDIDATE", "no valid prior candidate", ReasonCode.NO_VALID_ROLLBACK_TARGET, "BLOCK", False),
+        ("T15", "CURRENT", "DRAINING_PINNED_IN_FLIGHT_ONLY", "retirement declared", ReasonCode.RETIREMENT_DRAIN, "NO_NEW_PINS", False),
+        ("T16", "DRAINING_PINNED_IN_FLIGHT_ONLY", "RETIRED", "all in-flight references complete", ReasonCode.RETIRED, "NO_NEW_USE", False),
+        ("T17", "ANY", "BLOCKED", "PRETRADE1 returns typed NO_TRADE", ReasonCode.NO_TRADE_REOPTIMIZATION_ROUTED, "ROUTE_TO_PRETRADE1_REOPTIMIZATION", False),
+    )
+    assert tuple(
+        (
+            row.transition_id,
+            row.source_state,
+            row.destination_state,
+            row.trigger,
+            row.reason_code,
+            row.terminal_route,
+            row.owner_confirmation_required,
+        )
+        for row in MODE_SNAPSHOT_TRANSITIONS
+    ) == expected_transitions
 
 
 def test_policy_outcomes_are_typed_fail_closed_and_never_activate() -> None:
@@ -205,57 +333,70 @@ def test_policy_outcomes_are_typed_fail_closed_and_never_activate() -> None:
                 )
             ),
             AllowCandidateStateV1.EVIDENCE_UNAVAILABLE,
-            ReasonCode.EVIDENCE_UNAVAILABLE_F_NOT_IMPLEMENTED,
+            "T03",
+            (ReasonCode.EVIDENCE_UNAVAILABLE_F_NOT_IMPLEMENTED,),
         ),
         (
             _inputs(owner_confirmation=False),
             AllowCandidateStateV1.OWNER_CONFIRMATION_REQUIRED,
-            ReasonCode.OWNER_CONFIRMATION_REQUIRED,
+            "T06",
+            (ReasonCode.OWNER_CONFIRMATION_REQUIRED,),
         ),
         (
             _inputs(),
             AllowCandidateStateV1.ELIGIBLE_NOT_ACTIVATED,
-            ReasonCode.ALLOW_ELIGIBLE_NOT_ACTIVATED,
+            "T07",
+            (ReasonCode.ALLOW_ELIGIBLE_NOT_ACTIVATED,),
         ),
         (
             _inputs(kill_active=True),
             AllowCandidateStateV1.BLOCKED,
-            ReasonCode.KILL_OR_SUBMIT_DISABLED,
+            "T05",
+            (ReasonCode.KILL_OR_SUBMIT_DISABLED,),
         ),
         (
             _inputs(submit_disabled=True),
             AllowCandidateStateV1.BLOCKED,
-            ReasonCode.KILL_OR_SUBMIT_DISABLED,
-        ),
-        (
-            _inputs(computable=False),
-            AllowCandidateStateV1.BLOCKED,
-            ReasonCode.DEPENDENCY_OR_COMPUTABILITY_INCOMPLETE,
+            "T05",
+            (ReasonCode.KILL_OR_SUBMIT_DISABLED,),
         ),
         (
             _inputs(latency_profile=False),
             AllowCandidateStateV1.BLOCKED,
-            ReasonCode.LATENCY_PROFILE_REQUIRED,
+            "T04",
+            (
+                ReasonCode.POLICY_OR_SNAPSHOT_STALE,
+                ReasonCode.LATENCY_PROFILE_REQUIRED,
+            ),
         ),
         (
             _inputs(
                 evidence_state=ST12FEvidenceStateV1.EVIDENCE_REFERENCE_STALE
             ),
             AllowCandidateStateV1.BLOCKED,
-            ReasonCode.EVIDENCE_REFERENCE_UNAVAILABLE_STALE_CONFLICTING_OR_SCOPE_MISMATCH,
+            "T04",
+            (
+                ReasonCode.POLICY_OR_SNAPSHOT_STALE,
+                ReasonCode.EVIDENCE_REFERENCE_UNAVAILABLE_STALE_CONFLICTING_OR_SCOPE_MISMATCH,
+            ),
         ),
         (
             _inputs(valid_until_delta=timedelta(minutes=-1)),
             AllowCandidateStateV1.BLOCKED,
-            ReasonCode.KILL_SUBMIT_DISABLED_OR_SAFETY_BLOCK,
+            "T05",
+            (
+                ReasonCode.KILL_OR_SUBMIT_DISABLED,
+                ReasonCode.KILL_SUBMIT_DISABLED_OR_SAFETY_BLOCK,
+            ),
         ),
     )
-    for inputs, expected_state, expected_reason in cases:
+    for inputs, expected_state, expected_transition_id, expected_reasons in cases:
         result = evaluate_mode_snapshot_candidate(inputs)
         decision = result.mode_snapshot_decision
         proposal = result.snapshot_transition_proposal
         assert decision.allow_candidate_state is expected_state
-        assert decision.reason_codes == (expected_reason,)
+        assert decision.reason_codes == expected_reasons
+        assert proposal.transition_id == expected_transition_id
         assert decision.runtime_effect_authorized is False
         assert decision.active_pointer_commit_allowed is False
         assert decision.order_release_authorized is False
@@ -269,14 +410,9 @@ def test_policy_outcomes_are_typed_fail_closed_and_never_activate() -> None:
             assert candidate.runtime_effect_authorized is False
             assert candidate.order_release_authorized is False
             assert candidate.activated is False
-        if expected_reason in {
-            ReasonCode.KILL_OR_SUBMIT_DISABLED,
-            ReasonCode.KILL_SUBMIT_DISABLED_OR_SAFETY_BLOCK,
-            ReasonCode.EVIDENCE_UNAVAILABLE_F_NOT_IMPLEMENTED,
-            ReasonCode.EVIDENCE_REFERENCE_UNAVAILABLE_STALE_CONFLICTING_OR_SCOPE_MISMATCH,
-            ReasonCode.DEPENDENCY_OR_COMPUTABILITY_INCOMPLETE,
-            ReasonCode.LATENCY_PROFILE_REQUIRED,
-        }:
+        if expected_state is not AllowCandidateStateV1.ELIGIBLE_NOT_ACTIVATED and (
+            expected_state is not AllowCandidateStateV1.OWNER_CONFIRMATION_REQUIRED
+        ):
             assert candidate is None
             assert decision.snapshot_candidate_state is SnapshotCandidateStateV1.ABSENT
     clear_inputs = _inputs()
@@ -342,14 +478,8 @@ def test_pretrade_no_trade_routes_before_any_d_body_access() -> None:
     )
     assert resolver.calls == 0
 
-    kill_context = ComputationContextKeyV1(
-        context_id="CONTEXT::D::EARLY-SAFETY",
-        as_of=_inputs().evaluated_at,
-        observed_at=_inputs().evaluated_at - timedelta(seconds=1),
-        source_epoch_id="SOURCE-EPOCH::D::EARLY-SAFETY",
-        input_version="D::EARLY-SAFETY::V1",
-        maximum_age=timedelta(minutes=1),
-    )
+    bundle, _base_registry = _audit_bundle_fixture()
+    kill_context = bundle.execution_context
     kill_decision = resolve_decision(
         make_resolver(
             operation_id=operation_id,
@@ -372,27 +502,15 @@ def test_pretrade_no_trade_routes_before_any_d_body_access() -> None:
         def admit_operation(self, _request: object):
             return kill_decision
 
-    class _KillResolver:
-        def resolve_mode_snapshot_inputs(self, _request: object, decision: object):
-            template = _inputs(kill_active=True)
-            return replace(
-                template,
-                request_id=kill_decision.request_id,
-                principal_id=kill_decision.principal_id,
-                task_id=kill_decision.task_id,
-                current_agent_id=kill_decision.current_agent_id,
-                capability_decision_ref=kill_decision.decision_id,
-                context_ref=kill_context.context_id,
-                kill_submit_state=replace(
-                    template.kill_submit_state,
-                    scope_ref=kill_context.context_id,
-                ),
-            )
+    _bundle, owner_registry = _current_owner_registry(
+        kill_decision,
+        kill_active=True,
+    )
 
     class _KillBodyProbe:
         request_id = kill_decision.request_id
         operation_name = operation_id
-        requested_at = _inputs().evaluated_at
+        requested_at = kill_context.as_of
         principal_id = kill_decision.principal_id
         capability_bundle_id = "CAPABILITY::D::EARLY-SAFETY"
         idempotency_key = kill_decision.idempotency_key
@@ -409,10 +527,28 @@ def test_pretrade_no_trade_routes_before_any_d_body_access() -> None:
         def source_candidate_refs(self):
             raise AssertionError("candidate source body read after current safety block")
 
-    kill_service = QKUComputationControlPlaneV1(
-        CanonicalOwnerPacketRegistryV1(),
+    class _InjectedResolver:
+        def resolve_mode_snapshot_inputs(self, *_args: object):
+            return _inputs(kill_active=True)
+
+    injected_service = QKUComputationControlPlaneV1(
+        owner_registry,
         agent_capability_resolver=_KillAdmission(),
-        mode_snapshot_input_resolver=_KillResolver(),
+        mode_snapshot_input_resolver=_InjectedResolver(),
+    )
+    with pytest.raises(OwnerAdapterError):
+        injected_service.submit_candidate_proposal(
+            _KillBodyProbe()  # type: ignore[arg-type]
+        )
+
+    current_resolver = CurrentModeSnapshotInputResolverV1(
+        repo_root=Path(__file__).resolve().parents[3],
+        owner_registry=owner_registry,
+    )
+    kill_service = QKUComputationControlPlaneV1(
+        owner_registry,
+        agent_capability_resolver=_KillAdmission(),
+        mode_snapshot_input_resolver=current_resolver,
     )
     blocked_response = kill_service.submit_candidate_proposal(
         _KillBodyProbe()  # type: ignore[arg-type]
@@ -441,7 +577,13 @@ def test_non_d_public_contract_and_existing_source_owners_remain_bounded() -> No
     }
     baseline = evaluate_mode_snapshot_candidate(_inputs())
     changed = evaluate_mode_snapshot_candidate(
-        replace(_inputs(), owner_confirmation_present=False)
+        replace(
+            _inputs(),
+            owner_action_confirmation=replace(
+                _inputs().owner_action_confirmation,
+                state=OwnerActionConfirmationStateV1.ABSENT,
+            ),
+        )
     )
     assert baseline.mode_snapshot_decision.allow_candidate_state is (
         AllowCandidateStateV1.ELIGIBLE_NOT_ACTIVATED

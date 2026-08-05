@@ -3014,6 +3014,7 @@ def _expected_commands(
                 "accounting",
                 "execution",
                 "latency",
+                "d",
                 "agent",
                 "llm",
             )
@@ -3151,7 +3152,7 @@ def test_runner_registers_qku_primary_and_independent_systems():
             for part in command
         )
     ]
-    assert [command[-1] for command in qku_commands[:10]] == [
+    assert [command[-1] for command in qku_commands[:11]] == [
         "architecture",
         "operations",
         "quantum",
@@ -3160,10 +3161,11 @@ def test_runner_registers_qku_primary_and_independent_systems():
         "accounting",
         "execution",
         "latency",
+        "d",
         "agent",
         "llm",
     ]
-    assert {Path(command[1]).name for command in qku_commands[10:]} == {
+    assert {Path(command[1]).name for command in qku_commands[11:]} == {
         "independent_validate_qku_computation_control_plane.py",
         "independent_validate_qku_computation_control_plane_latency.py",
         "independent_validate_qku_computation_control_plane_model_risk.py",

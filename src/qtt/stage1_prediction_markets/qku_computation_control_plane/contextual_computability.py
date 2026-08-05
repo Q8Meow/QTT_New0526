@@ -13,7 +13,7 @@ from .errors import (
     ReasonCode,
     StackResolutionError,
 )
-from .implementation_registry import IMPLEMENTATION_REGISTRY
+from .implementation_registry import CURRENT_IMPLEMENTATION_REGISTRY
 from .input_resolver import (
     CanonicalOwnerPacketRegistryV1,
     FormulaInputResolutionV1,
@@ -28,16 +28,18 @@ from .models import (
     ContextualComputabilityResolutionV1,
 )
 from .oracle_contracts import (
-    GOLDEN_VECTOR_BY_MATH_ID,
-    ORACLE_BY_MATH_ID,
+    ST12D_CUMULATIVE_GOLDEN_VECTOR_BY_MATH_ID,
+    ST12D_CUMULATIVE_ORACLE_BY_MATH_ID,
 )
 from .specification import (
-    FROZEN_FORMULA_INPUT_CONTRACTS,
-    FROZEN_FORMULA_REQUIREMENTS,
-    FROZEN_NAMED_OUTPUT_CONTRACTS,
+    CURRENT_FORMULA_INPUT_CONTRACTS,
+    CURRENT_FORMULA_REQUIREMENTS,
+    CURRENT_NAMED_OUTPUT_CONTRACTS,
 )
 from .stack_resolver import (
     REGISTERED_FORMULA_STACKS,
+    RegisteredSnapshotComputationBundleV1,
+    SnapshotBundleComponentClosureV1,
     _SelectedStackContextClosureV1,
     _preflight_registered_stack_context_closure,
 )
@@ -51,6 +53,7 @@ class ContextualComputabilitySnapshotV1:
     input_resolution: FormulaInputResolutionV1 | None
     registered_stack_id: str | None
     stack_closure: _SelectedStackContextClosureV1 | None = None
+    snapshot_bundle_component_closure: SnapshotBundleComponentClosureV1 | None = None
     no_authority_flag: bool = True
 
     def __post_init__(self) -> None:
@@ -73,6 +76,15 @@ class ContextualComputabilitySnapshotV1:
                     self.stack_closure.execution_context
                     is not self.execution_context
                     or self.stack_closure.no_authority_flag is not True
+                )
+            )
+            or (
+                self.snapshot_bundle_component_closure is not None
+                and (
+                    self.snapshot_bundle_component_closure.math_spec_id
+                    != self.math_spec_id
+                    or self.snapshot_bundle_component_closure.input_resolution
+                    is not self.input_resolution
                 )
             )
             or self.no_authority_flag is not True
@@ -99,6 +111,11 @@ class ContextualComputabilitySnapshotV1:
                     *(
                         self.stack_closure.receipt_refs
                         if self.stack_closure is not None
+                        else ()
+                    ),
+                    *(
+                        self.snapshot_bundle_component_closure.receipt_refs
+                        if self.snapshot_bundle_component_closure is not None
                         else ()
                     ),
                 )
@@ -209,16 +226,56 @@ class FrozenContextualComputabilityResolverV1:
         required_stack_id: str | None = None,
         context_admission_blocker: ComputabilityBlockerCodeV1 | None = None,
         stack_admission_blocker: ComputabilityBlockerCodeV1 | None = None,
+        snapshot_bundle: RegisteredSnapshotComputationBundleV1 | None = None,
     ) -> ContextualComputabilitySnapshotV1:
         if not isinstance(context, ComputationExecutionContextV1):
             raise InputAuthorityError(
                 ReasonCode.INPUT_SCOPE_MISMATCH,
                 "contextual computability requires the execution-context subtype",
             )
+        if snapshot_bundle is not None:
+            if (
+                type(snapshot_bundle) is not RegisteredSnapshotComputationBundleV1
+                or snapshot_bundle.execution_context is not context
+                or required_stack_id is not None
+                or context_admission_blocker is not None
+                or stack_admission_blocker is not None
+            ):
+                raise InputAuthorityError(
+                    ReasonCode.INPUT_SCOPE_MISMATCH,
+                    "D bundle computability requires its exact context and no second stack",
+                )
+            component = next(
+                (
+                    row
+                    for row in snapshot_bundle.component_closures
+                    if row.math_spec_id == math_spec_id
+                ),
+                None,
+            )
+            if component is None:
+                raise InputAuthorityError(
+                    ReasonCode.NO_APPLICABLE_STACK,
+                    f"{math_spec_id} is not in the selected D snapshot bundle",
+                )
+            resolution = ContextualComputabilityResolutionV1(
+                specification=component.dimension_receipts[0],
+                fixture=component.dimension_receipts[1],
+                context=component.dimension_receipts[2],
+                stack=component.dimension_receipts[3],
+            )
+            return ContextualComputabilitySnapshotV1(
+                math_spec_id=math_spec_id,
+                execution_context=context,
+                resolution=resolution,
+                input_resolution=component.input_resolution,
+                registered_stack_id=snapshot_bundle.bundle_ref,
+                snapshot_bundle_component_closure=component,
+            )
         specification_closed = (
-            math_spec_id in FROZEN_FORMULA_REQUIREMENTS
-            and math_spec_id in FROZEN_FORMULA_INPUT_CONTRACTS
-            and math_spec_id in FROZEN_NAMED_OUTPUT_CONTRACTS
+            math_spec_id in CURRENT_FORMULA_REQUIREMENTS
+            and math_spec_id in CURRENT_FORMULA_INPUT_CONTRACTS
+            and math_spec_id in CURRENT_NAMED_OUTPUT_CONTRACTS
         )
         specification_blockers = (
             ()
@@ -228,9 +285,9 @@ class FrozenContextualComputabilityResolverV1:
             )
         )
         fixture_closed = (
-            math_spec_id in IMPLEMENTATION_REGISTRY
-            and math_spec_id in ORACLE_BY_MATH_ID
-            and math_spec_id in GOLDEN_VECTOR_BY_MATH_ID
+            math_spec_id in CURRENT_IMPLEMENTATION_REGISTRY
+            and math_spec_id in ST12D_CUMULATIVE_ORACLE_BY_MATH_ID
+            and math_spec_id in ST12D_CUMULATIVE_GOLDEN_VECTOR_BY_MATH_ID
         )
         fixture_blockers = (
             ()
@@ -402,7 +459,14 @@ class FrozenContextualComputabilityResolverV1:
                 ComputabilityClassV1.FIXTURE_COMPUTABLE,
                 fixture_blockers,
                 oracle_receipts=(
-                    (f"ORACLE::{math_spec_id}::V3_4",)
+                    (
+                        ST12D_CUMULATIVE_ORACLE_BY_MATH_ID[
+                            math_spec_id
+                        ].oracle_id,
+                        ST12D_CUMULATIVE_GOLDEN_VECTOR_BY_MATH_ID[
+                            math_spec_id
+                        ].vector_id,
+                    )
                     if not fixture_blockers
                     else ()
                 ),

@@ -7,7 +7,7 @@ activation, ALLOW grant, evidence production, safety state, or order release.
 from __future__ import annotations
 
 from dataclasses import dataclass, replace
-from datetime import datetime, timezone
+from datetime import datetime
 from types import MappingProxyType
 from typing import Mapping
 
@@ -22,6 +22,7 @@ from .models import (
     ModeSnapshotCandidateProposalResultV1,
     ModeSnapshotDecisionV1,
     ModeSnapshotOwnerProjectionV1,
+    OwnerActionConfirmationReceiptV1,
     ReadOnlyKillSubmitStateV1,
     SnapshotCandidateStateV1,
     SnapshotRetirementStateV1,
@@ -31,6 +32,7 @@ from .models import (
     ST12FEvidenceStateV1,
     SubmitDisabledStateV1,
 )
+from .stack_resolver import RegisteredSnapshotComputationBundleV1
 
 
 MODE_SNAPSHOT_CANDIDATE_KIND = "MODE_SNAPSHOT_CANDIDATE_V1"
@@ -166,9 +168,9 @@ class ModeSnapshotCandidateInputsV1:
     correlation_id: str
     evidence_reference: ST12FEvidenceReferenceV1
     kill_submit_state: ReadOnlyKillSubmitStateV1
+    computation_bundle_closure: RegisteredSnapshotComputationBundleV1
+    owner_action_confirmation: OwnerActionConfirmationReceiptV1
     latency_measurement_ref_or_explicit_absence: str = EXPLICIT_ABSENCE
-    all_four_computability_dimensions_closed: bool = False
-    owner_confirmation_present: bool = False
     latency_profile_present: bool = False
 
     def __post_init__(self) -> None:
@@ -228,16 +230,16 @@ class ModeSnapshotCandidateInputsV1:
             )
             or type(self.evidence_reference) is not ST12FEvidenceReferenceV1
             or type(self.kill_submit_state) is not ReadOnlyKillSubmitStateV1
+            or type(self.computation_bundle_closure)
+            is not RegisteredSnapshotComputationBundleV1
+            or type(self.owner_action_confirmation)
+            is not OwnerActionConfirmationReceiptV1
         ):
             raise ContractValidationError(
                 ReasonCode.PARAMETER_POLICY_OR_PIN_INVALID,
                 "mode snapshot inputs require exact immutable owner pins",
             )
-        for name in (
-            "all_four_computability_dimensions_closed",
-            "owner_confirmation_present",
-            "latency_profile_present",
-        ):
+        for name in ("latency_profile_present",):
             if type(getattr(self, name)) is not bool:
                 raise ContractValidationError(
                     ReasonCode.CONTRACT_OR_TYPE_INVALID,
@@ -260,11 +262,51 @@ class ModeSnapshotCandidateInputsV1:
                 ReasonCode.POLICY_OR_SNAPSHOT_STALE,
                 "candidate event times are not current and ordered",
             )
+        bundle = self.computation_bundle_closure
+        owner_action = self.owner_action_confirmation
+        if (
+            self.computation_bundle_ref != bundle.bundle_ref
+            or self.context_ref != bundle.execution_context.context_id
+            or self.formula_spec_refs
+            != tuple(row.math_spec_id for row in bundle.component_closures)
+            or self.implementation_version_pins
+            != bundle.execution_context.implementation_versions
+            or self.parameter_policy_snapshot_ref
+            != bundle.parameter_policy_snapshot_ref
+            or self.parameter_value_refs != bundle.parameter_value_refs
+            or self.source_epoch_refs != bundle.source_epoch_refs
+            or self.owner_action_policy_ref != owner_action.owner_action_policy_ref
+            or owner_action.receipt_ref not in self.receipt_lineage_refs
+            or bundle.preflight_receipt_ref not in self.receipt_lineage_refs
+        ):
+            raise ContractValidationError(
+                ReasonCode.PARAMETER_POLICY_OR_PIN_INVALID,
+                "mode snapshot inputs do not bind the exact bundle and owner receipts",
+            )
+
+    @property
+    def all_four_computability_dimensions_closed(self) -> bool:
+        """Derived closure fact; callers cannot supply this authority state."""
+
+        return self.computation_bundle_closure.all_four_dimensions_closed
+
+    @property
+    def owner_confirmation_present(self) -> bool:
+        """Derived identity/currentness fact from the canonical owner receipt."""
+
+        return self.owner_action_confirmation.is_current_for(
+            evaluated_at=self.evaluated_at,
+            principal_id=self.principal_id,
+            task_id=self.task_id,
+            capability_decision_ref=self.capability_decision_ref,
+            context_ref=self.context_ref,
+        )
 
 
 @dataclass(frozen=True, slots=True)
 class PriorSnapshotCandidateV1:
     candidate: FormulaRuntimeSnapshotCandidateV1
+    candidate_version: str
     retirement_state: SnapshotRetirementStateV1
     independently_valid: bool
     all_required_pins_current: bool
@@ -276,6 +318,11 @@ class PriorSnapshotCandidateV1:
             raise ContractValidationError(
                 ReasonCode.CONTRACT_OR_TYPE_INVALID,
                 "rollback inventory must contain exact immutable candidate rows",
+            )
+        if not isinstance(self.candidate_version, str) or not self.candidate_version.strip():
+            raise ContractValidationError(
+                ReasonCode.CONTRACT_OR_TYPE_INVALID,
+                "rollback inventory requires the exact candidate version identity",
             )
         if type(self.independently_valid) is not bool or type(
             self.all_required_pins_current
@@ -394,10 +441,6 @@ def validate_candidate_pin_identity(
         candidate.formula_spec_refs
     ):
         reasons.append(ReasonCode.PARAMETER_POLICY_OR_PIN_INVALID)
-    if inputs.owner_action_policy_ref == EXPLICIT_ABSENCE:
-        reasons.append(
-            ReasonCode.OWNER_CONFIRMATION_OR_SEGREGATION_OF_DUTIES_REQUIRED
-        )
     return tuple(dict.fromkeys(reasons))
 
 
@@ -628,6 +671,10 @@ def evaluate_mode_snapshot_candidate(
         and candidate.candidate_state is SnapshotCandidateStateV1.VALIDATED_NO_EFFECT
         else None
     )
+    primary_reason = rule.reason_code
+    decision_reasons = tuple(
+        dict.fromkeys((primary_reason, decision_reason))
+    )
     decision = ModeSnapshotDecisionV1(
         decision_id=f"MODE-SNAPSHOT-DECISION::{inputs.request_id}",
         request_id=inputs.request_id,
@@ -663,8 +710,8 @@ def evaluate_mode_snapshot_candidate(
         retirement_state=SnapshotRetirementStateV1.CURRENT,
         implementation_pins=inputs.implementation_version_pins,
         source_epoch_refs=inputs.source_epoch_refs,
-        reason_codes=(decision_reason,),
-        fallback_route=route,
+        reason_codes=decision_reasons,
+        fallback_route=rule.terminal_route,
         owner_review_route=owner_route,
         no_trade_route=NO_TRADE_ROUTE,
         latency_measurement_ref_or_explicit_absence=(
@@ -700,18 +747,23 @@ def evaluate_mode_snapshot_candidate(
             if rule.transition_id == "T10" and candidate is not None
             else allow_state
         ),
-        typed_reason_codes=(decision_reason,),
+        typed_reason_codes=decision_reasons,
         causation_id=inputs.causation_id,
         correlation_id=inputs.correlation_id,
     )
+    control_refs = [f"MODE-SNAPSHOT-CONTROL::{inputs.request_id}::EVALUATION"]
+    if candidate is not None:
+        control_refs.extend(
+            (
+                f"MODE-SNAPSHOT-CONTROL::{inputs.request_id}::BUILD",
+                f"MODE-SNAPSHOT-CONTROL::{inputs.request_id}::VALIDATION",
+            )
+        )
     return ModeSnapshotCandidateProposalResultV1(
         snapshot_candidate_or_explicit_absence=snapshot_for_result,
         mode_snapshot_decision=decision,
         snapshot_transition_proposal=transition,
-        control_receipt_refs=(
-            f"MODE-SNAPSHOT-CONTROL::{inputs.request_id}::EVALUATION",
-            f"MODE-SNAPSHOT-CONTROL::{inputs.request_id}::CANDIDATE",
-        ),
+        control_receipt_refs=tuple(control_refs),
     )
 
 
@@ -853,7 +905,7 @@ def propose_snapshot_retirement(
     )
 def select_prior_snapshot_candidate(
     candidates: tuple[PriorSnapshotCandidateV1, ...],
-) -> FormulaRuntimeSnapshotCandidateV1 | None:
+) -> PriorSnapshotCandidateV1 | None:
     """Select the frozen rollback target without committing it."""
 
     if not isinstance(candidates, tuple) or any(
@@ -864,7 +916,7 @@ def select_prior_snapshot_candidate(
             "rollback inventory must be an immutable typed tuple",
         )
     eligible = tuple(
-        row.candidate
+        row
         for row in candidates
         if row.independently_valid
         and row.all_required_pins_current
@@ -874,10 +926,10 @@ def select_prior_snapshot_candidate(
     )
     if not eligible:
         return None
-    latest = max(candidate.evaluated_at for candidate in eligible)
+    latest = max(row.candidate.evaluated_at for row in eligible)
     return min(
-        (candidate for candidate in eligible if candidate.evaluated_at == latest),
-        key=lambda candidate: candidate.snapshot_candidate_id,
+        (row for row in eligible if row.candidate.evaluated_at == latest),
+        key=lambda row: row.candidate.snapshot_candidate_id,
     )
 
 
@@ -909,13 +961,13 @@ def propose_rollback(
         proposal_id=f"SNAPSHOT-ROLLBACK::{request_id}",
         source_candidate_ref_or_explicit_absence=current_candidate_ref,
         target_candidate_ref=(
-            target.snapshot_candidate_id if target is not None else EXPLICIT_ABSENCE
+            target.candidate.snapshot_candidate_id
+            if target is not None
+            else EXPLICIT_ABSENCE
         ),
         source_candidate_version_or_explicit_absence=current_candidate_version,
         target_candidate_version=(
-            target.evaluated_at.astimezone(timezone.utc).isoformat()
-            if target is not None
-            else EXPLICIT_ABSENCE
+            target.candidate_version if target is not None else EXPLICIT_ABSENCE
         ),
         transition_id=rule.transition_id,
         expected_owner_state_ref=expected_owner_state_ref,

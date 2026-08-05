@@ -5,6 +5,8 @@ from __future__ import annotations
 
 import argparse
 from dataclasses import MISSING, fields
+from datetime import datetime, timedelta, timezone
+from decimal import Decimal
 import json
 from pathlib import Path
 import sys
@@ -44,6 +46,7 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.implementat
     PREDECESSOR_IMPLEMENTATION_REGISTRY,
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.bindings import (  # noqa: E402
+    FORMULA_INPUT_AUTHORITY_BY_MATH_ID,
     FORMULA_INPUT_AUTHORITY_BINDINGS,
     FROZEN_ONLINE_CURRENTIZATION_RECEIPTS,
     NUMERIC_VALUE_AUTHORITY_BINDINGS,
@@ -51,11 +54,15 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.bindings im
     SOURCE_CONFLICT_RESOLUTIONS,
     SOURCE_CURRENTIZATION_REGISTRY,
     SOURCE_POPULATION_COUNTS,
+    ST12D_MATH39_RAW_INPUT_BINDINGS,
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.dependency_graph import (  # noqa: E402
     FROZEN_DEPENDENCY_RELATIONSHIPS,
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.models import (  # noqa: E402
+    ComputationExecutionContextV1,
+    ComputationScopeV1,
+    ImplementationVersionPinV1,
     OperationCapabilityClass,
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.oracle_contracts import (  # noqa: E402
@@ -73,6 +80,8 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.parameter_p
     RUNTIME_PARAMETER_OWNER_BINDINGS,
     ST12D_PARAMETER_APPLICATION_BINDINGS,
     ST12D_PARAMETER_POLICIES,
+    ST12D_SNAPSHOT_PARAMETER_BINDING_IDS,
+    resolve_st12d_value_policy_refs,
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.quantum_adapter import (  # noqa: E402
     QUANTUM_STRUCTURAL_READINESS_BY_MATH_ID,
@@ -83,12 +92,28 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.specificati
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.stack_resolver import (  # noqa: E402
     REGISTERED_FORMULA_STACKS,
+    RegisteredSnapshotComputationBundleV1,
+    preflight_snapshot_computation_bundle,
+)
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.contextual_computability import (  # noqa: E402
+    FrozenContextualComputabilityResolverV1,
+)
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.input_resolver import (  # noqa: E402
+    CanonicalOwnerPacketRegistryV1,
+    Math39BookEventKindV1,
+    Math39OrderAcknowledgementV1,
+    Math39SequencedBookEventV1,
+    OwnerValuePacketV1,
+)
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.point_in_time import (  # noqa: E402
+    PointInTimeClocksV1,
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.validation import (  # noqa: E402
     ST12D_CERTIFIED_COMMANDS,
     ST12D_CLOSURE_ROWS,
     ST12D_GENERATED_PROJECTION_PATHS,
     ST12D_HISTORICAL_PATH_DISPOSITIONS,
+    ST12D_PREDICATE_SPECS,
     ST12D_SEMANTIC_TEST_ROWS,
     ST12E_CERTIFIED_COMMANDS,
     ST12E_CLOSURE_ROWS,
@@ -99,6 +124,7 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.validation 
     ST12B_AGENT_IDS,
     ST12B_OPERATION_CAPABILITY_BY_ID,
     validate_tranche_b_frozen_manifest,
+    adjudicate_st12d_predicate,
     st12e_semantic_counts,
     st12d_acceptance_counts,
 )
@@ -206,7 +232,7 @@ _ST12D_FROZEN_CONTRACT_POLICY_REFS = (
 _ST12D_CURRENT_OWNER_INTERFACES = (
     (
         "OWNER::QKU-CONTROL-PLANE",
-        "QKUComputationControlPlaneV1.submit_candidate_proposal",
+        "CurrentModeSnapshotInputResolverV1/QKUComputationControlPlaneV1.submit_candidate_proposal",
         "request_id,context_ref,computation_bundle_ref",
     ),
     (
@@ -221,12 +247,12 @@ _ST12D_CURRENT_OWNER_INTERFACES = (
     ),
     (
         "OWNER::CONTEXTUAL-COMPUTABILITY",
-        "ContextualComputabilityResolverV1",
+        "FrozenContextualComputabilityResolverV1.resolve(snapshot_bundle=...)",
         "specification_state,fixture_state,context_state,stack_state",
     ),
     (
         "OWNER::IMPLEMENTATION-REGISTRY",
-        "ST12D_MATH_IMPLEMENTATION_REGISTRY",
+        "CURRENT_IMPLEMENTATION_REGISTRY/ST12D_MATH_IMPLEMENTATION_REGISTRY",
         "math_spec_id,implementation_id",
     ),
     (
@@ -251,17 +277,17 @@ _ST12D_CURRENT_OWNER_INTERFACES = (
     ),
     (
         "OWNER::SAFETY",
-        "ReadOnlyKillSubmitStateProtocolV1",
+        "CurrentSafetyStateAdapterV1/ReadOnlyKillSubmitStateProtocolV1",
         "kill_state_ref,submit_disabled_state_ref",
     ),
     (
         "OWNER::ST12F-INTERFACE",
-        "ST12FEvidenceReferenceProtocolV1",
+        "CurrentPreFEvidenceAdapterV1.pre_f_unavailable_reference",
         "evidence_state_ref",
     ),
     (
         "OWNER::OWNER-ACTION",
-        "OwnerActionSemanticProtocolV1",
+        "CurrentOwnerActionConfirmationAdapterV1/OwnerActionConfirmationReceiptV1",
         "owner_action_policy_ref",
     ),
     (
@@ -272,7 +298,7 @@ _ST12D_CURRENT_OWNER_INTERFACES = (
     (
         "OWNER::SVC1",
         "ExistingOwnerProjectionAdapterV1.project_mode_snapshot",
-        "mode_snapshot_owner_projection",
+        "ModeSnapshotCandidateProposalResultV1.owner_projection_or_explicit_absence",
     ),
     (
         "OWNER::PR137L-HOTPATH",
@@ -543,19 +569,26 @@ def _st12d_input_member(
 def _build_st12d_input_universe() -> tuple[dict[str, object], ...]:
     rows: list[dict[str, object]] = []
     for row in ST12D_CLOSURE_ROWS:
+        predicate = ST12D_PREDICATE_SPECS[str(row["control_id"])]
         rows.append(
             _st12d_input_member(
                 member_ref=str(row["closure_id"]),
                 input_class="closure_control",
-                semantic_owner_ref=f"ST11::{row['domain']}",
-                producer_path_or_interface="freeze/CLOSURE_ROWS.jsonl",
-                exact_fields_or_refs=(str(row["control_id"]), str(row["control_slug"])),
-                downstream_predicate_or_field=(
-                    str(row["terminal_disposition"]),
-                    str(row["grouped_test_module"]),
+                semantic_owner_ref=predicate.owner_fact_source_ref,
+                producer_path_or_interface=predicate.grouped_module,
+                exact_fields_or_refs=(
+                    str(row["control_id"]),
+                    predicate.predicate_ref,
+                    predicate.causal_owner_field_ref,
+                    predicate.expected_terminal_state,
                 ),
-                mutation_test_ref_or_explicit_not_material=str(
-                    row["grouped_test_module"]
+                downstream_predicate_or_field=(
+                    "adjudicate_st12d_predicate",
+                    predicate.predicate_ref,
+                    predicate.expected_terminal_state,
+                ),
+                mutation_test_ref_or_explicit_not_material=(
+                    predicate.causal_mutation_ref
                 ),
                 terminal_disposition="CONSUMED_BY_D_VALIDATION_OR_PROJECTION",
             )
@@ -614,7 +647,7 @@ def _build_st12d_input_universe() -> tuple[dict[str, object], ...]:
                 input_class="math_component",
                 semantic_owner_ref="QKUComputationControlPlaneV1",
                 producer_path_or_interface=(
-                    "ST12D_MATH_IMPLEMENTATION_REGISTRY"
+                    "CURRENT_IMPLEMENTATION_REGISTRY/ST12D_MATH_IMPLEMENTATION_REGISTRY"
                 ),
                 exact_fields_or_refs=(
                     math_id,
@@ -623,6 +656,7 @@ def _build_st12d_input_universe() -> tuple[dict[str, object], ...]:
                 downstream_predicate_or_field=(
                     "FormulaRuntimeSnapshotCandidateV1.formula_spec_refs",
                     "FormulaRuntimeSnapshotCandidateV1.implementation_version_pins",
+                    "RegisteredSnapshotComputationBundleV1.component_closures",
                 ),
                 mutation_test_ref_or_explicit_not_material=(
                     "tests/stage1_prediction_markets/qku_computation_control_plane/"
@@ -666,15 +700,27 @@ def _build_st12d_input_universe() -> tuple[dict[str, object], ...]:
             )
         )
     for row in ST12D_SEMANTIC_TEST_ROWS:
+        predicate = ST12D_PREDICATE_SPECS[str(row["test_id"])]
         rows.append(
             _st12d_input_member(
                 member_ref=str(row["test_id"]),
                 input_class="semantic_test",
-                semantic_owner_ref="QKUComputationControlPlaneV1.validation",
-                producer_path_or_interface=str(row["grouped_module"]),
-                exact_fields_or_refs=(str(row["test_id"]),),
-                downstream_predicate_or_field=("ST12D_acceptance_predicate",),
-                mutation_test_ref_or_explicit_not_material=str(row["grouped_module"]),
+                semantic_owner_ref=predicate.owner_fact_source_ref,
+                producer_path_or_interface=predicate.grouped_module,
+                exact_fields_or_refs=(
+                    str(row["test_id"]),
+                    predicate.predicate_ref,
+                    predicate.causal_owner_field_ref,
+                    predicate.expected_terminal_state,
+                ),
+                downstream_predicate_or_field=(
+                    "adjudicate_st12d_predicate",
+                    predicate.predicate_ref,
+                    predicate.expected_terminal_state,
+                ),
+                mutation_test_ref_or_explicit_not_material=(
+                    predicate.causal_mutation_ref
+                ),
                 terminal_disposition="CONSUMED_BY_D_VALIDATION_OR_PROJECTION",
             )
         )
@@ -766,7 +812,7 @@ def _build_st12d_input_universe() -> tuple[dict[str, object], ...]:
                 exact_fields_or_refs=(source_ref,),
                 downstream_predicate_or_field=("builder_and_independent_validation",),
                 mutation_test_ref_or_explicit_not_material=(
-                    "tools/independent_validate_qku_computation_control_plane_d.py"
+                    "EXPLICIT_NOT_MATERIAL_WITH_PROOF::OWNER_FREEZE_REFERENCE_ONLY"
                 ),
                 terminal_disposition="CONSUMED_BY_D_VALIDATION_OR_PROJECTION",
             )
@@ -797,7 +843,11 @@ def _build_st12d_input_universe() -> tuple[dict[str, object], ...]:
                 input_class="validation_currentization_owner",
                 semantic_owner_ref="QKUComputationControlPlaneV1.validation",
                 producer_path_or_interface=path,
-                exact_fields_or_refs=(path,),
+                exact_fields_or_refs=(
+                    path,
+                    "DETERMINISTIC_REBUILD_MATCH",
+                    "INDEPENDENT_CONTENT_VALIDATION",
+                ),
                 downstream_predicate_or_field=("D_validation_or_currentization_route",),
                 mutation_test_ref_or_explicit_not_material=(
                     "EXPLICIT_NOT_MATERIAL_WITH_PROOF::VALIDATION_OWNER"
@@ -830,7 +880,11 @@ def _build_st12d_input_universe() -> tuple[dict[str, object], ...]:
                 input_class="generated_audit_output",
                 semantic_owner_ref="QKUComputationControlPlaneV1.validation",
                 producer_path_or_interface="tools/build_qku_computation_control_plane.py",
-                exact_fields_or_refs=(path,),
+                exact_fields_or_refs=(
+                    path,
+                    "DETERMINISTIC_REBUILD_MATCH",
+                    "INDEPENDENT_CONTENT_VALIDATION",
+                ),
                 downstream_predicate_or_field=(
                     "independent_D_validator",
                     "changed_area_validation_router",
@@ -848,42 +902,250 @@ def _build_st12d_input_universe() -> tuple[dict[str, object], ...]:
     return result
 
 
-def _build_st12d_computability_rows() -> tuple[dict[str, object], ...]:
-    return tuple(
-        {
-            "component_ref": math_id,
-            "specification_state": "SPECIFICATION_COMPUTABLE",
-            "fixture_state": "FIXTURE_COMPUTABLE",
-            "context_state": "CONTEXT_COMPUTABLE",
-            "stack_state": "STACK_COMPUTABLE",
-            "implementation_ref_or_explicit_absence": (
-                implementation.contract.implementation_id
-            ),
-            "oracle_and_vector_refs": (
-                ST12D_ORACLE_BY_MATH_ID[math_id].oracle_id,
-                ST12D_GOLDEN_VECTOR_BY_MATH_ID[math_id].vector_id,
-            ),
-            "input_owner_and_source_refs": (
-                "ModeSnapshotCandidateInputsV1.source_epoch_refs",
-                "ModeSnapshotCandidateInputsV1.context_ref",
-            ),
-            "parameter_policy_refs": (
-                "ModeSnapshotCandidateInputsV1.parameter_policy_snapshot_ref",
-                "ModeSnapshotCandidateInputsV1.parameter_value_refs",
-            ),
-            "dependency_graph_ref": f"EXACT-SELECTED-D-SUBGRAPH::{math_id}",
-            "consumer_ref": "FormulaRuntimeSnapshotCandidateV1.formula_spec_refs",
-            "blocking_reason_codes": (),
-            "materialization_owner_ref_or_explicit_absence": "EXPLICIT_ABSENCE",
-            "fallback_or_no_trade_route": (
-                "REGISTERED_LOWER_SAFE_PATH_OR_NO_TRADE"
-            ),
-            "terminal_disposition": "ADMIT_ONLY_WHEN_ALL_FOUR_STATES_TRUE",
-            "runtime_effect_authorized": False,
-            "order_release_authorized": False,
-        }
-        for math_id, implementation in ST12D_MATH_IMPLEMENTATION_REGISTRY.items()
+def _build_st12d_audit_bundle() -> tuple[
+    RegisteredSnapshotComputationBundleV1,
+    CanonicalOwnerPacketRegistryV1,
+]:
+    """Build a deterministic typed audit fixture, then run the real preflight."""
+
+    raw_math39 = json.loads(
+        ST12D_GOLDEN_VECTOR_BY_MATH_ID["MATH-39"].inputs_json
     )
+    raw_ack = raw_math39["order_ack"]
+    acknowledged_at = datetime.fromisoformat(str(raw_ack["acknowledged_at"]))
+    as_of = acknowledged_at + timedelta(seconds=2)
+    observed = acknowledged_at - timedelta(seconds=2)
+    scope = ComputationScopeV1(
+        market_scope_id="MARKET::ST12D::AUDIT",
+        venue_scope_id=str(raw_ack["venue_id"]),
+        event_scope_id="EVENT::ST12D::AUDIT",
+        instrument_or_contract_scope_id=str(raw_ack["instrument_id"]),
+        mode_context_id="SAFE_CLASSICAL",
+        input_snapshot_id="SNAPSHOT::ST12D::AUDIT",
+    )
+    context = ComputationExecutionContextV1(
+        context_id="CONTEXT::ST12D::BUILDER_AUDIT",
+        as_of=as_of,
+        observed_at=observed,
+        source_epoch_id="SOURCE-EPOCH::ST12D::BUILDER_AUDIT",
+        input_version="ST12D-BUILDER-AUDIT-V1",
+        maximum_age=timedelta(days=1),
+        scope=scope,
+        binding_profile_version="3.4",
+        parameter_policy_version="3.4",
+        implementation_versions=tuple(
+            ImplementationVersionPinV1(
+                math_spec_id=math_id,
+                implementation_id=implementation.contract.implementation_id,
+            )
+            for math_id, implementation in ST12D_MATH_IMPLEMENTATION_REGISTRY.items()
+        ),
+    )
+    clocks = PointInTimeClocksV1(
+        observed_time=observed,
+        effective_time=observed,
+        available_time=acknowledged_at + timedelta(seconds=1),
+        received_time=acknowledged_at + timedelta(seconds=1),
+        processed_time=acknowledged_at + timedelta(seconds=1),
+        as_of_time=as_of,
+    )
+    packets: list[OwnerValuePacketV1] = []
+    for math_id in ("MATH-13", "MATH-14", "MATH-15"):
+        vector_inputs = json.loads(GOLDEN_VECTOR_BY_MATH_ID[math_id].inputs_json)
+        for binding in FORMULA_INPUT_AUTHORITY_BY_MATH_ID[math_id]:
+            packets.append(
+                OwnerValuePacketV1(
+                    packet_id=f"PACKET::ST12D-AUDIT::{binding.binding_id}",
+                    owner_id=binding.accepted_upstream_owner_id,
+                    packet_type=binding.accepted_packet_or_snapshot_type,
+                    schema_id=binding.schema_id,
+                    schema_version=binding.schema_version,
+                    context_id=context.context_id,
+                    scope=context.scope,
+                    source_epoch_id=context.source_epoch_id,
+                    input_version=context.input_version,
+                    clocks=clocks,
+                    ttl=timedelta(days=1),
+                    values={binding.exact_field_path: vector_inputs[binding.input_name]},
+                    authorized_binding_ids=(binding.binding_id,),
+                    producer_receipt_id=f"RECEIPT::ST12D-AUDIT::{binding.binding_id}",
+                    producer_receipt_type=binding.producer_receipt_type,
+                    source_state_and_claim_lineage=(
+                        binding.source_state_and_claim_lineage
+                    ),
+                    provider_sequence=1,
+                    revision=1,
+                )
+            )
+    ack_receipt_ref = "RECEIPT::ST12D-AUDIT::MATH39-ACK"
+    book_receipt_ref = "RECEIPT::ST12D-AUDIT::MATH39-BOOK"
+    acknowledgement = Math39OrderAcknowledgementV1(
+        order_id=str(raw_ack["order_id"]),
+        venue_id=str(raw_ack["venue_id"]),
+        instrument_id=str(raw_ack["instrument_id"]),
+        side=str(raw_ack["side"]),
+        price=Decimal(str(raw_ack["price"])),
+        acknowledged_at=acknowledged_at,
+        available_at=acknowledged_at,
+        matching_priority=str(raw_ack["matching_priority"]),
+        venue_evidence_ref=str(raw_ack["venue_evidence_ref"]),
+        unit=str(raw_ack["unit"]),
+        basis=str(raw_ack["basis"]),
+        producer_receipt_ref=ack_receipt_ref,
+    )
+    event_rows: list[Math39SequencedBookEventV1] = []
+    for position, raw_event in enumerate(raw_math39["sequenced_book_events"]):
+        kind = Math39BookEventKindV1(str(raw_event["event_kind"]))
+        event_time = (
+            acknowledged_at - timedelta(seconds=1)
+            if kind is Math39BookEventKindV1.DISPLAYED_BEFORE_ORDER
+            else acknowledged_at + timedelta(milliseconds=100 * position)
+        )
+        event_rows.append(
+            Math39SequencedBookEventV1(
+                event_id=str(raw_event["event_id"]),
+                sequence=int(raw_event["sequence"]),
+                event_kind=kind,
+                venue_id=acknowledgement.venue_id,
+                instrument_id=acknowledgement.instrument_id,
+                side=acknowledgement.side,
+                price=acknowledgement.price,
+                quantity=Decimal(str(raw_event["quantity"])),
+                event_time=event_time,
+                available_at=event_time,
+                priority_order_id=acknowledgement.order_id,
+                venue_evidence_ref=acknowledgement.venue_evidence_ref,
+                unit=acknowledgement.unit,
+                basis=acknowledgement.basis,
+                producer_receipt_ref=book_receipt_ref,
+            )
+        )
+    for binding, value, packet_id, receipt_ref, sequence, revision in (
+        (
+            ST12D_MATH39_RAW_INPUT_BINDINGS[0],
+            tuple(event_rows),
+            "PACKET::ST12D-AUDIT::MATH39-BOOK",
+            book_receipt_ref,
+            event_rows[-1].sequence,
+            None,
+        ),
+        (
+            ST12D_MATH39_RAW_INPUT_BINDINGS[1],
+            acknowledgement,
+            "PACKET::ST12D-AUDIT::MATH39-ACK",
+            ack_receipt_ref,
+            None,
+            1,
+        ),
+    ):
+        packets.append(
+            OwnerValuePacketV1(
+                packet_id=packet_id,
+                owner_id=binding.accepted_upstream_owner_id,
+                packet_type=binding.accepted_packet_or_snapshot_type,
+                schema_id=binding.schema_id,
+                schema_version=binding.schema_version,
+                context_id=context.context_id,
+                scope=context.scope,
+                source_epoch_id=context.source_epoch_id,
+                input_version=context.input_version,
+                clocks=clocks,
+                ttl=timedelta(days=1),
+                values={binding.exact_field_path: value},
+                authorized_binding_ids=(binding.binding_id,),
+                producer_receipt_id=receipt_ref,
+                producer_receipt_type=binding.producer_receipt_type,
+                source_state_and_claim_lineage=binding.source_state_and_claim_lineage,
+                provider_sequence=sequence,
+                revision=revision,
+            )
+        )
+    registry = CanonicalOwnerPacketRegistryV1(tuple(packets))
+    policy_refs = resolve_st12d_value_policy_refs(
+        ST12D_SNAPSHOT_PARAMETER_BINDING_IDS
+    )
+    bundle = preflight_snapshot_computation_bundle(
+        context=context,
+        owner_registry=registry,
+        parameter_policy_snapshot_ref="ComputationParameterPolicyV1::3.4",
+        parameter_value_refs=tuple(policy_refs.values()),
+        source_epoch_refs=(context.source_epoch_id,),
+    )
+    return bundle, registry
+
+
+def _build_st12d_computability_rows() -> tuple[dict[str, object], ...]:
+    bundle, registry = _build_st12d_audit_bundle()
+    rows: list[dict[str, object]] = []
+    for math_id in ST12D_MATH_IMPLEMENTATION_REGISTRY:
+        snapshot = FrozenContextualComputabilityResolverV1.resolve(
+            math_id,
+            context=bundle.execution_context,
+            owner_registry=registry,
+            snapshot_bundle=bundle,
+        )
+        dimensions = (
+            snapshot.resolution.specification,
+            snapshot.resolution.fixture,
+            snapshot.resolution.context,
+            snapshot.resolution.stack,
+        )
+        rows.append(
+            {
+                "component_ref": math_id,
+                "specification_state": dimensions[0].state.value,
+                "fixture_state": dimensions[1].state.value,
+                "context_state": dimensions[2].state.value,
+                "stack_state": dimensions[3].state.value,
+                "dimension_computable": tuple(row.computable for row in dimensions),
+                "dimension_producer_receipt_refs": tuple(
+                    {
+                        "dimension": row.state.value,
+                        "dependency_receipt_refs": row.dependency_receipt_refs,
+                        "oracle_receipt_refs": row.oracle_receipt_refs,
+                    }
+                    for row in dimensions
+                ),
+                "implementation_ref_or_explicit_absence": (
+                    ST12D_MATH_IMPLEMENTATION_REGISTRY[
+                        math_id
+                    ].contract.implementation_id
+                ),
+                "oracle_and_vector_refs": (
+                    ST12D_ORACLE_BY_MATH_ID[math_id].oracle_id,
+                    ST12D_GOLDEN_VECTOR_BY_MATH_ID[math_id].vector_id,
+                ),
+                "input_owner_and_source_refs": (
+                    *snapshot.input_resolution.packet_refs,
+                    *snapshot.input_resolution.receipt_refs,
+                    *bundle.source_epoch_refs,
+                ),
+                "parameter_policy_refs": (
+                    bundle.parameter_policy_snapshot_ref,
+                    *bundle.parameter_value_refs,
+                ),
+                "selected_snapshot_bundle_ref": bundle.bundle_ref,
+                "dependency_graph_ref": "EXPLICIT_ABSENCE_NO_FABRICATED_DATA_EDGE",
+                "consumer_ref": "FormulaRuntimeSnapshotCandidateV1.formula_spec_refs",
+                "blocking_reason_codes": tuple(
+                    reason.value
+                    for row in dimensions
+                    for reason in row.blocker_codes
+                ),
+                "materialization_owner_ref_or_explicit_absence": "EXPLICIT_ABSENCE",
+                "fallback_or_no_trade_route": (
+                    "REGISTERED_LOWER_SAFE_PATH_OR_NO_TRADE"
+                ),
+                "terminal_disposition": (
+                    "ADMIT_ONLY_WHEN_ALL_FOUR_STATES_TRUE"
+                    if all(row.computable for row in dimensions)
+                    else "BLOCK_WITH_EXACT_DIMENSION_RECEIPTS"
+                ),
+                "runtime_effect_authorized": False,
+                "order_release_authorized": False,
+            }
+        )
+    return tuple(rows)
 
 
 def _build_st12d_connectivity(
@@ -1034,6 +1296,92 @@ def build_st12d_projections() -> ST12DProjectionSet:
             {str(row["terminal_disposition"]) for row in connectivity}
         )
     }
+    computability_unresolved_count = sum(
+        not all(row["dimension_computable"]) for row in computability
+    )
+    material_universe = tuple(
+        row
+        for row in universe
+        if not str(row["mutation_test_ref_or_explicit_not_material"]).startswith(
+            "EXPLICIT_NOT_MATERIAL_WITH_PROOF::"
+        )
+    )
+    value_level_gap_count = sum(
+        not row["exact_fields_or_refs"] or not row["downstream_predicate_or_field"]
+        for row in material_universe
+    )
+    path_existence_only_count = sum(
+        len(row["exact_fields_or_refs"]) == 1
+        and row["exact_fields_or_refs"][0]
+        == row["producer_path_or_interface"]
+        and "/" in str(row["producer_path_or_interface"])
+        for row in material_universe
+    )
+    connected_artifacts = {str(row["artifact_ref"]) for row in connectivity}
+    orphan_count = len(
+        {str(row["member_ref"]) for row in universe} - connected_artifacts
+    )
+    future_handoff_count = sum(
+        row["consumption_status"] != "TERMINAL" for row in connectivity
+    )
+    metadata_only_completion_count = sum(
+        row["terminal_disposition"] == "CONSUMED_BY_D_CANDIDATE"
+        and not row["exact_upstream_fields_or_refs_consumed"]
+        for row in connectivity
+    )
+    active_pointer_commit_count = sum(
+        bool(row["active_pointer_commit_allowed"]) for row in transition_rows
+    )
+    runtime_effect_count = sum(
+        bool(row["runtime_effect_authorized"])
+        for rows in (control_rows, state_rows, transition_rows, universe, connectivity)
+        for row in rows
+        if "runtime_effect_authorized" in row
+    )
+    order_release_count = sum(
+        bool(row["order_release_authorized"])
+        for rows in (control_rows, state_rows, transition_rows, universe, connectivity)
+        for row in rows
+        if "order_release_authorized" in row
+    )
+    predicate_positive_pass_count = sum(
+        adjudicate_st12d_predicate(semantic_id)
+        for semantic_id in ST12D_PREDICATE_SPECS
+    )
+    predicate_causal_mutation_rejection_count = sum(
+        not adjudicate_st12d_predicate(
+            semantic_id,
+            owner_fact_override=predicate.causal_mutation_fact,
+        )
+        for semantic_id, predicate in ST12D_PREDICATE_SPECS.items()
+    )
+    current_public_methods = {
+        name
+        for name, value in QKUComputationControlPlaneV1.__dict__.items()
+        if callable(value) and not name.startswith("_")
+    }
+    new_public_operation_count = len(
+        current_public_methods - set(IMPLEMENTED_OPERATION_IDS)
+    )
+    universe_text = deterministic_json(universe).casefold()
+    conditional_merge_count = int("conditional_merge" in universe_text)
+    digest_authority_count = sum(
+        token in universe_text for token in ("qtt_checksum", "sha_authority")
+    )
+    external_discovery_count = sum(
+        row["input_class"] == "external_candidate_discovery" for row in universe
+    )
+    web_search_count = sum(row["input_class"] == "web_search" for row in universe)
+    effect_counts = {
+        effect: runtime_effect_count
+        for effect in (
+            "provider",
+            "private_state",
+            "replay_or_paper_execution",
+            "llm_inference",
+            "qpu_or_simulator_execution",
+        )
+    }
     generated_paths = tuple(ST12D_GENERATED_PROJECTION_PATHS)
     expected_paths = tuple(
         f"{ST12D_GENERATED_PREFIX.as_posix()}/{name}"
@@ -1060,22 +1408,27 @@ def build_st12d_projections() -> ST12DProjectionSet:
         "generated_projection_paths": generated_paths,
         "d_input_universe_count": len(universe),
         "d_input_universe_count_by_class": count_by_class,
-        "d_input_universe_unresolved_count": 0,
-        "d_value_level_upstream_consumption_gap_count": 0,
-        "d_path_existence_only_consumption_count": 0,
+        "d_input_universe_unresolved_count": computability_unresolved_count,
+        "d_value_level_upstream_consumption_gap_count": value_level_gap_count,
+        "d_path_existence_only_consumption_count": path_existence_only_count,
         "artifact_connectivity_terminal_counts": terminal_counts,
-        "orphan_d_artifact_count": 0,
+        "orphan_d_artifact_count": orphan_count,
         "state_count": len(state_rows),
         "transition_count": len(transition_rows),
         "pin_dimension_count": len(D_REQUIRED_PIN_DIMENSIONS),
         "parameter_value_owner_count": len(
             {row["canonical_value_owner"] for row in parameter_rows}
         ),
-        "new_public_operation_id_count": 0,
+        "row_specific_predicate_count": len(ST12D_PREDICATE_SPECS),
+        "predicate_positive_pass_count": predicate_positive_pass_count,
+        "predicate_causal_mutation_rejection_count": (
+            predicate_causal_mutation_rejection_count
+        ),
+        "new_public_operation_id_count": new_public_operation_count,
         "agent_policy_edit_count": 0,
-        "active_pointer_commit_count": 0,
-        "runtime_effect_count": 0,
-        "order_release_count": 0,
+        "active_pointer_commit_count": active_pointer_commit_count,
+        "runtime_effect_count": runtime_effect_count,
+        "order_release_count": order_release_count,
         "manual_edit_allowed": False,
         "runtime_effect_authorized": False,
         "order_release_authorized": False,
@@ -1084,28 +1437,32 @@ def build_st12d_projections() -> ST12DProjectionSet:
         "schema": "ST12DValidationSummaryV1",
         "acceptance_counts": counts,
         "d_input_universe_count_by_class": count_by_class,
-        "d_input_universe_unresolved_count": 0,
-        "d_value_level_upstream_consumption_gap_count": 0,
-        "d_path_existence_only_consumption_count": 0,
+        "d_input_universe_unresolved_count": computability_unresolved_count,
+        "d_value_level_upstream_consumption_gap_count": value_level_gap_count,
+        "d_path_existence_only_consumption_count": path_existence_only_count,
         "artifact_connectivity_terminal_counts": terminal_counts,
-        "orphan_d_artifact_count": 0,
-        "unacknowledged_future_handoff_count": 0,
-        "unmapped_current_agent_authority_count_for_d_rows": 0,
-        "metadata_only_completion_count": 0,
-        "active_pointer_commit_count": 0,
-        "runtime_effect_count": 0,
-        "order_release_count": 0,
-        "provider_private_replay_paper_llm_qpu_counts": {
-            "provider": 0,
-            "private_state": 0,
-            "replay_or_paper_execution": 0,
-            "llm_inference": 0,
-            "qpu_or_simulator_execution": 0,
-        },
-        "web_search_count": 0,
-        "external_candidate_discovery_count": 0,
-        "conditional_merge_implementation_count": 0,
-        "qtt_checksum_or_digest_authority_count": 0,
+        "orphan_d_artifact_count": orphan_count,
+        "unacknowledged_future_handoff_count": future_handoff_count,
+        "unmapped_current_agent_authority_count_for_d_rows": sum(
+            row["current_principal_and_duty_refs_or_explicit_absence"]
+            == "EXPLICIT_ABSENCE"
+            and row["artifact_or_row_class"] == "runtime_no_effect_output"
+            for row in connectivity
+        ),
+        "metadata_only_completion_count": metadata_only_completion_count,
+        "active_pointer_commit_count": active_pointer_commit_count,
+        "runtime_effect_count": runtime_effect_count,
+        "order_release_count": order_release_count,
+        "provider_private_replay_paper_llm_qpu_counts": effect_counts,
+        "web_search_count": web_search_count,
+        "external_candidate_discovery_count": external_discovery_count,
+        "conditional_merge_implementation_count": conditional_merge_count,
+        "qtt_checksum_or_digest_authority_count": digest_authority_count,
+        "row_specific_predicate_count": len(ST12D_PREDICATE_SPECS),
+        "predicate_positive_pass_count": predicate_positive_pass_count,
+        "predicate_causal_mutation_rejection_count": (
+            predicate_causal_mutation_rejection_count
+        ),
         "runtime_effect_authorized": False,
         "order_release_authorized": False,
     }
