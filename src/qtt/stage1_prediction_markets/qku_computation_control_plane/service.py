@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from types import MappingProxyType
 from typing import Mapping
 
@@ -33,9 +33,28 @@ from .implementation_registry import (
     IMPLEMENTATION_REGISTRY,
     invoke_formula_v34,
 )
+from .latency_policy import (
+    ResourceUsageV1,
+    build_latency_measurement,
+    evaluate_latency_profile,
+    local_duration_now_ns,
+    validate_resource_bounds,
+)
+from .mode_snapshot_policy import (
+    MODE_SNAPSHOT_CANDIDATE_KIND,
+    ModeSnapshotCandidateInputsV1,
+    evaluate_mode_snapshot_candidate,
+    validate_current_kill_submit_state,
+)
 from .identity_adapter import RP5CIdentityAdapterV1
 from .persistence import PersistenceAdapterV1
-from .protocols import AgentCapabilityAdmissionProtocolV1
+from .receipts import materialize_mode_snapshot_control_receipts
+from .protocols import (
+    AgentCapabilityAdmissionProtocolV1,
+    ModeSnapshotCandidateInputProtocolV1,
+    ModeSnapshotOwnerProjectionProtocolV1,
+    OwnerProjectionViewV1,
+)
 from .input_resolver import (
     CanonicalOwnerPacketRegistryV1,
     FormulaInputResolverV1,
@@ -63,12 +82,17 @@ from .models import (
     InputResolutionV1,
     ImplementationVersionPinV1,
     MaterializationWorkOrderV1,
+    LatencyBudgetProfileV1,
+    LatencyMeasurementLabelsV1,
+    LatencyMeasurementV1,
+    ModeSnapshotCandidateProposalResultV1,
     NoTradeComparisonV1,
     OperationBlockerCodeV1,
     OperationRequestEnvelopeV1,
     OperationStatusV1,
     RequestMaterializationWorkOrderRequestV1,
     RequestMaterializationWorkOrderResponseV1,
+    ResourceBoundsProfileV1,
     ResolveApplicableStackRequestV1,
     ResolveApplicableStackResponseV1,
     ResolveContextualComputabilityRequestV1,
@@ -98,6 +122,107 @@ from .stack_resolver import (
 
 def _assertions(record: TypedValueRecordV1) -> Mapping[str, object]:
     return MappingProxyType({field.name: field.value for field in record.fields})
+
+
+_D_PROPOSAL_FIELDS = (
+    "candidate_contract_id",
+    "computation_bundle_ref",
+    "context_ref",
+    "formula_spec_refs",
+    "implementation_version_pins",
+    "binding_profile_ref",
+    "parameter_policy_snapshot_ref",
+    "parameter_value_refs",
+    "source_epoch_refs",
+    "receipt_lineage_refs",
+    "readiness_state_ref",
+    "pretrade_state_ref",
+    "owner_action_policy_ref",
+    "current_mode",
+    "requested_mode",
+    "expected_owner_state_ref",
+    "candidate_version",
+)
+
+
+def _d_text_tuple(value: object, field_name: str) -> tuple[str, ...]:
+    if not isinstance(value, str) or not value or value != value.strip():
+        raise ContractValidationError(
+            ReasonCode.CONTRACT_OR_TYPE_INVALID,
+            f"{field_name} must be canonical comma-delimited text",
+        )
+    values = tuple(value.split(","))
+    if (
+        any(not item or item != item.strip() for item in values)
+        or len(values) != len(set(values))
+    ):
+        raise ContractValidationError(
+            ReasonCode.CONTRACT_OR_TYPE_INVALID,
+            f"{field_name} must contain unique canonical identities",
+        )
+    return values
+
+
+def _validate_d_proposed_specification(
+    request: SubmitCandidateProposalRequestV1,
+    inputs: ModeSnapshotCandidateInputsV1,
+) -> None:
+    fields = _assertions(request.proposed_specification)
+    if tuple(fields) != _D_PROPOSAL_FIELDS or set(fields) != set(_D_PROPOSAL_FIELDS):
+        raise ContractValidationError(
+            ReasonCode.CONTRACT_OR_TYPE_INVALID,
+            "D proposal must contain exactly the frozen typed field roster",
+        )
+    if any(not isinstance(value, str) for value in fields.values()):
+        raise ContractValidationError(
+            ReasonCode.CONTRACT_OR_TYPE_INVALID,
+            "D proposal fields must be typed canonical text references",
+        )
+    if fields["candidate_contract_id"] != MODE_SNAPSHOT_CANDIDATE_KIND:
+        raise ContractValidationError(
+            ReasonCode.CONTRACT_OR_TYPE_INVALID,
+            "candidate contract identity does not match the allowlisted D kind",
+        )
+    pin_tokens = _d_text_tuple(
+        fields["implementation_version_pins"],
+        "implementation_version_pins",
+    )
+    try:
+        proposed_pins = tuple(
+            ImplementationVersionPinV1(*token.split("=", 1))
+            for token in pin_tokens
+            if token.count("=") == 1
+        )
+    except (TypeError, ValueError) as exc:
+        raise ContractValidationError(
+            ReasonCode.PARAMETER_POLICY_OR_PIN_INVALID,
+            "implementation pins must use exact math_spec_id=implementation_id text",
+        ) from exc
+    comparisons = (
+        (fields["computation_bundle_ref"], inputs.computation_bundle_ref),
+        (fields["context_ref"], inputs.context_ref),
+        (_d_text_tuple(fields["formula_spec_refs"], "formula_spec_refs"), inputs.formula_spec_refs),
+        (proposed_pins, inputs.implementation_version_pins),
+        (fields["binding_profile_ref"], inputs.binding_profile_ref),
+        (fields["parameter_policy_snapshot_ref"], inputs.parameter_policy_snapshot_ref),
+        (_d_text_tuple(fields["parameter_value_refs"], "parameter_value_refs"), inputs.parameter_value_refs),
+        (_d_text_tuple(fields["source_epoch_refs"], "source_epoch_refs"), inputs.source_epoch_refs),
+        (_d_text_tuple(fields["receipt_lineage_refs"], "receipt_lineage_refs"), inputs.receipt_lineage_refs),
+        (fields["readiness_state_ref"], inputs.readiness_state_ref),
+        (fields["pretrade_state_ref"], inputs.pretrade_state_ref),
+        (fields["owner_action_policy_ref"], inputs.owner_action_policy_ref),
+        (fields["current_mode"], inputs.current_mode),
+        (fields["requested_mode"], inputs.requested_mode),
+        (fields["expected_owner_state_ref"], inputs.expected_owner_state_ref),
+        (fields["candidate_version"], inputs.candidate_version),
+    )
+    if len(proposed_pins) != len(pin_tokens) or any(
+        proposed != resolved for proposed, resolved in comparisons
+    ):
+        raise ContractValidationError(
+            ReasonCode.SNAPSHOT_PIN_CONFLICT,
+            "caller proposal differs from exact current-owner resolved pins",
+        )
 
 
 def _common_response(
@@ -430,6 +555,248 @@ def _admit_agent_request(
     raise AuthorityDeniedError(reason, decision.decision_id)
 
 
+def _submit_mode_snapshot_candidate(
+    self,
+    request: SubmitCandidateProposalRequestV1,
+    capability_decision: AgentCapabilityDecisionV1,
+    *,
+    admission_ns: int,
+) -> SubmitCandidateProposalResponseV1:
+    """Private D body under the existing admitted public operation."""
+
+    resolver = self.mode_snapshot_input_resolver
+    if resolver is None:
+        raise OwnerAdapterError(
+            ReasonCode.OWNER_DATA_MISSING,
+            "D requires an exact read-only current-owner input resolver",
+        )
+    stage_values = {name: 0 for name in (
+        "central_capability_admission_ns",
+        "request_validation_ns",
+        "identity_and_context_resolution_ns",
+        "parameter_and_source_binding_ns",
+        "snapshot_candidate_resolution_ns",
+        "formula_compute_ns",
+        "output_validation_ns",
+        "receipt_materialization_ns",
+        "owner_projection_ns",
+    )}
+    stage_values["central_capability_admission_ns"] = admission_ns
+
+    identity_started = local_duration_now_ns()
+    inputs = resolver.resolve_mode_snapshot_inputs(
+        request,
+        capability_decision,
+    )
+    stage_values["identity_and_context_resolution_ns"] = (
+        local_duration_now_ns() - identity_started
+    )
+    if type(inputs) is not ModeSnapshotCandidateInputsV1 or (
+        inputs.request_id != request.request_id
+        or inputs.principal_id != request.principal_id
+        or inputs.task_id != capability_decision.task_id
+        or inputs.current_agent_id != capability_decision.current_agent_id
+        or inputs.capability_decision_ref != capability_decision.decision_id
+        or inputs.context_ref != request.context.context_id
+    ):
+        raise ContractValidationError(
+            ReasonCode.IDENTITY_OR_VERSION_UNRESOLVED,
+            "D resolved inputs do not bind the admitted request and task",
+        )
+
+    measurement_ref = f"LATENCY-MEASUREMENT::{request.request_id}"
+    source_candidate_refs: tuple[str, ...] = ()
+    safety_blocked = bool(
+        validate_current_kill_submit_state(
+            inputs.kill_submit_state,
+            evaluated_at=inputs.evaluated_at,
+        )
+    )
+    if not safety_blocked:
+        validation_started = local_duration_now_ns()
+        _validate_d_proposed_specification(request, inputs)
+        stage_values["request_validation_ns"] = (
+            local_duration_now_ns() - validation_started
+        )
+
+        binding_started = local_duration_now_ns()
+        source_candidate_refs = request.source_candidate_refs
+        usage = ResourceUsageV1(
+            input_cardinality=len(request.proposed_specification.fields),
+            input_bytes=sum(
+                len(field.name) + len(str(field.value))
+                for field in request.proposed_specification.fields
+            ),
+            dependency_depth=len(inputs.formula_spec_refs),
+            bootstrap_repetitions=0,
+            concurrency=1,
+        )
+        resources_closed = not validate_resource_bounds(
+            usage,
+            self.resource_bounds_profile,
+        )
+        inputs = replace(
+            inputs,
+            all_four_computability_dimensions_closed=(
+                inputs.all_four_computability_dimensions_closed
+                and resources_closed
+            ),
+            latency_profile_present=self.latency_budget_profile is not None,
+            latency_measurement_ref_or_explicit_absence=measurement_ref,
+        )
+        stage_values["parameter_and_source_binding_ns"] = (
+            local_duration_now_ns() - binding_started
+        )
+    else:
+        # A current safety-owner block precedes all proposal/schema/body reads.
+        inputs = replace(
+            inputs,
+            latency_measurement_ref_or_explicit_absence=measurement_ref,
+        )
+
+    candidate_started = local_duration_now_ns()
+    mode_snapshot_result = evaluate_mode_snapshot_candidate(inputs)
+    stage_values["snapshot_candidate_resolution_ns"] = (
+        local_duration_now_ns() - candidate_started
+    )
+    output_started = local_duration_now_ns()
+    if type(mode_snapshot_result) is not ModeSnapshotCandidateProposalResultV1:
+        raise ContractValidationError(
+            ReasonCode.CONTRACT_OR_TYPE_INVALID,
+            "D policy returned no exact typed proposal result",
+        )
+    stage_values["output_validation_ns"] = (
+        local_duration_now_ns() - output_started
+    )
+
+    owner_started = local_duration_now_ns()
+    projection_adapter = self.mode_snapshot_owner_projection_adapter
+    if projection_adapter is not None and self.mode_snapshot_svc_view is not None:
+        projection_adapter.project_mode_snapshot(
+            mode_snapshot_result.mode_snapshot_decision,
+            inputs.evidence_reference,
+            inputs.kill_submit_state,
+            snapshot_version=inputs.candidate_version,
+            svc_view=self.mode_snapshot_svc_view,
+        )
+    stage_values["owner_projection_ns"] = (
+        local_duration_now_ns() - owner_started
+    )
+
+    receipt_started = local_duration_now_ns()
+    control_receipts = materialize_mode_snapshot_control_receipts(
+        mode_snapshot_result,
+        parameter_value_refs=inputs.parameter_value_refs,
+        effective_at=request.requested_at,
+        recorded_at=request.requested_at,
+        traceparent=request.traceparent,
+        tracestate=request.tracestate,
+    )
+    control_refs = tuple(row.record_id for row in control_receipts)
+    stage_values["receipt_materialization_ns"] = (
+        local_duration_now_ns() - receipt_started
+    )
+
+    def materialize_measurement(
+        result: ModeSnapshotCandidateProposalResultV1,
+    ) -> LatencyMeasurementV1:
+        decision = result.mode_snapshot_decision
+        return build_latency_measurement(
+            measurement_ref=measurement_ref,
+            stage_values_ns=stage_values,
+            labels=LatencyMeasurementLabelsV1(
+                cold_or_warm="WARM",
+                concurrency_level=1,
+                platform_profile_id=(
+                    self.latency_budget_profile.profile_id
+                    if self.latency_budget_profile is not None
+                    else "EXPLICIT_ABSENCE"
+                ),
+                operation_id=request.operation_name,
+                success_or_blocker=decision.allow_candidate_state.value,
+                fallback_used=(
+                    decision.fallback_route
+                    not in {
+                        "CONTINUE_NO_EFFECT",
+                        "RETURN_DECISION_NO_EFFECT",
+                    }
+                ),
+            ),
+            rejection_count=(
+                0
+                if decision.allow_candidate_state.value
+                == "ELIGIBLE_NOT_ACTIVATED"
+                else 1
+            ),
+        )
+
+    measurement = materialize_measurement(mode_snapshot_result)
+    latency_decision = evaluate_latency_profile(
+        measurement,
+        self.latency_budget_profile,
+    )
+    if (
+        latency_decision.promotion_sensitive_allow_blocked
+        and inputs.latency_profile_present
+    ):
+        inputs = replace(inputs, latency_profile_present=False)
+        mode_snapshot_result = evaluate_mode_snapshot_candidate(inputs)
+        control_receipts = materialize_mode_snapshot_control_receipts(
+            mode_snapshot_result,
+            parameter_value_refs=inputs.parameter_value_refs,
+            effective_at=request.requested_at,
+            recorded_at=request.requested_at,
+            traceparent=request.traceparent,
+            tracestate=request.tracestate,
+        )
+        control_refs = tuple(row.record_id for row in control_receipts)
+        measurement = materialize_measurement(mode_snapshot_result)
+
+    decision = mode_snapshot_result.mode_snapshot_decision
+    succeeded = decision.allow_candidate_state.value == "ELIGIBLE_NOT_ACTIVATED"
+    blocker = () if succeeded else (
+        OperationBlockerCodeV1.EVIDENCE_REFERENCE_UNAVAILABLE
+        if decision.allow_candidate_state.value == "EVIDENCE_UNAVAILABLE"
+        else OperationBlockerCodeV1.KILL_OR_SUBMIT_DISABLED
+        if decision.reason_codes[0]
+        in {
+            ReasonCode.KILL_OR_SUBMIT_DISABLED,
+            ReasonCode.KILL_SUBMIT_DISABLED_OR_SAFETY_BLOCK,
+        }
+        else OperationBlockerCodeV1.LATENCY_PROFILE_REQUIRED
+        if decision.reason_codes[0] is ReasonCode.LATENCY_PROFILE_REQUIRED
+        else OperationBlockerCodeV1.MODE_SNAPSHOT_BLOCKED,
+    )
+    proposal = CandidateProposalV1(
+        **_result_common(
+            request,
+            terminal_route=decision.fallback_route,
+            evidence_refs=(
+                *source_candidate_refs,
+                *control_refs,
+                measurement.measurement_ref,
+            ),
+        ),
+        candidate_id=(
+            mode_snapshot_result.snapshot_transition_proposal.target_candidate_ref
+        ),
+        proposal_state=decision.allow_candidate_state.value,
+        mode_snapshot_result=mode_snapshot_result,
+    )
+    return SubmitCandidateProposalResponseV1(
+        **_common_response(
+            request,
+            status=(
+                OperationStatusV1.SUCCEEDED
+                if succeeded
+                else OperationStatusV1.BLOCKED
+            ),
+            blocker_codes=blocker,
+            receipt_refs=(*control_refs, measurement.measurement_ref),
+        ),
+        proposal=proposal,
+    )
+
 @dataclass(frozen=True, slots=True)
 class QKUComputationControlPlaneV1:
     """One bounded service; it owns no provider, private state, LLM, or QPU."""
@@ -438,6 +805,11 @@ class QKUComputationControlPlaneV1:
     agent_capability_resolver: AgentCapabilityAdmissionProtocolV1
     identity_adapter: RP5CIdentityAdapterV1 | None = None
     persistence_adapter: PersistenceAdapterV1 | None = None
+    mode_snapshot_input_resolver: ModeSnapshotCandidateInputProtocolV1 | None = None
+    mode_snapshot_owner_projection_adapter: ModeSnapshotOwnerProjectionProtocolV1 | None = None
+    mode_snapshot_svc_view: OwnerProjectionViewV1 | None = None
+    latency_budget_profile: LatencyBudgetProfileV1 | None = None
+    resource_bounds_profile: ResourceBoundsProfileV1 | None = None
 
     def __post_init__(self) -> None:
         if not isinstance(
@@ -451,6 +823,27 @@ class QKUComputationControlPlaneV1:
         ) or not isinstance(
             self.agent_capability_resolver,
             AgentCapabilityAdmissionProtocolV1,
+        ) or (
+            self.mode_snapshot_input_resolver is not None
+            and not isinstance(
+                self.mode_snapshot_input_resolver,
+                ModeSnapshotCandidateInputProtocolV1,
+            )
+        ) or (
+            self.mode_snapshot_owner_projection_adapter is not None
+            and not isinstance(
+                self.mode_snapshot_owner_projection_adapter,
+                ModeSnapshotOwnerProjectionProtocolV1,
+            )
+        ) or (
+            self.mode_snapshot_svc_view is not None
+            and type(self.mode_snapshot_svc_view) is not OwnerProjectionViewV1
+        ) or (
+            self.latency_budget_profile is not None
+            and type(self.latency_budget_profile) is not LatencyBudgetProfileV1
+        ) or (
+            self.resource_bounds_profile is not None
+            and type(self.resource_bounds_profile) is not ResourceBoundsProfileV1
         ):
             raise ContractValidationError(
                 ReasonCode.INVALID_CONTRACT,
@@ -956,7 +1349,18 @@ class QKUComputationControlPlaneV1:
     def submit_candidate_proposal(
         self, request: SubmitCandidateProposalRequestV1
     ) -> SubmitCandidateProposalResponseV1:
-        _admit_agent_request(self, request)
+        admission_started = local_duration_now_ns()
+        capability_decision = _admit_agent_request(self, request)
+        admission_ns = local_duration_now_ns() - admission_started
+        # The candidate discriminator is deliberately read only after the
+        # mandatory central ST12-E admission above.
+        if request.candidate_kind == MODE_SNAPSHOT_CANDIDATE_KIND:
+            return _submit_mode_snapshot_candidate(
+                self,
+                request,
+                capability_decision,
+                admission_ns=admission_ns,
+            )
         result = CandidateProposalV1(
             **_result_common(
                 request,

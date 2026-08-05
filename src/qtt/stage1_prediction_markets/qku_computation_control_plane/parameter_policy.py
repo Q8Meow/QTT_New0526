@@ -176,6 +176,59 @@ class ST12EParameterValueSemanticsV1:
 
 
 @dataclass(frozen=True, slots=True)
+class ST12DParameterValueSemanticsV1:
+    """Exact D application binding attached to the one central value owner."""
+
+    parameter_id: str
+    parameter_symbol: str
+    d_application_class: str
+    snapshot_binding_class: str
+    current_source_binding_refs: tuple[str, ...]
+    authoritative_value_policy_ref: str
+    value_mutation_authorized_by_st12d: bool = False
+
+    def __post_init__(self) -> None:
+        for name in (
+            "parameter_id",
+            "parameter_symbol",
+            "d_application_class",
+            "snapshot_binding_class",
+            "authoritative_value_policy_ref",
+        ):
+            if not isinstance(getattr(self, name), str) or not getattr(self, name):
+                raise ParameterPolicyError(
+                    ReasonCode.PARAMETER_OUT_OF_POLICY,
+                    f"ST12-D {name} must be canonical nonempty text",
+                )
+        if (
+            not isinstance(self.current_source_binding_refs, tuple)
+            or not self.current_source_binding_refs
+            or any(
+                not isinstance(value, str) or not value
+                for value in self.current_source_binding_refs
+            )
+            or len(self.current_source_binding_refs)
+            != len(set(self.current_source_binding_refs))
+            or self.d_application_class
+            not in {
+                "CENTRAL_PARAMETER_POLICY_ONLY_NO_D_SERVICE_CONSUMER",
+                "IMMUTABLE_D_SNAPSHOT_INPUT_BINDING",
+            }
+            or self.snapshot_binding_class
+            not in {
+                "NOT_IN_D_RUNTIME_SNAPSHOT",
+                "IMMUTABLE_RESOLVED_VALUE_PIN",
+                "RUNTIME_TYPED_POINTER_PIN",
+            }
+            or self.value_mutation_authorized_by_st12d is not False
+        ):
+            raise ParameterPolicyError(
+                ReasonCode.PARAMETER_OUT_OF_POLICY,
+                f"ST12-D binding law failed for {self.parameter_id}",
+            )
+
+
+@dataclass(frozen=True, slots=True)
 class ParameterPolicyRecordV1:
     canonical_owner: str
     certified_step11_custody_ref: str
@@ -212,6 +265,7 @@ class ParameterPolicyRecordV1:
     step12_primary_tranche_id: str
     original_row_json: str
     appendix_e_value_semantics: ST12EParameterValueSemanticsV1 | None = None
+    appendix_d_value_semantics: ST12DParameterValueSemanticsV1 | None = None
 
     def __post_init__(self) -> None:
         string_fields = (
@@ -305,7 +359,13 @@ class ParameterPolicyRecordV1:
                     f"{name} must be a boolean",
                 )
         appendix_e = self.appendix_e_value_semantics
-        if appendix_e is None and (
+        appendix_d = self.appendix_d_value_semantics
+        if appendix_e is not None and appendix_d is not None:
+            raise ParameterPolicyError(
+                ReasonCode.PARAMETER_OUT_OF_POLICY,
+                "one parameter policy cannot belong to both D and E overlays",
+            )
+        if appendix_e is None and appendix_d is None and (
             self.canonical_owner != "QKUComputationControlPlaneV1"
             or self.certified_step11_row_embedded_in_prompt is not False
             or self.codex_online_research_allowed
@@ -361,6 +421,22 @@ class ParameterPolicyRecordV1:
             raise ParameterPolicyError(
                 ReasonCode.PARAMETER_OUT_OF_POLICY,
                 f"Appendix-E typed policy mismatch for {self.parameter_id}",
+            )
+        if appendix_d is not None and (
+            self.canonical_owner
+            != "QKUComputationControlPlaneV1.ComputationParameterPolicyV1"
+            or self.codex_online_research_allowed
+            or self.effective_policy_authority
+            != "CERTIFIED_STEP11_PARAMETER_POLICY"
+            or self.step12_primary_tranche_id != "ST12-TRANCHE-D"
+            or self.parameter_id != appendix_d.parameter_id
+            or self.parameter_symbol != appendix_d.parameter_symbol
+            or appendix_d.authoritative_value_policy_ref
+            != f"ComputationParameterPolicyV1::{self.parameter_id}"
+        ):
+            raise ParameterPolicyError(
+                ReasonCode.PARAMETER_OUT_OF_POLICY,
+                f"Appendix-D typed policy mismatch for {self.parameter_id}",
             )
         if (
             isinstance(self.source_line_start, bool)
@@ -20836,4 +20912,215 @@ if (
     raise ParameterPolicyError(
         ReasonCode.PARAMETER_BINDING_MISMATCH,
         "ST12-E capability binding registry must be exact and unique 87/87",
+    )
+
+
+# Exact owner-frozen ST12-D value policies.  The compact archive is decoded
+# once at import into the existing central ComputationParameterPolicyV1 owner;
+# generated projections and runtime snapshots carry refs only.
+_ST12D_PARAMETER_POLICY_ARCHIVE_B85 = "c-rlq>vr18lE+^~EAwS$79?Qf+x9vi1PEIvfQST6e9k(f2oP8&Ah9Kp#Ix64YaU{raGqrTRo%LPNgO*eiF5QRvCyT}s;>HVRdw~>|9Ii7Rxf^g(bD=uQ|;OV)l_@hP&4g;(bZemw$bli+kL}s+m>ct=`GD}8GUQi)65r@7tVU>#kkrU*6UTi^taz?wZp>${w=-<LNC7MyPHG3qieXyP#e_icOHZD$DTj+{J9;j7jE?8x4-`bhk~^~#pQ2?LuKjQDt-_v(Fbp(#5b-I%x2!ia~4YIPJ)kac&kL~aOO;0W$A|Q;#L{E6K5UaMBi0rt~*umrmho4^lun^_Lfder%i(8YT?E%nlM>MaWJI@d;V%2N3SMs7<)6%o!U|CuIlwyXo+pb&fKlzA39<WoX}a~^3Wax3vY63tJ8m?S0+yE1-|{UZr5J^GYb60zwPRysXKGl3+lnasEK~C(I=Ni+cwZIdcTkU8kokF-bO#QwT?RK4sBC=Gty1Xvi07etM%~N)S+(l?JLc+=-;N^Z|nUF+}su4Mr-Rswb|9|xBBqX?x}izsP)x;iw^YL##=g*dinIIR>OZkdQ;b*xVW&R_H=xE%NUtBd7!pl+k@`NvbA?=YiJv9`)HLqpa!CyS88{p;Z`$eu^2m(4}87ewOd`o!p}nk4ZqOw^-cWMHQwS{OYP8Y(I~twBn<M`7PnY>i(4U82UXFEsz$wlM*sF(`_MjAn+GkNdE+`HG7y#*_zbb4>&pNA&;Kf>8#|tl5AOL<?8R&P5|ERr8+mhIar~*WN<Nx`@8m3kId0ZIe5n{KH^hhY=ZX_fZoJr?#Ou%%Kk`GBb{MRxlVEjQQ6k8lKXo8@?q_$xPpL`?s_;{$YiChq$s-Z<C*HzisZg9aSbCFOE9h*T5r@G-iB|3eGA9J+1xA546@5`lrAG*l2f3y1`)&Zq(T8@vztd5*aMu3hhK8Wg8;pb?46g?`C4YME17L)zL;4I$FN(NxUko5_82g&N^HIt9E4-u^QJa5*Qdum5PYW-K?a7VH(jeuwO%3<)&iEp>zs6AYCU$(gB7viSFw$<9V;V^~(GS9<v+({~bOqi)?Hhf)1vMpPaA>^N`qc7{so}M>cS9&A&1_*D;OdaHhj@d&F(gq%<EaB){7J11Chn9zE`+BCO%QtYB$rjo)SWDx5Z`U)c#G;}5k&ZZ6yq#>YG)EJZeQa55VLiNkEw9GmGL5&d~m~8eo&1=XX^3=>qtmKAavJyECkZURr2MPWW>-duh51mJ%(Blx>2zBh&zk>e{>dWD6>$BgAXnqJ9kLD`Al~<gQR*N<uxpd3SJ?KD%rb4akwUN#z=su;V)bt3qhSYe&9pm7E1cv&Y?E>_0dJ7Frg^F*fYr+@V(rnCmTgQg$6khH71z4FG-j~$Dh-;{-dY%+v?CTukE*&_=rZQ1IfadZ9>m<^lq1Al0*v%$LgyC>k^;P8krrnMREvDVpaI7UO^ODs<+flpEOQaQ!VXJk_9p;FX(<yvRZ%Cquaxf^|cn-V4I^ZiEu={$dZ<fcRuLS0Q~;;+FIB8N;BzEzO$0js`p`W%~5}-_q6nebV{%eC$7yOH!~YocqI)tYC#vHg{Iblo+TB}3Y&~pTfK(K!joD<F*>4fLZYwtFEvviqA_=D^bY-xcg$;lsb%n4A?qQG&1vKGjQ@yTJ9KAc#$V)5-O%2-8|RMG&2E=?wa8uAQ)pY8L~G_P7Pw^Xvq?*iR73aowHLZe*N+t!0}7{n@}_f_?H+yQwrLDt<N6r#PeD43qvK*pXST*$kr+fbq%WX6r#LBvpD`2w##f9%_vyyN4|sF{j)5AXK3T7zZfLx+GT1NBh_1+hCbbpx1jtQZ4A8;C=)kZT-4XMP9D+Nc#ky2;pi)0QJvn?Pq=NoDvFo+wzG0<aSK97s5!~|7=sCVObE8-oqZV}WXT<<Ahv-42<B=4~t6rWcmpCV?g055Hg8rTpVfzlc8ybBM`w$WUL118+s&t+oEN>yEXaUB7vcw}6!nOn}`9?4}ezXAkgbFanRTj>t?5Qu&M~b>7%xo`j@s#Cv6O)imNlelV7zEY$%ssu2&y5381a~1*$25Ajyp9Fvi&tmZWNLqfwuL6g1-g_wk{(O%LIov2|Gdcwk{oR@Q`@<%))lgv1S?beT1(Hz3*q~b#)F{8!R95@{0;oc!wu{R=5s80#18!Bcd`uKLA^^VtXlCeX_i-!OJjv(?;JP&Cx#5}cbl*kG$f4(FWy9zx0?1E>ZLP+mCxCB@W3?`1a)fd(5}_kI^t8|L(}&aY9~=-mA0zixyPnvs)#>ZBWnm@OOEcOmu*%_hERqpMYQ=*L_+GGm}oSxt=6U1#;8c~>M4)|*5LTyUgpT@;ce_le@e+?{9$F2A<lr~3uamB{~UCruS|W2roYwO7uxX2=;NeV`nd7tH&q%?z$zYblN%ZXQN|y)D}3dxnLvQgKh1h44!!vt8d`J?IE5xFKM|&!><?2;k4j7_G37y+a#CVSi7Ai56u5Az?s5gO&KfLKaW!&dxO3Q2Jpv{Efd3C-Fz6cB<ZiCepFQ=j<fDeT8Kf5FF^dgNSMA%aOSONY@!=L^0+*4m#59DnT9OW2DkC}y!O^VYpWllcLsP%F(9EZ%jg!U`&<5Gi9BzEoq~>{}hoPwpw@&*0Ps<#~hs83-g%@A0$4UlQxBesx_PC2#)%Be*#^cyUw?O(o`RIui+k6qp!Km0XLvSDLhat|6PD+L-8R8)f!O~eWM9C13aCK}c5OoAs1WQ8ZL%8m@Y_&_;qFs>|`~sS5)Xe!cU{@+_-J*VctOMg=EqOFMY&ZRB;o+=tTr51yZ*1ZRQbHL%2$P!PLsghmams$fBgc(mVPO>_YXbrIPeJ&Btic$93mMOaM`%23dmG5Yz<3A+v1d|f?2i<V&q`7#N#Q}H&?rfvB!$P3f}C_WO{9`tR#N*Z|5nY`rG7;z2?OJi0I=}@&aT*e1|7;jh7D9<9B?sG&9(^@_=GTUbowMPFpc6bvOwMxD)Y4yP9Y_WFLHsf7~H$U$zYgIh6)A8GGuB<st}_*CER#Zn91F-iJXG<q8}5ZI4&|qVQOkyd=Y$vp=lr<s3lT)rCYiP^a+SKtJTVoMF|lPgNQO@Q9{J`hAh~tTTR98EAa}_Uf&S2ko3?u-c~kqAm|8^B=yd95;vfP_zM{J>xzh4B*!}(nCQ2*j}KK7{`Ja09a%&kWY==;32~BD86u=%_qDeW3&?UG^3gVdDwS=}U@wNj38jyZfCxq0R;|mX0d7e({S$jL&YmC?vi34~Svo#a=o6illa4&FG)KcB`fs52wXQHukdPskKv;IiFnc*((R)3qblO?}>wRdV+^UJ)cydy>CnJbF&e)EScI||TxbKlNPPTj#PqzXkBar5GPB}Aj93Gt1pT)8hTvV^M>V@M5beGaf^Y3NSOhN*D<C#mw9|`sT9QTKD^6A2kR;Bjv8P=7qyizRs=Z-mFQLpT@+$Z_zKh#fG?*r6fQ8B;b4~qV28b}!<z#Kpe>3>sY^7t-8&Q7Ve*6OO%*D~LnJh%O}o!p)6b#jx;o|7U?uM|K_(xP{4UU~wP&Z+ZFB(A+aSNhtOh;qWtS{h9OZ3|*@XAQ~>wh^l70mgo|2%Px1VF#g|7&+SsL+93>@)>NR$IciFd14#`Qh8*7{$8up|Dn*b03~P8w~RgBo(v6Hf^!A>8Sg-_K<};hU>#Jfs?lj(7B4EGZdc9gJ5(_G3KQ^bh8DZIpS^@g;Vu0DtE+IQl2MUgKx>mt@8B1Z1cBs|*1nJug7_+!@O9PeR|9pRnY5%NG3`E5!PfN65PwA<Rz1IpE72N=b46LLLkQ^nmAf1};XDxSSvX@Cb1#D2g|iai>SWEQ#di=@pewb<5)a~L&|4;e5v^!h9~veP*rG)?AE&Q1^8j@zuAFbN5%&%~n9}$tn2v$w`5(dW0frc5qQTHisS&)crynTj^JTzzJ`0E%BV~po3LXP;o=jZiz+wFQ?zxgEE<xlRo1ViUM(8$@4m_LRZ*%br+Ue0MA|<r~aR7w?SVG%;&IAzL)4`;V%|FlXu0)(8B_F8*GU`E}#g6U7OXV*Lw9b<MZzpsA|2k0qQ;D6m?S5W);cW&RnO#gCBas>w;4W|IeL(q;XPPwk->@3#!jq?hj>CiFvwK#UWQuwNIFiFDY^0r)@y4C6kU~ag!usUK&|Ae|#aW|PELOa)y{y$=zO21Gti6{CfytUIu}kWJfNF7juJA~qBQ&2>mcR}LlimmeMtP4{wsDrtMkM<8|9GEeX9P1jbKu2t$)Yq2m+5*!GlH!d!fHJRkyIsQB;guTIdYD?U*r+pz5hkGo1vP+<Hqr`K%Q35t{t_DC!T}*h=)}T|0=|j&+*uo(&|;wCO)g>#LXapz&?O^gank#Q!-D<Jo{yy6m`gUB(vU6UVMYa(UUbfQ@?00-v2@F6`IZ4e{_R679B^G9)9;)yu{h;VU4d?mAi1AnN1N6;as&b7DE1Cbmu2%iko0+FAl^n&_DL556?jb7WB|IhM<<W$gKSH{WrpxP)r$%?Xk&1Q*gUk^Qhgo>a}GL$T(SKydeL7OQ8;KrItEu8iqxqkA7}x`e6829F#URT@T$hTDdvCgh0z|Rg;HSvD(?}!&+8NDjbkwyW>XV9=1y@(gxbeqbb?JEM-iGt_pn&(JD!#l)F6HCA!G!lEp6s>*`4JDHiL3mFtVu_Oc8?E|%r_@Z$1992&0U^=%b;Ct63y`o_p-w=0j^v>wVhz@Wo<LR->V5mf+C=pm#U#dE}Xg&0yH0P>n693dhOFt71Vv{!PIJ-UxXnxn(hqsDWfGwmHFG`d<mo;B{nv(Sq~tp|#zOp>%J?Om1H!)J6i<Ru8Fn1Ya5Mk^~yCd}1D$YdD`k|)4P6{7}L^#NQb<wJ5^;xiX@PO`z85}fu<YbD{Q+{dBIy7H>l$TSJUva9pqr{T!#3pAr;47z3E6bfSDhH9^=UyKaM2Z<$=h0(E14j<stCerbY<5H%mN|FEzE}Y*eO`*C5VSus>?p0k9lY>tR)r2^y#YV%D(@31a0W1kb$vaBjmP|G`3!>nCD+=lKO0L`qkr<+-sK+CtSNs^oT?N1fxnO{BYaMg9&>i)eBEKYsS)B#0ca~#sz79~Ug}`vlvs}iO3gn(^ykzxEWR(|wnjeVyF9Vbdt*fAp6kb|{fk_y-GKGlqjzb_7*KZLR#`omQ&y!}aDC8$@ojhjj-Z&pUTtvhsqp{p$d^zb<rGAiHpA6E?L>+0wMW8jEaTq4eZ@CuKP^dFZJ46AXfnn*aG*hd`ze9*9)dm?Ix<)x67S@|^F%jT|*{&#3XtN?gLNjt%6teUe*Q`5%D?QbG&7hKixvgHP<W{=-=!zmAD=M5=1Fgl6V}*Vvu}JEFgoIhKCwkz{T{pl@>aC32_S0dH<t;LJ+1REzD$iQmyq?N@O^S&6M)ZK_wT&6*lepzzG#iIsN4LyeZLnK%IE6RZ3_F<EA<y<D!{sbSuE3F81N5zRUmnkM2epHOc@9pE*r9+XX##qe9M8?ym}(_BN1oyjI0j!CYB>?bB}MKMEm<Lzf@)F-rFY)RoRCPyio|qu(<A42VgA8Laa#LHrK!C#o$S^91|Tz)z>bOCX;4Rvv!k<TgMi)IPsV^~5T62Z%ml5<-V;1!qe58_5moFWIw>7xjk~hO-Se$+XAKO>M(YmMiUL>ATLKsPC*-ZC!%(U1zoOm?iCFI3J3nq+oD<D27Pq@o(k>aB8R(D;T0+V|)wv$t6|K~kgu)Y;#I1whI=a~tigsYaWnx~RE9`iJ%NpLY<W6r!#!$=ODj87S>jb8(+{<ph8f*RSm%ma?UF{Dkore~C*%+HVG`dLxa^3NrUaZc$gs4Pwa<7rq)MK*R#IV#dJz>5TtWx9j8yHJ`;=7PV$5YCheGY7f5T=uiv^wvSNjv{q&5=TG*vV^lL`NAtS$G5@OEZf=$m?QItX?m;w(!jRoI0Mf%04u^J%`)tqbs~!DWI{pO`-7A+~*A7Pq=mJEGJXA;Lt$IXFRFoiKc>{oZ^o~5bihbDLd^)r+OV7*AJc#RvGF~hE-?~pQ2%1LyTZ3GQPB7M`SCYK0=jIpt|50!BqZdNy07uOE+yAUE={>H7Pe`Zg-j6{qWrG_o(noVQP)OpwJo=5YtV#d72|QOf}1*h&lO3d+K!s;o8Aa>ouwV+&5g(hfbiA|9npnM@>&$jaglI>Ne8eUvv}Q<s&ibB_CM;5w*`N+$HhAkXe*k%&r!AvQ&6}FZ!ex?U5yq<DJR3wexillGBa0RaC4^wgQf&Q420<p4U(ey}cQEv$R&#r09Cr7*;W{YUHWnxL*Gjst_G>mn!IZN)`SxvO{PadvZI;Q$=PjtNcsiy5TRdgCgVyYN{w?QxrCw6rH~<rn6rJ1uVLUR7N!2Vzn#XIm7{*XfO#~*XMQm3v%^*^jy${SefQ$!kqJ$S7~J%#vTbf>2CO(MfStKq2lBxb>AG<PfN~tUYv1KM(@h#T^YT*6TQn;$YuUhxvrT^1UFlb!m9I$9+T}w@;g#}Y00RAk8=x-grh84c&in3KU#*dlttvJsZm^=deLg(++rxB&<dI~^_;mM5QB<>t)dd!^e#^cZM+e5lW9fPJ&ctE+ft2AYF_Qof3<gXZmVt+R$!n6Y=><ze$((8>6%otCpV$okHlsqb%;_Yu0*d*J(FDeecZJjcjSBSfH6#Zj%!C%YI~JE-5Wr5QYesd&#mGx!!cIRQl9bvmh=JpZwhqT96c#}jhzSxB&9!ExEK=|g{?)#6rk%SSkV2VJblshD1vpWPH{SfUj`&7D3+=>=OetpB=&oztD~Qmu1@ODCqK$){$y~~6l?{clC`WjFA9bS(*Qp66@-p7K4(Qq*%s3!!B&0s3i+`gzqFIoS0L-Cgsc*>O2~Q;WXTR9Zx@Z(4O`=cV-G&GIky<%y7bn|S7b#XD6w3*0!t$D>c5ei04p@oz!W>Usrl{L)U4ZXJhMf6cXN|!5yNB;%+u4(h}w4mlL5z<I+PmVA*6&(7qrx>*Eb;Pr1mZOMn-ctBQ^8M;%PT+K$19y$!`h{IY4+IJQY|d>7a2|Z~<m9cgGil!_?oXk~G0O5a=19ege)u!b*m5ZutgzsWMf=LzVgoN5cK$lIWG<OD0*@y(V3h(9iMVVdGisJ@sa2*AF^RP_E$kKKenB!BsH#^yBrC?<4<@l~d8m6L}Tsa=tgiDm9ZY)SErUgzBW#RS?JO0`_8&t`vO;>Ii8l<5p$d>JfzvQ`KQ2*JMCi1Lb;nsa8*aN7xHFp-zRG=8zEU3I6>OyCGa?eGO!Lf6YTF`I$*C<hhToAe6an`t2v)LjgMU@SYu;GVQftypzMJ@kZJP?tl-TGu)&)()H@%$2$otR2XQ~Rf~);9Uq<*UF%q`$HYP|KUq7Ox6oo8DaIpKo&rjz?uuU4r<aak1tVTv$*j)nV^`1>l(xoaE4dz;xZWz>uelbTwO{YX9aDaM+GsozQ+{yJIeG@BoSMlOzJUjXWQ__FuHZgnF@`8YtY|)j$sHBgs3>sFRwrIKS$i^aL_LYGQ{9%*2N-`LTcz<YjsGKze@h*(LqA>iBZ~dmm-z6s_cN_lVmrx3P8#gQ5hl--kq=({t?_=$={`xAdh}_n5S1(*_3uCeXHV`T1v&mDDeSe8MdhkcT|}_Oc3XMU%$sDVTUCon3{Q(7$ESyf_acbw^=$;<!&w<2)>J5#v6V?Ht#Y=96Ut4%-?tAEY1E4)5viexFyfmE*LtY3lZzvV2pAG%MC&Cy*_1CJR-31JFxh&58Tk%<4#?1kPNe)DA`EgGqHqazxPnjI-#3bIZ|%WzaC~}vTH?m9hZ`(EC2o|s@d(^V)=XPc7NFKO6S<~+j)`Hw_N{?VxeJh7yQQ105foEXgVE4-+H3X^n7SnjS+!K`Mhv}xbv}<pjlDJSdzM237)+x*YUxeAi!#ofek&fN4vlSJ21OR&X{?ei0A?WkxXA^y-(C@1;6;u-TWvuBJv3+O_Co^&FPM=9i74j939llK8H^E^`$%>@b5I1yGC7F|KgQM2IQR)_{z0%#Yo+!71+9O%LZ-C--)H@Kc`t2bm^Y#p7L<@##rj!DL5~d?l~Pej8JUTBlLn85xs_I65%<eo#<>Cgwp`kZZ`H}}^i6?^olH<rvy1XC2wR@Wlvr(}4ypKL=2_T${1ZDEj?an#31K|#aI(s6>m&|VrA6IiDHPP`D;6iTEu2W;0bd!q2+Lu@7<tS{W*$@F&KzaPVv`?fY%9);^z?=a*d6|m9Y?GEB|7kCJET%_%W8fQsWg6qpvYOR42t}UoKkM}SaQlEIfdT;Ix(;q!$y;`)u=x#x$Kqdf8;#?@?7Z%$WTCJ6{C|M>yLPXrW6Gr32kJBLb8ZPl3ek$#Bo+oNCQ^ZPN-wUeUX{ps+`j2?dV>d8Arv^2Z>cB@lS~Q%E)NOALP?W{!TXATS|SRh|IKm;~Xn*<t|`@WF}jt;}gCR36!GjDJcseO+bm<8yG_s+M<2eW)mI#!&#($T(Zb7$RbB2i<B(#eG!uZN^f8tW?#J!D;DT5zA6`I)dw2yypfMqbhxtE-GD?A!Vp?23r~D+z~rghS7f{-s~0QPd>Yp=bNLyx=eA)!9lo5=*26{M%W8Qy@Up_&W2K!B(-<mykH8dMJ=U9vT|FeW1pG$uku1?v$t@1oAmeSFuwdmQ=Z<pS2Go;XB|AO2tm0$$GkI9V60^w-kLww!taxKFNKES!X+3O|_)sYS6sx)19Qs7eK5qusT$I+|aH)9Ep`pC<zG3G0rw9R^9h3<mzaq{YmpD`6%;Rtds<NVBb!7jIYV{7O@~c!qeO1<Fz3v*x1Zi`(F`2>nhyV^ADi)6L&e(5s>viTQp*Rr~qlz3-)s{t(h0@b4JB|Es+10e!3@`MdsZtsPgWNEiT3wWTh05sDK1S-7s<F!5*ScD3v(h~!e290f;>9<Sqh4UL2V5ieY?+JEM6%wp&_=@W?I%Q2aJ`MCEFBH;7kqF>Zw6bjmulkr*xIfr@`wdk?Prxah$C<uXd#n9qkZGS$(}MmvHM^N0KXsroRk1i0>I+{Kz>2q1gB3%y*bjmZK|oBESR8CIizX2Tse_i18K2IHn@_?hRY%ETaeZmaSyhk-Rs9XH-1QCzi*=)N-!lgDAPiBt}WRjgvxz6qGtzZ#bE<m!tJ#q8){70N|Zzq61=xi%W1)(7B==6wrgK#<kawIt3Yxgk^~uKnn$)8R&JlV_ljJiL-w%+AtdbRumpu)5EM>JP$)s+aiGwlOiMDeG=Ncg(twq;hS{h`A6l1G#E*^gkaHmLQwQIfms)hGR(Xqea!FT42#d%9vMcsL`@<Mwa~D~-jSK+39HpA_RY+_|587n;O>GBV+z%E%)60DiZ)|K&MNOy8&9#TEKsjsFi=zutY4&WK3xuRPu9|LXw72Zh!&>d&DT-v!1}>tmUL;~3lbe9{Fs2AZlK43ef(6RRA%6uM%woJwdE;3w@h0oXA<@E_vgRDi9bmHk^FmpdC|@=M+uBB(n^?*H%H{r9d&LvkwLdz@adLQ2doDhX!_)RNAQ!Y!G)PJy)>L_ON0bL8o9#|T7>_N|dWAz#^svgHQgli#DY@h^T;ePuw=#rOSA=r4bILVC0op)C7+ztQ@tt+{-=pARTNmq6wi!VT&?IOv9Hyl-Q+13Yjl#|R7sYZY8Xf+H+r#~kt}IB7ab+YLTIesEbMpRDe^0L}UtG>CleGvu1;srOX`eW&nCd=K-z8gx-L)hr&g90aJ*mKYAm*J|2bhXLdCx6*&r$Mh9c9)kky#ii@BgS(>e$+bUgJIW?R}Tvii1Ck3bnM2R%#v699E9&(Bh%Q1=P+B(k-$XzSYex*^G>9P7Zlfj(fO9eDQ6pp`%&7jZa><u&D+`Zi8Sl?!1}G-H*ag%wtW{FuIz`>yLTIPcsuiHZd0$U9BkEIV@@Csc7f$=b)YXK}kE$jdsf7pe616!n8xJdp@v3tn(1kAvmg6es<V7sMU*uoh9~{UWe|_jysLBTCuo;p2OFNs5-3m^Vz6TAd^Sp8;AB2_}~Yhz%CxyCy~O6{l1etSBjl^#5vdtX%YreB=+m04!m)&c`y2rt;l}!PGo=mXofj$oShv#2Zm|a&+Piy)j{zTbM{i{z(}qaj*Rp`Xfj(PPoYOESMZS{JKA-tBx)7qN*`c{fQ5%NXY}+fw#^FWc!J;)I;A=dz1c&8L{chBJSp+yQLAG(Qevx6QP?b(BOb`a5NVxMb1SiWYO93}VL5J%fqVhcOA;?M+VGwNJmOBcNR$UPOj1F#k;OIVdtxjjsbh$-2~{x~3=EU3q&m>8jf>NC)#Nd$QL&Jk(S{`6A1+FUUw)NMG4EN(<|fIF-;AiAb}aw>Qf6wgD`=p|Pa9u{j+_eJz>f5I3La2#Ht8?AQ7$iqG+JVn_ZKxfIx9F81-lZ-^}JBUL=~UN_$mBeK3D+s3b^Jpl%$AA=!%^Y;WPnqMJ|f6FNA<9sp;G+J%~;zDjj8Gt2di>?V^E{Lc+<x$+Or}w|!7++I6+~eNS-Tm(pOM4DKShUGnzJG@asnWj+B9R$gP$bK`*u@HKDc-fjd8V$UcDCGGj<PHE??*Dg}3u>i}Pe5fcBY|SaSA=|-o&K5?pgK+unh6W)F&jA`>>@cxg(6pHrp4qt{4;x>`hPJqjdBMkOHxD{aD4?_@_>G-Q8A?du#H)<@`Y<&`=L%X$=*+_f%7=E-=wO)zkwsrZ^d?*I?&<cW+U>C2_?LtWo^NewM{qJ!Xuwl;dc{fXZnlc&V&@80Eb?A%jL&dV!(9#cvvT9Wj_^G8_cgy7JlE{e#?&9pqf0Q2n~Kh0je4#GI2wNP(B0%C;j`DW@A2ROkHe94(@rH{e;dERZ6d~ah;@l5V=a~^WaXX`5D^=@vT@hIDXrI=Kq3cw9!SJ!;-c(20|~NXnVB#Fe+|*GE-MPg(QAy4ziAbP##IlNQv78BoJoOUEs%*dKv*d})Wm+Z5?9)Cb2rd&TO{DphA*c2Jq1isfPqBwh))_z5cO7TT4V)=<RGy!mf37vSADzb5V^$WG%)2&V^|&ZdU-lIIXJ#&TicxO-lUV{cuFT9R@l`x_+Yca&hR9&-}Adpkk=xKs1ID^#^ZfxtF~eYrSQ#P)_xjh`GD3rVz)yPfKlNETR1RbPSuJ7??doW_%mcYhQxc}I^=|t8&JCNnqYA-ZI;M8J<F}1^DaPf?S2X7M{EMqfyQSih!8ytbiFm?4N5VC81Q*WMFWAfQ}h8>pFAV<Y5XYkY3xKFv6E*2<`DoS#PIiZ5cBq;cWHXQc0yTmM>?N($onhh659>n4&#8fC145qCQ#bg90m%I>oCCCpf}BAVPWdR__n=pH!tQTnP1xpch|G%BVUZ5m^R$Z{{q-F`U*60Fj|yu1T;k~5UjPp2t1u3e^2V3C+O*Tybv*&*$M53r2}Hk$E$&gP1Uma2T4>?yqdT3L`bsAVHPT#fN0}7oa47w?sANb??AK%OhFL{+LI7FV+tvCvgT(BmD*#82c=3lA+QL}Kf;;hfGt{N^Km=CDpD`DGoCx&f=BKhdN9|3h-qPFHp&z+#{4NY;+A*a4YIWp;572tp-KaeplAdYhnP&rU~(<1^K>dJN?v{PF;qFzB3XqIx%__a1{i|o#O`E5z!WKi=gN&Yr;-oCfFX$C)3)k9?cbYvOa;b5L>E#kaQ~px1d<KbymcG(9Pg!@(i!RSly7+ELK>24zme01@_Vm2DOdoRJVh$^F2&`nT`<?kWh3JOd{Kr(DGvx7vzU>Pe%z%ev4YM$T%cNW)alULCakeOR}ADCn{RcCXGmQN4E9t~2X98kQ2WkMmU^XiyDBWD3VUYguZ^o*TY5%Y>k9iMPtOo7R}C-qT74_doi<L7zX|6WU%<J>2F@*)Hj7EF!fh%dsZq)k-D_A_HTMDqvRu*I=VT_2COzZ?;GL@}go=183phqPU0o$TPJ8{`D&sY6qDvDj9_Ezdu%)IrOtEKT+uAGV2Suz-j}Gc3k^L$}R_>ou#=9Qrl1j;gdLJdd&JzL6WHBeJ)Hb}r{8pI;lQj()S<RFA@;w$Vyk}o*L^ZCys+AKBxD~h}t4qt7^QF{sX(L}D4m|sN^I1@gB~gHw)q;sHu6O6Ge8r|8)oaDt^t9(}^jv1!lPV&}DRo2g<cNOH+xMg|h0W$3&7el2m0a!okN*d#=@?)"
+
+
+def _decode_st12d_parameter_rows() -> tuple[dict[str, object], ...]:
+    payload = zlib.decompress(
+        base64.b85decode(_ST12D_PARAMETER_POLICY_ARCHIVE_B85.encode("ascii"))
+    ).decode("utf-8")
+    rows = json.loads(payload)
+    if not isinstance(rows, list) or any(not isinstance(row, dict) for row in rows):
+        raise ParameterPolicyError(
+            ReasonCode.PARAMETER_BINDING_MISMATCH,
+            "ST12-D owner-frozen parameter archive is malformed",
+        )
+    return tuple(rows)
+
+
+_ST12D_PARAMETER_ROWS = _decode_st12d_parameter_rows()
+
+
+def _st12d_application(row: Mapping[str, object]) -> ST12DParameterValueSemanticsV1:
+    return ST12DParameterValueSemanticsV1(
+        parameter_id=str(row["id"]),
+        parameter_symbol=str(row["sym"]),
+        d_application_class=str(row["app"]),
+        snapshot_binding_class=str(row["snap"]),
+        current_source_binding_refs=tuple(str(value) for value in row["src"]),
+        authoritative_value_policy_ref=(
+            f"ComputationParameterPolicyV1::{row['id']}"
+        ),
+    )
+
+
+def _st12d_parameter_policy(
+    row: Mapping[str, object],
+    application: ST12DParameterValueSemanticsV1,
+) -> ParameterPolicyRecordV1:
+    precision = row["precision"]
+    if not isinstance(precision, Mapping):
+        raise ParameterPolicyError(
+            ReasonCode.PARAMETER_BINDING_MISMATCH,
+            f"ST12-D precision policy is malformed for {application.parameter_id}",
+        )
+    return ParameterPolicyRecordV1(
+        canonical_owner=(
+            "QKUComputationControlPlaneV1.ComputationParameterPolicyV1"
+        ),
+        certified_step11_custody_ref=str(row["custody"]),
+        certified_step11_row_embedded_in_prompt=False,
+        codex_online_research_allowed=False,
+        direct_source_claim_justifications=(),
+        effective_bounded_search_space_or_fit_constraint=str(row["bound"]),
+        effective_day1_seed_value_or_resolution_rule=str(row["seed"]),
+        effective_default_authority_class=str(row["default"]),
+        effective_fallback_behavior_when_value_unavailable=str(row["fallback"]),
+        effective_owner_dashboard_editability_class=str(row["edit"]),
+        effective_policy_authority=str(row["authority"]),
+        effective_reference_range_or_structural_constraint=str(row["range"]),
+        effective_resolution_class=str(row["res"]),
+        effective_source_state_refs=tuple(
+            str(value) for value in row["state_refs"]
+        ),
+        effective_ui_widget_class=str(row["widget"]),
+        effective_unit_or_basis=str(row["unit"]),
+        effective_value_source_class=str(row["source_class"]),
+        evidence_basis_class=str(row["evidence"]),
+        evidence_binding_rule_refs=tuple(
+            str(value) for value in row["binding_rules"]
+        ),
+        family_evidence_binding_ref=str(row["family"]),
+        implementation_resolution_kind=str(row["impl"]),
+        launch_computability_state=str(row["launch"]),
+        master_plan_heading_path=tuple(str(value) for value in row["heading"]),
+        master_plan_section_id=str(row["section"]),
+        missing_stale_invalid_behavior=str(row["missing"]),
+        parameter_audit_id=str(row["audit"]),
+        parameter_id=application.parameter_id,
+        parameter_symbol=application.parameter_symbol,
+        precision_and_rounding_policy=tuple(
+            (str(name), str(value)) for name, value in precision.items()
+        ),
+        runtime_resolution_procedure=tuple(
+            str(value) for value in row["procedure"]
+        ),
+        source_line_end=int(row["end"]),
+        source_line_start=int(row["start"]),
+        step12_primary_tranche_id="ST12-TRANCHE-D",
+        original_row_json=json.dumps(
+            {
+                "freeze_value_policy_ref": (
+                    "freeze/PARAMETER_POLICIES.jsonl::"
+                    f"{application.parameter_id}"
+                )
+            },
+            sort_keys=True,
+            separators=(",", ":"),
+        ),
+        appendix_d_value_semantics=application,
+    )
+
+
+ST12D_PARAMETER_APPLICATION_BINDINGS: Mapping[
+    str, ST12DParameterValueSemanticsV1
+] = MappingProxyType(
+    {
+        application.parameter_id: application
+        for application in (
+            _st12d_application(row) for row in _ST12D_PARAMETER_ROWS
+        )
+    }
+)
+ST12D_PARAMETER_POLICIES: Mapping[
+    str, ParameterPolicyRecordV1
+] = MappingProxyType(
+    {
+        application.parameter_id: _st12d_parameter_policy(row, application)
+        for row in _ST12D_PARAMETER_ROWS
+        for application in (
+            ST12D_PARAMETER_APPLICATION_BINDINGS[str(row["id"])],
+        )
+    }
+)
+ST12D_SNAPSHOT_PARAMETER_BINDING_IDS = tuple(
+    parameter_id
+    for parameter_id, binding in ST12D_PARAMETER_APPLICATION_BINDINGS.items()
+    if binding.d_application_class == "IMMUTABLE_D_SNAPSHOT_INPUT_BINDING"
+)
+
+_ST12D_POLICY_IDENTIFIERS = frozenset(
+    identifier
+    for policy in ST12D_PARAMETER_POLICIES.values()
+    for identifier in (policy.parameter_id, policy.parameter_audit_id)
+)
+if _ST12D_POLICY_IDENTIFIERS.intersection(PARAMETER_POLICY_BY_ID):
+    raise ParameterPolicyError(
+        ReasonCode.PARAMETER_BINDING_MISMATCH,
+        "Appendix-D parameter identity collides with an existing typed policy",
+    )
+PARAMETER_POLICY_BY_ID = MappingProxyType(
+    {
+        **PARAMETER_POLICY_BY_ID,
+        **{
+            identifier: policy
+            for policy in ST12D_PARAMETER_POLICIES.values()
+            for identifier in (policy.parameter_id, policy.parameter_audit_id)
+        },
+    }
+)
+
+
+def resolve_st12d_value_policy_refs(
+    parameter_ids: tuple[str, ...],
+) -> Mapping[str, str]:
+    """Resolve actual D value policies through the one central owner."""
+
+    if (
+        not isinstance(parameter_ids, tuple)
+        or len(parameter_ids) != len(set(parameter_ids))
+        or any(not isinstance(value, str) or not value for value in parameter_ids)
+    ):
+        raise ParameterPolicyError(
+            ReasonCode.PARAMETER_BINDING_MISMATCH,
+            "D parameter identities must be a unique immutable tuple",
+        )
+    resolved: dict[str, str] = {}
+    for parameter_id in parameter_ids:
+        binding = ST12D_PARAMETER_APPLICATION_BINDINGS.get(parameter_id)
+        if binding is None:
+            raise ParameterPolicyError(
+                ReasonCode.PARAMETER_UNKNOWN,
+                f"unknown ST12-D parameter identity: {parameter_id}",
+            )
+        policy = get_parameter_policy(parameter_id)
+        if (
+            policy is not ST12D_PARAMETER_POLICIES[parameter_id]
+            or policy.appendix_d_value_semantics is not binding
+        ):
+            raise ParameterPolicyError(
+                ReasonCode.PARAMETER_OWNER_MISSING,
+                f"canonical ST12-D value owner gap: {parameter_id}",
+            )
+        resolved[parameter_id] = binding.authoritative_value_policy_ref
+    return MappingProxyType(resolved)
+
+
+if (
+    len(ST12D_PARAMETER_APPLICATION_BINDINGS) != 28
+    or len(ST12D_PARAMETER_POLICIES) != 28
+    or len(ST12D_SNAPSHOT_PARAMETER_BINDING_IDS) != 21
+    or tuple(ST12D_PARAMETER_APPLICATION_BINDINGS)
+    != tuple(row["id"] for row in _ST12D_PARAMETER_ROWS)
+    or len(
+        {
+            policy.canonical_owner
+            for policy in ST12D_PARAMETER_POLICIES.values()
+        }
+    )
+    != 1
+    or any(
+        binding.value_mutation_authorized_by_st12d
+        for binding in ST12D_PARAMETER_APPLICATION_BINDINGS.values()
+    )
+):
+    raise ParameterPolicyError(
+        ReasonCode.PARAMETER_BINDING_MISMATCH,
+        "ST12-D parameter application closure must be exact 28/21 with one owner",
     )

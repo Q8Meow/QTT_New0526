@@ -206,6 +206,48 @@ def _typed_enum(value: object, enum_type: type[_EnumT], field_name: str) -> _Enu
     return value
 
 
+def _reason_tuple(
+    values: object,
+    field_name: str,
+    *,
+    require_nonempty: bool = False,
+) -> tuple[ReasonCode, ...]:
+    if (
+        not isinstance(values, tuple)
+        or any(type(value) is not ReasonCode for value in values)
+        or len(values) != len(set(values))
+        or (require_nonempty and not values)
+    ):
+        raise ContractValidationError(
+            ReasonCode.CONTRACT_OR_TYPE_INVALID,
+            f"{field_name} must be an ordered unique tuple of ReasonCode values",
+        )
+    return values
+
+
+def _utc_timestamp(value: object, field_name: str) -> datetime:
+    if (
+        not isinstance(value, datetime)
+        or value.tzinfo is None
+        or value.utcoffset() is None
+        or value.utcoffset().total_seconds() != 0
+    ):
+        raise ContractValidationError(
+            ReasonCode.CLOCK_DOMAIN_MISMATCH,
+            f"{field_name} must be a timezone-aware UTC datetime",
+        )
+    return value
+
+
+def _must_be_false(value: object, field_name: str) -> None:
+    _exact_bool(value, field_name)
+    if value is not False:
+        raise ContractValidationError(
+            ReasonCode.RUNTIME_EFFECT_FORBIDDEN,
+            f"{field_name} must remain exact false in ST12-D",
+        )
+
+
 def immutable_mapping(values: Mapping[str, str] | None = None) -> Mapping[str, str]:
     if values is None:
         return MappingProxyType({})
@@ -247,6 +289,69 @@ class BenchmarkSignConvention(StrEnum):
 class ModeEligibilityState(StrEnum):
     INELIGIBLE = "INELIGIBLE"
     CONTRACT_ONLY = "CONTRACT_ONLY"
+    ELIGIBLE_FOR_ALLOW_CANDIDACY_NO_EFFECT = (
+        "ELIGIBLE_FOR_ALLOW_CANDIDACY_NO_EFFECT"
+    )
+
+
+class AllowCandidateStateV1(StrEnum):
+    NOT_EVALUATED = "NOT_EVALUATED"
+    BLOCKED = "BLOCKED"
+    EVIDENCE_UNAVAILABLE = "EVIDENCE_UNAVAILABLE"
+    OWNER_CONFIRMATION_REQUIRED = "OWNER_CONFIRMATION_REQUIRED"
+    ELIGIBLE_NOT_ACTIVATED = "ELIGIBLE_NOT_ACTIVATED"
+
+
+class ActivationPreconditionStateV1(StrEnum):
+    NOT_AUTHORIZED_D_HOLD = "NOT_AUTHORIZED_D_HOLD"
+    PRECONDITIONS_INCOMPLETE = "PRECONDITIONS_INCOMPLETE"
+    PRECONDITIONS_SATISFIED_HELD = "PRECONDITIONS_SATISFIED_HELD"
+
+
+class SnapshotCandidateStateV1(StrEnum):
+    ABSENT = "ABSENT"
+    BUILT_IMMUTABLE = "BUILT_IMMUTABLE"
+    VALIDATED_NO_EFFECT = "VALIDATED_NO_EFFECT"
+    REJECTED = "REJECTED"
+    STALE = "STALE"
+    ROLLBACK_REQUIRED = "ROLLBACK_REQUIRED"
+    RETIRED = "RETIRED"
+
+
+class KillStateV1(StrEnum):
+    CLEAR_CURRENT = "CLEAR_CURRENT"
+    ACTIVE = "ACTIVE"
+    MISSING_STALE_OR_CONFLICTING = "MISSING_STALE_OR_CONFLICTING"
+
+
+class SubmitDisabledStateV1(StrEnum):
+    SUBMIT_ENABLED_READ_ONLY = "SUBMIT_ENABLED_READ_ONLY"
+    SUBMIT_DISABLED = "SUBMIT_DISABLED"
+    MISSING_STALE_OR_CONFLICTING = "MISSING_STALE_OR_CONFLICTING"
+
+
+class ST12FEvidenceStateV1(StrEnum):
+    EVIDENCE_REFERENCE_AVAILABLE = "EVIDENCE_REFERENCE_AVAILABLE"
+    EVIDENCE_REFERENCE_STALE = "EVIDENCE_REFERENCE_STALE"
+    EVIDENCE_REFERENCE_CONFLICTING = "EVIDENCE_REFERENCE_CONFLICTING"
+    EVIDENCE_UNAVAILABLE_F_NOT_IMPLEMENTED = (
+        "EVIDENCE_UNAVAILABLE_F_NOT_IMPLEMENTED"
+    )
+    EVIDENCE_INSUFFICIENT_FAIL_CLOSED = "EVIDENCE_INSUFFICIENT_FAIL_CLOSED"
+
+
+class SnapshotRollbackStateV1(StrEnum):
+    NONE = "NONE"
+    PROPOSED_PRIOR_IMMUTABLE_CANDIDATE = (
+        "PROPOSED_PRIOR_IMMUTABLE_CANDIDATE"
+    )
+    BLOCKED_NO_VALID_PRIOR_CANDIDATE = "BLOCKED_NO_VALID_PRIOR_CANDIDATE"
+
+
+class SnapshotRetirementStateV1(StrEnum):
+    CURRENT = "CURRENT"
+    DRAINING_PINNED_IN_FLIGHT_ONLY = "DRAINING_PINNED_IN_FLIGHT_ONLY"
+    RETIRED = "RETIRED"
 
 
 class EvidenceState(StrEnum):
@@ -320,6 +425,10 @@ class OperationBlockerCodeV1(StrEnum):
     UNIT_CONVERSION_FAILED = "UNIT_CONVERSION_FAILED"
     OUTPUT_SCHEMA_MISMATCH = "OUTPUT_SCHEMA_MISMATCH"
     FORMULA_EXECUTION_REJECTED = "FORMULA_EXECUTION_REJECTED"
+    MODE_SNAPSHOT_BLOCKED = "MODE_SNAPSHOT_BLOCKED"
+    EVIDENCE_REFERENCE_UNAVAILABLE = "EVIDENCE_REFERENCE_UNAVAILABLE"
+    KILL_OR_SUBMIT_DISABLED = "KILL_OR_SUBMIT_DISABLED"
+    LATENCY_PROFILE_REQUIRED = "LATENCY_PROFILE_REQUIRED"
 
 
 class TypedValueKindV1(StrEnum):
@@ -1044,6 +1153,667 @@ class FormulaRuntimeSnapshotV1:
                 ReasonCode.RUNTIME_EFFECT_FORBIDDEN,
                 "Tranche A snapshots cannot be activated",
             )
+
+
+@dataclass(frozen=True, slots=True)
+class ReadOnlyKillSubmitStateV1:
+    """Current-owner safety state that ST12-D can only inspect."""
+
+    state_ref: str
+    scope_ref: str
+    kill_active: bool
+    submit_disabled: bool
+    observed_at: datetime
+    valid_until: datetime
+    policy_version: str
+    causation_id: str
+    correlation_id: str
+
+    def __post_init__(self) -> None:
+        for name in (
+            "state_ref",
+            "scope_ref",
+            "policy_version",
+            "causation_id",
+            "correlation_id",
+        ):
+            _canonical_text(getattr(self, name), name)
+        _exact_bool(self.kill_active, "kill_active")
+        _exact_bool(self.submit_disabled, "submit_disabled")
+        observed = _utc_timestamp(self.observed_at, "observed_at")
+        valid_until = _utc_timestamp(self.valid_until, "valid_until")
+        if observed > valid_until:
+            raise ContractValidationError(
+                ReasonCode.POLICY_OR_SNAPSHOT_STALE,
+                "kill/submit validity cannot precede its observation",
+            )
+
+    @property
+    def kill_state(self) -> KillStateV1:
+        return KillStateV1.ACTIVE if self.kill_active else KillStateV1.CLEAR_CURRENT
+
+    @property
+    def submit_disabled_state(self) -> SubmitDisabledStateV1:
+        return (
+            SubmitDisabledStateV1.SUBMIT_DISABLED
+            if self.submit_disabled
+            else SubmitDisabledStateV1.SUBMIT_ENABLED_READ_ONLY
+        )
+
+
+@dataclass(frozen=True, slots=True)
+class ST12FEvidenceReferenceV1:
+    """Typed reference boundary only; ST12-D never produces F evidence."""
+
+    evidence_state: ST12FEvidenceStateV1
+    evidence_ref: str
+    lane: str
+    dataset_grade_ref: str
+    venue_semantic_binding_ref: str
+    cross_venue_equivalence_ref: str
+    observed_at: datetime
+    valid_until: datetime
+    policy_version: str
+    causation_id: str
+    correlation_id: str
+
+    def __post_init__(self) -> None:
+        _typed_enum(self.evidence_state, ST12FEvidenceStateV1, "evidence_state")
+        for name in (
+            "evidence_ref",
+            "lane",
+            "dataset_grade_ref",
+            "venue_semantic_binding_ref",
+            "cross_venue_equivalence_ref",
+            "policy_version",
+            "causation_id",
+            "correlation_id",
+        ):
+            _canonical_text(getattr(self, name), name)
+        observed = _utc_timestamp(self.observed_at, "observed_at")
+        valid_until = _utc_timestamp(self.valid_until, "valid_until")
+        if observed > valid_until:
+            raise ContractValidationError(
+                ReasonCode.POLICY_OR_SNAPSHOT_STALE,
+                "evidence validity cannot precede its observation",
+            )
+        if self.evidence_state is ST12FEvidenceStateV1.EVIDENCE_REFERENCE_AVAILABLE:
+            if self.lane not in {"REPLAY", "PAPER"}:
+                raise ContractValidationError(
+                    ReasonCode.CONTRACT_OR_TYPE_INVALID,
+                    "available F evidence must declare exactly REPLAY or PAPER",
+                )
+            if any(
+                getattr(self, name) == "EXPLICIT_ABSENCE"
+                for name in (
+                    "evidence_ref",
+                    "dataset_grade_ref",
+                    "venue_semantic_binding_ref",
+                    "cross_venue_equivalence_ref",
+                )
+            ):
+                raise ContractValidationError(
+                    ReasonCode.EVIDENCE_REFERENCE_UNAVAILABLE_STALE_CONFLICTING_OR_SCOPE_MISMATCH,
+                    "available evidence cannot carry an absent evidence pin",
+                )
+
+
+@dataclass(frozen=True, slots=True)
+class FormulaRuntimeSnapshotCandidateV1:
+    """Deeply immutable, version-pinned ST12-D candidate; never active state."""
+
+    snapshot_candidate_id: str
+    request_id: str
+    principal_id: str
+    task_id: str
+    capability_decision_ref: str
+    computation_bundle_ref: str
+    context_ref: str
+    formula_spec_refs: tuple[str, ...]
+    implementation_version_pins: tuple[ImplementationVersionPinV1, ...]
+    binding_profile_ref: str
+    parameter_policy_snapshot_ref: str
+    parameter_value_refs: tuple[str, ...]
+    source_epoch_refs: tuple[str, ...]
+    receipt_lineage_refs: tuple[str, ...]
+    readiness_state_ref: str
+    pretrade_state_ref: str
+    evidence_state_ref: str
+    kill_state_ref: str
+    submit_disabled_state_ref: str
+    created_at: datetime
+    evaluated_at: datetime
+    expires_at: datetime
+    stale_at: datetime | None
+    candidate_state: SnapshotCandidateStateV1
+    reason_codes: tuple[ReasonCode, ...]
+    fallback_route: str
+    owner_review_route: str
+    runtime_effect_authorized: bool = False
+    order_release_authorized: bool = False
+    activated: bool = False
+
+    def __post_init__(self) -> None:
+        for name in (
+            "snapshot_candidate_id",
+            "request_id",
+            "principal_id",
+            "task_id",
+            "capability_decision_ref",
+            "computation_bundle_ref",
+            "context_ref",
+            "binding_profile_ref",
+            "parameter_policy_snapshot_ref",
+            "readiness_state_ref",
+            "pretrade_state_ref",
+            "evidence_state_ref",
+            "kill_state_ref",
+            "submit_disabled_state_ref",
+            "fallback_route",
+            "owner_review_route",
+        ):
+            _canonical_text(getattr(self, name), name)
+        for name in (
+            "formula_spec_refs",
+            "parameter_value_refs",
+            "source_epoch_refs",
+            "receipt_lineage_refs",
+        ):
+            _validate_unique_text(getattr(self, name), name, nonempty=True)
+        if (
+            not isinstance(self.implementation_version_pins, tuple)
+            or not self.implementation_version_pins
+            or any(
+                type(pin) is not ImplementationVersionPinV1
+                for pin in self.implementation_version_pins
+            )
+            or len(
+                {pin.math_spec_id for pin in self.implementation_version_pins}
+            )
+            != len(self.implementation_version_pins)
+        ):
+            raise ContractValidationError(
+                ReasonCode.PARAMETER_POLICY_OR_PIN_INVALID,
+                "implementation_version_pins must be exact, ordered, and unique",
+            )
+        created = _utc_timestamp(self.created_at, "created_at")
+        evaluated = _utc_timestamp(self.evaluated_at, "evaluated_at")
+        expires = _utc_timestamp(self.expires_at, "expires_at")
+        if not created <= evaluated <= expires:
+            raise ContractValidationError(
+                ReasonCode.POLICY_OR_SNAPSHOT_STALE,
+                "candidate times must satisfy created <= evaluated <= expires",
+            )
+        if self.stale_at is not None:
+            stale = _utc_timestamp(self.stale_at, "stale_at")
+            if stale < created:
+                raise ContractValidationError(
+                    ReasonCode.POLICY_OR_SNAPSHOT_STALE,
+                    "stale_at cannot precede candidate creation",
+                )
+        _typed_enum(self.candidate_state, SnapshotCandidateStateV1, "candidate_state")
+        _reason_tuple(self.reason_codes, "reason_codes", require_nonempty=True)
+        for name in (
+            "runtime_effect_authorized",
+            "order_release_authorized",
+            "activated",
+        ):
+            _must_be_false(getattr(self, name), name)
+
+
+@dataclass(frozen=True, slots=True)
+class ModeSnapshotDecisionV1:
+    decision_id: str
+    request_id: str
+    task_id: str
+    principal_id: str
+    current_agent_id: str
+    capability_decision_ref: str
+    computation_bundle_ref: str
+    context_ref: str
+    parameter_policy_snapshot_ref: str
+    receipt_lineage_refs: tuple[str, ...]
+    readiness_state_ref: str
+    pretrade_state_ref: str
+    evidence_state_ref: str
+    kill_state_ref: str
+    submit_disabled_state_ref: str
+    owner_action_policy_ref: str
+    current_mode: str
+    requested_mode: str
+    mode_eligibility_state: ModeEligibilityState
+    allow_candidate_state: AllowCandidateStateV1
+    snapshot_candidate_state: SnapshotCandidateStateV1
+    activation_precondition_state: ActivationPreconditionStateV1
+    rollback_state: SnapshotRollbackStateV1
+    rollback_target_ref_or_explicit_absence: str
+    pin_policy_ref: str
+    stale_state: str
+    expires_at: datetime
+    retirement_state: SnapshotRetirementStateV1
+    implementation_pins: tuple[ImplementationVersionPinV1, ...]
+    source_epoch_refs: tuple[str, ...]
+    reason_codes: tuple[ReasonCode, ...]
+    fallback_route: str
+    owner_review_route: str
+    no_trade_route: str
+    latency_measurement_ref_or_explicit_absence: str
+    runtime_effect_authorized: bool = False
+    active_pointer_commit_allowed: bool = False
+    order_release_authorized: bool = False
+
+    def __post_init__(self) -> None:
+        for name in (
+            "decision_id",
+            "request_id",
+            "task_id",
+            "principal_id",
+            "current_agent_id",
+            "capability_decision_ref",
+            "computation_bundle_ref",
+            "context_ref",
+            "parameter_policy_snapshot_ref",
+            "readiness_state_ref",
+            "pretrade_state_ref",
+            "evidence_state_ref",
+            "kill_state_ref",
+            "submit_disabled_state_ref",
+            "owner_action_policy_ref",
+            "current_mode",
+            "requested_mode",
+            "rollback_target_ref_or_explicit_absence",
+            "pin_policy_ref",
+            "stale_state",
+            "fallback_route",
+            "owner_review_route",
+            "no_trade_route",
+            "latency_measurement_ref_or_explicit_absence",
+        ):
+            _canonical_text(getattr(self, name), name)
+        _validate_unique_text(self.receipt_lineage_refs, "receipt_lineage_refs", nonempty=True)
+        if (
+            not isinstance(self.implementation_pins, tuple)
+            or not self.implementation_pins
+            or any(type(pin) is not ImplementationVersionPinV1 for pin in self.implementation_pins)
+        ):
+            raise ContractValidationError(
+                ReasonCode.PARAMETER_POLICY_OR_PIN_INVALID,
+                "implementation_pins require exact typed pins",
+            )
+        _validate_unique_text(self.source_epoch_refs, "source_epoch_refs", nonempty=True)
+        for value, enum_type, name in (
+            (self.mode_eligibility_state, ModeEligibilityState, "mode_eligibility_state"),
+            (self.allow_candidate_state, AllowCandidateStateV1, "allow_candidate_state"),
+            (self.snapshot_candidate_state, SnapshotCandidateStateV1, "snapshot_candidate_state"),
+            (self.activation_precondition_state, ActivationPreconditionStateV1, "activation_precondition_state"),
+            (self.rollback_state, SnapshotRollbackStateV1, "rollback_state"),
+            (self.retirement_state, SnapshotRetirementStateV1, "retirement_state"),
+        ):
+            _typed_enum(value, enum_type, name)
+        _utc_timestamp(self.expires_at, "expires_at")
+        _reason_tuple(self.reason_codes, "reason_codes", require_nonempty=True)
+        for name in (
+            "runtime_effect_authorized",
+            "active_pointer_commit_allowed",
+            "order_release_authorized",
+        ):
+            _must_be_false(getattr(self, name), name)
+
+
+_D_TRANSITION_STATE_TYPES = (
+    ModeEligibilityState,
+    AllowCandidateStateV1,
+    SnapshotCandidateStateV1,
+    SnapshotRollbackStateV1,
+    SnapshotRetirementStateV1,
+)
+
+
+@dataclass(frozen=True, slots=True)
+class SnapshotTransitionProposalV1:
+    proposal_id: str
+    source_candidate_ref_or_explicit_absence: str
+    target_candidate_ref: str
+    source_candidate_version_or_explicit_absence: str
+    target_candidate_version: str
+    transition_id: str
+    expected_owner_state_ref: str
+    precondition_receipt_refs: tuple[str, ...]
+    proposed_state: ModeEligibilityState | AllowCandidateStateV1 | SnapshotCandidateStateV1 | SnapshotRollbackStateV1 | SnapshotRetirementStateV1
+    typed_reason_codes: tuple[ReasonCode, ...]
+    causation_id: str
+    correlation_id: str
+    active_pointer_commit_allowed: bool = False
+    mutation_allowed: bool = False
+    runtime_effect_authorized: bool = False
+    order_release_authorized: bool = False
+
+    def __post_init__(self) -> None:
+        for name in (
+            "proposal_id",
+            "source_candidate_ref_or_explicit_absence",
+            "target_candidate_ref",
+            "source_candidate_version_or_explicit_absence",
+            "target_candidate_version",
+            "transition_id",
+            "expected_owner_state_ref",
+            "causation_id",
+            "correlation_id",
+        ):
+            _canonical_text(getattr(self, name), name)
+        _validate_unique_text(
+            self.precondition_receipt_refs,
+            "precondition_receipt_refs",
+            nonempty=True,
+        )
+        if type(self.proposed_state) not in _D_TRANSITION_STATE_TYPES:
+            raise ContractValidationError(
+                ReasonCode.CONTRACT_OR_TYPE_INVALID,
+                "proposed_state must be an exact frozen D transition state",
+            )
+        _reason_tuple(self.typed_reason_codes, "typed_reason_codes", require_nonempty=True)
+        if self.causation_id == self.correlation_id:
+            raise ContractValidationError(
+                ReasonCode.CONTRACT_OR_TYPE_INVALID,
+                "causation and correlation identities must remain distinct",
+            )
+        for name in (
+            "active_pointer_commit_allowed",
+            "mutation_allowed",
+            "runtime_effect_authorized",
+            "order_release_authorized",
+        ):
+            _must_be_false(getattr(self, name), name)
+
+
+@dataclass(frozen=True, slots=True)
+class ModeSnapshotCandidateProposalResultV1:
+    snapshot_candidate_or_explicit_absence: FormulaRuntimeSnapshotCandidateV1 | None
+    mode_snapshot_decision: ModeSnapshotDecisionV1
+    snapshot_transition_proposal: SnapshotTransitionProposalV1
+    control_receipt_refs: tuple[str, ...]
+    no_authority_flag: bool = True
+
+    def __post_init__(self) -> None:
+        if self.snapshot_candidate_or_explicit_absence is not None and type(
+            self.snapshot_candidate_or_explicit_absence
+        ) is not FormulaRuntimeSnapshotCandidateV1:
+            raise ContractValidationError(
+                ReasonCode.CONTRACT_OR_TYPE_INVALID,
+                "snapshot candidate must be exact typed candidate or explicit None",
+            )
+        if type(self.mode_snapshot_decision) is not ModeSnapshotDecisionV1 or type(
+            self.snapshot_transition_proposal
+        ) is not SnapshotTransitionProposalV1:
+            raise ContractValidationError(
+                ReasonCode.CONTRACT_OR_TYPE_INVALID,
+                "mode snapshot result requires exact decision and proposal contracts",
+            )
+        _validate_unique_text(self.control_receipt_refs, "control_receipt_refs", nonempty=True)
+        _exact_bool(self.no_authority_flag, "no_authority_flag")
+        if self.no_authority_flag is not True:
+            raise ContractValidationError(
+                ReasonCode.RUNTIME_EFFECT_FORBIDDEN,
+                "mode snapshot proposal must retain its no-authority flag",
+            )
+
+
+@dataclass(frozen=True, slots=True)
+class ModeSnapshotOwnerProjectionV1:
+    decision_id: str
+    mode_eligibility_state: ModeEligibilityState
+    allow_candidate_state: AllowCandidateStateV1
+    snapshot_candidate_state: SnapshotCandidateStateV1
+    evidence_state: ST12FEvidenceStateV1
+    kill_state: KillStateV1
+    submit_disabled_state: SubmitDisabledStateV1
+    stale_state: str
+    reason_codes: tuple[ReasonCode, ...]
+    fallback_route: str
+    owner_review_route: str
+    policy_and_snapshot_versions: tuple[str, ...]
+    runtime_effect_authorized: bool = False
+    order_release_authorized: bool = False
+
+    def __post_init__(self) -> None:
+        for name in ("decision_id", "stale_state", "fallback_route", "owner_review_route"):
+            _canonical_text(getattr(self, name), name)
+        for value, enum_type, name in (
+            (self.mode_eligibility_state, ModeEligibilityState, "mode_eligibility_state"),
+            (self.allow_candidate_state, AllowCandidateStateV1, "allow_candidate_state"),
+            (self.snapshot_candidate_state, SnapshotCandidateStateV1, "snapshot_candidate_state"),
+            (self.evidence_state, ST12FEvidenceStateV1, "evidence_state"),
+            (self.kill_state, KillStateV1, "kill_state"),
+            (self.submit_disabled_state, SubmitDisabledStateV1, "submit_disabled_state"),
+        ):
+            _typed_enum(value, enum_type, name)
+        _reason_tuple(self.reason_codes, "reason_codes", require_nonempty=True)
+        _validate_unique_text(
+            self.policy_and_snapshot_versions,
+            "policy_and_snapshot_versions",
+            nonempty=True,
+        )
+        _must_be_false(self.runtime_effect_authorized, "runtime_effect_authorized")
+        _must_be_false(self.order_release_authorized, "order_release_authorized")
+
+
+@dataclass(frozen=True, slots=True)
+class LatencyStageDurationsV1:
+    central_capability_admission_ns: int
+    request_validation_ns: int
+    identity_and_context_resolution_ns: int
+    parameter_and_source_binding_ns: int
+    snapshot_candidate_resolution_ns: int
+    formula_compute_ns: int
+    output_validation_ns: int
+    receipt_materialization_ns: int
+    owner_projection_ns: int
+    total_local_no_effect_ns: int
+
+    def __post_init__(self) -> None:
+        component_names = tuple(
+            field.name
+            for field in dataclass_fields(self)
+            if field.name != "total_local_no_effect_ns"
+        )
+        if any(
+            isinstance(getattr(self, name), bool)
+            or not isinstance(getattr(self, name), int)
+            or getattr(self, name) < 0
+            for name in (*component_names, "total_local_no_effect_ns")
+        ):
+            raise ContractValidationError(
+                ReasonCode.CONTRACT_OR_TYPE_INVALID,
+                "latency stage durations must be nonnegative integer nanoseconds",
+            )
+        if self.total_local_no_effect_ns != sum(
+            getattr(self, name) for name in component_names
+        ):
+            raise ContractValidationError(
+                ReasonCode.CLOCK_DOMAIN_MISMATCH,
+                "total_local_no_effect_ns must equal the exact stage decomposition",
+            )
+
+
+@dataclass(frozen=True, slots=True)
+class LatencyMeasurementLabelsV1:
+    cold_or_warm: str
+    concurrency_level: int
+    platform_profile_id: str
+    operation_id: str
+    success_or_blocker: str
+    fallback_used: bool
+
+    def __post_init__(self) -> None:
+        for name in (
+            "cold_or_warm",
+            "platform_profile_id",
+            "operation_id",
+            "success_or_blocker",
+        ):
+            _canonical_text(getattr(self, name), name)
+        if self.cold_or_warm not in {"COLD", "WARM"}:
+            raise ContractValidationError(
+                ReasonCode.CONTRACT_OR_TYPE_INVALID,
+                "cold_or_warm must be exact COLD or WARM",
+            )
+        if (
+            isinstance(self.concurrency_level, bool)
+            or not isinstance(self.concurrency_level, int)
+            or self.concurrency_level < 1
+        ):
+            raise ContractValidationError(
+                ReasonCode.RESOURCE_BOUND_EXCEEDED,
+                "concurrency_level must be a positive integer",
+            )
+        _exact_bool(self.fallback_used, "fallback_used")
+
+
+@dataclass(frozen=True, slots=True)
+class LatencyMeasurementV1:
+    measurement_ref: str
+    event_time_utc: datetime
+    local_duration_clock_id: str
+    clock_implementation: str
+    clock_resolution_ns: int
+    platform_description: str
+    stages: LatencyStageDurationsV1
+    labels: LatencyMeasurementLabelsV1
+    cumulative_stage_ns: tuple[int, ...]
+    rejection_count: int
+    observer_overhead_ns: int
+    runtime_effect_authorized: bool = False
+
+    def __post_init__(self) -> None:
+        for name in (
+            "measurement_ref",
+            "local_duration_clock_id",
+            "clock_implementation",
+            "platform_description",
+        ):
+            _canonical_text(getattr(self, name), name)
+        _utc_timestamp(self.event_time_utc, "event_time_utc")
+        if self.local_duration_clock_id not in {
+            "LOCAL_DURATION",
+            "LOCAL_DURATION_FALLBACK",
+        }:
+            raise ContractValidationError(
+                ReasonCode.CLOCK_DOMAIN_MISMATCH,
+                "local durations require a registered monotonic clock",
+            )
+        if type(self.stages) is not LatencyStageDurationsV1 or type(
+            self.labels
+        ) is not LatencyMeasurementLabelsV1:
+            raise ContractValidationError(
+                ReasonCode.CONTRACT_OR_TYPE_INVALID,
+                "latency measurement requires exact stage and label contracts",
+            )
+        if (
+            isinstance(self.clock_resolution_ns, bool)
+            or not isinstance(self.clock_resolution_ns, int)
+            or self.clock_resolution_ns < 0
+            or not isinstance(self.cumulative_stage_ns, tuple)
+            or len(self.cumulative_stage_ns) != 9
+            or any(
+                isinstance(value, bool) or not isinstance(value, int) or value < 0
+                for value in self.cumulative_stage_ns
+            )
+            or tuple(sorted(self.cumulative_stage_ns)) != self.cumulative_stage_ns
+            or self.cumulative_stage_ns[-1] != self.stages.total_local_no_effect_ns
+        ):
+            raise ContractValidationError(
+                ReasonCode.CLOCK_DOMAIN_MISMATCH,
+                "latency clock metadata or cumulative decomposition is invalid",
+            )
+        for name in ("rejection_count", "observer_overhead_ns"):
+            value = getattr(self, name)
+            if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+                raise ContractValidationError(
+                    ReasonCode.CONTRACT_OR_TYPE_INVALID,
+                    f"{name} must be a nonnegative integer",
+                )
+        _must_be_false(self.runtime_effect_authorized, "runtime_effect_authorized")
+
+
+@dataclass(frozen=True, slots=True)
+class LatencyBudgetProfileV1:
+    profile_id: str
+    component_budget_ns: tuple[tuple[str, int], ...]
+    histogram_boundaries_ns: tuple[int, ...]
+    maximum_observer_overhead_ns: int
+    alert_threshold_ns: int
+    policy_version: str
+
+    def __post_init__(self) -> None:
+        _canonical_text(self.profile_id, "profile_id")
+        _canonical_text(self.policy_version, "policy_version")
+        if (
+            not isinstance(self.component_budget_ns, tuple)
+            or not self.component_budget_ns
+            or any(
+                not isinstance(item, tuple)
+                or len(item) != 2
+                or not isinstance(item[0], str)
+                or not item[0]
+                or isinstance(item[1], bool)
+                or not isinstance(item[1], int)
+                or item[1] < 0
+                for item in self.component_budget_ns
+            )
+            or len({item[0] for item in self.component_budget_ns})
+            != len(self.component_budget_ns)
+        ):
+            raise ContractValidationError(
+                ReasonCode.LATENCY_PROFILE_REQUIRED,
+                "component budgets must be exact unique owner-supplied nanosecond rows",
+            )
+        if (
+            not isinstance(self.histogram_boundaries_ns, tuple)
+            or not self.histogram_boundaries_ns
+            or any(
+                isinstance(value, bool) or not isinstance(value, int) or value < 0
+                for value in self.histogram_boundaries_ns
+            )
+            or tuple(sorted(set(self.histogram_boundaries_ns)))
+            != self.histogram_boundaries_ns
+        ):
+            raise ContractValidationError(
+                ReasonCode.LATENCY_PROFILE_REQUIRED,
+                "histogram boundaries must be strictly increasing nanoseconds",
+            )
+        for name in ("maximum_observer_overhead_ns", "alert_threshold_ns"):
+            value = getattr(self, name)
+            if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+                raise ContractValidationError(
+                    ReasonCode.LATENCY_PROFILE_REQUIRED,
+                    f"{name} must be owner-supplied nonnegative nanoseconds",
+                )
+
+
+@dataclass(frozen=True, slots=True)
+class ResourceBoundsProfileV1:
+    profile_id: str
+    maximum_input_cardinality: int
+    maximum_input_bytes: int
+    maximum_dependency_depth: int
+    maximum_bootstrap_repetitions: int
+    maximum_concurrency: int
+
+    def __post_init__(self) -> None:
+        _canonical_text(self.profile_id, "profile_id")
+        for name in (
+            "maximum_input_cardinality",
+            "maximum_input_bytes",
+            "maximum_dependency_depth",
+            "maximum_bootstrap_repetitions",
+            "maximum_concurrency",
+        ):
+            value = getattr(self, name)
+            if isinstance(value, bool) or not isinstance(value, int) or value < 1:
+                raise ContractValidationError(
+                    ReasonCode.RESOURCE_BOUND_EXCEEDED,
+                    f"{name} must be an explicit positive bound",
+                )
 
 
 @dataclass(frozen=True, slots=True)
@@ -1785,6 +2555,19 @@ class ResolutionExplanationV1(_TypedOperationResultV1):
 class CandidateProposalV1(_TypedOperationResultV1):
     candidate_id: str = ""
     proposal_state: str = "NO_EFFECT_RECORD"
+    mode_snapshot_result: ModeSnapshotCandidateProposalResultV1 | None = None
+
+    def __post_init__(self) -> None:
+        _TypedOperationResultV1.__post_init__(self)
+        _canonical_text(self.candidate_id, "candidate_id")
+        _canonical_text(self.proposal_state, "proposal_state")
+        if self.mode_snapshot_result is not None and type(
+            self.mode_snapshot_result
+        ) is not ModeSnapshotCandidateProposalResultV1:
+            raise ContractValidationError(
+                ReasonCode.CONTRACT_OR_TYPE_INVALID,
+                "mode_snapshot_result must be the exact optional D result",
+            )
 
 
 @dataclass(frozen=True, slots=True)

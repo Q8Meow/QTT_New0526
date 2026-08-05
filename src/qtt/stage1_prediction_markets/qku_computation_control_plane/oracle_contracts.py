@@ -1781,3 +1781,131 @@ if (
     or any(entry.oracle.production_import_allowed or entry.vector.production_import_allowed for entry in ST12C_ORACLE_PACK)
 ):
     raise ContractValidationError(ReasonCode.ORACLE_NOT_INDEPENDENT, "Tranche-C independent oracle/vector closure must be exact 13/13/13")
+
+
+# ST12-D reuses the current MATH-13/14/15 oracle/vector objects and adds one
+# data-only MATH-39 pair.  No expected value is imported by the independent D
+# validator and no production callable is used as an oracle here.
+_ST12D_MATH_39_ORACLE_ROW = {
+    "comparison_policy": "EXACT_DECIMAL",
+    "expected_value_or_invariant": {"queue_ahead": "80"},
+    "independence_proof": (
+        "INDEPENDENT_ALGORITHM_AND_EXPECTED_RESULT_STORED_SEPARATELY_FROM_PRODUCTION"
+    ),
+    "independent_algorithm_steps": [
+        "Parse four finite nonnegative Decimal quantities from the golden fixture.",
+        "Independently add displayed quantity and prior additions.",
+        "Independently subtract cancellations and trades ahead, then floor at zero.",
+        "Reject sequence, priority, source, unit, or basis inconsistency.",
+    ],
+    "math_spec_ref": "MATH-39",
+    "oracle_id": "ORACLE::MATH-39",
+    "oracle_version": "1.1R1",
+    "production_implementation_import_allowed": False,
+    "primary_validator_expected_value_import_allowed": False,
+}
+_ST12D_MATH_39_VECTOR_ROW = {
+    "comparison_policy": "EXACT_DECIMAL",
+    "expected": {"queue_ahead": "80"},
+    "inputs": {
+        "displayed_quantity_before_order": "100",
+        "net_prior_additions": "20",
+        "observed_prior_cancellations": "10",
+        "observed_trades_ahead": "30",
+    },
+    "math_spec_ref": "MATH-39",
+    "oracle_ref": "ORACLE::MATH-39",
+    "production_implementation_import_allowed": False,
+    "seed": None,
+    "vector_id": "GOLDEN::MATH-39",
+    "vector_kind": "NUMERIC_GOLDEN",
+}
+_ST12D_MATH_39_ORACLE = OracleContractV1(
+    oracle_id="ORACLE::MATH-39",
+    math_spec_id="MATH-39",
+    oracle_version="1.1R1",
+    comparison_policy="EXACT_DECIMAL",
+    expected_value_json=json.dumps(
+        {"queue_ahead": "80"}, sort_keys=True, separators=(",", ":")
+    ),
+    independent_algorithm_steps=tuple(
+        _ST12D_MATH_39_ORACLE_ROW["independent_algorithm_steps"]
+    ),
+    production_import_allowed=False,
+    primary_validator_import_allowed=False,
+)
+_ST12D_MATH_39_VECTOR = GoldenVectorV1(
+    vector_id="GOLDEN::MATH-39",
+    math_spec_id="MATH-39",
+    oracle_id="ORACLE::MATH-39",
+    vector_kind="NUMERIC_GOLDEN",
+    comparison_policy="EXACT_DECIMAL",
+    inputs_json=json.dumps(
+        _ST12D_MATH_39_VECTOR_ROW["inputs"],
+        sort_keys=True,
+        separators=(",", ":"),
+    ),
+    expected_json=json.dumps(
+        {"queue_ahead": "80"}, sort_keys=True, separators=(",", ":")
+    ),
+    seed=None,
+    production_import_allowed=False,
+)
+_ST12D_MATH_39_PACK_ENTRY = OraclePackEntryV1(
+    oracle=_ST12D_MATH_39_ORACLE,
+    vector=_ST12D_MATH_39_VECTOR,
+    oracle_row_json=json.dumps(
+        _ST12D_MATH_39_ORACLE_ROW, sort_keys=True, separators=(",", ":")
+    ),
+    vector_row_json=json.dumps(
+        _ST12D_MATH_39_VECTOR_ROW, sort_keys=True, separators=(",", ":")
+    ),
+)
+_ST12D_REUSED_PACK_BY_MATH_ID = {
+    entry.oracle.math_spec_id: entry
+    for entry in ORACLE_PACK
+    if entry.oracle.math_spec_id in {"MATH-13", "MATH-14", "MATH-15"}
+}
+ST12D_ORACLE_PACK = (
+    _ST12D_REUSED_PACK_BY_MATH_ID["MATH-13"],
+    _ST12D_REUSED_PACK_BY_MATH_ID["MATH-14"],
+    _ST12D_REUSED_PACK_BY_MATH_ID["MATH-15"],
+    _ST12D_MATH_39_PACK_ENTRY,
+)
+ST12D_ORACLE_BY_MATH_ID: Mapping[str, OracleContractV1] = MappingProxyType(
+    {entry.oracle.math_spec_id: entry.oracle for entry in ST12D_ORACLE_PACK}
+)
+ST12D_GOLDEN_VECTOR_BY_MATH_ID: Mapping[str, GoldenVectorV1] = MappingProxyType(
+    {entry.vector.math_spec_id: entry.vector for entry in ST12D_ORACLE_PACK}
+)
+ST12D_CUMULATIVE_ORACLE_BY_MATH_ID: Mapping[str, OracleContractV1] = (
+    MappingProxyType(
+        {**ST12C_CUMULATIVE_ORACLE_BY_MATH_ID, "MATH-39": _ST12D_MATH_39_ORACLE}
+    )
+)
+ST12D_CUMULATIVE_GOLDEN_VECTOR_BY_MATH_ID: Mapping[
+    str, GoldenVectorV1
+] = MappingProxyType(
+    {
+        **ST12C_CUMULATIVE_GOLDEN_VECTOR_BY_MATH_ID,
+        "MATH-39": _ST12D_MATH_39_VECTOR,
+    }
+)
+
+if (
+    tuple(ST12D_ORACLE_BY_MATH_ID)
+    != ("MATH-13", "MATH-14", "MATH-15", "MATH-39")
+    or len(ST12D_ORACLE_PACK) != 4
+    or len(ST12D_CUMULATIVE_ORACLE_BY_MATH_ID) != 43
+    or len(ST12D_CUMULATIVE_GOLDEN_VECTOR_BY_MATH_ID) != 43
+    or any(
+        ST12D_ORACLE_BY_MATH_ID[math_id] is not ORACLE_BY_MATH_ID[math_id]
+        or ST12D_GOLDEN_VECTOR_BY_MATH_ID[math_id]
+        is not GOLDEN_VECTOR_BY_MATH_ID[math_id]
+        for math_id in ("MATH-13", "MATH-14", "MATH-15")
+    )
+):
+    raise ContractValidationError(
+        ReasonCode.ORACLE_NOT_INDEPENDENT,
+        "Tranche-D must reuse three oracle/vector identities and add one pair",
+    )

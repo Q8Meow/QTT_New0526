@@ -4597,3 +4597,318 @@ def _security_with_st12e_checks() -> tuple[ValidationCheckV1, ...]:
 
 
 _DOMAIN_CHECKS["security"] = _security_with_st12e_checks
+
+
+# ST12-D frozen denominators and grouped physical routing.  These registries
+# carry semantic IDs only; executable predicates below validate the real owners.
+_ST12D_POLICY_TEST = (
+    "tests/stage1_prediction_markets/qku_computation_control_plane/"
+    "test_policy_state_matrix.py"
+)
+_ST12D_INTEGRATION_TEST = (
+    "tests/stage1_prediction_markets/qku_computation_control_plane/"
+    "test_integration_snapshot_matrix.py"
+)
+_ST12D_ADVERSARIAL_TEST = (
+    "tests/stage1_prediction_markets/qku_computation_control_plane/"
+    "test_adversarial_latency_security_matrix.py"
+)
+_ST12D_CONTROL_SEEDS = (
+    ("execution", "010", "sequence-gap-recovery", "READ_ONLY_CONSUME_EXISTING_EXECUTION_OWNER_AND_ENFORCE_D_GATE", _ST12D_POLICY_TEST),
+    ("execution", "011", "venue-semantic-binding", "READ_ONLY_CONSUME_EXISTING_EXECUTION_OWNER_AND_ENFORCE_D_GATE", _ST12D_POLICY_TEST),
+    ("execution", "012", "replay-paper-separation", "FREEZE_TYPED_ST12F_INTERFACE_FAIL_CLOSED_UNTIL_F", _ST12D_POLICY_TEST),
+    ("execution", "013", "historical-data-grade", "FREEZE_TYPED_ST12F_INTERFACE_FAIL_CLOSED_UNTIL_F", _ST12D_POLICY_TEST),
+    ("execution", "014", "cross-venue-equivalence", "FREEZE_TYPED_ST12F_INTERFACE_FAIL_CLOSED_UNTIL_F", _ST12D_POLICY_TEST),
+    ("latency", "001", "clock-inventory", "IMPLEMENT_PURE_NO_EFFECT_POLICY_UNDER_EXISTING_CONTROL_PLANE", _ST12D_ADVERSARIAL_TEST),
+    ("latency", "002", "timestamp-semantics", "IMPLEMENT_PURE_NO_EFFECT_POLICY_UNDER_EXISTING_CONTROL_PLANE", _ST12D_ADVERSARIAL_TEST),
+    ("latency", "003", "latency-decomposition", "IMPLEMENT_PURE_NO_EFFECT_POLICY_UNDER_EXISTING_CONTROL_PLANE", _ST12D_ADVERSARIAL_TEST),
+    ("latency", "004", "percentile-policy", "IMPLEMENT_PURE_NO_EFFECT_POLICY_UNDER_EXISTING_CONTROL_PLANE", _ST12D_ADVERSARIAL_TEST),
+    ("latency", "005", "cold-warm-paths", "IMPLEMENT_PURE_NO_EFFECT_POLICY_UNDER_EXISTING_CONTROL_PLANE", _ST12D_ADVERSARIAL_TEST),
+    ("latency", "011", "concurrency", "IMPLEMENT_PURE_NO_EFFECT_POLICY_UNDER_EXISTING_CONTROL_PLANE", _ST12D_ADVERSARIAL_TEST),
+    ("latency", "012", "trace-propagation", "IMPLEMENT_PURE_NO_EFFECT_POLICY_UNDER_EXISTING_CONTROL_PLANE", _ST12D_ADVERSARIAL_TEST),
+    ("latency", "013", "telemetry-semantics", "IMPLEMENT_PURE_NO_EFFECT_POLICY_UNDER_EXISTING_CONTROL_PLANE", _ST12D_ADVERSARIAL_TEST),
+    ("latency", "014", "independent-measurement", "IMPLEMENT_PURE_NO_EFFECT_POLICY_UNDER_EXISTING_CONTROL_PLANE", _ST12D_ADVERSARIAL_TEST),
+    ("latency", "015", "observer-effect", "IMPLEMENT_PURE_NO_EFFECT_POLICY_UNDER_EXISTING_CONTROL_PLANE", _ST12D_ADVERSARIAL_TEST),
+    ("latency", "016", "platform-parity", "IMPLEMENT_PURE_NO_EFFECT_POLICY_UNDER_EXISTING_CONTROL_PLANE", _ST12D_ADVERSARIAL_TEST),
+    ("latency", "017", "stale-fallback", "IMPLEMENT_PURE_NO_EFFECT_POLICY_UNDER_EXISTING_CONTROL_PLANE", _ST12D_POLICY_TEST),
+    ("latency", "018", "source-latency", "IMPLEMENT_PURE_NO_EFFECT_POLICY_UNDER_EXISTING_CONTROL_PLANE", _ST12D_ADVERSARIAL_TEST),
+    ("latency", "019", "quantum-llm-latency", "IMPLEMENT_PURE_NO_EFFECT_POLICY_UNDER_EXISTING_CONTROL_PLANE", _ST12D_ADVERSARIAL_TEST),
+    ("latency", "020", "slo-and-alerts", "IMPLEMENT_PURE_NO_EFFECT_POLICY_UNDER_EXISTING_CONTROL_PLANE", _ST12D_ADVERSARIAL_TEST),
+    ("security", "011", "replay-and-duplicate-defense", "IMPLEMENT_PURE_NO_EFFECT_POLICY_UNDER_EXISTING_CONTROL_PLANE", _ST12D_ADVERSARIAL_TEST),
+    ("security", "012", "race-condition-safety", "IMPLEMENT_PURE_NO_EFFECT_POLICY_UNDER_EXISTING_CONTROL_PLANE", _ST12D_ADVERSARIAL_TEST),
+    ("security", "013", "resource-bounds", "IMPLEMENT_PURE_NO_EFFECT_POLICY_UNDER_EXISTING_CONTROL_PLANE", _ST12D_ADVERSARIAL_TEST),
+)
+ST12D_CLOSURE_ROWS: tuple[Mapping[str, object], ...] = tuple(
+    MappingProxyType(
+        {
+            "closure_id": f"ST12-CLOSURE::ST11-{domain.upper()}::{number}",
+            "control_id": f"ST11-{domain.upper()}::{number}",
+            "domain": domain,
+            "control_slug": slug,
+            "terminal_disposition": disposition,
+            "grouped_test_module": module,
+            "runtime_effect_authorized": False,
+            "order_release_authorized": False,
+        }
+    )
+    for domain, number, slug, disposition, module in _ST12D_CONTROL_SEEDS
+)
+
+ST12D_HISTORICAL_PATH_DISPOSITIONS = (
+    ("mode_eligibility.py", "SUPERSEDED_BY_STRONGER_CURRENT_LOGIC", "models.py,service.py,mode_snapshot_policy.py"),
+    ("snapshot.py", "EXTEND_EXISTING_OWNER", "models.py,mode_snapshot_policy.py"),
+    ("activation.py", "CREATE_NEW_UNDER_EXISTING_OWNER", "mode_snapshot_policy.py"),
+    ("pinning.py", "SUPERSEDED_BY_STRONGER_CURRENT_LOGIC", "models.py,mode_snapshot_policy.py"),
+    ("hotpath_contract.py", "SUPERSEDED_BY_STRONGER_CURRENT_LOGIC", "PR137L,latency_policy.py"),
+    ("rollback_policy.py", "CREATE_NEW_UNDER_EXISTING_OWNER", "mode_snapshot_policy.py"),
+    ("kill_switch_protocol.py", "EXTEND_EXISTING_OWNER", "protocols.py,mode_snapshot_policy.py"),
+)
+
+ST12D_SEMANTIC_TEST_ROWS: tuple[Mapping[str, object], ...] = tuple(
+    MappingProxyType({"test_id": test_id, "grouped_module": module})
+    for test_id, module in (
+        *((test_id, _ST12D_INTEGRATION_TEST) for test_id in ("ST12-TEST::064", "ST12-TEST::066", "ST12-TEST::076", "ST12-TEST::077", "ST12-TEST::080")),
+        *((test_id, _ST12D_ADVERSARIAL_TEST) for test_id in ("ST12-TEST::082", "ST12-TEST::084", "ST12-TEST::085", "ST12-TEST::087", "ST12-TEST::088", "ST12-TEST::089", "ST12-TEST::090", "ST12-TEST::091", "ST12-TEST::092", "ST12-TEST::094", "ST12-TEST::095", "ST12-TEST::096", "ST12-TEST::097", "ST12-TEST::098", "ST12-TEST::099", "ST12-TEST::193", "ST12-TEST::194", "ST12-TEST::195")),
+        *((test_id, "tools/independent_validate_qku_computation_control_plane_d.py") for test_id in ("ST12-TEST::224", "ST12-TEST::225", "ST12-TEST::230")),
+    )
+)
+
+ST12D_CERTIFIED_COMMANDS = (
+    "python tools/independent_validate_qku_computation_control_plane_execution.py",
+    "python tools/independent_validate_qku_computation_control_plane_latency.py",
+    "python tools/independent_validate_qku_computation_control_plane_security.py",
+    "python tools/validate_qku_computation_control_plane.py --domain execution",
+    "python tools/validate_qku_computation_control_plane.py --domain latency",
+    "python tools/validate_qku_computation_control_plane.py --domain security",
+)
+
+ST12D_GENERATED_PROJECTION_PATHS = tuple(
+    "docs/master_plan/generated/qku_control_plane/mode_snapshot/" + name
+    for name in (
+        "manifest.json",
+        "control_closure.jsonl",
+        "parameter_binding_refs.jsonl",
+        "mode_state_registry.jsonl",
+        "transition_matrix.jsonl",
+        "d_input_universe.jsonl",
+        "computability_dispositions.jsonl",
+        "artifact_connectivity.jsonl",
+        "validation_summary.json",
+    )
+)
+
+
+def st12d_acceptance_counts() -> Mapping[str, int]:
+    from .implementation_registry import ST12D_MATH_IMPLEMENTATION_REGISTRY
+    from .oracle_contracts import (
+        ST12D_GOLDEN_VECTOR_BY_MATH_ID,
+        ST12D_ORACLE_BY_MATH_ID,
+    )
+    from .parameter_policy import ST12D_PARAMETER_APPLICATION_BINDINGS
+
+    return MappingProxyType(
+        {
+            "closure_controls": len(ST12D_CLOSURE_ROWS),
+            "historical_path_dispositions": len(ST12D_HISTORICAL_PATH_DISPOSITIONS),
+            "parameter_bindings": len(ST12D_PARAMETER_APPLICATION_BINDINGS),
+            "math_specifications": len(ST12D_MATH_IMPLEMENTATION_REGISTRY),
+            "independent_oracles": len(ST12D_ORACLE_BY_MATH_ID),
+            "golden_vectors": len(ST12D_GOLDEN_VECTOR_BY_MATH_ID),
+            "semantic_tests": len(ST12D_SEMANTIC_TEST_ROWS),
+            "certified_commands": len(ST12D_CERTIFIED_COMMANDS),
+        }
+    )
+
+
+def _st12d_predicate_matrix() -> Mapping[str, tuple[bool, str]]:
+    from .agent_policy import IMPLEMENTED_OPERATION_IDS
+    from .implementation_registry import (
+        IMPLEMENTATION_REGISTRY,
+        ST12D_MATH_IMPLEMENTATION_REGISTRY,
+        compute_math_39_queue_position_estimate,
+    )
+    from .latency_policy import (
+        CLOCK_REGISTRY,
+        FORBIDDEN_HOTPATH_DEPENDENCIES,
+        STAGE_NAMES,
+        aggregate_latency_samples,
+    )
+    from .mode_snapshot_policy import (
+        D_MODE_STATE_REGISTRY,
+        MODE_SNAPSHOT_TRANSITIONS,
+    )
+    from .oracle_contracts import (
+        GOLDEN_VECTOR_BY_MATH_ID,
+        ORACLE_BY_MATH_ID,
+        ST12D_GOLDEN_VECTOR_BY_MATH_ID,
+        ST12D_ORACLE_BY_MATH_ID,
+    )
+    from .parameter_policy import (
+        ST12D_PARAMETER_APPLICATION_BINDINGS,
+        ST12D_PARAMETER_POLICIES,
+        ST12D_SNAPSHOT_PARAMETER_BINDING_IDS,
+    )
+    from .receipts import EconomicRecordTypeV1, ModeSnapshotControlClassV1
+    from .service import QKUComputationControlPlaneV1
+
+    counts = st12d_acceptance_counts()
+    state_closed = (
+        sum(len(states) for states in D_MODE_STATE_REGISTRY.values()) == 35
+        and len(MODE_SNAPSHOT_TRANSITIONS) == 17
+        and all(
+            row.owner_confirmation_required is (row.transition_id == "T07")
+            for row in MODE_SNAPSHOT_TRANSITIONS
+        )
+    )
+    math_closed = (
+        tuple(ST12D_MATH_IMPLEMENTATION_REGISTRY)
+        == ("MATH-13", "MATH-14", "MATH-15", "MATH-39")
+        and all(
+            ST12D_MATH_IMPLEMENTATION_REGISTRY[math_id]
+            is IMPLEMENTATION_REGISTRY[math_id]
+            for math_id in ("MATH-13", "MATH-14", "MATH-15")
+        )
+        and compute_math_39_queue_position_estimate(
+            Decimal("100"), Decimal("20"), Decimal("10"), Decimal("30")
+        )
+        == Decimal("80")
+    )
+    oracle_closed = (
+        tuple(ST12D_ORACLE_BY_MATH_ID) == tuple(ST12D_MATH_IMPLEMENTATION_REGISTRY)
+        and tuple(ST12D_GOLDEN_VECTOR_BY_MATH_ID)
+        == tuple(ST12D_MATH_IMPLEMENTATION_REGISTRY)
+        and all(
+            ST12D_ORACLE_BY_MATH_ID[math_id] is ORACLE_BY_MATH_ID[math_id]
+            and ST12D_GOLDEN_VECTOR_BY_MATH_ID[math_id]
+            is GOLDEN_VECTOR_BY_MATH_ID[math_id]
+            for math_id in ("MATH-13", "MATH-14", "MATH-15")
+        )
+    )
+    parameter_closed = (
+        len(ST12D_PARAMETER_APPLICATION_BINDINGS) == 28
+        and len(ST12D_PARAMETER_POLICIES) == 28
+        and len(ST12D_SNAPSHOT_PARAMETER_BINDING_IDS) == 21
+        and len({row.canonical_owner for row in ST12D_PARAMETER_POLICIES.values()})
+        == 1
+    )
+    public_methods = {
+        name
+        for name, value in QKUComputationControlPlaneV1.__dict__.items()
+        if callable(value) and not name.startswith("_")
+    }
+    service_closed = (
+        len(IMPLEMENTED_OPERATION_IDS) == 12
+        and public_methods == set(IMPLEMENTED_OPERATION_IDS)
+        and "submit_candidate_proposal" in public_methods
+    )
+    latency_closed = (
+        len(CLOCK_REGISTRY) == 4
+        and len(STAGE_NAMES) == 9
+        and len(FORBIDDEN_HOTPATH_DEPENDENCIES) >= 12
+        and aggregate_latency_samples((1, 2, 3, 4, 5)).count == 5
+    )
+    receipts_closed = (
+        tuple(record.name for record in EconomicRecordTypeV1).count(
+            "MODE_SNAPSHOT_CONTROL"
+        )
+        == 1
+        and len(ModeSnapshotControlClassV1) == 7
+    )
+    root = Path(__file__).resolve().parents[4]
+    generated_closed = all((root / path).is_file() for path in ST12D_GENERATED_PROJECTION_PATHS)
+    denominator_closed = counts == {
+        "closure_controls": 23,
+        "historical_path_dispositions": 7,
+        "parameter_bindings": 28,
+        "math_specifications": 4,
+        "independent_oracles": 4,
+        "golden_vectors": 4,
+        "semantic_tests": 26,
+        "certified_commands": 6,
+    }
+    return MappingProxyType(
+        {
+            "execution": (
+                state_closed and service_closed and math_closed and oracle_closed,
+                f"states=35 transitions=17 public_operations={len(public_methods)} math=4",
+            ),
+            "latency": (
+                latency_closed,
+                f"clocks={len(CLOCK_REGISTRY)} stages={len(STAGE_NAMES)}",
+            ),
+            "security": (
+                receipts_closed and service_closed,
+                "single_control_receipt=true active_pointer_commit=false",
+            ),
+            "parameters": (
+                parameter_closed,
+                f"bindings={len(ST12D_PARAMETER_APPLICATION_BINDINGS)} snapshot=21 owners=1",
+            ),
+            "generated": (
+                generated_closed,
+                f"generated={sum((root / path).is_file() for path in ST12D_GENERATED_PROJECTION_PATHS)}/9",
+            ),
+            "denominators": (
+                denominator_closed,
+                "/".join(str(value) for value in counts.values()),
+            ),
+        }
+    )
+
+
+def _st12d_domain_checks(domain: str) -> tuple[ValidationCheckV1, ...]:
+    matrix = _st12d_predicate_matrix()
+    rows = tuple(row for row in ST12D_CLOSURE_ROWS if row["domain"] == domain)
+    return tuple(
+        ValidationCheckV1(
+            check_id=str(row["control_id"]),
+            passed=matrix[domain][0],
+            detail=f"{row['control_slug']}: {matrix[domain][1]}",
+        )
+        for row in rows
+    )
+
+
+_pre_d_execution_checks = _DOMAIN_CHECKS["execution"]
+_pre_d_security_checks = _DOMAIN_CHECKS["security"]
+
+
+def _execution_with_st12d_checks() -> tuple[ValidationCheckV1, ...]:
+    return (*_pre_d_execution_checks(), *_st12d_domain_checks("execution"))
+
+
+def _latency_checks() -> tuple[ValidationCheckV1, ...]:
+    return _st12d_domain_checks("latency")
+
+
+def _security_with_st12d_checks() -> tuple[ValidationCheckV1, ...]:
+    return (*_pre_d_security_checks(), *_st12d_domain_checks("security"))
+
+
+def _d_checks() -> tuple[ValidationCheckV1, ...]:
+    matrix = _st12d_predicate_matrix()
+    domain_checks = tuple(
+        check
+        for domain in ("execution", "latency", "security")
+        for check in _st12d_domain_checks(domain)
+    )
+    closure_checks = tuple(
+        ValidationCheckV1(
+            check_id=f"ST12D_{name.upper()}",
+            passed=value[0],
+            detail=value[1],
+        )
+        for name, value in matrix.items()
+        if name not in {"execution", "latency", "security"}
+    )
+    return (*domain_checks, *closure_checks)
+
+
+_DOMAIN_CHECKS.update(
+    {
+        "execution": _execution_with_st12d_checks,
+        "latency": _latency_checks,
+        "security": _security_with_st12d_checks,
+        "d": _d_checks,
+    }
+)

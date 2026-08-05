@@ -12,11 +12,16 @@ from .models import (
     FallbackEnvelopeV1,
     HealthEnvelopeV1,
     OperationContractV1,
+    ModeSnapshotDecisionV1,
+    ModeSnapshotOwnerProjectionV1,
+    ReadOnlyKillSubmitStateV1,
+    ST12FEvidenceReferenceV1,
     SupervisionEnvelopeV1,
 )
 
 if TYPE_CHECKING:
     from .agent_policy import AgentCapabilityDecisionV1
+    from .mode_snapshot_policy import ModeSnapshotCandidateInputsV1
 
 
 @runtime_checkable
@@ -80,6 +85,59 @@ class SafetyStateProjectionProtocolV1(Protocol):
     """Read-only safety-state view owned outside ST12-E."""
 
     def describe_safety_state(self, context_ref: str) -> object: ...
+
+
+@runtime_checkable
+class ReadOnlyKillSubmitStateProtocolV1(Protocol):
+    """Read exact current safety state; no set, clear, or override method exists."""
+
+    def read_kill_submit_state(
+        self, context_ref: str
+    ) -> ReadOnlyKillSubmitStateV1: ...
+
+
+@runtime_checkable
+class ST12FEvidenceReferenceProtocolV1(Protocol):
+    """Read only a future-F reference state; D cannot produce evidence."""
+
+    def read_evidence_reference(
+        self, context_ref: str
+    ) -> ST12FEvidenceReferenceV1: ...
+
+
+@runtime_checkable
+class ModeSnapshotCandidateInputProtocolV1(Protocol):
+    """Resolve exact precomputed D inputs after the central admission decision."""
+
+    def resolve_mode_snapshot_inputs(
+        self,
+        request: object,
+        capability_decision: "AgentCapabilityDecisionV1",
+    ) -> "ModeSnapshotCandidateInputsV1": ...
+
+
+@runtime_checkable
+class ModeSnapshotCandidateValidationProtocolV1(Protocol):
+    """Optional independent candidate validator with no mutation method."""
+
+    def validate_snapshot_candidate(
+        self, candidate: object
+    ) -> tuple[ReasonCode, ...]: ...
+
+
+@runtime_checkable
+class ModeSnapshotOwnerProjectionProtocolV1(Protocol):
+    """One-way D state projection into the existing owner semantic fabric."""
+
+    def project_mode_snapshot(
+        self,
+        decision: ModeSnapshotDecisionV1,
+        evidence: ST12FEvidenceReferenceV1,
+        safety: ReadOnlyKillSubmitStateV1,
+        *,
+        snapshot_version: str,
+        svc_view: "OwnerProjectionViewV1",
+    ) -> ModeSnapshotOwnerProjectionV1: ...
 
 
 @runtime_checkable
@@ -380,4 +438,34 @@ class ExistingOwnerProjectionAdapterV1:
             consume_interfaces=("AgentOrchService",),
             row_count=len(rows),
             identity_refs=("dag.jsonl",),
+        )
+
+    def project_mode_snapshot(
+        self,
+        decision: ModeSnapshotDecisionV1,
+        evidence: ST12FEvidenceReferenceV1,
+        safety: ReadOnlyKillSubmitStateV1,
+        *,
+        snapshot_version: str,
+        svc_view: OwnerProjectionViewV1,
+    ) -> ModeSnapshotOwnerProjectionV1:
+        """Project exact D semantics through an already loaded immutable SVC view."""
+
+        if (
+            type(svc_view) is not OwnerProjectionViewV1
+            or svc_view.owner_id != "SVC1"
+            or svc_view.projection_mutation_allowed
+            or svc_view.runtime_effect_allowed
+        ):
+            raise OwnerAdapterError(
+                ReasonCode.OWNER_DATA_MALFORMED,
+                "D owner projection requires a current no-effect SVC1 view",
+            )
+        from .mode_snapshot_policy import owner_projection
+
+        return owner_projection(
+            decision,
+            evidence,
+            safety,
+            snapshot_version=snapshot_version,
         )

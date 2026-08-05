@@ -10,7 +10,10 @@ from typing import Mapping
 
 from .context import exact_decimal, parse_utc
 from .errors import ContractValidationError, ReasonCode
-from .models import ComputationExecutionReceiptV1
+from .models import (
+    ComputationExecutionReceiptV1,
+    ModeSnapshotCandidateProposalResultV1,
+)
 
 
 def _required(value: object, name: str) -> None:
@@ -83,6 +86,17 @@ class EconomicRecordTypeV1(StrEnum):
     RECONCILIATION_BREAK = "RECONCILIATION_BREAK"
     ORDER_INTENT = "ORDER_INTENT"
     EXECUTION_CUSTODY = "EXECUTION_CUSTODY"
+    MODE_SNAPSHOT_CONTROL = "MODE_SNAPSHOT_CONTROL"
+
+
+class ModeSnapshotControlClassV1(StrEnum):
+    MODE_SNAPSHOT_EVALUATION = "MODE_SNAPSHOT_EVALUATION"
+    SNAPSHOT_CANDIDATE_BUILD = "SNAPSHOT_CANDIDATE_BUILD"
+    SNAPSHOT_CANDIDATE_VALIDATION = "SNAPSHOT_CANDIDATE_VALIDATION"
+    SNAPSHOT_PINNING = "SNAPSHOT_PINNING"
+    SNAPSHOT_ROLLBACK_PROPOSAL = "SNAPSHOT_ROLLBACK_PROPOSAL"
+    SNAPSHOT_STALE_OR_RETIREMENT = "SNAPSHOT_STALE_OR_RETIREMENT"
+    LATENCY_MEASUREMENT = "LATENCY_MEASUREMENT"
 
 
 ECONOMIC_RECORD_PAYLOAD_CLASS: Mapping[EconomicRecordTypeV1, tuple[str, str]] = MappingProxyType(
@@ -98,6 +112,10 @@ ECONOMIC_RECORD_PAYLOAD_CLASS: Mapping[EconomicRecordTypeV1, tuple[str, str]] = 
         EconomicRecordTypeV1.RECONCILIATION_BREAK: ("accounting", "ReconciliationBreakReceiptV1"),
         EconomicRecordTypeV1.ORDER_INTENT: ("lifecycle", "OrderIntentRecordV1"),
         EconomicRecordTypeV1.EXECUTION_CUSTODY: ("lifecycle", "ExecutionCustodyReceiptV1"),
+        EconomicRecordTypeV1.MODE_SNAPSHOT_CONTROL: (
+            "receipts",
+            "ModeSnapshotControlReceiptRecordV1",
+        ),
     }
 )
 
@@ -196,6 +214,177 @@ class DurableComputationExecutionReceiptRecordV1:
             raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "completed_at precedes started_at")
         object.__setattr__(self, "started_at", started)
         object.__setattr__(self, "completed_at", completed)
+
+
+@dataclass(frozen=True, slots=True)
+class ModeSnapshotControlReceiptRecordV1:
+    """One typed D control payload carried by the existing receipt spine."""
+
+    control_receipt_id: str
+    control_class: ModeSnapshotControlClassV1
+    request_id: str
+    task_id: str
+    principal_id: str
+    capability_decision_ref: str
+    context_ref: str
+    snapshot_candidate_ref_or_explicit_absence: str
+    mode_snapshot_decision_ref: str
+    transition_proposal_ref: str
+    implementation_pin_refs: tuple[str, ...]
+    parameter_value_refs: tuple[str, ...]
+    source_epoch_refs: tuple[str, ...]
+    state_before_refs: tuple[str, ...]
+    state_after_refs: tuple[str, ...]
+    typed_reason_codes: tuple[ReasonCode, ...]
+    fallback_route: str
+    owner_review_route: str
+    latency_measurement_ref_or_explicit_absence: str
+    owner_action_policy_ref: str
+    no_order_authority_flag: bool = True
+
+    def __post_init__(self) -> None:
+        for name in (
+            "control_receipt_id",
+            "request_id",
+            "task_id",
+            "principal_id",
+            "capability_decision_ref",
+            "context_ref",
+            "snapshot_candidate_ref_or_explicit_absence",
+            "mode_snapshot_decision_ref",
+            "transition_proposal_ref",
+            "fallback_route",
+            "owner_review_route",
+            "latency_measurement_ref_or_explicit_absence",
+            "owner_action_policy_ref",
+        ):
+            _required(getattr(self, name), name)
+        if type(self.control_class) is not ModeSnapshotControlClassV1:
+            raise ContractValidationError(
+                ReasonCode.CONTRACT_OR_TYPE_INVALID,
+                "control_class must use the single D control-class enum",
+            )
+        for name in (
+            "implementation_pin_refs",
+            "parameter_value_refs",
+            "source_epoch_refs",
+            "state_before_refs",
+            "state_after_refs",
+        ):
+            _identifier_tuple(getattr(self, name), name, allow_empty=False)
+        if (
+            not isinstance(self.typed_reason_codes, tuple)
+            or not self.typed_reason_codes
+            or any(type(reason) is not ReasonCode for reason in self.typed_reason_codes)
+            or len(self.typed_reason_codes) != len(set(self.typed_reason_codes))
+        ):
+            raise ContractValidationError(
+                ReasonCode.CONTRACT_OR_TYPE_INVALID,
+                "typed_reason_codes must be a nonempty unique ReasonCode tuple",
+            )
+        if self.no_order_authority_flag is not True:
+            raise ContractValidationError(
+                ReasonCode.ORDER_RELEASE_FORBIDDEN,
+                "D control receipts must retain no-order authority",
+            )
+
+
+def materialize_mode_snapshot_control_receipts(
+    result: ModeSnapshotCandidateProposalResultV1,
+    *,
+    parameter_value_refs: tuple[str, ...],
+    effective_at: datetime | str,
+    recorded_at: datetime | str,
+    traceparent: str,
+    tracestate: str,
+) -> tuple[EconomicReceiptEventSpineV1, ...]:
+    """Materialize two no-effect D payloads on the existing receipt spine."""
+
+    if type(result) is not ModeSnapshotCandidateProposalResultV1:
+        raise ContractValidationError(
+            ReasonCode.CONTRACT_OR_TYPE_INVALID,
+            "D receipt materialization requires an exact proposal result",
+        )
+    _identifier_tuple(parameter_value_refs, "parameter_value_refs", allow_empty=False)
+    decision = result.mode_snapshot_decision
+    proposal = result.snapshot_transition_proposal
+    candidate = result.snapshot_candidate_or_explicit_absence
+    candidate_ref = (
+        candidate.snapshot_candidate_id if candidate is not None else "EXPLICIT_ABSENCE"
+    )
+    implementation_refs = tuple(
+        f"{pin.math_spec_id}::{pin.implementation_id}"
+        for pin in decision.implementation_pins
+    )
+    control_classes = (
+        ModeSnapshotControlClassV1.MODE_SNAPSHOT_EVALUATION,
+        (
+            ModeSnapshotControlClassV1.SNAPSHOT_CANDIDATE_VALIDATION
+            if candidate is not None
+            else ModeSnapshotControlClassV1.SNAPSHOT_CANDIDATE_BUILD
+        ),
+    )
+    if len(result.control_receipt_refs) != len(control_classes):
+        raise ContractValidationError(
+            ReasonCode.CONTRACT_OR_TYPE_INVALID,
+            "D result/control receipt cardinality differs",
+        )
+    rows: list[EconomicReceiptEventSpineV1] = []
+    for index, (receipt_ref, control_class) in enumerate(
+        zip(result.control_receipt_refs, control_classes, strict=True)
+    ):
+        payload = ModeSnapshotControlReceiptRecordV1(
+            control_receipt_id=receipt_ref,
+            control_class=control_class,
+            request_id=decision.request_id,
+            task_id=decision.task_id,
+            principal_id=decision.principal_id,
+            capability_decision_ref=decision.capability_decision_ref,
+            context_ref=decision.context_ref,
+            snapshot_candidate_ref_or_explicit_absence=candidate_ref,
+            mode_snapshot_decision_ref=decision.decision_id,
+            transition_proposal_ref=proposal.proposal_id,
+            implementation_pin_refs=implementation_refs,
+            parameter_value_refs=parameter_value_refs,
+            source_epoch_refs=decision.source_epoch_refs,
+            state_before_refs=(
+                proposal.expected_owner_state_ref,
+                proposal.source_candidate_ref_or_explicit_absence,
+            ),
+            state_after_refs=(
+                proposal.target_candidate_ref,
+                proposal.proposed_state.value,
+            ),
+            typed_reason_codes=proposal.typed_reason_codes,
+            fallback_route=decision.fallback_route,
+            owner_review_route=decision.owner_review_route,
+            latency_measurement_ref_or_explicit_absence=(
+                decision.latency_measurement_ref_or_explicit_absence
+            ),
+            owner_action_policy_ref=decision.owner_action_policy_ref,
+        )
+        rows.append(
+            EconomicReceiptEventSpineV1(
+                record_id=receipt_ref,
+                record_type=EconomicRecordTypeV1.MODE_SNAPSHOT_CONTROL,
+                schema_version="ST12D_MODE_SNAPSHOT_CONTROL_V1",
+                semantic_owner="QKUComputationControlPlaneV1",
+                implementation_owner="QKUComputationControlPlaneV1",
+                context_ref=decision.context_ref,
+                effective_at=effective_at,
+                recorded_at=recorded_at,
+                causation_id=proposal.causation_id,
+                correlation_id=proposal.correlation_id,
+                traceparent=traceparent,
+                tracestate=tracestate,
+                sequence=index,
+                aggregate_id=f"MODE-SNAPSHOT::{decision.request_id}",
+                aggregate_version=index,
+                authority_class="NO_EFFECT_MODE_SNAPSHOT_CONTROL_ONLY",
+                typed_payload=payload,
+            )
+        )
+    return tuple(rows)
 
 
 @dataclass(frozen=True, slots=True)

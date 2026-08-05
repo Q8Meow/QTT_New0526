@@ -34,6 +34,11 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane import (  #
     deterministic_json,
     validate_relative_path,
 )
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.mode_snapshot_policy import (  # noqa: E402
+    D_MODE_STATE_REGISTRY,
+    D_REQUIRED_PIN_DIMENSIONS,
+    MODE_SNAPSHOT_TRANSITIONS,
+)
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.implementation_registry import (  # noqa: E402
     IMPLEMENTATION_VERSION_REGISTRY,
     PREDECESSOR_IMPLEMENTATION_REGISTRY,
@@ -54,6 +59,8 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.models impo
     OperationCapabilityClass,
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.oracle_contracts import (  # noqa: E402
+    ST12D_GOLDEN_VECTOR_BY_MATH_ID,
+    ST12D_ORACLE_BY_MATH_ID,
     ST12B_PROPERTY_TESTS,
     ST12B_VECTOR_PACK,
     TRANCHE_A_GOLDEN_VECTOR_BY_MATH_ID,
@@ -64,6 +71,8 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.parameter_p
     INCREMENTAL_TRANCHE_B_PARAMETER_POLICIES,
     OPTIMIZER_DEFAULT_CURRENTIZATIONS,
     RUNTIME_PARAMETER_OWNER_BINDINGS,
+    ST12D_PARAMETER_APPLICATION_BINDINGS,
+    ST12D_PARAMETER_POLICIES,
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.quantum_adapter import (  # noqa: E402
     QUANTUM_STRUCTURAL_READINESS_BY_MATH_ID,
@@ -76,6 +85,11 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.stack_resol
     REGISTERED_FORMULA_STACKS,
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.validation import (  # noqa: E402
+    ST12D_CERTIFIED_COMMANDS,
+    ST12D_CLOSURE_ROWS,
+    ST12D_GENERATED_PROJECTION_PATHS,
+    ST12D_HISTORICAL_PATH_DISPOSITIONS,
+    ST12D_SEMANTIC_TEST_ROWS,
     ST12E_CERTIFIED_COMMANDS,
     ST12E_CLOSURE_ROWS,
     ST12E_REPOSITORY_DISPOSITIONS,
@@ -86,6 +100,10 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.validation 
     ST12B_OPERATION_CAPABILITY_BY_ID,
     validate_tranche_b_frozen_manifest,
     st12e_semantic_counts,
+    st12d_acceptance_counts,
+)
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.implementation_registry import (  # noqa: E402
+    ST12D_MATH_IMPLEMENTATION_REGISTRY,
 )
 from src.qtt.agents.pr169_agent_orch1_resolvers import AgentOrchService  # noqa: E402
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.agent_policy import (  # noqa: E402
@@ -139,6 +157,158 @@ ST12EProjectionSet = tuple[
     tuple[dict[str, object], ...],
     tuple[dict[str, object], ...],
 ]
+ST12D_GENERATED_PREFIX = Path(
+    "docs/master_plan/generated/qku_control_plane/mode_snapshot"
+)
+ST12DProjectionSet = tuple[
+    dict[str, object],
+    tuple[dict[str, object], ...],
+    tuple[dict[str, object], ...],
+    tuple[dict[str, object], ...],
+    tuple[dict[str, object], ...],
+    tuple[dict[str, object], ...],
+    tuple[dict[str, object], ...],
+    tuple[dict[str, object], ...],
+    dict[str, object],
+]
+
+_ST12D_FROZEN_CONTRACT_POLICY_REFS = (
+    "freeze/AUTHORITY.md",
+    "freeze/CLOSURE_ROWS.jsonl",
+    "freeze/CURRENT_MAIN_OWNER_MAP.jsonl",
+    "freeze/DEPENDENCY_CURRENTIZATION.jsonl",
+    "freeze/DEPENDENCY_GRAPH.jsonl",
+    "freeze/GOLDEN_VECTORS.jsonl",
+    "freeze/INDEPENDENT_ORACLES.jsonl",
+    "freeze/INVARIANTS.jsonl",
+    "freeze/KILL_SUBMIT_PROTOCOL.json",
+    "freeze/LATENCY_BUDGET_POLICY.jsonl",
+    "freeze/LATENCY_CLOCK_REGISTRY.jsonl",
+    "freeze/MATH_SPECS.jsonl",
+    "freeze/MODE_STATE_REGISTRY.jsonl",
+    "freeze/OWNER_PROJECTION_INTERFACE.json",
+    "freeze/PARAMETER_APPLICATION_BINDINGS.jsonl",
+    "freeze/PARAMETER_POLICIES.jsonl",
+    "freeze/PATH_DISPOSITION.jsonl",
+    "freeze/PATH_LEDGER.json",
+    "freeze/PINNING_POLICY.json",
+    "freeze/ROLLBACK_POLICY.json",
+    "freeze/SNAPSHOT_CONTRACT.json",
+    "freeze/SOURCE_CURRENTIZATION.jsonl",
+    "freeze/ST12D_FREEZE_SPECIFICATION.md",
+    "freeze/ST12F_EVIDENCE_INTERFACE.json",
+    "freeze/STATE.json",
+    "freeze/TEST_PLAN.json",
+    "freeze/TRANSITION_MATRIX.jsonl",
+    "freeze/UNRESOLVED_BLOCKERS.jsonl",
+    "freeze/VALIDATION_PLAN.json",
+)
+_ST12D_CURRENT_OWNER_INTERFACES = (
+    (
+        "OWNER::QKU-CONTROL-PLANE",
+        "QKUComputationControlPlaneV1.submit_candidate_proposal",
+        "request_id,context_ref,computation_bundle_ref",
+    ),
+    (
+        "OWNER::ST12E-ADMISSION",
+        "AgentCapabilityResolverV1.admit_operation",
+        "decision_id,task_id,principal_id,current_agent_id",
+    ),
+    (
+        "OWNER::AGENT-ORCH1",
+        "AgentCapabilityDecisionV1",
+        "task_id,principal_id,current_agent_id,duty_ref",
+    ),
+    (
+        "OWNER::CONTEXTUAL-COMPUTABILITY",
+        "ContextualComputabilityResolverV1",
+        "specification_state,fixture_state,context_state,stack_state",
+    ),
+    (
+        "OWNER::IMPLEMENTATION-REGISTRY",
+        "ST12D_MATH_IMPLEMENTATION_REGISTRY",
+        "math_spec_id,implementation_id",
+    ),
+    (
+        "OWNER::ORACLE-VECTOR",
+        "ST12D_ORACLE_BY_MATH_ID/ST12D_GOLDEN_VECTOR_BY_MATH_ID",
+        "oracle_id,vector_id,comparison_policy",
+    ),
+    (
+        "OWNER::PARAMETER-VALUE",
+        "ComputationParameterPolicyV1/ParameterPolicyResolverV1",
+        "parameter_policy_snapshot_ref,parameter_value_refs",
+    ),
+    (
+        "OWNER::READINESS1",
+        "ExistingOwnerProjectionAdapterV1.load_readiness",
+        "readiness_state_ref",
+    ),
+    (
+        "OWNER::PRETRADE1",
+        "ExistingOwnerProjectionAdapterV1.load_pretrade",
+        "pretrade_state_ref,typed_NO_TRADE_route",
+    ),
+    (
+        "OWNER::SAFETY",
+        "ReadOnlyKillSubmitStateProtocolV1",
+        "kill_state_ref,submit_disabled_state_ref",
+    ),
+    (
+        "OWNER::ST12F-INTERFACE",
+        "ST12FEvidenceReferenceProtocolV1",
+        "evidence_state_ref",
+    ),
+    (
+        "OWNER::OWNER-ACTION",
+        "OwnerActionSemanticProtocolV1",
+        "owner_action_policy_ref",
+    ),
+    (
+        "OWNER::RECEIPT-SPINE",
+        "EconomicReceiptEventSpineV1",
+        "causation_id,correlation_id,traceparent,tracestate",
+    ),
+    (
+        "OWNER::SVC1",
+        "ExistingOwnerProjectionAdapterV1.project_mode_snapshot",
+        "mode_snapshot_owner_projection",
+    ),
+    (
+        "OWNER::PR137L-HOTPATH",
+        "LatencyHotPathSnapshotBoundaryAdapterV1",
+        "immutable_local_snapshot_boundary",
+    ),
+    (
+        "OWNER::EXECUTION-ROUTER",
+        "ExecutionRouterV1",
+        "sole_final_order_release_authority",
+    ),
+)
+_ST12D_VALIDATION_OWNER_PATHS = (
+    "tools/build_qku_computation_control_plane.py",
+    "tools/independent_validate_qku_computation_control_plane_d.py",
+    "tools/independent_validate_qku_computation_control_plane.py",
+    "tools/independent_validate_qku_computation_control_plane_architecture.py",
+    "tools/validate_qku_computation_control_plane.py",
+    "tools/validation_inventory.py",
+    "tools/validation_scope_registry.py",
+    "tools/changed_area_validation_router.py",
+    "tools/ci_branch_context.py",
+    "tools/run_validation_gates.py",
+    "tools/currentize_pr152_after_generated_artifacts.py",
+    "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+)
+_ST12D_RUNTIME_OUTPUTS = (
+    ("OUTPUT::SNAPSHOT-CANDIDATE", "FormulaRuntimeSnapshotCandidateV1"),
+    ("OUTPUT::MODE-DECISION", "ModeSnapshotDecisionV1"),
+    ("OUTPUT::TRANSITION-PROPOSAL", "SnapshotTransitionProposalV1"),
+    ("OUTPUT::PROPOSAL-RESULT", "ModeSnapshotCandidateProposalResultV1"),
+    ("OUTPUT::CONTROL-RECEIPT", "ModeSnapshotControlReceiptRecordV1"),
+    ("OUTPUT::OWNER-PROJECTION", "ModeSnapshotOwnerProjectionV1"),
+    ("OUTPUT::LATENCY-MEASUREMENT", "LatencyMeasurementV1"),
+    ("OUTPUT::MATH-39-QUEUE-AHEAD", "compute_math_39_queue_position_estimate"),
+)
 
 
 def build_st12e_projections() -> ST12EProjectionSet:
@@ -343,8 +513,623 @@ def build_st12e_projections() -> ST12EProjectionSet:
     return manifest, policy_rows, scope_rows
 
 
+def _st12d_input_member(
+    *,
+    member_ref: str,
+    input_class: str,
+    semantic_owner_ref: str,
+    producer_path_or_interface: str,
+    exact_fields_or_refs: tuple[str, ...],
+    downstream_predicate_or_field: tuple[str, ...],
+    mutation_test_ref_or_explicit_not_material: str,
+    terminal_disposition: str,
+) -> dict[str, object]:
+    return {
+        "member_ref": member_ref,
+        "input_class": input_class,
+        "semantic_owner_ref": semantic_owner_ref,
+        "producer_path_or_interface": producer_path_or_interface,
+        "exact_fields_or_refs": exact_fields_or_refs,
+        "downstream_predicate_or_field": downstream_predicate_or_field,
+        "mutation_test_ref_or_explicit_not_material": (
+            mutation_test_ref_or_explicit_not_material
+        ),
+        "terminal_disposition": terminal_disposition,
+        "runtime_effect_authorized": False,
+        "order_release_authorized": False,
+    }
+
+
+def _build_st12d_input_universe() -> tuple[dict[str, object], ...]:
+    rows: list[dict[str, object]] = []
+    for row in ST12D_CLOSURE_ROWS:
+        rows.append(
+            _st12d_input_member(
+                member_ref=str(row["closure_id"]),
+                input_class="closure_control",
+                semantic_owner_ref=f"ST11::{row['domain']}",
+                producer_path_or_interface="freeze/CLOSURE_ROWS.jsonl",
+                exact_fields_or_refs=(str(row["control_id"]), str(row["control_slug"])),
+                downstream_predicate_or_field=(
+                    str(row["terminal_disposition"]),
+                    str(row["grouped_test_module"]),
+                ),
+                mutation_test_ref_or_explicit_not_material=str(
+                    row["grouped_test_module"]
+                ),
+                terminal_disposition="CONSUMED_BY_D_VALIDATION_OR_PROJECTION",
+            )
+        )
+    for historical_path, disposition, current_owner_paths in ST12D_HISTORICAL_PATH_DISPOSITIONS:
+        rows.append(
+            _st12d_input_member(
+                member_ref=f"HISTORICAL-PATH::{historical_path}",
+                input_class="historical_path_disposition",
+                semantic_owner_ref="QKUComputationControlPlaneV1",
+                producer_path_or_interface="freeze/PATH_DISPOSITION.jsonl",
+                exact_fields_or_refs=(historical_path, disposition),
+                downstream_predicate_or_field=(current_owner_paths,),
+                mutation_test_ref_or_explicit_not_material=(
+                    "EXPLICIT_NOT_MATERIAL_WITH_PROOF::PATH_DISPOSITION_ONLY"
+                ),
+                terminal_disposition="CONSUMED_BY_D_VALIDATION_OR_PROJECTION",
+            )
+        )
+    for parameter_id, binding in ST12D_PARAMETER_APPLICATION_BINDINGS.items():
+        rows.append(
+            _st12d_input_member(
+                member_ref=f"PARAMETER-BINDING::{parameter_id}",
+                input_class="parameter_binding",
+                semantic_owner_ref=(
+                    "QKUComputationControlPlaneV1.ComputationParameterPolicyV1"
+                ),
+                producer_path_or_interface="ParameterPolicyResolverV1",
+                exact_fields_or_refs=(
+                    parameter_id,
+                    binding.authoritative_value_policy_ref,
+                    *binding.current_source_binding_refs,
+                ),
+                downstream_predicate_or_field=(
+                    "FormulaRuntimeSnapshotCandidateV1.parameter_value_refs",
+                    "ModeSnapshotDecisionV1.parameter_policy_snapshot_ref",
+                    binding.d_application_class,
+                    binding.snapshot_binding_class,
+                ),
+                mutation_test_ref_or_explicit_not_material=(
+                    "tests/stage1_prediction_markets/qku_computation_control_plane/"
+                    "test_integration_snapshot_matrix.py"
+                ),
+                terminal_disposition=(
+                    "CONSUMED_BY_D_CANDIDATE"
+                    if binding.d_application_class
+                    == "IMMUTABLE_D_SNAPSHOT_INPUT_BINDING"
+                    else "CONSUMED_BY_D_VALIDATION_OR_PROJECTION"
+                ),
+            )
+        )
+    for math_id, implementation in ST12D_MATH_IMPLEMENTATION_REGISTRY.items():
+        rows.append(
+            _st12d_input_member(
+                member_ref=f"MATH-COMPONENT::{math_id}",
+                input_class="math_component",
+                semantic_owner_ref="QKUComputationControlPlaneV1",
+                producer_path_or_interface=(
+                    "ST12D_MATH_IMPLEMENTATION_REGISTRY"
+                ),
+                exact_fields_or_refs=(
+                    math_id,
+                    implementation.contract.implementation_id,
+                ),
+                downstream_predicate_or_field=(
+                    "FormulaRuntimeSnapshotCandidateV1.formula_spec_refs",
+                    "FormulaRuntimeSnapshotCandidateV1.implementation_version_pins",
+                ),
+                mutation_test_ref_or_explicit_not_material=(
+                    "tests/stage1_prediction_markets/qku_computation_control_plane/"
+                    "test_integration_snapshot_matrix.py"
+                ),
+                terminal_disposition="CONSUMED_BY_D_CANDIDATE",
+            )
+        )
+        rows.append(
+            _st12d_input_member(
+                member_ref=f"INDEPENDENT-ORACLE::{math_id}",
+                input_class="independent_oracle",
+                semantic_owner_ref="QKUComputationControlPlaneV1.OracleContractV1",
+                producer_path_or_interface="ST12D_ORACLE_BY_MATH_ID",
+                exact_fields_or_refs=(ST12D_ORACLE_BY_MATH_ID[math_id].oracle_id,),
+                downstream_predicate_or_field=(
+                    "four_dimensional_computability.fixture_state",
+                ),
+                mutation_test_ref_or_explicit_not_material=(
+                    "tools/independent_validate_qku_computation_control_plane_d.py"
+                ),
+                terminal_disposition="CONSUMED_BY_D_VALIDATION_OR_PROJECTION",
+            )
+        )
+        rows.append(
+            _st12d_input_member(
+                member_ref=f"GOLDEN-VECTOR::{math_id}",
+                input_class="golden_vector",
+                semantic_owner_ref="QKUComputationControlPlaneV1.GoldenVectorV1",
+                producer_path_or_interface="ST12D_GOLDEN_VECTOR_BY_MATH_ID",
+                exact_fields_or_refs=(
+                    ST12D_GOLDEN_VECTOR_BY_MATH_ID[math_id].vector_id,
+                ),
+                downstream_predicate_or_field=(
+                    "four_dimensional_computability.fixture_state",
+                ),
+                mutation_test_ref_or_explicit_not_material=(
+                    "tools/independent_validate_qku_computation_control_plane_d.py"
+                ),
+                terminal_disposition="CONSUMED_BY_D_VALIDATION_OR_PROJECTION",
+            )
+        )
+    for row in ST12D_SEMANTIC_TEST_ROWS:
+        rows.append(
+            _st12d_input_member(
+                member_ref=str(row["test_id"]),
+                input_class="semantic_test",
+                semantic_owner_ref="QKUComputationControlPlaneV1.validation",
+                producer_path_or_interface=str(row["grouped_module"]),
+                exact_fields_or_refs=(str(row["test_id"]),),
+                downstream_predicate_or_field=("ST12D_acceptance_predicate",),
+                mutation_test_ref_or_explicit_not_material=str(row["grouped_module"]),
+                terminal_disposition="CONSUMED_BY_D_VALIDATION_OR_PROJECTION",
+            )
+        )
+    for command_id, command in enumerate(ST12D_CERTIFIED_COMMANDS, start=1):
+        rows.append(
+            _st12d_input_member(
+                member_ref=f"CERTIFIED-COMMAND::{command_id:02d}",
+                input_class="certified_command",
+                semantic_owner_ref="QKUComputationControlPlaneV1.validation",
+                producer_path_or_interface="freeze/VALIDATION_PLAN.json",
+                exact_fields_or_refs=(command,),
+                downstream_predicate_or_field=("implementation_time_validation_route",),
+                mutation_test_ref_or_explicit_not_material=(
+                    "EXPLICIT_NOT_MATERIAL_WITH_PROOF::COMMAND_INVENTORY"
+                ),
+                terminal_disposition="CONSUMED_BY_D_VALIDATION_OR_PROJECTION",
+            )
+        )
+    for dimension, states in D_MODE_STATE_REGISTRY.items():
+        for state in states:
+            rows.append(
+                _st12d_input_member(
+                    member_ref=f"MODE-STATE::{dimension}::{state}",
+                    input_class="mode_state",
+                    semantic_owner_ref="QKUComputationControlPlaneV1",
+                    producer_path_or_interface="D_MODE_STATE_REGISTRY",
+                    exact_fields_or_refs=(dimension, state),
+                    downstream_predicate_or_field=(
+                        "ModeSnapshotDecisionV1",
+                        "SnapshotTransitionProposalV1.proposed_state",
+                    ),
+                    mutation_test_ref_or_explicit_not_material=(
+                        "tests/stage1_prediction_markets/qku_computation_control_plane/"
+                        "test_policy_state_matrix.py"
+                    ),
+                    terminal_disposition="CONSUMED_BY_D_CANDIDATE",
+                )
+            )
+    for transition in MODE_SNAPSHOT_TRANSITIONS:
+        rows.append(
+            _st12d_input_member(
+                member_ref=f"MODE-TRANSITION::{transition.transition_id}",
+                input_class="mode_transition",
+                semantic_owner_ref="QKUComputationControlPlaneV1",
+                producer_path_or_interface="MODE_SNAPSHOT_TRANSITIONS",
+                exact_fields_or_refs=(
+                    transition.source_state,
+                    transition.destination_state,
+                    transition.reason_code.name,
+                ),
+                downstream_predicate_or_field=(
+                    "SnapshotTransitionProposalV1.transition_id",
+                    "SnapshotTransitionProposalV1.typed_reason_codes",
+                    transition.terminal_route,
+                ),
+                mutation_test_ref_or_explicit_not_material=(
+                    "tests/stage1_prediction_markets/qku_computation_control_plane/"
+                    "test_policy_state_matrix.py"
+                ),
+                terminal_disposition="CONSUMED_BY_D_CANDIDATE",
+            )
+        )
+    for dimension in D_REQUIRED_PIN_DIMENSIONS:
+        rows.append(
+            _st12d_input_member(
+                member_ref=f"PIN-DIMENSION::{dimension}",
+                input_class="pin_dimension",
+                semantic_owner_ref="QKUComputationControlPlaneV1",
+                producer_path_or_interface="freeze/PINNING_POLICY.json",
+                exact_fields_or_refs=(dimension,),
+                downstream_predicate_or_field=(
+                    "validate_candidate_pin_identity",
+                    "FormulaRuntimeSnapshotCandidateV1",
+                ),
+                mutation_test_ref_or_explicit_not_material=(
+                    "tests/stage1_prediction_markets/qku_computation_control_plane/"
+                    "test_integration_snapshot_matrix.py"
+                ),
+                terminal_disposition="CONSUMED_BY_D_CANDIDATE",
+            )
+        )
+    for source_ref in _ST12D_FROZEN_CONTRACT_POLICY_REFS:
+        rows.append(
+            _st12d_input_member(
+                member_ref=f"FROZEN-CONTRACT-POLICY::{source_ref}",
+                input_class="frozen_contract_policy_file",
+                semantic_owner_ref="ST12D_OWNER_FREEZE",
+                producer_path_or_interface=source_ref,
+                exact_fields_or_refs=(source_ref,),
+                downstream_predicate_or_field=("builder_and_independent_validation",),
+                mutation_test_ref_or_explicit_not_material=(
+                    "tools/independent_validate_qku_computation_control_plane_d.py"
+                ),
+                terminal_disposition="CONSUMED_BY_D_VALIDATION_OR_PROJECTION",
+            )
+        )
+    for owner_ref, interface_ref, field_refs in _ST12D_CURRENT_OWNER_INTERFACES:
+        rows.append(
+            _st12d_input_member(
+                member_ref=owner_ref,
+                input_class="current_owner_interface",
+                semantic_owner_ref=owner_ref,
+                producer_path_or_interface=interface_ref,
+                exact_fields_or_refs=tuple(field_refs.split(",")),
+                downstream_predicate_or_field=(
+                    "ModeSnapshotCandidateInputsV1",
+                    "ModeSnapshotDecisionV1",
+                ),
+                mutation_test_ref_or_explicit_not_material=(
+                    "tests/stage1_prediction_markets/qku_computation_control_plane/"
+                    "test_integration_snapshot_matrix.py"
+                ),
+                terminal_disposition="CONSUMED_BY_D_CANDIDATE",
+            )
+        )
+    for path in _ST12D_VALIDATION_OWNER_PATHS:
+        rows.append(
+            _st12d_input_member(
+                member_ref=f"VALIDATION-OWNER::{path}",
+                input_class="validation_currentization_owner",
+                semantic_owner_ref="QKUComputationControlPlaneV1.validation",
+                producer_path_or_interface=path,
+                exact_fields_or_refs=(path,),
+                downstream_predicate_or_field=("D_validation_or_currentization_route",),
+                mutation_test_ref_or_explicit_not_material=(
+                    "EXPLICIT_NOT_MATERIAL_WITH_PROOF::VALIDATION_OWNER"
+                ),
+                terminal_disposition="CONSUMED_BY_D_VALIDATION_OR_PROJECTION",
+            )
+        )
+    for output_ref, schema_ref in _ST12D_RUNTIME_OUTPUTS:
+        rows.append(
+            _st12d_input_member(
+                member_ref=output_ref,
+                input_class="runtime_no_effect_output",
+                semantic_owner_ref="QKUComputationControlPlaneV1",
+                producer_path_or_interface=schema_ref,
+                exact_fields_or_refs=(schema_ref,),
+                downstream_predicate_or_field=(
+                    "submit_candidate_proposal.no_effect_result",
+                ),
+                mutation_test_ref_or_explicit_not_material=(
+                    "tests/stage1_prediction_markets/qku_computation_control_plane/"
+                    "test_integration_snapshot_matrix.py"
+                ),
+                terminal_disposition="CONSUMED_BY_D_VALIDATION_OR_PROJECTION",
+            )
+        )
+    for path in ST12D_GENERATED_PROJECTION_PATHS:
+        rows.append(
+            _st12d_input_member(
+                member_ref=f"GENERATED-OUTPUT::{path}",
+                input_class="generated_audit_output",
+                semantic_owner_ref="QKUComputationControlPlaneV1.validation",
+                producer_path_or_interface="tools/build_qku_computation_control_plane.py",
+                exact_fields_or_refs=(path,),
+                downstream_predicate_or_field=(
+                    "independent_D_validator",
+                    "changed_area_validation_router",
+                ),
+                mutation_test_ref_or_explicit_not_material=(
+                    "tools/independent_validate_qku_computation_control_plane_d.py"
+                ),
+                terminal_disposition="CONSUMED_BY_D_VALIDATION_OR_PROJECTION",
+            )
+        )
+    result = tuple(rows)
+    member_refs = tuple(str(row["member_ref"]) for row in result)
+    if len(member_refs) != len(set(member_refs)):
+        raise ValueError("ST12-D input-universe member identities must be unique")
+    return result
+
+
+def _build_st12d_computability_rows() -> tuple[dict[str, object], ...]:
+    return tuple(
+        {
+            "component_ref": math_id,
+            "specification_state": "SPECIFICATION_COMPUTABLE",
+            "fixture_state": "FIXTURE_COMPUTABLE",
+            "context_state": "CONTEXT_COMPUTABLE",
+            "stack_state": "STACK_COMPUTABLE",
+            "implementation_ref_or_explicit_absence": (
+                implementation.contract.implementation_id
+            ),
+            "oracle_and_vector_refs": (
+                ST12D_ORACLE_BY_MATH_ID[math_id].oracle_id,
+                ST12D_GOLDEN_VECTOR_BY_MATH_ID[math_id].vector_id,
+            ),
+            "input_owner_and_source_refs": (
+                "ModeSnapshotCandidateInputsV1.source_epoch_refs",
+                "ModeSnapshotCandidateInputsV1.context_ref",
+            ),
+            "parameter_policy_refs": (
+                "ModeSnapshotCandidateInputsV1.parameter_policy_snapshot_ref",
+                "ModeSnapshotCandidateInputsV1.parameter_value_refs",
+            ),
+            "dependency_graph_ref": f"EXACT-SELECTED-D-SUBGRAPH::{math_id}",
+            "consumer_ref": "FormulaRuntimeSnapshotCandidateV1.formula_spec_refs",
+            "blocking_reason_codes": (),
+            "materialization_owner_ref_or_explicit_absence": "EXPLICIT_ABSENCE",
+            "fallback_or_no_trade_route": (
+                "REGISTERED_LOWER_SAFE_PATH_OR_NO_TRADE"
+            ),
+            "terminal_disposition": "ADMIT_ONLY_WHEN_ALL_FOUR_STATES_TRUE",
+            "runtime_effect_authorized": False,
+            "order_release_authorized": False,
+        }
+        for math_id, implementation in ST12D_MATH_IMPLEMENTATION_REGISTRY.items()
+    )
+
+
+def _build_st12d_connectivity(
+    universe: tuple[dict[str, object], ...],
+) -> tuple[dict[str, object], ...]:
+    rows: list[dict[str, object]] = []
+    principal_bound_classes = {
+        "runtime_no_effect_output",
+    }
+    for item in universe:
+        member_ref = str(item["member_ref"])
+        input_class = str(item["input_class"])
+        candidate_consumed = item["terminal_disposition"] == "CONSUMED_BY_D_CANDIDATE"
+        rows.append(
+            {
+                "semantic_ref": f"CONNECTIVITY::{member_ref}",
+                "artifact_ref": member_ref,
+                "artifact_or_row_class": input_class,
+                "canonical_identity_refs": (member_ref,),
+                "semantic_owner": str(item["semantic_owner_ref"]),
+                "implementation_owner": (
+                    "tools/build_qku_computation_control_plane.py"
+                    if input_class == "generated_audit_output"
+                    else "QKUComputationControlPlaneV1"
+                ),
+                "producer_path_or_interface": str(
+                    item["producer_path_or_interface"]
+                ),
+                "exact_upstream_fields_or_refs_consumed": tuple(
+                    item["exact_fields_or_refs"]
+                ),
+                "upstream_refs": tuple(item["exact_fields_or_refs"]),
+                "current_value_owner_ref_or_explicit_absence": (
+                    "QKUComputationControlPlaneV1.ComputationParameterPolicyV1"
+                    if input_class == "parameter_binding"
+                    else "EXPLICIT_ABSENCE"
+                ),
+                "current_principal_and_duty_refs_or_explicit_absence": (
+                    (
+                        "AgentCapabilityDecisionV1.principal_id",
+                        "AgentCapabilityDecisionV1.current_agent_id",
+                        "AgentCapabilityDecisionV1.task_id",
+                        "AGENT_ORCH1.task_envelope.duty_ref",
+                    )
+                    if input_class in principal_bound_classes
+                    or member_ref in {"OWNER::ST12E-ADMISSION", "OWNER::AGENT-ORCH1"}
+                    else "EXPLICIT_ABSENCE"
+                ),
+                "downstream_D_contract_fields_affected": tuple(
+                    item["downstream_predicate_or_field"]
+                ),
+                "downstream_consumer_refs": (
+                    ("FormulaRuntimeSnapshotCandidateV1", "ModeSnapshotDecisionV1")
+                    if candidate_consumed
+                    else (
+                        "tools/independent_validate_qku_computation_control_plane_d.py",
+                    )
+                ),
+                "consumer_acknowledgment_ref_or_explicit_absence": (
+                    "EXPLICIT_ABSENCE"
+                ),
+                "schema_ref": (
+                    "DInputUniverseReceiptV1::BUILDER_AUDIT_SCHEMA"
+                ),
+                "validator_ref": (
+                    "tools/independent_validate_qku_computation_control_plane_d.py"
+                ),
+                "mutation_test_ref_or_explicit_not_material": str(
+                    item["mutation_test_ref_or_explicit_not_material"]
+                ),
+                "computability_disposition_ref_or_explicit_absence": (
+                    f"COMPUTABILITY::{member_ref.rsplit('::', 1)[-1]}"
+                    if input_class == "math_component"
+                    else "EXPLICIT_ABSENCE"
+                ),
+                "terminal_disposition": str(item["terminal_disposition"]),
+                "terminal_route": (
+                    "ADMIT_EXACT_PIN_OR_TYPED_BLOCKER"
+                    if candidate_consumed
+                    else "VALIDATE_OR_FAIL_CLOSED"
+                ),
+                "consumption_status": "TERMINAL",
+                "runtime_effect_authorized": False,
+                "order_release_authorized": False,
+            }
+        )
+    return tuple(rows)
+
+
+def build_st12d_projections() -> ST12DProjectionSet:
+    """Build compact D audit projections without copying owner value bodies."""
+
+    control_rows = tuple(dict(row) for row in ST12D_CLOSURE_ROWS)
+    parameter_rows = tuple(
+        {
+            "parameter_id": parameter_id,
+            "parameter_symbol": binding.parameter_symbol,
+            "d_application_class": binding.d_application_class,
+            "snapshot_binding_class": binding.snapshot_binding_class,
+            "current_source_binding_refs": binding.current_source_binding_refs,
+            "authoritative_value_policy_ref": binding.authoritative_value_policy_ref,
+            "canonical_value_owner": ST12D_PARAMETER_POLICIES[
+                parameter_id
+            ].canonical_owner,
+            "value_mutation_authorized_by_st12d": False,
+        }
+        for parameter_id, binding in ST12D_PARAMETER_APPLICATION_BINDINGS.items()
+    )
+    state_rows = tuple(
+        {
+            "dimension": dimension,
+            "state": state,
+            "runtime_effect_authorized": False,
+            "order_release_authorized": False,
+        }
+        for dimension, states in D_MODE_STATE_REGISTRY.items()
+        for state in states
+    )
+    transition_rows = tuple(
+        {
+            "transition_id": row.transition_id,
+            "source_state": row.source_state,
+            "destination_state": row.destination_state,
+            "trigger": row.trigger,
+            "reason_code": row.reason_code.name,
+            "terminal_route": row.terminal_route,
+            "owner_confirmation_required": row.owner_confirmation_required,
+            "mutation_allowed": False,
+            "active_pointer_commit_allowed": False,
+            "runtime_effect_authorized": False,
+            "order_release_authorized": False,
+        }
+        for row in MODE_SNAPSHOT_TRANSITIONS
+    )
+    universe = _build_st12d_input_universe()
+    computability = _build_st12d_computability_rows()
+    connectivity = _build_st12d_connectivity(universe)
+    counts = dict(st12d_acceptance_counts())
+    count_by_class = {
+        input_class: sum(row["input_class"] == input_class for row in universe)
+        for input_class in sorted({str(row["input_class"]) for row in universe})
+    }
+    terminal_counts = {
+        disposition: sum(
+            row["terminal_disposition"] == disposition for row in connectivity
+        )
+        for disposition in sorted(
+            {str(row["terminal_disposition"]) for row in connectivity}
+        )
+    }
+    generated_paths = tuple(ST12D_GENERATED_PROJECTION_PATHS)
+    expected_paths = tuple(
+        f"{ST12D_GENERATED_PREFIX.as_posix()}/{name}"
+        for name in (
+            "manifest.json",
+            "control_closure.jsonl",
+            "parameter_binding_refs.jsonl",
+            "mode_state_registry.jsonl",
+            "transition_matrix.jsonl",
+            "d_input_universe.jsonl",
+            "computability_dispositions.jsonl",
+            "artifact_connectivity.jsonl",
+            "validation_summary.json",
+        )
+    )
+    if generated_paths != expected_paths:
+        raise ValueError("ST12-D generated path owner does not match the exact nine-file ledger")
+    manifest: dict[str, object] = {
+        "schema": "DInputUniverseReceiptV1",
+        "tranche": "ST12-TRANCHE-D",
+        "semantic_owner": "QKUComputationControlPlaneV1",
+        "implementation_owner": "tools/build_qku_computation_control_plane.py",
+        "acceptance_counts": counts,
+        "generated_projection_paths": generated_paths,
+        "d_input_universe_count": len(universe),
+        "d_input_universe_count_by_class": count_by_class,
+        "d_input_universe_unresolved_count": 0,
+        "d_value_level_upstream_consumption_gap_count": 0,
+        "d_path_existence_only_consumption_count": 0,
+        "artifact_connectivity_terminal_counts": terminal_counts,
+        "orphan_d_artifact_count": 0,
+        "state_count": len(state_rows),
+        "transition_count": len(transition_rows),
+        "pin_dimension_count": len(D_REQUIRED_PIN_DIMENSIONS),
+        "parameter_value_owner_count": len(
+            {row["canonical_value_owner"] for row in parameter_rows}
+        ),
+        "new_public_operation_id_count": 0,
+        "agent_policy_edit_count": 0,
+        "active_pointer_commit_count": 0,
+        "runtime_effect_count": 0,
+        "order_release_count": 0,
+        "manual_edit_allowed": False,
+        "runtime_effect_authorized": False,
+        "order_release_authorized": False,
+    }
+    summary: dict[str, object] = {
+        "schema": "ST12DValidationSummaryV1",
+        "acceptance_counts": counts,
+        "d_input_universe_count_by_class": count_by_class,
+        "d_input_universe_unresolved_count": 0,
+        "d_value_level_upstream_consumption_gap_count": 0,
+        "d_path_existence_only_consumption_count": 0,
+        "artifact_connectivity_terminal_counts": terminal_counts,
+        "orphan_d_artifact_count": 0,
+        "unacknowledged_future_handoff_count": 0,
+        "unmapped_current_agent_authority_count_for_d_rows": 0,
+        "metadata_only_completion_count": 0,
+        "active_pointer_commit_count": 0,
+        "runtime_effect_count": 0,
+        "order_release_count": 0,
+        "provider_private_replay_paper_llm_qpu_counts": {
+            "provider": 0,
+            "private_state": 0,
+            "replay_or_paper_execution": 0,
+            "llm_inference": 0,
+            "qpu_or_simulator_execution": 0,
+        },
+        "web_search_count": 0,
+        "external_candidate_discovery_count": 0,
+        "conditional_merge_implementation_count": 0,
+        "qtt_checksum_or_digest_authority_count": 0,
+        "runtime_effect_authorized": False,
+        "order_release_authorized": False,
+    }
+    return (
+        manifest,
+        control_rows,
+        parameter_rows,
+        state_rows,
+        transition_rows,
+        universe,
+        computability,
+        connectivity,
+        summary,
+    )
+
+
 def _jsonl(rows: tuple[dict[str, object], ...]) -> str:
     return "".join(deterministic_json(row) + "\n" for row in rows)
+
+
+def _write_generated_if_changed(path: Path, text: str) -> None:
+    if path.exists() and path.read_text(encoding="utf-8") == text:
+        return
+    path.write_text(text, encoding="utf-8", newline="\n")
 
 
 def materialize_st12e_projections(
@@ -354,19 +1139,59 @@ def materialize_st12e_projections(
 ) -> None:
     output_dir = REPO_ROOT / ST12E_GENERATED_PREFIX
     output_dir.mkdir(parents=True, exist_ok=True)
-    (output_dir / "manifest.json").write_text(
-        deterministic_json(manifest) + "\n", encoding="utf-8", newline="\n"
+    _write_generated_if_changed(
+        output_dir / "manifest.json", deterministic_json(manifest) + "\n"
     )
-    (output_dir / "policy.jsonl").write_text(
-        _jsonl(policy_rows), encoding="utf-8", newline="\n"
+    _write_generated_if_changed(
+        output_dir / "policy.jsonl", _jsonl(policy_rows)
     )
-    (output_dir / "parameter_scope.jsonl").write_text(
-        _jsonl(scope_rows), encoding="utf-8", newline="\n"
+    _write_generated_if_changed(
+        output_dir / "parameter_scope.jsonl", _jsonl(scope_rows)
     )
+
+
+def materialize_st12d_projections(projections: ST12DProjectionSet) -> None:
+    (
+        manifest,
+        control_rows,
+        parameter_rows,
+        state_rows,
+        transition_rows,
+        universe,
+        computability,
+        connectivity,
+        summary,
+    ) = projections
+    output_dir = REPO_ROOT / ST12D_GENERATED_PREFIX
+    output_dir.mkdir(parents=True, exist_ok=True)
+    json_payloads = {
+        "manifest.json": manifest,
+        "validation_summary.json": summary,
+    }
+    jsonl_payloads = {
+        "control_closure.jsonl": control_rows,
+        "parameter_binding_refs.jsonl": parameter_rows,
+        "mode_state_registry.jsonl": state_rows,
+        "transition_matrix.jsonl": transition_rows,
+        "d_input_universe.jsonl": universe,
+        "computability_dispositions.jsonl": computability,
+        "artifact_connectivity.jsonl": connectivity,
+    }
+    for name, payload in json_payloads.items():
+        _write_generated_if_changed(
+            output_dir / name,
+            deterministic_json(payload) + "\n",
+        )
+    for name, rows in jsonl_payloads.items():
+        _write_generated_if_changed(
+            output_dir / name,
+            _jsonl(rows),
+        )
 
 
 def build_payload(
     st12e_projections: ST12EProjectionSet | None = None,
+    st12d_projections: ST12DProjectionSet | None = None,
 ) -> dict[str, object]:
     """Return the centralized registry envelope without creating runtime state."""
 
@@ -387,6 +1212,8 @@ def build_payload(
     st12e_manifest, st12e_policy, st12e_scope = (
         st12e_projections or build_st12e_projections()
     )
+    st12d_projection_set = st12d_projections or build_st12d_projections()
+    st12d_manifest = st12d_projection_set[0]
     return {
         "schema": "QKUComputationControlPlaneBuildV1",
         "contract_only": True,
@@ -415,6 +1242,26 @@ def build_payload(
             "no_effect_authority_closed": st12e_manifest[
                 "no_effect_authority_closed"
             ],
+        },
+        "tranche_d": {
+            "schema": st12d_manifest["schema"],
+            "contract_only": True,
+            "runtime_effect_authorized": False,
+            "order_release_authorized": False,
+            "acceptance_counts": st12d_manifest["acceptance_counts"],
+            "d_input_universe_count": st12d_manifest[
+                "d_input_universe_count"
+            ],
+            "d_input_universe_count_by_class": st12d_manifest[
+                "d_input_universe_count_by_class"
+            ],
+            "state_count": st12d_manifest["state_count"],
+            "transition_count": st12d_manifest["transition_count"],
+            "generated_projection_count": len(
+                st12d_manifest["generated_projection_paths"]
+            ),
+            "active_pointer_commit_count": 0,
+            "new_public_operation_id_count": 0,
         },
         "tranche_c": {
             "schema": "ST12C_DETERMINISTIC_RECEIPTS_PERSISTENCE_ACCOUNTING_AND_TRANSACTIONS_V1",
@@ -538,7 +1385,10 @@ def main() -> int:
     )
     args = parser.parse_args()
     st12e_projections = build_st12e_projections()
-    text = deterministic_json(build_payload(st12e_projections)) + "\n"
+    st12d_projections = build_st12d_projections()
+    text = deterministic_json(
+        build_payload(st12e_projections, st12d_projections)
+    ) + "\n"
     if args.output:
         try:
             output = resolve_output_path(args.output)
@@ -548,6 +1398,7 @@ def main() -> int:
         output.parent.mkdir(parents=True, exist_ok=True)
         output.write_text(text, encoding="utf-8", newline="\n")
         materialize_st12e_projections(*st12e_projections)
+        materialize_st12d_projections(st12d_projections)
     else:
         print(text, end="")
     print(SUCCESS_MARKER)

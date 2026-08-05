@@ -232,6 +232,7 @@ def test_qku_shared_integration_paths_use_the_exact_allowlists() -> None:
             *inventory.ST12A_ALLOWED_EXACT_PATHS,
             *inventory.ST12B_ALLOWED_EXACT_PATHS,
             *inventory.ST12C_ALLOWED_EXACT_PATHS,
+            *inventory.ST12D_ALLOWED_EXACT_PATHS,
             *inventory.ST12E_ALLOWED_EXACT_PATHS,
         )
     )
@@ -302,6 +303,19 @@ def test_st12e_paths_route_all_six_e_validators() -> None:
     assert unallowlisted_result.full_validation_reason == (
         "unknown changed files force full validation"
     )
+
+
+def test_st12d_paths_route_every_d_validator_without_skips() -> None:
+    path = (
+        "docs/master_plan/generated/qku_control_plane/"
+        "mode_snapshot/manifest.json"
+    )
+    result = _pull_request_result(path)
+
+    assert inventory.ST12D_QKU_VALIDATOR_IDS <= set(result.required_validators)
+    assert path not in result.unknown_files
+    assert result.skipped_validators == ()
+    assert result.fail_closed_reasons == ()
 
 
 def test_qtt_authority_registry_change_routes_to_owner_validator():
