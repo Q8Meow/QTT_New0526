@@ -5430,6 +5430,7 @@ def _st12d_stage_receipt_fixture(
         ActivationPreconditionStateV1,
         AllowCandidateStateV1,
         ExecutedModeSnapshotTransitionTraceV1,
+        FormulaRuntimeSnapshotCandidateV1,
         ImplementationVersionPinV1,
         ModeEligibilityState,
         ModeSnapshotCandidateProposalResultV1,
@@ -5449,6 +5450,17 @@ def _st12d_stage_receipt_fixture(
     candidate_version = "CANDIDATE-VERSION::ST12D::STAGE-TRACE"
     owner_state_ref = "OWNER-STATE::ST12D::STAGE-TRACE"
     receipt_refs = ("OWNER-RECEIPT::ST12D::STAGE-TRACE",)
+    computation_bundle_ref = "SNAPSHOT-BUNDLE::ST12D::MATH-13-14-15-39"
+    parameter_policy_snapshot_ref = "ComputationParameterPolicyV1::3.4"
+    readiness_state_ref = "READINESS1::CURRENT"
+    pretrade_state_ref = "PRETRADE1::CURRENT"
+    evidence_state_ref = "ST12F-EVIDENCE::READ-ONLY::CURRENT"
+    safety_state_ref = "SAFETY-RECEIPT::ST12D::CURRENT"
+    implementation_pins = (
+        ImplementationVersionPinV1("MATH-13", "MATH-13::3.4"),
+    )
+    source_epoch_refs = ("SOURCE-EPOCH::ST12D::STAGE-TRACE",)
+    expires_at = observed_at + timedelta(minutes=1)
     common = {
         "request_id": request_id,
         "principal_id": principal_id,
@@ -5487,6 +5499,35 @@ def _st12d_stage_receipt_fixture(
         **common,
     )
     trace = ExecutedModeSnapshotTransitionTraceV1((build, validated, final))
+    candidate = FormulaRuntimeSnapshotCandidateV1(
+        snapshot_candidate_id=candidate_ref,
+        request_id=request_id,
+        principal_id=principal_id,
+        task_id=task_id,
+        capability_decision_ref=capability_ref,
+        computation_bundle_ref=computation_bundle_ref,
+        context_ref=context_ref,
+        formula_spec_refs=("MATH-13",),
+        implementation_version_pins=implementation_pins,
+        binding_profile_ref="BINDING-PROFILE::ST12D::STAGE-TRACE",
+        parameter_policy_snapshot_ref=parameter_policy_snapshot_ref,
+        parameter_value_refs=("RESOLVED-SNAPSHOT-PARAMETER::ST12D",),
+        source_epoch_refs=source_epoch_refs,
+        receipt_lineage_refs=receipt_refs,
+        readiness_state_ref=readiness_state_ref,
+        pretrade_state_ref=pretrade_state_ref,
+        evidence_state_ref=evidence_state_ref,
+        kill_state_ref=safety_state_ref,
+        submit_disabled_state_ref=safety_state_ref,
+        created_at=observed_at - timedelta(seconds=1),
+        evaluated_at=observed_at,
+        expires_at=expires_at,
+        stale_at=None,
+        candidate_state=SnapshotCandidateStateV1.VALIDATED_NO_EFFECT,
+        reason_codes=(ReasonCode.SNAPSHOT_CANDIDATE_VALID,),
+        fallback_route="RETURN_PROPOSAL_NO_EFFECT",
+        owner_review_route="EXISTING_OWNER_ACTION_REVIEW",
+    )
     decision = ModeSnapshotDecisionV1(
         decision_id="MODE-SNAPSHOT-DECISION::ST12D::STAGE-TRACE",
         request_id=request_id,
@@ -5494,15 +5535,15 @@ def _st12d_stage_receipt_fixture(
         principal_id=principal_id,
         current_agent_id=principal_id,
         capability_decision_ref=capability_ref,
-        computation_bundle_ref="SNAPSHOT-BUNDLE::ST12D::MATH-13-14-15-39",
+        computation_bundle_ref=computation_bundle_ref,
         context_ref=context_ref,
-        parameter_policy_snapshot_ref="ComputationParameterPolicyV1::3.4",
+        parameter_policy_snapshot_ref=parameter_policy_snapshot_ref,
         receipt_lineage_refs=receipt_refs,
-        readiness_state_ref="READINESS1::CURRENT",
-        pretrade_state_ref="PRETRADE1::CURRENT",
-        evidence_state_ref="ST12F-EVIDENCE::READ-ONLY::CURRENT",
-        kill_state_ref="SAFETY-RECEIPT::ST12D::CURRENT",
-        submit_disabled_state_ref="SAFETY-RECEIPT::ST12D::CURRENT",
+        readiness_state_ref=readiness_state_ref,
+        pretrade_state_ref=pretrade_state_ref,
+        evidence_state_ref=evidence_state_ref,
+        kill_state_ref=safety_state_ref,
+        submit_disabled_state_ref=safety_state_ref,
         owner_action_policy_ref="OWNER-ACTION-POLICY::CURRENT",
         current_mode="SAFE_CLASSICAL",
         requested_mode="HOTPATH_CANDIDATE_ONLY",
@@ -5518,12 +5559,10 @@ def _st12d_stage_receipt_fixture(
         rollback_target_ref_or_explicit_absence="EXPLICIT_ABSENCE",
         pin_policy_ref="ST12D-IN-FLIGHT-PIN-POLICY-v1",
         stale_state="CURRENT",
-        expires_at=observed_at + timedelta(minutes=1),
+        expires_at=expires_at,
         retirement_state=SnapshotRetirementStateV1.CURRENT,
-        implementation_pins=(
-            ImplementationVersionPinV1("MATH-13", "MATH-13::3.4"),
-        ),
-        source_epoch_refs=("SOURCE-EPOCH::ST12D::STAGE-TRACE",),
+        implementation_pins=implementation_pins,
+        source_epoch_refs=source_epoch_refs,
         reason_codes=(ReasonCode.OWNER_CONFIRMATION_REQUIRED,),
         fallback_route="HOLD",
         owner_review_route="EXISTING_OWNER_ACTION_REVIEW",
@@ -5533,7 +5572,7 @@ def _st12d_stage_receipt_fixture(
         ),
     )
     result = ModeSnapshotCandidateProposalResultV1(
-        snapshot_candidate_or_explicit_absence=None,
+        snapshot_candidate_or_explicit_absence=candidate,
         mode_snapshot_decision=decision,
         snapshot_transition_proposal=final,
         executed_transition_trace=trace,

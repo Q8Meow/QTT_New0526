@@ -55,6 +55,126 @@ EXPECTED_REPAIR_METRICS = {
     "semantic_test_identity_count": 26,
     "synthetic_override_mutation_count": 0,
 }
+EXPECTED_TERMINAL_OUTCOME_MATRIX = (
+    (("T03",), False, "EVIDENCE_UNAVAILABLE", "ABSENT"),
+    (("T04",), False, "BLOCKED", "ABSENT"),
+    (("T05",), False, "BLOCKED", "ABSENT"),
+    (("T08", "T09", "T06"), True, "OWNER_CONFIRMATION_REQUIRED", "VALIDATED_NO_EFFECT"),
+    (("T08", "T09", "T07"), True, "ELIGIBLE_NOT_ACTIVATED", "VALIDATED_NO_EFFECT"),
+    (("T08", "T10"), False, "BLOCKED", "REJECTED"),
+    (("T08", "T09", "T04"), True, "BLOCKED", "VALIDATED_NO_EFFECT"),
+)
+EXPECTED_TERMINAL_CANDIDATE_DECISION_FIELD_PAIRS = (
+    ("request_id", "request_id"),
+    ("principal_id", "principal_id"),
+    ("task_id", "task_id"),
+    ("capability_decision_ref", "capability_decision_ref"),
+    ("computation_bundle_ref", "computation_bundle_ref"),
+    ("context_ref", "context_ref"),
+    ("implementation_version_pins", "implementation_pins"),
+    ("parameter_policy_snapshot_ref", "parameter_policy_snapshot_ref"),
+    ("source_epoch_refs", "source_epoch_refs"),
+    ("receipt_lineage_refs", "receipt_lineage_refs"),
+    ("readiness_state_ref", "readiness_state_ref"),
+    ("pretrade_state_ref", "pretrade_state_ref"),
+    ("evidence_state_ref", "evidence_state_ref"),
+    ("kill_state_ref", "kill_state_ref"),
+    ("submit_disabled_state_ref", "submit_disabled_state_ref"),
+    ("expires_at", "expires_at"),
+)
+EXPECTED_REGISTERED_PHASES = (
+    "fast-preflight",
+    "deterministic-validators-a",
+    "deterministic-validators-b",
+    "deterministic-validators-c",
+    "pytest-shard-1",
+    "pytest-shard-2",
+    "pytest-shard-3",
+    "pytest-shard-4",
+    "pytest-shard-5",
+    "pytest-shard-6",
+    "pytest-shard-7",
+    "pytest-shard-8",
+    "post-validation",
+)
+EXPECTED_MANIFEST_KEYS = frozenset(
+    {
+        "acceptance_counts",
+        "active_pointer_commit_count",
+        "actual_control_mutation_case_count",
+        "actual_control_mutation_rejection_count",
+        "actual_control_positive_pass_count",
+        "agent_policy_edit_count",
+        "artifact_connectivity_terminal_counts",
+        "canonical_current_resolver_enforced_count",
+        "custom_resolver_bypass_count",
+        "d_input_universe_count",
+        "d_input_universe_count_by_class",
+        "d_input_universe_unresolved_count",
+        "d_path_existence_only_consumption_count",
+        "d_value_level_upstream_consumption_gap_count",
+        "executed_transition_trace_gap_count",
+        "generated_projection_paths",
+        "implementation_owner",
+        "manual_edit_allowed",
+        "new_public_operation_id_count",
+        "order_release_authorized",
+        "order_release_count",
+        "orphan_d_artifact_count",
+        "parameter_value_owner_count",
+        "phantom_receipt_ref_count",
+        "pin_dimension_count",
+        "runtime_effect_authorized",
+        "runtime_effect_count",
+        "schema",
+        "semantic_owner",
+        "semantic_test_identity_count",
+        "semantic_test_pass_count",
+        "stage_transition_receipt_mismatch_count",
+        "state_count",
+        "synthetic_override_mutation_count",
+        "synthetic_source_epoch_ref_count",
+        "tranche",
+        "transition_count",
+    }
+)
+EXPECTED_SUMMARY_KEYS = frozenset(
+    {
+        "acceptance_counts",
+        "active_pointer_commit_count",
+        "actual_control_mutation_case_count",
+        "actual_control_mutation_rejection_count",
+        "actual_control_positive_pass_count",
+        "artifact_connectivity_terminal_counts",
+        "canonical_current_resolver_enforced_count",
+        "conditional_merge_implementation_count",
+        "custom_resolver_bypass_count",
+        "d_input_universe_count_by_class",
+        "d_input_universe_unresolved_count",
+        "d_path_existence_only_consumption_count",
+        "d_value_level_upstream_consumption_gap_count",
+        "executed_transition_trace_gap_count",
+        "external_candidate_discovery_count",
+        "metadata_only_completion_count",
+        "order_release_authorized",
+        "order_release_count",
+        "orphan_d_artifact_count",
+        "phantom_receipt_ref_count",
+        "provider_private_replay_paper_llm_qpu_counts",
+        "qtt_checksum_or_digest_authority_count",
+        "runtime_effect_authorized",
+        "runtime_effect_count",
+        "schema",
+        "semantic_test_identity_count",
+        "semantic_test_pass_count",
+        "stage_transition_receipt_mismatch_count",
+        "synthetic_override_mutation_count",
+        "synthetic_source_epoch_ref_count",
+        "unacknowledged_future_handoff_count",
+        "unmapped_current_agent_authority_count_for_d_rows",
+        "web_search_count",
+    }
+)
 EXPECTED_UNIVERSE_CLASS_COUNTS = {
     "certified_command": 6,
     "closure_control": 23,
@@ -660,6 +780,11 @@ def _validate_denominators_and_artifact_identity(
     _require(names == tuple(sorted(EXPECTED_GENERATED_NAMES)), "generated path set is not exact")
     manifest = _read_json(ARTIFACTS / "manifest.json")
     summary = _read_json(ARTIFACTS / "validation_summary.json")
+    _require(
+        set(manifest) == EXPECTED_MANIFEST_KEYS
+        and set(summary) == EXPECTED_SUMMARY_KEYS,
+        "generated manifest or validation-summary report key set changed",
+    )
     controls = _read_jsonl(ARTIFACTS / "control_closure.jsonl")
     parameters = _read_jsonl(ARTIFACTS / "parameter_binding_refs.jsonl")
     states = _read_jsonl(ARTIFACTS / "mode_state_registry.jsonl")
@@ -960,6 +1085,158 @@ def _validate_contract_and_service_ast() -> None:
     trace_node = _class_node(models, "ExecutedModeSnapshotTransitionTraceV1")
     result_node = _class_node(models, "ModeSnapshotCandidateProposalResultV1")
     receipt_node = _class_node(receipts, "ModeSnapshotControlReceiptRecordV1")
+    matrix_node = next(
+        (
+            node
+            for node in models.body
+            if isinstance(node, ast.AnnAssign)
+            and isinstance(node.target, ast.Name)
+            and node.target.id == "_MODE_SNAPSHOT_TERMINAL_OUTCOME_MATRIX_V1"
+        ),
+        None,
+    )
+    _require(matrix_node is not None, "central terminal outcome matrix is missing")
+    matrix_value = matrix_node.value
+    if (
+        isinstance(matrix_value, ast.Call)
+        and isinstance(matrix_value.func, ast.Name)
+        and matrix_value.func.id == "MappingProxyType"
+        and len(matrix_value.args) == 1
+    ):
+        matrix_value = matrix_value.args[0]
+    if not isinstance(matrix_value, ast.Dict):
+        raise ValidationFailure("central terminal outcome matrix is not a readable mapping")
+    reconstructed_terminal_matrix: list[tuple[tuple[str, ...], bool, str, str]] = []
+    for shape_node, outcome_node in zip(
+        matrix_value.keys, matrix_value.values, strict=True
+    ):
+        if not (
+            isinstance(shape_node, ast.Tuple)
+            and all(
+                isinstance(item, ast.Constant) and isinstance(item.value, str)
+                for item in shape_node.elts
+            )
+            and isinstance(outcome_node, ast.Tuple)
+            and len(outcome_node.elts) == 3
+            and isinstance(outcome_node.elts[0], ast.Constant)
+            and type(outcome_node.elts[0].value) is bool
+            and isinstance(outcome_node.elts[1], ast.Attribute)
+            and isinstance(outcome_node.elts[2], ast.Attribute)
+        ):
+            raise ValidationFailure("terminal outcome matrix row is not statically readable")
+        reconstructed_terminal_matrix.append(
+            (
+                tuple(str(item.value) for item in shape_node.elts),
+                outcome_node.elts[0].value,
+                outcome_node.elts[1].attr,
+                outcome_node.elts[2].attr,
+            )
+        )
+    _require(
+        tuple(reconstructed_terminal_matrix) == EXPECTED_TERMINAL_OUTCOME_MATRIX
+        and ("T08",) not in {
+            shape for shape, _required, _allow, _snapshot in reconstructed_terminal_matrix
+        },
+        "seven-row terminal outcome matrix or T08-only fail-closed rule differs",
+    )
+
+    outcome_helper_node = next(
+        (
+            node
+            for node in models.body
+            if isinstance(node, ast.FunctionDef)
+            and node.name == "_validate_mode_snapshot_terminal_outcome_consistency"
+        ),
+        None,
+    )
+    _require(outcome_helper_node is not None, "central terminal outcome helper is missing")
+    outcome_helper_source = ast.get_source_segment(
+        models_source, outcome_helper_node
+    ) or ""
+    result_post_init = next(
+        (
+            node
+            for node in result_node.body
+            if isinstance(node, ast.FunctionDef) and node.name == "__post_init__"
+        ),
+        None,
+    )
+    _require(result_post_init is not None, "result post-init validator is missing")
+    outcome_helper_calls = tuple(
+        call
+        for call in ast.walk(result_post_init)
+        if isinstance(call, ast.Call)
+        and isinstance(call.func, ast.Name)
+        and call.func.id == "_validate_mode_snapshot_terminal_outcome_consistency"
+    )
+    result_post_init_source = ast.get_source_segment(models_source, result_post_init) or ""
+    _require(
+        len(outcome_helper_calls) == 1
+        and result_post_init_source.index(
+            "_validate_mode_snapshot_terminal_outcome_consistency("
+        )
+        < result_post_init_source.index(
+            '_validate_unique_text(self.control_receipt_refs, "control_receipt_refs")'
+        ),
+        "result post-init does not call one outcome helper before receipt acceptance",
+    )
+    candidate_decision_fields = next(
+        (
+            ast.literal_eval(node.value)
+            for node in ast.walk(outcome_helper_node)
+            if isinstance(node, ast.Assign)
+            and len(node.targets) == 1
+            and isinstance(node.targets[0], ast.Name)
+            and node.targets[0].id == "candidate_decision_fields"
+        ),
+        None,
+    )
+    _require(
+        candidate_decision_fields
+        == EXPECTED_TERMINAL_CANDIDATE_DECISION_FIELD_PAIRS,
+        "candidate/decision identity and pin join field set differs",
+    )
+    trace_identity_fields = next(
+        (
+            ast.literal_eval(node.value)
+            for node in ast.walk(outcome_helper_node)
+            if isinstance(node, ast.Assign)
+            and len(node.targets) == 1
+            and isinstance(node.targets[0], ast.Name)
+            and node.targets[0].id == "trace_identity_fields"
+        ),
+        None,
+    )
+    _require(
+        trace_identity_fields
+        == (
+            "request_id",
+            "principal_id",
+            "task_id",
+            "capability_decision_ref",
+            "context_ref",
+        )
+        and all(
+            token in outcome_helper_source
+            for token in (
+                "candidate_required != (candidate is not None)",
+                "proposal.precondition_receipt_refs != decision.receipt_lineage_refs",
+                "final_proposal.primary_reason_code is not decision.reason_codes[0]",
+                "final_proposal.diagnostic_reason_codes != decision.reason_codes[1:]",
+                "final_proposal.typed_reason_codes != decision.reason_codes",
+                "final_proposal.proposed_state is not expected_proposed_state",
+                "terminal_rule.terminal_route != decision.fallback_route",
+                "candidate.candidate_state is not SnapshotCandidateStateV1.VALIDATED_NO_EFFECT",
+                "candidate.runtime_effect_authorized is not False",
+                "candidate.order_release_authorized is not False",
+                "candidate.activated is not False",
+                "build_proposal.target_candidate_version",
+                "validated_proposal.source_candidate_version_or_explicit_absence",
+                "terminal_proposal.source_candidate_version_or_explicit_absence",
+            )
+        ),
+        "terminal outcome helper omits an exact identity, state, reason, route, or no-effect join",
+    )
     for node, names, expected in (
         (candidate_node, ("runtime_effect_authorized", "order_release_authorized", "activated"), False),
         (transition_node, ("active_pointer_commit_allowed", "mutation_allowed", "runtime_effect_authorized", "order_release_authorized"), False),
@@ -1257,7 +1534,9 @@ def _validate_contract_and_service_ast() -> None:
             shape in trace_source
             for shape in (
                 '("T03",)',
+                '("T04",)',
                 '("T05",)',
+                '("T08",)',
                 '("T08", "T09", "T06")',
                 '("T08", "T09", "T07")',
                 '("T08", "T10")',
@@ -1529,6 +1808,47 @@ def _validate_repair_closure_sources() -> None:
         and synthetic_tuple_token not in validation_source,
         "D validation lacks actual typed owner/input mutation adjudication",
     )
+    stage_fixture_node = next(
+        (
+            node
+            for node in validation_tree.body
+            if isinstance(node, ast.FunctionDef)
+            and node.name == "_st12d_stage_receipt_fixture"
+        ),
+        None,
+    )
+    _require(stage_fixture_node is not None, "stage receipt fixture is missing")
+    stage_assignments = {
+        node.targets[0].id: node.value
+        for node in stage_fixture_node.body
+        if isinstance(node, ast.Assign)
+        and len(node.targets) == 1
+        and isinstance(node.targets[0], ast.Name)
+    }
+    candidate_fixture_call = stage_assignments.get("candidate")
+    result_fixture_call = stage_assignments.get("result")
+    result_fixture_keywords = {
+        keyword.arg: keyword.value
+        for keyword in result_fixture_call.keywords
+        if keyword.arg is not None
+    } if isinstance(result_fixture_call, ast.Call) else {}
+    _require(
+        isinstance(candidate_fixture_call, ast.Call)
+        and isinstance(candidate_fixture_call.func, ast.Name)
+        and candidate_fixture_call.func.id == "FormulaRuntimeSnapshotCandidateV1"
+        and isinstance(result_fixture_call, ast.Call)
+        and isinstance(result_fixture_call.func, ast.Name)
+        and result_fixture_call.func.id == "ModeSnapshotCandidateProposalResultV1"
+        and isinstance(
+            result_fixture_keywords.get("snapshot_candidate_or_explicit_absence"),
+            ast.Name,
+        )
+        and result_fixture_keywords["snapshot_candidate_or_explicit_absence"].id
+        == "candidate"
+        and "ExecutedModeSnapshotTransitionTraceV1((build, validated, final))"
+        in (ast.get_source_segment(validation_source, stage_fixture_node) or ""),
+        "T09 stage receipt fixture does not carry its exact validated candidate",
+    )
     grouped_tests = (
         REPO_ROOT
         / "tests/stage1_prediction_markets/qku_computation_control_plane/test_policy_state_matrix.py",
@@ -1538,21 +1858,56 @@ def _validate_repair_closure_sources() -> None:
         / "tests/stage1_prediction_markets/qku_computation_control_plane/test_adversarial_latency_security_matrix.py",
     )
     test_sources = tuple(path.read_text(encoding="utf-8") for path in grouped_tests)
-    test_function_count = sum(
+    test_trees = tuple(ast.parse(source) for source in test_sources)
+    test_function_counts = tuple(
         sum(
             isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
             and node.name.startswith("test_")
-            for node in ast.parse(source).body
+            for node in tree.body
         )
-        for source in test_sources
+        for tree in test_trees
     )
     _require(
-        test_function_count < 23
+        test_function_counts == (4, 5, 5)
         and "for control_id in ST12D_ACTUAL_CONTROL_MUTATION_CASES"
         in test_sources[1]
         and "run_st12d_actual_control_mutation_case(control_id)"
         in test_sources[1],
         "grouped D tests expanded per ID or do not execute actual control mutations",
+    )
+    receipt_test_node = next(
+        node
+        for node in test_trees[1].body
+        if isinstance(node, ast.FunctionDef)
+        and node.name
+        == "test_receipt_spine_and_svc_projection_are_one_way_no_effect_views"
+    )
+    receipt_test_source = ast.get_source_segment(
+        test_sources[1], receipt_test_node
+    ) or ""
+    _require(
+        receipt_test_source.count("valid_terminal_rows =") == 1
+        and receipt_test_source.count("outcome_contradiction_matrix =") == 1
+        and "for contradiction in outcome_contradiction_matrix"
+        in receipt_test_source
+        and "with pytest.raises(ContractValidationError)" in receipt_test_source
+        and all(
+            shape in receipt_test_source
+            for shape in (
+                '("T03",)',
+                '("T04",)',
+                '("T05",)',
+                '("T08", "T09", "T06")',
+                '("T08", "T09", "T07")',
+                '("T08", "T10")',
+                '("T08", "T09", "T04")',
+            )
+        )
+        and "t08_only_trace" in receipt_test_source
+        and "decision_field_mutations" in receipt_test_source
+        and "candidate_field_mutations" in receipt_test_source
+        and "ST12-TEST::" not in test_sources[1],
+        "grouped integration test lacks one compact seven-row contradiction matrix",
     )
     _require(
         all(
@@ -1638,6 +1993,29 @@ def _validate_repair_closure_sources() -> None:
         forbidden_override_token not in builder_source
         and synthetic_tuple_token not in builder_source,
         "generated builder retains a synthetic mutation override pattern",
+    )
+    runner_source = (REPO_ROOT / "tools/run_validation_gates.py").read_text(
+        encoding="utf-8"
+    )
+    runner_tree = ast.parse(runner_source, filename="run_validation_gates.py")
+    runner_assignments = {
+        target.id: node.value
+        for node in runner_tree.body
+        if isinstance(node, ast.Assign) and len(node.targets) == 1
+        for target in node.targets
+        if isinstance(target, ast.Name)
+    }
+    reconstructed_registered_phases = (
+        ast.literal_eval(runner_assignments["FAST_PREFLIGHT_PHASE"]),
+        *ast.literal_eval(
+            runner_assignments["DETERMINISTIC_VALIDATOR_SHARD_PHASES"]
+        ),
+        *ast.literal_eval(runner_assignments["PYTEST_SHARD_PHASES"]),
+        ast.literal_eval(runner_assignments["POST_VALIDATION_PHASE"]),
+    )
+    _require(
+        reconstructed_registered_phases == EXPECTED_REGISTERED_PHASES,
+        "registered validation phase roster changed from the exact thirteen phases",
     )
     stack_source = (PACKAGE / "stack_resolver.py").read_text(encoding="utf-8")
     _require(

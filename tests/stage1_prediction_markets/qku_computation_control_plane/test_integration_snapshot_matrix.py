@@ -27,6 +27,7 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.implementat
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.mode_snapshot_policy import (
     MODE_SNAPSHOT_CANDIDATE_KIND,
     PriorSnapshotCandidateV1,
+    build_snapshot_transition_proposal,
     build_snapshot_candidate,
     construct_snapshot_candidate,
     evaluate_mode_snapshot_candidate,
@@ -41,15 +42,21 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.mode_snapsh
     validate_snapshot_new_use,
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.models import (
+    ActivationPreconditionStateV1,
+    AllowCandidateStateV1,
     ComputeComponentRequestV1,
+    ExecutedModeSnapshotTransitionTraceV1,
     ImplementationVersionPinV1,
     LatencyBudgetProfileV1,
+    ModeEligibilityState,
+    ModeSnapshotCandidateProposalResultV1,
     OperationStatusV1,
     ResourceBoundsProfileV1,
     SnapshotCandidateStateV1,
     SnapshotParameterResolutionStateV1,
     SnapshotRetirementStateV1,
     SnapshotRollbackStateV1,
+    ST12FEvidenceStateV1,
     SubmitCandidateProposalRequestV1,
     TypedValueKindV1,
     TypedValueRecordV1,
@@ -1103,21 +1110,250 @@ def test_receipt_spine_and_svc_projection_are_one_way_no_effect_views(
 
     held_result = evaluate_mode_snapshot_candidate(_inputs(owner_confirmation=False))
     latency_result = finalize_mode_snapshot_latency_block(result)
-    trace_cases = (
-        (service_result, ("T03",)),
-        (held_result, ("T08", "T09", "T06")),
-        (result, ("T08", "T09", "T07")),
-        (latency_result, ("T08", "T09", "T04")),
+    validated_candidate = result.snapshot_candidate_or_explicit_absence
+    assert validated_candidate is not None
+    build_proposal = result.executed_transition_trace.proposals[0]
+    rejected_proposal = build_snapshot_transition_proposal(
+        proposal_id=f"{build_proposal.proposal_id}::T10",
+        request_id=build_proposal.request_id,
+        principal_id=build_proposal.principal_id,
+        task_id=build_proposal.task_id,
+        capability_decision_ref=build_proposal.capability_decision_ref,
+        context_ref=build_proposal.context_ref,
+        source_candidate_ref_or_explicit_absence=(
+            build_proposal.target_candidate_ref
+        ),
+        target_candidate_ref=build_proposal.target_candidate_ref,
+        source_candidate_version_or_explicit_absence=(
+            build_proposal.target_candidate_version
+        ),
+        target_candidate_version=build_proposal.target_candidate_version,
+        transition_id="T10",
+        expected_owner_state_ref=build_proposal.expected_owner_state_ref,
+        precondition_receipt_refs=build_proposal.precondition_receipt_refs,
+        proposed_state=SnapshotCandidateStateV1.REJECTED,
+        causation_id=build_proposal.causation_id,
+        correlation_id=build_proposal.correlation_id,
     )
-    for traced_result, expected_trace in trace_cases:
+    rejected_trace = ExecutedModeSnapshotTransitionTraceV1(
+        (build_proposal, rejected_proposal)
+    )
+    rejected_result = ModeSnapshotCandidateProposalResultV1(
+        snapshot_candidate_or_explicit_absence=None,
+        mode_snapshot_decision=replace(
+            result.mode_snapshot_decision,
+            mode_eligibility_state=ModeEligibilityState.INELIGIBLE,
+            allow_candidate_state=AllowCandidateStateV1.BLOCKED,
+            snapshot_candidate_state=SnapshotCandidateStateV1.REJECTED,
+            activation_precondition_state=(
+                ActivationPreconditionStateV1.PRECONDITIONS_INCOMPLETE
+            ),
+            reason_codes=(ReasonCode.SNAPSHOT_CANDIDATE_INVALID,),
+            fallback_route="BLOCK",
+            owner_review_route="CURRENT_INPUT_OWNER_REVALIDATION",
+        ),
+        snapshot_transition_proposal=rejected_proposal,
+        executed_transition_trace=rejected_trace,
+        control_receipt_refs=(),
+    )
+    evidence_unavailable_result = evaluate_mode_snapshot_candidate(
+        _inputs(
+            evidence_state=(
+                ST12FEvidenceStateV1.EVIDENCE_UNAVAILABLE_F_NOT_IMPLEMENTED
+            )
+        )
+    )
+    stale_result = evaluate_mode_snapshot_candidate(
+        _inputs(evidence_state=ST12FEvidenceStateV1.EVIDENCE_REFERENCE_STALE)
+    )
+    safety_result = evaluate_mode_snapshot_candidate(_inputs(kill_active=True))
+    valid_terminal_rows = (
+        (
+            evidence_unavailable_result,
+            ("T03",),
+            False,
+            AllowCandidateStateV1.EVIDENCE_UNAVAILABLE,
+            SnapshotCandidateStateV1.ABSENT,
+        ),
+        (
+            stale_result,
+            ("T04",),
+            False,
+            AllowCandidateStateV1.BLOCKED,
+            SnapshotCandidateStateV1.ABSENT,
+        ),
+        (
+            safety_result,
+            ("T05",),
+            False,
+            AllowCandidateStateV1.BLOCKED,
+            SnapshotCandidateStateV1.ABSENT,
+        ),
+        (
+            held_result,
+            ("T08", "T09", "T06"),
+            True,
+            AllowCandidateStateV1.OWNER_CONFIRMATION_REQUIRED,
+            SnapshotCandidateStateV1.VALIDATED_NO_EFFECT,
+        ),
+        (
+            result,
+            ("T08", "T09", "T07"),
+            True,
+            AllowCandidateStateV1.ELIGIBLE_NOT_ACTIVATED,
+            SnapshotCandidateStateV1.VALIDATED_NO_EFFECT,
+        ),
+        (
+            rejected_result,
+            ("T08", "T10"),
+            False,
+            AllowCandidateStateV1.BLOCKED,
+            SnapshotCandidateStateV1.REJECTED,
+        ),
+        (
+            latency_result,
+            ("T08", "T09", "T04"),
+            True,
+            AllowCandidateStateV1.BLOCKED,
+            SnapshotCandidateStateV1.VALIDATED_NO_EFFECT,
+        ),
+    )
+    for (
+        traced_result,
+        expected_trace,
+        candidate_required,
+        expected_allow_state,
+        expected_snapshot_state,
+    ) in valid_terminal_rows:
         assert tuple(
             row.transition_id
             for row in traced_result.executed_transition_trace.proposals
         ) == expected_trace
         assert (
+            traced_result.snapshot_candidate_or_explicit_absence is not None
+        ) is candidate_required
+        assert (
+            traced_result.mode_snapshot_decision.allow_candidate_state
+            is expected_allow_state
+        )
+        assert (
+            traced_result.mode_snapshot_decision.snapshot_candidate_state
+            is expected_snapshot_state
+        )
+        assert (
             traced_result.snapshot_transition_proposal
             is traced_result.executed_transition_trace.final_proposal
         )
+        assert (
+            traced_result.snapshot_transition_proposal.typed_reason_codes
+            == traced_result.mode_snapshot_decision.reason_codes
+        )
+
+    t08_only_trace = ExecutedModeSnapshotTransitionTraceV1((build_proposal,))
+    decision_field_mutations = (
+        (result, "request_id", "REQUEST::D::MISMATCH"),
+        (result, "principal_id", "principal_mismatch"),
+        (result, "task_id", "TASK::D::MISMATCH"),
+        (result, "capability_decision_ref", "CAPABILITY::D::MISMATCH"),
+        (result, "context_ref", "CONTEXT::D::MISMATCH"),
+        (result, "receipt_lineage_refs", ("RECEIPT::D::MISMATCH",)),
+        (
+            latency_result,
+            "reason_codes",
+            tuple(reversed(latency_result.mode_snapshot_decision.reason_codes)),
+        ),
+        (result, "fallback_route", "BLOCK"),
+        (result, "allow_candidate_state", AllowCandidateStateV1.BLOCKED),
+        (
+            result,
+            "snapshot_candidate_state",
+            SnapshotCandidateStateV1.BUILT_IMMUTABLE,
+        ),
+        (
+            rejected_result,
+            "snapshot_candidate_state",
+            SnapshotCandidateStateV1.ABSENT,
+        ),
+    )
+    candidate_field_mutations = (
+        ("snapshot_candidate_id", "SNAPSHOT-CANDIDATE::D::MISMATCH"),
+        ("request_id", "REQUEST::D::MISMATCH"),
+        ("principal_id", "principal_mismatch"),
+        ("task_id", "TASK::D::MISMATCH"),
+        ("capability_decision_ref", "CAPABILITY::D::MISMATCH"),
+        ("computation_bundle_ref", "SNAPSHOT-BUNDLE::D::MISMATCH"),
+        ("context_ref", "CONTEXT::D::MISMATCH"),
+        (
+            "implementation_version_pins",
+            (
+                replace(
+                    validated_candidate.implementation_version_pins[0],
+                    implementation_id="IMPLEMENTATION::D::MISMATCH",
+                ),
+                *validated_candidate.implementation_version_pins[1:],
+            ),
+        ),
+        ("parameter_policy_snapshot_ref", "PARAMETER-POLICY::D::MISMATCH"),
+        ("source_epoch_refs", ("SOURCE-EPOCH::D::MISMATCH",)),
+        ("receipt_lineage_refs", ("RECEIPT::D::MISMATCH",)),
+        ("readiness_state_ref", "READINESS::D::MISMATCH"),
+        ("pretrade_state_ref", "PRETRADE1::D::MISMATCH"),
+        ("evidence_state_ref", "EVIDENCE::D::MISMATCH"),
+        ("kill_state_ref", "KILL::D::MISMATCH"),
+        ("submit_disabled_state_ref", "SUBMIT-DISABLED::D::MISMATCH"),
+        ("expires_at", validated_candidate.expires_at + timedelta(seconds=1)),
+        ("candidate_state", SnapshotCandidateStateV1.BUILT_IMMUTABLE),
+    )
+    outcome_contradiction_matrix = (
+        lambda: replace(
+            held_result, snapshot_candidate_or_explicit_absence=None
+        ),
+        lambda: replace(
+            evidence_unavailable_result,
+            snapshot_candidate_or_explicit_absence=validated_candidate,
+        ),
+        lambda: replace(
+            stale_result,
+            snapshot_candidate_or_explicit_absence=validated_candidate,
+        ),
+        lambda: replace(
+            safety_result,
+            snapshot_candidate_or_explicit_absence=validated_candidate,
+        ),
+        lambda: replace(
+            rejected_result,
+            snapshot_candidate_or_explicit_absence=validated_candidate,
+        ),
+        lambda: replace(
+            result,
+            snapshot_transition_proposal=t08_only_trace.final_proposal,
+            executed_transition_trace=t08_only_trace,
+        ),
+        *(
+            lambda base=base, field_name=field_name, value=value: replace(
+                base,
+                mode_snapshot_decision=replace(
+                    base.mode_snapshot_decision,
+                    **{field_name: value},
+                ),
+            )
+            for base, field_name, value in decision_field_mutations
+        ),
+        *(
+            lambda field_name=field_name, value=value: replace(
+                result,
+                snapshot_candidate_or_explicit_absence=replace(
+                    validated_candidate,
+                    **{field_name: value},
+                ),
+            )
+            for field_name, value in candidate_field_mutations
+        ),
+    )
+    for contradiction in outcome_contradiction_matrix:
+        with pytest.raises(ContractValidationError):
+            contradiction()
+
     latency_receipts = materialize_mode_snapshot_control_receipts(
         latency_result,
         parameter_value_refs=inputs.parameter_value_refs,

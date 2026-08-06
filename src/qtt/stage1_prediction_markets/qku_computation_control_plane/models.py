@@ -2074,6 +2074,231 @@ class ExecutedModeSnapshotTransitionTraceV1:
         return self.proposals[-1]
 
 
+_MODE_SNAPSHOT_TERMINAL_OUTCOME_MATRIX_V1: Mapping[
+    tuple[str, ...],
+    tuple[bool, AllowCandidateStateV1, SnapshotCandidateStateV1],
+] = MappingProxyType(
+    {
+        ("T03",): (
+            False,
+            AllowCandidateStateV1.EVIDENCE_UNAVAILABLE,
+            SnapshotCandidateStateV1.ABSENT,
+        ),
+        ("T04",): (
+            False,
+            AllowCandidateStateV1.BLOCKED,
+            SnapshotCandidateStateV1.ABSENT,
+        ),
+        ("T05",): (
+            False,
+            AllowCandidateStateV1.BLOCKED,
+            SnapshotCandidateStateV1.ABSENT,
+        ),
+        ("T08", "T09", "T06"): (
+            True,
+            AllowCandidateStateV1.OWNER_CONFIRMATION_REQUIRED,
+            SnapshotCandidateStateV1.VALIDATED_NO_EFFECT,
+        ),
+        ("T08", "T09", "T07"): (
+            True,
+            AllowCandidateStateV1.ELIGIBLE_NOT_ACTIVATED,
+            SnapshotCandidateStateV1.VALIDATED_NO_EFFECT,
+        ),
+        ("T08", "T10"): (
+            False,
+            AllowCandidateStateV1.BLOCKED,
+            SnapshotCandidateStateV1.REJECTED,
+        ),
+        ("T08", "T09", "T04"): (
+            True,
+            AllowCandidateStateV1.BLOCKED,
+            SnapshotCandidateStateV1.VALIDATED_NO_EFFECT,
+        ),
+    }
+)
+
+
+def _validate_mode_snapshot_terminal_outcome_consistency(
+    *,
+    candidate: FormulaRuntimeSnapshotCandidateV1 | None,
+    decision: ModeSnapshotDecisionV1,
+    trace: ExecutedModeSnapshotTransitionTraceV1,
+    final_proposal: SnapshotTransitionProposalV1,
+) -> None:
+    """Fail closed unless all returned terminal D surfaces describe one outcome."""
+
+    transition_ids = tuple(row.transition_id for row in trace.proposals)
+    try:
+        (
+            candidate_required,
+            expected_allow_state,
+            expected_snapshot_state,
+        ) = _MODE_SNAPSHOT_TERMINAL_OUTCOME_MATRIX_V1[transition_ids]
+    except KeyError as exc:
+        raise ContractValidationError(
+            ReasonCode.CONTRACT_OR_TYPE_INVALID,
+            f"terminal mode-snapshot result has no registered outcome: {transition_ids!r}",
+        ) from exc
+
+    if candidate_required != (candidate is not None):
+        raise ContractValidationError(
+            ReasonCode.SNAPSHOT_CANDIDATE_INVALID,
+            "terminal trace and returned candidate presence do not match",
+        )
+    if (
+        decision.allow_candidate_state is not expected_allow_state
+        or decision.snapshot_candidate_state is not expected_snapshot_state
+        or final_proposal.transition_id != transition_ids[-1]
+    ):
+        raise ContractValidationError(
+            ReasonCode.CONTRACT_OR_TYPE_INVALID,
+            "terminal trace and decision states do not match the registered outcome",
+        )
+
+    trace_identity_fields = (
+        "request_id",
+        "principal_id",
+        "task_id",
+        "capability_decision_ref",
+        "context_ref",
+    )
+    if any(
+        getattr(proposal, field_name) != getattr(decision, field_name)
+        for proposal in trace.proposals
+        for field_name in trace_identity_fields
+    ):
+        raise ContractValidationError(
+            ReasonCode.IDENTITY_OR_VERSION_UNRESOLVED,
+            "decision and executed trace do not share one admitted identity",
+        )
+    if any(
+        proposal.precondition_receipt_refs != decision.receipt_lineage_refs
+        for proposal in trace.proposals
+    ):
+        raise ContractValidationError(
+            ReasonCode.IDENTITY_OR_VERSION_UNRESOLVED,
+            "executed trace preconditions differ from decision receipt lineage",
+        )
+
+    from .mode_snapshot_policy import TRANSITION_BY_ID
+
+    terminal_rule = TRANSITION_BY_ID[final_proposal.transition_id]
+    expected_proposed_state = (
+        decision.snapshot_candidate_state
+        if final_proposal.transition_id == "T10"
+        else decision.allow_candidate_state
+    )
+    if (
+        final_proposal.primary_reason_code is not decision.reason_codes[0]
+        or final_proposal.diagnostic_reason_codes != decision.reason_codes[1:]
+        or final_proposal.typed_reason_codes != decision.reason_codes
+        or final_proposal.proposed_state is not expected_proposed_state
+        or terminal_rule.terminal_route != decision.fallback_route
+    ):
+        raise ContractValidationError(
+            ReasonCode.CONTRACT_OR_TYPE_INVALID,
+            "final proposal reason, state, or registered terminal route differs from the decision",
+        )
+
+    early_absence_shapes = {("T03",), ("T04",), ("T05",)}
+    if transition_ids in early_absence_shapes and any(
+        proposal.source_candidate_ref_or_explicit_absence != "EXPLICIT_ABSENCE"
+        or proposal.target_candidate_ref != "EXPLICIT_ABSENCE"
+        or proposal.source_candidate_version_or_explicit_absence
+        != "EXPLICIT_ABSENCE"
+        for proposal in trace.proposals
+    ):
+        raise ContractValidationError(
+            ReasonCode.SNAPSHOT_PIN_CONFLICT,
+            "candidate-absence terminal trace contains a candidate identity or source version",
+        )
+
+    if transition_ids == ("T08", "T10"):
+        build_proposal, rejected_proposal = trace.proposals
+        rejected_candidate_ref = build_proposal.target_candidate_ref
+        if (
+            build_proposal.source_candidate_ref_or_explicit_absence
+            != "EXPLICIT_ABSENCE"
+            or build_proposal.source_candidate_version_or_explicit_absence
+            != "EXPLICIT_ABSENCE"
+            or rejected_candidate_ref == "EXPLICIT_ABSENCE"
+            or rejected_proposal.source_candidate_ref_or_explicit_absence
+            != rejected_candidate_ref
+            or rejected_proposal.target_candidate_ref != rejected_candidate_ref
+            or rejected_proposal.source_candidate_version_or_explicit_absence
+            != build_proposal.target_candidate_version
+        ):
+            raise ContractValidationError(
+                ReasonCode.SNAPSHOT_PIN_CONFLICT,
+                "rejected candidate trace does not preserve its build identity and version",
+            )
+
+    if candidate is None:
+        return
+
+    candidate_decision_fields = (
+        ("request_id", "request_id"),
+        ("principal_id", "principal_id"),
+        ("task_id", "task_id"),
+        ("capability_decision_ref", "capability_decision_ref"),
+        ("computation_bundle_ref", "computation_bundle_ref"),
+        ("context_ref", "context_ref"),
+        ("implementation_version_pins", "implementation_pins"),
+        ("parameter_policy_snapshot_ref", "parameter_policy_snapshot_ref"),
+        ("source_epoch_refs", "source_epoch_refs"),
+        ("receipt_lineage_refs", "receipt_lineage_refs"),
+        ("readiness_state_ref", "readiness_state_ref"),
+        ("pretrade_state_ref", "pretrade_state_ref"),
+        ("evidence_state_ref", "evidence_state_ref"),
+        ("kill_state_ref", "kill_state_ref"),
+        ("submit_disabled_state_ref", "submit_disabled_state_ref"),
+        ("expires_at", "expires_at"),
+    )
+    if any(
+        getattr(candidate, candidate_field) != getattr(decision, decision_field)
+        for candidate_field, decision_field in candidate_decision_fields
+    ):
+        raise ContractValidationError(
+            ReasonCode.SNAPSHOT_PIN_CONFLICT,
+            "validated candidate and decision identity or pins differ",
+        )
+    if (
+        candidate.candidate_state is not SnapshotCandidateStateV1.VALIDATED_NO_EFFECT
+        or candidate.runtime_effect_authorized is not False
+        or candidate.order_release_authorized is not False
+        or candidate.activated is not False
+    ):
+        raise ContractValidationError(
+            ReasonCode.RUNTIME_EFFECT_FORBIDDEN,
+            "returned candidate must be validated and retain exact no-effect custody",
+        )
+
+    build_proposal, validated_proposal, terminal_proposal = trace.proposals
+    candidate_ref = candidate.snapshot_candidate_id
+    candidate_version = build_proposal.target_candidate_version
+    if (
+        build_proposal.source_candidate_ref_or_explicit_absence
+        != "EXPLICIT_ABSENCE"
+        or build_proposal.source_candidate_version_or_explicit_absence
+        != "EXPLICIT_ABSENCE"
+        or build_proposal.target_candidate_ref != candidate_ref
+        or validated_proposal.source_candidate_ref_or_explicit_absence
+        != candidate_ref
+        or validated_proposal.target_candidate_ref != candidate_ref
+        or validated_proposal.source_candidate_version_or_explicit_absence
+        != candidate_version
+        or terminal_proposal.source_candidate_ref_or_explicit_absence
+        != candidate_ref
+        or terminal_proposal.target_candidate_ref != candidate_ref
+        or terminal_proposal.source_candidate_version_or_explicit_absence
+        != candidate_version
+    ):
+        raise ContractValidationError(
+            ReasonCode.SNAPSHOT_PIN_CONFLICT,
+            "validated candidate and executed trace identity or version differ",
+        )
+
+
 @dataclass(frozen=True, slots=True)
 class ModeSnapshotCandidateProposalResultV1:
     snapshot_candidate_or_explicit_absence: FormulaRuntimeSnapshotCandidateV1 | None
@@ -2106,6 +2331,12 @@ class ModeSnapshotCandidateProposalResultV1:
                 ReasonCode.CONTRACT_OR_TYPE_INVALID,
                 "mode snapshot result requires one exact trace and its final proposal",
             )
+        _validate_mode_snapshot_terminal_outcome_consistency(
+            candidate=self.snapshot_candidate_or_explicit_absence,
+            decision=self.mode_snapshot_decision,
+            trace=self.executed_transition_trace,
+            final_proposal=self.snapshot_transition_proposal,
+        )
         _validate_unique_text(self.control_receipt_refs, "control_receipt_refs")
         if (
             self.owner_projection_or_explicit_absence is not None
