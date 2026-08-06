@@ -22434,12 +22434,10 @@ def resolve_st12d_snapshot_parameter_values(
                     ),
                     policy_ref=policy_ref,
                     parameter_policy_set_version=ST12D_PARAMETER_POLICY_SET_VERSION,
-                    producer_receipt_refs=(policy_ref,),
+                    producer_receipt_refs=(),
                     point_in_time_receipt_refs=(),
                     freshness_receipt_refs=(),
-                    source_epoch_refs=(
-                        f"PARAMETER-POLICY-EPOCH::{ST12D_PARAMETER_POLICY_SET_VERSION}",
-                    ),
+                    source_epoch_refs=(),
                     observed_at_or_explicit_absence="EXPLICIT_ABSENCE",
                     valid_until_or_explicit_absence="EXPLICIT_ABSENCE",
                 )

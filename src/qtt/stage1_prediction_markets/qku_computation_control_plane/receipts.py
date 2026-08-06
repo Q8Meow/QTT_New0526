@@ -323,7 +323,8 @@ def materialize_mode_snapshot_control_receipts(
         )
     _identifier_tuple(parameter_value_refs, "parameter_value_refs")
     decision = result.mode_snapshot_decision
-    proposal = result.snapshot_transition_proposal
+    trace = result.executed_transition_trace
+    proposal = trace.final_proposal
     candidate = result.snapshot_candidate_or_explicit_absence
     candidate_ref = (
         candidate.snapshot_candidate_id
@@ -336,17 +337,35 @@ def materialize_mode_snapshot_control_receipts(
         f"{pin.math_spec_id}::{pin.implementation_id}"
         for pin in decision.implementation_pins
     )
-    control_classes = [ModeSnapshotControlClassV1.MODE_SNAPSHOT_EVALUATION]
-    if decision.snapshot_candidate_state is not SnapshotCandidateStateV1.ABSENT:
-        control_classes.append(ModeSnapshotControlClassV1.SNAPSHOT_CANDIDATE_BUILD)
-    if decision.snapshot_candidate_state in {
-        SnapshotCandidateStateV1.VALIDATED_NO_EFFECT,
-        SnapshotCandidateStateV1.REJECTED,
-    }:
-        control_classes.append(
-            ModeSnapshotControlClassV1.SNAPSHOT_CANDIDATE_VALIDATION
+    proposal_by_transition_id = {
+        row.transition_id: row for row in trace.proposals
+    }
+    stage_proposals = [
+        (ModeSnapshotControlClassV1.MODE_SNAPSHOT_EVALUATION, proposal),
+    ]
+    if "T08" in proposal_by_transition_id:
+        stage_proposals.append(
+            (
+                ModeSnapshotControlClassV1.SNAPSHOT_CANDIDATE_BUILD,
+                proposal_by_transition_id["T08"],
+            )
         )
-    control_class_tuple = tuple(control_classes)
+    validation_proposal = next(
+        (
+            proposal_by_transition_id[transition_id]
+            for transition_id in ("T09", "T10")
+            if transition_id in proposal_by_transition_id
+        ),
+        None,
+    )
+    if validation_proposal is not None:
+        stage_proposals.append(
+            (
+                ModeSnapshotControlClassV1.SNAPSHOT_CANDIDATE_VALIDATION,
+                validation_proposal,
+            )
+        )
+    stage_proposal_tuple = tuple(stage_proposals)
     suffix_by_class = {
         ModeSnapshotControlClassV1.MODE_SNAPSHOT_EVALUATION: "EVALUATION",
         ModeSnapshotControlClassV1.SNAPSHOT_CANDIDATE_BUILD: "BUILD",
@@ -354,7 +373,7 @@ def materialize_mode_snapshot_control_receipts(
     }
     expected_refs = tuple(
         f"MODE-SNAPSHOT-CONTROL::{decision.request_id}::{suffix_by_class[row]}"
-        for row in control_class_tuple
+        for row, _proposal in stage_proposal_tuple
     )
     if result.control_receipt_refs and result.control_receipt_refs != expected_refs:
         raise ContractValidationError(
@@ -362,9 +381,12 @@ def materialize_mode_snapshot_control_receipts(
             "D result/control receipt identities differ from executed stages",
         )
     rows: list[EconomicReceiptEventSpineV1] = []
-    for index, (receipt_ref, control_class) in enumerate(
-        zip(expected_refs, control_class_tuple, strict=True)
+    from .mode_snapshot_policy import TRANSITION_BY_ID
+
+    for index, (receipt_ref, (control_class, stage_proposal)) in enumerate(
+        zip(expected_refs, stage_proposal_tuple, strict=True)
     ):
+        stage_rule = TRANSITION_BY_ID[stage_proposal.transition_id]
         payload = ModeSnapshotControlReceiptRecordV1(
             control_receipt_id=receipt_ref,
             control_class=control_class,
@@ -375,37 +397,37 @@ def materialize_mode_snapshot_control_receipts(
             context_ref=decision.context_ref,
             snapshot_candidate_ref_or_explicit_absence=candidate_ref,
             mode_snapshot_decision_ref=decision.decision_id,
-            transition_proposal_ref=proposal.proposal_id,
-            transition_id=proposal.transition_id,
-            source_state=proposal.source_state,
-            destination_state=proposal.destination_state,
-            target_candidate_version=proposal.target_candidate_version,
+            transition_proposal_ref=stage_proposal.proposal_id,
+            transition_id=stage_proposal.transition_id,
+            source_state=stage_proposal.source_state,
+            destination_state=stage_proposal.destination_state,
+            target_candidate_version=stage_proposal.target_candidate_version,
             implementation_pin_refs=implementation_refs,
             parameter_value_refs=parameter_value_refs,
             source_epoch_refs=decision.source_epoch_refs,
             predecessor_transition_receipt_refs=(
-                proposal.predecessor_transition_receipt_refs
+                stage_proposal.predecessor_transition_receipt_refs
             ),
             state_before_refs=tuple(
                 dict.fromkeys(
                     (
-                        proposal.source_state,
-                        proposal.expected_owner_state_ref,
-                        proposal.source_candidate_ref_or_explicit_absence,
-                        *proposal.predecessor_transition_receipt_refs,
+                        stage_proposal.source_state,
+                        stage_proposal.expected_owner_state_ref,
+                        stage_proposal.source_candidate_ref_or_explicit_absence,
+                        *stage_proposal.predecessor_transition_receipt_refs,
                     )
                 )
             ),
             state_after_refs=tuple(
                 dict.fromkeys(
                     (
-                        proposal.destination_state,
-                        proposal.target_candidate_ref,
+                        stage_proposal.destination_state,
+                        stage_proposal.target_candidate_ref,
                     )
                 )
             ),
-            typed_reason_codes=proposal.typed_reason_codes,
-            fallback_route=decision.fallback_route,
+            typed_reason_codes=stage_proposal.typed_reason_codes,
+            fallback_route=stage_rule.terminal_route,
             owner_review_route=decision.owner_review_route,
             latency_measurement_ref_or_explicit_absence=(
                 decision.latency_measurement_ref_or_explicit_absence
@@ -422,8 +444,8 @@ def materialize_mode_snapshot_control_receipts(
                 context_ref=decision.context_ref,
                 effective_at=effective_at,
                 recorded_at=recorded_at,
-                causation_id=proposal.causation_id,
-                correlation_id=proposal.correlation_id,
+                causation_id=stage_proposal.causation_id,
+                correlation_id=stage_proposal.correlation_id,
                 traceparent=traceparent,
                 tracestate=tracestate,
                 sequence=index,

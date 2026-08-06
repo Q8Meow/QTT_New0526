@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
-from .errors import OwnerAdapterError, ReasonCode
+from .errors import ContractValidationError, OwnerAdapterError, ReasonCode
 from .models import (
     ConfigurationEnvelopeV1,
     FallbackEnvelopeV1,
@@ -18,6 +18,7 @@ from .models import (
     ReadOnlyKillSubmitStateV1,
     ST12FEvidenceReferenceV1,
     SupervisionEnvelopeV1,
+    validate_reference_identity_classes,
 )
 
 if TYPE_CHECKING:
@@ -186,9 +187,12 @@ class OwnerProjectionViewV1:
     authority_domain: str
     source_path: str
     source_version: str
+    source_snapshot_ref: str
     consume_interfaces: tuple[str, ...]
     row_count: int
     identity_refs: tuple[str, ...]
+    receipt_refs: tuple[str, ...] = ()
+    source_epoch_refs: tuple[str, ...] = ()
     projection_mutation_allowed: bool = False
     runtime_effect_allowed: bool = False
 
@@ -198,6 +202,7 @@ class OwnerProjectionViewV1:
             "authority_domain",
             "source_path",
             "source_version",
+            "source_snapshot_ref",
         ):
             value = getattr(self, name)
             if not isinstance(value, str) or not value:
@@ -217,6 +222,37 @@ class OwnerProjectionViewV1:
                     ReasonCode.OWNER_DATA_MALFORMED,
                     f"{name} must contain unique nonempty owner lineage strings",
                 )
+        for name in ("receipt_refs", "source_epoch_refs"):
+            values = getattr(self, name)
+            if (
+                not isinstance(values, tuple)
+                or any(not isinstance(value, str) or not value for value in values)
+                or len(set(values)) != len(values)
+            ):
+                raise OwnerAdapterError(
+                    ReasonCode.OWNER_DATA_MALFORMED,
+                    f"{name} must contain only actual unique owner identities",
+                )
+        if self.source_snapshot_ref != self.source_path:
+            raise OwnerAdapterError(
+                ReasonCode.OWNER_DATA_MALFORMED,
+                "owner projection source snapshot must be the exact consumed source path",
+            )
+        try:
+            validate_reference_identity_classes(
+                source_snapshot_refs=(
+                    self.source_snapshot_ref,
+                    self.source_version,
+                    *self.identity_refs,
+                ),
+                source_epoch_refs=self.source_epoch_refs,
+                receipt_refs=self.receipt_refs,
+            )
+        except ContractValidationError as exc:
+            raise OwnerAdapterError(
+                ReasonCode.OWNER_DATA_MALFORMED,
+                "owner projection reference classes overlap or contain synthetic lineage",
+            ) from exc
         if (
             isinstance(self.row_count, bool)
             or not isinstance(self.row_count, int)
@@ -274,14 +310,23 @@ class PreloadedOwnerProjectionBundleV1:
     @property
     def receipt_refs(self) -> tuple[str, ...]:
         return tuple(
-            f"OWNER-PROJECTION-RECEIPT::{row.owner_id}::{row.source_version}"
+            ref
             for row in (self.readiness, self.pretrade, self.svc, self.agent_orch)
+            for ref in row.receipt_refs
         )
 
     @property
     def source_epoch_refs(self) -> tuple[str, ...]:
         return tuple(
-            f"OWNER-PROJECTION-EPOCH::{row.owner_id}::{row.source_version}"
+            ref
+            for row in (self.readiness, self.pretrade, self.svc, self.agent_orch)
+            for ref in row.source_epoch_refs
+        )
+
+    @property
+    def source_snapshot_refs(self) -> tuple[str, ...]:
+        return tuple(
+            row.source_snapshot_ref
             for row in (self.readiness, self.pretrade, self.svc, self.agent_orch)
         )
 
@@ -388,6 +433,7 @@ class ExistingOwnerProjectionAdapterV1:
             authority_domain="READINESS_PROJECTION",
             source_path="src/qtt/readiness/pr169_readiness1_resolvers.py",
             source_version=version,
+            source_snapshot_ref="src/qtt/readiness/pr169_readiness1_resolvers.py",
             consume_interfaces=(
                 "load_registry",
                 "load_agent_universe",
@@ -425,6 +471,7 @@ class ExistingOwnerProjectionAdapterV1:
             source_version=_single_projection_version(
                 rows, owner_id="PRETRADE1"
             ),
+            source_snapshot_ref="src/qtt/pretrade/pr169_pretrade1_resolvers.py",
             consume_interfaces=("load_registry",),
             row_count=len(rows),
             identity_refs=("PreTradeRegistryView",),
@@ -468,6 +515,7 @@ class ExistingOwnerProjectionAdapterV1:
             authority_domain="OWNER_READ_MODEL_AND_ACTION_PROJECTION",
             source_path="src/qtt/service/pr169_svc1_resolvers.py",
             source_version=version,
+            source_snapshot_ref="src/qtt/service/pr169_svc1_resolvers.py",
             consume_interfaces=("DashboardReadModelService",),
             row_count=len(rows),
             identity_refs=("read_model_snapshots.generated.jsonl",),
@@ -503,6 +551,7 @@ class ExistingOwnerProjectionAdapterV1:
             authority_domain="AGENT_TASK_AND_DAG_PROJECTION",
             source_path="src/qtt/agents/pr169_agent_orch1_resolvers.py",
             source_version=version,
+            source_snapshot_ref="src/qtt/agents/pr169_agent_orch1_resolvers.py",
             consume_interfaces=("AgentOrchService",),
             row_count=len(rows),
             identity_refs=("dag.jsonl",),

@@ -1473,20 +1473,57 @@ class ResolvedSnapshotParameterValueV1:
             self.resolution_state
             is SnapshotParameterResolutionStateV1.REQUIRED_OWNER_VALUE_UNAVAILABLE
         )
+        deterministic = (
+            self.resolution_state
+            is SnapshotParameterResolutionStateV1.DETERMINISTIC_POLICY_VALUE_MATERIALIZED
+        )
+        owner_resolved = (
+            self.resolution_state
+            is SnapshotParameterResolutionStateV1.OWNER_VALUE_RESOLVED
+        )
+        validate_reference_identity_classes(
+            policy_refs=(self.policy_ref,),
+            semantic_policy_set_versions=(self.parameter_policy_set_version,),
+            source_epoch_refs=self.source_epoch_refs,
+            receipt_refs=(
+                *self.producer_receipt_refs,
+                *self.point_in_time_receipt_refs,
+                *self.freshness_receipt_refs,
+            ),
+        )
         if unavailable:
             if (
                 not isinstance(value, str)
                 or not value.startswith("EXPLICIT_UNAVAILABLE::")
                 or not self.diagnostic_reason_codes
+                or self.producer_receipt_refs
+                or self.point_in_time_receipt_refs
+                or self.freshness_receipt_refs
+                or self.source_epoch_refs
             ):
                 raise ContractValidationError(
                     ReasonCode.PARAMETER_OWNER_MISSING,
                     "unavailable owner values require an exact typed blocker",
                 )
-        elif not self.producer_receipt_refs or not self.source_epoch_refs:
+        elif deterministic and (
+            self.producer_receipt_refs
+            or self.point_in_time_receipt_refs
+            or self.freshness_receipt_refs
+            or self.source_epoch_refs
+        ):
             raise ContractValidationError(
                 ReasonCode.PARAMETER_POLICY_OR_PIN_INVALID,
-                "resolved values require producer receipts and consumed source epochs",
+                "deterministic policy values cannot synthesize receipt or epoch lineage",
+            )
+        elif owner_resolved and (
+            not self.producer_receipt_refs
+            or not self.point_in_time_receipt_refs
+            or not self.freshness_receipt_refs
+            or not self.source_epoch_refs
+        ):
+            raise ContractValidationError(
+                ReasonCode.PARAMETER_POLICY_OR_PIN_INVALID,
+                "owner-resolved values require producer, PIT, freshness, and source-epoch proof",
             )
         for name in (
             "observed_at_or_explicit_absence",
@@ -1965,10 +2002,84 @@ class SnapshotTransitionProposalV1:
 
 
 @dataclass(frozen=True, slots=True)
+class ExecutedModeSnapshotTransitionTraceV1:
+    """One ordered, immutable account of the D transitions actually executed."""
+
+    proposals: tuple[SnapshotTransitionProposalV1, ...]
+
+    def __post_init__(self) -> None:
+        if (
+            not isinstance(self.proposals, tuple)
+            or not self.proposals
+            or any(type(row) is not SnapshotTransitionProposalV1 for row in self.proposals)
+            or len({row.proposal_id for row in self.proposals}) != len(self.proposals)
+        ):
+            raise ContractValidationError(
+                ReasonCode.CONTRACT_OR_TYPE_INVALID,
+                "executed transition trace requires unique exact proposal rows",
+            )
+        first = self.proposals[0]
+        identity_fields = (
+            "request_id",
+            "principal_id",
+            "task_id",
+            "capability_decision_ref",
+            "context_ref",
+            "target_candidate_version",
+            "causation_id",
+            "correlation_id",
+        )
+        if any(
+            getattr(row, name) != getattr(first, name)
+            for row in self.proposals[1:]
+            for name in identity_fields
+        ):
+            raise ContractValidationError(
+                ReasonCode.IDENTITY_OR_VERSION_UNRESOLVED,
+                "executed transition rows do not share one admitted request identity",
+            )
+        transition_ids = tuple(row.transition_id for row in self.proposals)
+        allowed_shapes = {
+            ("T03",),
+            ("T04",),
+            ("T05",),
+            ("T08",),
+            ("T08", "T09", "T06"),
+            ("T08", "T09", "T07"),
+            ("T08", "T10"),
+            ("T08", "T09", "T04"),
+        }
+        if transition_ids not in allowed_shapes:
+            raise ContractValidationError(
+                ReasonCode.CONTRACT_OR_TYPE_INVALID,
+                f"executed transition trace has a noncanonical D shape: {transition_ids!r}",
+            )
+        if transition_ids[0] == "T08":
+            candidate_ref = first.target_candidate_ref
+            if (
+                candidate_ref == "EXPLICIT_ABSENCE"
+                or any(row.target_candidate_ref != candidate_ref for row in self.proposals)
+                or any(
+                    row.source_candidate_ref_or_explicit_absence != candidate_ref
+                    for row in self.proposals[1:]
+                )
+            ):
+                raise ContractValidationError(
+                    ReasonCode.SNAPSHOT_PIN_CONFLICT,
+                    "candidate-stage transition rows do not preserve one candidate identity",
+                )
+
+    @property
+    def final_proposal(self) -> SnapshotTransitionProposalV1:
+        return self.proposals[-1]
+
+
+@dataclass(frozen=True, slots=True)
 class ModeSnapshotCandidateProposalResultV1:
     snapshot_candidate_or_explicit_absence: FormulaRuntimeSnapshotCandidateV1 | None
     mode_snapshot_decision: ModeSnapshotDecisionV1
     snapshot_transition_proposal: SnapshotTransitionProposalV1
+    executed_transition_trace: ExecutedModeSnapshotTransitionTraceV1
     control_receipt_refs: tuple[str, ...]
     owner_projection_or_explicit_absence: ModeSnapshotOwnerProjectionV1 | None = None
     latency_measurement_or_explicit_absence: LatencyMeasurementV1 | None = None
@@ -1983,12 +2094,17 @@ class ModeSnapshotCandidateProposalResultV1:
                 ReasonCode.CONTRACT_OR_TYPE_INVALID,
                 "snapshot candidate must be exact typed candidate or explicit None",
             )
-        if type(self.mode_snapshot_decision) is not ModeSnapshotDecisionV1 or type(
-            self.snapshot_transition_proposal
-        ) is not SnapshotTransitionProposalV1:
+        if (
+            type(self.mode_snapshot_decision) is not ModeSnapshotDecisionV1
+            or type(self.snapshot_transition_proposal) is not SnapshotTransitionProposalV1
+            or type(self.executed_transition_trace)
+            is not ExecutedModeSnapshotTransitionTraceV1
+            or self.snapshot_transition_proposal
+            is not self.executed_transition_trace.final_proposal
+        ):
             raise ContractValidationError(
                 ReasonCode.CONTRACT_OR_TYPE_INVALID,
-                "mode snapshot result requires exact decision and proposal contracts",
+                "mode snapshot result requires one exact trace and its final proposal",
             )
         _validate_unique_text(self.control_receipt_refs, "control_receipt_refs")
         if (
@@ -2038,7 +2154,10 @@ class ModeSnapshotCandidateProposalResultV1:
                 "control receipt proposals must be an immutable tuple",
             )
         if self.control_receipt_proposals:
-            from .receipts import EconomicReceiptEventSpineV1
+            from .receipts import (
+                EconomicReceiptEventSpineV1,
+                ModeSnapshotControlClassV1,
+            )
 
             if (
                 any(
@@ -2051,6 +2170,96 @@ class ModeSnapshotCandidateProposalResultV1:
                 raise ContractValidationError(
                     ReasonCode.CONTRACT_OR_TYPE_INVALID,
                     "control receipt refs must resolve to the exact returned typed proposals",
+                )
+            proposal_by_class = {
+                ModeSnapshotControlClassV1.MODE_SNAPSHOT_EVALUATION: (
+                    self.executed_transition_trace.final_proposal
+                ),
+                ModeSnapshotControlClassV1.SNAPSHOT_CANDIDATE_BUILD: next(
+                    (
+                        row
+                        for row in self.executed_transition_trace.proposals
+                        if row.transition_id == "T08"
+                    ),
+                    None,
+                ),
+                ModeSnapshotControlClassV1.SNAPSHOT_CANDIDATE_VALIDATION: next(
+                    (
+                        row
+                        for row in self.executed_transition_trace.proposals
+                        if row.transition_id in {"T09", "T10"}
+                    ),
+                    None,
+                ),
+            }
+            expected_classes = (
+                ModeSnapshotControlClassV1.MODE_SNAPSHOT_EVALUATION,
+                *(
+                    (ModeSnapshotControlClassV1.SNAPSHOT_CANDIDATE_BUILD,)
+                    if proposal_by_class[
+                        ModeSnapshotControlClassV1.SNAPSHOT_CANDIDATE_BUILD
+                    ]
+                    is not None
+                    else ()
+                ),
+                *(
+                    (ModeSnapshotControlClassV1.SNAPSHOT_CANDIDATE_VALIDATION,)
+                    if proposal_by_class[
+                        ModeSnapshotControlClassV1.SNAPSHOT_CANDIDATE_VALIDATION
+                    ]
+                    is not None
+                    else ()
+                ),
+            )
+            if any(
+                (mapped := proposal_by_class.get(row.typed_payload.control_class)) is None
+                or (
+                    row.typed_payload.transition_proposal_ref,
+                    row.typed_payload.transition_id,
+                    row.typed_payload.source_state,
+                    row.typed_payload.destination_state,
+                    row.typed_payload.target_candidate_version,
+                    row.typed_payload.state_before_refs,
+                    row.typed_payload.state_after_refs,
+                    row.typed_payload.typed_reason_codes,
+                    row.typed_payload.predecessor_transition_receipt_refs,
+                    row.causation_id,
+                    row.correlation_id,
+                )
+                != (
+                    mapped.proposal_id,
+                    mapped.transition_id,
+                    mapped.source_state,
+                    mapped.destination_state,
+                    mapped.target_candidate_version,
+                    tuple(
+                        dict.fromkeys(
+                            (
+                                mapped.source_state,
+                                mapped.expected_owner_state_ref,
+                                mapped.source_candidate_ref_or_explicit_absence,
+                                *mapped.predecessor_transition_receipt_refs,
+                            )
+                        )
+                    ),
+                    tuple(
+                        dict.fromkeys(
+                            (mapped.destination_state, mapped.target_candidate_ref)
+                        )
+                    ),
+                    mapped.typed_reason_codes,
+                    mapped.predecessor_transition_receipt_refs,
+                    mapped.causation_id,
+                    mapped.correlation_id,
+                )
+                for row in self.control_receipt_proposals
+            ) or tuple(
+                row.typed_payload.control_class
+                for row in self.control_receipt_proposals
+            ) != expected_classes:
+                raise ContractValidationError(
+                    ReasonCode.CONTRACT_OR_TYPE_INVALID,
+                    "control receipt cardinality and transition fields must resolve to the exact executed trace rows",
                 )
         elif self.control_receipt_refs:
             raise ContractValidationError(
@@ -2522,6 +2731,74 @@ def _validate_unique_text(values: object, field_name: str, *, nonempty: bool = F
         raise ContractValidationError(
             ReasonCode.INVALID_CONTRACT,
             f"{field_name} must not contain duplicates",
+        )
+
+
+def validate_reference_identity_classes(
+    *,
+    policy_refs: tuple[str, ...] = (),
+    semantic_policy_set_versions: tuple[str, ...] = (),
+    source_snapshot_refs: tuple[str, ...] = (),
+    source_epoch_refs: tuple[str, ...] = (),
+    receipt_refs: tuple[str, ...] = (),
+    candidate_or_decision_refs: tuple[str, ...] = (),
+    explicit_absence_refs: tuple[str, ...] = (),
+) -> None:
+    """Enforce the non-overlapping D reference ontology at existing boundaries."""
+
+    classes = {
+        "policy_ref": policy_refs,
+        "semantic_policy_set_version": semantic_policy_set_versions,
+        "source_snapshot_ref": source_snapshot_refs,
+        "source_epoch_ref": source_epoch_refs,
+        "receipt_ref": receipt_refs,
+        "candidate_or_decision_ref": candidate_or_decision_refs,
+    }
+    for name, values in classes.items():
+        _validate_unique_text(values, name)
+        if "EXPLICIT_ABSENCE" in values:
+            raise ContractValidationError(
+                ReasonCode.CONTRACT_OR_TYPE_INVALID,
+                f"explicit absence cannot occupy the {name} class",
+            )
+    _validate_unique_text(explicit_absence_refs, "explicit_absence")
+    if any(value != "EXPLICIT_ABSENCE" for value in explicit_absence_refs):
+        raise ContractValidationError(
+            ReasonCode.CONTRACT_OR_TYPE_INVALID,
+            "explicit-absence references must use the exact typed absence identity",
+        )
+    typed_sets = {name: set(values) for name, values in classes.items()}
+    names = tuple(typed_sets)
+    collisions = {
+        value
+        for index, name in enumerate(names)
+        for other in names[index + 1 :]
+        for value in typed_sets[name] & typed_sets[other]
+    }
+    if collisions:
+        raise ContractValidationError(
+            ReasonCode.CONTRACT_OR_TYPE_INVALID,
+            "reference identities cannot satisfy multiple semantic classes: "
+            + ", ".join(sorted(collisions)),
+        )
+    forbidden_receipt_prefixes = (
+        "ComputationParameterPolicyV1::",
+        "OWNER-PROJECTION-RECEIPT::",
+    )
+    forbidden_epoch_prefixes = (
+        "PARAMETER-POLICY-EPOCH::",
+        "OWNER-PROJECTION-EPOCH::",
+        "EVIDENCE-EPOCH::",
+    )
+    if any(ref.startswith(forbidden_receipt_prefixes) for ref in receipt_refs):
+        raise ContractValidationError(
+            ReasonCode.CONTRACT_OR_TYPE_INVALID,
+            "policy or projection identities cannot satisfy receipt fields",
+        )
+    if any(ref.startswith(forbidden_epoch_prefixes) for ref in source_epoch_refs):
+        raise ContractValidationError(
+            ReasonCode.SOURCE_EPOCH_STALE,
+            "semantic policy or projection versions cannot satisfy source epochs",
         )
 
 

@@ -1692,7 +1692,6 @@ class CurrentModeSnapshotInputResolverV1:
                 dict.fromkeys(
                     (
                         decision.agent_orch_receipt_ref,
-                        safety.state_ref,
                         safety_packet.producer_receipt_id,
                     )
                 )
@@ -1789,11 +1788,6 @@ class CurrentModeSnapshotInputResolverV1:
                     ),
                     *preconstruction_gate.source_epoch_refs,
                     owner_action_packet.source_epoch_id,
-                    (
-                        "EVIDENCE-EPOCH::"
-                        f"{preconstruction_gate.evidence_reference.policy_version}::"
-                        f"{preconstruction_gate.evidence_reference.evidence_state.value}"
-                    ),
                     *owner_projections.source_epoch_refs,
                 )
             )
@@ -1830,8 +1824,11 @@ class CurrentModeSnapshotInputResolverV1:
                     *preconstruction_gate.receipt_lineage_refs,
                     owner_action.receipt_ref,
                     owner_action_packet.producer_receipt_id,
-                    bundle.preflight_receipt_ref,
-                    *bundle.receipt_refs,
+                    *(
+                        ref
+                        for resolution in formula_input_resolutions
+                        for ref in resolution.receipt_refs
+                    ),
                     *(
                         ref
                         for row in resolved_parameter_values
@@ -1840,6 +1837,14 @@ class CurrentModeSnapshotInputResolverV1:
                             *row.point_in_time_receipt_refs,
                             *row.freshness_receipt_refs,
                         )
+                    ),
+                    *(
+                        (
+                            owner_action.predecessor_transition_receipt_ref_or_explicit_absence,
+                        )
+                        if owner_action.predecessor_transition_receipt_proposal_or_explicit_absence
+                        is not None
+                        else ()
                     ),
                     *owner_projections.receipt_refs,
                 )

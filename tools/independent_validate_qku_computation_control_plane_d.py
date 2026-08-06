@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Independent source-and-artifact validator for the exact ST12-D boundary.
 
-This validator deliberately does not import QKU production modules or use a
-production callable as an oracle.  Frozen expectations are reconstructed here,
-then compared with source AST and builder-owned reference-only projections.
+Frozen expectations are reconstructed here, then compared with source AST,
+builder-owned reference-only projections, and a bounded subprocess that treats
+the production authority boundary strictly as the system under test.
 """
 
 from __future__ import annotations
@@ -12,6 +12,7 @@ import ast
 from collections import Counter
 from decimal import Decimal
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -42,6 +43,17 @@ EXPECTED_COUNTS = {
     "golden_vectors": 4,
     "semantic_tests": 26,
     "certified_commands": 6,
+}
+EXPECTED_REPAIR_METRICS = {
+    "canonical_current_resolver_enforced_count": 1,
+    "custom_resolver_bypass_count": 0,
+    "executed_transition_trace_gap_count": 0,
+    "stage_transition_receipt_mismatch_count": 0,
+    "phantom_receipt_ref_count": 0,
+    "synthetic_source_epoch_ref_count": 0,
+    "actual_control_mutation_case_count": 23,
+    "semantic_test_identity_count": 26,
+    "synthetic_override_mutation_count": 0,
 }
 EXPECTED_UNIVERSE_CLASS_COUNTS = {
     "certified_command": 6,
@@ -181,6 +193,7 @@ EXPECTED_RUNTIME_CONSUMERS = {
     ),
     "OUTPUT::TRANSITION-PROPOSAL": (
         "SubmitCandidateProposalResponseV1.proposal",
+        "ModeSnapshotCandidateProposalResultV1.executed_transition_trace",
         "EconomicReceiptEventSpineV1.ModeSnapshotControlReceiptRecordV1.transition_proposal_ref",
     ),
     "OUTPUT::PROPOSAL-RESULT": (
@@ -346,9 +359,13 @@ EXPECTED_CONTRACT_FIELDS = {
         "active_pointer_commit_allowed", "mutation_allowed",
         "runtime_effect_authorized", "order_release_authorized",
     ),
+    "ExecutedModeSnapshotTransitionTraceV1": (
+        "proposals",
+    ),
     "ModeSnapshotCandidateProposalResultV1": (
         "snapshot_candidate_or_explicit_absence", "mode_snapshot_decision",
-        "snapshot_transition_proposal", "control_receipt_refs",
+        "snapshot_transition_proposal", "executed_transition_trace",
+        "control_receipt_refs",
         "owner_projection_or_explicit_absence",
         "latency_measurement_or_explicit_absence", "control_receipt_proposals",
         "no_authority_flag",
@@ -374,6 +391,17 @@ EXPECTED_CONTRACT_FIELDS = {
         "typed_reason_codes", "fallback_route", "owner_review_route",
         "latency_measurement_ref_or_explicit_absence", "owner_action_policy_ref",
         "no_mutation_flag", "no_activation_flag", "no_order_authority_flag",
+    ),
+}
+EXPECTED_PROTOCOL_FIELDS = {
+    "OwnerProjectionViewV1": (
+        "owner_id", "authority_domain", "source_path", "source_version",
+        "source_snapshot_ref", "consume_interfaces", "row_count",
+        "identity_refs", "receipt_refs", "source_epoch_refs",
+        "projection_mutation_allowed", "runtime_effect_allowed",
+    ),
+    "PreloadedOwnerProjectionBundleV1": (
+        "readiness", "pretrade", "svc", "agent_orch",
     ),
 }
 REQUIRED_CONNECTIVITY_FIELDS = {
@@ -482,7 +510,149 @@ def _git_path_changed(path: str) -> bool:
     raise ValidationFailure("cannot compare agent_policy.py with current main")
 
 
-def _validate_denominators_and_artifact_identity() -> tuple[
+def _execute_runtime_repair_probe() -> dict[str, int]:
+    probe_source = r'''
+import json
+from dataclasses import replace
+from pathlib import Path
+
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import OwnerAdapterError
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.input_resolver import (
+    CanonicalOwnerPacketRegistryV1,
+    CurrentModeSnapshotInputResolverV1,
+)
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.service import (
+    _require_current_mode_snapshot_resolver,
+)
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.validation import (
+    ST12D_ACTUAL_CONTROL_MUTATION_CASES,
+    ST12D_SEMANTIC_TEST_ROWS,
+    _st12d_build_control_fixture,
+    run_st12d_actual_control_mutation_case,
+)
+
+results = tuple(
+    run_st12d_actual_control_mutation_case(control_id)
+    for control_id in ST12D_ACTUAL_CONTROL_MUTATION_CASES
+)
+by_control = {row.control_id: row for row in results}
+fixture = _st12d_build_control_fixture("ST11-EXECUTION::012")
+exact = _require_current_mode_snapshot_resolver(fixture.service)
+
+class CustomEvidenceAvailableResolver:
+    def __init__(self):
+        self.gate_calls = 0
+        self.enrichment_calls = 0
+
+    def resolve_mode_snapshot_preconstruction_gate(self, *_args):
+        self.gate_calls += 1
+        return object()
+
+    def enrich_mode_snapshot_candidate(self, *_args):
+        self.enrichment_calls += 1
+        return object()
+
+custom = CustomEvidenceAvailableResolver()
+custom_bypassed = True
+try:
+    _require_current_mode_snapshot_resolver(
+        replace(fixture.service, mode_snapshot_input_resolver=custom)
+    )
+except OwnerAdapterError:
+    custom_bypassed = False
+
+wrong_registry_bypassed = True
+wrong_registry = CanonicalOwnerPacketRegistryV1()
+try:
+    _require_current_mode_snapshot_resolver(
+        replace(
+            fixture.service,
+            mode_snapshot_input_resolver=CurrentModeSnapshotInputResolverV1(
+                repo_root=Path("."),
+                owner_registry=wrong_registry,
+            ),
+        )
+    )
+except OwnerAdapterError:
+    wrong_registry_bypassed = False
+
+resolver_result = by_control["ST11-EXECUTION::012"]
+receipt_result = by_control["ST11-EXECUTION::013"]
+epoch_result = by_control["ST11-EXECUTION::014"]
+stage_result = by_control["ST11-SECURITY::012"]
+payload = {
+    "canonical_current_resolver_enforced_count": int(
+        type(exact) is CurrentModeSnapshotInputResolverV1
+        and exact.owner_registry is fixture.service.owner_registry
+        and resolver_result.positive_passed
+    ),
+    "custom_resolver_bypass_count": int(
+        custom_bypassed or not resolver_result.actual_mutation_rejected
+    ),
+    "custom_resolver_late_call_count": custom.gate_calls + custom.enrichment_calls,
+    "wrong_registry_bypass_count": int(wrong_registry_bypassed),
+    "executed_transition_trace_gap_count": int(not stage_result.positive_passed),
+    "stage_transition_receipt_mismatch_count": int(
+        not stage_result.actual_mutation_rejected
+    ),
+    "phantom_receipt_ref_count": int(not receipt_result.actual_mutation_rejected),
+    "synthetic_source_epoch_ref_count": int(
+        not epoch_result.actual_mutation_rejected
+    ),
+    "actual_control_mutation_case_count": len(results),
+    "actual_control_positive_pass_count": sum(row.positive_passed for row in results),
+    "actual_control_mutation_rejection_count": sum(
+        row.actual_mutation_rejected for row in results
+    ),
+    "semantic_test_identity_count": len(ST12D_SEMANTIC_TEST_ROWS),
+    "synthetic_override_mutation_count": sum(
+        row.positive_terminal_state == row.negative_reason_or_terminal_state
+        or not row.actual_mutation_rejected
+        for row in results
+    ),
+}
+print(json.dumps(payload, sort_keys=True))
+'''
+    env = os.environ.copy()
+    existing_pythonpath = env.get("PYTHONPATH", "")
+    env["PYTHONDONTWRITEBYTECODE"] = "1"
+    env["PYTHONPATH"] = str(REPO_ROOT) + (
+        os.pathsep + existing_pythonpath if existing_pythonpath else ""
+    )
+    completed = subprocess.run(
+        [sys.executable, "-B", "-c", probe_source],
+        cwd=REPO_ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+        timeout=60,
+        env=env,
+    )
+    _require(
+        completed.returncode == 0 and completed.stdout.strip(),
+        "bounded production authority probe failed: " + completed.stderr.strip(),
+    )
+    payload = json.loads(completed.stdout.strip().splitlines()[-1])
+    _require(
+        isinstance(payload, dict)
+        and all(type(value) is int for value in payload.values()),
+        "bounded production authority probe returned a malformed result",
+    )
+    for key, expected in EXPECTED_REPAIR_METRICS.items():
+        _require(payload.get(key) == expected, f"runtime repair metric mismatch: {key}")
+    _require(
+        payload.get("custom_resolver_late_call_count") == 0
+        and payload.get("wrong_registry_bypass_count") == 0
+        and payload.get("actual_control_positive_pass_count") == 23
+        and payload.get("actual_control_mutation_rejection_count") == 23,
+        "resolver rejection was late or the 23 real mutation probes did not close",
+    )
+    return {key: int(payload[key]) for key in EXPECTED_REPAIR_METRICS}
+
+
+def _validate_denominators_and_artifact_identity(
+    runtime_metrics: dict[str, int],
+) -> tuple[
     dict[str, object], tuple[dict[str, object], ...], tuple[dict[str, object], ...]
 ]:
     _require(ARTIFACTS.is_dir(), "ST12-D generated owner directory is missing")
@@ -676,6 +846,13 @@ def _validate_denominators_and_artifact_identity() -> tuple[
         and summary.get("synthetic_override_mutation_count") == 0,
         "23 actual control mutations or 26 semantic aliases are incomplete",
     )
+    _require(
+        all(
+            manifest.get(key) == value and summary.get(key) == value
+            for key, value in runtime_metrics.items()
+        ),
+        "generated repair metrics differ from independently executed mutations",
+    )
 
     _recursive_effect_check(manifest, "manifest")
     _recursive_effect_check(summary, "summary")
@@ -705,6 +882,12 @@ def _validate_contract_and_service_ast() -> None:
     for class_name, expected_fields in EXPECTED_CONTRACT_FIELDS.items():
         tree = receipts if class_name == "ModeSnapshotControlReceiptRecordV1" else models
         _require(_class_fields(_class_node(tree, class_name)) == expected_fields, f"{class_name} field roster mismatch")
+    protocols = _source_tree("protocols.py")
+    for class_name, expected_fields in EXPECTED_PROTOCOL_FIELDS.items():
+        _require(
+            _class_fields(_class_node(protocols, class_name)) == expected_fields,
+            f"{class_name} field roster mismatch",
+        )
 
     input_resolver = _source_tree("input_resolver.py")
     input_resolver_source = (PACKAGE / "input_resolver.py").read_text(encoding="utf-8")
@@ -774,6 +957,8 @@ def _validate_contract_and_service_ast() -> None:
     _require(decision_fields[-3:] == ("runtime_effect_authorized", "active_pointer_commit_allowed", "order_release_authorized"), "decision effect boundary mismatch")
     candidate_node = _class_node(models, "FormulaRuntimeSnapshotCandidateV1")
     transition_node = _class_node(models, "SnapshotTransitionProposalV1")
+    trace_node = _class_node(models, "ExecutedModeSnapshotTransitionTraceV1")
+    result_node = _class_node(models, "ModeSnapshotCandidateProposalResultV1")
     receipt_node = _class_node(receipts, "ModeSnapshotControlReceiptRecordV1")
     for node, names, expected in (
         (candidate_node, ("runtime_effect_authorized", "order_release_authorized", "activated"), False),
@@ -815,10 +1000,25 @@ def _validate_contract_and_service_ast() -> None:
     calls = [node for node in ast.walk(submit) if isinstance(node, ast.Call)]
     _require(sum(isinstance(call.func, ast.Name) and call.func.id == "_admit_agent_request" for call in calls) == 1, "submit_candidate_proposal lacks exactly one central admission")
     service_text = (PACKAGE / "service.py").read_text(encoding="utf-8")
+    service_functions = {
+        node.name: node
+        for node in service.body
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+    }
+    authority_source = ast.get_source_segment(
+        service_text, service_functions["_require_current_mode_snapshot_resolver"]
+    ) or ""
+    _require(
+        "type(resolver) is not CurrentModeSnapshotInputResolverV1"
+        in authority_source
+        and "resolver.owner_registry is not service.owner_registry"
+        in authority_source
+        and authority_source.count("raise OwnerAdapterError(") == 2,
+        "current production D does not require the exact resolver and same registry",
+    )
     admission_offset = service_text.index("capability_decision = _admit_agent_request", service_text.index("def submit_candidate_proposal"))
     discriminator_offset = service_text.index("request.candidate_kind", admission_offset)
     _require(admission_offset < discriminator_offset, "candidate kind is read before central admission")
-    private_offset = service_text.index("def _submit_mode_snapshot_candidate")
     private_node = next(
         node
         for node in service.body
@@ -826,8 +1026,14 @@ def _validate_contract_and_service_ast() -> None:
         and node.name == "_submit_mode_snapshot_candidate"
     )
     private_source = ast.get_source_segment(service_text, private_node) or ""
+    authority_offset = private_source.index(
+        "resolver = _require_current_mode_snapshot_resolver(self)"
+    )
     gate_offset = private_source.index(
         "resolver.resolve_mode_snapshot_preconstruction_gate"
+    )
+    canonical_evidence_offset = private_source.index(
+        "canonical_pre_f_evidence = pre_f_unavailable_reference"
     )
     early_policy_offset = private_source.index(
         "evaluate_mode_snapshot_preconstruction_gate"
@@ -845,13 +1051,15 @@ def _validate_contract_and_service_ast() -> None:
         "source_candidate_refs = request.source_candidate_refs"
     )
     _require(
-        gate_offset
+        authority_offset
+        < gate_offset
+        < canonical_evidence_offset
         < early_policy_offset
         < projection_bundle_offset
         < enrichment_offset
         < schema_offset
         < body_source_offset,
-        "T05/T03 do not short-circuit before D projection/enrichment/body work",
+        "canonical resolver/T05/T03 checks do not precede D enrichment/body work",
     )
     projection_offset = private_source.index(
         "projection = projection_adapter.project_mode_snapshot"
@@ -887,9 +1095,8 @@ def _validate_contract_and_service_ast() -> None:
         "D latency is not one bounded monotone two-pass nine-stage finalizer",
     )
     _require(
-        "not isinstance(resolver, ModeSnapshotCandidateInputProtocolV1)"
-        in private_source
-        and "resolver_registry is not self.owner_registry" in private_source
+        "_require_current_mode_snapshot_resolver(self)" in private_source
+        and "gate.evidence_reference != canonical_pre_f_evidence" in private_source
         and "inputs.evidence_reference is not gate.evidence_reference"
         in private_source
         and "PreloadedOwnerProjectionBundleV1" in private_source
@@ -944,6 +1151,9 @@ def _validate_contract_and_service_ast() -> None:
         "propose_snapshot_stale_or_rollback_required": ("T11", "T12"),
         "propose_rollback": ("T13", "T14", "SNAPSHOT_PIN_CONFLICT"),
         "propose_snapshot_retirement": ("T15", "T16"),
+        "finalize_mode_snapshot_latency_block": (
+            "T08", "T09", "T04", "ExecutedModeSnapshotTransitionTraceV1",
+        ),
     }
     for function_name, tokens in executable_tokens.items():
         node = functions.get(function_name)
@@ -961,7 +1171,7 @@ def _validate_contract_and_service_ast() -> None:
     evaluate_source = ast.get_source_segment(policy_source, evaluate_node) or ""
     _require(
         evaluate_source.index("_preconstruction_decision_state")
-        < evaluate_source.index("build_snapshot_candidate"),
+        < evaluate_source.index("construct_snapshot_candidate"),
         "candidate construction precedes hard preconstruction blockers",
     )
     rollback_kwonly = tuple(arg.arg for arg in functions["propose_rollback"].args.kwonlyargs)
@@ -1040,15 +1250,37 @@ def _validate_contract_and_service_ast() -> None:
         ),
         "typed predecessor receipts do not prove exact transition scope and no-effect state",
     )
+    trace_source = ast.get_source_segment(models_source, trace_node) or ""
+    result_source = ast.get_source_segment(models_source, result_node) or ""
+    _require(
+        all(
+            shape in trace_source
+            for shape in (
+                '("T03",)',
+                '("T05",)',
+                '("T08", "T09", "T06")',
+                '("T08", "T09", "T07")',
+                '("T08", "T10")',
+                '("T08", "T09", "T04")',
+            )
+        )
+        and "return self.proposals[-1]" in trace_source
+        and "is not self.executed_transition_trace.final_proposal" in result_source
+        and "control receipt cardinality and transition fields must resolve to the exact executed trace rows"
+        in result_source,
+        "ordered executed transition trace or mapped receipt validation is incomplete",
+    )
     receipts_source = (PACKAGE / "receipts.py").read_text(encoding="utf-8")
     materialize_start = receipts_source.index("def materialize_mode_snapshot_control_receipts")
     materialize_source = receipts_source[materialize_start:]
     _require(
         "MODE_SNAPSHOT_EVALUATION" in materialize_source
-        and "snapshot_candidate_state is not SnapshotCandidateStateV1.ABSENT" in materialize_source
-        and "SnapshotCandidateStateV1.REJECTED" in materialize_source
+        and "proposal_by_transition_id" in materialize_source
+        and 'if "T08" in proposal_by_transition_id' in materialize_source
+        and 'for transition_id in ("T09", "T10")' in materialize_source
+        and "stage_proposal.transition_id" in materialize_source
         and "result.control_receipt_refs != expected_refs" in materialize_source,
-        "D receipt classes are not derived from actually executed stages",
+        "D receipt classes are not mapped to the exact executed trace stages",
     )
     _require(_git_path_changed("src/qtt/stage1_prediction_markets/qku_computation_control_plane/agent_policy.py") is False, "agent_policy.py edit count is nonzero")
 
@@ -1236,6 +1468,10 @@ def _validate_repair_closure_sources() -> None:
                 "point_in_time_receipt_refs=(pit.receipt_id,)",
                 "freshness_receipt_refs=(freshness.receipt_id,)",
                 "source_epoch_refs=(packet.source_epoch_id,)",
+                "producer_receipt_refs=()",
+                "point_in_time_receipt_refs=()",
+                "freshness_receipt_refs=()",
+                "source_epoch_refs=()",
                 'if parameter_id == "ST10-PARAM::3002"',
                 'if parameter_id == "ST10-PARAM::3003"',
                 'if parameter_id == "ST10-PARAM::3641"',
@@ -1245,6 +1481,10 @@ def _validate_repair_closure_sources() -> None:
         and parameter_source.count('"ST10-PARAM::0764"') >= 2
         and parameter_source.count('"ST10-PARAM::3639"') >= 2,
         "D does not resolve the exact 21 typed value pins through owner/PIT/freshness custody",
+    )
+    _require(
+        '"PARAMETER-POLICY-EPOCH::"' not in parameter_source,
+        "static parameter rows still synthesize source epochs",
     )
     d_parameter_source = parameter_source[
         parameter_source.index("_ST12D_PARAMETER_ROW_001") :
@@ -1331,6 +1571,35 @@ def _validate_repair_closure_sources() -> None:
         and 'monkeypatch.setattr(Path, "read_text"' in test_sources[1],
         "D grouped tests do not prove consumed-only epochs and zero request file reads",
     )
+    _require(
+        "_CustomEvidenceAvailableResolver" in test_sources[1]
+        and "custom_resolver.gate_calls, custom_resolver.enrich_calls"
+        in test_sources[1]
+        and "wrong_registry_resolver" in test_sources[1]
+        and "expected_stage_transitions" in test_sources[1]
+        and "source_snapshot_refs" in test_sources[1]
+        and "producer_receipt_refs" in test_sources[1],
+        "grouped D tests omit canonical authority, trace, or reference-ontology probes",
+    )
+
+    models_source = (PACKAGE / "models.py").read_text(encoding="utf-8")
+    protocols_source = (PACKAGE / "protocols.py").read_text(encoding="utf-8")
+    resolver_source = (PACKAGE / "input_resolver.py").read_text(encoding="utf-8")
+    _require(
+        "def validate_reference_identity_classes(" in models_source
+        and '"ComputationParameterPolicyV1::"' in models_source
+        and '"OWNER-PROJECTION-RECEIPT::"' in models_source
+        and '"PARAMETER-POLICY-EPOCH::"' in models_source
+        and '"OWNER-PROJECTION-EPOCH::"' in models_source
+        and "source_snapshot_ref: str" in protocols_source
+        and "receipt_refs: tuple[str, ...] = ()" in protocols_source
+        and "source_epoch_refs: tuple[str, ...] = ()" in protocols_source
+        and "row.source_snapshot_ref" in protocols_source
+        and '"OWNER-PROJECTION-RECEIPT::"' not in protocols_source
+        and '"OWNER-PROJECTION-EPOCH::"' not in protocols_source
+        and '"EVIDENCE-EPOCH::"' not in resolver_source,
+        "policy, snapshot, receipt, and source-epoch reference classes are not separated",
+    )
 
     builder_source = (REPO_ROOT / "tools/build_qku_computation_control_plane.py").read_text(
         encoding="utf-8"
@@ -1357,7 +1626,12 @@ def _validate_repair_closure_sources() -> None:
         and "run_st12d_actual_control_mutation_case(control_id)"
         in builder_source
         and "actual_control_mutation_rejection_count = sum(" in builder_source
-        and '"synthetic_override_mutation_count": 0' in builder_source,
+        and "mutation_result_by_control" in builder_source
+        and "canonical_current_resolver_enforced_count = int(" in builder_source
+        and "stage_transition_receipt_mismatch_count = int(" in builder_source
+        and "synthetic_override_mutation_count = sum(" in builder_source
+        and '"synthetic_override_mutation_count": synthetic_override_mutation_count'
+        in builder_source,
         "generated validation summary is not derived from actual control mutations",
     )
     _require(
@@ -1411,7 +1685,8 @@ def _validate_no_metadata_only_or_scope_escape() -> None:
 
 def main() -> int:
     try:
-        _validate_denominators_and_artifact_identity()
+        runtime_metrics = _execute_runtime_repair_probe()
+        _validate_denominators_and_artifact_identity(runtime_metrics)
         _validate_contract_and_service_ast()
         _validate_math39_independently()
         _validate_repair_closure_sources()
@@ -1422,7 +1697,10 @@ def main() -> int:
     print(
         f"{SUCCESS_MARKER} "
         "closure=23 paths=7 parameters=28 math=4 oracles=4 vectors=4 "
-        "semantic_tests=26 commands=6 states=35 transitions=17 universe=240"
+        "semantic_tests=26 commands=6 states=35 transitions=17 universe=240 "
+        "canonical_resolver=1 custom_bypass=0 trace_gaps=0 "
+        "stage_receipt_mismatches=0 phantom_receipts=0 synthetic_epochs=0 "
+        "actual_mutations=23 synthetic_overrides=0"
     )
     return 0
 

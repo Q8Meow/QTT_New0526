@@ -11,8 +11,10 @@ import pytest
 
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import (
     ComputationControlPlaneError,
+    ContractValidationError,
     InputAuthorityError,
     NumericDomainError,
+    OwnerAdapterError,
     ReasonCode,
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.implementation_registry import (
@@ -24,11 +26,11 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.implementat
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.mode_snapshot_policy import (
     MODE_SNAPSHOT_CANDIDATE_KIND,
-    ModeSnapshotPreconstructionGateV1,
     PriorSnapshotCandidateV1,
     build_snapshot_candidate,
     construct_snapshot_candidate,
     evaluate_mode_snapshot_candidate,
+    finalize_mode_snapshot_latency_block,
     owner_projection,
     propose_rollback,
     propose_snapshot_retirement,
@@ -71,9 +73,6 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.protocols i
     ExistingOwnerProjectionAdapterV1,
     OwnerProjectionViewV1,
     PreloadedOwnerProjectionBundleV1,
-)
-from src.qtt.stage1_prediction_markets.qku_computation_control_plane.persistence import (
-    InMemoryPersistenceAdapterV1,
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.receipts import (
     EconomicRecordTypeV1,
@@ -479,6 +478,33 @@ def test_parameter_math_oracle_and_source_semantics_close_under_existing_owners(
     assert gap.value.reason_code is ReasonCode.SEQUENCE_GAP
 
     bundle, owner_registry = _audit_bundle_fixture()
+    deterministic_rows = tuple(
+        row
+        for row in bundle.resolved_parameter_values
+        if row.resolution_state
+        is SnapshotParameterResolutionStateV1.DETERMINISTIC_POLICY_VALUE_MATERIALIZED
+    )
+    owner_rows = tuple(
+        row
+        for row in bundle.resolved_parameter_values
+        if row.resolution_state is SnapshotParameterResolutionStateV1.OWNER_VALUE_RESOLVED
+    )
+    assert all(
+        not (
+            row.producer_receipt_refs
+            or row.point_in_time_receipt_refs
+            or row.freshness_receipt_refs
+            or row.source_epoch_refs
+        )
+        for row in deterministic_rows
+    )
+    assert all(
+        row.producer_receipt_refs
+        and row.point_in_time_receipt_refs
+        and row.freshness_receipt_refs
+        and row.source_epoch_refs
+        for row in owner_rows
+    )
     assert len(FROZEN_FORMULA_REQUIREMENTS) == 30
     assert len(FORMULA_INPUT_AUTHORITY_BINDINGS) == 142
     assert tuple(REGISTERED_FORMULA_STACKS) == (
@@ -626,6 +652,17 @@ def test_parameter_math_oracle_and_source_semantics_close_under_existing_owners(
     preloaded_projections = ExistingOwnerProjectionAdapterV1(
         _repo_root()
     ).load_bundle()
+    assert preloaded_projections.receipt_refs == ()
+    assert preloaded_projections.source_epoch_refs == ()
+    assert preloaded_projections.source_snapshot_refs == tuple(
+        row.source_path
+        for row in (
+            preloaded_projections.readiness,
+            preloaded_projections.pretrade,
+            preloaded_projections.svc,
+            preloaded_projections.agent_orch,
+        )
+    )
     baseline_enriched = snapshot_resolver.enrich_mode_snapshot_candidate(
         _SnapshotRequestProbe(),
         snapshot_admission,
@@ -654,6 +691,16 @@ def test_parameter_math_oracle_and_source_semantics_close_under_existing_owners(
     )
     assert unrelated_enriched.source_epoch_refs == baseline_enriched.source_epoch_refs
     assert "SOURCE-EPOCH::D::UNRELATED" not in unrelated_enriched.source_epoch_refs
+    assert not set(preloaded_projections.source_snapshot_refs).intersection(
+        baseline_enriched.source_epoch_refs
+    )
+    assert not {
+        row.policy_ref for row in baseline_enriched.resolved_parameter_values
+    }.intersection(baseline_enriched.receipt_lineage_refs)
+    assert (
+        baseline_enriched.computation_bundle_closure.preflight_receipt_ref
+        not in baseline_enriched.receipt_lineage_refs
+    )
     assert deterministic_json(
         evaluate_mode_snapshot_candidate(unrelated_enriched)
     ) == deterministic_json(evaluate_mode_snapshot_candidate(baseline_enriched))
@@ -807,6 +854,56 @@ def test_receipt_spine_and_svc_projection_are_one_way_no_effect_views(
     assert all(row.record_type is EconomicRecordTypeV1.MODE_SNAPSHOT_CONTROL for row in receipts)
     assert all(type(row.typed_payload) is ModeSnapshotControlReceiptRecordV1 for row in receipts)
     assert all(row.typed_payload.no_order_authority_flag is True for row in receipts)
+    expected_stage_transitions = (
+        (ModeSnapshotControlClassV1.MODE_SNAPSHOT_EVALUATION, "T07"),
+        (ModeSnapshotControlClassV1.SNAPSHOT_CANDIDATE_BUILD, "T08"),
+        (ModeSnapshotControlClassV1.SNAPSHOT_CANDIDATE_VALIDATION, "T09"),
+    )
+    assert tuple(
+        (row.typed_payload.control_class, row.typed_payload.transition_id)
+        for row in receipts
+    ) == expected_stage_transitions
+    trace_by_id = {
+        proposal.transition_id: proposal
+        for proposal in result.executed_transition_trace.proposals
+    }
+    for receipt, (_control_class, transition_id) in zip(
+        receipts, expected_stage_transitions, strict=True
+    ):
+        proposal = trace_by_id[transition_id]
+        assert (
+            receipt.typed_payload.transition_proposal_ref,
+            receipt.typed_payload.source_state,
+            receipt.typed_payload.destination_state,
+            receipt.typed_payload.typed_reason_codes,
+            receipt.typed_payload.predecessor_transition_receipt_refs,
+        ) == (
+            proposal.proposal_id,
+            proposal.source_state,
+            proposal.destination_state,
+            proposal.typed_reason_codes,
+            proposal.predecessor_transition_receipt_refs,
+        )
+    with pytest.raises(ContractValidationError):
+        replace(
+            result,
+            control_receipt_refs=tuple(row.record_id for row in receipts),
+            control_receipt_proposals=(
+                receipts[0],
+                replace(
+                    receipts[1],
+                    typed_payload=replace(
+                        receipts[1].typed_payload,
+                        transition_proposal_ref=result.snapshot_transition_proposal.proposal_id,
+                        transition_id=result.snapshot_transition_proposal.transition_id,
+                        source_state=result.snapshot_transition_proposal.source_state,
+                        destination_state=result.snapshot_transition_proposal.destination_state,
+                        typed_reason_codes=result.snapshot_transition_proposal.typed_reason_codes,
+                    ),
+                ),
+                receipts[2],
+            ),
+        )
     assert all(
         row.no_effect_flags.mode_or_allow_activation_allowed is False
         and row.no_effect_flags.order_release_allowed is False
@@ -833,6 +930,7 @@ def test_receipt_spine_and_svc_projection_are_one_way_no_effect_views(
         authority_domain="OWNER_READ_MODEL_AND_ACTION_PROJECTION",
         source_path="src/qtt/service/pr169_svc1_resolvers.py",
         source_version="SVC1::CURRENT",
+        source_snapshot_ref="src/qtt/service/pr169_svc1_resolvers.py",
         consume_interfaces=("DashboardReadModelService",),
         row_count=1,
         identity_refs=("read_model_snapshots.generated.jsonl",),
@@ -905,24 +1003,22 @@ def test_receipt_spine_and_svc_projection_are_one_way_no_effect_views(
         owner_registry=owner_registry,
     )
 
-    class _PreFGateProbe:
-        late_calls = 0
+    late_calls = 0
 
-        def __init__(self) -> None:
-            self.owner_registry = owner_registry
+    def _forbid_pre_f_enrichment(*_args: object) -> object:
+        nonlocal late_calls
+        late_calls += 1
+        raise AssertionError("late D enrichment entered the T03 HOTPATH")
 
-        def resolve_mode_snapshot_preconstruction_gate(self, *args: object):
-            return current_resolver.resolve_mode_snapshot_preconstruction_gate(*args)
-
-        def enrich_mode_snapshot_candidate(self, *_args: object):
-            self.late_calls += 1
-            raise AssertionError("late D enrichment entered the T03 HOTPATH")
-
-    pre_f_gate_probe = _PreFGateProbe()
+    monkeypatch.setattr(
+        current_resolver,
+        "enrich_mode_snapshot_candidate",
+        _forbid_pre_f_enrichment,
+    )
     service = QKUComputationControlPlaneV1(
         owner_registry,
         agent_capability_resolver=_Admission(),
-        mode_snapshot_input_resolver=pre_f_gate_probe,
+        mode_snapshot_input_resolver=current_resolver,
         latency_budget_profile=LatencyBudgetProfileV1(
             profile_id="LATENCY-PROFILE::D::SERVICE",
             component_budget_ns=tuple((name, 10**12) for name in STAGE_NAMES),
@@ -950,6 +1046,10 @@ def test_receipt_spine_and_svc_projection_are_one_way_no_effect_views(
     service_result = response.proposal.mode_snapshot_result
     assert service_result.no_authority_flag is True
     assert service_result.snapshot_transition_proposal.transition_id == "T03"
+    assert tuple(
+        row.transition_id
+        for row in service_result.executed_transition_trace.proposals
+    ) == ("T03",)
     assert service_result.snapshot_candidate_or_explicit_absence is None
     assert service_result.mode_snapshot_decision.reason_codes == (
         ReasonCode.EVIDENCE_UNAVAILABLE_F_NOT_IMPLEMENTED,
@@ -964,228 +1064,71 @@ def test_receipt_spine_and_svc_projection_are_one_way_no_effect_views(
         *service_result.control_receipt_refs,
         service_result.latency_measurement_or_explicit_absence.measurement_ref,
     )
-    assert pre_f_gate_probe.late_calls == 0
+    assert late_calls == 0
 
-    base_inputs = _inputs()
-    admitted_t06_receipt = _transition_receipt_proposal(
-        transition_id="T06",
-        request_id=admitted.request_id,
-        principal_id=admitted.principal_id,
-        task_id=admitted.task_id,
-        capability_decision_ref=admitted.decision_id,
-        context_ref=context.context_id,
-        snapshot_candidate_ref=f"SNAPSHOT-CANDIDATE::{admitted.request_id}",
-        candidate_version=base_inputs.candidate_version,
-        expected_owner_state_ref=base_inputs.expected_owner_state_ref,
-        effective_at=context.as_of,
-    )
-    owner_action = replace(
-        base_inputs.owner_action_confirmation,
-        principal_id=admitted.principal_id,
-        task_id=admitted.task_id,
-        capability_decision_ref=admitted.decision_id,
-        context_ref=context.context_id,
-        predecessor_transition_receipt_ref_or_explicit_absence=(
-            admitted_t06_receipt.record_id
-        ),
-        predecessor_transition_receipt_proposal_or_explicit_absence=(
-            admitted_t06_receipt
-        ),
-    )
-    enriched_inputs = replace(
-        base_inputs,
-        request_id=admitted.request_id,
-        principal_id=admitted.principal_id,
-        task_id=admitted.task_id,
-        current_agent_id=admitted.current_agent_id,
-        capability_decision_ref=admitted.decision_id,
-        owner_action_confirmation=owner_action,
-        receipt_lineage_refs=(
-            base_inputs.computation_bundle_closure.preflight_receipt_ref,
-            owner_action.receipt_ref,
-        ),
-    )
-    nonterminal_gate = ModeSnapshotPreconstructionGateV1(
-        request_id=enriched_inputs.request_id,
-        principal_id=enriched_inputs.principal_id,
-        task_id=enriched_inputs.task_id,
-        current_agent_id=enriched_inputs.current_agent_id,
-        capability_decision_ref=enriched_inputs.capability_decision_ref,
-        context_ref=enriched_inputs.context_ref,
-        current_mode=enriched_inputs.current_mode,
-        requested_mode=enriched_inputs.requested_mode,
-        candidate_version=enriched_inputs.candidate_version,
-        evaluated_at=enriched_inputs.evaluated_at,
-        expires_at=enriched_inputs.expires_at,
-        causation_id=enriched_inputs.causation_id,
-        correlation_id=enriched_inputs.correlation_id,
-        receipt_lineage_refs=(
-            admitted.agent_orch_receipt_ref,
-            enriched_inputs.kill_submit_state.state_ref,
-        ),
-        source_epoch_refs=(context.source_epoch_id,),
-        evidence_reference=enriched_inputs.evidence_reference,
-        kill_submit_state=enriched_inputs.kill_submit_state,
-    )
-
-    class _NonterminalResolver:
+    class _CustomEvidenceAvailableResolver:
         gate_calls = 0
         enrich_calls = 0
-
-        def __init__(self) -> None:
-            self.owner_registry = owner_registry
+        evidence_reference = _inputs().evidence_reference
 
         def resolve_mode_snapshot_preconstruction_gate(self, *_args: object):
             self.gate_calls += 1
-            return nonterminal_gate
+            raise AssertionError("custom resolver reached the production D gate")
 
-        def enrich_mode_snapshot_candidate(
-            self,
-            _request: object,
-            _decision: object,
-            gate: object,
-            projections: object,
-        ):
+        def enrich_mode_snapshot_candidate(self, *_args: object):
             self.enrich_calls += 1
-            assert gate is nonterminal_gate
-            assert projections is preloaded_owner_projections
-            return enriched_inputs
+            raise AssertionError("custom resolver reached production D enrichment")
 
-    def _full_proposal_record() -> TypedValueRecordV1:
-        values = (
-            ("candidate_contract_id", MODE_SNAPSHOT_CANDIDATE_KIND),
-            ("computation_bundle_ref", enriched_inputs.computation_bundle_ref),
-            ("context_ref", enriched_inputs.context_ref),
-            ("formula_spec_refs", ",".join(enriched_inputs.formula_spec_refs)),
-            (
-                "implementation_version_pins",
-                ",".join(
-                    f"{pin.math_spec_id}={pin.implementation_id}"
-                    for pin in enriched_inputs.implementation_version_pins
-                ),
-            ),
-            ("binding_profile_ref", enriched_inputs.binding_profile_ref),
-            (
-                "parameter_policy_snapshot_ref",
-                enriched_inputs.parameter_policy_snapshot_ref,
-            ),
-            (
-                "parameter_value_refs",
-                ",".join(enriched_inputs.parameter_value_refs),
-            ),
-            ("source_epoch_refs", ",".join(enriched_inputs.source_epoch_refs)),
-            (
-                "receipt_lineage_refs",
-                ",".join(enriched_inputs.receipt_lineage_refs),
-            ),
-            ("readiness_state_ref", enriched_inputs.readiness_state_ref),
-            ("pretrade_state_ref", enriched_inputs.pretrade_state_ref),
-            ("owner_action_policy_ref", enriched_inputs.owner_action_policy_ref),
-            ("current_mode", enriched_inputs.current_mode),
-            ("requested_mode", enriched_inputs.requested_mode),
-            (
-                "expected_owner_state_ref",
-                enriched_inputs.expected_owner_state_ref,
-            ),
-            ("candidate_version", enriched_inputs.candidate_version),
-        )
-        return TypedValueRecordV1(
-            tuple(
-                TypedValueV1(
-                    name=name,
-                    kind=TypedValueKindV1.TEXT,
-                    value=value,
-                    unit="identity",
-                    basis="canonical",
-                )
-                for name, value in values
-            )
-        )
-
-    full_request = replace(
-        request,
-        proposed_specification=_full_proposal_record(),
-    )
-    nonterminal_resolver = _NonterminalResolver()
-    common_service_fields = {
-        "agent_capability_resolver": _Admission(),
-        "mode_snapshot_input_resolver": nonterminal_resolver,
-        "mode_snapshot_owner_projection_adapter": adapter,
-        "mode_snapshot_projection_bundle": preloaded_owner_projections,
-        "resource_bounds_profile": service.resource_bounds_profile,
-    }
-    full_service = QKUComputationControlPlaneV1(
+    custom_resolver = _CustomEvidenceAvailableResolver()
+    custom_service = QKUComputationControlPlaneV1(
         owner_registry,
-        latency_budget_profile=service.latency_budget_profile,
-        **common_service_fields,
+        agent_capability_resolver=_Admission(),
+        mode_snapshot_input_resolver=custom_resolver,
     )
-    full_response = full_service.submit_candidate_proposal(full_request)
-    assert full_response.status is OperationStatusV1.SUCCEEDED
-    full_result = full_response.proposal.mode_snapshot_result
-    assert full_result is not None
-    assert len(full_result.control_receipt_proposals) == 3
-    assert tuple(
-        row.record_id for row in full_result.control_receipt_proposals
-    ) == full_result.control_receipt_refs
-    full_measurement = full_result.latency_measurement_or_explicit_absence
-    assert full_measurement is not None
-    assert full_measurement.stages.receipt_materialization_ns > 0
-    assert full_measurement.stages.owner_projection_ns > 0
-    assert full_response.receipt_refs == (
-        *full_result.control_receipt_refs,
-        full_measurement.measurement_ref,
-    )
+    with pytest.raises(OwnerAdapterError):
+        custom_service.submit_candidate_proposal(request)
+    assert (custom_resolver.gate_calls, custom_resolver.enrich_calls) == (0, 0)
 
-    persistence = InMemoryPersistenceAdapterV1()
-    tight_profile = LatencyBudgetProfileV1(
-        profile_id="LATENCY-PROFILE::D::FINAL-NINE-STAGE",
-        component_budget_ns=tuple(
-            (
-                name,
-                0
-                if name in {"receipt_materialization_ns", "owner_projection_ns"}
-                else 10**12,
-            )
-            for name in STAGE_NAMES
-        ),
-        histogram_boundaries_ns=(1, 10**6, 10**12),
-        maximum_observer_overhead_ns=10**9,
-        alert_threshold_ns=10**12,
-        policy_version="LATENCY-POLICY::D::FINAL-NINE-STAGE",
+    wrong_registry_resolver = CurrentModeSnapshotInputResolverV1(
+        repo_root=_repo_root(),
+        owner_registry=CanonicalOwnerPacketRegistryV1(owner_registry.packets),
     )
-    tight_service = QKUComputationControlPlaneV1(
+    wrong_registry_service = QKUComputationControlPlaneV1(
         owner_registry,
-        persistence_adapter=persistence,
-        latency_budget_profile=tight_profile,
-        **common_service_fields,
+        agent_capability_resolver=_Admission(),
+        mode_snapshot_input_resolver=wrong_registry_resolver,
     )
-    tight_response = tight_service.submit_candidate_proposal(full_request)
-    assert tight_response.status is OperationStatusV1.BLOCKED
-    tight_result = tight_response.proposal.mode_snapshot_result
-    assert tight_result is not None
-    assert ReasonCode.LATENCY_PROFILE_REQUIRED in (
-        tight_result.mode_snapshot_decision.reason_codes
+    with pytest.raises(OwnerAdapterError):
+        wrong_registry_service.submit_candidate_proposal(request)
+
+    held_result = evaluate_mode_snapshot_candidate(_inputs(owner_confirmation=False))
+    latency_result = finalize_mode_snapshot_latency_block(result)
+    trace_cases = (
+        (service_result, ("T03",)),
+        (held_result, ("T08", "T09", "T06")),
+        (result, ("T08", "T09", "T07")),
+        (latency_result, ("T08", "T09", "T04")),
     )
-    assert tight_result.snapshot_transition_proposal.transition_id == "T04"
-    tight_measurement = tight_result.latency_measurement_or_explicit_absence
-    assert tight_measurement is not None
-    assert tight_measurement.stages.receipt_materialization_ns > 0
-    assert tight_measurement.stages.owner_projection_ns > 0
+    for traced_result, expected_trace in trace_cases:
+        assert tuple(
+            row.transition_id
+            for row in traced_result.executed_transition_trace.proposals
+        ) == expected_trace
+        assert (
+            traced_result.snapshot_transition_proposal
+            is traced_result.executed_transition_trace.final_proposal
+        )
+    latency_receipts = materialize_mode_snapshot_control_receipts(
+        latency_result,
+        parameter_value_refs=inputs.parameter_value_refs,
+        effective_at=inputs.evaluated_at,
+        recorded_at=inputs.evaluated_at,
+        traceparent=request.traceparent,
+        tracestate=request.tracestate,
+    )
     assert tuple(
-        getattr(tight_measurement.stages, name) for name in STAGE_NAMES
-    )
-    assert tight_measurement.cumulative_stage_ns[-1] == (
-        tight_measurement.stages.total_local_no_effect_ns
-    )
-    assert all(
-        persistence.get_record(row.record_id) == row
-        for row in tight_result.control_receipt_proposals
-    )
-    assert len(tight_result.control_receipt_refs) == len(
-        set(tight_result.control_receipt_refs)
-    )
-    assert nonterminal_resolver.gate_calls == 2
-    assert nonterminal_resolver.enrich_calls == 2
+        row.typed_payload.transition_id for row in latency_receipts
+    ) == ("T04", "T08", "T09")
 
     non_d = service.submit_candidate_proposal(
         replace(

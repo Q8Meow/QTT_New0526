@@ -364,10 +364,11 @@ _ST12D_RUNTIME_OPERATIONAL_CONNECTIVITY = {
     "OUTPUT::TRANSITION-PROPOSAL": (
         (
             "SubmitCandidateProposalResponseV1.proposal",
+            "ModeSnapshotCandidateProposalResultV1.executed_transition_trace",
             "EconomicReceiptEventSpineV1.ModeSnapshotControlReceiptRecordV1.transition_proposal_ref",
         ),
-        "ModeSnapshotCandidateProposalResultV1.snapshot_transition_proposal",
-        "RETURNED_IN_RESPONSE_AND_CONTROL_RECEIPT_SPINE_NO_EFFECT",
+        "ModeSnapshotCandidateProposalResultV1.executed_transition_trace.final_proposal",
+        "RETURNED_IN_ORDERED_TRACE_RESPONSE_AND_CONTROL_RECEIPT_SPINE_NO_EFFECT",
     ),
     "OUTPUT::PROPOSAL-RESULT": (
         ("SubmitCandidateProposalResponseV1.proposal.mode_snapshot_result",),
@@ -1498,6 +1499,9 @@ def build_st12d_projections() -> ST12DProjectionSet:
         run_st12d_actual_control_mutation_case(control_id)
         for control_id in ST12D_ACTUAL_CONTROL_MUTATION_CASES
     )
+    mutation_result_by_control = {
+        row.control_id: row for row in control_mutation_results
+    }
     actual_control_positive_pass_count = sum(
         row.positive_passed for row in control_mutation_results
     )
@@ -1507,6 +1511,35 @@ def build_st12d_projections() -> ST12DProjectionSet:
     semantic_test_pass_count = sum(
         adjudicate_st12d_semantic_test(str(row["test_id"]))
         for row in ST12D_SEMANTIC_TEST_ROWS
+    )
+    resolver_authority_result = mutation_result_by_control["ST11-EXECUTION::012"]
+    receipt_ontology_result = mutation_result_by_control["ST11-EXECUTION::013"]
+    source_epoch_ontology_result = mutation_result_by_control[
+        "ST11-EXECUTION::014"
+    ]
+    stage_transition_result = mutation_result_by_control["ST11-SECURITY::012"]
+    canonical_current_resolver_enforced_count = int(
+        resolver_authority_result.positive_passed
+    )
+    custom_resolver_bypass_count = int(
+        not resolver_authority_result.actual_mutation_rejected
+    )
+    executed_transition_trace_gap_count = int(
+        not stage_transition_result.positive_passed
+    )
+    stage_transition_receipt_mismatch_count = int(
+        not stage_transition_result.actual_mutation_rejected
+    )
+    phantom_receipt_ref_count = int(
+        not receipt_ontology_result.actual_mutation_rejected
+    )
+    synthetic_source_epoch_ref_count = int(
+        not source_epoch_ontology_result.actual_mutation_rejected
+    )
+    synthetic_override_mutation_count = sum(
+        row.positive_terminal_state == row.negative_reason_or_terminal_state
+        or not row.actual_mutation_rejected
+        for row in control_mutation_results
     )
     current_public_methods = {
         name
@@ -1581,7 +1614,17 @@ def build_st12d_projections() -> ST12DProjectionSet:
         ),
         "semantic_test_identity_count": len(ST12D_SEMANTIC_TEST_ROWS),
         "semantic_test_pass_count": semantic_test_pass_count,
-        "synthetic_override_mutation_count": 0,
+        "canonical_current_resolver_enforced_count": (
+            canonical_current_resolver_enforced_count
+        ),
+        "custom_resolver_bypass_count": custom_resolver_bypass_count,
+        "executed_transition_trace_gap_count": executed_transition_trace_gap_count,
+        "stage_transition_receipt_mismatch_count": (
+            stage_transition_receipt_mismatch_count
+        ),
+        "phantom_receipt_ref_count": phantom_receipt_ref_count,
+        "synthetic_source_epoch_ref_count": synthetic_source_epoch_ref_count,
+        "synthetic_override_mutation_count": synthetic_override_mutation_count,
         "new_public_operation_id_count": new_public_operation_count,
         "agent_policy_edit_count": 0,
         "active_pointer_commit_count": active_pointer_commit_count,
@@ -1625,7 +1668,17 @@ def build_st12d_projections() -> ST12DProjectionSet:
         ),
         "semantic_test_identity_count": len(ST12D_SEMANTIC_TEST_ROWS),
         "semantic_test_pass_count": semantic_test_pass_count,
-        "synthetic_override_mutation_count": 0,
+        "canonical_current_resolver_enforced_count": (
+            canonical_current_resolver_enforced_count
+        ),
+        "custom_resolver_bypass_count": custom_resolver_bypass_count,
+        "executed_transition_trace_gap_count": executed_transition_trace_gap_count,
+        "stage_transition_receipt_mismatch_count": (
+            stage_transition_receipt_mismatch_count
+        ),
+        "phantom_receipt_ref_count": phantom_receipt_ref_count,
+        "synthetic_source_epoch_ref_count": synthetic_source_epoch_ref_count,
+        "synthetic_override_mutation_count": synthetic_override_mutation_count,
         "runtime_effect_authorized": False,
         "order_release_authorized": False,
     }

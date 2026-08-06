@@ -242,10 +242,7 @@ def _inputs(
         parameter_value_refs=bundle.parameter_value_refs,
         resolved_parameter_values=bundle.resolved_parameter_values,
         source_epoch_refs=bundle.source_epoch_refs,
-        receipt_lineage_refs=(
-            bundle.preflight_receipt_ref,
-            owner_action.receipt_ref,
-        ),
+        receipt_lineage_refs=(owner_action.receipt_ref,),
         readiness_state_ref="READINESS::D::CURRENT",
         pretrade_state_ref="PRETRADE1::TRADE-CANDIDATE",
         owner_action_policy_ref="OWNER-ACTION-POLICY::CURRENT",
@@ -589,36 +586,42 @@ def test_policy_outcomes_are_typed_fail_closed_and_never_activate() -> None:
             ),
             AllowCandidateStateV1.EVIDENCE_UNAVAILABLE,
             "T03",
+            ("T03",),
             (ReasonCode.EVIDENCE_UNAVAILABLE_F_NOT_IMPLEMENTED,),
         ),
         (
             _inputs(owner_confirmation=False),
             AllowCandidateStateV1.OWNER_CONFIRMATION_REQUIRED,
             "T06",
+            ("T08", "T09", "T06"),
             (ReasonCode.OWNER_CONFIRMATION_REQUIRED,),
         ),
         (
             _inputs(),
             AllowCandidateStateV1.ELIGIBLE_NOT_ACTIVATED,
             "T07",
+            ("T08", "T09", "T07"),
             (ReasonCode.ALLOW_ELIGIBLE_NOT_ACTIVATED,),
         ),
         (
             _inputs(kill_active=True),
             AllowCandidateStateV1.BLOCKED,
             "T05",
+            ("T05",),
             (ReasonCode.KILL_OR_SUBMIT_DISABLED,),
         ),
         (
             _inputs(submit_disabled=True),
             AllowCandidateStateV1.BLOCKED,
             "T05",
+            ("T05",),
             (ReasonCode.KILL_OR_SUBMIT_DISABLED,),
         ),
         (
             _inputs(latency_profile=False),
             AllowCandidateStateV1.BLOCKED,
             "T04",
+            ("T04",),
             (
                 ReasonCode.POLICY_OR_SNAPSHOT_STALE,
                 ReasonCode.LATENCY_PROFILE_REQUIRED,
@@ -630,6 +633,7 @@ def test_policy_outcomes_are_typed_fail_closed_and_never_activate() -> None:
             ),
             AllowCandidateStateV1.BLOCKED,
             "T04",
+            ("T04",),
             (
                 ReasonCode.POLICY_OR_SNAPSHOT_STALE,
                 ReasonCode.EVIDENCE_REFERENCE_UNAVAILABLE_STALE_CONFLICTING_OR_SCOPE_MISMATCH,
@@ -639,19 +643,30 @@ def test_policy_outcomes_are_typed_fail_closed_and_never_activate() -> None:
             _inputs(valid_until_delta=timedelta(minutes=-1)),
             AllowCandidateStateV1.BLOCKED,
             "T05",
+            ("T05",),
             (
                 ReasonCode.KILL_OR_SUBMIT_DISABLED,
                 ReasonCode.KILL_SUBMIT_DISABLED_OR_SAFETY_BLOCK,
             ),
         ),
     )
-    for inputs, expected_state, expected_transition_id, expected_reasons in cases:
+    for (
+        inputs,
+        expected_state,
+        expected_transition_id,
+        expected_trace,
+        expected_reasons,
+    ) in cases:
         result = evaluate_mode_snapshot_candidate(inputs)
         decision = result.mode_snapshot_decision
         proposal = result.snapshot_transition_proposal
         assert decision.allow_candidate_state is expected_state
         assert decision.reason_codes == expected_reasons
         assert proposal.transition_id == expected_transition_id
+        assert tuple(
+            row.transition_id for row in result.executed_transition_trace.proposals
+        ) == expected_trace
+        assert result.executed_transition_trace.final_proposal is proposal
         assert decision.runtime_effect_authorized is False
         assert decision.active_pointer_commit_allowed is False
         assert decision.order_release_authorized is False
@@ -793,35 +808,22 @@ def test_pretrade_no_trade_routes_before_any_d_body_access(
         owner_registry=owner_registry,
     )
 
-    class _GateThenExplode:
-        late_calls = 0
+    late_calls = 0
 
-        def __init__(self, registry: ExistingOwnerContractRegistryV1) -> None:
-            self.owner_registry = registry
+    def _forbid_enrichment(_self: object, *_args: object) -> object:
+        nonlocal late_calls
+        late_calls += 1
+        raise AssertionError("late D owner/bundle resolution ran after T05")
 
-        def resolve_mode_snapshot_preconstruction_gate(self, *args: object):
-            return current_resolver.resolve_mode_snapshot_preconstruction_gate(*args)
-
-        def enrich_mode_snapshot_candidate(self, *_args: object):
-            self.late_calls += 1
-            raise AssertionError("late D owner/bundle resolution ran after T05")
-
-    gate_probe = _GateThenExplode(owner_registry)
+    monkeypatch.setattr(
+        CurrentModeSnapshotInputResolverV1,
+        "enrich_mode_snapshot_candidate",
+        _forbid_enrichment,
+    )
     def _forbid_hotpath_file_read(*_args: object, **_kwargs: object) -> str:
         raise AssertionError("repository file read entered the T05 HOTPATH")
 
     monkeypatch.setattr(Path, "read_text", _forbid_hotpath_file_read)
-    injected_service = QKUComputationControlPlaneV1(
-        owner_registry,
-        agent_capability_resolver=_KillAdmission(),
-        mode_snapshot_input_resolver=gate_probe,
-    )
-    injected_response = injected_service.submit_candidate_proposal(
-        _KillBodyProbe()  # type: ignore[arg-type]
-    )
-    assert injected_response.status is OperationStatusV1.BLOCKED
-    assert gate_probe.late_calls == 0
-
     kill_service = QKUComputationControlPlaneV1(
         owner_registry,
         agent_capability_resolver=_KillAdmission(),
@@ -831,6 +833,7 @@ def test_pretrade_no_trade_routes_before_any_d_body_access(
         _KillBodyProbe()  # type: ignore[arg-type]
     )
     assert blocked_response.status is OperationStatusV1.BLOCKED
+    assert late_calls == 0
     assert blocked_response.proposal.mode_snapshot_result is not None
     assert (
         blocked_response.proposal.mode_snapshot_result.snapshot_candidate_or_explicit_absence
@@ -839,6 +842,10 @@ def test_pretrade_no_trade_routes_before_any_d_body_access(
     assert blocked_response.proposal.mode_snapshot_result.mode_snapshot_decision.reason_codes == (
         ReasonCode.KILL_OR_SUBMIT_DISABLED,
     )
+    assert tuple(
+        row.transition_id
+        for row in blocked_response.proposal.mode_snapshot_result.executed_transition_trace.proposals
+    ) == ("T05",)
 
 
 def test_non_d_public_contract_and_existing_source_owners_remain_bounded() -> None:

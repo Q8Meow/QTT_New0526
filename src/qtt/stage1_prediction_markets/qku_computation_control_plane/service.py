@@ -48,6 +48,8 @@ from .mode_snapshot_policy import (
     ModeSnapshotPreconstructionGateV1,
     evaluate_mode_snapshot_candidate,
     evaluate_mode_snapshot_preconstruction_gate,
+    finalize_mode_snapshot_latency_block,
+    pre_f_unavailable_reference,
 )
 from .identity_adapter import RP5CIdentityAdapterV1
 from .persistence import PersistenceAdapterV1, PersistenceAvailabilityV1
@@ -60,6 +62,7 @@ from .protocols import (
 )
 from .input_resolver import (
     CanonicalOwnerPacketRegistryV1,
+    CurrentModeSnapshotInputResolverV1,
     FormulaInputResolverV1,
 )
 from .models import (
@@ -560,6 +563,23 @@ def _admit_agent_request(
     raise AuthorityDeniedError(reason, decision.decision_id)
 
 
+def _require_current_mode_snapshot_resolver(
+    service: "QKUComputationControlPlaneV1",
+) -> CurrentModeSnapshotInputResolverV1:
+    resolver = service.mode_snapshot_input_resolver
+    if type(resolver) is not CurrentModeSnapshotInputResolverV1:
+        raise OwnerAdapterError(
+            ReasonCode.OWNER_DATA_MALFORMED,
+            "current production D requires the exact canonical current resolver",
+        )
+    if resolver.owner_registry is not service.owner_registry:
+        raise OwnerAdapterError(
+            ReasonCode.OWNER_DATA_MALFORMED,
+            "D resolver and service must share one immutable owner registry",
+        )
+    return resolver
+
+
 def _submit_mode_snapshot_candidate(
     self,
     request: SubmitCandidateProposalRequestV1,
@@ -569,18 +589,7 @@ def _submit_mode_snapshot_candidate(
 ) -> SubmitCandidateProposalResponseV1:
     """Gate-first D body with one bounded full-latency finalization."""
 
-    resolver = self.mode_snapshot_input_resolver
-    if resolver is None or not isinstance(resolver, ModeSnapshotCandidateInputProtocolV1):
-        raise OwnerAdapterError(
-            ReasonCode.OWNER_DATA_MISSING,
-            "D requires the exact gate-first input resolver protocol",
-        )
-    resolver_registry = getattr(resolver, "owner_registry", self.owner_registry)
-    if resolver_registry is not self.owner_registry:
-        raise OwnerAdapterError(
-            ReasonCode.OWNER_DATA_MALFORMED,
-            "D resolver and service must share one immutable owner registry",
-        )
+    resolver = _require_current_mode_snapshot_resolver(self)
     stage_values = {
         name: 0
         for name in (
@@ -617,6 +626,20 @@ def _submit_mode_snapshot_candidate(
         raise ContractValidationError(
             ReasonCode.IDENTITY_OR_VERSION_UNRESOLVED,
             "D preconstruction gate does not bind the admitted request and task",
+        )
+    causation_id, correlation_id = (
+        capability_decision.st12c_causation_correlation_refs[:2]
+    )
+    canonical_pre_f_evidence = pre_f_unavailable_reference(
+        observed_at=request.context.as_of,
+        valid_until=request.context.as_of + request.context.maximum_age,
+        causation_id=causation_id,
+        correlation_id=correlation_id,
+    )
+    if gate.evidence_reference != canonical_pre_f_evidence:
+        raise OwnerAdapterError(
+            ReasonCode.OWNER_DATA_MALFORMED,
+            "current production D gate must retain the canonical pre-F unavailable evidence",
         )
 
     candidate_started = local_duration_now_ns()
@@ -796,12 +819,12 @@ def _submit_mode_snapshot_candidate(
         and latency_decision.promotion_sensitive_allow_blocked
         and not latency_already_terminal
     ):
-        # Pass 2: rebuild the terminal latency-blocked surfaces once. Durations
-        # accumulate monotonically and eligibility is never re-opened.
-        assert inputs is not None
-        inputs = replace(inputs, latency_profile_present=False)
+        # Pass 2: preserve the executed build/validation rows and replace only
+        # the final decision transition before rebuilding its surfaces once.
         candidate_started = local_duration_now_ns()
-        mode_snapshot_result = evaluate_mode_snapshot_candidate(inputs)
+        mode_snapshot_result = finalize_mode_snapshot_latency_block(
+            mode_snapshot_result
+        )
         stage_values["snapshot_candidate_resolution_ns"] += (
             local_duration_now_ns() - candidate_started
         )

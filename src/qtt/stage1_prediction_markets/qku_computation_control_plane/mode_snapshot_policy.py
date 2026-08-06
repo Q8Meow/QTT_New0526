@@ -15,6 +15,7 @@ from .errors import ContractValidationError, ReasonCode
 from .models import (
     ActivationPreconditionStateV1,
     AllowCandidateStateV1,
+    ExecutedModeSnapshotTransitionTraceV1,
     FormulaRuntimeSnapshotCandidateV1,
     ImplementationVersionPinV1,
     KillStateV1,
@@ -32,6 +33,7 @@ from .models import (
     ST12FEvidenceReferenceV1,
     ST12FEvidenceStateV1,
     SubmitDisabledStateV1,
+    validate_reference_identity_classes,
 )
 from .stack_resolver import RegisteredSnapshotComputationBundleV1
 
@@ -281,12 +283,25 @@ class ModeSnapshotPreconstructionGateV1:
             type(self.evidence_reference) is not ST12FEvidenceReferenceV1
             or type(self.kill_submit_state) is not ReadOnlyKillSubmitStateV1
             or self.kill_submit_state.scope_ref != self.context_ref
-            or self.kill_submit_state.state_ref not in self.receipt_lineage_refs
         ):
             raise ContractValidationError(
                 ReasonCode.INPUT_PACKET_MISMATCH,
                 "preconstruction gate does not bind the exact safety/evidence state",
             )
+        validate_reference_identity_classes(
+            policy_refs=(
+                self.evidence_reference.policy_version,
+                self.kill_submit_state.policy_version,
+            ),
+            source_epoch_refs=self.source_epoch_refs,
+            receipt_refs=self.receipt_lineage_refs,
+            candidate_or_decision_refs=(self.capability_decision_ref,),
+            explicit_absence_refs=(
+                (self.evidence_reference.evidence_ref,)
+                if self.evidence_reference.evidence_ref == EXPLICIT_ABSENCE
+                else ()
+            ),
+        )
         for name in ("evaluated_at", "expires_at"):
             value = getattr(self, name)
             if (
@@ -459,12 +474,51 @@ class ModeSnapshotCandidateInputsV1:
             or self.source_epoch_refs != bundle.source_epoch_refs
             or self.owner_action_policy_ref != owner_action.owner_action_policy_ref
             or owner_action.receipt_ref not in self.receipt_lineage_refs
-            or bundle.preflight_receipt_ref not in self.receipt_lineage_refs
         ):
             raise ContractValidationError(
                 ReasonCode.PARAMETER_POLICY_OR_PIN_INVALID,
                 "mode snapshot inputs do not bind the exact bundle and owner receipts",
             )
+        validate_reference_identity_classes(
+            policy_refs=tuple(
+                dict.fromkeys(
+                    (
+                        self.parameter_policy_snapshot_ref,
+                        self.owner_action_policy_ref,
+                        *(row.policy_ref for row in self.resolved_parameter_values),
+                    )
+                )
+            ),
+            semantic_policy_set_versions=tuple(
+                dict.fromkeys(
+                    row.parameter_policy_set_version
+                    for row in self.resolved_parameter_values
+                )
+            ),
+            source_snapshot_refs=tuple(
+                dict.fromkeys(
+                    (
+                        self.readiness_state_ref,
+                        self.pretrade_state_ref,
+                        self.expected_owner_state_ref,
+                        *(
+                            (self.evidence_reference.evidence_ref,)
+                            if self.evidence_reference.evidence_ref
+                            != EXPLICIT_ABSENCE
+                            else ()
+                        ),
+                    )
+                )
+            ),
+            source_epoch_refs=self.source_epoch_refs,
+            receipt_refs=self.receipt_lineage_refs,
+            candidate_or_decision_refs=(self.capability_decision_ref,),
+            explicit_absence_refs=(
+                (self.evidence_reference.evidence_ref,)
+                if self.evidence_reference.evidence_ref == EXPLICIT_ABSENCE
+                else ()
+            ),
+        )
 
     @property
     def all_four_computability_dimensions_closed(self) -> bool:
@@ -653,6 +707,7 @@ def evaluate_mode_snapshot_preconstruction_gate(
         snapshot_candidate_or_explicit_absence=None,
         mode_snapshot_decision=decision,
         snapshot_transition_proposal=proposal,
+        executed_transition_trace=ExecutedModeSnapshotTransitionTraceV1((proposal,)),
         control_receipt_refs=(),
     )
 
@@ -945,9 +1000,62 @@ def evaluate_mode_snapshot_candidate(
             "mode snapshot evaluation requires exact typed resolved inputs",
         )
     decision_state = _preconstruction_decision_state(inputs)
-    candidate = None
+    built_candidate: FormulaRuntimeSnapshotCandidateV1 | None = None
+    candidate: FormulaRuntimeSnapshotCandidateV1 | None = None
+    stage_proposals: tuple[SnapshotTransitionProposalV1, ...] = ()
     if decision_state is None:
-        candidate = build_snapshot_candidate(inputs)
+        built_candidate = construct_snapshot_candidate(inputs)
+        candidate = validate_snapshot_candidate(built_candidate, inputs)
+        build_proposal = build_snapshot_transition_proposal(
+            proposal_id=f"SNAPSHOT-TRANSITION::{inputs.request_id}::T08",
+            request_id=inputs.request_id,
+            principal_id=inputs.principal_id,
+            task_id=inputs.task_id,
+            capability_decision_ref=inputs.capability_decision_ref,
+            context_ref=inputs.context_ref,
+            source_candidate_ref_or_explicit_absence=EXPLICIT_ABSENCE,
+            target_candidate_ref=built_candidate.snapshot_candidate_id,
+            source_candidate_version_or_explicit_absence=EXPLICIT_ABSENCE,
+            target_candidate_version=inputs.candidate_version,
+            transition_id="T08",
+            expected_owner_state_ref=inputs.expected_owner_state_ref,
+            precondition_receipt_refs=inputs.receipt_lineage_refs,
+            proposed_state=SnapshotCandidateStateV1.BUILT_IMMUTABLE,
+            causation_id=inputs.causation_id,
+            correlation_id=inputs.correlation_id,
+        )
+        validation_transition_id = (
+            "T10"
+            if candidate.candidate_state is SnapshotCandidateStateV1.REJECTED
+            else "T09"
+        )
+        validation_proposal = build_snapshot_transition_proposal(
+            proposal_id=(
+                f"SNAPSHOT-TRANSITION::{inputs.request_id}::{validation_transition_id}"
+            ),
+            request_id=inputs.request_id,
+            principal_id=inputs.principal_id,
+            task_id=inputs.task_id,
+            capability_decision_ref=inputs.capability_decision_ref,
+            context_ref=inputs.context_ref,
+            source_candidate_ref_or_explicit_absence=candidate.snapshot_candidate_id,
+            target_candidate_ref=candidate.snapshot_candidate_id,
+            source_candidate_version_or_explicit_absence=inputs.candidate_version,
+            target_candidate_version=inputs.candidate_version,
+            transition_id=validation_transition_id,
+            expected_owner_state_ref=inputs.expected_owner_state_ref,
+            precondition_receipt_refs=inputs.receipt_lineage_refs,
+            proposed_state=candidate.candidate_state,
+            diagnostic_reason_codes=tuple(
+                reason
+                for reason in candidate.reason_codes
+                if reason
+                is not TRANSITION_BY_ID[validation_transition_id].reason_code
+            ),
+            causation_id=inputs.causation_id,
+            correlation_id=inputs.correlation_id,
+        )
+        stage_proposals = (build_proposal, validation_proposal)
         decision_state = _postconstruction_decision_state(inputs, candidate)
     (
         eligibility,
@@ -1016,59 +1124,132 @@ def evaluate_mode_snapshot_candidate(
             inputs.latency_measurement_ref_or_explicit_absence
         ),
     )
-    predecessor_proposals = (
-        (
-            inputs.owner_action_confirmation.predecessor_transition_receipt_proposal_or_explicit_absence,
+    if rule.transition_id == "T10":
+        transition = stage_proposals[-1]
+    else:
+        predecessor_proposals = (
+            (
+                inputs.owner_action_confirmation.predecessor_transition_receipt_proposal_or_explicit_absence,
+            )
+            if rule.transition_id == "T07"
+            else ()
         )
-        if rule.transition_id == "T07"
-        else ()
+        transition = build_snapshot_transition_proposal(
+            proposal_id=(
+                f"SNAPSHOT-TRANSITION::{inputs.request_id}::{rule.transition_id}"
+            ),
+            request_id=inputs.request_id,
+            principal_id=inputs.principal_id,
+            task_id=inputs.task_id,
+            capability_decision_ref=inputs.capability_decision_ref,
+            context_ref=inputs.context_ref,
+            source_candidate_ref_or_explicit_absence=(
+                candidate.snapshot_candidate_id
+                if candidate is not None
+                else EXPLICIT_ABSENCE
+            ),
+            target_candidate_ref=(
+                candidate.snapshot_candidate_id
+                if candidate is not None
+                else EXPLICIT_ABSENCE
+            ),
+            source_candidate_version_or_explicit_absence=(
+                inputs.candidate_version
+                if candidate is not None
+                else EXPLICIT_ABSENCE
+            ),
+            target_candidate_version=inputs.candidate_version,
+            transition_id=rule.transition_id,
+            expected_owner_state_ref=inputs.expected_owner_state_ref,
+            precondition_receipt_refs=inputs.receipt_lineage_refs,
+            predecessor_transition_receipt_proposals=predecessor_proposals,
+            proposed_state=allow_state,
+            diagnostic_reason_codes=tuple(
+                reason for reason in decision_reasons if reason is not rule.reason_code
+            ),
+            causation_id=inputs.causation_id,
+            correlation_id=inputs.correlation_id,
+        )
+    trace_proposals = (
+        stage_proposals
+        if rule.transition_id == "T10"
+        else (*stage_proposals, transition)
     )
-    transition = build_snapshot_transition_proposal(
-        proposal_id=f"SNAPSHOT-TRANSITION::{inputs.request_id}",
-        request_id=inputs.request_id,
-        principal_id=inputs.principal_id,
-        task_id=inputs.task_id,
-        capability_decision_ref=inputs.capability_decision_ref,
-        context_ref=inputs.context_ref,
-        source_candidate_ref_or_explicit_absence=(
-            candidate.snapshot_candidate_id
-            if snapshot_for_result is not None
-            else EXPLICIT_ABSENCE
-        ),
-        target_candidate_ref=(
-            candidate.snapshot_candidate_id
-            if candidate is not None
-            else EXPLICIT_ABSENCE
-        ),
-        source_candidate_version_or_explicit_absence=(
-            inputs.candidate_version
-            if snapshot_for_result is not None
-            else EXPLICIT_ABSENCE
-        ),
-        target_candidate_version=inputs.candidate_version,
-        transition_id=rule.transition_id,
-        expected_owner_state_ref=inputs.expected_owner_state_ref,
-        precondition_receipt_refs=(
-            *inputs.receipt_lineage_refs,
-            inputs.owner_action_policy_ref,
-        ),
-        predecessor_transition_receipt_proposals=predecessor_proposals,
-        proposed_state=(
-            candidate.candidate_state
-            if rule.transition_id == "T10" and candidate is not None
-            else allow_state
-        ),
-        diagnostic_reason_codes=tuple(
-            reason for reason in decision_reasons if reason is not rule.reason_code
-        ),
-        causation_id=inputs.causation_id,
-        correlation_id=inputs.correlation_id,
-    )
+    trace = ExecutedModeSnapshotTransitionTraceV1(trace_proposals)
     return ModeSnapshotCandidateProposalResultV1(
         snapshot_candidate_or_explicit_absence=snapshot_for_result,
         mode_snapshot_decision=decision,
         snapshot_transition_proposal=transition,
+        executed_transition_trace=trace,
         control_receipt_refs=(),
+    )
+
+
+def finalize_mode_snapshot_latency_block(
+    result: ModeSnapshotCandidateProposalResultV1,
+) -> ModeSnapshotCandidateProposalResultV1:
+    """Replace only the final decision row after full local latency adjudication."""
+
+    if (
+        type(result) is not ModeSnapshotCandidateProposalResultV1
+        or result.snapshot_candidate_or_explicit_absence is None
+        or tuple(
+            row.transition_id
+            for row in result.executed_transition_trace.proposals[:2]
+        )
+        != ("T08", "T09")
+        or result.executed_transition_trace.final_proposal.transition_id
+        not in {"T06", "T07"}
+    ):
+        raise ContractValidationError(
+            ReasonCode.CONTRACT_OR_TYPE_INVALID,
+            "latency finalization requires one validated T08/T09 candidate trace",
+        )
+    candidate = result.snapshot_candidate_or_explicit_absence
+    previous = result.executed_transition_trace.final_proposal
+    rule = TRANSITION_BY_ID["T04"]
+    decision = replace(
+        result.mode_snapshot_decision,
+        mode_eligibility_state=ModeEligibilityState.INELIGIBLE,
+        allow_candidate_state=AllowCandidateStateV1.BLOCKED,
+        activation_precondition_state=(
+            ActivationPreconditionStateV1.PRECONDITIONS_INCOMPLETE
+        ),
+        reason_codes=(rule.reason_code, ReasonCode.LATENCY_PROFILE_REQUIRED),
+        fallback_route=rule.terminal_route,
+        owner_review_route="CURRENT_INPUT_OWNER_REVALIDATION",
+    )
+    transition = build_snapshot_transition_proposal(
+        proposal_id=f"SNAPSHOT-TRANSITION::{previous.request_id}::T04",
+        request_id=previous.request_id,
+        principal_id=previous.principal_id,
+        task_id=previous.task_id,
+        capability_decision_ref=previous.capability_decision_ref,
+        context_ref=previous.context_ref,
+        source_candidate_ref_or_explicit_absence=candidate.snapshot_candidate_id,
+        target_candidate_ref=candidate.snapshot_candidate_id,
+        source_candidate_version_or_explicit_absence=previous.target_candidate_version,
+        target_candidate_version=previous.target_candidate_version,
+        transition_id="T04",
+        expected_owner_state_ref=previous.expected_owner_state_ref,
+        precondition_receipt_refs=previous.precondition_receipt_refs,
+        proposed_state=AllowCandidateStateV1.BLOCKED,
+        diagnostic_reason_codes=(ReasonCode.LATENCY_PROFILE_REQUIRED,),
+        causation_id=previous.causation_id,
+        correlation_id=previous.correlation_id,
+    )
+    trace = ExecutedModeSnapshotTransitionTraceV1(
+        (*result.executed_transition_trace.proposals[:2], transition)
+    )
+    return replace(
+        result,
+        mode_snapshot_decision=decision,
+        snapshot_transition_proposal=transition,
+        executed_transition_trace=trace,
+        owner_projection_or_explicit_absence=None,
+        latency_measurement_or_explicit_absence=None,
+        control_receipt_refs=(),
+        control_receipt_proposals=(),
     )
 
 
