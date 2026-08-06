@@ -10,7 +10,11 @@ from typing import Mapping
 
 from .context import exact_decimal, parse_utc
 from .errors import ContractValidationError, ReasonCode
-from .models import ComputationExecutionReceiptV1
+from .models import (
+    ComputationExecutionReceiptV1,
+    ModeSnapshotCandidateProposalResultV1,
+    SnapshotCandidateStateV1,
+)
 
 
 def _required(value: object, name: str) -> None:
@@ -83,6 +87,17 @@ class EconomicRecordTypeV1(StrEnum):
     RECONCILIATION_BREAK = "RECONCILIATION_BREAK"
     ORDER_INTENT = "ORDER_INTENT"
     EXECUTION_CUSTODY = "EXECUTION_CUSTODY"
+    MODE_SNAPSHOT_CONTROL = "MODE_SNAPSHOT_CONTROL"
+
+
+class ModeSnapshotControlClassV1(StrEnum):
+    MODE_SNAPSHOT_EVALUATION = "MODE_SNAPSHOT_EVALUATION"
+    SNAPSHOT_CANDIDATE_BUILD = "SNAPSHOT_CANDIDATE_BUILD"
+    SNAPSHOT_CANDIDATE_VALIDATION = "SNAPSHOT_CANDIDATE_VALIDATION"
+    SNAPSHOT_PINNING = "SNAPSHOT_PINNING"
+    SNAPSHOT_ROLLBACK_PROPOSAL = "SNAPSHOT_ROLLBACK_PROPOSAL"
+    SNAPSHOT_STALE_OR_RETIREMENT = "SNAPSHOT_STALE_OR_RETIREMENT"
+    LATENCY_MEASUREMENT = "LATENCY_MEASUREMENT"
 
 
 ECONOMIC_RECORD_PAYLOAD_CLASS: Mapping[EconomicRecordTypeV1, tuple[str, str]] = MappingProxyType(
@@ -98,6 +113,10 @@ ECONOMIC_RECORD_PAYLOAD_CLASS: Mapping[EconomicRecordTypeV1, tuple[str, str]] = 
         EconomicRecordTypeV1.RECONCILIATION_BREAK: ("accounting", "ReconciliationBreakReceiptV1"),
         EconomicRecordTypeV1.ORDER_INTENT: ("lifecycle", "OrderIntentRecordV1"),
         EconomicRecordTypeV1.EXECUTION_CUSTODY: ("lifecycle", "ExecutionCustodyReceiptV1"),
+        EconomicRecordTypeV1.MODE_SNAPSHOT_CONTROL: (
+            "receipts",
+            "ModeSnapshotControlReceiptRecordV1",
+        ),
     }
 )
 
@@ -196,6 +215,247 @@ class DurableComputationExecutionReceiptRecordV1:
             raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "completed_at precedes started_at")
         object.__setattr__(self, "started_at", started)
         object.__setattr__(self, "completed_at", completed)
+
+
+@dataclass(frozen=True, slots=True)
+class ModeSnapshotControlReceiptRecordV1:
+    """One typed D control payload carried by the existing receipt spine."""
+
+    control_receipt_id: str
+    control_class: ModeSnapshotControlClassV1
+    request_id: str
+    task_id: str
+    principal_id: str
+    capability_decision_ref: str
+    context_ref: str
+    snapshot_candidate_ref_or_explicit_absence: str
+    mode_snapshot_decision_ref: str
+    transition_proposal_ref: str
+    transition_id: str
+    source_state: str
+    destination_state: str
+    target_candidate_version: str
+    implementation_pin_refs: tuple[str, ...]
+    parameter_value_refs: tuple[str, ...]
+    source_epoch_refs: tuple[str, ...]
+    predecessor_transition_receipt_refs: tuple[str, ...]
+    state_before_refs: tuple[str, ...]
+    state_after_refs: tuple[str, ...]
+    typed_reason_codes: tuple[ReasonCode, ...]
+    fallback_route: str
+    owner_review_route: str
+    latency_measurement_ref_or_explicit_absence: str
+    owner_action_policy_ref: str
+    no_mutation_flag: bool = True
+    no_activation_flag: bool = True
+    no_order_authority_flag: bool = True
+
+    def __post_init__(self) -> None:
+        for name in (
+            "control_receipt_id",
+            "request_id",
+            "task_id",
+            "principal_id",
+            "capability_decision_ref",
+            "context_ref",
+            "snapshot_candidate_ref_or_explicit_absence",
+            "mode_snapshot_decision_ref",
+            "transition_proposal_ref",
+            "transition_id",
+            "source_state",
+            "destination_state",
+            "target_candidate_version",
+            "fallback_route",
+            "owner_review_route",
+            "latency_measurement_ref_or_explicit_absence",
+            "owner_action_policy_ref",
+        ):
+            _required(getattr(self, name), name)
+        if type(self.control_class) is not ModeSnapshotControlClassV1:
+            raise ContractValidationError(
+                ReasonCode.CONTRACT_OR_TYPE_INVALID,
+                "control_class must use the single D control-class enum",
+            )
+        for name in ("implementation_pin_refs", "parameter_value_refs"):
+            _identifier_tuple(getattr(self, name), name)
+        _identifier_tuple(
+            self.predecessor_transition_receipt_refs,
+            "predecessor_transition_receipt_refs",
+        )
+        for name in ("source_epoch_refs", "state_before_refs", "state_after_refs"):
+            _identifier_tuple(getattr(self, name), name, allow_empty=False)
+        if (
+            not isinstance(self.typed_reason_codes, tuple)
+            or not self.typed_reason_codes
+            or any(type(reason) is not ReasonCode for reason in self.typed_reason_codes)
+            or len(self.typed_reason_codes) != len(set(self.typed_reason_codes))
+        ):
+            raise ContractValidationError(
+                ReasonCode.CONTRACT_OR_TYPE_INVALID,
+                "typed_reason_codes must be a nonempty unique ReasonCode tuple",
+            )
+        if (
+            self.no_mutation_flag is not True
+            or self.no_activation_flag is not True
+            or self.no_order_authority_flag is not True
+        ):
+            raise ContractValidationError(
+                ReasonCode.ORDER_RELEASE_FORBIDDEN,
+                "D control receipts must retain no-mutation/no-activation/no-order authority",
+            )
+
+
+def materialize_mode_snapshot_control_receipts(
+    result: ModeSnapshotCandidateProposalResultV1,
+    *,
+    parameter_value_refs: tuple[str, ...],
+    effective_at: datetime | str,
+    recorded_at: datetime | str,
+    traceparent: str,
+    tracestate: str,
+) -> tuple[EconomicReceiptEventSpineV1, ...]:
+    """Materialize only the D stages that were actually executed."""
+
+    if type(result) is not ModeSnapshotCandidateProposalResultV1:
+        raise ContractValidationError(
+            ReasonCode.CONTRACT_OR_TYPE_INVALID,
+            "D receipt materialization requires an exact proposal result",
+        )
+    _identifier_tuple(parameter_value_refs, "parameter_value_refs")
+    decision = result.mode_snapshot_decision
+    trace = result.executed_transition_trace
+    proposal = trace.final_proposal
+    candidate = result.snapshot_candidate_or_explicit_absence
+    candidate_ref = (
+        candidate.snapshot_candidate_id
+        if candidate is not None
+        else proposal.target_candidate_ref
+        if decision.snapshot_candidate_state is not SnapshotCandidateStateV1.ABSENT
+        else "EXPLICIT_ABSENCE"
+    )
+    implementation_refs = tuple(
+        f"{pin.math_spec_id}::{pin.implementation_id}"
+        for pin in decision.implementation_pins
+    )
+    proposal_by_transition_id = {
+        row.transition_id: row for row in trace.proposals
+    }
+    stage_proposals = [
+        (ModeSnapshotControlClassV1.MODE_SNAPSHOT_EVALUATION, proposal),
+    ]
+    if "T08" in proposal_by_transition_id:
+        stage_proposals.append(
+            (
+                ModeSnapshotControlClassV1.SNAPSHOT_CANDIDATE_BUILD,
+                proposal_by_transition_id["T08"],
+            )
+        )
+    validation_proposal = next(
+        (
+            proposal_by_transition_id[transition_id]
+            for transition_id in ("T09", "T10")
+            if transition_id in proposal_by_transition_id
+        ),
+        None,
+    )
+    if validation_proposal is not None:
+        stage_proposals.append(
+            (
+                ModeSnapshotControlClassV1.SNAPSHOT_CANDIDATE_VALIDATION,
+                validation_proposal,
+            )
+        )
+    stage_proposal_tuple = tuple(stage_proposals)
+    suffix_by_class = {
+        ModeSnapshotControlClassV1.MODE_SNAPSHOT_EVALUATION: "EVALUATION",
+        ModeSnapshotControlClassV1.SNAPSHOT_CANDIDATE_BUILD: "BUILD",
+        ModeSnapshotControlClassV1.SNAPSHOT_CANDIDATE_VALIDATION: "VALIDATION",
+    }
+    expected_refs = tuple(
+        f"MODE-SNAPSHOT-CONTROL::{decision.request_id}::{suffix_by_class[row]}"
+        for row, _proposal in stage_proposal_tuple
+    )
+    if result.control_receipt_refs and result.control_receipt_refs != expected_refs:
+        raise ContractValidationError(
+            ReasonCode.CONTRACT_OR_TYPE_INVALID,
+            "D result/control receipt identities differ from executed stages",
+        )
+    rows: list[EconomicReceiptEventSpineV1] = []
+    from .mode_snapshot_policy import TRANSITION_BY_ID
+
+    for index, (receipt_ref, (control_class, stage_proposal)) in enumerate(
+        zip(expected_refs, stage_proposal_tuple, strict=True)
+    ):
+        stage_rule = TRANSITION_BY_ID[stage_proposal.transition_id]
+        payload = ModeSnapshotControlReceiptRecordV1(
+            control_receipt_id=receipt_ref,
+            control_class=control_class,
+            request_id=decision.request_id,
+            task_id=decision.task_id,
+            principal_id=decision.principal_id,
+            capability_decision_ref=decision.capability_decision_ref,
+            context_ref=decision.context_ref,
+            snapshot_candidate_ref_or_explicit_absence=candidate_ref,
+            mode_snapshot_decision_ref=decision.decision_id,
+            transition_proposal_ref=stage_proposal.proposal_id,
+            transition_id=stage_proposal.transition_id,
+            source_state=stage_proposal.source_state,
+            destination_state=stage_proposal.destination_state,
+            target_candidate_version=stage_proposal.target_candidate_version,
+            implementation_pin_refs=implementation_refs,
+            parameter_value_refs=parameter_value_refs,
+            source_epoch_refs=decision.source_epoch_refs,
+            predecessor_transition_receipt_refs=(
+                stage_proposal.predecessor_transition_receipt_refs
+            ),
+            state_before_refs=tuple(
+                dict.fromkeys(
+                    (
+                        stage_proposal.source_state,
+                        stage_proposal.expected_owner_state_ref,
+                        stage_proposal.source_candidate_ref_or_explicit_absence,
+                        *stage_proposal.predecessor_transition_receipt_refs,
+                    )
+                )
+            ),
+            state_after_refs=tuple(
+                dict.fromkeys(
+                    (
+                        stage_proposal.destination_state,
+                        stage_proposal.target_candidate_ref,
+                    )
+                )
+            ),
+            typed_reason_codes=stage_proposal.typed_reason_codes,
+            fallback_route=stage_rule.terminal_route,
+            owner_review_route=decision.owner_review_route,
+            latency_measurement_ref_or_explicit_absence=(
+                decision.latency_measurement_ref_or_explicit_absence
+            ),
+            owner_action_policy_ref=decision.owner_action_policy_ref,
+        )
+        rows.append(
+            EconomicReceiptEventSpineV1(
+                record_id=receipt_ref,
+                record_type=EconomicRecordTypeV1.MODE_SNAPSHOT_CONTROL,
+                schema_version="ST12D_MODE_SNAPSHOT_CONTROL_V1",
+                semantic_owner="QKUComputationControlPlaneV1",
+                implementation_owner="QKUComputationControlPlaneV1",
+                context_ref=decision.context_ref,
+                effective_at=effective_at,
+                recorded_at=recorded_at,
+                causation_id=stage_proposal.causation_id,
+                correlation_id=stage_proposal.correlation_id,
+                traceparent=traceparent,
+                tracestate=tracestate,
+                sequence=index,
+                aggregate_id=f"MODE-SNAPSHOT::{decision.request_id}",
+                aggregate_version=index,
+                authority_class="NO_EFFECT_MODE_SNAPSHOT_CONTROL_ONLY",
+                typed_payload=payload,
+            )
+        )
+    return tuple(rows)
 
 
 @dataclass(frozen=True, slots=True)

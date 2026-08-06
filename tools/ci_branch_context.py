@@ -148,6 +148,7 @@ OWNER_AUTHORIZED_VALIDATION_BRANCHES = frozenset(
         "agent/st12b-contextual-computability-v3",
         "agent/st12c-deterministic-receipts-accounting-v1",
         "agent/st12e-capability-guard",
+        "agent/st12d-mode-snapshot-boundary",
     }
 )
 IDEMPOTENCE_RUNTIME_CONTAINMENT_HARDENING_BRANCH = (

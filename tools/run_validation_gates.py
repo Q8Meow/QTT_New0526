@@ -5366,6 +5366,8 @@ def build_validation_commands(
                 "source",
                 "accounting",
                 "execution",
+                "latency",
+                "d",
                 "agent",
                 "llm",
             )
@@ -5411,6 +5413,7 @@ def build_validation_commands(
                 "independent_validate_qku_computation_control_plane_agent.py",
                 "independent_validate_qku_computation_control_plane_llm.py",
                 "independent_validate_qku_computation_control_plane_security.py",
+                "independent_validate_qku_computation_control_plane_d.py",
             )
         ],
         [

@@ -60,6 +60,7 @@ PRODUCTION_NAMES = (
     "economic_math.py",
     "idempotency.py",
     "lifecycle.py",
+    "latency_policy.py",
     "migrations.py",
     "outbox.py",
     "persistence.py",
@@ -67,6 +68,7 @@ PRODUCTION_NAMES = (
     "rollback.py",
     "sqlite_reference.py",
     "transaction.py",
+    "mode_snapshot_policy.py",
 )
 EXPECTED_MATH_IDS = tuple(f"MATH-{value:02d}" for value in range(1, 16))
 EXPECTED_ALL_MATH_IDS = (

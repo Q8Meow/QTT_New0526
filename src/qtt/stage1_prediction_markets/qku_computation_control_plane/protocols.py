@@ -6,17 +6,28 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
-from .errors import OwnerAdapterError, ReasonCode
+from .errors import ContractValidationError, OwnerAdapterError, ReasonCode
 from .models import (
     ConfigurationEnvelopeV1,
     FallbackEnvelopeV1,
     HealthEnvelopeV1,
     OperationContractV1,
+    ModeSnapshotDecisionV1,
+    ModeSnapshotOwnerProjectionV1,
+    OwnerActionConfirmationReceiptV1,
+    ReadOnlyKillSubmitStateV1,
+    ST12FEvidenceReferenceV1,
     SupervisionEnvelopeV1,
+    validate_reference_identity_classes,
 )
 
 if TYPE_CHECKING:
     from .agent_policy import AgentCapabilityDecisionV1
+    from .mode_snapshot_policy import (
+        ModeSnapshotCandidateInputsV1,
+        ModeSnapshotPreconstructionGateV1,
+    )
+    from .models import ComputationExecutionContextV1
 
 
 @runtime_checkable
@@ -83,6 +94,80 @@ class SafetyStateProjectionProtocolV1(Protocol):
 
 
 @runtime_checkable
+class ReadOnlyKillSubmitStateProtocolV1(Protocol):
+    """Read exact current safety state; no set, clear, or override method exists."""
+
+    def read_kill_submit_state(
+        self, context: "ComputationExecutionContextV1"
+    ) -> ReadOnlyKillSubmitStateV1: ...
+
+
+@runtime_checkable
+class ST12FEvidenceReferenceProtocolV1(Protocol):
+    """Read only a future-F reference state; D cannot produce evidence."""
+
+    def read_evidence_reference(
+        self,
+        context: "ComputationExecutionContextV1",
+        *,
+        causation_id: str,
+        correlation_id: str,
+    ) -> ST12FEvidenceReferenceV1: ...
+
+
+@runtime_checkable
+class OwnerActionConfirmationProtocolV1(Protocol):
+    """Read one exact current owner-action receipt; no action method exists."""
+
+    def read_owner_action_confirmation(
+        self, context: "ComputationExecutionContextV1"
+    ) -> OwnerActionConfirmationReceiptV1: ...
+
+
+@runtime_checkable
+class ModeSnapshotCandidateInputProtocolV1(Protocol):
+    """Resolve the early gate first, then enrich only a nonterminal gate."""
+
+    def resolve_mode_snapshot_preconstruction_gate(
+        self,
+        request: object,
+        capability_decision: "AgentCapabilityDecisionV1",
+    ) -> "ModeSnapshotPreconstructionGateV1": ...
+
+    def enrich_mode_snapshot_candidate(
+        self,
+        request: object,
+        capability_decision: "AgentCapabilityDecisionV1",
+        preconstruction_gate: "ModeSnapshotPreconstructionGateV1",
+        owner_projections: "PreloadedOwnerProjectionBundleV1",
+    ) -> "ModeSnapshotCandidateInputsV1": ...
+
+
+@runtime_checkable
+class ModeSnapshotCandidateValidationProtocolV1(Protocol):
+    """Optional independent candidate validator with no mutation method."""
+
+    def validate_snapshot_candidate(
+        self, candidate: object
+    ) -> tuple[ReasonCode, ...]: ...
+
+
+@runtime_checkable
+class ModeSnapshotOwnerProjectionProtocolV1(Protocol):
+    """One-way D state projection into the existing owner semantic fabric."""
+
+    def project_mode_snapshot(
+        self,
+        decision: ModeSnapshotDecisionV1,
+        evidence: ST12FEvidenceReferenceV1,
+        safety: ReadOnlyKillSubmitStateV1,
+        *,
+        snapshot_version: str,
+        svc_view: "OwnerProjectionViewV1",
+    ) -> ModeSnapshotOwnerProjectionV1: ...
+
+
+@runtime_checkable
 class MemoryPriorProjectionProtocolV1(Protocol):
     """MEM1 condition-scoped prior view requiring current revalidation."""
 
@@ -102,9 +187,12 @@ class OwnerProjectionViewV1:
     authority_domain: str
     source_path: str
     source_version: str
+    source_snapshot_ref: str
     consume_interfaces: tuple[str, ...]
     row_count: int
     identity_refs: tuple[str, ...]
+    receipt_refs: tuple[str, ...] = ()
+    source_epoch_refs: tuple[str, ...] = ()
     projection_mutation_allowed: bool = False
     runtime_effect_allowed: bool = False
 
@@ -114,6 +202,7 @@ class OwnerProjectionViewV1:
             "authority_domain",
             "source_path",
             "source_version",
+            "source_snapshot_ref",
         ):
             value = getattr(self, name)
             if not isinstance(value, str) or not value:
@@ -133,6 +222,37 @@ class OwnerProjectionViewV1:
                     ReasonCode.OWNER_DATA_MALFORMED,
                     f"{name} must contain unique nonempty owner lineage strings",
                 )
+        for name in ("receipt_refs", "source_epoch_refs"):
+            values = getattr(self, name)
+            if (
+                not isinstance(values, tuple)
+                or any(not isinstance(value, str) or not value for value in values)
+                or len(set(values)) != len(values)
+            ):
+                raise OwnerAdapterError(
+                    ReasonCode.OWNER_DATA_MALFORMED,
+                    f"{name} must contain only actual unique owner identities",
+                )
+        if self.source_snapshot_ref != self.source_path:
+            raise OwnerAdapterError(
+                ReasonCode.OWNER_DATA_MALFORMED,
+                "owner projection source snapshot must be the exact consumed source path",
+            )
+        try:
+            validate_reference_identity_classes(
+                source_snapshot_refs=(
+                    self.source_snapshot_ref,
+                    self.source_version,
+                    *self.identity_refs,
+                ),
+                source_epoch_refs=self.source_epoch_refs,
+                receipt_refs=self.receipt_refs,
+            )
+        except ContractValidationError as exc:
+            raise OwnerAdapterError(
+                ReasonCode.OWNER_DATA_MALFORMED,
+                "owner projection reference classes overlap or contain synthetic lineage",
+            ) from exc
         if (
             isinstance(self.row_count, bool)
             or not isinstance(self.row_count, int)
@@ -158,6 +278,57 @@ class OwnerProjectionViewV1:
         from .serialization import validate_relative_path
 
         validate_relative_path(self.source_path)
+
+
+@dataclass(frozen=True, slots=True)
+class PreloadedOwnerProjectionBundleV1:
+    """Immutable four-owner projection bundle loaded outside the D request path."""
+
+    readiness: OwnerProjectionViewV1
+    pretrade: OwnerProjectionViewV1
+    svc: OwnerProjectionViewV1
+    agent_orch: OwnerProjectionViewV1
+
+    def __post_init__(self) -> None:
+        rows = (self.readiness, self.pretrade, self.svc, self.agent_orch)
+        if any(type(row) is not OwnerProjectionViewV1 for row in rows) or tuple(
+            row.owner_id for row in rows
+        ) != ("READINESS1", "PRETRADE1", "SVC1", "AGENT_ORCH1"):
+            raise OwnerAdapterError(
+                ReasonCode.OWNER_DATA_MALFORMED,
+                "preloaded D projections require the exact four current owner views",
+            )
+        if any(
+            row.projection_mutation_allowed or row.runtime_effect_allowed
+            for row in rows
+        ):
+            raise OwnerAdapterError(
+                ReasonCode.CAPABILITY_DENIED,
+                "preloaded owner projections must remain immutable and no-effect",
+            )
+
+    @property
+    def receipt_refs(self) -> tuple[str, ...]:
+        return tuple(
+            ref
+            for row in (self.readiness, self.pretrade, self.svc, self.agent_orch)
+            for ref in row.receipt_refs
+        )
+
+    @property
+    def source_epoch_refs(self) -> tuple[str, ...]:
+        return tuple(
+            ref
+            for row in (self.readiness, self.pretrade, self.svc, self.agent_orch)
+            for ref in row.source_epoch_refs
+        )
+
+    @property
+    def source_snapshot_refs(self) -> tuple[str, ...]:
+        return tuple(
+            row.source_snapshot_ref
+            for row in (self.readiness, self.pretrade, self.svc, self.agent_orch)
+        )
 
 
 def _validated_rows(
@@ -262,6 +433,7 @@ class ExistingOwnerProjectionAdapterV1:
             authority_domain="READINESS_PROJECTION",
             source_path="src/qtt/readiness/pr169_readiness1_resolvers.py",
             source_version=version,
+            source_snapshot_ref="src/qtt/readiness/pr169_readiness1_resolvers.py",
             consume_interfaces=(
                 "load_registry",
                 "load_agent_universe",
@@ -299,6 +471,7 @@ class ExistingOwnerProjectionAdapterV1:
             source_version=_single_projection_version(
                 rows, owner_id="PRETRADE1"
             ),
+            source_snapshot_ref="src/qtt/pretrade/pr169_pretrade1_resolvers.py",
             consume_interfaces=("load_registry",),
             row_count=len(rows),
             identity_refs=("PreTradeRegistryView",),
@@ -342,6 +515,7 @@ class ExistingOwnerProjectionAdapterV1:
             authority_domain="OWNER_READ_MODEL_AND_ACTION_PROJECTION",
             source_path="src/qtt/service/pr169_svc1_resolvers.py",
             source_version=version,
+            source_snapshot_ref="src/qtt/service/pr169_svc1_resolvers.py",
             consume_interfaces=("DashboardReadModelService",),
             row_count=len(rows),
             identity_refs=("read_model_snapshots.generated.jsonl",),
@@ -377,7 +551,48 @@ class ExistingOwnerProjectionAdapterV1:
             authority_domain="AGENT_TASK_AND_DAG_PROJECTION",
             source_path="src/qtt/agents/pr169_agent_orch1_resolvers.py",
             source_version=version,
+            source_snapshot_ref="src/qtt/agents/pr169_agent_orch1_resolvers.py",
             consume_interfaces=("AgentOrchService",),
             row_count=len(rows),
             identity_refs=("dag.jsonl",),
+        )
+
+    def load_bundle(self) -> PreloadedOwnerProjectionBundleV1:
+        """Load once before request handling; request code consumes only this value."""
+
+        return PreloadedOwnerProjectionBundleV1(
+            readiness=self.load_readiness(),
+            pretrade=self.load_pretrade(),
+            svc=self.load_svc(),
+            agent_orch=self.load_agent_orch(),
+        )
+
+    def project_mode_snapshot(
+        self,
+        decision: ModeSnapshotDecisionV1,
+        evidence: ST12FEvidenceReferenceV1,
+        safety: ReadOnlyKillSubmitStateV1,
+        *,
+        snapshot_version: str,
+        svc_view: OwnerProjectionViewV1,
+    ) -> ModeSnapshotOwnerProjectionV1:
+        """Project exact D semantics through an already loaded immutable SVC view."""
+
+        if (
+            type(svc_view) is not OwnerProjectionViewV1
+            or svc_view.owner_id != "SVC1"
+            or svc_view.projection_mutation_allowed
+            or svc_view.runtime_effect_allowed
+        ):
+            raise OwnerAdapterError(
+                ReasonCode.OWNER_DATA_MALFORMED,
+                "D owner projection requires a current no-effect SVC1 view",
+            )
+        from .mode_snapshot_policy import owner_projection
+
+        return owner_projection(
+            decision,
+            evidence,
+            safety,
+            snapshot_version=snapshot_version,
         )

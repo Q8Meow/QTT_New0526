@@ -5120,3 +5120,201 @@ if (
     or len(ST12C_CUMULATIVE_IMPLEMENTATION_REGISTRY) != 42
 ):
     raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "Tranche-C math implementation closure must be 13 with cumulative union 42")
+
+
+# ST12-D adds one formula identity while reusing MATH-13/14/15 by object
+# identity.  The predecessor 30-row public registry remains unchanged.
+def validate_math_39_event_context(
+    *,
+    sequence_continuous: bool,
+    matching_priority_known: bool,
+    unit: str,
+    basis: str,
+    venue_evidence_ref: str,
+) -> None:
+    """Fail closed before the pure queue-ahead formula is invoked."""
+
+    if type(sequence_continuous) is not bool or not sequence_continuous:
+        raise NumericDomainError(
+            ReasonCode.SEQUENCE_GAP,
+            "MATH-39 requires sequence-continuous events",
+        )
+    if type(matching_priority_known) is not bool or not matching_priority_known:
+        raise NumericDomainError(
+            ReasonCode.MATCHING_PRIORITY_UNKNOWN,
+            "MATH-39 requires a declared matching-priority convention",
+        )
+    if unit != "units" or basis != "ACKNOWLEDGED_INSERTION_POINT":
+        raise NumericDomainError(
+            ReasonCode.UNIT_BASIS_OR_PRECISION_INVALID,
+            "MATH-39 requires units at the acknowledged insertion point",
+        )
+    if not isinstance(venue_evidence_ref, str) or not venue_evidence_ref.strip():
+        raise NumericDomainError(
+            ReasonCode.MATCHING_PRIORITY_UNKNOWN,
+            "MATH-39 cannot claim an exact estimate without venue evidence",
+        )
+
+
+def compute_math_39_queue_position_estimate(
+    displayed_quantity_before_order: DecimalInput,
+    net_prior_additions: DecimalInput,
+    observed_prior_cancellations: DecimalInput,
+    observed_trades_ahead: DecimalInput,
+) -> Decimal:
+    """Exact conservative queue-ahead arithmetic on already admitted inputs."""
+
+    values = tuple(
+        _nonnegative(exact_decimal(value, field_name=name), field_name=name)
+        for name, value in (
+            ("displayed_quantity_before_order", displayed_quantity_before_order),
+            ("net_prior_additions", net_prior_additions),
+            ("observed_prior_cancellations", observed_prior_cancellations),
+            ("observed_trades_ahead", observed_trades_ahead),
+        )
+    )
+    displayed, additions, cancellations, trades = values
+    with localcontext(decimal_context_v1()):
+        return max(
+            Decimal(0),
+            displayed + additions - cancellations - trades,
+        )
+
+
+_ST12D_MATH_39_RECORD = MathImplementationRecordV1(
+    contract=ComputationImplementationV1(
+        implementation_id=(
+            "qku/implementation_registry.py::MATH-39::ST12D-CURRENTIZED-1.0"
+        ),
+        math_spec_id="MATH-39",
+        callable_name="compute_math_39_queue_position_estimate",
+        specification_version="ST12D-CURRENTIZED-1.0",
+        deterministic=True,
+        seed_required=False,
+    ),
+    name="QUEUE_POSITION_ESTIMATE",
+    family="EXECUTION_MODEL",
+    callable=compute_math_39_queue_position_estimate,
+    golden_vector_id="GOLDEN::MATH-39",
+    oracle_id="ORACLE::MATH-39",
+    specification_metadata=MathSpecificationMetadataV1(
+        certified_formula=(
+            "max(0, displayed_quantity_before_order + net_prior_additions - "
+            "observed_prior_cancellations - observed_trades_ahead)"
+        ),
+        domain_and_fail_closed_guards=(
+            "Reject missing, invalid, nonfinite, or negative quantities",
+            "Reject sequence gaps, unknown matching priority, and unit/basis mismatch before invocation",
+            "Never claim exact queue position without a venue-evidence reference",
+        ),
+        implementation_algorithm=(
+            "Initialize at the acknowledged insertion point",
+            "Consume only declared sequence-continuous events in stable order",
+            "Apply exact Decimal queue-ahead arithmetic and floor at zero",
+        ),
+        mandatory_comparator_or_reconciliation=(
+            "Empirical time-to-fill conditioned on price level"
+        ),
+        precision_and_rounding_policy=(
+            "DECIMAL_CONTEXT_PRECISION_34_ROUND_HALF_EVEN; NO_IMPLICIT_QUANTIZATION"
+        ),
+        optional_library_adapter_policy="STANDARD_LIBRARY_ONLY; NO_NEW_DEPENDENCY",
+        tie_break_policy="DECLARED_SEQUENCE_THEN_CANONICAL_EVENT_ID_ASCENDING",
+    ),
+)
+
+TRANCHE_D_NEW_IMPLEMENTATION_REGISTRY: Mapping[
+    str, MathImplementationRecordV1
+] = MappingProxyType({"MATH-39": _ST12D_MATH_39_RECORD})
+ST12D_MATH_IMPLEMENTATION_REGISTRY: Mapping[
+    str, MathImplementationRecordV1
+] = MappingProxyType(
+    {
+        "MATH-13": IMPLEMENTATION_REGISTRY["MATH-13"],
+        "MATH-14": IMPLEMENTATION_REGISTRY["MATH-14"],
+        "MATH-15": IMPLEMENTATION_REGISTRY["MATH-15"],
+        "MATH-39": _ST12D_MATH_39_RECORD,
+    }
+)
+ST12D_CUMULATIVE_IMPLEMENTATION_REGISTRY: Mapping[
+    str, MathImplementationRecordV1
+] = MappingProxyType(
+    {**ST12C_CUMULATIVE_IMPLEMENTATION_REGISTRY, **TRANCHE_D_NEW_IMPLEMENTATION_REGISTRY}
+)
+CURRENT_IMPLEMENTATION_REGISTRY: Mapping[str, MathImplementationRecordV1] = (
+    MappingProxyType({**IMPLEMENTATION_REGISTRY, **TRANCHE_D_NEW_IMPLEMENTATION_REGISTRY})
+)
+
+
+def get_current_math_implementation(
+    math_spec_id: str,
+) -> MathImplementationRecordV1:
+    try:
+        return CURRENT_IMPLEMENTATION_REGISTRY[math_spec_id]
+    except KeyError as exc:
+        raise ContractValidationError(
+            ReasonCode.UNKNOWN_IMPLEMENTATION,
+            f"unknown current math identity: {math_spec_id}",
+        ) from exc
+
+
+def invoke_current_formula(
+    math_spec_id: str,
+    inputs: Mapping[str, object],
+) -> object:
+    """Central invocation boundary for v3.4 plus the additive MATH-39 route."""
+
+    if math_spec_id != "MATH-39":
+        return invoke_formula_v34(math_spec_id, inputs)
+    if not isinstance(inputs, Mapping):
+        raise ContractValidationError(
+            ReasonCode.INVALID_CONTRACT,
+            "MATH-39 inputs must be an exact named mapping",
+        )
+    declared = (
+        "displayed_quantity_before_order",
+        "net_prior_additions",
+        "observed_prior_cancellations",
+        "observed_trades_ahead",
+    )
+    if tuple(inputs) != declared:
+        raise ContractValidationError(
+            ReasonCode.INVALID_CONTRACT,
+            "MATH-39 derived input identity and order differ from the current contract",
+        )
+    value = _ST12D_MATH_39_RECORD.callable(
+        *(inputs[name] for name in declared)
+    )
+    from .specification import validate_current_formula_output
+
+    validate_current_formula_output(math_spec_id, value)
+    return value
+
+
+def get_tranche_d_math_implementation(
+    math_spec_id: str,
+) -> MathImplementationRecordV1:
+    try:
+        return ST12D_MATH_IMPLEMENTATION_REGISTRY[math_spec_id]
+    except KeyError as exc:
+        raise ContractValidationError(
+            ReasonCode.UNKNOWN_IMPLEMENTATION,
+            f"unknown Tranche-D math identity: {math_spec_id}",
+        ) from exc
+
+
+if (
+    tuple(ST12D_MATH_IMPLEMENTATION_REGISTRY)
+    != ("MATH-13", "MATH-14", "MATH-15", "MATH-39")
+    or len(TRANCHE_D_NEW_IMPLEMENTATION_REGISTRY) != 1
+    or len(ST12D_CUMULATIVE_IMPLEMENTATION_REGISTRY) != 43
+    or any(
+        ST12D_MATH_IMPLEMENTATION_REGISTRY[math_id]
+        is not IMPLEMENTATION_REGISTRY[math_id]
+        for math_id in ("MATH-13", "MATH-14", "MATH-15")
+    )
+):
+    raise ContractValidationError(
+        ReasonCode.INVALID_CONTRACT,
+        "Tranche-D must reuse MATH-13/14/15 and add only MATH-39",
+    )

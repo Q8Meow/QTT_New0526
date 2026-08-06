@@ -50,6 +50,15 @@ ST12_BRANCH_CASES = (
             "Agent/st12e-capability-guard",
         ),
     ),
+    (
+        "agent/st12d-mode-snapshot-boundary",
+        (
+            "agent/st12d-mode-snapshot",
+            "agent/st12d-mode-snapshot-boundary-copy",
+            "agent/st12d-mode-snapshot-boundary/",
+            "Agent/st12d-mode-snapshot-boundary",
+        ),
+    ),
 )
 
 
@@ -91,7 +100,7 @@ def test_repair_and_main_cumulative_branch_classification():
 @pytest.mark.parametrize(
     ("branch", "adversarial_branches"),
     ST12_BRANCH_CASES,
-    ids=("st12a", "st12b", "st12c", "st12e"),
+    ids=("st12a", "st12b", "st12c", "st12e", "st12d"),
 )
 def test_st12_owner_authorized_branches_are_exactly_validation_only(
     branch: str,

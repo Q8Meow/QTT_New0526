@@ -206,6 +206,48 @@ def _typed_enum(value: object, enum_type: type[_EnumT], field_name: str) -> _Enu
     return value
 
 
+def _reason_tuple(
+    values: object,
+    field_name: str,
+    *,
+    require_nonempty: bool = False,
+) -> tuple[ReasonCode, ...]:
+    if (
+        not isinstance(values, tuple)
+        or any(type(value) is not ReasonCode for value in values)
+        or len(values) != len(set(values))
+        or (require_nonempty and not values)
+    ):
+        raise ContractValidationError(
+            ReasonCode.CONTRACT_OR_TYPE_INVALID,
+            f"{field_name} must be an ordered unique tuple of ReasonCode values",
+        )
+    return values
+
+
+def _utc_timestamp(value: object, field_name: str) -> datetime:
+    if (
+        not isinstance(value, datetime)
+        or value.tzinfo is None
+        or value.utcoffset() is None
+        or value.utcoffset().total_seconds() != 0
+    ):
+        raise ContractValidationError(
+            ReasonCode.CLOCK_DOMAIN_MISMATCH,
+            f"{field_name} must be a timezone-aware UTC datetime",
+        )
+    return value
+
+
+def _must_be_false(value: object, field_name: str) -> None:
+    _exact_bool(value, field_name)
+    if value is not False:
+        raise ContractValidationError(
+            ReasonCode.RUNTIME_EFFECT_FORBIDDEN,
+            f"{field_name} must remain exact false in ST12-D",
+        )
+
+
 def immutable_mapping(values: Mapping[str, str] | None = None) -> Mapping[str, str]:
     if values is None:
         return MappingProxyType({})
@@ -247,6 +289,85 @@ class BenchmarkSignConvention(StrEnum):
 class ModeEligibilityState(StrEnum):
     INELIGIBLE = "INELIGIBLE"
     CONTRACT_ONLY = "CONTRACT_ONLY"
+    ELIGIBLE_FOR_ALLOW_CANDIDACY_NO_EFFECT = (
+        "ELIGIBLE_FOR_ALLOW_CANDIDACY_NO_EFFECT"
+    )
+
+
+class AllowCandidateStateV1(StrEnum):
+    NOT_EVALUATED = "NOT_EVALUATED"
+    BLOCKED = "BLOCKED"
+    EVIDENCE_UNAVAILABLE = "EVIDENCE_UNAVAILABLE"
+    OWNER_CONFIRMATION_REQUIRED = "OWNER_CONFIRMATION_REQUIRED"
+    ELIGIBLE_NOT_ACTIVATED = "ELIGIBLE_NOT_ACTIVATED"
+
+
+class ActivationPreconditionStateV1(StrEnum):
+    NOT_AUTHORIZED_D_HOLD = "NOT_AUTHORIZED_D_HOLD"
+    PRECONDITIONS_INCOMPLETE = "PRECONDITIONS_INCOMPLETE"
+    PRECONDITIONS_SATISFIED_HELD = "PRECONDITIONS_SATISFIED_HELD"
+
+
+class SnapshotCandidateStateV1(StrEnum):
+    ABSENT = "ABSENT"
+    BUILT_IMMUTABLE = "BUILT_IMMUTABLE"
+    VALIDATED_NO_EFFECT = "VALIDATED_NO_EFFECT"
+    REJECTED = "REJECTED"
+    STALE = "STALE"
+    ROLLBACK_REQUIRED = "ROLLBACK_REQUIRED"
+    RETIRED = "RETIRED"
+
+
+class KillStateV1(StrEnum):
+    CLEAR_CURRENT = "CLEAR_CURRENT"
+    ACTIVE = "ACTIVE"
+    MISSING_STALE_OR_CONFLICTING = "MISSING_STALE_OR_CONFLICTING"
+
+
+class SubmitDisabledStateV1(StrEnum):
+    SUBMIT_ENABLED_READ_ONLY = "SUBMIT_ENABLED_READ_ONLY"
+    SUBMIT_DISABLED = "SUBMIT_DISABLED"
+    MISSING_STALE_OR_CONFLICTING = "MISSING_STALE_OR_CONFLICTING"
+
+
+class ST12FEvidenceStateV1(StrEnum):
+    EVIDENCE_REFERENCE_AVAILABLE = "EVIDENCE_REFERENCE_AVAILABLE"
+    EVIDENCE_REFERENCE_STALE = "EVIDENCE_REFERENCE_STALE"
+    EVIDENCE_REFERENCE_CONFLICTING = "EVIDENCE_REFERENCE_CONFLICTING"
+    EVIDENCE_UNAVAILABLE_F_NOT_IMPLEMENTED = (
+        "EVIDENCE_UNAVAILABLE_F_NOT_IMPLEMENTED"
+    )
+    EVIDENCE_INSUFFICIENT_FAIL_CLOSED = "EVIDENCE_INSUFFICIENT_FAIL_CLOSED"
+
+
+class SnapshotParameterResolutionStateV1(StrEnum):
+    """Finite resolution states owned by ComputationParameterPolicyV1."""
+
+    OWNER_VALUE_RESOLVED = "OWNER_VALUE_RESOLVED"
+    DETERMINISTIC_POLICY_VALUE_MATERIALIZED = (
+        "DETERMINISTIC_POLICY_VALUE_MATERIALIZED"
+    )
+    REQUIRED_OWNER_VALUE_UNAVAILABLE = "REQUIRED_OWNER_VALUE_UNAVAILABLE"
+
+
+class OwnerActionConfirmationStateV1(StrEnum):
+    CONFIRMED_CURRENT = "CONFIRMED_CURRENT"
+    ABSENT = "ABSENT"
+    STALE_OR_CONFLICTING = "STALE_OR_CONFLICTING"
+
+
+class SnapshotRollbackStateV1(StrEnum):
+    NONE = "NONE"
+    PROPOSED_PRIOR_IMMUTABLE_CANDIDATE = (
+        "PROPOSED_PRIOR_IMMUTABLE_CANDIDATE"
+    )
+    BLOCKED_NO_VALID_PRIOR_CANDIDATE = "BLOCKED_NO_VALID_PRIOR_CANDIDATE"
+
+
+class SnapshotRetirementStateV1(StrEnum):
+    CURRENT = "CURRENT"
+    DRAINING_PINNED_IN_FLIGHT_ONLY = "DRAINING_PINNED_IN_FLIGHT_ONLY"
+    RETIRED = "RETIRED"
 
 
 class EvidenceState(StrEnum):
@@ -320,6 +441,10 @@ class OperationBlockerCodeV1(StrEnum):
     UNIT_CONVERSION_FAILED = "UNIT_CONVERSION_FAILED"
     OUTPUT_SCHEMA_MISMATCH = "OUTPUT_SCHEMA_MISMATCH"
     FORMULA_EXECUTION_REJECTED = "FORMULA_EXECUTION_REJECTED"
+    MODE_SNAPSHOT_BLOCKED = "MODE_SNAPSHOT_BLOCKED"
+    EVIDENCE_REFERENCE_UNAVAILABLE = "EVIDENCE_REFERENCE_UNAVAILABLE"
+    KILL_OR_SUBMIT_DISABLED = "KILL_OR_SUBMIT_DISABLED"
+    LATENCY_PROFILE_REQUIRED = "LATENCY_PROFILE_REQUIRED"
 
 
 class TypedValueKindV1(StrEnum):
@@ -1047,6 +1172,1598 @@ class FormulaRuntimeSnapshotV1:
 
 
 @dataclass(frozen=True, slots=True)
+class ReadOnlyKillSubmitStateV1:
+    """Current-owner safety state that ST12-D can only inspect."""
+
+    state_ref: str
+    scope_ref: str
+    kill_active: bool
+    submit_disabled: bool
+    observed_at: datetime
+    valid_until: datetime
+    policy_version: str
+    causation_id: str
+    correlation_id: str
+
+    def __post_init__(self) -> None:
+        for name in (
+            "state_ref",
+            "scope_ref",
+            "policy_version",
+            "causation_id",
+            "correlation_id",
+        ):
+            _canonical_text(getattr(self, name), name)
+        _exact_bool(self.kill_active, "kill_active")
+        _exact_bool(self.submit_disabled, "submit_disabled")
+        observed = _utc_timestamp(self.observed_at, "observed_at")
+        valid_until = _utc_timestamp(self.valid_until, "valid_until")
+        if observed > valid_until:
+            raise ContractValidationError(
+                ReasonCode.POLICY_OR_SNAPSHOT_STALE,
+                "kill/submit validity cannot precede its observation",
+            )
+
+    @property
+    def kill_state(self) -> KillStateV1:
+        return KillStateV1.ACTIVE if self.kill_active else KillStateV1.CLEAR_CURRENT
+
+    @property
+    def submit_disabled_state(self) -> SubmitDisabledStateV1:
+        return (
+            SubmitDisabledStateV1.SUBMIT_DISABLED
+            if self.submit_disabled
+            else SubmitDisabledStateV1.SUBMIT_ENABLED_READ_ONLY
+        )
+
+
+@dataclass(frozen=True, slots=True)
+class ST12FEvidenceReferenceV1:
+    """Typed reference boundary only; ST12-D never produces F evidence."""
+
+    evidence_state: ST12FEvidenceStateV1
+    evidence_ref: str
+    lane: str
+    dataset_grade_ref: str
+    venue_semantic_binding_ref: str
+    cross_venue_equivalence_ref: str
+    observed_at: datetime
+    valid_until: datetime
+    policy_version: str
+    causation_id: str
+    correlation_id: str
+
+    def __post_init__(self) -> None:
+        _typed_enum(self.evidence_state, ST12FEvidenceStateV1, "evidence_state")
+        for name in (
+            "evidence_ref",
+            "lane",
+            "dataset_grade_ref",
+            "venue_semantic_binding_ref",
+            "cross_venue_equivalence_ref",
+            "policy_version",
+            "causation_id",
+            "correlation_id",
+        ):
+            _canonical_text(getattr(self, name), name)
+        observed = _utc_timestamp(self.observed_at, "observed_at")
+        valid_until = _utc_timestamp(self.valid_until, "valid_until")
+        if observed > valid_until:
+            raise ContractValidationError(
+                ReasonCode.POLICY_OR_SNAPSHOT_STALE,
+                "evidence validity cannot precede its observation",
+            )
+        if self.evidence_state is ST12FEvidenceStateV1.EVIDENCE_REFERENCE_AVAILABLE:
+            if self.lane not in {"REPLAY", "PAPER"}:
+                raise ContractValidationError(
+                    ReasonCode.CONTRACT_OR_TYPE_INVALID,
+                    "available F evidence must declare exactly REPLAY or PAPER",
+                )
+            if any(
+                getattr(self, name) == "EXPLICIT_ABSENCE"
+                for name in (
+                    "evidence_ref",
+                    "dataset_grade_ref",
+                    "venue_semantic_binding_ref",
+                    "cross_venue_equivalence_ref",
+                )
+            ):
+                raise ContractValidationError(
+                    ReasonCode.EVIDENCE_REFERENCE_UNAVAILABLE_STALE_CONFLICTING_OR_SCOPE_MISMATCH,
+                    "available evidence cannot carry an absent evidence pin",
+                )
+
+
+@dataclass(frozen=True, slots=True)
+class OwnerActionConfirmationReceiptV1:
+    """Exact current-owner action receipt; it grants no activation authority."""
+
+    receipt_ref: str
+    owner_action_policy_ref: str
+    state: OwnerActionConfirmationStateV1
+    principal_id: str
+    task_id: str
+    capability_decision_ref: str
+    context_ref: str
+    observed_at: datetime
+    valid_until: datetime
+    causation_id: str
+    correlation_id: str
+    predecessor_transition_id_or_explicit_absence: str = "EXPLICIT_ABSENCE"
+    predecessor_transition_receipt_ref_or_explicit_absence: str = (
+        "EXPLICIT_ABSENCE"
+    )
+    predecessor_transition_receipt_proposal_or_explicit_absence: object | None = None
+    runtime_effect_authorized: bool = False
+    order_release_authorized: bool = False
+
+    def __post_init__(self) -> None:
+        for name in (
+            "receipt_ref",
+            "owner_action_policy_ref",
+            "principal_id",
+            "task_id",
+            "capability_decision_ref",
+            "context_ref",
+            "causation_id",
+            "correlation_id",
+            "predecessor_transition_id_or_explicit_absence",
+            "predecessor_transition_receipt_ref_or_explicit_absence",
+        ):
+            _canonical_text(getattr(self, name), name)
+        _typed_enum(self.state, OwnerActionConfirmationStateV1, "state")
+        observed = _utc_timestamp(self.observed_at, "observed_at")
+        valid_until = _utc_timestamp(self.valid_until, "valid_until")
+        if observed > valid_until:
+            raise ContractValidationError(
+                ReasonCode.POLICY_OR_SNAPSHOT_STALE,
+                "owner-action receipt validity cannot precede observation",
+            )
+        if self.causation_id == self.correlation_id:
+            raise ContractValidationError(
+                ReasonCode.CONTRACT_OR_TYPE_INVALID,
+                "owner-action causation and correlation identities must differ",
+            )
+        predecessor = (
+            self.predecessor_transition_id_or_explicit_absence,
+            self.predecessor_transition_receipt_ref_or_explicit_absence,
+        )
+        predecessor_proposal = (
+            self.predecessor_transition_receipt_proposal_or_explicit_absence
+        )
+        if self.state is OwnerActionConfirmationStateV1.CONFIRMED_CURRENT:
+            from .receipts import (
+                EconomicReceiptEventSpineV1,
+                EconomicRecordTypeV1,
+                ModeSnapshotControlReceiptRecordV1,
+            )
+
+            if (
+                predecessor[0] != "T06"
+                or predecessor[1] == "EXPLICIT_ABSENCE"
+                or type(predecessor_proposal) is not EconomicReceiptEventSpineV1
+                or predecessor_proposal.record_type
+                is not EconomicRecordTypeV1.MODE_SNAPSHOT_CONTROL
+                or predecessor_proposal.record_id != predecessor[1]
+                or type(predecessor_proposal.typed_payload)
+                is not ModeSnapshotControlReceiptRecordV1
+                or predecessor_proposal.typed_payload.transition_id != "T06"
+                or predecessor_proposal.typed_payload.principal_id
+                != self.principal_id
+                or predecessor_proposal.typed_payload.task_id != self.task_id
+                or predecessor_proposal.typed_payload.capability_decision_ref
+                != self.capability_decision_ref
+                or predecessor_proposal.typed_payload.context_ref != self.context_ref
+                or predecessor_proposal.typed_payload.source_state != "NOT_EVALUATED"
+                or predecessor_proposal.typed_payload.destination_state
+                != "OWNER_CONFIRMATION_REQUIRED"
+                or predecessor_proposal.typed_payload.typed_reason_codes[0]
+                is not ReasonCode.OWNER_CONFIRMATION_REQUIRED
+            ):
+                raise ContractValidationError(
+                    ReasonCode.CONTRACT_OR_TYPE_INVALID,
+                    "confirmed owner action requires the exact typed prior T06 hold receipt",
+                )
+        elif (
+            predecessor != ("EXPLICIT_ABSENCE", "EXPLICIT_ABSENCE")
+            or predecessor_proposal is not None
+        ):
+            raise ContractValidationError(
+                ReasonCode.CONTRACT_OR_TYPE_INVALID,
+                "unconfirmed owner action cannot claim a predecessor transition receipt",
+            )
+        _must_be_false(self.runtime_effect_authorized, "runtime_effect_authorized")
+        _must_be_false(self.order_release_authorized, "order_release_authorized")
+
+    def is_current_for(
+        self,
+        *,
+        evaluated_at: datetime,
+        principal_id: str,
+        task_id: str,
+        capability_decision_ref: str,
+        context_ref: str,
+        request_id: str,
+        snapshot_candidate_ref: str,
+        candidate_version: str,
+    ) -> bool:
+        """Return a derived fact only when the exact receipt identity is current."""
+
+        evaluated = _utc_timestamp(evaluated_at, "evaluated_at")
+        predecessor = self.predecessor_transition_receipt_proposal_or_explicit_absence
+        payload = (
+            predecessor.typed_payload
+            if predecessor is not None
+            else None
+        )
+        return (
+            self.state is OwnerActionConfirmationStateV1.CONFIRMED_CURRENT
+            and self.observed_at <= evaluated <= self.valid_until
+            and self.principal_id == principal_id
+            and self.task_id == task_id
+            and self.capability_decision_ref == capability_decision_ref
+            and self.context_ref == context_ref
+            and getattr(payload, "request_id", None) == request_id
+            and getattr(payload, "snapshot_candidate_ref_or_explicit_absence", None)
+            == snapshot_candidate_ref
+            and getattr(payload, "target_candidate_version", None)
+            == candidate_version
+        )
+
+
+@dataclass(frozen=True, slots=True)
+class ResolvedSnapshotParameterValueV1:
+    """One exact snapshot-bound value pin under the existing parameter owner."""
+
+    parameter_id: str
+    parameter_symbol: str
+    resolved_value_ref: str
+    canonical_typed_value_or_explicit_unavailable: str | int | bool | Decimal
+    value_kind: str
+    unit_or_basis: str
+    resolution_state: SnapshotParameterResolutionStateV1
+    policy_ref: str
+    parameter_policy_set_version: str
+    producer_receipt_refs: tuple[str, ...]
+    point_in_time_receipt_refs: tuple[str, ...]
+    freshness_receipt_refs: tuple[str, ...]
+    source_epoch_refs: tuple[str, ...]
+    observed_at_or_explicit_absence: datetime | str
+    valid_until_or_explicit_absence: datetime | str
+    diagnostic_reason_codes: tuple[ReasonCode, ...] = ()
+    no_mutation_flag: bool = True
+
+    def __post_init__(self) -> None:
+        for name in (
+            "parameter_id",
+            "parameter_symbol",
+            "resolved_value_ref",
+            "value_kind",
+            "unit_or_basis",
+            "policy_ref",
+            "parameter_policy_set_version",
+        ):
+            _canonical_text(getattr(self, name), name)
+        if self.resolved_value_ref == self.policy_ref:
+            raise ContractValidationError(
+                ReasonCode.PARAMETER_POLICY_OR_PIN_INVALID,
+                "a parameter policy identity cannot occupy a resolved-value slot",
+            )
+        value = self.canonical_typed_value_or_explicit_unavailable
+        if type(value) not in {str, int, bool, Decimal} or (
+            isinstance(value, str) and not value
+        ):
+            raise ContractValidationError(
+                ReasonCode.PARAMETER_POLICY_OR_PIN_INVALID,
+                "resolved snapshot parameter values require one canonical typed value",
+            )
+        _typed_enum(
+            self.resolution_state,
+            SnapshotParameterResolutionStateV1,
+            "resolution_state",
+        )
+        for name in (
+            "producer_receipt_refs",
+            "point_in_time_receipt_refs",
+            "freshness_receipt_refs",
+            "source_epoch_refs",
+        ):
+            _validate_unique_text(getattr(self, name), name)
+        unavailable = (
+            self.resolution_state
+            is SnapshotParameterResolutionStateV1.REQUIRED_OWNER_VALUE_UNAVAILABLE
+        )
+        deterministic = (
+            self.resolution_state
+            is SnapshotParameterResolutionStateV1.DETERMINISTIC_POLICY_VALUE_MATERIALIZED
+        )
+        owner_resolved = (
+            self.resolution_state
+            is SnapshotParameterResolutionStateV1.OWNER_VALUE_RESOLVED
+        )
+        validate_reference_identity_classes(
+            policy_refs=(self.policy_ref,),
+            semantic_policy_set_versions=(self.parameter_policy_set_version,),
+            source_epoch_refs=self.source_epoch_refs,
+            receipt_refs=(
+                *self.producer_receipt_refs,
+                *self.point_in_time_receipt_refs,
+                *self.freshness_receipt_refs,
+            ),
+        )
+        if unavailable:
+            if (
+                not isinstance(value, str)
+                or not value.startswith("EXPLICIT_UNAVAILABLE::")
+                or not self.diagnostic_reason_codes
+                or self.producer_receipt_refs
+                or self.point_in_time_receipt_refs
+                or self.freshness_receipt_refs
+                or self.source_epoch_refs
+            ):
+                raise ContractValidationError(
+                    ReasonCode.PARAMETER_OWNER_MISSING,
+                    "unavailable owner values require an exact typed blocker",
+                )
+        elif deterministic and (
+            self.producer_receipt_refs
+            or self.point_in_time_receipt_refs
+            or self.freshness_receipt_refs
+            or self.source_epoch_refs
+        ):
+            raise ContractValidationError(
+                ReasonCode.PARAMETER_POLICY_OR_PIN_INVALID,
+                "deterministic policy values cannot synthesize receipt or epoch lineage",
+            )
+        elif owner_resolved and (
+            not self.producer_receipt_refs
+            or not self.point_in_time_receipt_refs
+            or not self.freshness_receipt_refs
+            or not self.source_epoch_refs
+        ):
+            raise ContractValidationError(
+                ReasonCode.PARAMETER_POLICY_OR_PIN_INVALID,
+                "owner-resolved values require producer, PIT, freshness, and source-epoch proof",
+            )
+        for name in (
+            "observed_at_or_explicit_absence",
+            "valid_until_or_explicit_absence",
+        ):
+            timestamp = getattr(self, name)
+            if timestamp != "EXPLICIT_ABSENCE":
+                _utc_timestamp(timestamp, name)
+        if (
+            self.observed_at_or_explicit_absence == "EXPLICIT_ABSENCE"
+        ) != (
+            self.valid_until_or_explicit_absence == "EXPLICIT_ABSENCE"
+        ):
+            raise ContractValidationError(
+                ReasonCode.CLOCK_DOMAIN_MISMATCH,
+                "resolved parameter validity must be exact timestamps or exact absence",
+            )
+        if (
+            self.observed_at_or_explicit_absence != "EXPLICIT_ABSENCE"
+            and self.observed_at_or_explicit_absence
+            > self.valid_until_or_explicit_absence
+        ):
+            raise ContractValidationError(
+                ReasonCode.POLICY_OR_SNAPSHOT_STALE,
+                "resolved parameter validity cannot precede observation",
+            )
+        if (
+            not isinstance(self.diagnostic_reason_codes, tuple)
+            or any(type(reason) is not ReasonCode for reason in self.diagnostic_reason_codes)
+            or len(self.diagnostic_reason_codes) != len(set(self.diagnostic_reason_codes))
+            or self.no_mutation_flag is not True
+        ):
+            raise ContractValidationError(
+                ReasonCode.PARAMETER_POLICY_OR_PIN_INVALID,
+                "resolved parameter diagnostics and no-mutation custody are invalid",
+            )
+
+
+@dataclass(frozen=True, slots=True)
+class FormulaRuntimeSnapshotCandidateV1:
+    """Deeply immutable, version-pinned ST12-D candidate; never active state."""
+
+    snapshot_candidate_id: str
+    request_id: str
+    principal_id: str
+    task_id: str
+    capability_decision_ref: str
+    computation_bundle_ref: str
+    context_ref: str
+    formula_spec_refs: tuple[str, ...]
+    implementation_version_pins: tuple[ImplementationVersionPinV1, ...]
+    binding_profile_ref: str
+    parameter_policy_snapshot_ref: str
+    parameter_value_refs: tuple[str, ...]
+    source_epoch_refs: tuple[str, ...]
+    receipt_lineage_refs: tuple[str, ...]
+    readiness_state_ref: str
+    pretrade_state_ref: str
+    evidence_state_ref: str
+    kill_state_ref: str
+    submit_disabled_state_ref: str
+    created_at: datetime
+    evaluated_at: datetime
+    expires_at: datetime
+    stale_at: datetime | None
+    candidate_state: SnapshotCandidateStateV1
+    reason_codes: tuple[ReasonCode, ...]
+    fallback_route: str
+    owner_review_route: str
+    runtime_effect_authorized: bool = False
+    order_release_authorized: bool = False
+    activated: bool = False
+
+    def __post_init__(self) -> None:
+        for name in (
+            "snapshot_candidate_id",
+            "request_id",
+            "principal_id",
+            "task_id",
+            "capability_decision_ref",
+            "computation_bundle_ref",
+            "context_ref",
+            "binding_profile_ref",
+            "parameter_policy_snapshot_ref",
+            "readiness_state_ref",
+            "pretrade_state_ref",
+            "evidence_state_ref",
+            "kill_state_ref",
+            "submit_disabled_state_ref",
+            "fallback_route",
+            "owner_review_route",
+        ):
+            _canonical_text(getattr(self, name), name)
+        for name in (
+            "formula_spec_refs",
+            "parameter_value_refs",
+            "source_epoch_refs",
+            "receipt_lineage_refs",
+        ):
+            _validate_unique_text(getattr(self, name), name, nonempty=True)
+        if (
+            not isinstance(self.implementation_version_pins, tuple)
+            or not self.implementation_version_pins
+            or any(
+                type(pin) is not ImplementationVersionPinV1
+                for pin in self.implementation_version_pins
+            )
+            or len(
+                {pin.math_spec_id for pin in self.implementation_version_pins}
+            )
+            != len(self.implementation_version_pins)
+        ):
+            raise ContractValidationError(
+                ReasonCode.PARAMETER_POLICY_OR_PIN_INVALID,
+                "implementation_version_pins must be exact, ordered, and unique",
+            )
+        created = _utc_timestamp(self.created_at, "created_at")
+        evaluated = _utc_timestamp(self.evaluated_at, "evaluated_at")
+        expires = _utc_timestamp(self.expires_at, "expires_at")
+        if not created <= evaluated <= expires:
+            raise ContractValidationError(
+                ReasonCode.POLICY_OR_SNAPSHOT_STALE,
+                "candidate times must satisfy created <= evaluated <= expires",
+            )
+        if self.stale_at is not None:
+            stale = _utc_timestamp(self.stale_at, "stale_at")
+            if stale < created:
+                raise ContractValidationError(
+                    ReasonCode.POLICY_OR_SNAPSHOT_STALE,
+                    "stale_at cannot precede candidate creation",
+                )
+        _typed_enum(self.candidate_state, SnapshotCandidateStateV1, "candidate_state")
+        _reason_tuple(self.reason_codes, "reason_codes", require_nonempty=True)
+        for name in (
+            "runtime_effect_authorized",
+            "order_release_authorized",
+            "activated",
+        ):
+            _must_be_false(getattr(self, name), name)
+
+
+@dataclass(frozen=True, slots=True)
+class ModeSnapshotDecisionV1:
+    decision_id: str
+    request_id: str
+    task_id: str
+    principal_id: str
+    current_agent_id: str
+    capability_decision_ref: str
+    computation_bundle_ref: str
+    context_ref: str
+    parameter_policy_snapshot_ref: str
+    receipt_lineage_refs: tuple[str, ...]
+    readiness_state_ref: str
+    pretrade_state_ref: str
+    evidence_state_ref: str
+    kill_state_ref: str
+    submit_disabled_state_ref: str
+    owner_action_policy_ref: str
+    current_mode: str
+    requested_mode: str
+    mode_eligibility_state: ModeEligibilityState
+    allow_candidate_state: AllowCandidateStateV1
+    snapshot_candidate_state: SnapshotCandidateStateV1
+    activation_precondition_state: ActivationPreconditionStateV1
+    rollback_state: SnapshotRollbackStateV1
+    rollback_target_ref_or_explicit_absence: str
+    pin_policy_ref: str
+    stale_state: str
+    expires_at: datetime
+    retirement_state: SnapshotRetirementStateV1
+    implementation_pins: tuple[ImplementationVersionPinV1, ...]
+    source_epoch_refs: tuple[str, ...]
+    reason_codes: tuple[ReasonCode, ...]
+    fallback_route: str
+    owner_review_route: str
+    no_trade_route: str
+    latency_measurement_ref_or_explicit_absence: str
+    runtime_effect_authorized: bool = False
+    active_pointer_commit_allowed: bool = False
+    order_release_authorized: bool = False
+
+    def __post_init__(self) -> None:
+        for name in (
+            "decision_id",
+            "request_id",
+            "task_id",
+            "principal_id",
+            "current_agent_id",
+            "capability_decision_ref",
+            "computation_bundle_ref",
+            "context_ref",
+            "parameter_policy_snapshot_ref",
+            "readiness_state_ref",
+            "pretrade_state_ref",
+            "evidence_state_ref",
+            "kill_state_ref",
+            "submit_disabled_state_ref",
+            "owner_action_policy_ref",
+            "current_mode",
+            "requested_mode",
+            "rollback_target_ref_or_explicit_absence",
+            "pin_policy_ref",
+            "stale_state",
+            "fallback_route",
+            "owner_review_route",
+            "no_trade_route",
+            "latency_measurement_ref_or_explicit_absence",
+        ):
+            _canonical_text(getattr(self, name), name)
+        _validate_unique_text(self.receipt_lineage_refs, "receipt_lineage_refs", nonempty=True)
+        if not isinstance(self.implementation_pins, tuple) or any(
+            type(pin) is not ImplementationVersionPinV1
+            for pin in self.implementation_pins
+        ):
+            raise ContractValidationError(
+                ReasonCode.PARAMETER_POLICY_OR_PIN_INVALID,
+                "implementation_pins require exact typed pins",
+            )
+        early_terminal = (
+            self.computation_bundle_ref == "EXPLICIT_ABSENCE"
+            and self.snapshot_candidate_state is SnapshotCandidateStateV1.ABSENT
+            and self.allow_candidate_state
+            in {AllowCandidateStateV1.BLOCKED, AllowCandidateStateV1.EVIDENCE_UNAVAILABLE}
+        )
+        if not early_terminal and not self.implementation_pins:
+            raise ContractValidationError(
+                ReasonCode.PARAMETER_POLICY_OR_PIN_INVALID,
+                "candidate-body decisions require exact implementation pins",
+            )
+        _validate_unique_text(
+            self.source_epoch_refs,
+            "source_epoch_refs",
+            nonempty=not early_terminal,
+        )
+        for value, enum_type, name in (
+            (self.mode_eligibility_state, ModeEligibilityState, "mode_eligibility_state"),
+            (self.allow_candidate_state, AllowCandidateStateV1, "allow_candidate_state"),
+            (self.snapshot_candidate_state, SnapshotCandidateStateV1, "snapshot_candidate_state"),
+            (self.activation_precondition_state, ActivationPreconditionStateV1, "activation_precondition_state"),
+            (self.rollback_state, SnapshotRollbackStateV1, "rollback_state"),
+            (self.retirement_state, SnapshotRetirementStateV1, "retirement_state"),
+        ):
+            _typed_enum(value, enum_type, name)
+        _utc_timestamp(self.expires_at, "expires_at")
+        _reason_tuple(self.reason_codes, "reason_codes", require_nonempty=True)
+        for name in (
+            "runtime_effect_authorized",
+            "active_pointer_commit_allowed",
+            "order_release_authorized",
+        ):
+            _must_be_false(getattr(self, name), name)
+
+
+_D_TRANSITION_STATE_TYPES = (
+    ModeEligibilityState,
+    AllowCandidateStateV1,
+    SnapshotCandidateStateV1,
+    SnapshotRollbackStateV1,
+    SnapshotRetirementStateV1,
+)
+
+
+@dataclass(frozen=True, slots=True)
+class SnapshotTransitionProposalV1:
+    proposal_id: str
+    request_id: str
+    principal_id: str
+    task_id: str
+    capability_decision_ref: str
+    context_ref: str
+    source_candidate_ref_or_explicit_absence: str
+    target_candidate_ref: str
+    source_candidate_version_or_explicit_absence: str
+    target_candidate_version: str
+    transition_id: str
+    source_state: str
+    destination_state: str
+    expected_owner_state_ref: str
+    precondition_receipt_refs: tuple[str, ...]
+    predecessor_transition_receipt_refs: tuple[str, ...]
+    predecessor_transition_receipt_proposals: tuple[object, ...]
+    proposed_state: ModeEligibilityState | AllowCandidateStateV1 | SnapshotCandidateStateV1 | SnapshotRollbackStateV1 | SnapshotRetirementStateV1
+    primary_reason_code: ReasonCode
+    diagnostic_reason_codes: tuple[ReasonCode, ...]
+    typed_reason_codes: tuple[ReasonCode, ...]
+    owner_confirmation_required: bool
+    causation_id: str
+    correlation_id: str
+    no_mutation_flag: bool = True
+    no_activation_flag: bool = True
+    no_order_release_flag: bool = True
+    active_pointer_commit_allowed: bool = False
+    mutation_allowed: bool = False
+    runtime_effect_authorized: bool = False
+    order_release_authorized: bool = False
+
+    def __post_init__(self) -> None:
+        for name in (
+            "proposal_id",
+            "request_id",
+            "principal_id",
+            "task_id",
+            "capability_decision_ref",
+            "context_ref",
+            "source_candidate_ref_or_explicit_absence",
+            "target_candidate_ref",
+            "source_candidate_version_or_explicit_absence",
+            "target_candidate_version",
+            "transition_id",
+            "source_state",
+            "destination_state",
+            "expected_owner_state_ref",
+            "causation_id",
+            "correlation_id",
+        ):
+            _canonical_text(getattr(self, name), name)
+        _validate_unique_text(
+            self.precondition_receipt_refs,
+            "precondition_receipt_refs",
+            nonempty=True,
+        )
+        _validate_unique_text(
+            self.predecessor_transition_receipt_refs,
+            "predecessor_transition_receipt_refs",
+        )
+        from .receipts import (
+            EconomicReceiptEventSpineV1,
+            EconomicRecordTypeV1,
+            ModeSnapshotControlReceiptRecordV1,
+        )
+
+        if (
+            not isinstance(self.predecessor_transition_receipt_proposals, tuple)
+            or any(
+                type(row) is not EconomicReceiptEventSpineV1
+                or row.record_type is not EconomicRecordTypeV1.MODE_SNAPSHOT_CONTROL
+                or type(row.typed_payload) is not ModeSnapshotControlReceiptRecordV1
+                for row in self.predecessor_transition_receipt_proposals
+            )
+            or tuple(
+                row.record_id
+                for row in self.predecessor_transition_receipt_proposals
+            )
+            != self.predecessor_transition_receipt_refs
+        ):
+            raise ContractValidationError(
+                ReasonCode.CONTRACT_OR_TYPE_INVALID,
+                "predecessor transition refs require exact typed receipt-spine proposals",
+            )
+        if type(self.proposed_state) not in _D_TRANSITION_STATE_TYPES:
+            raise ContractValidationError(
+                ReasonCode.CONTRACT_OR_TYPE_INVALID,
+                "proposed_state must be an exact frozen D transition state",
+            )
+        _typed_enum(self.primary_reason_code, ReasonCode, "primary_reason_code")
+        _reason_tuple(self.diagnostic_reason_codes, "diagnostic_reason_codes")
+        _reason_tuple(self.typed_reason_codes, "typed_reason_codes", require_nonempty=True)
+        if self.typed_reason_codes != (
+            self.primary_reason_code,
+            *self.diagnostic_reason_codes,
+        ):
+            raise ContractValidationError(
+                ReasonCode.CONTRACT_OR_TYPE_INVALID,
+                "transition reasons must be canonical primary reason then ordered diagnostics",
+            )
+        if type(self.owner_confirmation_required) is not bool:
+            raise ContractValidationError(
+                ReasonCode.CONTRACT_OR_TYPE_INVALID,
+                "owner-confirmation requirement must be an exact boolean",
+            )
+        from .mode_snapshot_policy import TRANSITION_BY_ID
+
+        try:
+            rule = TRANSITION_BY_ID[self.transition_id]
+        except KeyError as exc:
+            raise ContractValidationError(
+                ReasonCode.CONTRACT_OR_TYPE_INVALID,
+                "transition proposal references an unknown frozen transition",
+            ) from exc
+        if (
+            self.source_state != rule.source_state
+            or self.destination_state != rule.destination_state
+            or self.primary_reason_code is not rule.reason_code
+            or self.owner_confirmation_required is not rule.owner_confirmation_required
+            or self.proposed_state.value != rule.destination_state
+        ):
+            raise ContractValidationError(
+                ReasonCode.CONTRACT_OR_TYPE_INVALID,
+                "transition proposal does not join the frozen transition registry exactly",
+            )
+        required_predecessor = (
+            "T06"
+            if self.transition_id == "T07"
+            else "T12"
+            if self.transition_id in {"T13", "T14"}
+            else None
+        )
+        if required_predecessor is not None:
+            predecessor_rule = TRANSITION_BY_ID[required_predecessor]
+            if len(self.predecessor_transition_receipt_proposals) != 1:
+                raise ContractValidationError(
+                    ReasonCode.CONTRACT_OR_TYPE_INVALID,
+                    "transition proposal lacks its required predecessor receipt proof",
+                )
+            predecessor_proposal = self.predecessor_transition_receipt_proposals[0]
+            predecessor_payload = predecessor_proposal.typed_payload
+            expected_candidate_ref = (
+                self.target_candidate_ref
+                if self.transition_id == "T07"
+                else self.source_candidate_ref_or_explicit_absence
+            )
+            expected_candidate_version = (
+                self.target_candidate_version
+                if self.transition_id == "T07"
+                else self.source_candidate_version_or_explicit_absence
+            )
+            if (
+                predecessor_payload.transition_id != required_predecessor
+                or predecessor_payload.request_id != self.request_id
+                or predecessor_payload.principal_id != self.principal_id
+                or predecessor_payload.task_id != self.task_id
+                or predecessor_payload.capability_decision_ref
+                != self.capability_decision_ref
+                or predecessor_payload.context_ref != self.context_ref
+                or predecessor_payload.source_state != predecessor_rule.source_state
+                or predecessor_payload.destination_state
+                != predecessor_rule.destination_state
+                or predecessor_payload.destination_state != rule.source_state
+                or predecessor_payload.typed_reason_codes[0]
+                is not predecessor_rule.reason_code
+                or predecessor_payload.snapshot_candidate_ref_or_explicit_absence
+                != expected_candidate_ref
+                or predecessor_payload.target_candidate_version
+                != expected_candidate_version
+                or self.expected_owner_state_ref
+                not in predecessor_payload.state_before_refs
+                or predecessor_payload.no_mutation_flag is not True
+                or predecessor_payload.no_activation_flag is not True
+                or predecessor_payload.no_order_authority_flag is not True
+            ):
+                raise ContractValidationError(
+                    ReasonCode.CONTRACT_OR_TYPE_INVALID,
+                    "predecessor receipt does not prove the exact transition and candidate scope",
+                )
+        if required_predecessor is None and (
+            self.predecessor_transition_receipt_refs
+            or self.predecessor_transition_receipt_proposals
+        ):
+            raise ContractValidationError(
+                ReasonCode.CONTRACT_OR_TYPE_INVALID,
+                "transition proposal claims an inapplicable predecessor receipt",
+            )
+        if self.causation_id == self.correlation_id:
+            raise ContractValidationError(
+                ReasonCode.CONTRACT_OR_TYPE_INVALID,
+                "causation and correlation identities must remain distinct",
+            )
+        for name in (
+            "no_mutation_flag",
+            "no_activation_flag",
+            "no_order_release_flag",
+        ):
+            if getattr(self, name) is not True:
+                raise ContractValidationError(
+                    ReasonCode.RUNTIME_EFFECT_FORBIDDEN,
+                    f"{name} must remain exact true",
+                )
+        for name in (
+            "active_pointer_commit_allowed",
+            "mutation_allowed",
+            "runtime_effect_authorized",
+            "order_release_authorized",
+        ):
+            _must_be_false(getattr(self, name), name)
+
+
+@dataclass(frozen=True, slots=True)
+class ExecutedModeSnapshotTransitionTraceV1:
+    """One ordered, immutable account of the D transitions actually executed."""
+
+    proposals: tuple[SnapshotTransitionProposalV1, ...]
+
+    def __post_init__(self) -> None:
+        if (
+            not isinstance(self.proposals, tuple)
+            or not self.proposals
+            or any(type(row) is not SnapshotTransitionProposalV1 for row in self.proposals)
+            or len({row.proposal_id for row in self.proposals}) != len(self.proposals)
+        ):
+            raise ContractValidationError(
+                ReasonCode.CONTRACT_OR_TYPE_INVALID,
+                "executed transition trace requires unique exact proposal rows",
+            )
+        first = self.proposals[0]
+        identity_fields = (
+            "request_id",
+            "principal_id",
+            "task_id",
+            "capability_decision_ref",
+            "context_ref",
+            "target_candidate_version",
+            "causation_id",
+            "correlation_id",
+        )
+        if any(
+            getattr(row, name) != getattr(first, name)
+            for row in self.proposals[1:]
+            for name in identity_fields
+        ):
+            raise ContractValidationError(
+                ReasonCode.IDENTITY_OR_VERSION_UNRESOLVED,
+                "executed transition rows do not share one admitted request identity",
+            )
+        transition_ids = tuple(row.transition_id for row in self.proposals)
+        allowed_shapes = {
+            ("T03",),
+            ("T04",),
+            ("T05",),
+            ("T08",),
+            ("T08", "T09", "T06"),
+            ("T08", "T09", "T07"),
+            ("T08", "T10"),
+            ("T08", "T09", "T04"),
+        }
+        if transition_ids not in allowed_shapes:
+            raise ContractValidationError(
+                ReasonCode.CONTRACT_OR_TYPE_INVALID,
+                f"executed transition trace has a noncanonical D shape: {transition_ids!r}",
+            )
+        if transition_ids[0] == "T08":
+            candidate_ref = first.target_candidate_ref
+            if (
+                candidate_ref == "EXPLICIT_ABSENCE"
+                or any(row.target_candidate_ref != candidate_ref for row in self.proposals)
+                or any(
+                    row.source_candidate_ref_or_explicit_absence != candidate_ref
+                    for row in self.proposals[1:]
+                )
+            ):
+                raise ContractValidationError(
+                    ReasonCode.SNAPSHOT_PIN_CONFLICT,
+                    "candidate-stage transition rows do not preserve one candidate identity",
+                )
+
+    @property
+    def final_proposal(self) -> SnapshotTransitionProposalV1:
+        return self.proposals[-1]
+
+
+_MODE_SNAPSHOT_TERMINAL_OUTCOME_MATRIX_V1: Mapping[
+    tuple[str, ...],
+    tuple[bool, AllowCandidateStateV1, SnapshotCandidateStateV1],
+] = MappingProxyType(
+    {
+        ("T03",): (
+            False,
+            AllowCandidateStateV1.EVIDENCE_UNAVAILABLE,
+            SnapshotCandidateStateV1.ABSENT,
+        ),
+        ("T04",): (
+            False,
+            AllowCandidateStateV1.BLOCKED,
+            SnapshotCandidateStateV1.ABSENT,
+        ),
+        ("T05",): (
+            False,
+            AllowCandidateStateV1.BLOCKED,
+            SnapshotCandidateStateV1.ABSENT,
+        ),
+        ("T08", "T09", "T06"): (
+            True,
+            AllowCandidateStateV1.OWNER_CONFIRMATION_REQUIRED,
+            SnapshotCandidateStateV1.VALIDATED_NO_EFFECT,
+        ),
+        ("T08", "T09", "T07"): (
+            True,
+            AllowCandidateStateV1.ELIGIBLE_NOT_ACTIVATED,
+            SnapshotCandidateStateV1.VALIDATED_NO_EFFECT,
+        ),
+        ("T08", "T10"): (
+            False,
+            AllowCandidateStateV1.BLOCKED,
+            SnapshotCandidateStateV1.REJECTED,
+        ),
+        ("T08", "T09", "T04"): (
+            True,
+            AllowCandidateStateV1.BLOCKED,
+            SnapshotCandidateStateV1.VALIDATED_NO_EFFECT,
+        ),
+    }
+)
+
+
+def _validate_mode_snapshot_terminal_outcome_consistency(
+    *,
+    candidate: FormulaRuntimeSnapshotCandidateV1 | None,
+    decision: ModeSnapshotDecisionV1,
+    trace: ExecutedModeSnapshotTransitionTraceV1,
+    final_proposal: SnapshotTransitionProposalV1,
+) -> None:
+    """Fail closed unless all returned terminal D surfaces describe one outcome."""
+
+    transition_ids = tuple(row.transition_id for row in trace.proposals)
+    try:
+        (
+            candidate_required,
+            expected_allow_state,
+            expected_snapshot_state,
+        ) = _MODE_SNAPSHOT_TERMINAL_OUTCOME_MATRIX_V1[transition_ids]
+    except KeyError as exc:
+        raise ContractValidationError(
+            ReasonCode.CONTRACT_OR_TYPE_INVALID,
+            f"terminal mode-snapshot result has no registered outcome: {transition_ids!r}",
+        ) from exc
+
+    if candidate_required != (candidate is not None):
+        raise ContractValidationError(
+            ReasonCode.SNAPSHOT_CANDIDATE_INVALID,
+            "terminal trace and returned candidate presence do not match",
+        )
+    if (
+        decision.allow_candidate_state is not expected_allow_state
+        or decision.snapshot_candidate_state is not expected_snapshot_state
+        or final_proposal.transition_id != transition_ids[-1]
+    ):
+        raise ContractValidationError(
+            ReasonCode.CONTRACT_OR_TYPE_INVALID,
+            "terminal trace and decision states do not match the registered outcome",
+        )
+
+    trace_identity_fields = (
+        "request_id",
+        "principal_id",
+        "task_id",
+        "capability_decision_ref",
+        "context_ref",
+    )
+    if any(
+        getattr(proposal, field_name) != getattr(decision, field_name)
+        for proposal in trace.proposals
+        for field_name in trace_identity_fields
+    ):
+        raise ContractValidationError(
+            ReasonCode.IDENTITY_OR_VERSION_UNRESOLVED,
+            "decision and executed trace do not share one admitted identity",
+        )
+    if any(
+        proposal.precondition_receipt_refs != decision.receipt_lineage_refs
+        for proposal in trace.proposals
+    ):
+        raise ContractValidationError(
+            ReasonCode.IDENTITY_OR_VERSION_UNRESOLVED,
+            "executed trace preconditions differ from decision receipt lineage",
+        )
+
+    from .mode_snapshot_policy import TRANSITION_BY_ID
+
+    terminal_rule = TRANSITION_BY_ID[final_proposal.transition_id]
+    expected_proposed_state = (
+        decision.snapshot_candidate_state
+        if final_proposal.transition_id == "T10"
+        else decision.allow_candidate_state
+    )
+    if (
+        final_proposal.primary_reason_code is not decision.reason_codes[0]
+        or final_proposal.diagnostic_reason_codes != decision.reason_codes[1:]
+        or final_proposal.typed_reason_codes != decision.reason_codes
+        or final_proposal.proposed_state is not expected_proposed_state
+        or terminal_rule.terminal_route != decision.fallback_route
+    ):
+        raise ContractValidationError(
+            ReasonCode.CONTRACT_OR_TYPE_INVALID,
+            "final proposal reason, state, or registered terminal route differs from the decision",
+        )
+
+    early_absence_shapes = {("T03",), ("T04",), ("T05",)}
+    if transition_ids in early_absence_shapes and any(
+        proposal.source_candidate_ref_or_explicit_absence != "EXPLICIT_ABSENCE"
+        or proposal.target_candidate_ref != "EXPLICIT_ABSENCE"
+        or proposal.source_candidate_version_or_explicit_absence
+        != "EXPLICIT_ABSENCE"
+        for proposal in trace.proposals
+    ):
+        raise ContractValidationError(
+            ReasonCode.SNAPSHOT_PIN_CONFLICT,
+            "candidate-absence terminal trace contains a candidate identity or source version",
+        )
+
+    if transition_ids == ("T08", "T10"):
+        build_proposal, rejected_proposal = trace.proposals
+        rejected_candidate_ref = build_proposal.target_candidate_ref
+        if (
+            build_proposal.source_candidate_ref_or_explicit_absence
+            != "EXPLICIT_ABSENCE"
+            or build_proposal.source_candidate_version_or_explicit_absence
+            != "EXPLICIT_ABSENCE"
+            or rejected_candidate_ref == "EXPLICIT_ABSENCE"
+            or rejected_proposal.source_candidate_ref_or_explicit_absence
+            != rejected_candidate_ref
+            or rejected_proposal.target_candidate_ref != rejected_candidate_ref
+            or rejected_proposal.source_candidate_version_or_explicit_absence
+            != build_proposal.target_candidate_version
+        ):
+            raise ContractValidationError(
+                ReasonCode.SNAPSHOT_PIN_CONFLICT,
+                "rejected candidate trace does not preserve its build identity and version",
+            )
+
+    if candidate is None:
+        return
+
+    candidate_decision_fields = (
+        ("request_id", "request_id"),
+        ("principal_id", "principal_id"),
+        ("task_id", "task_id"),
+        ("capability_decision_ref", "capability_decision_ref"),
+        ("computation_bundle_ref", "computation_bundle_ref"),
+        ("context_ref", "context_ref"),
+        ("implementation_version_pins", "implementation_pins"),
+        ("parameter_policy_snapshot_ref", "parameter_policy_snapshot_ref"),
+        ("source_epoch_refs", "source_epoch_refs"),
+        ("receipt_lineage_refs", "receipt_lineage_refs"),
+        ("readiness_state_ref", "readiness_state_ref"),
+        ("pretrade_state_ref", "pretrade_state_ref"),
+        ("evidence_state_ref", "evidence_state_ref"),
+        ("kill_state_ref", "kill_state_ref"),
+        ("submit_disabled_state_ref", "submit_disabled_state_ref"),
+        ("expires_at", "expires_at"),
+    )
+    if any(
+        getattr(candidate, candidate_field) != getattr(decision, decision_field)
+        for candidate_field, decision_field in candidate_decision_fields
+    ):
+        raise ContractValidationError(
+            ReasonCode.SNAPSHOT_PIN_CONFLICT,
+            "validated candidate and decision identity or pins differ",
+        )
+    if (
+        candidate.candidate_state is not SnapshotCandidateStateV1.VALIDATED_NO_EFFECT
+        or candidate.runtime_effect_authorized is not False
+        or candidate.order_release_authorized is not False
+        or candidate.activated is not False
+    ):
+        raise ContractValidationError(
+            ReasonCode.RUNTIME_EFFECT_FORBIDDEN,
+            "returned candidate must be validated and retain exact no-effect custody",
+        )
+
+    build_proposal, validated_proposal, terminal_proposal = trace.proposals
+    candidate_ref = candidate.snapshot_candidate_id
+    candidate_version = build_proposal.target_candidate_version
+    if (
+        build_proposal.source_candidate_ref_or_explicit_absence
+        != "EXPLICIT_ABSENCE"
+        or build_proposal.source_candidate_version_or_explicit_absence
+        != "EXPLICIT_ABSENCE"
+        or build_proposal.target_candidate_ref != candidate_ref
+        or validated_proposal.source_candidate_ref_or_explicit_absence
+        != candidate_ref
+        or validated_proposal.target_candidate_ref != candidate_ref
+        or validated_proposal.source_candidate_version_or_explicit_absence
+        != candidate_version
+        or terminal_proposal.source_candidate_ref_or_explicit_absence
+        != candidate_ref
+        or terminal_proposal.target_candidate_ref != candidate_ref
+        or terminal_proposal.source_candidate_version_or_explicit_absence
+        != candidate_version
+    ):
+        raise ContractValidationError(
+            ReasonCode.SNAPSHOT_PIN_CONFLICT,
+            "validated candidate and executed trace identity or version differ",
+        )
+
+
+@dataclass(frozen=True, slots=True)
+class ModeSnapshotCandidateProposalResultV1:
+    snapshot_candidate_or_explicit_absence: FormulaRuntimeSnapshotCandidateV1 | None
+    mode_snapshot_decision: ModeSnapshotDecisionV1
+    snapshot_transition_proposal: SnapshotTransitionProposalV1
+    executed_transition_trace: ExecutedModeSnapshotTransitionTraceV1
+    control_receipt_refs: tuple[str, ...]
+    owner_projection_or_explicit_absence: ModeSnapshotOwnerProjectionV1 | None = None
+    latency_measurement_or_explicit_absence: LatencyMeasurementV1 | None = None
+    control_receipt_proposals: tuple[object, ...] = ()
+    no_authority_flag: bool = True
+
+    def __post_init__(self) -> None:
+        if self.snapshot_candidate_or_explicit_absence is not None and type(
+            self.snapshot_candidate_or_explicit_absence
+        ) is not FormulaRuntimeSnapshotCandidateV1:
+            raise ContractValidationError(
+                ReasonCode.CONTRACT_OR_TYPE_INVALID,
+                "snapshot candidate must be exact typed candidate or explicit None",
+            )
+        if (
+            type(self.mode_snapshot_decision) is not ModeSnapshotDecisionV1
+            or type(self.snapshot_transition_proposal) is not SnapshotTransitionProposalV1
+            or type(self.executed_transition_trace)
+            is not ExecutedModeSnapshotTransitionTraceV1
+            or self.snapshot_transition_proposal
+            is not self.executed_transition_trace.final_proposal
+        ):
+            raise ContractValidationError(
+                ReasonCode.CONTRACT_OR_TYPE_INVALID,
+                "mode snapshot result requires one exact trace and its final proposal",
+            )
+        _validate_mode_snapshot_terminal_outcome_consistency(
+            candidate=self.snapshot_candidate_or_explicit_absence,
+            decision=self.mode_snapshot_decision,
+            trace=self.executed_transition_trace,
+            final_proposal=self.snapshot_transition_proposal,
+        )
+        _validate_unique_text(self.control_receipt_refs, "control_receipt_refs")
+        if (
+            self.owner_projection_or_explicit_absence is not None
+            and type(self.owner_projection_or_explicit_absence)
+            is not ModeSnapshotOwnerProjectionV1
+        ):
+            raise ContractValidationError(
+                ReasonCode.CONTRACT_OR_TYPE_INVALID,
+                "owner projection must be the exact final projection or explicit None",
+            )
+        if self.owner_projection_or_explicit_absence is not None:
+            projection = self.owner_projection_or_explicit_absence
+            decision = self.mode_snapshot_decision
+            if (
+                projection.decision_id != decision.decision_id
+                or projection.mode_eligibility_state
+                is not decision.mode_eligibility_state
+                or projection.allow_candidate_state is not decision.allow_candidate_state
+                or projection.snapshot_candidate_state
+                is not decision.snapshot_candidate_state
+                or projection.reason_codes != decision.reason_codes
+                or projection.fallback_route != decision.fallback_route
+                or projection.owner_review_route != decision.owner_review_route
+            ):
+                raise ContractValidationError(
+                    ReasonCode.CONTRACT_OR_TYPE_INVALID,
+                    "returned owner projection must describe the final decision exactly",
+                )
+        if self.latency_measurement_or_explicit_absence is not None:
+            if type(self.latency_measurement_or_explicit_absence) is not LatencyMeasurementV1:
+                raise ContractValidationError(
+                    ReasonCode.CONTRACT_OR_TYPE_INVALID,
+                    "returned latency measurement must use the exact typed contract",
+                )
+            if (
+                self.mode_snapshot_decision.latency_measurement_ref_or_explicit_absence
+                != self.latency_measurement_or_explicit_absence.measurement_ref
+            ):
+                raise ContractValidationError(
+                    ReasonCode.CONTRACT_OR_TYPE_INVALID,
+                    "returned latency measurement identity differs from the decision pin",
+                )
+        if not isinstance(self.control_receipt_proposals, tuple):
+            raise ContractValidationError(
+                ReasonCode.CONTRACT_OR_TYPE_INVALID,
+                "control receipt proposals must be an immutable tuple",
+            )
+        if self.control_receipt_proposals:
+            from .receipts import (
+                EconomicReceiptEventSpineV1,
+                ModeSnapshotControlClassV1,
+            )
+
+            if (
+                any(
+                    type(row) is not EconomicReceiptEventSpineV1
+                    for row in self.control_receipt_proposals
+                )
+                or tuple(row.record_id for row in self.control_receipt_proposals)
+                != self.control_receipt_refs
+            ):
+                raise ContractValidationError(
+                    ReasonCode.CONTRACT_OR_TYPE_INVALID,
+                    "control receipt refs must resolve to the exact returned typed proposals",
+                )
+            proposal_by_class = {
+                ModeSnapshotControlClassV1.MODE_SNAPSHOT_EVALUATION: (
+                    self.executed_transition_trace.final_proposal
+                ),
+                ModeSnapshotControlClassV1.SNAPSHOT_CANDIDATE_BUILD: next(
+                    (
+                        row
+                        for row in self.executed_transition_trace.proposals
+                        if row.transition_id == "T08"
+                    ),
+                    None,
+                ),
+                ModeSnapshotControlClassV1.SNAPSHOT_CANDIDATE_VALIDATION: next(
+                    (
+                        row
+                        for row in self.executed_transition_trace.proposals
+                        if row.transition_id in {"T09", "T10"}
+                    ),
+                    None,
+                ),
+            }
+            expected_classes = (
+                ModeSnapshotControlClassV1.MODE_SNAPSHOT_EVALUATION,
+                *(
+                    (ModeSnapshotControlClassV1.SNAPSHOT_CANDIDATE_BUILD,)
+                    if proposal_by_class[
+                        ModeSnapshotControlClassV1.SNAPSHOT_CANDIDATE_BUILD
+                    ]
+                    is not None
+                    else ()
+                ),
+                *(
+                    (ModeSnapshotControlClassV1.SNAPSHOT_CANDIDATE_VALIDATION,)
+                    if proposal_by_class[
+                        ModeSnapshotControlClassV1.SNAPSHOT_CANDIDATE_VALIDATION
+                    ]
+                    is not None
+                    else ()
+                ),
+            )
+            if any(
+                (mapped := proposal_by_class.get(row.typed_payload.control_class)) is None
+                or (
+                    row.typed_payload.transition_proposal_ref,
+                    row.typed_payload.transition_id,
+                    row.typed_payload.source_state,
+                    row.typed_payload.destination_state,
+                    row.typed_payload.target_candidate_version,
+                    row.typed_payload.state_before_refs,
+                    row.typed_payload.state_after_refs,
+                    row.typed_payload.typed_reason_codes,
+                    row.typed_payload.predecessor_transition_receipt_refs,
+                    row.causation_id,
+                    row.correlation_id,
+                )
+                != (
+                    mapped.proposal_id,
+                    mapped.transition_id,
+                    mapped.source_state,
+                    mapped.destination_state,
+                    mapped.target_candidate_version,
+                    tuple(
+                        dict.fromkeys(
+                            (
+                                mapped.source_state,
+                                mapped.expected_owner_state_ref,
+                                mapped.source_candidate_ref_or_explicit_absence,
+                                *mapped.predecessor_transition_receipt_refs,
+                            )
+                        )
+                    ),
+                    tuple(
+                        dict.fromkeys(
+                            (mapped.destination_state, mapped.target_candidate_ref)
+                        )
+                    ),
+                    mapped.typed_reason_codes,
+                    mapped.predecessor_transition_receipt_refs,
+                    mapped.causation_id,
+                    mapped.correlation_id,
+                )
+                for row in self.control_receipt_proposals
+            ) or tuple(
+                row.typed_payload.control_class
+                for row in self.control_receipt_proposals
+            ) != expected_classes:
+                raise ContractValidationError(
+                    ReasonCode.CONTRACT_OR_TYPE_INVALID,
+                    "control receipt cardinality and transition fields must resolve to the exact executed trace rows",
+                )
+        elif self.control_receipt_refs:
+            raise ContractValidationError(
+                ReasonCode.CONTRACT_OR_TYPE_INVALID,
+                "string-only control receipt references are forbidden",
+            )
+        _exact_bool(self.no_authority_flag, "no_authority_flag")
+        if self.no_authority_flag is not True:
+            raise ContractValidationError(
+                ReasonCode.RUNTIME_EFFECT_FORBIDDEN,
+                "mode snapshot proposal must retain its no-authority flag",
+            )
+
+
+@dataclass(frozen=True, slots=True)
+class ModeSnapshotOwnerProjectionV1:
+    decision_id: str
+    mode_eligibility_state: ModeEligibilityState
+    allow_candidate_state: AllowCandidateStateV1
+    snapshot_candidate_state: SnapshotCandidateStateV1
+    evidence_state: ST12FEvidenceStateV1
+    kill_state: KillStateV1
+    submit_disabled_state: SubmitDisabledStateV1
+    stale_state: str
+    reason_codes: tuple[ReasonCode, ...]
+    fallback_route: str
+    owner_review_route: str
+    policy_and_snapshot_versions: tuple[str, ...]
+    runtime_effect_authorized: bool = False
+    order_release_authorized: bool = False
+
+    def __post_init__(self) -> None:
+        for name in ("decision_id", "stale_state", "fallback_route", "owner_review_route"):
+            _canonical_text(getattr(self, name), name)
+        for value, enum_type, name in (
+            (self.mode_eligibility_state, ModeEligibilityState, "mode_eligibility_state"),
+            (self.allow_candidate_state, AllowCandidateStateV1, "allow_candidate_state"),
+            (self.snapshot_candidate_state, SnapshotCandidateStateV1, "snapshot_candidate_state"),
+            (self.evidence_state, ST12FEvidenceStateV1, "evidence_state"),
+            (self.kill_state, KillStateV1, "kill_state"),
+            (self.submit_disabled_state, SubmitDisabledStateV1, "submit_disabled_state"),
+        ):
+            _typed_enum(value, enum_type, name)
+        _reason_tuple(self.reason_codes, "reason_codes", require_nonempty=True)
+        _validate_unique_text(
+            self.policy_and_snapshot_versions,
+            "policy_and_snapshot_versions",
+            nonempty=True,
+        )
+        _must_be_false(self.runtime_effect_authorized, "runtime_effect_authorized")
+        _must_be_false(self.order_release_authorized, "order_release_authorized")
+
+
+@dataclass(frozen=True, slots=True)
+class LatencyStageDurationsV1:
+    central_capability_admission_ns: int
+    request_validation_ns: int
+    identity_and_context_resolution_ns: int
+    parameter_and_source_binding_ns: int
+    snapshot_candidate_resolution_ns: int
+    formula_compute_ns: int
+    output_validation_ns: int
+    receipt_materialization_ns: int
+    owner_projection_ns: int
+    total_local_no_effect_ns: int
+
+    def __post_init__(self) -> None:
+        component_names = tuple(
+            field.name
+            for field in dataclass_fields(self)
+            if field.name != "total_local_no_effect_ns"
+        )
+        if any(
+            isinstance(getattr(self, name), bool)
+            or not isinstance(getattr(self, name), int)
+            or getattr(self, name) < 0
+            for name in (*component_names, "total_local_no_effect_ns")
+        ):
+            raise ContractValidationError(
+                ReasonCode.CONTRACT_OR_TYPE_INVALID,
+                "latency stage durations must be nonnegative integer nanoseconds",
+            )
+        if self.total_local_no_effect_ns != sum(
+            getattr(self, name) for name in component_names
+        ):
+            raise ContractValidationError(
+                ReasonCode.CLOCK_DOMAIN_MISMATCH,
+                "total_local_no_effect_ns must equal the exact stage decomposition",
+            )
+
+
+@dataclass(frozen=True, slots=True)
+class LatencyMeasurementLabelsV1:
+    cold_or_warm: str
+    concurrency_level: int
+    platform_profile_id: str
+    operation_id: str
+    success_or_blocker: str
+    fallback_used: bool
+
+    def __post_init__(self) -> None:
+        for name in (
+            "cold_or_warm",
+            "platform_profile_id",
+            "operation_id",
+            "success_or_blocker",
+        ):
+            _canonical_text(getattr(self, name), name)
+        if self.cold_or_warm not in {"COLD", "WARM"}:
+            raise ContractValidationError(
+                ReasonCode.CONTRACT_OR_TYPE_INVALID,
+                "cold_or_warm must be exact COLD or WARM",
+            )
+        if (
+            isinstance(self.concurrency_level, bool)
+            or not isinstance(self.concurrency_level, int)
+            or self.concurrency_level < 1
+        ):
+            raise ContractValidationError(
+                ReasonCode.RESOURCE_BOUND_EXCEEDED,
+                "concurrency_level must be a positive integer",
+            )
+        _exact_bool(self.fallback_used, "fallback_used")
+
+
+@dataclass(frozen=True, slots=True)
+class LatencyMeasurementV1:
+    measurement_ref: str
+    event_time_utc: datetime
+    local_duration_clock_id: str
+    clock_implementation: str
+    clock_resolution_ns: int
+    platform_description: str
+    stages: LatencyStageDurationsV1
+    labels: LatencyMeasurementLabelsV1
+    cumulative_stage_ns: tuple[int, ...]
+    rejection_count: int
+    observer_overhead_ns: int
+    runtime_effect_authorized: bool = False
+
+    def __post_init__(self) -> None:
+        for name in (
+            "measurement_ref",
+            "local_duration_clock_id",
+            "clock_implementation",
+            "platform_description",
+        ):
+            _canonical_text(getattr(self, name), name)
+        _utc_timestamp(self.event_time_utc, "event_time_utc")
+        if self.local_duration_clock_id not in {
+            "LOCAL_DURATION",
+            "LOCAL_DURATION_FALLBACK",
+        }:
+            raise ContractValidationError(
+                ReasonCode.CLOCK_DOMAIN_MISMATCH,
+                "local durations require a registered monotonic clock",
+            )
+        if type(self.stages) is not LatencyStageDurationsV1 or type(
+            self.labels
+        ) is not LatencyMeasurementLabelsV1:
+            raise ContractValidationError(
+                ReasonCode.CONTRACT_OR_TYPE_INVALID,
+                "latency measurement requires exact stage and label contracts",
+            )
+        if (
+            isinstance(self.clock_resolution_ns, bool)
+            or not isinstance(self.clock_resolution_ns, int)
+            or self.clock_resolution_ns < 0
+            or not isinstance(self.cumulative_stage_ns, tuple)
+            or len(self.cumulative_stage_ns) != 9
+            or any(
+                isinstance(value, bool) or not isinstance(value, int) or value < 0
+                for value in self.cumulative_stage_ns
+            )
+            or tuple(sorted(self.cumulative_stage_ns)) != self.cumulative_stage_ns
+            or self.cumulative_stage_ns[-1] != self.stages.total_local_no_effect_ns
+        ):
+            raise ContractValidationError(
+                ReasonCode.CLOCK_DOMAIN_MISMATCH,
+                "latency clock metadata or cumulative decomposition is invalid",
+            )
+        for name in ("rejection_count", "observer_overhead_ns"):
+            value = getattr(self, name)
+            if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+                raise ContractValidationError(
+                    ReasonCode.CONTRACT_OR_TYPE_INVALID,
+                    f"{name} must be a nonnegative integer",
+                )
+        _must_be_false(self.runtime_effect_authorized, "runtime_effect_authorized")
+
+
+@dataclass(frozen=True, slots=True)
+class LatencyBudgetProfileV1:
+    profile_id: str
+    component_budget_ns: tuple[tuple[str, int], ...]
+    histogram_boundaries_ns: tuple[int, ...]
+    maximum_observer_overhead_ns: int
+    alert_threshold_ns: int
+    policy_version: str
+
+    def __post_init__(self) -> None:
+        _canonical_text(self.profile_id, "profile_id")
+        _canonical_text(self.policy_version, "policy_version")
+        if (
+            not isinstance(self.component_budget_ns, tuple)
+            or not self.component_budget_ns
+            or any(
+                not isinstance(item, tuple)
+                or len(item) != 2
+                or not isinstance(item[0], str)
+                or not item[0]
+                or isinstance(item[1], bool)
+                or not isinstance(item[1], int)
+                or item[1] < 0
+                for item in self.component_budget_ns
+            )
+            or len({item[0] for item in self.component_budget_ns})
+            != len(self.component_budget_ns)
+        ):
+            raise ContractValidationError(
+                ReasonCode.LATENCY_PROFILE_REQUIRED,
+                "component budgets must be exact unique owner-supplied nanosecond rows",
+            )
+        if (
+            not isinstance(self.histogram_boundaries_ns, tuple)
+            or not self.histogram_boundaries_ns
+            or any(
+                isinstance(value, bool) or not isinstance(value, int) or value < 0
+                for value in self.histogram_boundaries_ns
+            )
+            or tuple(sorted(set(self.histogram_boundaries_ns)))
+            != self.histogram_boundaries_ns
+        ):
+            raise ContractValidationError(
+                ReasonCode.LATENCY_PROFILE_REQUIRED,
+                "histogram boundaries must be strictly increasing nanoseconds",
+            )
+        for name in ("maximum_observer_overhead_ns", "alert_threshold_ns"):
+            value = getattr(self, name)
+            if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+                raise ContractValidationError(
+                    ReasonCode.LATENCY_PROFILE_REQUIRED,
+                    f"{name} must be owner-supplied nonnegative nanoseconds",
+                )
+
+
+@dataclass(frozen=True, slots=True)
+class ResourceBoundsProfileV1:
+    profile_id: str
+    maximum_input_cardinality: int
+    maximum_input_bytes: int
+    maximum_dependency_depth: int
+    maximum_bootstrap_repetitions: int
+    maximum_concurrency: int
+
+    def __post_init__(self) -> None:
+        _canonical_text(self.profile_id, "profile_id")
+        for name in (
+            "maximum_input_cardinality",
+            "maximum_input_bytes",
+            "maximum_dependency_depth",
+            "maximum_bootstrap_repetitions",
+            "maximum_concurrency",
+        ):
+            value = getattr(self, name)
+            if isinstance(value, bool) or not isinstance(value, int) or value < 1:
+                raise ContractValidationError(
+                    ReasonCode.RESOURCE_BOUND_EXCEEDED,
+                    f"{name} must be an explicit positive bound",
+                )
+
+
+@dataclass(frozen=True, slots=True)
 class TransactionEnvelopeV1:
     transaction_id: str
     snapshot_id: str
@@ -1245,6 +2962,74 @@ def _validate_unique_text(values: object, field_name: str, *, nonempty: bool = F
         raise ContractValidationError(
             ReasonCode.INVALID_CONTRACT,
             f"{field_name} must not contain duplicates",
+        )
+
+
+def validate_reference_identity_classes(
+    *,
+    policy_refs: tuple[str, ...] = (),
+    semantic_policy_set_versions: tuple[str, ...] = (),
+    source_snapshot_refs: tuple[str, ...] = (),
+    source_epoch_refs: tuple[str, ...] = (),
+    receipt_refs: tuple[str, ...] = (),
+    candidate_or_decision_refs: tuple[str, ...] = (),
+    explicit_absence_refs: tuple[str, ...] = (),
+) -> None:
+    """Enforce the non-overlapping D reference ontology at existing boundaries."""
+
+    classes = {
+        "policy_ref": policy_refs,
+        "semantic_policy_set_version": semantic_policy_set_versions,
+        "source_snapshot_ref": source_snapshot_refs,
+        "source_epoch_ref": source_epoch_refs,
+        "receipt_ref": receipt_refs,
+        "candidate_or_decision_ref": candidate_or_decision_refs,
+    }
+    for name, values in classes.items():
+        _validate_unique_text(values, name)
+        if "EXPLICIT_ABSENCE" in values:
+            raise ContractValidationError(
+                ReasonCode.CONTRACT_OR_TYPE_INVALID,
+                f"explicit absence cannot occupy the {name} class",
+            )
+    _validate_unique_text(explicit_absence_refs, "explicit_absence")
+    if any(value != "EXPLICIT_ABSENCE" for value in explicit_absence_refs):
+        raise ContractValidationError(
+            ReasonCode.CONTRACT_OR_TYPE_INVALID,
+            "explicit-absence references must use the exact typed absence identity",
+        )
+    typed_sets = {name: set(values) for name, values in classes.items()}
+    names = tuple(typed_sets)
+    collisions = {
+        value
+        for index, name in enumerate(names)
+        for other in names[index + 1 :]
+        for value in typed_sets[name] & typed_sets[other]
+    }
+    if collisions:
+        raise ContractValidationError(
+            ReasonCode.CONTRACT_OR_TYPE_INVALID,
+            "reference identities cannot satisfy multiple semantic classes: "
+            + ", ".join(sorted(collisions)),
+        )
+    forbidden_receipt_prefixes = (
+        "ComputationParameterPolicyV1::",
+        "OWNER-PROJECTION-RECEIPT::",
+    )
+    forbidden_epoch_prefixes = (
+        "PARAMETER-POLICY-EPOCH::",
+        "OWNER-PROJECTION-EPOCH::",
+        "EVIDENCE-EPOCH::",
+    )
+    if any(ref.startswith(forbidden_receipt_prefixes) for ref in receipt_refs):
+        raise ContractValidationError(
+            ReasonCode.CONTRACT_OR_TYPE_INVALID,
+            "policy or projection identities cannot satisfy receipt fields",
+        )
+    if any(ref.startswith(forbidden_epoch_prefixes) for ref in source_epoch_refs):
+        raise ContractValidationError(
+            ReasonCode.SOURCE_EPOCH_STALE,
+            "semantic policy or projection versions cannot satisfy source epochs",
         )
 
 
@@ -1708,10 +3493,13 @@ class FrozenFormulaOutputV1:
                 ReasonCode.INVALID_CONTRACT,
                 "formula output requires the exact execution context",
             )
-        if self.output_schema_version != "ST12B_OUTPUT_V3_4":
+        if self.output_schema_version not in {
+            "ST12B_OUTPUT_V3_4",
+            "ST12D_OUTPUT_V1",
+        }:
             raise ContractValidationError(
                 ReasonCode.OUTPUT_SCHEMA_MISMATCH,
-                "formula outputs must use the exact frozen ST12B output version",
+                "formula outputs must use an exact current output schema version",
             )
         _validate_unique_text(self.receipt_refs, "receipt_refs")
         _exact_bool(self.no_authority_flag, "no_authority_flag")
@@ -1785,6 +3573,19 @@ class ResolutionExplanationV1(_TypedOperationResultV1):
 class CandidateProposalV1(_TypedOperationResultV1):
     candidate_id: str = ""
     proposal_state: str = "NO_EFFECT_RECORD"
+    mode_snapshot_result: ModeSnapshotCandidateProposalResultV1 | None = None
+
+    def __post_init__(self) -> None:
+        _TypedOperationResultV1.__post_init__(self)
+        _canonical_text(self.candidate_id, "candidate_id")
+        _canonical_text(self.proposal_state, "proposal_state")
+        if self.mode_snapshot_result is not None and type(
+            self.mode_snapshot_result
+        ) is not ModeSnapshotCandidateProposalResultV1:
+            raise ContractValidationError(
+                ReasonCode.CONTRACT_OR_TYPE_INVALID,
+                "mode_snapshot_result must be the exact optional D result",
+            )
 
 
 @dataclass(frozen=True, slots=True)

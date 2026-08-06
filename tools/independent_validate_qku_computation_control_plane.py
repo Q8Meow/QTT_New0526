@@ -10,7 +10,7 @@ import sys
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-DOMAINS = ("architecture", "operations", "quantum", "security", "source", "e")
+DOMAINS = ("architecture", "operations", "quantum", "security", "source", "e", "d")
 SUCCESS_MARKER = "QKU_COMPUTATION_CONTROL_PLANE_INDEPENDENTLY_VALIDATED"
 
 

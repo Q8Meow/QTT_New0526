@@ -41,10 +41,12 @@ EXPECTED_PRODUCTION_FILES = {
     "agent_policy.py",
     "lifecycle.py",
     "sqlite_reference.py",
+    "latency_policy.py",
+    "mode_snapshot_policy.py",
 }
 
 
-def test_production_package_is_exactly_the_collapsed_39_files() -> None:
+def test_production_package_is_exactly_the_collapsed_41_files() -> None:
     root = Path(__file__).resolve().parents[4]
     package = (
         root

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import ast
 from collections import Counter
-from dataclasses import dataclass, fields
+from dataclasses import dataclass, fields, replace
 from datetime import UTC, datetime, timedelta
 from decimal import Decimal
 from enum import StrEnum
@@ -4597,3 +4597,1780 @@ def _security_with_st12e_checks() -> tuple[ValidationCheckV1, ...]:
 
 
 _DOMAIN_CHECKS["security"] = _security_with_st12e_checks
+
+
+# ST12-D frozen denominators and grouped physical routing.  These registries
+# carry semantic IDs only; executable predicates below validate the real owners.
+_ST12D_POLICY_TEST = (
+    "tests/stage1_prediction_markets/qku_computation_control_plane/"
+    "test_policy_state_matrix.py"
+)
+_ST12D_INTEGRATION_TEST = (
+    "tests/stage1_prediction_markets/qku_computation_control_plane/"
+    "test_integration_snapshot_matrix.py"
+)
+_ST12D_ADVERSARIAL_TEST = (
+    "tests/stage1_prediction_markets/qku_computation_control_plane/"
+    "test_adversarial_latency_security_matrix.py"
+)
+_ST12D_CONTROL_SEEDS = (
+    ("execution", "010", "sequence-gap-recovery", "READ_ONLY_CONSUME_EXISTING_EXECUTION_OWNER_AND_ENFORCE_D_GATE", _ST12D_POLICY_TEST),
+    ("execution", "011", "venue-semantic-binding", "READ_ONLY_CONSUME_EXISTING_EXECUTION_OWNER_AND_ENFORCE_D_GATE", _ST12D_POLICY_TEST),
+    ("execution", "012", "replay-paper-separation", "FREEZE_TYPED_ST12F_INTERFACE_FAIL_CLOSED_UNTIL_F", _ST12D_POLICY_TEST),
+    ("execution", "013", "historical-data-grade", "FREEZE_TYPED_ST12F_INTERFACE_FAIL_CLOSED_UNTIL_F", _ST12D_POLICY_TEST),
+    ("execution", "014", "cross-venue-equivalence", "FREEZE_TYPED_ST12F_INTERFACE_FAIL_CLOSED_UNTIL_F", _ST12D_POLICY_TEST),
+    ("latency", "001", "clock-inventory", "IMPLEMENT_PURE_NO_EFFECT_POLICY_UNDER_EXISTING_CONTROL_PLANE", _ST12D_ADVERSARIAL_TEST),
+    ("latency", "002", "timestamp-semantics", "IMPLEMENT_PURE_NO_EFFECT_POLICY_UNDER_EXISTING_CONTROL_PLANE", _ST12D_ADVERSARIAL_TEST),
+    ("latency", "003", "latency-decomposition", "IMPLEMENT_PURE_NO_EFFECT_POLICY_UNDER_EXISTING_CONTROL_PLANE", _ST12D_ADVERSARIAL_TEST),
+    ("latency", "004", "percentile-policy", "IMPLEMENT_PURE_NO_EFFECT_POLICY_UNDER_EXISTING_CONTROL_PLANE", _ST12D_ADVERSARIAL_TEST),
+    ("latency", "005", "cold-warm-paths", "IMPLEMENT_PURE_NO_EFFECT_POLICY_UNDER_EXISTING_CONTROL_PLANE", _ST12D_ADVERSARIAL_TEST),
+    ("latency", "011", "concurrency", "IMPLEMENT_PURE_NO_EFFECT_POLICY_UNDER_EXISTING_CONTROL_PLANE", _ST12D_ADVERSARIAL_TEST),
+    ("latency", "012", "trace-propagation", "IMPLEMENT_PURE_NO_EFFECT_POLICY_UNDER_EXISTING_CONTROL_PLANE", _ST12D_ADVERSARIAL_TEST),
+    ("latency", "013", "telemetry-semantics", "IMPLEMENT_PURE_NO_EFFECT_POLICY_UNDER_EXISTING_CONTROL_PLANE", _ST12D_ADVERSARIAL_TEST),
+    ("latency", "014", "independent-measurement", "IMPLEMENT_PURE_NO_EFFECT_POLICY_UNDER_EXISTING_CONTROL_PLANE", _ST12D_ADVERSARIAL_TEST),
+    ("latency", "015", "observer-effect", "IMPLEMENT_PURE_NO_EFFECT_POLICY_UNDER_EXISTING_CONTROL_PLANE", _ST12D_ADVERSARIAL_TEST),
+    ("latency", "016", "platform-parity", "IMPLEMENT_PURE_NO_EFFECT_POLICY_UNDER_EXISTING_CONTROL_PLANE", _ST12D_ADVERSARIAL_TEST),
+    ("latency", "017", "stale-fallback", "IMPLEMENT_PURE_NO_EFFECT_POLICY_UNDER_EXISTING_CONTROL_PLANE", _ST12D_POLICY_TEST),
+    ("latency", "018", "source-latency", "IMPLEMENT_PURE_NO_EFFECT_POLICY_UNDER_EXISTING_CONTROL_PLANE", _ST12D_ADVERSARIAL_TEST),
+    ("latency", "019", "quantum-llm-latency", "IMPLEMENT_PURE_NO_EFFECT_POLICY_UNDER_EXISTING_CONTROL_PLANE", _ST12D_ADVERSARIAL_TEST),
+    ("latency", "020", "slo-and-alerts", "IMPLEMENT_PURE_NO_EFFECT_POLICY_UNDER_EXISTING_CONTROL_PLANE", _ST12D_ADVERSARIAL_TEST),
+    ("security", "011", "replay-and-duplicate-defense", "IMPLEMENT_PURE_NO_EFFECT_POLICY_UNDER_EXISTING_CONTROL_PLANE", _ST12D_ADVERSARIAL_TEST),
+    ("security", "012", "race-condition-safety", "IMPLEMENT_PURE_NO_EFFECT_POLICY_UNDER_EXISTING_CONTROL_PLANE", _ST12D_ADVERSARIAL_TEST),
+    ("security", "013", "resource-bounds", "IMPLEMENT_PURE_NO_EFFECT_POLICY_UNDER_EXISTING_CONTROL_PLANE", _ST12D_ADVERSARIAL_TEST),
+)
+_ST12D_CONTROL_OWNER_FIELDS = MappingProxyType(
+    {
+        "ST11-EXECUTION::010": "FormulaInputResolverV1.sequence_id",
+        "ST11-EXECUTION::011": "ST12DMath39RawInputBindingV1.accepted_upstream_owner_id",
+        "ST11-EXECUTION::012": "QKUComputationControlPlaneV1.mode_snapshot_input_resolver",
+        "ST11-EXECUTION::013": "ResolvedSnapshotParameterValueV1.producer_receipt_refs",
+        "ST11-EXECUTION::014": "OwnerProjectionViewV1.source_epoch_refs",
+        "ST11-LATENCY::001": "CLOCK_REGISTRY.clock_id",
+        "ST11-LATENCY::002": "CLOCK_REGISTRY.allowed_use",
+        "ST11-LATENCY::003": "LatencyStageDurationsV1.stage_names",
+        "ST11-LATENCY::004": "LatencyDistributionV1.percentiles",
+        "ST11-LATENCY::005": "LatencyMeasurementLabelsV1.cold_or_warm",
+        "ST11-LATENCY::011": "LatencyMeasurementLabelsV1.concurrency_level",
+        "ST11-LATENCY::012": "validate_trace_propagation.output_traceparent",
+        "ST11-LATENCY::013": "LatencyMeasurementV1.rejection_count",
+        "ST11-LATENCY::014": "LatencyMeasurementV1.local_duration_clock_id",
+        "ST11-LATENCY::015": "LatencyMeasurementV1.observer_overhead_ns",
+        "ST11-LATENCY::016": "CLOCK_REGISTRY.api_or_source",
+        "ST11-LATENCY::017": "stale_fallback.terminal_route",
+        "ST11-LATENCY::018": "CLOCK_REGISTRY.PROVIDER_EVENT_TIME",
+        "ST11-LATENCY::019": "FORBIDDEN_HOTPATH_DEPENDENCIES.effect_class",
+        "ST11-LATENCY::020": "LatencyBudgetProfileV1.owner_profile",
+        "ST11-SECURITY::011": "NoEffectFlagsV1.effect_authorities",
+        "ST11-SECURITY::012": "ModeSnapshotControlReceiptRecordV1.transition_id",
+        "ST11-SECURITY::013": "ResourceBoundsProfileV1.maximum_input_bytes",
+    }
+)
+_ST12D_CONTROL_TERMINAL_STATES = MappingProxyType(
+    {
+        "ST11-EXECUTION::010": "SEQUENCE_GAP_REJECTED",
+        "ST11-EXECUTION::011": "EXACT_VENUE_OWNER_BINDINGS",
+        "ST11-EXECUTION::012": "CANONICAL_CURRENT_RESOLVER_ENFORCED",
+        "ST11-EXECUTION::013": "POLICY_RECEIPT_CLASSES_SEPARATED",
+        "ST11-EXECUTION::014": "SOURCE_SNAPSHOT_EPOCH_CLASSES_SEPARATED",
+        "ST11-LATENCY::001": "REGISTERED_NO_EFFECT",
+        "ST11-LATENCY::002": "CLOCK_DOMAINS_SEPARATED",
+        "ST11-LATENCY::003": "EXACT_NINE_STAGE_DECOMPOSITION",
+        "ST11-LATENCY::004": "NEAREST_RANK_PERCENTILES",
+        "ST11-LATENCY::005": "COLD_WARM_LABEL_BOUND",
+        "ST11-LATENCY::011": "BOUNDED_CONCURRENCY_LABEL_BOUND",
+        "ST11-LATENCY::012": "TRACE_PROPAGATED_OR_REJECTED",
+        "ST11-LATENCY::013": "TELEMETRY_NO_EFFECT",
+        "ST11-LATENCY::014": "LOCAL_MONOTONIC_MEASUREMENT",
+        "ST11-LATENCY::015": "OWNER_PROFILE_REVALIDATION",
+        "ST11-LATENCY::016": "PLATFORM_CLOCK_IDENTITY_BOUND",
+        "ST11-LATENCY::017": "NO_TRADE_OR_PREAPPROVED_FALLBACK",
+        "ST11-LATENCY::018": "PROVIDER_TIME_SOURCE_ONLY",
+        "ST11-LATENCY::019": "LATER_TRANCHE_AUTHORITY_REQUIRED",
+        "ST11-LATENCY::020": "OFFLINE_MEASUREMENT_ONLY_BLOCK_ALLOW_CANDIDACY",
+        "ST11-SECURITY::011": "NO_EFFECTS",
+        "ST11-SECURITY::012": "STAGE_TRANSITION_RECEIPTS_ALIGNED",
+        "ST11-SECURITY::013": "RESOURCE_BOUND_EXCEEDED",
+    }
+)
+ST12D_CLOSURE_ROWS: tuple[Mapping[str, object], ...] = tuple(
+    MappingProxyType(
+        {
+            "closure_id": f"ST12-CLOSURE::ST11-{domain.upper()}::{number}",
+            "control_id": f"ST11-{domain.upper()}::{number}",
+            "domain": domain,
+            "control_slug": slug,
+            "terminal_disposition": disposition,
+            "grouped_test_module": module,
+            "predicate_ref": f"ST12D-PREDICATE::{domain.upper()}::{number}",
+            "positive_fixture_ref": f"ST12D-FIXTURE::POSITIVE::{domain.upper()}::{number}",
+            "causal_mutation_ref": f"ST12D-FIXTURE::MUTATION::{domain.upper()}::{number}",
+            "causal_owner_field_ref": _ST12D_CONTROL_OWNER_FIELDS[
+                f"ST11-{domain.upper()}::{number}"
+            ],
+            "expected_terminal_state": _ST12D_CONTROL_TERMINAL_STATES[
+                f"ST11-{domain.upper()}::{number}"
+            ],
+            "runtime_effect_authorized": False,
+            "order_release_authorized": False,
+        }
+    )
+    for domain, number, slug, disposition, module in _ST12D_CONTROL_SEEDS
+)
+
+ST12D_HISTORICAL_PATH_DISPOSITIONS = (
+    ("mode_eligibility.py", "SUPERSEDED_BY_STRONGER_CURRENT_LOGIC", "models.py,service.py,mode_snapshot_policy.py"),
+    ("snapshot.py", "EXTEND_EXISTING_OWNER", "models.py,mode_snapshot_policy.py"),
+    ("activation.py", "CREATE_NEW_UNDER_EXISTING_OWNER", "mode_snapshot_policy.py"),
+    ("pinning.py", "SUPERSEDED_BY_STRONGER_CURRENT_LOGIC", "models.py,mode_snapshot_policy.py"),
+    ("hotpath_contract.py", "SUPERSEDED_BY_STRONGER_CURRENT_LOGIC", "PR137L,latency_policy.py"),
+    ("rollback_policy.py", "CREATE_NEW_UNDER_EXISTING_OWNER", "mode_snapshot_policy.py"),
+    ("kill_switch_protocol.py", "EXTEND_EXISTING_OWNER", "protocols.py,mode_snapshot_policy.py"),
+)
+
+_ST12D_SEMANTIC_CONTROL_REF = MappingProxyType(
+    {
+        "ST12-TEST::064": "ST11-EXECUTION::014",
+        "ST12-TEST::066": "ST11-EXECUTION::013",
+        "ST12-TEST::076": "ST11-EXECUTION::012",
+        "ST12-TEST::077": "ST11-EXECUTION::010",
+        "ST12-TEST::080": "ST11-EXECUTION::011",
+        "ST12-TEST::082": "ST11-LATENCY::001",
+        "ST12-TEST::084": "ST11-LATENCY::005",
+        "ST12-TEST::085": "ST11-LATENCY::011",
+        "ST12-TEST::087": "ST11-LATENCY::014",
+        "ST12-TEST::088": "ST11-LATENCY::003",
+        "ST12-TEST::089": "ST11-LATENCY::015",
+        "ST12-TEST::090": "ST11-LATENCY::004",
+        "ST12-TEST::091": "ST11-LATENCY::016",
+        "ST12-TEST::092": "ST11-LATENCY::019",
+        "ST12-TEST::094": "ST11-LATENCY::020",
+        "ST12-TEST::095": "ST11-LATENCY::018",
+        "ST12-TEST::096": "ST11-LATENCY::017",
+        "ST12-TEST::097": "ST11-LATENCY::013",
+        "ST12-TEST::098": "ST11-LATENCY::002",
+        "ST12-TEST::099": "ST11-LATENCY::012",
+        "ST12-TEST::193": "ST11-SECURITY::012",
+        "ST12-TEST::194": "ST11-SECURITY::011",
+        "ST12-TEST::195": "ST11-SECURITY::013",
+        "ST12-TEST::224": "INDEPENDENT-EXECUTION-VALIDATOR",
+        "ST12-TEST::225": "INDEPENDENT-LATENCY-VALIDATOR",
+        "ST12-TEST::230": "INDEPENDENT-SECURITY-VALIDATOR",
+    }
+)
+
+_ST12D_CLOSURE_BY_CONTROL_ID = MappingProxyType(
+    {str(row["control_id"]): row for row in ST12D_CLOSURE_ROWS}
+)
+_ST12D_INDEPENDENT_VALIDATOR_COMMAND_BY_REF = MappingProxyType(
+    {
+        "INDEPENDENT-EXECUTION-VALIDATOR": (
+            "python tools/independent_validate_qku_computation_control_plane_execution.py"
+        ),
+        "INDEPENDENT-LATENCY-VALIDATOR": (
+            "python tools/independent_validate_qku_computation_control_plane_latency.py"
+        ),
+        "INDEPENDENT-SECURITY-VALIDATOR": (
+            "python tools/independent_validate_qku_computation_control_plane_security.py"
+        ),
+    }
+)
+
+
+def _st12d_semantic_alias_row(test_id: str, module: str) -> Mapping[str, object]:
+    mapped_ref = _ST12D_SEMANTIC_CONTROL_REF[test_id]
+    if mapped_ref in _ST12D_CLOSURE_BY_CONTROL_ID:
+        control = _ST12D_CLOSURE_BY_CONTROL_ID[mapped_ref]
+        predicate_ref = str(control["predicate_ref"])
+        positive_fixture_ref = str(control["positive_fixture_ref"])
+        causal_mutation_ref = str(control["causal_mutation_ref"])
+        causal_owner_field_ref = str(control["causal_owner_field_ref"])
+        expected_terminal_state = str(control["expected_terminal_state"])
+    else:
+        command = _ST12D_INDEPENDENT_VALIDATOR_COMMAND_BY_REF[mapped_ref]
+        predicate_ref = f"ST12D-CERTIFIED-VALIDATOR::{mapped_ref}"
+        positive_fixture_ref = command
+        causal_mutation_ref = (
+            f"EXPLICIT_NOT_MATERIAL_WITH_PROOF::{mapped_ref}"
+        )
+        causal_owner_field_ref = command
+        expected_terminal_state = "VALIDATOR_PASS"
+    return MappingProxyType(
+        {
+            "test_id": test_id,
+            "grouped_module": module,
+            "mapped_control_case_or_validator_ref": mapped_ref,
+            "predicate_ref": predicate_ref,
+            "positive_fixture_ref": positive_fixture_ref,
+            "causal_mutation_ref": causal_mutation_ref,
+            "causal_owner_field_ref": causal_owner_field_ref,
+            "expected_terminal_state": expected_terminal_state,
+        }
+    )
+
+
+ST12D_SEMANTIC_TEST_ROWS: tuple[Mapping[str, object], ...] = tuple(
+    _st12d_semantic_alias_row(test_id, module)
+    for test_id, module in (
+        *((test_id, _ST12D_INTEGRATION_TEST) for test_id in ("ST12-TEST::064", "ST12-TEST::066", "ST12-TEST::076", "ST12-TEST::077", "ST12-TEST::080")),
+        *((test_id, _ST12D_ADVERSARIAL_TEST) for test_id in ("ST12-TEST::082", "ST12-TEST::084", "ST12-TEST::085", "ST12-TEST::087", "ST12-TEST::088", "ST12-TEST::089", "ST12-TEST::090", "ST12-TEST::091", "ST12-TEST::092", "ST12-TEST::094", "ST12-TEST::095", "ST12-TEST::096", "ST12-TEST::097", "ST12-TEST::098", "ST12-TEST::099", "ST12-TEST::193", "ST12-TEST::194", "ST12-TEST::195")),
+        *((test_id, "tools/independent_validate_qku_computation_control_plane_d.py") for test_id in ("ST12-TEST::224", "ST12-TEST::225", "ST12-TEST::230")),
+    )
+)
+
+ST12D_CERTIFIED_COMMANDS = (
+    *_ST12D_INDEPENDENT_VALIDATOR_COMMAND_BY_REF.values(),
+    "python tools/validate_qku_computation_control_plane.py --domain execution",
+    "python tools/validate_qku_computation_control_plane.py --domain latency",
+    "python tools/validate_qku_computation_control_plane.py --domain security",
+)
+
+ST12D_GENERATED_PROJECTION_PATHS = tuple(
+    "docs/master_plan/generated/qku_control_plane/mode_snapshot/" + name
+    for name in (
+        "manifest.json",
+        "control_closure.jsonl",
+        "parameter_binding_refs.jsonl",
+        "mode_state_registry.jsonl",
+        "transition_matrix.jsonl",
+        "d_input_universe.jsonl",
+        "computability_dispositions.jsonl",
+        "artifact_connectivity.jsonl",
+        "validation_summary.json",
+    )
+)
+
+
+def st12d_acceptance_counts() -> Mapping[str, int]:
+    from .implementation_registry import ST12D_MATH_IMPLEMENTATION_REGISTRY
+    from .oracle_contracts import (
+        ST12D_GOLDEN_VECTOR_BY_MATH_ID,
+        ST12D_ORACLE_BY_MATH_ID,
+    )
+    from .parameter_policy import ST12D_PARAMETER_APPLICATION_BINDINGS
+
+    return MappingProxyType(
+        {
+            "closure_controls": len(ST12D_CLOSURE_ROWS),
+            "historical_path_dispositions": len(ST12D_HISTORICAL_PATH_DISPOSITIONS),
+            "parameter_bindings": len(ST12D_PARAMETER_APPLICATION_BINDINGS),
+            "math_specifications": len(ST12D_MATH_IMPLEMENTATION_REGISTRY),
+            "independent_oracles": len(ST12D_ORACLE_BY_MATH_ID),
+            "golden_vectors": len(ST12D_GOLDEN_VECTOR_BY_MATH_ID),
+            "semantic_tests": len(ST12D_SEMANTIC_TEST_ROWS),
+            "certified_commands": len(ST12D_CERTIFIED_COMMANDS),
+        }
+    )
+
+
+_ST12D_EXPECTED_OWNER_FACTS: Mapping[str, object] = MappingProxyType(
+    {
+        "ST11-EXECUTION::010": (
+            "FIVAB::sequenced_book_events::MATH-39",
+            "NO_FUTURE_DATA_AND_EXACT_CONTEXT_AS_OF",
+            "OWNER_TTL_AND_SOURCE_EPOCH_MUST_BE_CURRENT",
+            "ST12D_SEQUENCE_GAP",
+        ),
+        "ST11-EXECUTION::011": (
+            (
+                "sequenced_book_events",
+                "SelectedVenuePublicMarketDataOwnerV1",
+                "SequencedBookEventsPacketV1",
+                "quantity units at acknowledged insertion point",
+            ),
+            (
+                "order_ack",
+                "EconomicReceiptEventSpineV1",
+                "OrderAcknowledgementReceiptV1",
+                "event time at acknowledged insertion point",
+            ),
+        ),
+        "ST11-EXECUTION::012": (
+            "CurrentModeSnapshotInputResolverV1",
+            True,
+            "EVIDENCE_REFERENCE_AVAILABLE",
+        ),
+        "ST11-EXECUTION::013": (
+            "DETERMINISTIC_POLICY_VALUE_MATERIALIZED",
+            (),
+            (),
+            (),
+            (),
+        ),
+        "ST11-EXECUTION::014": (
+            "src/qtt/service/pr169_svc1_resolvers.py",
+            (),
+            (),
+        ),
+        "ST11-LATENCY::001": (
+            "LOCAL_DURATION",
+            "LOCAL_DURATION_FALLBACK",
+            "EVENT_CORRELATION",
+            "PROVIDER_EVENT_TIME",
+        ),
+        "ST11-LATENCY::002": (
+            ("LOCAL_DURATION", "duration deltas only"),
+            ("LOCAL_DURATION_FALLBACK", "duration deltas only"),
+            ("EVENT_CORRELATION", "never subtract for local latency"),
+            (
+                "PROVIDER_EVENT_TIME",
+                "never treat as local duration without synchronization receipt",
+            ),
+        ),
+        "ST11-LATENCY::003": (
+            "central_capability_admission_ns",
+            "request_validation_ns",
+            "identity_and_context_resolution_ns",
+            "parameter_and_source_binding_ns",
+            "snapshot_candidate_resolution_ns",
+            "formula_compute_ns",
+            "output_validation_ns",
+            "receipt_materialization_ns",
+            "owner_projection_ns",
+        ),
+        "ST11-LATENCY::004": (10, 1, 10, 5, 10, 10),
+        "ST11-LATENCY::005": ("COLD", "WARM", False),
+        "ST11-LATENCY::011": (4, False),
+        "ST11-LATENCY::012": ((), ("ST12D_IDENTITY_OR_VERSION_UNRESOLVED",)),
+        "ST11-LATENCY::013": (2, 45, 45, False),
+        "ST11-LATENCY::014": ("VALUE", True, True),
+        "ST11-LATENCY::015": (
+            True,
+            ("ST12D_LATENCY_PROFILE_REQUIRED",),
+            "OWNER_LATENCY_PROFILE_REVALIDATION",
+            False,
+        ),
+        "ST11-LATENCY::016": (
+            "time.perf_counter_ns",
+            "time.monotonic_ns",
+            "timezone-aware UTC wall clock",
+            "typed provider/source timestamp",
+        ),
+        "ST11-LATENCY::017": (
+            "CONTINUE_NO_EFFECT",
+            "PREAPPROVED_FAST_CLASSICAL_FALLBACK_NO_EFFECT",
+            "NO_TRADE",
+        ),
+        "ST11-LATENCY::018": (
+            "never treat as local duration without synchronization receipt",
+            "source decomposition only after clock-domain declaration",
+            True,
+        ),
+        "ST11-LATENCY::019": (
+            (
+                "LLM inference",
+                "QPU execution",
+                "private state access",
+                "provider connection",
+                "quantum simulator execution",
+            ),
+            True,
+        ),
+        "ST11-LATENCY::020": (
+            True,
+            "OFFLINE_MEASUREMENT_ONLY_BLOCK_ALLOW_CANDIDACY",
+            ("ST12D_LATENCY_PROFILE_REQUIRED",),
+            False,
+        ),
+        "ST11-SECURITY::011": (
+            (
+                ("provider_connection_allowed", False),
+                ("private_state_read_allowed", False),
+                ("replay_or_paper_execution_allowed", False),
+                ("llm_inference_allowed", False),
+                ("qpu_execution_allowed", False),
+                ("mode_or_allow_activation_allowed", False),
+                ("order_release_allowed", False),
+                ("capital_mutation_allowed", False),
+            ),
+            "MODE_SNAPSHOT_CONTROL",
+            7,
+        ),
+        "ST11-SECURITY::012": (
+            ("T08", "T09", "T06"),
+            ("T06", "T08", "T09"),
+        ),
+        "ST11-SECURITY::013": (
+            (),
+            ("ST12D_RESOURCE_BOUND_EXCEEDED",),
+        ),
+        "INDEPENDENT-EXECUTION-VALIDATOR": (
+            "python tools/independent_validate_qku_computation_control_plane_execution.py"
+        ),
+        "INDEPENDENT-LATENCY-VALIDATOR": (
+            "python tools/independent_validate_qku_computation_control_plane_latency.py"
+        ),
+        "INDEPENDENT-SECURITY-VALIDATOR": (
+            "python tools/independent_validate_qku_computation_control_plane_security.py"
+        ),
+    }
+)
+
+
+@dataclass(frozen=True, slots=True)
+class ST12DActualControlMutationCaseV1:
+    """One control-level positive fixture and real typed negative mutation."""
+
+    control_id: str
+    positive_typed_fixture_builder: Callable[[], object]
+    actual_owner_or_input_mutation: Callable[[object], object]
+    canonical_observer: Callable[[object], str]
+    expected_positive_terminal_state: str
+    expected_negative_reason_or_terminal_state: str
+    mapped_semantic_test_ids: tuple[str, ...]
+    grouped_module: str
+    positive_fixture_ref: str
+    causal_mutation_ref: str
+    causal_owner_field_ref: str
+
+    def __post_init__(self) -> None:
+        for name in (
+            "control_id",
+            "expected_positive_terminal_state",
+            "expected_negative_reason_or_terminal_state",
+            "grouped_module",
+            "positive_fixture_ref",
+            "causal_mutation_ref",
+            "causal_owner_field_ref",
+        ):
+            value = getattr(self, name)
+            if not isinstance(value, str) or not value.strip():
+                raise RuntimeError(f"ST12-D mutation case {name} is not exact text")
+        if (
+            not callable(self.positive_typed_fixture_builder)
+            or not callable(self.actual_owner_or_input_mutation)
+            or not callable(self.canonical_observer)
+            or not self.mapped_semantic_test_ids
+            or len(self.mapped_semantic_test_ids)
+            != len(set(self.mapped_semantic_test_ids))
+        ):
+            raise RuntimeError("ST12-D actual control mutation case is incomplete")
+
+
+@dataclass(frozen=True, slots=True)
+class ST12DActualControlMutationResultV1:
+    control_id: str
+    positive_terminal_state: str
+    negative_reason_or_terminal_state: str
+    positive_passed: bool
+    actual_mutation_rejected: bool
+
+    @property
+    def passed(self) -> bool:
+        return self.positive_passed and self.actual_mutation_rejected
+
+
+@dataclass(frozen=True, slots=True)
+class _ST12DMath39SequenceFixtureV1:
+    events: tuple[object, ...]
+
+
+@dataclass(frozen=True, slots=True)
+class _ST12DLatencyProfileFixtureV1:
+    measurement: object
+    profile: object | None
+
+
+@dataclass(frozen=True, slots=True)
+class _ST12DTraceFixtureV1:
+    input_traceparent: str
+    input_tracestate: str
+    output_traceparent: str
+    output_tracestate: str
+
+
+@dataclass(frozen=True, slots=True)
+class _ST12DStaleFallbackFixtureV1:
+    evaluated_at: datetime
+    valid_until: datetime
+    preapproved_fast_classical_fallback_ref: str | None
+
+
+@dataclass(frozen=True, slots=True)
+class _ST12DDependencyFixtureV1:
+    dependency_classes: tuple[str, ...]
+
+
+@dataclass(frozen=True, slots=True)
+class _ST12DResourceFixtureV1:
+    usage: object
+    profile: object
+
+
+@dataclass(frozen=True, slots=True)
+class _ST12DResolverAuthorityFixtureV1:
+    service: object
+
+
+@dataclass(frozen=True, slots=True)
+class _ST12DStageReceiptFixtureV1:
+    result: object
+
+
+class _ST12DAdmissionProbeV1:
+    def admit_operation(self, _request: object) -> object:
+        return object()
+
+
+class _ST12DCustomEvidenceResolverV1:
+    evidence_state = "EVIDENCE_REFERENCE_AVAILABLE"
+
+    def resolve_mode_snapshot_preconstruction_gate(self, *_args: object) -> object:
+        return object()
+
+    def enrich_mode_snapshot_candidate(self, *_args: object) -> object:
+        return object()
+
+
+def _st12d_latency_labels(*, cold_or_warm: str = "WARM", concurrency: int = 1):
+    from .models import LatencyMeasurementLabelsV1
+
+    return LatencyMeasurementLabelsV1(
+        cold_or_warm=cold_or_warm,
+        concurrency_level=concurrency,
+        platform_profile_id="OWNER-PLATFORM::ST12D-VALIDATION",
+        operation_id="submit_candidate_proposal",
+        success_or_blocker="NO_EFFECT_VALIDATION",
+        fallback_used=False,
+    )
+
+
+def _st12d_actual_owner_fact(owner_fact_source_ref: str) -> object:
+    if owner_fact_source_ref in {
+        "ST11-EXECUTION::010",
+        "ST11-EXECUTION::011",
+    }:
+        from .bindings import get_current_formula_input_bindings
+
+        bindings = get_current_formula_input_bindings("MATH-39")
+        if owner_fact_source_ref == "ST11-EXECUTION::010":
+            events = bindings[0]
+            return (
+                events.binding_id,
+                events.point_in_time_rule,
+                events.freshness_rule,
+                ReasonCode.SEQUENCE_GAP.value,
+            )
+        return tuple(
+            (
+                row.input_name,
+                row.accepted_upstream_owner_id,
+                row.accepted_packet_or_snapshot_type,
+                row.unit_or_basis,
+            )
+            for row in bindings
+        )
+    if owner_fact_source_ref in {
+        "ST11-EXECUTION::012",
+        "ST11-EXECUTION::013",
+        "ST11-EXECUTION::014",
+    }:
+        fixture = _st12d_build_control_fixture(owner_fact_source_ref)
+        if owner_fact_source_ref == "ST11-EXECUTION::012":
+            from .service import _require_current_mode_snapshot_resolver
+
+            resolver = _require_current_mode_snapshot_resolver(fixture.service)
+            return (
+                type(resolver).__name__,
+                resolver.owner_registry is fixture.service.owner_registry,
+                _ST12DCustomEvidenceResolverV1.evidence_state,
+            )
+        if owner_fact_source_ref == "ST11-EXECUTION::013":
+            return (
+                fixture.resolution_state.value,
+                fixture.producer_receipt_refs,
+                fixture.point_in_time_receipt_refs,
+                fixture.freshness_receipt_refs,
+                fixture.source_epoch_refs,
+            )
+        return (
+            fixture.source_snapshot_ref,
+            fixture.receipt_refs,
+            fixture.source_epoch_refs,
+        )
+
+    from .latency_policy import (
+        CLOCK_REGISTRY,
+        FORBIDDEN_HOTPATH_DEPENDENCIES,
+        STAGE_NAMES,
+        ResourceUsageV1,
+        aggregate_latency_samples,
+        build_latency_measurement,
+        evaluate_latency_profile,
+        local_duration_now_ns,
+        measure_callable,
+        stale_fallback,
+        validate_hotpath_dependency_classes,
+        validate_resource_bounds,
+        validate_trace_propagation,
+    )
+
+    if owner_fact_source_ref == "ST11-LATENCY::001":
+        return tuple(CLOCK_REGISTRY)
+    if owner_fact_source_ref == "ST11-LATENCY::002":
+        return tuple((clock_id, row[1]) for clock_id, row in CLOCK_REGISTRY.items())
+    if owner_fact_source_ref == "ST11-LATENCY::003":
+        return tuple(STAGE_NAMES)
+    if owner_fact_source_ref == "ST11-LATENCY::004":
+        distribution = aggregate_latency_samples((9, 1, 5, 3, 7, 2, 8, 6, 4, 10))
+        return (
+            distribution.count,
+            distribution.minimum_ns,
+            distribution.maximum_ns,
+            distribution.p50_ns,
+            distribution.p95_ns,
+            distribution.p99_ns,
+        )
+    if owner_fact_source_ref == "ST11-LATENCY::005":
+        cold = _st12d_latency_labels(cold_or_warm="COLD")
+        warm = _st12d_latency_labels(cold_or_warm="WARM")
+        return (cold.cold_or_warm, warm.cold_or_warm, warm.fallback_used)
+    if owner_fact_source_ref == "ST11-LATENCY::011":
+        labels = _st12d_latency_labels(concurrency=4)
+        return (labels.concurrency_level, labels.fallback_used)
+    if owner_fact_source_ref == "ST11-LATENCY::012":
+        traceparent = "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01"
+        accepted = validate_trace_propagation(
+            input_traceparent=traceparent,
+            input_tracestate="vendor=value",
+            output_traceparent=traceparent,
+            output_tracestate="vendor=value",
+        )
+        rejected = validate_trace_propagation(
+            input_traceparent=traceparent,
+            input_tracestate="vendor=value",
+            output_traceparent=traceparent[:-2] + "00",
+            output_tracestate="vendor=value",
+        )
+        return (
+            tuple(reason.value for reason in accepted),
+            tuple(reason.value for reason in rejected),
+        )
+    stage_values = {name: index for index, name in enumerate(STAGE_NAMES, start=1)}
+    measured_at = datetime(2026, 8, 4, 12, 0, tzinfo=UTC)
+    if owner_fact_source_ref == "ST11-LATENCY::013":
+        measurement = build_latency_measurement(
+            measurement_ref="LATENCY::ST12D::TELEMETRY",
+            stage_values_ns=stage_values,
+            labels=_st12d_latency_labels(),
+            rejection_count=2,
+            observer_overhead_ns=3,
+            event_time_utc=measured_at,
+        )
+        return (
+            measurement.rejection_count,
+            measurement.cumulative_stage_ns[-1],
+            measurement.stages.total_local_no_effect_ns,
+            measurement.runtime_effect_authorized,
+        )
+    if owner_fact_source_ref == "ST11-LATENCY::014":
+        before = local_duration_now_ns()
+        value, elapsed = measure_callable(lambda: "VALUE")
+        after = local_duration_now_ns()
+        return (value, elapsed >= 0, after >= before)
+    if owner_fact_source_ref == "ST11-LATENCY::015":
+        from .models import LatencyBudgetProfileV1
+
+        measurement = build_latency_measurement(
+            measurement_ref="LATENCY::ST12D::OBSERVER",
+            stage_values_ns=stage_values,
+            labels=_st12d_latency_labels(),
+            observer_overhead_ns=5,
+            event_time_utc=measured_at,
+        )
+        profile = LatencyBudgetProfileV1(
+            profile_id="LATENCY-PROFILE::ST12D::OBSERVER",
+            component_budget_ns=tuple((name, 10) for name in STAGE_NAMES),
+            histogram_boundaries_ns=(1, 10, 100),
+            maximum_observer_overhead_ns=4,
+            alert_threshold_ns=100,
+            policy_version="LATENCY-POLICY::ST12D::OBSERVER",
+        )
+        decision = evaluate_latency_profile(measurement, profile)
+        return (
+            decision.promotion_sensitive_allow_blocked,
+            tuple(reason.value for reason in decision.reason_codes),
+            decision.terminal_route,
+            decision.runtime_effect_authorized,
+        )
+    if owner_fact_source_ref == "ST11-LATENCY::016":
+        return tuple(row[0] for row in CLOCK_REGISTRY.values())
+    if owner_fact_source_ref == "ST11-LATENCY::017":
+        return (
+            stale_fallback(
+                evaluated_at=measured_at,
+                valid_until=measured_at + timedelta(seconds=1),
+                preapproved_fast_classical_fallback_ref=None,
+            ).terminal_route,
+            stale_fallback(
+                evaluated_at=measured_at,
+                valid_until=measured_at - timedelta(seconds=1),
+                preapproved_fast_classical_fallback_ref="FAST-CLASSICAL::PREAPPROVED",
+            ).terminal_route,
+            stale_fallback(
+                evaluated_at=measured_at,
+                valid_until=measured_at - timedelta(seconds=1),
+                preapproved_fast_classical_fallback_ref=None,
+            ).terminal_route,
+        )
+    if owner_fact_source_ref == "ST11-LATENCY::018":
+        provider_clock = CLOCK_REGISTRY["PROVIDER_EVENT_TIME"]
+        return (
+            provider_clock[1],
+            provider_clock[2],
+            "parameter_and_source_binding_ns" in STAGE_NAMES,
+        )
+    if owner_fact_source_ref == "ST11-LATENCY::019":
+        effect_classes = tuple(
+            sorted(
+                FORBIDDEN_HOTPATH_DEPENDENCIES
+                & {
+                    "LLM inference",
+                    "QPU execution",
+                    "quantum simulator execution",
+                    "provider connection",
+                    "private state access",
+                }
+            )
+        )
+        return (
+            effect_classes,
+            all(
+                validate_hotpath_dependency_classes((effect_class,))
+                == (ReasonCode.LATER_TRANCHE_AUTHORITY_REQUIRED,)
+                for effect_class in effect_classes
+            ),
+        )
+    if owner_fact_source_ref == "ST11-LATENCY::020":
+        measurement = build_latency_measurement(
+            measurement_ref="LATENCY::ST12D::OWNER-PROFILE",
+            stage_values_ns=stage_values,
+            labels=_st12d_latency_labels(),
+            event_time_utc=measured_at,
+        )
+        decision = evaluate_latency_profile(measurement, None)
+        return (
+            decision.promotion_sensitive_allow_blocked,
+            decision.terminal_route,
+            tuple(reason.value for reason in decision.reason_codes),
+            decision.runtime_effect_authorized,
+        )
+    if owner_fact_source_ref == "ST11-SECURITY::011":
+        from .receipts import (
+            EconomicRecordTypeV1,
+            ModeSnapshotControlClassV1,
+            NO_EFFECTS_V1,
+        )
+
+        return (
+            tuple(
+                (field.name, getattr(NO_EFFECTS_V1, field.name))
+                for field in fields(NO_EFFECTS_V1)
+            ),
+            EconomicRecordTypeV1.MODE_SNAPSHOT_CONTROL.value,
+            len(ModeSnapshotControlClassV1),
+        )
+    if owner_fact_source_ref == "ST11-SECURITY::012":
+        fixture = _st12d_build_control_fixture(owner_fact_source_ref)
+        return (
+            tuple(
+                row.transition_id
+                for row in fixture.result.executed_transition_trace.proposals
+            ),
+            tuple(
+                row.typed_payload.transition_id
+                for row in fixture.result.control_receipt_proposals
+            ),
+        )
+    if owner_fact_source_ref == "ST11-SECURITY::013":
+        from .models import ResourceBoundsProfileV1
+
+        usage = ResourceUsageV1(4, 128, 4, 0, 2)
+        profile = ResourceBoundsProfileV1(
+            profile_id="RESOURCE-BOUNDS::ST12D::PREDICATE",
+            maximum_input_cardinality=4,
+            maximum_input_bytes=128,
+            maximum_dependency_depth=4,
+            maximum_bootstrap_repetitions=1,
+            maximum_concurrency=2,
+        )
+        return (
+            tuple(reason.value for reason in validate_resource_bounds(usage, profile)),
+            tuple(
+                reason.value
+                for reason in validate_resource_bounds(
+                    ResourceUsageV1(4, 129, 4, 0, 2), profile
+                )
+            ),
+        )
+    if owner_fact_source_ref.startswith("INDEPENDENT-"):
+        command_by_owner = {
+            "INDEPENDENT-EXECUTION-VALIDATOR": (
+                "python tools/independent_validate_qku_computation_control_plane_execution.py"
+            ),
+            "INDEPENDENT-LATENCY-VALIDATOR": (
+                "python tools/independent_validate_qku_computation_control_plane_latency.py"
+            ),
+            "INDEPENDENT-SECURITY-VALIDATOR": (
+                "python tools/independent_validate_qku_computation_control_plane_security.py"
+            ),
+        }
+        command = command_by_owner[owner_fact_source_ref]
+        return command if command in ST12D_CERTIFIED_COMMANDS else "EXPLICIT_ABSENCE"
+    raise ContractValidationError(
+        ReasonCode.CONTRACT_OR_TYPE_INVALID,
+        f"unknown ST12-D predicate owner fact source: {owner_fact_source_ref}",
+    )
+
+
+def _st12d_stage_receipt_fixture(
+    observed_at: datetime,
+) -> _ST12DStageReceiptFixtureV1:
+    from .mode_snapshot_policy import build_snapshot_transition_proposal
+    from .models import (
+        ActivationPreconditionStateV1,
+        AllowCandidateStateV1,
+        ExecutedModeSnapshotTransitionTraceV1,
+        FormulaRuntimeSnapshotCandidateV1,
+        ImplementationVersionPinV1,
+        ModeEligibilityState,
+        ModeSnapshotCandidateProposalResultV1,
+        ModeSnapshotDecisionV1,
+        SnapshotCandidateStateV1,
+        SnapshotRetirementStateV1,
+        SnapshotRollbackStateV1,
+    )
+    from .receipts import materialize_mode_snapshot_control_receipts
+
+    request_id = "REQUEST::ST12D::STAGE-TRACE"
+    principal_id = "parameter_selector_agent"
+    task_id = "TASK::ST12D::STAGE-TRACE"
+    capability_ref = "CAPABILITY::ST12D::STAGE-TRACE"
+    context_ref = "CONTEXT::ST12D::STAGE-TRACE"
+    candidate_ref = "CANDIDATE::ST12D::STAGE-TRACE"
+    candidate_version = "CANDIDATE-VERSION::ST12D::STAGE-TRACE"
+    owner_state_ref = "OWNER-STATE::ST12D::STAGE-TRACE"
+    receipt_refs = ("OWNER-RECEIPT::ST12D::STAGE-TRACE",)
+    computation_bundle_ref = "SNAPSHOT-BUNDLE::ST12D::MATH-13-14-15-39"
+    parameter_policy_snapshot_ref = "ComputationParameterPolicyV1::3.4"
+    readiness_state_ref = "READINESS1::CURRENT"
+    pretrade_state_ref = "PRETRADE1::CURRENT"
+    evidence_state_ref = "ST12F-EVIDENCE::READ-ONLY::CURRENT"
+    safety_state_ref = "SAFETY-RECEIPT::ST12D::CURRENT"
+    implementation_pins = (
+        ImplementationVersionPinV1("MATH-13", "MATH-13::3.4"),
+    )
+    source_epoch_refs = ("SOURCE-EPOCH::ST12D::STAGE-TRACE",)
+    expires_at = observed_at + timedelta(minutes=1)
+    common = {
+        "request_id": request_id,
+        "principal_id": principal_id,
+        "task_id": task_id,
+        "capability_decision_ref": capability_ref,
+        "context_ref": context_ref,
+        "target_candidate_ref": candidate_ref,
+        "target_candidate_version": candidate_version,
+        "expected_owner_state_ref": owner_state_ref,
+        "precondition_receipt_refs": receipt_refs,
+        "causation_id": "CAUSE::ST12D::STAGE-TRACE",
+        "correlation_id": "CORRELATION::ST12D::STAGE-TRACE",
+    }
+    build = build_snapshot_transition_proposal(
+        proposal_id="TRANSITION-PROPOSAL::ST12D::STAGE-TRACE::T08",
+        source_candidate_ref_or_explicit_absence="EXPLICIT_ABSENCE",
+        source_candidate_version_or_explicit_absence="EXPLICIT_ABSENCE",
+        transition_id="T08",
+        proposed_state=SnapshotCandidateStateV1.BUILT_IMMUTABLE,
+        **common,
+    )
+    validated = build_snapshot_transition_proposal(
+        proposal_id="TRANSITION-PROPOSAL::ST12D::STAGE-TRACE::T09",
+        source_candidate_ref_or_explicit_absence=candidate_ref,
+        source_candidate_version_or_explicit_absence=candidate_version,
+        transition_id="T09",
+        proposed_state=SnapshotCandidateStateV1.VALIDATED_NO_EFFECT,
+        **common,
+    )
+    final = build_snapshot_transition_proposal(
+        proposal_id="TRANSITION-PROPOSAL::ST12D::STAGE-TRACE::T06",
+        source_candidate_ref_or_explicit_absence=candidate_ref,
+        source_candidate_version_or_explicit_absence=candidate_version,
+        transition_id="T06",
+        proposed_state=AllowCandidateStateV1.OWNER_CONFIRMATION_REQUIRED,
+        **common,
+    )
+    trace = ExecutedModeSnapshotTransitionTraceV1((build, validated, final))
+    candidate = FormulaRuntimeSnapshotCandidateV1(
+        snapshot_candidate_id=candidate_ref,
+        request_id=request_id,
+        principal_id=principal_id,
+        task_id=task_id,
+        capability_decision_ref=capability_ref,
+        computation_bundle_ref=computation_bundle_ref,
+        context_ref=context_ref,
+        formula_spec_refs=("MATH-13",),
+        implementation_version_pins=implementation_pins,
+        binding_profile_ref="BINDING-PROFILE::ST12D::STAGE-TRACE",
+        parameter_policy_snapshot_ref=parameter_policy_snapshot_ref,
+        parameter_value_refs=("RESOLVED-SNAPSHOT-PARAMETER::ST12D",),
+        source_epoch_refs=source_epoch_refs,
+        receipt_lineage_refs=receipt_refs,
+        readiness_state_ref=readiness_state_ref,
+        pretrade_state_ref=pretrade_state_ref,
+        evidence_state_ref=evidence_state_ref,
+        kill_state_ref=safety_state_ref,
+        submit_disabled_state_ref=safety_state_ref,
+        created_at=observed_at - timedelta(seconds=1),
+        evaluated_at=observed_at,
+        expires_at=expires_at,
+        stale_at=None,
+        candidate_state=SnapshotCandidateStateV1.VALIDATED_NO_EFFECT,
+        reason_codes=(ReasonCode.SNAPSHOT_CANDIDATE_VALID,),
+        fallback_route="RETURN_PROPOSAL_NO_EFFECT",
+        owner_review_route="EXISTING_OWNER_ACTION_REVIEW",
+    )
+    decision = ModeSnapshotDecisionV1(
+        decision_id="MODE-SNAPSHOT-DECISION::ST12D::STAGE-TRACE",
+        request_id=request_id,
+        task_id=task_id,
+        principal_id=principal_id,
+        current_agent_id=principal_id,
+        capability_decision_ref=capability_ref,
+        computation_bundle_ref=computation_bundle_ref,
+        context_ref=context_ref,
+        parameter_policy_snapshot_ref=parameter_policy_snapshot_ref,
+        receipt_lineage_refs=receipt_refs,
+        readiness_state_ref=readiness_state_ref,
+        pretrade_state_ref=pretrade_state_ref,
+        evidence_state_ref=evidence_state_ref,
+        kill_state_ref=safety_state_ref,
+        submit_disabled_state_ref=safety_state_ref,
+        owner_action_policy_ref="OWNER-ACTION-POLICY::CURRENT",
+        current_mode="SAFE_CLASSICAL",
+        requested_mode="HOTPATH_CANDIDATE_ONLY",
+        mode_eligibility_state=(
+            ModeEligibilityState.ELIGIBLE_FOR_ALLOW_CANDIDACY_NO_EFFECT
+        ),
+        allow_candidate_state=AllowCandidateStateV1.OWNER_CONFIRMATION_REQUIRED,
+        snapshot_candidate_state=SnapshotCandidateStateV1.VALIDATED_NO_EFFECT,
+        activation_precondition_state=(
+            ActivationPreconditionStateV1.PRECONDITIONS_SATISFIED_HELD
+        ),
+        rollback_state=SnapshotRollbackStateV1.NONE,
+        rollback_target_ref_or_explicit_absence="EXPLICIT_ABSENCE",
+        pin_policy_ref="ST12D-IN-FLIGHT-PIN-POLICY-v1",
+        stale_state="CURRENT",
+        expires_at=expires_at,
+        retirement_state=SnapshotRetirementStateV1.CURRENT,
+        implementation_pins=implementation_pins,
+        source_epoch_refs=source_epoch_refs,
+        reason_codes=(ReasonCode.OWNER_CONFIRMATION_REQUIRED,),
+        fallback_route="HOLD",
+        owner_review_route="EXISTING_OWNER_ACTION_REVIEW",
+        no_trade_route="ROUTE_TO_PRETRADE1_REOPTIMIZATION",
+        latency_measurement_ref_or_explicit_absence=(
+            "LATENCY-MEASUREMENT::ST12D::STAGE-TRACE"
+        ),
+    )
+    result = ModeSnapshotCandidateProposalResultV1(
+        snapshot_candidate_or_explicit_absence=candidate,
+        mode_snapshot_decision=decision,
+        snapshot_transition_proposal=final,
+        executed_transition_trace=trace,
+        control_receipt_refs=(),
+    )
+    receipts = materialize_mode_snapshot_control_receipts(
+        result,
+        parameter_value_refs=("RESOLVED-SNAPSHOT-PARAMETER::ST12D",),
+        effective_at=observed_at,
+        recorded_at=observed_at,
+        traceparent="00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01",
+        tracestate="vendor=value",
+    )
+    return _ST12DStageReceiptFixtureV1(
+        replace(
+            result,
+            control_receipt_refs=tuple(row.record_id for row in receipts),
+            control_receipt_proposals=receipts,
+        )
+    )
+
+
+def _st12d_build_control_fixture(control_id: str) -> object:
+    from .input_resolver import (
+        Math39BookEventKindV1,
+        Math39SequencedBookEventV1,
+    )
+    from .latency_policy import ResourceUsageV1, build_latency_measurement
+    from .models import (
+        LatencyBudgetProfileV1,
+        ResolvedSnapshotParameterValueV1,
+        ResourceBoundsProfileV1,
+        SnapshotParameterResolutionStateV1,
+    )
+    from .receipts import (
+        NO_EFFECTS_V1,
+    )
+
+    observed_at = datetime(2026, 8, 4, 12, 0, tzinfo=UTC)
+    if control_id == "ST11-EXECUTION::010":
+        common = {
+            "venue_id": "VENUE::ST12D",
+            "instrument_id": "INSTRUMENT::ST12D",
+            "side": "YES",
+            "price": Decimal("0.50"),
+            "event_time": observed_at,
+            "available_at": observed_at,
+            "priority_order_id": "ORDER::ST12D",
+            "venue_evidence_ref": "VENUE-EVIDENCE::ST12D",
+            "unit": "units",
+            "basis": "ACKNOWLEDGED_INSERTION_POINT",
+            "producer_receipt_ref": "RECEIPT::BOOK::ST12D",
+        }
+        return _ST12DMath39SequenceFixtureV1(
+            events=(
+                Math39SequencedBookEventV1(
+                    event_id="EVENT::ST12D::1",
+                    sequence=10,
+                    event_kind=Math39BookEventKindV1.DISPLAYED_BEFORE_ORDER,
+                    quantity=Decimal("100"),
+                    **common,
+                ),
+                Math39SequencedBookEventV1(
+                    event_id="EVENT::ST12D::2",
+                    sequence=11,
+                    event_kind=Math39BookEventKindV1.PRIOR_ADDITION,
+                    quantity=Decimal("20"),
+                    **common,
+                ),
+            )
+        )
+    if control_id == "ST11-EXECUTION::011":
+        from .bindings import ST12D_MATH39_RAW_INPUT_BINDINGS
+
+        return ST12D_MATH39_RAW_INPUT_BINDINGS[0]
+    if control_id == "ST11-EXECUTION::012":
+        from .input_resolver import (
+            CanonicalOwnerPacketRegistryV1,
+            CurrentModeSnapshotInputResolverV1,
+        )
+        from .service import QKUComputationControlPlaneV1
+
+        registry = CanonicalOwnerPacketRegistryV1()
+        return _ST12DResolverAuthorityFixtureV1(
+            QKUComputationControlPlaneV1(
+                owner_registry=registry,
+                agent_capability_resolver=_ST12DAdmissionProbeV1(),
+                mode_snapshot_input_resolver=CurrentModeSnapshotInputResolverV1(
+                    repo_root=Path("."),
+                    owner_registry=registry,
+                ),
+            )
+        )
+    if control_id == "ST11-EXECUTION::013":
+        return ResolvedSnapshotParameterValueV1(
+            parameter_id="ST10-PARAM::3002",
+            parameter_symbol="synth_exec",
+            resolved_value_ref=(
+                "RESOLVED-SNAPSHOT-PARAMETER::ST10-PARAM::3002::3.4"
+            ),
+            canonical_typed_value_or_explicit_unavailable=False,
+            value_kind="BOOLEAN",
+            unit_or_basis="boolean policy",
+            resolution_state=(
+                SnapshotParameterResolutionStateV1.DETERMINISTIC_POLICY_VALUE_MATERIALIZED
+            ),
+            policy_ref="ComputationParameterPolicyV1::ST10-PARAM::3002",
+            parameter_policy_set_version="3.4",
+            producer_receipt_refs=(),
+            point_in_time_receipt_refs=(),
+            freshness_receipt_refs=(),
+            source_epoch_refs=(),
+            observed_at_or_explicit_absence="EXPLICIT_ABSENCE",
+            valid_until_or_explicit_absence="EXPLICIT_ABSENCE",
+        )
+    if control_id == "ST11-EXECUTION::014":
+        from .protocols import OwnerProjectionViewV1
+
+        source_path = "src/qtt/service/pr169_svc1_resolvers.py"
+        return OwnerProjectionViewV1(
+            owner_id="SVC1",
+            authority_domain="OWNER_READ_MODEL_AND_ACTION_PROJECTION",
+            source_path=source_path,
+            source_version="SVC1::CURRENT",
+            source_snapshot_ref=source_path,
+            consume_interfaces=("DashboardReadModelService",),
+            row_count=1,
+            identity_refs=("read_model_snapshots.generated.jsonl",),
+        )
+
+    stage_values = {name: index for index, name in enumerate(
+        (
+            "central_capability_admission_ns",
+            "request_validation_ns",
+            "identity_and_context_resolution_ns",
+            "parameter_and_source_binding_ns",
+            "snapshot_candidate_resolution_ns",
+            "formula_compute_ns",
+            "output_validation_ns",
+            "receipt_materialization_ns",
+            "owner_projection_ns",
+        ),
+        start=1,
+    )}
+    measurement = build_latency_measurement(
+        measurement_ref=f"LATENCY::ST12D::MUTATION::{control_id}",
+        stage_values_ns=stage_values,
+        labels=_st12d_latency_labels(concurrency=4 if control_id == "ST11-LATENCY::011" else 1),
+        rejection_count=2,
+        observer_overhead_ns=5,
+        event_time_utc=observed_at,
+    )
+    if control_id in {
+        "ST11-LATENCY::001",
+        "ST11-LATENCY::002",
+        "ST11-LATENCY::013",
+        "ST11-LATENCY::014",
+        "ST11-LATENCY::016",
+        "ST11-LATENCY::018",
+    }:
+        return measurement
+    if control_id == "ST11-LATENCY::003":
+        return MappingProxyType(stage_values)
+    if control_id == "ST11-LATENCY::004":
+        return (9, 1, 5, 3, 7, 2, 8, 6, 4, 10)
+    if control_id in {"ST11-LATENCY::005", "ST11-LATENCY::011"}:
+        return measurement.labels
+    if control_id == "ST11-LATENCY::012":
+        traceparent = "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01"
+        return _ST12DTraceFixtureV1(
+            input_traceparent=traceparent,
+            input_tracestate="vendor=value",
+            output_traceparent=traceparent,
+            output_tracestate="vendor=value",
+        )
+    if control_id == "ST11-LATENCY::015":
+        return _ST12DLatencyProfileFixtureV1(
+            measurement=measurement,
+            profile=LatencyBudgetProfileV1(
+                profile_id="LATENCY-PROFILE::ST12D::OBSERVER",
+                component_budget_ns=tuple((name, 10) for name in stage_values),
+                histogram_boundaries_ns=(1, 10, 100),
+                maximum_observer_overhead_ns=4,
+                alert_threshold_ns=100,
+                policy_version="LATENCY-POLICY::ST12D::OBSERVER",
+            ),
+        )
+    if control_id == "ST11-LATENCY::017":
+        return _ST12DStaleFallbackFixtureV1(
+            evaluated_at=observed_at,
+            valid_until=observed_at - timedelta(seconds=1),
+            preapproved_fast_classical_fallback_ref=None,
+        )
+    if control_id == "ST11-LATENCY::019":
+        return _ST12DDependencyFixtureV1(("QPU execution",))
+    if control_id == "ST11-LATENCY::020":
+        return _ST12DLatencyProfileFixtureV1(measurement=measurement, profile=None)
+    if control_id == "ST11-SECURITY::011":
+        return NO_EFFECTS_V1
+    if control_id == "ST11-SECURITY::012":
+        return _st12d_stage_receipt_fixture(observed_at)
+    if control_id == "ST11-SECURITY::013":
+        return _ST12DResourceFixtureV1(
+            usage=ResourceUsageV1(4, 129, 4, 0, 2),
+            profile=ResourceBoundsProfileV1(
+                profile_id="RESOURCE-BOUNDS::ST12D::MUTATION",
+                maximum_input_cardinality=4,
+                maximum_input_bytes=128,
+                maximum_dependency_depth=4,
+                maximum_bootstrap_repetitions=1,
+                maximum_concurrency=2,
+            ),
+        )
+    raise ContractValidationError(
+        ReasonCode.CONTRACT_OR_TYPE_INVALID,
+        f"unknown ST12-D actual mutation control: {control_id}",
+    )
+
+
+def _st12d_mutate_control_fixture(control_id: str, fixture: object) -> object:
+    from .models import LatencyBudgetProfileV1
+
+    if control_id == "ST11-EXECUTION::010":
+        assert type(fixture) is _ST12DMath39SequenceFixtureV1
+        return replace(
+            fixture,
+            events=(
+                fixture.events[0],
+                replace(fixture.events[1], sequence=12),
+            ),
+        )
+    if control_id == "ST11-EXECUTION::011":
+        return replace(fixture, accepted_upstream_owner_id="MUTATED-NONCANONICAL-OWNER")
+    if control_id == "ST11-EXECUTION::012":
+        assert type(fixture) is _ST12DResolverAuthorityFixtureV1
+        return replace(
+            fixture,
+            service=replace(
+                fixture.service,
+                mode_snapshot_input_resolver=_ST12DCustomEvidenceResolverV1(),
+            ),
+        )
+    if control_id == "ST11-EXECUTION::013":
+        return replace(
+            fixture,
+            producer_receipt_refs=(fixture.policy_ref,),
+        )
+    if control_id == "ST11-EXECUTION::014":
+        return replace(
+            fixture,
+            source_epoch_refs=(fixture.source_snapshot_ref,),
+        )
+    if control_id == "ST11-LATENCY::001":
+        return replace(fixture, local_duration_clock_id="EVENT_CORRELATION")
+    if control_id == "ST11-LATENCY::002":
+        return replace(fixture, event_time_utc=fixture.event_time_utc.replace(tzinfo=None))
+    if control_id == "ST11-LATENCY::003":
+        values = dict(fixture)
+        values.pop("owner_projection_ns")
+        return MappingProxyType(values)
+    if control_id == "ST11-LATENCY::004":
+        return (*fixture, -1)
+    if control_id == "ST11-LATENCY::005":
+        return replace(fixture, cold_or_warm="UNDECLARED")
+    if control_id == "ST11-LATENCY::011":
+        return replace(fixture, concurrency_level=0)
+    if control_id == "ST11-LATENCY::012":
+        return replace(
+            fixture,
+            output_traceparent=fixture.output_traceparent[:-2] + "00",
+        )
+    if control_id == "ST11-LATENCY::013":
+        return replace(fixture, runtime_effect_authorized=True)
+    if control_id == "ST11-LATENCY::014":
+        return replace(fixture, cumulative_stage_ns=(0,) * 9)
+    if control_id == "ST11-LATENCY::015":
+        assert type(fixture) is _ST12DLatencyProfileFixtureV1
+        return replace(
+            fixture,
+            profile=replace(fixture.profile, maximum_observer_overhead_ns=5),
+        )
+    if control_id == "ST11-LATENCY::016":
+        return replace(fixture, platform_description="")
+    if control_id == "ST11-LATENCY::017":
+        return replace(
+            fixture,
+            evaluated_at=fixture.evaluated_at.replace(tzinfo=None),
+        )
+    if control_id == "ST11-LATENCY::018":
+        return replace(fixture, local_duration_clock_id="PROVIDER_EVENT_TIME")
+    if control_id == "ST11-LATENCY::019":
+        return replace(
+            fixture,
+            dependency_classes=("precomputed local immutable snapshot",),
+        )
+    if control_id == "ST11-LATENCY::020":
+        assert type(fixture) is _ST12DLatencyProfileFixtureV1
+        stage_names = tuple(fixture.measurement.stages.__dataclass_fields__)
+        stage_names = tuple(name for name in stage_names if name != "total_local_no_effect_ns")
+        return replace(
+            fixture,
+            profile=LatencyBudgetProfileV1(
+                profile_id="LATENCY-PROFILE::ST12D::MUTATED",
+                component_budget_ns=tuple((name, 10**6) for name in stage_names),
+                histogram_boundaries_ns=(1, 10, 10**6),
+                maximum_observer_overhead_ns=10**6,
+                alert_threshold_ns=10**6,
+                policy_version="LATENCY-POLICY::ST12D::MUTATED",
+            ),
+        )
+    if control_id == "ST11-SECURITY::011":
+        return replace(fixture, order_release_allowed=True)
+    if control_id == "ST11-SECURITY::012":
+        assert type(fixture) is _ST12DStageReceiptFixtureV1
+        result = fixture.result
+        final = result.executed_transition_trace.final_proposal
+        receipts = result.control_receipt_proposals
+        build_receipt = receipts[1]
+        mutated_build = replace(
+            build_receipt,
+            typed_payload=replace(
+                build_receipt.typed_payload,
+                transition_proposal_ref=final.proposal_id,
+                transition_id=final.transition_id,
+                source_state=final.source_state,
+                destination_state=final.destination_state,
+                predecessor_transition_receipt_refs=(
+                    final.predecessor_transition_receipt_refs
+                ),
+                state_before_refs=(
+                    final.source_state,
+                    final.expected_owner_state_ref,
+                    final.source_candidate_ref_or_explicit_absence,
+                ),
+                state_after_refs=(
+                    final.destination_state,
+                    final.target_candidate_ref,
+                ),
+                typed_reason_codes=final.typed_reason_codes,
+                fallback_route="HOLD",
+            ),
+        )
+        return replace(
+            fixture,
+            result=replace(
+                result,
+                control_receipt_proposals=(
+                    receipts[0],
+                    mutated_build,
+                    receipts[2],
+                ),
+            ),
+        )
+    if control_id == "ST11-SECURITY::013":
+        assert type(fixture) is _ST12DResourceFixtureV1
+        return replace(fixture, usage=replace(fixture.usage, input_bytes=128))
+    raise ContractValidationError(
+        ReasonCode.CONTRACT_OR_TYPE_INVALID,
+        f"unknown ST12-D actual mutation control: {control_id}",
+    )
+
+
+def _st12d_observe_control_fixture(control_id: str, fixture: object) -> str:
+    from .bindings import ST12D_MATH39_RAW_INPUT_BINDING_BY_ID
+    from .implementation_registry import validate_math_39_event_context
+    from .latency_policy import (
+        CLOCK_REGISTRY,
+        aggregate_latency_samples,
+        evaluate_latency_profile,
+        latency_stage_durations,
+        stale_fallback,
+        validate_hotpath_dependency_classes,
+        validate_resource_bounds,
+        validate_trace_propagation,
+    )
+    from .receipts import NoEffectFlagsV1
+
+    expected = _ST12D_CONTROL_TERMINAL_STATES[control_id]
+    if control_id == "ST11-EXECUTION::010":
+        if type(fixture) is not _ST12DMath39SequenceFixtureV1:
+            raise ContractValidationError(
+                ReasonCode.CONTRACT_OR_TYPE_INVALID,
+                "sequence control requires its exact typed fixture",
+            )
+        sequences = tuple(event.sequence for event in fixture.events)
+        validate_math_39_event_context(
+            sequence_continuous=sequences
+            == tuple(range(sequences[0], sequences[0] + len(sequences))),
+            matching_priority_known=True,
+            unit="units",
+            basis="ACKNOWLEDGED_INSERTION_POINT",
+            venue_evidence_ref="VENUE-EVIDENCE::ST12D",
+        )
+        return expected
+    if control_id == "ST11-EXECUTION::011":
+        canonical = ST12D_MATH39_RAW_INPUT_BINDING_BY_ID[fixture.binding_id]
+        return expected if fixture == canonical else ReasonCode.INPUT_OWNER_MISMATCH.name
+    if control_id == "ST11-EXECUTION::012":
+        from .service import _require_current_mode_snapshot_resolver
+
+        if type(fixture) is not _ST12DResolverAuthorityFixtureV1:
+            raise ContractValidationError(
+                ReasonCode.CONTRACT_OR_TYPE_INVALID,
+                "resolver authority control requires its exact typed fixture",
+            )
+        _require_current_mode_snapshot_resolver(fixture.service)
+        return expected
+    if control_id == "ST11-EXECUTION::013":
+        return expected if not (
+            fixture.producer_receipt_refs
+            or fixture.point_in_time_receipt_refs
+            or fixture.freshness_receipt_refs
+            or fixture.source_epoch_refs
+        ) else ReasonCode.CONTRACT_OR_TYPE_INVALID.name
+    if control_id == "ST11-EXECUTION::014":
+        return expected if (
+            fixture.source_snapshot_ref == fixture.source_path
+            and not fixture.receipt_refs
+            and not fixture.source_epoch_refs
+        ) else ReasonCode.OWNER_DATA_MALFORMED.name
+    if control_id == "ST11-LATENCY::001":
+        return expected if fixture.local_duration_clock_id in CLOCK_REGISTRY else ReasonCode.CLOCK_DOMAIN_MISMATCH.name
+    if control_id == "ST11-LATENCY::002":
+        return expected if fixture.event_time_utc.utcoffset() == timedelta(0) else ReasonCode.CLOCK_DOMAIN_MISMATCH.name
+    if control_id == "ST11-LATENCY::003":
+        latency_stage_durations(fixture)
+        return expected
+    if control_id == "ST11-LATENCY::004":
+        aggregate_latency_samples(fixture)
+        return expected
+    if control_id == "ST11-LATENCY::005":
+        return expected if fixture.cold_or_warm in {"COLD", "WARM"} else ReasonCode.CONTRACT_OR_TYPE_INVALID.name
+    if control_id == "ST11-LATENCY::011":
+        return expected if fixture.concurrency_level <= 4 else ReasonCode.RESOURCE_BOUND_EXCEEDED.name
+    if control_id == "ST11-LATENCY::012":
+        reasons = validate_trace_propagation(
+            input_traceparent=fixture.input_traceparent,
+            input_tracestate=fixture.input_tracestate,
+            output_traceparent=fixture.output_traceparent,
+            output_tracestate=fixture.output_tracestate,
+        )
+        return expected if not reasons else reasons[0].name
+    if control_id == "ST11-LATENCY::013":
+        return expected if fixture.runtime_effect_authorized is False else ReasonCode.RUNTIME_EFFECT_FORBIDDEN.name
+    if control_id == "ST11-LATENCY::014":
+        return expected if fixture.cumulative_stage_ns[-1] == fixture.stages.total_local_no_effect_ns else ReasonCode.CLOCK_DOMAIN_MISMATCH.name
+    if control_id == "ST11-LATENCY::015":
+        decision = evaluate_latency_profile(fixture.measurement, fixture.profile)
+        return expected if decision.promotion_sensitive_allow_blocked else decision.terminal_route
+    if control_id == "ST11-LATENCY::016":
+        return expected if fixture.platform_description and fixture.clock_implementation else ReasonCode.INVALID_CONTRACT.name
+    if control_id == "ST11-LATENCY::017":
+        decision = stale_fallback(
+            evaluated_at=fixture.evaluated_at,
+            valid_until=fixture.valid_until,
+            preapproved_fast_classical_fallback_ref=(
+                fixture.preapproved_fast_classical_fallback_ref
+            ),
+        )
+        return expected if decision.terminal_route in {
+            "NO_TRADE",
+            "PREAPPROVED_FAST_CLASSICAL_FALLBACK_NO_EFFECT",
+        } else decision.terminal_route
+    if control_id == "ST11-LATENCY::018":
+        return expected if fixture.local_duration_clock_id != "PROVIDER_EVENT_TIME" else ReasonCode.CLOCK_DOMAIN_MISMATCH.name
+    if control_id == "ST11-LATENCY::019":
+        reasons = validate_hotpath_dependency_classes(fixture.dependency_classes)
+        return expected if reasons == (ReasonCode.LATER_TRANCHE_AUTHORITY_REQUIRED,) else "CONTINUE_NO_EFFECT"
+    if control_id == "ST11-LATENCY::020":
+        decision = evaluate_latency_profile(fixture.measurement, fixture.profile)
+        return expected if decision.promotion_sensitive_allow_blocked else decision.terminal_route
+    if control_id == "ST11-SECURITY::011":
+        if type(fixture) is not NoEffectFlagsV1:
+            raise ContractValidationError(
+                ReasonCode.CONTRACT_OR_TYPE_INVALID,
+                "security no-effect control requires exact typed flags",
+            )
+        return expected
+    if control_id == "ST11-SECURITY::012":
+        if type(fixture) is not _ST12DStageReceiptFixtureV1:
+            raise ContractValidationError(
+                ReasonCode.CONTRACT_OR_TYPE_INVALID,
+                "stage receipt control requires its exact typed fixture",
+            )
+        return expected if tuple(
+            (
+                row.typed_payload.control_class.value,
+                row.typed_payload.transition_id,
+            )
+            for row in fixture.result.control_receipt_proposals
+        ) == (
+            ("MODE_SNAPSHOT_EVALUATION", "T06"),
+            ("SNAPSHOT_CANDIDATE_BUILD", "T08"),
+            ("SNAPSHOT_CANDIDATE_VALIDATION", "T09"),
+        ) else ReasonCode.CONTRACT_OR_TYPE_INVALID.name
+    if control_id == "ST11-SECURITY::013":
+        reasons = validate_resource_bounds(fixture.usage, fixture.profile)
+        return reasons[0].name if reasons else "CONTINUE_NO_EFFECT"
+    raise ContractValidationError(
+        ReasonCode.CONTRACT_OR_TYPE_INVALID,
+        f"unknown ST12-D actual mutation control: {control_id}",
+    )
+
+
+_ST12D_EXPECTED_NEGATIVE_OUTCOME = MappingProxyType(
+    {
+        "ST11-EXECUTION::010": ReasonCode.SEQUENCE_GAP.name,
+        "ST11-EXECUTION::011": ReasonCode.INPUT_OWNER_MISMATCH.name,
+        "ST11-EXECUTION::012": ReasonCode.OWNER_DATA_MALFORMED.name,
+        "ST11-EXECUTION::013": ReasonCode.CONTRACT_OR_TYPE_INVALID.name,
+        "ST11-EXECUTION::014": ReasonCode.OWNER_DATA_MALFORMED.name,
+        "ST11-LATENCY::001": ReasonCode.CLOCK_DOMAIN_MISMATCH.name,
+        "ST11-LATENCY::002": ReasonCode.CLOCK_DOMAIN_MISMATCH.name,
+        "ST11-LATENCY::003": ReasonCode.CONTRACT_OR_TYPE_INVALID.name,
+        "ST11-LATENCY::004": ReasonCode.CONTRACT_OR_TYPE_INVALID.name,
+        "ST11-LATENCY::005": ReasonCode.CONTRACT_OR_TYPE_INVALID.name,
+        "ST11-LATENCY::011": ReasonCode.RESOURCE_BOUND_EXCEEDED.name,
+        "ST11-LATENCY::012": ReasonCode.IDENTITY_OR_VERSION_UNRESOLVED.name,
+        "ST11-LATENCY::013": ReasonCode.RUNTIME_EFFECT_FORBIDDEN.name,
+        "ST11-LATENCY::014": ReasonCode.CLOCK_DOMAIN_MISMATCH.name,
+        "ST11-LATENCY::015": "CONTINUE_NO_EFFECT",
+        "ST11-LATENCY::016": ReasonCode.INVALID_CONTRACT.name,
+        "ST11-LATENCY::017": ReasonCode.CLOCK_DOMAIN_MISMATCH.name,
+        "ST11-LATENCY::018": ReasonCode.CLOCK_DOMAIN_MISMATCH.name,
+        "ST11-LATENCY::019": "CONTINUE_NO_EFFECT",
+        "ST11-LATENCY::020": "CONTINUE_NO_EFFECT",
+        "ST11-SECURITY::011": ReasonCode.RUNTIME_EFFECT_FORBIDDEN.name,
+        "ST11-SECURITY::012": ReasonCode.CONTRACT_OR_TYPE_INVALID.name,
+        "ST11-SECURITY::013": "CONTINUE_NO_EFFECT",
+    }
+)
+
+
+def _build_st12d_actual_control_mutation_cases() -> Mapping[
+    str, ST12DActualControlMutationCaseV1
+]:
+    semantic_ids_by_control = {
+        control_id: tuple(
+            test_id
+            for test_id, mapped_ref in _ST12D_SEMANTIC_CONTROL_REF.items()
+            if mapped_ref == control_id
+        )
+        for control_id in _ST12D_CLOSURE_BY_CONTROL_ID
+    }
+    cases: dict[str, ST12DActualControlMutationCaseV1] = {}
+    for control_id, row in _ST12D_CLOSURE_BY_CONTROL_ID.items():
+        cases[control_id] = ST12DActualControlMutationCaseV1(
+            control_id=control_id,
+            positive_typed_fixture_builder=(
+                lambda control_id=control_id: _st12d_build_control_fixture(control_id)
+            ),
+            actual_owner_or_input_mutation=(
+                lambda fixture, control_id=control_id: _st12d_mutate_control_fixture(
+                    control_id, fixture
+                )
+            ),
+            canonical_observer=(
+                lambda fixture, control_id=control_id: _st12d_observe_control_fixture(
+                    control_id, fixture
+                )
+            ),
+            expected_positive_terminal_state=str(row["expected_terminal_state"]),
+            expected_negative_reason_or_terminal_state=(
+                _ST12D_EXPECTED_NEGATIVE_OUTCOME[control_id]
+            ),
+            mapped_semantic_test_ids=semantic_ids_by_control[control_id],
+            grouped_module=str(row["grouped_test_module"]),
+            positive_fixture_ref=str(row["positive_fixture_ref"]),
+            causal_mutation_ref=str(row["causal_mutation_ref"]),
+            causal_owner_field_ref=str(row["causal_owner_field_ref"]),
+        )
+    return MappingProxyType(cases)
+
+
+ST12D_ACTUAL_CONTROL_MUTATION_CASES = _build_st12d_actual_control_mutation_cases()
+
+
+def run_st12d_actual_control_mutation_case(
+    control_id: str,
+) -> ST12DActualControlMutationResultV1:
+    try:
+        case = ST12D_ACTUAL_CONTROL_MUTATION_CASES[control_id]
+    except KeyError as exc:
+        raise ContractValidationError(
+            ReasonCode.CONTRACT_OR_TYPE_INVALID,
+            f"unknown ST12-D actual control mutation case: {control_id}",
+        ) from exc
+    positive_fixture = case.positive_typed_fixture_builder()
+    positive_terminal = case.canonical_observer(positive_fixture)
+    try:
+        mutated_fixture = case.actual_owner_or_input_mutation(positive_fixture)
+        negative_terminal = case.canonical_observer(mutated_fixture)
+    except ComputationControlPlaneError as exc:
+        negative_terminal = exc.reason_code.name
+    return ST12DActualControlMutationResultV1(
+        control_id=control_id,
+        positive_terminal_state=positive_terminal,
+        negative_reason_or_terminal_state=negative_terminal,
+        positive_passed=(
+            positive_terminal == case.expected_positive_terminal_state
+        ),
+        actual_mutation_rejected=(
+            negative_terminal == case.expected_negative_reason_or_terminal_state
+            and negative_terminal != positive_terminal
+        ),
+    )
+
+
+def adjudicate_st12d_semantic_test(test_id: str) -> bool:
+    try:
+        mapped_ref = _ST12D_SEMANTIC_CONTROL_REF[test_id]
+    except KeyError as exc:
+        raise ContractValidationError(
+            ReasonCode.CONTRACT_OR_TYPE_INVALID,
+            f"unknown ST12-D semantic test identity: {test_id}",
+        ) from exc
+    if mapped_ref in ST12D_ACTUAL_CONTROL_MUTATION_CASES:
+        return run_st12d_actual_control_mutation_case(mapped_ref).passed
+    return (
+        _ST12D_INDEPENDENT_VALIDATOR_COMMAND_BY_REF[mapped_ref]
+        in ST12D_CERTIFIED_COMMANDS
+    )
+
+
+if (
+    len(ST12D_ACTUAL_CONTROL_MUTATION_CASES) != 23
+    or len(ST12D_SEMANTIC_TEST_ROWS) != 26
+    or set(ST12D_ACTUAL_CONTROL_MUTATION_CASES)
+    != set(_ST12D_EXPECTED_NEGATIVE_OUTCOME)
+    or any(
+        len(case.mapped_semantic_test_ids) != 1
+        for case in ST12D_ACTUAL_CONTROL_MUTATION_CASES.values()
+    )
+):
+    raise RuntimeError(
+        "ST12-D requires exactly 23 actual control mutations and 26 semantic aliases"
+    )
+
+
+def _st12d_domain_checks(domain: str) -> tuple[ValidationCheckV1, ...]:
+    rows = tuple(row for row in ST12D_CLOSURE_ROWS if row["domain"] == domain)
+    return tuple(
+        ValidationCheckV1(
+            check_id=str(row["control_id"]),
+            passed=run_st12d_actual_control_mutation_case(
+                str(row["control_id"])
+            ).passed,
+            detail=(
+                f"{row['predicate_ref']} owner_field={row['causal_owner_field_ref']} "
+                f"terminal={row['expected_terminal_state']}"
+            ),
+        )
+        for row in rows
+    )
+
+
+def _st12d_aggregate_closure() -> Mapping[str, tuple[bool, str]]:
+    from .agent_policy import IMPLEMENTED_OPERATION_IDS
+    from .implementation_registry import (
+        IMPLEMENTATION_REGISTRY,
+        ST12D_MATH_IMPLEMENTATION_REGISTRY,
+        compute_math_39_queue_position_estimate,
+    )
+    from .mode_snapshot_policy import D_MODE_STATE_REGISTRY, MODE_SNAPSHOT_TRANSITIONS
+    from .oracle_contracts import (
+        GOLDEN_VECTOR_BY_MATH_ID,
+        ORACLE_BY_MATH_ID,
+        ST12D_GOLDEN_VECTOR_BY_MATH_ID,
+        ST12D_ORACLE_BY_MATH_ID,
+    )
+    from .parameter_policy import (
+        ST12D_PARAMETER_APPLICATION_BINDINGS,
+        ST12D_PARAMETER_POLICIES,
+        ST12D_SNAPSHOT_PARAMETER_BINDING_IDS,
+    )
+    from .service import QKUComputationControlPlaneV1
+
+    counts = st12d_acceptance_counts()
+    public_methods = {
+        name
+        for name, value in QKUComputationControlPlaneV1.__dict__.items()
+        if callable(value) and not name.startswith("_")
+    }
+    architecture_closed = (
+        sum(len(states) for states in D_MODE_STATE_REGISTRY.values()) == 35
+        and len(MODE_SNAPSHOT_TRANSITIONS) == 17
+        and len(IMPLEMENTED_OPERATION_IDS) == 12
+        and public_methods == set(IMPLEMENTED_OPERATION_IDS)
+        and tuple(ST12D_MATH_IMPLEMENTATION_REGISTRY)
+        == ("MATH-13", "MATH-14", "MATH-15", "MATH-39")
+        and all(
+            ST12D_MATH_IMPLEMENTATION_REGISTRY[math_id]
+            is IMPLEMENTATION_REGISTRY[math_id]
+            for math_id in ("MATH-13", "MATH-14", "MATH-15")
+        )
+        and compute_math_39_queue_position_estimate(
+            Decimal("100"), Decimal("20"), Decimal("10"), Decimal("30")
+        )
+        == Decimal("80")
+        and tuple(ST12D_ORACLE_BY_MATH_ID) == tuple(ST12D_MATH_IMPLEMENTATION_REGISTRY)
+        and tuple(ST12D_GOLDEN_VECTOR_BY_MATH_ID)
+        == tuple(ST12D_MATH_IMPLEMENTATION_REGISTRY)
+        and all(
+            ST12D_ORACLE_BY_MATH_ID[math_id] is ORACLE_BY_MATH_ID[math_id]
+            and ST12D_GOLDEN_VECTOR_BY_MATH_ID[math_id]
+            is GOLDEN_VECTOR_BY_MATH_ID[math_id]
+            for math_id in ("MATH-13", "MATH-14", "MATH-15")
+        )
+    )
+    parameter_closed = (
+        len(ST12D_PARAMETER_APPLICATION_BINDINGS) == 28
+        and len(ST12D_PARAMETER_POLICIES) == 28
+        and len(ST12D_SNAPSHOT_PARAMETER_BINDING_IDS) == 21
+        and len({row.canonical_owner for row in ST12D_PARAMETER_POLICIES.values()})
+        == 1
+    )
+    root = Path(__file__).resolve().parents[4]
+    generated_count = sum(
+        (root / path).is_file() for path in ST12D_GENERATED_PROJECTION_PATHS
+    )
+    denominator_closed = counts == {
+        "closure_controls": 23,
+        "historical_path_dispositions": 7,
+        "parameter_bindings": 28,
+        "math_specifications": 4,
+        "independent_oracles": 4,
+        "golden_vectors": 4,
+        "semantic_tests": 26,
+        "certified_commands": 6,
+    }
+    return MappingProxyType(
+        {
+            "architecture": (
+                architecture_closed,
+                f"states=35 transitions=17 public_operations={len(public_methods)} math=4",
+            ),
+            "parameters": (
+                parameter_closed,
+                f"bindings={len(ST12D_PARAMETER_APPLICATION_BINDINGS)} snapshot=21 owners=1",
+            ),
+            "generated": (generated_count == 9, f"generated={generated_count}/9"),
+            "denominators": (
+                denominator_closed,
+                "/".join(str(value) for value in counts.values()),
+            ),
+        }
+    )
+
+
+_pre_d_execution_checks = _DOMAIN_CHECKS["execution"]
+_pre_d_security_checks = _DOMAIN_CHECKS["security"]
+
+
+def _execution_with_st12d_checks() -> tuple[ValidationCheckV1, ...]:
+    return (*_pre_d_execution_checks(), *_st12d_domain_checks("execution"))
+
+
+def _latency_checks() -> tuple[ValidationCheckV1, ...]:
+    return _st12d_domain_checks("latency")
+
+
+def _security_with_st12d_checks() -> tuple[ValidationCheckV1, ...]:
+    return (*_pre_d_security_checks(), *_st12d_domain_checks("security"))
+
+
+def _d_checks() -> tuple[ValidationCheckV1, ...]:
+    domain_checks = tuple(
+        check
+        for domain in ("execution", "latency", "security")
+        for check in _st12d_domain_checks(domain)
+    )
+    semantic_checks = tuple(
+        ValidationCheckV1(
+            check_id=str(row["test_id"]),
+            passed=adjudicate_st12d_semantic_test(str(row["test_id"])),
+            detail=(
+                f"{row['predicate_ref']} owner_field={row['causal_owner_field_ref']} "
+                f"terminal={row['expected_terminal_state']}"
+            ),
+        )
+        for row in ST12D_SEMANTIC_TEST_ROWS
+    )
+    closure_checks = tuple(
+        ValidationCheckV1(
+            check_id=f"ST12D_{name.upper()}",
+            passed=value[0],
+            detail=value[1],
+        )
+        for name, value in _st12d_aggregate_closure().items()
+    )
+    return (*domain_checks, *semantic_checks, *closure_checks)
+
+
+_DOMAIN_CHECKS.update(
+    {
+        "execution": _execution_with_st12d_checks,
+        "latency": _latency_checks,
+        "security": _security_with_st12d_checks,
+        "d": _d_checks,
+    }
+)

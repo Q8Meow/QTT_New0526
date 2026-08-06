@@ -15,6 +15,10 @@ import zlib
 
 from .context import decimal_context_v1, exact_decimal, parse_utc
 from .errors import NumericDomainError, ParameterPolicyError, ReasonCode
+from .models import (
+    ResolvedSnapshotParameterValueV1,
+    SnapshotParameterResolutionStateV1,
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -176,6 +180,59 @@ class ST12EParameterValueSemanticsV1:
 
 
 @dataclass(frozen=True, slots=True)
+class ST12DParameterValueSemanticsV1:
+    """Exact D application binding attached to the one central value owner."""
+
+    parameter_id: str
+    parameter_symbol: str
+    d_application_class: str
+    snapshot_binding_class: str
+    current_source_binding_refs: tuple[str, ...]
+    authoritative_value_policy_ref: str
+    value_mutation_authorized_by_st12d: bool = False
+
+    def __post_init__(self) -> None:
+        for name in (
+            "parameter_id",
+            "parameter_symbol",
+            "d_application_class",
+            "snapshot_binding_class",
+            "authoritative_value_policy_ref",
+        ):
+            if not isinstance(getattr(self, name), str) or not getattr(self, name):
+                raise ParameterPolicyError(
+                    ReasonCode.PARAMETER_OUT_OF_POLICY,
+                    f"ST12-D {name} must be canonical nonempty text",
+                )
+        if (
+            not isinstance(self.current_source_binding_refs, tuple)
+            or not self.current_source_binding_refs
+            or any(
+                not isinstance(value, str) or not value
+                for value in self.current_source_binding_refs
+            )
+            or len(self.current_source_binding_refs)
+            != len(set(self.current_source_binding_refs))
+            or self.d_application_class
+            not in {
+                "CENTRAL_PARAMETER_POLICY_ONLY_NO_D_SERVICE_CONSUMER",
+                "IMMUTABLE_D_SNAPSHOT_INPUT_BINDING",
+            }
+            or self.snapshot_binding_class
+            not in {
+                "NOT_IN_D_RUNTIME_SNAPSHOT",
+                "IMMUTABLE_RESOLVED_VALUE_PIN",
+                "RUNTIME_TYPED_POINTER_PIN",
+            }
+            or self.value_mutation_authorized_by_st12d is not False
+        ):
+            raise ParameterPolicyError(
+                ReasonCode.PARAMETER_OUT_OF_POLICY,
+                f"ST12-D binding law failed for {self.parameter_id}",
+            )
+
+
+@dataclass(frozen=True, slots=True)
 class ParameterPolicyRecordV1:
     canonical_owner: str
     certified_step11_custody_ref: str
@@ -212,6 +269,7 @@ class ParameterPolicyRecordV1:
     step12_primary_tranche_id: str
     original_row_json: str
     appendix_e_value_semantics: ST12EParameterValueSemanticsV1 | None = None
+    appendix_d_value_semantics: ST12DParameterValueSemanticsV1 | None = None
 
     def __post_init__(self) -> None:
         string_fields = (
@@ -305,7 +363,13 @@ class ParameterPolicyRecordV1:
                     f"{name} must be a boolean",
                 )
         appendix_e = self.appendix_e_value_semantics
-        if appendix_e is None and (
+        appendix_d = self.appendix_d_value_semantics
+        if appendix_e is not None and appendix_d is not None:
+            raise ParameterPolicyError(
+                ReasonCode.PARAMETER_OUT_OF_POLICY,
+                "one parameter policy cannot belong to both D and E overlays",
+            )
+        if appendix_e is None and appendix_d is None and (
             self.canonical_owner != "QKUComputationControlPlaneV1"
             or self.certified_step11_row_embedded_in_prompt is not False
             or self.codex_online_research_allowed
@@ -361,6 +425,22 @@ class ParameterPolicyRecordV1:
             raise ParameterPolicyError(
                 ReasonCode.PARAMETER_OUT_OF_POLICY,
                 f"Appendix-E typed policy mismatch for {self.parameter_id}",
+            )
+        if appendix_d is not None and (
+            self.canonical_owner
+            != "QKUComputationControlPlaneV1.ComputationParameterPolicyV1"
+            or self.codex_online_research_allowed
+            or self.effective_policy_authority
+            != "CERTIFIED_STEP11_PARAMETER_POLICY"
+            or self.step12_primary_tranche_id != "ST12-TRANCHE-D"
+            or self.parameter_id != appendix_d.parameter_id
+            or self.parameter_symbol != appendix_d.parameter_symbol
+            or appendix_d.authoritative_value_policy_ref
+            != f"ComputationParameterPolicyV1::{self.parameter_id}"
+        ):
+            raise ParameterPolicyError(
+                ReasonCode.PARAMETER_OUT_OF_POLICY,
+                f"Appendix-D typed policy mismatch for {self.parameter_id}",
             )
         if (
             isinstance(self.source_line_start, bool)
@@ -20836,4 +20916,1665 @@ if (
     raise ParameterPolicyError(
         ReasonCode.PARAMETER_BINDING_MISMATCH,
         "ST12-E capability binding registry must be exact and unique 87/87",
+    )
+
+
+# Exact readable owner-frozen ST12-D value policies.  Values remain under the one
+# ComputationParameterPolicyV1 owner and are never copied into projections.
+_ST12D_PARAMETER_ROW_001: dict[str, object] = {'app': 'CENTRAL_PARAMETER_POLICY_ONLY_NO_D_SERVICE_CONSUMER',
+ 'audit': 'ST11-PARAM::00332',
+ 'authority': 'CERTIFIED_STEP11_PARAMETER_POLICY',
+ 'binding_rules': [],
+ 'bound': 'QTT may not skip the official recovery surface merely because one feed appears '
+          'approximately complete',
+ 'custody': 'inputs/certified_step11/QTT_Stage1_Step11_Parameter_Policy_Adjudication_v1_0.jsonl#ST11-PARAM::00332',
+ 'default': 'PUBLIC_METHOD_OR_PINNED_PROVIDER_DEFAULT_REQUIRES_IMPLEMENTATION_VERSION_BINDING',
+ 'edit': 'EDITABLE_WITH_MAINTENANCE_WINDOW',
+ 'end': 8500,
+ 'evidence': 'FAMILY_SOURCE_PACK_PLUS_EXACT_OWNER_APPROVED_VALUE',
+ 'fallback': 'FAIL_CLOSED_TO_REGISTERED_LOWER_SAFE_PATH_OR_NO_TRADE',
+ 'family': 'ST12-FAMILY-EVIDENCE::D3_3AB2C',
+ 'heading': ['Part II \u2014 Retained institutional design and parameter catalog',
+             'D3. Operating architecture',
+             'D3.3AB2C Drop-copy, secondary execution-custody, and dual-feed reconciliation atomic '
+             'parameter and control specification'],
+ 'id': 'ST10-PARAM::0332',
+ 'impl': 'EXPLICIT_FAIL_CLOSED_POLICY',
+ 'launch': 'COMPUTABLE_TYPED_FAIL_CLOSED_OR_NO_TRADE_STATE',
+ 'missing': 'PRESERVE_EXPLICIT_FAIL_CLOSED_STATE',
+ 'precision': {'allowlist_check': 'REQUIRED',
+               'internal_numeric_type': 'typed_symbolic',
+               'normalization': 'CANONICAL_EXACT_TOKEN_NO_FREE_TEXT_COERCION',
+               'rounding': 'NOT_APPLICABLE'},
+ 'procedure': ['Materialize the declared fail-closed state exactly.',
+               'Return a typed blocker/no-trade status and do not substitute a numeric fallback.',
+               'Validate the resolved typed value or token against the effective resolution class, '
+               'declared structural constraint, and canonical allowlist; on failure apply the '
+               'declared fail-closed fallback and emit the exact reason code.'],
+ 'range': '{MANDATORY_WHEN_OFFICIAL_BACKFILL_OR_STATUS_SNAPSHOT_SURFACE_EXISTS,NOT_AVAILABLE_FAIL_CLOSED_TO_NO_RELEASE}',
+ 'res': 'STATIC_ENUM_OR_CONNECTOR_RULE',
+ 'section': 'D3.3AB2C',
+ 'seed': 'MANDATORY_WHEN_OFFICIAL_BACKFILL_OR_STATUS_SNAPSHOT_SURFACE_EXISTS_ELSE_FAIL_CLOSED_TO_NO_RELEASE',
+ 'snap': 'NOT_IN_D_RUNTIME_SNAPSHOT',
+ 'source_class': 'PUBLIC_VENUE_RECOVERY_REFERENCE_PLUS_QTT_DAY1_SELECTION',
+ 'src': ['INHERITED_CERTIFIED_STEP11_FAMILY_SOURCE_PACK_OR_EXACT_OWNER_POLICY'],
+ 'start': 8489,
+ 'state_refs': ['OWNER_POLICY::D3_3AB2C', 'SOURCE_PACK::D3_3AB2C'],
+ 'sym': 'sel_drop_backfill',
+ 'unit': 'backfill-requirement enum',
+ 'widget': 'ENUM_DROPDOWN'}
+_ST12D_PARAMETER_ROW_002: dict[str, object] = {'app': 'CENTRAL_PARAMETER_POLICY_ONLY_NO_D_SERVICE_CONSUMER',
+ 'audit': 'ST11-PARAM::00456',
+ 'authority': 'CERTIFIED_STEP11_PARAMETER_POLICY',
+ 'binding_rules': [],
+ 'bound': 'full-snapshot schedule may not be omitted while automatic backups are active',
+ 'custody': 'inputs/certified_step11/QTT_Stage1_Step11_Parameter_Policy_Adjudication_v1_0.jsonl#ST11-PARAM::00456',
+ 'default': 'EXPLICIT_QTT_OR_OWNER_POLICY_SEED_OR_RESOLUTION_RULE',
+ 'edit': 'EDITABLE_WITH_SHADOW',
+ 'end': 18873,
+ 'evidence': 'FAMILY_SOURCE_PACK_PLUS_EXACT_OWNER_APPROVED_VALUE',
+ 'fallback': 'FAIL_CLOSED_TO_REGISTERED_LOWER_SAFE_PATH_OR_NO_TRADE',
+ 'family': 'ST12-FAMILY-EVIDENCE::D3_11_7_10B',
+ 'heading': ['Part II \u2014 Retained institutional design and parameter catalog',
+             'D3. Operating architecture',
+             'D3.11 Deployment Manifests and Codex Override Files',
+             'D3.11.7 Hands-off automation governance registry, stepped-autonomy maturity model, '
+             'and optional translator role law',
+             'D3.11.7.10B Automatic backup subsystem atomic parameter and control specification'],
+ 'id': 'ST10-PARAM::0456',
+ 'impl': 'STATIC_OR_DETERMINISTIC_RULE',
+ 'launch': 'COMPUTABLE_FROM_STATIC_VALUE_OR_DETERMINISTIC_RULE',
+ 'missing': 'REJECT_INVALID_VALUE_NO_SILENT_DEFAULT',
+ 'precision': {'allowlist_check': 'REQUIRED',
+               'internal_numeric_type': 'typed_symbolic',
+               'normalization': 'CANONICAL_EXACT_TOKEN_NO_FREE_TEXT_COERCION',
+               'rounding': 'NOT_APPLICABLE'},
+ 'procedure': ['Parse the declared Day-1 seed or deterministic rule into the declared type.',
+               'Validate against the reference range and structural constraint.',
+               'Apply the declared bounded edit/search law; reject any value outside it.'],
+ 'range': '{WEEKLY_FULL_SNAPSHOT_SUNDAY_LOCAL_03_00_OR_EQUIVALENT_OWNER_EDITABLE,DAILY_FULL_SNAPSHOT_OWNER_APPROVED,OWNER_CUSTOM_APPROVED}',
+ 'res': 'STATIC_ENUM',
+ 'section': 'D3.11.7.10B',
+ 'seed': 'WEEKLY_FULL_SNAPSHOT_SUNDAY_LOCAL_03_00_OR_EQUIVALENT_OWNER_EDITABLE',
+ 'snap': 'NOT_IN_D_RUNTIME_SNAPSHOT',
+ 'source_class': 'QTT_BACKUP_SCHEDULE_RULE',
+ 'src': ['INHERITED_CERTIFIED_STEP11_FAMILY_SOURCE_PACK_OR_EXACT_OWNER_POLICY'],
+ 'start': 18862,
+ 'state_refs': ['OWNER_POLICY::D3_11_7_10B', 'SOURCE_PACK::D3_11_7_10B'],
+ 'sym': 'bkp_full',
+ 'unit': 'full-snapshot schedule family',
+ 'widget': 'SCHEDULE_EDITOR_WIDGET'}
+_ST12D_PARAMETER_ROW_003: dict[str, object] = {'app': 'CENTRAL_PARAMETER_POLICY_ONLY_NO_D_SERVICE_CONSUMER',
+ 'audit': 'ST11-PARAM::00457',
+ 'authority': 'CERTIFIED_STEP11_PARAMETER_POLICY',
+ 'binding_rules': [],
+ 'bound': 'high-consequence changes may not bypass the declared forced-snapshot trigger family '
+          'when automatic backups are active',
+ 'custody': 'inputs/certified_step11/QTT_Stage1_Step11_Parameter_Policy_Adjudication_v1_0.jsonl#ST11-PARAM::00457',
+ 'default': 'EXPLICIT_QTT_OR_OWNER_POLICY_SEED_OR_RESOLUTION_RULE',
+ 'edit': 'EDITABLE_WITH_SHADOW',
+ 'end': 18885,
+ 'evidence': 'FAMILY_SOURCE_PACK_PLUS_EXACT_OWNER_APPROVED_VALUE',
+ 'fallback': 'FAIL_CLOSED_TO_REGISTERED_LOWER_SAFE_PATH_OR_NO_TRADE',
+ 'family': 'ST12-FAMILY-EVIDENCE::D3_11_7_10B',
+ 'heading': ['Part II \u2014 Retained institutional design and parameter catalog',
+             'D3. Operating architecture',
+             'D3.11 Deployment Manifests and Codex Override Files',
+             'D3.11.7 Hands-off automation governance registry, stepped-autonomy maturity model, '
+             'and optional translator role law',
+             'D3.11.7.10B Automatic backup subsystem atomic parameter and control specification'],
+ 'id': 'ST10-PARAM::0457',
+ 'impl': 'STATIC_OR_DETERMINISTIC_RULE',
+ 'launch': 'COMPUTABLE_FROM_STATIC_VALUE_OR_DETERMINISTIC_RULE',
+ 'missing': 'REJECT_INVALID_VALUE_NO_SILENT_DEFAULT',
+ 'precision': {'allowlist_check': 'REQUIRED',
+               'internal_numeric_type': 'typed_symbolic',
+               'normalization': 'CANONICAL_EXACT_TOKEN_NO_FREE_TEXT_COERCION',
+               'rounding': 'NOT_APPLICABLE'},
+ 'procedure': ['Parse the declared Day-1 seed or deterministic rule into the declared type.',
+               'Validate against the reference range and structural constraint.',
+               'Apply the declared bounded edit/search law; reject any value outside it.'],
+ 'range': 'non-empty declared trigger-set only',
+ 'res': 'STATIC_ENUM',
+ 'section': 'D3.11.7.10B',
+ 'seed': '{PRE_DEPLOYMENT,PRE_MAJOR_PROMOTION,PRE_MASTER_PLAN_CHANGE,PRE_CREDENTIAL_ROTATION,OWNER_MANUAL_REQUEST}',
+ 'snap': 'NOT_IN_D_RUNTIME_SNAPSHOT',
+ 'source_class': 'QTT_BACKUP_TRIGGER_RULE',
+ 'src': ['INHERITED_CERTIFIED_STEP11_FAMILY_SOURCE_PACK_OR_EXACT_OWNER_POLICY'],
+ 'start': 18874,
+ 'state_refs': ['OWNER_POLICY::D3_11_7_10B', 'SOURCE_PACK::D3_11_7_10B'],
+ 'sym': 'bkp_force',
+ 'unit': 'forced-snapshot trigger family',
+ 'widget': 'MULTISELECT_TRIGGER_WIDGET'}
+_ST12D_PARAMETER_ROW_004: dict[str, object] = {'app': 'CENTRAL_PARAMETER_POLICY_ONLY_NO_D_SERVICE_CONSUMER',
+ 'audit': 'ST11-PARAM::00463',
+ 'authority': 'CERTIFIED_STEP11_PARAMETER_POLICY',
+ 'binding_rules': [],
+ 'bound': 'GitHub snapshot sync may not self-enable before owner policy approval',
+ 'custody': 'inputs/certified_step11/QTT_Stage1_Step11_Parameter_Policy_Adjudication_v1_0.jsonl#ST11-PARAM::00463',
+ 'default': 'EXPLICIT_QTT_OR_OWNER_POLICY_SEED_OR_RESOLUTION_RULE',
+ 'edit': 'EDITABLE_WITH_SHADOW',
+ 'end': 18957,
+ 'evidence': 'FAMILY_SOURCE_PACK_PLUS_EXACT_OWNER_APPROVED_VALUE',
+ 'fallback': 'FAIL_CLOSED_TO_REGISTERED_LOWER_SAFE_PATH_OR_NO_TRADE',
+ 'family': 'ST12-FAMILY-EVIDENCE::D3_11_7_10B',
+ 'heading': ['Part II \u2014 Retained institutional design and parameter catalog',
+             'D3. Operating architecture',
+             'D3.11 Deployment Manifests and Codex Override Files',
+             'D3.11.7 Hands-off automation governance registry, stepped-autonomy maturity model, '
+             'and optional translator role law',
+             'D3.11.7.10B Automatic backup subsystem atomic parameter and control specification'],
+ 'id': 'ST10-PARAM::0463',
+ 'impl': 'STATIC_OR_DETERMINISTIC_RULE',
+ 'launch': 'COMPUTABLE_FROM_STATIC_VALUE_OR_DETERMINISTIC_RULE',
+ 'missing': 'REJECT_INVALID_VALUE_NO_SILENT_DEFAULT',
+ 'precision': {'allowlist_check': 'REQUIRED',
+               'internal_numeric_type': 'typed_symbolic',
+               'normalization': 'CANONICAL_EXACT_TOKEN_NO_FREE_TEXT_COERCION',
+               'rounding': 'NOT_APPLICABLE'},
+ 'procedure': ['Parse the declared Day-1 seed or deterministic rule into the declared type.',
+               'Validate against the reference range and structural constraint.',
+               'Apply the declared bounded edit/search law; reject any value outside it.'],
+ 'range': '{OWNER_APPROVED_AUTOMATIC_SNAPSHOT_SYNC_ALLOWED,MANUAL_GITHUB_SNAPSHOT_ONLY,DISABLED}',
+ 'res': 'STATIC_ENUM',
+ 'section': 'D3.11.7.10B',
+ 'seed': 'OWNER_APPROVED_AUTOMATIC_SNAPSHOT_SYNC_ALLOWED',
+ 'snap': 'NOT_IN_D_RUNTIME_SNAPSHOT',
+ 'source_class': 'QTT_GITHUB_SNAPSHOT_RULE',
+ 'src': ['INHERITED_CERTIFIED_STEP11_FAMILY_SOURCE_PACK_OR_EXACT_OWNER_POLICY'],
+ 'start': 18946,
+ 'state_refs': ['OWNER_POLICY::D3_11_7_10B', 'SOURCE_PACK::D3_11_7_10B'],
+ 'sym': 'gh_bkp_mode',
+ 'unit': 'GitHub-snapshot-sync mode',
+ 'widget': 'ENUM_DROPDOWN'}
+_ST12D_PARAMETER_ROW_005: dict[str, object] = {'app': 'CENTRAL_PARAMETER_POLICY_ONLY_NO_D_SERVICE_CONSUMER',
+ 'audit': 'ST11-PARAM::00464',
+ 'authority': 'CERTIFIED_STEP11_PARAMETER_POLICY',
+ 'binding_rules': [],
+ 'bound': 'primary working branch may not be the automatic backup destination',
+ 'custody': 'inputs/certified_step11/QTT_Stage1_Step11_Parameter_Policy_Adjudication_v1_0.jsonl#ST11-PARAM::00464',
+ 'default': 'EXPLICIT_QTT_OR_OWNER_POLICY_SEED_OR_RESOLUTION_RULE',
+ 'edit': 'EDITABLE_WITH_SHADOW',
+ 'end': 18969,
+ 'evidence': 'FAMILY_SOURCE_PACK_PLUS_EXACT_OWNER_APPROVED_VALUE',
+ 'fallback': 'FAIL_CLOSED_TO_REGISTERED_LOWER_SAFE_PATH_OR_NO_TRADE',
+ 'family': 'ST12-FAMILY-EVIDENCE::D3_11_7_10B',
+ 'heading': ['Part II \u2014 Retained institutional design and parameter catalog',
+             'D3. Operating architecture',
+             'D3.11 Deployment Manifests and Codex Override Files',
+             'D3.11.7 Hands-off automation governance registry, stepped-autonomy maturity model, '
+             'and optional translator role law',
+             'D3.11.7.10B Automatic backup subsystem atomic parameter and control specification'],
+ 'id': 'ST10-PARAM::0464',
+ 'impl': 'STATIC_OR_DETERMINISTIC_RULE',
+ 'launch': 'COMPUTABLE_FROM_STATIC_VALUE_OR_DETERMINISTIC_RULE',
+ 'missing': 'REJECT_INVALID_VALUE_NO_SILENT_DEFAULT',
+ 'precision': {'allowlist_check': 'REQUIRED',
+               'internal_numeric_type': 'typed_symbolic',
+               'normalization': 'CANONICAL_EXACT_TOKEN_NO_FREE_TEXT_COERCION',
+               'rounding': 'NOT_APPLICABLE'},
+ 'procedure': ['Parse the declared Day-1 seed or deterministic rule into the declared type.',
+               'Validate against the reference range and structural constraint.',
+               'Apply the declared bounded edit/search law; reject any value outside it.'],
+ 'range': '{BACKUP_BRANCH,SNAPSHOT_BRANCH,ARCHIVE_REPO}',
+ 'res': 'STATIC_ENUM',
+ 'section': 'D3.11.7.10B',
+ 'seed': 'BACKUP_BRANCH_OR_SNAPSHOT_BRANCH_OR_ARCHIVE_REPO_ONLY',
+ 'snap': 'NOT_IN_D_RUNTIME_SNAPSHOT',
+ 'source_class': 'QTT_GITHUB_SNAPSHOT_GUARDRAIL',
+ 'src': ['INHERITED_CERTIFIED_STEP11_FAMILY_SOURCE_PACK_OR_EXACT_OWNER_POLICY'],
+ 'start': 18958,
+ 'state_refs': ['OWNER_POLICY::D3_11_7_10B', 'SOURCE_PACK::D3_11_7_10B'],
+ 'sym': 'gh_bkp_dst',
+ 'unit': 'GitHub-snapshot destination guardrail',
+ 'widget': 'ENUM_DROPDOWN_PLUS_REPO_SELECTOR'}
+_ST12D_PARAMETER_ROW_006: dict[str, object] = {'app': 'CENTRAL_PARAMETER_POLICY_ONLY_NO_D_SERVICE_CONSUMER',
+ 'audit': 'ST11-PARAM::00467',
+ 'authority': 'CERTIFIED_STEP11_PARAMETER_POLICY',
+ 'binding_rules': [],
+ 'bound': 'required controls may not be hidden when automatic backup subsystem is active',
+ 'custody': 'inputs/certified_step11/QTT_Stage1_Step11_Parameter_Policy_Adjudication_v1_0.jsonl#ST11-PARAM::00467',
+ 'default': 'EXPLICIT_QTT_OR_OWNER_POLICY_SEED_OR_RESOLUTION_RULE',
+ 'edit': 'READ_ONLY_CONTROL_SET_OWNER_VISIBLE',
+ 'end': 19005,
+ 'evidence': 'FAMILY_SOURCE_PACK_PLUS_EXACT_OWNER_APPROVED_VALUE',
+ 'fallback': 'FAIL_CLOSED_TO_REGISTERED_LOWER_SAFE_PATH_OR_NO_TRADE',
+ 'family': 'ST12-FAMILY-EVIDENCE::D3_11_7_10B',
+ 'heading': ['Part II \u2014 Retained institutional design and parameter catalog',
+             'D3. Operating architecture',
+             'D3.11 Deployment Manifests and Codex Override Files',
+             'D3.11.7 Hands-off automation governance registry, stepped-autonomy maturity model, '
+             'and optional translator role law',
+             'D3.11.7.10B Automatic backup subsystem atomic parameter and control specification'],
+ 'id': 'ST10-PARAM::0467',
+ 'impl': 'STATIC_OR_DETERMINISTIC_RULE',
+ 'launch': 'COMPUTABLE_FROM_STATIC_VALUE_OR_DETERMINISTIC_RULE',
+ 'missing': 'REJECT_INVALID_VALUE_NO_SILENT_DEFAULT',
+ 'precision': {'allowlist_check': 'REQUIRED',
+               'internal_numeric_type': 'typed_symbolic',
+               'normalization': 'CANONICAL_EXACT_TOKEN_NO_FREE_TEXT_COERCION',
+               'rounding': 'NOT_APPLICABLE'},
+ 'procedure': ['Parse the declared Day-1 seed or deterministic rule into the declared type.',
+               'Validate against the reference range and structural constraint.',
+               'Apply the declared bounded edit/search law; reject any value outside it.'],
+ 'range': 'non-empty owner-control set only',
+ 'res': 'STATIC_ENUM_SET',
+ 'section': 'D3.11.7.10B',
+ 'seed': '{BACKUP_NOW,FULL_SNAPSHOT_NOW,VERIFY_BACKUP_INTEGRITY,CHANGE_BACKUP_FREQUENCY,CHANGE_BACKUP_TARGET,PAUSE_RESUME_AUTOMATIC_BACKUPS,TEST_NEW_EXTERNAL_DRIVE,GITHUB_SNAPSHOT_SYNC_ON_OFF}',
+ 'snap': 'NOT_IN_D_RUNTIME_SNAPSHOT',
+ 'source_class': 'QTT_OWNER_DASHBOARD_CONTROL_RULE',
+ 'src': ['INHERITED_CERTIFIED_STEP11_FAMILY_SOURCE_PACK_OR_EXACT_OWNER_POLICY'],
+ 'start': 18994,
+ 'state_refs': ['OWNER_POLICY::D3_11_7_10B', 'SOURCE_PACK::D3_11_7_10B'],
+ 'sym': 'bkp_ui',
+ 'unit': 'manual backup control set',
+ 'widget': 'BUTTON_PANEL_PLUS_SETTINGS_FORM'}
+_ST12D_PARAMETER_ROW_007: dict[str, object] = {'app': 'IMMUTABLE_D_SNAPSHOT_INPUT_BINDING',
+ 'audit': 'ST11-PARAM::00764',
+ 'authority': 'CERTIFIED_STEP11_PARAMETER_POLICY',
+ 'binding_rules': [],
+ 'bound': 'positive scalar only',
+ 'custody': 'inputs/certified_step11/QTT_Stage1_Step11_Parameter_Policy_Adjudication_v1_0.jsonl#ST11-PARAM::00764',
+ 'default': 'PUBLIC_METHOD_OR_PINNED_PROVIDER_DEFAULT_REQUIRES_IMPLEMENTATION_VERSION_BINDING',
+ 'edit': 'READ_ONLY_BY_DEFAULT',
+ 'end': 32710,
+ 'evidence': 'FAMILY_SOURCE_PACK_PLUS_EXACT_OWNER_APPROVED_VALUE',
+ 'fallback': 'FAIL_CLOSED_TO_REGISTERED_LOWER_SAFE_PATH_OR_NO_TRADE',
+ 'family': 'ST12-FAMILY-EVIDENCE::FE_10C1',
+ 'heading': ['Part II \u2014 Retained institutional design and parameter catalog',
+             'D11. Canonical family registry \u2014 feature engineering',
+             'FE-10C1 \u2014 SVI / SSVI atomic parameter pack'],
+ 'id': 'ST10-PARAM::0764',
+ 'impl': 'OFFLINE_CALIBRATION_OR_BOUNDED_OPTIMIZATION',
+ 'launch': 'COMPUTABLE_WITH_DECLARED_DAY1_SEED_AND_OFFLINE_VALIDATION',
+ 'missing': 'USE_DECLARED_SEED_ONLY_IF_PRESENT_ELSE_BLOCK; NEVER_WIDEN_SEARCH_SPACE',
+ 'precision': {'finite_check': 'REQUIRED',
+               'internal_numeric_type': 'float64_or_declared_array_dtype',
+               'probability_domain': '[0,1] WHEN APPLICABLE',
+               'rounding': 'NONE_INTERNAL; CONVERT_TO_DECIMAL_AT_FINANCIAL_BOUNDARY'},
+ 'procedure': ['Use the declared Day-1 seed when one exists and mark it SEED_NOT_VALIDATED.',
+               'Fit or optimize only in REPLAY/PAPER research lanes using point-in-time data, '
+               'purging/embargo when labels overlap, and a declared comparator.',
+               'Search only the bounded space in bounded_search_space_or_fit_constraint; '
+               'deterministic seed and full trial inventory are mandatory.',
+               'No promotion follows from fit success alone; evidence and owner gates remain '
+               'separate.'],
+ 'range': 'strictly positive total variance',
+ 'res': 'FIT_TIME_RESOLVED',
+ 'section': 'FE-10C1',
+ 'seed': 'theta_atm = sigma_atm_snapshot^2 * tau_expiry',
+ 'snap': 'IMMUTABLE_RESOLVED_VALUE_PIN',
+ 'source_class': 'INSTITUTIONAL_PUBLIC_METHOD_REFERENCE',
+ 'src': ['INHERITED_CERTIFIED_STEP11_FAMILY_SOURCE_PACK_OR_EXACT_OWNER_POLICY'],
+ 'start': 32699,
+ 'state_refs': ['OWNER_POLICY::FE_10C1', 'SOURCE_PACK::FE_10C1'],
+ 'sym': 'theta_atm',
+ 'unit': 'total variance',
+ 'widget': 'READ_ONLY_NUMERIC'}
+_ST12D_PARAMETER_ROW_008: dict[str, object] = {'app': 'IMMUTABLE_D_SNAPSHOT_INPUT_BINDING',
+ 'audit': 'ST11-PARAM::00940',
+ 'authority': 'CERTIFIED_STEP11_PARAMETER_POLICY',
+ 'binding_rules': [],
+ 'bound': '`0.01..0.30` when owner-edited manually; trained model must persist `get_all_params()` '
+          'snapshot of the realized value produced by the declared public-default branch or '
+          'override',
+ 'custody': 'inputs/certified_step11/QTT_Stage1_Step11_Parameter_Policy_Adjudication_v1_0.jsonl#ST11-PARAM::00940',
+ 'default': 'PUBLIC_METHOD_OR_PINNED_PROVIDER_DEFAULT_REQUIRES_IMPLEMENTATION_VERSION_BINDING',
+ 'edit': 'EDITABLE_WITH_SHADOW',
+ 'end': 36460,
+ 'evidence': 'FAMILY_SOURCE_PACK_PLUS_EXACT_OWNER_APPROVED_VALUE',
+ 'fallback': 'FAIL_CLOSED_TO_REGISTERED_LOWER_SAFE_PATH_OR_NO_TRADE',
+ 'family': 'ST12-FAMILY-EVIDENCE::CM_05D',
+ 'heading': ['Part II \u2014 Retained institutional design and parameter catalog',
+             'D12. Canonical family registry \u2014 classical model families',
+             'CM-05D \u2014 CatBoost atomic parameter pack'],
+ 'id': 'ST10-PARAM::0940',
+ 'impl': 'OFFLINE_CALIBRATION_OR_BOUNDED_OPTIMIZATION',
+ 'launch': 'COMPUTABLE_WITH_DECLARED_DAY1_SEED_AND_OFFLINE_VALIDATION',
+ 'missing': 'USE_DECLARED_SEED_ONLY_IF_PRESENT_ELSE_BLOCK; NEVER_WIDEN_SEARCH_SPACE',
+ 'precision': {'finite_check': 'REQUIRED',
+               'internal_numeric_type': 'float64_or_declared_array_dtype',
+               'probability_domain': '[0,1] WHEN APPLICABLE',
+               'rounding': 'NONE_INTERNAL; CONVERT_TO_DECIMAL_AT_FINANCIAL_BOUNDARY'},
+ 'procedure': ['Use the declared Day-1 seed when one exists and mark it SEED_NOT_VALIDATED.',
+               'Fit or optimize only in REPLAY/PAPER research lanes using point-in-time data, '
+               'purging/embargo when labels overlap, and a declared comparator.',
+               'Search only the bounded space in bounded_search_space_or_fit_constraint; '
+               'deterministic seed and full trial inventory are mandatory.',
+               'No promotion follows from fit success alone; evidence and owner gates remain '
+               'separate.'],
+ 'range': 'positive real scalar with documented public-default branch '
+          '`{AUTO_FOR_{Logloss,MultiClass,RMSE}_WHEN_leaf_estimation_iterations_leaf_estimation_method_l2_leaf_reg_UNSET,0.03_OTHERWISE}`',
+ 'res': 'FIT_TIME_RESOLVED',
+ 'section': 'CM-05D',
+ 'seed': 'AUTO_FOR_{Logloss,MultiClass,RMSE}_WHEN_leaf_estimation_iterations_leaf_estimation_method_l2_leaf_reg_UNSET_ELSE_0.03__AND_ALWAYS_PERSIST_REALIZED_VALUE_IN_CATBOOST_FIT_RECEIPT',
+ 'snap': 'IMMUTABLE_RESOLVED_VALUE_PIN',
+ 'source_class': 'PUBLIC_OFFICIAL_DOC_DEFAULT',
+ 'src': ['SRC-CATBOOST-LEARNING-RATE'],
+ 'start': 36449,
+ 'state_refs': ['OWNER_POLICY::CM_05D', 'SOURCE_PACK::CM_05D'],
+ 'sym': 'eta',
+ 'unit': 'learning-rate scalar',
+ 'widget': 'DECIMAL_SLIDER'}
+_ST12D_PARAMETER_ROW_009: dict[str, object] = {'app': 'IMMUTABLE_D_SNAPSHOT_INPUT_BINDING',
+ 'audit': 'ST11-PARAM::01946',
+ 'authority': 'CERTIFIED_STEP11_PARAMETER_POLICY',
+ 'binding_rules': [],
+ 'bound': 'open-close state may not be inferred from buy-versus-sell side alone because both buys '
+          'and sells can open or close positions on listed-option paths',
+ 'custody': 'inputs/certified_step11/QTT_Stage1_Step11_Parameter_Policy_Adjudication_v1_0.jsonl#ST11-PARAM::01946',
+ 'default': 'EXPLICIT_QTT_OR_OWNER_POLICY_SEED_OR_RESOLUTION_RULE',
+ 'edit': 'EDITABLE_WITH_SHADOW',
+ 'end': 53854,
+ 'evidence': 'FAMILY_SOURCE_PACK_PLUS_EXACT_OWNER_APPROVED_VALUE',
+ 'fallback': 'FAIL_CLOSED_TO_REGISTERED_LOWER_SAFE_PATH_OR_NO_TRADE',
+ 'family': 'ST12-FAMILY-EVIDENCE::EX_10IA',
+ 'heading': ['Part II \u2014 Retained institutional design and parameter catalog',
+             'D14. Canonical family registry \u2014 risk and allocation',
+             'EX-10IA \u2014 Listed-option order-marking, open-close-position, and customer-origin '
+             'atomic parameter pack'],
+ 'id': 'ST10-PARAM::1946',
+ 'impl': 'RUNTIME_TYPED_BINDING',
+ 'launch': 'EXECUTABLE_FAIL_CLOSED_UNTIL_TYPED_CURRENT_BINDING',
+ 'missing': 'RETURN_BLOCKER_MISSING_STALE_AMBIGUOUS_OR_OUT_OF_RANGE_NO_VALUE',
+ 'precision': {'allowlist_check': 'REQUIRED',
+               'internal_numeric_type': 'typed_symbolic',
+               'normalization': 'CANONICAL_EXACT_TOKEN_NO_FREE_TEXT_COERCION',
+               'rounding': 'NOT_APPLICABLE'},
+ 'procedure': ['Resolve only through BindingProfileV1 using a current SourceSnapshotV1 or declared '
+               'internal state snapshot.',
+               'Validate type, unit, effective time, scope and source epoch before computation.',
+               'If missing, stale, ambiguous or out of range, return the exact blocker and no '
+               'value.',
+               'Never let a Codex implementation browse or invent the value; source parser and '
+               'blocker behavior are specified in the Step 12 source registry.'],
+ 'range': '{RESOLVE_FROM_DECLARED_ORDER_INTENT_PLUS_PRETRADE_POSITION_SNAPSHOT_PLUS_ACTIVE_SERIES_RESTRICTION_CARD, '
+          'REQUIRE_EXPLICIT_OWNER_OR_STRATEGY_PACKET_MARK_AND_VALIDATE_AGAINST_POSITION_SNAPSHOT, '
+          'ACTIVE_VENUE_SPEC_CARD_RULE}',
+ 'res': 'STATIC_POLICY_ID_WITH_RUNTIME_POSITION_SNAPSHOT',
+ 'section': 'EX-10IA',
+ 'seed': 'RESOLVE_FROM_DECLARED_ORDER_INTENT_PLUS_PRETRADE_POSITION_SNAPSHOT_PLUS_ACTIVE_SERIES_RESTRICTION_CARD',
+ 'snap': 'IMMUTABLE_RESOLVED_VALUE_PIN',
+ 'source_class': 'QTT_CANONICAL_OPTION_ORDER_MARKING_RULE_WITH_VENUE_VALIDATION',
+ 'src': ['INHERITED_CERTIFIED_STEP11_FAMILY_SOURCE_PACK_OR_EXACT_OWNER_POLICY'],
+ 'start': 53843,
+ 'state_refs': ['OWNER_POLICY::EX_10IA', 'SOURCE_PACK::EX_10IA'],
+ 'sym': 'opt_oc_res',
+ 'unit': 'open-close-resolution policy enum',
+ 'widget': 'ENUM_DROPDOWN'}
+_ST12D_PARAMETER_ROW_010: dict[str, object] = {'app': 'IMMUTABLE_D_SNAPSHOT_INPUT_BINDING',
+ 'audit': 'ST11-PARAM::02026',
+ 'authority': 'CERTIFIED_STEP11_PARAMETER_POLICY',
+ 'binding_rules': [],
+ 'bound': 'delta convention may not be guessed from strike grids, one surface snapshot, or a '
+          'non-FX options engine when the declared pair convention is unresolved',
+ 'custody': 'inputs/certified_step11/QTT_Stage1_Step11_Parameter_Policy_Adjudication_v1_0.jsonl#ST11-PARAM::02026',
+ 'default': 'PUBLIC_METHOD_OR_PINNED_PROVIDER_DEFAULT_REQUIRES_IMPLEMENTATION_VERSION_BINDING',
+ 'edit': 'READ_ONLY_RUNTIME_POINTER_OWNER_VISIBLE',
+ 'end': 54959,
+ 'evidence': 'FAMILY_SOURCE_PACK_PLUS_EXACT_OWNER_APPROVED_VALUE',
+ 'fallback': 'FAIL_CLOSED_TO_REGISTERED_LOWER_SAFE_PATH_OR_NO_TRADE',
+ 'family': 'ST12-FAMILY-EVIDENCE::EX_10L0A',
+ 'heading': ['Part II \u2014 Retained institutional design and parameter catalog',
+             'D14. Canonical family registry \u2014 risk and allocation',
+             'EX-10L0A \u2014 FX convention-pointer resolution closure'],
+ 'id': 'ST10-PARAM::2026',
+ 'impl': 'EXPLICIT_FAIL_CLOSED_POLICY',
+ 'launch': 'COMPUTABLE_TYPED_FAIL_CLOSED_OR_NO_TRADE_STATE',
+ 'missing': 'PRESERVE_EXPLICIT_FAIL_CLOSED_STATE',
+ 'precision': {'allowlist_check': 'REQUIRED',
+               'internal_numeric_type': 'typed_symbolic',
+               'normalization': 'CANONICAL_EXACT_TOKEN_NO_FREE_TEXT_COERCION',
+               'rounding': 'NOT_APPLICABLE'},
+ 'procedure': ['Materialize the declared fail-closed state exactly.',
+               'Return a typed blocker/no-trade status and do not substitute a numeric fallback.',
+               'Validate the resolved typed value or token against the effective resolution class, '
+               'declared structural constraint, and canonical allowlist; on failure apply the '
+               'declared fail-closed fallback and emit the exact reason code.'],
+ 'range': '{SPOT_DELTA, FORWARD_DELTA, PREMIUM_ADJUSTED_SPOT_DELTA, '
+          'PREMIUM_ADJUSTED_FORWARD_DELTA, FAIL_CLOSED}',
+ 'res': 'STATIC_ENUM_OR_RULE',
+ 'section': 'EX-10L0A',
+ 'seed': 'USE_ACTIVE_PAIR_CONVENTION_CARD_OR_OFFICIAL_CONFIRMATION_PRIMARY; '
+         'ELSE_IF_THE_ACTIVE_QUOTE_CONVENTION_EXPLICITLY_DECLARES_SPOT_DELTA_FORWARD_DELTA_OR_PREMIUM_ADJUSTED_VARIANTS_FOLLOW_IT_EXACTLY; '
+         'ELSE_FAIL_CLOSED',
+ 'snap': 'IMMUTABLE_RESOLVED_VALUE_PIN',
+ 'source_class': 'PUBLIC_FX_OPTION_DELTA_CONVENTION_REFERENCE_WITH_QTT_CANONICAL_DEFAULT_RULE',
+ 'src': ['INHERITED_CERTIFIED_STEP11_FAMILY_SOURCE_PACK_OR_EXACT_OWNER_POLICY'],
+ 'start': 54948,
+ 'state_refs': ['OWNER_POLICY::EX_10L0A', 'SOURCE_PACK::EX_10L0A'],
+ 'sym': 'fxo_delta_rule',
+ 'unit': 'FX-option delta-convention resolution rule',
+ 'widget': 'READ_ONLY_RULE_CARD_PLUS_POINTER_LINK'}
+_ST12D_PARAMETER_ROW_011: dict[str, object] = {'app': 'IMMUTABLE_D_SNAPSHOT_INPUT_BINDING',
+ 'audit': 'ST11-PARAM::02112',
+ 'authority': 'CERTIFIED_STEP11_PARAMETER_POLICY',
+ 'binding_rules': [],
+ 'bound': 'fixed public schedule only; live paths may not infer assignment windows from local data '
+          'snapshots or stale vendor lore',
+ 'custody': 'inputs/certified_step11/QTT_Stage1_Step11_Parameter_Policy_Adjudication_v1_0.jsonl#ST11-PARAM::02112',
+ 'default': 'PUBLIC_METHOD_OR_PINNED_PROVIDER_DEFAULT_REQUIRES_IMPLEMENTATION_VERSION_BINDING',
+ 'edit': 'READ_ONLY_BY_DEFAULT',
+ 'end': 56129,
+ 'evidence': 'FAMILY_SOURCE_PACK_PLUS_EXACT_OWNER_APPROVED_VALUE',
+ 'fallback': 'FAIL_CLOSED_TO_REGISTERED_LOWER_SAFE_PATH_OR_NO_TRADE',
+ 'family': 'ST12-FAMILY-EVIDENCE::EX_10OAA',
+ 'heading': ['Part II \u2014 Retained institutional design and parameter catalog',
+             'D14. Canonical family registry \u2014 risk and allocation',
+             'EX-10OAA \u2014 Equities / ETF variable-round-lot, odd-lot, mixed-lot, and BOLO atomic '
+             'parameter pack'],
+ 'id': 'ST10-PARAM::2112',
+ 'impl': 'STATIC_OR_DETERMINISTIC_RULE',
+ 'launch': 'COMPUTABLE_FROM_STATIC_VALUE_OR_DETERMINISTIC_RULE',
+ 'missing': 'REJECT_INVALID_VALUE_NO_SILENT_DEFAULT',
+ 'precision': {'allowlist_check': 'REQUIRED',
+               'internal_numeric_type': 'typed_symbolic',
+               'normalization': 'CANONICAL_EXACT_TOKEN_NO_FREE_TEXT_COERCION',
+               'rounding': 'NOT_APPLICABLE'},
+ 'procedure': ['Parse the declared Day-1 seed or deterministic rule into the declared type.',
+               'Validate against the reference range and structural constraint.',
+               'Apply the declared bounded edit/search law; reject any value outside it.'],
+ 'range': '`{MARCH_EVALUATION_TO_FIRST_BUSINESS_DAY_OF_MAY, '
+          'SEPTEMBER_EVALUATION_TO_FIRST_BUSINESS_DAY_OF_NOVEMBER}` on the current official rule '
+          'path',
+ 'res': 'STATIC_POLICY_ID',
+ 'section': 'EX-10OAA',
+ 'seed': 'SEMIANNUAL_PRIMARY_LISTING_MARKET_ASSIGNMENT_USING_MARCH_AND_SEPTEMBER_EVALUATION_PERIODS',
+ 'snap': 'IMMUTABLE_RESOLVED_VALUE_PIN',
+ 'source_class': 'PUBLIC_OFFICIAL_MARKET_STRUCTURE_STANDARD',
+ 'src': ['SRC-SEC-ROUNDLOT-2024'],
+ 'start': 56118,
+ 'state_refs': ['OWNER_POLICY::EX_10OAA', 'SOURCE_PACK::EX_10OAA'],
+ 'sym': 'nms_rlot_cycle',
+ 'unit': 'assignment-cycle policy ID',
+ 'widget': 'READ_ONLY_POLICY_BADGE'}
+_ST12D_PARAMETER_ROW_012: dict[str, object] = {'app': 'IMMUTABLE_D_SNAPSHOT_INPUT_BINDING',
+ 'audit': 'ST11-PARAM::02117',
+ 'authority': 'CERTIFIED_STEP11_PARAMETER_POLICY',
+ 'binding_rules': [],
+ 'bound': 'pointer only; live paths may not synthesize BOLO from stale snapshots or '
+          'screenshot-like views when an official or declared-equivalent packet exists',
+ 'custody': 'inputs/certified_step11/QTT_Stage1_Step11_Parameter_Policy_Adjudication_v1_0.jsonl#ST11-PARAM::02117',
+ 'default': 'PUBLIC_METHOD_OR_PINNED_PROVIDER_DEFAULT_REQUIRES_IMPLEMENTATION_VERSION_BINDING',
+ 'edit': 'READ_ONLY_RUNTIME_POINTER_OWNER_VISIBLE',
+ 'end': 56189,
+ 'evidence': 'FAMILY_SOURCE_PACK_PLUS_EXACT_OWNER_APPROVED_VALUE',
+ 'fallback': 'FAIL_CLOSED_TO_REGISTERED_LOWER_SAFE_PATH_OR_NO_TRADE',
+ 'family': 'ST12-FAMILY-EVIDENCE::EX_10OAA',
+ 'heading': ['Part II \u2014 Retained institutional design and parameter catalog',
+             'D14. Canonical family registry \u2014 risk and allocation',
+             'EX-10OAA \u2014 Equities / ETF variable-round-lot, odd-lot, mixed-lot, and BOLO atomic '
+             'parameter pack'],
+ 'id': 'ST10-PARAM::2117',
+ 'impl': 'RUNTIME_TYPED_BINDING',
+ 'launch': 'EXECUTABLE_FAIL_CLOSED_UNTIL_TYPED_CURRENT_BINDING',
+ 'missing': 'RETURN_BLOCKER_MISSING_STALE_AMBIGUOUS_OR_OUT_OF_RANGE_NO_VALUE',
+ 'precision': {'allowlist_check': 'REQUIRED',
+               'internal_numeric_type': 'typed_symbolic',
+               'normalization': 'CANONICAL_EXACT_TOKEN_NO_FREE_TEXT_COERCION',
+               'rounding': 'NOT_APPLICABLE'},
+ 'procedure': ['Resolve only through BindingProfileV1 using a current SourceSnapshotV1 or declared '
+               'internal state snapshot.',
+               'Validate type, unit, effective time, scope and source epoch before computation.',
+               'If missing, stale, ambiguous or out of range, return the exact blocker and no '
+               'value.',
+               'Never let a Codex implementation browse or invent the value; source parser and '
+               'blocker behavior are specified in the Step 12 source registry.'],
+ 'range': 'non-empty pointer required whenever odd-lot-aware execution-quality analytics, slippage '
+          'benchmarking, or best-displayed-price diagnostics are enabled',
+ 'res': 'STATIC_POINTER_WITH_RUNTIME_RECEIPTS',
+ 'section': 'EX-10OAA',
+ 'seed': 'RESOLVE_POINTER_ONLY_AFTER_EX10OAC1_nms_bolo_rule_RETURNS_ACTIVE_BOLO_SOURCE_POINTER_OR_READ_ONLY_DISABLED_STATE',
+ 'snap': 'RUNTIME_TYPED_POINTER_PIN',
+ 'source_class': 'PUBLIC_OFFICIAL_MARKET_STRUCTURE_STANDARD_WITH_RUNTIME_POINTER',
+ 'src': ['SRC-SEC-RULE605-BOLO-2026'],
+ 'start': 56178,
+ 'state_refs': ['OWNER_POLICY::EX_10OAA', 'SOURCE_PACK::EX_10OAA'],
+ 'sym': 'nms_bolo_ptr',
+ 'unit': 'BOLO pointer',
+ 'widget': 'POINTER_CARD_LINK'}
+_ST12D_PARAMETER_ROW_013: dict[str, object] = {'app': 'IMMUTABLE_D_SNAPSHOT_INPUT_BINDING',
+ 'audit': 'ST11-PARAM::02157',
+ 'authority': 'CERTIFIED_STEP11_PARAMETER_POLICY',
+ 'binding_rules': [],
+ 'bound': 'pointer only; basket-aware sleeves may not use stale holdings snapshots once same-day '
+          'disclosure is declared available',
+ 'custody': 'inputs/certified_step11/QTT_Stage1_Step11_Parameter_Policy_Adjudication_v1_0.jsonl#ST11-PARAM::02157',
+ 'default': 'PUBLIC_METHOD_OR_PINNED_PROVIDER_DEFAULT_REQUIRES_IMPLEMENTATION_VERSION_BINDING',
+ 'edit': 'READ_ONLY_RUNTIME_POINTER_OWNER_VISIBLE',
+ 'end': 56714,
+ 'evidence': 'FAMILY_SOURCE_PACK_PLUS_EXACT_OWNER_APPROVED_VALUE',
+ 'fallback': 'FAIL_CLOSED_TO_REGISTERED_LOWER_SAFE_PATH_OR_NO_TRADE',
+ 'family': 'ST12-FAMILY-EVIDENCE::EX_10OB',
+ 'heading': ['Part II \u2014 Retained institutional design and parameter catalog',
+             'D14. Canonical family registry \u2014 risk and allocation',
+             'EX-10OB \u2014 ETF primary-market creation/redemption, basket-policy, and NAV-deviation '
+             'atomic parameter pack'],
+ 'id': 'ST10-PARAM::2157',
+ 'impl': 'RUNTIME_TYPED_BINDING',
+ 'launch': 'EXECUTABLE_FAIL_CLOSED_UNTIL_TYPED_CURRENT_BINDING',
+ 'missing': 'RETURN_BLOCKER_MISSING_STALE_AMBIGUOUS_OR_OUT_OF_RANGE_NO_VALUE',
+ 'precision': {'allowlist_check': 'REQUIRED',
+               'internal_numeric_type': 'typed_symbolic',
+               'normalization': 'CANONICAL_EXACT_TOKEN_NO_FREE_TEXT_COERCION',
+               'rounding': 'NOT_APPLICABLE'},
+ 'procedure': ['Resolve only through BindingProfileV1 using a current SourceSnapshotV1 or declared '
+               'internal state snapshot.',
+               'Validate type, unit, effective time, scope and source epoch before computation.',
+               'If missing, stale, ambiguous or out of range, return the exact blocker and no '
+               'value.',
+               'Never let a Codex implementation browse or invent the value; source parser and '
+               'blocker behavior are specified in the Step 12 source registry.'],
+ 'range': 'non-empty pointer required before any ETF basket-aware arbitrage or premium/discount '
+          'model is promoted',
+ 'res': 'STATIC_POINTER_WITH_RUNTIME_DISCLOSURE',
+ 'section': 'EX-10OB',
+ 'seed': 'RESOLVE_POINTER_ONLY_AFTER_EX10OB1_etf_basket_rule_RETURNS_ACTIVE_BASKET_DISCLOSURE_POINTER_OR_FAIL_CLOSED',
+ 'snap': 'RUNTIME_TYPED_POINTER_PIN',
+ 'source_class': 'PUBLIC_OFFICIAL_OPERATING_STANDARD_WITH_RUNTIME_POINTER',
+ 'src': ['SRC-SEC-ETF-RULE6C11'],
+ 'start': 56703,
+ 'state_refs': ['OWNER_POLICY::EX_10OB', 'SOURCE_PACK::EX_10OB'],
+ 'sym': 'etf_basket_ptr',
+ 'unit': 'basket / holdings disclosure pointer',
+ 'widget': 'POINTER_CARD_LINK'}
+_ST12D_PARAMETER_ROW_014: dict[str, object] = {'app': 'CENTRAL_PARAMETER_POLICY_ONLY_NO_D_SERVICE_CONSUMER',
+ 'audit': 'ST11-PARAM::02493',
+ 'authority': 'CERTIFIED_STEP11_PARAMETER_POLICY',
+ 'binding_rules': [],
+ 'bound': 'mixed-PUB runs may not be collapsed into one global scalar when effective values differ',
+ 'custody': 'inputs/certified_step11/QTT_Stage1_Step11_Parameter_Policy_Adjudication_v1_0.jsonl#ST11-PARAM::02493',
+ 'default': 'EXPLICIT_QTT_OR_OWNER_POLICY_SEED_OR_RESOLUTION_RULE',
+ 'edit': 'READ_ONLY_SYMBOLIC',
+ 'end': 63343,
+ 'evidence': 'FAMILY_SOURCE_PACK_PLUS_EXACT_OWNER_APPROVED_VALUE',
+ 'fallback': 'FAIL_CLOSED_TO_REGISTERED_LOWER_SAFE_PATH_OR_NO_TRADE',
+ 'family': 'ST12-FAMILY-EVIDENCE::QT_12F1',
+ 'heading': ['Part II \u2014 Retained institutional design and parameter catalog',
+             'D16. Canonical family registry \u2014 true quantum and quantum-inspired families',
+             'QT-12F1 \u2014 IBM Runtime PUB-level override atomic parameter pack'],
+ 'id': 'ST10-PARAM::2493',
+ 'impl': 'STATIC_OR_DETERMINISTIC_RULE',
+ 'launch': 'COMPUTABLE_FROM_STATIC_VALUE_OR_DETERMINISTIC_RULE',
+ 'missing': 'REJECT_INVALID_VALUE_NO_SILENT_DEFAULT',
+ 'precision': {'allowlist_check': 'REQUIRED',
+               'internal_numeric_type': 'typed_symbolic',
+               'normalization': 'CANONICAL_EXACT_TOKEN_NO_FREE_TEXT_COERCION',
+               'rounding': 'NOT_APPLICABLE'},
+ 'procedure': ['Parse the declared Day-1 seed or deterministic rule into the declared type.',
+               'Validate against the reference range and structural constraint.',
+               'Apply the declared bounded edit/search law; reject any value outside it.'],
+ 'range': '{EXPLICIT_ROW_PER_PUB_WHEN_MIXED_COMPACT_SUMMARY_ONLY_WHEN_HOMOGENEOUS}',
+ 'res': 'STATIC_ENUM',
+ 'section': 'QT-12F1',
+ 'seed': 'EXPLICIT_ROW_PER_PUB_WHEN_MIXED_COMPACT_SUMMARY_ONLY_WHEN_HOMOGENEOUS',
+ 'snap': 'NOT_IN_D_RUNTIME_SNAPSHOT',
+ 'source_class': 'QTT_RUNTIME_RENDER_RULE',
+ 'src': ['INHERITED_CERTIFIED_STEP11_FAMILY_SOURCE_PACK_OR_EXACT_OWNER_POLICY'],
+ 'start': 63332,
+ 'state_refs': ['OWNER_POLICY::QT_12F1', 'SOURCE_PACK::QT_12F1'],
+ 'sym': 'pub_render',
+ 'unit': 'PUB-snapshot render rule',
+ 'widget': 'FORMULA_BADGE'}
+_ST12D_PARAMETER_ROW_015: dict[str, object] = {'app': 'IMMUTABLE_D_SNAPSHOT_INPUT_BINDING',
+ 'audit': 'ST11-PARAM::02639',
+ 'authority': 'CERTIFIED_STEP11_PARAMETER_POLICY',
+ 'binding_rules': [],
+ 'bound': 'promotion-sensitive runs may not compare target-dependent results without one explicit '
+          'target snapshot receipt',
+ 'custody': 'inputs/certified_step11/QTT_Stage1_Step11_Parameter_Policy_Adjudication_v1_0.jsonl#ST11-PARAM::02639',
+ 'default': 'PUBLIC_METHOD_OR_PINNED_PROVIDER_DEFAULT_REQUIRES_IMPLEMENTATION_VERSION_BINDING',
+ 'edit': 'READ_ONLY_SYMBOLIC',
+ 'end': 66844,
+ 'evidence': 'FAMILY_SOURCE_PACK_PLUS_EXACT_OWNER_APPROVED_VALUE',
+ 'fallback': 'FAIL_CLOSED_TO_REGISTERED_LOWER_SAFE_PATH_OR_NO_TRADE',
+ 'family': 'ST12-FAMILY-EVIDENCE::QT_22F5',
+ 'heading': ['Part II \u2014 Retained institutional design and parameter catalog',
+             'D16. Canonical family registry \u2014 true quantum and quantum-inspired families',
+             'QT-22F5 \u2014 Qiskit transpilation-output provenance, ISA-circuit, and backend-target '
+             'snapshot atomic parameter pack'],
+ 'id': 'ST10-PARAM::2639',
+ 'impl': 'STATIC_OR_DETERMINISTIC_RULE',
+ 'launch': 'COMPUTABLE_FROM_STATIC_VALUE_OR_DETERMINISTIC_RULE',
+ 'missing': 'REJECT_INVALID_VALUE_NO_SILENT_DEFAULT',
+ 'precision': {'allowlist_check': 'REQUIRED',
+               'internal_numeric_type': 'typed_symbolic',
+               'normalization': 'CANONICAL_EXACT_TOKEN_NO_FREE_TEXT_COERCION',
+               'rounding': 'NOT_APPLICABLE'},
+ 'procedure': ['Parse the declared Day-1 seed or deterministic rule into the declared type.',
+               'Validate against the reference range and structural constraint.',
+               'Apply the declared bounded edit/search law; reject any value outside it.'],
+ 'range': '{CAPTURE_DECLARED_TARGET_HISTORY_DATETIME_OR_EXPLICIT_CURRENT_TARGET_RECEIPT_FOR_EVERY_PROMOTION_SENSITIVE_RUN}',
+ 'res': 'STATIC_RULE_ENUM',
+ 'section': 'QT-22F5',
+ 'seed': 'CAPTURE_DECLARED_TARGET_HISTORY_DATETIME_OR_EXPLICIT_CURRENT_TARGET_RECEIPT_FOR_EVERY_PROMOTION_SENSITIVE_RUN',
+ 'snap': 'IMMUTABLE_RESOLVED_VALUE_PIN',
+ 'source_class': 'PUBLIC_OFFICIAL_BACKEND_TARGET_HISTORY_INTERFACE_PLUS_QTT_REPLAY_RULE',
+ 'src': ['INHERITED_CERTIFIED_STEP11_FAMILY_SOURCE_PACK_OR_EXACT_OWNER_POLICY'],
+ 'start': 66833,
+ 'state_refs': ['OWNER_POLICY::QT_22F5', 'SOURCE_PACK::QT_22F5'],
+ 'sym': 'target_dt_rule',
+ 'unit': 'target-snapshot timing rule',
+ 'widget': 'FORMULA_BADGE'}
+_ST12D_PARAMETER_ROW_016: dict[str, object] = {'app': 'IMMUTABLE_D_SNAPSHOT_INPUT_BINDING',
+ 'audit': 'ST11-PARAM::02641',
+ 'authority': 'CERTIFIED_STEP11_PARAMETER_POLICY',
+ 'binding_rules': [],
+ 'bound': 'circuit-depth, gate-count, or layout summaries alone may not substitute for one stable '
+          'ISA-artifact fingerprint',
+ 'custody': 'inputs/certified_step11/QTT_Stage1_Step11_Parameter_Policy_Adjudication_v1_0.jsonl#ST11-PARAM::02641',
+ 'default': 'EXPLICIT_QTT_OR_OWNER_POLICY_SEED_OR_RESOLUTION_RULE',
+ 'edit': 'READ_ONLY_SYMBOLIC',
+ 'end': 66868,
+ 'evidence': 'FAMILY_SOURCE_PACK_PLUS_EXACT_OWNER_APPROVED_VALUE',
+ 'fallback': 'FAIL_CLOSED_TO_REGISTERED_LOWER_SAFE_PATH_OR_NO_TRADE',
+ 'family': 'ST12-FAMILY-EVIDENCE::QT_22F5',
+ 'heading': ['Part II \u2014 Retained institutional design and parameter catalog',
+             'D16. Canonical family registry \u2014 true quantum and quantum-inspired families',
+             'QT-22F5 \u2014 Qiskit transpilation-output provenance, ISA-circuit, and backend-target '
+             'snapshot atomic parameter pack'],
+ 'id': 'ST10-PARAM::2641',
+ 'impl': 'STATIC_OR_DETERMINISTIC_RULE',
+ 'launch': 'COMPUTABLE_FROM_STATIC_VALUE_OR_DETERMINISTIC_RULE',
+ 'missing': 'REJECT_INVALID_VALUE_NO_SILENT_DEFAULT',
+ 'precision': {'allowlist_check': 'REQUIRED',
+               'internal_numeric_type': 'typed_symbolic',
+               'normalization': 'CANONICAL_EXACT_TOKEN_NO_FREE_TEXT_COERCION',
+               'rounding': 'NOT_APPLICABLE'},
+ 'procedure': ['Parse the declared Day-1 seed or deterministic rule into the declared type.',
+               'Validate against the reference range and structural constraint.',
+               'Apply the declared bounded edit/search law; reject any value outside it.'],
+ 'range': '{REQUIRE_STABLE_FINGERPRINT_OF_TRANSPILED_ISA_CIRCUIT_BEFORE_PROMOTION_SENSITIVE_COMPARISON_OR_CACHE_REUSE}',
+ 'res': 'STATIC_RULE_ENUM',
+ 'section': 'QT-22F5',
+ 'seed': 'REQUIRE_STABLE_FINGERPRINT_OF_TRANSPILED_ISA_CIRCUIT_BEFORE_PROMOTION_SENSITIVE_COMPARISON_OR_CACHE_REUSE',
+ 'snap': 'IMMUTABLE_RESOLVED_VALUE_PIN',
+ 'source_class': 'QTT_REPRODUCIBILITY_AND_COMPARATOR_RULE',
+ 'src': ['SRC-IBM-ISA-LAYOUT'],
+ 'start': 66857,
+ 'state_refs': ['OWNER_POLICY::QT_22F5', 'SOURCE_PACK::QT_22F5'],
+ 'sym': 'isa_fp_rule',
+ 'unit': 'ISA-fingerprint rule',
+ 'widget': 'FORMULA_BADGE'}
+_ST12D_PARAMETER_ROW_017: dict[str, object] = {'app': 'IMMUTABLE_D_SNAPSHOT_INPUT_BINDING',
+ 'audit': 'ST11-PARAM::02642',
+ 'authority': 'CERTIFIED_STEP11_PARAMETER_POLICY',
+ 'binding_rules': [],
+ 'bound': 'estimator paths using observables may not omit the layout receipt',
+ 'custody': 'inputs/certified_step11/QTT_Stage1_Step11_Parameter_Policy_Adjudication_v1_0.jsonl#ST11-PARAM::02642',
+ 'default': 'PUBLIC_METHOD_OR_PINNED_PROVIDER_DEFAULT_REQUIRES_IMPLEMENTATION_VERSION_BINDING',
+ 'edit': 'EDITABLE_WITH_SHADOW',
+ 'end': 66880,
+ 'evidence': 'FAMILY_SOURCE_PACK_PLUS_EXACT_OWNER_APPROVED_VALUE',
+ 'fallback': 'FAIL_CLOSED_TO_REGISTERED_LOWER_SAFE_PATH_OR_NO_TRADE',
+ 'family': 'ST12-FAMILY-EVIDENCE::QT_22F5',
+ 'heading': ['Part II \u2014 Retained institutional design and parameter catalog',
+             'D16. Canonical family registry \u2014 true quantum and quantum-inspired families',
+             'QT-22F5 \u2014 Qiskit transpilation-output provenance, ISA-circuit, and backend-target '
+             'snapshot atomic parameter pack'],
+ 'id': 'ST10-PARAM::2642',
+ 'impl': 'STATIC_OR_DETERMINISTIC_RULE',
+ 'launch': 'COMPUTABLE_FROM_STATIC_VALUE_OR_DETERMINISTIC_RULE',
+ 'missing': 'REJECT_INVALID_VALUE_NO_SILENT_DEFAULT',
+ 'precision': {'allowlist_check': 'REQUIRED',
+               'internal_numeric_type': 'typed_symbolic',
+               'normalization': 'CANONICAL_EXACT_TOKEN_NO_FREE_TEXT_COERCION',
+               'rounding': 'NOT_APPLICABLE'},
+ 'procedure': ['Parse the declared Day-1 seed or deterministic rule into the declared type.',
+               'Validate against the reference range and structural constraint.',
+               'Apply the declared bounded edit/search law; reject any value outside it.'],
+ 'range': '{REQUIRED_FOR_ALL_ISA_CIRCUITS_USED_IN_ESTIMATOR_OR_SAMPLER_COMPARABILITY_PATHS, '
+          'REQUIRED_FOR_ESTIMATOR_ONLY_AND_OPTIONAL_FOR_SAMPLER}',
+ 'res': 'STATIC_ENUM',
+ 'section': 'QT-22F5',
+ 'seed': 'REQUIRED_FOR_ALL_ISA_CIRCUITS_USED_IN_ESTIMATOR_OR_SAMPLER_COMPARABILITY_PATHS',
+ 'snap': 'IMMUTABLE_RESOLVED_VALUE_PIN',
+ 'source_class': 'PUBLIC_OFFICIAL_LAYOUT_APPLICATION_PATTERN_PLUS_QTT_COMPARABILITY_RULE',
+ 'src': ['INHERITED_CERTIFIED_STEP11_FAMILY_SOURCE_PACK_OR_EXACT_OWNER_POLICY'],
+ 'start': 66869,
+ 'state_refs': ['OWNER_POLICY::QT_22F5', 'SOURCE_PACK::QT_22F5'],
+ 'sym': 'layout_rcpt',
+ 'unit': 'layout-receipt policy enum',
+ 'widget': 'ENUM_DROPDOWN'}
+_ST12D_PARAMETER_ROW_018: dict[str, object] = {'app': 'IMMUTABLE_D_SNAPSHOT_INPUT_BINDING',
+ 'audit': 'ST11-PARAM::02644',
+ 'authority': 'CERTIFIED_STEP11_PARAMETER_POLICY',
+ 'binding_rules': [],
+ 'bound': 'Estimator paths may not assume virtual-qubit observables remain valid after '
+          'transpilation without one explicit layout-application step or equivalent receipt',
+ 'custody': 'inputs/certified_step11/QTT_Stage1_Step11_Parameter_Policy_Adjudication_v1_0.jsonl#ST11-PARAM::02644',
+ 'default': 'PUBLIC_METHOD_OR_PINNED_PROVIDER_DEFAULT_REQUIRES_IMPLEMENTATION_VERSION_BINDING',
+ 'edit': 'READ_ONLY_SYMBOLIC',
+ 'end': 66904,
+ 'evidence': 'FAMILY_SOURCE_PACK_PLUS_EXACT_OWNER_APPROVED_VALUE',
+ 'fallback': 'FAIL_CLOSED_TO_REGISTERED_LOWER_SAFE_PATH_OR_NO_TRADE',
+ 'family': 'ST12-FAMILY-EVIDENCE::QT_22F5',
+ 'heading': ['Part II \u2014 Retained institutional design and parameter catalog',
+             'D16. Canonical family registry \u2014 true quantum and quantum-inspired families',
+             'QT-22F5 \u2014 Qiskit transpilation-output provenance, ISA-circuit, and backend-target '
+             'snapshot atomic parameter pack'],
+ 'id': 'ST10-PARAM::2644',
+ 'impl': 'STATIC_OR_DETERMINISTIC_RULE',
+ 'launch': 'COMPUTABLE_FROM_STATIC_VALUE_OR_DETERMINISTIC_RULE',
+ 'missing': 'REJECT_INVALID_VALUE_NO_SILENT_DEFAULT',
+ 'precision': {'allowlist_check': 'REQUIRED',
+               'internal_numeric_type': 'typed_symbolic',
+               'normalization': 'CANONICAL_EXACT_TOKEN_NO_FREE_TEXT_COERCION',
+               'rounding': 'NOT_APPLICABLE'},
+ 'procedure': ['Parse the declared Day-1 seed or deterministic rule into the declared type.',
+               'Validate against the reference range and structural constraint.',
+               'Apply the declared bounded edit/search law; reject any value outside it.'],
+ 'range': '{APPLY_LAYOUT_TO_OBSERVABLES_USING_THE_ISA_CIRCUIT_LAYOUT_BEFORE_ESTIMATOR_EXECUTION}',
+ 'res': 'STATIC_RULE_ENUM',
+ 'section': 'QT-22F5',
+ 'seed': 'APPLY_LAYOUT_TO_OBSERVABLES_USING_THE_ISA_CIRCUIT_LAYOUT_BEFORE_ESTIMATOR_EXECUTION',
+ 'snap': 'IMMUTABLE_RESOLVED_VALUE_PIN',
+ 'source_class': 'PUBLIC_OFFICIAL_PATTERN_REFERENCE_PLUS_QTT_RUNTIME_RULE',
+ 'src': ['INHERITED_CERTIFIED_STEP11_FAMILY_SOURCE_PACK_OR_EXACT_OWNER_POLICY'],
+ 'start': 66893,
+ 'state_refs': ['OWNER_POLICY::QT_22F5', 'SOURCE_PACK::QT_22F5'],
+ 'sym': 'obs_layout_rule',
+ 'unit': 'observable-layout application rule',
+ 'widget': 'FORMULA_BADGE'}
+_ST12D_PARAMETER_ROW_019: dict[str, object] = {'app': 'IMMUTABLE_D_SNAPSHOT_INPUT_BINDING',
+ 'audit': 'ST11-PARAM::02645',
+ 'authority': 'CERTIFIED_STEP11_PARAMETER_POLICY',
+ 'binding_rules': [],
+ 'bound': 'seed, layout method, routing method, and optimization level alone may not substitute '
+          'for one pipeline-level provenance receipt when custom or remote transpilation is used',
+ 'custody': 'inputs/certified_step11/QTT_Stage1_Step11_Parameter_Policy_Adjudication_v1_0.jsonl#ST11-PARAM::02645',
+ 'default': 'PUBLIC_METHOD_OR_PINNED_PROVIDER_DEFAULT_REQUIRES_IMPLEMENTATION_VERSION_BINDING',
+ 'edit': 'READ_ONLY_SYMBOLIC',
+ 'end': 66916,
+ 'evidence': 'FAMILY_SOURCE_PACK_PLUS_EXACT_OWNER_APPROVED_VALUE',
+ 'fallback': 'FAIL_CLOSED_TO_REGISTERED_LOWER_SAFE_PATH_OR_NO_TRADE',
+ 'family': 'ST12-FAMILY-EVIDENCE::QT_22F5',
+ 'heading': ['Part II \u2014 Retained institutional design and parameter catalog',
+             'D16. Canonical family registry \u2014 true quantum and quantum-inspired families',
+             'QT-22F5 \u2014 Qiskit transpilation-output provenance, ISA-circuit, and backend-target '
+             'snapshot atomic parameter pack'],
+ 'id': 'ST10-PARAM::2645',
+ 'impl': 'STATIC_OR_DETERMINISTIC_RULE',
+ 'launch': 'COMPUTABLE_FROM_STATIC_VALUE_OR_DETERMINISTIC_RULE',
+ 'missing': 'REJECT_INVALID_VALUE_NO_SILENT_DEFAULT',
+ 'precision': {'allowlist_check': 'REQUIRED',
+               'internal_numeric_type': 'typed_symbolic',
+               'normalization': 'CANONICAL_EXACT_TOKEN_NO_FREE_TEXT_COERCION',
+               'rounding': 'NOT_APPLICABLE'},
+ 'procedure': ['Parse the declared Day-1 seed or deterministic rule into the declared type.',
+               'Validate against the reference range and structural constraint.',
+               'Apply the declared bounded edit/search law; reject any value outside it.'],
+ 'range': '{REQUIRE_PASS_MANAGER_OR_EQUIVALENT_PIPELINE_FINGERPRINT_FOR_PROMOTION_SENSITIVE_TRANSPILATION_COMPARISON}',
+ 'res': 'STATIC_RULE_ENUM',
+ 'section': 'QT-22F5',
+ 'seed': 'REQUIRE_PASS_MANAGER_OR_EQUIVALENT_PIPELINE_FINGERPRINT_FOR_PROMOTION_SENSITIVE_TRANSPILATION_COMPARISON',
+ 'snap': 'IMMUTABLE_RESOLVED_VALUE_PIN',
+ 'source_class': 'QTT_REPRODUCIBILITY_RULE_WITH_PUBLIC_TRANSPILER_INTERFACE_ANCHOR',
+ 'src': ['INHERITED_CERTIFIED_STEP11_FAMILY_SOURCE_PACK_OR_EXACT_OWNER_POLICY'],
+ 'start': 66905,
+ 'state_refs': ['OWNER_POLICY::QT_22F5', 'SOURCE_PACK::QT_22F5'],
+ 'sym': 'pm_fp_rule',
+ 'unit': 'pass-manager fingerprint rule',
+ 'widget': 'FORMULA_BADGE'}
+_ST12D_PARAMETER_ROW_020: dict[str, object] = {'app': 'IMMUTABLE_D_SNAPSHOT_INPUT_BINDING',
+ 'audit': 'ST11-PARAM::02646',
+ 'authority': 'CERTIFIED_STEP11_PARAMETER_POLICY',
+ 'binding_rules': [],
+ 'bound': 'if full layout or final-mapping metadata must survive round-trip persistence, textual '
+          'interchange formats may not be treated as layout-complete substitutes for QPY or an '
+          'equivalent richer format',
+ 'custody': 'inputs/certified_step11/QTT_Stage1_Step11_Parameter_Policy_Adjudication_v1_0.jsonl#ST11-PARAM::02646',
+ 'default': 'PUBLIC_METHOD_OR_PINNED_PROVIDER_DEFAULT_REQUIRES_IMPLEMENTATION_VERSION_BINDING',
+ 'edit': 'EDITABLE_WITH_SHADOW',
+ 'end': 66928,
+ 'evidence': 'FAMILY_SOURCE_PACK_PLUS_EXACT_OWNER_APPROVED_VALUE',
+ 'fallback': 'FAIL_CLOSED_TO_REGISTERED_LOWER_SAFE_PATH_OR_NO_TRADE',
+ 'family': 'ST12-FAMILY-EVIDENCE::QT_22F5',
+ 'heading': ['Part II \u2014 Retained institutional design and parameter catalog',
+             'D16. Canonical family registry \u2014 true quantum and quantum-inspired families',
+             'QT-22F5 \u2014 Qiskit transpilation-output provenance, ISA-circuit, and backend-target '
+             'snapshot atomic parameter pack'],
+ 'id': 'ST10-PARAM::2646',
+ 'impl': 'STATIC_OR_DETERMINISTIC_RULE',
+ 'launch': 'COMPUTABLE_FROM_STATIC_VALUE_OR_DETERMINISTIC_RULE',
+ 'missing': 'REJECT_INVALID_VALUE_NO_SILENT_DEFAULT',
+ 'precision': {'allowlist_check': 'REQUIRED',
+               'internal_numeric_type': 'typed_symbolic',
+               'normalization': 'CANONICAL_EXACT_TOKEN_NO_FREE_TEXT_COERCION',
+               'rounding': 'NOT_APPLICABLE'},
+ 'procedure': ['Parse the declared Day-1 seed or deterministic rule into the declared type.',
+               'Validate against the reference range and structural constraint.',
+               'Apply the declared bounded edit/search law; reject any value outside it.'],
+ 'range': '{QPY, OPENQASM3, PROVIDER_NATIVE_PAYLOAD_ONLY_WITH_DECLARED_RECEIPT}',
+ 'res': 'STATIC_ENUM',
+ 'section': 'QT-22F5',
+ 'seed': 'QPY_WHEN_FULL_QISKIT_LAYOUT_AND_METADATA_PRESERVATION_IS_REQUIRED_ELSE_OPENQASM3_FOR_TEXTUAL_INTERCHANGE_ONLY',
+ 'snap': 'IMMUTABLE_RESOLVED_VALUE_PIN',
+ 'source_class': 'PUBLIC_OFFICIAL_SERIALIZATION_REFERENCE_WITH_QTT_DAY1_SELECTION',
+ 'src': ['SRC-QISKIT-QPY'],
+ 'start': 66917,
+ 'state_refs': ['OWNER_POLICY::QT_22F5', 'SOURCE_PACK::QT_22F5'],
+ 'sym': 'isa_ser_fmt',
+ 'unit': 'serialization-format enum',
+ 'widget': 'ENUM_DROPDOWN'}
+_ST12D_PARAMETER_ROW_021: dict[str, object] = {'app': 'IMMUTABLE_D_SNAPSHOT_INPUT_BINDING',
+ 'audit': 'ST11-PARAM::02647',
+ 'authority': 'CERTIFIED_STEP11_PARAMETER_POLICY',
+ 'binding_rules': [],
+ 'bound': 'materially changed backend-target or transpilation-pipeline state may not silently '
+          'reuse stale compiled artifacts',
+ 'custody': 'inputs/certified_step11/QTT_Stage1_Step11_Parameter_Policy_Adjudication_v1_0.jsonl#ST11-PARAM::02647',
+ 'default': 'EXPLICIT_QTT_OR_OWNER_POLICY_SEED_OR_RESOLUTION_RULE',
+ 'edit': 'READ_ONLY_SYMBOLIC',
+ 'end': 66940,
+ 'evidence': 'FAMILY_SOURCE_PACK_PLUS_EXACT_OWNER_APPROVED_VALUE',
+ 'fallback': 'FAIL_CLOSED_TO_REGISTERED_LOWER_SAFE_PATH_OR_NO_TRADE',
+ 'family': 'ST12-FAMILY-EVIDENCE::QT_22F5',
+ 'heading': ['Part II \u2014 Retained institutional design and parameter catalog',
+             'D16. Canonical family registry \u2014 true quantum and quantum-inspired families',
+             'QT-22F5 \u2014 Qiskit transpilation-output provenance, ISA-circuit, and backend-target '
+             'snapshot atomic parameter pack'],
+ 'id': 'ST10-PARAM::2647',
+ 'impl': 'STATIC_OR_DETERMINISTIC_RULE',
+ 'launch': 'COMPUTABLE_FROM_STATIC_VALUE_OR_DETERMINISTIC_RULE',
+ 'missing': 'REJECT_INVALID_VALUE_NO_SILENT_DEFAULT',
+ 'precision': {'allowlist_check': 'REQUIRED',
+               'internal_numeric_type': 'typed_symbolic',
+               'normalization': 'CANONICAL_EXACT_TOKEN_NO_FREE_TEXT_COERCION',
+               'rounding': 'NOT_APPLICABLE'},
+ 'procedure': ['Parse the declared Day-1 seed or deterministic rule into the declared type.',
+               'Validate against the reference range and structural constraint.',
+               'Apply the declared bounded edit/search law; reject any value outside it.'],
+ 'range': '{INVALIDATE_AND_REBUILD_IF_BACKEND_IDENTITY_TARGET_SNAPSHOT_LAYOUT_RULES_OR_PASS_MANAGER_FINGERPRINT_CHANGE_MATERIALLY}',
+ 'res': 'STATIC_RULE_ENUM',
+ 'section': 'QT-22F5',
+ 'seed': 'INVALIDATE_AND_REBUILD_IF_BACKEND_IDENTITY_TARGET_SNAPSHOT_LAYOUT_RULES_OR_PASS_MANAGER_FINGERPRINT_CHANGE_MATERIALLY',
+ 'snap': 'IMMUTABLE_RESOLVED_VALUE_PIN',
+ 'source_class': 'QTT_CACHE_SAFETY_AND_REPLAY_RULE',
+ 'src': ['SRC-QISKIT-QPY', 'SRC-IBM-ISA-LAYOUT'],
+ 'start': 66929,
+ 'state_refs': ['OWNER_POLICY::QT_22F5', 'SOURCE_PACK::QT_22F5'],
+ 'sym': 'isa_reuse_rule',
+ 'unit': 'transpilation-reuse invalidation rule',
+ 'widget': 'FORMULA_BADGE'}
+_ST12D_PARAMETER_ROW_022: dict[str, object] = {'app': 'IMMUTABLE_D_SNAPSHOT_INPUT_BINDING',
+ 'audit': 'ST11-PARAM::02648',
+ 'authority': 'CERTIFIED_STEP11_PARAMETER_POLICY',
+ 'binding_rules': [],
+ 'bound': 'stale or unproven compiled-artifact provenance may not remain promotion-comparable',
+ 'custody': 'inputs/certified_step11/QTT_Stage1_Step11_Parameter_Policy_Adjudication_v1_0.jsonl#ST11-PARAM::02648',
+ 'default': 'EXPLICIT_QTT_OR_OWNER_POLICY_SEED_OR_RESOLUTION_RULE',
+ 'edit': 'EDITABLE_WITH_SHADOW',
+ 'end': 66953,
+ 'evidence': 'FAMILY_SOURCE_PACK_PLUS_EXACT_OWNER_APPROVED_VALUE',
+ 'fallback': 'FAIL_CLOSED_TO_REGISTERED_LOWER_SAFE_PATH_OR_NO_TRADE',
+ 'family': 'ST12-FAMILY-EVIDENCE::QT_22F5',
+ 'heading': ['Part II \u2014 Retained institutional design and parameter catalog',
+             'D16. Canonical family registry \u2014 true quantum and quantum-inspired families',
+             'QT-22F5 \u2014 Qiskit transpilation-output provenance, ISA-circuit, and backend-target '
+             'snapshot atomic parameter pack'],
+ 'id': 'ST10-PARAM::2648',
+ 'impl': 'STATIC_OR_DETERMINISTIC_RULE',
+ 'launch': 'COMPUTABLE_FROM_STATIC_VALUE_OR_DETERMINISTIC_RULE',
+ 'missing': 'REJECT_INVALID_VALUE_NO_SILENT_DEFAULT',
+ 'precision': {'allowlist_check': 'REQUIRED',
+               'internal_numeric_type': 'typed_symbolic',
+               'normalization': 'CANONICAL_EXACT_TOKEN_NO_FREE_TEXT_COERCION',
+               'rounding': 'NOT_APPLICABLE'},
+ 'procedure': ['Parse the declared Day-1 seed or deterministic rule into the declared type.',
+               'Validate against the reference range and structural constraint.',
+               'Apply the declared bounded edit/search law; reject any value outside it.'],
+ 'range': '{FALL_BACK_TO_STRONGEST_APPROVED_FRESHLY_REBUILT_ISA_PROFILE_OR_CLASSICAL_COMPARATOR_AND_REJECT_PROMOTION_SENSITIVE_USE_OF_THE_STALE_ARTIFACT, '
+          'REJECT_RUN_ARTIFACT_ENTIRELY}',
+ 'res': 'STATIC_ENUM',
+ 'section': 'QT-22F5',
+ 'seed': 'FALL_BACK_TO_STRONGEST_APPROVED_FRESHLY_REBUILT_ISA_PROFILE_OR_CLASSICAL_COMPARATOR_AND_REJECT_PROMOTION_SENSITIVE_USE_OF_THE_STALE_ARTIFACT',
+ 'snap': 'IMMUTABLE_RESOLVED_VALUE_PIN',
+ 'source_class': 'QTT_FAIL_CLOSED_PROVENANCE_RULE',
+ 'src': ['SRC-IBM-ISA-LAYOUT'],
+ 'start': 66941,
+ 'state_refs': ['OWNER_POLICY::QT_22F5', 'SOURCE_PACK::QT_22F5'],
+ 'sym': 'isa_prov_fb',
+ 'unit': 'provenance-fallback policy enum',
+ 'widget': 'ENUM_DROPDOWN'}
+_ST12D_PARAMETER_ROW_023: dict[str, object] = {'app': 'IMMUTABLE_D_SNAPSHOT_INPUT_BINDING',
+ 'audit': 'ST11-PARAM::03002',
+ 'authority': 'CERTIFIED_STEP11_PARAMETER_POLICY',
+ 'binding_rules': [],
+ 'bound': 'promoted profiles must choose an explicit bool; server-conditioned behavior is '
+          'admissible only when the runtime snapshot records the resolved branch exactly',
+ 'custody': 'inputs/certified_step11/QTT_Stage1_Step11_Parameter_Policy_Adjudication_v1_0.jsonl#ST11-PARAM::03002',
+ 'default': 'PUBLIC_METHOD_OR_PINNED_PROVIDER_DEFAULT_REQUIRES_IMPLEMENTATION_VERSION_BINDING',
+ 'edit': 'EDITABLE_WITH_SHADOW',
+ 'end': 73200,
+ 'evidence': 'FAMILY_SOURCE_PACK_PLUS_EXACT_OWNER_APPROVED_VALUE',
+ 'fallback': 'FAIL_CLOSED_TO_REGISTERED_LOWER_SAFE_PATH_OR_NO_TRADE',
+ 'family': 'ST12-FAMILY-EVIDENCE::QT_38D',
+ 'heading': ['Part II \u2014 Retained institutional design and parameter catalog',
+             'D16. Canonical family registry \u2014 true quantum and quantum-inspired families',
+             'QT-38D \u2014 Runtime mitigation, precedence, and suppression atomic parameter pack'],
+ 'id': 'ST10-PARAM::3002',
+ 'impl': 'STATIC_OR_DETERMINISTIC_RULE',
+ 'launch': 'COMPUTABLE_FROM_STATIC_VALUE_OR_DETERMINISTIC_RULE',
+ 'missing': 'REJECT_INVALID_VALUE_NO_SILENT_DEFAULT',
+ 'precision': {'allowlist_check': 'REQUIRED',
+               'internal_numeric_type': 'typed_symbolic',
+               'normalization': 'CANONICAL_EXACT_TOKEN_NO_FREE_TEXT_COERCION',
+               'rounding': 'NOT_APPLICABLE'},
+ 'procedure': ['Parse the declared Day-1 seed or deterministic rule into the declared type.',
+               'Validate against the reference range and structural constraint.',
+               'Apply the declared bounded edit/search law; reject any value outside it.'],
+ 'range': '{False,True,server_conditioned}',
+ 'res': 'PRIMITIVE_AND_RESILIENCE_CONDITIONAL',
+ 'section': 'QT-38D',
+ 'seed': 'QTT promoted runtime baseline = Sampler=False and Estimator=False at '
+         'resilience_level=1`; research comparator path may still capture the public '
+         'server-conditioned unset behavior, which resolves to `False` for estimator resilience '
+         'levels `{0,1}` and `True` for estimator resilience level `{2}',
+ 'snap': 'IMMUTABLE_RESOLVED_VALUE_PIN',
+ 'source_class': 'PUBLIC_OFFICIAL_DOC_DEFAULT_PLUS_QTT_INTERNAL_VALIDATED_DEFAULT',
+ 'src': ['SRC-IBM-TWIRLING'],
+ 'start': 73189,
+ 'state_refs': ['OWNER_POLICY::QT_38D', 'SOURCE_PACK::QT_38D'],
+ 'sym': 'twirl_gates',
+ 'unit': 'bool or server-conditioned state',
+ 'widget': 'BOOLEAN_OR_SERVER_CONDITIONED_TOGGLE'}
+_ST12D_PARAMETER_ROW_024: dict[str, object] = {'app': 'IMMUTABLE_D_SNAPSHOT_INPUT_BINDING',
+ 'audit': 'ST11-PARAM::03003',
+ 'authority': 'CERTIFIED_STEP11_PARAMETER_POLICY',
+ 'binding_rules': [],
+ 'bound': 'promoted profiles must choose an explicit bool; server-conditioned behavior is '
+          'admissible only when the runtime snapshot records the resolved branch exactly',
+ 'custody': 'inputs/certified_step11/QTT_Stage1_Step11_Parameter_Policy_Adjudication_v1_0.jsonl#ST11-PARAM::03003',
+ 'default': 'PUBLIC_METHOD_OR_PINNED_PROVIDER_DEFAULT_REQUIRES_IMPLEMENTATION_VERSION_BINDING',
+ 'edit': 'EDITABLE_WITH_SHADOW',
+ 'end': 73212,
+ 'evidence': 'FAMILY_SOURCE_PACK_PLUS_EXACT_OWNER_APPROVED_VALUE',
+ 'fallback': 'FAIL_CLOSED_TO_REGISTERED_LOWER_SAFE_PATH_OR_NO_TRADE',
+ 'family': 'ST12-FAMILY-EVIDENCE::QT_38D',
+ 'heading': ['Part II \u2014 Retained institutional design and parameter catalog',
+             'D16. Canonical family registry \u2014 true quantum and quantum-inspired families',
+             'QT-38D \u2014 Runtime mitigation, precedence, and suppression atomic parameter pack'],
+ 'id': 'ST10-PARAM::3003',
+ 'impl': 'STATIC_OR_DETERMINISTIC_RULE',
+ 'launch': 'COMPUTABLE_FROM_STATIC_VALUE_OR_DETERMINISTIC_RULE',
+ 'missing': 'REJECT_INVALID_VALUE_NO_SILENT_DEFAULT',
+ 'precision': {'allowlist_check': 'REQUIRED',
+               'internal_numeric_type': 'typed_symbolic',
+               'normalization': 'CANONICAL_EXACT_TOKEN_NO_FREE_TEXT_COERCION',
+               'rounding': 'NOT_APPLICABLE'},
+ 'procedure': ['Parse the declared Day-1 seed or deterministic rule into the declared type.',
+               'Validate against the reference range and structural constraint.',
+               'Apply the declared bounded edit/search law; reject any value outside it.'],
+ 'range': '{False,True,server_conditioned}',
+ 'res': 'PRIMITIVE_AND_RESILIENCE_CONDITIONAL',
+ 'section': 'QT-38D',
+ 'seed': 'QTT promoted runtime baseline = Sampler=False and Estimator=True at resilience_level=1`; '
+         'research comparator path may still capture the public server-conditioned unset behavior, '
+         'which resolves to `False` for estimator resilience level `{0}` and `True` for estimator '
+         'resilience levels `{1,2}',
+ 'snap': 'IMMUTABLE_RESOLVED_VALUE_PIN',
+ 'source_class': 'PUBLIC_OFFICIAL_DOC_DEFAULT_PLUS_QTT_INTERNAL_VALIDATED_DEFAULT',
+ 'src': ['SRC-IBM-TWIRLING'],
+ 'start': 73201,
+ 'state_refs': ['OWNER_POLICY::QT_38D', 'SOURCE_PACK::QT_38D'],
+ 'sym': 'twirl_measure',
+ 'unit': 'bool or server-conditioned state',
+ 'widget': 'BOOLEAN_OR_SERVER_CONDITIONED_TOGGLE'}
+_ST12D_PARAMETER_ROW_025: dict[str, object] = {'app': 'IMMUTABLE_D_SNAPSHOT_INPUT_BINDING',
+ 'audit': 'ST11-PARAM::03490',
+ 'authority': 'CERTIFIED_STEP11_PARAMETER_POLICY',
+ 'binding_rules': [],
+ 'bound': 'refresh cadence may not be so stale that a known tier change can persist invisibly '
+          'across live or shadow sessions',
+ 'custody': 'inputs/certified_step11/QTT_Stage1_Step11_Parameter_Policy_Adjudication_v1_0.jsonl#ST11-PARAM::03490',
+ 'default': 'PUBLIC_METHOD_OR_PINNED_PROVIDER_DEFAULT_REQUIRES_IMPLEMENTATION_VERSION_BINDING',
+ 'edit': 'EDITABLE_WITH_SHADOW',
+ 'end': 84995,
+ 'evidence': 'FAMILY_SOURCE_PACK_PLUS_EXACT_OWNER_APPROVED_VALUE',
+ 'fallback': 'FAIL_CLOSED_TO_REGISTERED_LOWER_SAFE_PATH_OR_NO_TRADE',
+ 'family': 'ST12-FAMILY-EVIDENCE::D19_19V2',
+ 'heading': ['Part II \u2014 Retained institutional design and parameter catalog',
+             'D19. Formula and basis reference',
+             'D19.19V2 Venue fee-tier, VIP / liquidity-program, and tier-drift atomic parameter '
+             'pack'],
+ 'id': 'ST10-PARAM::3490',
+ 'impl': 'STATIC_OR_DETERMINISTIC_RULE',
+ 'launch': 'COMPUTABLE_FROM_STATIC_VALUE_OR_DETERMINISTIC_RULE',
+ 'missing': 'REJECT_INVALID_VALUE_NO_SILENT_DEFAULT',
+ 'precision': {'allowlist_check': 'REQUIRED',
+               'internal_numeric_type': 'typed_symbolic',
+               'normalization': 'CANONICAL_EXACT_TOKEN_NO_FREE_TEXT_COERCION',
+               'rounding': 'NOT_APPLICABLE'},
+ 'procedure': ['Parse the declared Day-1 seed or deterministic rule into the declared type.',
+               'Validate against the reference range and structural constraint.',
+               'Apply the declared bounded edit/search law; reject any value outside it.'],
+ 'range': '{REFRESH_AT_SESSION_START_AND_ON_OFFICIAL_ACCOUNT_OR_PROGRAM_CHANGE_EVENT, '
+          'REFRESH_ON_EVERY_ORDER_ENTRY_FOR_LOW_LATENCY_SUPPORTED_APIS, '
+          'REFRESH_ON_DECLARED_PROGRAM_SNAPSHOT_SCHEDULE}',
+ 'res': 'STATIC_ENUM',
+ 'section': 'D19.19V2',
+ 'seed': 'REFRESH_AT_SESSION_START_AND_ON_OFFICIAL_ACCOUNT_OR_PROGRAM_CHANGE_EVENT',
+ 'snap': 'RUNTIME_TYPED_POINTER_PIN',
+ 'source_class': 'PUBLIC_OFFICIAL_PROGRAM_QUERY_REFERENCE_PLUS_QTT_DAY1_SELECTION',
+ 'src': ['INHERITED_CERTIFIED_STEP11_FAMILY_SOURCE_PACK_OR_EXACT_OWNER_POLICY'],
+ 'start': 84984,
+ 'state_refs': ['OWNER_POLICY::D19_19V2', 'SOURCE_PACK::D19_19V2'],
+ 'sym': 'fee_tier_ref',
+ 'unit': 'tier-refresh policy enum',
+ 'widget': 'ENUM_DROPDOWN'}
+_ST12D_PARAMETER_ROW_026: dict[str, object] = {'app': 'IMMUTABLE_D_SNAPSHOT_INPUT_BINDING',
+ 'audit': 'ST11-PARAM::03598',
+ 'authority': 'CERTIFIED_STEP11_PARAMETER_POLICY',
+ 'binding_rules': [],
+ 'bound': 'no optimizer may widen freshness tolerance without replayed adverse-selection evidence',
+ 'custody': 'inputs/certified_step11/QTT_Stage1_Step11_Parameter_Policy_Adjudication_v1_0.jsonl#ST11-PARAM::03598',
+ 'default': 'EXPLICIT_QTT_OR_OWNER_POLICY_SEED_OR_RESOLUTION_RULE',
+ 'edit': 'OWNER_VISIBLE_LOCKED_ON',
+ 'end': 87279,
+ 'evidence': 'FAMILY_SOURCE_PACK_PLUS_EXACT_OWNER_APPROVED_VALUE',
+ 'fallback': 'FAIL_CLOSED_TO_REGISTERED_LOWER_SAFE_PATH_OR_NO_TRADE',
+ 'family': 'ST12-FAMILY-EVIDENCE::D20B_1A1',
+ 'heading': ['Part II \u2014 Retained institutional design and parameter catalog',
+             'D20B. Day-1 deployment presets',
+             'D20B.1A1 Kalshi / Polymarket fee-aware binary-edge, Kelly, tick, clip, and '
+             'execution-gate atomic profile'],
+ 'id': 'ST10-PARAM::3598',
+ 'impl': 'STATIC_OR_DETERMINISTIC_RULE',
+ 'launch': 'COMPUTABLE_FROM_STATIC_VALUE_OR_DETERMINISTIC_RULE',
+ 'missing': 'REJECT_INVALID_VALUE_NO_SILENT_DEFAULT',
+ 'precision': {'decimal_context_precision': 34,
+               'internal_numeric_type': 'Decimal',
+               'nonfinite_policy': 'REJECT',
+               'quantization': 'SOURCE_OR_UNIT_DECLARED; NO_IMPLICIT_BINARY_FLOAT_CONVERSION',
+               'rounding': 'ROUND_HALF_EVEN'},
+ 'procedure': ['Parse the declared Day-1 seed or deterministic rule into the declared type.',
+               'Validate against the reference range and structural constraint.',
+               'Apply the declared bounded edit/search law; reject any value outside it.'],
+ 'range': 'staleness tolerance is zero for detected structural change; if the venue exposes a hash '
+          'or sequence it must match the candidate input; otherwise QTT must use the strongest '
+          'available snapshot timestamp and private-state receipt',
+ 'res': 'STRUCTURAL_PRECHECK',
+ 'section': 'D20B.1A1',
+ 'seed': 'RECOMPUTE_DECISION_IF_ORDERBOOK_HASH, TICK_SIZE, MINIMUM_SIZE, SEQUENCE, OR '
+         'PRIVATE_STATE_CHANGED_AFTER_CANDIDATE_GENERATION',
+ 'snap': 'IMMUTABLE_RESOLVED_VALUE_PIN',
+ 'source_class': 'OFFICIAL_VENUE_ORDERBOOK_AND_WEBSOCKET_DOCS_PLUS_QTT_PRIVATE_STATE_LAW',
+ 'src': ['SRC-HUMMINGBOT-PMM'],
+ 'start': 87268,
+ 'state_refs': ['OWNER_POLICY::D20B_1A1', 'SOURCE_PACK::D20B_1A1'],
+ 'sym': 'kp_book_fresh',
+ 'unit': 'freshness gate',
+ 'widget': 'BOOK_FRESHNESS_STATUS_CARD'}
+_ST12D_PARAMETER_ROW_027: dict[str, object] = {'app': 'IMMUTABLE_D_SNAPSHOT_INPUT_BINDING',
+ 'audit': 'ST11-PARAM::03639',
+ 'authority': 'CERTIFIED_STEP11_PARAMETER_POLICY',
+ 'binding_rules': [],
+ 'bound': 'unresolved kappa blocks the Avellaneda-Stoikov live branch and leaves only the no-maker '
+          'or benchmark comparator branch',
+ 'custody': 'inputs/certified_step11/QTT_Stage1_Step11_Parameter_Policy_Adjudication_v1_0.jsonl#ST11-PARAM::03639',
+ 'default': 'PUBLIC_METHOD_OR_PINNED_PROVIDER_DEFAULT_REQUIRES_IMPLEMENTATION_VERSION_BINDING',
+ 'edit': 'READ_ONLY_FIT_WITH_OWNER_STRICTER_MIN_SPREAD_ALLOWED',
+ 'end': 88497,
+ 'evidence': 'FAMILY_SOURCE_PACK_PLUS_EXACT_OWNER_APPROVED_VALUE',
+ 'fallback': 'FAIL_CLOSED_TO_REGISTERED_LOWER_SAFE_PATH_OR_NO_TRADE',
+ 'family': 'ST12-FAMILY-EVIDENCE::D20B_1A4',
+ 'heading': ['Part II \u2014 Retained institutional design and parameter catalog',
+             'D20B. Day-1 deployment presets',
+             'D20B.1A4 Kalshi / Polymarket inventory-aware maker quoting, adverse-selection guard, '
+             'and public Avellaneda-Stoikov / Hummingbot-default atomic profile'],
+ 'id': 'ST10-PARAM::3639',
+ 'impl': 'OFFLINE_CALIBRATION_REQUIRED',
+ 'launch': 'EXECUTABLE_FAIL_CLOSED_UNTIL_CALIBRATION_RECEIPT',
+ 'missing': 'RETURN_BLOCKER_CALIBRATION_REQUIRED_NO_GUESSED_DEFAULT',
+ 'precision': {'decimal_context_precision': 34,
+               'internal_numeric_type': 'Decimal',
+               'nonfinite_policy': 'REJECT',
+               'quantization': 'SOURCE_OR_UNIT_DECLARED; NO_IMPLICIT_BINARY_FLOAT_CONVERSION',
+               'rounding': 'ROUND_HALF_EVEN'},
+ 'procedure': ['Use the declared Day-1 seed when one exists and mark it SEED_NOT_VALIDATED.',
+               'Fit or optimize only in REPLAY/PAPER research lanes using point-in-time data, '
+               'purging/embargo when labels overlap, and a declared comparator.',
+               'Search only the bounded space in bounded_search_space_or_fit_constraint; '
+               'deterministic seed and full trial inventory are mandatory.',
+               'No promotion follows from fit success alone; evidence and owner gates remain '
+               'separate.'],
+ 'range': 'positive finite numeric; higher kappa means denser liquidity and smaller quoted spreads '
+          'under the model',
+ 'res': 'FIT_RESOLVED_FROM_TRADING_INTENSITY_OR_COMPUTED_FROM_SPREAD_LIMITS',
+ 'section': 'D20B.1A4',
+ 'seed': 'FIT_FROM_ORDERBOOK_SNAPSHOT_CHANGES_AND_FILL_OR_TRADE_INTENSITY_AFTER_BUFFER_FULL; '
+         'OTHERWISE_NO_LIVE_MAKER_QUOTE',
+ 'snap': 'IMMUTABLE_RESOLVED_VALUE_PIN',
+ 'source_class': 'PUBLIC_AVELLANEDA_STOIKOV_INTENSITY_MODEL_PLUS_PUBLIC_HUMMINGBOT_ESTIMATOR_REFERENCE',
+ 'src': ['SRC-HUMMINGBOT-PMM'],
+ 'start': 88486,
+ 'state_refs': ['OWNER_POLICY::D20B_1A4', 'SOURCE_PACK::D20B_1A4'],
+ 'sym': 'kp_mm_kappa',
+ 'unit': 'liquidity parameter',
+ 'widget': 'KAPPA_ESTIMATOR_CARD'}
+_ST12D_PARAMETER_ROW_028: dict[str, object] = {'app': 'IMMUTABLE_D_SNAPSHOT_INPUT_BINDING',
+ 'audit': 'ST11-PARAM::03641',
+ 'authority': 'CERTIFIED_STEP11_PARAMETER_POLICY',
+ 'binding_rules': [],
+ 'bound': 'maker quotes are blocked until the trading-intensity buffer is full on a point-in-time '
+          'basis',
+ 'custody': 'inputs/certified_step11/QTT_Stage1_Step11_Parameter_Policy_Adjudication_v1_0.jsonl#ST11-PARAM::03641',
+ 'default': 'PUBLIC_METHOD_OR_PINNED_PROVIDER_DEFAULT_REQUIRES_IMPLEMENTATION_VERSION_BINDING',
+ 'edit': 'EDITABLE_WITH_SHADOW',
+ 'end': 88521,
+ 'evidence': 'FAMILY_SOURCE_PACK_PLUS_EXACT_OWNER_APPROVED_VALUE',
+ 'fallback': 'FAIL_CLOSED_TO_REGISTERED_LOWER_SAFE_PATH_OR_NO_TRADE',
+ 'family': 'ST12-FAMILY-EVIDENCE::D20B_1A4',
+ 'heading': ['Part II \u2014 Retained institutional design and parameter catalog',
+             'D20B. Day-1 deployment presets',
+             'D20B.1A4 Kalshi / Polymarket inventory-aware maker quoting, adverse-selection guard, '
+             'and public Avellaneda-Stoikov / Hummingbot-default atomic profile'],
+ 'id': 'ST10-PARAM::3641',
+ 'impl': 'STATIC_OR_DETERMINISTIC_RULE',
+ 'launch': 'COMPUTABLE_FROM_STATIC_VALUE_OR_DETERMINISTIC_RULE',
+ 'missing': 'REJECT_INVALID_VALUE_NO_SILENT_DEFAULT',
+ 'precision': {'allowlist_check': 'REQUIRED',
+               'internal_numeric_type': 'typed_symbolic',
+               'normalization': 'CANONICAL_EXACT_TOKEN_NO_FREE_TEXT_COERCION',
+               'rounding': 'NOT_APPLICABLE'},
+ 'procedure': ['Parse the declared Day-1 seed or deterministic rule into the declared type.',
+               'Validate against the reference range and structural constraint.',
+               'Apply the declared bounded edit/search law; reject any value outside it.'],
+ 'range': 'positive integer; public Hummingbot Avellaneda strategy documentation lists `200` ticks '
+          'as the trading-intensity buffer default',
+ 'res': 'STATIC_INTEGER_WITH_PUBLIC_DEFAULT',
+ 'section': 'D20B.1A4',
+ 'seed': '200',
+ 'snap': 'IMMUTABLE_RESOLVED_VALUE_PIN',
+ 'source_class': 'PUBLIC_OPEN_SOURCE_STRATEGY_DEFAULT',
+ 'src': ['SRC-HUMMINGBOT-PMM'],
+ 'start': 88510,
+ 'state_refs': ['OWNER_POLICY::D20B_1A4', 'SOURCE_PACK::D20B_1A4'],
+ 'sym': 'kp_mm_intensity_buf',
+ 'unit': 'changed orderbook ticks',
+ 'widget': 'INTEGER_INPUT_WITH_INTENSITY_BUFFER_BADGE'}
+_ST12D_PARAMETER_ROWS: tuple[dict[str, object], ...] = (
+    _ST12D_PARAMETER_ROW_001,
+    _ST12D_PARAMETER_ROW_002,
+    _ST12D_PARAMETER_ROW_003,
+    _ST12D_PARAMETER_ROW_004,
+    _ST12D_PARAMETER_ROW_005,
+    _ST12D_PARAMETER_ROW_006,
+    _ST12D_PARAMETER_ROW_007,
+    _ST12D_PARAMETER_ROW_008,
+    _ST12D_PARAMETER_ROW_009,
+    _ST12D_PARAMETER_ROW_010,
+    _ST12D_PARAMETER_ROW_011,
+    _ST12D_PARAMETER_ROW_012,
+    _ST12D_PARAMETER_ROW_013,
+    _ST12D_PARAMETER_ROW_014,
+    _ST12D_PARAMETER_ROW_015,
+    _ST12D_PARAMETER_ROW_016,
+    _ST12D_PARAMETER_ROW_017,
+    _ST12D_PARAMETER_ROW_018,
+    _ST12D_PARAMETER_ROW_019,
+    _ST12D_PARAMETER_ROW_020,
+    _ST12D_PARAMETER_ROW_021,
+    _ST12D_PARAMETER_ROW_022,
+    _ST12D_PARAMETER_ROW_023,
+    _ST12D_PARAMETER_ROW_024,
+    _ST12D_PARAMETER_ROW_025,
+    _ST12D_PARAMETER_ROW_026,
+    _ST12D_PARAMETER_ROW_027,
+    _ST12D_PARAMETER_ROW_028,
+)
+def _st12d_application(row: Mapping[str, object]) -> ST12DParameterValueSemanticsV1:
+    return ST12DParameterValueSemanticsV1(
+        parameter_id=str(row["id"]),
+        parameter_symbol=str(row["sym"]),
+        d_application_class=str(row["app"]),
+        snapshot_binding_class=str(row["snap"]),
+        current_source_binding_refs=tuple(str(value) for value in row["src"]),
+        authoritative_value_policy_ref=(
+            f"ComputationParameterPolicyV1::{row['id']}"
+        ),
+    )
+
+
+def _st12d_parameter_policy(
+    row: Mapping[str, object],
+    application: ST12DParameterValueSemanticsV1,
+) -> ParameterPolicyRecordV1:
+    precision = row["precision"]
+    if not isinstance(precision, Mapping):
+        raise ParameterPolicyError(
+            ReasonCode.PARAMETER_BINDING_MISMATCH,
+            f"ST12-D precision policy is malformed for {application.parameter_id}",
+        )
+    return ParameterPolicyRecordV1(
+        canonical_owner=(
+            "QKUComputationControlPlaneV1.ComputationParameterPolicyV1"
+        ),
+        certified_step11_custody_ref=str(row["custody"]),
+        certified_step11_row_embedded_in_prompt=False,
+        codex_online_research_allowed=False,
+        direct_source_claim_justifications=(),
+        effective_bounded_search_space_or_fit_constraint=str(row["bound"]),
+        effective_day1_seed_value_or_resolution_rule=str(row["seed"]),
+        effective_default_authority_class=str(row["default"]),
+        effective_fallback_behavior_when_value_unavailable=str(row["fallback"]),
+        effective_owner_dashboard_editability_class=str(row["edit"]),
+        effective_policy_authority=str(row["authority"]),
+        effective_reference_range_or_structural_constraint=str(row["range"]),
+        effective_resolution_class=str(row["res"]),
+        effective_source_state_refs=tuple(
+            str(value) for value in row["state_refs"]
+        ),
+        effective_ui_widget_class=str(row["widget"]),
+        effective_unit_or_basis=str(row["unit"]),
+        effective_value_source_class=str(row["source_class"]),
+        evidence_basis_class=str(row["evidence"]),
+        evidence_binding_rule_refs=tuple(
+            str(value) for value in row["binding_rules"]
+        ),
+        family_evidence_binding_ref=str(row["family"]),
+        implementation_resolution_kind=str(row["impl"]),
+        launch_computability_state=str(row["launch"]),
+        master_plan_heading_path=tuple(str(value) for value in row["heading"]),
+        master_plan_section_id=str(row["section"]),
+        missing_stale_invalid_behavior=str(row["missing"]),
+        parameter_audit_id=str(row["audit"]),
+        parameter_id=application.parameter_id,
+        parameter_symbol=application.parameter_symbol,
+        precision_and_rounding_policy=tuple(
+            (str(name), str(value)) for name, value in precision.items()
+        ),
+        runtime_resolution_procedure=tuple(
+            str(value) for value in row["procedure"]
+        ),
+        source_line_end=int(row["end"]),
+        source_line_start=int(row["start"]),
+        step12_primary_tranche_id="ST12-TRANCHE-D",
+        original_row_json=json.dumps(
+            {
+                "freeze_value_policy_ref": (
+                    "freeze/PARAMETER_POLICIES.jsonl::"
+                    f"{application.parameter_id}"
+                )
+            },
+            sort_keys=True,
+            separators=(",", ":"),
+        ),
+        appendix_d_value_semantics=application,
+    )
+
+
+ST12D_PARAMETER_APPLICATION_BINDINGS: Mapping[
+    str, ST12DParameterValueSemanticsV1
+] = MappingProxyType(
+    {
+        application.parameter_id: application
+        for application in (
+            _st12d_application(row) for row in _ST12D_PARAMETER_ROWS
+        )
+    }
+)
+ST12D_PARAMETER_POLICIES: Mapping[
+    str, ParameterPolicyRecordV1
+] = MappingProxyType(
+    {
+        application.parameter_id: _st12d_parameter_policy(row, application)
+        for row in _ST12D_PARAMETER_ROWS
+        for application in (
+            ST12D_PARAMETER_APPLICATION_BINDINGS[str(row["id"])],
+        )
+    }
+)
+ST12D_SNAPSHOT_PARAMETER_BINDING_IDS = tuple(
+    parameter_id
+    for parameter_id, binding in ST12D_PARAMETER_APPLICATION_BINDINGS.items()
+    if binding.d_application_class == "IMMUTABLE_D_SNAPSHOT_INPUT_BINDING"
+)
+
+_ST12D_POLICY_IDENTIFIERS = frozenset(
+    identifier
+    for policy in ST12D_PARAMETER_POLICIES.values()
+    for identifier in (policy.parameter_id, policy.parameter_audit_id)
+)
+if _ST12D_POLICY_IDENTIFIERS.intersection(PARAMETER_POLICY_BY_ID):
+    raise ParameterPolicyError(
+        ReasonCode.PARAMETER_BINDING_MISMATCH,
+        "Appendix-D parameter identity collides with an existing typed policy",
+    )
+PARAMETER_POLICY_BY_ID = MappingProxyType(
+    {
+        **PARAMETER_POLICY_BY_ID,
+        **{
+            identifier: policy
+            for policy in ST12D_PARAMETER_POLICIES.values()
+            for identifier in (policy.parameter_id, policy.parameter_audit_id)
+        },
+    }
+)
+
+
+def resolve_st12d_value_policy_refs(
+    parameter_ids: tuple[str, ...],
+) -> Mapping[str, str]:
+    """Resolve actual D value policies through the one central owner."""
+
+    if (
+        not isinstance(parameter_ids, tuple)
+        or len(parameter_ids) != len(set(parameter_ids))
+        or any(not isinstance(value, str) or not value for value in parameter_ids)
+    ):
+        raise ParameterPolicyError(
+            ReasonCode.PARAMETER_BINDING_MISMATCH,
+            "D parameter identities must be a unique immutable tuple",
+        )
+    resolved: dict[str, str] = {}
+    for parameter_id in parameter_ids:
+        binding = ST12D_PARAMETER_APPLICATION_BINDINGS.get(parameter_id)
+        if binding is None:
+            raise ParameterPolicyError(
+                ReasonCode.PARAMETER_UNKNOWN,
+                f"unknown ST12-D parameter identity: {parameter_id}",
+            )
+        policy = get_parameter_policy(parameter_id)
+        if (
+            policy is not ST12D_PARAMETER_POLICIES[parameter_id]
+            or policy.appendix_d_value_semantics is not binding
+        ):
+            raise ParameterPolicyError(
+                ReasonCode.PARAMETER_OWNER_MISSING,
+                f"canonical ST12-D value owner gap: {parameter_id}",
+            )
+        resolved[parameter_id] = binding.authoritative_value_policy_ref
+    return MappingProxyType(resolved)
+
+
+ST12D_PARAMETER_POLICY_SET_VERSION = "ST12D-PARAMETER-POLICY-SET-v1"
+ST12D_PARAMETER_VALUE_PACKET_TYPE = "ResolvedSnapshotParameterValueV1"
+ST12D_PARAMETER_VALUE_PACKET_SCHEMA_ID = (
+    "ComputationParameterPolicyV1::ResolvedSnapshotParameterValueV1::SCHEMA"
+)
+ST12D_PARAMETER_VALUE_PACKET_SCHEMA_VERSION = "1.0.0"
+
+ST12D_OWNER_RESOLVED_PARAMETER_IDS = frozenset(
+    {
+        "ST10-PARAM::0764",
+        "ST10-PARAM::0940",
+        "ST10-PARAM::1946",
+        "ST10-PARAM::2117",
+        "ST10-PARAM::2157",
+        "ST10-PARAM::3490",
+        "ST10-PARAM::3598",
+        "ST10-PARAM::3639",
+    }
+)
+
+
+def st12d_snapshot_parameter_binding_id(parameter_id: str) -> str:
+    if parameter_id not in ST12D_SNAPSHOT_PARAMETER_BINDING_IDS:
+        raise ParameterPolicyError(
+            ReasonCode.PARAMETER_UNKNOWN,
+            f"unknown D snapshot parameter binding: {parameter_id}",
+        )
+    return f"ST12D::PARAMETER-VALUE::{parameter_id}"
+
+
+def st12d_snapshot_parameter_field_path(parameter_id: str) -> str:
+    try:
+        symbol = ST12D_PARAMETER_POLICIES[parameter_id].parameter_symbol
+    except KeyError as exc:
+        raise ParameterPolicyError(
+            ReasonCode.PARAMETER_UNKNOWN,
+            f"unknown D snapshot parameter field: {parameter_id}",
+        ) from exc
+    return f"snapshot_parameter_values.{symbol}"
+
+
+def st12d_snapshot_parameter_source_lineage(parameter_id: str) -> str:
+    policy = ST12D_PARAMETER_POLICIES[parameter_id]
+    return (
+        f"{policy.canonical_owner} -> {parameter_id} -> "
+        "FormulaRuntimeSnapshotCandidateV1"
+    )
+
+
+def _st12d_parameter_value_kind(parameter_id: str, value: object) -> str:
+    if parameter_id in {"ST10-PARAM::0764", "ST10-PARAM::0940", "ST10-PARAM::3639"}:
+        return "DECIMAL"
+    if parameter_id in {"ST10-PARAM::2117", "ST10-PARAM::2157", "ST10-PARAM::3490"}:
+        return "TYPED_POINTER"
+    if type(value) is bool:
+        return "BOOLEAN"
+    if type(value) is int:
+        return "INTEGER"
+    return "CANONICAL_ENUM_OR_RULE"
+
+
+def _st12d_canonical_owner_value(parameter_id: str, value: object) -> object:
+    if parameter_id in {"ST10-PARAM::0764", "ST10-PARAM::0940", "ST10-PARAM::3639"}:
+        if type(value) is not Decimal or not value.is_finite() or value <= 0:
+            raise ParameterPolicyError(
+                ReasonCode.PARAMETER_OUT_OF_POLICY,
+                f"{parameter_id} owner value must be an exact positive Decimal",
+            )
+        return value
+    if not isinstance(value, str) or not value or value != value.strip():
+        raise ParameterPolicyError(
+            ReasonCode.PARAMETER_OUT_OF_POLICY,
+            f"{parameter_id} owner value must be exact canonical text",
+        )
+    return value
+
+
+def _st12d_static_policy_value(parameter_id: str) -> str | int | bool:
+    policy = ST12D_PARAMETER_POLICIES[parameter_id]
+    if policy.implementation_resolution_kind not in {
+        "STATIC_OR_DETERMINISTIC_RULE",
+        "EXPLICIT_FAIL_CLOSED_POLICY",
+    }:
+        raise ParameterPolicyError(
+            ReasonCode.PARAMETER_OWNER_MISSING,
+            f"{parameter_id} requires an exact current owner value packet",
+        )
+    if parameter_id == "ST10-PARAM::3002":
+        return False
+    if parameter_id == "ST10-PARAM::3003":
+        return True
+    if parameter_id == "ST10-PARAM::3641":
+        return 200
+    return policy.effective_day1_seed_value_or_resolution_rule
+
+
+def resolve_st12d_snapshot_parameter_values(
+    *,
+    context: object,
+    owner_registry: object,
+) -> tuple[ResolvedSnapshotParameterValueV1, ...]:
+    """Resolve all 21 D pins without confusing policy identity with value identity."""
+
+    from .context import ComputationContextKeyV1
+    from .errors import (
+        FreshnessError,
+        InputAuthorityError,
+        PointInTimeError,
+    )
+    from .freshness import FreshnessPolicyV1, FreshnessResolverV1
+    from .input_resolver import CanonicalOwnerPacketRegistryV1
+    from .point_in_time import PointInTimeFieldClassV1, PointInTimePolicyV1
+
+    if (
+        not isinstance(context, ComputationContextKeyV1)
+        or not isinstance(owner_registry, CanonicalOwnerPacketRegistryV1)
+    ):
+        raise ParameterPolicyError(
+            ReasonCode.PARAMETER_BINDING_MISMATCH,
+            "D value resolution requires the exact execution context and owner registry",
+        )
+    rows: list[ResolvedSnapshotParameterValueV1] = []
+    for parameter_id in ST12D_SNAPSHOT_PARAMETER_BINDING_IDS:
+        policy = ST12D_PARAMETER_POLICIES[parameter_id]
+        policy_ref = ST12D_PARAMETER_APPLICATION_BINDINGS[
+            parameter_id
+        ].authoritative_value_policy_ref
+        if parameter_id not in ST12D_OWNER_RESOLVED_PARAMETER_IDS:
+            value = _st12d_static_policy_value(parameter_id)
+            rows.append(
+                ResolvedSnapshotParameterValueV1(
+                    parameter_id=parameter_id,
+                    parameter_symbol=policy.parameter_symbol,
+                    resolved_value_ref=(
+                        f"RESOLVED-SNAPSHOT-PARAMETER::{parameter_id}::"
+                        f"{ST12D_PARAMETER_POLICY_SET_VERSION}"
+                    ),
+                    canonical_typed_value_or_explicit_unavailable=value,
+                    value_kind=_st12d_parameter_value_kind(parameter_id, value),
+                    unit_or_basis=policy.effective_unit_or_basis,
+                    resolution_state=(
+                        SnapshotParameterResolutionStateV1.DETERMINISTIC_POLICY_VALUE_MATERIALIZED
+                    ),
+                    policy_ref=policy_ref,
+                    parameter_policy_set_version=ST12D_PARAMETER_POLICY_SET_VERSION,
+                    producer_receipt_refs=(),
+                    point_in_time_receipt_refs=(),
+                    freshness_receipt_refs=(),
+                    source_epoch_refs=(),
+                    observed_at_or_explicit_absence="EXPLICIT_ABSENCE",
+                    valid_until_or_explicit_absence="EXPLICIT_ABSENCE",
+                )
+            )
+            continue
+        binding_id = st12d_snapshot_parameter_binding_id(parameter_id)
+        try:
+            packet = owner_registry.packet_for(
+                context=context,
+                binding_id=binding_id,
+            )
+            if (
+                packet.owner_id != policy.canonical_owner
+                or packet.packet_type != ST12D_PARAMETER_VALUE_PACKET_TYPE
+                or packet.schema_id != ST12D_PARAMETER_VALUE_PACKET_SCHEMA_ID
+                or packet.schema_version != ST12D_PARAMETER_VALUE_PACKET_SCHEMA_VERSION
+                or packet.producer_receipt_type
+                != ST12D_PARAMETER_VALUE_PACKET_TYPE
+                or packet.source_state_and_claim_lineage
+                != st12d_snapshot_parameter_source_lineage(parameter_id)
+                or packet.source_conflict
+            ):
+                raise InputAuthorityError(
+                    ReasonCode.PARAMETER_BINDING_MISMATCH,
+                    f"{parameter_id} owner value packet identity or lineage differs",
+                )
+            field_path = st12d_snapshot_parameter_field_path(parameter_id)
+            try:
+                raw_value = packet.values[field_path]
+            except KeyError as exc:
+                raise InputAuthorityError(
+                    ReasonCode.PARAMETER_BINDING_MISMATCH,
+                    f"{parameter_id} owner packet lacks its exact value field",
+                ) from exc
+            value = _st12d_canonical_owner_value(parameter_id, raw_value)
+            pit = PointInTimePolicyV1.validate(
+                receipt_id=f"PIT::{packet.packet_id}::{binding_id}",
+                field_class=PointInTimeFieldClassV1.OBSERVATION,
+                clocks=packet.clocks,
+                context=context,
+                prior_revision_available_time=packet.prior_revision_available_time,
+            )
+            freshness = FreshnessResolverV1.validate(
+                receipt_id=f"FRESHNESS::{packet.packet_id}::{binding_id}",
+                clocks=packet.clocks,
+                context=context,
+                packet_source_epoch_id=packet.source_epoch_id,
+                policy=FreshnessPolicyV1(ttl=packet.ttl),
+                provider_sequence=packet.provider_sequence,
+                revision=packet.revision,
+            )
+        except (
+            FreshnessError,
+            InputAuthorityError,
+            ParameterPolicyError,
+            PointInTimeError,
+        ) as exc:
+            reason = exc.reason_code
+            rows.append(
+                ResolvedSnapshotParameterValueV1(
+                    parameter_id=parameter_id,
+                    parameter_symbol=policy.parameter_symbol,
+                    resolved_value_ref=(
+                        f"RESOLVED-SNAPSHOT-PARAMETER::{parameter_id}::UNAVAILABLE"
+                    ),
+                    canonical_typed_value_or_explicit_unavailable=(
+                        f"EXPLICIT_UNAVAILABLE::{reason.value}"
+                    ),
+                    value_kind="EXPLICIT_UNAVAILABLE",
+                    unit_or_basis=policy.effective_unit_or_basis,
+                    resolution_state=(
+                        SnapshotParameterResolutionStateV1.REQUIRED_OWNER_VALUE_UNAVAILABLE
+                    ),
+                    policy_ref=policy_ref,
+                    parameter_policy_set_version=ST12D_PARAMETER_POLICY_SET_VERSION,
+                    producer_receipt_refs=(),
+                    point_in_time_receipt_refs=(),
+                    freshness_receipt_refs=(),
+                    source_epoch_refs=(),
+                    observed_at_or_explicit_absence="EXPLICIT_ABSENCE",
+                    valid_until_or_explicit_absence="EXPLICIT_ABSENCE",
+                    diagnostic_reason_codes=(reason,),
+                )
+            )
+            continue
+        rows.append(
+            ResolvedSnapshotParameterValueV1(
+                parameter_id=parameter_id,
+                parameter_symbol=policy.parameter_symbol,
+                resolved_value_ref=(
+                    f"RESOLVED-SNAPSHOT-PARAMETER::{parameter_id}::"
+                    f"{packet.producer_receipt_id}"
+                ),
+                canonical_typed_value_or_explicit_unavailable=value,
+                value_kind=_st12d_parameter_value_kind(parameter_id, value),
+                unit_or_basis=policy.effective_unit_or_basis,
+                resolution_state=SnapshotParameterResolutionStateV1.OWNER_VALUE_RESOLVED,
+                policy_ref=policy_ref,
+                parameter_policy_set_version=ST12D_PARAMETER_POLICY_SET_VERSION,
+                producer_receipt_refs=(packet.producer_receipt_id,),
+                point_in_time_receipt_refs=(pit.receipt_id,),
+                freshness_receipt_refs=(freshness.receipt_id,),
+                source_epoch_refs=(packet.source_epoch_id,),
+                observed_at_or_explicit_absence=packet.clocks.observed_time,
+                valid_until_or_explicit_absence=(
+                    packet.clocks.available_time + packet.ttl
+                ),
+            )
+        )
+    result = tuple(rows)
+    if tuple(row.parameter_id for row in result) != ST12D_SNAPSHOT_PARAMETER_BINDING_IDS:
+        raise ParameterPolicyError(
+            ReasonCode.PARAMETER_BINDING_MISMATCH,
+            "D snapshot parameter resolution order or denominator differs from the freeze",
+        )
+    return result
+
+
+if (
+    len(ST12D_PARAMETER_APPLICATION_BINDINGS) != 28
+    or len(ST12D_PARAMETER_POLICIES) != 28
+    or len(ST12D_SNAPSHOT_PARAMETER_BINDING_IDS) != 21
+    or tuple(ST12D_PARAMETER_APPLICATION_BINDINGS)
+    != tuple(row["id"] for row in _ST12D_PARAMETER_ROWS)
+    or len(
+        {
+            policy.canonical_owner
+            for policy in ST12D_PARAMETER_POLICIES.values()
+        }
+    )
+    != 1
+    or any(
+        binding.value_mutation_authorized_by_st12d
+        for binding in ST12D_PARAMETER_APPLICATION_BINDINGS.values()
+    )
+):
+    raise ParameterPolicyError(
+        ReasonCode.PARAMETER_BINDING_MISMATCH,
+        "ST12-D parameter application closure must be exact 28/21 with one owner",
     )
