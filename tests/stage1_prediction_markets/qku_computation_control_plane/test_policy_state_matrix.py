@@ -177,6 +177,11 @@ def _inputs(
             policy_version="ST12F-INTERFACE-v1",
             causation_id="CAUSE::D::EVIDENCE",
             correlation_id="CORRELATION::D::EVIDENCE",
+            input_lock_id="ST12F-INPUT-LOCK::D::1",
+            component_or_template_ref="ST12F-TEMPLATE::D::1",
+            evidence_bundle_version="ST12F-EVIDENCE-BUNDLE::D::1::V1",
+            source_epoch_refs=("SOURCE-EPOCH::D::1",),
+            terminal_state="CLOSED_INDEPENDENTLY_VALIDATED",
         )
     )
     predecessor_proposal = (
@@ -853,7 +858,8 @@ def test_non_d_public_contract_and_existing_source_owners_remain_bounded() -> No
         IMPLEMENTED_OPERATION_IDS,
     )
 
-    assert len(IMPLEMENTED_OPERATION_IDS) == 12
+    assert len(IMPLEMENTED_OPERATION_IDS) == 15
+    assert {"compile_replay_paper_cohort", "register_replay_paper_result", "build_evidence_bundle"} <= set(IMPLEMENTED_OPERATION_IDS)
     assert set(IMPLEMENTED_OPERATION_IDS) == {
         name
         for name, member in vars(QKUComputationControlPlaneV1).items()

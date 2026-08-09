@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, fields
+from dataclasses import dataclass
 from datetime import datetime
 from enum import StrEnum
 from types import MappingProxyType
@@ -13,8 +13,11 @@ from .errors import ContractValidationError, ReasonCode
 from .models import (
     ComputationExecutionReceiptV1,
     ModeSnapshotCandidateProposalResultV1,
+    NO_EFFECTS_V1,
+    NoEffectFlagsV1,
     SnapshotCandidateStateV1,
 )
+from .serialization import deterministic_json, safe_json_loads
 
 
 def _required(value: object, name: str) -> None:
@@ -51,30 +54,6 @@ def _require_declared_scale(value: str, scale: int, name: str) -> None:
         )
 
 
-@dataclass(frozen=True, slots=True)
-class NoEffectFlagsV1:
-    provider_connection_allowed: bool = False
-    private_state_read_allowed: bool = False
-    replay_or_paper_execution_allowed: bool = False
-    llm_inference_allowed: bool = False
-    qpu_execution_allowed: bool = False
-    mode_or_allow_activation_allowed: bool = False
-    order_release_allowed: bool = False
-    capital_mutation_allowed: bool = False
-
-    def __post_init__(self) -> None:
-        for field in fields(self):
-            value = getattr(self, field.name)
-            if type(value) is not bool or value:
-                raise ContractValidationError(
-                    ReasonCode.RUNTIME_EFFECT_FORBIDDEN,
-                    f"Tranche-C no-effect flag {field.name} must be exact false",
-                )
-
-
-NO_EFFECTS_V1 = NoEffectFlagsV1()
-
-
 class EconomicRecordTypeV1(StrEnum):
     DURABLE_COMPUTATION_RECEIPT = "DURABLE_COMPUTATION_RECEIPT"
     ECONOMIC_EVENT = "ECONOMIC_EVENT"
@@ -88,6 +67,7 @@ class EconomicRecordTypeV1(StrEnum):
     ORDER_INTENT = "ORDER_INTENT"
     EXECUTION_CUSTODY = "EXECUTION_CUSTODY"
     MODE_SNAPSHOT_CONTROL = "MODE_SNAPSHOT_CONTROL"
+    ST12F_EVIDENCE_CONTROL = "ST12F_EVIDENCE_CONTROL"
 
 
 class ModeSnapshotControlClassV1(StrEnum):
@@ -98,6 +78,192 @@ class ModeSnapshotControlClassV1(StrEnum):
     SNAPSHOT_ROLLBACK_PROPOSAL = "SNAPSHOT_ROLLBACK_PROPOSAL"
     SNAPSHOT_STALE_OR_RETIREMENT = "SNAPSHOT_STALE_OR_RETIREMENT"
     LATENCY_MEASUREMENT = "LATENCY_MEASUREMENT"
+
+
+class ST12FReceiptClassV1(StrEnum):
+    COHORT_COMPILATION = "COHORT_COMPILATION"
+    INPUT_LOCK = "INPUT_LOCK"
+    REPLAY_REGISTRATION = "REPLAY_REGISTRATION"
+    PAPER_REGISTRATION = "PAPER_REGISTRATION"
+    DIVERGENCE_ASSESSMENT = "DIVERGENCE_ASSESSMENT"
+    MODEL_RISK_ASSESSMENT = "MODEL_RISK_ASSESSMENT"
+    QUANTUM_TRACE_VALIDATION = "QUANTUM_TRACE_VALIDATION"
+    LLM_ANNOTATION_VALIDATION = "LLM_ANNOTATION_VALIDATION"
+    EVIDENCE_BUNDLE_VERSION = "EVIDENCE_BUNDLE_VERSION"
+    INDEPENDENT_REVIEW_VERSION = "INDEPENDENT_REVIEW_VERSION"
+    D_EVIDENCE_REFERENCE = "D_EVIDENCE_REFERENCE"
+    G_HANDOFF_REFERENCE = "G_HANDOFF_REFERENCE"
+
+
+ST12F_RECEIPT_CONTRACT_ALLOWLIST: Mapping[
+    ST12FReceiptClassV1, tuple[str, str]
+] = MappingProxyType(
+    {
+        ST12FReceiptClassV1.COHORT_COMPILATION: (
+            "cohort_compiler",
+            "ReplayPaperCohortCompilationRecordV1",
+        ),
+        ST12FReceiptClassV1.INPUT_LOCK: (
+            "input_lock",
+            "ImmutableReplayPaperInputLockV1",
+        ),
+        ST12FReceiptClassV1.REPLAY_REGISTRATION: (
+            "evidence",
+            "ReplayResultContractV1",
+        ),
+        ST12FReceiptClassV1.PAPER_REGISTRATION: (
+            "evidence",
+            "PaperResultContractV1",
+        ),
+        ST12FReceiptClassV1.DIVERGENCE_ASSESSMENT: (
+            "evidence",
+            "DivergenceAssessmentV1",
+        ),
+        ST12FReceiptClassV1.MODEL_RISK_ASSESSMENT: (
+            "model_risk",
+            "ModelRiskEvidenceAssessmentV1",
+        ),
+        ST12FReceiptClassV1.QUANTUM_TRACE_VALIDATION: (
+            "quantum_benchmark",
+            "QuantumTraceValidationReceiptV1",
+        ),
+        ST12FReceiptClassV1.LLM_ANNOTATION_VALIDATION: (
+            "llm_gateway",
+            "DeterministicEvidenceAnnotationContractV1",
+        ),
+        ST12FReceiptClassV1.EVIDENCE_BUNDLE_VERSION: (
+            "evidence",
+            "ComputationEvidenceBundleV1",
+        ),
+        ST12FReceiptClassV1.INDEPENDENT_REVIEW_VERSION: (
+            "evidence",
+            "IndependentReviewRecordV1",
+        ),
+        ST12FReceiptClassV1.D_EVIDENCE_REFERENCE: (
+            "models",
+            "ST12FEvidenceReferenceV1",
+        ),
+        ST12FReceiptClassV1.G_HANDOFF_REFERENCE: (
+            "evidence",
+            "FToGHandoffReferencesV1",
+        ),
+    }
+)
+
+
+@dataclass(frozen=True, slots=True)
+class ST12FEvidenceControlReceiptRecordV1:
+    control_receipt_id: str
+    receipt_class: ST12FReceiptClassV1
+    operation_id: str
+    request_id: str
+    idempotency_key: str
+    contract_type: str
+    contract_id: str
+    contract_version: str
+    input_lock_id_or_explicit_absence: str
+    parent_version_ref_or_explicit_absence: str
+    canonical_contract_json: str
+    source_record_refs: tuple[str, ...]
+    parameter_value_refs: tuple[str, ...]
+    source_epoch_refs: tuple[str, ...]
+    typed_reason_codes: tuple[ReasonCode, ...]
+    terminal_state: str
+    fixture_only_not_evidence: bool
+    no_effect_flags: NoEffectFlagsV1 = NO_EFFECTS_V1
+
+    def __post_init__(self) -> None:
+        for name in (
+            "control_receipt_id",
+            "operation_id",
+            "request_id",
+            "idempotency_key",
+            "contract_type",
+            "contract_id",
+            "contract_version",
+            "input_lock_id_or_explicit_absence",
+            "parent_version_ref_or_explicit_absence",
+            "canonical_contract_json",
+            "terminal_state",
+        ):
+            _required(getattr(self, name), name)
+        if type(self.receipt_class) is not ST12FReceiptClassV1:
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "ST12-F receipt_class must be the exact allowlisted enum",
+            )
+        expected_module, expected_type = ST12F_RECEIPT_CONTRACT_ALLOWLIST[
+            self.receipt_class
+        ]
+        if self.contract_type != expected_type:
+            raise ContractValidationError(
+                ReasonCode.SCHEMA_MISMATCH,
+                "ST12-F receipt class and canonical contract type differ",
+            )
+        for name in (
+            "source_record_refs",
+            "parameter_value_refs",
+            "source_epoch_refs",
+        ):
+            _identifier_tuple(getattr(self, name), name)
+        if (
+            not isinstance(self.typed_reason_codes, tuple)
+            or any(type(code) is not ReasonCode for code in self.typed_reason_codes)
+            or len(self.typed_reason_codes) != len(set(self.typed_reason_codes))
+        ):
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "typed_reason_codes must be a unique ReasonCode tuple",
+            )
+        if type(self.fixture_only_not_evidence) is not bool:
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "fixture_only_not_evidence must be an exact boolean",
+            )
+        if type(self.no_effect_flags) is not NoEffectFlagsV1:
+            raise ContractValidationError(
+                ReasonCode.RUNTIME_EFFECT_FORBIDDEN,
+                "ST12-F receipts require the shared no-effect custody type",
+            )
+        payload = safe_json_loads(self.canonical_contract_json)
+        if not isinstance(payload, dict) or deterministic_json(payload) != self.canonical_contract_json:
+            raise ContractValidationError(
+                ReasonCode.SERIALIZATION_UNSAFE,
+                "canonical_contract_json must be exact deterministic object text",
+            )
+        if not expected_module or not expected_type:
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "ST12-F receipt allowlist entry is incomplete",
+            )
+
+    def reconstruct(self, expected_type: type[object]) -> object:
+        expected_module, expected_name = ST12F_RECEIPT_CONTRACT_ALLOWLIST[
+            self.receipt_class
+        ]
+        if (
+            expected_type.__name__ != expected_name
+            or expected_type.__module__.rsplit(".", 1)[-1] != expected_module
+            or self.contract_type != expected_name
+        ):
+            raise ContractValidationError(
+                ReasonCode.SCHEMA_MISMATCH,
+                "receipt reconstruction type is not the exact allowlisted class",
+            )
+        constructor = getattr(expected_type, "from_canonical_mapping", None)
+        if not callable(constructor):
+            raise ContractValidationError(
+                ReasonCode.SCHEMA_MISMATCH,
+                "allowlisted contract lacks canonical reconstruction authority",
+            )
+        payload = safe_json_loads(self.canonical_contract_json)
+        value = constructor(payload)
+        if type(value) is not expected_type or deterministic_json(value) != self.canonical_contract_json:
+            raise ContractValidationError(
+                ReasonCode.SCHEMA_MISMATCH,
+                "canonical contract reconstruction did not round-trip exactly",
+            )
+        return value
 
 
 ECONOMIC_RECORD_PAYLOAD_CLASS: Mapping[EconomicRecordTypeV1, tuple[str, str]] = MappingProxyType(
@@ -116,6 +282,10 @@ ECONOMIC_RECORD_PAYLOAD_CLASS: Mapping[EconomicRecordTypeV1, tuple[str, str]] = 
         EconomicRecordTypeV1.MODE_SNAPSHOT_CONTROL: (
             "receipts",
             "ModeSnapshotControlReceiptRecordV1",
+        ),
+        EconomicRecordTypeV1.ST12F_EVIDENCE_CONTROL: (
+            "receipts",
+            "ST12FEvidenceControlReceiptRecordV1",
         ),
     }
 )

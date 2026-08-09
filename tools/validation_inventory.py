@@ -20,6 +20,7 @@ from tools.validation_scope_registry import (
     ST12C_ALLOWED_EXACT_PATHS,
     ST12D_ALLOWED_EXACT_PATHS,
     ST12E_ALLOWED_EXACT_PATHS,
+    ST12F_ALLOWED_EXACT_PATHS,
 )
 
 
@@ -94,6 +95,7 @@ QKU_ALLOWED_EXACT_PATHS = frozenset(
         *ST12C_ALLOWED_EXACT_PATHS,
         *ST12D_ALLOWED_EXACT_PATHS,
         *ST12E_ALLOWED_EXACT_PATHS,
+        *ST12F_ALLOWED_EXACT_PATHS,
     )
 )
 ST12C_QKU_VALIDATOR_IDS = frozenset(
@@ -139,6 +141,22 @@ ST12D_EXCLUSIVE_QKU_VALIDATOR_IDS = frozenset(
         "independent_validate_qku_computation_control_plane_d",
         "validate_qku_computation_control_plane_d",
         "validate_qku_computation_control_plane_latency",
+    }
+)
+ST12F_QKU_VALIDATOR_IDS = frozenset(
+    {
+        "independent_validate_qku_computation_control_plane",
+        "independent_validate_qku_computation_control_plane_architecture",
+        "independent_validate_qku_computation_control_plane_d",
+        "independent_validate_qku_computation_control_plane_execution",
+        "independent_validate_qku_computation_control_plane_llm",
+        "independent_validate_qku_computation_control_plane_model_risk",
+        "independent_validate_qku_computation_control_plane_operations",
+        "independent_validate_qku_computation_control_plane_quantum",
+        "independent_validate_qku_computation_control_plane_source",
+        "validate_qku_computation_control_plane_llm",
+        "validate_qku_computation_control_plane_model_risk",
+        "validate_qku_computation_control_plane_quantum",
     }
 )
 
@@ -332,6 +350,8 @@ def _pr_tag_from_token(token: str) -> str:
 
 
 def _owner_pr_or_feature(stem: str, validator_id: str) -> str:
+    if validator_id in ST12F_QKU_VALIDATOR_IDS:
+        return "ST12-TRANCHE-F"
     if validator_id in ST12D_EXCLUSIVE_QKU_VALIDATOR_IDS:
         return "ST12-TRANCHE-D"
     if validator_id in ST12E_EXCLUSIVE_QKU_VALIDATOR_IDS:

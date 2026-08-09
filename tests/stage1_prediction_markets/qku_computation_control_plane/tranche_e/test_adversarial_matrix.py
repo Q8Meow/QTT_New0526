@@ -481,13 +481,34 @@ def test_optional_task_scope_requires_an_explicit_absence_token() -> None:
     assert captured.value.reason_code is ReasonCode.TASK_SCOPE_MISMATCH
 
 
-def test_held_operation_contract_is_denied_without_implementation() -> None:
-    operation_id = "compile_replay_paper_cohort"
-    decision = resolve_decision(
-        make_resolver(operation_id=operation_id), operation_id=operation_id
-    )
-    assert ReasonCode.REPLAY_PAPER_EFFECT_FORBIDDEN in decision.reason_codes
-    assert not decision.eligible
+def test_st12f_operations_are_no_effect_eligible_and_effect_attempts_are_denied() -> None:
+    for operation_id in (
+        "compile_replay_paper_cohort",
+        "register_replay_paper_result",
+        "build_evidence_bundle",
+    ):
+        decision = resolve_decision(
+            make_resolver(operation_id=operation_id), operation_id=operation_id
+        )
+        assert (
+            decision.decision_state
+            is AgentCapabilityDecisionStateV1.ELIGIBLE_FOR_NO_EFFECT_QKU_REQUEST
+        )
+        assert decision.eligible
+        assert decision.runtime_effect_authorized is False
+        assert ReasonCode.REPLAY_PAPER_EFFECT_FORBIDDEN not in decision.reason_codes
+
+        effect_attempt = resolve_decision(
+            make_resolver(
+                operation_id=operation_id,
+                envelope_overrides={"replay_paper_effect_requested": True},
+            ),
+            operation_id=operation_id,
+        )
+        assert effect_attempt.decision_state is AgentCapabilityDecisionStateV1.DENIED
+        assert not effect_attempt.eligible
+        assert ReasonCode.REPLAY_PAPER_EFFECT_FORBIDDEN in effect_attempt.reason_codes
+        assert effect_attempt.runtime_effect_authorized is False
 
 
 def test_coefficient_level_quantum_reference_is_advisory_and_no_effect() -> None:

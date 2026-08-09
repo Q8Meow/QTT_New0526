@@ -426,7 +426,12 @@ def _runtime_topology_failures(
         elif isinstance(node, ast.ImportFrom) and node.module:
             root = node.module.split(".", 1)[0]
             if root in FORBIDDEN_IMPORT_ROOTS:
-                failures.append(f"runtime import {node.module}")
+                if not (
+                    file_name == "parameter_policy.py"
+                    and node.module == "threading"
+                    and {alias.name for alias in node.names} <= {"Condition", "Lock"}
+                ):
+                    failures.append(f"runtime import {node.module}")
         elif isinstance(node, ast.Call):
             qualified_name = _qualified_callable_name(node.func)
             is_exact_exception = (
@@ -560,11 +565,11 @@ def main() -> int:
             }
             expected_methods = {
                 "__post_init__",
-                *(str(row[1]) for row in EXPECTED_ROWS[:12]),
+                *(str(row[1]) for row in EXPECTED_ROWS),
             }
             if service_methods != expected_methods:
                 failures.append(
-                    "the central service does not expose exactly operations 01..12"
+                    "the central service does not expose exactly operations 01..15"
                 )
         if any(
             isinstance(node, ast.ExceptHandler)

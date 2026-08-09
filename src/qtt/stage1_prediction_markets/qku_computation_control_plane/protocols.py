@@ -23,11 +23,22 @@ from .models import (
 
 if TYPE_CHECKING:
     from .agent_policy import AgentCapabilityDecisionV1
+    from .cohort_compiler import ReplayPaperCohortCompilationRecordV1
+    from .evidence import (
+        ComputationEvidenceBundleV1,
+        PaperResultContractV1,
+        ReplayResultContractV1,
+    )
     from .mode_snapshot_policy import (
         ModeSnapshotCandidateInputsV1,
         ModeSnapshotPreconstructionGateV1,
     )
-    from .models import ComputationExecutionContextV1
+    from .models import (
+        BuildEvidenceBundleRequestV1,
+        CompileReplayPaperCohortRequestV1,
+        ComputationExecutionContextV1,
+        RegisterReplayPaperResultRequestV1,
+    )
 
 
 @runtime_checkable
@@ -84,6 +95,37 @@ class AgentCapabilityAdmissionProtocolV1(Protocol):
     def admit_operation(
         self, request: object
     ) -> "AgentCapabilityDecisionV1": ...
+
+
+@runtime_checkable
+class ReplayPaperCohortCompilerProtocolV1(Protocol):
+    """Injected OP13 delegate; it exposes no execution or runner method."""
+
+    def compile(
+        self, request: "CompileReplayPaperCohortRequestV1"
+    ) -> "ReplayPaperCohortCompilationRecordV1": ...
+
+
+@runtime_checkable
+class ComputationEvidenceServiceProtocolV1(Protocol):
+    """Injected OP14/OP15 and read-only F-reference behavior."""
+
+    def register_result(
+        self, request: "RegisterReplayPaperResultRequestV1"
+    ) -> "ReplayResultContractV1 | PaperResultContractV1": ...
+
+    def build_bundle(
+        self,
+        request: "BuildEvidenceBundleRequestV1",
+    ) -> "ComputationEvidenceBundleV1": ...
+
+    def read_evidence_reference(
+        self,
+        context: "ComputationExecutionContextV1",
+        *,
+        causation_id: str,
+        correlation_id: str,
+    ) -> ST12FEvidenceReferenceV1: ...
 
 
 @runtime_checkable

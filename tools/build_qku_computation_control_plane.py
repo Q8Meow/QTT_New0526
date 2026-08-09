@@ -178,6 +178,33 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.parameter_p
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.service import (  # noqa: E402
     QKUComputationControlPlaneV1,
 )
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.input_lock import (  # noqa: E402
+    ImmutableReplayPaperInputLockV1,
+    ST12F_PAPER_RESULT_CONTRACT_IDS_V1,
+    ST12F_PARAMETER_VALUE_REF_COUNT_V1,
+    ST12F_REPLAY_RESULT_CONTRACT_IDS_V1,
+    ST12F_TEMPLATE_IDS_V1,
+)
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.evidence import (  # noqa: E402
+    ComputationEvidenceBundleV1,
+    DivergenceAssessmentV1,
+    EvidenceBundleTerminalStateV1,
+    IndependentReviewDecisionV1,
+    PaperResultContractV1,
+    ReplayResultContractV1,
+    ST12F_EVIDENCE_IDENTITIES_V1,
+    ST12F_EVIDENCE_METRIC_DEFINITIONS_V1,
+)
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.llm_gateway import (  # noqa: E402
+    LLMAdvisoryTaskV1,
+)
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.model_risk import (  # noqa: E402
+    MODEL_RISK_CONTROL_IDS_V1,
+    NO_TRADE_CONDITION_IDS_V1,
+)
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.quantum_adapter import (  # noqa: E402
+    ST12F_QUANTUM_TRACE_ONLY_BOUNDARIES_V1,
+)
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.authority import (  # noqa: E402
     TRANCHE_A_AUTHORITY,
 )
@@ -206,6 +233,24 @@ ST12DProjectionSet = tuple[
     tuple[dict[str, object], ...],
     dict[str, object],
 ]
+ST12F_GENERATED_PREFIX = Path(
+    "docs/master_plan/generated/qku_control_plane/evidence"
+)
+ST12F_GENERATED_PATHS = (
+    "cohort_registry.jsonl",
+    "evidence_bundle_registry.jsonl",
+    "evidence_metric_registry.jsonl",
+    "independent_review_contracts.jsonl",
+    "llm_annotation_contracts.jsonl",
+    "manifest.json",
+    "model_risk_adjudications.jsonl",
+    "no_trade_comparisons.jsonl",
+    "paper_result_contracts.jsonl",
+    "parent_input_locks.jsonl",
+    "quantum_benchmark_contracts.jsonl",
+    "replay_result_contracts.jsonl",
+    "validation_summary.json",
+)
 
 _ST12D_FROZEN_CONTRACT_POLICY_REFS = (
     "freeze/AUTHORITY.md",
@@ -1762,9 +1807,153 @@ def materialize_st12d_projections(projections: ST12DProjectionSet) -> None:
         )
 
 
+def _st12f_dataclass_row(value: object) -> dict[str, object]:
+    return {field.name: getattr(value, field.name) for field in fields(value)}
+
+
+def build_st12f_projections() -> dict[str, str]:
+    """Build static, non-empirical ST12-F contract projections."""
+
+    replay_fields = tuple(field.name for field in fields(ReplayResultContractV1))
+    paper_fields = tuple(field.name for field in fields(PaperResultContractV1))
+    lock_fields = tuple(field.name for field in fields(ImmutableReplayPaperInputLockV1))
+    divergence_fields = tuple(field.name for field in fields(DivergenceAssessmentV1))
+    bundle_fields = tuple(field.name for field in fields(ComputationEvidenceBundleV1))
+    cohort_rows = tuple(
+        {
+            "template_id": template_id,
+            "ordinal": index,
+            "replay_result_contract_id": ST12F_REPLAY_RESULT_CONTRACT_IDS_V1[index - 1],
+            "paper_result_contract_id": ST12F_PAPER_RESULT_CONTRACT_IDS_V1[index - 1],
+            "campaign_execution_authorized": False,
+            "empirical_evidence": False,
+        }
+        for index, template_id in enumerate(ST12F_TEMPLATE_IDS_V1, 1)
+    )
+    replay_rows = tuple(
+        {
+            "expected_result_contract_id": contract_id,
+            "cohort_template_id": ST12F_TEMPLATE_IDS_V1[index],
+            "lane": "REPLAY",
+            "contract_type": "ReplayResultContractV1",
+            "field_roster": replay_fields,
+            "empirical_instance_count": 0,
+        }
+        for index, contract_id in enumerate(ST12F_REPLAY_RESULT_CONTRACT_IDS_V1)
+    )
+    paper_rows = tuple(
+        {
+            "expected_result_contract_id": contract_id,
+            "cohort_template_id": ST12F_TEMPLATE_IDS_V1[index],
+            "lane": "PAPER",
+            "contract_type": "PaperResultContractV1",
+            "field_roster": paper_fields,
+            "empirical_instance_count": 0,
+        }
+        for index, contract_id in enumerate(ST12F_PAPER_RESULT_CONTRACT_IDS_V1)
+    )
+    metric_rows = tuple(_st12f_dataclass_row(row) for row in ST12F_EVIDENCE_METRIC_DEFINITIONS_V1)
+    identity_rows = tuple(
+        {
+            "evidence_identity": identity,
+            "terminal_disposition_schema": (
+                "APPLICABLE_EXECUTED_AND_RECEIPTED",
+                "APPLICABLE_BLOCKED_WITH_TYPED_REASON",
+                "NOT_APPLICABLE_WITH_PROOF",
+            ),
+            "actual_disposition": "UNAVAILABLE_NO_EMPIRICAL_INSTANCE",
+            "empirical_evidence": False,
+        }
+        for identity in ST12F_EVIDENCE_IDENTITIES_V1
+    )
+    review_rows = tuple(
+        {"lifecycle_state": state.value, "immutable_version_required": True, "self_review_allowed": False}
+        for state in EvidenceBundleTerminalStateV1
+    ) + tuple(
+        {"review_decision": decision.value, "immutable_version_required": True, "self_review_allowed": False}
+        for decision in IndependentReviewDecisionV1
+    )
+    llm_rows = tuple(
+        {"advisory_task": task.value, "preexisting_annotation_only": True, "inference_authorized": False, "numeric_authority": False}
+        for task in LLMAdvisoryTaskV1
+    )
+    model_risk_rows = tuple(
+        {"control_id": control_id, "terminal_evidence_required": True, "automatic_promotion_allowed": False}
+        for control_id in MODEL_RISK_CONTROL_IDS_V1
+    )
+    no_trade_rows = tuple(
+        {"condition_id": condition_id, "permanent_no_trade_wins_when_active": True}
+        for condition_id in NO_TRADE_CONDITION_IDS_V1
+    )
+    quantum_rows = tuple(_st12f_dataclass_row(row) for row in ST12F_QUANTUM_TRACE_ONLY_BOUNDARIES_V1)
+    full_paths = tuple((ST12F_GENERATED_PREFIX / name).as_posix() for name in ST12F_GENERATED_PATHS)
+    manifest = {
+        "schema": "QTT_ST12F_EVIDENCE_PROJECTION_MANIFEST_V1_4",
+        "generated_projection_paths": full_paths,
+        "projection_count": 13,
+        "template_count": 52,
+        "replay_slot_count": 52,
+        "paper_slot_count": 52,
+        "total_slot_count": 104,
+        "parameter_value_ref_count": ST12F_PARAMETER_VALUE_REF_COUNT_V1,
+        "evidence_metric_definition_count": 38,
+        "evidence_identity_disposition_count": 48,
+        "empirical_evidence_count": 0,
+        "source_truth_count": 0,
+        "runtime_effect_authorized": False,
+    }
+    summary = {
+        "schema": "QTT_ST12F_STATIC_CODE_VALIDATION_SUMMARY_V1_4",
+        "static_code_validation_only": True,
+        "contract_field_counts": {
+            "ImmutableReplayPaperInputLockV1": len(lock_fields),
+            "ReplayResultContractV1": len(replay_fields),
+            "PaperResultContractV1": len(paper_fields),
+            "DivergenceAssessmentV1": len(divergence_fields),
+            "ComputationEvidenceBundleV1": len(bundle_fields),
+        },
+        "empirical_campaign_executed": False,
+        "evidence_pass_claimed": False,
+        "independent_review_claimed": False,
+        "runtime_effect_authorized": False,
+    }
+    payloads = {
+        "cohort_registry.jsonl": _jsonl(cohort_rows),
+        "evidence_bundle_registry.jsonl": _jsonl(identity_rows),
+        "evidence_metric_registry.jsonl": _jsonl(metric_rows),
+        "independent_review_contracts.jsonl": _jsonl(review_rows),
+        "llm_annotation_contracts.jsonl": _jsonl(llm_rows),
+        "manifest.json": deterministic_json(manifest) + "\n",
+        "model_risk_adjudications.jsonl": _jsonl(model_risk_rows),
+        "no_trade_comparisons.jsonl": _jsonl(no_trade_rows),
+        "paper_result_contracts.jsonl": _jsonl(paper_rows),
+        "parent_input_locks.jsonl": _jsonl(({
+            "contract_type": "ImmutableReplayPaperInputLockV1",
+            "field_roster": lock_fields,
+            "template_count": 52,
+            "parameter_value_ref_count": ST12F_PARAMETER_VALUE_REF_COUNT_V1,
+            "empirical_instance_count": 0,
+        },)),
+        "quantum_benchmark_contracts.jsonl": _jsonl(quantum_rows),
+        "replay_result_contracts.jsonl": _jsonl(replay_rows),
+        "validation_summary.json": deterministic_json(summary) + "\n",
+    }
+    if tuple(payloads) != ST12F_GENERATED_PATHS:
+        raise ValueError("ST12-F projection roster differs from the exact 13 paths")
+    return payloads
+
+
+def materialize_st12f_projections(projections: dict[str, str]) -> None:
+    output_dir = REPO_ROOT / ST12F_GENERATED_PREFIX
+    output_dir.mkdir(parents=True, exist_ok=True)
+    for name in ST12F_GENERATED_PATHS:
+        _write_generated_if_changed(output_dir / name, projections[name])
+
+
 def build_payload(
     st12e_projections: ST12EProjectionSet | None = None,
     st12d_projections: ST12DProjectionSet | None = None,
+    st12f_projections: dict[str, str] | None = None,
 ) -> dict[str, object]:
     """Return the centralized registry envelope without creating runtime state."""
 
@@ -1787,6 +1976,7 @@ def build_payload(
     )
     st12d_projection_set = st12d_projections or build_st12d_projections()
     st12d_manifest = st12d_projection_set[0]
+    st12f_projection_set = st12f_projections or build_st12f_projections()
     return {
         "schema": "QKUComputationControlPlaneBuildV1",
         "contract_only": True,
@@ -1835,6 +2025,16 @@ def build_payload(
             ),
             "active_pointer_commit_count": 0,
             "new_public_operation_id_count": 0,
+        },
+        "tranche_f": {
+            "schema": "QTT_ST12F_CENTRAL_CONTRACTS_V1_4",
+            "contract_only": True,
+            "runtime_effect_authorized": False,
+            "generated_projection_count": len(st12f_projection_set),
+            "template_count": len(ST12F_TEMPLATE_IDS_V1),
+            "result_slot_count": len(ST12F_REPLAY_RESULT_CONTRACT_IDS_V1) + len(ST12F_PAPER_RESULT_CONTRACT_IDS_V1),
+            "evidence_identity_count": len(ST12F_EVIDENCE_IDENTITIES_V1),
+            "evidence_metric_definition_count": len(ST12F_EVIDENCE_METRIC_DEFINITIONS_V1),
         },
         "tranche_c": {
             "schema": "ST12C_DETERMINISTIC_RECEIPTS_PERSISTENCE_ACCOUNTING_AND_TRANSACTIONS_V1",
@@ -1956,11 +2156,17 @@ def main() -> int:
         "--output",
         help="Optional JSON path below the repository .tmp directory.",
     )
+    parser.add_argument(
+        "--st12f-only",
+        action="store_true",
+        help="Materialize only the ST12-F evidence projections.",
+    )
     args = parser.parse_args()
     st12e_projections = build_st12e_projections()
     st12d_projections = build_st12d_projections()
+    st12f_projections = build_st12f_projections()
     text = deterministic_json(
-        build_payload(st12e_projections, st12d_projections)
+        build_payload(st12e_projections, st12d_projections, st12f_projections)
     ) + "\n"
     if args.output:
         try:
@@ -1970,8 +2176,10 @@ def main() -> int:
             return 2
         output.parent.mkdir(parents=True, exist_ok=True)
         output.write_text(text, encoding="utf-8", newline="\n")
-        materialize_st12e_projections(*st12e_projections)
-        materialize_st12d_projections(st12d_projections)
+        if not args.st12f_only:
+            materialize_st12e_projections(*st12e_projections)
+            materialize_st12d_projections(st12d_projections)
+        materialize_st12f_projections(st12f_projections)
     else:
         print(text, end="")
     print(SUCCESS_MARKER)

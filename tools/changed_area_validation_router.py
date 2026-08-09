@@ -21,6 +21,7 @@ from tools.validation_scope_registry import (
     ST12C_ALLOWED_EXACT_PATHS,
     ST12D_ALLOWED_EXACT_PATHS,
     ST12E_ALLOWED_EXACT_PATHS,
+    ST12F_ALLOWED_EXACT_PATHS,
 )
 from tools.validation_inventory import (
     FAST_UNIVERSAL_PREFLIGHT,
@@ -29,6 +30,7 @@ from tools.validation_inventory import (
     ST12C_QKU_VALIDATOR_IDS,
     ST12D_QKU_VALIDATOR_IDS,
     ST12E_QKU_VALIDATOR_IDS,
+    ST12F_QKU_VALIDATOR_IDS,
     VALIDATION_INFRASTRUCTURE_GLOBS,
     ValidatorInventoryEntry,
     entries_matching_path,
@@ -54,6 +56,7 @@ QKU_VALIDATOR_IDS = frozenset(
         *ST12C_QKU_VALIDATOR_IDS,
         *ST12D_QKU_VALIDATOR_IDS,
         *ST12E_QKU_VALIDATOR_IDS,
+        *ST12F_QKU_VALIDATOR_IDS,
     }
 )
 QKU_ALLOWED_EXACT_PATHS = frozenset(
@@ -63,6 +66,7 @@ QKU_ALLOWED_EXACT_PATHS = frozenset(
         *ST12C_ALLOWED_EXACT_PATHS,
         *ST12D_ALLOWED_EXACT_PATHS,
         *ST12E_ALLOWED_EXACT_PATHS,
+        *ST12F_ALLOWED_EXACT_PATHS,
     )
 )
 

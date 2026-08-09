@@ -348,6 +348,9 @@ EXPECTED_PUBLIC_OPERATIONS = (
     "explain_resolution",
     "submit_candidate_proposal",
     "request_materialization_work_order",
+    "compile_replay_paper_cohort",
+    "register_replay_paper_result",
+    "build_evidence_bundle",
 )
 EXPECTED_STATES = {
     "MODE_ELIGIBILITY": (
@@ -443,6 +446,8 @@ EXPECTED_CONTRACT_FIELDS = {
         "evidence_state", "evidence_ref", "lane", "dataset_grade_ref",
         "venue_semantic_binding_ref", "cross_venue_equivalence_ref", "observed_at",
         "valid_until", "policy_version", "causation_id", "correlation_id",
+        "input_lock_id", "component_or_template_ref", "evidence_bundle_version",
+        "source_epoch_refs", "terminal_state", "no_effect_flags",
     ),
     "OwnerActionConfirmationReceiptV1": (
         "receipt_ref", "owner_action_policy_ref", "state", "principal_id",
@@ -1561,7 +1566,44 @@ def _validate_contract_and_service_ast() -> None:
         and "result.control_receipt_refs != expected_refs" in materialize_source,
         "D receipt classes are not mapped to the exact executed trace stages",
     )
-    _require(_git_path_changed("src/qtt/stage1_prediction_markets/qku_computation_control_plane/agent_policy.py") is False, "agent_policy.py edit count is nonzero")
+    agent_policy = _source_tree("agent_policy.py")
+    assignments = {
+        target.id: statement.value
+        for statement in agent_policy.body
+        if isinstance(statement, ast.Assign)
+        for target in statement.targets
+        if isinstance(target, ast.Name)
+    }
+    annotated_assignments = {
+        statement.target.id: statement.value
+        for statement in agent_policy.body
+        if isinstance(statement, ast.AnnAssign)
+        and isinstance(statement.target, ast.Name)
+        and statement.value is not None
+    }
+    _require(
+        ast.literal_eval(assignments["_PRE_ST12F_IMPLEMENTED_OPERATION_IDS"])
+        == EXPECTED_PUBLIC_OPERATIONS[:12]
+        and ast.literal_eval(assignments["_PRE_ST12F_HELD_OPERATION_IDS"])
+        == EXPECTED_PUBLIC_OPERATIONS[12:]
+        and ast.literal_eval(annotated_assignments["HELD_OPERATION_IDS"]) == (),
+        "agent admission operation partition is not currentized for OP13-OP15",
+    )
+    implemented = assignments["IMPLEMENTED_OPERATION_IDS"]
+    _require(
+        isinstance(implemented, ast.Tuple)
+        and tuple(
+            element.value.id
+            for element in implemented.elts
+            if isinstance(element, ast.Starred)
+            and isinstance(element.value, ast.Name)
+        )
+        == (
+            "_PRE_ST12F_IMPLEMENTED_OPERATION_IDS",
+            "_PRE_ST12F_HELD_OPERATION_IDS",
+        ),
+        "agent admission implemented-operation union is not exact",
+    )
 
 
 def _validate_math39_independently() -> None:

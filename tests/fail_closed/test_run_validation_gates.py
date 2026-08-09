@@ -3017,6 +3017,7 @@ def _expected_commands(
                 "d",
                 "agent",
                 "llm",
+                "model_risk",
             )
         ],
         [
@@ -3061,6 +3062,10 @@ def _expected_commands(
                 "independent_validate_qku_computation_control_plane_llm.py",
                 "independent_validate_qku_computation_control_plane_security.py",
                 "independent_validate_qku_computation_control_plane_d.py",
+                "independent_validate_qku_computation_control_plane_quantum.py",
+                "independent_validate_qku_computation_control_plane_architecture.py",
+                "independent_validate_qku_computation_control_plane_operations.py",
+                "independent_validate_qku_computation_control_plane_source.py",
             )
         ],
         [
@@ -3152,7 +3157,7 @@ def test_runner_registers_qku_primary_and_independent_systems():
             for part in command
         )
     ]
-    assert [command[-1] for command in qku_commands[:11]] == [
+    assert [command[-1] for command in qku_commands[:12]] == [
         "architecture",
         "operations",
         "quantum",
@@ -3164,8 +3169,9 @@ def test_runner_registers_qku_primary_and_independent_systems():
         "d",
         "agent",
         "llm",
+        "model_risk",
     ]
-    assert {Path(command[1]).name for command in qku_commands[11:]} == {
+    assert {Path(command[1]).name for command in qku_commands[12:]} == {
         "independent_validate_qku_computation_control_plane.py",
         "independent_validate_qku_computation_control_plane_latency.py",
         "independent_validate_qku_computation_control_plane_model_risk.py",
@@ -3175,6 +3181,10 @@ def test_runner_registers_qku_primary_and_independent_systems():
         "independent_validate_qku_computation_control_plane_llm.py",
         "independent_validate_qku_computation_control_plane_security.py",
         "independent_validate_qku_computation_control_plane_d.py",
+        "independent_validate_qku_computation_control_plane_quantum.py",
+        "independent_validate_qku_computation_control_plane_architecture.py",
+        "independent_validate_qku_computation_control_plane_operations.py",
+        "independent_validate_qku_computation_control_plane_source.py",
     }
 
 
@@ -12167,3 +12177,19 @@ def test_nested_validator_contract_scan_allows_recorded_receipt_contract_text():
             )
             == ()
         )
+def test_st12f_focused_validators_remain_in_existing_validation_phase() -> None:
+    commands = tuple(
+        tuple(command)
+        for phase in runner.build_phase_manifest(Path(".tmp/st12f-runner"), Path(".tmp/st12f-runner/pytest"))
+        for command in phase["commands"]
+    )
+    joined = tuple(" ".join(command) for command in commands)
+    for token in (
+        "--domain llm",
+        "--domain model_risk",
+        "--domain quantum",
+        "independent_validate_qku_computation_control_plane_llm.py",
+        "independent_validate_qku_computation_control_plane_model_risk.py",
+        "independent_validate_qku_computation_control_plane_quantum.py",
+    ):
+        assert any(token in command for command in joined)

@@ -59,6 +59,15 @@ ST12_BRANCH_CASES = (
             "Agent/st12d-mode-snapshot-boundary",
         ),
     ),
+    (
+        "agent/st12f-evidence-model-risk-v1",
+        (
+            "agent/st12f-evidence-model-risk",
+            "agent/st12f-evidence-model-risk-v1-copy",
+            "agent/st12f-evidence-model-risk-v1/",
+            "Agent/st12f-evidence-model-risk-v1",
+        ),
+    ),
 )
 
 
@@ -100,7 +109,7 @@ def test_repair_and_main_cumulative_branch_classification():
 @pytest.mark.parametrize(
     ("branch", "adversarial_branches"),
     ST12_BRANCH_CASES,
-    ids=("st12a", "st12b", "st12c", "st12e", "st12d"),
+    ids=("st12a", "st12b", "st12c", "st12e", "st12d", "st12f"),
 )
 def test_st12_owner_authorized_branches_are_exactly_validation_only(
     branch: str,

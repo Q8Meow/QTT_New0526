@@ -5318,3 +5318,310 @@ if (
         ReasonCode.INVALID_CONTRACT,
         "Tranche-D must reuse MATH-13/14/15 and add only MATH-39",
     )
+
+
+# ST12-F private evidence registry.  The public service dispatch above remains
+# byte-stable and does not route any of these evidence-only callables.
+def compute_math_40_adverse_selection_cost(
+    *,
+    signed_fill_quantity: DecimalInput,
+    midpoint_after_fill: DecimalInput,
+    fill_price: DecimalInput,
+) -> Decimal:
+    quantity = exact_decimal(signed_fill_quantity, field_name="signed_fill_quantity")
+    midpoint = exact_decimal(midpoint_after_fill, field_name="midpoint_after_fill")
+    price = exact_decimal(fill_price, field_name="fill_price")
+    return quantity * (midpoint - price)
+
+
+def compute_math_41_latency_alpha_decay(
+    *, edge_now: float, latency: float, tau: float
+) -> float:
+    edge = finite_float(edge_now, field_name="edge_now")
+    elapsed = finite_float(latency, field_name="latency")
+    decay_time = finite_float(tau, field_name="tau")
+    if elapsed < 0 or decay_time <= 0:
+        raise NumericDomainError(
+            ReasonCode.OUT_OF_DOMAIN,
+            "latency must be nonnegative and fitted tau strictly positive",
+        )
+    return edge * math.exp(-elapsed / decay_time)
+
+
+def compute_math_42_square_root_market_impact(
+    *, Y: float, sigma: float, Q: DecimalInput, ADV: DecimalInput
+) -> float:
+    coefficient = finite_float(Y, field_name="Y")
+    volatility = finite_float(sigma, field_name="sigma")
+    quantity = exact_decimal(Q, field_name="Q")
+    average_volume = exact_decimal(ADV, field_name="ADV")
+    if coefficient < 0 or volatility < 0 or average_volume <= 0:
+        raise NumericDomainError(
+            ReasonCode.OUT_OF_DOMAIN,
+            "impact coefficient/volatility must be nonnegative and ADV positive",
+        )
+    return coefficient * volatility * math.sqrt(float(abs(quantity) / average_volume))
+
+
+def compute_math_43_capacity_crowding_penalty(
+    *, participation: float, approved_participation_cap: float, penalty_scale: float
+) -> float:
+    observed = finite_float(participation, field_name="participation")
+    cap = finite_float(
+        approved_participation_cap,
+        field_name="approved_participation_cap",
+    )
+    scale = finite_float(penalty_scale, field_name="penalty_scale")
+    if observed < 0 or cap <= 0 or scale < 0:
+        raise NumericDomainError(
+            ReasonCode.OUT_OF_DOMAIN,
+            "participation/scale must be nonnegative and cap strictly positive",
+        )
+    return max(0.0, observed / cap - 1.0) ** 2 * scale
+
+
+def compute_math_44_covariance_shrinkage(
+    *,
+    sample_covariance: Sequence[Sequence[float]],
+    target: Sequence[Sequence[float]],
+    delta: float,
+) -> tuple[tuple[float, ...], ...]:
+    weight = finite_float(delta, field_name="delta")
+    if not 0 <= weight <= 1:
+        raise NumericDomainError(ReasonCode.OUT_OF_DOMAIN, "delta must be in [0,1]")
+    sample = tuple(tuple(finite_float(value, field_name="sample_covariance") for value in row) for row in sample_covariance)
+    goal = tuple(tuple(finite_float(value, field_name="target") for value in row) for row in target)
+    size = len(sample)
+    if size == 0 or len(goal) != size or any(len(row) != size for row in (*sample, *goal)):
+        raise NumericDomainError(
+            ReasonCode.OUT_OF_DOMAIN,
+            "covariance and target must be same-sized nonempty square matrices",
+        )
+    if any(abs(sample[i][j] - sample[j][i]) > 1e-12 or abs(goal[i][j] - goal[j][i]) > 1e-12 for i in range(size) for j in range(size)):
+        raise NumericDomainError(
+            ReasonCode.OUT_OF_DOMAIN,
+            "covariance and target must be symmetric",
+        )
+    result = tuple(
+        tuple((1.0 - weight) * sample[i][j] + weight * goal[i][j] for j in range(size))
+        for i in range(size)
+    )
+    # Deterministic semidefinite Cholesky check.  Gershgorin bounds are only
+    # sufficient and would reject valid covariance matrices that are not
+    # diagonally dominant.
+    tolerance = 1e-12
+    lower = [[0.0 for _ in range(size)] for _ in range(size)]
+    for row_index in range(size):
+        for column_index in range(row_index + 1):
+            residual = result[row_index][column_index] - math.fsum(
+                lower[row_index][offset] * lower[column_index][offset]
+                for offset in range(column_index)
+            )
+            if row_index == column_index:
+                if residual < -tolerance:
+                    raise NumericDomainError(
+                        ReasonCode.OUT_OF_DOMAIN,
+                        "shrunk covariance must be positive semidefinite",
+                    )
+                lower[row_index][column_index] = math.sqrt(max(0.0, residual))
+            elif lower[column_index][column_index] > tolerance:
+                lower[row_index][column_index] = (
+                    residual / lower[column_index][column_index]
+                )
+            elif abs(residual) > tolerance:
+                raise NumericDomainError(
+                    ReasonCode.OUT_OF_DOMAIN,
+                    "shrunk covariance must be positive semidefinite",
+                )
+    return result
+
+
+def compute_math_45_lower_confidence_bound_no_trade_gate(
+    *,
+    estimated_net_edge: DecimalInput,
+    uncertainty: DecimalInput,
+    z_or_quantile: DecimalInput,
+    model_risk_haircut: DecimalInput,
+) -> Mapping[str, object]:
+    edge = exact_decimal(estimated_net_edge, field_name="estimated_net_edge")
+    uncertainty_value = exact_decimal(uncertainty, field_name="uncertainty")
+    quantile = exact_decimal(z_or_quantile, field_name="z_or_quantile")
+    haircut = exact_decimal(model_risk_haircut, field_name="model_risk_haircut")
+    if uncertainty_value < 0 or quantile < 0 or haircut < 0:
+        raise NumericDomainError(
+            ReasonCode.OUT_OF_DOMAIN,
+            "uncertainty, quantile, and model-risk haircut must be nonnegative",
+        )
+    lcb = edge - quantile * uncertainty_value - haircut
+    return MappingProxyType({"lcb_net": lcb, "trade_gate": lcb > 0})
+
+
+def compute_math_50_qaoa_preexisting_trace_validation(
+    *,
+    trace_weights: Mapping[str, DecimalInput],
+    locked_costs: Mapping[str, DecimalInput],
+    observed_feasibility: Mapping[str, bool],
+    same_lock: bool,
+) -> Mapping[str, object]:
+    if same_lock is not True or not trace_weights or set(trace_weights) != set(locked_costs) or set(trace_weights) != set(observed_feasibility):
+        raise ContractValidationError(
+            ReasonCode.ST12F_QUANTUM_TRACE_INVALID,
+            "QAOA trace keys and immutable lock must match exactly",
+        )
+    weights = {key: exact_decimal(value, field_name=f"trace_weight[{key}]") for key, value in trace_weights.items()}
+    costs = {key: exact_decimal(value, field_name=f"locked_cost[{key}]") for key, value in locked_costs.items()}
+    if any(value < 0 for value in weights.values()) or sum(weights.values(), Decimal(0)) != Decimal(1):
+        raise ContractValidationError(
+            ReasonCode.ST12F_QUANTUM_TRACE_INVALID,
+            "QAOA trace weights must be nonnegative and sum exactly to one",
+        )
+    if any(type(value) is not bool for value in observed_feasibility.values()):
+        raise ContractValidationError(
+            ReasonCode.ST12F_QUANTUM_TRACE_INVALID,
+            "QAOA feasibility values must be exact booleans",
+        )
+    feasible = tuple(key for key in sorted(costs) if observed_feasibility[key])
+    if not feasible:
+        raise ContractValidationError(
+            ReasonCode.ST12F_QUANTUM_TRACE_INVALID,
+            "QAOA trace contains no original-model feasible candidate",
+        )
+    selected = min(feasible, key=lambda key: (costs[key], key))
+    expected = sum((weights[key] * costs[key] for key in weights), Decimal(0))
+    return MappingProxyType(
+        {
+            "expected_objective": expected,
+            "selected_candidate_id": selected,
+            "selected_original_model_feasible": True,
+            "effect_call_count": 0,
+        }
+    )
+
+
+def compute_math_51_vqe_preexisting_trace_validation(
+    *,
+    parameter_point_ids: Sequence[str],
+    expectation_trace: Sequence[DecimalInput],
+    variance_trace: Sequence[DecimalInput],
+    selected_point_id: str,
+    selected_original_model_feasible: bool,
+    same_lock: bool,
+) -> Mapping[str, object]:
+    point_ids = tuple(parameter_point_ids)
+    expectations = tuple(exact_decimal(value, field_name="expectation") for value in expectation_trace)
+    variances = tuple(exact_decimal(value, field_name="variance") for value in variance_trace)
+    if (
+        same_lock is not True
+        or not point_ids
+        or len(point_ids) != len(expectations)
+        or len(point_ids) != len(variances)
+        or len(point_ids) != len(set(point_ids))
+        or any(not isinstance(value, str) or not value for value in point_ids)
+        or any(value < 0 for value in variances)
+        or selected_original_model_feasible is not True
+    ):
+        raise ContractValidationError(
+            ReasonCode.ST12F_QUANTUM_TRACE_INVALID,
+            "VQE trace is incomplete, nonfinite, infeasible, or cross-lock",
+        )
+    index = min(range(len(point_ids)), key=lambda item: (expectations[item], point_ids[item]))
+    if selected_point_id != point_ids[index]:
+        raise ContractValidationError(
+            ReasonCode.ST12F_QUANTUM_TRACE_INVALID,
+            "VQE selected point differs from the supplied minimum expectation",
+        )
+    return MappingProxyType(
+        {
+            "expected_objective": expectations[index],
+            "variance": variances[index],
+            "selected_candidate_id": point_ids[index],
+            "selected_original_model_feasible": True,
+            "effect_call_count": 0,
+        }
+    )
+
+
+def compute_math_52_quantum_classical_benchmark_utility(
+    *,
+    validated_quantum_utility: DecimalInput,
+    strongest_classical_utility: DecimalInput,
+    no_trade_utility: DecimalInput,
+    same_lock: bool,
+    same_cost_basis: bool,
+) -> Mapping[str, object]:
+    if same_lock is not True or same_cost_basis is not True:
+        raise ContractValidationError(
+            ReasonCode.ST12F_INPUT_LOCK_MISMATCH,
+            "MATH-52 requires one immutable lock and identical economic basis",
+        )
+    quantum = exact_decimal(validated_quantum_utility, field_name="validated_quantum_utility")
+    classical = exact_decimal(strongest_classical_utility, field_name="strongest_classical_utility")
+    no_trade = exact_decimal(no_trade_utility, field_name="no_trade_utility")
+    utilities = {
+        "VALIDATED_QUANTUM": quantum,
+        "STRONGEST_CLASSICAL": classical,
+        "NO_TRADE": no_trade,
+    }
+    winner = sorted(utilities, key=lambda key: (-utilities[key], key))[0]
+    return MappingProxyType(
+        {
+            "delta_quantum_vs_classical": quantum - classical,
+            "delta_quantum_vs_no_trade": quantum - no_trade,
+            "winner": winner,
+            "quantum_advantage_claim_allowed": False,
+        }
+    )
+
+
+_ST12F_NEW_EVIDENCE_CALLABLES_V1: Mapping[str, Callable[..., object]] = MappingProxyType(
+    {
+        "MATH-40": compute_math_40_adverse_selection_cost,
+        "MATH-41": compute_math_41_latency_alpha_decay,
+        "MATH-42": compute_math_42_square_root_market_impact,
+        "MATH-43": compute_math_43_capacity_crowding_penalty,
+        "MATH-44": compute_math_44_covariance_shrinkage,
+        "MATH-45": compute_math_45_lower_confidence_bound_no_trade_gate,
+        "MATH-50": compute_math_50_qaoa_preexisting_trace_validation,
+        "MATH-51": compute_math_51_vqe_preexisting_trace_validation,
+        "MATH-52": compute_math_52_quantum_classical_benchmark_utility,
+    }
+)
+_ST12F_REUSED_EVIDENCE_CALLABLES_V1: Mapping[str, Callable[..., object]] = MappingProxyType(
+    {
+        **{
+            f"MATH-{number:02d}": IMPLEMENTATION_REGISTRY[f"MATH-{number:02d}"].callable
+            for number in range(1, 26)
+        },
+        **{
+            f"MATH-{number:02d}": TRANCHE_C_IMPLEMENTATION_REGISTRY[f"MATH-{number:02d}"].callable
+            for number in range(26, 39)
+        },
+        "MATH-39": TRANCHE_D_NEW_IMPLEMENTATION_REGISTRY["MATH-39"].callable,
+    }
+)
+ST12F_EVIDENCE_MATH_CALLABLE_REGISTRY_V1: Mapping[str, Callable[..., object]] = MappingProxyType(
+    {**_ST12F_REUSED_EVIDENCE_CALLABLES_V1, **_ST12F_NEW_EVIDENCE_CALLABLES_V1}
+)
+
+
+def get_st12f_evidence_math_callable_v1(math_spec_id: str) -> Callable[..., object]:
+    """Internal evidence lookup; it is intentionally outside public service dispatch."""
+
+    try:
+        return ST12F_EVIDENCE_MATH_CALLABLE_REGISTRY_V1[math_spec_id]
+    except KeyError as exc:
+        raise ContractValidationError(
+            ReasonCode.UNKNOWN_IMPLEMENTATION,
+            f"unknown ST12-F evidence math identity: {math_spec_id}",
+        ) from exc
+
+
+if (
+    len(_ST12F_REUSED_EVIDENCE_CALLABLES_V1) != 39
+    or len(_ST12F_NEW_EVIDENCE_CALLABLES_V1) != 9
+    or len(ST12F_EVIDENCE_MATH_CALLABLE_REGISTRY_V1) != 48
+):
+    raise ContractValidationError(
+        ReasonCode.INVALID_CONTRACT,
+        "ST12-F evidence registry must reuse 39 and add exactly nine callables",
+    )

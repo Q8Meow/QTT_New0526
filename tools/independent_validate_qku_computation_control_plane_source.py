@@ -47,6 +47,17 @@ def _literal(tree: ast.Module, name: str) -> str:
     raise ValueError(f"missing literal {name}")
 
 
+def _tuple_literal(tree: ast.Module, name: str) -> tuple[object, ...]:
+    for node in tree.body:
+        if isinstance(node, ast.Assign) and any(
+            isinstance(target, ast.Name) and target.id == name for target in node.targets
+        ):
+            value = ast.literal_eval(node.value)
+            if isinstance(value, tuple):
+                return value
+    raise ValueError(f"missing tuple {name}")
+
+
 def main() -> int:
     failures: list[str] = []
     tree = ast.parse(
@@ -58,9 +69,13 @@ def main() -> int:
         overlays = json.loads(
             _literal(tree, "_CURRENTIZATION_OVERLAY_ROWS_JSON")
         )
+        st12f_overlays = _tuple_literal(tree, "_ST12F_SOURCE_OVERLAY_ROWS_V1")
+        st12f_conflicts = _tuple_literal(tree, "_ST12F_SOURCE_CONFLICT_ROWS_V1")
     except (ValueError, json.JSONDecodeError) as exc:
         print(str(exc), file=sys.stderr)
         return 1
+    if len(source_rows) + len(st12f_overlays) != 35 or len(st12f_conflicts) != 7:
+        failures.append("ST12-F terminal source closure is not exact 35 decisions and seven conflicts")
     if len(source_rows) != 29:
         failures.append(f"certified source denominator={len(source_rows)}, expected=29")
     if len(overlays) != 7:

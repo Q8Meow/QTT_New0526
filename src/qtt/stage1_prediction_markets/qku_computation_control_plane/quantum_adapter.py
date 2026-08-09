@@ -327,3 +327,62 @@ if (
         ReasonCode.INVALID_CONTRACT,
         "the frozen quantum structural-readiness roster must contain four rows",
     )
+
+
+@dataclass(frozen=True, slots=True)
+class ST12FQuantumTraceOnlyBoundaryV1:
+    math_spec_id: str
+    operation: str
+    accepted_input: str
+    deterministic_fallback: str
+    ansatz_construction_allowed: bool = False
+    optimizer_execution_allowed: bool = False
+    primitive_invocation_allowed: bool = False
+    transpilation_allowed: bool = False
+    simulator_provider_qpu_allowed: bool = False
+    quantum_advantage_claim_allowed: bool = False
+
+    def __post_init__(self) -> None:
+        if (
+            self.math_spec_id not in {"MATH-50", "MATH-51", "MATH-52"}
+            or not self.operation
+            or not self.accepted_input
+            or self.deterministic_fallback
+            != "STRONGEST_APPROVED_CLASSICAL_OR_PERMANENT_NO_TRADE"
+            or any(
+                (
+                    self.ansatz_construction_allowed,
+                    self.optimizer_execution_allowed,
+                    self.primitive_invocation_allowed,
+                    self.transpilation_allowed,
+                    self.simulator_provider_qpu_allowed,
+                    self.quantum_advantage_claim_allowed,
+                )
+            )
+        ):
+            raise ContractValidationError(
+                ReasonCode.CAPABILITY_DENIED,
+                "ST12-F quantum boundary is pre-existing-trace validation only",
+            )
+
+
+ST12F_QUANTUM_TRACE_ONLY_BOUNDARIES_V1 = (
+    ST12FQuantumTraceOnlyBoundaryV1(
+        "MATH-50",
+        "VALIDATE_AND_RECOMPUTE_PREEXISTING_QAOA_TRACE",
+        "QAOAPreexistingTraceV1",
+        "STRONGEST_APPROVED_CLASSICAL_OR_PERMANENT_NO_TRADE",
+    ),
+    ST12FQuantumTraceOnlyBoundaryV1(
+        "MATH-51",
+        "VALIDATE_AND_RECOMPUTE_PREEXISTING_VQE_TRACE",
+        "VQEPreexistingTraceV1",
+        "STRONGEST_APPROVED_CLASSICAL_OR_PERMANENT_NO_TRADE",
+    ),
+    ST12FQuantumTraceOnlyBoundaryV1(
+        "MATH-52",
+        "COMPARE_VALIDATED_QUANTUM_CLASSICAL_AND_NO_TRADE_SAME_LOCK",
+        "QuantumTraceValidationReceiptV1",
+        "STRONGEST_APPROVED_CLASSICAL_OR_PERMANENT_NO_TRADE",
+    ),
+)

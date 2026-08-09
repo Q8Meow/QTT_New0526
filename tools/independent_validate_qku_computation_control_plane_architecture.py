@@ -69,6 +69,12 @@ PRODUCTION_NAMES = (
     "sqlite_reference.py",
     "transaction.py",
     "mode_snapshot_policy.py",
+    "cohort_compiler.py",
+    "input_lock.py",
+    "evidence.py",
+    "model_risk.py",
+    "quantum_benchmark.py",
+    "llm_gateway.py",
 )
 EXPECTED_MATH_IDS = tuple(f"MATH-{value:02d}" for value in range(1, 16))
 EXPECTED_ALL_MATH_IDS = (
@@ -904,6 +910,9 @@ def main() -> int:
             f"centralized module roster: missing={missing_names!r} "
             f"unexpected={unexpected_names!r}"
         )
+    data_names = frozenset(path.name for path in (PACKAGE / "data").glob("*") if path.is_file())
+    if len(data_names) != 13 or "st12f_parameter_resources_manifest.json" not in data_names or "__init__.py" in data_names:
+        failures.append("certified ST12-F data directory differs from 13 exact non-package resources")
     for name in PRODUCTION_NAMES:
         path = PACKAGE / name
         if not path.is_file():
@@ -913,6 +922,21 @@ def main() -> int:
             ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
         except (OSError, SyntaxError) as exc:
             failures.append(f"{name}: {exc}")
+    for file_name, class_name, expected_count in (
+        ("input_lock.py", "ImmutableReplayPaperInputLockV1", 33),
+        ("evidence.py", "ReplayResultContractV1", 26),
+        ("evidence.py", "PaperResultContractV1", 26),
+        ("evidence.py", "DivergenceAssessmentV1", 18),
+        ("evidence.py", "ComputationEvidenceBundleV1", 30),
+    ):
+        tree = ast.parse((PACKAGE / file_name).read_text(encoding="utf-8"))
+        classes = tuple(node for node in tree.body if isinstance(node, ast.ClassDef) and node.name == class_name)
+        field_count = sum(
+            isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name)
+            for node in (classes[0].body if len(classes) == 1 else ())
+        )
+        if field_count != expected_count:
+            failures.append(f"{class_name}: canonical field count={field_count}, expected={expected_count}")
     specification_tree = ast.parse(
         (PACKAGE / "specification.py").read_text(encoding="utf-8")
     )

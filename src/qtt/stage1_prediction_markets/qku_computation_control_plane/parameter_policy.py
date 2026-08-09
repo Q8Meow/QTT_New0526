@@ -7,14 +7,26 @@ import base64
 from datetime import datetime
 from decimal import Decimal, localcontext
 from enum import StrEnum
+from importlib import resources
+from importlib.resources.abc import Traversable
 import json
 import re
+from threading import Condition, Lock
 from types import MappingProxyType
-from typing import Mapping
+from typing import Mapping, NoReturn
 import zlib
 
 from .context import decimal_context_v1, exact_decimal, parse_utc
-from .errors import NumericDomainError, ParameterPolicyError, ReasonCode
+from .errors import (
+    ComputationControlPlaneError,
+    ContractValidationError,
+    LifecycleContractError,
+    NumericDomainError,
+    OperationBoundaryError,
+    ParameterPolicyError,
+    ReasonCode,
+    SerializationSafetyError,
+)
 from .models import (
     ResolvedSnapshotParameterValueV1,
     SnapshotParameterResolutionStateV1,
@@ -20787,6 +20799,1573 @@ PARAMETER_POLICY_BY_ID = MappingProxyType(
 # Public owner name; this is an alias of the existing central policy schema,
 # not a competing value-policy class or registry.
 ComputationParameterPolicyV1 = ParameterPolicyRecordV1
+
+
+class ST12FParameterRegistryInitializationStateV1(StrEnum):
+    UNINITIALIZED = "UNINITIALIZED"
+    INITIALIZING = "INITIALIZING"
+    READY = "READY"
+    FAILED_STICKY = "FAILED_STICKY"
+
+
+class ST12FCalibrationPolicyAbsenceV1(StrEnum):
+    NOT_APPLICABLE_NO_OFFLINE_CALIBRATION = (
+        "NOT_APPLICABLE_NO_OFFLINE_CALIBRATION"
+    )
+
+
+ST12F_CALIBRATION_POLICY_ABSENCE_V1 = (
+    ST12FCalibrationPolicyAbsenceV1.NOT_APPLICABLE_NO_OFFLINE_CALIBRATION
+)
+
+
+@dataclass(frozen=True, slots=True)
+class ST12FParameterPolicyRowV1:
+    basis: Mapping[str, object]
+    calibration_route: Mapping[str, object]
+    canonical_value_owner: str
+    certified_step11_calibration_route: str
+    certified_step11_custody_ref: str
+    certified_step11_revalidation_trigger: str
+    codex_online_research_allowed: bool
+    default_authority_class: str
+    domain: Mapping[str, object]
+    fallback: str
+    hard_bounds: Mapping[str, object]
+    implementation_resolution_kind: str
+    initial_default_or_resolution_rule: str
+    initialization_policy: Mapping[str, object]
+    lane_applicability: tuple[str, ...]
+    latency_class: str
+    master_plan_section_id: str
+    missing_stale_invalid_behavior: str
+    optimizer_and_optimizer_version: Mapping[str, object]
+    owner_editability: str
+    parameter_id: str
+    parameter_symbol: str
+    parameter_type: Mapping[str, object]
+    parameter_value_type_resolution: str
+    policy_consumer_owner: str
+    precision: str
+    provider_or_library: Mapping[str, object]
+    research_completeness_state: str
+    revalidation_trigger: Mapping[str, object]
+    rounding: str
+    runtime_resolution_procedure: tuple[str, ...]
+    runtime_value_fabrication_allowed: bool
+    scale_or_transform: str
+    schedule: str
+    search_or_tuning_range: Mapping[str, object]
+    second_value_owner_allowed: bool
+    seed_policy: str
+    semantic_role: str
+    shadow_or_replay_trigger: str
+    source_and_evidence_requirements: Mapping[str, object]
+    source_identity_refs: tuple[str, ...]
+    unit: str
+    warm_start_policy: str
+
+
+@dataclass(frozen=True, slots=True)
+class ST12FParameterApplicationBindingV1:
+    application_contract: str
+    binding_id: str
+    calibration_optimizer_policy_ref: str
+    canonical_value_owner: str
+    complete_canonical_schema_ref: str
+    consumer_may_browse_or_invent_value: bool
+    double_default_prohibited: bool
+    effective_range_field: str
+    effective_rule_field: str
+    family_evidence_binding_ref: str
+    master_plan_section_id: str
+    parameter_id: str
+    parameter_symbol: str
+    policy_consumer_owner: str
+    resolution_path: str
+    runtime_or_provider_effect_authorized: bool
+    second_parameter_value_owner_prohibited: bool
+
+
+@dataclass(frozen=True, slots=True)
+class ST12FCalibrationOptimizerPolicyV1:
+    calibration_route: Mapping[str, object]
+    fallback: str
+    hard_bounds: Mapping[str, object]
+    initialization_policy: Mapping[str, object]
+    method_version: str
+    parameter_id: str
+    parameter_symbol: str
+    policy_consumer_owner: str
+    required_preexisting_receipt_fields: tuple[str, ...]
+    revalidation_trigger: Mapping[str, object]
+    search_or_tuning_range: Mapping[str, object]
+    seed_policy: str
+    selected_method: str
+    st12f_execution_authorized: bool
+    warm_start_policy: str
+
+
+def _st12f_bounded_text_v1(value: object) -> str:
+    text = value if type(value) is str else type(value).__name__
+    return text[:160]
+
+
+@dataclass(frozen=True, slots=True)
+class ST12FParameterRegistryV1:
+    parameter_policies: tuple[ST12FParameterPolicyRowV1, ...]
+    application_bindings: tuple[ST12FParameterApplicationBindingV1, ...]
+    calibration_policies: tuple[ST12FCalibrationOptimizerPolicyV1, ...]
+    policy_by_parameter_id: Mapping[str, ST12FParameterPolicyRowV1]
+    binding_by_parameter_id: Mapping[str, ST12FParameterApplicationBindingV1]
+    binding_by_binding_id: Mapping[str, ST12FParameterApplicationBindingV1]
+    calibration_by_parameter_id: Mapping[
+        str, ST12FCalibrationOptimizerPolicyV1
+    ]
+
+    def parameter_policy_for_id(
+        self, parameter_id: str
+    ) -> ST12FParameterPolicyRowV1:
+        try:
+            return self.policy_by_parameter_id[parameter_id]
+        except (KeyError, TypeError) as exc:
+            raise ParameterPolicyError(
+                ReasonCode.OWNER_DATA_MISSING,
+                "unknown ST12-F parameter: "
+                + _st12f_bounded_text_v1(parameter_id),
+            ) from exc
+
+    def application_binding_for_parameter_id(
+        self, parameter_id: str
+    ) -> ST12FParameterApplicationBindingV1:
+        try:
+            return self.binding_by_parameter_id[parameter_id]
+        except (KeyError, TypeError) as exc:
+            raise ParameterPolicyError(
+                ReasonCode.PARAMETER_BINDING_MISMATCH,
+                "missing ST12-F parameter binding: "
+                + _st12f_bounded_text_v1(parameter_id),
+            ) from exc
+
+    def application_binding_for_binding_id(
+        self, binding_id: str
+    ) -> ST12FParameterApplicationBindingV1:
+        try:
+            return self.binding_by_binding_id[binding_id]
+        except (KeyError, TypeError) as exc:
+            raise ParameterPolicyError(
+                ReasonCode.PARAMETER_BINDING_MISMATCH,
+                "unknown ST12-F binding: " + _st12f_bounded_text_v1(binding_id),
+            ) from exc
+
+    def calibration_policy_or_absence_for_parameter_id(
+        self, parameter_id: str
+    ) -> ST12FCalibrationOptimizerPolicyV1 | ST12FCalibrationPolicyAbsenceV1:
+        self.parameter_policy_for_id(parameter_id)
+        calibration = self.calibration_by_parameter_id.get(parameter_id)
+        if calibration is not None:
+            return calibration
+        return ST12F_CALIBRATION_POLICY_ABSENCE_V1
+
+
+@dataclass(frozen=True, slots=True)
+class _ST12FParameterShardDescriptorV1:
+    first_parameter_id: str
+    first_row_ordinal: int
+    last_parameter_id: str
+    last_row_ordinal: int
+    numeric_parameter_id_max_inclusive: int
+    numeric_parameter_id_min_inclusive: int
+    package_member: str
+    resource_path: str
+    row_count: int
+    size_bytes: int
+
+
+@dataclass(frozen=True, slots=True)
+class _ST12FParameterResourceManifestV1:
+    application_binding_field_count: int
+    calibration_optimizer_policy_count: int
+    calibration_optimizer_policy_field_count: int
+    canonical_value_owner: str
+    codex_copy_law: str
+    codex_reserialization_authorized: bool
+    fixed_numeric_shard_width: int
+    immutable_index_policy: str
+    loader_implementation_path: str
+    loader_owner: str
+    lookup_complexity: str
+    manifest_resource_path: str
+    manual_codex_transcription_authorized: bool
+    maximum_line_size_bytes: int
+    maximum_shard_size_bytes: int
+    module_import_may_parse_all_resources: bool
+    no_sha_or_digest_authority: bool
+    non_calibration_explicit_absence_count: int
+    opaque_encoding_or_compression: bool
+    owner_zip_runtime_dependency: bool
+    parameter_application_binding_count: int
+    parameter_policy_count: int
+    per_request_filesystem_reads_allowed: bool
+    per_request_json_parsing_allowed: bool
+    policy_field_count: int
+    raw_row_terminal_output_forbidden: bool
+    resource_access_api: str
+    resource_format: str
+    resource_read_timing: str
+    resource_row_schema: str
+    resource_semantic_authority: str
+    runtime_codex_input_dependency: bool
+    schema: str
+    shard_count: int
+    shards: tuple[_ST12FParameterShardDescriptorV1, ...]
+    strict_json_duplicate_keys_rejected: bool
+    strict_json_nonfinite_constants_rejected: bool
+
+
+@dataclass(frozen=True, slots=True)
+class _ST12FParameterResourceRowV1:
+    row_ordinal: int
+    parameter_id: str
+    policy: ST12FParameterPolicyRowV1
+    application_binding: ST12FParameterApplicationBindingV1
+    calibration_policy_or_absence: (
+        ST12FCalibrationOptimizerPolicyV1 | ST12FCalibrationPolicyAbsenceV1
+    )
+
+
+@dataclass(frozen=True, slots=True)
+class _ST12FParameterRegistryBuildReceiptV1:
+    resource_filenames: tuple[str, ...]
+    shard_filenames: tuple[str, ...]
+    resource_count: int
+    shard_count: int
+    policy_count: int
+    binding_count: int
+    calibration_count: int
+    explicit_absence_count: int
+    resolution_distribution: tuple[tuple[str, int], ...]
+    manifest_byte_count: int
+    maximum_shard_byte_count: int
+    maximum_physical_line_byte_count: int
+    canonical_value_owner: str
+    owner_package_equality_claimed: bool
+
+
+@dataclass(frozen=True, slots=True)
+class _ST12FParameterRegistryFailureV1:
+    exception_type_name: str
+    reason_code: ReasonCode
+    bounded_detail: str
+
+
+@dataclass(slots=True)
+class _ST12FParameterRegistryInitializationHolderV1:
+    initialization_state: ST12FParameterRegistryInitializationStateV1 = (
+        ST12FParameterRegistryInitializationStateV1.UNINITIALIZED
+    )
+    ready_receipt: _ST12FParameterRegistryBuildReceiptV1 | None = None
+    sticky_failure: _ST12FParameterRegistryFailureV1 | None = None
+
+
+_ST12F_PARAMETER_RESOURCE_FILENAMES_V1 = (
+    "st12f_parameter_resources_manifest.json",
+    "st12f_parameter_rows_0001_0320.jsonl",
+    "st12f_parameter_rows_0321_0640.jsonl",
+    "st12f_parameter_rows_0641_0960.jsonl",
+    "st12f_parameter_rows_0961_1280.jsonl",
+    "st12f_parameter_rows_1281_1600.jsonl",
+    "st12f_parameter_rows_1601_1920.jsonl",
+    "st12f_parameter_rows_1921_2240.jsonl",
+    "st12f_parameter_rows_2241_2560.jsonl",
+    "st12f_parameter_rows_2561_2880.jsonl",
+    "st12f_parameter_rows_2881_3200.jsonl",
+    "st12f_parameter_rows_3201_3520.jsonl",
+    "st12f_parameter_rows_3521_3840.jsonl",
+)
+_ST12F_PARAMETER_SHARD_INTERVALS_V1 = (
+    (1, 320),
+    (321, 640),
+    (641, 960),
+    (961, 1280),
+    (1281, 1600),
+    (1601, 1920),
+    (1921, 2240),
+    (2241, 2560),
+    (2561, 2880),
+    (2881, 3200),
+    (3201, 3520),
+    (3521, 3840),
+)
+_ST12F_PARAMETER_ID_PATTERN_V1 = re.compile(r"^ST10-PARAM::(\d{4})$")
+_ST12F_BINDING_ID_PATTERN_V1 = re.compile(
+    r"^ST12F-PARAM-BINDING::ST10-PARAM::\d{4}$"
+)
+_ST12F_PARAMETER_RESOURCE_ROW_KEYS_V1 = frozenset(
+    {
+        "application_binding",
+        "calibration_optimizer_policy_or_explicit_absence",
+        "parameter_id",
+        "policy",
+        "resource_schema",
+        "row_ordinal",
+    }
+)
+_ST12F_PARAMETER_POLICY_KEYS_V1 = frozenset(
+    {
+        "basis", "calibration_route", "canonical_value_owner",
+        "certified_step11_calibration_route", "certified_step11_custody_ref",
+        "certified_step11_revalidation_trigger", "codex_online_research_allowed",
+        "default_authority_class", "domain", "fallback", "hard_bounds",
+        "implementation_resolution_kind", "initial_default_or_resolution_rule",
+        "initialization_policy", "lane_applicability", "latency_class",
+        "master_plan_section_id", "missing_stale_invalid_behavior",
+        "optimizer_and_optimizer_version", "owner_editability", "parameter_id",
+        "parameter_symbol", "parameter_type", "parameter_value_type_resolution",
+        "policy_consumer_owner", "precision", "provider_or_library",
+        "research_completeness_state", "revalidation_trigger", "rounding",
+        "runtime_resolution_procedure", "runtime_value_fabrication_allowed",
+        "scale_or_transform", "schedule", "search_or_tuning_range",
+        "second_value_owner_allowed", "seed_policy", "semantic_role",
+        "shadow_or_replay_trigger", "source_and_evidence_requirements",
+        "source_identity_refs", "unit", "warm_start_policy",
+    }
+)
+_ST12F_PARAMETER_BINDING_KEYS_V1 = frozenset(
+    {
+        "application_contract", "binding_id", "calibration_optimizer_policy_ref",
+        "canonical_value_owner", "complete_canonical_schema_ref",
+        "consumer_may_browse_or_invent_value", "double_default_prohibited",
+        "effective_range_field", "effective_rule_field",
+        "family_evidence_binding_ref", "master_plan_section_id", "parameter_id",
+        "parameter_symbol", "policy_consumer_owner", "resolution_path",
+        "runtime_or_provider_effect_authorized",
+        "second_parameter_value_owner_prohibited",
+    }
+)
+_ST12F_PARAMETER_CALIBRATION_KEYS_V1 = frozenset(
+    {
+        "calibration_route", "fallback", "hard_bounds", "initialization_policy",
+        "method_version", "parameter_id", "parameter_symbol",
+        "policy_consumer_owner", "required_preexisting_receipt_fields",
+        "revalidation_trigger", "search_or_tuning_range", "seed_policy",
+        "selected_method", "st12f_execution_authorized", "warm_start_policy",
+    }
+)
+_ST12F_SHARD_DESCRIPTOR_KEYS_V1 = frozenset(
+    {
+        "first_parameter_id", "first_row_ordinal", "last_parameter_id",
+        "last_row_ordinal", "numeric_parameter_id_max_inclusive",
+        "numeric_parameter_id_min_inclusive", "package_member", "resource_path",
+        "row_count", "size_bytes",
+    }
+)
+_ST12F_MANIFEST_EXPECTED_SCALARS_V1: Mapping[str, object] = MappingProxyType(
+    {
+        "application_binding_field_count": 17,
+        "calibration_optimizer_policy_count": 50,
+        "calibration_optimizer_policy_field_count": 15,
+        "canonical_value_owner": "ComputationParameterPolicyV1",
+        "codex_copy_law": "COPY_OWNER_SUPPLIED_PLAIN_UTF8_RESOURCE_FILES_WITHOUT_CONTENT_TRANSFORMATION",
+        "codex_reserialization_authorized": False,
+        "fixed_numeric_shard_width": 320,
+        "immutable_index_policy": "TUPLE_PLUS_MAPPINGPROXYTYPE_INDEXES_BY_PARAMETER_ID_AND_BINDING_ID",
+        "loader_implementation_path": "src/qtt/stage1_prediction_markets/qku_computation_control_plane/parameter_policy.py",
+        "loader_owner": "ComputationParameterPolicyV1",
+        "lookup_complexity": "EXPECTED_O1_DICTIONARY_LOOKUP_NO_FULL_SCAN",
+        "manifest_resource_path": "src/qtt/stage1_prediction_markets/qku_computation_control_plane/data/st12f_parameter_resources_manifest.json",
+        "manual_codex_transcription_authorized": False,
+        "maximum_line_size_bytes": 65536,
+        "maximum_shard_size_bytes": 2100000,
+        "module_import_may_parse_all_resources": False,
+        "no_sha_or_digest_authority": True,
+        "non_calibration_explicit_absence_count": 3046,
+        "opaque_encoding_or_compression": False,
+        "owner_zip_runtime_dependency": False,
+        "parameter_application_binding_count": 3096,
+        "parameter_policy_count": 3096,
+        "per_request_filesystem_reads_allowed": False,
+        "per_request_json_parsing_allowed": False,
+        "policy_field_count": 43,
+        "raw_row_terminal_output_forbidden": True,
+        "resource_access_api": "importlib.resources.files",
+        "resource_format": "PLAIN_UTF8_CANONICAL_JSONL_ONE_COMPLETE_PARAMETER_PER_LINE",
+        "resource_read_timing": "PREFERRED_SERVICE_STARTUP_PREWARM_WITH_MANDATORY_GUARD_BEFORE_FIRST_OP13_OP14_OR_OP15_ADMISSION",
+        "resource_row_schema": "ST12F_PARAMETER_RESOURCE_ROW_V1",
+        "resource_semantic_authority": "OWNER_SUPPLIED_EXACT_REPOSITORY_RESOURCE_UNDER_COMPUTATION_PARAMETER_POLICY_V1",
+        "runtime_codex_input_dependency": False,
+        "schema": "ST12F_PARAMETER_RESOURCE_MANIFEST_V1",
+        "shard_count": 12,
+        "strict_json_duplicate_keys_rejected": True,
+        "strict_json_nonfinite_constants_rejected": True,
+    }
+)
+_ST12F_MANIFEST_KEYS_V1 = frozenset(
+    (*_ST12F_MANIFEST_EXPECTED_SCALARS_V1, "shards")
+)
+_ST12F_EXPECTED_RESOLUTION_DISTRIBUTION_V1: Mapping[str, int] = MappingProxyType(
+    {
+        "STATIC_OR_DETERMINISTIC_RULE": 2668,
+        "RUNTIME_TYPED_BINDING": 300,
+        "EXPLICIT_FAIL_CLOSED_POLICY": 78,
+        "OFFLINE_CALIBRATION_OR_BOUNDED_OPTIMIZATION": 38,
+        "OFFLINE_CALIBRATION_REQUIRED": 12,
+    }
+)
+_ST12F_OFFLINE_RESOLUTION_KINDS_V1 = frozenset(
+    {
+        "OFFLINE_CALIBRATION_OR_BOUNDED_OPTIMIZATION",
+        "OFFLINE_CALIBRATION_REQUIRED",
+    }
+)
+_ST12F_NONCALIBRATION_SEARCH_STATE_BY_KIND_V1: Mapping[str, str] = (
+    MappingProxyType(
+        {
+            "STATIC_OR_DETERMINISTIC_RULE": "NOT_APPLICABLE_STATIC_OR_DETERMINISTIC_POLICY",
+            "RUNTIME_TYPED_BINDING": "NOT_APPLICABLE_RUNTIME_TYPED_BINDING",
+            "EXPLICIT_FAIL_CLOSED_POLICY": "NOT_APPLICABLE_FAIL_CLOSED_POLICY",
+        }
+    )
+)
+_ST12F_NONCALIBRATION_ROUTE_BY_KIND_V1: Mapping[str, tuple[str, str]] = (
+    MappingProxyType(
+        {
+            "STATIC_OR_DETERMINISTIC_RULE": (
+                "CERTIFIED_STATIC_VALUE_OR_DETERMINISTIC_RESOLUTION_RULE",
+                "NOT_APPLICABLE_STATIC_OR_DETERMINISTIC_POLICY",
+            ),
+            "RUNTIME_TYPED_BINDING": (
+                "CANONICAL_OWNER_PACKET_AND_SOURCE_RECEIPT_RESOLVER",
+                "RUNTIME_TYPED_BINDING_RESOLUTION",
+            ),
+            "EXPLICIT_FAIL_CLOSED_POLICY": (
+                "NO_CALIBRATION; TERMINAL_TYPED_BLOCKER_OR_REGISTERED_FALLBACK",
+                "NOT_APPLICABLE_FAIL_CLOSED_POLICY",
+            ),
+        }
+    )
+)
+_ST12F_BINDING_APPLICATION_CONTRACT_V1 = (
+    "The consuming formula or evidence policy receives the resolved typed value "
+    "only after exact type, unit, basis, scope, effective-time, source-epoch, "
+    "bounds, precision and editability checks. Missing, stale, ambiguous or "
+    "out-of-range inputs return the row-declared blocker or fallback and no value."
+)
+_ST12F_BINDING_COMPLETE_SCHEMA_REF_V1 = "PARAMETER_POLICY_CLOSURE.jsonl"
+_ST12F_BINDING_RESOLUTION_PATH_BY_KIND_V1: Mapping[str, str] = MappingProxyType(
+    {
+        "STATIC_OR_DETERMINISTIC_RULE": (
+            "ComputationParameterPolicyV1 -> typed static or deterministic policy "
+            "accessor -> typed receipt"
+        ),
+        "RUNTIME_TYPED_BINDING": (
+            "BindingProfileV1 -> current SourceSnapshotV1 or internal-state "
+            "snapshot -> ComputationParameterPolicyV1 -> typed receipt"
+        ),
+        "EXPLICIT_FAIL_CLOSED_POLICY": (
+            "ComputationParameterPolicyV1 -> typed static or deterministic policy "
+            "accessor -> typed receipt"
+        ),
+        "OFFLINE_CALIBRATION_OR_BOUNDED_OPTIMIZATION": (
+            "ComputationParameterPolicyV1 -> typed static or deterministic policy "
+            "accessor -> typed receipt"
+        ),
+        "OFFLINE_CALIBRATION_REQUIRED": (
+            "ComputationParameterPolicyV1 -> typed static or deterministic policy "
+            "accessor -> typed receipt"
+        ),
+    }
+)
+
+
+def _st12f_schema_error_v1(context: str, detail: str) -> NoReturn:
+    raise ContractValidationError(
+        ReasonCode.SCHEMA_MISMATCH,
+        f"ST12-F {context}: {detail}",
+    )
+
+
+def _st12f_require_exact_object_v1(
+    value: object, expected_keys: frozenset[str], context: str
+) -> dict[str, object]:
+    if type(value) is not dict:
+        _st12f_schema_error_v1(context, "exact built-in dict required")
+    if frozenset(value) != expected_keys:
+        _st12f_schema_error_v1(context, "unexpected key roster")
+    return value
+
+
+def _st12f_require_field_types_v1(
+    value: dict[str, object],
+    *,
+    strings: tuple[str, ...] = (),
+    booleans: tuple[str, ...] = (),
+    integers: tuple[str, ...] = (),
+    objects: tuple[str, ...] = (),
+    string_lists: tuple[str, ...] = (),
+    context: str,
+) -> None:
+    for key in strings:
+        if type(value[key]) is not str:
+            _st12f_schema_error_v1(context, f"{key} must be str")
+    for key in booleans:
+        if type(value[key]) is not bool:
+            _st12f_schema_error_v1(context, f"{key} must be bool")
+    for key in integers:
+        if type(value[key]) is not int:
+            _st12f_schema_error_v1(context, f"{key} must be int")
+    for key in objects:
+        if type(value[key]) is not dict:
+            _st12f_schema_error_v1(context, f"{key} must be dict")
+    for key in string_lists:
+        items = value[key]
+        if type(items) is not list or any(type(item) is not str for item in items):
+            _st12f_schema_error_v1(context, f"{key} must be list[str]")
+
+
+def _st12f_require_nested_object_v1(
+    value: object,
+    *,
+    strings: tuple[str, ...] = (),
+    booleans: tuple[str, ...] = (),
+    string_lists: tuple[str, ...] = (),
+    context: str,
+) -> dict[str, object]:
+    keys = frozenset((*strings, *booleans, *string_lists))
+    result = _st12f_require_exact_object_v1(value, keys, context)
+    _st12f_require_field_types_v1(
+        result,
+        strings=strings,
+        booleans=booleans,
+        string_lists=string_lists,
+        context=context,
+    )
+    return result
+
+
+def _st12f_reject_duplicate_object_pairs_v1(
+    items: list[tuple[str, object]],
+) -> dict[str, object]:
+    result: dict[str, object] = {}
+    for key, value in items:
+        if key in result:
+            raise SerializationSafetyError(
+                ReasonCode.SERIALIZATION_UNSAFE,
+                "ST12-F duplicate JSON key: " + _st12f_bounded_text_v1(key),
+            )
+        result[key] = value
+    return result
+
+
+def _st12f_reject_nonfinite_json_constant_v1(value: str) -> NoReturn:
+    raise NumericDomainError(
+        ReasonCode.NONFINITE_NUMERIC_INPUT,
+        "ST12-F nonfinite JSON constant rejected: "
+        + _st12f_bounded_text_v1(value),
+    )
+
+
+def _st12f_parse_strict_json_object_v1(
+    raw: bytes, context: str
+) -> dict[str, object]:
+    try:
+        text = raw.decode("utf-8", "strict")
+    except UnicodeDecodeError as exc:
+        raise SerializationSafetyError(
+            ReasonCode.SERIALIZATION_UNSAFE,
+            f"ST12-F invalid UTF-8: {context}",
+        ) from exc
+    try:
+        value = json.loads(
+            text,
+            object_pairs_hook=_st12f_reject_duplicate_object_pairs_v1,
+            parse_constant=_st12f_reject_nonfinite_json_constant_v1,
+        )
+    except ComputationControlPlaneError:
+        raise
+    except (json.JSONDecodeError, ValueError) as exc:
+        raise SerializationSafetyError(
+            ReasonCode.SERIALIZATION_UNSAFE,
+            f"ST12-F invalid JSON: {context}",
+        ) from exc
+    if type(value) is not dict:
+        _st12f_schema_error_v1(context, "top-level JSON object required")
+    return value
+
+
+def _st12f_parameter_resource_root_v1() -> Traversable:
+    return resources.files(__package__).joinpath("data")
+
+
+def _st12f_validate_resource_roster_v1(root: Traversable) -> None:
+    try:
+        if not root.is_dir():
+            raise FileNotFoundError("data directory")
+        children = tuple(root.iterdir())
+    except OSError as exc:
+        raise ParameterPolicyError(
+            ReasonCode.OWNER_DATA_MISSING,
+            "ST12-F data resource directory is unavailable",
+        ) from exc
+    actual = {child.name for child in children}
+    expected = set(_ST12F_PARAMETER_RESOURCE_FILENAMES_V1)
+    if actual != expected or any(not child.is_file() for child in children):
+        raise ParameterPolicyError(
+            ReasonCode.OWNER_DATA_CONTRADICTORY,
+            "ST12-F resource roster is missing or unexpected",
+        )
+
+
+def _st12f_load_parameter_resource_manifest_v1(
+    root: Traversable,
+) -> tuple[_ST12FParameterResourceManifestV1, int]:
+    path = root.joinpath(_ST12F_PARAMETER_RESOURCE_FILENAMES_V1[0])
+    try:
+        if not path.is_file():
+            raise FileNotFoundError(path.name)
+        with path.open("rb") as stream:
+            raw = stream.read(65537)
+    except OSError as exc:
+        raise ParameterPolicyError(
+            ReasonCode.OWNER_DATA_MISSING,
+            "ST12-F manifest is unavailable",
+        ) from exc
+    if len(raw) > 65536:
+        raise ParameterPolicyError(
+            ReasonCode.RESOURCE_BOUND_EXCEEDED,
+            "ST12-F manifest exceeds 65536 bytes",
+        )
+    value = _st12f_parse_strict_json_object_v1(raw, "manifest")
+    manifest = _st12f_require_exact_object_v1(
+        value, _ST12F_MANIFEST_KEYS_V1, "manifest"
+    )
+    for key, expected in _ST12F_MANIFEST_EXPECTED_SCALARS_V1.items():
+        actual = manifest[key]
+        if type(actual) is not type(expected) or actual != expected:
+            _st12f_schema_error_v1("manifest", f"{key} mismatch")
+    raw_shards = manifest["shards"]
+    if type(raw_shards) is not list or len(raw_shards) != 12:
+        _st12f_schema_error_v1("manifest", "exact twelve-shard list required")
+    descriptors: list[_ST12FParameterShardDescriptorV1] = []
+    next_ordinal = 1
+    for index, (raw_descriptor, interval, filename) in enumerate(
+        zip(
+            raw_shards,
+            _ST12F_PARAMETER_SHARD_INTERVALS_V1,
+            _ST12F_PARAMETER_RESOURCE_FILENAMES_V1[1:],
+            strict=True,
+        ),
+        1,
+    ):
+        context = f"manifest shard {index}"
+        descriptor = _st12f_require_exact_object_v1(
+            raw_descriptor, _ST12F_SHARD_DESCRIPTOR_KEYS_V1, context
+        )
+        _st12f_require_field_types_v1(
+            descriptor,
+            strings=(
+                "first_parameter_id", "last_parameter_id", "package_member",
+                "resource_path",
+            ),
+            integers=(
+                "first_row_ordinal", "last_row_ordinal",
+                "numeric_parameter_id_max_inclusive",
+                "numeric_parameter_id_min_inclusive", "row_count", "size_bytes",
+            ),
+            context=context,
+        )
+        minimum, maximum = interval
+        if (
+            descriptor["numeric_parameter_id_min_inclusive"] != minimum
+            or descriptor["numeric_parameter_id_max_inclusive"] != maximum
+            or descriptor["package_member"]
+            != "PARAMETER_DATA_RESOURCES/" + filename
+            or descriptor["resource_path"]
+            != "src/qtt/stage1_prediction_markets/qku_computation_control_plane/data/"
+            + filename
+        ):
+            _st12f_schema_error_v1(context, "identity or interval mismatch")
+        row_count = descriptor["row_count"]
+        if (
+            row_count <= 0
+            or descriptor["first_row_ordinal"] != next_ordinal
+            or descriptor["last_row_ordinal"] != next_ordinal + row_count - 1
+            or descriptor["size_bytes"] <= 0
+            or descriptor["size_bytes"] >= 2100000
+        ):
+            _st12f_schema_error_v1(context, "ordinal, count, or size mismatch")
+        for key in ("first_parameter_id", "last_parameter_id"):
+            match = _ST12F_PARAMETER_ID_PATTERN_V1.fullmatch(descriptor[key])
+            if match is None or not minimum <= int(match.group(1)) <= maximum:
+                _st12f_schema_error_v1(context, f"{key} outside interval")
+        descriptors.append(_ST12FParameterShardDescriptorV1(**descriptor))
+        next_ordinal += row_count
+    if next_ordinal != 3097:
+        _st12f_schema_error_v1("manifest", "global row count mismatch")
+    scalar_values = {
+        key: manifest[key] for key in _ST12F_MANIFEST_EXPECTED_SCALARS_V1
+    }
+    return (
+        _ST12FParameterResourceManifestV1(
+            **scalar_values,
+            shards=tuple(descriptors),
+        ),
+        len(raw),
+    )
+
+
+def _st12f_validate_policy_object_v1(
+    raw: object, context: str
+) -> dict[str, object]:
+    policy = _st12f_require_exact_object_v1(
+        raw, _ST12F_PARAMETER_POLICY_KEYS_V1, context
+    )
+    _st12f_require_field_types_v1(
+        policy,
+        strings=(
+            "canonical_value_owner", "certified_step11_calibration_route",
+            "certified_step11_custody_ref", "certified_step11_revalidation_trigger",
+            "default_authority_class", "fallback", "implementation_resolution_kind",
+            "initial_default_or_resolution_rule", "latency_class",
+            "master_plan_section_id", "missing_stale_invalid_behavior",
+            "owner_editability", "parameter_id", "parameter_symbol",
+            "parameter_value_type_resolution", "policy_consumer_owner", "precision",
+            "research_completeness_state", "rounding", "scale_or_transform",
+            "schedule", "seed_policy", "semantic_role", "shadow_or_replay_trigger",
+            "unit", "warm_start_policy",
+        ),
+        booleans=(
+            "codex_online_research_allowed", "runtime_value_fabrication_allowed",
+            "second_value_owner_allowed",
+        ),
+        objects=(
+            "basis", "calibration_route", "domain", "hard_bounds",
+            "initialization_policy", "optimizer_and_optimizer_version",
+            "parameter_type", "provider_or_library", "revalidation_trigger",
+            "search_or_tuning_range", "source_and_evidence_requirements",
+        ),
+        string_lists=(
+            "lane_applicability", "runtime_resolution_procedure",
+            "source_identity_refs",
+        ),
+        context=context,
+    )
+    basis = _st12f_require_nested_object_v1(
+        policy["basis"],
+        strings=("conversion_rule", "declared_unit_or_basis", "normalized_unit_class"),
+        booleans=("implicit_conversion_allowed",),
+        context=context + " basis",
+    )
+    route = _st12f_require_nested_object_v1(
+        policy["calibration_route"],
+        strings=("route", "state"),
+        booleans=("empirical_result_required", "fit_success_is_promotion_authority"),
+        context=context + " calibration_route",
+    )
+    domain = _st12f_require_nested_object_v1(
+        policy["domain"],
+        strings=("constraint_text", "invalid_value_behavior", "validation_mode"),
+        booleans=("implicit_clipping_allowed",),
+        context=context + " domain",
+    )
+    bounds = _st12f_require_nested_object_v1(
+        policy["hard_bounds"],
+        strings=("constraint_text", "invalid_value_behavior", "validation_mode"),
+        booleans=("implicit_clipping_allowed",),
+        context=context + " hard_bounds",
+    )
+    initialization = _st12f_require_nested_object_v1(
+        policy["initialization_policy"],
+        strings=("rule", "state"),
+        booleans=("silent_random_initialization_allowed",),
+        context=context + " initialization_policy",
+    )
+    _st12f_require_nested_object_v1(
+        policy["parameter_type"],
+        strings=(
+            "certified_resolution_class", "financial_numeric_serialization",
+            "normalized_storage_type",
+        ),
+        context=context + " parameter_type",
+    )
+    provider = _st12f_require_nested_object_v1(
+        policy["provider_or_library"],
+        strings=("name", "version"),
+        booleans=(
+            "dependency_change_authorized", "repository_pin_controls_implementation",
+        ),
+        string_lists=("source_pack_refs",),
+        context=context + " provider_or_library",
+    )
+    _st12f_require_nested_object_v1(
+        policy["revalidation_trigger"],
+        strings=("certified_step11_trigger", "provider_or_method_scope"),
+        booleans=("silent_carry_forward_allowed",),
+        string_lists=("triggers",),
+        context=context + " revalidation_trigger",
+    )
+    _st12f_require_nested_object_v1(
+        policy["source_and_evidence_requirements"],
+        strings=(
+            "capability_binding_rule", "evidence_basis_class",
+            "family_evidence_binding_ref",
+        ),
+        string_lists=("binding_rule_refs",),
+        context=context + " source_and_evidence_requirements",
+    )
+    resolution = policy["implementation_resolution_kind"]
+    optimizer = policy["optimizer_and_optimizer_version"]
+    search = policy["search_or_tuning_range"]
+    if resolution in _ST12F_OFFLINE_RESOLUTION_KINDS_V1:
+        optimizer = _st12f_require_nested_object_v1(
+            optimizer,
+            strings=("configuration_authority", "optimizer", "state", "version"),
+            booleans=("st12f_execution_authorized",),
+            string_lists=("required_receipt_fields",),
+            context=context + " optimizer calibrated variant",
+        )
+        search = _st12f_require_nested_object_v1(
+            search,
+            strings=("constraint_text", "state"),
+            booleans=("promotion_from_fit_success_allowed", "unbounded_search_allowed"),
+            context=context + " search calibrated variant",
+        )
+        if (
+            optimizer["state"] != "EXACT_OFFLINE_METHOD_SELECTED"
+            or search["state"] != "BOUNDED_OFFLINE_REPLAY_PAPER_CALIBRATION"
+            or route["route"] != "TYPED_PARAMETER_POLICY_CALIBRATION_WORK_ORDER"
+            or route["state"] != "OFFLINE_REPLAY_PAPER_CALIBRATION_WORK_ORDER"
+            or route["empirical_result_required"] is not True
+            or route["fit_success_is_promotion_authority"] is not False
+            or search["promotion_from_fit_success_allowed"] is not False
+            or search["unbounded_search_allowed"] is not False
+            or optimizer["st12f_execution_authorized"] is not False
+        ):
+            _st12f_schema_error_v1(context, "calibrated discriminator mismatch")
+    else:
+        try:
+            expected_search_state = _ST12F_NONCALIBRATION_SEARCH_STATE_BY_KIND_V1[
+                resolution
+            ]
+            expected_route, expected_route_state = (
+                _ST12F_NONCALIBRATION_ROUTE_BY_KIND_V1[resolution]
+            )
+        except KeyError:
+            _st12f_schema_error_v1(context, "unknown resolution kind")
+        optimizer = _st12f_require_nested_object_v1(
+            optimizer,
+            strings=("optimizer", "state", "version"),
+            booleans=("st12f_execution_authorized",),
+            context=context + " optimizer non-calibration variant",
+        )
+        search = _st12f_require_nested_object_v1(
+            search,
+            strings=("constraint_text", "state"),
+            booleans=("unbounded_search_allowed",),
+            context=context + " search non-calibration variant",
+        )
+        if (
+            optimizer["state"] != "NOT_APPLICABLE_NO_OFFLINE_OPTIMIZER"
+            or search["state"] != expected_search_state
+            or route["route"] != expected_route
+            or route["state"] != expected_route_state
+            or route["empirical_result_required"] is not False
+        ):
+            _st12f_schema_error_v1(context, "non-calibration discriminator mismatch")
+    if policy["canonical_value_owner"] != "ComputationParameterPolicyV1":
+        raise ParameterPolicyError(
+            ReasonCode.INPUT_OWNER_MISMATCH,
+            f"ST12-F policy canonical owner mismatch: {context}",
+        )
+    if (
+        policy["runtime_value_fabrication_allowed"] is not False
+        or policy["second_value_owner_allowed"] is not False
+        or policy["codex_online_research_allowed"] is not False
+        or basis["implicit_conversion_allowed"] is not False
+        or domain["implicit_clipping_allowed"] is not False
+        or bounds["implicit_clipping_allowed"] is not False
+        or initialization["silent_random_initialization_allowed"] is not False
+        or optimizer["st12f_execution_authorized"] is not False
+        or provider["dependency_change_authorized"] is not False
+        or provider["repository_pin_controls_implementation"] is not True
+        or route["fit_success_is_promotion_authority"] is not False
+        or search["unbounded_search_allowed"] is not False
+    ):
+        raise ParameterPolicyError(
+            ReasonCode.PARAMETER_OUT_OF_POLICY,
+            f"ST12-F authority invariant failed: {context}",
+        )
+    if (
+        bounds != domain
+        or initialization["rule"] != policy["initial_default_or_resolution_rule"]
+        or basis["declared_unit_or_basis"] != policy["unit"]
+        or provider["source_pack_refs"] != policy["source_identity_refs"]
+    ):
+        raise ParameterPolicyError(
+            ReasonCode.OWNER_DATA_CONTRADICTORY,
+            f"ST12-F recursive policy join failed: {context}",
+        )
+    return policy
+
+
+def _st12f_build_parameter_policy_row_v1(
+    raw: object, context: str
+) -> ST12FParameterPolicyRowV1:
+    policy = _st12f_validate_policy_object_v1(raw, context)
+    frozen = {key: _freeze_parameter_value(value) for key, value in policy.items()}
+    return ST12FParameterPolicyRowV1(**frozen)
+
+
+def _st12f_build_application_binding_v1(
+    raw: object, context: str
+) -> ST12FParameterApplicationBindingV1:
+    binding = _st12f_require_exact_object_v1(
+        raw, _ST12F_PARAMETER_BINDING_KEYS_V1, context
+    )
+    _st12f_require_field_types_v1(
+        binding,
+        strings=(
+            "application_contract", "binding_id", "calibration_optimizer_policy_ref",
+            "canonical_value_owner", "complete_canonical_schema_ref",
+            "effective_range_field", "effective_rule_field",
+            "family_evidence_binding_ref", "master_plan_section_id", "parameter_id",
+            "parameter_symbol", "policy_consumer_owner", "resolution_path",
+        ),
+        booleans=(
+            "consumer_may_browse_or_invent_value", "double_default_prohibited",
+            "runtime_or_provider_effect_authorized",
+            "second_parameter_value_owner_prohibited",
+        ),
+        context=context,
+    )
+    if binding["canonical_value_owner"] != "ComputationParameterPolicyV1":
+        raise ParameterPolicyError(
+            ReasonCode.INPUT_OWNER_MISMATCH,
+            f"ST12-F binding canonical owner mismatch: {context}",
+        )
+    if (
+        binding["consumer_may_browse_or_invent_value"] is not False
+        or binding["double_default_prohibited"] is not True
+        or binding["runtime_or_provider_effect_authorized"] is not False
+        or binding["second_parameter_value_owner_prohibited"] is not True
+        or binding["effective_range_field"]
+        != "st12f_currentized_reference_range_or_structural_constraint"
+        or binding["effective_rule_field"]
+        != "st12f_currentized_day1_seed_or_resolution_rule"
+        or binding["application_contract"]
+        != _ST12F_BINDING_APPLICATION_CONTRACT_V1
+        or binding["complete_canonical_schema_ref"]
+        != _ST12F_BINDING_COMPLETE_SCHEMA_REF_V1
+    ):
+        raise ParameterPolicyError(
+            ReasonCode.PARAMETER_BINDING_MISMATCH,
+            f"ST12-F binding authority invariant failed: {context}",
+        )
+    return ST12FParameterApplicationBindingV1(**binding)
+
+
+def _st12f_build_calibration_policy_or_absence_v1(
+    raw: object,
+    policy: ST12FParameterPolicyRowV1,
+    binding: ST12FParameterApplicationBindingV1,
+    context: str,
+) -> ST12FCalibrationOptimizerPolicyV1 | ST12FCalibrationPolicyAbsenceV1:
+    if raw == ST12F_CALIBRATION_POLICY_ABSENCE_V1.value:
+        if (
+            type(raw) is not str
+            or policy.implementation_resolution_kind
+            in _ST12F_OFFLINE_RESOLUTION_KINDS_V1
+            or binding.calibration_optimizer_policy_ref != raw
+        ):
+            raise ParameterPolicyError(
+                ReasonCode.PARAMETER_BINDING_MISMATCH,
+                f"ST12-F calibration absence mismatch: {context}",
+            )
+        return ST12F_CALIBRATION_POLICY_ABSENCE_V1
+    calibration = _st12f_require_exact_object_v1(
+        raw, _ST12F_PARAMETER_CALIBRATION_KEYS_V1, context
+    )
+    _st12f_require_field_types_v1(
+        calibration,
+        strings=(
+            "fallback", "method_version", "parameter_id", "parameter_symbol",
+            "policy_consumer_owner", "seed_policy", "selected_method",
+            "warm_start_policy",
+        ),
+        booleans=("st12f_execution_authorized",),
+        objects=(
+            "calibration_route", "hard_bounds", "initialization_policy",
+            "revalidation_trigger", "search_or_tuning_range",
+        ),
+        string_lists=("required_preexisting_receipt_fields",),
+        context=context,
+    )
+    _st12f_require_nested_object_v1(
+        calibration["calibration_route"],
+        strings=("route", "state"),
+        booleans=("empirical_result_required", "fit_success_is_promotion_authority"),
+        context=context + " calibration_route",
+    )
+    _st12f_require_nested_object_v1(
+        calibration["hard_bounds"],
+        strings=("constraint_text", "invalid_value_behavior", "validation_mode"),
+        booleans=("implicit_clipping_allowed",),
+        context=context + " hard_bounds",
+    )
+    _st12f_require_nested_object_v1(
+        calibration["initialization_policy"],
+        strings=("rule", "state"),
+        booleans=("silent_random_initialization_allowed",),
+        context=context + " initialization_policy",
+    )
+    _st12f_require_nested_object_v1(
+        calibration["revalidation_trigger"],
+        strings=("certified_step11_trigger", "provider_or_method_scope"),
+        booleans=("silent_carry_forward_allowed",),
+        string_lists=("triggers",),
+        context=context + " revalidation_trigger",
+    )
+    _st12f_require_nested_object_v1(
+        calibration["search_or_tuning_range"],
+        strings=("constraint_text", "state"),
+        booleans=("promotion_from_fit_success_allowed", "unbounded_search_allowed"),
+        context=context + " search_or_tuning_range",
+    )
+    frozen_calibration = MappingProxyType(
+        {
+            key: _freeze_parameter_value(value)
+            for key, value in calibration.items()
+        }
+    )
+    frozen_route = frozen_calibration["calibration_route"]
+    frozen_search = frozen_calibration["search_or_tuning_range"]
+    if (
+        policy.implementation_resolution_kind
+        not in _ST12F_OFFLINE_RESOLUTION_KINDS_V1
+        or frozen_calibration["parameter_id"] != policy.parameter_id
+        or frozen_calibration["parameter_symbol"] != policy.parameter_symbol
+        or frozen_calibration["policy_consumer_owner"]
+        != policy.policy_consumer_owner
+        or frozen_calibration["calibration_route"] != policy.calibration_route
+        or frozen_calibration["hard_bounds"] != policy.hard_bounds
+        or frozen_calibration["initialization_policy"]
+        != policy.initialization_policy
+        or frozen_calibration["revalidation_trigger"]
+        != policy.revalidation_trigger
+        or frozen_calibration["search_or_tuning_range"]
+        != policy.search_or_tuning_range
+        or frozen_calibration["fallback"] != policy.fallback
+        or frozen_calibration["seed_policy"] != policy.seed_policy
+        or frozen_calibration["warm_start_policy"] != policy.warm_start_policy
+        or frozen_calibration["selected_method"]
+        != policy.optimizer_and_optimizer_version["optimizer"]
+        or frozen_calibration["method_version"]
+        != policy.optimizer_and_optimizer_version["version"]
+        or tuple(frozen_calibration["required_preexisting_receipt_fields"])
+        != tuple(
+            policy.optimizer_and_optimizer_version["required_receipt_fields"]
+        )
+        or frozen_route["route"]
+        != "TYPED_PARAMETER_POLICY_CALIBRATION_WORK_ORDER"
+        or frozen_route["state"]
+        != "OFFLINE_REPLAY_PAPER_CALIBRATION_WORK_ORDER"
+        or frozen_route["empirical_result_required"] is not True
+        or frozen_route["fit_success_is_promotion_authority"] is not False
+        or frozen_search["state"]
+        != "BOUNDED_OFFLINE_REPLAY_PAPER_CALIBRATION"
+        or frozen_search["promotion_from_fit_success_allowed"] is not False
+        or frozen_search["unbounded_search_allowed"] is not False
+        or frozen_calibration["st12f_execution_authorized"] is not False
+        or binding.calibration_optimizer_policy_ref
+        != "CALIBRATION::" + policy.parameter_id
+    ):
+        raise ParameterPolicyError(
+            ReasonCode.PARAMETER_BINDING_MISMATCH,
+            f"ST12-F calibration join failed: {context}",
+        )
+    return ST12FCalibrationOptimizerPolicyV1(**frozen_calibration)
+
+
+def _st12f_load_parameter_resource_shard_v1(
+    root: Traversable,
+    descriptor: _ST12FParameterShardDescriptorV1,
+) -> tuple[tuple[_ST12FParameterResourceRowV1, ...], int, int]:
+    filename = descriptor.package_member.removeprefix("PARAMETER_DATA_RESOURCES/")
+    path = root.joinpath(filename)
+    rows: list[_ST12FParameterResourceRowV1] = []
+    size = 0
+    maximum_line = 0
+    try:
+        if not path.is_file():
+            raise FileNotFoundError(filename)
+        with path.open("rb") as stream:
+            while True:
+                raw_line = stream.readline(65537)
+                if not raw_line:
+                    break
+                size += len(raw_line)
+                maximum_line = max(maximum_line, len(raw_line))
+                if size >= 2100000 or len(raw_line) > 65536:
+                    raise ParameterPolicyError(
+                        ReasonCode.RESOURCE_BOUND_EXCEEDED,
+                        f"ST12-F resource bound exceeded: {filename}",
+                    )
+                if not raw_line.endswith(b"\n"):
+                    raise SerializationSafetyError(
+                        ReasonCode.SERIALIZATION_UNSAFE,
+                        f"ST12-F row does not end in LF: {filename}",
+                    )
+                payload = raw_line[:-1]
+                if not payload.strip():
+                    raise ParameterPolicyError(
+                        ReasonCode.OWNER_DATA_MALFORMED,
+                        f"ST12-F blank row rejected: {filename}",
+                    )
+                row_number = len(rows) + 1
+                context = f"{filename} row {row_number}"
+                value = _st12f_parse_strict_json_object_v1(raw_line, context)
+                row = _st12f_require_exact_object_v1(
+                    value, _ST12F_PARAMETER_RESOURCE_ROW_KEYS_V1, context
+                )
+                _st12f_require_field_types_v1(
+                    row,
+                    strings=("resource_schema", "parameter_id"),
+                    integers=("row_ordinal",),
+                    objects=("policy", "application_binding"),
+                    context=context,
+                )
+                if row["resource_schema"] != "ST12F_PARAMETER_RESOURCE_ROW_V1":
+                    _st12f_schema_error_v1(context, "resource schema mismatch")
+                expected_ordinal = descriptor.first_row_ordinal + len(rows)
+                parameter_id = row["parameter_id"]
+                match = _ST12F_PARAMETER_ID_PATTERN_V1.fullmatch(parameter_id)
+                if (
+                    row["row_ordinal"] != expected_ordinal
+                    or match is None
+                    or not descriptor.numeric_parameter_id_min_inclusive
+                    <= int(match.group(1))
+                    <= descriptor.numeric_parameter_id_max_inclusive
+                ):
+                    raise ParameterPolicyError(
+                        ReasonCode.PARAMETER_OUT_OF_POLICY,
+                        f"ST12-F row order or range mismatch: {context}",
+                    )
+                policy = _st12f_build_parameter_policy_row_v1(
+                    row["policy"], context + " policy"
+                )
+                binding = _st12f_build_application_binding_v1(
+                    row["application_binding"], context + " binding"
+                )
+                if (
+                    parameter_id != policy.parameter_id
+                    or parameter_id != binding.parameter_id
+                    or policy.parameter_symbol != binding.parameter_symbol
+                    or binding.policy_consumer_owner
+                    != policy.policy_consumer_owner
+                    or binding.master_plan_section_id
+                    != policy.master_plan_section_id
+                    or binding.family_evidence_binding_ref
+                    != policy.source_and_evidence_requirements[
+                        "family_evidence_binding_ref"
+                    ]
+                    or binding.resolution_path
+                    != _ST12F_BINDING_RESOLUTION_PATH_BY_KIND_V1[
+                        policy.implementation_resolution_kind
+                    ]
+                    or binding.binding_id
+                    != "ST12F-PARAM-BINDING::" + parameter_id
+                    or _ST12F_BINDING_ID_PATTERN_V1.fullmatch(binding.binding_id)
+                    is None
+                ):
+                    raise ParameterPolicyError(
+                        ReasonCode.PARAMETER_BINDING_MISMATCH,
+                        f"ST12-F policy/binding identity mismatch: {context}",
+                    )
+                calibration = _st12f_build_calibration_policy_or_absence_v1(
+                    row["calibration_optimizer_policy_or_explicit_absence"],
+                    policy,
+                    binding,
+                    context + " calibration",
+                )
+                rows.append(
+                    _ST12FParameterResourceRowV1(
+                        row_ordinal=row["row_ordinal"],
+                        parameter_id=parameter_id,
+                        policy=policy,
+                        application_binding=binding,
+                        calibration_policy_or_absence=calibration,
+                    )
+                )
+    except OSError as exc:
+        raise ParameterPolicyError(
+            ReasonCode.OWNER_DATA_MISSING,
+            f"ST12-F shard unavailable: {filename}",
+        ) from exc
+    if (
+        size != descriptor.size_bytes
+        or len(rows) != descriptor.row_count
+        or not rows
+        or rows[0].parameter_id != descriptor.first_parameter_id
+        or rows[-1].parameter_id != descriptor.last_parameter_id
+        or rows[-1].row_ordinal != descriptor.last_row_ordinal
+    ):
+        raise ParameterPolicyError(
+            ReasonCode.OWNER_DATA_CONTRADICTORY,
+            f"ST12-F shard custody mismatch: {filename}",
+        )
+    return tuple(rows), size, maximum_line
+
+
+def _st12f_validate_complete_registry_inputs_v1(
+    rows: tuple[_ST12FParameterResourceRowV1, ...],
+) -> None:
+    if len(rows) != 3096:
+        raise ParameterPolicyError(
+            ReasonCode.OWNER_DATA_CONTRADICTORY,
+            "ST12-F policy population must be 3096",
+        )
+    parameter_ids: set[str] = set()
+    binding_ids: set[str] = set()
+    distribution: dict[str, int] = {}
+    previous_numeric = 0
+    calibrations = 0
+    absences = 0
+    for expected_ordinal, row in enumerate(rows, 1):
+        match = _ST12F_PARAMETER_ID_PATTERN_V1.fullmatch(row.parameter_id)
+        numeric = int(match.group(1)) if match is not None else -1
+        if (
+            row.row_ordinal != expected_ordinal
+            or numeric <= previous_numeric
+            or row.parameter_id in parameter_ids
+            or row.application_binding.binding_id in binding_ids
+        ):
+            raise ParameterPolicyError(
+                ReasonCode.OWNER_DATA_CONTRADICTORY,
+                "ST12-F global identity order or uniqueness mismatch",
+            )
+        previous_numeric = numeric
+        parameter_ids.add(row.parameter_id)
+        binding_ids.add(row.application_binding.binding_id)
+        kind = row.policy.implementation_resolution_kind
+        distribution[kind] = distribution.get(kind, 0) + 1
+        if isinstance(
+            row.calibration_policy_or_absence,
+            ST12FCalibrationOptimizerPolicyV1,
+        ):
+            calibrations += 1
+        else:
+            absences += 1
+    if (
+        len(parameter_ids) != 3096
+        or len(binding_ids) != 3096
+        or calibrations != 50
+        or absences != 3046
+        or distribution != dict(_ST12F_EXPECTED_RESOLUTION_DISTRIBUTION_V1)
+    ):
+        raise ParameterPolicyError(
+            ReasonCode.OWNER_DATA_CONTRADICTORY,
+            "ST12-F populations or resolution distribution mismatch",
+        )
+
+
+def _st12f_build_complete_parameter_registry_v1(
+    root: Traversable,
+) -> tuple[ST12FParameterRegistryV1, _ST12FParameterRegistryBuildReceiptV1]:
+    _st12f_validate_resource_roster_v1(root)
+    manifest, manifest_size = _st12f_load_parameter_resource_manifest_v1(root)
+    all_rows: list[_ST12FParameterResourceRowV1] = []
+    maximum_shard = 0
+    maximum_line = 0
+    for descriptor in manifest.shards:
+        rows, shard_size, line_size = _st12f_load_parameter_resource_shard_v1(
+            root, descriptor
+        )
+        all_rows.extend(rows)
+        maximum_shard = max(maximum_shard, shard_size)
+        maximum_line = max(maximum_line, line_size)
+    frozen_rows = tuple(all_rows)
+    _st12f_validate_complete_registry_inputs_v1(frozen_rows)
+    policies = tuple(row.policy for row in frozen_rows)
+    bindings = tuple(row.application_binding for row in frozen_rows)
+    calibrations = tuple(
+        row.calibration_policy_or_absence
+        for row in frozen_rows
+        if isinstance(
+            row.calibration_policy_or_absence,
+            ST12FCalibrationOptimizerPolicyV1,
+        )
+    )
+    registry = ST12FParameterRegistryV1(
+        parameter_policies=policies,
+        application_bindings=bindings,
+        calibration_policies=calibrations,
+        policy_by_parameter_id=MappingProxyType(
+            {row.parameter_id: row for row in policies}
+        ),
+        binding_by_parameter_id=MappingProxyType(
+            {row.parameter_id: row for row in bindings}
+        ),
+        binding_by_binding_id=MappingProxyType(
+            {row.binding_id: row for row in bindings}
+        ),
+        calibration_by_parameter_id=MappingProxyType(
+            {row.parameter_id: row for row in calibrations}
+        ),
+    )
+    distribution = tuple(_ST12F_EXPECTED_RESOLUTION_DISTRIBUTION_V1.items())
+    receipt = _ST12FParameterRegistryBuildReceiptV1(
+        resource_filenames=_ST12F_PARAMETER_RESOURCE_FILENAMES_V1,
+        shard_filenames=_ST12F_PARAMETER_RESOURCE_FILENAMES_V1[1:],
+        resource_count=13,
+        shard_count=12,
+        policy_count=len(policies),
+        binding_count=len(bindings),
+        calibration_count=len(calibrations),
+        explicit_absence_count=3046,
+        resolution_distribution=distribution,
+        manifest_byte_count=manifest_size,
+        maximum_shard_byte_count=maximum_shard,
+        maximum_physical_line_byte_count=maximum_line,
+        canonical_value_owner="ComputationParameterPolicyV1",
+        owner_package_equality_claimed=False,
+    )
+    return registry, receipt
+
+
+_ST12F_FAILURE_EXCEPTION_TYPES_V1: Mapping[
+    str, type[ComputationControlPlaneError]
+] = MappingProxyType(
+    {
+        "ContractValidationError": ContractValidationError,
+        "LifecycleContractError": LifecycleContractError,
+        "NumericDomainError": NumericDomainError,
+        "OperationBoundaryError": OperationBoundaryError,
+        "ParameterPolicyError": ParameterPolicyError,
+        "SerializationSafetyError": SerializationSafetyError,
+    }
+)
+
+
+def _st12f_capture_registry_failure_v1(
+    error: Exception,
+) -> _ST12FParameterRegistryFailureV1:
+    if isinstance(error, ComputationControlPlaneError):
+        exception_name = type(error).__name__
+        reason_code = error.reason_code
+        detail = str(error)
+        prefix = f"{reason_code}: "
+        if detail.startswith(prefix):
+            detail = detail[len(prefix):]
+        if exception_name not in _ST12F_FAILURE_EXCEPTION_TYPES_V1:
+            exception_name = "ContractValidationError"
+    else:
+        exception_name = "ContractValidationError"
+        reason_code = ReasonCode.VALIDATION_FAILED
+        detail = "unexpected ST12-F registry failure: " + type(error).__name__
+    return _ST12FParameterRegistryFailureV1(
+        exception_type_name=exception_name,
+        reason_code=reason_code,
+        bounded_detail=detail[:512],
+    )
+
+
+def _st12f_raise_registry_failure_v1(
+    failure: _ST12FParameterRegistryFailureV1,
+) -> NoReturn:
+    exception_type = _ST12F_FAILURE_EXCEPTION_TYPES_V1[
+        failure.exception_type_name
+    ]
+    raise exception_type(failure.reason_code, failure.bounded_detail)
+
+
+_ST12F_PARAMETER_REGISTRY_CONDITION_V1 = Condition(Lock())
+_ST12F_PARAMETER_REGISTRY_HOLDER_V1 = (
+    _ST12FParameterRegistryInitializationHolderV1()
+)
+_ST12F_PARAMETER_REGISTRY_READY_V1: ST12FParameterRegistryV1 | None = None
+
+
+def _st12f_lifecycle_failure_record_v1(
+    detail: str,
+) -> _ST12FParameterRegistryFailureV1:
+    return _ST12FParameterRegistryFailureV1(
+        exception_type_name="LifecycleContractError",
+        reason_code=ReasonCode.ILLEGAL_STATE_TRANSITION,
+        bounded_detail=detail[:512],
+    )
+
+
+def _st12f_publish_sticky_failure_locked_v1(
+    failure: _ST12FParameterRegistryFailureV1,
+) -> bool:
+    if _ST12F_PARAMETER_REGISTRY_READY_V1 is not None:
+        _ST12F_PARAMETER_REGISTRY_CONDITION_V1.notify_all()
+        return False
+    _ST12F_PARAMETER_REGISTRY_HOLDER_V1.ready_receipt = None
+    _ST12F_PARAMETER_REGISTRY_HOLDER_V1.sticky_failure = failure
+    _ST12F_PARAMETER_REGISTRY_HOLDER_V1.initialization_state = (
+        ST12FParameterRegistryInitializationStateV1.FAILED_STICKY
+    )
+    _ST12F_PARAMETER_REGISTRY_CONDITION_V1.notify_all()
+    return True
+
+
+def _st12f_terminalize_initializer_cancellation_v1(
+    detail: str,
+) -> None:
+    failure = _st12f_lifecycle_failure_record_v1(detail)
+    with _ST12F_PARAMETER_REGISTRY_CONDITION_V1:
+        ready = _ST12F_PARAMETER_REGISTRY_READY_V1
+        state = _ST12F_PARAMETER_REGISTRY_HOLDER_V1.initialization_state
+        if ready is not None:
+            _ST12F_PARAMETER_REGISTRY_CONDITION_V1.notify_all()
+            return
+        if state is ST12FParameterRegistryInitializationStateV1.UNINITIALIZED:
+            _ST12F_PARAMETER_REGISTRY_CONDITION_V1.notify_all()
+            return
+        if state is ST12FParameterRegistryInitializationStateV1.FAILED_STICKY:
+            _ST12F_PARAMETER_REGISTRY_CONDITION_V1.notify_all()
+            return
+        _st12f_publish_sticky_failure_locked_v1(failure)
+
+
+def _load_st12f_parameter_registry_state_machine_v1(
+) -> ST12FParameterRegistryV1:
+    global _ST12F_PARAMETER_REGISTRY_READY_V1
+
+    elected_initializer = False
+    failure_to_raise: _ST12FParameterRegistryFailureV1 | None = None
+    try:
+        with _ST12F_PARAMETER_REGISTRY_CONDITION_V1:
+            while True:
+                ready = _ST12F_PARAMETER_REGISTRY_READY_V1
+                if ready is not None:
+                    return ready
+                state = _ST12F_PARAMETER_REGISTRY_HOLDER_V1.initialization_state
+                if state is ST12FParameterRegistryInitializationStateV1.UNINITIALIZED:
+                    elected_initializer = True
+                    _ST12F_PARAMETER_REGISTRY_HOLDER_V1.initialization_state = (
+                        ST12FParameterRegistryInitializationStateV1.INITIALIZING
+                    )
+                    break
+                if state is ST12FParameterRegistryInitializationStateV1.INITIALIZING:
+                    _ST12F_PARAMETER_REGISTRY_CONDITION_V1.wait_for(
+                        lambda: (
+                            _ST12F_PARAMETER_REGISTRY_READY_V1 is not None
+                            or _ST12F_PARAMETER_REGISTRY_HOLDER_V1.initialization_state
+                            is not ST12FParameterRegistryInitializationStateV1.INITIALIZING
+                        )
+                    )
+                    continue
+                if state is ST12FParameterRegistryInitializationStateV1.FAILED_STICKY:
+                    failure_to_raise = (
+                        _ST12F_PARAMETER_REGISTRY_HOLDER_V1.sticky_failure
+                    )
+                    if failure_to_raise is None:
+                        failure_to_raise = _st12f_lifecycle_failure_record_v1(
+                            "ST12-F failure state lacks immutable failure data"
+                        )
+                        _st12f_publish_sticky_failure_locked_v1(failure_to_raise)
+                    break
+                failure_to_raise = _st12f_lifecycle_failure_record_v1(
+                    "ST12-F READY state lacks publication token"
+                )
+                _st12f_publish_sticky_failure_locked_v1(failure_to_raise)
+                break
+
+        if not elected_initializer:
+            if failure_to_raise is None:  # pragma: no cover - defensive narrowing
+                failure_to_raise = _st12f_lifecycle_failure_record_v1(
+                    "ST12-F state-machine failure data unavailable"
+                )
+            _st12f_raise_registry_failure_v1(failure_to_raise)
+
+        try:
+            local_registry, local_receipt = (
+                _st12f_build_complete_parameter_registry_v1(
+                    _st12f_parameter_resource_root_v1()
+                )
+            )
+        except Exception as error:
+            local_failure = _st12f_capture_registry_failure_v1(error)
+            with _ST12F_PARAMETER_REGISTRY_CONDITION_V1:
+                failure_published = _st12f_publish_sticky_failure_locked_v1(
+                    local_failure
+                )
+            if not failure_published:
+                _st12f_raise_registry_failure_v1(
+                    _st12f_lifecycle_failure_record_v1(
+                        "ST12-F failure publication found an existing ready registry"
+                    )
+                )
+            _st12f_raise_registry_failure_v1(local_failure)
+
+        publication_failure: _ST12FParameterRegistryFailureV1 | None = None
+        with _ST12F_PARAMETER_REGISTRY_CONDITION_V1:
+            if (
+                _ST12F_PARAMETER_REGISTRY_HOLDER_V1.initialization_state
+                is not ST12FParameterRegistryInitializationStateV1.INITIALIZING
+                or _ST12F_PARAMETER_REGISTRY_READY_V1 is not None
+            ):
+                publication_failure = _st12f_lifecycle_failure_record_v1(
+                    "ST12-F registry publication state changed unexpectedly"
+                )
+                if _ST12F_PARAMETER_REGISTRY_READY_V1 is None:
+                    _st12f_publish_sticky_failure_locked_v1(publication_failure)
+                else:
+                    _ST12F_PARAMETER_REGISTRY_CONDITION_V1.notify_all()
+            else:
+                _ST12F_PARAMETER_REGISTRY_HOLDER_V1.ready_receipt = local_receipt
+                _ST12F_PARAMETER_REGISTRY_HOLDER_V1.sticky_failure = None
+                _ST12F_PARAMETER_REGISTRY_HOLDER_V1.initialization_state = (
+                    ST12FParameterRegistryInitializationStateV1.READY
+                )
+                _ST12F_PARAMETER_REGISTRY_READY_V1 = local_registry
+                _ST12F_PARAMETER_REGISTRY_CONDITION_V1.notify_all()
+        if publication_failure is not None:
+            _st12f_raise_registry_failure_v1(publication_failure)
+        return local_registry
+    except KeyboardInterrupt:
+        if elected_initializer:
+            _st12f_terminalize_initializer_cancellation_v1(
+                "ST12-F initialization cancelled by KeyboardInterrupt"
+            )
+        raise
+    except SystemExit:
+        if elected_initializer:
+            _st12f_terminalize_initializer_cancellation_v1(
+                "ST12-F initialization cancelled by SystemExit"
+            )
+        raise
+
+
+def load_st12f_parameter_registry_v1() -> ST12FParameterRegistryV1:
+    ready = _ST12F_PARAMETER_REGISTRY_READY_V1
+    if ready is not None:
+        return ready
+    return _load_st12f_parameter_registry_state_machine_v1()
+
+
+def initialize_st12f_parameter_registry_v1() -> ST12FParameterRegistryV1:
+    return load_st12f_parameter_registry_v1()
+
+
+def _st12f_parameter_registry_build_receipt_v1(
+    expected_registry: ST12FParameterRegistryV1,
+) -> _ST12FParameterRegistryBuildReceiptV1:
+    with _ST12F_PARAMETER_REGISTRY_CONDITION_V1:
+        if (
+            _ST12F_PARAMETER_REGISTRY_READY_V1 is not expected_registry
+            or _ST12F_PARAMETER_REGISTRY_HOLDER_V1.initialization_state
+            is not ST12FParameterRegistryInitializationStateV1.READY
+            or _ST12F_PARAMETER_REGISTRY_HOLDER_V1.ready_receipt is None
+        ):
+            raise LifecycleContractError(
+                ReasonCode.ILLEGAL_STATE_TRANSITION,
+                "ST12-F build receipt requested before matching READY publication",
+            )
+        return _ST12F_PARAMETER_REGISTRY_HOLDER_V1.ready_receipt
+
 
 
 @dataclass(frozen=True, slots=True)

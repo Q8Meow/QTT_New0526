@@ -34,6 +34,22 @@ EXPECTED_ST12D_QKU_VALIDATOR_IDS = frozenset(
         "validate_qku_computation_control_plane_security",
     }
 )
+EXPECTED_ST12F_QKU_VALIDATOR_IDS = frozenset(
+    {
+        "independent_validate_qku_computation_control_plane",
+        "independent_validate_qku_computation_control_plane_architecture",
+        "independent_validate_qku_computation_control_plane_d",
+        "independent_validate_qku_computation_control_plane_execution",
+        "independent_validate_qku_computation_control_plane_llm",
+        "independent_validate_qku_computation_control_plane_model_risk",
+        "independent_validate_qku_computation_control_plane_operations",
+        "independent_validate_qku_computation_control_plane_quantum",
+        "independent_validate_qku_computation_control_plane_source",
+        "validate_qku_computation_control_plane_llm",
+        "validate_qku_computation_control_plane_model_risk",
+        "validate_qku_computation_control_plane_quantum",
+    }
+)
 
 
 def test_inventory_represents_every_run_validation_gate_command():
@@ -93,10 +109,12 @@ def test_inventory_has_centralized_qku_validation_entries():
         *EXPECTED_ST12C_QKU_VALIDATOR_IDS,
         *EXPECTED_ST12D_QKU_VALIDATOR_IDS,
         *EXPECTED_ST12E_QKU_VALIDATOR_IDS,
+        *EXPECTED_ST12F_QKU_VALIDATOR_IDS,
     }
     assert inventory.ST12C_QKU_VALIDATOR_IDS == EXPECTED_ST12C_QKU_VALIDATOR_IDS
     assert inventory.ST12E_QKU_VALIDATOR_IDS == EXPECTED_ST12E_QKU_VALIDATOR_IDS
     assert inventory.ST12D_QKU_VALIDATOR_IDS == EXPECTED_ST12D_QKU_VALIDATOR_IDS
+    assert inventory.ST12F_QKU_VALIDATOR_IDS == EXPECTED_ST12F_QKU_VALIDATOR_IDS
     assert inventory.ST12D_EXCLUSIVE_QKU_VALIDATOR_IDS == {
         "independent_validate_qku_computation_control_plane_d",
         "validate_qku_computation_control_plane_d",
@@ -116,12 +134,13 @@ def test_inventory_has_centralized_qku_validation_entries():
             *inventory.ST12C_ALLOWED_EXACT_PATHS,
             *inventory.ST12D_ALLOWED_EXACT_PATHS,
             *inventory.ST12E_ALLOWED_EXACT_PATHS,
+            *inventory.ST12F_ALLOWED_EXACT_PATHS,
         )
     )
     assert expected <= set(entries)
     for validator_id in expected:
         entry = entries[validator_id]
-        expected_owner = (
+        expected_owner = "ST12-TRANCHE-F" if validator_id in EXPECTED_ST12F_QKU_VALIDATOR_IDS else (
             "ST12-TRANCHE-D"
             if validator_id
             in inventory.ST12D_EXCLUSIVE_QKU_VALIDATOR_IDS
@@ -170,6 +189,7 @@ def test_qku_paths_route_to_primary_and_independent_validation():
         *EXPECTED_ST12C_QKU_VALIDATOR_IDS,
         *EXPECTED_ST12D_QKU_VALIDATOR_IDS,
         *EXPECTED_ST12E_QKU_VALIDATOR_IDS,
+        *EXPECTED_ST12F_QKU_VALIDATOR_IDS,
     } <= matching_ids
 
 

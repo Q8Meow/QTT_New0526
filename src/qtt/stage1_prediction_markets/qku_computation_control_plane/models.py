@@ -36,6 +36,32 @@ def _canonical_text(value: object, field_name: str) -> str:
 
 
 @dataclass(frozen=True, slots=True)
+class NoEffectFlagsV1:
+    """One shared exact-false custody value for every ST12 no-effect record."""
+
+    provider_connection_allowed: bool = False
+    private_state_read_allowed: bool = False
+    replay_or_paper_execution_allowed: bool = False
+    llm_inference_allowed: bool = False
+    qpu_execution_allowed: bool = False
+    mode_or_allow_activation_allowed: bool = False
+    order_release_allowed: bool = False
+    capital_mutation_allowed: bool = False
+
+    def __post_init__(self) -> None:
+        for field_definition in dataclass_fields(self):
+            value = getattr(self, field_definition.name)
+            if type(value) is not bool or value:
+                raise ContractValidationError(
+                    ReasonCode.RUNTIME_EFFECT_FORBIDDEN,
+                    f"no-effect flag {field_definition.name} must be exact false",
+                )
+
+
+NO_EFFECTS_V1 = NoEffectFlagsV1()
+
+
+@dataclass(frozen=True, slots=True)
 class ComputationScopeV1:
     """Exact economic/data scope; it creates no runtime or trading authority."""
 
@@ -1049,7 +1075,9 @@ class GoldenVectorV1:
 
 
 @dataclass(frozen=True, slots=True)
-class ComputationEvidenceBundleV1:
+class LegacyComputationEvidenceOrthogonalityViewV1:
+    """Retained architecture-only provenance; never canonical F evidence."""
+
     evidence_id: str
     specification_id: str
     oracle_id: str
@@ -1232,6 +1260,12 @@ class ST12FEvidenceReferenceV1:
     policy_version: str
     causation_id: str
     correlation_id: str
+    input_lock_id: str = "EXPLICIT_ABSENCE"
+    component_or_template_ref: str = "EXPLICIT_ABSENCE"
+    evidence_bundle_version: str = "EXPLICIT_ABSENCE"
+    source_epoch_refs: tuple[str, ...] = ()
+    terminal_state: str = "UNAVAILABLE"
+    no_effect_flags: NoEffectFlagsV1 = NO_EFFECTS_V1
 
     def __post_init__(self) -> None:
         _typed_enum(self.evidence_state, ST12FEvidenceStateV1, "evidence_state")
@@ -1244,8 +1278,23 @@ class ST12FEvidenceReferenceV1:
             "policy_version",
             "causation_id",
             "correlation_id",
+            "input_lock_id",
+            "component_or_template_ref",
+            "evidence_bundle_version",
+            "terminal_state",
         ):
             _canonical_text(getattr(self, name), name)
+        _text_tuple(self.source_epoch_refs, "source_epoch_refs")
+        if len(self.source_epoch_refs) != len(set(self.source_epoch_refs)):
+            raise ContractValidationError(
+                ReasonCode.CONTRACT_OR_TYPE_INVALID,
+                "source_epoch_refs must contain unique identities",
+            )
+        if type(self.no_effect_flags) is not NoEffectFlagsV1:
+            raise ContractValidationError(
+                ReasonCode.RUNTIME_EFFECT_FORBIDDEN,
+                "F evidence references require the shared no-effect custody type",
+            )
         observed = _utc_timestamp(self.observed_at, "observed_at")
         valid_until = _utc_timestamp(self.valid_until, "valid_until")
         if observed > valid_until:
@@ -1254,10 +1303,10 @@ class ST12FEvidenceReferenceV1:
                 "evidence validity cannot precede its observation",
             )
         if self.evidence_state is ST12FEvidenceStateV1.EVIDENCE_REFERENCE_AVAILABLE:
-            if self.lane not in {"REPLAY", "PAPER"}:
+            if self.lane not in {"REPLAY", "PAPER", "REPLAY_PAPER"}:
                 raise ContractValidationError(
                     ReasonCode.CONTRACT_OR_TYPE_INVALID,
-                    "available F evidence must declare exactly REPLAY or PAPER",
+                    "available F evidence must declare REPLAY, PAPER, or REPLAY_PAPER",
                 )
             if any(
                 getattr(self, name) == "EXPLICIT_ABSENCE"
@@ -1266,11 +1315,22 @@ class ST12FEvidenceReferenceV1:
                     "dataset_grade_ref",
                     "venue_semantic_binding_ref",
                     "cross_venue_equivalence_ref",
+                    "input_lock_id",
+                    "component_or_template_ref",
+                    "evidence_bundle_version",
                 )
             ):
                 raise ContractValidationError(
                     ReasonCode.EVIDENCE_REFERENCE_UNAVAILABLE_STALE_CONFLICTING_OR_SCOPE_MISMATCH,
                     "available evidence cannot carry an absent evidence pin",
+                )
+            if (
+                not self.source_epoch_refs
+                or self.terminal_state != "CLOSED_INDEPENDENTLY_VALIDATED"
+            ):
+                raise ContractValidationError(
+                    ReasonCode.EVIDENCE_REFERENCE_UNAVAILABLE_STALE_CONFLICTING_OR_SCOPE_MISMATCH,
+                    "available evidence requires current source epochs and closed review",
                 )
 
 

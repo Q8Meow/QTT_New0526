@@ -52,7 +52,7 @@ UPSTREAM_IDENTITY_CROSSWALK_REQUIRED = (
 ST12E_BINDING_EXACT = "EXACT_ST12E_CAPABILITY_BINDING"
 ST12E_BINDING_OUTSIDE_SCOPE = "OUTSIDE_ST12E_CAPABILITY_BINDING_SCOPE"
 
-IMPLEMENTED_OPERATION_IDS = (
+_PRE_ST12F_IMPLEMENTED_OPERATION_IDS = (
     "resolve_identity",
     "resolve_contextual_computability",
     "resolve_applicable_stack",
@@ -66,11 +66,16 @@ IMPLEMENTED_OPERATION_IDS = (
     "submit_candidate_proposal",
     "request_materialization_work_order",
 )
-HELD_OPERATION_IDS = (
+_PRE_ST12F_HELD_OPERATION_IDS = (
     "compile_replay_paper_cohort",
     "register_replay_paper_result",
     "build_evidence_bundle",
 )
+IMPLEMENTED_OPERATION_IDS = (
+    *_PRE_ST12F_IMPLEMENTED_OPERATION_IDS,
+    *_PRE_ST12F_HELD_OPERATION_IDS,
+)
+HELD_OPERATION_IDS: tuple[str, ...] = ()
 SAFETY_NON_MATERIAL_OPERATION_IDS = (
     "resolve_identity",
     "get_snapshot_view",
@@ -1951,9 +1956,9 @@ class AgentCapabilityPolicyStoreV1:
             or manifest.get("quantum_mapping_or_execution_allowed") is not False
             or manifest.get("raw_jsonl_request_time_scan_allowed") is not False
             or tuple(manifest.get("implemented_operation_ids") or ())
-            != IMPLEMENTED_OPERATION_IDS
+            != _PRE_ST12F_IMPLEMENTED_OPERATION_IDS
             or tuple(manifest.get("held_operation_ids") or ())
-            != HELD_OPERATION_IDS
+            != _PRE_ST12F_HELD_OPERATION_IDS
         ):
             raise AuthorityDeniedError(
                 ReasonCode.TASK_ENVELOPE_STALE,

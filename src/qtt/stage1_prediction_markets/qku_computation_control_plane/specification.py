@@ -2136,3 +2136,81 @@ if (
         ReasonCode.INVALID_CONTRACT,
         "v3.4 requires 30 formulas, 30 schemas, and exactly 130 record members",
     )
+
+
+@dataclass(frozen=True, slots=True)
+class ST12FEvidenceMathSpecificationV1:
+    """Central data-only specification for one additive F evidence callable."""
+
+    math_spec_id: str
+    name: str
+    specification_version: str
+    input_names: tuple[str, ...]
+    output_name: str
+    output_unit_or_basis: str
+    comparison_policy: str
+    independent_oracle_ref: str
+    golden_vector_ref: str
+    trace_only: bool
+    live_order_authority: bool = False
+    provider_or_qpu_effect_authorized: bool = False
+
+    def __post_init__(self) -> None:
+        if (
+            self.math_spec_id not in {"MATH-40", "MATH-41", "MATH-42", "MATH-43", "MATH-44", "MATH-45", "MATH-50", "MATH-51", "MATH-52"}
+            or self.specification_version != "1.4"
+            or not self.name
+            or not self.input_names
+            or len(self.input_names) != len(set(self.input_names))
+            or self.independent_oracle_ref != f"ORACLE::{self.math_spec_id}"
+            or self.golden_vector_ref != f"GOLDEN::{self.math_spec_id}"
+            or type(self.trace_only) is not bool
+            or self.trace_only != (self.math_spec_id in {"MATH-50", "MATH-51", "MATH-52"})
+            or self.live_order_authority
+            or self.provider_or_qpu_effect_authorized
+        ):
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "ST12-F evidence math specification violates central owner closure",
+            )
+
+
+_ST12F_NEW_MATH_SPEC_ROWS_V1 = (
+    ("MATH-40", "ADVERSE_SELECTION_COST", ("fill_price", "midpoint_after_fill", "signed_fill_quantity"), "adverse_selection_cost", "currency", "EXACT_DECIMAL_AND_DECLARED_SIGN"),
+    ("MATH-41", "LATENCY_ALPHA_DECAY", ("edge_now", "latency", "tau"), "decayed_edge", "same edge", "ABS_TOL_1E-15"),
+    ("MATH-42", "SQUARE_ROOT_MARKET_IMPACT", ("Y", "sigma", "Q", "ADV"), "impact_fraction", "fraction of price", "ABS_TOL_1E-15"),
+    ("MATH-43", "CAPACITY_CROWDING_PENALTY", ("participation", "approved_participation_cap", "penalty_scale"), "capacity_penalty", "utility", "ABS_TOL_1E-15"),
+    ("MATH-44", "COVARIANCE_SHRINKAGE", ("sample_covariance", "target", "delta"), "shrunk_covariance", "covariance basis", "ABS_TOL_1E-15"),
+    ("MATH-45", "LOWER_CONFIDENCE_BOUND_NO_TRADE_GATE", ("estimated_net_edge", "uncertainty", "z_or_quantile", "model_risk_haircut"), "lcb_gate", "declared edge", "ABS_TOL_1E-15"),
+    ("MATH-50", "QAOA_PREEXISTING_TRACE_VALIDATION", ("trace_weights", "locked_costs", "observed_feasibility", "same_lock"), "qaoa_trace_validation_receipt", "declared trace/economic basis", "EXACT_DECIMAL_AND_BOOLEAN_INVARIANTS"),
+    ("MATH-51", "VQE_PREEXISTING_TRACE_VALIDATION", ("parameter_point_ids", "expectation_trace", "variance_trace", "selected_point_id", "selected_original_model_feasible", "same_lock"), "vqe_trace_validation_receipt", "declared trace/economic basis", "EXACT_DECIMAL_AND_BOOLEAN_INVARIANTS"),
+    ("MATH-52", "QUANTUM_CLASSICAL_BENCHMARK_UTILITY", ("validated_quantum_utility", "strongest_classical_utility", "no_trade_utility", "same_lock", "same_cost_basis"), "benchmark_delta_packet", "declared metrics", "EXACT_DECIMAL_AND_ENUM_INVARIANTS"),
+)
+ST12F_NEW_EVIDENCE_MATH_SPECIFICATIONS_V1: Mapping[
+    str, ST12FEvidenceMathSpecificationV1
+] = MappingProxyType(
+    {
+        row[0]: ST12FEvidenceMathSpecificationV1(
+            math_spec_id=row[0],
+            name=row[1],
+            specification_version="1.4",
+            input_names=row[2],
+            output_name=row[3],
+            output_unit_or_basis=row[4],
+            comparison_policy=row[5],
+            independent_oracle_ref=f"ORACLE::{row[0]}",
+            golden_vector_ref=f"GOLDEN::{row[0]}",
+            trace_only=row[0] in {"MATH-50", "MATH-51", "MATH-52"},
+        )
+        for row in _ST12F_NEW_MATH_SPEC_ROWS_V1
+    }
+)
+ST12F_EVIDENCE_MATH_SPECIFICATION_IDS_V1 = tuple(
+    f"MATH-{number:02d}" for number in (*range(1, 46), 50, 51, 52)
+)
+
+if len(ST12F_NEW_EVIDENCE_MATH_SPECIFICATIONS_V1) != 9 or len(ST12F_EVIDENCE_MATH_SPECIFICATION_IDS_V1) != 48:
+    raise ContractValidationError(
+        ReasonCode.INVALID_CONTRACT,
+        "ST12-F math closure must remain exact 39 reused plus 9 additive",
+    )

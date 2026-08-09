@@ -1606,11 +1606,23 @@ class CurrentModeSnapshotInputResolverV1:
         *,
         repo_root: str | Path,
         owner_registry: CanonicalOwnerPacketRegistryV1,
+        canonical_f_evidence_owner: object | None = None,
     ) -> None:
+        if canonical_f_evidence_owner is not None and not callable(
+            getattr(canonical_f_evidence_owner, "read_evidence_reference", None)
+        ):
+            raise InputAuthorityError(
+                ReasonCode.INPUT_OWNER_MISMATCH,
+                "F evidence owner must expose the exact read-only reference method",
+            )
         self._repo_root = Path(repo_root).resolve()
         self._owner_registry = owner_registry
         self._safety = CurrentSafetyStateAdapterV1(owner_registry)
-        self._evidence = CurrentPreFEvidenceAdapterV1()
+        self._evidence = (
+            CurrentPreFEvidenceAdapterV1()
+            if canonical_f_evidence_owner is None
+            else canonical_f_evidence_owner
+        )
         self._owner_action = CurrentOwnerActionConfirmationAdapterV1(owner_registry)
 
     @property
@@ -1620,6 +1632,12 @@ class CurrentModeSnapshotInputResolverV1:
     @property
     def repo_root(self) -> Path:
         return self._repo_root
+
+    @property
+    def canonical_f_evidence_owner(self) -> object:
+        """Return the immutable injected owner; requests cannot replace it."""
+
+        return self._evidence
 
     @staticmethod
     def _admitted_context(

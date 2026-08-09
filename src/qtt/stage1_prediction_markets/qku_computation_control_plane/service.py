@@ -56,9 +56,11 @@ from .persistence import PersistenceAdapterV1, PersistenceAvailabilityV1
 from .receipts import materialize_mode_snapshot_control_receipts
 from .protocols import (
     AgentCapabilityAdmissionProtocolV1,
+    ComputationEvidenceServiceProtocolV1,
     ModeSnapshotCandidateInputProtocolV1,
     ModeSnapshotOwnerProjectionProtocolV1,
     PreloadedOwnerProjectionBundleV1,
+    ReplayPaperCohortCompilerProtocolV1,
 )
 from .input_resolver import (
     CanonicalOwnerPacketRegistryV1,
@@ -66,9 +68,13 @@ from .input_resolver import (
     FormulaInputResolverV1,
 )
 from .models import (
+    BuildEvidenceBundleRequestV1,
+    BuildEvidenceBundleResponseV1,
     CandidateProposalV1,
     CompareWithNoTradeRequestV1,
     CompareWithNoTradeResponseV1,
+    CompileReplayPaperCohortRequestV1,
+    CompileReplayPaperCohortResponseV1,
     ComponentResultV1,
     ComputeComponentRequestV1,
     ComputeComponentResponseV1,
@@ -79,6 +85,7 @@ from .models import (
     ComputationExecutionContextV1,
     EvaluateTradePlanRequestV1,
     EvaluateTradePlanResponseV1,
+    EvidenceBundleResultV1,
     ExplainResolutionRequestV1,
     ExplainResolutionResponseV1,
     FrozenFormulaOutputV1,
@@ -98,6 +105,10 @@ from .models import (
     OperationStatusV1,
     RequestMaterializationWorkOrderRequestV1,
     RequestMaterializationWorkOrderResponseV1,
+    RegisterReplayPaperResultRequestV1,
+    RegisterReplayPaperResultResponseV1,
+    ReplayPaperCohortCompilationV1,
+    ReplayPaperResultRegistrationV1,
     ResourceBoundsProfileV1,
     ResolveApplicableStackRequestV1,
     ResolveApplicableStackResponseV1,
@@ -923,6 +934,8 @@ class QKUComputationControlPlaneV1:
     mode_snapshot_projection_bundle: PreloadedOwnerProjectionBundleV1 | None = None
     latency_budget_profile: LatencyBudgetProfileV1 | None = None
     resource_bounds_profile: ResourceBoundsProfileV1 | None = None
+    replay_paper_cohort_compiler: ReplayPaperCohortCompilerProtocolV1 | None = None
+    computation_evidence_service: ComputationEvidenceServiceProtocolV1 | None = None
 
     def __post_init__(self) -> None:
         if not isinstance(
@@ -958,6 +971,23 @@ class QKUComputationControlPlaneV1:
         ) or (
             self.resource_bounds_profile is not None
             and type(self.resource_bounds_profile) is not ResourceBoundsProfileV1
+        ) or (
+            self.replay_paper_cohort_compiler is not None
+            and not isinstance(
+                self.replay_paper_cohort_compiler,
+                ReplayPaperCohortCompilerProtocolV1,
+            )
+        ) or (
+            self.computation_evidence_service is not None
+            and not isinstance(
+                self.computation_evidence_service,
+                ComputationEvidenceServiceProtocolV1,
+            )
+        ) or (
+            self.computation_evidence_service is not None
+            and self.mode_snapshot_input_resolver is not None
+            and self.mode_snapshot_input_resolver.canonical_f_evidence_owner
+            is not self.computation_evidence_service
         ):
             raise ContractValidationError(
                 ReasonCode.INVALID_CONTRACT,
@@ -1510,6 +1540,96 @@ class QKUComputationControlPlaneV1:
         return RequestMaterializationWorkOrderResponseV1(
             **_common_response(request, status=OperationStatusV1.SUCCEEDED),
             work_order=result,
+        )
+
+    def compile_replay_paper_cohort(
+        self, request: CompileReplayPaperCohortRequestV1
+    ) -> CompileReplayPaperCohortResponseV1:
+        """ST10-OP::13: admit before materializing one no-effect cohort."""
+
+        _admit_agent_request(self, request)
+        compiler = self.replay_paper_cohort_compiler
+        if not isinstance(compiler, ReplayPaperCohortCompilerProtocolV1):
+            raise InputAuthorityError(
+                ReasonCode.INPUT_OWNER_MISSING,
+                "OP13 requires the injected canonical cohort compiler",
+            )
+        compilation = compiler.compile(request)
+        refs = (compilation.compilation_id, compilation.input_lock_id)
+        result = ReplayPaperCohortCompilationV1(
+            **_result_common(
+                request,
+                terminal_route="COHORT_CONTRACT_COMPILED_NO_EXECUTION",
+                evidence_refs=refs,
+            )
+        )
+        return CompileReplayPaperCohortResponseV1(
+            **_common_response(
+                request,
+                status=OperationStatusV1.SUCCEEDED,
+                receipt_refs=refs,
+            ),
+            cohort_compilation=result,
+        )
+
+    def register_replay_paper_result(
+        self, request: RegisterReplayPaperResultRequestV1
+    ) -> RegisterReplayPaperResultResponseV1:
+        """ST10-OP::14: admit before registering one pre-existing lane packet."""
+
+        _admit_agent_request(self, request)
+        evidence_service = self.computation_evidence_service
+        if not isinstance(evidence_service, ComputationEvidenceServiceProtocolV1):
+            raise InputAuthorityError(
+                ReasonCode.INPUT_OWNER_MISSING,
+                "OP14 requires the injected canonical evidence service",
+            )
+        registration = evidence_service.register_result(request)
+        refs = (registration.result_id,)
+        result = ReplayPaperResultRegistrationV1(
+            **_result_common(
+                request,
+                terminal_route=f"{request.lane}_RESULT_REGISTERED_NO_EXECUTION",
+                evidence_refs=refs,
+            )
+        )
+        return RegisterReplayPaperResultResponseV1(
+            **_common_response(
+                request,
+                status=OperationStatusV1.SUCCEEDED,
+                receipt_refs=refs,
+            ),
+            registration=result,
+        )
+
+    def build_evidence_bundle(
+        self, request: BuildEvidenceBundleRequestV1
+    ) -> BuildEvidenceBundleResponseV1:
+        """ST10-OP::15: admit before building one immutable bundle version."""
+
+        _admit_agent_request(self, request)
+        evidence_service = self.computation_evidence_service
+        if not isinstance(evidence_service, ComputationEvidenceServiceProtocolV1):
+            raise InputAuthorityError(
+                ReasonCode.INPUT_OWNER_MISSING,
+                "OP15 requires the injected canonical evidence service",
+            )
+        bundle = evidence_service.build_bundle(request)
+        refs = (bundle.evidence_bundle_version,)
+        result = EvidenceBundleResultV1(
+            **_result_common(
+                request,
+                terminal_route=bundle.terminal_state.value,
+                evidence_refs=refs,
+            )
+        )
+        return BuildEvidenceBundleResponseV1(
+            **_common_response(
+                request,
+                status=OperationStatusV1.SUCCEEDED,
+                receipt_refs=refs,
+            ),
+            evidence_bundle=result,
         )
 
 if len(REGISTERED_FORMULA_STACKS) != 1 or len(IMPLEMENTATION_REGISTRY) != 30:

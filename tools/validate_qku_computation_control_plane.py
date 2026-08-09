@@ -26,6 +26,7 @@ DOMAIN_MATH_IDS = {
     "execution": ("MATH-37", "MATH-38"),
     "llm": (),
     "latency": (),
+    "model_risk": (),
     "operations": (),
     "quantum": ("MATH-46", "MATH-47", "MATH-48", "MATH-49"),
     "security": (),

@@ -17,12 +17,15 @@ SERVICE_METHODS = (
     "resolve_required_inputs", "compute_component", "compute_stack", "compare_with_no_trade",
     "evaluate_trade_plan", "get_snapshot_view", "explain_resolution",
     "submit_candidate_proposal", "request_materialization_work_order",
+    "compile_replay_paper_cohort", "register_replay_paper_result", "build_evidence_bundle",
 )
 FORBIDDEN_METHODS = {"submit", "cancel", "amend", "sign", "dispatch", "send"}
 NEW_MODULES = (
     "economic_math.py", "receipts.py", "persistence.py", "migrations.py", "outbox.py",
     "transaction.py", "idempotency.py", "rollback.py", "accounting.py", "lifecycle.py",
     "sqlite_reference.py",
+    "cohort_compiler.py", "input_lock.py", "evidence.py", "model_risk.py",
+    "quantum_benchmark.py", "llm_gateway.py",
 )
 
 

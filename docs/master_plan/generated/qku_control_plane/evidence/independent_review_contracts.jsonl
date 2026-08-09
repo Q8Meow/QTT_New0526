@@ -1,0 +1,10 @@
+{"immutable_version_required":true,"lifecycle_state":"INCOMPLETE_MISSING_REPLAY","self_review_allowed":false}
+{"immutable_version_required":true,"lifecycle_state":"INCOMPLETE_MISSING_PAPER","self_review_allowed":false}
+{"immutable_version_required":true,"lifecycle_state":"INCOMPLETE_CONFLICT","self_review_allowed":false}
+{"immutable_version_required":true,"lifecycle_state":"READY_FOR_INDEPENDENT_REVIEW","self_review_allowed":false}
+{"immutable_version_required":true,"lifecycle_state":"INDEPENDENT_REVIEW_REJECTED","self_review_allowed":false}
+{"immutable_version_required":true,"lifecycle_state":"CLOSED_INDEPENDENTLY_VALIDATED","self_review_allowed":false}
+{"immutable_version_required":true,"lifecycle_state":"STALE","self_review_allowed":false}
+{"immutable_version_required":true,"lifecycle_state":"SUPERSEDED","self_review_allowed":false}
+{"immutable_version_required":true,"review_decision":"VALIDATED","self_review_allowed":false}
+{"immutable_version_required":true,"review_decision":"REJECTED","self_review_allowed":false}

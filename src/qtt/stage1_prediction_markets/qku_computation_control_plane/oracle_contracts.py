@@ -6,6 +6,7 @@ from dataclasses import dataclass
 import base64
 from decimal import Decimal
 import json
+import math
 from types import MappingProxyType
 from typing import Mapping
 import zlib
@@ -2019,4 +2020,167 @@ if (
     raise ContractValidationError(
         ReasonCode.ORACLE_NOT_INDEPENDENT,
         "Tranche-D must reuse three oracle/vector identities and add one pair",
+    )
+
+
+_ST12F_NEW_VECTOR_ROWS_V1: Mapping[str, Mapping[str, object]] = MappingProxyType(
+    {
+        "MATH-40": {"inputs": {"fill_price": "0.45", "midpoint_after_fill": "0.43", "signed_fill_quantity": "100"}, "expected": {"side_convention_explicit": True, "signed_markout": "-2.00"}, "comparison": "EXACT_DECIMAL_AND_DECLARED_SIGN", "seed": 4001},
+        "MATH-41": {"inputs": {"edge_now": 0.1, "latency": 2.0, "tau": 4.0}, "expected": {"edge_after_latency": 0.06065306597126335}, "comparison": "ABS_TOL_1E-15", "seed": None},
+        "MATH-42": {"inputs": {"ADV": 10000, "Q": 100, "Y": 0.5, "sigma": 0.02}, "expected": {"impact_fraction": 0.001}, "comparison": "ABS_TOL_1E-15", "seed": None},
+        "MATH-43": {"inputs": {"approved_participation_cap": 0.1, "participation": 0.2, "penalty_scale": 0.5}, "expected": {"capacity_penalty": 0.5}, "comparison": "ABS_TOL_1E-15", "seed": None},
+        "MATH-44": {"inputs": {"delta": 0.25, "sample_covariance": [[1.0, 0.2], [0.2, 2.0]], "target": [[1.0, 0.0], [0.0, 2.0]]}, "expected": {"shrunk_covariance": [[1.0, 0.15], [0.15, 2.0]]}, "comparison": "ABS_TOL_1E-15", "seed": None},
+        "MATH-45": {"inputs": {"estimated_net_edge": 0.1, "model_risk_haircut": 0.01, "uncertainty": 0.02, "z_or_quantile": 1.96}, "expected": {"lcb_net": 0.0508, "trade_gate": True}, "comparison": "ABS_TOL_1E-15", "seed": None},
+        "MATH-50": {"inputs": {"locked_costs": {"00": "0.0", "01": "1.0", "10": "1.5", "11": "3.0"}, "observed_feasibility": {"00": True, "01": True, "10": True, "11": False}, "same_lock": True, "trace_weights": {"00": "0.50", "01": "0.25", "10": "0.25", "11": "0.00"}}, "expected": {"expected_energy": "0.625", "optimizer_calls": 0, "primitive_calls": 0, "qpu_calls": 0, "selected_bitstring": "00", "selected_original_model_feasible": True}, "comparison": "EXACT_DECIMAL_AND_BOOLEAN_INVARIANTS", "seed": None},
+        "MATH-51": {"inputs": {"expectation_trace": ["1.50", "1.20", "1.10"], "parameter_point_ids": ["P0", "P1", "P2"], "same_lock": True, "selected_original_model_feasible": True, "selected_point_id": "P2", "variance_trace": ["0.09", "0.04", "0.01"]}, "expected": {"estimator_calls": 0, "minimum_supplied_expectation": "1.10", "optimizer_calls": 0, "qpu_calls": 0, "selected_point_id": "P2", "selected_variance": "0.01"}, "comparison": "EXACT_DECIMAL_AND_BOOLEAN_INVARIANTS", "seed": None},
+        "MATH-52": {"inputs": {"no_trade_utility": "0.0", "same_cost_basis": True, "same_lock": True, "strongest_classical_utility": "1.3", "validated_quantum_utility": "1.2"}, "expected": {"delta_utility_quantum_vs_classical": "-0.1", "delta_utility_quantum_vs_no_trade": "1.2", "quantum_advantage_claim_allowed": False, "winner": "STRONGEST_CLASSICAL"}, "comparison": "EXACT_DECIMAL_AND_ENUM_INVARIANTS", "seed": None},
+    }
+)
+
+
+def independently_reconstruct_st12f_math_v1(
+    math_spec_id: str, raw_inputs: Mapping[str, object]
+) -> Mapping[str, object]:
+    """Standard-library oracle that never imports a production callable."""
+
+    if math_spec_id == "MATH-40":
+        result = Decimal(str(raw_inputs["signed_fill_quantity"])) * (
+            Decimal(str(raw_inputs["midpoint_after_fill"]))
+            - Decimal(str(raw_inputs["fill_price"]))
+        )
+        return {"side_convention_explicit": True, "signed_markout": format(result, ".2f")}
+    if math_spec_id == "MATH-41":
+        edge = float(raw_inputs["edge_now"])
+        latency = float(raw_inputs["latency"])
+        tau = float(raw_inputs["tau"])
+        if tau <= 0 or latency < 0 or not all(math.isfinite(value) for value in (edge, latency, tau)):
+            raise ValueError("invalid latency-decay domain")
+        return {"edge_after_latency": edge * math.exp(-latency / tau)}
+    if math_spec_id == "MATH-42":
+        y = float(raw_inputs["Y"])
+        sigma = float(raw_inputs["sigma"])
+        quantity = Decimal(str(raw_inputs["Q"]))
+        adv = Decimal(str(raw_inputs["ADV"]))
+        if adv <= 0 or sigma < 0 or not math.isfinite(y) or not math.isfinite(sigma):
+            raise ValueError("invalid market-impact domain")
+        return {"impact_fraction": y * sigma * math.sqrt(float(abs(quantity) / adv))}
+    if math_spec_id == "MATH-43":
+        participation = float(raw_inputs["participation"])
+        cap = float(raw_inputs["approved_participation_cap"])
+        scale = float(raw_inputs["penalty_scale"])
+        if cap <= 0 or scale < 0 or not all(math.isfinite(value) for value in (participation, cap, scale)):
+            raise ValueError("invalid capacity domain")
+        return {"capacity_penalty": max(0.0, participation / cap - 1.0) ** 2 * scale}
+    if math_spec_id == "MATH-44":
+        sample = raw_inputs["sample_covariance"]
+        target = raw_inputs["target"]
+        delta = float(raw_inputs["delta"])
+        if not isinstance(sample, list | tuple) or not isinstance(target, list | tuple) or not 0 <= delta <= 1 or len(sample) != len(target):
+            raise ValueError("invalid covariance-shrinkage domain")
+        result = [
+            [
+                (1.0 - delta) * float(value) + delta * float(target[i][j])
+                for j, value in enumerate(row)
+            ]
+            for i, row in enumerate(sample)
+        ]
+        return {"shrunk_covariance": result}
+    if math_spec_id == "MATH-45":
+        lcb = (
+            float(raw_inputs["estimated_net_edge"])
+            - float(raw_inputs["z_or_quantile"]) * float(raw_inputs["uncertainty"])
+            - float(raw_inputs["model_risk_haircut"])
+        )
+        return {"lcb_net": lcb, "trade_gate": lcb > 0}
+    if math_spec_id == "MATH-50":
+        if raw_inputs.get("same_lock") is not True:
+            raise ValueError("quantum trace lock mismatch")
+        weights = {key: Decimal(str(value)) for key, value in raw_inputs["trace_weights"].items()}
+        costs = {key: Decimal(str(value)) for key, value in raw_inputs["locked_costs"].items()}
+        feasible = raw_inputs["observed_feasibility"]
+        if sum(weights.values()) != Decimal(1) or set(weights) != set(costs) or set(weights) != set(feasible):
+            raise ValueError("invalid normalized trace")
+        selected = min((key for key in weights if feasible[key]), key=lambda key: (costs[key], key))
+        return {"expected_energy": str(sum(weights[key] * costs[key] for key in weights)), "optimizer_calls": 0, "primitive_calls": 0, "qpu_calls": 0, "selected_bitstring": selected, "selected_original_model_feasible": True}
+    if math_spec_id == "MATH-51":
+        if raw_inputs.get("same_lock") is not True or raw_inputs.get("selected_original_model_feasible") is not True:
+            raise ValueError("VQE trace lock or feasibility mismatch")
+        ids = tuple(raw_inputs["parameter_point_ids"])
+        expectations = tuple(Decimal(str(value)) for value in raw_inputs["expectation_trace"])
+        variances = tuple(Decimal(str(value)) for value in raw_inputs["variance_trace"])
+        if len(ids) != len(expectations) or len(ids) != len(variances) or any(value < 0 for value in variances):
+            raise ValueError("invalid VQE trace")
+        selected = str(raw_inputs["selected_point_id"])
+        index = ids.index(selected)
+        return {"estimator_calls": 0, "minimum_supplied_expectation": str(min(expectations)), "optimizer_calls": 0, "qpu_calls": 0, "selected_point_id": selected, "selected_variance": str(variances[index])}
+    if math_spec_id == "MATH-52":
+        if raw_inputs.get("same_lock") is not True or raw_inputs.get("same_cost_basis") is not True:
+            raise ValueError("comparison basis mismatch")
+        quantum = Decimal(str(raw_inputs["validated_quantum_utility"]))
+        classical = Decimal(str(raw_inputs["strongest_classical_utility"]))
+        no_trade = Decimal(str(raw_inputs["no_trade_utility"]))
+        utilities = {"VALIDATED_QUANTUM": quantum, "STRONGEST_CLASSICAL": classical, "NO_TRADE": no_trade}
+        winner = sorted(utilities, key=lambda key: (-utilities[key], key))[0]
+        return {"delta_utility_quantum_vs_classical": str(quantum - classical), "delta_utility_quantum_vs_no_trade": str(quantum - no_trade), "quantum_advantage_claim_allowed": False, "winner": winner}
+    raise KeyError(math_spec_id)
+
+
+_ST12F_ORACLE_STEPS_V1 = (
+    "Parse the golden-vector inputs without importing the production implementation.",
+    "Apply the independently stated formula, enumeration, or trace invariant procedure.",
+    "Compare every declared output using the vector comparison policy.",
+    "Reject missing, invalid, nonfinite, unit-incompatible, or lock-inconsistent inputs.",
+)
+ST12F_NEW_ORACLE_BY_MATH_ID: Mapping[str, OracleContractV1] = MappingProxyType(
+    {
+        math_id: OracleContractV1(
+            oracle_id=f"ORACLE::{math_id}",
+            math_spec_id=math_id,
+            oracle_version="1.4",
+            comparison_policy=str(row["comparison"]),
+            expected_value_json=json.dumps(row["expected"], sort_keys=True, separators=(",", ":")),
+            independent_algorithm_steps=_ST12F_ORACLE_STEPS_V1,
+        )
+        for math_id, row in _ST12F_NEW_VECTOR_ROWS_V1.items()
+    }
+)
+ST12F_NEW_GOLDEN_VECTOR_BY_MATH_ID: Mapping[str, GoldenVectorV1] = MappingProxyType(
+    {
+        math_id: GoldenVectorV1(
+            vector_id=f"GOLDEN::{math_id}",
+            math_spec_id=math_id,
+            oracle_id=f"ORACLE::{math_id}",
+            vector_kind="NUMERIC_GOLDEN",
+            comparison_policy=str(row["comparison"]),
+            inputs_json=json.dumps(row["inputs"], sort_keys=True, separators=(",", ":")),
+            expected_json=json.dumps(row["expected"], sort_keys=True, separators=(",", ":")),
+            seed=row["seed"],
+        )
+        for math_id, row in _ST12F_NEW_VECTOR_ROWS_V1.items()
+    }
+)
+ST12F_EVIDENCE_ORACLE_BY_MATH_ID: Mapping[str, OracleContractV1] = MappingProxyType(
+    {
+        **{math_id: ST12D_CUMULATIVE_ORACLE_BY_MATH_ID[math_id] for math_id in (f"MATH-{number:02d}" for number in range(1, 40))},
+        **ST12F_NEW_ORACLE_BY_MATH_ID,
+    }
+)
+ST12F_EVIDENCE_GOLDEN_VECTOR_BY_MATH_ID: Mapping[str, GoldenVectorV1] = MappingProxyType(
+    {
+        **{math_id: ST12D_CUMULATIVE_GOLDEN_VECTOR_BY_MATH_ID[math_id] for math_id in (f"MATH-{number:02d}" for number in range(1, 40))},
+        **ST12F_NEW_GOLDEN_VECTOR_BY_MATH_ID,
+    }
+)
+
+if (
+    len(ST12F_NEW_ORACLE_BY_MATH_ID) != 9
+    or len(ST12F_NEW_GOLDEN_VECTOR_BY_MATH_ID) != 9
+    or len(ST12F_EVIDENCE_ORACLE_BY_MATH_ID) != 48
+    or len(ST12F_EVIDENCE_GOLDEN_VECTOR_BY_MATH_ID) != 48
+    or any(oracle.production_import_allowed or oracle.primary_validator_import_allowed for oracle in ST12F_EVIDENCE_ORACLE_BY_MATH_ID.values())
+    or any(vector.production_import_allowed for vector in ST12F_EVIDENCE_GOLDEN_VECTOR_BY_MATH_ID.values())
+):
+    raise ContractValidationError(
+        ReasonCode.ORACLE_NOT_INDEPENDENT,
+        "ST12-F independent oracle/vector closure must remain exact 48/48",
     )
