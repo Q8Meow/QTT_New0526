@@ -27,6 +27,7 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors impo
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.evidence import (
     ComputationEvidenceServiceV1,
+    EvidenceBundleTerminalStateV1,
     ReplayResultContractV1,
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.input_lock import (
@@ -73,6 +74,72 @@ FORBIDDEN_CALL_NAMES = {
     "serve_forever",
     "start",
 }
+
+OWNER_BUNDLE_FIELDS_V1 = (
+    "evidence_id",
+    "schema_version",
+    "contract_version",
+    "evidence_bundle_version",
+    "component_or_template_ref",
+    "input_lock_id",
+    "actual_executed_component_versions",
+    "actual_executed_stack_versions",
+    "replay_result_ref",
+    "paper_result_ref",
+    "divergence_assessment_ref",
+    "lane_execution_receipt_refs",
+    "calibration_and_probability_quality",
+    "transaction_cost_decomposition",
+    "fill_and_queue_quality",
+    "latency_and_staleness",
+    "capacity_and_crowding",
+    "portfolio_marginal_contribution",
+    "false_discovery_and_overfit_controls",
+    "regime_and_scenario_outcomes",
+    "uncertainty_and_model_risk_reserves",
+    "agent_and_model_disagreement",
+    "no_trade_comparison",
+    "independent_review_state",
+    "failure_and_negative_evidence_states",
+    "source_and_provenance_refs",
+    "d_evidence_reference_projection",
+    "g_handoff_projection",
+    "terminal_state",
+    "blocker_codes",
+)
+
+OWNER_LIFECYCLE_TRANSITIONS_V1 = (
+    (
+        "INCOMPLETE_MISSING_REPLAY",
+        "READY_FOR_INDEPENDENT_REVIEW",
+        "BOTH_LANES_PRESENT_SAME_LOCK_ALL_REQUIRED_CONTROLS_COMPUTED",
+    ),
+    (
+        "INCOMPLETE_MISSING_PAPER",
+        "READY_FOR_INDEPENDENT_REVIEW",
+        "BOTH_LANES_PRESENT_SAME_LOCK_ALL_REQUIRED_CONTROLS_COMPUTED",
+    ),
+    (
+        "READY_FOR_INDEPENDENT_REVIEW",
+        "CLOSED_INDEPENDENTLY_VALIDATED",
+        "SEPARATE_REVIEW_RECEIPT_PASS_AND_ZERO_HARD_VETOES",
+    ),
+    (
+        "READY_FOR_INDEPENDENT_REVIEW",
+        "INDEPENDENT_REVIEW_REJECTED",
+        "SEPARATE_REVIEW_RECEIPT_REJECT",
+    ),
+    (
+        "CLOSED_INDEPENDENTLY_VALIDATED",
+        "STALE",
+        "TTL_SOURCE_EPOCH_PARAMETER_IMPLEMENTATION_OR_CONTEXT_CHANGE",
+    ),
+    (
+        "CLOSED_INDEPENDENTLY_VALIDATED",
+        "SUPERSEDED",
+        "NEWER_VALIDATED_BUNDLE_VERSION_SAME_IDENTITY",
+    ),
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -632,6 +699,94 @@ def _class_fields(tree: ast.Module, name: str) -> tuple[str, ...]:
     return ()
 
 
+def _parse_bundle_transition_registry(
+    tree: ast.Module,
+) -> tuple[tuple[str, str, str], ...]:
+    value = _assignment(tree, "_EVIDENCE_BUNDLE_TRANSITION_GUARDS_V1")
+    if (
+        not isinstance(value, ast.Call)
+        or not isinstance(value.func, ast.Name)
+        or value.func.id != "MappingProxyType"
+        or len(value.args) != 1
+        or value.keywords
+        or not isinstance(value.args[0], ast.Dict)
+    ):
+        return ()
+    rows: list[tuple[str, str, str]] = []
+    for key, guard in zip(value.args[0].keys, value.args[0].values, strict=True):
+        if (
+            not isinstance(key, ast.Tuple)
+            or len(key.elts) != 2
+            or not all(isinstance(item, ast.Attribute) for item in key.elts)
+            or not all(
+                isinstance(item.value, ast.Name)
+                and item.value.id == "EvidenceBundleTerminalStateV1"
+                for item in key.elts
+                if isinstance(item, ast.Attribute)
+            )
+            or not isinstance(guard, ast.Constant)
+            or not isinstance(guard.value, str)
+        ):
+            return ()
+        source, target = key.elts
+        assert isinstance(source, ast.Attribute)
+        assert isinstance(target, ast.Attribute)
+        rows.append((source.attr, target.attr, guard.value))
+    return tuple(rows)
+
+
+@dataclass(frozen=True, slots=True)
+class _BundleTransitionProbeV1:
+    evidence_id: str
+    input_lock_id: str
+    component_or_template_ref: str
+    evidence_bundle_version: str
+    terminal_state: EvidenceBundleTerminalStateV1
+    independent_review_state: str
+
+
+def _validate_complete_bundle_transition_matrix() -> tuple[int, int, int]:
+    expected_pairs = {
+        (source, target)
+        for source, target, _guard in OWNER_LIFECYCLE_TRANSITIONS_V1
+    }
+    allowed = 0
+    prohibited = 0
+    failures = 0
+    for source in EvidenceBundleTerminalStateV1:
+        previous = _BundleTransitionProbeV1(
+            evidence_id="EVIDENCE::INDEPENDENT-VALIDATION",
+            input_lock_id="LOCK::INDEPENDENT-VALIDATION",
+            component_or_template_ref="MATH-01",
+            evidence_bundle_version=f"BUNDLE::{source.value}::PRIOR",
+            terminal_state=source,
+            independent_review_state=source.value,
+        )
+        for target in EvidenceBundleTerminalStateV1:
+            candidate = replace(
+                previous,
+                evidence_bundle_version=f"BUNDLE::{source.value}::{target.value}",
+                terminal_state=target,
+                independent_review_state=target.value,
+            )
+            succeeded = True
+            try:
+                ComputationEvidenceServiceV1._validate_bundle_transition(
+                    previous,
+                    candidate,  # type: ignore[arg-type]
+                )
+            except ContractValidationError:
+                succeeded = False
+            expected = (source.value, target.value) in expected_pairs
+            if succeeded != expected:
+                failures += 1
+            elif succeeded:
+                allowed += 1
+            else:
+                prohibited += 1
+    return allowed, prohibited, failures
+
+
 def _parse_operation_rows(tree: ast.Module) -> tuple[tuple[object, ...], ...]:
     value = _assignment(tree, "_OPERATION_ROWS")
     if not isinstance(value, ast.Tuple):
@@ -849,6 +1004,25 @@ def main() -> int:
         ):
             if required not in model_text and required not in validation_text:
                 failures.append(f"operation invariant is absent: {required}")
+    evidence = parsed.get("evidence.py")
+    if evidence is None:
+        failures.append("ST12-F evidence owner source is absent")
+    else:
+        if _class_fields(evidence, "ComputationEvidenceBundleV1") != OWNER_BUNDLE_FIELDS_V1:
+            failures.append("bundle fields differ from the independent exact 30-field roster")
+        if _parse_bundle_transition_registry(evidence) != OWNER_LIFECYCLE_TRANSITIONS_V1:
+            failures.append("bundle transition registry differs from the independent exact six-transition roster")
+    allowed_transitions, prohibited_transitions, transition_failures = (
+        _validate_complete_bundle_transition_matrix()
+    )
+    if (
+        allowed_transitions != 6
+        or prohibited_transitions != 58
+        or transition_failures
+    ):
+        failures.append(
+            "bundle transition behavior does not reject the complete prohibited matrix"
+        )
     forbidden_files = {
         "runtime.py",
         "supervision.py",
@@ -910,7 +1084,10 @@ def main() -> int:
         return 1
     print(
         f"{SUCCESS_MARKER} operation_contracts={len(EXPECTED_ROWS)} "
-        f"executable_op14_checks={len(executable_checks)}"
+        f"executable_op14_checks={len(executable_checks)} "
+        f"bundle_fields={len(OWNER_BUNDLE_FIELDS_V1)} "
+        f"lifecycle_transitions={allowed_transitions} "
+        f"prohibited_transition_rejections={prohibited_transitions}"
     )
     return 0
 

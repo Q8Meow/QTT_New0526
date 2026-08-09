@@ -194,6 +194,7 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.evidence im
     ReplayResultContractV1,
     ST12F_EVIDENCE_IDENTITIES_V1,
     ST12F_EVIDENCE_METRIC_DEFINITIONS_V1,
+    _EVIDENCE_BUNDLE_TRANSITION_GUARDS_V1,
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.llm_gateway import (  # noqa: E402
     LLMAdvisoryTaskV1,
@@ -1872,7 +1873,18 @@ def build_st12f_projections() -> dict[str, str]:
     ) + tuple(
         {"review_decision": decision.value, "immutable_version_required": True, "self_review_allowed": False}
         for decision in IndependentReviewDecisionV1
+    ) + tuple(
+        {
+            "from": source.value,
+            "to": target.value,
+            "guard": guard,
+            "immutable_version_required": True,
+            "self_review_allowed": False,
+        }
+        for (source, target), guard in _EVIDENCE_BUNDLE_TRANSITION_GUARDS_V1.items()
     )
+    if len(review_rows) != 16:
+        raise ValueError("ST12-F independent-review projection must contain exactly 16 rows")
     llm_rows = tuple(
         {"advisory_task": task.value, "preexisting_annotation_only": True, "inference_authorized": False, "numeric_authority": False}
         for task in LLMAdvisoryTaskV1

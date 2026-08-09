@@ -298,20 +298,19 @@ class ST12FEvidenceControlReceiptRecordV1:
                 "ST12-F receipt identity, version, or input-lock metadata differs from its contract",
             )
 
-        parent = "EXPLICIT_ABSENCE"
-        if self.receipt_class is ST12FReceiptClassV1.EVIDENCE_BUNDLE_VERSION:
-            parent = getattr(value, "prior_bundle_ref_or_explicit_absence", None)
-        elif self.receipt_class is ST12FReceiptClassV1.INDEPENDENT_REVIEW_VERSION:
-            parent = getattr(value, "prior_bundle_ref", None)
-        elif self.receipt_class is ST12FReceiptClassV1.D_EVIDENCE_REFERENCE:
-            parent = getattr(value, "evidence_ref", None)
-        elif self.receipt_class is ST12FReceiptClassV1.G_HANDOFF_REFERENCE:
-            parent = getattr(value, "evidence_bundle_ref", None)
-        if parent != self.parent_version_ref_or_explicit_absence:
-            raise ContractValidationError(
-                ReasonCode.SCHEMA_MISMATCH,
-                "ST12-F receipt parent-version metadata differs from its contract",
-            )
+        if self.receipt_class is not ST12FReceiptClassV1.EVIDENCE_BUNDLE_VERSION:
+            parent = "EXPLICIT_ABSENCE"
+            if self.receipt_class is ST12FReceiptClassV1.INDEPENDENT_REVIEW_VERSION:
+                parent = getattr(value, "prior_bundle_ref", None)
+            elif self.receipt_class is ST12FReceiptClassV1.D_EVIDENCE_REFERENCE:
+                parent = getattr(value, "evidence_ref", None)
+            elif self.receipt_class is ST12FReceiptClassV1.G_HANDOFF_REFERENCE:
+                parent = getattr(value, "evidence_bundle_ref", None)
+            if parent != self.parent_version_ref_or_explicit_absence:
+                raise ContractValidationError(
+                    ReasonCode.SCHEMA_MISMATCH,
+                    "ST12-F receipt parent-version metadata differs from its contract",
+                )
 
         expected_sources: tuple[str, ...] | None = None
         if self.receipt_class in {

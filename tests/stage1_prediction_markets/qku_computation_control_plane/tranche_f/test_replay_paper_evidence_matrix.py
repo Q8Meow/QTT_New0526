@@ -125,6 +125,70 @@ _SECTION_FIELDS = (
     "agent_and_model_disagreement",
     "no_trade_comparison",
 )
+_OWNER_BUNDLE_FIELDS = (
+    "evidence_id",
+    "schema_version",
+    "contract_version",
+    "evidence_bundle_version",
+    "component_or_template_ref",
+    "input_lock_id",
+    "actual_executed_component_versions",
+    "actual_executed_stack_versions",
+    "replay_result_ref",
+    "paper_result_ref",
+    "divergence_assessment_ref",
+    "lane_execution_receipt_refs",
+    "calibration_and_probability_quality",
+    "transaction_cost_decomposition",
+    "fill_and_queue_quality",
+    "latency_and_staleness",
+    "capacity_and_crowding",
+    "portfolio_marginal_contribution",
+    "false_discovery_and_overfit_controls",
+    "regime_and_scenario_outcomes",
+    "uncertainty_and_model_risk_reserves",
+    "agent_and_model_disagreement",
+    "no_trade_comparison",
+    "independent_review_state",
+    "failure_and_negative_evidence_states",
+    "source_and_provenance_refs",
+    "d_evidence_reference_projection",
+    "g_handoff_projection",
+    "terminal_state",
+    "blocker_codes",
+)
+_OWNER_TRANSITIONS = (
+    (
+        "INCOMPLETE_MISSING_REPLAY",
+        "READY_FOR_INDEPENDENT_REVIEW",
+        "BOTH_LANES_PRESENT_SAME_LOCK_ALL_REQUIRED_CONTROLS_COMPUTED",
+    ),
+    (
+        "INCOMPLETE_MISSING_PAPER",
+        "READY_FOR_INDEPENDENT_REVIEW",
+        "BOTH_LANES_PRESENT_SAME_LOCK_ALL_REQUIRED_CONTROLS_COMPUTED",
+    ),
+    (
+        "READY_FOR_INDEPENDENT_REVIEW",
+        "CLOSED_INDEPENDENTLY_VALIDATED",
+        "SEPARATE_REVIEW_RECEIPT_PASS_AND_ZERO_HARD_VETOES",
+    ),
+    (
+        "READY_FOR_INDEPENDENT_REVIEW",
+        "INDEPENDENT_REVIEW_REJECTED",
+        "SEPARATE_REVIEW_RECEIPT_REJECT",
+    ),
+    (
+        "CLOSED_INDEPENDENTLY_VALIDATED",
+        "STALE",
+        "TTL_SOURCE_EPOCH_PARAMETER_IMPLEMENTATION_OR_CONTEXT_CHANGE",
+    ),
+    (
+        "CLOSED_INDEPENDENTLY_VALIDATED",
+        "SUPERSEDED",
+        "NEWER_VALIDATED_BUNDLE_VERSION_SAME_IDENTITY",
+    ),
+)
 _NOW = datetime(2026, 1, 1, 12, tzinfo=UTC)
 
 
@@ -253,7 +317,6 @@ def _bundle(**section_overrides: EvidenceSectionV1) -> ComputationEvidenceBundle
         schema_version="QTT_ST12F_COMPUTATION_EVIDENCE_BUNDLE_V1_4",
         contract_version="1.4",
         evidence_bundle_version="BUNDLE::VERSION::1",
-        prior_bundle_ref_or_explicit_absence="EXPLICIT_ABSENCE",
         component_or_template_ref="MATH-01",
         input_lock_id="ST12F-LOCK::VALID-ONEPASS",
         actual_executed_component_versions={"MATH-01": "VERSION::1"},
@@ -342,6 +405,15 @@ def test_input_lock_and_lane_contract_matrix() -> None:
 def test_divergence_and_evidence_identity_matrix() -> None:
     assert _divergence().terminal_state is DivergenceTerminalStateV1.CONSISTENT_WITHIN_LOCKED_THRESHOLDS
     bundle = _bundle()
+    assert tuple(field.name for field in fields(ComputationEvidenceBundleV1)) == _OWNER_BUNDLE_FIELDS
+    noncanonical_payload = json.loads(bundle.canonical_json())
+    noncanonical_payload["prior_bundle_ref_or_explicit_absence"] = "EXPLICIT_ABSENCE"
+    try:
+        ComputationEvidenceBundleV1.from_canonical_mapping(noncanonical_payload)
+    except ContractValidationError as exc:
+        assert exc.reason_code is ReasonCode.SCHEMA_MISMATCH
+    else:
+        raise AssertionError("removed noncanonical 31st bundle field was accepted")
     identities = tuple(
         row.evidence_identity
         for name in _SECTION_FIELDS
@@ -516,6 +588,7 @@ def _runtime_packet(
     result_id: str | None = None,
     fixture: bool = False,
     run_reference: str | None = None,
+    component: str = "MATH-01",
 ) -> ReplayResultContractV1 | PaperResultContractV1:
     contract_type = ReplayResultContractV1 if lane == "REPLAY" else PaperResultContractV1
     cutoff = harness.snapshot.point_in_time_cutoff
@@ -523,8 +596,8 @@ def _runtime_packet(
         result_id=f"RESULT::{lane}" if result_id is None else result_id,
         schema_version="QTT_ST12F_LANE_RESULT_CONTRACTS_V1_4",
         contract_version="1.4",
-        cohort_template_id="MATH-01",
-        expected_result_contract_id=f"ST12F-{lane}-CONTRACT::MATH-01",
+        cohort_template_id=component,
+        expected_result_contract_id=f"ST12F-{lane}-CONTRACT::{component}",
         input_lock_id=harness.compilation.input_lock_id,
         run_reference=f"RUN::{lane}" if run_reference is None else run_reference,
         producer_identity=f"PRODUCER::{lane}",
@@ -586,14 +659,30 @@ def _register_request(
 
 def _register_dual_lanes(
     harness: _RuntimeHarnessV1,
+    *,
+    identity: str = "",
+    component: str = "MATH-01",
 ) -> tuple[ReplayResultContractV1, PaperResultContractV1]:
+    suffix = "" if not identity else f"::{identity}"
     replay = harness.service.register_result(
-        _register_request(harness, "REPLAY", "REPLAY"),
-        _runtime_packet(harness, "REPLAY"),
+        _register_request(harness, "REPLAY", f"REPLAY{suffix}"),
+        _runtime_packet(
+            harness,
+            "REPLAY",
+            result_id=f"RESULT::REPLAY{suffix}",
+            run_reference=f"RUN::REPLAY{suffix}",
+            component=component,
+        ),
     )
     paper = harness.service.register_result(
-        _register_request(harness, "PAPER", "PAPER"),
-        _runtime_packet(harness, "PAPER"),
+        _register_request(harness, "PAPER", f"PAPER{suffix}"),
+        _runtime_packet(
+            harness,
+            "PAPER",
+            result_id=f"RESULT::PAPER{suffix}",
+            run_reference=f"RUN::PAPER{suffix}",
+            component=component,
+        ),
     )
     assert type(replay) is ReplayResultContractV1
     assert type(paper) is PaperResultContractV1
@@ -603,9 +692,11 @@ def _register_dual_lanes(
 def _runtime_divergence(
     replay: ReplayResultContractV1,
     paper: PaperResultContractV1,
+    *,
+    identity: str = "RUNTIME",
 ) -> DivergenceAssessmentV1:
     return DivergenceAssessmentV1(
-        assessment_id="DIVERGENCE::RUNTIME",
+        assessment_id=f"DIVERGENCE::{identity}",
         schema_version="QTT_ST12F_DIVERGENCE_ASSESSMENT_V1_4",
         contract_version="1.4",
         input_lock_id=replay.input_lock_id,
@@ -645,6 +736,8 @@ def _runtime_conflicting_divergence(
 def _runtime_model_risk(
     replay: ReplayResultContractV1,
     paper: PaperResultContractV1,
+    *,
+    identity: str = "RUNTIME",
 ) -> object:
     controls = tuple(
         ModelRiskControlEvidenceV1(
@@ -668,7 +761,7 @@ def _runtime_model_risk(
     )
     expiry = _NOW + timedelta(hours=1)
     basis = ModelRiskAdjudicationBasisV1(
-        expected_component_or_template_ref="MATH-01",
+        expected_component_or_template_ref=replay.cohort_template_id,
         evaluated_at=_NOW,
         required_evidence_valid_until=expiry,
         required_evidence_receipt_refs=("RECEIPT::REQUIRED-EVIDENCE",),
@@ -697,7 +790,7 @@ def _runtime_model_risk(
         independent_review_receipt_ref="RECEIPT::REVIEW-PENDING",
     )
     comparison = PermanentNoTradeEvidenceComparisonV1(
-        comparison_id="NO-TRADE-COMPARISON::RUNTIME",
+        comparison_id=f"NO-TRADE-COMPARISON::{identity}",
         input_lock_id=replay.input_lock_id,
         execution_adjusted_lcb=Decimal("0.1"),
         candidate_utility=Decimal("1"),
@@ -706,7 +799,7 @@ def _runtime_model_risk(
         strongest_comparator="CANDIDATE",
     )
     return ModelRiskEvidenceAdjudicatorV1().adjudicate(
-        assessment_id="MODEL-RISK::RUNTIME",
+        assessment_id=f"MODEL-RISK::{identity}",
         input_lock_id=replay.input_lock_id,
         controls=controls,
         conditions=conditions,
@@ -836,7 +929,7 @@ def _bundle_candidate(
     replay: ReplayResultContractV1 | None,
     paper: PaperResultContractV1 | None,
     divergence_ref: str,
-    prior_ref: str = "EXPLICIT_ABSENCE",
+    component: str = "MATH-01",
     blockers: tuple[ReasonCode, ...] = (),
     d_reference: ST12FEvidenceReferenceV1 | str = "UNAVAILABLE",
     g_handoff: FToGHandoffReferencesV1 | str = "UNAVAILABLE",
@@ -851,10 +944,9 @@ def _bundle_candidate(
         schema_version="QTT_ST12F_COMPUTATION_EVIDENCE_BUNDLE_V1_4",
         contract_version="1.4",
         evidence_bundle_version=version,
-        prior_bundle_ref_or_explicit_absence=prior_ref,
-        component_or_template_ref="MATH-01",
+        component_or_template_ref=component,
         input_lock_id=input_lock_id,
-        actual_executed_component_versions={"MATH-01": "VERSION::MATH-01"},
+        actual_executed_component_versions={component: f"VERSION::{component}"},
         actual_executed_stack_versions={"STACK::RUNTIME": "VERSION::1"},
         replay_result_ref="EXPLICIT_ABSENCE" if replay is None else replay.result_id,
         paper_result_ref="EXPLICIT_ABSENCE" if paper is None else paper.result_id,
@@ -877,6 +969,8 @@ def _bundle_request(
     identity: str,
     source_refs: tuple[str, ...],
     requested_at: datetime,
+    component: str = "MATH-01",
+    input_lock_id: str | None = None,
 ) -> BuildEvidenceBundleRequestV1:
     return BuildEvidenceBundleRequestV1(
         request_id=f"REQUEST::OP15::{identity}",
@@ -888,8 +982,12 @@ def _bundle_request(
         idempotency_key=f"IDEMPOTENCY::OP15::{identity}",
         traceparent=_TRACEPARENT,
         tracestate="qtt=runtime",
-        component_id="MATH-01",
-        input_lock_id=harness.compilation.input_lock_id,
+        component_id=component,
+        input_lock_id=(
+            harness.compilation.input_lock_id
+            if input_lock_id is None
+            else input_lock_id
+        ),
         evidence_record_refs=source_refs,
         required_lanes=("REPLAY", "PAPER"),
     )
@@ -904,6 +1002,7 @@ def _review_record(
     input_lock_id: str,
     decision: IndependentReviewDecisionV1,
     reviewed_at: datetime,
+    valid_until: datetime | None = None,
 ) -> IndependentReviewRecordV1:
     blockers = () if decision is IndependentReviewDecisionV1.VALIDATED else (
         ReasonCode.ST12F_MODEL_RISK_VETO,
@@ -923,8 +1022,65 @@ def _review_record(
         decision=decision,
         blocker_codes=blockers,
         reviewed_at=reviewed_at,
-        valid_until=reviewed_at + timedelta(hours=1),
+        valid_until=(
+            reviewed_at + timedelta(hours=1)
+            if valid_until is None
+            else valid_until
+        ),
     )
+
+
+def _closed_projections(
+    *,
+    identity: str,
+    evidence_id: str,
+    version: str,
+    input_lock_id: str,
+    component: str,
+    observed_at: datetime,
+    valid_until: datetime,
+    model_receipt_ref: str,
+) -> tuple[ST12FEvidenceReferenceV1, FToGHandoffReferencesV1, str]:
+    bundle_ref = f"ST12F-RECEIPT::{version}::EVIDENCE_BUNDLE_VERSION"
+    reference = ST12FEvidenceReferenceV1(
+        evidence_state=ST12FEvidenceStateV1.EVIDENCE_REFERENCE_AVAILABLE,
+        evidence_ref=bundle_ref,
+        lane="REPLAY_PAPER",
+        dataset_grade_ref=f"DATASET-GRADE::{identity}",
+        venue_semantic_binding_ref=f"VENUE-SEMANTICS::{identity}",
+        cross_venue_equivalence_ref=f"CROSS-VENUE::{identity}",
+        observed_at=observed_at,
+        valid_until=valid_until,
+        policy_version="ST12F_EVIDENCE_POLICY_V1_4",
+        causation_id=f"CAUSE::{identity}",
+        correlation_id=f"CORRELATION::{identity}",
+        input_lock_id=input_lock_id,
+        component_or_template_ref=component,
+        evidence_bundle_version=version,
+        source_epoch_refs=("SOURCE::1=EPOCH::1",),
+        terminal_state=(
+            EvidenceBundleTerminalStateV1.CLOSED_INDEPENDENTLY_VALIDATED.value
+        ),
+        reference_id=f"D-REFERENCE::{identity}",
+        evidence_id=evidence_id,
+    )
+    handoff = FToGHandoffReferencesV1(
+        handoff_id=f"G-HANDOFF::{identity}",
+        contract_version="1.4",
+        input_lock_id=input_lock_id,
+        source_epoch_refs=reference.source_epoch_refs,
+        observed_at=observed_at,
+        valid_until=valid_until,
+        terminal_state=reference.terminal_state,
+        evidence_bundle_ref=bundle_ref,
+        no_trade_blocker_refs=(),
+        champion_challenger_evidence_refs=(model_receipt_ref,),
+        portfolio_utility_refs=(f"RECEIPT::PORTFOLIO-UTILITY::{identity}",),
+        quantum_classical_comparison_receipt_ref=(
+            f"RECEIPT::QUANTUM-COMPARISON::{identity}"
+        ),
+    )
+    return reference, handoff, bundle_ref
 
 
 def _typed_lane_packet_record(
@@ -1213,6 +1369,9 @@ def test_complete_durable_bundle_lifecycle_receipts_and_d_resolution() -> None:
         ),
     )
     observed_states = {persisted_ready.terminal_state}
+    incomplete_values: dict[
+        EvidenceBundleTerminalStateV1, ComputationEvidenceBundleV1
+    ] = {}
     for offset, (identity, state, replay_row, paper_row) in enumerate(
         incomplete_cases, start=11
     ):
@@ -1246,7 +1405,44 @@ def test_complete_durable_bundle_lifecycle_receipts_and_d_resolution() -> None:
                 else ()
             ),
         )
+        incomplete_values[state] = value
         observed_states.add(value.terminal_state)
+
+    missing_to_ready_values: list[ComputationEvidenceBundleV1] = []
+    for offset, missing_state in enumerate(
+        (
+            EvidenceBundleTerminalStateV1.INCOMPLETE_MISSING_REPLAY,
+            EvidenceBundleTerminalStateV1.INCOMPLETE_MISSING_PAPER,
+        ),
+        start=16,
+    ):
+        prior = incomplete_values[missing_state]
+        transitioned = _bundle_candidate(
+            evidence_id=prior.evidence_id,
+            version=f"{prior.evidence_bundle_version}::READY",
+            input_lock_id=replay.input_lock_id,
+            state=EvidenceBundleTerminalStateV1.READY_FOR_INDEPENDENT_REVIEW,
+            source_refs=durable_sources,
+            replay=replay,
+            paper=paper,
+            divergence_ref=divergence.assessment_id,
+        )
+        missing_to_ready_values.append(
+            harness.service.build_bundle(
+                _bundle_request(
+                    harness,
+                    identity=f"{missing_state.value}-TO-READY",
+                    source_refs=durable_sources,
+                    requested_at=_NOW + timedelta(seconds=offset),
+                ),
+                transitioned,
+            )
+        )
+    assert all(
+        value.terminal_state
+        is EvidenceBundleTerminalStateV1.READY_FOR_INDEPENDENT_REVIEW
+        for value in missing_to_ready_values
+    )
 
     missing_divergence_sources = ("UPSTREAM::MISSING-DIVERGENCE",)
     try:
@@ -1316,7 +1512,6 @@ def test_complete_durable_bundle_lifecycle_receipts_and_d_resolution() -> None:
         replay=replay,
         paper=paper,
         divergence_ref=divergence.assessment_id,
-        prior_ref=rejected_prior,
         blockers=rejected_review.blocker_codes,
     )
     rejected_value = harness.service.build_bundle(
@@ -1348,7 +1543,6 @@ def test_complete_durable_bundle_lifecycle_receipts_and_d_resolution() -> None:
                 rejected,
                 evidence_id="EVIDENCE::WRONG-REVIEW",
                 evidence_bundle_version="BUNDLE::WRONG-REVIEW::2",
-                prior_bundle_ref_or_explicit_absence=rejected_prior,
             ),
             control_contracts=(wrong_review,),
         )
@@ -1420,7 +1614,6 @@ def test_complete_durable_bundle_lifecycle_receipts_and_d_resolution() -> None:
         replay=replay,
         paper=paper,
         divergence_ref=divergence.assessment_id,
-        prior_ref=closed_prior,
         d_reference=d_reference,
         g_handoff=g_handoff,
     )
@@ -1436,41 +1629,276 @@ def test_complete_durable_bundle_lifecycle_receipts_and_d_resolution() -> None:
     )
     observed_states.add(closed_value.terminal_state)
 
-    for identity, state, second, blockers in (
-        (
-            "STALE",
-            EvidenceBundleTerminalStateV1.STALE,
-            40,
-            (ReasonCode.ST12F_BUNDLE_STALE,),
-        ),
-        ("SUPERSEDED", EvidenceBundleTerminalStateV1.SUPERSEDED, 50, ()),
-    ):
-        prior = new_ready(identity, second)
+    def close_ready(
+        *,
+        runtime: _RuntimeHarnessV1,
+        identity: str,
+        ready_value: ComputationEvidenceBundleV1,
+        replay_value: ReplayResultContractV1,
+        paper_value: PaperResultContractV1,
+        divergence_value: DivergenceAssessmentV1,
+        source_refs: tuple[str, ...],
+        model_receipt_ref: str,
+        requested_at: datetime,
+        valid_until: datetime,
+        component: str = "MATH-01",
+    ) -> tuple[ComputationEvidenceBundleV1, ST12FEvidenceReferenceV1, str]:
         prior_ref = (
-            f"ST12F-RECEIPT::{prior.evidence_bundle_version}::EVIDENCE_BUNDLE_VERSION"
+            f"ST12F-RECEIPT::{ready_value.evidence_bundle_version}::"
+            "EVIDENCE_BUNDLE_VERSION"
+        )
+        version = f"{ready_value.evidence_bundle_version}::CLOSED"
+        review = _review_record(
+            review_id=f"REVIEW::{identity}",
+            prior_ref=prior_ref,
+            evidence_id=ready_value.evidence_id,
+            candidate_version=version,
+            input_lock_id=ready_value.input_lock_id,
+            decision=IndependentReviewDecisionV1.VALIDATED,
+            reviewed_at=requested_at - timedelta(seconds=1),
+            valid_until=valid_until,
+        )
+        reference, handoff, record_ref = _closed_projections(
+            identity=identity,
+            evidence_id=ready_value.evidence_id,
+            version=version,
+            input_lock_id=ready_value.input_lock_id,
+            component=component,
+            observed_at=review.reviewed_at,
+            valid_until=review.valid_until,
+            model_receipt_ref=model_receipt_ref,
         )
         candidate = _bundle_candidate(
-            evidence_id=prior.evidence_id,
-            version=f"BUNDLE::{identity}::2",
-            input_lock_id=replay.input_lock_id,
-            state=state,
+            evidence_id=ready_value.evidence_id,
+            version=version,
+            input_lock_id=ready_value.input_lock_id,
+            component=component,
+            state=EvidenceBundleTerminalStateV1.CLOSED_INDEPENDENTLY_VALIDATED,
+            source_refs=source_refs,
+            replay=replay_value,
+            paper=paper_value,
+            divergence_ref=divergence_value.assessment_id,
+            d_reference=reference,
+            g_handoff=handoff,
+        )
+        value = runtime.service.build_bundle(
+            _bundle_request(
+                runtime,
+                identity=f"{identity}-CLOSED",
+                source_refs=source_refs,
+                requested_at=requested_at,
+                component=component,
+                input_lock_id=ready_value.input_lock_id,
+            ),
+            candidate,
+            control_contracts=(review,),
+        )
+        return value, reference, record_ref
+
+    for prohibited_state in (
+        EvidenceBundleTerminalStateV1.STALE,
+        EvidenceBundleTerminalStateV1.SUPERSEDED,
+    ):
+        prohibited = _bundle_candidate(
+            evidence_id=persisted_ready.evidence_id,
+            version=f"BUNDLE::READY-PROHIBITED::{prohibited_state.value}",
+            input_lock_id=persisted_ready.input_lock_id,
+            state=prohibited_state,
             source_refs=durable_sources,
             replay=replay,
             paper=paper,
             divergence_ref=divergence.assessment_id,
-            prior_ref=prior_ref,
-            blockers=blockers,
+            blockers=(
+                (ReasonCode.ST12F_BUNDLE_STALE,)
+                if prohibited_state is EvidenceBundleTerminalStateV1.STALE
+                else ()
+            ),
         )
-        value = harness.service.build_bundle(
+        try:
+            ComputationEvidenceServiceV1._validate_bundle_transition(
+                persisted_ready,
+                prohibited,
+            )
+        except ContractValidationError as exc:
+            assert exc.reason_code is ReasonCode.ST12F_EVIDENCE_INCOMPLETE
+        else:
+            raise AssertionError(
+                f"READY to {prohibited_state.value} was accepted"
+            )
+
+    stale_ready = new_ready("STALE", 40)
+    stale_closed, stale_reference, stale_closed_ref = close_ready(
+        runtime=harness,
+        identity="STALE",
+        ready_value=stale_ready,
+        replay_value=replay,
+        paper_value=paper,
+        divergence_value=divergence,
+        source_refs=durable_sources,
+        model_receipt_ref=model_receipt,
+        requested_at=_NOW + timedelta(seconds=42),
+        valid_until=_NOW + timedelta(seconds=44),
+    )
+    stale_candidate = _bundle_candidate(
+        evidence_id=stale_closed.evidence_id,
+        version="BUNDLE::STALE::3",
+        input_lock_id=stale_closed.input_lock_id,
+        state=EvidenceBundleTerminalStateV1.STALE,
+        source_refs=durable_sources,
+        replay=replay,
+        paper=paper,
+        divergence_ref=divergence.assessment_id,
+        blockers=(ReasonCode.ST12F_BUNDLE_STALE,),
+    )
+    try:
+        harness.service.build_bundle(
             _bundle_request(
                 harness,
-                identity=f"{identity}-FINAL",
+                identity="STALE-WITHOUT-GUARD",
                 source_refs=durable_sources,
-                requested_at=_NOW + timedelta(seconds=second + 1),
+                requested_at=_NOW + timedelta(seconds=43),
             ),
-            candidate,
+            stale_candidate,
         )
-        observed_states.add(value.terminal_state)
+    except ContractValidationError as exc:
+        assert exc.reason_code is ReasonCode.ST12F_BUNDLE_STALE
+    else:
+        raise AssertionError("CLOSED to STALE without exact TTL proof was accepted")
+    stale_value = harness.service.build_bundle(
+        _bundle_request(
+            harness,
+            identity="STALE-WITH-TTL-GUARD",
+            source_refs=durable_sources,
+            requested_at=_NOW + timedelta(seconds=45),
+        ),
+        stale_candidate,
+    )
+    assert stale_reference.valid_until < _NOW + timedelta(seconds=45)
+    observed_states.add(stale_value.terminal_state)
+
+    superseded_ready = new_ready("SUPERSEDED", 50)
+    superseded_closed, _superseded_reference, superseded_closed_ref = close_ready(
+        runtime=harness,
+        identity="SUPERSEDED-OLD",
+        ready_value=superseded_ready,
+        replay_value=replay,
+        paper_value=paper,
+        divergence_value=divergence,
+        source_refs=durable_sources,
+        model_receipt_ref=model_receipt,
+        requested_at=_NOW + timedelta(seconds=52),
+        valid_until=_NOW + timedelta(hours=1),
+    )
+    superseded_without_newer = _bundle_candidate(
+        evidence_id=superseded_closed.evidence_id,
+        version="BUNDLE::SUPERSEDED::WITHOUT-NEWER",
+        input_lock_id=superseded_closed.input_lock_id,
+        state=EvidenceBundleTerminalStateV1.SUPERSEDED,
+        source_refs=durable_sources,
+        replay=replay,
+        paper=paper,
+        divergence_ref=divergence.assessment_id,
+    )
+    try:
+        harness.service.build_bundle(
+            _bundle_request(
+                harness,
+                identity="SUPERSEDED-WITHOUT-NEWER-CLOSED",
+                source_refs=durable_sources,
+                requested_at=_NOW + timedelta(seconds=53),
+            ),
+            superseded_without_newer,
+        )
+    except ContractValidationError as exc:
+        assert exc.reason_code is ReasonCode.ST12F_EVIDENCE_INCOMPLETE
+    else:
+        raise AssertionError(
+            "CLOSED to SUPERSEDED without a newer closed bundle was accepted"
+        )
+
+    newer_harness = _runtime_harness(
+        harness.persistence,
+        identity="SUPERSEDED-NEW-LOCK",
+    )
+    newer_replay, newer_paper = _register_dual_lanes(
+        newer_harness,
+        identity="SUPERSEDED-NEW-LOCK",
+    )
+    newer_divergence = _runtime_divergence(
+        newer_replay,
+        newer_paper,
+        identity="SUPERSEDED-NEW-LOCK",
+    )
+    newer_model_risk = _runtime_model_risk(
+        newer_replay,
+        newer_paper,
+        identity="SUPERSEDED-NEW-LOCK",
+    )
+    newer_sources = ("UPSTREAM::SUPERSEDED-NEW-LOCK",)
+    newer_ready_candidate = _bundle_candidate(
+        evidence_id=superseded_closed.evidence_id,
+        version="BUNDLE::SUPERSEDED-NEW-LOCK::READY",
+        input_lock_id=newer_replay.input_lock_id,
+        state=EvidenceBundleTerminalStateV1.READY_FOR_INDEPENDENT_REVIEW,
+        source_refs=newer_sources,
+        replay=newer_replay,
+        paper=newer_paper,
+        divergence_ref=newer_divergence.assessment_id,
+    )
+    newer_ready = newer_harness.service.build_bundle(
+        _bundle_request(
+            newer_harness,
+            identity="SUPERSEDED-NEW-LOCK-READY",
+            source_refs=newer_sources,
+            requested_at=_NOW + timedelta(seconds=54),
+        ),
+        newer_ready_candidate,
+        control_contracts=(newer_divergence, newer_model_risk),
+    )
+    newer_divergence_receipt = (
+        f"ST12F-RECEIPT::{newer_divergence.assessment_id}::"
+        "DIVERGENCE_ASSESSMENT"
+    )
+    newer_model_receipt = (
+        f"ST12F-RECEIPT::{newer_model_risk.assessment_id}::"
+        "MODEL_RISK_ASSESSMENT"
+    )
+    newer_durable_sources = (newer_divergence_receipt, newer_model_receipt)
+    newer_closed, _newer_reference, newer_closed_ref = close_ready(
+        runtime=newer_harness,
+        identity="SUPERSEDED-NEW-LOCK",
+        ready_value=newer_ready,
+        replay_value=newer_replay,
+        paper_value=newer_paper,
+        divergence_value=newer_divergence,
+        source_refs=newer_durable_sources,
+        model_receipt_ref=newer_model_receipt,
+        requested_at=_NOW + timedelta(seconds=56),
+        valid_until=_NOW + timedelta(hours=1),
+    )
+    superseded_sources = (newer_closed_ref,)
+    superseded_candidate = _bundle_candidate(
+        evidence_id=superseded_closed.evidence_id,
+        version="BUNDLE::SUPERSEDED::WITH-NEWER",
+        input_lock_id=superseded_closed.input_lock_id,
+        state=EvidenceBundleTerminalStateV1.SUPERSEDED,
+        source_refs=superseded_sources,
+        replay=replay,
+        paper=paper,
+        divergence_ref=divergence.assessment_id,
+    )
+    superseded_value = newer_harness.service.build_bundle(
+        _bundle_request(
+            newer_harness,
+            identity="SUPERSEDED-WITH-NEWER-CLOSED",
+            source_refs=superseded_sources,
+            requested_at=_NOW + timedelta(seconds=58),
+            input_lock_id=superseded_closed.input_lock_id,
+        ),
+        superseded_candidate,
+    )
+    assert newer_closed.input_lock_id != superseded_value.input_lock_id
+    observed_states.add(superseded_value.terminal_state)
 
     assert observed_states == set(EvidenceBundleTerminalStateV1)
 
@@ -1482,6 +1910,255 @@ def test_complete_durable_bundle_lifecycle_receipts_and_d_resolution() -> None:
     assert divergence.assessment_id in restarted.immutable_indexes["divergence"]
     assert d_reference.reference_id in restarted.immutable_indexes["d_references"]
     assert g_handoff.handoff_id in restarted.immutable_indexes["g_handoffs"]
+
+    def transition_contract(
+        state: EvidenceBundleTerminalStateV1,
+        *,
+        version: str,
+    ) -> ComputationEvidenceBundleV1:
+        state_replay: ReplayResultContractV1 | None = replay
+        state_paper: PaperResultContractV1 | None = paper
+        state_divergence = divergence.assessment_id
+        state_blockers: tuple[ReasonCode, ...] = ()
+        state_reference: ST12FEvidenceReferenceV1 | str = "UNAVAILABLE"
+        state_handoff: FToGHandoffReferencesV1 | str = "UNAVAILABLE"
+        if state is EvidenceBundleTerminalStateV1.INCOMPLETE_MISSING_REPLAY:
+            state_replay = None
+            state_divergence = "EXPLICIT_ABSENCE"
+            state_blockers = (ReasonCode.ST12F_EVIDENCE_INCOMPLETE,)
+        elif state is EvidenceBundleTerminalStateV1.INCOMPLETE_MISSING_PAPER:
+            state_paper = None
+            state_divergence = "EXPLICIT_ABSENCE"
+            state_blockers = (ReasonCode.ST12F_EVIDENCE_INCOMPLETE,)
+        elif state is EvidenceBundleTerminalStateV1.INCOMPLETE_CONFLICT:
+            state_divergence = conflicting_divergence.assessment_id
+            state_blockers = (ReasonCode.ST12F_EVIDENCE_INCOMPLETE,)
+        elif state is EvidenceBundleTerminalStateV1.INDEPENDENT_REVIEW_REJECTED:
+            state_blockers = (ReasonCode.ST12F_MODEL_RISK_VETO,)
+        elif state is EvidenceBundleTerminalStateV1.STALE:
+            state_blockers = (ReasonCode.ST12F_BUNDLE_STALE,)
+        elif state is EvidenceBundleTerminalStateV1.CLOSED_INDEPENDENTLY_VALIDATED:
+            state_reference, state_handoff, _record_ref = _closed_projections(
+                identity=f"TRANSITION-MATRIX::{version}",
+                evidence_id="EVIDENCE::TRANSITION-MATRIX",
+                version=version,
+                input_lock_id=replay.input_lock_id,
+                component="MATH-01",
+                observed_at=_NOW,
+                valid_until=_NOW + timedelta(hours=1),
+                model_receipt_ref=model_receipt,
+            )
+        return _bundle_candidate(
+            evidence_id="EVIDENCE::TRANSITION-MATRIX",
+            version=version,
+            input_lock_id=replay.input_lock_id,
+            state=state,
+            source_refs=durable_sources,
+            replay=state_replay,
+            paper=state_paper,
+            divergence_ref=state_divergence,
+            blockers=state_blockers,
+            d_reference=state_reference,
+            g_handoff=state_handoff,
+        )
+
+    allowed_pairs = {
+        (source, target) for source, target, _guard in _OWNER_TRANSITIONS
+    }
+    allowed_transition_positive_count = 0
+    prohibited_transition_rejection_count = 0
+    for source_state in EvidenceBundleTerminalStateV1:
+        previous = transition_contract(
+            source_state,
+            version=f"BUNDLE::TRANSITION-MATRIX::{source_state.value}::PRIOR",
+        )
+        for target_state in EvidenceBundleTerminalStateV1:
+            candidate = transition_contract(
+                target_state,
+                version=(
+                    f"BUNDLE::TRANSITION-MATRIX::{source_state.value}::"
+                    f"{target_state.value}"
+                ),
+            )
+            assert (
+                previous.evidence_id,
+                previous.input_lock_id,
+                previous.component_or_template_ref,
+            ) == (
+                candidate.evidence_id,
+                candidate.input_lock_id,
+                candidate.component_or_template_ref,
+            )
+            assert previous.evidence_bundle_version != candidate.evidence_bundle_version
+            expected_allowed = (
+                source_state.value,
+                target_state.value,
+            ) in allowed_pairs
+            try:
+                ComputationEvidenceServiceV1._validate_bundle_transition(
+                    previous,
+                    candidate,
+                )
+            except ContractValidationError as exc:
+                assert not expected_allowed
+                assert exc.reason_code is ReasonCode.ST12F_EVIDENCE_INCOMPLETE
+                prohibited_transition_rejection_count += 1
+            else:
+                assert expected_allowed
+                allowed_transition_positive_count += 1
+    assert allowed_transition_positive_count == 6
+    assert prohibited_transition_rejection_count == 58
+
+    root_states = {
+        EvidenceBundleTerminalStateV1.INCOMPLETE_MISSING_REPLAY,
+        EvidenceBundleTerminalStateV1.INCOMPLETE_MISSING_PAPER,
+        EvidenceBundleTerminalStateV1.INCOMPLETE_CONFLICT,
+        EvidenceBundleTerminalStateV1.READY_FOR_INDEPENDENT_REVIEW,
+    }
+    for state in EvidenceBundleTerminalStateV1:
+        candidate = transition_contract(
+            state,
+            version=f"BUNDLE::TRANSITION-MATRIX::ROOT::{state.value}",
+        )
+        try:
+            ComputationEvidenceServiceV1._validate_bundle_transition(
+                None,
+                candidate,
+            )
+        except ContractValidationError as exc:
+            assert state not in root_states
+            assert exc.reason_code is ReasonCode.ST12F_EVIDENCE_INCOMPLETE
+        else:
+            assert state in root_states
+
+    identity_previous = transition_contract(
+        EvidenceBundleTerminalStateV1.INCOMPLETE_MISSING_REPLAY,
+        version="BUNDLE::IDENTITY-CONTINUITY::PRIOR",
+    )
+    identity_candidate = transition_contract(
+        EvidenceBundleTerminalStateV1.READY_FOR_INDEPENDENT_REVIEW,
+        version="BUNDLE::IDENTITY-CONTINUITY::CANDIDATE",
+    )
+    ComputationEvidenceServiceV1._validate_bundle_transition(
+        identity_previous,
+        identity_candidate,
+    )
+    for field_name, changed_value in (
+        ("evidence_id", "EVIDENCE::MIGRATED"),
+        ("input_lock_id", "LOCK::MIGRATED"),
+        ("component_or_template_ref", "MATH-02"),
+    ):
+        migrated = replace(identity_candidate, **{field_name: changed_value})
+        assert migrated.evidence_bundle_version == identity_candidate.evidence_bundle_version
+        try:
+            ComputationEvidenceServiceV1._validate_bundle_transition(
+                identity_previous,
+                migrated,
+            )
+        except ContractValidationError as exc:
+            assert exc.reason_code is ReasonCode.ST12F_EVIDENCE_IDENTITY_INVALID
+        else:
+            raise AssertionError(f"bundle identity migration accepted: {field_name}")
+    same_version = replace(
+        identity_candidate,
+        evidence_bundle_version=identity_previous.evidence_bundle_version,
+    )
+    try:
+        ComputationEvidenceServiceV1._validate_bundle_transition(
+            identity_previous,
+            same_version,
+        )
+    except ContractValidationError as exc:
+        assert exc.reason_code is ReasonCode.ST12F_EVIDENCE_INCOMPLETE
+    else:
+        raise AssertionError("same-version lifecycle transition was accepted")
+
+    stale_ready_ref = (
+        f"ST12F-RECEIPT::{stale_ready.evidence_bundle_version}::"
+        "EVIDENCE_BUNDLE_VERSION"
+    )
+    stale_value_ref = (
+        f"ST12F-RECEIPT::{stale_value.evidence_bundle_version}::"
+        "EVIDENCE_BUNDLE_VERSION"
+    )
+    lineage_rows = (
+        (stale_ready_ref, stale_ready, "EXPLICIT_ABSENCE"),
+        (stale_closed_ref, stale_closed, stale_ready_ref),
+        (stale_value_ref, stale_value, stale_closed_ref),
+    )
+    assert ComputationEvidenceServiceV1._bundle_leaf_ref(lineage_rows) == stale_value_ref
+    stale_identity = (
+        stale_value.evidence_id,
+        stale_value.input_lock_id,
+        stale_value.component_or_template_ref,
+    )
+    assert harness.service.immutable_indexes["current_bundles"][stale_identity] == stale_value_ref
+    assert restarted.immutable_indexes["current_bundles"][stale_identity] == stale_value_ref
+    for record_ref, _bundle_value, expected_parent in lineage_rows:
+        spine = harness.persistence.get_record(record_ref)
+        assert type(spine) is EconomicReceiptEventSpineV1
+        assert (
+            spine.typed_payload.parent_version_ref_or_explicit_absence
+            == expected_parent
+        )
+        assert not hasattr(
+            spine.typed_payload.reconstruct(ComputationEvidenceBundleV1),
+            "prior_bundle_ref_or_explicit_absence",
+        )
+
+    branch_ref = "ST12F-RECEIPT::BUNDLE::LINEAGE-BRANCH::EVIDENCE_BUNDLE_VERSION"
+    branch_value = replace(
+        rejected_value,
+        evidence_id=stale_ready.evidence_id,
+        input_lock_id=stale_ready.input_lock_id,
+        component_or_template_ref=stale_ready.component_or_template_ref,
+        evidence_bundle_version="BUNDLE::LINEAGE-BRANCH",
+    )
+    lineage_negative_cases = (
+        ("branched", (*lineage_rows, (branch_ref, branch_value, stale_ready_ref))),
+        (
+            "cyclic",
+            (
+                (stale_ready_ref, stale_ready, stale_value_ref),
+                lineage_rows[1],
+                lineage_rows[2],
+            ),
+        ),
+        (
+            "disconnected",
+            (
+                lineage_rows[0],
+                (stale_closed_ref, stale_closed, "EXPLICIT_ABSENCE"),
+                lineage_rows[2],
+            ),
+        ),
+        (
+            "missing-parent",
+            (
+                lineage_rows[0],
+                (stale_closed_ref, stale_closed, "ST12F-RECEIPT::MISSING-PARENT"),
+                lineage_rows[2],
+            ),
+        ),
+    )
+    lineage_rejections: dict[str, int] = {
+        name: 0 for name, _rows in lineage_negative_cases
+    }
+    for name, mutated_rows in lineage_negative_cases:
+        assert len(mutated_rows) >= len(lineage_rows)
+        try:
+            ComputationEvidenceServiceV1._bundle_leaf_ref(mutated_rows)
+        except ContractValidationError as exc:
+            assert exc.reason_code is ReasonCode.ST12F_EVIDENCE_INCOMPLETE
+            lineage_rejections[name] += 1
+        else:
+            raise AssertionError(f"{name} durable bundle lineage was accepted")
+    assert lineage_rejections == {
+        "branched": 1,
+        "cyclic": 1,
+        "disconnected": 1,
+        "missing-parent": 1,
+    }
 
     read_context = replace(
         harness.context,
@@ -1519,6 +2196,103 @@ def test_complete_durable_bundle_lifecycle_receipts_and_d_resolution() -> None:
             query=mismatched,
         )
         assert unavailable.evidence_state is ST12FEvidenceStateV1.EVIDENCE_INSUFFICIENT_FAIL_CLOSED
+
+    multi_component_references: dict[str, ST12FEvidenceReferenceV1] = {}
+    for offset, component in enumerate(("MATH-02", "MATH-03"), start=70):
+        identity = f"MULTI-{component}"
+        component_replay, component_paper = _register_dual_lanes(
+            newer_harness,
+            identity=identity,
+            component=component,
+        )
+        component_divergence = _runtime_divergence(
+            component_replay,
+            component_paper,
+            identity=identity,
+        )
+        component_model_risk = _runtime_model_risk(
+            component_replay,
+            component_paper,
+            identity=identity,
+        )
+        component_sources = (f"UPSTREAM::{identity}",)
+        component_ready = newer_harness.service.build_bundle(
+            _bundle_request(
+                newer_harness,
+                identity=f"{identity}-READY",
+                source_refs=component_sources,
+                requested_at=_NOW + timedelta(seconds=offset),
+                component=component,
+            ),
+            _bundle_candidate(
+                evidence_id="EVIDENCE::MULTI-COMPONENT",
+                version=f"BUNDLE::{identity}::READY",
+                input_lock_id=component_replay.input_lock_id,
+                component=component,
+                state=EvidenceBundleTerminalStateV1.READY_FOR_INDEPENDENT_REVIEW,
+                source_refs=component_sources,
+                replay=component_replay,
+                paper=component_paper,
+                divergence_ref=component_divergence.assessment_id,
+            ),
+            control_contracts=(component_divergence, component_model_risk),
+        )
+        component_divergence_receipt = (
+            f"ST12F-RECEIPT::{component_divergence.assessment_id}::"
+            "DIVERGENCE_ASSESSMENT"
+        )
+        component_model_receipt = (
+            f"ST12F-RECEIPT::{component_model_risk.assessment_id}::"
+            "MODEL_RISK_ASSESSMENT"
+        )
+        component_closed, component_reference, _component_closed_ref = close_ready(
+            runtime=newer_harness,
+            identity=identity,
+            ready_value=component_ready,
+            replay_value=component_replay,
+            paper_value=component_paper,
+            divergence_value=component_divergence,
+            source_refs=(
+                component_divergence_receipt,
+                component_model_receipt,
+            ),
+            model_receipt_ref=component_model_receipt,
+            requested_at=_NOW + timedelta(seconds=offset + 1),
+            valid_until=_NOW + timedelta(hours=1),
+            component=component,
+        )
+        assert (
+            component_closed.component_or_template_ref == component
+            and component_closed.evidence_id == "EVIDENCE::MULTI-COMPONENT"
+        )
+        multi_component_references[component] = component_reference
+
+    multi_read_at = _NOW + timedelta(seconds=90)
+    multi_read_context = replace(
+        newer_harness.context,
+        as_of=multi_read_at,
+        observed_at=multi_read_at,
+    )
+    multi_component_selection_count = 0
+    for component in ("MATH-02", "MATH-03"):
+        expected_reference = multi_component_references[component]
+        actual_reference = newer_harness.service.read_evidence_reference(
+            multi_read_context,
+            causation_id=f"READ-CAUSE::{component}",
+            correlation_id=f"READ-CORRELATION::{component}",
+            query=FToDEvidenceReferenceQueryV1(
+                query_id=f"D-QUERY::{component}",
+                requested_evidence_id="EVIDENCE::MULTI-COMPONENT",
+                requested_component_or_template_ref=component,
+                expected_input_lock_id=expected_reference.input_lock_id,
+                expected_source_epoch_refs=expected_reference.source_epoch_refs,
+                evaluated_at=multi_read_at,
+                request_read_lineage_refs=(f"READ-LINEAGE::{component}",),
+            ),
+        )
+        assert actual_reference == expected_reference
+        multi_component_selection_count += 1
+    assert multi_component_selection_count == 2
 
     try:
         replace(d_reference, terminal_state="STALE")

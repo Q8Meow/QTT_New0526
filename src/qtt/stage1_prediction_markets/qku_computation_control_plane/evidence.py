@@ -586,6 +586,45 @@ class EvidenceBundleTerminalStateV1(StrEnum):
     SUPERSEDED = "SUPERSEDED"
 
 
+_EVIDENCE_BUNDLE_TRANSITION_GUARDS_V1 = MappingProxyType(
+    {
+        (
+            EvidenceBundleTerminalStateV1.INCOMPLETE_MISSING_REPLAY,
+            EvidenceBundleTerminalStateV1.READY_FOR_INDEPENDENT_REVIEW,
+        ): "BOTH_LANES_PRESENT_SAME_LOCK_ALL_REQUIRED_CONTROLS_COMPUTED",
+        (
+            EvidenceBundleTerminalStateV1.INCOMPLETE_MISSING_PAPER,
+            EvidenceBundleTerminalStateV1.READY_FOR_INDEPENDENT_REVIEW,
+        ): "BOTH_LANES_PRESENT_SAME_LOCK_ALL_REQUIRED_CONTROLS_COMPUTED",
+        (
+            EvidenceBundleTerminalStateV1.READY_FOR_INDEPENDENT_REVIEW,
+            EvidenceBundleTerminalStateV1.CLOSED_INDEPENDENTLY_VALIDATED,
+        ): "SEPARATE_REVIEW_RECEIPT_PASS_AND_ZERO_HARD_VETOES",
+        (
+            EvidenceBundleTerminalStateV1.READY_FOR_INDEPENDENT_REVIEW,
+            EvidenceBundleTerminalStateV1.INDEPENDENT_REVIEW_REJECTED,
+        ): "SEPARATE_REVIEW_RECEIPT_REJECT",
+        (
+            EvidenceBundleTerminalStateV1.CLOSED_INDEPENDENTLY_VALIDATED,
+            EvidenceBundleTerminalStateV1.STALE,
+        ): "TTL_SOURCE_EPOCH_PARAMETER_IMPLEMENTATION_OR_CONTEXT_CHANGE",
+        (
+            EvidenceBundleTerminalStateV1.CLOSED_INDEPENDENTLY_VALIDATED,
+            EvidenceBundleTerminalStateV1.SUPERSEDED,
+        ): "NEWER_VALIDATED_BUNDLE_VERSION_SAME_IDENTITY",
+    }
+)
+
+_EVIDENCE_BUNDLE_INITIAL_STATES_V1 = frozenset(
+    {
+        EvidenceBundleTerminalStateV1.INCOMPLETE_MISSING_REPLAY,
+        EvidenceBundleTerminalStateV1.INCOMPLETE_MISSING_PAPER,
+        EvidenceBundleTerminalStateV1.INCOMPLETE_CONFLICT,
+        EvidenceBundleTerminalStateV1.READY_FOR_INDEPENDENT_REVIEW,
+    }
+)
+
+
 class IndependentReviewDecisionV1(StrEnum):
     VALIDATED = "VALIDATED"
     REJECTED = "REJECTED"
@@ -741,7 +780,6 @@ class ComputationEvidenceBundleV1:
     schema_version: str
     contract_version: str
     evidence_bundle_version: str
-    prior_bundle_ref_or_explicit_absence: str
     component_or_template_ref: str
     input_lock_id: str
     actual_executed_component_versions: Mapping[str, object]
@@ -775,7 +813,6 @@ class ComputationEvidenceBundleV1:
         for name in (
             "evidence_id",
             "evidence_bundle_version",
-            "prior_bundle_ref_or_explicit_absence",
             "component_or_template_ref",
             "input_lock_id",
             "replay_result_ref",
@@ -817,7 +854,7 @@ class ComputationEvidenceBundleV1:
     @classmethod
     def from_canonical_mapping(cls, value: object) -> "ComputationEvidenceBundleV1":
         if not isinstance(value, Mapping) or set(value) != {field.name for field in fields(cls)}:
-            raise ContractValidationError(ReasonCode.SCHEMA_MISMATCH, "bundle payload differs from exact 31-field roster")
+            raise ContractValidationError(ReasonCode.SCHEMA_MISMATCH, "bundle payload differs from exact 30-field roster")
         payload = dict(value)
         for name in _SECTION_FIELDS_V1:
             payload[name] = EvidenceSectionV1.from_canonical_mapping(payload[name])
@@ -972,7 +1009,7 @@ class ComputationEvidenceServiceV1:
         self._slot_results: dict[tuple[str, str, str, str], str] = {}
         self._divergence: dict[str, DivergenceAssessmentV1] = {}
         self._bundles: dict[str, ComputationEvidenceBundleV1] = {}
-        self._current_bundle_by_identity: dict[tuple[str, str], str] = {}
+        self._current_bundle_by_identity: dict[tuple[str, str, str], str] = {}
         self._reviews: dict[str, IndependentReviewRecordV1] = {}
         self._d_references: dict[str, ST12FEvidenceReferenceV1] = {}
         self._g_handoffs: dict[str, FToGHandoffReferencesV1] = {}
@@ -1064,8 +1101,10 @@ class ComputationEvidenceServiceV1:
         slots: dict[tuple[str, str, str, str], str] = {}
         divergence: dict[str, DivergenceAssessmentV1] = {}
         bundles: dict[str, ComputationEvidenceBundleV1] = {}
-        bundle_rows: list[tuple[str, ComputationEvidenceBundleV1]] = []
-        current: dict[tuple[str, str], str] = {}
+        bundle_rows: list[
+            tuple[str, ComputationEvidenceBundleV1, str]
+        ] = []
+        current: dict[tuple[str, str, str], str] = {}
         reviews: dict[str, IndependentReviewRecordV1] = {}
         d_references: dict[str, ST12FEvidenceReferenceV1] = {}
         g_handoffs: dict[str, FToGHandoffReferencesV1] = {}
@@ -1110,7 +1149,13 @@ class ComputationEvidenceServiceV1:
             elif type(value) is ComputationEvidenceBundleV1:
                 bundles[spine.record_id] = value
                 bundles[value.evidence_bundle_version] = value
-                bundle_rows.append((spine.record_id, value))
+                bundle_rows.append(
+                    (
+                        spine.record_id,
+                        value,
+                        payload.parent_version_ref_or_explicit_absence,
+                    )
+                )
             elif type(value) is IndependentReviewRecordV1:
                 reviews[value.review_id] = value
                 reviews[spine.record_id] = value
@@ -1121,15 +1166,24 @@ class ComputationEvidenceServiceV1:
                 g_handoffs[value.handoff_id] = value
                 g_handoffs[spine.record_id] = value
         identities = {
-            (value.evidence_id, value.input_lock_id)
-            for _, value in bundle_rows
+            (
+                value.evidence_id,
+                value.input_lock_id,
+                value.component_or_template_ref,
+            )
+            for _, value, _ in bundle_rows
         }
         for identity in identities:
             current[identity] = self._bundle_leaf_ref(
                 tuple(
                     row
                     for row in bundle_rows
-                    if (row[1].evidence_id, row[1].input_lock_id) == identity
+                    if (
+                        row[1].evidence_id,
+                        row[1].input_lock_id,
+                        row[1].component_or_template_ref,
+                    )
+                    == identity
                 )
             )
         self._lane_results = lane_results
@@ -1276,7 +1330,7 @@ class ComputationEvidenceServiceV1:
             return (
                 ST12FReceiptClassV1.EVIDENCE_BUNDLE_VERSION,
                 contract.evidence_bundle_version,
-                contract.prior_bundle_ref_or_explicit_absence,
+                "EXPLICIT_ABSENCE",
                 contract.source_and_provenance_refs,
                 contract.terminal_state.value,
                 contract.blocker_codes,
@@ -1329,6 +1383,7 @@ class ComputationEvidenceServiceV1:
         request: RegisterReplayPaperResultRequestV1 | BuildEvidenceBundleRequestV1,
         contract: object,
         input_lock: ImmutableReplayPaperInputLockV1,
+        bundle_parent_ref: str | None = None,
     ) -> EconomicReceiptEventSpineV1:
         (
             receipt_class,
@@ -1338,6 +1393,18 @@ class ComputationEvidenceServiceV1:
             terminal_state,
             reason_codes,
         ) = self._contract_receipt_parts(contract)
+        if receipt_class is ST12FReceiptClassV1.EVIDENCE_BUNDLE_VERSION:
+            if bundle_parent_ref is None:
+                raise ContractValidationError(
+                    ReasonCode.ST12F_EVIDENCE_INCOMPLETE,
+                    "bundle receipt construction requires the service-resolved durable parent",
+                )
+            parent_ref = _text(bundle_parent_ref, "bundle_parent_ref")
+        elif bundle_parent_ref is not None:
+            raise ContractValidationError(
+                ReasonCode.SCHEMA_MISMATCH,
+                "non-bundle receipt cannot carry a bundle parent override",
+            )
         record_id = f"ST12F-RECEIPT::{contract_id}::{receipt_class.value}"
         payload = ST12FEvidenceControlReceiptRecordV1(
             control_receipt_id=record_id,
@@ -1738,13 +1805,9 @@ class ComputationEvidenceServiceV1:
         previous_ref = self._durable_current_bundle_ref(
             candidate.evidence_id,
             candidate.input_lock_id,
+            candidate.component_or_template_ref,
         )
         expected_parent = previous_ref or "EXPLICIT_ABSENCE"
-        if candidate.prior_bundle_ref_or_explicit_absence != expected_parent:
-            raise ContractValidationError(
-                ReasonCode.ST12F_EVIDENCE_INCOMPLETE,
-                "bundle parent differs from the durable current version",
-            )
         previous = None if previous_ref is None else self.resolve_bundle(previous_ref)
         self._validate_bundle_transition(previous, candidate)
 
@@ -1814,6 +1877,12 @@ class ComputationEvidenceServiceV1:
             candidate=candidate,
             review=review,
         )
+        self._validate_bundle_transition_guard(
+            request=request,
+            previous_ref=previous_ref,
+            previous=previous,
+            candidate=candidate,
+        )
 
         self._validate_closed_projections(
             candidate,
@@ -1838,7 +1907,12 @@ class ComputationEvidenceServiceV1:
                     ReasonCode.PERSISTENCE_CONFLICT,
                     "OP15 control receipt identity already binds different evidence",
                 )
-        bundle_spine = self._receipt(request=request, contract=candidate, input_lock=lock)
+        bundle_spine = self._receipt(
+            request=request,
+            contract=candidate,
+            input_lock=lock,
+            bundle_parent_ref=expected_parent,
+        )
         spines.append(bundle_spine)
         if candidate.terminal_state is EvidenceBundleTerminalStateV1.CLOSED_INDEPENDENTLY_VALIDATED:
             assert type(candidate.d_evidence_reference_projection) is ST12FEvidenceReferenceV1
@@ -1864,43 +1938,109 @@ class ComputationEvidenceServiceV1:
         self,
         evidence_id: str,
         input_lock_id: str,
+        component_or_template_ref: str,
     ) -> str | None:
-        matches: list[tuple[str, ComputationEvidenceBundleV1]] = []
+        matches: list[
+            tuple[str, ComputationEvidenceBundleV1, str]
+        ] = []
         for spine in self._durable_receipt_spines():
             payload = spine.typed_payload
             assert type(payload) is ST12FEvidenceControlReceiptRecordV1
             if payload.receipt_class is not ST12FReceiptClassV1.EVIDENCE_BUNDLE_VERSION:
                 continue
             value = payload.reconstruct(ComputationEvidenceBundleV1)
-            if value.evidence_id == evidence_id and value.input_lock_id == input_lock_id:
-                matches.append((spine.record_id, value))
+            self._validate_receipt_lock_metadata(spine)
+            if (
+                value.evidence_id == evidence_id
+                and value.input_lock_id == input_lock_id
+                and value.component_or_template_ref == component_or_template_ref
+            ):
+                matches.append(
+                    (
+                        spine.record_id,
+                        value,
+                        payload.parent_version_ref_or_explicit_absence,
+                    )
+                )
         return None if not matches else self._bundle_leaf_ref(tuple(matches))
 
     @staticmethod
     def _bundle_leaf_ref(
-        rows: tuple[tuple[str, ComputationEvidenceBundleV1], ...],
+        rows: tuple[tuple[str, ComputationEvidenceBundleV1, str], ...],
     ) -> str:
-        by_ref = {record_ref: value for record_ref, value in rows}
-        parents = {
-            value.prior_bundle_ref_or_explicit_absence
-            for value in by_ref.values()
-            if value.prior_bundle_ref_or_explicit_absence != "EXPLICIT_ABSENCE"
+        by_ref = {record_ref: value for record_ref, value, _ in rows}
+        parent_by_ref = {record_ref: parent for record_ref, _, parent in rows}
+        if len(by_ref) != len(rows) or len(parent_by_ref) != len(rows):
+            raise ContractValidationError(
+                ReasonCode.ST12F_EVIDENCE_INCOMPLETE,
+                "durable bundle lineage repeats an immutable receipt identity",
+            )
+        missing_parents = {
+            parent
+            for parent in parent_by_ref.values()
+            if parent != "EXPLICIT_ABSENCE" and parent not in by_ref
         }
-        if any(parent not in by_ref for parent in parents):
+        if missing_parents:
             raise ContractValidationError(
                 ReasonCode.ST12F_EVIDENCE_INCOMPLETE,
                 "durable bundle lineage has a missing parent receipt",
             )
-        leaves = tuple(sorted(set(by_ref) - parents))
-        roots = tuple(
-            ref
-            for ref, value in by_ref.items()
-            if value.prior_bundle_ref_or_explicit_absence == "EXPLICIT_ABSENCE"
-        )
-        if len(leaves) != 1 or len(roots) != 1:
+
+        children_by_ref: dict[str, list[str]] = {ref: [] for ref in by_ref}
+        for child_ref, parent_ref in parent_by_ref.items():
+            if parent_ref != "EXPLICIT_ABSENCE":
+                children_by_ref[parent_ref].append(child_ref)
+        if any(len(children) > 1 for children in children_by_ref.values()):
             raise ContractValidationError(
                 ReasonCode.ST12F_EVIDENCE_INCOMPLETE,
-                "durable bundle lineage is branched or disconnected",
+                "durable bundle lineage is branched",
+            )
+
+        for start_ref in by_ref:
+            visited: set[str] = set()
+            current_ref = start_ref
+            while current_ref != "EXPLICIT_ABSENCE":
+                if current_ref in visited:
+                    raise ContractValidationError(
+                        ReasonCode.ST12F_EVIDENCE_INCOMPLETE,
+                        "durable bundle lineage is cyclic",
+                    )
+                visited.add(current_ref)
+                current_ref = parent_by_ref[current_ref]
+
+        roots = tuple(
+            ref
+            for ref, parent_ref in parent_by_ref.items()
+            if parent_ref == "EXPLICIT_ABSENCE"
+        )
+        leaves = tuple(
+            ref for ref, children in children_by_ref.items() if not children
+        )
+        if len(roots) != 1 or len(leaves) != 1:
+            raise ContractValidationError(
+                ReasonCode.ST12F_EVIDENCE_INCOMPLETE,
+                "durable bundle lineage is disconnected",
+            )
+
+        traversed: set[str] = set()
+        current_ref = roots[0]
+        previous: ComputationEvidenceBundleV1 | None = None
+        while True:
+            traversed.add(current_ref)
+            current = by_ref[current_ref]
+            ComputationEvidenceServiceV1._validate_bundle_transition(
+                previous,
+                current,
+            )
+            children = children_by_ref[current_ref]
+            if not children:
+                break
+            previous = current
+            current_ref = children[0]
+        if traversed != set(by_ref):
+            raise ContractValidationError(
+                ReasonCode.ST12F_EVIDENCE_INCOMPLETE,
+                "durable bundle lineage is disconnected",
             )
         return leaves[0]
 
@@ -1966,35 +2106,27 @@ class ComputationEvidenceServiceV1:
                 ReasonCode.ST12F_INDEPENDENT_REVIEW_REQUIRED,
                 "bundle review state differs from its immutable terminal state",
             )
-        initial = {
-            EvidenceBundleTerminalStateV1.INCOMPLETE_MISSING_REPLAY,
-            EvidenceBundleTerminalStateV1.INCOMPLETE_MISSING_PAPER,
-            EvidenceBundleTerminalStateV1.INCOMPLETE_CONFLICT,
-            EvidenceBundleTerminalStateV1.READY_FOR_INDEPENDENT_REVIEW,
-        }
         if previous is None:
-            allowed = initial
-        elif previous.terminal_state is EvidenceBundleTerminalStateV1.READY_FOR_INDEPENDENT_REVIEW:
-            allowed = {
-                EvidenceBundleTerminalStateV1.INDEPENDENT_REVIEW_REJECTED,
-                EvidenceBundleTerminalStateV1.CLOSED_INDEPENDENTLY_VALIDATED,
-                EvidenceBundleTerminalStateV1.STALE,
-                EvidenceBundleTerminalStateV1.SUPERSEDED,
-            }
-        elif previous.terminal_state is EvidenceBundleTerminalStateV1.CLOSED_INDEPENDENTLY_VALIDATED:
-            allowed = {
-                EvidenceBundleTerminalStateV1.STALE,
-                EvidenceBundleTerminalStateV1.SUPERSEDED,
-            }
-        else:
-            allowed = {
-                *initial,
-                EvidenceBundleTerminalStateV1.STALE,
-                EvidenceBundleTerminalStateV1.SUPERSEDED,
-            }
-        if state not in allowed or (
-            previous is not None
-            and candidate.evidence_bundle_version == previous.evidence_bundle_version
+            if state not in _EVIDENCE_BUNDLE_INITIAL_STATES_V1:
+                raise ContractValidationError(
+                    ReasonCode.ST12F_EVIDENCE_INCOMPLETE,
+                    "bundle lifecycle root is not owner-certified",
+                )
+            return
+        if (
+            candidate.evidence_id != previous.evidence_id
+            or candidate.input_lock_id != previous.input_lock_id
+            or candidate.component_or_template_ref
+            != previous.component_or_template_ref
+        ):
+            raise ContractValidationError(
+                ReasonCode.ST12F_EVIDENCE_IDENTITY_INVALID,
+                "bundle lifecycle transition changes its exact three-part identity",
+            )
+        if (
+            candidate.evidence_bundle_version == previous.evidence_bundle_version
+            or (previous.terminal_state, state)
+            not in _EVIDENCE_BUNDLE_TRANSITION_GUARDS_V1
         ):
             raise ContractValidationError(
                 ReasonCode.ST12F_EVIDENCE_INCOMPLETE,
@@ -2169,6 +2301,150 @@ class ComputationEvidenceServiceV1:
                 "review does not bind the exact prior/candidate/version/lock/epoch custody",
             )
 
+    def _validate_bundle_transition_guard(
+        self,
+        *,
+        request: BuildEvidenceBundleRequestV1,
+        previous_ref: str | None,
+        previous: ComputationEvidenceBundleV1 | None,
+        candidate: ComputationEvidenceBundleV1,
+    ) -> None:
+        state = candidate.terminal_state
+        if state is EvidenceBundleTerminalStateV1.STALE:
+            prior_reference = (
+                None
+                if previous is None
+                else previous.d_evidence_reference_projection
+            )
+            if (
+                previous_ref is None
+                or type(prior_reference) is not ST12FEvidenceReferenceV1
+                or prior_reference.evidence_ref != previous_ref
+                or prior_reference.evidence_state
+                is not ST12FEvidenceStateV1.EVIDENCE_REFERENCE_AVAILABLE
+                or request.requested_at <= prior_reference.valid_until
+            ):
+                raise ContractValidationError(
+                    ReasonCode.ST12F_BUNDLE_STALE,
+                    "CLOSED to STALE requires exact expiry of the prior closed D reference",
+                )
+            return
+        if state is not EvidenceBundleTerminalStateV1.SUPERSEDED:
+            return
+        if previous_ref is None or previous is None:
+            raise ContractValidationError(
+                ReasonCode.ST12F_EVIDENCE_INCOMPLETE,
+                "CLOSED to SUPERSEDED requires a durable closed predecessor",
+            )
+
+        durable_spines = self._durable_receipt_spines()
+        spines_by_ref = {spine.record_id: spine for spine in durable_spines}
+        prior_spine = spines_by_ref.get(previous_ref)
+        if prior_spine is None:
+            raise ContractValidationError(
+                ReasonCode.ST12F_EVIDENCE_INCOMPLETE,
+                "CLOSED to SUPERSEDED predecessor receipt is not durable",
+            )
+
+        for spine in durable_spines:
+            payload = spine.typed_payload
+            assert type(payload) is ST12FEvidenceControlReceiptRecordV1
+            if (
+                payload.receipt_class
+                is not ST12FReceiptClassV1.EVIDENCE_BUNDLE_VERSION
+                or spine.record_id == previous_ref
+                or spine.record_id not in request.evidence_record_refs
+                or not prior_spine.recorded_at
+                < spine.recorded_at
+                <= request.requested_at
+            ):
+                continue
+            newer = payload.reconstruct(ComputationEvidenceBundleV1)
+            self._validate_receipt_lock_metadata(spine)
+            if (
+                newer.terminal_state
+                is not EvidenceBundleTerminalStateV1.CLOSED_INDEPENDENTLY_VALIDATED
+                or newer.evidence_id != previous.evidence_id
+                or newer.component_or_template_ref
+                != previous.component_or_template_ref
+                or newer.evidence_bundle_version
+                == previous.evidence_bundle_version
+            ):
+                continue
+            reference = newer.d_evidence_reference_projection
+            if (
+                type(reference) is not ST12FEvidenceReferenceV1
+                or reference.evidence_state
+                is not ST12FEvidenceStateV1.EVIDENCE_REFERENCE_AVAILABLE
+                or reference.evidence_ref != spine.record_id
+                or reference.evidence_id != newer.evidence_id
+                or reference.component_or_template_ref
+                != newer.component_or_template_ref
+                or reference.input_lock_id != newer.input_lock_id
+                or reference.evidence_bundle_version
+                != newer.evidence_bundle_version
+                or not reference.observed_at
+                <= request.requested_at
+                <= reference.valid_until
+                or self._durable_current_bundle_ref(
+                    newer.evidence_id,
+                    newer.input_lock_id,
+                    newer.component_or_template_ref,
+                )
+                != spine.record_id
+            ):
+                continue
+            reference_receipt_ref = (
+                f"ST12F-RECEIPT::{reference.reference_id}::D_EVIDENCE_REFERENCE"
+            )
+            reference_spine = spines_by_ref.get(reference_receipt_ref)
+            if (
+                reference_spine is None
+                or type(reference_spine.typed_payload)
+                is not ST12FEvidenceControlReceiptRecordV1
+                or reference_spine.typed_payload.receipt_class
+                is not ST12FReceiptClassV1.D_EVIDENCE_REFERENCE
+                or reference_spine.typed_payload.reconstruct(
+                    ST12FEvidenceReferenceV1
+                )
+                != reference
+            ):
+                continue
+            independently_reviewed = False
+            for review_spine in durable_spines:
+                review_payload = review_spine.typed_payload
+                assert type(review_payload) is ST12FEvidenceControlReceiptRecordV1
+                if (
+                    review_payload.receipt_class
+                    is not ST12FReceiptClassV1.INDEPENDENT_REVIEW_VERSION
+                ):
+                    continue
+                review = review_payload.reconstruct(IndependentReviewRecordV1)
+                if (
+                    review.prior_bundle_ref
+                    == payload.parent_version_ref_or_explicit_absence
+                    and review.evidence_id == newer.evidence_id
+                    and review.evidence_bundle_version
+                    == newer.evidence_bundle_version
+                    and review.input_lock_id == newer.input_lock_id
+                    and review.decision is IndependentReviewDecisionV1.VALIDATED
+                    and review.bundle_producer_identity == self._producer_identity
+                    and review.reviewer_identity != self._producer_identity
+                    and review.reviewed_source_epoch_refs
+                    == reference.source_epoch_refs
+                    and review.reviewed_at
+                    <= request.requested_at
+                    <= review.valid_until
+                ):
+                    independently_reviewed = True
+                    break
+            if independently_reviewed:
+                return
+        raise ContractValidationError(
+            ReasonCode.ST12F_EVIDENCE_INCOMPLETE,
+            "CLOSED to SUPERSEDED requires a referenced, newer, current, valid, independently reviewed closed bundle",
+        )
+
     @staticmethod
     def _validate_closed_projections(
         candidate: ComputationEvidenceBundleV1,
@@ -2243,7 +2519,12 @@ class ComputationEvidenceServiceV1:
                     continue
                 reference = payload.reconstruct(ST12FEvidenceReferenceV1)
                 self._validate_receipt_lock_metadata(spine)
-                if reference.evidence_id == query.requested_evidence_id:
+                if (
+                    reference.evidence_id == query.requested_evidence_id
+                    and reference.component_or_template_ref
+                    == query.requested_component_or_template_ref
+                    and reference.input_lock_id == query.expected_input_lock_id
+                ):
                     candidates.append((spine, reference))
         except (ContractValidationError, PersistenceContractError):
             return unavailable()
@@ -2253,6 +2534,7 @@ class ComputationEvidenceServiceV1:
         current_bundle_ref = self._durable_current_bundle_ref(
             reference.evidence_id,
             reference.input_lock_id,
+            reference.component_or_template_ref,
         )
         try:
             bundle = self.resolve_bundle(reference.evidence_ref)
@@ -2299,7 +2581,7 @@ if (
     len(fields(ReplayResultContractV1)) != 26
     or len(fields(PaperResultContractV1)) != 26
     or len(fields(DivergenceAssessmentV1)) != 18
-    or len(fields(ComputationEvidenceBundleV1)) != 31
+    or len(fields(ComputationEvidenceBundleV1)) != 30
     or len(ST12F_EVIDENCE_IDENTITIES_V1) != 48
 ):
     raise ContractValidationError(

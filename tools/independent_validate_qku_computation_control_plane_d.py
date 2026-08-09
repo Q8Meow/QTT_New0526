@@ -10,6 +10,8 @@ from __future__ import annotations
 
 import ast
 from collections import Counter
+from dataclasses import dataclass
+from datetime import UTC, datetime, timedelta
 from decimal import Decimal
 import json
 import os
@@ -19,6 +21,8 @@ import sys
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 PACKAGE = REPO_ROOT / "src/qtt/stage1_prediction_markets/qku_computation_control_plane"
 ARTIFACTS = REPO_ROOT / "docs/master_plan/generated/qku_control_plane/mode_snapshot"
 SUCCESS_MARKER = "QKU_COMPUTATION_CONTROL_PLANE_D_INDEPENDENTLY_VALIDATED"
@@ -2218,11 +2222,177 @@ def _validate_no_metadata_only_or_scope_escape() -> None:
     }), "later-tranche generated output entered D")
 
 
+def _validate_st12f_three_part_d_selection() -> int:
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.evidence import (
+        ComputationEvidenceServiceV1,
+        EvidenceBundleTerminalStateV1,
+        FToDEvidenceReferenceQueryV1,
+    )
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.models import (
+        ST12FEvidenceReferenceV1,
+        ST12FEvidenceStateV1,
+    )
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.receipts import (
+        ST12FEvidenceControlReceiptRecordV1,
+        ST12FReceiptClassV1,
+    )
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.serialization import (
+        deterministic_json,
+    )
+
+    @dataclass(frozen=True, slots=True)
+    class _ContextProbeV1:
+        as_of: datetime
+
+    @dataclass(frozen=True, slots=True)
+    class _BundleProbeV1:
+        evidence_id: str
+        component_or_template_ref: str
+        input_lock_id: str
+        evidence_bundle_version: str
+        terminal_state: EvidenceBundleTerminalStateV1
+        d_evidence_reference_projection: ST12FEvidenceReferenceV1
+
+    @dataclass(frozen=True, slots=True)
+    class _ReceiptSpineProbeV1:
+        record_id: str
+        typed_payload: ST12FEvidenceControlReceiptRecordV1
+
+    observed_at = datetime(2035, 1, 1, 12, tzinfo=UTC)
+    evidence_id = "EVIDENCE::SHARED-INDEPENDENT-D-SELECTION"
+    identities = (
+        ("MATH-01", "LOCK::COMPONENT-A", "BUNDLE::COMPONENT-A"),
+        ("MATH-02", "LOCK::COMPONENT-B", "BUNDLE::COMPONENT-B"),
+        ("MATH-03", "LOCK::UNRELATED-LATER", "BUNDLE::UNRELATED-LATER"),
+    )
+    spines: list[_ReceiptSpineProbeV1] = []
+    bundles: dict[str, _BundleProbeV1] = {}
+    current_refs: dict[tuple[str, str, str], str] = {}
+    references: dict[str, ST12FEvidenceReferenceV1] = {}
+    for ordinal, (component, input_lock, version) in enumerate(identities, 1):
+        bundle_ref = f"ST12F-RECEIPT::{version}::EVIDENCE_BUNDLE_VERSION"
+        reference = ST12FEvidenceReferenceV1(
+            evidence_state=ST12FEvidenceStateV1.EVIDENCE_REFERENCE_AVAILABLE,
+            evidence_ref=bundle_ref,
+            lane="REPLAY_PAPER",
+            dataset_grade_ref=f"DATASET::{component}",
+            venue_semantic_binding_ref=f"VENUE::{component}",
+            cross_venue_equivalence_ref=f"EQUIVALENCE::{component}",
+            observed_at=observed_at - timedelta(minutes=ordinal),
+            valid_until=observed_at + timedelta(hours=1),
+            policy_version="ST12F_EVIDENCE_POLICY_V1_4",
+            causation_id=f"CAUSATION::{component}",
+            correlation_id=f"CORRELATION::{component}",
+            input_lock_id=input_lock,
+            component_or_template_ref=component,
+            evidence_bundle_version=version,
+            source_epoch_refs=(f"SOURCE_EPOCH::{component}",),
+            terminal_state="CLOSED_INDEPENDENTLY_VALIDATED",
+            reference_id=f"D-REFERENCE::{component}",
+            evidence_id=evidence_id,
+        )
+        receipt = ST12FEvidenceControlReceiptRecordV1(
+            control_receipt_id=(
+                f"ST12F-RECEIPT::{reference.reference_id}::D_EVIDENCE_REFERENCE"
+            ),
+            receipt_class=ST12FReceiptClassV1.D_EVIDENCE_REFERENCE,
+            operation_id="ST10-OP::15",
+            request_id=f"REQUEST::{component}",
+            idempotency_key=f"IDEMPOTENCY::{component}",
+            contract_type="ST12FEvidenceReferenceV1",
+            contract_id=reference.reference_id,
+            contract_version=reference.contract_version,
+            input_lock_id_or_explicit_absence=input_lock,
+            parent_version_ref_or_explicit_absence=bundle_ref,
+            canonical_contract_json=deterministic_json(reference),
+            source_record_refs=(bundle_ref,),
+            parameter_value_refs=(),
+            source_epoch_refs=reference.source_epoch_refs,
+            typed_reason_codes=(),
+            terminal_state=reference.terminal_state,
+            fixture_only_not_evidence=False,
+        )
+        spines.append(_ReceiptSpineProbeV1(bundle_ref, receipt))
+        bundles[bundle_ref] = _BundleProbeV1(
+            evidence_id=evidence_id,
+            component_or_template_ref=component,
+            input_lock_id=input_lock,
+            evidence_bundle_version=version,
+            terminal_state=(
+                EvidenceBundleTerminalStateV1.CLOSED_INDEPENDENTLY_VALIDATED
+            ),
+            d_evidence_reference_projection=reference,
+        )
+        current_refs[(evidence_id, input_lock, component)] = bundle_ref
+        references[component] = reference
+
+    class _SelectionProbeServiceV1(ComputationEvidenceServiceV1):
+        def __init__(self) -> None:
+            self.observed_current_identities: list[tuple[str, str, str]] = []
+
+        def _durable_receipt_spines(self) -> tuple[_ReceiptSpineProbeV1, ...]:
+            return tuple(spines)
+
+        def _validate_receipt_lock_metadata(self, spine: object) -> None:
+            return None
+
+        def _durable_current_bundle_ref(
+            self,
+            requested_evidence_id: str,
+            expected_input_lock_id: str,
+            requested_component_or_template_ref: str,
+        ) -> str | None:
+            identity = (
+                requested_evidence_id,
+                expected_input_lock_id,
+                requested_component_or_template_ref,
+            )
+            self.observed_current_identities.append(identity)
+            return current_refs.get(identity)
+
+        def resolve_bundle(self, bundle_ref: str) -> _BundleProbeV1:
+            return bundles[bundle_ref]
+
+    service = _SelectionProbeServiceV1()
+    selected = 0
+    for component, input_lock, _version in identities[:2]:
+        query = FToDEvidenceReferenceQueryV1(
+            query_id=f"QUERY::{component}",
+            requested_evidence_id=evidence_id,
+            requested_component_or_template_ref=component,
+            expected_input_lock_id=input_lock,
+            expected_source_epoch_refs=(f"SOURCE_EPOCH::{component}",),
+            evaluated_at=observed_at,
+            request_read_lineage_refs=(f"REQUEST-LINEAGE::{component}",),
+        )
+        actual = service.read_evidence_reference(
+            _ContextProbeV1(as_of=observed_at),
+            causation_id=f"QUERY-CAUSATION::{component}",
+            correlation_id=f"QUERY-CORRELATION::{component}",
+            query=query,
+        )
+        _require(
+            actual == references[component],
+            "exact component D reference was hidden by a later unrelated reference",
+        )
+        selected += 1
+    _require(
+        tuple(service.observed_current_identities)
+        == tuple(
+            (evidence_id, input_lock, component)
+            for component, input_lock, _version in identities[:2]
+        ),
+        "D current-bundle selection did not use the exact three-part identity",
+    )
+    return selected
+
+
 def main() -> int:
     try:
         runtime_metrics = _execute_runtime_repair_probe()
         _validate_denominators_and_artifact_identity(runtime_metrics)
         _validate_contract_and_service_ast()
+        multi_component_d_selection_count = _validate_st12f_three_part_d_selection()
         _validate_math39_independently()
         _validate_repair_closure_sources()
         _validate_no_metadata_only_or_scope_escape()
@@ -2235,7 +2405,8 @@ def main() -> int:
         "semantic_tests=26 commands=6 states=35 transitions=17 universe=240 "
         "canonical_resolver=1 custom_bypass=0 trace_gaps=0 "
         "stage_receipt_mismatches=0 phantom_receipts=0 synthetic_epochs=0 "
-        "actual_mutations=23 synthetic_overrides=0 f_reference_cases=9"
+        "actual_mutations=23 synthetic_overrides=0 f_reference_cases=9 "
+        f"multi_component_d_selection={multi_component_d_selection_count}"
     )
     return 0
 

@@ -7103,6 +7103,7 @@ from .evidence import (
     ReplayResultContractV1 as _ST12FReplayResultContractV1,
     ST12F_EVIDENCE_IDENTITIES_V1 as _ST12F_EVIDENCE_IDENTITIES_V1,
     ST12F_EVIDENCE_METRIC_DEFINITIONS_V1 as _ST12F_EVIDENCE_METRICS_V1,
+    _EVIDENCE_BUNDLE_TRANSITION_GUARDS_V1 as _ST12F_ACTUAL_TRANSITIONS_V1,
 )
 from .implementation_registry import (
     ST12F_EVIDENCE_MATH_CALLABLE_REGISTRY_V1 as _ST12F_MATH_CALLABLES_V1,
@@ -7161,16 +7162,95 @@ from .receipts import (
 from .serialization import deterministic_json as _st12f_deterministic_json
 
 
+_ST12F_OWNER_BUNDLE_FIELDS_V1 = (
+    "evidence_id",
+    "schema_version",
+    "contract_version",
+    "evidence_bundle_version",
+    "component_or_template_ref",
+    "input_lock_id",
+    "actual_executed_component_versions",
+    "actual_executed_stack_versions",
+    "replay_result_ref",
+    "paper_result_ref",
+    "divergence_assessment_ref",
+    "lane_execution_receipt_refs",
+    "calibration_and_probability_quality",
+    "transaction_cost_decomposition",
+    "fill_and_queue_quality",
+    "latency_and_staleness",
+    "capacity_and_crowding",
+    "portfolio_marginal_contribution",
+    "false_discovery_and_overfit_controls",
+    "regime_and_scenario_outcomes",
+    "uncertainty_and_model_risk_reserves",
+    "agent_and_model_disagreement",
+    "no_trade_comparison",
+    "independent_review_state",
+    "failure_and_negative_evidence_states",
+    "source_and_provenance_refs",
+    "d_evidence_reference_projection",
+    "g_handoff_projection",
+    "terminal_state",
+    "blocker_codes",
+)
+
+_ST12F_OWNER_LIFECYCLE_TRANSITIONS_V1 = (
+    (
+        "INCOMPLETE_MISSING_REPLAY",
+        "READY_FOR_INDEPENDENT_REVIEW",
+        "BOTH_LANES_PRESENT_SAME_LOCK_ALL_REQUIRED_CONTROLS_COMPUTED",
+    ),
+    (
+        "INCOMPLETE_MISSING_PAPER",
+        "READY_FOR_INDEPENDENT_REVIEW",
+        "BOTH_LANES_PRESENT_SAME_LOCK_ALL_REQUIRED_CONTROLS_COMPUTED",
+    ),
+    (
+        "READY_FOR_INDEPENDENT_REVIEW",
+        "CLOSED_INDEPENDENTLY_VALIDATED",
+        "SEPARATE_REVIEW_RECEIPT_PASS_AND_ZERO_HARD_VETOES",
+    ),
+    (
+        "READY_FOR_INDEPENDENT_REVIEW",
+        "INDEPENDENT_REVIEW_REJECTED",
+        "SEPARATE_REVIEW_RECEIPT_REJECT",
+    ),
+    (
+        "CLOSED_INDEPENDENTLY_VALIDATED",
+        "STALE",
+        "TTL_SOURCE_EPOCH_PARAMETER_IMPLEMENTATION_OR_CONTEXT_CHANGE",
+    ),
+    (
+        "CLOSED_INDEPENDENTLY_VALIDATED",
+        "SUPERSEDED",
+        "NEWER_VALIDATED_BUNDLE_VERSION_SAME_IDENTITY",
+    ),
+)
+
+
 def _st12f_central_contract_checks() -> tuple[ValidationCheckV1, ...]:
     lane_ids = (*_ST12F_REPLAY_SLOTS_V1, *_ST12F_PAPER_SLOTS_V1)
+    actual_transitions = tuple(
+        (source.value, target.value, guard)
+        for (source, target), guard in _ST12F_ACTUAL_TRANSITIONS_V1.items()
+    )
     return (
         _check("ST12F_CANONICAL_SCHEMAS", (
             len(fields(_ST12FInputLockV1)) == 33
             and len(fields(_ST12FReplayResultContractV1)) == 26
             and len(fields(_ST12FPaperResultContractV1)) == 26
             and len(fields(_ST12FDivergenceAssessmentV1)) == 18
-            and len(fields(_ST12FComputationEvidenceBundleV1)) == 31
+            and tuple(
+                field.name for field in fields(_ST12FComputationEvidenceBundleV1)
+            )
+            == _ST12F_OWNER_BUNDLE_FIELDS_V1
         ), "five exact canonical contract field rosters"),
+        _check(
+            "ST12F_OWNER_LIFECYCLE_TRANSITIONS_6",
+            actual_transitions == _ST12F_OWNER_LIFECYCLE_TRANSITIONS_V1,
+            "six exact owner lifecycle transition triples and no fallback graph",
+        ),
         _check("ST12F_COHORT_AND_SLOTS", len(_ST12F_TEMPLATE_IDS_V1) == 52 and len(_ST12F_REPLAY_SLOTS_V1) == 52 and len(_ST12F_PAPER_SLOTS_V1) == 52 and len(set(lane_ids)) == 104, "52 ordered templates and 104 disjoint lane slots"),
         _check("ST12F_MATH_ORACLE_VECTOR_48", len(_ST12F_MATH_SPEC_IDS_V1) == len(_ST12F_MATH_CALLABLES_V1) == len(_ST12F_ORACLES_V1) == len(_ST12F_VECTORS_V1) == 48, "48 specifications, callables, independent oracles, and vectors"),
         _check("ST12F_EVIDENCE_IDENTITIES_48", len(_ST12F_EVIDENCE_IDENTITIES_V1) == len(set(_ST12F_EVIDENCE_IDENTITIES_V1)) == 48, "48 exact evidence identities"),
