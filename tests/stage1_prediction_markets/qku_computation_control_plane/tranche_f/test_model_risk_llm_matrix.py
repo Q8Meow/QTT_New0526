@@ -2253,6 +2253,9 @@ def test_ready_hot_path_and_immutable_index_matrix() -> None:
 
 # ST12-F v1.1 additive model-risk/LLM matrix.  Everything above this anchor is
 # the frozen ST12-TEST::227::COMPLETE_PARAMETER_SCHEMA section.
+if not _VENV_PYTHON.is_file():
+    _VENV_PYTHON = Path(sys.executable).resolve()
+
 from dataclasses import replace as _st12f_replace
 from decimal import Decimal as _ST12FDecimal
 
