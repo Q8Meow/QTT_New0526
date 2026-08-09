@@ -7097,6 +7097,8 @@ _DOMAIN_CHECKS.update(
 from .evidence import (
     ComputationEvidenceBundleV1 as _ST12FComputationEvidenceBundleV1,
     DivergenceAssessmentV1 as _ST12FDivergenceAssessmentV1,
+    DivergenceTerminalStateV1 as _ST12FDivergenceTerminalStateV1,
+    FToDEvidenceReferenceQueryV1 as _ST12FFToDQueryV1,
     PaperResultContractV1 as _ST12FPaperResultContractV1,
     ReplayResultContractV1 as _ST12FReplayResultContractV1,
     ST12F_EVIDENCE_IDENTITIES_V1 as _ST12F_EVIDENCE_IDENTITIES_V1,
@@ -7114,6 +7116,13 @@ from .input_lock import (
 from .model_risk import (
     MODEL_RISK_CONTROL_IDS_V1 as _ST12F_MODEL_RISK_CONTROL_IDS_V1,
     NO_TRADE_CONDITION_IDS_V1 as _ST12F_NO_TRADE_CONDITION_IDS_V1,
+    ModelRiskAdjudicationBasisV1 as _ST12FModelRiskBasisV1,
+    ModelRiskControlEvidenceV1 as _ST12FModelRiskControlEvidenceV1,
+    ModelRiskControlStateV1 as _ST12FModelRiskControlStateV1,
+    ModelRiskEvidenceAdjudicatorV1 as _ST12FModelRiskAdjudicatorV1,
+    ModelRiskLaneEvidenceV1 as _ST12FModelRiskLaneEvidenceV1,
+    NoTradeConditionOutcomeV1 as _ST12FNoTradeConditionOutcomeV1,
+    PermanentNoTradeEvidenceComparisonV1 as _ST12FNoTradeComparisonV1,
 )
 from .oracle_contracts import (
     ST12F_EVIDENCE_GOLDEN_VECTOR_BY_MATH_ID as _ST12F_VECTORS_V1,
@@ -7129,6 +7138,27 @@ from .source_policy import (
 from .specification import (
     ST12F_EVIDENCE_MATH_SPECIFICATION_IDS_V1 as _ST12F_MATH_SPEC_IDS_V1,
 )
+from .input_resolver import (
+    CurrentModeSnapshotInputResolverV1 as _ST12FCurrentDInputResolverV1,
+)
+from .llm_gateway import (
+    AnnotationCitationV1 as _ST12FAnnotationCitationV1,
+    AnnotationClaimV1 as _ST12FAnnotationClaimV1,
+    CanonicalNumericEvidenceValueV1 as _ST12FCanonicalNumericValueV1,
+    GroundedLLMGatewayV1 as _ST12FGroundedLLMGatewayV1,
+    LLMAdvisoryTaskV1 as _ST12FLLMAdvisoryTaskV1,
+    PreexistingAnnotationPacketV1 as _ST12FAnnotationPacketV1,
+    QuotedNumericFactV1 as _ST12FQuotedNumericFactV1,
+)
+from .models import (
+    ST12FEvidenceReferenceV1 as _ST12FEvidenceReferenceV1,
+    ST12FEvidenceStateV1 as _ST12FEvidenceStateV1,
+)
+from .receipts import (
+    ST12FEvidenceControlReceiptRecordV1 as _ST12FControlReceiptV1,
+    ST12FReceiptClassV1 as _ST12FReceiptClassV1,
+)
+from .serialization import deterministic_json as _st12f_deterministic_json
 
 
 def _st12f_central_contract_checks() -> tuple[ValidationCheckV1, ...]:
@@ -7139,7 +7169,7 @@ def _st12f_central_contract_checks() -> tuple[ValidationCheckV1, ...]:
             and len(fields(_ST12FReplayResultContractV1)) == 26
             and len(fields(_ST12FPaperResultContractV1)) == 26
             and len(fields(_ST12FDivergenceAssessmentV1)) == 18
-            and len(fields(_ST12FComputationEvidenceBundleV1)) == 30
+            and len(fields(_ST12FComputationEvidenceBundleV1)) == 31
         ), "five exact canonical contract field rosters"),
         _check("ST12F_COHORT_AND_SLOTS", len(_ST12F_TEMPLATE_IDS_V1) == 52 and len(_ST12F_REPLAY_SLOTS_V1) == 52 and len(_ST12F_PAPER_SLOTS_V1) == 52 and len(set(lane_ids)) == 104, "52 ordered templates and 104 disjoint lane slots"),
         _check("ST12F_MATH_ORACLE_VECTOR_48", len(_ST12F_MATH_SPEC_IDS_V1) == len(_ST12F_MATH_CALLABLES_V1) == len(_ST12F_ORACLES_V1) == len(_ST12F_VECTORS_V1) == 48, "48 specifications, callables, independent oracles, and vectors"),
@@ -7150,40 +7180,404 @@ def _st12f_central_contract_checks() -> tuple[ValidationCheckV1, ...]:
     )
 
 
+def _st12f_receipt_metadata_executable_v1() -> bool:
+    divergence = _ST12FDivergenceAssessmentV1(
+        assessment_id="DIVERGENCE::CENTRAL-VALIDATION",
+        schema_version="QTT_ST12F_DIVERGENCE_ASSESSMENT_V1_4",
+        contract_version="1.4",
+        input_lock_id="LOCK::CENTRAL-VALIDATION",
+        cohort_template_id="MATH-01",
+        replay_result_ref="RESULT::REPLAY",
+        paper_result_ref="RESULT::PAPER",
+        metric_deltas={"utility": Decimal("0")},
+        directional_agreement=True,
+        calibration_delta=Decimal("0"),
+        execution_cost_delta=Decimal("0"),
+        fill_delta=Decimal("0"),
+        latency_delta=Decimal("0"),
+        capacity_delta=Decimal("0"),
+        regime_delta=Decimal("0"),
+        threshold_policy_refs=("POLICY::LOCKED",),
+        typed_blockers=(),
+        terminal_state=(
+            _ST12FDivergenceTerminalStateV1.CONSISTENT_WITHIN_LOCKED_THRESHOLDS
+        ),
+    )
+    receipt = _ST12FControlReceiptV1(
+        control_receipt_id=(
+            "ST12F-RECEIPT::DIVERGENCE::CENTRAL-VALIDATION::"
+            "DIVERGENCE_ASSESSMENT"
+        ),
+        receipt_class=_ST12FReceiptClassV1.DIVERGENCE_ASSESSMENT,
+        operation_id="ST10-OP::15",
+        request_id="REQUEST::CENTRAL-VALIDATION",
+        idempotency_key="IDEMPOTENCY::CENTRAL-VALIDATION",
+        contract_type="DivergenceAssessmentV1",
+        contract_id=divergence.assessment_id,
+        contract_version=divergence.contract_version,
+        input_lock_id_or_explicit_absence=divergence.input_lock_id,
+        parent_version_ref_or_explicit_absence="EXPLICIT_ABSENCE",
+        canonical_contract_json=_st12f_deterministic_json(divergence),
+        source_record_refs=(
+            divergence.replay_result_ref,
+            divergence.paper_result_ref,
+        ),
+        parameter_value_refs=(),
+        source_epoch_refs=(),
+        typed_reason_codes=(),
+        terminal_state=divergence.terminal_state.value,
+        fixture_only_not_evidence=False,
+    )
+    valid_round_trip = receipt.reconstruct(_ST12FDivergenceAssessmentV1) == divergence
+    forged_rejected = False
+    try:
+        replace(receipt, source_record_refs=("RESULT::FORGED",)).reconstruct(
+            _ST12FDivergenceAssessmentV1
+        )
+    except ContractValidationError as exc:
+        forged_rejected = exc.reason_code is ReasonCode.SCHEMA_MISMATCH
+    return valid_round_trip and forged_rejected
+
+
+def _st12f_model_risk_executable_v1() -> bool:
+    now = datetime(2026, 1, 1, 12, tzinfo=UTC)
+    controls = tuple(
+        _ST12FModelRiskControlEvidenceV1(
+            identity,
+            _ST12FModelRiskControlStateV1.PASS_RECEIPTED,
+            (f"RECEIPT::{identity}",),
+            (),
+            (),
+            True,
+        )
+        for identity in _ST12F_MODEL_RISK_CONTROL_IDS_V1
+    )
+    caller_false = tuple(
+        _ST12FNoTradeConditionOutcomeV1(
+            identity, False, (f"RECEIPT::{identity}",), ()
+        )
+        for identity in _ST12F_NO_TRADE_CONDITION_IDS_V1
+    )
+
+    def lane(name: str) -> _ST12FModelRiskLaneEvidenceV1:
+        return _ST12FModelRiskLaneEvidenceV1(
+            lane=name,
+            result_receipt_ref=f"RECEIPT::{name}",
+            input_lock_id="LOCK::MODEL-RISK",
+            component_or_template_ref="MATH-01",
+            observed_at=now - timedelta(minutes=1),
+            valid_until=now + timedelta(minutes=1),
+        )
+
+    assessment = _ST12FModelRiskAdjudicatorV1().adjudicate(
+        assessment_id="MODEL-RISK::CENTRAL-VALIDATION",
+        input_lock_id="LOCK::MODEL-RISK",
+        controls=controls,
+        conditions=caller_false,
+        comparison=_ST12FNoTradeComparisonV1(
+            comparison_id="COMPARISON::CLASSICAL-DOMINATES",
+            input_lock_id="LOCK::MODEL-RISK",
+            execution_adjusted_lcb=Decimal("0.1"),
+            candidate_utility=Decimal("1"),
+            strongest_classical_utility=Decimal("1.1"),
+            no_trade_utility=Decimal("0"),
+            strongest_comparator="STRONGEST_CLASSICAL",
+        ),
+        adjudication_basis=_ST12FModelRiskBasisV1(
+            expected_component_or_template_ref="MATH-01",
+            evaluated_at=now,
+            required_evidence_valid_until=now + timedelta(minutes=1),
+            required_evidence_receipt_refs=("RECEIPT::REQUIRED",),
+            replay_lane=lane("REPLAY"),
+            paper_lane=lane("PAPER"),
+            uncertainty_reserve=Decimal("0.05"),
+            model_risk_reserve=Decimal("0.05"),
+            capacity_hard_veto=False,
+            liquidity_hard_veto=False,
+            capacity_liquidity_receipt_refs=("RECEIPT::CAPACITY",),
+            independent_review_state="READY_FOR_INDEPENDENT_REVIEW",
+            independent_review_receipt_ref="RECEIPT::REVIEW",
+        ),
+        limitations=("LIMITATION::DECLARED",),
+        receipt_refs=("RECEIPT::ASSESSMENT",),
+    )
+    by_id = {
+        row.condition_id: row for row in assessment.no_trade_condition_outcomes
+    }
+    return (
+        by_id["STRONGEST_CLASSICAL_OR_NO_TRADE_DOMINATES"].active
+        and assessment.terminal_state == "NO_TRADE"
+        and assessment.automatic_promotion_allowed is False
+    )
+
+
+class _ST12FCentralNumericResolverV1:
+    def resolve_numeric_evidence(
+        self, *, numeric_fact_id: str, evidence_ref: str
+    ) -> _ST12FCanonicalNumericValueV1:
+        now = datetime(2026, 1, 1, 12, tzinfo=UTC)
+        return _ST12FCanonicalNumericValueV1(
+            numeric_fact_id=numeric_fact_id,
+            evidence_ref=evidence_ref,
+            evidence_bundle_ref=evidence_ref,
+            value=Decimal("0.5"),
+            unit_and_basis="probability|unitless",
+            evidence_receipt_ref="ST12F-RECEIPT::D::CENTRAL",
+            numeric_recheck_receipt_ref="ST12F-RECEIPT::LLM::CENTRAL",
+            input_lock_id="LOCK::LLM",
+            source_epoch_refs=("SOURCE::1=EPOCH::1",),
+            observed_at=now - timedelta(minutes=1),
+            valid_until=now + timedelta(minutes=1),
+        )
+
+    @staticmethod
+    def receipt_exists(receipt_ref: str) -> bool:
+        return receipt_ref in {
+            "ST12F-RECEIPT::D::CENTRAL",
+            "ST12F-RECEIPT::LLM::CENTRAL",
+        }
+
+
+def _st12f_llm_executable_v1() -> bool:
+    now = datetime(2026, 1, 1, 12, tzinfo=UTC)
+    packet = _ST12FAnnotationPacketV1(
+        annotation_id="ANNOTATION::CENTRAL",
+        evidence_bundle_refs=("BUNDLE::CENTRAL",),
+        redacted_context_refs=("CONTEXT::REDACTED",),
+        untrusted_content_fragments=(),
+        advisory_task=_ST12FLLMAdvisoryTaskV1.SUMMARIZE_EVIDENCE,
+        citations=(
+            _ST12FAnnotationCitationV1(
+                "CITATION::CENTRAL", "BUNDLE::CENTRAL", ("CLAIM::CENTRAL",)
+            ),
+        ),
+        claims=(
+            _ST12FAnnotationClaimV1(
+                "CLAIM::CENTRAL",
+                "Advisory evidence summary.",
+                ("CITATION::CENTRAL",),
+                ("NUMERIC::CENTRAL",),
+            ),
+        ),
+        limitations=("LIMITATION::ADVISORY",),
+        abstentions=(),
+        quoted_numeric_facts=(
+            _ST12FQuotedNumericFactV1(
+                "NUMERIC::CENTRAL",
+                "BUNDLE::CENTRAL",
+                "probability|unitless",
+                Decimal("0.5"),
+                ("CLAIM::CENTRAL",),
+            ),
+        ),
+        deterministic_numeric_recheck_receipt_refs=(
+            "ST12F-RECEIPT::LLM::CENTRAL",
+        ),
+        upstream_budget_metadata={
+            "budget_source_ref": "BUDGET::UPSTREAM",
+            "supplied_upstream": True,
+            "token_budget": 64,
+        },
+        requested_actions=("SUMMARIZE_EVIDENCE",),
+    )
+    gateway = _ST12FGroundedLLMGatewayV1(_ST12FCentralNumericResolverV1())
+    normalized = gateway.validate_and_normalize(packet, evaluated_at=now)
+    forged_rejected = False
+    try:
+        gateway.validate_and_normalize(
+            replace(
+                packet,
+                quoted_numeric_facts=(
+                    replace(
+                        packet.quoted_numeric_facts[0],
+                        quoted_value=Decimal("0.6"),
+                    ),
+                ),
+            ),
+            evaluated_at=now,
+        )
+    except ContractValidationError as exc:
+        forged_rejected = exc.reason_code is ReasonCode.ST12F_LLM_ANNOTATION_INVALID
+    return (
+        normalized.numeric_recheck_passed
+        and normalized.canonical_numeric_evidence[0].value == Decimal("0.5")
+        and forged_rejected
+    )
+
+
+def _st12f_quantum_executable_v1() -> bool:
+    raw = json.loads(_ST12F_VECTORS_V1["MATH-52"].inputs_json)
+    result = _ST12F_MATH_CALLABLES_V1["MATH-52"](**raw)
+    mismatch = dict(raw)
+    mismatch["strongest_classical_basis"] = {
+        **raw["strongest_classical_basis"],
+        "cost_basis_ref": "COST::MISMATCH",
+    }
+    mismatch_rejected = False
+    try:
+        _ST12F_MATH_CALLABLES_V1["MATH-52"](**mismatch)
+    except ContractValidationError as exc:
+        mismatch_rejected = exc.reason_code is ReasonCode.ST12F_QUANTUM_TRACE_INVALID
+    return (
+        result["winner"] == "STRONGEST_CLASSICAL"
+        and result["delta_quantum_vs_classical"] == Decimal("-0.1")
+        and result["delta_quantum_vs_no_trade"] == Decimal("1.2")
+        and result["quantum_advantage_claim_allowed"] is False
+        and mismatch_rejected
+    )
+
+
+def _st12f_d_reference_executable_v1() -> bool:
+    now = datetime(2026, 1, 1, 12, tzinfo=UTC)
+    query = _ST12FFToDQueryV1(
+        query_id="QUERY::CENTRAL",
+        requested_evidence_id="EVIDENCE::CENTRAL",
+        requested_component_or_template_ref="MATH-01",
+        expected_input_lock_id="LOCK::D",
+        expected_source_epoch_refs=("SOURCE::1=EPOCH::1",),
+        evaluated_at=now,
+        request_read_lineage_refs=("RECEIPT::READ",),
+    )
+    reference = _ST12FEvidenceReferenceV1(
+        evidence_state=_ST12FEvidenceStateV1.EVIDENCE_REFERENCE_AVAILABLE,
+        evidence_ref="ST12F-RECEIPT::BUNDLE::EVIDENCE_BUNDLE_VERSION",
+        lane="REPLAY_PAPER",
+        dataset_grade_ref="DATASET::GRADE",
+        venue_semantic_binding_ref="VENUE::SEMANTICS",
+        cross_venue_equivalence_ref="CROSS-VENUE::EQUIVALENCE",
+        observed_at=now - timedelta(minutes=1),
+        valid_until=now + timedelta(minutes=1),
+        policy_version="ST12F_EVIDENCE_POLICY_V1_4",
+        causation_id="CAUSE::ORIGINAL",
+        correlation_id="CORRELATION::ORIGINAL",
+        input_lock_id="LOCK::D",
+        component_or_template_ref="MATH-01",
+        evidence_bundle_version="BUNDLE::1",
+        source_epoch_refs=("SOURCE::1=EPOCH::1",),
+        terminal_state="CLOSED_INDEPENDENTLY_VALIDATED",
+        reference_id="D-REFERENCE::CENTRAL",
+        evidence_id="EVIDENCE::CENTRAL",
+    )
+
+    @dataclass(frozen=True, slots=True)
+    class _Context:
+        as_of: datetime
+
+    valid = _ST12FCurrentDInputResolverV1._validate_f_reference_for_d(
+        context=_Context(now),
+        query=query,
+        reference=reference,
+        causation_id="CAUSE::READ",
+        correlation_id="CORRELATION::READ",
+    )
+    stale = _ST12FCurrentDInputResolverV1._validate_f_reference_for_d(
+        context=_Context(now),
+        query=query,
+        reference=replace(
+            reference,
+            observed_at=now - timedelta(minutes=2),
+            valid_until=now - timedelta(minutes=1),
+        ),
+        causation_id="CAUSE::READ",
+        correlation_id="CORRELATION::READ",
+    )
+    return (
+        valid is reference
+        and valid.causation_id == "CAUSE::ORIGINAL"
+        and valid.correlation_id == "CORRELATION::ORIGINAL"
+        and stale.evidence_state
+        is not _ST12FEvidenceStateV1.EVIDENCE_REFERENCE_AVAILABLE
+    )
+
+
+_pre_st12f_operations_checks = _DOMAIN_CHECKS["operations"]
+_pre_st12f_d_checks = _DOMAIN_CHECKS["d"]
 _pre_st12f_llm_checks = _DOMAIN_CHECKS["llm"]
 _pre_st12f_quantum_checks = _DOMAIN_CHECKS["quantum"]
 
 
 def _st12f_llm_checks() -> tuple[ValidationCheckV1, ...]:
     source = (REPO_ROOT / "src/qtt/stage1_prediction_markets/qku_computation_control_plane/llm_gateway.py").read_text(encoding="utf-8")
-    return (*_pre_st12f_llm_checks(), *_st12f_central_contract_checks(), _check(
-        "ST12F_LLM_ADVISORY_ONLY",
-        not any(token in source for token in ("import openai", "from openai", "import anthropic", "from anthropic", "def infer")),
-        "pre-existing annotation normalization has no SDK or inference path",
-    ))
+    return (
+        *_pre_st12f_llm_checks(),
+        *_st12f_central_contract_checks(),
+        _check(
+            "ST12F_LLM_ADVISORY_ONLY",
+            not any(token in source for token in ("import openai", "from openai", "import anthropic", "from anthropic", "def infer")),
+            "pre-existing annotation normalization has no SDK or inference path",
+        ),
+        _check(
+            "ST12F_LLM_CANONICAL_NUMERIC_RECHECK_EXECUTABLE",
+            _st12f_llm_executable_v1(),
+            "canonical evidence supplies the value and a forged caller quote fails",
+        ),
+    )
 
 
 def _st12f_model_risk_checks() -> tuple[ValidationCheckV1, ...]:
     source = (REPO_ROOT / "src/qtt/stage1_prediction_markets/qku_computation_control_plane/model_risk.py").read_text(encoding="utf-8")
-    return (*_st12f_central_contract_checks(), _check(
-        "ST12F_MODEL_RISK_NO_PROMOTION",
-        "automatic_promotion_allowed=False" in source and "permanent_no_trade_wins" in source,
-        "deterministic adjudication preserves NO_TRADE and zero promotion authority",
-    ))
+    return (
+        *_st12f_central_contract_checks(),
+        _check(
+            "ST12F_MODEL_RISK_NO_PROMOTION",
+            "automatic_promotion_allowed=False" in source and "permanent_no_trade_wins" in source,
+            "deterministic adjudication preserves NO_TRADE and zero promotion authority",
+        ),
+        _check(
+            "ST12F_MODEL_RISK_DERIVED_VETO_EXECUTABLE",
+            _st12f_model_risk_executable_v1(),
+            "caller-false condition cannot suppress classical domination",
+        ),
+    )
 
 
 def _st12f_quantum_checks() -> tuple[ValidationCheckV1, ...]:
     source = (REPO_ROOT / "src/qtt/stage1_prediction_markets/qku_computation_control_plane/quantum_benchmark.py").read_text(encoding="utf-8")
     forbidden = ("Estimator(", "Sampler(", "transpile(", "AerSimulator(", "provider.", "qpu.")
-    return (*_pre_st12f_quantum_checks(), *_st12f_central_contract_checks(), _check(
-        "ST12F_QUANTUM_TRACE_ONLY",
-        len(_ST12F_QUANTUM_BOUNDARIES_V1) == 3 and not any(token in source for token in forbidden),
-        "MATH-50 through MATH-52 validate supplied traces without execution",
-    ))
+    return (
+        *_pre_st12f_quantum_checks(),
+        *_st12f_central_contract_checks(),
+        _check(
+            "ST12F_QUANTUM_TRACE_ONLY",
+            len(_ST12F_QUANTUM_BOUNDARIES_V1) == 3 and not any(token in source for token in forbidden),
+            "MATH-50 through MATH-52 validate supplied traces without execution",
+        ),
+        _check(
+            "ST12F_MATH52_BASIS_AND_ORDER_EXECUTABLE",
+            _st12f_quantum_executable_v1(),
+            "typed basis mismatch rejects and lexicographic result is exact",
+        ),
+    )
+
+
+def _st12f_operations_checks() -> tuple[ValidationCheckV1, ...]:
+    return (
+        *_pre_st12f_operations_checks(),
+        *_st12f_central_contract_checks(),
+        _check(
+            "ST12F_RECEIPT_METADATA_EXECUTABLE",
+            _st12f_receipt_metadata_executable_v1(),
+            "receipt reconstruction binds canonical contract and exact metadata",
+        ),
+    )
+
+
+def _st12f_d_checks() -> tuple[ValidationCheckV1, ...]:
+    return (
+        *_pre_st12f_d_checks(),
+        *_st12f_central_contract_checks(),
+        _check(
+            "ST12F_D_REFERENCE_FAIL_CLOSED_EXECUTABLE",
+            _st12f_d_reference_executable_v1(),
+            "current D read preserves original lineage and rejects stale evidence",
+        ),
+    )
 
 
 _DOMAIN_CHECKS.update(
     {
+        "operations": _st12f_operations_checks,
+        "d": _st12f_d_checks,
         "llm": _st12f_llm_checks,
         "model_risk": _st12f_model_risk_checks,
         "quantum": _st12f_quantum_checks,

@@ -263,7 +263,174 @@ class ST12FEvidenceControlReceiptRecordV1:
                 ReasonCode.SCHEMA_MISMATCH,
                 "canonical contract reconstruction did not round-trip exactly",
             )
+        self._validate_metadata(value)
         return value
+
+    def _validate_metadata(self, value: object) -> None:
+        """Bind receipt metadata to the reconstructed immutable contract."""
+
+        identifier_fields = {
+            ST12FReceiptClassV1.COHORT_COMPILATION: "compilation_id",
+            ST12FReceiptClassV1.INPUT_LOCK: "input_lock_id",
+            ST12FReceiptClassV1.REPLAY_REGISTRATION: "result_id",
+            ST12FReceiptClassV1.PAPER_REGISTRATION: "result_id",
+            ST12FReceiptClassV1.DIVERGENCE_ASSESSMENT: "assessment_id",
+            ST12FReceiptClassV1.MODEL_RISK_ASSESSMENT: "assessment_id",
+            ST12FReceiptClassV1.QUANTUM_TRACE_VALIDATION: "receipt_id",
+            ST12FReceiptClassV1.LLM_ANNOTATION_VALIDATION: "annotation_id",
+            ST12FReceiptClassV1.EVIDENCE_BUNDLE_VERSION: "evidence_bundle_version",
+            ST12FReceiptClassV1.INDEPENDENT_REVIEW_VERSION: "review_id",
+            ST12FReceiptClassV1.D_EVIDENCE_REFERENCE: "reference_id",
+            ST12FReceiptClassV1.G_HANDOFF_REFERENCE: "handoff_id",
+        }
+        contract_id = getattr(value, identifier_fields[self.receipt_class], None)
+        contract_version = getattr(value, "contract_version", None)
+        input_lock_id = getattr(value, "input_lock_id", None)
+        if self.receipt_class is ST12FReceiptClassV1.COHORT_COMPILATION:
+            input_lock_id = getattr(getattr(value, "input_lock", None), "input_lock_id", None)
+        if (
+            contract_id != self.contract_id
+            or contract_version != self.contract_version
+            or input_lock_id != self.input_lock_id_or_explicit_absence
+        ):
+            raise ContractValidationError(
+                ReasonCode.SCHEMA_MISMATCH,
+                "ST12-F receipt identity, version, or input-lock metadata differs from its contract",
+            )
+
+        parent = "EXPLICIT_ABSENCE"
+        if self.receipt_class is ST12FReceiptClassV1.EVIDENCE_BUNDLE_VERSION:
+            parent = getattr(value, "prior_bundle_ref_or_explicit_absence", None)
+        elif self.receipt_class is ST12FReceiptClassV1.INDEPENDENT_REVIEW_VERSION:
+            parent = getattr(value, "prior_bundle_ref", None)
+        elif self.receipt_class is ST12FReceiptClassV1.D_EVIDENCE_REFERENCE:
+            parent = getattr(value, "evidence_ref", None)
+        elif self.receipt_class is ST12FReceiptClassV1.G_HANDOFF_REFERENCE:
+            parent = getattr(value, "evidence_bundle_ref", None)
+        if parent != self.parent_version_ref_or_explicit_absence:
+            raise ContractValidationError(
+                ReasonCode.SCHEMA_MISMATCH,
+                "ST12-F receipt parent-version metadata differs from its contract",
+            )
+
+        expected_sources: tuple[str, ...] | None = None
+        if self.receipt_class in {
+            ST12FReceiptClassV1.COHORT_COMPILATION,
+            ST12FReceiptClassV1.INPUT_LOCK,
+        }:
+            expected_sources = ()
+        elif self.receipt_class in {
+            ST12FReceiptClassV1.REPLAY_REGISTRATION,
+            ST12FReceiptClassV1.PAPER_REGISTRATION,
+        }:
+            expected_sources = (getattr(value, "run_reference"),)
+        elif self.receipt_class is ST12FReceiptClassV1.DIVERGENCE_ASSESSMENT:
+            expected_sources = (
+                getattr(value, "replay_result_ref"),
+                getattr(value, "paper_result_ref"),
+            )
+        elif self.receipt_class is ST12FReceiptClassV1.MODEL_RISK_ASSESSMENT:
+            expected_sources = tuple(getattr(value, "receipt_refs"))
+        elif self.receipt_class is ST12FReceiptClassV1.QUANTUM_TRACE_VALIDATION:
+            expected_sources = (
+                getattr(value, "trace_id"),
+                getattr(value, "strongest_classical_receipt_ref"),
+                getattr(value, "no_trade_receipt_ref"),
+            )
+        elif self.receipt_class is ST12FReceiptClassV1.LLM_ANNOTATION_VALIDATION:
+            expected_sources = tuple(
+                dict.fromkeys(
+                    (
+                        *getattr(value, "evidence_bundle_refs"),
+                        *(row.evidence_receipt_ref for row in getattr(value, "canonical_numeric_evidence")),
+                        *getattr(value, "deterministic_numeric_recheck_receipt_refs"),
+                    )
+                )
+            )
+        elif self.receipt_class is ST12FReceiptClassV1.EVIDENCE_BUNDLE_VERSION:
+            expected_sources = tuple(getattr(value, "source_and_provenance_refs"))
+        elif self.receipt_class is ST12FReceiptClassV1.INDEPENDENT_REVIEW_VERSION:
+            expected_sources = (
+                getattr(value, "prior_bundle_ref"),
+                getattr(value, "authority_receipt_ref"),
+            )
+        elif self.receipt_class is ST12FReceiptClassV1.D_EVIDENCE_REFERENCE:
+            expected_sources = (getattr(value, "evidence_ref"),)
+        elif self.receipt_class is ST12FReceiptClassV1.G_HANDOFF_REFERENCE:
+            expected_sources = tuple(
+                dict.fromkeys(
+                    (
+                        getattr(value, "evidence_bundle_ref"),
+                        *getattr(value, "no_trade_blocker_refs"),
+                        *getattr(value, "champion_challenger_evidence_refs"),
+                        *getattr(value, "portfolio_utility_refs"),
+                        getattr(value, "quantum_classical_comparison_receipt_ref"),
+                    )
+                )
+            )
+        if expected_sources != self.source_record_refs:
+            raise ContractValidationError(
+                ReasonCode.SCHEMA_MISMATCH,
+                "ST12-F receipt source-record metadata differs from its contract",
+            )
+
+        expected_epochs: tuple[str, ...] | None = None
+        source_epochs = getattr(value, "source_epochs", None)
+        if isinstance(source_epochs, Mapping):
+            expected_epochs = tuple(
+                f"{key}={source_epochs[key]}" for key in sorted(source_epochs)
+            )
+        if self.receipt_class is ST12FReceiptClassV1.COHORT_COMPILATION:
+            source_epochs = getattr(getattr(value, "input_lock", None), "source_epochs", None)
+            if isinstance(source_epochs, Mapping):
+                expected_epochs = tuple(
+                    f"{key}={source_epochs[key]}" for key in sorted(source_epochs)
+                )
+        for field_name in ("source_epoch_refs", "reviewed_source_epoch_refs"):
+            if hasattr(value, field_name):
+                expected_epochs = tuple(getattr(value, field_name))
+        if expected_epochs is not None and expected_epochs != self.source_epoch_refs:
+            raise ContractValidationError(
+                ReasonCode.SCHEMA_MISMATCH,
+                "ST12-F receipt source-epoch metadata differs from its contract",
+            )
+
+        expected_parameters = getattr(value, "parameter_value_refs", None)
+        if self.receipt_class is ST12FReceiptClassV1.COHORT_COMPILATION:
+            expected_parameters = getattr(getattr(value, "input_lock", None), "parameter_value_refs", None)
+        if expected_parameters is not None and tuple(expected_parameters) != self.parameter_value_refs:
+            raise ContractValidationError(
+                ReasonCode.SCHEMA_MISMATCH,
+                "ST12-F receipt parameter metadata differs from its contract",
+            )
+
+        terminal = {
+            ST12FReceiptClassV1.COHORT_COMPILATION: "COMPILED",
+            ST12FReceiptClassV1.INPUT_LOCK: "LOCKED_IMMUTABLE",
+            ST12FReceiptClassV1.REPLAY_REGISTRATION: "REPLAY_REGISTERED",
+            ST12FReceiptClassV1.PAPER_REGISTRATION: "PAPER_REGISTERED",
+            ST12FReceiptClassV1.LLM_ANNOTATION_VALIDATION: "ANNOTATION_VALIDATED_NO_EFFECT",
+        }.get(self.receipt_class, getattr(value, "terminal_state", None))
+        if hasattr(terminal, "value"):
+            terminal = terminal.value
+        if self.receipt_class is ST12FReceiptClassV1.DIVERGENCE_ASSESSMENT:
+            terminal = getattr(value, "terminal_state").value
+        if self.receipt_class is ST12FReceiptClassV1.INDEPENDENT_REVIEW_VERSION:
+            terminal = getattr(value, "decision").value
+        reasons = getattr(value, "blocker_codes", getattr(value, "typed_blockers", ()))
+        fixture = getattr(value, "fixture_only_not_evidence", False)
+        contract_no_effects = getattr(value, "no_effect_flags", NO_EFFECTS_V1)
+        if (
+            terminal != self.terminal_state
+            or tuple(reasons) != self.typed_reason_codes
+            or fixture != self.fixture_only_not_evidence
+            or contract_no_effects != self.no_effect_flags
+            or self.no_effect_flags != NO_EFFECTS_V1
+        ):
+            raise ContractValidationError(
+                ReasonCode.SCHEMA_MISMATCH,
+                "ST12-F receipt state, reason, fixture, or no-effect metadata differs from its contract",
+            )
 
 
 ECONOMIC_RECORD_PAYLOAD_CLASS: Mapping[EconomicRecordTypeV1, tuple[str, str]] = MappingProxyType(

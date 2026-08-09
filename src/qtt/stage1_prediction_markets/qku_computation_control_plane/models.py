@@ -10,7 +10,7 @@ import re
 from types import MappingProxyType
 from typing import ClassVar, Mapping, TypeVar
 
-from .context import ComputationContextKeyV1
+from .context import ComputationContextKeyV1, parse_utc
 from .errors import ContractValidationError, ReasonCode
 
 
@@ -1265,6 +1265,9 @@ class ST12FEvidenceReferenceV1:
     evidence_bundle_version: str = "EXPLICIT_ABSENCE"
     source_epoch_refs: tuple[str, ...] = ()
     terminal_state: str = "UNAVAILABLE"
+    reference_id: str = "EXPLICIT_ABSENCE"
+    evidence_id: str = "EXPLICIT_ABSENCE"
+    contract_version: str = "1.4"
     no_effect_flags: NoEffectFlagsV1 = NO_EFFECTS_V1
 
     def __post_init__(self) -> None:
@@ -1282,6 +1285,9 @@ class ST12FEvidenceReferenceV1:
             "component_or_template_ref",
             "evidence_bundle_version",
             "terminal_state",
+            "reference_id",
+            "evidence_id",
+            "contract_version",
         ):
             _canonical_text(getattr(self, name), name)
         _text_tuple(self.source_epoch_refs, "source_epoch_refs")
@@ -1294,6 +1300,11 @@ class ST12FEvidenceReferenceV1:
             raise ContractValidationError(
                 ReasonCode.RUNTIME_EFFECT_FORBIDDEN,
                 "F evidence references require the shared no-effect custody type",
+            )
+        if self.contract_version != "1.4":
+            raise ContractValidationError(
+                ReasonCode.SCHEMA_MISMATCH,
+                "F evidence reference contract version differs",
             )
         observed = _utc_timestamp(self.observed_at, "observed_at")
         valid_until = _utc_timestamp(self.valid_until, "valid_until")
@@ -1318,6 +1329,8 @@ class ST12FEvidenceReferenceV1:
                     "input_lock_id",
                     "component_or_template_ref",
                     "evidence_bundle_version",
+                    "reference_id",
+                    "evidence_id",
                 )
             ):
                 raise ContractValidationError(
@@ -1332,6 +1345,32 @@ class ST12FEvidenceReferenceV1:
                     ReasonCode.EVIDENCE_REFERENCE_UNAVAILABLE_STALE_CONFLICTING_OR_SCOPE_MISMATCH,
                     "available evidence requires current source epochs and closed review",
                 )
+
+    @classmethod
+    def from_canonical_mapping(cls, value: object) -> "ST12FEvidenceReferenceV1":
+        if not isinstance(value, Mapping) or set(value) != {
+            field.name for field in dataclass_fields(cls)
+        }:
+            raise ContractValidationError(
+                ReasonCode.SCHEMA_MISMATCH,
+                "F evidence-reference payload fields differ",
+            )
+        payload = dict(value)
+        payload["evidence_state"] = ST12FEvidenceStateV1(payload["evidence_state"])
+        payload["source_epoch_refs"] = tuple(payload["source_epoch_refs"])
+        payload["observed_at"] = parse_utc(
+            payload["observed_at"], field_name="observed_at"
+        )
+        payload["valid_until"] = parse_utc(
+            payload["valid_until"], field_name="valid_until"
+        )
+        payload["no_effect_flags"] = NO_EFFECTS_V1
+        return cls(**payload)
+
+    def canonical_json(self) -> str:
+        from .serialization import deterministic_json
+
+        return deterministic_json(self)
 
 
 @dataclass(frozen=True, slots=True)

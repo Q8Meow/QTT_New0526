@@ -2,33 +2,103 @@
 
 from __future__ import annotations
 
-from dataclasses import replace
+from dataclasses import dataclass, fields, replace
 from datetime import UTC, datetime, timedelta
 from decimal import Decimal
+import json
+
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.agent_policy import (
+    AgentCapabilityDecisionStateV1,
+    AgentCapabilityDecisionV1,
+    POLICY_VERSION,
+)
 
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import (
     ContractValidationError,
+    PersistenceContractError,
     ReasonCode,
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.evidence import (
     ComputationEvidenceBundleV1,
+    ComputationEvidenceServiceV1,
     DivergenceAssessmentV1,
     DivergenceTerminalStateV1,
     EvidenceBundleTerminalStateV1,
     EvidenceIdentityDispositionStateV1,
     EvidenceIdentityDispositionV1,
     EvidenceSectionV1,
+    FToDEvidenceReferenceQueryV1,
+    FToGHandoffReferencesV1,
     IndependentReviewDecisionV1,
     IndependentReviewRecordV1,
     PaperResultContractV1,
     ReplayResultContractV1,
     ST12F_EVIDENCE_IDENTITIES_V1,
 )
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.cohort_compiler import (
+    ReplayPaperCohortCompilationRecordV1,
+    ReplayPaperCohortCompilerV1,
+)
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.context import (
+    ComputationContextKeyV1,
+)
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.input_lock import (
     CanonicalReplayPaperInputSnapshotV1,
+    ImmutableReplayPaperInputLockV1,
     ST12F_TEMPLATE_IDS_V1,
     build_immutable_replay_paper_input_lock_v1,
     canonical_st12f_parameter_value_refs_v1,
+)
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.input_resolver import (
+    CanonicalOwnerPacketRegistryV1,
+)
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.llm_gateway import (
+    AnnotationCitationV1,
+    AnnotationClaimV1,
+    CanonicalNumericEvidenceValueV1,
+    DeterministicEvidenceAnnotationContractV1,
+    LLMAdvisoryTaskV1,
+    QuotedNumericFactV1,
+)
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.model_risk import (
+    MODEL_RISK_CONTROL_IDS_V1,
+    NO_TRADE_CONDITION_IDS_V1,
+    ModelRiskAdjudicationBasisV1,
+    ModelRiskControlEvidenceV1,
+    ModelRiskControlStateV1,
+    ModelRiskEvidenceAdjudicatorV1,
+    ModelRiskLaneEvidenceV1,
+    NoTradeConditionOutcomeV1,
+    PermanentNoTradeEvidenceComparisonV1,
+)
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.models import (
+    BuildEvidenceBundleRequestV1,
+    CompileReplayPaperCohortRequestV1,
+    NO_EFFECTS_V1,
+    RegisterReplayPaperResultRequestV1,
+    ST12FEvidenceReferenceV1,
+    ST12FEvidenceStateV1,
+    TypedValueKindV1,
+    TypedValueRecordV1,
+    TypedValueV1,
+)
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.persistence import (
+    InMemoryPersistenceAdapterV1,
+)
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.quantum_benchmark import (
+    QuantumEconomicBasisV1,
+    QuantumTraceValidationReceiptV1,
+)
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.receipts import (
+    EconomicReceiptEventSpineV1,
+    ST12FEvidenceControlReceiptRecordV1,
+    ST12FReceiptClassV1,
+)
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.serialization import (
+    deterministic_json,
+)
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.service import (
+    QKUComputationControlPlaneV1,
 )
 
 
@@ -183,6 +253,7 @@ def _bundle(**section_overrides: EvidenceSectionV1) -> ComputationEvidenceBundle
         schema_version="QTT_ST12F_COMPUTATION_EVIDENCE_BUNDLE_V1_4",
         contract_version="1.4",
         evidence_bundle_version="BUNDLE::VERSION::1",
+        prior_bundle_ref_or_explicit_absence="EXPLICIT_ABSENCE",
         component_or_template_ref="MATH-01",
         input_lock_id="ST12F-LOCK::VALID-ONEPASS",
         actual_executed_component_versions={"MATH-01": "VERSION::1"},
@@ -284,3 +355,1237 @@ def test_independent_review_and_no_effect_matrix() -> None:
     assert review.no_self_review is True
     assert _bundle().d_evidence_reference_projection == "UNAVAILABLE"
     assert _lane().fixture_only_not_evidence is True
+
+
+_TRACEPARENT = "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01"
+
+
+def _runtime_snapshot() -> CanonicalReplayPaperInputSnapshotV1:
+    lock = _valid_lock()
+    return CanonicalReplayPaperInputSnapshotV1(
+        decision_time=lock.decision_time,
+        point_in_time_cutoff=lock.point_in_time_cutoff,
+        market_scope=lock.market_scope,
+        venue_scope=lock.venue_scope,
+        instrument_scope=lock.instrument_scope,
+        formula_specification_versions=lock.formula_specification_versions,
+        implementation_versions=lock.implementation_versions,
+        parameter_policy_version=lock.parameter_policy_version,
+        parameter_value_refs=lock.parameter_value_refs,
+        source_epochs=lock.source_epochs,
+        data_semantics_version=lock.data_semantics_version,
+        venue_semantics_version=lock.venue_semantics_version,
+        accounting_definition=lock.accounting_definition,
+        fee_assumptions=lock.fee_assumptions,
+        spread_assumptions=lock.spread_assumptions,
+        slippage_assumptions=lock.slippage_assumptions,
+        fill_and_queue_assumptions=lock.fill_and_queue_assumptions,
+        latency_and_staleness_assumptions=lock.latency_and_staleness_assumptions,
+        capacity_and_crowding_assumptions=lock.capacity_and_crowding_assumptions,
+        portfolio_and_cash_context=lock.portfolio_and_cash_context,
+        random_seed_policy=lock.random_seed_policy,
+        resampling_policy=lock.resampling_policy,
+        scenario_set_id=lock.scenario_set_id,
+        causation_id=lock.causation_id,
+        correlation_id=lock.correlation_id,
+        created_by=lock.created_by,
+        created_at=lock.created_at,
+    )
+
+
+class _CommitFailingAdapterV1(InMemoryPersistenceAdapterV1):
+    def __init__(self) -> None:
+        super().__init__()
+        self.fail_next_commit = False
+
+    def _commit(self, transaction: object) -> None:
+        if self.fail_next_commit:
+            self.fail_next_commit = False
+            raise PersistenceContractError(
+                ReasonCode.PERSISTENCE_UNAVAILABLE,
+                "injected atomic commit failure",
+            )
+        super()._commit(transaction)  # type: ignore[arg-type]
+
+
+@dataclass(slots=True)
+class _RuntimeHarnessV1:
+    snapshot: CanonicalReplayPaperInputSnapshotV1
+    persistence: InMemoryPersistenceAdapterV1
+    compiler: ReplayPaperCohortCompilerV1
+    service: ComputationEvidenceServiceV1
+    compilation: ReplayPaperCohortCompilationRecordV1
+    context: ComputationContextKeyV1
+
+
+class _NoEffectAdmissionV1:
+    def admit_operation(self, request: object) -> AgentCapabilityDecisionV1:
+        request_id = str(getattr(request, "request_id"))
+        operation_id = str(getattr(request, "operation_name"))
+        principal_id = str(getattr(request, "principal_id"))
+        idempotency_key = str(getattr(request, "idempotency_key"))
+        return AgentCapabilityDecisionV1(
+            decision_id=f"TEST-DECISION::{request_id}",
+            request_id=request_id,
+            task_id=f"TEST-TASK::{request_id}",
+            principal_id=principal_id,
+            current_agent_id="dashboard_agent",
+            source_agent_refs=("AGENT_RT_11",),
+            operation_id=operation_id,
+            policy_version=POLICY_VERSION,
+            decision_state=(
+                AgentCapabilityDecisionStateV1.ELIGIBLE_FOR_NO_EFFECT_QKU_REQUEST
+            ),
+            reason_codes=(),
+            scope_refs=(f"operation_id={operation_id}", "test_fixture=ST12F"),
+            idempotency_key=idempotency_key,
+            retry_disposition="NO_RETRY_AUTHORITY",
+            peer_sod_disposition="TEST_FIXTURE_NO_SELF_APPROVAL",
+            safety_state_disposition="NON_MATERIAL_LOCAL_NO_EFFECT",
+            terminal_route="QKUComputationControlPlaneV1_NO_EFFECT_REQUEST",
+            agent_orch_receipt_ref=f"AGENT-ORCH::TEST::{request_id}",
+            st12c_causation_correlation_refs=(
+                f"OperationRequestEnvelopeV1.request_id={request_id}",
+                f"OperationRequestEnvelopeV1.idempotency_key={idempotency_key}",
+            ),
+            evidence_refs=("EXPLICIT_TEST_FIXTURE",),
+            alternative_route_refs=("DENY_TASK",),
+            disagreement_state="NONE_DECLARED",
+            confidence_state="TEST_FIXTURE_ONLY",
+            limitation_codes=(
+                "NO_PROVIDER_PRIVATE_STATE_ORDER_QPU_OR_RUNTIME_EFFECT",
+                "QKU_AND_FORMULA_IMMUTABLE",
+            ),
+        )
+
+
+def _compile_request(
+    *,
+    identity: str,
+    context: ComputationContextKeyV1,
+) -> CompileReplayPaperCohortRequestV1:
+    return CompileReplayPaperCohortRequestV1(
+        request_id=f"REQUEST::OP13::{identity}",
+        operation_name="compile_replay_paper_cohort",
+        requested_at=_NOW,
+        principal_id="PRINCIPAL::RUNTIME",
+        capability_bundle_id="CAPABILITY::RUNTIME",
+        context=context,
+        idempotency_key=identity,
+        traceparent=_TRACEPARENT,
+        tracestate="qtt=runtime",
+        template_ids=ST12F_TEMPLATE_IDS_V1,
+        requested_lanes=("REPLAY", "PAPER"),
+        input_lock_id=f"ST12F-LOCK::{identity}",
+        campaign_execution_requested=False,
+    )
+
+
+def _runtime_harness(
+    persistence: InMemoryPersistenceAdapterV1 | None = None,
+    *,
+    identity: str = "RUNTIME-CAMPAIGN",
+) -> _RuntimeHarnessV1:
+    snapshot = _runtime_snapshot()
+    adapter = InMemoryPersistenceAdapterV1() if persistence is None else persistence
+    compiler = ReplayPaperCohortCompilerV1(snapshot, adapter)
+    context = ComputationContextKeyV1(
+        context_id="MATH-01",
+        as_of=_NOW,
+        observed_at=_NOW,
+        source_epoch_id="SOURCE::1=EPOCH::1",
+        input_version="INPUT::RUNTIME",
+        maximum_age=timedelta(hours=1),
+    )
+    request = _compile_request(identity=identity, context=context)
+    compilation = compiler.compile(request)
+    return _RuntimeHarnessV1(
+        snapshot=snapshot,
+        persistence=adapter,
+        compiler=compiler,
+        service=ComputationEvidenceServiceV1(compiler, adapter),
+        compilation=compilation,
+        context=context,
+    )
+
+
+def _runtime_packet(
+    harness: _RuntimeHarnessV1,
+    lane: str,
+    *,
+    result_id: str | None = None,
+    fixture: bool = False,
+    run_reference: str | None = None,
+) -> ReplayResultContractV1 | PaperResultContractV1:
+    contract_type = ReplayResultContractV1 if lane == "REPLAY" else PaperResultContractV1
+    cutoff = harness.snapshot.point_in_time_cutoff
+    return contract_type(
+        result_id=f"RESULT::{lane}" if result_id is None else result_id,
+        schema_version="QTT_ST12F_LANE_RESULT_CONTRACTS_V1_4",
+        contract_version="1.4",
+        cohort_template_id="MATH-01",
+        expected_result_contract_id=f"ST12F-{lane}-CONTRACT::MATH-01",
+        input_lock_id=harness.compilation.input_lock_id,
+        run_reference=f"RUN::{lane}" if run_reference is None else run_reference,
+        producer_identity=f"PRODUCER::{lane}",
+        implementation_versions=harness.snapshot.implementation_versions,
+        source_epochs=harness.snapshot.source_epochs,
+        point_in_time_cutoff=cutoff,
+        accounting_definition=deterministic_json(
+            harness.snapshot.accounting_definition
+        ),
+        scenario_policy={"scenario": harness.snapshot.scenario_set_id},
+        resampling_policy=harness.snapshot.resampling_policy,
+        economic_metrics={"utility": "1"},
+        tca_metrics={"cost": "0.1"},
+        fill_metrics={"fill": "1"},
+        latency_metrics={"latency": "1ms"},
+        capacity_metrics={"capacity": "1"},
+        failure_states=(),
+        limitations=("LIMITATION::DECLARED",),
+        started_at=cutoff,
+        completed_at=cutoff + timedelta(seconds=1),
+        available_at=cutoff + timedelta(seconds=2),
+        closed_at=cutoff + timedelta(seconds=3),
+        fixture_only_not_evidence=fixture,
+    )
+
+
+def _register_request(
+    harness: _RuntimeHarnessV1,
+    lane: str,
+    identity: str,
+) -> RegisterReplayPaperResultRequestV1:
+    placeholder = TypedValueRecordV1(
+        (
+            TypedValueV1(
+                "placeholder",
+                TypedValueKindV1.TEXT,
+                "preexisting-packet-supplied-separately",
+                "unitless",
+                "test",
+            ),
+        )
+    )
+    return RegisterReplayPaperResultRequestV1(
+        request_id=f"REQUEST::OP14::{identity}",
+        operation_name="register_replay_paper_result",
+        requested_at=_NOW + timedelta(seconds=1),
+        principal_id="PRINCIPAL::RUNTIME",
+        capability_bundle_id="CAPABILITY::RUNTIME",
+        context=harness.context,
+        idempotency_key=f"IDEMPOTENCY::OP14::{identity}",
+        traceparent=_TRACEPARENT,
+        tracestate="qtt=runtime",
+        cohort_instance_id=harness.compilation.compilation_id,
+        lane=lane,
+        input_lock_id=harness.compilation.input_lock_id,
+        result_packet=placeholder,
+    )
+
+
+def _register_dual_lanes(
+    harness: _RuntimeHarnessV1,
+) -> tuple[ReplayResultContractV1, PaperResultContractV1]:
+    replay = harness.service.register_result(
+        _register_request(harness, "REPLAY", "REPLAY"),
+        _runtime_packet(harness, "REPLAY"),
+    )
+    paper = harness.service.register_result(
+        _register_request(harness, "PAPER", "PAPER"),
+        _runtime_packet(harness, "PAPER"),
+    )
+    assert type(replay) is ReplayResultContractV1
+    assert type(paper) is PaperResultContractV1
+    return replay, paper
+
+
+def _runtime_divergence(
+    replay: ReplayResultContractV1,
+    paper: PaperResultContractV1,
+) -> DivergenceAssessmentV1:
+    return DivergenceAssessmentV1(
+        assessment_id="DIVERGENCE::RUNTIME",
+        schema_version="QTT_ST12F_DIVERGENCE_ASSESSMENT_V1_4",
+        contract_version="1.4",
+        input_lock_id=replay.input_lock_id,
+        cohort_template_id=replay.cohort_template_id,
+        replay_result_ref=replay.result_id,
+        paper_result_ref=paper.result_id,
+        metric_deltas={"utility": Decimal("0")},
+        directional_agreement=True,
+        calibration_delta=Decimal("0"),
+        execution_cost_delta=Decimal("0"),
+        fill_delta=Decimal("0"),
+        latency_delta=Decimal("0"),
+        capacity_delta=Decimal("0"),
+        regime_delta=Decimal("0"),
+        threshold_policy_refs=("THRESHOLD::RUNTIME",),
+        typed_blockers=(),
+        terminal_state=DivergenceTerminalStateV1.CONSISTENT_WITHIN_LOCKED_THRESHOLDS,
+    )
+
+
+def _runtime_conflicting_divergence(
+    replay: ReplayResultContractV1,
+    paper: PaperResultContractV1,
+) -> DivergenceAssessmentV1:
+    return replace(
+        _runtime_divergence(replay, paper),
+        assessment_id="DIVERGENCE::RUNTIME::CONFLICT",
+        directional_agreement=False,
+        calibration_delta=None,
+        typed_blockers=(ReasonCode.ST12F_EVIDENCE_INCOMPLETE,),
+        terminal_state=(
+            DivergenceTerminalStateV1.INCOMPARABLE_MISSING_OR_CONFLICTING_EVIDENCE
+        ),
+    )
+
+
+def _runtime_model_risk(
+    replay: ReplayResultContractV1,
+    paper: PaperResultContractV1,
+) -> object:
+    controls = tuple(
+        ModelRiskControlEvidenceV1(
+            control_id,
+            ModelRiskControlStateV1.PASS_RECEIPTED,
+            (f"RECEIPT::{control_id}",),
+            (),
+            (),
+            True,
+        )
+        for control_id in MODEL_RISK_CONTROL_IDS_V1
+    )
+    conditions = tuple(
+        NoTradeConditionOutcomeV1(
+            condition_id,
+            False,
+            (f"RECEIPT::{condition_id}",),
+            (),
+        )
+        for condition_id in NO_TRADE_CONDITION_IDS_V1
+    )
+    expiry = _NOW + timedelta(hours=1)
+    basis = ModelRiskAdjudicationBasisV1(
+        expected_component_or_template_ref="MATH-01",
+        evaluated_at=_NOW,
+        required_evidence_valid_until=expiry,
+        required_evidence_receipt_refs=("RECEIPT::REQUIRED-EVIDENCE",),
+        replay_lane=ModelRiskLaneEvidenceV1(
+            "REPLAY",
+            f"ST12F-RECEIPT::{replay.result_id}::REPLAY_REGISTRATION",
+            replay.input_lock_id,
+            replay.cohort_template_id,
+            replay.closed_at,
+            expiry,
+        ),
+        paper_lane=ModelRiskLaneEvidenceV1(
+            "PAPER",
+            f"ST12F-RECEIPT::{paper.result_id}::PAPER_REGISTRATION",
+            paper.input_lock_id,
+            paper.cohort_template_id,
+            paper.closed_at,
+            expiry,
+        ),
+        uncertainty_reserve=Decimal("0.05"),
+        model_risk_reserve=Decimal("0.05"),
+        capacity_hard_veto=False,
+        liquidity_hard_veto=False,
+        capacity_liquidity_receipt_refs=("RECEIPT::CAPACITY-LIQUIDITY",),
+        independent_review_state="READY_FOR_INDEPENDENT_REVIEW",
+        independent_review_receipt_ref="RECEIPT::REVIEW-PENDING",
+    )
+    comparison = PermanentNoTradeEvidenceComparisonV1(
+        comparison_id="NO-TRADE-COMPARISON::RUNTIME",
+        input_lock_id=replay.input_lock_id,
+        execution_adjusted_lcb=Decimal("0.1"),
+        candidate_utility=Decimal("1"),
+        strongest_classical_utility=Decimal("0.8"),
+        no_trade_utility=Decimal("0"),
+        strongest_comparator="CANDIDATE",
+    )
+    return ModelRiskEvidenceAdjudicatorV1().adjudicate(
+        assessment_id="MODEL-RISK::RUNTIME",
+        input_lock_id=replay.input_lock_id,
+        controls=controls,
+        conditions=conditions,
+        comparison=comparison,
+        adjudication_basis=basis,
+        limitations=("LIMITATION::RUNTIME",),
+        receipt_refs=("RECEIPT::MODEL-RISK-UPSTREAM",),
+    )
+
+
+def _runtime_quantum(input_lock_id: str) -> QuantumTraceValidationReceiptV1:
+    basis = QuantumEconomicBasisV1(
+        input_lock_id=input_lock_id,
+        original_formulation_id="MATH-01",
+        objective_sense="MAXIMIZE",
+        constraint_refs=("CONSTRAINT::RUNTIME",),
+        accounting_basis_ref="ACCOUNTING::NET",
+        cost_basis_ref="COST::ALL-IN",
+        capacity_basis_ref="CAPACITY::RUNTIME",
+        scenario_set_ref="SCENARIO::1",
+        resource_budget_ref="RESOURCE::RUNTIME",
+        ttl_policy_ref="TTL::RUNTIME",
+        version_epoch_pins=("SOURCE::1=EPOCH::1", "VERSION::RUNTIME"),
+    )
+    return QuantumTraceValidationReceiptV1(
+        receipt_id="QUANTUM-TRACE::RUNTIME",
+        schema_version="QTT_ST12F_QUANTUM_TRACE_VALIDATION_V1_4",
+        contract_version="1.4",
+        math_spec_id="MATH-50",
+        trace_id="TRACE::RUNTIME",
+        input_lock_id=input_lock_id,
+        formulation_id="MATH-01",
+        comparison_basis=basis,
+        selected_candidate_id="CANDIDATE::RUNTIME",
+        recomputed_objective=Decimal("1"),
+        recomputed_variance_or_explicit_absence="EXPLICIT_ABSENCE",
+        selected_original_model_feasible=True,
+        selected_hard_veto=False,
+        original_model_interpret_back_valid=True,
+        strongest_classical_receipt_ref="RECEIPT::CLASSICAL",
+        no_trade_receipt_ref="RECEIPT::NO-TRADE",
+        original_economic_utility=Decimal("1"),
+        resource_use=Decimal("1"),
+        latency=Decimal("1"),
+        deterministic_tie_break="CANDIDATE::RUNTIME",
+        effect_counts={
+            "ansatz_construction": 0,
+            "optimizer": 0,
+            "estimator": 0,
+            "sampler": 0,
+            "transpiler": 0,
+            "simulator": 0,
+            "provider": 0,
+            "qpu": 0,
+        },
+        terminal_state="VALIDATED_TRACE_ONLY",
+    )
+
+
+def _runtime_llm(input_lock_id: str) -> DeterministicEvidenceAnnotationContractV1:
+    citation = AnnotationCitationV1(
+        "CITATION::RUNTIME", "UPSTREAM-BUNDLE::RUNTIME", ("CLAIM::RUNTIME",)
+    )
+    claim = AnnotationClaimV1(
+        "CLAIM::RUNTIME",
+        "The supplied evidence remains advisory.",
+        (citation.citation_id,),
+        ("NUMERIC::RUNTIME",),
+    )
+    fact = QuotedNumericFactV1(
+        "NUMERIC::RUNTIME",
+        citation.evidence_ref,
+        "probability|unitless",
+        Decimal("0.5"),
+        (claim.claim_id,),
+    )
+    numeric = CanonicalNumericEvidenceValueV1(
+        numeric_fact_id=fact.numeric_fact_id,
+        evidence_ref=fact.evidence_ref,
+        evidence_bundle_ref=fact.evidence_ref,
+        value=fact.quoted_value,
+        unit_and_basis=fact.unit_and_basis,
+        evidence_receipt_ref="ST12F-RECEIPT::NUMERIC-EVIDENCE::D_EVIDENCE_REFERENCE",
+        numeric_recheck_receipt_ref="ST12F-RECEIPT::NUMERIC-RECHECK::LLM_ANNOTATION_VALIDATION",
+        input_lock_id=input_lock_id,
+        source_epoch_refs=("SOURCE::1=EPOCH::1",),
+        observed_at=_NOW - timedelta(minutes=1),
+        valid_until=_NOW + timedelta(hours=1),
+    )
+    return DeterministicEvidenceAnnotationContractV1(
+        annotation_id="ANNOTATION::RUNTIME",
+        schema_version="QTT_ST12F_DETERMINISTIC_EVIDENCE_ANNOTATION_V1_4",
+        contract_version="1.4",
+        evidence_bundle_refs=(citation.evidence_ref,),
+        redacted_context_refs=("REDACTED::RUNTIME",),
+        untrusted_content_isolated=True,
+        advisory_task=LLMAdvisoryTaskV1.SUMMARIZE_EVIDENCE,
+        citations=(citation,),
+        claims=(claim,),
+        limitations=("LIMITATION::ADVISORY",),
+        abstentions=(),
+        quoted_numeric_facts=(fact,),
+        canonical_numeric_evidence=(numeric,),
+        deterministic_numeric_recheck_receipt_refs=(
+            numeric.numeric_recheck_receipt_ref,
+        ),
+        upstream_budget_metadata={
+            "budget_source_ref": "BUDGET::RUNTIME",
+            "supplied_upstream": True,
+            "token_budget": 64,
+        },
+        input_lock_id=input_lock_id,
+        source_epoch_refs=numeric.source_epoch_refs,
+        observed_at=numeric.observed_at,
+        valid_until=numeric.valid_until,
+        numeric_recheck_passed=True,
+    )
+
+
+def _bundle_candidate(
+    *,
+    evidence_id: str,
+    version: str,
+    input_lock_id: str,
+    state: EvidenceBundleTerminalStateV1,
+    source_refs: tuple[str, ...],
+    replay: ReplayResultContractV1 | None,
+    paper: PaperResultContractV1 | None,
+    divergence_ref: str,
+    prior_ref: str = "EXPLICIT_ABSENCE",
+    blockers: tuple[ReasonCode, ...] = (),
+    d_reference: ST12FEvidenceReferenceV1 | str = "UNAVAILABLE",
+    g_handoff: FToGHandoffReferencesV1 | str = "UNAVAILABLE",
+) -> ComputationEvidenceBundleV1:
+    present = tuple(row for row in (replay, paper) if row is not None)
+    lane_receipts = tuple(
+        f"ST12F-RECEIPT::{row.result_id}::{('REPLAY' if type(row) is ReplayResultContractV1 else 'PAPER')}_REGISTRATION"
+        for row in present
+    )
+    return ComputationEvidenceBundleV1(
+        evidence_id=evidence_id,
+        schema_version="QTT_ST12F_COMPUTATION_EVIDENCE_BUNDLE_V1_4",
+        contract_version="1.4",
+        evidence_bundle_version=version,
+        prior_bundle_ref_or_explicit_absence=prior_ref,
+        component_or_template_ref="MATH-01",
+        input_lock_id=input_lock_id,
+        actual_executed_component_versions={"MATH-01": "VERSION::MATH-01"},
+        actual_executed_stack_versions={"STACK::RUNTIME": "VERSION::1"},
+        replay_result_ref="EXPLICIT_ABSENCE" if replay is None else replay.result_id,
+        paper_result_ref="EXPLICIT_ABSENCE" if paper is None else paper.result_id,
+        divergence_assessment_ref=divergence_ref,
+        lane_execution_receipt_refs=lane_receipts,
+        **_sections(),
+        independent_review_state=state.value,
+        failure_and_negative_evidence_states=(state.value,) if blockers else (),
+        source_and_provenance_refs=source_refs,
+        d_evidence_reference_projection=d_reference,
+        g_handoff_projection=g_handoff,
+        terminal_state=state,
+        blocker_codes=blockers,
+    )
+
+
+def _bundle_request(
+    harness: _RuntimeHarnessV1,
+    *,
+    identity: str,
+    source_refs: tuple[str, ...],
+    requested_at: datetime,
+) -> BuildEvidenceBundleRequestV1:
+    return BuildEvidenceBundleRequestV1(
+        request_id=f"REQUEST::OP15::{identity}",
+        operation_name="build_evidence_bundle",
+        requested_at=requested_at,
+        principal_id="PRINCIPAL::RUNTIME",
+        capability_bundle_id="CAPABILITY::RUNTIME",
+        context=harness.context,
+        idempotency_key=f"IDEMPOTENCY::OP15::{identity}",
+        traceparent=_TRACEPARENT,
+        tracestate="qtt=runtime",
+        component_id="MATH-01",
+        input_lock_id=harness.compilation.input_lock_id,
+        evidence_record_refs=source_refs,
+        required_lanes=("REPLAY", "PAPER"),
+    )
+
+
+def _review_record(
+    *,
+    review_id: str,
+    prior_ref: str,
+    evidence_id: str,
+    candidate_version: str,
+    input_lock_id: str,
+    decision: IndependentReviewDecisionV1,
+    reviewed_at: datetime,
+) -> IndependentReviewRecordV1:
+    blockers = () if decision is IndependentReviewDecisionV1.VALIDATED else (
+        ReasonCode.ST12F_MODEL_RISK_VETO,
+    )
+    return IndependentReviewRecordV1(
+        review_id=review_id,
+        schema_version="QTT_ST12F_INDEPENDENT_REVIEW_RECORD_V1_4",
+        contract_version="1.4",
+        prior_bundle_ref=prior_ref,
+        evidence_id=evidence_id,
+        evidence_bundle_version=candidate_version,
+        input_lock_id=input_lock_id,
+        reviewer_identity="REVIEWER::INDEPENDENT",
+        bundle_producer_identity="ComputationEvidenceServiceV1",
+        authority_receipt_ref=f"AUTHORITY::{review_id}",
+        reviewed_source_epoch_refs=("SOURCE::1=EPOCH::1",),
+        decision=decision,
+        blocker_codes=blockers,
+        reviewed_at=reviewed_at,
+        valid_until=reviewed_at + timedelta(hours=1),
+    )
+
+
+def _typed_lane_packet_record(
+    packet: ReplayResultContractV1 | PaperResultContractV1,
+) -> TypedValueRecordV1:
+    raw = json.loads(packet.canonical_json())
+    json_fields = {
+        "implementation_versions",
+        "source_epochs",
+        "scenario_policy",
+        "resampling_policy",
+        "economic_metrics",
+        "tca_metrics",
+        "fill_metrics",
+        "latency_metrics",
+        "capacity_metrics",
+        "failure_states",
+        "limitations",
+    }
+    values: list[TypedValueV1] = []
+    for field in fields(type(packet)):
+        value = raw[field.name]
+        if field.name in json_fields:
+            kind = TypedValueKindV1.TEXT
+            value = deterministic_json(value)
+        elif field.name == "fixture_only_not_evidence":
+            kind = TypedValueKindV1.BOOLEAN
+        else:
+            kind = TypedValueKindV1.TEXT
+        values.append(
+            TypedValueV1(
+                field.name,
+                kind,
+                value,
+                "unitless",
+                "canonical ST12-F lane packet",
+            )
+        )
+    return TypedValueRecordV1(tuple(values))
+
+
+class _BundleCandidateResolverV1:
+    def __init__(self, candidate: ComputationEvidenceBundleV1) -> None:
+        self.candidate = candidate
+
+    def resolve_bundle_candidate(
+        self, _request: BuildEvidenceBundleRequestV1
+    ) -> ComputationEvidenceBundleV1:
+        return self.candidate
+
+    @staticmethod
+    def resolve_control_contracts(
+        _request: BuildEvidenceBundleRequestV1,
+    ) -> tuple[object, ...]:
+        return ()
+
+
+def _assert_public_op13_op14_op15_receipt_ids() -> None:
+    snapshot = _runtime_snapshot()
+    adapter = InMemoryPersistenceAdapterV1()
+    compiler = ReplayPaperCohortCompilerV1(snapshot, adapter)
+    context = ComputationContextKeyV1(
+        context_id="MATH-01",
+        as_of=_NOW,
+        observed_at=_NOW,
+        source_epoch_id="SOURCE::1=EPOCH::1",
+        input_version="INPUT::PUBLIC-RECEIPTS",
+        maximum_age=timedelta(hours=1),
+    )
+    evidence_service = ComputationEvidenceServiceV1(compiler, adapter)
+    facade = QKUComputationControlPlaneV1(
+        CanonicalOwnerPacketRegistryV1(),
+        agent_capability_resolver=_NoEffectAdmissionV1(),
+        persistence_adapter=adapter,
+        replay_paper_cohort_compiler=compiler,
+        computation_evidence_service=evidence_service,
+    )
+    compile_request = _compile_request(
+        identity="PUBLIC-RECEIPTS", context=context
+    )
+    op13 = facade.compile_replay_paper_cohort(compile_request)
+    compilation = compiler.resolve_compilation(
+        "ST12F-COMPILATION::PUBLIC-RECEIPTS"
+    )
+    assert op13.receipt_refs == op13.cohort_compilation.evidence_refs
+    assert len(op13.receipt_refs) == 2
+    assert all(adapter.get_record(ref) is not None for ref in op13.receipt_refs)
+
+    harness = _RuntimeHarnessV1(
+        snapshot=snapshot,
+        persistence=adapter,
+        compiler=compiler,
+        service=evidence_service,
+        compilation=compilation,
+        context=context,
+    )
+    replay = _runtime_packet(harness, "REPLAY", result_id="RESULT::PUBLIC")
+    register_request = replace(
+        _register_request(harness, "REPLAY", "PUBLIC-RECEIPTS"),
+        result_packet=_typed_lane_packet_record(replay),
+    )
+    op14 = facade.register_replay_paper_result(register_request)
+    assert op14.receipt_refs == op14.registration.evidence_refs
+    assert op14.receipt_refs == (
+        "ST12F-RECEIPT::RESULT::PUBLIC::REPLAY_REGISTRATION",
+    )
+    assert all(adapter.get_record(ref) is not None for ref in op14.receipt_refs)
+
+    source_refs = ("UPSTREAM::PUBLIC-RECEIPTS",)
+    candidate = _bundle_candidate(
+        evidence_id="EVIDENCE::PUBLIC-RECEIPTS",
+        version="BUNDLE::PUBLIC-RECEIPTS::1",
+        input_lock_id=replay.input_lock_id,
+        state=EvidenceBundleTerminalStateV1.INCOMPLETE_MISSING_PAPER,
+        source_refs=source_refs,
+        replay=replay,
+        paper=None,
+        divergence_ref="EXPLICIT_ABSENCE",
+        blockers=(ReasonCode.ST12F_EVIDENCE_INCOMPLETE,),
+    )
+    op15_service = ComputationEvidenceServiceV1(
+        compiler,
+        adapter,
+        bundle_candidate_resolver=_BundleCandidateResolverV1(candidate),
+    )
+    op15_facade = QKUComputationControlPlaneV1(
+        CanonicalOwnerPacketRegistryV1(),
+        agent_capability_resolver=_NoEffectAdmissionV1(),
+        persistence_adapter=adapter,
+        replay_paper_cohort_compiler=compiler,
+        computation_evidence_service=op15_service,
+    )
+    op15 = op15_facade.build_evidence_bundle(
+        _bundle_request(
+            harness,
+            identity="PUBLIC-RECEIPTS",
+            source_refs=source_refs,
+            requested_at=_NOW + timedelta(seconds=10),
+        )
+    )
+    assert op15.receipt_refs == op15.evidence_bundle.evidence_refs
+    assert op15.receipt_refs == (
+        "ST12F-RECEIPT::BUNDLE::PUBLIC-RECEIPTS::1::EVIDENCE_BUNDLE_VERSION",
+    )
+    assert all(adapter.get_record(ref) is not None for ref in op15.receipt_refs)
+
+
+def test_op14_atomic_restart_conflict_and_fixture_non_poisoning() -> None:
+    failing_adapter = _CommitFailingAdapterV1()
+    failing = _runtime_harness(failing_adapter, identity="ATOMIC")
+    failing_adapter.fail_next_commit = True
+    before = {
+        name: dict(index)
+        for name, index in failing.service.immutable_indexes.items()
+    }
+    try:
+        failing.service.register_result(
+            _register_request(failing, "REPLAY", "ATOMIC"),
+            _runtime_packet(failing, "REPLAY"),
+        )
+    except PersistenceContractError as exc:
+        assert exc.reason_code is ReasonCode.PERSISTENCE_UNAVAILABLE
+    else:
+        raise AssertionError("injected commit failure did not roll back")
+    after = {
+        name: dict(index)
+        for name, index in failing.service.immutable_indexes.items()
+    }
+    assert after == before
+    assert (
+        failing.persistence.get_record(
+            "ST12F-RECEIPT::RESULT::REPLAY::REPLAY_REGISTRATION"
+        )
+        is None
+    )
+
+    fixture_harness = _runtime_harness(identity="FIXTURE")
+    fixture = _runtime_packet(fixture_harness, "REPLAY", fixture=True)
+    fixture_harness.service.register_result(
+        _register_request(fixture_harness, "REPLAY", "FIXTURE"), fixture
+    )
+    assert not fixture_harness.service.immutable_indexes["lane_results"]
+    assert not fixture_harness.service.immutable_indexes["slot_results"]
+    assert fixture_harness.service.last_committed_receipt_refs == ()
+    real = _runtime_packet(fixture_harness, "REPLAY")
+    fixture_harness.service.register_result(
+        _register_request(fixture_harness, "REPLAY", "REAL-AFTER-FIXTURE"),
+        real,
+    )
+    assert len(fixture_harness.service.immutable_indexes["slot_results"]) == 1
+
+    restart_harness = _runtime_harness(identity="RESTART")
+    committed = restart_harness.service.register_result(
+        _register_request(restart_harness, "REPLAY", "FIRST"),
+        _runtime_packet(restart_harness, "REPLAY"),
+    )
+    fresh_compiler = ReplayPaperCohortCompilerV1(
+        restart_harness.snapshot, restart_harness.persistence
+    )
+    restarted = ComputationEvidenceServiceV1(
+        fresh_compiler, restart_harness.persistence
+    )
+    replayed = restarted.register_result(
+        _register_request(restart_harness, "REPLAY", "SAME-PAYLOAD-NEW-KEY"),
+        committed,
+    )
+    assert replayed == committed
+    assert len(restarted.immutable_indexes["slot_results"]) == 1
+    competing = _runtime_packet(
+        restart_harness,
+        "REPLAY",
+        result_id="RESULT::REPLAY::COMPETING",
+        run_reference="RUN::REPLAY::COMPETING",
+    )
+    try:
+        restarted.register_result(
+            _register_request(restart_harness, "REPLAY", "COMPETING"),
+            competing,
+        )
+    except ContractValidationError as exc:
+        assert exc.reason_code is ReasonCode.ST12F_RESULT_SLOT_CONFLICT
+    else:
+        raise AssertionError("restart natural-slot conflict was accepted")
+    _assert_public_op13_op14_op15_receipt_ids()
+
+
+def test_complete_durable_bundle_lifecycle_receipts_and_d_resolution() -> None:
+    harness = _runtime_harness(identity="LIFECYCLE")
+    replay, paper = _register_dual_lanes(harness)
+    divergence = _runtime_divergence(replay, paper)
+    conflicting_divergence = _runtime_conflicting_divergence(replay, paper)
+    model_risk = _runtime_model_risk(replay, paper)
+    quantum = _runtime_quantum(replay.input_lock_id)
+    annotation = _runtime_llm(replay.input_lock_id)
+    initial_sources = ("UPSTREAM::RUNTIME",)
+    ready = _bundle_candidate(
+        evidence_id="EVIDENCE::READY-BASE",
+        version="BUNDLE::READY-BASE::1",
+        input_lock_id=replay.input_lock_id,
+        state=EvidenceBundleTerminalStateV1.READY_FOR_INDEPENDENT_REVIEW,
+        source_refs=initial_sources,
+        replay=replay,
+        paper=paper,
+        divergence_ref=divergence.assessment_id,
+    )
+    ready_request = _bundle_request(
+        harness,
+        identity="READY-BASE",
+        source_refs=initial_sources,
+        requested_at=_NOW + timedelta(seconds=10),
+    )
+    persisted_ready = harness.service.build_bundle(
+        ready_request,
+        ready,
+        control_contracts=(divergence, model_risk, quantum, annotation),
+    )
+    assert persisted_ready.terminal_state is EvidenceBundleTerminalStateV1.READY_FOR_INDEPENDENT_REVIEW
+    assert len(harness.service.last_committed_receipt_refs) == 5
+
+    divergence_receipt = (
+        f"ST12F-RECEIPT::{divergence.assessment_id}::DIVERGENCE_ASSESSMENT"
+    )
+    model_receipt = (
+        f"ST12F-RECEIPT::{model_risk.assessment_id}::MODEL_RISK_ASSESSMENT"
+    )
+    durable_sources = (divergence_receipt, model_receipt)
+
+    incomplete_cases = (
+        (
+            "MISSING-REPLAY",
+            EvidenceBundleTerminalStateV1.INCOMPLETE_MISSING_REPLAY,
+            None,
+            paper,
+        ),
+        (
+            "MISSING-PAPER",
+            EvidenceBundleTerminalStateV1.INCOMPLETE_MISSING_PAPER,
+            replay,
+            None,
+        ),
+        (
+            "CONFLICT",
+            EvidenceBundleTerminalStateV1.INCOMPLETE_CONFLICT,
+            replay,
+            paper,
+        ),
+    )
+    observed_states = {persisted_ready.terminal_state}
+    for offset, (identity, state, replay_row, paper_row) in enumerate(
+        incomplete_cases, start=11
+    ):
+        source_refs = (f"UPSTREAM::{identity}",)
+        candidate = _bundle_candidate(
+            evidence_id=f"EVIDENCE::{identity}",
+            version=f"BUNDLE::{identity}::1",
+            input_lock_id=replay.input_lock_id,
+            state=state,
+            source_refs=source_refs,
+            replay=replay_row,
+            paper=paper_row,
+            divergence_ref=(
+                "EXPLICIT_ABSENCE"
+                if replay_row is None or paper_row is None
+                else conflicting_divergence.assessment_id
+            ),
+            blockers=(ReasonCode.ST12F_EVIDENCE_INCOMPLETE,),
+        )
+        value = harness.service.build_bundle(
+            _bundle_request(
+                harness,
+                identity=identity,
+                source_refs=source_refs,
+                requested_at=_NOW + timedelta(seconds=offset),
+            ),
+            candidate,
+            control_contracts=(
+                (conflicting_divergence,)
+                if state is EvidenceBundleTerminalStateV1.INCOMPLETE_CONFLICT
+                else ()
+            ),
+        )
+        observed_states.add(value.terminal_state)
+
+    missing_divergence_sources = ("UPSTREAM::MISSING-DIVERGENCE",)
+    try:
+        harness.service.build_bundle(
+            _bundle_request(
+                harness,
+                identity="MISSING-DIVERGENCE",
+                source_refs=missing_divergence_sources,
+                requested_at=_NOW + timedelta(seconds=19),
+            ),
+            _bundle_candidate(
+                evidence_id="EVIDENCE::MISSING-DIVERGENCE",
+                version="BUNDLE::MISSING-DIVERGENCE::1",
+                input_lock_id=replay.input_lock_id,
+                state=EvidenceBundleTerminalStateV1.READY_FOR_INDEPENDENT_REVIEW,
+                source_refs=missing_divergence_sources,
+                replay=replay,
+                paper=paper,
+                divergence_ref="EXPLICIT_ABSENCE",
+            ),
+        )
+    except ContractValidationError as exc:
+        assert exc.reason_code is ReasonCode.ST12F_EVIDENCE_INCOMPLETE
+    else:
+        raise AssertionError("dual-lane bundle without divergence proof was accepted")
+
+    def new_ready(identity: str, second: int) -> ComputationEvidenceBundleV1:
+        candidate = _bundle_candidate(
+            evidence_id=f"EVIDENCE::{identity}",
+            version=f"BUNDLE::{identity}::1",
+            input_lock_id=replay.input_lock_id,
+            state=EvidenceBundleTerminalStateV1.READY_FOR_INDEPENDENT_REVIEW,
+            source_refs=durable_sources,
+            replay=replay,
+            paper=paper,
+            divergence_ref=divergence.assessment_id,
+        )
+        return harness.service.build_bundle(
+            _bundle_request(
+                harness,
+                identity=f"{identity}-READY",
+                source_refs=durable_sources,
+                requested_at=_NOW + timedelta(seconds=second),
+            ),
+            candidate,
+        )
+
+    rejected_ready = new_ready("REJECT", 20)
+    rejected_prior = (
+        f"ST12F-RECEIPT::{rejected_ready.evidence_bundle_version}::EVIDENCE_BUNDLE_VERSION"
+    )
+    rejected_review = _review_record(
+        review_id="REVIEW::REJECTED",
+        prior_ref=rejected_prior,
+        evidence_id=rejected_ready.evidence_id,
+        candidate_version="BUNDLE::REJECT::2",
+        input_lock_id=replay.input_lock_id,
+        decision=IndependentReviewDecisionV1.REJECTED,
+        reviewed_at=_NOW + timedelta(seconds=21),
+    )
+    rejected = _bundle_candidate(
+        evidence_id=rejected_ready.evidence_id,
+        version=rejected_review.evidence_bundle_version,
+        input_lock_id=replay.input_lock_id,
+        state=EvidenceBundleTerminalStateV1.INDEPENDENT_REVIEW_REJECTED,
+        source_refs=durable_sources,
+        replay=replay,
+        paper=paper,
+        divergence_ref=divergence.assessment_id,
+        prior_ref=rejected_prior,
+        blockers=rejected_review.blocker_codes,
+    )
+    rejected_value = harness.service.build_bundle(
+        _bundle_request(
+            harness,
+            identity="REJECTED",
+            source_refs=durable_sources,
+            requested_at=_NOW + timedelta(seconds=22),
+        ),
+        rejected,
+        control_contracts=(rejected_review,),
+    )
+    observed_states.add(rejected_value.terminal_state)
+
+    wrong_review = replace(
+        rejected_review,
+        review_id="REVIEW::WRONG-CANDIDATE",
+        evidence_bundle_version="BUNDLE::WRONG",
+    )
+    try:
+        harness.service.build_bundle(
+            _bundle_request(
+                harness,
+                identity="WRONG-REVIEW",
+                source_refs=durable_sources,
+                requested_at=_NOW + timedelta(seconds=23),
+            ),
+            replace(
+                rejected,
+                evidence_id="EVIDENCE::WRONG-REVIEW",
+                evidence_bundle_version="BUNDLE::WRONG-REVIEW::2",
+                prior_bundle_ref_or_explicit_absence=rejected_prior,
+            ),
+            control_contracts=(wrong_review,),
+        )
+    except ContractValidationError as exc:
+        assert exc.reason_code in {
+            ReasonCode.ST12F_EVIDENCE_INCOMPLETE,
+            ReasonCode.ST12F_INDEPENDENT_REVIEW_REQUIRED,
+        }
+    else:
+        raise AssertionError("wrong review prior/candidate version was accepted")
+
+    closed_ready = new_ready("CLOSED", 30)
+    closed_prior = (
+        f"ST12F-RECEIPT::{closed_ready.evidence_bundle_version}::EVIDENCE_BUNDLE_VERSION"
+    )
+    closed_version = "BUNDLE::CLOSED::2"
+    bundle_record_ref = (
+        f"ST12F-RECEIPT::{closed_version}::EVIDENCE_BUNDLE_VERSION"
+    )
+    closed_review = _review_record(
+        review_id="REVIEW::VALIDATED",
+        prior_ref=closed_prior,
+        evidence_id=closed_ready.evidence_id,
+        candidate_version=closed_version,
+        input_lock_id=replay.input_lock_id,
+        decision=IndependentReviewDecisionV1.VALIDATED,
+        reviewed_at=_NOW + timedelta(seconds=31),
+    )
+    d_reference = ST12FEvidenceReferenceV1(
+        evidence_state=ST12FEvidenceStateV1.EVIDENCE_REFERENCE_AVAILABLE,
+        evidence_ref=bundle_record_ref,
+        lane="REPLAY_PAPER",
+        dataset_grade_ref="DATASET-GRADE::RUNTIME",
+        venue_semantic_binding_ref="VENUE-SEMANTICS::RUNTIME",
+        cross_venue_equivalence_ref="CROSS-VENUE::RUNTIME",
+        observed_at=closed_review.reviewed_at,
+        valid_until=closed_review.valid_until,
+        policy_version="ST12F_EVIDENCE_POLICY_V1_4",
+        causation_id="CAUSE::1",
+        correlation_id="CORRELATION::1",
+        input_lock_id=replay.input_lock_id,
+        component_or_template_ref="MATH-01",
+        evidence_bundle_version=closed_version,
+        source_epoch_refs=("SOURCE::1=EPOCH::1",),
+        terminal_state=EvidenceBundleTerminalStateV1.CLOSED_INDEPENDENTLY_VALIDATED.value,
+        reference_id="D-REFERENCE::CLOSED",
+        evidence_id=closed_ready.evidence_id,
+    )
+    g_handoff = FToGHandoffReferencesV1(
+        handoff_id="G-HANDOFF::CLOSED",
+        contract_version="1.4",
+        input_lock_id=replay.input_lock_id,
+        source_epoch_refs=("SOURCE::1=EPOCH::1",),
+        observed_at=closed_review.reviewed_at,
+        valid_until=closed_review.valid_until,
+        terminal_state=EvidenceBundleTerminalStateV1.CLOSED_INDEPENDENTLY_VALIDATED.value,
+        evidence_bundle_ref=bundle_record_ref,
+        no_trade_blocker_refs=(),
+        champion_challenger_evidence_refs=(model_receipt,),
+        portfolio_utility_refs=("RECEIPT::PORTFOLIO-UTILITY",),
+        quantum_classical_comparison_receipt_ref="RECEIPT::QUANTUM-COMPARISON",
+    )
+    closed = _bundle_candidate(
+        evidence_id=closed_ready.evidence_id,
+        version=closed_version,
+        input_lock_id=replay.input_lock_id,
+        state=EvidenceBundleTerminalStateV1.CLOSED_INDEPENDENTLY_VALIDATED,
+        source_refs=durable_sources,
+        replay=replay,
+        paper=paper,
+        divergence_ref=divergence.assessment_id,
+        prior_ref=closed_prior,
+        d_reference=d_reference,
+        g_handoff=g_handoff,
+    )
+    closed_value = harness.service.build_bundle(
+        _bundle_request(
+            harness,
+            identity="CLOSED",
+            source_refs=durable_sources,
+            requested_at=_NOW + timedelta(seconds=32),
+        ),
+        closed,
+        control_contracts=(closed_review,),
+    )
+    observed_states.add(closed_value.terminal_state)
+
+    for identity, state, second, blockers in (
+        (
+            "STALE",
+            EvidenceBundleTerminalStateV1.STALE,
+            40,
+            (ReasonCode.ST12F_BUNDLE_STALE,),
+        ),
+        ("SUPERSEDED", EvidenceBundleTerminalStateV1.SUPERSEDED, 50, ()),
+    ):
+        prior = new_ready(identity, second)
+        prior_ref = (
+            f"ST12F-RECEIPT::{prior.evidence_bundle_version}::EVIDENCE_BUNDLE_VERSION"
+        )
+        candidate = _bundle_candidate(
+            evidence_id=prior.evidence_id,
+            version=f"BUNDLE::{identity}::2",
+            input_lock_id=replay.input_lock_id,
+            state=state,
+            source_refs=durable_sources,
+            replay=replay,
+            paper=paper,
+            divergence_ref=divergence.assessment_id,
+            prior_ref=prior_ref,
+            blockers=blockers,
+        )
+        value = harness.service.build_bundle(
+            _bundle_request(
+                harness,
+                identity=f"{identity}-FINAL",
+                source_refs=durable_sources,
+                requested_at=_NOW + timedelta(seconds=second + 1),
+            ),
+            candidate,
+        )
+        observed_states.add(value.terminal_state)
+
+    assert observed_states == set(EvidenceBundleTerminalStateV1)
+
+    restarted = ComputationEvidenceServiceV1(
+        ReplayPaperCohortCompilerV1(harness.snapshot, harness.persistence),
+        harness.persistence,
+    )
+    assert restarted.resolve_bundle(bundle_record_ref) == closed_value
+    assert divergence.assessment_id in restarted.immutable_indexes["divergence"]
+    assert d_reference.reference_id in restarted.immutable_indexes["d_references"]
+    assert g_handoff.handoff_id in restarted.immutable_indexes["g_handoffs"]
+
+    read_context = replace(
+        harness.context,
+        as_of=_NOW + timedelta(seconds=33),
+        observed_at=_NOW + timedelta(seconds=33),
+    )
+    query = FToDEvidenceReferenceQueryV1(
+        query_id="D-QUERY::VALID",
+        requested_evidence_id=closed_value.evidence_id,
+        requested_component_or_template_ref="MATH-01",
+        expected_input_lock_id=replay.input_lock_id,
+        expected_source_epoch_refs=("SOURCE::1=EPOCH::1",),
+        evaluated_at=_NOW + timedelta(seconds=33),
+        request_read_lineage_refs=("READ-RECEIPT::1",),
+    )
+    resolved = restarted.read_evidence_reference(
+        read_context,
+        causation_id="READ-CAUSE::DIFFERENT",
+        correlation_id="READ-CORRELATION::DIFFERENT",
+        query=query,
+    )
+    assert resolved == d_reference
+    mismatch_queries = (
+        replace(query, requested_evidence_id="EVIDENCE::OTHER"),
+        replace(query, requested_component_or_template_ref="MATH-02"),
+        replace(query, expected_input_lock_id="ST12F-LOCK::OTHER"),
+        replace(query, expected_source_epoch_refs=("SOURCE::1=EPOCH::OTHER",)),
+        replace(query, evaluated_at=d_reference.valid_until + timedelta(seconds=1)),
+    )
+    for mismatched in mismatch_queries:
+        unavailable = restarted.read_evidence_reference(
+            read_context,
+            causation_id="READ-CAUSE::DIFFERENT",
+            correlation_id="READ-CORRELATION::DIFFERENT",
+            query=mismatched,
+        )
+        assert unavailable.evidence_state is ST12FEvidenceStateV1.EVIDENCE_INSUFFICIENT_FAIL_CLOSED
+
+    try:
+        replace(d_reference, terminal_state="STALE")
+    except ContractValidationError as exc:
+        assert exc.reason_code is ReasonCode.EVIDENCE_REFERENCE_UNAVAILABLE_STALE_CONFLICTING_OR_SCOPE_MISMATCH
+    else:
+        raise AssertionError("D terminal-state mismatch was accepted")
+    bad_no_effect = replace(d_reference)
+    object.__setattr__(bad_no_effect, "no_effect_flags", object())
+    try:
+        ComputationEvidenceServiceV1._validate_closed_projections(
+            replace(closed_value, d_evidence_reference_projection=bad_no_effect),
+            bundle_record_ref=bundle_record_ref,
+            lock=harness.compilation.input_lock,
+        )
+    except ContractValidationError as exc:
+        assert exc.reason_code is ReasonCode.ST12F_EVIDENCE_INCOMPLETE
+    else:
+        raise AssertionError("D no-effect mismatch was accepted")
+
+    spines = tuple(
+        row
+        for row in harness.service._durable_receipt_spines()
+        if type(row.typed_payload) is ST12FEvidenceControlReceiptRecordV1
+    )
+    classes = {row.typed_payload.receipt_class for row in spines}
+    assert classes == set(ST12FReceiptClassV1)
+    expected_types: dict[ST12FReceiptClassV1, type[object]] = {
+        ST12FReceiptClassV1.COHORT_COMPILATION: ReplayPaperCohortCompilationRecordV1,
+        ST12FReceiptClassV1.INPUT_LOCK: ImmutableReplayPaperInputLockV1,
+        ST12FReceiptClassV1.REPLAY_REGISTRATION: ReplayResultContractV1,
+        ST12FReceiptClassV1.PAPER_REGISTRATION: PaperResultContractV1,
+        ST12FReceiptClassV1.DIVERGENCE_ASSESSMENT: DivergenceAssessmentV1,
+        ST12FReceiptClassV1.MODEL_RISK_ASSESSMENT: type(model_risk),
+        ST12FReceiptClassV1.QUANTUM_TRACE_VALIDATION: QuantumTraceValidationReceiptV1,
+        ST12FReceiptClassV1.LLM_ANNOTATION_VALIDATION: DeterministicEvidenceAnnotationContractV1,
+        ST12FReceiptClassV1.EVIDENCE_BUNDLE_VERSION: ComputationEvidenceBundleV1,
+        ST12FReceiptClassV1.INDEPENDENT_REVIEW_VERSION: IndependentReviewRecordV1,
+        ST12FReceiptClassV1.D_EVIDENCE_REFERENCE: ST12FEvidenceReferenceV1,
+        ST12FReceiptClassV1.G_HANDOFF_REFERENCE: FToGHandoffReferencesV1,
+    }
+    for spine in spines:
+        payload = spine.typed_payload
+        payload.reconstruct(expected_types[payload.receipt_class])
+
+    replay_spine = harness.persistence.get_record(
+        f"ST12F-RECEIPT::{replay.result_id}::REPLAY_REGISTRATION"
+    )
+    assert type(replay_spine) is EconomicReceiptEventSpineV1
+    mismatched_metadata = replace(
+        replay_spine.typed_payload,
+        contract_id="RESULT::OTHER",
+    )
+    try:
+        mismatched_metadata.reconstruct(ReplayResultContractV1)
+    except ContractValidationError as exc:
+        assert exc.reason_code is ReasonCode.SCHEMA_MISMATCH
+    else:
+        raise AssertionError("receipt metadata/contract mismatch was accepted")
+
+    assert harness.persistence.get_record(
+        f"ST12F-RECEIPT::{harness.compilation.compilation_id}::COHORT_COMPILATION"
+    ) is not None
+    assert harness.persistence.get_record(
+        f"ST12F-RECEIPT::{harness.compilation.input_lock_id}::INPUT_LOCK"
+    ) is not None
+    assert all(
+        ref.startswith("ST12F-RECEIPT::")
+        for ref in harness.service.last_committed_receipt_refs
+    )

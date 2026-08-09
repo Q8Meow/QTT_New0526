@@ -927,7 +927,7 @@ def main() -> int:
         ("evidence.py", "ReplayResultContractV1", 26),
         ("evidence.py", "PaperResultContractV1", 26),
         ("evidence.py", "DivergenceAssessmentV1", 18),
-        ("evidence.py", "ComputationEvidenceBundleV1", 30),
+        ("evidence.py", "ComputationEvidenceBundleV1", 31),
     ):
         tree = ast.parse((PACKAGE / file_name).read_text(encoding="utf-8"))
         classes = tuple(node for node in tree.body if isinstance(node, ast.ClassDef) and node.name == class_name)

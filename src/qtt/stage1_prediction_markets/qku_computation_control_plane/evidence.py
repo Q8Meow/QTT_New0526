@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, fields
-from datetime import datetime
+from datetime import UTC, datetime
 from decimal import Decimal
 from enum import StrEnum
 import math
@@ -26,7 +26,7 @@ from .idempotency import (
 from .input_lock import ImmutableReplayPaperInputLockV1, ST12F_TEMPLATE_IDS_V1
 from .lifecycle import StateTransitionReceiptV1, TransitionDispositionV1
 from .llm_gateway import DeterministicEvidenceAnnotationContractV1
-from .model_risk import ModelRiskEvidenceAssessmentV1
+from .model_risk import ModelRiskControlStateV1, ModelRiskEvidenceAssessmentV1
 from .models import (
     BuildEvidenceBundleRequestV1,
     NO_EFFECTS_V1,
@@ -38,7 +38,10 @@ from .models import (
 )
 from .parameter_policy import initialize_st12f_parameter_registry_v1
 from .persistence import PersistenceAdapterV1, PersistenceAvailabilityV1
-from .quantum_benchmark import QuantumClassicalNoTradeComparisonV1
+from .quantum_benchmark import (
+    QuantumClassicalNoTradeComparisonV1,
+    QuantumTraceValidationReceiptV1,
+)
 from .receipts import (
     EconomicReceiptEventSpineV1,
     EconomicRecordTypeV1,
@@ -654,6 +657,13 @@ class IndependentReviewRecordV1:
 
 @dataclass(frozen=True, slots=True)
 class FToGHandoffReferencesV1:
+    handoff_id: str
+    contract_version: str
+    input_lock_id: str
+    source_epoch_refs: tuple[str, ...]
+    observed_at: datetime
+    valid_until: datetime
+    terminal_state: str
     evidence_bundle_ref: str
     no_trade_blocker_refs: tuple[str, ...]
     champion_challenger_evidence_refs: tuple[str, ...]
@@ -662,6 +672,28 @@ class FToGHandoffReferencesV1:
     read_only: bool = True
 
     def __post_init__(self) -> None:
+        _text(self.handoff_id, "handoff_id")
+        _text(self.input_lock_id, "input_lock_id")
+        if self.contract_version != "1.4":
+            raise ContractValidationError(
+                ReasonCode.SCHEMA_MISMATCH,
+                "F-to-G handoff contract version differs",
+            )
+        _refs(self.source_epoch_refs, "source_epoch_refs", required=True)
+        observed = parse_utc(self.observed_at, field_name="observed_at")
+        valid_until = parse_utc(self.valid_until, field_name="valid_until")
+        object.__setattr__(self, "observed_at", observed)
+        object.__setattr__(self, "valid_until", valid_until)
+        if observed > valid_until:
+            raise ContractValidationError(
+                ReasonCode.ST12F_BUNDLE_STALE,
+                "F-to-G validity precedes observation",
+            )
+        if self.terminal_state != EvidenceBundleTerminalStateV1.CLOSED_INDEPENDENTLY_VALIDATED.value:
+            raise ContractValidationError(
+                ReasonCode.ST12F_INDEPENDENT_REVIEW_REQUIRED,
+                "F-to-G handoff requires a closed independently validated bundle",
+            )
         _text(self.evidence_bundle_ref, "evidence_bundle_ref")
         for name in (
             "no_trade_blocker_refs",
@@ -678,6 +710,7 @@ class FToGHandoffReferencesV1:
         if not isinstance(value, Mapping) or set(value) != {field.name for field in fields(cls)}:
             raise ContractValidationError(ReasonCode.SCHEMA_MISMATCH, "F-to-G handoff fields differ")
         payload = dict(value)
+        payload["source_epoch_refs"] = tuple(payload["source_epoch_refs"])
         for name in (
             "no_trade_blocker_refs",
             "champion_challenger_evidence_refs",
@@ -708,6 +741,7 @@ class ComputationEvidenceBundleV1:
     schema_version: str
     contract_version: str
     evidence_bundle_version: str
+    prior_bundle_ref_or_explicit_absence: str
     component_or_template_ref: str
     input_lock_id: str
     actual_executed_component_versions: Mapping[str, object]
@@ -741,6 +775,7 @@ class ComputationEvidenceBundleV1:
         for name in (
             "evidence_id",
             "evidence_bundle_version",
+            "prior_bundle_ref_or_explicit_absence",
             "component_or_template_ref",
             "input_lock_id",
             "replay_result_ref",
@@ -782,7 +817,7 @@ class ComputationEvidenceBundleV1:
     @classmethod
     def from_canonical_mapping(cls, value: object) -> "ComputationEvidenceBundleV1":
         if not isinstance(value, Mapping) or set(value) != {field.name for field in fields(cls)}:
-            raise ContractValidationError(ReasonCode.SCHEMA_MISMATCH, "bundle payload differs from exact 30-field roster")
+            raise ContractValidationError(ReasonCode.SCHEMA_MISMATCH, "bundle payload differs from exact 31-field roster")
         payload = dict(value)
         for name in _SECTION_FIELDS_V1:
             payload[name] = EvidenceSectionV1.from_canonical_mapping(payload[name])
@@ -792,17 +827,54 @@ class ComputationEvidenceBundleV1:
         payload["blocker_codes"] = tuple(ReasonCode(code) for code in payload["blocker_codes"])
         payload["terminal_state"] = EvidenceBundleTerminalStateV1(payload["terminal_state"])
         if payload["d_evidence_reference_projection"] != "UNAVAILABLE":
-            d_value = dict(payload["d_evidence_reference_projection"])
-            d_value["evidence_state"] = ST12FEvidenceStateV1(d_value["evidence_state"])
-            d_value["source_epoch_refs"] = tuple(d_value["source_epoch_refs"])
-            d_value["no_effect_flags"] = NO_EFFECTS_V1
-            payload["d_evidence_reference_projection"] = ST12FEvidenceReferenceV1(**d_value)
+            payload["d_evidence_reference_projection"] = (
+                ST12FEvidenceReferenceV1.from_canonical_mapping(
+                    payload["d_evidence_reference_projection"]
+                )
+            )
         if payload["g_handoff_projection"] != "UNAVAILABLE":
             payload["g_handoff_projection"] = FToGHandoffReferencesV1.from_canonical_mapping(payload["g_handoff_projection"])
         return cls(**payload)
 
     def canonical_json(self) -> str:
         return deterministic_json(self)
+
+
+@dataclass(frozen=True, slots=True)
+class FToDEvidenceReferenceQueryV1:
+    """Exact read-only D query; it carries no activation or execution authority."""
+
+    query_id: str
+    requested_evidence_id: str
+    requested_component_or_template_ref: str
+    expected_input_lock_id: str
+    expected_source_epoch_refs: tuple[str, ...]
+    evaluated_at: datetime
+    request_read_lineage_refs: tuple[str, ...]
+
+    def __post_init__(self) -> None:
+        for name in (
+            "query_id",
+            "requested_evidence_id",
+            "requested_component_or_template_ref",
+            "expected_input_lock_id",
+        ):
+            _text(getattr(self, name), name)
+        _refs(
+            self.expected_source_epoch_refs,
+            "expected_source_epoch_refs",
+            required=True,
+        )
+        _refs(
+            self.request_read_lineage_refs,
+            "request_read_lineage_refs",
+            required=True,
+        )
+        object.__setattr__(
+            self,
+            "evaluated_at",
+            parse_utc(self.evaluated_at, field_name="evaluated_at"),
+        )
 
 
 class CohortCompilationResolverProtocolV1(Protocol):
@@ -876,6 +948,8 @@ def _source_epoch_refs(lock: ImmutableReplayPaperInputLockV1) -> tuple[str, ...]
 class ComputationEvidenceServiceV1:
     """One evidence owner over injected compiler, review, and ST12-C owners."""
 
+    supports_typed_reference_query = True
+
     def __init__(
         self,
         cohort_resolver: CohortCompilationResolverProtocolV1,
@@ -895,16 +969,185 @@ class ComputationEvidenceServiceV1:
         self._bundle_candidate_resolver = bundle_candidate_resolver
         self._producer_identity = _text(producer_identity, "producer_identity")
         self._lane_results: dict[str, ReplayResultContractV1 | PaperResultContractV1] = {}
-        self._slot_results: dict[tuple[str, str], str] = {}
+        self._slot_results: dict[tuple[str, str, str, str], str] = {}
         self._divergence: dict[str, DivergenceAssessmentV1] = {}
         self._bundles: dict[str, ComputationEvidenceBundleV1] = {}
         self._current_bundle_by_identity: dict[tuple[str, str], str] = {}
+        self._reviews: dict[str, IndependentReviewRecordV1] = {}
+        self._d_references: dict[str, ST12FEvidenceReferenceV1] = {}
+        self._g_handoffs: dict[str, FToGHandoffReferencesV1] = {}
+        self._last_committed_receipt_refs: tuple[str, ...] = ()
+        self._rebuild_caches_from_durable_receipts()
+
+    @staticmethod
+    def _contract_type_for_receipt_class(
+        receipt_class: ST12FReceiptClassV1,
+    ) -> type[object]:
+        mapping: Mapping[ST12FReceiptClassV1, type[object]] = {
+            ST12FReceiptClassV1.REPLAY_REGISTRATION: ReplayResultContractV1,
+            ST12FReceiptClassV1.PAPER_REGISTRATION: PaperResultContractV1,
+            ST12FReceiptClassV1.DIVERGENCE_ASSESSMENT: DivergenceAssessmentV1,
+            ST12FReceiptClassV1.MODEL_RISK_ASSESSMENT: ModelRiskEvidenceAssessmentV1,
+            ST12FReceiptClassV1.QUANTUM_TRACE_VALIDATION: QuantumTraceValidationReceiptV1,
+            ST12FReceiptClassV1.LLM_ANNOTATION_VALIDATION: DeterministicEvidenceAnnotationContractV1,
+            ST12FReceiptClassV1.EVIDENCE_BUNDLE_VERSION: ComputationEvidenceBundleV1,
+            ST12FReceiptClassV1.INDEPENDENT_REVIEW_VERSION: IndependentReviewRecordV1,
+            ST12FReceiptClassV1.D_EVIDENCE_REFERENCE: ST12FEvidenceReferenceV1,
+            ST12FReceiptClassV1.G_HANDOFF_REFERENCE: FToGHandoffReferencesV1,
+        }
+        try:
+            return mapping[receipt_class]
+        except KeyError as exc:
+            raise ContractValidationError(
+                ReasonCode.SCHEMA_MISMATCH,
+                "receipt class is not owned by OP14/OP15",
+            ) from exc
+
+    def _durable_receipt_spines(self) -> tuple[EconomicReceiptEventSpineV1, ...]:
+        maximum = datetime.max.replace(tzinfo=UTC)
+        rows = self._persistence.reconstruct_as_of(
+            effective_cutoff=maximum,
+            recorded_cutoff=maximum,
+            aggregate_scope=(),
+        )
+        return tuple(
+            sorted(
+                (
+                    row
+                    for row in rows
+                    if type(row) is EconomicReceiptEventSpineV1
+                    and type(row.typed_payload) is ST12FEvidenceControlReceiptRecordV1
+                ),
+                key=lambda row: (row.recorded_at, row.record_id),
+            )
+        )
+
+    def _validate_receipt_lock_metadata(
+        self,
+        spine: EconomicReceiptEventSpineV1,
+    ) -> None:
+        payload = spine.typed_payload
+        assert type(payload) is ST12FEvidenceControlReceiptRecordV1
+        if payload.input_lock_id_or_explicit_absence == "EXPLICIT_ABSENCE":
+            if payload.parameter_value_refs or payload.source_epoch_refs:
+                raise ContractValidationError(
+                    ReasonCode.SCHEMA_MISMATCH,
+                    "lock-absent receipt carries parameter or epoch pins",
+                )
+            return
+        lock = self._cohort_resolver.resolve_input_lock(
+            payload.input_lock_id_or_explicit_absence
+        )
+        if (
+            payload.parameter_value_refs != lock.parameter_value_refs
+            or payload.source_epoch_refs != _source_epoch_refs(lock)
+        ):
+            raise ContractValidationError(
+                ReasonCode.SCHEMA_MISMATCH,
+                "receipt parameter or epoch pins differ from the canonical input lock",
+            )
+
+    @staticmethod
+    def _natural_slot(
+        value: ReplayResultContractV1 | PaperResultContractV1,
+        lane: str,
+    ) -> tuple[str, str, str, str]:
+        return (
+            value.input_lock_id,
+            lane,
+            value.cohort_template_id,
+            value.expected_result_contract_id,
+        )
+
+    def _rebuild_caches_from_durable_receipts(self) -> None:
+        lane_results: dict[str, ReplayResultContractV1 | PaperResultContractV1] = {}
+        slots: dict[tuple[str, str, str, str], str] = {}
+        divergence: dict[str, DivergenceAssessmentV1] = {}
+        bundles: dict[str, ComputationEvidenceBundleV1] = {}
+        bundle_rows: list[tuple[str, ComputationEvidenceBundleV1]] = []
+        current: dict[tuple[str, str], str] = {}
+        reviews: dict[str, IndependentReviewRecordV1] = {}
+        d_references: dict[str, ST12FEvidenceReferenceV1] = {}
+        g_handoffs: dict[str, FToGHandoffReferencesV1] = {}
+        for spine in self._durable_receipt_spines():
+            payload = spine.typed_payload
+            assert type(payload) is ST12FEvidenceControlReceiptRecordV1
+            if payload.receipt_class in {
+                ST12FReceiptClassV1.COHORT_COMPILATION,
+                ST12FReceiptClassV1.INPUT_LOCK,
+            }:
+                continue
+            expected_type = self._contract_type_for_receipt_class(payload.receipt_class)
+            value = payload.reconstruct(expected_type)
+            self._validate_receipt_lock_metadata(spine)
+            if type(value) in {ReplayResultContractV1, PaperResultContractV1}:
+                lane = (
+                    "REPLAY"
+                    if type(value) is ReplayResultContractV1
+                    else "PAPER"
+                )
+                assert isinstance(value, ReplayResultContractV1 | PaperResultContractV1)
+                slot = self._natural_slot(value, lane)
+                if (
+                    value.result_id in lane_results
+                    and deterministic_json(lane_results[value.result_id])
+                    != deterministic_json(value)
+                ):
+                    raise ContractValidationError(
+                        ReasonCode.ST12F_RESULT_SLOT_CONFLICT,
+                        "durable result identity binds competing canonical packets",
+                    )
+                previous_id = slots.get(slot)
+                if previous_id is not None and deterministic_json(lane_results[previous_id]) != deterministic_json(value):
+                    raise ContractValidationError(
+                        ReasonCode.ST12F_RESULT_SLOT_CONFLICT,
+                        "durable natural slot has competing canonical packets",
+                    )
+                lane_results[value.result_id] = value
+                slots[slot] = value.result_id
+            elif type(value) is DivergenceAssessmentV1:
+                divergence[value.assessment_id] = value
+            elif type(value) is ComputationEvidenceBundleV1:
+                bundles[spine.record_id] = value
+                bundles[value.evidence_bundle_version] = value
+                bundle_rows.append((spine.record_id, value))
+            elif type(value) is IndependentReviewRecordV1:
+                reviews[value.review_id] = value
+                reviews[spine.record_id] = value
+            elif type(value) is ST12FEvidenceReferenceV1:
+                d_references[value.reference_id] = value
+                d_references[spine.record_id] = value
+            elif type(value) is FToGHandoffReferencesV1:
+                g_handoffs[value.handoff_id] = value
+                g_handoffs[spine.record_id] = value
+        identities = {
+            (value.evidence_id, value.input_lock_id)
+            for _, value in bundle_rows
+        }
+        for identity in identities:
+            current[identity] = self._bundle_leaf_ref(
+                tuple(
+                    row
+                    for row in bundle_rows
+                    if (row[1].evidence_id, row[1].input_lock_id) == identity
+                )
+            )
+        self._lane_results = lane_results
+        self._slot_results = slots
+        self._divergence = divergence
+        self._bundles = bundles
+        self._current_bundle_by_identity = current
+        self._reviews = reviews
+        self._d_references = d_references
+        self._g_handoffs = g_handoffs
 
     def _load_contract(self, record_ref: str, expected_type: type[object]) -> object:
         spine = self._persistence.get_record(record_ref)
         if type(spine) is not EconomicReceiptEventSpineV1 or type(spine.typed_payload) is not ST12FEvidenceControlReceiptRecordV1:
             raise PersistenceContractError(ReasonCode.OWNER_DATA_MISSING, "typed ST12-F receipt is absent")
-        return spine.typed_payload.reconstruct(expected_type)
+        value = spine.typed_payload.reconstruct(expected_type)
+        self._validate_receipt_lock_metadata(spine)
+        return value
 
     def resolve_lane_result(self, result_id: str, lane: str) -> ReplayResultContractV1 | PaperResultContractV1:
         value = self._lane_results.get(result_id)
@@ -926,19 +1169,175 @@ class ComputationEvidenceServiceV1:
             self._bundles[bundle_ref] = value
         return value
 
+    def resolve_review(self, review_ref: str) -> IndependentReviewRecordV1:
+        value = self._reviews.get(review_ref)
+        if value is None:
+            receipt_ref = (
+                review_ref
+                if review_ref.startswith("ST12F-RECEIPT::")
+                else f"ST12F-RECEIPT::{review_ref}::INDEPENDENT_REVIEW_VERSION"
+            )
+            value = self._load_contract(receipt_ref, IndependentReviewRecordV1)  # type: ignore[assignment]
+            self._reviews[review_ref] = value
+            self._reviews[receipt_ref] = value
+        return value
+
+    def resolve_control_receipt(
+        self,
+        receipt_ref: str,
+        expected_type: type[object],
+    ) -> object:
+        """Canonical read path for every OP14/OP15 receipt class."""
+
+        return self._load_contract(receipt_ref, expected_type)
+
+    @property
+    def last_committed_receipt_refs(self) -> tuple[str, ...]:
+        return self._last_committed_receipt_refs
+
+    @staticmethod
+    def _contract_receipt_parts(
+        contract: object,
+    ) -> tuple[
+        ST12FReceiptClassV1,
+        str,
+        str,
+        tuple[str, ...],
+        str,
+        tuple[ReasonCode, ...],
+    ]:
+        if type(contract) is ReplayResultContractV1:
+            return (
+                ST12FReceiptClassV1.REPLAY_REGISTRATION,
+                contract.result_id,
+                "EXPLICIT_ABSENCE",
+                (contract.run_reference,),
+                "REPLAY_REGISTERED",
+                (),
+            )
+        if type(contract) is PaperResultContractV1:
+            return (
+                ST12FReceiptClassV1.PAPER_REGISTRATION,
+                contract.result_id,
+                "EXPLICIT_ABSENCE",
+                (contract.run_reference,),
+                "PAPER_REGISTERED",
+                (),
+            )
+        if type(contract) is DivergenceAssessmentV1:
+            return (
+                ST12FReceiptClassV1.DIVERGENCE_ASSESSMENT,
+                contract.assessment_id,
+                "EXPLICIT_ABSENCE",
+                (contract.replay_result_ref, contract.paper_result_ref),
+                contract.terminal_state.value,
+                contract.typed_blockers,
+            )
+        if type(contract) is ModelRiskEvidenceAssessmentV1:
+            return (
+                ST12FReceiptClassV1.MODEL_RISK_ASSESSMENT,
+                contract.assessment_id,
+                "EXPLICIT_ABSENCE",
+                contract.receipt_refs,
+                contract.terminal_state,
+                contract.blocker_codes,
+            )
+        if type(contract) is QuantumTraceValidationReceiptV1:
+            return (
+                ST12FReceiptClassV1.QUANTUM_TRACE_VALIDATION,
+                contract.receipt_id,
+                "EXPLICIT_ABSENCE",
+                (
+                    contract.trace_id,
+                    contract.strongest_classical_receipt_ref,
+                    contract.no_trade_receipt_ref,
+                ),
+                contract.terminal_state,
+                (),
+            )
+        if type(contract) is DeterministicEvidenceAnnotationContractV1:
+            return (
+                ST12FReceiptClassV1.LLM_ANNOTATION_VALIDATION,
+                contract.annotation_id,
+                "EXPLICIT_ABSENCE",
+                tuple(
+                    dict.fromkeys(
+                        (
+                            *contract.evidence_bundle_refs,
+                            *(row.evidence_receipt_ref for row in contract.canonical_numeric_evidence),
+                            *contract.deterministic_numeric_recheck_receipt_refs,
+                        )
+                    )
+                ),
+                "ANNOTATION_VALIDATED_NO_EFFECT",
+                (),
+            )
+        if type(contract) is ComputationEvidenceBundleV1:
+            return (
+                ST12FReceiptClassV1.EVIDENCE_BUNDLE_VERSION,
+                contract.evidence_bundle_version,
+                contract.prior_bundle_ref_or_explicit_absence,
+                contract.source_and_provenance_refs,
+                contract.terminal_state.value,
+                contract.blocker_codes,
+            )
+        if type(contract) is IndependentReviewRecordV1:
+            return (
+                ST12FReceiptClassV1.INDEPENDENT_REVIEW_VERSION,
+                contract.review_id,
+                contract.prior_bundle_ref,
+                (contract.prior_bundle_ref, contract.authority_receipt_ref),
+                contract.decision.value,
+                contract.blocker_codes,
+            )
+        if type(contract) is ST12FEvidenceReferenceV1:
+            return (
+                ST12FReceiptClassV1.D_EVIDENCE_REFERENCE,
+                contract.reference_id,
+                contract.evidence_ref,
+                (contract.evidence_ref,),
+                contract.terminal_state,
+                (),
+            )
+        if type(contract) is FToGHandoffReferencesV1:
+            return (
+                ST12FReceiptClassV1.G_HANDOFF_REFERENCE,
+                contract.handoff_id,
+                contract.evidence_bundle_ref,
+                tuple(
+                    dict.fromkeys(
+                        (
+                            contract.evidence_bundle_ref,
+                            *contract.no_trade_blocker_refs,
+                            *contract.champion_challenger_evidence_refs,
+                            *contract.portfolio_utility_refs,
+                            contract.quantum_classical_comparison_receipt_ref,
+                        )
+                    )
+                ),
+                contract.terminal_state,
+                (),
+            )
+        raise ContractValidationError(
+            ReasonCode.SCHEMA_MISMATCH,
+            "OP14/OP15 contract is outside the receipt allowlist",
+        )
+
     def _receipt(
         self,
         *,
         request: RegisterReplayPaperResultRequestV1 | BuildEvidenceBundleRequestV1,
-        receipt_class: ST12FReceiptClassV1,
         contract: object,
-        contract_id: str,
         input_lock: ImmutableReplayPaperInputLockV1,
-        parent_ref: str = "EXPLICIT_ABSENCE",
-        source_refs: tuple[str, ...] = (),
-        terminal_state: str,
-        reason_codes: tuple[ReasonCode, ...] = (),
     ) -> EconomicReceiptEventSpineV1:
+        (
+            receipt_class,
+            contract_id,
+            parent_ref,
+            source_refs,
+            terminal_state,
+            reason_codes,
+        ) = self._contract_receipt_parts(contract)
         record_id = f"ST12F-RECEIPT::{contract_id}::{receipt_class.value}"
         payload = ST12FEvidenceControlReceiptRecordV1(
             control_receipt_id=record_id,
@@ -980,18 +1379,34 @@ class ComputationEvidenceServiceV1:
             no_effect_flags=NO_EFFECTS_V1,
         )
 
-    def _persist_one(
+    def _persist_many(
         self,
         *,
         request: RegisterReplayPaperResultRequestV1 | BuildEvidenceBundleRequestV1,
-        spine: EconomicReceiptEventSpineV1,
+        spines: tuple[EconomicReceiptEventSpineV1, ...],
+        primary_record_ref: str,
         identity_class: str,
+        extra_transitions: tuple[StateTransitionReceiptV1, ...] = (),
     ) -> EconomicReceiptEventSpineV1:
+        if not spines or primary_record_ref not in {row.record_id for row in spines}:
+            raise ContractValidationError(
+                ReasonCode.INCOMPLETE_CONTRACT,
+                "atomic ST12-F persistence requires a primary receipt",
+            )
+        canonical_request = deterministic_json(
+            {
+                "request": safe_json_loads(canonical_request_json_v1(request)),
+                "contracts": [
+                    safe_json_loads(row.typed_payload.canonical_contract_json)
+                    for row in spines
+                ],
+            }
+        )
         claim = IdempotencyClaimReceiptV1(
             claim_id=f"ST12F-IDEMPOTENCY::{request.idempotency_key}::{identity_class}",
             idempotency_key=request.idempotency_key,
             identity_class=identity_class,
-            canonical_request_json=canonical_request_json_v1(request),
+            canonical_request_json=canonical_request,
             claim_state=IdempotencyClaimStateV1.ACQUIRED,
             result_record_ref=None,
             created_at=request.requested_at,
@@ -1011,7 +1426,48 @@ class ComputationEvidenceServiceV1:
                 raise IdempotencyContractError(ReasonCode.IDEMPOTENCY_CONFLICT, "same key binds a different canonical request")
             if acquisition.outcome is not IdempotencyOutcomeV1.ACQUIRED:
                 raise IdempotencyContractError(ReasonCode.IDEMPOTENCY_IN_PROGRESS, "same canonical request is already in progress")
-            self._persistence.insert_receipt_record(transaction, spine)
+            for spine in spines:
+                self._persistence.insert_receipt_record(transaction, spine)
+                self._persistence.insert_state_transition(
+                    transaction,
+                    StateTransitionReceiptV1(
+                        transition_id=f"ST12F-CONTROL-STATE::{spine.record_id}",
+                        aggregate_id=f"ST12F-CONTROL::{spine.record_id}",
+                        transition_family="UNIT_OF_WORK_STATE_MACHINE_V1",
+                        prior_state="NEW",
+                        event_class="ST12F_CONTROL_RECEIPT_COMMITTED",
+                        candidate_state="ACTIVE",
+                        disposition=TransitionDispositionV1.ACCEPTED,
+                        event_identity=spine.record_id,
+                        aggregate_version_before=0,
+                        aggregate_version_after=1,
+                        effective_at=spine.effective_at,
+                        recorded_at=spine.recorded_at,
+                        reason_code=ReasonCode.CENTRAL_ADMISSION_PASS.value,
+                        reconciliation_required=False,
+                    ),
+                )
+            for transition in extra_transitions:
+                self._persistence.insert_state_transition(transaction, transition)
+            self._persistence.insert_state_transition(
+                transaction,
+                StateTransitionReceiptV1(
+                    transition_id=f"{claim.claim_id}::ACQUIRED",
+                    aggregate_id=claim.claim_id,
+                    transition_family="IDEMPOTENCY_CLAIM_STATE_MACHINE_V1",
+                    prior_state="UNSEEN",
+                    event_class=f"{identity_class}_ACQUIRED",
+                    candidate_state="ACQUIRED",
+                    disposition=TransitionDispositionV1.ACCEPTED,
+                    event_identity=request.request_id,
+                    aggregate_version_before=0,
+                    aggregate_version_after=1,
+                    effective_at=request.requested_at,
+                    recorded_at=request.requested_at,
+                    reason_code=ReasonCode.CENTRAL_ADMISSION_PASS.value,
+                    reconciliation_required=False,
+                ),
+            )
             self._persistence.insert_state_transition(
                 transaction,
                 StateTransitionReceiptV1(
@@ -1023,17 +1479,28 @@ class ComputationEvidenceServiceV1:
                     candidate_state="COMPLETED",
                     disposition=TransitionDispositionV1.ACCEPTED,
                     event_identity=request.request_id,
-                    aggregate_version_before=0,
-                    aggregate_version_after=1,
+                    aggregate_version_before=1,
+                    aggregate_version_after=2,
                     effective_at=request.requested_at,
                     recorded_at=request.requested_at,
                     reason_code=ReasonCode.CENTRAL_ADMISSION_PASS.value,
                     reconciliation_required=False,
                 ),
             )
-            self._persistence.bind_idempotency_result(transaction, acquisition.claim_ref, spine.record_id, request.requested_at)
+            self._persistence.bind_idempotency_result(
+                transaction,
+                acquisition.claim_ref,
+                primary_record_ref,
+                request.requested_at,
+            )
             transaction.commit()
-            return spine
+            primary = self._persistence.get_record(primary_record_ref)
+            if type(primary) is not EconomicReceiptEventSpineV1:
+                raise PersistenceContractError(
+                    ReasonCode.OWNER_DATA_MISSING,
+                    "committed primary ST12-F receipt is absent",
+                )
+            return primary
         except BaseException:
             if transaction.is_active:
                 transaction.rollback()
@@ -1044,6 +1511,7 @@ class ComputationEvidenceServiceV1:
         request: RegisterReplayPaperResultRequestV1,
         packet: ReplayResultContractV1 | PaperResultContractV1 | None = None,
     ) -> ReplayResultContractV1 | PaperResultContractV1:
+        self._last_committed_receipt_refs = ()
         initialize_st12f_parameter_registry_v1()
         if type(request) is not RegisterReplayPaperResultRequestV1:
             raise ContractValidationError(ReasonCode.CONTRACT_OR_TYPE_INVALID, "OP14 delegate requires exact request")
@@ -1064,100 +1532,677 @@ class ComputationEvidenceServiceV1:
             or value.accounting_definition != deterministic_json(lock.accounting_definition)
         ):
             raise ContractValidationError(ReasonCode.ST12F_INPUT_LOCK_MISMATCH, "lane packet differs from exact lock/slot/version/epoch/accounting pins")
-        natural_slot = (lock.input_lock_id, value.expected_result_contract_id)
-        existing_id = self._slot_results.get(natural_slot)
+        natural_slot = self._natural_slot(value, request.lane)
+        durable_lanes, durable_slots = self._durable_lane_index()
+        existing_id = durable_slots.get(natural_slot)
         if existing_id is not None:
-            existing = self._lane_results[existing_id]
+            existing = durable_lanes[existing_id]
             if deterministic_json(existing) == deterministic_json(value):
+                receipt_class = (
+                    ST12FReceiptClassV1.REPLAY_REGISTRATION
+                    if request.lane == "REPLAY"
+                    else ST12FReceiptClassV1.PAPER_REGISTRATION
+                )
+                self._last_committed_receipt_refs = (
+                    f"ST12F-RECEIPT::{existing.result_id}::{receipt_class.value}",
+                )
                 return existing
             raise ContractValidationError(ReasonCode.ST12F_RESULT_SLOT_CONFLICT, "a competing result already owns this immutable slot")
-        self._lane_results[value.result_id] = value
-        self._slot_results[natural_slot] = value.result_id
         if value.fixture_only_not_evidence:
             return value
-        receipt_class = ST12FReceiptClassV1.REPLAY_REGISTRATION if request.lane == "REPLAY" else ST12FReceiptClassV1.PAPER_REGISTRATION
         spine = self._receipt(
             request=request,
-            receipt_class=receipt_class,
             contract=value,
-            contract_id=value.result_id,
             input_lock=lock,
-            source_refs=(value.run_reference,),
-            terminal_state=f"{request.lane}_REGISTERED",
         )
-        self._persist_one(request=request, spine=spine, identity_class="ST10-OP::14")
-        return value
+        slot_identity = "::".join(natural_slot)
+        slot_transition = StateTransitionReceiptV1(
+            transition_id=f"ST12F-NATURAL-SLOT::{slot_identity}::OWNED",
+            aggregate_id=f"ST12F-NATURAL-SLOT::{slot_identity}",
+            transition_family="UNIT_OF_WORK_STATE_MACHINE_V1",
+            prior_state="NEW",
+            event_class="ST12F_RESULT_SLOT_OWNED",
+            candidate_state="ACTIVE",
+            disposition=TransitionDispositionV1.ACCEPTED,
+            event_identity=spine.record_id,
+            aggregate_version_before=0,
+            aggregate_version_after=1,
+            effective_at=value.closed_at,
+            recorded_at=value.closed_at,
+            reason_code=ReasonCode.CENTRAL_ADMISSION_PASS.value,
+            reconciliation_required=False,
+        )
+        try:
+            persisted = self._persist_many(
+                request=request,
+                spines=(spine,),
+                primary_record_ref=spine.record_id,
+                identity_class="ST10-OP::14",
+                extra_transitions=(slot_transition,),
+            )
+        except PersistenceContractError as exc:
+            check_lanes, check_slots = self._durable_lane_index()
+            owner_id = check_slots.get(natural_slot)
+            if owner_id is not None and deterministic_json(check_lanes[owner_id]) != deterministic_json(value):
+                raise ContractValidationError(
+                    ReasonCode.ST12F_RESULT_SLOT_CONFLICT,
+                    "a competing durable result owns this immutable natural slot",
+                ) from exc
+            raise
+        committed = persisted.typed_payload.reconstruct(expected_type)
+        self._lane_results[value.result_id] = committed  # type: ignore[assignment]
+        self._slot_results[natural_slot] = value.result_id
+        self._last_committed_receipt_refs = (persisted.record_id,)
+        return committed  # type: ignore[return-value]
 
-    def register_divergence(self, assessment: DivergenceAssessmentV1) -> None:
+    def _durable_lane_index(
+        self,
+    ) -> tuple[
+        dict[str, ReplayResultContractV1 | PaperResultContractV1],
+        dict[tuple[str, str, str, str], str],
+    ]:
+        lanes: dict[str, ReplayResultContractV1 | PaperResultContractV1] = {}
+        slots: dict[tuple[str, str, str, str], str] = {}
+        for spine in self._durable_receipt_spines():
+            payload = spine.typed_payload
+            assert type(payload) is ST12FEvidenceControlReceiptRecordV1
+            if payload.receipt_class not in {
+                ST12FReceiptClassV1.REPLAY_REGISTRATION,
+                ST12FReceiptClassV1.PAPER_REGISTRATION,
+            }:
+                continue
+            lane = (
+                "REPLAY"
+                if payload.receipt_class is ST12FReceiptClassV1.REPLAY_REGISTRATION
+                else "PAPER"
+            )
+            expected = ReplayResultContractV1 if lane == "REPLAY" else PaperResultContractV1
+            value = payload.reconstruct(expected)
+            assert isinstance(value, ReplayResultContractV1 | PaperResultContractV1)
+            self._validate_receipt_lock_metadata(spine)
+            if (
+                value.result_id in lanes
+                and deterministic_json(lanes[value.result_id])
+                != deterministic_json(value)
+            ):
+                raise ContractValidationError(
+                    ReasonCode.ST12F_RESULT_SLOT_CONFLICT,
+                    "durable result identity binds competing canonical packets",
+                )
+            slot = self._natural_slot(value, lane)
+            owner = slots.get(slot)
+            if owner is not None and deterministic_json(lanes[owner]) != deterministic_json(value):
+                raise ContractValidationError(
+                    ReasonCode.ST12F_RESULT_SLOT_CONFLICT,
+                    "durable natural slot contains competing results",
+                )
+            lanes[value.result_id] = value
+            slots[slot] = value.result_id
+        return lanes, slots
+
+    def _validate_divergence(self, assessment: DivergenceAssessmentV1) -> None:
         if type(assessment) is not DivergenceAssessmentV1:
             raise ContractValidationError(ReasonCode.CONTRACT_OR_TYPE_INVALID, "divergence must be exact typed contract")
         replay = self.resolve_lane_result(assessment.replay_result_ref, "REPLAY")
         paper = self.resolve_lane_result(assessment.paper_result_ref, "PAPER")
         if replay.input_lock_id != assessment.input_lock_id or paper.input_lock_id != assessment.input_lock_id or replay.cohort_template_id != assessment.cohort_template_id or paper.cohort_template_id != assessment.cohort_template_id:
             raise ContractValidationError(ReasonCode.ST12F_INPUT_LOCK_MISMATCH, "divergence inputs do not share one lock/template")
-        self._divergence[assessment.assessment_id] = assessment
+
+    def register_divergence(
+        self,
+        assessment: DivergenceAssessmentV1,
+        request: BuildEvidenceBundleRequestV1,
+    ) -> DivergenceAssessmentV1:
+        """Persist divergence through the existing OP15 transaction contract."""
+
+        if type(request) is not BuildEvidenceBundleRequestV1:
+            raise ContractValidationError(
+                ReasonCode.CONTRACT_OR_TYPE_INVALID,
+                "divergence registration requires the existing OP15 request",
+            )
+        self._validate_divergence(assessment)
+        lock = self._cohort_resolver.resolve_input_lock(assessment.input_lock_id)
+        spine = self._receipt(request=request, contract=assessment, input_lock=lock)
+        persisted = self._persist_many(
+            request=request,
+            spines=(spine,),
+            primary_record_ref=spine.record_id,
+            identity_class="ST10-OP::15::DIVERGENCE",
+        )
+        value = persisted.typed_payload.reconstruct(DivergenceAssessmentV1)
+        self._divergence[value.assessment_id] = value
+        self._last_committed_receipt_refs = (persisted.record_id,)
+        return value
 
     def build_bundle(
         self,
         request: BuildEvidenceBundleRequestV1,
         candidate: ComputationEvidenceBundleV1 | None = None,
+        *,
+        control_contracts: tuple[object, ...] | None = None,
     ) -> ComputationEvidenceBundleV1:
+        self._last_committed_receipt_refs = ()
         initialize_st12f_parameter_registry_v1()
         if candidate is None and self._bundle_candidate_resolver is not None:
             candidate = self._bundle_candidate_resolver.resolve_bundle_candidate(request)
+        if control_contracts is None and callable(
+            getattr(self._bundle_candidate_resolver, "resolve_control_contracts", None)
+        ):
+            control_contracts = tuple(
+                self._bundle_candidate_resolver.resolve_control_contracts(request)
+            )
+        controls = () if control_contracts is None else control_contracts
         if type(request) is not BuildEvidenceBundleRequestV1 or type(candidate) is not ComputationEvidenceBundleV1:
             raise ContractValidationError(ReasonCode.CONTRACT_OR_TYPE_INVALID, "OP15 requires exact request and canonical candidate")
+        if not isinstance(controls, tuple):
+            raise ContractValidationError(
+                ReasonCode.CONTRACT_OR_TYPE_INVALID,
+                "OP15 control contracts must be an immutable tuple",
+            )
         lock = self._cohort_resolver.resolve_input_lock(request.input_lock_id)
         if candidate.input_lock_id != lock.input_lock_id or candidate.component_or_template_ref != request.component_id or request.required_lanes != ("REPLAY", "PAPER"):
             raise ContractValidationError(ReasonCode.ST12F_INPUT_LOCK_MISMATCH, "OP15 scope differs from canonical lock/component/dual lane")
-        replay = self.resolve_lane_result(candidate.replay_result_ref, "REPLAY")
-        paper = self.resolve_lane_result(candidate.paper_result_ref, "PAPER")
-        if replay.fixture_only_not_evidence or paper.fixture_only_not_evidence:
-            raise ContractValidationError(ReasonCode.ST12F_FIXTURE_NOT_EVIDENCE, "fixture packets cannot be persisted or counted as evidence")
-        if replay.input_lock_id != lock.input_lock_id or paper.input_lock_id != lock.input_lock_id:
-            raise ContractValidationError(ReasonCode.ST12F_INPUT_LOCK_MISMATCH, "bundle lanes do not share the canonical lock")
-        if candidate.divergence_assessment_ref not in self._divergence:
-            raise ContractValidationError(ReasonCode.ST12F_EVIDENCE_INCOMPLETE, "bundle divergence assessment is unresolved")
-        previous_ref = self._current_bundle_by_identity.get((candidate.evidence_id, candidate.input_lock_id))
-        closed = candidate.terminal_state is EvidenceBundleTerminalStateV1.CLOSED_INDEPENDENTLY_VALIDATED
-        if closed:
-            review_refs = [ref for ref in request.evidence_record_refs if self._review_resolver is not None and ref.startswith("ST12F-REVIEW::")]
-            if len(review_refs) != 1 or previous_ref is None or self._review_resolver is None:
-                raise ContractValidationError(ReasonCode.ST12F_INDEPENDENT_REVIEW_REQUIRED, "closed version requires one separate pre-existing review and prior version")
-            review = self._review_resolver.resolve_review(review_refs[0])
-            previous = self.resolve_bundle(previous_ref)
-            if (
-                type(review) is not IndependentReviewRecordV1
-                or review.prior_bundle_ref != previous_ref
-                or review.evidence_id != candidate.evidence_id
-                or review.input_lock_id != lock.input_lock_id
-                or review.bundle_producer_identity == review.reviewer_identity
-                or review.bundle_producer_identity != self._producer_identity
-                or review.decision is not IndependentReviewDecisionV1.VALIDATED
-                or review.reviewed_source_epoch_refs != _source_epoch_refs(lock)
-                or review.valid_until < request.requested_at
-                or previous.terminal_state is not EvidenceBundleTerminalStateV1.READY_FOR_INDEPENDENT_REVIEW
-            ):
-                raise ContractValidationError(ReasonCode.ST12F_SELF_REVIEW_FORBIDDEN, "independent review does not close the exact prior bundle version")
-        elif candidate.terminal_state is not EvidenceBundleTerminalStateV1.READY_FOR_INDEPENDENT_REVIEW:
-            raise ContractValidationError(ReasonCode.ST12F_EVIDENCE_INCOMPLETE, "initial OP15 bundle must be ready for independent review")
-        spine = self._receipt(
-            request=request,
-            receipt_class=ST12FReceiptClassV1.EVIDENCE_BUNDLE_VERSION,
-            contract=candidate,
-            contract_id=candidate.evidence_bundle_version,
-            input_lock=lock,
-            parent_ref=previous_ref or "EXPLICIT_ABSENCE",
-            source_refs=request.evidence_record_refs,
-            terminal_state=candidate.terminal_state.value,
-            reason_codes=candidate.blocker_codes,
+        if candidate.source_and_provenance_refs != request.evidence_record_refs:
+            raise ContractValidationError(
+                ReasonCode.INPUT_SCOPE_MISMATCH,
+                "bundle provenance must equal the exact OP15 evidence roster",
+            )
+        bundle_record_ref = f"ST12F-RECEIPT::{candidate.evidence_bundle_version}::EVIDENCE_BUNDLE_VERSION"
+        existing_bundle_spine = self._persistence.get_record(bundle_record_ref)
+        if existing_bundle_spine is not None:
+            if type(existing_bundle_spine) is not EconomicReceiptEventSpineV1:
+                raise PersistenceContractError(
+                    ReasonCode.PERSISTENCE_CONFLICT,
+                    "bundle version identity is owned by a non-receipt record",
+                )
+            existing_bundle = existing_bundle_spine.typed_payload.reconstruct(
+                ComputationEvidenceBundleV1
+            )
+            if deterministic_json(existing_bundle) != deterministic_json(candidate):
+                raise PersistenceContractError(
+                    ReasonCode.PERSISTENCE_CONFLICT,
+                    "immutable bundle version already binds different evidence",
+                )
+            existing_refs = [bundle_record_ref]
+            if candidate.terminal_state is EvidenceBundleTerminalStateV1.CLOSED_INDEPENDENTLY_VALIDATED:
+                assert type(candidate.d_evidence_reference_projection) is ST12FEvidenceReferenceV1
+                assert type(candidate.g_handoff_projection) is FToGHandoffReferencesV1
+                existing_refs.extend(
+                    (
+                        f"ST12F-RECEIPT::{candidate.d_evidence_reference_projection.reference_id}::D_EVIDENCE_REFERENCE",
+                        f"ST12F-RECEIPT::{candidate.g_handoff_projection.handoff_id}::G_HANDOFF_REFERENCE",
+                    )
+                )
+            self._last_committed_receipt_refs = tuple(existing_refs)
+            return existing_bundle
+        previous_ref = self._durable_current_bundle_ref(
+            candidate.evidence_id,
+            candidate.input_lock_id,
         )
-        persisted = self._persist_one(request=request, spine=spine, identity_class="ST10-OP::15")
+        expected_parent = previous_ref or "EXPLICIT_ABSENCE"
+        if candidate.prior_bundle_ref_or_explicit_absence != expected_parent:
+            raise ContractValidationError(
+                ReasonCode.ST12F_EVIDENCE_INCOMPLETE,
+                "bundle parent differs from the durable current version",
+            )
+        previous = None if previous_ref is None else self.resolve_bundle(previous_ref)
+        self._validate_bundle_transition(previous, candidate)
+
+        replay = None if candidate.replay_result_ref == "EXPLICIT_ABSENCE" else self.resolve_lane_result(candidate.replay_result_ref, "REPLAY")
+        paper = None if candidate.paper_result_ref == "EXPLICIT_ABSENCE" else self.resolve_lane_result(candidate.paper_result_ref, "PAPER")
+        self._validate_bundle_lanes(candidate, lock, replay, paper)
+
+        control_by_type: dict[type[object], object] = {}
+        allowed_control_types = {
+            DivergenceAssessmentV1,
+            ModelRiskEvidenceAssessmentV1,
+            QuantumTraceValidationReceiptV1,
+            DeterministicEvidenceAnnotationContractV1,
+            IndependentReviewRecordV1,
+        }
+        for control in controls:
+            if type(control) not in allowed_control_types:
+                raise ContractValidationError(
+                    ReasonCode.SCHEMA_MISMATCH,
+                    "OP15 control tuple contains a non-control contract",
+                )
+            self._contract_receipt_parts(control)
+            if type(control) in control_by_type:
+                raise ContractValidationError(
+                    ReasonCode.ST12F_EVIDENCE_INCOMPLETE,
+                    "OP15 carries duplicate control contract types",
+                )
+            if getattr(control, "input_lock_id", lock.input_lock_id) != lock.input_lock_id:
+                raise ContractValidationError(
+                    ReasonCode.ST12F_INPUT_LOCK_MISMATCH,
+                    "OP15 control contract differs from the canonical input lock",
+                )
+            control_by_type[type(control)] = control
+
+        divergence = control_by_type.get(DivergenceAssessmentV1)
+        if divergence is None and candidate.divergence_assessment_ref != "EXPLICIT_ABSENCE":
+            receipt_ref = f"ST12F-RECEIPT::{candidate.divergence_assessment_ref}::DIVERGENCE_ASSESSMENT"
+            if self._persistence.get_record(receipt_ref) is not None:
+                divergence = self._load_contract(receipt_ref, DivergenceAssessmentV1)
+        if divergence is not None:
+            assert type(divergence) is DivergenceAssessmentV1
+            if divergence.assessment_id != candidate.divergence_assessment_ref:
+                raise ContractValidationError(
+                    ReasonCode.ST12F_EVIDENCE_INCOMPLETE,
+                    "bundle divergence reference differs from its contract",
+                )
+            self._validate_divergence(divergence)
+        self._validate_bundle_divergence(candidate, divergence)
+
+        model_risk = control_by_type.get(ModelRiskEvidenceAssessmentV1)
+        if model_risk is None:
+            model_risk = self._find_control_in_request(
+                request,
+                ST12FReceiptClassV1.MODEL_RISK_ASSESSMENT,
+                ModelRiskEvidenceAssessmentV1,
+            )
+        self._validate_bundle_model_risk(candidate, model_risk)
+
+        review = control_by_type.get(IndependentReviewRecordV1)
+        if review is None:
+            review = self._find_review_for_request(request)
+        self._validate_bundle_review(
+            request=request,
+            lock=lock,
+            previous_ref=previous_ref,
+            previous=previous,
+            candidate=candidate,
+            review=review,
+        )
+
+        self._validate_closed_projections(
+            candidate,
+            bundle_record_ref=bundle_record_ref,
+            lock=lock,
+        )
+        spines: list[EconomicReceiptEventSpineV1] = []
+        effective_controls = list(controls)
+        if (
+            type(review) is IndependentReviewRecordV1
+            and IndependentReviewRecordV1 not in control_by_type
+        ):
+            effective_controls.append(review)
+        for control in effective_controls:
+            receipt_class, contract_id, *_ = self._contract_receipt_parts(control)
+            receipt_ref = f"ST12F-RECEIPT::{contract_id}::{receipt_class.value}"
+            existing = self._persistence.get_record(receipt_ref)
+            if existing is None:
+                spines.append(self._receipt(request=request, contract=control, input_lock=lock))
+            elif type(existing) is not EconomicReceiptEventSpineV1 or deterministic_json(existing.typed_payload.reconstruct(type(control))) != deterministic_json(control):
+                raise PersistenceContractError(
+                    ReasonCode.PERSISTENCE_CONFLICT,
+                    "OP15 control receipt identity already binds different evidence",
+                )
+        bundle_spine = self._receipt(request=request, contract=candidate, input_lock=lock)
+        spines.append(bundle_spine)
+        if candidate.terminal_state is EvidenceBundleTerminalStateV1.CLOSED_INDEPENDENTLY_VALIDATED:
+            assert type(candidate.d_evidence_reference_projection) is ST12FEvidenceReferenceV1
+            assert type(candidate.g_handoff_projection) is FToGHandoffReferencesV1
+            spines.extend(
+                (
+                    self._receipt(request=request, contract=candidate.d_evidence_reference_projection, input_lock=lock),
+                    self._receipt(request=request, contract=candidate.g_handoff_projection, input_lock=lock),
+                )
+            )
+        persisted = self._persist_many(
+            request=request,
+            spines=tuple(spines),
+            primary_record_ref=bundle_spine.record_id,
+            identity_class="ST10-OP::15",
+        )
         value = persisted.typed_payload.reconstruct(ComputationEvidenceBundleV1)
-        self._bundles[persisted.record_id] = value
-        self._bundles[value.evidence_bundle_version] = value
-        self._current_bundle_by_identity[(value.evidence_id, value.input_lock_id)] = persisted.record_id
+        self._rebuild_caches_from_durable_receipts()
+        self._last_committed_receipt_refs = tuple(row.record_id for row in spines)
         return value
+
+    def _durable_current_bundle_ref(
+        self,
+        evidence_id: str,
+        input_lock_id: str,
+    ) -> str | None:
+        matches: list[tuple[str, ComputationEvidenceBundleV1]] = []
+        for spine in self._durable_receipt_spines():
+            payload = spine.typed_payload
+            assert type(payload) is ST12FEvidenceControlReceiptRecordV1
+            if payload.receipt_class is not ST12FReceiptClassV1.EVIDENCE_BUNDLE_VERSION:
+                continue
+            value = payload.reconstruct(ComputationEvidenceBundleV1)
+            if value.evidence_id == evidence_id and value.input_lock_id == input_lock_id:
+                matches.append((spine.record_id, value))
+        return None if not matches else self._bundle_leaf_ref(tuple(matches))
+
+    @staticmethod
+    def _bundle_leaf_ref(
+        rows: tuple[tuple[str, ComputationEvidenceBundleV1], ...],
+    ) -> str:
+        by_ref = {record_ref: value for record_ref, value in rows}
+        parents = {
+            value.prior_bundle_ref_or_explicit_absence
+            for value in by_ref.values()
+            if value.prior_bundle_ref_or_explicit_absence != "EXPLICIT_ABSENCE"
+        }
+        if any(parent not in by_ref for parent in parents):
+            raise ContractValidationError(
+                ReasonCode.ST12F_EVIDENCE_INCOMPLETE,
+                "durable bundle lineage has a missing parent receipt",
+            )
+        leaves = tuple(sorted(set(by_ref) - parents))
+        roots = tuple(
+            ref
+            for ref, value in by_ref.items()
+            if value.prior_bundle_ref_or_explicit_absence == "EXPLICIT_ABSENCE"
+        )
+        if len(leaves) != 1 or len(roots) != 1:
+            raise ContractValidationError(
+                ReasonCode.ST12F_EVIDENCE_INCOMPLETE,
+                "durable bundle lineage is branched or disconnected",
+            )
+        return leaves[0]
+
+    def _find_control_in_request(
+        self,
+        request: BuildEvidenceBundleRequestV1,
+        receipt_class: ST12FReceiptClassV1,
+        expected_type: type[object],
+    ) -> object | None:
+        matches: list[object] = []
+        for ref in request.evidence_record_refs:
+            spine = self._persistence.get_record(ref)
+            if (
+                type(spine) is EconomicReceiptEventSpineV1
+                and type(spine.typed_payload) is ST12FEvidenceControlReceiptRecordV1
+                and spine.typed_payload.receipt_class is receipt_class
+            ):
+                matches.append(spine.typed_payload.reconstruct(expected_type))
+        if len(matches) > 1:
+            raise ContractValidationError(
+                ReasonCode.ST12F_EVIDENCE_INCOMPLETE,
+                "OP15 evidence roster contains duplicate control classes",
+            )
+        return None if not matches else matches[0]
+
+    def _find_review_for_request(
+        self,
+        request: BuildEvidenceBundleRequestV1,
+    ) -> IndependentReviewRecordV1 | None:
+        durable = self._find_control_in_request(
+            request,
+            ST12FReceiptClassV1.INDEPENDENT_REVIEW_VERSION,
+            IndependentReviewRecordV1,
+        )
+        if durable is not None:
+            assert type(durable) is IndependentReviewRecordV1
+            return durable
+        if self._review_resolver is None:
+            return None
+        candidates: list[IndependentReviewRecordV1] = []
+        for ref in request.evidence_record_refs:
+            try:
+                candidate = self._review_resolver.resolve_review(ref)
+            except (ContractValidationError, PersistenceContractError, KeyError):
+                continue
+            if type(candidate) is IndependentReviewRecordV1:
+                candidates.append(candidate)
+        if len(candidates) > 1:
+            raise ContractValidationError(
+                ReasonCode.ST12F_INDEPENDENT_REVIEW_REQUIRED,
+                "OP15 resolves more than one independent review",
+            )
+        return None if not candidates else candidates[0]
+
+    @staticmethod
+    def _validate_bundle_transition(
+        previous: ComputationEvidenceBundleV1 | None,
+        candidate: ComputationEvidenceBundleV1,
+    ) -> None:
+        state = candidate.terminal_state
+        if candidate.independent_review_state != state.value:
+            raise ContractValidationError(
+                ReasonCode.ST12F_INDEPENDENT_REVIEW_REQUIRED,
+                "bundle review state differs from its immutable terminal state",
+            )
+        initial = {
+            EvidenceBundleTerminalStateV1.INCOMPLETE_MISSING_REPLAY,
+            EvidenceBundleTerminalStateV1.INCOMPLETE_MISSING_PAPER,
+            EvidenceBundleTerminalStateV1.INCOMPLETE_CONFLICT,
+            EvidenceBundleTerminalStateV1.READY_FOR_INDEPENDENT_REVIEW,
+        }
+        if previous is None:
+            allowed = initial
+        elif previous.terminal_state is EvidenceBundleTerminalStateV1.READY_FOR_INDEPENDENT_REVIEW:
+            allowed = {
+                EvidenceBundleTerminalStateV1.INDEPENDENT_REVIEW_REJECTED,
+                EvidenceBundleTerminalStateV1.CLOSED_INDEPENDENTLY_VALIDATED,
+                EvidenceBundleTerminalStateV1.STALE,
+                EvidenceBundleTerminalStateV1.SUPERSEDED,
+            }
+        elif previous.terminal_state is EvidenceBundleTerminalStateV1.CLOSED_INDEPENDENTLY_VALIDATED:
+            allowed = {
+                EvidenceBundleTerminalStateV1.STALE,
+                EvidenceBundleTerminalStateV1.SUPERSEDED,
+            }
+        else:
+            allowed = {
+                *initial,
+                EvidenceBundleTerminalStateV1.STALE,
+                EvidenceBundleTerminalStateV1.SUPERSEDED,
+            }
+        if state not in allowed or (
+            previous is not None
+            and candidate.evidence_bundle_version == previous.evidence_bundle_version
+        ):
+            raise ContractValidationError(
+                ReasonCode.ST12F_EVIDENCE_INCOMPLETE,
+                "bundle lifecycle transition or immutable version identity is invalid",
+            )
+
+    @staticmethod
+    def _validate_bundle_lanes(
+        candidate: ComputationEvidenceBundleV1,
+        lock: ImmutableReplayPaperInputLockV1,
+        replay: ReplayResultContractV1 | None,
+        paper: PaperResultContractV1 | None,
+    ) -> None:
+        state = candidate.terminal_state
+        if (replay is None) != (state is EvidenceBundleTerminalStateV1.INCOMPLETE_MISSING_REPLAY):
+            raise ContractValidationError(
+                ReasonCode.ST12F_EVIDENCE_INCOMPLETE,
+                "missing REPLAY evidence requires its exact immutable incomplete state",
+            )
+        if (paper is None) != (state is EvidenceBundleTerminalStateV1.INCOMPLETE_MISSING_PAPER):
+            raise ContractValidationError(
+                ReasonCode.ST12F_EVIDENCE_INCOMPLETE,
+                "missing PAPER evidence requires its exact immutable incomplete state",
+            )
+        present = tuple(row for row in (replay, paper) if row is not None)
+        if any(
+            row.fixture_only_not_evidence
+            or row.input_lock_id != lock.input_lock_id
+            or row.cohort_template_id != candidate.component_or_template_ref
+            for row in present
+        ):
+            raise ContractValidationError(
+                ReasonCode.ST12F_FIXTURE_NOT_EVIDENCE,
+                "bundle lanes must be real evidence under one exact lock and template",
+            )
+        expected_receipts = tuple(
+            f"ST12F-RECEIPT::{row.result_id}::{('REPLAY' if type(row) is ReplayResultContractV1 else 'PAPER')}_REGISTRATION"
+            for row in present
+        )
+        if candidate.lane_execution_receipt_refs != expected_receipts:
+            raise ContractValidationError(
+                ReasonCode.ST12F_EVIDENCE_INCOMPLETE,
+                "bundle lane receipt references are not the exact committed spine IDs",
+            )
+        if state in {
+            EvidenceBundleTerminalStateV1.INCOMPLETE_MISSING_REPLAY,
+            EvidenceBundleTerminalStateV1.INCOMPLETE_MISSING_PAPER,
+            EvidenceBundleTerminalStateV1.INCOMPLETE_CONFLICT,
+            EvidenceBundleTerminalStateV1.INDEPENDENT_REVIEW_REJECTED,
+            EvidenceBundleTerminalStateV1.STALE,
+        } and not candidate.blocker_codes:
+            raise ContractValidationError(
+                ReasonCode.ST12F_EVIDENCE_INCOMPLETE,
+                "incomplete, rejected, or stale bundle requires typed blockers",
+            )
+
+    @staticmethod
+    def _validate_bundle_divergence(
+        candidate: ComputationEvidenceBundleV1,
+        divergence: object | None,
+    ) -> None:
+        state = candidate.terminal_state
+        missing_lane = state in {
+            EvidenceBundleTerminalStateV1.INCOMPLETE_MISSING_REPLAY,
+            EvidenceBundleTerminalStateV1.INCOMPLETE_MISSING_PAPER,
+        }
+        if missing_lane:
+            valid = (
+                candidate.divergence_assessment_ref == "EXPLICIT_ABSENCE"
+                and divergence is None
+            )
+        else:
+            expected_terminal = (
+                DivergenceTerminalStateV1.INCOMPARABLE_MISSING_OR_CONFLICTING_EVIDENCE
+                if state is EvidenceBundleTerminalStateV1.INCOMPLETE_CONFLICT
+                else DivergenceTerminalStateV1.CONSISTENT_WITHIN_LOCKED_THRESHOLDS
+            )
+            valid = (
+                type(divergence) is DivergenceAssessmentV1
+                and candidate.divergence_assessment_ref
+                == divergence.assessment_id
+                and candidate.replay_result_ref == divergence.replay_result_ref
+                and candidate.paper_result_ref == divergence.paper_result_ref
+                and divergence.terminal_state is expected_terminal
+            )
+        if not valid:
+            raise ContractValidationError(
+                ReasonCode.ST12F_EVIDENCE_INCOMPLETE,
+                "bundle lifecycle state lacks its exact dual-lane divergence proof",
+            )
+
+    @staticmethod
+    def _validate_bundle_model_risk(
+        candidate: ComputationEvidenceBundleV1,
+        model_risk: object | None,
+    ) -> None:
+        if candidate.terminal_state not in {
+            EvidenceBundleTerminalStateV1.READY_FOR_INDEPENDENT_REVIEW,
+            EvidenceBundleTerminalStateV1.CLOSED_INDEPENDENTLY_VALIDATED,
+        }:
+            return
+        if type(model_risk) is not ModelRiskEvidenceAssessmentV1:
+            raise ContractValidationError(
+                ReasonCode.ST12F_EVIDENCE_INCOMPLETE,
+                "READY/CLOSED bundle requires a typed model-risk assessment",
+            )
+        comparison = model_risk.permanent_no_trade_comparison
+        non_review_veto = any(
+            row.active and row.condition_id != "INDEPENDENT_REVIEW_NOT_CLOSED"
+            for row in model_risk.no_trade_condition_outcomes
+        )
+        controls_pass = all(
+            row.state is not ModelRiskControlStateV1.BLOCKED_WITH_TYPED_REASON
+            and row.current
+            for row in model_risk.control_evidence
+        )
+        if (
+            non_review_veto
+            or not controls_pass
+            or comparison.execution_adjusted_lcb <= 0
+            or comparison.candidate_utility <= comparison.strongest_classical_utility
+            or comparison.candidate_utility <= comparison.no_trade_utility
+        ):
+            raise ContractValidationError(
+                ReasonCode.ST12F_MODEL_RISK_VETO,
+                "READY/CLOSED bundle has an unresolved deterministic hard veto",
+            )
+
+    def _validate_bundle_review(
+        self,
+        *,
+        request: BuildEvidenceBundleRequestV1,
+        lock: ImmutableReplayPaperInputLockV1,
+        previous_ref: str | None,
+        previous: ComputationEvidenceBundleV1 | None,
+        candidate: ComputationEvidenceBundleV1,
+        review: object | None,
+    ) -> None:
+        state = candidate.terminal_state
+        if state not in {
+            EvidenceBundleTerminalStateV1.INDEPENDENT_REVIEW_REJECTED,
+            EvidenceBundleTerminalStateV1.CLOSED_INDEPENDENTLY_VALIDATED,
+        }:
+            if review is not None:
+                raise ContractValidationError(
+                    ReasonCode.ST12F_INDEPENDENT_REVIEW_REQUIRED,
+                    "non-review lifecycle state cannot consume a review decision",
+                )
+            return
+        expected_decision = (
+            IndependentReviewDecisionV1.REJECTED
+            if state is EvidenceBundleTerminalStateV1.INDEPENDENT_REVIEW_REJECTED
+            else IndependentReviewDecisionV1.VALIDATED
+        )
+        if (
+            type(review) is not IndependentReviewRecordV1
+            or previous_ref is None
+            or previous is None
+            or previous.terminal_state is not EvidenceBundleTerminalStateV1.READY_FOR_INDEPENDENT_REVIEW
+            or review.prior_bundle_ref != previous_ref
+            or review.evidence_id != candidate.evidence_id
+            or review.evidence_bundle_version != candidate.evidence_bundle_version
+            or review.input_lock_id != lock.input_lock_id
+            or review.bundle_producer_identity != self._producer_identity
+            or review.reviewer_identity == self._producer_identity
+            or review.decision is not expected_decision
+            or review.reviewed_source_epoch_refs != _source_epoch_refs(lock)
+            or not review.reviewed_at <= request.requested_at <= review.valid_until
+        ):
+            raise ContractValidationError(
+                ReasonCode.ST12F_INDEPENDENT_REVIEW_REQUIRED,
+                "review does not bind the exact prior/candidate/version/lock/epoch custody",
+            )
+
+    @staticmethod
+    def _validate_closed_projections(
+        candidate: ComputationEvidenceBundleV1,
+        *,
+        bundle_record_ref: str,
+        lock: ImmutableReplayPaperInputLockV1,
+    ) -> None:
+        if candidate.terminal_state is not EvidenceBundleTerminalStateV1.CLOSED_INDEPENDENTLY_VALIDATED:
+            return
+        reference = candidate.d_evidence_reference_projection
+        handoff = candidate.g_handoff_projection
+        if (
+            type(reference) is not ST12FEvidenceReferenceV1
+            or type(handoff) is not FToGHandoffReferencesV1
+            or reference.evidence_state is not ST12FEvidenceStateV1.EVIDENCE_REFERENCE_AVAILABLE
+            or reference.evidence_id != candidate.evidence_id
+            or reference.evidence_ref != bundle_record_ref
+            or reference.evidence_bundle_version != candidate.evidence_bundle_version
+            or reference.component_or_template_ref != candidate.component_or_template_ref
+            or reference.input_lock_id != lock.input_lock_id
+            or reference.source_epoch_refs != _source_epoch_refs(lock)
+            or reference.lane != "REPLAY_PAPER"
+            or reference.terminal_state != candidate.terminal_state.value
+            or reference.no_effect_flags != NO_EFFECTS_V1
+            or handoff.evidence_bundle_ref != bundle_record_ref
+            or handoff.input_lock_id != lock.input_lock_id
+            or handoff.source_epoch_refs != _source_epoch_refs(lock)
+            or handoff.terminal_state != candidate.terminal_state.value
+            or not handoff.read_only
+        ):
+            raise ContractValidationError(
+                ReasonCode.ST12F_EVIDENCE_INCOMPLETE,
+                "closed bundle D/G projections differ from canonical custody",
+            )
 
     def read_evidence_reference(
         self,
@@ -1165,16 +2210,11 @@ class ComputationEvidenceServiceV1:
         *,
         causation_id: str,
         correlation_id: str,
+        query: FToDEvidenceReferenceQueryV1 | None = None,
     ) -> ST12FEvidenceReferenceV1:
-        context_id = _text(getattr(context, "context_id", ""), "context_id")
-        candidates = [
-            bundle
-            for bundle in self._bundles.values()
-            if bundle.component_or_template_ref == context_id
-            and bundle.terminal_state is EvidenceBundleTerminalStateV1.CLOSED_INDEPENDENTLY_VALIDATED
-        ]
-        if not candidates:
-            observed = parse_utc(getattr(context, "as_of"), field_name="as_of")
+        observed = parse_utc(getattr(context, "as_of"), field_name="as_of")
+
+        def unavailable() -> ST12FEvidenceReferenceV1:
             return ST12FEvidenceReferenceV1(
                 evidence_state=ST12FEvidenceStateV1.EVIDENCE_INSUFFICIENT_FAIL_CLOSED,
                 evidence_ref="EXPLICIT_ABSENCE",
@@ -1188,12 +2228,55 @@ class ComputationEvidenceServiceV1:
                 causation_id=causation_id,
                 correlation_id=correlation_id,
             )
-        bundle = sorted(candidates, key=lambda item: item.evidence_bundle_version)[-1]
-        reference = bundle.d_evidence_reference_projection
-        if type(reference) is not ST12FEvidenceReferenceV1:
-            raise ContractValidationError(ReasonCode.ST12F_EVIDENCE_INCOMPLETE, "closed bundle lacks its canonical D projection")
-        if reference.causation_id != causation_id or reference.correlation_id != correlation_id:
-            raise ContractValidationError(ReasonCode.INPUT_SCOPE_MISMATCH, "F reference causation/correlation differs from request")
+
+        if (
+            type(query) is not FToDEvidenceReferenceQueryV1
+            or query.evaluated_at != observed
+        ):
+            return unavailable()
+        candidates: list[tuple[EconomicReceiptEventSpineV1, ST12FEvidenceReferenceV1]] = []
+        try:
+            for spine in self._durable_receipt_spines():
+                payload = spine.typed_payload
+                assert type(payload) is ST12FEvidenceControlReceiptRecordV1
+                if payload.receipt_class is not ST12FReceiptClassV1.D_EVIDENCE_REFERENCE:
+                    continue
+                reference = payload.reconstruct(ST12FEvidenceReferenceV1)
+                self._validate_receipt_lock_metadata(spine)
+                if reference.evidence_id == query.requested_evidence_id:
+                    candidates.append((spine, reference))
+        except (ContractValidationError, PersistenceContractError):
+            return unavailable()
+        if not candidates:
+            return unavailable()
+        _, reference = candidates[-1]
+        current_bundle_ref = self._durable_current_bundle_ref(
+            reference.evidence_id,
+            reference.input_lock_id,
+        )
+        try:
+            bundle = self.resolve_bundle(reference.evidence_ref)
+        except (ContractValidationError, PersistenceContractError):
+            return unavailable()
+        if (
+            reference.evidence_state is not ST12FEvidenceStateV1.EVIDENCE_REFERENCE_AVAILABLE
+            or reference.evidence_ref != current_bundle_ref
+            or reference.evidence_ref not in {row.record_id for row in self._durable_receipt_spines()}
+            or reference.component_or_template_ref != query.requested_component_or_template_ref
+            or reference.input_lock_id != query.expected_input_lock_id
+            or reference.source_epoch_refs != query.expected_source_epoch_refs
+            or reference.terminal_state != EvidenceBundleTerminalStateV1.CLOSED_INDEPENDENTLY_VALIDATED.value
+            or reference.lane != "REPLAY_PAPER"
+            or reference.no_effect_flags != NO_EFFECTS_V1
+            or not reference.observed_at <= query.evaluated_at <= reference.valid_until
+            or bundle.evidence_id != query.requested_evidence_id
+            or bundle.component_or_template_ref != query.requested_component_or_template_ref
+            or bundle.input_lock_id != query.expected_input_lock_id
+            or bundle.evidence_bundle_version != reference.evidence_bundle_version
+            or bundle.terminal_state is not EvidenceBundleTerminalStateV1.CLOSED_INDEPENDENTLY_VALIDATED
+            or bundle.d_evidence_reference_projection != reference
+        ):
+            return unavailable()
         return reference
 
     @property
@@ -1205,6 +2288,9 @@ class ComputationEvidenceServiceV1:
                 "divergence": MappingProxyType(self._divergence),
                 "bundles": MappingProxyType(self._bundles),
                 "current_bundles": MappingProxyType(self._current_bundle_by_identity),
+                "reviews": MappingProxyType(self._reviews),
+                "d_references": MappingProxyType(self._d_references),
+                "g_handoffs": MappingProxyType(self._g_handoffs),
             }
         )
 
@@ -1213,7 +2299,7 @@ if (
     len(fields(ReplayResultContractV1)) != 26
     or len(fields(PaperResultContractV1)) != 26
     or len(fields(DivergenceAssessmentV1)) != 18
-    or len(fields(ComputationEvidenceBundleV1)) != 30
+    or len(fields(ComputationEvidenceBundleV1)) != 31
     or len(ST12F_EVIDENCE_IDENTITIES_V1) != 48
 ):
     raise ContractValidationError(

@@ -49,7 +49,6 @@ from .mode_snapshot_policy import (
     evaluate_mode_snapshot_candidate,
     evaluate_mode_snapshot_preconstruction_gate,
     finalize_mode_snapshot_latency_block,
-    pre_f_unavailable_reference,
 )
 from .identity_adapter import RP5CIdentityAdapterV1
 from .persistence import PersistenceAdapterV1, PersistenceAvailabilityV1
@@ -100,6 +99,7 @@ from .models import (
     LatencyMeasurementV1,
     ModeSnapshotCandidateProposalResultV1,
     NoTradeComparisonV1,
+    NO_EFFECTS_V1,
     OperationBlockerCodeV1,
     OperationRequestEnvelopeV1,
     OperationStatusV1,
@@ -122,6 +122,8 @@ from .models import (
     SnapshotViewV1,
     StackResolutionV1,
     StackResultV1,
+    ST12FEvidenceReferenceV1,
+    ST12FEvidenceStateV1,
     SubmitCandidateProposalRequestV1,
     SubmitCandidateProposalResponseV1,
     TradePlanEvaluationV1,
@@ -638,20 +640,38 @@ def _submit_mode_snapshot_candidate(
             ReasonCode.IDENTITY_OR_VERSION_UNRESOLVED,
             "D preconstruction gate does not bind the admitted request and task",
         )
-    causation_id, correlation_id = (
-        capability_decision.st12c_causation_correlation_refs[:2]
-    )
-    canonical_pre_f_evidence = pre_f_unavailable_reference(
-        observed_at=request.context.as_of,
-        valid_until=request.context.as_of + request.context.maximum_age,
-        causation_id=causation_id,
-        correlation_id=correlation_id,
-    )
-    if gate.evidence_reference != canonical_pre_f_evidence:
-        raise OwnerAdapterError(
-            ReasonCode.OWNER_DATA_MALFORMED,
-            "current production D gate must retain the canonical pre-F unavailable evidence",
+    evidence = gate.evidence_reference
+    if evidence.evidence_state is ST12FEvidenceStateV1.EVIDENCE_REFERENCE_AVAILABLE:
+        evidence_receipt_ref = (
+            f"ST12F-RECEIPT::{evidence.reference_id}::D_EVIDENCE_REFERENCE"
         )
+        if (
+            type(evidence) is not ST12FEvidenceReferenceV1
+            or self.computation_evidence_service is None
+            or resolver.canonical_f_evidence_owner
+            is not self.computation_evidence_service
+            or getattr(
+                self.computation_evidence_service,
+                "supports_typed_reference_query",
+                False,
+            )
+            is not True
+            or evidence.reference_id == "EXPLICIT_ABSENCE"
+            or evidence.evidence_ref == "EXPLICIT_ABSENCE"
+            or evidence.contract_version != "1.4"
+            or evidence.lane != "REPLAY_PAPER"
+            or evidence.terminal_state != "CLOSED_INDEPENDENTLY_VALIDATED"
+            or evidence.no_effect_flags != NO_EFFECTS_V1
+            or evidence_receipt_ref not in gate.receipt_lineage_refs
+            or any(epoch not in gate.source_epoch_refs for epoch in evidence.source_epoch_refs)
+            or not evidence.observed_at
+            <= request.context.as_of
+            <= evidence.valid_until
+        ):
+            raise OwnerAdapterError(
+                ReasonCode.OWNER_DATA_MALFORMED,
+                "available F evidence does not retain canonical read-only custody",
+            )
 
     candidate_started = local_duration_now_ns()
     mode_snapshot_result = evaluate_mode_snapshot_preconstruction_gate(
@@ -1555,7 +1575,10 @@ class QKUComputationControlPlaneV1:
                 "OP13 requires the injected canonical cohort compiler",
             )
         compilation = compiler.compile(request)
-        refs = (compilation.compilation_id, compilation.input_lock_id)
+        refs = (
+            f"ST12F-RECEIPT::{compilation.compilation_id}::COHORT_COMPILATION",
+            f"ST12F-RECEIPT::{compilation.input_lock_id}::INPUT_LOCK",
+        )
         result = ReplayPaperCohortCompilationV1(
             **_result_common(
                 request,
@@ -1585,7 +1608,9 @@ class QKUComputationControlPlaneV1:
                 "OP14 requires the injected canonical evidence service",
             )
         registration = evidence_service.register_result(request)
-        refs = (registration.result_id,)
+        refs = tuple(
+            getattr(evidence_service, "last_committed_receipt_refs", ())
+        )
         result = ReplayPaperResultRegistrationV1(
             **_result_common(
                 request,
@@ -1615,7 +1640,9 @@ class QKUComputationControlPlaneV1:
                 "OP15 requires the injected canonical evidence service",
             )
         bundle = evidence_service.build_bundle(request)
-        refs = (bundle.evidence_bundle_version,)
+        refs = tuple(
+            getattr(evidence_service, "last_committed_receipt_refs", ())
+        )
         result = EvidenceBundleResultV1(
             **_result_common(
                 request,

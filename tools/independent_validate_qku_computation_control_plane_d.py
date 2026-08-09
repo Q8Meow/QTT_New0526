@@ -447,7 +447,8 @@ EXPECTED_CONTRACT_FIELDS = {
         "venue_semantic_binding_ref", "cross_venue_equivalence_ref", "observed_at",
         "valid_until", "policy_version", "causation_id", "correlation_id",
         "input_lock_id", "component_or_template_ref", "evidence_bundle_version",
-        "source_epoch_refs", "terminal_state", "no_effect_flags",
+        "source_epoch_refs", "terminal_state", "reference_id", "evidence_id",
+        "contract_version", "no_effect_flags",
     ),
     "OwnerActionConfirmationReceiptV1": (
         "receipt_ref", "owner_action_policy_ref", "state", "principal_id",
@@ -1054,6 +1055,67 @@ def _validate_contract_and_service_ast() -> None:
         input_resolver_source,
         resolver_methods["enrich_mode_snapshot_candidate"],
     ) or ""
+    query_source = ast.get_source_segment(
+        input_resolver_source,
+        resolver_methods["_typed_f_reference_query"],
+    ) or ""
+    reference_validation_source = ast.get_source_segment(
+        input_resolver_source,
+        resolver_methods["_validate_f_reference_for_d"],
+    ) or ""
+    evidence_tree = _source_tree("evidence.py")
+    _require(
+        _class_fields(_class_node(evidence_tree, "FToDEvidenceReferenceQueryV1"))
+        == (
+            "query_id",
+            "requested_evidence_id",
+            "requested_component_or_template_ref",
+            "expected_input_lock_id",
+            "expected_source_epoch_refs",
+            "evaluated_at",
+            "request_read_lineage_refs",
+        ),
+        "F-to-D query does not carry the exact immutable seven-field custody roster",
+    )
+    _require(
+        all(
+            token in query_source
+            for token in (
+                'request_refs = tuple(getattr(request, "source_candidate_refs", ()))',
+                "tagged_refs = tuple(dict.fromkeys((*request_refs, *evidence_refs)))",
+                'ref.startswith("ST12F_EVIDENCE_ID=")',
+                'ref.startswith("ST12F_INPUT_LOCK_ID=")',
+                'ref.startswith("ST12F_COMPONENT_OR_TEMPLATE_REF=")',
+                'ref.startswith("ST12F_SOURCE_EPOCH=")',
+                "requested_evidence_id=",
+                "requested_component_or_template_ref=",
+                "expected_input_lock_id=",
+                "expected_source_epoch_refs=",
+                "evaluated_at=context.as_of",
+                "request_read_lineage_refs=",
+            )
+        )
+        and all(
+            token in reference_validation_source
+            for token in (
+                "reference.evidence_id ==",
+                "reference.component_or_template_ref",
+                "reference.input_lock_id",
+                "reference.source_epoch_refs",
+                'reference.lane == "REPLAY_PAPER"',
+                'reference.terminal_state == "CLOSED_INDEPENDENTLY_VALIDATED"',
+                'reference.evidence_ref.startswith("ST12F-RECEIPT::")',
+                'reference.contract_version == "1.4"',
+                "reference.no_effect_flags == NO_EFFECTS_V1",
+                "reference.observed_at",
+                "reference.valid_until",
+                "pre_f_unavailable_reference(",
+            )
+        )
+        and "reference.causation_id ==" not in reference_validation_source
+        and "reference.correlation_id ==" not in reference_validation_source,
+        "D does not independently validate every typed F identity/scope/lock/epoch/state/no-effect/freshness pin",
+    )
     _require(
         "pre_f_unavailable_reference(" in input_resolver_source
         and "read_kill_submit_state(context)" in early_resolver_source
@@ -1081,6 +1143,51 @@ def _validate_contract_and_service_ast() -> None:
         and "ExistingOwnerProjectionAdapterV1" not in input_resolver_source
         and ".read_text(" not in input_resolver_source,
         "current D resolver is not gate-first with preloaded projection custody",
+    )
+
+    # Reconstruct the expected D truth table without calling the production
+    # predicate.  One valid row and eight one-field mutations prove that every
+    # authorized mismatch is independently expected to fail closed.
+    baseline = {
+        "evidence_id": "EVIDENCE::1",
+        "scope": "MATH-01",
+        "lock": "LOCK::1",
+        "epochs": ("SOURCE::1=EPOCH::1",),
+        "state": "EVIDENCE_REFERENCE_AVAILABLE",
+        "terminal": "CLOSED_INDEPENDENTLY_VALIDATED",
+        "no_effect": True,
+        "fresh": True,
+    }
+
+    def independently_available(row: dict[str, object]) -> bool:
+        return (
+            row["evidence_id"] == "EVIDENCE::1"
+            and row["scope"] == "MATH-01"
+            and row["lock"] == "LOCK::1"
+            and row["epochs"] == ("SOURCE::1=EPOCH::1",)
+            and row["state"] == "EVIDENCE_REFERENCE_AVAILABLE"
+            and row["terminal"] == "CLOSED_INDEPENDENTLY_VALIDATED"
+            and row["no_effect"] is True
+            and row["fresh"] is True
+        )
+
+    mutations = (
+        ("evidence_id", "EVIDENCE::OTHER"),
+        ("scope", "MATH-02"),
+        ("lock", "LOCK::OTHER"),
+        ("epochs", ("SOURCE::1=EPOCH::OTHER",)),
+        ("state", "EVIDENCE_REFERENCE_STALE"),
+        ("terminal", "STALE"),
+        ("no_effect", False),
+        ("fresh", False),
+    )
+    _require(
+        independently_available(baseline)
+        and all(
+            not independently_available({**baseline, field_name: value})
+            for field_name, value in mutations
+        ),
+        "independent F-to-D fail-closed truth table differs",
     )
 
     decision_fields = _class_fields(_class_node(models, "ModeSnapshotDecisionV1"))
@@ -1314,8 +1421,8 @@ def _validate_contract_and_service_ast() -> None:
     gate_offset = private_source.index(
         "resolver.resolve_mode_snapshot_preconstruction_gate"
     )
-    canonical_evidence_offset = private_source.index(
-        "canonical_pre_f_evidence = pre_f_unavailable_reference"
+    evidence_custody_offset = private_source.index(
+        "evidence = gate.evidence_reference"
     )
     early_policy_offset = private_source.index(
         "evaluate_mode_snapshot_preconstruction_gate"
@@ -1335,7 +1442,7 @@ def _validate_contract_and_service_ast() -> None:
     _require(
         authority_offset
         < gate_offset
-        < canonical_evidence_offset
+        < evidence_custody_offset
         < early_policy_offset
         < projection_bundle_offset
         < enrichment_offset
@@ -1378,7 +1485,15 @@ def _validate_contract_and_service_ast() -> None:
     )
     _require(
         "_require_current_mode_snapshot_resolver(self)" in private_source
-        and "gate.evidence_reference != canonical_pre_f_evidence" in private_source
+        and "self.computation_evidence_service is None" in private_source
+        and "resolver.canonical_f_evidence_owner" in private_source
+        and "is not self.computation_evidence_service" in private_source
+        and "evidence_receipt_ref not in gate.receipt_lineage_refs"
+        in private_source
+        and "epoch not in gate.source_epoch_refs" in private_source
+        and "evidence.no_effect_flags != NO_EFFECTS_V1" in private_source
+        and 'evidence.terminal_state != "CLOSED_INDEPENDENTLY_VALIDATED"'
+        in private_source
         and "inputs.evidence_reference is not gate.evidence_reference"
         in private_source
         and "PreloadedOwnerProjectionBundleV1" in private_source
@@ -2120,7 +2235,7 @@ def main() -> int:
         "semantic_tests=26 commands=6 states=35 transitions=17 universe=240 "
         "canonical_resolver=1 custom_bypass=0 trace_gaps=0 "
         "stage_receipt_mismatches=0 phantom_receipts=0 synthetic_epochs=0 "
-        "actual_mutations=23 synthetic_overrides=0"
+        "actual_mutations=23 synthetic_overrides=0 f_reference_cases=9"
     )
     return 0
 

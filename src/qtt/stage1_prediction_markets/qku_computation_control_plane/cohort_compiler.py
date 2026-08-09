@@ -7,6 +7,7 @@ from datetime import datetime
 from types import MappingProxyType
 from typing import Mapping
 
+from .context import parse_utc
 from .errors import (
     ContractValidationError,
     IdempotencyContractError,
@@ -87,6 +88,11 @@ class ReplayPaperCohortCompilationRecordV1:
                 ReasonCode.ST12F_TEMPLATE_ROSTER_MISMATCH,
                 "compilation must contain the exact 52/52/52 ordered rosters",
             )
+        object.__setattr__(
+            self,
+            "created_at",
+            parse_utc(self.created_at, field_name="created_at"),
+        )
         if self.created_at != self.input_lock.created_at:
             raise ContractValidationError(
                 ReasonCode.POINT_IN_TIME_FRESHNESS_OR_SEQUENCE_INVALID,
@@ -101,6 +107,12 @@ class ReplayPaperCohortCompilationRecordV1:
                 "cohort compilation payload field roster differs",
             )
         payload = dict(value)
+        for name in (
+            "cohort_template_ids",
+            "expected_replay_result_contract_ids",
+            "expected_paper_result_contract_ids",
+        ):
+            payload[name] = tuple(payload[name])
         payload["input_lock"] = ImmutableReplayPaperInputLockV1.from_canonical_mapping(
             payload["input_lock"]
         )

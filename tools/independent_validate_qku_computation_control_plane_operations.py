@@ -4,13 +4,50 @@
 from __future__ import annotations
 
 import ast
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 import sys
 from types import MappingProxyType
 
-
 REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.cohort_compiler import (
+    ReplayPaperCohortCompilerV1,
+)
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.context import (
+    ComputationContextKeyV1,
+)
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import (
+    ContractValidationError,
+    PersistenceContractError,
+    ReasonCode,
+)
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.evidence import (
+    ComputationEvidenceServiceV1,
+    ReplayResultContractV1,
+)
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.input_lock import (
+    CanonicalReplayPaperInputSnapshotV1,
+    ST12F_TEMPLATE_IDS_V1,
+    canonical_st12f_parameter_value_refs_v1,
+)
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.models import (
+    CompileReplayPaperCohortRequestV1,
+    RegisterReplayPaperResultRequestV1,
+    TypedValueKindV1,
+    TypedValueRecordV1,
+    TypedValueV1,
+)
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.persistence import (
+    InMemoryPersistenceAdapterV1,
+)
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.serialization import (
+    deterministic_json,
+)
+
 PACKAGE = (
     REPO_ROOT
     / "src"
@@ -297,6 +334,279 @@ EXPECTED_ROWS = (
     ),
 )
 SUCCESS_MARKER = "QKU_OPERATIONS_INDEPENDENTLY_VALIDATED"
+
+
+_ST12F_NOW = datetime(2026, 1, 1, 12, tzinfo=UTC)
+_ST12F_TRACEPARENT = (
+    "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01"
+)
+
+
+class _CommitFailingAdapterV1(InMemoryPersistenceAdapterV1):
+    def __init__(self) -> None:
+        super().__init__()
+        self.fail_next_commit = False
+
+    def _commit(self, transaction: object) -> None:
+        if self.fail_next_commit:
+            self.fail_next_commit = False
+            raise PersistenceContractError(
+                ReasonCode.PERSISTENCE_UNAVAILABLE,
+                "independent injected commit failure",
+            )
+        super()._commit(transaction)  # type: ignore[arg-type]
+
+
+def _st12f_snapshot() -> CanonicalReplayPaperInputSnapshotV1:
+    versions = {
+        identity: f"VERSION::{identity}" for identity in ST12F_TEMPLATE_IDS_V1
+    }
+    return CanonicalReplayPaperInputSnapshotV1(
+        decision_time=_ST12F_NOW,
+        point_in_time_cutoff=_ST12F_NOW - timedelta(minutes=1),
+        market_scope=("MARKET::INDEPENDENT",),
+        venue_scope=("VENUE::INDEPENDENT",),
+        instrument_scope=("INSTRUMENT::INDEPENDENT",),
+        formula_specification_versions=versions,
+        implementation_versions=versions,
+        parameter_policy_version="ST12F_PARAMETER_POLICY_V1_4",
+        parameter_value_refs=canonical_st12f_parameter_value_refs_v1(),
+        source_epochs={"SOURCE::1": "EPOCH::1"},
+        data_semantics_version="DATA::V1",
+        venue_semantics_version="VENUE::V1",
+        accounting_definition={"basis": "NET"},
+        fee_assumptions={"policy_ref": "FEE::1"},
+        spread_assumptions={"policy_ref": "SPREAD::1"},
+        slippage_assumptions={"policy_ref": "SLIPPAGE::1"},
+        fill_and_queue_assumptions={"policy_ref": "FILL::1"},
+        latency_and_staleness_assumptions={"policy_ref": "LATENCY::1"},
+        capacity_and_crowding_assumptions={"policy_ref": "CAPACITY::1"},
+        portfolio_and_cash_context={
+            "permanent_no_trade_baseline_ref": "NO-TRADE::1"
+        },
+        random_seed_policy={"seed": 17},
+        resampling_policy={"trial_family_id": "TRIAL::1"},
+        scenario_set_id="SCENARIO::1",
+        causation_id="CAUSE::ORIGINAL",
+        correlation_id="CORRELATION::ORIGINAL",
+        created_by="OWNER::INDEPENDENT",
+        created_at=_ST12F_NOW,
+    )
+
+
+def _st12f_runtime(
+    adapter: InMemoryPersistenceAdapterV1,
+    *,
+    identity: str,
+) -> tuple[
+    ReplayPaperCohortCompilerV1,
+    ComputationEvidenceServiceV1,
+    object,
+    ComputationContextKeyV1,
+]:
+    snapshot = _st12f_snapshot()
+    compiler = ReplayPaperCohortCompilerV1(snapshot, adapter)
+    context = ComputationContextKeyV1(
+        context_id="MATH-01",
+        as_of=_ST12F_NOW,
+        observed_at=_ST12F_NOW,
+        source_epoch_id="SOURCE::1=EPOCH::1",
+        input_version="INPUT::INDEPENDENT",
+        maximum_age=timedelta(hours=1),
+    )
+    request = CompileReplayPaperCohortRequestV1(
+        request_id=f"REQUEST::OP13::{identity}",
+        operation_name="compile_replay_paper_cohort",
+        requested_at=_ST12F_NOW,
+        principal_id="PRINCIPAL::INDEPENDENT",
+        capability_bundle_id="CAPABILITY::INDEPENDENT",
+        context=context,
+        idempotency_key=identity,
+        traceparent=_ST12F_TRACEPARENT,
+        tracestate="qtt=independent",
+        template_ids=ST12F_TEMPLATE_IDS_V1,
+        requested_lanes=("REPLAY", "PAPER"),
+        input_lock_id=f"ST12F-LOCK::{identity}",
+        campaign_execution_requested=False,
+    )
+    compilation = compiler.compile(request)
+    return compiler, ComputationEvidenceServiceV1(compiler, adapter), compilation, context
+
+
+def _st12f_packet(
+    compilation: object,
+    snapshot: CanonicalReplayPaperInputSnapshotV1,
+    *,
+    result_id: str,
+    run_reference: str,
+    fixture: bool,
+) -> ReplayResultContractV1:
+    cutoff = snapshot.point_in_time_cutoff
+    return ReplayResultContractV1(
+        result_id=result_id,
+        schema_version="QTT_ST12F_LANE_RESULT_CONTRACTS_V1_4",
+        contract_version="1.4",
+        cohort_template_id="MATH-01",
+        expected_result_contract_id="ST12F-REPLAY-CONTRACT::MATH-01",
+        input_lock_id=str(getattr(compilation, "input_lock_id")),
+        run_reference=run_reference,
+        producer_identity="PRODUCER::REPLAY",
+        implementation_versions=snapshot.implementation_versions,
+        source_epochs=snapshot.source_epochs,
+        point_in_time_cutoff=cutoff,
+        accounting_definition=deterministic_json(snapshot.accounting_definition),
+        scenario_policy={"scenario": snapshot.scenario_set_id},
+        resampling_policy=snapshot.resampling_policy,
+        economic_metrics={"utility": "1"},
+        tca_metrics={"cost": "0.1"},
+        fill_metrics={"fill": "1"},
+        latency_metrics={"latency": "1ms"},
+        capacity_metrics={"capacity": "1"},
+        failure_states=(),
+        limitations=("LIMITATION::DECLARED",),
+        started_at=cutoff,
+        completed_at=cutoff + timedelta(seconds=1),
+        available_at=cutoff + timedelta(seconds=2),
+        closed_at=cutoff + timedelta(seconds=3),
+        fixture_only_not_evidence=fixture,
+    )
+
+
+def _st12f_register_request(
+    compilation: object,
+    context: ComputationContextKeyV1,
+    *,
+    identity: str,
+) -> RegisterReplayPaperResultRequestV1:
+    placeholder = TypedValueRecordV1(
+        (
+            TypedValueV1(
+                "placeholder",
+                TypedValueKindV1.TEXT,
+                "preexisting-packet-supplied-separately",
+                "unitless",
+                "independent-validator",
+            ),
+        )
+    )
+    return RegisterReplayPaperResultRequestV1(
+        request_id=f"REQUEST::OP14::{identity}",
+        operation_name="register_replay_paper_result",
+        requested_at=_ST12F_NOW + timedelta(seconds=1),
+        principal_id="PRINCIPAL::INDEPENDENT",
+        capability_bundle_id="CAPABILITY::INDEPENDENT",
+        context=context,
+        idempotency_key=f"IDEMPOTENCY::OP14::{identity}",
+        traceparent=_ST12F_TRACEPARENT,
+        tracestate="qtt=independent",
+        cohort_instance_id=str(getattr(compilation, "compilation_id")),
+        lane="REPLAY",
+        input_lock_id=str(getattr(compilation, "input_lock_id")),
+        result_packet=placeholder,
+    )
+
+
+def _table_counts(adapter: InMemoryPersistenceAdapterV1) -> tuple[tuple[str, int], ...]:
+    return tuple(sorted((name, len(rows)) for name, rows in adapter._tables.items()))
+
+
+def _st12f_executable_operation_checks() -> tuple[bool, ...]:
+    failing_adapter = _CommitFailingAdapterV1()
+    compiler, failing_service, compilation, context = _st12f_runtime(
+        failing_adapter, identity="ROLLBACK"
+    )
+    snapshot = compiler.canonical_snapshot
+    packet = _st12f_packet(
+        compilation,
+        snapshot,
+        result_id="RESULT::ROLLBACK",
+        run_reference="RUN::ROLLBACK",
+        fixture=False,
+    )
+    counts_before_failure = _table_counts(failing_adapter)
+    indexes_before_failure = tuple(
+        len(index) for index in failing_service.immutable_indexes.values()
+    )
+    failing_adapter.fail_next_commit = True
+    rollback_rejected = False
+    try:
+        failing_service.register_result(
+            _st12f_register_request(compilation, context, identity="ROLLBACK"),
+            packet,
+        )
+    except PersistenceContractError as exc:
+        rollback_rejected = exc.reason_code is ReasonCode.PERSISTENCE_UNAVAILABLE
+
+    adapter = InMemoryPersistenceAdapterV1()
+    compiler, service, compilation, context = _st12f_runtime(
+        adapter, identity="DURABLE"
+    )
+    snapshot = compiler.canonical_snapshot
+    counts_before_fixture = _table_counts(adapter)
+    fixture = _st12f_packet(
+        compilation,
+        snapshot,
+        result_id="RESULT::FIXTURE",
+        run_reference="RUN::FIXTURE",
+        fixture=True,
+    )
+    fixture_result = service.register_result(
+        _st12f_register_request(compilation, context, identity="FIXTURE"),
+        fixture,
+    )
+    counts_after_fixture = _table_counts(adapter)
+    fixture_indexes = tuple(len(index) for index in service.immutable_indexes.values())
+    committed_packet = replace(
+        fixture,
+        result_id="RESULT::COMMITTED",
+        run_reference="RUN::COMMITTED",
+        fixture_only_not_evidence=False,
+    )
+    committed = service.register_result(
+        _st12f_register_request(compilation, context, identity="COMMITTED"),
+        committed_packet,
+    )
+    receipt_refs = service.last_committed_receipt_refs
+    restarted = ComputationEvidenceServiceV1(compiler, adapter)
+    counts_before_replay = _table_counts(adapter)
+    replayed = restarted.register_result(
+        _st12f_register_request(compilation, context, identity="REPLAYED"),
+        committed_packet,
+    )
+    conflict_rejected = False
+    try:
+        restarted.register_result(
+            _st12f_register_request(compilation, context, identity="CONFLICT"),
+            replace(
+                committed_packet,
+                result_id="RESULT::CONFLICT",
+                run_reference="RUN::CONFLICT",
+            ),
+        )
+    except ContractValidationError as exc:
+        conflict_rejected = exc.reason_code is ReasonCode.ST12F_RESULT_SLOT_CONFLICT
+
+    return (
+        rollback_rejected,
+        _table_counts(failing_adapter) == counts_before_failure,
+        tuple(len(index) for index in failing_service.immutable_indexes.values())
+        == indexes_before_failure,
+        fixture_result is fixture,
+        counts_after_fixture == counts_before_fixture,
+        fixture_indexes == (0, 0, 0, 0, 0, 0, 0, 0),
+        committed == committed_packet and committed is not committed_packet,
+        len(service.immutable_indexes["lane_results"]) == 1,
+        len(service.immutable_indexes["slot_results"]) == 1,
+        len(restarted.immutable_indexes["lane_results"]) == 1,
+        len(restarted.immutable_indexes["slot_results"]) == 1,
+        replayed == committed and replayed is not committed_packet,
+        _table_counts(adapter) == counts_before_replay,
+        conflict_rejected,
+        len(receipt_refs) == 1
+        and receipt_refs[0]
+        == "ST12F-RECEIPT::RESULT::COMMITTED::REPLAY_REGISTRATION",
+        adapter.get_record(receipt_refs[0]) is not None,
+    )
 
 
 def _assignment(tree: ast.Module, name: str) -> ast.expr | None:
@@ -588,11 +898,19 @@ def main() -> int:
     ):
         if required not in validation_text:
             failures.append(f"Tranche-B operation capability projection missing: {required}")
+    executable_checks = _st12f_executable_operation_checks()
+    if not all(executable_checks):
+        failures.extend(
+            f"ST12-F executable OP14 invariant failed: check_{index}"
+            for index, passed in enumerate(executable_checks, start=1)
+            if not passed
+        )
     if failures:
         print("\n".join(failures), file=sys.stderr)
         return 1
     print(
-        f"{SUCCESS_MARKER} operation_contracts={len(EXPECTED_ROWS)}"
+        f"{SUCCESS_MARKER} operation_contracts={len(EXPECTED_ROWS)} "
+        f"executable_op14_checks={len(executable_checks)}"
     )
     return 0
 

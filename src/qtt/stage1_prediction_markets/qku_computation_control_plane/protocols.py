@@ -125,6 +125,7 @@ class ComputationEvidenceServiceProtocolV1(Protocol):
         *,
         causation_id: str,
         correlation_id: str,
+        query: object | None = None,
     ) -> ST12FEvidenceReferenceV1: ...
 
 
@@ -154,6 +155,7 @@ class ST12FEvidenceReferenceProtocolV1(Protocol):
         *,
         causation_id: str,
         correlation_id: str,
+        query: object | None = None,
     ) -> ST12FEvidenceReferenceV1: ...
 
 

@@ -23,6 +23,9 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.input_resol
     ST12D_OWNER_ACTION_BINDING_ID,
     ST12D_SAFETY_BINDING_ID,
 )
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.latency_policy import (
+    STAGE_NAMES,
+)
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.mode_snapshot_policy import (
     D_MODE_STATE_REGISTRY,
     D_REQUIRED_PIN_DIMENSIONS,
@@ -38,17 +41,26 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.models impo
     ActivationPreconditionStateV1,
     AllowCandidateStateV1,
     KillStateV1,
+    LatencyBudgetProfileV1,
     ModeEligibilityState,
     OwnerActionConfirmationReceiptV1,
     OwnerActionConfirmationStateV1,
     OperationStatusV1,
     ReadOnlyKillSubmitStateV1,
+    ResourceBoundsProfileV1,
     SnapshotCandidateStateV1,
     SnapshotRetirementStateV1,
     SnapshotRollbackStateV1,
     ST12FEvidenceReferenceV1,
     ST12FEvidenceStateV1,
+    SubmitCandidateProposalRequestV1,
     SubmitDisabledStateV1,
+    TypedValueKindV1,
+    TypedValueRecordV1,
+    TypedValueV1,
+)
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.protocols import (
+    ExistingOwnerProjectionAdapterV1,
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.receipts import (
     EconomicReceiptEventSpineV1,
@@ -182,6 +194,8 @@ def _inputs(
             evidence_bundle_version="ST12F-EVIDENCE-BUNDLE::D::1::V1",
             source_epoch_refs=("SOURCE-EPOCH::D::1",),
             terminal_state="CLOSED_INDEPENDENTLY_VALIDATED",
+            reference_id="D-REFERENCE::1",
+            evidence_id="EVIDENCE::D::1",
         )
     )
     predecessor_proposal = (
@@ -889,3 +903,270 @@ def test_non_d_public_contract_and_existing_source_owners_remain_bounded() -> No
     assert baseline.snapshot_transition_proposal.expected_owner_state_ref == (
         changed.snapshot_transition_proposal.expected_owner_state_ref
     )
+    _assert_current_d_f_reference_boundary()
+
+
+def _assert_current_d_f_reference_boundary() -> None:
+    operation_id = "submit_candidate_proposal"
+    bundle, _registry = _audit_bundle_fixture()
+    context = bundle.execution_context
+    decision = resolve_decision(
+        make_resolver(
+            operation_id=operation_id,
+            envelope_overrides={
+                "context_ref": context.context_id,
+                "idempotency_key": "IDEMPOTENCY::D::F-REFERENCE",
+            },
+        ),
+        request_id="REQUEST::D::F-REFERENCE",
+        operation_id=operation_id,
+        context_ref=context.context_id,
+        requested_scope_refs={
+            "qku_scope_refs": ("QKU::ST12E::TEST",),
+            "formula_scope_refs": ("MATH-01",),
+        },
+        request_idempotency_key="IDEMPOTENCY::D::F-REFERENCE",
+    )
+    _bundle, owner_registry = _current_owner_registry(decision)
+
+    class _Request:
+        request_id = decision.request_id
+        principal_id = decision.principal_id
+        context = bundle.execution_context
+        evidence_id = "EVIDENCE::F::CURRENT"
+        input_lock_id = "ST12F-LOCK::F::CURRENT"
+        component_id = "MATH-01"
+        source_epoch_refs = ("SOURCE::F=EPOCH::CURRENT",)
+
+    baseline = ST12FEvidenceReferenceV1(
+        evidence_state=ST12FEvidenceStateV1.EVIDENCE_REFERENCE_AVAILABLE,
+        evidence_ref="ST12F-RECEIPT::BUNDLE::F::EVIDENCE_BUNDLE_VERSION",
+        lane="REPLAY_PAPER",
+        dataset_grade_ref="DATASET-GRADE::F",
+        venue_semantic_binding_ref="VENUE-SEMANTICS::F",
+        cross_venue_equivalence_ref="CROSS-VENUE::F",
+        observed_at=context.as_of - timedelta(minutes=1),
+        valid_until=context.as_of + timedelta(minutes=1),
+        policy_version="ST12F_EVIDENCE_POLICY_V1_4",
+        causation_id="ORIGINAL-CAUSE::F",
+        correlation_id="ORIGINAL-CORRELATION::F",
+        input_lock_id=_Request.input_lock_id,
+        component_or_template_ref=_Request.component_id,
+        evidence_bundle_version="BUNDLE::F::1",
+        source_epoch_refs=_Request.source_epoch_refs,
+        terminal_state="CLOSED_INDEPENDENTLY_VALIDATED",
+        reference_id="D-REFERENCE::F::CURRENT",
+        evidence_id=_Request.evidence_id,
+    )
+
+    class _FOwner:
+        supports_typed_reference_query = True
+
+        def __init__(self, value: ST12FEvidenceReferenceV1) -> None:
+            self.value = value
+            self.queries: list[object] = []
+
+        def read_evidence_reference(self, _context: object, **kwargs: object):
+            self.queries.append(kwargs.get("query"))
+            return self.value
+
+        def register_result(self, _request: object):
+            raise AssertionError("D cannot invoke OP14")
+
+        def build_bundle(self, _request: object):
+            raise AssertionError("D cannot invoke OP15")
+
+    owner = _FOwner(baseline)
+    resolver = CurrentModeSnapshotInputResolverV1(
+        repo_root=Path(__file__).resolve().parents[3],
+        owner_registry=owner_registry,
+        canonical_f_evidence_owner=owner,
+    )
+    gate = resolver.resolve_mode_snapshot_preconstruction_gate(_Request(), decision)
+    assert gate.evidence_reference == baseline
+    assert gate.evidence_reference.causation_id == "ORIGINAL-CAUSE::F"
+    assert gate.evidence_reference.correlation_id == "ORIGINAL-CORRELATION::F"
+    assert _Request.source_epoch_refs[0] in gate.source_epoch_refs
+    assert (
+        "ST12F-RECEIPT::D-REFERENCE::F::CURRENT::D_EVIDENCE_REFERENCE"
+        in gate.receipt_lineage_refs
+    )
+    query = owner.queries[-1]
+    assert getattr(query, "requested_evidence_id") == _Request.evidence_id
+    assert getattr(query, "requested_component_or_template_ref") == "MATH-01"
+    assert getattr(query, "expected_input_lock_id") == _Request.input_lock_id
+    assert getattr(query, "expected_source_epoch_refs") == _Request.source_epoch_refs
+
+    tagged_source_refs = (
+        f"ST12F_EVIDENCE_ID={_Request.evidence_id}",
+        f"ST12F_INPUT_LOCK_ID={_Request.input_lock_id}",
+        f"ST12F_COMPONENT_OR_TEMPLATE_REF={_Request.component_id}",
+        *(f"ST12F_SOURCE_EPOCH={epoch}" for epoch in _Request.source_epoch_refs),
+    )
+    placeholder = TypedValueRecordV1(
+        (
+            TypedValueV1(
+                name="candidate_contract_id",
+                kind=TypedValueKindV1.TEXT,
+                value=MODE_SNAPSHOT_CANDIDATE_KIND,
+                unit="identity",
+                basis="canonical",
+            ),
+        )
+    )
+    tagged_request = SubmitCandidateProposalRequestV1(
+        request_id=decision.request_id,
+        operation_name=operation_id,
+        requested_at=context.as_of,
+        principal_id=decision.principal_id,
+        capability_bundle_id="CAPABILITY::D::F-REFERENCE",
+        context=context,
+        idempotency_key=decision.idempotency_key,
+        traceparent="00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01",
+        tracestate="vendor=value",
+        candidate_kind=MODE_SNAPSHOT_CANDIDATE_KIND,
+        proposed_specification=placeholder,
+        source_candidate_refs=tagged_source_refs,
+        requested_owner_review=True,
+    )
+    tagged_gate = resolver.resolve_mode_snapshot_preconstruction_gate(
+        tagged_request,
+        decision,
+    )
+    assert tagged_gate.evidence_reference == baseline
+    tagged_query = owner.queries[-1]
+    assert getattr(tagged_query, "requested_evidence_id") == _Request.evidence_id
+    assert getattr(tagged_query, "requested_component_or_template_ref") == "MATH-01"
+    assert getattr(tagged_query, "expected_input_lock_id") == _Request.input_lock_id
+    assert getattr(tagged_query, "expected_source_epoch_refs") == _Request.source_epoch_refs
+
+    projection_adapter = ExistingOwnerProjectionAdapterV1(
+        Path(__file__).resolve().parents[3]
+    )
+    projection_bundle = projection_adapter.load_bundle()
+    projection_bundle = replace(
+        projection_bundle,
+        svc=replace(projection_bundle.svc, source_version="CURRENT"),
+    )
+    resolved_inputs = resolver.enrich_mode_snapshot_candidate(
+        tagged_request,
+        decision,
+        tagged_gate,
+        projection_bundle,
+    )
+    values = (
+        ("candidate_contract_id", MODE_SNAPSHOT_CANDIDATE_KIND),
+        ("computation_bundle_ref", resolved_inputs.computation_bundle_ref),
+        ("context_ref", resolved_inputs.context_ref),
+        ("formula_spec_refs", ",".join(resolved_inputs.formula_spec_refs)),
+        (
+            "implementation_version_pins",
+            ",".join(
+                f"{pin.math_spec_id}={pin.implementation_id}"
+                for pin in resolved_inputs.implementation_version_pins
+            ),
+        ),
+        ("binding_profile_ref", resolved_inputs.binding_profile_ref),
+        (
+            "parameter_policy_snapshot_ref",
+            resolved_inputs.parameter_policy_snapshot_ref,
+        ),
+        ("parameter_value_refs", ",".join(resolved_inputs.parameter_value_refs)),
+        ("source_epoch_refs", ",".join(resolved_inputs.source_epoch_refs)),
+        ("receipt_lineage_refs", ",".join(resolved_inputs.receipt_lineage_refs)),
+        ("readiness_state_ref", resolved_inputs.readiness_state_ref),
+        ("pretrade_state_ref", resolved_inputs.pretrade_state_ref),
+        ("owner_action_policy_ref", resolved_inputs.owner_action_policy_ref),
+        ("current_mode", resolved_inputs.current_mode),
+        ("requested_mode", resolved_inputs.requested_mode),
+        ("expected_owner_state_ref", resolved_inputs.expected_owner_state_ref),
+        ("candidate_version", resolved_inputs.candidate_version),
+    )
+    public_request = replace(
+        tagged_request,
+        proposed_specification=TypedValueRecordV1(
+            tuple(
+                TypedValueV1(
+                    name=name,
+                    kind=TypedValueKindV1.TEXT,
+                    value=value,
+                    unit="identity",
+                    basis="canonical",
+                )
+                for name, value in values
+            )
+        ),
+    )
+
+    class _Admission:
+        def admit_operation(self, _request: object):
+            return decision
+
+    service = QKUComputationControlPlaneV1(
+        owner_registry,
+        agent_capability_resolver=_Admission(),
+        mode_snapshot_input_resolver=resolver,
+        mode_snapshot_owner_projection_adapter=projection_adapter,
+        mode_snapshot_projection_bundle=projection_bundle,
+        latency_budget_profile=LatencyBudgetProfileV1(
+            profile_id="LATENCY-PROFILE::D::F-REFERENCE",
+            component_budget_ns=tuple((name, 10**12) for name in STAGE_NAMES),
+            histogram_boundaries_ns=(1, 10**6, 10**12),
+            maximum_observer_overhead_ns=10**9,
+            alert_threshold_ns=10**12,
+            policy_version="LATENCY-POLICY::D::F-REFERENCE",
+        ),
+        resource_bounds_profile=ResourceBoundsProfileV1(
+            profile_id="RESOURCE-BOUNDS::D::F-REFERENCE",
+            maximum_input_cardinality=32,
+            maximum_input_bytes=100_000,
+            maximum_dependency_depth=16,
+            maximum_bootstrap_repetitions=1,
+            maximum_concurrency=1,
+        ),
+        computation_evidence_service=owner,
+    )
+    response = service.submit_candidate_proposal(public_request)
+    assert response.status is OperationStatusV1.SUCCEEDED
+    assert response.proposal.mode_snapshot_result is not None
+    public_result = response.proposal.mode_snapshot_result
+    assert public_result.mode_snapshot_decision.allow_candidate_state is (
+        AllowCandidateStateV1.ELIGIBLE_NOT_ACTIVATED
+    )
+    assert public_result.snapshot_candidate_or_explicit_absence is not None
+    assert public_result.snapshot_candidate_or_explicit_absence.activated is False
+    assert public_result.mode_snapshot_decision.runtime_effect_authorized is False
+    assert public_result.mode_snapshot_decision.order_release_authorized is False
+
+    bad_terminal = replace(baseline)
+    object.__setattr__(bad_terminal, "terminal_state", "STALE")
+    bad_no_effect = replace(baseline)
+    object.__setattr__(bad_no_effect, "no_effect_flags", object())
+    mutations = (
+        replace(baseline, evidence_id="EVIDENCE::OTHER"),
+        replace(baseline, component_or_template_ref="MATH-02"),
+        replace(baseline, input_lock_id="ST12F-LOCK::OTHER"),
+        replace(baseline, source_epoch_refs=("SOURCE::F=EPOCH::OTHER",)),
+        replace(
+            baseline,
+            evidence_state=ST12FEvidenceStateV1.EVIDENCE_REFERENCE_STALE,
+        ),
+        bad_terminal,
+        bad_no_effect,
+        replace(
+            baseline,
+            observed_at=context.as_of - timedelta(minutes=2),
+            valid_until=context.as_of - timedelta(minutes=1),
+        ),
+    )
+    for mutated in mutations:
+        mutated_owner = _FOwner(mutated)
+        mutated_resolver = CurrentModeSnapshotInputResolverV1(
+            repo_root=Path(__file__).resolve().parents[3],
+            owner_registry=owner_registry,
+            canonical_f_evidence_owner=mutated_owner,
+        )
+        blocked = mutated_resolver.resolve_mode_snapshot_preconstruction_gate(
+            _Request(), decision
+        )
+        assert blocked.evidence_reference.evidence_state is not ST12FEvidenceStateV1.EVIDENCE_REFERENCE_AVAILABLE

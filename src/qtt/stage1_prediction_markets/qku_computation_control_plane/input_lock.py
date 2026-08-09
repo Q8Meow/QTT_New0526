@@ -370,7 +370,18 @@ class ImmutableReplayPaperInputLockV1:
                 ReasonCode.SCHEMA_MISMATCH,
                 "input-lock payload field roster differs",
             )
-        return cls(**dict(value))
+        payload = dict(value)
+        for name in (
+            "market_scope",
+            "venue_scope",
+            "instrument_scope",
+            "cohort_template_ids",
+            "expected_replay_result_contract_ids",
+            "expected_paper_result_contract_ids",
+            "parameter_value_refs",
+        ):
+            payload[name] = tuple(payload[name])
+        return cls(**payload)
 
     def canonical_json(self) -> str:
         return deterministic_json(self)

@@ -3,11 +3,12 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, fields
+from datetime import datetime
 from decimal import Decimal
 from enum import StrEnum
 from typing import Mapping
 
-from .context import exact_decimal
+from .context import exact_decimal, parse_utc
 from .errors import ContractValidationError, ReasonCode
 from .serialization import deterministic_json
 
@@ -98,7 +99,9 @@ class ModelRiskControlEvidenceV1:
             raise ContractValidationError(ReasonCode.SCHEMA_MISMATCH, "control payload must be a mapping")
         payload = dict(value)
         payload["state"] = ModelRiskControlStateV1(payload["state"])
+        payload["evidence_receipt_refs"] = tuple(payload["evidence_receipt_refs"])
         payload["blocker_codes"] = tuple(ReasonCode(code) for code in payload["blocker_codes"])
+        payload["limitation_refs"] = tuple(payload["limitation_refs"])
         return cls(**payload)
 
 
@@ -136,6 +139,7 @@ class NoTradeConditionOutcomeV1:
         if not isinstance(value, Mapping):
             raise ContractValidationError(ReasonCode.SCHEMA_MISMATCH, "condition payload must be a mapping")
         payload = dict(value)
+        payload["evidence_receipt_refs"] = tuple(payload["evidence_receipt_refs"])
         payload["reason_codes"] = tuple(ReasonCode(code) for code in payload["reason_codes"])
         return cls(**payload)
 
@@ -173,7 +177,15 @@ class PermanentNoTradeEvidenceComparisonV1:
             "STRONGEST_CLASSICAL": self.strongest_classical_utility,
             "NO_TRADE": self.no_trade_utility,
         }
-        expected = sorted(utilities, key=lambda key: (-utilities[key], key))[0]
+        conservative_priority = {
+            "NO_TRADE": 0,
+            "STRONGEST_CLASSICAL": 1,
+            "CANDIDATE": 2,
+        }
+        expected = sorted(
+            utilities,
+            key=lambda key: (-utilities[key], conservative_priority[key]),
+        )[0]
         if self.strongest_comparator != expected:
             raise ContractValidationError(
                 ReasonCode.ST12F_MODEL_RISK_VETO,
@@ -188,6 +200,149 @@ class PermanentNoTradeEvidenceComparisonV1:
 
 
 @dataclass(frozen=True, slots=True)
+class ModelRiskLaneEvidenceV1:
+    lane: str
+    result_receipt_ref: str
+    input_lock_id: str
+    component_or_template_ref: str
+    observed_at: datetime
+    valid_until: datetime
+
+    def __post_init__(self) -> None:
+        if self.lane not in {"REPLAY", "PAPER"}:
+            raise ContractValidationError(
+                ReasonCode.ST12F_LANE_SUBSTITUTION_FORBIDDEN,
+                "model-risk lane evidence must be exact REPLAY or PAPER",
+            )
+        for name in (
+            "result_receipt_ref",
+            "input_lock_id",
+            "component_or_template_ref",
+        ):
+            value = getattr(self, name)
+            if not isinstance(value, str) or not value:
+                raise ContractValidationError(
+                    ReasonCode.ST12F_EVIDENCE_INCOMPLETE,
+                    f"{name} is required for model-risk lane evidence",
+                )
+        observed = parse_utc(self.observed_at, field_name="observed_at")
+        valid_until = parse_utc(self.valid_until, field_name="valid_until")
+        object.__setattr__(self, "observed_at", observed)
+        object.__setattr__(self, "valid_until", valid_until)
+        if observed > valid_until:
+            raise ContractValidationError(
+                ReasonCode.ST12F_EVIDENCE_INCOMPLETE,
+                "model-risk lane validity precedes observation",
+            )
+
+    @classmethod
+    def from_canonical_mapping(cls, value: object) -> "ModelRiskLaneEvidenceV1":
+        if not isinstance(value, Mapping) or set(value) != {field.name for field in fields(cls)}:
+            raise ContractValidationError(
+                ReasonCode.SCHEMA_MISMATCH,
+                "model-risk lane evidence fields differ",
+            )
+        return cls(**dict(value))
+
+
+@dataclass(frozen=True, slots=True)
+class ModelRiskAdjudicationBasisV1:
+    expected_component_or_template_ref: str
+    evaluated_at: datetime
+    required_evidence_valid_until: datetime
+    required_evidence_receipt_refs: tuple[str, ...]
+    replay_lane: ModelRiskLaneEvidenceV1 | None
+    paper_lane: ModelRiskLaneEvidenceV1 | None
+    uncertainty_reserve: Decimal
+    model_risk_reserve: Decimal
+    capacity_hard_veto: bool
+    liquidity_hard_veto: bool
+    capacity_liquidity_receipt_refs: tuple[str, ...]
+    independent_review_state: str
+    independent_review_receipt_ref: str
+
+    def __post_init__(self) -> None:
+        for name in (
+            "expected_component_or_template_ref",
+            "independent_review_state",
+            "independent_review_receipt_ref",
+        ):
+            value = getattr(self, name)
+            if not isinstance(value, str) or not value:
+                raise ContractValidationError(
+                    ReasonCode.ST12F_EVIDENCE_INCOMPLETE,
+                    f"{name} is required for model-risk adjudication",
+                )
+        _refs(
+            self.required_evidence_receipt_refs,
+            "required_evidence_receipt_refs",
+            required=True,
+        )
+        _refs(
+            self.capacity_liquidity_receipt_refs,
+            "capacity_liquidity_receipt_refs",
+            required=True,
+        )
+        for name, lane in (("replay_lane", self.replay_lane), ("paper_lane", self.paper_lane)):
+            if lane is not None and type(lane) is not ModelRiskLaneEvidenceV1:
+                raise ContractValidationError(
+                    ReasonCode.ST12F_EVIDENCE_INCOMPLETE,
+                    f"{name} must be exact typed lane evidence or explicit absence",
+                )
+        if self.replay_lane is not None and self.replay_lane.lane != "REPLAY":
+            raise ContractValidationError(
+                ReasonCode.ST12F_LANE_SUBSTITUTION_FORBIDDEN,
+                "replay model-risk evidence carries another lane",
+            )
+        if self.paper_lane is not None and self.paper_lane.lane != "PAPER":
+            raise ContractValidationError(
+                ReasonCode.ST12F_LANE_SUBSTITUTION_FORBIDDEN,
+                "paper model-risk evidence carries another lane",
+            )
+        evaluated = parse_utc(self.evaluated_at, field_name="evaluated_at")
+        valid_until = parse_utc(
+            self.required_evidence_valid_until,
+            field_name="required_evidence_valid_until",
+        )
+        object.__setattr__(self, "evaluated_at", evaluated)
+        object.__setattr__(self, "required_evidence_valid_until", valid_until)
+        for name in ("uncertainty_reserve", "model_risk_reserve"):
+            value = exact_decimal(getattr(self, name), field_name=name)
+            if value < 0:
+                raise ContractValidationError(
+                    ReasonCode.ST12F_MODEL_RISK_VETO,
+                    f"{name} must be nonnegative",
+                )
+            object.__setattr__(self, name, value)
+        if type(self.capacity_hard_veto) is not bool or type(self.liquidity_hard_veto) is not bool:
+            raise ContractValidationError(
+                ReasonCode.ST12F_MODEL_RISK_VETO,
+                "capacity and liquidity vetoes must be exact booleans",
+            )
+
+    @classmethod
+    def from_canonical_mapping(cls, value: object) -> "ModelRiskAdjudicationBasisV1":
+        if not isinstance(value, Mapping) or set(value) != {field.name for field in fields(cls)}:
+            raise ContractValidationError(
+                ReasonCode.SCHEMA_MISMATCH,
+                "model-risk adjudication basis fields differ",
+            )
+        payload = dict(value)
+        payload["required_evidence_receipt_refs"] = tuple(
+            payload["required_evidence_receipt_refs"]
+        )
+        payload["capacity_liquidity_receipt_refs"] = tuple(
+            payload["capacity_liquidity_receipt_refs"]
+        )
+        for name in ("replay_lane", "paper_lane"):
+            if payload[name] is not None:
+                payload[name] = ModelRiskLaneEvidenceV1.from_canonical_mapping(
+                    payload[name]
+                )
+        return cls(**payload)
+
+
+@dataclass(frozen=True, slots=True)
 class ModelRiskEvidenceAssessmentV1:
     assessment_id: str
     schema_version: str
@@ -196,6 +351,7 @@ class ModelRiskEvidenceAssessmentV1:
     control_evidence: tuple[ModelRiskControlEvidenceV1, ...]
     no_trade_condition_outcomes: tuple[NoTradeConditionOutcomeV1, ...]
     permanent_no_trade_comparison: PermanentNoTradeEvidenceComparisonV1
+    adjudication_basis: ModelRiskAdjudicationBasisV1
     blocker_codes: tuple[ReasonCode, ...]
     limitations: tuple[str, ...]
     receipt_refs: tuple[str, ...]
@@ -219,6 +375,11 @@ class ModelRiskEvidenceAssessmentV1:
             )
         if type(self.permanent_no_trade_comparison) is not PermanentNoTradeEvidenceComparisonV1 or self.permanent_no_trade_comparison.input_lock_id != self.input_lock_id:
             raise ContractValidationError(ReasonCode.ST12F_INPUT_LOCK_MISMATCH, "comparison lock differs")
+        if type(self.adjudication_basis) is not ModelRiskAdjudicationBasisV1:
+            raise ContractValidationError(
+                ReasonCode.ST12F_EVIDENCE_INCOMPLETE,
+                "model-risk assessment lacks its typed adjudication basis",
+            )
         _refs(self.limitations, "limitations")
         _refs(self.receipt_refs, "receipt_refs")
         if (
@@ -236,15 +397,31 @@ class ModelRiskEvidenceAssessmentV1:
                 "assessment may create evidence but never promotion authority",
             )
         active = any(row.active for row in self.no_trade_condition_outcomes)
-        if self.permanent_no_trade_wins != active or (active and self.terminal_state != "NO_TRADE"):
+        non_review_veto = any(
+            row.active and row.condition_id != "INDEPENDENT_REVIEW_NOT_CLOSED"
+            for row in self.no_trade_condition_outcomes
+        )
+        review_pending = next(
+            row.active
+            for row in self.no_trade_condition_outcomes
+            if row.condition_id == "INDEPENDENT_REVIEW_NOT_CLOSED"
+        )
+        if self.permanent_no_trade_wins != active or (
+            non_review_veto and self.terminal_state != "NO_TRADE"
+        ):
             raise ContractValidationError(
                 ReasonCode.ST12F_MODEL_RISK_VETO,
                 "NO_TRADE terminal result must preserve every active veto",
             )
-        if not active and self.terminal_state != "READY_FOR_INDEPENDENT_REVIEW":
+        if not non_review_veto and review_pending and self.terminal_state != "READY_FOR_INDEPENDENT_REVIEW":
             raise ContractValidationError(
                 ReasonCode.ST12F_INDEPENDENT_REVIEW_REQUIRED,
                 "veto-free evidence remains pending independent review",
+            )
+        if not active and self.terminal_state != "CLOSED_INDEPENDENTLY_VALIDATED":
+            raise ContractValidationError(
+                ReasonCode.ST12F_INDEPENDENT_REVIEW_REQUIRED,
+                "review-closed model-risk evidence requires its closed terminal state",
             )
 
     @classmethod
@@ -263,7 +440,12 @@ class ModelRiskEvidenceAssessmentV1:
         payload["permanent_no_trade_comparison"] = PermanentNoTradeEvidenceComparisonV1.from_canonical_mapping(
             payload["permanent_no_trade_comparison"]
         )
+        payload["adjudication_basis"] = ModelRiskAdjudicationBasisV1.from_canonical_mapping(
+            payload["adjudication_basis"]
+        )
         payload["blocker_codes"] = tuple(ReasonCode(code) for code in payload["blocker_codes"])
+        payload["limitations"] = tuple(payload["limitations"])
+        payload["receipt_refs"] = tuple(payload["receipt_refs"])
         return cls(**payload)
 
     def canonical_json(self) -> str:
@@ -279,6 +461,7 @@ class ModelRiskEvidenceAdjudicatorV1:
         controls: tuple[ModelRiskControlEvidenceV1, ...],
         conditions: tuple[NoTradeConditionOutcomeV1, ...],
         comparison: PermanentNoTradeEvidenceComparisonV1,
+        adjudication_basis: ModelRiskAdjudicationBasisV1,
         limitations: tuple[str, ...],
         receipt_refs: tuple[str, ...],
     ) -> ModelRiskEvidenceAssessmentV1:
@@ -287,30 +470,137 @@ class ModelRiskEvidenceAdjudicatorV1:
                 ReasonCode.ST12F_EVIDENCE_INCOMPLETE,
                 "adjudication requires exact 12-control and eight-condition inputs",
             )
-        mutable = list(conditions)
-        missing_or_stale = any(
-            row.state is ModelRiskControlStateV1.BLOCKED_WITH_TYPED_REASON or not row.current
-            for row in controls
+        if (
+            type(comparison) is not PermanentNoTradeEvidenceComparisonV1
+            or type(adjudication_basis) is not ModelRiskAdjudicationBasisV1
+            or comparison.input_lock_id != input_lock_id
+        ):
+            raise ContractValidationError(
+                ReasonCode.ST12F_INPUT_LOCK_MISMATCH,
+                "model-risk comparison and adjudication basis must share one exact lock",
+            )
+        mutable = {row.condition_id: row for row in conditions}
+
+        def activate(
+            condition_id: str,
+            derived: bool,
+            *,
+            evidence_refs: tuple[str, ...],
+            reason_code: ReasonCode,
+        ) -> None:
+            prior = mutable[condition_id]
+            active = prior.active or derived
+            mutable[condition_id] = NoTradeConditionOutcomeV1(
+                condition_id=condition_id,
+                active=active,
+                evidence_receipt_refs=tuple(
+                    dict.fromkeys((*prior.evidence_receipt_refs, *evidence_refs))
+                ),
+                reason_codes=(
+                    tuple(dict.fromkeys((*prior.reason_codes, reason_code)))
+                    if derived
+                    else prior.reason_codes
+                ),
+            )
+
+        lane_rows = tuple(
+            row
+            for row in (adjudication_basis.replay_lane, adjudication_basis.paper_lane)
+            if row is not None
         )
-        if missing_or_stale:
-            index = NO_TRADE_CONDITION_IDS_V1.index("MISSING_OR_STALE_REQUIRED_EVIDENCE")
-            prior = mutable[index]
-            mutable[index] = NoTradeConditionOutcomeV1(
-                prior.condition_id,
-                True,
-                prior.evidence_receipt_refs,
-                tuple(dict.fromkeys((*prior.reason_codes, ReasonCode.ST12F_MODEL_RISK_VETO))),
+        lane_refs = tuple(row.result_receipt_ref for row in lane_rows)
+        missing_or_stale = (
+            adjudication_basis.evaluated_at
+            > adjudication_basis.required_evidence_valid_until
+            or any(
+                not row.observed_at
+                <= adjudication_basis.evaluated_at
+                <= row.valid_until
+                for row in lane_rows
             )
-        if comparison.execution_adjusted_lcb <= 0:
-            index = NO_TRADE_CONDITION_IDS_V1.index("NEGATIVE_OR_ZERO_EXECUTION_ADJUSTED_LCB")
-            prior = mutable[index]
-            mutable[index] = NoTradeConditionOutcomeV1(
-                prior.condition_id,
-                True,
-                prior.evidence_receipt_refs,
-                tuple(dict.fromkeys((*prior.reason_codes, ReasonCode.ST12F_MODEL_RISK_VETO))),
+            or any(
+                row.state is ModelRiskControlStateV1.BLOCKED_WITH_TYPED_REASON
+                or not row.current
+                for row in controls
             )
-        active_conditions = tuple(mutable)
+        )
+        lanes_missing = (
+            adjudication_basis.replay_lane is None
+            or adjudication_basis.paper_lane is None
+        )
+        lock_or_scope_conflict = any(
+            row.input_lock_id != input_lock_id
+            or row.component_or_template_ref
+            != adjudication_basis.expected_component_or_template_ref
+            for row in lane_rows
+        )
+        reserve_dominates = (
+            adjudication_basis.uncertainty_reserve
+            + adjudication_basis.model_risk_reserve
+            >= comparison.candidate_utility
+        )
+        capacity_or_liquidity_veto = (
+            adjudication_basis.capacity_hard_veto
+            or adjudication_basis.liquidity_hard_veto
+        )
+        comparator_dominates = comparison.candidate_utility <= max(
+            comparison.strongest_classical_utility,
+            comparison.no_trade_utility,
+        )
+        review_not_closed = (
+            adjudication_basis.independent_review_state
+            != "CLOSED_INDEPENDENTLY_VALIDATED"
+        )
+
+        activate(
+            "NEGATIVE_OR_ZERO_EXECUTION_ADJUSTED_LCB",
+            comparison.execution_adjusted_lcb <= 0,
+            evidence_refs=(comparison.comparison_id,),
+            reason_code=ReasonCode.ST12F_MODEL_RISK_VETO,
+        )
+        activate(
+            "MISSING_OR_STALE_REQUIRED_EVIDENCE",
+            missing_or_stale,
+            evidence_refs=adjudication_basis.required_evidence_receipt_refs,
+            reason_code=ReasonCode.STALE_CONTEXT,
+        )
+        activate(
+            "REPLAY_OR_PAPER_LANE_MISSING",
+            lanes_missing,
+            evidence_refs=lane_refs,
+            reason_code=ReasonCode.ST12F_EVIDENCE_INCOMPLETE,
+        )
+        activate(
+            "LOCK_OR_SCOPE_CONFLICT",
+            lock_or_scope_conflict,
+            evidence_refs=lane_refs,
+            reason_code=ReasonCode.ST12F_INPUT_LOCK_MISMATCH,
+        )
+        activate(
+            "UNCERTAINTY_OR_MODEL_RISK_DOMINATES_EDGE",
+            reserve_dominates,
+            evidence_refs=adjudication_basis.required_evidence_receipt_refs,
+            reason_code=ReasonCode.ST12F_MODEL_RISK_VETO,
+        )
+        activate(
+            "CAPACITY_OR_LIQUIDITY_HARD_VETO",
+            capacity_or_liquidity_veto,
+            evidence_refs=adjudication_basis.capacity_liquidity_receipt_refs,
+            reason_code=ReasonCode.ST12F_MODEL_RISK_VETO,
+        )
+        activate(
+            "STRONGEST_CLASSICAL_OR_NO_TRADE_DOMINATES",
+            comparator_dominates,
+            evidence_refs=(comparison.comparison_id,),
+            reason_code=ReasonCode.ST12F_MODEL_RISK_VETO,
+        )
+        activate(
+            "INDEPENDENT_REVIEW_NOT_CLOSED",
+            review_not_closed,
+            evidence_refs=(adjudication_basis.independent_review_receipt_ref,),
+            reason_code=ReasonCode.ST12F_INDEPENDENT_REVIEW_REQUIRED,
+        )
+        active_conditions = tuple(mutable[row_id] for row_id in NO_TRADE_CONDITION_IDS_V1)
         blockers = tuple(
             dict.fromkeys(
                 code
@@ -320,6 +610,17 @@ class ModelRiskEvidenceAdjudicatorV1:
             )
         )
         no_trade = any(row.active for row in active_conditions)
+        non_review_veto = any(
+            row.active and row.condition_id != "INDEPENDENT_REVIEW_NOT_CLOSED"
+            for row in active_conditions
+        )
+        terminal_state = (
+            "NO_TRADE"
+            if non_review_veto
+            else "READY_FOR_INDEPENDENT_REVIEW"
+            if review_not_closed
+            else "CLOSED_INDEPENDENTLY_VALIDATED"
+        )
         return ModelRiskEvidenceAssessmentV1(
             assessment_id=assessment_id,
             schema_version="QTT_ST12F_MODEL_RISK_ASSESSMENT_V1_4",
@@ -328,13 +629,14 @@ class ModelRiskEvidenceAdjudicatorV1:
             control_evidence=controls,
             no_trade_condition_outcomes=active_conditions,
             permanent_no_trade_comparison=comparison,
+            adjudication_basis=adjudication_basis,
             blocker_codes=blockers,
             limitations=limitations,
             receipt_refs=receipt_refs,
             permanent_no_trade_wins=no_trade,
             champion_challenger_evidence_only=True,
             automatic_promotion_allowed=False,
-            terminal_state="NO_TRADE" if no_trade else "READY_FOR_INDEPENDENT_REVIEW",
+            terminal_state=terminal_state,
         )
 
 
