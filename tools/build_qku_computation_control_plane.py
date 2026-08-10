@@ -190,10 +190,12 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.evidence im
     DivergenceAssessmentV1,
     EvidenceBundleTerminalStateV1,
     IndependentReviewDecisionV1,
+    IndependentReviewAuthorityRequestV1,
     PaperResultContractV1,
     ReplayResultContractV1,
     ST12F_EVIDENCE_IDENTITIES_V1,
     ST12F_EVIDENCE_METRIC_DEFINITIONS_V1,
+    ST12F_STATIC_NOT_APPLICABLE_MATH_IDS_V1,
     _EVIDENCE_BUNDLE_TRANSITION_GUARDS_V1,
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.llm_gateway import (  # noqa: E402
@@ -1812,6 +1814,46 @@ def _st12f_dataclass_row(value: object) -> dict[str, object]:
     return {field.name: getattr(value, field.name) for field in fields(value)}
 
 
+def _st12f_required_evidence_closure(
+    component_or_template_ref: str,
+) -> tuple[str, ...]:
+    required = {component_or_template_ref}
+    changed = True
+    while changed:
+        changed = False
+        for relationship in FROZEN_DEPENDENCY_RELATIONSHIPS.values():
+            if (
+                relationship.consumer_math_spec_id in required
+                and relationship.producer_math_spec_id not in required
+            ):
+                required.add(relationship.producer_math_spec_id)
+                changed = True
+    return tuple(
+        identity
+        for identity in ST12F_EVIDENCE_IDENTITIES_V1
+        if identity in required
+    )
+
+
+def _st12f_static_partition(component_or_template_ref: str) -> dict[str, object]:
+    required = set(
+        _st12f_required_evidence_closure(component_or_template_ref)
+    )
+    required_static_ids = tuple(
+        identity
+        for identity in ST12F_STATIC_NOT_APPLICABLE_MATH_IDS_V1
+        if identity in required
+    )
+    return {
+        "required_static_ids": required_static_ids,
+        "executed_count": 38 + len(required_static_ids),
+        "static_not_applicable_count": (
+            len(ST12F_STATIC_NOT_APPLICABLE_MATH_IDS_V1)
+            - len(required_static_ids)
+        ),
+    }
+
+
 def build_st12f_projections() -> dict[str, str]:
     """Build static, non-empirical ST12-F contract projections."""
 
@@ -1858,10 +1900,28 @@ def build_st12f_projections() -> dict[str, str]:
         {
             "evidence_identity": identity,
             "terminal_disposition_schema": (
-                "APPLICABLE_EXECUTED_AND_RECEIPTED",
-                "APPLICABLE_BLOCKED_WITH_TYPED_REASON",
-                "NOT_APPLICABLE_WITH_PROOF",
+                (
+                    "APPLICABLE_EXECUTED_AND_RECEIPTED",
+                    "APPLICABLE_BLOCKED_WITH_TYPED_REASON",
+                    "NOT_APPLICABLE_WITH_PROOF",
+                )
+                if identity in ST12F_STATIC_NOT_APPLICABLE_MATH_IDS_V1
+                else (
+                    "APPLICABLE_EXECUTED_AND_RECEIPTED",
+                    "APPLICABLE_BLOCKED_WITH_TYPED_REASON",
+                )
             ),
+            "static_not_applicable_allowlisted": (
+                identity in ST12F_STATIC_NOT_APPLICABLE_MATH_IDS_V1
+            ),
+            "static_applicability_rule": (
+                "ALLOWLISTED_AND_OUTSIDE_SELECTED_COMPONENT_"
+                "TRANSITIVE_UPSTREAM_CLOSURE"
+                if identity in ST12F_STATIC_NOT_APPLICABLE_MATH_IDS_V1
+                else "FORBIDDEN_ACTUAL_DURABLE_VALUE_REQUIRED"
+            ),
+            "dependency_closure_owner": "FROZEN_DEPENDENCY_RELATIONSHIPS",
+            "selected_component_included_in_required_closure": True,
             "actual_disposition": "UNAVAILABLE_NO_EMPIRICAL_INSTANCE",
             "empirical_evidence": False,
         }
@@ -1882,9 +1942,28 @@ def build_st12f_projections() -> dict[str, str]:
             "self_review_allowed": False,
         }
         for (source, target), guard in _EVIDENCE_BUNDLE_TRANSITION_GUARDS_V1.items()
+    ) + (
+        {
+            "contract_type": "IndependentReviewAuthorityResolverProtocolV1",
+            "review_producer": "IndependentEvidenceReviewV1",
+            "semantic_owner": "AgentCapabilityResolverV1",
+            "private_request_type": "IndependentReviewAuthorityRequestV1",
+            "private_request_fields": tuple(
+                field.name
+                for field in fields(IndependentReviewAuthorityRequestV1)
+            ),
+            "required_resolver_methods": (
+                "admit_operation",
+                "resolve_preexisting_agent_orch_decision_receipt",
+            ),
+            "preexisting_receipt_lookup_key": "row_id",
+            "caller_supplied_capability_decision_allowed": False,
+            "raw_agent_orch_reader_in_review_producer_allowed": False,
+            "runtime_effect_authorized": False,
+        },
     )
-    if len(review_rows) != 16:
-        raise ValueError("ST12-F independent-review projection must contain exactly 16 rows")
+    if len(review_rows) != 17:
+        raise ValueError("ST12-F independent-review projection must contain exactly 17 rows")
     llm_rows = tuple(
         {"advisory_task": task.value, "preexisting_annotation_only": True, "inference_authorized": False, "numeric_authority": False}
         for task in LLMAdvisoryTaskV1
@@ -1913,6 +1992,24 @@ def build_st12f_projections() -> dict[str, str]:
         "empirical_evidence_count": 0,
         "source_truth_count": 0,
         "runtime_effect_authorized": False,
+        "real_owner_review_integration": "AgentCapabilityResolverV1",
+        "caller_supplied_review_decision_count": 0,
+        "synthetic_agent_orch_review_adapter_count": 0,
+        "static_applicability_dependency_closure": (
+            "FROZEN_DEPENDENCY_RELATIONSHIPS_TRANSITIVE_UPSTREAM"
+        ),
+        "canonical_math01_partition": (
+            "39_EXECUTED_PLUS_9_STATIC_NOT_APPLICABLE"
+        ),
+        "metric_durable_values_consumed_and_validated": "38/38",
+        "metric_values_produced_by_st12f": 0,
+        "upstream_durable_computation_producer_state": (
+            "PREEXISTING_UPSTREAM_DEPENDENCY_HELD_OUTSIDE_"
+            "ST12F_EXECUTION_AUTHORITY"
+        ),
+        "preexisting_durable_receipt_required": True,
+        "generated_projection_is_empirical_evidence": False,
+        "runtime_fixture_is_empirical_evidence": False,
     }
     summary = {
         "schema": "QTT_ST12F_STATIC_CODE_VALIDATION_SUMMARY_V1_4",
@@ -1928,6 +2025,27 @@ def build_st12f_projections() -> dict[str, str]:
         "evidence_pass_claimed": False,
         "independent_review_claimed": False,
         "runtime_effect_authorized": False,
+        "independent_review_contract_row_count": len(review_rows),
+        "real_owner_review_integration": "PASS",
+        "caller_supplied_review_decision_count": 0,
+        "synthetic_agent_orch_review_adapter_count": 0,
+        "static_applicability_dependency_closure": "PASS",
+        "static_applicability_canonical_partitions": {
+            component: _st12f_static_partition(component)
+            for component in ("MATH-01", "MATH-02", "MATH-05")
+        },
+        "canonical_math01_partition": (
+            "39_EXECUTED_PLUS_9_STATIC_NOT_APPLICABLE"
+        ),
+        "metric_durable_values_consumed_and_validated": "38/38",
+        "metric_values_produced_by_st12f": 0,
+        "upstream_durable_computation_producer_state": (
+            "PREEXISTING_UPSTREAM_DEPENDENCY_HELD_OUTSIDE_"
+            "ST12F_EXECUTION_AUTHORITY"
+        ),
+        "preexisting_durable_receipt_required": True,
+        "generated_projection_is_empirical_evidence": False,
+        "runtime_fixture_is_empirical_evidence": False,
     }
     payloads = {
         "cohort_registry.jsonl": _jsonl(cohort_rows),

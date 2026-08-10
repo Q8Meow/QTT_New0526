@@ -7143,10 +7143,13 @@ from .evidence import (
     DivergenceAssessmentV1 as _ST12FDivergenceAssessmentV1,
     DivergenceTerminalStateV1 as _ST12FDivergenceTerminalStateV1,
     FToDEvidenceReferenceQueryV1 as _ST12FFToDQueryV1,
+    IndependentReviewAuthorityRequestV1 as _ST12FReviewAuthorityRequestV1,
     PaperResultContractV1 as _ST12FPaperResultContractV1,
     ReplayResultContractV1 as _ST12FReplayResultContractV1,
     ST12F_EVIDENCE_IDENTITIES_V1 as _ST12F_EVIDENCE_IDENTITIES_V1,
     ST12F_EVIDENCE_METRIC_DEFINITIONS_V1 as _ST12F_EVIDENCE_METRICS_V1,
+    ST12F_STATIC_NOT_APPLICABLE_MATH_IDS_V1 as _ST12F_STATIC_IDS_V1,
+    _required_evidence_identity_closure_v1 as _st12f_required_closure_v1,
     _EVIDENCE_BUNDLE_TRANSITION_GUARDS_V1 as _ST12F_ACTUAL_TRANSITIONS_V1,
 )
 from .implementation_registry import (
@@ -7272,6 +7275,22 @@ _ST12F_OWNER_LIFECYCLE_TRANSITIONS_V1 = (
     ),
 )
 
+_ST12F_REVIEW_AUTHORITY_REQUEST_FIELDS_V1 = (
+    "request_id",
+    "requested_at",
+    "principal_id",
+    "capability_bundle_id",
+    "context",
+    "idempotency_key",
+    "traceparent",
+    "tracestate",
+    "prior_bundle_ref",
+    "input_lock_id",
+    "component_or_template_ref",
+    "reviewer_identity",
+    "bundle_producer_identity",
+)
+
 
 def _st12f_central_contract_checks() -> tuple[ValidationCheckV1, ...]:
     lane_ids = (*_ST12F_REPLAY_SLOTS_V1, *_ST12F_PAPER_SLOTS_V1)
@@ -7299,6 +7318,31 @@ def _st12f_central_contract_checks() -> tuple[ValidationCheckV1, ...]:
         _check("ST12F_MATH_ORACLE_VECTOR_48", len(_ST12F_MATH_SPEC_IDS_V1) == len(_ST12F_MATH_CALLABLES_V1) == len(_ST12F_ORACLES_V1) == len(_ST12F_VECTORS_V1) == 48, "48 specifications, callables, independent oracles, and vectors"),
         _check("ST12F_EVIDENCE_IDENTITIES_48", len(_ST12F_EVIDENCE_IDENTITIES_V1) == len(set(_ST12F_EVIDENCE_IDENTITIES_V1)) == 48, "48 exact evidence identities"),
         _check("ST12F_EVIDENCE_METRICS_38", len(_ST12F_EVIDENCE_METRICS_V1) == 38 and len({row.metric_id for row in _ST12F_EVIDENCE_METRICS_V1}) == 38, "38 named metric definitions"),
+        _check(
+            "ST12F_REAL_REVIEW_AUTHORITY_REQUEST",
+            (
+                tuple(
+                    field.name
+                    for field in fields(_ST12FReviewAuthorityRequestV1)
+                )
+                == _ST12F_REVIEW_AUTHORITY_REQUEST_FIELDS_V1
+                and _ST12FReviewAuthorityRequestV1.__dataclass_params__.frozen
+                and hasattr(_ST12FReviewAuthorityRequestV1, "__slots__")
+            ),
+            "private frozen 13-field review request with no caller decision",
+        ),
+        _check(
+            "ST12F_DEPENDENCY_CLOSED_STATIC_APPLICABILITY",
+            (
+                _st12f_required_closure_v1("MATH-01") == ("MATH-01",)
+                and _st12f_required_closure_v1("MATH-02")
+                == ("MATH-01", "MATH-02")
+                and _st12f_required_closure_v1("MATH-05")
+                == ("MATH-03", "MATH-04", "MATH-05")
+                and len(_ST12F_STATIC_IDS_V1) == 10
+            ),
+            "selected component plus exact transitive frozen dependency closure",
+        ),
         _check("ST12F_MODEL_RISK_12_PLUS_8", len(_ST12F_MODEL_RISK_CONTROL_IDS_V1) == 12 and len(_ST12F_NO_TRADE_CONDITION_IDS_V1) == 8, "12 terminal controls and eight permanent NO_TRADE conditions"),
         _check("ST12F_SOURCE_CLOSURE_35_PLUS_7", len(_ST12F_SOURCE_DECISIONS_V1) == 35 and len(_ST12F_SOURCE_CONFLICTS_V1) == 7, "35 terminal source decisions and seven conflicts"),
     )

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections import Counter
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import datetime, timezone
 from enum import StrEnum
 import json
@@ -194,6 +194,21 @@ TASK_ENVELOPE_FIELDS = (
     "quarantine_route",
     "owner_escalation_route",
     "no_effect_profile_ref",
+)
+_INDEPENDENT_REVIEW_AUTHORITY_REQUEST_FIELDS_V1 = (
+    "request_id",
+    "requested_at",
+    "principal_id",
+    "capability_bundle_id",
+    "context",
+    "idempotency_key",
+    "traceparent",
+    "tracestate",
+    "prior_bundle_ref",
+    "input_lock_id",
+    "component_or_template_ref",
+    "reviewer_identity",
+    "bundle_producer_identity",
 )
 EXPLICIT_ABSENCE = "ABSENT_NOT_APPLICABLE"
 
@@ -2055,6 +2070,45 @@ class AgentCapabilityResolverV1:
             f"AGENT_ORCH1_RECEIPT_GAP::{task_id}",
         )
 
+    def _preexisting_agent_orch_decision_receipt(
+        self, receipt_ref: object
+    ) -> Mapping[str, object] | None:
+        if not isinstance(receipt_ref, str) or not receipt_ref:
+            return None
+        row = self.policy_store.snapshot.agent_orch_receipt_rows.get(
+            receipt_ref
+        )
+        expected = {
+            "object_type": "AgentDecisionReceiptV1",
+            "object_version": self.policy_store.snapshot.registry_version,
+            "control_plane_only": True,
+            "fake_receipt_created": False,
+            "live_execution_created": False,
+            "order_submission_created": False,
+            "runtime_side_effect_allowed": False,
+            "source_truth_created": False,
+        }
+        if (
+            not isinstance(row, Mapping)
+            or row.get("row_id") != receipt_ref
+            or any(row.get(name) != value for name, value in expected.items())
+        ):
+            return None
+        return row
+
+    def resolve_preexisting_agent_orch_decision_receipt(
+        self, receipt_ref: str
+    ) -> Mapping[str, object]:
+        """Resolve one real frozen Agent-Orch no-effect receipt by row id."""
+
+        row = self._preexisting_agent_orch_decision_receipt(receipt_ref)
+        if row is None:
+            raise AuthorityDeniedError(
+                ReasonCode.SEGREGATION_OF_DUTIES_VIOLATION,
+                "review authority is not one pre-existing no-effect Agent-Orch receipt",
+            )
+        return row
+
     def _decision(
         self,
         *,
@@ -2418,38 +2472,26 @@ class AgentCapabilityResolverV1:
             peer_duty_ref = envelope.get("peer_challenge_duty_ref")
             peer_receipt_ref = envelope.get("peer_challenge_receipt_ref")
             peer_reasoning_ref = envelope.get("peer_reasoning_chain_ref")
-            independent_peer = any(
-                isinstance(peer_principal_id, str)
-                and peer_principal_id in binding.current_principal_refs
-                and isinstance(peer_duty_ref, str)
-                and peer_duty_ref in binding.current_duty_refs
+            mapped_peer_bindings = tuple(
+                binding
                 for binding in (
                     self.policy_store.snapshot.identity_map.bindings.values()
                 )
-            )
-            peer_receipt = (
-                self.policy_store.snapshot.agent_orch_receipt_rows.get(
-                    peer_receipt_ref
+                if (
+                    isinstance(peer_principal_id, str)
+                    and peer_principal_id in binding.current_principal_refs
+                    and isinstance(peer_duty_ref, str)
+                    and peer_duty_ref in binding.current_duty_refs
                 )
-                if isinstance(peer_receipt_ref, str)
-                else None
             )
-            peer_receipt_role_keys = {
-                _normalized_role_key(value)
-                for field in ("required_roles", "responsible_roles")
-                for value in tuple(
-                    peer_receipt.get(field, ())
-                    if peer_receipt is not None
-                    else ()
-                )
-            }
+            peer_receipt = self._preexisting_agent_orch_decision_receipt(
+                peer_receipt_ref
+            )
             if (
                 envelope.get("peer_challenge_satisfied") is not True
-                or not independent_peer
+                or len(mapped_peer_bindings) != 1
                 or peer_principal_id == bundle.current_agent_id
                 or peer_receipt is None
-                or _normalized_role_key(peer_duty_ref)
-                not in peer_receipt_role_keys
                 or not isinstance(peer_reasoning_ref, str)
                 or not peer_reasoning_ref
             ):
@@ -2823,6 +2865,39 @@ class AgentCapabilityResolverV1:
                 getattr(request, "idempotency_key", "")
             ),
         )
+        request_fields = getattr(type(request), "__dataclass_fields__", {})
+        if (
+            type(request).__name__ == "IndependentReviewAuthorityRequestV1"
+            and type(request).__module__
+            == (
+                "src.qtt.stage1_prediction_markets."
+                "qku_computation_control_plane.evidence"
+            )
+            and tuple(request_fields)
+            == _INDEPENDENT_REVIEW_AUTHORITY_REQUEST_FIELDS_V1
+            and decision.eligible
+        ):
+            review_scope_refs = (
+                "INDEPENDENT_REVIEW_ONLY",
+                f"context_ref={getattr(context, 'context_id', '')}",
+                f"input_lock_id={getattr(request, 'input_lock_id', '')}",
+                (
+                    "component_or_template_ref="
+                    f"{getattr(request, 'component_or_template_ref', '')}"
+                ),
+            )
+            if all(not value.endswith("=") for value in review_scope_refs):
+                decision = replace(
+                    decision,
+                    scope_refs=tuple(
+                        dict.fromkeys((*decision.scope_refs, *review_scope_refs))
+                    ),
+                )
+                seen_key = (decision.principal_id, decision.idempotency_key)
+                prior = self._idempotency.get(seen_key)
+                if prior is not None:
+                    self._idempotency[seen_key] = (prior[0], decision)
+                self.last_decision = decision
         return decision
 
 

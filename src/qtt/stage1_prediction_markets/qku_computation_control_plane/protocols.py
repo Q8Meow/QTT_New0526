@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING, Protocol, runtime_checkable
+from typing import TYPE_CHECKING, Mapping, Protocol, runtime_checkable
 
 from .errors import ContractValidationError, OwnerAdapterError, ReasonCode
 from .models import (
@@ -97,6 +97,19 @@ class AgentCapabilityAdmissionProtocolV1(Protocol):
     def admit_operation(
         self, request: object
     ) -> "AgentCapabilityDecisionV1": ...
+
+
+@runtime_checkable
+class IndependentReviewAuthorityResolverProtocolV1(Protocol):
+    """Resolve private review authority from one frozen no-effect snapshot."""
+
+    def admit_operation(
+        self, request: object
+    ) -> "AgentCapabilityDecisionV1": ...
+
+    def resolve_preexisting_agent_orch_decision_receipt(
+        self, receipt_ref: str
+    ) -> Mapping[str, object]: ...
 
 
 @runtime_checkable

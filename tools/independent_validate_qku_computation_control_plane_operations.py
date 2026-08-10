@@ -6,6 +6,7 @@ from __future__ import annotations
 import ast
 from dataclasses import dataclass, replace
 from datetime import UTC, datetime, timedelta
+import json
 from pathlib import Path
 import sys
 from types import MappingProxyType
@@ -57,6 +58,21 @@ PACKAGE = (
     / "qtt"
     / "stage1_prediction_markets"
     / "qku_computation_control_plane"
+)
+AGENT_CAPABILITY_ARTIFACTS = (
+    REPO_ROOT
+    / "docs"
+    / "master_plan"
+    / "generated"
+    / "qku_control_plane"
+    / "agent_capability"
+)
+AGENT_ORCH_ARTIFACTS = (
+    REPO_ROOT
+    / "docs"
+    / "master_plan"
+    / "generated"
+    / "pr169_agent_orch1"
 )
 FORBIDDEN_IMPORT_ROOTS = {
     "asyncio",
@@ -159,6 +175,59 @@ OWNER_CONCURRENCY_CASE_IDS_V1 = (
     "SUPERSEDED",
     "CACHE",
 )
+OWNER_V18_INTEGRATION_CASES = (
+    ("V18-TEST::01", "REAL_OWNER_REVIEW_POSITIVE"),
+    ("V18-TEST::02", "CALLER_DECISION_REJECT"),
+    ("V18-TEST::03", "SYNTHETIC_AGENT_ORCH_ROW_REJECT"),
+    ("V18-TEST::04", "AGENT_ORCH_ROW_ID_MISMATCH_REJECT"),
+    ("V18-TEST::05", "PEER_SOD_REQUIRED"),
+    ("V18-TEST::06", "SELF_REVIEW_REJECT"),
+    ("V18-TEST::07", "REVIEW_SCOPE_MISMATCH_REJECT"),
+    ("V18-TEST::08", "STATIC_SELF_COMPONENT_REJECT"),
+    ("V18-TEST::09", "STATIC_DIRECT_DEPENDENCY_REJECT"),
+    ("V18-TEST::10", "STATIC_SECOND_DIRECT_DEPENDENCY_REJECT"),
+    ("V18-TEST::11", "STATIC_UNRELATED_ALLOW"),
+    ("V18-TEST::12", "PARTITION_MATH01"),
+    ("V18-TEST::13", "PARTITION_MATH02"),
+    ("V18-TEST::14", "PARTITION_MATH05"),
+    ("V18-TEST::15", "FIXED_PARTITION_REJECT"),
+    ("V18-TEST::16", "DURABLE_PRODUCER_BOUNDARY"),
+)
+OWNER_V18_REVIEW_REQUEST_FIELDS = (
+    "request_id",
+    "requested_at",
+    "principal_id",
+    "capability_bundle_id",
+    "context",
+    "idempotency_key",
+    "traceparent",
+    "tracestate",
+    "prior_bundle_ref",
+    "input_lock_id",
+    "component_or_template_ref",
+    "reviewer_identity",
+    "bundle_producer_identity",
+)
+OWNER_V18_STATIC_IDS = (
+    "MATH-01",
+    "MATH-02",
+    "MATH-03",
+    "MATH-04",
+    "MATH-05",
+    "MATH-06",
+    "MATH-07",
+    "MATH-34",
+    "MATH-35",
+    "MATH-36",
+)
+OWNER_V18_EVIDENCE_IDENTITIES = tuple(
+    f"MATH-{number:02d}" for number in (*range(1, 46), 50, 51, 52)
+)
+OWNER_V18_CANONICAL_PARTITIONS = {
+    "MATH-01": (39, 9),
+    "MATH-02": (40, 8),
+    "MATH-05": (41, 7),
+}
 
 
 @dataclass(frozen=True, slots=True)
@@ -781,6 +850,229 @@ def _method_return_name(
     )
 
 
+def _class_method_names(
+    tree: ast.Module,
+    class_name: str,
+) -> tuple[str, ...]:
+    class_node = next(
+        (
+            node
+            for node in tree.body
+            if isinstance(node, ast.ClassDef) and node.name == class_name
+        ),
+        None,
+    )
+    if class_node is None:
+        return ()
+    return tuple(
+        node.name
+        for node in class_node.body
+        if isinstance(node, ast.FunctionDef)
+    )
+
+
+def _method_arguments(
+    tree: ast.Module,
+    class_name: str,
+    method_name: str,
+) -> tuple[tuple[str, ...], tuple[str, ...]]:
+    class_node = next(
+        (
+            node
+            for node in tree.body
+            if isinstance(node, ast.ClassDef) and node.name == class_name
+        ),
+        None,
+    )
+    if class_node is None:
+        return (), ()
+    method = next(
+        (
+            node
+            for node in class_node.body
+            if isinstance(node, ast.FunctionDef) and node.name == method_name
+        ),
+        None,
+    )
+    if method is None:
+        return (), ()
+    return (
+        tuple(argument.arg for argument in method.args.args),
+        tuple(argument.arg for argument in method.args.kwonlyargs),
+    )
+
+
+def _parse_frozen_dependency_pairs(
+    tree: ast.Module,
+) -> tuple[tuple[str, str], ...]:
+    value = _assignment(tree, "_FROZEN_DEPENDENCY_RELATIONSHIPS")
+    if not isinstance(value, ast.Tuple):
+        return ()
+    pairs: list[tuple[str, str]] = []
+    for item in value.elts:
+        if not isinstance(item, ast.Call):
+            return ()
+        keywords = {
+            keyword.arg: keyword.value
+            for keyword in item.keywords
+            if keyword.arg is not None
+        }
+        producer = keywords.get("producer_math_spec_id")
+        consumer = keywords.get("consumer_math_spec_id")
+        if not (
+            isinstance(producer, ast.Constant)
+            and isinstance(producer.value, str)
+            and isinstance(consumer, ast.Constant)
+            and isinstance(consumer.value, str)
+        ):
+            return ()
+        pairs.append((producer.value, consumer.value))
+    return tuple(pairs)
+
+
+def _independent_required_closure(
+    component_or_template_ref: str,
+    dependency_pairs: tuple[tuple[str, str], ...],
+) -> tuple[str, ...]:
+    required = {component_or_template_ref}
+    changed = True
+    while changed:
+        changed = False
+        for producer, consumer in dependency_pairs:
+            if consumer in required and producer not in required:
+                required.add(producer)
+                changed = True
+    return tuple(
+        identity
+        for identity in OWNER_V18_EVIDENCE_IDENTITIES
+        if identity in required
+    )
+
+
+def _jsonl_rows(path: Path) -> tuple[dict[str, object], ...]:
+    rows: list[dict[str, object]] = []
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        value = json.loads(line)
+        if not isinstance(value, dict):
+            raise TypeError(f"{path} contains a non-object row")
+        rows.append(value)
+    return tuple(rows)
+
+
+def _independent_real_review_truths() -> tuple[
+    dict[str, object],
+    str,
+    str,
+    dict[str, object],
+    dict[str, object],
+]:
+    policy_rows = _jsonl_rows(AGENT_CAPABILITY_ARTIFACTS / "policy.jsonl")
+    mapped = tuple(
+        sorted(
+            (
+                row
+                for row in policy_rows
+                if row.get("row_type") == "IDENTITY_COMPATIBILITY"
+                and row.get("current_principal_refs")
+                and row.get("current_role_refs")
+                and row.get("current_duty_refs")
+                and row.get("intersection_scope")
+            ),
+            key=lambda row: str(row.get("source_agent_id") or ""),
+        )
+    )
+    peer_pairs = tuple(
+        (str(principal), str(duty))
+        for row in mapped
+        for principal in tuple(row["current_principal_refs"])
+        for duty in tuple(row["current_duty_refs"])
+    )
+    selected_identity: tuple[dict[str, object], str, str] | None = None
+    for reviewer in mapped:
+        reviewer_principal = str(
+            tuple(reviewer["current_principal_refs"])[0]
+        )
+        for peer_principal, peer_duty in peer_pairs:
+            if (
+                peer_principal != reviewer_principal
+                and peer_pairs.count((peer_principal, peer_duty)) == 1
+            ):
+                selected_identity = (
+                    reviewer,
+                    peer_principal,
+                    peer_duty,
+                )
+                break
+        if selected_identity is not None:
+            break
+    if selected_identity is None:
+        raise ValueError("no exact distinct mapped reviewer/peer pair")
+
+    manifest = json.loads(
+        (AGENT_ORCH_ARTIFACTS / "manifest.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    if not isinstance(manifest, dict):
+        raise TypeError("Agent-Orch manifest is not an object")
+    tasks = _jsonl_rows(AGENT_ORCH_ARTIFACTS / "task_env.jsonl")
+    receipts = _jsonl_rows(
+        AGENT_ORCH_ARTIFACTS / "decision_receipts.jsonl"
+    )
+    receipt_by_candidate = {
+        str(row.get("candidate_id") or ""): row for row in receipts
+    }
+    selected_task_receipt: tuple[
+        dict[str, object], dict[str, object]
+    ] | None = None
+    for task in sorted(tasks, key=lambda row: str(row.get("task_id") or "")):
+        receipt = receipt_by_candidate.get(
+            str(task.get("candidate_id") or "")
+        )
+        if receipt is not None:
+            selected_task_receipt = (task, receipt)
+            break
+    if selected_task_receipt is None:
+        raise ValueError("no task owns a pre-existing Agent-Orch receipt")
+
+    reviewer, peer_principal, peer_duty = selected_identity
+    task, receipt = selected_task_receipt
+    required_receipt_fields = {
+        "object_type": "AgentDecisionReceiptV1",
+        "object_version": manifest.get("manifest_version"),
+        "control_plane_only": True,
+        "fake_receipt_created": False,
+        "live_execution_created": False,
+        "order_submission_created": False,
+        "runtime_side_effect_allowed": False,
+        "source_truth_created": False,
+    }
+    receipt_ref = str(receipt.get("row_id") or "")
+    exact_peer_rows = tuple(
+        row
+        for row in mapped
+        if peer_principal in tuple(row["current_principal_refs"])
+        and peer_duty in tuple(row["current_duty_refs"])
+    )
+    if (
+        not receipt_ref
+        or task.get("candidate_id") != receipt.get("candidate_id")
+        or any(
+            receipt.get(name) != value
+            for name, value in required_receipt_fields.items()
+        )
+        or len(exact_peer_rows) != 1
+        or peer_principal
+        == str(tuple(reviewer["current_principal_refs"])[0])
+    ):
+        raise ValueError(
+            "mapped reviewer/peer or frozen Agent-Orch row is not exact"
+        )
+    return reviewer, peer_principal, peer_duty, task, receipt
+
+
 def _parse_bundle_transition_registry(
     tree: ast.Module,
 ) -> tuple[tuple[str, str, str], ...]:
@@ -1033,6 +1325,7 @@ def validate_runtime_topology_source(
 
 def main() -> int:
     failures: list[str] = []
+    real_review_truths_reconstructed = False
     parsed: dict[str, ast.Module] = {}
     for path in sorted(PACKAGE.glob("*.py"), key=lambda item: item.name):
         tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
@@ -1134,6 +1427,174 @@ def main() -> int:
             or "last_committed_receipt_refs" in evidence_text
         ):
             failures.append("shared mutable last-result state remains")
+        if (
+            _class_fields(evidence, "IndependentReviewAuthorityRequestV1")
+            != OWNER_V18_REVIEW_REQUEST_FIELDS
+            or not _class_is_frozen_slots_dataclass(
+                evidence,
+                "IndependentReviewAuthorityRequestV1",
+            )
+        ):
+            failures.append(
+                "v1.8 private review authority request differs from its exact frozen 13-field contract"
+            )
+        review_positional, review_keyword = _method_arguments(
+            evidence,
+            "IndependentEvidenceReviewV1",
+            "review_ready_bundle",
+        )
+        if review_positional != ("self", "review") or review_keyword != (
+            "principal_id",
+            "capability_bundle_id",
+            "context",
+            "component_or_template_ref",
+            "traceparent",
+            "tracestate",
+        ):
+            failures.append(
+                "independent review still exposes caller authority or differs from the private request seam"
+            )
+        review_init_positional, review_init_keyword = _method_arguments(
+            evidence,
+            "IndependentEvidenceReviewV1",
+            "__init__",
+        )
+        if review_init_positional != (
+            "self",
+            "cohort_resolver",
+            "persistence_adapter",
+            "authority_resolver",
+        ) or review_init_keyword:
+            failures.append(
+                "independent review constructor does not receive the exact authority resolver protocol"
+            )
+        for forbidden in (
+            "AgentOrchDecisionReceiptReaderProtocolV1",
+            "list_decision_receipts",
+            "peer_receipt_role_keys",
+        ):
+            if forbidden in evidence_text:
+                failures.append(
+                    f"superseded synthetic review seam remains: {forbidden}"
+                )
+        for required in (
+            "IndependentReviewAuthorityResolverProtocolV1",
+            ".admit_operation(",
+            ".resolve_preexisting_agent_orch_decision_receipt(",
+            "FROZEN_DEPENDENCY_RELATIONSHIPS::",
+            "TRANSITIVE_UPSTREAM_CLOSURE",
+            "_required_evidence_identity_closure_v1",
+            "expected_executed_identity_ids",
+            "expected_static_identity_ids",
+        ):
+            if required not in evidence_text:
+                failures.append(f"v1.8 evidence closure is absent: {required}")
+
+    protocols = parsed.get("protocols.py")
+    if protocols is None or _class_method_names(
+        protocols,
+        "IndependentReviewAuthorityResolverProtocolV1",
+    ) != (
+        "admit_operation",
+        "resolve_preexisting_agent_orch_decision_receipt",
+    ):
+        failures.append("v1.8 review authority resolver protocol differs")
+    agent_policy = parsed.get("agent_policy.py")
+    if agent_policy is None:
+        failures.append("agent capability resolver source is absent")
+    else:
+        resolver_methods = _class_method_names(
+            agent_policy,
+            "AgentCapabilityResolverV1",
+        )
+        agent_policy_text = (PACKAGE / "agent_policy.py").read_text(
+            encoding="utf-8"
+        )
+        if "resolve_preexisting_agent_orch_decision_receipt" not in resolver_methods:
+            failures.append("real AgentCapabilityResolverV1 receipt lookup is absent")
+        for required in (
+            '"object_type": "AgentDecisionReceiptV1"',
+            '"control_plane_only": True',
+            '"fake_receipt_created": False',
+            '"live_execution_created": False',
+            '"order_submission_created": False',
+            '"runtime_side_effect_allowed": False',
+            '"source_truth_created": False',
+            "mapped_peer_bindings",
+            "type(request).__module__",
+            "qku_computation_control_plane.evidence",
+        ):
+            if required not in agent_policy_text:
+                failures.append(
+                    f"real Agent-Orch no-effect receipt validation is absent: {required}"
+                )
+        if "peer_receipt_role_keys" in agent_policy_text:
+            failures.append("peer SOD still depends on raw receipt role fields")
+
+    try:
+        (
+            reviewer_truth,
+            peer_principal_truth,
+            peer_duty_truth,
+            task_truth,
+            receipt_truth,
+        ) = _independent_real_review_truths()
+    except (OSError, TypeError, ValueError, json.JSONDecodeError) as exc:
+        failures.append(
+            "independent real-owner review reconstruction failed: "
+            f"{type(exc).__name__}: {exc}"
+        )
+    else:
+        real_review_truths_reconstructed = all(
+            (
+                bool(reviewer_truth.get("source_agent_id")),
+                bool(peer_principal_truth),
+                bool(peer_duty_truth),
+                bool(task_truth.get("task_id")),
+                bool(receipt_truth.get("row_id")),
+            )
+        )
+        if not real_review_truths_reconstructed:
+            failures.append("independent real-owner review truths are incomplete")
+
+    dependency_graph = parsed.get("dependency_graph.py")
+    dependency_pairs = (
+        ()
+        if dependency_graph is None
+        else _parse_frozen_dependency_pairs(dependency_graph)
+    )
+    if len(dependency_pairs) != 6:
+        failures.append("frozen dependency relationship reconstruction failed")
+    else:
+        reconstructed_partitions = {
+            component: (
+                38
+                + len(
+                    set(OWNER_V18_STATIC_IDS)
+                    & set(
+                        _independent_required_closure(
+                            component,
+                            dependency_pairs,
+                        )
+                    )
+                ),
+                10
+                - len(
+                    set(OWNER_V18_STATIC_IDS)
+                    & set(
+                        _independent_required_closure(
+                            component,
+                            dependency_pairs,
+                        )
+                    )
+                ),
+            )
+            for component in OWNER_V18_CANONICAL_PARTITIONS
+        }
+        if reconstructed_partitions != OWNER_V18_CANONICAL_PARTITIONS:
+            failures.append(
+                "independent frozen dependency closure does not reconstruct MATH-01/MATH-02/MATH-05 partitions"
+            )
 
     grouped_test_path = (
         REPO_ROOT
@@ -1156,6 +1617,41 @@ def main() -> int:
             or ast.literal_eval(case_roster) != OWNER_CONCURRENCY_CASE_IDS_V1
         ):
             failures.append("grouped concurrency case roster differs from v1.7")
+        v18_roster = _assignment(grouped_tree, "_V18_INTEGRATION_CASES")
+        if (
+            v18_roster is None
+            or ast.literal_eval(v18_roster) != OWNER_V18_INTEGRATION_CASES
+        ):
+            failures.append("grouped v1.8 integration matrix differs from 16 exact rows")
+        physical_pytest_functions = tuple(
+            node
+            for node in grouped_tree.body
+            if isinstance(node, ast.FunctionDef)
+            and node.name.startswith("test_")
+        )
+        if len(physical_pytest_functions) != 5:
+            failures.append("v1.8 added or removed a physical pytest function")
+        grouped_text = grouped_test_path.read_text(encoding="utf-8")
+        for forbidden in (
+            "class _AgentOrchRowsV1",
+            "def _review_authority(",
+            "list_decision_receipts",
+        ):
+            if forbidden in grouped_text:
+                failures.append(
+                    f"grouped tests retain synthetic review authority: {forbidden}"
+                )
+        for required in (
+            "AgentCapabilityPolicyStoreV1.from_generated",
+            "AgentCapabilityResolverV1(",
+            "snapshot.identity_map.bindings.values()",
+            "snapshot.agent_orch_receipt_rows",
+            "snapshot.agent_orch_receipt_refs_by_candidate_id",
+        ):
+            if required not in grouped_text:
+                failures.append(
+                    f"grouped tests do not certify real owner authority: {required}"
+                )
         threading_imports = tuple(
             node
             for node in grouped_tree.body
@@ -1183,6 +1679,21 @@ def main() -> int:
             for node in ast.walk(grouped_tree)
         ):
             failures.append("grouped concurrency tests use sleep as proof")
+    builder_text = (
+        REPO_ROOT / "tools" / "build_qku_computation_control_plane.py"
+    ).read_text(encoding="utf-8")
+    for required in (
+        '"metric_durable_values_consumed_and_validated": "38/38"',
+        '"metric_values_produced_by_st12f": 0',
+        "PREEXISTING_UPSTREAM_DEPENDENCY_HELD_OUTSIDE_",
+        '"generated_projection_is_empirical_evidence": False',
+        '"runtime_fixture_is_empirical_evidence": False',
+        "39_EXECUTED_PLUS_9_STATIC_NOT_APPLICABLE",
+    ):
+        if required not in builder_text:
+            failures.append(f"durable evidence projection boundary is absent: {required}")
+    if "create_generic_durable_computation_receipt" in builder_text:
+        failures.append("ST12-F builder creates a forbidden generic computation producer")
     allowed_transitions, prohibited_transitions, transition_failures = (
         _validate_complete_bundle_transition_matrix()
     )
@@ -1271,7 +1782,12 @@ def main() -> int:
         f"executable_op14_checks={len(executable_checks)} "
         f"bundle_fields={len(OWNER_BUNDLE_FIELDS_V1)} "
         f"lifecycle_transitions={allowed_transitions} "
-        f"prohibited_transition_rejections={prohibited_transitions}"
+        f"prohibited_transition_rejections={prohibited_transitions} "
+        f"v18_integration_rows={len(OWNER_V18_INTEGRATION_CASES)} "
+        f"real_review_truths_reconstructed={int(real_review_truths_reconstructed)} "
+        "canonical_math01_partition=39+9 "
+        "metric_durable_values_consumed_and_validated=38/38 "
+        "metric_values_produced_by_st12f=0"
     )
     return 0
 

@@ -6,12 +6,22 @@ from collections.abc import Callable, Mapping
 from dataclasses import dataclass, fields, replace
 from datetime import UTC, datetime, timedelta
 from decimal import Decimal
+from functools import lru_cache
 import json
+from pathlib import Path
 from threading import Barrier, Thread
 
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.agent_policy import (
+    EXPLICIT_ABSENCE,
+    NO_EFFECT_PROFILE_REF,
     AgentCapabilityDecisionStateV1,
     AgentCapabilityDecisionV1,
+    AgentBoundaryStateViewV1,
+    AgentCapabilityBundleV1,
+    AgentCapabilityPolicySnapshotV1,
+    AgentCapabilityPolicyStoreV1,
+    AgentCapabilityResolverV1,
+    AgentSafetyStateV1,
     POLICY_VERSION,
 )
 
@@ -1013,8 +1023,11 @@ def _metric_spine(
         completed_at=recorded_at,
         latency_ns=0,
         output_unit=output_unit,
-        output_basis=ST12F_METRIC_OUTPUT_BASIS_BY_MATH_ID_V1[math_spec_id],
-        accounting_class="ST12F_TEST_EVIDENCE",
+        output_basis=ST12F_METRIC_OUTPUT_BASIS_BY_MATH_ID_V1.get(
+            math_spec_id,
+            "preexisting_component_output_value",
+        ),
+        accounting_class="ST12F_CONSUMER_HARNESS_PREEXISTING_NOT_EMPIRICAL",
         fallback_used=False,
         warning_codes=(),
         failure_code=failure_code,
@@ -1025,8 +1038,8 @@ def _metric_spine(
         record_id=record_ref,
         record_type=EconomicRecordTypeV1.DURABLE_COMPUTATION_RECEIPT,
         schema_version="QTT_DURABLE_COMPUTATION_RECEIPT_SPINE_V1",
-        semantic_owner="ComputationEvidenceServiceV1",
-        implementation_owner="ComputationEvidenceServiceV1",
+        semantic_owner="PreexistingUpstreamComputationProducerTestFixtureV1",
+        implementation_owner="PreexistingUpstreamComputationProducerTestFixtureV1",
         context_ref=harness.context.context_id,
         effective_at=recorded_at,
         recorded_at=recorded_at,
@@ -1146,11 +1159,12 @@ def _prepare_complete_custody(
     generic_refs: dict[str, str] = {}
     spines: list[EconomicReceiptEventSpineV1] = []
     receipt_time = _NOW + timedelta(seconds=time_offset)
+    required_nonmetric_ids = {"MATH-01"}
     for binding in ST12F_EVIDENCE_OUTPUT_BINDINGS_V1:
-        if binding.static_not_applicable_allowed or binding.math_spec_id in {
-            "MATH-50",
-            "MATH-51",
-        }:
+        if (
+            binding.static_not_applicable_allowed
+            and binding.math_spec_id not in required_nonmetric_ids
+        ) or binding.math_spec_id in {"MATH-50", "MATH-51"}:
             continue
         ref = f"ST12F-DURABLE::{identity}::{binding.math_spec_id}"
         generic_refs[binding.math_spec_id] = ref
@@ -1205,7 +1219,7 @@ def _prepare_complete_custody(
         "MATH-34",
         "MATH-35",
         "MATH-36",
-    }
+    } - required_nonmetric_ids
     for math_spec_id in ST12F_EVIDENCE_IDENTITIES_V1:
         if math_spec_id in static_ids:
             proof = StaticEvidenceApplicabilityProofV1.for_scope(
@@ -1479,6 +1493,62 @@ def _closed_projections(
     return reference, handoff
 
 
+@lru_cache(maxsize=1)
+def _review_policy_store() -> AgentCapabilityPolicyStoreV1:
+    return AgentCapabilityPolicyStoreV1.from_generated(
+        Path(__file__).resolve().parents[4]
+    )
+
+
+def _review_identity_fixture(
+    snapshot: AgentCapabilityPolicySnapshotV1,
+) -> tuple[object, str, str]:
+    mapped = tuple(
+        sorted(
+            (
+                binding
+                for binding in snapshot.identity_map.bindings.values()
+                if binding.current_principal_refs
+                and binding.current_role_refs
+                and binding.current_duty_refs
+                and binding.intersection_scope
+            ),
+            key=lambda binding: binding.source_agent_id,
+        )
+    )
+    peer_pairs = tuple(
+        (principal, duty)
+        for binding in mapped
+        for principal in binding.current_principal_refs
+        for duty in binding.current_duty_refs
+    )
+    for reviewer in mapped:
+        reviewer_principal = reviewer.current_principal_refs[0]
+        for peer_principal, peer_duty in peer_pairs:
+            if (
+                peer_principal != reviewer_principal
+                and peer_pairs.count((peer_principal, peer_duty)) == 1
+            ):
+                return reviewer, peer_principal, peer_duty
+    raise AssertionError("real Agent-Orch snapshot lacks distinct mapped review peers")
+
+
+def _review_task_and_receipt(
+    snapshot: AgentCapabilityPolicySnapshotV1,
+) -> tuple[Mapping[str, object], str]:
+    for task_id in sorted(snapshot.agent_orch_task_rows):
+        task = snapshot.agent_orch_task_rows[task_id]
+        receipt_ref = snapshot.agent_orch_receipt_refs_by_candidate_id.get(
+            str(task.get("candidate_id") or "")
+        )
+        if (
+            isinstance(receipt_ref, str)
+            and receipt_ref in snapshot.agent_orch_receipt_rows
+        ):
+            return task, receipt_ref
+    raise AssertionError("real Agent-Orch snapshot lacks a frozen decision receipt")
+
+
 def _review_record(
     *,
     identity: str,
@@ -1488,6 +1558,9 @@ def _review_record(
     input_lock_id: str,
     reviewed_at: datetime,
 ) -> IndependentReviewRecordV1:
+    snapshot = _review_policy_store().snapshot
+    reviewer, _, _ = _review_identity_fixture(snapshot)
+    _, receipt_ref = _review_task_and_receipt(snapshot)
     return IndependentReviewRecordV1(
         review_id=f"REVIEW::{identity}",
         schema_version="QTT_ST12F_INDEPENDENT_REVIEW_RECORD_V1_4",
@@ -1496,9 +1569,9 @@ def _review_record(
         evidence_id=evidence_id,
         evidence_bundle_version=candidate_version,
         input_lock_id=input_lock_id,
-        reviewer_identity="REVIEWER::INDEPENDENT",
+        reviewer_identity=reviewer.current_principal_refs[0],
         bundle_producer_identity="ComputationEvidenceServiceV1",
-        authority_receipt_ref=f"AGENT-ORCH::REVIEW::{identity}",
+        authority_receipt_ref=receipt_ref,
         reviewed_source_epoch_refs=("SOURCE::1=EPOCH::1",),
         decision=IndependentReviewDecisionV1.VALIDATED,
         blocker_codes=(),
@@ -1507,98 +1580,165 @@ def _review_record(
     )
 
 
-def _review_authority(
+def _review_authority_resolver(
     review: IndependentReviewRecordV1,
+    context: ComputationContextKeyV1,
     *,
-    context_ref: str,
-) -> AgentCapabilityDecisionV1:
-    return AgentCapabilityDecisionV1(
-        decision_id=f"DECISION::{review.review_id}",
-        request_id=f"REQUEST::{review.review_id}",
-        task_id=f"TASK::{review.review_id}",
-        principal_id="PRINCIPAL::RUNTIME",
-        current_agent_id=review.reviewer_identity,
-        source_agent_refs=("AGENT_RT_11",),
-        operation_id="build_evidence_bundle",
-        policy_version=POLICY_VERSION,
-        decision_state=(
-            AgentCapabilityDecisionStateV1.ELIGIBLE_FOR_NO_EFFECT_QKU_REQUEST
-        ),
-        reason_codes=(),
-        scope_refs=(
-            "INDEPENDENT_REVIEW_ONLY",
-            f"context_ref={context_ref}",
-            f"input_lock_id={review.input_lock_id}",
-            "component_or_template_ref=MATH-01",
-        ),
-        idempotency_key=f"IDEMPOTENCY::{review.review_id}",
-        retry_disposition="NO_RETRY_AUTHORITY",
-        peer_sod_disposition="PEER_CHALLENGE_AND_SOD_ENFORCED",
-        safety_state_disposition="NON_MATERIAL_LOCAL_NO_EFFECT",
-        terminal_route="INDEPENDENT_REVIEW_ONLY",
-        agent_orch_receipt_ref=review.authority_receipt_ref,
-        st12c_causation_correlation_refs=(
-            f"CAUSE::{review.review_id}",
-            f"CORRELATION::{review.review_id}",
-        ),
-        evidence_refs=(review.prior_bundle_ref,),
-        alternative_route_refs=("OWNER_REVIEW",),
-        disagreement_state="NONE_DECLARED",
-        confidence_state="EXACT_PREEXISTING_AUTHORITY",
-        limitation_codes=("NO_RUNTIME_EFFECT",),
+    envelope_overrides: Mapping[str, object] | None = None,
+    policy_snapshot: AgentCapabilityPolicySnapshotV1 | None = None,
+) -> tuple[AgentCapabilityResolverV1, str]:
+    store = (
+        _review_policy_store()
+        if policy_snapshot is None
+        else AgentCapabilityPolicyStoreV1(policy_snapshot)
     )
-
-
-class _AgentOrchRowsV1:
-    def __init__(
-        self,
-        authority: AgentCapabilityDecisionV1,
-        *,
-        context_ref: str,
-    ) -> None:
-        self._rows = (
-            {
-                "projection_ref": authority.agent_orch_receipt_ref,
-                "task_id": authority.task_id,
-                "principal_id": authority.principal_id,
-                "current_agent_id": authority.current_agent_id,
-                "operation_id": authority.operation_id,
-                "context_ref": context_ref,
-                "control_plane_only": True,
-                "runtime_side_effect_allowed": False,
-            },
-        )
-
-    def list_decision_receipts(self) -> tuple[dict[str, object], ...]:
-        return self._rows
+    snapshot = store.snapshot
+    reviewer, peer_principal, peer_duty = _review_identity_fixture(snapshot)
+    task, receipt_ref = _review_task_and_receipt(snapshot)
+    request_identity = (
+        f"ST12F-INDEPENDENT-REVIEW-AUTHORITY::{review.review_id}"
+    )
+    envelope: dict[str, object] = {
+        "principal_id": review.reviewer_identity,
+        "current_agent_id": review.reviewer_identity,
+        "certified_source_agent_ids": (reviewer.source_agent_id,),
+        "role_ref": reviewer.current_role_refs[0],
+        "duty_ref": reviewer.current_duty_refs[0],
+        "task_id": str(task["task_id"]),
+        "operation_id": "build_evidence_bundle",
+        "objective_ref": "OBJECTIVE::INDEPENDENT_EVIDENCE_REVIEW_NO_EFFECT",
+        "prohibited_objective_refs": (
+            "SOURCE_TRUTH",
+            "MODE_ACTIVATION",
+            "ORDER_RELEASE",
+        ),
+        "qku_scope_refs": ("QKU::ST12F::INDEPENDENT_REVIEW",),
+        "formula_scope_refs": ("MATH-01",),
+        "data_scope_refs": ("PREEXISTING_DURABLE_EVIDENCE_ONLY",),
+        "tool_scope_refs": ("QKUComputationControlPlaneV1",),
+        "action_scope_refs": (snapshot.owner_action_ids[0],),
+        "context_ref": context.context_id,
+        "market_scope": "prediction_market",
+        "venue_scope": "NO_PROVIDER_ACCESS",
+        "candidate_scope_ref": f"TradePlanCandidateV1::{review.review_id}",
+        "portfolio_scope_ref_or_none": EXPLICIT_ABSENCE,
+        "mode_eligibility_ref_without_activation": EXPLICIT_ABSENCE,
+        "snapshot_version_requirements": (snapshot.registry_version,),
+        "policy_version": POLICY_VERSION,
+        "registry_version": snapshot.registry_version,
+        "implementation_version_requirements": (
+            "MATH-01::OWNER_RECERTIFIED_REVIEW_SCOPE",
+        ),
+        "deadline": "2099-01-01T00:00:00+00:00",
+        "latency_class": "NO_EFFECT_OFFLINE",
+        "idempotency_key": request_identity,
+        "retry_policy_ref": str(task["retry_policy_ref_or_gap"]),
+        "money_budget": 0,
+        "compute_budget": 1,
+        "token_budget": 0,
+        "tool_call_budget": 0,
+        "external_call_budget": 0,
+        "peer_challenge_requirement": True,
+        "peer_challenge_satisfied": True,
+        "peer_challenge_principal_id": peer_principal,
+        "peer_challenge_duty_ref": peer_duty,
+        "peer_challenge_receipt_ref": receipt_ref,
+        "peer_reasoning_chain_ref": f"PEER-REASONING::{review.review_id}",
+        "segregation_of_duties_requirement": True,
+        "self_review_requested": False,
+        "abstention_route": "ABSTAIN_AND_OWNER_REVIEW",
+        "quarantine_route": "AGENT_ORCH1_QUARANTINE_ROUTE",
+        "owner_escalation_route": "OWNER_REVIEW_REQUIRED",
+        "no_effect_profile_ref": NO_EFFECT_PROFILE_REF,
+    }
+    if envelope_overrides:
+        envelope.update(envelope_overrides)
+    bundle_id = f"ST12F-REVIEW-CAPABILITY::{review.review_id}"
+    bundle = AgentCapabilityBundleV1(
+        bundle_id=bundle_id,
+        principal_id=review.reviewer_identity,
+        current_agent_id=review.reviewer_identity,
+        certified_source_agent_ids=(reviewer.source_agent_id,),
+        role_ref=reviewer.current_role_refs[0],
+        duty_ref=reviewer.current_duty_refs[0],
+        permission_scope=tuple(reviewer.intersection_scope),
+        task_envelope=envelope,
+        boundary_state=AgentBoundaryStateViewV1(
+            state=AgentSafetyStateV1.GREEN,
+            state_ref="ST12D_SAFETY_STATE::READ_ONLY_REVIEW_FIXTURE",
+            observed_at="2026-01-01T00:00:00+00:00",
+            valid_until="2099-01-01T00:00:00+00:00",
+        ),
+    )
+    return AgentCapabilityResolverV1(store, {bundle_id: bundle}), bundle_id
 
 
 def _persist_review(
     custody: _CompleteCustodyV1,
     review: IndependentReviewRecordV1,
 ) -> tuple[str, AgentCapabilityDecisionV1]:
-    authority = _review_authority(
-        review,
-        context_ref=custody.harness.context.context_id,
+    resolver, bundle_id = _review_authority_resolver(
+        review, custody.harness.context
     )
     producer = IndependentEvidenceReviewV1(
         custody.harness.compiler,
         custody.harness.persistence,
-        _AgentOrchRowsV1(
-            authority,
-            context_ref=custody.harness.context.context_id,
-        ),
+        resolver,
     )
     spine = producer.review_ready_bundle(
         review,
-        authority,
-        principal_id=authority.principal_id,
-        context_ref=custody.harness.context.context_id,
+        principal_id=review.reviewer_identity,
+        capability_bundle_id=bundle_id,
+        context=custody.harness.context,
         component_or_template_ref="MATH-01",
         traceparent=_TRACEPARENT,
         tracestate="qtt=runtime",
     )
+    authority = resolver.last_decision
+    assert type(authority) is AgentCapabilityDecisionV1
     return spine.record_id, authority
+
+
+def _v18_static_partition(component_or_template_ref: str) -> tuple[int, int]:
+    static_count = 0
+    applicable_nonmetric_count = 0
+    for binding in ST12F_EVIDENCE_OUTPUT_BINDINGS_V1:
+        if not binding.static_not_applicable_allowed:
+            continue
+        try:
+            StaticEvidenceApplicabilityProofV1.for_scope(
+                math_spec_id=binding.math_spec_id,
+                component_or_template_ref=component_or_template_ref,
+                input_lock_id="LOCK::V18-PARTITION",
+            )
+        except ContractValidationError as exc:
+            assert (
+                exc.reason_code
+                is ReasonCode.ST12F_EVIDENCE_IDENTITY_INVALID
+            )
+            applicable_nonmetric_count += 1
+        else:
+            static_count += 1
+    return 38 + applicable_nonmetric_count, static_count
+
+
+def _v18_static_rejection_after_valid_baseline(
+    *,
+    math_spec_id: str,
+    valid_component_ref: str,
+    invalid_component_ref: str,
+) -> StaticEvidenceApplicabilityProofV1:
+    baseline = StaticEvidenceApplicabilityProofV1.for_scope(
+        math_spec_id=math_spec_id,
+        component_or_template_ref=valid_component_ref,
+        input_lock_id="LOCK::V18-STATIC-BASELINE",
+    )
+    assert baseline.math_spec_id == math_spec_id
+    return StaticEvidenceApplicabilityProofV1.for_scope(
+        math_spec_id=math_spec_id,
+        component_or_template_ref=invalid_component_ref,
+        input_lock_id="LOCK::V18-STATIC-BASELINE",
+    )
 
 
 def _closed_candidate(
@@ -1865,6 +2005,25 @@ _CONCURRENCY_CASE_IDS_V1_7 = (
     "STALE-5",
     "SUPERSEDED",
     "CACHE",
+)
+
+_V18_INTEGRATION_CASES = (
+    ("V18-TEST::01", "REAL_OWNER_REVIEW_POSITIVE"),
+    ("V18-TEST::02", "CALLER_DECISION_REJECT"),
+    ("V18-TEST::03", "SYNTHETIC_AGENT_ORCH_ROW_REJECT"),
+    ("V18-TEST::04", "AGENT_ORCH_ROW_ID_MISMATCH_REJECT"),
+    ("V18-TEST::05", "PEER_SOD_REQUIRED"),
+    ("V18-TEST::06", "SELF_REVIEW_REJECT"),
+    ("V18-TEST::07", "REVIEW_SCOPE_MISMATCH_REJECT"),
+    ("V18-TEST::08", "STATIC_SELF_COMPONENT_REJECT"),
+    ("V18-TEST::09", "STATIC_DIRECT_DEPENDENCY_REJECT"),
+    ("V18-TEST::10", "STATIC_SECOND_DIRECT_DEPENDENCY_REJECT"),
+    ("V18-TEST::11", "STATIC_UNRELATED_ALLOW"),
+    ("V18-TEST::12", "PARTITION_MATH01"),
+    ("V18-TEST::13", "PARTITION_MATH02"),
+    ("V18-TEST::14", "PARTITION_MATH05"),
+    ("V18-TEST::15", "FIXED_PARTITION_REJECT"),
+    ("V18-TEST::16", "DURABLE_PRODUCER_BOUNDARY"),
 )
 
 
@@ -2276,34 +2435,337 @@ def test_complete_durable_bundle_lifecycle_receipts_and_d_resolution() -> None:
         input_lock_id=ready.input_lock_id,
         reviewed_at=_NOW + timedelta(seconds=11),
     )
-    authority_probe = _review_authority(
+    authority_resolver, authority_bundle_id = _review_authority_resolver(
         review_probe,
-        context_ref=harness.context.context_id,
+        harness.context,
     )
     producer_probe = IndependentEvidenceReviewV1(
         harness.compiler,
         harness.persistence,
-        _AgentOrchRowsV1(
-            authority_probe,
-            context_ref=harness.context.context_id,
-        ),
+        authority_resolver,
     )
-    _assert_reason(
-        lambda: producer_probe.review_ready_bundle(
+
+    missing_peer_resolver, missing_peer_bundle_id = (
+        _review_authority_resolver(
             review_probe,
-            replace(
-                authority_probe,
-                current_agent_id="ComputationEvidenceServiceV1",
-            ),
-            principal_id=authority_probe.principal_id,
-            context_ref=harness.context.context_id,
+            harness.context,
+            envelope_overrides={"peer_challenge_satisfied": False},
+        )
+    )
+    missing_peer_producer = IndependentEvidenceReviewV1(
+        harness.compiler,
+        harness.persistence,
+        missing_peer_resolver,
+    )
+    scope_resolver, scope_bundle_id = _review_authority_resolver(
+        review_probe,
+        harness.context,
+    )
+    scope_producer = IndependentEvidenceReviewV1(
+        harness.compiler,
+        harness.persistence,
+        scope_resolver,
+    )
+    snapshot = _review_policy_store().snapshot
+    _, real_receipt_ref = _review_task_and_receipt(snapshot)
+    real_receipt_row = dict(
+        snapshot.agent_orch_receipt_rows[real_receipt_ref]
+    )
+    mismatched_rows = dict(snapshot.agent_orch_receipt_rows)
+    mismatched_rows[real_receipt_ref] = {
+        **real_receipt_row,
+        "row_id": f"{real_receipt_ref}::MISMATCH",
+    }
+    mismatched_snapshot = replace(
+        snapshot,
+        agent_orch_receipt_rows=mismatched_rows,
+    )
+    mismatched_resolver, _ = _review_authority_resolver(
+        review_probe,
+        harness.context,
+        policy_snapshot=mismatched_snapshot,
+    )
+    effect_rows = dict(snapshot.agent_orch_receipt_rows)
+    effect_rows[real_receipt_ref] = {
+        **real_receipt_row,
+        "runtime_side_effect_allowed": True,
+    }
+    effect_snapshot = replace(
+        snapshot,
+        agent_orch_receipt_rows=effect_rows,
+    )
+    effect_resolver, _ = _review_authority_resolver(
+        review_probe,
+        harness.context,
+        policy_snapshot=effect_snapshot,
+    )
+
+    def caller_decision_rejected() -> object:
+        authority = authority_resolver.last_decision
+        assert type(authority) is AgentCapabilityDecisionV1
+        return producer_probe.review_ready_bundle(  # type: ignore[call-arg]
+            review_probe,
+            authority,
+            principal_id=review_probe.reviewer_identity,
+            capability_bundle_id=authority_bundle_id,
+            context=harness.context,
             component_or_template_ref="MATH-01",
             traceparent=_TRACEPARENT,
             tracestate="qtt=runtime",
+        )
+
+    def synthetic_and_effect_bearing_rows_rejected() -> object:
+        _assert_reason(
+            lambda: effect_resolver.resolve_preexisting_agent_orch_decision_receipt(
+                real_receipt_ref
+            ),
+            ReasonCode.SEGREGATION_OF_DUTIES_VIOLATION,
+            AuthorityDeniedError,
+        )
+        return IndependentEvidenceReviewV1(
+            harness.compiler,
+            harness.persistence,
+            object(),  # type: ignore[arg-type]
+        )
+
+    def durable_boundary_observation() -> tuple[str, int, str]:
+        before = harness.persistence.reconstruct_as_of(
+            effective_cutoff=ready_request.requested_at,
+            recorded_cutoff=ready_request.requested_at,
+            aggregate_scope=(),
+        )
+        lock = harness.compiler.resolve_input_lock(
+            ready.input_lock_id,
+            decision_cutoff=ready_request.requested_at,
+        )
+        admission = harness.service._admit_bundle_evidence(
+            request=ready_request,
+            candidate=ready,
+            lock=lock,
+            replay=custody.replay,
+            paper=custody.paper,
+        )
+        after = harness.persistence.reconstruct_as_of(
+            effective_cutoff=ready_request.requested_at,
+            recorded_cutoff=ready_request.requested_at,
+            aggregate_scope=(),
+        )
+        metric_math_ids = {
+            binding.math_spec_id
+            for binding in ST12F_EVIDENCE_OUTPUT_BINDINGS_V1
+            if binding.metric_id != "EXPLICIT_ABSENCE"
+        }
+        metric_refs = tuple(
+            row.evidence_record_refs[0]
+            for section_name in _SECTION_FIELDS
+            for row in getattr(ready, section_name).identity_dispositions
+            if row.evidence_identity in metric_math_ids
+            and row.disposition
+            is EvidenceIdentityDispositionStateV1.APPLICABLE_EXECUTED_AND_RECEIPTED
+        )
+        assert len(admission.component_versions) == 39
+        assert len(metric_refs) == len(set(metric_refs)) == 38
+        assert set(metric_refs) <= {
+            row.record_id
+            for row in before
+            if type(row) is EconomicReceiptEventSpineV1
+        }
+        return (
+            "38/38",
+            len(after) - len(before),
+            (
+                "PREEXISTING_UPSTREAM_DEPENDENCY_HELD_OUTSIDE_"
+                "ST12F_EXECUTION_AUTHORITY"
+            ),
+        )
+
+    def fixed_partition_rejected() -> tuple[object, ...]:
+        assert _v18_static_partition("MATH-01") == (39, 9)
+        return tuple(
+            StaticEvidenceApplicabilityProofV1.for_scope(
+                math_spec_id=binding.math_spec_id,
+                component_or_template_ref="MATH-01",
+                input_lock_id="LOCK::V18-FIXED-PARTITION",
+            )
+            for binding in ST12F_EVIDENCE_OUTPUT_BINDINGS_V1
+            if binding.static_not_applicable_allowed
+        )
+
+    cases: tuple[
+        tuple[
+            str,
+            Callable[[], object],
+            object,
+            type[BaseException] | None,
+            ReasonCode | None,
+        ],
+        ...,
+    ] = (
+        (
+            "V18-TEST::01",
+            lambda: type(
+                producer_probe.review_ready_bundle(
+                    review_probe,
+                    principal_id=review_probe.reviewer_identity,
+                    capability_bundle_id=authority_bundle_id,
+                    context=harness.context,
+                    component_or_template_ref="MATH-01",
+                    traceparent=_TRACEPARENT,
+                    tracestate="qtt=runtime",
+                )
+            )
+            is EconomicReceiptEventSpineV1,
+            True,
+            None,
+            None,
         ),
-        ReasonCode.SEGREGATION_OF_DUTIES_VIOLATION,
-        AuthorityDeniedError,
+        ("V18-TEST::02", caller_decision_rejected, None, TypeError, None),
+        (
+            "V18-TEST::03",
+            synthetic_and_effect_bearing_rows_rejected,
+            None,
+            AuthorityDeniedError,
+            ReasonCode.SEGREGATION_OF_DUTIES_VIOLATION,
+        ),
+        (
+            "V18-TEST::04",
+            lambda: mismatched_resolver.resolve_preexisting_agent_orch_decision_receipt(
+                real_receipt_ref
+            ),
+            None,
+            AuthorityDeniedError,
+            ReasonCode.SEGREGATION_OF_DUTIES_VIOLATION,
+        ),
+        (
+            "V18-TEST::05",
+            lambda: missing_peer_producer.review_ready_bundle(
+                review_probe,
+                principal_id=review_probe.reviewer_identity,
+                capability_bundle_id=missing_peer_bundle_id,
+                context=harness.context,
+                component_or_template_ref="MATH-01",
+                traceparent=_TRACEPARENT,
+                tracestate="qtt=runtime",
+            ),
+            None,
+            AuthorityDeniedError,
+            ReasonCode.SEGREGATION_OF_DUTIES_VIOLATION,
+        ),
+        (
+            "V18-TEST::06",
+            lambda: replace(
+                review_probe,
+                reviewer_identity=review_probe.bundle_producer_identity,
+            ),
+            None,
+            ContractValidationError,
+            ReasonCode.ST12F_SELF_REVIEW_FORBIDDEN,
+        ),
+        (
+            "V18-TEST::07",
+            lambda: scope_producer.review_ready_bundle(
+                review_probe,
+                principal_id=review_probe.reviewer_identity,
+                capability_bundle_id=scope_bundle_id,
+                context=harness.context,
+                component_or_template_ref="MATH-02",
+                traceparent=_TRACEPARENT,
+                tracestate="qtt=runtime",
+            ),
+            None,
+            AuthorityDeniedError,
+            ReasonCode.SEGREGATION_OF_DUTIES_VIOLATION,
+        ),
+        (
+            "V18-TEST::08",
+            lambda: _v18_static_rejection_after_valid_baseline(
+                math_spec_id="MATH-01",
+                valid_component_ref="MATH-05",
+                invalid_component_ref="MATH-01",
+            ),
+            None,
+            ContractValidationError,
+            ReasonCode.ST12F_EVIDENCE_IDENTITY_INVALID,
+        ),
+        (
+            "V18-TEST::09",
+            lambda: _v18_static_rejection_after_valid_baseline(
+                math_spec_id="MATH-03",
+                valid_component_ref="MATH-01",
+                invalid_component_ref="MATH-05",
+            ),
+            None,
+            ContractValidationError,
+            ReasonCode.ST12F_EVIDENCE_IDENTITY_INVALID,
+        ),
+        (
+            "V18-TEST::10",
+            lambda: _v18_static_rejection_after_valid_baseline(
+                math_spec_id="MATH-04",
+                valid_component_ref="MATH-01",
+                invalid_component_ref="MATH-05",
+            ),
+            None,
+            ContractValidationError,
+            ReasonCode.ST12F_EVIDENCE_IDENTITY_INVALID,
+        ),
+        (
+            "V18-TEST::11",
+            lambda: type(
+                StaticEvidenceApplicabilityProofV1.for_scope(
+                    math_spec_id="MATH-01",
+                    component_or_template_ref="MATH-05",
+                    input_lock_id="LOCK::V18-UNRELATED",
+                )
+            )
+            is StaticEvidenceApplicabilityProofV1,
+            True,
+            None,
+            None,
+        ),
+        ("V18-TEST::12", lambda: _v18_static_partition("MATH-01"), (39, 9), None, None),
+        ("V18-TEST::13", lambda: _v18_static_partition("MATH-02"), (40, 8), None, None),
+        ("V18-TEST::14", lambda: _v18_static_partition("MATH-05"), (41, 7), None, None),
+        (
+            "V18-TEST::15",
+            fixed_partition_rejected,
+            None,
+            ContractValidationError,
+            ReasonCode.ST12F_EVIDENCE_IDENTITY_INVALID,
+        ),
+        (
+            "V18-TEST::16",
+            durable_boundary_observation,
+            (
+                "38/38",
+                0,
+                (
+                    "PREEXISTING_UPSTREAM_DEPENDENCY_HELD_OUTSIDE_"
+                    "ST12F_EXECUTION_AUTHORITY"
+                ),
+            ),
+            None,
+            None,
+        ),
     )
+    assert tuple(row[0] for row in cases) == tuple(
+        row[0] for row in _V18_INTEGRATION_CASES
+    )
+    observed_v18: set[str] = set()
+    for case_id, action, expected, exception_type, reason_code in cases:
+        if exception_type is None:
+            assert action() == expected
+        else:
+            try:
+                action()
+            except exception_type as exc:
+                if reason_code is not None:
+                    assert getattr(exc, "reason_code", None) is reason_code
+            else:
+                raise AssertionError(f"{case_id} accepted its one-invariant mutation")
+        observed_v18.add(case_id)
+    assert observed_v18 == {row[0] for row in _V18_INTEGRATION_CASES}
+
     _assert_reason(
         lambda: replace(
             review_probe,
@@ -2501,7 +2963,7 @@ def test_complete_durable_bundle_lifecycle_receipts_and_d_resolution() -> None:
         replay=custody.replay,
         paper=custody.paper,
     )
-    assert len(admission.component_versions) == 38
+    assert len(admission.component_versions) == 39
     all_dispositions = tuple(
         row
         for section_name in _SECTION_FIELDS
@@ -2512,12 +2974,12 @@ def test_complete_durable_bundle_lifecycle_receipts_and_d_resolution() -> None:
         row.disposition
         is EvidenceIdentityDispositionStateV1.APPLICABLE_EXECUTED_AND_RECEIPTED
         for row in all_dispositions
-    ) == 38
+    ) == 39
     assert sum(
         row.disposition
         is EvidenceIdentityDispositionStateV1.NOT_APPLICABLE_WITH_PROOF
         for row in all_dispositions
-    ) == 10
+    ) == 9
     metric_ids = {
         f"MATH-{number:02d}"
         for number in (*range(8, 34), *range(37, 46))

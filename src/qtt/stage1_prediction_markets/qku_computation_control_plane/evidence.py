@@ -15,6 +15,7 @@ from .agent_policy import (
     AgentCapabilityDecisionV1,
 )
 from .context import ComputationContextKeyV1, exact_decimal, parse_utc
+from .dependency_graph import FROZEN_DEPENDENCY_RELATIONSHIPS
 from .errors import (
     AuthorityDeniedError,
     ContractValidationError,
@@ -49,6 +50,7 @@ from .models import (
 )
 from .parameter_policy import initialize_st12f_parameter_registry_v1
 from .persistence import PersistenceAdapterV1, PersistenceAvailabilityV1
+from .protocols import IndependentReviewAuthorityResolverProtocolV1
 from .quantum_benchmark import (
     QuantumClassicalNoTradeComparisonV1,
     QuantumTraceValidationReceiptV1,
@@ -92,6 +94,29 @@ ST12F_STATIC_NOT_APPLICABLE_MATH_IDS_V1 = (
 )
 
 
+def _required_evidence_identity_closure_v1(
+    component_or_template_ref: str,
+) -> tuple[str, ...]:
+    """Return the selected component's exact ordered transitive upstream closure."""
+
+    required = {component_or_template_ref}
+    changed = True
+    while changed:
+        changed = False
+        for relationship in FROZEN_DEPENDENCY_RELATIONSHIPS.values():
+            if (
+                relationship.consumer_math_spec_id in required
+                and relationship.producer_math_spec_id not in required
+            ):
+                required.add(relationship.producer_math_spec_id)
+                changed = True
+    return tuple(
+        identity
+        for identity in ST12F_EVIDENCE_IDENTITIES_V1
+        if identity in required
+    )
+
+
 @dataclass(frozen=True, slots=True)
 class StaticEvidenceApplicabilityProofV1:
     """Deterministic proof that one non-metric math identity is out of scope."""
@@ -122,8 +147,12 @@ class StaticEvidenceApplicabilityProofV1:
             f"{self.math_spec_id}::{self.component_or_template_ref}::"
             f"{self.input_lock_id}"
         )
+        required_closure = _required_evidence_identity_closure_v1(
+            self.component_or_template_ref
+        )
         if (
             self.math_spec_id not in ST12F_STATIC_NOT_APPLICABLE_MATH_IDS_V1
+            or self.math_spec_id in required_closure
             or self.proof_id != expected_id
             or not (
                 self.math_spec_id in CURRENT_FORMULA_REQUIREMENTS
@@ -138,12 +167,16 @@ class StaticEvidenceApplicabilityProofV1:
             or self.implementation_registry_ref
             != f"CURRENT_IMPLEMENTATION_REGISTRY::{self.math_spec_id}"
             or self.dependency_graph_ref
-            != f"CompiledDependencyGraphV1::{self.component_or_template_ref}"
+            != (
+                "FROZEN_DEPENDENCY_RELATIONSHIPS::"
+                f"{self.component_or_template_ref}::"
+                "TRANSITIVE_UPSTREAM_CLOSURE"
+            )
             or self.reason != "NOT_REQUIRED_BY_COMPONENT_DEPENDENCY_GRAPH"
         ):
             raise ContractValidationError(
                 ReasonCode.ST12F_EVIDENCE_IDENTITY_INVALID,
-                "static applicability proof differs from the exact allowlist",
+                "static applicability proof differs from the dependency-closed allowlist",
             )
 
     @classmethod
@@ -169,7 +202,8 @@ class StaticEvidenceApplicabilityProofV1:
                 f"CURRENT_IMPLEMENTATION_REGISTRY::{math_spec_id}"
             ),
             dependency_graph_ref=(
-                f"CompiledDependencyGraphV1::{component_or_template_ref}"
+                "FROZEN_DEPENDENCY_RELATIONSHIPS::"
+                f"{component_or_template_ref}::TRANSITIVE_UPSTREAM_CLOSURE"
             ),
             reason="NOT_REQUIRED_BY_COMPONENT_DEPENDENCY_GRAPH",
         )
@@ -1445,8 +1479,70 @@ def _source_epoch_refs(lock: ImmutableReplayPaperInputLockV1) -> tuple[str, ...]
     return tuple(f"{key}={lock.source_epochs[key]}" for key in sorted(lock.source_epochs))
 
 
-class AgentOrchDecisionReceiptReaderProtocolV1(Protocol):
-    def list_decision_receipts(self) -> tuple[dict[str, object], ...]: ...
+@dataclass(frozen=True, slots=True)
+class IndependentReviewAuthorityRequestV1:
+    """Private no-effect request created only by the segregated review producer."""
+
+    request_id: str
+    requested_at: datetime
+    principal_id: str
+    capability_bundle_id: str
+    context: ComputationContextKeyV1
+    idempotency_key: str
+    traceparent: str
+    tracestate: str
+    prior_bundle_ref: str
+    input_lock_id: str
+    component_or_template_ref: str
+    reviewer_identity: str
+    bundle_producer_identity: str
+
+    def __post_init__(self) -> None:
+        for name in (
+            "request_id",
+            "principal_id",
+            "capability_bundle_id",
+            "idempotency_key",
+            "traceparent",
+            "prior_bundle_ref",
+            "input_lock_id",
+            "component_or_template_ref",
+            "reviewer_identity",
+            "bundle_producer_identity",
+        ):
+            _text(getattr(self, name), name)
+        if not isinstance(self.tracestate, str):
+            raise ContractValidationError(
+                ReasonCode.CONTRACT_OR_TYPE_INVALID,
+                "tracestate must be text",
+            )
+        if type(self.context) is not ComputationContextKeyV1:
+            raise ContractValidationError(
+                ReasonCode.CONTRACT_OR_TYPE_INVALID,
+                "private review authority requires one exact context",
+            )
+        if self.reviewer_identity == self.bundle_producer_identity:
+            raise AuthorityDeniedError(
+                ReasonCode.SEGREGATION_OF_DUTIES_VIOLATION,
+                "private review authority cannot authorize self-review",
+            )
+        object.__setattr__(
+            self,
+            "requested_at",
+            parse_utc(self.requested_at, field_name="requested_at"),
+        )
+
+    @property
+    def operation_name(self) -> str:
+        return "build_evidence_bundle"
+
+    @property
+    def component_ids(self) -> tuple[str, ...]:
+        return (self.component_or_template_ref,)
+
+    @property
+    def parameter_ids(self) -> tuple[str, ...]:
+        return ()
 
 
 class IndependentEvidenceReviewV1:
@@ -1456,7 +1552,7 @@ class IndependentEvidenceReviewV1:
         self,
         cohort_resolver: CohortCompilationResolverProtocolV1,
         persistence_adapter: PersistenceAdapterV1,
-        agent_orch_service: AgentOrchDecisionReceiptReaderProtocolV1,
+        authority_resolver: IndependentReviewAuthorityResolverProtocolV1,
     ) -> None:
         if (
             not isinstance(persistence_adapter, PersistenceAdapterV1)
@@ -1472,24 +1568,25 @@ class IndependentEvidenceReviewV1:
                 ReasonCode.INPUT_OWNER_MISMATCH,
                 "independent review requires the canonical input-lock resolver",
             )
-        if not callable(
-            getattr(agent_orch_service, "list_decision_receipts", None)
+        if not isinstance(
+            authority_resolver,
+            IndependentReviewAuthorityResolverProtocolV1,
         ):
             raise AuthorityDeniedError(
                 ReasonCode.SEGREGATION_OF_DUTIES_VIOLATION,
-                "independent review requires the Agent-Orch receipt reader",
+                "independent review requires the exact authority resolver protocol",
             )
         self._cohort_resolver = cohort_resolver
         self._persistence = persistence_adapter
-        self._agent_orch_service = agent_orch_service
+        self._authority_resolver = authority_resolver
 
     def review_ready_bundle(
         self,
         review: IndependentReviewRecordV1,
-        authority_decision: AgentCapabilityDecisionV1,
         *,
         principal_id: str,
-        context_ref: str,
+        capability_bundle_id: str,
+        context: ComputationContextKeyV1,
         component_or_template_ref: str,
         traceparent: str,
         tracestate: str,
@@ -1501,16 +1598,46 @@ class IndependentEvidenceReviewV1:
             )
         for name, value in (
             ("principal_id", principal_id),
-            ("context_ref", context_ref),
+            ("capability_bundle_id", capability_bundle_id),
             ("component_or_template_ref", component_or_template_ref),
             ("traceparent", traceparent),
         ):
             _text(value, name)
+        if type(context) is not ComputationContextKeyV1:
+            raise ContractValidationError(
+                ReasonCode.CONTRACT_OR_TYPE_INVALID,
+                "review producer requires one exact context",
+            )
         if not isinstance(tracestate, str):
             raise ContractValidationError(
                 ReasonCode.CONTRACT_OR_TYPE_INVALID,
                 "tracestate must be text",
             )
+        context_ref = context.context_id
+        authority_request = IndependentReviewAuthorityRequestV1(
+            request_id=(
+                "ST12F-INDEPENDENT-REVIEW-AUTHORITY::"
+                f"{review.review_id}"
+            ),
+            requested_at=review.reviewed_at,
+            principal_id=principal_id,
+            capability_bundle_id=capability_bundle_id,
+            context=context,
+            idempotency_key=(
+                "ST12F-INDEPENDENT-REVIEW-AUTHORITY::"
+                f"{review.review_id}"
+            ),
+            traceparent=traceparent,
+            tracestate=tracestate,
+            prior_bundle_ref=review.prior_bundle_ref,
+            input_lock_id=review.input_lock_id,
+            component_or_template_ref=component_or_template_ref,
+            reviewer_identity=review.reviewer_identity,
+            bundle_producer_identity=review.bundle_producer_identity,
+        )
+        authority_decision = self._authority_resolver.admit_operation(
+            authority_request
+        )
         authority_valid = (
             type(authority_decision) is AgentCapabilityDecisionV1
             and authority_decision.authorizes_independent_review(
@@ -1522,25 +1649,38 @@ class IndependentEvidenceReviewV1:
                 component_or_template_ref=component_or_template_ref,
             )
         )
-        rows = self._agent_orch_service.list_decision_receipts()
-        matching_rows = tuple(
-            row
-            for row in rows
-            if isinstance(row, Mapping)
-            and row.get("projection_ref")
-            == authority_decision.agent_orch_receipt_ref
-            and row.get("task_id") == authority_decision.task_id
-            and row.get("principal_id") == principal_id
-            and row.get("current_agent_id") == review.reviewer_identity
-            and row.get("operation_id") == "build_evidence_bundle"
-            and row.get("context_ref") == context_ref
-            and row.get("control_plane_only") is True
-            and row.get("runtime_side_effect_allowed") is False
-        ) if type(authority_decision) is AgentCapabilityDecisionV1 else ()
-        if not authority_valid or len(matching_rows) != 1:
+        if not authority_valid:
             raise AuthorityDeniedError(
                 ReasonCode.SEGREGATION_OF_DUTIES_VIOLATION,
-                "review authority does not match one pre-existing Agent-Orch receipt",
+                "review authority does not match the private no-effect request",
+            )
+        authority_row = (
+            self._authority_resolver
+            .resolve_preexisting_agent_orch_decision_receipt(
+                authority_decision.agent_orch_receipt_ref
+            )
+        )
+        required_row_fields = {
+            "object_type": "AgentDecisionReceiptV1",
+            "control_plane_only": True,
+            "fake_receipt_created": False,
+            "live_execution_created": False,
+            "order_submission_created": False,
+            "runtime_side_effect_allowed": False,
+            "source_truth_created": False,
+        }
+        if (
+            not isinstance(authority_row, Mapping)
+            or authority_row.get("row_id")
+            != authority_decision.agent_orch_receipt_ref
+            or any(
+                authority_row.get(name) != value
+                for name, value in required_row_fields.items()
+            )
+        ):
+            raise AuthorityDeniedError(
+                ReasonCode.SEGREGATION_OF_DUTIES_VIOLATION,
+                "review authority row is absent, mismatched, or effect-bearing",
             )
 
         cutoff = review.reviewed_at
@@ -3527,6 +3667,8 @@ class ComputationEvidenceServiceV1:
         static_refs: list[str] = []
         disposition_negative: list[str] = []
         actual_metric_ids: list[str] = []
+        executed_identity_ids: list[str] = []
+        static_identity_ids: list[str] = []
         for disposition in dispositions:
             math_spec_id = disposition.evidence_identity
             binding = _EVIDENCE_OUTPUT_BINDING_BY_MATH_ID_V1[math_spec_id]
@@ -3559,6 +3701,7 @@ class ComputationEvidenceServiceV1:
                         "static N/A reference does not reconstruct to the exact proof",
                     )
                 static_refs.append(proof.proof_id)
+                static_identity_ids.append(math_spec_id)
                 consumed.add(proof.proof_id)
                 continue
 
@@ -3599,6 +3742,7 @@ class ComputationEvidenceServiceV1:
                     math_refs.append(ref)
             component_versions[math_spec_id] = implementation
             component_receipt_refs[math_spec_id] = ref
+            executed_identity_ids.append(math_spec_id)
             consumed.add(ref)
             if binding.metric_id != "EXPLICIT_ABSENCE":
                 actual_metric_ids.append(binding.metric_id)
@@ -3613,6 +3757,21 @@ class ComputationEvidenceServiceV1:
         expected_metric_ids = tuple(
             row.metric_id for row in ST12F_EVIDENCE_METRIC_DEFINITIONS_V1
         )
+        required_closure = set(
+            _required_evidence_identity_closure_v1(
+                candidate.component_or_template_ref
+            )
+        )
+        expected_static_identity_ids = tuple(
+            identity
+            for identity in ST12F_STATIC_NOT_APPLICABLE_MATH_IDS_V1
+            if identity not in required_closure
+        )
+        expected_executed_identity_ids = tuple(
+            identity
+            for identity in ST12F_EVIDENCE_IDENTITIES_V1
+            if identity not in expected_static_identity_ids
+        )
         if (
             candidate.terminal_state in complete_states
             and tuple(actual_metric_ids) != expected_metric_ids
@@ -3620,6 +3779,15 @@ class ComputationEvidenceServiceV1:
             raise ContractValidationError(
                 ReasonCode.ST12F_EVIDENCE_INCOMPLETE,
                 "complete bundle lacks all 38 ordered actual metric values",
+            )
+        if candidate.terminal_state in complete_states and (
+            tuple(executed_identity_ids) != expected_executed_identity_ids
+            or tuple(static_identity_ids) != expected_static_identity_ids
+            or len(executed_identity_ids) + len(static_identity_ids) != 48
+        ):
+            raise ContractValidationError(
+                ReasonCode.ST12F_EVIDENCE_IDENTITY_INVALID,
+                "complete bundle partition differs from the selected component dependency closure",
             )
 
         divergence, divergence_ref = self._find_control_in_request(
