@@ -48,8 +48,13 @@ class _IndependentResolverV1:
         self.valid_until = valid_until or NOW + timedelta(minutes=1)
 
     def resolve_numeric_evidence(
-        self, *, numeric_fact_id: str, evidence_ref: str
+        self, *, numeric_fact_id: str, evidence_ref: str, evaluated_at: datetime
     ) -> CanonicalNumericEvidenceValueV1:
+        if evaluated_at != NOW:
+            raise ContractValidationError(
+                ReasonCode.ST12F_LLM_ANNOTATION_INVALID,
+                "numeric evidence cutoff differs",
+            )
         return CanonicalNumericEvidenceValueV1(
             numeric_fact_id=numeric_fact_id,
             evidence_ref=evidence_ref,
@@ -64,7 +69,9 @@ class _IndependentResolverV1:
             valid_until=self.valid_until,
         )
 
-    def receipt_exists(self, receipt_ref: str) -> bool:
+    def receipt_exists(self, receipt_ref: str, *, evaluated_at: datetime) -> bool:
+        if evaluated_at != NOW:
+            return False
         return self.receipts_exist and receipt_ref in {
             "ST12F-RECEIPT::D::1",
             "ST12F-RECEIPT::LLM-RECHECK::1",

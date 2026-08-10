@@ -2329,11 +2329,30 @@ def _validate_st12f_three_part_d_selection() -> int:
     class _SelectionProbeServiceV1(ComputationEvidenceServiceV1):
         def __init__(self) -> None:
             self.observed_current_identities: list[tuple[str, str, str]] = []
+            self.observed_cutoffs: list[
+                tuple[str, datetime, datetime]
+            ] = []
 
-        def _durable_receipt_spines(self) -> tuple[_ReceiptSpineProbeV1, ...]:
+        def _durable_receipt_spines(
+            self,
+            *,
+            effective_cutoff: datetime,
+            recorded_cutoff: datetime,
+        ) -> tuple[_ReceiptSpineProbeV1, ...]:
+            self.observed_cutoffs.append(
+                ("durable", effective_cutoff, recorded_cutoff)
+            )
             return tuple(spines)
 
-        def _validate_receipt_lock_metadata(self, spine: object) -> None:
+        def _validate_receipt_lock_metadata(
+            self,
+            spine: object,
+            *,
+            decision_cutoff: datetime,
+        ) -> None:
+            self.observed_cutoffs.append(
+                ("receipt", decision_cutoff, decision_cutoff)
+            )
             return None
 
         def _durable_current_bundle_ref(
@@ -2341,6 +2360,8 @@ def _validate_st12f_three_part_d_selection() -> int:
             requested_evidence_id: str,
             expected_input_lock_id: str,
             requested_component_or_template_ref: str,
+            *,
+            decision_cutoff: datetime,
         ) -> str | None:
             identity = (
                 requested_evidence_id,
@@ -2348,9 +2369,20 @@ def _validate_st12f_three_part_d_selection() -> int:
                 requested_component_or_template_ref,
             )
             self.observed_current_identities.append(identity)
+            self.observed_cutoffs.append(
+                ("current", decision_cutoff, decision_cutoff)
+            )
             return current_refs.get(identity)
 
-        def resolve_bundle(self, bundle_ref: str) -> _BundleProbeV1:
+        def resolve_bundle(
+            self,
+            bundle_ref: str,
+            *,
+            decision_cutoff: datetime,
+        ) -> _BundleProbeV1:
+            self.observed_cutoffs.append(
+                ("bundle", decision_cutoff, decision_cutoff)
+            )
             return bundles[bundle_ref]
 
     service = _SelectionProbeServiceV1()
@@ -2383,6 +2415,14 @@ def _validate_st12f_three_part_d_selection() -> int:
             for component, input_lock, _version in identities[:2]
         ),
         "D current-bundle selection did not use the exact three-part identity",
+    )
+    _require(
+        bool(service.observed_cutoffs)
+        and all(
+            effective == observed_at and recorded == observed_at
+            for _reader, effective, recorded in service.observed_cutoffs
+        ),
+        "D authoritative reads did not preserve one explicit bitemporal cutoff",
     )
     return selected
 

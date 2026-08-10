@@ -26,8 +26,10 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors impo
     ReasonCode,
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.evidence import (
+    BuiltEvidenceBundleOutcomeV1,
     ComputationEvidenceServiceV1,
     EvidenceBundleTerminalStateV1,
+    RegisteredLaneResultOutcomeV1,
     ReplayResultContractV1,
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.input_lock import (
@@ -139,6 +141,23 @@ OWNER_LIFECYCLE_TRANSITIONS_V1 = (
         "SUPERSEDED",
         "NEWER_VALIDATED_BUNDLE_VERSION_SAME_IDENTITY",
     ),
+)
+OWNER_CONCURRENCY_CASE_IDS_V1 = (
+    "OUTCOME-01",
+    "OUTCOME-02",
+    "OP14-IDENTICAL",
+    "OP14-COMPETING",
+    "OP15-ROOT-IDENTICAL",
+    "OP15-ROOT-COMPETING",
+    "OP15-SIBLING",
+    "BITEMPORAL",
+    "REVIEW",
+    "EVIDENCE-48",
+    "METRICS-38",
+    "TRUTH",
+    "STALE-5",
+    "SUPERSEDED",
+    "CACHE",
 )
 
 
@@ -617,7 +636,7 @@ def _st12f_executable_operation_checks() -> tuple[bool, ...]:
         run_reference="RUN::FIXTURE",
         fixture=True,
     )
-    fixture_result = service.register_result(
+    fixture_outcome = service.register_result(
         _st12f_register_request(compilation, context, identity="FIXTURE"),
         fixture,
     )
@@ -629,14 +648,14 @@ def _st12f_executable_operation_checks() -> tuple[bool, ...]:
         run_reference="RUN::COMMITTED",
         fixture_only_not_evidence=False,
     )
-    committed = service.register_result(
+    committed_outcome = service.register_result(
         _st12f_register_request(compilation, context, identity="COMMITTED"),
         committed_packet,
     )
-    receipt_refs = service.last_committed_receipt_refs
+    receipt_refs = committed_outcome.receipt_refs
     restarted = ComputationEvidenceServiceV1(compiler, adapter)
     counts_before_replay = _table_counts(adapter)
-    replayed = restarted.register_result(
+    replayed_outcome = restarted.register_result(
         _st12f_register_request(compilation, context, identity="REPLAYED"),
         committed_packet,
     )
@@ -658,21 +677,28 @@ def _st12f_executable_operation_checks() -> tuple[bool, ...]:
         _table_counts(failing_adapter) == counts_before_failure,
         tuple(len(index) for index in failing_service.immutable_indexes.values())
         == indexes_before_failure,
-        fixture_result is fixture,
+        type(fixture_outcome) is RegisteredLaneResultOutcomeV1,
+        fixture_outcome.registered_result is fixture,
+        fixture_outcome.receipt_refs == (),
         counts_after_fixture == counts_before_fixture,
         fixture_indexes == (0, 0, 0, 0, 0, 0, 0, 0),
-        committed == committed_packet and committed is not committed_packet,
+        type(committed_outcome) is RegisteredLaneResultOutcomeV1,
+        committed_outcome.registered_result == committed_packet
+        and committed_outcome.registered_result is not committed_packet,
         len(service.immutable_indexes["lane_results"]) == 1,
         len(service.immutable_indexes["slot_results"]) == 1,
         len(restarted.immutable_indexes["lane_results"]) == 1,
         len(restarted.immutable_indexes["slot_results"]) == 1,
-        replayed == committed and replayed is not committed_packet,
+        type(replayed_outcome) is RegisteredLaneResultOutcomeV1,
+        replayed_outcome == committed_outcome,
         _table_counts(adapter) == counts_before_replay,
         conflict_rejected,
         len(receipt_refs) == 1
         and receipt_refs[0]
         == "ST12F-RECEIPT::RESULT::COMMITTED::REPLAY_REGISTRATION",
         adapter.get_record(receipt_refs[0]) is not None,
+        not hasattr(service, "last_committed_receipt_refs")
+        and not hasattr(restarted, "last_committed_receipt_refs"),
     )
 
 
@@ -697,6 +723,62 @@ def _class_fields(tree: ast.Module, name: str) -> tuple[str, ...]:
                 and statement.target.id != "EXPECTED_OPERATION_NAME"
             )
     return ()
+
+
+def _class_is_frozen_slots_dataclass(tree: ast.Module, name: str) -> bool:
+    class_node = next(
+        (
+            node
+            for node in tree.body
+            if isinstance(node, ast.ClassDef) and node.name == name
+        ),
+        None,
+    )
+    if class_node is None:
+        return False
+    return any(
+        isinstance(decorator, ast.Call)
+        and isinstance(decorator.func, ast.Name)
+        and decorator.func.id == "dataclass"
+        and {
+            keyword.arg: keyword.value.value
+            for keyword in decorator.keywords
+            if keyword.arg in {"frozen", "slots"}
+            and isinstance(keyword.value, ast.Constant)
+        }
+        == {"frozen": True, "slots": True}
+        for decorator in class_node.decorator_list
+    )
+
+
+def _method_return_name(
+    tree: ast.Module,
+    class_name: str,
+    method_name: str,
+) -> str | None:
+    class_node = next(
+        (
+            node
+            for node in tree.body
+            if isinstance(node, ast.ClassDef) and node.name == class_name
+        ),
+        None,
+    )
+    if class_node is None:
+        return None
+    method = next(
+        (
+            node
+            for node in class_node.body
+            if isinstance(node, ast.FunctionDef) and node.name == method_name
+        ),
+        None,
+    )
+    return (
+        method.returns.id
+        if method is not None and isinstance(method.returns, ast.Name)
+        else None
+    )
 
 
 def _parse_bundle_transition_registry(
@@ -891,11 +973,18 @@ def _runtime_topology_failures(
         elif isinstance(node, ast.ImportFrom) and node.module:
             root = node.module.split(".", 1)[0]
             if root in FORBIDDEN_IMPORT_ROOTS:
-                if not (
+                parameter_policy_exception = (
                     file_name == "parameter_policy.py"
                     and node.module == "threading"
                     and {alias.name for alias in node.names} <= {"Condition", "Lock"}
-                ):
+                )
+                cache_publication_exception = (
+                    file_name == "evidence.py"
+                    and node.module == "threading"
+                    and tuple((alias.name, alias.asname) for alias in node.names)
+                    == (("Lock", None),)
+                )
+                if not parameter_policy_exception and not cache_publication_exception:
                     failures.append(f"runtime import {node.module}")
         elif isinstance(node, ast.Call):
             qualified_name = _qualified_callable_name(node.func)
@@ -1012,6 +1101,88 @@ def main() -> int:
             failures.append("bundle fields differ from the independent exact 30-field roster")
         if _parse_bundle_transition_registry(evidence) != OWNER_LIFECYCLE_TRANSITIONS_V1:
             failures.append("bundle transition registry differs from the independent exact six-transition roster")
+        outcome_fields = {
+            "RegisteredLaneResultOutcomeV1": (
+                "registered_result",
+                "receipt_refs",
+            ),
+            "BuiltEvidenceBundleOutcomeV1": (
+                "evidence_bundle",
+                "receipt_refs",
+            ),
+        }
+        for class_name, expected_fields in outcome_fields.items():
+            if _class_fields(evidence, class_name) != expected_fields:
+                failures.append(f"{class_name}: immutable outcome fields differ")
+            if not _class_is_frozen_slots_dataclass(evidence, class_name):
+                failures.append(f"{class_name}: frozen slots contract is absent")
+        if _method_return_name(
+            evidence,
+            "ComputationEvidenceServiceV1",
+            "register_result",
+        ) != "RegisteredLaneResultOutcomeV1":
+            failures.append("OP14 does not return its immutable atomic outcome")
+        if _method_return_name(
+            evidence,
+            "ComputationEvidenceServiceV1",
+            "build_bundle",
+        ) != "BuiltEvidenceBundleOutcomeV1":
+            failures.append("OP15 does not return its immutable atomic outcome")
+        evidence_text = (PACKAGE / "evidence.py").read_text(encoding="utf-8")
+        if (
+            "_last_committed_receipt_refs" in evidence_text
+            or "last_committed_receipt_refs" in evidence_text
+        ):
+            failures.append("shared mutable last-result state remains")
+
+    grouped_test_path = (
+        REPO_ROOT
+        / "tests"
+        / "stage1_prediction_markets"
+        / "qku_computation_control_plane"
+        / "tranche_f"
+        / "test_replay_paper_evidence_matrix.py"
+    )
+    if not grouped_test_path.is_file():
+        failures.append("grouped replay/PAPER evidence matrix is absent")
+    else:
+        grouped_tree = ast.parse(
+            grouped_test_path.read_text(encoding="utf-8"),
+            filename=str(grouped_test_path),
+        )
+        case_roster = _assignment(grouped_tree, "_CONCURRENCY_CASE_IDS_V1_7")
+        if (
+            case_roster is None
+            or ast.literal_eval(case_roster) != OWNER_CONCURRENCY_CASE_IDS_V1
+        ):
+            failures.append("grouped concurrency case roster differs from v1.7")
+        threading_imports = tuple(
+            node
+            for node in grouped_tree.body
+            if isinstance(node, ast.ImportFrom)
+            and node.module == "threading"
+        )
+        if (
+            len(threading_imports) != 1
+            or tuple(
+                (alias.name, alias.asname)
+                for alias in threading_imports[0].names
+            )
+            != (("Barrier", None), ("Thread", None))
+        ):
+            failures.append("grouped concurrency test threading import differs")
+        if any(
+            isinstance(node, ast.Call)
+            and (
+                (isinstance(node.func, ast.Name) and node.func.id == "sleep")
+                or (
+                    isinstance(node.func, ast.Attribute)
+                    and node.func.attr == "sleep"
+                )
+            )
+            for node in ast.walk(grouped_tree)
+        ):
+            failures.append("grouped concurrency tests use sleep as proof")
     allowed_transitions, prohibited_transitions, transition_failures = (
         _validate_complete_bundle_transition_matrix()
     )
@@ -1062,6 +1233,19 @@ def main() -> int:
             for node in ast.walk(service)
         ):
             failures.append("the central service catches an untyped broad exception")
+        service_text = (PACKAGE / "service.py").read_text(encoding="utf-8")
+        if "last_committed_receipt_refs" in service_text:
+            failures.append("public OP14/OP15 still read shared last-result state")
+        for required in (
+            "outcome = evidence_service.register_result(request)",
+            "outcome = evidence_service.build_bundle(request)",
+            "refs = outcome.receipt_refs",
+            "bundle = outcome.evidence_bundle",
+        ):
+            if required not in service_text:
+                failures.append(
+                    f"public atomic outcome consumer is absent: {required}"
+                )
     validation_text = (PACKAGE / "validation.py").read_text(encoding="utf-8")
     for required in (
         "ST12B_CENTRAL_SERVICE_OPERATION_IDS = tuple(OPERATION_SCHEMA_REGISTRY)[:12]",

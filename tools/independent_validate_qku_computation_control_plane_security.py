@@ -282,6 +282,9 @@ def main() -> int:
     certified_import_count = 0
     other_importlib_import_count = 0
     dynamic_import_call_count = 0
+    cache_lock_import_count = 0
+    cache_lock_assignment_count = 0
+    cache_lock_publication_count = 0
     for path in sorted(PACKAGE.glob("*.py")):
         tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
         if path.name == "authority.py":
@@ -295,6 +298,22 @@ def main() -> int:
                     other_importlib_import_count += 1
             elif isinstance(node, ast.ImportFrom) and node.module:
                 root = node.module.split(".", 1)[0]
+                if root == "threading":
+                    signature = tuple(
+                        (alias.name, alias.asname) for alias in node.names
+                    )
+                    if path.name == "evidence.py":
+                        if node.module == "threading" and signature == (("Lock", None),):
+                            cache_lock_import_count += 1
+                        else:
+                            failures.append(
+                                "evidence.py: cache publication import differs "
+                                "from exact threading.Lock authority"
+                            )
+                    elif path.name != "parameter_policy.py":
+                        failures.append(
+                            f"{path.name}: unauthorized production threading import"
+                        )
                 if root == "importlib" and _is_certified_parameter_resource_import(
                     path,
                     node,
@@ -328,6 +347,46 @@ def main() -> int:
                         node.func.attr,
                     ) == ("importlib", "import_module"):
                         dynamic_import_call_count += 1
+            if path.name == "evidence.py" and isinstance(node, ast.Assign):
+                if (
+                    len(node.targets) == 1
+                    and isinstance(node.targets[0], ast.Attribute)
+                    and isinstance(node.targets[0].value, ast.Name)
+                    and node.targets[0].value.id == "self"
+                    and node.targets[0].attr == "_cache_publication_lock"
+                    and isinstance(node.value, ast.Call)
+                    and isinstance(node.value.func, ast.Name)
+                    and node.value.func.id == "Lock"
+                    and not node.value.args
+                    and not node.value.keywords
+                ):
+                    cache_lock_assignment_count += 1
+            if path.name == "evidence.py" and isinstance(node, ast.With):
+                if (
+                    len(node.items) == 1
+                    and isinstance(node.items[0].context_expr, ast.Attribute)
+                    and isinstance(
+                        node.items[0].context_expr.value,
+                        ast.Name,
+                    )
+                    and node.items[0].context_expr.value.id == "self"
+                    and node.items[0].context_expr.attr
+                    == "_cache_publication_lock"
+                    and node.items[0].optional_vars is None
+                ):
+                    cache_lock_publication_count += 1
+    if cache_lock_import_count != 1:
+        failures.append(
+            "evidence.py does not contain exactly one certified Lock import"
+        )
+    if cache_lock_assignment_count != 1:
+        failures.append(
+            "evidence.py does not construct exactly one cache publication Lock"
+        )
+    if cache_lock_publication_count != 1:
+        failures.append(
+            "evidence.py does not use its Lock exactly once for cache publication"
+        )
     parameter_policy_tree = ast.parse(
         (PACKAGE / "parameter_policy.py").read_text(encoding="utf-8"),
         filename="parameter_policy.py",

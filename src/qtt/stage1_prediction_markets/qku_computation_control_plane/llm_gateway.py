@@ -212,9 +212,15 @@ class CanonicalNumericEvidenceResolverProtocolV1(Protocol):
         *,
         numeric_fact_id: str,
         evidence_ref: str,
+        evaluated_at: datetime,
     ) -> CanonicalNumericEvidenceValueV1: ...
 
-    def receipt_exists(self, receipt_ref: str) -> bool: ...
+    def receipt_exists(
+        self,
+        receipt_ref: str,
+        *,
+        evaluated_at: datetime,
+    ) -> bool: ...
 
 
 @dataclass(frozen=True, slots=True)
@@ -529,6 +535,7 @@ class GroundedLLMGatewayV1:
             resolved = self._evidence_resolver.resolve_numeric_evidence(
                 numeric_fact_id=fact.numeric_fact_id,
                 evidence_ref=fact.evidence_ref,
+                evaluated_at=evaluation_time,
             )
             if (
                 type(resolved) is not CanonicalNumericEvidenceValueV1
@@ -540,10 +547,12 @@ class GroundedLLMGatewayV1:
                 or resolved.value != fact.quoted_value
                 or not resolved.observed_at <= evaluation_time <= resolved.valid_until
                 or not self._evidence_resolver.receipt_exists(
-                    resolved.evidence_receipt_ref
+                    resolved.evidence_receipt_ref,
+                    evaluated_at=evaluation_time,
                 )
                 or not self._evidence_resolver.receipt_exists(
-                    resolved.numeric_recheck_receipt_ref
+                    resolved.numeric_recheck_receipt_ref,
+                    evaluated_at=evaluation_time,
                 )
             ):
                 raise ContractValidationError(

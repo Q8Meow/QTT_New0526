@@ -2295,8 +2295,9 @@ class _ST12FNumericResolver:
         self._value = _ST12FDecimal(value)
 
     def resolve_numeric_evidence(
-        self, *, numeric_fact_id: str, evidence_ref: str
+        self, *, numeric_fact_id: str, evidence_ref: str, evaluated_at: _ST12FDateTime
     ) -> _CanonicalNumericEvidenceValueV1:
+        assert evaluated_at == _ST12F_NOW
         return _CanonicalNumericEvidenceValueV1(
             numeric_fact_id=numeric_fact_id,
             evidence_ref=evidence_ref,
@@ -2311,7 +2312,10 @@ class _ST12FNumericResolver:
             valid_until=_ST12F_NOW + _ST12FTimedelta(minutes=1),
         )
 
-    def receipt_exists(self, receipt_ref: str) -> bool:
+    def receipt_exists(
+        self, receipt_ref: str, *, evaluated_at: _ST12FDateTime
+    ) -> bool:
+        assert evaluated_at == _ST12F_NOW
         return self._receipts_resolve and receipt_ref in {
             "ST12F-RECEIPT::EVIDENCE::D_EVIDENCE_REFERENCE",
             "ST12F-RECEIPT::NUMERIC-RECHECK::LLM_ANNOTATION_VALIDATION",

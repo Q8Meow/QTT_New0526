@@ -930,6 +930,34 @@ class AgentCapabilityDecisionV1:
             AgentCapabilityDecisionStateV1.ELIGIBLE_FOR_NO_EFFECT_QKU_REQUEST
         )
 
+    def authorizes_independent_review(
+        self,
+        *,
+        principal_id: str,
+        reviewer_identity: str,
+        authority_receipt_ref: str,
+        context_ref: str,
+        input_lock_id: str,
+        component_or_template_ref: str,
+    ) -> bool:
+        required_scope = {
+            "independent_review_only",
+            f"context_ref={context_ref}".casefold(),
+            f"input_lock_id={input_lock_id}".casefold(),
+            f"component_or_template_ref={component_or_template_ref}".casefold(),
+        }
+        actual_scope = {ref.casefold() for ref in self.scope_refs}
+        return (
+            self.eligible
+            and self.operation_id == "build_evidence_bundle"
+            and self.peer_sod_disposition
+            == "PEER_CHALLENGE_AND_SOD_ENFORCED"
+            and self.principal_id == principal_id
+            and self.current_agent_id == reviewer_identity
+            and self.agent_orch_receipt_ref == authority_receipt_ref
+            and required_scope <= actual_scope
+        )
+
 
 @dataclass(frozen=True, slots=True)
 class AgentCapabilityPolicySnapshotV1:

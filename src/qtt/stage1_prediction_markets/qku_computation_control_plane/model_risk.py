@@ -451,6 +451,69 @@ class ModelRiskEvidenceAssessmentV1:
     def canonical_json(self) -> str:
         return deterministic_json(self)
 
+    def assert_independent_review_join(
+        self,
+        *,
+        assessment_receipt_ref: str,
+        parent_ready_bundle_ref: str,
+        reviewed_parent_bundle_ref: str,
+        candidate_bundle_version: str,
+        reviewed_candidate_bundle_version: str,
+        review_receipt_ref: str,
+        reviewer_authority_receipt_ref: str,
+        input_lock_id: str,
+        component_or_template_ref: str,
+        source_epoch_refs: tuple[str, ...],
+        reviewed_source_epoch_refs: tuple[str, ...],
+        effective_cutoff: datetime,
+        recorded_cutoff: datetime,
+        review_recorded_at: datetime,
+    ) -> None:
+        effective = parse_utc(effective_cutoff, field_name="effective_cutoff")
+        recorded = parse_utc(recorded_cutoff, field_name="recorded_cutoff")
+        review_recorded = parse_utc(
+            review_recorded_at,
+            field_name="review_recorded_at",
+        )
+        expected_assessment_ref = (
+            f"ST12F-RECEIPT::{self.assessment_id}::MODEL_RISK_ASSESSMENT"
+        )
+        required_receipts = {
+            parent_ready_bundle_ref,
+            review_receipt_ref,
+            reviewer_authority_receipt_ref,
+        }
+        non_review_conditions = tuple(
+            row
+            for row in self.no_trade_condition_outcomes
+            if row.condition_id != "INDEPENDENT_REVIEW_NOT_CLOSED"
+        )
+        if (
+            assessment_receipt_ref != expected_assessment_ref
+            or parent_ready_bundle_ref != reviewed_parent_bundle_ref
+            or candidate_bundle_version != reviewed_candidate_bundle_version
+            or self.input_lock_id != input_lock_id
+            or self.adjudication_basis.expected_component_or_template_ref
+            != component_or_template_ref
+            or self.adjudication_basis.independent_review_receipt_ref
+            != review_receipt_ref
+            or self.adjudication_basis.independent_review_state
+            != "CLOSED_INDEPENDENTLY_VALIDATED"
+            or source_epoch_refs != reviewed_source_epoch_refs
+            or not required_receipts <= set(self.receipt_refs)
+            or effective != recorded
+            or review_recorded > recorded
+            or not self.adjudication_basis.evaluated_at
+            <= effective
+            <= self.adjudication_basis.required_evidence_valid_until
+            or len(non_review_conditions) != 7
+            or any(row.active for row in non_review_conditions)
+        ):
+            raise ContractValidationError(
+                ReasonCode.ST12F_MODEL_RISK_VETO,
+                "model-risk review closure differs from the exact assessment, parent, candidate, review, authority, lock, epoch, or cutoff join",
+            )
+
 
 class ModelRiskEvidenceAdjudicatorV1:
     def adjudicate(

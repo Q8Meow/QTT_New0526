@@ -1607,10 +1607,8 @@ class QKUComputationControlPlaneV1:
                 ReasonCode.INPUT_OWNER_MISSING,
                 "OP14 requires the injected canonical evidence service",
             )
-        registration = evidence_service.register_result(request)
-        refs = tuple(
-            getattr(evidence_service, "last_committed_receipt_refs", ())
-        )
+        outcome = evidence_service.register_result(request)
+        refs = outcome.receipt_refs
         result = ReplayPaperResultRegistrationV1(
             **_result_common(
                 request,
@@ -1639,10 +1637,9 @@ class QKUComputationControlPlaneV1:
                 ReasonCode.INPUT_OWNER_MISSING,
                 "OP15 requires the injected canonical evidence service",
             )
-        bundle = evidence_service.build_bundle(request)
-        refs = tuple(
-            getattr(evidence_service, "last_committed_receipt_refs", ())
-        )
+        outcome = evidence_service.build_bundle(request)
+        bundle = outcome.evidence_bundle
+        refs = outcome.receipt_refs
         result = EvidenceBundleResultV1(
             **_result_common(
                 request,

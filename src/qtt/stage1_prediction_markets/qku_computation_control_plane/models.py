@@ -3967,6 +3967,11 @@ class RegisterReplayPaperResultResponseV1(OperationResponseEnvelopeV1):
             ReplayPaperResultRegistrationV1,
             "registration",
         )
+        if self.receipt_refs != self.registration.evidence_refs:
+            raise ContractValidationError(
+                ReasonCode.SCHEMA_MISMATCH,
+                "OP14 response and result must carry the same ordered produced-receipt tuple",
+            )
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)
@@ -3981,6 +3986,11 @@ class BuildEvidenceBundleResponseV1(OperationResponseEnvelopeV1):
             EvidenceBundleResultV1,
             "evidence_bundle",
         )
+        if self.receipt_refs != self.evidence_bundle.evidence_refs:
+            raise ContractValidationError(
+                ReasonCode.SCHEMA_MISMATCH,
+                "OP15 response and result must carry the same ordered produced-receipt tuple",
+            )
 
 
 @dataclass(frozen=True, slots=True)

@@ -25,8 +25,10 @@ if TYPE_CHECKING:
     from .agent_policy import AgentCapabilityDecisionV1
     from .cohort_compiler import ReplayPaperCohortCompilationRecordV1
     from .evidence import (
+        BuiltEvidenceBundleOutcomeV1,
         ComputationEvidenceBundleV1,
         PaperResultContractV1,
+        RegisteredLaneResultOutcomeV1,
         ReplayResultContractV1,
     )
     from .mode_snapshot_policy import (
@@ -112,12 +114,12 @@ class ComputationEvidenceServiceProtocolV1(Protocol):
 
     def register_result(
         self, request: "RegisterReplayPaperResultRequestV1"
-    ) -> "ReplayResultContractV1 | PaperResultContractV1": ...
+    ) -> "RegisteredLaneResultOutcomeV1": ...
 
     def build_bundle(
         self,
         request: "BuildEvidenceBundleRequestV1",
-    ) -> "ComputationEvidenceBundleV1": ...
+    ) -> "BuiltEvidenceBundleOutcomeV1": ...
 
     def read_evidence_reference(
         self,

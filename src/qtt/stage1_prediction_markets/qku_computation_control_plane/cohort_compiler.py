@@ -194,10 +194,24 @@ class ReplayPaperCohortCompilerV1:
                 self._slots[(compilation.compilation_id, lane, contract_id)] = slot
 
     def _load_compilation_receipt(
-        self, compilation_id: str
+        self,
+        compilation_id: str,
+        *,
+        decision_cutoff: datetime,
     ) -> ReplayPaperCohortCompilationRecordV1:
         receipt_ref = f"ST12F-RECEIPT::{compilation_id}::COHORT_COMPILATION"
-        spine = self._persistence.get_record(receipt_ref)
+        cutoff = parse_utc(decision_cutoff, field_name="decision_cutoff")
+        matches = tuple(
+            row
+            for row in self._persistence.reconstruct_as_of(
+                effective_cutoff=cutoff,
+                recorded_cutoff=cutoff,
+                aggregate_scope=(),
+            )
+            if type(row) is EconomicReceiptEventSpineV1
+            and row.record_id == receipt_ref
+        )
+        spine = matches[0] if len(matches) == 1 else None
         if type(spine) is not EconomicReceiptEventSpineV1 or type(spine.typed_payload) is not ST12FEvidenceControlReceiptRecordV1:
             raise PersistenceContractError(
                 ReasonCode.OWNER_DATA_MISSING,
@@ -210,17 +224,27 @@ class ReplayPaperCohortCompilerV1:
         return compilation
 
     def resolve_compilation(
-        self, compilation_id: str
+        self,
+        compilation_id: str,
+        *,
+        decision_cutoff: datetime,
     ) -> ReplayPaperCohortCompilationRecordV1:
-        compilation = self._compilations.get(compilation_id)
-        return compilation if compilation is not None else self._load_compilation_receipt(compilation_id)
+        return self._load_compilation_receipt(
+            compilation_id,
+            decision_cutoff=decision_cutoff,
+        )
 
-    def resolve_input_lock(self, input_lock_id: str) -> ImmutableReplayPaperInputLockV1:
-        lock = self._locks.get(input_lock_id)
-        if lock is not None:
-            return lock
+    def resolve_input_lock(
+        self,
+        input_lock_id: str,
+        *,
+        decision_cutoff: datetime,
+    ) -> ImmutableReplayPaperInputLockV1:
         token = input_lock_id.removeprefix("ST12F-LOCK::")
-        compilation = self.resolve_compilation(f"ST12F-COMPILATION::{token}")
+        compilation = self.resolve_compilation(
+            f"ST12F-COMPILATION::{token}",
+            decision_cutoff=decision_cutoff,
+        )
         if compilation.input_lock_id != input_lock_id:
             raise ContractValidationError(
                 ReasonCode.ST12F_INPUT_LOCK_MISMATCH,
@@ -233,8 +257,13 @@ class ReplayPaperCohortCompilerV1:
         compilation_id: str,
         lane: str,
         expected_result_contract_id: str,
+        *,
+        decision_cutoff: datetime,
     ) -> ReplayPaperExpectedSlotV1:
-        self.resolve_compilation(compilation_id)
+        self.resolve_compilation(
+            compilation_id,
+            decision_cutoff=decision_cutoff,
+        )
         try:
             return self._slots[(compilation_id, lane, expected_result_contract_id)]
         except KeyError as exc:
@@ -343,7 +372,10 @@ class ReplayPaperCohortCompilerV1:
             acquisition = self._persistence.acquire_idempotency_claim(transaction, claim)
             if acquisition.outcome is IdempotencyOutcomeV1.REPLAYED_SAME_PAYLOAD:
                 transaction.rollback()
-                return self.resolve_compilation(compilation_id)
+                return self.resolve_compilation(
+                    compilation_id,
+                    decision_cutoff=request.requested_at,
+                )
             if acquisition.outcome is IdempotencyOutcomeV1.CONFLICT_DIFFERENT_PAYLOAD:
                 raise IdempotencyContractError(
                     ReasonCode.IDEMPOTENCY_CONFLICT,

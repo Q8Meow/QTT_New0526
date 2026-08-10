@@ -1294,6 +1294,9 @@ def _no_runtime_topology() -> bool:
     package = REPO_ROOT / Path(PRODUCTION_CORE_PATHS[0]).parent
     if forbidden_file_names & {path.name for path in package.glob("*.py")}:
         return False
+    cache_lock_import_count = 0
+    cache_lock_assignment_count = 0
+    cache_lock_publication_count = 0
     for path, tree in _package_ast():
         for node in ast.walk(tree):
             if isinstance(node, ast.Import) and any(
@@ -1306,13 +1309,54 @@ def _no_runtime_topology() -> bool:
                 and node.module
                 and node.module.split(".", 1)[0] in forbidden_modules
             ):
-                if not (
+                parameter_policy_exception = (
                     path.name == "parameter_policy.py"
                     and node.module == "threading"
                     and {alias.name for alias in node.names} <= {"Condition", "Lock"}
-                ):
+                )
+                cache_publication_exception = (
+                    path.name == "evidence.py"
+                    and node.module == "threading"
+                    and tuple((alias.name, alias.asname) for alias in node.names)
+                    == (("Lock", None),)
+                )
+                if cache_publication_exception:
+                    cache_lock_import_count += 1
+                if not parameter_policy_exception and not cache_publication_exception:
                     return False
-    return True
+            if path.name == "evidence.py" and isinstance(node, ast.Assign):
+                if (
+                    len(node.targets) == 1
+                    and isinstance(node.targets[0], ast.Attribute)
+                    and isinstance(node.targets[0].value, ast.Name)
+                    and node.targets[0].value.id == "self"
+                    and node.targets[0].attr == "_cache_publication_lock"
+                    and isinstance(node.value, ast.Call)
+                    and isinstance(node.value.func, ast.Name)
+                    and node.value.func.id == "Lock"
+                    and not node.value.args
+                    and not node.value.keywords
+                ):
+                    cache_lock_assignment_count += 1
+            if path.name == "evidence.py" and isinstance(node, ast.With):
+                if (
+                    len(node.items) == 1
+                    and isinstance(node.items[0].context_expr, ast.Attribute)
+                    and isinstance(
+                        node.items[0].context_expr.value,
+                        ast.Name,
+                    )
+                    and node.items[0].context_expr.value.id == "self"
+                    and node.items[0].context_expr.attr
+                    == "_cache_publication_lock"
+                    and node.items[0].optional_vars is None
+                ):
+                    cache_lock_publication_count += 1
+    return (
+        cache_lock_import_count == 1
+        and cache_lock_assignment_count == 1
+        and cache_lock_publication_count == 1
+    )
 
 
 def _no_dynamic_import_or_unsafe_deserialization() -> bool:
@@ -7393,9 +7437,14 @@ def _st12f_model_risk_executable_v1() -> bool:
 
 class _ST12FCentralNumericResolverV1:
     def resolve_numeric_evidence(
-        self, *, numeric_fact_id: str, evidence_ref: str
+        self, *, numeric_fact_id: str, evidence_ref: str, evaluated_at: datetime
     ) -> _ST12FCanonicalNumericValueV1:
         now = datetime(2026, 1, 1, 12, tzinfo=UTC)
+        if evaluated_at != now:
+            raise ContractValidationError(
+                ReasonCode.ST12F_LLM_ANNOTATION_INVALID,
+                "numeric evidence resolver requires the explicit evaluation cutoff",
+            )
         return _ST12FCanonicalNumericValueV1(
             numeric_fact_id=numeric_fact_id,
             evidence_ref=evidence_ref,
@@ -7411,7 +7460,9 @@ class _ST12FCentralNumericResolverV1:
         )
 
     @staticmethod
-    def receipt_exists(receipt_ref: str) -> bool:
+    def receipt_exists(receipt_ref: str, *, evaluated_at: datetime) -> bool:
+        if evaluated_at != datetime(2026, 1, 1, 12, tzinfo=UTC):
+            return False
         return receipt_ref in {
             "ST12F-RECEIPT::D::CENTRAL",
             "ST12F-RECEIPT::LLM::CENTRAL",
