@@ -1,0 +1,17 @@
+{"immutable_version_required":true,"lifecycle_state":"INCOMPLETE_MISSING_REPLAY","self_review_allowed":false}
+{"immutable_version_required":true,"lifecycle_state":"INCOMPLETE_MISSING_PAPER","self_review_allowed":false}
+{"immutable_version_required":true,"lifecycle_state":"INCOMPLETE_CONFLICT","self_review_allowed":false}
+{"immutable_version_required":true,"lifecycle_state":"READY_FOR_INDEPENDENT_REVIEW","self_review_allowed":false}
+{"immutable_version_required":true,"lifecycle_state":"INDEPENDENT_REVIEW_REJECTED","self_review_allowed":false}
+{"immutable_version_required":true,"lifecycle_state":"CLOSED_INDEPENDENTLY_VALIDATED","self_review_allowed":false}
+{"immutable_version_required":true,"lifecycle_state":"STALE","self_review_allowed":false}
+{"immutable_version_required":true,"lifecycle_state":"SUPERSEDED","self_review_allowed":false}
+{"immutable_version_required":true,"review_decision":"VALIDATED","self_review_allowed":false}
+{"immutable_version_required":true,"review_decision":"REJECTED","self_review_allowed":false}
+{"from":"INCOMPLETE_MISSING_REPLAY","guard":"BOTH_LANES_PRESENT_SAME_LOCK_ALL_REQUIRED_CONTROLS_COMPUTED","immutable_version_required":true,"self_review_allowed":false,"to":"READY_FOR_INDEPENDENT_REVIEW"}
+{"from":"INCOMPLETE_MISSING_PAPER","guard":"BOTH_LANES_PRESENT_SAME_LOCK_ALL_REQUIRED_CONTROLS_COMPUTED","immutable_version_required":true,"self_review_allowed":false,"to":"READY_FOR_INDEPENDENT_REVIEW"}
+{"from":"READY_FOR_INDEPENDENT_REVIEW","guard":"SEPARATE_REVIEW_RECEIPT_PASS_AND_ZERO_HARD_VETOES","immutable_version_required":true,"self_review_allowed":false,"to":"CLOSED_INDEPENDENTLY_VALIDATED"}
+{"from":"READY_FOR_INDEPENDENT_REVIEW","guard":"SEPARATE_REVIEW_RECEIPT_REJECT","immutable_version_required":true,"self_review_allowed":false,"to":"INDEPENDENT_REVIEW_REJECTED"}
+{"from":"CLOSED_INDEPENDENTLY_VALIDATED","guard":"TTL_SOURCE_EPOCH_PARAMETER_IMPLEMENTATION_OR_CONTEXT_CHANGE","immutable_version_required":true,"self_review_allowed":false,"to":"STALE"}
+{"from":"CLOSED_INDEPENDENTLY_VALIDATED","guard":"NEWER_VALIDATED_BUNDLE_VERSION_SAME_IDENTITY","immutable_version_required":true,"self_review_allowed":false,"to":"SUPERSEDED"}
+{"caller_supplied_capability_decision_allowed":false,"contract_type":"IndependentReviewAuthorityResolverProtocolV1","preexisting_receipt_lookup_key":"row_id","private_request_fields":["request_id","requested_at","principal_id","capability_bundle_id","context","idempotency_key","traceparent","tracestate","prior_bundle_ref","input_lock_id","component_or_template_ref","reviewer_identity","bundle_producer_identity"],"private_request_type":"IndependentReviewAuthorityRequestV1","raw_agent_orch_reader_in_review_producer_allowed":false,"required_resolver_methods":["admit_operation","resolve_preexisting_agent_orch_decision_receipt"],"review_producer":"IndependentEvidenceReviewV1","runtime_effect_authorized":false,"semantic_owner":"AgentCapabilityResolverV1"}

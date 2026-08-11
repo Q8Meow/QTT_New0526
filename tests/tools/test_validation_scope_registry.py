@@ -2074,3 +2074,50 @@ def test_downstream_scope_guards_consume_central_registry() -> None:
         source = inspect.getsource(module)
         assert "is_pr_scoped_changed_path_allowed" in source
         assert "is_pr168_gfp_changed_path" not in source
+def test_st12f_current_main_scope_is_exact_and_fail_closed() -> None:
+    assert registry.ST12F_BRANCH == "agent/st12f-evidence-model-risk-v1"
+    assert len(registry.ST12F_ALLOWED_EXACT_PATHS) == 82
+    assert not any("*" in path for path in registry.ST12F_ALLOWED_EXACT_PATHS)
+    added_paths = {
+        "tests/stage1_prediction_markets/qku_computation_control_plane/tranche_b/test_service_operations.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/tranche_e/test_adversarial_matrix.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/tranche_e/test_integration_matrix.py",
+    }
+    assert added_paths <= registry.ST12F_ALLOWED_EXACT_PATHS
+    for path in registry.ST12F_ALLOWED_EXACT_PATHS:
+        decision = registry.explain_pr_scope_decision(registry.ST12F_BRANCH, path)
+        assert decision["allowed"] is True
+        assert decision["pr_id"] == "ST12-TRANCHE-F"
+        validation_decision = registry.explain_pr_scope_decision(FIXTURE_BRANCH, path)
+        assert validation_decision["allowed"] is True
+    for path in added_paths:
+        assert registry.is_pr_scoped_changed_path_allowed(registry.ST12F_BRANCH, path)
+        decision = registry.explain_pr_scope_decision(registry.ST12F_BRANCH, path)
+        assert decision["allowed"] is True
+        assert decision["pr_id"] == "ST12-TRANCHE-F"
+        assert decision["matched_rule"] == f"exact:{path}"
+        assert decision["reason"] == "registered_exact_path"
+    for path in {
+        "tests/stage1_prediction_markets/qku_computation_control_plane/tranche_b/test_service_operation.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/tranche_e/test_adversarial_matrix_extra.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/tranche_e/test_integration_matrix.json",
+    }:
+        assert path not in registry.ST12F_ALLOWED_EXACT_PATHS
+        assert not registry.is_pr_scoped_changed_path_allowed(
+            registry.ST12F_BRANCH, path
+        )
+        decision = registry.explain_pr_scope_decision(registry.ST12F_BRANCH, path)
+        assert decision["allowed"] is False
+        assert decision["matched_rule"] == "no_st12f_exact_scope_rule"
+    for path in {
+        "src/qtt/core/testing/gate_result.py",
+        "tests/core/test_qtt_cumulative_gate.py",
+    }:
+        validation_decision = registry.explain_pr_scope_decision(FIXTURE_BRANCH, path)
+        assert validation_decision["pr_id"] == "ST12-TRANCHE-F"
+    denied = registry.explain_pr_scope_decision(
+        registry.ST12F_BRANCH,
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/not_authorized.py",
+    )
+    assert denied["allowed"] is False
+    assert denied["matched_rule"] == "no_st12f_exact_scope_rule"

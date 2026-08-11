@@ -45,9 +45,11 @@ from .models import (
     ComputationExecutionContextV1,
     ComputationScopeV1,
     ImplementationVersionPinV1,
+    NO_EFFECTS_V1,
     OwnerActionConfirmationReceiptV1,
     ReadOnlyKillSubmitStateV1,
     ST12FEvidenceReferenceV1,
+    ST12FEvidenceStateV1,
 )
 from .specification import FROZEN_FORMULA_REQUIREMENTS
 
@@ -1606,11 +1608,23 @@ class CurrentModeSnapshotInputResolverV1:
         *,
         repo_root: str | Path,
         owner_registry: CanonicalOwnerPacketRegistryV1,
+        canonical_f_evidence_owner: object | None = None,
     ) -> None:
+        if canonical_f_evidence_owner is not None and not callable(
+            getattr(canonical_f_evidence_owner, "read_evidence_reference", None)
+        ):
+            raise InputAuthorityError(
+                ReasonCode.INPUT_OWNER_MISMATCH,
+                "F evidence owner must expose the exact read-only reference method",
+            )
         self._repo_root = Path(repo_root).resolve()
         self._owner_registry = owner_registry
         self._safety = CurrentSafetyStateAdapterV1(owner_registry)
-        self._evidence = CurrentPreFEvidenceAdapterV1()
+        self._evidence = (
+            CurrentPreFEvidenceAdapterV1()
+            if canonical_f_evidence_owner is None
+            else canonical_f_evidence_owner
+        )
         self._owner_action = CurrentOwnerActionConfirmationAdapterV1(owner_registry)
 
     @property
@@ -1620,6 +1634,12 @@ class CurrentModeSnapshotInputResolverV1:
     @property
     def repo_root(self) -> Path:
         return self._repo_root
+
+    @property
+    def canonical_f_evidence_owner(self) -> object:
+        """Return the immutable injected owner; requests cannot replace it."""
+
+        return self._evidence
 
     @staticmethod
     def _admitted_context(
@@ -1650,6 +1670,133 @@ class CurrentModeSnapshotInputResolverV1:
         )
         return capability_decision, context, causation_id, correlation_id
 
+    @staticmethod
+    def _typed_f_reference_query(
+        request: object,
+        decision: object,
+        context: ComputationExecutionContextV1,
+        *,
+        causation_id: str,
+        correlation_id: str,
+        safety_receipt_ref: str,
+    ) -> object | None:
+        from .evidence import FToDEvidenceReferenceQueryV1
+
+        requested_evidence_id = getattr(request, "evidence_id", None)
+        expected_input_lock_id = getattr(request, "input_lock_id", None)
+        requested_component = getattr(request, "component_id", None)
+        expected_epochs = getattr(request, "source_epoch_refs", None)
+        evidence_refs = tuple(getattr(decision, "evidence_refs", ()))
+        scope_refs = tuple(getattr(decision, "scope_refs", ()))
+        request_refs = tuple(getattr(request, "source_candidate_refs", ()))
+        tagged_refs = tuple(dict.fromkeys((*request_refs, *evidence_refs)))
+
+        if not isinstance(requested_evidence_id, str) or not requested_evidence_id:
+            matches = tuple(
+                ref.split("=", 1)[1]
+                for ref in tagged_refs
+                if ref.startswith("ST12F_EVIDENCE_ID=") and "=" in ref
+            )
+            requested_evidence_id = matches[0] if len(matches) == 1 else None
+        if not isinstance(expected_input_lock_id, str) or not expected_input_lock_id:
+            matches = tuple(
+                ref.split("=", 1)[1]
+                for ref in tagged_refs
+                if ref.startswith("ST12F_INPUT_LOCK_ID=") and "=" in ref
+            )
+            expected_input_lock_id = matches[0] if len(matches) == 1 else None
+        if not isinstance(requested_component, str) or not requested_component:
+            tagged_matches = tuple(
+                ref.split("=", 1)[1]
+                for ref in tagged_refs
+                if ref.startswith("ST12F_COMPONENT_OR_TEMPLATE_REF=")
+                and "=" in ref
+            )
+            scope_matches = tuple(ref for ref in scope_refs if ref.startswith("MATH-"))
+            requested_component = (
+                tagged_matches[0]
+                if len(tagged_matches) == 1
+                else scope_matches[0]
+                if len(scope_matches) == 1
+                else None
+            )
+        if not isinstance(expected_epochs, tuple) or not expected_epochs:
+            expected_epochs = tuple(
+                ref.split("ST12F_SOURCE_EPOCH=", 1)[1]
+                for ref in tagged_refs
+                if ref.startswith("ST12F_SOURCE_EPOCH=")
+            )
+        if (
+            not isinstance(requested_evidence_id, str)
+            or not requested_evidence_id
+            or not isinstance(expected_input_lock_id, str)
+            or not expected_input_lock_id
+            or not isinstance(requested_component, str)
+            or not requested_component
+            or not isinstance(expected_epochs, tuple)
+            or not expected_epochs
+        ):
+            return None
+        return FToDEvidenceReferenceQueryV1(
+            query_id=f"ST12D-F-QUERY::{getattr(decision, 'request_id')}",
+            requested_evidence_id=requested_evidence_id,
+            requested_component_or_template_ref=requested_component,
+            expected_input_lock_id=expected_input_lock_id,
+            expected_source_epoch_refs=expected_epochs,
+            evaluated_at=context.as_of,
+            request_read_lineage_refs=tuple(
+                dict.fromkeys(
+                    (
+                        getattr(decision, "agent_orch_receipt_ref"),
+                        safety_receipt_ref,
+                        causation_id,
+                        correlation_id,
+                    )
+                )
+            ),
+        )
+
+    @staticmethod
+    def _validate_f_reference_for_d(
+        *,
+        context: ComputationExecutionContextV1,
+        query: object | None,
+        reference: ST12FEvidenceReferenceV1,
+        causation_id: str,
+        correlation_id: str,
+    ) -> ST12FEvidenceReferenceV1:
+        if reference.evidence_state is not ST12FEvidenceStateV1.EVIDENCE_REFERENCE_AVAILABLE:
+            return reference
+        valid = (
+            query is not None
+            and reference.reference_id != "EXPLICIT_ABSENCE"
+            and reference.evidence_id == getattr(query, "requested_evidence_id", None)
+            and reference.component_or_template_ref
+            == getattr(query, "requested_component_or_template_ref", None)
+            and reference.input_lock_id
+            == getattr(query, "expected_input_lock_id", None)
+            and reference.source_epoch_refs
+            == getattr(query, "expected_source_epoch_refs", None)
+            and reference.lane == "REPLAY_PAPER"
+            and reference.terminal_state == "CLOSED_INDEPENDENTLY_VALIDATED"
+            and reference.evidence_ref.startswith("ST12F-RECEIPT::")
+            and reference.contract_version == "1.4"
+            and reference.no_effect_flags == NO_EFFECTS_V1
+            and reference.observed_at
+            <= getattr(query, "evaluated_at", context.as_of)
+            <= reference.valid_until
+        )
+        if valid:
+            return reference
+        from .mode_snapshot_policy import pre_f_unavailable_reference
+
+        return pre_f_unavailable_reference(
+            observed_at=context.as_of,
+            valid_until=context.as_of,
+            causation_id=causation_id,
+            correlation_id=correlation_id,
+        )
+
     def resolve_mode_snapshot_preconstruction_gate(
         self,
         request: object,
@@ -1666,10 +1813,41 @@ class CurrentModeSnapshotInputResolverV1:
             context=context,
             binding_id=ST12D_SAFETY_BINDING_ID,
         )
-        evidence = self._evidence.read_evidence_reference(
-            context,
-            causation_id=causation_id,
-            correlation_id=correlation_id,
+        if getattr(self._evidence, "supports_typed_reference_query", False):
+            query = self._typed_f_reference_query(
+                request,
+                decision,
+                context,
+                causation_id=causation_id,
+                correlation_id=correlation_id,
+                safety_receipt_ref=safety_packet.producer_receipt_id,
+            )
+            evidence = self._evidence.read_evidence_reference(
+                context,
+                causation_id=causation_id,
+                correlation_id=correlation_id,
+                query=query,
+            )
+            evidence = self._validate_f_reference_for_d(
+                context=context,
+                query=query,
+                reference=evidence,
+                causation_id=causation_id,
+                correlation_id=correlation_id,
+            )
+        else:
+            evidence = self._evidence.read_evidence_reference(
+                context,
+                causation_id=causation_id,
+                correlation_id=correlation_id,
+            )
+        evidence_receipt_refs = (
+            (
+                f"ST12F-RECEIPT::{evidence.reference_id}::D_EVIDENCE_REFERENCE",
+            )
+            if evidence.evidence_state
+            is ST12FEvidenceStateV1.EVIDENCE_REFERENCE_AVAILABLE
+            else ()
         )
         return ModeSnapshotPreconstructionGateV1(
             request_id=decision.request_id,
@@ -1685,6 +1863,7 @@ class CurrentModeSnapshotInputResolverV1:
             expires_at=min(
                 context.as_of + context.maximum_age,
                 safety.valid_until,
+                evidence.valid_until,
             ),
             causation_id=causation_id,
             correlation_id=correlation_id,
@@ -1693,10 +1872,18 @@ class CurrentModeSnapshotInputResolverV1:
                     (
                         decision.agent_orch_receipt_ref,
                         safety_packet.producer_receipt_id,
+                        *evidence_receipt_refs,
                     )
                 )
             ),
-            source_epoch_refs=(safety_packet.source_epoch_id,),
+            source_epoch_refs=tuple(
+                dict.fromkeys(
+                    (
+                        safety_packet.source_epoch_id,
+                        *evidence.source_epoch_refs,
+                    )
+                )
+            ),
             evidence_reference=evidence,
             kill_submit_state=safety,
         )

@@ -1,0 +1,6 @@
+{"advisory_task":"SUMMARIZE_EVIDENCE","inference_authorized":false,"numeric_authority":false,"preexisting_annotation_only":true}
+{"advisory_task":"IDENTIFY_INCONSISTENCIES","inference_authorized":false,"numeric_authority":false,"preexisting_annotation_only":true}
+{"advisory_task":"ANNOTATE_RESEARCH","inference_authorized":false,"numeric_authority":false,"preexisting_annotation_only":true}
+{"advisory_task":"CRITIQUE_ASSUMPTIONS","inference_authorized":false,"numeric_authority":false,"preexisting_annotation_only":true}
+{"advisory_task":"EXPLAIN_DISAGREEMENT","inference_authorized":false,"numeric_authority":false,"preexisting_annotation_only":true}
+{"advisory_task":"PROPOSE_OWNER_REVIEW_QUESTIONS","inference_authorized":false,"numeric_authority":false,"preexisting_annotation_only":true}

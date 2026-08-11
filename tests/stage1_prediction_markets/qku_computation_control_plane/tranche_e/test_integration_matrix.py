@@ -160,21 +160,36 @@ def test_service_requires_one_typed_admission_owner_and_no_none_bypass() -> None
     )
 
 
-def test_all_twelve_public_operations_execute_exactly_one_central_admission() -> None:
+def test_all_fifteen_public_operations_execute_exactly_one_central_admission() -> None:
+    exact_operation_names = (
+        "resolve_identity",
+        "resolve_contextual_computability",
+        "resolve_applicable_stack",
+        "resolve_required_inputs",
+        "compute_component",
+        "compute_stack",
+        "compare_with_no_trade",
+        "evaluate_trade_plan",
+        "get_snapshot_view",
+        "explain_resolution",
+        "submit_candidate_proposal",
+        "request_materialization_work_order",
+        "compile_replay_paper_cohort",
+        "register_replay_paper_result",
+        "build_evidence_bundle",
+    )
     structural_counts = {
-        operation_id: inspect.getsource(
-            getattr(QKUComputationControlPlaneV1, operation_id)
+        operation_name: inspect.getsource(
+            getattr(QKUComputationControlPlaneV1, operation_name)
         ).count("_admit_agent_request(self, request)")
-        for operation_id in IMPLEMENTED_OPERATION_IDS
+        for operation_name in exact_operation_names
     }
 
+    assert IMPLEMENTED_OPERATION_IDS == exact_operation_names
+    assert HELD_OPERATION_IDS == ()
     assert structural_counts == {
-        operation_id: 1 for operation_id in IMPLEMENTED_OPERATION_IDS
+        operation_name: 1 for operation_name in exact_operation_names
     }
-    assert not any(
-        hasattr(QKUComputationControlPlaneV1, operation_id)
-        for operation_id in HELD_OPERATION_IDS
-    )
 
 
 def test_eligible_denied_and_no_trade_decisions_control_body_execution() -> None:

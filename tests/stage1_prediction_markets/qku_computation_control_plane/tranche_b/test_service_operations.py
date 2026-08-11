@@ -342,9 +342,9 @@ def _service() -> QKUComputationControlPlaneV1:
     )
 
 
-def test_service_exposes_exact_twelve_operations_and_holds_three_schemas() -> None:
+def test_service_exposes_exact_fifteen_operations_and_preserves_tranche_b_projection() -> None:
     service = _service()
-    operation_names = (
+    exact_operation_names = (
         "resolve_identity",
         "resolve_contextual_computability",
         "resolve_applicable_stack",
@@ -357,17 +357,35 @@ def test_service_exposes_exact_twelve_operations_and_holds_three_schemas() -> No
         "explain_resolution",
         "submit_candidate_proposal",
         "request_materialization_work_order",
+        "compile_replay_paper_cohort",
+        "register_replay_paper_result",
+        "build_evidence_bundle",
+    )
+    exact_operation_ids = (
+        "ST10-OP::01",
+        "ST10-OP::02",
+        "ST10-OP::03",
+        "ST10-OP::04",
+        "ST10-OP::05",
+        "ST10-OP::06",
+        "ST10-OP::07",
+        "ST10-OP::08",
+        "ST10-OP::09",
+        "ST10-OP::10",
+        "ST10-OP::11",
+        "ST10-OP::12",
+        "ST10-OP::13",
+        "ST10-OP::14",
+        "ST10-OP::15",
     )
 
-    assert len(ST12B_CENTRAL_SERVICE_OPERATION_IDS) == 12
-    assert all(callable(getattr(service, name)) for name in operation_names)
-    assert not hasattr(service, "compile_replay_paper_cohort")
-    assert not hasattr(service, "register_replay_paper_result")
-    assert not hasattr(service, "build_evidence_bundle")
+    assert ST12B_CENTRAL_SERVICE_OPERATION_IDS == exact_operation_ids[:12]
+    assert tuple(ST12B_OPERATION_CAPABILITY_BY_ID) == exact_operation_ids
+    assert all(callable(getattr(service, name)) for name in exact_operation_names)
     assert all(
         ST12B_OPERATION_CAPABILITY_BY_ID[operation_id]
         is OperationCapabilityClass.CONTRACT_DEFINITION_ONLY
-        for operation_id in ("ST10-OP::13", "ST10-OP::14", "ST10-OP::15")
+        for operation_id in exact_operation_ids[12:]
     )
 
 

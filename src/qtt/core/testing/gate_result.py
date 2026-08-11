@@ -51,6 +51,10 @@ SKIP_DIR_PARTS = {
     "__pycache__",
 }
 
+# Root .codex_inputs is Git-invisible workspace-local coding-control input,
+# never repository or runtime authority.
+_ROOT_LOCAL_CONTROL_INPUT_DIR_NAMES = frozenset({".codex_inputs"})
+
 
 def static_metadata(generated_by: str) -> dict[str, Any]:
     metadata: dict[str, Any] = {
@@ -192,15 +196,25 @@ def true_claim_failures(
 
 
 def hidden_zip_paths(repo_root: pathlib.Path) -> list[pathlib.PurePosixPath]:
-    root = repo_root.resolve()
+    resolved_repo_root = repo_root.resolve()
     paths: list[pathlib.PurePosixPath] = []
-    if not root.exists():
+    if not resolved_repo_root.exists():
         return paths
-    for dirpath, dirnames, filenames in os.walk(root):
-        dirnames[:] = [name for name in dirnames if name not in SKIP_DIR_PARTS]
+    for dirpath, dirnames, filenames in os.walk(resolved_repo_root):
         current_dir = pathlib.Path(dirpath)
+        dirnames[:] = [name for name in dirnames if name not in SKIP_DIR_PARTS]
+        if current_dir == resolved_repo_root:
+            dirnames[:] = [
+                name
+                for name in dirnames
+                if name not in _ROOT_LOCAL_CONTROL_INPUT_DIR_NAMES
+            ]
         for filename in filenames:
             path = current_dir / filename
             if path.suffix.lower() == ".zip":
-                paths.append(pathlib.PurePosixPath(path.relative_to(root).as_posix()))
+                paths.append(
+                    pathlib.PurePosixPath(
+                        path.relative_to(resolved_repo_root).as_posix()
+                    )
+                )
     return sorted(paths, key=str)

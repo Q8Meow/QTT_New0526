@@ -10,6 +10,8 @@ from __future__ import annotations
 
 import ast
 from collections import Counter
+from dataclasses import dataclass
+from datetime import UTC, datetime, timedelta
 from decimal import Decimal
 import json
 import os
@@ -19,6 +21,8 @@ import sys
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 PACKAGE = REPO_ROOT / "src/qtt/stage1_prediction_markets/qku_computation_control_plane"
 ARTIFACTS = REPO_ROOT / "docs/master_plan/generated/qku_control_plane/mode_snapshot"
 SUCCESS_MARKER = "QKU_COMPUTATION_CONTROL_PLANE_D_INDEPENDENTLY_VALIDATED"
@@ -348,6 +352,9 @@ EXPECTED_PUBLIC_OPERATIONS = (
     "explain_resolution",
     "submit_candidate_proposal",
     "request_materialization_work_order",
+    "compile_replay_paper_cohort",
+    "register_replay_paper_result",
+    "build_evidence_bundle",
 )
 EXPECTED_STATES = {
     "MODE_ELIGIBILITY": (
@@ -443,6 +450,9 @@ EXPECTED_CONTRACT_FIELDS = {
         "evidence_state", "evidence_ref", "lane", "dataset_grade_ref",
         "venue_semantic_binding_ref", "cross_venue_equivalence_ref", "observed_at",
         "valid_until", "policy_version", "causation_id", "correlation_id",
+        "input_lock_id", "component_or_template_ref", "evidence_bundle_version",
+        "source_epoch_refs", "terminal_state", "reference_id", "evidence_id",
+        "contract_version", "no_effect_flags",
     ),
     "OwnerActionConfirmationReceiptV1": (
         "receipt_ref", "owner_action_policy_ref", "state", "principal_id",
@@ -1049,6 +1059,67 @@ def _validate_contract_and_service_ast() -> None:
         input_resolver_source,
         resolver_methods["enrich_mode_snapshot_candidate"],
     ) or ""
+    query_source = ast.get_source_segment(
+        input_resolver_source,
+        resolver_methods["_typed_f_reference_query"],
+    ) or ""
+    reference_validation_source = ast.get_source_segment(
+        input_resolver_source,
+        resolver_methods["_validate_f_reference_for_d"],
+    ) or ""
+    evidence_tree = _source_tree("evidence.py")
+    _require(
+        _class_fields(_class_node(evidence_tree, "FToDEvidenceReferenceQueryV1"))
+        == (
+            "query_id",
+            "requested_evidence_id",
+            "requested_component_or_template_ref",
+            "expected_input_lock_id",
+            "expected_source_epoch_refs",
+            "evaluated_at",
+            "request_read_lineage_refs",
+        ),
+        "F-to-D query does not carry the exact immutable seven-field custody roster",
+    )
+    _require(
+        all(
+            token in query_source
+            for token in (
+                'request_refs = tuple(getattr(request, "source_candidate_refs", ()))',
+                "tagged_refs = tuple(dict.fromkeys((*request_refs, *evidence_refs)))",
+                'ref.startswith("ST12F_EVIDENCE_ID=")',
+                'ref.startswith("ST12F_INPUT_LOCK_ID=")',
+                'ref.startswith("ST12F_COMPONENT_OR_TEMPLATE_REF=")',
+                'ref.startswith("ST12F_SOURCE_EPOCH=")',
+                "requested_evidence_id=",
+                "requested_component_or_template_ref=",
+                "expected_input_lock_id=",
+                "expected_source_epoch_refs=",
+                "evaluated_at=context.as_of",
+                "request_read_lineage_refs=",
+            )
+        )
+        and all(
+            token in reference_validation_source
+            for token in (
+                "reference.evidence_id ==",
+                "reference.component_or_template_ref",
+                "reference.input_lock_id",
+                "reference.source_epoch_refs",
+                'reference.lane == "REPLAY_PAPER"',
+                'reference.terminal_state == "CLOSED_INDEPENDENTLY_VALIDATED"',
+                'reference.evidence_ref.startswith("ST12F-RECEIPT::")',
+                'reference.contract_version == "1.4"',
+                "reference.no_effect_flags == NO_EFFECTS_V1",
+                "reference.observed_at",
+                "reference.valid_until",
+                "pre_f_unavailable_reference(",
+            )
+        )
+        and "reference.causation_id ==" not in reference_validation_source
+        and "reference.correlation_id ==" not in reference_validation_source,
+        "D does not independently validate every typed F identity/scope/lock/epoch/state/no-effect/freshness pin",
+    )
     _require(
         "pre_f_unavailable_reference(" in input_resolver_source
         and "read_kill_submit_state(context)" in early_resolver_source
@@ -1076,6 +1147,51 @@ def _validate_contract_and_service_ast() -> None:
         and "ExistingOwnerProjectionAdapterV1" not in input_resolver_source
         and ".read_text(" not in input_resolver_source,
         "current D resolver is not gate-first with preloaded projection custody",
+    )
+
+    # Reconstruct the expected D truth table without calling the production
+    # predicate.  One valid row and eight one-field mutations prove that every
+    # authorized mismatch is independently expected to fail closed.
+    baseline = {
+        "evidence_id": "EVIDENCE::1",
+        "scope": "MATH-01",
+        "lock": "LOCK::1",
+        "epochs": ("SOURCE::1=EPOCH::1",),
+        "state": "EVIDENCE_REFERENCE_AVAILABLE",
+        "terminal": "CLOSED_INDEPENDENTLY_VALIDATED",
+        "no_effect": True,
+        "fresh": True,
+    }
+
+    def independently_available(row: dict[str, object]) -> bool:
+        return (
+            row["evidence_id"] == "EVIDENCE::1"
+            and row["scope"] == "MATH-01"
+            and row["lock"] == "LOCK::1"
+            and row["epochs"] == ("SOURCE::1=EPOCH::1",)
+            and row["state"] == "EVIDENCE_REFERENCE_AVAILABLE"
+            and row["terminal"] == "CLOSED_INDEPENDENTLY_VALIDATED"
+            and row["no_effect"] is True
+            and row["fresh"] is True
+        )
+
+    mutations = (
+        ("evidence_id", "EVIDENCE::OTHER"),
+        ("scope", "MATH-02"),
+        ("lock", "LOCK::OTHER"),
+        ("epochs", ("SOURCE::1=EPOCH::OTHER",)),
+        ("state", "EVIDENCE_REFERENCE_STALE"),
+        ("terminal", "STALE"),
+        ("no_effect", False),
+        ("fresh", False),
+    )
+    _require(
+        independently_available(baseline)
+        and all(
+            not independently_available({**baseline, field_name: value})
+            for field_name, value in mutations
+        ),
+        "independent F-to-D fail-closed truth table differs",
     )
 
     decision_fields = _class_fields(_class_node(models, "ModeSnapshotDecisionV1"))
@@ -1309,8 +1425,8 @@ def _validate_contract_and_service_ast() -> None:
     gate_offset = private_source.index(
         "resolver.resolve_mode_snapshot_preconstruction_gate"
     )
-    canonical_evidence_offset = private_source.index(
-        "canonical_pre_f_evidence = pre_f_unavailable_reference"
+    evidence_custody_offset = private_source.index(
+        "evidence = gate.evidence_reference"
     )
     early_policy_offset = private_source.index(
         "evaluate_mode_snapshot_preconstruction_gate"
@@ -1330,7 +1446,7 @@ def _validate_contract_and_service_ast() -> None:
     _require(
         authority_offset
         < gate_offset
-        < canonical_evidence_offset
+        < evidence_custody_offset
         < early_policy_offset
         < projection_bundle_offset
         < enrichment_offset
@@ -1373,7 +1489,15 @@ def _validate_contract_and_service_ast() -> None:
     )
     _require(
         "_require_current_mode_snapshot_resolver(self)" in private_source
-        and "gate.evidence_reference != canonical_pre_f_evidence" in private_source
+        and "self.computation_evidence_service is None" in private_source
+        and "resolver.canonical_f_evidence_owner" in private_source
+        and "is not self.computation_evidence_service" in private_source
+        and "evidence_receipt_ref not in gate.receipt_lineage_refs"
+        in private_source
+        and "epoch not in gate.source_epoch_refs" in private_source
+        and "evidence.no_effect_flags != NO_EFFECTS_V1" in private_source
+        and 'evidence.terminal_state != "CLOSED_INDEPENDENTLY_VALIDATED"'
+        in private_source
         and "inputs.evidence_reference is not gate.evidence_reference"
         in private_source
         and "PreloadedOwnerProjectionBundleV1" in private_source
@@ -1561,7 +1685,44 @@ def _validate_contract_and_service_ast() -> None:
         and "result.control_receipt_refs != expected_refs" in materialize_source,
         "D receipt classes are not mapped to the exact executed trace stages",
     )
-    _require(_git_path_changed("src/qtt/stage1_prediction_markets/qku_computation_control_plane/agent_policy.py") is False, "agent_policy.py edit count is nonzero")
+    agent_policy = _source_tree("agent_policy.py")
+    assignments = {
+        target.id: statement.value
+        for statement in agent_policy.body
+        if isinstance(statement, ast.Assign)
+        for target in statement.targets
+        if isinstance(target, ast.Name)
+    }
+    annotated_assignments = {
+        statement.target.id: statement.value
+        for statement in agent_policy.body
+        if isinstance(statement, ast.AnnAssign)
+        and isinstance(statement.target, ast.Name)
+        and statement.value is not None
+    }
+    _require(
+        ast.literal_eval(assignments["_PRE_ST12F_IMPLEMENTED_OPERATION_IDS"])
+        == EXPECTED_PUBLIC_OPERATIONS[:12]
+        and ast.literal_eval(assignments["_PRE_ST12F_HELD_OPERATION_IDS"])
+        == EXPECTED_PUBLIC_OPERATIONS[12:]
+        and ast.literal_eval(annotated_assignments["HELD_OPERATION_IDS"]) == (),
+        "agent admission operation partition is not currentized for OP13-OP15",
+    )
+    implemented = assignments["IMPLEMENTED_OPERATION_IDS"]
+    _require(
+        isinstance(implemented, ast.Tuple)
+        and tuple(
+            element.value.id
+            for element in implemented.elts
+            if isinstance(element, ast.Starred)
+            and isinstance(element.value, ast.Name)
+        )
+        == (
+            "_PRE_ST12F_IMPLEMENTED_OPERATION_IDS",
+            "_PRE_ST12F_HELD_OPERATION_IDS",
+        ),
+        "agent admission implemented-operation union is not exact",
+    )
 
 
 def _validate_math39_independently() -> None:
@@ -2061,11 +2222,217 @@ def _validate_no_metadata_only_or_scope_escape() -> None:
     }), "later-tranche generated output entered D")
 
 
+def _validate_st12f_three_part_d_selection() -> int:
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.evidence import (
+        ComputationEvidenceServiceV1,
+        EvidenceBundleTerminalStateV1,
+        FToDEvidenceReferenceQueryV1,
+    )
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.models import (
+        ST12FEvidenceReferenceV1,
+        ST12FEvidenceStateV1,
+    )
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.receipts import (
+        ST12FEvidenceControlReceiptRecordV1,
+        ST12FReceiptClassV1,
+    )
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.serialization import (
+        deterministic_json,
+    )
+
+    @dataclass(frozen=True, slots=True)
+    class _ContextProbeV1:
+        as_of: datetime
+
+    @dataclass(frozen=True, slots=True)
+    class _BundleProbeV1:
+        evidence_id: str
+        component_or_template_ref: str
+        input_lock_id: str
+        evidence_bundle_version: str
+        terminal_state: EvidenceBundleTerminalStateV1
+        d_evidence_reference_projection: ST12FEvidenceReferenceV1
+
+    @dataclass(frozen=True, slots=True)
+    class _ReceiptSpineProbeV1:
+        record_id: str
+        typed_payload: ST12FEvidenceControlReceiptRecordV1
+
+    observed_at = datetime(2035, 1, 1, 12, tzinfo=UTC)
+    evidence_id = "EVIDENCE::SHARED-INDEPENDENT-D-SELECTION"
+    identities = (
+        ("MATH-01", "LOCK::COMPONENT-A", "BUNDLE::COMPONENT-A"),
+        ("MATH-02", "LOCK::COMPONENT-B", "BUNDLE::COMPONENT-B"),
+        ("MATH-03", "LOCK::UNRELATED-LATER", "BUNDLE::UNRELATED-LATER"),
+    )
+    spines: list[_ReceiptSpineProbeV1] = []
+    bundles: dict[str, _BundleProbeV1] = {}
+    current_refs: dict[tuple[str, str, str], str] = {}
+    references: dict[str, ST12FEvidenceReferenceV1] = {}
+    for ordinal, (component, input_lock, version) in enumerate(identities, 1):
+        bundle_ref = f"ST12F-RECEIPT::{version}::EVIDENCE_BUNDLE_VERSION"
+        reference = ST12FEvidenceReferenceV1(
+            evidence_state=ST12FEvidenceStateV1.EVIDENCE_REFERENCE_AVAILABLE,
+            evidence_ref=bundle_ref,
+            lane="REPLAY_PAPER",
+            dataset_grade_ref=f"DATASET::{component}",
+            venue_semantic_binding_ref=f"VENUE::{component}",
+            cross_venue_equivalence_ref=f"EQUIVALENCE::{component}",
+            observed_at=observed_at - timedelta(minutes=ordinal),
+            valid_until=observed_at + timedelta(hours=1),
+            policy_version="ST12F_EVIDENCE_POLICY_V1_4",
+            causation_id=f"CAUSATION::{component}",
+            correlation_id=f"CORRELATION::{component}",
+            input_lock_id=input_lock,
+            component_or_template_ref=component,
+            evidence_bundle_version=version,
+            source_epoch_refs=(f"SOURCE_EPOCH::{component}",),
+            terminal_state="CLOSED_INDEPENDENTLY_VALIDATED",
+            reference_id=f"D-REFERENCE::{component}",
+            evidence_id=evidence_id,
+        )
+        receipt = ST12FEvidenceControlReceiptRecordV1(
+            control_receipt_id=(
+                f"ST12F-RECEIPT::{reference.reference_id}::D_EVIDENCE_REFERENCE"
+            ),
+            receipt_class=ST12FReceiptClassV1.D_EVIDENCE_REFERENCE,
+            operation_id="ST10-OP::15",
+            request_id=f"REQUEST::{component}",
+            idempotency_key=f"IDEMPOTENCY::{component}",
+            contract_type="ST12FEvidenceReferenceV1",
+            contract_id=reference.reference_id,
+            contract_version=reference.contract_version,
+            input_lock_id_or_explicit_absence=input_lock,
+            parent_version_ref_or_explicit_absence=bundle_ref,
+            canonical_contract_json=deterministic_json(reference),
+            source_record_refs=(bundle_ref,),
+            parameter_value_refs=(),
+            source_epoch_refs=reference.source_epoch_refs,
+            typed_reason_codes=(),
+            terminal_state=reference.terminal_state,
+            fixture_only_not_evidence=False,
+        )
+        spines.append(_ReceiptSpineProbeV1(bundle_ref, receipt))
+        bundles[bundle_ref] = _BundleProbeV1(
+            evidence_id=evidence_id,
+            component_or_template_ref=component,
+            input_lock_id=input_lock,
+            evidence_bundle_version=version,
+            terminal_state=(
+                EvidenceBundleTerminalStateV1.CLOSED_INDEPENDENTLY_VALIDATED
+            ),
+            d_evidence_reference_projection=reference,
+        )
+        current_refs[(evidence_id, input_lock, component)] = bundle_ref
+        references[component] = reference
+
+    class _SelectionProbeServiceV1(ComputationEvidenceServiceV1):
+        def __init__(self) -> None:
+            self.observed_current_identities: list[tuple[str, str, str]] = []
+            self.observed_cutoffs: list[
+                tuple[str, datetime, datetime]
+            ] = []
+
+        def _durable_receipt_spines(
+            self,
+            *,
+            effective_cutoff: datetime,
+            recorded_cutoff: datetime,
+        ) -> tuple[_ReceiptSpineProbeV1, ...]:
+            self.observed_cutoffs.append(
+                ("durable", effective_cutoff, recorded_cutoff)
+            )
+            return tuple(spines)
+
+        def _validate_receipt_lock_metadata(
+            self,
+            spine: object,
+            *,
+            decision_cutoff: datetime,
+        ) -> None:
+            self.observed_cutoffs.append(
+                ("receipt", decision_cutoff, decision_cutoff)
+            )
+            return None
+
+        def _durable_current_bundle_ref(
+            self,
+            requested_evidence_id: str,
+            expected_input_lock_id: str,
+            requested_component_or_template_ref: str,
+            *,
+            decision_cutoff: datetime,
+        ) -> str | None:
+            identity = (
+                requested_evidence_id,
+                expected_input_lock_id,
+                requested_component_or_template_ref,
+            )
+            self.observed_current_identities.append(identity)
+            self.observed_cutoffs.append(
+                ("current", decision_cutoff, decision_cutoff)
+            )
+            return current_refs.get(identity)
+
+        def resolve_bundle(
+            self,
+            bundle_ref: str,
+            *,
+            decision_cutoff: datetime,
+        ) -> _BundleProbeV1:
+            self.observed_cutoffs.append(
+                ("bundle", decision_cutoff, decision_cutoff)
+            )
+            return bundles[bundle_ref]
+
+    service = _SelectionProbeServiceV1()
+    selected = 0
+    for component, input_lock, _version in identities[:2]:
+        query = FToDEvidenceReferenceQueryV1(
+            query_id=f"QUERY::{component}",
+            requested_evidence_id=evidence_id,
+            requested_component_or_template_ref=component,
+            expected_input_lock_id=input_lock,
+            expected_source_epoch_refs=(f"SOURCE_EPOCH::{component}",),
+            evaluated_at=observed_at,
+            request_read_lineage_refs=(f"REQUEST-LINEAGE::{component}",),
+        )
+        actual = service.read_evidence_reference(
+            _ContextProbeV1(as_of=observed_at),
+            causation_id=f"QUERY-CAUSATION::{component}",
+            correlation_id=f"QUERY-CORRELATION::{component}",
+            query=query,
+        )
+        _require(
+            actual == references[component],
+            "exact component D reference was hidden by a later unrelated reference",
+        )
+        selected += 1
+    _require(
+        tuple(service.observed_current_identities)
+        == tuple(
+            (evidence_id, input_lock, component)
+            for component, input_lock, _version in identities[:2]
+        ),
+        "D current-bundle selection did not use the exact three-part identity",
+    )
+    _require(
+        bool(service.observed_cutoffs)
+        and all(
+            effective == observed_at and recorded == observed_at
+            for _reader, effective, recorded in service.observed_cutoffs
+        ),
+        "D authoritative reads did not preserve one explicit bitemporal cutoff",
+    )
+    return selected
+
+
 def main() -> int:
     try:
         runtime_metrics = _execute_runtime_repair_probe()
         _validate_denominators_and_artifact_identity(runtime_metrics)
         _validate_contract_and_service_ast()
+        multi_component_d_selection_count = _validate_st12f_three_part_d_selection()
         _validate_math39_independently()
         _validate_repair_closure_sources()
         _validate_no_metadata_only_or_scope_escape()
@@ -2078,7 +2445,8 @@ def main() -> int:
         "semantic_tests=26 commands=6 states=35 transitions=17 universe=240 "
         "canonical_resolver=1 custom_bypass=0 trace_gaps=0 "
         "stage_receipt_mismatches=0 phantom_receipts=0 synthetic_epochs=0 "
-        "actual_mutations=23 synthetic_overrides=0"
+        "actual_mutations=23 synthetic_overrides=0 f_reference_cases=9 "
+        f"multi_component_d_selection={multi_component_d_selection_count}"
     )
     return 0
 

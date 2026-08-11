@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING, Protocol, runtime_checkable
+from typing import TYPE_CHECKING, Mapping, Protocol, runtime_checkable
 
 from .errors import ContractValidationError, OwnerAdapterError, ReasonCode
 from .models import (
@@ -23,11 +23,24 @@ from .models import (
 
 if TYPE_CHECKING:
     from .agent_policy import AgentCapabilityDecisionV1
+    from .cohort_compiler import ReplayPaperCohortCompilationRecordV1
+    from .evidence import (
+        BuiltEvidenceBundleOutcomeV1,
+        ComputationEvidenceBundleV1,
+        PaperResultContractV1,
+        RegisteredLaneResultOutcomeV1,
+        ReplayResultContractV1,
+    )
     from .mode_snapshot_policy import (
         ModeSnapshotCandidateInputsV1,
         ModeSnapshotPreconstructionGateV1,
     )
-    from .models import ComputationExecutionContextV1
+    from .models import (
+        BuildEvidenceBundleRequestV1,
+        CompileReplayPaperCohortRequestV1,
+        ComputationExecutionContextV1,
+        RegisterReplayPaperResultRequestV1,
+    )
 
 
 @runtime_checkable
@@ -87,6 +100,51 @@ class AgentCapabilityAdmissionProtocolV1(Protocol):
 
 
 @runtime_checkable
+class IndependentReviewAuthorityResolverProtocolV1(Protocol):
+    """Resolve private review authority from one frozen no-effect snapshot."""
+
+    def admit_operation(
+        self, request: object
+    ) -> "AgentCapabilityDecisionV1": ...
+
+    def resolve_preexisting_agent_orch_decision_receipt(
+        self, receipt_ref: str
+    ) -> Mapping[str, object]: ...
+
+
+@runtime_checkable
+class ReplayPaperCohortCompilerProtocolV1(Protocol):
+    """Injected OP13 delegate; it exposes no execution or runner method."""
+
+    def compile(
+        self, request: "CompileReplayPaperCohortRequestV1"
+    ) -> "ReplayPaperCohortCompilationRecordV1": ...
+
+
+@runtime_checkable
+class ComputationEvidenceServiceProtocolV1(Protocol):
+    """Injected OP14/OP15 and read-only F-reference behavior."""
+
+    def register_result(
+        self, request: "RegisterReplayPaperResultRequestV1"
+    ) -> "RegisteredLaneResultOutcomeV1": ...
+
+    def build_bundle(
+        self,
+        request: "BuildEvidenceBundleRequestV1",
+    ) -> "BuiltEvidenceBundleOutcomeV1": ...
+
+    def read_evidence_reference(
+        self,
+        context: "ComputationExecutionContextV1",
+        *,
+        causation_id: str,
+        correlation_id: str,
+        query: object | None = None,
+    ) -> ST12FEvidenceReferenceV1: ...
+
+
+@runtime_checkable
 class SafetyStateProjectionProtocolV1(Protocol):
     """Read-only safety-state view owned outside ST12-E."""
 
@@ -112,6 +170,7 @@ class ST12FEvidenceReferenceProtocolV1(Protocol):
         *,
         causation_id: str,
         correlation_id: str,
+        query: object | None = None,
     ) -> ST12FEvidenceReferenceV1: ...
 
 

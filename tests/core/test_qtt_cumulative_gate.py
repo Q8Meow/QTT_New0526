@@ -170,8 +170,15 @@ def test_qtt_cumulative_gate_represents_all_prior_receipts_or_static_bootstrap()
 
 def test_qtt_cumulative_gate_blocks_hidden_zip_authority(tmp_path):
     report = _report()
+    control_zip_path = tmp_path / ".codex_inputs" / "owner_control.zip"
+    control_zip_path.parent.mkdir()
+    control_zip_path.write_bytes(b"PK")
     zip_path = tmp_path / "hidden_authority.zip"
     zip_path.write_bytes(b"PK")
+
+    assert qtt_test_gate.hidden_zip_paths(tmp_path) == [
+        qtt_test_gate.pathlib.PurePosixPath("hidden_authority.zip"),
+    ]
 
     failures = qtt_test_gate.validate_qtt_test_gate_report(
         report,
@@ -180,6 +187,19 @@ def test_qtt_cumulative_gate_blocks_hidden_zip_authority(tmp_path):
     )
 
     _assert_failure_contains(failures, "hidden ZIP authority")
+
+    nested_zip_path = (
+        tmp_path / "nested" / ".codex_inputs" / "hidden_authority.zip"
+    )
+    nested_zip_path.parent.mkdir(parents=True)
+    nested_zip_path.write_bytes(b"PK")
+
+    assert qtt_test_gate.hidden_zip_paths(tmp_path) == [
+        qtt_test_gate.pathlib.PurePosixPath("hidden_authority.zip"),
+        qtt_test_gate.pathlib.PurePosixPath(
+            "nested/.codex_inputs/hidden_authority.zip"
+        ),
+    ]
 
 
 def test_qtt_cumulative_gate_blocks_direct_main_bypass_claim():

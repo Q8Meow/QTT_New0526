@@ -107,6 +107,19 @@ _BLOCKER_BY_REASON_SUFFIX: Mapping[str, OperationBlockerCodeV1] = MappingProxyTy
         ),
         "CAPABILITY_DENIED": OperationBlockerCodeV1.AUTHORITY_DENIED,
         "RUNTIME_EFFECT_FORBIDDEN": OperationBlockerCodeV1.RUNTIME_EFFECT_FORBIDDEN,
+        "TEMPLATE_ROSTER_MISMATCH": OperationBlockerCodeV1.INVALID_REQUEST,
+        "INPUT_LOCK_MISMATCH": OperationBlockerCodeV1.INPUT_SCOPE_MISMATCH,
+        "LANE_SUBSTITUTION_FORBIDDEN": OperationBlockerCodeV1.INVALID_REQUEST,
+        "RESULT_SLOT_CONFLICT": OperationBlockerCodeV1.INPUT_VALUE_CONFLICT,
+        "EVIDENCE_INCOMPLETE": OperationBlockerCodeV1.EVIDENCE_REFERENCE_UNAVAILABLE,
+        "INDEPENDENT_REVIEW_REQUIRED": OperationBlockerCodeV1.EVIDENCE_REFERENCE_UNAVAILABLE,
+        "SELF_REVIEW_FORBIDDEN": OperationBlockerCodeV1.AUTHORITY_DENIED,
+        "MODEL_RISK_VETO": OperationBlockerCodeV1.EVIDENCE_REFERENCE_UNAVAILABLE,
+        "QUANTUM_TRACE_INVALID": OperationBlockerCodeV1.INVALID_REQUEST,
+        "LLM_ANNOTATION_INVALID": OperationBlockerCodeV1.INVALID_REQUEST,
+        "FIXTURE_NOT_EVIDENCE": OperationBlockerCodeV1.EVIDENCE_REFERENCE_UNAVAILABLE,
+        "BUNDLE_STALE": OperationBlockerCodeV1.EVIDENCE_REFERENCE_UNAVAILABLE,
+        "EVIDENCE_IDENTITY_INVALID": OperationBlockerCodeV1.INVALID_REQUEST,
     }
 )
 
@@ -117,7 +130,11 @@ class PublicFallbackBoundaryV1:
     @staticmethod
     def translate(exc: ComputationControlPlaneError) -> FallbackDispositionV1:
         reason = exc.reason_code.value
-        suffix = reason.removeprefix("ST12A_").removeprefix("ST12B_")
+        suffix = (
+            reason.removeprefix("ST12A_")
+            .removeprefix("ST12B_")
+            .removeprefix("ST12F_")
+        )
         blocker = _BLOCKER_BY_REASON_SUFFIX.get(
             suffix, OperationBlockerCodeV1.INVALID_REQUEST
         )

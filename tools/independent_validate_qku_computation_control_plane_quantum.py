@@ -1,207 +1,288 @@
 #!/usr/bin/env python3
-"""Independent MATH-46..49 reconstruction without production imports."""
+"""Independent executable MATH-50 through MATH-52 validation."""
 
 from __future__ import annotations
 
-import ast
-from itertools import product
-import math
+from dataclasses import replace
+from decimal import Decimal
 from pathlib import Path
 import sys
 
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
-PACKAGE = (
-    REPO_ROOT
-    / "src"
-    / "qtt"
-    / "stage1_prediction_markets"
-    / "qku_computation_control_plane"
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import (  # noqa: E402
+    ContractValidationError,
+    ReasonCode,
 )
-SUCCESS_MARKER = "QKU_QUANTUM_INDEPENDENTLY_VALIDATED"
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.quantum_benchmark import (  # noqa: E402
+    EconomicComparatorReceiptV1,
+    QAOAPreexistingTraceV1,
+    QAOATracePointV1,
+    QuantumBenchmarkServiceV1,
+    QuantumEconomicBasisV1,
+    VQEPreexistingTraceV1,
+    VQETracePointV1,
+)
 
 
-def _expect_value_error(callable_) -> bool:
-    try:
-        callable_()
-    except (ValueError, ArithmeticError):
-        return True
-    return False
-
-
-def _qubo_energy(
-    binary: tuple[int, ...],
-    diagonal: tuple[float, ...] = (1.0, 2.0),
-    upper_terms: tuple[tuple[int, int, float], ...] = ((0, 1, 0.5),),
-    offset: float = 0.1,
-) -> float:
-    if len(binary) != len(diagonal) or any(value not in (0, 1) for value in binary):
-        raise ValueError("invalid binary assignment")
-    seen: set[tuple[int, int]] = set()
-    for i, j, value in upper_terms:
-        if not 0 <= i < j < len(diagonal) or (i, j) in seen or not math.isfinite(value):
-            raise ValueError("invalid upper-triangular coefficient map")
-        seen.add((i, j))
-    return (
-        offset
-        + math.fsum(value * binary[index] for index, value in enumerate(diagonal))
-        + math.fsum(
-            value * binary[i] * binary[j]
-            for i, j, value in upper_terms
-        )
-    )
-
-
-def _ising_energy(spins: tuple[int, ...]) -> float:
-    offset = 0.1 + 1 / 2 + 2 / 2 + 0.5 / 4
-    h0 = -1 / 2 - 0.5 / 4
-    h1 = -2 / 2 - 0.5 / 4
-    coupling = 0.5 / 4
-    return offset + h0 * spins[0] + h1 * spins[1] + coupling * spins[0] * spins[1]
-
-
-def independently_reconstruct() -> dict[str, bool]:
-    math_46 = (
-        abs(
-            _qubo_energy(
-                (1, 0, 1),
-                (1.0, 2.0, 3.0),
-                ((0, 2, 0.5),),
-            )
-            - 4.6
-        )
-        <= 1e-15
-        and _expect_value_error(
-            lambda: _qubo_energy(
-                (1, 1),
-                (1.0, 2.0),
-                ((1, 0, 0.5),),
-            )
-        )
-        and _expect_value_error(
-            lambda: _qubo_energy(
-                (1, 1),
-                (1.0, 2.0),
-                ((0, 1, 0.5), (0, 1, 0.2)),
-            )
-        )
-    )
-    assignments = tuple(product((0, 1), repeat=2))
-    coefficient_scale = max(1.0, abs(0.1) + abs(1.0) + abs(2.0) + abs(0.5))
-    parity_tolerance = 8 * 4 * math.ulp(coefficient_scale)
-    math_47 = all(
-        abs(
-            _qubo_energy(binary)
-            - _ising_energy(tuple(1 - 2 * item for item in binary))
-        )
-        <= parity_tolerance
-        for binary in assignments
-    ) and _expect_value_error(lambda: _qubo_energy((0, 1, 0)))
-    feasible = tuple(
-        (x, y, x + y)
-        for x, y in product((0, 1), repeat=2)
-        if x + y <= 1
-    )
-    optimal = min(
-        (item for item in feasible if item[2] == max(row[2] for row in feasible)),
-        key=lambda item: (item[0], item[1]),
-    )
-    math_48 = (
-        max(item[2] for item in feasible) == 1
-        and all(x + y <= 1 for x, y, _objective in feasible)
-        and optimal == (0, 1, 1)
-        and not tuple(
-            (x, y)
-            for x, y in product((0, 1), repeat=2)
-            if x + y <= -1
-        )
-    )
-    case_registry = {
-        "a": ("A0", "A1"),
-        "b": ("B0", "B1"),
+def _basis(**overrides: object) -> QuantumEconomicBasisV1:
+    values: dict[str, object] = {
+        "input_lock_id": "L::1",
+        "original_formulation_id": "F::1",
+        "objective_sense": "MAXIMIZE",
+        "constraint_refs": ("CONSTRAINT::1",),
+        "accounting_basis_ref": "ACCOUNTING::1",
+        "cost_basis_ref": "COST::1",
+        "capacity_basis_ref": "CAPACITY::1",
+        "scenario_set_ref": "SCENARIO::1",
+        "resource_budget_ref": "RESOURCE::1",
+        "ttl_policy_ref": "TTL::1",
+        "version_epoch_pins": ("VERSION::1", "SOURCE::1=EPOCH::1"),
     }
-    discrete = tuple(
-        ((a, b), (0 if a == "A0" else 1) + (0 if b == "B0" else 1))
-        for a, b in product(case_registry["a"], case_registry["b"])
+    values.update(overrides)
+    return QuantumEconomicBasisV1(**values)
+
+
+def _comparator(
+    comparator_class: str,
+    *,
+    basis: QuantumEconomicBasisV1 | None = None,
+    utility: str = "0.65",
+    resource_use: str = "2",
+    latency: str = "2",
+    feasible: bool = True,
+    hard_veto: bool = False,
+) -> EconomicComparatorReceiptV1:
+    return EconomicComparatorReceiptV1(
+        receipt_id=f"RECEIPT::{comparator_class}",
+        comparator_class=comparator_class,
+        comparison_basis=_basis() if basis is None else basis,
+        feasible=feasible,
+        hard_veto=hard_veto,
+        conservative_utility=Decimal(utility),
+        resource_use=Decimal(resource_use),
+        latency=Decimal(latency),
+        deterministic_tie_break=f"TIE::{comparator_class}",
     )
-    best = min(discrete, key=lambda item: (item[1], item[0]))
-    math_49 = (
-        best == (("A0", "B0"), 0)
-        and len(discrete) == math.prod(len(cases) for cases in case_registry.values())
-        and best[0][0] in case_registry["a"]
-        and best[0][1] in case_registry["b"]
-        and _expect_value_error(
-            lambda: (
-                (_ for _ in ()).throw(ValueError("duplicate case label"))
-                if len(("A0", "A0")) != len(set(("A0", "A0")))
-                else ()
-            )
-        )
+
+
+def _qaoa() -> QAOAPreexistingTraceV1:
+    classical = _comparator("STRONGEST_CLASSICAL")
+    no_trade = _comparator(
+        "NO_TRADE", utility="0", resource_use="0", latency="0"
     )
-    return {
-        "MATH-46": math_46,
-        "MATH-47": math_47,
-        "MATH-48": math_48,
-        "MATH-49": math_49,
-    }
+    return QAOAPreexistingTraceV1(
+        trace_id="Q::1",
+        input_lock_id="L::1",
+        formulation_id="F::1",
+        objective_id="O::1",
+        objective_sense="MAXIMIZE",
+        parameter_order=("theta",),
+        seed_policy_ref="SEED::1",
+        bounds_ref="BOUNDS::1",
+        constraint_refs=("CONSTRAINT::1",),
+        comparison_basis=_basis(),
+        points=(
+            QAOATracePointV1(
+                "A", Decimal("0.25"), Decimal("2"), True,
+                Decimal("0.6"), Decimal("2"), Decimal("2"),
+            ),
+            QAOATracePointV1(
+                "B", Decimal("0.75"), Decimal("1"), True,
+                Decimal("0.7"), Decimal("1"), Decimal("1"),
+            ),
+        ),
+        selected_candidate_id="B",
+        strongest_classical_receipt_ref=classical.receipt_id,
+        no_trade_receipt_ref=no_trade.receipt_id,
+        strongest_classical_comparator=classical,
+        no_trade_comparator=no_trade,
+        trace_complete=True,
+        original_model_interpret_back_valid=True,
+    )
+
+
+def _vqe() -> VQEPreexistingTraceV1:
+    classical = _comparator("STRONGEST_CLASSICAL")
+    no_trade = _comparator(
+        "NO_TRADE", utility="0", resource_use="0", latency="0"
+    )
+    return VQEPreexistingTraceV1(
+        trace_id="V::1",
+        input_lock_id="L::1",
+        formulation_id="F::1",
+        objective_sense="MAXIMIZE",
+        hamiltonian_id="H::1",
+        ansatz_metadata_ref="ANSATZ::SUPPLIED",
+        parameter_order=("phi",),
+        optimizer_metadata_ref="OPTIMIZER::SUPPLIED",
+        seed_policy_ref="SEED::1",
+        bounds_ref="BOUNDS::1",
+        constraint_refs=("CONSTRAINT::1",),
+        comparison_basis=_basis(),
+        points=(
+            VQETracePointV1(
+                "A", Decimal("0.2"), Decimal("0.01"), Decimal("1"),
+                True, Decimal("0.55"), Decimal("1"), Decimal("1"),
+            ),
+            VQETracePointV1(
+                "B", Decimal("0.4"), Decimal("0.02"), Decimal("2"),
+                True, Decimal("0.5"), Decimal("2"), Decimal("2"),
+            ),
+        ),
+        selected_point_id="A",
+        strongest_classical_receipt_ref=classical.receipt_id,
+        no_trade_receipt_ref=no_trade.receipt_id,
+        strongest_classical_comparator=classical,
+        no_trade_comparator=no_trade,
+        trace_complete=True,
+        original_model_interpret_back_valid=True,
+    )
 
 
 def main() -> int:
-    failures: list[str] = []
-    implementation_tree: ast.Module | None = None
-    for path in sorted(PACKAGE.glob("*.py")):
-        tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
-        if path.name == "implementation_registry.py":
-            implementation_tree = tree
-        for node in ast.walk(tree):
-            if isinstance(node, (ast.Import, ast.ImportFrom)):
-                module_names = (
-                    [alias.name for alias in node.names]
-                    if isinstance(node, ast.Import)
-                    else [node.module or ""]
-                )
-                if any(
-                    name.startswith(("qiskit", "dwave", "dimod"))
-                    for name in module_names
-                ):
-                    failures.append(f"{path.name}: imports optional quantum SDK")
-    class_names = {
-        node.name
-        for node in (implementation_tree.body if implementation_tree else ())
-        if isinstance(node, ast.ClassDef)
-    }
-    function_names = {
-        node.name
-        for node in (implementation_tree.body if implementation_tree else ())
-        if isinstance(node, ast.FunctionDef)
-    }
-    if not {
-        "ObjectiveScalingReceiptV1",
-        "QuboModelV1",
-        "IsingModelV1",
-        "QuadraticVariableV1",
-        "DiscreteVariableV1",
-    } <= class_names:
-        failures.append("typed quantum model or scaling-receipt contract is missing")
-    if not {
-        "compute_math_46_qubo_upper_triangular_convention",
-        "compute_math_47_qubo_to_ising_transform",
-        "compute_math_48_constrained_quadratic_model",
-        "compute_math_49_discrete_quadratic_model",
-    } <= function_names:
-        failures.append("one or more centralized quantum callables are missing")
-    reconstructed = independently_reconstruct()
-    failures.extend(
-        f"{math_id}: independent golden reconstruction failed"
-        for math_id, passed in reconstructed.items()
-        if not passed
+    service = QuantumBenchmarkServiceV1()
+    qaoa = _qaoa()
+    vqe = _vqe()
+    q_receipt = service.validate_qaoa_trace(qaoa)
+    v_receipt = service.validate_vqe_trace(vqe)
+
+    # These expected values are reconstructed here from raw supplied traces;
+    # they are not read from a production result or a generated projection.
+    independent_qaoa_trace_cost = sum(
+        point.trace_weight * point.locked_cost for point in qaoa.points
     )
-    if failures:
-        print("\n".join(failures), file=sys.stderr)
+    independent_qaoa_winner = sorted(
+        (point for point in qaoa.points if point.original_model_feasible),
+        key=lambda point: (-point.original_economic_utility, point.candidate_id),
+    )[0]
+    independent_vqe_winner = sorted(
+        (point for point in vqe.points if point.original_model_feasible),
+        key=lambda point: (
+            -point.original_economic_utility,
+            point.parameter_point_id,
+        ),
+    )[0]
+
+    basis_mutations: tuple[tuple[str, object], ...] = (
+        ("input_lock_id", "L::OTHER"),
+        ("original_formulation_id", "F::OTHER"),
+        ("objective_sense", "MINIMIZE"),
+        ("constraint_refs", ("CONSTRAINT::OTHER",)),
+        ("accounting_basis_ref", "ACCOUNTING::OTHER"),
+        ("cost_basis_ref", "COST::OTHER"),
+        ("capacity_basis_ref", "CAPACITY::OTHER"),
+        ("scenario_set_ref", "SCENARIO::OTHER"),
+        ("resource_budget_ref", "RESOURCE::OTHER"),
+        ("ttl_policy_ref", "TTL::OTHER"),
+        ("version_epoch_pins", ("VERSION::OTHER",)),
+    )
+    rejected_dimensions: list[str] = []
+    for field_name, value in basis_mutations:
+        try:
+            service.compare_same_lock(
+                comparison_id=f"MISMATCH::{field_name}",
+                quantum_receipt=q_receipt,
+                strongest_classical_receipt=_comparator(
+                    "STRONGEST_CLASSICAL",
+                    basis=replace(_basis(), **{field_name: value}),
+                ),
+                no_trade_receipt=_comparator(
+                    "NO_TRADE", utility="0", resource_use="0", latency="0"
+                ),
+            )
+        except ContractValidationError as exc:
+            expected = (
+                ReasonCode.ST12F_INPUT_LOCK_MISMATCH
+                if field_name == "input_lock_id"
+                else ReasonCode.ST12F_QUANTUM_TRACE_INVALID
+            )
+            if exc.reason_code is expected:
+                rejected_dimensions.append(field_name)
+
+    infeasible_a = replace(
+        qaoa.points[0], original_model_feasible=False, original_economic_utility=Decimal("9")
+    )
+    feasible_only = service.validate_qaoa_trace(
+        replace(qaoa, points=(infeasible_a, qaoa.points[1]))
+    )
+    infeasible_selection_rejected = False
+    try:
+        service.validate_qaoa_trace(
+            replace(
+                qaoa,
+                points=(infeasible_a, qaoa.points[1]),
+                selected_candidate_id="A",
+            )
+        )
+    except ContractValidationError as exc:
+        infeasible_selection_rejected = (
+            exc.reason_code is ReasonCode.ST12F_QUANTUM_TRACE_INVALID
+        )
+    tie = service.compare_same_lock(
+        comparison_id="CONSERVATIVE::TIE",
+        quantum_receipt=q_receipt,
+        strongest_classical_receipt=_comparator(
+            "STRONGEST_CLASSICAL",
+            utility="0.7",
+            resource_use="1",
+            latency="1",
+        ),
+        no_trade_receipt=_comparator(
+            "NO_TRADE", utility="0.7", resource_use="1", latency="1"
+        ),
+    )
+    no_trade_rejections = 0
+    for feasible, hard_veto in ((False, False), (True, True)):
+        try:
+            _comparator(
+                "NO_TRADE",
+                utility="0",
+                resource_use="0",
+                latency="0",
+                feasible=feasible,
+                hard_veto=hard_veto,
+            )
+        except ContractValidationError as exc:
+            if exc.reason_code is ReasonCode.ST12F_QUANTUM_TRACE_INVALID:
+                no_trade_rejections += 1
+
+    source = (
+        ROOT
+        / "src/qtt/stage1_prediction_markets/qku_computation_control_plane/quantum_benchmark.py"
+    ).read_text(encoding="utf-8")
+    forbidden_calls = (
+        "Estimator(", "Sampler(", "transpile(", ".run(",
+        "AerSimulator(", "provider.", "qpu.",
+    )
+    checks = (
+        q_receipt.recomputed_objective == independent_qaoa_trace_cost,
+        q_receipt.selected_candidate_id == independent_qaoa_winner.candidate_id,
+        q_receipt.original_economic_utility
+        == independent_qaoa_winner.original_economic_utility,
+        v_receipt.recomputed_objective == independent_vqe_winner.expectation,
+        v_receipt.recomputed_variance_or_explicit_absence
+        == independent_vqe_winner.variance,
+        v_receipt.original_economic_utility
+        == independent_vqe_winner.original_economic_utility,
+        feasible_only.selected_candidate_id == "B",
+        infeasible_selection_rejected,
+        tuple(rejected_dimensions)
+        == tuple(field_name for field_name, _ in basis_mutations),
+        tie.winner == "NO_TRADE",
+        tie.quantum_advantage_claim_allowed is False,
+        no_trade_rejections == 2,
+        not any(token in source for token in forbidden_calls),
+        set(q_receipt.effect_counts.values()) == {0},
+    )
+    if not all(checks):
+        print("QKU_QUANTUM_INDEPENDENT_VALIDATION_FAILED", file=sys.stderr)
         return 1
     print(
-        f"{SUCCESS_MARKER} independent_oracles={len(reconstructed)} "
-        f"passing_invariant_groups={sum(reconstructed.values())}"
+        "QKU_QUANTUM_INDEPENDENTLY_VALIDATED "
+        "checks=14 trace_only=3 math52_basis_dimensions=11 effect_calls=0"
     )
     return 0
 

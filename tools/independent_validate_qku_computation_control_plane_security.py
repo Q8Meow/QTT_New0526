@@ -32,6 +32,7 @@ FORBIDDEN_IMPORT_ROOTS = {
 FORBIDDEN_CALLS = {"eval", "exec", "__import__", "compile"}
 FORBIDDEN_ATTRIBUTE_CALLS = {
     ("importlib", "import_module"),
+    ("importlib", "reload"),
     ("pickle", "load"),
     ("pickle", "loads"),
 }
@@ -100,6 +101,24 @@ def _find_function(
         ),
         None,
     )
+
+
+def _is_certified_parameter_resource_import(
+    path: Path,
+    node: ast.ImportFrom,
+) -> bool:
+    if path.resolve() != (PACKAGE / "parameter_policy.py").resolve():
+        return False
+    if node.level != 0:
+        return False
+    signature = (
+        node.module,
+        tuple((alias.name, alias.asname) for alias in node.names),
+    )
+    return signature in {
+        ("importlib", (("resources", None),)),
+        ("importlib.resources.abc", (("Traversable", None),)),
+    }
 
 
 def _directly_imports_module(tree: ast.Module, module_name: str) -> bool:
@@ -260,6 +279,12 @@ def main() -> int:
     failures: list[str] = []
     failures.extend(validate_st12e_domain("security"))
     authority_tree: ast.Module | None = None
+    certified_import_count = 0
+    other_importlib_import_count = 0
+    dynamic_import_call_count = 0
+    cache_lock_import_count = 0
+    cache_lock_assignment_count = 0
+    cache_lock_publication_count = 0
     for path in sorted(PACKAGE.glob("*.py")):
         tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
         if path.name == "authority.py":
@@ -269,14 +294,41 @@ def main() -> int:
                 roots = {alias.name.split(".", 1)[0] for alias in node.names}
                 if roots & FORBIDDEN_IMPORT_ROOTS:
                     failures.append(f"{path.name}: unsafe import {sorted(roots)}")
+                if "importlib" in roots:
+                    other_importlib_import_count += 1
             elif isinstance(node, ast.ImportFrom) and node.module:
                 root = node.module.split(".", 1)[0]
-                if root in FORBIDDEN_IMPORT_ROOTS:
+                if root == "threading":
+                    signature = tuple(
+                        (alias.name, alias.asname) for alias in node.names
+                    )
+                    if path.name == "evidence.py":
+                        if node.module == "threading" and signature == (("Lock", None),):
+                            cache_lock_import_count += 1
+                        else:
+                            failures.append(
+                                "evidence.py: cache publication import differs "
+                                "from exact threading.Lock authority"
+                            )
+                    elif path.name != "parameter_policy.py":
+                        failures.append(
+                            f"{path.name}: unauthorized production threading import"
+                        )
+                if root == "importlib" and _is_certified_parameter_resource_import(
+                    path,
+                    node,
+                ):
+                    certified_import_count += 1
+                elif root in FORBIDDEN_IMPORT_ROOTS:
                     failures.append(f"{path.name}: unsafe import {root}")
+                    if root == "importlib":
+                        other_importlib_import_count += 1
             elif isinstance(node, ast.Call):
                 name = node.func.id if isinstance(node.func, ast.Name) else ""
                 if name in FORBIDDEN_CALLS:
                     failures.append(f"{path.name}: unsafe call {name}")
+                if name == "__import__":
+                    dynamic_import_call_count += 1
                 if (
                     isinstance(node.func, ast.Attribute)
                     and isinstance(node.func.value, ast.Name)
@@ -290,6 +342,121 @@ def main() -> int:
                         f"{path.name}: unsafe call "
                         f"{node.func.value.id}.{node.func.attr}"
                     )
+                    if (
+                        node.func.value.id,
+                        node.func.attr,
+                    ) == ("importlib", "import_module"):
+                        dynamic_import_call_count += 1
+            if path.name == "evidence.py" and isinstance(node, ast.Assign):
+                if (
+                    len(node.targets) == 1
+                    and isinstance(node.targets[0], ast.Attribute)
+                    and isinstance(node.targets[0].value, ast.Name)
+                    and node.targets[0].value.id == "self"
+                    and node.targets[0].attr == "_cache_publication_lock"
+                    and isinstance(node.value, ast.Call)
+                    and isinstance(node.value.func, ast.Name)
+                    and node.value.func.id == "Lock"
+                    and not node.value.args
+                    and not node.value.keywords
+                ):
+                    cache_lock_assignment_count += 1
+            if path.name == "evidence.py" and isinstance(node, ast.With):
+                if (
+                    len(node.items) == 1
+                    and isinstance(node.items[0].context_expr, ast.Attribute)
+                    and isinstance(
+                        node.items[0].context_expr.value,
+                        ast.Name,
+                    )
+                    and node.items[0].context_expr.value.id == "self"
+                    and node.items[0].context_expr.attr
+                    == "_cache_publication_lock"
+                    and node.items[0].optional_vars is None
+                ):
+                    cache_lock_publication_count += 1
+    if cache_lock_import_count != 1:
+        failures.append(
+            "evidence.py does not contain exactly one certified Lock import"
+        )
+    if cache_lock_assignment_count != 1:
+        failures.append(
+            "evidence.py does not construct exactly one cache publication Lock"
+        )
+    if cache_lock_publication_count != 1:
+        failures.append(
+            "evidence.py does not use its Lock exactly once for cache publication"
+        )
+    parameter_policy_tree = ast.parse(
+        (PACKAGE / "parameter_policy.py").read_text(encoding="utf-8"),
+        filename="parameter_policy.py",
+    )
+    resource_root_functions = tuple(
+        node
+        for node in parameter_policy_tree.body
+        if isinstance(node, ast.FunctionDef)
+        and node.name == "_st12f_parameter_resource_root_v1"
+    )
+    resource_calls = tuple(
+        node
+        for node in ast.walk(parameter_policy_tree)
+        if isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Attribute)
+        and isinstance(node.func.value, ast.Name)
+        and node.func.value.id == "resources"
+    )
+    resource_root_exact = False
+    if len(resource_root_functions) == 1:
+        resource_root = resource_root_functions[0]
+        if len(resource_root.body) == 1 and isinstance(
+            resource_root.body[0],
+            ast.Return,
+        ):
+            join_call = resource_root.body[0].value
+            if (
+                isinstance(join_call, ast.Call)
+                and isinstance(join_call.func, ast.Attribute)
+                and join_call.func.attr == "joinpath"
+                and len(join_call.args) == 1
+                and isinstance(join_call.args[0], ast.Constant)
+                and join_call.args[0].value == "data"
+                and not join_call.keywords
+                and isinstance(join_call.func.value, ast.Call)
+            ):
+                files_call = join_call.func.value
+                resource_root_exact = (
+                    isinstance(files_call.func, ast.Attribute)
+                    and isinstance(files_call.func.value, ast.Name)
+                    and files_call.func.value.id == "resources"
+                    and files_call.func.attr == "files"
+                    and len(files_call.args) == 1
+                    and isinstance(files_call.args[0], ast.Name)
+                    and files_call.args[0].id == "__package__"
+                    and not files_call.keywords
+                )
+    if certified_import_count != 2:
+        failures.append(
+            "parameter_policy.py does not contain exactly two certified "
+            "package-resource imports"
+        )
+    if other_importlib_import_count:
+        failures.append("a non-certified importlib-root import exists")
+    if len(resource_root_functions) != 1:
+        failures.append(
+            "parameter_policy.py does not define exactly one top-level "
+            "_st12f_parameter_resource_root_v1"
+        )
+    if not resource_root_exact:
+        failures.append(
+            "parameter resource root is not exactly "
+            "resources.files(__package__).joinpath('data')"
+        )
+    if len(resource_calls) != 1:
+        failures.append(
+            "parameter_policy.py contains a non-certified resources call"
+        )
+    if dynamic_import_call_count:
+        failures.append("a dynamic import call exists")
     capability_defaults: list[bool] = []
     for node in authority_tree.body if authority_tree else ():
         if isinstance(node, ast.ClassDef) and node.name == "CapabilityEnvelopeV1":
@@ -491,7 +658,12 @@ def main() -> int:
     if failures:
         print("\n".join(failures), file=sys.stderr)
         return 1
-    print(SUCCESS_MARKER)
+    print(
+        f"{SUCCESS_MARKER} "
+        f"certified_importlib_resource_import_count={certified_import_count} "
+        f"other_importlib_import_count={other_importlib_import_count} "
+        f"dynamic_import_call_count={dynamic_import_call_count}"
+    )
     return 0
 
 

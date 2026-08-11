@@ -231,11 +231,12 @@ def test_qku_shared_integration_paths_use_the_exact_allowlists() -> None:
         (
             *inventory.ST12A_ALLOWED_EXACT_PATHS,
             *inventory.ST12B_ALLOWED_EXACT_PATHS,
-            *inventory.ST12C_ALLOWED_EXACT_PATHS,
-            *inventory.ST12D_ALLOWED_EXACT_PATHS,
-            *inventory.ST12E_ALLOWED_EXACT_PATHS,
+                *inventory.ST12C_ALLOWED_EXACT_PATHS,
+                *inventory.ST12D_ALLOWED_EXACT_PATHS,
+                *inventory.ST12E_ALLOWED_EXACT_PATHS,
+                *inventory.ST12F_ALLOWED_EXACT_PATHS,
+            )
         )
-    )
     for path in inventory.QKU_ALLOWED_EXACT_PATHS:
         assert router.QKU_VALIDATOR_IDS <= set(result.classified_files[path])
     assert result.unknown_files == ()
@@ -444,3 +445,11 @@ def test_router_policy_report_knows_all_eight_pytest_shard_jobs():
 
     assert report["required_jobs_for_reduced_pr_mode"] == expected_jobs
     assert report["required_jobs_for_full_mode"] == expected_jobs
+
+
+def test_st12f_current_main_path_routes_all_focused_validators() -> None:
+    result = _pull_request_result(
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/evidence.py"
+    )
+    assert inventory.ST12F_QKU_VALIDATOR_IDS <= set(result.required_validators)
+    assert result.fail_closed_reasons == ()

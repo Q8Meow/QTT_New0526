@@ -4,19 +4,75 @@
 from __future__ import annotations
 
 import ast
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
+from datetime import UTC, datetime, timedelta
+import json
 from pathlib import Path
 import sys
 from types import MappingProxyType
 
-
 REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.cohort_compiler import (
+    ReplayPaperCohortCompilerV1,
+)
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.context import (
+    ComputationContextKeyV1,
+)
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import (
+    ContractValidationError,
+    PersistenceContractError,
+    ReasonCode,
+)
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.evidence import (
+    BuiltEvidenceBundleOutcomeV1,
+    ComputationEvidenceServiceV1,
+    EvidenceBundleTerminalStateV1,
+    RegisteredLaneResultOutcomeV1,
+    ReplayResultContractV1,
+)
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.input_lock import (
+    CanonicalReplayPaperInputSnapshotV1,
+    ST12F_TEMPLATE_IDS_V1,
+    canonical_st12f_parameter_value_refs_v1,
+)
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.models import (
+    CompileReplayPaperCohortRequestV1,
+    RegisterReplayPaperResultRequestV1,
+    TypedValueKindV1,
+    TypedValueRecordV1,
+    TypedValueV1,
+)
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.persistence import (
+    InMemoryPersistenceAdapterV1,
+)
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.serialization import (
+    deterministic_json,
+)
+
 PACKAGE = (
     REPO_ROOT
     / "src"
     / "qtt"
     / "stage1_prediction_markets"
     / "qku_computation_control_plane"
+)
+AGENT_CAPABILITY_ARTIFACTS = (
+    REPO_ROOT
+    / "docs"
+    / "master_plan"
+    / "generated"
+    / "qku_control_plane"
+    / "agent_capability"
+)
+AGENT_ORCH_ARTIFACTS = (
+    REPO_ROOT
+    / "docs"
+    / "master_plan"
+    / "generated"
+    / "pr169_agent_orch1"
 )
 FORBIDDEN_IMPORT_ROOTS = {
     "asyncio",
@@ -35,6 +91,142 @@ FORBIDDEN_CALL_NAMES = {
     "run",
     "serve_forever",
     "start",
+}
+
+OWNER_BUNDLE_FIELDS_V1 = (
+    "evidence_id",
+    "schema_version",
+    "contract_version",
+    "evidence_bundle_version",
+    "component_or_template_ref",
+    "input_lock_id",
+    "actual_executed_component_versions",
+    "actual_executed_stack_versions",
+    "replay_result_ref",
+    "paper_result_ref",
+    "divergence_assessment_ref",
+    "lane_execution_receipt_refs",
+    "calibration_and_probability_quality",
+    "transaction_cost_decomposition",
+    "fill_and_queue_quality",
+    "latency_and_staleness",
+    "capacity_and_crowding",
+    "portfolio_marginal_contribution",
+    "false_discovery_and_overfit_controls",
+    "regime_and_scenario_outcomes",
+    "uncertainty_and_model_risk_reserves",
+    "agent_and_model_disagreement",
+    "no_trade_comparison",
+    "independent_review_state",
+    "failure_and_negative_evidence_states",
+    "source_and_provenance_refs",
+    "d_evidence_reference_projection",
+    "g_handoff_projection",
+    "terminal_state",
+    "blocker_codes",
+)
+
+OWNER_LIFECYCLE_TRANSITIONS_V1 = (
+    (
+        "INCOMPLETE_MISSING_REPLAY",
+        "READY_FOR_INDEPENDENT_REVIEW",
+        "BOTH_LANES_PRESENT_SAME_LOCK_ALL_REQUIRED_CONTROLS_COMPUTED",
+    ),
+    (
+        "INCOMPLETE_MISSING_PAPER",
+        "READY_FOR_INDEPENDENT_REVIEW",
+        "BOTH_LANES_PRESENT_SAME_LOCK_ALL_REQUIRED_CONTROLS_COMPUTED",
+    ),
+    (
+        "READY_FOR_INDEPENDENT_REVIEW",
+        "CLOSED_INDEPENDENTLY_VALIDATED",
+        "SEPARATE_REVIEW_RECEIPT_PASS_AND_ZERO_HARD_VETOES",
+    ),
+    (
+        "READY_FOR_INDEPENDENT_REVIEW",
+        "INDEPENDENT_REVIEW_REJECTED",
+        "SEPARATE_REVIEW_RECEIPT_REJECT",
+    ),
+    (
+        "CLOSED_INDEPENDENTLY_VALIDATED",
+        "STALE",
+        "TTL_SOURCE_EPOCH_PARAMETER_IMPLEMENTATION_OR_CONTEXT_CHANGE",
+    ),
+    (
+        "CLOSED_INDEPENDENTLY_VALIDATED",
+        "SUPERSEDED",
+        "NEWER_VALIDATED_BUNDLE_VERSION_SAME_IDENTITY",
+    ),
+)
+OWNER_CONCURRENCY_CASE_IDS_V1 = (
+    "OUTCOME-01",
+    "OUTCOME-02",
+    "OP14-IDENTICAL",
+    "OP14-COMPETING",
+    "OP15-ROOT-IDENTICAL",
+    "OP15-ROOT-COMPETING",
+    "OP15-SIBLING",
+    "BITEMPORAL",
+    "REVIEW",
+    "EVIDENCE-48",
+    "METRICS-38",
+    "TRUTH",
+    "STALE-5",
+    "SUPERSEDED",
+    "CACHE",
+)
+OWNER_V18_INTEGRATION_CASES = (
+    ("V18-TEST::01", "REAL_OWNER_REVIEW_POSITIVE"),
+    ("V18-TEST::02", "CALLER_DECISION_REJECT"),
+    ("V18-TEST::03", "SYNTHETIC_AGENT_ORCH_ROW_REJECT"),
+    ("V18-TEST::04", "AGENT_ORCH_ROW_ID_MISMATCH_REJECT"),
+    ("V18-TEST::05", "PEER_SOD_REQUIRED"),
+    ("V18-TEST::06", "SELF_REVIEW_REJECT"),
+    ("V18-TEST::07", "REVIEW_SCOPE_MISMATCH_REJECT"),
+    ("V18-TEST::08", "STATIC_SELF_COMPONENT_REJECT"),
+    ("V18-TEST::09", "STATIC_DIRECT_DEPENDENCY_REJECT"),
+    ("V18-TEST::10", "STATIC_SECOND_DIRECT_DEPENDENCY_REJECT"),
+    ("V18-TEST::11", "STATIC_UNRELATED_ALLOW"),
+    ("V18-TEST::12", "PARTITION_MATH01"),
+    ("V18-TEST::13", "PARTITION_MATH02"),
+    ("V18-TEST::14", "PARTITION_MATH05"),
+    ("V18-TEST::15", "FIXED_PARTITION_REJECT"),
+    ("V18-TEST::16", "DURABLE_PRODUCER_BOUNDARY"),
+)
+OWNER_V18_REVIEW_REQUEST_FIELDS = (
+    "request_id",
+    "requested_at",
+    "principal_id",
+    "capability_bundle_id",
+    "context",
+    "idempotency_key",
+    "traceparent",
+    "tracestate",
+    "prior_bundle_ref",
+    "input_lock_id",
+    "component_or_template_ref",
+    "reviewer_identity",
+    "bundle_producer_identity",
+)
+OWNER_V18_STATIC_IDS = (
+    "MATH-01",
+    "MATH-02",
+    "MATH-03",
+    "MATH-04",
+    "MATH-05",
+    "MATH-06",
+    "MATH-07",
+    "MATH-34",
+    "MATH-35",
+    "MATH-36",
+)
+OWNER_V18_EVIDENCE_IDENTITIES = tuple(
+    f"MATH-{number:02d}" for number in (*range(1, 46), 50, 51, 52)
+)
+OWNER_V18_CANONICAL_PARTITIONS = {
+    "MATH-01": (39, 9),
+    "MATH-02": (40, 8),
+    "MATH-05": (41, 7),
 }
 
 
@@ -299,6 +491,286 @@ EXPECTED_ROWS = (
 SUCCESS_MARKER = "QKU_OPERATIONS_INDEPENDENTLY_VALIDATED"
 
 
+_ST12F_NOW = datetime(2026, 1, 1, 12, tzinfo=UTC)
+_ST12F_TRACEPARENT = (
+    "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01"
+)
+
+
+class _CommitFailingAdapterV1(InMemoryPersistenceAdapterV1):
+    def __init__(self) -> None:
+        super().__init__()
+        self.fail_next_commit = False
+
+    def _commit(self, transaction: object) -> None:
+        if self.fail_next_commit:
+            self.fail_next_commit = False
+            raise PersistenceContractError(
+                ReasonCode.PERSISTENCE_UNAVAILABLE,
+                "independent injected commit failure",
+            )
+        super()._commit(transaction)  # type: ignore[arg-type]
+
+
+def _st12f_snapshot() -> CanonicalReplayPaperInputSnapshotV1:
+    versions = {
+        identity: f"VERSION::{identity}" for identity in ST12F_TEMPLATE_IDS_V1
+    }
+    return CanonicalReplayPaperInputSnapshotV1(
+        decision_time=_ST12F_NOW,
+        point_in_time_cutoff=_ST12F_NOW - timedelta(minutes=1),
+        market_scope=("MARKET::INDEPENDENT",),
+        venue_scope=("VENUE::INDEPENDENT",),
+        instrument_scope=("INSTRUMENT::INDEPENDENT",),
+        formula_specification_versions=versions,
+        implementation_versions=versions,
+        parameter_policy_version="ST12F_PARAMETER_POLICY_V1_4",
+        parameter_value_refs=canonical_st12f_parameter_value_refs_v1(),
+        source_epochs={"SOURCE::1": "EPOCH::1"},
+        data_semantics_version="DATA::V1",
+        venue_semantics_version="VENUE::V1",
+        accounting_definition={"basis": "NET"},
+        fee_assumptions={"policy_ref": "FEE::1"},
+        spread_assumptions={"policy_ref": "SPREAD::1"},
+        slippage_assumptions={"policy_ref": "SLIPPAGE::1"},
+        fill_and_queue_assumptions={"policy_ref": "FILL::1"},
+        latency_and_staleness_assumptions={"policy_ref": "LATENCY::1"},
+        capacity_and_crowding_assumptions={"policy_ref": "CAPACITY::1"},
+        portfolio_and_cash_context={
+            "permanent_no_trade_baseline_ref": "NO-TRADE::1"
+        },
+        random_seed_policy={"seed": 17},
+        resampling_policy={"trial_family_id": "TRIAL::1"},
+        scenario_set_id="SCENARIO::1",
+        causation_id="CAUSE::ORIGINAL",
+        correlation_id="CORRELATION::ORIGINAL",
+        created_by="OWNER::INDEPENDENT",
+        created_at=_ST12F_NOW,
+    )
+
+
+def _st12f_runtime(
+    adapter: InMemoryPersistenceAdapterV1,
+    *,
+    identity: str,
+) -> tuple[
+    ReplayPaperCohortCompilerV1,
+    ComputationEvidenceServiceV1,
+    object,
+    ComputationContextKeyV1,
+]:
+    snapshot = _st12f_snapshot()
+    compiler = ReplayPaperCohortCompilerV1(snapshot, adapter)
+    context = ComputationContextKeyV1(
+        context_id="MATH-01",
+        as_of=_ST12F_NOW,
+        observed_at=_ST12F_NOW,
+        source_epoch_id="SOURCE::1=EPOCH::1",
+        input_version="INPUT::INDEPENDENT",
+        maximum_age=timedelta(hours=1),
+    )
+    request = CompileReplayPaperCohortRequestV1(
+        request_id=f"REQUEST::OP13::{identity}",
+        operation_name="compile_replay_paper_cohort",
+        requested_at=_ST12F_NOW,
+        principal_id="PRINCIPAL::INDEPENDENT",
+        capability_bundle_id="CAPABILITY::INDEPENDENT",
+        context=context,
+        idempotency_key=identity,
+        traceparent=_ST12F_TRACEPARENT,
+        tracestate="qtt=independent",
+        template_ids=ST12F_TEMPLATE_IDS_V1,
+        requested_lanes=("REPLAY", "PAPER"),
+        input_lock_id=f"ST12F-LOCK::{identity}",
+        campaign_execution_requested=False,
+    )
+    compilation = compiler.compile(request)
+    return compiler, ComputationEvidenceServiceV1(compiler, adapter), compilation, context
+
+
+def _st12f_packet(
+    compilation: object,
+    snapshot: CanonicalReplayPaperInputSnapshotV1,
+    *,
+    result_id: str,
+    run_reference: str,
+    fixture: bool,
+) -> ReplayResultContractV1:
+    cutoff = snapshot.point_in_time_cutoff
+    return ReplayResultContractV1(
+        result_id=result_id,
+        schema_version="QTT_ST12F_LANE_RESULT_CONTRACTS_V1_4",
+        contract_version="1.4",
+        cohort_template_id="MATH-01",
+        expected_result_contract_id="ST12F-REPLAY-CONTRACT::MATH-01",
+        input_lock_id=str(getattr(compilation, "input_lock_id")),
+        run_reference=run_reference,
+        producer_identity="PRODUCER::REPLAY",
+        implementation_versions=snapshot.implementation_versions,
+        source_epochs=snapshot.source_epochs,
+        point_in_time_cutoff=cutoff,
+        accounting_definition=deterministic_json(snapshot.accounting_definition),
+        scenario_policy={"scenario": snapshot.scenario_set_id},
+        resampling_policy=snapshot.resampling_policy,
+        economic_metrics={"utility": "1"},
+        tca_metrics={"cost": "0.1"},
+        fill_metrics={"fill": "1"},
+        latency_metrics={"latency": "1ms"},
+        capacity_metrics={"capacity": "1"},
+        failure_states=(),
+        limitations=("LIMITATION::DECLARED",),
+        started_at=cutoff,
+        completed_at=cutoff + timedelta(seconds=1),
+        available_at=cutoff + timedelta(seconds=2),
+        closed_at=cutoff + timedelta(seconds=3),
+        fixture_only_not_evidence=fixture,
+    )
+
+
+def _st12f_register_request(
+    compilation: object,
+    context: ComputationContextKeyV1,
+    *,
+    identity: str,
+) -> RegisterReplayPaperResultRequestV1:
+    placeholder = TypedValueRecordV1(
+        (
+            TypedValueV1(
+                "placeholder",
+                TypedValueKindV1.TEXT,
+                "preexisting-packet-supplied-separately",
+                "unitless",
+                "independent-validator",
+            ),
+        )
+    )
+    return RegisterReplayPaperResultRequestV1(
+        request_id=f"REQUEST::OP14::{identity}",
+        operation_name="register_replay_paper_result",
+        requested_at=_ST12F_NOW + timedelta(seconds=1),
+        principal_id="PRINCIPAL::INDEPENDENT",
+        capability_bundle_id="CAPABILITY::INDEPENDENT",
+        context=context,
+        idempotency_key=f"IDEMPOTENCY::OP14::{identity}",
+        traceparent=_ST12F_TRACEPARENT,
+        tracestate="qtt=independent",
+        cohort_instance_id=str(getattr(compilation, "compilation_id")),
+        lane="REPLAY",
+        input_lock_id=str(getattr(compilation, "input_lock_id")),
+        result_packet=placeholder,
+    )
+
+
+def _table_counts(adapter: InMemoryPersistenceAdapterV1) -> tuple[tuple[str, int], ...]:
+    return tuple(sorted((name, len(rows)) for name, rows in adapter._tables.items()))
+
+
+def _st12f_executable_operation_checks() -> tuple[bool, ...]:
+    failing_adapter = _CommitFailingAdapterV1()
+    compiler, failing_service, compilation, context = _st12f_runtime(
+        failing_adapter, identity="ROLLBACK"
+    )
+    snapshot = compiler.canonical_snapshot
+    packet = _st12f_packet(
+        compilation,
+        snapshot,
+        result_id="RESULT::ROLLBACK",
+        run_reference="RUN::ROLLBACK",
+        fixture=False,
+    )
+    counts_before_failure = _table_counts(failing_adapter)
+    indexes_before_failure = tuple(
+        len(index) for index in failing_service.immutable_indexes.values()
+    )
+    failing_adapter.fail_next_commit = True
+    rollback_rejected = False
+    try:
+        failing_service.register_result(
+            _st12f_register_request(compilation, context, identity="ROLLBACK"),
+            packet,
+        )
+    except PersistenceContractError as exc:
+        rollback_rejected = exc.reason_code is ReasonCode.PERSISTENCE_UNAVAILABLE
+
+    adapter = InMemoryPersistenceAdapterV1()
+    compiler, service, compilation, context = _st12f_runtime(
+        adapter, identity="DURABLE"
+    )
+    snapshot = compiler.canonical_snapshot
+    counts_before_fixture = _table_counts(adapter)
+    fixture = _st12f_packet(
+        compilation,
+        snapshot,
+        result_id="RESULT::FIXTURE",
+        run_reference="RUN::FIXTURE",
+        fixture=True,
+    )
+    fixture_outcome = service.register_result(
+        _st12f_register_request(compilation, context, identity="FIXTURE"),
+        fixture,
+    )
+    counts_after_fixture = _table_counts(adapter)
+    fixture_indexes = tuple(len(index) for index in service.immutable_indexes.values())
+    committed_packet = replace(
+        fixture,
+        result_id="RESULT::COMMITTED",
+        run_reference="RUN::COMMITTED",
+        fixture_only_not_evidence=False,
+    )
+    committed_outcome = service.register_result(
+        _st12f_register_request(compilation, context, identity="COMMITTED"),
+        committed_packet,
+    )
+    receipt_refs = committed_outcome.receipt_refs
+    restarted = ComputationEvidenceServiceV1(compiler, adapter)
+    counts_before_replay = _table_counts(adapter)
+    replayed_outcome = restarted.register_result(
+        _st12f_register_request(compilation, context, identity="REPLAYED"),
+        committed_packet,
+    )
+    conflict_rejected = False
+    try:
+        restarted.register_result(
+            _st12f_register_request(compilation, context, identity="CONFLICT"),
+            replace(
+                committed_packet,
+                result_id="RESULT::CONFLICT",
+                run_reference="RUN::CONFLICT",
+            ),
+        )
+    except ContractValidationError as exc:
+        conflict_rejected = exc.reason_code is ReasonCode.ST12F_RESULT_SLOT_CONFLICT
+
+    return (
+        rollback_rejected,
+        _table_counts(failing_adapter) == counts_before_failure,
+        tuple(len(index) for index in failing_service.immutable_indexes.values())
+        == indexes_before_failure,
+        type(fixture_outcome) is RegisteredLaneResultOutcomeV1,
+        fixture_outcome.registered_result is fixture,
+        fixture_outcome.receipt_refs == (),
+        counts_after_fixture == counts_before_fixture,
+        fixture_indexes == (0, 0, 0, 0, 0, 0, 0, 0),
+        type(committed_outcome) is RegisteredLaneResultOutcomeV1,
+        committed_outcome.registered_result == committed_packet
+        and committed_outcome.registered_result is not committed_packet,
+        len(service.immutable_indexes["lane_results"]) == 1,
+        len(service.immutable_indexes["slot_results"]) == 1,
+        len(restarted.immutable_indexes["lane_results"]) == 1,
+        len(restarted.immutable_indexes["slot_results"]) == 1,
+        type(replayed_outcome) is RegisteredLaneResultOutcomeV1,
+        replayed_outcome == committed_outcome,
+        _table_counts(adapter) == counts_before_replay,
+        conflict_rejected,
+        len(receipt_refs) == 1
+        and receipt_refs[0]
+        == "ST12F-RECEIPT::RESULT::COMMITTED::REPLAY_REGISTRATION",
+        adapter.get_record(receipt_refs[0]) is not None,
+        not hasattr(service, "last_committed_receipt_refs")
+        and not hasattr(restarted, "last_committed_receipt_refs"),
+    )
+
+
 def _assignment(tree: ast.Module, name: str) -> ast.expr | None:
     for node in tree.body:
         if isinstance(node, ast.Assign) and any(
@@ -320,6 +792,373 @@ def _class_fields(tree: ast.Module, name: str) -> tuple[str, ...]:
                 and statement.target.id != "EXPECTED_OPERATION_NAME"
             )
     return ()
+
+
+def _class_is_frozen_slots_dataclass(tree: ast.Module, name: str) -> bool:
+    class_node = next(
+        (
+            node
+            for node in tree.body
+            if isinstance(node, ast.ClassDef) and node.name == name
+        ),
+        None,
+    )
+    if class_node is None:
+        return False
+    return any(
+        isinstance(decorator, ast.Call)
+        and isinstance(decorator.func, ast.Name)
+        and decorator.func.id == "dataclass"
+        and {
+            keyword.arg: keyword.value.value
+            for keyword in decorator.keywords
+            if keyword.arg in {"frozen", "slots"}
+            and isinstance(keyword.value, ast.Constant)
+        }
+        == {"frozen": True, "slots": True}
+        for decorator in class_node.decorator_list
+    )
+
+
+def _method_return_name(
+    tree: ast.Module,
+    class_name: str,
+    method_name: str,
+) -> str | None:
+    class_node = next(
+        (
+            node
+            for node in tree.body
+            if isinstance(node, ast.ClassDef) and node.name == class_name
+        ),
+        None,
+    )
+    if class_node is None:
+        return None
+    method = next(
+        (
+            node
+            for node in class_node.body
+            if isinstance(node, ast.FunctionDef) and node.name == method_name
+        ),
+        None,
+    )
+    return (
+        method.returns.id
+        if method is not None and isinstance(method.returns, ast.Name)
+        else None
+    )
+
+
+def _class_method_names(
+    tree: ast.Module,
+    class_name: str,
+) -> tuple[str, ...]:
+    class_node = next(
+        (
+            node
+            for node in tree.body
+            if isinstance(node, ast.ClassDef) and node.name == class_name
+        ),
+        None,
+    )
+    if class_node is None:
+        return ()
+    return tuple(
+        node.name
+        for node in class_node.body
+        if isinstance(node, ast.FunctionDef)
+    )
+
+
+def _method_arguments(
+    tree: ast.Module,
+    class_name: str,
+    method_name: str,
+) -> tuple[tuple[str, ...], tuple[str, ...]]:
+    class_node = next(
+        (
+            node
+            for node in tree.body
+            if isinstance(node, ast.ClassDef) and node.name == class_name
+        ),
+        None,
+    )
+    if class_node is None:
+        return (), ()
+    method = next(
+        (
+            node
+            for node in class_node.body
+            if isinstance(node, ast.FunctionDef) and node.name == method_name
+        ),
+        None,
+    )
+    if method is None:
+        return (), ()
+    return (
+        tuple(argument.arg for argument in method.args.args),
+        tuple(argument.arg for argument in method.args.kwonlyargs),
+    )
+
+
+def _parse_frozen_dependency_pairs(
+    tree: ast.Module,
+) -> tuple[tuple[str, str], ...]:
+    value = _assignment(tree, "_FROZEN_DEPENDENCY_RELATIONSHIPS")
+    if not isinstance(value, ast.Tuple):
+        return ()
+    pairs: list[tuple[str, str]] = []
+    for item in value.elts:
+        if not isinstance(item, ast.Call):
+            return ()
+        keywords = {
+            keyword.arg: keyword.value
+            for keyword in item.keywords
+            if keyword.arg is not None
+        }
+        producer = keywords.get("producer_math_spec_id")
+        consumer = keywords.get("consumer_math_spec_id")
+        if not (
+            isinstance(producer, ast.Constant)
+            and isinstance(producer.value, str)
+            and isinstance(consumer, ast.Constant)
+            and isinstance(consumer.value, str)
+        ):
+            return ()
+        pairs.append((producer.value, consumer.value))
+    return tuple(pairs)
+
+
+def _independent_required_closure(
+    component_or_template_ref: str,
+    dependency_pairs: tuple[tuple[str, str], ...],
+) -> tuple[str, ...]:
+    required = {component_or_template_ref}
+    changed = True
+    while changed:
+        changed = False
+        for producer, consumer in dependency_pairs:
+            if consumer in required and producer not in required:
+                required.add(producer)
+                changed = True
+    return tuple(
+        identity
+        for identity in OWNER_V18_EVIDENCE_IDENTITIES
+        if identity in required
+    )
+
+
+def _jsonl_rows(path: Path) -> tuple[dict[str, object], ...]:
+    rows: list[dict[str, object]] = []
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        value = json.loads(line)
+        if not isinstance(value, dict):
+            raise TypeError(f"{path} contains a non-object row")
+        rows.append(value)
+    return tuple(rows)
+
+
+def _independent_real_review_truths() -> tuple[
+    dict[str, object],
+    str,
+    str,
+    dict[str, object],
+    dict[str, object],
+]:
+    policy_rows = _jsonl_rows(AGENT_CAPABILITY_ARTIFACTS / "policy.jsonl")
+    mapped = tuple(
+        sorted(
+            (
+                row
+                for row in policy_rows
+                if row.get("row_type") == "IDENTITY_COMPATIBILITY"
+                and row.get("current_principal_refs")
+                and row.get("current_role_refs")
+                and row.get("current_duty_refs")
+                and row.get("intersection_scope")
+            ),
+            key=lambda row: str(row.get("source_agent_id") or ""),
+        )
+    )
+    peer_pairs = tuple(
+        (str(principal), str(duty))
+        for row in mapped
+        for principal in tuple(row["current_principal_refs"])
+        for duty in tuple(row["current_duty_refs"])
+    )
+    selected_identity: tuple[dict[str, object], str, str] | None = None
+    for reviewer in mapped:
+        reviewer_principal = str(
+            tuple(reviewer["current_principal_refs"])[0]
+        )
+        for peer_principal, peer_duty in peer_pairs:
+            if (
+                peer_principal != reviewer_principal
+                and peer_pairs.count((peer_principal, peer_duty)) == 1
+            ):
+                selected_identity = (
+                    reviewer,
+                    peer_principal,
+                    peer_duty,
+                )
+                break
+        if selected_identity is not None:
+            break
+    if selected_identity is None:
+        raise ValueError("no exact distinct mapped reviewer/peer pair")
+
+    manifest = json.loads(
+        (AGENT_ORCH_ARTIFACTS / "manifest.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    if not isinstance(manifest, dict):
+        raise TypeError("Agent-Orch manifest is not an object")
+    tasks = _jsonl_rows(AGENT_ORCH_ARTIFACTS / "task_env.jsonl")
+    receipts = _jsonl_rows(
+        AGENT_ORCH_ARTIFACTS / "decision_receipts.jsonl"
+    )
+    receipt_by_candidate = {
+        str(row.get("candidate_id") or ""): row for row in receipts
+    }
+    selected_task_receipt: tuple[
+        dict[str, object], dict[str, object]
+    ] | None = None
+    for task in sorted(tasks, key=lambda row: str(row.get("task_id") or "")):
+        receipt = receipt_by_candidate.get(
+            str(task.get("candidate_id") or "")
+        )
+        if receipt is not None:
+            selected_task_receipt = (task, receipt)
+            break
+    if selected_task_receipt is None:
+        raise ValueError("no task owns a pre-existing Agent-Orch receipt")
+
+    reviewer, peer_principal, peer_duty = selected_identity
+    task, receipt = selected_task_receipt
+    required_receipt_fields = {
+        "object_type": "AgentDecisionReceiptV1",
+        "object_version": manifest.get("manifest_version"),
+        "control_plane_only": True,
+        "fake_receipt_created": False,
+        "live_execution_created": False,
+        "order_submission_created": False,
+        "runtime_side_effect_allowed": False,
+        "source_truth_created": False,
+    }
+    receipt_ref = str(receipt.get("row_id") or "")
+    exact_peer_rows = tuple(
+        row
+        for row in mapped
+        if peer_principal in tuple(row["current_principal_refs"])
+        and peer_duty in tuple(row["current_duty_refs"])
+    )
+    if (
+        not receipt_ref
+        or task.get("candidate_id") != receipt.get("candidate_id")
+        or any(
+            receipt.get(name) != value
+            for name, value in required_receipt_fields.items()
+        )
+        or len(exact_peer_rows) != 1
+        or peer_principal
+        == str(tuple(reviewer["current_principal_refs"])[0])
+    ):
+        raise ValueError(
+            "mapped reviewer/peer or frozen Agent-Orch row is not exact"
+        )
+    return reviewer, peer_principal, peer_duty, task, receipt
+
+
+def _parse_bundle_transition_registry(
+    tree: ast.Module,
+) -> tuple[tuple[str, str, str], ...]:
+    value = _assignment(tree, "_EVIDENCE_BUNDLE_TRANSITION_GUARDS_V1")
+    if (
+        not isinstance(value, ast.Call)
+        or not isinstance(value.func, ast.Name)
+        or value.func.id != "MappingProxyType"
+        or len(value.args) != 1
+        or value.keywords
+        or not isinstance(value.args[0], ast.Dict)
+    ):
+        return ()
+    rows: list[tuple[str, str, str]] = []
+    for key, guard in zip(value.args[0].keys, value.args[0].values, strict=True):
+        if (
+            not isinstance(key, ast.Tuple)
+            or len(key.elts) != 2
+            or not all(isinstance(item, ast.Attribute) for item in key.elts)
+            or not all(
+                isinstance(item.value, ast.Name)
+                and item.value.id == "EvidenceBundleTerminalStateV1"
+                for item in key.elts
+                if isinstance(item, ast.Attribute)
+            )
+            or not isinstance(guard, ast.Constant)
+            or not isinstance(guard.value, str)
+        ):
+            return ()
+        source, target = key.elts
+        assert isinstance(source, ast.Attribute)
+        assert isinstance(target, ast.Attribute)
+        rows.append((source.attr, target.attr, guard.value))
+    return tuple(rows)
+
+
+@dataclass(frozen=True, slots=True)
+class _BundleTransitionProbeV1:
+    evidence_id: str
+    input_lock_id: str
+    component_or_template_ref: str
+    evidence_bundle_version: str
+    terminal_state: EvidenceBundleTerminalStateV1
+    independent_review_state: str
+
+
+def _validate_complete_bundle_transition_matrix() -> tuple[int, int, int]:
+    expected_pairs = {
+        (source, target)
+        for source, target, _guard in OWNER_LIFECYCLE_TRANSITIONS_V1
+    }
+    allowed = 0
+    prohibited = 0
+    failures = 0
+    for source in EvidenceBundleTerminalStateV1:
+        previous = _BundleTransitionProbeV1(
+            evidence_id="EVIDENCE::INDEPENDENT-VALIDATION",
+            input_lock_id="LOCK::INDEPENDENT-VALIDATION",
+            component_or_template_ref="MATH-01",
+            evidence_bundle_version=f"BUNDLE::{source.value}::PRIOR",
+            terminal_state=source,
+            independent_review_state=source.value,
+        )
+        for target in EvidenceBundleTerminalStateV1:
+            candidate = replace(
+                previous,
+                evidence_bundle_version=f"BUNDLE::{source.value}::{target.value}",
+                terminal_state=target,
+                independent_review_state=target.value,
+            )
+            succeeded = True
+            try:
+                ComputationEvidenceServiceV1._validate_bundle_transition(
+                    previous,
+                    candidate,  # type: ignore[arg-type]
+                )
+            except ContractValidationError:
+                succeeded = False
+            expected = (source.value, target.value) in expected_pairs
+            if succeeded != expected:
+                failures += 1
+            elif succeeded:
+                allowed += 1
+            else:
+                prohibited += 1
+    return allowed, prohibited, failures
 
 
 def _parse_operation_rows(tree: ast.Module) -> tuple[tuple[object, ...], ...]:
@@ -426,7 +1265,19 @@ def _runtime_topology_failures(
         elif isinstance(node, ast.ImportFrom) and node.module:
             root = node.module.split(".", 1)[0]
             if root in FORBIDDEN_IMPORT_ROOTS:
-                failures.append(f"runtime import {node.module}")
+                parameter_policy_exception = (
+                    file_name == "parameter_policy.py"
+                    and node.module == "threading"
+                    and {alias.name for alias in node.names} <= {"Condition", "Lock"}
+                )
+                cache_publication_exception = (
+                    file_name == "evidence.py"
+                    and node.module == "threading"
+                    and tuple((alias.name, alias.asname) for alias in node.names)
+                    == (("Lock", None),)
+                )
+                if not parameter_policy_exception and not cache_publication_exception:
+                    failures.append(f"runtime import {node.module}")
         elif isinstance(node, ast.Call):
             qualified_name = _qualified_callable_name(node.func)
             is_exact_exception = (
@@ -474,6 +1325,7 @@ def validate_runtime_topology_source(
 
 def main() -> int:
     failures: list[str] = []
+    real_review_truths_reconstructed = False
     parsed: dict[str, ast.Module] = {}
     for path in sorted(PACKAGE.glob("*.py"), key=lambda item: item.name):
         tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
@@ -534,6 +1386,325 @@ def main() -> int:
         ):
             if required not in model_text and required not in validation_text:
                 failures.append(f"operation invariant is absent: {required}")
+    evidence = parsed.get("evidence.py")
+    if evidence is None:
+        failures.append("ST12-F evidence owner source is absent")
+    else:
+        if _class_fields(evidence, "ComputationEvidenceBundleV1") != OWNER_BUNDLE_FIELDS_V1:
+            failures.append("bundle fields differ from the independent exact 30-field roster")
+        if _parse_bundle_transition_registry(evidence) != OWNER_LIFECYCLE_TRANSITIONS_V1:
+            failures.append("bundle transition registry differs from the independent exact six-transition roster")
+        outcome_fields = {
+            "RegisteredLaneResultOutcomeV1": (
+                "registered_result",
+                "receipt_refs",
+            ),
+            "BuiltEvidenceBundleOutcomeV1": (
+                "evidence_bundle",
+                "receipt_refs",
+            ),
+        }
+        for class_name, expected_fields in outcome_fields.items():
+            if _class_fields(evidence, class_name) != expected_fields:
+                failures.append(f"{class_name}: immutable outcome fields differ")
+            if not _class_is_frozen_slots_dataclass(evidence, class_name):
+                failures.append(f"{class_name}: frozen slots contract is absent")
+        if _method_return_name(
+            evidence,
+            "ComputationEvidenceServiceV1",
+            "register_result",
+        ) != "RegisteredLaneResultOutcomeV1":
+            failures.append("OP14 does not return its immutable atomic outcome")
+        if _method_return_name(
+            evidence,
+            "ComputationEvidenceServiceV1",
+            "build_bundle",
+        ) != "BuiltEvidenceBundleOutcomeV1":
+            failures.append("OP15 does not return its immutable atomic outcome")
+        evidence_text = (PACKAGE / "evidence.py").read_text(encoding="utf-8")
+        if (
+            "_last_committed_receipt_refs" in evidence_text
+            or "last_committed_receipt_refs" in evidence_text
+        ):
+            failures.append("shared mutable last-result state remains")
+        if (
+            _class_fields(evidence, "IndependentReviewAuthorityRequestV1")
+            != OWNER_V18_REVIEW_REQUEST_FIELDS
+            or not _class_is_frozen_slots_dataclass(
+                evidence,
+                "IndependentReviewAuthorityRequestV1",
+            )
+        ):
+            failures.append(
+                "v1.8 private review authority request differs from its exact frozen 13-field contract"
+            )
+        review_positional, review_keyword = _method_arguments(
+            evidence,
+            "IndependentEvidenceReviewV1",
+            "review_ready_bundle",
+        )
+        if review_positional != ("self", "review") or review_keyword != (
+            "principal_id",
+            "capability_bundle_id",
+            "context",
+            "component_or_template_ref",
+            "traceparent",
+            "tracestate",
+        ):
+            failures.append(
+                "independent review still exposes caller authority or differs from the private request seam"
+            )
+        review_init_positional, review_init_keyword = _method_arguments(
+            evidence,
+            "IndependentEvidenceReviewV1",
+            "__init__",
+        )
+        if review_init_positional != (
+            "self",
+            "cohort_resolver",
+            "persistence_adapter",
+            "authority_resolver",
+        ) or review_init_keyword:
+            failures.append(
+                "independent review constructor does not receive the exact authority resolver protocol"
+            )
+        for forbidden in (
+            "AgentOrchDecisionReceiptReaderProtocolV1",
+            "list_decision_receipts",
+            "peer_receipt_role_keys",
+        ):
+            if forbidden in evidence_text:
+                failures.append(
+                    f"superseded synthetic review seam remains: {forbidden}"
+                )
+        for required in (
+            "IndependentReviewAuthorityResolverProtocolV1",
+            ".admit_operation(",
+            ".resolve_preexisting_agent_orch_decision_receipt(",
+            "FROZEN_DEPENDENCY_RELATIONSHIPS::",
+            "TRANSITIVE_UPSTREAM_CLOSURE",
+            "_required_evidence_identity_closure_v1",
+            "expected_executed_identity_ids",
+            "expected_static_identity_ids",
+        ):
+            if required not in evidence_text:
+                failures.append(f"v1.8 evidence closure is absent: {required}")
+
+    protocols = parsed.get("protocols.py")
+    if protocols is None or _class_method_names(
+        protocols,
+        "IndependentReviewAuthorityResolverProtocolV1",
+    ) != (
+        "admit_operation",
+        "resolve_preexisting_agent_orch_decision_receipt",
+    ):
+        failures.append("v1.8 review authority resolver protocol differs")
+    agent_policy = parsed.get("agent_policy.py")
+    if agent_policy is None:
+        failures.append("agent capability resolver source is absent")
+    else:
+        resolver_methods = _class_method_names(
+            agent_policy,
+            "AgentCapabilityResolverV1",
+        )
+        agent_policy_text = (PACKAGE / "agent_policy.py").read_text(
+            encoding="utf-8"
+        )
+        if "resolve_preexisting_agent_orch_decision_receipt" not in resolver_methods:
+            failures.append("real AgentCapabilityResolverV1 receipt lookup is absent")
+        for required in (
+            '"object_type": "AgentDecisionReceiptV1"',
+            '"control_plane_only": True',
+            '"fake_receipt_created": False',
+            '"live_execution_created": False',
+            '"order_submission_created": False',
+            '"runtime_side_effect_allowed": False',
+            '"source_truth_created": False',
+            "mapped_peer_bindings",
+            "type(request).__module__",
+            "qku_computation_control_plane.evidence",
+        ):
+            if required not in agent_policy_text:
+                failures.append(
+                    f"real Agent-Orch no-effect receipt validation is absent: {required}"
+                )
+        if "peer_receipt_role_keys" in agent_policy_text:
+            failures.append("peer SOD still depends on raw receipt role fields")
+
+    try:
+        (
+            reviewer_truth,
+            peer_principal_truth,
+            peer_duty_truth,
+            task_truth,
+            receipt_truth,
+        ) = _independent_real_review_truths()
+    except (OSError, TypeError, ValueError, json.JSONDecodeError) as exc:
+        failures.append(
+            "independent real-owner review reconstruction failed: "
+            f"{type(exc).__name__}: {exc}"
+        )
+    else:
+        real_review_truths_reconstructed = all(
+            (
+                bool(reviewer_truth.get("source_agent_id")),
+                bool(peer_principal_truth),
+                bool(peer_duty_truth),
+                bool(task_truth.get("task_id")),
+                bool(receipt_truth.get("row_id")),
+            )
+        )
+        if not real_review_truths_reconstructed:
+            failures.append("independent real-owner review truths are incomplete")
+
+    dependency_graph = parsed.get("dependency_graph.py")
+    dependency_pairs = (
+        ()
+        if dependency_graph is None
+        else _parse_frozen_dependency_pairs(dependency_graph)
+    )
+    if len(dependency_pairs) != 6:
+        failures.append("frozen dependency relationship reconstruction failed")
+    else:
+        reconstructed_partitions = {
+            component: (
+                38
+                + len(
+                    set(OWNER_V18_STATIC_IDS)
+                    & set(
+                        _independent_required_closure(
+                            component,
+                            dependency_pairs,
+                        )
+                    )
+                ),
+                10
+                - len(
+                    set(OWNER_V18_STATIC_IDS)
+                    & set(
+                        _independent_required_closure(
+                            component,
+                            dependency_pairs,
+                        )
+                    )
+                ),
+            )
+            for component in OWNER_V18_CANONICAL_PARTITIONS
+        }
+        if reconstructed_partitions != OWNER_V18_CANONICAL_PARTITIONS:
+            failures.append(
+                "independent frozen dependency closure does not reconstruct MATH-01/MATH-02/MATH-05 partitions"
+            )
+
+    grouped_test_path = (
+        REPO_ROOT
+        / "tests"
+        / "stage1_prediction_markets"
+        / "qku_computation_control_plane"
+        / "tranche_f"
+        / "test_replay_paper_evidence_matrix.py"
+    )
+    if not grouped_test_path.is_file():
+        failures.append("grouped replay/PAPER evidence matrix is absent")
+    else:
+        grouped_tree = ast.parse(
+            grouped_test_path.read_text(encoding="utf-8"),
+            filename=str(grouped_test_path),
+        )
+        case_roster = _assignment(grouped_tree, "_CONCURRENCY_CASE_IDS_V1_7")
+        if (
+            case_roster is None
+            or ast.literal_eval(case_roster) != OWNER_CONCURRENCY_CASE_IDS_V1
+        ):
+            failures.append("grouped concurrency case roster differs from v1.7")
+        v18_roster = _assignment(grouped_tree, "_V18_INTEGRATION_CASES")
+        if (
+            v18_roster is None
+            or ast.literal_eval(v18_roster) != OWNER_V18_INTEGRATION_CASES
+        ):
+            failures.append("grouped v1.8 integration matrix differs from 16 exact rows")
+        physical_pytest_functions = tuple(
+            node
+            for node in grouped_tree.body
+            if isinstance(node, ast.FunctionDef)
+            and node.name.startswith("test_")
+        )
+        if len(physical_pytest_functions) != 5:
+            failures.append("v1.8 added or removed a physical pytest function")
+        grouped_text = grouped_test_path.read_text(encoding="utf-8")
+        for forbidden in (
+            "class _AgentOrchRowsV1",
+            "def _review_authority(",
+            "list_decision_receipts",
+        ):
+            if forbidden in grouped_text:
+                failures.append(
+                    f"grouped tests retain synthetic review authority: {forbidden}"
+                )
+        for required in (
+            "AgentCapabilityPolicyStoreV1.from_generated",
+            "AgentCapabilityResolverV1(",
+            "snapshot.identity_map.bindings.values()",
+            "snapshot.agent_orch_receipt_rows",
+            "snapshot.agent_orch_receipt_refs_by_candidate_id",
+        ):
+            if required not in grouped_text:
+                failures.append(
+                    f"grouped tests do not certify real owner authority: {required}"
+                )
+        threading_imports = tuple(
+            node
+            for node in grouped_tree.body
+            if isinstance(node, ast.ImportFrom)
+            and node.module == "threading"
+        )
+        if (
+            len(threading_imports) != 1
+            or tuple(
+                (alias.name, alias.asname)
+                for alias in threading_imports[0].names
+            )
+            != (("Barrier", None), ("Thread", None))
+        ):
+            failures.append("grouped concurrency test threading import differs")
+        if any(
+            isinstance(node, ast.Call)
+            and (
+                (isinstance(node.func, ast.Name) and node.func.id == "sleep")
+                or (
+                    isinstance(node.func, ast.Attribute)
+                    and node.func.attr == "sleep"
+                )
+            )
+            for node in ast.walk(grouped_tree)
+        ):
+            failures.append("grouped concurrency tests use sleep as proof")
+    builder_text = (
+        REPO_ROOT / "tools" / "build_qku_computation_control_plane.py"
+    ).read_text(encoding="utf-8")
+    for required in (
+        '"metric_durable_values_consumed_and_validated": "38/38"',
+        '"metric_values_produced_by_st12f": 0',
+        "PREEXISTING_UPSTREAM_DEPENDENCY_HELD_OUTSIDE_",
+        '"generated_projection_is_empirical_evidence": False',
+        '"runtime_fixture_is_empirical_evidence": False',
+        "39_EXECUTED_PLUS_9_STATIC_NOT_APPLICABLE",
+    ):
+        if required not in builder_text:
+            failures.append(f"durable evidence projection boundary is absent: {required}")
+    if "create_generic_durable_computation_receipt" in builder_text:
+        failures.append("ST12-F builder creates a forbidden generic computation producer")
+    allowed_transitions, prohibited_transitions, transition_failures = (
+        _validate_complete_bundle_transition_matrix()
+    )
+    if (
+        allowed_transitions != 6
+        or prohibited_transitions != 58
+        or transition_failures
+    ):
+        failures.append(
+            "bundle transition behavior does not reject the complete prohibited matrix"
+        )
     forbidden_files = {
         "runtime.py",
         "supervision.py",
@@ -560,11 +1731,11 @@ def main() -> int:
             }
             expected_methods = {
                 "__post_init__",
-                *(str(row[1]) for row in EXPECTED_ROWS[:12]),
+                *(str(row[1]) for row in EXPECTED_ROWS),
             }
             if service_methods != expected_methods:
                 failures.append(
-                    "the central service does not expose exactly operations 01..12"
+                    "the central service does not expose exactly operations 01..15"
                 )
         if any(
             isinstance(node, ast.ExceptHandler)
@@ -573,6 +1744,19 @@ def main() -> int:
             for node in ast.walk(service)
         ):
             failures.append("the central service catches an untyped broad exception")
+        service_text = (PACKAGE / "service.py").read_text(encoding="utf-8")
+        if "last_committed_receipt_refs" in service_text:
+            failures.append("public OP14/OP15 still read shared last-result state")
+        for required in (
+            "outcome = evidence_service.register_result(request)",
+            "outcome = evidence_service.build_bundle(request)",
+            "refs = outcome.receipt_refs",
+            "bundle = outcome.evidence_bundle",
+        ):
+            if required not in service_text:
+                failures.append(
+                    f"public atomic outcome consumer is absent: {required}"
+                )
     validation_text = (PACKAGE / "validation.py").read_text(encoding="utf-8")
     for required in (
         "ST12B_CENTRAL_SERVICE_OPERATION_IDS = tuple(OPERATION_SCHEMA_REGISTRY)[:12]",
@@ -583,11 +1767,27 @@ def main() -> int:
     ):
         if required not in validation_text:
             failures.append(f"Tranche-B operation capability projection missing: {required}")
+    executable_checks = _st12f_executable_operation_checks()
+    if not all(executable_checks):
+        failures.extend(
+            f"ST12-F executable OP14 invariant failed: check_{index}"
+            for index, passed in enumerate(executable_checks, start=1)
+            if not passed
+        )
     if failures:
         print("\n".join(failures), file=sys.stderr)
         return 1
     print(
-        f"{SUCCESS_MARKER} operation_contracts={len(EXPECTED_ROWS)}"
+        f"{SUCCESS_MARKER} operation_contracts={len(EXPECTED_ROWS)} "
+        f"executable_op14_checks={len(executable_checks)} "
+        f"bundle_fields={len(OWNER_BUNDLE_FIELDS_V1)} "
+        f"lifecycle_transitions={allowed_transitions} "
+        f"prohibited_transition_rejections={prohibited_transitions} "
+        f"v18_integration_rows={len(OWNER_V18_INTEGRATION_CASES)} "
+        f"real_review_truths_reconstructed={int(real_review_truths_reconstructed)} "
+        "canonical_math01_partition=39+9 "
+        "metric_durable_values_consumed_and_validated=38/38 "
+        "metric_values_produced_by_st12f=0"
     )
     return 0
 

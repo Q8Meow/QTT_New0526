@@ -5370,6 +5370,7 @@ def build_validation_commands(
                 "d",
                 "agent",
                 "llm",
+                "model_risk",
             )
         ],
         [
@@ -5414,6 +5415,10 @@ def build_validation_commands(
                 "independent_validate_qku_computation_control_plane_llm.py",
                 "independent_validate_qku_computation_control_plane_security.py",
                 "independent_validate_qku_computation_control_plane_d.py",
+                "independent_validate_qku_computation_control_plane_quantum.py",
+                "independent_validate_qku_computation_control_plane_architecture.py",
+                "independent_validate_qku_computation_control_plane_operations.py",
+                "independent_validate_qku_computation_control_plane_source.py",
             )
         ],
         [

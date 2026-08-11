@@ -69,6 +69,12 @@ PRODUCTION_NAMES = (
     "sqlite_reference.py",
     "transaction.py",
     "mode_snapshot_policy.py",
+    "cohort_compiler.py",
+    "input_lock.py",
+    "evidence.py",
+    "model_risk.py",
+    "quantum_benchmark.py",
+    "llm_gateway.py",
 )
 EXPECTED_MATH_IDS = tuple(f"MATH-{value:02d}" for value in range(1, 16))
 EXPECTED_ALL_MATH_IDS = (
@@ -117,6 +123,38 @@ FORMULA_EXECUTION_FIELDS = (
     "typed_output_contract",
     "context_key",
     "authority_envelope",
+)
+EVIDENCE_BUNDLE_FIELDS = (
+    "evidence_id",
+    "schema_version",
+    "contract_version",
+    "evidence_bundle_version",
+    "component_or_template_ref",
+    "input_lock_id",
+    "actual_executed_component_versions",
+    "actual_executed_stack_versions",
+    "replay_result_ref",
+    "paper_result_ref",
+    "divergence_assessment_ref",
+    "lane_execution_receipt_refs",
+    "calibration_and_probability_quality",
+    "transaction_cost_decomposition",
+    "fill_and_queue_quality",
+    "latency_and_staleness",
+    "capacity_and_crowding",
+    "portfolio_marginal_contribution",
+    "false_discovery_and_overfit_controls",
+    "regime_and_scenario_outcomes",
+    "uncertainty_and_model_risk_reserves",
+    "agent_and_model_disagreement",
+    "no_trade_comparison",
+    "independent_review_state",
+    "failure_and_negative_evidence_states",
+    "source_and_provenance_refs",
+    "d_evidence_reference_projection",
+    "g_handoff_projection",
+    "terminal_state",
+    "blocker_codes",
 )
 SUCCESS_MARKER = "QKU_ARCHITECTURE_INDEPENDENTLY_VALIDATED"
 DECIMAL_CONTEXT = Context(prec=34, rounding=ROUND_HALF_EVEN)
@@ -904,6 +942,9 @@ def main() -> int:
             f"centralized module roster: missing={missing_names!r} "
             f"unexpected={unexpected_names!r}"
         )
+    data_names = frozenset(path.name for path in (PACKAGE / "data").glob("*") if path.is_file())
+    if len(data_names) != 13 or "st12f_parameter_resources_manifest.json" not in data_names or "__init__.py" in data_names:
+        failures.append("certified ST12-F data directory differs from 13 exact non-package resources")
     for name in PRODUCTION_NAMES:
         path = PACKAGE / name
         if not path.is_file():
@@ -913,6 +954,31 @@ def main() -> int:
             ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
         except (OSError, SyntaxError) as exc:
             failures.append(f"{name}: {exc}")
+    for file_name, class_name, expected_count in (
+        ("input_lock.py", "ImmutableReplayPaperInputLockV1", 33),
+        ("evidence.py", "ReplayResultContractV1", 26),
+        ("evidence.py", "PaperResultContractV1", 26),
+        ("evidence.py", "DivergenceAssessmentV1", 18),
+        ("evidence.py", "ComputationEvidenceBundleV1", 30),
+    ):
+        tree = ast.parse((PACKAGE / file_name).read_text(encoding="utf-8"))
+        classes = tuple(node for node in tree.body if isinstance(node, ast.ClassDef) and node.name == class_name)
+        field_names = tuple(
+            node.target.id
+            for node in (classes[0].body if len(classes) == 1 else ())
+            if isinstance(node, ast.AnnAssign)
+            and isinstance(node.target, ast.Name)
+        )
+        field_count = len(field_names)
+        if field_count != expected_count:
+            failures.append(f"{class_name}: canonical field count={field_count}, expected={expected_count}")
+        if (
+            class_name == "ComputationEvidenceBundleV1"
+            and field_names != EVIDENCE_BUNDLE_FIELDS
+        ):
+            failures.append(
+                "ComputationEvidenceBundleV1 exact 30-field roster differs"
+            )
     specification_tree = ast.parse(
         (PACKAGE / "specification.py").read_text(encoding="utf-8")
     )

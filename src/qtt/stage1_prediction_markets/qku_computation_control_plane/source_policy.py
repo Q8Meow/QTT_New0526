@@ -4100,3 +4100,104 @@ def assert_source_precedence(states: tuple[SourceStateV1, ...]) -> None:
             ReasonCode.SOURCE_CONFLICT,
             "source conflict resolution is not terminal",
         )
+
+
+@dataclass(frozen=True, slots=True)
+class ST12FSourceDecisionViewV1:
+    decision_id: str
+    stable_source_identity: str
+    decision_class: str
+    terminal_state: str
+    runtime_provider_access_authorized: bool = False
+    repository_dependency_change_authorized: bool = False
+
+    def __post_init__(self) -> None:
+        if (
+            not self.decision_id
+            or not self.stable_source_identity
+            or self.decision_class not in {"CERTIFIED_STEP12_CURRENTIZATION", "ST12F_CURRENT_MAIN_OVERLAY"}
+            or self.terminal_state != "COMPLETE_TERMINAL_SOURCE_DECISION"
+            or self.runtime_provider_access_authorized
+            or self.repository_dependency_change_authorized
+        ):
+            raise SourcePolicyError(
+                ReasonCode.SOURCE_CONFLICT,
+                "ST12-F source decision is not terminal and no-effect",
+            )
+
+
+@dataclass(frozen=True, slots=True)
+class ST12FSourceConflictResolutionV1:
+    conflict_id: str
+    subject: str
+    resolution: str
+    controlling_current_direct_value: str
+    terminal_state: str = "COMPLETE_TERMINAL_CONFLICT_RESOLUTION"
+    codex_resolution_allowed: bool = False
+
+    def __post_init__(self) -> None:
+        if (
+            not self.conflict_id
+            or not self.subject
+            or not self.resolution
+            or not self.controlling_current_direct_value
+            or self.terminal_state != "COMPLETE_TERMINAL_CONFLICT_RESOLUTION"
+            or self.codex_resolution_allowed
+        ):
+            raise SourcePolicyError(
+                ReasonCode.SOURCE_CONFLICT,
+                "source conflict must preserve exact terminal owner resolution",
+            )
+
+
+_ST12F_SOURCE_OVERLAY_ROWS_V1 = (
+    ("ST12F-CURR::POLYMARKET-GLOBAL-FEES", "VENUE::POLYMARKET_GLOBAL::CURRENT_DYNAMIC_MARKET_FEE_RECEIPT"),
+    ("ST12F-CURR::POLYMARKET-US-FEES", "VENUE::POLYMARKET_US::CURRENT_SEPARATE_JURISDICTIONAL_FEE_EPOCH"),
+    ("ST12F-CURR::POLYMARKET-FEE-RATE-ENDPOINT", "VENUE::POLYMARKET_GLOBAL::TOKEN_FEE_RATE_ENDPOINT"),
+    ("ST12F-CURR::POLYMARKET-RATE-LIMITS", "VENUE::POLYMARKET_GLOBAL::ENDPOINT_KEYED_RATE_LIMITS"),
+    ("ST12F-CURR::POLYMARKET-BUILDER-FEES", "VENUE::POLYMARKET_GLOBAL::BUILDER_FEE_PROFILE"),
+    ("ST12F-CURR::POLYMARKET-PYTHON-SDK", "LIBRARY::POLYMARKET_PYTHON_SDK::PUBLIC_RELEASE_SURFACE"),
+)
+ST12F_SOURCE_DECISIONS_V1 = tuple(
+    ST12FSourceDecisionViewV1(
+        decision_id=state.source_state_id,
+        stable_source_identity=state.stable_source_identity,
+        decision_class="CERTIFIED_STEP12_CURRENTIZATION",
+        terminal_state="COMPLETE_TERMINAL_SOURCE_DECISION",
+    )
+    for state in CERTIFIED_SOURCE_STATES
+) + tuple(
+    ST12FSourceDecisionViewV1(
+        decision_id=decision_id,
+        stable_source_identity=identity,
+        decision_class="ST12F_CURRENT_MAIN_OVERLAY",
+        terminal_state="COMPLETE_TERMINAL_SOURCE_DECISION",
+    )
+    for decision_id, identity in _ST12F_SOURCE_OVERLAY_ROWS_V1
+)
+ST12F_SOURCE_DECISION_BY_ID_V1: Mapping[str, ST12FSourceDecisionViewV1] = MappingProxyType(
+    {row.decision_id: row for row in ST12F_SOURCE_DECISIONS_V1}
+)
+
+_ST12F_SOURCE_CONFLICT_ROWS_V1 = (
+    ("ST12-R2-CONFLICT-001", "Polymarket Global Sports fee and rebate", "CURRENT_DIRECT_OFFICIAL_PAGE_WINS", "SPORTS_FEE_0.05_REBATE_15PCT"),
+    ("ST12-R2-CONFLICT-002", "OTLP document versus protocol schema release", "SEPARATE_DOCUMENT_AND_PROTOCOL_PACKAGE_FIELDS_CURRENT_DIRECT_SOURCES_WIN", "OTLP_DOC_1.11_PROTO_1.10"),
+    ("ST12-R2-CONFLICT-003", "Polymarket US versus Global fee semantics", "NO_CROSS_VENUE_GENERALIZATION", "SEPARATE_VENUE_SCOPED_RULES"),
+    ("ST12-R2-CONFLICT-004", "pandas current release observation", "CURRENT_RELEASE_OBSERVED_WITHOUT_REPOSITORY_PIN_OR_INSTALL_AUTHORITY", "3.0.5_CURRENT_EXTERNAL_OBSERVATION_3.0.4_YANKED_REPOSITORY_PIN_UNCHANGED"),
+    ("ST12-R2-CONFLICT-005", "Qiskit Optimization 0.7.0", "ISOLATED_NONLIVE_COMPATIBILITY_ADAPTER_WITH_MIGRATION_RISK", "NO_LONGER_OFFICIALLY_SUPPORTED_BY_IBM"),
+    ("ST12-R2-CONFLICT-006", "Qiskit core current release", "CURRENT_EXTERNAL_RELEASE_OBSERVATION_ONLY", "2.5.1_RELEASED_2026_07_23_NO_REPOSITORY_PIN_CHANGE"),
+    ("ST12-R2-CONFLICT-008", "Polymarket unified Python SDK stable release versus beta or legacy-only client representation", "CURRENT_DIRECT_STABLE_RELEASE_AND_EXACT_COMPATIBILITY_ROLE_WIN_NO_AUTO_MIGRATION", "polymarket-client_0.1.0_PRIMARY_OBSERVATION; py-clob-client-v2_1.1.0_COMPATIBILITY_ADAPTER"),
+)
+ST12F_SOURCE_CONFLICT_RESOLUTIONS_V1 = tuple(
+    ST12FSourceConflictResolutionV1(*row) for row in _ST12F_SOURCE_CONFLICT_ROWS_V1
+)
+
+if (
+    len(ST12F_SOURCE_DECISIONS_V1) != 35
+    or len(ST12F_SOURCE_DECISION_BY_ID_V1) != 35
+    or len(ST12F_SOURCE_CONFLICT_RESOLUTIONS_V1) != 7
+):
+    raise SourcePolicyError(
+        ReasonCode.SOURCE_CONFLICT,
+        "ST12-F source closure must remain exact 35 decisions and seven conflicts",
+    )

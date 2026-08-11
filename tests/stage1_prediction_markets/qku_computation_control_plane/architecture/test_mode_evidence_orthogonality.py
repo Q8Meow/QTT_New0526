@@ -4,7 +4,7 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors impo
     ContractValidationError,
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.models import (
-    ComputationEvidenceBundleV1,
+    LegacyComputationEvidenceOrthogonalityViewV1,
     ComputationModeEligibilityV1,
     EvidenceState,
     ModeEligibilityState,
@@ -12,7 +12,7 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.models impo
 
 
 def test_evidence_and_mode_authority_remain_orthogonal() -> None:
-    evidence = ComputationEvidenceBundleV1(
+    evidence = LegacyComputationEvidenceOrthogonalityViewV1(
         "evidence-1",
         "spec-1",
         "oracle-1",

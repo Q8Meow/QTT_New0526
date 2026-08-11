@@ -52,6 +52,7 @@ ST12B_BRANCH = "agent/st12b-contextual-computability-v3"
 ST12C_BRANCH = "agent/st12c-deterministic-receipts-accounting-v1"
 ST12E_BRANCH = "agent/st12e-capability-guard"
 ST12D_BRANCH = "agent/st12d-mode-snapshot-boundary"
+ST12F_BRANCH = "agent/st12f-evidence-model-risk-v1"
 
 _PR168_BRANCHES = frozenset(
     {
@@ -433,6 +434,101 @@ ST12D_VALIDATION_CONTEXT_EXACT_PATHS = frozenset(
         | ST12E_ALLOWED_EXACT_PATHS
     )
 )
+
+_ST12F_RESOURCE_NAMES = (
+    "st12f_parameter_resources_manifest.json",
+    "st12f_parameter_rows_0001_0320.jsonl",
+    "st12f_parameter_rows_0321_0640.jsonl",
+    "st12f_parameter_rows_0641_0960.jsonl",
+    "st12f_parameter_rows_0961_1280.jsonl",
+    "st12f_parameter_rows_1281_1600.jsonl",
+    "st12f_parameter_rows_1601_1920.jsonl",
+    "st12f_parameter_rows_1921_2240.jsonl",
+    "st12f_parameter_rows_2241_2560.jsonl",
+    "st12f_parameter_rows_2561_2880.jsonl",
+    "st12f_parameter_rows_2881_3200.jsonl",
+    "st12f_parameter_rows_3201_3520.jsonl",
+    "st12f_parameter_rows_3521_3840.jsonl",
+)
+_ST12F_PROJECTION_NAMES = (
+    "cohort_registry.jsonl",
+    "evidence_bundle_registry.jsonl",
+    "evidence_metric_registry.jsonl",
+    "independent_review_contracts.jsonl",
+    "llm_annotation_contracts.jsonl",
+    "manifest.json",
+    "model_risk_adjudications.jsonl",
+    "no_trade_comparisons.jsonl",
+    "paper_result_contracts.jsonl",
+    "parent_input_locks.jsonl",
+    "quantum_benchmark_contracts.jsonl",
+    "replay_result_contracts.jsonl",
+    "validation_summary.json",
+)
+ST12F_ALLOWED_EXACT_PATHS = frozenset(
+    {
+        "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+        *(f"src/qtt/stage1_prediction_markets/qku_computation_control_plane/data/{name}" for name in _ST12F_RESOURCE_NAMES),
+        *(f"docs/master_plan/generated/qku_control_plane/evidence/{name}" for name in _ST12F_PROJECTION_NAMES),
+        "src/qtt/core/testing/gate_result.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/__init__.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/agent_policy.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/cohort_compiler.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/errors.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/evidence.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/fallback.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/implementation_registry.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/input_lock.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/input_resolver.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/llm_gateway.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/model_risk.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/models.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/oracle_contracts.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/parameter_policy.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/protocols.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/quantum_adapter.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/quantum_benchmark.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/receipts.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/service.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/source_policy.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/specification.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/validation.py",
+        "tests/core/test_qtt_cumulative_gate.py",
+        "tests/fail_closed/test_run_validation_gates.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/architecture/test_repository_file_closure.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/architecture/test_mode_evidence_orthogonality.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/test_policy_state_matrix.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/tranche_b/test_service_operations.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/tranche_e/test_adversarial_matrix.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/tranche_e/test_integration_matrix.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/tranche_f/test_model_risk_llm_matrix.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/tranche_f/test_quantum_benchmark_matrix.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/tranche_f/test_replay_paper_evidence_matrix.py",
+        "tests/tools/test_changed_area_validation_router.py",
+        "tests/tools/test_ci_branch_context.py",
+        "tests/tools/test_validation_inventory.py",
+        "tests/tools/test_validation_scope_registry.py",
+        "tools/build_qku_computation_control_plane.py",
+        "tools/changed_area_validation_router.py",
+        "tools/ci_branch_context.py",
+        "tools/independent_validate_qku_computation_control_plane.py",
+        "tools/independent_validate_qku_computation_control_plane_architecture.py",
+        "tools/independent_validate_qku_computation_control_plane_d.py",
+        "tools/independent_validate_qku_computation_control_plane_execution.py",
+        "tools/independent_validate_qku_computation_control_plane_llm.py",
+        "tools/independent_validate_qku_computation_control_plane_model_risk.py",
+        "tools/independent_validate_qku_computation_control_plane_operations.py",
+        "tools/independent_validate_qku_computation_control_plane_quantum.py",
+        "tools/independent_validate_qku_computation_control_plane_security.py",
+        "tools/independent_validate_qku_computation_control_plane_source.py",
+        "tools/run_validation_gates.py",
+        "tools/validate_qku_computation_control_plane.py",
+        "tools/validation_inventory.py",
+        "tools/validation_scope_registry.py",
+    }
+)
+if len(ST12F_ALLOWED_EXACT_PATHS) != 82:
+    raise RuntimeError("ST12-F exact current-main scope must contain 82 paths")
 
 _PR168_ALLOWED_EXACT_PATHS = frozenset(
     {
@@ -2017,6 +2113,15 @@ def _pr169_dash1_scope_decision(branch_name: str, normalized: str) -> dict[str, 
 def explain_pr_scope_decision(branch: str, path: str) -> dict[str, object]:
     normalized = normalize_changed_path(path)
     branch_name = str(branch).strip()
+    if branch_name == ST12F_BRANCH and normalized in ST12F_ALLOWED_EXACT_PATHS:
+        return {
+            "allowed": True,
+            "branch": branch_name,
+            "normalized_path": normalized,
+            "pr_id": "ST12-TRANCHE-F",
+            "matched_rule": f"exact:{normalized}",
+            "reason": "registered_exact_path",
+        }
     if branch_name == ST12D_BRANCH and normalized in ST12D_ALLOWED_EXACT_PATHS:
         return {
             "allowed": True,
@@ -2177,6 +2282,18 @@ def explain_pr_scope_decision(branch: str, path: str) -> dict[str, object]:
             "matched_rule": f"validation_context_exact:{normalized}",
             "reason": "registered_validation_context_exact_path",
         }
+    if (
+        is_validation_context_branch(branch_name)
+        and normalized in ST12F_ALLOWED_EXACT_PATHS
+    ):
+        return {
+            "allowed": True,
+            "branch": branch_name,
+            "normalized_path": normalized,
+            "pr_id": "ST12-TRANCHE-F",
+            "matched_rule": f"validation_context_exact:{normalized}",
+            "reason": "registered_validation_context_exact_path",
+        }
     forbidden_reason = _forbidden_reason(normalized)
     if forbidden_reason:
         return {
@@ -2221,6 +2338,15 @@ def explain_pr_scope_decision(branch: str, path: str) -> dict[str, object]:
             "normalized_path": normalized,
             "pr_id": "ST12-TRANCHE-E",
             "matched_rule": "no_st12e_exact_scope_rule",
+            "reason": "path_not_registered_for_pr_scope",
+        }
+    if branch_name == ST12F_BRANCH:
+        return {
+            "allowed": False,
+            "branch": branch_name,
+            "normalized_path": normalized,
+            "pr_id": "ST12-TRANCHE-F",
+            "matched_rule": "no_st12f_exact_scope_rule",
             "reason": "path_not_registered_for_pr_scope",
         }
     if branch_name == ST12D_BRANCH:

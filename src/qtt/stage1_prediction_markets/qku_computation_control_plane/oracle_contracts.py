@@ -6,6 +6,7 @@ from dataclasses import dataclass
 import base64
 from decimal import Decimal
 import json
+import math
 from types import MappingProxyType
 from typing import Mapping
 import zlib
@@ -2019,4 +2020,438 @@ if (
     raise ContractValidationError(
         ReasonCode.ORACLE_NOT_INDEPENDENT,
         "Tranche-D must reuse three oracle/vector identities and add one pair",
+    )
+
+
+_ST12F_NEW_VECTOR_ROWS_V1: Mapping[str, Mapping[str, object]] = MappingProxyType(
+    {
+        "MATH-40": {"inputs": {"fill_price": "0.45", "midpoint_after_fill": "0.43", "signed_fill_quantity": "100"}, "expected": {"side_convention_explicit": True, "signed_markout": "-2.00"}, "comparison": "EXACT_DECIMAL_AND_DECLARED_SIGN", "seed": 4001},
+        "MATH-41": {"inputs": {"edge_now": 0.1, "latency": 2.0, "tau": 4.0}, "expected": {"edge_after_latency": 0.06065306597126335}, "comparison": "ABS_TOL_1E-15", "seed": None},
+        "MATH-42": {"inputs": {"ADV": 10000, "Q": 100, "Y": 0.5, "sigma": 0.02}, "expected": {"impact_fraction": 0.001}, "comparison": "ABS_TOL_1E-15", "seed": None},
+        "MATH-43": {"inputs": {"approved_participation_cap": 0.1, "participation": 0.2, "penalty_scale": 0.5}, "expected": {"capacity_penalty": 0.5}, "comparison": "ABS_TOL_1E-15", "seed": None},
+        "MATH-44": {"inputs": {"delta": 0.25, "sample_covariance": [[1.0, 0.2], [0.2, 2.0]], "target": [[1.0, 0.0], [0.0, 2.0]]}, "expected": {"shrunk_covariance": [[1.0, 0.15], [0.15, 2.0]]}, "comparison": "ABS_TOL_1E-15", "seed": None},
+        "MATH-45": {"inputs": {"estimated_net_edge": 0.1, "model_risk_haircut": 0.01, "uncertainty": 0.02, "z_or_quantile": 1.96}, "expected": {"lcb_net": 0.0508, "trade_gate": True}, "comparison": "ABS_TOL_1E-15", "seed": None},
+        "MATH-50": {
+            "inputs": {
+                "input_lock_id": "LOCK::Q",
+                "formulation_id": "FORMULATION::Q",
+                "objective_id": "OBJECTIVE::Q",
+                "parameter_order": ["theta-1"],
+                "seed_policy_ref": "SEED::Q",
+                "bounds_ref": "BOUNDS::Q",
+                "constraint_refs": ["CONSTRAINT::Q"],
+                "trace_complete": True,
+                "original_model_interpret_back_valid": True,
+                "trace_weights": {"00": "0.50", "01": "0.25", "10": "0.25", "11": "0.00"},
+                "locked_costs": {"00": "0.0", "01": "1.0", "10": "1.5", "11": "3.0"},
+                "observed_feasibility": {"00": True, "01": True, "10": True, "11": False},
+                "original_economic_utilities": {"00": "0.6", "01": "0.8", "10": "0.7", "11": "2.0"},
+                "resource_use": {"00": "1", "01": "2", "10": "3", "11": "4"},
+                "latency": {"00": "1", "01": "2", "10": "3", "11": "4"},
+                "selected_candidate_id": "01",
+                "objective_sense": "MAXIMIZE",
+                "quantum_basis": {"input_lock_id": "LOCK::Q", "original_formulation_id": "FORMULATION::Q", "objective_sense": "MAXIMIZE", "constraint_refs": ["CONSTRAINT::Q"], "accounting_basis_ref": "ACCOUNTING::Q", "cost_basis_ref": "COST::Q", "capacity_basis_ref": "CAPACITY::Q", "scenario_set_ref": "SCENARIO::Q", "resource_budget_ref": "RESOURCE::Q", "ttl_policy_ref": "TTL::Q", "version_epoch_pins": ["EPOCH::Q"]},
+                "strongest_classical_basis": {"input_lock_id": "LOCK::Q", "original_formulation_id": "FORMULATION::Q", "objective_sense": "MAXIMIZE", "constraint_refs": ["CONSTRAINT::Q"], "accounting_basis_ref": "ACCOUNTING::Q", "cost_basis_ref": "COST::Q", "capacity_basis_ref": "CAPACITY::Q", "scenario_set_ref": "SCENARIO::Q", "resource_budget_ref": "RESOURCE::Q", "ttl_policy_ref": "TTL::Q", "version_epoch_pins": ["EPOCH::Q"]},
+                "no_trade_basis": {"input_lock_id": "LOCK::Q", "original_formulation_id": "FORMULATION::Q", "objective_sense": "MAXIMIZE", "constraint_refs": ["CONSTRAINT::Q"], "accounting_basis_ref": "ACCOUNTING::Q", "cost_basis_ref": "COST::Q", "capacity_basis_ref": "CAPACITY::Q", "scenario_set_ref": "SCENARIO::Q", "resource_budget_ref": "RESOURCE::Q", "ttl_policy_ref": "TTL::Q", "version_epoch_pins": ["EPOCH::Q"]},
+            },
+            "expected": {"trace_expected_locked_cost": "0.625", "original_economic_objective": "0.8", "selected_candidate_id": "01", "selected_original_model_feasible": True, "effect_call_count": 0},
+            "comparison": "EXACT_DECIMAL_AND_TYPED_BASIS_INVARIANTS",
+            "seed": None,
+        },
+        "MATH-51": {
+            "inputs": {
+                "input_lock_id": "LOCK::Q", "formulation_id": "FORMULATION::Q", "hamiltonian_id": "HAMILTONIAN::Q", "ansatz_metadata_ref": "ANSATZ::Q", "parameter_order": ["phi-1"], "optimizer_metadata_ref": "OPTIMIZER::Q", "seed_policy_ref": "SEED::Q", "bounds_ref": "BOUNDS::Q", "constraint_refs": ["CONSTRAINT::Q"], "trace_complete": True, "original_model_interpret_back_valid": True,
+                "parameter_point_ids": ["P0", "P1", "P2"], "expectation_trace": ["1.50", "1.20", "1.10"], "variance_trace": ["0.09", "0.04", "0.01"], "locked_costs": ["3", "2", "1"], "original_economic_utilities": ["0.6", "0.8", "1.2"], "observed_feasibility": [True, True, True], "resource_use": ["3", "2", "1"], "latency": ["3", "2", "1"], "selected_point_id": "P2", "objective_sense": "MAXIMIZE",
+                "quantum_basis": {"input_lock_id": "LOCK::Q", "original_formulation_id": "FORMULATION::Q", "objective_sense": "MAXIMIZE", "constraint_refs": ["CONSTRAINT::Q"], "accounting_basis_ref": "ACCOUNTING::Q", "cost_basis_ref": "COST::Q", "capacity_basis_ref": "CAPACITY::Q", "scenario_set_ref": "SCENARIO::Q", "resource_budget_ref": "RESOURCE::Q", "ttl_policy_ref": "TTL::Q", "version_epoch_pins": ["EPOCH::Q"]},
+                "strongest_classical_basis": {"input_lock_id": "LOCK::Q", "original_formulation_id": "FORMULATION::Q", "objective_sense": "MAXIMIZE", "constraint_refs": ["CONSTRAINT::Q"], "accounting_basis_ref": "ACCOUNTING::Q", "cost_basis_ref": "COST::Q", "capacity_basis_ref": "CAPACITY::Q", "scenario_set_ref": "SCENARIO::Q", "resource_budget_ref": "RESOURCE::Q", "ttl_policy_ref": "TTL::Q", "version_epoch_pins": ["EPOCH::Q"]},
+                "no_trade_basis": {"input_lock_id": "LOCK::Q", "original_formulation_id": "FORMULATION::Q", "objective_sense": "MAXIMIZE", "constraint_refs": ["CONSTRAINT::Q"], "accounting_basis_ref": "ACCOUNTING::Q", "cost_basis_ref": "COST::Q", "capacity_basis_ref": "CAPACITY::Q", "scenario_set_ref": "SCENARIO::Q", "resource_budget_ref": "RESOURCE::Q", "ttl_policy_ref": "TTL::Q", "version_epoch_pins": ["EPOCH::Q"]},
+            },
+            "expected": {"trace_expectation": "1.10", "variance": "0.01", "original_economic_objective": "1.2", "selected_candidate_id": "P2", "selected_original_model_feasible": True, "effect_call_count": 0},
+            "comparison": "EXACT_DECIMAL_AND_TYPED_BASIS_INVARIANTS",
+            "seed": None,
+        },
+        "MATH-52": {
+            "inputs": {
+                "quantum_basis": {"input_lock_id": "LOCK::Q", "original_formulation_id": "FORMULATION::Q", "objective_sense": "MAXIMIZE", "constraint_refs": ["CONSTRAINT::Q"], "accounting_basis_ref": "ACCOUNTING::Q", "cost_basis_ref": "COST::Q", "capacity_basis_ref": "CAPACITY::Q", "scenario_set_ref": "SCENARIO::Q", "resource_budget_ref": "RESOURCE::Q", "ttl_policy_ref": "TTL::Q", "version_epoch_pins": ["EPOCH::Q"]},
+                "strongest_classical_basis": {"input_lock_id": "LOCK::Q", "original_formulation_id": "FORMULATION::Q", "objective_sense": "MAXIMIZE", "constraint_refs": ["CONSTRAINT::Q"], "accounting_basis_ref": "ACCOUNTING::Q", "cost_basis_ref": "COST::Q", "capacity_basis_ref": "CAPACITY::Q", "scenario_set_ref": "SCENARIO::Q", "resource_budget_ref": "RESOURCE::Q", "ttl_policy_ref": "TTL::Q", "version_epoch_pins": ["EPOCH::Q"]},
+                "no_trade_basis": {"input_lock_id": "LOCK::Q", "original_formulation_id": "FORMULATION::Q", "objective_sense": "MAXIMIZE", "constraint_refs": ["CONSTRAINT::Q"], "accounting_basis_ref": "ACCOUNTING::Q", "cost_basis_ref": "COST::Q", "capacity_basis_ref": "CAPACITY::Q", "scenario_set_ref": "SCENARIO::Q", "resource_budget_ref": "RESOURCE::Q", "ttl_policy_ref": "TTL::Q", "version_epoch_pins": ["EPOCH::Q"]},
+                "validated_quantum": {"comparator_class": "VALIDATED_QUANTUM", "feasible": True, "hard_veto": False, "conservative_utility": "1.2", "resource_use": "2", "latency": "2", "deterministic_tie_break": "Q"},
+                "strongest_classical": {"comparator_class": "STRONGEST_CLASSICAL", "feasible": True, "hard_veto": False, "conservative_utility": "1.3", "resource_use": "1", "latency": "1", "deterministic_tie_break": "C"},
+                "no_trade": {"comparator_class": "NO_TRADE", "feasible": True, "hard_veto": False, "conservative_utility": "0", "resource_use": "0", "latency": "0", "deterministic_tie_break": "N"},
+            },
+            "expected": {"delta_quantum_vs_classical": "-0.1", "delta_quantum_vs_no_trade": "1.2", "quantum_advantage_claim_allowed": False, "winner": "STRONGEST_CLASSICAL"},
+            "comparison": "LEXICOGRAPHIC_FEASIBILITY_UTILITY_RESOURCE_LATENCY_TIEBREAK",
+            "seed": None,
+        },
+    }
+)
+
+_ST12F_MATH52_BASIS_FIELDS_V1 = (
+    "input_lock_id",
+    "original_formulation_id",
+    "objective_sense",
+    "constraint_refs",
+    "accounting_basis_ref",
+    "cost_basis_ref",
+    "capacity_basis_ref",
+    "scenario_set_ref",
+    "resource_budget_ref",
+    "ttl_policy_ref",
+    "version_epoch_pins",
+)
+
+
+def _independently_validate_st12f_comparison_basis_v1(
+    raw_inputs: Mapping[str, object],
+) -> None:
+    bases = tuple(
+        raw_inputs[name]
+        for name in (
+            "quantum_basis",
+            "strongest_classical_basis",
+            "no_trade_basis",
+        )
+    )
+    if any(
+        not isinstance(row, Mapping)
+        or set(row) != set(_ST12F_MATH52_BASIS_FIELDS_V1)
+        for row in bases
+    ):
+        raise ValueError("comparison basis is incomplete")
+    normalized = []
+    text_fields = tuple(
+        field_name
+        for field_name in _ST12F_MATH52_BASIS_FIELDS_V1
+        if field_name not in {"constraint_refs", "version_epoch_pins"}
+    )
+    for basis in bases:
+        if any(
+            not isinstance(basis[field_name], str)
+            or not basis[field_name]
+            or basis[field_name] != basis[field_name].strip()
+            for field_name in text_fields
+        ) or basis["objective_sense"] not in {"MAXIMIZE", "MINIMIZE"}:
+            raise ValueError("comparison basis identities are not canonical")
+        row = dict(basis)
+        for field_name in ("constraint_refs", "version_epoch_pins"):
+            refs = basis[field_name]
+            if (
+                not isinstance(refs, (list, tuple))
+                or not refs
+                or any(
+                    not isinstance(item, str)
+                    or not item
+                    or item != item.strip()
+                    for item in refs
+                )
+                or len(refs) != len(set(refs))
+            ):
+                raise ValueError("comparison basis references are not canonical")
+            row[field_name] = tuple(refs)
+        normalized.append(row)
+    first = normalized[0]
+    if any(
+        row[field_name] != first[field_name]
+        for row in normalized[1:]
+        for field_name in _ST12F_MATH52_BASIS_FIELDS_V1
+    ):
+        raise ValueError("comparison basis mismatch")
+
+
+def independently_reconstruct_st12f_math_v1(
+    math_spec_id: str, raw_inputs: Mapping[str, object]
+) -> Mapping[str, object]:
+    """Standard-library oracle that never imports a production callable."""
+
+    if math_spec_id == "MATH-40":
+        result = Decimal(str(raw_inputs["signed_fill_quantity"])) * (
+            Decimal(str(raw_inputs["midpoint_after_fill"]))
+            - Decimal(str(raw_inputs["fill_price"]))
+        )
+        return {"side_convention_explicit": True, "signed_markout": format(result, ".2f")}
+    if math_spec_id == "MATH-41":
+        edge = float(raw_inputs["edge_now"])
+        latency = float(raw_inputs["latency"])
+        tau = float(raw_inputs["tau"])
+        if tau <= 0 or latency < 0 or not all(math.isfinite(value) for value in (edge, latency, tau)):
+            raise ValueError("invalid latency-decay domain")
+        return {"edge_after_latency": edge * math.exp(-latency / tau)}
+    if math_spec_id == "MATH-42":
+        y = float(raw_inputs["Y"])
+        sigma = float(raw_inputs["sigma"])
+        quantity = Decimal(str(raw_inputs["Q"]))
+        adv = Decimal(str(raw_inputs["ADV"]))
+        if adv <= 0 or sigma < 0 or not math.isfinite(y) or not math.isfinite(sigma):
+            raise ValueError("invalid market-impact domain")
+        return {"impact_fraction": y * sigma * math.sqrt(float(abs(quantity) / adv))}
+    if math_spec_id == "MATH-43":
+        participation = float(raw_inputs["participation"])
+        cap = float(raw_inputs["approved_participation_cap"])
+        scale = float(raw_inputs["penalty_scale"])
+        if cap <= 0 or scale < 0 or not all(math.isfinite(value) for value in (participation, cap, scale)):
+            raise ValueError("invalid capacity domain")
+        return {"capacity_penalty": max(0.0, participation / cap - 1.0) ** 2 * scale}
+    if math_spec_id == "MATH-44":
+        sample = raw_inputs["sample_covariance"]
+        target = raw_inputs["target"]
+        delta = float(raw_inputs["delta"])
+        if not isinstance(sample, list | tuple) or not isinstance(target, list | tuple) or not 0 <= delta <= 1 or len(sample) != len(target):
+            raise ValueError("invalid covariance-shrinkage domain")
+        result = [
+            [
+                (1.0 - delta) * float(value) + delta * float(target[i][j])
+                for j, value in enumerate(row)
+            ]
+            for i, row in enumerate(sample)
+        ]
+        return {"shrunk_covariance": result}
+    if math_spec_id == "MATH-45":
+        lcb = (
+            float(raw_inputs["estimated_net_edge"])
+            - float(raw_inputs["z_or_quantile"]) * float(raw_inputs["uncertainty"])
+            - float(raw_inputs["model_risk_haircut"])
+        )
+        return {"lcb_net": lcb, "trade_gate": lcb > 0}
+    if math_spec_id == "MATH-50":
+        _independently_validate_st12f_comparison_basis_v1(raw_inputs)
+        basis = raw_inputs["quantum_basis"]
+        if (
+            raw_inputs.get("trace_complete") is not True
+            or raw_inputs.get("original_model_interpret_back_valid") is not True
+            or basis["input_lock_id"] != raw_inputs["input_lock_id"]
+            or basis["original_formulation_id"] != raw_inputs["formulation_id"]
+            or basis["objective_sense"] != raw_inputs["objective_sense"]
+            or tuple(basis["constraint_refs"]) != tuple(raw_inputs["constraint_refs"])
+        ):
+            raise ValueError("QAOA trace identity or basis mismatch")
+        weights = {key: Decimal(str(value)) for key, value in raw_inputs["trace_weights"].items()}
+        costs = {key: Decimal(str(value)) for key, value in raw_inputs["locked_costs"].items()}
+        utilities = {key: Decimal(str(value)) for key, value in raw_inputs["original_economic_utilities"].items()}
+        feasible = raw_inputs["observed_feasibility"]
+        resources = {
+            key: Decimal(str(value))
+            for key, value in raw_inputs["resource_use"].items()
+        }
+        latencies = {
+            key: Decimal(str(value))
+            for key, value in raw_inputs["latency"].items()
+        }
+        if (
+            sum(weights.values()) != Decimal(1)
+            or set(weights) != set(costs)
+            or set(weights) != set(feasible)
+            or set(weights) != set(utilities)
+            or set(weights) != set(resources)
+            or set(weights) != set(latencies)
+            or any(type(value) is not bool for value in feasible.values())
+            or any(value < 0 for value in weights.values())
+            or any(value < 0 for value in resources.values())
+            or any(value < 0 for value in latencies.values())
+            or not any(feasible.values())
+        ):
+            raise ValueError("invalid normalized trace")
+        sense = raw_inputs["objective_sense"]
+        selected = min(
+            (key for key in weights if feasible[key]),
+            key=lambda key: (
+                -utilities[key] if sense == "MAXIMIZE" else utilities[key],
+                key,
+            ),
+        )
+        if selected != raw_inputs["selected_candidate_id"]:
+            raise ValueError("QAOA selected point mismatch")
+        return {
+            "trace_expected_locked_cost": str(sum(weights[key] * costs[key] for key in weights)),
+            "original_economic_objective": str(utilities[selected]),
+            "selected_candidate_id": selected,
+            "selected_original_model_feasible": True,
+            "effect_call_count": 0,
+        }
+    if math_spec_id == "MATH-51":
+        _independently_validate_st12f_comparison_basis_v1(raw_inputs)
+        basis = raw_inputs["quantum_basis"]
+        if (
+            raw_inputs.get("trace_complete") is not True
+            or raw_inputs.get("original_model_interpret_back_valid") is not True
+            or basis["input_lock_id"] != raw_inputs["input_lock_id"]
+            or basis["original_formulation_id"] != raw_inputs["formulation_id"]
+            or basis["objective_sense"] != raw_inputs["objective_sense"]
+            or tuple(basis["constraint_refs"]) != tuple(raw_inputs["constraint_refs"])
+        ):
+            raise ValueError("VQE trace identity or basis mismatch")
+        ids = tuple(raw_inputs["parameter_point_ids"])
+        expectations = tuple(Decimal(str(value)) for value in raw_inputs["expectation_trace"])
+        variances = tuple(Decimal(str(value)) for value in raw_inputs["variance_trace"])
+        costs = tuple(Decimal(str(value)) for value in raw_inputs["locked_costs"])
+        utilities = tuple(Decimal(str(value)) for value in raw_inputs["original_economic_utilities"])
+        feasibility = tuple(raw_inputs["observed_feasibility"])
+        resources = tuple(Decimal(str(value)) for value in raw_inputs["resource_use"])
+        latencies = tuple(Decimal(str(value)) for value in raw_inputs["latency"])
+        if (
+            len(ids) != len(expectations)
+            or len(ids) != len(variances)
+            or len(ids) != len(costs)
+            or len(ids) != len(utilities)
+            or len(ids) != len(feasibility)
+            or len(ids) != len(resources)
+            or len(ids) != len(latencies)
+            or not ids
+            or len(ids) != len(set(ids))
+            or any(not isinstance(value, str) or not value for value in ids)
+            or any(value < 0 for value in variances)
+            or any(value < 0 for value in resources)
+            or any(value < 0 for value in latencies)
+            or any(type(value) is not bool for value in feasibility)
+            or not any(feasibility)
+        ):
+            raise ValueError("invalid VQE trace")
+        sense = raw_inputs["objective_sense"]
+        selected = min(
+            (ids[index] for index, value in enumerate(feasibility) if value),
+            key=lambda key: (
+                -utilities[ids.index(key)]
+                if sense == "MAXIMIZE"
+                else utilities[ids.index(key)],
+                key,
+            ),
+        )
+        if selected != str(raw_inputs["selected_point_id"]):
+            raise ValueError("VQE selected point mismatch")
+        index = ids.index(selected)
+        return {
+            "trace_expectation": str(expectations[index]),
+            "variance": str(variances[index]),
+            "original_economic_objective": str(utilities[index]),
+            "selected_candidate_id": selected,
+            "selected_original_model_feasible": True,
+            "effect_call_count": 0,
+        }
+    if math_spec_id == "MATH-52":
+        _independently_validate_st12f_comparison_basis_v1(raw_inputs)
+        expected_classes = (
+            ("validated_quantum", "VALIDATED_QUANTUM"),
+            ("strongest_classical", "STRONGEST_CLASSICAL"),
+            ("no_trade", "NO_TRADE"),
+        )
+        rows = []
+        for input_name, expected_class in expected_classes:
+            row = raw_inputs[input_name]
+            if (
+                not isinstance(row, Mapping)
+                or set(row)
+                != {
+                    "comparator_class",
+                    "feasible",
+                    "hard_veto",
+                    "conservative_utility",
+                    "resource_use",
+                    "latency",
+                    "deterministic_tie_break",
+                }
+                or row.get("comparator_class") != expected_class
+                or type(row.get("feasible")) is not bool
+                or type(row.get("hard_veto")) is not bool
+                or not isinstance(row.get("deterministic_tie_break"), str)
+                or not row["deterministic_tie_break"]
+            ):
+                raise ValueError("invalid comparator receipt")
+            if expected_class == "NO_TRADE" and (
+                row["feasible"] is not True or row["hard_veto"] is not False
+            ):
+                raise ValueError("permanent NO_TRADE is unavailable")
+            resource = Decimal(str(row["resource_use"]))
+            latency = Decimal(str(row["latency"]))
+            if resource < 0 or latency < 0:
+                raise ValueError("comparator resource or latency is negative")
+            rows.append(
+                (
+                    expected_class,
+                    row["feasible"],
+                    row["hard_veto"],
+                    Decimal(str(row["conservative_utility"])),
+                    resource,
+                    latency,
+                    row["deterministic_tie_break"],
+                )
+            )
+        priority = {"NO_TRADE": 0, "STRONGEST_CLASSICAL": 1, "VALIDATED_QUANTUM": 2}
+        winner = min(
+            rows,
+            key=lambda row: (
+                0 if row[1] and not row[2] else 1,
+                -row[3],
+                row[4],
+                row[5],
+                priority[row[0]],
+                row[6],
+            ),
+        )[0]
+        utilities = {row[0]: row[3] for row in rows}
+        return {
+            "delta_quantum_vs_classical": str(utilities["VALIDATED_QUANTUM"] - utilities["STRONGEST_CLASSICAL"]),
+            "delta_quantum_vs_no_trade": str(utilities["VALIDATED_QUANTUM"] - utilities["NO_TRADE"]),
+            "quantum_advantage_claim_allowed": False,
+            "winner": winner,
+        }
+    raise KeyError(math_spec_id)
+
+
+_ST12F_ORACLE_STEPS_V1 = (
+    "Parse the golden-vector inputs without importing the production implementation.",
+    "Apply the independently stated formula, enumeration, or trace invariant procedure.",
+    "Compare every declared output using the vector comparison policy.",
+    "Reject missing, invalid, nonfinite, unit-incompatible, or lock-inconsistent inputs.",
+)
+ST12F_NEW_ORACLE_BY_MATH_ID: Mapping[str, OracleContractV1] = MappingProxyType(
+    {
+        math_id: OracleContractV1(
+            oracle_id=f"ORACLE::{math_id}",
+            math_spec_id=math_id,
+            oracle_version="1.4",
+            comparison_policy=str(row["comparison"]),
+            expected_value_json=json.dumps(row["expected"], sort_keys=True, separators=(",", ":")),
+            independent_algorithm_steps=_ST12F_ORACLE_STEPS_V1,
+        )
+        for math_id, row in _ST12F_NEW_VECTOR_ROWS_V1.items()
+    }
+)
+ST12F_NEW_GOLDEN_VECTOR_BY_MATH_ID: Mapping[str, GoldenVectorV1] = MappingProxyType(
+    {
+        math_id: GoldenVectorV1(
+            vector_id=f"GOLDEN::{math_id}",
+            math_spec_id=math_id,
+            oracle_id=f"ORACLE::{math_id}",
+            vector_kind="NUMERIC_GOLDEN",
+            comparison_policy=str(row["comparison"]),
+            inputs_json=json.dumps(row["inputs"], sort_keys=True, separators=(",", ":")),
+            expected_json=json.dumps(row["expected"], sort_keys=True, separators=(",", ":")),
+            seed=row["seed"],
+        )
+        for math_id, row in _ST12F_NEW_VECTOR_ROWS_V1.items()
+    }
+)
+ST12F_EVIDENCE_ORACLE_BY_MATH_ID: Mapping[str, OracleContractV1] = MappingProxyType(
+    {
+        **{math_id: ST12D_CUMULATIVE_ORACLE_BY_MATH_ID[math_id] for math_id in (f"MATH-{number:02d}" for number in range(1, 40))},
+        **ST12F_NEW_ORACLE_BY_MATH_ID,
+    }
+)
+ST12F_EVIDENCE_GOLDEN_VECTOR_BY_MATH_ID: Mapping[str, GoldenVectorV1] = MappingProxyType(
+    {
+        **{math_id: ST12D_CUMULATIVE_GOLDEN_VECTOR_BY_MATH_ID[math_id] for math_id in (f"MATH-{number:02d}" for number in range(1, 40))},
+        **ST12F_NEW_GOLDEN_VECTOR_BY_MATH_ID,
+    }
+)
+
+if (
+    len(ST12F_NEW_ORACLE_BY_MATH_ID) != 9
+    or len(ST12F_NEW_GOLDEN_VECTOR_BY_MATH_ID) != 9
+    or len(ST12F_EVIDENCE_ORACLE_BY_MATH_ID) != 48
+    or len(ST12F_EVIDENCE_GOLDEN_VECTOR_BY_MATH_ID) != 48
+    or any(oracle.production_import_allowed or oracle.primary_validator_import_allowed for oracle in ST12F_EVIDENCE_ORACLE_BY_MATH_ID.values())
+    or any(vector.production_import_allowed for vector in ST12F_EVIDENCE_GOLDEN_VECTOR_BY_MATH_ID.values())
+):
+    raise ContractValidationError(
+        ReasonCode.ORACLE_NOT_INDEPENDENT,
+        "ST12-F independent oracle/vector closure must remain exact 48/48",
     )

@@ -104,6 +104,14 @@ from .parameter_policy import (
     CUMULATIVE_PARAMETER_POLICIES,
     PARAMETER_POLICIES,
     ParameterPolicyResolverV1,
+    ST12F_CALIBRATION_POLICY_ABSENCE_V1,
+    ST12FCalibrationOptimizerPolicyV1,
+    ST12FParameterApplicationBindingV1,
+    ST12FParameterPolicyRowV1,
+    ST12FParameterRegistryV1,
+    _ST12FParameterRegistryBuildReceiptV1,
+    _st12f_parameter_registry_build_receipt_v1,
+    initialize_st12f_parameter_registry_v1,
 )
 from .plugin_adapter import PR162EPluginAdapterV1
 from .protocols import ExistingOwnerProjectionAdapterV1
@@ -153,6 +161,12 @@ PRODUCTION_CORE_PATHS = (
     "src/qtt/stage1_prediction_markets/qku_computation_control_plane/service.py",
     "src/qtt/stage1_prediction_markets/qku_computation_control_plane/stack_resolver.py",
     "src/qtt/stage1_prediction_markets/qku_computation_control_plane/unit_conversion.py",
+    "src/qtt/stage1_prediction_markets/qku_computation_control_plane/cohort_compiler.py",
+    "src/qtt/stage1_prediction_markets/qku_computation_control_plane/input_lock.py",
+    "src/qtt/stage1_prediction_markets/qku_computation_control_plane/evidence.py",
+    "src/qtt/stage1_prediction_markets/qku_computation_control_plane/model_risk.py",
+    "src/qtt/stage1_prediction_markets/qku_computation_control_plane/quantum_benchmark.py",
+    "src/qtt/stage1_prediction_markets/qku_computation_control_plane/llm_gateway.py",
 )
 TRANCHE_A_PRODUCTION_CORE_PATHS = PRODUCTION_CORE_PATHS[:19]
 
@@ -1280,7 +1294,10 @@ def _no_runtime_topology() -> bool:
     package = REPO_ROOT / Path(PRODUCTION_CORE_PATHS[0]).parent
     if forbidden_file_names & {path.name for path in package.glob("*.py")}:
         return False
-    for _, tree in _package_ast():
+    cache_lock_import_count = 0
+    cache_lock_assignment_count = 0
+    cache_lock_publication_count = 0
+    for path, tree in _package_ast():
         for node in ast.walk(tree):
             if isinstance(node, ast.Import) and any(
                 alias.name.split(".", 1)[0] in forbidden_modules
@@ -1292,8 +1309,54 @@ def _no_runtime_topology() -> bool:
                 and node.module
                 and node.module.split(".", 1)[0] in forbidden_modules
             ):
-                return False
-    return True
+                parameter_policy_exception = (
+                    path.name == "parameter_policy.py"
+                    and node.module == "threading"
+                    and {alias.name for alias in node.names} <= {"Condition", "Lock"}
+                )
+                cache_publication_exception = (
+                    path.name == "evidence.py"
+                    and node.module == "threading"
+                    and tuple((alias.name, alias.asname) for alias in node.names)
+                    == (("Lock", None),)
+                )
+                if cache_publication_exception:
+                    cache_lock_import_count += 1
+                if not parameter_policy_exception and not cache_publication_exception:
+                    return False
+            if path.name == "evidence.py" and isinstance(node, ast.Assign):
+                if (
+                    len(node.targets) == 1
+                    and isinstance(node.targets[0], ast.Attribute)
+                    and isinstance(node.targets[0].value, ast.Name)
+                    and node.targets[0].value.id == "self"
+                    and node.targets[0].attr == "_cache_publication_lock"
+                    and isinstance(node.value, ast.Call)
+                    and isinstance(node.value.func, ast.Name)
+                    and node.value.func.id == "Lock"
+                    and not node.value.args
+                    and not node.value.keywords
+                ):
+                    cache_lock_assignment_count += 1
+            if path.name == "evidence.py" and isinstance(node, ast.With):
+                if (
+                    len(node.items) == 1
+                    and isinstance(node.items[0].context_expr, ast.Attribute)
+                    and isinstance(
+                        node.items[0].context_expr.value,
+                        ast.Name,
+                    )
+                    and node.items[0].context_expr.value.id == "self"
+                    and node.items[0].context_expr.attr
+                    == "_cache_publication_lock"
+                    and node.items[0].optional_vars is None
+                ):
+                    cache_lock_publication_count += 1
+    return (
+        cache_lock_import_count == 1
+        and cache_lock_assignment_count == 1
+        and cache_lock_publication_count == 1
+    )
 
 
 def _no_dynamic_import_or_unsafe_deserialization() -> bool:
@@ -1341,6 +1404,701 @@ def _parameter_seed_resolution_valid() -> bool:
     return True
 
 
+def _st12f_parameter_registry_integrity_checks_v1(
+    registry: ST12FParameterRegistryV1,
+    receipt: _ST12FParameterRegistryBuildReceiptV1,
+) -> tuple[ValidationCheckV1, ...]:
+    expected_shards = tuple(
+        f"st12f_parameter_rows_{start:04d}_{start + 319:04d}.jsonl"
+        for start in range(1, 3841, 320)
+    )
+    expected_resources = (
+        "st12f_parameter_resources_manifest.json",
+        *expected_shards,
+    )
+    expected_distribution = (
+        ("STATIC_OR_DETERMINISTIC_RULE", 2668),
+        ("RUNTIME_TYPED_BINDING", 300),
+        ("EXPLICIT_FAIL_CLOSED_POLICY", 78),
+        ("OFFLINE_CALIBRATION_OR_BOUNDED_OPTIMIZATION", 38),
+        ("OFFLINE_CALIBRATION_REQUIRED", 12),
+    )
+
+    def recursively_immutable(value: object) -> bool:
+        if type(value) is MappingProxyType:
+            return all(
+                type(key) is str and recursively_immutable(item)
+                for key, item in value.items()
+            )
+        if type(value) is tuple:
+            return all(recursively_immutable(item) for item in value)
+        return type(value) in {str, bool, int, float, type(None)}
+
+    def frozen_slots_rows(rows: tuple[object, ...], expected_type: type) -> bool:
+        parameters = getattr(expected_type, "__dataclass_params__", None)
+        return (
+            parameters is not None
+            and parameters.frozen
+            and "__slots__" in expected_type.__dict__
+            and all(type(row) is expected_type for row in rows)
+        )
+
+    registry_type_valid = (
+        type(registry) is ST12FParameterRegistryV1
+        and getattr(ST12FParameterRegistryV1, "__dataclass_params__").frozen
+        and "__slots__" in ST12FParameterRegistryV1.__dict__
+    )
+    receipt_parameters = getattr(
+        _ST12FParameterRegistryBuildReceiptV1,
+        "__dataclass_params__",
+        None,
+    )
+    receipt_type_valid = (
+        type(receipt) is _ST12FParameterRegistryBuildReceiptV1
+        and receipt_parameters is not None
+        and receipt_parameters.frozen
+        and "__slots__" in _ST12FParameterRegistryBuildReceiptV1.__dict__
+    )
+    policies = registry.parameter_policies if registry_type_valid else ()
+    bindings = registry.application_bindings if registry_type_valid else ()
+    calibrations = registry.calibration_policies if registry_type_valid else ()
+    policy_ids = tuple(row.parameter_id for row in policies)
+    binding_parameter_ids = tuple(row.parameter_id for row in bindings)
+    binding_ids = tuple(row.binding_id for row in bindings)
+    calibration_ids = tuple(row.parameter_id for row in calibrations)
+    resolution_counts = Counter(
+        row.implementation_resolution_kind for row in policies
+    )
+    actual_distribution = tuple(
+        (kind, resolution_counts[kind]) for kind, _ in expected_distribution
+    )
+
+    roster_and_bounds_valid = receipt_type_valid and (
+        receipt.resource_filenames == expected_resources
+        and receipt.shard_filenames == expected_shards
+        and receipt.resource_count == 13
+        and receipt.shard_count == 12
+        and 0 < receipt.manifest_byte_count <= 65536
+        and 0 < receipt.maximum_shard_byte_count < 2100000
+        and 0 < receipt.maximum_physical_line_byte_count <= 65536
+    )
+    populations_valid = receipt_type_valid and (
+        receipt.policy_count == len(policies) == 3096
+        and receipt.binding_count == len(bindings) == 3096
+        and receipt.calibration_count == len(calibrations) == 50
+        and receipt.explicit_absence_count == 3046
+        and receipt.canonical_value_owner == "ComputationParameterPolicyV1"
+    )
+    distribution_valid = receipt_type_valid and (
+        receipt.resolution_distribution == expected_distribution
+        and actual_distribution == expected_distribution
+    )
+    ordered_rows_valid = (
+        type(policies) is tuple
+        and type(bindings) is tuple
+        and type(calibrations) is tuple
+        and frozen_slots_rows(policies, ST12FParameterPolicyRowV1)
+        and frozen_slots_rows(bindings, ST12FParameterApplicationBindingV1)
+        and frozen_slots_rows(calibrations, ST12FCalibrationOptimizerPolicyV1)
+    )
+    indexes = (
+        registry.policy_by_parameter_id,
+        registry.binding_by_parameter_id,
+        registry.binding_by_binding_id,
+        registry.calibration_by_parameter_id,
+    )
+    index_shapes_valid = (
+        all(type(index) is MappingProxyType for index in indexes)
+        and tuple(len(index) for index in indexes) == (3096, 3096, 3096, 50)
+    )
+    index_identity_valid = (
+        tuple(registry.policy_by_parameter_id) == policy_ids
+        and tuple(registry.binding_by_parameter_id) == binding_parameter_ids
+        and tuple(registry.binding_by_binding_id) == binding_ids
+        and tuple(registry.calibration_by_parameter_id) == calibration_ids
+        and len(set(policy_ids)) == len(policy_ids)
+        and len(set(binding_ids)) == len(binding_ids)
+        and all(
+            registry.policy_by_parameter_id[row.parameter_id] is row
+            for row in policies
+        )
+        and all(
+            registry.binding_by_parameter_id[row.parameter_id] is row
+            and registry.binding_by_binding_id[row.binding_id] is row
+            for row in bindings
+        )
+        and all(
+            registry.calibration_by_parameter_id[row.parameter_id] is row
+            for row in calibrations
+        )
+    )
+    recursively_frozen_valid = all(
+        recursively_immutable(getattr(row, field.name))
+        for row in (*policies, *bindings, *calibrations)
+        for field in fields(row)
+    )
+    canonical_owner_and_fabrication_valid = (
+        all(
+            row.canonical_value_owner == "ComputationParameterPolicyV1"
+            and row.runtime_value_fabrication_allowed is False
+            and row.second_value_owner_allowed is False
+            for row in policies
+        )
+        and all(
+            row.canonical_value_owner == "ComputationParameterPolicyV1"
+            and row.consumer_may_browse_or_invent_value is False
+            and row.second_parameter_value_owner_prohibited is True
+            for row in bindings
+        )
+    )
+    range_metadata_not_runtime_valid = all(
+        type(policy.search_or_tuning_range) is MappingProxyType
+        and type(policy.initial_default_or_resolution_rule) is str
+        and binding.effective_range_field
+        == "st12f_currentized_reference_range_or_structural_constraint"
+        and binding.effective_rule_field
+        == "st12f_currentized_day1_seed_or_resolution_rule"
+        for policy, binding in zip(policies, bindings, strict=True)
+    )
+    policy_binding_joins_valid = (
+        len(policies) == len(bindings)
+        and len({row.application_contract for row in bindings}) == 1
+        and len({row.complete_canonical_schema_ref for row in bindings}) == 1
+        and len(
+            {
+                binding.resolution_path
+                for policy, binding in zip(policies, bindings, strict=True)
+                if policy.implementation_resolution_kind == "RUNTIME_TYPED_BINDING"
+            }
+        )
+        == 1
+        and len(
+            {
+                binding.resolution_path
+                for policy, binding in zip(policies, bindings, strict=True)
+                if policy.implementation_resolution_kind != "RUNTIME_TYPED_BINDING"
+            }
+        )
+        == 1
+        and all(
+            policy.parameter_id == binding.parameter_id
+            and policy.parameter_symbol == binding.parameter_symbol
+            and policy.policy_consumer_owner == binding.policy_consumer_owner
+            and policy.master_plan_section_id == binding.master_plan_section_id
+            and binding.family_evidence_binding_ref
+            == policy.source_and_evidence_requirements[
+                "family_evidence_binding_ref"
+            ]
+            and binding.binding_id
+            == "ST12F-PARAM-BINDING::" + policy.parameter_id
+            and binding.calibration_optimizer_policy_ref
+            in {
+                ST12F_CALIBRATION_POLICY_ABSENCE_V1.value,
+                "CALIBRATION::" + policy.parameter_id,
+            }
+            for policy, binding in zip(policies, bindings, strict=True)
+        )
+    )
+
+    def calibration_join_valid(
+        calibration: ST12FCalibrationOptimizerPolicyV1,
+    ) -> bool:
+        policy = registry.policy_by_parameter_id[calibration.parameter_id]
+        binding = registry.binding_by_parameter_id[calibration.parameter_id]
+        return (
+            calibration.parameter_symbol == policy.parameter_symbol
+            and calibration.policy_consumer_owner == policy.policy_consumer_owner
+            and calibration.calibration_route == policy.calibration_route
+            and calibration.hard_bounds == policy.hard_bounds
+            and calibration.initialization_policy == policy.initialization_policy
+            and calibration.revalidation_trigger == policy.revalidation_trigger
+            and calibration.search_or_tuning_range == policy.search_or_tuning_range
+            and calibration.fallback == policy.fallback
+            and calibration.seed_policy == policy.seed_policy
+            and calibration.warm_start_policy == policy.warm_start_policy
+            and calibration.selected_method
+            == policy.optimizer_and_optimizer_version["optimizer"]
+            and calibration.method_version
+            == policy.optimizer_and_optimizer_version["version"]
+            and calibration.required_preexisting_receipt_fields
+            == tuple(
+                policy.optimizer_and_optimizer_version[
+                    "required_receipt_fields"
+                ]
+            )
+            and calibration.st12f_execution_authorized is False
+            and binding.calibration_optimizer_policy_ref
+            == "CALIBRATION::" + policy.parameter_id
+        )
+
+    calibration_id_set = set(calibration_ids)
+    non_calibrated_policies = tuple(
+        policy for policy in policies if policy.parameter_id not in calibration_id_set
+    )
+    calibration_and_absence_valid = (
+        len(non_calibrated_policies) == 3046
+        and all(calibration_join_valid(row) for row in calibrations)
+        and all(
+            registry.calibration_policy_or_absence_for_parameter_id(
+                policy.parameter_id
+            )
+            is ST12F_CALIBRATION_POLICY_ABSENCE_V1
+            and registry.binding_by_parameter_id[
+                policy.parameter_id
+            ].calibration_optimizer_policy_ref
+            == ST12F_CALIBRATION_POLICY_ABSENCE_V1.value
+            for policy in non_calibrated_policies
+        )
+    )
+    repeated_ready_identity = initialize_st12f_parameter_registry_v1() is registry
+    owner_package_equality_not_claimed = (
+        receipt_type_valid and receipt.owner_package_equality_claimed is False
+    )
+    return (
+        _check(
+            "ARCH_ST12F_REGISTRY_RECEIPT_TYPES",
+            registry_type_valid and receipt_type_valid,
+            "exact frozen registry and immutable build-receipt types",
+        ),
+        _check(
+            "ARCH_ST12F_RESOURCE_ROSTER_BOUNDS",
+            roster_and_bounds_valid,
+            "13 exact resources, 12 ordered shards, and certified byte bounds",
+        ),
+        _check(
+            "ARCH_ST12F_RECEIPT_POPULATIONS",
+            populations_valid,
+            "3096 policies, 3096 bindings, 50 calibrations, 3046 absences",
+        ),
+        _check(
+            "ARCH_ST12F_RESOLUTION_DISTRIBUTION",
+            distribution_valid,
+            "2668/300/78/38/12 exact resolution distribution",
+        ),
+        _check(
+            "ARCH_ST12F_ORDERED_TYPED_ROWS",
+            ordered_rows_valid,
+            "ordered tuples contain exact frozen slots-enabled row types",
+        ),
+        _check(
+            "ARCH_ST12F_IMMUTABLE_INDEX_SHAPES",
+            index_shapes_valid,
+            "four mapping-proxy indexes with counts 3096/3096/3096/50",
+        ),
+        _check(
+            "ARCH_ST12F_INDEX_IDENTITY_CLOSURE",
+            index_identity_valid,
+            "every index key and object identity reconciles to ordered tuples",
+        ),
+        _check(
+            "ARCH_ST12F_RECURSIVE_IMMUTABILITY",
+            recursively_frozen_valid,
+            "nested mappings are mapping proxies and sequences are tuples",
+        ),
+        _check(
+            "ARCH_ST12F_OWNER_AND_FABRICATION_LAW",
+            canonical_owner_and_fabrication_valid,
+            "one canonical owner and no runtime value fabrication",
+        ),
+        _check(
+            "ARCH_ST12F_RANGE_METADATA_NOT_RUNTIME_VALUE",
+            range_metadata_not_runtime_valid,
+            "search metadata remains distinct from typed resolution rules",
+        ),
+        _check(
+            "ARCH_ST12F_POLICY_BINDING_JOINS",
+            policy_binding_joins_valid,
+            "all policy and application-binding identities reconcile",
+        ),
+        _check(
+            "ARCH_ST12F_CALIBRATION_AND_ABSENCE_JOINS",
+            calibration_and_absence_valid,
+            "50 calibration joins and one singleton for 3046 absences",
+        ),
+        _check(
+            "ARCH_ST12F_REPEATED_READY_IDENTITY",
+            repeated_ready_identity,
+            "repeated prewarm returns the same immutable ready registry",
+        ),
+        _check(
+            "ARCH_ST12F_NO_OWNER_PACKAGE_EQUALITY_CLAIM",
+            owner_package_equality_not_claimed,
+            "owner_package_equality_claimed=False",
+        ),
+    )
+
+
+def _st12f_parameter_registry_hot_path_ast_checks_v1(
+) -> tuple[ValidationCheckV1, ...]:
+    path = REPO_ROOT / (
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/"
+        "parameter_policy.py"
+    )
+    tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+    module_functions = {
+        node.name: node
+        for node in tree.body
+        if isinstance(node, ast.FunctionDef)
+    }
+    module_classes = {
+        node.name: node for node in tree.body if isinstance(node, ast.ClassDef)
+    }
+
+    def call_name(node: ast.expr) -> str:
+        if isinstance(node, ast.Name):
+            return node.id
+        if isinstance(node, ast.Attribute):
+            prefix = call_name(node.value)
+            return f"{prefix}.{node.attr}" if prefix else node.attr
+        return ""
+
+    def calls_in(nodes: tuple[ast.AST, ...]) -> tuple[str, ...]:
+        return tuple(
+            call_name(candidate.func)
+            for root in nodes
+            for candidate in ast.walk(root)
+            if isinstance(candidate, ast.Call)
+        )
+
+    start = next(
+        (
+            index
+            for index, node in enumerate(tree.body)
+            if isinstance(node, ast.ClassDef)
+            and node.name == "ST12FParameterRegistryInitializationStateV1"
+        ),
+        -1,
+    )
+    end = next(
+        (
+            index
+            for index, node in enumerate(tree.body)
+            if isinstance(node, ast.FunctionDef)
+            and node.name == "_st12f_parameter_registry_build_receipt_v1"
+        ),
+        -1,
+    )
+    symbol_scope_valid = 0 <= start <= end
+    section_nodes = tuple(tree.body[start : end + 1]) if symbol_scope_valid else ()
+    initialization_names = {
+        "load_st12f_parameter_registry_v1",
+        "initialize_st12f_parameter_registry_v1",
+        "_load_st12f_parameter_registry_state_machine_v1",
+        "_st12f_build_complete_parameter_registry_v1",
+    }
+    module_level_initialization_calls = tuple(
+        name
+        for statement in tree.body
+        if not isinstance(statement, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef))
+        for name in calls_in((statement,))
+        if name.rsplit(".", 1)[-1] in initialization_names
+    )
+    load_function = module_functions.get("load_st12f_parameter_registry_v1")
+    fast_path_shape_valid = False
+    ready_fast_path_forbidden_calls: tuple[str, ...] = ()
+    ready_fast_path_iteration_count = 0
+    ready_fast_path_condition_context_count = 0
+    if load_function is not None:
+        pointer_assignment_index = next(
+            (
+                index
+                for index, node in enumerate(load_function.body)
+                if isinstance(node, ast.Assign)
+                and any(
+                    isinstance(target, ast.Name) and target.id == "ready"
+                    for target in node.targets
+                )
+                and isinstance(node.value, ast.Name)
+                and node.value.id == "_ST12F_PARAMETER_REGISTRY_READY_V1"
+            ),
+            -1,
+        )
+        fast_if_index = next(
+            (
+                index
+                for index, node in enumerate(load_function.body)
+                if isinstance(node, ast.If)
+                and any(
+                    isinstance(child, ast.Return)
+                    and isinstance(child.value, ast.Name)
+                    and child.value.id == "ready"
+                    for child in node.body
+                )
+            ),
+            -1,
+        )
+        delegation_index = next(
+            (
+                index
+                for index, node in enumerate(load_function.body)
+                if isinstance(node, ast.Return)
+                and isinstance(node.value, ast.Call)
+                and call_name(node.value.func)
+                == "_load_st12f_parameter_registry_state_machine_v1"
+            ),
+            -1,
+        )
+        fast_path_shape_valid = (
+            pointer_assignment_index == 0
+            and fast_if_index == 1
+            and delegation_index > fast_if_index
+        )
+        if pointer_assignment_index >= 0 and fast_if_index >= 0:
+            fast_path_nodes = (
+                load_function.body[pointer_assignment_index],
+                load_function.body[fast_if_index],
+            )
+            ready_fast_path_forbidden_calls = calls_in(fast_path_nodes)
+            ready_fast_path_iteration_count = sum(
+                isinstance(
+                    candidate,
+                    (
+                        ast.For,
+                        ast.AsyncFor,
+                        ast.ListComp,
+                        ast.SetComp,
+                        ast.DictComp,
+                        ast.GeneratorExp,
+                    ),
+                )
+                for root in fast_path_nodes
+                for candidate in ast.walk(root)
+            )
+            ready_fast_path_condition_context_count = sum(
+                isinstance(candidate, (ast.With, ast.AsyncWith))
+                and any(
+                    isinstance(name, ast.Name)
+                    and name.id == "_ST12F_PARAMETER_REGISTRY_CONDITION_V1"
+                    for name in ast.walk(candidate)
+                )
+                for root in fast_path_nodes
+                for candidate in ast.walk(root)
+            )
+    registry_class = module_classes.get("ST12FParameterRegistryV1")
+    accessor_names = {
+        "parameter_policy_for_id": "policy_by_parameter_id",
+        "application_binding_for_parameter_id": "binding_by_parameter_id",
+        "application_binding_for_binding_id": "binding_by_binding_id",
+        "calibration_policy_or_absence_for_parameter_id": (
+            "calibration_by_parameter_id"
+        ),
+    }
+    accessor_iteration_count = 0
+    direct_accessor_count = 0
+    if registry_class is not None:
+        methods = {
+            node.name: node
+            for node in registry_class.body
+            if isinstance(node, ast.FunctionDef)
+        }
+        for method_name, mapping_name in accessor_names.items():
+            method = methods.get(method_name)
+            if method is None:
+                continue
+            accessor_iteration_count += sum(
+                isinstance(
+                    node,
+                    (
+                        ast.For,
+                        ast.AsyncFor,
+                        ast.ListComp,
+                        ast.SetComp,
+                        ast.DictComp,
+                        ast.GeneratorExp,
+                    ),
+                )
+                for node in ast.walk(method)
+            )
+            mapping_access = any(
+                (
+                    isinstance(node, ast.Subscript)
+                    and isinstance(node.value, ast.Attribute)
+                    and isinstance(node.value.value, ast.Name)
+                    and node.value.value.id == "self"
+                    and node.value.attr == mapping_name
+                )
+                or (
+                    isinstance(node, ast.Call)
+                    and isinstance(node.func, ast.Attribute)
+                    and node.func.attr == "get"
+                    and isinstance(node.func.value, ast.Attribute)
+                    and isinstance(node.func.value.value, ast.Name)
+                    and node.func.value.value.id == "self"
+                    and node.func.value.attr == mapping_name
+                )
+                for node in ast.walk(method)
+            )
+            ordered_tuple_access = any(
+                isinstance(node, ast.Attribute)
+                and node.attr
+                in {
+                    "parameter_policies",
+                    "application_bindings",
+                    "calibration_policies",
+                }
+                for node in ast.walk(method)
+            )
+            if mapping_access and not ordered_tuple_access:
+                direct_accessor_count += 1
+    public_arbitrary_path_loaders = tuple(
+        node.name
+        for root in section_nodes
+        for node in ast.walk(root)
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+        and not node.name.startswith("_")
+        and ("load" in node.name or "initialize" in node.name)
+        and (
+            any(
+                token in argument.arg.lower()
+                for argument in (*node.args.posonlyargs, *node.args.args)
+                for token in ("path", "root", "directory", "filename", "resource")
+            )
+            or any(
+                name.rsplit(".", 1)[-1] in {"open", "Path"}
+                for name in calls_in((node,))
+            )
+        )
+    )
+    string_literals = tuple(
+        node.value
+        for root in section_nodes
+        for node in ast.walk(root)
+        if isinstance(node, ast.Constant) and isinstance(node.value, str)
+    )
+    runtime_codex_inputs_references = sum(
+        ".codex_inputs" in value.lower() for value in string_literals
+    )
+    runtime_owner_zip_references = sum(
+        "owner.zip" in value.lower() for value in string_literals
+    )
+    effect_prefixes = (
+        "call_provider",
+        "invoke_provider",
+        "run_optimizer",
+        "execute_optimizer",
+        "optimize",
+        "run_simulator",
+        "simulate",
+        "execute_qpu",
+        "run_qpu",
+        "activate_mode",
+        "submit_order",
+        "cancel_order",
+        "amend_order",
+        "release_order",
+        "mutate_capital",
+        "deploy",
+    )
+    effect_call_names = tuple(
+        name
+        for name in calls_in(section_nodes)
+        if name.rsplit(".", 1)[-1].lower().startswith(effect_prefixes)
+        or any(
+            token in name.lower()
+            for token in (
+                "provider.",
+                "optimizer.",
+                "simulator.",
+                "qpu.",
+                "mode.",
+                "order.",
+                "capital.",
+            )
+        )
+    )
+    opaque_tokens = (
+        "base85",
+        "ascii85",
+        "base64",
+        "base32",
+        "gzip",
+        "zlib",
+        "lzma",
+        "bz2",
+        "pickle",
+        "marshal",
+    )
+    opaque_representation_count = sum(
+        any(token in value.lower() for token in opaque_tokens)
+        for value in (
+            *string_literals,
+            *calls_in(section_nodes),
+            *(
+                node.id
+                for root in section_nodes
+                for node in ast.walk(root)
+                if isinstance(node, ast.Name)
+            ),
+        )
+    )
+    return (
+        _check(
+            "ARCH_ST12F_AST_MODULE_IMPORT_LAZY",
+            symbol_scope_valid and not module_level_initialization_calls,
+            "module_level_initialization_call_count="
+            f"{len(module_level_initialization_calls)}",
+        ),
+        _check(
+            "ARCH_ST12F_AST_READY_POINTER_FAST_RETURN",
+            symbol_scope_valid and fast_path_shape_valid,
+            "ready pointer is returned before state-machine delegation",
+        ),
+        _check(
+            "ARCH_ST12F_AST_READY_FAST_PATH_NO_CALLS",
+            fast_path_shape_valid
+            and not ready_fast_path_forbidden_calls
+            and ready_fast_path_iteration_count == 0
+            and ready_fast_path_condition_context_count == 0,
+            "ready_fast_path_forbidden_call_count="
+            f"{len(ready_fast_path_forbidden_calls)}; "
+            f"iteration_count={ready_fast_path_iteration_count}; "
+            "condition_context_count="
+            f"{ready_fast_path_condition_context_count}",
+        ),
+        _check(
+            "ARCH_ST12F_AST_DIRECT_INDEX_ACCESSORS",
+            direct_accessor_count == 4 and accessor_iteration_count == 0,
+            f"direct_accessors={direct_accessor_count}; "
+            f"public_accessor_iteration_count={accessor_iteration_count}",
+        ),
+        _check(
+            "ARCH_ST12F_AST_NO_PUBLIC_ARBITRARY_PATH_LOADER",
+            not public_arbitrary_path_loaders,
+            "public_arbitrary_path_loader_count="
+            f"{len(public_arbitrary_path_loaders)}",
+        ),
+        _check(
+            "ARCH_ST12F_AST_NO_EXTERNAL_RUNTIME_PATH",
+            runtime_codex_inputs_references == 0
+            and runtime_owner_zip_references == 0,
+            f"runtime_codex_inputs_reference_count={runtime_codex_inputs_references}; "
+            f"runtime_owner_zip_reference_count={runtime_owner_zip_references}",
+        ),
+        _check(
+            "ARCH_ST12F_AST_NO_RUNTIME_EFFECT_CALLS",
+            not effect_call_names,
+            f"runtime_effect_call_count={len(effect_call_names)}",
+        ),
+        _check(
+            "ARCH_ST12F_AST_NO_OPAQUE_REPRESENTATION",
+            opaque_representation_count == 0,
+            f"opaque_representation_count={opaque_representation_count}",
+        ),
+    )
+
+
+def validate_st12f_parameter_registry_v1() -> ValidationReportV1:
+    registry = initialize_st12f_parameter_registry_v1()
+    receipt = _st12f_parameter_registry_build_receipt_v1(registry)
+    checks = (
+        *_st12f_parameter_registry_integrity_checks_v1(registry, receipt),
+        *_st12f_parameter_registry_hot_path_ast_checks_v1(),
+    )
+    report = ValidationReportV1("architecture", checks)
+    report.assert_passed()
+    return report
+
+
 def _existing_owner_views_valid() -> bool:
     identity = RP5CIdentityAdapterV1(REPO_ROOT).get_formula("FORMULA_QKU")
     plugins = PR162EPluginAdapterV1(REPO_ROOT).load_families()
@@ -1377,8 +2135,9 @@ def _existing_owner_views_valid() -> bool:
 
 def _architecture_checks() -> tuple[ValidationCheckV1, ...]:
     ids = tuple(IMPLEMENTATION_REGISTRY)
+    st12f_parameter_registry_checks = validate_st12f_parameter_registry_v1().checks
     return (
-        _check("ARCH_PRODUCTION_CORE_27", len(PRODUCTION_CORE_PATHS) == 27, "27 paths"),
+        _check("ARCH_PRODUCTION_CORE_33", len(PRODUCTION_CORE_PATHS) == 33, "33 centralized validation paths including six ST12-F partitions"),
         _check("ARCH_OWNER_MAP_10", len(OWNER_IDS) == 10, "10 existing owners"),
         _check(
             "ARCH_IMPLEMENTATION_REGISTRY_30",
@@ -1422,6 +2181,7 @@ def _architecture_checks() -> tuple[ValidationCheckV1, ...]:
             _parameter_seed_resolution_valid(),
             "all 135 exact seed rows resolve with frozen metadata",
         ),
+        *st12f_parameter_registry_checks,
         _check(
             "ARCH_EXISTING_OWNERS_10_CONSUMED",
             _existing_owner_views_valid(),
@@ -4223,7 +4983,7 @@ def _st12e_service_admission_predicate(root: Path) -> tuple[bool, str]:
         for node in ast.walk(helper)
     )
     passed = (
-        len(IMPLEMENTED_OPERATION_IDS) == 12
+        len(IMPLEMENTED_OPERATION_IDS) == 15
         and set(admission_counts.values()) == {1}
         and not helper_has_optional_bypass
     )
@@ -4473,8 +5233,8 @@ def _st12e_predicate_matrix() -> Mapping[str, tuple[bool, str]]:
     )
     task_scope_closed = (
         POLICY_VERSION == "ST12E_AGENT_CAPABILITY_POLICY_V1_1"
-        and len(IMPLEMENTED_OPERATION_IDS) == 12
-        and len(HELD_OPERATION_IDS) == 3
+        and len(IMPLEMENTED_OPERATION_IDS) == 15
+        and len(HELD_OPERATION_IDS) == 0
         and len(TASK_ENVELOPE_FIELDS) == len(set(TASK_ENVELOPE_FIELDS))
         and all(
             binding.st12e_binding_state == ST12E_BINDING_EXACT
@@ -6259,7 +7019,7 @@ def _st12d_aggregate_closure() -> Mapping[str, tuple[bool, str]]:
     architecture_closed = (
         sum(len(states) for states in D_MODE_STATE_REGISTRY.values()) == 35
         and len(MODE_SNAPSHOT_TRANSITIONS) == 17
-        and len(IMPLEMENTED_OPERATION_IDS) == 12
+        and len(IMPLEMENTED_OPERATION_IDS) == 15
         and public_methods == set(IMPLEMENTED_OPERATION_IDS)
         and tuple(ST12D_MATH_IMPLEMENTATION_REGISTRY)
         == ("MATH-13", "MATH-14", "MATH-15", "MATH-39")
@@ -6372,5 +7132,629 @@ _DOMAIN_CHECKS.update(
         "latency": _latency_checks,
         "security": _security_with_st12d_checks,
         "d": _d_checks,
+    }
+)
+
+
+# Additive ST12-F central-contract checks.  The accepted 22-check parameter
+# registry validator above remains unchanged and is consumed as a prerequisite.
+from .evidence import (
+    ComputationEvidenceBundleV1 as _ST12FComputationEvidenceBundleV1,
+    DivergenceAssessmentV1 as _ST12FDivergenceAssessmentV1,
+    DivergenceTerminalStateV1 as _ST12FDivergenceTerminalStateV1,
+    FToDEvidenceReferenceQueryV1 as _ST12FFToDQueryV1,
+    IndependentReviewAuthorityRequestV1 as _ST12FReviewAuthorityRequestV1,
+    PaperResultContractV1 as _ST12FPaperResultContractV1,
+    ReplayResultContractV1 as _ST12FReplayResultContractV1,
+    ST12F_EVIDENCE_IDENTITIES_V1 as _ST12F_EVIDENCE_IDENTITIES_V1,
+    ST12F_EVIDENCE_METRIC_DEFINITIONS_V1 as _ST12F_EVIDENCE_METRICS_V1,
+    ST12F_STATIC_NOT_APPLICABLE_MATH_IDS_V1 as _ST12F_STATIC_IDS_V1,
+    _required_evidence_identity_closure_v1 as _st12f_required_closure_v1,
+    _EVIDENCE_BUNDLE_TRANSITION_GUARDS_V1 as _ST12F_ACTUAL_TRANSITIONS_V1,
+)
+from .implementation_registry import (
+    ST12F_EVIDENCE_MATH_CALLABLE_REGISTRY_V1 as _ST12F_MATH_CALLABLES_V1,
+)
+from .input_lock import (
+    ImmutableReplayPaperInputLockV1 as _ST12FInputLockV1,
+    ST12F_PAPER_RESULT_CONTRACT_IDS_V1 as _ST12F_PAPER_SLOTS_V1,
+    ST12F_REPLAY_RESULT_CONTRACT_IDS_V1 as _ST12F_REPLAY_SLOTS_V1,
+    ST12F_TEMPLATE_IDS_V1 as _ST12F_TEMPLATE_IDS_V1,
+)
+from .model_risk import (
+    MODEL_RISK_CONTROL_IDS_V1 as _ST12F_MODEL_RISK_CONTROL_IDS_V1,
+    NO_TRADE_CONDITION_IDS_V1 as _ST12F_NO_TRADE_CONDITION_IDS_V1,
+    ModelRiskAdjudicationBasisV1 as _ST12FModelRiskBasisV1,
+    ModelRiskControlEvidenceV1 as _ST12FModelRiskControlEvidenceV1,
+    ModelRiskControlStateV1 as _ST12FModelRiskControlStateV1,
+    ModelRiskEvidenceAdjudicatorV1 as _ST12FModelRiskAdjudicatorV1,
+    ModelRiskLaneEvidenceV1 as _ST12FModelRiskLaneEvidenceV1,
+    NoTradeConditionOutcomeV1 as _ST12FNoTradeConditionOutcomeV1,
+    PermanentNoTradeEvidenceComparisonV1 as _ST12FNoTradeComparisonV1,
+)
+from .oracle_contracts import (
+    ST12F_EVIDENCE_GOLDEN_VECTOR_BY_MATH_ID as _ST12F_VECTORS_V1,
+    ST12F_EVIDENCE_ORACLE_BY_MATH_ID as _ST12F_ORACLES_V1,
+)
+from .quantum_adapter import (
+    ST12F_QUANTUM_TRACE_ONLY_BOUNDARIES_V1 as _ST12F_QUANTUM_BOUNDARIES_V1,
+)
+from .source_policy import (
+    ST12F_SOURCE_CONFLICT_RESOLUTIONS_V1 as _ST12F_SOURCE_CONFLICTS_V1,
+    ST12F_SOURCE_DECISIONS_V1 as _ST12F_SOURCE_DECISIONS_V1,
+)
+from .specification import (
+    ST12F_EVIDENCE_MATH_SPECIFICATION_IDS_V1 as _ST12F_MATH_SPEC_IDS_V1,
+)
+from .input_resolver import (
+    CurrentModeSnapshotInputResolverV1 as _ST12FCurrentDInputResolverV1,
+)
+from .llm_gateway import (
+    AnnotationCitationV1 as _ST12FAnnotationCitationV1,
+    AnnotationClaimV1 as _ST12FAnnotationClaimV1,
+    CanonicalNumericEvidenceValueV1 as _ST12FCanonicalNumericValueV1,
+    GroundedLLMGatewayV1 as _ST12FGroundedLLMGatewayV1,
+    LLMAdvisoryTaskV1 as _ST12FLLMAdvisoryTaskV1,
+    PreexistingAnnotationPacketV1 as _ST12FAnnotationPacketV1,
+    QuotedNumericFactV1 as _ST12FQuotedNumericFactV1,
+)
+from .models import (
+    ST12FEvidenceReferenceV1 as _ST12FEvidenceReferenceV1,
+    ST12FEvidenceStateV1 as _ST12FEvidenceStateV1,
+)
+from .receipts import (
+    ST12FEvidenceControlReceiptRecordV1 as _ST12FControlReceiptV1,
+    ST12FReceiptClassV1 as _ST12FReceiptClassV1,
+)
+from .serialization import deterministic_json as _st12f_deterministic_json
+
+
+_ST12F_OWNER_BUNDLE_FIELDS_V1 = (
+    "evidence_id",
+    "schema_version",
+    "contract_version",
+    "evidence_bundle_version",
+    "component_or_template_ref",
+    "input_lock_id",
+    "actual_executed_component_versions",
+    "actual_executed_stack_versions",
+    "replay_result_ref",
+    "paper_result_ref",
+    "divergence_assessment_ref",
+    "lane_execution_receipt_refs",
+    "calibration_and_probability_quality",
+    "transaction_cost_decomposition",
+    "fill_and_queue_quality",
+    "latency_and_staleness",
+    "capacity_and_crowding",
+    "portfolio_marginal_contribution",
+    "false_discovery_and_overfit_controls",
+    "regime_and_scenario_outcomes",
+    "uncertainty_and_model_risk_reserves",
+    "agent_and_model_disagreement",
+    "no_trade_comparison",
+    "independent_review_state",
+    "failure_and_negative_evidence_states",
+    "source_and_provenance_refs",
+    "d_evidence_reference_projection",
+    "g_handoff_projection",
+    "terminal_state",
+    "blocker_codes",
+)
+
+_ST12F_OWNER_LIFECYCLE_TRANSITIONS_V1 = (
+    (
+        "INCOMPLETE_MISSING_REPLAY",
+        "READY_FOR_INDEPENDENT_REVIEW",
+        "BOTH_LANES_PRESENT_SAME_LOCK_ALL_REQUIRED_CONTROLS_COMPUTED",
+    ),
+    (
+        "INCOMPLETE_MISSING_PAPER",
+        "READY_FOR_INDEPENDENT_REVIEW",
+        "BOTH_LANES_PRESENT_SAME_LOCK_ALL_REQUIRED_CONTROLS_COMPUTED",
+    ),
+    (
+        "READY_FOR_INDEPENDENT_REVIEW",
+        "CLOSED_INDEPENDENTLY_VALIDATED",
+        "SEPARATE_REVIEW_RECEIPT_PASS_AND_ZERO_HARD_VETOES",
+    ),
+    (
+        "READY_FOR_INDEPENDENT_REVIEW",
+        "INDEPENDENT_REVIEW_REJECTED",
+        "SEPARATE_REVIEW_RECEIPT_REJECT",
+    ),
+    (
+        "CLOSED_INDEPENDENTLY_VALIDATED",
+        "STALE",
+        "TTL_SOURCE_EPOCH_PARAMETER_IMPLEMENTATION_OR_CONTEXT_CHANGE",
+    ),
+    (
+        "CLOSED_INDEPENDENTLY_VALIDATED",
+        "SUPERSEDED",
+        "NEWER_VALIDATED_BUNDLE_VERSION_SAME_IDENTITY",
+    ),
+)
+
+_ST12F_REVIEW_AUTHORITY_REQUEST_FIELDS_V1 = (
+    "request_id",
+    "requested_at",
+    "principal_id",
+    "capability_bundle_id",
+    "context",
+    "idempotency_key",
+    "traceparent",
+    "tracestate",
+    "prior_bundle_ref",
+    "input_lock_id",
+    "component_or_template_ref",
+    "reviewer_identity",
+    "bundle_producer_identity",
+)
+
+
+def _st12f_central_contract_checks() -> tuple[ValidationCheckV1, ...]:
+    lane_ids = (*_ST12F_REPLAY_SLOTS_V1, *_ST12F_PAPER_SLOTS_V1)
+    actual_transitions = tuple(
+        (source.value, target.value, guard)
+        for (source, target), guard in _ST12F_ACTUAL_TRANSITIONS_V1.items()
+    )
+    return (
+        _check("ST12F_CANONICAL_SCHEMAS", (
+            len(fields(_ST12FInputLockV1)) == 33
+            and len(fields(_ST12FReplayResultContractV1)) == 26
+            and len(fields(_ST12FPaperResultContractV1)) == 26
+            and len(fields(_ST12FDivergenceAssessmentV1)) == 18
+            and tuple(
+                field.name for field in fields(_ST12FComputationEvidenceBundleV1)
+            )
+            == _ST12F_OWNER_BUNDLE_FIELDS_V1
+        ), "five exact canonical contract field rosters"),
+        _check(
+            "ST12F_OWNER_LIFECYCLE_TRANSITIONS_6",
+            actual_transitions == _ST12F_OWNER_LIFECYCLE_TRANSITIONS_V1,
+            "six exact owner lifecycle transition triples and no fallback graph",
+        ),
+        _check("ST12F_COHORT_AND_SLOTS", len(_ST12F_TEMPLATE_IDS_V1) == 52 and len(_ST12F_REPLAY_SLOTS_V1) == 52 and len(_ST12F_PAPER_SLOTS_V1) == 52 and len(set(lane_ids)) == 104, "52 ordered templates and 104 disjoint lane slots"),
+        _check("ST12F_MATH_ORACLE_VECTOR_48", len(_ST12F_MATH_SPEC_IDS_V1) == len(_ST12F_MATH_CALLABLES_V1) == len(_ST12F_ORACLES_V1) == len(_ST12F_VECTORS_V1) == 48, "48 specifications, callables, independent oracles, and vectors"),
+        _check("ST12F_EVIDENCE_IDENTITIES_48", len(_ST12F_EVIDENCE_IDENTITIES_V1) == len(set(_ST12F_EVIDENCE_IDENTITIES_V1)) == 48, "48 exact evidence identities"),
+        _check("ST12F_EVIDENCE_METRICS_38", len(_ST12F_EVIDENCE_METRICS_V1) == 38 and len({row.metric_id for row in _ST12F_EVIDENCE_METRICS_V1}) == 38, "38 named metric definitions"),
+        _check(
+            "ST12F_REAL_REVIEW_AUTHORITY_REQUEST",
+            (
+                tuple(
+                    field.name
+                    for field in fields(_ST12FReviewAuthorityRequestV1)
+                )
+                == _ST12F_REVIEW_AUTHORITY_REQUEST_FIELDS_V1
+                and _ST12FReviewAuthorityRequestV1.__dataclass_params__.frozen
+                and hasattr(_ST12FReviewAuthorityRequestV1, "__slots__")
+            ),
+            "private frozen 13-field review request with no caller decision",
+        ),
+        _check(
+            "ST12F_DEPENDENCY_CLOSED_STATIC_APPLICABILITY",
+            (
+                _st12f_required_closure_v1("MATH-01") == ("MATH-01",)
+                and _st12f_required_closure_v1("MATH-02")
+                == ("MATH-01", "MATH-02")
+                and _st12f_required_closure_v1("MATH-05")
+                == ("MATH-03", "MATH-04", "MATH-05")
+                and len(_ST12F_STATIC_IDS_V1) == 10
+            ),
+            "selected component plus exact transitive frozen dependency closure",
+        ),
+        _check("ST12F_MODEL_RISK_12_PLUS_8", len(_ST12F_MODEL_RISK_CONTROL_IDS_V1) == 12 and len(_ST12F_NO_TRADE_CONDITION_IDS_V1) == 8, "12 terminal controls and eight permanent NO_TRADE conditions"),
+        _check("ST12F_SOURCE_CLOSURE_35_PLUS_7", len(_ST12F_SOURCE_DECISIONS_V1) == 35 and len(_ST12F_SOURCE_CONFLICTS_V1) == 7, "35 terminal source decisions and seven conflicts"),
+    )
+
+
+def _st12f_receipt_metadata_executable_v1() -> bool:
+    divergence = _ST12FDivergenceAssessmentV1(
+        assessment_id="DIVERGENCE::CENTRAL-VALIDATION",
+        schema_version="QTT_ST12F_DIVERGENCE_ASSESSMENT_V1_4",
+        contract_version="1.4",
+        input_lock_id="LOCK::CENTRAL-VALIDATION",
+        cohort_template_id="MATH-01",
+        replay_result_ref="RESULT::REPLAY",
+        paper_result_ref="RESULT::PAPER",
+        metric_deltas={"utility": Decimal("0")},
+        directional_agreement=True,
+        calibration_delta=Decimal("0"),
+        execution_cost_delta=Decimal("0"),
+        fill_delta=Decimal("0"),
+        latency_delta=Decimal("0"),
+        capacity_delta=Decimal("0"),
+        regime_delta=Decimal("0"),
+        threshold_policy_refs=("POLICY::LOCKED",),
+        typed_blockers=(),
+        terminal_state=(
+            _ST12FDivergenceTerminalStateV1.CONSISTENT_WITHIN_LOCKED_THRESHOLDS
+        ),
+    )
+    receipt = _ST12FControlReceiptV1(
+        control_receipt_id=(
+            "ST12F-RECEIPT::DIVERGENCE::CENTRAL-VALIDATION::"
+            "DIVERGENCE_ASSESSMENT"
+        ),
+        receipt_class=_ST12FReceiptClassV1.DIVERGENCE_ASSESSMENT,
+        operation_id="ST10-OP::15",
+        request_id="REQUEST::CENTRAL-VALIDATION",
+        idempotency_key="IDEMPOTENCY::CENTRAL-VALIDATION",
+        contract_type="DivergenceAssessmentV1",
+        contract_id=divergence.assessment_id,
+        contract_version=divergence.contract_version,
+        input_lock_id_or_explicit_absence=divergence.input_lock_id,
+        parent_version_ref_or_explicit_absence="EXPLICIT_ABSENCE",
+        canonical_contract_json=_st12f_deterministic_json(divergence),
+        source_record_refs=(
+            divergence.replay_result_ref,
+            divergence.paper_result_ref,
+        ),
+        parameter_value_refs=(),
+        source_epoch_refs=(),
+        typed_reason_codes=(),
+        terminal_state=divergence.terminal_state.value,
+        fixture_only_not_evidence=False,
+    )
+    valid_round_trip = receipt.reconstruct(_ST12FDivergenceAssessmentV1) == divergence
+    forged_rejected = False
+    try:
+        replace(receipt, source_record_refs=("RESULT::FORGED",)).reconstruct(
+            _ST12FDivergenceAssessmentV1
+        )
+    except ContractValidationError as exc:
+        forged_rejected = exc.reason_code is ReasonCode.SCHEMA_MISMATCH
+    return valid_round_trip and forged_rejected
+
+
+def _st12f_model_risk_executable_v1() -> bool:
+    now = datetime(2026, 1, 1, 12, tzinfo=UTC)
+    controls = tuple(
+        _ST12FModelRiskControlEvidenceV1(
+            identity,
+            _ST12FModelRiskControlStateV1.PASS_RECEIPTED,
+            (f"RECEIPT::{identity}",),
+            (),
+            (),
+            True,
+        )
+        for identity in _ST12F_MODEL_RISK_CONTROL_IDS_V1
+    )
+    caller_false = tuple(
+        _ST12FNoTradeConditionOutcomeV1(
+            identity, False, (f"RECEIPT::{identity}",), ()
+        )
+        for identity in _ST12F_NO_TRADE_CONDITION_IDS_V1
+    )
+
+    def lane(name: str) -> _ST12FModelRiskLaneEvidenceV1:
+        return _ST12FModelRiskLaneEvidenceV1(
+            lane=name,
+            result_receipt_ref=f"RECEIPT::{name}",
+            input_lock_id="LOCK::MODEL-RISK",
+            component_or_template_ref="MATH-01",
+            observed_at=now - timedelta(minutes=1),
+            valid_until=now + timedelta(minutes=1),
+        )
+
+    assessment = _ST12FModelRiskAdjudicatorV1().adjudicate(
+        assessment_id="MODEL-RISK::CENTRAL-VALIDATION",
+        input_lock_id="LOCK::MODEL-RISK",
+        controls=controls,
+        conditions=caller_false,
+        comparison=_ST12FNoTradeComparisonV1(
+            comparison_id="COMPARISON::CLASSICAL-DOMINATES",
+            input_lock_id="LOCK::MODEL-RISK",
+            execution_adjusted_lcb=Decimal("0.1"),
+            candidate_utility=Decimal("1"),
+            strongest_classical_utility=Decimal("1.1"),
+            no_trade_utility=Decimal("0"),
+            strongest_comparator="STRONGEST_CLASSICAL",
+        ),
+        adjudication_basis=_ST12FModelRiskBasisV1(
+            expected_component_or_template_ref="MATH-01",
+            evaluated_at=now,
+            required_evidence_valid_until=now + timedelta(minutes=1),
+            required_evidence_receipt_refs=("RECEIPT::REQUIRED",),
+            replay_lane=lane("REPLAY"),
+            paper_lane=lane("PAPER"),
+            uncertainty_reserve=Decimal("0.05"),
+            model_risk_reserve=Decimal("0.05"),
+            capacity_hard_veto=False,
+            liquidity_hard_veto=False,
+            capacity_liquidity_receipt_refs=("RECEIPT::CAPACITY",),
+            independent_review_state="READY_FOR_INDEPENDENT_REVIEW",
+            independent_review_receipt_ref="RECEIPT::REVIEW",
+        ),
+        limitations=("LIMITATION::DECLARED",),
+        receipt_refs=("RECEIPT::ASSESSMENT",),
+    )
+    by_id = {
+        row.condition_id: row for row in assessment.no_trade_condition_outcomes
+    }
+    return (
+        by_id["STRONGEST_CLASSICAL_OR_NO_TRADE_DOMINATES"].active
+        and assessment.terminal_state == "NO_TRADE"
+        and assessment.automatic_promotion_allowed is False
+    )
+
+
+class _ST12FCentralNumericResolverV1:
+    def resolve_numeric_evidence(
+        self, *, numeric_fact_id: str, evidence_ref: str, evaluated_at: datetime
+    ) -> _ST12FCanonicalNumericValueV1:
+        now = datetime(2026, 1, 1, 12, tzinfo=UTC)
+        if evaluated_at != now:
+            raise ContractValidationError(
+                ReasonCode.ST12F_LLM_ANNOTATION_INVALID,
+                "numeric evidence resolver requires the explicit evaluation cutoff",
+            )
+        return _ST12FCanonicalNumericValueV1(
+            numeric_fact_id=numeric_fact_id,
+            evidence_ref=evidence_ref,
+            evidence_bundle_ref=evidence_ref,
+            value=Decimal("0.5"),
+            unit_and_basis="probability|unitless",
+            evidence_receipt_ref="ST12F-RECEIPT::D::CENTRAL",
+            numeric_recheck_receipt_ref="ST12F-RECEIPT::LLM::CENTRAL",
+            input_lock_id="LOCK::LLM",
+            source_epoch_refs=("SOURCE::1=EPOCH::1",),
+            observed_at=now - timedelta(minutes=1),
+            valid_until=now + timedelta(minutes=1),
+        )
+
+    @staticmethod
+    def receipt_exists(receipt_ref: str, *, evaluated_at: datetime) -> bool:
+        if evaluated_at != datetime(2026, 1, 1, 12, tzinfo=UTC):
+            return False
+        return receipt_ref in {
+            "ST12F-RECEIPT::D::CENTRAL",
+            "ST12F-RECEIPT::LLM::CENTRAL",
+        }
+
+
+def _st12f_llm_executable_v1() -> bool:
+    now = datetime(2026, 1, 1, 12, tzinfo=UTC)
+    packet = _ST12FAnnotationPacketV1(
+        annotation_id="ANNOTATION::CENTRAL",
+        evidence_bundle_refs=("BUNDLE::CENTRAL",),
+        redacted_context_refs=("CONTEXT::REDACTED",),
+        untrusted_content_fragments=(),
+        advisory_task=_ST12FLLMAdvisoryTaskV1.SUMMARIZE_EVIDENCE,
+        citations=(
+            _ST12FAnnotationCitationV1(
+                "CITATION::CENTRAL", "BUNDLE::CENTRAL", ("CLAIM::CENTRAL",)
+            ),
+        ),
+        claims=(
+            _ST12FAnnotationClaimV1(
+                "CLAIM::CENTRAL",
+                "Advisory evidence summary.",
+                ("CITATION::CENTRAL",),
+                ("NUMERIC::CENTRAL",),
+            ),
+        ),
+        limitations=("LIMITATION::ADVISORY",),
+        abstentions=(),
+        quoted_numeric_facts=(
+            _ST12FQuotedNumericFactV1(
+                "NUMERIC::CENTRAL",
+                "BUNDLE::CENTRAL",
+                "probability|unitless",
+                Decimal("0.5"),
+                ("CLAIM::CENTRAL",),
+            ),
+        ),
+        deterministic_numeric_recheck_receipt_refs=(
+            "ST12F-RECEIPT::LLM::CENTRAL",
+        ),
+        upstream_budget_metadata={
+            "budget_source_ref": "BUDGET::UPSTREAM",
+            "supplied_upstream": True,
+            "token_budget": 64,
+        },
+        requested_actions=("SUMMARIZE_EVIDENCE",),
+    )
+    gateway = _ST12FGroundedLLMGatewayV1(_ST12FCentralNumericResolverV1())
+    normalized = gateway.validate_and_normalize(packet, evaluated_at=now)
+    forged_rejected = False
+    try:
+        gateway.validate_and_normalize(
+            replace(
+                packet,
+                quoted_numeric_facts=(
+                    replace(
+                        packet.quoted_numeric_facts[0],
+                        quoted_value=Decimal("0.6"),
+                    ),
+                ),
+            ),
+            evaluated_at=now,
+        )
+    except ContractValidationError as exc:
+        forged_rejected = exc.reason_code is ReasonCode.ST12F_LLM_ANNOTATION_INVALID
+    return (
+        normalized.numeric_recheck_passed
+        and normalized.canonical_numeric_evidence[0].value == Decimal("0.5")
+        and forged_rejected
+    )
+
+
+def _st12f_quantum_executable_v1() -> bool:
+    raw = json.loads(_ST12F_VECTORS_V1["MATH-52"].inputs_json)
+    result = _ST12F_MATH_CALLABLES_V1["MATH-52"](**raw)
+    mismatch = dict(raw)
+    mismatch["strongest_classical_basis"] = {
+        **raw["strongest_classical_basis"],
+        "cost_basis_ref": "COST::MISMATCH",
+    }
+    mismatch_rejected = False
+    try:
+        _ST12F_MATH_CALLABLES_V1["MATH-52"](**mismatch)
+    except ContractValidationError as exc:
+        mismatch_rejected = exc.reason_code is ReasonCode.ST12F_QUANTUM_TRACE_INVALID
+    return (
+        result["winner"] == "STRONGEST_CLASSICAL"
+        and result["delta_quantum_vs_classical"] == Decimal("-0.1")
+        and result["delta_quantum_vs_no_trade"] == Decimal("1.2")
+        and result["quantum_advantage_claim_allowed"] is False
+        and mismatch_rejected
+    )
+
+
+def _st12f_d_reference_executable_v1() -> bool:
+    now = datetime(2026, 1, 1, 12, tzinfo=UTC)
+    query = _ST12FFToDQueryV1(
+        query_id="QUERY::CENTRAL",
+        requested_evidence_id="EVIDENCE::CENTRAL",
+        requested_component_or_template_ref="MATH-01",
+        expected_input_lock_id="LOCK::D",
+        expected_source_epoch_refs=("SOURCE::1=EPOCH::1",),
+        evaluated_at=now,
+        request_read_lineage_refs=("RECEIPT::READ",),
+    )
+    reference = _ST12FEvidenceReferenceV1(
+        evidence_state=_ST12FEvidenceStateV1.EVIDENCE_REFERENCE_AVAILABLE,
+        evidence_ref="ST12F-RECEIPT::BUNDLE::EVIDENCE_BUNDLE_VERSION",
+        lane="REPLAY_PAPER",
+        dataset_grade_ref="DATASET::GRADE",
+        venue_semantic_binding_ref="VENUE::SEMANTICS",
+        cross_venue_equivalence_ref="CROSS-VENUE::EQUIVALENCE",
+        observed_at=now - timedelta(minutes=1),
+        valid_until=now + timedelta(minutes=1),
+        policy_version="ST12F_EVIDENCE_POLICY_V1_4",
+        causation_id="CAUSE::ORIGINAL",
+        correlation_id="CORRELATION::ORIGINAL",
+        input_lock_id="LOCK::D",
+        component_or_template_ref="MATH-01",
+        evidence_bundle_version="BUNDLE::1",
+        source_epoch_refs=("SOURCE::1=EPOCH::1",),
+        terminal_state="CLOSED_INDEPENDENTLY_VALIDATED",
+        reference_id="D-REFERENCE::CENTRAL",
+        evidence_id="EVIDENCE::CENTRAL",
+    )
+
+    @dataclass(frozen=True, slots=True)
+    class _Context:
+        as_of: datetime
+
+    valid = _ST12FCurrentDInputResolverV1._validate_f_reference_for_d(
+        context=_Context(now),
+        query=query,
+        reference=reference,
+        causation_id="CAUSE::READ",
+        correlation_id="CORRELATION::READ",
+    )
+    stale = _ST12FCurrentDInputResolverV1._validate_f_reference_for_d(
+        context=_Context(now),
+        query=query,
+        reference=replace(
+            reference,
+            observed_at=now - timedelta(minutes=2),
+            valid_until=now - timedelta(minutes=1),
+        ),
+        causation_id="CAUSE::READ",
+        correlation_id="CORRELATION::READ",
+    )
+    return (
+        valid is reference
+        and valid.causation_id == "CAUSE::ORIGINAL"
+        and valid.correlation_id == "CORRELATION::ORIGINAL"
+        and stale.evidence_state
+        is not _ST12FEvidenceStateV1.EVIDENCE_REFERENCE_AVAILABLE
+    )
+
+
+_pre_st12f_operations_checks = _DOMAIN_CHECKS["operations"]
+_pre_st12f_d_checks = _DOMAIN_CHECKS["d"]
+_pre_st12f_llm_checks = _DOMAIN_CHECKS["llm"]
+_pre_st12f_quantum_checks = _DOMAIN_CHECKS["quantum"]
+
+
+def _st12f_llm_checks() -> tuple[ValidationCheckV1, ...]:
+    source = (REPO_ROOT / "src/qtt/stage1_prediction_markets/qku_computation_control_plane/llm_gateway.py").read_text(encoding="utf-8")
+    return (
+        *_pre_st12f_llm_checks(),
+        *_st12f_central_contract_checks(),
+        _check(
+            "ST12F_LLM_ADVISORY_ONLY",
+            not any(token in source for token in ("import openai", "from openai", "import anthropic", "from anthropic", "def infer")),
+            "pre-existing annotation normalization has no SDK or inference path",
+        ),
+        _check(
+            "ST12F_LLM_CANONICAL_NUMERIC_RECHECK_EXECUTABLE",
+            _st12f_llm_executable_v1(),
+            "canonical evidence supplies the value and a forged caller quote fails",
+        ),
+    )
+
+
+def _st12f_model_risk_checks() -> tuple[ValidationCheckV1, ...]:
+    source = (REPO_ROOT / "src/qtt/stage1_prediction_markets/qku_computation_control_plane/model_risk.py").read_text(encoding="utf-8")
+    return (
+        *_st12f_central_contract_checks(),
+        _check(
+            "ST12F_MODEL_RISK_NO_PROMOTION",
+            "automatic_promotion_allowed=False" in source and "permanent_no_trade_wins" in source,
+            "deterministic adjudication preserves NO_TRADE and zero promotion authority",
+        ),
+        _check(
+            "ST12F_MODEL_RISK_DERIVED_VETO_EXECUTABLE",
+            _st12f_model_risk_executable_v1(),
+            "caller-false condition cannot suppress classical domination",
+        ),
+    )
+
+
+def _st12f_quantum_checks() -> tuple[ValidationCheckV1, ...]:
+    source = (REPO_ROOT / "src/qtt/stage1_prediction_markets/qku_computation_control_plane/quantum_benchmark.py").read_text(encoding="utf-8")
+    forbidden = ("Estimator(", "Sampler(", "transpile(", "AerSimulator(", "provider.", "qpu.")
+    return (
+        *_pre_st12f_quantum_checks(),
+        *_st12f_central_contract_checks(),
+        _check(
+            "ST12F_QUANTUM_TRACE_ONLY",
+            len(_ST12F_QUANTUM_BOUNDARIES_V1) == 3 and not any(token in source for token in forbidden),
+            "MATH-50 through MATH-52 validate supplied traces without execution",
+        ),
+        _check(
+            "ST12F_MATH52_BASIS_AND_ORDER_EXECUTABLE",
+            _st12f_quantum_executable_v1(),
+            "typed basis mismatch rejects and lexicographic result is exact",
+        ),
+    )
+
+
+def _st12f_operations_checks() -> tuple[ValidationCheckV1, ...]:
+    return (
+        *_pre_st12f_operations_checks(),
+        *_st12f_central_contract_checks(),
+        _check(
+            "ST12F_RECEIPT_METADATA_EXECUTABLE",
+            _st12f_receipt_metadata_executable_v1(),
+            "receipt reconstruction binds canonical contract and exact metadata",
+        ),
+    )
+
+
+def _st12f_d_checks() -> tuple[ValidationCheckV1, ...]:
+    return (
+        *_pre_st12f_d_checks(),
+        *_st12f_central_contract_checks(),
+        _check(
+            "ST12F_D_REFERENCE_FAIL_CLOSED_EXECUTABLE",
+            _st12f_d_reference_executable_v1(),
+            "current D read preserves original lineage and rejects stale evidence",
+        ),
+    )
+
+
+_DOMAIN_CHECKS.update(
+    {
+        "operations": _st12f_operations_checks,
+        "d": _st12f_d_checks,
+        "llm": _st12f_llm_checks,
+        "model_risk": _st12f_model_risk_checks,
+        "quantum": _st12f_quantum_checks,
     }
 )
