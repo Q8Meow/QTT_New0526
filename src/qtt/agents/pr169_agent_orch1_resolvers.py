@@ -4,7 +4,13 @@ from dataclasses import dataclass
 import json
 from pathlib import Path
 from types import MappingProxyType
-from typing import Any, Iterable, Mapping
+from typing import TYPE_CHECKING, Any, Iterable, Mapping
+
+if TYPE_CHECKING:
+    from ..stage1_prediction_markets.qku_computation_control_plane.existing_owner_projection import (
+        ST12GOwnerProjectionResolutionV2,
+        ST12GProjectionResolutionV2,
+    )
 
 
 GENERATED_PREFIX = Path("docs/master_plan/generated/pr169_agent_orch1")
@@ -479,3 +485,49 @@ class AgentOrchService:
 
 class AgentOrchAPI(AgentOrchService):
     pass
+
+
+def resolve_st12g_projection_v2(
+    resolution: "ST12GProjectionResolutionV2",
+) -> "ST12GOwnerProjectionResolutionV2":
+    """Select AGENT-ORCH1 without I/O, core copying, or recomputation."""
+
+    from ..stage1_prediction_markets.qku_computation_control_plane import (
+        existing_owner_projection as st12g,
+    )
+    from ..stage1_prediction_markets.qku_computation_control_plane.errors import (
+        ContractValidationError,
+        ReasonCode,
+    )
+
+    if type(resolution) is not st12g.ST12GProjectionResolutionV2:
+        raise ContractValidationError(
+            ReasonCode.INPUT_OWNER_MISMATCH,
+            "AGENT-ORCH1 requires the exact central ST12-G resolution",
+        )
+    if (
+        resolution.resolution_state
+        is st12g.ST12GProjectionResolutionStateV2.CURRENT_READ_ONLY
+    ):
+        bundle = resolution.projection_bundle
+        if type(bundle) is not st12g.ST12GProjectionBundleV2 or type(
+            bundle.agent_orch
+        ) is not st12g.ST12GAgentEvidenceHandoffV2:
+            raise ContractValidationError(
+                ReasonCode.SCHEMA_MISMATCH,
+                "AGENT-ORCH1 projection is missing from the central bundle",
+            )
+        payload = bundle.agent_orch
+    else:
+        payload = resolution.absence
+        if type(payload) is not st12g.ST12GProjectionAbsenceV2:
+            raise ContractValidationError(
+                ReasonCode.SCHEMA_MISMATCH,
+                "AGENT-ORCH1 noncurrent resolution must preserve central absence",
+            )
+    return st12g.ST12GOwnerProjectionResolutionV2(
+        consumer_id="AGENT_ORCH1",
+        source_request_id=resolution.request_id,
+        resolution_state=resolution.resolution_state,
+        payload=payload,
+    )

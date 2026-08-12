@@ -29,6 +29,8 @@ ACTION_REQUEST_CLASSES = builder.ACTION_REQUEST_CLASSES
 EVENT_CLASSES = builder.EVENT_CLASSES
 SNAPSHOT_CLASSES = builder.SNAPSHOT_CLASSES
 RECEIPT_CLASSES = builder.RECEIPT_CLASSES
+ST12G_DESCRIPTOR_NAME = builder.ST12G_DESCRIPTOR_NAME
+ST12G_CONTRACT_MANIFEST_REF = builder.ST12G_CONTRACT_MANIFEST_REF
 
 REGISTRY_REQUIRED_FIELDS = (
     "registry_row_id",
@@ -630,6 +632,41 @@ def _validate_reports(reports: dict[str, dict[str, Any]]) -> None:
     )
 
 
+def _validate_st12g_descriptor(
+    artifact_dir: Path, reports: dict[str, dict[str, Any]]
+) -> None:
+    path = artifact_dir / ST12G_DESCRIPTOR_NAME
+    _assert(path.exists(), f"missing SVC1 ST12-G descriptor: {path}")
+    rows = _load_jsonl(path)
+    expected = {
+        "descriptor_id": "ST12G-DESCRIPTOR::SVC1",
+        "contract_version": "2.0",
+        "consumer_id": "SVC1",
+        "contract_type": "ST12GServiceEvidenceViewV2",
+        "source_contract_manifest_ref": ST12G_CONTRACT_MANIFEST_REF,
+        "canonical_owner_ref": "PR169_SVC1_SERVICE_REGISTRY_AND_READ_MODEL_FABRIC",
+        "runtime_instance_state": "NOT_MATERIALIZED_BY_REPOSITORY_BUILD",
+        "manual_edit_allowed": False,
+        "runtime_effect_allowed": False,
+        "write_authority": "NONE",
+        "downstream_route_refs": ["SVC1", "DASH1_UI1"],
+    }
+    _assert(rows == [expected], "SVC1 ST12-G descriptor differs")
+    artifact_refs = {
+        item.get("artifact_ref")
+        for item in reports["service_manifest.json"].get("generated_artifacts", [])
+    }
+    _assert(
+        (GENERATED_PREFIX / ST12G_DESCRIPTOR_NAME).as_posix() in artifact_refs,
+        "SVC1 manifest omits ST12-G descriptor",
+    )
+    _assert(
+        reports["no_orphan.report.json"].get("st12g_contract_descriptor_count")
+        == 1,
+        "SVC1 no-orphan report omits ST12-G descriptor",
+    )
+
+
 def _validate_no_raw_runtime_scan(repo_root: Path) -> None:
     resolver = repo_root / "src/qtt/service/pr169_svc1_resolvers.py"
     _assert(resolver.exists(), "SVC1 resolver missing")
@@ -675,6 +712,7 @@ def validate(repo_root: Path, artifact_dir: Path) -> None:
     _validate_agent_llm_qku_routes(rows_by_file)
     _validate_surface_chat_mobile_expansion(rows_by_file)
     _validate_reports(reports)
+    _validate_st12g_descriptor(artifact_dir, reports)
     _validate_no_raw_runtime_scan(repo_root)
     _validate_current_equivalent(repo_root, artifact_dir)
 

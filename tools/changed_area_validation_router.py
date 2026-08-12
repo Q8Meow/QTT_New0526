@@ -22,6 +22,7 @@ from tools.validation_scope_registry import (
     ST12D_ALLOWED_EXACT_PATHS,
     ST12E_ALLOWED_EXACT_PATHS,
     ST12F_ALLOWED_EXACT_PATHS,
+    ST12G_ALLOWED_EXACT_PATHS,
 )
 from tools.validation_inventory import (
     FAST_UNIVERSAL_PREFLIGHT,
@@ -31,6 +32,8 @@ from tools.validation_inventory import (
     ST12D_QKU_VALIDATOR_IDS,
     ST12E_QKU_VALIDATOR_IDS,
     ST12F_QKU_VALIDATOR_IDS,
+    ST12G_QKU_VALIDATOR_IDS,
+    ST12G_REQUIRED_VALIDATOR_IDS,
     VALIDATION_INFRASTRUCTURE_GLOBS,
     ValidatorInventoryEntry,
     entries_matching_path,
@@ -43,6 +46,9 @@ from tools import run_validation_gates as runner
 
 ROUTING_POLICY_VERSION = 1
 FORCE_FULL_FLAG_NAME = "QTT_FORCE_FULL_VALIDATION"
+ST12G_INDEPENDENT_VALIDATOR_SCRIPT = (
+    "tools/independent_validate_qku_computation_control_plane_g.py"
+)
 QKU_VALIDATOR_IDS = frozenset(
     {
         "independent_validate_qku_computation_control_plane",
@@ -57,6 +63,7 @@ QKU_VALIDATOR_IDS = frozenset(
         *ST12D_QKU_VALIDATOR_IDS,
         *ST12E_QKU_VALIDATOR_IDS,
         *ST12F_QKU_VALIDATOR_IDS,
+        *ST12G_QKU_VALIDATOR_IDS,
     }
 )
 QKU_ALLOWED_EXACT_PATHS = frozenset(
@@ -67,6 +74,7 @@ QKU_ALLOWED_EXACT_PATHS = frozenset(
         *ST12D_ALLOWED_EXACT_PATHS,
         *ST12E_ALLOWED_EXACT_PATHS,
         *ST12F_ALLOWED_EXACT_PATHS,
+        *ST12G_ALLOWED_EXACT_PATHS,
     )
 )
 
@@ -338,19 +346,27 @@ def _classify_changed_files(
     tests: list[str] = []
     domains: set[str] = set()
     fail_closed: list[str] = []
+    entries = validation_inventory()
     qku_entries = {
         entry.validator_id: entry
-        for entry in validation_inventory()
+        for entry in entries
         if entry.validator_id in QKU_VALIDATOR_IDS
+    }
+    st12g_entries = {
+        entry.validator_id: entry
+        for entry in entries
+        if entry.validator_id in ST12G_REQUIRED_VALIDATOR_IDS
     }
 
     for path in changed_files:
         matches_by_id = {
             entry.validator_id: entry
-            for entry in entries_matching_path(path)
+            for entry in entries_matching_path(path, entries)
         }
         if _is_qku_control_plane_path(path):
             matches_by_id.update(qku_entries)
+        if normalize_repo_ref(path) in ST12G_ALLOWED_EXACT_PATHS:
+            matches_by_id.update(st12g_entries)
         matches = tuple(
             matches_by_id[validator_id]
             for validator_id in sorted(matches_by_id)
@@ -435,6 +451,13 @@ def build_router_result(router_input: RouterInput) -> RouterResult:
             if missing:
                 routing_failures.add(
                     f"QKU_VALIDATION_ROUTE_INCOMPLETE: {path}: {missing}"
+                )
+        if normalize_repo_ref(path) in ST12G_ALLOWED_EXACT_PATHS:
+            routed = set(classified_files.get(path, ()))
+            missing = sorted(ST12G_REQUIRED_VALIDATOR_IDS - routed)
+            if missing:
+                routing_failures.add(
+                    f"ST12G_VALIDATION_ROUTE_INCOMPLETE: {path}: {missing}"
                 )
     fail_closed_reasons = tuple(sorted(routing_failures))
 

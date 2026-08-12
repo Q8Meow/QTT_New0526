@@ -25,6 +25,9 @@ from .owner_surface_models import (
     REQUIRED_JSONL_OUTPUTS,
     REQUIRED_JSON_OUTPUTS,
     REQUIRED_UI_OUTPUTS,
+    ST12G_CONTRACT_MANIFEST_REF,
+    ST12G_DESCRIPTOR_FILENAME,
+    ST12G_SVC_DESCRIPTOR_REF,
     VALIDATION_MARKER,
     VALIDATOR_REF,
     projection_trace,
@@ -1229,15 +1232,25 @@ def build_dag_rows(registry_rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return rows
 
 
-def build_data_value_route_map_rows(out_dir: Path, registry_rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    files = [REGISTRY_FILENAME, *REQUIRED_JSONL_OUTPUTS, *REQUIRED_JSON_OUTPUTS, *REQUIRED_UI_OUTPUTS]
+def build_data_value_route_map_rows(
+    registry_rows: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    files = [
+        REGISTRY_FILENAME,
+        *REQUIRED_JSONL_OUTPUTS,
+        *REQUIRED_JSON_OUTPUTS,
+        *REQUIRED_UI_OUTPUTS,
+        ST12G_DESCRIPTOR_FILENAME,
+    ]
     rows: list[dict[str, Any]] = []
     for index, file_name in enumerate(dict.fromkeys(files), start=1):
         feature_id = registry_rows[(index - 1) % len(registry_rows)]["feature_id"]
         rows.append(
             {
                 **projection_trace(feature_id),
-                "artifact_path": repo_posix(out_dir / file_name),
+                "artifact_path": repo_posix(
+                    Path("docs/master_plan/generated/pr169_dash1") / file_name
+                ),
                 "row_family": Path(file_name).name,
                 "value_family": "owner_dashboard_command_plane_contract",
                 "producer_tool": PRODUCER_TOOL,
@@ -1254,7 +1267,45 @@ def build_data_value_route_map_rows(out_dir: Path, registry_rows: list[dict[str,
     return rows
 
 
-def build_static_ui(out_dir: Path) -> None:
+def _build_st12g_descriptor(out_dir: Path, repo_root: Path) -> dict[str, Any]:
+    isolated_source_path = (
+        out_dir.parent / "pr169_svc1" / Path(ST12G_SVC_DESCRIPTOR_REF).name
+    )
+    source_path = (
+        isolated_source_path
+        if isolated_source_path.exists()
+        else repo_root / ST12G_SVC_DESCRIPTOR_REF
+    )
+    source_rows = read_jsonl(source_path)
+    if len(source_rows) != 1:
+        raise ValueError("ST12-G dashboard projection requires exactly one SVC1 descriptor")
+    source = source_rows[0]
+    if (
+        source.get("consumer_id") != "SVC1"
+        or source.get("contract_type") != "ST12GServiceEvidenceViewV2"
+        or source.get("source_contract_manifest_ref") != ST12G_CONTRACT_MANIFEST_REF
+        or source.get("runtime_instance_state")
+        != "NOT_MATERIALIZED_BY_REPOSITORY_BUILD"
+        or source.get("runtime_effect_allowed") is not False
+        or source.get("write_authority") != "NONE"
+    ):
+        raise ValueError("ST12-G SVC1 descriptor is missing or semantically invalid")
+    return {
+        "descriptor_id": "ST12G-DESCRIPTOR::DASH1_UI1",
+        "contract_version": "2.0",
+        "consumer_id": "DASH1_UI1",
+        "contract_type": "ST12GOwnerDashboardEvidenceViewV2",
+        "source_contract_manifest_ref": ST12G_CONTRACT_MANIFEST_REF,
+        "canonical_owner_ref": "PR169_DASH1_OWNER_DASHBOARD_SURFACE_REGISTRY",
+        "runtime_instance_state": "NOT_MATERIALIZED_BY_REPOSITORY_BUILD",
+        "manual_edit_allowed": False,
+        "runtime_effect_allowed": False,
+        "write_authority": "NONE",
+        "downstream_route_refs": ["DASH1_UI1"],
+    }
+
+
+def build_static_ui(out_dir: Path, *, repo_root: Path) -> None:
     ui_dir = out_dir / "ui"
     fixtures_dir = ui_dir / "fixtures"
     fixtures_dir.mkdir(parents=True, exist_ok=True)
@@ -1342,9 +1393,28 @@ def build_static_ui(out_dir: Path) -> None:
             {"k": "owner_review", "v": 1},
         ],
     }
-    (ui_dir / "owner_dashboard_review_surface.html").write_text(html, encoding="utf-8")
-    (ui_dir / "owner_dashboard_review_surface.css").write_text(css, encoding="utf-8")
-    (ui_dir / "owner_dashboard_review_surface.js").write_text(js, encoding="utf-8")
+    surface_paths = (
+        ui_dir / "owner_dashboard_review_surface.html",
+        ui_dir / "owner_dashboard_review_surface.css",
+        ui_dir / "owner_dashboard_review_surface.js",
+    )
+    canonical_ui_dir = (
+        repo_root / "docs/master_plan/generated/pr169_dash1/ui"
+    ).resolve()
+    if ui_dir.resolve() != canonical_ui_dir:
+        for target in surface_paths:
+            source = canonical_ui_dir / target.name
+            if not source.is_file():
+                raise ValueError(
+                    f"isolated DASH1 build lacks read-only renderer source: {source}"
+                )
+            source_bytes = source.read_bytes()
+            if not target.exists() or target.read_bytes() != source_bytes:
+                target.write_bytes(source_bytes)
+    if not all(path.exists() for path in surface_paths):
+        surface_paths[0].write_text(html, encoding="utf-8")
+        surface_paths[1].write_text(css, encoding="utf-8")
+        surface_paths[2].write_text(js, encoding="utf-8")
     write_json(fixtures_dir / "owner_dashboard_demo_data.json", fixture)
 
 
@@ -1381,7 +1451,8 @@ def build_read_receipt() -> dict[str, Any]:
     }
 
 
-def build_all(out_dir: Path) -> dict[str, Any]:
+def build_all(out_dir: Path, *, repo_root: Path | None = None) -> dict[str, Any]:
+    source_repo_root = repo_root.resolve() if repo_root is not None else out_dir.parents[3]
     out_dir.mkdir(parents=True, exist_ok=True)
     registry_path = out_dir / REGISTRY_FILENAME
     if registry_path.exists():
@@ -1405,6 +1476,7 @@ def build_all(out_dir: Path) -> dict[str, Any]:
     research_intake_rows = build_research_intake_rows(registry_rows)
     research_pipeline_rows = build_research_pipeline_rows(registry_rows)
     dag_rows = build_dag_rows(registry_rows)
+    st12g_descriptor = _build_st12g_descriptor(out_dir, source_repo_root)
 
     projection_payloads: dict[str, list[dict[str, Any]]] = {
         "owner_dashboard_packet.generated.jsonl": build_owner_dashboard_packet(registry_rows),
@@ -1500,6 +1572,17 @@ def build_all(out_dir: Path) -> dict[str, Any]:
                 "registry_row_ref": registry_row_ref(registry_rows[0]["feature_id"]),
             }
             for file_name in REQUIRED_JSONL_OUTPUTS
+        ] + [
+            {
+                **projection_trace(registry_rows[0]["feature_id"]),
+                "projection_file": ST12G_DESCRIPTOR_FILENAME,
+                "projection_kind": "svc1_derived_existing_owner_evidence_view_contract",
+                "projection_manual_edit_allowed": False,
+                "projection_authoritative_source": ST12G_SVC_DESCRIPTOR_REF,
+                "projection_validation_ref": VALIDATOR_REF,
+                "source_contract_manifest_ref": ST12G_CONTRACT_MANIFEST_REF,
+                "direct_f_binding_allowed": False,
+            }
         ],
         "owner_notify_transport_registry.generated.jsonl": [_generic_projection_row(registry_rows[0], "owner_notify_transport_registry") | {"transport": "TG1_mirror_contract", "runtime_created": False, "token_access_created": False}],
         "lineage.generated.jsonl": [{**projection_trace(row["feature_id"]), "lineage_id": f"LINEAGE::{row['feature_id']}", "upstream_artifact_refs": row["upstream_artifact_refs"], "downstream_consumer_refs": row["downstream_consumer_refs"]} for row in registry_rows],
@@ -1554,14 +1637,23 @@ def build_all(out_dir: Path) -> dict[str, Any]:
             {**projection_trace("RESEARCH_INTAKE_SOCIAL_POST_URL"), "route_id": "LIVE_CANARY_REVIEW_ROUTE", "required_before_live_canary": ["replay_paper_validation_receipts", "owner_review", "risk_pretrade_route", "execution_router_gate"], "live_order_authority_created": False}
         ],
     }
-    projection_payloads["owner_data_value_route_map.generated.jsonl"] = build_data_value_route_map_rows(out_dir, registry_rows)
+    projection_payloads["owner_data_value_route_map.generated.jsonl"] = build_data_value_route_map_rows(
+        registry_rows,
+    )
 
     for file_name, rows in projection_payloads.items():
         write_jsonl(out_dir / file_name, rows)
+    write_jsonl(out_dir / ST12G_DESCRIPTOR_FILENAME, (st12g_descriptor,))
 
-    build_static_ui(out_dir)
+    build_static_ui(out_dir, repo_root=source_repo_root)
 
-    generated_files = [REGISTRY_FILENAME, *REQUIRED_JSONL_OUTPUTS, *REQUIRED_JSON_OUTPUTS, *REQUIRED_UI_OUTPUTS]
+    generated_files = [
+        REGISTRY_FILENAME,
+        *REQUIRED_JSONL_OUTPUTS,
+        *REQUIRED_JSON_OUTPUTS,
+        *REQUIRED_UI_OUTPUTS,
+        ST12G_DESCRIPTOR_FILENAME,
+    ]
     manifest = {
         "artifact_id": "PR169_DASH1_OWNER_DASHBOARD_REGISTRY_MANIFEST",
         "created_by_pr": PR_ID,
@@ -1572,6 +1664,11 @@ def build_all(out_dir: Path) -> dict[str, Any]:
         "generated_files": list(dict.fromkeys(generated_files)),
         "manual_edit_allowed_only_for": [REGISTRY_FILENAME],
         "authority_boundary_ref": AUTHORITY_BOUNDARY_REF,
+        "st12g_contract_descriptor": {
+            "artifact_ref": ST12G_DESCRIPTOR_FILENAME,
+            "source_owner": "SVC1_ONLY",
+            "direct_f_binding_allowed": False,
+        },
     }
     no_orphan = {
         "artifact_id": "PR169_DASH1_OWNER_DASHBOARD_NO_ORPHAN_REPORT",
@@ -1593,6 +1690,8 @@ def build_all(out_dir: Path) -> dict[str, Any]:
         "quantum_rows_structural_or_QMAP1_routed": True,
         "institutional_metric_rows_have_refs_or_review_route": True,
         "generated_artifacts_in_data_value_route_map": True,
+        "st12g_svc1_only_projection_connected": True,
+        "st12g_zero_direct_f_bindings": True,
     }
     authority = {
         "artifact_id": "PR169_DASH1_OWNER_DASHBOARD_AUTHORITY_BOUNDARY_REPORT",
@@ -1635,6 +1734,9 @@ def build_all(out_dir: Path) -> dict[str, Any]:
         "external_network_required": False,
         "credential_or_connector_required": False,
         "runtime_server_created": False,
+        "st12g_contract_view_ref": ST12G_DESCRIPTOR_FILENAME,
+        "st12g_source_owner": "SVC1_ONLY",
+        "st12g_direct_f_binding_allowed": False,
     }
     validation_summary = {
         "artifact_id": "PR169_DASH1_VALIDATION_SUMMARY",
@@ -1644,6 +1746,7 @@ def build_all(out_dir: Path) -> dict[str, Any]:
         "validator": VALIDATOR_REF,
         "registry_row_count": len(registry_rows),
         "generated_file_count": len(set(generated_files)),
+        "st12g_contract_descriptor_validated": True,
     }
     write_json(out_dir / "read_receipt.json", build_read_receipt())
     write_json(out_dir / "owner_dashboard_registry_manifest.json", manifest)
@@ -1660,9 +1763,9 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--repo-root", default=".")
     parser.add_argument("--timeout-ms", default="3600000")
     args = parser.parse_args(argv)
-    repo_root = Path(args.repo_root)
+    repo_root = Path(args.repo_root).resolve()
     out_dir = repo_root / args.out_dir
-    manifest = build_all(out_dir)
+    manifest = build_all(out_dir, repo_root=repo_root)
     print(f"PR169_DASH1_OWNER_DASHBOARD_BUILD_OK rows={manifest['registry_row_count']} out={repo_posix(out_dir)}")
     return 0
 

@@ -28,6 +28,10 @@ from .owner_surface_models import (
     REQUIRED_JSONL_OUTPUTS,
     REQUIRED_JSON_OUTPUTS,
     REQUIRED_UI_OUTPUTS,
+    ST12G_CONTRACT_MANIFEST_REF,
+    ST12G_DESCRIPTOR_FILENAME,
+    ST12G_MATERIALIZATION_FIELDS,
+    ST12G_SVC_DESCRIPTOR_REF,
     V4_ROUTE_LABELS,
     VALIDATION_MARKER,
     read_json,
@@ -72,6 +76,30 @@ def validate_artifacts(base_dir: Path | str) -> tuple[str, ...]:
     for file_name in REQUIRED_UI_OUTPUTS:
         if not (base / file_name).exists():
             failures.append(f"missing_ui:{file_name}")
+
+    st12g_path = base / ST12G_DESCRIPTOR_FILENAME
+    st12g_rows = read_jsonl(st12g_path) if st12g_path.exists() else []
+    if len(st12g_rows) != 1:
+        failures.append(f"st12g_descriptor_count:{len(st12g_rows)}")
+    else:
+        descriptor = st12g_rows[0]
+        if set(descriptor) != set(ST12G_MATERIALIZATION_FIELDS):
+            failures.append("st12g_descriptor_schema_mismatch")
+        expected = {
+            "descriptor_id": "ST12G-DESCRIPTOR::DASH1_UI1",
+            "contract_version": "2.0",
+            "consumer_id": "DASH1_UI1",
+            "contract_type": "ST12GOwnerDashboardEvidenceViewV2",
+            "source_contract_manifest_ref": ST12G_CONTRACT_MANIFEST_REF,
+            "canonical_owner_ref": "PR169_DASH1_OWNER_DASHBOARD_SURFACE_REGISTRY",
+            "runtime_instance_state": "NOT_MATERIALIZED_BY_REPOSITORY_BUILD",
+            "manual_edit_allowed": False,
+            "runtime_effect_allowed": False,
+            "write_authority": "NONE",
+            "downstream_route_refs": ["DASH1_UI1"],
+        }
+        if descriptor != expected:
+            failures.append("st12g_descriptor_payload_mismatch")
 
     registry_rows = read_jsonl(registry_path)
     if not registry_rows:
@@ -263,13 +291,27 @@ def validate_artifacts(base_dir: Path | str) -> tuple[str, ...]:
 
     data_map_rows = jsonl_rows_by_file.get("owner_data_value_route_map.generated.jsonl", [])
     mapped_artifacts = {Path(str(row.get("artifact_path", ""))).name for row in data_map_rows}
-    required_names = {Path(name).name for name in (REGISTRY_FILENAME, *REQUIRED_JSONL_OUTPUTS, *REQUIRED_JSON_OUTPUTS, *REQUIRED_UI_OUTPUTS)}
+    required_names = {
+        Path(name).name
+        for name in (
+            REGISTRY_FILENAME,
+            *REQUIRED_JSONL_OUTPUTS,
+            ST12G_DESCRIPTOR_FILENAME,
+            *REQUIRED_JSON_OUTPUTS,
+            *REQUIRED_UI_OUTPUTS,
+        )
+    }
     _failures_append_missing(failures, "data_value_route_map_artifacts", mapped_artifacts, required_names)
 
     no_orphan = read_json(base / "owner_dashboard_no_orphan.report.json")
     authority = read_json(base / "owner_dashboard_authority_boundary.report.json")
     if no_orphan.get("status") != "PASS":
         failures.append("no_orphan_report_not_pass")
+    if (
+        no_orphan.get("st12g_svc1_only_projection_connected") is not True
+        or no_orphan.get("st12g_zero_direct_f_bindings") is not True
+    ):
+        failures.append("st12g_svc1_only_lineage_not_proven")
     if authority.get("status") != "PASS":
         failures.append("authority_report_not_pass")
     for key, value in authority.items():
@@ -277,6 +319,23 @@ def validate_artifacts(base_dir: Path | str) -> tuple[str, ...]:
             continue
         if isinstance(value, bool) and key.endswith(("authority", "reads", "writers", "readers", "created", "bypass", "override", "guarantee")) and value:
             failures.append(f"authority_boundary_true:{key}")
+
+    projection_manifest_rows = jsonl_rows_by_file.get(
+        "owner_surface_projection_manifest.generated.jsonl", []
+    )
+    st12g_manifest_rows = [
+        row
+        for row in projection_manifest_rows
+        if row.get("projection_file") == ST12G_DESCRIPTOR_FILENAME
+    ]
+    if len(st12g_manifest_rows) != 1:
+        failures.append("st12g_projection_manifest_registration_mismatch")
+    elif (
+        st12g_manifest_rows[0].get("projection_authoritative_source")
+        != ST12G_SVC_DESCRIPTOR_REF
+        or st12g_manifest_rows[0].get("direct_f_binding_allowed") is not False
+    ):
+        failures.append("st12g_projection_manifest_direct_f_or_lineage_drift")
 
     ui_text = ""
     for ui_file in REQUIRED_UI_OUTPUTS:

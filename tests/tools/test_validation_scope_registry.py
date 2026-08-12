@@ -2121,3 +2121,36 @@ def test_st12f_current_main_scope_is_exact_and_fail_closed() -> None:
     )
     assert denied["allowed"] is False
     assert denied["matched_rule"] == "no_st12f_exact_scope_rule"
+
+
+def test_st12g_authorized_scope_is_exact_and_rejects_near_names() -> None:
+    assert registry.ST12G_BRANCH == "agent/st12g-existing-owner-projections-v2"
+    assert len(registry.ST12G_ALLOWED_EXACT_PATHS) == 65
+    assert not any("*" in path for path in registry.ST12G_ALLOWED_EXACT_PATHS)
+    assert {
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/existing_owner_projection.py",
+        "tools/independent_validate_qku_computation_control_plane_g.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/tranche_g/test_contract_matrix.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/tranche_g/test_consumer_integration_matrix.py",
+        "docs/master_plan/generated/qku_control_plane/existing_owner_projection/st12g_projection_contract_manifest.json",
+        "docs/master_plan/generated/pr169_dash1/st12g_evidence_owner_view_contract.generated.jsonl",
+    } <= registry.ST12G_ALLOWED_EXACT_PATHS
+    for path in registry.ST12G_ALLOWED_EXACT_PATHS:
+        decision = registry.explain_pr_scope_decision(registry.ST12G_BRANCH, path)
+        assert decision["allowed"] is True
+        assert decision["pr_id"] == "ST12-TRANCHE-G"
+        assert decision["matched_rule"] == f"exact:{path}"
+    for branch in (
+        f"{registry.ST12G_BRANCH}-copy",
+        registry.ST12G_BRANCH.removesuffix("-v2"),
+    ):
+        assert not registry.is_pr_scoped_changed_path_allowed(
+            branch,
+            "src/qtt/stage1_prediction_markets/qku_computation_control_plane/existing_owner_projection.py",
+        )
+    denied = registry.explain_pr_scope_decision(
+        registry.ST12G_BRANCH,
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/dashboard_projection.py",
+    )
+    assert denied["allowed"] is False
+    assert denied["reason"] == "forbidden_path"

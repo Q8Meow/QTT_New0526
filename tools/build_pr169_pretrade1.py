@@ -104,6 +104,7 @@ JSON_ARTIFACTS = (
     "pretrade_quality_gates.report.json",
     "market_installation_acceptance.report.json",
 )
+ST12G_DESCRIPTOR_NAME = "st12g_evidence_projection_contract.generated.jsonl"
 
 AUTHORITY_FALSE_FIELDS = (
     "submit_authority_created",
@@ -2585,7 +2586,7 @@ def _reports(registry: Sequence[dict[str, Any]], artifact_rows: dict[str, Sequen
         "projection_version": PROJECTION_VERSION,
         "prompt_version": PROMPT_VERSION,
     }
-    artifact_count = len(JSONL_ARTIFACTS) + len(JSON_ARTIFACTS)
+    artifact_count = len(JSONL_ARTIFACTS) + len(JSON_ARTIFACTS) + 1
     component_count = len(artifact_rows["reality_model_component_contracts.generated.jsonl"])
     upstream_route_count = len(registry)
     downstream_route_count = len(artifact_rows["consumer_routes.generated.jsonl"])
@@ -2616,6 +2617,7 @@ def _reports(registry: Sequence[dict[str, Any]], artifact_rows: dict[str, Sequen
             "generated_artifact_count": artifact_count,
             "route_map_rows": len(artifact_rows["pretrade_artifact_value_route_map.generated.jsonl"]),
             "registry_row_count": len(registry),
+            "st12g_contract_descriptor_count": 1,
         },
         "no_submit_authority.report.json": {
             **base,
@@ -2813,7 +2815,7 @@ def _reports(registry: Sequence[dict[str, Any]], artifact_rows: dict[str, Sequen
                 "manual_edit_allowed": False,
                 "orphan_status": "NOT_ORPHANED_ROUTE_PROOF_PRESENT",
             }
-            for name in (*JSONL_ARTIFACTS, *JSON_ARTIFACTS)
+            for name in (*JSONL_ARTIFACTS, *JSON_ARTIFACTS, ST12G_DESCRIPTOR_NAME)
         ],
     }
     return reports
@@ -2889,6 +2891,26 @@ def _artifact_rows(registry: Sequence[dict[str, Any]], ctx: SourceContext) -> di
         "candidate_external_info_lanes.generated.jsonl": _external_lane_rows(registry),
         "pretrade_gap_ledger.generated.jsonl": _gap_rows(registry),
         "consumer_routes.generated.jsonl": _consumer_routes(registry),
+        ST12G_DESCRIPTOR_NAME: (
+            {
+                "descriptor_id": "ST12G-DESCRIPTOR::PRETRADE1",
+                "contract_version": "2.0",
+                "consumer_id": "PRETRADE1",
+                "contract_type": "ST12GPretradeEvidenceProjectionV2",
+                "source_contract_manifest_ref": (
+                    "docs/master_plan/generated/qku_control_plane/"
+                    "existing_owner_projection/st12g_projection_contract_manifest.json"
+                ),
+                "canonical_owner_ref": (
+                    "PR169_PRETRADE1_CANONICAL_REGISTRY_AND_RESOLVER"
+                ),
+                "runtime_instance_state": "NOT_MATERIALIZED_BY_REPOSITORY_BUILD",
+                "manual_edit_allowed": False,
+                "runtime_effect_allowed": False,
+                "write_authority": "NONE",
+                "downstream_route_refs": ["PRETRADE1"],
+            },
+        ),
     }
     return rows
 
@@ -2903,6 +2925,7 @@ def build(repo_root: Path, out_dir: Path) -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
     for name in JSONL_ARTIFACTS:
         _write_jsonl(out_dir / name, artifact_rows[name])
+    _write_jsonl(out_dir / ST12G_DESCRIPTOR_NAME, artifact_rows[ST12G_DESCRIPTOR_NAME])
     for name in JSON_ARTIFACTS:
         _write_json(out_dir / name, reports[name])
 

@@ -17585,6 +17585,35 @@
       ],
       "validation_ref": "tools/validate_pr169_dash1_owner_dashboard.py",
       "value_family": "owner_dashboard_command_plane_contract"
+    },
+    {
+      "agent_role_refs_from_PR165_D2": [
+        "dashboard_agent",
+        "governance_agent",
+        "commander_agent"
+      ],
+      "artifact_path": "docs/master_plan/generated/pr169_dash1/st12g_evidence_owner_view_contract.generated.jsonl",
+      "authoritative_source": "owner_dashboard_surface_registry.jsonl",
+      "canonical_source_ref": "owner_dashboard_surface_registry.jsonl",
+      "downstream_consumer_refs": [
+        "OwnerSurfaceResolver",
+        "tools/validate_pr169_dash1_owner_dashboard.py"
+      ],
+      "generated_from": "owner_dashboard_surface_registry.jsonl",
+      "manual_edit_allowed": false,
+      "no_orphan_status": "CONNECTED_TO_DATA_VALUE_ROUTE_MAP",
+      "owner_surface_registry_refs": [
+        "owner_dashboard_surface_registry.jsonl::DASH1_FEATURE_064_READ_LATER_QUEUE"
+      ],
+      "producer_tool": "tools/build_pr169_dash1_owner_dashboard.py",
+      "registry_row_ref": "owner_dashboard_surface_registry.jsonl::DASH1_FEATURE_064_READ_LATER_QUEUE",
+      "resolver_method": "OwnerSurfaceResolver",
+      "row_family": "st12g_evidence_owner_view_contract.generated.jsonl",
+      "upstream_artifact_refs": [
+        "owner_dashboard_surface_registry.jsonl"
+      ],
+      "validation_ref": "tools/validate_pr169_dash1_owner_dashboard.py",
+      "value_family": "owner_dashboard_command_plane_contract"
     }
   ],
   "decision_queue": [
@@ -59338,6 +59367,8 @@
     "registry_rows_checked": 171,
     "shadow_slots_have_no_execution_authority": true,
     "source_panel_has_no_direct_truth_creation": true,
+    "st12g_svc1_only_projection_connected": true,
+    "st12g_zero_direct_f_bindings": true,
     "status": "PASS",
     "upstream_evidence_refs_resolve_or_route": true
   },
@@ -63457,6 +63488,31 @@
         "route_id": "REPLAY_PAPER_ROUTE"
       }
     ]
+  },
+  "st12g_evidence_view": {
+    "action_authority_created": false,
+    "contract_descriptor": {
+      "canonical_owner_ref": "PR169_DASH1_OWNER_DASHBOARD_SURFACE_REGISTRY",
+      "consumer_id": "DASH1_UI1",
+      "contract_type": "ST12GOwnerDashboardEvidenceViewV2",
+      "contract_version": "2.0",
+      "descriptor_id": "ST12G-DESCRIPTOR::DASH1_UI1",
+      "downstream_route_refs": [
+        "DASH1_UI1"
+      ],
+      "manual_edit_allowed": false,
+      "runtime_effect_allowed": false,
+      "runtime_instance_state": "NOT_MATERIALIZED_BY_REPOSITORY_BUILD",
+      "source_contract_manifest_ref": "docs/master_plan/generated/qku_control_plane/existing_owner_projection/st12g_projection_contract_manifest.json",
+      "write_authority": "NONE"
+    },
+    "dashboard_state_owner": "DASH1",
+    "direct_f_binding_allowed": false,
+    "runtime_effect_allowed": false,
+    "runtime_instance_state": "NOT_MATERIALIZED_BY_REPOSITORY_BUILD",
+    "source_owner": "SVC1_ONLY",
+    "ui1_role": "RENDERER_ONLY",
+    "write_authority": "NONE"
   },
   "stale_data_banner": {
     "data_freshness": "STATIC_GENERATED_BOOT_DATA",
@@ -98730,7 +98786,15 @@
           "upstream_ref_or_provider_pending_gap": "current PR169 generated dashboard artifacts or provider_pending gap",
           "validator_or_test_consumer": "tools/validate_pr169_dash1_owner_dashboard_ui.py; tests/pr169_dash1_ui1/test_ui1r2r6_truth.py"
         }
-      ]
+      ],
+      "st12g_existing_owner_projection": {
+        "contract_descriptor_ref": "st12g_evidence_owner_view_contract.generated.jsonl",
+        "direct_f_binding_allowed": false,
+        "second_dashboard_state_owner_created": false,
+        "source_owner": "SVC1_ONLY",
+        "state_owner": "DASH1",
+        "ui1_role": "RENDERER_ONLY"
+      }
     },
     "changed_file_ownership_audit": [
       {
@@ -101434,6 +101498,31 @@
       "renderers / validators / tests / Playwright"
     ],
     "source_truth_created": false,
+    "st12g_evidence_view": {
+      "action_authority_created": false,
+      "contract_descriptor": {
+        "canonical_owner_ref": "PR169_DASH1_OWNER_DASHBOARD_SURFACE_REGISTRY",
+        "consumer_id": "DASH1_UI1",
+        "contract_type": "ST12GOwnerDashboardEvidenceViewV2",
+        "contract_version": "2.0",
+        "descriptor_id": "ST12G-DESCRIPTOR::DASH1_UI1",
+        "downstream_route_refs": [
+          "DASH1_UI1"
+        ],
+        "manual_edit_allowed": false,
+        "runtime_effect_allowed": false,
+        "runtime_instance_state": "NOT_MATERIALIZED_BY_REPOSITORY_BUILD",
+        "source_contract_manifest_ref": "docs/master_plan/generated/qku_control_plane/existing_owner_projection/st12g_projection_contract_manifest.json",
+        "write_authority": "NONE"
+      },
+      "dashboard_state_owner": "DASH1",
+      "direct_f_binding_allowed": false,
+      "runtime_effect_allowed": false,
+      "runtime_instance_state": "NOT_MATERIALIZED_BY_REPOSITORY_BUILD",
+      "source_owner": "SVC1_ONLY",
+      "ui1_role": "RENDERER_ONLY",
+      "write_authority": "NONE"
+    },
     "theme_truth_contract": {
       "activation_state_or_provider_stage": "UI1_R2R6_LOCAL_PROVIDER_PENDING",
       "authority_boundary": "LOCAL_STATIC_NO_RUNTIME_NO_CREDENTIALS_NO_DIRECT_VENUE_SUBMIT_NO_EXECUTION_ROUTER_RELEASE",

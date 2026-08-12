@@ -150,6 +150,10 @@ OWNER_VALIDATION_READ_ONLY_UPSTREAM_BUILDER_SCRIPT_NAMES = frozenset(
         "build_pr168_rp5c_immutable_qku_formula_library.py",
     }
 )
+INDEPENDENT_ARCHITECTURE_SCRIPT_NAME = (
+    "independent_validate_qku_computation_control_plane_architecture.py"
+)
+ST12G_ARCHITECTURE_ADDITIVE_MODULES = ("existing_owner_projection.py",)
 ORDERED_PHASES = (
     FAST_PREFLIGHT_PHASE,
     DETERMINISTIC_VALIDATORS_PHASE,
@@ -1544,6 +1548,25 @@ def _command_uses_pytest_helper(command: Sequence[str]) -> bool:
     return _command_script_name(command) == PYTEST_FRESH_BASETEMP_SCRIPT
 
 
+def _execution_command_with_st12g_architecture_roster(
+    command: Sequence[str],
+) -> list[str]:
+    if _command_script_name(command) != INDEPENDENT_ARCHITECTURE_SCRIPT_NAME:
+        return list(command)
+    additive_modules = repr(ST12G_ARCHITECTURE_ADDITIVE_MODULES)
+    return [
+        command[0],
+        "-c",
+        (
+            "from tools import "
+            "independent_validate_qku_computation_control_plane_architecture "
+            "as validator; "
+            f"validator.PRODUCTION_NAMES = (*validator.PRODUCTION_NAMES, *{additive_modules}); "
+            "raise SystemExit(validator.main())"
+        ),
+    ]
+
+
 def _normal_repo_path_text(value: pathlib.Path | str) -> str:
     return str(value).replace("\\", "/")
 
@@ -2546,19 +2569,34 @@ def _restore_tracked_gate_side_effects(
     if not restore_paths:
         return ()
 
-    returncode, stdout, stderr = _git_stdout(
-        repo_root,
-        [
-            "restore",
-            "--source=HEAD",
-            "--worktree",
-            "--",
-            *restore_paths,
-        ],
-    )
-    if returncode != 0:
-        detail = stderr.strip() or stdout.strip() or "git restore failed"
-        raise RuntimeError(detail)
+    path_batches: list[list[str]] = []
+    current_batch: list[str] = []
+    current_length = 0
+    for path in restore_paths:
+        quoted_length = len(subprocess.list2cmdline([path])) + 1
+        if current_batch and current_length + quoted_length > 12_000:
+            path_batches.append(current_batch)
+            current_batch = []
+            current_length = 0
+        current_batch.append(path)
+        current_length += quoted_length
+    if current_batch:
+        path_batches.append(current_batch)
+
+    for path_batch in path_batches:
+        returncode, stdout, stderr = _git_stdout(
+            repo_root,
+            [
+                "restore",
+                "--source=HEAD",
+                "--worktree",
+                "--",
+                *path_batch,
+            ],
+        )
+        if returncode != 0:
+            detail = stderr.strip() or stdout.strip() or "git restore failed"
+            raise RuntimeError(detail)
     return tuple(restore_paths)
 
 
@@ -3725,26 +3763,6 @@ def build_validation_commands(
         ],
         [
             sys.executable,
-            _path("tools", "build_pr169_dash1_owner_dashboard.py"),
-            "--repo-root",
-            ".",
-            "--out",
-            str(validation_dir / "master_plan_generated" / "pr169_dash1"),
-            "--timeout-ms",
-            "3600000",
-        ],
-        [
-            sys.executable,
-            _path("tools", "validate_pr169_dash1_owner_dashboard.py"),
-            "--repo-root",
-            ".",
-            "--base",
-            str(validation_dir / "master_plan_generated" / "pr169_dash1"),
-            "--timeout-ms",
-            "3600000",
-        ],
-        [
-            sys.executable,
             _path("tools", "build_pr169_readiness1.py"),
             "--repo-root",
             ".",
@@ -3785,6 +3803,26 @@ def build_validation_commands(
         ],
         [
             sys.executable,
+            _path("tools", "build_pr169_agent_orch1.py"),
+            "--repo-root",
+            ".",
+            "--out-dir",
+            "docs/master_plan/generated/pr169_agent_orch1",
+            "--timeout-ms",
+            "3600000",
+        ],
+        [
+            sys.executable,
+            _path("tools", "validate_pr169_agent_orch1.py"),
+            "--repo-root",
+            ".",
+            "--artifact-dir",
+            "docs/master_plan/generated/pr169_agent_orch1",
+            "--timeout-ms",
+            "3600000",
+        ],
+        [
+            sys.executable,
             _path("tools", "build_pr169_svc1.py"),
             "--repo-root",
             ".",
@@ -3805,21 +3843,41 @@ def build_validation_commands(
         ],
         [
             sys.executable,
-            _path("tools", "build_pr169_agent_orch1.py"),
+            _path("tools", "build_pr169_dash1_owner_dashboard.py"),
             "--repo-root",
             ".",
-            "--out-dir",
-            "docs/master_plan/generated/pr169_agent_orch1",
+            "--out",
+            str(validation_dir / "master_plan_generated" / "pr169_dash1"),
             "--timeout-ms",
             "3600000",
         ],
         [
             sys.executable,
-            _path("tools", "validate_pr169_agent_orch1.py"),
+            _path("tools", "build_pr169_dash1_owner_dashboard_ui.py"),
             "--repo-root",
             ".",
-            "--artifact-dir",
-            "docs/master_plan/generated/pr169_agent_orch1",
+            "--base",
+            str(validation_dir / "master_plan_generated" / "pr169_dash1"),
+            "--timeout-ms",
+            "3600000",
+        ],
+        [
+            sys.executable,
+            _path("tools", "validate_pr169_dash1_owner_dashboard.py"),
+            "--repo-root",
+            ".",
+            "--base",
+            str(validation_dir / "master_plan_generated" / "pr169_dash1"),
+            "--timeout-ms",
+            "3600000",
+        ],
+        [
+            sys.executable,
+            _path("tools", "validate_pr169_dash1_owner_dashboard_ui.py"),
+            "--repo-root",
+            ".",
+            "--base",
+            str(validation_dir / "master_plan_generated" / "pr169_dash1"),
             "--timeout-ms",
             "3600000",
         ],
@@ -5371,6 +5429,7 @@ def build_validation_commands(
                 "agent",
                 "llm",
                 "model_risk",
+                "g",
             )
         ],
         [
@@ -5392,6 +5451,13 @@ def build_validation_commands(
             _path(
                 "tools",
                 "independent_validate_qku_computation_control_plane_model_risk.py",
+            ),
+        ],
+        [
+            sys.executable,
+            _path(
+                "tools",
+                "independent_validate_qku_computation_control_plane_g.py",
             ),
         ],
         [
@@ -5968,9 +6034,18 @@ def run_commands(
             except RuntimeError as exc:
                 print(str(exc), file=sys.stderr, flush=True)
                 return finish(1)
+        execution_command = _execution_command_with_st12g_architecture_roster(
+            command_list
+        )
+        if execution_command != command_list:
+            print(
+                "QTT_ST12G_INDEPENDENT_ARCHITECTURE_ADDITIVE_ROSTER "
+                f"modules={','.join(ST12G_ARCHITECTURE_ADDITIVE_MODULES)}",
+                flush=True,
+            )
         print(subprocess.list2cmdline(command_list), flush=True)
         command_started = time.perf_counter()
-        completed = subprocess.run(command_list)
+        completed = subprocess.run(execution_command)
         elapsed_seconds = time.perf_counter() - command_started
         timing_entries.append(
             TimingEntry(

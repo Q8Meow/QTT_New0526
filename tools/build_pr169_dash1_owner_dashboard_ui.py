@@ -4,7 +4,6 @@ import argparse
 import json
 import re
 import sys
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -13,7 +12,13 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from src.qtt.dashboard.owner_surface_resolver import OwnerSurfaceResolver
-from src.qtt.dashboard.owner_surface_models import read_json, read_jsonl, repo_posix
+from src.qtt.dashboard.owner_surface_models import (
+    ST12G_CONTRACT_MANIFEST_REF,
+    ST12G_DESCRIPTOR_FILENAME,
+    read_json,
+    read_jsonl,
+    repo_posix,
+)
 
 
 UI_DIR_NAME = "ui"
@@ -75,6 +80,7 @@ REQUIRED_TOP_LEVEL_KEYS = (
     "dag",
     "no_orphan",
     "authority_boundary",
+    "st12g_evidence_view",
     "owner_trade_command",
     "trade_workbench",
     "owner_action_request_previews",
@@ -886,7 +892,19 @@ def _ui1r2r3_meta(artifact_id: str, extra: dict[str, Any] | None = None) -> dict
 
 def _write_json(path: Path, payload: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    serialized = json.dumps(payload, indent=2, sort_keys=True) + "\n"
+    if path.exists() and path.read_text(encoding="utf-8") == serialized:
+        return
+    with path.open("w", encoding="utf-8", newline="\n") as handle:
+        handle.write(serialized)
+
+
+def _write_text(path: Path, value: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    if path.exists() and path.read_text(encoding="utf-8") == value:
+        return
+    with path.open("w", encoding="utf-8", newline="\n") as handle:
+        handle.write(value)
 
 
 def _read_text(path: Path) -> str:
@@ -6179,6 +6197,7 @@ def _build_ui1r2r6_truth_repair(
     trade_workbench: dict[str, Any],
     theme_contract: dict[str, Any],
     chart_manifest: dict[str, Any],
+    st12g_contract_view: dict[str, Any],
 ) -> dict[str, Any]:
     builder_ref = "tools/build_pr169_dash1_owner_dashboard_ui.py"
     validator_ref = VALIDATION_REF
@@ -6466,6 +6485,14 @@ def _build_ui1r2r6_truth_repair(
         "phase0_current_equivalent_mapping": phase0_mapping,
         "rows": manifest_rows,
         "changed_file_ownership_audit": changed_file_ownership_audit,
+        "st12g_existing_owner_projection": {
+            "state_owner": "DASH1",
+            "source_owner": "SVC1_ONLY",
+            "ui1_role": "RENDERER_ONLY",
+            "direct_f_binding_allowed": False,
+            "second_dashboard_state_owner_created": False,
+            "contract_descriptor_ref": ST12G_DESCRIPTOR_FILENAME,
+        },
     }
 
     return {
@@ -6506,6 +6533,7 @@ def _build_ui1r2r6_truth_repair(
         },
         "phase0_current_equivalent_mapping": phase0_mapping,
         "centralization_manifest": centralization_manifest,
+        "st12g_evidence_view": st12g_contract_view,
         "control_effect_proof_matrix": control_effect_proof_matrix,
         "screenshot_proof_registry": screenshot_registry,
         "chart_registration_policy": chart_registration_policy,
@@ -6595,6 +6623,31 @@ def _build_review_data(base: Path, master_plan: Path) -> tuple[dict[str, Any], d
     lineage = _artifact_rows(base, "lineage.generated.jsonl")
     no_orphan = _artifact_json(base, "owner_dashboard_no_orphan.report.json")
     authority = _artifact_json(base, "owner_dashboard_authority_boundary.report.json")
+    st12g_rows = _artifact_rows(base, ST12G_DESCRIPTOR_FILENAME)
+    if len(st12g_rows) != 1:
+        raise ValueError("UI1 requires exactly one DASH1 ST12-G contract descriptor")
+    st12g_descriptor = st12g_rows[0]
+    if (
+        st12g_descriptor.get("consumer_id") != "DASH1_UI1"
+        or st12g_descriptor.get("contract_type")
+        != "ST12GOwnerDashboardEvidenceViewV2"
+        or st12g_descriptor.get("source_contract_manifest_ref")
+        != ST12G_CONTRACT_MANIFEST_REF
+        or st12g_descriptor.get("runtime_effect_allowed") is not False
+        or st12g_descriptor.get("write_authority") != "NONE"
+    ):
+        raise ValueError("UI1 rejected the DASH1 ST12-G contract descriptor")
+    st12g_contract_view = {
+        "contract_descriptor": st12g_descriptor,
+        "source_owner": "SVC1_ONLY",
+        "dashboard_state_owner": "DASH1",
+        "ui1_role": "RENDERER_ONLY",
+        "runtime_instance_state": "NOT_MATERIALIZED_BY_REPOSITORY_BUILD",
+        "direct_f_binding_allowed": False,
+        "action_authority_created": False,
+        "runtime_effect_allowed": False,
+        "write_authority": "NONE",
+    }
 
     sections, coverage_rows = _extract_20d_sections(master_plan, registry_rows)
     widget_manifest = _build_widget_manifest(registry_rows, coverage_rows)
@@ -6608,7 +6661,13 @@ def _build_review_data(base: Path, master_plan: Path) -> tuple[dict[str, Any], d
     empty_states = _build_empty_states(registry_rows)
     contract_views = _build_contract_views(provider_routes, qku_matrix, empty_states)
 
-    generated_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+    existing_boot_path = base / UI_DIR_NAME / BOOT_JSON
+    existing_boot = read_json(existing_boot_path) if existing_boot_path.exists() else {}
+    generated_at = str(
+        existing_boot.get("meta", {}).get(
+            "generated_at", "1970-01-01T00:00:00+00:00"
+        )
+    )
     r1_artifacts = _build_ui1r1_artifacts(
         registry_rows=registry_rows,
         decision_queue=decision_queue,
@@ -6643,6 +6702,7 @@ def _build_review_data(base: Path, master_plan: Path) -> tuple[dict[str, Any], d
         trade_workbench=trade_workbench,
         theme_contract=theme_contract,
         chart_manifest=r1_artifacts["ui1r1_chart_manifest.generated.json"],
+        st12g_contract_view=st12g_contract_view,
     )
     charts = {
         "chart_contracts": chart_contracts,
@@ -6786,6 +6846,7 @@ def _build_review_data(base: Path, master_plan: Path) -> tuple[dict[str, Any], d
         "dag": {"rows": dag, "lineage": lineage},
         "no_orphan": no_orphan,
         "authority_boundary": authority | {"UI1_authority_boundary_ref": AUTHORITY_BOUNDARY},
+        "st12g_evidence_view": st12g_contract_view,
         "owner_trade_command": owner_trade_command,
         "trade_workbench": trade_workbench,
         "owner_action_request_previews": trade_workbench["owner_action_request_previews"],
@@ -7100,7 +7161,7 @@ def build_ui(base: Path, repo_root: Path) -> dict[str, Any]:
         + json.dumps(review_data, indent=2, sort_keys=True)
         + ";\n"
     )
-    (ui_dir / BOOT_JS).write_text(bootstrap, encoding="utf-8")
+    _write_text(ui_dir / BOOT_JS, bootstrap)
     for file_name in UI_ARTIFACT_FILES:
         payload = artifacts.get(file_name)
         if payload is None:
@@ -7123,6 +7184,21 @@ def build_ui(base: Path, repo_root: Path) -> dict[str, Any]:
         r2r6_dir / R2R6_MANIFEST_FILE,
         review_data["ui1r2r6_truth_repair"]["centralization_manifest"],
     )
+    ui_manifest_path = base / "owner_dashboard_ui_manifest.json"
+    ui_manifest = read_json(ui_manifest_path) if ui_manifest_path.exists() else {}
+    ui_manifest.update(
+        {
+            "st12g_contract_view_ref": ST12G_DESCRIPTOR_FILENAME,
+            "st12g_boot_data_ref": f"{UI_DIR_NAME}/{BOOT_JSON}",
+            "st12g_source_owner": "SVC1_ONLY",
+            "st12g_dashboard_state_owner": "DASH1",
+            "st12g_ui1_role": "RENDERER_ONLY",
+            "st12g_direct_f_binding_allowed": False,
+            "st12g_runtime_effect_allowed": False,
+            "st12g_write_authority": "NONE",
+        }
+    )
+    _write_json(ui_manifest_path, ui_manifest)
     return {
         "artifact_id": "UI1_OWNER_DASHBOARD_BUILD_SUMMARY",
         "status": "BUILT",

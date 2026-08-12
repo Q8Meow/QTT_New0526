@@ -24,6 +24,7 @@ DOMAIN_MATH_IDS = {
     "architecture": tuple(f"MATH-{value:02d}" for value in range(1, 16)),
     "d": (),
     "execution": ("MATH-37", "MATH-38"),
+    "g": (),
     "llm": (),
     "latency": (),
     "model_risk": (),

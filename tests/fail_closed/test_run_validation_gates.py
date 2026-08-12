@@ -1379,26 +1379,6 @@ def _expected_commands(
         ],
         [
             python_executable,
-            str(Path("tools") / "build_pr169_dash1_owner_dashboard.py"),
-            "--repo-root",
-            ".",
-            "--out",
-            str(validation_dir / "master_plan_generated" / "pr169_dash1"),
-            "--timeout-ms",
-            "3600000",
-        ],
-        [
-            python_executable,
-            str(Path("tools") / "validate_pr169_dash1_owner_dashboard.py"),
-            "--repo-root",
-            ".",
-            "--base",
-            str(validation_dir / "master_plan_generated" / "pr169_dash1"),
-            "--timeout-ms",
-            "3600000",
-        ],
-        [
-            python_executable,
             str(Path("tools") / "build_pr169_readiness1.py"),
             "--repo-root",
             ".",
@@ -1439,6 +1419,26 @@ def _expected_commands(
         ],
         [
             python_executable,
+            str(Path("tools") / "build_pr169_agent_orch1.py"),
+            "--repo-root",
+            ".",
+            "--out-dir",
+            str(validation_dir / "master_plan_generated" / "pr169_agent_orch1"),
+            "--timeout-ms",
+            "3600000",
+        ],
+        [
+            python_executable,
+            str(Path("tools") / "validate_pr169_agent_orch1.py"),
+            "--repo-root",
+            ".",
+            "--artifact-dir",
+            str(validation_dir / "master_plan_generated" / "pr169_agent_orch1"),
+            "--timeout-ms",
+            "3600000",
+        ],
+        [
+            python_executable,
             str(Path("tools") / "build_pr169_svc1.py"),
             "--repo-root",
             ".",
@@ -1459,21 +1459,41 @@ def _expected_commands(
         ],
         [
             python_executable,
-            str(Path("tools") / "build_pr169_agent_orch1.py"),
+            str(Path("tools") / "build_pr169_dash1_owner_dashboard.py"),
             "--repo-root",
             ".",
-            "--out-dir",
-            str(validation_dir / "master_plan_generated" / "pr169_agent_orch1"),
+            "--out",
+            str(validation_dir / "master_plan_generated" / "pr169_dash1"),
             "--timeout-ms",
             "3600000",
         ],
         [
             python_executable,
-            str(Path("tools") / "validate_pr169_agent_orch1.py"),
+            str(Path("tools") / "build_pr169_dash1_owner_dashboard_ui.py"),
             "--repo-root",
             ".",
-            "--artifact-dir",
-            str(validation_dir / "master_plan_generated" / "pr169_agent_orch1"),
+            "--base",
+            str(validation_dir / "master_plan_generated" / "pr169_dash1"),
+            "--timeout-ms",
+            "3600000",
+        ],
+        [
+            python_executable,
+            str(Path("tools") / "validate_pr169_dash1_owner_dashboard.py"),
+            "--repo-root",
+            ".",
+            "--base",
+            str(validation_dir / "master_plan_generated" / "pr169_dash1"),
+            "--timeout-ms",
+            "3600000",
+        ],
+        [
+            python_executable,
+            str(Path("tools") / "validate_pr169_dash1_owner_dashboard_ui.py"),
+            "--repo-root",
+            ".",
+            "--base",
+            str(validation_dir / "master_plan_generated" / "pr169_dash1"),
             "--timeout-ms",
             "3600000",
         ],
@@ -3018,6 +3038,7 @@ def _expected_commands(
                 "agent",
                 "llm",
                 "model_risk",
+                "g",
             )
         ],
         [
@@ -3039,6 +3060,13 @@ def _expected_commands(
             str(
                 Path("tools")
                 / "independent_validate_qku_computation_control_plane_model_risk.py"
+            ),
+        ],
+        [
+            python_executable,
+            str(
+                Path("tools")
+                / "independent_validate_qku_computation_control_plane_g.py"
             ),
         ],
         [
@@ -3157,7 +3185,7 @@ def test_runner_registers_qku_primary_and_independent_systems():
             for part in command
         )
     ]
-    assert [command[-1] for command in qku_commands[:12]] == [
+    assert [command[-1] for command in qku_commands[:13]] == [
         "architecture",
         "operations",
         "quantum",
@@ -3170,11 +3198,13 @@ def test_runner_registers_qku_primary_and_independent_systems():
         "agent",
         "llm",
         "model_risk",
+        "g",
     ]
-    assert {Path(command[1]).name for command in qku_commands[12:]} == {
+    assert {Path(command[1]).name for command in qku_commands[13:]} == {
         "independent_validate_qku_computation_control_plane.py",
         "independent_validate_qku_computation_control_plane_latency.py",
         "independent_validate_qku_computation_control_plane_model_risk.py",
+        "independent_validate_qku_computation_control_plane_g.py",
         "independent_validate_qku_computation_control_plane_accounting.py",
         "independent_validate_qku_computation_control_plane_execution.py",
         "independent_validate_qku_computation_control_plane_agent.py",
@@ -11452,6 +11482,40 @@ def test_runner_timing_summary_preserves_failure_return_code(monkeypatch, capsys
     assert runner.SUCCESS_MARKER not in output
 
 
+def test_st12g_validators_are_in_full_gate_and_failure_propagates(
+    monkeypatch,
+    capsys,
+):
+    commands = runner.build_deterministic_validator_commands(
+        Path(".tmp/st12g-gate"),
+        Path(".tmp/st12g-gate/pytest"),
+    )
+    command_text = {" ".join(command) for command in commands}
+    assert any(
+        "validate_qku_computation_control_plane.py --domain g" in command
+        for command in command_text
+    )
+    assert any(
+        command.endswith("independent_validate_qku_computation_control_plane_g.py")
+        for command in command_text
+    )
+    assert any(
+        "validate_pr169_dash1_owner_dashboard_ui.py" in command
+        for command in command_text
+    )
+
+    class Completed:
+        returncode = 19
+
+    monkeypatch.setattr(runner.subprocess, "run", lambda command, **kwargs: Completed())
+    exit_code = runner.run_commands(
+        [["python", "tools/independent_validate_qku_computation_control_plane_g.py"]],
+        phase="st12g-failure-propagation",
+    )
+    assert exit_code == 19
+    assert runner.SUCCESS_MARKER not in capsys.readouterr().out
+
+
 def test_runner_timing_report_writes_only_when_requested(monkeypatch, tmp_path):
     class Completed:
         returncode = 0
@@ -11541,7 +11605,7 @@ def test_runner_returns_zero_when_all_mocked_commands_pass(monkeypatch, capsys):
     pytest_basetemp = _pytest_basetemp_from_commands(seen)
     assert pytest_basetemp.name.startswith("run_validation_gates_pytest_")
     expected = [
-        command
+        runner._execution_command_with_st12g_architecture_roster(command)
         for command in runner.build_phase_commands(
             runner.ALL_PHASE,
             validation_dir,

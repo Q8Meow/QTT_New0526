@@ -349,6 +349,10 @@
       "row_count": 5
     },
     {
+      "artifact_ref": "docs/master_plan/generated/pr169_svc1/st12g_evidence_view_contract.generated.jsonl",
+      "row_count": 1
+    },
+    {
       "artifact_ref": "docs/master_plan/generated/pr169_svc1/service_manifest.json",
       "row_count": 1
     },
@@ -944,5 +948,10 @@
   ],
   "projection_version": "PR169-SVC1-v1.4",
   "prompt_version": "v1.4",
+  "st12g_contract_descriptor": {
+    "artifact_ref": "docs/master_plan/generated/pr169_svc1/st12g_evidence_view_contract.generated.jsonl",
+    "contract_type": "ST12GServiceEvidenceViewV2",
+    "source_contract_manifest_ref": "docs/master_plan/generated/qku_control_plane/existing_owner_projection/st12g_projection_contract_manifest.json"
+  },
   "validator_name": "tools/validate_pr169_svc1.py"
 }

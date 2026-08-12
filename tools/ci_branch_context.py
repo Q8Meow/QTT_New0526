@@ -150,6 +150,7 @@ OWNER_AUTHORIZED_VALIDATION_BRANCHES = frozenset(
         "agent/st12e-capability-guard",
         "agent/st12d-mode-snapshot-boundary",
         "agent/st12f-evidence-model-risk-v1",
+        "agent/st12g-existing-owner-projections-v2",
     }
 )
 IDEMPOTENCE_RUNTIME_CONTAINMENT_HARDENING_BRANCH = (

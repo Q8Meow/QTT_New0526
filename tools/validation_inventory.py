@@ -21,6 +21,7 @@ from tools.validation_scope_registry import (
     ST12D_ALLOWED_EXACT_PATHS,
     ST12E_ALLOWED_EXACT_PATHS,
     ST12F_ALLOWED_EXACT_PATHS,
+    ST12G_ALLOWED_EXACT_PATHS,
 )
 
 
@@ -96,6 +97,7 @@ QKU_ALLOWED_EXACT_PATHS = frozenset(
         *ST12D_ALLOWED_EXACT_PATHS,
         *ST12E_ALLOWED_EXACT_PATHS,
         *ST12F_ALLOWED_EXACT_PATHS,
+        *ST12G_ALLOWED_EXACT_PATHS,
     )
 )
 ST12C_QKU_VALIDATOR_IDS = frozenset(
@@ -158,6 +160,33 @@ ST12F_QKU_VALIDATOR_IDS = frozenset(
         "validate_qku_computation_control_plane_model_risk",
         "validate_qku_computation_control_plane_quantum",
     }
+)
+ST12G_QKU_VALIDATOR_IDS = frozenset(
+    {
+        "validate_qku_computation_control_plane_g",
+        "independent_validate_qku_computation_control_plane_g",
+    }
+)
+ST12G_OWNER_VALIDATOR_IDS = frozenset(
+    {
+        "validate_pr169_readiness1",
+        "validate_pr169_pretrade1",
+        "validate_pr169_agent_orch1",
+        "validate_pr169_svc1",
+        "validate_pr169_dash1_owner_dashboard",
+        "validate_pr169_dash1_owner_dashboard_ui",
+    }
+)
+ST12G_REQUIRED_VALIDATOR_IDS = frozenset(
+    (*ST12G_QKU_VALIDATOR_IDS, *ST12G_OWNER_VALIDATOR_IDS)
+)
+ST12G_EXACT_VALIDATION_COMMANDS = (
+    "python tools/validate_qku_computation_control_plane.py --domain g",
+    "python tools/independent_validate_qku_computation_control_plane_g.py",
+    "python tools/validate_validation_inventory.py",
+    "python -m pytest tests/stage1_prediction_markets/qku_computation_control_plane/tranche_g/test_contract_matrix.py -q",
+    "python -m pytest tests/stage1_prediction_markets/qku_computation_control_plane/tranche_g/test_consumer_integration_matrix.py -q",
+    "python tools/run_validation_gates.py --phase all --validation-mode full",
 )
 
 
@@ -350,6 +379,8 @@ def _pr_tag_from_token(token: str) -> str:
 
 
 def _owner_pr_or_feature(stem: str, validator_id: str) -> str:
+    if validator_id in ST12G_QKU_VALIDATOR_IDS:
+        return "ST12-TRANCHE-G"
     if validator_id in ST12F_QKU_VALIDATOR_IDS:
         return "ST12-TRANCHE-F"
     if validator_id in ST12D_EXCLUSIVE_QKU_VALIDATOR_IDS:
@@ -936,11 +967,14 @@ def command_inventory_ids_for_phase(phase: str) -> tuple[str, ...]:
     )
 
 
-def entries_matching_path(path: str) -> tuple[ValidatorInventoryEntry, ...]:
+def entries_matching_path(
+    path: str,
+    entries: Sequence[ValidatorInventoryEntry] | None = None,
+) -> tuple[ValidatorInventoryEntry, ...]:
     normalized = normalize_repo_ref(path)
     matches = [
         entry
-        for entry in validation_inventory()
+        for entry in (validation_inventory() if entries is None else entries)
         if _matches_any(normalized, entry.required_when_files_match)
     ]
     specific_token = _specific_pr_token_for_path(normalized)

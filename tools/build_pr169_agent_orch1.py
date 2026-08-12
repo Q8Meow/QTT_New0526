@@ -25,6 +25,11 @@ VALIDATOR_NAME = "tools/validate_pr169_agent_orch1.py"
 GENERATED_PREFIX = Path("docs/master_plan/generated/pr169_agent_orch1")
 REGISTRY_REF = "docs/master_plan/generated/pr169_agent_orch1/registry.jsonl"
 MANIFEST_REF = "docs/master_plan/generated/pr169_agent_orch1/manifest.json"
+ST12G_DESCRIPTOR_NAME = "st12g_evidence_handoff_contract.generated.jsonl"
+ST12G_CONTRACT_MANIFEST_REF = (
+    "docs/master_plan/generated/qku_control_plane/"
+    "existing_owner_projection/st12g_projection_contract_manifest.json"
+)
 
 SVC1_PREFIX = Path("docs/master_plan/generated/pr169_svc1")
 READINESS1_PREFIX = Path("docs/master_plan/generated/pr169_readiness1")
@@ -1677,6 +1682,16 @@ def _artifact_manifest() -> list[dict[str, Any]]:
                 "intelligence_lane": "GOVERNANCE_LANE",
             }
         )
+    manifest.append(
+        {
+            "file": ST12G_DESCRIPTOR_NAME,
+            "semantic_class": "existing_owner_evidence_projection_contract",
+            "object_type": "ST12GAgentEvidenceHandoffV2",
+            "consumer": "AGENT_ORCH1",
+            "canonical_source": ST12G_CONTRACT_MANIFEST_REF,
+            "intelligence_lane": "GOVERNANCE_LANE",
+        }
+    )
     return manifest
 
 
@@ -1713,6 +1728,7 @@ def _build_reports(registry_rows: Sequence[Mapping[str, Any]], rows_by_file: Map
     report_extra = {
         "projection_counts": projection_counts,
         "missing_projection_files": missing_projection_files,
+        "st12g_contract_descriptor_count": 1,
     }
     reports: dict[str, dict[str, Any]] = {
         "manifest.json": {
@@ -1822,9 +1838,27 @@ def build(repo_root: Path, out_dir: Path) -> None:
     registry_rows = _build_registry(ctx)
     rows_by_file = _projection_rows(registry_rows)
     reports = _build_reports(registry_rows, rows_by_file)
+    st12g_descriptor = (
+        {
+            "descriptor_id": "ST12G-DESCRIPTOR::AGENT_ORCH1",
+            "contract_version": "2.0",
+            "consumer_id": "AGENT_ORCH1",
+            "contract_type": "ST12GAgentEvidenceHandoffV2",
+            "source_contract_manifest_ref": ST12G_CONTRACT_MANIFEST_REF,
+            "canonical_owner_ref": (
+                "PR169_AGENT_ORCH1_REGISTRY_DAG_TASK_AND_RECEIPT_AUTHORITY"
+            ),
+            "runtime_instance_state": "NOT_MATERIALIZED_BY_REPOSITORY_BUILD",
+            "manual_edit_allowed": False,
+            "runtime_effect_allowed": False,
+            "write_authority": "NONE",
+            "downstream_route_refs": ["AGENT_ORCH1"],
+        },
+    )
 
     for file_name in JSONL_ARTIFACTS:
         _write_jsonl(output_dir / file_name, rows_by_file[file_name])
+    _write_jsonl(output_dir / ST12G_DESCRIPTOR_NAME, st12g_descriptor)
     for file_name in JSON_REPORTS:
         _write_json(output_dir / file_name, reports[file_name])
 

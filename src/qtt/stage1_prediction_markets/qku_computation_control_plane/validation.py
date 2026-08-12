@@ -7136,6 +7136,276 @@ _DOMAIN_CHECKS.update(
 )
 
 
+_ST12G_PUBLIC_TYPES_V2 = (
+    "ST12GProjectionRequestV2",
+    "ST12GProjectionResolutionStateV2",
+    "ST12GReferenceCollectionStateV2",
+    "ST12GReferenceCollectionV2",
+    "ST12GVersionMappingStateV2",
+    "ST12GVersionMappingV2",
+    "ST12GBlockerSetStateV2",
+    "ST12GBlockerStateV2",
+    "ST12GProjectionCoreV2",
+    "ST12GReadinessEvidenceProjectionV2",
+    "ST12GPretradeEvidenceProjectionV2",
+    "ST12GAgentEvidenceHandoffV2",
+    "ST12GServiceEvidenceViewV2",
+    "ST12GProjectionBundleV2",
+    "ST12GProjectionAbsenceV2",
+    "ST12GProjectionResolutionV2",
+    "ST12GOwnerProjectionResolutionV2",
+    "ST12GOwnerDashboardEvidenceViewV2",
+    "ExistingOwnerProjectionCompilerV2",
+    "ExistingOwnerProjectionCoordinatorV2",
+)
+
+_ST12G_CORE_FIELDS_V2 = (
+    "core_id",
+    "contract_version",
+    "evaluation_context_id",
+    "evaluated_at",
+    "source_handoff_receipt_ref",
+    "current_d_reference_receipt_ref",
+    "current_d_reference_id",
+    "handoff_id",
+    "input_lock_id",
+    "source_epoch_refs",
+    "observed_at",
+    "valid_until",
+    "terminal_state",
+    "evidence_bundle_ref",
+    "evidence_id",
+    "evidence_bundle_version",
+    "component_or_template_ref",
+    "independent_review_state",
+    "actual_executed_component_versions",
+    "actual_executed_stack_version_state",
+    "replay_result_ref",
+    "paper_result_ref",
+    "divergence_assessment_ref",
+    "lane_execution_receipt_refs",
+    "failure_and_negative_evidence_state",
+    "source_and_provenance_refs",
+    "bundle_blocker_state",
+    "no_trade_blocker_reference_state",
+    "champion_challenger_reference_state",
+    "portfolio_utility_reference_state",
+    "quantum_classical_comparison_receipt_ref",
+    "runtime_authority",
+    "no_effect_flags",
+)
+
+
+def _st12g_resolve_read_call_counts_v2(source: str) -> Mapping[str, int]:
+    tree = ast.parse(source)
+    coordinator = next(
+        node
+        for node in tree.body
+        if isinstance(node, ast.ClassDef)
+        and node.name == "ExistingOwnerProjectionCoordinatorV2"
+    )
+    resolve = next(
+        node
+        for node in coordinator.body
+        if isinstance(node, ast.FunctionDef) and node.name == "resolve"
+    )
+    methods = (
+        "resolve_g_handoff",
+        "resolve_control_receipt",
+        "resolve_bundle",
+        "read_evidence_reference",
+    )
+    return MappingProxyType(
+        {
+            method: sum(
+                1
+                for node in ast.walk(resolve)
+                if isinstance(node, ast.Call)
+                and isinstance(node.func, ast.Attribute)
+                and node.func.attr == method
+            )
+            for method in methods
+        }
+    )
+
+
+def _st12g_checks() -> tuple[ValidationCheckV1, ...]:
+    from . import existing_owner_projection as st12g
+
+    source_path = (
+        REPO_ROOT
+        / "src/qtt/stage1_prediction_markets/qku_computation_control_plane/"
+        "existing_owner_projection.py"
+    )
+    source = source_path.read_text(encoding="utf-8")
+    tree = ast.parse(source)
+    forbidden_import_roots = {
+        "asyncio",
+        "httpx",
+        "numpy",
+        "openai",
+        "pandas",
+        "requests",
+        "socket",
+        "sqlite3",
+        "subprocess",
+    }
+    imported_roots = {
+        alias.name.split(".", 1)[0]
+        for node in ast.walk(tree)
+        if isinstance(node, (ast.Import, ast.ImportFrom))
+        for alias in node.names
+    }
+    forbidden_calls = {
+        node.func.id
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
+        and node.func.id in {"open", "eval", "exec", "compile"}
+    }
+    direct_owner_paths = (
+        "src/qtt/readiness/pr169_readiness1_resolvers.py",
+        "src/qtt/pretrade/pr169_pretrade1_resolvers.py",
+        "src/qtt/agents/pr169_agent_orch1_resolvers.py",
+        "src/qtt/service/pr169_svc1_resolvers.py",
+    )
+    direct_owner_sources = tuple(
+        (REPO_ROOT / path).read_text(encoding="utf-8")
+        for path in direct_owner_paths
+    )
+    dashboard_source = (
+        REPO_ROOT / "src/qtt/dashboard/owner_surface_resolver.py"
+    ).read_text(encoding="utf-8")
+    read_counts = _st12g_resolve_read_call_counts_v2(source)
+    request_fields = tuple(
+        field.name for field in fields(st12g.ST12GProjectionRequestV2)
+    )
+    core_fields = tuple(
+        field.name for field in fields(st12g.ST12GProjectionCoreV2)
+    )
+    owner_field_counts = tuple(
+        len(fields(owner_type))
+        for owner_type in (
+            st12g.ST12GReadinessEvidenceProjectionV2,
+            st12g.ST12GPretradeEvidenceProjectionV2,
+            st12g.ST12GAgentEvidenceHandoffV2,
+            st12g.ST12GServiceEvidenceViewV2,
+        )
+    )
+    owner_core_fields = tuple(
+        fields(owner_type)[3].name
+        for owner_type in (
+            st12g.ST12GReadinessEvidenceProjectionV2,
+            st12g.ST12GPretradeEvidenceProjectionV2,
+            st12g.ST12GAgentEvidenceHandoffV2,
+            st12g.ST12GServiceEvidenceViewV2,
+        )
+    )
+    resolution_states = tuple(
+        state.value for state in st12g.ST12GProjectionResolutionStateV2
+    )
+    return (
+        _check(
+            "ST12G_PUBLIC_TYPE_ROSTER_20",
+            len(st12g.__all__) == 20
+            and set(st12g.__all__) == set(_ST12G_PUBLIC_TYPES_V2),
+            "exact twenty-type public ST12-G surface",
+        ),
+        _check(
+            "ST12G_REQUEST_EXACT_FROZEN_SLOTS_5",
+            request_fields
+            == (
+                "request_id",
+                "context",
+                "source_handoff_receipt_ref",
+                "causation_id",
+                "correlation_id",
+            )
+            and st12g.ST12GProjectionRequestV2.__dataclass_params__.frozen
+            and "__slots__" in st12g.ST12GProjectionRequestV2.__dict__,
+            "trusted context supplies the only cutoff and no caller custody fields",
+        ),
+        _check(
+            "ST12G_SHARED_CORE_EXACT_FROZEN_SLOTS_33",
+            core_fields == _ST12G_CORE_FIELDS_V2
+            and st12g.ST12GProjectionCoreV2.__dataclass_params__.frozen
+            and "__slots__" in st12g.ST12GProjectionCoreV2.__dict__,
+            "one immutable 33-field shared core",
+        ),
+        _check(
+            "ST12G_FOUR_DIRECT_OWNER_WRAPPERS_SHARE_CORE",
+            owner_field_counts == (9, 11, 11, 11)
+            and owner_core_fields == ("core", "core", "core", "core"),
+            "four thin owner overlays reference the same core field",
+        ),
+        _check(
+            "ST12G_DASHBOARD_EXACT_15_FIELD_SVC_VIEW",
+            len(fields(st12g.ST12GOwnerDashboardEvidenceViewV2)) == 15
+            and "direct_f_binding_allowed"
+            in {field.name for field in fields(st12g.ST12GOwnerDashboardEvidenceViewV2)},
+            "DASH1/UI1 is an exact SVC1-derived presentation contract",
+        ),
+        _check(
+            "ST12G_TAGGED_RESOLUTION_STATES_EXACT_3",
+            resolution_states
+            == (
+                "CURRENT_READ_ONLY",
+                "UNAVAILABLE_STALE_NO_AUTHORITY",
+                "UNAVAILABLE_BLOCKED_NO_AUTHORITY",
+            ),
+            "current, stale absence, and blocked absence are disjoint",
+        ),
+        _check(
+            "ST12G_PURE_STATELESS_COMPILER",
+            st12g.ExistingOwnerProjectionCompilerV2.__slots__ == ()
+            and not imported_roots.intersection(forbidden_import_roots)
+            and not forbidden_calls,
+            "compiler has no state, I/O, provider, numerical, or process dependency",
+        ),
+        _check(
+            "ST12G_COORDINATOR_EXACT_FOUR_DURABLE_READS",
+            tuple(read_counts.values()) == (1, 1, 1, 1),
+            "one call to each existing durable read and no extra custody read",
+        ),
+        _check(
+            "ST12G_EXISTING_OWNER_RESOLVERS_EXACT_FOUR",
+            all(
+                source.count("def resolve_st12g_projection_v2(") == 1
+                for source in direct_owner_sources
+            ),
+            "one selector on each existing direct owner",
+        ),
+        _check(
+            "ST12G_DASHBOARD_SVC_ONLY",
+            dashboard_source.count("def resolve_st12g_projection_v2(") == 1
+            and "consumer_id != \"SVC1\"" in dashboard_source
+            and "direct_f_binding_allowed=False" in dashboard_source,
+            "dashboard rejects non-SVC1 input and creates no direct F binding",
+        ),
+        _check(
+            "ST12G_TYPED_STALE_BLOCKED_REASON_PARTITION",
+            bool(st12g._STALE_REASON_CODES)
+            and bool(st12g._BLOCKED_REASON_CODES)
+            and st12g._STALE_REASON_CODES.isdisjoint(st12g._BLOCKED_REASON_CODES)
+            and all(
+                type(code) is ReasonCode
+                for code in (*st12g._STALE_REASON_CODES, *st12g._BLOCKED_REASON_CODES)
+            ),
+            "existing reason codes map to one typed noncurrent partition",
+        ),
+        _check(
+            "ST12G_NO_NEW_OPERATION_OR_EFFECT_AUTHORITY",
+            "OperationContractV1" not in source
+            and "order_release_allowed=True" not in source
+            and "runtime_effect_allowed=True" not in source
+            and "write_authority=\"NONE\"" in dashboard_source,
+            "read-only projection does not register an operation or effect authority",
+        ),
+    )
+
+
+_DOMAIN_CHECKS["g"] = _st12g_checks
+
+
 # Additive ST12-F central-contract checks.  The accepted 22-check parameter
 # registry validator above remains unchanged and is consumed as a prerequisite.
 from .evidence import (

@@ -4379,3 +4379,16 @@ def test_pr165_d3_quantum_selection_branch_context_allowance_is_narrow():
         branch,
         "tools/validate_no_runtime_trade_execution.py",
     )
+
+
+def test_st12g_owner_authorized_branch_match_is_exact() -> None:
+    branch = "agent/st12g-existing-owner-projections-v2"
+    assert branch in context.OWNER_AUTHORIZED_VALIDATION_BRANCHES
+    assert context.is_owner_authorized_validation_branch(branch)
+    for near_name in (
+        f"{branch}-copy",
+        branch.removesuffix("-v2"),
+        branch.upper(),
+    ):
+        assert near_name not in context.OWNER_AUTHORIZED_VALIDATION_BRANCHES
+        assert not context.is_owner_authorized_validation_branch(near_name)

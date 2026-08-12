@@ -15,6 +15,11 @@ REGISTRY_REF = "docs/master_plan/generated/pr169_pretrade1/pretrade_decision_reg
 BUILDER_NAME = "tools/build_pr169_pretrade1.py"
 VALIDATOR_NAME = "tools/validate_pr169_pretrade1.py"
 PROJECTION_VERSION = "PR169-PRETRADE1-v2.8S2"
+ST12G_DESCRIPTOR_NAME = "st12g_evidence_projection_contract.generated.jsonl"
+ST12G_CONTRACT_MANIFEST_REF = (
+    "docs/master_plan/generated/qku_control_plane/"
+    "existing_owner_projection/st12g_projection_contract_manifest.json"
+)
 
 REQUIRED_JSONL = (
     "pretrade_decision_registry.jsonl",
@@ -320,7 +325,7 @@ def _load_all(artifact_dir: Path) -> tuple[dict[str, list[dict[str, Any]]], dict
 
 
 def _validate_filenames(artifact_dir: Path) -> None:
-    expected = set(REQUIRED_JSONL) | set(REQUIRED_JSON)
+    expected = set(REQUIRED_JSONL) | set(REQUIRED_JSON) | {ST12G_DESCRIPTOR_NAME}
     actual = {path.name for path in artifact_dir.iterdir() if path.is_file()}
     _assert(expected <= actual, "not all required artifacts are present")
     for name in actual:
@@ -662,6 +667,37 @@ def _validate_central_resolver(repo_root: Path) -> None:
     _assert(reads <= {REGISTRY_REF}, f"resolver reads unexpected generated JSONL paths: {sorted(reads)}")
 
 
+def _validate_st12g_descriptor(artifact_dir: Path, reports: dict[str, dict[str, Any]]) -> None:
+    rows = _read_jsonl(artifact_dir / ST12G_DESCRIPTOR_NAME)
+    expected = {
+        "descriptor_id": "ST12G-DESCRIPTOR::PRETRADE1",
+        "contract_version": "2.0",
+        "consumer_id": "PRETRADE1",
+        "contract_type": "ST12GPretradeEvidenceProjectionV2",
+        "source_contract_manifest_ref": ST12G_CONTRACT_MANIFEST_REF,
+        "canonical_owner_ref": "PR169_PRETRADE1_CANONICAL_REGISTRY_AND_RESOLVER",
+        "runtime_instance_state": "NOT_MATERIALIZED_BY_REPOSITORY_BUILD",
+        "manual_edit_allowed": False,
+        "runtime_effect_allowed": False,
+        "write_authority": "NONE",
+        "downstream_route_refs": ["PRETRADE1"],
+    }
+    _assert(rows == [expected], "PRETRADE1 ST12-G descriptor differs")
+    artifact_refs = {
+        item.get("artifact_ref")
+        for item in reports["pretrade_manifest.json"].get("generated_artifacts", [])
+    }
+    _assert(
+        _as_ref(ST12G_DESCRIPTOR_NAME) in artifact_refs,
+        "PRETRADE1 manifest omits ST12-G descriptor",
+    )
+    _assert(
+        reports["no_orphan.report.json"].get("st12g_contract_descriptor_count")
+        == 1,
+        "PRETRADE1 no-orphan report omits ST12-G descriptor",
+    )
+
+
 def validate(repo_root: Path, artifact_dir: Path) -> None:
     _assert(artifact_dir.name == "pr169_pretrade1", "validator must target PRETRADE1 owned prefix")
     _assert(artifact_dir.exists(), f"artifact directory missing: {artifact_dir}")
@@ -673,6 +709,7 @@ def validate(repo_root: Path, artifact_dir: Path) -> None:
     _validate_reality_contracts(rows_by_file)
     _validate_pretrade_specific(rows_by_file)
     _validate_reports(rows_by_file, reports)
+    _validate_st12g_descriptor(artifact_dir, reports)
     _validate_central_resolver(repo_root)
     builder_reads = _source_reads(repo_root / BUILDER_NAME)
     _assert("docs/master_plan/generated/pr168_mem1/memory_query_receipt.jsonl" not in builder_reads, "builder must not consume MEM1 receipts as truth")

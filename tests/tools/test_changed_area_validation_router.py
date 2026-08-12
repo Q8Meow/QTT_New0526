@@ -235,6 +235,7 @@ def test_qku_shared_integration_paths_use_the_exact_allowlists() -> None:
                 *inventory.ST12D_ALLOWED_EXACT_PATHS,
                 *inventory.ST12E_ALLOWED_EXACT_PATHS,
                 *inventory.ST12F_ALLOWED_EXACT_PATHS,
+                *inventory.ST12G_ALLOWED_EXACT_PATHS,
             )
         )
     for path in inventory.QKU_ALLOWED_EXACT_PATHS:
@@ -452,4 +453,23 @@ def test_st12f_current_main_path_routes_all_focused_validators() -> None:
         "src/qtt/stage1_prediction_markets/qku_computation_control_plane/evidence.py"
     )
     assert inventory.ST12F_QKU_VALIDATOR_IDS <= set(result.required_validators)
+    assert result.fail_closed_reasons == ()
+
+
+def test_every_st12g_path_routes_all_g_and_existing_owner_validators() -> None:
+    result = build_router_result(
+        RouterInput(
+            repo_root=REPO_ROOT,
+            changed_files=tuple(sorted(inventory.ST12G_ALLOWED_EXACT_PATHS)),
+            workflow_event_name="pull_request",
+            is_pull_request=True,
+            current_branch="agent/st12g-existing-owner-projections-v2",
+        )
+    )
+    assert len(inventory.ST12G_ALLOWED_EXACT_PATHS) == 65
+    for path in inventory.ST12G_ALLOWED_EXACT_PATHS:
+        assert inventory.ST12G_REQUIRED_VALIDATOR_IDS <= set(
+            result.classified_files[path]
+        )
+    assert result.unknown_files == ()
     assert result.fail_closed_reasons == ()

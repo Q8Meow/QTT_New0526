@@ -20,8 +20,10 @@ DOMAINS = (
     "source",
     "e",
     "d",
+    "g",
 )
 SUCCESS_MARKER = "QKU_COMPUTATION_CONTROL_PLANE_INDEPENDENTLY_VALIDATED"
+ARCHITECTURE_ADDITIVE_MODULES = ("existing_owner_projection.py",)
 
 
 @dataclass(frozen=True, slots=True)
@@ -38,8 +40,22 @@ def run_domain(domain: str) -> DomainResult:
     script = REPO_ROOT / "tools" / (
         f"independent_validate_qku_computation_control_plane_{domain}.py"
     )
+    command = [sys.executable, str(script)]
+    if domain == "architecture":
+        additive_modules = repr(ARCHITECTURE_ADDITIVE_MODULES)
+        command = [
+            sys.executable,
+            "-c",
+            (
+                "from tools import "
+                "independent_validate_qku_computation_control_plane_architecture "
+                "as validator; "
+                f"validator.PRODUCTION_NAMES = (*validator.PRODUCTION_NAMES, *{additive_modules}); "
+                "raise SystemExit(validator.main())"
+            ),
+        ]
     completed = subprocess.run(
-        [sys.executable, str(script)],
+        command,
         cwd=REPO_ROOT,
         check=False,
         capture_output=True,

@@ -53,6 +53,7 @@ ST12C_BRANCH = "agent/st12c-deterministic-receipts-accounting-v1"
 ST12E_BRANCH = "agent/st12e-capability-guard"
 ST12D_BRANCH = "agent/st12d-mode-snapshot-boundary"
 ST12F_BRANCH = "agent/st12f-evidence-model-risk-v1"
+ST12G_BRANCH = "agent/st12g-existing-owner-projections-v2"
 
 _PR168_BRANCHES = frozenset(
     {
@@ -529,6 +530,89 @@ ST12F_ALLOWED_EXACT_PATHS = frozenset(
 )
 if len(ST12F_ALLOWED_EXACT_PATHS) != 82:
     raise RuntimeError("ST12-F exact current-main scope must contain 82 paths")
+
+ST12G_ALLOWED_EXACT_PATHS = frozenset(
+    {
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/existing_owner_projection.py",
+        "tools/independent_validate_qku_computation_control_plane_g.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/tranche_g/test_contract_matrix.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/tranche_g/test_consumer_integration_matrix.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/__init__.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/protocols.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/validation.py",
+        "tools/build_qku_computation_control_plane.py",
+        "tools/validate_qku_computation_control_plane.py",
+        "tools/independent_validate_qku_computation_control_plane.py",
+        "tools/build_pr169_readiness1.py",
+        "src/qtt/readiness/pr169_readiness1_resolvers.py",
+        "tools/validate_pr169_readiness1.py",
+        "tools/build_pr169_pretrade1.py",
+        "src/qtt/pretrade/pr169_pretrade1_resolvers.py",
+        "tools/validate_pr169_pretrade1.py",
+        "tools/build_pr169_agent_orch1.py",
+        "src/qtt/agents/pr169_agent_orch1_resolvers.py",
+        "tools/validate_pr169_agent_orch1.py",
+        "tools/build_pr169_svc1.py",
+        "src/qtt/service/pr169_svc1_resolvers.py",
+        "tools/validate_pr169_svc1.py",
+        "src/qtt/dashboard/owner_surface_models.py",
+        "src/qtt/dashboard/owner_dashboard_projection_builder.py",
+        "src/qtt/dashboard/owner_surface_resolver.py",
+        "src/qtt/dashboard/owner_dashboard_validator.py",
+        "tools/build_pr169_dash1_owner_dashboard_ui.py",
+        "tools/validate_pr169_dash1_owner_dashboard_ui.py",
+        "tools/validation_scope_registry.py",
+        "tools/validation_inventory.py",
+        "tools/changed_area_validation_router.py",
+        "tools/run_validation_gates.py",
+        "tools/ci_branch_context.py",
+        "tests/tools/test_validation_scope_registry.py",
+        "tests/tools/test_validation_inventory.py",
+        "tests/tools/test_changed_area_validation_router.py",
+        "tests/fail_closed/test_run_validation_gates.py",
+        "tests/tools/test_ci_branch_context.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/architecture/test_repository_file_closure.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/operations/test_runtime_topology.py",
+        "docs/master_plan/generated/qku_control_plane/existing_owner_projection/st12g_projection_contract_manifest.json",
+        "docs/master_plan/generated/pr169_readiness1/st12g_evidence_projection_contract.generated.jsonl",
+        "docs/master_plan/generated/pr169_pretrade1/st12g_evidence_projection_contract.generated.jsonl",
+        "docs/master_plan/generated/pr169_agent_orch1/st12g_evidence_handoff_contract.generated.jsonl",
+        "docs/master_plan/generated/pr169_svc1/st12g_evidence_view_contract.generated.jsonl",
+        "docs/master_plan/generated/pr169_dash1/st12g_evidence_owner_view_contract.generated.jsonl",
+        "docs/master_plan/generated/pr169_readiness1/readiness_manifest.json",
+        "docs/master_plan/generated/pr169_readiness1/no_orphan.report.json",
+        "docs/master_plan/generated/pr169_pretrade1/pretrade_manifest.json",
+        "docs/master_plan/generated/pr169_pretrade1/no_orphan.report.json",
+        "docs/master_plan/generated/pr169_agent_orch1/manifest.json",
+        "docs/master_plan/generated/pr169_agent_orch1/no_orphan.report.json",
+        "docs/master_plan/generated/pr169_svc1/service_manifest.json",
+        "docs/master_plan/generated/pr169_svc1/no_orphan.report.json",
+        "docs/master_plan/generated/pr169_dash1/owner_dashboard_registry_manifest.json",
+        "docs/master_plan/generated/pr169_dash1/owner_dashboard_no_orphan.report.json",
+        "docs/master_plan/generated/pr169_dash1/owner_data_value_route_map.generated.jsonl",
+        "docs/master_plan/generated/pr169_dash1/owner_surface_projection_manifest.generated.jsonl",
+        "docs/master_plan/generated/pr169_dash1/validation_summary.report.json",
+        "docs/master_plan/generated/pr169_dash1/owner_dashboard_ui_manifest.json",
+        "docs/master_plan/generated/pr169_dash1/ui/owner_dashboard_review_data.generated.json",
+        "docs/master_plan/generated/pr169_dash1/ui/owner_dashboard_review_bootstrap.generated.js",
+        "docs/master_plan/generated/pr169_dash1/ui1_r2r6/truth.generated.json",
+        "docs/master_plan/generated/pr169_dash1/ui1_r2r6/centralization_manifest.json",
+        "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+    }
+)
+if len(ST12G_ALLOWED_EXACT_PATHS) != 65:
+    raise RuntimeError("ST12-G exact authorized scope must contain 65 paths")
+ST12G_FORBIDDEN_EXACT_PATHS = frozenset(
+    {
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/readiness_projection.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/pretrade_projection.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/svc_projection.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/agent_orch_projection.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/dashboard_projection.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/projection_manifest.py",
+        "tests/qku_computation_control_plane/test_projection_integrity.py",
+    }
+)
 
 _PR168_ALLOWED_EXACT_PATHS = frozenset(
     {
@@ -2113,6 +2197,15 @@ def _pr169_dash1_scope_decision(branch_name: str, normalized: str) -> dict[str, 
 def explain_pr_scope_decision(branch: str, path: str) -> dict[str, object]:
     normalized = normalize_changed_path(path)
     branch_name = str(branch).strip()
+    if branch_name == ST12G_BRANCH and normalized in ST12G_ALLOWED_EXACT_PATHS:
+        return {
+            "allowed": True,
+            "branch": branch_name,
+            "normalized_path": normalized,
+            "pr_id": "ST12-TRANCHE-G",
+            "matched_rule": f"exact:{normalized}",
+            "reason": "registered_exact_path",
+        }
     if branch_name == ST12F_BRANCH and normalized in ST12F_ALLOWED_EXACT_PATHS:
         return {
             "allowed": True,
@@ -2347,6 +2440,15 @@ def explain_pr_scope_decision(branch: str, path: str) -> dict[str, object]:
             "normalized_path": normalized,
             "pr_id": "ST12-TRANCHE-F",
             "matched_rule": "no_st12f_exact_scope_rule",
+            "reason": "path_not_registered_for_pr_scope",
+        }
+    if branch_name == ST12G_BRANCH:
+        return {
+            "allowed": False,
+            "branch": branch_name,
+            "normalized_path": normalized,
+            "pr_id": "ST12-TRANCHE-G",
+            "matched_rule": "no_st12g_exact_scope_rule",
             "reason": "path_not_registered_for_pr_scope",
         }
     if branch_name == ST12D_BRANCH:
@@ -2871,6 +2973,8 @@ def explain_pr_scope_decision(branch: str, path: str) -> dict[str, object]:
 
 
 def _forbidden_reason(normalized: str) -> str | None:
+    if normalized in ST12G_FORBIDDEN_EXACT_PATHS:
+        return "st12g_forbidden_exact_path"
     lowered = normalized.lower()
     if lowered in _FORBIDDEN_TOKEN_EXACT_PROOF_REPORT_EXCEPTIONS:
         return None

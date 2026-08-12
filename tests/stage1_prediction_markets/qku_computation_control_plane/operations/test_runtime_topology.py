@@ -1,4 +1,11 @@
+import ast
+from dataclasses import fields
 from pathlib import Path
+
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.existing_owner_projection import (
+    ExistingOwnerProjectionCompilerV2,
+    ExistingOwnerProjectionCoordinatorV2,
+)
 
 from tools.independent_validate_qku_computation_control_plane_operations import (
     main,
@@ -130,3 +137,61 @@ sqlite3.connect(':memory:')
                 for fragment in expected_fragments
             ), f"{label}: {failures!r}"
     assert main() == 0
+
+
+def test_st12g_adds_no_runtime_owner_or_effect_topology() -> None:
+    root = Path(__file__).resolve().parents[4]
+    central_path = (
+        root
+        / "src/qtt/stage1_prediction_markets/qku_computation_control_plane/"
+        "existing_owner_projection.py"
+    )
+    tree = ast.parse(central_path.read_text(encoding="utf-8"))
+    assert ExistingOwnerProjectionCompilerV2.__slots__ == ()
+    assert tuple(field.name for field in fields(ExistingOwnerProjectionCoordinatorV2)) == (
+        "evidence_service",
+        "owner_views",
+        "compiler",
+    )
+    class_names = {
+        node.name.casefold()
+        for node in tree.body
+        if isinstance(node, ast.ClassDef)
+    }
+    assert not any(
+        token in name
+        for name in class_names
+        for token in ("database", "queue", "cache", "registry", "runtime_service")
+    )
+    imported_roots = {
+        alias.name.split(".", 1)[0]
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Import)
+        for alias in node.names
+    } | {
+        node.module.split(".", 1)[0]
+        for node in ast.walk(tree)
+        if isinstance(node, ast.ImportFrom) and node.module
+    }
+    assert imported_roots.isdisjoint(
+        {"sqlite3", "socket", "requests", "httpx", "openai", "subprocess"}
+    )
+    compiler = next(
+        node
+        for node in tree.body
+        if isinstance(node, ast.ClassDef)
+        and node.name == "ExistingOwnerProjectionCompilerV2"
+    )
+    assert not any(isinstance(node, (ast.Global, ast.Nonlocal)) for node in ast.walk(compiler))
+    assert not any(
+        isinstance(node, (ast.Assign, ast.AnnAssign, ast.AugAssign))
+        and any(
+            isinstance(target, ast.Attribute)
+            and isinstance(target.value, ast.Name)
+            and target.value.id == "self"
+            for target in (
+                node.targets if isinstance(node, ast.Assign) else (node.target,)
+            )
+        )
+        for node in ast.walk(compiler)
+    )

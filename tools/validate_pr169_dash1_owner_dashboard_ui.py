@@ -39,6 +39,10 @@ from tools.build_pr169_dash1_owner_dashboard_ui import (
     THEME_STORAGE_KEY,
     UI_ARTIFACT_FILES,
 )
+from src.qtt.dashboard.owner_surface_models import (
+    ST12G_CONTRACT_MANIFEST_REF,
+    ST12G_DESCRIPTOR_FILENAME,
+)
 
 
 SUCCESS_MARKER = "PR169_DASH1_UI1_OWNER_DASHBOARD_UI_VALIDATION_OK"
@@ -113,6 +117,38 @@ def validate(base: Path) -> tuple[str, ...]:
         failures.append("fixture_fallback_active_when_generated_artifacts_exist")
     if data.get("fixture_fallback", {}).get("fixture_primary_when_generated_artifacts_exist") is not False:
         failures.append("fixture_primary_when_generated_artifacts_exist")
+    st12g_view = data.get("st12g_evidence_view", {})
+    st12g_descriptor = st12g_view.get("contract_descriptor", {})
+    if (
+        st12g_descriptor.get("consumer_id") != "DASH1_UI1"
+        or st12g_descriptor.get("contract_type")
+        != "ST12GOwnerDashboardEvidenceViewV2"
+        or st12g_descriptor.get("source_contract_manifest_ref")
+        != ST12G_CONTRACT_MANIFEST_REF
+        or st12g_view.get("source_owner") != "SVC1_ONLY"
+        or st12g_view.get("dashboard_state_owner") != "DASH1"
+        or st12g_view.get("ui1_role") != "RENDERER_ONLY"
+        or st12g_view.get("direct_f_binding_allowed") is not False
+        or st12g_view.get("action_authority_created") is not False
+        or st12g_view.get("runtime_effect_allowed") is not False
+        or st12g_view.get("write_authority") != "NONE"
+    ):
+        failures.append("st12g_boot_view_semantic_or_authority_drift")
+    if "ST12F" in json.dumps(st12g_view, sort_keys=True):
+        failures.append("st12g_ui_direct_f_binding_detected")
+
+    ui_manifest_path = base / "owner_dashboard_ui_manifest.json"
+    ui_manifest = _read_json(ui_manifest_path) if ui_manifest_path.exists() else {}
+    if (
+        ui_manifest.get("st12g_contract_view_ref") != ST12G_DESCRIPTOR_FILENAME
+        or ui_manifest.get("st12g_source_owner") != "SVC1_ONLY"
+        or ui_manifest.get("st12g_dashboard_state_owner") != "DASH1"
+        or ui_manifest.get("st12g_ui1_role") != "RENDERER_ONLY"
+        or ui_manifest.get("st12g_direct_f_binding_allowed") is not False
+        or ui_manifest.get("st12g_runtime_effect_allowed") is not False
+        or ui_manifest.get("st12g_write_authority") != "NONE"
+    ):
+        failures.append("st12g_ui_manifest_semantic_or_authority_drift")
     if not data.get("owner_packet", {}).get("packet_id"):
         failures.append("owner_packet_not_loaded")
     if not data.get("decision_queue"):
@@ -297,6 +333,8 @@ def validate(base: Path) -> tuple[str, ...]:
         failures.append("theme_storage_key_missing_from_js")
     if "window.QTT_OWNER_DASHBOARD_DATA" not in _text(boot_js):
         failures.append("bootstrap_global_missing")
+    if "ST12GOwnerDashboardEvidenceViewV2" not in _text(boot_js):
+        failures.append("st12g_bootstrap_contract_view_missing")
     if "fetch(" in js_text:
         failures.append("app_js_uses_fetch")
     if "OwnerActionRegistry" not in combined:
@@ -1576,6 +1614,20 @@ def validate(base: Path) -> tuple[str, ...]:
             failures.append("ui1r2r6_one_builder_bad")
         if r2r6.get("one_validator") != "tools/validate_pr169_dash1_owner_dashboard_ui.py":
             failures.append("ui1r2r6_one_validator_bad")
+        if r2r6.get("st12g_evidence_view") != st12g_view:
+            failures.append("ui1r2r6_st12g_view_differs_from_boot_view")
+        st12g_centralization = r2r6_manifest.get(
+            "st12g_existing_owner_projection", {}
+        )
+        if (
+            st12g_centralization.get("state_owner") != "DASH1"
+            or st12g_centralization.get("source_owner") != "SVC1_ONLY"
+            or st12g_centralization.get("ui1_role") != "RENDERER_ONLY"
+            or st12g_centralization.get("direct_f_binding_allowed") is not False
+            or st12g_centralization.get("second_dashboard_state_owner_created")
+            is not False
+        ):
+            failures.append("ui1r2r6_st12g_centralization_drift")
 
         required_domains = {
             "settings/preferences",

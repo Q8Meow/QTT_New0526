@@ -3,7 +3,17 @@ from __future__ import annotations
 from dataclasses import dataclass
 import json
 from pathlib import Path
-from typing import Any, Iterable
+from typing import TYPE_CHECKING, Any, Iterable
+
+from ..stage1_prediction_markets.qku_computation_control_plane.errors import (
+    ContractValidationError,
+    ReasonCode,
+)
+if TYPE_CHECKING:
+    from ..stage1_prediction_markets.qku_computation_control_plane.existing_owner_projection import (
+        ST12GOwnerProjectionResolutionV2,
+        ST12GProjectionResolutionV2,
+    )
 
 
 GENERATED_PREFIX = Path("docs/master_plan/generated/pr169_svc1")
@@ -533,3 +543,45 @@ def load_service_manifest(*, base_dir: Path | str | None = None) -> dict[str, An
 
 def list_read_model_snapshots(*, base_dir: Path | str | None = None) -> tuple[dict[str, Any], ...]:
     return DashboardReadModelService(base_dir).list_read_model_snapshots()
+
+
+def resolve_st12g_projection_v2(
+    resolution: "ST12GProjectionResolutionV2",
+) -> "ST12GOwnerProjectionResolutionV2":
+    """Select SVC1 without I/O, core copying, or recomputation."""
+
+    from ..stage1_prediction_markets.qku_computation_control_plane import (
+        existing_owner_projection as st12g,
+    )
+
+    if type(resolution) is not st12g.ST12GProjectionResolutionV2:
+        raise ContractValidationError(
+            ReasonCode.INPUT_OWNER_MISMATCH,
+            "SVC1 requires the exact central ST12-G resolution",
+        )
+    if (
+        resolution.resolution_state
+        is st12g.ST12GProjectionResolutionStateV2.CURRENT_READ_ONLY
+    ):
+        bundle = resolution.projection_bundle
+        if type(bundle) is not st12g.ST12GProjectionBundleV2 or type(
+            bundle.svc
+        ) is not st12g.ST12GServiceEvidenceViewV2:
+            raise ContractValidationError(
+                ReasonCode.SCHEMA_MISMATCH,
+                "SVC1 projection is missing from the central bundle",
+            )
+        payload = bundle.svc
+    else:
+        payload = resolution.absence
+        if type(payload) is not st12g.ST12GProjectionAbsenceV2:
+            raise ContractValidationError(
+                ReasonCode.SCHEMA_MISMATCH,
+                "SVC1 noncurrent resolution must preserve central absence",
+            )
+    return st12g.ST12GOwnerProjectionResolutionV2(
+        consumer_id="SVC1",
+        source_request_id=resolution.request_id,
+        resolution_state=resolution.resolution_state,
+        payload=payload,
+    )

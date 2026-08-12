@@ -19,6 +19,28 @@ AUTHORITY_BOUNDARY_REF = (
     "PR169_DASH1_AUTHORITY_BOUNDARY::NO_DASHBOARD_RUNTIME_NO_ORDER_NO_PRIVATE_READS"
 )
 NO_ORPHAN_REF = "owner_dashboard_no_orphan.report.json"
+ST12G_DESCRIPTOR_FILENAME = "st12g_evidence_owner_view_contract.generated.jsonl"
+ST12G_SVC_DESCRIPTOR_REF = (
+    "docs/master_plan/generated/pr169_svc1/"
+    "st12g_evidence_view_contract.generated.jsonl"
+)
+ST12G_CONTRACT_MANIFEST_REF = (
+    "docs/master_plan/generated/qku_control_plane/"
+    "existing_owner_projection/st12g_projection_contract_manifest.json"
+)
+ST12G_MATERIALIZATION_FIELDS = (
+    "descriptor_id",
+    "contract_version",
+    "consumer_id",
+    "contract_type",
+    "source_contract_manifest_ref",
+    "canonical_owner_ref",
+    "runtime_instance_state",
+    "manual_edit_allowed",
+    "runtime_effect_allowed",
+    "write_authority",
+    "downstream_route_refs",
+)
 
 LIFECYCLE_STATES = frozenset(
     {
@@ -233,7 +255,11 @@ def read_json(path: Path) -> Any:
 
 def write_json(path: Path, payload: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    serialized = json.dumps(payload, indent=2, sort_keys=True) + "\n"
+    if path.exists() and path.read_text(encoding="utf-8") == serialized:
+        return
+    with path.open("w", encoding="utf-8", newline="\n") as handle:
+        handle.write(serialized)
 
 
 def read_jsonl(path: Path) -> list[dict[str, Any]]:
@@ -252,9 +278,14 @@ def read_jsonl(path: Path) -> list[dict[str, Any]]:
 
 def write_jsonl(path: Path, rows: Iterable[dict[str, Any]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
+    serialized = "".join(
+        json.dumps(row, sort_keys=True, separators=(",", ":")) + "\n"
+        for row in rows
+    )
+    if path.exists() and path.read_text(encoding="utf-8") == serialized:
+        return
     with path.open("w", encoding="utf-8", newline="\n") as handle:
-        for row in rows:
-            handle.write(json.dumps(row, sort_keys=True, separators=(",", ":")) + "\n")
+        handle.write(serialized)
 
 
 def repo_posix(path: Path | str) -> str:
