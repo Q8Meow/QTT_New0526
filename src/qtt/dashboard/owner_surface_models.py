@@ -28,6 +28,9 @@ ST12G_CONTRACT_MANIFEST_REF = (
     "docs/master_plan/generated/qku_control_plane/"
     "existing_owner_projection/st12g_projection_contract_manifest.json"
 )
+ST12G_DASHBOARD_SURFACE_ID = "QKU_COMPUTATION_CONTROL_PLANE"
+ST12G_REGISTRY_FEATURE_ID = "OWNER_DASHBOARD_PACKET_V1"
+ST12G_SOURCE_OWNER = "SVC1"
 ST12G_MATERIALIZATION_FIELDS = (
     "descriptor_id",
     "contract_version",

@@ -21,6 +21,12 @@ REPO_ROOT = pathlib.Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
+from tools.validation_scope_registry import (  # noqa: E402
+    ST12G_ARCHITECTURE_ADDITIVE_MODULES,
+    ST12G_INDEPENDENT_ARCHITECTURE_SCRIPT_NAME,
+    build_st12g_architecture_validation_command,
+)
+
 SUCCESS_MARKER = "QTT_VALIDATION_GATES_OK"
 PYTEST_FRESH_BASETEMP_SCRIPT = "run_pytest_fresh_basetemp.py"
 PHASE_SUCCESS_MARKER_PREFIX = "QTT_VALIDATION_PHASE_OK"
@@ -150,10 +156,6 @@ OWNER_VALIDATION_READ_ONLY_UPSTREAM_BUILDER_SCRIPT_NAMES = frozenset(
         "build_pr168_rp5c_immutable_qku_formula_library.py",
     }
 )
-INDEPENDENT_ARCHITECTURE_SCRIPT_NAME = (
-    "independent_validate_qku_computation_control_plane_architecture.py"
-)
-ST12G_ARCHITECTURE_ADDITIVE_MODULES = ("existing_owner_projection.py",)
 ORDERED_PHASES = (
     FAST_PREFLIGHT_PHASE,
     DETERMINISTIC_VALIDATORS_PHASE,
@@ -1551,20 +1553,12 @@ def _command_uses_pytest_helper(command: Sequence[str]) -> bool:
 def _execution_command_with_st12g_architecture_roster(
     command: Sequence[str],
 ) -> list[str]:
-    if _command_script_name(command) != INDEPENDENT_ARCHITECTURE_SCRIPT_NAME:
+    if (
+        _command_script_name(command)
+        != ST12G_INDEPENDENT_ARCHITECTURE_SCRIPT_NAME
+    ):
         return list(command)
-    additive_modules = repr(ST12G_ARCHITECTURE_ADDITIVE_MODULES)
-    return [
-        command[0],
-        "-c",
-        (
-            "from tools import "
-            "independent_validate_qku_computation_control_plane_architecture "
-            "as validator; "
-            f"validator.PRODUCTION_NAMES = (*validator.PRODUCTION_NAMES, *{additive_modules}); "
-            "raise SystemExit(validator.main())"
-        ),
-    ]
+    return list(build_st12g_architecture_validation_command(command[0]))
 
 
 def _normal_repo_path_text(value: pathlib.Path | str) -> str:
@@ -6043,7 +6037,7 @@ def run_commands(
                 f"modules={','.join(ST12G_ARCHITECTURE_ADDITIVE_MODULES)}",
                 flush=True,
             )
-        print(subprocess.list2cmdline(command_list), flush=True)
+        print(subprocess.list2cmdline(execution_command), flush=True)
         command_started = time.perf_counter()
         completed = subprocess.run(execution_command)
         elapsed_seconds = time.perf_counter() - command_started
@@ -6051,7 +6045,7 @@ def run_commands(
             TimingEntry(
                 phase=phase,
                 command_index=command_index,
-                command=command_list,
+                command=execution_command,
                 elapsed_seconds=elapsed_seconds,
                 returncode=completed.returncode,
             )

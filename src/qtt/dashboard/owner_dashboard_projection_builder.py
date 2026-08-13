@@ -26,7 +26,10 @@ from .owner_surface_models import (
     REQUIRED_JSON_OUTPUTS,
     REQUIRED_UI_OUTPUTS,
     ST12G_CONTRACT_MANIFEST_REF,
+    ST12G_DASHBOARD_SURFACE_ID,
     ST12G_DESCRIPTOR_FILENAME,
+    ST12G_REGISTRY_FEATURE_ID,
+    ST12G_SOURCE_OWNER,
     ST12G_SVC_DESCRIPTOR_REF,
     VALIDATION_MARKER,
     VALIDATOR_REF,
@@ -1242,8 +1245,50 @@ def build_data_value_route_map_rows(
         *REQUIRED_UI_OUTPUTS,
         ST12G_DESCRIPTOR_FILENAME,
     ]
+    registry_by_id = {row["feature_id"]: row for row in registry_rows}
+    if ST12G_REGISTRY_FEATURE_ID not in registry_by_id:
+        raise ValueError(
+            "ST12-G dashboard route requires the canonical owner packet registry row"
+        )
     rows: list[dict[str, Any]] = []
     for index, file_name in enumerate(dict.fromkeys(files), start=1):
+        if file_name == ST12G_DESCRIPTOR_FILENAME:
+            rows.append(
+                {
+                    **projection_trace(ST12G_REGISTRY_FEATURE_ID),
+                    "artifact_path": repo_posix(
+                        Path("docs/master_plan/generated/pr169_dash1")
+                        / file_name
+                    ),
+                    "row_family": Path(file_name).name,
+                    "value_family": (
+                        "qku_computation_control_plane_existing_owner_projection"
+                    ),
+                    "producer_tool": PRODUCER_TOOL,
+                    "canonical_source_ref": REGISTRY_FILENAME,
+                    "upstream_artifact_refs": [ST12G_SVC_DESCRIPTOR_REF],
+                    "downstream_consumer_refs": [
+                        "OwnerSurfaceResolver.resolve_st12g_projection_v2",
+                        VALIDATOR_REF,
+                    ],
+                    "agent_role_refs_from_PR165_D2": list(DEFAULT_AGENT_ROLES),
+                    "resolver_method": "resolve_st12g_projection_v2",
+                    "owner_surface_registry_refs": [
+                        registry_row_ref(ST12G_REGISTRY_FEATURE_ID)
+                    ],
+                    "source_owner": ST12G_SOURCE_OWNER,
+                    "destination_surface": ST12G_DASHBOARD_SURFACE_ID,
+                    "direct_f_binding_allowed": False,
+                    "write_authority": "NONE",
+                    "runtime_effect_allowed": False,
+                    "order_authority": False,
+                    "mode_authority": False,
+                    "capital_authority": False,
+                    "validation_ref": VALIDATOR_REF,
+                    "no_orphan_status": "CONNECTED_TO_DATA_VALUE_ROUTE_MAP",
+                }
+            )
+            continue
         feature_id = registry_rows[(index - 1) % len(registry_rows)]["feature_id"]
         rows.append(
             {
@@ -1574,7 +1619,7 @@ def build_all(out_dir: Path, *, repo_root: Path | None = None) -> dict[str, Any]
             for file_name in REQUIRED_JSONL_OUTPUTS
         ] + [
             {
-                **projection_trace(registry_rows[0]["feature_id"]),
+                **projection_trace(ST12G_REGISTRY_FEATURE_ID),
                 "projection_file": ST12G_DESCRIPTOR_FILENAME,
                 "projection_kind": "svc1_derived_existing_owner_evidence_view_contract",
                 "projection_manual_edit_allowed": False,
@@ -1582,6 +1627,13 @@ def build_all(out_dir: Path, *, repo_root: Path | None = None) -> dict[str, Any]
                 "projection_validation_ref": VALIDATOR_REF,
                 "source_contract_manifest_ref": ST12G_CONTRACT_MANIFEST_REF,
                 "direct_f_binding_allowed": False,
+                "source_owner": ST12G_SOURCE_OWNER,
+                "destination_surface": ST12G_DASHBOARD_SURFACE_ID,
+                "write_authority": "NONE",
+                "runtime_effect_allowed": False,
+                "order_authority": False,
+                "mode_authority": False,
+                "capital_authority": False,
             }
         ],
         "owner_notify_transport_registry.generated.jsonl": [_generic_projection_row(registry_rows[0], "owner_notify_transport_registry") | {"transport": "TG1_mirror_contract", "runtime_created": False, "token_access_created": False}],

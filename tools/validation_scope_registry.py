@@ -54,6 +54,32 @@ ST12E_BRANCH = "agent/st12e-capability-guard"
 ST12D_BRANCH = "agent/st12d-mode-snapshot-boundary"
 ST12F_BRANCH = "agent/st12f-evidence-model-risk-v1"
 ST12G_BRANCH = "agent/st12g-existing-owner-projections-v2"
+ST12G_INDEPENDENT_ARCHITECTURE_SCRIPT_NAME = (
+    "independent_validate_qku_computation_control_plane_architecture.py"
+)
+ST12G_ARCHITECTURE_ADDITIVE_MODULES = ("existing_owner_projection.py",)
+
+
+def build_st12g_architecture_validation_command(
+    python_executable: str,
+) -> tuple[str, ...]:
+    """Build the one authoritative additive architecture validation command."""
+
+    if type(python_executable) is not str or not python_executable.strip():
+        raise ValueError("python_executable must be nonempty text")
+    additive_modules = repr(ST12G_ARCHITECTURE_ADDITIVE_MODULES)
+    return (
+        python_executable,
+        "-c",
+        (
+            "from tools import "
+            "independent_validate_qku_computation_control_plane_architecture "
+            "as validator; "
+            "validator.PRODUCTION_NAMES = "
+            f"(*validator.PRODUCTION_NAMES, *{additive_modules}); "
+            "raise SystemExit(validator.main())"
+        ),
+    )
 
 _PR168_BRANCHES = frozenset(
     {

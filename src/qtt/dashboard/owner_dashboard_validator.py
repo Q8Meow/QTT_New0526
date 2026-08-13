@@ -7,6 +7,14 @@ import json
 from pathlib import Path
 from typing import Any
 
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import (
+    ContractValidationError,
+    ReasonCode,
+)
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.serialization import (
+    deterministic_json,
+)
+
 from .owner_action_registry import ACTION_DEFINITIONS
 from .owner_dashboard_projection_builder import (
     CHART_CONTRACTS,
@@ -29,13 +37,17 @@ from .owner_surface_models import (
     REQUIRED_JSON_OUTPUTS,
     REQUIRED_UI_OUTPUTS,
     ST12G_CONTRACT_MANIFEST_REF,
+    ST12G_DASHBOARD_SURFACE_ID,
     ST12G_DESCRIPTOR_FILENAME,
     ST12G_MATERIALIZATION_FIELDS,
+    ST12G_REGISTRY_FEATURE_ID,
+    ST12G_SOURCE_OWNER,
     ST12G_SVC_DESCRIPTOR_REF,
     V4_ROUTE_LABELS,
     VALIDATION_MARKER,
     read_json,
     read_jsonl,
+    registry_row_ref,
     write_json,
 )
 
@@ -56,6 +68,75 @@ def _walk_json(value: Any) -> list[Any]:
         for child in value:
             values.extend(_walk_json(child))
     return values
+
+
+def validate_st12g_descriptor_candidate(
+    candidate: object,
+    *,
+    existing: object | None = None,
+) -> dict[str, object]:
+    """Validate one real generated DASH1 ST12-G descriptor candidate."""
+
+    if type(candidate) is not dict:
+        raise ContractValidationError(
+            ReasonCode.SCHEMA_MISMATCH,
+            "ST12-G dashboard descriptor must be an exact object",
+        )
+    if any(
+        key in candidate
+        for key in ("runtime_evidence", "evidence_value", "owner_decision")
+    ):
+        raise ContractValidationError(
+            ReasonCode.ST12F_FIXTURE_NOT_EVIDENCE,
+            "repository descriptor cannot materialize runtime evidence",
+        )
+    if set(candidate) != set(ST12G_MATERIALIZATION_FIELDS):
+        raise ContractValidationError(
+            ReasonCode.SCHEMA_MISMATCH,
+            "ST12-G dashboard descriptor field roster differs",
+        )
+    if existing is not None:
+        if type(existing) is not dict or set(existing) != set(
+            ST12G_MATERIALIZATION_FIELDS
+        ):
+            raise ContractValidationError(
+                ReasonCode.SCHEMA_MISMATCH,
+                "existing ST12-G dashboard descriptor is not canonical",
+            )
+        if existing["descriptor_id"] == candidate["descriptor_id"]:
+            if deterministic_json(existing) != deterministic_json(candidate):
+                raise ContractValidationError(
+                    ReasonCode.IDEMPOTENCY_CONFLICT,
+                    "same dashboard descriptor slot carries changed payload",
+                )
+            return existing
+    expected = {
+        "descriptor_id": "ST12G-DESCRIPTOR::DASH1_UI1",
+        "contract_version": "2.0",
+        "consumer_id": "DASH1_UI1",
+        "contract_type": "ST12GOwnerDashboardEvidenceViewV2",
+        "source_contract_manifest_ref": ST12G_CONTRACT_MANIFEST_REF,
+        "canonical_owner_ref": "PR169_DASH1_OWNER_DASHBOARD_SURFACE_REGISTRY",
+        "runtime_instance_state": "NOT_MATERIALIZED_BY_REPOSITORY_BUILD",
+        "manual_edit_allowed": False,
+        "runtime_effect_allowed": False,
+        "write_authority": "NONE",
+        "downstream_route_refs": ["DASH1_UI1"],
+    }
+    if (
+        candidate["runtime_instance_state"]
+        != "NOT_MATERIALIZED_BY_REPOSITORY_BUILD"
+    ):
+        raise ContractValidationError(
+            ReasonCode.ST12F_FIXTURE_NOT_EVIDENCE,
+            "generated descriptor cannot be presented as empirical evidence",
+        )
+    if candidate != expected:
+        raise ContractValidationError(
+            ReasonCode.SCHEMA_MISMATCH,
+            "ST12-G dashboard descriptor payload differs",
+        )
+    return candidate
 
 
 def validate_artifacts(base_dir: Path | str) -> tuple[str, ...]:
@@ -83,23 +164,13 @@ def validate_artifacts(base_dir: Path | str) -> tuple[str, ...]:
         failures.append(f"st12g_descriptor_count:{len(st12g_rows)}")
     else:
         descriptor = st12g_rows[0]
-        if set(descriptor) != set(ST12G_MATERIALIZATION_FIELDS):
-            failures.append("st12g_descriptor_schema_mismatch")
-        expected = {
-            "descriptor_id": "ST12G-DESCRIPTOR::DASH1_UI1",
-            "contract_version": "2.0",
-            "consumer_id": "DASH1_UI1",
-            "contract_type": "ST12GOwnerDashboardEvidenceViewV2",
-            "source_contract_manifest_ref": ST12G_CONTRACT_MANIFEST_REF,
-            "canonical_owner_ref": "PR169_DASH1_OWNER_DASHBOARD_SURFACE_REGISTRY",
-            "runtime_instance_state": "NOT_MATERIALIZED_BY_REPOSITORY_BUILD",
-            "manual_edit_allowed": False,
-            "runtime_effect_allowed": False,
-            "write_authority": "NONE",
-            "downstream_route_refs": ["DASH1_UI1"],
-        }
-        if descriptor != expected:
-            failures.append("st12g_descriptor_payload_mismatch")
+        try:
+            validate_st12g_descriptor_candidate(descriptor)
+        except ContractValidationError as exc:
+            failures.append(
+                "st12g_descriptor_"
+                f"{exc.reason_code.name.casefold()}"
+            )
 
     registry_rows = read_jsonl(registry_path)
     if not registry_rows:
@@ -302,6 +373,41 @@ def validate_artifacts(base_dir: Path | str) -> tuple[str, ...]:
         )
     }
     _failures_append_missing(failures, "data_value_route_map_artifacts", mapped_artifacts, required_names)
+    st12g_route_rows = [
+        row
+        for row in data_map_rows
+        if Path(str(row.get("artifact_path", ""))).name
+        == ST12G_DESCRIPTOR_FILENAME
+    ]
+    if len(st12g_route_rows) != 1:
+        failures.append("st12g_data_route_count_mismatch")
+    else:
+        route = st12g_route_rows[0]
+        route_refs = tuple(
+            str(value) for value in route.get("owner_surface_registry_refs", [])
+        )
+        if any("READ_LATER_QUEUE" in value for value in route_refs):
+            failures.append("st12g_route_assigned_to_read_later_queue")
+        if route.get("destination_surface") != ST12G_DASHBOARD_SURFACE_ID:
+            failures.append("st12g_route_destination_not_qku_control_plane")
+        if (
+            route.get("source_owner") != ST12G_SOURCE_OWNER
+            or route.get("canonical_source_ref") != REGISTRY_FILENAME
+            or route.get("upstream_artifact_refs") != [ST12G_SVC_DESCRIPTOR_REF]
+        ):
+            failures.append("st12g_route_missing_svc1_source_binding")
+        if route_refs != (registry_row_ref(ST12G_REGISTRY_FEATURE_ID),):
+            failures.append("st12g_route_registry_anchor_drift")
+        if route.get("direct_f_binding_allowed") is not False:
+            failures.append("st12g_route_direct_f_source_detected")
+        if (
+            route.get("write_authority") != "NONE"
+            or route.get("runtime_effect_allowed") is not False
+            or route.get("order_authority") is not False
+            or route.get("mode_authority") is not False
+            or route.get("capital_authority") is not False
+        ):
+            failures.append("st12g_route_effect_or_authority_detected")
 
     no_orphan = read_json(base / "owner_dashboard_no_orphan.report.json")
     authority = read_json(base / "owner_dashboard_authority_boundary.report.json")
@@ -336,6 +442,19 @@ def validate_artifacts(base_dir: Path | str) -> tuple[str, ...]:
         or st12g_manifest_rows[0].get("direct_f_binding_allowed") is not False
     ):
         failures.append("st12g_projection_manifest_direct_f_or_lineage_drift")
+    elif (
+        st12g_manifest_rows[0].get("source_owner") != ST12G_SOURCE_OWNER
+        or st12g_manifest_rows[0].get("destination_surface")
+        != ST12G_DASHBOARD_SURFACE_ID
+        or st12g_manifest_rows[0].get("registry_row_ref")
+        != registry_row_ref(ST12G_REGISTRY_FEATURE_ID)
+        or st12g_manifest_rows[0].get("write_authority") != "NONE"
+        or st12g_manifest_rows[0].get("runtime_effect_allowed") is not False
+        or st12g_manifest_rows[0].get("order_authority") is not False
+        or st12g_manifest_rows[0].get("mode_authority") is not False
+        or st12g_manifest_rows[0].get("capital_authority") is not False
+    ):
+        failures.append("st12g_projection_manifest_route_or_authority_drift")
 
     ui_text = ""
     for ui_file in REQUIRED_UI_OUTPUTS:

@@ -11614,7 +11614,13 @@ def test_runner_returns_zero_when_all_mocked_commands_pass(monkeypatch, capsys):
         if command[0] != "git"
     ]
     assert seen == expected
-    assert capsys.readouterr().out.splitlines()[-1] == runner.SUCCESS_MARKER
+    output = capsys.readouterr().out.splitlines()
+    assert output[-1] == runner.SUCCESS_MARKER
+    architecture_command = list(
+        runner.build_st12g_architecture_validation_command(sys.executable)
+    )
+    assert architecture_command in seen
+    assert subprocess.list2cmdline(architecture_command) in output
 
 
 def test_runner_sets_run_local_no_runtime_scan_cache_env(monkeypatch):

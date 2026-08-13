@@ -2,13 +2,15 @@
 
 from __future__ import annotations
 
-import ast
 from copy import copy
-from dataclasses import fields, replace
+from dataclasses import replace
 from pathlib import Path
 
 import pytest
 
+from src.qtt.dashboard.owner_dashboard_validator import (
+    validate_st12g_descriptor_candidate,
+)
 from src.qtt.agents.pr169_agent_orch1_resolvers import (
     resolve_st12g_projection_v2 as resolve_agent,
 )
@@ -54,24 +56,27 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.models impo
     ST12FEvidenceReferenceV1,
     ST12FEvidenceStateV1,
 )
-from src.qtt.stage1_prediction_markets.qku_computation_control_plane.receipts import (
-    ST12FReceiptClassV1,
-)
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.serialization import (
     validate_relative_path,
 )
-from src.qtt.stage1_prediction_markets.qku_computation_control_plane.service import (
-    QKUComputationControlPlaneV1,
-)
-
 from tests.stage1_prediction_markets.qku_computation_control_plane.tranche_g.test_contract_matrix import (
+    _BehaviorCase,
     _EvidenceService,
     _ROOT,
     _assert_reason,
     _baseline,
+    _binding_baseline,
     _compile,
+    _compiler_candidate,
     _descriptor,
     _request,
+)
+from tools.independent_validate_qku_computation_control_plane_g import (
+    validate_projection_field_binding_candidate,
+    validate_public_operation_roster_candidate,
+    validate_receipt_class_roster_candidate,
+    validate_static_architecture_candidate,
+    validate_st12g_changed_path_candidate,
 )
 
 
@@ -84,32 +89,38 @@ _HISTORICAL_CONSUMER_CASES = (
     ("ST12-TEST::228", "INDEPENDENT_OPERATIONS_AND_FIVE_CONSUMER_RECONSTRUCTION", "PASS"),
 )
 
+_COMPILER_ENTRYPOINT = "src/qtt/stage1_prediction_markets/qku_computation_control_plane/existing_owner_projection.py::ExistingOwnerProjectionCompilerV2.compile_current"
+_COORDINATOR_ENTRYPOINT = "src/qtt/stage1_prediction_markets/qku_computation_control_plane/existing_owner_projection.py::ExistingOwnerProjectionCoordinatorV2.resolve"
+_DESCRIPTOR_ENTRYPOINT = "src/qtt/dashboard/owner_dashboard_validator.py::validate_st12g_descriptor_candidate"
+_STATIC_ENTRYPOINT = "tools/independent_validate_qku_computation_control_plane_g.py::validate_static_architecture_candidate"
+_BINDING_ENTRYPOINT = "tools/independent_validate_qku_computation_control_plane_g.py::validate_projection_field_binding_candidate"
+
 _FAIL_CASES_CONSUMER = (
-    ("G-FAIL::046", "REQUEST_HANDOFF_RECEIPT_REF_NOT_FULL_CANONICAL_G_RECEIPT_REF", "SCHEMA_MISMATCH"),
-    ("G-FAIL::047", "REQUEST_CONTAINS_FORBIDDEN_EXPECTED_SOURCE_EPOCH_OR_INPUT_LOCK_FIELD", "SCHEMA_MISMATCH"),
-    ("G-FAIL::048", "REQUEST_CONTAINS_FORBIDDEN_REQUESTED_AT_OR_EVALUATED_AT_FIELD", "SCHEMA_MISMATCH"),
-    ("G-FAIL::049", "CURRENT_RESOLUTION_CARRIES_PRESENT_BLOCKERS", "SCHEMA_MISMATCH"),
-    ("G-FAIL::050", "STALE_RESOLUTION_CARRIES_CURRENT_PROJECTION_BUNDLE", "SCHEMA_MISMATCH"),
-    ("G-FAIL::051", "BLOCKED_RESOLUTION_CARRIES_EXPLICIT_EMPTY_NO_BLOCKERS", "SCHEMA_MISMATCH"),
-    ("G-FAIL::052", "CURRENT_CENTRAL_BUNDLE_MISSING_ONE_DIRECT_OWNER_PROJECTION", "SCHEMA_MISMATCH"),
-    ("G-FAIL::053", "DIRECT_OWNER_RESOLVER_RECEIVES_WRONG_CONSUMER_CONTRACT", "INPUT_OWNER_MISMATCH"),
-    ("G-FAIL::054", "DASHBOARD_RESOLVER_RECEIVES_CENTRAL_G_OR_F_INPUT_INSTEAD_OF_SVC1_OWNER_RESOLUTION", "INPUT_OWNER_MISMATCH"),
-    ("G-FAIL::055", "DASHBOARD_RESOLVER_CHANGES_SVC1_STALE_OR_BLOCKED_ABSENCE", "SCHEMA_MISMATCH"),
-    ("G-FAIL::056", "OWNER_ARTIFACT_WRITE_OUTSIDE_EXISTING_OWNER_PREFIX", "PATH_UNSAFE"),
-    ("G-FAIL::057", "GENERATED_CONTRACT_DESCRIPTOR_CONTAINS_FABRICATED_RUNTIME_EVIDENCE_INSTANCE", "ST12F_FIXTURE_NOT_EVIDENCE"),
-    ("G-FAIL::058", "GENERATED_DESCRIPTOR_HAS_EXTRA_OR_MISSING_FIELD", "SCHEMA_MISMATCH"),
-    ("G-FAIL::059", "CONSUMER_FIELD_BINDING_REFERENCES_UNKNOWN_SOURCE_FIELD", "SCHEMA_MISMATCH"),
-    ("G-FAIL::060", "FILESYSTEM_READ_DURING_PURE_COMPILER_OR_DIRECT_OWNER_MAPPER_CALL", "RUNTIME_EFFECT_FORBIDDEN"),
-    ("G-FAIL::061", "NETWORK_OR_PROVIDER_CALL_DURING_G_COMPILATION_OR_OWNER_MAPPING", "DIRECT_PROVIDER_FORBIDDEN"),
-    ("G-FAIL::062", "OWNER_NATURAL_SLOT_SAME_ID_DIFFERENT_DESCRIPTOR", "IDEMPOTENCY_CONFLICT"),
-    ("G-FAIL::063", "CENTRAL_COMPILER_INTRODUCES_CACHE_DATABASE_CURRENT_POINTER_OR_MUTABLE_STATE", "RUNTIME_EFFECT_FORBIDDEN"),
-    ("G-FAIL::064", "NEW_PUBLIC_QKU_OPERATION_ADDED_FOR_G", "OPERATION_NOT_ALLOWED"),
-    ("G-FAIL::065", "NEW_DURABLE_RECEIPT_CLASS_ADDED_FOR_G", "SCHEMA_MISMATCH"),
-    ("G-FAIL::066", "READ_ONLY_ST12F_HANDOFF_OR_RECEIPT_OWNER_MUTATED_BY_G", "PATH_UNSAFE"),
-    ("G-FAIL::067", "CURRENT_D_REFERENCE_UNAVAILABLE_STALE_CONFLICTING_OR_NOT_CURRENT", "EVIDENCE_REFERENCE_UNAVAILABLE_STALE_CONFLICTING_OR_SCOPE_MISMATCH"),
-    ("G-FAIL::068", "CONTEXT_INPUT_SNAPSHOT_ID_DIFFERS_FROM_DURABLE_INPUT_LOCK", "INPUT_SCOPE_MISMATCH"),
-    ("G-FAIL::069", "CONTEXT_MARKET_VENUE_OR_INSTRUMENT_SCOPE_OUTSIDE_DURABLE_INPUT_LOCK", "INPUT_SCOPE_MISMATCH"),
-    ("G-FAIL::070", "TRUSTED_EXECUTION_CONTEXT_IS_STALE", "STALE_CONTEXT"),
+    _BehaviorCase("G-FAIL::046", "PRODUCTION_MUTATION_REJECTION", "_request", "REQUEST_HANDOFF_RECEIPT_REF_NOT_FULL_CANONICAL_G_RECEIPT_REF", "src/qtt/stage1_prediction_markets/qku_computation_control_plane/existing_owner_projection.py::ST12GProjectionRequestV2.__post_init__", "REJECT_SCHEMA_MISMATCH", "SCHEMA_MISMATCH", "NONE"),
+    _BehaviorCase("G-FAIL::047", "PRODUCTION_MUTATION_REJECTION", "_request mapping", "REQUEST_CONTAINS_FORBIDDEN_EXPECTED_SOURCE_EPOCH_OR_INPUT_LOCK_FIELD", _COORDINATOR_ENTRYPOINT, "REJECT_SCHEMA_MISMATCH", "SCHEMA_MISMATCH", "NONE"),
+    _BehaviorCase("G-FAIL::048", "PRODUCTION_MUTATION_REJECTION", "_request mapping", "REQUEST_CONTAINS_FORBIDDEN_REQUESTED_AT_OR_EVALUATED_AT_FIELD", _COORDINATOR_ENTRYPOINT, "REJECT_SCHEMA_MISMATCH", "SCHEMA_MISMATCH", "NONE"),
+    _BehaviorCase("G-FAIL::049", "PRODUCTION_MUTATION_REJECTION", "_current_resolution", "CURRENT_RESOLUTION_CARRIES_PRESENT_BLOCKERS", "src/qtt/stage1_prediction_markets/qku_computation_control_plane/existing_owner_projection.py::ST12GProjectionCoreV2.__post_init__", "REJECT_SCHEMA_MISMATCH", "SCHEMA_MISMATCH", "NONE"),
+    _BehaviorCase("G-FAIL::050", "PRODUCTION_MUTATION_REJECTION", "_current_resolution", "STALE_RESOLUTION_CARRIES_CURRENT_PROJECTION_BUNDLE", "src/qtt/stage1_prediction_markets/qku_computation_control_plane/existing_owner_projection.py::ST12GProjectionResolutionV2.__init__", "REJECT_SCHEMA_MISMATCH", "SCHEMA_MISMATCH", "NONE"),
+    _BehaviorCase("G-FAIL::051", "PRODUCTION_MUTATION_REJECTION", "_absence", "BLOCKED_RESOLUTION_CARRIES_EXPLICIT_EMPTY_NO_BLOCKERS", "src/qtt/stage1_prediction_markets/qku_computation_control_plane/existing_owner_projection.py::ST12GProjectionAbsenceV2.__post_init__", "REJECT_SCHEMA_MISMATCH", "SCHEMA_MISMATCH", "NONE"),
+    _BehaviorCase("G-FAIL::052", "PRODUCTION_MUTATION_REJECTION", "_current_resolution", "CURRENT_CENTRAL_BUNDLE_MISSING_ONE_DIRECT_OWNER_PROJECTION", "src/qtt/stage1_prediction_markets/qku_computation_control_plane/existing_owner_projection.py::ST12GProjectionBundleV2.__post_init__", "REJECT_PARTIAL_OWNER_BUNDLE", "SCHEMA_MISMATCH", "NONE"),
+    _BehaviorCase("G-FAIL::053", "PRODUCTION_MUTATION_REJECTION", "_current_resolution", "DIRECT_OWNER_RESOLVER_RECEIVES_WRONG_CONSUMER_CONTRACT", "src/qtt/stage1_prediction_markets/qku_computation_control_plane/existing_owner_projection.py::ST12GOwnerProjectionResolutionV2.__init__", "REJECT_OWNER_TOPOLOGY_MISMATCH", "INPUT_OWNER_MISMATCH", "NONE"),
+    _BehaviorCase("G-FAIL::054", "PRODUCTION_MUTATION_REJECTION", "_current_resolution", "DASHBOARD_RESOLVER_RECEIVES_CENTRAL_G_OR_F_INPUT_INSTEAD_OF_SVC1_OWNER_RESOLUTION", "src/qtt/dashboard/owner_surface_resolver.py::resolve_st12g_projection_v2", "REJECT_OWNER_CHAIN_BYPASS", "INPUT_OWNER_MISMATCH", "NONE"),
+    _BehaviorCase("G-FAIL::055", "PRODUCTION_MUTATION_REJECTION", "SVC1 stale absence", "DASHBOARD_RESOLVER_CHANGES_SVC1_STALE_OR_BLOCKED_ABSENCE", "src/qtt/stage1_prediction_markets/qku_computation_control_plane/existing_owner_projection.py::ST12GOwnerDashboardEvidenceViewV2.__post_init__", "REJECT_LINEAGE_REWRITE", "SCHEMA_MISMATCH", "NONE"),
+    _BehaviorCase("G-FAIL::056", "PRODUCTION_MUTATION_REJECTION", "existing owner path", "OWNER_ARTIFACT_WRITE_OUTSIDE_EXISTING_OWNER_PREFIX", "src/qtt/stage1_prediction_markets/qku_computation_control_plane/serialization.py::validate_relative_path", "REJECT_PATH_SCOPE", "PATH_UNSAFE", "NONE"),
+    _BehaviorCase("G-FAIL::057", "PRODUCTION_MUTATION_REJECTION", "generated DASH1 descriptor", "GENERATED_CONTRACT_DESCRIPTOR_CONTAINS_FABRICATED_RUNTIME_EVIDENCE_INSTANCE", _DESCRIPTOR_ENTRYPOINT, "REJECT_EVIDENCE_FABRICATION", "ST12F_FIXTURE_NOT_EVIDENCE", "NONE"),
+    _BehaviorCase("G-FAIL::058", "PRODUCTION_MUTATION_REJECTION", "generated DASH1 descriptor", "GENERATED_DESCRIPTOR_HAS_EXTRA_OR_MISSING_FIELD", _DESCRIPTOR_ENTRYPOINT, "REJECT_SCHEMA_MISMATCH", "SCHEMA_MISMATCH", "NONE"),
+    _BehaviorCase("G-FAIL::059", "STATIC_ARCHITECTURE_MUTATION_DETECTION", "projection_field_bindings.jsonl", "CONSUMER_FIELD_BINDING_REFERENCES_UNKNOWN_SOURCE_FIELD", _BINDING_ENTRYPOINT, "REJECT_SCHEMA_MISMATCH", "SCHEMA_MISMATCH", "NONE"),
+    _BehaviorCase("G-FAIL::060", "STATIC_ARCHITECTURE_MUTATION_DETECTION", "existing_owner_projection.py", "FILESYSTEM_READ_DURING_PURE_COMPILER_OR_DIRECT_OWNER_MAPPER_CALL", _STATIC_ENTRYPOINT, "REJECT_RUNTIME_EFFECT_FORBIDDEN", "RUNTIME_EFFECT_FORBIDDEN", "NONE"),
+    _BehaviorCase("G-FAIL::061", "STATIC_ARCHITECTURE_MUTATION_DETECTION", "existing_owner_projection.py", "NETWORK_OR_PROVIDER_CALL_DURING_G_COMPILATION_OR_OWNER_MAPPING", _STATIC_ENTRYPOINT, "REJECT_PROVIDER_ACCESS", "DIRECT_PROVIDER_FORBIDDEN", "NONE"),
+    _BehaviorCase("G-FAIL::062", "PRODUCTION_MUTATION_REJECTION", "generated DASH1 descriptor", "OWNER_NATURAL_SLOT_SAME_ID_DIFFERENT_DESCRIPTOR", _DESCRIPTOR_ENTRYPOINT, "REJECT_IDEMPOTENCY_CONFLICT", "IDEMPOTENCY_CONFLICT", "NONE"),
+    _BehaviorCase("G-FAIL::063", "STATIC_ARCHITECTURE_MUTATION_DETECTION", "existing_owner_projection.py", "CENTRAL_COMPILER_INTRODUCES_CACHE_DATABASE_CURRENT_POINTER_OR_MUTABLE_STATE", _STATIC_ENTRYPOINT, "REJECT_DUPLICATE_AUTHORITY", "RUNTIME_EFFECT_FORBIDDEN", "NONE"),
+    _BehaviorCase("G-FAIL::064", "STATIC_ARCHITECTURE_MUTATION_DETECTION", "QKUComputationControlPlaneV1 public roster", "NEW_PUBLIC_QKU_OPERATION_ADDED_FOR_G", "tools/independent_validate_qku_computation_control_plane_g.py::validate_public_operation_roster_candidate", "REJECT_OPERATION_AUTHORITY_EXPANSION", "OPERATION_NOT_ALLOWED", "NONE"),
+    _BehaviorCase("G-FAIL::065", "STATIC_ARCHITECTURE_MUTATION_DETECTION", "ST12FReceiptClassV1 roster", "NEW_DURABLE_RECEIPT_CLASS_ADDED_FOR_G", "tools/independent_validate_qku_computation_control_plane_g.py::validate_receipt_class_roster_candidate", "REJECT_RECEIPT_AUTHORITY_EXPANSION", "SCHEMA_MISMATCH", "NONE"),
+    _BehaviorCase("G-FAIL::066", "STATIC_ARCHITECTURE_MUTATION_DETECTION", "ST12-G exact write scope", "READ_ONLY_ST12F_HANDOFF_OR_RECEIPT_OWNER_MUTATED_BY_G", "tools/independent_validate_qku_computation_control_plane_g.py::validate_st12g_changed_path_candidate", "REJECT_PREDECESSOR_MUTATION", "PATH_UNSAFE", "NONE"),
+    _BehaviorCase("G-FAIL::067", "PRODUCTION_MUTATION_REJECTION", "_baseline", "CURRENT_D_REFERENCE_UNAVAILABLE_STALE_CONFLICTING_OR_NOT_CURRENT", _COMPILER_ENTRYPOINT, "RETURN_BLOCKED_NO_AUTHORITY", "EVIDENCE_REFERENCE_UNAVAILABLE_STALE_CONFLICTING_OR_SCOPE_MISMATCH", "NONE"),
+    _BehaviorCase("G-FAIL::068", "PRODUCTION_MUTATION_REJECTION", "_baseline", "CONTEXT_INPUT_SNAPSHOT_ID_DIFFERS_FROM_DURABLE_INPUT_LOCK", _COMPILER_ENTRYPOINT, "REJECT_CONTEXT_SCOPE_MISMATCH", "INPUT_SCOPE_MISMATCH", "NONE"),
+    _BehaviorCase("G-FAIL::069", "PRODUCTION_MUTATION_REJECTION", "_baseline", "CONTEXT_MARKET_VENUE_OR_INSTRUMENT_SCOPE_OUTSIDE_DURABLE_INPUT_LOCK", _COMPILER_ENTRYPOINT, "REJECT_CONTEXT_SCOPE_MISMATCH", "INPUT_SCOPE_MISMATCH", "NONE"),
+    _BehaviorCase("G-FAIL::070", "PRODUCTION_MUTATION_REJECTION", "_baseline", "TRUSTED_EXECUTION_CONTEXT_IS_STALE", _COORDINATOR_ENTRYPOINT, "RETURN_STALE_NO_AUTHORITY", "STALE_CONTEXT", "NONE"),
 )
 
 _DESCRIPTOR_FIELDS = {
@@ -167,53 +178,6 @@ def _absence(
     )
 
 
-def _descriptor_guard(
-    value: dict[str, object],
-    *,
-    existing: dict[str, object] | None = None,
-) -> dict[str, object]:
-    if any(key in value for key in ("runtime_evidence", "evidence_value", "owner_decision")):
-        raise ContractValidationError(
-            ReasonCode.ST12F_FIXTURE_NOT_EVIDENCE,
-            "repository descriptor cannot materialize runtime evidence",
-        )
-    if set(value) != _DESCRIPTOR_FIELDS:
-        raise ContractValidationError(
-            ReasonCode.SCHEMA_MISMATCH,
-            "ST12-G descriptor field roster differs",
-        )
-    if existing is not None and existing["descriptor_id"] == value["descriptor_id"]:
-        if existing != value:
-            raise ContractValidationError(
-                ReasonCode.IDEMPOTENCY_CONFLICT,
-                "same descriptor slot carries changed payload",
-            )
-        return existing
-    return value
-
-
-def _known_binding_source_fields() -> set[str]:
-    return {
-        field.name
-        for contract in (
-            ComputationExecutionContextV1,
-            ImmutableReplayPaperInputLockV1,
-            FToGHandoffReferencesV1,
-            ComputationEvidenceBundleV1,
-            ST12FEvidenceReferenceV1,
-        )
-        for field in fields(contract)
-    }
-
-
-def _validate_binding_source(field_name: str) -> None:
-    if field_name not in _known_binding_source_fields():
-        raise ContractValidationError(
-            ReasonCode.SCHEMA_MISMATCH,
-            "consumer binding source field is unknown",
-        )
-
-
 def _run_historical_consumer(case_id: str) -> None:
     current = _current_resolution()
     owner_resolutions = _all_owner_resolutions(current)
@@ -258,14 +222,27 @@ def _run_consumer_failure(case_id: str, trigger: str, expected: str) -> None:
     if case_id == "G-FAIL::046":
         _assert_reason(expected, lambda: replace(_request(), source_handoff_receipt_ref="G-HANDOFF::SHORT"))
     elif case_id in {"G-FAIL::047", "G-FAIL::048"}:
-        names = {field.name for field in fields(ST12GProjectionRequestV2)}
-        forbidden = (
-            {"expected_source_epoch_refs", "expected_input_lock_id", "expected_parent_bundle_ref"}
-            if case_id == "G-FAIL::047"
-            else {"requested_at", "evaluated_at"}
+        request = _request()
+        candidate = {
+            "request_id": request.request_id,
+            "context": request.context,
+            "source_handoff_receipt_ref": request.source_handoff_receipt_ref,
+            "causation_id": request.causation_id,
+            "correlation_id": request.correlation_id,
+        }
+        if case_id == "G-FAIL::047":
+            candidate["expected_source_epoch_refs"] = handoff.source_epoch_refs
+            candidate["expected_input_lock_id"] = lock.input_lock_id
+        else:
+            candidate["requested_at"] = context.as_of
+            candidate["evaluated_at"] = context.as_of
+        _assert_reason(
+            expected,
+            lambda: ExistingOwnerProjectionCoordinatorV2(
+                _EvidenceService(),
+                owners,
+            ).resolve(candidate),
         )
-        assert names.isdisjoint(forbidden)
-        assert ReasonCode.SCHEMA_MISMATCH.name == expected
     elif case_id == "G-FAIL::049":
         blockers = ST12GBlockerStateV2(
             ST12GBlockerSetStateV2.PRESENT_TYPED_BLOCKERS,
@@ -324,82 +301,104 @@ def _run_consumer_failure(case_id: str, trigger: str, expected: str) -> None:
         )
         dashboard = resolve_dashboard(svc_resolution)
         assert svc_resolution.absence is absence
-        assert dashboard.source_svc_resolution_state is absence.state
-        assert dashboard.source_svc_projection_id_or_explicit_absence == "EXPLICIT_ABSENCE"
-        assert ReasonCode.SCHEMA_MISMATCH.name == expected
+        _assert_reason(
+            expected,
+            lambda: replace(
+                dashboard,
+                source_svc_projection_id_or_explicit_absence=(
+                    _current_resolution().projection_bundle.svc.projection_id
+                ),
+            ),
+        )
     elif case_id == "G-FAIL::056":
         _assert_reason(expected, lambda: validate_relative_path("../other-owner/output.json"))
     elif case_id == "G-FAIL::057":
-        bad = _descriptor("SVC1") | {"runtime_evidence": {"profit": 1}}
-        _assert_reason(expected, lambda: _descriptor_guard(bad))
-    elif case_id == "G-FAIL::058":
-        bad = dict(_descriptor("SVC1"))
-        bad.pop("write_authority")
-        _assert_reason(expected, lambda: _descriptor_guard(bad))
-    elif case_id == "G-FAIL::059":
-        _assert_reason(expected, lambda: _validate_binding_source("unknown_source_field"))
-    elif case_id in {"G-FAIL::060", "G-FAIL::061"}:
-        paths = (
-            "src/qtt/stage1_prediction_markets/qku_computation_control_plane/existing_owner_projection.py",
-            "src/qtt/readiness/pr169_readiness1_resolvers.py",
-            "src/qtt/pretrade/pr169_pretrade1_resolvers.py",
-            "src/qtt/agents/pr169_agent_orch1_resolvers.py",
-            "src/qtt/service/pr169_svc1_resolvers.py",
-            "src/qtt/dashboard/owner_surface_resolver.py",
+        bad = _descriptor("DASH1_UI1") | {"runtime_evidence": {"profit": 1}}
+        _assert_reason(
+            expected,
+            lambda: validate_st12g_descriptor_candidate(bad),
         )
-        trees = [ast.parse((_ROOT / path).read_text(encoding="utf-8")) for path in paths]
-        if case_id == "G-FAIL::060":
-            forbidden_calls = {"open", "read_text", "read_bytes", "write_text", "write_bytes"}
-            compiler = next(node for node in trees[0].body if isinstance(node, ast.ClassDef) and node.name == "ExistingOwnerProjectionCompilerV2")
-            assert not any(isinstance(node, ast.Call) and ((isinstance(node.func, ast.Name) and node.func.id in forbidden_calls) or (isinstance(node.func, ast.Attribute) and node.func.attr in forbidden_calls)) for node in ast.walk(compiler))
-        else:
-            imported_roots = {
-                alias.name.split(".", 1)[0]
-                for tree in trees
-                for node in ast.walk(tree)
-                if isinstance(node, ast.Import)
-                for alias in node.names
-            } | {
-                node.module.split(".", 1)[0]
-                for tree in trees
-                for node in ast.walk(tree)
-                if isinstance(node, ast.ImportFrom) and node.module
-            }
-            assert imported_roots.isdisjoint(
-                {"requests", "socket", "openai", "httpx", "urllib"}
-            )
-            assert not any(
-                isinstance(node, ast.Call)
-                and isinstance(node.func, ast.Attribute)
-                and node.func.attr in {"connect", "request", "urlopen"}
-                for tree in trees
-                for node in ast.walk(tree)
-            )
-        assert ReasonCode[expected].name == expected
+    elif case_id == "G-FAIL::058":
+        bad = dict(_descriptor("DASH1_UI1"))
+        bad.pop("write_authority")
+        _assert_reason(
+            expected,
+            lambda: validate_st12g_descriptor_candidate(bad),
+        )
+    elif case_id == "G-FAIL::059":
+        bad_binding = _binding_baseline() | {
+            "source_field_or_rule": "unknown_source_field"
+        }
+        _assert_reason(
+            expected,
+            lambda: validate_projection_field_binding_candidate(bad_binding),
+        )
+    elif case_id == "G-FAIL::060":
+        candidate = _compiler_candidate(
+            "    filesystem_probe = Path(\"candidate\").read_text()"
+        )
+        _assert_reason(
+            expected,
+            lambda: validate_static_architecture_candidate(candidate),
+        )
+    elif case_id == "G-FAIL::061":
+        candidate = _compiler_candidate(
+            "    provider_probe = requests.request(\"GET\", \"https://provider.invalid\")"
+        ).replace(
+            "from __future__ import annotations",
+            "from __future__ import annotations\nimport requests",
+            1,
+        )
+        _assert_reason(
+            expected,
+            lambda: validate_static_architecture_candidate(candidate),
+        )
     elif case_id == "G-FAIL::062":
-        original = _descriptor("AGENT_ORCH1")
+        original = _descriptor("DASH1_UI1")
         changed = original | {"downstream_route_refs": ["DIFFERENT"]}
-        _assert_reason(expected, lambda: _descriptor_guard(changed, existing=original))
+        _assert_reason(
+            expected,
+            lambda: validate_st12g_descriptor_candidate(
+                changed,
+                existing=original,
+            ),
+        )
     elif case_id == "G-FAIL::063":
-        compiler = ExistingOwnerProjectionCompilerV2()
-        assert compiler.__slots__ == () and not hasattr(compiler, "__dict__")
-        assert ExistingOwnerProjectionCoordinatorV2.__dataclass_params__.frozen
-        assert ReasonCode.RUNTIME_EFFECT_FORBIDDEN.name == expected
+        candidate = _compiler_candidate("    cache = {}")
+        _assert_reason(
+            expected,
+            lambda: validate_static_architecture_candidate(candidate),
+        )
     elif case_id == "G-FAIL::064":
+        from src.qtt.stage1_prediction_markets.qku_computation_control_plane.service import QKUComputationControlPlaneV1
+
         public = {
             name
             for name, value in QKUComputationControlPlaneV1.__dict__.items()
             if callable(value) and not name.startswith("_")
         }
-        assert not any("st12g" in name.casefold() or "projection" in name.casefold() for name in public)
-        assert ReasonCode.OPERATION_NOT_ALLOWED.name == expected
+        _assert_reason(
+            expected,
+            lambda: validate_public_operation_roster_candidate(
+                (*sorted(public), "resolve_st12g_projection_v2")
+            ),
+        )
     elif case_id == "G-FAIL::065":
-        assert not any("ST12G" in member.name for member in ST12FReceiptClassV1)
-        assert ReasonCode.SCHEMA_MISMATCH.name == expected
+        from src.qtt.stage1_prediction_markets.qku_computation_control_plane.receipts import ST12FReceiptClassV1
+
+        _assert_reason(
+            expected,
+            lambda: validate_receipt_class_roster_candidate(
+                (*(member.name for member in ST12FReceiptClassV1), "ST12G_PROJECTION")
+            ),
+        )
     elif case_id == "G-FAIL::066":
-        source = (_ROOT / "src/qtt/stage1_prediction_markets/qku_computation_control_plane/existing_owner_projection.py").read_text(encoding="utf-8")
-        assert not any(token in source for token in ("object.__setattr__(handoff", "object.__setattr__(bundle", "save(", "commit("))
-        assert ReasonCode.PATH_UNSAFE.name == expected
+        _assert_reason(
+            expected,
+            lambda: validate_st12g_changed_path_candidate(
+                "src/qtt/stage1_prediction_markets/qku_computation_control_plane/evidence.py"
+            ),
+        )
     elif case_id == "G-FAIL::067":
         unavailable = copy(reference)
         object.__setattr__(
@@ -435,12 +434,25 @@ _CONSUMER_CASES = (*_HISTORICAL_CONSUMER_CASES, *_FAIL_CASES_CONSUMER)
 
 
 @pytest.mark.parametrize(
-    ("case_id", "trigger", "expected"),
+    "case",
     _CONSUMER_CASES,
     ids=[row[0] for row in _CONSUMER_CASES],
 )
-def test_st12g_consumer_case(case_id: str, trigger: str, expected: str) -> None:
-    if case_id.startswith("ST12-TEST::"):
-        _run_historical_consumer(case_id)
+def test_st12g_consumer_case(case: tuple[str, ...] | _BehaviorCase) -> None:
+    if not isinstance(case, _BehaviorCase):
+        _run_historical_consumer(case[0])
     else:
-        _run_consumer_failure(case_id, trigger, expected)
+        assert case.verification_mode in {
+            "PRODUCTION_MUTATION_REJECTION",
+            "EXISTING_OWNER_REJECTION_PROPAGATION",
+            "STATIC_ARCHITECTURE_MUTATION_DETECTION",
+            "DETERMINISTIC_PRESERVATION_PROOF",
+        }
+        assert case.valid_baseline_factory
+        assert case.production_entrypoint
+        assert case.expected_terminal_outcome
+        _run_consumer_failure(
+            case.case_id,
+            case.declared_mutation_action,
+            case.expected_reason_code,
+        )

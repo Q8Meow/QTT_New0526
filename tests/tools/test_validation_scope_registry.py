@@ -2125,6 +2125,13 @@ def test_st12f_current_main_scope_is_exact_and_fail_closed() -> None:
 
 def test_st12g_authorized_scope_is_exact_and_rejects_near_names() -> None:
     assert registry.ST12G_BRANCH == "agent/st12g-existing-owner-projections-v2"
+    assert registry.ST12G_ARCHITECTURE_ADDITIVE_MODULES == (
+        "existing_owner_projection.py",
+    )
+    command = registry.build_st12g_architecture_validation_command("python")
+    assert command[:2] == ("python", "-c")
+    assert command[2].count("existing_owner_projection.py") == 1
+    assert command[2].count("validator.PRODUCTION_NAMES") == 2
     assert len(registry.ST12G_ALLOWED_EXACT_PATHS) == 65
     assert not any("*" in path for path in registry.ST12G_ALLOWED_EXACT_PATHS)
     assert {

@@ -8,8 +8,15 @@ from pathlib import Path
 import subprocess
 import sys
 
-
 REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from tools.validation_scope_registry import (  # noqa: E402
+    build_st12g_architecture_validation_command,
+)
+
+
 DOMAINS = (
     "architecture",
     "operations",
@@ -23,7 +30,6 @@ DOMAINS = (
     "g",
 )
 SUCCESS_MARKER = "QKU_COMPUTATION_CONTROL_PLANE_INDEPENDENTLY_VALIDATED"
-ARCHITECTURE_ADDITIVE_MODULES = ("existing_owner_projection.py",)
 
 
 @dataclass(frozen=True, slots=True)
@@ -42,18 +48,7 @@ def run_domain(domain: str) -> DomainResult:
     )
     command = [sys.executable, str(script)]
     if domain == "architecture":
-        additive_modules = repr(ARCHITECTURE_ADDITIVE_MODULES)
-        command = [
-            sys.executable,
-            "-c",
-            (
-                "from tools import "
-                "independent_validate_qku_computation_control_plane_architecture "
-                "as validator; "
-                f"validator.PRODUCTION_NAMES = (*validator.PRODUCTION_NAMES, *{additive_modules}); "
-                "raise SystemExit(validator.main())"
-            ),
-        ]
+        command = list(build_st12g_architecture_validation_command(sys.executable))
     completed = subprocess.run(
         command,
         cwd=REPO_ROOT,
