@@ -422,13 +422,25 @@ class ST12FEvidenceControlReceiptRecordV1:
         if (
             terminal != self.terminal_state
             or tuple(reasons) != self.typed_reason_codes
-            or fixture != self.fixture_only_not_evidence
             or contract_no_effects != self.no_effect_flags
             or self.no_effect_flags != NO_EFFECTS_V1
         ):
             raise ContractValidationError(
                 ReasonCode.SCHEMA_MISMATCH,
-                "ST12-F receipt state, reason, fixture, or no-effect metadata differs from its contract",
+                "ST12-F receipt state, reason, or no-effect metadata differs from its contract",
+            )
+        if (
+            self.receipt_class is ST12FReceiptClassV1.G_HANDOFF_REFERENCE
+            and self.fixture_only_not_evidence is True
+        ):
+            raise ContractValidationError(
+                ReasonCode.ST12F_FIXTURE_NOT_EVIDENCE,
+                "G-handoff control receipt cannot be marked fixture-only evidence",
+            )
+        if fixture != self.fixture_only_not_evidence:
+            raise ContractValidationError(
+                ReasonCode.SCHEMA_MISMATCH,
+                "ST12-F receipt fixture metadata differs from its contract",
             )
 
 
