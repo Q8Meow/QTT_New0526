@@ -30,6 +30,8 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.evidence im
     BuiltEvidenceBundleOutcomeV1,
     ComputationEvidenceServiceV1,
     EvidenceBundleTerminalStateV1,
+    FToGHandoffReferencesV1,
+    PaperResultContractV1,
     RegisteredLaneResultOutcomeV1,
     ReplayResultContractV1,
 )
@@ -40,6 +42,7 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.input_lock 
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.models import (
     CompileReplayPaperCohortRequestV1,
+    NO_EFFECTS_V1,
     RegisterReplayPaperResultRequestV1,
     TypedValueKindV1,
     TypedValueRecordV1,
@@ -50,6 +53,10 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.persistence
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.serialization import (
     deterministic_json,
+)
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.receipts import (
+    ST12FEvidenceControlReceiptRecordV1,
+    ST12FReceiptClassV1,
 )
 
 PACKAGE = (
@@ -769,6 +776,176 @@ def _st12f_executable_operation_checks() -> tuple[bool, ...]:
         not hasattr(service, "last_committed_receipt_refs")
         and not hasattr(restarted, "last_committed_receipt_refs"),
     )
+
+
+def _st12f_fixture_receipt_checks() -> dict[str, str]:
+    adapter = InMemoryPersistenceAdapterV1()
+    compiler, _, compilation, _ = _st12f_runtime(
+        adapter,
+        identity="FIXTURE-RECEIPT-AUDIT",
+    )
+    snapshot = compiler.canonical_snapshot
+    source_epoch_refs = tuple(
+        f"{key}={snapshot.source_epochs[key]}" for key in sorted(snapshot.source_epochs)
+    )
+    parameter_value_refs = canonical_st12f_parameter_value_refs_v1()
+    handoff = FToGHandoffReferencesV1(
+        handoff_id="G-HANDOFF::FIXTURE-RECEIPT-AUDIT",
+        contract_version="1.4",
+        input_lock_id=str(getattr(compilation, "input_lock_id")),
+        source_epoch_refs=source_epoch_refs,
+        observed_at=_ST12F_NOW,
+        valid_until=_ST12F_NOW + timedelta(hours=4),
+        terminal_state=EvidenceBundleTerminalStateV1.CLOSED_INDEPENDENTLY_VALIDATED.value,
+        evidence_bundle_ref=(
+            "ST12F-RECEIPT::BUNDLE::FIXTURE-RECEIPT-AUDIT::"
+            "EVIDENCE_BUNDLE_VERSION"
+        ),
+        no_trade_blocker_refs=("NO-TRADE::FIXTURE-RECEIPT-AUDIT",),
+        champion_challenger_evidence_refs=(
+            "MODEL-RISK::FIXTURE-RECEIPT-AUDIT",
+        ),
+        portfolio_utility_refs=("PORTFOLIO-UTILITY::FIXTURE-RECEIPT-AUDIT",),
+        quantum_classical_comparison_receipt_ref=(
+            "QUANTUM-COMPARISON::FIXTURE-RECEIPT-AUDIT"
+        ),
+    )
+    handoff_receipt = ST12FEvidenceControlReceiptRecordV1(
+        control_receipt_id=(
+            f"ST12F-RECEIPT::{handoff.handoff_id}::G_HANDOFF_REFERENCE"
+        ),
+        receipt_class=ST12FReceiptClassV1.G_HANDOFF_REFERENCE,
+        operation_id="ST12F-PRIVATE::REGISTER_CONTROL",
+        request_id="REQUEST::G-HANDOFF::FIXTURE-RECEIPT-AUDIT",
+        idempotency_key="IDEMPOTENCY::G-HANDOFF::FIXTURE-RECEIPT-AUDIT",
+        contract_type=type(handoff).__name__,
+        contract_id=handoff.handoff_id,
+        contract_version=handoff.contract_version,
+        input_lock_id_or_explicit_absence=handoff.input_lock_id,
+        parent_version_ref_or_explicit_absence=handoff.evidence_bundle_ref,
+        canonical_contract_json=deterministic_json(handoff),
+        source_record_refs=tuple(
+            dict.fromkeys(
+                (
+                    handoff.evidence_bundle_ref,
+                    *handoff.no_trade_blocker_refs,
+                    *handoff.champion_challenger_evidence_refs,
+                    *handoff.portfolio_utility_refs,
+                    handoff.quantum_classical_comparison_receipt_ref,
+                )
+            )
+        ),
+        parameter_value_refs=parameter_value_refs,
+        source_epoch_refs=handoff.source_epoch_refs,
+        typed_reason_codes=(),
+        terminal_state=handoff.terminal_state,
+        fixture_only_not_evidence=False,
+    )
+    valid_g_handoff = handoff_receipt.reconstruct(FToGHandoffReferencesV1)
+
+    fixture_reason = "NO_ERROR"
+    try:
+        replace(
+            handoff_receipt,
+            fixture_only_not_evidence=True,
+        ).reconstruct(FToGHandoffReferencesV1)
+    except ContractValidationError as exc:
+        fixture_reason = exc.reason_code.name
+
+    ordinary_reason = "NO_ERROR"
+    try:
+        replace(
+            handoff_receipt,
+            parent_version_ref_or_explicit_absence=(
+                "ST12F-RECEIPT::BUNDLE::MISMATCH::EVIDENCE_BUNDLE_VERSION"
+            ),
+        ).reconstruct(FToGHandoffReferencesV1)
+    except ContractValidationError as exc:
+        ordinary_reason = exc.reason_code.name
+
+    replay_fixture = _st12f_packet(
+        compilation,
+        snapshot,
+        result_id="RESULT::REPLAY::FIXTURE-RECEIPT-AUDIT",
+        run_reference="RUN::REPLAY::FIXTURE-RECEIPT-AUDIT",
+        fixture=True,
+    )
+    paper_payload = json.loads(replay_fixture.canonical_json())
+    paper_payload.update(
+        {
+            "result_id": "RESULT::PAPER::FIXTURE-RECEIPT-AUDIT",
+            "expected_result_contract_id": "ST12F-PAPER-CONTRACT::MATH-01",
+            "run_reference": "RUN::PAPER::FIXTURE-RECEIPT-AUDIT",
+            "producer_identity": "PRODUCER::PAPER",
+        }
+    )
+    paper_fixture = PaperResultContractV1.from_canonical_mapping(paper_payload)
+    fixture_reconstructions: dict[ST12FReceiptClassV1, bool] = {}
+    fixture_receipts: list[ST12FEvidenceControlReceiptRecordV1] = []
+    for fixture_contract, receipt_class, terminal_state in (
+        (
+            replay_fixture,
+            ST12FReceiptClassV1.REPLAY_REGISTRATION,
+            "REPLAY_REGISTERED",
+        ),
+        (
+            paper_fixture,
+            ST12FReceiptClassV1.PAPER_REGISTRATION,
+            "PAPER_REGISTERED",
+        ),
+    ):
+        fixture_receipt = ST12FEvidenceControlReceiptRecordV1(
+            control_receipt_id=(
+                f"ST12F-RECEIPT::{fixture_contract.result_id}::{receipt_class.value}"
+            ),
+            receipt_class=receipt_class,
+            operation_id="ST10-OP::14",
+            request_id=f"REQUEST::{receipt_class.value}::FIXTURE-RECEIPT-AUDIT",
+            idempotency_key=(
+                f"IDEMPOTENCY::{receipt_class.value}::FIXTURE-RECEIPT-AUDIT"
+            ),
+            contract_type=type(fixture_contract).__name__,
+            contract_id=fixture_contract.result_id,
+            contract_version=fixture_contract.contract_version,
+            input_lock_id_or_explicit_absence=fixture_contract.input_lock_id,
+            parent_version_ref_or_explicit_absence="EXPLICIT_ABSENCE",
+            canonical_contract_json=fixture_contract.canonical_json(),
+            source_record_refs=(fixture_contract.run_reference,),
+            parameter_value_refs=parameter_value_refs,
+            source_epoch_refs=source_epoch_refs,
+            typed_reason_codes=(),
+            terminal_state=terminal_state,
+            fixture_only_not_evidence=True,
+        )
+        fixture_receipts.append(fixture_receipt)
+        fixture_reconstructions[receipt_class] = (
+            fixture_receipt.reconstruct(type(fixture_contract)) == fixture_contract
+        )
+
+    runtime_effect_count = sum(
+        receipt.no_effect_flags != NO_EFFECTS_V1
+        for receipt in (handoff_receipt, *fixture_receipts)
+    )
+    return {
+        "valid_g_handoff_reconstruction": (
+            "PASS" if valid_g_handoff == handoff else "FAIL"
+        ),
+        "fixture_marked_g_handoff_reason": fixture_reason,
+        "ordinary_g_handoff_metadata_reason": ordinary_reason,
+        "matched_replay_fixture_reconstruction": (
+            "PASS"
+            if fixture_reconstructions[ST12FReceiptClassV1.REPLAY_REGISTRATION]
+            else "FAIL"
+        ),
+        "matched_paper_fixture_reconstruction": (
+            "PASS"
+            if fixture_reconstructions[ST12FReceiptClassV1.PAPER_REGISTRATION]
+            else "FAIL"
+        ),
+        "new_reason_code_count": "0",
+        "new_receipt_class_count": "0",
+        "runtime_effect_count": str(runtime_effect_count),
+    }
 
 
 def _assignment(tree: ast.Module, name: str) -> ast.expr | None:
@@ -1774,9 +1951,31 @@ def main() -> int:
             for index, passed in enumerate(executable_checks, start=1)
             if not passed
         )
+    fixture_receipt_results = _st12f_fixture_receipt_checks()
+    expected_fixture_receipt_results = {
+        "valid_g_handoff_reconstruction": "PASS",
+        "fixture_marked_g_handoff_reason": "ST12F_FIXTURE_NOT_EVIDENCE",
+        "ordinary_g_handoff_metadata_reason": "SCHEMA_MISMATCH",
+        "matched_replay_fixture_reconstruction": "PASS",
+        "matched_paper_fixture_reconstruction": "PASS",
+        "new_reason_code_count": "0",
+        "new_receipt_class_count": "0",
+        "runtime_effect_count": "0",
+    }
+    if fixture_receipt_results != expected_fixture_receipt_results:
+        failures.append(
+            "independent fixture-receipt reconstruction matrix differs: "
+            f"{fixture_receipt_results}"
+        )
     if failures:
         print("\n".join(failures), file=sys.stderr)
         return 1
+    print(
+        " ".join(
+            f"{key}={fixture_receipt_results[key]}"
+            for key in expected_fixture_receipt_results
+        )
+    )
     print(
         f"{SUCCESS_MARKER} operation_contracts={len(EXPECTED_ROWS)} "
         f"executable_op14_checks={len(executable_checks)} "

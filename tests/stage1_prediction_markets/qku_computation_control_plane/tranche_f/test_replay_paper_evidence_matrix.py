@@ -3515,6 +3515,109 @@ def test_complete_durable_bundle_lifecycle_receipts_and_d_resolution() -> None:
         is EvidenceBundleTerminalStateV1.SUPERSEDED
     )
 
+    g_handoff = winner.g_handoff_projection
+    assert type(g_handoff) is FToGHandoffReferencesV1
+    g_handoff_receipt = ST12FEvidenceControlReceiptRecordV1(
+        control_receipt_id=(
+            f"ST12F-RECEIPT::{g_handoff.handoff_id}::G_HANDOFF_REFERENCE"
+        ),
+        receipt_class=ST12FReceiptClassV1.G_HANDOFF_REFERENCE,
+        operation_id="ST12F-PRIVATE::REGISTER_CONTROL",
+        request_id="REQUEST::G-HANDOFF::FIXTURE-RECEIPT",
+        idempotency_key="IDEMPOTENCY::G-HANDOFF::FIXTURE-RECEIPT",
+        contract_type=type(g_handoff).__name__,
+        contract_id=g_handoff.handoff_id,
+        contract_version=g_handoff.contract_version,
+        input_lock_id_or_explicit_absence=g_handoff.input_lock_id,
+        parent_version_ref_or_explicit_absence=g_handoff.evidence_bundle_ref,
+        canonical_contract_json=deterministic_json(g_handoff),
+        source_record_refs=tuple(
+            dict.fromkeys(
+                (
+                    g_handoff.evidence_bundle_ref,
+                    *g_handoff.no_trade_blocker_refs,
+                    *g_handoff.champion_challenger_evidence_refs,
+                    *g_handoff.portfolio_utility_refs,
+                    g_handoff.quantum_classical_comparison_receipt_ref,
+                )
+            )
+        ),
+        parameter_value_refs=lock.parameter_value_refs,
+        source_epoch_refs=g_handoff.source_epoch_refs,
+        typed_reason_codes=(),
+        terminal_state=g_handoff.terminal_state,
+        fixture_only_not_evidence=False,
+    )
+    assert g_handoff_receipt.reconstruct(FToGHandoffReferencesV1) == g_handoff
+    _assert_reason(
+        lambda: replace(
+            g_handoff_receipt,
+            fixture_only_not_evidence=True,
+        ).reconstruct(FToGHandoffReferencesV1),
+        ReasonCode.ST12F_FIXTURE_NOT_EVIDENCE,
+    )
+    _assert_reason(
+        lambda: replace(
+            g_handoff_receipt,
+            parent_version_ref_or_explicit_absence=(
+                "ST12F-RECEIPT::BUNDLE::MISMATCH::EVIDENCE_BUNDLE_VERSION"
+            ),
+        ).reconstruct(FToGHandoffReferencesV1),
+        ReasonCode.SCHEMA_MISMATCH,
+    )
+
+    replay_fixture = _runtime_packet(
+        harness,
+        "REPLAY",
+        result_id="RESULT::REPLAY::FIXTURE-RECEIPT",
+        run_reference="RUN::REPLAY::FIXTURE-RECEIPT",
+        fixture=True,
+    )
+    paper_fixture = _runtime_packet(
+        harness,
+        "PAPER",
+        result_id="RESULT::PAPER::FIXTURE-RECEIPT",
+        run_reference="RUN::PAPER::FIXTURE-RECEIPT",
+        fixture=True,
+    )
+    for fixture_contract, receipt_class, terminal_state in (
+        (
+            replay_fixture,
+            ST12FReceiptClassV1.REPLAY_REGISTRATION,
+            "REPLAY_REGISTERED",
+        ),
+        (
+            paper_fixture,
+            ST12FReceiptClassV1.PAPER_REGISTRATION,
+            "PAPER_REGISTERED",
+        ),
+    ):
+        fixture_receipt = ST12FEvidenceControlReceiptRecordV1(
+            control_receipt_id=(
+                f"ST12F-RECEIPT::{fixture_contract.result_id}::{receipt_class.value}"
+            ),
+            receipt_class=receipt_class,
+            operation_id="ST10-OP::14",
+            request_id=f"REQUEST::{receipt_class.value}::FIXTURE-RECEIPT",
+            idempotency_key=f"IDEMPOTENCY::{receipt_class.value}::FIXTURE-RECEIPT",
+            contract_type=type(fixture_contract).__name__,
+            contract_id=fixture_contract.result_id,
+            contract_version=fixture_contract.contract_version,
+            input_lock_id_or_explicit_absence=fixture_contract.input_lock_id,
+            parent_version_ref_or_explicit_absence="EXPLICIT_ABSENCE",
+            canonical_contract_json=fixture_contract.canonical_json(),
+            source_record_refs=(fixture_contract.run_reference,),
+            parameter_value_refs=lock.parameter_value_refs,
+            source_epoch_refs=tuple(
+                f"{key}={fixture_contract.source_epochs[key]}"
+                for key in sorted(fixture_contract.source_epochs)
+            ),
+            typed_reason_codes=(),
+            terminal_state=terminal_state,
+            fixture_only_not_evidence=True,
+        )
+        assert fixture_receipt.reconstruct(type(fixture_contract)) == fixture_contract
+
     receipt_classes = {
         row.typed_payload.receipt_class
         for row in _control_rows(
