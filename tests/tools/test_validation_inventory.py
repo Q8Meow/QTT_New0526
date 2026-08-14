@@ -50,6 +50,22 @@ EXPECTED_ST12F_QKU_VALIDATOR_IDS = frozenset(
         "validate_qku_computation_control_plane_quantum",
     }
 )
+EXPECTED_ST12G_QKU_VALIDATOR_IDS = frozenset(
+    {
+        "validate_qku_computation_control_plane_g",
+        "independent_validate_qku_computation_control_plane_g",
+    }
+)
+EXPECTED_ST12G_OWNER_VALIDATOR_IDS = frozenset(
+    {
+        "validate_pr169_readiness1",
+        "validate_pr169_pretrade1",
+        "validate_pr169_agent_orch1",
+        "validate_pr169_svc1",
+        "validate_pr169_dash1_owner_dashboard",
+        "validate_pr169_dash1_owner_dashboard_ui",
+    }
+)
 
 
 def test_inventory_represents_every_run_validation_gate_command():
@@ -110,11 +126,13 @@ def test_inventory_has_centralized_qku_validation_entries():
         *EXPECTED_ST12D_QKU_VALIDATOR_IDS,
         *EXPECTED_ST12E_QKU_VALIDATOR_IDS,
         *EXPECTED_ST12F_QKU_VALIDATOR_IDS,
+        *EXPECTED_ST12G_QKU_VALIDATOR_IDS,
     }
     assert inventory.ST12C_QKU_VALIDATOR_IDS == EXPECTED_ST12C_QKU_VALIDATOR_IDS
     assert inventory.ST12E_QKU_VALIDATOR_IDS == EXPECTED_ST12E_QKU_VALIDATOR_IDS
     assert inventory.ST12D_QKU_VALIDATOR_IDS == EXPECTED_ST12D_QKU_VALIDATOR_IDS
     assert inventory.ST12F_QKU_VALIDATOR_IDS == EXPECTED_ST12F_QKU_VALIDATOR_IDS
+    assert inventory.ST12G_QKU_VALIDATOR_IDS == EXPECTED_ST12G_QKU_VALIDATOR_IDS
     assert inventory.ST12D_EXCLUSIVE_QKU_VALIDATOR_IDS == {
         "independent_validate_qku_computation_control_plane_d",
         "validate_qku_computation_control_plane_d",
@@ -135,30 +153,26 @@ def test_inventory_has_centralized_qku_validation_entries():
             *inventory.ST12D_ALLOWED_EXACT_PATHS,
             *inventory.ST12E_ALLOWED_EXACT_PATHS,
             *inventory.ST12F_ALLOWED_EXACT_PATHS,
+            *inventory.ST12G_ALLOWED_EXACT_PATHS,
         )
     )
     assert expected <= set(entries)
     for validator_id in expected:
         entry = entries[validator_id]
-        expected_owner = "ST12-TRANCHE-F" if validator_id in EXPECTED_ST12F_QKU_VALIDATOR_IDS else (
-            "ST12-TRANCHE-D"
-            if validator_id
-            in inventory.ST12D_EXCLUSIVE_QKU_VALIDATOR_IDS
-            else (
-                "ST12-TRANCHE-E"
-                if validator_id
-                in inventory.ST12E_EXCLUSIVE_QKU_VALIDATOR_IDS
-                else (
-                    "ST12-TRANCHE-C"
-                    if validator_id in EXPECTED_ST12C_QKU_VALIDATOR_IDS
-                    else (
-                        "ST12-TRANCHE-B"
-                        if validator_id.endswith(("_latency", "_model_risk"))
-                        else "ST12-TRANCHE-A"
-                    )
-                )
-            )
-        )
+        if validator_id in EXPECTED_ST12G_QKU_VALIDATOR_IDS:
+            expected_owner = "ST12-TRANCHE-G"
+        elif validator_id in EXPECTED_ST12F_QKU_VALIDATOR_IDS:
+            expected_owner = "ST12-TRANCHE-F"
+        elif validator_id in inventory.ST12D_EXCLUSIVE_QKU_VALIDATOR_IDS:
+            expected_owner = "ST12-TRANCHE-D"
+        elif validator_id in inventory.ST12E_EXCLUSIVE_QKU_VALIDATOR_IDS:
+            expected_owner = "ST12-TRANCHE-E"
+        elif validator_id in EXPECTED_ST12C_QKU_VALIDATOR_IDS:
+            expected_owner = "ST12-TRANCHE-C"
+        elif validator_id.endswith(("_latency", "_model_risk")):
+            expected_owner = "ST12-TRANCHE-B"
+        else:
+            expected_owner = "ST12-TRANCHE-A"
         assert entry.owner_pr_or_feature == expected_owner
         assert entry.owner_domain == "QKU computation control plane"
         assert inventory.QKU_ALLOWED_EXACT_PATHS <= set(
@@ -190,7 +204,25 @@ def test_qku_paths_route_to_primary_and_independent_validation():
         *EXPECTED_ST12D_QKU_VALIDATOR_IDS,
         *EXPECTED_ST12E_QKU_VALIDATOR_IDS,
         *EXPECTED_ST12F_QKU_VALIDATOR_IDS,
+        *EXPECTED_ST12G_QKU_VALIDATOR_IDS,
     } <= matching_ids
+
+
+def test_st12g_exact_commands_and_owner_validators_are_registered() -> None:
+    expected_commands = (
+        "python tools/validate_qku_computation_control_plane.py --domain g",
+        "python tools/independent_validate_qku_computation_control_plane_g.py",
+        "python tools/validate_validation_inventory.py",
+        "python -m pytest tests/stage1_prediction_markets/qku_computation_control_plane/tranche_g/test_contract_matrix.py -q",
+        "python -m pytest tests/stage1_prediction_markets/qku_computation_control_plane/tranche_g/test_consumer_integration_matrix.py -q",
+        "python tools/run_validation_gates.py --phase all --validation-mode full",
+    )
+    assert inventory.ST12G_EXACT_VALIDATION_COMMANDS == expected_commands
+    assert inventory.ST12G_OWNER_VALIDATOR_IDS == EXPECTED_ST12G_OWNER_VALIDATOR_IDS
+    assert inventory.ST12G_REQUIRED_VALIDATOR_IDS == frozenset(
+        (*EXPECTED_ST12G_QKU_VALIDATOR_IDS, *EXPECTED_ST12G_OWNER_VALIDATOR_IDS)
+    )
+    assert inventory.ST12G_REQUIRED_VALIDATOR_IDS <= inventory.inventory_by_id().keys()
 
 
 def test_inventory_has_qtt_authority_reason_code_registry_entry():

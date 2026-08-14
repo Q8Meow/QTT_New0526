@@ -1,11 +1,10 @@
 {
   "artifact_id": "PR169_DASH1_VALIDATION_SUMMARY",
   "builder": "tools/build_pr169_dash1_owner_dashboard.py",
-  "failure_count": 0,
-  "failures": [],
-  "generated_file_count": 64,
+  "generated_file_count": 65,
   "registry_row_count": 171,
-  "status": "PASS",
+  "st12g_contract_descriptor_validated": true,
+  "status": "BUILT",
   "validation_marker": "PR169_DASH1_OWNER_DASHBOARD_VALIDATION_OK",
   "validator": "tools/validate_pr169_dash1_owner_dashboard.py"
 }

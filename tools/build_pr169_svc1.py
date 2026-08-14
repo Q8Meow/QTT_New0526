@@ -24,6 +24,11 @@ BUILDER_NAME = "tools/build_pr169_svc1.py"
 VALIDATOR_NAME = "tools/validate_pr169_svc1.py"
 GENERATED_PREFIX = Path("docs/master_plan/generated/pr169_svc1")
 REGISTRY_REF = "docs/master_plan/generated/pr169_svc1/service_registry.jsonl"
+ST12G_DESCRIPTOR_NAME = "st12g_evidence_view_contract.generated.jsonl"
+ST12G_CONTRACT_MANIFEST_REF = (
+    "docs/master_plan/generated/qku_control_plane/"
+    "existing_owner_projection/st12g_projection_contract_manifest.json"
+)
 
 READINESS_PREFIX = Path("docs/master_plan/generated/pr169_readiness1")
 PRETRADE_PREFIX = Path("docs/master_plan/generated/pr169_pretrade1")
@@ -1778,7 +1783,13 @@ def _reports(registry_rows: list[dict[str, Any]], rows_by_file: dict[str, list[d
     generated_artifacts = [
         {"artifact_ref": _artifact_ref(file_name), "row_count": len(rows_by_file.get(file_name, []))}
         for file_name in JSONL_ARTIFACTS
-    ] + [{"artifact_ref": _artifact_ref(file_name), "row_count": 1} for file_name in JSON_ARTIFACTS]
+    ] + [
+        {"artifact_ref": _artifact_ref(ST12G_DESCRIPTOR_NAME), "row_count": 1},
+        *[
+            {"artifact_ref": _artifact_ref(file_name), "row_count": 1}
+            for file_name in JSON_ARTIFACTS
+        ],
+    ]
     projection_files = sorted(file_name for file_name in JSONL_ARTIFACTS if file_name != "service_registry.jsonl")
     common_pass = {
         "acceptance_state": "PASS",
@@ -1824,6 +1835,11 @@ def _reports(registry_rows: list[dict[str, Any]], rows_by_file: dict[str, list[d
                 "PR152 currentization runs after the final file set",
             ],
             "projection_files": projection_files,
+            "st12g_contract_descriptor": {
+                "artifact_ref": _artifact_ref(ST12G_DESCRIPTOR_NAME),
+                "contract_type": "ST12GServiceEvidenceViewV2",
+                "source_contract_manifest_ref": ST12G_CONTRACT_MANIFEST_REF,
+            },
         },
         "no_orphan.report.json": {
             **common_pass,
@@ -1831,6 +1847,7 @@ def _reports(registry_rows: list[dict[str, Any]], rows_by_file: dict[str, list[d
             "orphan_statuses": sorted({str(row["orphan_status"]) for row in registry_rows}),
             "registry_row_count": len(registry_rows),
             "projection_file_count": len(projection_files),
+            "st12g_contract_descriptor_count": 1,
             "required_route_proof": "producer, registry source, validator, owner/service consumer, downstream route, agent route, authority state",
         },
         "no_raw_jsonl_scan.report.json": {
@@ -1996,6 +2013,26 @@ def build(repo_root: Path, out_dir: Path) -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
     for file_name in JSONL_ARTIFACTS:
         _write_jsonl(out_dir / file_name, rows_by_file[file_name])
+    _write_jsonl(
+        out_dir / ST12G_DESCRIPTOR_NAME,
+        (
+            {
+                "descriptor_id": "ST12G-DESCRIPTOR::SVC1",
+                "contract_version": "2.0",
+                "consumer_id": "SVC1",
+                "contract_type": "ST12GServiceEvidenceViewV2",
+                "source_contract_manifest_ref": ST12G_CONTRACT_MANIFEST_REF,
+                "canonical_owner_ref": (
+                    "PR169_SVC1_SERVICE_REGISTRY_AND_READ_MODEL_FABRIC"
+                ),
+                "runtime_instance_state": "NOT_MATERIALIZED_BY_REPOSITORY_BUILD",
+                "manual_edit_allowed": False,
+                "runtime_effect_allowed": False,
+                "write_authority": "NONE",
+                "downstream_route_refs": ["SVC1", "DASH1_UI1"],
+            },
+        ),
+    )
     for file_name in JSON_ARTIFACTS:
         _write_json(out_dir / file_name, reports[file_name])
 

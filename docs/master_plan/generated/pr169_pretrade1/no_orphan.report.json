@@ -2,7 +2,7 @@
   "acceptance_state": "PASS",
   "authoritative_source": "docs/master_plan/generated/pr169_pretrade1/pretrade_decision_registry.jsonl",
   "builder_name": "tools/build_pr169_pretrade1.py",
-  "generated_artifact_count": 75,
+  "generated_artifact_count": 76,
   "generated_from": "docs/master_plan/generated/pr169_pretrade1/pretrade_decision_registry.jsonl",
   "manual_edit_allowed": false,
   "orphan_count": 0,
@@ -11,5 +11,6 @@
   "registry_row_count": 5,
   "report_type": "NO_ORPHAN_REPORT",
   "route_map_rows": 80,
+  "st12g_contract_descriptor_count": 1,
   "validator_name": "tools/validate_pr169_pretrade1.py"
 }

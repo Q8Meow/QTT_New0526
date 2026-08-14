@@ -23,6 +23,8 @@ JSON_REPORTS = builder.JSON_REPORTS
 AUTHORITY_FALSE_FIELDS = builder.AUTHORITY_FALSE_FIELDS
 LIVE_PATH_FALSE_FIELDS = builder.LIVE_PATH_FALSE_FIELDS
 REQUIRED_BASENAME_MAX_CHARS = 56
+ST12G_DESCRIPTOR_NAME = builder.ST12G_DESCRIPTOR_NAME
+ST12G_CONTRACT_MANIFEST_REF = builder.ST12G_CONTRACT_MANIFEST_REF
 
 REQUIRED_STATE_FIELDS = (
     "provider_state",
@@ -454,6 +456,49 @@ def _validate_reports(reports: Mapping[str, Mapping[str, Any]], failures: list[s
             _assert(count == 0, f"{name} authority true count nonzero for {field}: {count}", failures)
 
 
+def _validate_st12g_descriptor(
+    artifact_dir: Path,
+    reports: Mapping[str, Mapping[str, Any]],
+    failures: list[str],
+) -> None:
+    rows = _read_jsonl(artifact_dir / ST12G_DESCRIPTOR_NAME, failures)
+    expected = {
+        "descriptor_id": "ST12G-DESCRIPTOR::AGENT_ORCH1",
+        "contract_version": "2.0",
+        "consumer_id": "AGENT_ORCH1",
+        "contract_type": "ST12GAgentEvidenceHandoffV2",
+        "source_contract_manifest_ref": ST12G_CONTRACT_MANIFEST_REF,
+        "canonical_owner_ref": (
+            "PR169_AGENT_ORCH1_REGISTRY_DAG_TASK_AND_RECEIPT_AUTHORITY"
+        ),
+        "runtime_instance_state": "NOT_MATERIALIZED_BY_REPOSITORY_BUILD",
+        "manual_edit_allowed": False,
+        "runtime_effect_allowed": False,
+        "write_authority": "NONE",
+        "downstream_route_refs": ["AGENT_ORCH1"],
+    }
+    _assert(rows == [expected], "AGENT_ORCH1 ST12-G descriptor differs", failures)
+    manifest_files = {
+        entry.get("file")
+        for entry in (reports.get("manifest.json") or {}).get(
+            "artifact_manifest", []
+        )
+    }
+    _assert(
+        ST12G_DESCRIPTOR_NAME in manifest_files,
+        "AGENT_ORCH1 manifest omits ST12-G descriptor",
+        failures,
+    )
+    _assert(
+        (reports.get("no_orphan.report.json") or {}).get(
+            "st12g_contract_descriptor_count"
+        )
+        == 1,
+        "AGENT_ORCH1 no-orphan report omits ST12-G descriptor",
+        failures,
+    )
+
+
 def _validate_resolver_static(repo_root: Path, failures: list[str]) -> None:
     resolver_path = repo_root / "src/qtt/agents/pr169_agent_orch1_resolvers.py"
     _assert(resolver_path.exists(), "Resolver/API contract module missing", failures)
@@ -492,6 +537,7 @@ def validate(repo_root: Path, artifact_dir: Path) -> None:
     _validate_prep_and_receipts(rows_by_file, failures)
     _validate_owner_and_tournament(root, rows_by_file, failures)
     _validate_reports(reports, failures)
+    _validate_st12g_descriptor(output_dir, reports, failures)
     _validate_resolver_static(root, failures)
     if failures:
         raise ValidationError(failures)

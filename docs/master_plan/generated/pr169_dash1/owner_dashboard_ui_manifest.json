@@ -6,5 +6,13 @@
   "html_ref": "ui/owner_dashboard_review_surface.html",
   "runtime_server_created": false,
   "script_ref": "ui/owner_dashboard_review_surface.js",
+  "st12g_boot_data_ref": "ui/owner_dashboard_review_data.generated.json",
+  "st12g_contract_view_ref": "st12g_evidence_owner_view_contract.generated.jsonl",
+  "st12g_dashboard_state_owner": "DASH1",
+  "st12g_direct_f_binding_allowed": false,
+  "st12g_runtime_effect_allowed": false,
+  "st12g_source_owner": "SVC1_ONLY",
+  "st12g_ui1_role": "RENDERER_ONLY",
+  "st12g_write_authority": "NONE",
   "style_ref": "ui/owner_dashboard_review_surface.css"
 }

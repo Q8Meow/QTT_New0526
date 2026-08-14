@@ -16,6 +16,8 @@
   "registry_rows_checked": 171,
   "shadow_slots_have_no_execution_authority": true,
   "source_panel_has_no_direct_truth_creation": true,
+  "st12g_svc1_only_projection_connected": true,
+  "st12g_zero_direct_f_bindings": true,
   "status": "PASS",
   "upstream_evidence_refs_resolve_or_route": true
 }

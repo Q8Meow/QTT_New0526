@@ -3,7 +3,7 @@
   "authoritative_source": "docs/master_plan/generated/pr169_readiness1/agent_readiness_registry.jsonl",
   "builder_name": "tools/build_pr169_readiness1.py",
   "downstream_route_count": 175,
-  "generated_artifact_route_proof_count": 43,
+  "generated_artifact_route_proof_count": 44,
   "generated_from": "docs/master_plan/generated/pr169_readiness1/agent_readiness_registry.jsonl",
   "manual_edit_allowed": false,
   "orphan_count": 0,
@@ -13,5 +13,6 @@
   "registry_row_count": 5,
   "report_type": "NO_ORPHAN_REPORT",
   "scoped_gap_count": 25,
+  "st12g_contract_descriptor_count": 1,
   "validator_name": "tools/validate_pr169_readiness1.py"
 }

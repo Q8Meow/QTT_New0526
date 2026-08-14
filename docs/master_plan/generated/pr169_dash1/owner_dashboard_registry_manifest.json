@@ -66,7 +66,8 @@
     "ui/owner_dashboard_review_surface.html",
     "ui/owner_dashboard_review_surface.js",
     "ui/owner_dashboard_review_surface.css",
-    "ui/fixtures/owner_dashboard_demo_data.json"
+    "ui/fixtures/owner_dashboard_demo_data.json",
+    "st12g_evidence_owner_view_contract.generated.jsonl"
   ],
   "manual_edit_allowed_only_for": [
     "owner_dashboard_surface_registry.jsonl"
@@ -74,5 +75,10 @@
   "projection_count": 53,
   "registry_path": "owner_dashboard_surface_registry.jsonl",
   "registry_row_count": 171,
-  "single_canonical_dashboard_registry": true
+  "single_canonical_dashboard_registry": true,
+  "st12g_contract_descriptor": {
+    "artifact_ref": "st12g_evidence_owner_view_contract.generated.jsonl",
+    "direct_f_binding_allowed": false,
+    "source_owner": "SVC1_ONLY"
+  }
 }

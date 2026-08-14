@@ -128,5 +128,6 @@
   "projection_version": "PR169-AGENT-ORCH1-v2.2",
   "report_name": "no_orphan",
   "row_count": 461,
+  "st12g_contract_descriptor_count": 1,
   "validator": "tools/validate_pr169_agent_orch1.py"
 }

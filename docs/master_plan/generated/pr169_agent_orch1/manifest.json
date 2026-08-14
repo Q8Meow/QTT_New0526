@@ -769,6 +769,14 @@
       "intelligence_lane": "GOVERNANCE_LANE",
       "object_type": "AgentOrchProofReportV1",
       "semantic_class": "proof_report"
+    },
+    {
+      "canonical_source": "docs/master_plan/generated/qku_control_plane/existing_owner_projection/st12g_projection_contract_manifest.json",
+      "consumer": "AGENT_ORCH1",
+      "file": "st12g_evidence_handoff_contract.generated.jsonl",
+      "intelligence_lane": "GOVERNANCE_LANE",
+      "object_type": "ST12GAgentEvidenceHandoffV2",
+      "semantic_class": "existing_owner_evidence_projection_contract"
     }
   ],
   "baseline_consumed": {

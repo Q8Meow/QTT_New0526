@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Mapping, Protocol, runtime_checkable
 
@@ -27,6 +28,8 @@ if TYPE_CHECKING:
     from .evidence import (
         BuiltEvidenceBundleOutcomeV1,
         ComputationEvidenceBundleV1,
+        FToDEvidenceReferenceQueryV1,
+        FToGHandoffReferencesV1,
         PaperResultContractV1,
         RegisteredLaneResultOutcomeV1,
         ReplayResultContractV1,
@@ -121,8 +124,30 @@ class ReplayPaperCohortCompilerProtocolV1(Protocol):
     ) -> "ReplayPaperCohortCompilationRecordV1": ...
 
 
+_ProtocolMetaV1 = type(Protocol)
+
+
+class _ComputationEvidenceProtocolMetaV1(_ProtocolMetaV1):
+    """Preserve the predecessor service's structural runtime admission."""
+
+    def __instancecheck__(cls, instance: object) -> bool:
+        if cls.__name__ == "ComputationEvidenceServiceProtocolV1":
+            return all(
+                callable(getattr(instance, method_name, None))
+                for method_name in (
+                    "register_result",
+                    "build_bundle",
+                    "read_evidence_reference",
+                )
+            )
+        return super().__instancecheck__(instance)
+
+
 @runtime_checkable
-class ComputationEvidenceServiceProtocolV1(Protocol):
+class ComputationEvidenceServiceProtocolV1(
+    Protocol,
+    metaclass=_ComputationEvidenceProtocolMetaV1,
+):
     """Injected OP14/OP15 and read-only F-reference behavior."""
 
     def register_result(
@@ -134,13 +159,35 @@ class ComputationEvidenceServiceProtocolV1(Protocol):
         request: "BuildEvidenceBundleRequestV1",
     ) -> "BuiltEvidenceBundleOutcomeV1": ...
 
+    def resolve_g_handoff(
+        self,
+        handoff_ref: str,
+        *,
+        decision_cutoff: datetime,
+    ) -> "FToGHandoffReferencesV1": ...
+
+    def resolve_control_receipt(
+        self,
+        receipt_ref: str,
+        expected_type: type[object],
+        *,
+        decision_cutoff: datetime,
+    ) -> object: ...
+
+    def resolve_bundle(
+        self,
+        bundle_ref: str,
+        *,
+        decision_cutoff: datetime,
+    ) -> "ComputationEvidenceBundleV1": ...
+
     def read_evidence_reference(
         self,
         context: "ComputationExecutionContextV1",
         *,
         causation_id: str,
         correlation_id: str,
-        query: object | None = None,
+        query: "FToDEvidenceReferenceQueryV1 | None" = None,
     ) -> ST12FEvidenceReferenceV1: ...
 
 

@@ -35,6 +35,12 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane import (  #
     build_tranche_a_coverage_manifest,
     deterministic_json,
     validate_relative_path,
+    ST12GAgentEvidenceHandoffV2,
+    ST12GOwnerDashboardEvidenceViewV2,
+    ST12GPretradeEvidenceProjectionV2,
+    ST12GProjectionCoreV2,
+    ST12GReadinessEvidenceProjectionV2,
+    ST12GServiceEvidenceViewV2,
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.mode_snapshot_policy import (  # noqa: E402
     D_MODE_STATE_REGISTRY,
@@ -214,6 +220,10 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.authority i
 
 
 SUCCESS_MARKER = "QKU_COMPUTATION_CONTROL_PLANE_BUILD_VALIDATED"
+ST12G_GENERATED_MANIFEST = Path(
+    "docs/master_plan/generated/qku_control_plane/existing_owner_projection/"
+    "st12g_projection_contract_manifest.json"
+)
 ST12E_GENERATED_PREFIX = Path(
     "docs/master_plan/generated/qku_control_plane/agent_capability"
 )
@@ -2080,6 +2090,72 @@ def materialize_st12f_projections(projections: dict[str, str]) -> None:
         _write_generated_if_changed(output_dir / name, projections[name])
 
 
+def materialize_st12g_projection_contract_manifest() -> None:
+    """Write the central contract descriptor before any destination owner."""
+
+    owner_types = (
+        ("READINESS1", ST12GReadinessEvidenceProjectionV2),
+        ("PRETRADE1", ST12GPretradeEvidenceProjectionV2),
+        ("AGENT_ORCH1", ST12GAgentEvidenceHandoffV2),
+        ("SVC1", ST12GServiceEvidenceViewV2),
+        ("DASH1_UI1", ST12GOwnerDashboardEvidenceViewV2),
+    )
+    manifest = {
+        "manifest_id": "ST12G_EXISTING_OWNER_PROJECTION_CONTRACT_MANIFEST_V2",
+        "contract_family": "ST12G_EXISTING_OWNER_PROJECTION_V2",
+        "contract_version": "2.0",
+        "production_module_path": (
+            "src/qtt/stage1_prediction_markets/qku_computation_control_plane/"
+            "existing_owner_projection.py"
+        ),
+        "public_coordinator": "ExistingOwnerProjectionCoordinatorV2",
+        "pure_compiler": "ExistingOwnerProjectionCompilerV2",
+        "shared_core_contract": "ST12GProjectionCoreV2",
+        "shared_core_field_count": len(fields(ST12GProjectionCoreV2)),
+        "shared_core_fields_in_order": [
+            field.name for field in fields(ST12GProjectionCoreV2)
+        ],
+        "direct_consumer_ids": [
+            "READINESS1",
+            "PRETRADE1",
+            "AGENT_ORCH1",
+            "SVC1",
+        ],
+        "derived_consumer_id": "DASH1_UI1",
+        "owner_contracts": {
+            owner_id: owner_type.__name__ for owner_id, owner_type in owner_types
+        },
+        "owner_descriptor_refs": [
+            "docs/master_plan/generated/pr169_readiness1/st12g_evidence_projection_contract.generated.jsonl",
+            "docs/master_plan/generated/pr169_pretrade1/st12g_evidence_projection_contract.generated.jsonl",
+            "docs/master_plan/generated/pr169_agent_orch1/st12g_evidence_handoff_contract.generated.jsonl",
+            "docs/master_plan/generated/pr169_svc1/st12g_evidence_view_contract.generated.jsonl",
+            "docs/master_plan/generated/pr169_dash1/st12g_evidence_owner_view_contract.generated.jsonl",
+        ],
+        "source_binding_row_count": 71,
+        "runtime_instance_state": "NOT_MATERIALIZED_BY_REPOSITORY_BUILD",
+        "manual_edit_allowed": False,
+        "runtime_effect_allowed": False,
+        "write_authority": "NONE",
+        "no_effect_flags": {
+            "provider_connection_allowed": False,
+            "private_state_read_allowed": False,
+            "replay_or_paper_execution_allowed": False,
+            "llm_inference_allowed": False,
+            "qpu_execution_allowed": False,
+            "mode_or_allow_activation_allowed": False,
+            "order_release_allowed": False,
+            "capital_mutation_allowed": False,
+        },
+    }
+    output = REPO_ROOT / ST12G_GENERATED_MANIFEST
+    output.parent.mkdir(parents=True, exist_ok=True)
+    _write_generated_if_changed(
+        output,
+        json.dumps(manifest, indent=2, sort_keys=True) + "\n",
+    )
+
+
 def build_payload(
     st12e_projections: ST12EProjectionSet | None = None,
     st12d_projections: ST12DProjectionSet | None = None,
@@ -2287,11 +2363,23 @@ def main() -> int:
         help="Optional JSON path below the repository .tmp directory.",
     )
     parser.add_argument(
+        "--st12g-only",
+        action="store_true",
+        help="Materialize only the ST12-G static owner-projection contract manifest.",
+    )
+    parser.add_argument(
         "--st12f-only",
         action="store_true",
         help="Materialize only the ST12-F evidence projections.",
     )
     args = parser.parse_args()
+    materialize_st12g_projection_contract_manifest()
+    if args.st12g_only:
+        print(
+            "QKU_COMPUTATION_CONTROL_PLANE_ST12G_CONTRACT_BUILD_OK "
+            f"out={ST12G_GENERATED_MANIFEST.as_posix()}"
+        )
+        return 0
     st12e_projections = build_st12e_projections()
     st12d_projections = build_st12d_projections()
     st12f_projections = build_st12f_projections()

@@ -69,6 +69,7 @@ JSON_ARTIFACTS = (
 )
 
 TEXT_ARTIFACTS = ("pr_body.md",)
+ST12G_DESCRIPTOR_NAME = "st12g_evidence_projection_contract.generated.jsonl"
 
 AUTHORITY_FALSE_FIELDS = (
     "runtime_side_effect_allowed",
@@ -2245,7 +2246,12 @@ def _gap_rows(registry: Sequence[dict[str, Any]]) -> list[dict[str, Any]]:
 
 
 def _manifest(artifact_rows: dict[str, Sequence[dict[str, Any]]], reports: dict[str, dict[str, Any]]) -> dict[str, Any]:
-    artifact_names = [*JSONL_ARTIFACTS, *JSON_ARTIFACTS, *TEXT_ARTIFACTS]
+    artifact_names = [
+        *JSONL_ARTIFACTS,
+        *JSON_ARTIFACTS,
+        *TEXT_ARTIFACTS,
+        ST12G_DESCRIPTOR_NAME,
+    ]
     generated_artifacts = []
     for name in artifact_names:
         generated_artifacts.append(
@@ -2281,7 +2287,9 @@ def _manifest(artifact_rows: dict[str, Sequence[dict[str, Any]]], reports: dict[
 
 
 def _reports(registry: Sequence[dict[str, Any]], artifact_rows: dict[str, Sequence[dict[str, Any]]]) -> dict[str, dict[str, Any]]:
-    artifact_count = len(JSONL_ARTIFACTS) + len(JSON_ARTIFACTS) + len(TEXT_ARTIFACTS)
+    artifact_count = (
+        len(JSONL_ARTIFACTS) + len(JSON_ARTIFACTS) + len(TEXT_ARTIFACTS) + 1
+    )
     route_count = len(artifact_rows["consumer_routes.generated.jsonl"])
     base = {
         "generated_from": REGISTRY_REF,
@@ -2303,6 +2311,7 @@ def _reports(registry: Sequence[dict[str, Any]], artifact_rows: dict[str, Sequen
             "downstream_route_count": route_count,
             "scoped_gap_count": len(artifact_rows["readiness_gap_ledger.generated.jsonl"]),
             "pr165_d2_gap_count": sum(1 for row in registry if not row["agent_role_refs"]),
+            "st12g_contract_descriptor_count": 1,
         },
         "no_raw_jsonl_scan.report.json": {
             **base,
@@ -2500,12 +2509,33 @@ def build(repo_root: Path, out_dir: Path) -> None:
         "hotpath_handoff.generated.jsonl": _hotpath_rows(registry),
         "candidate_external_info_lanes.generated.jsonl": _candidate_external_info_rows(registry),
         "readiness_gap_ledger.generated.jsonl": _gap_rows(registry),
+        ST12G_DESCRIPTOR_NAME: (
+            {
+                "descriptor_id": "ST12G-DESCRIPTOR::READINESS1",
+                "contract_version": "2.0",
+                "consumer_id": "READINESS1",
+                "contract_type": "ST12GReadinessEvidenceProjectionV2",
+                "source_contract_manifest_ref": (
+                    "docs/master_plan/generated/qku_control_plane/"
+                    "existing_owner_projection/st12g_projection_contract_manifest.json"
+                ),
+                "canonical_owner_ref": (
+                    "PR169_READINESS1_CANONICAL_REGISTRY_AND_RESOLVER"
+                ),
+                "runtime_instance_state": "NOT_MATERIALIZED_BY_REPOSITORY_BUILD",
+                "manual_edit_allowed": False,
+                "runtime_effect_allowed": False,
+                "write_authority": "NONE",
+                "downstream_route_refs": ["READINESS1"],
+            },
+        ),
     }
     reports = _reports(registry, artifact_rows)
     reports["readiness_manifest.json"] = _manifest(artifact_rows, reports)
 
     for name in JSONL_ARTIFACTS:
         _write_jsonl(out_dir / name, artifact_rows[name])
+    _write_jsonl(out_dir / ST12G_DESCRIPTOR_NAME, artifact_rows[ST12G_DESCRIPTOR_NAME])
     for name in JSON_ARTIFACTS:
         _write_json(out_dir / name, reports[name])
     (out_dir / "pr_body.md").write_text(_pr_body(registry, reports), encoding="utf-8")

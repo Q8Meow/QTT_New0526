@@ -15,6 +15,11 @@ REGISTRY_REF = "docs/master_plan/generated/pr169_readiness1/agent_readiness_regi
 BUILDER_NAME = "tools/build_pr169_readiness1.py"
 VALIDATOR_NAME = "tools/validate_pr169_readiness1.py"
 PROJECTION_VERSION = "PR169-READINESS1-v4.3.1"
+ST12G_DESCRIPTOR_NAME = "st12g_evidence_projection_contract.generated.jsonl"
+ST12G_CONTRACT_MANIFEST_REF = (
+    "docs/master_plan/generated/qku_control_plane/"
+    "existing_owner_projection/st12g_projection_contract_manifest.json"
+)
 
 REQUIRED_JSONL = (
     "agent_readiness_registry.jsonl",
@@ -534,6 +539,40 @@ def _validate_manifest(rows_by_file: dict[str, list[dict[str, Any]]], reports: d
     _assert(reports["no_raw_jsonl_scan.report.json"]["blocked_paths"] == [], "raw JSONL scan report has blocked paths")
 
 
+def _validate_st12g_descriptor(artifact_dir: Path, reports: dict[str, dict[str, Any]]) -> None:
+    path = artifact_dir / ST12G_DESCRIPTOR_NAME
+    _assert(path.exists(), f"missing READINESS1 ST12-G descriptor: {path}")
+    rows = _read_jsonl(path)
+    expected = {
+        "descriptor_id": "ST12G-DESCRIPTOR::READINESS1",
+        "contract_version": "2.0",
+        "consumer_id": "READINESS1",
+        "contract_type": "ST12GReadinessEvidenceProjectionV2",
+        "source_contract_manifest_ref": ST12G_CONTRACT_MANIFEST_REF,
+        "canonical_owner_ref": "PR169_READINESS1_CANONICAL_REGISTRY_AND_RESOLVER",
+        "runtime_instance_state": "NOT_MATERIALIZED_BY_REPOSITORY_BUILD",
+        "manual_edit_allowed": False,
+        "runtime_effect_allowed": False,
+        "write_authority": "NONE",
+        "downstream_route_refs": ["READINESS1"],
+    }
+    _assert(rows == [expected], "READINESS1 ST12-G descriptor differs")
+    manifest_refs = {
+        item.get("artifact_ref")
+        for item in reports["readiness_manifest.json"].get("generated_artifacts", [])
+    }
+    _assert(
+        f"docs/master_plan/generated/pr169_readiness1/{ST12G_DESCRIPTOR_NAME}"
+        in manifest_refs,
+        "READINESS1 manifest omits ST12-G descriptor",
+    )
+    _assert(
+        reports["no_orphan.report.json"].get("st12g_contract_descriptor_count")
+        == 1,
+        "READINESS1 no-orphan report omits ST12-G descriptor",
+    )
+
+
 def _validate_no_placeholders(rows_by_file: dict[str, list[dict[str, Any]]], reports: dict[str, dict[str, Any]]) -> None:
     banned_exact = {"TODO", "TBD", "needs work", "unknown"}
     for name, rows in rows_by_file.items():
@@ -591,6 +630,7 @@ def validate(repo_root: Path, artifact_dir: Path) -> None:
     _validate_executable_now(registry, rows_by_file["executable_now.generated.jsonl"])
     _validate_route_artifacts(rows_by_file, reports)
     _validate_manifest(rows_by_file, reports)
+    _validate_st12g_descriptor(artifact_dir, reports)
     _validate_no_placeholders(rows_by_file, reports)
     _validate_no_raw_jsonl_runtime(repo_root, reports)
     _validate_all_authority_flags(rows_by_file, reports)

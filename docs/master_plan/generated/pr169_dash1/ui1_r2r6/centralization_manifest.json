@@ -1353,5 +1353,13 @@
       "upstream_ref_or_provider_pending_gap": "current PR169 generated dashboard artifacts or provider_pending gap",
       "validator_or_test_consumer": "tools/validate_pr169_dash1_owner_dashboard_ui.py; tests/pr169_dash1_ui1/test_ui1r2r6_truth.py"
     }
-  ]
+  ],
+  "st12g_existing_owner_projection": {
+    "contract_descriptor_ref": "st12g_evidence_owner_view_contract.generated.jsonl",
+    "direct_f_binding_allowed": false,
+    "second_dashboard_state_owner_created": false,
+    "source_owner": "SVC1_ONLY",
+    "state_owner": "DASH1",
+    "ui1_role": "RENDERER_ONLY"
+  }
 }
