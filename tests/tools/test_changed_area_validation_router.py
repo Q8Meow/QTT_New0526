@@ -192,13 +192,23 @@ def test_generated_report_without_owner_fails_closed():
 
 
 def test_validation_infrastructure_change_forces_full_validation():
-    result = _pull_request_result("tools/changed_area_validation_router.py")
-
-    assert result.full_validation_required is True
-    assert result.full_validation_reason == (
-        "validation infrastructure changed: tools/changed_area_validation_router.py"
+    validation_infrastructure_paths = (
+        "tools/changed_area_validation_router.py",
+        "tools/validate_no_runtime_artifacts.py",
+        "tests/fail_closed/test_no_runtime_artifacts_strict.py",
     )
-    assert len(result.required_validators) > 100
+
+    for path in validation_infrastructure_paths:
+        result = _pull_request_result(path)
+
+        assert result.full_validation_required is True
+        assert result.full_validation_reason == (
+            f"validation infrastructure changed: {path}"
+        )
+        assert result.skipped_validators == ()
+        assert result.fail_closed_reasons == ()
+        assert result.unknown_files == ()
+        assert len(result.required_validators) == len(inventory.validation_inventory())
 
 
 def test_qku_control_plane_change_routes_all_central_validators():

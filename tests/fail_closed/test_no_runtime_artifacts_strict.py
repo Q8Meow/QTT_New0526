@@ -74,8 +74,17 @@ def test_scanner_rejects_flagged_runtime_paths_and_install_scripts(tmp_path):
     assert any("package install script" in violation for violation in violations)
 
 
-def test_scanner_allows_exact_ci_test_dependency_pytest_install(tmp_path):
-    _write_ci_validation_workflow(tmp_path, ["python -m pip install pytest"])
+@pytest.mark.parametrize(
+    "install_command",
+    [
+        "python -m pip install pytest",
+        "python -m pip install pytest==9.1.1",
+    ],
+)
+def test_scanner_allows_exact_ci_test_dependency_pytest_install(
+    tmp_path, install_command
+):
+    _write_ci_validation_workflow(tmp_path, [install_command])
 
     violations = scan_repository(tmp_path, _strict_options())
 
@@ -88,6 +97,7 @@ def test_scanner_allows_exact_ci_test_dependency_pytest_install(tmp_path):
         "python -m pip install requests",
         "python -m pip install pytest requests",
         "python -m pip install pytest --upgrade",
+        "python -m pip install pytest==9.1.0",
         "pip install pytest",
     ],
 )
@@ -101,14 +111,24 @@ def test_scanner_rejects_non_allowlisted_pip_installs_in_ci_workflow(
     assert any("pip install command" in violation for violation in violations)
 
 
-def test_scanner_rejects_duplicate_ci_pytest_dependency_install(tmp_path):
-    _write_ci_validation_workflow(
-        tmp_path,
+@pytest.mark.parametrize(
+    "install_commands",
+    [
+        ["python -m pip install pytest", "python -m pip install pytest"],
+        [
+            "python -m pip install pytest==9.1.1",
+            "python -m pip install pytest==9.1.1",
+        ],
         [
             "python -m pip install pytest",
-            "python -m pip install pytest",
+            "python -m pip install pytest==9.1.1",
         ],
-    )
+    ],
+)
+def test_scanner_rejects_duplicate_or_mixed_ci_pytest_dependency_installs(
+    tmp_path, install_commands
+):
+    _write_ci_validation_workflow(tmp_path, install_commands)
 
     violations = scan_repository(tmp_path, _strict_options())
 
@@ -676,6 +696,57 @@ def test_scanner_rejects_arbitrary_files_under_three_venue_canary_eligibility_di
     violations = scan_repository(tmp_path, _strict_options())
 
     assert any("runtime path" in violation for violation in violations)
+
+
+def test_scanner_excludes_top_level_codex_inputs_custody(tmp_path):
+    custody_dir = tmp_path / ".codex_inputs" / "g21" / "d"
+    custody_dir.mkdir(parents=True)
+    (custody_dir / "validators.py").write_text(
+        "import requests\nrequests.get('https://example.invalid/source')\n",
+        encoding="utf-8",
+    )
+    (custody_dir / "install.sh").write_text(
+        "python -m pip install requests\n",
+        encoding="utf-8",
+    )
+
+    violations = scan_repository(tmp_path, _strict_options())
+    iterated = {
+        path.relative_to(tmp_path).as_posix()
+        for path in scanner._iter_paths(tmp_path)
+    }
+
+    assert violations == []
+    assert not any(
+        path == ".codex_inputs" or path.startswith(".codex_inputs/")
+        for path in iterated
+    )
+
+
+def test_scanner_rejects_nested_codex_inputs_lookalike(tmp_path):
+    nested_file = tmp_path / "src" / ".codex_inputs" / "bad.py"
+    nested_file.parent.mkdir(parents=True)
+    nested_file.write_text(
+        "\n".join(
+            [
+                "import requests",
+                "import subprocess",
+                "requests.get('https://example.invalid/source')",
+                "subprocess.run(['pip', 'install', 'package'])",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    violations = scan_repository(tmp_path, _strict_options())
+    iterated = {
+        path.relative_to(tmp_path).as_posix()
+        for path in scanner._iter_paths(tmp_path)
+    }
+
+    assert "src/.codex_inputs/bad.py" in iterated
+    assert any("HTTP retrieval client" in violation for violation in violations)
+    assert any("subprocess pip install command" in violation for violation in violations)
 
 
 def test_scanner_ignores_forbidden_looking_files_inside_venv(tmp_path):

@@ -6208,9 +6208,15 @@ def _filter_foreign_branch_guarded_builders_for_owner_validation(
     *,
     branch: str,
 ) -> list[list[str]]:
-    from tools.ci_branch_context import is_owner_authorized_validation_branch
+    from tools.ci_branch_context import (
+        is_owner_authorized_validation_branch,
+        is_validation_infrastructure_branch,
+    )
 
-    if not is_owner_authorized_validation_branch(branch):
+    if not (
+        is_owner_authorized_validation_branch(branch)
+        or is_validation_infrastructure_branch(branch)
+    ):
         return [list(command) for command in commands]
 
     kept: list[list[str]] = []

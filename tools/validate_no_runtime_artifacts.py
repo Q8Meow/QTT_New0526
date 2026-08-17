@@ -338,6 +338,7 @@ SKIP_DIR_PARTS = {
     "node_modules",
     "venv",
 }
+TOP_LEVEL_LOCAL_CUSTODY_DIR_NAMES = frozenset({".codex_inputs"})
 SKIP_FILE_NAMES = {
     ".coverage",
     "coverage.xml",
@@ -359,10 +360,14 @@ PACKAGE_INSTALL_LINE_HINTS = (
 )
 
 # CI_TEST_DEPENDENCY_ALLOWLIST is the only package-install exception: CI may
-# install pytest before running the repository's canonical validation gates.
+# install one exact approved pytest dependency before running the repository's
+# canonical validation gates.
 CI_TEST_DEPENDENCY_ALLOWLIST = {
-    pathlib.PurePosixPath(".github/workflows/qtt_validation.yml"): (
-        "python -m pip install pytest"
+    pathlib.PurePosixPath(".github/workflows/qtt_validation.yml"): frozenset(
+        {
+            "python -m pip install pytest",
+            "python -m pip install pytest==9.1.1",
+        }
     ),
 }
 
@@ -561,11 +566,34 @@ def _is_allowed_always_forbidden_path(
     return False
 
 
+def _should_exclude_directory_from_scan(
+    *,
+    root: pathlib.Path,
+    current_dir: pathlib.Path,
+    directory_name: str,
+) -> bool:
+    if directory_name in SKIP_DIR_PARTS:
+        return True
+    return (
+        current_dir == root
+        and directory_name in TOP_LEVEL_LOCAL_CUSTODY_DIR_NAMES
+    )
+
+
 def _iter_paths(root: pathlib.Path) -> list[pathlib.Path]:
+    root = root.resolve()
     paths: list[pathlib.Path] = []
     for dirpath, dirnames, filenames in os.walk(root):
-        dirnames[:] = [name for name in dirnames if name not in SKIP_DIR_PARTS]
         current_dir = pathlib.Path(dirpath)
+        dirnames[:] = [
+            name
+            for name in dirnames
+            if not _should_exclude_directory_from_scan(
+                root=root,
+                current_dir=current_dir,
+                directory_name=name,
+            )
+        ]
         paths.extend(current_dir / name for name in dirnames)
         paths.extend(current_dir / name for name in filenames if name not in SKIP_FILE_NAMES)
     return sorted(paths, key=lambda item: item.as_posix().lower())
@@ -897,10 +925,10 @@ def _is_ci_test_dependency_allowlisted_pip_install(
     match: re.Match[str],
     allowlist_hits: dict[pathlib.PurePosixPath, int],
 ) -> bool:
-    allowed_command = CI_TEST_DEPENDENCY_ALLOWLIST.get(path)
-    if allowed_command is None:
+    allowed_commands = CI_TEST_DEPENDENCY_ALLOWLIST.get(path)
+    if allowed_commands is None:
         return False
-    if _matched_line(text, match) != allowed_command:
+    if _matched_line(text, match) not in allowed_commands:
         return False
 
     allowlist_hits[path] = allowlist_hits.get(path, 0) + 1
