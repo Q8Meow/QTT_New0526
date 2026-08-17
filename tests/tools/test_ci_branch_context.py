@@ -82,6 +82,7 @@ def test_repair_and_main_cumulative_branch_classification():
     assert context.is_repair_branch("repair/pr138-main-push-ci-context") is True
     assert context.is_repair_branch(repair_branch) is True
     assert context.is_validation_infrastructure_branch(repair_branch) is True
+    assert context.is_owner_authorized_validation_branch(repair_branch) is False
     assert context.is_main_cumulative_branch(repair_branch) is True
     assert context.is_main_cumulative_branch("main") is True
     assert context.is_main_cumulative_branch("repair/main-cumulative-example") is True

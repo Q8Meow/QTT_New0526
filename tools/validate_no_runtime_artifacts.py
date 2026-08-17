@@ -7,6 +7,7 @@ from dataclasses import dataclass
 import os
 import pathlib
 import re
+import subprocess
 import sys
 import time
 from typing import Callable
@@ -321,6 +322,7 @@ TEXT_SUFFIXES = {
 }
 PACKAGE_INSTALL_TEXT_SUFFIXES = TEXT_SUFFIXES | {".md", ".rst", ".txt"}
 NO_RUNTIME_PROGRESS_INTERVAL_SECONDS = 30.0
+LOCAL_CUSTODY_GIT_TIMEOUT_SECONDS = 10.0
 SKIP_DIR_PARTS = {
     ".git",
     ".venv",
@@ -566,21 +568,111 @@ def _is_allowed_always_forbidden_path(
     return False
 
 
+def _validate_top_level_local_custody_boundary(
+    root: pathlib.Path,
+) -> tuple[list[str], frozenset[str]]:
+    root = root.resolve()
+    custody_name = ".codex_inputs"
+    custody_root = root / custody_name
+    if not custody_root.exists():
+        return [], frozenset()
+
+    # Isolated synthetic roots are not repositories and must not cause Git to
+    # search a parent checkout. Only an immediate Git marker authorizes the
+    # bounded repository-local custody queries below.
+    if not (root / ".git").exists():
+        return [], frozenset()
+
+    def run_git(
+        operation: str,
+        argv: list[str],
+    ) -> tuple[subprocess.CompletedProcess[bytes] | None, str | None]:
+        try:
+            completed = subprocess.run(
+                ["git", *argv],
+                cwd=root,
+                check=False,
+                capture_output=True,
+                text=False,
+                shell=False,
+                timeout=LOCAL_CUSTODY_GIT_TIMEOUT_SECONDS,
+            )
+        except (OSError, subprocess.TimeoutExpired):
+            return None, f"LOCAL_CUSTODY_GIT_STATUS_UNAVAILABLE: {operation}"
+        return completed, None
+
+    worktree, error = run_git("worktree-detection", ["rev-parse", "--show-toplevel"])
+    if error is not None or worktree is None:
+        return [error or "LOCAL_CUSTODY_GIT_STATUS_UNAVAILABLE: worktree-detection"], frozenset()
+    if worktree.returncode != 0:
+        return ["LOCAL_CUSTODY_GIT_STATUS_UNAVAILABLE: worktree-detection"], frozenset()
+    try:
+        worktree_root = pathlib.Path(
+            worktree.stdout.decode("utf-8", errors="replace").strip()
+        ).resolve()
+    except (OSError, ValueError):
+        return ["LOCAL_CUSTODY_GIT_STATUS_UNAVAILABLE: worktree-detection"], frozenset()
+    if worktree_root != root:
+        return ["LOCAL_CUSTODY_GIT_STATUS_UNAVAILABLE: worktree-detection"], frozenset()
+
+    tracked, error = run_git(
+        "tracked-path-query",
+        ["ls-files", "-z", "--", custody_name],
+    )
+    if error is not None or tracked is None:
+        return [error or "LOCAL_CUSTODY_GIT_STATUS_UNAVAILABLE: tracked-path-query"], frozenset()
+    if tracked.returncode != 0:
+        return ["LOCAL_CUSTODY_GIT_STATUS_UNAVAILABLE: tracked-path-query"], frozenset()
+    tracked_paths = sorted(
+        {
+            pathlib.PurePosixPath(
+                entry.decode("utf-8", errors="replace").replace("\\", "/")
+            ).as_posix()
+            for entry in tracked.stdout.split(b"\0")
+            if entry
+        },
+        key=lambda path: (path.casefold(), path),
+    )
+    if tracked_paths:
+        return [
+            f"TRACKED_PATH_INSIDE_LOCAL_CUSTODY: {path}"
+            for path in tracked_paths
+        ], frozenset()
+
+    ignored, error = run_git(
+        "ignore-check",
+        ["check-ignore", "--quiet", "--", custody_name],
+    )
+    if error is not None or ignored is None:
+        return [error or "LOCAL_CUSTODY_GIT_STATUS_UNAVAILABLE: ignore-check"], frozenset()
+    if ignored.returncode == 0:
+        return [], frozenset({custody_name})
+    if ignored.returncode == 1:
+        return [f"TOP_LEVEL_LOCAL_CUSTODY_NOT_IGNORED: {custody_name}"], frozenset()
+    return ["LOCAL_CUSTODY_GIT_STATUS_UNAVAILABLE: ignore-check"], frozenset()
+
+
 def _should_exclude_directory_from_scan(
     *,
     root: pathlib.Path,
     current_dir: pathlib.Path,
     directory_name: str,
+    excluded_top_level_local_custody_dir_names: frozenset[str],
 ) -> bool:
     if directory_name in SKIP_DIR_PARTS:
         return True
     return (
         current_dir == root
         and directory_name in TOP_LEVEL_LOCAL_CUSTODY_DIR_NAMES
+        and directory_name in excluded_top_level_local_custody_dir_names
     )
 
 
-def _iter_paths(root: pathlib.Path) -> list[pathlib.Path]:
+def _iter_paths(
+    root: pathlib.Path,
+    *,
+    excluded_top_level_local_custody_dir_names: frozenset[str] = frozenset(),
+) -> list[pathlib.Path]:
     root = root.resolve()
     paths: list[pathlib.Path] = []
     for dirpath, dirnames, filenames in os.walk(root):
@@ -592,6 +684,9 @@ def _iter_paths(root: pathlib.Path) -> list[pathlib.Path]:
                 root=root,
                 current_dir=current_dir,
                 directory_name=name,
+                excluded_top_level_local_custody_dir_names=(
+                    excluded_top_level_local_custody_dir_names
+                ),
             )
         ]
         paths.extend(current_dir / name for name in dirnames)
@@ -1026,7 +1121,16 @@ def scan_repository(
         progress,
         f"NO_RUNTIME_ARTIFACT_SCAN_START root={root}",
     )
-    paths = _iter_paths(root)
+    custody_violations, excluded_top_level_local_custody_dir_names = (
+        _validate_top_level_local_custody_boundary(root)
+    )
+    violations.extend(custody_violations)
+    paths = _iter_paths(
+        root,
+        excluded_top_level_local_custody_dir_names=(
+            excluded_top_level_local_custody_dir_names
+        ),
+    )
     _progress_receipt(
         progress,
         "NO_RUNTIME_ARTIFACT_SCAN_SCOPE "

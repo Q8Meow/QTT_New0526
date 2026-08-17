@@ -1,3 +1,4 @@
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -699,6 +700,17 @@ def test_scanner_rejects_arbitrary_files_under_three_venue_canary_eligibility_di
 
 
 def test_scanner_excludes_top_level_codex_inputs_custody(tmp_path):
+    def run_git(*args: str) -> None:
+        subprocess.run(
+            ["git", *args],
+            cwd=tmp_path,
+            check=True,
+            capture_output=True,
+            text=True,
+            shell=False,
+        )
+
+    run_git("init", "--quiet")
     custody_dir = tmp_path / ".codex_inputs" / "g21" / "d"
     custody_dir.mkdir(parents=True)
     (custody_dir / "validators.py").write_text(
@@ -710,17 +722,47 @@ def test_scanner_excludes_top_level_codex_inputs_custody(tmp_path):
         encoding="utf-8",
     )
 
-    violations = scan_repository(tmp_path, _strict_options())
-    iterated = {
+    not_ignored_violations = scan_repository(tmp_path, _strict_options())
+    not_ignored_iterated = {
         path.relative_to(tmp_path).as_posix()
         for path in scanner._iter_paths(tmp_path)
     }
+    assert "TOP_LEVEL_LOCAL_CUSTODY_NOT_IGNORED: .codex_inputs" in (
+        not_ignored_violations
+    )
+    assert ".codex_inputs/g21/d/validators.py" in not_ignored_iterated
 
-    assert violations == []
+    local_exclude = tmp_path / ".git" / "info" / "exclude"
+    local_exclude.write_text(
+        local_exclude.read_text(encoding="utf-8") + "\n.codex_inputs/\n",
+        encoding="utf-8",
+    )
+    ignored_violations = scan_repository(tmp_path, _strict_options())
+    custody_violations, excluded_custody_names = (
+        scanner._validate_top_level_local_custody_boundary(tmp_path)
+    )
+    ignored_iterated = {
+        path.relative_to(tmp_path).as_posix()
+        for path in scanner._iter_paths(
+            tmp_path,
+            excluded_top_level_local_custody_dir_names=excluded_custody_names,
+        )
+    }
+
+    assert ignored_violations == []
+    assert custody_violations == []
+    assert excluded_custody_names == frozenset({".codex_inputs"})
     assert not any(
         path == ".codex_inputs" or path.startswith(".codex_inputs/")
-        for path in iterated
+        for path in ignored_iterated
     )
+
+    run_git("add", "-f", "--", ".codex_inputs/g21/d/validators.py")
+    tracked_violations = scan_repository(tmp_path, _strict_options())
+    assert (
+        "TRACKED_PATH_INSIDE_LOCAL_CUSTODY: "
+        ".codex_inputs/g21/d/validators.py"
+    ) in tracked_violations
 
 
 def test_scanner_rejects_nested_codex_inputs_lookalike(tmp_path):
