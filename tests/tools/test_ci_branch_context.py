@@ -77,7 +77,13 @@ def _clear_github_branch_context_env(monkeypatch):
 
 
 def test_repair_and_main_cumulative_branch_classification():
+    repair_branch = context.NO_RUNTIME_CUSTODY_AND_CI_DEPENDENCY_REPAIR_BRANCH
+
     assert context.is_repair_branch("repair/pr138-main-push-ci-context") is True
+    assert context.is_repair_branch(repair_branch) is True
+    assert context.is_validation_infrastructure_branch(repair_branch) is True
+    assert context.is_owner_authorized_validation_branch(repair_branch) is False
+    assert context.is_main_cumulative_branch(repair_branch) is True
     assert context.is_main_cumulative_branch("main") is True
     assert context.is_main_cumulative_branch("repair/main-cumulative-example") is True
     assert (
@@ -3882,6 +3888,41 @@ def test_changed_path_helper_requires_exact_repair_scope():
         context.PR163_C_MAIN_BRANCH_CONTEXT_REPAIR_BRANCH,
         "docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl",
     )
+
+    branch = context.NO_RUNTIME_CUSTODY_AND_CI_DEPENDENCY_REPAIR_BRANCH
+    expected_paths = frozenset(
+        {
+            "tools/validate_no_runtime_artifacts.py",
+            "tests/fail_closed/test_no_runtime_artifacts_strict.py",
+            "tools/validation_inventory.py",
+            "tests/tools/test_changed_area_validation_router.py",
+            "tools/ci_branch_context.py",
+            "tests/tools/test_ci_branch_context.py",
+            "tools/run_validation_gates.py",
+            "tests/fail_closed/test_run_validation_gates.py",
+            "docs/master_plan/generated/"
+            "PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+        }
+    )
+    assert context.EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_CHANGED_PATHS[branch] == (
+        expected_paths
+    )
+    for path in expected_paths:
+        assert context.changed_path_allowed_for_explicit_repair_branch(branch, path)
+
+    for path in (
+        "README.md",
+        "docs/master_plan/QTT_MasterPlan_Current.md",
+        "docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl",
+        "src/qtt/runtime/order_executor.py",
+    ):
+        assert not context.changed_path_allowed_for_explicit_repair_branch(branch, path)
+
+    for lookalike_branch in (f"{branch}/nested", f"{branch}-suffix"):
+        assert not context.changed_path_allowed_for_explicit_repair_branch(
+            lookalike_branch,
+            "tools/ci_branch_context.py",
+        )
 
 
 def test_idempotence_runtime_containment_hardening_scope_is_exact():

@@ -49,6 +49,7 @@ COST_TIERS = frozenset({"FAST", "MEDIUM", "SLOW", "DEEP"})
 VALIDATION_INFRASTRUCTURE_GLOBS = (
     ".github/workflows/**",
     "tools/run_validation_gates.py",
+    "tools/validate_no_runtime_artifacts.py",
     "tools/ci_branch_context.py",
     "tools/validation_scope_registry.py",
     "tools/validate_validation_scope_registry.py",
@@ -72,6 +73,7 @@ VALIDATION_INFRASTRUCTURE_GLOBS = (
     "tests/tools/test_validation_scope_registry.py",
     "tests/tools/test_qtt_authority_reason_code_registry.py",
     "tests/fail_closed/test_run_validation_gates.py",
+    "tests/fail_closed/test_no_runtime_artifacts_strict.py",
     "docs/master_plan/generated/PR208_*.report.json",
 )
 PR152_TRACKED_GLOBS = (

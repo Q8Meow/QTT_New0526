@@ -25,11 +25,29 @@ REPAIR_BRANCH_PREFIX = "repair/"
 MAIN_CUMULATIVE_BRANCH_PREFIX = "repair/main-cumulative-"
 CI_RUNTIME_PARALLEL_CACHE_TIMEOUT_BRANCH = "pr-ci-runtime-parallel-cache-timeout"
 PR208_CI_RUNTIME_RATIONALIZATION_BRANCH = "pr208-ci-runtime-rationalization"
+NO_RUNTIME_CUSTODY_AND_CI_DEPENDENCY_REPAIR_BRANCH = (
+    "repair/no-runtime-custody-and-ci-dependency-boundary"
+)
+NO_RUNTIME_CUSTODY_AND_CI_DEPENDENCY_REPAIR_CHANGED_PATHS = frozenset(
+    {
+        "tools/validate_no_runtime_artifacts.py",
+        "tests/fail_closed/test_no_runtime_artifacts_strict.py",
+        "tools/validation_inventory.py",
+        "tests/tools/test_changed_area_validation_router.py",
+        "tools/ci_branch_context.py",
+        "tests/tools/test_ci_branch_context.py",
+        "tools/run_validation_gates.py",
+        "tests/fail_closed/test_run_validation_gates.py",
+        "docs/master_plan/generated/"
+        "PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+    }
+)
 VALIDATION_INFRASTRUCTURE_BRANCHES = frozenset(
     {
         "pr-ci-fastfail-validation-context-preflight",
         CI_RUNTIME_PARALLEL_CACHE_TIMEOUT_BRANCH,
         PR208_CI_RUNTIME_RATIONALIZATION_BRANCH,
+        NO_RUNTIME_CUSTODY_AND_CI_DEPENDENCY_REPAIR_BRANCH,
     }
 )
 VALIDATION_INFRASTRUCTURE_CHANGED_PATHS = frozenset(
@@ -1879,6 +1897,9 @@ PR159S_ALLOWED_CHANGED_PATHS = frozenset(
     }
 )
 EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_CHANGED_PATHS = {
+    NO_RUNTIME_CUSTODY_AND_CI_DEPENDENCY_REPAIR_BRANCH: (
+        NO_RUNTIME_CUSTODY_AND_CI_DEPENDENCY_REPAIR_CHANGED_PATHS
+    ),
     PR152_HELPER_CLI_TEMP_REPO_GIT_STATUS_REPAIR_BRANCH: frozenset(
         {
             ".github/workflows/qtt_validation.yml",

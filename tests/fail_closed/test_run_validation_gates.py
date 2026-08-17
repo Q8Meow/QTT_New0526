@@ -313,7 +313,10 @@ def test_runner_pr169_readiness1_branch_scope_keeps_only_readiness1_deterministi
 def test_owner_authorized_validation_branch_keeps_all_non_guarded_commands(
     capsys,
 ):
-    branch = "agent/st12a-contract-envelope"
+    branches = (
+        "agent/st12a-contract-envelope",
+        "repair/no-runtime-custody-and-ci-dependency-boundary",
+    )
     commands = [
         ["python", "tools/build_pr168_rp5c_immutable_qku_formula_library.py"],
         ["python", "tools/build_qku_computation_control_plane.py"],
@@ -333,32 +336,58 @@ def test_owner_authorized_validation_branch_keeps_all_non_guarded_commands(
         ["python", "tools/run_pr168_vs1_trading_intelligence_slice.py"],
     ]
 
-    kept = runner._filter_foreign_branch_guarded_builders_for_owner_validation(
-        commands,
-        branch=branch,
-    )
-    kept_names = [runner._command_script_name(command) for command in kept]
+    for branch in branches:
+        kept = runner._filter_foreign_branch_guarded_builders_for_owner_validation(
+            commands,
+            branch=branch,
+        )
+        kept_names = [runner._command_script_name(command) for command in kept]
 
-    assert kept_names == [
-        "build_qku_computation_control_plane.py",
-        "build_pr169_readiness1.py",
-        "build_pr169_svc1.py",
-        "validate_pr168_rp5c_immutable_qku_formula_library.py",
-        "run_pr168_vs1_trading_intelligence_slice.py",
-    ]
-    assert all(
-        runner._command_script_name(command) in kept_names
-        for command in commands
-        if runner._command_script_name(command).startswith("validate_")
-    )
+        assert kept_names == [
+            "build_qku_computation_control_plane.py",
+            "build_pr169_readiness1.py",
+            "build_pr169_svc1.py",
+            "validate_pr168_rp5c_immutable_qku_formula_library.py",
+            "run_pr168_vs1_trading_intelligence_slice.py",
+        ]
+        assert len(commands) - len(kept) == 1
+        assert kept_names.count(
+            "build_pr168_rp5c_immutable_qku_formula_library.py"
+        ) == 0
+        assert kept_names.count(
+            "validate_pr168_rp5c_immutable_qku_formula_library.py"
+        ) == 1
+        assert all(
+            runner._command_script_name(command) in kept_names
+            for command in commands
+            if runner._command_script_name(command).startswith("validate_")
+        )
+        assert all(
+            runner._command_script_name(command) in kept_names
+            for command in commands
+            if runner._command_script_name(command).startswith("build_")
+            and runner._command_script_name(command)
+            not in runner.OWNER_VALIDATION_READ_ONLY_UPSTREAM_BUILDER_SCRIPT_NAMES
+        )
+
     output = capsys.readouterr().out
-    assert "QTT_OWNER_AUTHORIZED_VALIDATION_UPSTREAM_BUILDERS_READ_ONLY" in output
-    assert "build_pr168_rp5c_immutable_qku_formula_library.py" in output
+    assert output.count(
+        "QTT_OWNER_AUTHORIZED_VALIDATION_UPSTREAM_BUILDERS_READ_ONLY"
+    ) == len(branches)
+    assert output.count("build_pr168_rp5c_immutable_qku_formula_library.py") == len(
+        branches
+    )
+    for branch in branches:
+        assert f"branch={branch}" in output
 
-    assert runner._filter_foreign_branch_guarded_builders_for_owner_validation(
-        commands,
-        branch=f"{branch}-copy",
-    ) == commands
+    unclassified_branches = ["feature/unrelated", "main"]
+    for branch in branches:
+        unclassified_branches.extend((f"{branch}-copy", branch.upper()))
+    for unclassified_branch in unclassified_branches:
+        assert runner._filter_foreign_branch_guarded_builders_for_owner_validation(
+            commands,
+            branch=unclassified_branch,
+        ) == commands
 
 
 def test_owner_authorized_validation_phase_omits_no_validator(tmp_path):
@@ -368,22 +397,40 @@ def test_owner_authorized_validation_phase_omits_no_validator(tmp_path):
         validation_root,
         tmp_path / "pytest",
     )
-    kept = runner._filter_foreign_branch_guarded_builders_for_owner_validation(
-        commands,
-        branch="agent/st12a-contract-envelope",
-    )
+    original_names = [runner._command_script_name(command) for command in commands]
     original_validator_names = {
         runner._command_script_name(command)
         for command in commands
         if runner._command_script_name(command).startswith("validate_")
     }
-    kept_names = {runner._command_script_name(command) for command in kept}
+    assert original_names.count(
+        "build_pr168_rp5c_immutable_qku_formula_library.py"
+    ) == 1
+    assert original_names.count(
+        "validate_pr168_rp5c_immutable_qku_formula_library.py"
+    ) == 1
 
-    assert original_validator_names <= kept_names
-    assert "build_pr168_rp5c_immutable_qku_formula_library.py" not in kept_names
-    assert "validate_pr168_rp5c_immutable_qku_formula_library.py" in kept_names
-    assert "build_pr169_readiness1.py" in kept_names
-    assert "validate_pr169_readiness1.py" in kept_names
+    for branch in (
+        "agent/st12a-contract-envelope",
+        "repair/no-runtime-custody-and-ci-dependency-boundary",
+    ):
+        kept = runner._filter_foreign_branch_guarded_builders_for_owner_validation(
+            commands,
+            branch=branch,
+        )
+        kept_names = [runner._command_script_name(command) for command in kept]
+        kept_name_set = set(kept_names)
+
+        assert original_validator_names <= kept_name_set
+        assert len(commands) - len(kept) == 1
+        assert kept_names.count(
+            "build_pr168_rp5c_immutable_qku_formula_library.py"
+        ) == 0
+        assert kept_names.count(
+            "validate_pr168_rp5c_immutable_qku_formula_library.py"
+        ) == 1
+        assert "build_pr169_readiness1.py" in kept_name_set
+        assert "validate_pr169_readiness1.py" in kept_name_set
 
 
 def test_run_validation_gates_direct_script_imports_router_without_pythonpath():
