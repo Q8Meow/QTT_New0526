@@ -187,6 +187,14 @@ def _clear_branch_context_env(monkeypatch):
         monkeypatch.delenv(env_name, raising=False)
 
 
+def _st12h_mock_terminal_output(command: list[str]) -> str:
+    contract = runner._st12h_command_contract(command)
+    if contract is None:
+        return ""
+    _timeout, markers = contract
+    return "" if not markers else "\n".join(markers) + "\n"
+
+
 def _env_without_pythonpath() -> dict[str, str]:
     env = os.environ.copy()
     env.pop("PYTHONPATH", None)
@@ -3074,18 +3082,13 @@ def _expected_commands(
             ]
             for domain in (
                 "architecture",
-                "operations",
                 "quantum",
-                "security",
-                "source",
-                "accounting",
-                "execution",
                 "latency",
                 "d",
                 "agent",
-                "llm",
                 "model_risk",
                 "g",
+                "h",
             )
         ],
         [
@@ -3116,32 +3119,18 @@ def _expected_commands(
                 / "independent_validate_qku_computation_control_plane_g.py"
             ),
         ],
-        [
-            python_executable,
-            str(
-                Path("tools")
-                / "independent_validate_qku_computation_control_plane_accounting.py"
-            ),
-        ],
-        [
-            python_executable,
-            str(
-                Path("tools")
-                / "independent_validate_qku_computation_control_plane_execution.py"
-            ),
-        ],
         *[
             [python_executable, str(Path("tools") / script_name)]
             for script_name in (
                 "independent_validate_qku_computation_control_plane_agent.py",
-                "independent_validate_qku_computation_control_plane_llm.py",
-                "independent_validate_qku_computation_control_plane_security.py",
                 "independent_validate_qku_computation_control_plane_d.py",
                 "independent_validate_qku_computation_control_plane_quantum.py",
                 "independent_validate_qku_computation_control_plane_architecture.py",
-                "independent_validate_qku_computation_control_plane_operations.py",
-                "independent_validate_qku_computation_control_plane_source.py",
             )
+        ],
+        *[
+            list(command)
+            for command in runner.build_st12h_validation_commands(python_executable)
         ],
         [
             python_executable,
@@ -3232,37 +3221,29 @@ def test_runner_registers_qku_primary_and_independent_systems():
             for part in command
         )
     ]
-    assert [command[-1] for command in qku_commands[:13]] == [
+    assert [command[-1] for command in qku_commands[:8]] == [
         "architecture",
-        "operations",
         "quantum",
-        "security",
-        "source",
-        "accounting",
-        "execution",
         "latency",
         "d",
         "agent",
-        "llm",
         "model_risk",
         "g",
+        "h",
     ]
-    assert {Path(command[1]).name for command in qku_commands[13:]} == {
+    assert [Path(command[1]).name for command in qku_commands[8:16]] == [
         "independent_validate_qku_computation_control_plane.py",
         "independent_validate_qku_computation_control_plane_latency.py",
         "independent_validate_qku_computation_control_plane_model_risk.py",
         "independent_validate_qku_computation_control_plane_g.py",
-        "independent_validate_qku_computation_control_plane_accounting.py",
-        "independent_validate_qku_computation_control_plane_execution.py",
         "independent_validate_qku_computation_control_plane_agent.py",
-        "independent_validate_qku_computation_control_plane_llm.py",
-        "independent_validate_qku_computation_control_plane_security.py",
         "independent_validate_qku_computation_control_plane_d.py",
         "independent_validate_qku_computation_control_plane_quantum.py",
         "independent_validate_qku_computation_control_plane_architecture.py",
-        "independent_validate_qku_computation_control_plane_operations.py",
-        "independent_validate_qku_computation_control_plane_source.py",
-    }
+    ]
+    assert tuple(tuple(command) for command in qku_commands[16:]) == tuple(
+        runner.build_st12h_validation_commands(sys.executable)
+    )
 
 
 def test_runner_phase_manifest_covers_full_validation_plan(monkeypatch):
@@ -3364,7 +3345,8 @@ def test_runner_pytest_shards_cover_each_test_file_once():
 
     assert all_tests
     assert set(flattened) == all_tests
-    assert len(flattened) == len(set(flattened))
+    assert flattened.count(runner.ST12H_TEST_MODULE) == 2
+    assert len(flattened) == len(set(flattened)) + 1
     assert set(shard_manifest) == set(runner.PYTEST_SHARD_PHASES)
     assert (
         runner.ISOLATED_SOURCE_EVIDENCE_PYTEST
@@ -3985,6 +3967,7 @@ def test_runner_splits_pytest_shard_8_residual_tests_deterministically():
         ),
         ("tests/source_evidence",),
         (runner.ST12A_TEST_ROOT,),
+        (runner.ST12H_TEST_MODULE,),
     ]
     assert commands[0].bounded_idempotence is True
     assert commands[1].ignores == (idempotence_path,)
@@ -3998,10 +3981,62 @@ def test_runner_splits_pytest_shard_8_residual_tests_deterministically():
     assert commands[9].ignores == (pr167_idempotence_path,)
     assert commands[10].bounded_idempotence is True
     assert commands[11].ignores == (pr162e_idempotence_path,)
-    assert commands[-2].ignores == (runner.ISOLATED_SOURCE_EVIDENCE_PYTEST,)
-    assert commands[-1].paths == (runner.ST12A_TEST_ROOT,)
+    assert commands[-3].ignores == (runner.ISOLATED_SOURCE_EVIDENCE_PYTEST,)
+    assert commands[-2].paths == (runner.ST12A_TEST_ROOT,)
+    assert commands[-2].ignores == ()
+    assert commands[-2].reason == "Complete QKU control-plane domain test root"
+    assert "exact 42-file" not in commands[-2].reason
+    assert commands[-1].paths == (runner.ST12H_TEST_MODULE,)
     assert all(command.reason for command in commands)
     assert ("tests",) not in [command.paths for command in commands]
+
+    pytest_basetemp = Path(".tmp") / "pytest-basetemp"
+    built_commands = [
+        runner._build_pytest_command(
+            command,
+            pytest_basetemp,
+        )
+        for command in commands
+    ]
+    import_mode_flag = "--import-mode=importlib"
+    legacy_registered_command = [
+        sys.executable,
+        runner._path("tools", runner.PYTEST_FRESH_BASETEMP_SCRIPT),
+        runner.ST12A_TEST_ROOT,
+        "-q",
+        runner.PYTEST_DURATIONS_ARG,
+        "--basetemp",
+        str(pytest_basetemp),
+    ]
+    assert built_commands[-2] == legacy_registered_command
+    assert all(
+        not any(argument.startswith("--import-mode") for argument in built)
+        for built in built_commands
+    )
+    assert sum(
+        command.paths == (runner.ST12A_TEST_ROOT,) for command in commands
+    ) == 1
+
+    adapted = runner._execution_command_with_qku_root_importlib(
+        built_commands[-2]
+    )
+    assert adapted.count(import_mode_flag) == 1
+    import_mode_index = adapted.index(import_mode_flag)
+    assert adapted[import_mode_index + 1] == "--basetemp"
+    assert adapted[:import_mode_index] + adapted[import_mode_index + 1 :] == (
+        built_commands[-2]
+    )
+    assert runner._execution_command_with_qku_root_importlib(adapted) == adapted
+    with pytest.raises(
+        RuntimeError,
+        match="^QTT_QKU_ROOT_PYTEST_IMPORT_MODE_CONFLICT$",
+    ):
+        runner._execution_command_with_qku_root_importlib(
+            [*built_commands[-2], "--import-mode=prepend"]
+        )
+    assert runner._execution_command_with_qku_root_importlib(
+        built_commands[-1]
+    ) == built_commands[-1]
 
     expanded_paths = [
         path
@@ -4009,7 +4044,8 @@ def test_runner_splits_pytest_shard_8_residual_tests_deterministically():
         for path in runner._pytest_files_for_command(command, REPO_ROOT)
     ]
 
-    assert len(expanded_paths) == len(set(expanded_paths))
+    assert expanded_paths.count(runner.ST12H_TEST_MODULE) == 2
+    assert len(expanded_paths) == len(set(expanded_paths)) + 1
     assert set(expanded_paths) == set(
         runner.pytest_shard_manifest(REPO_ROOT)["pytest-shard-8"]
     )
@@ -5619,7 +5655,7 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
             raise AssertionError(f"unexpected git command: {git_args}")
 
         events.append(("gate", command))
-        return Completed()
+        return Completed(stdout=_st12h_mock_terminal_output(command))
 
     monkeypatch.setattr(runner.subprocess, "run", fake_run)
     monkeypatch.setattr(runner, "_untracked_paths", lambda repo_root: set())
@@ -11636,7 +11672,7 @@ def test_runner_returns_zero_when_all_mocked_commands_pass(monkeypatch, capsys):
         if command[0] == "git":
             return Completed()
         seen.append(command)
-        return Completed()
+        return Completed(stdout=_st12h_mock_terminal_output(command))
 
     monkeypatch.setattr(runner.subprocess, "run", fake_run)
     monkeypatch.setattr(
@@ -11652,7 +11688,9 @@ def test_runner_returns_zero_when_all_mocked_commands_pass(monkeypatch, capsys):
     pytest_basetemp = _pytest_basetemp_from_commands(seen)
     assert pytest_basetemp.name.startswith("run_validation_gates_pytest_")
     expected = [
-        runner._execution_command_with_st12g_architecture_roster(command)
+        runner._execution_command_with_qku_root_importlib(
+            runner._execution_command_with_st12g_architecture_roster(command)
+        )
         for command in runner.build_phase_commands(
             runner.ALL_PHASE,
             validation_dir,
@@ -11663,6 +11701,11 @@ def test_runner_returns_zero_when_all_mocked_commands_pass(monkeypatch, capsys):
     assert seen == expected
     output = capsys.readouterr().out.splitlines()
     assert output[-1] == runner.SUCCESS_MARKER
+    assert output.count(
+        "QTT_QKU_ROOT_PYTEST_IMPORT_MODE_APPLIED "
+        "mode=importlib "
+        f"selected_root={runner.ST12A_TEST_ROOT}"
+    ) == 1
     architecture_command = list(
         runner.build_st12g_architecture_validation_command(sys.executable)
     )
@@ -12065,7 +12108,7 @@ def test_runner_creates_tmp_parent_before_running_commands(monkeypatch, capsys):
         if command[0] == "git":
             return Completed()
         seen.append(command)
-        return Completed()
+        return Completed(stdout=_st12h_mock_terminal_output(command))
 
     monkeypatch.setattr(runner, "_repo_root", lambda: repo_root)
     monkeypatch.setattr(runner.subprocess, "run", fake_run)
@@ -12199,7 +12242,7 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
     assert "    timeout-minutes: 90\n" in shard_block
     assert "    strategy:\n" in shard_block
     assert "      fail-fast: false\n" in shard_block
-    assert "          python-version: '3.14'\n" in shard_block
+    assert "          python-version: '3.14.6'\n" in shard_block
     assert "      - name: Restore pip download cache\n" in shard_block
     assert "        uses: actions/cache@v4\n" in shard_block
     assert "cache-dependency-path" not in shard_block
@@ -12207,12 +12250,15 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
     assert "        with: &pip_cache\n" in shard_block
     assert "          path: ~/.cache/pip\n" in shard_block
     assert (
-        "          key: ${{ runner.os }}-python-3.14-pip-pytest-"
+        "          key: ${{ runner.os }}-python-3.14.6-pip-pytest-9.1.1-"
         "${{ hashFiles('.github/workflows/qtt_validation.yml') }}\n"
     ) in shard_block
-    assert "            ${{ runner.os }}-python-3.14-pip-pytest-\n" in shard_block
+    assert (
+        "            ${{ runner.os }}-python-3.14.6-pip-pytest-9.1.1-\n"
+        in shard_block
+    )
     assert "        run: &install_pytest |\n" in shard_block
-    assert "          python -m pip install pytest\n" in shard_block
+    assert "          python -m pip install pytest==9.1.1\n" in shard_block
     for phase in runner.ORDERED_PHASES:
         assert f"          - phase: {phase}\n" in shard_block
     assert "          - phase: deterministic-validators\n" not in shard_block
@@ -12310,3 +12356,199 @@ def test_st12f_focused_validators_remain_in_existing_validation_phase() -> None:
         "independent_validate_qku_computation_control_plane_quantum.py",
     ):
         assert any(token in command for command in joined)
+
+
+def test_st12h_commands_use_only_existing_phases_and_one_existing_pytest_shard() -> None:
+    manifest = runner.build_phase_manifest(
+        Path(".tmp/st12h-runner-contract"),
+        Path(".tmp/st12h-runner-contract-pytest"),
+    )
+    by_phase = {
+        str(record["phase"]): tuple(record["commands"]) for record in manifest
+    }
+    frozen = tuple(
+        runner._st12h_normalized_command(command)
+        for command in runner.build_st12h_validation_commands(sys.executable)
+    )
+    deterministic_c = tuple(
+        runner._st12h_normalized_command(command)
+        for command in by_phase["deterministic-validators-c"]
+    )
+    indices = [deterministic_c.index(command) for command in frozen]
+
+    assert len(runner.ORDERED_PHASES) == 13
+    assert runner._st12h_runner_topology_failures() == ()
+    assert indices == list(range(indices[0], indices[0] + 12))
+    assert all(deterministic_c.count(command) == 1 for command in frozen)
+    for phase, commands in by_phase.items():
+        if phase != "deterministic-validators-c":
+            assert not {
+                runner._st12h_normalized_command(command) for command in commands
+            }.intersection(frozen)
+    grouped_matrix_commands = [
+        command
+        for command in by_phase["pytest-shard-8"]
+        if runner.ST12H_TEST_MODULE in runner._pytest_path_args(command)
+    ]
+    assert len(grouped_matrix_commands) == 1
+    workflow = _workflow_text()
+    assert workflow.count("  validation_shards:\n") == 1
+    assert workflow.count("  validation:\n") == 1
+
+
+def test_st12h_runner_enforces_exact_timeouts_one_process_and_zero_retry() -> None:
+    commands = runner.build_phase_commands(
+        runner.ALL_PHASE,
+        Path(".tmp/st12h-timeout-contract"),
+        Path(".tmp/st12h-timeout-contract-pytest"),
+    )
+    contracts = [
+        runner._st12h_command_contract(command)
+        for command in commands
+        if runner._st12h_command_contract(command) is not None
+    ]
+
+    assert len(contracts) == 15
+    assert sum(timeout == 1200 for timeout, _markers in contracts) == 14
+    assert sum(timeout == 1800 for timeout, _markers in contracts) == 1
+    assert runner.ST12H_MAX_CONCURRENT_VALIDATION_PROCESSES == 1
+    assert runner.ST12H_AUTOMATIC_FULL_CAMPAIGN_RETRIES == 0
+    assert runner.ST12H_MAX_FULL_LOCAL_CAMPAIGNS_PER_TRACKED_STATE == 1
+
+
+def test_st12h_pr152_guidance_follows_stable_outputs_before_one_full_route() -> None:
+    assert runner.build_pre_validation_finalization_guidance() == [
+        {
+            "command_id": "pr152_currentize_after_generated_artifacts",
+            "command": (
+                ".\\.venv\\Scripts\\python.exe "
+                "tools\\currentize_pr152_after_generated_artifacts.py"
+            ),
+            "when": (
+                "after final generated artifacts settle and before validation gates"
+            ),
+            "ci_tracked_report_mutation_allowed": False,
+        }
+    ]
+    manifest = runner.build_phase_manifest(
+        Path(".tmp/st12h-full-route"),
+        Path(".tmp/st12h-full-route-pytest"),
+    )
+    flattened = [
+        list(command)
+        for record in manifest
+        for command in record["commands"]
+    ]
+    assert runner.build_phase_commands(
+        runner.ALL_PHASE,
+        Path(".tmp/st12h-full-route"),
+        Path(".tmp/st12h-full-route-pytest"),
+    ) == flattened
+    assert runner._st12h_selected_command_failures(
+        flattened,
+        phase=runner.ALL_PHASE,
+    ) == ()
+
+
+def test_st12h_runner_fails_closed_for_missing_marker(monkeypatch, capsys) -> None:
+    command = [
+        sys.executable,
+        "tools/validate_qku_computation_control_plane.py",
+        "--domain",
+        "h",
+    ]
+
+    def fake_run(argv, **kwargs):
+        assert kwargs["timeout"] == 1200
+        return subprocess.CompletedProcess(
+            argv,
+            0,
+            stdout=(
+                "QKU_COMPUTATION_CONTROL_PLANE_VALIDATED domain=h "
+                "contract_checks=36 golden_vectors=0\n"
+            ),
+            stderr="",
+        )
+
+    monkeypatch.setattr(runner.subprocess, "run", fake_run)
+
+    assert runner.run_commands([command], phase="deterministic-validators-c") == 1
+    assert "ST12H_VALIDATION_TERMINAL_MARKER_MISSING" in capsys.readouterr().err
+
+
+def test_st12h_runner_fails_closed_for_timeout(monkeypatch, capsys) -> None:
+    command = [
+        sys.executable,
+        "tools/independent_validate_qku_computation_control_plane.py",
+    ]
+
+    def fake_run(argv, **kwargs):
+        assert kwargs["timeout"] == 1800
+        raise subprocess.TimeoutExpired(argv, kwargs["timeout"])
+
+    monkeypatch.setattr(runner.subprocess, "run", fake_run)
+
+    assert runner.run_commands([command], phase="deterministic-validators-c") == 1
+    assert "ST12H_VALIDATION_COMMAND_TIMEOUT" in capsys.readouterr().err
+
+
+def test_st12h_runner_fails_closed_for_skipped_command_and_protected_change() -> None:
+    commands = runner.build_phase_commands(
+        runner.ALL_PHASE,
+        Path(".tmp/st12h-skipped-command"),
+        Path(".tmp/st12h-skipped-command-pytest"),
+    )
+    skipped = tuple(runner.build_st12h_validation_commands(sys.executable))[0]
+    commands.remove(list(skipped))
+
+    assert any(
+        failure.startswith("ST12H_VALIDATION_COMMAND_SKIPPED_OR_DUPLICATED")
+        for failure in runner._st12h_selected_command_failures(
+            commands,
+            phase=runner.ALL_PHASE,
+        )
+    )
+    protected = (
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/"
+        "accounting.py"
+    )
+    assert runner._st12h_execution_budget_failures(
+        protected_predecessor_changes=(protected,)
+    ) == (f"ST12H_READ_ONLY_PREDECESSOR_CHANGED: {protected}",)
+
+
+def test_st12h_runner_fails_closed_for_budget_overrun_and_second_campaign(
+    monkeypatch,
+    capsys,
+) -> None:
+    failures = runner._st12h_execution_budget_failures(
+        concurrent_validation_processes=2,
+        automatic_full_campaign_retry_count=1,
+        full_local_campaign_count=2,
+        scratch_logical_bytes=runner.ST12H_MAX_SCRATCH_LOGICAL_BYTES + 1,
+        scratch_allocated_bytes=runner.ST12H_MAX_SCRATCH_ALLOCATED_BYTES + 1,
+        scratch_file_count=runner.ST12H_MAX_SCRATCH_FILES + 1,
+        scratch_directory_count=runner.ST12H_MAX_SCRATCH_DIRECTORIES + 1,
+    )
+    assert set(failures) == {
+        "ST12H_CONCURRENT_VALIDATION_PROCESS_BUDGET_EXCEEDED",
+        "ST12H_AUTOMATIC_FULL_CAMPAIGN_RETRY_FORBIDDEN",
+        "ST12H_FULL_LOCAL_CAMPAIGN_BUDGET_EXCEEDED",
+        "ST12H_SCRATCH_LOGICAL_BYTE_BUDGET_EXCEEDED",
+        "ST12H_SCRATCH_ALLOCATED_BYTE_BUDGET_EXCEEDED",
+        "ST12H_SCRATCH_FILE_BUDGET_EXCEEDED",
+        "ST12H_SCRATCH_DIRECTORY_BUDGET_EXCEEDED",
+    }
+
+    monkeypatch.setattr(
+        runner,
+        "_st12h_scratch_usage",
+        lambda roots: (runner.ST12H_MAX_SCRATCH_LOGICAL_BYTES + 1, 0, 0, 0),
+    )
+    monkeypatch.setattr(
+        runner.subprocess,
+        "run",
+        lambda command: subprocess.CompletedProcess(command, 0),
+    )
+    assert runner.run_commands([[sys.executable, "noop.py"]]) == 1
+    assert "ST12H_SCRATCH_LOGICAL_BYTE_BUDGET_EXCEEDED" in capsys.readouterr().err

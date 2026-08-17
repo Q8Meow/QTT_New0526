@@ -12,6 +12,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.validation import (  # noqa: E402
+    ST12H_GROUPED_MATRIX_SUCCESS_MARKER,
     compare_golden_vector,
     compare_st12c_golden_vector,
     validate_domain,
@@ -25,6 +26,7 @@ DOMAIN_MATH_IDS = {
     "d": (),
     "execution": ("MATH-37", "MATH-38"),
     "g": (),
+    "h": (),
     "llm": (),
     "latency": (),
     "model_risk": (),
@@ -62,6 +64,8 @@ def main() -> int:
         f"contract_checks={len(report.checks)} "
         f"golden_vectors={len(DOMAIN_MATH_IDS[args.domain])}"
     )
+    if args.domain == "h":
+        print(ST12H_GROUPED_MATRIX_SUCCESS_MARKER)
     return 0
 
 

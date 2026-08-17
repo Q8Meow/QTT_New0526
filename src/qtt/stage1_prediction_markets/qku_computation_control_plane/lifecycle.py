@@ -590,3 +590,109 @@ class FillAccumulatorV1:
 
 FINAL_RELEASE_AUTHORITY = "ExecutionRouterV1_FUTURE_SOLE_OWNER_NOT_IMPLEMENTED"
 FORBIDDEN_EXECUTION_METHODS = frozenset({"submit", "cancel", "amend", "sign", "dispatch", "send"})
+
+
+class ST12HFinalizationStateV1(StrEnum):
+    """Exact non-runtime ST12-H implementation/publication custody states."""
+
+    HELD = "HELD"
+    PHASE0_VERIFIED_IMPLEMENTATION_HELD = "PHASE0_VERIFIED_IMPLEMENTATION_HELD"
+    IMPLEMENTATION_AUTHORIZED = "IMPLEMENTATION_AUTHORIZED"
+    IMPLEMENTATION_IN_PROGRESS = "IMPLEMENTATION_IN_PROGRESS"
+    FOCUSED_VALIDATED = "FOCUSED_VALIDATED"
+    GENERATED_STABLE = "GENERATED_STABLE"
+    AFFECTED_SCOPE_VALIDATED = "AFFECTED_SCOPE_VALIDATED"
+    FULL_LOCAL_VALIDATED = "FULL_LOCAL_VALIDATED"
+    DRAFT_PR_OPEN = "DRAFT_PR_OPEN"
+    INDEPENDENT_CODE_AUDIT_PENDING = "INDEPENDENT_CODE_AUDIT_PENDING"
+    INDEPENDENT_CODE_AUDIT_PASS = "INDEPENDENT_CODE_AUDIT_PASS"
+    MERGE_HELD = "MERGE_HELD"
+    MERGED_MAIN_GREEN = "MERGED_MAIN_GREEN"
+    OWNER_ACCEPTED = "OWNER_ACCEPTED"
+
+
+ST12H_FINALIZATION_STATE_MACHINE_V1: Mapping[
+    ST12HFinalizationStateV1,
+    tuple[ST12HFinalizationStateV1, ...],
+] = MappingProxyType(
+    {
+        ST12HFinalizationStateV1.HELD: (
+            ST12HFinalizationStateV1.PHASE0_VERIFIED_IMPLEMENTATION_HELD,
+        ),
+        ST12HFinalizationStateV1.PHASE0_VERIFIED_IMPLEMENTATION_HELD: (
+            ST12HFinalizationStateV1.IMPLEMENTATION_AUTHORIZED,
+        ),
+        ST12HFinalizationStateV1.IMPLEMENTATION_AUTHORIZED: (
+            ST12HFinalizationStateV1.IMPLEMENTATION_IN_PROGRESS,
+        ),
+        ST12HFinalizationStateV1.IMPLEMENTATION_IN_PROGRESS: (
+            ST12HFinalizationStateV1.FOCUSED_VALIDATED,
+        ),
+        ST12HFinalizationStateV1.FOCUSED_VALIDATED: (
+            ST12HFinalizationStateV1.GENERATED_STABLE,
+        ),
+        ST12HFinalizationStateV1.GENERATED_STABLE: (
+            ST12HFinalizationStateV1.AFFECTED_SCOPE_VALIDATED,
+        ),
+        ST12HFinalizationStateV1.AFFECTED_SCOPE_VALIDATED: (
+            ST12HFinalizationStateV1.FULL_LOCAL_VALIDATED,
+        ),
+        ST12HFinalizationStateV1.FULL_LOCAL_VALIDATED: (
+            ST12HFinalizationStateV1.DRAFT_PR_OPEN,
+        ),
+        ST12HFinalizationStateV1.DRAFT_PR_OPEN: (
+            ST12HFinalizationStateV1.INDEPENDENT_CODE_AUDIT_PENDING,
+        ),
+        ST12HFinalizationStateV1.INDEPENDENT_CODE_AUDIT_PENDING: (
+            ST12HFinalizationStateV1.INDEPENDENT_CODE_AUDIT_PASS,
+        ),
+        ST12HFinalizationStateV1.INDEPENDENT_CODE_AUDIT_PASS: (
+            ST12HFinalizationStateV1.MERGE_HELD,
+        ),
+        ST12HFinalizationStateV1.MERGE_HELD: (),
+        ST12HFinalizationStateV1.MERGED_MAIN_GREEN: (
+            ST12HFinalizationStateV1.OWNER_ACCEPTED,
+        ),
+        ST12HFinalizationStateV1.OWNER_ACCEPTED: (),
+    }
+)
+
+
+def validate_st12h_finalization_transition_v1(
+    current: ST12HFinalizationStateV1,
+    proposed: ST12HFinalizationStateV1,
+    receipt_refs: tuple[str, ...],
+) -> None:
+    """Validate one explicit H custody transition without performing it."""
+
+    if type(current) is not ST12HFinalizationStateV1 or type(proposed) is not ST12HFinalizationStateV1:
+        raise ContractValidationError(
+            ReasonCode.INVALID_CONTRACT,
+            "ST12-H transition states must be exact enum values",
+        )
+    if (
+        not isinstance(receipt_refs, tuple)
+        or not receipt_refs
+        or len(set(receipt_refs)) != len(receipt_refs)
+        or any(
+            not isinstance(value, str)
+            or not value
+            or value != value.strip()
+            for value in receipt_refs
+        )
+    ):
+        raise ContractValidationError(
+            ReasonCode.INCOMPLETE_CONTRACT,
+            "ST12-H transitions require ordered unique canonical receipt refs",
+        )
+    if proposed not in ST12H_FINALIZATION_STATE_MACHINE_V1[current]:
+        reason = (
+            ReasonCode.LATER_TRANCHE_AUTHORITY_REQUIRED
+            if current is ST12HFinalizationStateV1.MERGE_HELD
+            or proposed is ST12HFinalizationStateV1.MERGED_MAIN_GREEN
+            else ReasonCode.TRANSACTION_STATE_INVALID
+        )
+        raise ContractValidationError(
+            reason,
+            f"ST12-H transition {current.value}->{proposed.value} is not authorized",
+        )

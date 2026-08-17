@@ -246,6 +246,7 @@ def test_qku_shared_integration_paths_use_the_exact_allowlists() -> None:
                 *inventory.ST12E_ALLOWED_EXACT_PATHS,
                 *inventory.ST12F_ALLOWED_EXACT_PATHS,
                 *inventory.ST12G_ALLOWED_EXACT_PATHS,
+                *inventory.ST12H_ALLOWED_EXACT_PATHS,
             )
         )
     for path in inventory.QKU_ALLOWED_EXACT_PATHS:
@@ -369,7 +370,12 @@ def test_router_output_is_deterministic():
     assert first.to_json_dict() == second.to_json_dict()
 
 
-def test_pr152_decision_is_clean_after_currentization_counts_match():
+def test_pr152_decision_is_clean_after_currentization_counts_match(monkeypatch):
+    monkeypatch.setattr(
+        router,
+        "_pr152_currentization_report_matches_filesystem",
+        lambda _repo_root: True,
+    )
     result = _pull_request_result(
         "docs/master_plan/generated/PR208_CIRuntimeRationalizationSummary.report.json"
     )
@@ -483,3 +489,41 @@ def test_every_st12g_path_routes_all_g_and_existing_owner_validators() -> None:
         )
     assert result.unknown_files == ()
     assert result.fail_closed_reasons == ()
+
+
+def test_st12h_exact_paths_route_required_validators_and_protect_predecessors() -> None:
+    result = build_router_result(
+        RouterInput(
+            repo_root=REPO_ROOT,
+            changed_files=tuple(sorted(inventory.ST12H_ACTIVE_PATHS)),
+            workflow_event_name="pull_request",
+            is_pull_request=True,
+            current_branch="agent/st12h-validation-currentization-operations-publication",
+        )
+    )
+    assert len(inventory.ST12H_ACTIVE_PATHS) == 25
+    assert result.unknown_files == ()
+    assert result.fail_closed_reasons == ()
+    for path in inventory.ST12H_ACTIVE_PATHS:
+        assert inventory.ST12H_REQUIRED_VALIDATOR_IDS <= set(
+            result.classified_files[path]
+        )
+    for path in (
+        ".github/workflows/qtt_validation.yml",
+        "tools/changed_area_validation_router.py",
+        "tests/tools/test_validation_inventory.py",
+    ):
+        focused = _pull_request_result(path)
+        assert focused.full_validation_required is True
+
+    protected_path = sorted(router.ST12H_READ_ONLY_PREDECESSOR_PATHS)[0]
+    protected = build_router_result(
+        RouterInput(
+            repo_root=REPO_ROOT,
+            changed_files=(protected_path,),
+            current_branch="agent/st12h-validation-currentization-operations-publication",
+        )
+    )
+    assert protected.fail_closed_reasons == (
+        f"ST12H_READ_ONLY_PREDECESSOR_CHANGED: {protected_path}",
+    )

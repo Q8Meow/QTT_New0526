@@ -2,6 +2,7 @@ from pathlib import Path
 
 from tools import run_validation_gates as runner
 from tools import validation_inventory as inventory
+from tools import validation_scope_registry as scope_registry
 
 
 EXPECTED_ST12C_QKU_VALIDATOR_IDS = frozenset(
@@ -54,6 +55,24 @@ EXPECTED_ST12G_QKU_VALIDATOR_IDS = frozenset(
     {
         "validate_qku_computation_control_plane_g",
         "independent_validate_qku_computation_control_plane_g",
+    }
+)
+EXPECTED_ST12H_QKU_VALIDATOR_IDS = frozenset(
+    {
+        "independent_validate_qku_computation_control_plane",
+        "independent_validate_qku_computation_control_plane_accounting",
+        "independent_validate_qku_computation_control_plane_execution",
+        "independent_validate_qku_computation_control_plane_llm",
+        "independent_validate_qku_computation_control_plane_operations",
+        "independent_validate_qku_computation_control_plane_security",
+        "independent_validate_qku_computation_control_plane_source",
+        "validate_qku_computation_control_plane_h",
+        "validate_qku_computation_control_plane_accounting",
+        "validate_qku_computation_control_plane_execution",
+        "validate_qku_computation_control_plane_llm",
+        "validate_qku_computation_control_plane_operations",
+        "validate_qku_computation_control_plane_security",
+        "validate_qku_computation_control_plane_source",
     }
 )
 EXPECTED_ST12G_OWNER_VALIDATOR_IDS = frozenset(
@@ -127,12 +146,14 @@ def test_inventory_has_centralized_qku_validation_entries():
         *EXPECTED_ST12E_QKU_VALIDATOR_IDS,
         *EXPECTED_ST12F_QKU_VALIDATOR_IDS,
         *EXPECTED_ST12G_QKU_VALIDATOR_IDS,
+        *EXPECTED_ST12H_QKU_VALIDATOR_IDS,
     }
     assert inventory.ST12C_QKU_VALIDATOR_IDS == EXPECTED_ST12C_QKU_VALIDATOR_IDS
     assert inventory.ST12E_QKU_VALIDATOR_IDS == EXPECTED_ST12E_QKU_VALIDATOR_IDS
     assert inventory.ST12D_QKU_VALIDATOR_IDS == EXPECTED_ST12D_QKU_VALIDATOR_IDS
     assert inventory.ST12F_QKU_VALIDATOR_IDS == EXPECTED_ST12F_QKU_VALIDATOR_IDS
     assert inventory.ST12G_QKU_VALIDATOR_IDS == EXPECTED_ST12G_QKU_VALIDATOR_IDS
+    assert inventory.ST12H_QKU_VALIDATOR_IDS == EXPECTED_ST12H_QKU_VALIDATOR_IDS
     assert inventory.ST12D_EXCLUSIVE_QKU_VALIDATOR_IDS == {
         "independent_validate_qku_computation_control_plane_d",
         "validate_qku_computation_control_plane_d",
@@ -154,12 +175,15 @@ def test_inventory_has_centralized_qku_validation_entries():
             *inventory.ST12E_ALLOWED_EXACT_PATHS,
             *inventory.ST12F_ALLOWED_EXACT_PATHS,
             *inventory.ST12G_ALLOWED_EXACT_PATHS,
+            *inventory.ST12H_ALLOWED_EXACT_PATHS,
         )
     )
     assert expected <= set(entries)
     for validator_id in expected:
         entry = entries[validator_id]
-        if validator_id in EXPECTED_ST12G_QKU_VALIDATOR_IDS:
+        if validator_id in EXPECTED_ST12H_QKU_VALIDATOR_IDS:
+            expected_owner = "ST12-TRANCHE-H"
+        elif validator_id in EXPECTED_ST12G_QKU_VALIDATOR_IDS:
             expected_owner = "ST12-TRANCHE-G"
         elif validator_id in EXPECTED_ST12F_QKU_VALIDATOR_IDS:
             expected_owner = "ST12-TRANCHE-F"
@@ -754,3 +778,38 @@ def test_inventory_path_globs_are_posix():
         ):
             for glob in getattr(entry, field_name):
                 assert "\\" not in glob, (entry.validator_id, field_name, glob)
+
+
+def test_st12h_inventory_is_exact_and_uses_central_command_authority() -> None:
+    entries = inventory.inventory_by_id()
+    assert inventory.ST12H_ACTIVE_PATHS is inventory.ST12H_ALLOWED_EXACT_PATHS
+    assert (
+        inventory.ST12H_EXACT_VALIDATION_COMMANDS
+        is scope_registry.ST12H_EXACT_VALIDATION_COMMANDS
+    )
+    assert len(inventory.ST12H_ACTIVE_PATHS) == 25
+    assert inventory.ST12H_QKU_VALIDATOR_IDS == EXPECTED_ST12H_QKU_VALIDATOR_IDS
+    assert inventory.ST12H_REQUIRED_VALIDATOR_IDS == frozenset(
+        {
+            *EXPECTED_ST12H_QKU_VALIDATOR_IDS,
+            inventory.ST12H_GROUPED_MATRIX_VALIDATOR_ID,
+        }
+    )
+    assert inventory.ST12H_REQUIRED_VALIDATOR_IDS <= set(entries)
+    assert len(inventory.ST12H_EXACT_VALIDATION_COMMANDS) == 12
+    assert len(set(inventory.ST12H_EXACT_VALIDATION_COMMANDS)) == 12
+    assert len(entries) == len(set(entries))
+    assert len(runner.ORDERED_PHASES) == 13
+    assert set(inventory.PHASE_JOB_IDS.values()) == {"validation_shards"}
+
+    report_paths = {
+        path
+        for path in inventory.ST12H_ACTIVE_PATHS
+        if path.startswith("docs/master_plan/generated/qku_control_plane/st12_h_")
+    }
+    assert report_paths == {
+        "docs/master_plan/generated/qku_control_plane/st12_h_validation_currentization_operations_publication.report.json",
+        "docs/master_plan/generated/qku_control_plane/st12_h_final_step12_handoff.report.json",
+    }
+    for path in inventory.ST12H_ACTIVE_PATHS:
+        assert inventory.entries_matching_path(path)

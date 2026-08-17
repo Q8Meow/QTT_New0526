@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, fields as dataclass_fields
 from datetime import datetime
+from decimal import Decimal
 from enum import StrEnum
 from types import MappingProxyType
 from typing import Mapping
@@ -16,6 +17,11 @@ from .models import (
     NO_EFFECTS_V1,
     NoEffectFlagsV1,
     SnapshotCandidateStateV1,
+    ST12HStep12FinalHandoffV1,
+    ST12HValidationCurrentizationOperationsPublicationReportV1,
+    TypedValueKindV1,
+    TypedValueRecordV1,
+    TypedValueV1,
 )
 from .serialization import deterministic_json, safe_json_loads
 
@@ -1035,3 +1041,781 @@ VALUE_TRANSFORMATION_REGISTRY_V1: Mapping[str, str] = MappingProxyType(
         **{f"MATH-{number}": "REGISTERED_FORMULA" for number in range(26, 39)},
     }
 )
+
+
+def _st12h_required_text(value: object, name: str) -> str:
+    if (
+        not isinstance(value, str)
+        or not value
+        or value != value.strip()
+        or any(ord(character) < 0x20 for character in value)
+    ):
+        raise ContractValidationError(
+            ReasonCode.INVALID_CONTRACT,
+            f"{name} must be canonical nonempty text",
+        )
+    return value
+
+
+def _st12h_refs(
+    value: object,
+    name: str,
+    *,
+    allow_empty: bool = False,
+) -> tuple[str, ...]:
+    if not isinstance(value, tuple) or (not allow_empty and not value):
+        raise ContractValidationError(
+            ReasonCode.INVALID_CONTRACT,
+            f"{name} must be an immutable ordered tuple",
+        )
+    for index, item in enumerate(value):
+        _st12h_required_text(item, f"{name}[{index}]")
+    if len(set(value)) != len(value):
+        raise ContractValidationError(
+            ReasonCode.INVALID_CONTRACT,
+            f"{name} must contain unique values",
+        )
+    return value
+
+
+def _st12h_count(value: object, name: str) -> int:
+    if type(value) is not int or value < 0:
+        raise ContractValidationError(
+            ReasonCode.INVALID_CONTRACT,
+            f"{name} must be an exact nonnegative integer",
+        )
+    return value
+
+
+@dataclass(frozen=True, slots=True)
+class ST12HReceiptCustodyV1:
+    schema_version: str
+    terminal_state: str
+    reason_code_or_none: ReasonCode | None
+    required_reference_ids: tuple[str, ...]
+    evaluated_at: datetime
+    valid_until: datetime
+    custody_state: str
+    no_effect_flags: NoEffectFlagsV1
+
+    def __post_init__(self) -> None:
+        _st12h_required_text(self.schema_version, "schema_version")
+        _st12h_required_text(self.terminal_state, "terminal_state")
+        _st12h_required_text(self.custody_state, "custody_state")
+        if self.reason_code_or_none is not None and type(self.reason_code_or_none) is not ReasonCode:
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "reason_code_or_none must be an exact ReasonCode or None",
+            )
+        _st12h_refs(self.required_reference_ids, "required_reference_ids")
+        evaluated = parse_utc(self.evaluated_at, field_name="evaluated_at")
+        valid_until = parse_utc(self.valid_until, field_name="valid_until")
+        if evaluated > valid_until:
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "evaluated_at must not be after valid_until",
+            )
+        object.__setattr__(self, "evaluated_at", evaluated)
+        object.__setattr__(self, "valid_until", valid_until)
+        if self.no_effect_flags is not NO_EFFECTS_V1:
+            raise ContractValidationError(
+                ReasonCode.RUNTIME_EFFECT_FORBIDDEN,
+                "receipt custody must use the shared NO_EFFECTS_V1",
+            )
+
+
+@dataclass(frozen=True, slots=True)
+class ST12HBackupRestoreReceiptV1(ST12HReceiptCustodyV1):
+    receipt_id: str
+    stage_id: str
+    artifact_refs: tuple[str, ...]
+    artifact_member_count: int
+    restored_member_count: int
+    byte_parity_count: int
+    validation_markers: tuple[str, ...]
+    repository_copy_count: int
+    copied_git_index_count: int
+    scratch_logical_bytes: int
+    scratch_allocated_bytes: int
+    scratch_file_count: int
+    cleanup_state: str
+
+    def __post_init__(self) -> None:
+        ST12HReceiptCustodyV1.__post_init__(self)
+        for name in ("receipt_id", "stage_id", "cleanup_state"):
+            _st12h_required_text(getattr(self, name), name)
+        _st12h_refs(self.artifact_refs, "artifact_refs")
+        _st12h_refs(self.validation_markers, "validation_markers")
+        for name in (
+            "artifact_member_count",
+            "restored_member_count",
+            "byte_parity_count",
+            "repository_copy_count",
+            "copied_git_index_count",
+            "scratch_logical_bytes",
+            "scratch_allocated_bytes",
+            "scratch_file_count",
+        ):
+            _st12h_count(getattr(self, name), name)
+        if not (
+            self.artifact_member_count
+            == self.restored_member_count
+            == self.byte_parity_count
+        ):
+            raise ContractValidationError(
+                ReasonCode.RECONCILIATION_REQUIRED,
+                "backup, restore, and byte-parity member counts must agree",
+            )
+        if self.repository_copy_count != 0 or self.copied_git_index_count != 0:
+            raise ContractValidationError(
+                ReasonCode.RUNTIME_EFFECT_FORBIDDEN,
+                "repository and Git-index copies are forbidden",
+            )
+
+
+@dataclass(frozen=True, slots=True)
+class ST12HControlReceiptV1(ST12HReceiptCustodyV1):
+    receipt_id: str
+    closure_id: str
+    control_id: str
+    case_id: str
+    domain: str
+    owner_path: str
+    owner_symbol: str
+    input_fixture_ref: str
+    mutation_operation: str
+    control_payload: TypedValueRecordV1
+    assertion_results: TypedValueRecordV1
+    source_receipt_refs: tuple[str, ...]
+
+    def __post_init__(self) -> None:
+        ST12HReceiptCustodyV1.__post_init__(self)
+        for name in (
+            "receipt_id",
+            "closure_id",
+            "control_id",
+            "case_id",
+            "domain",
+            "owner_path",
+            "owner_symbol",
+            "input_fixture_ref",
+            "mutation_operation",
+        ):
+            _st12h_required_text(getattr(self, name), name)
+        if type(self.control_payload) is not TypedValueRecordV1 or type(self.assertion_results) is not TypedValueRecordV1:
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "control payload and assertion results must be exact typed records",
+            )
+        _st12h_refs(
+            self.source_receipt_refs,
+            "source_receipt_refs",
+            allow_empty=True,
+        )
+
+
+@dataclass(frozen=True, slots=True)
+class ST12HFinalizationReceiptV1(ST12HReceiptCustodyV1):
+    receipt_id: str
+    control_id: str
+    predecessor_receipt_refs: tuple[str, ...]
+    evidence_refs: tuple[str, ...]
+
+    def __post_init__(self) -> None:
+        ST12HReceiptCustodyV1.__post_init__(self)
+        _st12h_required_text(self.receipt_id, "receipt_id")
+        _st12h_required_text(self.control_id, "control_id")
+        _st12h_refs(
+            self.predecessor_receipt_refs,
+            "predecessor_receipt_refs",
+            allow_empty=True,
+        )
+        _st12h_refs(self.evidence_refs, "evidence_refs")
+
+
+@dataclass(frozen=True, slots=True)
+class ST12HPublicationReceiptV1(ST12HReceiptCustodyV1):
+    publication_id: str
+    artifact_refs: tuple[str, ...]
+    validation_receipt_refs: tuple[str, ...]
+    independent_audit_receipt_ref: str
+    validation_campaign_receipt_ref: str
+    completion_denominators: Mapping[str, int]
+    active_implementation_path_count: int
+    read_only_predecessor_path_count: int
+    grouped_test_module_count: int
+    grouped_test_function_count: int
+    stale_receipt_count: int
+    stale_receipt_rejection_count: int
+    authority_non_effects: tuple[str, ...]
+    next_owner_action: str
+
+    def __post_init__(self) -> None:
+        ST12HReceiptCustodyV1.__post_init__(self)
+        for name in (
+            "publication_id",
+            "independent_audit_receipt_ref",
+            "validation_campaign_receipt_ref",
+            "next_owner_action",
+        ):
+            _st12h_required_text(getattr(self, name), name)
+        _st12h_refs(self.artifact_refs, "artifact_refs")
+        _st12h_refs(self.validation_receipt_refs, "validation_receipt_refs")
+        _st12h_refs(self.authority_non_effects, "authority_non_effects")
+        if len(self.artifact_refs) != 2 or len(self.authority_non_effects) != 15:
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "publication requires exactly two artifacts and fifteen held authorities",
+            )
+        if not isinstance(self.completion_denominators, Mapping) or not self.completion_denominators:
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "completion_denominators must be a nonempty mapping",
+            )
+        normalized: dict[str, int] = {}
+        for key, value in self.completion_denominators.items():
+            _st12h_required_text(key, "completion_denominators.key")
+            normalized[key] = _st12h_count(value, f"completion_denominators[{key}]")
+        object.__setattr__(
+            self,
+            "completion_denominators",
+            MappingProxyType(dict(sorted(normalized.items()))),
+        )
+        exact = (
+            self.active_implementation_path_count,
+            self.read_only_predecessor_path_count,
+            self.grouped_test_module_count,
+            self.grouped_test_function_count,
+            self.stale_receipt_count,
+            self.stale_receipt_rejection_count,
+        )
+        if exact != (25, 66, 1, 6, 0, 14):
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "publication path, test, and stale-receipt denominators must be exact",
+            )
+
+
+@dataclass(frozen=True, slots=True)
+class ST12HValidationCommandReceiptV1(ST12HReceiptCustodyV1):
+    receipt_id: str
+    campaign_id: str
+    command_id: str
+    execution_order: int
+    command_argv: tuple[str, ...]
+    cwd_policy: str
+    environment_id: str
+    environment_class: str
+    started_at: datetime
+    finished_at: datetime
+    elapsed_seconds: Decimal
+    returncode: int
+    terminal_marker: str
+    stdout_ref: str
+    stderr_ref: str
+    stdout_line_count: int
+    stderr_line_count: int
+    tracked_paths_before: tuple[str, ...]
+    tracked_paths_after: tuple[str, ...]
+    staged_paths_before: tuple[str, ...]
+    staged_paths_after: tuple[str, ...]
+    ordinary_untracked_paths_before: tuple[str, ...]
+    ordinary_untracked_paths_after: tuple[str, ...]
+    scratch_logical_bytes: int
+    scratch_allocated_bytes: int
+    scratch_file_count: int
+    attempt_count: int
+
+    def __post_init__(self) -> None:
+        ST12HReceiptCustodyV1.__post_init__(self)
+        for name in (
+            "receipt_id",
+            "campaign_id",
+            "command_id",
+            "cwd_policy",
+            "environment_id",
+            "environment_class",
+            "terminal_marker",
+            "stdout_ref",
+            "stderr_ref",
+        ):
+            _st12h_required_text(getattr(self, name), name)
+        _st12h_refs(self.command_argv, "command_argv")
+        for name in (
+            "tracked_paths_before",
+            "tracked_paths_after",
+            "staged_paths_before",
+            "staged_paths_after",
+            "ordinary_untracked_paths_before",
+            "ordinary_untracked_paths_after",
+        ):
+            _st12h_refs(getattr(self, name), name, allow_empty=True)
+        started = parse_utc(self.started_at, field_name="started_at")
+        finished = parse_utc(self.finished_at, field_name="finished_at")
+        if started > finished:
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "started_at must not be after finished_at",
+            )
+        object.__setattr__(self, "started_at", started)
+        object.__setattr__(self, "finished_at", finished)
+        if type(self.elapsed_seconds) is not Decimal or not self.elapsed_seconds.is_finite() or self.elapsed_seconds < 0:
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "elapsed_seconds must be a finite nonnegative Decimal",
+            )
+        for name in (
+            "execution_order",
+            "returncode",
+            "stdout_line_count",
+            "stderr_line_count",
+            "scratch_logical_bytes",
+            "scratch_allocated_bytes",
+            "scratch_file_count",
+            "attempt_count",
+        ):
+            _st12h_count(getattr(self, name), name)
+        if self.execution_order < 1 or self.attempt_count != 1:
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "execution order must be positive and attempt count exact one",
+            )
+
+
+@dataclass(frozen=True, slots=True)
+class ST12HValidationCampaignReceiptV1(ST12HReceiptCustodyV1):
+    campaign_id: str
+    environment_receipt_refs: tuple[str, ...]
+    environment_class: str
+    command_receipts: tuple[ST12HValidationCommandReceiptV1, ...]
+    phase_receipt_refs: tuple[str, ...]
+    command_count: int
+    pass_count: int
+    fail_count: int
+    full_campaign_count: int
+    scratch_logical_bytes: int
+    scratch_allocated_bytes: int
+    scratch_file_count: int
+    tracked_state_stable: bool
+    scratch_budget_pass: bool
+    network_policy_pass: bool
+    final_custody_state: str
+
+    def __post_init__(self) -> None:
+        ST12HReceiptCustodyV1.__post_init__(self)
+        _st12h_required_text(self.campaign_id, "campaign_id")
+        _st12h_required_text(self.environment_class, "environment_class")
+        _st12h_required_text(self.final_custody_state, "final_custody_state")
+        _st12h_refs(self.environment_receipt_refs, "environment_receipt_refs")
+        _st12h_refs(self.phase_receipt_refs, "phase_receipt_refs")
+        if not isinstance(self.command_receipts, tuple) or any(
+            type(receipt) is not ST12HValidationCommandReceiptV1
+            for receipt in self.command_receipts
+        ):
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "command_receipts must contain exact command receipts",
+            )
+        for name in (
+            "command_count",
+            "pass_count",
+            "fail_count",
+            "full_campaign_count",
+            "scratch_logical_bytes",
+            "scratch_allocated_bytes",
+            "scratch_file_count",
+        ):
+            _st12h_count(getattr(self, name), name)
+        if self.command_count != len(self.command_receipts) or self.pass_count + self.fail_count != self.command_count:
+            raise ContractValidationError(
+                ReasonCode.RECONCILIATION_REQUIRED,
+                "campaign command counts do not reconcile",
+            )
+        if self.full_campaign_count != 1:
+            raise ContractValidationError(
+                ReasonCode.RESOURCE_BOUND_EXCEEDED,
+                "full_campaign_count must be exact one",
+            )
+        if any(
+            type(getattr(self, name)) is not bool or getattr(self, name) is not True
+            for name in (
+                "tracked_state_stable",
+                "scratch_budget_pass",
+                "network_policy_pass",
+            )
+        ):
+            raise ContractValidationError(
+                ReasonCode.VALIDATION_FAILED,
+                "campaign custody and budget flags must be exact true",
+            )
+
+
+_ST12H_SERIALIZED_FIELD_ORDER: Mapping[str, tuple[str, ...]] = MappingProxyType(
+    {
+        "ST12H-SERIALIZED-CONTRACT::01": (
+            "provider_connection_allowed",
+            "private_state_read_allowed",
+            "replay_or_paper_execution_allowed",
+            "llm_inference_allowed",
+            "qpu_execution_allowed",
+            "mode_or_allow_activation_allowed",
+            "order_release_allowed",
+            "capital_mutation_allowed",
+        ),
+        "ST12H-SERIALIZED-CONTRACT::02": (
+            "schema_version",
+            "terminal_state",
+            "reason_code_or_none",
+            "required_reference_ids",
+            "evaluated_at",
+            "valid_until",
+            "custody_state",
+            "no_effect_flags",
+            "receipt_id",
+            "stage_id",
+            "artifact_refs",
+            "artifact_member_count",
+            "restored_member_count",
+            "byte_parity_count",
+            "validation_markers",
+            "repository_copy_count",
+            "copied_git_index_count",
+            "scratch_logical_bytes",
+            "scratch_allocated_bytes",
+            "scratch_file_count",
+            "cleanup_state",
+        ),
+        "ST12H-SERIALIZED-CONTRACT::03": (
+            "schema_version",
+            "terminal_state",
+            "reason_code_or_none",
+            "required_reference_ids",
+            "evaluated_at",
+            "valid_until",
+            "custody_state",
+            "no_effect_flags",
+            "receipt_id",
+            "closure_id",
+            "control_id",
+            "case_id",
+            "domain",
+            "owner_path",
+            "owner_symbol",
+            "input_fixture_ref",
+            "mutation_operation",
+            "control_payload",
+            "assertion_results",
+            "source_receipt_refs",
+        ),
+        "ST12H-SERIALIZED-CONTRACT::04": (
+            "schema_version",
+            "terminal_state",
+            "reason_code_or_none",
+            "required_reference_ids",
+            "evaluated_at",
+            "valid_until",
+            "custody_state",
+            "no_effect_flags",
+            "receipt_id",
+            "control_id",
+            "predecessor_receipt_refs",
+            "evidence_refs",
+        ),
+        "ST12H-SERIALIZED-CONTRACT::05": (
+            "schema_version",
+            "terminal_state",
+            "reason_code_or_none",
+            "required_reference_ids",
+            "evaluated_at",
+            "valid_until",
+            "custody_state",
+            "no_effect_flags",
+            "publication_id",
+            "artifact_refs",
+            "validation_receipt_refs",
+            "independent_audit_receipt_ref",
+            "validation_campaign_receipt_ref",
+            "completion_denominators",
+            "active_implementation_path_count",
+            "read_only_predecessor_path_count",
+            "grouped_test_module_count",
+            "grouped_test_function_count",
+            "stale_receipt_count",
+            "stale_receipt_rejection_count",
+            "authority_non_effects",
+            "next_owner_action",
+        ),
+        "ST12H-SERIALIZED-CONTRACT::06": (
+            "schema_version",
+            "terminal_state",
+            "reason_code_or_none",
+            "required_reference_ids",
+            "evaluated_at",
+            "valid_until",
+            "custody_state",
+            "no_effect_flags",
+        ),
+        "ST12H-SERIALIZED-CONTRACT::07": (
+            "schema_version",
+            "handoff_id",
+            "tranche",
+            "frozen_denominators",
+            "final_control_refs",
+            "validation_campaign_receipt_ref",
+            "publication_receipt_ref",
+            "active_implementation_path_count",
+            "read_only_predecessor_path_count",
+            "grouped_test_module_count",
+            "grouped_test_function_count",
+            "stale_receipt_count",
+            "held_authorities",
+            "terminal_state",
+            "next_owner_action",
+            "no_effect_flags",
+        ),
+        "ST12H-SERIALIZED-CONTRACT::08": (
+            "schema_version",
+            "terminal_state",
+            "reason_code_or_none",
+            "required_reference_ids",
+            "evaluated_at",
+            "valid_until",
+            "custody_state",
+            "no_effect_flags",
+            "campaign_id",
+            "environment_receipt_refs",
+            "environment_class",
+            "command_receipts",
+            "phase_receipt_refs",
+            "command_count",
+            "pass_count",
+            "fail_count",
+            "full_campaign_count",
+            "scratch_logical_bytes",
+            "scratch_allocated_bytes",
+            "scratch_file_count",
+            "tracked_state_stable",
+            "scratch_budget_pass",
+            "network_policy_pass",
+            "final_custody_state",
+        ),
+        "ST12H-SERIALIZED-CONTRACT::09": (
+            "schema_version",
+            "terminal_state",
+            "reason_code_or_none",
+            "required_reference_ids",
+            "evaluated_at",
+            "valid_until",
+            "custody_state",
+            "no_effect_flags",
+            "receipt_id",
+            "campaign_id",
+            "command_id",
+            "execution_order",
+            "command_argv",
+            "cwd_policy",
+            "environment_id",
+            "environment_class",
+            "started_at",
+            "finished_at",
+            "elapsed_seconds",
+            "returncode",
+            "terminal_marker",
+            "stdout_ref",
+            "stderr_ref",
+            "stdout_line_count",
+            "stderr_line_count",
+            "tracked_paths_before",
+            "tracked_paths_after",
+            "staged_paths_before",
+            "staged_paths_after",
+            "ordinary_untracked_paths_before",
+            "ordinary_untracked_paths_after",
+            "scratch_logical_bytes",
+            "scratch_allocated_bytes",
+            "scratch_file_count",
+            "attempt_count",
+        ),
+        "ST12H-SERIALIZED-CONTRACT::10": (
+            "schema_version",
+            "tranche",
+            "generated_projection_only",
+            "master_plan_source_authority",
+            "closure_counts",
+            "path_counts",
+            "parameter_count",
+            "math_counts",
+            "test_topology",
+            "validation_command_count",
+            "validation_campaign_phase_count",
+            "environment_classes",
+            "validation_command_receipt_refs",
+            "validation_campaign_receipt_ref",
+            "budget_usage",
+            "source_currentness_evidence_refs",
+            "source_binding_count",
+            "stale_receipt_class_count",
+            "stale_receipt_rejection_count",
+            "backup_restore_stage_count",
+            "finalization_control_count",
+            "serialized_contract_binding_count",
+            "schema_file_count",
+            "schema_owner_consumer_binding_count",
+            "schema_cardinality_binding_count",
+            "reason_code_binding_count",
+            "held_authorities",
+            "authority_effects",
+            "terminal_state",
+            "next_owner_action",
+        ),
+    }
+)
+
+_ST12H_NO_EFFECT_FIELD_ORDER = _ST12H_SERIALIZED_FIELD_ORDER[
+    "ST12H-SERIALIZED-CONTRACT::01"
+]
+
+_ST12H_SERIALIZED_BINDINGS: Mapping[str, tuple[type[object], tuple[str, ...]]] = MappingProxyType(
+    {
+        "ST12H-SERIALIZED-CONTRACT::01": (
+            NoEffectFlagsV1,
+            _ST12H_SERIALIZED_FIELD_ORDER["ST12H-SERIALIZED-CONTRACT::01"],
+        ),
+        "ST12H-SERIALIZED-CONTRACT::02": (
+            ST12HBackupRestoreReceiptV1,
+            _ST12H_SERIALIZED_FIELD_ORDER["ST12H-SERIALIZED-CONTRACT::02"],
+        ),
+        "ST12H-SERIALIZED-CONTRACT::03": (
+            ST12HControlReceiptV1,
+            _ST12H_SERIALIZED_FIELD_ORDER["ST12H-SERIALIZED-CONTRACT::03"],
+        ),
+        "ST12H-SERIALIZED-CONTRACT::04": (
+            ST12HFinalizationReceiptV1,
+            _ST12H_SERIALIZED_FIELD_ORDER["ST12H-SERIALIZED-CONTRACT::04"],
+        ),
+        "ST12H-SERIALIZED-CONTRACT::05": (
+            ST12HPublicationReceiptV1,
+            _ST12H_SERIALIZED_FIELD_ORDER["ST12H-SERIALIZED-CONTRACT::05"],
+        ),
+        "ST12H-SERIALIZED-CONTRACT::06": (
+            ST12HReceiptCustodyV1,
+            _ST12H_SERIALIZED_FIELD_ORDER["ST12H-SERIALIZED-CONTRACT::06"],
+        ),
+        "ST12H-SERIALIZED-CONTRACT::07": (
+            ST12HStep12FinalHandoffV1,
+            _ST12H_SERIALIZED_FIELD_ORDER["ST12H-SERIALIZED-CONTRACT::07"],
+        ),
+        "ST12H-SERIALIZED-CONTRACT::08": (
+            ST12HValidationCampaignReceiptV1,
+            _ST12H_SERIALIZED_FIELD_ORDER["ST12H-SERIALIZED-CONTRACT::08"],
+        ),
+        "ST12H-SERIALIZED-CONTRACT::09": (
+            ST12HValidationCommandReceiptV1,
+            _ST12H_SERIALIZED_FIELD_ORDER["ST12H-SERIALIZED-CONTRACT::09"],
+        ),
+        "ST12H-SERIALIZED-CONTRACT::10": (
+            ST12HValidationCurrentizationOperationsPublicationReportV1,
+            _ST12H_SERIALIZED_FIELD_ORDER["ST12H-SERIALIZED-CONTRACT::10"],
+        ),
+    }
+)
+
+
+def _st12h_decimal_text(value: Decimal) -> str:
+    if type(value) is not Decimal or not value.is_finite():
+        raise ContractValidationError(
+            ReasonCode.INVALID_CONTRACT,
+            "Decimal serialization requires a finite exact Decimal",
+        )
+    return format(value, "f")
+
+
+def _st12h_datetime_text(value: datetime) -> str:
+    parsed = parse_utc(value, field_name="serialized datetime")
+    return parsed.isoformat().replace("+00:00", "Z")
+
+
+def _st12h_typed_value(value: TypedValueV1) -> dict[str, object]:
+    if type(value) is not TypedValueV1:
+        raise ContractValidationError(
+            ReasonCode.INVALID_CONTRACT,
+            "typed record contains a non-TypedValueV1 row",
+        )
+    normalized: object
+    if value.kind is TypedValueKindV1.DECIMAL:
+        normalized = _st12h_decimal_text(value.value)  # type: ignore[arg-type]
+    else:
+        normalized = value.value
+    return {
+        "name": value.name,
+        "kind": value.kind.value,
+        "value": normalized,
+        "unit": value.unit,
+        "basis": value.basis,
+    }
+
+
+def _st12h_normalize_serialized_value(value: object) -> object:
+    if type(value) in {str, int, bool, float} or value is None:
+        return value
+    if type(value) is Decimal:
+        return _st12h_decimal_text(value)
+    if type(value) is datetime:
+        return _st12h_datetime_text(value)
+    if type(value) is ReasonCode:
+        return value.value
+    if type(value) is NoEffectFlagsV1:
+        if value is not NO_EFFECTS_V1:
+            raise ContractValidationError(
+                ReasonCode.RUNTIME_EFFECT_FORBIDDEN,
+                "only the shared NO_EFFECTS_V1 may be serialized",
+            )
+        return {name: False for name in _ST12H_NO_EFFECT_FIELD_ORDER}
+    if type(value) is TypedValueRecordV1:
+        return {"fields": [_st12h_typed_value(item) for item in value.fields]}
+    if isinstance(value, tuple):
+        return [_st12h_normalize_serialized_value(item) for item in value]
+    if isinstance(value, Mapping):
+        normalized: dict[str, object] = {}
+        for key in sorted(value):
+            _st12h_required_text(key, "serialized mapping key")
+            normalized[key] = _st12h_count(value[key], f"serialized mapping[{key}]")
+        return normalized
+    for expected_type, field_order in _ST12H_SERIALIZED_BINDINGS.values():
+        if type(value) is expected_type:
+            return {
+                name: _st12h_normalize_serialized_value(getattr(value, name))
+                for name in field_order
+            }
+    raise ContractValidationError(
+        ReasonCode.INVALID_CONTRACT,
+        f"no explicit ST12-H serialization transform for {type(value).__name__}",
+    )
+
+
+def serialize_st12h_contract_v1(value: object, *, binding_id: str) -> str:
+    """Serialize one of the ten closed ST12-H bindings explicitly."""
+
+    _st12h_required_text(binding_id, "binding_id")
+    try:
+        expected_type, field_order = _ST12H_SERIALIZED_BINDINGS[binding_id]
+    except KeyError as exc:
+        raise ContractValidationError(
+            ReasonCode.INVALID_CONTRACT,
+            f"unknown ST12-H serialized binding {binding_id}",
+        ) from exc
+    if type(value) is not expected_type:
+        raise ContractValidationError(
+            ReasonCode.SCHEMA_MISMATCH,
+            f"{binding_id} requires exact {expected_type.__name__}",
+        )
+    if tuple(field.name for field in dataclass_fields(value)) != field_order:
+        raise ContractValidationError(
+            ReasonCode.SCHEMA_MISMATCH,
+            f"{binding_id} field roster or order drifted",
+        )
+    payload = {
+        name: _st12h_normalize_serialized_value(getattr(value, name))
+        for name in field_order
+    }
+    return deterministic_json(payload)

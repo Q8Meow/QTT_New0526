@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 from enum import StrEnum
 import json
 from types import MappingProxyType
@@ -4200,4 +4200,297 @@ if (
     raise SourcePolicyError(
         ReasonCode.SOURCE_CONFLICT,
         "ST12-F source closure must remain exact 35 decisions and seven conflicts",
+    )
+
+
+def _st12h_source_text(value: object, *, field_name: str) -> str:
+    if not isinstance(value, str) or not value or value.strip() != value:
+        raise SourcePolicyError(
+            ReasonCode.SOURCE_EPOCH_MISSING,
+            f"{field_name} must be canonical nonempty text",
+        )
+    return value
+
+
+@dataclass(frozen=True, slots=True)
+class ST12HSourceBindingV1:
+    source_id: str
+    source_name: str
+    source_class: str
+    authority_class: str
+    source_locator: str
+    publication_or_version: str
+    observed_at: date
+    currentness_state: str
+    rights_state: str
+    recheck_trigger: str
+    codex_research_required: bool
+
+    def __post_init__(self) -> None:
+        for field_name in (
+            "source_id",
+            "source_name",
+            "source_class",
+            "authority_class",
+            "source_locator",
+            "publication_or_version",
+            "currentness_state",
+            "rights_state",
+            "recheck_trigger",
+        ):
+            _st12h_source_text(getattr(self, field_name), field_name=field_name)
+        if type(self.observed_at) is not date:
+            raise SourcePolicyError(
+                ReasonCode.SOURCE_EPOCH_MISSING,
+                "observed_at must be an exact date",
+            )
+        if self.codex_research_required is not False:
+            raise SourcePolicyError(
+                ReasonCode.CAPABILITY_DENIED,
+                "ST12-H does not authorize Codex research",
+            )
+
+
+@dataclass(frozen=True, slots=True)
+class ST12HSourceCurrentizationRuleV1:
+    rule_id: str
+    source_id: str
+    mutable_fact_class: str
+    recheck_action: str
+    stale_behavior: str
+    conflict_behavior: str
+    online_research_allowed_to_codex: bool
+
+    def __post_init__(self) -> None:
+        for field_name in (
+            "rule_id",
+            "source_id",
+            "mutable_fact_class",
+            "recheck_action",
+            "stale_behavior",
+            "conflict_behavior",
+        ):
+            _st12h_source_text(getattr(self, field_name), field_name=field_name)
+        if self.online_research_allowed_to_codex is not False:
+            raise SourcePolicyError(
+                ReasonCode.CAPABILITY_DENIED,
+                "ST12-H source currentization is owner-supplied and offline",
+            )
+
+
+_ST12H_SOURCE_ROWS = (
+    (
+        "ST12H-V8-SRC::01",
+        "QTT Master Plan v10.0.4",
+        "OWNER_SUPPLIED_CONTROLLING_DOCUMENT",
+        "OWNER_ARCHITECTURE_AUTHORITY",
+        "uploaded:QTT_MasterPlan_Current_v10_0_4.md",
+        "10.0.4",
+        "STABLE_ARCHITECTURE_CONTROLLING_CURRENT_REPOSITORY_OUTRANKS_DATED_PROGRESS",
+        "OWNER_SUPPLIED_INTERNAL_USE",
+        "PERMANENT_ARCHITECTURE_CHANGE_ONLY",
+    ),
+    (
+        "ST12H-V8-SRC::02",
+        "QTT Current Canonical Implementation Roadmap v10.0",
+        "OWNER_SUPPLIED_STABLE_ROADMAP_CANDIDATE",
+        "OWNER_STABLE_ROADMAP_LAW_AUTHORITY",
+        "uploaded:QTT_Current_Canonical_Implementation_Roadmap_v10_0.md",
+        "10.0",
+        "STABLE_LAWS_ACCEPTED_DATED_FRONTIER_SUPERSEDED",
+        "OWNER_SUPPLIED_INTERNAL_USE",
+        "PERMANENT_ROADMAP_CHANGE_ONLY",
+    ),
+    (
+        "ST12H-V8-SRC::03",
+        "Certified Step-12 owner package H payload",
+        "CERTIFIED_HISTORICAL_BASELINE",
+        "HISTORICAL_PROVENANCE_ONLY",
+        "uploaded:QTT_FINAL_Step12_Complete_Owner_Package_v1_2R4_CURRENTIZED_REPAIRED_COMPLETE_CERTIFIED.zip",
+        "v1.2R4",
+        "DENOMINATORS_AND_REQUIREMENT_INVENTORY_ACCEPTED_PATH_ACTIONS_REQUIRE_CURRENT_MAIN_RECONCILIATION",
+        "OWNER_SUPPLIED_INTERNAL_USE",
+        "CURRENT_MAIN_OWNER_OR_PATH_CHANGE",
+    ),
+    (
+        "ST12H-V8-SRC::04",
+        "Post-ST12-G complete handoff",
+        "OWNER_SUPPLIED_MUTABLE_STATE_HANDOFF",
+        "OWNER_GATE_STATE_PROVENANCE",
+        "uploaded:QTT_Post_ST12G_NewChat_Complete_Handoff_v1_0.md",
+        "1.0",
+        "STARTING_STATE_REVERIFIED_REMOTE_LOCAL_FACTS_REQUIRE_PHASE0",
+        "OWNER_SUPPLIED_INTERNAL_USE",
+        "BEFORE_EVERY_OWNER_OR_CODEX_GATE",
+    ),
+    (
+        "ST12H-V8-SRC::05",
+        "Current GitHub main owner topology",
+        "CURRENT_REPOSITORY_IMPLEMENTATION",
+        "CURRENT_REPOSITORY_IMPLEMENTATION_AUTHORITY",
+        "https://github.com/Q8Meow/QTT_New0526/tree/main",
+        "current-main-observed-2026-08-15",
+        "REMOTE_CURRENT_AT_OWNER_PACKAGE_FREEZE",
+        "PUBLIC_REPOSITORY_REFERENCE",
+        "CODEX_PHASE0_PREPUSH_PREMERGE",
+    ),
+    (
+        "ST12H-V8-SRC::06",
+        "Current QTT validation workflow",
+        "CURRENT_REPOSITORY_IMPLEMENTATION",
+        "CURRENT_REPOSITORY_IMPLEMENTATION_AUTHORITY",
+        "https://github.com/Q8Meow/QTT_New0526/blob/main/.github/workflows/qtt_validation.yml",
+        "current-main-observed-2026-08-15",
+        "CURRENT_REQUIRES_H_ENVIRONMENT_PIN_CURRENTIZATION",
+        "PUBLIC_REPOSITORY_REFERENCE",
+        "WORKFLOW_CHANGE_OR_PREMERGE",
+    ),
+    (
+        "ST12H-V8-SRC::07",
+        "CPython 3.14.6 release",
+        "OFFICIAL_PRIMARY_DEPENDENCY_SOURCE",
+        "OFFICIAL_PRIMARY_VERSION_AUTHORITY",
+        "https://www.python.org/downloads/release/python-3146/",
+        "3.14.6",
+        "PINNED_CLEAN_CI_AUTHORITATIVE",
+        "OFFICIAL_PUBLIC_DOCUMENTATION_REFERENCE_ONLY",
+        "WORKFLOW_RUNTIME_PIN_CHANGE",
+    ),
+    (
+        "ST12H-V8-SRC::08",
+        "pytest 9.1.1 release",
+        "OFFICIAL_PRIMARY_DEPENDENCY_SOURCE",
+        "OFFICIAL_PRIMARY_VERSION_AUTHORITY",
+        "https://pypi.org/project/pytest/9.1.1/",
+        "9.1.1",
+        "PINNED_CLEAN_CI_AUTHORITATIVE",
+        "OFFICIAL_PUBLIC_DOCUMENTATION_REFERENCE_ONLY",
+        "WORKFLOW_DEPENDENCY_PIN_CHANGE",
+    ),
+    (
+        "ST12H-V8-SRC::09",
+        "Current ReasonCode, NoEffectFlags and validation owners",
+        "CURRENT_REPOSITORY_IMPLEMENTATION",
+        "CURRENT_REPOSITORY_IMPLEMENTATION_AUTHORITY",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/{errors.py,models.py,validation.py}",
+        "current-main-observed-2026-08-15",
+        "CURRENT_EXACT_CODE_OWNER",
+        "PUBLIC_REPOSITORY_REFERENCE",
+        "REASON_CODE_MODEL_OR_VALIDATION_OWNER_CHANGE",
+    ),
+)
+
+ST12H_SOURCE_BINDINGS = tuple(
+    ST12HSourceBindingV1(
+        source_id=source_id,
+        source_name=source_name,
+        source_class=source_class,
+        authority_class=authority_class,
+        source_locator=source_locator,
+        publication_or_version=publication_or_version,
+        observed_at=date(2026, 8, 15),
+        currentness_state=currentness_state,
+        rights_state=rights_state,
+        recheck_trigger=recheck_trigger,
+        codex_research_required=False,
+    )
+    for (
+        source_id,
+        source_name,
+        source_class,
+        authority_class,
+        source_locator,
+        publication_or_version,
+        currentness_state,
+        rights_state,
+        recheck_trigger,
+    ) in _ST12H_SOURCE_ROWS
+)
+
+_ST12H_MUTABLE_FACT_CLASSES = (
+    "PERMANENT_ARCHITECTURE",
+    "PERMANENT_ROADMAP_LAWS",
+    "CURRENT_MAIN_OWNER_OR_PATH",
+    "OWNER_OR_CODEX_GATE_STATE",
+    "REMOTE_CURRENT_MAIN",
+    "VALIDATION_WORKFLOW",
+    "WORKFLOW_RUNTIME_PIN",
+    "WORKFLOW_DEPENDENCY_PIN",
+    "REASON_CODE_MODEL_OR_VALIDATION_OWNER",
+)
+
+ST12H_SOURCE_CURRENTIZATION_RULES = tuple(
+    ST12HSourceCurrentizationRuleV1(
+        rule_id=f"ST12H-SOURCE-CURRENTIZATION::{index:02d}",
+        source_id=binding.source_id,
+        mutable_fact_class=mutable_fact_class,
+        recheck_action=binding.recheck_trigger,
+        stale_behavior="REJECT_STALE_MUTABLE_FACT",
+        conflict_behavior="REJECT_SOURCE_CONFLICT",
+        online_research_allowed_to_codex=False,
+    )
+    for index, (binding, mutable_fact_class) in enumerate(
+        zip(ST12H_SOURCE_BINDINGS, _ST12H_MUTABLE_FACT_CLASSES, strict=True),
+        start=1,
+    )
+)
+
+_ST12H_RIGHTS_STATES = frozenset(
+    {
+        "OWNER_SUPPLIED_INTERNAL_USE",
+        "PUBLIC_REPOSITORY_REFERENCE",
+        "OFFICIAL_PUBLIC_DOCUMENTATION_REFERENCE_ONLY",
+    }
+)
+
+
+def validate_st12h_source_binding_v1(
+    binding: ST12HSourceBindingV1,
+    *,
+    evaluated_at: date,
+) -> None:
+    if not isinstance(binding, ST12HSourceBindingV1) or type(evaluated_at) is not date:
+        raise SourcePolicyError(
+            ReasonCode.SOURCE_EPOCH_MISSING,
+            "ST12-H source validation requires an exact binding and date",
+        )
+    if not binding.source_locator:
+        raise SourcePolicyError(
+            ReasonCode.SOURCE_EPOCH_MISSING,
+            "ST12-H source locator is missing",
+        )
+    if binding.rights_state not in _ST12H_RIGHTS_STATES:
+        raise SourcePolicyError(
+            ReasonCode.SOURCE_RIGHTS_BLOCKED,
+            "ST12-H source rights are unknown",
+        )
+    if binding.observed_at > evaluated_at:
+        raise SourcePolicyError(
+            ReasonCode.SOURCE_EPOCH_STALE,
+            "ST12-H source observation is in the future",
+        )
+    if "STALE" in binding.currentness_state:
+        raise SourcePolicyError(
+            ReasonCode.SOURCE_EPOCH_STALE,
+            "ST12-H current source is stale",
+        )
+    if (
+        binding.source_class == "CERTIFIED_HISTORICAL_BASELINE"
+        and binding.authority_class != "HISTORICAL_PROVENANCE_ONLY"
+    ):
+        raise SourcePolicyError(
+            ReasonCode.SOURCE_CONFLICT,
+            "historical ST12-H provenance cannot become current source truth",
+        )
+
+
+if (
+    len(ST12H_SOURCE_BINDINGS) != 9
+    or len(ST12H_SOURCE_CURRENTIZATION_RULES) != 9
+    or tuple(row.source_id for row in ST12H_SOURCE_BINDINGS)
+    != tuple(f"ST12H-V8-SRC::{index:02d}" for index in range(1, 10))
+):
+    raise SourcePolicyError(
+        ReasonCode.SOURCE_CONFLICT,
+        "ST12-H source closure must remain exact and ordered",
     )

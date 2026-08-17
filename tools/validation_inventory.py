@@ -22,6 +22,8 @@ from tools.validation_scope_registry import (
     ST12E_ALLOWED_EXACT_PATHS,
     ST12F_ALLOWED_EXACT_PATHS,
     ST12G_ALLOWED_EXACT_PATHS,
+    ST12H_ALLOWED_EXACT_PATHS,
+    ST12H_EXACT_VALIDATION_COMMANDS,
 )
 
 
@@ -100,6 +102,7 @@ QKU_ALLOWED_EXACT_PATHS = frozenset(
         *ST12E_ALLOWED_EXACT_PATHS,
         *ST12F_ALLOWED_EXACT_PATHS,
         *ST12G_ALLOWED_EXACT_PATHS,
+        *ST12H_ALLOWED_EXACT_PATHS,
     )
 )
 ST12C_QKU_VALIDATOR_IDS = frozenset(
@@ -168,6 +171,29 @@ ST12G_QKU_VALIDATOR_IDS = frozenset(
         "validate_qku_computation_control_plane_g",
         "independent_validate_qku_computation_control_plane_g",
     }
+)
+ST12H_ACTIVE_PATHS = ST12H_ALLOWED_EXACT_PATHS
+ST12H_QKU_VALIDATOR_IDS = frozenset(
+    {
+        "independent_validate_qku_computation_control_plane",
+        "independent_validate_qku_computation_control_plane_accounting",
+        "independent_validate_qku_computation_control_plane_execution",
+        "independent_validate_qku_computation_control_plane_llm",
+        "independent_validate_qku_computation_control_plane_operations",
+        "independent_validate_qku_computation_control_plane_security",
+        "independent_validate_qku_computation_control_plane_source",
+        "validate_qku_computation_control_plane_h",
+        "validate_qku_computation_control_plane_accounting",
+        "validate_qku_computation_control_plane_execution",
+        "validate_qku_computation_control_plane_llm",
+        "validate_qku_computation_control_plane_operations",
+        "validate_qku_computation_control_plane_security",
+        "validate_qku_computation_control_plane_source",
+    }
+)
+ST12H_GROUPED_MATRIX_VALIDATOR_ID = "pytest_shard_8_test_contract_matrix_pytest"
+ST12H_REQUIRED_VALIDATOR_IDS = frozenset(
+    (*ST12H_QKU_VALIDATOR_IDS, ST12H_GROUPED_MATRIX_VALIDATOR_ID)
 )
 ST12G_OWNER_VALIDATOR_IDS = frozenset(
     {
@@ -381,6 +407,8 @@ def _pr_tag_from_token(token: str) -> str:
 
 
 def _owner_pr_or_feature(stem: str, validator_id: str) -> str:
+    if validator_id in ST12H_QKU_VALIDATOR_IDS:
+        return "ST12-TRANCHE-H"
     if validator_id in ST12G_QKU_VALIDATOR_IDS:
         return "ST12-TRANCHE-G"
     if validator_id in ST12F_QKU_VALIDATOR_IDS:
