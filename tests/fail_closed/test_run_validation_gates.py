@@ -390,6 +390,39 @@ def test_owner_authorized_validation_branch_keeps_all_non_guarded_commands(
         ) == commands
 
 
+def test_st12_architecture_oracle_prerequisite_filters_only_rp5c_builder(capsys):
+    commands = [
+        ["python", "tools/build_pr168_rp5c_immutable_qku_formula_library.py"],
+        ["python", "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"],
+        ["python", "tools/validate_validation_inventory.py"],
+    ]
+
+    kept = runner._filter_foreign_branch_guarded_builders_for_owner_validation(
+        commands,
+        branch=(
+            ci_branch_context.ST12_ARCHITECTURE_ORACLE_PREREQUISITE_REPAIR_BRANCH
+        ),
+    )
+    kept_names = [runner._command_script_name(command) for command in kept]
+
+    assert kept_names.count(
+        "build_pr168_rp5c_immutable_qku_formula_library.py"
+    ) == 0
+    assert kept_names.count(
+        "validate_pr168_rp5c_immutable_qku_formula_library.py"
+    ) == 1
+    assert kept_names.count("validate_validation_inventory.py") == 1
+    assert len(kept) == 2
+    output = capsys.readouterr().out
+    assert output.count(
+        "QTT_OWNER_AUTHORIZED_VALIDATION_UPSTREAM_BUILDERS_READ_ONLY"
+    ) == 1
+    assert (
+        "branch="
+        + ci_branch_context.ST12_ARCHITECTURE_ORACLE_PREREQUISITE_REPAIR_BRANCH
+    ) in output
+
+
 def test_owner_authorized_validation_phase_omits_no_validator(tmp_path):
     validation_root = tmp_path / "validation"
     commands = runner.build_phase_commands(
