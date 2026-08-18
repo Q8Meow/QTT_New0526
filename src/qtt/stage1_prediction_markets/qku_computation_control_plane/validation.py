@@ -7159,7 +7159,6 @@ from .models import (  # noqa: E402
 from .parameter_policy import (  # noqa: E402
     ST12H_PARAMETER_APPLICATION_BINDINGS,
     ST12H_PARAMETER_POLICIES,
-    _ST12H_PARAMETER_APPLICATION_REGISTRY,
     _evaluate_st12h_parameter_applications_v1,
 )
 from .receipts import (  # noqa: E402
@@ -7236,6 +7235,8 @@ from .source_policy import (  # noqa: E402
     ST12H_SOURCE_BINDINGS,
     ST12HSourceBindingV1,
     _ST12HSourceCurrentnessReceiptV1,
+    _observe_st12h_source_binding_v1,
+    _st12h_source_evidence_ref,
     _validate_st12h_source_currentness_receipt_v1,
     validate_st12h_source_binding_v1,
 )
@@ -7699,6 +7700,8 @@ def validate_st12h_parameter_consumption_v1() -> None:
             or policy.consumer_symbols
             != ST12H_PARAMETER_CONSUMER_BY_SYMBOL[binding.parameter_symbol]
             or not set(binding.semantic_case_ids).issubset(_ST12H_CASE_BY_ID)
+            or binding.consumer_path.endswith("/parameter_policy.py")
+            or binding.consumer_symbol.startswith("_validate_st12h_parameter_contract")
             or binding.runtime_activation_authorized
             or policy.runtime_activation_authorized
         ):
@@ -7708,11 +7711,10 @@ def validate_st12h_parameter_consumption_v1() -> None:
     evidence = _evaluate_st12h_parameter_applications_v1()
     if (
         len(evidence) != 21
-        or set(_ST12H_PARAMETER_APPLICATION_REGISTRY)
-        != {policy.parameter_id for policy in ST12H_PARAMETER_POLICIES}
         or any(
-            row.disposition != "H_PUBLICATION_VALUE_EFFECT_PROVEN"
-            or not row.contract_assertion_passed
+            row.disposition != "H_CONTRACT_BINDING_VALIDATED"
+            or not row.policy_resolution_passed
+            or not row.exact_application_binding_passed
             or row.invalid_mutation_reason is not ReasonCode.PARAMETER_OUT_OF_POLICY
             or row.runtime_activation_authorized
             or not row.runtime_consumer_held
@@ -7720,7 +7722,7 @@ def validate_st12h_parameter_consumption_v1() -> None:
         )
     ):
         raise _st12h_validation_failure(
-            "ST12-H parameter values were not consumed or rejected by exact policy"
+            "ST12-H parameter contracts were not resolved, bound, or rejected exactly"
         )
 
 
@@ -10395,9 +10397,9 @@ def _validate_st12h_source_binding_coverage_v1(
         len(bindings) != 9
         or len({binding.source_id for binding in bindings}) != 9
         or any(
-            not binding.currentness_evidence_ref
-            or not binding.recheck_trigger
+            not binding.recheck_trigger
             or not binding.rights_state
+            or not _st12h_source_evidence_ref(binding)
             for binding in bindings
         )
     ):
@@ -10418,6 +10420,18 @@ def _validate_st12h_source_numeric_owner_separation_v1(
         )
 
 
+def _st12h_validate_and_observe_source_binding_v1(
+    binding: ST12HSourceBindingV1,
+    *,
+    evaluated_at: date,
+) -> _ST12HSourceCurrentnessReceiptV1:
+    validate_st12h_source_binding_v1(binding, evaluated_at=evaluated_at)
+    return _observe_st12h_source_binding_v1(
+        binding,
+        evaluated_at=evaluated_at,
+    )
+
+
 def _validate_st12h_final_source_packet_v1(
     receipts: tuple[_ST12HSourceCurrentnessReceiptV1, ...],
     *,
@@ -10436,7 +10450,7 @@ def _validate_st12h_final_source_packet_v1(
             evaluated_at=datetime.now(UTC).date(),
         )
         _validate_st12h_source_numeric_owner_separation_v1(
-            binding.currentness_evidence_ref,
+            _st12h_source_evidence_ref(binding),
             numeric_authority_ref,
         )
 
@@ -10821,7 +10835,7 @@ def _invoke_st12h_source_control(
         )
     if suffix in {"FRESHNESS", "STATISTICAL_CURRENTNESS"}:
         try:
-            receipt = validate_st12h_source_binding_v1(
+            receipt = _st12h_validate_and_observe_source_binding_v1(
                 binding,
                 evaluated_at=(
                     date(2026, 1, 1)
@@ -10836,7 +10850,7 @@ def _invoke_st12h_source_control(
                 owner_call_refs=("validate_st12h_source_binding_v1",),
                 evidence={
                     "source_id": binding.source_id,
-                    "source_epoch_ref": binding.currentness_evidence_ref,
+                    "source_epoch_ref": _st12h_source_evidence_ref(binding),
                     "observed_at": binding.observed_at.isoformat(), "valid_until": "EXPIRED",
                     "currentness_state": "STALE",
                     "method_id": binding.source_id,
@@ -10855,7 +10869,7 @@ def _invoke_st12h_source_control(
             owner_call_refs=("validate_st12h_source_binding_v1",),
             evidence={
                 "source_id": binding.source_id,
-                "source_epoch_ref": binding.currentness_evidence_ref,
+                "source_epoch_ref": _st12h_source_evidence_ref(binding),
                 "observed_at": binding.observed_at.isoformat(),
                 "valid_until": (
                     receipt.valid_until.isoformat() if receipt.valid_until else "STABLE_VERSION"
@@ -10898,7 +10912,7 @@ def _invoke_st12h_source_control(
             },
         )
     if suffix == "OWNER_SEPARATION":
-        source_ref = binding.currentness_evidence_ref
+        source_ref = _st12h_source_evidence_ref(binding)
         numeric_ref = source_ref if fixture.attack_enabled else "PARAM_AUTH::ST12H::NUMERIC"
         try:
             _validate_st12h_source_numeric_owner_separation_v1(
@@ -10925,7 +10939,7 @@ def _invoke_st12h_source_control(
             },
         )
     receipts = tuple(
-        validate_st12h_source_binding_v1(
+        _st12h_validate_and_observe_source_binding_v1(
             row,
             evaluated_at=datetime.now(UTC).date(),
         )

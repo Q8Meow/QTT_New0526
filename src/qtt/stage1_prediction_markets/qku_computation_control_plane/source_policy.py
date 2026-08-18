@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import ast
 from dataclasses import dataclass
 from datetime import UTC, date, datetime
 from enum import StrEnum
@@ -4222,12 +4223,9 @@ class ST12HSourceBindingV1:
     source_locator: str
     publication_or_version: str
     observed_at: date
-    stability_class: str
-    ttl_days_or_none: int | None
     currentness_state: str
     rights_state: str
     recheck_trigger: str
-    currentness_evidence_ref: str
     codex_research_required: bool
 
     def __post_init__(self) -> None:
@@ -4238,33 +4236,15 @@ class ST12HSourceBindingV1:
             "authority_class",
             "source_locator",
             "publication_or_version",
-            "stability_class",
             "currentness_state",
             "rights_state",
             "recheck_trigger",
-            "currentness_evidence_ref",
         ):
             _st12h_source_text(getattr(self, field_name), field_name=field_name)
         if type(self.observed_at) is not date:
             raise SourcePolicyError(
                 ReasonCode.SOURCE_EPOCH_MISSING,
                 "observed_at must be an exact date",
-            )
-        if self.stability_class not in {"STABLE_VERSION", "MUTABLE_RECHECK"}:
-            raise SourcePolicyError(
-                ReasonCode.SOURCE_EPOCH_MISSING,
-                "stability_class must select one exact currentness policy",
-            )
-        if self.stability_class == "STABLE_VERSION":
-            if self.ttl_days_or_none is not None:
-                raise SourcePolicyError(
-                    ReasonCode.SOURCE_CONFLICT,
-                    "stable-version sources must not claim a mutable TTL",
-                )
-        elif type(self.ttl_days_or_none) is not int or self.ttl_days_or_none < 0:
-            raise SourcePolicyError(
-                ReasonCode.SOURCE_EPOCH_MISSING,
-                "mutable sources require an exact nonnegative TTL",
             )
         if self.codex_research_required is not False:
             raise SourcePolicyError(
@@ -4410,31 +4390,10 @@ ST12H_SOURCE_BINDINGS = tuple(
         authority_class=authority_class,
         source_locator=source_locator,
         publication_or_version=publication_or_version,
-        observed_at=date(2026, 8, 17),
-        stability_class=(
-            "MUTABLE_RECHECK"
-            if source_id in {
-                "ST12H-V8-SRC::04",
-                "ST12H-V8-SRC::05",
-                "ST12H-V8-SRC::06",
-                "ST12H-V8-SRC::09",
-            }
-            else "STABLE_VERSION"
-        ),
-        ttl_days_or_none=(
-            0
-            if source_id in {
-                "ST12H-V8-SRC::04",
-                "ST12H-V8-SRC::05",
-                "ST12H-V8-SRC::06",
-                "ST12H-V8-SRC::09",
-            }
-            else None
-        ),
+        observed_at=date(2026, 8, 15),
         currentness_state=currentness_state,
         rights_state=rights_state,
         recheck_trigger=recheck_trigger,
-        currentness_evidence_ref=f"ST12H-SOURCE-EVIDENCE::{source_id}",
         codex_research_required=False,
     )
     for (
@@ -4501,166 +4460,250 @@ def _st12h_repository_root() -> Path:
     return Path(__file__).resolve().parents[4]
 
 
-def _st12h_symbolic_branch_ref(repo_root: Path) -> str:
-    git_entry = repo_root / ".git"
-    git_directory = git_entry
-    if git_entry.is_file():
-        declaration = git_entry.read_text(encoding="utf-8").strip()
-        if not declaration.startswith("gitdir: "):
-            raise SourcePolicyError(
-                ReasonCode.SOURCE_EPOCH_MISSING,
-                "selected worktree has no canonical Git directory declaration",
-            )
-        git_directory = (repo_root / declaration.removeprefix("gitdir: ")).resolve()
-    head = (git_directory / "HEAD").read_text(encoding="utf-8").strip()
-    if not head.startswith("ref: refs/heads/"):
+_ST12H_MUTABLE_SOURCE_IDS = frozenset(
+    {
+        "ST12H-V8-SRC::04",
+        "ST12H-V8-SRC::05",
+        "ST12H-V8-SRC::06",
+        "ST12H-V8-SRC::09",
+    }
+)
+_ST12H_STABLE_SOURCE_IDS = frozenset(
+    {"ST12H-V8-SRC::01", "ST12H-V8-SRC::02", "ST12H-V8-SRC::07", "ST12H-V8-SRC::08"}
+)
+_ST12H_SOURCE_DISPOSITION_BY_ID: Mapping[str, str] = MappingProxyType(
+    {
+        "ST12H-V8-SRC::01": "CURRENT_BY_STABLE_VERSION",
+        "ST12H-V8-SRC::02": "CURRENT_BY_STABLE_VERSION",
+        "ST12H-V8-SRC::03": "PROVENANCE_ONLY_PINNED",
+        "ST12H-V8-SRC::04": "SUPERSEDED_BY_CURRENT_REPOSITORY_CUSTODY",
+        "ST12H-V8-SRC::05": "CURRENT_BY_TRACKED_REPOSITORY_RECHECK",
+        "ST12H-V8-SRC::06": "CURRENT_BY_TRACKED_REPOSITORY_RECHECK",
+        "ST12H-V8-SRC::07": "CURRENT_BY_STABLE_VERSION",
+        "ST12H-V8-SRC::08": "CURRENT_BY_STABLE_VERSION",
+        "ST12H-V8-SRC::09": "CURRENT_BY_TRACKED_REPOSITORY_RECHECK",
+    }
+)
+
+
+def _st12h_source_evidence_ref(binding: ST12HSourceBindingV1) -> str:
+    return f"ST12H-SOURCE-EVIDENCE::{binding.source_id}"
+
+
+def _st12h_parse_tracked_python_owner(repo_root: Path, path: str) -> ast.Module:
+    try:
+        source = (repo_root / path).read_text(encoding="utf-8")
+        return ast.parse(source, filename=path)
+    except (OSError, SyntaxError) as exc:
+        raise SourcePolicyError(
+            ReasonCode.SOURCE_EPOCH_MISSING,
+            f"tracked source owner is unavailable or invalid: {path}",
+        ) from exc
+
+
+def _st12h_module_symbol_kinds(tree: ast.Module) -> Mapping[str, str]:
+    symbols: dict[str, str] = {}
+    for node in tree.body:
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            symbols[node.name] = "FUNCTION"
+        elif isinstance(node, ast.ClassDef):
+            symbols[node.name] = "CLASS"
+        elif isinstance(node, (ast.Assign, ast.AnnAssign)):
+            targets = node.targets if isinstance(node, ast.Assign) else (node.target,)
+            for target in targets:
+                if isinstance(target, ast.Name):
+                    symbols[target.id] = "VALUE"
+    return MappingProxyType(symbols)
+
+
+def _st12h_validate_repository_topology(repo_root: Path) -> tuple[str, ...]:
+    validation_path = (
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/validation.py"
+    )
+    runner_path = "tools/run_validation_gates.py"
+    validation_tree = _st12h_parse_tracked_python_owner(repo_root, validation_path)
+    runner_tree = _st12h_parse_tracked_python_owner(repo_root, runner_path)
+    validation_symbols = _st12h_module_symbol_kinds(validation_tree)
+    runner_symbols = _st12h_module_symbol_kinds(runner_tree)
+    imported_scope_owner = any(
+        isinstance(node, ast.ImportFrom)
+        and node.module == "tools.validation_scope_registry"
+        and any(alias.name == "build_st12h_validation_commands" for alias in node.names)
+        for node in runner_tree.body
+    )
+    if (
+        validation_symbols.get("ST12H_CONTROL_CASES") != "VALUE"
+        or validation_symbols.get("ST12H_EXECUTABLE_CONTROL_ADAPTERS") != "VALUE"
+        or validation_symbols.get("validate_st12h_control_case_v1") != "FUNCTION"
+        or runner_symbols.get("_execution_command_with_qku_root_importlib") != "FUNCTION"
+        or not imported_scope_owner
+    ):
         raise SourcePolicyError(
             ReasonCode.SOURCE_EPOCH_STALE,
-            "mutable source recheck requires a symbolic branch context",
+            "current tracked repository owner topology recheck failed",
         )
-    return head.removeprefix("ref: refs/heads/")
+    return (validation_path, runner_path)
+
+
+def _st12h_workflow_contract_state(workflow_path: Path) -> Mapping[str, object]:
+    try:
+        text = workflow_path.read_text(encoding="utf-8")
+    except OSError as exc:
+        raise SourcePolicyError(
+            ReasonCode.SOURCE_EPOCH_MISSING,
+            "current validation workflow is unavailable",
+        ) from exc
+    if len(text.encode("utf-8")) > 256 * 1024:
+        raise SourcePolicyError(
+            ReasonCode.SOURCE_EPOCH_STALE,
+            "current validation workflow exceeds the bounded contract parser limit",
+        )
+    setup_actions: list[str] = []
+    python_versions: list[str] = []
+    pytest_installs: list[str] = []
+    phases: list[str] = []
+    aggregate_needs: list[str] = []
+    in_validation_job = False
+    in_needs = False
+    for raw_line in text.splitlines():
+        stripped = raw_line.strip()
+        indent = len(raw_line) - len(raw_line.lstrip(" "))
+        if indent == 2 and stripped.endswith(":"):
+            in_validation_job = stripped == "validation:"
+            in_needs = False
+        elif in_validation_job and indent == 4 and stripped == "needs:":
+            in_needs = True
+        elif in_validation_job and indent <= 4 and stripped and stripped != "needs:":
+            in_needs = False
+        if stripped.startswith("uses: actions/setup-python@"):
+            setup_actions.append(stripped.removeprefix("uses: "))
+        elif stripped.startswith("python-version:"):
+            python_versions.append(
+                stripped.partition(":")[2].strip().strip("'\"")
+            )
+        elif stripped == "python -m pip install pytest==9.1.1":
+            pytest_installs.append(stripped)
+        elif stripped.startswith("- phase:"):
+            phases.append(stripped.partition(":")[2].strip())
+        elif in_validation_job and in_needs and stripped.startswith("- "):
+            aggregate_needs.append(stripped.removeprefix("- ").strip())
+    return MappingProxyType(
+        {
+            "setup_actions": tuple(setup_actions),
+            "python_versions": tuple(python_versions),
+            "pytest_installs": tuple(pytest_installs),
+            "phases": tuple(phases),
+            "aggregate_needs": tuple(aggregate_needs),
+        }
+    )
+
+
+def _st12h_validate_workflow_contract(repo_root: Path) -> tuple[str, ...]:
+    workflow_path = ".github/workflows/qtt_validation.yml"
+    state = _st12h_workflow_contract_state(repo_root / workflow_path)
+    if (
+        state["setup_actions"] != ("actions/setup-python@v5", "actions/setup-python@v5")
+        or state["python_versions"] != ("3.14.6", "3.14.6")
+        or state["pytest_installs"] != ("python -m pip install pytest==9.1.1",)
+        or len(state["phases"]) != 13
+        or state["aggregate_needs"] != ("validation_shards",)
+    ):
+        raise SourcePolicyError(
+            ReasonCode.SOURCE_EPOCH_STALE,
+            "current validation workflow differs from the exact H workflow contract",
+        )
+    return (workflow_path,)
+
+
+def _st12h_validate_reason_model_and_validation_owners(
+    repo_root: Path,
+) -> tuple[str, ...]:
+    paths = (
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/errors.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/models.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/validation.py",
+    )
+    errors_tree, models_tree, validation_tree = tuple(
+        _st12h_parse_tracked_python_owner(repo_root, path) for path in paths
+    )
+    reason_class = next(
+        (node for node in errors_tree.body if isinstance(node, ast.ClassDef) and node.name == "ReasonCode"),
+        None,
+    )
+    reason_values: dict[str, object] = {}
+    if reason_class is not None:
+        for node in reason_class.body:
+            if (
+                isinstance(node, ast.Assign)
+                and len(node.targets) == 1
+                and isinstance(node.targets[0], ast.Name)
+                and isinstance(node.value, ast.Constant)
+            ):
+                reason_values[node.targets[0].id] = node.value.value
+    no_effect_class = next(
+        (node for node in models_tree.body if isinstance(node, ast.ClassDef) and node.name == "NoEffectFlagsV1"),
+        None,
+    )
+    no_effect_fields = {
+        node.target.id: node.value.value
+        for node in (() if no_effect_class is None else no_effect_class.body)
+        if isinstance(node, ast.AnnAssign)
+        and isinstance(node.target, ast.Name)
+        and isinstance(node.value, ast.Constant)
+    }
+    required_no_effect_fields = {
+        "provider_connection_allowed",
+        "private_state_read_allowed",
+        "replay_or_paper_execution_allowed",
+        "llm_inference_allowed",
+        "qpu_execution_allowed",
+        "mode_or_allow_activation_allowed",
+        "order_release_allowed",
+        "capital_mutation_allowed",
+    }
+    validation_symbols = _st12h_module_symbol_kinds(validation_tree)
+    if (
+        reason_values.get("KILL_OR_SUBMIT_DISABLED")
+        != "ST12D_KILL_OR_SUBMIT_DISABLED"
+        or reason_values.get("CONTEXT_SCOPE_MISMATCH")
+        != "ST12E_CONTEXT_SCOPE_MISMATCH"
+        or set(no_effect_fields) != required_no_effect_fields
+        or any(value is not False for value in no_effect_fields.values())
+        or validation_symbols.get("validate_st12h_control_case_v1") != "FUNCTION"
+        or validation_symbols.get("validate_st12h_parameter_consumption_v1") != "FUNCTION"
+    ):
+        raise SourcePolicyError(
+            ReasonCode.SOURCE_EPOCH_STALE,
+            "current reason, no-effect, or validation owner recheck failed",
+        )
+    return paths
 
 
 def _st12h_mutable_source_recheck(
     binding: ST12HSourceBindingV1,
+    *,
+    repo_root: Path,
 ) -> tuple[str, ...]:
-    repo_root = _st12h_repository_root()
-    if not (repo_root / ".git").exists():
-        raise SourcePolicyError(
-            ReasonCode.SOURCE_EPOCH_MISSING,
-            "mutable repository source requires the selected Git worktree",
-        )
-    if binding.source_id == "ST12H-V8-SRC::04":
-        branch = _st12h_symbolic_branch_ref(repo_root)
-        package_guard = repo_root / ".codex_inputs/h80/p/guard/YOLO_FULL_ACCESS_SAFETY_GUARD.txt"
-        active_registry = (
-            repo_root
-            / ".codex_inputs/h80/p/current_main/h_repository_mutation_allowlist.jsonl"
-        )
-        protected_registry = (
-            repo_root
-            / ".codex_inputs/h80/p/current_main/"
-            "h_repository_read_only_predecessor_registry.jsonl"
-        )
-        try:
-            active_rows = tuple(
-                json.loads(line)
-                for line in active_registry.read_text(encoding="utf-8").splitlines()
-            )
-            protected_rows = tuple(
-                json.loads(line)
-                for line in protected_registry.read_text(encoding="utf-8").splitlines()
-            )
-        except (OSError, ValueError, TypeError) as exc:
-            raise SourcePolicyError(
-                ReasonCode.SOURCE_EPOCH_MISSING,
-                "post-ST12-G currentization registries are unavailable",
-            ) from exc
-        if (
-            branch
-            != "agent/st12h-validation-currentization-operations-publication"
-            or not package_guard.is_file()
-            or len(active_rows) != 25
-            or len(protected_rows) != 66
-            or any(row.get("repository_path") is None for row in active_rows)
-            or any(row.get("repository_path") is None for row in protected_rows)
-        ):
-            raise SourcePolicyError(
-                ReasonCode.SOURCE_EPOCH_STALE,
-                "post-ST12-G handoff no longer matches the selected H validation context",
-            )
-        return (
-            "agent/st12h-validation-currentization-operations-publication",
-            ".codex_inputs/h80/p/guard/YOLO_FULL_ACCESS_SAFETY_GUARD.txt",
-            ".codex_inputs/h80/p/current_main/h_repository_mutation_allowlist.jsonl",
-            ".codex_inputs/h80/p/current_main/h_repository_read_only_predecessor_registry.jsonl",
-            "ACTIVE_PATH_COUNT=25",
-            "PROTECTED_PATH_COUNT=66",
-            binding.currentness_evidence_ref,
-        )
-    if binding.source_id == "ST12H-V8-SRC::05":
-        paths = (
-            "src/qtt/stage1_prediction_markets/qku_computation_control_plane/validation.py",
-            "tools/run_validation_gates.py",
-        )
-        try:
-            validation_source = (repo_root / paths[0]).read_text(encoding="utf-8")
-            runner_source = (repo_root / paths[1]).read_text(encoding="utf-8")
-        except OSError as exc:
-            raise SourcePolicyError(
-                ReasonCode.SOURCE_EPOCH_MISSING,
-                "current repository owner topology is unreadable",
-            ) from exc
-        if (
-            "ST12H_CONTROL_CASES" not in validation_source
-            or "ST12H_EXECUTABLE_CONTROL_ADAPTERS" not in validation_source
-            or "_execution_command_with_qku_root_importlib" not in runner_source
-            or "build_st12h_validation_commands" not in runner_source
-        ):
-            raise SourcePolicyError(
-                ReasonCode.SOURCE_EPOCH_STALE,
-                "current repository owner topology recheck failed",
-            )
-        return (*paths, binding.currentness_evidence_ref)
+    if binding.source_id in {"ST12H-V8-SRC::04", "ST12H-V8-SRC::05"}:
+        return (*_st12h_validate_repository_topology(repo_root), _st12h_source_evidence_ref(binding))
     if binding.source_id == "ST12H-V8-SRC::06":
-        workflow_path = repo_root / ".github/workflows/qtt_validation.yml"
-        try:
-            workflow = workflow_path.read_text(encoding="utf-8")
-        except OSError as exc:
-            raise SourcePolicyError(
-                ReasonCode.SOURCE_EPOCH_MISSING,
-                "current validation workflow is unavailable",
-            ) from exc
-        if (
-            workflow.count("uses: actions/setup-python@v5") != 2
-            or workflow.count("python-version: '3.14.6'") != 2
-            or workflow.count("python -m pip install pytest==9.1.1") != 1
-        ):
-            raise SourcePolicyError(
-                ReasonCode.SOURCE_EPOCH_STALE,
-                "current validation workflow differs from the final H pin contract",
-            )
-        return (
-            ".github/workflows/qtt_validation.yml",
-            binding.currentness_evidence_ref,
-        )
+        return (*_st12h_validate_workflow_contract(repo_root), _st12h_source_evidence_ref(binding))
     if binding.source_id == "ST12H-V8-SRC::09":
-        owners = (
-            "src/qtt/stage1_prediction_markets/qku_computation_control_plane/errors.py",
-            "src/qtt/stage1_prediction_markets/qku_computation_control_plane/models.py",
-            "src/qtt/stage1_prediction_markets/qku_computation_control_plane/validation.py",
+        return (
+            *_st12h_validate_reason_model_and_validation_owners(repo_root),
+            _st12h_source_evidence_ref(binding),
         )
-        try:
-            owner_sources = tuple(
-                (repo_root / path).read_text(encoding="utf-8") for path in owners
-            )
-        except OSError as exc:
-            raise SourcePolicyError(
-                ReasonCode.SOURCE_EPOCH_MISSING,
-                "current reason/model/validation owners are unreadable",
-            ) from exc
-        if (
-            "class ReasonCode" not in owner_sources[0]
-            or "ST12D_KILL_OR_SUBMIT_DISABLED" not in owner_sources[0]
-            or "ST12E_CONTEXT_SCOPE_MISMATCH" not in owner_sources[0]
-            or "class NoEffectFlagsV1" not in owner_sources[1]
-            or "def validate_st12h_control_case_v1" not in owner_sources[2]
-        ):
-            raise SourcePolicyError(
-                ReasonCode.SOURCE_EPOCH_STALE,
-                "current reason/model/validation owner recheck failed",
-            )
-        return (*owners, binding.currentness_evidence_ref)
     raise SourcePolicyError(
         ReasonCode.SOURCE_CONFLICT,
-        f"mutable source has no exact offline recheck owner: {binding.source_id}",
+        f"mutable source has no exact tracked recheck owner: {binding.source_id}",
     )
 
 
-def validate_st12h_source_binding_v1(
+def _observe_st12h_source_binding_v1(
     binding: ST12HSourceBindingV1,
     *,
     evaluated_at: date,
+    repo_root: Path | None = None,
 ) -> _ST12HSourceCurrentnessReceiptV1:
     if not isinstance(binding, ST12HSourceBindingV1) or type(evaluated_at) is not date:
         raise SourcePolicyError(
@@ -4682,39 +4725,69 @@ def validate_st12h_source_binding_v1(
             ReasonCode.SOURCE_EPOCH_STALE,
             "ST12-H source observation is in the future",
         )
-    if (
-        binding.source_class == "CERTIFIED_HISTORICAL_BASELINE"
-        and binding.authority_class != "HISTORICAL_PROVENANCE_ONLY"
-    ):
+    disposition = _ST12H_SOURCE_DISPOSITION_BY_ID.get(binding.source_id)
+    if disposition is None:
         raise SourcePolicyError(
             ReasonCode.SOURCE_CONFLICT,
-            "historical ST12-H provenance cannot become current source truth",
+            "ST12-H source has no exact currentness disposition",
         )
-    if binding.stability_class == "MUTABLE_RECHECK":
-        evidence_refs = _st12h_mutable_source_recheck(binding)
-        valid_until = evaluated_at
-        terminal_state = "CURRENT_BY_ACTUAL_OFFLINE_RECHECK"
-    else:
-        if not binding.publication_or_version or not binding.currentness_evidence_ref:
+    if binding.source_id == "ST12H-V8-SRC::03":
+        if (
+            binding.source_class != "CERTIFIED_HISTORICAL_BASELINE"
+            or binding.authority_class != "HISTORICAL_PROVENANCE_ONLY"
+        ):
             raise SourcePolicyError(
-                ReasonCode.SOURCE_EPOCH_MISSING,
-                "stable source requires an exact version and evidence reference",
+                ReasonCode.SOURCE_CONFLICT,
+                "historical ST12-H provenance cannot become current implementation truth",
             )
         evidence_refs = (
             binding.source_locator,
             binding.publication_or_version,
-            binding.currentness_evidence_ref,
+            _st12h_source_evidence_ref(binding),
         )
+        stability_class = "PINNED_PROVENANCE"
         valid_until = None
-        terminal_state = "CURRENT_BY_STABLE_VERSION_BASIS"
+    elif binding.source_id in _ST12H_STABLE_SOURCE_IDS:
+        if not binding.publication_or_version:
+            raise SourcePolicyError(
+                ReasonCode.SOURCE_EPOCH_MISSING,
+                "stable source requires an exact version",
+            )
+        evidence_refs = (
+            binding.source_locator,
+            binding.publication_or_version,
+            _st12h_source_evidence_ref(binding),
+        )
+        stability_class = "STABLE_VERSION"
+        valid_until = None
+    elif binding.source_id in _ST12H_MUTABLE_SOURCE_IDS:
+        evidence_refs = _st12h_mutable_source_recheck(
+            binding,
+            repo_root=repo_root or _st12h_repository_root(),
+        )
+        stability_class = "MUTABLE_RECHECK"
+        valid_until = evaluated_at
+    else:
+        raise SourcePolicyError(
+            ReasonCode.SOURCE_CONFLICT,
+            "ST12-H source currentness class is not exact",
+        )
     return _ST12HSourceCurrentnessReceiptV1(
         source_id=binding.source_id,
         evaluated_at=evaluated_at,
         valid_until=valid_until,
-        stability_class=binding.stability_class,
+        stability_class=stability_class,
         evidence_refs=evidence_refs,
-        terminal_state=terminal_state,
+        terminal_state=disposition,
     )
+
+
+def validate_st12h_source_binding_v1(
+    binding: ST12HSourceBindingV1,
+    *,
+    evaluated_at: date,
+) -> None:
+    _observe_st12h_source_binding_v1(binding, evaluated_at=evaluated_at)
 
 
 def _validate_st12h_source_currentness_receipt_v1(
@@ -4730,17 +4803,15 @@ def _validate_st12h_source_currentness_receipt_v1(
             ReasonCode.SOURCE_EPOCH_MISSING,
             "source currentness requires one exact observed receipt and date",
         )
-    if receipt.terminal_state not in {
-        "CURRENT_BY_ACTUAL_OFFLINE_RECHECK",
-        "CURRENT_BY_STABLE_VERSION_BASIS",
-    }:
+    expected_disposition = _ST12H_SOURCE_DISPOSITION_BY_ID.get(receipt.source_id)
+    if receipt.terminal_state != expected_disposition:
         raise SourcePolicyError(
             ReasonCode.SOURCE_CONFLICT,
             "source currentness receipt has an unknown terminal state",
         )
     if receipt.stability_class == "MUTABLE_RECHECK":
         if (
-            receipt.terminal_state != "CURRENT_BY_ACTUAL_OFFLINE_RECHECK"
+            receipt.source_id not in _ST12H_MUTABLE_SOURCE_IDS
             or receipt.valid_until != receipt.evaluated_at
             or not receipt.evidence_refs
         ):
@@ -4750,13 +4821,24 @@ def _validate_st12h_source_currentness_receipt_v1(
             )
     elif receipt.stability_class == "STABLE_VERSION":
         if (
-            receipt.terminal_state != "CURRENT_BY_STABLE_VERSION_BASIS"
+            receipt.source_id not in _ST12H_STABLE_SOURCE_IDS
             or receipt.valid_until is not None
             or not receipt.evidence_refs
         ):
             raise SourcePolicyError(
                 ReasonCode.SOURCE_CONFLICT,
                 "stable source currentness requires its exact version-basis receipt",
+            )
+    elif receipt.stability_class == "PINNED_PROVENANCE":
+        if (
+            receipt.source_id != "ST12H-V8-SRC::03"
+            or receipt.terminal_state != "PROVENANCE_ONLY_PINNED"
+            or receipt.valid_until is not None
+            or not receipt.evidence_refs
+        ):
+            raise SourcePolicyError(
+                ReasonCode.SOURCE_CONFLICT,
+                "pinned provenance requires an exact non-current receipt",
             )
     else:
         raise SourcePolicyError(

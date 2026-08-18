@@ -18,7 +18,7 @@ import subprocess
 import sys
 import tempfile
 from types import MappingProxyType
-from typing import Mapping, Sequence
+from typing import Callable, Mapping, Sequence
 import unicodedata
 import warnings
 import zipfile
@@ -32,9 +32,23 @@ from tools.validation_scope_registry import (  # noqa: E402
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import (  # noqa: E402
     ComputationControlPlaneError,
+    ReasonCode,
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.models import (  # noqa: E402
     NO_EFFECTS_V1,
+)
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.economic_math import (  # noqa: E402
+    TRANCHE_C_MATH_SPECIFICATIONS,
+)
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.implementation_registry import (  # noqa: E402
+    IMPLEMENTATION_REGISTRY,
+    ST12F_EVIDENCE_MATH_CALLABLE_REGISTRY_V1,
+)
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.oracle_contracts import (  # noqa: E402
+    ST12D_CUMULATIVE_GOLDEN_VECTOR_BY_MATH_ID,
+    ST12D_CUMULATIVE_ORACLE_BY_MATH_ID,
+    ST12F_EVIDENCE_GOLDEN_VECTOR_BY_MATH_ID,
+    ST12F_EVIDENCE_ORACLE_BY_MATH_ID,
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.receipts import (  # noqa: E402
     ST12HBackupRestoreReceiptV1,
@@ -51,6 +65,11 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.receipts im
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.validation import (  # noqa: E402
     ST12H_BACKUP_RESTORE_PLANS,
     ST12H_FINALIZATION_CONTROLS,
+)
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.specification import (  # noqa: E402
+    MATH_IO_CONTRACTS,
+    ST12D_MATH39_REQUIREMENT,
+    ST12F_NEW_EVIDENCE_MATH_SPECIFICATIONS_V1,
 )
 
 
@@ -78,19 +97,27 @@ ST12H_COMPLETE_MATH_MARKER = "ST12H_MATH_01_52_COVERAGE_RECONSTRUCTED"
 class ST12HDirectMathEvidenceV1:
     math_id: str
     vector_ref: str
+    oracle_ref: str
+    comparison_policy: str
     independent_method: str
     observed_result: object
     mutation: str
     mutation_result: object
     negative_vector_rejected: bool
+    precision_or_tolerance_mutation_rejected: bool
+    source_or_unit_mutation_rejected: bool
 
 
 @dataclass(frozen=True, slots=True)
 class ST12HMathEvidenceCrosswalkV1:
     math_id: str
+    tracked_oracle_id: str
+    tracked_golden_vector_id: str
     production_owner: tuple[str, ...]
     independent_validator_owner: str
+    comparison_policy: str
     exact_vector_or_invariant: str
+    mutation_family: str
     boundary_negative_mutation_evidence: str
     validator_command: tuple[str, ...]
     validator_marker: str
@@ -99,46 +126,156 @@ class ST12HMathEvidenceCrosswalkV1:
 
 
 _ST12H_DIRECT_MATH_IDS = tuple(f"MATH-{index:02d}" for index in range(40, 45))
-_ST12H_MATH_SHARD_REGISTRY = (
-    REPO_ROOT
-    / ".codex_inputs"
-    / "h80"
-    / "p"
-    / "registries"
-    / "h_math_reconstruction_shard_registry.jsonl"
+_ST12H_ALL_MATH_IDS = tuple(f"MATH-{index:02d}" for index in range(1, 53))
+
+
+def _st12h_tracked_oracle(math_id: str) -> object:
+    if math_id in ST12F_EVIDENCE_ORACLE_BY_MATH_ID:
+        return ST12F_EVIDENCE_ORACLE_BY_MATH_ID[math_id]
+    return ST12D_CUMULATIVE_ORACLE_BY_MATH_ID[math_id]
+
+
+def _st12h_tracked_golden_vector(math_id: str) -> object:
+    if math_id in ST12F_EVIDENCE_GOLDEN_VECTOR_BY_MATH_ID:
+        return ST12F_EVIDENCE_GOLDEN_VECTOR_BY_MATH_ID[math_id]
+    return ST12D_CUMULATIVE_GOLDEN_VECTOR_BY_MATH_ID[math_id]
+
+
+def _st12h_tracked_math_contract(math_id: str) -> object:
+    if math_id in MATH_IO_CONTRACTS:
+        return MATH_IO_CONTRACTS[math_id]
+    if math_id in TRANCHE_C_MATH_SPECIFICATIONS:
+        return TRANCHE_C_MATH_SPECIFICATIONS[math_id]
+    if math_id == "MATH-39":
+        return ST12D_MATH39_REQUIREMENT
+    return ST12F_NEW_EVIDENCE_MATH_SPECIFICATIONS_V1[math_id]
+
+
+def _st12h_tracked_production_callable(math_id: str) -> object:
+    if math_id in ST12F_EVIDENCE_MATH_CALLABLE_REGISTRY_V1:
+        return ST12F_EVIDENCE_MATH_CALLABLE_REGISTRY_V1[math_id]
+    return IMPLEMENTATION_REGISTRY[math_id].callable
+
+
+_ST12H_TRACKED_ORACLE_BY_MATH_ID: Mapping[str, object] = MappingProxyType(
+    {math_id: _st12h_tracked_oracle(math_id) for math_id in _ST12H_ALL_MATH_IDS}
 )
-_ST12H_GOLDEN_VECTOR_REGISTRY = (
-    REPO_ROOT
-    / ".codex_inputs"
-    / "h80"
-    / "p"
-    / "registries"
-    / "h_golden_vector_registry.jsonl"
+_ST12H_TRACKED_GOLDEN_VECTOR_BY_MATH_ID: Mapping[str, object] = MappingProxyType(
+    {
+        math_id: _st12h_tracked_golden_vector(math_id)
+        for math_id in _ST12H_ALL_MATH_IDS
+    }
 )
-_ST12H_INDEPENDENT_ORACLE_REGISTRY = (
-    REPO_ROOT
-    / ".codex_inputs"
-    / "h80"
-    / "p"
-    / "registries"
-    / "h_independent_oracle_registry.jsonl"
+_ST12H_TRACKED_CONTRACT_BY_MATH_ID: Mapping[str, object] = MappingProxyType(
+    {
+        math_id: _st12h_tracked_math_contract(math_id)
+        for math_id in _ST12H_ALL_MATH_IDS
+    }
+)
+_ST12H_TRACKED_PRODUCTION_CALLABLE_BY_MATH_ID: Mapping[str, object] = MappingProxyType(
+    {
+        math_id: _st12h_tracked_production_callable(math_id)
+        for math_id in _ST12H_ALL_MATH_IDS
+    }
 )
 
 
-def _st12h_registry_rows(
-    path: Path,
-    id_field: str,
-) -> Mapping[str, Mapping[str, object]]:
-    rows: dict[str, Mapping[str, object]] = {}
-    for line in path.read_text(encoding="utf-8").splitlines():
-        payload = json.loads(line)
-        key = payload[id_field]
-        if not isinstance(key, str) or key in rows:
-            raise AssertionError(
-                f"invalid or duplicate ST12-H registry identity: {key!r}"
+def _st12h_validate_math_id_inventory(math_ids: Sequence[str]) -> None:
+    if (
+        tuple(math_ids) != _ST12H_ALL_MATH_IDS
+        or len(math_ids) != 52
+        or len(set(math_ids)) != 52
+    ):
+        raise AssertionError("tracked math identity inventory is not exact MATH-01..52")
+
+
+def _st12h_assert_exact_tracked_math_owners(
+    *,
+    oracles: Mapping[str, object] | None = None,
+    vectors: Mapping[str, object] | None = None,
+    contracts: Mapping[str, object] | None = None,
+    callables: Mapping[str, object] | None = None,
+) -> None:
+    oracle_map = (
+        _ST12H_TRACKED_ORACLE_BY_MATH_ID if oracles is None else oracles
+    )
+    vector_map = (
+        _ST12H_TRACKED_GOLDEN_VECTOR_BY_MATH_ID if vectors is None else vectors
+    )
+    contract_map = (
+        _ST12H_TRACKED_CONTRACT_BY_MATH_ID if contracts is None else contracts
+    )
+    callable_map = (
+        _ST12H_TRACKED_PRODUCTION_CALLABLE_BY_MATH_ID
+        if callables is None
+        else callables
+    )
+    expected = set(_ST12H_ALL_MATH_IDS)
+    _st12h_validate_math_id_inventory(tuple(oracle_map))
+    tracked_maps = (oracle_map, vector_map, contract_map, callable_map)
+    if any(set(owner) != expected or len(owner) != 52 for owner in tracked_maps):
+        raise AssertionError("tracked MATH-01..52 owner maps are not exact and unique")
+    for math_id in _ST12H_ALL_MATH_IDS:
+        oracle = oracle_map[math_id]
+        vector = vector_map[math_id]
+        if (
+            getattr(oracle, "math_spec_id", None) != math_id
+            or getattr(vector, "math_spec_id", None) != math_id
+            or getattr(vector, "oracle_id", None) != getattr(oracle, "oracle_id", None)
+            or getattr(oracle, "production_import_allowed", None) is not False
+            or getattr(vector, "production_import_allowed", None) is not False
+            or not callable(callable_map[math_id])
+        ):
+            raise AssertionError(f"tracked math owner join failed: {math_id}")
+
+
+_ST12H_INHERITED_DOMAIN_BY_MATH_ID: Mapping[str, str] = MappingProxyType(
+    {
+        **{
+            math_id: "architecture"
+            for math_id in (
+                *(f"MATH-{index:02d}" for index in range(1, 26)),
+                *(f"MATH-{index:02d}" for index in range(46, 50)),
             )
-        rows[key] = payload
-    return rows
+        },
+        **{f"MATH-{index:02d}": "accounting" for index in range(26, 37)},
+        "MATH-37": "execution",
+        "MATH-38": "execution",
+        "MATH-39": "d",
+        "MATH-45": "model_risk",
+        "MATH-50": "quantum",
+        "MATH-51": "quantum",
+        "MATH-52": "quantum",
+    }
+)
+_ST12H_INHERITED_OWNER_BY_DOMAIN: Mapping[str, str] = MappingProxyType(
+    {
+        domain: f"tools/independent_validate_qku_computation_control_plane_{domain}.py"
+        for domain in ("architecture", "accounting", "execution", "d", "model_risk", "quantum")
+    }
+)
+_ST12H_INHERITED_MARKER_BY_DOMAIN: Mapping[str, str] = MappingProxyType(
+    {
+        "architecture": "QKU_ARCHITECTURE_INDEPENDENTLY_VALIDATED",
+        "accounting": "QKU_ACCOUNTING_INDEPENDENTLY_VALIDATED",
+        "execution": "QKU_EXECUTION_INDEPENDENTLY_VALIDATED",
+        "d": "QKU_COMPUTATION_CONTROL_PLANE_D_INDEPENDENTLY_VALIDATED",
+        "model_risk": "QKU_MODEL_RISK_INDEPENDENTLY_VALIDATED",
+        "quantum": "QKU_QUANTUM_INDEPENDENTLY_VALIDATED",
+    }
+)
+
+
+def _st12h_validate_inherited_owner_assignment(math_id: str, owner: str) -> None:
+    expected_domain = _ST12H_INHERITED_DOMAIN_BY_MATH_ID.get(math_id)
+    if (
+        expected_domain is None
+        or owner != _ST12H_INHERITED_OWNER_BY_DOMAIN[expected_domain]
+    ):
+        raise AssertionError(f"inherited validator ownership drifted: {math_id}")
+
+
+_st12h_assert_exact_tracked_math_owners()
 
 
 def _st12h_direct_math_observable(
@@ -146,130 +283,162 @@ def _st12h_direct_math_observable(
     values: Mapping[str, object],
 ) -> object:
     if math_id == "MATH-40":
-        side = values["side"]
-        if side not in {"BUY", "SELL"}:
-            raise ValueError("MATH-40 side must be BUY or SELL")
-        quantity = Decimal(str(values["quantity"]))
+        quantity = Decimal(str(values["signed_fill_quantity"]))
         fill_price = Decimal(str(values["fill_price"]))
-        reference_price = Decimal(str(values["reference_price"]))
-        if quantity <= 0:
-            raise ValueError("MATH-40 quantity must be positive")
-        sign = Decimal("-1") if side == "BUY" else Decimal("1")
-        return sign * quantity * (fill_price - reference_price)
+        reference_price = Decimal(str(values["midpoint_after_fill"]))
+        if quantity == 0 or not all(
+            value.is_finite() for value in (quantity, fill_price, reference_price)
+        ):
+            raise ValueError("MATH-40 inputs must be finite with nonzero signed quantity")
+        return {
+            "side_convention_explicit": True,
+            "signed_markout": -quantity * (fill_price - reference_price),
+        }
     if math_id == "MATH-41":
         latency = float(values["latency"])
         tau = float(values["tau"])
-        baseline = float(values["baseline"])
+        baseline = float(values["edge_now"])
         if latency < 0 or tau <= 0 or not all(
             math.isfinite(value) for value in (latency, tau, baseline)
         ):
             raise ValueError("MATH-41 inputs are outside their declared domain")
-        return baseline * math.exp(-latency / tau)
+        return {"edge_after_latency": baseline * math.exp(-latency / tau)}
     if math_id == "MATH-42":
-        eta = float(values["eta"])
+        eta = float(values["Y"])
         sigma = float(values["sigma"])
-        quantity = float(values["quantity"])
-        volume = float(values["volume"])
+        quantity = float(values["Q"])
+        volume = float(values["ADV"])
         if eta < 0 or sigma < 0 or quantity < 0 or volume <= 0:
             raise ValueError("MATH-42 inputs are outside their declared domain")
-        return eta * sigma * math.sqrt(quantity / volume)
+        return {"impact_fraction": eta * sigma * math.sqrt(quantity / volume)}
     if math_id == "MATH-43":
         participation = Decimal(str(values["participation"]))
-        threshold = Decimal(str(values["threshold"]))
-        coefficient = Decimal(str(values["coefficient"]))
+        threshold = Decimal(str(values["approved_participation_cap"]))
+        coefficient = Decimal(str(values["penalty_scale"]))
         if participation < 0 or threshold <= 0 or coefficient < 0:
             raise ValueError("MATH-43 inputs are outside their declared domain")
-        return (
-            max(Decimal("0"), participation / threshold - Decimal("1")) ** 2
-            * coefficient
-        )
+        return {
+            "capacity_penalty": (
+                max(Decimal("0"), participation / threshold - Decimal("1")) ** 2
+                * coefficient
+            )
+        }
     if math_id == "MATH-44":
         delta = Decimal(str(values["delta"]))
-        sample = values["sample"]
+        sample = values["sample_covariance"]
         target = values["target"]
         if not Decimal("0") <= delta <= Decimal("1"):
             raise ValueError("MATH-44 delta must be in [0,1]")
         if (
-            not isinstance(sample, tuple)
-            or not isinstance(target, tuple)
+            not isinstance(sample, (tuple, list))
+            or not isinstance(target, (tuple, list))
             or len(sample) != 2
             or len(target) != 2
             or any(len(row) != 2 for row in (*sample, *target))
         ):
             raise ValueError("MATH-44 requires two 2x2 matrices")
-        return tuple(
-            tuple(
-                (Decimal("1") - delta) * Decimal(str(sample[row][column]))
-                + delta * Decimal(str(target[row][column]))
-                for column in range(2)
+        return {
+            "shrunk_covariance": tuple(
+                tuple(
+                    (Decimal("1") - delta) * Decimal(str(sample[row][column]))
+                    + delta * Decimal(str(target[row][column]))
+                    for column in range(2)
+                )
+                for row in range(2)
             )
-            for row in range(2)
-        )
+        }
     raise ValueError(f"not an H-direct math obligation: {math_id}")
+
+
+def _st12h_direct_value_matches(
+    observed: object,
+    expected: object,
+    *,
+    comparison_policy: str,
+) -> bool:
+    if isinstance(observed, Mapping) and isinstance(expected, Mapping):
+        return set(observed) == set(expected) and all(
+            _st12h_direct_value_matches(
+                observed[key],
+                expected[key],
+                comparison_policy=comparison_policy,
+            )
+            for key in observed
+        )
+    if isinstance(observed, (tuple, list)) and isinstance(expected, (tuple, list)):
+        return len(observed) == len(expected) and all(
+            _st12h_direct_value_matches(
+                left,
+                right,
+                comparison_policy=comparison_policy,
+            )
+            for left, right in zip(observed, expected, strict=True)
+        )
+    if isinstance(observed, bool) or isinstance(expected, bool):
+        return type(observed) is bool and observed is expected
+    if comparison_policy == "EXACT_DECIMAL_AND_DECLARED_SIGN":
+        return type(observed) is Decimal and str(observed) == str(expected)
+    if comparison_policy == "ABS_TOL_1E-15":
+        try:
+            return math.isclose(
+                float(observed),
+                float(expected),
+                rel_tol=0.0,
+                abs_tol=1e-15,
+            )
+        except (TypeError, ValueError, OverflowError):
+            return False
+    raise AssertionError(f"unsupported tracked comparison policy: {comparison_policy}")
 
 
 def reconstruct_st12h_direct_math_evidence_v1(
 ) -> tuple[ST12HDirectMathEvidenceV1, ...]:
-    vectors: Mapping[str, Mapping[str, object]] = {
-        "MATH-40": {
-            "side": "BUY",
-            "quantity": "100",
-            "fill_price": "0.45",
-            "reference_price": "0.43",
-        },
-        "MATH-41": {"baseline": 0.1, "latency": 2.0, "tau": 4.0},
-        "MATH-42": {
-            "eta": 0.5,
-            "sigma": 0.02,
-            "quantity": 100.0,
-            "volume": 10000.0,
-        },
-        "MATH-43": {
-            "participation": "0.2",
-            "threshold": "0.1",
-            "coefficient": "0.5",
-        },
-        "MATH-44": {
-            "delta": "0.25",
-            "sample": (("1", "0.2"), ("0.2", "2")),
-            "target": (("1", "0"), ("0", "2")),
-        },
-    }
-    expected: Mapping[str, object] = {
-        "MATH-40": Decimal("-2.00"),
-        "MATH-41": 0.06065306597126335,
-        "MATH-42": 0.001,
-        "MATH-43": Decimal("0.5"),
-        "MATH-44": (
-            (Decimal("1.00"), Decimal("0.150")),
-            (Decimal("0.150"), Decimal("2.00")),
-        ),
-    }
     mutations: Mapping[str, tuple[str, object]] = {
         "MATH-40": ("fill_price", "0.46"),
         "MATH-41": ("latency", 3.0),
-        "MATH-42": ("quantity", 400.0),
+        "MATH-42": ("Q", 400.0),
         "MATH-43": ("participation", "0.3"),
         "MATH-44": ("delta", "0.50"),
     }
     negatives: Mapping[str, tuple[str, object]] = {
-        "MATH-40": ("quantity", "0"),
+        "MATH-40": ("signed_fill_quantity", "0"),
         "MATH-41": ("tau", 0.0),
-        "MATH-42": ("volume", 0.0),
-        "MATH-43": ("threshold", "0"),
+        "MATH-42": ("ADV", 0.0),
+        "MATH-43": ("approved_participation_cap", "0"),
         "MATH-44": ("delta", "1.1"),
+    }
+    source_unit_fields: Mapping[str, str] = {
+        "MATH-40": "midpoint_after_fill",
+        "MATH-41": "latency",
+        "MATH-42": "ADV",
+        "MATH-43": "approved_participation_cap",
+        "MATH-44": "sample_covariance",
     }
     evidence: list[ST12HDirectMathEvidenceV1] = []
     for math_id in _ST12H_DIRECT_MATH_IDS:
-        vector = dict(vectors[math_id])
+        vector_owner = _ST12H_TRACKED_GOLDEN_VECTOR_BY_MATH_ID[math_id]
+        oracle_owner = _ST12H_TRACKED_ORACLE_BY_MATH_ID[math_id]
+        contract_owner = _ST12H_TRACKED_CONTRACT_BY_MATH_ID[math_id]
+        vector = json.loads(vector_owner.inputs_json)
+        vector_expected = json.loads(vector_owner.expected_json)
+        oracle_expected = json.loads(oracle_owner.expected_value_json)
+        comparison_policy = oracle_owner.comparison_policy
+        if (
+            vector_expected != oracle_expected
+            or vector_owner.comparison_policy != comparison_policy
+            or getattr(contract_owner, "comparison_policy", None) != comparison_policy
+            or set(vector) != set(getattr(contract_owner, "input_names", ()))
+            or oracle_owner.production_import_allowed
+            or oracle_owner.primary_validator_import_allowed
+            or vector_owner.production_import_allowed
+        ):
+            raise AssertionError(f"tracked direct owner contract drifted: {math_id}")
         observed = _st12h_direct_math_observable(math_id, vector)
-        target = expected[math_id]
-        valid = (
-            math.isclose(float(observed), target, rel_tol=0.0, abs_tol=1e-15)
-            if isinstance(target, float)
-            else observed == target
-        )
-        if not valid:
+        if not _st12h_direct_value_matches(
+            observed,
+            oracle_expected,
+            comparison_policy=comparison_policy,
+        ):
             raise AssertionError(
                 f"independent direct reconstruction failed: {math_id}"
             )
@@ -289,15 +458,48 @@ def reconstruct_st12h_direct_math_evidence_v1(
             rejected = True
         if not rejected:
             raise AssertionError(f"direct negative vector was accepted: {math_id}")
+        precision_mutation = deepcopy(oracle_expected)
+        first_numeric_key = next(
+            key
+            for key, value in precision_mutation.items()
+            if not isinstance(value, bool)
+        )
+        if isinstance(precision_mutation[first_numeric_key], list):
+            precision_mutation[first_numeric_key][0][0] += 1e-9
+        elif comparison_policy == "EXACT_DECIMAL_AND_DECLARED_SIGN":
+            precision_mutation[first_numeric_key] = "-2.01"
+        else:
+            precision_mutation[first_numeric_key] = (
+                float(precision_mutation[first_numeric_key]) + 1e-9
+            )
+        precision_rejected = not _st12h_direct_value_matches(
+            observed,
+            precision_mutation,
+            comparison_policy=comparison_policy,
+        )
+        unit_field = source_unit_fields[math_id]
+        unit_mutation = dict(vector)
+        unit_mutation[f"{unit_field}_wrong_unit"] = unit_mutation.pop(unit_field)
+        source_unit_rejected = False
+        try:
+            _st12h_direct_math_observable(math_id, unit_mutation)
+        except (KeyError, TypeError, ValueError):
+            source_unit_rejected = True
+        if not precision_rejected or not source_unit_rejected:
+            raise AssertionError(f"direct precision/source mutation was accepted: {math_id}")
         evidence.append(
             ST12HDirectMathEvidenceV1(
                 math_id=math_id,
-                vector_ref=f"H-DIRECT-GOLDEN::{math_id}",
+                vector_ref=vector_owner.vector_id,
+                oracle_ref=oracle_owner.oracle_id,
+                comparison_policy=comparison_policy,
                 independent_method=f"_st12h_direct_math_observable::{math_id}",
                 observed_result=observed,
                 mutation=f"{mutation_field}={mutation_value!r}",
                 mutation_result=mutation_observed,
                 negative_vector_rejected=True,
+                precision_or_tolerance_mutation_rejected=True,
+                source_or_unit_mutation_rejected=True,
             )
         )
     return tuple(evidence)
@@ -325,52 +527,79 @@ def _st12h_result_marker(result: "DomainResult") -> str:
     return markers[-1].split()[0]
 
 
+def _validate_st12h_math_crosswalk_rows(
+    rows: Sequence[ST12HMathEvidenceCrosswalkV1],
+) -> None:
+    if (
+        tuple(row.math_id for row in rows) != _ST12H_ALL_MATH_IDS
+        or sum(row.evidence_class == "H_DIRECT_EXECUTED" for row in rows) != 5
+        or sum(row.evidence_class == "INHERITED_EXECUTED" for row in rows) != 47
+        or any(
+            not row.tracked_oracle_id
+            or not row.tracked_golden_vector_id
+            or not row.production_owner
+            or not row.independent_validator_owner
+            or not row.comparison_policy
+            or not row.mutation_family
+            or "IDENTITY_ONLY" in row.mutation_family
+            or not row.boundary_negative_mutation_evidence
+            or not row.execution_receipt_ref
+            for row in rows
+        )
+    ):
+        raise AssertionError("ST12-H 52-row math evidence crosswalk is incomplete")
+
+
 def build_st12h_math_evidence_crosswalk_v1(
     results: Sequence["DomainResult"],
 ) -> tuple[ST12HMathEvidenceCrosswalkV1, ...]:
-    shard_rows = _st12h_registry_rows(
-        _ST12H_MATH_SHARD_REGISTRY,
-        "math_spec_id",
-    )
-    vector_rows = _st12h_registry_rows(
-        _ST12H_GOLDEN_VECTOR_REGISTRY,
-        "math_spec_ref",
-    )
-    oracle_rows = _st12h_registry_rows(
-        _ST12H_INDEPENDENT_ORACLE_REGISTRY,
-        "math_spec_ref",
-    )
+    _st12h_assert_exact_tracked_math_owners()
     result_by_domain = {result.domain: result for result in results}
-    if len(shard_rows) != 52 or len(vector_rows) != 52 or len(oracle_rows) != 52:
-        raise AssertionError(
-            "ST12-H math evidence registries must each contain 52 exact rows"
-        )
+    for domain, expected_marker in _ST12H_INHERITED_MARKER_BY_DOMAIN.items():
+        result = result_by_domain.get(domain)
+        if (
+            result is None
+            or result.returncode != 0
+            or not result.stdout.strip()
+            or expected_marker not in result.stdout.split()
+        ):
+            raise AssertionError(
+                f"inherited independent validator result is absent or invalid: {domain}"
+            )
     direct_by_id = {
         row.math_id: row for row in reconstruct_st12h_direct_math_evidence_v1()
     }
     crosswalk: list[ST12HMathEvidenceCrosswalkV1] = []
-    for index in range(1, 53):
-        math_id = f"MATH-{index:02d}"
-        shard = shard_rows[math_id]
-        vector = vector_rows[math_id]
-        oracle = oracle_rows[math_id]
-        owner = str(shard["independent_validator_path"])
+    for math_id in _ST12H_ALL_MATH_IDS:
+        vector = _ST12H_TRACKED_GOLDEN_VECTOR_BY_MATH_ID[math_id]
+        oracle = _ST12H_TRACKED_ORACLE_BY_MATH_ID[math_id]
+        production_callable = _ST12H_TRACKED_PRODUCTION_CALLABLE_BY_MATH_ID[math_id]
+        production_owner = (
+            f"{production_callable.__module__.replace('.', '/')}.py::{production_callable.__qualname__}",
+        )
         if math_id in direct_by_id:
             direct = direct_by_id[math_id]
             crosswalk.append(
                 ST12HMathEvidenceCrosswalkV1(
                     math_id=math_id,
-                    production_owner=tuple(
-                        str(value) for value in shard["production_owner_paths"]
-                    ),
+                    tracked_oracle_id=oracle.oracle_id,
+                    tracked_golden_vector_id=vector.vector_id,
+                    production_owner=production_owner,
                     independent_validator_owner=(
                         "tools/independent_validate_qku_computation_control_plane.py"
                         "::reconstruct_st12h_direct_math_evidence_v1"
                     ),
+                    comparison_policy=oracle.comparison_policy,
                     exact_vector_or_invariant=direct.vector_ref,
+                    mutation_family=(
+                        "MATERIAL_INPUT+DOMAIN_GUARD+PRECISION_TOLERANCE+SOURCE_UNIT"
+                    ),
                     boundary_negative_mutation_evidence=(
                         f"{direct.mutation}; observed={direct.mutation_result!r}; "
-                        f"negative_rejected={direct.negative_vector_rejected}"
+                        f"negative_rejected={direct.negative_vector_rejected}; "
+                        "precision_rejected="
+                        f"{direct.precision_or_tolerance_mutation_rejected}; "
+                        f"source_unit_rejected={direct.source_or_unit_mutation_rejected}"
                     ),
                     validator_command=(
                         "python",
@@ -382,33 +611,29 @@ def build_st12h_math_evidence_crosswalk_v1(
                 )
             )
             continue
-        domain = str(shard["domain"]).replace("-", "_")
-        result = result_by_domain.get(domain)
-        if result is None or result.returncode != 0:
-            raise AssertionError(
-                f"inherited independent validator did not pass: {math_id}"
-            )
-        if owner.replace("\\", "/") != str(
-            oracle["current_main_independent_validator_path"]
-        ).replace("\\", "/"):
-            raise AssertionError(f"inherited validator ownership drifted: {math_id}")
+        domain = _ST12H_INHERITED_DOMAIN_BY_MATH_ID[math_id]
+        result = result_by_domain[domain]
+        owner = _ST12H_INHERITED_OWNER_BY_DOMAIN[domain]
+        _st12h_validate_inherited_owner_assignment(math_id, owner)
         marker = _st12h_result_marker(result)
-        mutation_targets = tuple(
-            str(value) for value in oracle["mutation_targets_required"]
-        )
+        expected_marker = _ST12H_INHERITED_MARKER_BY_DOMAIN[domain]
+        if marker != expected_marker:
+            raise AssertionError(f"inherited validator marker drifted: {math_id}")
         crosswalk.append(
             ST12HMathEvidenceCrosswalkV1(
                 math_id=math_id,
-                production_owner=tuple(
-                    str(value) for value in shard["production_owner_paths"]
-                ),
+                tracked_oracle_id=oracle.oracle_id,
+                tracked_golden_vector_id=vector.vector_id,
+                production_owner=production_owner,
                 independent_validator_owner=owner,
+                comparison_policy=oracle.comparison_policy,
                 exact_vector_or_invariant=(
-                    f"{vector['vector_id']}::{vector['comparison_policy']}"
+                    f"{vector.vector_id}::{vector.comparison_policy}"
                 ),
+                mutation_family="INHERITED_GOLDEN_BOUNDARY_NEGATIVE_MUTATION_MATRIX",
                 boundary_negative_mutation_evidence=(
                     f"executed_marker={marker}; "
-                    f"mutation_targets={mutation_targets!r}"
+                    f"oracle_steps={oracle.independent_algorithm_steps!r}"
                 ),
                 validator_command=("python", owner),
                 validator_marker=marker,
@@ -417,22 +642,22 @@ def build_st12h_math_evidence_crosswalk_v1(
             )
         )
     rows = tuple(crosswalk)
-    if (
-        tuple(row.math_id for row in rows)
-        != tuple(f"MATH-{index:02d}" for index in range(1, 53))
-        or sum(row.evidence_class == "H_DIRECT_EXECUTED" for row in rows) != 5
-        or sum(row.evidence_class == "INHERITED_EXECUTED" for row in rows) != 47
-    ):
-        raise AssertionError("ST12-H 52-row math evidence crosswalk is incomplete")
+    _validate_st12h_math_crosswalk_rows(rows)
     return rows
 
 
-def reconstruct_st12h_complete_math_coverage_v1(
+def _reconstruct_st12h_complete_math_coverage_from_results_v1(
     results: Sequence["DomainResult"],
 ) -> tuple[str, ...]:
     return tuple(
         row.math_id for row in build_st12h_math_evidence_crosswalk_v1(results)
     )
+
+
+def reconstruct_st12h_complete_math_coverage_v1() -> tuple[str, ...]:
+    domains = tuple(_ST12H_INHERITED_MARKER_BY_DOMAIN)
+    results = tuple(run_domain(domain) for domain in domains)
+    return _reconstruct_st12h_complete_math_coverage_from_results_v1(results)
 
 
 def reconstruct_st12h_authority_boundary_v1() -> None:
@@ -1577,6 +1802,7 @@ def _execute_finalization_owner(
 ) -> tuple[tuple[str, ...], str]:
     from src.qtt.stage1_prediction_markets.qku_computation_control_plane.source_policy import (
         ST12H_SOURCE_BINDINGS,
+        _observe_st12h_source_binding_v1,
         _validate_st12h_source_currentness_receipt_v1,
         validate_st12h_source_binding_v1,
     )
@@ -1667,13 +1893,19 @@ def _execute_finalization_owner(
         )
     if control_id == "ST12H-FINAL::06":
         evaluation_date = datetime.now(UTC).date()
-        receipts = tuple(
+        receipts_list = []
+        for row in ST12H_SOURCE_BINDINGS:
             validate_st12h_source_binding_v1(
                 row,
                 evaluated_at=evaluation_date,
             )
-            for row in ST12H_SOURCE_BINDINGS
-        )
+            receipts_list.append(
+                _observe_st12h_source_binding_v1(
+                    row,
+                    evaluated_at=evaluation_date,
+                )
+            )
+        receipts = tuple(receipts_list)
         for receipt in receipts:
             _validate_st12h_source_currentness_receipt_v1(
                 receipt,
@@ -1959,7 +2191,7 @@ def execute_st12h_finalization_controls_v1(
     return rows
 
 
-def reconstruct_st12h_final_acceptance_v1(
+def _reconstruct_st12h_final_acceptance_evidence_v1(
     *,
     math_crosswalk: Sequence[ST12HMathEvidenceCrosswalkV1],
     backup_receipts: Sequence[ST12HBackupRestoreReceiptV1],
@@ -1985,6 +2217,42 @@ def reconstruct_st12h_final_acceptance_v1(
     return finalization
 
 
+def reconstruct_st12h_final_acceptance_v1() -> None:
+    results = tuple(
+        run_domain(domain) for domain in _ST12H_INHERITED_MARKER_BY_DOMAIN
+    )
+    math_crosswalk = build_st12h_math_evidence_crosswalk_v1(results)
+    backup_receipts = execute_st12h_backup_restore_portability_v1()
+    serialized_rows = reconstruct_st12h_serialized_payload_evidence_v1()
+    _reconstruct_st12h_final_acceptance_evidence_v1(
+        math_crosswalk=math_crosswalk,
+        backup_receipts=backup_receipts,
+        serialized_rows=serialized_rows,
+    )
+
+
+def _observe_st12h_expected_qtt_rejection_v1(
+    operation: Callable[[], object],
+    *,
+    expected_reason: ReasonCode,
+) -> ReasonCode:
+    """Observe one exact typed QTT rejection without hiding programming errors."""
+
+    try:
+        operation()
+    except ComputationControlPlaneError as exc:
+        if exc.reason_code is not expected_reason:
+            raise AssertionError(
+                "ST12-H grouped mutation raised an unexpected QTT reason: "
+                f"expected={expected_reason.value} actual={exc.reason_code.value}"
+            ) from exc
+        return exc.reason_code
+    raise AssertionError(
+        "ST12-H grouped mutation was accepted instead of failing closed: "
+        f"expected_reason={expected_reason.value}"
+    )
+
+
 def _exercise_st12h_grouped_defect_injections_v1() -> Mapping[str, bool]:
     """Reject the audit's defect families through one bounded grouped matrix."""
 
@@ -1995,10 +2263,12 @@ def _exercise_st12h_grouped_defect_injections_v1() -> Mapping[str, bool]:
     )
     from src.qtt.stage1_prediction_markets.qku_computation_control_plane.parameter_policy import (
         _evaluate_st12h_parameter_applications_v1,
+        _reject_st12h_parameter_renamed_value_echo_v1,
         _validate_st12h_parameter_application_evidence_v1,
     )
     from src.qtt.stage1_prediction_markets.qku_computation_control_plane.source_policy import (
         ST12H_SOURCE_BINDINGS,
+        _observe_st12h_source_binding_v1,
         _validate_st12h_source_currentness_receipt_v1,
         validate_st12h_source_binding_v1,
     )
@@ -2056,28 +2326,29 @@ def _exercise_st12h_grouped_defect_injections_v1() -> Mapping[str, bool]:
         results["required_receipt_fields_unavailable"] = False
 
     parameter_evidence = _evaluate_st12h_parameter_applications_v1()
-    alternative_row = next(
-        row
-        for row in parameter_evidence
-        if row.permitted_alternative is not None
-    )
-    inert_parameter_rows = tuple(
-        replace(
-            row,
-            alternative_output_or_none=row.baseline_output,
-        )
-        if row.parameter_id == alternative_row.parameter_id
-        else row
-        for row in parameter_evidence
-    )
     try:
-        _validate_st12h_parameter_application_evidence_v1(
-            inert_parameter_rows
+        _reject_st12h_parameter_renamed_value_echo_v1(
+            {"renamed_downstream_field": parameter_evidence[0].resolved_value_or_rule},
+            raw_value=parameter_evidence[0].resolved_value_or_rule,
         )
     except ParameterPolicyError:
-        results["parameter_mutation_without_effect"] = True
+        results["parameter_renamed_value_echo"] = True
     else:
-        results["parameter_mutation_without_effect"] = False
+        results["parameter_renamed_value_echo"] = False
+    try:
+        _validate_st12h_parameter_application_evidence_v1(
+            (
+                replace(
+                    parameter_evidence[0],
+                    disposition="DOWNSTREAM_IMPLEMENTATION_EFFECT",
+                ),
+                *parameter_evidence[1:],
+            )
+        )
+    except ParameterPolicyError:
+        results["parameter_runtime_consumption_overclaim"] = True
+    else:
+        results["parameter_runtime_consumption_overclaim"] = False
 
     try:
         build_st12h_math_evidence_crosswalk_v1(())
@@ -2085,6 +2356,88 @@ def _exercise_st12h_grouped_defect_injections_v1() -> Mapping[str, bool]:
         results["math_identity_count_without_execution"] = True
     else:
         results["math_identity_count_without_execution"] = False
+
+    try:
+        _st12h_validate_math_id_inventory(_ST12H_ALL_MATH_IDS[:-1])
+    except AssertionError:
+        results["math_missing_id"] = True
+    else:
+        results["math_missing_id"] = False
+    try:
+        _st12h_validate_math_id_inventory(
+            (*_ST12H_ALL_MATH_IDS[:-1], _ST12H_ALL_MATH_IDS[-2])
+        )
+    except AssertionError:
+        results["math_duplicate_id"] = True
+    else:
+        results["math_duplicate_id"] = False
+    try:
+        _st12h_validate_inherited_owner_assignment(
+            "MATH-01",
+            _ST12H_INHERITED_OWNER_BY_DOMAIN["accounting"],
+        )
+    except AssertionError:
+        results["math_wrong_inherited_owner"] = True
+    else:
+        results["math_wrong_inherited_owner"] = False
+    synthetic_results = tuple(
+        DomainResult(
+            domain=domain,
+            returncode=0,
+            stdout=marker,
+            stderr="",
+        )
+        for domain, marker in _ST12H_INHERITED_MARKER_BY_DOMAIN.items()
+    )
+    try:
+        build_st12h_math_evidence_crosswalk_v1(
+            (replace(synthetic_results[0], stdout=""), *synthetic_results[1:])
+        )
+    except AssertionError:
+        results["math_empty_inherited_result"] = True
+    else:
+        results["math_empty_inherited_result"] = False
+    try:
+        build_st12h_math_evidence_crosswalk_v1(
+            (
+                replace(synthetic_results[0], stdout="QKU_WRONG_MARKER"),
+                *synthetic_results[1:],
+            )
+        )
+    except AssertionError:
+        results["math_wrong_inherited_marker"] = True
+    else:
+        results["math_wrong_inherited_marker"] = False
+    synthetic_crosswalk = build_st12h_math_evidence_crosswalk_v1(synthetic_results)
+    try:
+        _validate_st12h_math_crosswalk_rows(
+            (
+                replace(synthetic_crosswalk[0], mutation_family="IDENTITY_ONLY"),
+                *synthetic_crosswalk[1:],
+            )
+        )
+    except AssertionError:
+        results["math_identity_only_evidence"] = True
+    else:
+        results["math_identity_only_evidence"] = False
+    oracle_production_import_rejection_reason = (
+        _observe_st12h_expected_qtt_rejection_v1(
+            lambda: replace(
+                _ST12H_TRACKED_ORACLE_BY_MATH_ID["MATH-40"],
+                production_import_allowed=True,
+            ),
+            expected_reason=ReasonCode.ORACLE_NOT_INDEPENDENT,
+        )
+    )
+    results["math_direct_production_expected_import"] = (
+        oracle_production_import_rejection_reason
+        is ReasonCode.ORACLE_NOT_INDEPENDENT
+    )
+    package_custody_token = "." + "codex_inputs" + "/h80/p/registries"
+    results["math_external_package_runtime_dependency"] = (
+        package_custody_token
+        not in Path(__file__).read_text(encoding="utf-8")
+    )
 
     serialized = reconstruct_st12h_serialized_payload_evidence_v1()
     required_serialized_mutations = {
@@ -2127,10 +2480,14 @@ def _exercise_st12h_grouped_defect_injections_v1() -> Mapping[str, bool]:
     mutable_source = next(
         binding
         for binding in ST12H_SOURCE_BINDINGS
-        if binding.stability_class == "MUTABLE_RECHECK"
+        if binding.source_id == "ST12H-V8-SRC::05"
     )
     source_evaluation = datetime.now(UTC).date()
-    source_receipt = validate_st12h_source_binding_v1(
+    validate_st12h_source_binding_v1(
+        mutable_source,
+        evaluated_at=source_evaluation,
+    )
+    source_receipt = _observe_st12h_source_binding_v1(
         mutable_source,
         evaluated_at=source_evaluation,
     )
@@ -2250,7 +2607,7 @@ def _exercise_st12h_grouped_defect_injections_v1() -> Mapping[str, bool]:
     )
 
     try:
-        reconstruct_st12h_final_acceptance_v1(
+        _reconstruct_st12h_final_acceptance_evidence_v1(
             math_crosswalk=(),
             backup_receipts=(),
             serialized_rows=(),
@@ -2281,6 +2638,27 @@ def _exercise_st12h_grouped_defect_injections_v1() -> Mapping[str, bool]:
             f"{runner.ST12A_TEST_ROOT}/"
         )
     )
+
+    parameter_mutation_checks = (
+        results.pop("parameter_renamed_value_echo"),
+        results.pop("parameter_runtime_consumption_overclaim"),
+    )
+    results["parameter_mutation_without_effect"] = all(parameter_mutation_checks)
+    math_oracle_checks = tuple(
+        results.pop(key)
+        for key in (
+            "math_identity_count_without_execution",
+            "math_missing_id",
+            "math_duplicate_id",
+            "math_wrong_inherited_owner",
+            "math_empty_inherited_result",
+            "math_wrong_inherited_marker",
+            "math_identity_only_evidence",
+            "math_direct_production_expected_import",
+            "math_external_package_runtime_dependency",
+        )
+    )
+    results["math_identity_count_without_execution"] = all(math_oracle_checks)
 
     if len(results) != 19 or not all(results.values()):
         raise AssertionError(
@@ -2353,7 +2731,7 @@ def main() -> int:
     serialized_rows = reconstruct_st12h_serialized_payload_evidence_v1()
     reconstruct_st12h_authority_boundary_v1()
     backup_receipts = execute_st12h_backup_restore_portability_v1()
-    finalization = reconstruct_st12h_final_acceptance_v1(
+    finalization = _reconstruct_st12h_final_acceptance_evidence_v1(
         math_crosswalk=math_crosswalk,
         backup_receipts=backup_receipts,
         serialized_rows=serialized_rows,
