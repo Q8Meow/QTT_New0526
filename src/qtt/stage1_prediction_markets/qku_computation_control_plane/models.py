@@ -4303,6 +4303,9 @@ def _st12h_immutable_int_mapping(
 @dataclass(frozen=True, slots=True)
 class ST12HBackupRestorePlanV1:
     plan_id: str
+    operation: str
+    precondition: str
+    postcondition: str
     artifact_paths: tuple[str, ...]
     external_scratch_root_policy: str
     max_archive_count: int
@@ -4312,7 +4315,8 @@ class ST12HBackupRestorePlanV1:
     cleanup_required: bool
 
     def __post_init__(self) -> None:
-        _canonical_text(self.plan_id, "plan_id")
+        for name in ("plan_id", "operation", "precondition", "postcondition"):
+            _canonical_text(getattr(self, name), name)
         _st12h_text_tuple(self.artifact_paths, "artifact_paths")
         _canonical_text(
             self.external_scratch_root_policy,
@@ -4353,7 +4357,7 @@ class ST12HControlCaseV1:
     fixture_ref: str
     mutation_operation: str
     expected_terminal_state: str
-    expected_reason_code: ReasonCode
+    expected_reason_code: ReasonCode | None
     required_receipt_fields: tuple[str, ...]
     test_function: str
     independent_validator_path: str
@@ -4386,10 +4390,10 @@ class ST12HControlCaseV1:
                 ReasonCode.INVALID_CONTRACT,
                 "case identity or domain is outside the exact H matrix",
             )
-        if type(self.expected_reason_code) is not ReasonCode:
+        if self.expected_reason_code is not None and type(self.expected_reason_code) is not ReasonCode:
             raise ContractValidationError(
                 ReasonCode.INVALID_CONTRACT,
-                "expected_reason_code must be an exact ReasonCode",
+                "expected_reason_code must be an exact ReasonCode or explicit absence",
             )
         _st12h_text_tuple(self.required_receipt_fields, "required_receipt_fields")
         if self.no_effect_flags is not NO_EFFECTS_V1:
@@ -4473,10 +4477,10 @@ class ST12HPublicationManifestV1:
                 ReasonCode.INVALID_CONTRACT,
                 "publication requires exactly two reports and fifteen held authorities",
             )
-        if type(self.stale_receipt_count) is not int or self.stale_receipt_count != 0:
+        if type(self.stale_receipt_count) is not int or self.stale_receipt_count < 1:
             raise ContractValidationError(
                 ReasonCode.INVALID_CONTRACT,
-                "stale_receipt_count must be exact zero",
+                "publication must disclose at least one invalidated stale receipt class",
             )
 
 
@@ -4747,17 +4751,22 @@ class ST12HStep12FinalHandoffV1:
             self.read_only_predecessor_path_count,
             self.grouped_test_module_count,
             self.grouped_test_function_count,
-            self.stale_receipt_count,
         )
-        if exact_counts != (25, 66, 1, 6, 0):
+        if exact_counts != (25, 66, 1, 6) or type(self.stale_receipt_count) is not int or self.stale_receipt_count < 0:
             raise ContractValidationError(
                 ReasonCode.INVALID_CONTRACT,
                 "handoff path, test, and stale-receipt counts must be exact",
             )
-        if len(self.held_authorities) != 15 or self.terminal_state != "STEP12_COMPLETE_IMPLEMENTATION_HANDOFF_HELD":
+        if len(self.held_authorities) != 15 or self.terminal_state not in {
+            "IMPLEMENTATION_IN_PROGRESS",
+            "INDEPENDENT_CODE_AUDIT_FAILED",
+            "FINAL_CONTROLS_INCOMPLETE",
+            "PUBLICATION_HELD",
+            "MERGE_HELD",
+        }:
             raise ContractValidationError(
                 ReasonCode.INVALID_CONTRACT,
-                "handoff must preserve the exact held-authority terminal state",
+                "handoff must preserve one exact incomplete or held terminal state",
             )
         if self.no_effect_flags is not NO_EFFECTS_V1:
             raise ContractValidationError(
@@ -4849,4 +4858,20 @@ class ST12HValidationCurrentizationOperationsPublicationReportV1:
             raise ContractValidationError(
                 ReasonCode.RUNTIME_EFFECT_FORBIDDEN,
                 "the report must preserve all held authorities and shared no-effects",
+            )
+        if self.terminal_state not in {
+            "IMPLEMENTATION_IN_PROGRESS",
+            "INDEPENDENT_CODE_AUDIT_FAILED",
+            "FINAL_CONTROLS_INCOMPLETE",
+            "PUBLICATION_HELD",
+            "MERGE_HELD",
+        }:
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "tracked report projection cannot claim current execution completion",
+            )
+        if self.stale_receipt_rejection_count < self.stale_receipt_class_count:
+            raise ContractValidationError(
+                ReasonCode.SOURCE_EPOCH_STALE,
+                "tracked report must reject every stale receipt class",
             )

@@ -2394,9 +2394,11 @@ _ST12H_HELD_AUTHORITIES = (
     "profit_or_quantum_advantage_claim",
 )
 _ST12H_VALIDATION_CAMPAIGN_RECEIPT_REF = (
-    "ST12H-VALIDATION-CAMPAIGN-RECEIPT::LOCAL-ONE-FULL-CAMPAIGN"
+    "REQUIRED-EXTERNAL::ST12H-VALIDATION-CAMPAIGN-RECEIPT::CORRECTED-STATE"
 )
-_ST12H_PUBLICATION_RECEIPT_REF = "ST12H-PUBLICATION-RECEIPT::DRAFT-PR"
+_ST12H_PUBLICATION_RECEIPT_REF = (
+    "REQUIRED-EXTERNAL::ST12H-PUBLICATION-RECEIPT::INDEPENDENT-REAUDIT"
+)
 
 
 def build_st12h_validation_currentization_operations_publication_report(
@@ -2416,6 +2418,20 @@ def build_st12h_validation_currentization_operations_publication_report(
             "security": 4,
             "source": 6,
             "total": 36,
+            "control_inventory_count": 36,
+            "implemented_control_contract_count": 36,
+            "actual_current_control_execution_count": 0,
+            "held_control_count": 36,
+            "external_control_receipt_requirement_count": 36,
+            "parameter_inventory_count": 21,
+            "implemented_parameter_contract_count": 21,
+            "actual_current_parameter_execution_count": 0,
+            "runtime_parameter_application_count": 0,
+            "runtime_authority_count": 0,
+            "backup_restore_inventory_count": 12,
+            "actual_current_backup_restore_execution_count": 0,
+            "finalization_inventory_count": 24,
+            "actual_current_finalization_execution_count": 0,
         },
         path_counts={
             "active": 25,
@@ -2427,9 +2443,15 @@ def build_st12h_validation_currentization_operations_publication_report(
         parameter_count=21,
         math_counts={
             "specifications": 52,
-            "oracles": 52,
-            "vectors": 52,
-            "direct_h_reconstructions": 5,
+            "independent_oracle_contracts": 52,
+            "golden_vector_or_invariant_contracts": 52,
+            "evidence_crosswalk_contracts": 52,
+            "h_direct_contracts": 5,
+            "inherited_validator_contracts": 47,
+            "actual_current_execution_count": 0,
+            "held_count": 52,
+            "external_dynamic_receipt_requirement_count": 52,
+            "identity_only_evidence_count": 0,
         },
         test_topology={
             "semantic_identities": 42,
@@ -2445,7 +2467,8 @@ def build_st12h_validation_currentization_operations_publication_report(
             "CLEAN_CI_AUTHORITATIVE",
         ),
         validation_command_receipt_refs=tuple(
-            f"ST12H-VALIDATION-COMMAND-RECEIPT::{command.command_id}"
+            "REQUIRED-EXTERNAL::ST12H-VALIDATION-COMMAND-RECEIPT::"
+            f"{command.command_id}::CORRECTED-STATE"
             for command in ST12H_VALIDATION_COMMANDS
         ),
         validation_campaign_receipt_ref=_ST12H_VALIDATION_CAMPAIGN_RECEIPT_REF,
@@ -2455,11 +2478,13 @@ def build_st12h_validation_currentization_operations_publication_report(
             "scratch_file_count": 0,
             "repository_copy_count": 0,
             "copied_git_index_count": 0,
-            "full_local_campaign_count": 1,
+            "full_local_campaign_count": 0,
             "automatic_full_campaign_retry_count": 0,
         },
         source_currentness_evidence_refs=tuple(
-            source.source_id for source in ST12H_SOURCE_BINDINGS
+            "REQUIRED-EXTERNAL::ST12H-SOURCE-CURRENTNESS-RECEIPT::"
+            f"{source.source_id}::CORRECTED-STATE"
+            for source in ST12H_SOURCE_BINDINGS
         ),
         source_binding_count=9,
         stale_receipt_class_count=14,
@@ -2473,9 +2498,7 @@ def build_st12h_validation_currentization_operations_publication_report(
         reason_code_binding_count=27,
         held_authorities=_ST12H_HELD_AUTHORITIES,
         authority_effects=NO_EFFECTS_V1,
-        terminal_state=(
-            "VALIDATION_CURRENTIZATION_OPERATIONS_PUBLICATION_VALIDATED"
-        ),
+        terminal_state="FINAL_CONTROLS_INCOMPLETE",
         next_owner_action="INDEPENDENT_ACTUAL_CODE_AUDIT",
     )
     payload = json.loads(
@@ -2508,9 +2531,9 @@ def build_st12h_final_step12_handoff_report() -> dict[str, object]:
         read_only_predecessor_path_count=66,
         grouped_test_module_count=1,
         grouped_test_function_count=6,
-        stale_receipt_count=0,
+        stale_receipt_count=14,
         held_authorities=_ST12H_HELD_AUTHORITIES,
-        terminal_state="STEP12_COMPLETE_IMPLEMENTATION_HANDOFF_HELD",
+        terminal_state="INDEPENDENT_CODE_AUDIT_FAILED",
         next_owner_action="INDEPENDENT_ACTUAL_CODE_AUDIT",
         no_effect_flags=NO_EFFECTS_V1,
     )
@@ -2542,7 +2565,14 @@ def _materialize_st12h_reports() -> None:
         output = REPO_ROOT / relative_path
         output.parent.mkdir(parents=True, exist_ok=True)
         output.write_text(
-            json.dumps(payload, sort_keys=True, separators=(",", ":")) + "\n",
+            json.dumps(
+                payload,
+                ensure_ascii=False,
+                allow_nan=False,
+                separators=(",", ":"),
+                sort_keys=False,
+            )
+            + "\n",
             encoding="utf-8",
             newline="\n",
         )

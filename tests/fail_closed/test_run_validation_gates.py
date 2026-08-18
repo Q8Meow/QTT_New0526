@@ -3345,8 +3345,8 @@ def test_runner_pytest_shards_cover_each_test_file_once():
 
     assert all_tests
     assert set(flattened) == all_tests
-    assert flattened.count(runner.ST12H_TEST_MODULE) == 2
-    assert len(flattened) == len(set(flattened)) + 1
+    assert flattened.count(runner.ST12H_TEST_MODULE) == 1
+    assert len(flattened) == len(set(flattened))
     assert set(shard_manifest) == set(runner.PYTEST_SHARD_PHASES)
     assert (
         runner.ISOLATED_SOURCE_EVIDENCE_PYTEST
@@ -3967,7 +3967,6 @@ def test_runner_splits_pytest_shard_8_residual_tests_deterministically():
         ),
         ("tests/source_evidence",),
         (runner.ST12A_TEST_ROOT,),
-        (runner.ST12H_TEST_MODULE,),
     ]
     assert commands[0].bounded_idempotence is True
     assert commands[1].ignores == (idempotence_path,)
@@ -3981,12 +3980,11 @@ def test_runner_splits_pytest_shard_8_residual_tests_deterministically():
     assert commands[9].ignores == (pr167_idempotence_path,)
     assert commands[10].bounded_idempotence is True
     assert commands[11].ignores == (pr162e_idempotence_path,)
-    assert commands[-3].ignores == (runner.ISOLATED_SOURCE_EVIDENCE_PYTEST,)
-    assert commands[-2].paths == (runner.ST12A_TEST_ROOT,)
-    assert commands[-2].ignores == ()
-    assert commands[-2].reason == "Complete QKU control-plane domain test root"
-    assert "exact 42-file" not in commands[-2].reason
-    assert commands[-1].paths == (runner.ST12H_TEST_MODULE,)
+    assert commands[-2].ignores == (runner.ISOLATED_SOURCE_EVIDENCE_PYTEST,)
+    assert commands[-1].paths == (runner.ST12A_TEST_ROOT,)
+    assert commands[-1].ignores == ()
+    assert commands[-1].reason == "Complete QKU control-plane domain test root"
+    assert "exact 42-file" not in commands[-1].reason
     assert all(command.reason for command in commands)
     assert ("tests",) not in [command.paths for command in commands]
 
@@ -4008,7 +4006,7 @@ def test_runner_splits_pytest_shard_8_residual_tests_deterministically():
         "--basetemp",
         str(pytest_basetemp),
     ]
-    assert built_commands[-2] == legacy_registered_command
+    assert built_commands[-1] == legacy_registered_command
     assert all(
         not any(argument.startswith("--import-mode") for argument in built)
         for built in built_commands
@@ -4018,13 +4016,13 @@ def test_runner_splits_pytest_shard_8_residual_tests_deterministically():
     ) == 1
 
     adapted = runner._execution_command_with_qku_root_importlib(
-        built_commands[-2]
+        built_commands[-1]
     )
     assert adapted.count(import_mode_flag) == 1
     import_mode_index = adapted.index(import_mode_flag)
     assert adapted[import_mode_index + 1] == "--basetemp"
     assert adapted[:import_mode_index] + adapted[import_mode_index + 1 :] == (
-        built_commands[-2]
+        built_commands[-1]
     )
     assert runner._execution_command_with_qku_root_importlib(adapted) == adapted
     with pytest.raises(
@@ -4032,11 +4030,11 @@ def test_runner_splits_pytest_shard_8_residual_tests_deterministically():
         match="^QTT_QKU_ROOT_PYTEST_IMPORT_MODE_CONFLICT$",
     ):
         runner._execution_command_with_qku_root_importlib(
-            [*built_commands[-2], "--import-mode=prepend"]
+            [*built_commands[-1], "--import-mode=prepend"]
         )
     assert runner._execution_command_with_qku_root_importlib(
-        built_commands[-1]
-    ) == built_commands[-1]
+        built_commands[0]
+    ) == built_commands[0]
 
     expanded_paths = [
         path
@@ -4044,8 +4042,8 @@ def test_runner_splits_pytest_shard_8_residual_tests_deterministically():
         for path in runner._pytest_files_for_command(command, REPO_ROOT)
     ]
 
-    assert expanded_paths.count(runner.ST12H_TEST_MODULE) == 2
-    assert len(expanded_paths) == len(set(expanded_paths)) + 1
+    assert expanded_paths.count(runner.ST12H_TEST_MODULE) == 1
+    assert len(expanded_paths) == len(set(expanded_paths))
     assert set(expanded_paths) == set(
         runner.pytest_shard_manifest(REPO_ROOT)["pytest-shard-8"]
     )
@@ -12385,12 +12383,22 @@ def test_st12h_commands_use_only_existing_phases_and_one_existing_pytest_shard()
             assert not {
                 runner._st12h_normalized_command(command) for command in commands
             }.intersection(frozen)
-    grouped_matrix_commands = [
+    direct_grouped_matrix_commands = [
         command
         for command in by_phase["pytest-shard-8"]
         if runner.ST12H_TEST_MODULE in runner._pytest_path_args(command)
     ]
-    assert len(grouped_matrix_commands) == 1
+    complete_qku_root_commands = [
+        command
+        for command in by_phase["pytest-shard-8"]
+        if runner._pytest_path_args(command) == (runner.ST12A_TEST_ROOT,)
+    ]
+    assert direct_grouped_matrix_commands == []
+    assert len(complete_qku_root_commands) == 1
+    assert (
+        runner.ST12H_TEST_MODULE
+        in runner.pytest_shard_manifest(REPO_ROOT)["pytest-shard-8"]
+    )
     workflow = _workflow_text()
     assert workflow.count("  validation_shards:\n") == 1
     assert workflow.count("  validation:\n") == 1

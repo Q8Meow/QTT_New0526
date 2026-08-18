@@ -6,6 +6,7 @@ from dataclasses import dataclass, fields as dataclass_fields
 from datetime import datetime
 from decimal import Decimal
 from enum import StrEnum
+import json
 from types import MappingProxyType
 from typing import Mapping
 
@@ -1289,10 +1290,10 @@ class ST12HPublicationReceiptV1(ST12HReceiptCustodyV1):
             self.stale_receipt_count,
             self.stale_receipt_rejection_count,
         )
-        if exact != (25, 66, 1, 6, 0, 14):
+        if exact[:4] != (25, 66, 1, 6) or self.stale_receipt_rejection_count < self.stale_receipt_count:
             raise ContractValidationError(
                 ReasonCode.INVALID_CONTRACT,
-                "publication path, test, and stale-receipt denominators must be exact",
+                "publication custody counts or stale-receipt rejection are invalid",
             )
 
 
@@ -1448,6 +1449,62 @@ class ST12HValidationCampaignReceiptV1(ST12HReceiptCustodyV1):
                 ReasonCode.VALIDATION_FAILED,
                 "campaign custody and budget flags must be exact true",
             )
+
+
+_ST12H_SEMANTIC_VALIDATOR_REVISION = (
+    "ST12H-SEMANTIC-REVISION::PR286-CONSOLIDATED-AUDIT-CORRECTION-V1"
+)
+
+
+def _validate_st12h_receipt_currentness_v1(
+    receipt: ST12HReceiptCustodyV1,
+    *,
+    evaluated_at: datetime,
+    required_reference_ids: tuple[str, ...] = (),
+) -> None:
+    """Reject expired, superseded, mismatched, or pre-correction H receipts."""
+
+    if not isinstance(receipt, ST12HReceiptCustodyV1):
+        raise ContractValidationError(
+            ReasonCode.INVALID_CONTRACT,
+            "receipt currentness requires one typed ST12-H receipt",
+        )
+    evaluated = parse_utc(evaluated_at, field_name="evaluated_at")
+    if evaluated < receipt.evaluated_at:
+        raise ContractValidationError(
+            ReasonCode.SOURCE_EPOCH_STALE,
+            "ST12-H receipt cannot be evaluated before its observed execution time",
+        )
+    if evaluated > receipt.valid_until:
+        raise ContractValidationError(
+            ReasonCode.SOURCE_EPOCH_STALE,
+            "ST12-H receipt validity expired before evaluation",
+        )
+    if _ST12H_SEMANTIC_VALIDATOR_REVISION not in receipt.required_reference_ids:
+        raise ContractValidationError(
+            ReasonCode.SOURCE_EPOCH_STALE,
+            "ST12-H receipt predates the current semantic validator revision",
+        )
+    missing = tuple(
+        reference
+        for reference in required_reference_ids
+        if reference not in receipt.required_reference_ids
+    )
+    if missing:
+        raise ContractValidationError(
+            ReasonCode.RECONCILIATION_REQUIRED,
+            "ST12-H receipt required-reference set is mismatched",
+        )
+    if receipt.custody_state in {
+        "SUPERSEDED",
+        "INCOMPLETE",
+        "MISMATCHED",
+        "STALE",
+    }:
+        raise ContractValidationError(
+            ReasonCode.SOURCE_EPOCH_STALE,
+            f"ST12-H receipt custody is not current: {receipt.custody_state}",
+        )
 
 
 _ST12H_SERIALIZED_FIELD_ORDER: Mapping[str, tuple[str, ...]] = MappingProxyType(
@@ -1818,4 +1875,10 @@ def serialize_st12h_contract_v1(value: object, *, binding_id: str) -> str:
         name: _st12h_normalize_serialized_value(getattr(value, name))
         for name in field_order
     }
-    return deterministic_json(payload)
+    return json.dumps(
+        payload,
+        ensure_ascii=False,
+        allow_nan=False,
+        separators=(",", ":"),
+        sort_keys=False,
+    )

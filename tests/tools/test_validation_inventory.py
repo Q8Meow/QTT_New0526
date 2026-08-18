@@ -789,6 +789,13 @@ def test_st12h_inventory_is_exact_and_uses_central_command_authority() -> None:
     )
     assert len(inventory.ST12H_ACTIVE_PATHS) == 25
     assert inventory.ST12H_QKU_VALIDATOR_IDS == EXPECTED_ST12H_QKU_VALIDATOR_IDS
+    assert inventory.ST12H_GROUPED_MATRIX_VALIDATOR_ID == (
+        "pytest_shard_8_qku_computation_control_plane_pytest"
+    )
+    assert (
+        "pytest_shard_8_test_contract_matrix_pytest"
+        not in inventory.ST12H_REQUIRED_VALIDATOR_IDS
+    )
     assert inventory.ST12H_REQUIRED_VALIDATOR_IDS == frozenset(
         {
             *EXPECTED_ST12H_QKU_VALIDATOR_IDS,

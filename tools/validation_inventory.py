@@ -191,7 +191,9 @@ ST12H_QKU_VALIDATOR_IDS = frozenset(
         "validate_qku_computation_control_plane_source",
     }
 )
-ST12H_GROUPED_MATRIX_VALIDATOR_ID = "pytest_shard_8_test_contract_matrix_pytest"
+ST12H_GROUPED_MATRIX_VALIDATOR_ID = (
+    "pytest_shard_8_qku_computation_control_plane_pytest"
+)
 ST12H_REQUIRED_VALIDATOR_IDS = frozenset(
     (*ST12H_QKU_VALIDATOR_IDS, ST12H_GROUPED_MATRIX_VALIDATOR_ID)
 )

@@ -1123,12 +1123,6 @@ PYTEST_SHARD_COMMANDS: dict[str, tuple[PytestShardCommand, ...]] = {
             runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
             historical_runtime_seconds=1.0,
         ),
-        PytestShardCommand(
-            paths=(ST12H_TEST_MODULE,),
-            reason="ST12-H exact six-function grouped control matrix",
-            runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
-            historical_runtime_seconds=1.0,
-        ),
     ),
 }
 PRE_VALIDATION_FINALIZATION_GUIDANCE = (
@@ -1614,7 +1608,7 @@ def _st12h_command_contract(
         )
     if (
         script_name == PYTEST_FRESH_BASETEMP_SCRIPT
-        and ST12H_TEST_MODULE in _pytest_path_args(command)
+        and ST12A_TEST_ROOT in _pytest_path_args(command)
     ):
         return 1200, ()
     return None
@@ -1699,7 +1693,7 @@ def _st12h_selected_command_failures(
     if phase in {ALL_PHASE, "pytest-shard-8"}:
         grouped_matrix_count = sum(
             _command_script_name(command) == PYTEST_FRESH_BASETEMP_SCRIPT
-            and ST12H_TEST_MODULE in _pytest_path_args(command)
+            and ST12A_TEST_ROOT in _pytest_path_args(command)
             for command in normalized
         )
         if grouped_matrix_count != 1:
@@ -1773,7 +1767,7 @@ def _st12h_runner_topology_failures() -> tuple[str, ...]:
     for record_phase, phase_commands in by_phase.items():
         matrix_count = sum(
             _command_script_name(command) == PYTEST_FRESH_BASETEMP_SCRIPT
-            and ST12H_TEST_MODULE in _pytest_path_args(command)
+            and ST12A_TEST_ROOT in _pytest_path_args(command)
             for command in phase_commands
         )
         expected = 1 if record_phase == "pytest-shard-8" else 0
@@ -2003,16 +1997,6 @@ def pytest_shard_manifest(
     return {phase: tuple(sorted(paths)) for phase, paths in manifest.items()}
 
 
-def _is_exact_st12h_additive_pytest_overlap(
-    path: str,
-    phases: Sequence[str],
-) -> bool:
-    return path == ST12H_TEST_MODULE and tuple(phases) == (
-        "pytest-shard-8",
-        "pytest-shard-8",
-    )
-
-
 def pytest_shard_membership(
     repo_root: pathlib.Path | str | None = None,
 ) -> dict[str, str]:
@@ -2024,7 +2008,6 @@ def pytest_shard_membership(
         path
         for path, phases in placements.items()
         if len(phases) > 1
-        and not _is_exact_st12h_additive_pytest_overlap(path, phases)
     )
     if duplicates:
         duplicate_text = ", ".join(duplicates)
@@ -2085,7 +2068,6 @@ def pytest_runtime_budget_failures(
         path
         for path, phases in placements.items()
         if len(phases) > 1
-        and not _is_exact_st12h_additive_pytest_overlap(path, phases)
     )
     if missing:
         failures.append("PYTEST_SHARD_UNASSIGNED_TESTS: " + ", ".join(missing))

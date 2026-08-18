@@ -603,12 +603,10 @@ class ST12HFinalizationStateV1(StrEnum):
     GENERATED_STABLE = "GENERATED_STABLE"
     AFFECTED_SCOPE_VALIDATED = "AFFECTED_SCOPE_VALIDATED"
     FULL_LOCAL_VALIDATED = "FULL_LOCAL_VALIDATED"
+    CORRECTED_IMPLEMENTATION_VALIDATED = "CORRECTED_IMPLEMENTATION_VALIDATED"
     DRAFT_PR_OPEN = "DRAFT_PR_OPEN"
-    INDEPENDENT_CODE_AUDIT_PENDING = "INDEPENDENT_CODE_AUDIT_PENDING"
-    INDEPENDENT_CODE_AUDIT_PASS = "INDEPENDENT_CODE_AUDIT_PASS"
+    INDEPENDENT_REAUDIT_REQUIRED = "INDEPENDENT_REAUDIT_REQUIRED"
     MERGE_HELD = "MERGE_HELD"
-    MERGED_MAIN_GREEN = "MERGED_MAIN_GREEN"
-    OWNER_ACCEPTED = "OWNER_ACCEPTED"
 
 
 ST12H_FINALIZATION_STATE_MACHINE_V1: Mapping[
@@ -638,22 +636,18 @@ ST12H_FINALIZATION_STATE_MACHINE_V1: Mapping[
             ST12HFinalizationStateV1.FULL_LOCAL_VALIDATED,
         ),
         ST12HFinalizationStateV1.FULL_LOCAL_VALIDATED: (
+            ST12HFinalizationStateV1.CORRECTED_IMPLEMENTATION_VALIDATED,
+        ),
+        ST12HFinalizationStateV1.CORRECTED_IMPLEMENTATION_VALIDATED: (
             ST12HFinalizationStateV1.DRAFT_PR_OPEN,
         ),
         ST12HFinalizationStateV1.DRAFT_PR_OPEN: (
-            ST12HFinalizationStateV1.INDEPENDENT_CODE_AUDIT_PENDING,
+            ST12HFinalizationStateV1.INDEPENDENT_REAUDIT_REQUIRED,
         ),
-        ST12HFinalizationStateV1.INDEPENDENT_CODE_AUDIT_PENDING: (
-            ST12HFinalizationStateV1.INDEPENDENT_CODE_AUDIT_PASS,
-        ),
-        ST12HFinalizationStateV1.INDEPENDENT_CODE_AUDIT_PASS: (
+        ST12HFinalizationStateV1.INDEPENDENT_REAUDIT_REQUIRED: (
             ST12HFinalizationStateV1.MERGE_HELD,
         ),
         ST12HFinalizationStateV1.MERGE_HELD: (),
-        ST12HFinalizationStateV1.MERGED_MAIN_GREEN: (
-            ST12HFinalizationStateV1.OWNER_ACCEPTED,
-        ),
-        ST12HFinalizationStateV1.OWNER_ACCEPTED: (),
     }
 )
 
@@ -689,7 +683,6 @@ def validate_st12h_finalization_transition_v1(
         reason = (
             ReasonCode.LATER_TRANCHE_AUTHORITY_REQUIRED
             if current is ST12HFinalizationStateV1.MERGE_HELD
-            or proposed is ST12HFinalizationStateV1.MERGED_MAIN_GREEN
             else ReasonCode.TRANSACTION_STATE_INVALID
         )
         raise ContractValidationError(
