@@ -145,6 +145,101 @@ def test_allowed_pr152_currentization_output_still_passes(monkeypatch):
     assert validator.validate(Path(".")) == ()
 
 
+def test_st12_architecture_oracle_prerequisite_repair_scope_is_exact(monkeypatch):
+    branch = (
+        validator.context.ST12_ARCHITECTURE_ORACLE_PREREQUISITE_REPAIR_BRANCH
+    )
+    allowed = frozenset(
+        {
+            "tools/independent_validate_qku_computation_control_plane_architecture.py",
+            "tools/ci_branch_context.py",
+            "tests/tools/test_ci_branch_context.py",
+            "tests/tools/test_validate_repair_pr_changed_file_scope.py",
+            "tests/fail_closed/test_run_validation_gates.py",
+            "docs/master_plan/generated/"
+            "PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+        }
+    )
+    assert (
+        validator.context.ST12_ARCHITECTURE_ORACLE_PREREQUISITE_REPAIR_CHANGED_PATHS
+        == allowed
+    )
+    assert all(
+        validator.context.changed_path_allowed_for_explicit_repair_branch(
+            branch,
+            path,
+        )
+        for path in allowed
+    )
+
+    rejected = (
+        "src/qtt/stage1_prediction_markets/runtime.py",
+        "docs/master_plan/generated/UnrelatedArchitectureOracle.report.json",
+        "docs/master_plan/QTT_MasterPlan_Current.md",
+        "docs/roadmap/QTT_Roadmap_v10.md",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/"
+        "tranche_h/test_contract_matrix.py",
+        ".github/workflows/qtt_validation.yml",
+        "tools/pr168_rp5c_config.py",
+        "tools/build_pr168_rp5c_immutable_qku_formula_library.py",
+    )
+    assert all(
+        not validator.context.changed_path_allowed_for_explicit_repair_branch(
+            branch,
+            path,
+        )
+        for path in rejected
+    )
+
+    monkeypatch.setattr(
+        validator.context,
+        "current_branch_context",
+        lambda repo_root: validator.context.BranchContext(
+            branch=branch,
+            source="test",
+        ),
+    )
+    monkeypatch.setattr(
+        validator,
+        "_git",
+        _fake_status_git(
+            (
+                *(f" M {path}" for path in sorted(allowed)),
+                "?? .tmp/qtt-validation-router/st12-architecture-oracle.json",
+                "?? .pytest_cache/st12-architecture-oracle/cache",
+            )
+        ),
+    )
+    assert validator.validate(Path(".")) == ()
+
+
+def test_exact_mapped_repair_scopes_precede_generic_pr152_allowances():
+    context = validator.context
+    generic_pr152_paths = context.PR152_CURRENTIZATION_AFTER_FASTFAIL_MERGE_CHANGED_PATHS
+
+    for branch, exact_scope in sorted(
+        context.EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_CHANGED_PATHS.items()
+    ):
+        if not context.is_repair_branch(branch):
+            continue
+        for path in generic_pr152_paths:
+            assert context.is_explicit_downstream_repair_changed_path(
+                branch,
+                path,
+            ) is (path in exact_scope)
+
+    non_repair_owner_branch = "agent/st12a-contract-envelope"
+    assert context.is_owner_authorized_validation_branch(non_repair_owner_branch)
+    assert not context.is_repair_branch(non_repair_owner_branch)
+    assert all(
+        context.is_explicit_downstream_repair_changed_path(
+            non_repair_owner_branch,
+            path,
+        )
+        for path in generic_pr152_paths
+    )
+
+
 def test_repair_branch_exact_changed_path_scope_still_fails_closed(monkeypatch):
     _force_pr166_sm2_repair_branch(monkeypatch)
     monkeypatch.setattr(

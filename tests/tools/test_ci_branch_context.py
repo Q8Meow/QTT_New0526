@@ -112,6 +112,28 @@ def test_repair_and_main_cumulative_branch_classification():
     assert context.is_repair_branch("feature/non-downstream-validation") is False
 
 
+def test_st12_architecture_oracle_prerequisite_repair_branch_is_exactly_classified():
+    branch = context.ST12_ARCHITECTURE_ORACLE_PREREQUISITE_REPAIR_BRANCH
+
+    assert context.is_repair_branch(branch) is True
+    assert context.is_owner_authorized_validation_branch(branch) is True
+    assert context.is_validation_infrastructure_branch(branch) is False
+    assert context.is_validation_execution_branch(branch) is False
+    assert context.is_main_cumulative_branch(branch) is False
+    assert context.roadmap_pr_number(branch) is None
+    assert branch not in context.EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_PR_NUMBERS
+
+    for adversarial in (
+        f"{branch}-copy",
+        f"{branch}/",
+        branch.upper(),
+        branch.replace("oracle-closure", "oracles-closure"),
+        "repair/st12-architecture-independent-oracle-unrelated",
+    ):
+        assert adversarial != branch
+        assert not context.is_owner_authorized_validation_branch(adversarial)
+
+
 @pytest.mark.parametrize(
     ("branch", "adversarial_branches"),
     ST12_BRANCH_CASES,
