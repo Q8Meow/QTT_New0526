@@ -246,8 +246,11 @@ class _ArchitectureMathEvidenceV1:
     property_id: object
     current_output_schema: object
     declared_comparison_policy: object
+    compiled_comparison_mode: str
+    compiled_absolute_tolerance_or_not_applicable: str
     comparator_registry_version: object
     comparator_authority_classification: object
+    comparison_policy_execution_observed: bool
     golden_observation: object
     boundary_observation: object
     negative_exception_observation: object
@@ -305,7 +308,7 @@ def _tracked_architecture_material() -> dict[str, dict[str, object]]:
     """Read immutable oracle/vector data without importing production code."""
 
     comparator_failures = _comparator_registry_failures(
-        _INDEPENDENT_CURRENT_COMPARATOR_REGISTRY
+        _ARCHITECTURE_COMPARATOR_REGISTRY
     )
     if comparator_failures:
         raise ValueError("; ".join(comparator_failures))
@@ -466,6 +469,12 @@ def _tracked_architecture_material() -> dict[str, dict[str, object]]:
             raise ValueError(
                 f"current ST12-B architecture {identity_field} identities are not exact"
             )
+    comparator_failures = _comparator_registry_failures(
+        _ARCHITECTURE_COMPARATOR_REGISTRY,
+        material,
+    )
+    if comparator_failures:
+        raise ValueError("; ".join(comparator_failures))
     return material
 
 
@@ -538,203 +547,180 @@ def _json_ready(value: object) -> object:
     return value
 
 
-def _payload_matches(
-    observed: object,
-    expected: object,
-    *,
-    absolute_tolerance: float = 1e-12,
-) -> bool:
-    if isinstance(expected, Mapping):
-        return (
-            isinstance(observed, Mapping)
-            and set(observed) == set(expected)
-            and all(
-                _payload_matches(
-                    observed[key],
-                    expected[key],
-                    absolute_tolerance=absolute_tolerance,
-                )
-                for key in expected
-            )
-        )
-    if isinstance(expected, list | tuple):
-        return (
-            isinstance(observed, list | tuple)
-            and len(observed) == len(expected)
-            and all(
-                _payload_matches(
-                    observed_item,
-                    expected_item,
-                    absolute_tolerance=absolute_tolerance,
-                )
-                for observed_item, expected_item in zip(
-                    observed,
-                    expected,
-                    strict=True,
-                )
-            )
-        )
-    if (
-        isinstance(expected, int | float)
-        and not isinstance(expected, bool)
-        and isinstance(observed, int | float)
-        and not isinstance(observed, bool)
-    ):
-        return math.isclose(
-            float(observed),
-            float(expected),
-            rel_tol=0.0,
-            abs_tol=absolute_tolerance,
-        )
-    return observed == expected
-
-
 @dataclass(frozen=True)
 class _CompiledComparisonPolicyV1:
     declared_policy: str
+    compiled_comparison_mode: str
     operational_policy: str
     absolute_tolerance: float | None
     exact_mapping_order: bool
     exact_decimal_representation: bool
+    structural_rules: tuple[str, ...]
 
 
-_COMPARATOR_REGISTRY_VERSION = "ST12_ARCHITECTURE_COMPARATOR_REGISTRY_V1"
+@dataclass(frozen=True)
+class _ArchitectureComparisonResultV1:
+    math_id: str
+    comparison_passed: bool
+    tracked_comparison_policy: str
+    compiled_comparison_mode: str
+    compiled_absolute_tolerance_or_not_applicable: str
+    structural_rules: tuple[str, ...]
+    comparator_registry_version: str
+    comparison_policy_execution_observed: bool
+
+
+_COMPARATOR_REGISTRY_VERSION = "ST12_ARCHITECTURE_COMPARATOR_REGISTRY_V2"
 _COMPARATOR_AUTHORITY_CLASSIFICATION = (
     "INDEPENDENT_VALIDATOR_FROZEN_COMPARATOR_AUTHORITY"
 )
 _CURRENT_DECLARED_COMPARISON_POLICY = (
     "CANONICAL_STRUCTURE_WITH_DECLARED_NUMERIC_TOLERANCE"
 )
-_CURRENT_STRUCTURAL_COMPARATOR = (
-    "EXACT_NESTED_FIELD_SET_AND_TYPE_WITH_TOLERANT_NUMERIC_LEAVES"
+_COMPARATOR_TOLERANCE_NOT_APPLICABLE = "NOT_APPLICABLE"
+_BASE_STRUCTURAL_RULES = (
+    "EXACT_NESTED_FIELD_SET",
+    "EXACT_NESTED_VALUE_TYPE",
+    "EXACT_SEQUENCE_ORDER",
 )
-_STRICT_1E15_COMPARATOR_ROWS = ("MATH-19", "MATH-46", "MATH-47", "MATH-49")
 
 
 @dataclass(frozen=True)
-class _FrozenComparatorAuthorityV1:
+class _ArchitectureComparatorRegistryRowV2:
     math_id: str
+    tracked_comparison_policy: str
+    compiled_comparison_mode: str
+    absolute_tolerance_or_not_applicable: str
+    structural_rules: tuple[str, ...]
     registry_version: str
     authority_classification: str
-    declared_policy: str
-    operational_policy: str
-    absolute_tolerance: float
-    structural_comparator: str
 
 
-def _frozen_current_comparator(
+def _architecture_comparator_row(
     math_id: str,
-    tolerance: float,
-) -> _FrozenComparatorAuthorityV1:
-    exponent = "1E-15" if tolerance == 1e-15 else "1E-12"
-    return _FrozenComparatorAuthorityV1(
+    tracked_policy: str,
+    mode: str,
+    tolerance: str = _COMPARATOR_TOLERANCE_NOT_APPLICABLE,
+    *additional_structural_rules: str,
+) -> _ArchitectureComparatorRegistryRowV2:
+    return _ArchitectureComparatorRegistryRowV2(
         math_id=math_id,
+        tracked_comparison_policy=tracked_policy,
+        compiled_comparison_mode=mode,
+        absolute_tolerance_or_not_applicable=tolerance,
+        structural_rules=(*_BASE_STRUCTURAL_RULES, *additional_structural_rules),
         registry_version=_COMPARATOR_REGISTRY_VERSION,
         authority_classification=_COMPARATOR_AUTHORITY_CLASSIFICATION,
-        declared_policy=_CURRENT_DECLARED_COMPARISON_POLICY,
-        operational_policy=f"{_CURRENT_DECLARED_COMPARISON_POLICY}::{exponent}",
-        absolute_tolerance=tolerance,
-        structural_comparator=_CURRENT_STRUCTURAL_COMPARATOR,
     )
 
 
-_INDEPENDENT_CURRENT_COMPARATOR_REGISTRY = MappingProxyType(
+_ARCHITECTURE_COMPARATOR_REGISTRY = MappingProxyType(
     {
-        "MATH-16": _frozen_current_comparator("MATH-16", 1e-12),
-        "MATH-17": _frozen_current_comparator("MATH-17", 1e-12),
-        "MATH-18": _frozen_current_comparator("MATH-18", 1e-12),
-        "MATH-19": _frozen_current_comparator("MATH-19", 1e-15),
-        "MATH-20": _frozen_current_comparator("MATH-20", 1e-12),
-        "MATH-21": _frozen_current_comparator("MATH-21", 1e-12),
-        "MATH-22": _frozen_current_comparator("MATH-22", 1e-12),
-        "MATH-23": _frozen_current_comparator("MATH-23", 1e-12),
-        "MATH-24": _frozen_current_comparator("MATH-24", 1e-12),
-        "MATH-25": _frozen_current_comparator("MATH-25", 1e-12),
-        "MATH-46": _frozen_current_comparator("MATH-46", 1e-15),
-        "MATH-47": _frozen_current_comparator("MATH-47", 1e-15),
-        "MATH-48": _frozen_current_comparator("MATH-48", 1e-12),
-        "MATH-49": _frozen_current_comparator("MATH-49", 1e-15),
+        "MATH-01": _architecture_comparator_row("MATH-01", "EXACT_DECIMAL", "EXACT_DECIMAL", _COMPARATOR_TOLERANCE_NOT_APPLICABLE, "EXACT_DECIMAL_REPRESENTATION"),
+        "MATH-02": _architecture_comparator_row("MATH-02", "ABS_TOL_1E-15", "ABSOLUTE_TOLERANCE", "1E-15"),
+        "MATH-03": _architecture_comparator_row("MATH-03", "EXACT_DECIMAL", "EXACT_DECIMAL", _COMPARATOR_TOLERANCE_NOT_APPLICABLE, "EXACT_DECIMAL_REPRESENTATION"),
+        "MATH-04": _architecture_comparator_row("MATH-04", "EXACT_DECIMAL", "EXACT_DECIMAL", _COMPARATOR_TOLERANCE_NOT_APPLICABLE, "EXACT_DECIMAL_REPRESENTATION"),
+        "MATH-05": _architecture_comparator_row("MATH-05", "DECIMAL_CONTEXT_PRECISION_34_EXACT_RESULT", "DECIMAL_CONTEXT_PRECISION_34_EXACT_RESULT", _COMPARATOR_TOLERANCE_NOT_APPLICABLE, "EXACT_DECIMAL_REPRESENTATION", "DECIMAL_CONTEXT_PRECISION_34"),
+        "MATH-06": _architecture_comparator_row("MATH-06", "EXACT_DECIMAL", "EXACT_DECIMAL", _COMPARATOR_TOLERANCE_NOT_APPLICABLE, "EXACT_DECIMAL_REPRESENTATION"),
+        "MATH-07": _architecture_comparator_row("MATH-07", "EXACT_DECIMAL", "EXACT_DECIMAL", _COMPARATOR_TOLERANCE_NOT_APPLICABLE, "EXACT_DECIMAL_REPRESENTATION"),
+        "MATH-08": _architecture_comparator_row("MATH-08", "EXACT_DECIMAL", "EXACT_DECIMAL", _COMPARATOR_TOLERANCE_NOT_APPLICABLE, "EXACT_DECIMAL_REPRESENTATION"),
+        "MATH-09": _architecture_comparator_row("MATH-09", "ABS_TOL_1E-15", "ABSOLUTE_TOLERANCE", "1E-15"),
+        "MATH-10": _architecture_comparator_row("MATH-10", "ABS_TOL_1E-15", "ABSOLUTE_TOLERANCE", "1E-15"),
+        "MATH-11": _architecture_comparator_row("MATH-11", "ABS_TOL_1E-12", "ABSOLUTE_TOLERANCE", "1E-12"),
+        "MATH-12": _architecture_comparator_row("MATH-12", "EXACT_ORDER_AND_INDEX_SET", "EXACT_ORDER_AND_INDEX_SET", _COMPARATOR_TOLERANCE_NOT_APPLICABLE, "EXACT_MAPPING_ORDER", "EXACT_INDEX_SET"),
+        "MATH-13": _architecture_comparator_row("MATH-13", "EXACT_ORDER_AND_INDEX_SET", "EXACT_ORDER_AND_INDEX_SET", _COMPARATOR_TOLERANCE_NOT_APPLICABLE, "EXACT_MAPPING_ORDER", "EXACT_INDEX_SET"),
+        "MATH-14": _architecture_comparator_row("MATH-14", "BOOLEAN_INVARIANTS", "BOOLEAN_INVARIANTS", _COMPARATOR_TOLERANCE_NOT_APPLICABLE, "EXACT_BOOLEAN_TYPE_AND_VALUE"),
+        "MATH-15": _architecture_comparator_row("MATH-15", "ABS_TOL_1E-15", "ABSOLUTE_TOLERANCE", "1E-15"),
+        "MATH-16": _architecture_comparator_row("MATH-16", _CURRENT_DECLARED_COMPARISON_POLICY, "STRUCTURAL_NESTED_NUMERIC", "1E-12", "TOLERANT_NUMERIC_LEAVES_ONLY"),
+        "MATH-17": _architecture_comparator_row("MATH-17", _CURRENT_DECLARED_COMPARISON_POLICY, "STRUCTURAL_NESTED_NUMERIC", "1E-12", "TOLERANT_NUMERIC_LEAVES_ONLY"),
+        "MATH-18": _architecture_comparator_row("MATH-18", _CURRENT_DECLARED_COMPARISON_POLICY, "STRUCTURAL_NESTED_NUMERIC", "1E-12", "TOLERANT_NUMERIC_LEAVES_ONLY"),
+        "MATH-19": _architecture_comparator_row("MATH-19", _CURRENT_DECLARED_COMPARISON_POLICY, "STRUCTURAL_NESTED_NUMERIC", "1E-15", "TOLERANT_NUMERIC_LEAVES_ONLY"),
+        "MATH-20": _architecture_comparator_row("MATH-20", _CURRENT_DECLARED_COMPARISON_POLICY, "STRUCTURAL_NESTED_NUMERIC", "1E-12", "TOLERANT_NUMERIC_LEAVES_ONLY"),
+        "MATH-21": _architecture_comparator_row("MATH-21", _CURRENT_DECLARED_COMPARISON_POLICY, "STRUCTURAL_NESTED_NUMERIC", "1E-12", "TOLERANT_NUMERIC_LEAVES_ONLY"),
+        "MATH-22": _architecture_comparator_row("MATH-22", _CURRENT_DECLARED_COMPARISON_POLICY, "STRUCTURAL_NESTED_NUMERIC", "1E-12", "TOLERANT_NUMERIC_LEAVES_ONLY"),
+        "MATH-23": _architecture_comparator_row("MATH-23", _CURRENT_DECLARED_COMPARISON_POLICY, "STRUCTURAL_NESTED_NUMERIC", "1E-12", "TOLERANT_NUMERIC_LEAVES_ONLY"),
+        "MATH-24": _architecture_comparator_row("MATH-24", _CURRENT_DECLARED_COMPARISON_POLICY, "STRUCTURAL_NESTED_NUMERIC", "1E-12", "TOLERANT_NUMERIC_LEAVES_ONLY"),
+        "MATH-25": _architecture_comparator_row("MATH-25", _CURRENT_DECLARED_COMPARISON_POLICY, "STRUCTURAL_NESTED_NUMERIC", "1E-12", "TOLERANT_NUMERIC_LEAVES_ONLY"),
+        "MATH-46": _architecture_comparator_row("MATH-46", _CURRENT_DECLARED_COMPARISON_POLICY, "STRUCTURAL_NESTED_NUMERIC", "1E-15", "TOLERANT_NUMERIC_LEAVES_ONLY"),
+        "MATH-47": _architecture_comparator_row("MATH-47", _CURRENT_DECLARED_COMPARISON_POLICY, "STRUCTURAL_NESTED_NUMERIC", "1E-15", "TOLERANT_NUMERIC_LEAVES_ONLY"),
+        "MATH-48": _architecture_comparator_row("MATH-48", _CURRENT_DECLARED_COMPARISON_POLICY, "STRUCTURAL_NESTED_NUMERIC", "1E-12", "TOLERANT_NUMERIC_LEAVES_ONLY"),
+        "MATH-49": _architecture_comparator_row("MATH-49", _CURRENT_DECLARED_COMPARISON_POLICY, "STRUCTURAL_NESTED_NUMERIC", "1E-15", "TOLERANT_NUMERIC_LEAVES_ONLY"),
     }
 )
 
 
 def _comparator_registry_failures(
-    registry: Mapping[str, _FrozenComparatorAuthorityV1],
+    registry: Mapping[str, _ArchitectureComparatorRegistryRowV2],
+    tracked_material: Mapping[str, Mapping[str, object]] | None = None,
 ) -> tuple[str, ...]:
     failures: list[str] = []
-    if tuple(registry) != CURRENT_ST12B_ARCHITECTURE_MATH_IDS:
+    if tuple(registry) != ARCHITECTURE_MATH_IDS:
         failures.append("comparator registry identity/order differs")
-    for math_id in CURRENT_ST12B_ARCHITECTURE_MATH_IDS:
+    for math_id in ARCHITECTURE_MATH_IDS:
         entry = registry.get(math_id)
+        expected = _ARCHITECTURE_COMPARATOR_REGISTRY.get(math_id)
         if entry is None:
             failures.append(f"{math_id}: comparator row missing")
             continue
-        expected_tolerance = (
-            1e-15 if math_id in _STRICT_1E15_COMPARATOR_ROWS else 1e-12
-        )
-        expected_exponent = "1E-15" if expected_tolerance == 1e-15 else "1E-12"
+        if expected is None or entry != expected:
+            failures.append(f"{math_id}: comparator registry row drift")
         if entry.math_id != math_id:
             failures.append(f"{math_id}: comparator row identity drift")
         if entry.registry_version != _COMPARATOR_REGISTRY_VERSION:
             failures.append(f"{math_id}: comparator registry version drift")
         if entry.authority_classification != _COMPARATOR_AUTHORITY_CLASSIFICATION:
             failures.append(f"{math_id}: comparator authority drift")
-        if entry.declared_policy != _CURRENT_DECLARED_COMPARISON_POLICY:
-            failures.append(f"{math_id}: declared comparison policy drift")
-        if entry.operational_policy != (
-            f"{_CURRENT_DECLARED_COMPARISON_POLICY}::{expected_exponent}"
-        ):
-            failures.append(f"{math_id}: operational comparison policy drift")
-        if entry.absolute_tolerance != expected_tolerance:
-            failures.append(f"{math_id}: numeric tolerance drift")
-        if entry.structural_comparator != _CURRENT_STRUCTURAL_COMPARATOR:
-            failures.append(f"{math_id}: structural comparator drift")
+        if tracked_material is not None:
+            tracked = tracked_material.get(math_id)
+            if tracked is None or entry.tracked_comparison_policy != str(
+                tracked.get("comparison_policy")
+            ):
+                failures.append(f"{math_id}: tracked comparison policy mismatch")
     return tuple(failures)
 
 
 def _compile_comparison_policy(
     declared_policy: str,
     *,
-    math_id: str | None = None,
+    math_id: str,
 ) -> _CompiledComparisonPolicyV1:
-    if declared_policy == _CURRENT_DECLARED_COMPARISON_POLICY:
-        if math_id is None:
-            raise ValueError(
-                "current nested comparison policy requires an exact math identity"
-            )
-        authority = _INDEPENDENT_CURRENT_COMPARATOR_REGISTRY.get(math_id)
-        if authority is None:
-            raise ValueError(f"unknown current comparator row: {math_id}")
-        if authority.declared_policy != declared_policy:
-            raise ValueError(f"declared comparison policy drift: {math_id}")
-        return _CompiledComparisonPolicyV1(
-            declared_policy=declared_policy,
-            operational_policy=authority.operational_policy,
-            absolute_tolerance=authority.absolute_tolerance,
-            exact_mapping_order=False,
-            exact_decimal_representation=False,
-        )
-    definitions = {
-        "ABS_TOL_1E-15": (1e-15, False, False),
-        "ABS_TOL_1E-12": (1e-12, False, False),
-        "EXACT_BOOLEAN_INVARIANT": (None, False, False),
-        "EXACT_ORDERING_INDEX_INVARIANT": (None, True, False),
-        "EXACT_CANONICAL_STRUCTURE": (None, True, False),
-        "EXACT_DECIMAL_FIXED_REPRESENTATION": (None, True, True),
-        "ENUMERATION_INVARIANT": (1e-15, False, False),
-        "BRUTE_FORCE_ENUMERATION": (1e-12, False, False),
-        "EXACT_DISCRETE_ENUMERATION": (1e-15, False, False),
+    authority = _ARCHITECTURE_COMPARATOR_REGISTRY.get(math_id)
+    if authority is None:
+        raise ValueError(f"unknown architecture comparator row: {math_id}")
+    if authority.tracked_comparison_policy != declared_policy:
+        raise ValueError(f"tracked comparison policy mismatch: {math_id}")
+    tolerance_text = authority.absolute_tolerance_or_not_applicable
+    if tolerance_text == _COMPARATOR_TOLERANCE_NOT_APPLICABLE:
+        tolerance = None
+    elif tolerance_text == "1E-15":
+        tolerance = 1e-15
+    elif tolerance_text == "1E-12":
+        tolerance = 1e-12
+    else:
+        raise ValueError(f"unknown comparison tolerance: {math_id}")
+    allowed_modes = {
+        "EXACT_DECIMAL",
+        "DECIMAL_CONTEXT_PRECISION_34_EXACT_RESULT",
+        "ABSOLUTE_TOLERANCE",
+        "EXACT_ORDER_AND_INDEX_SET",
+        "BOOLEAN_INVARIANTS",
+        "STRUCTURAL_NESTED_NUMERIC",
     }
-    definition = definitions.get(declared_policy)
-    if definition is None:
-        raise ValueError(f"unknown comparison policy: {declared_policy}")
-    tolerance, exact_order, exact_decimal = definition
+    if authority.compiled_comparison_mode not in allowed_modes:
+        raise ValueError(f"unknown comparison policy: {math_id}")
+    operational_policy = declared_policy
+    if tolerance is not None and not declared_policy.endswith(tolerance_text):
+        operational_policy = f"{declared_policy}::{tolerance_text}"
     return _CompiledComparisonPolicyV1(
         declared_policy=declared_policy,
-        operational_policy=declared_policy,
+        compiled_comparison_mode=authority.compiled_comparison_mode,
+        operational_policy=operational_policy,
         absolute_tolerance=tolerance,
-        exact_mapping_order=exact_order,
-        exact_decimal_representation=exact_decimal,
+        exact_mapping_order="EXACT_MAPPING_ORDER" in authority.structural_rules,
+        exact_decimal_representation=(
+            "EXACT_DECIMAL_REPRESENTATION" in authority.structural_rules
+        ),
+        structural_rules=authority.structural_rules,
     )
 
 
@@ -744,7 +730,7 @@ def _compiled_payload_matches(
     policy: _CompiledComparisonPolicyV1,
 ) -> bool:
     if isinstance(expected, Mapping):
-        if not isinstance(observed, Mapping):
+        if not isinstance(observed, Mapping) or type(observed) is not type(expected):
             return False
         if policy.exact_mapping_order:
             if tuple(observed) != tuple(expected):
@@ -758,6 +744,7 @@ def _compiled_payload_matches(
     if isinstance(expected, list | tuple):
         return (
             isinstance(observed, list | tuple)
+            and type(observed) is type(expected)
             and len(observed) == len(expected)
             and all(
                 _compiled_payload_matches(left, right, policy)
@@ -781,6 +768,8 @@ def _compiled_payload_matches(
         and isinstance(observed, int | float)
         and not isinstance(observed, bool)
     ):
+        if type(observed) is not type(expected):
+            return False
         if not math.isfinite(float(expected)) or not math.isfinite(float(observed)):
             return False
         if policy.absolute_tolerance is None:
@@ -792,6 +781,32 @@ def _compiled_payload_matches(
             abs_tol=policy.absolute_tolerance,
         )
     return type(observed) is type(expected) and observed == expected
+
+
+def _compare_architecture_payload(
+    math_id: str,
+    observed: object,
+    expected: object,
+    *,
+    tracked_comparison_policy: str,
+) -> _ArchitectureComparisonResultV1:
+    policy = _compile_comparison_policy(
+        tracked_comparison_policy,
+        math_id=math_id,
+    )
+    authority = _ARCHITECTURE_COMPARATOR_REGISTRY[math_id]
+    return _ArchitectureComparisonResultV1(
+        math_id=math_id,
+        comparison_passed=_compiled_payload_matches(observed, expected, policy),
+        tracked_comparison_policy=tracked_comparison_policy,
+        compiled_comparison_mode=policy.compiled_comparison_mode,
+        compiled_absolute_tolerance_or_not_applicable=(
+            authority.absolute_tolerance_or_not_applicable
+        ),
+        structural_rules=policy.structural_rules,
+        comparator_registry_version=authority.registry_version,
+        comparison_policy_execution_observed=True,
+    )
 
 
 def _mutated_copy(value: object, path: Sequence[object], replacement_value: object) -> object:
@@ -810,59 +825,119 @@ def _value_at_path(value: object, path: Sequence[object]) -> object:
     return cursor
 
 
+def _legacy_tolerance_window_false_acceptance_count(
+    material: Mapping[str, Mapping[str, object]],
+) -> int:
+    false_acceptances = 0
+    for math_id, field_name in (
+        ("MATH-09", "log_loss"),
+        ("MATH-10", "ece"),
+        ("MATH-15", "p_value"),
+    ):
+        expected: dict[str, object] = {field_name: 0.0}
+        observed = {field_name: 5e-13}
+        if math_id == "MATH-15":
+            expected["reject"] = True
+            observed["reject"] = True
+        false_acceptances += int(
+            _compare_architecture_payload(
+                math_id,
+                observed,
+                expected,
+                tracked_comparison_policy=str(
+                    material[math_id]["comparison_policy"]
+                ),
+            ).comparison_passed
+        )
+    return false_acceptances
+
+
 def _comparison_policy_self_rejections() -> int:
-    missing_row = dict(_INDEPENDENT_CURRENT_COMPARATOR_REGISTRY)
-    missing_row.pop("MATH-16")
+    material = _tracked_architecture_material()
+    missing_row = dict(_ARCHITECTURE_COMPARATOR_REGISTRY)
+    missing_row.pop("MATH-01")
     if not _comparator_registry_failures(missing_row):
         raise ValueError("missing comparator row was accepted")
-    unknown_row = dict(_INDEPENDENT_CURRENT_COMPARATOR_REGISTRY)
-    unknown_row["MATH-50"] = replace(
-        unknown_row["MATH-16"],
-        math_id="MATH-50",
+    unknown_policy = dict(_ARCHITECTURE_COMPARATOR_REGISTRY)
+    unknown_policy["MATH-01"] = replace(
+        unknown_policy["MATH-01"],
+        compiled_comparison_mode="UNKNOWN_POLICY",
     )
-    if not _comparator_registry_failures(unknown_row):
-        raise ValueError("unknown comparator row was accepted")
-    changed_tolerance = dict(_INDEPENDENT_CURRENT_COMPARATOR_REGISTRY)
-    changed_tolerance["MATH-16"] = replace(
-        changed_tolerance["MATH-16"],
-        absolute_tolerance=1e-9,
+    if not _comparator_registry_failures(unknown_policy):
+        raise ValueError("unknown comparator policy was accepted")
+    changed_tolerance = dict(_ARCHITECTURE_COMPARATOR_REGISTRY)
+    changed_tolerance["MATH-09"] = replace(
+        changed_tolerance["MATH-09"],
+        absolute_tolerance_or_not_applicable="1E-12",
     )
     if not _comparator_registry_failures(changed_tolerance):
-        raise ValueError("changed comparator tolerance was accepted")
-    strict_downgrade = dict(_INDEPENDENT_CURRENT_COMPARATOR_REGISTRY)
-    strict_downgrade["MATH-19"] = replace(
-        strict_downgrade["MATH-19"],
-        operational_policy=(
-            f"{_CURRENT_DECLARED_COMPARISON_POLICY}::1E-12"
-        ),
-        absolute_tolerance=1e-12,
-    )
-    if not _comparator_registry_failures(strict_downgrade):
         raise ValueError("1E-15 comparator row accepted a 1E-12 replacement")
-    strict = _compile_comparison_policy("ABS_TOL_1E-15")
-    if _compiled_payload_matches(0.0, 5e-13, strict):
-        raise ValueError("1e-15 comparison was weakened to 1e-12")
-    ordered = _compile_comparison_policy("EXACT_ORDERING_INDEX_INVARIANT")
-    if _compiled_payload_matches({"b": 2, "a": 1}, {"a": 1, "b": 2}, ordered):
+    if _legacy_tolerance_window_false_acceptance_count(material):
+        raise ValueError("legacy 1E-15 rows accepted 1E-12-window drift")
+    if _compare_architecture_payload(
+        "MATH-01",
+        {"p_market": "0.420"},
+        {"p_market": "0.42"},
+        tracked_comparison_policy=str(material["MATH-01"]["comparison_policy"]),
+    ).comparison_passed:
+        raise ValueError("exact Decimal drift was accepted")
+    if _compare_architecture_payload(
+        "MATH-05",
+        {"relative_spread": "0.04651162790697674418604651162790699"},
+        {"relative_spread": "0.04651162790697674418604651162790698"},
+        tracked_comparison_policy=str(material["MATH-05"]["comparison_policy"]),
+    ).comparison_passed:
+        raise ValueError("precision-34 representation drift was accepted")
+    if _compare_architecture_payload(
+        "MATH-12",
+        {"rejected_original_indices": [0, 1], "largest_rank": 2},
+        {"largest_rank": 2, "rejected_original_indices": [0, 1]},
+        tracked_comparison_policy=str(material["MATH-12"]["comparison_policy"]),
+    ).comparison_passed:
         raise ValueError("exact ordered comparison accepted reordered output")
-    decimal_policy = _compile_comparison_policy("EXACT_DECIMAL_FIXED_REPRESENTATION")
-    if _compiled_payload_matches(1.25, Decimal("1.25"), decimal_policy):
-        raise ValueError("exact Decimal comparison accepted float coercion")
-    structural = _compile_comparison_policy("EXACT_CANONICAL_STRUCTURE")
-    if _compiled_payload_matches(
-        {"required": 1},
-        {"required": 1, "also_required": 2},
-        structural,
-    ):
+    if _compare_architecture_payload(
+        "MATH-12",
+        {"largest_rank": 2, "rejected_original_indices": [0, 2]},
+        {"largest_rank": 2, "rejected_original_indices": [0, 1]},
+        tracked_comparison_policy=str(material["MATH-12"]["comparison_policy"]),
+    ).comparison_passed:
+        raise ValueError("exact comparison accepted index-set drift")
+    if _compare_architecture_payload(
+        "MATH-14",
+        {"interval_contains_sample_mean": False, "same_seed_reproducible": True},
+        {"interval_contains_sample_mean": True, "same_seed_reproducible": True},
+        tracked_comparison_policy=str(material["MATH-14"]["comparison_policy"]),
+    ).comparison_passed:
+        raise ValueError("Boolean invariant drift was accepted")
+    if _compare_architecture_payload(
+        "MATH-16",
+        {"required": 1.0},
+        {"required": 1.0, "also_required": 2.0},
+        tracked_comparison_policy=str(material["MATH-16"]["comparison_policy"]),
+    ).comparison_passed:
         raise ValueError("structural comparison accepted an omitted field")
     try:
-        _compile_comparison_policy("UNKNOWN_COMPARISON_POLICY")
+        _compile_comparison_policy("UNKNOWN_COMPARISON_POLICY", math_id="MATH-01")
     except ValueError as exc:
-        if "unknown comparison policy" not in str(exc):
+        if "tracked comparison policy mismatch" not in str(exc):
             raise
     else:
-        raise ValueError("unknown comparison policy was accepted")
-    return 9
+        raise ValueError("tracked-policy/registry-policy mismatch was accepted")
+    try:
+        _compile_comparison_policy("UNKNOWN_COMPARISON_POLICY", math_id="MATH-99")
+    except ValueError as exc:
+        if "unknown architecture comparator row" not in str(exc):
+            raise
+    else:
+        raise ValueError("unknown comparator row was accepted")
+    if _compare_architecture_payload(
+        "MATH-01",
+        {"p_market": 0.42},
+        {"p_market": "0.42"},
+        tracked_comparison_policy=str(material["MATH-01"]["comparison_policy"]),
+    ).comparison_passed:
+        raise ValueError("exact Decimal comparison accepted float coercion")
+    return 15
 
 
 def _apply_declared_mutation(inputs: object, mutation: Mapping[str, object]) -> object:
@@ -3062,7 +3137,13 @@ def _legacy_formula_regression_mutation_evidence(
     else:
         baseline_observed = observed
         mutated_observed = _execute_legacy_architecture_row(math_id, mutated, material)
-    changed = not _payload_matches(baseline_observed, mutated_observed)
+    comparison = _compare_architecture_payload(
+        math_id,
+        baseline_observed,
+        mutated_observed,
+        tracked_comparison_policy=str(material["comparison_policy"]),
+    )
+    changed = not comparison.comparison_passed
     if not changed:
         raise _EvidenceContractMismatch(
             f"{math_id} legacy formula-regression mutation produced no change"
@@ -3070,7 +3151,8 @@ def _legacy_formula_regression_mutation_evidence(
     return {
         "baseline_observed": _json_ready(baseline_observed),
         "baseline_value": _json_ready(_value_at_path(inputs, path)),
-        "comparison_policy": "LEGACY_FORMULA_REGRESSION_EXACT_CHANGE",
+        "comparison_policy": comparison.tracked_comparison_policy,
+        "comparison_policy_execution": _json_ready(asdict(comparison)),
         "exact_consequence": {
             "comparison_matches_baseline": False,
             "state": "OBSERVED_LEGACY_FORMULA_REGRESSION_CHANGE",
@@ -3200,7 +3282,13 @@ def _execute_observed_mutation(
             "mutation_observed": True,
             "replacement_value": _json_ready(replacement_value),
         }
-    changed = not _compiled_payload_matches(baseline, mutated, policy)
+    comparison = _compare_architecture_payload(
+        math_id,
+        baseline,
+        mutated,
+        tracked_comparison_policy=str(material["comparison_policy"]),
+    )
+    changed = not comparison.comparison_passed
     if not changed:
         raise _EvidenceContractMismatch(
             f"{math_id} {mutation_family} produced no observed result change"
@@ -3209,6 +3297,7 @@ def _execute_observed_mutation(
         "baseline_observed": _json_ready(baseline),
         "baseline_value": _json_ready(baseline_value),
         "comparison_policy": policy.operational_policy,
+        "comparison_policy_execution": _json_ready(asdict(comparison)),
         "exact_consequence": {
             "comparison_matches_baseline": False,
             "state": "OBSERVED_OUTPUT_CHANGE",
@@ -3362,11 +3451,18 @@ def _actual_execution_mutation_evidence(
         boundary.get("inputs"),
         material,
     )
-    if not _compiled_payload_matches(boundary_observed, boundary.get("expected"), policy):
+    boundary_comparison = _compare_architecture_payload(
+        math_id,
+        boundary_observed,
+        boundary.get("expected"),
+        tracked_comparison_policy=str(material["comparison_policy"]),
+    )
+    if not boundary_comparison.comparison_passed:
         raise _EvidenceContractMismatch(f"{math_id} BOUNDARY vector comparison failed")
     evidence.update(
         {
             "boundary_observed": _json_ready(boundary_observed),
+            "boundary_comparison": _json_ready(asdict(boundary_comparison)),
             "boundary_vector_id": boundary.get("vector_id"),
             "expected_output_mutated": False,
         }
@@ -3491,10 +3587,13 @@ def _build_architecture_evidence(
                 tracked,
             )
             regression_passed = reconstructed_01_15.get(math_id) is True
-            comparison_passed = regression_passed and _payload_matches(
+            golden_comparison = _compare_architecture_payload(
+                math_id,
                 observed,
                 golden.get("expected"),
+                tracked_comparison_policy=str(tracked["comparison_policy"]),
             )
+            comparison_passed = regression_passed and golden_comparison.comparison_passed
             formula_regression = _legacy_formula_regression_mutation_evidence(
                 math_id,
                 tracked,
@@ -3519,6 +3618,9 @@ def _build_architecture_evidence(
                         "legacy_domain_rejection": _json_ready(domain_regression),
                         "legacy_formula_regression_mutation": _json_ready(
                             formula_regression
+                        ),
+                        "legacy_golden_comparison": _json_ready(
+                            asdict(golden_comparison)
                         ),
                         "legacy_golden_observation": _json_ready(observed),
                         "legacy_regression_group_passed": regression_passed,
@@ -3547,9 +3649,20 @@ def _build_architecture_evidence(
                     property_id=_LEGACY_NOT_CLAIMED,
                     current_output_schema=_LEGACY_NOT_CLAIMED,
                     declared_comparison_policy=str(tracked["comparison_policy"]),
-                    comparator_registry_version=_LEGACY_NOT_CLAIMED,
+                    compiled_comparison_mode=(
+                        golden_comparison.compiled_comparison_mode
+                    ),
+                    compiled_absolute_tolerance_or_not_applicable=(
+                        golden_comparison.compiled_absolute_tolerance_or_not_applicable
+                    ),
+                    comparator_registry_version=(
+                        golden_comparison.comparator_registry_version
+                    ),
                     comparator_authority_classification=(
-                        "LEGACY_TRACKED_GOLDEN_COMPARISON"
+                        _COMPARATOR_AUTHORITY_CLASSIFICATION
+                    ),
+                    comparison_policy_execution_observed=(
+                        golden_comparison.comparison_policy_execution_observed
                     ),
                     golden_observation=_LEGACY_NOT_CLAIMED,
                     boundary_observation=_LEGACY_NOT_CLAIMED,
@@ -3570,7 +3683,13 @@ def _build_architecture_evidence(
         )
         observed = _execute_new_architecture_row(math_id, golden.get("inputs"), tracked)
         expected = golden.get("expected")
-        comparison_passed = _compiled_payload_matches(observed, expected, policy)
+        golden_comparison = _compare_architecture_payload(
+            math_id,
+            observed,
+            expected,
+            tracked_comparison_policy=str(tracked["comparison_policy"]),
+        )
+        comparison_passed = golden_comparison.comparison_passed
         boundary = tracked.get("boundary")
         if not isinstance(boundary, Mapping):
             raise ValueError(f"boundary row is not a mapping: {math_id}")
@@ -3579,7 +3698,13 @@ def _build_architecture_evidence(
             boundary.get("inputs"),
             tracked,
         )
-        if not _compiled_payload_matches(boundary_observed, boundary.get("expected"), policy):
+        boundary_comparison = _compare_architecture_payload(
+            math_id,
+            boundary_observed,
+            boundary.get("expected"),
+            tracked_comparison_policy=str(tracked["comparison_policy"]),
+        )
+        if not boundary_comparison.comparison_passed:
             raise ValueError(f"{math_id} BOUNDARY vector comparison failed")
         negative_evidence = _exact_negative_evidence(math_id, tracked)
         property_evidence = _property_mutation_evidence(math_id, tracked, policy)
@@ -3599,7 +3724,7 @@ def _build_architecture_evidence(
                 evidence_tier=_EVIDENCE_TIER_BY_MATH_ID[math_id],
                 oracle_id=str(tracked["oracle_id"]),
                 golden_vector_id=str(tracked["golden_vector_id"]),
-                comparison_policy=policy.operational_policy,
+                comparison_policy=str(tracked["comparison_policy"]),
                 independent_algorithm_id=(
                     f"ARCHITECTURE_STANDARD_LIBRARY_RECONSTRUCTION::{math_id}::V2"
                 ),
@@ -3608,7 +3733,9 @@ def _build_architecture_evidence(
                         execution_mutation_evidence
                     ),
                     "boundary_observation": _json_ready(boundary_observed),
+                    "boundary_comparison": _json_ready(asdict(boundary_comparison)),
                     "evidence_tier": _CURRENT_FULL_CONTRACT_TIER,
+                    "golden_comparison": _json_ready(asdict(golden_comparison)),
                     "golden_observation": _json_ready(observed),
                     "negative_exception_observation": _json_ready(
                         negative_evidence
@@ -3645,9 +3772,16 @@ def _build_architecture_evidence(
                     "schema_version": str(tracked["output_schema_version"]),
                 },
                 declared_comparison_policy=str(tracked["comparison_policy"]),
+                compiled_comparison_mode=golden_comparison.compiled_comparison_mode,
+                compiled_absolute_tolerance_or_not_applicable=(
+                    golden_comparison.compiled_absolute_tolerance_or_not_applicable
+                ),
                 comparator_registry_version=_COMPARATOR_REGISTRY_VERSION,
                 comparator_authority_classification=(
                     _COMPARATOR_AUTHORITY_CLASSIFICATION
+                ),
+                comparison_policy_execution_observed=(
+                    golden_comparison.comparison_policy_execution_observed
                 ),
                 golden_observation=_json_ready(observed),
                 boundary_observation=_json_ready(boundary_observed),
@@ -3678,6 +3812,52 @@ def _mutation_observation_complete(value: object) -> bool:
     )
 
 
+def _comparison_execution_complete(
+    value: object,
+    row: _ArchitectureMathEvidenceV1,
+) -> bool:
+    authority = _ARCHITECTURE_COMPARATOR_REGISTRY.get(row.math_id)
+    return (
+        authority is not None
+        and isinstance(value, Mapping)
+        and value.get("math_id") == row.math_id
+        and value.get("comparison_passed") is True
+        and value.get("tracked_comparison_policy")
+        == authority.tracked_comparison_policy
+        and value.get("compiled_comparison_mode")
+        == authority.compiled_comparison_mode
+        and value.get("compiled_absolute_tolerance_or_not_applicable")
+        == authority.absolute_tolerance_or_not_applicable
+        and tuple(value.get("structural_rules", ())) == authority.structural_rules
+        and value.get("comparator_registry_version")
+        == _COMPARATOR_REGISTRY_VERSION
+        and value.get("comparison_policy_execution_observed") is True
+    )
+
+
+def _row_golden_comparison_observation(
+    row: _ArchitectureMathEvidenceV1,
+) -> object:
+    if not isinstance(row.actual_observed_evidence, Mapping):
+        return None
+    key = (
+        "legacy_golden_comparison"
+        if row.evidence_tier == _LEGACY_GOLDEN_REGRESSION_TIER
+        else "golden_comparison"
+    )
+    return row.actual_observed_evidence.get(key)
+
+
+def _generic_default_comparator_call_count() -> int:
+    tree = ast.parse(Path(__file__).read_text(encoding="utf-8"), filename=__file__)
+    return sum(
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id == "_payload_matches"
+        for node in ast.walk(tree)
+    )
+
+
 def _evidence_denominators(
     rows: Sequence[_ArchitectureMathEvidenceV1],
 ) -> dict[str, int]:
@@ -3687,10 +3867,40 @@ def _evidence_denominators(
     current_rows = tuple(
         row for row in rows if row.evidence_tier == _CURRENT_FULL_CONTRACT_TIER
     )
+    material = _tracked_architecture_material()
     return {
         "architecture_identity_order_rows": len(rows),
+        "architecture_comparator_rows": sum(
+            row.math_id in _ARCHITECTURE_COMPARATOR_REGISTRY for row in rows
+        ),
         "legacy_golden_regression_rows": len(legacy_rows),
         "current_full_contract_rows": len(current_rows),
+        "legacy_declared_policy_executions": sum(
+            row.comparison_policy_execution_observed is True
+            and _comparison_execution_complete(
+                _row_golden_comparison_observation(row),
+                row,
+            )
+            for row in legacy_rows
+        ),
+        "current_declared_policy_executions": sum(
+            row.comparison_policy_execution_observed is True
+            and _comparison_execution_complete(
+                _row_golden_comparison_observation(row),
+                row,
+            )
+            for row in current_rows
+        ),
+        "generic_default_comparator_calls": _generic_default_comparator_call_count(),
+        "tracked_policy_registry_mismatches": len(
+            _comparator_registry_failures(
+                _ARCHITECTURE_COMPARATOR_REGISTRY,
+                material,
+            )
+        ),
+        "legacy_tolerance_window_false_acceptances": (
+            _legacy_tolerance_window_false_acceptance_count(material)
+        ),
         "current_golden_executions": sum(
             row.golden_observation != _LEGACY_NOT_CLAIMED
             and row.golden_comparison_passed
@@ -3781,6 +3991,52 @@ def _evidence_contract_failures(
         if tracked is None:
             failures.append(f"{row.math_id}: wrong owner routing")
             continue
+        comparator = _ARCHITECTURE_COMPARATOR_REGISTRY.get(row.math_id)
+        if comparator is None:
+            failures.append(f"{row.math_id}: comparator row missing")
+            continue
+        if row.comparison_policy != comparator.tracked_comparison_policy:
+            failures.append(f"{row.math_id}: tracked comparison policy drift")
+        if row.declared_comparison_policy != comparator.tracked_comparison_policy:
+            failures.append(f"{row.math_id}: declared comparison policy drift")
+        if row.compiled_comparison_mode != comparator.compiled_comparison_mode:
+            failures.append(f"{row.math_id}: compiled comparison mode drift")
+        if row.compiled_absolute_tolerance_or_not_applicable != (
+            comparator.absolute_tolerance_or_not_applicable
+        ):
+            failures.append(f"{row.math_id}: compiled comparison tolerance drift")
+        if row.comparator_registry_version != _COMPARATOR_REGISTRY_VERSION:
+            failures.append(f"{row.math_id}: comparator registry version drift")
+        if row.comparator_authority_classification != (
+            _COMPARATOR_AUTHORITY_CLASSIFICATION
+        ):
+            failures.append(f"{row.math_id}: comparator authority drift")
+        if row.comparison_policy_execution_observed is not True:
+            failures.append(f"{row.math_id}: comparison policy was not executed")
+        if not _comparison_execution_complete(
+            _row_golden_comparison_observation(row),
+            row,
+        ):
+            failures.append(f"{row.math_id}: golden comparator execution missing")
+        golden_material = tracked.get("golden")
+        aggregate_observed = (
+            row.legacy_golden_observation
+            if row.evidence_tier == _LEGACY_GOLDEN_REGRESSION_TIER
+            else row.golden_observation
+        )
+        if not isinstance(golden_material, Mapping):
+            failures.append(f"{row.math_id}: aggregate golden material missing")
+        else:
+            aggregate_comparison = _compare_architecture_payload(
+                row.math_id,
+                aggregate_observed,
+                golden_material.get("expected"),
+                tracked_comparison_policy=str(tracked["comparison_policy"]),
+            )
+            if not aggregate_comparison.comparison_passed:
+                failures.append(
+                    f"{row.math_id}: aggregate comparator validation failed"
+                )
         expected_tier = _EVIDENCE_TIER_BY_MATH_ID.get(row.math_id)
         if row.evidence_tier != expected_tier or row.evidence_tier != tracked.get(
             "evidence_tier"
@@ -3842,12 +4098,6 @@ def _evidence_contract_failures(
             ):
                 if value != _LEGACY_NOT_CLAIMED:
                     failures.append(f"{row.math_id}: legacy {field_name} was claimed")
-            if row.comparator_registry_version != _LEGACY_NOT_CLAIMED:
-                failures.append(f"{row.math_id}: legacy row claimed current comparator")
-            if row.comparator_authority_classification != (
-                "LEGACY_TRACKED_GOLDEN_COMPARISON"
-            ):
-                failures.append(f"{row.math_id}: wrong legacy comparator authority")
             continue
 
         if expected_tier != _CURRENT_FULL_CONTRACT_TIER:
@@ -3857,16 +4107,6 @@ def _evidence_contract_failures(
             str(tracked["comparison_policy"]),
             math_id=row.math_id,
         )
-        if row.comparison_policy != expected_policy.operational_policy:
-            failures.append(f"{row.math_id}: comparison policy was not compiled")
-        if row.declared_comparison_policy != tracked["comparison_policy"]:
-            failures.append(f"{row.math_id}: declared comparison policy drift")
-        if row.comparator_registry_version != _COMPARATOR_REGISTRY_VERSION:
-            failures.append(f"{row.math_id}: comparator registry version drift")
-        if row.comparator_authority_classification != (
-            _COMPARATOR_AUTHORITY_CLASSIFICATION
-        ):
-            failures.append(f"{row.math_id}: comparator authority drift")
         if row.terminal_state != "CURRENT_FULL_CONTRACT_PASSED":
             failures.append(f"{row.math_id}: current row is held")
         if row.precision_or_tolerance_mutation_observed is not True:
@@ -3940,8 +4180,14 @@ def _evidence_contract_failures(
 
     expected_denominators = {
         "architecture_identity_order_rows": 29,
+        "architecture_comparator_rows": 29,
         "legacy_golden_regression_rows": 15,
         "current_full_contract_rows": 14,
+        "legacy_declared_policy_executions": 15,
+        "current_declared_policy_executions": 14,
+        "generic_default_comparator_calls": 0,
+        "tracked_policy_registry_mismatches": 0,
+        "legacy_tolerance_window_false_acceptances": 0,
         "current_golden_executions": 14,
         "current_boundary_executions": 14,
         "current_exact_negative_executions": 14,
@@ -3994,6 +4240,28 @@ def _exercise_evidence_contract_mutations(
         (replace(first, oracle_id="WRONG::ORACLE"), *rows[1:]),
         (replace(first, golden_vector_id="WRONG::VECTOR"), *rows[1:]),
         (replace(first, comparison_policy="WRONG_POLICY"), *rows[1:]),
+        (replace(first, compiled_comparison_mode="WRONG_MODE"), *rows[1:]),
+        (
+            replace(
+                first,
+                compiled_absolute_tolerance_or_not_applicable="1E-12",
+            ),
+            *rows[1:],
+        ),
+        (
+            replace(first, comparison_policy_execution_observed=False),
+            *rows[1:],
+        ),
+        (
+            replace(
+                first,
+                actual_observed_evidence=changed_mapping(
+                    first.actual_observed_evidence,
+                    legacy_golden_comparison=None,
+                ),
+            ),
+            *rows[1:],
+        ),
         (replace(first, actual_observed_evidence=None), *rows[1:]),
         (replace(first, actual_observed_evidence=SUCCESS_MARKER), *rows[1:]),
         (replace(first, actual_observed_evidence={"declared_steps_only": True}), *rows[1:]),
@@ -4149,11 +4417,12 @@ def _exercise_evidence_contract_mutations(
         full_symmetric_46,
         math_46,
     )
-    policy_46 = _compile_comparison_policy(
-        str(math_46["comparison_policy"]),
-        math_id="MATH-46",
-    )
-    if not _compiled_payload_matches(converted_46, golden_46.get("expected"), policy_46):
+    if not _compare_architecture_payload(
+        "MATH-46",
+        converted_46,
+        golden_46.get("expected"),
+        tracked_comparison_policy=str(math_46["comparison_policy"]),
+    ).comparison_passed:
         raise ValueError("MATH-46 full-symmetric adapter changed canonical QUBO meaning")
     conflicting_46 = dict(full_symmetric_46)
     conflicting_46["upper_terms"] = [{"i": 0, "j": 1, "value": 3.0}]
@@ -4168,8 +4437,12 @@ def _exercise_evidence_contract_mutations(
     assert isinstance(golden_47, Mapping)
     output_47 = _execute_new_architecture_row("MATH-47", golden_47.get("inputs"), math_47)
     drifted_47 = _mutated_copy(output_47, ("offset",), float(output_47["offset"]) + 1.0)
-    policy_47 = _compile_comparison_policy(str(math_47["comparison_policy"]), math_id="MATH-47")
-    if _compiled_payload_matches(drifted_47, golden_47.get("expected"), policy_47):
+    if _compare_architecture_payload(
+        "MATH-47",
+        drifted_47,
+        golden_47.get("expected"),
+        tracked_comparison_policy=str(math_47["comparison_policy"]),
+    ).comparison_passed:
         raise ValueError("MATH-47 sign/offset parity drift escaped comparison")
     operational_checks += 1
 
@@ -4892,8 +5165,14 @@ def main() -> int:
     print(
         f"{SUCCESS_MARKER} "
         f"architecture_identity_order_rows={evidence_denominators['architecture_identity_order_rows']} "
+        f"architecture_comparator_rows={evidence_denominators['architecture_comparator_rows']} "
         f"legacy_golden_regression_rows={evidence_denominators['legacy_golden_regression_rows']} "
         f"current_full_contract_rows={evidence_denominators['current_full_contract_rows']} "
+        f"legacy_declared_policy_executions={evidence_denominators['legacy_declared_policy_executions']} "
+        f"current_declared_policy_executions={evidence_denominators['current_declared_policy_executions']} "
+        f"generic_default_comparator_calls={evidence_denominators['generic_default_comparator_calls']} "
+        f"tracked_policy_registry_mismatches={evidence_denominators['tracked_policy_registry_mismatches']} "
+        f"legacy_tolerance_window_false_acceptances={evidence_denominators['legacy_tolerance_window_false_acceptances']} "
         f"current_golden_executions={evidence_denominators['current_golden_executions']} "
         f"current_boundary_executions={evidence_denominators['current_boundary_executions']} "
         f"current_exact_negative_executions={evidence_denominators['current_exact_negative_executions']} "
