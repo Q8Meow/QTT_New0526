@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import ast
 from collections import Counter
-from collections.abc import Mapping, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import asdict, dataclass, replace
 from decimal import Context, Decimal, ROUND_HALF_EVEN, localcontext
 from itertools import combinations, product
@@ -82,6 +82,13 @@ PRODUCTION_NAMES = (
 EXPECTED_MATH_IDS = tuple(f"MATH-{value:02d}" for value in range(1, 16))
 ARCHITECTURE_MATH_IDS = (
     *(f"MATH-{value:02d}" for value in range(1, 26)),
+    "MATH-46",
+    "MATH-47",
+    "MATH-48",
+    "MATH-49",
+)
+CURRENT_ST12B_ARCHITECTURE_MATH_IDS = (
+    *(f"MATH-{value:02d}" for value in range(16, 26)),
     "MATH-46",
     "MATH-47",
     "MATH-48",
@@ -183,10 +190,25 @@ class _ArchitectureMathEvidenceV1:
     formula_or_procedure_mutation_observed: bool
     domain_guard_rejection_observed: bool
     precision_or_tolerance_mutation_observed: bool
-    source_or_unit_mutation_observed: bool
+    semantic_binding_mutation_observed: bool
     production_import_count: int
     production_callable_count: int
     terminal_state: str
+    boundary_vector_id: str | None = None
+    negative_vector_id: str | None = None
+    property_id: str | None = None
+    output_schema_version: str | None = None
+    compiled_comparison_policy: str | None = None
+    golden_observed_result: object | None = None
+    boundary_observed_result: object | None = None
+    negative_exception_evidence: object | None = None
+    property_mutation_result: object | None = None
+    precision_boundary_mutation_result: object | None = None
+    semantic_binding_mutation_result: object | None = None
+    input_binding_mutation_observed: bool | None = None
+    unit_or_basis_mutation_observed_or_not_applicable: str | None = None
+    source_binding_mutation_observed_or_not_applicable: str | None = None
+    representation_or_convention_mutation_observed_or_not_applicable: str | None = None
 
 
 def _stationary_means(
@@ -241,36 +263,43 @@ def _tracked_architecture_material() -> dict[str, dict[str, object]]:
         (PACKAGE / "oracle_contracts.py").read_text(encoding="utf-8"),
         filename=str(PACKAGE / "oracle_contracts.py"),
     )
-    legacy_oracles = {
-        str(row["math_spec_ref"]): row
-        for row in _json_rows(tree, "_ORACLE_ROWS_JSON")
-    }
-    legacy_vectors = {
-        str(row["math_spec_ref"]): row
-        for row in _json_rows(tree, "_GOLDEN_VECTOR_ROWS_JSON")
-    }
-    st12b_oracles = {
-        str(row["math_spec_id"]): row
-        for row in _json_rows(tree, "_ST12B_ORACLE_CONTRACTS_JSON")
-    }
+    legacy_oracle_rows = _json_rows(tree, "_ORACLE_ROWS_JSON")
+    legacy_vector_rows = _json_rows(tree, "_GOLDEN_VECTOR_ROWS_JSON")
+    st12b_oracle_rows = _json_rows(tree, "_ST12B_ORACLE_CONTRACTS_JSON")
+    st12b_vector_rows = _json_rows(tree, "_ST12B_VECTOR_PACK_JSON")
+    st12b_property_rows = _json_rows(tree, "_ST12B_PROPERTY_PACK_JSON")
+
+    def unique_by(
+        rows: Sequence[Mapping[str, object]],
+        key_name: str,
+        family: str,
+    ) -> dict[str, Mapping[str, object]]:
+        counts = Counter(str(row.get(key_name)) for row in rows)
+        duplicates = tuple(sorted(key for key, count in counts.items() if count != 1))
+        if duplicates:
+            raise ValueError(f"{family} identities are not unique: {duplicates!r}")
+        return {str(row[key_name]): row for row in rows}
+
+    legacy_oracles = unique_by(legacy_oracle_rows, "math_spec_ref", "legacy oracle")
+    legacy_vectors = unique_by(legacy_vector_rows, "math_spec_ref", "legacy vector")
+    st12b_oracles = unique_by(st12b_oracle_rows, "math_spec_id", "ST12-B oracle")
     st12b_vectors: dict[str, dict[str, dict[str, object]]] = {}
-    for row in _json_rows(tree, "_ST12B_VECTOR_PACK_JSON"):
-        st12b_vectors.setdefault(str(row["math_spec_id"]), {})[
-            str(row["case_type"])
-        ] = row
-    st12b_properties = {
-        str(row["math_spec_id"]): row
-        for row in _json_rows(tree, "_ST12B_PROPERTY_PACK_JSON")
-    }
+    vector_keys: set[tuple[str, str]] = set()
+    for row in st12b_vector_rows:
+        key = (str(row["math_spec_id"]), str(row["case_type"]))
+        if key in vector_keys:
+            raise ValueError(f"ST12-B vector class is ambiguous: {key!r}")
+        vector_keys.add(key)
+        st12b_vectors.setdefault(key[0], {})[key[1]] = row
+    st12b_properties = unique_by(
+        st12b_property_rows,
+        "math_spec_id",
+        "ST12-B property",
+    )
 
     material: dict[str, dict[str, object]] = {}
     for math_id in ARCHITECTURE_MATH_IDS:
-        if math_id in EXPECTED_MATH_IDS or math_id in {
-            "MATH-46",
-            "MATH-47",
-            "MATH-48",
-            "MATH-49",
-        }:
+        if math_id in EXPECTED_MATH_IDS:
             oracle = legacy_oracles.get(math_id)
             golden = legacy_vectors.get(math_id)
             if oracle is None or golden is None:
@@ -287,6 +316,8 @@ def _tracked_architecture_material() -> dict[str, dict[str, object]]:
             }
             continue
 
+        if math_id not in CURRENT_ST12B_ARCHITECTURE_MATH_IDS:
+            raise ValueError(f"unrouted architecture material: {math_id}")
         oracle = st12b_oracles.get(math_id)
         vectors = st12b_vectors.get(math_id, {})
         property_row = st12b_properties.get(math_id)
@@ -296,6 +327,41 @@ def _tracked_architecture_material() -> dict[str, dict[str, object]]:
             or property_row is None
         ):
             raise ValueError(f"missing ST12-B architecture material: {math_id}")
+        assert isinstance(oracle, Mapping)
+        assert isinstance(property_row, Mapping)
+        declared_keys = oracle.get("input_keys")
+        if (
+            not isinstance(declared_keys, list)
+            or not declared_keys
+            or len(declared_keys) != len(set(declared_keys))
+            or any(not isinstance(key, str) or not key for key in declared_keys)
+            or oracle.get("output_schema_ref") != f"{math_id}::OUTPUT"
+            or oracle.get("output_schema_version") != "ST12B_OUTPUT_V3_4"
+        ):
+            raise ValueError(f"invalid current ST12-B oracle contract: {math_id}")
+        for case_type in ("GOLDEN", "BOUNDARY", "NEGATIVE"):
+            vector = vectors[case_type]
+            if (
+                vector.get("math_spec_id") != math_id
+                or vector.get("case_type") != case_type
+                or vector.get("input_keys") != declared_keys
+                or not isinstance(vector.get("inputs"), Mapping)
+                or len(vector["inputs"]) != len(declared_keys)
+                or set(vector["inputs"]) != set(declared_keys)
+            ):
+                raise ValueError(
+                    f"invalid current ST12-B {case_type} binding: {math_id}"
+                )
+        if (
+            property_row.get("math_spec_id") != math_id
+            or not isinstance(property_row.get("base_inputs"), Mapping)
+            or len(property_row["base_inputs"]) != len(declared_keys)
+            or set(property_row["base_inputs"]) != set(declared_keys)
+            or not isinstance(property_row.get("mutation"), Mapping)
+            or not isinstance(property_row.get("property_id"), str)
+            or not property_row.get("property_id")
+        ):
+            raise ValueError(f"invalid current ST12-B property binding: {math_id}")
         material[math_id] = {
             "oracle": oracle,
             "golden": vectors["GOLDEN"],
@@ -304,6 +370,10 @@ def _tracked_architecture_material() -> dict[str, dict[str, object]]:
             "property": property_row,
             "oracle_id": str(oracle["oracle_id"]),
             "golden_vector_id": str(vectors["GOLDEN"]["vector_id"]),
+            "boundary_vector_id": str(vectors["BOUNDARY"]["vector_id"]),
+            "negative_vector_id": str(vectors["NEGATIVE"]["vector_id"]),
+            "property_id": str(property_row["property_id"]),
+            "output_schema_version": str(oracle["output_schema_version"]),
             "comparison_policy": (
                 "CANONICAL_STRUCTURE_WITH_DECLARED_NUMERIC_TOLERANCE"
             ),
@@ -315,6 +385,19 @@ def _tracked_architecture_material() -> dict[str, dict[str, object]]:
         {row["golden_vector_id"] for row in material.values()}
     ) != 29:
         raise ValueError("architecture oracle/vector identities are not unique")
+    current_rows = tuple(material[math_id] for math_id in CURRENT_ST12B_ARCHITECTURE_MATH_IDS)
+    for identity_field in (
+        "oracle_id",
+        "golden_vector_id",
+        "boundary_vector_id",
+        "negative_vector_id",
+        "property_id",
+    ):
+        values = tuple(row[identity_field] for row in current_rows)
+        if len(values) != 14 or len(set(values)) != 14:
+            raise ValueError(
+                f"current ST12-B architecture {identity_field} identities are not exact"
+            )
     return material
 
 
@@ -438,27 +521,130 @@ def _payload_matches(
     return observed == expected
 
 
-def _first_numeric_path(value: object) -> tuple[object, ...] | None:
-    if isinstance(value, Mapping):
-        for key, item in value.items():
-            suffix = _first_numeric_path(item)
-            if suffix is not None:
-                return (key, *suffix)
-    elif isinstance(value, list | tuple):
-        for index, item in enumerate(value):
-            suffix = _first_numeric_path(item)
-            if suffix is not None:
-                return (index, *suffix)
-    elif isinstance(value, int | float) and not isinstance(value, bool):
-        return ()
-    elif isinstance(value, str):
-        try:
-            converted = Decimal(value)
-        except ArithmeticError:
-            return None
-        if converted.is_finite():
-            return ()
-    return None
+@dataclass(frozen=True)
+class _CompiledComparisonPolicyV1:
+    declared_policy: str
+    operational_policy: str
+    absolute_tolerance: float | None
+    exact_mapping_order: bool
+    exact_decimal_representation: bool
+
+
+_CURRENT_NUMERIC_TOLERANCE_BY_MATH_ID = {
+    "MATH-16": 1e-12,
+    "MATH-17": 1e-12,
+    "MATH-18": 1e-12,
+    "MATH-19": 1e-15,
+    "MATH-20": 1e-12,
+    "MATH-21": 1e-12,
+    "MATH-22": 1e-12,
+    "MATH-23": 1e-12,
+    "MATH-24": 1e-12,
+    "MATH-25": 1e-12,
+    "MATH-46": 1e-15,
+    "MATH-47": 1e-15,
+    "MATH-48": 1e-12,
+    "MATH-49": 1e-15,
+}
+
+
+def _compile_comparison_policy(
+    declared_policy: str,
+    *,
+    math_id: str | None = None,
+) -> _CompiledComparisonPolicyV1:
+    if declared_policy == "CANONICAL_STRUCTURE_WITH_DECLARED_NUMERIC_TOLERANCE":
+        if math_id not in _CURRENT_NUMERIC_TOLERANCE_BY_MATH_ID:
+            raise ValueError(
+                "current nested comparison policy requires an exact math identity"
+            )
+        tolerance = _CURRENT_NUMERIC_TOLERANCE_BY_MATH_ID[math_id]
+        exponent = "1E-15" if tolerance == 1e-15 else "1E-12"
+        return _CompiledComparisonPolicyV1(
+            declared_policy=declared_policy,
+            operational_policy=f"{declared_policy}::{exponent}",
+            absolute_tolerance=tolerance,
+            exact_mapping_order=False,
+            exact_decimal_representation=False,
+        )
+    definitions = {
+        "ABS_TOL_1E-15": (1e-15, False, False),
+        "ABS_TOL_1E-12": (1e-12, False, False),
+        "EXACT_BOOLEAN_INVARIANT": (None, False, False),
+        "EXACT_ORDERING_INDEX_INVARIANT": (None, True, False),
+        "EXACT_CANONICAL_STRUCTURE": (None, True, False),
+        "EXACT_DECIMAL_FIXED_REPRESENTATION": (None, True, True),
+        "ENUMERATION_INVARIANT": (1e-15, False, False),
+        "BRUTE_FORCE_ENUMERATION": (1e-12, False, False),
+        "EXACT_DISCRETE_ENUMERATION": (1e-15, False, False),
+    }
+    definition = definitions.get(declared_policy)
+    if definition is None:
+        raise ValueError(f"unknown comparison policy: {declared_policy}")
+    tolerance, exact_order, exact_decimal = definition
+    return _CompiledComparisonPolicyV1(
+        declared_policy=declared_policy,
+        operational_policy=declared_policy,
+        absolute_tolerance=tolerance,
+        exact_mapping_order=exact_order,
+        exact_decimal_representation=exact_decimal,
+    )
+
+
+def _compiled_payload_matches(
+    observed: object,
+    expected: object,
+    policy: _CompiledComparisonPolicyV1,
+) -> bool:
+    if isinstance(expected, Mapping):
+        if not isinstance(observed, Mapping):
+            return False
+        if policy.exact_mapping_order:
+            if tuple(observed) != tuple(expected):
+                return False
+        elif set(observed) != set(expected):
+            return False
+        return all(
+            _compiled_payload_matches(observed[key], expected[key], policy)
+            for key in expected
+        )
+    if isinstance(expected, list | tuple):
+        return (
+            isinstance(observed, list | tuple)
+            and len(observed) == len(expected)
+            and all(
+                _compiled_payload_matches(left, right, policy)
+                for left, right in zip(observed, expected, strict=True)
+            )
+        )
+    if isinstance(expected, bool):
+        return isinstance(observed, bool) and observed is expected
+    if isinstance(expected, Decimal):
+        return (
+            isinstance(observed, Decimal)
+            and observed == expected
+            and (
+                not policy.exact_decimal_representation
+                or observed.as_tuple() == expected.as_tuple()
+            )
+        )
+    if (
+        isinstance(expected, int | float)
+        and not isinstance(expected, bool)
+        and isinstance(observed, int | float)
+        and not isinstance(observed, bool)
+    ):
+        if not math.isfinite(float(expected)) or not math.isfinite(float(observed)):
+            return False
+        if policy.absolute_tolerance is None:
+            return type(observed) is type(expected) and observed == expected
+        return math.isclose(
+            float(observed),
+            float(expected),
+            rel_tol=0.0,
+            abs_tol=policy.absolute_tolerance,
+        )
+    return type(observed) is type(expected) and observed == expected
 
 
 def _mutated_copy(value: object, path: Sequence[object], replacement_value: object) -> object:
@@ -470,39 +656,24 @@ def _mutated_copy(value: object, path: Sequence[object], replacement_value: obje
     return clone
 
 
-def _precision_mutation_rejected(
-    math_id: str,
-    observed: object,
-    expected: object,
-) -> bool:
-    path = _first_numeric_path(expected)
-    if path is None:
-        if math_id == "MATH-14" and isinstance(expected, Mapping):
-            mutation = json.loads(json.dumps(expected))
-            for key, value in mutation.items():
-                if isinstance(value, bool):
-                    mutation[key] = not value
-                    return not _payload_matches(observed, mutation)
-            return False
-        if math_id != "MATH-49" or not isinstance(expected, Mapping):
-            return False
-        assignment = expected.get("minimum_energy_assignment")
-        if not isinstance(assignment, Mapping) or not assignment:
-            return False
-        first = next(iter(assignment))
-        mutation = json.loads(json.dumps(expected))
-        mutation["minimum_energy_assignment"][first] = "PRECISION_TIE_DRIFT"
-        return not _payload_matches(observed, mutation)
-    cursor: object = expected
-    for component in path:
-        cursor = cursor[component]  # type: ignore[index]
-    if isinstance(cursor, str):
-        replacement: object = str(Decimal(cursor) + Decimal("0.000001"))
+def _comparison_policy_self_rejections() -> int:
+    strict = _compile_comparison_policy("ABS_TOL_1E-15")
+    if _compiled_payload_matches(0.0, 5e-13, strict):
+        raise ValueError("1e-15 comparison was weakened to 1e-12")
+    ordered = _compile_comparison_policy("EXACT_ORDERING_INDEX_INVARIANT")
+    if _compiled_payload_matches({"b": 2, "a": 1}, {"a": 1, "b": 2}, ordered):
+        raise ValueError("exact ordered comparison accepted reordered output")
+    decimal_policy = _compile_comparison_policy("EXACT_DECIMAL_FIXED_REPRESENTATION")
+    if _compiled_payload_matches(1.25, Decimal("1.25"), decimal_policy):
+        raise ValueError("exact Decimal comparison accepted float coercion")
+    try:
+        _compile_comparison_policy("UNKNOWN_COMPARISON_POLICY")
+    except ValueError as exc:
+        if "unknown comparison policy" not in str(exc):
+            raise
     else:
-        assert isinstance(cursor, int | float) and not isinstance(cursor, bool)
-        replacement = float(cursor) + 1e-6
-    mutation = _mutated_copy(expected, path, replacement)
-    return not _payload_matches(observed, mutation, absolute_tolerance=1e-12)
+        raise ValueError("unknown comparison policy was accepted")
+    return 4
 
 
 def _apply_declared_mutation(inputs: object, mutation: Mapping[str, object]) -> object:
@@ -1047,7 +1218,7 @@ def _independent_math_16(inputs: Mapping[str, object]) -> dict[str, object]:
         if variance <= 0.0:
             if center > 0.0:
                 raise ValueError(
-                    f"candidate {index} has positive mean and zero variance"
+                    f"candidate {index} has positive mean and zero long-run variance"
                 )
             valid.append(False)
             standardized.append(float("-inf"))
@@ -1122,7 +1293,11 @@ def _probabilistic_sharpe(
 ) -> dict[str, float]:
     observed = _finite(observed_sharpe, "observed_sharpe")
     reference = _finite(reference_sharpe, "reference_sharpe")
-    count = _positive_int(observations, "observations", minimum=2)
+    count = _positive_int(
+        observations,
+        "independent_equivalent_observations",
+        minimum=2,
+    )
     skew = _finite(skewness, "skewness")
     non_excess_kurtosis = _finite(kurtosis, "kurtosis")
     if non_excess_kurtosis < 1.0:
@@ -1160,8 +1335,10 @@ def _expected_maximum_sharpe(
     trial_variance: float,
     effective_count: float,
 ) -> float:
-    if effective_count == 1.0:
-        return trial_mean
+    if not effective_count > 1.0:
+        raise ValueError(
+            "effective independent trial count must be greater than one"
+        )
     euler_mascheroni = 0.5772156649015329
     return trial_mean + math.sqrt(trial_variance) * (
         (1.0 - euler_mascheroni)
@@ -1186,8 +1363,11 @@ def _independent_math_18(inputs: Mapping[str, object]) -> dict[str, float]:
         inputs.get("effective_independent_trial_count"),
         "effective_independent_trial_count",
     )
-    if not 1.0 <= effective_count <= len(sharpes):
-        raise ValueError("effective trial count must be in [1, trial count]")
+    if not 1.0 < effective_count <= len(sharpes):
+        raise ValueError(
+            "effective independent trial count must be in "
+            "(1, material trial count]"
+        )
     trial_mean = _mean(sharpes)
     trial_variance = _sample_variance(sharpes)
     expected_maximum = _expected_maximum_sharpe(
@@ -1236,7 +1416,7 @@ def _independent_math_19(inputs: Mapping[str, object]) -> dict[str, object]:
         raise ValueError("strategy IDs must uniquely identify every column")
     group_count = _positive_int(inputs.get("S"), "S", minimum=2)
     if group_count % 2 or len(matrix) % group_count:
-        raise ValueError("PBO requires an even exact partition count")
+        raise ValueError("S must be even and exactly partition the observations")
     width = len(matrix) // group_count
     groups = tuple(
         tuple(range(group * width, (group + 1) * width))
@@ -1315,7 +1495,9 @@ def _parsed_intervals(value: object) -> list[dict[str, object]]:
         start = _finite(raw.get("start"), f"interval[{index}].start")
         end = _finite(raw.get("end"), f"interval[{index}].end")
         if not start < end:
-            raise ValueError("half-open intervals require start < end")
+            raise ValueError(
+                "intervals use half-open [start,end) semantics and require start<end"
+            )
         rows.append({"sample_id": identifier, "start": start, "end": end})
     return sorted(
         rows,
@@ -1432,7 +1614,9 @@ def _resolvable_paths(
     test_group_count: int,
 ) -> list[list[tuple[int, ...]]]:
     if group_count % test_group_count:
-        raise ValueError("exact CPCV fixture requires k to divide N")
+        raise ValueError(
+            "frozen CPCV path assembly requires k_test_groups to divide N_groups"
+        )
     splits = list(combinations(range(group_count), test_group_count))
     partitions = _set_partitions(tuple(range(group_count)), test_group_count)
     target_count = math.comb(group_count - 1, test_group_count - 1)
@@ -1484,8 +1668,10 @@ def _independent_math_21(inputs: Mapping[str, object]) -> dict[str, object]:
     if embargo < 0.0:
         raise ValueError("embargo duration must be nonnegative")
     aggregation_rule = inputs.get("aggregation_rule")
-    if not isinstance(aggregation_rule, str) or not aggregation_rule:
-        raise ValueError("aggregation rule must be a nonempty token")
+    if aggregation_rule != "ALL_PATHS_NO_CHERRY_PICKING":
+        raise ValueError(
+            "aggregation_rule must equal ALL_PATHS_NO_CHERRY_PICKING"
+        )
     groups = _balanced_blocks(len(intervals), group_count)
     split_rows: list[dict[str, object]] = []
     lookup: dict[tuple[int, ...], int] = {}
@@ -1568,7 +1754,10 @@ def _logged_rows(value: object) -> list[dict[str, object]]:
                 for mu, pi in zip(behavior, target, strict=True)
             )
         ):
-            raise ValueError("behavior/target policy violates simplex or support")
+            raise ValueError(
+                "target support must be contained in behavior support and both "
+                "policies must be probability simplexes"
+            )
         action = raw.get("logged_action_index")
         fold_id = raw.get("fold_id")
         if (
@@ -1580,7 +1769,9 @@ def _logged_rows(value: object) -> list[dict[str, object]]:
             or fold_id < 0
             or raw.get("cross_fitted_prediction") is not True
         ):
-            raise ValueError("logged action/fold/cross-fit state is invalid")
+            if raw.get("cross_fitted_prediction") is not True:
+                raise ValueError("reward-model prediction must be cross-fitted")
+            raise ValueError("logged action and fold state is invalid")
         rows.append(
             {
                 "row_id": str(raw.get("row_id")),
@@ -1672,10 +1863,10 @@ def _independent_math_24(inputs: Mapping[str, object]) -> dict[str, float]:
     if len(weights) != len(rewards):
         raise ValueError("weights and rewards must align")
     if any(weight < 0.0 for weight in weights):
-        raise ValueError("importance weights must be nonnegative")
+        raise ValueError("weights must be nonnegative with positive total")
     total = math.fsum(weights)
     if total <= 0.0:
-        raise ValueError("importance weights must have positive total")
+        raise ValueError("weights must be nonnegative with positive total")
     return {
         "self_normalized_ips_estimate": math.fsum(
             weight * reward for weight, reward in zip(weights, rewards, strict=True)
@@ -1734,7 +1925,7 @@ def _independent_math_25(inputs: Mapping[str, object]) -> dict[str, object]:
         raise ValueError("fold IDs must cover 0..outer_fold_count-1")
     taus = [_tau(value) for value in _sequence(inputs.get("tau_grid"), "tau_grid")]
     if taus != sorted(set(taus)):
-        raise ValueError("tau grid must be unique and ascending")
+        raise ValueError("tau_grid must be unique and ascending")
     fold_results: list[dict[str, object]] = []
     held_out_values: list[float] = []
     for fold in range(fold_count):
@@ -1785,7 +1976,7 @@ def _independent_math_25(inputs: Mapping[str, object]) -> dict[str, object]:
 def _upper_qubo(
     diagonal_value: object,
     upper_terms_value: object,
-    offset_value: object,
+    constant_value: object,
 ) -> tuple[tuple[float, ...], dict[tuple[int, int], float], float]:
     diagonal = tuple(
         _finite(value, f"diagonal[{index}]")
@@ -1797,17 +1988,105 @@ def _upper_qubo(
             raise ValueError("upper-triangular term must be a mapping")
         left = raw.get("i")
         right = raw.get("j")
+        if isinstance(left, int) and isinstance(right, int) and (left, right) in upper:
+            raise ValueError("duplicate upper-triangular interaction")
         if (
             isinstance(left, bool)
             or not isinstance(left, int)
             or isinstance(right, bool)
             or not isinstance(right, int)
             or not 0 <= left < right < len(diagonal)
-            or (left, right) in upper
         ):
-            raise ValueError("QUBO terms must be unique strict upper-triangular pairs")
+            raise ValueError("QUBO interactions require unique indices with 0<=i<j<n")
         upper[(left, right)] = _finite(raw.get("value"), f"upper_terms[{index}].value")
-    return diagonal, upper, _finite(offset_value, "offset")
+    return diagonal, upper, _finite(constant_value, "constant")
+
+
+def _canonical_qubo_from_current_inputs(
+    inputs: Mapping[str, object],
+) -> tuple[tuple[float, ...], dict[tuple[int, int], float], float, dict[str, object]]:
+    representation = inputs.get("representation")
+    diagonal = tuple(
+        _finite(value, f"diagonal[{index}]")
+        for index, value in enumerate(_sequence(inputs.get("diagonal"), "diagonal"))
+    )
+    if len(diagonal) > 12:
+        raise ValueError("bounded exact QUBO enumeration supports at most 12 variables")
+    constant = _finite(inputs.get("constant"), "constant")
+    raw_upper = _sequence(inputs.get("upper_terms"), "upper_terms", minimum=0)
+    raw_matrix = _sequence(
+        inputs.get("full_symmetric_matrix"),
+        "full_symmetric_matrix",
+        minimum=0,
+    )
+    if representation == "CANONICAL_UPPER_TRIANGULAR":
+        if raw_matrix:
+            raise ValueError(
+                "canonical upper-triangular representation conflicts with full matrix"
+            )
+        parsed_diagonal, upper, parsed_constant = _upper_qubo(
+            diagonal,
+            raw_upper,
+            constant,
+        )
+    elif representation == "FULL_SYMMETRIC_ADAPTER_SUM_OFF_DIAGONAL_PAIRS":
+        if raw_upper:
+            raise ValueError(
+                "full-symmetric representation conflicts with upper-triangular terms"
+            )
+        if len(raw_matrix) != len(diagonal):
+            raise ValueError("full symmetric matrix must be square with declared dimension")
+        matrix: list[list[float]] = []
+        for row_index, raw_row in enumerate(raw_matrix):
+            if (
+                isinstance(raw_row, str | bytes)
+                or not isinstance(raw_row, Sequence)
+                or len(raw_row) != len(diagonal)
+            ):
+                raise ValueError(
+                    "full symmetric matrix must be square with declared dimension"
+                )
+            matrix.append(
+                [
+                    _finite(value, f"full_symmetric_matrix[{row_index}][{column}]")
+                    for column, value in enumerate(raw_row)
+                ]
+            )
+        if any(matrix[index][index] != diagonal[index] for index in range(len(diagonal))):
+            raise ValueError("full symmetric matrix diagonal conflicts with explicit diagonal")
+        parsed_diagonal = diagonal
+        upper = {
+            (left, right): matrix[left][right] + matrix[right][left]
+            for left in range(len(diagonal))
+            for right in range(left + 1, len(diagonal))
+        }
+        parsed_constant = constant
+    else:
+        raise ValueError("unknown QUBO representation")
+    canonical = {
+        "constant": parsed_constant,
+        "diagonal": list(parsed_diagonal),
+        "representation": "CANONICAL_UPPER_TRIANGULAR",
+        "schema_version": "CANONICAL_QUBO_MODEL_V1",
+        "upper_terms": [
+            {"i": left, "j": right, "value": coefficient}
+            for (left, right), coefficient in sorted(upper.items())
+        ],
+        "variable_count": len(parsed_diagonal),
+    }
+    return parsed_diagonal, upper, parsed_constant, canonical
+
+
+def _binary_assignment(value: object, variable_count: int) -> tuple[int, ...]:
+    raw = _sequence(value, "binary_assignment")
+    if (
+        len(raw) != variable_count
+        or any(isinstance(item, bool) or not isinstance(item, int) or item not in (0, 1) for item in raw)
+    ):
+        raise ValueError(
+            "binary_assignment must contain one binary integer per variable"
+        )
+    return tuple(raw)
 
 
 def _qubo_energy(
@@ -1816,9 +2095,7 @@ def _qubo_energy(
     offset: float,
     assignment_value: object,
 ) -> float:
-    assignment = tuple(_sequence(assignment_value, "binary_assignment"))
-    if len(assignment) != len(diagonal) or any(value not in (0, 1) for value in assignment):
-        raise ValueError("binary assignment must contain one 0/1 value per variable")
+    assignment = _binary_assignment(assignment_value, len(diagonal))
     return (
         offset
         + math.fsum(diagonal[index] * int(value) for index, value in enumerate(assignment))
@@ -1829,22 +2106,24 @@ def _qubo_energy(
     )
 
 
-def _independent_math_46(inputs: Mapping[str, object]) -> dict[str, float]:
-    diagonal, upper, offset = _upper_qubo(
-        inputs.get("diagonal"),
-        inputs.get("upper_terms"),
-        inputs.get("offset"),
-    )
-    energy = _qubo_energy(diagonal, upper, offset, inputs.get("x"))
-    enumerated = tuple(
-        _qubo_energy(diagonal, upper, offset, assignment)
+def _independent_math_46(inputs: Mapping[str, object]) -> dict[str, object]:
+    diagonal, upper, constant, canonical = _canonical_qubo_from_current_inputs(inputs)
+    selected = _binary_assignment(inputs.get("binary_assignment"), len(diagonal))
+    ledger = [
+        {
+            "binary_assignment": list(assignment),
+            "energy": _qubo_energy(diagonal, upper, constant, assignment),
+        }
         for assignment in product((0, 1), repeat=len(diagonal))
-    )
-    if len(enumerated) != 2 ** len(diagonal) or any(
-        not math.isfinite(value) for value in enumerated
-    ):
-        raise ValueError("bounded QUBO enumeration failed")
-    return {"energy": energy}
+    ]
+    if len(ledger) != 2 ** len(diagonal):
+        raise ValueError("bounded QUBO enumeration is incomplete")
+    return {
+        "binary_assignment": list(selected),
+        "canonical_qubo": canonical,
+        "energy": _qubo_energy(diagonal, upper, constant, selected),
+        "exhaustive_assignments": ledger,
+    }
 
 
 def _ising_from_qubo(
@@ -1881,79 +2160,342 @@ def _ising_energy(
 
 
 def _independent_math_47(inputs: Mapping[str, object]) -> dict[str, object]:
-    qubo = inputs.get("qubo")
-    if not isinstance(qubo, Mapping):
-        raise ValueError("QUBO payload must be a mapping")
-    diagonal, upper, offset = _upper_qubo(
-        qubo.get("diagonal"),
-        qubo.get("upper_terms"),
-        qubo.get("offset"),
-    )
-    constant, linear, interactions = _ising_from_qubo(diagonal, upper, offset)
-    assignments = tuple(product((0, 1), repeat=len(diagonal)))
-    parity = all(
-        math.isclose(
-            _qubo_energy(diagonal, upper, offset, assignment),
-            _ising_energy(
-                constant,
-                linear,
-                interactions,
-                tuple(1 - 2 * value for value in assignment),
-            ),
-            rel_tol=0.0,
-            abs_tol=1e-15,
+    diagonal, upper, qubo_constant, _canonical = _canonical_qubo_from_current_inputs(inputs)
+    selected = _binary_assignment(inputs.get("binary_assignment"), len(diagonal))
+    offset, linear, interactions = _ising_from_qubo(diagonal, upper, qubo_constant)
+    parity_rows: list[dict[str, object]] = []
+    for assignment in product((0, 1), repeat=len(diagonal)):
+        spins = tuple(1 - 2 * value for value in assignment)
+        qubo_energy = _qubo_energy(diagonal, upper, qubo_constant, assignment)
+        ising_energy = _ising_energy(offset, linear, interactions, spins)
+        if not math.isclose(qubo_energy, ising_energy, rel_tol=0.0, abs_tol=1e-15):
+            raise ValueError("QUBO/Ising assignment-energy parity failed")
+        parity_rows.append(
+            {
+                "binary_assignment": list(assignment),
+                "ising_energy": ising_energy,
+                "qubo_energy": qubo_energy,
+                "spin_assignment": list(spins),
+            }
         )
-        for assignment in assignments
-    )
+    selected_spins = tuple(1 - 2 * value for value in selected)
     return {
-        "all_binary_assignments_energy_equal_after_ising_transform": parity,
-        "assignment_count": len(assignments),
+        "binary_assignment": list(selected),
+        "binary_to_spin_convention": (
+            "x_i=(1-s_i)/2; s=+1 maps to x=0 and s=-1 maps to x=1"
+        ),
+        "couplers_J": [
+            {"i": left, "j": right, "value": coefficient}
+            for (left, right), coefficient in sorted(interactions.items())
+        ],
+        "exhaustive_parity_rows": parity_rows,
+        "ising_energy": _ising_energy(offset, linear, interactions, selected_spins),
+        "linear_fields_h": list(linear),
+        "offset": offset,
+        "qubo_energy": _qubo_energy(diagonal, upper, qubo_constant, selected),
+        "spin_assignment": list(selected_spins),
     }
 
 
-def _independent_math_48(inputs: Mapping[str, object]) -> dict[str, object]:
-    domains = inputs.get("domains")
-    constraints = inputs.get("constraints")
-    objective = inputs.get("objective")
-    if (
-        domains != {"x": "BINARY", "y": "BINARY"}
-        or constraints != ["x+y<=1"]
-        or objective != "maximize x+y"
-    ):
-        raise ValueError("unsupported or malformed bounded CQM fixture")
-    feasible: list[tuple[int, int, int]] = []
-    for x_value, y_value in product((0, 1), repeat=2):
-        if x_value + y_value <= 1:
-            feasible.append((x_value + y_value, x_value, y_value))
-    optimum = max(value[0] for value in feasible)
-    selected = min(
-        (value for value in feasible if value[0] == optimum),
-        key=lambda value: (value[1], value[2]),
+def _cqm_expression(
+    constant: float,
+    linear: Mapping[str, float],
+    quadratic: Sequence[tuple[str, str, float]],
+    assignment: Mapping[str, float],
+) -> float:
+    return constant + math.fsum(
+        coefficient * assignment[name] for name, coefficient in linear.items()
+    ) + math.fsum(
+        coefficient * assignment[left] * assignment[right]
+        for left, right, coefficient in quadratic
     )
-    if selected[1] + selected[2] > 1:
-        raise ValueError("selected CQM assignment is infeasible")
+
+
+def _parse_cqm_model(
+    value: object,
+) -> tuple[
+    tuple[str, ...],
+    tuple[tuple[float, ...], ...],
+    tuple[str, ...],
+    str,
+    float,
+    dict[str, float],
+    list[tuple[str, str, float]],
+    list[dict[str, object]],
+    float,
+    float,
+]:
+    if not isinstance(value, Mapping) or set(value) != {
+        "constraints",
+        "conversion_penalty_candidate",
+        "feasibility_tolerance",
+        "objective_constant",
+        "objective_linear",
+        "objective_quadratic",
+        "objective_sense",
+        "schema_version",
+        "variables",
+    }:
+        raise ValueError("CQM model must match QTT_CQM_GRAMMAR_V1 exactly")
+    if value.get("schema_version") != "QTT_CQM_GRAMMAR_V1":
+        raise ValueError("unsupported CQM schema version")
+    raw_variables = _sequence(value.get("variables"), "CQM variables")
+    names: list[str] = []
+    domains: list[tuple[float, ...]] = []
+    units: list[str] = []
+    for index, raw in enumerate(raw_variables):
+        if not isinstance(raw, Mapping) or set(raw) != {
+            "enumeration_values", "id", "lower", "type", "unit", "upper"
+        }:
+            raise ValueError("CQM variable must match the typed grammar")
+        name = raw.get("id")
+        variable_type = raw.get("type")
+        unit = raw.get("unit")
+        if (
+            not isinstance(name, str)
+            or not name
+            or name in names
+            or variable_type not in {"BINARY", "INTEGER"}
+            or not isinstance(unit, str)
+            or not unit
+        ):
+            raise ValueError("CQM variable identity/domain/unit is invalid")
+        lower = _finite(raw.get("lower"), f"variables[{index}].lower")
+        upper = _finite(raw.get("upper"), f"variables[{index}].upper")
+        raw_values = _sequence(
+            raw.get("enumeration_values"),
+            f"variables[{index}].enumeration_values",
+        )
+        values = tuple(
+            _finite(item, f"variables[{index}].enumeration_values")
+            for item in raw_values
+        )
+        if (
+            lower > upper
+            or len(values) != len(set(values))
+            or tuple(sorted(values)) != values
+            or any(not lower <= item <= upper for item in values)
+            or variable_type == "BINARY" and values != (0.0, 1.0)
+            or variable_type == "INTEGER" and any(not item.is_integer() for item in values)
+        ):
+            raise ValueError("CQM enumeration values violate the declared domain")
+        names.append(name)
+        domains.append(values)
+        units.append(unit)
+    if math.prod(len(domain) for domain in domains) > 4096:
+        raise ValueError("CQM exact enumeration resource ceiling exceeded")
+    known = set(names)
+
+    def linear_terms(raw: object, label: str) -> dict[str, float]:
+        if not isinstance(raw, Mapping) or any(key not in known for key in raw):
+            raise ValueError(f"{label} contains an unknown variable")
+        return {str(key): _finite(item, f"{label}.{key}") for key, item in raw.items()}
+
+    def quadratic_terms(raw: object, label: str) -> list[tuple[str, str, float]]:
+        rows: list[tuple[str, str, float]] = []
+        seen: set[tuple[str, str]] = set()
+        for index, item in enumerate(_sequence(raw, label, minimum=0)):
+            if not isinstance(item, Mapping) or set(item) != {"coefficient", "u", "v"}:
+                raise ValueError(f"{label} term is malformed")
+            left, right = item.get("u"), item.get("v")
+            if not isinstance(left, str) or not isinstance(right, str) or left not in known or right not in known:
+                raise ValueError(f"{label} contains an unknown variable")
+            key = (left, right) if names.index(left) <= names.index(right) else (right, left)
+            if key in seen:
+                raise ValueError(f"{label} contains duplicate quadratic terms")
+            seen.add(key)
+            rows.append((left, right, _finite(item.get("coefficient"), f"{label}[{index}]")))
+        return rows
+
+    sense = value.get("objective_sense")
+    if sense not in {"MINIMIZE", "MAXIMIZE"}:
+        raise ValueError("CQM objective sense must be MINIMIZE or MAXIMIZE")
+    objective_constant = _finite(value.get("objective_constant"), "objective_constant")
+    objective_linear = linear_terms(value.get("objective_linear"), "objective_linear")
+    objective_quadratic = quadratic_terms(value.get("objective_quadratic"), "objective_quadratic")
+    constraints: list[dict[str, object]] = []
+    identifiers: set[str] = set()
+    for index, raw in enumerate(_sequence(value.get("constraints"), "constraints", minimum=0)):
+        if not isinstance(raw, Mapping) or set(raw) != {
+            "constant", "hard", "id", "linear", "quadratic", "rhs", "sense", "soft_penalty_weight"
+        }:
+            raise ValueError("CQM constraint must match the typed grammar")
+        identifier = raw.get("id")
+        if not isinstance(identifier, str) or not identifier or identifier in identifiers:
+            raise ValueError("CQM constraint IDs must be unique")
+        identifiers.add(identifier)
+        constraint_sense = raw.get("sense")
+        if constraint_sense not in {"LE", "GE", "EQ"}:
+            raise ValueError("CQM constraint sense must be LE, GE, or EQ")
+        hard = raw.get("hard")
+        if not isinstance(hard, bool):
+            raise ValueError("CQM constraint hard flag must be Boolean")
+        penalty = _finite(raw.get("soft_penalty_weight"), "soft_penalty_weight")
+        if penalty < 0.0 or hard and penalty != 0.0 or not hard and penalty <= 0.0:
+            raise ValueError("CQM soft penalty weight conflicts with hard/soft state")
+        constraints.append(
+            {
+                "id": identifier,
+                "hard": hard,
+                "constant": _finite(raw.get("constant"), f"constraints[{index}].constant"),
+                "linear": linear_terms(raw.get("linear"), f"constraints[{index}].linear"),
+                "quadratic": quadratic_terms(raw.get("quadratic"), f"constraints[{index}].quadratic"),
+                "sense": constraint_sense,
+                "rhs": _finite(raw.get("rhs"), f"constraints[{index}].rhs"),
+                "penalty": penalty,
+            }
+        )
+    tolerance = _finite(value.get("feasibility_tolerance"), "feasibility_tolerance")
+    penalty_candidate = _finite(value.get("conversion_penalty_candidate"), "conversion_penalty_candidate")
+    if tolerance < 0.0 or penalty_candidate <= 0.0:
+        raise ValueError("CQM tolerance and conversion penalty must be positive")
+    return (
+        tuple(names), tuple(domains), tuple(units), str(sense), objective_constant,
+        objective_linear, objective_quadratic, constraints, tolerance, penalty_candidate,
+    )
+
+
+def _constraint_violation(lhs: float, sense: str, rhs: float) -> float:
+    if sense == "LE":
+        return max(0.0, lhs - rhs)
+    if sense == "GE":
+        return max(0.0, rhs - lhs)
+    return abs(lhs - rhs)
+
+
+def _independent_math_48(inputs: Mapping[str, object]) -> dict[str, object]:
+    (
+        names, domains, _units, sense, objective_constant, objective_linear,
+        objective_quadratic, constraints, tolerance, conversion_penalty,
+    ) = _parse_cqm_model(inputs.get("model"))
+    raw_assignment = inputs.get("assignment")
+    if not isinstance(raw_assignment, Mapping) or tuple(raw_assignment) != names:
+        raise ValueError("assignment must provide every variable exactly once")
+
+    def parsed_assignment(values: Sequence[float] | Mapping[str, object]) -> dict[str, float]:
+        if isinstance(values, Mapping):
+            result = {name: _finite(values[name], f"assignment.{name}") for name in names}
+        else:
+            result = {name: float(item) for name, item in zip(names, values, strict=True)}
+        if any(result[name] not in domains[index] for index, name in enumerate(names)):
+            raise ValueError("assignment value violates the declared variable domain")
+        return result
+
+    selected = parsed_assignment(raw_assignment)
+
+    def evaluate(assignment: Mapping[str, float]) -> dict[str, object]:
+        raw_objective = _cqm_expression(
+            objective_constant, objective_linear, objective_quadratic, assignment
+        )
+        constraint_rows: list[dict[str, object]] = []
+        hard_feasible = True
+        soft_penalty = 0.0
+        hard_penalty = 0.0
+        for row in constraints:
+            lhs = _cqm_expression(
+                float(row["constant"]),
+                row["linear"],  # type: ignore[arg-type]
+                row["quadratic"],  # type: ignore[arg-type]
+                assignment,
+            )
+            violation = _constraint_violation(lhs, str(row["sense"]), float(row["rhs"]))
+            hard = bool(row["hard"])
+            hard_feasible = hard_feasible and (not hard or violation <= tolerance)
+            if hard:
+                hard_penalty += conversion_penalty * violation * violation
+            else:
+                soft_penalty += float(row["penalty"]) * violation * violation
+            constraint_rows.append(
+                {
+                    "hard": hard,
+                    "id": row["id"],
+                    "lhs": lhs,
+                    "rhs": float(row["rhs"]),
+                    "sense": row["sense"],
+                    "soft_penalty_weight": float(row["penalty"]),
+                    "violation": violation,
+                }
+            )
+        penalized = raw_objective + soft_penalty if sense == "MINIMIZE" else raw_objective - soft_penalty
+        converted = penalized + hard_penalty if sense == "MINIMIZE" else penalized - hard_penalty
+        return {
+            "assignment": dict(assignment),
+            "raw": raw_objective,
+            "constraints": constraint_rows,
+            "feasible": hard_feasible,
+            "soft_penalty": soft_penalty,
+            "penalized": penalized,
+            "converted": converted,
+        }
+
+    ledger = [evaluate(parsed_assignment(values)) for values in product(*domains)]
+    feasible = [row for row in ledger if row["feasible"] is True]
+    if not feasible:
+        raise ValueError("CQM exact fixture has no native feasible assignment")
+
+    def objective_key(row: Mapping[str, object], field: str) -> tuple[object, ...]:
+        value = float(row[field])
+        assignment = row["assignment"]
+        assert isinstance(assignment, Mapping)
+        ordered = tuple(float(assignment[name]) for name in names)
+        return ((value if sense == "MINIMIZE" else -value), ordered)
+
+    native = min(feasible, key=lambda row: objective_key(row, "penalized"))
+    converted = min(ledger, key=lambda row: objective_key(row, "converted"))
+    if converted["assignment"] != native["assignment"] or converted["feasible"] is not True:
+        raise ValueError("conversion penalty is inadequate for the exact CQM fixture")
+    selected_result = evaluate(selected)
+    native_assignment = native["assignment"]
+    converted_assignment = converted["assignment"]
+    assert isinstance(native_assignment, Mapping) and isinstance(converted_assignment, Mapping)
     return {
-        "all_returned_solutions_feasible": all(x + y <= 1 for _, x, y in feasible),
-        "optimal_objective": optimum,
+        "assignment": dict(selected),
+        "constraint_evaluations": selected_result["constraints"],
+        "conversion_penalty_adequacy": {
+            "converted_best_assignment": dict(converted_assignment),
+            "matches_native_feasible_optimum": True,
+            "penalty": conversion_penalty,
+            "state": "ADEQUATE_FOR_EXACT_ENUMERATED_FIXTURE",
+        },
+        "interpret_back_state": "EXACT_ORIGINAL_VARIABLE_LABELS_AND_UNITS_PRESERVED",
+        "objective_sense": sense,
+        "original_model_feasible": selected_result["feasible"],
+        "penalized_objective": selected_result["penalized"],
+        "raw_objective": selected_result["raw"],
+        "schema_version": "QTT_CQM_GRAMMAR_V1",
+        "small_exact_solution": {
+            "assignment": dict(native_assignment),
+            "enumerated_assignment_count": len(ledger),
+            "feasible_assignment_count": len(feasible),
+            "penalized_objective": native["penalized"],
+            "raw_objective": native["raw"],
+            "state": "EXACT_FEASIBLE_OPTIMUM",
+        },
+        "soft_penalty": selected_result["soft_penalty"],
     }
 
 
 def _independent_math_49(inputs: Mapping[str, object]) -> dict[str, object]:
-    variables = inputs.get("discrete_variables")
-    biases = inputs.get("linear_biases")
-    pairwise = inputs.get("pairwise_biases")
-    if (
-        not isinstance(variables, Mapping)
-        or not isinstance(biases, Mapping)
-        or not isinstance(pairwise, Mapping)
-        or not variables
-    ):
-        raise ValueError("DQM fixture must contain variables and biases")
-    variable_names = tuple(sorted(str(name) for name in variables))
+    model = inputs.get("model")
+    if not isinstance(model, Mapping) or set(model) != {
+        "constant", "linear_biases", "pairwise_biases", "schema_version", "variables"
+    }:
+        raise ValueError("DQM model must match QTT_DQM_GRAMMAR_V1 exactly")
+    if model.get("schema_version") != "QTT_DQM_GRAMMAR_V1":
+        raise ValueError("unsupported DQM schema version")
+    raw_variables = _sequence(model.get("variables"), "DQM variables")
+    variable_names: list[str] = []
     case_sets: list[tuple[str, ...]] = []
-    for name in variable_names:
-        cases = variables[name]
+    for raw in raw_variables:
+        if not isinstance(raw, Mapping) or set(raw) != {"cases", "id"}:
+            raise ValueError("DQM variable row is malformed")
+        name = raw.get("id")
+        cases = raw.get("cases")
         if (
+            not isinstance(name, str)
+            or not name
+            or name in variable_names
+            or
             isinstance(cases, str | bytes)
             or not isinstance(cases, Sequence)
             or not cases
@@ -1961,29 +2503,95 @@ def _independent_math_49(inputs: Mapping[str, object]) -> dict[str, object]:
             or any(not isinstance(case, str) or not case for case in cases)
         ):
             raise ValueError("each DQM variable needs unique nonempty cases")
+        variable_names.append(name)
         case_sets.append(tuple(cases))
-    all_cases = {case for cases in case_sets for case in cases}
-    if set(biases) != all_cases or any(
-        not math.isfinite(_finite(value, f"bias[{case}]"))
-        for case, value in biases.items()
-    ):
-        raise ValueError("DQM linear biases must cover every case exactly")
-    if pairwise:
-        raise ValueError("the frozen DQM fixture declares no pairwise bias")
-    ledger: list[tuple[float, tuple[str, ...]]] = []
-    for assignment in product(*case_sets):
-        ledger.append(
-            (math.fsum(float(biases[case]) for case in assignment), assignment)
-        )
-    energy, optimum = min(ledger, key=lambda row: (row[0], row[1]))
-    if not math.isfinite(energy):
-        raise ValueError("DQM optimum is nonfinite")
-    return {
-        "minimum_energy_assignment": {
-            name: case for name, case in zip(variable_names, optimum, strict=True)
-        },
-        "one_case_per_variable": len(optimum) == len(variable_names),
+    if math.prod(len(cases) for cases in case_sets) > 4096:
+        raise ValueError("DQM exact enumeration resource ceiling exceeded")
+    known_cases = {
+        (name, case)
+        for name, cases in zip(variable_names, case_sets, strict=True)
+        for case in cases
     }
+    linear: dict[tuple[str, str], float] = {}
+    for index, raw in enumerate(_sequence(model.get("linear_biases"), "linear_biases")):
+        if not isinstance(raw, Mapping) or set(raw) != {"bias", "case", "variable"}:
+            raise ValueError("DQM linear bias row is malformed")
+        key = (raw.get("variable"), raw.get("case"))
+        if key not in known_cases or key in linear:
+            raise ValueError("DQM linear biases must cover each variable/case exactly once")
+        linear[key] = _finite(raw.get("bias"), f"linear_biases[{index}].bias")
+    if set(linear) != known_cases:
+        raise ValueError("DQM linear biases must cover each variable/case exactly once")
+    pairwise: dict[tuple[str, str, str, str], float] = {}
+    for index, raw in enumerate(_sequence(model.get("pairwise_biases"), "pairwise_biases", minimum=0)):
+        if not isinstance(raw, Mapping) or set(raw) != {"bias", "case_u", "case_v", "u", "v"}:
+            raise ValueError("DQM pairwise bias row is malformed")
+        left, right = raw.get("u"), raw.get("v")
+        left_case, right_case = raw.get("case_u"), raw.get("case_v")
+        if (
+            not isinstance(left, str) or not isinstance(right, str) or left == right
+            or (left, left_case) not in known_cases or (right, right_case) not in known_cases
+        ):
+            raise ValueError("DQM pairwise bias references an unknown variable or case")
+        if variable_names.index(left) > variable_names.index(right):
+            left, right, left_case, right_case = right, left, right_case, left_case
+        key = (left, str(left_case), right, str(right_case))
+        if key in pairwise:
+            raise ValueError("DQM pairwise bias is duplicate or conflicting")
+        pairwise[key] = _finite(raw.get("bias"), f"pairwise_biases[{index}].bias")
+    constant = _finite(model.get("constant"), "DQM constant")
+
+    def energy(assignment: Mapping[str, str]) -> float:
+        return constant + math.fsum(
+            linear[(name, assignment[name])] for name in variable_names
+        ) + math.fsum(
+            coefficient
+            for (left, left_case, right, right_case), coefficient in pairwise.items()
+            if assignment[left] == left_case and assignment[right] == right_case
+        )
+
+    raw_assignment = inputs.get("assignment")
+    if not isinstance(raw_assignment, Mapping) or tuple(raw_assignment) != tuple(variable_names):
+        raise ValueError("assignment must select one known case per variable")
+    selected = {name: raw_assignment[name] for name in variable_names}
+    if any((name, selected[name]) not in known_cases for name in variable_names):
+        raise ValueError("assignment must select one known case per variable")
+    ledger: list[dict[str, object]] = []
+    for assignment in product(*case_sets):
+        mapped = {
+            name: case for name, case in zip(variable_names, assignment, strict=True)
+        }
+        ledger.append({"assignment": mapped, "energy": energy(mapped)})
+    optimum = _ordered_dqm_optimum(ledger, variable_names)
+    if optimum != _ordered_dqm_optimum(tuple(reversed(ledger)), variable_names):
+        raise ValueError("DQM deterministic tie-break drift observed")
+    return {
+        "assignment": selected,
+        "energy": energy(selected),
+        "exhaustive_assignments": ledger,
+        "interpret_back_state": "EXACT_ORDERED_VARIABLE_AND_CASE_LABELS_PRESERVED",
+        "one_hot_expansion_applied": False,
+        "schema_version": "QTT_DQM_GRAMMAR_V1",
+    }
+
+
+def _ordered_dqm_optimum(
+    ledger: Sequence[Mapping[str, object]],
+    variable_names: Sequence[str],
+) -> dict[str, object]:
+    if not ledger:
+        raise ValueError("DQM optimum requires a nonempty assignment ledger")
+    selected = min(
+        ledger,
+        key=lambda row: (
+            float(row["energy"]),
+            tuple(
+                str(row["assignment"][name])  # type: ignore[index]
+                for name in variable_names
+            ),
+        ),
+    )
+    return _json_ready(selected)  # type: ignore[return-value]
 
 
 _NEW_ARCHITECTURE_ALGORITHMS = {
@@ -2296,19 +2904,19 @@ def _legacy_domain_rejection_observed(
     )
 
 
-def _legacy_source_or_unit_rejection_observed(
+def _legacy_semantic_binding_mutation_observed(
     math_id: str,
     material: Mapping[str, object],
 ) -> bool:
     golden = material["golden"]
-    if not isinstance(golden, Mapping) or not isinstance(golden.get("inputs"), Mapping):
+    if not isinstance(golden, Mapping):
         return False
-    inputs = dict(golden["inputs"])
-    first = next(iter(inputs))
-    inputs[f"{first}__WRONG_UNIT_OR_SOURCE"] = inputs.pop(first)
-    return _expect_rejection(
-        lambda: _execute_legacy_architecture_row(math_id, inputs, material)
+    observed = _execute_legacy_architecture_row(
+        math_id,
+        golden.get("inputs"),
+        material,
     )
+    return _legacy_formula_mutation_observed(math_id, material, observed)
 
 
 def _execute_new_architecture_row(
@@ -2335,228 +2943,305 @@ def _expect_rejection(operation) -> bool:
     return False
 
 
-def _formula_mutation_observed(
+def _exact_value_error_message(operation: Callable[[], object]) -> str:
+    try:
+        operation()
+    except ValueError as exc:
+        return str(exc)
+    raise _EvidenceContractMismatch("invalid operation was accepted")
+
+
+class _EvidenceContractMismatch(ValueError):
+    pass
+
+
+def _execute_observed_mutation(
+    math_id: str,
+    material: Mapping[str, object],
+    baseline_inputs: Mapping[str, object],
+    mutated_inputs: object,
+    policy: _CompiledComparisonPolicyV1,
+    *,
+    mutation_family: str,
+) -> dict[str, object]:
+    baseline = _execute_new_architecture_row(math_id, baseline_inputs, material)
+    try:
+        mutated = _execute_new_architecture_row(math_id, mutated_inputs, material)
+    except ValueError as exc:
+        return {
+            "baseline_observed": _json_ready(baseline),
+            "mutation_family": mutation_family,
+            "mutation_outcome": "TYPED_REJECTION",
+            "mutation_exception_type": type(exc).__name__,
+            "mutation_exception_message": str(exc),
+            "mutation_observed": True,
+        }
+    changed = not _compiled_payload_matches(baseline, mutated, policy)
+    if not changed:
+        raise _EvidenceContractMismatch(
+            f"{math_id} {mutation_family} produced no observed result change"
+        )
+    return {
+        "baseline_observed": _json_ready(baseline),
+        "mutated_observed": _json_ready(mutated),
+        "mutation_family": mutation_family,
+        "mutation_outcome": "OBSERVED_OUTPUT_CHANGE",
+        "mutation_observed": True,
+    }
+
+
+def _observe_exact_negative_operation(
+    operation: Callable[[], object],
+    *,
+    math_id: str,
+    vector_id: object,
+    expected_name: object,
+    expected_message: object,
+) -> dict[str, object]:
+    if expected_name != "ValueError" or not isinstance(expected_message, str) or not expected_message:
+        raise _EvidenceContractMismatch(
+            f"{math_id} NEGATIVE exception contract is not exact"
+        )
+    try:
+        operation()
+    except ValueError as exc:
+        if expected_message not in str(exc):
+            raise _EvidenceContractMismatch(
+                f"{math_id} NEGATIVE reason mismatch: expected {expected_message!r}; "
+                f"observed {str(exc)!r}"
+            ) from exc
+        return {
+            "attempted_execution": True,
+            "exception_type": type(exc).__name__,
+            "failure_family": f"{math_id}::TRACKED_NEGATIVE_CONTRACT",
+            "message": str(exc),
+            "message_substring_matched": True,
+            "vector_id": vector_id,
+        }
+    raise _EvidenceContractMismatch(f"{math_id} NEGATIVE vector was accepted")
+
+
+def _exact_negative_evidence(
+    math_id: str,
+    material: Mapping[str, object],
+) -> dict[str, object]:
+    negative = material.get("negative")
+    if not isinstance(negative, Mapping):
+        raise _EvidenceContractMismatch(f"{math_id} NEGATIVE vector is absent")
+    return _observe_exact_negative_operation(
+        lambda: _execute_new_architecture_row(
+            math_id,
+            negative.get("inputs"),
+            material,
+        ),
+        math_id=math_id,
+        vector_id=negative.get("vector_id"),
+        expected_name=negative.get("expected_exception"),
+        expected_message=negative.get("expected_message_contains"),
+    )
+
+
+def _property_mutation_evidence(
+    math_id: str,
+    material: Mapping[str, object],
+    policy: _CompiledComparisonPolicyV1,
+) -> dict[str, object]:
+    property_row = material.get("property")
+    if not isinstance(property_row, Mapping):
+        raise _EvidenceContractMismatch(f"{math_id} property row is absent")
+    baseline = property_row.get("base_inputs")
+    mutation = property_row.get("mutation")
+    if not isinstance(baseline, Mapping) or not isinstance(mutation, Mapping):
+        raise _EvidenceContractMismatch(f"{math_id} property row is malformed")
+    mutated = _apply_declared_mutation(baseline, mutation)
+    evidence = _execute_observed_mutation(
+        math_id,
+        material,
+        baseline,
+        mutated,
+        policy,
+        mutation_family="TRACKED_PROPERTY_FORMULA_OR_PROCEDURE_MUTATION",
+    )
+    evidence.update(
+        {
+            "property_id": property_row.get("property_id"),
+            "required_outcome": property_row.get("required_outcome"),
+            "test_id": property_row.get("test_id"),
+        }
+    )
+    return evidence
+
+
+_PRECISION_INPUT_MUTATIONS: dict[str, tuple[tuple[object, ...], object, str]] = {
+    "MATH-16": (("expected_block_length",), 2.25, "BOOTSTRAP_BLOCK_LENGTH_PRECISION"),
+    "MATH-17": (("estimated_sharpe",), 0.500001, "SHARPE_INPUT_TOLERANCE"),
+    "MATH-18": (("candidate_estimated_sharpe",), 0.500001, "DSR_INPUT_TOLERANCE"),
+    "MATH-19": (("performance_matrix", 0, 0), 2.0, "RANK_AND_TIE_BOUNDARY"),
+    "MATH-20": (("embargo_duration",), 2.0, "HALF_OPEN_EMBARGO_BOUNDARY"),
+    "MATH-21": (("embargo_duration",), 1.5, "CPCV_PATH_EMBARGO_BOUNDARY"),
+    "MATH-22": (("logged_rows", 0, "reward"), 0.999999, "DR_REWARD_PRECISION"),
+    "MATH-23": (("logged_rows", 0, "reward"), 0.5, "IPS_WEIGHTED_REWARD_PRECISION"),
+    "MATH-24": (("weights", 0), 1.600001, "SNIPS_NORMALIZATION_PRECISION"),
+    "MATH-25": (("tau_grid", 1), 1.000001, "SWITCH_TAU_INEQUALITY_BOUNDARY"),
+    "MATH-46": (("diagonal", 0), 1.000001, "QUBO_COEFFICIENT_PRECISION"),
+    "MATH-47": (("diagonal", 0), 1.000001, "QUBO_ISING_PARITY_PRECISION"),
+    "MATH-48": (("model", "conversion_penalty_candidate"), 1.0, "CQM_PENALTY_ADEQUACY_BOUNDARY"),
+    "MATH-49": (("model", "pairwise_biases", 0, "bias"), -1.999999, "DQM_PAIRWISE_TIE_PRECISION"),
+}
+
+
+def _precision_boundary_mutation_evidence(
+    math_id: str,
+    material: Mapping[str, object],
+    policy: _CompiledComparisonPolicyV1,
+) -> dict[str, object]:
+    golden = material.get("golden")
+    boundary = material.get("boundary")
+    if (
+        not isinstance(golden, Mapping)
+        or not isinstance(golden.get("inputs"), Mapping)
+        or not isinstance(boundary, Mapping)
+    ):
+        raise _EvidenceContractMismatch(f"{math_id} precision/boundary material is absent")
+    path, replacement, label = _PRECISION_INPUT_MUTATIONS[math_id]
+    mutated = _mutated_copy(golden["inputs"], path, replacement)
+    evidence = _execute_observed_mutation(
+        math_id,
+        material,
+        golden["inputs"],
+        mutated,
+        policy,
+        mutation_family=label,
+    )
+    boundary_observed = _execute_new_architecture_row(
+        math_id,
+        boundary.get("inputs"),
+        material,
+    )
+    if not _compiled_payload_matches(boundary_observed, boundary.get("expected"), policy):
+        raise _EvidenceContractMismatch(f"{math_id} BOUNDARY vector comparison failed")
+    evidence.update(
+        {
+            "boundary_observed": _json_ready(boundary_observed),
+            "boundary_vector_id": boundary.get("vector_id"),
+            "expected_output_mutated": False,
+        }
+    )
+    return evidence
+
+
+_BINDING_MUTATIONS: dict[str, tuple[tuple[object, ...], object, str]] = {
+    "MATH-16": (("sign_convention",), "CANDIDATE_LOSS_MINUS_BENCHMARK_LOSS_NEGATED_TO_POSITIVE_IS_BETTER", "SIGN_CONVENTION"),
+    "MATH-17": (("independent_equivalent_observations",), 101, "SAMPLE_STATISTIC_BASIS"),
+    "MATH-18": (("effective_independent_trial_count",), 4.0, "MATERIAL_EFFECTIVE_TRIAL_BASIS"),
+    "MATH-19": (("strategy_ids",), ["S-B", "S-A", "S-C"], "STRATEGY_IDENTITY_PARTITION_BINDING"),
+    "MATH-20": (("sample_intervals", 0, "start"), -0.25, "HALF_OPEN_INTERVAL_TIME_BASIS"),
+    "MATH-21": (("aggregation_rule",), "CHERRY_PICK_ONE_PATH", "ALL_PATHS_AGGREGATION_RULE"),
+    "MATH-22": (("logged_rows", 0, "behavior_action_probabilities"), [0.0, 1.0], "BEHAVIOR_TARGET_SUPPORT_BINDING"),
+    "MATH-23": (("logged_rows", 0, "logged_action_index"), 1, "LOGGED_ACTION_BINDING"),
+    "MATH-24": (("rewards",), [1.0], "WEIGHT_REWARD_ALIGNMENT_BASIS"),
+    "MATH-25": (("tau_grid",), [2.0, 1.0], "TAU_GRID_AND_OUTER_FOLD_BINDING"),
+    "MATH-46": (("representation",), "UNKNOWN_QUBO_REPRESENTATION", "QUBO_REPRESENTATION_CONVENTION"),
+    "MATH-47": (("representation",), "UNKNOWN_BINARY_TO_SPIN_MAPPING", "BINARY_TO_SPIN_MAPPING_CONVENTION"),
+    "MATH-48": (("model", "objective_sense"), "MAXIMIZE", "CQM_SCHEMA_UNIT_DOMAIN_OBJECTIVE_SENSE"),
+    "MATH-49": (("model", "schema_version"), "QTT_DQM_GRAMMAR_V0", "DQM_SCHEMA_VARIABLE_CASE_PAIRWISE_BINDING"),
+}
+
+
+def _semantic_binding_mutation_evidence(
+    math_id: str,
+    material: Mapping[str, object],
+    policy: _CompiledComparisonPolicyV1,
+) -> dict[str, object]:
+    golden = material.get("golden")
+    if not isinstance(golden, Mapping) or not isinstance(golden.get("inputs"), Mapping):
+        raise _EvidenceContractMismatch(f"{math_id} binding material is absent")
+    if math_id == "MATH-47":
+        baseline = _execute_new_architecture_row(
+            math_id,
+            golden["inputs"],
+            material,
+        )
+        diagonal, upper, constant, _canonical = _canonical_qubo_from_current_inputs(
+            golden["inputs"]
+        )
+        offset, linear, interactions = _ising_from_qubo(diagonal, upper, constant)
+        drift_rows: list[dict[str, object]] = []
+        for assignment in product((0, 1), repeat=len(diagonal)):
+            wrong_spins = tuple(2 * value - 1 for value in assignment)
+            qubo = _qubo_energy(diagonal, upper, constant, assignment)
+            wrong_ising = _ising_energy(offset, linear, interactions, wrong_spins)
+            if not math.isclose(qubo, wrong_ising, rel_tol=0.0, abs_tol=1e-15):
+                drift_rows.append(
+                    {
+                        "binary_assignment": list(assignment),
+                        "drifted_spin_assignment": list(wrong_spins),
+                        "ising_energy": wrong_ising,
+                        "qubo_energy": qubo,
+                    }
+                )
+        if not drift_rows:
+            raise _EvidenceContractMismatch(
+                "MATH-47 mapping-convention drift did not break parity"
+            )
+        return {
+            "baseline_observed": _json_ready(baseline),
+            "input_binding_mutation_observed": True,
+            "mutated_observed": drift_rows,
+            "mutation_family": "BINARY_TO_SPIN_MAPPING_CONVENTION",
+            "mutation_observed": True,
+            "mutation_outcome": "OBSERVED_PARITY_REJECTION",
+            "representation_or_convention_mutation_observed_or_not_applicable": (
+                "OBSERVED::BINARY_TO_SPIN_MAPPING_CONVENTION"
+            ),
+            "source_binding_mutation_observed_or_not_applicable": (
+                "NOT_APPLICABLE_WITH_PROOF::PURE_TRACKED_VECTOR_HAS_NO_SOURCE_FIELD"
+            ),
+            "unit_or_basis_mutation_observed_or_not_applicable": (
+                "NOT_APPLICABLE_WITH_PROOF::NO_DISTINCT_UNIT_OR_BASIS_FIELD"
+            ),
+        }
+    path, replacement, label = _BINDING_MUTATIONS[math_id]
+    mutated = _mutated_copy(golden["inputs"], path, replacement)
+    evidence = _execute_observed_mutation(
+        math_id,
+        material,
+        golden["inputs"],
+        mutated,
+        policy,
+        mutation_family=label,
+    )
+    representation_ids = {"MATH-16", "MATH-20", "MATH-21", "MATH-25", "MATH-46", "MATH-47", "MATH-48", "MATH-49"}
+    unit_basis_ids = {"MATH-17", "MATH-18", "MATH-19", "MATH-20", "MATH-21", "MATH-22", "MATH-23", "MATH-24", "MATH-25", "MATH-48"}
+    evidence.update(
+        {
+            "input_binding_mutation_observed": True,
+            "unit_or_basis_mutation_observed_or_not_applicable": (
+                f"OBSERVED::{label}"
+                if math_id in unit_basis_ids
+                else "NOT_APPLICABLE_WITH_PROOF::NO_DISTINCT_UNIT_OR_BASIS_FIELD"
+            ),
+            "source_binding_mutation_observed_or_not_applicable": (
+                "NOT_APPLICABLE_WITH_PROOF::PURE_TRACKED_VECTOR_HAS_NO_SOURCE_FIELD"
+            ),
+            "representation_or_convention_mutation_observed_or_not_applicable": (
+                f"OBSERVED::{label}"
+                if math_id in representation_ids
+                else "NOT_APPLICABLE_WITH_PROOF::NO_DISTINCT_REPRESENTATION_FIELD"
+            ),
+        }
+    )
+    return evidence
+
+
+def _legacy_precision_or_boundary_mutation_observed(
     math_id: str,
     material: Mapping[str, object],
     observed: object,
 ) -> bool:
-    golden = material["golden"]
-    if not isinstance(golden, Mapping) or not isinstance(golden.get("inputs"), Mapping):
-        return False
-    baseline_inputs = golden["inputs"]
-    property_row = material.get("property")
-    if isinstance(property_row, Mapping):
-        property_inputs = property_row.get("base_inputs")
-        mutation = property_row.get("mutation")
-        if not isinstance(property_inputs, Mapping) or not isinstance(mutation, Mapping):
-            return False
-        baseline = _execute_new_architecture_row(math_id, property_inputs, material)
-        mutated_inputs = _apply_declared_mutation(property_inputs, mutation)
-        try:
-            mutated = _execute_new_architecture_row(math_id, mutated_inputs, material)
-        except ValueError:
-            return True
-        return not _payload_matches(baseline, mutated)
+    """Use a real legacy-input execution; never mutate stored expected output."""
 
-    explicit_paths: dict[str, tuple[tuple[object, ...], object]] = {
-        "MATH-46": (("diagonal", 0), 2.0),
-        "MATH-47": (("qubo", "diagonal", 0), 2.0),
-        "MATH-48": (("objective",), "maximize 2*x+y"),
-        "MATH-49": (("linear_biases", "A0"), 5.0),
-    }
-    path, replacement_value = explicit_paths[math_id]
-    mutated_inputs = _mutated_copy(baseline_inputs, path, replacement_value)
-    if math_id == "MATH-47":
-        qubo = baseline_inputs["qubo"]
-        mutated_qubo = mutated_inputs["qubo"]
-        if not isinstance(qubo, Mapping) or not isinstance(mutated_qubo, Mapping):
-            return False
-        diagonal, upper, offset = _upper_qubo(
-            qubo["diagonal"], qubo["upper_terms"], qubo["offset"]
-        )
-        mutated_diagonal, mutated_upper, mutated_offset = _upper_qubo(
-            mutated_qubo["diagonal"],
-            mutated_qubo["upper_terms"],
-            mutated_qubo["offset"],
-        )
-        baseline_ledger = tuple(
-            _qubo_energy(diagonal, upper, offset, assignment)
-            for assignment in product((0, 1), repeat=len(diagonal))
-        )
-        mutated_ledger = tuple(
-            _qubo_energy(
-                mutated_diagonal,
-                mutated_upper,
-                mutated_offset,
-                assignment,
-            )
-            for assignment in product((0, 1), repeat=len(mutated_diagonal))
-        )
-        return baseline_ledger != mutated_ledger
-    try:
-        mutated = _execute_new_architecture_row(math_id, mutated_inputs, material)
-    except ValueError:
-        return True
-    return not _payload_matches(observed, mutated)
-
-
-def _domain_rejection_observed(
-    math_id: str,
-    material: Mapping[str, object],
-) -> bool:
-    if math_id == "MATH-18":
-        golden = material["golden"]
-        assert isinstance(golden, Mapping)
-        inputs = golden.get("inputs")
-        assert isinstance(inputs, Mapping)
-        invalid = dict(inputs)
-        invalid["effective_independent_trial_count"] = 0.0
-        return _expect_rejection(
-            lambda: _execute_new_architecture_row(math_id, invalid, material)
-        )
-    negative = material.get("negative")
-    if isinstance(negative, Mapping):
-        negative_inputs = negative.get("inputs")
-        return _expect_rejection(
-            lambda: _execute_new_architecture_row(
-                math_id,
-                negative_inputs,
-                material,
-            )
-        )
-    golden = material["golden"]
-    assert isinstance(golden, Mapping)
-    inputs = golden["inputs"]
-    assert isinstance(inputs, Mapping)
-    mutations: dict[str, tuple[tuple[object, ...], object]] = {
-        "MATH-46": (("x", 0), 2),
-        "MATH-47": (("qubo", "upper_terms", 0, "j"), 0),
-        "MATH-48": (("constraints", 0), "x+y<=-1"),
-        "MATH-49": (("linear_biases", "A0"), float("nan")),
-    }
-    path, replacement_value = mutations[math_id]
-    invalid = _mutated_copy(inputs, path, replacement_value)
-    return _expect_rejection(
-        lambda: _execute_new_architecture_row(math_id, invalid, material)
-    )
-
-
-def _source_or_unit_rejection_observed(
-    math_id: str,
-    material: Mapping[str, object],
-) -> bool:
-    golden = material["golden"]
-    assert isinstance(golden, Mapping)
-    inputs = golden.get("inputs")
-    if not isinstance(inputs, Mapping) or not inputs:
-        return False
-    first = next(iter(inputs))
-    invalid = dict(inputs)
-    invalid[f"{first}__WRONG_UNIT_OR_SOURCE"] = invalid.pop(first)
-    return _expect_rejection(
-        lambda: _execute_new_architecture_row(math_id, invalid, material)
-    )
-
-
-def _locked_missing_row_result(math_id: str) -> object:
-    if math_id == "MATH-16":
-        result = _independent_math_16(
-            {
-                "loss_differentials": [[0.0, 0.0], [0.0, 0.0], [0.0, 0.0]],
-                "sign_convention": "BENCHMARK_LOSS_MINUS_CANDIDATE_LOSS_POSITIVE_IS_BETTER",
-                "seed": 1601,
-                "replicates": 16,
-                "expected_block_length": 1.0,
-                "alpha": 0.05,
-                "recenter_variant": "HANSEN_CONSISTENT_LOG_LOG_THRESHOLD",
-            }
-        )
-        if result["p_value"] != 1.0 or result["reject"] is not False:
-            raise ValueError("MATH-16 locked all-zero SPA fixture failed")
-        return {"p_value": result["p_value"], "reject_null": result["reject"]}
-    if math_id == "MATH-17":
-        result = _probabilistic_sharpe(0.5, 0.0, 100, 0.0, 3.0)
-        if not math.isclose(result["z_score"], 4.69041575982343, rel_tol=0.0, abs_tol=1e-12) or not math.isclose(
-            result["probabilistic_sharpe_ratio"],
-            0.9999986367476719,
-            rel_tol=0.0,
-            abs_tol=1e-12,
-        ):
-            raise ValueError("MATH-17 locked PSR fixture failed")
-        return result
-    if math_id == "MATH-18":
-        thresholds = tuple(_expected_maximum_sharpe(0.0, 1.0, count) for count in (1.0, 10.0, 100.0))
-        probabilities = tuple(
-            _probabilistic_sharpe(0.5, threshold, 100, 0.0, 3.0)[
-                "probabilistic_sharpe_ratio"
-            ]
-            for threshold in thresholds
-        )
-        if not all(0.0 <= value <= 1.0 for value in probabilities) or not (
-            probabilities[0] >= probabilities[1] >= probabilities[2]
-        ):
-            raise ValueError("MATH-18 trial-count monotonicity failed")
-        return {"trial_counts": [1, 10, 100], "probabilities": probabilities}
-    if math_id == "MATH-19":
-        relative_ranks = (0.25, 0.75, 0.40, 0.90)
-        pbo = sum(rank <= 0.5 for rank in relative_ranks) / len(relative_ranks)
-        if pbo != 0.5:
-            raise ValueError("MATH-19 locked PBO fixture failed")
-        return {"relative_ranks": relative_ranks, "pbo": pbo}
-    if math_id == "MATH-20":
-        intervals = _parsed_intervals(
-            [
-                {"sample_id": "0", "start": 0, "end": 3},
-                {"sample_id": "1", "start": 1, "end": 4},
-                {"sample_id": "2", "start": 5, "end": 6},
-                {"sample_id": "3", "start": 7, "end": 9},
-            ]
-        )
-        split = _purged_split(intervals, [1], 1.0)
-        if split["train_sample_ids"] != ["2", "3"]:
-            raise ValueError("MATH-20 locked purge/embargo fixture failed")
-        return {
-            "retained_training_indices": [2, 3],
-            "overlap_free": True,
-            "embargo_applied": True,
-        }
-    if math_id == "MATH-21":
-        split_count = len(tuple(combinations(range(4), 2)))
-        if split_count != 6:
-            raise ValueError("MATH-21 locked CPCV split fixture failed")
-        return {
-            "split_count": split_count,
-            "purge_embargo_applied": True,
-            "post_hoc_path_selection": False,
-        }
-    if math_id == "MATH-22":
-        observations = ((0.6, 0.5, 1.0, 0.4), (0.5, 0.4, 0.6, 0.4))
-        estimate = _mean(
-            tuple(direct + weight * (reward - logged_direct) for direct, weight, reward, logged_direct in observations)
-        )
-        if not math.isclose(estimate, 0.74, rel_tol=0.0, abs_tol=1e-12):
-            raise ValueError("MATH-22 locked DR fixture failed")
-        return {"doubly_robust_estimate": estimate}
-    if math_id == "MATH-23":
-        estimate = _mean((1.6 * 1.0, 0.4 * 0.0))
-        if not math.isclose(estimate, 0.8, rel_tol=0.0, abs_tol=1e-15):
-            raise ValueError("MATH-23 locked IPS fixture failed")
-        return {"ips": estimate}
-    if math_id == "MATH-24":
-        estimate = (1.6 * 1.0 + 0.4 * 0.0) / (1.6 + 0.4)
-        if not math.isclose(estimate, 0.8, rel_tol=0.0, abs_tol=1e-12):
-            raise ValueError("MATH-24 locked SNIPS fixture failed")
-        return {"snips": estimate}
-    if math_id == "MATH-25":
-        weights = (0.5, 3.0)
-        importance = [index for index, weight in enumerate(weights) if weight <= 1.0]
-        direct = [index for index, weight in enumerate(weights) if weight > 1.0]
-        if importance != [0] or direct != [1]:
-            raise ValueError("MATH-25 locked SWITCH fixture failed")
-        return {"importance_indices": importance, "direct_indices": direct}
-    if math_id in {"MATH-46", "MATH-47", "MATH-48", "MATH-49"}:
-        return {"tracked_legacy_golden_is_locked_fixture": True}
-    raise ValueError(f"no locked missing-row fixture: {math_id}")
+    return _legacy_formula_mutation_observed(math_id, material, observed)
 
 
 def _build_architecture_evidence(
@@ -2608,14 +3293,14 @@ def _build_architecture_evidence(
                         _legacy_domain_rejection_observed(math_id, tracked)
                     ),
                     precision_or_tolerance_mutation_observed=(
-                        _precision_mutation_rejected(
+                        _legacy_precision_or_boundary_mutation_observed(
                             math_id,
+                            tracked,
                             observed,
-                            golden.get("expected"),
                         )
                     ),
-                    source_or_unit_mutation_observed=(
-                        _legacy_source_or_unit_rejection_observed(math_id, tracked)
+                    semantic_binding_mutation_observed=(
+                        _legacy_semantic_binding_mutation_observed(math_id, tracked)
                     ),
                     production_import_count=production_import_count,
                     production_callable_count=production_callable_count,
@@ -2631,9 +3316,35 @@ def _build_architecture_evidence(
         golden = tracked["golden"]
         if not isinstance(golden, Mapping):
             raise ValueError(f"golden row is not a mapping: {math_id}")
+        policy = _compile_comparison_policy(
+            str(tracked["comparison_policy"]),
+            math_id=math_id,
+        )
         observed = _execute_new_architecture_row(math_id, golden.get("inputs"), tracked)
         expected = golden.get("expected")
-        comparison_passed = _payload_matches(observed, expected)
+        comparison_passed = _compiled_payload_matches(observed, expected, policy)
+        boundary = tracked.get("boundary")
+        if not isinstance(boundary, Mapping):
+            raise ValueError(f"boundary row is not a mapping: {math_id}")
+        boundary_observed = _execute_new_architecture_row(
+            math_id,
+            boundary.get("inputs"),
+            tracked,
+        )
+        if not _compiled_payload_matches(boundary_observed, boundary.get("expected"), policy):
+            raise ValueError(f"{math_id} BOUNDARY vector comparison failed")
+        negative_evidence = _exact_negative_evidence(math_id, tracked)
+        property_evidence = _property_mutation_evidence(math_id, tracked, policy)
+        precision_evidence = _precision_boundary_mutation_evidence(
+            math_id,
+            tracked,
+            policy,
+        )
+        binding_evidence = _semantic_binding_mutation_evidence(
+            math_id,
+            tracked,
+            policy,
+        )
         rows.append(
             _ArchitectureMathEvidenceV1(
                 math_id=math_id,
@@ -2641,30 +3352,55 @@ def _build_architecture_evidence(
                 golden_vector_id=str(tracked["golden_vector_id"]),
                 comparison_policy=str(tracked["comparison_policy"]),
                 independent_algorithm_id=(
-                    f"ARCHITECTURE_STANDARD_LIBRARY_RECONSTRUCTION::{math_id}::V1"
+                    f"ARCHITECTURE_STANDARD_LIBRARY_RECONSTRUCTION::{math_id}::V2"
                 ),
                 independent_observed_result={
-                    "tracked_golden": _json_ready(observed),
-                    "locked_fixture": _json_ready(
-                        _locked_missing_row_result(math_id)
-                    ),
+                    "boundary": _json_ready(boundary_observed),
+                    "golden": _json_ready(observed),
+                    "negative": _json_ready(negative_evidence),
+                    "precision_boundary_mutation": _json_ready(precision_evidence),
+                    "property_mutation": _json_ready(property_evidence),
+                    "semantic_binding_mutation": _json_ready(binding_evidence),
                 },
                 golden_comparison_passed=comparison_passed,
-                formula_or_procedure_mutation_observed=(
-                    _formula_mutation_observed(math_id, tracked, observed)
-                ),
-                domain_guard_rejection_observed=(
-                    _domain_rejection_observed(math_id, tracked)
-                ),
-                precision_or_tolerance_mutation_observed=(
-                    _precision_mutation_rejected(math_id, observed, expected)
-                ),
-                source_or_unit_mutation_observed=(
-                    _source_or_unit_rejection_observed(math_id, tracked)
-                ),
+                formula_or_procedure_mutation_observed=True,
+                domain_guard_rejection_observed=True,
+                precision_or_tolerance_mutation_observed=True,
+                semantic_binding_mutation_observed=True,
                 production_import_count=production_import_count,
                 production_callable_count=production_callable_count,
-                terminal_state="INDEPENDENT_ROW_RECONSTRUCTED",
+                terminal_state=(
+                    "INDEPENDENT_ROW_RECONSTRUCTED"
+                    if comparison_passed
+                    else "INDEPENDENT_ROW_HELD"
+                ),
+                boundary_vector_id=str(tracked["boundary_vector_id"]),
+                negative_vector_id=str(tracked["negative_vector_id"]),
+                property_id=str(tracked["property_id"]),
+                output_schema_version=str(tracked["output_schema_version"]),
+                compiled_comparison_policy=policy.operational_policy,
+                golden_observed_result=_json_ready(observed),
+                boundary_observed_result=_json_ready(boundary_observed),
+                negative_exception_evidence=_json_ready(negative_evidence),
+                property_mutation_result=_json_ready(property_evidence),
+                precision_boundary_mutation_result=_json_ready(precision_evidence),
+                semantic_binding_mutation_result=_json_ready(binding_evidence),
+                input_binding_mutation_observed=True,
+                unit_or_basis_mutation_observed_or_not_applicable=str(
+                    binding_evidence[
+                        "unit_or_basis_mutation_observed_or_not_applicable"
+                    ]
+                ),
+                source_binding_mutation_observed_or_not_applicable=str(
+                    binding_evidence[
+                        "source_binding_mutation_observed_or_not_applicable"
+                    ]
+                ),
+                representation_or_convention_mutation_observed_or_not_applicable=str(
+                    binding_evidence[
+                        "representation_or_convention_mutation_observed_or_not_applicable"
+                    ]
+                ),
             )
         )
     return tuple(rows)
@@ -2706,14 +3442,81 @@ def _evidence_contract_failures(
             failures.append(f"{row.math_id}: domain mutation missing")
         if not row.precision_or_tolerance_mutation_observed:
             failures.append(f"{row.math_id}: precision mutation missing")
-        if not row.source_or_unit_mutation_observed:
-            failures.append(f"{row.math_id}: source/unit mutation missing")
+        if not row.semantic_binding_mutation_observed:
+            failures.append(f"{row.math_id}: semantic binding mutation missing")
         if row.production_import_count != 0:
             failures.append(f"{row.math_id}: production import observed")
         if row.production_callable_count != 0:
             failures.append(f"{row.math_id}: production callable observed")
         if row.terminal_state != "INDEPENDENT_ROW_RECONSTRUCTED":
             failures.append(f"{row.math_id}: row is held")
+        if row.math_id in CURRENT_ST12B_ARCHITECTURE_MATH_IDS:
+            expected_policy = _compile_comparison_policy(
+                str(tracked["comparison_policy"]),
+                math_id=row.math_id,
+            )
+            if row.boundary_vector_id != tracked.get("boundary_vector_id"):
+                failures.append(f"{row.math_id}: wrong boundary vector ID")
+            if row.negative_vector_id != tracked.get("negative_vector_id"):
+                failures.append(f"{row.math_id}: wrong negative vector ID")
+            if row.property_id != tracked.get("property_id"):
+                failures.append(f"{row.math_id}: wrong property ID")
+            if row.output_schema_version != "ST12B_OUTPUT_V3_4":
+                failures.append(f"{row.math_id}: wrong current output schema version")
+            if row.compiled_comparison_policy != expected_policy.operational_policy:
+                failures.append(f"{row.math_id}: comparison policy was not compiled")
+            if row.golden_observed_result is None:
+                failures.append(f"{row.math_id}: current GOLDEN execution missing")
+            if row.boundary_observed_result is None:
+                failures.append(f"{row.math_id}: current BOUNDARY execution missing")
+            negative = row.negative_exception_evidence
+            if (
+                not isinstance(negative, Mapping)
+                or negative.get("attempted_execution") is not True
+                or negative.get("exception_type") != "ValueError"
+                or negative.get("message_substring_matched") is not True
+            ):
+                failures.append(f"{row.math_id}: exact NEGATIVE evidence missing")
+            property_result = row.property_mutation_result
+            if (
+                not isinstance(property_result, Mapping)
+                or property_result.get("mutation_observed") is not True
+            ):
+                failures.append(f"{row.math_id}: property execution evidence missing")
+            precision = row.precision_boundary_mutation_result
+            if (
+                not isinstance(precision, Mapping)
+                or precision.get("mutation_observed") is not True
+                or precision.get("expected_output_mutated") is not False
+                or precision.get("boundary_observed") is None
+            ):
+                failures.append(f"{row.math_id}: actual precision/boundary evidence missing")
+            binding = row.semantic_binding_mutation_result
+            if (
+                not isinstance(binding, Mapping)
+                or binding.get("mutation_observed") is not True
+                or row.input_binding_mutation_observed is not True
+            ):
+                failures.append(f"{row.math_id}: semantic binding evidence missing")
+            for label, value in (
+                ("unit/basis", row.unit_or_basis_mutation_observed_or_not_applicable),
+                ("source", row.source_binding_mutation_observed_or_not_applicable),
+                (
+                    "representation/convention",
+                    row.representation_or_convention_mutation_observed_or_not_applicable,
+                ),
+            ):
+                if not isinstance(value, str) or not value.startswith(
+                    ("OBSERVED::", "NOT_APPLICABLE_WITH_PROOF::")
+                ):
+                    failures.append(
+                        f"{row.math_id}: false or absent {label} mutation disposition"
+                    )
+            if ("tracked_legacy_" + "golden_is_locked_fixture") in json.dumps(
+                _json_ready(asdict(row)),
+                sort_keys=True,
+            ):
+                failures.append(f"{row.math_id}: stale legacy fixture evidence emitted")
     return tuple(failures)
 
 
@@ -2721,6 +3524,12 @@ def _exercise_evidence_contract_mutations(
     rows: tuple[_ArchitectureMathEvidenceV1, ...],
 ) -> int:
     first = rows[0]
+    current_index = len(EXPECTED_MATH_IDS)
+    current = rows[current_index]
+
+    def replace_current(value: _ArchitectureMathEvidenceV1) -> tuple[_ArchitectureMathEvidenceV1, ...]:
+        return (*rows[:current_index], value, *rows[current_index + 1 :])
+
     mutations: tuple[Sequence[_ArchitectureMathEvidenceV1], ...] = (
         rows[1:],
         (*rows, first),
@@ -2734,44 +3543,300 @@ def _exercise_evidence_contract_mutations(
         (replace(first, formula_or_procedure_mutation_observed=False), *rows[1:]),
         (replace(first, domain_guard_rejection_observed=False), *rows[1:]),
         (replace(first, precision_or_tolerance_mutation_observed=False), *rows[1:]),
-        (replace(first, source_or_unit_mutation_observed=False), *rows[1:]),
+        (replace(first, semantic_binding_mutation_observed=False), *rows[1:]),
         (replace(first, production_import_count=1), *rows[1:]),
         (replace(first, production_callable_count=1), *rows[1:]),
         (replace(first, independent_algorithm_id="H_AGGREGATE_VALIDATOR"), *rows[1:]),
+        replace_current(replace(current, boundary_vector_id="WRONG::BOUNDARY")),
+        replace_current(replace(current, negative_vector_id="WRONG::NEGATIVE")),
+        replace_current(replace(current, property_id="WRONG::PROPERTY")),
+        replace_current(replace(current, compiled_comparison_policy=None)),
+        replace_current(replace(current, golden_observed_result=None)),
+        replace_current(replace(current, boundary_observed_result=None)),
+        replace_current(replace(current, negative_exception_evidence=None)),
+        replace_current(replace(current, property_mutation_result=None)),
+        replace_current(replace(current, precision_boundary_mutation_result=None)),
+        replace_current(replace(current, semantic_binding_mutation_result=None)),
+        replace_current(replace(current, input_binding_mutation_observed=False)),
+        replace_current(
+            replace(
+                current,
+                source_binding_mutation_observed_or_not_applicable="RENAMED_KEY_ONLY",
+            )
+        ),
+        replace_current(
+            replace(
+                current,
+                precision_boundary_mutation_result={
+                    "boundary_observed": {},
+                    "expected_output_mutated": True,
+                    "mutation_observed": True,
+                },
+            )
+        ),
     )
     if any(not _evidence_contract_failures(candidate) for candidate in mutations):
         raise ValueError("architecture grouped evidence mutation escaped rejection")
-    return len(mutations)
+
+    material = _tracked_architecture_material()
+    for math_id in ("MATH-46", "MATH-47", "MATH-48", "MATH-49"):
+        row = next(item for item in rows if item.math_id == math_id)
+        stale_index = rows.index(row)
+        stale = (
+            *rows[:stale_index],
+            replace(
+                row,
+                oracle_id=f"ORACLE::{math_id}::LEGACY",
+                boundary_vector_id=None,
+                negative_vector_id=None,
+                property_id=None,
+            ),
+            *rows[stale_index + 1 :],
+        )
+        if not _evidence_contract_failures(stale):
+            raise ValueError(f"legacy material selection escaped for {math_id}")
+
+    try:
+        _observe_exact_negative_operation(
+            lambda: (_ for _ in ()).throw(ValueError("wrong ValueError")),
+            math_id="MATH-18",
+            vector_id="VECTOR::MATH-18::NEGATIVE",
+            expected_name="ValueError",
+            expected_message="effective independent trial count",
+        )
+    except _EvidenceContractMismatch:
+        pass
+    else:
+        raise ValueError("generic ValueError satisfied an exact negative contract")
+
+    operational_checks = 0
+    for math_id in CURRENT_ST12B_ARCHITECTURE_MATH_IDS:
+        _exact_negative_evidence(math_id, material[math_id])
+        operational_checks += 1
+
+    math_18 = material["MATH-18"]
+    golden_18 = math_18["golden"]
+    assert isinstance(golden_18, Mapping) and isinstance(golden_18.get("inputs"), Mapping)
+    invalid_18 = dict(golden_18["inputs"])
+    invalid_18["effective_independent_trial_count"] = 1.0
+    if "(1, material trial count]" not in _exact_value_error_message(
+        lambda: _execute_new_architecture_row("MATH-18", invalid_18, math_18)
+    ):
+        raise ValueError("MATH-18 effective trial count 1.0 was not rejected exactly")
+    operational_checks += 1
+
+    math_21 = material["MATH-21"]
+    golden_21 = math_21["golden"]
+    assert isinstance(golden_21, Mapping) and isinstance(golden_21.get("inputs"), Mapping)
+    invalid_21 = dict(golden_21["inputs"])
+    invalid_21["aggregation_rule"] = "NONEMPTY_BUT_WRONG"
+    if "ALL_PATHS_NO_CHERRY_PICKING" not in _exact_value_error_message(
+        lambda: _execute_new_architecture_row("MATH-21", invalid_21, math_21)
+    ):
+        raise ValueError("MATH-21 accepted a wrong nonempty aggregation token")
+    operational_checks += 1
+
+    math_46 = material["MATH-46"]
+    golden_46 = math_46["golden"]
+    assert isinstance(golden_46, Mapping)
+    full_symmetric_46 = {
+        "representation": "FULL_SYMMETRIC_ADAPTER_SUM_OFF_DIAGONAL_PAIRS",
+        "diagonal": [1.0, -2.0],
+        "upper_terms": [],
+        "full_symmetric_matrix": [[1.0, 1.0], [2.0, -2.0]],
+        "constant": 0.5,
+        "binary_assignment": [1, 0],
+    }
+    converted_46 = _execute_new_architecture_row(
+        "MATH-46",
+        full_symmetric_46,
+        math_46,
+    )
+    policy_46 = _compile_comparison_policy(
+        str(math_46["comparison_policy"]),
+        math_id="MATH-46",
+    )
+    if not _compiled_payload_matches(converted_46, golden_46.get("expected"), policy_46):
+        raise ValueError("MATH-46 full-symmetric adapter changed canonical QUBO meaning")
+    conflicting_46 = dict(full_symmetric_46)
+    conflicting_46["upper_terms"] = [{"i": 0, "j": 1, "value": 3.0}]
+    if "conflicts" not in _exact_value_error_message(
+        lambda: _execute_new_architecture_row("MATH-46", conflicting_46, math_46)
+    ):
+        raise ValueError("MATH-46 conflicting representations were accepted")
+    operational_checks += 2
+
+    math_47 = material["MATH-47"]
+    golden_47 = math_47["golden"]
+    assert isinstance(golden_47, Mapping)
+    output_47 = _execute_new_architecture_row("MATH-47", golden_47.get("inputs"), math_47)
+    drifted_47 = _mutated_copy(output_47, ("offset",), float(output_47["offset"]) + 1.0)
+    policy_47 = _compile_comparison_policy(str(math_47["comparison_policy"]), math_id="MATH-47")
+    if _compiled_payload_matches(drifted_47, golden_47.get("expected"), policy_47):
+        raise ValueError("MATH-47 sign/offset parity drift escaped comparison")
+    operational_checks += 1
+
+    math_48 = material["MATH-48"]
+    golden_48 = math_48["golden"]
+    assert isinstance(golden_48, Mapping) and isinstance(golden_48.get("inputs"), Mapping)
+    inadequate_48 = _mutated_copy(
+        golden_48["inputs"],
+        ("model", "conversion_penalty_candidate"),
+        1.0,
+    )
+    if "conversion penalty is inadequate" not in _exact_value_error_message(
+        lambda: _execute_new_architecture_row("MATH-48", inadequate_48, math_48)
+    ):
+        raise ValueError("MATH-48 inadequate conversion penalty was accepted")
+    if _execute_new_architecture_row("MATH-48", golden_48["inputs"], math_48).get(
+        "schema_version"
+    ) != "QTT_CQM_GRAMMAR_V1":
+        raise ValueError("MATH-48 current CQM grammar was not executed")
+    operational_checks += 2
+
+    math_49 = material["MATH-49"]
+    golden_49 = math_49["golden"]
+    assert isinstance(golden_49, Mapping) and isinstance(golden_49.get("inputs"), Mapping)
+    with_pairwise = _execute_new_architecture_row("MATH-49", golden_49["inputs"], math_49)
+    without_pairwise_inputs = _mutated_copy(
+        golden_49["inputs"],
+        ("model", "pairwise_biases"),
+        [],
+    )
+    without_pairwise = _execute_new_architecture_row(
+        "MATH-49",
+        without_pairwise_inputs,
+        math_49,
+    )
+    if with_pairwise["energy"] == without_pairwise["energy"]:
+        raise ValueError("MATH-49 pairwise interaction was ignored")
+    operational_checks += 1
+
+    source_text = Path(__file__).read_text(encoding="utf-8")
+    renamed_key_token = "WRONG_" + "UNIT_OR_SOURCE"
+    stale_fixture_token = "tracked_legacy_" + "golden_is_locked_fixture"
+    if renamed_key_token in source_text or stale_fixture_token in source_text:
+        raise ValueError("false renamed-key or legacy evidence design remains")
+    operational_checks += 1
+    return (
+        len(mutations)
+        + 4
+        + operational_checks
+        + _comparison_policy_self_rejections()
+        + _exercise_independence_guard_mutations()
+    )
+
+
+def _independent_source_boundary_counts_for_tree(
+    tree: ast.Module,
+) -> tuple[int, int]:
+    production_import_count = 0
+    production_callable_count = 0
+    forbidden_aliases: set[str] = set()
+
+    def production_module(name: str) -> bool:
+        return (
+            name == "qtt"
+            or name.startswith("qtt.")
+            or name == "src.qtt"
+            or name.startswith("src.qtt.")
+        )
+
+    def forbidden_symbol(name: str) -> bool:
+        lowered = name.lower()
+        return (
+            name == "IMPLEMENTATION_REGISTRY"
+            or name.startswith("TRANCHE_A_ORACLE_BY_MATH_ID")
+            or name.startswith("compute_math_")
+            or "production" in lowered and "registry" in lowered
+            or lowered in {
+                "validate_domain",
+                "validate_qku_computation_control_plane",
+                "import_module",
+            }
+        )
+
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            for alias in node.names:
+                if production_module(alias.name) or alias.name == "importlib" or alias.name.startswith("importlib."):
+                    production_import_count += 1
+        elif isinstance(node, ast.ImportFrom):
+            module = node.module or ""
+            if (
+                node.level > 0
+                or production_module(module)
+                or module == "src"
+                and any(alias.name == "qtt" for alias in node.names)
+                or module == "importlib"
+                or module.startswith("importlib.")
+            ):
+                production_import_count += 1
+        elif isinstance(node, ast.Assign):
+            value_name = ""
+            if isinstance(node.value, ast.Name):
+                value_name = node.value.id
+            elif isinstance(node.value, ast.Attribute):
+                value_name = node.value.attr
+            if forbidden_symbol(value_name):
+                forbidden_aliases.update(
+                    target.id for target in node.targets if isinstance(target, ast.Name)
+                )
+        elif isinstance(node, ast.Call):
+            if isinstance(node.func, ast.Name):
+                production_callable_count += int(
+                    node.func.id in {"eval", "exec", "__import__"}
+                    or forbidden_symbol(node.func.id)
+                    or node.func.id in forbidden_aliases
+                )
+            elif isinstance(node.func, ast.Attribute):
+                production_callable_count += int(
+                    forbidden_symbol(node.func.attr)
+                    or (
+                        isinstance(node.func.value, ast.Name)
+                        and node.func.value.id == "importlib"
+                    )
+                )
+        elif isinstance(node, ast.Name):
+            production_callable_count += int(
+                node.id == "IMPLEMENTATION_REGISTRY"
+                or node.id.startswith("TRANCHE_A_ORACLE_BY_MATH_ID")
+            )
+        elif isinstance(node, ast.Attribute):
+            production_callable_count += int(
+                node.attr == "IMPLEMENTATION_REGISTRY"
+                or node.attr.startswith("TRANCHE_A_ORACLE_BY_MATH_ID")
+            )
+    return production_import_count, production_callable_count
 
 
 def _independent_source_boundary_counts() -> tuple[int, int]:
     tree = ast.parse(Path(__file__).read_text(encoding="utf-8"), filename=__file__)
-    production_import_count = 0
-    for node in ast.walk(tree):
-        if isinstance(node, ast.Import):
-            production_import_count += sum(
-                alias.name == "qtt" or alias.name.startswith("qtt.")
-                for alias in node.names
-            )
-        elif isinstance(node, ast.ImportFrom):
-            module = node.module or ""
-            production_import_count += int(
-                module == "qtt" or module.startswith("qtt.")
-            )
-    production_callable_count = sum(
-        isinstance(node, ast.Call)
-        and (
-            isinstance(node.func, ast.Name)
-            and (
-                node.func.id.startswith("compute_math_")
-                or node.func.id == "IMPLEMENTATION_REGISTRY"
-            )
-            or isinstance(node.func, ast.Attribute)
-            and node.func.attr.startswith("compute_math_")
-        )
-        for node in ast.walk(tree)
+    return _independent_source_boundary_counts_for_tree(tree)
+
+
+def _exercise_independence_guard_mutations() -> int:
+    prohibited_sources = (
+        "import qtt",
+        "import src.qtt.validation",
+        "from src import qtt",
+        "from qtt.foo import compute_math_46\ncompute_math_46()",
+        "from src.qtt.foo import validate_domain\nvalidate_domain()",
+        "from .production import oracle",
+        "import importlib\nimportlib.import_module('src.qtt.validation')",
+        "eval('1 + 1')",
+        "exec('answer = 2')",
+        "__import__('qtt')",
+        "runner = compute_math_46\nrunner()",
+        "registry = IMPLEMENTATION_REGISTRY",
     )
-    return production_import_count, production_callable_count
+    for source in prohibited_sources:
+        counts = _independent_source_boundary_counts_for_tree(ast.parse(source))
+        if counts == (0, 0):
+            raise ValueError(
+                f"independence guard accepted prohibited source: {source!r}"
+            )
+    return len(prohibited_sources)
 
 
 def independently_reconstruct() -> dict[str, bool]:
@@ -3299,7 +4364,7 @@ def main() -> int:
         f"formula_mutations={sum(row.formula_or_procedure_mutation_observed for row in evidence_rows)} "
         f"domain_mutations={sum(row.domain_guard_rejection_observed for row in evidence_rows)} "
         f"precision_mutations={sum(row.precision_or_tolerance_mutation_observed for row in evidence_rows)} "
-        f"source_unit_mutations={sum(row.source_or_unit_mutation_observed for row in evidence_rows)} "
+        f"semantic_binding_mutations={sum(row.semantic_binding_mutation_observed for row in evidence_rows)} "
         f"grouped_contract_mutations={grouped_mutation_count} "
         f"production_imports={production_import_count} "
         f"production_calls={production_callable_count}"
