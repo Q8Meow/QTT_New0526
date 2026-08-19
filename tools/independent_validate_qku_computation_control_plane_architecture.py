@@ -11,7 +11,7 @@ import ast
 from collections import Counter
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import asdict, dataclass, replace
-from decimal import Context, Decimal, ROUND_HALF_EVEN, localcontext
+from decimal import Context, Decimal, DecimalException, ROUND_HALF_EVEN, localcontext
 from itertools import combinations, product
 import json
 import math
@@ -250,6 +250,9 @@ class _ArchitectureMathEvidenceV1:
     compiled_absolute_tolerance_or_not_applicable: str
     comparator_registry_version: object
     comparator_authority_classification: object
+    numeric_text_leaf_paths: object
+    numeric_text_representation: object
+    comparison_execution_trace: object
     comparison_policy_execution_observed: bool
     golden_observation: object
     boundary_observation: object
@@ -552,10 +555,26 @@ class _CompiledComparisonPolicyV1:
     declared_policy: str
     compiled_comparison_mode: str
     operational_policy: str
-    absolute_tolerance: float | None
+    absolute_tolerance: Decimal | None
     exact_mapping_order: bool
     exact_decimal_representation: bool
     structural_rules: tuple[str, ...]
+    numeric_text_leaf_paths: tuple[tuple[str, ...], ...]
+    numeric_text_representation: str
+
+
+@dataclass
+class _ComparisonExecutionTraceV1:
+    structural_mapping_checks: int = 0
+    structural_sequence_checks: int = 0
+    exact_decimal_text_leaf_checks: int = 0
+    precision_34_exact_leaf_checks: int = 0
+    numeric_float_tolerance_leaf_checks: int = 0
+    numeric_text_tolerance_leaf_checks: int = 0
+    exact_order_or_index_checks: int = 0
+    boolean_leaf_checks: int = 0
+    exact_scalar_checks: int = 0
+    declared_mode_branch_reached: bool = False
 
 
 @dataclass(frozen=True)
@@ -566,11 +585,14 @@ class _ArchitectureComparisonResultV1:
     compiled_comparison_mode: str
     compiled_absolute_tolerance_or_not_applicable: str
     structural_rules: tuple[str, ...]
+    numeric_text_leaf_paths: tuple[tuple[str, ...], ...]
+    numeric_text_representation: str
     comparator_registry_version: str
+    execution_trace: _ComparisonExecutionTraceV1
     comparison_policy_execution_observed: bool
 
 
-_COMPARATOR_REGISTRY_VERSION = "ST12_ARCHITECTURE_COMPARATOR_REGISTRY_V2"
+_COMPARATOR_REGISTRY_VERSION = "ST12_ARCHITECTURE_COMPARATOR_REGISTRY_V3"
 _COMPARATOR_AUTHORITY_CLASSIFICATION = (
     "INDEPENDENT_VALIDATOR_FROZEN_COMPARATOR_AUTHORITY"
 )
@@ -578,6 +600,8 @@ _CURRENT_DECLARED_COMPARISON_POLICY = (
     "CANONICAL_STRUCTURE_WITH_DECLARED_NUMERIC_TOLERANCE"
 )
 _COMPARATOR_TOLERANCE_NOT_APPLICABLE = "NOT_APPLICABLE"
+_COMPARATOR_NUMERIC_TEXT_REPRESENTATION_NOT_APPLICABLE = "NOT_APPLICABLE"
+_CANONICAL_FIXED_DECIMAL_TEXT = "CANONICAL_FIXED_DECIMAL_TEXT"
 _BASE_STRUCTURAL_RULES = (
     "EXACT_NESTED_FIELD_SET",
     "EXACT_NESTED_VALUE_TYPE",
@@ -586,12 +610,64 @@ _BASE_STRUCTURAL_RULES = (
 
 
 @dataclass(frozen=True)
-class _ArchitectureComparatorRegistryRowV2:
+class _ComparisonPolicyModeCompatibilityV1:
+    tracked_comparison_policy: str
+    compiled_comparison_mode: str
+    allowed_tolerances: tuple[str, ...]
+
+
+_COMPARISON_POLICY_MODE_COMPATIBILITY = MappingProxyType(
+    {
+        "EXACT_DECIMAL": _ComparisonPolicyModeCompatibilityV1(
+            "EXACT_DECIMAL",
+            "EXACT_DECIMAL",
+            (_COMPARATOR_TOLERANCE_NOT_APPLICABLE,),
+        ),
+        "DECIMAL_CONTEXT_PRECISION_34_EXACT_RESULT": (
+            _ComparisonPolicyModeCompatibilityV1(
+                "DECIMAL_CONTEXT_PRECISION_34_EXACT_RESULT",
+                "DECIMAL_CONTEXT_PRECISION_34_EXACT_RESULT",
+                (_COMPARATOR_TOLERANCE_NOT_APPLICABLE,),
+            )
+        ),
+        "ABS_TOL_1E-15": _ComparisonPolicyModeCompatibilityV1(
+            "ABS_TOL_1E-15",
+            "ABSOLUTE_TOLERANCE",
+            ("1E-15",),
+        ),
+        "ABS_TOL_1E-12": _ComparisonPolicyModeCompatibilityV1(
+            "ABS_TOL_1E-12",
+            "ABSOLUTE_TOLERANCE",
+            ("1E-12",),
+        ),
+        "EXACT_ORDER_AND_INDEX_SET": _ComparisonPolicyModeCompatibilityV1(
+            "EXACT_ORDER_AND_INDEX_SET",
+            "EXACT_ORDER_AND_INDEX_SET",
+            (_COMPARATOR_TOLERANCE_NOT_APPLICABLE,),
+        ),
+        "BOOLEAN_INVARIANTS": _ComparisonPolicyModeCompatibilityV1(
+            "BOOLEAN_INVARIANTS",
+            "BOOLEAN_INVARIANTS",
+            (_COMPARATOR_TOLERANCE_NOT_APPLICABLE,),
+        ),
+        _CURRENT_DECLARED_COMPARISON_POLICY: _ComparisonPolicyModeCompatibilityV1(
+            _CURRENT_DECLARED_COMPARISON_POLICY,
+            "STRUCTURAL_NESTED_NUMERIC",
+            ("1E-15", "1E-12"),
+        ),
+    }
+)
+
+
+@dataclass(frozen=True)
+class _ArchitectureComparatorRegistryRowV3:
     math_id: str
     tracked_comparison_policy: str
     compiled_comparison_mode: str
     absolute_tolerance_or_not_applicable: str
     structural_rules: tuple[str, ...]
+    numeric_text_leaf_paths: tuple[tuple[str, ...], ...]
+    numeric_text_representation: str
     registry_version: str
     authority_classification: str
 
@@ -602,13 +678,19 @@ def _architecture_comparator_row(
     mode: str,
     tolerance: str = _COMPARATOR_TOLERANCE_NOT_APPLICABLE,
     *additional_structural_rules: str,
-) -> _ArchitectureComparatorRegistryRowV2:
-    return _ArchitectureComparatorRegistryRowV2(
+    numeric_text_leaf_paths: tuple[tuple[str, ...], ...] = (),
+    numeric_text_representation: str = (
+        _COMPARATOR_NUMERIC_TEXT_REPRESENTATION_NOT_APPLICABLE
+    ),
+) -> _ArchitectureComparatorRegistryRowV3:
+    return _ArchitectureComparatorRegistryRowV3(
         math_id=math_id,
         tracked_comparison_policy=tracked_policy,
         compiled_comparison_mode=mode,
         absolute_tolerance_or_not_applicable=tolerance,
         structural_rules=(*_BASE_STRUCTURAL_RULES, *additional_structural_rules),
+        numeric_text_leaf_paths=numeric_text_leaf_paths,
+        numeric_text_representation=numeric_text_representation,
         registry_version=_COMPARATOR_REGISTRY_VERSION,
         authority_classification=_COMPARATOR_AUTHORITY_CLASSIFICATION,
     )
@@ -617,7 +699,14 @@ def _architecture_comparator_row(
 _ARCHITECTURE_COMPARATOR_REGISTRY = MappingProxyType(
     {
         "MATH-01": _architecture_comparator_row("MATH-01", "EXACT_DECIMAL", "EXACT_DECIMAL", _COMPARATOR_TOLERANCE_NOT_APPLICABLE, "EXACT_DECIMAL_REPRESENTATION"),
-        "MATH-02": _architecture_comparator_row("MATH-02", "ABS_TOL_1E-15", "ABSOLUTE_TOLERANCE", "1E-15"),
+        "MATH-02": _architecture_comparator_row(
+            "MATH-02",
+            "ABS_TOL_1E-15",
+            "ABSOLUTE_TOLERANCE",
+            "1E-15",
+            numeric_text_leaf_paths=(("edge_probability",),),
+            numeric_text_representation=_CANONICAL_FIXED_DECIMAL_TEXT,
+        ),
         "MATH-03": _architecture_comparator_row("MATH-03", "EXACT_DECIMAL", "EXACT_DECIMAL", _COMPARATOR_TOLERANCE_NOT_APPLICABLE, "EXACT_DECIMAL_REPRESENTATION"),
         "MATH-04": _architecture_comparator_row("MATH-04", "EXACT_DECIMAL", "EXACT_DECIMAL", _COMPARATOR_TOLERANCE_NOT_APPLICABLE, "EXACT_DECIMAL_REPRESENTATION"),
         "MATH-05": _architecture_comparator_row("MATH-05", "DECIMAL_CONTEXT_PRECISION_34_EXACT_RESULT", "DECIMAL_CONTEXT_PRECISION_34_EXACT_RESULT", _COMPARATOR_TOLERANCE_NOT_APPLICABLE, "EXACT_DECIMAL_REPRESENTATION", "DECIMAL_CONTEXT_PRECISION_34"),
@@ -649,8 +738,27 @@ _ARCHITECTURE_COMPARATOR_REGISTRY = MappingProxyType(
 )
 
 
+def _policy_mode_compatibility_failures(
+    entry: _ArchitectureComparatorRegistryRowV3,
+) -> tuple[str, ...]:
+    compatibility = _COMPARISON_POLICY_MODE_COMPATIBILITY.get(
+        entry.tracked_comparison_policy
+    )
+    if compatibility is None:
+        return (f"{entry.math_id}: unknown tracked comparison policy",)
+    failures: list[str] = []
+    if entry.compiled_comparison_mode != compatibility.compiled_comparison_mode:
+        failures.append(f"{entry.math_id}: policy/mode compatibility mismatch")
+    if (
+        entry.absolute_tolerance_or_not_applicable
+        not in compatibility.allowed_tolerances
+    ):
+        failures.append(f"{entry.math_id}: policy/tolerance compatibility mismatch")
+    return tuple(failures)
+
+
 def _comparator_registry_failures(
-    registry: Mapping[str, _ArchitectureComparatorRegistryRowV2],
+    registry: Mapping[str, _ArchitectureComparatorRegistryRowV3],
     tracked_material: Mapping[str, Mapping[str, object]] | None = None,
 ) -> tuple[str, ...]:
     failures: list[str] = []
@@ -670,6 +778,18 @@ def _comparator_registry_failures(
             failures.append(f"{math_id}: comparator registry version drift")
         if entry.authority_classification != _COMPARATOR_AUTHORITY_CLASSIFICATION:
             failures.append(f"{math_id}: comparator authority drift")
+        failures.extend(_policy_mode_compatibility_failures(entry))
+        if math_id == "MATH-02":
+            if entry.numeric_text_leaf_paths != (("edge_probability",),):
+                failures.append("MATH-02: numeric-text path registration differs")
+            if entry.numeric_text_representation != _CANONICAL_FIXED_DECIMAL_TEXT:
+                failures.append("MATH-02: numeric-text representation differs")
+        elif entry.numeric_text_leaf_paths:
+            failures.append(f"{math_id}: unauthorized numeric-text tolerance path")
+        elif entry.numeric_text_representation != (
+            _COMPARATOR_NUMERIC_TEXT_REPRESENTATION_NOT_APPLICABLE
+        ):
+            failures.append(f"{math_id}: unauthorized numeric-text representation")
         if tracked_material is not None:
             tracked = tracked_material.get(math_id)
             if tracked is None or entry.tracked_comparison_policy != str(
@@ -689,13 +809,23 @@ def _compile_comparison_policy(
         raise ValueError(f"unknown architecture comparator row: {math_id}")
     if authority.tracked_comparison_policy != declared_policy:
         raise ValueError(f"tracked comparison policy mismatch: {math_id}")
+    compatibility = _COMPARISON_POLICY_MODE_COMPATIBILITY.get(declared_policy)
+    if compatibility is None:
+        raise ValueError(f"unknown tracked comparison policy: {math_id}")
+    if authority.compiled_comparison_mode != compatibility.compiled_comparison_mode:
+        raise ValueError(f"policy/mode compatibility mismatch: {math_id}")
+    if (
+        authority.absolute_tolerance_or_not_applicable
+        not in compatibility.allowed_tolerances
+    ):
+        raise ValueError(f"policy/tolerance compatibility mismatch: {math_id}")
     tolerance_text = authority.absolute_tolerance_or_not_applicable
     if tolerance_text == _COMPARATOR_TOLERANCE_NOT_APPLICABLE:
         tolerance = None
     elif tolerance_text == "1E-15":
-        tolerance = 1e-15
+        tolerance = Decimal("1E-15")
     elif tolerance_text == "1E-12":
-        tolerance = 1e-12
+        tolerance = Decimal("1E-12")
     else:
         raise ValueError(f"unknown comparison tolerance: {math_id}")
     allowed_modes = {
@@ -721,39 +851,168 @@ def _compile_comparison_policy(
             "EXACT_DECIMAL_REPRESENTATION" in authority.structural_rules
         ),
         structural_rules=authority.structural_rules,
+        numeric_text_leaf_paths=authority.numeric_text_leaf_paths,
+        numeric_text_representation=authority.numeric_text_representation,
     )
+
+
+def _canonical_numeric_text_decimal(value: object) -> Decimal | None:
+    if not isinstance(value, str):
+        return None
+    try:
+        parsed = Decimal(value)
+        if not parsed.is_finite() or _canonical_decimal_text(parsed) != value:
+            return None
+    except DecimalException:
+        return None
+    return parsed
+
+
+def _trace_count(
+    trace: _ComparisonExecutionTraceV1 | Mapping[str, object],
+    field_name: str,
+) -> int:
+    value = (
+        trace.get(field_name)
+        if isinstance(trace, Mapping)
+        else getattr(trace, field_name, None)
+    )
+    return value if isinstance(value, int) and not isinstance(value, bool) else 0
+
+
+def _trace_declared_mode_reached(
+    compiled_mode: str,
+    trace: _ComparisonExecutionTraceV1 | Mapping[str, object],
+) -> bool:
+    numeric_tolerance_checks = _trace_count(
+        trace, "numeric_float_tolerance_leaf_checks"
+    ) + _trace_count(trace, "numeric_text_tolerance_leaf_checks")
+    if compiled_mode == "EXACT_DECIMAL":
+        return _trace_count(trace, "exact_decimal_text_leaf_checks") > 0
+    if compiled_mode == "DECIMAL_CONTEXT_PRECISION_34_EXACT_RESULT":
+        return _trace_count(trace, "precision_34_exact_leaf_checks") > 0
+    if compiled_mode == "ABSOLUTE_TOLERANCE":
+        return numeric_tolerance_checks > 0
+    if compiled_mode == "EXACT_ORDER_AND_INDEX_SET":
+        return _trace_count(trace, "exact_order_or_index_checks") > 0
+    if compiled_mode == "BOOLEAN_INVARIANTS":
+        return _trace_count(trace, "boolean_leaf_checks") > 0
+    if compiled_mode == "STRUCTURAL_NESTED_NUMERIC":
+        structural_checks = _trace_count(
+            trace, "structural_mapping_checks"
+        ) + _trace_count(trace, "structural_sequence_checks")
+        return structural_checks > 0 and numeric_tolerance_checks > 0
+    return False
 
 
 def _compiled_payload_matches(
     observed: object,
     expected: object,
     policy: _CompiledComparisonPolicyV1,
+    *,
+    path: tuple[object, ...],
+    trace: _ComparisonExecutionTraceV1,
 ) -> bool:
     if isinstance(expected, Mapping):
+        trace.structural_mapping_checks += 1
         if not isinstance(observed, Mapping) or type(observed) is not type(expected):
             return False
         if policy.exact_mapping_order:
+            trace.exact_order_or_index_checks += 1
             if tuple(observed) != tuple(expected):
                 return False
         elif set(observed) != set(expected):
             return False
         return all(
-            _compiled_payload_matches(observed[key], expected[key], policy)
+            _compiled_payload_matches(
+                observed[key],
+                expected[key],
+                policy,
+                path=(*path, key),
+                trace=trace,
+            )
             for key in expected
         )
     if isinstance(expected, list | tuple):
+        trace.structural_sequence_checks += 1
+        if policy.compiled_comparison_mode == "EXACT_ORDER_AND_INDEX_SET":
+            trace.exact_order_or_index_checks += 1
         return (
             isinstance(observed, list | tuple)
             and type(observed) is type(expected)
             and len(observed) == len(expected)
             and all(
-                _compiled_payload_matches(left, right, policy)
-                for left, right in zip(observed, expected, strict=True)
+                _compiled_payload_matches(
+                    left,
+                    right,
+                    policy,
+                    path=(*path, index),
+                    trace=trace,
+                )
+                for index, (left, right) in enumerate(
+                    zip(observed, expected, strict=True)
+                )
             )
         )
+    if path in policy.numeric_text_leaf_paths:
+        trace.numeric_text_tolerance_leaf_checks += 1
+        if policy.numeric_text_representation != _CANONICAL_FIXED_DECIMAL_TEXT:
+            return False
+        observed_decimal = _canonical_numeric_text_decimal(observed)
+        expected_decimal = _canonical_numeric_text_decimal(expected)
+        return (
+            observed_decimal is not None
+            and expected_decimal is not None
+            and policy.absolute_tolerance is not None
+            and abs(observed_decimal - expected_decimal)
+            <= policy.absolute_tolerance
+        )
+    if policy.compiled_comparison_mode == "EXACT_DECIMAL" and isinstance(
+        expected, str | Decimal
+    ):
+        trace.exact_decimal_text_leaf_checks += 1
+        if isinstance(expected, str):
+            observed_decimal = _canonical_numeric_text_decimal(observed)
+            expected_decimal = _canonical_numeric_text_decimal(expected)
+            return (
+                observed_decimal is not None
+                and expected_decimal is not None
+                and observed_decimal == expected_decimal
+                and observed == expected
+            )
+        return (
+            isinstance(observed, Decimal)
+            and observed == expected
+            and (
+                not policy.exact_decimal_representation
+                or observed.as_tuple() == expected.as_tuple()
+            )
+        )
+    if (
+        policy.compiled_comparison_mode
+        == "DECIMAL_CONTEXT_PRECISION_34_EXACT_RESULT"
+        and isinstance(expected, str | Decimal)
+    ):
+        trace.precision_34_exact_leaf_checks += 1
+        if isinstance(expected, str):
+            observed_decimal = _canonical_numeric_text_decimal(observed)
+            expected_decimal = _canonical_numeric_text_decimal(expected)
+            return (
+                observed_decimal is not None
+                and expected_decimal is not None
+                and observed_decimal == expected_decimal
+                and observed == expected
+            )
+        return (
+            isinstance(observed, Decimal)
+            and observed == expected
+            and observed.as_tuple() == expected.as_tuple()
+        )
     if isinstance(expected, bool):
+        trace.boolean_leaf_checks += 1
         return isinstance(observed, bool) and observed is expected
     if isinstance(expected, Decimal):
+        trace.exact_decimal_text_leaf_checks += 1
         return (
             isinstance(observed, Decimal)
             and observed == expected
@@ -773,13 +1032,16 @@ def _compiled_payload_matches(
         if not math.isfinite(float(expected)) or not math.isfinite(float(observed)):
             return False
         if policy.absolute_tolerance is None:
+            trace.exact_scalar_checks += 1
             return type(observed) is type(expected) and observed == expected
+        trace.numeric_float_tolerance_leaf_checks += 1
         return math.isclose(
             float(observed),
             float(expected),
             rel_tol=0.0,
-            abs_tol=policy.absolute_tolerance,
+            abs_tol=float(policy.absolute_tolerance),
         )
+    trace.exact_scalar_checks += 1
     return type(observed) is type(expected) and observed == expected
 
 
@@ -795,17 +1057,35 @@ def _compare_architecture_payload(
         math_id=math_id,
     )
     authority = _ARCHITECTURE_COMPARATOR_REGISTRY[math_id]
+    trace = _ComparisonExecutionTraceV1()
+    comparison_passed = _compiled_payload_matches(
+        observed,
+        expected,
+        policy,
+        path=(),
+        trace=trace,
+    )
+    comparison_policy_execution_observed = _trace_declared_mode_reached(
+        policy.compiled_comparison_mode,
+        trace,
+    )
+    trace.declared_mode_branch_reached = comparison_policy_execution_observed
     return _ArchitectureComparisonResultV1(
         math_id=math_id,
-        comparison_passed=_compiled_payload_matches(observed, expected, policy),
+        comparison_passed=comparison_passed,
         tracked_comparison_policy=tracked_comparison_policy,
         compiled_comparison_mode=policy.compiled_comparison_mode,
         compiled_absolute_tolerance_or_not_applicable=(
             authority.absolute_tolerance_or_not_applicable
         ),
         structural_rules=policy.structural_rules,
+        numeric_text_leaf_paths=policy.numeric_text_leaf_paths,
+        numeric_text_representation=policy.numeric_text_representation,
         comparator_registry_version=authority.registry_version,
-        comparison_policy_execution_observed=True,
+        execution_trace=trace,
+        comparison_policy_execution_observed=(
+            comparison_policy_execution_observed
+        ),
     )
 
 
@@ -852,8 +1132,94 @@ def _legacy_tolerance_window_false_acceptance_count(
     return false_acceptances
 
 
+def _math_02_numeric_text_comparator_matrix(
+    material: Mapping[str, Mapping[str, object]],
+) -> Mapping[str, bool]:
+    tracked_policy = str(material["MATH-02"]["comparison_policy"])
+
+    def compare(observed: object, expected: object) -> _ArchitectureComparisonResultV1:
+        return _compare_architecture_payload(
+            "MATH-02",
+            {"edge_probability": observed},
+            {"edge_probability": expected},
+            tracked_comparison_policy=tracked_policy,
+        )
+
+    within = compare("0.0600000000000005", "0.06")
+    outside = compare("0.060000000000002", "0.06")
+    trailing_zero = compare("0.060", "0.06")
+    exponent = compare("6E-2", "0.06")
+    float_coercion = compare(0.06, "0.06")
+    invalid_text = compare("not-a-number", "0.06")
+    no_tolerance_leaf = _compare_architecture_payload(
+        "MATH-02",
+        {"unrelated": "same"},
+        {"unrelated": "same"},
+        tracked_comparison_policy=tracked_policy,
+    )
+    missing_registration = dict(_ARCHITECTURE_COMPARATOR_REGISTRY)
+    missing_registration["MATH-02"] = replace(
+        missing_registration["MATH-02"],
+        numeric_text_leaf_paths=(),
+        numeric_text_representation=(
+            _COMPARATOR_NUMERIC_TEXT_REPRESENTATION_NOT_APPLICABLE
+        ),
+    )
+    wrong_tolerance = dict(_ARCHITECTURE_COMPARATOR_REGISTRY)
+    wrong_tolerance["MATH-02"] = replace(
+        wrong_tolerance["MATH-02"],
+        absolute_tolerance_or_not_applicable="1E-12",
+    )
+    incompatible_mode = replace(
+        _ARCHITECTURE_COMPARATOR_REGISTRY["MATH-02"],
+        compiled_comparison_mode="EXACT_DECIMAL",
+    )
+    return MappingProxyType(
+        {
+            "within_tolerance_canonical_numeric_text_accepted": (
+                within.comparison_passed
+                and within.comparison_policy_execution_observed
+                and within.execution_trace.numeric_text_tolerance_leaf_checks == 1
+            ),
+            "outside_tolerance_canonical_numeric_text_rejected": (
+                not outside.comparison_passed
+            ),
+            "noncanonical_trailing_zero_text_rejected": (
+                not trailing_zero.comparison_passed
+            ),
+            "exponent_text_rejected": not exponent.comparison_passed,
+            "float_coercion_rejected": not float_coercion.comparison_passed,
+            "invalid_numeric_text_rejected": not invalid_text.comparison_passed,
+            "missing_numeric_text_registration_rejected": bool(
+                _comparator_registry_failures(missing_registration)
+            ),
+            "absolute_tolerance_leaf_not_reached_is_unobserved": (
+                no_tolerance_leaf.comparison_passed
+                and not no_tolerance_leaf.comparison_policy_execution_observed
+                and no_tolerance_leaf.execution_trace.numeric_text_tolerance_leaf_checks
+                == 0
+            ),
+            "incorrect_tolerance_rejected": bool(
+                _comparator_registry_failures(wrong_tolerance)
+            ),
+            "policy_mode_incompatibility_rejected": bool(
+                _policy_mode_compatibility_failures(incompatible_mode)
+            ),
+        }
+    )
+
+
 def _comparison_policy_self_rejections() -> int:
     material = _tracked_architecture_material()
+    math_02_matrix = _math_02_numeric_text_comparator_matrix(material)
+    failed_math_02_checks = tuple(
+        name for name, passed in math_02_matrix.items() if not passed
+    )
+    if failed_math_02_checks:
+        raise ValueError(
+            "MATH-02 numeric-text comparator defects escaped: "
+            + ", ".join(failed_math_02_checks)
+        )
     missing_row = dict(_ARCHITECTURE_COMPARATOR_REGISTRY)
     missing_row.pop("MATH-01")
     if not _comparator_registry_failures(missing_row):
@@ -937,7 +1303,7 @@ def _comparison_policy_self_rejections() -> int:
         tracked_comparison_policy=str(material["MATH-01"]["comparison_policy"]),
     ).comparison_passed:
         raise ValueError("exact Decimal comparison accepted float coercion")
-    return 15
+    return 15 + len(math_02_matrix)
 
 
 def _apply_declared_mutation(inputs: object, mutation: Mapping[str, object]) -> object:
@@ -3661,6 +4027,15 @@ def _build_architecture_evidence(
                     comparator_authority_classification=(
                         _COMPARATOR_AUTHORITY_CLASSIFICATION
                     ),
+                    numeric_text_leaf_paths=_json_ready(
+                        golden_comparison.numeric_text_leaf_paths
+                    ),
+                    numeric_text_representation=(
+                        golden_comparison.numeric_text_representation
+                    ),
+                    comparison_execution_trace=_json_ready(
+                        asdict(golden_comparison.execution_trace)
+                    ),
                     comparison_policy_execution_observed=(
                         golden_comparison.comparison_policy_execution_observed
                     ),
@@ -3780,6 +4155,15 @@ def _build_architecture_evidence(
                 comparator_authority_classification=(
                     _COMPARATOR_AUTHORITY_CLASSIFICATION
                 ),
+                numeric_text_leaf_paths=_json_ready(
+                    golden_comparison.numeric_text_leaf_paths
+                ),
+                numeric_text_representation=(
+                    golden_comparison.numeric_text_representation
+                ),
+                comparison_execution_trace=_json_ready(
+                    asdict(golden_comparison.execution_trace)
+                ),
                 comparison_policy_execution_observed=(
                     golden_comparison.comparison_policy_execution_observed
                 ),
@@ -3817,10 +4201,29 @@ def _comparison_execution_complete(
     row: _ArchitectureMathEvidenceV1,
 ) -> bool:
     authority = _ARCHITECTURE_COMPARATOR_REGISTRY.get(row.math_id)
+    if authority is None or not isinstance(value, Mapping):
+        return False
+    raw_paths = value.get("numeric_text_leaf_paths")
+    if not isinstance(raw_paths, list | tuple):
+        return False
+    normalized_paths: list[tuple[str, ...]] = []
+    for raw_path in raw_paths:
+        if not isinstance(raw_path, list | tuple) or any(
+            not isinstance(component, str) for component in raw_path
+        ):
+            return False
+        normalized_paths.append(tuple(raw_path))
+    execution_trace = value.get("execution_trace")
+    mode_reached = (
+        isinstance(execution_trace, Mapping)
+        and execution_trace.get("declared_mode_branch_reached") is True
+        and _trace_declared_mode_reached(
+            authority.compiled_comparison_mode,
+            execution_trace,
+        )
+    )
     return (
-        authority is not None
-        and isinstance(value, Mapping)
-        and value.get("math_id") == row.math_id
+        value.get("math_id") == row.math_id
         and value.get("comparison_passed") is True
         and value.get("tracked_comparison_policy")
         == authority.tracked_comparison_policy
@@ -3829,9 +4232,20 @@ def _comparison_execution_complete(
         and value.get("compiled_absolute_tolerance_or_not_applicable")
         == authority.absolute_tolerance_or_not_applicable
         and tuple(value.get("structural_rules", ())) == authority.structural_rules
+        and tuple(normalized_paths) == authority.numeric_text_leaf_paths
+        and value.get("numeric_text_representation")
+        == authority.numeric_text_representation
         and value.get("comparator_registry_version")
         == _COMPARATOR_REGISTRY_VERSION
+        and execution_trace == row.comparison_execution_trace
+        and row.numeric_text_leaf_paths == _json_ready(
+            authority.numeric_text_leaf_paths
+        )
+        and row.numeric_text_representation
+        == authority.numeric_text_representation
+        and mode_reached
         and value.get("comparison_policy_execution_observed") is True
+        and row.comparison_policy_execution_observed is True
     )
 
 
@@ -3855,6 +4269,22 @@ def _generic_default_comparator_call_count() -> int:
         and isinstance(node.func, ast.Name)
         and node.func.id == "_payload_matches"
         for node in ast.walk(tree)
+    )
+
+
+def _legacy_within_tolerance_false_rejection_count(
+    material: Mapping[str, Mapping[str, object]],
+) -> int:
+    result = _compare_architecture_payload(
+        "MATH-02",
+        {"edge_probability": "0.0600000000000005"},
+        {"edge_probability": "0.06"},
+        tracked_comparison_policy=str(material["MATH-02"]["comparison_policy"]),
+    )
+    return int(
+        not result.comparison_passed
+        or not result.comparison_policy_execution_observed
+        or result.execution_trace.numeric_text_tolerance_leaf_checks < 1
     )
 
 
@@ -3891,6 +4321,25 @@ def _evidence_denominators(
             )
             for row in current_rows
         ),
+        "mode_specific_policy_executions": sum(
+            _comparison_execution_complete(
+                _row_golden_comparison_observation(row),
+                row,
+            )
+            for row in rows
+        ),
+        "math_02_numeric_text_tolerance_executions": sum(
+            _trace_count(
+                row.comparison_execution_trace,
+                "numeric_text_tolerance_leaf_checks",
+            )
+            for row in rows
+            if row.math_id == "MATH-02"
+            and _comparison_execution_complete(
+                _row_golden_comparison_observation(row),
+                row,
+            )
+        ),
         "generic_default_comparator_calls": _generic_default_comparator_call_count(),
         "tracked_policy_registry_mismatches": len(
             _comparator_registry_failures(
@@ -3900,6 +4349,24 @@ def _evidence_denominators(
         ),
         "legacy_tolerance_window_false_acceptances": (
             _legacy_tolerance_window_false_acceptance_count(material)
+        ),
+        "legacy_within_tolerance_false_rejections": (
+            _legacy_within_tolerance_false_rejection_count(material)
+        ),
+        "policy_execution_flags_without_matching_trace": sum(
+            row.comparison_policy_execution_observed is True
+            and not (
+                isinstance(row.comparison_execution_trace, Mapping)
+                and row.comparison_execution_trace.get(
+                    "declared_mode_branch_reached"
+                )
+                is True
+                and _trace_declared_mode_reached(
+                    row.compiled_comparison_mode,
+                    row.comparison_execution_trace,
+                )
+            )
+            for row in rows
         ),
         "current_golden_executions": sum(
             row.golden_observation != _LEGACY_NOT_CLAIMED
@@ -4011,7 +4478,24 @@ def _evidence_contract_failures(
             _COMPARATOR_AUTHORITY_CLASSIFICATION
         ):
             failures.append(f"{row.math_id}: comparator authority drift")
-        if row.comparison_policy_execution_observed is not True:
+        if row.numeric_text_leaf_paths != _json_ready(
+            comparator.numeric_text_leaf_paths
+        ):
+            failures.append(f"{row.math_id}: numeric-text path authority drift")
+        if row.numeric_text_representation != comparator.numeric_text_representation:
+            failures.append(f"{row.math_id}: numeric-text representation drift")
+        trace_supports_mode = (
+            isinstance(row.comparison_execution_trace, Mapping)
+            and row.comparison_execution_trace.get("declared_mode_branch_reached")
+            is True
+            and _trace_declared_mode_reached(
+                comparator.compiled_comparison_mode,
+                row.comparison_execution_trace,
+            )
+        )
+        if row.comparison_policy_execution_observed is not trace_supports_mode:
+            failures.append(f"{row.math_id}: unsupported policy execution flag")
+        if not trace_supports_mode:
             failures.append(f"{row.math_id}: comparison policy was not executed")
         if not _comparison_execution_complete(
             _row_golden_comparison_observation(row),
@@ -4036,6 +4520,10 @@ def _evidence_contract_failures(
             if not aggregate_comparison.comparison_passed:
                 failures.append(
                     f"{row.math_id}: aggregate comparator validation failed"
+                )
+            if not aggregate_comparison.comparison_policy_execution_observed:
+                failures.append(
+                    f"{row.math_id}: aggregate comparator mode was not executed"
                 )
         expected_tier = _EVIDENCE_TIER_BY_MATH_ID.get(row.math_id)
         if row.evidence_tier != expected_tier or row.evidence_tier != tracked.get(
@@ -4185,9 +4673,13 @@ def _evidence_contract_failures(
         "current_full_contract_rows": 14,
         "legacy_declared_policy_executions": 15,
         "current_declared_policy_executions": 14,
+        "mode_specific_policy_executions": 29,
+        "math_02_numeric_text_tolerance_executions": 1,
         "generic_default_comparator_calls": 0,
         "tracked_policy_registry_mismatches": 0,
         "legacy_tolerance_window_false_acceptances": 0,
+        "legacy_within_tolerance_false_rejections": 0,
+        "policy_execution_flags_without_matching_trace": 0,
         "current_golden_executions": 14,
         "current_boundary_executions": 14,
         "current_exact_negative_executions": 14,
@@ -4233,6 +4725,31 @@ def _exercise_evidence_contract_mutations(
 
     math_48_row = next(row for row in rows if row.math_id == "MATH-48")
     math_49_row = next(row for row in rows if row.math_id == "MATH-49")
+    math_02_row = next(row for row in rows if row.math_id == "MATH-02")
+    unsupported_execution_claim = math_02_row.comparison_policy_execution_observed
+    if unsupported_execution_claim is not True:
+        raise ValueError("MATH-02 valid evidence did not execute its policy")
+    unsupported_trace = {
+        "structural_mapping_checks": 1,
+        "structural_sequence_checks": 0,
+        "exact_decimal_text_leaf_checks": 0,
+        "precision_34_exact_leaf_checks": 0,
+        "numeric_float_tolerance_leaf_checks": 0,
+        "numeric_text_tolerance_leaf_checks": 0,
+        "exact_order_or_index_checks": 0,
+        "boolean_leaf_checks": 0,
+        "exact_scalar_checks": 1,
+        "declared_mode_branch_reached": True,
+    }
+    math_02_golden_comparison = changed_mapping(
+        math_02_row.actual_observed_evidence["legacy_golden_comparison"],
+        execution_trace=unsupported_trace,
+        comparison_policy_execution_observed=unsupported_execution_claim,
+    )
+    math_02_actual_observed = changed_mapping(
+        math_02_row.actual_observed_evidence,
+        legacy_golden_comparison=math_02_golden_comparison,
+    )
 
     mutations: tuple[Sequence[_ArchitectureMathEvidenceV1], ...] = (
         rows[1:],
@@ -4251,6 +4768,19 @@ def _exercise_evidence_contract_mutations(
         (
             replace(first, comparison_policy_execution_observed=False),
             *rows[1:],
+        ),
+        replace_at(
+            "MATH-02",
+            replace(
+                math_02_row,
+                actual_observed_evidence=math_02_actual_observed,
+                comparison_execution_trace=unsupported_trace,
+                comparison_policy_execution_observed=unsupported_execution_claim,
+            ),
+        ),
+        replace_at(
+            "MATH-02",
+            replace(math_02_row, numeric_text_leaf_paths=[]),
         ),
         (
             replace(
@@ -5170,9 +5700,13 @@ def main() -> int:
         f"current_full_contract_rows={evidence_denominators['current_full_contract_rows']} "
         f"legacy_declared_policy_executions={evidence_denominators['legacy_declared_policy_executions']} "
         f"current_declared_policy_executions={evidence_denominators['current_declared_policy_executions']} "
+        f"mode_specific_policy_executions={evidence_denominators['mode_specific_policy_executions']} "
+        f"math_02_numeric_text_tolerance_executions={evidence_denominators['math_02_numeric_text_tolerance_executions']} "
         f"generic_default_comparator_calls={evidence_denominators['generic_default_comparator_calls']} "
         f"tracked_policy_registry_mismatches={evidence_denominators['tracked_policy_registry_mismatches']} "
         f"legacy_tolerance_window_false_acceptances={evidence_denominators['legacy_tolerance_window_false_acceptances']} "
+        f"legacy_within_tolerance_false_rejections={evidence_denominators['legacy_within_tolerance_false_rejections']} "
+        f"policy_execution_flags_without_matching_trace={evidence_denominators['policy_execution_flags_without_matching_trace']} "
         f"current_golden_executions={evidence_denominators['current_golden_executions']} "
         f"current_boundary_executions={evidence_denominators['current_boundary_executions']} "
         f"current_exact_negative_executions={evidence_denominators['current_exact_negative_executions']} "
