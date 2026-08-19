@@ -20,6 +20,7 @@ from pathlib import Path
 from random import Random
 from statistics import NormalDist
 import sys
+from types import MappingProxyType
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -93,6 +94,45 @@ CURRENT_ST12B_ARCHITECTURE_MATH_IDS = (
     "MATH-47",
     "MATH-48",
     "MATH-49",
+)
+_LEGACY_GOLDEN_REGRESSION_TIER = "LEGACY_GOLDEN_REGRESSION"
+_CURRENT_FULL_CONTRACT_TIER = "CURRENT_FULL_CONTRACT"
+_LEGACY_NOT_CLAIMED = "NOT_CLAIMED_FOR_LEGACY_REGRESSION_TIER"
+_CURRENT_LEGACY_NOT_APPLICABLE = (
+    "NOT_APPLICABLE_FOR_CURRENT_FULL_CONTRACT_TIER"
+)
+_EVIDENCE_TIER_BY_MATH_ID = MappingProxyType(
+    {
+        "MATH-01": _LEGACY_GOLDEN_REGRESSION_TIER,
+        "MATH-02": _LEGACY_GOLDEN_REGRESSION_TIER,
+        "MATH-03": _LEGACY_GOLDEN_REGRESSION_TIER,
+        "MATH-04": _LEGACY_GOLDEN_REGRESSION_TIER,
+        "MATH-05": _LEGACY_GOLDEN_REGRESSION_TIER,
+        "MATH-06": _LEGACY_GOLDEN_REGRESSION_TIER,
+        "MATH-07": _LEGACY_GOLDEN_REGRESSION_TIER,
+        "MATH-08": _LEGACY_GOLDEN_REGRESSION_TIER,
+        "MATH-09": _LEGACY_GOLDEN_REGRESSION_TIER,
+        "MATH-10": _LEGACY_GOLDEN_REGRESSION_TIER,
+        "MATH-11": _LEGACY_GOLDEN_REGRESSION_TIER,
+        "MATH-12": _LEGACY_GOLDEN_REGRESSION_TIER,
+        "MATH-13": _LEGACY_GOLDEN_REGRESSION_TIER,
+        "MATH-14": _LEGACY_GOLDEN_REGRESSION_TIER,
+        "MATH-15": _LEGACY_GOLDEN_REGRESSION_TIER,
+        "MATH-16": _CURRENT_FULL_CONTRACT_TIER,
+        "MATH-17": _CURRENT_FULL_CONTRACT_TIER,
+        "MATH-18": _CURRENT_FULL_CONTRACT_TIER,
+        "MATH-19": _CURRENT_FULL_CONTRACT_TIER,
+        "MATH-20": _CURRENT_FULL_CONTRACT_TIER,
+        "MATH-21": _CURRENT_FULL_CONTRACT_TIER,
+        "MATH-22": _CURRENT_FULL_CONTRACT_TIER,
+        "MATH-23": _CURRENT_FULL_CONTRACT_TIER,
+        "MATH-24": _CURRENT_FULL_CONTRACT_TIER,
+        "MATH-25": _CURRENT_FULL_CONTRACT_TIER,
+        "MATH-46": _CURRENT_FULL_CONTRACT_TIER,
+        "MATH-47": _CURRENT_FULL_CONTRACT_TIER,
+        "MATH-48": _CURRENT_FULL_CONTRACT_TIER,
+        "MATH-49": _CURRENT_FULL_CONTRACT_TIER,
+    }
 )
 EXPECTED_ALL_MATH_IDS = (
     *EXPECTED_MATH_IDS,
@@ -175,40 +215,45 @@ EVIDENCE_BUNDLE_FIELDS = (
 )
 SUCCESS_MARKER = "QKU_ARCHITECTURE_INDEPENDENTLY_VALIDATED"
 EVIDENCE_MARKER = "ST12_ARCHITECTURE_MATH_EVIDENCE_V1"
+CURRENT_FULL_CONTRACT_EVIDENCE_MARKER = (
+    "ST12_ARCHITECTURE_CURRENT_FULL_CONTRACT_EVIDENCE_V1"
+)
 DECIMAL_CONTEXT = Context(prec=34, rounding=ROUND_HALF_EVEN)
 
 
 @dataclass(frozen=True)
 class _ArchitectureMathEvidenceV1:
     math_id: str
+    evidence_tier: str
     oracle_id: str
     golden_vector_id: str
     comparison_policy: str
     independent_algorithm_id: str
-    independent_observed_result: object
+    actual_observed_evidence: object
     golden_comparison_passed: bool
     formula_or_procedure_mutation_observed: bool
     domain_guard_rejection_observed: bool
-    precision_or_tolerance_mutation_observed: bool
-    semantic_binding_mutation_observed: bool
+    precision_or_tolerance_mutation_observed: bool | str
+    semantic_binding_mutation_observed: bool | str
     production_import_count: int
     production_callable_count: int
     terminal_state: str
-    boundary_vector_id: str | None = None
-    negative_vector_id: str | None = None
-    property_id: str | None = None
-    output_schema_version: str | None = None
-    compiled_comparison_policy: str | None = None
-    golden_observed_result: object | None = None
-    boundary_observed_result: object | None = None
-    negative_exception_evidence: object | None = None
-    property_mutation_result: object | None = None
-    precision_boundary_mutation_result: object | None = None
-    semantic_binding_mutation_result: object | None = None
-    input_binding_mutation_observed: bool | None = None
-    unit_or_basis_mutation_observed_or_not_applicable: str | None = None
-    source_binding_mutation_observed_or_not_applicable: str | None = None
-    representation_or_convention_mutation_observed_or_not_applicable: str | None = None
+    legacy_golden_observation: object
+    legacy_formula_regression_mutation_observation: object
+    legacy_domain_rejection_observation: object
+    boundary_vector_id: object
+    negative_vector_id: object
+    property_id: object
+    current_output_schema: object
+    declared_comparison_policy: object
+    comparator_registry_version: object
+    comparator_authority_classification: object
+    golden_observation: object
+    boundary_observation: object
+    negative_exception_observation: object
+    property_mutation_observation: object
+    actual_execution_mutation_observation: object
+    semantic_binding_mutation_observation: object
 
 
 def _stationary_means(
@@ -259,6 +304,12 @@ def _json_rows(tree: ast.Module, name: str) -> list[dict[str, object]]:
 def _tracked_architecture_material() -> dict[str, dict[str, object]]:
     """Read immutable oracle/vector data without importing production code."""
 
+    comparator_failures = _comparator_registry_failures(
+        _INDEPENDENT_CURRENT_COMPARATOR_REGISTRY
+    )
+    if comparator_failures:
+        raise ValueError("; ".join(comparator_failures))
+
     tree = ast.parse(
         (PACKAGE / "oracle_contracts.py").read_text(encoding="utf-8"),
         filename=str(PACKAGE / "oracle_contracts.py"),
@@ -305,6 +356,7 @@ def _tracked_architecture_material() -> dict[str, dict[str, object]]:
             if oracle is None or golden is None:
                 raise ValueError(f"missing legacy architecture material: {math_id}")
             material[math_id] = {
+                "evidence_tier": _EVIDENCE_TIER_BY_MATH_ID[math_id],
                 "oracle": oracle,
                 "golden": golden,
                 "boundary": None,
@@ -363,6 +415,7 @@ def _tracked_architecture_material() -> dict[str, dict[str, object]]:
         ):
             raise ValueError(f"invalid current ST12-B property binding: {math_id}")
         material[math_id] = {
+            "evidence_tier": _EVIDENCE_TIER_BY_MATH_ID[math_id],
             "oracle": oracle,
             "golden": vectors["GOLDEN"],
             "boundary": vectors["BOUNDARY"],
@@ -373,6 +426,7 @@ def _tracked_architecture_material() -> dict[str, dict[str, object]]:
             "boundary_vector_id": str(vectors["BOUNDARY"]["vector_id"]),
             "negative_vector_id": str(vectors["NEGATIVE"]["vector_id"]),
             "property_id": str(property_row["property_id"]),
+            "output_schema_ref": str(oracle["output_schema_ref"]),
             "output_schema_version": str(oracle["output_schema_version"]),
             "comparison_policy": (
                 "CANONICAL_STRUCTURE_WITH_DECLARED_NUMERIC_TOLERANCE"
@@ -381,6 +435,20 @@ def _tracked_architecture_material() -> dict[str, dict[str, object]]:
 
     if tuple(material) != ARCHITECTURE_MATH_IDS:
         raise ValueError("architecture material denominator/order is not exact")
+    if tuple(_EVIDENCE_TIER_BY_MATH_ID) != ARCHITECTURE_MATH_IDS:
+        raise ValueError("architecture evidence-tier membership/order is not exact")
+    if tuple(
+        math_id
+        for math_id, tier in _EVIDENCE_TIER_BY_MATH_ID.items()
+        if tier == _LEGACY_GOLDEN_REGRESSION_TIER
+    ) != EXPECTED_MATH_IDS:
+        raise ValueError("legacy evidence-tier membership is not exact")
+    if tuple(
+        math_id
+        for math_id, tier in _EVIDENCE_TIER_BY_MATH_ID.items()
+        if tier == _CURRENT_FULL_CONTRACT_TIER
+    ) != CURRENT_ST12B_ARCHITECTURE_MATH_IDS:
+        raise ValueError("current evidence-tier membership is not exact")
     if len({row["oracle_id"] for row in material.values()}) != 29 or len(
         {row["golden_vector_id"] for row in material.values()}
     ) != 29:
@@ -530,22 +598,98 @@ class _CompiledComparisonPolicyV1:
     exact_decimal_representation: bool
 
 
-_CURRENT_NUMERIC_TOLERANCE_BY_MATH_ID = {
-    "MATH-16": 1e-12,
-    "MATH-17": 1e-12,
-    "MATH-18": 1e-12,
-    "MATH-19": 1e-15,
-    "MATH-20": 1e-12,
-    "MATH-21": 1e-12,
-    "MATH-22": 1e-12,
-    "MATH-23": 1e-12,
-    "MATH-24": 1e-12,
-    "MATH-25": 1e-12,
-    "MATH-46": 1e-15,
-    "MATH-47": 1e-15,
-    "MATH-48": 1e-12,
-    "MATH-49": 1e-15,
-}
+_COMPARATOR_REGISTRY_VERSION = "ST12_ARCHITECTURE_COMPARATOR_REGISTRY_V1"
+_COMPARATOR_AUTHORITY_CLASSIFICATION = (
+    "INDEPENDENT_VALIDATOR_FROZEN_COMPARATOR_AUTHORITY"
+)
+_CURRENT_DECLARED_COMPARISON_POLICY = (
+    "CANONICAL_STRUCTURE_WITH_DECLARED_NUMERIC_TOLERANCE"
+)
+_CURRENT_STRUCTURAL_COMPARATOR = (
+    "EXACT_NESTED_FIELD_SET_AND_TYPE_WITH_TOLERANT_NUMERIC_LEAVES"
+)
+_STRICT_1E15_COMPARATOR_ROWS = ("MATH-19", "MATH-46", "MATH-47", "MATH-49")
+
+
+@dataclass(frozen=True)
+class _FrozenComparatorAuthorityV1:
+    math_id: str
+    registry_version: str
+    authority_classification: str
+    declared_policy: str
+    operational_policy: str
+    absolute_tolerance: float
+    structural_comparator: str
+
+
+def _frozen_current_comparator(
+    math_id: str,
+    tolerance: float,
+) -> _FrozenComparatorAuthorityV1:
+    exponent = "1E-15" if tolerance == 1e-15 else "1E-12"
+    return _FrozenComparatorAuthorityV1(
+        math_id=math_id,
+        registry_version=_COMPARATOR_REGISTRY_VERSION,
+        authority_classification=_COMPARATOR_AUTHORITY_CLASSIFICATION,
+        declared_policy=_CURRENT_DECLARED_COMPARISON_POLICY,
+        operational_policy=f"{_CURRENT_DECLARED_COMPARISON_POLICY}::{exponent}",
+        absolute_tolerance=tolerance,
+        structural_comparator=_CURRENT_STRUCTURAL_COMPARATOR,
+    )
+
+
+_INDEPENDENT_CURRENT_COMPARATOR_REGISTRY = MappingProxyType(
+    {
+        "MATH-16": _frozen_current_comparator("MATH-16", 1e-12),
+        "MATH-17": _frozen_current_comparator("MATH-17", 1e-12),
+        "MATH-18": _frozen_current_comparator("MATH-18", 1e-12),
+        "MATH-19": _frozen_current_comparator("MATH-19", 1e-15),
+        "MATH-20": _frozen_current_comparator("MATH-20", 1e-12),
+        "MATH-21": _frozen_current_comparator("MATH-21", 1e-12),
+        "MATH-22": _frozen_current_comparator("MATH-22", 1e-12),
+        "MATH-23": _frozen_current_comparator("MATH-23", 1e-12),
+        "MATH-24": _frozen_current_comparator("MATH-24", 1e-12),
+        "MATH-25": _frozen_current_comparator("MATH-25", 1e-12),
+        "MATH-46": _frozen_current_comparator("MATH-46", 1e-15),
+        "MATH-47": _frozen_current_comparator("MATH-47", 1e-15),
+        "MATH-48": _frozen_current_comparator("MATH-48", 1e-12),
+        "MATH-49": _frozen_current_comparator("MATH-49", 1e-15),
+    }
+)
+
+
+def _comparator_registry_failures(
+    registry: Mapping[str, _FrozenComparatorAuthorityV1],
+) -> tuple[str, ...]:
+    failures: list[str] = []
+    if tuple(registry) != CURRENT_ST12B_ARCHITECTURE_MATH_IDS:
+        failures.append("comparator registry identity/order differs")
+    for math_id in CURRENT_ST12B_ARCHITECTURE_MATH_IDS:
+        entry = registry.get(math_id)
+        if entry is None:
+            failures.append(f"{math_id}: comparator row missing")
+            continue
+        expected_tolerance = (
+            1e-15 if math_id in _STRICT_1E15_COMPARATOR_ROWS else 1e-12
+        )
+        expected_exponent = "1E-15" if expected_tolerance == 1e-15 else "1E-12"
+        if entry.math_id != math_id:
+            failures.append(f"{math_id}: comparator row identity drift")
+        if entry.registry_version != _COMPARATOR_REGISTRY_VERSION:
+            failures.append(f"{math_id}: comparator registry version drift")
+        if entry.authority_classification != _COMPARATOR_AUTHORITY_CLASSIFICATION:
+            failures.append(f"{math_id}: comparator authority drift")
+        if entry.declared_policy != _CURRENT_DECLARED_COMPARISON_POLICY:
+            failures.append(f"{math_id}: declared comparison policy drift")
+        if entry.operational_policy != (
+            f"{_CURRENT_DECLARED_COMPARISON_POLICY}::{expected_exponent}"
+        ):
+            failures.append(f"{math_id}: operational comparison policy drift")
+        if entry.absolute_tolerance != expected_tolerance:
+            failures.append(f"{math_id}: numeric tolerance drift")
+        if entry.structural_comparator != _CURRENT_STRUCTURAL_COMPARATOR:
+            failures.append(f"{math_id}: structural comparator drift")
+    return tuple(failures)
 
 
 def _compile_comparison_policy(
@@ -553,17 +697,20 @@ def _compile_comparison_policy(
     *,
     math_id: str | None = None,
 ) -> _CompiledComparisonPolicyV1:
-    if declared_policy == "CANONICAL_STRUCTURE_WITH_DECLARED_NUMERIC_TOLERANCE":
-        if math_id not in _CURRENT_NUMERIC_TOLERANCE_BY_MATH_ID:
+    if declared_policy == _CURRENT_DECLARED_COMPARISON_POLICY:
+        if math_id is None:
             raise ValueError(
                 "current nested comparison policy requires an exact math identity"
             )
-        tolerance = _CURRENT_NUMERIC_TOLERANCE_BY_MATH_ID[math_id]
-        exponent = "1E-15" if tolerance == 1e-15 else "1E-12"
+        authority = _INDEPENDENT_CURRENT_COMPARATOR_REGISTRY.get(math_id)
+        if authority is None:
+            raise ValueError(f"unknown current comparator row: {math_id}")
+        if authority.declared_policy != declared_policy:
+            raise ValueError(f"declared comparison policy drift: {math_id}")
         return _CompiledComparisonPolicyV1(
             declared_policy=declared_policy,
-            operational_policy=f"{declared_policy}::{exponent}",
-            absolute_tolerance=tolerance,
+            operational_policy=authority.operational_policy,
+            absolute_tolerance=authority.absolute_tolerance,
             exact_mapping_order=False,
             exact_decimal_representation=False,
         )
@@ -656,7 +803,42 @@ def _mutated_copy(value: object, path: Sequence[object], replacement_value: obje
     return clone
 
 
+def _value_at_path(value: object, path: Sequence[object]) -> object:
+    cursor = value
+    for component in path:
+        cursor = cursor[component]  # type: ignore[index]
+    return cursor
+
+
 def _comparison_policy_self_rejections() -> int:
+    missing_row = dict(_INDEPENDENT_CURRENT_COMPARATOR_REGISTRY)
+    missing_row.pop("MATH-16")
+    if not _comparator_registry_failures(missing_row):
+        raise ValueError("missing comparator row was accepted")
+    unknown_row = dict(_INDEPENDENT_CURRENT_COMPARATOR_REGISTRY)
+    unknown_row["MATH-50"] = replace(
+        unknown_row["MATH-16"],
+        math_id="MATH-50",
+    )
+    if not _comparator_registry_failures(unknown_row):
+        raise ValueError("unknown comparator row was accepted")
+    changed_tolerance = dict(_INDEPENDENT_CURRENT_COMPARATOR_REGISTRY)
+    changed_tolerance["MATH-16"] = replace(
+        changed_tolerance["MATH-16"],
+        absolute_tolerance=1e-9,
+    )
+    if not _comparator_registry_failures(changed_tolerance):
+        raise ValueError("changed comparator tolerance was accepted")
+    strict_downgrade = dict(_INDEPENDENT_CURRENT_COMPARATOR_REGISTRY)
+    strict_downgrade["MATH-19"] = replace(
+        strict_downgrade["MATH-19"],
+        operational_policy=(
+            f"{_CURRENT_DECLARED_COMPARISON_POLICY}::1E-12"
+        ),
+        absolute_tolerance=1e-12,
+    )
+    if not _comparator_registry_failures(strict_downgrade):
+        raise ValueError("1E-15 comparator row accepted a 1E-12 replacement")
     strict = _compile_comparison_policy("ABS_TOL_1E-15")
     if _compiled_payload_matches(0.0, 5e-13, strict):
         raise ValueError("1e-15 comparison was weakened to 1e-12")
@@ -666,6 +848,13 @@ def _comparison_policy_self_rejections() -> int:
     decimal_policy = _compile_comparison_policy("EXACT_DECIMAL_FIXED_REPRESENTATION")
     if _compiled_payload_matches(1.25, Decimal("1.25"), decimal_policy):
         raise ValueError("exact Decimal comparison accepted float coercion")
+    structural = _compile_comparison_policy("EXACT_CANONICAL_STRUCTURE")
+    if _compiled_payload_matches(
+        {"required": 1},
+        {"required": 1, "also_required": 2},
+        structural,
+    ):
+        raise ValueError("structural comparison accepted an omitted field")
     try:
         _compile_comparison_policy("UNKNOWN_COMPARISON_POLICY")
     except ValueError as exc:
@@ -673,7 +862,7 @@ def _comparison_policy_self_rejections() -> int:
             raise
     else:
         raise ValueError("unknown comparison policy was accepted")
-    return 4
+    return 9
 
 
 def _apply_declared_mutation(inputs: object, mutation: Mapping[str, object]) -> object:
@@ -2830,23 +3019,22 @@ def _execute_legacy_architecture_row(
     raise ValueError(f"no legacy architecture algorithm: {math_id}")
 
 
-def _legacy_formula_mutation_observed(
+def _legacy_formula_regression_mutation_evidence(
     math_id: str,
     material: Mapping[str, object],
     observed: object,
-) -> bool:
+) -> dict[str, object]:
     golden = material["golden"]
     if not isinstance(golden, Mapping) or not isinstance(golden.get("inputs"), Mapping):
-        return False
+        raise _EvidenceContractMismatch(f"{math_id} legacy golden inputs are absent")
     inputs = golden["inputs"]
     if math_id == "MATH-14":
-        mutated = dict(inputs)
-        mutated["seed"] = int(inputs["seed"]) + 1
-        return _legacy_stationary_bootstrap_means(inputs) != _legacy_stationary_bootstrap_means(mutated)
-    if math_id == "MATH-15":
-        mutated = dict(inputs)
+        path: tuple[object, ...] = ("seed",)
+        replacement: object = int(inputs["seed"]) + 1
+    elif math_id == "MATH-15":
         rows = _sequence(inputs["loss_differentials"], "loss differentials")
-        mutated["loss_differentials"] = [
+        path = ("loss_differentials",)
+        replacement = [
             [-_finite(value, "loss differential") for value in _sequence(row, "row")]
             for row in rows
         ]
@@ -2867,18 +3055,41 @@ def _legacy_formula_mutation_observed(
             "MATH-13": (("p_values", 0), 0.1),
         }
         path, replacement = mutations[math_id]
-        mutated = _mutated_copy(inputs, path, replacement)
-    changed = _execute_legacy_architecture_row(math_id, mutated, material)
-    return not _payload_matches(observed, changed)
+    mutated = _mutated_copy(inputs, path, replacement)
+    if math_id == "MATH-14":
+        baseline_observed = _legacy_stationary_bootstrap_means(inputs)
+        mutated_observed = _legacy_stationary_bootstrap_means(mutated)
+    else:
+        baseline_observed = observed
+        mutated_observed = _execute_legacy_architecture_row(math_id, mutated, material)
+    changed = not _payload_matches(baseline_observed, mutated_observed)
+    if not changed:
+        raise _EvidenceContractMismatch(
+            f"{math_id} legacy formula-regression mutation produced no change"
+        )
+    return {
+        "baseline_observed": _json_ready(baseline_observed),
+        "baseline_value": _json_ready(_value_at_path(inputs, path)),
+        "comparison_policy": "LEGACY_FORMULA_REGRESSION_EXACT_CHANGE",
+        "exact_consequence": {
+            "comparison_matches_baseline": False,
+            "state": "OBSERVED_LEGACY_FORMULA_REGRESSION_CHANGE",
+        },
+        "input_path": list(path),
+        "mutated_observed": _json_ready(mutated_observed),
+        "mutation_family": f"LEGACY_FORMULA_REGRESSION_INPUT_MUTATION::{math_id}",
+        "mutation_observed": True,
+        "replacement_value": _json_ready(replacement),
+    }
 
 
-def _legacy_domain_rejection_observed(
+def _legacy_domain_rejection_evidence(
     math_id: str,
     material: Mapping[str, object],
-) -> bool:
+) -> dict[str, object]:
     golden = material["golden"]
     if not isinstance(golden, Mapping) or not isinstance(golden.get("inputs"), Mapping):
-        return False
+        raise _EvidenceContractMismatch(f"{math_id} legacy golden inputs are absent")
     inputs = golden["inputs"]
     mutations: dict[str, tuple[tuple[object, ...], object]] = {
         "MATH-01": (("payout_per_winning_contract",), "0"),
@@ -2899,24 +3110,25 @@ def _legacy_domain_rejection_observed(
     }
     path, replacement = mutations[math_id]
     invalid = _mutated_copy(inputs, path, replacement)
-    return _expect_rejection(
-        lambda: _execute_legacy_architecture_row(math_id, invalid, material)
+    try:
+        _execute_legacy_architecture_row(math_id, invalid, material)
+    except (ValueError, ArithmeticError, OverflowError) as exc:
+        return {
+            "baseline_value": _json_ready(_value_at_path(inputs, path)),
+            "comparison_policy": "LEGACY_TYPED_DOMAIN_REJECTION",
+            "exact_consequence": {
+                "exception_message": str(exc),
+                "exception_type": type(exc).__name__,
+                "state": "OBSERVED_LEGACY_DOMAIN_REJECTION",
+            },
+            "input_path": list(path),
+            "mutation_family": f"LEGACY_DOMAIN_GUARD_MUTATION::{math_id}",
+            "mutation_observed": True,
+            "replacement_value": _json_ready(replacement),
+        }
+    raise _EvidenceContractMismatch(
+        f"{math_id} legacy domain mutation was accepted"
     )
-
-
-def _legacy_semantic_binding_mutation_observed(
-    math_id: str,
-    material: Mapping[str, object],
-) -> bool:
-    golden = material["golden"]
-    if not isinstance(golden, Mapping):
-        return False
-    observed = _execute_legacy_architecture_row(
-        math_id,
-        golden.get("inputs"),
-        material,
-    )
-    return _legacy_formula_mutation_observed(math_id, material, observed)
 
 
 def _execute_new_architecture_row(
@@ -2962,6 +3174,9 @@ def _execute_observed_mutation(
     mutated_inputs: object,
     policy: _CompiledComparisonPolicyV1,
     *,
+    input_path: Sequence[object],
+    baseline_value: object,
+    replacement_value: object,
     mutation_family: str,
 ) -> dict[str, object]:
     baseline = _execute_new_architecture_row(math_id, baseline_inputs, material)
@@ -2970,11 +3185,20 @@ def _execute_observed_mutation(
     except ValueError as exc:
         return {
             "baseline_observed": _json_ready(baseline),
+            "baseline_value": _json_ready(baseline_value),
+            "comparison_policy": policy.operational_policy,
+            "exact_consequence": {
+                "exception_message": str(exc),
+                "exception_type": type(exc).__name__,
+                "state": "TYPED_REJECTION",
+            },
+            "input_path": list(input_path),
             "mutation_family": mutation_family,
             "mutation_outcome": "TYPED_REJECTION",
             "mutation_exception_type": type(exc).__name__,
             "mutation_exception_message": str(exc),
             "mutation_observed": True,
+            "replacement_value": _json_ready(replacement_value),
         }
     changed = not _compiled_payload_matches(baseline, mutated, policy)
     if not changed:
@@ -2983,10 +3207,18 @@ def _execute_observed_mutation(
         )
     return {
         "baseline_observed": _json_ready(baseline),
+        "baseline_value": _json_ready(baseline_value),
+        "comparison_policy": policy.operational_policy,
+        "exact_consequence": {
+            "comparison_matches_baseline": False,
+            "state": "OBSERVED_OUTPUT_CHANGE",
+        },
+        "input_path": list(input_path),
         "mutated_observed": _json_ready(mutated),
         "mutation_family": mutation_family,
         "mutation_outcome": "OBSERVED_OUTPUT_CHANGE",
         "mutation_observed": True,
+        "replacement_value": _json_ready(replacement_value),
     }
 
 
@@ -3054,12 +3286,18 @@ def _property_mutation_evidence(
     if not isinstance(baseline, Mapping) or not isinstance(mutation, Mapping):
         raise _EvidenceContractMismatch(f"{math_id} property row is malformed")
     mutated = _apply_declared_mutation(baseline, mutation)
+    path = mutation.get("path")
+    assert isinstance(path, list)
+    replacement = mutation.get("replacement")
     evidence = _execute_observed_mutation(
         math_id,
         material,
         baseline,
         mutated,
         policy,
+        input_path=path,
+        baseline_value=_value_at_path(baseline, path),
+        replacement_value=replacement,
         mutation_family="TRACKED_PROPERTY_FORMULA_OR_PROCEDURE_MUTATION",
     )
     evidence.update(
@@ -3072,25 +3310,28 @@ def _property_mutation_evidence(
     return evidence
 
 
-_PRECISION_INPUT_MUTATIONS: dict[str, tuple[tuple[object, ...], object, str]] = {
-    "MATH-16": (("expected_block_length",), 2.25, "BOOTSTRAP_BLOCK_LENGTH_PRECISION"),
-    "MATH-17": (("estimated_sharpe",), 0.500001, "SHARPE_INPUT_TOLERANCE"),
-    "MATH-18": (("candidate_estimated_sharpe",), 0.500001, "DSR_INPUT_TOLERANCE"),
-    "MATH-19": (("performance_matrix", 0, 0), 2.0, "RANK_AND_TIE_BOUNDARY"),
-    "MATH-20": (("embargo_duration",), 2.0, "HALF_OPEN_EMBARGO_BOUNDARY"),
-    "MATH-21": (("embargo_duration",), 1.5, "CPCV_PATH_EMBARGO_BOUNDARY"),
-    "MATH-22": (("logged_rows", 0, "reward"), 0.999999, "DR_REWARD_PRECISION"),
-    "MATH-23": (("logged_rows", 0, "reward"), 0.5, "IPS_WEIGHTED_REWARD_PRECISION"),
-    "MATH-24": (("weights", 0), 1.600001, "SNIPS_NORMALIZATION_PRECISION"),
-    "MATH-25": (("tau_grid", 1), 1.000001, "SWITCH_TAU_INEQUALITY_BOUNDARY"),
-    "MATH-46": (("diagonal", 0), 1.000001, "QUBO_COEFFICIENT_PRECISION"),
-    "MATH-47": (("diagonal", 0), 1.000001, "QUBO_ISING_PARITY_PRECISION"),
-    "MATH-48": (("model", "conversion_penalty_candidate"), 1.0, "CQM_PENALTY_ADEQUACY_BOUNDARY"),
-    "MATH-49": (("model", "pairwise_biases", 0, "bias"), -1.999999, "DQM_PAIRWISE_TIE_PRECISION"),
+_ACTUAL_EXECUTION_MUTATIONS: dict[
+    str,
+    tuple[tuple[object, ...], object, str],
+] = {
+    "MATH-16": (("expected_block_length",), 2.25, "EXPECTED_BLOCK_LENGTH_EXECUTION_SENSITIVITY"),
+    "MATH-17": (("estimated_sharpe",), 0.500001, "ESTIMATED_SHARPE_INPUT_SENSITIVITY"),
+    "MATH-18": (("candidate_estimated_sharpe",), 0.500001, "CANDIDATE_SHARPE_OUTPUT_SENSITIVITY"),
+    "MATH-19": (("performance_matrix", 0, 0), 2.0, "PERFORMANCE_INPUT_RANKING_SENSITIVITY"),
+    "MATH-20": (("embargo_duration",), 2.0, "EMBARGO_DURATION_SENSITIVITY_UNDER_HALF_OPEN_INTERVALS"),
+    "MATH-21": (("embargo_duration",), 1.5, "EMBARGO_MUTATION_WITH_EXACT_SPLIT_AND_PATH_OUTPUT_COMPARISON"),
+    "MATH-22": (("logged_rows", 0, "reward"), 0.999999, "LOGGED_REWARD_DOUBLY_ROBUST_OUTPUT_SENSITIVITY"),
+    "MATH-23": (("logged_rows", 0, "reward"), 0.5, "REWARD_AND_IMPORTANCE_WEIGHT_OUTPUT_SENSITIVITY"),
+    "MATH-24": (("weights", 0), 1.600001, "IMPORTANCE_WEIGHT_NORMALIZATION_OUTPUT_SENSITIVITY"),
+    "MATH-25": (("tau_grid", 1), 1.000001, "TAU_INEQUALITY_SELECTION_SENSITIVITY"),
+    "MATH-46": (("diagonal", 0), 1.000001, "QUBO_DIAGONAL_COEFFICIENT_ENERGY_SENSITIVITY"),
+    "MATH-47": (("diagonal", 0), 1.000001, "QUBO_COEFFICIENT_PARITY_PRESERVATION_SENSITIVITY"),
+    "MATH-48": (("model", "conversion_penalty_candidate"), 1.0, "CONVERSION_PENALTY_ADEQUACY_MUTATION"),
+    "MATH-49": (("model", "pairwise_biases", 0, "bias"), -1.999999, "PAIRWISE_BIAS_AND_ASSIGNMENT_ENERGY_SENSITIVITY"),
 }
 
 
-def _precision_boundary_mutation_evidence(
+def _actual_execution_mutation_evidence(
     math_id: str,
     material: Mapping[str, object],
     policy: _CompiledComparisonPolicyV1,
@@ -3103,7 +3344,7 @@ def _precision_boundary_mutation_evidence(
         or not isinstance(boundary, Mapping)
     ):
         raise _EvidenceContractMismatch(f"{math_id} precision/boundary material is absent")
-    path, replacement, label = _PRECISION_INPUT_MUTATIONS[math_id]
+    path, replacement, label = _ACTUAL_EXECUTION_MUTATIONS[math_id]
     mutated = _mutated_copy(golden["inputs"], path, replacement)
     evidence = _execute_observed_mutation(
         math_id,
@@ -3111,6 +3352,9 @@ def _precision_boundary_mutation_evidence(
         golden["inputs"],
         mutated,
         policy,
+        input_path=path,
+        baseline_value=_value_at_path(golden["inputs"], path),
+        replacement_value=replacement,
         mutation_family=label,
     )
     boundary_observed = _execute_new_architecture_row(
@@ -3131,20 +3375,20 @@ def _precision_boundary_mutation_evidence(
 
 
 _BINDING_MUTATIONS: dict[str, tuple[tuple[object, ...], object, str]] = {
-    "MATH-16": (("sign_convention",), "CANDIDATE_LOSS_MINUS_BENCHMARK_LOSS_NEGATED_TO_POSITIVE_IS_BETTER", "SIGN_CONVENTION"),
-    "MATH-17": (("independent_equivalent_observations",), 101, "SAMPLE_STATISTIC_BASIS"),
-    "MATH-18": (("effective_independent_trial_count",), 4.0, "MATERIAL_EFFECTIVE_TRIAL_BASIS"),
-    "MATH-19": (("strategy_ids",), ["S-B", "S-A", "S-C"], "STRATEGY_IDENTITY_PARTITION_BINDING"),
-    "MATH-20": (("sample_intervals", 0, "start"), -0.25, "HALF_OPEN_INTERVAL_TIME_BASIS"),
-    "MATH-21": (("aggregation_rule",), "CHERRY_PICK_ONE_PATH", "ALL_PATHS_AGGREGATION_RULE"),
-    "MATH-22": (("logged_rows", 0, "behavior_action_probabilities"), [0.0, 1.0], "BEHAVIOR_TARGET_SUPPORT_BINDING"),
-    "MATH-23": (("logged_rows", 0, "logged_action_index"), 1, "LOGGED_ACTION_BINDING"),
-    "MATH-24": (("rewards",), [1.0], "WEIGHT_REWARD_ALIGNMENT_BASIS"),
-    "MATH-25": (("tau_grid",), [2.0, 1.0], "TAU_GRID_AND_OUTER_FOLD_BINDING"),
-    "MATH-46": (("representation",), "UNKNOWN_QUBO_REPRESENTATION", "QUBO_REPRESENTATION_CONVENTION"),
-    "MATH-47": (("representation",), "UNKNOWN_BINARY_TO_SPIN_MAPPING", "BINARY_TO_SPIN_MAPPING_CONVENTION"),
-    "MATH-48": (("model", "objective_sense"), "MAXIMIZE", "CQM_SCHEMA_UNIT_DOMAIN_OBJECTIVE_SENSE"),
-    "MATH-49": (("model", "schema_version"), "QTT_DQM_GRAMMAR_V0", "DQM_SCHEMA_VARIABLE_CASE_PAIRWISE_BINDING"),
+    "MATH-16": (("sign_convention",), "CANDIDATE_LOSS_MINUS_BENCHMARK_LOSS_NEGATED_TO_POSITIVE_IS_BETTER", "SIGN_CONVENTION_BINDING_MUTATION"),
+    "MATH-17": (("independent_equivalent_observations",), 101, "INDEPENDENT_EQUIVALENT_OBSERVATION_COUNT_BINDING_MUTATION"),
+    "MATH-18": (("effective_independent_trial_count",), 4.0, "EFFECTIVE_INDEPENDENT_TRIAL_COUNT_BINDING_MUTATION"),
+    "MATH-19": (("strategy_ids",), ["S-B", "S-A", "S-C"], "STRATEGY_ID_ORDER_BINDING_MUTATION"),
+    "MATH-20": (("sample_intervals", 0, "start"), -0.25, "FIRST_INTERVAL_START_TIME_BINDING_MUTATION"),
+    "MATH-21": (("aggregation_rule",), "CHERRY_PICK_ONE_PATH", "AGGREGATION_RULE_BINDING_MUTATION"),
+    "MATH-22": (("logged_rows", 0, "behavior_action_probabilities"), [0.0, 1.0], "BEHAVIOR_POLICY_SUPPORT_BINDING_MUTATION"),
+    "MATH-23": (("logged_rows", 0, "logged_action_index"), 1, "LOGGED_ACTION_INDEX_BINDING_MUTATION"),
+    "MATH-24": (("rewards",), [1.0], "REWARD_WEIGHT_CARDINALITY_BINDING_MUTATION"),
+    "MATH-25": (("tau_grid",), [2.0, 1.0], "TAU_GRID_ORDER_BINDING_MUTATION"),
+    "MATH-46": (("representation",), "UNKNOWN_QUBO_REPRESENTATION", "QUBO_REPRESENTATION_BINDING_MUTATION"),
+    "MATH-47": (("representation",), "UNKNOWN_BINARY_TO_SPIN_MAPPING", "BINARY_TO_SPIN_MAPPING_CONVENTION_MUTATION"),
+    "MATH-48": (("model", "objective_sense"), "MAXIMIZE", "OBJECTIVE_SENSE_BINDING_MUTATION"),
+    "MATH-49": (("model", "schema_version"), "QTT_DQM_GRAMMAR_V0", "DQM_SCHEMA_VERSION_BINDING_MUTATION"),
 }
 
 
@@ -3186,20 +3430,24 @@ def _semantic_binding_mutation_evidence(
             )
         return {
             "baseline_observed": _json_ready(baseline),
+            "baseline_value": (
+                "x_i=(1-s_i)/2; s=+1 maps to x=0 and s=-1 maps to x=1"
+            ),
+            "comparison_policy": policy.operational_policy,
+            "exact_consequence": {
+                "parity_failure_rows": len(drift_rows),
+                "state": "OBSERVED_PARITY_REJECTION",
+            },
+            "input_path": ["independent_procedure", "binary_to_spin_convention"],
             "input_binding_mutation_observed": True,
             "mutated_observed": drift_rows,
-            "mutation_family": "BINARY_TO_SPIN_MAPPING_CONVENTION",
+            "mutation_family": "BINARY_TO_SPIN_MAPPING_CONVENTION_MUTATION",
             "mutation_observed": True,
             "mutation_outcome": "OBSERVED_PARITY_REJECTION",
-            "representation_or_convention_mutation_observed_or_not_applicable": (
-                "OBSERVED::BINARY_TO_SPIN_MAPPING_CONVENTION"
+            "replacement_value": (
+                "s_i=2*x_i-1; s=-1 maps to x=0 and s=+1 maps to x=1"
             ),
-            "source_binding_mutation_observed_or_not_applicable": (
-                "NOT_APPLICABLE_WITH_PROOF::PURE_TRACKED_VECTOR_HAS_NO_SOURCE_FIELD"
-            ),
-            "unit_or_basis_mutation_observed_or_not_applicable": (
-                "NOT_APPLICABLE_WITH_PROOF::NO_DISTINCT_UNIT_OR_BASIS_FIELD"
-            ),
+            "semantic_binding_dimension": "BINARY_TO_SPIN_MAPPING_CONVENTION",
         }
     path, replacement, label = _BINDING_MUTATIONS[math_id]
     mutated = _mutated_copy(golden["inputs"], path, replacement)
@@ -3209,39 +3457,18 @@ def _semantic_binding_mutation_evidence(
         golden["inputs"],
         mutated,
         policy,
+        input_path=path,
+        baseline_value=_value_at_path(golden["inputs"], path),
+        replacement_value=replacement,
         mutation_family=label,
     )
-    representation_ids = {"MATH-16", "MATH-20", "MATH-21", "MATH-25", "MATH-46", "MATH-47", "MATH-48", "MATH-49"}
-    unit_basis_ids = {"MATH-17", "MATH-18", "MATH-19", "MATH-20", "MATH-21", "MATH-22", "MATH-23", "MATH-24", "MATH-25", "MATH-48"}
     evidence.update(
         {
             "input_binding_mutation_observed": True,
-            "unit_or_basis_mutation_observed_or_not_applicable": (
-                f"OBSERVED::{label}"
-                if math_id in unit_basis_ids
-                else "NOT_APPLICABLE_WITH_PROOF::NO_DISTINCT_UNIT_OR_BASIS_FIELD"
-            ),
-            "source_binding_mutation_observed_or_not_applicable": (
-                "NOT_APPLICABLE_WITH_PROOF::PURE_TRACKED_VECTOR_HAS_NO_SOURCE_FIELD"
-            ),
-            "representation_or_convention_mutation_observed_or_not_applicable": (
-                f"OBSERVED::{label}"
-                if math_id in representation_ids
-                else "NOT_APPLICABLE_WITH_PROOF::NO_DISTINCT_REPRESENTATION_FIELD"
-            ),
+            "semantic_binding_dimension": label,
         }
     )
     return evidence
-
-
-def _legacy_precision_or_boundary_mutation_observed(
-    math_id: str,
-    material: Mapping[str, object],
-    observed: object,
-) -> bool:
-    """Use a real legacy-input execution; never mutate stored expected output."""
-
-    return _legacy_formula_mutation_observed(math_id, material, observed)
 
 
 def _build_architecture_evidence(
@@ -3268,47 +3495,68 @@ def _build_architecture_evidence(
                 observed,
                 golden.get("expected"),
             )
+            formula_regression = _legacy_formula_regression_mutation_evidence(
+                math_id,
+                tracked,
+                observed,
+            )
+            domain_regression = _legacy_domain_rejection_evidence(
+                math_id,
+                tracked,
+            )
             rows.append(
                 _ArchitectureMathEvidenceV1(
                     math_id=math_id,
+                    evidence_tier=_EVIDENCE_TIER_BY_MATH_ID[math_id],
                     oracle_id=str(tracked["oracle_id"]),
                     golden_vector_id=str(tracked["golden_vector_id"]),
                     comparison_policy=str(tracked["comparison_policy"]),
                     independent_algorithm_id=(
                         f"ARCHITECTURE_LEGACY_INDEPENDENT_RECONSTRUCTION::{math_id}"
                     ),
-                    independent_observed_result={
-                        "tracked_golden": _json_ready(observed),
+                    actual_observed_evidence={
+                        "evidence_tier": _LEGACY_GOLDEN_REGRESSION_TIER,
+                        "legacy_domain_rejection": _json_ready(domain_regression),
+                        "legacy_formula_regression_mutation": _json_ready(
+                            formula_regression
+                        ),
+                        "legacy_golden_observation": _json_ready(observed),
                         "legacy_regression_group_passed": regression_passed,
                     },
                     golden_comparison_passed=comparison_passed,
-                    formula_or_procedure_mutation_observed=(
-                        _legacy_formula_mutation_observed(
-                            math_id,
-                            tracked,
-                            observed,
-                        )
-                    ),
-                    domain_guard_rejection_observed=(
-                        _legacy_domain_rejection_observed(math_id, tracked)
-                    ),
-                    precision_or_tolerance_mutation_observed=(
-                        _legacy_precision_or_boundary_mutation_observed(
-                            math_id,
-                            tracked,
-                            observed,
-                        )
-                    ),
-                    semantic_binding_mutation_observed=(
-                        _legacy_semantic_binding_mutation_observed(math_id, tracked)
-                    ),
+                    formula_or_procedure_mutation_observed=True,
+                    domain_guard_rejection_observed=True,
+                    precision_or_tolerance_mutation_observed=_LEGACY_NOT_CLAIMED,
+                    semantic_binding_mutation_observed=_LEGACY_NOT_CLAIMED,
                     production_import_count=production_import_count,
                     production_callable_count=production_callable_count,
                     terminal_state=(
-                        "INDEPENDENT_ROW_RECONSTRUCTED"
+                        "LEGACY_GOLDEN_REGRESSION_PASSED"
                         if comparison_passed
-                        else "INDEPENDENT_ROW_HELD"
+                        else "LEGACY_GOLDEN_REGRESSION_HELD"
                     ),
+                    legacy_golden_observation=_json_ready(observed),
+                    legacy_formula_regression_mutation_observation=_json_ready(
+                        formula_regression
+                    ),
+                    legacy_domain_rejection_observation=_json_ready(
+                        domain_regression
+                    ),
+                    boundary_vector_id=_LEGACY_NOT_CLAIMED,
+                    negative_vector_id=_LEGACY_NOT_CLAIMED,
+                    property_id=_LEGACY_NOT_CLAIMED,
+                    current_output_schema=_LEGACY_NOT_CLAIMED,
+                    declared_comparison_policy=str(tracked["comparison_policy"]),
+                    comparator_registry_version=_LEGACY_NOT_CLAIMED,
+                    comparator_authority_classification=(
+                        "LEGACY_TRACKED_GOLDEN_COMPARISON"
+                    ),
+                    golden_observation=_LEGACY_NOT_CLAIMED,
+                    boundary_observation=_LEGACY_NOT_CLAIMED,
+                    negative_exception_observation=_LEGACY_NOT_CLAIMED,
+                    property_mutation_observation=_LEGACY_NOT_CLAIMED,
+                    actual_execution_mutation_observation=_LEGACY_NOT_CLAIMED,
+                    semantic_binding_mutation_observation=_LEGACY_NOT_CLAIMED,
                 )
             )
             continue
@@ -3335,7 +3583,7 @@ def _build_architecture_evidence(
             raise ValueError(f"{math_id} BOUNDARY vector comparison failed")
         negative_evidence = _exact_negative_evidence(math_id, tracked)
         property_evidence = _property_mutation_evidence(math_id, tracked, policy)
-        precision_evidence = _precision_boundary_mutation_evidence(
+        execution_mutation_evidence = _actual_execution_mutation_evidence(
             math_id,
             tracked,
             policy,
@@ -3348,19 +3596,27 @@ def _build_architecture_evidence(
         rows.append(
             _ArchitectureMathEvidenceV1(
                 math_id=math_id,
+                evidence_tier=_EVIDENCE_TIER_BY_MATH_ID[math_id],
                 oracle_id=str(tracked["oracle_id"]),
                 golden_vector_id=str(tracked["golden_vector_id"]),
-                comparison_policy=str(tracked["comparison_policy"]),
+                comparison_policy=policy.operational_policy,
                 independent_algorithm_id=(
                     f"ARCHITECTURE_STANDARD_LIBRARY_RECONSTRUCTION::{math_id}::V2"
                 ),
-                independent_observed_result={
-                    "boundary": _json_ready(boundary_observed),
-                    "golden": _json_ready(observed),
-                    "negative": _json_ready(negative_evidence),
-                    "precision_boundary_mutation": _json_ready(precision_evidence),
-                    "property_mutation": _json_ready(property_evidence),
-                    "semantic_binding_mutation": _json_ready(binding_evidence),
+                actual_observed_evidence={
+                    "actual_execution_mutation_observation": _json_ready(
+                        execution_mutation_evidence
+                    ),
+                    "boundary_observation": _json_ready(boundary_observed),
+                    "evidence_tier": _CURRENT_FULL_CONTRACT_TIER,
+                    "golden_observation": _json_ready(observed),
+                    "negative_exception_observation": _json_ready(
+                        negative_evidence
+                    ),
+                    "property_mutation_observation": _json_ready(property_evidence),
+                    "semantic_binding_mutation_observation": _json_ready(
+                        binding_evidence
+                    ),
                 },
                 golden_comparison_passed=comparison_passed,
                 formula_or_procedure_mutation_observed=True,
@@ -3370,40 +3626,145 @@ def _build_architecture_evidence(
                 production_import_count=production_import_count,
                 production_callable_count=production_callable_count,
                 terminal_state=(
-                    "INDEPENDENT_ROW_RECONSTRUCTED"
+                    "CURRENT_FULL_CONTRACT_PASSED"
                     if comparison_passed
-                    else "INDEPENDENT_ROW_HELD"
+                    else "CURRENT_FULL_CONTRACT_HELD"
+                ),
+                legacy_golden_observation=_CURRENT_LEGACY_NOT_APPLICABLE,
+                legacy_formula_regression_mutation_observation=(
+                    _CURRENT_LEGACY_NOT_APPLICABLE
+                ),
+                legacy_domain_rejection_observation=(
+                    _CURRENT_LEGACY_NOT_APPLICABLE
                 ),
                 boundary_vector_id=str(tracked["boundary_vector_id"]),
                 negative_vector_id=str(tracked["negative_vector_id"]),
                 property_id=str(tracked["property_id"]),
-                output_schema_version=str(tracked["output_schema_version"]),
-                compiled_comparison_policy=policy.operational_policy,
-                golden_observed_result=_json_ready(observed),
-                boundary_observed_result=_json_ready(boundary_observed),
-                negative_exception_evidence=_json_ready(negative_evidence),
-                property_mutation_result=_json_ready(property_evidence),
-                precision_boundary_mutation_result=_json_ready(precision_evidence),
-                semantic_binding_mutation_result=_json_ready(binding_evidence),
-                input_binding_mutation_observed=True,
-                unit_or_basis_mutation_observed_or_not_applicable=str(
-                    binding_evidence[
-                        "unit_or_basis_mutation_observed_or_not_applicable"
-                    ]
+                current_output_schema={
+                    "schema_ref": str(tracked["output_schema_ref"]),
+                    "schema_version": str(tracked["output_schema_version"]),
+                },
+                declared_comparison_policy=str(tracked["comparison_policy"]),
+                comparator_registry_version=_COMPARATOR_REGISTRY_VERSION,
+                comparator_authority_classification=(
+                    _COMPARATOR_AUTHORITY_CLASSIFICATION
                 ),
-                source_binding_mutation_observed_or_not_applicable=str(
-                    binding_evidence[
-                        "source_binding_mutation_observed_or_not_applicable"
-                    ]
+                golden_observation=_json_ready(observed),
+                boundary_observation=_json_ready(boundary_observed),
+                negative_exception_observation=_json_ready(negative_evidence),
+                property_mutation_observation=_json_ready(property_evidence),
+                actual_execution_mutation_observation=_json_ready(
+                    execution_mutation_evidence
                 ),
-                representation_or_convention_mutation_observed_or_not_applicable=str(
-                    binding_evidence[
-                        "representation_or_convention_mutation_observed_or_not_applicable"
-                    ]
-                ),
+                semantic_binding_mutation_observation=_json_ready(binding_evidence),
             )
         )
     return tuple(rows)
+
+
+def _mutation_observation_complete(value: object) -> bool:
+    return (
+        isinstance(value, Mapping)
+        and value.get("mutation_observed") is True
+        and isinstance(value.get("mutation_family"), str)
+        and bool(value.get("mutation_family"))
+        and isinstance(value.get("input_path"), list)
+        and bool(value.get("input_path"))
+        and "baseline_value" in value
+        and "replacement_value" in value
+        and isinstance(value.get("exact_consequence"), Mapping)
+        and isinstance(value.get("comparison_policy"), str)
+        and bool(value.get("comparison_policy"))
+    )
+
+
+def _evidence_denominators(
+    rows: Sequence[_ArchitectureMathEvidenceV1],
+) -> dict[str, int]:
+    legacy_rows = tuple(
+        row for row in rows if row.evidence_tier == _LEGACY_GOLDEN_REGRESSION_TIER
+    )
+    current_rows = tuple(
+        row for row in rows if row.evidence_tier == _CURRENT_FULL_CONTRACT_TIER
+    )
+    return {
+        "architecture_identity_order_rows": len(rows),
+        "legacy_golden_regression_rows": len(legacy_rows),
+        "current_full_contract_rows": len(current_rows),
+        "current_golden_executions": sum(
+            row.golden_observation != _LEGACY_NOT_CLAIMED
+            and row.golden_comparison_passed
+            for row in current_rows
+        ),
+        "current_boundary_executions": sum(
+            row.boundary_observation != _LEGACY_NOT_CLAIMED
+            for row in current_rows
+        ),
+        "current_exact_negative_executions": sum(
+            isinstance(row.negative_exception_observation, Mapping)
+            and row.negative_exception_observation.get("attempted_execution") is True
+            and row.negative_exception_observation.get("message_substring_matched") is True
+            for row in current_rows
+        ),
+        "current_property_mutations": sum(
+            _mutation_observation_complete(row.property_mutation_observation)
+            for row in current_rows
+        ),
+        "current_actual_execution_mutations": sum(
+            _mutation_observation_complete(row.actual_execution_mutation_observation)
+            for row in current_rows
+        ),
+        "current_semantic_binding_mutations": sum(
+            _mutation_observation_complete(row.semantic_binding_mutation_observation)
+            for row in current_rows
+        ),
+        "legacy_rows_counted_as_current_full_contract": sum(
+            row.math_id in EXPECTED_MATH_IDS
+            and row.evidence_tier == _CURRENT_FULL_CONTRACT_TIER
+            for row in rows
+        ),
+        "legacy_formula_mutations_reused_as_precision_evidence": sum(
+            row.math_id in EXPECTED_MATH_IDS
+            and (
+                row.precision_or_tolerance_mutation_observed is True
+                or (
+                    row.actual_execution_mutation_observation != _LEGACY_NOT_CLAIMED
+                    and row.actual_execution_mutation_observation
+                    == row.legacy_formula_regression_mutation_observation
+                )
+            )
+            for row in rows
+        ),
+        "legacy_formula_mutations_reused_as_semantic_binding_evidence": sum(
+            row.math_id in EXPECTED_MATH_IDS
+            and (
+                row.semantic_binding_mutation_observed is True
+                or (
+                    row.semantic_binding_mutation_observation != _LEGACY_NOT_CLAIMED
+                    and row.semantic_binding_mutation_observation
+                    == row.legacy_formula_regression_mutation_observation
+                )
+            )
+            for row in rows
+        ),
+    }
+
+
+def _denominator_claim_failures(
+    rows: Sequence[_ArchitectureMathEvidenceV1],
+    claimed: Mapping[str, object],
+) -> tuple[str, ...]:
+    actual = _evidence_denominators(rows)
+    failures: list[str] = []
+    if set(claimed) != set(actual):
+        failures.append("aggregate denominator field set differs")
+    for name, expected in actual.items():
+        if claimed.get(name) != expected:
+            failures.append(
+                f"aggregate denominator claim {name}={claimed.get(name)!r}; "
+                f"observed {expected}"
+            )
+    return tuple(failures)
 
 
 def _evidence_contract_failures(
@@ -3420,17 +3781,20 @@ def _evidence_contract_failures(
         if tracked is None:
             failures.append(f"{row.math_id}: wrong owner routing")
             continue
+        expected_tier = _EVIDENCE_TIER_BY_MATH_ID.get(row.math_id)
+        if row.evidence_tier != expected_tier or row.evidence_tier != tracked.get(
+            "evidence_tier"
+        ):
+            failures.append(f"{row.math_id}: wrong evidence tier")
         if row.oracle_id != tracked["oracle_id"]:
             failures.append(f"{row.math_id}: wrong oracle ID")
         if row.golden_vector_id != tracked["golden_vector_id"]:
             failures.append(f"{row.math_id}: wrong golden vector ID")
-        if row.comparison_policy != tracked["comparison_policy"]:
-            failures.append(f"{row.math_id}: wrong comparison policy")
-        if row.independent_observed_result in (None, {}, SUCCESS_MARKER):
-            failures.append(f"{row.math_id}: missing or marker-only observed result")
-        if row.independent_observed_result == {"declared_steps_only": True}:
+        if row.actual_observed_evidence in (None, {}, SUCCESS_MARKER):
+            failures.append(f"{row.math_id}: missing or marker-only observed evidence")
+        if row.actual_observed_evidence == {"declared_steps_only": True}:
             failures.append(f"{row.math_id}: declared steps are not execution")
-        if row.independent_observed_result == {"stored_expected_object_parity": True}:
+        if row.actual_observed_evidence == {"stored_expected_object_parity": True}:
             failures.append(f"{row.math_id}: stored expected parity is not execution")
         if "H_AGGREGATE" in row.independent_algorithm_id:
             failures.append(f"{row.math_id}: wrong owner routing")
@@ -3440,83 +3804,161 @@ def _evidence_contract_failures(
             failures.append(f"{row.math_id}: formula/procedure mutation missing")
         if not row.domain_guard_rejection_observed:
             failures.append(f"{row.math_id}: domain mutation missing")
-        if not row.precision_or_tolerance_mutation_observed:
-            failures.append(f"{row.math_id}: precision mutation missing")
-        if not row.semantic_binding_mutation_observed:
-            failures.append(f"{row.math_id}: semantic binding mutation missing")
         if row.production_import_count != 0:
             failures.append(f"{row.math_id}: production import observed")
         if row.production_callable_count != 0:
             failures.append(f"{row.math_id}: production callable observed")
-        if row.terminal_state != "INDEPENDENT_ROW_RECONSTRUCTED":
-            failures.append(f"{row.math_id}: row is held")
-        if row.math_id in CURRENT_ST12B_ARCHITECTURE_MATH_IDS:
-            expected_policy = _compile_comparison_policy(
-                str(tracked["comparison_policy"]),
-                math_id=row.math_id,
+
+        if expected_tier == _LEGACY_GOLDEN_REGRESSION_TIER:
+            if row.comparison_policy != tracked["comparison_policy"]:
+                failures.append(f"{row.math_id}: wrong legacy comparison policy")
+            if row.terminal_state != "LEGACY_GOLDEN_REGRESSION_PASSED":
+                failures.append(f"{row.math_id}: legacy row is held")
+            if row.precision_or_tolerance_mutation_observed != _LEGACY_NOT_CLAIMED:
+                failures.append(f"{row.math_id}: false legacy precision claim")
+            if row.semantic_binding_mutation_observed != _LEGACY_NOT_CLAIMED:
+                failures.append(f"{row.math_id}: false legacy semantic-binding claim")
+            if row.legacy_golden_observation in (None, _CURRENT_LEGACY_NOT_APPLICABLE):
+                failures.append(f"{row.math_id}: legacy golden observation missing")
+            if not _mutation_observation_complete(
+                row.legacy_formula_regression_mutation_observation
+            ):
+                failures.append(f"{row.math_id}: legacy formula regression missing")
+            if not _mutation_observation_complete(
+                row.legacy_domain_rejection_observation
+            ):
+                failures.append(f"{row.math_id}: legacy domain rejection missing")
+            for field_name, value in (
+                ("boundary vector", row.boundary_vector_id),
+                ("negative vector", row.negative_vector_id),
+                ("property", row.property_id),
+                ("current output schema", row.current_output_schema),
+                ("golden observation", row.golden_observation),
+                ("boundary observation", row.boundary_observation),
+                ("negative observation", row.negative_exception_observation),
+                ("property mutation", row.property_mutation_observation),
+                ("actual execution mutation", row.actual_execution_mutation_observation),
+                ("semantic binding mutation", row.semantic_binding_mutation_observation),
+            ):
+                if value != _LEGACY_NOT_CLAIMED:
+                    failures.append(f"{row.math_id}: legacy {field_name} was claimed")
+            if row.comparator_registry_version != _LEGACY_NOT_CLAIMED:
+                failures.append(f"{row.math_id}: legacy row claimed current comparator")
+            if row.comparator_authority_classification != (
+                "LEGACY_TRACKED_GOLDEN_COMPARISON"
+            ):
+                failures.append(f"{row.math_id}: wrong legacy comparator authority")
+            continue
+
+        if expected_tier != _CURRENT_FULL_CONTRACT_TIER:
+            failures.append(f"{row.math_id}: unknown registered evidence tier")
+            continue
+        expected_policy = _compile_comparison_policy(
+            str(tracked["comparison_policy"]),
+            math_id=row.math_id,
+        )
+        if row.comparison_policy != expected_policy.operational_policy:
+            failures.append(f"{row.math_id}: comparison policy was not compiled")
+        if row.declared_comparison_policy != tracked["comparison_policy"]:
+            failures.append(f"{row.math_id}: declared comparison policy drift")
+        if row.comparator_registry_version != _COMPARATOR_REGISTRY_VERSION:
+            failures.append(f"{row.math_id}: comparator registry version drift")
+        if row.comparator_authority_classification != (
+            _COMPARATOR_AUTHORITY_CLASSIFICATION
+        ):
+            failures.append(f"{row.math_id}: comparator authority drift")
+        if row.terminal_state != "CURRENT_FULL_CONTRACT_PASSED":
+            failures.append(f"{row.math_id}: current row is held")
+        if row.precision_or_tolerance_mutation_observed is not True:
+            failures.append(f"{row.math_id}: actual execution mutation missing")
+        if row.semantic_binding_mutation_observed is not True:
+            failures.append(f"{row.math_id}: semantic binding mutation missing")
+        if any(
+            value != _CURRENT_LEGACY_NOT_APPLICABLE
+            for value in (
+                row.legacy_golden_observation,
+                row.legacy_formula_regression_mutation_observation,
+                row.legacy_domain_rejection_observation,
             )
-            if row.boundary_vector_id != tracked.get("boundary_vector_id"):
-                failures.append(f"{row.math_id}: wrong boundary vector ID")
-            if row.negative_vector_id != tracked.get("negative_vector_id"):
-                failures.append(f"{row.math_id}: wrong negative vector ID")
-            if row.property_id != tracked.get("property_id"):
-                failures.append(f"{row.math_id}: wrong property ID")
-            if row.output_schema_version != "ST12B_OUTPUT_V3_4":
-                failures.append(f"{row.math_id}: wrong current output schema version")
-            if row.compiled_comparison_policy != expected_policy.operational_policy:
-                failures.append(f"{row.math_id}: comparison policy was not compiled")
-            if row.golden_observed_result is None:
-                failures.append(f"{row.math_id}: current GOLDEN execution missing")
-            if row.boundary_observed_result is None:
-                failures.append(f"{row.math_id}: current BOUNDARY execution missing")
-            negative = row.negative_exception_evidence
-            if (
-                not isinstance(negative, Mapping)
-                or negative.get("attempted_execution") is not True
-                or negative.get("exception_type") != "ValueError"
-                or negative.get("message_substring_matched") is not True
-            ):
-                failures.append(f"{row.math_id}: exact NEGATIVE evidence missing")
-            property_result = row.property_mutation_result
-            if (
-                not isinstance(property_result, Mapping)
-                or property_result.get("mutation_observed") is not True
-            ):
-                failures.append(f"{row.math_id}: property execution evidence missing")
-            precision = row.precision_boundary_mutation_result
-            if (
-                not isinstance(precision, Mapping)
-                or precision.get("mutation_observed") is not True
-                or precision.get("expected_output_mutated") is not False
-                or precision.get("boundary_observed") is None
-            ):
-                failures.append(f"{row.math_id}: actual precision/boundary evidence missing")
-            binding = row.semantic_binding_mutation_result
-            if (
-                not isinstance(binding, Mapping)
-                or binding.get("mutation_observed") is not True
-                or row.input_binding_mutation_observed is not True
-            ):
-                failures.append(f"{row.math_id}: semantic binding evidence missing")
-            for label, value in (
-                ("unit/basis", row.unit_or_basis_mutation_observed_or_not_applicable),
-                ("source", row.source_binding_mutation_observed_or_not_applicable),
-                (
-                    "representation/convention",
-                    row.representation_or_convention_mutation_observed_or_not_applicable,
-                ),
-            ):
-                if not isinstance(value, str) or not value.startswith(
-                    ("OBSERVED::", "NOT_APPLICABLE_WITH_PROOF::")
-                ):
-                    failures.append(
-                        f"{row.math_id}: false or absent {label} mutation disposition"
-                    )
-            if ("tracked_legacy_" + "golden_is_locked_fixture") in json.dumps(
-                _json_ready(asdict(row)),
-                sort_keys=True,
-            ):
-                failures.append(f"{row.math_id}: stale legacy fixture evidence emitted")
+        ):
+            failures.append(f"{row.math_id}: current row claimed legacy evidence")
+        if row.boundary_vector_id != tracked.get("boundary_vector_id"):
+            failures.append(f"{row.math_id}: wrong boundary vector ID")
+        if row.negative_vector_id != tracked.get("negative_vector_id"):
+            failures.append(f"{row.math_id}: wrong negative vector ID")
+        if row.property_id != tracked.get("property_id"):
+            failures.append(f"{row.math_id}: wrong property ID")
+        if row.current_output_schema != {
+            "schema_ref": tracked.get("output_schema_ref"),
+            "schema_version": "ST12B_OUTPUT_V3_4",
+        }:
+            failures.append(f"{row.math_id}: wrong current output schema")
+        if row.golden_observation == _LEGACY_NOT_CLAIMED:
+            failures.append(f"{row.math_id}: current GOLDEN execution missing")
+        if row.boundary_observation == _LEGACY_NOT_CLAIMED:
+            failures.append(f"{row.math_id}: current BOUNDARY execution missing")
+        negative = row.negative_exception_observation
+        if (
+            not isinstance(negative, Mapping)
+            or negative.get("attempted_execution") is not True
+            or negative.get("exception_type") != "ValueError"
+            or negative.get("message_substring_matched") is not True
+        ):
+            failures.append(f"{row.math_id}: exact NEGATIVE evidence missing")
+        for label, value in (
+            ("property", row.property_mutation_observation),
+            ("actual execution", row.actual_execution_mutation_observation),
+            ("semantic binding", row.semantic_binding_mutation_observation),
+        ):
+            if not _mutation_observation_complete(value):
+                failures.append(f"{row.math_id}: {label} mutation evidence missing")
+            elif value.get("comparison_policy") != expected_policy.operational_policy:
+                failures.append(f"{row.math_id}: {label} comparison policy drift")
+        expected_execution_label = _ACTUAL_EXECUTION_MUTATIONS[row.math_id][2]
+        if (
+            isinstance(row.actual_execution_mutation_observation, Mapping)
+            and row.actual_execution_mutation_observation.get("mutation_family")
+            != expected_execution_label
+        ):
+            failures.append(f"{row.math_id}: overbroad execution mutation description")
+        expected_binding_label = (
+            "BINARY_TO_SPIN_MAPPING_CONVENTION_MUTATION"
+            if row.math_id == "MATH-47"
+            else _BINDING_MUTATIONS[row.math_id][2]
+        )
+        if (
+            isinstance(row.semantic_binding_mutation_observation, Mapping)
+            and row.semantic_binding_mutation_observation.get("mutation_family")
+            != expected_binding_label
+        ):
+            failures.append(f"{row.math_id}: overbroad binding mutation description")
+        if ("tracked_legacy_" + "golden_is_locked_fixture") in json.dumps(
+            _json_ready(asdict(row)),
+            sort_keys=True,
+        ):
+            failures.append(f"{row.math_id}: stale legacy fixture evidence emitted")
+
+    expected_denominators = {
+        "architecture_identity_order_rows": 29,
+        "legacy_golden_regression_rows": 15,
+        "current_full_contract_rows": 14,
+        "current_golden_executions": 14,
+        "current_boundary_executions": 14,
+        "current_exact_negative_executions": 14,
+        "current_property_mutations": 14,
+        "current_actual_execution_mutations": 14,
+        "current_semantic_binding_mutations": 14,
+        "legacy_rows_counted_as_current_full_contract": 0,
+        "legacy_formula_mutations_reused_as_precision_evidence": 0,
+        "legacy_formula_mutations_reused_as_semantic_binding_evidence": 0,
+    }
+    actual_denominators = _evidence_denominators(rows)
+    for name, expected in expected_denominators.items():
+        if actual_denominators.get(name) != expected:
+            failures.append(
+                f"aggregate denominator {name}={actual_denominators.get(name)!r}; "
+                f"expected {expected}"
+            )
     return tuple(failures)
 
 
@@ -3527,8 +3969,24 @@ def _exercise_evidence_contract_mutations(
     current_index = len(EXPECTED_MATH_IDS)
     current = rows[current_index]
 
-    def replace_current(value: _ArchitectureMathEvidenceV1) -> tuple[_ArchitectureMathEvidenceV1, ...]:
-        return (*rows[:current_index], value, *rows[current_index + 1 :])
+    def replace_at(
+        math_id: str,
+        value: _ArchitectureMathEvidenceV1,
+    ) -> tuple[_ArchitectureMathEvidenceV1, ...]:
+        index = next(
+            position for position, row in enumerate(rows) if row.math_id == math_id
+        )
+        return (*rows[:index], value, *rows[index + 1 :])
+
+    def changed_mapping(value: object, **changes: object) -> dict[str, object]:
+        if not isinstance(value, Mapping):
+            raise ValueError("mutation target is not a mapping")
+        result = dict(value)
+        result.update(changes)
+        return result
+
+    math_48_row = next(row for row in rows if row.math_id == "MATH-48")
+    math_49_row = next(row for row in rows if row.math_id == "MATH-49")
 
     mutations: tuple[Sequence[_ArchitectureMathEvidenceV1], ...] = (
         rows[1:],
@@ -3536,47 +3994,86 @@ def _exercise_evidence_contract_mutations(
         (replace(first, oracle_id="WRONG::ORACLE"), *rows[1:]),
         (replace(first, golden_vector_id="WRONG::VECTOR"), *rows[1:]),
         (replace(first, comparison_policy="WRONG_POLICY"), *rows[1:]),
-        (replace(first, independent_observed_result=None), *rows[1:]),
-        (replace(first, independent_observed_result=SUCCESS_MARKER), *rows[1:]),
-        (replace(first, independent_observed_result={"declared_steps_only": True}), *rows[1:]),
-        (replace(first, independent_observed_result={"stored_expected_object_parity": True}), *rows[1:]),
+        (replace(first, actual_observed_evidence=None), *rows[1:]),
+        (replace(first, actual_observed_evidence=SUCCESS_MARKER), *rows[1:]),
+        (replace(first, actual_observed_evidence={"declared_steps_only": True}), *rows[1:]),
+        (replace(first, actual_observed_evidence={"stored_expected_object_parity": True}), *rows[1:]),
         (replace(first, formula_or_procedure_mutation_observed=False), *rows[1:]),
         (replace(first, domain_guard_rejection_observed=False), *rows[1:]),
-        (replace(first, precision_or_tolerance_mutation_observed=False), *rows[1:]),
-        (replace(first, semantic_binding_mutation_observed=False), *rows[1:]),
+        (replace(first, evidence_tier=_CURRENT_FULL_CONTRACT_TIER), *rows[1:]),
+        (replace(first, precision_or_tolerance_mutation_observed=True), *rows[1:]),
+        (replace(first, semantic_binding_mutation_observed=True), *rows[1:]),
+        (
+            replace(
+                first,
+                actual_execution_mutation_observation=(
+                    first.legacy_formula_regression_mutation_observation
+                ),
+            ),
+            *rows[1:],
+        ),
+        (
+            replace(
+                first,
+                semantic_binding_mutation_observation=(
+                    first.legacy_formula_regression_mutation_observation
+                ),
+            ),
+            *rows[1:],
+        ),
+        (replace(first, boundary_observation=True), *rows[1:]),
         (replace(first, production_import_count=1), *rows[1:]),
         (replace(first, production_callable_count=1), *rows[1:]),
         (replace(first, independent_algorithm_id="H_AGGREGATE_VALIDATOR"), *rows[1:]),
-        replace_current(replace(current, boundary_vector_id="WRONG::BOUNDARY")),
-        replace_current(replace(current, negative_vector_id="WRONG::NEGATIVE")),
-        replace_current(replace(current, property_id="WRONG::PROPERTY")),
-        replace_current(replace(current, compiled_comparison_policy=None)),
-        replace_current(replace(current, golden_observed_result=None)),
-        replace_current(replace(current, boundary_observed_result=None)),
-        replace_current(replace(current, negative_exception_evidence=None)),
-        replace_current(replace(current, property_mutation_result=None)),
-        replace_current(replace(current, precision_boundary_mutation_result=None)),
-        replace_current(replace(current, semantic_binding_mutation_result=None)),
-        replace_current(replace(current, input_binding_mutation_observed=False)),
-        replace_current(
-            replace(
-                current,
-                source_binding_mutation_observed_or_not_applicable="RENAMED_KEY_ONLY",
-            )
+        replace_at(
+            current.math_id,
+            replace(current, evidence_tier=_LEGACY_GOLDEN_REGRESSION_TIER),
         ),
-        replace_current(
+        replace_at(current.math_id, replace(current, boundary_vector_id="WRONG::BOUNDARY")),
+        replace_at(current.math_id, replace(current, negative_vector_id="WRONG::NEGATIVE")),
+        replace_at(current.math_id, replace(current, property_id="WRONG::PROPERTY")),
+        replace_at(current.math_id, replace(current, comparison_policy="WRONG_POLICY")),
+        replace_at(current.math_id, replace(current, comparator_registry_version="DRIFTED")),
+        replace_at(current.math_id, replace(current, golden_observation=_LEGACY_NOT_CLAIMED)),
+        replace_at(current.math_id, replace(current, boundary_observation=_LEGACY_NOT_CLAIMED)),
+        replace_at(current.math_id, replace(current, negative_exception_observation=_LEGACY_NOT_CLAIMED)),
+        replace_at(current.math_id, replace(current, property_mutation_observation=_LEGACY_NOT_CLAIMED)),
+        replace_at(current.math_id, replace(current, actual_execution_mutation_observation=_LEGACY_NOT_CLAIMED)),
+        replace_at(current.math_id, replace(current, semantic_binding_mutation_observation=_LEGACY_NOT_CLAIMED)),
+        replace_at(
+            "MATH-48",
             replace(
-                current,
-                precision_boundary_mutation_result={
-                    "boundary_observed": {},
-                    "expected_output_mutated": True,
-                    "mutation_observed": True,
-                },
-            )
+                math_48_row,
+                semantic_binding_mutation_observation=changed_mapping(
+                    math_48_row.semantic_binding_mutation_observation,
+                    mutation_family="CQM_SCHEMA_UNIT_DOMAIN_OBJECTIVE_SENSE",
+                ),
+            ),
+        ),
+        replace_at(
+            "MATH-49",
+            replace(
+                math_49_row,
+                semantic_binding_mutation_observation=changed_mapping(
+                    math_49_row.semantic_binding_mutation_observation,
+                    mutation_family="DQM_SCHEMA_VARIABLE_CASE_PAIRWISE_BINDING",
+                ),
+            ),
         ),
     )
     if any(not _evidence_contract_failures(candidate) for candidate in mutations):
         raise ValueError("architecture grouped evidence mutation escaped rejection")
+
+    truthful_denominators = _evidence_denominators(rows)
+    false_precision_claim = dict(truthful_denominators)
+    false_precision_claim["current_actual_execution_mutations"] = 29
+    if not _denominator_claim_failures(rows, false_precision_claim):
+        raise ValueError("aggregate 29/29 execution-mutation claim was accepted")
+    false_binding_claim = dict(truthful_denominators)
+    false_binding_claim["current_semantic_binding_mutations"] = 29
+    if not _denominator_claim_failures(rows, false_binding_claim):
+        raise ValueError("aggregate 29/29 semantic-binding claim was accepted")
+    denominator_mutation_count = 2
 
     material = _tracked_architecture_material()
     for math_id in ("MATH-46", "MATH-47", "MATH-48", "MATH-49"):
@@ -3721,6 +4218,7 @@ def _exercise_evidence_contract_mutations(
     return (
         len(mutations)
         + 4
+        + denominator_mutation_count
         + operational_checks
         + _comparison_policy_self_rejections()
         + _exercise_independence_guard_mutations()
@@ -4334,6 +4832,12 @@ def main() -> int:
         )
         failures.extend(_evidence_contract_failures(evidence_rows))
         grouped_mutation_count = _exercise_evidence_contract_mutations(evidence_rows)
+        failures.extend(
+            _denominator_claim_failures(
+                evidence_rows,
+                _evidence_denominators(evidence_rows),
+            )
+        )
     except (OSError, SyntaxError, ValueError, KeyError, TypeError) as exc:
         failures.append(f"architecture row evidence reconstruction failed: {exc}")
     if production_import_count or production_callable_count:
@@ -4343,8 +4847,19 @@ def main() -> int:
     if failures:
         print("\n".join(failures), file=sys.stderr)
         return 1
+    evidence_denominators = _evidence_denominators(evidence_rows)
+    current_evidence_rows = tuple(
+        row
+        for row in evidence_rows
+        if row.evidence_tier == _CURRENT_FULL_CONTRACT_TIER
+    )
     evidence_payload = {
         "architecture_math_count": len(evidence_rows),
+        "denominators": evidence_denominators,
+        "evidence_tier_domain": [
+            _LEGACY_GOLDEN_REGRESSION_TIER,
+            _CURRENT_FULL_CONTRACT_TIER,
+        ],
         "rows": [_json_ready(asdict(row)) for row in evidence_rows],
         "schema_version": EVIDENCE_MARKER,
     }
@@ -4358,13 +4873,36 @@ def main() -> int:
             sort_keys=True,
         )
     )
+    current_evidence_payload = {
+        "current_full_contract_count": len(current_evidence_rows),
+        "denominators": evidence_denominators,
+        "rows": [_json_ready(asdict(row)) for row in current_evidence_rows],
+        "schema_version": CURRENT_FULL_CONTRACT_EVIDENCE_MARKER,
+    }
     print(
-        f"{SUCCESS_MARKER} independent_oracles={len(evidence_rows)} "
-        f"passing_invariant_groups={sum(row.golden_comparison_passed for row in evidence_rows)} "
-        f"formula_mutations={sum(row.formula_or_procedure_mutation_observed for row in evidence_rows)} "
-        f"domain_mutations={sum(row.domain_guard_rejection_observed for row in evidence_rows)} "
-        f"precision_mutations={sum(row.precision_or_tolerance_mutation_observed for row in evidence_rows)} "
-        f"semantic_binding_mutations={sum(row.semantic_binding_mutation_observed for row in evidence_rows)} "
+        f"{CURRENT_FULL_CONTRACT_EVIDENCE_MARKER} "
+        + json.dumps(
+            current_evidence_payload,
+            ensure_ascii=False,
+            allow_nan=False,
+            separators=(",", ":"),
+            sort_keys=True,
+        )
+    )
+    print(
+        f"{SUCCESS_MARKER} "
+        f"architecture_identity_order_rows={evidence_denominators['architecture_identity_order_rows']} "
+        f"legacy_golden_regression_rows={evidence_denominators['legacy_golden_regression_rows']} "
+        f"current_full_contract_rows={evidence_denominators['current_full_contract_rows']} "
+        f"current_golden_executions={evidence_denominators['current_golden_executions']} "
+        f"current_boundary_executions={evidence_denominators['current_boundary_executions']} "
+        f"current_exact_negative_executions={evidence_denominators['current_exact_negative_executions']} "
+        f"current_property_mutations={evidence_denominators['current_property_mutations']} "
+        f"current_actual_execution_mutations={evidence_denominators['current_actual_execution_mutations']} "
+        f"current_semantic_binding_mutations={evidence_denominators['current_semantic_binding_mutations']} "
+        f"legacy_rows_counted_as_current_full_contract={evidence_denominators['legacy_rows_counted_as_current_full_contract']} "
+        f"legacy_formula_mutations_reused_as_precision_evidence={evidence_denominators['legacy_formula_mutations_reused_as_precision_evidence']} "
+        f"legacy_formula_mutations_reused_as_semantic_binding_evidence={evidence_denominators['legacy_formula_mutations_reused_as_semantic_binding_evidence']} "
         f"grouped_contract_mutations={grouped_mutation_count} "
         f"production_imports={production_import_count} "
         f"production_calls={production_callable_count}"
