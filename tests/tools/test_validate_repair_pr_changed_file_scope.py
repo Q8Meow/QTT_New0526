@@ -213,6 +213,101 @@ def test_st12_architecture_oracle_prerequisite_repair_scope_is_exact(monkeypatch
     assert validator.validate(Path(".")) == ()
 
 
+def test_st12_inherited_math_receipt_repair_scope_is_exact(monkeypatch):
+    branch = validator.context.ST12_INHERITED_MATH_ROW_RECEIPT_REPAIR_BRANCH
+    allowed = frozenset(
+        {
+            "tools/qku_independent_math_row_receipt.py",
+            "tools/independent_validate_qku_computation_control_plane_accounting.py",
+            "tools/independent_validate_qku_computation_control_plane_execution.py",
+            "tools/independent_validate_qku_computation_control_plane_d.py",
+            "tools/independent_validate_qku_computation_control_plane_model_risk.py",
+            "tools/independent_validate_qku_computation_control_plane_quantum.py",
+            "tools/ci_branch_context.py",
+            "tools/validation_inventory.py",
+            "tools/validation_scope_registry.py",
+            "tools/validate_idempotence_runtime_containment.py",
+            "tests/tools/test_ci_branch_context.py",
+            "tests/tools/test_validate_repair_pr_changed_file_scope.py",
+            "tests/tools/test_qku_independent_math_row_receipt.py",
+            "tests/tools/test_validation_inventory.py",
+            "tests/tools/test_validation_scope_registry.py",
+            "tests/tools/test_validate_idempotence_runtime_containment.py",
+            "docs/master_plan/generated/"
+            "PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+        }
+    )
+    assert (
+        validator.context.ST12_INHERITED_MATH_ROW_RECEIPT_REPAIR_CHANGED_PATHS
+        == allowed
+    )
+    assert all(
+        validator.context.changed_path_allowed_for_explicit_repair_branch(
+            branch,
+            path,
+        )
+        for path in allowed
+    )
+
+    rejected = (
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/validation.py",
+        "tools/independent_validate_qku_computation_control_plane_architecture.py",
+        "tools/changed_area_validation_router.py",
+        "tools/validate_validation_inventory.py",
+        "tools/run_validation_gates.py",
+        "tools/pr168_rp5c_config.py",
+        "tests/tools/test_changed_area_validation_router.py",
+        "tests/tools/fixtures/idempotence_runtime_containment_inventory.json",
+        "tests/fail_closed/test_run_validation_gates.py",
+        ".github/workflows/qtt_validation.yml",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/"
+        "tranche_h/test_contract_matrix.py",
+        "docs/master_plan/QTT_MasterPlan_Current.md",
+        "docs/roadmap/QTT_Roadmap_v10.md",
+        "docs/master_plan/generated/UnrelatedInheritedReceipt.report.json",
+        "docs/master_plan/generated/PR208_ValidationInventory.report.json",
+    )
+    assert all(
+        not validator.context.changed_path_allowed_for_explicit_repair_branch(
+            branch,
+            path,
+        )
+        for path in rejected
+    )
+    assert all(
+        not validator.context.changed_path_allowed_for_explicit_repair_branch(
+            branch,
+            path,
+        )
+        for path in (
+            "tools/qku_independent_math_row_receipts.py",
+            "tools/Validation_inventory.py",
+            "tests/tools/test_validation_inventory.py/",
+        )
+    )
+
+    monkeypatch.setattr(
+        validator.context,
+        "current_branch_context",
+        lambda repo_root: validator.context.BranchContext(
+            branch=branch,
+            source="test",
+        ),
+    )
+    monkeypatch.setattr(
+        validator,
+        "_git",
+        _fake_status_git(
+            (
+                *(f" M {path}" for path in sorted(allowed)),
+                "?? .tmp/qtt-validation-router/st12-inherited-receipts.json",
+                "?? .pytest_cache/st12-inherited-receipts/cache",
+            )
+        ),
+    )
+    assert validator.validate(Path(".")) == ()
+
+
 def test_exact_mapped_repair_scopes_precede_generic_pr152_allowances():
     context = validator.context
     generic_pr152_paths = context.PR152_CURRENTIZATION_AFTER_FASTFAIL_MERGE_CHANGED_PATHS

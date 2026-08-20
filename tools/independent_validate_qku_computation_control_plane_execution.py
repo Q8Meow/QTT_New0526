@@ -4,12 +4,32 @@
 from __future__ import annotations
 
 import ast
+import base64
+from dataclasses import dataclass, replace
+from datetime import UTC, datetime, timedelta
 from decimal import Decimal
+import json
 from pathlib import Path
 import sys
+import zlib
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from tools.qku_independent_math_row_receipt import (  # noqa: E402
+    EVIDENCE_TIER,
+    INDEPENDENT_REFERENCE_NO_PRODUCTION_RUNTIME_IMPORT,
+    NO_PRODUCTION_SYSTEM_UNDER_TEST,
+    TERMINAL_STATE,
+    IndependentMathRowEvidenceV1,
+    build_envelope,
+    evidence_observation,
+    format_evidence_line,
+    observed_result,
+)
+
 PACKAGE = REPO_ROOT / "src" / "qtt" / "stage1_prediction_markets" / "qku_computation_control_plane"
 SUCCESS = "QKU_EXECUTION_INDEPENDENTLY_VALIDATED"
 SERVICE_METHODS = (
@@ -27,6 +47,740 @@ NEW_MODULES = (
     "cohort_compiler.py", "input_lock.py", "evidence.py", "model_risk.py",
     "quantum_benchmark.py", "llm_gateway.py",
 )
+
+
+class _IndependentArtifactRejection(ValueError):
+    def __init__(self, failure_family: str, message: str) -> None:
+        self.failure_family = failure_family
+        super().__init__(message)
+
+
+def _text(value: object, name: str) -> str:
+    if not isinstance(value, str) or not value.strip():
+        raise _IndependentArtifactRejection(
+            "MODEL_ARTIFACT_REQUIRED", f"{name} is required"
+        )
+    return value
+
+
+def _decimal(value: object, name: str) -> Decimal:
+    try:
+        result = Decimal(str(value))
+    except Exception as exc:
+        raise _IndependentArtifactRejection(
+            "OUT_OF_DOMAIN", f"{name} must be an exact Decimal"
+        ) from exc
+    if not result.is_finite():
+        raise _IndependentArtifactRejection(
+            "OUT_OF_DOMAIN", f"{name} must be finite"
+        )
+    return result
+
+
+def _utc(value: datetime | str, name: str) -> datetime:
+    try:
+        result = value if isinstance(value, datetime) else datetime.fromisoformat(value)
+    except (TypeError, ValueError) as exc:
+        raise _IndependentArtifactRejection(
+            "MODEL_ARTIFACT_REQUIRED", f"{name} must be an ISO datetime"
+        ) from exc
+    if result.tzinfo is None or result.utcoffset() is None:
+        raise _IndependentArtifactRejection(
+            "MODEL_ARTIFACT_REQUIRED", f"{name} must be timezone-aware"
+        )
+    return result.astimezone(UTC)
+
+
+@dataclass(frozen=True, slots=True)
+class _IndependentFillProbabilityArtifactV1:
+    artifact_id: str
+    artifact_version: str
+    feature_schema_ref: str
+    calibration_receipt_ref: str
+    scope_ref: str
+    horizon_seconds: int
+    probability: Decimal | str
+    feature_snapshot_ref: str
+    feature_observed_at: datetime | str
+    evaluated_at: datetime | str
+    artifact_valid_until: datetime | str
+    maximum_feature_age: timedelta
+    calibration_state: str
+
+    def __post_init__(self) -> None:
+        for name in (
+            "artifact_id",
+            "artifact_version",
+            "feature_schema_ref",
+            "calibration_receipt_ref",
+            "scope_ref",
+            "feature_snapshot_ref",
+            "calibration_state",
+        ):
+            _text(getattr(self, name), name)
+        if (
+            isinstance(self.horizon_seconds, bool)
+            or not isinstance(self.horizon_seconds, int)
+            or self.horizon_seconds <= 0
+        ):
+            raise _IndependentArtifactRejection(
+                "OUT_OF_DOMAIN", "horizon_seconds must be positive"
+            )
+        probability = _decimal(self.probability, "probability")
+        if probability < 0 or probability > 1:
+            raise _IndependentArtifactRejection(
+                "OUT_OF_DOMAIN", "probability must be in [0,1]"
+            )
+        observed = _utc(self.feature_observed_at, "feature_observed_at")
+        evaluated = _utc(self.evaluated_at, "evaluated_at")
+        valid_until = _utc(self.artifact_valid_until, "artifact_valid_until")
+        if (
+            not isinstance(self.maximum_feature_age, timedelta)
+            or self.maximum_feature_age <= timedelta(0)
+        ):
+            raise _IndependentArtifactRejection(
+                "MODEL_ARTIFACT_REQUIRED",
+                "maximum_feature_age must be explicit and positive",
+            )
+        if (
+            self.calibration_state != "VALIDATED"
+            or evaluated < observed
+            or evaluated - observed > self.maximum_feature_age
+            or evaluated >= valid_until
+        ):
+            raise _IndependentArtifactRejection(
+                "MODEL_ARTIFACT_REQUIRED",
+                "model calibration, validity, or feature freshness gate failed",
+            )
+        object.__setattr__(self, "probability", probability)
+        object.__setattr__(self, "feature_observed_at", observed)
+        object.__setattr__(self, "evaluated_at", evaluated)
+        object.__setattr__(self, "artifact_valid_until", valid_until)
+
+
+def _independent_fill_probability(
+    artifact: _IndependentFillProbabilityArtifactV1 | None,
+    *,
+    feature_schema_ref: str,
+    scope_ref: str,
+    horizon_seconds: int,
+) -> Decimal:
+    if artifact is None:
+        raise _IndependentArtifactRejection(
+            "MODEL_ARTIFACT_REQUIRED", "no default fill-probability model exists"
+        )
+    if (
+        artifact.feature_schema_ref != feature_schema_ref
+        or artifact.scope_ref != scope_ref
+        or artifact.horizon_seconds != horizon_seconds
+    ):
+        raise _IndependentArtifactRejection(
+            "MODEL_ARTIFACT_REQUIRED",
+            "model artifact is outside declared schema, scope, or horizon",
+        )
+    assert isinstance(artifact.probability, Decimal)
+    return artifact.probability
+
+
+@dataclass(frozen=True, slots=True)
+class _IndependentFillDistributionArtifactV1:
+    artifact_id: str
+    artifact_version: str
+    source_binding_ref: str
+    scope_ref: str
+    horizon_seconds: int
+    evaluated_at: datetime | str
+    artifact_valid_until: datetime | str
+    order_quantity: Decimal | str
+    normalization_tolerance: Decimal | str
+    fill_quantity_distribution: tuple[tuple[object, object], ...]
+
+    def __post_init__(self) -> None:
+        for name in (
+            "artifact_id",
+            "artifact_version",
+            "source_binding_ref",
+            "scope_ref",
+        ):
+            _text(getattr(self, name), name)
+        if (
+            isinstance(self.horizon_seconds, bool)
+            or not isinstance(self.horizon_seconds, int)
+            or self.horizon_seconds <= 0
+        ):
+            raise _IndependentArtifactRejection(
+                "MODEL_ARTIFACT_REQUIRED",
+                "distribution horizon must be explicit and positive",
+            )
+        evaluated = _utc(self.evaluated_at, "evaluated_at")
+        valid_until = _utc(self.artifact_valid_until, "artifact_valid_until")
+        if (
+            evaluated >= valid_until
+            or not isinstance(self.fill_quantity_distribution, tuple)
+            or not self.fill_quantity_distribution
+        ):
+            raise _IndependentArtifactRejection(
+                "MODEL_ARTIFACT_REQUIRED", "distribution artifact is stale or empty"
+            )
+        maximum = _decimal(self.order_quantity, "order_quantity")
+        tolerance = _decimal(self.normalization_tolerance, "normalization_tolerance")
+        if maximum < 0 or tolerance < 0:
+            raise _IndependentArtifactRejection(
+                "OUT_OF_DOMAIN", "distribution bounds must be nonnegative"
+            )
+        object.__setattr__(self, "evaluated_at", evaluated)
+        object.__setattr__(self, "artifact_valid_until", valid_until)
+        object.__setattr__(self, "order_quantity", maximum)
+        object.__setattr__(self, "normalization_tolerance", tolerance)
+
+
+def _independent_expected_fill(
+    artifact: _IndependentFillDistributionArtifactV1 | None,
+) -> Decimal:
+    if artifact is None or not isinstance(
+        artifact, _IndependentFillDistributionArtifactV1
+    ):
+        raise _IndependentArtifactRejection(
+            "MODEL_ARTIFACT_REQUIRED", "a versioned fill distribution is required"
+        )
+    maximum = artifact.order_quantity
+    tolerance = artifact.normalization_tolerance
+    assert isinstance(maximum, Decimal) and isinstance(tolerance, Decimal)
+    if tolerance >= 1:
+        raise _IndependentArtifactRejection(
+            "OUT_OF_DOMAIN", "normalization tolerance must be less than one"
+        )
+    probability_sum = Decimal(0)
+    expected = Decimal(0)
+    for index, item in enumerate(artifact.fill_quantity_distribution):
+        if not isinstance(item, tuple) or len(item) != 2:
+            raise _IndependentArtifactRejection(
+                "INVALID_CONTRACT", "distribution rows must be (quantity, probability)"
+            )
+        quantity = _decimal(item[0], f"distribution[{index}].quantity")
+        probability = _decimal(item[1], f"distribution[{index}].probability")
+        if quantity < 0 or probability < 0 or probability > 1:
+            raise _IndependentArtifactRejection(
+                "OUT_OF_DOMAIN", "distribution quantity/probability is invalid"
+            )
+        if quantity > maximum:
+            raise _IndependentArtifactRejection(
+                "OUT_OF_DOMAIN", "fill support exceeds order quantity"
+            )
+        probability_sum += probability
+        expected += quantity * probability
+    if probability_sum <= 0 or abs(probability_sum - Decimal(1)) > tolerance:
+        raise _IndependentArtifactRejection(
+            "OUT_OF_DOMAIN",
+            "fill probabilities exceed the explicitly declared normalization tolerance",
+        )
+    # MATH-38 is the declared expectation sum(quantity * probability).
+    # Normalization is a separate fail-closed contract; it is not permission
+    # to silently turn the estimator into self-normalized importance sampling.
+    result = expected
+    if result < 0 or result > maximum:
+        raise _IndependentArtifactRejection(
+            "OUT_OF_DOMAIN", "expected fill is outside order support"
+        )
+    return result
+
+
+def _assigned_literal(path: Path, name: str) -> object:
+    tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+    for node in tree.body:
+        if isinstance(node, ast.Assign) and any(
+            isinstance(target, ast.Name) and target.id == name for target in node.targets
+        ):
+            return ast.literal_eval(node.value)
+    raise ValueError(f"missing literal {name}")
+
+
+def _archive_rows(path: Path, name: str) -> tuple[dict[str, object], ...]:
+    payload = _assigned_literal(path, name)
+    if not isinstance(payload, str):
+        raise ValueError(f"{name} is not literal text")
+    text = zlib.decompress(base64.b85decode(payload.encode("ascii"))).decode(
+        "utf-8-sig"
+    )
+    rows = tuple(json.loads(line) for line in text.splitlines() if line.strip())
+    if any(not isinstance(row, dict) for row in rows):
+        raise ValueError(f"{name} contains a nonobject")
+    return rows
+
+
+def _capture_rejection(callable_, family: str, message: str) -> dict[str, object]:
+    try:
+        callable_()
+    except _IndependentArtifactRejection as exc:
+        if exc.failure_family != family or message not in str(exc):
+            raise ValueError(
+                f"wrong independent rejection: {exc.failure_family}::{exc}"
+            ) from exc
+        return {
+            "failure_family": exc.failure_family,
+            "exception_type": type(exc).__name__,
+            "message": str(exc),
+        }
+    raise ValueError(f"expected rejection {family}::{message} was accepted")
+
+
+def _fill_probability_fixture(
+    horizon: int,
+    probability: str,
+    **overrides: object,
+) -> _IndependentFillProbabilityArtifactV1:
+    observed = datetime(2026, 1, 1, tzinfo=UTC)
+    values: dict[str, object] = {
+        "artifact_id": f"GOLDEN::MODEL::{horizon}",
+        "artifact_version": "1",
+        "feature_schema_ref": "GOLDEN::FEATURES",
+        "calibration_receipt_ref": "GOLDEN::CALIBRATION",
+        "scope_ref": "GOLDEN::SCOPE",
+        "horizon_seconds": horizon,
+        "probability": probability,
+        "feature_snapshot_ref": f"GOLDEN::FEATURE-SNAPSHOT::{horizon}",
+        "feature_observed_at": observed,
+        "evaluated_at": observed + timedelta(seconds=1),
+        "artifact_valid_until": observed + timedelta(minutes=1),
+        "maximum_feature_age": timedelta(seconds=5),
+        "calibration_state": "VALIDATED",
+    }
+    values.update(overrides)
+    return _IndependentFillProbabilityArtifactV1(**values)  # type: ignore[arg-type]
+
+
+def _distribution_fixture(
+    distribution: tuple[tuple[object, object], ...],
+    **overrides: object,
+) -> _IndependentFillDistributionArtifactV1:
+    evaluated = datetime(2026, 1, 1, tzinfo=UTC)
+    values: dict[str, object] = {
+        "artifact_id": "GOLDEN::DISTRIBUTION",
+        "artifact_version": "1",
+        "source_binding_ref": "GOLDEN::SOURCE",
+        "scope_ref": "GOLDEN::SCOPE",
+        "horizon_seconds": 30,
+        "evaluated_at": evaluated,
+        "artifact_valid_until": evaluated + timedelta(minutes=1),
+        "order_quantity": "100",
+        "normalization_tolerance": "0",
+        "fill_quantity_distribution": distribution,
+    }
+    values.update(overrides)
+    return _IndependentFillDistributionArtifactV1(**values)  # type: ignore[arg-type]
+
+
+def _validate_execution_math_owner_ast(tree: ast.Module) -> None:
+    artifact = next(
+        node
+        for node in tree.body
+        if isinstance(node, ast.ClassDef)
+        and node.name == "FillProbabilityModelArtifactV1"
+    )
+    fields = tuple(
+        node.target.id
+        for node in artifact.body
+        if isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name)
+    )
+    if fields != (
+        "artifact_id",
+        "artifact_version",
+        "feature_schema_ref",
+        "calibration_receipt_ref",
+        "scope_ref",
+        "horizon_seconds",
+        "probability",
+        "feature_snapshot_ref",
+        "feature_observed_at",
+        "evaluated_at",
+        "artifact_valid_until",
+        "maximum_feature_age",
+        "calibration_state",
+    ):
+        raise ValueError("MATH-37 production artifact field contract differs")
+    fill_function = next(
+        node
+        for node in tree.body
+        if isinstance(node, ast.FunctionDef) and node.name == "fill_probability_v1"
+    )
+    source = ast.unparse(fill_function)
+    for token in (
+        "artifact is None",
+        "feature_schema_ref",
+        "scope_ref",
+        "horizon_seconds",
+        "artifact.probability",
+    ):
+        if token not in source:
+            raise ValueError(f"MATH-37 production owner guard differs: {token}")
+
+
+def _build_execution_receipt_rows(
+    oracles: tuple[dict[str, object], ...],
+    vectors: tuple[dict[str, object], ...],
+) -> tuple[IndependentMathRowEvidenceV1, ...]:
+    oracle_by_id = {str(row["math_spec_ref"]): row for row in oracles}
+    vector_by_id = {str(row["math_spec_ref"]): row for row in vectors}
+
+    oracle37 = oracle_by_id["MATH-37"]
+    vector37 = vector_by_id["MATH-37"]
+    horizons = vector37["inputs"]["same_order_context_horizons_seconds"]  # type: ignore[index]
+    if horizons != [1, 5, 30]:
+        raise ValueError("MATH-37 tracked horizon roster differs")
+    artifacts = tuple(
+        _fill_probability_fixture(horizon, probability)
+        for horizon, probability in zip(horizons, ("0.1", "0.4", "0.8"), strict=True)
+    )
+    probabilities = tuple(
+        _independent_fill_probability(
+            artifact,
+            feature_schema_ref="GOLDEN::FEATURES",
+            scope_ref="GOLDEN::SCOPE",
+            horizon_seconds=horizon,
+        )
+        for artifact, horizon in zip(artifacts, horizons, strict=True)
+    )
+    actual37 = {
+        "calibration_receipt_required": all(
+            bool(artifact.calibration_receipt_ref) for artifact in artifacts
+        ),
+        "probabilities_bounded_0_1": all(0 <= value <= 1 for value in probabilities),
+        "probability_non_decreasing_by_horizon": probabilities
+        == tuple(sorted(probabilities)),
+    }
+    expected37 = vector37["expected"]
+    if actual37 != expected37:
+        raise ValueError("MATH-37 independent artifact result differs")
+    missing_rejection = _capture_rejection(
+        lambda: _independent_fill_probability(
+            None,
+            feature_schema_ref="GOLDEN::FEATURES",
+            scope_ref="GOLDEN::SCOPE",
+            horizon_seconds=5,
+        ),
+        "MODEL_ARTIFACT_REQUIRED",
+        "no default fill-probability model exists",
+    )
+    negative37 = {
+        "missing_artifact": missing_rejection,
+        "stale_artifact": _capture_rejection(
+            lambda: _fill_probability_fixture(
+                5,
+                "0.4",
+                evaluated_at=datetime(2026, 1, 1, 0, 2, tzinfo=UTC),
+                artifact_valid_until=datetime(2026, 1, 1, 0, 1, tzinfo=UTC),
+            ),
+            "MODEL_ARTIFACT_REQUIRED",
+            "model calibration, validity, or feature freshness gate failed",
+        ),
+        "uncalibrated_artifact": _capture_rejection(
+            lambda: _fill_probability_fixture(5, "0.4", calibration_state="PENDING"),
+            "MODEL_ARTIFACT_REQUIRED",
+            "model calibration, validity, or feature freshness gate failed",
+        ),
+        "nonfinite_probability": _capture_rejection(
+            lambda: _fill_probability_fixture(5, "NaN"),
+            "OUT_OF_DOMAIN",
+            "probability must be finite",
+        ),
+    }
+    binding37 = {
+        name: _capture_rejection(
+            lambda artifact=artifact, schema=schema, scope=scope, horizon=horizon: _independent_fill_probability(
+                artifact,
+                feature_schema_ref=schema,
+                scope_ref=scope,
+                horizon_seconds=horizon,
+            ),
+            "MODEL_ARTIFACT_REQUIRED",
+            "model artifact is outside declared schema, scope, or horizon",
+        )
+        for name, artifact, schema, scope, horizon in (
+            (
+                "wrong_schema",
+                artifacts[1],
+                "GOLDEN::FEATURES::OTHER",
+                "GOLDEN::SCOPE",
+                5,
+            ),
+            (
+                "wrong_scope",
+                artifacts[1],
+                "GOLDEN::FEATURES",
+                "GOLDEN::SCOPE::OTHER",
+                5,
+            ),
+            (
+                "wrong_horizon",
+                artifacts[1],
+                "GOLDEN::FEATURES",
+                "GOLDEN::SCOPE",
+                30,
+            ),
+        )
+    }
+    boundary_artifact = _fill_probability_fixture(
+        5,
+        "0",
+        evaluated_at=datetime(2026, 1, 1, tzinfo=UTC) + timedelta(seconds=5),
+    )
+    upper_boundary = _fill_probability_fixture(5, "1")
+    boundary37 = {
+        "probability_zero": str(
+            _independent_fill_probability(
+                boundary_artifact,
+                feature_schema_ref="GOLDEN::FEATURES",
+                scope_ref="GOLDEN::SCOPE",
+                horizon_seconds=5,
+            )
+        ),
+        "probability_one": str(
+            _independent_fill_probability(
+                upper_boundary,
+                feature_schema_ref="GOLDEN::FEATURES",
+                scope_ref="GOLDEN::SCOPE",
+                horizon_seconds=5,
+            )
+        ),
+        "maximum_feature_age_inclusive": True,
+    }
+    precision37 = {
+        "exact_maximum_age_probability": boundary37["probability_zero"],
+        "over_maximum_age_rejection": _capture_rejection(
+            lambda: _fill_probability_fixture(
+                5,
+                "0.4",
+                evaluated_at=datetime(2026, 1, 1, tzinfo=UTC)
+                + timedelta(seconds=5, microseconds=1),
+            ),
+            "MODEL_ARTIFACT_REQUIRED",
+            "model calibration, validity, or feature freshness gate failed",
+        ),
+    }
+    mutated_probability = _independent_fill_probability(
+        replace(artifacts[1], probability=Decimal("0.5")),
+        feature_schema_ref="GOLDEN::FEATURES",
+        scope_ref="GOLDEN::SCOPE",
+        horizon_seconds=5,
+    )
+    if mutated_probability == probabilities[1]:
+        raise ValueError("MATH-37 probability mutation was not observed")
+
+    oracle38 = oracle_by_id["MATH-38"]
+    vector38 = vector_by_id["MATH-38"]
+    distribution_rows = vector38["inputs"]["fill_quantity_distribution"]  # type: ignore[index]
+    distribution = tuple(
+        (row["quantity"], row["probability"]) for row in distribution_rows
+    )
+    artifact38 = _distribution_fixture(distribution)
+    expected_fill = _independent_expected_fill(artifact38)
+    actual38 = {"expected_fill_quantity": expected_fill}
+    expected38 = vector38["expected"]
+    if expected_fill != Decimal(str(expected38["expected_fill_quantity"])):  # type: ignore[index]
+        raise ValueError("MATH-38 independent expectation differs")
+    mutated_distribution = _distribution_fixture(
+        (("0", ".3"), ("50", ".3"), ("100", ".4"))
+    )
+    mutated_fill = _independent_expected_fill(mutated_distribution)
+    if mutated_fill != Decimal("55") or mutated_fill == expected_fill:
+        raise ValueError("MATH-38 distribution mutation was not observed")
+    boundary_fill = _independent_expected_fill(_distribution_fixture((("0", "1"),)))
+    negative38 = {
+        "missing": _capture_rejection(
+            lambda: _independent_expected_fill(None),
+            "MODEL_ARTIFACT_REQUIRED",
+            "a versioned fill distribution is required",
+        ),
+        "empty": _capture_rejection(
+            lambda: _distribution_fixture(()),
+            "MODEL_ARTIFACT_REQUIRED",
+            "distribution artifact is stale or empty",
+        ),
+        "stale": _capture_rejection(
+            lambda: _distribution_fixture(
+                distribution,
+                artifact_valid_until=datetime(2026, 1, 1, tzinfo=UTC),
+            ),
+            "MODEL_ARTIFACT_REQUIRED",
+            "distribution artifact is stale or empty",
+        ),
+        "malformed": _capture_rejection(
+            lambda: _independent_expected_fill(
+                _distribution_fixture((("0", ".2", "EXTRA"),))  # type: ignore[arg-type]
+            ),
+            "INVALID_CONTRACT",
+            "distribution rows must be (quantity, probability)",
+        ),
+        "nonnormalized": _capture_rejection(
+            lambda: _independent_expected_fill(
+                _distribution_fixture((("0", ".2"), ("100", ".7")))
+            ),
+            "OUT_OF_DOMAIN",
+            "fill probabilities exceed",
+        ),
+        "over_quantity": _capture_rejection(
+            lambda: _independent_expected_fill(
+                _distribution_fixture((("0", ".2"), ("101", ".8")))
+            ),
+            "OUT_OF_DOMAIN",
+            "fill support exceeds order quantity",
+        ),
+    }
+    domain38 = _capture_rejection(
+        lambda: _independent_expected_fill(
+            _distribution_fixture((("-1", ".2"), ("100", ".8")))
+        ),
+        "OUT_OF_DOMAIN",
+        "distribution quantity/probability is invalid",
+    )
+    within_tolerance = _independent_expected_fill(
+        _distribution_fixture(
+            (("0", ".2"), ("50", ".3"), ("100", ".5000000000005")),
+            normalization_tolerance="0.000000000001",
+        )
+    )
+    outside_tolerance = _capture_rejection(
+        lambda: _independent_expected_fill(
+            _distribution_fixture(
+                (("0", ".2"), ("50", ".3"), ("100", ".500000000002")),
+                normalization_tolerance="0.000000000001",
+            )
+        ),
+        "OUT_OF_DOMAIN",
+        "fill probabilities exceed",
+    )
+    binding38 = {
+        "missing_source": _capture_rejection(
+            lambda: _distribution_fixture(distribution, source_binding_ref=""),
+            "MODEL_ARTIFACT_REQUIRED",
+            "source_binding_ref is required",
+        ),
+        "invalid_horizon": _capture_rejection(
+            lambda: _distribution_fixture(distribution, horizon_seconds=0),
+            "MODEL_ARTIFACT_REQUIRED",
+            "distribution horizon must be explicit and positive",
+        ),
+        "order_quantity_custody": negative38["over_quantity"],
+    }
+
+    shared = {
+        "domain_owner": (
+            "tools/independent_validate_qku_computation_control_plane_execution.py"
+        ),
+        "evidence_tier": EVIDENCE_TIER,
+        "independence_class": INDEPENDENT_REFERENCE_NO_PRODUCTION_RUNTIME_IMPORT,
+        "production_system_under_test_invocation_count": 0,
+        "production_expected_value_import_count": 0,
+        "production_oracle_call_count": 0,
+        "external_effect_count": 0,
+        "terminal_state": TERMINAL_STATE,
+    }
+    return (
+        IndependentMathRowEvidenceV1(
+            math_id="MATH-37",
+            oracle_id=str(oracle37["oracle_id"]),
+            golden_vector_id=str(vector37["vector_id"]),
+            comparison_policy=str(vector37["comparison_policy"]),
+            observed_result=observed_result(
+                independent_observation=actual37,
+                independent_expected_result=expected37,  # type: ignore[arg-type]
+                system_under_test_observation=NO_PRODUCTION_SYSTEM_UNDER_TEST,
+                comparison_passed=True,
+            ),
+            boundary_or_invariant_observation=evidence_observation(
+                "FILL_PROBABILITY_ENDPOINT_AND_FEATURE_AGE_BOUNDARIES",
+                "BOUNDARY_PASS",
+                boundary37,
+            ),
+            negative_or_abstention_observation=evidence_observation(
+                "FILL_PROBABILITY_ARTIFACT_REJECTION_AND_ABSTENTION_MATRIX",
+                "TYPED_REJECTION",
+                negative37,
+            ),
+            formula_or_procedure_mutation_observation=evidence_observation(
+                "CALIBRATED_PROBABILITY_OUTPUT_MUTATION",
+                "OBSERVED_OUTPUT_CHANGE",
+                {
+                    "input_path": ["probability"],
+                    "baseline_value": str(probabilities[1]),
+                    "replacement_value": "0.5",
+                    "baseline_result": str(probabilities[1]),
+                    "mutated_result": str(mutated_probability),
+                },
+            ),
+            domain_guard_observation=evidence_observation(
+                "POSITIVE_INTEGER_HORIZON_GUARD",
+                "TYPED_REJECTION",
+                _capture_rejection(
+                    lambda: _fill_probability_fixture(0, "0.4"),
+                    "OUT_OF_DOMAIN",
+                    "horizon_seconds must be positive",
+                ),
+            ),
+            precision_or_tolerance_observation=evidence_observation(
+                "MAXIMUM_FEATURE_AGE_INCLUSIVE_BOUNDARY",
+                "BOUNDARY_PASS_AND_TYPED_REJECTION",
+                precision37,
+            ),
+            source_unit_or_binding_observation=evidence_observation(
+                "FEATURE_SCHEMA_SCOPE_AND_HORIZON_BINDING_MUTATIONS",
+                "TYPED_REJECTION",
+                binding37,
+            ),
+            **shared,
+        ),
+        IndependentMathRowEvidenceV1(
+            math_id="MATH-38",
+            oracle_id=str(oracle38["oracle_id"]),
+            golden_vector_id=str(vector38["vector_id"]),
+            comparison_policy=str(vector38["comparison_policy"]),
+            observed_result=observed_result(
+                independent_observation=actual38,
+                independent_expected_result=expected38,  # type: ignore[arg-type]
+                system_under_test_observation=NO_PRODUCTION_SYSTEM_UNDER_TEST,
+                comparison_passed=True,
+            ),
+            boundary_or_invariant_observation=evidence_observation(
+                "ZERO_FILL_EXACT_NORMALIZATION_BOUNDARY",
+                "BOUNDARY_PASS",
+                {"distribution": [["0", "1"]], "observed_result": boundary_fill},
+            ),
+            negative_or_abstention_observation=evidence_observation(
+                "FILL_DISTRIBUTION_REJECTION_MATRIX",
+                "TYPED_REJECTION",
+                negative38,
+            ),
+            formula_or_procedure_mutation_observation=evidence_observation(
+                "FILL_DISTRIBUTION_PROBABILITY_MUTATION",
+                "OBSERVED_OUTPUT_CHANGE",
+                {
+                    "baseline_distribution": distribution,
+                    "mutated_distribution": mutated_distribution.fill_quantity_distribution,
+                    "baseline_result": expected_fill,
+                    "mutated_result": mutated_fill,
+                },
+            ),
+            domain_guard_observation=evidence_observation(
+                "NONNEGATIVE_FILL_QUANTITY_GUARD",
+                "TYPED_REJECTION",
+                domain38,
+            ),
+            precision_or_tolerance_observation=evidence_observation(
+                "EXPLICIT_NORMALIZATION_TOLERANCE_BOUNDARY",
+                "BOUNDARY_PASS_AND_TYPED_REJECTION",
+                {
+                    "within_tolerance_result": within_tolerance,
+                    "outside_tolerance_rejection": outside_tolerance,
+                },
+            ),
+            source_unit_or_binding_observation=evidence_observation(
+                "SOURCE_HORIZON_AND_ORDER_QUANTITY_CUSTODY_MUTATIONS",
+                "TYPED_REJECTION",
+                binding38,
+            ),
+            **shared,
+        ),
+    )
 
 
 def _tree(name: str) -> ast.Module:
@@ -94,13 +848,34 @@ def _call_order(tree: ast.Module) -> tuple[str, ...]:
 
 def main() -> int:
     failures: list[str] = []
+    receipt_rows: tuple[IndependentMathRowEvidenceV1, ...] = ()
     try:
         trees = {name: _tree(name) for name in NEW_MODULES}
         service_tree = _tree("service.py")
         validation_tree = _tree("validation.py")
+        _validate_execution_math_owner_ast(trees["economic_math.py"])
     except (OSError, SyntaxError) as exc:
         print(f"source parse failed: {exc}", file=sys.stderr)
         return 1
+    except ValueError as exc:
+        failures.append(str(exc))
+    try:
+        oracles = _archive_rows(
+            PACKAGE / "oracle_contracts.py", "_ST12C_ORACLE_ARCHIVE_B85"
+        )
+        vectors = _archive_rows(
+            PACKAGE / "oracle_contracts.py", "_ST12C_VECTOR_ARCHIVE_B85"
+        )
+        receipt_rows = _build_execution_receipt_rows(oracles, vectors)
+    except (
+        OSError,
+        SyntaxError,
+        ValueError,
+        KeyError,
+        TypeError,
+        zlib.error,
+    ) as exc:
+        failures.append(f"execution row-receipt reconstruction failed: {exc}")
     try:
         if _class_methods(service_tree, "QKUComputationControlPlaneV1") != SERVICE_METHODS:
             failures.append("existing public service method roster changed")
@@ -305,6 +1080,7 @@ def main() -> int:
     if failures:
         print("\n".join(failures), file=sys.stderr)
         return 1
+    print(format_evidence_line(build_envelope("EXECUTION", receipt_rows)))
     print(f"{SUCCESS} controls=9 identities=8 gates=13 lifecycle=NO_WRITE effects=0 blockers=9")
     return 0
 
