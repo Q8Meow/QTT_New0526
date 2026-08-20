@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import ast
 from copy import deepcopy
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from decimal import Decimal
 import json
 from pathlib import Path
@@ -10,11 +10,14 @@ from pathlib import Path
 import pytest
 
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.economic_math import (
+    FillProbabilityModelArtifactV1,
     FillQuantityDistributionArtifactV1,
     expected_partial_fill_quantity_v1,
+    fill_probability_v1,
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import (
     NumericDomainError,
+    ReasonCode,
 )
 from tools import qku_independent_math_row_receipt as receipt
 from tools import independent_validate_qku_computation_control_plane_execution as execution_receipt
@@ -89,8 +92,10 @@ def _line(payload: object, *, allow_nan: bool = False) -> str:
 
 
 def _production_fill_distribution(
-    distribution: tuple[tuple[str, str], ...],
-    normalization_tolerance: str,
+    distribution: tuple[tuple[object, object], ...],
+    normalization_tolerance: object,
+    *,
+    order_quantity: object = "100",
 ) -> FillQuantityDistributionArtifactV1:
     evaluated = datetime(2026, 1, 1, tzinfo=UTC)
     return FillQuantityDistributionArtifactV1(
@@ -101,9 +106,36 @@ def _production_fill_distribution(
         horizon_seconds=30,
         evaluated_at=evaluated,
         artifact_valid_until=datetime(2026, 1, 2, tzinfo=UTC),
-        order_quantity="100",
+        order_quantity=order_quantity,  # type: ignore[arg-type]
         normalization_tolerance=normalization_tolerance,
-        fill_quantity_distribution=distribution,
+        fill_quantity_distribution=distribution,  # type: ignore[arg-type]
+    )
+
+
+def _production_fill_probability(
+    probability: object,
+) -> tuple[FillProbabilityModelArtifactV1, Decimal]:
+    observed = datetime(2026, 1, 1, tzinfo=UTC)
+    artifact = FillProbabilityModelArtifactV1(
+        artifact_id="TEST::MATH-37::MODEL",
+        artifact_version="1",
+        feature_schema_ref="TEST::MATH-37::FEATURES",
+        calibration_receipt_ref="TEST::MATH-37::CALIBRATION",
+        scope_ref="TEST::MATH-37::SCOPE",
+        horizon_seconds=5,
+        probability=probability,  # type: ignore[arg-type]
+        feature_snapshot_ref="TEST::MATH-37::SNAPSHOT",
+        feature_observed_at=observed,
+        evaluated_at=observed + timedelta(seconds=1),
+        artifact_valid_until=observed + timedelta(minutes=1),
+        maximum_feature_age=timedelta(seconds=5),
+        calibration_state="VALIDATED",
+    )
+    return artifact, fill_probability_v1(
+        artifact=artifact,
+        feature_schema_ref="TEST::MATH-37::FEATURES",
+        scope_ref="TEST::MATH-37::SCOPE",
+        horizon_seconds=5,
     )
 
 
@@ -142,6 +174,171 @@ def test_receipt_domains_have_exact_ordered_membership() -> None:
         "MATH-52",
     )
     assert len(combined) == len(set(combined)) == 18
+
+    def independent_probability(value: object) -> Decimal:
+        return execution_receipt._independent_fill_probability(
+            execution_receipt._fill_probability_fixture(5, value),
+            feature_schema_ref="GOLDEN::FEATURES",
+            scope_ref="GOLDEN::SCOPE",
+            horizon_seconds=5,
+        )
+
+    def independent_fill(
+        distribution: tuple[tuple[object, object], ...],
+        tolerance: object = "0",
+        *,
+        order_quantity: object = "100",
+    ) -> Decimal:
+        return execution_receipt._independent_expected_fill(
+            execution_receipt._distribution_fixture(
+                distribution,
+                normalization_tolerance=tolerance,
+                order_quantity=order_quantity,
+            )
+        )
+
+    def production_fill(
+        distribution: tuple[tuple[object, object], ...],
+        tolerance: object = "0",
+        *,
+        order_quantity: object = "100",
+    ) -> Decimal:
+        return expected_partial_fill_quantity_v1(
+            artifact=_production_fill_distribution(
+                distribution,
+                tolerance,
+                order_quantity=order_quantity,
+            )
+        )
+
+    def assert_numeric_rejection_pair(
+        independent_call,
+        production_call,
+        expected_family: str,
+    ) -> None:
+        with pytest.raises(
+            execution_receipt._IndependentArtifactRejection
+        ) as independent_error:
+            independent_call()
+        assert independent_error.value.failure_family == expected_family
+        with pytest.raises(NumericDomainError) as production_error:
+            production_call()
+        assert production_error.value.reason_code is getattr(
+            ReasonCode, expected_family
+        )
+
+    math37_high_precision_text = "0.12345678901234567890123456789012345"
+    math37_string_expected = Decimal("0.1234567890123456789012345678901234")
+    independent_string_result = independent_probability(math37_high_precision_text)
+    _, production_string_result = _production_fill_probability(
+        math37_high_precision_text
+    )
+    assert independent_string_result == math37_string_expected
+    assert production_string_result == math37_string_expected
+
+    math37_decimal_input = Decimal(math37_high_precision_text)
+    independent_decimal_artifact = execution_receipt._fill_probability_fixture(
+        5, math37_decimal_input
+    )
+    independent_decimal_result = execution_receipt._independent_fill_probability(
+        independent_decimal_artifact,
+        feature_schema_ref="GOLDEN::FEATURES",
+        scope_ref="GOLDEN::SCOPE",
+        horizon_seconds=5,
+    )
+    production_decimal_artifact, production_decimal_result = (
+        _production_fill_probability(math37_decimal_input)
+    )
+    assert independent_decimal_artifact.probability is math37_decimal_input
+    assert production_decimal_artifact.probability is math37_decimal_input
+    assert independent_decimal_result is math37_decimal_input
+    assert production_decimal_result is math37_decimal_input
+    assert independent_decimal_result == Decimal(math37_high_precision_text)
+
+    assert_numeric_rejection_pair(
+        lambda: independent_probability(0.4),
+        lambda: _production_fill_probability(0.4),
+        "FLOAT_DECIMAL_CONTAMINATION",
+    )
+
+    math38_high_precision_distribution = (
+        ("76.619839145498174104090161033962172", "0.5"),
+        ("0", "0.5"),
+    )
+    math38_high_precision_expected = Decimal(
+        "38.30991957274908705204508051698108"
+    )
+    assert (
+        independent_fill(math38_high_precision_distribution)
+        == math38_high_precision_expected
+    )
+    assert (
+        production_fill(math38_high_precision_distribution)
+        == math38_high_precision_expected
+    )
+    assert independent_fill(math38_high_precision_distribution) != Decimal(
+        "38.30991957274908705204508051698109"
+    )
+
+    normalized_distribution: tuple[tuple[object, object], ...] = (
+        ("0", "0.5"),
+        ("100", "0.5"),
+    )
+    float_contamination_cases = (
+        (
+            lambda: independent_fill(
+                normalized_distribution, order_quantity=100.0
+            ),
+            lambda: production_fill(
+                normalized_distribution, order_quantity=100.0
+            ),
+        ),
+        (
+            lambda: independent_fill(normalized_distribution, 0.0),
+            lambda: production_fill(normalized_distribution, 0.0),
+        ),
+        (
+            lambda: independent_fill(((0.0, "0.5"), ("100", "0.5"))),
+            lambda: production_fill(((0.0, "0.5"), ("100", "0.5"))),
+        ),
+        (
+            lambda: independent_fill((("0", 0.5), ("100", "0.5"))),
+            lambda: production_fill((("0", 0.5), ("100", "0.5"))),
+        ),
+    )
+    for independent_call, production_call in float_contamination_cases:
+        assert_numeric_rejection_pair(
+            independent_call,
+            production_call,
+            "FLOAT_DECIMAL_CONTAMINATION",
+        )
+
+    assert_numeric_rejection_pair(
+        lambda: independent_fill((("not-a-number", "0.5"), ("100", "0.5"))),
+        lambda: production_fill((("not-a-number", "0.5"), ("100", "0.5"))),
+        "INVALID_NUMERIC_INPUT",
+    )
+    assert_numeric_rejection_pair(
+        lambda: independent_fill((("0", "NaN"), ("100", "0.5"))),
+        lambda: production_fill((("0", "NaN"), ("100", "0.5"))),
+        "NONFINITE_NUMERIC_INPUT",
+    )
+    assert_numeric_rejection_pair(
+        lambda: independent_fill(normalized_distribution, order_quantity=True),
+        lambda: production_fill(normalized_distribution, order_quantity=True),
+        "FLOAT_DECIMAL_CONTAMINATION",
+    )
+
+    class NumericLookingObject:
+        def __str__(self) -> str:
+            return "0.5"
+
+    numeric_looking_object = NumericLookingObject()
+    assert_numeric_rejection_pair(
+        lambda: independent_probability(numeric_looking_object),
+        lambda: _production_fill_probability(numeric_looking_object),
+        "INVALID_NUMERIC_INPUT",
+    )
 
     math38_admitted_cases = (
         (

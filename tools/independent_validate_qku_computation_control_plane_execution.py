@@ -7,7 +7,16 @@ import ast
 import base64
 from dataclasses import dataclass, replace
 from datetime import UTC, datetime, timedelta
-from decimal import Context, Decimal, ROUND_HALF_EVEN, localcontext
+from decimal import (
+    Context,
+    Decimal,
+    DivisionByZero,
+    FloatOperation,
+    InvalidOperation,
+    localcontext,
+    Overflow,
+    ROUND_HALF_EVEN,
+)
 import json
 from pathlib import Path
 import sys
@@ -55,7 +64,20 @@ class _IndependentArtifactRejection(ValueError):
         super().__init__(message)
 
 
-_INDEPENDENT_DECIMAL_CONTEXT = Context(prec=34, rounding=ROUND_HALF_EVEN)
+_INDEPENDENT_DECIMAL_PRECISION = 34
+_INDEPENDENT_DECIMAL_ROUNDING = ROUND_HALF_EVEN
+
+
+def _independent_decimal_context() -> Context:
+    context = Context(
+        prec=_INDEPENDENT_DECIMAL_PRECISION,
+        rounding=_INDEPENDENT_DECIMAL_ROUNDING,
+    )
+    context.traps[FloatOperation] = True
+    context.traps[InvalidOperation] = True
+    context.traps[DivisionByZero] = True
+    context.traps[Overflow] = True
+    return context
 
 
 def _text(value: object, name: str) -> str:
@@ -67,15 +89,25 @@ def _text(value: object, name: str) -> str:
 
 
 def _decimal(value: object, name: str) -> Decimal:
-    try:
-        result = Decimal(str(value))
-    except Exception as exc:
+    if isinstance(value, (bool, float)):
         raise _IndependentArtifactRejection(
-            "OUT_OF_DOMAIN", f"{name} must be an exact Decimal"
+            "FLOAT_DECIMAL_CONTAMINATION",
+            f"{name} must be Decimal, canonical string, or integer",
+        )
+    try:
+        if isinstance(value, Decimal):
+            result = value
+        elif isinstance(value, (str, int)):
+            result = _independent_decimal_context().create_decimal(value)
+        else:
+            raise TypeError(f"unsupported exact-Decimal input type: {type(value).__name__}")
+    except (InvalidOperation, ValueError, TypeError) as exc:
+        raise _IndependentArtifactRejection(
+            "INVALID_NUMERIC_INPUT", f"{name} is not a valid Decimal"
         ) from exc
     if not result.is_finite():
         raise _IndependentArtifactRejection(
-            "OUT_OF_DOMAIN", f"{name} must be finite"
+            "NONFINITE_NUMERIC_INPUT", f"{name} must be finite"
         )
     return result
 
@@ -102,7 +134,7 @@ class _IndependentFillProbabilityArtifactV1:
     calibration_receipt_ref: str
     scope_ref: str
     horizon_seconds: int
-    probability: Decimal | str
+    probability: object
     feature_snapshot_ref: str
     feature_observed_at: datetime | str
     evaluated_at: datetime | str
@@ -194,8 +226,8 @@ class _IndependentFillDistributionArtifactV1:
     horizon_seconds: int
     evaluated_at: datetime | str
     artifact_valid_until: datetime | str
-    order_quantity: Decimal | str
-    normalization_tolerance: Decimal | str
+    order_quantity: object
+    normalization_tolerance: object
     fill_quantity_distribution: tuple[tuple[object, object], ...]
 
     def __post_init__(self) -> None:
@@ -262,7 +294,7 @@ def _independent_expected_fill_computation(
         )
     probability_sum = Decimal(0)
     weighted_sum = Decimal(0)
-    with localcontext(_INDEPENDENT_DECIMAL_CONTEXT) as context:
+    with localcontext(_independent_decimal_context()) as context:
         for index, item in enumerate(artifact.fill_quantity_distribution):
             if not isinstance(item, tuple) or len(item) != 2:
                 raise _IndependentArtifactRejection(
@@ -288,7 +320,7 @@ def _independent_expected_fill_computation(
             "OUT_OF_DOMAIN",
             "fill probabilities exceed the explicitly declared normalization tolerance",
         )
-    with localcontext(_INDEPENDENT_DECIMAL_CONTEXT) as context:
+    with localcontext(_independent_decimal_context()) as context:
         normalized_expected_fill = context.divide(weighted_sum, probability_sum)
     if normalized_expected_fill < 0 or normalized_expected_fill > maximum:
         raise _IndependentArtifactRejection(
@@ -346,9 +378,87 @@ def _capture_rejection(callable_, family: str, message: str) -> dict[str, object
     raise ValueError(f"expected rejection {family}::{message} was accepted")
 
 
+def _independent_decimal_boundary_evidence() -> dict[str, object]:
+    high_precision_text = "0.12345678901234567890123456789012345"
+    expected_string_conversion = Decimal(
+        "0.1234567890123456789012345678901234"
+    )
+    parsed_string = _decimal(high_precision_text, "high_precision_string")
+    parsed_integer = _decimal(100, "integer_input")
+    decimal_input = Decimal(high_precision_text)
+    preserved_decimal = _decimal(decimal_input, "decimal_input")
+
+    class _NumericLookingObject:
+        def __str__(self) -> str:
+            return "0.5"
+
+    if (
+        parsed_string != expected_string_conversion
+        or parsed_integer != Decimal(100)
+        or preserved_decimal is not decimal_input
+        or preserved_decimal != decimal_input
+    ):
+        raise ValueError("independent exact-Decimal accepted-input contract differs")
+
+    rejected_inputs = {
+        "bool": _capture_rejection(
+            lambda: _decimal(True, "bool_input"),
+            "FLOAT_DECIMAL_CONTAMINATION",
+            "must be Decimal, canonical string, or integer",
+        ),
+        "float": _capture_rejection(
+            lambda: _decimal(0.5, "float_input"),
+            "FLOAT_DECIMAL_CONTAMINATION",
+            "must be Decimal, canonical string, or integer",
+        ),
+        "invalid_text": _capture_rejection(
+            lambda: _decimal("not-a-number", "invalid_text"),
+            "INVALID_NUMERIC_INPUT",
+            "is not a valid Decimal",
+        ),
+        "nonfinite_text": _capture_rejection(
+            lambda: _decimal("NaN", "nonfinite_text"),
+            "NONFINITE_NUMERIC_INPUT",
+            "must be finite",
+        ),
+        "unsupported_object": _capture_rejection(
+            lambda: _decimal(_NumericLookingObject(), "unsupported_object"),
+            "INVALID_NUMERIC_INPUT",
+            "is not a valid Decimal",
+        ),
+    }
+    return {
+        "accepted_numeric_input_classes": {
+            "canonical_string": {
+                "input": high_precision_text,
+                "observed": parsed_string,
+                "fresh_context_create_decimal": True,
+            },
+            "integer": {
+                "input": 100,
+                "observed": parsed_integer,
+                "fresh_context_create_decimal": True,
+            },
+            "Decimal": {
+                "input": decimal_input,
+                "observed": preserved_decimal,
+                "input_object_preserved": preserved_decimal is decimal_input,
+            },
+        },
+        "rejected_numeric_input_classes": rejected_inputs,
+        "precision": _INDEPENDENT_DECIMAL_PRECISION,
+        "rounding": "ROUND_HALF_EVEN",
+        "string_and_integer_input_conversion": "FRESH_CONTEXT_CREATE_DECIMAL",
+        "decimal_object_input_conversion": "PRESERVE_EXACT_OBJECT",
+        "invalid_input_rejection": rejected_inputs["invalid_text"],
+        "nonfinite_input_rejection": rejected_inputs["nonfinite_text"],
+        "float_contamination_rejection": rejected_inputs["float"],
+    }
+
+
 def _fill_probability_fixture(
     horizon: int,
-    probability: str,
+    probability: object,
     **overrides: object,
 ) -> _IndependentFillProbabilityArtifactV1:
     observed = datetime(2026, 1, 1, tzinfo=UTC)
@@ -392,7 +502,263 @@ def _distribution_fixture(
     return _IndependentFillDistributionArtifactV1(**values)  # type: ignore[arg-type]
 
 
-def _validate_execution_math_owner_ast(tree: ast.Module) -> None:
+def _validate_execution_math_owner_ast(
+    economic_tree: ast.Module,
+    context_tree: ast.Module,
+    independent_tree: ast.Module,
+) -> None:
+    def function(tree: ast.Module, name: str) -> ast.FunctionDef:
+        return next(
+            node
+            for node in tree.body
+            if isinstance(node, ast.FunctionDef) and node.name == name
+        )
+
+    def assigned_expression(tree: ast.Module, name: str) -> ast.expr:
+        return next(
+            node.value
+            for node in tree.body
+            if isinstance(node, ast.Assign)
+            and any(
+                isinstance(target, ast.Name) and target.id == name
+                for target in node.targets
+            )
+        )
+
+    def context_call_has_contract(
+        function_node: ast.FunctionDef,
+        precision: str | int,
+        rounding: str,
+    ) -> bool:
+        for call in (
+            node for node in ast.walk(function_node) if isinstance(node, ast.Call)
+        ):
+            if not isinstance(call.func, ast.Name) or call.func.id != "Context":
+                continue
+            keywords = {keyword.arg: keyword.value for keyword in call.keywords}
+            precision_node = keywords.get("prec")
+            rounding_node = keywords.get("rounding")
+            precision_matches = (
+                isinstance(precision, int)
+                and isinstance(precision_node, ast.Constant)
+                and precision_node.value == precision
+            ) or (
+                isinstance(precision, str)
+                and isinstance(precision_node, ast.Name)
+                and precision_node.id == precision
+            )
+            if (
+                precision_matches
+                and isinstance(rounding_node, ast.Name)
+                and rounding_node.id == rounding
+            ):
+                return True
+        return False
+
+    def enabled_decimal_traps(function_node: ast.FunctionDef) -> set[str]:
+        traps: set[str] = set()
+        for node in ast.walk(function_node):
+            if (
+                isinstance(node, ast.Assign)
+                and len(node.targets) == 1
+                and isinstance(node.targets[0], ast.Subscript)
+                and isinstance(node.targets[0].value, ast.Attribute)
+                and node.targets[0].value.attr == "traps"
+                and isinstance(node.targets[0].slice, ast.Name)
+                and isinstance(node.value, ast.Constant)
+                and node.value.value is True
+            ):
+                traps.add(node.targets[0].slice.id)
+        return traps
+
+    required_traps = {
+        "FloatOperation",
+        "InvalidOperation",
+        "DivisionByZero",
+        "Overflow",
+    }
+    production_context = function(context_tree, "decimal_context_v1")
+    precision_assignment = assigned_expression(context_tree, "DECIMAL_PRECISION")
+    rounding_assignment = assigned_expression(context_tree, "DECIMAL_ROUNDING")
+    if (
+        not isinstance(precision_assignment, ast.Constant)
+        or precision_assignment.value != 34
+        or not isinstance(rounding_assignment, ast.Name)
+        or rounding_assignment.id != "ROUND_HALF_EVEN"
+        or not context_call_has_contract(
+            production_context, "DECIMAL_PRECISION", "DECIMAL_ROUNDING"
+        )
+        or enabled_decimal_traps(production_context) != required_traps
+    ):
+        raise ValueError("production exact-Decimal context contract differs")
+
+    production_exact_decimal = function(context_tree, "exact_decimal")
+    production_type_checks = {
+        node.args[1].id
+        for node in ast.walk(production_exact_decimal)
+        if isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id == "isinstance"
+        and len(node.args) >= 2
+        and isinstance(node.args[1], ast.Name)
+    }
+    production_reason_families = {
+        node.attr
+        for node in ast.walk(production_exact_decimal)
+        if isinstance(node, ast.Attribute)
+        and isinstance(node.value, ast.Name)
+        and node.value.id == "ReasonCode"
+    }
+    production_create_decimal_calls = tuple(
+        node
+        for node in ast.walk(production_exact_decimal)
+        if isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Attribute)
+        and node.func.attr == "create_decimal"
+        and len(node.args) == 1
+        and isinstance(node.args[0], ast.Name)
+        and node.args[0].id == "value"
+    )
+    production_decimal_preservation = any(
+        isinstance(node, ast.IfExp)
+        and isinstance(node.body, ast.Name)
+        and node.body.id == "value"
+        and any(
+            isinstance(child, ast.Name) and child.id == "Decimal"
+            for child in ast.walk(node.test)
+        )
+        for node in ast.walk(production_exact_decimal)
+    )
+    production_exception_types = {
+        child.id
+        for handler in ast.walk(production_exact_decimal)
+        if isinstance(handler, ast.ExceptHandler) and handler.type is not None
+        for child in ast.walk(handler.type)
+        if isinstance(child, ast.Name)
+    }
+    if (
+        not {"bool", "float", "Decimal"} <= production_type_checks
+        or len(production_create_decimal_calls) != 1
+        or not production_decimal_preservation
+        or not {"InvalidOperation", "ValueError", "TypeError"}
+        <= production_exception_types
+        or not {
+            "FLOAT_DECIMAL_CONTAMINATION",
+            "INVALID_NUMERIC_INPUT",
+            "NONFINITE_NUMERIC_INPUT",
+        }
+        <= production_reason_families
+        or not any(
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Attribute)
+            and node.func.attr == "is_finite"
+            for node in ast.walk(production_exact_decimal)
+        )
+    ):
+        raise ValueError("production exact_decimal input-boundary contract differs")
+
+    production_decimal_adapter = function(economic_tree, "_decimal")
+    adapter_calls = tuple(
+        node
+        for node in ast.walk(production_decimal_adapter)
+        if isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id == "exact_decimal"
+    )
+    if len(adapter_calls) != 1:
+        raise ValueError("economic_math._decimal no longer delegates to exact_decimal")
+
+    independent_context = function(independent_tree, "_independent_decimal_context")
+    independent_decimal = function(independent_tree, "_decimal")
+    independent_precision = assigned_expression(
+        independent_tree, "_INDEPENDENT_DECIMAL_PRECISION"
+    )
+    independent_rounding = assigned_expression(
+        independent_tree, "_INDEPENDENT_DECIMAL_ROUNDING"
+    )
+    if (
+        not isinstance(independent_precision, ast.Constant)
+        or independent_precision.value != 34
+        or not isinstance(independent_rounding, ast.Name)
+        or independent_rounding.id != "ROUND_HALF_EVEN"
+        or not context_call_has_contract(
+            independent_context,
+            "_INDEPENDENT_DECIMAL_PRECISION",
+            "_INDEPENDENT_DECIMAL_ROUNDING",
+        )
+        or enabled_decimal_traps(independent_context) != required_traps
+    ):
+        raise ValueError("independent exact-Decimal context contract differs")
+
+    independent_type_checks = {
+        child.id
+        for node in ast.walk(independent_decimal)
+        if isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id == "isinstance"
+        and len(node.args) >= 2
+        for child in ast.walk(node.args[1])
+        if isinstance(child, ast.Name)
+    }
+    independent_failure_families = {
+        node.value
+        for node in ast.walk(independent_decimal)
+        if isinstance(node, ast.Constant)
+        and isinstance(node.value, str)
+        and node.value
+        in {
+            "FLOAT_DECIMAL_CONTAMINATION",
+            "INVALID_NUMERIC_INPUT",
+            "NONFINITE_NUMERIC_INPUT",
+        }
+    }
+    independent_create_decimal_calls = tuple(
+        node
+        for node in ast.walk(independent_decimal)
+        if isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Attribute)
+        and node.func.attr == "create_decimal"
+        and isinstance(node.func.value, ast.Call)
+        and isinstance(node.func.value.func, ast.Name)
+        and node.func.value.func.id == "_independent_decimal_context"
+    )
+    decimal_str_calls = tuple(
+        node
+        for node in ast.walk(independent_decimal)
+        if isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id == "Decimal"
+        and node.args
+        and isinstance(node.args[0], ast.Call)
+        and isinstance(node.args[0].func, ast.Name)
+        and node.args[0].func.id == "str"
+    )
+    decimal_object_preservation = any(
+        isinstance(node, ast.Assign)
+        and isinstance(node.value, ast.Name)
+        and node.value.id == "value"
+        and any(
+            isinstance(target, ast.Name) and target.id == "result"
+            for target in node.targets
+        )
+        for node in ast.walk(independent_decimal)
+    )
+    if (
+        not {"bool", "float", "Decimal", "str", "int"}
+        <= independent_type_checks
+        or len(independent_create_decimal_calls) != 1
+        or decimal_str_calls
+        or not decimal_object_preservation
+        or independent_failure_families
+        != {
+            "FLOAT_DECIMAL_CONTAMINATION",
+            "INVALID_NUMERIC_INPUT",
+            "NONFINITE_NUMERIC_INPUT",
+        }
+    ):
+        raise ValueError("independent exact-Decimal input-boundary contract differs")
+
+    tree = economic_tree
     artifact = next(
         node
         for node in tree.body
@@ -420,6 +786,23 @@ def _validate_execution_math_owner_ast(tree: ast.Module) -> None:
         "calibration_state",
     ):
         raise ValueError("MATH-37 production artifact field contract differs")
+    artifact_post_init = next(
+        node
+        for node in artifact.body
+        if isinstance(node, ast.FunctionDef) and node.name == "__post_init__"
+    )
+    if not any(
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id == "_probability"
+        and node.args
+        and isinstance(node.args[0], ast.Attribute)
+        and isinstance(node.args[0].value, ast.Name)
+        and node.args[0].value.id == "self"
+        and node.args[0].attr == "probability"
+        for node in ast.walk(artifact_post_init)
+    ):
+        raise ValueError("MATH-37 probability no longer passes through _probability")
     fill_function = next(
         node
         for node in tree.body
@@ -520,6 +903,41 @@ def _validate_execution_math_owner_ast(tree: ast.Module) -> None:
     if typed_rejections != {"ContractValidationError", "NumericDomainError"}:
         raise ValueError("MATH-38 production typed rejection contract differs")
 
+    independent_probability_artifact = next(
+        node
+        for node in independent_tree.body
+        if isinstance(node, ast.ClassDef)
+        and node.name == "_IndependentFillProbabilityArtifactV1"
+    )
+    independent_distribution_artifact = next(
+        node
+        for node in independent_tree.body
+        if isinstance(node, ast.ClassDef)
+        and node.name == "_IndependentFillDistributionArtifactV1"
+    )
+    independent_expected_fill = function(
+        independent_tree, "_independent_expected_fill_computation"
+    )
+    independent_boundary_source = "\n".join(
+        (
+            ast.unparse(independent_probability_artifact),
+            ast.unparse(independent_distribution_artifact),
+            ast.unparse(independent_expected_fill),
+        )
+    )
+    for token in (
+        "_decimal(self.probability, 'probability')",
+        "_decimal(self.order_quantity, 'order_quantity')",
+        "_decimal(self.normalization_tolerance, 'normalization_tolerance')",
+        "_decimal(item[0], f'distribution[{index}].quantity')",
+        "_decimal(item[1], f'distribution[{index}].probability')",
+        "localcontext(_independent_decimal_context())",
+    ):
+        if token not in independent_boundary_source:
+            raise ValueError(
+                f"independent MATH-37/MATH-38 Decimal boundary differs: {token}"
+            )
+
 
 def _build_execution_receipt_rows(
     oracles: tuple[dict[str, object], ...],
@@ -527,6 +945,7 @@ def _build_execution_receipt_rows(
 ) -> tuple[IndependentMathRowEvidenceV1, ...]:
     oracle_by_id = {str(row["math_spec_ref"]): row for row in oracles}
     vector_by_id = {str(row["math_spec_ref"]): row for row in vectors}
+    decimal_boundary = _independent_decimal_boundary_evidence()
 
     oracle37 = oracle_by_id["MATH-37"]
     vector37 = vector_by_id["MATH-37"]
@@ -546,6 +965,31 @@ def _build_execution_receipt_rows(
         )
         for artifact, horizon in zip(artifacts, horizons, strict=True)
     )
+    high_precision_text = "0.12345678901234567890123456789012345"
+    high_precision_string_probability = _independent_fill_probability(
+        _fill_probability_fixture(5, high_precision_text),
+        feature_schema_ref="GOLDEN::FEATURES",
+        scope_ref="GOLDEN::SCOPE",
+        horizon_seconds=5,
+    )
+    high_precision_decimal_input = Decimal(high_precision_text)
+    high_precision_decimal_artifact = _fill_probability_fixture(
+        5, high_precision_decimal_input
+    )
+    high_precision_decimal_probability = _independent_fill_probability(
+        high_precision_decimal_artifact,
+        feature_schema_ref="GOLDEN::FEATURES",
+        scope_ref="GOLDEN::SCOPE",
+        horizon_seconds=5,
+    )
+    if (
+        high_precision_string_probability
+        != Decimal("0.1234567890123456789012345678901234")
+        or high_precision_decimal_probability != high_precision_decimal_input
+        or high_precision_decimal_artifact.probability
+        is not high_precision_decimal_input
+    ):
+        raise ValueError("MATH-37 exact-Decimal input-boundary execution differs")
     actual37 = {
         "calibration_receipt_required": all(
             bool(artifact.calibration_receipt_ref) for artifact in artifacts
@@ -586,8 +1030,18 @@ def _build_execution_receipt_rows(
         ),
         "nonfinite_probability": _capture_rejection(
             lambda: _fill_probability_fixture(5, "NaN"),
-            "OUT_OF_DOMAIN",
+            "NONFINITE_NUMERIC_INPUT",
             "probability must be finite",
+        ),
+        "invalid_numeric_probability": _capture_rejection(
+            lambda: _fill_probability_fixture(5, "not-a-number"),
+            "INVALID_NUMERIC_INPUT",
+            "probability is not a valid Decimal",
+        ),
+        "float_contamination": _capture_rejection(
+            lambda: _fill_probability_fixture(5, 0.4),
+            "FLOAT_DECIMAL_CONTAMINATION",
+            "probability must be Decimal, canonical string, or integer",
         ),
     }
     binding37 = {
@@ -662,6 +1116,18 @@ def _build_execution_receipt_rows(
             "MODEL_ARTIFACT_REQUIRED",
             "model calibration, validity, or feature freshness gate failed",
         ),
+        "exact_decimal_input_boundary": {
+            "shared_owner_execution": decimal_boundary,
+            "high_precision_string_input": high_precision_text,
+            "high_precision_string_observed": high_precision_string_probability,
+            "high_precision_decimal_input": high_precision_decimal_input,
+            "high_precision_decimal_observed": high_precision_decimal_probability,
+            "decimal_object_preserved": (
+                high_precision_decimal_artifact.probability
+                is high_precision_decimal_input
+            ),
+            "production_owner_contract_guard": "STATIC_AST_EXECUTED",
+        },
     }
     mutated_probability = _independent_fill_probability(
         replace(artifacts[1], probability=Decimal("0.5")),
@@ -686,10 +1152,11 @@ def _build_execution_receipt_rows(
         "probability_sum": computation38.probability_sum,
         "weighted_sum": computation38.weighted_sum,
         "normalized_expected_fill": computation38.normalized_expected_fill,
-        "current_owner_semantic_alignment": True,
     }
     expected38 = vector38["expected"]
-    if expected_fill != Decimal(str(expected38["expected_fill_quantity"])):  # type: ignore[index]
+    if expected_fill != _decimal(  # type: ignore[index]
+        expected38["expected_fill_quantity"], "tracked_expected_fill_quantity"
+    ):
         raise ValueError("MATH-38 independent expectation differs")
     mutated_distribution = _distribution_fixture(
         (("0", ".3"), ("50", ".3"), ("100", ".4"))
@@ -738,6 +1205,57 @@ def _build_execution_receipt_rows(
             "OUT_OF_DOMAIN",
             "fill support exceeds order quantity",
         ),
+        "decimal_input_boundary": {
+            "float_order_quantity": _capture_rejection(
+                lambda: _distribution_fixture(
+                    distribution, order_quantity=100.0
+                ),
+                "FLOAT_DECIMAL_CONTAMINATION",
+                "order_quantity must be Decimal, canonical string, or integer",
+            ),
+            "float_normalization_tolerance": _capture_rejection(
+                lambda: _distribution_fixture(
+                    distribution, normalization_tolerance=0.0
+                ),
+                "FLOAT_DECIMAL_CONTAMINATION",
+                "normalization_tolerance must be Decimal, canonical string, or integer",
+            ),
+            "float_distribution_quantity": _capture_rejection(
+                lambda: _independent_expected_fill(
+                    _distribution_fixture(((0.0, "0.5"), ("100", "0.5")))
+                ),
+                "FLOAT_DECIMAL_CONTAMINATION",
+                "distribution[0].quantity must be Decimal, canonical string, or integer",
+            ),
+            "float_distribution_probability": _capture_rejection(
+                lambda: _independent_expected_fill(
+                    _distribution_fixture((("0", 0.5), ("100", "0.5")))
+                ),
+                "FLOAT_DECIMAL_CONTAMINATION",
+                "distribution[0].probability must be Decimal, canonical string, or integer",
+            ),
+            "invalid_numeric_text": _capture_rejection(
+                lambda: _independent_expected_fill(
+                    _distribution_fixture(
+                        (("not-a-number", "0.5"), ("100", "0.5"))
+                    )
+                ),
+                "INVALID_NUMERIC_INPUT",
+                "distribution[0].quantity is not a valid Decimal",
+            ),
+            "nonfinite_numeric_text": _capture_rejection(
+                lambda: _independent_expected_fill(
+                    _distribution_fixture((("0", "NaN"), ("100", "0.5")))
+                ),
+                "NONFINITE_NUMERIC_INPUT",
+                "distribution[0].probability must be finite",
+            ),
+            "boolean_input": _capture_rejection(
+                lambda: _distribution_fixture(distribution, order_quantity=True),
+                "FLOAT_DECIMAL_CONTAMINATION",
+                "order_quantity must be Decimal, canonical string, or integer",
+            ),
+        },
     }
     domain38 = _capture_rejection(
         lambda: _independent_expected_fill(
@@ -784,6 +1302,25 @@ def _build_execution_receipt_rows(
         "OUT_OF_DOMAIN",
         "fill probabilities exceed",
     )
+    high_precision_rounding = _independent_expected_fill_computation(
+        _distribution_fixture(
+            (
+                ("76.619839145498174104090161033962172", "0.5"),
+                ("0", "0.5"),
+            ),
+            normalization_tolerance="0",
+        )
+    )
+    high_precision_expected = Decimal("38.30991957274908705204508051698108")
+    high_precision_false_result = Decimal("38.30991957274908705204508051698109")
+    if (
+        high_precision_rounding.probability_sum != Decimal("1.0")
+        or high_precision_rounding.normalized_expected_fill
+        != high_precision_expected
+        or high_precision_rounding.normalized_expected_fill
+        == high_precision_false_result
+    ):
+        raise ValueError("MATH-38 exact-Decimal input-time rounding differs")
     negative38.update(
         {
             "zero_probability_sum": _capture_rejection(
@@ -940,6 +1477,23 @@ def _build_execution_receipt_rows(
                         "accepted": True,
                     },
                     "outside_tolerance_rejection": outside_tolerance,
+                    "exact_decimal_input_boundary": {
+                        "shared_owner_execution": decimal_boundary,
+                        "high_precision_distribution": [
+                            ["76.619839145498174104090161033962172", "0.5"],
+                            ["0", "0.5"],
+                        ],
+                        "probability_sum": high_precision_rounding.probability_sum,
+                        "weighted_sum": high_precision_rounding.weighted_sum,
+                        "normalized_expected_fill": (
+                            high_precision_rounding.normalized_expected_fill
+                        ),
+                        "prior_false_result_rejected": (
+                            high_precision_rounding.normalized_expected_fill
+                            != high_precision_false_result
+                        ),
+                        "production_owner_contract_guard": "STATIC_AST_EXECUTED",
+                    },
                 },
             ),
             source_unit_or_binding_observation=evidence_observation(
@@ -1022,7 +1576,13 @@ def main() -> int:
         trees = {name: _tree(name) for name in NEW_MODULES}
         service_tree = _tree("service.py")
         validation_tree = _tree("validation.py")
-        _validate_execution_math_owner_ast(trees["economic_math.py"])
+        context_tree = _tree("context.py")
+        independent_tree = ast.parse(
+            Path(__file__).read_text(encoding="utf-8"), filename=__file__
+        )
+        _validate_execution_math_owner_ast(
+            trees["economic_math.py"], context_tree, independent_tree
+        )
     except (OSError, SyntaxError) as exc:
         print(f"source parse failed: {exc}", file=sys.stderr)
         return 1
