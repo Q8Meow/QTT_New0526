@@ -7,7 +7,7 @@ import ast
 import base64
 from dataclasses import dataclass, replace
 from datetime import UTC, datetime, timedelta
-from decimal import Decimal
+from decimal import Context, Decimal, ROUND_HALF_EVEN, localcontext
 import json
 from pathlib import Path
 import sys
@@ -53,6 +53,9 @@ class _IndependentArtifactRejection(ValueError):
     def __init__(self, failure_family: str, message: str) -> None:
         self.failure_family = failure_family
         super().__init__(message)
+
+
+_INDEPENDENT_DECIMAL_CONTEXT = Context(prec=34, rounding=ROUND_HALF_EVEN)
 
 
 def _text(value: object, name: str) -> str:
@@ -234,9 +237,16 @@ class _IndependentFillDistributionArtifactV1:
         object.__setattr__(self, "normalization_tolerance", tolerance)
 
 
-def _independent_expected_fill(
+@dataclass(frozen=True, slots=True)
+class _IndependentExpectedFillComputationV1:
+    probability_sum: Decimal
+    weighted_sum: Decimal
+    normalized_expected_fill: Decimal
+
+
+def _independent_expected_fill_computation(
     artifact: _IndependentFillDistributionArtifactV1 | None,
-) -> Decimal:
+) -> _IndependentExpectedFillComputationV1:
     if artifact is None or not isinstance(
         artifact, _IndependentFillDistributionArtifactV1
     ):
@@ -251,38 +261,50 @@ def _independent_expected_fill(
             "OUT_OF_DOMAIN", "normalization tolerance must be less than one"
         )
     probability_sum = Decimal(0)
-    expected = Decimal(0)
-    for index, item in enumerate(artifact.fill_quantity_distribution):
-        if not isinstance(item, tuple) or len(item) != 2:
-            raise _IndependentArtifactRejection(
-                "INVALID_CONTRACT", "distribution rows must be (quantity, probability)"
+    weighted_sum = Decimal(0)
+    with localcontext(_INDEPENDENT_DECIMAL_CONTEXT) as context:
+        for index, item in enumerate(artifact.fill_quantity_distribution):
+            if not isinstance(item, tuple) or len(item) != 2:
+                raise _IndependentArtifactRejection(
+                    "INVALID_CONTRACT",
+                    "distribution rows must be (quantity, probability)",
+                )
+            quantity = _decimal(item[0], f"distribution[{index}].quantity")
+            probability = _decimal(item[1], f"distribution[{index}].probability")
+            if quantity < 0 or probability < 0 or probability > 1:
+                raise _IndependentArtifactRejection(
+                    "OUT_OF_DOMAIN", "distribution quantity/probability is invalid"
+                )
+            if quantity > maximum:
+                raise _IndependentArtifactRejection(
+                    "OUT_OF_DOMAIN", "fill support exceeds order quantity"
+                )
+            probability_sum = context.add(probability_sum, probability)
+            weighted_sum = context.add(
+                weighted_sum, context.multiply(quantity, probability)
             )
-        quantity = _decimal(item[0], f"distribution[{index}].quantity")
-        probability = _decimal(item[1], f"distribution[{index}].probability")
-        if quantity < 0 or probability < 0 or probability > 1:
-            raise _IndependentArtifactRejection(
-                "OUT_OF_DOMAIN", "distribution quantity/probability is invalid"
-            )
-        if quantity > maximum:
-            raise _IndependentArtifactRejection(
-                "OUT_OF_DOMAIN", "fill support exceeds order quantity"
-            )
-        probability_sum += probability
-        expected += quantity * probability
     if probability_sum <= 0 or abs(probability_sum - Decimal(1)) > tolerance:
         raise _IndependentArtifactRejection(
             "OUT_OF_DOMAIN",
             "fill probabilities exceed the explicitly declared normalization tolerance",
         )
-    # MATH-38 is the declared expectation sum(quantity * probability).
-    # Normalization is a separate fail-closed contract; it is not permission
-    # to silently turn the estimator into self-normalized importance sampling.
-    result = expected
-    if result < 0 or result > maximum:
+    with localcontext(_INDEPENDENT_DECIMAL_CONTEXT) as context:
+        normalized_expected_fill = context.divide(weighted_sum, probability_sum)
+    if normalized_expected_fill < 0 or normalized_expected_fill > maximum:
         raise _IndependentArtifactRejection(
             "OUT_OF_DOMAIN", "expected fill is outside order support"
         )
-    return result
+    return _IndependentExpectedFillComputationV1(
+        probability_sum=probability_sum,
+        weighted_sum=weighted_sum,
+        normalized_expected_fill=normalized_expected_fill,
+    )
+
+
+def _independent_expected_fill(
+    artifact: _IndependentFillDistributionArtifactV1 | None,
+) -> Decimal:
+    return _independent_expected_fill_computation(artifact).normalized_expected_fill
 
 
 def _assigned_literal(path: Path, name: str) -> object:
@@ -413,6 +435,90 @@ def _validate_execution_math_owner_ast(tree: ast.Module) -> None:
     ):
         if token not in source:
             raise ValueError(f"MATH-37 production owner guard differs: {token}")
+
+    distribution_artifact = next(
+        node
+        for node in tree.body
+        if isinstance(node, ast.ClassDef)
+        and node.name == "FillQuantityDistributionArtifactV1"
+    )
+    distribution_fields = tuple(
+        node.target.id
+        for node in distribution_artifact.body
+        if isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name)
+    )
+    if distribution_fields != (
+        "artifact_id",
+        "artifact_version",
+        "source_binding_ref",
+        "scope_ref",
+        "horizon_seconds",
+        "evaluated_at",
+        "artifact_valid_until",
+        "order_quantity",
+        "normalization_tolerance",
+        "fill_quantity_distribution",
+    ):
+        raise ValueError("MATH-38 production artifact field contract differs")
+    distribution_artifact_source = ast.unparse(distribution_artifact)
+    for token in (
+        "distribution horizon must be explicit and positive",
+        "distribution artifact is stale or empty",
+        "_nonnegative(self.order_quantity, 'order_quantity')",
+        "_nonnegative(self.normalization_tolerance, 'normalization_tolerance')",
+    ):
+        if token not in distribution_artifact_source:
+            raise ValueError(
+                f"MATH-38 production artifact guard differs: {token}"
+            )
+    expected_fill_function = next(
+        node
+        for node in tree.body
+        if isinstance(node, ast.FunctionDef)
+        and node.name == "expected_partial_fill_quantity_v1"
+    )
+    expected_fill_source = ast.unparse(expected_fill_function)
+    for token in (
+        "artifact is None",
+        "FillQuantityDistributionArtifactV1",
+        "artifact.normalization_tolerance",
+        "localcontext(decimal_context_v1())",
+        "probability_sum",
+        "_nonnegative(item[0]",
+        "_probability(item[1]",
+        "context.add(probability_sum, probability)",
+        "context.multiply(quantity, probability)",
+        "abs(probability_sum - Decimal(1)) > tolerance",
+        "context.divide(expected, probability_sum)",
+        "quantity > maximum",
+        "distribution rows must be (quantity, probability)",
+        "fill probabilities exceed the explicitly declared normalization tolerance",
+        "expected fill is outside order support",
+    ):
+        if token not in expected_fill_source:
+            raise ValueError(f"MATH-38 production owner guard differs: {token}")
+    expected_fill_calls = tuple(
+        node
+        for node in ast.walk(expected_fill_function)
+        if isinstance(node, ast.Call)
+    )
+    if not any(
+        isinstance(call.func, ast.Attribute)
+        and call.func.attr == "divide"
+        and len(call.args) == 2
+        and isinstance(call.args[1], ast.Name)
+        and call.args[1].id == "probability_sum"
+        for call in expected_fill_calls
+    ):
+        raise ValueError("MATH-38 production normalization division differs")
+    typed_rejections = {
+        call.func.id
+        for call in expected_fill_calls
+        if isinstance(call.func, ast.Name)
+        and call.func.id in {"ContractValidationError", "NumericDomainError"}
+    }
+    if typed_rejections != {"ContractValidationError", "NumericDomainError"}:
+        raise ValueError("MATH-38 production typed rejection contract differs")
 
 
 def _build_execution_receipt_rows(
@@ -573,8 +679,15 @@ def _build_execution_receipt_rows(
         (row["quantity"], row["probability"]) for row in distribution_rows
     )
     artifact38 = _distribution_fixture(distribution)
-    expected_fill = _independent_expected_fill(artifact38)
-    actual38 = {"expected_fill_quantity": expected_fill}
+    computation38 = _independent_expected_fill_computation(artifact38)
+    expected_fill = computation38.normalized_expected_fill
+    actual38 = {
+        "expected_fill_quantity": expected_fill,
+        "probability_sum": computation38.probability_sum,
+        "weighted_sum": computation38.weighted_sum,
+        "normalized_expected_fill": computation38.normalized_expected_fill,
+        "current_owner_semantic_alignment": True,
+    }
     expected38 = vector38["expected"]
     if expected_fill != Decimal(str(expected38["expected_fill_quantity"])):  # type: ignore[index]
         raise ValueError("MATH-38 independent expectation differs")
@@ -633,12 +746,34 @@ def _build_execution_receipt_rows(
         "OUT_OF_DOMAIN",
         "distribution quantity/probability is invalid",
     )
-    within_tolerance = _independent_expected_fill(
+    within_tolerance = _independent_expected_fill_computation(
         _distribution_fixture(
             (("0", ".2"), ("50", ".3"), ("100", ".5000000000005")),
             normalization_tolerance="0.000000000001",
         )
     )
+    if within_tolerance != _IndependentExpectedFillComputationV1(
+        probability_sum=Decimal("1.0000000000005"),
+        weighted_sum=Decimal("65.0000000000500"),
+        normalized_expected_fill=Decimal(
+            "65.00000000001749999999999125000000"
+        ),
+    ):
+        raise ValueError("MATH-38 within-tolerance normalization differs")
+    exact_tolerance = _independent_expected_fill_computation(
+        _distribution_fixture(
+            (("0", ".2"), ("50", ".3"), ("100", ".500000000001")),
+            normalization_tolerance="0.000000000001",
+        )
+    )
+    if exact_tolerance != _IndependentExpectedFillComputationV1(
+        probability_sum=Decimal("1.000000000001"),
+        weighted_sum=Decimal("65.000000000100"),
+        normalized_expected_fill=Decimal(
+            "65.00000000003499999999996500000000"
+        ),
+    ):
+        raise ValueError("MATH-38 exact-tolerance normalization differs")
     outside_tolerance = _capture_rejection(
         lambda: _independent_expected_fill(
             _distribution_fixture(
@@ -648,6 +783,24 @@ def _build_execution_receipt_rows(
         ),
         "OUT_OF_DOMAIN",
         "fill probabilities exceed",
+    )
+    negative38.update(
+        {
+            "zero_probability_sum": _capture_rejection(
+                lambda: _independent_expected_fill(
+                    _distribution_fixture((("0", "0"), ("100", "0")))
+                ),
+                "OUT_OF_DOMAIN",
+                "fill probabilities exceed",
+            ),
+            "probability_above_one": _capture_rejection(
+                lambda: _independent_expected_fill(
+                    _distribution_fixture((("0", "0"), ("100", "1.0000000000001")))
+                ),
+                "OUT_OF_DOMAIN",
+                "distribution quantity/probability is invalid",
+            ),
+        }
     )
     binding38 = {
         "missing_source": _capture_rejection(
@@ -769,7 +922,23 @@ def _build_execution_receipt_rows(
                 "EXPLICIT_NORMALIZATION_TOLERANCE_BOUNDARY",
                 "BOUNDARY_PASS_AND_TYPED_REJECTION",
                 {
-                    "within_tolerance_result": within_tolerance,
+                    "normalization_tolerance": "0.000000000001",
+                    "within_tolerance": {
+                        "probability_sum": within_tolerance.probability_sum,
+                        "weighted_sum": within_tolerance.weighted_sum,
+                        "normalized_expected_fill": (
+                            within_tolerance.normalized_expected_fill
+                        ),
+                        "accepted": True,
+                    },
+                    "exact_tolerance": {
+                        "probability_sum": exact_tolerance.probability_sum,
+                        "weighted_sum": exact_tolerance.weighted_sum,
+                        "normalized_expected_fill": (
+                            exact_tolerance.normalized_expected_fill
+                        ),
+                        "accepted": True,
+                    },
                     "outside_tolerance_rejection": outside_tolerance,
                 },
             ),

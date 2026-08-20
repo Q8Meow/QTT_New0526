@@ -1,11 +1,23 @@
 from __future__ import annotations
 
+import ast
 from copy import deepcopy
+from datetime import UTC, datetime
+from decimal import Decimal
 import json
+from pathlib import Path
 
 import pytest
 
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.economic_math import (
+    FillQuantityDistributionArtifactV1,
+    expected_partial_fill_quantity_v1,
+)
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import (
+    NumericDomainError,
+)
 from tools import qku_independent_math_row_receipt as receipt
+from tools import independent_validate_qku_computation_control_plane_execution as execution_receipt
 
 
 def _valid_row(domain: str, math_id: str) -> receipt.IndependentMathRowEvidenceV1:
@@ -76,6 +88,25 @@ def _line(payload: object, *, allow_nan: bool = False) -> str:
     )
 
 
+def _production_fill_distribution(
+    distribution: tuple[tuple[str, str], ...],
+    normalization_tolerance: str,
+) -> FillQuantityDistributionArtifactV1:
+    evaluated = datetime(2026, 1, 1, tzinfo=UTC)
+    return FillQuantityDistributionArtifactV1(
+        artifact_id="TEST::MATH-38::DISTRIBUTION",
+        artifact_version="1",
+        source_binding_ref="TEST::MATH-38::SOURCE",
+        scope_ref="TEST::MATH-38::SCOPE",
+        horizon_seconds=30,
+        evaluated_at=evaluated,
+        artifact_valid_until=datetime(2026, 1, 2, tzinfo=UTC),
+        order_quantity="100",
+        normalization_tolerance=normalization_tolerance,
+        fill_quantity_distribution=distribution,
+    )
+
+
 def test_receipt_schema_serialization_and_parser_are_canonical() -> None:
     envelope = _valid_envelope("ACCOUNTING")
     evidence_line = receipt.format_evidence_line(envelope)
@@ -111,6 +142,102 @@ def test_receipt_domains_have_exact_ordered_membership() -> None:
         "MATH-52",
     )
     assert len(combined) == len(set(combined)) == 18
+
+    math38_admitted_cases = (
+        (
+            (("0", "0.2"), ("50", "0.3"), ("100", "0.5")),
+            "0",
+            Decimal("1"),
+            Decimal("65.0"),
+            Decimal("65"),
+        ),
+        (
+            (("0", "0.2"), ("50", "0.3"), ("100", "0.5000000000005")),
+            "0.000000000001",
+            Decimal("1.0000000000005"),
+            Decimal("65.0000000000500"),
+            Decimal("65.00000000001749999999999125000000"),
+        ),
+        (
+            (("0", "0.2"), ("50", "0.3"), ("100", "0.500000000001")),
+            "0.000000000001",
+            Decimal("1.000000000001"),
+            Decimal("65.000000000100"),
+            Decimal("65.00000000003499999999996500000000"),
+        ),
+    )
+    for distribution, tolerance, expected_sum, expected_weighted, expected in (
+        math38_admitted_cases
+    ):
+        independent_computation = (
+            execution_receipt._independent_expected_fill_computation(
+                execution_receipt._distribution_fixture(
+                    distribution,
+                    normalization_tolerance=tolerance,
+                )
+            )
+        )
+        assert independent_computation.probability_sum == expected_sum
+        assert independent_computation.weighted_sum == expected_weighted
+        assert independent_computation.normalized_expected_fill == expected
+        production_result = expected_partial_fill_quantity_v1(
+            artifact=_production_fill_distribution(distribution, tolerance)
+        )
+        assert production_result == expected
+        assert independent_computation.normalized_expected_fill == production_result
+
+    within_tolerance_raw_sum = math38_admitted_cases[1][3]
+    within_tolerance_expected = math38_admitted_cases[1][4]
+    assert within_tolerance_raw_sum != within_tolerance_expected
+
+    outside_tolerance_distribution = (
+        ("0", "0.2"),
+        ("50", "0.3"),
+        ("100", "0.500000000002"),
+    )
+    with pytest.raises(
+        execution_receipt._IndependentArtifactRejection,
+        match="fill probabilities exceed",
+    ):
+        execution_receipt._independent_expected_fill(
+            execution_receipt._distribution_fixture(
+                outside_tolerance_distribution,
+                normalization_tolerance="0.000000000001",
+            )
+        )
+    with pytest.raises(NumericDomainError, match="fill probabilities exceed"):
+        expected_partial_fill_quantity_v1(
+            artifact=_production_fill_distribution(
+                outside_tolerance_distribution,
+                "0.000000000001",
+            )
+        )
+
+    execution_source = Path(execution_receipt.__file__).read_text(encoding="utf-8")
+    execution_tree = ast.parse(execution_source)
+    imported_modules = {
+        alias.name
+        for node in ast.walk(execution_tree)
+        if isinstance(node, ast.Import)
+        for alias in node.names
+    } | {
+        node.module or ""
+        for node in ast.walk(execution_tree)
+        if isinstance(node, ast.ImportFrom)
+    }
+    assert not any(
+        name == "qtt"
+        or name.startswith("qtt.")
+        or name == "src.qtt"
+        or name.startswith("src.qtt.")
+        for name in imported_modules
+    )
+    assert not any(
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id == "expected_partial_fill_quantity_v1"
+        for node in ast.walk(execution_tree)
+    )
 
 
 def test_receipt_adversarial_mutations_fail_closed() -> None:
