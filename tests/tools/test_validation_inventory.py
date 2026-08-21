@@ -1,5 +1,7 @@
+from fnmatch import fnmatchcase
 from pathlib import Path
 
+from tools import changed_area_validation_router as router
 from tools import run_validation_gates as runner
 from tools import validation_inventory as inventory
 from tools import validation_scope_registry as scope_registry
@@ -205,6 +207,91 @@ def test_inventory_has_centralized_qku_validation_entries():
         assert not any(
             "*" in path for path in entry.required_when_files_match
         )
+
+
+def test_shared_validator_support_tool_ownership_is_exact_and_routes():
+    shared_path = "tools/qku_independent_math_row_receipt.py"
+    expected_owners = frozenset(
+        {
+            "independent_validate_qku_computation_control_plane",
+            "independent_validate_qku_computation_control_plane_accounting",
+            "independent_validate_qku_computation_control_plane_execution",
+            "independent_validate_qku_computation_control_plane_d",
+            "independent_validate_qku_computation_control_plane_model_risk",
+            "independent_validate_qku_computation_control_plane_quantum",
+            "pytest_shard_1_tools_fail_closed",
+        }
+    )
+    entries = inventory.validation_inventory()
+    entries_by_id = {entry.validator_id: entry for entry in entries}
+    assert inventory.SHARED_VALIDATOR_SUPPORT_TOOL_OWNERS == {
+        shared_path: expected_owners
+    }
+    assert expected_owners <= entries_by_id.keys()
+
+    pytest_phase = next(
+        phase_record
+        for phase_record in runner.build_phase_manifest(
+            Path(".tmp/test-shared-support-inventory"),
+            Path(".tmp/test-shared-support-inventory/pytest"),
+        )
+        if phase_record["phase"] == "pytest-shard-1"
+    )
+    tools_fail_closed_command = next(
+        command
+        for command in pytest_phase["commands"]
+        if "tests/tools" in command and "tests/fail_closed" in command
+    )
+    assert inventory.validator_id_for_command(
+        tools_fail_closed_command,
+        "pytest-shard-1",
+    ) == "pytest_shard_1_tools_fail_closed"
+
+    matching_ids = frozenset(
+        entry.validator_id for entry in inventory.entries_matching_path(shared_path)
+    )
+    assert matching_ids == expected_owners
+    for validator_id, entry in entries_by_id.items():
+        if validator_id in expected_owners:
+            assert shared_path in entry.tool_globs
+        else:
+            assert shared_path not in entry.tool_globs
+        assert all(
+            tool_glob == shared_path
+            for tool_glob in entry.tool_globs
+            if fnmatchcase(shared_path, tool_glob)
+        )
+    assert shared_path not in inventory.QKU_ALLOWED_EXACT_PATHS
+    assert not any(
+        fnmatchcase(shared_path, glob)
+        for glob in inventory.VALIDATION_INFRASTRUCTURE_GLOBS
+    )
+
+    result = router.build_router_result(
+        router.RouterInput(
+            repo_root=Path(__file__).resolve().parents[2],
+            changed_files=(shared_path,),
+            workflow_event_name="pull_request",
+            is_pull_request=True,
+            current_branch="repair/st12-inherited-math-row-receipt-closure",
+        )
+    )
+    assert result.unknown_files == ()
+    assert result.fail_closed_reasons == ()
+    assert result.classified_files[shared_path] == tuple(sorted(expected_owners))
+    assert expected_owners <= set(result.required_validators)
+
+    registered_commands = {
+        (phase_record["phase"], inventory.canonical_command(command))
+        for phase_record in runner.build_phase_manifest(
+            Path(".tmp/qtt_validation_inventory"),
+            Path(".tmp/qtt_validation_inventory/pytest"),
+        )
+        for command in phase_record["commands"]
+    }
+    assert len(entries) == 449
+    assert {(entry.phase, entry.command) for entry in entries} == registered_commands
+    assert {entry.phase for entry in entries} == set(runner.ORDERED_PHASES)
 
 
 def test_qku_paths_route_to_primary_and_independent_validation():

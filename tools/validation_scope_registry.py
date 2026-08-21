@@ -1702,6 +1702,42 @@ def is_validation_context_branch(branch: str) -> bool:
     return str(branch).strip() in _VALIDATION_CONTEXT_BRANCHES
 
 
+def _registered_exact_repair_scope_decision(
+    branch: str,
+    path: str,
+) -> dict[str, object] | None:
+    from tools.ci_branch_context import (
+        EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_CHANGED_PATHS,
+        is_repair_branch,
+        normalize_branch_context,
+    )
+
+    branch_name = normalize_branch_context(str(branch))
+    normalized = normalize_changed_path(path)
+    if not is_repair_branch(branch_name):
+        return None
+    exact_scope = EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_CHANGED_PATHS.get(branch_name)
+    if exact_scope is None:
+        return None
+    allowed = normalized in exact_scope
+    return {
+        "allowed": allowed,
+        "branch": branch_name,
+        "normalized_path": normalized,
+        "pr_id": "REGISTERED-EXACT-REPAIR",
+        "matched_rule": (
+            f"exact:{normalized}"
+            if allowed
+            else "registered_exact_repair_scope_denial"
+        ),
+        "reason": (
+            "registered_exact_path"
+            if allowed
+            else "path_not_registered_for_exact_repair_scope"
+        ),
+    }
+
+
 def is_pr_scoped_changed_path_allowed(branch: str, path: str) -> bool:
     return bool(explain_pr_scope_decision(branch, path)["allowed"])
 
@@ -2377,6 +2413,10 @@ def _pr169_dash1_scope_decision(branch_name: str, normalized: str) -> dict[str, 
 
 
 def explain_pr_scope_decision(branch: str, path: str) -> dict[str, object]:
+    repair_decision = _registered_exact_repair_scope_decision(branch, path)
+    if repair_decision is not None:
+        return repair_decision
+
     normalized = normalize_changed_path(path)
     branch_name = str(branch).strip()
     if branch_name == ST12H_BRANCH:
@@ -3073,6 +3113,30 @@ def explain_pr_scope_decision(branch: str, path: str) -> dict[str, object]:
         }
 
     if branch_name == VALIDATION_FIXTURE_BRANCH:
+        from tools.ci_branch_context import (
+            EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_CHANGED_PATHS,
+        )
+
+        for registered_repair_branch in sorted(
+            EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_CHANGED_PATHS
+        ):
+            registered_repair_decision = _registered_exact_repair_scope_decision(
+                registered_repair_branch,
+                normalized,
+            )
+            if (
+                registered_repair_decision is not None
+                and registered_repair_decision["allowed"] is True
+            ):
+                return {
+                    **registered_repair_decision,
+                    "branch": branch_name,
+                    "matched_rule": (
+                        "validation_context_registered_exact_repair:"
+                        f"{registered_repair_branch}:{normalized}"
+                    ),
+                    "reason": "registered_validation_context_exact_repair_path",
+                }
         rp_decision = _pr168_rp_scope_decision(branch_name, normalized)
         if rp_decision:
             return rp_decision

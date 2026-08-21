@@ -6,6 +6,7 @@ from fnmatch import fnmatchcase
 import re
 from pathlib import Path, PurePosixPath
 import sys
+from types import MappingProxyType
 from typing import Iterable, Mapping, Sequence
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -104,6 +105,21 @@ QKU_ALLOWED_EXACT_PATHS = frozenset(
         *ST12G_ALLOWED_EXACT_PATHS,
         *ST12H_ALLOWED_EXACT_PATHS,
     )
+)
+SHARED_VALIDATOR_SUPPORT_TOOL_OWNERS: Mapping[str, frozenset[str]] = MappingProxyType(
+    {
+        "tools/qku_independent_math_row_receipt.py": frozenset(
+            {
+                "independent_validate_qku_computation_control_plane",
+                "independent_validate_qku_computation_control_plane_accounting",
+                "independent_validate_qku_computation_control_plane_execution",
+                "independent_validate_qku_computation_control_plane_d",
+                "independent_validate_qku_computation_control_plane_model_risk",
+                "independent_validate_qku_computation_control_plane_quantum",
+                "pytest_shard_1_tools_fail_closed",
+            }
+        )
+    }
 )
 ST12C_QKU_VALIDATOR_IDS = frozenset(
     {
@@ -880,7 +896,15 @@ def _entry_for_command(command: Sequence[str], phase: str) -> ValidatorInventory
     classes = _classes_for(stem, canonical, phase)
     output_globs = _dedupe_sorted(_output_globs(script_name, stem))
     tool_globs = _dedupe_sorted(
-        [*_script_path_glob(script_name), *_domain_globs(stem, canonical)]
+        [
+            *_script_path_glob(script_name),
+            *_domain_globs(stem, canonical),
+            *(
+                path
+                for path, owner_ids in SHARED_VALIDATOR_SUPPORT_TOOL_OWNERS.items()
+                if validator_id in owner_ids
+            ),
+        ]
     )
     test_globs = _test_globs(stem, canonical, phase)
     workflow_globs = _workflow_globs(stem)
@@ -1269,6 +1293,71 @@ def validate_inventory(entries: Sequence[ValidatorInventoryEntry] | None = None)
         failures.append(f"VALIDATION_INVENTORY_UNKNOWN_EXTRA_COMMAND: {validator_id}")
 
     repo_root = Path(__file__).resolve().parents[1]
+    normalized_shared_paths: list[str] = []
+    rows_by_id = {entry.validator_id: entry for entry in rows}
+    for raw_path, owner_ids in SHARED_VALIDATOR_SUPPORT_TOOL_OWNERS.items():
+        try:
+            normalized_path = normalize_repo_ref(raw_path)
+        except ValueError as exc:
+            failures.append(
+                f"VALIDATION_INVENTORY_BAD_SHARED_SUPPORT_PATH: {raw_path} {exc}"
+            )
+            continue
+        normalized_shared_paths.append(normalized_path)
+        if any(token in raw_path for token in ("*", "?", "[")):
+            failures.append(
+                f"VALIDATION_INVENTORY_WILDCARD_SHARED_SUPPORT_PATH: {raw_path}"
+            )
+        if not isinstance(owner_ids, frozenset):
+            failures.append(
+                f"VALIDATION_INVENTORY_MUTABLE_SHARED_SUPPORT_OWNERS: {raw_path}"
+            )
+        if not owner_ids:
+            failures.append(
+                f"VALIDATION_INVENTORY_EMPTY_SHARED_SUPPORT_OWNERS: {raw_path}"
+            )
+        for unknown_owner in sorted(owner_ids - expected_ids):
+            failures.append(
+                "VALIDATION_INVENTORY_UNKNOWN_SHARED_SUPPORT_OWNER: "
+                f"{raw_path} {unknown_owner}"
+            )
+        if not (repo_root / normalized_path).is_file():
+            failures.append(
+                f"VALIDATION_INVENTORY_MISSING_SHARED_SUPPORT_TOOL: {raw_path}"
+            )
+        for owner_id in sorted(owner_ids & set(rows_by_id)):
+            if normalized_path not in rows_by_id[owner_id].tool_globs:
+                failures.append(
+                    "VALIDATION_INVENTORY_SHARED_SUPPORT_OWNER_MISSING_PATH: "
+                    f"{owner_id} {normalized_path}"
+                )
+        for entry in rows:
+            exact_path_present = normalized_path in entry.tool_globs
+            if exact_path_present and entry.validator_id not in owner_ids:
+                failures.append(
+                    "VALIDATION_INVENTORY_SHARED_SUPPORT_UNRELATED_OWNER: "
+                    f"{entry.validator_id} {normalized_path}"
+                )
+            for tool_glob in entry.tool_globs:
+                if tool_glob != normalized_path and _matches_any(
+                    normalized_path, (tool_glob,)
+                ):
+                    failures.append(
+                        "VALIDATION_INVENTORY_SHARED_SUPPORT_BROAD_GLOB: "
+                        f"{entry.validator_id} {tool_glob} {normalized_path}"
+                    )
+    duplicate_shared_paths = sorted(
+        {
+            path
+            for path in normalized_shared_paths
+            if normalized_shared_paths.count(path) > 1
+        }
+    )
+    for duplicate_path in duplicate_shared_paths:
+        failures.append(
+            f"VALIDATION_INVENTORY_DUPLICATE_SHARED_SUPPORT_PATH: {duplicate_path}"
+        )
+
     for entry in rows:
         if not entry.validator_id:
             failures.append("VALIDATION_INVENTORY_EMPTY_VALIDATOR_ID")

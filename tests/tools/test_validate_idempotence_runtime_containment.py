@@ -3,6 +3,7 @@ from __future__ import annotations
 from copy import deepcopy
 from pathlib import Path
 
+from tools import ci_branch_context as context
 from tools import validate_idempotence_runtime_containment as validator
 
 
@@ -223,6 +224,52 @@ def test_generated_report_payload_change_is_rejected_for_hardening_pr():
     )
 
     assert "FORBIDDEN_GENERATED_REPORT_PAYLOAD_CHANGE" in _codes(failures)
+
+
+def test_exact_registered_repair_scope_allows_only_current_pr152_report():
+    branch = context.ST12_INHERITED_MATH_ROW_RECEIPT_REPAIR_BRANCH
+    pr152_report = (
+        "docs/master_plan/generated/"
+        "PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json"
+    )
+
+    assert validator._allowed_explicit_roadmap_feature_touch(
+        branch,
+        pr152_report,
+        auto_discovered_changed_paths=True,
+    )
+    assert validator._validate_changed_files(
+        _inventory(),
+        (pr152_report,),
+        workflow_text=WORKFLOW_TEXT,
+        current_branch=branch,
+        auto_discovered_changed_paths=True,
+    ) == []
+
+    for denied_path in (
+        "docs/master_plan/generated/Unrelated.report.json",
+        "docs/master_plan/generated/PR208_FinalSummary.report.json",
+        "docs/master_plan/QTT_MasterPlan_Current.md",
+        "docs/roadmap/generated/Unrelated.report.json",
+    ):
+        assert not validator._allowed_explicit_roadmap_feature_touch(
+            branch,
+            denied_path,
+            auto_discovered_changed_paths=True,
+        )
+
+    for adversarial_branch in (
+        branch.upper(),
+        f"{branch}-suffix",
+        f"{branch}/",
+        branch.replace("receipt-closure", "receipts-closure"),
+        "repair/st12-unregistered-repair",
+    ):
+        assert not validator._allowed_explicit_roadmap_feature_touch(
+            adversarial_branch,
+            pr152_report,
+            auto_discovered_changed_paths=True,
+        )
 
 
 def test_master_plan_content_change_is_rejected_for_hardening_pr():

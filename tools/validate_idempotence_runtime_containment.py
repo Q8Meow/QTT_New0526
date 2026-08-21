@@ -665,21 +665,31 @@ def _allowed_explicit_roadmap_feature_touch(
 ) -> bool:
     if not auto_discovered_changed_paths:
         return False
-    if is_pr_scoped_changed_path_allowed(branch, path):
-        return True
     try:
         from tools.ci_branch_context import (
+            EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_CHANGED_PATHS,
             PR162E_BRANCH,
             PR162E_Q_BRANCH,
             PR166_Q_BRANCH,
             PR166_QB_BRANCH,
             PR166_QC_BRANCH,
-            is_explicit_downstream_repair_changed_path,
             PR167_BRANCH,
+            is_explicit_downstream_repair_changed_path,
+            is_repair_branch,
+            normalize_branch_context,
         )
     except Exception:
-        return False
-    if branch not in {
+        return is_pr_scoped_changed_path_allowed(branch, path)
+
+    normalized_branch = normalize_branch_context(branch)
+    exact_repair_scope = EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_CHANGED_PATHS.get(
+        normalized_branch
+    )
+    if is_repair_branch(normalized_branch) and exact_repair_scope is not None:
+        return is_explicit_downstream_repair_changed_path(normalized_branch, path)
+    if is_pr_scoped_changed_path_allowed(normalized_branch, path):
+        return True
+    if normalized_branch not in {
         PR166_Q_BRANCH,
         PR166_QB_BRANCH,
         PR166_QC_BRANCH,
@@ -688,7 +698,7 @@ def _allowed_explicit_roadmap_feature_touch(
         PR167_BRANCH,
     }:
         return False
-    return is_explicit_downstream_repair_changed_path(branch, path)
+    return is_explicit_downstream_repair_changed_path(normalized_branch, path)
 
 
 def _validate_checkout(inventory: Mapping[str, Any]) -> list[Failure]:
