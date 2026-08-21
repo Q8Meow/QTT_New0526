@@ -56,6 +56,11 @@ def exact_decimal(value: Decimal | str | int, *, field_name: str = "value") -> D
             ReasonCode.FLOAT_DECIMAL_CONTAMINATION,
             f"{field_name} must be Decimal, canonical string, or integer",
         )
+    if not isinstance(value, (Decimal, str, int)):
+        raise NumericDomainError(
+            ReasonCode.INVALID_NUMERIC_INPUT,
+            f"{field_name} is not a valid Decimal",
+        )
     try:
         result = (
             value

@@ -421,6 +421,22 @@ def _independent_decimal_boundary_evidence() -> dict[str, object]:
             "NONFINITE_NUMERIC_INPUT",
             "must be finite",
         ),
+        "tuple_decimal_representation": _capture_rejection(
+            lambda: _decimal(
+                (0, (1, 2, 3), -2),
+                "tuple_decimal_representation",
+            ),
+            "INVALID_NUMERIC_INPUT",
+            "is not a valid Decimal",
+        ),
+        "list_decimal_representation": _capture_rejection(
+            lambda: _decimal(
+                [0, (1, 2, 3), -2],
+                "list_decimal_representation",
+            ),
+            "INVALID_NUMERIC_INPUT",
+            "is not a valid Decimal",
+        ),
         "unsupported_object": _capture_rejection(
             lambda: _decimal(_NumericLookingObject(), "unsupported_object"),
             "INVALID_NUMERIC_INPUT",
@@ -593,15 +609,60 @@ def _validate_execution_math_owner_ast(
         raise ValueError("production exact-Decimal context contract differs")
 
     production_exact_decimal = function(context_tree, "exact_decimal")
-    production_type_checks = {
-        node.args[1].id
-        for node in ast.walk(production_exact_decimal)
-        if isinstance(node, ast.Call)
-        and isinstance(node.func, ast.Name)
-        and node.func.id == "isinstance"
-        and len(node.args) >= 2
-        and isinstance(node.args[1], ast.Name)
-    }
+
+    def value_isinstance_types(node: ast.AST) -> tuple[str, ...] | None:
+        if (
+            not isinstance(node, ast.Call)
+            or not isinstance(node.func, ast.Name)
+            or node.func.id != "isinstance"
+            or len(node.args) != 2
+            or not isinstance(node.args[0], ast.Name)
+            or node.args[0].id != "value"
+        ):
+            return None
+        type_node = node.args[1]
+        if isinstance(type_node, ast.Name):
+            return (type_node.id,)
+        if isinstance(type_node, ast.Tuple):
+            names = tuple(
+                element.id
+                for element in type_node.elts
+                if isinstance(element, ast.Name)
+            )
+            return names if len(names) == len(type_node.elts) else None
+        return None
+
+    def body_has_reason(node: ast.AST, reason: str) -> bool:
+        return any(
+            isinstance(child, ast.Attribute)
+            and isinstance(child.value, ast.Name)
+            and child.value.id == "ReasonCode"
+            and child.attr == reason
+            for child in ast.walk(node)
+        )
+
+    contamination_guards = tuple(
+        node
+        for node in production_exact_decimal.body
+        if isinstance(node, ast.If)
+        and {
+            types[0]
+            for child in ast.walk(node.test)
+            if (types := value_isinstance_types(child)) is not None
+            and len(types) == 1
+        }
+        == {"bool", "float"}
+        and body_has_reason(node, "FLOAT_DECIMAL_CONTAMINATION")
+    )
+    exact_admission_guards = tuple(
+        node
+        for node in production_exact_decimal.body
+        if isinstance(node, ast.If)
+        and isinstance(node.test, ast.UnaryOp)
+        and isinstance(node.test.op, ast.Not)
+        and value_isinstance_types(node.test.operand) == ("Decimal", "str", "int")
+        and body_has_reason(node, "INVALID_NUMERIC_INPUT")
+    )
     production_reason_families = {
         node.attr
         for node in ast.walk(production_exact_decimal)
@@ -615,6 +676,9 @@ def _validate_execution_math_owner_ast(
         if isinstance(node, ast.Call)
         and isinstance(node.func, ast.Attribute)
         and node.func.attr == "create_decimal"
+        and isinstance(node.func.value, ast.Call)
+        and isinstance(node.func.value.func, ast.Name)
+        and node.func.value.func.id == "decimal_context_v1"
         and len(node.args) == 1
         and isinstance(node.args[0], ast.Name)
         and node.args[0].id == "value"
@@ -636,12 +700,34 @@ def _validate_execution_math_owner_ast(
         for child in ast.walk(handler.type)
         if isinstance(child, ast.Name)
     }
+    invalid_handlers = tuple(
+        handler
+        for handler in ast.walk(production_exact_decimal)
+        if isinstance(handler, ast.ExceptHandler)
+        and body_has_reason(handler, "INVALID_NUMERIC_INPUT")
+    )
+    nonfinite_guards = tuple(
+        node
+        for node in production_exact_decimal.body
+        if isinstance(node, ast.If)
+        and isinstance(node.test, ast.UnaryOp)
+        and isinstance(node.test.op, ast.Not)
+        and isinstance(node.test.operand, ast.Call)
+        and isinstance(node.test.operand.func, ast.Attribute)
+        and isinstance(node.test.operand.func.value, ast.Name)
+        and node.test.operand.func.value.id == "result"
+        and node.test.operand.func.attr == "is_finite"
+        and body_has_reason(node, "NONFINITE_NUMERIC_INPUT")
+    )
     if (
-        not {"bool", "float", "Decimal"} <= production_type_checks
+        len(contamination_guards) != 1
+        or len(exact_admission_guards) != 1
         or len(production_create_decimal_calls) != 1
         or not production_decimal_preservation
         or not {"InvalidOperation", "ValueError", "TypeError"}
         <= production_exception_types
+        or len(invalid_handlers) != 1
+        or len(nonfinite_guards) != 1
         or not {
             "FLOAT_DECIMAL_CONTAMINATION",
             "INVALID_NUMERIC_INPUT",

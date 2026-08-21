@@ -260,6 +260,13 @@ def test_receipt_domains_have_exact_ordered_membership() -> None:
         lambda: _production_fill_probability(0.4),
         "FLOAT_DECIMAL_CONTAMINATION",
     )
+    decimal_tuple_representation = (0, (1, 2, 3), -2)
+    decimal_list_representation = [0, (1, 2, 3), -2]
+    assert_numeric_rejection_pair(
+        lambda: independent_probability(decimal_tuple_representation),
+        lambda: _production_fill_probability(decimal_tuple_representation),
+        "INVALID_NUMERIC_INPUT",
+    )
 
     math38_high_precision_distribution = (
         ("76.619839145498174104090161033962172", "0.5"),
@@ -311,6 +318,20 @@ def test_receipt_domains_have_exact_ordered_membership() -> None:
             independent_call,
             production_call,
             "FLOAT_DECIMAL_CONTAMINATION",
+        )
+
+    for unsupported_numeric in (
+        decimal_tuple_representation,
+        decimal_list_representation,
+    ):
+        assert_numeric_rejection_pair(
+            lambda value=unsupported_numeric: independent_fill(
+                ((value, "0.5"), ("100", "0.5"))
+            ),
+            lambda value=unsupported_numeric: production_fill(
+                ((value, "0.5"), ("100", "0.5"))
+            ),
+            "INVALID_NUMERIC_INPUT",
         )
 
     assert_numeric_rejection_pair(

@@ -227,12 +227,16 @@ def test_st12_inherited_math_receipt_repair_scope_is_exact(monkeypatch):
             "tools/validation_inventory.py",
             "tools/validation_scope_registry.py",
             "tools/validate_idempotence_runtime_containment.py",
+            "src/qtt/stage1_prediction_markets/qku_computation_control_plane/"
+            "context.py",
             "tests/tools/test_ci_branch_context.py",
             "tests/tools/test_validate_repair_pr_changed_file_scope.py",
             "tests/tools/test_qku_independent_math_row_receipt.py",
             "tests/tools/test_validation_inventory.py",
             "tests/tools/test_validation_scope_registry.py",
             "tests/tools/test_validate_idempotence_runtime_containment.py",
+            "tests/stage1_prediction_markets/qku_computation_control_plane/"
+            "security/test_input_validation.py",
             "docs/master_plan/generated/"
             "PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
         }
@@ -251,6 +255,9 @@ def test_st12_inherited_math_receipt_repair_scope_is_exact(monkeypatch):
 
     rejected = (
         "src/qtt/stage1_prediction_markets/qku_computation_control_plane/validation.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/contexts.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/security/"
+        "test_input_validations.py",
         "tools/independent_validate_qku_computation_control_plane_architecture.py",
         "tools/changed_area_validation_router.py",
         "tools/validate_validation_inventory.py",

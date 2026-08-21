@@ -57,12 +57,15 @@ ST12_INHERITED_MATH_ROW_RECEIPT_REPAIR_CHANGED_PATHS = frozenset(
         "tools/validation_inventory.py",
         "tools/validation_scope_registry.py",
         "tools/validate_idempotence_runtime_containment.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/context.py",
         "tests/tools/test_ci_branch_context.py",
         "tests/tools/test_validate_repair_pr_changed_file_scope.py",
         "tests/tools/test_qku_independent_math_row_receipt.py",
         "tests/tools/test_validation_inventory.py",
         "tests/tools/test_validation_scope_registry.py",
         "tests/tools/test_validate_idempotence_runtime_containment.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/security/"
+        "test_input_validation.py",
         "docs/master_plan/generated/"
         "PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
     }

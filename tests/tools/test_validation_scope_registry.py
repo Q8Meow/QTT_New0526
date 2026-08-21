@@ -2168,7 +2168,7 @@ def test_registered_exact_repair_scope_reaches_atomicrows_owners(monkeypatch) ->
 
     branch = context.ST12_INHERITED_MATH_ROW_RECEIPT_REPAIR_BRANCH
     exact_paths = context.EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_CHANGED_PATHS[branch]
-    assert len(exact_paths) == 17
+    assert len(exact_paths) == 19
     for path in exact_paths:
         decision = registry._registered_exact_repair_scope_decision(branch, path)
         assert decision is not None

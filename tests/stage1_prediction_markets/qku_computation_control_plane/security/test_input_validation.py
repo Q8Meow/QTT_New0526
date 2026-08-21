@@ -37,6 +37,20 @@ def test_general_decimal_boundary_remains_exact_while_probability_is_centralized
     with pytest.raises(NumericDomainError) as caught:
         exact_decimal(0.42)
     assert caught.value.reason_code is ReasonCode.FLOAT_DECIMAL_CONTAMINATION
+
+    class NumericLookingObject:
+        def __str__(self) -> str:
+            return "0.5"
+
+    for unsupported in (
+        (0, (1, 2, 3), -2),
+        [0, (1, 2, 3), -2],
+        NumericLookingObject(),
+    ):
+        with pytest.raises(NumericDomainError) as caught:
+            exact_decimal(unsupported)  # type: ignore[arg-type]
+        assert caught.value.reason_code is ReasonCode.INVALID_NUMERIC_INPUT
+
     assert canonical_probability_decimal(0.42) == Decimal("0.42")
     assert canonical_probability_decimal("0.42") == Decimal("0.42")
     for value in (True, float("nan"), float("inf"), -0.01, 1.01):
