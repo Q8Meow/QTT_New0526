@@ -289,7 +289,7 @@ def test_shared_validator_support_tool_ownership_is_exact_and_routes():
         )
         for command in phase_record["commands"]
     }
-    assert len(entries) == 449
+    assert len(entries) == len(registered_commands) == 450
     assert {(entry.phase, entry.command) for entry in entries} == registered_commands
     assert {entry.phase for entry in entries} == set(runner.ORDERED_PHASES)
 

@@ -4,6 +4,8 @@
 from __future__ import annotations
 
 import argparse
+import ast
+from collections.abc import Mapping
 from copy import deepcopy
 from dataclasses import dataclass, replace
 from datetime import UTC, datetime, timedelta
@@ -18,7 +20,7 @@ import subprocess
 import sys
 import tempfile
 from types import MappingProxyType
-from typing import Callable, Mapping, Sequence
+from typing import Callable, Sequence
 import unicodedata
 import warnings
 import zipfile
@@ -29,6 +31,19 @@ if str(REPO_ROOT) not in sys.path:
 
 from tools.validation_scope_registry import (  # noqa: E402
     build_st12g_architecture_validation_command,
+)
+from tools.qku_independent_math_row_receipt import (  # noqa: E402
+    EVIDENCE_PREFIX as INHERITED_RECEIPT_PREFIX,
+    EXPECTED_DOMAIN_MATH_IDS as INHERITED_DOMAIN_MATH_IDS,
+    EXPECTED_DOMAIN_OWNER as INHERITED_DOMAIN_OWNER,
+    INDEPENDENT_REFERENCE_NO_PRODUCTION_RUNTIME_IMPORT,
+    PRODUCTION_SYSTEM_UNDER_TEST_WITH_INDEPENDENT_EXPECTED_RESULT,
+    SCHEMA_VERSION as INHERITED_RECEIPT_SCHEMA_VERSION,
+    IndependentMathEvidenceEnvelopeV1,
+    IndependentMathRowEvidenceV1,
+    MathRowReceiptValidationError,
+    evidence_denominators as inherited_evidence_denominators,
+    parse_evidence_line,
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import (  # noqa: E402
     ComputationControlPlaneError,
@@ -45,10 +60,16 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.implementat
     ST12F_EVIDENCE_MATH_CALLABLE_REGISTRY_V1,
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.oracle_contracts import (  # noqa: E402
+    GOLDEN_VECTOR_BY_MATH_ID,
+    ORACLE_BY_MATH_ID,
     ST12D_CUMULATIVE_GOLDEN_VECTOR_BY_MATH_ID,
     ST12D_CUMULATIVE_ORACLE_BY_MATH_ID,
+    ST12B_PROPERTY_TESTS,
+    ST12B_VECTORS_BY_MATH_ID,
     ST12F_EVIDENCE_GOLDEN_VECTOR_BY_MATH_ID,
     ST12F_EVIDENCE_ORACLE_BY_MATH_ID,
+    TRANCHE_A_GOLDEN_VECTOR_BY_MATH_ID,
+    TRANCHE_A_ORACLE_BY_MATH_ID,
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.receipts import (  # noqa: E402
     ST12HBackupRestoreReceiptV1,
@@ -92,6 +113,135 @@ SUCCESS_MARKER = "QKU_COMPUTATION_CONTROL_PLANE_INDEPENDENTLY_VALIDATED"
 ST12H_DIRECT_MATH_MARKER = "ST12H_MATH_40_44_INDEPENDENTLY_RECONSTRUCTED"
 ST12H_COMPLETE_MATH_MARKER = "ST12H_MATH_01_52_COVERAGE_RECONSTRUCTED"
 
+_ST12H_ARCHITECTURE_AGGREGATE_PREFIX = "ST12_ARCHITECTURE_MATH_EVIDENCE_V1"
+_ST12H_ARCHITECTURE_CURRENT_PREFIX = (
+    "ST12_ARCHITECTURE_CURRENT_FULL_CONTRACT_EVIDENCE_V1"
+)
+_ST12H_ARCHITECTURE_SUCCESS_MARKER = "QKU_ARCHITECTURE_INDEPENDENTLY_VALIDATED"
+_ST12H_ARCHITECTURE_COMPARATOR_VERSION = (
+    "ST12_ARCHITECTURE_COMPARATOR_REGISTRY_V3"
+)
+_ST12H_ARCHITECTURE_LEGACY_TIER = "LEGACY_GOLDEN_REGRESSION"
+_ST12H_ARCHITECTURE_CURRENT_TIER = "CURRENT_FULL_CONTRACT"
+_ST12H_ARCHITECTURE_LEGACY_NOT_CLAIMED = (
+    "NOT_CLAIMED_FOR_LEGACY_REGRESSION_TIER"
+)
+_ST12H_ARCHITECTURE_CURRENT_LEGACY_NOT_APPLICABLE = (
+    "NOT_APPLICABLE_FOR_CURRENT_FULL_CONTRACT_TIER"
+)
+_ST12H_ARCHITECTURE_MATH_IDS = (
+    *(f"MATH-{index:02d}" for index in range(1, 26)),
+    *(f"MATH-{index:02d}" for index in range(46, 50)),
+)
+_ST12H_ARCHITECTURE_LEGACY_IDS = tuple(
+    f"MATH-{index:02d}" for index in range(1, 16)
+)
+_ST12H_ARCHITECTURE_CURRENT_IDS = (
+    *(f"MATH-{index:02d}" for index in range(16, 26)),
+    *(f"MATH-{index:02d}" for index in range(46, 50)),
+)
+_ST12H_NONARCHITECTURE_DOMAIN_ORDER = (
+    "accounting",
+    "execution",
+    "d",
+    "model_risk",
+    "quantum",
+)
+_ST12H_RECEIPT_DOMAIN_BY_RESULT_DOMAIN = MappingProxyType(
+    {
+        "accounting": "ACCOUNTING",
+        "execution": "EXECUTION",
+        "d": "D",
+        "model_risk": "MODEL_RISK",
+        "quantum": "QUANTUM",
+    }
+)
+
+_ST12H_ARCHITECTURE_ROW_FIELDS = frozenset(
+    {
+        "math_id",
+        "evidence_tier",
+        "oracle_id",
+        "golden_vector_id",
+        "comparison_policy",
+        "independent_algorithm_id",
+        "actual_observed_evidence",
+        "golden_comparison_passed",
+        "formula_or_procedure_mutation_observed",
+        "domain_guard_rejection_observed",
+        "precision_or_tolerance_mutation_observed",
+        "semantic_binding_mutation_observed",
+        "production_import_count",
+        "production_callable_count",
+        "terminal_state",
+        "legacy_golden_observation",
+        "legacy_formula_regression_mutation_observation",
+        "legacy_domain_rejection_observation",
+        "boundary_vector_id",
+        "negative_vector_id",
+        "property_id",
+        "current_output_schema",
+        "declared_comparison_policy",
+        "compiled_comparison_mode",
+        "compiled_absolute_tolerance_or_not_applicable",
+        "comparator_registry_version",
+        "comparator_authority_classification",
+        "numeric_text_leaf_paths",
+        "numeric_text_representation",
+        "comparison_execution_trace",
+        "comparison_policy_execution_observed",
+        "golden_observation",
+        "boundary_observation",
+        "negative_exception_observation",
+        "property_mutation_observation",
+        "actual_execution_mutation_observation",
+        "semantic_binding_mutation_observation",
+    }
+)
+_ST12H_ARCHITECTURE_AGGREGATE_FIELDS = frozenset(
+    {
+        "architecture_math_count",
+        "denominators",
+        "evidence_tier_domain",
+        "rows",
+        "schema_version",
+    }
+)
+_ST12H_ARCHITECTURE_CURRENT_FIELDS = frozenset(
+    {
+        "current_full_contract_count",
+        "denominators",
+        "rows",
+        "schema_version",
+    }
+)
+_ST12H_ARCHITECTURE_DENOMINATOR_FIELDS = frozenset(
+    {
+        "architecture_identity_order_rows",
+        "architecture_comparator_rows",
+        "legacy_golden_regression_rows",
+        "current_full_contract_rows",
+        "legacy_declared_policy_executions",
+        "current_declared_policy_executions",
+        "mode_specific_policy_executions",
+        "math_02_numeric_text_tolerance_executions",
+        "generic_default_comparator_calls",
+        "tracked_policy_registry_mismatches",
+        "legacy_tolerance_window_false_acceptances",
+        "legacy_within_tolerance_false_rejections",
+        "policy_execution_flags_without_matching_trace",
+        "current_golden_executions",
+        "current_boundary_executions",
+        "current_exact_negative_executions",
+        "current_property_mutations",
+        "current_actual_execution_mutations",
+        "current_semantic_binding_mutations",
+        "legacy_rows_counted_as_current_full_contract",
+        "legacy_formula_mutations_reused_as_precision_evidence",
+        "legacy_formula_mutations_reused_as_semantic_binding_evidence",
+    }
+)
+
 
 @dataclass(frozen=True, slots=True)
 class ST12HDirectMathEvidenceV1:
@@ -125,17 +275,44 @@ class ST12HMathEvidenceCrosswalkV1:
     execution_receipt_ref: str
 
 
+@dataclass(frozen=True, slots=True)
+class _ST12HArchitectureReceiptV3:
+    command: tuple[str, ...]
+    terminal_marker: str
+    aggregate_schema: str
+    current_schema: str
+    denominators: Mapping[str, int]
+    rows: tuple[Mapping[str, object], ...]
+    current_rows: tuple[Mapping[str, object], ...]
+
+
+@dataclass(frozen=True, slots=True)
+class _ST12HNonarchitectureReceiptV3:
+    result_domain: str
+    command: tuple[str, ...]
+    terminal_marker: str
+    envelope: IndependentMathEvidenceEnvelopeV1
+
+
 _ST12H_DIRECT_MATH_IDS = tuple(f"MATH-{index:02d}" for index in range(40, 45))
 _ST12H_ALL_MATH_IDS = tuple(f"MATH-{index:02d}" for index in range(1, 53))
 
 
 def _st12h_tracked_oracle(math_id: str) -> object:
+    if math_id in _ST12H_ARCHITECTURE_LEGACY_IDS:
+        return TRANCHE_A_ORACLE_BY_MATH_ID[math_id]
+    if math_id in _ST12H_ARCHITECTURE_CURRENT_IDS:
+        return ORACLE_BY_MATH_ID[math_id]
     if math_id in ST12F_EVIDENCE_ORACLE_BY_MATH_ID:
         return ST12F_EVIDENCE_ORACLE_BY_MATH_ID[math_id]
     return ST12D_CUMULATIVE_ORACLE_BY_MATH_ID[math_id]
 
 
 def _st12h_tracked_golden_vector(math_id: str) -> object:
+    if math_id in _ST12H_ARCHITECTURE_LEGACY_IDS:
+        return TRANCHE_A_GOLDEN_VECTOR_BY_MATH_ID[math_id]
+    if math_id in _ST12H_ARCHITECTURE_CURRENT_IDS:
+        return GOLDEN_VECTOR_BY_MATH_ID[math_id]
     if math_id in ST12F_EVIDENCE_GOLDEN_VECTOR_BY_MATH_ID:
         return ST12F_EVIDENCE_GOLDEN_VECTOR_BY_MATH_ID[math_id]
     return ST12D_CUMULATIVE_GOLDEN_VECTOR_BY_MATH_ID[math_id]
@@ -250,20 +427,22 @@ _ST12H_INHERITED_DOMAIN_BY_MATH_ID: Mapping[str, str] = MappingProxyType(
 )
 _ST12H_INHERITED_OWNER_BY_DOMAIN: Mapping[str, str] = MappingProxyType(
     {
-        domain: f"tools/independent_validate_qku_computation_control_plane_{domain}.py"
-        for domain in ("architecture", "accounting", "execution", "d", "model_risk", "quantum")
+        "architecture": (
+            "tools/independent_validate_qku_computation_control_plane_architecture.py"
+        ),
+        **{
+            result_domain: INHERITED_DOMAIN_OWNER[receipt_domain]
+            for result_domain, receipt_domain in (
+                ("accounting", "ACCOUNTING"),
+                ("execution", "EXECUTION"),
+                ("d", "D"),
+                ("model_risk", "MODEL_RISK"),
+                ("quantum", "QUANTUM"),
+            )
+        },
     }
 )
-_ST12H_INHERITED_MARKER_BY_DOMAIN: Mapping[str, str] = MappingProxyType(
-    {
-        "architecture": "QKU_ARCHITECTURE_INDEPENDENTLY_VALIDATED",
-        "accounting": "QKU_ACCOUNTING_INDEPENDENTLY_VALIDATED",
-        "execution": "QKU_EXECUTION_INDEPENDENTLY_VALIDATED",
-        "d": "QKU_COMPUTATION_CONTROL_PLANE_D_INDEPENDENTLY_VALIDATED",
-        "model_risk": "QKU_MODEL_RISK_INDEPENDENTLY_VALIDATED",
-        "quantum": "QKU_QUANTUM_INDEPENDENTLY_VALIDATED",
-    }
-)
+_ST12H_INHERITED_RESULT_DOMAINS = tuple(_ST12H_INHERITED_OWNER_BY_DOMAIN)
 
 
 def _st12h_validate_inherited_owner_assignment(math_id: str, owner: str) -> None:
@@ -514,40 +693,1141 @@ def reconstruct_st12h_math_40_to_44_v1() -> tuple[str, ...]:
     return identities
 
 
-def _st12h_result_marker(result: "DomainResult") -> str:
-    markers = tuple(
+def _st12h_literal_assignment(path: Path, name: str) -> object:
+    tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+    values: list[object] = []
+    for node in tree.body:
+        if isinstance(node, ast.Assign) and any(
+            isinstance(target, ast.Name) and target.id == name
+            for target in node.targets
+        ):
+            values.append(ast.literal_eval(node.value))
+    if len(values) != 1:
+        raise AssertionError(f"registered owner constant is not exact: {path}::{name}")
+    return values[0]
+
+
+def _st12h_architecture_owner_contract(
+) -> tuple[tuple[str, ...], str, str, str]:
+    owner = REPO_ROOT / _ST12H_INHERITED_OWNER_BY_DOMAIN["architecture"]
+    aggregate_prefix = _st12h_literal_assignment(owner, "EVIDENCE_MARKER")
+    current_prefix = _st12h_literal_assignment(
+        owner,
+        "CURRENT_FULL_CONTRACT_EVIDENCE_MARKER",
+    )
+    terminal_marker = _st12h_literal_assignment(owner, "SUCCESS_MARKER")
+    comparator_version = _st12h_literal_assignment(
+        owner,
+        "_COMPARATOR_REGISTRY_VERSION",
+    )
+    if (
+        aggregate_prefix != _ST12H_ARCHITECTURE_AGGREGATE_PREFIX
+        or current_prefix != _ST12H_ARCHITECTURE_CURRENT_PREFIX
+        or terminal_marker != _ST12H_ARCHITECTURE_SUCCESS_MARKER
+        or comparator_version != _ST12H_ARCHITECTURE_COMPARATOR_VERSION
+    ):
+        raise AssertionError("architecture registered owner contract drifted")
+    command = tuple(build_st12g_architecture_validation_command(sys.executable))
+    if (
+        len(command) != 3
+        or command[0] != sys.executable
+        or command[1] != "-c"
+        or "independent_validate_qku_computation_control_plane_architecture"
+        not in command[2]
+    ):
+        raise AssertionError("architecture command is not the central registered owner")
+    return command, aggregate_prefix, current_prefix, terminal_marker
+
+
+def _st12h_terminal_marker_from_owner(owner: str) -> str:
+    path = REPO_ROOT / owner
+    tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+    candidates: set[str] = set()
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Constant) or not isinstance(node.value, str):
+            continue
+        for token in node.value.replace("\n", " ").split():
+            normalized = token.strip("'\"()[]{}:;,.")
+            if (
+                normalized.startswith("QKU_")
+                and normalized.endswith("_INDEPENDENTLY_VALIDATED")
+            ):
+                candidates.add(normalized)
+    if len(candidates) != 1:
+        raise AssertionError(f"terminal marker owner is not exact: {owner}")
+    return next(iter(candidates))
+
+
+def _st12h_nonarchitecture_owner_contracts(
+) -> Mapping[str, tuple[tuple[str, ...], str]]:
+    contracts: dict[str, tuple[tuple[str, ...], str]] = {}
+    for result_domain in _ST12H_NONARCHITECTURE_DOMAIN_ORDER:
+        owner = _ST12H_INHERITED_OWNER_BY_DOMAIN[result_domain]
+        receipt_domain = _ST12H_RECEIPT_DOMAIN_BY_RESULT_DOMAIN[result_domain]
+        if owner != INHERITED_DOMAIN_OWNER[receipt_domain]:
+            raise AssertionError(
+                f"nonarchitecture registered owner drifted: {result_domain}"
+            )
+        command = (sys.executable, str(REPO_ROOT / owner))
+        contracts[result_domain] = (
+            command,
+            _st12h_terminal_marker_from_owner(owner),
+        )
+    return MappingProxyType(contracts)
+
+
+def _st12h_reject_duplicate_json_keys(
+    pairs: list[tuple[str, object]],
+) -> dict[str, object]:
+    result: dict[str, object] = {}
+    for key, value in pairs:
+        if key in result:
+            raise AssertionError(f"duplicate architecture receipt JSON key: {key}")
+        result[key] = value
+    return result
+
+
+def _st12h_reject_nonfinite_json_constant(value: str) -> object:
+    raise AssertionError(f"nonfinite architecture receipt JSON value: {value}")
+
+
+def _st12h_parse_prefixed_json_line(
+    line: str,
+    *,
+    prefix: str,
+) -> Mapping[str, object]:
+    actual_prefix, separator, payload_text = line.partition(" ")
+    if actual_prefix != prefix or separator != " " or not payload_text:
+        raise AssertionError(f"receipt prefix or payload differs: {prefix}")
+    try:
+        payload = json.loads(
+            payload_text,
+            object_pairs_hook=_st12h_reject_duplicate_json_keys,
+            parse_constant=_st12h_reject_nonfinite_json_constant,
+        )
+    except (json.JSONDecodeError, TypeError, ValueError) as exc:
+        raise AssertionError(f"malformed architecture receipt JSON: {exc}") from exc
+    if not isinstance(payload, Mapping):
+        raise AssertionError("architecture receipt payload is not an object")
+    return payload
+
+
+def _st12h_trace_count(trace: object, name: str) -> int:
+    if not isinstance(trace, Mapping):
+        return 0
+    value = trace.get(name)
+    return value if type(value) is int and value >= 0 else 0
+
+
+def _st12h_architecture_trace_reached(row: Mapping[str, object]) -> bool:
+    trace = row.get("comparison_execution_trace")
+    if not isinstance(trace, Mapping) or trace.get("declared_mode_branch_reached") is not True:
+        return False
+    mode = row.get("compiled_comparison_mode")
+    numeric_tolerance = _st12h_trace_count(
+        trace,
+        "numeric_float_tolerance_leaf_checks",
+    ) + _st12h_trace_count(trace, "numeric_text_tolerance_leaf_checks")
+    if mode == "EXACT_DECIMAL":
+        return _st12h_trace_count(trace, "exact_decimal_text_leaf_checks") > 0
+    if mode == "DECIMAL_CONTEXT_PRECISION_34_EXACT_RESULT":
+        return _st12h_trace_count(trace, "precision_34_exact_leaf_checks") > 0
+    if mode == "ABSOLUTE_TOLERANCE":
+        return numeric_tolerance > 0
+    if mode == "EXACT_ORDER_AND_INDEX_SET":
+        return _st12h_trace_count(trace, "exact_order_or_index_checks") > 0
+    if mode == "BOOLEAN_INVARIANTS":
+        return _st12h_trace_count(trace, "boolean_leaf_checks") > 0
+    if mode == "STRUCTURAL_NESTED_NUMERIC":
+        structural = _st12h_trace_count(
+            trace,
+            "structural_mapping_checks",
+        ) + _st12h_trace_count(trace, "structural_sequence_checks")
+        return structural > 0 and numeric_tolerance > 0
+    return False
+
+
+def _st12h_architecture_mutation_complete(value: object) -> bool:
+    return (
+        isinstance(value, Mapping)
+        and value.get("mutation_observed") is True
+        and isinstance(value.get("mutation_family"), str)
+        and bool(value.get("mutation_family"))
+        and isinstance(value.get("input_path"), list)
+        and bool(value.get("input_path"))
+        and "baseline_value" in value
+        and "replacement_value" in value
+        and isinstance(value.get("exact_consequence"), Mapping)
+        and isinstance(value.get("comparison_policy"), str)
+        and bool(value.get("comparison_policy"))
+    )
+
+
+def _st12h_marker_or_declared_only(value: object) -> bool:
+    if isinstance(value, str):
+        return "VALIDATED" in value or "DECLARED_STEP" in value
+    if isinstance(value, Mapping):
+        lowered = {str(key).lower() for key in value}
+        if lowered & {
+            "algorithm_steps",
+            "declared_steps",
+            "declared_steps_only",
+            "independent_algorithm_steps",
+        }:
+            return True
+        return len(value) == 1 and any(
+            _st12h_marker_or_declared_only(item) for item in value.values()
+        )
+    return False
+
+
+def _st12h_architecture_denominators(
+    rows: Sequence[Mapping[str, object]],
+) -> Mapping[str, int]:
+    legacy = tuple(
+        row
+        for row in rows
+        if row.get("evidence_tier") == _ST12H_ARCHITECTURE_LEGACY_TIER
+    )
+    current = tuple(
+        row
+        for row in rows
+        if row.get("evidence_tier") == _ST12H_ARCHITECTURE_CURRENT_TIER
+    )
+    reached = {
+        str(row.get("math_id")): _st12h_architecture_trace_reached(row)
+        for row in rows
+    }
+    allowed_modes = {
+        "EXACT_DECIMAL",
+        "DECIMAL_CONTEXT_PRECISION_34_EXACT_RESULT",
+        "ABSOLUTE_TOLERANCE",
+        "EXACT_ORDER_AND_INDEX_SET",
+        "BOOLEAN_INVARIANTS",
+        "STRUCTURAL_NESTED_NUMERIC",
+    }
+    mismatches = sum(
+        row.get("comparator_registry_version")
+        != _ST12H_ARCHITECTURE_COMPARATOR_VERSION
+        or row.get("declared_comparison_policy") != row.get("comparison_policy")
+        or row.get("compiled_comparison_mode") not in allowed_modes
+        for row in rows
+    )
+    return MappingProxyType(
+        {
+            "architecture_identity_order_rows": len(rows),
+            "architecture_comparator_rows": sum(
+                row.get("comparator_registry_version")
+                == _ST12H_ARCHITECTURE_COMPARATOR_VERSION
+                for row in rows
+            ),
+            "legacy_golden_regression_rows": len(legacy),
+            "current_full_contract_rows": len(current),
+            "legacy_declared_policy_executions": sum(
+                row.get("comparison_policy_execution_observed") is True
+                and reached[str(row.get("math_id"))]
+                for row in legacy
+            ),
+            "current_declared_policy_executions": sum(
+                row.get("comparison_policy_execution_observed") is True
+                and reached[str(row.get("math_id"))]
+                for row in current
+            ),
+            "mode_specific_policy_executions": sum(reached.values()),
+            "math_02_numeric_text_tolerance_executions": sum(
+                _st12h_trace_count(
+                    row.get("comparison_execution_trace"),
+                    "numeric_text_tolerance_leaf_checks",
+                )
+                for row in rows
+                if row.get("math_id") == "MATH-02" and reached["MATH-02"]
+            ),
+            "generic_default_comparator_calls": sum(
+                row.get("compiled_comparison_mode") not in allowed_modes
+                for row in rows
+            ),
+            "tracked_policy_registry_mismatches": mismatches,
+            "legacy_tolerance_window_false_acceptances": 0,
+            "legacy_within_tolerance_false_rejections": 0,
+            "policy_execution_flags_without_matching_trace": sum(
+                row.get("comparison_policy_execution_observed") is True
+                and not reached[str(row.get("math_id"))]
+                for row in rows
+            ),
+            "current_golden_executions": sum(
+                row.get("golden_observation")
+                != _ST12H_ARCHITECTURE_LEGACY_NOT_CLAIMED
+                and row.get("golden_comparison_passed") is True
+                for row in current
+            ),
+            "current_boundary_executions": sum(
+                row.get("boundary_observation")
+                != _ST12H_ARCHITECTURE_LEGACY_NOT_CLAIMED
+                for row in current
+            ),
+            "current_exact_negative_executions": sum(
+                isinstance(row.get("negative_exception_observation"), Mapping)
+                and row["negative_exception_observation"].get("attempted_execution")
+                is True
+                and row["negative_exception_observation"].get(
+                    "message_substring_matched"
+                )
+                is True
+                for row in current
+            ),
+            "current_property_mutations": sum(
+                _st12h_architecture_mutation_complete(
+                    row.get("property_mutation_observation")
+                )
+                for row in current
+            ),
+            "current_actual_execution_mutations": sum(
+                _st12h_architecture_mutation_complete(
+                    row.get("actual_execution_mutation_observation")
+                )
+                for row in current
+            ),
+            "current_semantic_binding_mutations": sum(
+                _st12h_architecture_mutation_complete(
+                    row.get("semantic_binding_mutation_observation")
+                )
+                for row in current
+            ),
+            "legacy_rows_counted_as_current_full_contract": sum(
+                row.get("math_id") in _ST12H_ARCHITECTURE_LEGACY_IDS
+                and row.get("evidence_tier") == _ST12H_ARCHITECTURE_CURRENT_TIER
+                for row in rows
+            ),
+            "legacy_formula_mutations_reused_as_precision_evidence": sum(
+                row.get("math_id") in _ST12H_ARCHITECTURE_LEGACY_IDS
+                and (
+                    row.get("precision_or_tolerance_mutation_observed") is True
+                    or (
+                        row.get("actual_execution_mutation_observation")
+                        != _ST12H_ARCHITECTURE_LEGACY_NOT_CLAIMED
+                        and row.get("actual_execution_mutation_observation")
+                        == row.get("legacy_formula_regression_mutation_observation")
+                    )
+                )
+                for row in rows
+            ),
+            "legacy_formula_mutations_reused_as_semantic_binding_evidence": sum(
+                row.get("math_id") in _ST12H_ARCHITECTURE_LEGACY_IDS
+                and (
+                    row.get("semantic_binding_mutation_observed") is True
+                    or (
+                        row.get("semantic_binding_mutation_observation")
+                        != _ST12H_ARCHITECTURE_LEGACY_NOT_CLAIMED
+                        and row.get("semantic_binding_mutation_observation")
+                        == row.get("legacy_formula_regression_mutation_observation")
+                    )
+                )
+                for row in rows
+            ),
+        }
+    )
+
+
+def _st12h_validate_architecture_row(
+    row: Mapping[str, object],
+    *,
+    expected_math_id: str,
+) -> None:
+    if set(row) != _ST12H_ARCHITECTURE_ROW_FIELDS:
+        raise AssertionError(f"architecture receipt row fields differ: {expected_math_id}")
+    if row.get("math_id") != expected_math_id:
+        raise AssertionError("architecture receipt rows are missing, extra, or reordered")
+    expected_tier = (
+        _ST12H_ARCHITECTURE_LEGACY_TIER
+        if expected_math_id in _ST12H_ARCHITECTURE_LEGACY_IDS
+        else _ST12H_ARCHITECTURE_CURRENT_TIER
+    )
+    oracle = _ST12H_TRACKED_ORACLE_BY_MATH_ID[expected_math_id]
+    vector = _ST12H_TRACKED_GOLDEN_VECTOR_BY_MATH_ID[expected_math_id]
+    if (
+        row.get("evidence_tier") != expected_tier
+        or row.get("oracle_id") != getattr(oracle, "oracle_id", None)
+        or row.get("golden_vector_id") != getattr(vector, "vector_id", None)
+        or row.get("comparison_policy")
+        != getattr(oracle, "comparison_policy", None)
+        or row.get("declared_comparison_policy")
+        != getattr(oracle, "comparison_policy", None)
+    ):
+        raise AssertionError(f"architecture tier/oracle/vector owner drifted: {expected_math_id}")
+    if (
+        not isinstance(row.get("independent_algorithm_id"), str)
+        or not row["independent_algorithm_id"]
+        or "H_AGGREGATE" in row["independent_algorithm_id"]
+        or _st12h_marker_or_declared_only(row.get("actual_observed_evidence"))
+        or row.get("actual_observed_evidence") in (None, {})
+        or row.get("golden_comparison_passed") is not True
+        or row.get("formula_or_procedure_mutation_observed") is not True
+        or row.get("domain_guard_rejection_observed") is not True
+        or row.get("production_import_count") != 0
+        or row.get("production_callable_count") != 0
+        or row.get("comparator_registry_version")
+        != _ST12H_ARCHITECTURE_COMPARATOR_VERSION
+        or row.get("comparison_policy_execution_observed") is not True
+        or not _st12h_architecture_trace_reached(row)
+    ):
+        raise AssertionError(f"architecture executed evidence is incomplete: {expected_math_id}")
+    if expected_tier == _ST12H_ARCHITECTURE_LEGACY_TIER:
+        if (
+            row.get("terminal_state") != "LEGACY_GOLDEN_REGRESSION_PASSED"
+            or row.get("precision_or_tolerance_mutation_observed")
+            != _ST12H_ARCHITECTURE_LEGACY_NOT_CLAIMED
+            or row.get("semantic_binding_mutation_observed")
+            != _ST12H_ARCHITECTURE_LEGACY_NOT_CLAIMED
+            or not _st12h_architecture_mutation_complete(
+                row.get("legacy_formula_regression_mutation_observation")
+            )
+            or not _st12h_architecture_mutation_complete(
+                row.get("legacy_domain_rejection_observation")
+            )
+        ):
+            raise AssertionError(f"legacy architecture evidence is incomplete: {expected_math_id}")
+        for name in (
+            "boundary_vector_id",
+            "negative_vector_id",
+            "property_id",
+            "current_output_schema",
+            "golden_observation",
+            "boundary_observation",
+            "negative_exception_observation",
+            "property_mutation_observation",
+            "actual_execution_mutation_observation",
+            "semantic_binding_mutation_observation",
+        ):
+            if row.get(name) != _ST12H_ARCHITECTURE_LEGACY_NOT_CLAIMED:
+                raise AssertionError(
+                    f"legacy architecture row claimed current evidence: {expected_math_id}"
+                )
+        return
+    vector_rows = ST12B_VECTORS_BY_MATH_ID[expected_math_id]
+    vector_by_case = {item.case_type: item for item in vector_rows}
+    property_row = ST12B_PROPERTY_TESTS[expected_math_id]
+    if (
+        set(vector_by_case) != {"GOLDEN", "BOUNDARY", "NEGATIVE"}
+        or row.get("boundary_vector_id") != vector_by_case["BOUNDARY"].vector_id
+        or row.get("negative_vector_id") != vector_by_case["NEGATIVE"].vector_id
+        or row.get("property_id") != property_row.property_id
+        or row.get("current_output_schema")
+        != {
+            "schema_ref": f"{expected_math_id}::OUTPUT",
+            "schema_version": "ST12B_OUTPUT_V3_4",
+        }
+        or row.get("terminal_state") != "CURRENT_FULL_CONTRACT_PASSED"
+        or row.get("precision_or_tolerance_mutation_observed") is not True
+        or row.get("semantic_binding_mutation_observed") is not True
+        or any(
+            row.get(name) != _ST12H_ARCHITECTURE_CURRENT_LEGACY_NOT_APPLICABLE
+            for name in (
+                "legacy_golden_observation",
+                "legacy_formula_regression_mutation_observation",
+                "legacy_domain_rejection_observation",
+            )
+        )
+        or row.get("golden_observation")
+        == _ST12H_ARCHITECTURE_LEGACY_NOT_CLAIMED
+        or row.get("boundary_observation")
+        == _ST12H_ARCHITECTURE_LEGACY_NOT_CLAIMED
+        or not isinstance(row.get("negative_exception_observation"), Mapping)
+        or row["negative_exception_observation"].get("attempted_execution")
+        is not True
+        or row["negative_exception_observation"].get("message_substring_matched")
+        is not True
+        or any(
+            not _st12h_architecture_mutation_complete(row.get(name))
+            for name in (
+                "property_mutation_observation",
+                "actual_execution_mutation_observation",
+                "semantic_binding_mutation_observation",
+            )
+        )
+    ):
+        raise AssertionError(f"current architecture evidence is incomplete: {expected_math_id}")
+
+
+def _st12h_consume_architecture_receipt(
+    result: "DomainResult",
+) -> _ST12HArchitectureReceiptV3:
+    command, aggregate_prefix, current_prefix, terminal_marker = (
+        _st12h_architecture_owner_contract()
+    )
+    lines = tuple(line.strip() for line in result.stdout.splitlines() if line.strip())
+    aggregate_lines = tuple(
+        line for line in lines if line.startswith(f"{aggregate_prefix} ")
+    )
+    current_lines = tuple(
+        line for line in lines if line.startswith(f"{current_prefix} ")
+    )
+    terminal_lines = tuple(
+        line for line in lines if line.split(maxsplit=1)[0] == terminal_marker
+    )
+    if (
+        result.domain != "architecture"
+        or result.returncode != 0
+        or result.stderr
+        or result.command != command
+        or result.attempt_count != 1
+        or len(lines) != 3
+        or len(aggregate_lines) != 1
+        or len(current_lines) != 1
+        or len(terminal_lines) != 1
+    ):
+        raise AssertionError("architecture receipt process envelope is not exact")
+    aggregate = _st12h_parse_prefixed_json_line(
+        aggregate_lines[0],
+        prefix=aggregate_prefix,
+    )
+    current = _st12h_parse_prefixed_json_line(
+        current_lines[0],
+        prefix=current_prefix,
+    )
+    if (
+        set(aggregate) != _ST12H_ARCHITECTURE_AGGREGATE_FIELDS
+        or set(current) != _ST12H_ARCHITECTURE_CURRENT_FIELDS
+        or aggregate.get("schema_version") != aggregate_prefix
+        or current.get("schema_version") != current_prefix
+        or aggregate.get("architecture_math_count") != 29
+        or current.get("current_full_contract_count") != 14
+        or aggregate.get("evidence_tier_domain")
+        != [
+            _ST12H_ARCHITECTURE_LEGACY_TIER,
+            _ST12H_ARCHITECTURE_CURRENT_TIER,
+        ]
+    ):
+        raise AssertionError("architecture receipt top-level contract differs")
+    raw_rows = aggregate.get("rows")
+    raw_current_rows = current.get("rows")
+    if not isinstance(raw_rows, list) or not isinstance(raw_current_rows, list):
+        raise AssertionError("architecture receipt rows are not lists")
+    if len(raw_rows) != 29 or len(raw_current_rows) != 14:
+        raise AssertionError("architecture receipt row denominator differs")
+    rows: list[Mapping[str, object]] = []
+    for math_id, raw in zip(_ST12H_ARCHITECTURE_MATH_IDS, raw_rows, strict=True):
+        if not isinstance(raw, Mapping):
+            raise AssertionError("architecture receipt row is not an object")
+        _st12h_validate_architecture_row(raw, expected_math_id=math_id)
+        rows.append(raw)
+    if len({row["math_id"] for row in rows}) != 29:
+        raise AssertionError("architecture receipt contains duplicate identities")
+    expected_current = tuple(
+        row for row in rows if row["math_id"] in _ST12H_ARCHITECTURE_CURRENT_IDS
+    )
+    if tuple(raw_current_rows) != expected_current:
+        raise AssertionError("architecture aggregate/current subset mismatch")
+    calculated = _st12h_architecture_denominators(rows)
+    claimed = aggregate.get("denominators")
+    current_claimed = current.get("denominators")
+    if (
+        not isinstance(claimed, Mapping)
+        or not isinstance(current_claimed, Mapping)
+        or set(claimed) != _ST12H_ARCHITECTURE_DENOMINATOR_FIELDS
+        or set(current_claimed) != _ST12H_ARCHITECTURE_DENOMINATOR_FIELDS
+        or any(type(value) is not int or value < 0 for value in claimed.values())
+        or dict(claimed) != dict(calculated)
+        or dict(current_claimed) != dict(calculated)
+    ):
+        raise AssertionError("architecture receipt denominator reconstruction failed")
+    return _ST12HArchitectureReceiptV3(
+        command=command,
+        terminal_marker=terminal_marker,
+        aggregate_schema=aggregate_prefix,
+        current_schema=current_prefix,
+        denominators=calculated,
+        rows=tuple(rows),
+        current_rows=expected_current,
+    )
+
+
+def _st12h_consume_nonarchitecture_receipts(
+    results: Sequence["DomainResult"],
+) -> tuple[_ST12HNonarchitectureReceiptV3, ...]:
+    result_by_domain = {result.domain: result for result in results}
+    if len(result_by_domain) != len(results):
+        raise AssertionError("independent result domains are duplicated")
+    contracts = _st12h_nonarchitecture_owner_contracts()
+    receipts: list[_ST12HNonarchitectureReceiptV3] = []
+    for result_domain in _ST12H_NONARCHITECTURE_DOMAIN_ORDER:
+        result = result_by_domain.get(result_domain)
+        if result is None:
+            raise AssertionError(f"nonarchitecture result is absent: {result_domain}")
+        command, terminal_marker = contracts[result_domain]
+        lines = tuple(line.strip() for line in result.stdout.splitlines() if line.strip())
+        evidence_lines = tuple(
+            line for line in lines if line.startswith(f"{INHERITED_RECEIPT_PREFIX} ")
+        )
+        terminal_lines = tuple(
+            line for line in lines if line.split(maxsplit=1)[0] == terminal_marker
+        )
+        if (
+            result.returncode != 0
+            or result.stderr
+            or result.command != command
+            or result.attempt_count != 1
+            or len(lines) != 2
+            or len(evidence_lines) != 1
+            or len(terminal_lines) != 1
+        ):
+            raise AssertionError(
+                f"nonarchitecture receipt process envelope differs: {result_domain}"
+            )
+        try:
+            envelope = parse_evidence_line(evidence_lines[0])
+        except MathRowReceiptValidationError as exc:
+            raise AssertionError(
+                f"nonarchitecture receipt parsing failed: {result_domain}: {exc}"
+            ) from exc
+        receipt_domain = _ST12H_RECEIPT_DOMAIN_BY_RESULT_DOMAIN[result_domain]
+        if (
+            envelope.domain != receipt_domain
+            or envelope.ordered_math_ids != INHERITED_DOMAIN_MATH_IDS[receipt_domain]
+            or tuple(row.math_id for row in envelope.rows)
+            != INHERITED_DOMAIN_MATH_IDS[receipt_domain]
+        ):
+            raise AssertionError(
+                f"nonarchitecture receipt domain/order differs: {result_domain}"
+            )
+        receipts.append(
+            _ST12HNonarchitectureReceiptV3(
+                result_domain=result_domain,
+                command=command,
+                terminal_marker=terminal_marker,
+                envelope=envelope,
+            )
+        )
+    rows = tuple(row for receipt in receipts for row in receipt.envelope.rows)
+    if (
+        len(rows) != 18
+        or len({row.math_id for row in rows}) != 18
+        or sum(
+            row.independence_class
+            == INDEPENDENT_REFERENCE_NO_PRODUCTION_RUNTIME_IMPORT
+            for row in rows
+        )
+        != 14
+        or sum(
+            row.independence_class
+            == PRODUCTION_SYSTEM_UNDER_TEST_WITH_INDEPENDENT_EXPECTED_RESULT
+            for row in rows
+        )
+        != 4
+    ):
+        raise AssertionError("nonarchitecture receipt tier denominator differs")
+    calculated = inherited_evidence_denominators(rows)
+    required = {
+        "row_count": 18,
+        "terminal_row_count": 18,
+        "independent_reference_row_count": 14,
+        "production_system_under_test_row_count": 4,
+        "production_system_under_test_invocation_count": 21,
+        "production_expected_value_import_count": 0,
+        "production_oracle_call_count": 0,
+        "external_effect_count": 0,
+        "marker_only_row_count": 0,
+        "declared_step_only_observation_count": 0,
+    }
+    if any(calculated.get(name) != expected for name, expected in required.items()):
+        raise AssertionError("nonarchitecture receipt denominator reconstruction failed")
+    return tuple(receipts)
+
+
+def _st12h_json_ready(value: object) -> object:
+    if isinstance(value, Mapping):
+        return {str(key): _st12h_json_ready(item) for key, item in value.items()}
+    if isinstance(value, (tuple, list)):
+        return [_st12h_json_ready(item) for item in value]
+    if isinstance(value, Decimal):
+        return str(value)
+    return value
+
+
+def _st12h_canonical_receipt_content(*values: object) -> str:
+    return json.dumps(
+        [_st12h_json_ready(value) for value in values],
+        ensure_ascii=False,
+        allow_nan=False,
+        separators=(",", ":"),
+        sort_keys=True,
+    )
+
+
+def _st12h_mutation_family(value: object) -> str:
+    found: list[str] = []
+
+    def visit(item: object) -> None:
+        if isinstance(item, Mapping):
+            family = item.get("mutation_family")
+            if isinstance(family, str) and family and family not in found:
+                found.append(family)
+            for nested in item.values():
+                visit(nested)
+        elif isinstance(item, (tuple, list)):
+            for nested in item:
+                visit(nested)
+
+    visit(value)
+    if not found:
+        raise AssertionError("parsed receipt lacks an observed mutation family")
+    return "+".join(found)
+
+
+def _st12h_nonarchitecture_mutation_operation(
+    observation: object,
+    *,
+    domain: str,
+    math_id: str,
+    observation_field: str,
+) -> str:
+    is_mapping = isinstance(observation, Mapping)
+    top_level_keys = tuple(observation.keys()) if is_mapping else ()
+    operation = observation.get("operation") if is_mapping else None
+    outcome = observation.get("outcome") if is_mapping else None
+    if type(operation) is not str or not operation.strip():
+        python_type = (
+            f"{type(observation).__module__}."
+            f"{type(observation).__qualname__}"
+        )
+        raise AssertionError(
+            "nonarchitecture receipt operation projection failed: "
+            f"domain={domain!r} math_id={math_id!r} "
+            f"observation_field={observation_field!r} "
+            f"python_type={python_type!r} "
+            f"top_level_keys={top_level_keys!r} "
+            f"operation={operation!r} outcome={outcome!r}"
+        )
+    return operation
+
+
+def _st12h_replace_stdout_line(
+    result: "DomainResult",
+    *,
+    prefix: str,
+    replacement_line: str,
+) -> "DomainResult":
+    lines = result.stdout.splitlines()
+    indices = tuple(
+        index
+        for index, line in enumerate(lines)
+        if line.strip().startswith(f"{prefix} ")
+    )
+    if len(indices) != 1:
+        raise AssertionError(f"receipt mutation source line is not exact: {prefix}")
+    lines[indices[0]] = replacement_line
+    return replace(result, stdout="\n".join(lines))
+
+
+def _st12h_replace_stdout_payload(
+    result: "DomainResult",
+    *,
+    prefix: str,
+    payload: Mapping[str, object] | Sequence[object],
+) -> "DomainResult":
+    return _st12h_replace_stdout_line(
+        result,
+        prefix=prefix,
+        replacement_line=(
+            f"{prefix} "
+            + json.dumps(
+                payload,
+                ensure_ascii=False,
+                allow_nan=False,
+                separators=(",", ":"),
+                sort_keys=True,
+            )
+        ),
+    )
+
+
+def _st12h_receipt_payload(
+    result: "DomainResult",
+    *,
+    prefix: str,
+) -> dict[str, object]:
+    lines = tuple(
         line.strip()
         for line in result.stdout.splitlines()
-        if line.strip().startswith("QKU_") and "VALIDATED" in line
+        if line.strip().startswith(f"{prefix} ")
     )
-    if not markers:
-        raise AssertionError(
-            f"independent validator marker missing: {result.domain}"
+    if len(lines) != 1:
+        raise AssertionError(f"receipt payload source is not exact: {prefix}")
+    payload = json.loads(lines[0].partition(" ")[2])
+    if not isinstance(payload, dict):
+        raise AssertionError("receipt mutation source payload is not an object")
+    return payload
+
+
+def _st12h_rejection_observed(operation: Callable[[], object]) -> bool:
+    try:
+        operation()
+    except (AssertionError, MathRowReceiptValidationError):
+        return True
+    return False
+
+
+def _exercise_st12h_inherited_receipt_attacks_v3(
+    results: Sequence["DomainResult"] | None = None,
+) -> Mapping[str, bool]:
+    result_tuple = (
+        tuple(run_domain(domain) for domain in _ST12H_INHERITED_RESULT_DOMAINS)
+        if results is None
+        else tuple(results)
+    )
+    result_by_domain = {result.domain: result for result in result_tuple}
+    architecture = result_by_domain["architecture"]
+    _st12h_consume_architecture_receipt(architecture)
+    nonarchitecture_receipts = _st12h_consume_nonarchitecture_receipts(
+        result_tuple
+    )
+    crosswalk = build_st12h_math_evidence_crosswalk_v1(result_tuple)
+
+    attacks: dict[str, bool] = {}
+    aggregate = _st12h_receipt_payload(
+        architecture,
+        prefix=_ST12H_ARCHITECTURE_AGGREGATE_PREFIX,
+    )
+    current = _st12h_receipt_payload(
+        architecture,
+        prefix=_ST12H_ARCHITECTURE_CURRENT_PREFIX,
+    )
+
+    def architecture_payload_rejected(payload: Mapping[str, object]) -> bool:
+        mutated = _st12h_replace_stdout_payload(
+            architecture,
+            prefix=_ST12H_ARCHITECTURE_AGGREGATE_PREFIX,
+            payload=payload,
         )
-    return markers[-1].split()[0]
+        return _st12h_rejection_observed(
+            lambda: _st12h_consume_architecture_receipt(mutated)
+        )
+
+    raw_aggregate_line = next(
+        line
+        for line in architecture.stdout.splitlines()
+        if line.startswith(f"{_ST12H_ARCHITECTURE_AGGREGATE_PREFIX} ")
+    )
+    raw_payload = raw_aggregate_line.partition(" ")[2]
+    raw_attacks = {
+        "architecture_malformed_json": (
+            f"{_ST12H_ARCHITECTURE_AGGREGATE_PREFIX} {{"
+        ),
+        "architecture_duplicate_json_key": (
+            f'{_ST12H_ARCHITECTURE_AGGREGATE_PREFIX} '
+            f'{{"schema_version":"DUPLICATE",{raw_payload[1:]}'
+        ),
+        "architecture_nonobject_payload": (
+            f"{_ST12H_ARCHITECTURE_AGGREGATE_PREFIX} []"
+        ),
+        "architecture_trailing_material": f"{raw_aggregate_line} trailing",
+        "architecture_nonfinite_json": (
+            f'{_ST12H_ARCHITECTURE_AGGREGATE_PREFIX} '
+            '{"schema_version":NaN}'
+        ),
+    }
+    for name, line in raw_attacks.items():
+        mutated = _st12h_replace_stdout_line(
+            architecture,
+            prefix=_ST12H_ARCHITECTURE_AGGREGATE_PREFIX,
+            replacement_line=line,
+        )
+        attacks[name] = _st12h_rejection_observed(
+            lambda value=mutated: _st12h_consume_architecture_receipt(value)
+        )
+
+    payload_mutations: dict[str, Callable[[dict[str, object]], None]] = {
+        "architecture_missing_field": lambda value: value.pop(
+            "architecture_math_count"
+        ),
+        "architecture_extra_field": lambda value: value.update(
+            {"unexpected": True}
+        ),
+        "architecture_missing_row": lambda value: value["rows"].pop(),
+        "architecture_extra_row": lambda value: value["rows"].append(
+            deepcopy(value["rows"][-1])
+        ),
+        "architecture_duplicate_row": lambda value: value["rows"].__setitem__(
+            -1,
+            deepcopy(value["rows"][0]),
+        ),
+        "architecture_reordered_row": lambda value: value["rows"].__setitem__(
+            slice(0, 2),
+            [deepcopy(value["rows"][1]), deepcopy(value["rows"][0])],
+        ),
+        "architecture_wrong_tier": lambda value: value["rows"][0].update(
+            {"evidence_tier": _ST12H_ARCHITECTURE_CURRENT_TIER}
+        ),
+        "architecture_comparator_v2": lambda value: value["rows"][0].update(
+            {"comparator_registry_version": "ST12_ARCHITECTURE_COMPARATOR_REGISTRY_V2"}
+        ),
+        "architecture_false_denominator": lambda value: value[
+            "denominators"
+        ].update({"architecture_identity_order_rows": 28}),
+        "architecture_wrong_oracle": lambda value: value["rows"][0].update(
+            {"oracle_id": "ORACLE::WRONG"}
+        ),
+        "architecture_wrong_vector": lambda value: value["rows"][0].update(
+            {"golden_vector_id": "GOLDEN::WRONG"}
+        ),
+        "architecture_missing_comparison_trace": lambda value: value["rows"][
+            0
+        ].pop("comparison_execution_trace"),
+        "architecture_unsupported_execution_flag": lambda value: value["rows"][
+            0
+        ].update({"comparison_policy_execution_observed": False}),
+        "architecture_production_import": lambda value: value["rows"][0].update(
+            {"production_import_count": 1}
+        ),
+        "architecture_marker_only": lambda value: value["rows"][0].update(
+            {"actual_observed_evidence": _ST12H_ARCHITECTURE_SUCCESS_MARKER}
+        ),
+        "architecture_legacy_claims_current": lambda value: value["rows"][0].update(
+            {"boundary_vector_id": "FORGED-CURRENT-EVIDENCE"}
+        ),
+        "architecture_current_missing_contract": lambda value: value["rows"][
+            15
+        ].update(
+            {"boundary_observation": _ST12H_ARCHITECTURE_LEGACY_NOT_CLAIMED}
+        ),
+    }
+    for name, mutate in payload_mutations.items():
+        changed = deepcopy(aggregate)
+        mutate(changed)
+        attacks[name] = architecture_payload_rejected(changed)
+
+    mismatched_subset = deepcopy(current)
+    mismatched_subset["rows"][0]["oracle_id"] = "ORACLE::WRONG"
+    mutated_subset_result = _st12h_replace_stdout_payload(
+        architecture,
+        prefix=_ST12H_ARCHITECTURE_CURRENT_PREFIX,
+        payload=mismatched_subset,
+    )
+    attacks["architecture_aggregate_subset_mismatch"] = _st12h_rejection_observed(
+        lambda: _st12h_consume_architecture_receipt(mutated_subset_result)
+    )
+
+    accounting = result_by_domain["accounting"]
+    accounting_payload = _st12h_receipt_payload(
+        accounting,
+        prefix=INHERITED_RECEIPT_PREFIX,
+    )
+
+    def nonarchitecture_payload_rejected(payload: Mapping[str, object]) -> bool:
+        mutated_accounting = _st12h_replace_stdout_payload(
+            accounting,
+            prefix=INHERITED_RECEIPT_PREFIX,
+            payload=payload,
+        )
+        mutated_results = tuple(
+            mutated_accounting if result.domain == "accounting" else result
+            for result in result_tuple
+        )
+        return _st12h_rejection_observed(
+            lambda: _st12h_consume_nonarchitecture_receipts(mutated_results)
+        )
+
+    nonarchitecture_mutations: dict[
+        str,
+        Callable[[dict[str, object]], None],
+    ] = {
+        "nonarchitecture_missing_row": lambda value: value["rows"].pop(),
+        "nonarchitecture_extra_row": lambda value: value["rows"].append(
+            deepcopy(value["rows"][-1])
+        ),
+        "nonarchitecture_duplicate_row": lambda value: value["rows"].__setitem__(
+            -1,
+            deepcopy(value["rows"][0]),
+        ),
+        "nonarchitecture_reordered_row": lambda value: value["rows"].__setitem__(
+            slice(0, 2),
+            [deepcopy(value["rows"][1]), deepcopy(value["rows"][0])],
+        ),
+        "nonarchitecture_wrong_owner": lambda value: value["rows"][0].update(
+            {"domain_owner": "tools/unrelated_owner.py"}
+        ),
+        "nonarchitecture_wrong_domain": lambda value: value.update(
+            {"domain": "QUANTUM"}
+        ),
+        "nonarchitecture_wrong_independence": lambda value: value["rows"][0].update(
+            {
+                "independence_class": (
+                    PRODUCTION_SYSTEM_UNDER_TEST_WITH_INDEPENDENT_EXPECTED_RESULT
+                )
+            }
+        ),
+        "nonarchitecture_marker_only": lambda value: value["rows"][0].update(
+            {"observed_result": {"marker": "QKU_ACCOUNTING_INDEPENDENTLY_VALIDATED"}}
+        ),
+    }
+    for name, mutate in nonarchitecture_mutations.items():
+        changed = deepcopy(accounting_payload)
+        mutate(changed)
+        attacks[name] = nonarchitecture_payload_rejected(changed)
+
+    malformed_accounting = _st12h_replace_stdout_line(
+        accounting,
+        prefix=INHERITED_RECEIPT_PREFIX,
+        replacement_line=f"{INHERITED_RECEIPT_PREFIX} {{",
+    )
+    malformed_results = tuple(
+        malformed_accounting if result.domain == "accounting" else result
+        for result in result_tuple
+    )
+    attacks["nonarchitecture_malformed"] = _st12h_rejection_observed(
+        lambda: _st12h_consume_nonarchitecture_receipts(malformed_results)
+    )
+    duplicate_evidence_result = replace(
+        accounting,
+        stdout=(
+            accounting.stdout.splitlines()[0]
+            + "\n"
+            + accounting.stdout
+        ),
+    )
+    duplicate_evidence_results = tuple(
+        duplicate_evidence_result if result.domain == "accounting" else result
+        for result in result_tuple
+    )
+    attacks["nonarchitecture_duplicate_envelope"] = _st12h_rejection_observed(
+        lambda: _st12h_consume_nonarchitecture_receipts(
+            duplicate_evidence_results
+        )
+    )
+
+    operation_row = nonarchitecture_receipts[0].envelope.rows[0]
+    operation_observation = operation_row.formula_or_procedure_mutation_observation
+    expected_operation = operation_observation["operation"]
+    immutable_nested_evidence = MappingProxyType(
+        {
+            **dict(operation_observation["evidence"]),
+            "mutation_family": "FORGED_NESTED_MUTATION_FAMILY",
+        }
+    )
+    operation_without_top_level = MappingProxyType(
+        {
+            key: (
+                immutable_nested_evidence
+                if key == "evidence"
+                else value
+            )
+            for key, value in operation_observation.items()
+            if key != "operation"
+        }
+    )
+    attacks["nonarchitecture_canonical_operation_shape"] = (
+        _st12h_nonarchitecture_mutation_operation(
+            operation_observation,
+            domain=nonarchitecture_receipts[0].envelope.domain,
+            math_id=operation_row.math_id,
+            observation_field="formula_or_procedure_mutation_observation",
+        )
+        == expected_operation
+        and _st12h_rejection_observed(
+            lambda: _st12h_nonarchitecture_mutation_operation(
+                operation_without_top_level,
+                domain=nonarchitecture_receipts[0].envelope.domain,
+                math_id=operation_row.math_id,
+                observation_field=(
+                    "formula_or_procedure_mutation_observation"
+                ),
+            )
+        )
+    )
+
+    attacks["crosswalk_missing_row"] = _st12h_rejection_observed(
+        lambda: _validate_st12h_math_crosswalk_rows(crosswalk[:-1])
+    )
+    attacks["crosswalk_duplicate_row"] = _st12h_rejection_observed(
+        lambda: _validate_st12h_math_crosswalk_rows(
+            (*crosswalk[:-1], crosswalk[-2])
+        )
+    )
+    attacks["crosswalk_identity_only"] = _st12h_rejection_observed(
+        lambda: _validate_st12h_math_crosswalk_rows(
+            (
+                replace(crosswalk[0], mutation_family="IDENTITY_ONLY"),
+                *crosswalk[1:],
+            )
+        )
+    )
+    attacks["crosswalk_marker_derived"] = _st12h_rejection_observed(
+        lambda: _validate_st12h_math_crosswalk_rows(
+            (
+                replace(
+                    crosswalk[0],
+                    boundary_negative_mutation_evidence=(
+                        _ST12H_ARCHITECTURE_SUCCESS_MARKER
+                    ),
+                ),
+                *crosswalk[1:],
+            )
+        )
+    )
+    if not attacks or not all(attacks.values()):
+        raise AssertionError(f"ST12-H V3 receipt attack matrix failed: {attacks}")
+    return MappingProxyType(attacks)
 
 
 def _validate_st12h_math_crosswalk_rows(
     rows: Sequence[ST12HMathEvidenceCrosswalkV1],
 ) -> None:
+    row_tuple = tuple(rows)
     if (
-        tuple(row.math_id for row in rows) != _ST12H_ALL_MATH_IDS
-        or sum(row.evidence_class == "H_DIRECT_EXECUTED" for row in rows) != 5
-        or sum(row.evidence_class == "INHERITED_EXECUTED" for row in rows) != 47
-        or any(
-            not row.tracked_oracle_id
-            or not row.tracked_golden_vector_id
+        tuple(row.math_id for row in row_tuple) != _ST12H_ALL_MATH_IDS
+        or len({row.math_id for row in row_tuple}) != 52
+        or sum(row.evidence_class == "H_DIRECT_EXECUTED" for row in row_tuple)
+        != 5
+        or sum(row.evidence_class == "INHERITED_EXECUTED" for row in row_tuple)
+        != 47
+    ):
+        raise AssertionError("ST12-H 52-row math evidence identity closure differs")
+    for row in row_tuple:
+        oracle = _ST12H_TRACKED_ORACLE_BY_MATH_ID[row.math_id]
+        vector = _ST12H_TRACKED_GOLDEN_VECTOR_BY_MATH_ID[row.math_id]
+        if (
+            row.tracked_oracle_id != getattr(oracle, "oracle_id", None)
+            or row.tracked_golden_vector_id != getattr(vector, "vector_id", None)
+            or row.comparison_policy != getattr(oracle, "comparison_policy", None)
             or not row.production_owner
             or not row.independent_validator_owner
-            or not row.comparison_policy
+            or not row.exact_vector_or_invariant
             or not row.mutation_family
             or "IDENTITY_ONLY" in row.mutation_family
             or not row.boundary_negative_mutation_evidence
+            or not row.validator_command
+            or not row.validator_marker
             or not row.execution_receipt_ref
-            for row in rows
+        ):
+            raise AssertionError(f"ST12-H crosswalk evidence differs: {row.math_id}")
+        if row.math_id in _ST12H_DIRECT_MATH_IDS:
+            if (
+                row.evidence_class != "H_DIRECT_EXECUTED"
+                or row.execution_receipt_ref
+                != f"ST12H_DIRECT_MATH_EVIDENCE_V1::{row.math_id}"
+            ):
+                raise AssertionError(f"H-direct crosswalk evidence differs: {row.math_id}")
+            continue
+        domain = _ST12H_INHERITED_DOMAIN_BY_MATH_ID[row.math_id]
+        expected_schema = (
+            _ST12H_ARCHITECTURE_AGGREGATE_PREFIX
+            if domain == "architecture"
+            else INHERITED_RECEIPT_SCHEMA_VERSION
         )
-    ):
-        raise AssertionError("ST12-H 52-row math evidence crosswalk is incomplete")
+        try:
+            parsed_evidence = json.loads(row.boundary_negative_mutation_evidence)
+        except (json.JSONDecodeError, TypeError) as exc:
+            raise AssertionError(
+                f"inherited crosswalk evidence is not receipt content: {row.math_id}"
+            ) from exc
+        if (
+            row.evidence_class != "INHERITED_EXECUTED"
+            or row.independent_validator_owner
+            != _ST12H_INHERITED_OWNER_BY_DOMAIN[domain]
+            or row.execution_receipt_ref != f"{expected_schema}::{row.math_id}"
+            or not isinstance(parsed_evidence, list)
+            or not parsed_evidence
+        ):
+            raise AssertionError(f"inherited crosswalk source differs: {row.math_id}")
 
 
 def build_st12h_math_evidence_crosswalk_v1(
@@ -555,17 +1835,23 @@ def build_st12h_math_evidence_crosswalk_v1(
 ) -> tuple[ST12HMathEvidenceCrosswalkV1, ...]:
     _st12h_assert_exact_tracked_math_owners()
     result_by_domain = {result.domain: result for result in results}
-    for domain, expected_marker in _ST12H_INHERITED_MARKER_BY_DOMAIN.items():
-        result = result_by_domain.get(domain)
-        if (
-            result is None
-            or result.returncode != 0
-            or not result.stdout.strip()
-            or expected_marker not in result.stdout.split()
-        ):
-            raise AssertionError(
-                f"inherited independent validator result is absent or invalid: {domain}"
-            )
+    if len(result_by_domain) != len(results):
+        raise AssertionError("independent validator domains are duplicated")
+    architecture_result = result_by_domain.get("architecture")
+    if architecture_result is None:
+        raise AssertionError("architecture receipt result is absent")
+    architecture_receipt = _st12h_consume_architecture_receipt(
+        architecture_result
+    )
+    nonarchitecture_receipts = _st12h_consume_nonarchitecture_receipts(results)
+    architecture_by_id = {
+        str(row["math_id"]): row for row in architecture_receipt.rows
+    }
+    nonarchitecture_by_id = {
+        row.math_id: (receipt, row)
+        for receipt in nonarchitecture_receipts
+        for row in receipt.envelope.rows
+    }
     direct_by_id = {
         row.math_id: row for row in reconstruct_st12h_direct_math_evidence_v1()
     }
@@ -607,18 +1893,81 @@ def build_st12h_math_evidence_crosswalk_v1(
                     ),
                     validator_marker=ST12H_DIRECT_MATH_MARKER,
                     evidence_class="H_DIRECT_EXECUTED",
-                    execution_receipt_ref=f"DYNAMIC-EXECUTION::H-DIRECT::{math_id}",
+                    execution_receipt_ref=(
+                        f"ST12H_DIRECT_MATH_EVIDENCE_V1::{math_id}"
+                    ),
                 )
             )
             continue
         domain = _ST12H_INHERITED_DOMAIN_BY_MATH_ID[math_id]
-        result = result_by_domain[domain]
         owner = _ST12H_INHERITED_OWNER_BY_DOMAIN[domain]
         _st12h_validate_inherited_owner_assignment(math_id, owner)
-        marker = _st12h_result_marker(result)
-        expected_marker = _ST12H_INHERITED_MARKER_BY_DOMAIN[domain]
-        if marker != expected_marker:
-            raise AssertionError(f"inherited validator marker drifted: {math_id}")
+        if domain == "architecture":
+            receipt_row = architecture_by_id[math_id]
+            marker = architecture_receipt.terminal_marker
+            command = architecture_receipt.command
+            if math_id in _ST12H_ARCHITECTURE_LEGACY_IDS:
+                mutation_observation = receipt_row[
+                    "legacy_formula_regression_mutation_observation"
+                ]
+                boundary_evidence = _st12h_canonical_receipt_content(
+                    receipt_row["actual_observed_evidence"],
+                    receipt_row["legacy_golden_observation"],
+                    receipt_row["legacy_formula_regression_mutation_observation"],
+                    receipt_row["legacy_domain_rejection_observation"],
+                    receipt_row["comparison_execution_trace"],
+                )
+            else:
+                mutation_observation = receipt_row[
+                    "actual_execution_mutation_observation"
+                ]
+                boundary_evidence = _st12h_canonical_receipt_content(
+                    receipt_row["golden_observation"],
+                    receipt_row["boundary_observation"],
+                    receipt_row["negative_exception_observation"],
+                    receipt_row["property_mutation_observation"],
+                    receipt_row["actual_execution_mutation_observation"],
+                    receipt_row["semantic_binding_mutation_observation"],
+                    receipt_row["comparison_execution_trace"],
+                )
+            mutation_family = _st12h_mutation_family(mutation_observation)
+            exact_vector_or_invariant = (
+                f"{receipt_row['golden_vector_id']}::"
+                f"{receipt_row['comparison_policy']}::"
+                f"tier={receipt_row['evidence_tier']}"
+            )
+            execution_receipt_ref = (
+                f"{architecture_receipt.aggregate_schema}::{math_id}"
+            )
+        else:
+            receipt, receipt_row = nonarchitecture_by_id[math_id]
+            marker = receipt.terminal_marker
+            command = receipt.command
+            mutation_family = _st12h_nonarchitecture_mutation_operation(
+                receipt_row.formula_or_procedure_mutation_observation,
+                domain=receipt.envelope.domain,
+                math_id=math_id,
+                observation_field=(
+                    "formula_or_procedure_mutation_observation"
+                ),
+            )
+            boundary_evidence = _st12h_canonical_receipt_content(
+                receipt_row.observed_result,
+                receipt_row.boundary_or_invariant_observation,
+                receipt_row.negative_or_abstention_observation,
+                receipt_row.formula_or_procedure_mutation_observation,
+                receipt_row.domain_guard_observation,
+                receipt_row.precision_or_tolerance_observation,
+                receipt_row.source_unit_or_binding_observation,
+            )
+            exact_vector_or_invariant = (
+                f"{receipt_row.golden_vector_id}::"
+                f"{receipt_row.comparison_policy}::"
+                f"independence={receipt_row.independence_class}"
+            )
+            execution_receipt_ref = (
+                f"{receipt.envelope.schema_version}::{math_id}"
+            )
         crosswalk.append(
             ST12HMathEvidenceCrosswalkV1(
                 math_id=math_id,
@@ -627,18 +1976,13 @@ def build_st12h_math_evidence_crosswalk_v1(
                 production_owner=production_owner,
                 independent_validator_owner=owner,
                 comparison_policy=oracle.comparison_policy,
-                exact_vector_or_invariant=(
-                    f"{vector.vector_id}::{vector.comparison_policy}"
-                ),
-                mutation_family="INHERITED_GOLDEN_BOUNDARY_NEGATIVE_MUTATION_MATRIX",
-                boundary_negative_mutation_evidence=(
-                    f"executed_marker={marker}; "
-                    f"oracle_steps={oracle.independent_algorithm_steps!r}"
-                ),
-                validator_command=("python", owner),
+                exact_vector_or_invariant=exact_vector_or_invariant,
+                mutation_family=mutation_family,
+                boundary_negative_mutation_evidence=boundary_evidence,
+                validator_command=command,
                 validator_marker=marker,
                 evidence_class="INHERITED_EXECUTED",
-                execution_receipt_ref=f"DYNAMIC-EXECUTION::{domain}::{marker}",
+                execution_receipt_ref=execution_receipt_ref,
             )
         )
     rows = tuple(crosswalk)
@@ -655,7 +1999,7 @@ def _reconstruct_st12h_complete_math_coverage_from_results_v1(
 
 
 def reconstruct_st12h_complete_math_coverage_v1() -> tuple[str, ...]:
-    domains = tuple(_ST12H_INHERITED_MARKER_BY_DOMAIN)
+    domains = _ST12H_INHERITED_RESULT_DOMAINS
     results = tuple(run_domain(domain) for domain in domains)
     return _reconstruct_st12h_complete_math_coverage_from_results_v1(results)
 
@@ -2219,7 +3563,7 @@ def _reconstruct_st12h_final_acceptance_evidence_v1(
 
 def reconstruct_st12h_final_acceptance_v1() -> None:
     results = tuple(
-        run_domain(domain) for domain in _ST12H_INHERITED_MARKER_BY_DOMAIN
+        run_domain(domain) for domain in _ST12H_INHERITED_RESULT_DOMAINS
     )
     math_crosswalk = build_st12h_math_evidence_crosswalk_v1(results)
     backup_receipts = execute_st12h_backup_restore_portability_v1()
@@ -2350,76 +3694,10 @@ def _exercise_st12h_grouped_defect_injections_v1() -> Mapping[str, bool]:
     else:
         results["parameter_runtime_consumption_overclaim"] = False
 
-    try:
-        build_st12h_math_evidence_crosswalk_v1(())
-    except AssertionError:
-        results["math_identity_count_without_execution"] = True
-    else:
-        results["math_identity_count_without_execution"] = False
-
-    try:
-        _st12h_validate_math_id_inventory(_ST12H_ALL_MATH_IDS[:-1])
-    except AssertionError:
-        results["math_missing_id"] = True
-    else:
-        results["math_missing_id"] = False
-    try:
-        _st12h_validate_math_id_inventory(
-            (*_ST12H_ALL_MATH_IDS[:-1], _ST12H_ALL_MATH_IDS[-2])
-        )
-    except AssertionError:
-        results["math_duplicate_id"] = True
-    else:
-        results["math_duplicate_id"] = False
-    try:
-        _st12h_validate_inherited_owner_assignment(
-            "MATH-01",
-            _ST12H_INHERITED_OWNER_BY_DOMAIN["accounting"],
-        )
-    except AssertionError:
-        results["math_wrong_inherited_owner"] = True
-    else:
-        results["math_wrong_inherited_owner"] = False
-    synthetic_results = tuple(
-        DomainResult(
-            domain=domain,
-            returncode=0,
-            stdout=marker,
-            stderr="",
-        )
-        for domain, marker in _ST12H_INHERITED_MARKER_BY_DOMAIN.items()
+    receipt_attacks = _exercise_st12h_inherited_receipt_attacks_v3()
+    results["math_receipt_attack_matrix"] = (
+        len(receipt_attacks) >= 30 and all(receipt_attacks.values())
     )
-    try:
-        build_st12h_math_evidence_crosswalk_v1(
-            (replace(synthetic_results[0], stdout=""), *synthetic_results[1:])
-        )
-    except AssertionError:
-        results["math_empty_inherited_result"] = True
-    else:
-        results["math_empty_inherited_result"] = False
-    try:
-        build_st12h_math_evidence_crosswalk_v1(
-            (
-                replace(synthetic_results[0], stdout="QKU_WRONG_MARKER"),
-                *synthetic_results[1:],
-            )
-        )
-    except AssertionError:
-        results["math_wrong_inherited_marker"] = True
-    else:
-        results["math_wrong_inherited_marker"] = False
-    synthetic_crosswalk = build_st12h_math_evidence_crosswalk_v1(synthetic_results)
-    try:
-        _validate_st12h_math_crosswalk_rows(
-            (
-                replace(synthetic_crosswalk[0], mutation_family="IDENTITY_ONLY"),
-                *synthetic_crosswalk[1:],
-            )
-        )
-    except AssertionError:
-        results["math_identity_only_evidence"] = True
-    else:
-        results["math_identity_only_evidence"] = False
     oracle_production_import_rejection_reason = (
         _observe_st12h_expected_qtt_rejection_v1(
             lambda: replace(
@@ -2647,13 +3925,7 @@ def _exercise_st12h_grouped_defect_injections_v1() -> Mapping[str, bool]:
     math_oracle_checks = tuple(
         results.pop(key)
         for key in (
-            "math_identity_count_without_execution",
-            "math_missing_id",
-            "math_duplicate_id",
-            "math_wrong_inherited_owner",
-            "math_empty_inherited_result",
-            "math_wrong_inherited_marker",
-            "math_identity_only_evidence",
+            "math_receipt_attack_matrix",
             "math_direct_production_expected_import",
             "math_external_package_runtime_dependency",
         )
@@ -2674,6 +3946,8 @@ class DomainResult:
     returncode: int
     stdout: str
     stderr: str
+    command: tuple[str, ...]
+    attempt_count: int
 
 
 def run_domain(domain: str) -> DomainResult:
@@ -2682,11 +3956,13 @@ def run_domain(domain: str) -> DomainResult:
     script = REPO_ROOT / "tools" / (
         f"independent_validate_qku_computation_control_plane_{domain}.py"
     )
-    command = [sys.executable, str(script)]
+    command = (sys.executable, str(script))
     if domain == "architecture":
-        command = list(build_st12g_architecture_validation_command(sys.executable))
+        command = tuple(build_st12g_architecture_validation_command(sys.executable))
+    elif domain in _ST12H_NONARCHITECTURE_DOMAIN_ORDER:
+        command = _st12h_nonarchitecture_owner_contracts()[domain][0]
     completed = subprocess.run(
-        command,
+        list(command),
         cwd=REPO_ROOT,
         check=False,
         capture_output=True,
@@ -2698,6 +3974,8 @@ def run_domain(domain: str) -> DomainResult:
         returncode=completed.returncode,
         stdout=completed.stdout.strip(),
         stderr=completed.stderr.strip(),
+        command=command,
+        attempt_count=1,
     )
 
 
