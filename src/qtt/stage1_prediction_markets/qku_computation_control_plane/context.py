@@ -67,7 +67,7 @@ def exact_decimal(value: Decimal | str | int, *, field_name: str = "value") -> D
             if isinstance(value, Decimal)
             else decimal_context_v1().create_decimal(value)
         )
-    except (InvalidOperation, ValueError, TypeError) as exc:
+    except (InvalidOperation, Overflow, ValueError, TypeError) as exc:
         raise NumericDomainError(
             ReasonCode.INVALID_NUMERIC_INPUT, f"{field_name} is not a valid Decimal"
         ) from exc

@@ -9,6 +9,9 @@ from pathlib import Path
 
 import pytest
 
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.context import (
+    decimal_context_v1,
+)
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.economic_math import (
     FillProbabilityModelArtifactV1,
     FillQuantityDistributionArtifactV1,
@@ -260,6 +263,12 @@ def test_receipt_domains_have_exact_ordered_membership() -> None:
         lambda: _production_fill_probability(0.4),
         "FLOAT_DECIMAL_CONTAMINATION",
     )
+    context_overflow_text = f"1e{decimal_context_v1().Emax + 1}"
+    assert_numeric_rejection_pair(
+        lambda: independent_probability(context_overflow_text),
+        lambda: _production_fill_probability(context_overflow_text),
+        "INVALID_NUMERIC_INPUT",
+    )
     decimal_tuple_representation = (0, (1, 2, 3), -2)
     decimal_list_representation = [0, (1, 2, 3), -2]
     assert_numeric_rejection_pair(
@@ -337,6 +346,15 @@ def test_receipt_domains_have_exact_ordered_membership() -> None:
     assert_numeric_rejection_pair(
         lambda: independent_fill((("not-a-number", "0.5"), ("100", "0.5"))),
         lambda: production_fill((("not-a-number", "0.5"), ("100", "0.5"))),
+        "INVALID_NUMERIC_INPUT",
+    )
+    assert_numeric_rejection_pair(
+        lambda: independent_fill(
+            ((context_overflow_text, "0.5"), ("100", "0.5"))
+        ),
+        lambda: production_fill(
+            ((context_overflow_text, "0.5"), ("100", "0.5"))
+        ),
         "INVALID_NUMERIC_INPUT",
     )
     assert_numeric_rejection_pair(

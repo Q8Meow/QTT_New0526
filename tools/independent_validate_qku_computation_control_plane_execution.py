@@ -101,7 +101,7 @@ def _decimal(value: object, name: str) -> Decimal:
             result = _independent_decimal_context().create_decimal(value)
         else:
             raise TypeError(f"unsupported exact-Decimal input type: {type(value).__name__}")
-    except (InvalidOperation, ValueError, TypeError) as exc:
+    except (InvalidOperation, Overflow, ValueError, TypeError) as exc:
         raise _IndependentArtifactRejection(
             "INVALID_NUMERIC_INPUT", f"{name} is not a valid Decimal"
         ) from exc
@@ -380,11 +380,19 @@ def _capture_rejection(callable_, family: str, message: str) -> dict[str, object
 
 def _independent_decimal_boundary_evidence() -> dict[str, object]:
     high_precision_text = "0.12345678901234567890123456789012345"
+    boundary_context = _independent_decimal_context()
+    maximum_exponent = boundary_context.Emax
+    maximum_accepted_exponent_text = f"1e{maximum_exponent}"
+    maximum_plus_one_overflow_text = f"1e{maximum_exponent + 1}"
     expected_string_conversion = Decimal(
         "0.1234567890123456789012345678901234"
     )
     parsed_string = _decimal(high_precision_text, "high_precision_string")
     parsed_integer = _decimal(100, "integer_input")
+    parsed_maximum_exponent = _decimal(
+        maximum_accepted_exponent_text,
+        "maximum_accepted_exponent",
+    )
     decimal_input = Decimal(high_precision_text)
     preserved_decimal = _decimal(decimal_input, "decimal_input")
 
@@ -395,6 +403,8 @@ def _independent_decimal_boundary_evidence() -> dict[str, object]:
     if (
         parsed_string != expected_string_conversion
         or parsed_integer != Decimal(100)
+        or not parsed_maximum_exponent.is_finite()
+        or parsed_maximum_exponent.adjusted() != maximum_exponent
         or preserved_decimal is not decimal_input
         or preserved_decimal != decimal_input
     ):
@@ -413,6 +423,14 @@ def _independent_decimal_boundary_evidence() -> dict[str, object]:
         ),
         "invalid_text": _capture_rejection(
             lambda: _decimal("not-a-number", "invalid_text"),
+            "INVALID_NUMERIC_INPUT",
+            "is not a valid Decimal",
+        ),
+        "context_overflow_text": _capture_rejection(
+            lambda: _decimal(
+                maximum_plus_one_overflow_text,
+                "context_overflow_text",
+            ),
             "INVALID_NUMERIC_INPUT",
             "is not a valid Decimal",
         ),
@@ -455,6 +473,11 @@ def _independent_decimal_boundary_evidence() -> dict[str, object]:
                 "observed": parsed_integer,
                 "fresh_context_create_decimal": True,
             },
+            "context_emax_string": {
+                "input": maximum_accepted_exponent_text,
+                "observed": parsed_maximum_exponent,
+                "fresh_context_create_decimal": True,
+            },
             "Decimal": {
                 "input": decimal_input,
                 "observed": preserved_decimal,
@@ -466,6 +489,18 @@ def _independent_decimal_boundary_evidence() -> dict[str, object]:
         "rounding": "ROUND_HALF_EVEN",
         "string_and_integer_input_conversion": "FRESH_CONTEXT_CREATE_DECIMAL",
         "decimal_object_input_conversion": "PRESERVE_EXACT_OBJECT",
+        "context_overflow_boundary": {
+            "maximum_exponent": maximum_exponent,
+            "maximum_accepted_exponent_text": maximum_accepted_exponent_text,
+            "maximum_plus_one_overflow_text": maximum_plus_one_overflow_text,
+            "accepted_maximum_exponent_result": parsed_maximum_exponent,
+            "overflow_rejection_family": rejected_inputs[
+                "context_overflow_text"
+            ]["failure_family"],
+            "overflow_exception_type_after_translation": rejected_inputs[
+                "context_overflow_text"
+            ]["exception_type"],
+        },
         "invalid_input_rejection": rejected_inputs["invalid_text"],
         "nonfinite_input_rejection": rejected_inputs["nonfinite_text"],
         "float_contamination_rejection": rejected_inputs["float"],
@@ -641,6 +676,44 @@ def _validate_execution_math_owner_ast(
             for child in ast.walk(node)
         )
 
+    def body_calls_name(node: ast.AST, name: str) -> bool:
+        return any(
+            isinstance(child, ast.Call)
+            and isinstance(child.func, ast.Name)
+            and child.func.id == name
+            for child in ast.walk(node)
+        )
+
+    def exception_type_names(handler: ast.ExceptHandler) -> tuple[str, ...]:
+        if isinstance(handler.type, ast.Name):
+            return (handler.type.id,)
+        if isinstance(handler.type, ast.Tuple):
+            names = tuple(
+                element.id
+                for element in handler.type.elts
+                if isinstance(element, ast.Name)
+            )
+            return names if len(names) == len(handler.type.elts) else ()
+        return ()
+
+    def try_uses_context_create_decimal(
+        try_node: ast.Try,
+        context_factory: str,
+    ) -> bool:
+        return any(
+            isinstance(call, ast.Call)
+            and isinstance(call.func, ast.Attribute)
+            and call.func.attr == "create_decimal"
+            and isinstance(call.func.value, ast.Call)
+            and isinstance(call.func.value.func, ast.Name)
+            and call.func.value.func.id == context_factory
+            and len(call.args) == 1
+            and isinstance(call.args[0], ast.Name)
+            and call.args[0].id == "value"
+            for statement in try_node.body
+            for call in ast.walk(statement)
+        )
+
     contamination_guards = tuple(
         node
         for node in production_exact_decimal.body
@@ -693,13 +766,17 @@ def _validate_execution_math_owner_ast(
         )
         for node in ast.walk(production_exact_decimal)
     )
-    production_exception_types = {
-        child.id
-        for handler in ast.walk(production_exact_decimal)
-        if isinstance(handler, ast.ExceptHandler) and handler.type is not None
-        for child in ast.walk(handler.type)
-        if isinstance(child, ast.Name)
-    }
+    production_conversion_handlers = tuple(
+        handler
+        for try_node in ast.walk(production_exact_decimal)
+        if isinstance(try_node, ast.Try)
+        and try_uses_context_create_decimal(try_node, "decimal_context_v1")
+        for handler in try_node.handlers
+        if exception_type_names(handler)
+        == ("InvalidOperation", "Overflow", "ValueError", "TypeError")
+        and body_calls_name(handler, "NumericDomainError")
+        and body_has_reason(handler, "INVALID_NUMERIC_INPUT")
+    )
     invalid_handlers = tuple(
         handler
         for handler in ast.walk(production_exact_decimal)
@@ -724,8 +801,7 @@ def _validate_execution_math_owner_ast(
         or len(exact_admission_guards) != 1
         or len(production_create_decimal_calls) != 1
         or not production_decimal_preservation
-        or not {"InvalidOperation", "ValueError", "TypeError"}
-        <= production_exception_types
+        or len(production_conversion_handlers) != 1
         or len(invalid_handlers) != 1
         or len(nonfinite_guards) != 1
         or not {
@@ -808,6 +884,24 @@ def _validate_execution_math_owner_ast(
         and isinstance(node.func.value.func, ast.Name)
         and node.func.value.func.id == "_independent_decimal_context"
     )
+    independent_conversion_handlers = tuple(
+        handler
+        for try_node in ast.walk(independent_decimal)
+        if isinstance(try_node, ast.Try)
+        and try_uses_context_create_decimal(
+            try_node,
+            "_independent_decimal_context",
+        )
+        for handler in try_node.handlers
+        if exception_type_names(handler)
+        == ("InvalidOperation", "Overflow", "ValueError", "TypeError")
+        and body_calls_name(handler, "_IndependentArtifactRejection")
+        and any(
+            isinstance(child, ast.Constant)
+            and child.value == "INVALID_NUMERIC_INPUT"
+            for child in ast.walk(handler)
+        )
+    )
     decimal_str_calls = tuple(
         node
         for node in ast.walk(independent_decimal)
@@ -833,6 +927,7 @@ def _validate_execution_math_owner_ast(
         not {"bool", "float", "Decimal", "str", "int"}
         <= independent_type_checks
         or len(independent_create_decimal_calls) != 1
+        or len(independent_conversion_handlers) != 1
         or decimal_str_calls
         or not decimal_object_preservation
         or independent_failure_families
