@@ -6,6 +6,7 @@ from __future__ import annotations
 import ast
 import base64
 from collections import Counter
+from copy import deepcopy
 from decimal import Context, Decimal, ROUND_HALF_EVEN, localcontext
 import json
 from pathlib import Path
@@ -14,6 +15,21 @@ import zlib
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from tools.qku_independent_math_row_receipt import (  # noqa: E402
+    EVIDENCE_TIER,
+    INDEPENDENT_REFERENCE_NO_PRODUCTION_RUNTIME_IMPORT,
+    NO_PRODUCTION_SYSTEM_UNDER_TEST,
+    TERMINAL_STATE,
+    IndependentMathRowEvidenceV1,
+    build_envelope,
+    evidence_observation,
+    format_evidence_line,
+    observed_result,
+)
+
 PACKAGE = REPO_ROOT / "src" / "qtt" / "stage1_prediction_markets" / "qku_computation_control_plane"
 EXPECTED_PRODUCTION = (
     "context.py", "economic_math.py", "receipts.py", "persistence.py", "migrations.py",
@@ -24,6 +40,7 @@ PROHIBITED = ("decimal_math.py", "execution.py", "accounting_tca_adapter.py", "t
 EXPECTED_MATH_IDS = tuple(f"MATH-{value}" for value in range(26, 39))
 CONTEXT = Context(prec=34, rounding=ROUND_HALF_EVEN)
 SUCCESS = "QKU_ACCOUNTING_INDEPENDENTLY_VALIDATED"
+RECEIPT_MATH_IDS = tuple(f"MATH-{value:02d}" for value in range(26, 37))
 
 
 def _assigned_literal(path: Path, name: str) -> object:
@@ -85,6 +102,517 @@ def _golden_results() -> dict[str, object]:
         "MATH-37": (True, True, True),
         "MATH-38": expected_fill,
     }
+
+
+def _required(inputs: dict[str, object], name: str) -> object:
+    if name not in inputs:
+        raise ValueError(f"{name} is required")
+    return inputs[name]
+
+
+def _finite_decimal(value: object, name: str) -> Decimal:
+    try:
+        result = _d(value)
+    except Exception as exc:
+        raise ValueError(f"{name} must be an exact Decimal") from exc
+    if not result.is_finite():
+        raise ValueError(f"{name} must be finite")
+    return result
+
+
+def _nonnegative_decimal(value: object, name: str) -> Decimal:
+    result = _finite_decimal(value, name)
+    if result < 0:
+        raise ValueError(f"{name} must be nonnegative")
+    return result
+
+
+def _probability_decimal(value: object, name: str) -> Decimal:
+    result = _finite_decimal(value, name)
+    if result < 0 or result > 1:
+        raise ValueError(f"{name} must be in [0,1]")
+    return result
+
+
+def _tail_expected_shortfall(losses: object, alpha: object) -> Decimal:
+    if not isinstance(losses, list | tuple) or not losses:
+        raise ValueError("losses must be nonempty")
+    observations = sorted(
+        (_finite_decimal(value, "loss") for value in losses), reverse=True
+    )
+    confidence = _probability_decimal(alpha, "alpha")
+    if confidence <= 0 or confidence >= 1:
+        raise ValueError("alpha must be in (0,1)")
+    with localcontext(CONTEXT) as context:
+        observation_mass = context.divide(Decimal(1), Decimal(len(observations)))
+        required_mass = context.subtract(Decimal(1), confidence)
+        remaining = required_mass
+        weighted = Decimal(0)
+        for loss in observations:
+            if remaining <= 0:
+                break
+            used = min(observation_mass, remaining)
+            weighted = context.add(weighted, context.multiply(loss, used))
+            remaining = context.subtract(remaining, used)
+        if remaining != 0:
+            raise ValueError("insufficient empirical tail support")
+        return context.divide(weighted, required_mass)
+
+
+def _accounting_result(math_id: str, raw_inputs: object) -> dict[str, object]:
+    if not isinstance(raw_inputs, dict):
+        raise ValueError(f"{math_id} inputs must be a mapping")
+    inputs = raw_inputs
+    with localcontext(CONTEXT) as context:
+        if math_id == "MATH-26":
+            current_raw = _required(inputs, "current_action_values")
+            scenarios_raw = _required(inputs, "new_information_scenarios")
+            if not isinstance(current_raw, list | tuple) or not current_raw:
+                raise ValueError("current_action_values must be nonempty")
+            if not isinstance(scenarios_raw, list | tuple) or not scenarios_raw:
+                raise ValueError("new_information_scenarios must be nonempty")
+            current = tuple(
+                _finite_decimal(value, "current_action_value")
+                for value in current_raw
+            )
+            probability_sum = Decimal(0)
+            posterior = Decimal(0)
+            for scenario in scenarios_raw:
+                if not isinstance(scenario, dict):
+                    raise ValueError("scenario must be a mapping")
+                probability = _probability_decimal(
+                    _required(scenario, "probability"), "scenario probability"
+                )
+                values_raw = _required(scenario, "action_values")
+                if not isinstance(values_raw, list | tuple) or len(values_raw) != len(
+                    current
+                ):
+                    raise ValueError("scenario action values must align")
+                values = tuple(
+                    _finite_decimal(value, "scenario action value")
+                    for value in values_raw
+                )
+                probability_sum = context.add(probability_sum, probability)
+                posterior = context.add(
+                    posterior, context.multiply(probability, max(values))
+                )
+            if probability_sum != 1:
+                raise ValueError("scenario probabilities must sum exactly to one")
+            acquisition_cost = _nonnegative_decimal(
+                _required(inputs, "acquisition_cost"), "acquisition_cost"
+            )
+            return {
+                "evi": context.subtract(
+                    context.subtract(posterior, max(current)), acquisition_cost
+                )
+            }
+        if math_id == "MATH-27":
+            probability = _probability_decimal(
+                _required(inputs, "win_probability"), "win_probability"
+            )
+            odds = _finite_decimal(_required(inputs, "net_odds"), "net_odds")
+            if odds <= 0:
+                raise ValueError("net_odds must be positive")
+            raw = context.divide(
+                context.subtract(
+                    context.multiply(odds, probability),
+                    context.subtract(Decimal(1), probability),
+                ),
+                odds,
+            )
+            return {"kelly_fraction": raw}
+        if math_id == "MATH-28":
+            full = _finite_decimal(
+                _required(inputs, "full_kelly_fraction"), "full_kelly_fraction"
+            )
+            multiplier = _finite_decimal(
+                _required(inputs, "fraction_multiplier"), "fraction_multiplier"
+            )
+            cap = _nonnegative_decimal(_required(inputs, "risk_cap"), "risk_cap")
+            if multiplier <= 0 or multiplier > 1:
+                raise ValueError("fraction_multiplier must be in (0,1]")
+            return {
+                "fractional_kelly": min(
+                    context.multiply(max(Decimal(0), full), multiplier), cap
+                )
+            }
+        if math_id == "MATH-29":
+            mean = _finite_decimal(_required(inputs, "mean_return"), "mean_return")
+            risk = _nonnegative_decimal(
+                _required(inputs, "risk_aversion"), "risk_aversion"
+            )
+            variance = _nonnegative_decimal(
+                _required(inputs, "variance"), "variance"
+            )
+            cost = _nonnegative_decimal(
+                _required(inputs, "transaction_cost"), "transaction_cost"
+            )
+            return {
+                "utility": context.subtract(
+                    context.subtract(
+                        mean,
+                        context.divide(context.multiply(risk, variance), Decimal(2)),
+                    ),
+                    cost,
+                )
+            }
+        if math_id in {"MATH-30", "MATH-31"}:
+            losses_raw = _required(inputs, "losses")
+            alpha = _required(inputs, "alpha")
+            shortfall = _tail_expected_shortfall(losses_raw, alpha)
+            if math_id == "MATH-31":
+                return {"expected_shortfall": shortfall}
+            assert isinstance(losses_raw, list | tuple)
+            observations = sorted(
+                (_finite_decimal(value, "loss") for value in losses_raw),
+                reverse=True,
+            )
+            confidence = _probability_decimal(alpha, "alpha")
+            mass = context.divide(Decimal(1), Decimal(len(observations)))
+            remaining = context.subtract(Decimal(1), confidence)
+            value_at_risk = observations[0]
+            for loss in observations:
+                value_at_risk = loss
+                remaining = context.subtract(remaining, min(mass, remaining))
+                if remaining == 0:
+                    break
+            return {"var": value_at_risk, "cvar": shortfall}
+        if math_id in {"MATH-32", "MATH-33"}:
+            side = _required(inputs, "side")
+            if side not in {"BUY", "SELL"}:
+                raise ValueError("side must be BUY or SELL")
+            quantity = _nonnegative_decimal(
+                _required(inputs, "quantity"), "quantity"
+            )
+            signed = quantity if side == "BUY" else -quantity
+            execution = _finite_decimal(
+                _required(inputs, "execution_price"), "execution_price"
+            )
+            reference_name = (
+                "decision_price" if math_id == "MATH-32" else "midpoint_at_decision"
+            )
+            reference = _finite_decimal(
+                _required(inputs, reference_name), reference_name
+            )
+            market = context.multiply(signed, context.subtract(execution, reference))
+            if math_id == "MATH-33":
+                return {"spread_cost": market}
+            return {
+                "implementation_shortfall": sum(
+                    (
+                        market,
+                        _finite_decimal(
+                            _required(inputs, "explicit_fees"), "explicit_fees"
+                        ),
+                        _finite_decimal(
+                            _required(inputs, "opportunity_cost_unfilled"),
+                            "opportunity_cost_unfilled",
+                        ),
+                        _finite_decimal(
+                            _required(inputs, "other_costs"), "other_costs"
+                        ),
+                    ),
+                    Decimal(0),
+                )
+            }
+        if math_id == "MATH-34":
+            contracts = _nonnegative_decimal(
+                _required(inputs, "contracts"), "contracts"
+            )
+            rate = _nonnegative_decimal(_required(inputs, "fee_rate"), "fee_rate")
+            price = _probability_decimal(_required(inputs, "price"), "price")
+            raw = context.multiply(
+                context.multiply(context.multiply(contracts, rate), price),
+                context.subtract(Decimal(1), price),
+            )
+            return {
+                "fee_before_rounding": raw,
+                "fee_after_rounding": raw.quantize(
+                    Decimal(".00001"), rounding=ROUND_HALF_EVEN
+                ),
+            }
+        if math_id == "MATH-35":
+            contracts = _nonnegative_decimal(
+                _required(inputs, "contracts"), "contracts"
+            )
+            maker = _finite_decimal(_required(inputs, "maker_theta"), "maker_theta")
+            taker = _finite_decimal(_required(inputs, "taker_theta"), "taker_theta")
+            if maker > 0 or taker < 0:
+                raise ValueError("theta conflicts with maker/taker economic role")
+            price = _probability_decimal(_required(inputs, "price"), "price")
+            common = context.multiply(
+                context.multiply(contracts, price), context.subtract(Decimal(1), price)
+            )
+            maker_raw = context.multiply(common, maker)
+            taker_raw = context.multiply(common, taker)
+            return {
+                "maker_amount_before_rounding": maker_raw,
+                "maker_amount_after_bankers_rounding": maker_raw.quantize(
+                    Decimal(".01"), rounding=ROUND_HALF_EVEN
+                ),
+                "taker_amount_before_rounding": taker_raw,
+                "taker_amount_after_bankers_rounding": taker_raw.quantize(
+                    Decimal(".01"), rounding=ROUND_HALF_EVEN
+                ),
+            }
+        if math_id == "MATH-36":
+            payout = _finite_decimal(_required(inputs, "payout"), "payout")
+            yes = _finite_decimal(
+                _required(inputs, "yes_best_bid"), "yes_best_bid"
+            )
+            no = _finite_decimal(_required(inputs, "no_best_bid"), "no_best_bid")
+            if payout <= 0 or any(value < 0 or value > payout for value in (yes, no)):
+                raise ValueError("binary-book inputs are outside payout")
+            return {
+                "yes_implied_ask": context.subtract(payout, no),
+                "no_implied_ask": context.subtract(payout, yes),
+            }
+    raise ValueError(f"unsupported accounting receipt row: {math_id}")
+
+
+def _numeric_equal(observed: object, expected: object, tolerance: Decimal) -> bool:
+    if isinstance(observed, bool) or isinstance(expected, bool):
+        return type(observed) is bool and observed is expected
+    if isinstance(observed, dict) and isinstance(expected, dict):
+        return set(observed) == set(expected) and all(
+            _numeric_equal(observed[key], expected[key], tolerance) for key in observed
+        )
+    try:
+        observed_decimal = _finite_decimal(observed, "observed")
+        expected_decimal = _finite_decimal(expected, "expected")
+    except ValueError:
+        return type(observed) is type(expected) and observed == expected
+    return abs(observed_decimal - expected_decimal) <= tolerance
+
+
+def _accounting_comparison_passed(
+    policy: str, observed: dict[str, object], expected: object
+) -> bool:
+    if not isinstance(expected, dict):
+        return False
+    tolerance = Decimal("1E-15") if policy == "ABS_TOL_1E-15" else Decimal(0)
+    if policy not in {
+        "ABS_TOL_1E-15",
+        "EXACT_DECIMAL",
+        "EXACT_DECIMAL_AND_5DP_BOUNDARY",
+        "EXACT_DECIMAL_AND_BANKERS_CENT_BOUNDARY",
+    }:
+        return False
+    if not _numeric_equal(observed, expected, tolerance):
+        return False
+    if policy == "EXACT_DECIMAL_AND_5DP_BOUNDARY":
+        rounded = observed.get("fee_after_rounding")
+        return isinstance(rounded, Decimal) and rounded.as_tuple().exponent == -5
+    if policy == "EXACT_DECIMAL_AND_BANKERS_CENT_BOUNDARY":
+        rounded = (
+            observed.get("maker_amount_after_bankers_rounding"),
+            observed.get("taker_amount_after_bankers_rounding"),
+        )
+        return all(
+            isinstance(value, Decimal) and value.as_tuple().exponent == -2
+            for value in rounded
+        )
+    return True
+
+
+def _changed_inputs(inputs: dict[str, object], path: tuple[object, ...], value: object) -> dict[str, object]:
+    result = deepcopy(inputs)
+    target: object = result
+    for segment in path[:-1]:
+        target = target[segment]  # type: ignore[index]
+    target[path[-1]] = value  # type: ignore[index]
+    return result
+
+
+_FORMULA_MUTATIONS: dict[str, tuple[tuple[object, ...], object, str]] = {
+    "MATH-26": (("acquisition_cost",), "0.20", "ACQUISITION_COST_FORMULA_MUTATION"),
+    "MATH-27": (("win_probability",), "0.55", "WIN_PROBABILITY_FORMULA_MUTATION"),
+    "MATH-28": (("fraction_multiplier",), "0.25", "FRACTIONAL_KELLY_MULTIPLIER_MUTATION"),
+    "MATH-29": (("mean_return",), "0.11", "MEAN_RETURN_FORMULA_MUTATION"),
+    "MATH-30": (("losses", 3), "4", "TAIL_LOSS_FORMULA_MUTATION"),
+    "MATH-31": (("losses", 3), "4", "TAIL_LOSS_FORMULA_MUTATION"),
+    "MATH-32": (("execution_price",), "0.53", "EXECUTION_PRICE_FORMULA_MUTATION"),
+    "MATH-33": (("execution_price",), "0.45", "SPREAD_PRICE_FORMULA_MUTATION"),
+    "MATH-34": (("fee_rate",), "0.04", "GLOBAL_FEE_RATE_FORMULA_MUTATION"),
+    "MATH-35": (("maker_theta",), "-0.02", "MAKER_THETA_FORMULA_MUTATION"),
+    "MATH-36": (("no_best_bid",), "0.55", "BOOK_COMPLEMENT_FORMULA_MUTATION"),
+}
+
+_DOMAIN_MUTATIONS: dict[str, tuple[tuple[object, ...], object, str]] = {
+    "MATH-26": (("new_information_scenarios", 0, "probability"), "0.6", "PROBABILITY_SIMPLEX_GUARD"),
+    "MATH-27": (("net_odds",), "0", "POSITIVE_ODDS_GUARD"),
+    "MATH-28": (("fraction_multiplier",), "0", "MULTIPLIER_DOMAIN_GUARD"),
+    "MATH-29": (("variance",), "-0.01", "NONNEGATIVE_VARIANCE_GUARD"),
+    "MATH-30": (("alpha",), "1", "TAIL_CONFIDENCE_DOMAIN_GUARD"),
+    "MATH-31": (("losses",), [], "NONEMPTY_LOSS_DOMAIN_GUARD"),
+    "MATH-32": (("side",), "HOLD", "SIDE_DOMAIN_GUARD"),
+    "MATH-33": (("quantity",), "-1", "NONNEGATIVE_QUANTITY_GUARD"),
+    "MATH-34": (("price",), "1.1", "PRICE_PROBABILITY_GUARD"),
+    "MATH-35": (("maker_theta",), "0.01", "MAKER_SIGN_DOMAIN_GUARD"),
+    "MATH-36": (("payout",), "0", "POSITIVE_PAYOUT_GUARD"),
+}
+
+_PRECISION_MUTATIONS: dict[str, tuple[tuple[object, ...], object, str]] = {
+    "MATH-26": (("acquisition_cost",), "0.100000000000001", "DECIMAL_COST_PRECISION_MUTATION"),
+    "MATH-27": (("win_probability",), "0.6000000000000001", "PROBABILITY_PRECISION_MUTATION"),
+    "MATH-28": (("fraction_multiplier",), "0.5000000000000001", "MULTIPLIER_PRECISION_MUTATION"),
+    "MATH-29": (("variance",), "0.0400000000000001", "VARIANCE_PRECISION_MUTATION"),
+    "MATH-30": (("losses", 3), "3.000000000000001", "TAIL_PRECISION_MUTATION"),
+    "MATH-31": (("losses", 3), "3.000000000000001", "TAIL_PRECISION_MUTATION"),
+    "MATH-32": (("execution_price",), "0.5200000000000001", "PRICE_PRECISION_MUTATION"),
+    "MATH-33": (("execution_price",), "0.4400000000000001", "PRICE_PRECISION_MUTATION"),
+    "MATH-34": (("price",), "0.500001", "FIVE_DP_ROUNDING_BOUNDARY_MUTATION"),
+    "MATH-35": (("price",), "0.500001", "BANKERS_CENT_BOUNDARY_MUTATION"),
+    "MATH-36": (("no_best_bid",), "0.560000000000001", "BOOK_PRICE_PRECISION_MUTATION"),
+}
+
+_BINDING_MUTATIONS: dict[str, tuple[tuple[object, ...], object, str]] = {
+    "MATH-26": (("new_information_scenarios", 0, "action_values"), [0.8], "ACTION_ROSTER_BINDING_MUTATION"),
+    "MATH-27": (("win_probability",), "60", "PROBABILITY_UNIT_MUTATION"),
+    "MATH-28": (("risk_cap",), "0.05", "RISK_CAP_BINDING_MUTATION"),
+    "MATH-29": (("transaction_cost",), "0.01", "TRANSACTION_COST_BASIS_MUTATION"),
+    "MATH-30": (("losses",), [0, 100, 200, 300], "LOSS_UNIT_BASIS_MUTATION"),
+    "MATH-31": (("losses",), [0, 100, 200, 300], "LOSS_UNIT_BASIS_MUTATION"),
+    "MATH-32": (("side",), "SELL", "ORDER_SIDE_BINDING_MUTATION"),
+    "MATH-33": (("side",), "SELL", "ORDER_SIDE_BINDING_MUTATION"),
+    "MATH-34": (("fee_rate",), "0.06", "FEE_SCHEDULE_BINDING_MUTATION"),
+    "MATH-35": (("maker_theta",), "0.01", "LIQUIDITY_ROLE_BINDING_MUTATION"),
+    "MATH-36": (("yes_best_bid",), "0.56", "YES_NO_BOOK_BINDING_MUTATION"),
+}
+
+
+def _mutation_observation(
+    math_id: str,
+    inputs: dict[str, object],
+    mutation: tuple[tuple[object, ...], object, str],
+    *,
+    require_rejection: bool,
+) -> object:
+    path, replacement, operation = mutation
+    baseline = _accounting_result(math_id, inputs)
+    original: object = inputs
+    for segment in path:
+        original = original[segment]  # type: ignore[index]
+    mutated_inputs = _changed_inputs(inputs, path, replacement)
+    try:
+        mutated = _accounting_result(math_id, mutated_inputs)
+    except ValueError as exc:
+        return evidence_observation(
+            operation,
+            "TYPED_REJECTION",
+            {
+                "input_path": list(path),
+                "baseline_value": original,
+                "replacement_value": replacement,
+                "exception_type": type(exc).__name__,
+                "exception_message": str(exc),
+            },
+        )
+    if require_rejection:
+        raise ValueError(f"{math_id}: domain mutation was accepted")
+    if mutated == baseline:
+        raise ValueError(f"{math_id}: mutation did not change an observed result")
+    return evidence_observation(
+        operation,
+        "OBSERVED_OUTPUT_CHANGE",
+        {
+            "input_path": list(path),
+            "baseline_value": original,
+            "replacement_value": replacement,
+            "baseline_result": baseline,
+            "mutated_result": mutated,
+        },
+    )
+
+
+def _build_accounting_receipt_rows(
+    oracles: tuple[dict[str, object], ...],
+    vectors: tuple[dict[str, object], ...],
+) -> tuple[IndependentMathRowEvidenceV1, ...]:
+    oracle_by_id = {str(row["math_spec_ref"]): row for row in oracles}
+    vector_by_id = {str(row["math_spec_ref"]): row for row in vectors}
+    rows: list[IndependentMathRowEvidenceV1] = []
+    for math_id in RECEIPT_MATH_IDS:
+        oracle = oracle_by_id[math_id]
+        vector = vector_by_id[math_id]
+        if (
+            oracle.get("oracle_id") != f"ORACLE::{math_id}"
+            or vector.get("vector_id") != f"GOLDEN::{math_id}"
+            or vector.get("oracle_ref") != oracle.get("oracle_id")
+            or vector.get("comparison_policy") != oracle.get("comparison_policy")
+        ):
+            raise ValueError(f"{math_id}: tracked oracle/vector identity differs")
+        raw_inputs = vector.get("inputs")
+        if not isinstance(raw_inputs, dict):
+            raise ValueError(f"{math_id}: tracked inputs are not a mapping")
+        actual = _accounting_result(math_id, raw_inputs)
+        expected = vector.get("expected")
+        policy = str(vector.get("comparison_policy"))
+        comparison_passed = _accounting_comparison_passed(policy, actual, expected)
+        if not comparison_passed or not isinstance(expected, dict):
+            raise ValueError(f"{math_id}: declared comparison policy failed")
+        domain_observation = _mutation_observation(
+            math_id,
+            raw_inputs,
+            _DOMAIN_MUTATIONS[math_id],
+            require_rejection=True,
+        )
+        rows.append(
+            IndependentMathRowEvidenceV1(
+                math_id=math_id,
+                domain_owner=(
+                    "tools/independent_validate_qku_computation_control_plane_accounting.py"
+                ),
+                oracle_id=str(oracle["oracle_id"]),
+                golden_vector_id=str(vector["vector_id"]),
+                comparison_policy=policy,
+                evidence_tier=EVIDENCE_TIER,
+                observed_result=observed_result(
+                    independent_observation=actual,
+                    independent_expected_result=expected,
+                    system_under_test_observation=NO_PRODUCTION_SYSTEM_UNDER_TEST,
+                    comparison_passed=True,
+                ),
+                boundary_or_invariant_observation=evidence_observation(
+                    f"{policy}_GOLDEN_COMPARISON",
+                    "PASS",
+                    {
+                        "observed_result": actual,
+                        "independently_checked_expected": expected,
+                        "policy_executed": policy,
+                    },
+                ),
+                negative_or_abstention_observation=domain_observation,
+                formula_or_procedure_mutation_observation=_mutation_observation(
+                    math_id,
+                    raw_inputs,
+                    _FORMULA_MUTATIONS[math_id],
+                    require_rejection=False,
+                ),
+                domain_guard_observation=domain_observation,
+                precision_or_tolerance_observation=_mutation_observation(
+                    math_id,
+                    raw_inputs,
+                    _PRECISION_MUTATIONS[math_id],
+                    require_rejection=False,
+                ),
+                source_unit_or_binding_observation=_mutation_observation(
+                    math_id,
+                    raw_inputs,
+                    _BINDING_MUTATIONS[math_id],
+                    require_rejection=False,
+                ),
+                independence_class=(
+                    INDEPENDENT_REFERENCE_NO_PRODUCTION_RUNTIME_IMPORT
+                ),
+                production_system_under_test_invocation_count=0,
+                production_expected_value_import_count=0,
+                production_oracle_call_count=0,
+                external_effect_count=0,
+                terminal_state=TERMINAL_STATE,
+            )
+        )
+    return tuple(rows)
 
 
 def _source_safety(failures: list[str]) -> None:
@@ -422,6 +950,7 @@ def _semantic_repair_closure(
 
 def main() -> int:
     failures: list[str] = []
+    receipt_rows: tuple[IndependentMathRowEvidenceV1, ...] = ()
     _source_safety(failures)
     try:
         policies = _archive_rows(PACKAGE / "parameter_policy.py", "_ST12C_POLICY_ARCHIVE_B85")
@@ -444,6 +973,10 @@ def main() -> int:
     if any(row.get("production_implementation_import_allowed") is not False for row in (*oracles, *vectors)):
         failures.append("oracle/vector production-import separation failed")
     _semantic_repair_closure(failures, policies, bindings)
+    try:
+        receipt_rows = _build_accounting_receipt_rows(oracles, vectors)
+    except (KeyError, TypeError, ValueError, ArithmeticError) as exc:
+        failures.append(f"accounting row-receipt reconstruction failed: {exc}")
     actual = _golden_results()
     expected = {
         "MATH-26": Decimal(".15"), "MATH-27": Decimal(".20"), "MATH-28": Decimal(".10"),
@@ -462,6 +995,7 @@ def main() -> int:
     if failures:
         print("\n".join(failures), file=sys.stderr)
         return 1
+    print(format_evidence_line(build_envelope("ACCOUNTING", receipt_rows)))
     print(f"{SUCCESS} controls=16 policies=80 bindings=80 math=13 oracles=13 vectors=13 effects=0")
     return 0
 

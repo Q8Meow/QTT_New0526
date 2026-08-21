@@ -2161,3 +2161,73 @@ def test_st12g_authorized_scope_is_exact_and_rejects_near_names() -> None:
     )
     assert denied["allowed"] is False
     assert denied["reason"] == "forbidden_path"
+
+
+def test_registered_exact_repair_scope_reaches_atomicrows_owners(monkeypatch) -> None:
+    from tools import ci_branch_context as context
+
+    branch = context.ST12_INHERITED_MATH_ROW_RECEIPT_REPAIR_BRANCH
+    exact_paths = context.EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_CHANGED_PATHS[branch]
+    assert len(exact_paths) == 19
+    for path in exact_paths:
+        decision = registry._registered_exact_repair_scope_decision(branch, path)
+        assert decision is not None
+        assert decision["allowed"] is True
+        assert decision["branch"] == branch
+        assert decision["normalized_path"] == path
+        assert registry.is_pr_scoped_changed_path_allowed(branch, path)
+
+    formerly_rejected = (
+        "tools/qku_independent_math_row_receipt.py",
+        "tests/tools/test_qku_independent_math_row_receipt.py",
+    )
+    branch_context = context.BranchContext(branch=branch, source="unit-test")
+    for module in (pr140_report, pr141_report, pr142_report):
+        monkeypatch.setattr(
+            module,
+            "current_branch_context",
+            lambda _repo_root, value=branch_context: value,
+        )
+    for path in formerly_rejected:
+        assert pr140_report._is_allowed_pr140_changed_path(path, REPO_ROOT)
+        assert pr141_report._is_allowed_pr141_changed_path(path, REPO_ROOT)
+        assert pr142_report._is_allowed_pr142_changed_path_for_branch(path, branch)
+        assert registry.is_pr_scoped_changed_path_allowed(FIXTURE_BRANCH, path)
+
+    for adversarial_branch in (
+        branch.upper(),
+        f"{branch}-suffix",
+        f"{branch}/",
+        branch.replace("receipt-closure", "receipts-closure"),
+        "repair/st12-unregistered-repair",
+    ):
+        assert registry._registered_exact_repair_scope_decision(
+            adversarial_branch,
+            formerly_rejected[0],
+        ) is None
+        assert not registry.is_pr_scoped_changed_path_allowed(
+            adversarial_branch,
+            formerly_rejected[0],
+        )
+
+    for denied_path in (
+        "tools/qku_independent_math_row_receipt.py/suffix",
+        "prefix/tools/qku_independent_math_row_receipt.py",
+        "src/qtt/stage1_prediction_markets/atomicrows/unrelated.py",
+        "docs/master_plan/generated/Unrelated.report.json",
+        "docs/master_plan/generated/PR208_FinalSummary.report.json",
+        "docs/master_plan/QTT_MasterPlan_Current.md",
+        "docs/roadmap/QTT_Roadmap_v10.md",
+        ".github/workflows/qtt_validation.yml",
+        "tools/run_validation_gates.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/"
+        "tranche_h/test_contract_matrix.py",
+    ):
+        decision = registry._registered_exact_repair_scope_decision(
+            branch,
+            denied_path,
+        )
+        assert decision is not None
+        assert decision["allowed"] is False
+        assert decision["reason"] == "path_not_registered_for_exact_repair_scope"
+        assert not registry.is_pr_scoped_changed_path_allowed(branch, denied_path)

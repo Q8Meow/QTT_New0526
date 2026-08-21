@@ -42,6 +42,34 @@ ST12_ARCHITECTURE_ORACLE_PREREQUISITE_REPAIR_CHANGED_PATHS = frozenset(
         "PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
     }
 )
+ST12_INHERITED_MATH_ROW_RECEIPT_REPAIR_BRANCH = (
+    "repair/st12-inherited-math-row-receipt-closure"
+)
+ST12_INHERITED_MATH_ROW_RECEIPT_REPAIR_CHANGED_PATHS = frozenset(
+    {
+        "tools/qku_independent_math_row_receipt.py",
+        "tools/independent_validate_qku_computation_control_plane_accounting.py",
+        "tools/independent_validate_qku_computation_control_plane_execution.py",
+        "tools/independent_validate_qku_computation_control_plane_d.py",
+        "tools/independent_validate_qku_computation_control_plane_model_risk.py",
+        "tools/independent_validate_qku_computation_control_plane_quantum.py",
+        "tools/ci_branch_context.py",
+        "tools/validation_inventory.py",
+        "tools/validation_scope_registry.py",
+        "tools/validate_idempotence_runtime_containment.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/context.py",
+        "tests/tools/test_ci_branch_context.py",
+        "tests/tools/test_validate_repair_pr_changed_file_scope.py",
+        "tests/tools/test_qku_independent_math_row_receipt.py",
+        "tests/tools/test_validation_inventory.py",
+        "tests/tools/test_validation_scope_registry.py",
+        "tests/tools/test_validate_idempotence_runtime_containment.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/security/"
+        "test_input_validation.py",
+        "docs/master_plan/generated/"
+        "PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+    }
+)
 NO_RUNTIME_CUSTODY_AND_CI_DEPENDENCY_REPAIR_CHANGED_PATHS = frozenset(
     {
         "tools/validate_no_runtime_artifacts.py",
@@ -184,6 +212,7 @@ OWNER_AUTHORIZED_VALIDATION_BRANCHES = frozenset(
         "agent/st12f-evidence-model-risk-v1",
         "agent/st12g-existing-owner-projections-v2",
         ST12_ARCHITECTURE_ORACLE_PREREQUISITE_REPAIR_BRANCH,
+        ST12_INHERITED_MATH_ROW_RECEIPT_REPAIR_BRANCH,
     }
 )
 IDEMPOTENCE_RUNTIME_CONTAINMENT_HARDENING_BRANCH = (
@@ -1914,6 +1943,9 @@ PR159S_ALLOWED_CHANGED_PATHS = frozenset(
 EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_CHANGED_PATHS = {
     ST12_ARCHITECTURE_ORACLE_PREREQUISITE_REPAIR_BRANCH: (
         ST12_ARCHITECTURE_ORACLE_PREREQUISITE_REPAIR_CHANGED_PATHS
+    ),
+    ST12_INHERITED_MATH_ROW_RECEIPT_REPAIR_BRANCH: (
+        ST12_INHERITED_MATH_ROW_RECEIPT_REPAIR_CHANGED_PATHS
     ),
     NO_RUNTIME_CUSTODY_AND_CI_DEPENDENCY_REPAIR_BRANCH: (
         NO_RUNTIME_CUSTODY_AND_CI_DEPENDENCY_REPAIR_CHANGED_PATHS

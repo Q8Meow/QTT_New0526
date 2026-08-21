@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import ast
 from collections import Counter
+from copy import deepcopy
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from decimal import Decimal
@@ -23,6 +24,19 @@ import sys
 REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
+
+from tools.qku_independent_math_row_receipt import (  # noqa: E402
+    EVIDENCE_TIER,
+    INDEPENDENT_REFERENCE_NO_PRODUCTION_RUNTIME_IMPORT,
+    NO_PRODUCTION_SYSTEM_UNDER_TEST,
+    TERMINAL_STATE,
+    IndependentMathRowEvidenceV1,
+    build_envelope,
+    evidence_observation,
+    format_evidence_line,
+    observed_result,
+)
+
 PACKAGE = REPO_ROOT / "src/qtt/stage1_prediction_markets/qku_computation_control_plane"
 ARTIFACTS = REPO_ROOT / "docs/master_plan/generated/qku_control_plane/mode_snapshot"
 SUCCESS_MARKER = "QKU_COMPUTATION_CONTROL_PLANE_D_INDEPENDENTLY_VALIDATED"
@@ -1725,8 +1739,87 @@ def _validate_contract_and_service_ast() -> None:
     )
 
 
-def _validate_math39_independently() -> None:
+def _independently_reconstruct_math39(raw_inputs: object) -> Decimal:
+    _require(isinstance(raw_inputs, dict), "MATH-39 raw inputs must be a mapping")
+    _require(
+        tuple(raw_inputs) == ("order_ack", "sequenced_book_events"),
+        "MATH-39 oracle requires the exact two raw owner records",
+    )
+    ack = raw_inputs["order_ack"]
+    events = raw_inputs["sequenced_book_events"]
+    _require(
+        isinstance(ack, dict)
+        and ack.get("matching_priority") == "PRICE_TIME_FIFO"
+        and ack.get("unit") == "units"
+        and ack.get("basis") == "ACKNOWLEDGED_INSERTION_POINT"
+        and bool(ack.get("venue_evidence_ref"))
+        and isinstance(events, list)
+        and bool(events),
+        "MATH-39 oracle raw acknowledgement or event stream is invalid",
+    )
+    sequences = tuple(
+        row.get("sequence") if isinstance(row, dict) else None for row in events
+    )
+    _require(
+        all(
+            not isinstance(value, bool) and isinstance(value, int)
+            for value in sequences
+        )
+        and sequences
+        == tuple(range(sequences[0], sequences[0] + len(sequences))),
+        "MATH-39 oracle event sequence is not continuous",
+    )
+    quantities = {
+        "DISPLAYED_BEFORE_ORDER": Decimal(0),
+        "PRIOR_ADDITION": Decimal(0),
+        "PRIOR_CANCELLATION": Decimal(0),
+        "TRADE_AHEAD": Decimal(0),
+    }
+    for row in events:
+        _require(isinstance(row, dict), "MATH-39 raw event is not a mapping")
+        kind = row.get("event_kind")
+        _require(kind in quantities, "MATH-39 oracle encountered an unknown event kind")
+        try:
+            quantity = Decimal(str(row.get("quantity")))
+        except Exception as exc:
+            raise ValidationFailure(
+                "MATH-39 oracle quantity is not an exact Decimal"
+            ) from exc
+        _require(
+            quantity.is_finite() and quantity >= 0,
+            "MATH-39 oracle quantities must be finite and nonnegative",
+        )
+        quantities[str(kind)] += quantity
+    return max(
+        Decimal(0),
+        quantities["DISPLAYED_BEFORE_ORDER"]
+        + quantities["PRIOR_ADDITION"]
+        - quantities["PRIOR_CANCELLATION"]
+        - quantities["TRADE_AHEAD"],
+    )
+
+
+def _math39_rejection(callable_, message: str) -> dict[str, object]:
+    try:
+        callable_()
+    except ValidationFailure as exc:
+        _require(message in str(exc), f"wrong MATH-39 rejection: {exc}")
+        return {"exception_type": type(exc).__name__, "message": str(exc)}
+    raise ValidationFailure(f"expected MATH-39 rejection was accepted: {message}")
+
+
+def _validate_math39_independently() -> IndependentMathRowEvidenceV1:
     oracle_tree = _source_tree("oracle_contracts.py")
+    oracle_node = next(
+        node
+        for node in oracle_tree.body
+        if isinstance(node, ast.Assign)
+        and any(
+            isinstance(target, ast.Name)
+            and target.id == "_ST12D_MATH_39_ORACLE_ROW"
+            for target in node.targets
+        )
+    )
     vector_node = next(
         node
         for node in oracle_tree.body
@@ -1737,6 +1830,7 @@ def _validate_math39_independently() -> None:
             for target in node.targets
         )
     )
+    oracle = ast.literal_eval(oracle_node.value)
     vector = ast.literal_eval(vector_node.value)
     raw_inputs = vector["inputs"]
     _require(
@@ -1777,6 +1871,10 @@ def _validate_math39_independently() -> None:
     _require(
         independent_expected == Decimal(vector["expected"]["queue_ahead"]) == Decimal("80"),
         "independent raw-record MATH-39 reconstruction failed",
+    )
+    _require(
+        _independently_reconstruct_math39(raw_inputs) == independent_expected,
+        "MATH-39 receipt reconstruction differs from the preserved owner",
     )
     _require(max(Decimal(0), Decimal("1") - Decimal("2") - Decimal("3")) == 0, "MATH-39 floor invariant failed")
 
@@ -1847,6 +1945,133 @@ def _validate_math39_independently() -> None:
         "not value.is_finite()",
     ):
         _require(token in resolver_source, f"MATH-39 raw resolver guard missing: {token}")
+
+    formula_inputs = deepcopy(raw_inputs)
+    formula_inputs["sequenced_book_events"][1]["quantity"] = "21"
+    formula_result = _independently_reconstruct_math39(formula_inputs)
+    _require(formula_result == Decimal("81"), "MATH-39 formula mutation failed")
+
+    domain_inputs = deepcopy(raw_inputs)
+    domain_inputs["sequenced_book_events"][0]["quantity"] = "-1"
+    domain_rejection = _math39_rejection(
+        lambda: _independently_reconstruct_math39(domain_inputs),
+        "finite and nonnegative",
+    )
+
+    precision_inputs = deepcopy(raw_inputs)
+    precision_inputs["sequenced_book_events"][1]["quantity"] = "20.0001"
+    precision_result = _independently_reconstruct_math39(precision_inputs)
+    _require(
+        precision_result == Decimal("80.0001"),
+        "MATH-39 Decimal precision mutation failed",
+    )
+
+    sequence_inputs = deepcopy(raw_inputs)
+    sequence_inputs["sequenced_book_events"][2]["sequence"] = 104
+    sequence_rejection = _math39_rejection(
+        lambda: _independently_reconstruct_math39(sequence_inputs),
+        "sequence is not continuous",
+    )
+
+    source_rejections: dict[str, object] = {}
+    for name, field, replacement in (
+        ("matching_priority", "matching_priority", "PRO_RATA"),
+        ("venue_evidence", "venue_evidence_ref", ""),
+        ("unit", "unit", "contracts"),
+        ("basis", "basis", "UNACKNOWLEDGED_SNAPSHOT"),
+    ):
+        changed = deepcopy(raw_inputs)
+        changed["order_ack"][field] = replacement
+        source_rejections[name] = _math39_rejection(
+            lambda changed=changed: _independently_reconstruct_math39(changed),
+            "raw acknowledgement or event stream is invalid",
+        )
+
+    zero_floor_inputs = deepcopy(raw_inputs)
+    zero_floor_inputs["sequenced_book_events"][0]["quantity"] = "1"
+    zero_floor_inputs["sequenced_book_events"][1]["quantity"] = "0"
+    zero_floor_inputs["sequenced_book_events"][2]["quantity"] = "2"
+    zero_floor_inputs["sequenced_book_events"][3]["quantity"] = "3"
+    zero_floor_result = _independently_reconstruct_math39(zero_floor_inputs)
+    _require(zero_floor_result == 0, "MATH-39 zero floor receipt boundary failed")
+
+    _require(
+        oracle["oracle_id"] == "ORACLE::MATH-39"
+        and vector["vector_id"] == "GOLDEN::MATH-39"
+        and oracle["comparison_policy"] == vector["comparison_policy"]
+        == "EXACT_DECIMAL",
+        "MATH-39 tracked receipt identities differ",
+    )
+    return IndependentMathRowEvidenceV1(
+        math_id="MATH-39",
+        domain_owner="tools/independent_validate_qku_computation_control_plane_d.py",
+        oracle_id=oracle["oracle_id"],
+        golden_vector_id=vector["vector_id"],
+        comparison_policy=vector["comparison_policy"],
+        evidence_tier=EVIDENCE_TIER,
+        observed_result=observed_result(
+            independent_observation={"queue_ahead": independent_expected},
+            independent_expected_result=vector["expected"],
+            system_under_test_observation=NO_PRODUCTION_SYSTEM_UNDER_TEST,
+            comparison_passed=True,
+        ),
+        boundary_or_invariant_observation=evidence_observation(
+            "QUEUE_AHEAD_ZERO_FLOOR_BOUNDARY",
+            "BOUNDARY_PASS",
+            {
+                "raw_quantities": {
+                    "displayed": "1",
+                    "additions": "0",
+                    "cancellations": "2",
+                    "trades_ahead": "3",
+                },
+                "observed_queue_ahead": zero_floor_result,
+            },
+        ),
+        negative_or_abstention_observation=evidence_observation(
+            "SEQUENCE_CONTINUITY_NEGATIVE_MUTATION",
+            "TYPED_REJECTION",
+            sequence_rejection,
+        ),
+        formula_or_procedure_mutation_observation=evidence_observation(
+            "PRIOR_ADDITION_QUEUE_ARITHMETIC_MUTATION",
+            "OBSERVED_OUTPUT_CHANGE",
+            {
+                "input_path": ["sequenced_book_events", 1, "quantity"],
+                "baseline_value": "20",
+                "replacement_value": "21",
+                "baseline_result": independent_expected,
+                "mutated_result": formula_result,
+            },
+        ),
+        domain_guard_observation=evidence_observation(
+            "NONNEGATIVE_RAW_QUANTITY_GUARD",
+            "TYPED_REJECTION",
+            domain_rejection,
+        ),
+        precision_or_tolerance_observation=evidence_observation(
+            "EXACT_DECIMAL_QUEUE_QUANTITY_MUTATION",
+            "OBSERVED_OUTPUT_CHANGE",
+            {
+                "input_path": ["sequenced_book_events", 1, "quantity"],
+                "baseline_value": "20",
+                "replacement_value": "20.0001",
+                "baseline_result": independent_expected,
+                "mutated_result": precision_result,
+            },
+        ),
+        source_unit_or_binding_observation=evidence_observation(
+            "MATCHING_PRIORITY_VENUE_UNIT_AND_INSERTION_BASIS_MUTATIONS",
+            "TYPED_REJECTION",
+            source_rejections,
+        ),
+        independence_class=INDEPENDENT_REFERENCE_NO_PRODUCTION_RUNTIME_IMPORT,
+        production_system_under_test_invocation_count=0,
+        production_expected_value_import_count=0,
+        production_oracle_call_count=0,
+        external_effect_count=0,
+        terminal_state=TERMINAL_STATE,
+    )
 
 
 def _validate_repair_closure_sources() -> None:
@@ -2428,17 +2653,22 @@ def _validate_st12f_three_part_d_selection() -> int:
 
 
 def main() -> int:
+    receipt_row: IndependentMathRowEvidenceV1 | None = None
     try:
         runtime_metrics = _execute_runtime_repair_probe()
         _validate_denominators_and_artifact_identity(runtime_metrics)
         _validate_contract_and_service_ast()
         multi_component_d_selection_count = _validate_st12f_three_part_d_selection()
-        _validate_math39_independently()
+        receipt_row = _validate_math39_independently()
         _validate_repair_closure_sources()
         _validate_no_metadata_only_or_scope_escape()
     except (OSError, ValueError, KeyError, TypeError, ValidationFailure) as exc:
         print(f"ST12D_INDEPENDENT_VALIDATION_FAILED::{exc}", file=sys.stderr)
         return 1
+    if receipt_row is None:
+        print("ST12D_INDEPENDENT_VALIDATION_FAILED::MATH-39 receipt absent", file=sys.stderr)
+        return 1
+    print(format_evidence_line(build_envelope("D", (receipt_row,))))
     print(
         f"{SUCCESS_MARKER} "
         "closure=23 paths=7 parameters=28 math=4 oracles=4 vectors=4 "
