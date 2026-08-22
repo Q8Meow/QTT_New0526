@@ -4237,3 +4237,641 @@ class OperationContractV1:
                 ReasonCode.INVALID_CONTRACT,
                 "response JSON is not the exact deterministic operation schema",
             )
+
+
+# ST12-H validation/currentization/operations/publication contracts.  These
+# types are deliberately appended to the established model owner: H creates no
+# service surface and no runtime authority.
+
+
+def _st12h_text_tuple(
+    value: object,
+    field_name: str,
+    *,
+    allow_empty: bool = False,
+) -> tuple[str, ...]:
+    if not isinstance(value, tuple) or (not allow_empty and not value):
+        raise ContractValidationError(
+            ReasonCode.INVALID_CONTRACT,
+            f"{field_name} must be an immutable ordered tuple",
+        )
+    for index, item in enumerate(value):
+        _canonical_text(item, f"{field_name}[{index}]")
+    if len(set(value)) != len(value):
+        raise ContractValidationError(
+            ReasonCode.INVALID_CONTRACT,
+            f"{field_name} must contain unique values",
+        )
+    return value
+
+
+def _st12h_exact_bool(value: object, field_name: str) -> bool:
+    if type(value) is not bool:
+        raise ContractValidationError(
+            ReasonCode.INVALID_CONTRACT,
+            f"{field_name} must be an exact bool",
+        )
+    return value
+
+
+def _st12h_nonnegative_int(value: object, field_name: str) -> int:
+    if type(value) is not int or value < 0:
+        raise ContractValidationError(
+            ReasonCode.INVALID_CONTRACT,
+            f"{field_name} must be an exact nonnegative integer",
+        )
+    return value
+
+
+def _st12h_immutable_int_mapping(
+    value: object,
+    field_name: str,
+) -> Mapping[str, int]:
+    if not isinstance(value, Mapping) or not value:
+        raise ContractValidationError(
+            ReasonCode.INVALID_CONTRACT,
+            f"{field_name} must be a nonempty string-to-integer mapping",
+        )
+    normalized: dict[str, int] = {}
+    for key, item in value.items():
+        _canonical_text(key, f"{field_name}.key")
+        _st12h_nonnegative_int(item, f"{field_name}[{key}]")
+        normalized[key] = item
+    return MappingProxyType(dict(sorted(normalized.items())))
+
+
+@dataclass(frozen=True, slots=True)
+class ST12HBackupRestorePlanV1:
+    plan_id: str
+    operation: str
+    precondition: str
+    postcondition: str
+    artifact_paths: tuple[str, ...]
+    external_scratch_root_policy: str
+    max_archive_count: int
+    repository_copy_allowed: bool
+    copied_git_index_allowed: bool
+    restore_validation_commands: tuple[tuple[str, ...], ...]
+    cleanup_required: bool
+
+    def __post_init__(self) -> None:
+        for name in ("plan_id", "operation", "precondition", "postcondition"):
+            _canonical_text(getattr(self, name), name)
+        _st12h_text_tuple(self.artifact_paths, "artifact_paths")
+        _canonical_text(
+            self.external_scratch_root_policy,
+            "external_scratch_root_policy",
+        )
+        if type(self.max_archive_count) is not int or self.max_archive_count != 1:
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "max_archive_count must be exact one",
+            )
+        if self.repository_copy_allowed is not False or self.copied_git_index_allowed is not False:
+            raise ContractValidationError(
+                ReasonCode.RUNTIME_EFFECT_FORBIDDEN,
+                "repository and Git-index copies are forbidden",
+            )
+        if not isinstance(self.restore_validation_commands, tuple) or not self.restore_validation_commands:
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "restore_validation_commands must be a nonempty tuple",
+            )
+        for index, command in enumerate(self.restore_validation_commands):
+            _st12h_text_tuple(command, f"restore_validation_commands[{index}]")
+        if self.cleanup_required is not True:
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "cleanup_required must be exact true",
+            )
+
+
+@dataclass(frozen=True, slots=True)
+class ST12HControlCaseV1:
+    case_id: str
+    closure_id: str
+    domain: str
+    control_slug: str
+    owner_path: str
+    owner_symbol: str
+    fixture_ref: str
+    mutation_operation: str
+    expected_terminal_state: str
+    expected_reason_code: ReasonCode | None
+    required_receipt_fields: tuple[str, ...]
+    test_function: str
+    independent_validator_path: str
+    no_effect_flags: NoEffectFlagsV1 = NO_EFFECTS_V1
+
+    def __post_init__(self) -> None:
+        for name in (
+            "case_id",
+            "closure_id",
+            "domain",
+            "control_slug",
+            "owner_path",
+            "owner_symbol",
+            "fixture_ref",
+            "mutation_operation",
+            "expected_terminal_state",
+            "test_function",
+            "independent_validator_path",
+        ):
+            _canonical_text(getattr(self, name), name)
+        if not self.case_id.startswith("ST12H::") or self.domain not in {
+            "accounting",
+            "execution",
+            "llm",
+            "operations",
+            "security",
+            "source",
+        }:
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "case identity or domain is outside the exact H matrix",
+            )
+        if self.expected_reason_code is not None and type(self.expected_reason_code) is not ReasonCode:
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "expected_reason_code must be an exact ReasonCode or explicit absence",
+            )
+        _st12h_text_tuple(self.required_receipt_fields, "required_receipt_fields")
+        if self.no_effect_flags is not NO_EFFECTS_V1:
+            raise ContractValidationError(
+                ReasonCode.RUNTIME_EFFECT_FORBIDDEN,
+                "control cases must use the shared NO_EFFECTS_V1",
+            )
+
+
+@dataclass(frozen=True, slots=True)
+class ST12HFinalizationControlV1:
+    control_id: str
+    control: str
+    owner_ref: str
+    owner_symbol_disposition: str
+    predecessor_control_ids: tuple[str, ...]
+    terminal_receipt: str
+    exact_contract: str
+    no_effect_flags: NoEffectFlagsV1 = NO_EFFECTS_V1
+
+    def __post_init__(self) -> None:
+        for name in (
+            "control_id",
+            "control",
+            "owner_ref",
+            "owner_symbol_disposition",
+            "terminal_receipt",
+            "exact_contract",
+        ):
+            _canonical_text(getattr(self, name), name)
+        _st12h_text_tuple(
+            self.predecessor_control_ids,
+            "predecessor_control_ids",
+            allow_empty=True,
+        )
+        if self.no_effect_flags is not NO_EFFECTS_V1:
+            raise ContractValidationError(
+                ReasonCode.RUNTIME_EFFECT_FORBIDDEN,
+                "finalization controls must use the shared NO_EFFECTS_V1",
+            )
+
+
+@dataclass(frozen=True, slots=True)
+class ST12HGeneratedReportSpecV1:
+    artifact_id: str
+    path: str
+    schema_ref: str
+    builder_symbol: str
+    source_registry_refs: tuple[str, ...]
+    manual_edit_allowed: bool
+    master_plan_source_authority: bool
+
+    def __post_init__(self) -> None:
+        for name in ("artifact_id", "path", "schema_ref", "builder_symbol"):
+            _canonical_text(getattr(self, name), name)
+        _st12h_text_tuple(self.source_registry_refs, "source_registry_refs")
+        if self.manual_edit_allowed is not False or self.master_plan_source_authority is not False:
+            raise ContractValidationError(
+                ReasonCode.RUNTIME_EFFECT_FORBIDDEN,
+                "generated reports are projection-only and never manually editable",
+            )
+
+
+@dataclass(frozen=True, slots=True)
+class ST12HPublicationManifestV1:
+    publication_id: str
+    artifact_refs: tuple[str, ...]
+    validation_receipt_refs: tuple[str, ...]
+    stale_receipt_count: int
+    authority_non_effects: tuple[str, ...]
+    next_owner_action: str
+
+    def __post_init__(self) -> None:
+        _canonical_text(self.publication_id, "publication_id")
+        _st12h_text_tuple(self.artifact_refs, "artifact_refs")
+        _st12h_text_tuple(self.validation_receipt_refs, "validation_receipt_refs")
+        _st12h_text_tuple(self.authority_non_effects, "authority_non_effects")
+        _canonical_text(self.next_owner_action, "next_owner_action")
+        if len(self.artifact_refs) != 2 or len(self.authority_non_effects) != 15:
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "publication requires exactly two reports and fifteen held authorities",
+            )
+        if type(self.stale_receipt_count) is not int or self.stale_receipt_count < 1:
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "publication must disclose at least one invalidated stale receipt class",
+            )
+
+
+@dataclass(frozen=True, slots=True)
+class ST12HValidationCommandPlanV1:
+    command_id: str
+    execution_order: int
+    domain: str
+    argv: tuple[str, ...]
+    repository_paths: tuple[str, ...]
+    marker_policy: str
+    expected_terminal_markers: tuple[str, ...]
+    hard_timeout_seconds: int
+    max_attempts: int
+    environment_id: str
+    network_class: str
+    provider_effect_allowed: bool
+    private_state_allowed: bool
+    runtime_or_trading_effect_allowed: bool
+
+    def __post_init__(self) -> None:
+        for name in (
+            "command_id",
+            "domain",
+            "marker_policy",
+            "environment_id",
+            "network_class",
+        ):
+            _canonical_text(getattr(self, name), name)
+        _st12h_text_tuple(self.argv, "argv")
+        _st12h_text_tuple(self.repository_paths, "repository_paths")
+        _st12h_text_tuple(
+            self.expected_terminal_markers,
+            "expected_terminal_markers",
+            allow_empty=True,
+        )
+        if any(token in {"|", "||", "&", "&&", ";", ">", ">>"} for token in self.argv):
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "argv must not contain shell operators",
+            )
+        if type(self.execution_order) is not int or self.execution_order < 1:
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "execution_order must be a positive integer",
+            )
+        if type(self.hard_timeout_seconds) is not int or not 1 <= self.hard_timeout_seconds <= 7200:
+            raise ContractValidationError(
+                ReasonCode.RESOURCE_BOUND_EXCEEDED,
+                "hard_timeout_seconds must be within 1..7200",
+            )
+        if type(self.max_attempts) is not int or self.max_attempts != 1:
+            raise ContractValidationError(
+                ReasonCode.RESOURCE_BOUND_EXCEEDED,
+                "max_attempts must be exact one",
+            )
+        for name in (
+            "provider_effect_allowed",
+            "private_state_allowed",
+            "runtime_or_trading_effect_allowed",
+        ):
+            if getattr(self, name) is not False:
+                raise ContractValidationError(
+                    ReasonCode.RUNTIME_EFFECT_FORBIDDEN,
+                    f"{name} must be exact false",
+                )
+
+
+@dataclass(frozen=True, slots=True)
+class ST12HValidationCampaignPhaseV1:
+    phase: int
+    phase_id: str
+    action_class: str
+    environment_class: str
+    commands: tuple[ST12HValidationCommandPlanV1, ...]
+    instruction_ref: str | None
+    gate_contract_ref: str | None
+
+    def __post_init__(self) -> None:
+        if type(self.phase) is not int or not 1 <= self.phase <= 14:
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "phase must be within 1..14",
+            )
+        for name in ("phase_id", "action_class", "environment_class"):
+            _canonical_text(getattr(self, name), name)
+        if self.action_class not in {
+            "EXECUTABLE_COMMAND_SET",
+            "CODEX_READ_ONLY_GATE",
+            "OWNER_DECISION_GATE",
+            "EXTERNAL_CI_GATE",
+            "PUBLICATION_GATE",
+        }:
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "unknown campaign action class",
+            )
+        if not isinstance(self.commands, tuple) or any(
+            type(command) is not ST12HValidationCommandPlanV1
+            for command in self.commands
+        ):
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "commands must be exact ST12HValidationCommandPlanV1 values",
+            )
+        if self.action_class != "EXECUTABLE_COMMAND_SET" and self.commands:
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "non-executable gates cannot contain commands",
+            )
+        for name in ("instruction_ref", "gate_contract_ref"):
+            value = getattr(self, name)
+            if value is not None:
+                _canonical_text(value, name)
+
+
+@dataclass(frozen=True, slots=True)
+class ST12HValidationCampaignPlanV1:
+    campaign_id: str
+    phases: tuple[ST12HValidationCampaignPhaseV1, ...]
+    full_local_campaign_limit: int
+    scratch_budget_ref: str
+    tracked_side_effect_policy: str
+    final_custody_requirement: str
+    repository_copy_count: int
+    copied_git_index_count: int
+
+    def __post_init__(self) -> None:
+        for name in (
+            "campaign_id",
+            "scratch_budget_ref",
+            "tracked_side_effect_policy",
+            "final_custody_requirement",
+        ):
+            _canonical_text(getattr(self, name), name)
+        if (
+            not isinstance(self.phases, tuple)
+            or len(self.phases) != 14
+            or tuple(phase.phase for phase in self.phases) != tuple(range(1, 15))
+            or len({phase.phase_id for phase in self.phases}) != 14
+        ):
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "phases must be the exact ordered fourteen-phase campaign",
+            )
+        if type(self.full_local_campaign_limit) is not int or self.full_local_campaign_limit != 1:
+            raise ContractValidationError(
+                ReasonCode.RESOURCE_BOUND_EXCEEDED,
+                "full_local_campaign_limit must be exact one",
+            )
+        if self.tracked_side_effect_policy != "EXACT_ALLOWLIST_ONLY" or self.final_custody_requirement != "CLEAN_EXCEPT_INTENTIONAL_AUTHORIZED_DELTA":
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "campaign custody policies must be exact",
+            )
+        if self.repository_copy_count != 0 or self.copied_git_index_count != 0:
+            raise ContractValidationError(
+                ReasonCode.RUNTIME_EFFECT_FORBIDDEN,
+                "repository and Git-index copies are forbidden",
+            )
+
+
+@dataclass(frozen=True, slots=True)
+class ST12HValidationEnvironmentV1:
+    environment_id: str
+    environment_class: str
+    python_requirement: str
+    pytest_requirement_or_explicit_absence: str
+    interpreter_ref: str
+    dependency_mutation_allowed: bool
+    network_class: str
+    authoritative_for_clean_ci: bool
+    recorded_python_version: str
+    recorded_pytest_version_or_explicit_absence: str
+
+    def __post_init__(self) -> None:
+        for name in (
+            "environment_id",
+            "environment_class",
+            "python_requirement",
+            "pytest_requirement_or_explicit_absence",
+            "interpreter_ref",
+            "network_class",
+            "recorded_python_version",
+            "recorded_pytest_version_or_explicit_absence",
+        ):
+            _canonical_text(getattr(self, name), name)
+        if self.environment_class not in {
+            "PACKAGE_AUDIT",
+            "LOCAL_FOCUSED_COMPATIBILITY",
+            "CLEAN_CI_AUTHORITATIVE",
+        }:
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "unknown validation environment class",
+            )
+        if self.network_class not in {
+            "VALIDATION_NETWORK_FORBIDDEN",
+            "CI_SERVICE_ALLOWED",
+        }:
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "unknown validation network class",
+            )
+        if self.dependency_mutation_allowed is not False:
+            raise ContractValidationError(
+                ReasonCode.RUNTIME_EFFECT_FORBIDDEN,
+                "dependency mutation is forbidden",
+            )
+        _st12h_exact_bool(
+            self.authoritative_for_clean_ci,
+            "authoritative_for_clean_ci",
+        )
+        if self.environment_class == "CLEAN_CI_AUTHORITATIVE" and (
+            self.python_requirement != "3.14.6"
+            or self.pytest_requirement_or_explicit_absence != "9.1.1"
+            or self.authoritative_for_clean_ci is not True
+        ):
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "clean CI must use the exact freeze-scoped pins",
+            )
+
+
+@dataclass(frozen=True, slots=True)
+class ST12HStep12FinalHandoffV1:
+    schema_version: str
+    handoff_id: str
+    tranche: str
+    frozen_denominators: tuple[int, int, int, int, int, int, int, int]
+    final_control_refs: tuple[str, ...]
+    validation_campaign_receipt_ref: str
+    publication_receipt_ref: str
+    active_implementation_path_count: int
+    read_only_predecessor_path_count: int
+    grouped_test_module_count: int
+    grouped_test_function_count: int
+    stale_receipt_count: int
+    held_authorities: tuple[str, ...]
+    terminal_state: str
+    next_owner_action: str
+    no_effect_flags: NoEffectFlagsV1
+
+    def __post_init__(self) -> None:
+        for name in (
+            "schema_version",
+            "handoff_id",
+            "tranche",
+            "validation_campaign_receipt_ref",
+            "publication_receipt_ref",
+            "terminal_state",
+            "next_owner_action",
+        ):
+            _canonical_text(getattr(self, name), name)
+        if (
+            not isinstance(self.frozen_denominators, tuple)
+            or len(self.frozen_denominators) != 8
+            or any(type(value) is not int or value < 0 for value in self.frozen_denominators)
+        ):
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "frozen_denominators must contain exactly eight nonnegative integers",
+            )
+        _st12h_text_tuple(self.final_control_refs, "final_control_refs")
+        _st12h_text_tuple(self.held_authorities, "held_authorities")
+        exact_counts = (
+            self.active_implementation_path_count,
+            self.read_only_predecessor_path_count,
+            self.grouped_test_module_count,
+            self.grouped_test_function_count,
+        )
+        if exact_counts != (25, 66, 1, 6) or type(self.stale_receipt_count) is not int or self.stale_receipt_count < 0:
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "handoff path, test, and stale-receipt counts must be exact",
+            )
+        if len(self.held_authorities) != 15 or self.terminal_state not in {
+            "IMPLEMENTATION_IN_PROGRESS",
+            "INDEPENDENT_CODE_AUDIT_FAILED",
+            "FINAL_CONTROLS_INCOMPLETE",
+            "PUBLICATION_HELD",
+            "MERGE_HELD",
+        }:
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "handoff must preserve one exact incomplete or held terminal state",
+            )
+        if self.no_effect_flags is not NO_EFFECTS_V1:
+            raise ContractValidationError(
+                ReasonCode.RUNTIME_EFFECT_FORBIDDEN,
+                "handoff must use the shared NO_EFFECTS_V1",
+            )
+
+
+@dataclass(frozen=True, slots=True)
+class ST12HValidationCurrentizationOperationsPublicationReportV1:
+    schema_version: str
+    tranche: str
+    generated_projection_only: bool
+    master_plan_source_authority: bool
+    closure_counts: Mapping[str, int]
+    path_counts: Mapping[str, int]
+    parameter_count: int
+    math_counts: Mapping[str, int]
+    test_topology: Mapping[str, int]
+    validation_command_count: int
+    validation_campaign_phase_count: int
+    environment_classes: tuple[str, ...]
+    validation_command_receipt_refs: tuple[str, ...]
+    validation_campaign_receipt_ref: str
+    budget_usage: Mapping[str, int]
+    source_currentness_evidence_refs: tuple[str, ...]
+    source_binding_count: int
+    stale_receipt_class_count: int
+    stale_receipt_rejection_count: int
+    backup_restore_stage_count: int
+    finalization_control_count: int
+    serialized_contract_binding_count: int
+    schema_file_count: int
+    schema_owner_consumer_binding_count: int
+    schema_cardinality_binding_count: int
+    reason_code_binding_count: int
+    held_authorities: tuple[str, ...]
+    authority_effects: NoEffectFlagsV1
+    terminal_state: str
+    next_owner_action: str
+
+    def __post_init__(self) -> None:
+        for name in (
+            "schema_version",
+            "tranche",
+            "validation_campaign_receipt_ref",
+            "terminal_state",
+            "next_owner_action",
+        ):
+            _canonical_text(getattr(self, name), name)
+        if self.generated_projection_only is not True or self.master_plan_source_authority is not False:
+            raise ContractValidationError(
+                ReasonCode.RUNTIME_EFFECT_FORBIDDEN,
+                "the report must be projection-only and non-authoritative",
+            )
+        for name in ("closure_counts", "path_counts", "math_counts", "test_topology", "budget_usage"):
+            object.__setattr__(
+                self,
+                name,
+                _st12h_immutable_int_mapping(getattr(self, name), name),
+            )
+        for name in (
+            "parameter_count",
+            "validation_command_count",
+            "validation_campaign_phase_count",
+            "source_binding_count",
+            "stale_receipt_class_count",
+            "stale_receipt_rejection_count",
+            "backup_restore_stage_count",
+            "finalization_control_count",
+            "serialized_contract_binding_count",
+            "schema_file_count",
+            "schema_owner_consumer_binding_count",
+            "schema_cardinality_binding_count",
+            "reason_code_binding_count",
+        ):
+            _st12h_nonnegative_int(getattr(self, name), name)
+        _st12h_text_tuple(self.environment_classes, "environment_classes")
+        _st12h_text_tuple(
+            self.validation_command_receipt_refs,
+            "validation_command_receipt_refs",
+        )
+        _st12h_text_tuple(
+            self.source_currentness_evidence_refs,
+            "source_currentness_evidence_refs",
+        )
+        _st12h_text_tuple(self.held_authorities, "held_authorities")
+        if len(self.held_authorities) != 15 or self.authority_effects is not NO_EFFECTS_V1:
+            raise ContractValidationError(
+                ReasonCode.RUNTIME_EFFECT_FORBIDDEN,
+                "the report must preserve all held authorities and shared no-effects",
+            )
+        if self.terminal_state not in {
+            "IMPLEMENTATION_IN_PROGRESS",
+            "INDEPENDENT_CODE_AUDIT_FAILED",
+            "FINAL_CONTROLS_INCOMPLETE",
+            "PUBLICATION_HELD",
+            "MERGE_HELD",
+        }:
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "tracked report projection cannot claim current execution completion",
+            )
+        if self.stale_receipt_rejection_count < self.stale_receipt_class_count:
+            raise ContractValidationError(
+                ReasonCode.SOURCE_EPOCH_STALE,
+                "tracked report must reject every stale receipt class",
+            )

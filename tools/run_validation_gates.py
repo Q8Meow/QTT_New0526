@@ -24,11 +24,14 @@ if str(REPO_ROOT) not in sys.path:
 from tools.validation_scope_registry import (  # noqa: E402
     ST12G_ARCHITECTURE_ADDITIVE_MODULES,
     ST12G_INDEPENDENT_ARCHITECTURE_SCRIPT_NAME,
+    ST12H_READ_ONLY_PREDECESSOR_PATHS,
+    build_st12h_validation_commands,
     build_st12g_architecture_validation_command,
 )
 
 SUCCESS_MARKER = "QTT_VALIDATION_GATES_OK"
 PYTEST_FRESH_BASETEMP_SCRIPT = "run_pytest_fresh_basetemp.py"
+_QKU_ROOT_PYTEST_IMPORT_MODE_ARG = "--import-mode=importlib"
 PHASE_SUCCESS_MARKER_PREFIX = "QTT_VALIDATION_PHASE_OK"
 TIMING_SCHEMA_VERSION = 1
 SLOWEST_ENTRY_LIMIT = 20
@@ -260,6 +263,17 @@ PR167_TEST_ROOT = (
 ST12A_TEST_ROOT = (
     "tests/stage1_prediction_markets/qku_computation_control_plane"
 )
+ST12H_TEST_MODULE = (
+    "tests/stage1_prediction_markets/qku_computation_control_plane/"
+    "tranche_h/test_contract_matrix.py"
+)
+ST12H_MAX_CONCURRENT_VALIDATION_PROCESSES = 1
+ST12H_AUTOMATIC_FULL_CAMPAIGN_RETRIES = 0
+ST12H_MAX_FULL_LOCAL_CAMPAIGNS_PER_TRACKED_STATE = 1
+ST12H_MAX_SCRATCH_LOGICAL_BYTES = 17_179_869_184
+ST12H_MAX_SCRATCH_ALLOCATED_BYTES = 17_179_869_184
+ST12H_MAX_SCRATCH_FILES = 120_000
+ST12H_MAX_SCRATCH_DIRECTORIES = 20_000
 PR166_SM2_PYTEST_FILE_GROUPS = (
     (
         "test_pr166_sm2_ablation.py",
@@ -1105,7 +1119,7 @@ PYTEST_SHARD_COMMANDS: dict[str, tuple[PytestShardCommand, ...]] = {
         ),
         PytestShardCommand(
             paths=(ST12A_TEST_ROOT,),
-            reason="ST12 Tranche-A exact 42-file domain test group",
+            reason="Complete QKU control-plane domain test root",
             runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
             historical_runtime_seconds=1.0,
         ),
@@ -1546,6 +1560,307 @@ def _command_script_name(command: Sequence[str]) -> str:
     return pathlib.PurePath(command[1]).name
 
 
+def _st12h_command_contract(
+    command: Sequence[str],
+) -> tuple[int, tuple[str, ...]] | None:
+    script_name = _command_script_name(command)
+    if script_name == "validate_qku_computation_control_plane.py":
+        try:
+            domain = command[command.index("--domain") + 1]
+        except (ValueError, IndexError):
+            return None
+        markers = (f"QKU_COMPUTATION_CONTROL_PLANE_VALIDATED domain={domain}",)
+        if domain == "h":
+            markers += (
+                "ST12H_GROUPED_MATRIX_VALIDATED functions=6 control_cases=36 "
+                "semantic_identities=42 custom_case_labels=0",
+            )
+        if domain in {"accounting", "execution", "llm", "operations", "security", "source", "h"}:
+            return 1200, markers
+        return None
+    independent_markers = {
+        "independent_validate_qku_computation_control_plane_accounting.py": (
+            "QKU_ACCOUNTING_INDEPENDENTLY_VALIDATED",
+        ),
+        "independent_validate_qku_computation_control_plane_execution.py": (
+            "QKU_EXECUTION_INDEPENDENTLY_VALIDATED",
+        ),
+        "independent_validate_qku_computation_control_plane_llm.py": (
+            "QKU_LLM_INDEPENDENTLY_VALIDATED",
+        ),
+        "independent_validate_qku_computation_control_plane_operations.py": (
+            "QKU_OPERATIONS_INDEPENDENTLY_VALIDATED",
+        ),
+        "independent_validate_qku_computation_control_plane_security.py": (
+            "QKU_SECURITY_INDEPENDENTLY_VALIDATED",
+        ),
+        "independent_validate_qku_computation_control_plane_source.py": (
+            "QKU_SOURCE_INDEPENDENTLY_VALIDATED",
+        ),
+    }
+    if script_name in independent_markers:
+        return 1200, independent_markers[script_name]
+    if script_name == "independent_validate_qku_computation_control_plane.py":
+        return 1800, (
+            "QKU_COMPUTATION_CONTROL_PLANE_INDEPENDENTLY_VALIDATED",
+            "ST12H_MATH_40_44_INDEPENDENTLY_RECONSTRUCTED",
+            "ST12H_MATH_01_52_COVERAGE_RECONSTRUCTED",
+        )
+    if (
+        script_name == PYTEST_FRESH_BASETEMP_SCRIPT
+        and ST12A_TEST_ROOT in _pytest_path_args(command)
+    ):
+        return 1200, ()
+    return None
+
+
+def _st12h_missing_terminal_markers(
+    output: str,
+    expected_markers: Sequence[str],
+) -> tuple[str, ...]:
+    lines = tuple(line.strip() for line in output.splitlines())
+    return tuple(
+        marker
+        for marker in expected_markers
+        if not any(line == marker or line.startswith(f"{marker} ") for line in lines)
+    )
+
+
+def _st12h_normalized_command(command: Sequence[str]) -> tuple[str, ...]:
+    return tuple(
+        part if index == 0 else part.replace("\\", "/")
+        for index, part in enumerate(command)
+    )
+
+
+def _st12h_selected_command_failures(
+    commands: Sequence[Sequence[str]],
+    *,
+    phase: str,
+) -> tuple[str, ...]:
+    normalized = tuple(_st12h_normalized_command(command) for command in commands)
+    deterministic_phases = {
+        ALL_PHASE,
+        DETERMINISTIC_VALIDATORS_PHASE,
+        "deterministic-validators-c",
+    }
+    failures: list[str] = []
+    if phase in deterministic_phases:
+        frozen = tuple(
+            _st12h_normalized_command(command)
+            for command in build_st12h_validation_commands(sys.executable)
+        )
+        frozen_indices: list[int] = []
+        for expected in frozen:
+            indices = [
+                index for index, command in enumerate(normalized) if command == expected
+            ]
+            if len(indices) != 1:
+                failures.append(
+                    "ST12H_VALIDATION_COMMAND_SKIPPED_OR_DUPLICATED: "
+                    f"{subprocess.list2cmdline(expected)}"
+                )
+            else:
+                frozen_indices.append(indices[0])
+        if len(frozen_indices) == len(frozen) and frozen_indices != list(
+            range(frozen_indices[0], frozen_indices[0] + len(frozen))
+        ):
+            failures.append("ST12H_VALIDATION_COMMAND_ORDER_OR_CONTIGUITY_DRIFT")
+
+        primary_h_count = sum(
+            _command_script_name(command)
+            == "validate_qku_computation_control_plane.py"
+            and "--domain" in command
+            and command[command.index("--domain") + 1 : command.index("--domain") + 2]
+            == ("h",)
+            for command in normalized
+        )
+        aggregate_count = sum(
+            _command_script_name(command)
+            == "independent_validate_qku_computation_control_plane.py"
+            for command in normalized
+        )
+        if primary_h_count != 1:
+            failures.append(
+                "ST12H_VALIDATION_COMMAND_SKIPPED_OR_DUPLICATED: primary-h"
+            )
+        if aggregate_count != 1:
+            failures.append(
+                "ST12H_VALIDATION_COMMAND_SKIPPED_OR_DUPLICATED: "
+                "independent-aggregate"
+            )
+
+    if phase in {ALL_PHASE, "pytest-shard-8"}:
+        grouped_matrix_count = sum(
+            _command_script_name(command) == PYTEST_FRESH_BASETEMP_SCRIPT
+            and ST12A_TEST_ROOT in _pytest_path_args(command)
+            for command in normalized
+        )
+        if grouped_matrix_count != 1:
+            failures.append(
+                "ST12H_VALIDATION_COMMAND_SKIPPED_OR_DUPLICATED: grouped-matrix"
+            )
+    return tuple(failures)
+
+
+def _st12h_runner_topology_failures() -> tuple[str, ...]:
+    failures: list[str] = []
+    if len(ORDERED_PHASES) != 13:
+        failures.append("ST12H_VALIDATION_PHASE_TOPOLOGY_DRIFT")
+    if (
+        ST12H_MAX_CONCURRENT_VALIDATION_PROCESSES != 1
+        or ST12H_AUTOMATIC_FULL_CAMPAIGN_RETRIES != 0
+        or ST12H_MAX_FULL_LOCAL_CAMPAIGNS_PER_TRACKED_STATE != 1
+        or ST12H_MAX_SCRATCH_LOGICAL_BYTES != 17_179_869_184
+        or ST12H_MAX_SCRATCH_ALLOCATED_BYTES != 17_179_869_184
+        or ST12H_MAX_SCRATCH_FILES != 120_000
+        or ST12H_MAX_SCRATCH_DIRECTORIES != 20_000
+    ):
+        failures.append("ST12H_VALIDATION_OR_SCRATCH_BUDGET_CONTRACT_DRIFT")
+    if PRE_VALIDATION_FINALIZATION_GUIDANCE != (
+        {
+            "command_id": "pr152_currentize_after_generated_artifacts",
+            "command": (
+                ".\\.venv\\Scripts\\python.exe "
+                "tools\\currentize_pr152_after_generated_artifacts.py"
+            ),
+            "when": (
+                "after final generated artifacts settle and before validation gates"
+            ),
+            "ci_tracked_report_mutation_allowed": False,
+        },
+    ):
+        failures.append("ST12H_PR152_CURRENTIZATION_SEQUENCE_DRIFT")
+    manifest = build_phase_manifest(
+        pathlib.Path(tempfile.gettempdir()) / "st12h-runner-contract",
+        pathlib.Path(tempfile.gettempdir()) / "st12h-runner-contract-pytest",
+    )
+    by_phase = {
+        str(record["phase"]): tuple(record["commands"]) for record in manifest
+    }
+    failures.extend(
+        _st12h_selected_command_failures(
+            by_phase["deterministic-validators-c"],
+            phase="deterministic-validators-c",
+        )
+    )
+    failures.extend(
+        _st12h_selected_command_failures(
+            by_phase["pytest-shard-8"],
+            phase="pytest-shard-8",
+        )
+    )
+    frozen = {
+        _st12h_normalized_command(command)
+        for command in build_st12h_validation_commands(sys.executable)
+    }
+    for record_phase, phase_commands in by_phase.items():
+        if record_phase == "deterministic-validators-c":
+            continue
+        if any(
+            _st12h_normalized_command(command) in frozen
+            for command in phase_commands
+        ):
+            failures.append(
+                "ST12H_VALIDATION_COMMAND_WRONG_PHASE: " f"{record_phase}"
+            )
+    for record_phase, phase_commands in by_phase.items():
+        matrix_count = sum(
+            _command_script_name(command) == PYTEST_FRESH_BASETEMP_SCRIPT
+            and ST12A_TEST_ROOT in _pytest_path_args(command)
+            for command in phase_commands
+        )
+        expected = 1 if record_phase == "pytest-shard-8" else 0
+        if matrix_count != expected:
+            failures.append(
+                "ST12H_GROUPED_MATRIX_WRONG_PHASE: " f"{record_phase}"
+            )
+    return tuple(failures)
+
+
+def _st12h_scratch_usage(
+    roots: Sequence[pathlib.Path],
+) -> tuple[int, int, int, int]:
+    logical_bytes = 0
+    allocated_bytes = 0
+    file_count = 0
+    directory_count = 0
+    pending = [pathlib.Path(root) for root in roots]
+    while pending:
+        current = pending.pop()
+        if not current.exists():
+            continue
+        if current.is_dir():
+            directory_count += 1
+            with os.scandir(current) as entries:
+                for entry in entries:
+                    if entry.is_dir(follow_symlinks=False):
+                        pending.append(pathlib.Path(entry.path))
+                        continue
+                    stat_result = entry.stat(follow_symlinks=False)
+                    logical_bytes += stat_result.st_size
+                    blocks = getattr(stat_result, "st_blocks", None)
+                    allocated_bytes += (
+                        stat_result.st_size if blocks is None else blocks * 512
+                    )
+                    file_count += 1
+            continue
+        stat_result = current.stat()
+        logical_bytes += stat_result.st_size
+        blocks = getattr(stat_result, "st_blocks", None)
+        allocated_bytes += stat_result.st_size if blocks is None else blocks * 512
+        file_count += 1
+    return logical_bytes, allocated_bytes, file_count, directory_count
+
+
+def _st12h_execution_budget_failures(
+    *,
+    concurrent_validation_processes: int = 1,
+    automatic_full_campaign_retry_count: int = 0,
+    full_local_campaign_count: int = 0,
+    scratch_logical_bytes: int = 0,
+    scratch_allocated_bytes: int = 0,
+    scratch_file_count: int = 0,
+    scratch_directory_count: int = 0,
+    protected_predecessor_changes: Sequence[str] = (),
+) -> tuple[str, ...]:
+    failures: list[str] = []
+    if concurrent_validation_processes > ST12H_MAX_CONCURRENT_VALIDATION_PROCESSES:
+        failures.append("ST12H_CONCURRENT_VALIDATION_PROCESS_BUDGET_EXCEEDED")
+    if automatic_full_campaign_retry_count > ST12H_AUTOMATIC_FULL_CAMPAIGN_RETRIES:
+        failures.append("ST12H_AUTOMATIC_FULL_CAMPAIGN_RETRY_FORBIDDEN")
+    if full_local_campaign_count > ST12H_MAX_FULL_LOCAL_CAMPAIGNS_PER_TRACKED_STATE:
+        failures.append("ST12H_FULL_LOCAL_CAMPAIGN_BUDGET_EXCEEDED")
+    if scratch_logical_bytes > ST12H_MAX_SCRATCH_LOGICAL_BYTES:
+        failures.append("ST12H_SCRATCH_LOGICAL_BYTE_BUDGET_EXCEEDED")
+    if scratch_allocated_bytes > ST12H_MAX_SCRATCH_ALLOCATED_BYTES:
+        failures.append("ST12H_SCRATCH_ALLOCATED_BYTE_BUDGET_EXCEEDED")
+    if scratch_file_count > ST12H_MAX_SCRATCH_FILES:
+        failures.append("ST12H_SCRATCH_FILE_BUDGET_EXCEEDED")
+    if scratch_directory_count > ST12H_MAX_SCRATCH_DIRECTORIES:
+        failures.append("ST12H_SCRATCH_DIRECTORY_BUDGET_EXCEEDED")
+    failures.extend(
+        f"ST12H_READ_ONLY_PREDECESSOR_CHANGED: {path}"
+        for path in sorted(set(protected_predecessor_changes))
+    )
+    return tuple(failures)
+
+
+def _st12h_scratch_budget_failures(
+    roots: Sequence[pathlib.Path],
+) -> tuple[str, ...]:
+    try:
+        logical, allocated, files, directories = _st12h_scratch_usage(roots)
+    except OSError as exc:
+        return (f"ST12H_SCRATCH_MEASUREMENT_FAILED: {exc}",)
+    return _st12h_execution_budget_failures(
+        scratch_logical_bytes=logical,
+        scratch_allocated_bytes=allocated,
+        scratch_file_count=files,
+        scratch_directory_count=directories,
+    )
+
+
 def _command_uses_pytest_helper(command: Sequence[str]) -> bool:
     return _command_script_name(command) == PYTEST_FRESH_BASETEMP_SCRIPT
 
@@ -1559,6 +1874,61 @@ def _execution_command_with_st12g_architecture_roster(
     ):
         return list(command)
     return list(build_st12g_architecture_validation_command(command[0]))
+
+
+def _is_exact_qku_root_pytest_command(command: Sequence[str]) -> bool:
+    if (
+        len(command) <= 1
+        or str(command[1]).replace("\\", "/")
+        != f"tools/{PYTEST_FRESH_BASETEMP_SCRIPT}"
+    ):
+        return False
+
+    selected_paths: list[str] = []
+    skip_next_value = False
+    for argument in command[2:]:
+        normalized = str(argument).replace("\\", "/")
+        if skip_next_value:
+            skip_next_value = False
+            continue
+        if normalized in {"--ignore", "--basetemp", "--import-mode"}:
+            skip_next_value = True
+            continue
+        if normalized.startswith("-"):
+            continue
+        selected_paths.append(normalized)
+    return selected_paths == [ST12A_TEST_ROOT]
+
+
+def _execution_command_with_qku_root_importlib(
+    command: Sequence[str],
+) -> list[str]:
+    adapted = list(command)
+    if not _is_exact_qku_root_pytest_command(adapted):
+        return adapted
+
+    import_mode_options = [
+        argument
+        for argument in adapted
+        if str(argument) == "--import-mode"
+        or str(argument).startswith("--import-mode=")
+    ]
+    if import_mode_options:
+        if import_mode_options == [_QKU_ROOT_PYTEST_IMPORT_MODE_ARG]:
+            return adapted
+        raise RuntimeError("QTT_QKU_ROOT_PYTEST_IMPORT_MODE_CONFLICT")
+
+    basetemp_index = next(
+        (
+            index
+            for index, argument in enumerate(adapted)
+            if str(argument) == "--basetemp"
+            or str(argument).startswith("--basetemp=")
+        ),
+        len(adapted),
+    )
+    adapted.insert(basetemp_index, _QKU_ROOT_PYTEST_IMPORT_MODE_ARG)
+    return adapted
 
 
 def _normal_repo_path_text(value: pathlib.Path | str) -> str:
@@ -1630,18 +2000,19 @@ def pytest_shard_manifest(
 def pytest_shard_membership(
     repo_root: pathlib.Path | str | None = None,
 ) -> dict[str, str]:
-    membership: dict[str, str] = {}
-    duplicates: list[str] = []
+    placements: dict[str, list[str]] = {}
     for phase, paths in pytest_shard_manifest(repo_root).items():
         for path in paths:
-            if path in membership:
-                duplicates.append(path)
-                continue
-            membership[path] = phase
+            placements.setdefault(path, []).append(phase)
+    duplicates = sorted(
+        path
+        for path, phases in placements.items()
+        if len(phases) > 1
+    )
     if duplicates:
-        duplicate_text = ", ".join(sorted(duplicates))
+        duplicate_text = ", ".join(duplicates)
         raise ValueError(f"pytest shard duplicate test files: {duplicate_text}")
-    return membership
+    return {path: phases[0] for path, phases in placements.items()}
 
 
 def pytest_runtime_budget_plan() -> dict[str, object]:
@@ -1684,7 +2055,20 @@ def pytest_runtime_budget_failures(
         for path in phase_paths
     ]
     missing = sorted(all_tests - set(flattened))
-    duplicates = sorted({path for path in flattened if flattened.count(path) > 1})
+    placements = {
+        path: tuple(
+            phase
+            for phase, phase_paths in manifest.items()
+            for candidate in phase_paths
+            if candidate == path
+        )
+        for path in set(flattened)
+    }
+    duplicates = sorted(
+        path
+        for path, phases in placements.items()
+        if len(phases) > 1
+    )
     if missing:
         failures.append("PYTEST_SHARD_UNASSIGNED_TESTS: " + ", ".join(missing))
     if duplicates:
@@ -2441,6 +2825,24 @@ def _tracked_modified_paths(repo_root: pathlib.Path) -> set[str]:
         for path in stdout.splitlines()
         if path.strip()
     }
+
+
+def _st12h_changed_protected_predecessors(
+    repo_root: pathlib.Path,
+) -> tuple[str, ...]:
+    returncode, stdout, stderr = _git_stdout(
+        repo_root,
+        ["diff", "--name-only", "HEAD", "--"],
+    )
+    if returncode != 0:
+        detail = stderr.strip() or stdout.strip() or "git diff --name-only failed"
+        raise RuntimeError(detail)
+    changed = {
+        path.strip().replace("\\", "/")
+        for path in stdout.splitlines()
+        if path.strip()
+    }
+    return tuple(sorted(changed.intersection(ST12H_READ_ONLY_PREDECESSOR_PATHS)))
 
 
 def _untracked_paths(repo_root: pathlib.Path) -> set[str]:
@@ -5412,18 +5814,13 @@ def build_validation_commands(
             ]
             for domain in (
                 "architecture",
-                "operations",
                 "quantum",
-                "security",
-                "source",
-                "accounting",
-                "execution",
                 "latency",
                 "d",
                 "agent",
-                "llm",
                 "model_risk",
                 "g",
+                "h",
             )
         ],
         [
@@ -5454,32 +5851,18 @@ def build_validation_commands(
                 "independent_validate_qku_computation_control_plane_g.py",
             ),
         ],
-        [
-            sys.executable,
-            _path(
-                "tools",
-                "independent_validate_qku_computation_control_plane_accounting.py",
-            ),
-        ],
-        [
-            sys.executable,
-            _path(
-                "tools",
-                "independent_validate_qku_computation_control_plane_execution.py",
-            ),
-        ],
         *[
             [sys.executable, _path("tools", script_name)]
             for script_name in (
                 "independent_validate_qku_computation_control_plane_agent.py",
-                "independent_validate_qku_computation_control_plane_llm.py",
-                "independent_validate_qku_computation_control_plane_security.py",
                 "independent_validate_qku_computation_control_plane_d.py",
                 "independent_validate_qku_computation_control_plane_quantum.py",
                 "independent_validate_qku_computation_control_plane_architecture.py",
-                "independent_validate_qku_computation_control_plane_operations.py",
-                "independent_validate_qku_computation_control_plane_source.py",
             )
+        ],
+        *[
+            list(command)
+            for command in build_st12h_validation_commands(sys.executable)
         ],
         [
             sys.executable,
@@ -5953,6 +6336,7 @@ def run_commands(
     *,
     phase: str = ALL_PHASE,
     timing_report_path: pathlib.Path | None = None,
+    scratch_roots: Sequence[pathlib.Path] = (),
 ) -> int:
     cleanup_repo_root = (
         _RUN_COMMANDS_CLEANUP_REPO_ROOT if repo_root is None else repo_root
@@ -5961,6 +6345,11 @@ def run_commands(
     total_started = time.perf_counter()
 
     def finish(returncode: int) -> int:
+        scratch_failures = _st12h_scratch_budget_failures(scratch_roots)
+        if scratch_failures:
+            for failure in scratch_failures:
+                print(failure, file=sys.stderr, flush=True)
+            returncode = 1
         try:
             restore_gate_side_effects()
         except RuntimeError as exc:
@@ -6016,6 +6405,7 @@ def run_commands(
             initially_untracked_paths,
         )
 
+    active_validation_processes = 0
     for command_index, command in enumerate(commands, start=1):
         command_list = list(command)
         if cleanup_repo_root is not None and (
@@ -6037,15 +6427,70 @@ def run_commands(
                 f"modules={','.join(ST12G_ARCHITECTURE_ADDITIVE_MODULES)}",
                 flush=True,
             )
+        timing_identity_command = list(execution_command)
+        qku_root_execution_command = _execution_command_with_qku_root_importlib(
+            execution_command
+        )
+        if qku_root_execution_command != execution_command:
+            print(
+                "QTT_QKU_ROOT_PYTEST_IMPORT_MODE_APPLIED "
+                "mode=importlib "
+                f"selected_root={ST12A_TEST_ROOT}",
+                flush=True,
+            )
+        execution_command = qku_root_execution_command
         print(subprocess.list2cmdline(execution_command), flush=True)
         command_started = time.perf_counter()
-        completed = subprocess.run(execution_command)
+        st12h_contract = _st12h_command_contract(execution_command)
+        process_failures = _st12h_execution_budget_failures(
+            concurrent_validation_processes=active_validation_processes + 1,
+        )
+        if process_failures:
+            for failure in process_failures:
+                print(failure, file=sys.stderr, flush=True)
+            return finish(1)
+        active_validation_processes += 1
+        try:
+            if st12h_contract is None:
+                completed = subprocess.run(execution_command)
+            else:
+                hard_timeout_seconds, _expected_markers = st12h_contract
+                completed = subprocess.run(
+                    execution_command,
+                    capture_output=True,
+                    text=True,
+                    timeout=hard_timeout_seconds,
+                )
+                if getattr(completed, "stdout", ""):
+                    print(completed.stdout, end="", flush=True)
+                if getattr(completed, "stderr", ""):
+                    print(completed.stderr, end="", file=sys.stderr, flush=True)
+        except subprocess.TimeoutExpired:
+            elapsed_seconds = time.perf_counter() - command_started
+            timing_entries.append(
+                TimingEntry(
+                    phase=phase,
+                    command_index=command_index,
+                    command=timing_identity_command,
+                    elapsed_seconds=elapsed_seconds,
+                    returncode=124,
+                )
+            )
+            print(
+                "ST12H_VALIDATION_COMMAND_TIMEOUT "
+                f"command={subprocess.list2cmdline(execution_command)}",
+                file=sys.stderr,
+                flush=True,
+            )
+            return finish(1)
+        finally:
+            active_validation_processes -= 1
         elapsed_seconds = time.perf_counter() - command_started
         timing_entries.append(
             TimingEntry(
                 phase=phase,
                 command_index=command_index,
-                command=execution_command,
+                command=timing_identity_command,
                 elapsed_seconds=elapsed_seconds,
                 returncode=completed.returncode,
             )
@@ -6057,6 +6502,11 @@ def run_commands(
             f"returncode={completed.returncode}",
             flush=True,
         )
+        scratch_failures = _st12h_scratch_budget_failures(scratch_roots)
+        if scratch_failures:
+            for failure in scratch_failures:
+                print(failure, file=sys.stderr, flush=True)
+            return finish(1)
         if completed.returncode != 0:
             if cleanup_repo_root is not None and _is_final_pytest_command(
                 command_list
@@ -6066,6 +6516,26 @@ def run_commands(
                 except RuntimeError as exc:
                     print(str(exc), file=sys.stderr, flush=True)
             return finish(completed.returncode)
+        if st12h_contract is not None:
+            _hard_timeout_seconds, expected_markers = st12h_contract
+            combined_output = "\n".join(
+                (
+                    str(getattr(completed, "stdout", "")),
+                    str(getattr(completed, "stderr", "")),
+                )
+            )
+            missing_markers = _st12h_missing_terminal_markers(
+                combined_output,
+                expected_markers,
+            )
+            if missing_markers:
+                print(
+                    "ST12H_VALIDATION_TERMINAL_MARKER_MISSING "
+                    f"markers={','.join(missing_markers)}",
+                    file=sys.stderr,
+                    flush=True,
+                )
+                return finish(1)
         try:
             _record_no_runtime_scan_success(command_list, cleanup_repo_root)
         except RuntimeError as exc:
@@ -6798,12 +7268,49 @@ def main(argv: Sequence[str] | None = None) -> int:
                     pathlib.Path(temp_dir),
                     pathlib.Path(pytest_temp_dir),
                 )
-                from tools.ci_branch_context import current_branch_context
+                topology_failures = _st12h_runner_topology_failures()
+                if topology_failures:
+                    for failure in topology_failures:
+                        print(failure, file=sys.stderr, flush=True)
+                    return 2
+                from tools.ci_branch_context import (
+                    ST12H_IMPLEMENTATION_BRANCH,
+                    current_branch_context,
+                )
+
+                branch_context = current_branch_context(repo_root)
+                protected_predecessor_changes: tuple[str, ...] = ()
+                if branch_context.branch == ST12H_IMPLEMENTATION_BRANCH:
+                    try:
+                        protected_predecessor_changes = (
+                            _st12h_changed_protected_predecessors(repo_root)
+                        )
+                    except RuntimeError as exc:
+                        print(
+                            f"ST12H_PROTECTED_PREDECESSOR_CHECK_FAILED: {exc}",
+                            file=sys.stderr,
+                            flush=True,
+                        )
+                        return 2
+                budget_failures = _st12h_execution_budget_failures(
+                    automatic_full_campaign_retry_count=0,
+                    full_local_campaign_count=(
+                        1
+                        if args.phase == ALL_PHASE
+                        and args.validation_mode == "full"
+                        else 0
+                    ),
+                    protected_predecessor_changes=protected_predecessor_changes,
+                )
+                if budget_failures:
+                    for failure in budget_failures:
+                        print(failure, file=sys.stderr, flush=True)
+                    return 2
 
                 commands = (
                     _filter_foreign_branch_guarded_builders_for_owner_validation(
                         commands,
-                        branch=current_branch_context(repo_root).branch,
+                        branch=branch_context.branch,
                     )
                 )
                 router_result = None
@@ -6977,12 +7484,25 @@ def main(argv: Sequence[str] | None = None) -> int:
                         phase=args.phase,
                         commands=commands,
                     )
+                if branch_context.branch == ST12H_IMPLEMENTATION_BRANCH:
+                    selected_command_failures = _st12h_selected_command_failures(
+                        commands,
+                        phase=args.phase,
+                    )
+                    if selected_command_failures:
+                        for failure in selected_command_failures:
+                            print(failure, file=sys.stderr, flush=True)
+                        return 2
                 if _run_commands_accepts_repo_root():
                     return run_commands(
                         commands,
                         repo_root=repo_root,
                         phase=args.phase,
                         timing_report_path=timing_report_path,
+                        scratch_roots=(
+                            pathlib.Path(temp_dir),
+                            pathlib.Path(pytest_temp_dir),
+                        ),
                     )
                 return run_commands(commands)
     finally:

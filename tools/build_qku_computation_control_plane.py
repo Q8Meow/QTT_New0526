@@ -143,6 +143,22 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.validation 
     st12e_semantic_counts,
     st12d_acceptance_counts,
 )
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.models import (  # noqa: E402
+    NO_EFFECTS_V1,
+    ST12HStep12FinalHandoffV1,
+    ST12HValidationCurrentizationOperationsPublicationReportV1,
+)
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.receipts import (  # noqa: E402
+    serialize_st12h_contract_v1,
+)
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.source_policy import (  # noqa: E402
+    ST12H_SOURCE_BINDINGS,
+)
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.validation import (  # noqa: E402
+    ST12H_FINALIZATION_CONTROLS,
+    ST12H_VALIDATION_COMMANDS,
+    validate_st12h_serialized_contracts_v1,
+)
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.implementation_registry import (  # noqa: E402
     ST12D_MATH_IMPLEMENTATION_REGISTRY,
 )
@@ -2356,6 +2372,212 @@ def resolve_output_path(value: str) -> Path:
     return output
 
 
+ST12H_GENERATED_PATHS = (
+    "docs/master_plan/generated/qku_control_plane/st12_h_validation_currentization_operations_publication.report.json",
+    "docs/master_plan/generated/qku_control_plane/st12_h_final_step12_handoff.report.json",
+)
+_ST12H_HELD_AUTHORITIES = (
+    "provider_connection",
+    "private_state_read",
+    "replay_execution",
+    "paper_execution",
+    "llm_inference",
+    "qpu_or_simulator_execution",
+    "mode_or_allow_activation",
+    "order_submit_cancel_or_amend",
+    "capital_mutation",
+    "canary_authority",
+    "live_authority",
+    "launch_authority",
+    "post_step12_implementation",
+    "master_plan_source_mutation",
+    "profit_or_quantum_advantage_claim",
+)
+_ST12H_VALIDATION_CAMPAIGN_RECEIPT_REF = (
+    "REQUIRED-EXTERNAL::ST12H-VALIDATION-CAMPAIGN-RECEIPT::CORRECTED-STATE"
+)
+_ST12H_PUBLICATION_RECEIPT_REF = (
+    "REQUIRED-EXTERNAL::ST12H-PUBLICATION-RECEIPT::INDEPENDENT-REAUDIT"
+)
+
+
+def build_st12h_validation_currentization_operations_publication_report(
+) -> dict[str, object]:
+    report = ST12HValidationCurrentizationOperationsPublicationReportV1(
+        schema_version=(
+            "ST12H_VALIDATION_CURRENTIZATION_OPERATIONS_PUBLICATION_REPORT_V1"
+        ),
+        tranche="ST12-TRANCHE-H",
+        generated_projection_only=True,
+        master_plan_source_authority=False,
+        closure_counts={
+            "accounting": 4,
+            "execution": 6,
+            "llm": 10,
+            "operations": 6,
+            "security": 4,
+            "source": 6,
+            "total": 36,
+            "control_inventory_count": 36,
+            "implemented_control_contract_count": 36,
+            "actual_current_control_execution_count": 0,
+            "held_control_count": 36,
+            "external_control_receipt_requirement_count": 36,
+            "parameter_inventory_count": 21,
+            "implemented_parameter_contract_count": 21,
+            "actual_current_parameter_execution_count": 0,
+            "runtime_parameter_application_count": 0,
+            "runtime_authority_count": 0,
+            "backup_restore_inventory_count": 12,
+            "actual_current_backup_restore_execution_count": 0,
+            "finalization_inventory_count": 24,
+            "actual_current_finalization_execution_count": 0,
+        },
+        path_counts={
+            "active": 25,
+            "read_only": 66,
+            "new_production_modules": 0,
+            "new_test_modules": 1,
+            "new_validator_families": 0,
+        },
+        parameter_count=21,
+        math_counts={
+            "specifications": 52,
+            "independent_oracle_contracts": 52,
+            "golden_vector_or_invariant_contracts": 52,
+            "evidence_crosswalk_contracts": 52,
+            "h_direct_contracts": 5,
+            "inherited_validator_contracts": 47,
+            "actual_current_execution_count": 0,
+            "held_count": 52,
+            "external_dynamic_receipt_requirement_count": 52,
+            "identity_only_evidence_count": 0,
+        },
+        test_topology={
+            "semantic_identities": 42,
+            "modules": 1,
+            "functions": 6,
+            "custom_case_labels": 0,
+        },
+        validation_command_count=12,
+        validation_campaign_phase_count=14,
+        environment_classes=(
+            "PACKAGE_AUDIT",
+            "LOCAL_FOCUSED_COMPATIBILITY",
+            "CLEAN_CI_AUTHORITATIVE",
+        ),
+        validation_command_receipt_refs=tuple(
+            "REQUIRED-EXTERNAL::ST12H-VALIDATION-COMMAND-RECEIPT::"
+            f"{command.command_id}::CORRECTED-STATE"
+            for command in ST12H_VALIDATION_COMMANDS
+        ),
+        validation_campaign_receipt_ref=_ST12H_VALIDATION_CAMPAIGN_RECEIPT_REF,
+        budget_usage={
+            "scratch_logical_bytes": 0,
+            "scratch_allocated_bytes": 0,
+            "scratch_file_count": 0,
+            "repository_copy_count": 0,
+            "copied_git_index_count": 0,
+            "full_local_campaign_count": 0,
+            "automatic_full_campaign_retry_count": 0,
+        },
+        source_currentness_evidence_refs=tuple(
+            "REQUIRED-EXTERNAL::ST12H-SOURCE-CURRENTNESS-RECEIPT::"
+            f"{source.source_id}::CORRECTED-STATE"
+            for source in ST12H_SOURCE_BINDINGS
+        ),
+        source_binding_count=9,
+        stale_receipt_class_count=14,
+        stale_receipt_rejection_count=14,
+        backup_restore_stage_count=12,
+        finalization_control_count=24,
+        serialized_contract_binding_count=10,
+        schema_file_count=10,
+        schema_owner_consumer_binding_count=10,
+        schema_cardinality_binding_count=93,
+        reason_code_binding_count=27,
+        held_authorities=_ST12H_HELD_AUTHORITIES,
+        authority_effects=NO_EFFECTS_V1,
+        terminal_state="FINAL_CONTROLS_INCOMPLETE",
+        next_owner_action="INDEPENDENT_ACTUAL_CODE_AUDIT",
+    )
+    payload = json.loads(
+        serialize_st12h_contract_v1(
+            report,
+            binding_id="ST12H-SERIALIZED-CONTRACT::10",
+        )
+    )
+    errors = validate_st12h_serialized_contracts_v1(
+        binding_id="ST12H-SERIALIZED-CONTRACT::10",
+        payload=payload,
+    )
+    if errors:
+        raise ValueError(f"invalid ST12-H report 01: {errors}")
+    return payload
+
+
+def build_st12h_final_step12_handoff_report() -> dict[str, object]:
+    report = ST12HStep12FinalHandoffV1(
+        schema_version="ST12H_FINAL_STEP12_HANDOFF_V1",
+        handoff_id="ST12H-HANDOFF::FINAL-STEP12",
+        tranche="ST12-TRANCHE-H",
+        frozen_denominators=(36, 41, 21, 52, 52, 52, 42, 12),
+        final_control_refs=tuple(
+            control.control_id for control in ST12H_FINALIZATION_CONTROLS
+        ),
+        validation_campaign_receipt_ref=_ST12H_VALIDATION_CAMPAIGN_RECEIPT_REF,
+        publication_receipt_ref=_ST12H_PUBLICATION_RECEIPT_REF,
+        active_implementation_path_count=25,
+        read_only_predecessor_path_count=66,
+        grouped_test_module_count=1,
+        grouped_test_function_count=6,
+        stale_receipt_count=14,
+        held_authorities=_ST12H_HELD_AUTHORITIES,
+        terminal_state="INDEPENDENT_CODE_AUDIT_FAILED",
+        next_owner_action="INDEPENDENT_ACTUAL_CODE_AUDIT",
+        no_effect_flags=NO_EFFECTS_V1,
+    )
+    payload = json.loads(
+        serialize_st12h_contract_v1(
+            report,
+            binding_id="ST12H-SERIALIZED-CONTRACT::07",
+        )
+    )
+    errors = validate_st12h_serialized_contracts_v1(
+        binding_id="ST12H-SERIALIZED-CONTRACT::07",
+        payload=payload,
+    )
+    if errors:
+        raise ValueError(f"invalid ST12-H report 02: {errors}")
+    return payload
+
+
+def _materialize_st12h_reports() -> None:
+    payloads = (
+        build_st12h_validation_currentization_operations_publication_report(),
+        build_st12h_final_step12_handoff_report(),
+    )
+    for relative_path, payload in zip(
+        ST12H_GENERATED_PATHS,
+        payloads,
+        strict=True,
+    ):
+        output = REPO_ROOT / relative_path
+        output.parent.mkdir(parents=True, exist_ok=True)
+        output.write_text(
+            json.dumps(
+                payload,
+                ensure_ascii=False,
+                allow_nan=False,
+                separators=(",", ":"),
+                sort_keys=False,
+            )
+            + "\n",
+            encoding="utf-8",
+            newline="\n",
+        )
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -2380,6 +2602,7 @@ def main() -> int:
             f"out={ST12G_GENERATED_MANIFEST.as_posix()}"
         )
         return 0
+    _materialize_st12h_reports()
     st12e_projections = build_st12e_projections()
     st12d_projections = build_st12d_projections()
     st12f_projections = build_st12f_projections()

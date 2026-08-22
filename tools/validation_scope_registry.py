@@ -54,6 +54,7 @@ ST12E_BRANCH = "agent/st12e-capability-guard"
 ST12D_BRANCH = "agent/st12d-mode-snapshot-boundary"
 ST12F_BRANCH = "agent/st12f-evidence-model-risk-v1"
 ST12G_BRANCH = "agent/st12g-existing-owner-projections-v2"
+ST12H_BRANCH = "agent/st12h-validation-currentization-operations-publication"
 ST12G_INDEPENDENT_ARCHITECTURE_SCRIPT_NAME = (
     "independent_validate_qku_computation_control_plane_architecture.py"
 )
@@ -628,6 +629,161 @@ ST12G_ALLOWED_EXACT_PATHS = frozenset(
 )
 if len(ST12G_ALLOWED_EXACT_PATHS) != 65:
     raise RuntimeError("ST12-G exact authorized scope must contain 65 paths")
+
+ST12H_ALLOWED_EXACT_PATHS = frozenset(
+    {
+        ".github/workflows/qtt_validation.yml",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/__init__.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/models.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/receipts.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/lifecycle.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/parameter_policy.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/source_policy.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/validation.py",
+        "tools/build_qku_computation_control_plane.py",
+        "tools/validate_qku_computation_control_plane.py",
+        "tools/independent_validate_qku_computation_control_plane.py",
+        "tools/validation_inventory.py",
+        "tools/validation_scope_registry.py",
+        "tools/changed_area_validation_router.py",
+        "tools/run_validation_gates.py",
+        "tools/ci_branch_context.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/tranche_h/test_contract_matrix.py",
+        "tests/tools/test_changed_area_validation_router.py",
+        "tests/tools/test_ci_branch_context.py",
+        "tests/tools/test_validation_inventory.py",
+        "tests/tools/test_validation_scope_registry.py",
+        "tests/fail_closed/test_run_validation_gates.py",
+        "docs/master_plan/generated/qku_control_plane/st12_h_validation_currentization_operations_publication.report.json",
+        "docs/master_plan/generated/qku_control_plane/st12_h_final_step12_handoff.report.json",
+        "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+    }
+)
+
+_ST12H_VALIDATION_CONTEXT_EXACT_PATHS = frozenset(
+    ST12H_ALLOWED_EXACT_PATHS
+    - (
+        ST12A_ALLOWED_EXACT_PATHS
+        | ST12A_SHARED_CURRENTIZATION_EXACT_PATHS
+        | ST12B_ALLOWED_EXACT_PATHS
+        | ST12C_ALLOWED_EXACT_PATHS
+        | ST12D_ALLOWED_EXACT_PATHS
+        | ST12E_ALLOWED_EXACT_PATHS
+        | ST12F_ALLOWED_EXACT_PATHS
+        | ST12G_ALLOWED_EXACT_PATHS
+    )
+)
+
+ST12H_READ_ONLY_PREDECESSOR_PATHS = frozenset(
+    {
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/accounting.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/agent_policy.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/authority.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/bindings.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/cohort_compiler.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/context.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/contextual_computability.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/dependency_graph.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/economic_math.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/errors.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/evidence.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/existing_owner_projection.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/fallback.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/freshness.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/idempotency.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/identity_adapter.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/implementation_registry.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/input_lock.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/input_resolver.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/latency_policy.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/llm_gateway.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/migrations.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/mode_snapshot_policy.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/model_risk.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/oracle_contracts.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/outbox.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/persistence.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/plugin_adapter.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/point_in_time.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/protocols.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/quantum_adapter.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/quantum_benchmark.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/rollback.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/serialization.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/service.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/source_rights.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/specification.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/sqlite_reference.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/stack_resolver.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/transaction.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/unit_conversion.py",
+        "tools/independent_validate_qku_computation_control_plane_architecture.py",
+        "tools/independent_validate_qku_computation_control_plane_accounting.py",
+        "tools/independent_validate_qku_computation_control_plane_d.py",
+        "tools/independent_validate_qku_computation_control_plane_execution.py",
+        "tools/independent_validate_qku_computation_control_plane_latency.py",
+        "tools/independent_validate_qku_computation_control_plane_llm.py",
+        "tools/independent_validate_qku_computation_control_plane_model_risk.py",
+        "tools/independent_validate_qku_computation_control_plane_operations.py",
+        "tools/independent_validate_qku_computation_control_plane_quantum.py",
+        "tools/independent_validate_qku_computation_control_plane_security.py",
+        "tools/independent_validate_qku_computation_control_plane_source.py",
+        "tools/independent_validate_qku_computation_control_plane_g.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/accounting/test_contract_matrix.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/execution/test_contract_matrix.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/tranche_f/test_model_risk_llm_matrix.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/operations/test_runtime_topology.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/test_adversarial_latency_security_matrix.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/source/test_all_29_revalidated.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/tranche_g/test_contract_matrix.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/tranche_g/test_consumer_integration_matrix.py",
+        "tools/validate_validation_inventory.py",
+        "tools/validate_validation_scope_registry.py",
+        "tools/validate_ci_branch_context_matrix.py",
+        "tools/currentize_pr152_after_generated_artifacts.py",
+        "tools/validate_grand_global_debug_logical_consistency_audit.py",
+    }
+)
+
+ST12H_EXACT_VALIDATION_COMMANDS = (
+    ("python", "tools/independent_validate_qku_computation_control_plane_accounting.py"),
+    ("python", "tools/independent_validate_qku_computation_control_plane_execution.py"),
+    ("python", "tools/independent_validate_qku_computation_control_plane_llm.py"),
+    ("python", "tools/independent_validate_qku_computation_control_plane_operations.py"),
+    ("python", "tools/independent_validate_qku_computation_control_plane_security.py"),
+    ("python", "tools/independent_validate_qku_computation_control_plane_source.py"),
+    ("python", "tools/validate_qku_computation_control_plane.py", "--domain", "accounting"),
+    ("python", "tools/validate_qku_computation_control_plane.py", "--domain", "execution"),
+    ("python", "tools/validate_qku_computation_control_plane.py", "--domain", "llm"),
+    ("python", "tools/validate_qku_computation_control_plane.py", "--domain", "operations"),
+    ("python", "tools/validate_qku_computation_control_plane.py", "--domain", "security"),
+    ("python", "tools/validate_qku_computation_control_plane.py", "--domain", "source"),
+)
+
+
+def build_st12h_validation_commands(
+    python_executable: str,
+) -> tuple[tuple[str, ...], ...]:
+    if (
+        type(python_executable) is not str
+        or not python_executable
+        or python_executable.strip() != python_executable
+    ):
+        raise ValueError("python_executable must be canonical nonempty text")
+    return tuple(
+        (python_executable, *command[1:])
+        for command in ST12H_EXACT_VALIDATION_COMMANDS
+    )
+
+
+if (
+    len(ST12H_ALLOWED_EXACT_PATHS) != 25
+    or len(ST12H_READ_ONLY_PREDECESSOR_PATHS) != 66
+    or ST12H_ALLOWED_EXACT_PATHS.intersection(ST12H_READ_ONLY_PREDECESSOR_PATHS)
+    or len(ST12H_EXACT_VALIDATION_COMMANDS) != 12
+):
+    raise RuntimeError("ST12-H path and command closure must remain exact")
+
 ST12G_FORBIDDEN_EXACT_PATHS = frozenset(
     {
         "src/qtt/stage1_prediction_markets/qku_computation_control_plane/readiness_projection.py",
@@ -2263,6 +2419,24 @@ def explain_pr_scope_decision(branch: str, path: str) -> dict[str, object]:
 
     normalized = normalize_changed_path(path)
     branch_name = str(branch).strip()
+    if branch_name == ST12H_BRANCH:
+        if normalized in ST12H_ALLOWED_EXACT_PATHS:
+            return {
+                "allowed": True,
+                "branch": branch_name,
+                "normalized_path": normalized,
+                "pr_id": "ST12-TRANCHE-H",
+                "matched_rule": f"exact:{normalized}",
+                "reason": "registered_exact_path",
+            }
+        return {
+            "allowed": False,
+            "branch": branch_name,
+            "normalized_path": normalized,
+            "pr_id": "ST12-TRANCHE-H",
+            "matched_rule": "no_st12h_scope_rule",
+            "reason": "path_not_registered_for_pr_scope",
+        }
     if branch_name == ST12G_BRANCH and normalized in ST12G_ALLOWED_EXACT_PATHS:
         return {
             "allowed": True,
@@ -2450,6 +2624,18 @@ def explain_pr_scope_decision(branch: str, path: str) -> dict[str, object]:
             "branch": branch_name,
             "normalized_path": normalized,
             "pr_id": "ST12-TRANCHE-F",
+            "matched_rule": f"validation_context_exact:{normalized}",
+            "reason": "registered_validation_context_exact_path",
+        }
+    if (
+        is_validation_context_branch(branch_name)
+        and normalized in _ST12H_VALIDATION_CONTEXT_EXACT_PATHS
+    ):
+        return {
+            "allowed": True,
+            "branch": branch_name,
+            "normalized_path": normalized,
+            "pr_id": "ST12-TRANCHE-H",
             "matched_rule": f"validation_context_exact:{normalized}",
             "reason": "registered_validation_context_exact_path",
         }

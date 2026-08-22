@@ -24157,3 +24157,503 @@ if (
         ReasonCode.PARAMETER_BINDING_MISMATCH,
         "ST12-D parameter application closure must be exact 28/21 with one owner",
     )
+
+
+def _st12h_parameter_text(value: object, name: str) -> str:
+    if (
+        not isinstance(value, str)
+        or not value
+        or value != value.strip()
+        or any(ord(character) < 0x20 for character in value)
+    ):
+        raise ParameterPolicyError(
+            ReasonCode.PARAMETER_OUT_OF_POLICY,
+            f"{name} must be canonical nonempty text",
+        )
+    return value
+
+
+def _st12h_parameter_tuple(value: object, name: str) -> tuple[str, ...]:
+    if (
+        not isinstance(value, tuple)
+        or not value
+        or len(set(value)) != len(value)
+        or any(
+            not isinstance(item, str)
+            or not item
+            or item != item.strip()
+            for item in value
+        )
+    ):
+        raise ParameterPolicyError(
+            ReasonCode.PARAMETER_OUT_OF_POLICY,
+            f"{name} must be an immutable unique canonical tuple",
+        )
+    return value
+
+
+@dataclass(frozen=True, slots=True)
+class ST12HParameterApplicationBindingV1:
+    binding_id: str
+    parameter_id: str
+    parameter_symbol: str
+    consumer_path: str
+    consumer_symbol: str
+    semantic_case_ids: tuple[str, ...]
+    application_scope: str
+    fallback: str
+    runtime_activation_authorized: bool
+
+    def __post_init__(self) -> None:
+        for name in (
+            "binding_id",
+            "parameter_id",
+            "parameter_symbol",
+            "consumer_path",
+            "consumer_symbol",
+            "application_scope",
+            "fallback",
+        ):
+            _st12h_parameter_text(getattr(self, name), name)
+        _st12h_parameter_tuple(self.semantic_case_ids, "semantic_case_ids")
+        if self.application_scope not in {
+            "accounting",
+            "execution",
+            "llm",
+            "operations",
+            "security",
+            "source",
+            "CONTRACT_ONLY_NONLIVE_STEP12_VALIDATION_AND_PUBLICATION",
+        }:
+            raise ParameterPolicyError(
+                ReasonCode.PARAMETER_OUT_OF_POLICY,
+                "ST12-H parameter binding scope is not an exact frozen H scope",
+            )
+        if self.runtime_activation_authorized is not False:
+            raise ParameterPolicyError(
+                ReasonCode.RUNTIME_EFFECT_FORBIDDEN,
+                "ST12-H parameter bindings cannot activate runtime values",
+            )
+
+
+@dataclass(frozen=True, slots=True)
+class ST12HParameterPolicyV1:
+    parameter_id: str
+    parameter_symbol: str
+    semantic_role: str
+    resolution_class: str
+    resolved_value_or_rule: str
+    unit_or_basis: str
+    structural_constraint: str
+    value_source_class: str
+    default_authority_class: str
+    owner_editability_class: str
+    ui_widget_class: str
+    missing_stale_invalid_behavior: str
+    consumer_symbols: tuple[str, ...]
+    runtime_activation_authorized: bool
+
+    def __post_init__(self) -> None:
+        for name in (
+            "parameter_id",
+            "parameter_symbol",
+            "semantic_role",
+            "resolution_class",
+            "resolved_value_or_rule",
+            "unit_or_basis",
+            "structural_constraint",
+            "value_source_class",
+            "default_authority_class",
+            "owner_editability_class",
+            "ui_widget_class",
+            "missing_stale_invalid_behavior",
+        ):
+            _st12h_parameter_text(getattr(self, name), name)
+        _st12h_parameter_tuple(self.consumer_symbols, "consumer_symbols")
+        if self.runtime_activation_authorized is not False:
+            raise ParameterPolicyError(
+                ReasonCode.RUNTIME_EFFECT_FORBIDDEN,
+                "ST12-H parameter policies cannot activate runtime values",
+            )
+
+
+_ST12H_PARAMETER_BINDING_ROWS: tuple[
+    tuple[str, str, str, str, str, tuple[str, ...], str, str], ...
+] = (
+    ("ST12H-PARAM-BIND::01", "ST10-PARAM::0010", "leak_fin", "src/qtt/stage1_prediction_markets/qku_computation_control_plane/validation.py", "validate_st12h_domain_v1", ("ST12H::SOURCE::STATISTICAL_CURRENTNESS",), "source", "FAIL_CLOSED_TO_REGISTERED_LOWER_SAFE_PATH_OR_NO_TRADE"),
+    ("ST12H-PARAM-BIND::02", "ST10-PARAM::0012", "emb_fin", "src/qtt/stage1_prediction_markets/qku_computation_control_plane/validation.py", "validate_st12h_domain_v1", ("ST12H::SOURCE::STATISTICAL_CURRENTNESS",), "source", "FAIL_CLOSED_TO_REGISTERED_LOWER_SAFE_PATH_OR_NO_TRADE"),
+    ("ST12H-PARAM-BIND::03", "ST10-PARAM::0055", "mode_cap_mkt", "src/qtt/stage1_prediction_markets/qku_computation_control_plane/validation.py", "validate_st12h_domain_v1", ("ST12H::EXECUTION::MARKET_ACCESS_BOUNDARY",), "execution", "FAIL_CLOSED_TO_REGISTERED_LOWER_SAFE_PATH_OR_NO_TRADE"),
+    ("ST12H-PARAM-BIND::04", "ST10-PARAM::0075", "prio_fast", "src/qtt/stage1_prediction_markets/qku_computation_control_plane/validation.py", "validate_st12h_domain_v1", ("ST12H::EXECUTION::DETERMINISTIC_FALLBACK",), "execution", "FAIL_CLOSED_TO_REGISTERED_LOWER_SAFE_PATH_OR_NO_TRADE"),
+    ("ST12H-PARAM-BIND::05", "ST10-PARAM::0088", "state_auto_dir", "src/qtt/stage1_prediction_markets/qku_computation_control_plane/validation.py", "validate_st12h_domain_v1", ("ST12H::OPERATIONS::READINESS_HONESTY",), "operations", "FAIL_CLOSED_TO_REGISTERED_LOWER_SAFE_PATH_OR_NO_TRADE"),
+    ("ST12H-PARAM-BIND::06", "ST10-PARAM::0094", "mode_hloop", "src/qtt/stage1_prediction_markets/qku_computation_control_plane/validation.py", "validate_st12h_domain_v1", ("ST12H::OPERATIONS::INCIDENT_RESPONSE",), "operations", "FAIL_CLOSED_TO_REGISTERED_LOWER_SAFE_PATH_OR_NO_TRADE"),
+    ("ST12H-PARAM-BIND::07", "ST10-PARAM::0113", "state_se_frag", "src/qtt/stage1_prediction_markets/qku_computation_control_plane/validation.py", "validate_st12h_domain_v1", ("ST12H::EXECUTION::PER_VENUE_AUTHORIZATION",), "execution", "FAIL_CLOSED_TO_REGISTERED_LOWER_SAFE_PATH_OR_NO_TRADE"),
+    ("ST12H-PARAM-BIND::08", "ST10-PARAM::0139", "rule_perf_not_enough", "tools/build_qku_computation_control_plane.py", "build_st12h_final_step12_handoff_report", ("ST12H::OPERATIONS::READINESS_HONESTY",), "CONTRACT_ONLY_NONLIVE_STEP12_VALIDATION_AND_PUBLICATION", "FAIL_CLOSED_TO_REGISTERED_LOWER_SAFE_PATH_OR_NO_TRADE"),
+    ("ST12H-PARAM-BIND::09", "ST10-PARAM::0153", "thr_profit_major", "tools/build_qku_computation_control_plane.py", "build_st12h_final_step12_handoff_report", ("ST12H::ACCOUNTING::NO_PROFIT_FABRICATION",), "CONTRACT_ONLY_NONLIVE_STEP12_VALIDATION_AND_PUBLICATION", "FAIL_CLOSED_TO_REGISTERED_LOWER_SAFE_PATH_OR_NO_TRADE"),
+    ("ST12H-PARAM-BIND::10", "ST10-PARAM::0155", "rule_no_auto_full", "src/qtt/stage1_prediction_markets/qku_computation_control_plane/lifecycle.py", "validate_st12h_finalization_transition_v1", ("ST12H::OPERATIONS::READINESS_HONESTY",), "CONTRACT_ONLY_NONLIVE_STEP12_VALIDATION_AND_PUBLICATION", "FAIL_CLOSED_TO_REGISTERED_LOWER_SAFE_PATH_OR_NO_TRADE"),
+    ("ST12H-PARAM-BIND::11", "ST10-PARAM::0156", "rule_no_cap_expand_thr", "src/qtt/stage1_prediction_markets/qku_computation_control_plane/lifecycle.py", "validate_st12h_finalization_transition_v1", ("ST12H::OPERATIONS::READINESS_HONESTY",), "CONTRACT_ONLY_NONLIVE_STEP12_VALIDATION_AND_PUBLICATION", "FAIL_CLOSED_TO_REGISTERED_LOWER_SAFE_PATH_OR_NO_TRADE"),
+    ("ST12H-PARAM-BIND::12", "ST10-PARAM::0158", "state_launch_seed", "src/qtt/stage1_prediction_markets/qku_computation_control_plane/lifecycle.py", "validate_st12h_finalization_transition_v1", ("ST12H::OPERATIONS::FINAL_OPERATIONAL_PACKET",), "CONTRACT_ONLY_NONLIVE_STEP12_VALIDATION_AND_PUBLICATION", "FAIL_CLOSED_TO_REGISTERED_LOWER_SAFE_PATH_OR_NO_TRADE"),
+    ("ST12H-PARAM-BIND::13", "ST10-PARAM::0167", "state_pfwd", "src/qtt/stage1_prediction_markets/qku_computation_control_plane/validation.py", "validate_st12h_domain_v1", ("ST12H::SECURITY::EXCEPTION_GOVERNANCE",), "security", "FAIL_CLOSED_TO_REGISTERED_LOWER_SAFE_PATH_OR_NO_TRADE"),
+    ("ST12H-PARAM-BIND::14", "ST10-PARAM::0195", "mode_exec_partner", "src/qtt/stage1_prediction_markets/qku_computation_control_plane/validation.py", "validate_st12h_domain_v1", ("ST12H::EXECUTION::PER_VENUE_AUTHORIZATION",), "execution", "FAIL_CLOSED_TO_REGISTERED_LOWER_SAFE_PATH_OR_NO_TRADE"),
+    ("ST12H-PARAM-BIND::15", "ST10-PARAM::0220", "host_cluster_role", "src/qtt/stage1_prediction_markets/qku_computation_control_plane/validation.py", "validate_st12h_domain_v1", ("ST12H::OPERATIONS::DEPLOYMENT_PARITY",), "operations", "FAIL_CLOSED_TO_REGISTERED_LOWER_SAFE_PATH_OR_NO_TRADE"),
+    ("ST12H-PARAM-BIND::16", "ST10-PARAM::0222", "net_eth_role", "src/qtt/stage1_prediction_markets/qku_computation_control_plane/validation.py", "validate_st12h_domain_v1", ("ST12H::OPERATIONS::DEPLOYMENT_PARITY",), "operations", "FAIL_CLOSED_TO_REGISTERED_LOWER_SAFE_PATH_OR_NO_TRADE"),
+    ("ST12H-PARAM-BIND::17", "ST10-PARAM::0313", "sel_unc_ord", "src/qtt/stage1_prediction_markets/qku_computation_control_plane/validation.py", "validate_st12h_domain_v1", ("ST12H::EXECUTION::SUBMIT_DISABLED_DRY_RUN",), "execution", "FAIL_CLOSED_TO_REGISTERED_LOWER_SAFE_PATH_OR_NO_TRADE"),
+    ("ST12H-PARAM-BIND::18", "ST10-PARAM::0516", "cap_exec_po", "src/qtt/stage1_prediction_markets/qku_computation_control_plane/validation.py", "validate_st12h_domain_v1", ("ST12H::EXECUTION::COST_FILL_MODEL_USE",), "execution", "FAIL_CLOSED_TO_REGISTERED_LOWER_SAFE_PATH_OR_NO_TRADE"),
+    ("ST12H-PARAM-BIND::19", "ST10-PARAM::0525", "obscap_po", "src/qtt/stage1_prediction_markets/qku_computation_control_plane/validation.py", "validate_st12h_domain_v1", ("ST12H::EXECUTION::COST_FILL_MODEL_USE",), "execution", "FAIL_CLOSED_TO_REGISTERED_LOWER_SAFE_PATH_OR_NO_TRADE"),
+    ("ST12H-PARAM-BIND::20", "ST10-PARAM::0611", "ext_shadow_d", "tools/build_qku_computation_control_plane.py", "build_st12h_final_step12_handoff_report", ("ST12H::OPERATIONS::FINAL_OPERATIONAL_PACKET",), "CONTRACT_ONLY_NONLIVE_STEP12_VALIDATION_AND_PUBLICATION", "FAIL_CLOSED_TO_REGISTERED_LOWER_SAFE_PATH_OR_NO_TRADE"),
+    ("ST12H-PARAM-BIND::21", "ST10-PARAM::0619", "ri_object", "src/qtt/stage1_prediction_markets/qku_computation_control_plane/source_policy.py", "validate_st12h_source_binding_v1", ("ST12H::SOURCE::FINAL_SOURCE_PACKET",), "CONTRACT_ONLY_NONLIVE_STEP12_VALIDATION_AND_PUBLICATION", "FAIL_CLOSED_TO_REGISTERED_LOWER_SAFE_PATH_OR_NO_TRADE"),
+)
+
+
+ST12H_PARAMETER_APPLICATION_BINDINGS: tuple[
+    ST12HParameterApplicationBindingV1, ...
+] = tuple(
+    ST12HParameterApplicationBindingV1(
+        binding_id=binding_id,
+        parameter_id=parameter_id,
+        parameter_symbol=parameter_symbol,
+        consumer_path=consumer_path,
+        consumer_symbol=consumer_symbol,
+        semantic_case_ids=semantic_case_ids,
+        application_scope=application_scope,
+        fallback=fallback,
+        runtime_activation_authorized=False,
+    )
+    for (
+        binding_id,
+        parameter_id,
+        parameter_symbol,
+        consumer_path,
+        consumer_symbol,
+        semantic_case_ids,
+        application_scope,
+        fallback,
+    ) in _ST12H_PARAMETER_BINDING_ROWS
+)
+
+
+_ST12H_BINDINGS_BY_PARAMETER: Mapping[
+    str, tuple[ST12HParameterApplicationBindingV1, ...]
+] = MappingProxyType(
+    {
+        parameter_id: tuple(
+            binding
+            for binding in ST12H_PARAMETER_APPLICATION_BINDINGS
+            if binding.parameter_id == parameter_id
+        )
+        for parameter_id in tuple(row[1] for row in _ST12H_PARAMETER_BINDING_ROWS)
+    }
+)
+
+
+_ST12H_PARAMETER_POLICY_ROWS: tuple[tuple[str, ...], ...] = (
+    ("ST10-PARAM::0010", "leak_fin", "ST12-FAMILY-EVIDENCE::D2_10D1", "STATIC_ENUM", "PURGE_PLUS_EMBARGO_REQUIRED_WHEN_LABELS_OR_EVENTS_OVERLAP", "leakage-control rule", "{PURGE_PLUS_EMBARGO_REQUIRED_WHEN_LABELS_OR_EVENTS_OVERLAP}", "PUBLIC_FINANCE_ML_LEAKAGE_CONTROL_PLUS_QTT_RULE", "PUBLIC_METHOD_OR_PINNED_PROVIDER_DEFAULT_REQUIRES_IMPLEMENTATION_VERSION_BINDING", "READ_ONLY_SYMBOLIC", "FORMULA_BADGE", "REJECT_INVALID_VALUE_NO_SILENT_DEFAULT"),
+    ("ST10-PARAM::0012", "emb_fin", "ST12-FAMILY-EVIDENCE::D2_10D1", "STATIC_RULE", "MAX_LABEL_HORIZON_OR_EVENT_SPILLOVER_DRIVEN", "embargo-size resolution rule", "{MAX_LABEL_HORIZON_OR_EVENT_SPILLOVER_DRIVEN}", "QTT_FINANCE_VALIDATION_RULE", "EXPLICIT_QTT_OR_OWNER_POLICY_SEED_OR_RESOLUTION_RULE", "READ_ONLY_SYMBOLIC", "FORMULA_BADGE", "REJECT_INVALID_VALUE_NO_SILENT_DEFAULT"),
+    ("ST10-PARAM::0055", "mode_cap_mkt", "ST12-FAMILY-EVIDENCE::D2_11A2", "STATIC_ENUM", "ACTIVE_BY_DEFAULT", "sleeve-local-capital-market enum", "{ACTIVE_BY_DEFAULT,DISABLED_GLOBAL_ACCOUNT_VIEW_ONLY}", "QTT_CAPITAL_ROUTING_RULE", "EXPLICIT_QTT_OR_OWNER_POLICY_SEED_OR_RESOLUTION_RULE", "OWNER_ONLY", "ENUM_DROPDOWN", "REJECT_INVALID_VALUE_NO_SILENT_DEFAULT"),
+    ("ST10-PARAM::0075", "prio_fast", "ST12-FAMILY-EVIDENCE::D2_12A", "STATIC_ENUM", "FAST_LANE_WINS_BY_DEFAULT", "fast-lane-priority enum", "{FAST_LANE_WINS_BY_DEFAULT,SCOPE_BOUND_SLOWER_PATH_EXCEPTION}", "QTT_FAST_LANE_PRIORITY_RULE", "EXPLICIT_QTT_OR_OWNER_POLICY_SEED_OR_RESOLUTION_RULE", "READ_ONLY_SYMBOLIC", "FORMULA_BADGE", "REJECT_INVALID_VALUE_NO_SILENT_DEFAULT"),
+    ("ST10-PARAM::0088", "state_auto_dir", "ST12-FAMILY-EVIDENCE::D2_14A", "STATIC_ENUM", "MAXIMIZE_AUTOMATION_BY_DEFAULT", "automation-direction rule", "{MAXIMIZE_AUTOMATION_BY_DEFAULT}", "QTT_AUTOMATION_DIRECTION_LAW", "EXPLICIT_QTT_OR_OWNER_POLICY_SEED_OR_RESOLUTION_RULE", "READ_ONLY_SYMBOLIC", "FORMULA_BADGE", "REJECT_INVALID_VALUE_NO_SILENT_DEFAULT"),
+    ("ST10-PARAM::0094", "mode_hloop", "ST12-FAMILY-EVIDENCE::D2_15A", "STATIC_ENUM", "HUMAN_OUT_OF_LOOP_BY_DEFAULT_HUMAN_ON_LOOP_FOR_GOVERNANCE_AND_EMERGENCY_ONLY", "human-loop operating-mode rule", "{HUMAN_OUT_OF_LOOP_BY_DEFAULT_HUMAN_ON_LOOP_FOR_GOVERNANCE_AND_EMERGENCY_ONLY}", "QTT_HUMAN_ON_LOOP_LAW", "EXPLICIT_QTT_OR_OWNER_POLICY_SEED_OR_RESOLUTION_RULE", "READ_ONLY_SYMBOLIC", "FORMULA_BADGE", "REJECT_INVALID_VALUE_NO_SILENT_DEFAULT"),
+    ("ST10-PARAM::0113", "state_se_frag", "ST12-FAMILY-EVIDENCE::D2_16A1", "STATIC_ENUM", "BREACH_FORBIDS_LIVE_ELIGIBILITY", "fragility-ceiling enforcement rule", "{BREACH_FORBIDS_LIVE_ELIGIBILITY}", "QTT_SAFE_SELF_EVOLUTION_LAW", "EXPLICIT_QTT_OR_OWNER_POLICY_SEED_OR_RESOLUTION_RULE", "READ_ONLY_RUNTIME_RECEIPT", "STATUS_BADGE", "REJECT_INVALID_VALUE_NO_SILENT_DEFAULT"),
+    ("ST10-PARAM::0139", "rule_perf_not_enough", "ST12-FAMILY-EVIDENCE::D2_19A", "STATIC_ENUM", "NOT_SUFFICIENT_BY_ITSELF", "performance-stability insufficiency rule", "{NOT_SUFFICIENT_BY_ITSELF}", "QTT_STEPPED_AUTONOMY_LAW", "EXPLICIT_QTT_OR_OWNER_POLICY_SEED_OR_RESOLUTION_RULE", "READ_ONLY_SYMBOLIC", "FORMULA_BADGE", "REJECT_INVALID_VALUE_NO_SILENT_DEFAULT"),
+    ("ST10-PARAM::0153", "thr_profit_major", "ST12-FAMILY-EVIDENCE::D2_23A", "STATIC_NUMERIC", "1000000.00", "USD cumulative realized net profit threshold", "USD > 0.00", "QTT_THRESHOLD_CROSSING_GOVERNANCE_LAW", "EXPLICIT_QTT_OR_OWNER_POLICY_SEED_OR_RESOLUTION_RULE", "OWNER_ONLY", "USD_NUMERIC_INPUT", "REJECT_INVALID_VALUE_NO_SILENT_DEFAULT"),
+    ("ST10-PARAM::0155", "rule_no_auto_full", "ST12-FAMILY-EVIDENCE::D2_23A", "STATIC_ENUM", "FORBIDDEN", "near-full-autonomy nonauthorization rule", "{FORBIDDEN}", "QTT_THRESHOLD_CROSSING_GOVERNANCE_LAW", "EXPLICIT_QTT_OR_OWNER_POLICY_SEED_OR_RESOLUTION_RULE", "READ_ONLY_SYMBOLIC", "FORMULA_BADGE", "REJECT_INVALID_VALUE_NO_SILENT_DEFAULT"),
+    ("ST10-PARAM::0156", "rule_no_cap_expand_thr", "ST12-FAMILY-EVIDENCE::D2_23A", "STATIC_ENUM", "FORBIDDEN", "capital-envelope-expansion nonauthorization rule", "{FORBIDDEN}", "QTT_THRESHOLD_CROSSING_GOVERNANCE_LAW", "EXPLICIT_QTT_OR_OWNER_POLICY_SEED_OR_RESOLUTION_RULE", "READ_ONLY_SYMBOLIC", "FORMULA_BADGE", "REJECT_INVALID_VALUE_NO_SILENT_DEFAULT"),
+    ("ST10-PARAM::0158", "state_launch_seed", "ST12-FAMILY-EVIDENCE::D2_24A0", "STATIC_ENUM", "ASSISTED_LIVE_CONSERVATIVE_SEED_REQUIRED", "launch-mode state", "{ASSISTED_LIVE_CONSERVATIVE_SEED_REQUIRED}", "QTT_EARLY_STAGE_SEED_LAW", "EXPLICIT_QTT_OR_OWNER_POLICY_SEED_OR_RESOLUTION_RULE", "READ_ONLY_SYMBOLIC", "FORMULA_BADGE", "REJECT_INVALID_VALUE_NO_SILENT_DEFAULT"),
+    ("ST10-PARAM::0167", "state_pfwd", "ST12-FAMILY-EVIDENCE::D2_24A0R", "STATIC_ENUM", "FORBIDDEN_BY_DEFAULT_AND_EXPECTED_DISABLED", "port-forwarding state", "{FORBIDDEN_BY_DEFAULT_AND_EXPECTED_DISABLED}", "QTT_NO_PORT_FORWARDING_RULE", "EXPLICIT_QTT_OR_OWNER_POLICY_SEED_OR_RESOLUTION_RULE", "READ_ONLY_SYMBOLIC", "FORMULA_BADGE", "PRESERVE_EXPLICIT_FAIL_CLOSED_STATE"),
+    ("ST10-PARAM::0195", "mode_exec_partner", "ST12-FAMILY-EVIDENCE::D2_24D1", "STATIC_ENUM", "ACCOUNT_AGNOSTIC_EXECUTION_PARTNER_MODE", "execution-partner mode rule", "{ACCOUNT_AGNOSTIC_EXECUTION_PARTNER_MODE,CONNECTOR_NATIVE_TERM_ONLY_WHEN_REQUIRED}", "QTT_ACCOUNT_AGNOSTIC_VOCABULARY_RULE", "EXPLICIT_QTT_OR_OWNER_POLICY_SEED_OR_RESOLUTION_RULE", "READ_ONLY_SYMBOLIC", "FORMULA_BADGE", "REJECT_INVALID_VALUE_NO_SILENT_DEFAULT"),
+    ("ST10-PARAM::0220", "host_cluster_role", "ST12-FAMILY-EVIDENCE::D3_2D", "STATIC_ENUM", "DEEP_COMPUTE_AND_ARTIFACT_GENERATION_BY_DEFAULT", "host-role enum", "{DEEP_COMPUTE_AND_ARTIFACT_GENERATION_BY_DEFAULT}", "QTT_HARDWARE_TOPOLOGY_RULE", "EXPLICIT_QTT_OR_OWNER_POLICY_SEED_OR_RESOLUTION_RULE", "READ_ONLY_SYMBOLIC", "FORMULA_BADGE", "REJECT_INVALID_VALUE_NO_SILENT_DEFAULT"),
+    ("ST10-PARAM::0222", "net_eth_role", "ST12-FAMILY-EVIDENCE::D3_2D", "STATIC_ENUM", "ADMIN_ARTIFACT_TRANSFER_AND_NEARLINE_WORKLOADS_SUFFICIENT_BY_DEFAULT", "Ethernet-role enum", "{ADMIN_ARTIFACT_TRANSFER_AND_NEARLINE_WORKLOADS_SUFFICIENT_BY_DEFAULT,BENCHMARK_REQUIRED_FOR_HIGHER_LIVE_MODES}", "QTT_NETWORK_ROLE_RULE", "EXPLICIT_QTT_OR_OWNER_POLICY_SEED_OR_RESOLUTION_RULE", "READ_ONLY_SYMBOLIC", "FORMULA_BADGE", "REJECT_INVALID_VALUE_NO_SILENT_DEFAULT"),
+    ("ST10-PARAM::0313", "sel_unc_ord", "ST12-FAMILY-EVIDENCE::D3_3AB2B", "STATIC_ENUM", "ORDERS_NOT_ASSUMED_LIVE_UNTIL_REAFFIRMED_BY_AUTHORITATIVE_RECONCILIATION", "uncertain-order-state policy", "{ORDERS_NOT_ASSUMED_LIVE_UNTIL_REAFFIRMED_BY_AUTHORITATIVE_RECONCILIATION}", "QTT_SESSION_RECOVERY_RULE", "EXPLICIT_QTT_OR_OWNER_POLICY_SEED_OR_RESOLUTION_RULE", "READ_ONLY_SYMBOLIC", "FORMULA_BADGE", "REJECT_INVALID_VALUE_NO_SILENT_DEFAULT"),
+    ("ST10-PARAM::0516", "cap_exec_po", "ST12-FAMILY-EVIDENCE::D8_0B3H", "STATIC_ENUM", "OBSERVABILITY_CAPPED_AND_RUNNER_UP_REQUIRED", "execution-family confidence-cap rule", "{OBSERVABILITY_CAPPED_AND_RUNNER_UP_REQUIRED}", "QTT_RECON_CONFIDENCE_CAP_RULE", "EXPLICIT_QTT_OR_OWNER_POLICY_SEED_OR_RESOLUTION_RULE", "READ_ONLY_SYMBOLIC", "FORMULA_BADGE", "REJECT_INVALID_VALUE_NO_SILENT_DEFAULT"),
+    ("ST10-PARAM::0525", "obscap_po", "ST12-FAMILY-EVIDENCE::D8_0B3H", "STATIC_ENUM", "ALL_CONFIDENCE_AND_QRNG_STATES_CAPPED_BY_OBSERVABILITY_GRADE", "observability-cap rule", "{ALL_CONFIDENCE_AND_QRNG_STATES_CAPPED_BY_OBSERVABILITY_GRADE}", "QTT_OBSERVABILITY_CAP_RULE", "EXPLICIT_QTT_OR_OWNER_POLICY_SEED_OR_RESOLUTION_RULE", "READ_ONLY_SYMBOLIC", "FORMULA_BADGE", "REJECT_INVALID_VALUE_NO_SILENT_DEFAULT"),
+    ("ST10-PARAM::0611", "ext_shadow_d", "ST12-FAMILY-EVIDENCE::D8_11B1", "STATIC_INTEGER", "14", "calendar days", "positive integer day count with canonical default `14`; explicit owner packet may override by different duration or sample-count target", "QTT_OWNER_DECISION_LADDER_LAW", "EXPLICIT_QTT_OR_OWNER_POLICY_SEED_OR_RESOLUTION_RULE", "EDITABLE_WITH_SHADOW", "INTEGER_INPUT", "REJECT_INVALID_VALUE_NO_SILENT_DEFAULT"),
+    ("ST10-PARAM::0619", "ri_object", "ST12-FAMILY-EVIDENCE::D8_11B1", "STATIC_ENUM", "ALL_INTAKE_SURFACES_MUST_CREATE_RESEARCH_INTAKE_RI_OBJECT", "intake-underlying-object rule", "{ALL_INTAKE_SURFACES_MUST_CREATE_RESEARCH_INTAKE_RI_OBJECT}", "QTT_RESEARCH_INTAKE_SURFACE_LAW", "EXPLICIT_QTT_OR_OWNER_POLICY_SEED_OR_RESOLUTION_RULE", "READ_ONLY_SYMBOLIC", "FORMULA_BADGE", "REJECT_INVALID_VALUE_NO_SILENT_DEFAULT"),
+)
+
+
+def _st12h_policy_from_row(row: tuple[str, ...]) -> ST12HParameterPolicyV1:
+    parameter_id = row[0]
+    try:
+        bindings = _ST12H_BINDINGS_BY_PARAMETER[parameter_id]
+    except KeyError as exc:
+        raise ParameterPolicyError(
+            ReasonCode.PARAMETER_BINDING_MISMATCH,
+            f"missing ST12-H application binding for {parameter_id}",
+        ) from exc
+    return ST12HParameterPolicyV1(
+        parameter_id=parameter_id,
+        parameter_symbol=row[1],
+        semantic_role=row[2],
+        resolution_class=row[3],
+        resolved_value_or_rule=row[4],
+        unit_or_basis=row[5],
+        structural_constraint=row[6],
+        value_source_class=row[7],
+        default_authority_class=row[8],
+        owner_editability_class=row[9],
+        ui_widget_class=row[10],
+        missing_stale_invalid_behavior=row[11],
+        consumer_symbols=tuple(
+            dict.fromkeys(binding.consumer_symbol for binding in bindings)
+        ),
+        runtime_activation_authorized=False,
+    )
+
+
+ST12H_PARAMETER_POLICIES: tuple[ST12HParameterPolicyV1, ...] = tuple(
+    _st12h_policy_from_row(row) for row in _ST12H_PARAMETER_POLICY_ROWS
+)
+
+_ST12H_PARAMETER_POLICY_BY_ID: Mapping[str, ST12HParameterPolicyV1] = MappingProxyType(
+    {policy.parameter_id: policy for policy in ST12H_PARAMETER_POLICIES}
+)
+_ST12H_PARAMETER_POLICY_BY_SYMBOL: Mapping[str, ST12HParameterPolicyV1] = MappingProxyType(
+    {policy.parameter_symbol: policy for policy in ST12H_PARAMETER_POLICIES}
+)
+
+
+def resolve_st12h_parameter_policy_v1(
+    parameter_id_or_symbol: str,
+) -> ST12HParameterPolicyV1:
+    """Resolve an exact H parameter identifier without aliases or guessing."""
+
+    key = _st12h_parameter_text(parameter_id_or_symbol, "parameter_id_or_symbol")
+    by_id = _ST12H_PARAMETER_POLICY_BY_ID.get(key)
+    by_symbol = _ST12H_PARAMETER_POLICY_BY_SYMBOL.get(key)
+    if by_id is not None and by_symbol is not None and by_id is not by_symbol:
+        raise ParameterPolicyError(
+            ReasonCode.PARAMETER_BINDING_MISMATCH,
+            f"ambiguous ST12-H parameter identity {key}",
+        )
+    policy = by_id or by_symbol
+    if policy is None:
+        raise ParameterPolicyError(
+            ReasonCode.PARAMETER_OUT_OF_POLICY,
+            f"unknown ST12-H parameter identity {key}",
+        )
+    return policy
+
+
+@dataclass(frozen=True, slots=True)
+class _ST12HParameterApplicationEvidenceV1:
+    parameter_id: str
+    parameter_symbol: str
+    resolved_value_or_rule: object
+    unit_or_basis: str
+    structural_constraint: str
+    consumer_path: str
+    consumer_symbol: str
+    semantic_case_ids: tuple[str, ...]
+    application_scope: str
+    fallback: str
+    owner_editability_class: str
+    ui_widget_class: str
+    invalid_mutation: object
+    invalid_mutation_reason: ReasonCode
+    allowed_alternative_or_none: object | None
+    alternative_disposition_or_none: str | None
+    disposition: str
+    policy_resolution_passed: bool
+    exact_application_binding_passed: bool
+    runtime_activation_authorized: bool
+    runtime_consumer_held: bool
+
+
+def _st12h_parameter_allowed_values(
+    policy: ST12HParameterPolicyV1,
+) -> tuple[object, ...]:
+    if policy.resolution_class == "STATIC_NUMERIC":
+        value = Decimal(policy.resolved_value_or_rule)
+        return (value, value + Decimal("1.00"))
+    if policy.resolution_class == "STATIC_INTEGER":
+        value = int(policy.resolved_value_or_rule)
+        return (value, value + 1)
+    constraint = policy.structural_constraint
+    if constraint.startswith("{") and constraint.endswith("}"):
+        return tuple(
+            item.strip()
+            for item in constraint[1:-1].split(",")
+            if item.strip()
+        )
+    return (policy.resolved_value_or_rule,)
+
+
+def _validate_st12h_parameter_contract_value_v1(
+    policy: ST12HParameterPolicyV1,
+    value: object,
+) -> object:
+    """Validate and normalize one nonlive H contract value without consuming it."""
+
+    if type(policy) is not ST12HParameterPolicyV1:
+        raise ParameterPolicyError(
+            ReasonCode.PARAMETER_OUT_OF_POLICY,
+            "ST12-H contract validation requires one exact policy",
+        )
+    allowed = _st12h_parameter_allowed_values(policy)
+    if policy.resolution_class == "STATIC_NUMERIC":
+        if type(value) is not Decimal or not value.is_finite() or value <= 0:
+            raise ParameterPolicyError(
+                ReasonCode.PARAMETER_OUT_OF_POLICY,
+                f"{policy.parameter_symbol} requires a positive exact Decimal",
+            )
+    elif policy.resolution_class == "STATIC_INTEGER":
+        if type(value) is not int or value <= 0:
+            raise ParameterPolicyError(
+                ReasonCode.PARAMETER_OUT_OF_POLICY,
+                f"{policy.parameter_symbol} requires a positive exact integer",
+            )
+    elif value not in allowed:
+        raise ParameterPolicyError(
+            ReasonCode.PARAMETER_OUT_OF_POLICY,
+            f"{policy.parameter_symbol} value is outside its exact policy set",
+        )
+    return value
+
+
+def _reject_st12h_parameter_renamed_value_echo_v1(
+    claimed_effect: Mapping[str, object],
+    *,
+    raw_value: object,
+) -> None:
+    """Reject a renamed input echo presented as downstream implementation evidence."""
+
+    if not isinstance(claimed_effect, Mapping) or not claimed_effect:
+        raise ParameterPolicyError(
+            ReasonCode.PARAMETER_BINDING_MISMATCH,
+            "parameter effect claim must be a nonempty mapping",
+        )
+    if any(value == raw_value for value in claimed_effect.values()):
+        raise ParameterPolicyError(
+            ReasonCode.PARAMETER_BINDING_MISMATCH,
+            "a renamed raw input is not downstream parameter-consumption evidence",
+        )
+
+
+def _evaluate_st12h_parameter_applications_v1(
+) -> tuple[_ST12HParameterApplicationEvidenceV1, ...]:
+    evidence: list[_ST12HParameterApplicationEvidenceV1] = []
+    for policy, binding in zip(
+        ST12H_PARAMETER_POLICIES,
+        ST12H_PARAMETER_APPLICATION_BINDINGS,
+        strict=True,
+    ):
+        allowed = _st12h_parameter_allowed_values(policy)
+        resolved = allowed[0]
+        normalized = _validate_st12h_parameter_contract_value_v1(policy, resolved)
+        invalid_mutation: object = None
+        try:
+            _validate_st12h_parameter_contract_value_v1(policy, invalid_mutation)
+        except ParameterPolicyError as exc:
+            if exc.reason_code is not ReasonCode.PARAMETER_OUT_OF_POLICY:
+                raise
+            invalid_reason = exc.reason_code
+        else:
+            raise ParameterPolicyError(
+                ReasonCode.PARAMETER_BINDING_MISMATCH,
+                f"{policy.parameter_symbol} accepted an invalid contract value",
+            )
+        if len(allowed) > 1:
+            alternative: object | None = allowed[1]
+            _validate_st12h_parameter_contract_value_v1(policy, alternative)
+            alternative_disposition: str | None = (
+                "CONTRACT_VALUE_ALTERNATIVE_VALIDATED"
+            )
+        else:
+            alternative = None
+            alternative_disposition = None
+        evidence.append(
+            _ST12HParameterApplicationEvidenceV1(
+                parameter_id=policy.parameter_id,
+                parameter_symbol=policy.parameter_symbol,
+                resolved_value_or_rule=normalized,
+                unit_or_basis=policy.unit_or_basis,
+                structural_constraint=policy.structural_constraint,
+                consumer_path=binding.consumer_path,
+                consumer_symbol=binding.consumer_symbol,
+                semantic_case_ids=binding.semantic_case_ids,
+                application_scope=binding.application_scope,
+                fallback=binding.fallback,
+                owner_editability_class=policy.owner_editability_class,
+                ui_widget_class=policy.ui_widget_class,
+                invalid_mutation=invalid_mutation,
+                invalid_mutation_reason=invalid_reason,
+                allowed_alternative_or_none=alternative,
+                alternative_disposition_or_none=alternative_disposition,
+                disposition="H_CONTRACT_BINDING_VALIDATED",
+                policy_resolution_passed=True,
+                exact_application_binding_passed=True,
+                runtime_activation_authorized=False,
+                runtime_consumer_held=True,
+            )
+        )
+    rows = tuple(evidence)
+    _validate_st12h_parameter_application_evidence_v1(rows)
+    return rows
+
+
+def _validate_st12h_parameter_application_evidence_v1(
+    rows: tuple[_ST12HParameterApplicationEvidenceV1, ...],
+) -> None:
+    if (
+        len(rows) != 21
+        or tuple(row.parameter_id for row in rows)
+        != tuple(policy.parameter_id for policy in ST12H_PARAMETER_POLICIES)
+        or any(
+            row.disposition != "H_CONTRACT_BINDING_VALIDATED"
+            or not row.policy_resolution_passed
+            or not row.exact_application_binding_passed
+            or row.invalid_mutation_reason
+            is not ReasonCode.PARAMETER_OUT_OF_POLICY
+            or row.runtime_activation_authorized
+            or not row.runtime_consumer_held
+            or (
+                row.allowed_alternative_or_none is not None
+                and row.alternative_disposition_or_none
+                != "CONTRACT_VALUE_ALTERNATIVE_VALIDATED"
+            )
+            or (
+                row.allowed_alternative_or_none is None
+                and row.alternative_disposition_or_none is not None
+            )
+            or row.consumer_path != binding.consumer_path
+            or row.consumer_symbol != binding.consumer_symbol
+            or row.semantic_case_ids != binding.semantic_case_ids
+            or row.application_scope != binding.application_scope
+            or row.fallback != binding.fallback
+            or row.unit_or_basis != policy.unit_or_basis
+            or row.structural_constraint != policy.structural_constraint
+            or row.owner_editability_class != policy.owner_editability_class
+            or row.ui_widget_class != policy.ui_widget_class
+            for row, policy, binding in zip(
+                rows,
+                ST12H_PARAMETER_POLICIES,
+                ST12H_PARAMETER_APPLICATION_BINDINGS,
+                strict=True,
+            )
+        )
+    ):
+        raise ParameterPolicyError(
+            ReasonCode.PARAMETER_BINDING_MISMATCH,
+            "ST12-H parameter contract-binding closure is incomplete",
+        )
+
+
+if (
+    len(ST12H_PARAMETER_POLICIES) != 21
+    or len(ST12H_PARAMETER_APPLICATION_BINDINGS) != 21
+    or len(_ST12H_PARAMETER_POLICY_BY_ID) != 21
+    or len(_ST12H_PARAMETER_POLICY_BY_SYMBOL) != 21
+    or tuple(policy.parameter_id for policy in ST12H_PARAMETER_POLICIES)
+    != tuple(binding.parameter_id for binding in ST12H_PARAMETER_APPLICATION_BINDINGS)
+    or any(
+        policy.parameter_symbol != binding.parameter_symbol
+        for policy, binding in zip(
+            ST12H_PARAMETER_POLICIES,
+            ST12H_PARAMETER_APPLICATION_BINDINGS,
+            strict=True,
+        )
+    )
+):
+    raise ParameterPolicyError(
+        ReasonCode.PARAMETER_BINDING_MISMATCH,
+        "ST12-H parameter policy and application closure must be exact 21/21",
+    )

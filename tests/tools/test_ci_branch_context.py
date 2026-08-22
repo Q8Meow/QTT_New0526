@@ -68,6 +68,16 @@ ST12_BRANCH_CASES = (
             "Agent/st12f-evidence-model-risk-v1",
         ),
     ),
+    (
+        "agent/st12h-validation-currentization-operations-publication",
+        (
+            "agent/st12h-validation-currentization-operations",
+            "agent/st12h-validation-currentization-operations-publication-copy",
+            "agent/st12h-validation-currentization-operations-publication/",
+            "Agent/st12h-validation-currentization-operations-publication",
+            "agent/*st12h-validation-currentization-operations-publication",
+        ),
+    ),
 )
 
 
@@ -159,7 +169,7 @@ def test_st12_inherited_math_receipt_repair_branch_is_exactly_classified():
 @pytest.mark.parametrize(
     ("branch", "adversarial_branches"),
     ST12_BRANCH_CASES,
-    ids=("st12a", "st12b", "st12c", "st12e", "st12d", "st12f"),
+    ids=("st12a", "st12b", "st12c", "st12e", "st12d", "st12f", "st12h"),
 )
 def test_st12_owner_authorized_branches_are_exactly_validation_only(
     branch: str,

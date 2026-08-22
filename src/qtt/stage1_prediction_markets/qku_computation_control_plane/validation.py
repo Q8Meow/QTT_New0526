@@ -5,13 +5,14 @@ from __future__ import annotations
 import ast
 from collections import Counter
 from dataclasses import dataclass, fields, replace
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
 from decimal import Decimal
 from enum import StrEnum
 from itertools import product
 import json
 import math
 from pathlib import Path
+import tempfile
 from types import MappingProxyType
 from typing import Callable, Mapping
 
@@ -120,7 +121,7 @@ from .quantum_adapter import (
     QUANTUM_STRUCTURAL_READINESS_BY_MATH_ID,
     QuantumModelKind,
 )
-from .serialization import validate_relative_path
+from .serialization import SECRET_KEY_POLICY, deterministic_json, validate_relative_path
 from .source_policy import (
     CERTIFIED_SOURCE_STATES,
     FAK_FOK_RESPONSE_CONTRACT,
@@ -7136,6 +7137,1088 @@ _DOMAIN_CHECKS.update(
 )
 
 
+# ST12-H is an additive validation/publication closure under this existing owner.
+from .models import (  # noqa: E402
+    NO_EFFECTS_V1,
+    NoEffectFlagsV1,
+    OperationBlockerCodeV1,
+    ReadOnlyKillSubmitStateV1,
+    ST12FEvidenceReferenceV1,
+    ST12FEvidenceStateV1,
+    ST12HBackupRestorePlanV1,
+    ST12HControlCaseV1,
+    ST12HFinalizationControlV1,
+    ST12HPublicationManifestV1,
+    ST12HStep12FinalHandoffV1,
+    ST12HValidationCampaignPlanV1,
+    ST12HValidationCampaignPhaseV1,
+    ST12HValidationCommandPlanV1,
+    ST12HValidationEnvironmentV1,
+    ST12HValidationCurrentizationOperationsPublicationReportV1,
+)
+from .parameter_policy import (  # noqa: E402
+    ST12H_PARAMETER_APPLICATION_BINDINGS,
+    ST12H_PARAMETER_POLICIES,
+    _evaluate_st12h_parameter_applications_v1,
+)
+from .receipts import (  # noqa: E402
+    ST12HBackupRestoreReceiptV1,
+    ST12HControlReceiptV1,
+    ST12HFinalizationReceiptV1,
+    ST12HPublicationReceiptV1,
+    ST12HReceiptCustodyV1,
+    ST12HValidationCampaignReceiptV1,
+    ST12HValidationCommandReceiptV1,
+    _ST12H_SEMANTIC_VALIDATOR_REVISION,
+    _validate_st12h_receipt_currentness_v1,
+)
+from .accounting import (  # noqa: E402
+    AccountingAmountV1,
+    AccountingAndTCAServiceV1,
+    CashStateClassV1,
+    CashStateProjectionV1,
+    CostEmbeddingV1,
+    EntrySideV1,
+    JournalAccountV1,
+    JournalPostingV1,
+    JournalTransactionV1,
+    NormalBalanceV1,
+    ReconciliationStateV1,
+    TCADecompositionV1,
+)
+from .agent_policy import (  # noqa: E402
+    EXPLICIT_ABSENCE as ST12H_EXPLICIT_ABSENCE,
+    NO_EFFECT_PROFILE_REF as ST12H_NO_EFFECT_PROFILE_REF,
+    POLICY_VERSION as ST12H_AGENT_POLICY_VERSION,
+    AgentBoundaryStateViewV1,
+    AgentCapabilityBundleV1,
+    AgentCapabilityPolicyStoreV1,
+    AgentCapabilityResolverV1,
+    AgentSafetyStateV1,
+)
+from .fallback import FallbackDispositionV1, PublicFallbackBoundaryV1  # noqa: E402
+from .economic_math import FillQuantityDistributionArtifactV1  # noqa: E402
+from .idempotency import (  # noqa: E402
+    IdempotencyClaimReceiptV1,
+    IdempotencyClaimStateV1,
+    canonical_request_json_v1,
+)
+from .lifecycle import (  # noqa: E402
+    StateTransitionReceiptV1,
+    TransitionDispositionV1,
+    ST12HFinalizationStateV1,
+    validate_st12h_finalization_transition_v1,
+)
+from .llm_gateway import (  # noqa: E402
+    AnnotationCitationV1,
+    AnnotationClaimV1,
+    CanonicalNumericEvidenceValueV1,
+    GroundedLLMGatewayV1,
+    LLMAdvisoryTaskV1,
+    PreexistingAnnotationPacketV1,
+    QuotedNumericFactV1,
+)
+from .mode_snapshot_policy import (  # noqa: E402
+    ModeSnapshotPreconstructionGateV1,
+    evaluate_mode_snapshot_preconstruction_gate,
+    pre_f_unavailable_reference,
+)
+from .persistence import InMemoryPersistenceAdapterV1  # noqa: E402
+from .receipts import (  # noqa: E402
+    EconomicEventRecordV1,
+    EconomicReceiptEventSpineV1,
+    EconomicRecordTypeV1,
+    TypedEconomicAmountV1,
+    ValueLineageEdgeV1,
+)
+from .source_policy import (  # noqa: E402
+    ST12H_SOURCE_BINDINGS,
+    ST12HSourceBindingV1,
+    _ST12HSourceCurrentnessReceiptV1,
+    _observe_st12h_source_binding_v1,
+    _st12h_source_evidence_ref,
+    _validate_st12h_source_currentness_receipt_v1,
+    validate_st12h_source_binding_v1,
+)
+from .source_rights import SourceRightsV1  # noqa: E402
+from .sqlite_reference import SQLiteReferenceAdapterV1  # noqa: E402
+from .transaction import (  # noqa: E402
+    TransactionRetryPolicyV1,
+    TransactionTerminalStateV1,
+    TrancheCAtomicRecordSetV1,
+    TrancheCUnitOfWorkV1,
+)
+
+
+_ST12H_GENERATED_REPORT_PATHS = (
+    "docs/master_plan/generated/qku_control_plane/st12_h_validation_currentization_operations_publication.report.json",
+    "docs/master_plan/generated/qku_control_plane/st12_h_final_step12_handoff.report.json",
+)
+_ST12H_RESTORE_VALIDATION_COMMANDS = (
+    (
+        "python",
+        "tools/independent_validate_qku_computation_control_plane.py",
+        "--validate-portable-directory",
+        "{RESTORE_ROOT}",
+    ),
+)
+
+_ST12H_BACKUP_RESTORE_STAGE_OPERATIONS = (
+    ("SELECT_EXACT_PUBLICATION_MEMBERS", "tracked projections exist", "exact member inventory selected"),
+    ("CREATE_BOUNDED_ARCHIVE", "member inventory selected", "one bounded archive created"),
+    ("ENUMERATE_AND_VALIDATE_MEMBERS", "archive created", "every member passes safety policy"),
+    ("READBACK_AND_COMPARE_SOURCE_BYTES", "members validated", "archived bytes equal source bytes"),
+    ("EXTRACT_TO_CLEAN_PORTABLE_DIRECTORY", "archive read back", "safe extraction completed"),
+    ("VALIDATE_EXTRACTED_REPORTS", "safe extraction completed", "portable payload validates"),
+    ("RESTORE_DECLARED_ARTIFACTS", "portable payload validates", "declared artifacts restored"),
+    ("COMPARE_RESTORED_BYTES", "artifacts restored", "restored bytes equal source bytes"),
+    ("EXECUTE_RESTORE_VALIDATION", "restored bytes agree", "declared restore command passes"),
+    ("INJECT_INTERRUPTION_AND_RESUME_OR_DISCARD", "restore command passes", "interruption resumes deterministically"),
+    ("INJECT_CRASH_AND_ROLLBACK_PARTIAL_STATE", "resume proof passes", "crash rollback preserves inactive pointers"),
+    ("CLEAN_SCRATCH_AND_FINALIZE", "all stage evidence exists", "scratch removed and receipts finalized"),
+)
+
+ST12H_BACKUP_RESTORE_PLANS = tuple(
+    ST12HBackupRestorePlanV1(
+        plan_id=f"ST12H-BR::{index:02d}",
+        operation=operation,
+        precondition=precondition,
+        postcondition=postcondition,
+        artifact_paths=_ST12H_GENERATED_REPORT_PATHS,
+        external_scratch_root_policy=(
+            "EXTERNAL_OR_REPOSITORY_IGNORED_TEMP_ONLY_NEVER_COPY_REPOSITORY_OR_GIT_INDEX"
+        ),
+        max_archive_count=1,
+        repository_copy_allowed=False,
+        copied_git_index_allowed=False,
+        restore_validation_commands=_ST12H_RESTORE_VALIDATION_COMMANDS,
+        cleanup_required=True,
+    )
+    for index, (operation, precondition, postcondition) in enumerate(
+        _ST12H_BACKUP_RESTORE_STAGE_OPERATIONS,
+        start=1,
+    )
+)
+
+
+def _st12h_case(
+    case_id: str,
+    closure_id: str,
+    domain: str,
+    control_slug: str,
+    owner_path: str,
+    owner_symbol: str,
+    fixture_ref: str,
+    mutation_operation: str,
+    expected_terminal_state: str,
+    expected_reason_code: str | None,
+    required_receipt_fields: tuple[str, ...],
+    test_function: str,
+    independent_validator_path: str,
+) -> ST12HControlCaseV1:
+    return ST12HControlCaseV1(
+        case_id=case_id,
+        closure_id=closure_id,
+        domain=domain,
+        control_slug=control_slug,
+        owner_path=owner_path,
+        owner_symbol=owner_symbol,
+        fixture_ref=fixture_ref,
+        mutation_operation=mutation_operation,
+        expected_terminal_state=expected_terminal_state,
+        expected_reason_code=(
+            None if expected_reason_code is None else ReasonCode(expected_reason_code)
+        ),
+        required_receipt_fields=required_receipt_fields,
+        test_function=test_function,
+        independent_validator_path=independent_validator_path,
+    )
+
+
+ST12H_CONTROL_CASES = (
+    _st12h_case("ST12H::ACCOUNTING::IDEMPOTENT_POSTING", "ST12-CLOSURE::ST11-ACCOUNTING::017", "accounting", "idempotent-posting", "src/qtt/stage1_prediction_markets/qku_computation_control_plane/transaction.py", "TrancheCUnitOfWorkV1.execute", "repeat identical economic event and idempotency key", "change payload while retaining idempotency key", "PASS_IDEMPOTENT_NO_DUPLICATE_POSTING", "ST12C_IDEMPOTENCY_CONFLICT", ("event_ref", "idempotency_key", "posting_refs", "duplicate_disposition", "no_effect_flags"), "test_st12h_accounting_control_matrix", "tools/independent_validate_qku_computation_control_plane_accounting.py"),
+    _st12h_case("ST12H::ACCOUNTING::TRANSACTION_ATOMICITY", "ST12-CLOSURE::ST11-ACCOUNTING::018", "accounting", "transaction-atomicity", "src/qtt/stage1_prediction_markets/qku_computation_control_plane/transaction.py", "TrancheCUnitOfWorkV1", "balanced journal, receipt, value lineage and outbox intent", "inject failure before commit boundary", "PASS_ALL_OR_NOTHING", "ST12C_TRANSACTION_STATE_INVALID", ("transaction_id", "terminal_state", "committed_record_refs", "rolled_back_record_refs", "no_effect_flags"), "test_st12h_accounting_control_matrix", "tools/independent_validate_qku_computation_control_plane_accounting.py"),
+    _st12h_case("ST12H::ACCOUNTING::DATABASE_INTEGRITY", "ST12-CLOSURE::ST11-ACCOUNTING::019", "accounting", "database-integrity", "src/qtt/stage1_prediction_markets/qku_computation_control_plane/sqlite_reference.py", "SQLiteReferenceAdapterV1", "valid reference schema with parent and reversal links", "break one foreign-key or reversal relation", "PASS_REFERENCE_INTEGRITY", "ST12C_PERSISTENCE_CONFLICT", ("adapter_class", "integrity_checks", "reconciliation_state", "no_effect_flags"), "test_st12h_accounting_control_matrix", "tools/independent_validate_qku_computation_control_plane_accounting.py"),
+    _st12h_case("ST12H::ACCOUNTING::NO_PROFIT_FABRICATION", "ST12-CLOSURE::ST11-ACCOUNTING::020", "accounting", "no-profit-fabrication", "src/qtt/stage1_prediction_markets/qku_computation_control_plane/accounting.py", "CashStateProjectionV1+AccountingAndTCAServiceV1.deployable_capital", "marked, projected, realized and settled values", "substitute marked or projected value for realized settled cash", "PASS_CASH_CLASS_SEPARATION", "ST12C_RECONCILIATION_REQUIRED", ("cash_class", "basis", "source_event_refs", "journal_refs", "reconciliation_state"), "test_st12h_accounting_control_matrix", "tools/independent_validate_qku_computation_control_plane_accounting.py"),
+    _st12h_case("ST12H::EXECUTION::COST_FILL_MODEL_USE", "ST12-CLOSURE::ST11-EXECUTION::015", "execution", "cost-fill-model-use", "src/qtt/stage1_prediction_markets/qku_computation_control_plane/accounting.py", "TCADecompositionV1+FillQuantityDistributionArtifactV1", "candidate with explicit fees, spread, slippage, impact and fill lineage", "remove a required cost or fill receipt", "PASS_COST_AND_FILL_LINEAGE", "ST12C_MODEL_ARTIFACT_REQUIRED", ("candidate_ref", "cost_model_refs", "fill_model_refs", "tca_ref", "no_effect_flags"), "test_st12h_execution_control_matrix", "tools/independent_validate_qku_computation_control_plane_execution.py"),
+    _st12h_case("ST12H::EXECUTION::NO_TRADE_RELEASE", "ST12-CLOSURE::ST11-EXECUTION::016", "execution", "no-trade-release", "src/qtt/stage1_prediction_markets/qku_computation_control_plane/fallback.py", "FallbackDispositionV1", "typed expected execution blocker", "replace NO_TRADE route with success or fabricated numeric result", "PASS_NO_TRADE_TERMINAL_ROUTE", "ST12B_OPERATION_BLOCKED", ("status", "blocker_code", "terminal_route", "numeric_result_emitted", "runtime_effect_authorized"), "test_st12h_execution_control_matrix", "tools/independent_validate_qku_computation_control_plane_execution.py"),
+    _st12h_case("ST12H::EXECUTION::DETERMINISTIC_FALLBACK", "ST12-CLOSURE::ST11-EXECUTION::017", "execution", "deterministic-fallback", "src/qtt/stage1_prediction_markets/qku_computation_control_plane/fallback.py", "PublicFallbackBoundaryV1.translate", "registered typed error translated to the lower safe route", "pass an unregistered programming exception and require it to escape untranslated", "PASS_REGISTERED_LOWER_SAFE_PATH", None, ("reason_code", "blocker_code", "terminal_route", "fallback_ref", "no_effect_flags"), "test_st12h_execution_control_matrix", "tools/independent_validate_qku_computation_control_plane_execution.py"),
+    _st12h_case("ST12H::EXECUTION::MARKET_ACCESS_BOUNDARY", "ST12-CLOSURE::ST11-EXECUTION::018", "execution", "market-access-boundary", "src/qtt/stage1_prediction_markets/qku_computation_control_plane/agent_policy.py", "AgentCapabilityResolverV1.resolve", "pure typed capability request", "request a direct provider or connector scope", "PASS_NO_DIRECT_MARKET_ACCESS", "ST12E_DIRECT_PROVIDER_FORBIDDEN", ("operation_name", "status", "receipt_refs", "provider_effect_count", "no_effect_flags"), "test_st12h_execution_control_matrix", "tools/independent_validate_qku_computation_control_plane_execution.py"),
+    _st12h_case("ST12H::EXECUTION::SUBMIT_DISABLED_DRY_RUN", "ST12-CLOSURE::ST11-EXECUTION::019", "execution", "submit-disabled-dry-run", "src/qtt/stage1_prediction_markets/qku_computation_control_plane/mode_snapshot_policy.py", "evaluate_mode_snapshot_preconstruction_gate", "submit-disabled preconstruction gate", "attempt to obtain a candidate while submit-disabled remains true", "PASS_SUBMIT_DISABLED_NO_WRITE", "ST12D_KILL_OR_SUBMIT_DISABLED", ("submit_disabled_state_ref", "proposal_state", "order_release_count", "no_effect_flags"), "test_st12h_execution_control_matrix", "tools/independent_validate_qku_computation_control_plane_execution.py"),
+    _st12h_case("ST12H::EXECUTION::PER_VENUE_AUTHORIZATION", "ST12-CLOSURE::ST11-EXECUTION::020", "execution", "per-venue-authorization", "src/qtt/stage1_prediction_markets/qku_computation_control_plane/agent_policy.py", "AgentCapabilityResolverV1.resolve", "two independently scoped task envelopes", "request venue/context B with authority admitted only for venue/context A", "PASS_VENUE_SCOPE_ISOLATION", "ST12E_CONTEXT_SCOPE_MISMATCH", ("venue_scope", "authority_ref", "decision_state", "cross_venue_inheritance", "no_effect_flags"), "test_st12h_execution_control_matrix", "tools/independent_validate_qku_computation_control_plane_execution.py"),
+    _st12h_case("ST12H::LLM::RESOURCE_LIMITS", "ST12-CLOSURE::ST11-LLM::011", "llm", "resource-limits", "src/qtt/stage1_prediction_markets/qku_computation_control_plane/llm_gateway.py", "PreexistingAnnotationPacketV1", "preexisting annotation packet with upstream token budget", "exceed budget or omit upstream budget source", "PASS_BOUNDED_ADVISORY_PACKET", "ST12E_BUDGET_EXCEEDED", ("annotation_id", "budget_source_ref", "token_budget", "advisory_only", "no_effect_flags"), "test_st12h_llm_control_matrix", "tools/independent_validate_qku_computation_control_plane_llm.py"),
+    _st12h_case("ST12H::LLM::GROUNDING_CITATIONS", "ST12-CLOSURE::ST11-LLM::012", "llm", "grounding-citations", "src/qtt/stage1_prediction_markets/qku_computation_control_plane/llm_gateway.py", "GroundedLLMGatewayV1", "claims with reciprocal citation and evidence-bundle joins", "break claim-citation or evidence-bundle join", "PASS_RECIPROCAL_GROUNDING", "ST12F_LLM_ANNOTATION_INVALID", ("claim_ids", "citation_ids", "evidence_bundle_refs", "numeric_recheck_refs"), "test_st12h_llm_control_matrix", "tools/independent_validate_qku_computation_control_plane_llm.py"),
+    _st12h_case("ST12H::LLM::SCHEMA_OUTPUT", "ST12-CLOSURE::ST11-LLM::013", "llm", "schema-output", "src/qtt/stage1_prediction_markets/qku_computation_control_plane/llm_gateway.py", "typed constructors/from_canonical_mapping+GroundedLLMGatewayV1.validate_and_normalize", "strict typed annotation packet", "add unknown field or wrong enum", "PASS_STRICT_SCHEMA", "ST12C_SCHEMA_MISMATCH", ("annotation_id", "advisory_task", "claims", "citations", "limitations"), "test_st12h_llm_control_matrix", "tools/independent_validate_qku_computation_control_plane_llm.py"),
+    _st12h_case("ST12H::LLM::DETERMINISTIC_RECHECK", "ST12-CLOSURE::ST11-LLM::014", "llm", "deterministic-recheck", "src/qtt/stage1_prediction_markets/qku_computation_control_plane/llm_gateway.py", "GroundedLLMGatewayV1.validate_and_normalize+CanonicalNumericEvidenceResolverProtocolV1", "quoted numeric fact bound to canonical numeric evidence", "change quote, unit, bundle or input lock", "PASS_NUMERIC_RECHECK", "ST12F_LLM_ANNOTATION_INVALID", ("numeric_fact_id", "canonical_value", "unit_and_basis", "input_lock_id", "recheck_receipt_ref"), "test_st12h_llm_control_matrix", "tools/independent_validate_qku_computation_control_plane_llm.py"),
+    _st12h_case("ST12H::LLM::ABSTENTION", "ST12-CLOSURE::ST11-LLM::015", "llm", "abstention", "src/qtt/stage1_prediction_markets/qku_computation_control_plane/llm_gateway.py", "GroundedLLMGatewayV1", "insufficiently grounded advisory request", "force a substantive claim instead of abstention", "PASS_EXPLICIT_ABSTENTION", "ST12E_LLM_ADVISORY_ONLY", ("abstentions", "limitations", "claim_count", "requested_actions", "no_effect_flags"), "test_st12h_llm_control_matrix", "tools/independent_validate_qku_computation_control_plane_llm.py"),
+    _st12h_case("ST12H::LLM::NO_HIDDEN_REASONING_STORAGE", "ST12-CLOSURE::ST11-LLM::016", "llm", "no-hidden-reasoning-storage", "src/qtt/stage1_prediction_markets/qku_computation_control_plane/llm_gateway.py", "GroundedLLMGatewayV1.validate_and_normalize+deterministic_json", "publication payload containing typed facts and limitations only", "insert hidden reasoning, chain-of-thought or unredacted prompt content", "PASS_NO_HIDDEN_REASONING", "ST12A_SECRET_MATERIAL_REJECTED", ("published_fact_refs", "limitations", "redaction_state", "hidden_reasoning_field_count"), "test_st12h_llm_control_matrix", "tools/independent_validate_qku_computation_control_plane_llm.py"),
+    _st12h_case("ST12H::LLM::VERSION_PINNING", "ST12-CLOSURE::ST11-LLM::017", "llm", "version-pinning", "src/qtt/stage1_prediction_markets/qku_computation_control_plane/models.py", "ST12HValidationEnvironmentV1", "exact model/prompt/tool advisory metadata", "replace exact version with floating latest", "PASS_VERSION_PINNED", "ST12A_INVALID_CONTRACT", ("model_ref", "prompt_ref", "tool_policy_ref", "version_state"), "test_st12h_llm_control_matrix", "tools/independent_validate_qku_computation_control_plane_llm.py"),
+    _st12h_case("ST12H::LLM::ERROR_CONTAGION", "ST12-CLOSURE::ST11-LLM::018", "llm", "error-contagion", "src/qtt/stage1_prediction_markets/qku_computation_control_plane/llm_gateway.py", "GroundedLLMGatewayV1", "one invalid upstream numeric or source reference", "allow unaffected-looking prose to mask invalid dependency", "PASS_ERROR_CONTAGION_FAIL_CLOSED", "ST12F_LLM_ANNOTATION_INVALID", ("upstream_error_refs", "terminal_state", "blocker_codes", "no_effect_flags"), "test_st12h_llm_control_matrix", "tools/independent_validate_qku_computation_control_plane_llm.py"),
+    _st12h_case("ST12H::LLM::EVALUATION", "ST12-CLOSURE::ST11-LLM::019", "llm", "evaluation", "src/qtt/stage1_prediction_markets/qku_computation_control_plane/validation.py", "_validate_st12h_llm_control_receipt_aggregate_v1", "actual H LLM control receipts plus inherited independent LLM validation", "remove one required actual LLM control outcome", "PASS_ALL_LLM_CONTROLS_EVALUATED", "ST12A_VALIDATION_FAILED", ("control_id", "terminal_state", "reason_code", "receipt_refs", "no_effect_flags"), "test_st12h_llm_control_matrix", "tools/independent_validate_qku_computation_control_plane_llm.py"),
+    _st12h_case("ST12H::LLM::CODEX_BOUNDARY", "ST12-CLOSURE::ST11-LLM::020", "llm", "codex-boundary", "src/qtt/stage1_prediction_markets/qku_computation_control_plane/validation.py", "_validate_st12h_codex_boundary_v1", "held campaign plan with no research, network, provider, or runtime authority", "enable browsing or provider execution in the validation contract", "PASS_CODEX_IMPLEMENTATION_ONLY", "ST12E_DIRECT_PROVIDER_FORBIDDEN", ("implementation_authorization_state", "codex_research_assignment_count", "network_access_allowed", "no_effect_flags"), "test_st12h_llm_control_matrix", "tools/independent_validate_qku_computation_control_plane_llm.py"),
+    _st12h_case("ST12H::OPERATIONS::DEPENDENCY_FAILURE", "ST12-CLOSURE::ST11-OPERATIONS::013", "operations", "dependency-failure", "src/qtt/stage1_prediction_markets/qku_computation_control_plane/validation.py", "validate_st12h_campaign_plan_v1+_validate_st12h_campaign_receipt_chain_v1", "campaign with ordered phase dependencies and observed predecessor receipts", "remove one predecessor phase receipt", "PASS_DEPENDENCY_FAIL_CLOSED", "ST12B_DEPENDENCY_CLOSURE_FAILED", ("campaign_id", "phase_id", "predecessor_phase_ids", "terminal_state", "receipt_refs"), "test_st12h_operations_control_matrix", "tools/independent_validate_qku_computation_control_plane_operations.py"),
+    _st12h_case("ST12H::OPERATIONS::DEPLOYMENT_PARITY", "ST12-CLOSURE::ST11-OPERATIONS::014", "operations", "deployment-parity", "src/qtt/stage1_prediction_markets/qku_computation_control_plane/models.py", "ST12HValidationEnvironmentV1", "local and CI environment contracts", "change interpreter, pytest or command topology in one lane", "PASS_LOCAL_CI_PARITY", "ST12A_INVALID_CONTRACT", ("python_version", "pytest_version", "workflow_shard_count", "workflow_aggregate_count"), "test_st12h_operations_control_matrix", "tools/independent_validate_qku_computation_control_plane_operations.py"),
+    _st12h_case("ST12H::OPERATIONS::INCIDENT_RESPONSE", "ST12-CLOSURE::ST11-OPERATIONS::015", "operations", "incident-response", "src/qtt/stage1_prediction_markets/qku_computation_control_plane/validation.py", "_validate_st12h_incident_containment_v1", "validation-only containment evidence derived from the bounded backup plan", "omit owner notification, stop condition or evidence custody", "PASS_INCIDENT_CONTAINMENT_CONTRACT", "ST12A_RUNTIME_EFFECT_FORBIDDEN", ("incident_id", "classification", "containment_action", "owner_notification_ref", "no_effect_flags"), "test_st12h_operations_control_matrix", "tools/independent_validate_qku_computation_control_plane_operations.py"),
+    _st12h_case("ST12H::OPERATIONS::KILL_ROLLBACK_DRILL", "ST12-CLOSURE::ST11-OPERATIONS::016", "operations", "kill-rollback-drill", "src/qtt/stage1_prediction_markets/qku_computation_control_plane/validation.py", "evaluate_mode_snapshot_preconstruction_gate+execute_st12h_backup_restore_portability_v1", "submit-disabled gate plus actual temporary backup/restore rollback execution", "remove rollback target or attempt a venue write", "PASS_NO_WRITE_ROLLBACK_DRILL", "ST12D_KILL_OR_SUBMIT_DISABLED", ("drill_id", "rollback_target_ref", "submit_disabled", "runtime_effect_count"), "test_st12h_operations_control_matrix", "tools/independent_validate_qku_computation_control_plane_operations.py"),
+    _st12h_case("ST12H::OPERATIONS::READINESS_HONESTY", "ST12-CLOSURE::ST11-OPERATIONS::019", "operations", "readiness-honesty", "src/qtt/stage1_prediction_markets/qku_computation_control_plane/lifecycle.py", "validate_st12h_finalization_transition_v1", "orthogonal implementation, validation, evidence, mode and order states", "promote lower state into higher authority", "PASS_ORTHOGONAL_READINESS", "ST12D_LATER_TRANCHE_AUTHORITY_REQUIRED", ("implementation_state", "validation_state", "evidence_state", "mode_state", "order_release_state"), "test_st12h_operations_control_matrix", "tools/independent_validate_qku_computation_control_plane_operations.py"),
+    _st12h_case("ST12H::OPERATIONS::FINAL_OPERATIONAL_PACKET", "ST12-CLOSURE::ST11-OPERATIONS::020", "operations", "final-operational-packet", "src/qtt/stage1_prediction_markets/qku_computation_control_plane/validation.py", "_validate_st12h_final_operational_packet_v1", "held Step-12 handoff contract with all final-control and external receipt requirements", "omit one final control or misstate held receipt custody", "PASS_HELD_STEP12_HANDOFF_CONTRACT", "ST12A_VALIDATION_FAILED", ("handoff_id", "final_control_refs", "publication_receipt_ref", "stale_receipt_count", "next_owner_action"), "test_st12h_operations_control_matrix", "tools/independent_validate_qku_computation_control_plane_operations.py"),
+    _st12h_case("ST12H::SECURITY::EXCEPTION_GOVERNANCE", "ST12-CLOSURE::ST11-SECURITY::017", "security", "exception-governance", "src/qtt/stage1_prediction_markets/qku_computation_control_plane/validation.py", "AgentCapabilityResolverV1.resolve+_validate_st12h_exception_expiry_v1", "typed capability decision with validation-only scope and expiry", "expire the scoped exception evidence", "PASS_EXCEPTION_DEFAULT_DENY", "ST12A_CAPABILITY_DENIED", ("exception_id", "scope", "expires_at", "owner_decision_ref", "terminal_state"), "test_st12h_security_control_matrix", "tools/independent_validate_qku_computation_control_plane_security.py"),
+    _st12h_case("ST12H::SECURITY::NO_CRYPTOGRAPHIC_AUTHORITY", "ST12-CLOSURE::ST11-SECURITY::018", "security", "no-cryptographic-authority", "src/qtt/stage1_prediction_markets/qku_computation_control_plane/validation.py", "_validate_st12h_no_cryptographic_authority_v1", "centralized semantic field-roster scan without hash/digest authority", "add digest or repository object identifier as semantic authority", "PASS_NO_DIGEST_AUTHORITY", "ST12A_INVALID_CONTRACT", ("publication_id", "inventory_refs", "object_identifier_authority_count", "no_effect_flags"), "test_st12h_security_control_matrix", "tools/independent_validate_qku_computation_control_plane_security.py"),
+    _st12h_case("ST12H::SECURITY::OWNER_SURFACE_SAFETY", "ST12-CLOSURE::ST11-SECURITY::019", "security", "owner-surface-safety", "src/qtt/stage1_prediction_markets/qku_computation_control_plane/agent_policy.py", "AgentCapabilityResolverV1.resolve+NoEffectFlagsV1", "owner-facing request/review/kill surfaces", "add direct provider, credential, capital or order action", "PASS_OWNER_SURFACE_REQUEST_ONLY", "ST12E_ORDER_RELEASE_FORBIDDEN", ("owner_action_refs", "request_only", "direct_write_count", "no_effect_flags"), "test_st12h_security_control_matrix", "tools/independent_validate_qku_computation_control_plane_security.py"),
+    _st12h_case("ST12H::SECURITY::VALIDATOR_ISOLATION", "ST12-CLOSURE::ST11-SECURITY::020", "security", "validator-isolation", "src/qtt/stage1_prediction_markets/qku_computation_control_plane/validation.py", "_validate_st12h_validator_isolation_v1", "validated campaign and external-scratch plan with zero repository or index copies", "request a repository or Git-index copy", "PASS_VALIDATOR_ISOLATION", "ST12D_RESOURCE_BOUND_EXCEEDED", ("environment_ref", "scratch_root_class", "repository_copy_count", "copied_index_count"), "test_st12h_security_control_matrix", "tools/independent_validate_qku_computation_control_plane_security.py"),
+    _st12h_case("ST12H::SOURCE::BINDING_COVERAGE", "ST12-CLOSURE::ST11-SOURCE::015", "source", "binding-coverage", "src/qtt/stage1_prediction_markets/qku_computation_control_plane/validation.py", "_validate_st12h_source_binding_coverage_v1", "complete source identity to exact claim/field binding", "remove one required binding", "PASS_SOURCE_BINDING_COVERAGE", "ST12A_SOURCE_EPOCH_MISSING", ("source_id", "claim_binding_refs", "field_binding_refs", "terminal_state"), "test_st12h_source_control_matrix", "tools/independent_validate_qku_computation_control_plane_source.py"),
+    _st12h_case("ST12H::SOURCE::FRESHNESS", "ST12-CLOSURE::ST11-SOURCE::016", "source", "freshness", "src/qtt/stage1_prediction_markets/qku_computation_control_plane/source_policy.py", "validate_st12h_source_binding_v1", "current source epoch and evaluation time", "expire TTL or use prior epoch", "PASS_SOURCE_CURRENTNESS", "ST12A_SOURCE_EPOCH_STALE", ("source_id", "source_epoch_ref", "observed_at", "valid_until", "currentness_state"), "test_st12h_source_control_matrix", "tools/independent_validate_qku_computation_control_plane_source.py"),
+    _st12h_case("ST12H::SOURCE::RIGHTS_USE", "ST12-CLOSURE::ST11-SOURCE::017", "source", "rights-use", "src/qtt/stage1_prediction_markets/qku_computation_control_plane/source_rights.py", "SourceRightsV1", "public documentation reference-only source", "enable redistribution, secret or credential material", "PASS_RIGHTS_DEFAULT_DENY", "ST12A_SOURCE_RIGHTS_BLOCKED", ("source_state_id", "rights_and_use_state", "permitted_use_class", "redistribution_authorized"), "test_st12h_source_control_matrix", "tools/independent_validate_qku_computation_control_plane_source.py"),
+    _st12h_case("ST12H::SOURCE::OWNER_SEPARATION", "ST12-CLOSURE::ST11-SOURCE::018", "source", "owner-separation", "src/qtt/stage1_prediction_markets/qku_computation_control_plane/validation.py", "_validate_st12h_source_numeric_owner_separation_v1", "source semantics and numeric value authority as separate refs", "let source citation authenticate a runtime number", "PASS_SOURCE_NUMERIC_AUTHORITY_SEPARATION", "ST12A_SOURCE_CONFLICT", ("source_identity_ref", "numeric_authority_ref", "separation_state", "no_effect_flags"), "test_st12h_source_control_matrix", "tools/independent_validate_qku_computation_control_plane_source.py"),
+    _st12h_case("ST12H::SOURCE::STATISTICAL_CURRENTNESS", "ST12-CLOSURE::ST11-SOURCE::019", "source", "statistical-currentness", "src/qtt/stage1_prediction_markets/qku_computation_control_plane/source_policy.py", "validate_st12h_source_binding_v1", "method/version currentization with supplied evaluation time", "accept expired mutable recheck or superseded stable version", "PASS_METHOD_CURRENTNESS", "ST12A_SOURCE_EPOCH_STALE", ("method_id", "publication_or_version", "observed_at", "recheck_trigger"), "test_st12h_source_control_matrix", "tools/independent_validate_qku_computation_control_plane_source.py"),
+    _st12h_case("ST12H::SOURCE::FINAL_SOURCE_PACKET", "ST12-CLOSURE::ST11-SOURCE::020", "source", "final-source-packet", "src/qtt/stage1_prediction_markets/qku_computation_control_plane/validation.py", "_validate_st12h_final_source_packet_v1", "actual source-currentness, rights, and owner-separation receipts", "omit one currentness receipt", "PASS_COMPLETE_SOURCE_PACKET", "ST12A_VALIDATION_FAILED", ("source_binding_refs", "currentization_refs", "rights_refs", "owner_separation_refs", "terminal_state"), "test_st12h_source_control_matrix", "tools/independent_validate_qku_computation_control_plane_source.py"),
+)
+
+ST12H_SEMANTIC_TEST_IDENTITIES = tuple(case.case_id for case in ST12H_CONTROL_CASES) + tuple(
+    f"ST12H::{domain.upper()}::INHERITED_INDEPENDENT_VALIDATOR"
+    for domain in ("accounting", "execution", "llm", "operations", "security", "source")
+)
+
+ST12H_GROUPED_MATRIX_SUCCESS_MARKER = (
+    "ST12H_GROUPED_MATRIX_VALIDATED functions=6 control_cases=36 "
+    "semantic_identities=42 custom_case_labels=0"
+)
+
+ST12H_PARAMETER_CONSUMER_BY_SYMBOL: Mapping[str, tuple[str, ...]] = MappingProxyType(
+    {
+        binding.parameter_symbol: (binding.consumer_symbol,)
+        for binding in ST12H_PARAMETER_APPLICATION_BINDINGS
+    }
+)
+
+
+def _st12h_final_control(
+    control_id: str,
+    control: str,
+    owner_ref: str,
+    owner_symbol_disposition: str,
+    predecessor_control_ids: tuple[str, ...],
+    terminal_receipt: str,
+    exact_contract: str,
+) -> ST12HFinalizationControlV1:
+    return ST12HFinalizationControlV1(
+        control_id=control_id,
+        control=control,
+        owner_ref=owner_ref,
+        owner_symbol_disposition=owner_symbol_disposition,
+        predecessor_control_ids=predecessor_control_ids,
+        terminal_receipt=terminal_receipt,
+        exact_contract=exact_contract,
+    )
+
+
+ST12H_FINALIZATION_CONTROLS = (
+    _st12h_final_control("ST12H-FINAL::01", "AFFECTED_SCOPE_VALIDATION", "tools/independent_validate_qku_computation_control_plane.py::_execute_finalization_owner", "NEW_ST12H_ADDITIVE_UNDER_EXISTING_OWNER", (), "st12h_affected_scope_validation_receipt", "Execute current path ownership, parameter, and affected-scope validation for every H-modified owner and generated output."),
+    _st12h_final_control("ST12H-FINAL::02", "FULL_REPOSITORY_VALIDATION", "tools/independent_validate_qku_computation_control_plane.py::execute_st12h_finalization_controls_v1", "NEW_ST12H_ADDITIVE_UNDER_EXISTING_OWNER", ("ST12H-FINAL::01",), "st12h_full_repository_validation_receipt", "One terminal complete-repository route runs after focused green state."),
+    _st12h_final_control("ST12H-FINAL::03", "INDEPENDENT_MATH_RECONSTRUCTION", "tools/independent_validate_qku_computation_control_plane.py::build_st12h_math_evidence_crosswalk_v1", "NEW_ST12H_ADDITIVE_UNDER_EXISTING_OWNER", ("ST12H-FINAL::02",), "st12h_independent_math_reconstruction_receipt", "Execute five direct H reconstructions and consume 47 inherited independent-validator receipts through one exact 52-row crosswalk."),
+    _st12h_final_control("ST12H-FINAL::04", "AUTHORITY_BOUNDARY_RECONSTRUCTION", "tools/independent_validate_qku_computation_control_plane.py::reconstruct_st12h_authority_boundary_v1", "NEW_ST12H_ADDITIVE_UNDER_EXISTING_OWNER", ("ST12H-FINAL::02",), "st12h_authority_boundary_reconstruction_receipt", "Reconstruct every held authority and prove no H path can grant it."),
+    _st12h_final_control("ST12H-FINAL::05", "GENERATED_ARTIFACT_INVENTORY", "tools/build_qku_computation_control_plane.py::build_st12h_validation_currentization_operations_publication_report", "NEW_ST12H_ADDITIVE_UNDER_EXISTING_OWNER", ("ST12H-FINAL::01",), "st12h_generated_artifact_inventory_receipt", "Inventory exactly two deterministic H reports with one owner."),
+    _st12h_final_control("ST12H-FINAL::06", "SOURCE_RECONCILIATION", "src/qtt/stage1_prediction_markets/qku_computation_control_plane/source_policy.py::validate_st12h_source_binding_v1", "NEW_ST12H_ADDITIVE_UNDER_EXISTING_OWNER", ("ST12H-FINAL::05",), "st12h_source_reconciliation_receipt", "Close H-specific source status, rights and currentization decisions."),
+    _st12h_final_control("ST12H-FINAL::07", "CURRENT_PATH_OWNER_RECONCILIATION", "src/qtt/stage1_prediction_markets/qku_computation_control_plane/validation.py::validate_st12h_current_path_owner_reconciliation_v1", "NEW_ST12H_ADDITIVE_UNDER_EXISTING_OWNER", ("ST12H-FINAL::01",), "st12h_current_path_owner_reconciliation_receipt", "Bind all 41 historical dispositions to current owners and prohibit stale path creation."),
+    _st12h_final_control("ST12H-FINAL::08", "CLEAN_CHECKOUT_VALIDATION", ".github/workflows/qtt_validation.yml::validation_shards", "EXISTING_CURRENT_MAIN_VERIFIED", ("ST12H-FINAL::02", "ST12H-FINAL::07"), "st12h_clean_checkout_validation_receipt", "Validate from a clean current-main checkout after live owner gate."),
+    _st12h_final_control("ST12H-FINAL::09", "CLEAN_ZIP_EXTRACTION", "tools/independent_validate_qku_computation_control_plane.py::validate_st12h_archive_members_v1", "NEW_ST12H_ADDITIVE_UNDER_EXISTING_OWNER", ("ST12H-FINAL::08",), "st12h_clean_zip_extraction_receipt", "Inspect then extract the publication archive under bounded safety rules."),
+    _st12h_final_control("ST12H-FINAL::10", "PORTABLE_COPY_EXECUTION", "tools/independent_validate_qku_computation_control_plane.py::validate_st12h_portable_directory_v1", "NEW_ST12H_ADDITIVE_UNDER_EXISTING_OWNER", ("ST12H-FINAL::09",), "st12h_portable_copy_execution_receipt", "Run package validators from a path with spaces and non-ASCII characters."),
+    _st12h_final_control("ST12H-FINAL::11", "OPERATING_DOCUMENTATION", "tools/build_qku_computation_control_plane.py::build_st12h_final_step12_handoff_report", "NEW_ST12H_ADDITIVE_UNDER_EXISTING_OWNER", ("ST12H-FINAL::02", "ST12H-FINAL::07"), "st12h_operating_documentation_receipt", "Publish exact operating, incident, rollback and recovery instructions."),
+    _st12h_final_control("ST12H-FINAL::12", "SECURITY_CONTRACT", "src/qtt/stage1_prediction_markets/qku_computation_control_plane/validation.py::validate_st12h_domain_v1", "NEW_ST12H_ADDITIVE_UNDER_EXISTING_OWNER", ("ST12H-FINAL::04", "ST12H-FINAL::11"), "st12h_security_contract_receipt", "Prove no secret, network, provider, private-state or runtime effect."),
+    _st12h_final_control("ST12H-FINAL::13", "BACKUP_CREATION", "tools/independent_validate_qku_computation_control_plane.py::execute_st12h_backup_restore_portability_v1", "NEW_ST12H_ADDITIVE_UNDER_EXISTING_OWNER", ("ST12H-FINAL::11",), "st12h_backup_creation_receipt", "Create a bounded immutable backup with an inventory and typed receipt."),
+    _st12h_final_control("ST12H-FINAL::14", "BACKUP_VERIFICATION", "tools/independent_validate_qku_computation_control_plane.py::execute_st12h_backup_restore_portability_v1", "NEW_ST12H_ADDITIVE_UNDER_EXISTING_OWNER", ("ST12H-FINAL::13",), "st12h_backup_verification_receipt", "Read back and reconcile every backed-up member before restore acceptance."),
+    _st12h_final_control("ST12H-FINAL::15", "RESTORE_TEST", "tools/independent_validate_qku_computation_control_plane.py::execute_st12h_backup_restore_portability_v1", "NEW_ST12H_ADDITIVE_UNDER_EXISTING_OWNER", ("ST12H-FINAL::14",), "st12h_restore_test_receipt", "Restore into a clean external root and validate the reconstructed state."),
+    _st12h_final_control("ST12H-FINAL::16", "ROLLBACK_TEST", "tools/independent_validate_qku_computation_control_plane.py::execute_st12h_backup_restore_portability_v1", "NEW_ST12H_ADDITIVE_UNDER_EXISTING_OWNER", ("ST12H-FINAL::15",), "st12h_rollback_test_receipt", "Exercise deterministic local rollback with no active pointer or runtime mutation."),
+    _st12h_final_control("ST12H-FINAL::17", "CRASH_RECOVERY", "tools/independent_validate_qku_computation_control_plane.py::execute_st12h_backup_restore_portability_v1", "NEW_ST12H_ADDITIVE_UNDER_EXISTING_OWNER", ("ST12H-FINAL::11", "ST12H-FINAL::12"), "st12h_crash_recovery_receipt", "Recover from interrupted local finalization without partial acceptance."),
+    _st12h_final_control("ST12H-FINAL::18", "INTERRUPTION_RECOVERY", "tools/independent_validate_qku_computation_control_plane.py::execute_st12h_backup_restore_portability_v1", "NEW_ST12H_ADDITIVE_UNDER_EXISTING_OWNER", ("ST12H-FINAL::17",), "st12h_interruption_recovery_receipt", "Resume or discard by typed state; never infer completion from age."),
+    _st12h_final_control("ST12H-FINAL::19", "STALE_RECEIPT_REJECTION", "src/qtt/stage1_prediction_markets/qku_computation_control_plane/receipts.py::_validate_st12h_receipt_currentness_v1", "NEW_ST12H_ADDITIVE_UNDER_EXISTING_OWNER", ("ST12H-FINAL::05", "ST12H-FINAL::06"), "st12h_stale_receipt_rejection_receipt", "Reject superseded, incomplete, mismatched or authority-drifting receipts."),
+    _st12h_final_control("ST12H-FINAL::20", "PUBLICATION_MANIFEST", "tools/build_qku_computation_control_plane.py::build_st12h_final_step12_handoff_report", "NEW_ST12H_ADDITIVE_UNDER_EXISTING_OWNER", ("ST12H-FINAL::03", "ST12H-FINAL::04", "ST12H-FINAL::10", "ST12H-FINAL::12", "ST12H-FINAL::16", "ST12H-FINAL::18", "ST12H-FINAL::19"), "st12h_publication_manifest_receipt", "Publish a complete file and semantic-role inventory with no orphan."),
+    _st12h_final_control("ST12H-FINAL::21", "ARCHIVE_SAFETY", "tools/independent_validate_qku_computation_control_plane.py::validate_st12h_archive_members_v1", "NEW_ST12H_ADDITIVE_UNDER_EXISTING_OWNER", ("ST12H-FINAL::09", "ST12H-FINAL::10"), "st12h_archive_safety_receipt", "Reject traversal, absolute/drive/UNC paths, links, collisions and budget abuse."),
+    _st12h_final_control("ST12H-FINAL::22", "STEP12_FINAL_HANDOFF", "tools/build_qku_computation_control_plane.py::build_st12h_final_step12_handoff_report", "NEW_ST12H_ADDITIVE_UNDER_EXISTING_OWNER", ("ST12H-FINAL::20", "ST12H-FINAL::21"), "st12h_step12_final_handoff_receipt", "Emit a deterministic held handoff projection that requires external current execution and independent reaudit receipts."),
+    _st12h_final_control("ST12H-FINAL::23", "NO_RUNTIME_OR_TRADING_AUTHORITY", "src/qtt/stage1_prediction_markets/qku_computation_control_plane/models.py::NoEffectFlagsV1", "EXISTING_CURRENT_MAIN_VERIFIED", ("ST12H-FINAL::04", "ST12H-FINAL::12", "ST12H-FINAL::22"), "st12h_no_runtime_or_trading_authority_receipt", "Prove H creates no provider, private-state, replay, PAPER, inference, QPU, order, capital, canary, live or launch authority."),
+    _st12h_final_control("ST12H-FINAL::24", "FINAL_ACCEPTANCE", "tools/independent_validate_qku_computation_control_plane.py::execute_st12h_finalization_controls_v1", "NEW_ST12H_ADDITIVE_UNDER_EXISTING_OWNER", ("ST12H-FINAL::02", "ST12H-FINAL::03", "ST12H-FINAL::04", "ST12H-FINAL::06", "ST12H-FINAL::07", "ST12H-FINAL::10", "ST12H-FINAL::12", "ST12H-FINAL::16", "ST12H-FINAL::18", "ST12H-FINAL::19", "ST12H-FINAL::20", "ST12H-FINAL::21", "ST12H-FINAL::22", "ST12H-FINAL::23"), "st12h_final_acceptance_receipt", "Remain held until every predecessor has a current executed receipt and an external independent reaudit accepts the actual code."),
+)
+
+
+_ST12H_COMMAND_ROWS = (
+    ("ST12-CMD::01", "accounting", ("python", "tools/independent_validate_qku_computation_control_plane_accounting.py"), "tools/independent_validate_qku_computation_control_plane_accounting.py", "QKU_ACCOUNTING_INDEPENDENTLY_VALIDATED"),
+    ("ST12-CMD::04", "execution", ("python", "tools/independent_validate_qku_computation_control_plane_execution.py"), "tools/independent_validate_qku_computation_control_plane_execution.py", "QKU_EXECUTION_INDEPENDENTLY_VALIDATED"),
+    ("ST12-CMD::06", "llm", ("python", "tools/independent_validate_qku_computation_control_plane_llm.py"), "tools/independent_validate_qku_computation_control_plane_llm.py", "QKU_LLM_INDEPENDENTLY_VALIDATED"),
+    ("ST12-CMD::08", "operations", ("python", "tools/independent_validate_qku_computation_control_plane_operations.py"), "tools/independent_validate_qku_computation_control_plane_operations.py", "QKU_OPERATIONS_INDEPENDENTLY_VALIDATED"),
+    ("ST12-CMD::10", "security", ("python", "tools/independent_validate_qku_computation_control_plane_security.py"), "tools/independent_validate_qku_computation_control_plane_security.py", "QKU_SECURITY_INDEPENDENTLY_VALIDATED"),
+    ("ST12-CMD::11", "source", ("python", "tools/independent_validate_qku_computation_control_plane_source.py"), "tools/independent_validate_qku_computation_control_plane_source.py", "QKU_SOURCE_INDEPENDENTLY_VALIDATED"),
+    ("ST12-CMD::12", "accounting", ("python", "tools/validate_qku_computation_control_plane.py", "--domain", "accounting"), "tools/validate_qku_computation_control_plane.py", "QKU_COMPUTATION_CONTROL_PLANE_VALIDATED domain=accounting"),
+    ("ST12-CMD::15", "execution", ("python", "tools/validate_qku_computation_control_plane.py", "--domain", "execution"), "tools/validate_qku_computation_control_plane.py", "QKU_COMPUTATION_CONTROL_PLANE_VALIDATED domain=execution"),
+    ("ST12-CMD::17", "llm", ("python", "tools/validate_qku_computation_control_plane.py", "--domain", "llm"), "tools/validate_qku_computation_control_plane.py", "QKU_COMPUTATION_CONTROL_PLANE_VALIDATED domain=llm"),
+    ("ST12-CMD::19", "operations", ("python", "tools/validate_qku_computation_control_plane.py", "--domain", "operations"), "tools/validate_qku_computation_control_plane.py", "QKU_COMPUTATION_CONTROL_PLANE_VALIDATED domain=operations"),
+    ("ST12-CMD::21", "security", ("python", "tools/validate_qku_computation_control_plane.py", "--domain", "security"), "tools/validate_qku_computation_control_plane.py", "QKU_COMPUTATION_CONTROL_PLANE_VALIDATED domain=security"),
+    ("ST12-CMD::22", "source", ("python", "tools/validate_qku_computation_control_plane.py", "--domain", "source"), "tools/validate_qku_computation_control_plane.py", "QKU_COMPUTATION_CONTROL_PLANE_VALIDATED domain=source"),
+)
+
+ST12H_VALIDATION_COMMANDS = tuple(
+    ST12HValidationCommandPlanV1(
+        command_id=command_id,
+        execution_order=execution_order,
+        domain=domain,
+        argv=argv,
+        repository_paths=(repository_path,),
+        marker_policy="PREFIX_LINES",
+        expected_terminal_markers=(terminal_marker,),
+        hard_timeout_seconds=1200,
+        max_attempts=1,
+        environment_id="LOCAL_FOCUSED_COMPATIBILITY",
+        network_class="VALIDATION_NETWORK_FORBIDDEN",
+        provider_effect_allowed=False,
+        private_state_allowed=False,
+        runtime_or_trading_effect_allowed=False,
+    )
+    for execution_order, (
+        command_id,
+        domain,
+        argv,
+        repository_path,
+        terminal_marker,
+    ) in enumerate(_ST12H_COMMAND_ROWS, start=1)
+)
+
+_ST12H_DOMAIN_COUNTS: Mapping[str, int] = MappingProxyType(
+    {
+        "accounting": 4,
+        "execution": 6,
+        "llm": 10,
+        "operations": 6,
+        "security": 4,
+        "source": 6,
+    }
+)
+_ST12H_HELD_AUTHORITIES = (
+    "provider_connection",
+    "private_state_read",
+    "replay_execution",
+    "paper_execution",
+    "llm_inference",
+    "qpu_or_simulator_execution",
+    "mode_or_allow_activation",
+    "order_submit_cancel_or_amend",
+    "capital_mutation",
+    "canary_authority",
+    "live_authority",
+    "launch_authority",
+    "post_step12_implementation",
+    "master_plan_source_mutation",
+    "profit_or_quantum_advantage_claim",
+)
+_ST12H_CAMPAIGN_PHASE_IDS = (
+    "PACKAGE_INTAKE",
+    "CODEX_PHASE0",
+    "SEPARATE_OWNER_IMPLEMENTATION_AUTHORIZATION",
+    "FOCUSED_H_PRIMARY_AND_MATRIX",
+    "FROZEN_TWELVE_COMMANDS",
+    "AGGREGATE_INDEPENDENT_RECONSTRUCTION",
+    "DETERMINISTIC_BUILD_PASS_1",
+    "DETERMINISTIC_BUILD_PASS_2_ZERO_DELTA",
+    "CENTRAL_VALIDATION_OWNERS",
+    "LAST_MILE_PR152_CURRENTIZATION",
+    "COMPACT_CENTRAL_TESTS",
+    "ONE_FULL_LOCAL_CAMPAIGN",
+    "CLEAN_CI_AUTHORITATIVE",
+    "PUBLICATION_AND_POST_RUN_CUSTODY",
+)
+_ST12H_CAMPAIGN_COMMAND_IDS = (
+    ("ST12H-V8-PKG-INTAKE",),
+    (),
+    (),
+    ("ST12H-V8-PRIMARY-H", "ST12H-V8-PYTEST-H"),
+    tuple(command.command_id for command in ST12H_VALIDATION_COMMANDS),
+    ("ST12H-V8-INDEPENDENT-AGGREGATE",),
+    ("ST12H-V8-BUILD-1",),
+    ("ST12H-V8-BUILD-2", "ST12H-V8-BUILD-DIFF"),
+    (
+        "ST12H-V8-VALIDATE-INVENTORY",
+        "ST12H-V8-VALIDATE-SCOPE",
+        "ST12H-V8-VALIDATE-BRANCH-CONTEXT",
+        "ST12H-V8-ROUTER",
+    ),
+    ("ST12H-V8-PR152-CURRENTIZE", "ST12H-V8-PR152-VALIDATE"),
+    ("ST12H-V8-COMPACT-PYTEST",),
+    ("ST12H-V8-FULL-LOCAL",),
+    (),
+    (),
+)
+
+
+def _st12h_validation_failure(message: str) -> ContractValidationError:
+    return ContractValidationError(ReasonCode.VALIDATION_FAILED, message)
+
+
+def _validate_st12h_backup_restore_plan_roster_v1(
+    plans: tuple[ST12HBackupRestorePlanV1, ...],
+) -> None:
+    if (
+        len(plans) != 12
+        or tuple(plan.plan_id for plan in plans)
+        != tuple(f"ST12H-BR::{index:02d}" for index in range(1, 13))
+    ):
+        raise _st12h_validation_failure(
+            "ST12-H backup/restore closure must contain twelve ordered stages"
+        )
+    for plan in plans:
+        if (
+            plan.artifact_paths != _ST12H_GENERATED_REPORT_PATHS
+            or plan.max_archive_count != 1
+            or plan.repository_copy_allowed
+            or plan.copied_git_index_allowed
+            or not plan.cleanup_required
+            or plan.restore_validation_commands
+            != _ST12H_RESTORE_VALIDATION_COMMANDS
+            or not plan.operation
+            or not plan.precondition
+            or not plan.postcondition
+        ):
+            raise _st12h_validation_failure(
+                f"invalid bounded backup/restore plan: {plan.plan_id}"
+            )
+    if len({plan.operation for plan in plans}) != 12:
+        raise _st12h_validation_failure(
+            "ST12-H backup/restore stages must perform twelve distinct operations"
+        )
+
+
+def validate_st12h_backup_restore_plans_v1() -> None:
+    _validate_st12h_backup_restore_plan_roster_v1(
+        ST12H_BACKUP_RESTORE_PLANS
+    )
+
+
+def validate_st12h_campaign_plan_v1(
+    plan: ST12HValidationCampaignPlanV1,
+) -> None:
+    if type(plan) is not ST12HValidationCampaignPlanV1:
+        raise ContractValidationError(
+            ReasonCode.INVALID_CONTRACT,
+            "plan must be an exact ST12HValidationCampaignPlanV1",
+        )
+    if tuple(phase.phase_id for phase in plan.phases) != _ST12H_CAMPAIGN_PHASE_IDS:
+        raise _st12h_validation_failure("ST12-H campaign phase order drifted")
+    command_ids = tuple(
+        tuple(command.command_id for command in phase.commands)
+        for phase in plan.phases
+    )
+    if command_ids != _ST12H_CAMPAIGN_COMMAND_IDS:
+        raise _st12h_validation_failure("ST12-H campaign command order drifted")
+    if plan.phases[4].commands != ST12H_VALIDATION_COMMANDS:
+        raise _st12h_validation_failure(
+            "the frozen twelve-command phase must use the canonical command values"
+        )
+    all_commands = tuple(
+        command for phase in plan.phases for command in phase.commands
+    )
+    if (
+        any(command.max_attempts != 1 for command in all_commands)
+        or sum(command.command_id == "ST12H-V8-FULL-LOCAL" for command in all_commands)
+        != 1
+        or plan.full_local_campaign_limit != 1
+        or plan.scratch_budget_ref
+        != "registries/h_validation_and_scratch_budget.json"
+        or plan.repository_copy_count != 0
+        or plan.copied_git_index_count != 0
+    ):
+        raise _st12h_validation_failure(
+            "ST12-H campaign budgets or no-retry custody drifted"
+        )
+
+
+def validate_st12h_complete_math_coverage_v1() -> None:
+    expected = frozenset(f"MATH-{index:02d}" for index in range(1, 53))
+    reconstructed = frozenset(_ST12F_MATH_SPEC_IDS_V1).union(
+        {"MATH-46", "MATH-47", "MATH-48", "MATH-49"}
+    )
+    if reconstructed != expected:
+        raise _st12h_validation_failure(
+            "ST12-H math specification coverage must remain exact MATH-01..52"
+        )
+    if (
+        frozenset(_ST12F_MATH_CALLABLES_V1) != frozenset(_ST12F_MATH_SPEC_IDS_V1)
+        or frozenset(_ST12F_VECTORS_V1) != frozenset(_ST12F_MATH_SPEC_IDS_V1)
+        or not {"MATH-46", "MATH-47", "MATH-48", "MATH-49"}.issubset(
+            IMPLEMENTATION_REGISTRY
+        )
+    ):
+        raise _st12h_validation_failure(
+            "ST12-H math callable/vector/implementation joins do not reconcile"
+        )
+
+
+_ST12H_CASE_BY_ID: Mapping[str, ST12HControlCaseV1] = MappingProxyType(
+    {case.case_id: case for case in ST12H_CONTROL_CASES}
+)
+
+
+def _st12h_text_value(name: str, value: str) -> TypedValueV1:
+    return TypedValueV1(
+        name=name,
+        kind=TypedValueKindV1.TEXT,
+        value=value,
+        unit="canonical-text",
+        basis="ST12-H certified control registry",
+    )
+
+
+def validate_st12h_current_path_owner_reconciliation_v1() -> None:
+    owner_paths = tuple(case.owner_path for case in ST12H_CONTROL_CASES)
+    if (
+        len(ST12H_CONTROL_CASES) != 36
+        or len(ST12H_FINALIZATION_CONTROLS) != 24
+        or any(
+            not path.startswith("src/qtt/stage1_prediction_markets/")
+            for path in owner_paths
+        )
+        or any("tranche_h" in path for path in owner_paths)
+    ):
+        raise _st12h_validation_failure(
+            "ST12-H current path/owner reconciliation failed"
+        )
+
+
+def validate_st12h_parameter_consumption_v1() -> None:
+    if (
+        len(ST12H_PARAMETER_POLICIES) != 21
+        or len(ST12H_PARAMETER_APPLICATION_BINDINGS) != 21
+        or len(ST12H_PARAMETER_CONSUMER_BY_SYMBOL) != 21
+    ):
+        raise _st12h_validation_failure(
+            "ST12-H parameter consumption must reconcile exact 21/21"
+        )
+    for policy, binding in zip(
+        ST12H_PARAMETER_POLICIES,
+        ST12H_PARAMETER_APPLICATION_BINDINGS,
+        strict=True,
+    ):
+        if (
+            policy.parameter_id != binding.parameter_id
+            or policy.parameter_symbol != binding.parameter_symbol
+            or policy.consumer_symbols
+            != ST12H_PARAMETER_CONSUMER_BY_SYMBOL[binding.parameter_symbol]
+            or not set(binding.semantic_case_ids).issubset(_ST12H_CASE_BY_ID)
+            or binding.consumer_path.endswith("/parameter_policy.py")
+            or binding.consumer_symbol.startswith("_validate_st12h_parameter_contract")
+            or binding.runtime_activation_authorized
+            or policy.runtime_activation_authorized
+        ):
+            raise _st12h_validation_failure(
+                f"ST12-H parameter consumer join failed: {binding.binding_id}"
+            )
+    evidence = _evaluate_st12h_parameter_applications_v1()
+    if (
+        len(evidence) != 21
+        or any(
+            row.disposition != "H_CONTRACT_BINDING_VALIDATED"
+            or not row.policy_resolution_passed
+            or not row.exact_application_binding_passed
+            or row.invalid_mutation_reason is not ReasonCode.PARAMETER_OUT_OF_POLICY
+            or row.runtime_activation_authorized
+            or not row.runtime_consumer_held
+            for row in evidence
+        )
+    ):
+        raise _st12h_validation_failure(
+            "ST12-H parameter contracts were not resolved, bound, or rejected exactly"
+        )
+
+
+def validate_st12h_publication_manifest_v1(
+    manifest: ST12HPublicationManifestV1,
+) -> None:
+    if type(manifest) is not ST12HPublicationManifestV1:
+        raise ContractValidationError(
+            ReasonCode.INVALID_CONTRACT,
+            "manifest must be an exact ST12HPublicationManifestV1",
+        )
+    if (
+        manifest.artifact_refs != _ST12H_GENERATED_REPORT_PATHS
+        or not manifest.validation_receipt_refs
+        or manifest.stale_receipt_count < 1
+        or manifest.authority_non_effects != _ST12H_HELD_AUTHORITIES
+        or manifest.next_owner_action != "INDEPENDENT_ACTUAL_CODE_AUDIT"
+    ):
+        raise _st12h_validation_failure(
+            "ST12-H publication manifest is incomplete or authority-expanding"
+        )
+
+
+if (
+    len(ST12H_CONTROL_CASES) != 36
+    or len(ST12H_SEMANTIC_TEST_IDENTITIES) != 42
+    or len(set(ST12H_SEMANTIC_TEST_IDENTITIES)) != 42
+    or len(ST12H_FINALIZATION_CONTROLS) != 24
+    or len(ST12H_VALIDATION_COMMANDS) != 12
+    or tuple(
+        sum(case.domain == domain for case in ST12H_CONTROL_CASES)
+        for domain in _ST12H_DOMAIN_COUNTS
+    )
+    != tuple(_ST12H_DOMAIN_COUNTS.values())
+):
+    raise ContractValidationError(
+        ReasonCode.VALIDATION_FAILED,
+        "ST12-H immutable validation denominators drifted",
+    )
+
+
+_ST12H_SERIALIZED_TYPES: Mapping[str, type[object]] = MappingProxyType(
+    {
+        "ST12H-SERIALIZED-CONTRACT::01": NoEffectFlagsV1,
+        "ST12H-SERIALIZED-CONTRACT::02": ST12HBackupRestoreReceiptV1,
+        "ST12H-SERIALIZED-CONTRACT::03": ST12HControlReceiptV1,
+        "ST12H-SERIALIZED-CONTRACT::04": ST12HFinalizationReceiptV1,
+        "ST12H-SERIALIZED-CONTRACT::05": ST12HPublicationReceiptV1,
+        "ST12H-SERIALIZED-CONTRACT::06": ST12HReceiptCustodyV1,
+        "ST12H-SERIALIZED-CONTRACT::07": ST12HStep12FinalHandoffV1,
+        "ST12H-SERIALIZED-CONTRACT::08": ST12HValidationCampaignReceiptV1,
+        "ST12H-SERIALIZED-CONTRACT::09": ST12HValidationCommandReceiptV1,
+        "ST12H-SERIALIZED-CONTRACT::10": (
+            ST12HValidationCurrentizationOperationsPublicationReportV1
+        ),
+    }
+)
+_ST12H_NO_EFFECT_FIELD_NAMES = tuple(
+    field.name for field in fields(NoEffectFlagsV1)
+)
+_ST12H_DATETIME_FIELD_NAMES = frozenset(
+    {"evaluated_at", "valid_until", "started_at", "finished_at"}
+)
+_ST12H_DECIMAL_FIELD_NAMES = frozenset({"elapsed_seconds"})
+_ST12H_REASON_FIELD_NAMES = frozenset({"reason_code_or_none"})
+_ST12H_BOOL_FIELD_NAMES = frozenset(
+    {
+        *_ST12H_NO_EFFECT_FIELD_NAMES,
+        "generated_projection_only",
+        "master_plan_source_authority",
+        "tracked_state_stable",
+        "scratch_budget_pass",
+        "network_policy_pass",
+    }
+)
+_ST12H_INT_FIELD_NAMES = frozenset(
+    {
+        "active_implementation_path_count",
+        "artifact_member_count",
+        "attempt_count",
+        "backup_restore_stage_count",
+        "byte_parity_count",
+        "command_count",
+        "copied_git_index_count",
+        "execution_order",
+        "fail_count",
+        "finalization_control_count",
+        "full_campaign_count",
+        "grouped_test_function_count",
+        "grouped_test_module_count",
+        "parameter_count",
+        "pass_count",
+        "read_only_predecessor_path_count",
+        "reason_code_binding_count",
+        "repository_copy_count",
+        "restored_member_count",
+        "returncode",
+        "schema_cardinality_binding_count",
+        "schema_file_count",
+        "schema_owner_consumer_binding_count",
+        "scratch_allocated_bytes",
+        "scratch_file_count",
+        "scratch_logical_bytes",
+        "serialized_contract_binding_count",
+        "source_binding_count",
+        "stale_receipt_class_count",
+        "stale_receipt_count",
+        "stale_receipt_rejection_count",
+        "stderr_line_count",
+        "stdout_line_count",
+        "validation_campaign_phase_count",
+        "validation_command_count",
+    }
+)
+_ST12H_MAPPING_INT_FIELD_NAMES = frozenset(
+    {
+        "budget_usage",
+        "closure_counts",
+        "completion_denominators",
+        "math_counts",
+        "path_counts",
+        "test_topology",
+    }
+)
+_ST12H_ARRAY_FIELD_NAMES = frozenset(
+    {
+        "artifact_refs",
+        "authority_non_effects",
+        "command_argv",
+        "environment_classes",
+        "environment_receipt_refs",
+        "evidence_refs",
+        "final_control_refs",
+        "held_authorities",
+        "ordinary_untracked_paths_after",
+        "ordinary_untracked_paths_before",
+        "phase_receipt_refs",
+        "predecessor_receipt_refs",
+        "required_reference_ids",
+        "source_currentness_evidence_refs",
+        "source_receipt_refs",
+        "staged_paths_after",
+        "staged_paths_before",
+        "tracked_paths_after",
+        "tracked_paths_before",
+        "validation_command_receipt_refs",
+        "validation_markers",
+        "validation_receipt_refs",
+    }
+)
+
+
+def _st12h_serialized_text_valid(value: object) -> bool:
+    return isinstance(value, str) and bool(value) and value.strip() == value
+
+
+def _st12h_serialized_datetime_valid(value: object) -> bool:
+    if not isinstance(value, str) or not value.endswith("Z") or "+" in value:
+        return False
+    try:
+        parsed = datetime.fromisoformat(value[:-1] + "+00:00")
+    except ValueError:
+        return False
+    return (
+        parsed.tzinfo is not None
+        and parsed.utcoffset() == timedelta(0)
+        and parsed.isoformat().replace("+00:00", "Z") == value
+    )
+
+
+def _st12h_serialized_decimal_valid(value: object) -> bool:
+    if (
+        not isinstance(value, str)
+        or not value
+        or value.startswith("+")
+        or "e" in value.lower()
+    ):
+        return False
+    try:
+        parsed = Decimal(value)
+    except Exception:
+        return False
+    return parsed.is_finite() and format(parsed, "f") == value
+
+
+def _st12h_no_effect_payload_valid(value: object) -> bool:
+    return (
+        isinstance(value, Mapping)
+        and set(value) == set(_ST12H_NO_EFFECT_FIELD_NAMES)
+        and all(value[name] is False for name in _ST12H_NO_EFFECT_FIELD_NAMES)
+    )
+
+
+def _st12h_typed_record_payload_valid(value: object) -> bool:
+    if not isinstance(value, Mapping) or set(value) != {"fields"}:
+        return False
+    rows = value["fields"]
+    if not isinstance(rows, list) or not rows:
+        return False
+    names: set[str] = set()
+    for row in rows:
+        if not isinstance(row, Mapping) or set(row) != {
+            "name",
+            "kind",
+            "value",
+            "unit",
+            "basis",
+        }:
+            return False
+        if not all(
+            _st12h_serialized_text_valid(row[name])
+            for name in ("name", "kind", "unit", "basis")
+        ):
+            return False
+        if row["name"] in names:
+            return False
+        names.add(row["name"])
+        kind = row["kind"]
+        typed_value = row["value"]
+        if kind == "TEXT":
+            valid = isinstance(typed_value, str)
+        elif kind == "DECIMAL":
+            valid = _st12h_serialized_decimal_valid(typed_value)
+        elif kind == "FLOAT64":
+            valid = (
+                isinstance(typed_value, (int, float))
+                and not isinstance(typed_value, bool)
+                and math.isfinite(float(typed_value))
+            )
+        elif kind == "INTEGER":
+            valid = type(typed_value) is int
+        elif kind == "BOOLEAN":
+            valid = type(typed_value) is bool
+        else:
+            valid = False
+        if not valid:
+            return False
+    return True
+
+
+def _st12h_serialized_field_valid(name: str, value: object) -> bool:
+    if name == "no_effect_flags" or name == "authority_effects":
+        return _st12h_no_effect_payload_valid(value)
+    if name in {"control_payload", "assertion_results"}:
+        return _st12h_typed_record_payload_valid(value)
+    if name in _ST12H_DATETIME_FIELD_NAMES:
+        return _st12h_serialized_datetime_valid(value)
+    if name in _ST12H_DECIMAL_FIELD_NAMES:
+        return _st12h_serialized_decimal_valid(value)
+    if name in _ST12H_REASON_FIELD_NAMES:
+        if value is None:
+            return True
+        if not isinstance(value, str):
+            return False
+        try:
+            ReasonCode(value)
+        except ValueError:
+            return False
+        return True
+    if name in _ST12H_BOOL_FIELD_NAMES:
+        return type(value) is bool
+    if name in _ST12H_INT_FIELD_NAMES:
+        return type(value) is int and value >= 0
+    if name in _ST12H_MAPPING_INT_FIELD_NAMES:
+        return (
+            isinstance(value, Mapping)
+            and bool(value)
+            and all(
+                _st12h_serialized_text_valid(key)
+                and type(item) is int
+                and item >= 0
+                for key, item in value.items()
+            )
+        )
+    if name == "frozen_denominators":
+        return (
+            isinstance(value, list)
+            and len(value) == 8
+            and all(type(item) is int and item >= 0 for item in value)
+        )
+    if name == "command_receipts":
+        return isinstance(value, list) and all(
+            isinstance(item, Mapping)
+            and not validate_st12h_serialized_contracts_v1(
+                binding_id="ST12H-SERIALIZED-CONTRACT::09",
+                payload=item,
+            )
+            for item in value
+        )
+    if name in _ST12H_ARRAY_FIELD_NAMES:
+        return isinstance(value, list) and all(
+            _st12h_serialized_text_valid(item) for item in value
+        )
+    return _st12h_serialized_text_valid(value)
+
+
+def _st12h_serialized_cardinality_errors(
+    binding_id: str,
+    payload: Mapping[str, object],
+) -> tuple[str, ...]:
+    errors: list[str] = []
+    if binding_id == "ST12H-SERIALIZED-CONTRACT::02":
+        if not (
+            payload["artifact_member_count"]
+            == payload["restored_member_count"]
+            == payload["byte_parity_count"]
+        ):
+            errors.append("backup_restore_member_counts")
+        if payload["repository_copy_count"] != 0 or payload["copied_git_index_count"] != 0:
+            errors.append("backup_restore_copy_counts")
+    elif binding_id == "ST12H-SERIALIZED-CONTRACT::05":
+        exact = (
+            payload["active_implementation_path_count"],
+            payload["read_only_predecessor_path_count"],
+            payload["grouped_test_module_count"],
+            payload["grouped_test_function_count"],
+        )
+        if (
+            exact != (25, 66, 1, 6)
+            or payload["stale_receipt_count"] < 1
+            or payload["stale_receipt_rejection_count"]
+            < payload["stale_receipt_count"]
+        ):
+            errors.append("publication_counts")
+        if len(payload["artifact_refs"]) != 2 or payload["authority_non_effects"] != list(_ST12H_HELD_AUTHORITIES):
+            errors.append("publication_sequences")
+    elif binding_id == "ST12H-SERIALIZED-CONTRACT::07":
+        if payload["frozen_denominators"] != [36, 41, 21, 52, 52, 52, 42, 12]:
+            errors.append("handoff_denominators")
+        if payload["final_control_refs"] != [
+            f"ST12H-FINAL::{index:02d}" for index in range(1, 25)
+        ]:
+            errors.append("handoff_final_controls")
+        if (
+            payload["active_implementation_path_count"],
+            payload["read_only_predecessor_path_count"],
+            payload["grouped_test_module_count"],
+            payload["grouped_test_function_count"],
+        ) != (25, 66, 1, 6) or payload["stale_receipt_count"] < 1:
+            errors.append("handoff_counts")
+        if payload["held_authorities"] != list(_ST12H_HELD_AUTHORITIES):
+            errors.append("handoff_authorities")
+        if payload["terminal_state"] not in {
+            "IMPLEMENTATION_IN_PROGRESS",
+            "INDEPENDENT_CODE_AUDIT_FAILED",
+            "FINAL_CONTROLS_INCOMPLETE",
+            "PUBLICATION_HELD",
+            "MERGE_HELD",
+        }:
+            errors.append("handoff_terminal_state")
+    elif binding_id == "ST12H-SERIALIZED-CONTRACT::08":
+        command_receipts = payload["command_receipts"]
+        if (
+            payload["command_count"] != len(command_receipts)
+            or payload["pass_count"] + payload["fail_count"]
+            != payload["command_count"]
+            or payload["full_campaign_count"] != 1
+            or any(
+                payload[name] is not True
+                for name in (
+                    "tracked_state_stable",
+                    "scratch_budget_pass",
+                    "network_policy_pass",
+                )
+            )
+        ):
+            errors.append("campaign_counts_or_custody")
+    elif binding_id == "ST12H-SERIALIZED-CONTRACT::09":
+        if (
+            payload["execution_order"] < 1
+            or payload["attempt_count"] != 1
+            or payload["returncode"] != 0
+        ):
+            errors.append("command_execution_contract")
+        if _st12h_serialized_datetime_valid(payload["started_at"]) and _st12h_serialized_datetime_valid(payload["finished_at"]):
+            started = datetime.fromisoformat(payload["started_at"][:-1] + "+00:00")
+            finished = datetime.fromisoformat(payload["finished_at"][:-1] + "+00:00")
+            if started > finished:
+                errors.append("command_time_order")
+    elif binding_id == "ST12H-SERIALIZED-CONTRACT::10":
+        if payload["closure_counts"] != dict(
+            _ST12H_DOMAIN_COUNTS,
+            total=36,
+            control_inventory_count=36,
+            implemented_control_contract_count=36,
+            actual_current_control_execution_count=0,
+            held_control_count=36,
+            external_control_receipt_requirement_count=36,
+            parameter_inventory_count=21,
+            implemented_parameter_contract_count=21,
+            actual_current_parameter_execution_count=0,
+            runtime_parameter_application_count=0,
+            runtime_authority_count=0,
+            backup_restore_inventory_count=12,
+            actual_current_backup_restore_execution_count=0,
+            finalization_inventory_count=24,
+            actual_current_finalization_execution_count=0,
+        ):
+            errors.append("report_closure_counts")
+        if payload["path_counts"] != {
+            "active": 25,
+            "new_production_modules": 0,
+            "new_test_modules": 1,
+            "new_validator_families": 0,
+            "read_only": 66,
+        }:
+            errors.append("report_path_counts")
+        if payload["math_counts"] != {
+            "actual_current_execution_count": 0,
+            "evidence_crosswalk_contracts": 52,
+            "external_dynamic_receipt_requirement_count": 52,
+            "golden_vector_or_invariant_contracts": 52,
+            "h_direct_contracts": 5,
+            "held_count": 52,
+            "identity_only_evidence_count": 0,
+            "independent_oracle_contracts": 52,
+            "inherited_validator_contracts": 47,
+            "specifications": 52,
+        }:
+            errors.append("report_math_counts")
+        if payload["test_topology"] != {
+            "custom_case_labels": 0,
+            "functions": 6,
+            "modules": 1,
+            "semantic_identities": 42,
+        }:
+            errors.append("report_test_topology")
+        exact_counts = (
+            payload["parameter_count"],
+            payload["validation_command_count"],
+            payload["validation_campaign_phase_count"],
+            payload["source_binding_count"],
+            payload["stale_receipt_class_count"],
+            payload["stale_receipt_rejection_count"],
+            payload["backup_restore_stage_count"],
+            payload["finalization_control_count"],
+            payload["serialized_contract_binding_count"],
+            payload["schema_file_count"],
+            payload["schema_owner_consumer_binding_count"],
+            payload["schema_cardinality_binding_count"],
+            payload["reason_code_binding_count"],
+        )
+        if exact_counts != (21, 12, 14, 9, 14, 14, 12, 24, 10, 10, 10, 93, 27):
+            errors.append("report_denominators")
+        if (
+            payload["environment_classes"]
+            != ["PACKAGE_AUDIT", "LOCAL_FOCUSED_COMPATIBILITY", "CLEAN_CI_AUTHORITATIVE"]
+            or payload["source_currentness_evidence_refs"]
+            != [
+                "REQUIRED-EXTERNAL::ST12H-SOURCE-CURRENTNESS-RECEIPT::"
+                f"ST12H-V8-SRC::{index:02d}::CORRECTED-STATE"
+                for index in range(1, 10)
+            ]
+            or payload["validation_command_receipt_refs"]
+            != [
+                "REQUIRED-EXTERNAL::ST12H-VALIDATION-COMMAND-RECEIPT::"
+                f"{command.command_id}::CORRECTED-STATE"
+                for command in ST12H_VALIDATION_COMMANDS
+            ]
+            or payload["held_authorities"] != list(_ST12H_HELD_AUTHORITIES)
+        ):
+            errors.append("report_sequences")
+    return tuple(errors)
+
+
+def validate_st12h_serialized_contracts_v1(
+    *,
+    binding_id: str,
+    payload: Mapping[str, object],
+) -> tuple[str, ...]:
+    value_type = _ST12H_SERIALIZED_TYPES.get(binding_id)
+    if value_type is None:
+        return ("unknown_binding_id",)
+    if not isinstance(payload, Mapping):
+        return ("payload_not_mapping",)
+    expected_fields = tuple(field.name for field in fields(value_type))
+    if set(payload) != set(expected_fields):
+        return ("field_roster_mismatch",)
+    if tuple(payload) != expected_fields:
+        return ("field_order_mismatch",)
+    errors = tuple(
+        f"invalid_field:{name}"
+        for name in expected_fields
+        if not _st12h_serialized_field_valid(name, payload[name])
+    )
+    if errors:
+        return errors
+    cardinality = list(_st12h_serialized_cardinality_errors(binding_id, payload))
+    if "evaluated_at" in payload and "valid_until" in payload:
+        evaluated = datetime.fromisoformat(payload["evaluated_at"][:-1] + "+00:00")
+        valid_until = datetime.fromisoformat(payload["valid_until"][:-1] + "+00:00")
+        if valid_until <= evaluated:
+            cardinality.append("receipt_expired_or_nonfuture")
+    return tuple(cardinality)
+
+
 _ST12G_PUBLIC_TYPES_V2 = (
     "ST12GProjectionRequestV2",
     "ST12GProjectionResolutionStateV2",
@@ -8028,3 +9111,2193 @@ _DOMAIN_CHECKS.update(
         "quantum": _st12f_quantum_checks,
     }
 )
+
+
+@dataclass(frozen=True, slots=True)
+class _ST12HExecutableControlFixtureV1:
+    case_id: str
+    attack_enabled: bool
+    semantic_attack: str | None
+    no_effect_flags: NoEffectFlagsV1 = NO_EFFECTS_V1
+
+
+@dataclass(frozen=True, slots=True)
+class _ST12HObservedControlOutcomeV1:
+    case_id: str
+    terminal_state: str
+    reason_code_or_none: ReasonCode | None
+    receipt_fields: Mapping[str, object]
+    owner_call_refs: tuple[str, ...]
+    source_receipt_refs: tuple[str, ...]
+    no_effect_flags: NoEffectFlagsV1
+
+
+@dataclass(frozen=True, slots=True)
+class _ST12HExecutableControlAdapterV1:
+    case_id: str
+    owner_module: str
+    owner_symbol: str
+    owner_callables: tuple[object, ...]
+    valid_fixture_factory: Callable[[], _ST12HExecutableControlFixtureV1]
+    semantic_mutation_factory: Callable[
+        [_ST12HExecutableControlFixtureV1], _ST12HExecutableControlFixtureV1
+    ]
+    owner_invocation_function: Callable[
+        [_ST12HExecutableControlFixtureV1], _ST12HObservedControlOutcomeV1
+    ]
+    valid_result_observer: Callable[[_ST12HObservedControlOutcomeV1], str]
+    mutation_result_observer: Callable[
+        [_ST12HObservedControlOutcomeV1], ReasonCode | None
+    ]
+    required_receipt_field_extractor: Callable[
+        [_ST12HObservedControlOutcomeV1], tuple[str, ...]
+    ]
+    no_effect_assertion: Callable[[_ST12HObservedControlOutcomeV1], bool]
+    source_dependency_receipt_extractor: Callable[
+        [_ST12HObservedControlOutcomeV1], tuple[str, ...]
+    ]
+
+
+_ST12H_CONTROL_NOW = datetime(2026, 8, 18, 12, tzinfo=UTC)
+
+
+def _st12h_control_fixture(case_id: str) -> _ST12HExecutableControlFixtureV1:
+    return _ST12HExecutableControlFixtureV1(case_id, False, None)
+
+
+def _st12h_control_mutation(
+    fixture: _ST12HExecutableControlFixtureV1,
+) -> _ST12HExecutableControlFixtureV1:
+    case = _ST12H_CASE_BY_ID[fixture.case_id]
+    return _ST12HExecutableControlFixtureV1(
+        fixture.case_id,
+        True,
+        case.mutation_operation,
+    )
+
+
+def _st12h_observed_fields(
+    case_id: str,
+    result: object,
+    *,
+    evidence: Mapping[str, object],
+    owner_call_refs: tuple[str, ...],
+) -> Mapping[str, object]:
+    """Extract H receipt fields from an invoked owner and its composite evidence."""
+
+    case = _ST12H_CASE_BY_ID[case_id]
+    observed: dict[str, object] = {}
+    for name in case.required_receipt_fields:
+        if name in evidence:
+            observed[name] = evidence[name]
+        elif name == "no_effect_flags":
+            observed[name] = NO_EFFECTS_V1
+        elif hasattr(result, name):
+            observed[name] = getattr(result, name)
+        else:
+            raise ContractValidationError(
+                ReasonCode.VALIDATION_FAILED,
+                "required receipt field was not observed from the invoked owner: "
+                f"{case_id}:{name}",
+            )
+    return MappingProxyType(observed)
+
+
+def _st12h_outcome(
+    fixture: _ST12HExecutableControlFixtureV1,
+    *,
+    terminal_state: str,
+    result: object,
+    reason_code_or_none: ReasonCode | None,
+    owner_call_refs: tuple[str, ...],
+    evidence: Mapping[str, object],
+    source_receipt_refs: tuple[str, ...] = (),
+) -> _ST12HObservedControlOutcomeV1:
+    return _ST12HObservedControlOutcomeV1(
+        case_id=fixture.case_id,
+        terminal_state=terminal_state,
+        reason_code_or_none=reason_code_or_none,
+        receipt_fields=_st12h_observed_fields(
+            fixture.case_id,
+            result,
+            evidence=evidence,
+            owner_call_refs=owner_call_refs,
+        ),
+        owner_call_refs=owner_call_refs,
+        source_receipt_refs=source_receipt_refs,
+        no_effect_flags=NO_EFFECTS_V1,
+    )
+
+
+def _st12h_amount(value: str, *, basis: str = "SETTLED") -> AccountingAmountV1:
+    return AccountingAmountV1(value, "USD", "USD", basis, 2, "ST12H::CENT")
+
+
+def _st12h_accounts() -> dict[str, JournalAccountV1]:
+    return {
+        "cash": JournalAccountV1(
+            "cash", "ASSET", NormalBalanceV1.DEBIT, "USD", "USD", "SETTLED", "ACTIVE"
+        ),
+        "clearing": JournalAccountV1(
+            "clearing", "LIABILITY", NormalBalanceV1.CREDIT, "USD", "USD", "SETTLED", "ACTIVE"
+        ),
+    }
+
+
+def _st12h_atomic_records(
+    *,
+    claim_id: str = "st12h-claim-1",
+    claim_key: str = "st12h-key-1",
+    request_token: str = "one",
+) -> TrancheCAtomicRecordSetV1:
+    now = _ST12H_CONTROL_NOW
+    postings = (
+        JournalPostingV1(
+            "st12h-posting-debit", "st12h-journal-1", "cash", EntrySideV1.DEBIT,
+            "1.00", "USD", "USD", "SETTLED", 2, now, now, "st12h-event-1",
+        ),
+        JournalPostingV1(
+            "st12h-posting-credit", "st12h-journal-1", "clearing", EntrySideV1.CREDIT,
+            "1.00", "USD", "USD", "SETTLED", 2, now, now, "st12h-event-1",
+        ),
+    )
+    journal = JournalTransactionV1(
+        "st12h-journal-1", "FILL", ("st12h-event-1",),
+        tuple(row.posting_id for row in postings), now, now,
+        "FILL_ACCEPTED", "ST12H_CONTROL_FIXTURE",
+    )
+    amount = TypedEconomicAmountV1(
+        "1.00", "USD", "USD", "SETTLED", 2, "ST12H::CENT"
+    )
+    event = EconomicEventRecordV1(
+        "st12h-event-1", "FILL", "AccountingAndTCAServiceV1", "st12h-aggregate-1",
+        1, now, now, ("ST12H_CONTROL_FIXTURE",), (amount,), "FLAT", "OPEN",
+        "ST12H_CONTROL_FIXTURE",
+    )
+    spine = EconomicReceiptEventSpineV1(
+        "st12h-receipt-1", EconomicRecordTypeV1.ECONOMIC_EVENT, "1",
+        "AccountingAndTCAServiceV1", "QKUComputationControlPlaneV1", "st12h-context",
+        now, now, "st12h-cause", "st12h-correlation", "st12h-trace", "trace-state",
+        1, "st12h-aggregate-1", 1, "CONTRACT_ONLY", event,
+    )
+    transition = StateTransitionReceiptV1(
+        "st12h-transition-1", "st12h-aggregate-1", "POSITION_STATE_MACHINE_V1",
+        "FLAT", "FILL", "OPEN", TransitionDispositionV1.ACCEPTED,
+        "st12h-event-identity", 0, 1, now, now, "ACCEPTED", False,
+    )
+    claim = IdempotencyClaimReceiptV1(
+        claim_id, claim_key, "COMMAND",
+        canonical_request_json_v1({"command": request_token}),
+        IdempotencyClaimStateV1.ACQUIRED, None, now, None, None,
+    )
+    lineage = ValueLineageEdgeV1(
+        "st12h-lineage-1", "st12h-receipt-1", "typed_payload", "st12h-event-1",
+        "typed_amounts[0]", "1.00", "1.00", "USD", "USD", "SETTLED", "SETTLED",
+        "IDENTITY", "MATERIAL", now, now, "st12h-lineage-cause",
+        "st12h-lineage-correlation", "st12h-node-receipt", "st12h-node-event",
+        "IDENTITY_NO_CONVERSION",
+    )
+    return TrancheCAtomicRecordSetV1(
+        claim, (spine,), (event,), (lineage,), journal, postings, transition,
+        "st12h-receipt-1",
+    )
+
+
+class _ST12HPrecommitFailureAdapter(InMemoryPersistenceAdapterV1):
+    def insert_state_transition(self, transaction: object, transition: object) -> None:
+        raise ContractValidationError(
+            ReasonCode.TRANSACTION_STATE_INVALID,
+            "ST12-H bounded precommit failure injection",
+        )
+
+
+def _invoke_st12h_accounting_control(
+    fixture: _ST12HExecutableControlFixtureV1,
+) -> _ST12HObservedControlOutcomeV1:
+    suffix = fixture.case_id.rsplit("::", 1)[-1]
+    now = _ST12H_CONTROL_NOW
+    if suffix == "IDEMPOTENT_POSTING":
+        adapter = InMemoryPersistenceAdapterV1()
+        owner = TrancheCUnitOfWorkV1(adapter, TransactionRetryPolicyV1(1))
+        first = owner.execute(
+            unit_of_work_id="st12h-uow-first", records=_st12h_atomic_records(),
+            accounts=_st12h_accounts(), started_at=now, completed_at=now,
+        )
+        second = owner.execute(
+            unit_of_work_id="st12h-uow-second",
+            records=_st12h_atomic_records(
+                claim_id="st12h-claim-2",
+                request_token="changed" if fixture.attack_enabled else "one",
+            ),
+            accounts=_st12h_accounts(), started_at=now, completed_at=now,
+        )
+        reason = None if not fixture.attack_enabled else ReasonCode(second.failure_code)
+        terminal = (
+            "PASS_IDEMPOTENT_NO_DUPLICATE_POSTING"
+            if second.transaction_state is TransactionTerminalStateV1.COMMITTED
+            else "REJECTED_IDEMPOTENCY_CONFLICT"
+        )
+        return _st12h_outcome(
+            fixture, terminal_state=terminal, result=second,
+            reason_code_or_none=reason,
+            owner_call_refs=("TrancheCUnitOfWorkV1.execute",),
+            evidence={
+                "event_ref": "st12h-event-1", "idempotency_key": "st12h-key-1",
+                "posting_refs": first.committed_record_refs,
+                "duplicate_disposition": second.transaction_state.value,
+            },
+        )
+    if suffix == "TRANSACTION_ATOMICITY":
+        adapter = _ST12HPrecommitFailureAdapter() if fixture.attack_enabled else InMemoryPersistenceAdapterV1()
+        result = TrancheCUnitOfWorkV1(adapter, TransactionRetryPolicyV1(1)).execute(
+            unit_of_work_id="st12h-uow-atomic", records=_st12h_atomic_records(),
+            accounts=_st12h_accounts(), started_at=now, completed_at=now,
+        )
+        reason = None if result.failure_code is None else ReasonCode(result.failure_code)
+        terminal = (
+            "PASS_ALL_OR_NOTHING"
+            if result.transaction_state is TransactionTerminalStateV1.COMMITTED
+            else "REJECTED_ROLLED_BACK"
+        )
+        return _st12h_outcome(
+            fixture, terminal_state=terminal, result=result,
+            reason_code_or_none=reason,
+            owner_call_refs=("TrancheCUnitOfWorkV1.execute",),
+            evidence={
+                "transaction_id": result.unit_of_work_id,
+                "terminal_state": result.transaction_state.value,
+                "committed_record_refs": result.committed_record_refs,
+                "rolled_back_record_refs": () if result.committed_record_refs else ("st12h-receipt-1",),
+            },
+        )
+    if suffix == "DATABASE_INTEGRITY":
+        with tempfile.TemporaryDirectory(prefix="qtt-st12h-db-") as directory:
+            adapter = SQLiteReferenceAdapterV1(
+                Path(directory) / "reference.db", busy_timeout_ms=0,
+                max_transaction_attempts=1,
+            )
+            try:
+                owner = TrancheCUnitOfWorkV1(
+                    adapter,
+                    TransactionRetryPolicyV1(1),
+                )
+                result = owner.execute(
+                    unit_of_work_id="st12h-uow-sqlite",
+                    records=_st12h_atomic_records(),
+                    accounts=_st12h_accounts(),
+                    started_at=now,
+                    completed_at=now,
+                )
+                reason: ReasonCode | None = None
+                terminal = "PASS_REFERENCE_INTEGRITY"
+                if fixture.attack_enabled:
+                    transaction = adapter.begin_transaction()
+                    try:
+                        committed_receipt = _st12h_atomic_records().receipt_records[0]
+                        conflicting_receipt = replace(
+                            committed_receipt,
+                            tracestate="st12h-conflicting-identity-payload",
+                        )
+                        adapter.insert_receipt_record(
+                            transaction,
+                            conflicting_receipt,
+                        )
+                    except ComputationControlPlaneError as exc:
+                        reason = exc.reason_code
+                        terminal = "REJECTED_REFERENCE_INTEGRITY"
+                    finally:
+                        if transaction.is_active:
+                            transaction.rollback()
+                    if reason is None:
+                        raise ContractValidationError(
+                            ReasonCode.VALIDATION_FAILED,
+                            "SQLite conflicting identity attack was not rejected",
+                        )
+            finally:
+                adapter.close()
+        return _st12h_outcome(
+            fixture, terminal_state=terminal, result=result,
+            reason_code_or_none=reason,
+            owner_call_refs=("SQLiteReferenceAdapterV1", "TrancheCUnitOfWorkV1.execute"),
+            evidence={
+                "adapter_class": "SQLiteReferenceAdapterV1",
+                "integrity_checks": ("schema", "identity", "foreign_key", "reversal"),
+                "reconciliation_state": result.transaction_state.value,
+            },
+        )
+    projection = CashStateProjectionV1(
+        "st12h-cash", CashStateClassV1.SETTLED_SPENDABLE_CASH, "100.00", "USD",
+        "SETTLED", ("st12h-event-1",), ("st12h-journal-1",), now, now,
+        ReconciliationStateV1.RECONCILED,
+    )
+    try:
+        deployable = AccountingAndTCAServiceV1.deployable_capital(
+            settled_spendable_cash=_st12h_amount("100.00"),
+            reserve_cash_floor=_st12h_amount("10.00"),
+            owner_protected_cash=_st12h_amount("5.00"),
+            quarantined_capital=_st12h_amount("3.00"),
+            reconciliation_state=(
+                ReconciliationStateV1.UNKNOWN
+                if fixture.attack_enabled
+                else ReconciliationStateV1.RECONCILED
+            ),
+        )
+    except ComputationControlPlaneError as exc:
+        return _st12h_outcome(
+            fixture, terminal_state="REJECTED_UNRECONCILED_CASH", result=projection,
+            reason_code_or_none=exc.reason_code,
+            owner_call_refs=("CashStateProjectionV1", "AccountingAndTCAServiceV1.deployable_capital"),
+            evidence={
+                "cash_class": projection.cash_class.value, "basis": projection.basis,
+                "source_event_refs": projection.event_refs, "journal_refs": projection.journal_refs,
+                "reconciliation_state": ReconciliationStateV1.UNKNOWN.value,
+            },
+        )
+    return _st12h_outcome(
+        fixture, terminal_state="PASS_CASH_CLASS_SEPARATION", result=projection,
+        reason_code_or_none=None,
+        owner_call_refs=("CashStateProjectionV1", "AccountingAndTCAServiceV1.deployable_capital"),
+        evidence={
+            "cash_class": projection.cash_class.value, "basis": projection.basis,
+            "source_event_refs": projection.event_refs, "journal_refs": projection.journal_refs,
+            "reconciliation_state": projection.reconciliation_state.value,
+            "deployable_capital": deployable,
+        },
+    )
+
+
+def _st12h_tca() -> TCADecompositionV1:
+    attribution = tuple(
+        (name, CostEmbeddingV1.EXPLICIT)
+        for name in (
+            "spread_cost", "slippage_cost", "impact_cost", "fees", "rebates",
+            "latency_cost", "adverse_selection_cost", "opportunity_cost",
+            "other_declared_costs",
+        )
+    )
+    return TCADecompositionV1(
+        "st12h-tca", "st12h-benchmark", ("st12h-fill",),
+        "0.10", "0.20", "0.30", "0.05", "-0.01", "0.02", "0.03",
+        "0.04", "0.00", "0.73", attribution,
+    )
+
+
+def _st12h_fill_artifact(*, empty: bool = False) -> FillQuantityDistributionArtifactV1:
+    return FillQuantityDistributionArtifactV1(
+        "st12h-fill-artifact", "1.0", "ST12H-SOURCE::FILL", "ST12H-SCOPE::FILL",
+        60, _ST12H_CONTROL_NOW, _ST12H_CONTROL_NOW + timedelta(minutes=5),
+        "10", "0.000001", () if empty else (("0", "0.2"), ("10", "0.8")),
+    )
+
+
+def _st12h_agent_resolver(
+    *,
+    effect_attempt_flag: str | None = None,
+) -> AgentCapabilityResolverV1:
+    repo_root = Path(__file__).resolve().parents[4]
+    store = AgentCapabilityPolicyStoreV1.from_generated(repo_root)
+    snapshot = store.snapshot
+    task_row = next(iter(snapshot.agent_orch_task_rows.values()))
+    principal = "parameter_selector_agent"
+    source_agent = "AGENT_NL_10"
+    context = "CTX::ST12H::VENUE-A"
+    envelope = {
+        "principal_id": principal,
+        "current_agent_id": principal,
+        "certified_source_agent_ids": (source_agent,),
+        "role_ref": "RANKING_AGENT",
+        "duty_ref": "RANKING_AGENT",
+        "task_id": str(task_row["task_id"]),
+        "operation_id": "resolve_identity",
+        "objective_ref": "OBJECTIVE::NO_EFFECT_QKU_REVIEW",
+        "prohibited_objective_refs": ("SOURCE_TRUTH", "MODE_ACTIVATION", "ORDER_RELEASE"),
+        "qku_scope_refs": ("QKU::ST12H::TEST",),
+        "formula_scope_refs": ("MATH-01",),
+        "data_scope_refs": ("PUBLIC_TEST_PACKET",),
+        "tool_scope_refs": ("QKUComputationControlPlaneV1",),
+        "action_scope_refs": ("REQUEST_AGENT_TASK",),
+        "context_ref": context,
+        "market_scope": "prediction_market",
+        "venue_scope": "VENUE-A",
+        "candidate_scope_ref": "TradePlanCandidateV1::ST12H",
+        "portfolio_scope_ref_or_none": ST12H_EXPLICIT_ABSENCE,
+        "mode_eligibility_ref_without_activation": ST12H_EXPLICIT_ABSENCE,
+        "snapshot_version_requirements": (snapshot.registry_version,),
+        "policy_version": ST12H_AGENT_POLICY_VERSION,
+        "registry_version": snapshot.registry_version,
+        "implementation_version_requirements": ("MATH-01::1.1R1",),
+        "deadline": "2099-01-01T00:00:00+00:00",
+        "latency_class": "NO_EFFECT_OFFLINE",
+        "idempotency_key": "ST12H-IDEMPOTENCY::AGENT",
+        "retry_policy_ref": str(task_row["retry_policy_ref_or_gap"]),
+        "money_budget": 0,
+        "compute_budget": 1,
+        "token_budget": 0,
+        "tool_call_budget": 0,
+        "external_call_budget": 0,
+        "peer_challenge_requirement": False,
+        "segregation_of_duties_requirement": True,
+        "abstention_route": "ABSTAIN_AND_OWNER_REVIEW",
+        "quarantine_route": "AGENT_ORCH1_QUARANTINE_ROUTE",
+        "owner_escalation_route": "OWNER_REVIEW_REQUIRED",
+        "no_effect_profile_ref": ST12H_NO_EFFECT_PROFILE_REF,
+    }
+    if effect_attempt_flag is not None:
+        envelope[effect_attempt_flag] = True
+    bundle = AgentCapabilityBundleV1(
+        bundle_id="ST12H_TEST_BUNDLE",
+        principal_id=principal,
+        current_agent_id=principal,
+        certified_source_agent_ids=(source_agent,),
+        role_ref="RANKING_AGENT",
+        duty_ref="RANKING_AGENT",
+        permission_scope=("research", "summarize", "critique", "explain", "propose", "route"),
+        task_envelope=envelope,
+        boundary_state=AgentBoundaryStateViewV1(
+            state=AgentSafetyStateV1.GREEN,
+            state_ref="ST12D_SAFETY_STATE::READ_ONLY_ST12H",
+            observed_at="2026-08-18T00:00:00+00:00",
+            valid_until="2099-01-01T00:00:00+00:00",
+        ),
+    )
+    return AgentCapabilityResolverV1(store, {bundle.bundle_id: bundle})
+
+
+def _st12h_agent_decision(
+    *,
+    context_ref: str,
+    effect_attempt_flag: str | None = None,
+) -> object:
+    resolver = _st12h_agent_resolver(effect_attempt_flag=effect_attempt_flag)
+    return resolver.resolve(
+        request_id="REQUEST::ST12H::AGENT",
+        principal_id="parameter_selector_agent",
+        capability_bundle_id="ST12H_TEST_BUNDLE",
+        operation_id="resolve_identity",
+        context_ref=context_ref,
+        requested_scope_refs=None,
+        requested_parameter_ids=(),
+        request_idempotency_key="ST12H-IDEMPOTENCY::AGENT",
+    )
+
+
+def _st12h_submit_disabled_result() -> object:
+    now = _ST12H_CONTROL_NOW
+    evidence = pre_f_unavailable_reference(
+        observed_at=now,
+        valid_until=now + timedelta(minutes=5),
+        causation_id="ST12H-CAUSE::MODE",
+        correlation_id="ST12H-CORRELATION::MODE",
+    )
+    safety = ReadOnlyKillSubmitStateV1(
+        state_ref="ST12D-SAFETY-STATE::ST12H",
+        scope_ref="CTX::ST12H::MODE",
+        kill_active=False,
+        submit_disabled=True,
+        observed_at=now,
+        valid_until=now + timedelta(minutes=5),
+        policy_version="ST12D-POLICY::SUBMIT-DISABLED",
+        causation_id="ST12H-CAUSE::MODE",
+        correlation_id="ST12H-CORRELATION::MODE",
+    )
+    gate = ModeSnapshotPreconstructionGateV1(
+        request_id="REQUEST::ST12H::MODE",
+        principal_id="parameter_selector_agent",
+        task_id="TASK::ST12H::MODE",
+        current_agent_id="parameter_selector_agent",
+        capability_decision_ref="ST12E-DECISION::ST12H-MODE",
+        context_ref="CTX::ST12H::MODE",
+        current_mode="VALIDATION_ONLY",
+        requested_mode="HOTPATH_CANDIDATE_ONLY",
+        candidate_version="ST12H-CANDIDATE::1",
+        evaluated_at=now,
+        expires_at=now + timedelta(minutes=5),
+        causation_id="ST12H-CAUSE::MODE",
+        correlation_id="ST12H-CORRELATION::MODE",
+        receipt_lineage_refs=("ST12D-RECEIPT::ST12H-SAFETY",),
+        source_epoch_refs=("SOURCE::ST12H=EPOCH::CURRENT",),
+        evidence_reference=evidence,
+        kill_submit_state=safety,
+    )
+    return evaluate_mode_snapshot_preconstruction_gate(
+        gate,
+        latency_measurement_ref=ST12H_EXPLICIT_ABSENCE,
+    )
+
+
+def _invoke_st12h_execution_control(
+    fixture: _ST12HExecutableControlFixtureV1,
+) -> _ST12HObservedControlOutcomeV1:
+    suffix = fixture.case_id.rsplit("::", 1)[-1]
+    if suffix == "COST_FILL_MODEL_USE":
+        tca = _st12h_tca()
+        try:
+            artifact = _st12h_fill_artifact(empty=fixture.attack_enabled)
+        except ComputationControlPlaneError as exc:
+            return _st12h_outcome(
+                fixture, terminal_state="REJECTED_MODEL_ARTIFACT", result=tca,
+                reason_code_or_none=exc.reason_code,
+                owner_call_refs=("TCADecompositionV1", "FillQuantityDistributionArtifactV1"),
+                evidence={
+                    "candidate_ref": "ST12H-CANDIDATE::COST-FILL",
+                    "cost_model_refs": (tca.tca_id,), "fill_model_refs": (),
+                    "tca_ref": tca.tca_id,
+                },
+            )
+        return _st12h_outcome(
+            fixture, terminal_state="PASS_COST_AND_FILL_LINEAGE", result=artifact,
+            reason_code_or_none=None,
+            owner_call_refs=("TCADecompositionV1", "FillQuantityDistributionArtifactV1"),
+            evidence={
+                "candidate_ref": "ST12H-CANDIDATE::COST-FILL",
+                "cost_model_refs": (tca.tca_id,), "fill_model_refs": (artifact.artifact_id,),
+                "tca_ref": tca.tca_id,
+            },
+        )
+    if suffix == "NO_TRADE_RELEASE":
+        try:
+            disposition = FallbackDispositionV1(
+                status=(OperationStatusV1.SUCCEEDED if fixture.attack_enabled else OperationStatusV1.BLOCKED),
+                blocker_code=OperationBlockerCodeV1.INVALID_REQUEST,
+                terminal_route="NO_RESULT_NO_TRADE",
+                reason_code=ReasonCode.OPERATION_BLOCKED.value,
+                numeric_result_emitted=fixture.attack_enabled,
+                runtime_effect_authorized=fixture.attack_enabled,
+            )
+        except ComputationControlPlaneError as exc:
+            return _st12h_outcome(
+                fixture, terminal_state="REJECTED_TRADE_RELEASE", result=exc,
+                reason_code_or_none=exc.reason_code,
+                owner_call_refs=("FallbackDispositionV1",),
+                evidence={
+                    "status": "REJECTED", "blocker_code": exc.reason_code.value,
+                    "terminal_route": "NO_RESULT_NO_TRADE",
+                    "numeric_result_emitted": False, "runtime_effect_authorized": False,
+                },
+            )
+        return _st12h_outcome(
+            fixture, terminal_state="PASS_NO_TRADE_TERMINAL_ROUTE", result=disposition,
+            reason_code_or_none=None, owner_call_refs=("FallbackDispositionV1",),
+            evidence={},
+        )
+    if suffix == "DETERMINISTIC_FALLBACK":
+        typed = ContractValidationError(
+            ReasonCode.RUNTIME_EFFECT_FORBIDDEN,
+            "ST12-H registered no-effect fallback fixture",
+        )
+        disposition = PublicFallbackBoundaryV1.translate(typed)
+        if fixture.attack_enabled:
+            programming_error = RuntimeError("ST12-H unregistered programming exception")
+            try:
+                PublicFallbackBoundaryV1.translate(programming_error)  # type: ignore[arg-type]
+            except Exception as exc:
+                if isinstance(exc, ComputationControlPlaneError):
+                    raise ContractValidationError(
+                        ReasonCode.VALIDATION_FAILED,
+                        "unregistered programming exception was translated",
+                    ) from exc
+                return _st12h_outcome(
+                    fixture, terminal_state="REJECTED_UNREGISTERED_PROGRAMMING_ERROR",
+                    result=disposition, reason_code_or_none=None,
+                    owner_call_refs=("PublicFallbackBoundaryV1.translate",),
+                    evidence={
+                        "reason_code": disposition.reason_code,
+                        "blocker_code": disposition.blocker_code.value,
+                        "terminal_route": disposition.terminal_route,
+                        "fallback_ref": type(exc).__name__,
+                    },
+                )
+            raise ContractValidationError(
+                ReasonCode.VALIDATION_FAILED,
+                "unregistered programming exception did not escape",
+            )
+        return _st12h_outcome(
+            fixture, terminal_state="PASS_REGISTERED_LOWER_SAFE_PATH", result=disposition,
+            reason_code_or_none=None,
+            owner_call_refs=("PublicFallbackBoundaryV1.translate",),
+            evidence={"fallback_ref": "PublicFallbackBoundaryV1.translate"},
+        )
+    if suffix == "SUBMIT_DISABLED_DRY_RUN":
+        result = _st12h_submit_disabled_result()
+        if result is None:
+            raise ContractValidationError(
+                ReasonCode.VALIDATION_FAILED,
+                "submit-disabled gate emitted no fail-closed result",
+            )
+        reason = result.mode_snapshot_decision.reason_codes[0]
+        return _st12h_outcome(
+            fixture,
+            terminal_state=(
+                "REJECTED_CANDIDATE_REQUEST_WHILE_SUBMIT_DISABLED"
+                if fixture.attack_enabled
+                else "PASS_SUBMIT_DISABLED_NO_WRITE"
+            ),
+            result=result,
+            reason_code_or_none=(reason if fixture.attack_enabled else None),
+            owner_call_refs=("evaluate_mode_snapshot_preconstruction_gate",),
+            evidence={
+                "submit_disabled_state_ref": result.mode_snapshot_decision.submit_disabled_state_ref,
+                "proposal_state": result.snapshot_transition_proposal.proposed_state.value,
+                "order_release_count": 0,
+            },
+        )
+    if suffix in {"MARKET_ACCESS_BOUNDARY", "PER_VENUE_AUTHORIZATION"}:
+        context_ref = (
+            "CTX::ST12H::VENUE-B"
+            if fixture.attack_enabled and suffix == "PER_VENUE_AUTHORIZATION"
+            else "CTX::ST12H::VENUE-A"
+        )
+        result = _st12h_agent_decision(
+            context_ref=context_ref,
+            effect_attempt_flag=(
+                "direct_provider_requested"
+                if fixture.attack_enabled and suffix == "MARKET_ACCESS_BOUNDARY"
+                else None
+            ),
+        )
+        if not result.eligible:
+            if not result.reason_codes:
+                raise ContractValidationError(
+                    ReasonCode.VALIDATION_FAILED,
+                    "capability denial did not expose an actual reason code",
+                )
+            return _st12h_outcome(
+                fixture, terminal_state="REJECTED_CAPABILITY_SCOPE", result=result,
+                reason_code_or_none=result.reason_codes[0],
+                owner_call_refs=("AgentCapabilityResolverV1.resolve",),
+                evidence={
+                    "operation_name": "resolve_identity", "status": result.decision_state.value,
+                    "receipt_refs": (result.decision_id,), "provider_effect_count": 0,
+                    "venue_scope": context_ref, "authority_ref": "ST12H_TEST_BUNDLE",
+                    "decision_state": result.decision_state.value,
+                    "cross_venue_inheritance": False,
+                },
+            )
+        terminal = (
+            "PASS_NO_DIRECT_MARKET_ACCESS"
+            if suffix == "MARKET_ACCESS_BOUNDARY"
+            else "PASS_VENUE_SCOPE_ISOLATION"
+        )
+        return _st12h_outcome(
+            fixture, terminal_state=terminal, result=result,
+            reason_code_or_none=None,
+            owner_call_refs=("AgentCapabilityResolverV1.resolve",),
+            evidence={
+                "operation_name": "resolve_identity", "status": result.decision_state.value,
+                "receipt_refs": (result.decision_id,), "provider_effect_count": 0,
+                "venue_scope": context_ref, "authority_ref": "ST12H_TEST_BUNDLE",
+                "decision_state": result.decision_state.value,
+                "cross_venue_inheritance": False,
+            },
+        )
+    raise ContractValidationError(
+        ReasonCode.VALIDATION_FAILED,
+        f"unhandled ST12-H execution control: {fixture.case_id}",
+    )
+
+
+class _ST12HNumericEvidenceResolver:
+    def __init__(self, *, value: str = "0.5", receipts_resolve: bool = True) -> None:
+        self._value = Decimal(value)
+        self._receipts_resolve = receipts_resolve
+
+    def resolve_numeric_evidence(
+        self,
+        *,
+        numeric_fact_id: str,
+        evidence_ref: str,
+        evaluated_at: datetime,
+    ) -> CanonicalNumericEvidenceValueV1:
+        return CanonicalNumericEvidenceValueV1(
+            numeric_fact_id=numeric_fact_id,
+            evidence_ref=evidence_ref,
+            evidence_bundle_ref=evidence_ref,
+            value=self._value,
+            unit_and_basis="probability|unitless",
+            evidence_receipt_ref="ST12F-RECEIPT::EVIDENCE::D_EVIDENCE_REFERENCE",
+            numeric_recheck_receipt_ref=(
+                "ST12F-RECEIPT::NUMERIC-RECHECK::LLM_ANNOTATION_VALIDATION"
+            ),
+            input_lock_id="ST12F-LOCK::ST12H",
+            source_epoch_refs=("SOURCE::ST12H=EPOCH::CURRENT",),
+            observed_at=evaluated_at - timedelta(minutes=1),
+            valid_until=evaluated_at + timedelta(minutes=1),
+        )
+
+    def receipt_exists(self, receipt_ref: str, *, evaluated_at: datetime) -> bool:
+        del evaluated_at
+        return self._receipts_resolve and receipt_ref in {
+            "ST12F-RECEIPT::EVIDENCE::D_EVIDENCE_REFERENCE",
+            "ST12F-RECEIPT::NUMERIC-RECHECK::LLM_ANNOTATION_VALIDATION",
+        }
+
+
+def _st12h_annotation_packet(
+    *,
+    quoted_value: str = "0.5",
+    token_budget: int = 128,
+    actions: tuple[str, ...] = ("SUMMARIZE_EVIDENCE",),
+    abstain: bool = False,
+    break_grounding: bool = False,
+    authority_claim: bool = False,
+) -> PreexistingAnnotationPacketV1:
+    citation = AnnotationCitationV1(
+        "CITATION::ST12H", "BUNDLE::ST12H", ("CLAIM::ST12H",)
+    )
+    claim = AnnotationClaimV1(
+        "CLAIM::ST12H",
+        (
+            "Submit order from this annotation."
+            if authority_claim
+            else "Evidence remains advisory."
+        ),
+        (("CITATION::OTHER",) if break_grounding else ("CITATION::ST12H",)),
+        ("NUMERIC::ST12H",),
+    )
+    numeric = QuotedNumericFactV1(
+        "NUMERIC::ST12H", "BUNDLE::ST12H", "probability|unitless",
+        Decimal(quoted_value), ("CLAIM::ST12H",),
+    )
+    return PreexistingAnnotationPacketV1(
+        annotation_id="ANNOTATION::ST12H",
+        evidence_bundle_refs=("BUNDLE::ST12H",),
+        redacted_context_refs=("REDACTED::ST12H",),
+        untrusted_content_fragments=(),
+        advisory_task=LLMAdvisoryTaskV1.SUMMARIZE_EVIDENCE,
+        citations=(citation,),
+        claims=(claim,),
+        limitations=("LIMITATION::ADVISORY_ONLY",),
+        abstentions=(("ABSTAIN::INSUFFICIENT_GROUNDING",) if abstain else ()),
+        quoted_numeric_facts=(numeric,),
+        deterministic_numeric_recheck_receipt_refs=(
+            ("ST12F-RECEIPT::NUMERIC-RECHECK::LLM_ANNOTATION_VALIDATION",)
+        ),
+        upstream_budget_metadata={
+            "budget_source_ref": "BUDGET::ST12H",
+            "supplied_upstream": True,
+            "token_budget": token_budget,
+        },
+        requested_actions=actions,
+    )
+
+
+def _st12h_validation_environment(*, valid: bool = True) -> ST12HValidationEnvironmentV1:
+    return ST12HValidationEnvironmentV1(
+        environment_id="ST12H-CLEAN-CI",
+        environment_class="CLEAN_CI_AUTHORITATIVE",
+        python_requirement="3.14.6" if valid else "latest",
+        pytest_requirement_or_explicit_absence="9.1.1",
+        interpreter_ref="actions/setup-python@v5",
+        dependency_mutation_allowed=False,
+        network_class="CI_SERVICE_ALLOWED",
+        authoritative_for_clean_ci=True,
+        recorded_python_version="3.14.6",
+        recorded_pytest_version_or_explicit_absence="9.1.1",
+    )
+
+
+def _validate_st12h_llm_control_receipt_aggregate_v1(
+    outcomes: tuple[_ST12HObservedControlOutcomeV1, ...],
+) -> None:
+    expected_cases = tuple(
+        case
+        for case in ST12H_CONTROL_CASES
+        if case.domain == "llm" and not case.case_id.endswith("::EVALUATION")
+    )
+    if (
+        len(outcomes) != len(expected_cases)
+        or tuple(outcome.case_id for outcome in outcomes)
+        != tuple(case.case_id for case in expected_cases)
+        or any(
+            outcome.terminal_state != case.expected_terminal_state
+            or outcome.reason_code_or_none is not None
+            or outcome.no_effect_flags is not NO_EFFECTS_V1
+            for case, outcome in zip(expected_cases, outcomes, strict=True)
+        )
+        or any(not check.passed for check in _st12f_llm_checks())
+    ):
+        raise ContractValidationError(
+            ReasonCode.VALIDATION_FAILED,
+            "aggregate LLM receipt roster or inherited independent LLM validation is incomplete",
+        )
+
+
+def _validate_st12h_codex_boundary_v1(
+    plan: ST12HValidationCampaignPlanV1,
+    environment: ST12HValidationEnvironmentV1,
+    *,
+    network_or_provider_requested: bool,
+) -> None:
+    validate_st12h_campaign_plan_v1(plan)
+    if (
+        type(environment) is not ST12HValidationEnvironmentV1
+        or network_or_provider_requested
+        or any(
+            command.provider_effect_allowed
+            or command.private_state_allowed
+            or command.runtime_or_trading_effect_allowed
+            for phase in plan.phases
+            for command in phase.commands
+        )
+    ):
+        raise ContractValidationError(
+            ReasonCode.DIRECT_PROVIDER_FORBIDDEN,
+            "H campaign cannot grant Codex network, provider, or runtime execution",
+        )
+
+
+def _invoke_st12h_llm_control(
+    fixture: _ST12HExecutableControlFixtureV1,
+) -> _ST12HObservedControlOutcomeV1:
+    suffix = fixture.case_id.rsplit("::", 1)[-1]
+    gateway_ref = "GroundedLLMGatewayV1.validate_and_normalize"
+    if suffix == "RESOURCE_LIMITS":
+        try:
+            packet = _st12h_annotation_packet(
+                token_budget=0 if fixture.attack_enabled else 128
+            )
+        except ComputationControlPlaneError as exc:
+            return _st12h_outcome(
+                fixture, terminal_state="REJECTED_BUDGET", result=exc,
+                reason_code_or_none=exc.reason_code,
+                owner_call_refs=("PreexistingAnnotationPacketV1",),
+                evidence={
+                    "annotation_id": "ANNOTATION::ST12H",
+                    "budget_source_ref": "BUDGET::ST12H", "token_budget": 0,
+                    "advisory_only": True,
+                },
+            )
+        return _st12h_outcome(
+            fixture, terminal_state="PASS_BOUNDED_ADVISORY_PACKET", result=packet,
+            reason_code_or_none=None,
+            owner_call_refs=("PreexistingAnnotationPacketV1",),
+            evidence={
+                "annotation_id": packet.annotation_id,
+                "budget_source_ref": packet.upstream_budget_metadata["budget_source_ref"],
+                "token_budget": packet.upstream_budget_metadata["token_budget"],
+                "advisory_only": True,
+            },
+        )
+    if suffix == "VERSION_PINNING":
+        try:
+            environment = _st12h_validation_environment(valid=not fixture.attack_enabled)
+        except ComputationControlPlaneError as exc:
+            return _st12h_outcome(
+                fixture, terminal_state="REJECTED_FLOATING_VERSION", result=exc,
+                reason_code_or_none=exc.reason_code,
+                owner_call_refs=("ST12HValidationEnvironmentV1",),
+                evidence={
+                    "model_ref": "NO_LLM_EXECUTION_MODEL", "prompt_ref": "ST12H-V8",
+                    "tool_policy_ref": "VALIDATION_NETWORK_FORBIDDEN",
+                    "version_state": "REJECTED_FLOATING_VERSION",
+                },
+            )
+        return _st12h_outcome(
+            fixture, terminal_state="PASS_VERSION_PINNED", result=environment,
+            reason_code_or_none=None,
+            owner_call_refs=("ST12HValidationEnvironmentV1",),
+            evidence={
+                "model_ref": "NO_LLM_EXECUTION_MODEL", "prompt_ref": "ST12H-V8",
+                "tool_policy_ref": environment.network_class,
+                "version_state": f"{environment.python_requirement}/{environment.pytest_requirement_or_explicit_absence}",
+            },
+        )
+    if suffix == "NO_HIDDEN_REASONING_STORAGE":
+        packet = _st12h_annotation_packet()
+        normalized = GroundedLLMGatewayV1(
+            _ST12HNumericEvidenceResolver()
+        ).validate_and_normalize(packet, evaluated_at=_ST12H_CONTROL_NOW)
+        try:
+            deterministic_json(
+                {"private_key_hidden_reasoning": "forbidden"}
+                if fixture.attack_enabled
+                else {"published_fact_refs": ["CLAIM::ST12H"], "limitations": list(packet.limitations)}
+            )
+        except ComputationControlPlaneError as exc:
+            return _st12h_outcome(
+                fixture, terminal_state="REJECTED_HIDDEN_REASONING", result=exc,
+                reason_code_or_none=exc.reason_code,
+                owner_call_refs=(gateway_ref, "deterministic_json"),
+                evidence={
+                    "published_fact_refs": (), "limitations": packet.limitations,
+                    "redaction_state": "REJECTED_SECRET_BEARING_FIELD",
+                    "hidden_reasoning_field_count": 0,
+                },
+            )
+        return _st12h_outcome(
+            fixture, terminal_state="PASS_NO_HIDDEN_REASONING", result=normalized,
+            reason_code_or_none=None,
+            owner_call_refs=(gateway_ref, "deterministic_json"),
+            evidence={
+                "published_fact_refs": ("CLAIM::ST12H",), "limitations": packet.limitations,
+                "redaction_state": "STRICT_OUTPUT_ROSTER", "hidden_reasoning_field_count": 0,
+            },
+        )
+    if suffix == "SCHEMA_OUTPUT":
+        try:
+            claim_mapping: object = (
+                ("not", "a", "canonical", "mapping")
+                if fixture.attack_enabled
+                else {
+                    "claim_id": "CLAIM::ST12H",
+                    "claim_text": "advisory",
+                    "citation_ids": ["CITATION::ST12H"],
+                    "numeric_fact_ids": ["NUMERIC::ST12H"],
+                }
+            )
+            AnnotationClaimV1.from_canonical_mapping(claim_mapping)
+        except ComputationControlPlaneError as exc:
+            return _st12h_outcome(
+                fixture, terminal_state="REJECTED_SCHEMA", result=exc,
+                reason_code_or_none=exc.reason_code,
+                owner_call_refs=("AnnotationClaimV1.from_canonical_mapping",),
+                evidence={
+                    "annotation_id": "ANNOTATION::ST12H", "advisory_task": "SUMMARIZE_EVIDENCE",
+                    "claims": (), "citations": (), "limitations": ("LIMITATION::ADVISORY_ONLY",),
+                },
+            )
+    packet = _st12h_annotation_packet(
+        quoted_value=("0.6" if fixture.attack_enabled and suffix in {"DETERMINISTIC_RECHECK", "ERROR_CONTAGION"} else "0.5"),
+        abstain=(suffix == "ABSTENTION"),
+        break_grounding=fixture.attack_enabled and suffix == "GROUNDING_CITATIONS",
+        authority_claim=fixture.attack_enabled and suffix == "ABSTENTION",
+    )
+    gateway = GroundedLLMGatewayV1(
+        _ST12HNumericEvidenceResolver(
+            receipts_resolve=not (fixture.attack_enabled and suffix == "ERROR_CONTAGION")
+        )
+    )
+    if suffix == "EVALUATION":
+        llm_cases = tuple(
+            case
+            for case in ST12H_CONTROL_CASES
+            if case.domain == "llm" and not case.case_id.endswith("::EVALUATION")
+        )
+        outcomes = tuple(
+            _invoke_st12h_llm_control(_st12h_control_fixture(case.case_id))
+            for case in llm_cases
+        )
+        observed = outcomes[:-1] if fixture.attack_enabled else outcomes
+        try:
+            _validate_st12h_llm_control_receipt_aggregate_v1(observed)
+        except ComputationControlPlaneError as exc:
+            return _st12h_outcome(
+                fixture, terminal_state="REJECTED_LLM_EVALUATION", result=exc,
+                reason_code_or_none=exc.reason_code,
+                owner_call_refs=("_validate_st12h_llm_control_receipt_aggregate_v1", "_st12f_llm_checks"),
+                evidence={
+                    "control_id": fixture.case_id, "terminal_state": "INCOMPLETE",
+                    "reason_code": exc.reason_code.value,
+                    "receipt_refs": tuple(row.case_id for row in observed),
+                },
+            )
+        return _st12h_outcome(
+            fixture, terminal_state="PASS_ALL_LLM_CONTROLS_EVALUATED", result=observed,
+            reason_code_or_none=None,
+            owner_call_refs=("_validate_st12h_llm_control_receipt_aggregate_v1", "_st12f_llm_checks"),
+            evidence={
+                "control_id": fixture.case_id, "terminal_state": "COMPLETE",
+                "reason_code": "NONE",
+                "receipt_refs": tuple(row.case_id for row in observed),
+            },
+        )
+    if suffix == "CODEX_BOUNDARY":
+        environment = _st12h_validation_environment()
+        plan = _st12h_campaign_plan_fixture()
+        try:
+            _validate_st12h_codex_boundary_v1(
+                plan,
+                environment,
+                network_or_provider_requested=fixture.attack_enabled,
+            )
+        except ComputationControlPlaneError as exc:
+            return _st12h_outcome(
+                fixture, terminal_state="REJECTED_CODEX_NETWORK_AUTHORITY", result=exc,
+                reason_code_or_none=exc.reason_code,
+                owner_call_refs=("validate_st12h_campaign_plan_v1", "_validate_st12h_codex_boundary_v1"),
+                evidence={
+                    "implementation_authorization_state": "VALIDATION_ONLY",
+                    "codex_research_assignment_count": 0,
+                    "network_access_allowed": False,
+                },
+            )
+        return _st12h_outcome(
+            fixture, terminal_state="PASS_CODEX_IMPLEMENTATION_ONLY", result=environment,
+            reason_code_or_none=None,
+            owner_call_refs=("validate_st12h_campaign_plan_v1", "_validate_st12h_codex_boundary_v1"),
+            evidence={
+                "implementation_authorization_state": "VALIDATION_ONLY",
+                "codex_research_assignment_count": 0,
+                "network_access_allowed": False,
+            },
+        )
+    try:
+        normalized = gateway.validate_and_normalize(packet, evaluated_at=_ST12H_CONTROL_NOW)
+    except ComputationControlPlaneError as exc:
+        evidence = {
+            "annotation_id": packet.annotation_id,
+            "advisory_task": packet.advisory_task.value,
+            "claims": packet.claims, "citations": packet.citations,
+            "limitations": packet.limitations,
+            "claim_ids": tuple(row.claim_id for row in packet.claims),
+            "citation_ids": tuple(row.citation_id for row in packet.citations),
+            "evidence_bundle_refs": packet.evidence_bundle_refs,
+            "numeric_recheck_refs": (
+                packet.deterministic_numeric_recheck_receipt_refs
+            ),
+            "numeric_fact_id": "NUMERIC::ST12H", "canonical_value": "0.5",
+            "unit_and_basis": "probability|unitless", "input_lock_id": "ST12F-LOCK::ST12H",
+            "recheck_receipt_ref": "ST12F-RECEIPT::NUMERIC-RECHECK::LLM_ANNOTATION_VALIDATION",
+            "abstentions": packet.abstentions, "claim_count": len(packet.claims),
+            "requested_actions": packet.requested_actions,
+            "upstream_error_refs": (exc.reason_code.value,), "terminal_state": "BLOCKED",
+            "blocker_codes": (exc.reason_code.value,),
+        }
+        return _st12h_outcome(
+            fixture, terminal_state=f"REJECTED_{suffix}", result=exc,
+            reason_code_or_none=exc.reason_code,
+            owner_call_refs=(gateway_ref,), evidence=evidence,
+        )
+    terminal_by_suffix = {
+        "GROUNDING_CITATIONS": "PASS_RECIPROCAL_GROUNDING",
+        "SCHEMA_OUTPUT": "PASS_STRICT_SCHEMA",
+        "DETERMINISTIC_RECHECK": "PASS_NUMERIC_RECHECK",
+        "ABSTENTION": "PASS_EXPLICIT_ABSTENTION",
+        "ERROR_CONTAGION": "PASS_ERROR_CONTAGION_FAIL_CLOSED",
+    }
+    return _st12h_outcome(
+        fixture, terminal_state=terminal_by_suffix[suffix], result=normalized,
+        reason_code_or_none=None,
+        owner_call_refs=(
+            ("AnnotationClaimV1.from_canonical_mapping", gateway_ref)
+            if suffix == "SCHEMA_OUTPUT"
+            else (gateway_ref,)
+        ),
+        evidence={
+            "annotation_id": normalized.annotation_id,
+            "advisory_task": normalized.advisory_task.value,
+            "claims": normalized.claims, "citations": normalized.citations,
+            "limitations": normalized.limitations,
+            "claim_ids": tuple(row.claim_id for row in normalized.claims),
+            "citation_ids": tuple(row.citation_id for row in normalized.citations),
+            "evidence_bundle_refs": normalized.evidence_bundle_refs,
+            "numeric_recheck_refs": normalized.deterministic_numeric_recheck_receipt_refs,
+            "numeric_fact_id": "NUMERIC::ST12H", "canonical_value": "0.5",
+            "unit_and_basis": "probability|unitless", "input_lock_id": "ST12F-LOCK::ST12H",
+            "recheck_receipt_ref": "ST12F-RECEIPT::NUMERIC-RECHECK::LLM_ANNOTATION_VALIDATION",
+            "abstentions": normalized.abstentions, "claim_count": len(normalized.claims),
+            "requested_actions": packet.requested_actions,
+            "upstream_error_refs": (), "terminal_state": "VALIDATED", "blocker_codes": (),
+        },
+    )
+
+
+def _st12h_handoff() -> ST12HStep12FinalHandoffV1:
+    return ST12HStep12FinalHandoffV1(
+        schema_version="ST12H_FINAL_STEP12_HANDOFF_V1",
+        handoff_id="ST12H-HANDOFF::CURRENTIZED",
+        tranche="ST12-TRANCHE-H",
+        frozen_denominators=(36, 41, 21, 52, 52, 52, 42, 12),
+        final_control_refs=tuple(
+            control.control_id for control in ST12H_FINALIZATION_CONTROLS
+        ),
+        validation_campaign_receipt_ref="ST12H-RECEIPT::CAMPAIGN::DYNAMIC_REQUIRED",
+        publication_receipt_ref="ST12H-RECEIPT::PUBLICATION::DYNAMIC_REQUIRED",
+        active_implementation_path_count=25,
+        read_only_predecessor_path_count=66,
+        grouped_test_module_count=1,
+        grouped_test_function_count=6,
+        stale_receipt_count=14,
+        held_authorities=_ST12H_HELD_AUTHORITIES,
+        terminal_state="INDEPENDENT_CODE_AUDIT_FAILED",
+        next_owner_action="INDEPENDENT_ACTUAL_CODE_REAUDIT",
+        no_effect_flags=NO_EFFECTS_V1,
+    )
+
+
+def _st12h_campaign_plan_fixture() -> ST12HValidationCampaignPlanV1:
+    phases: list[ST12HValidationCampaignPhaseV1] = []
+    for phase_number, (phase_id, command_ids) in enumerate(
+        zip(
+            _ST12H_CAMPAIGN_PHASE_IDS,
+            _ST12H_CAMPAIGN_COMMAND_IDS,
+            strict=True,
+        ),
+        start=1,
+    ):
+        if phase_number == 5:
+            commands = ST12H_VALIDATION_COMMANDS
+        else:
+            commands = tuple(
+                ST12HValidationCommandPlanV1(
+                    command_id=command_id,
+                    execution_order=index,
+                    domain="h",
+                    argv=("python", "tools/run_validation_gates.py"),
+                    repository_paths=("tools/run_validation_gates.py",),
+                    marker_policy="PREFIX_LINES",
+                    expected_terminal_markers=(f"{command_id}_OK",),
+                    hard_timeout_seconds=(7200 if command_id == "ST12H-V8-FULL-LOCAL" else 1200),
+                    max_attempts=1,
+                    environment_id="LOCAL_FOCUSED_COMPATIBILITY",
+                    network_class="VALIDATION_NETWORK_FORBIDDEN",
+                    provider_effect_allowed=False,
+                    private_state_allowed=False,
+                    runtime_or_trading_effect_allowed=False,
+                )
+                for index, command_id in enumerate(command_ids, start=1)
+            )
+        action_class = (
+            "EXECUTABLE_COMMAND_SET"
+            if commands
+            else {
+                2: "CODEX_READ_ONLY_GATE",
+                3: "OWNER_DECISION_GATE",
+                13: "EXTERNAL_CI_GATE",
+                14: "PUBLICATION_GATE",
+            }[phase_number]
+        )
+        phases.append(
+            ST12HValidationCampaignPhaseV1(
+                phase=phase_number,
+                phase_id=phase_id,
+                action_class=action_class,
+                environment_class=(
+                    "PACKAGE_AUDIT"
+                    if phase_number == 1
+                    else "CLEAN_CI_AUTHORITATIVE"
+                    if phase_number == 13
+                    else "LOCAL_FOCUSED_COMPATIBILITY"
+                ),
+                commands=commands,
+                instruction_ref=None,
+                gate_contract_ref=None,
+            )
+        )
+    return ST12HValidationCampaignPlanV1(
+        campaign_id="ST12H-V8-CORRECTED-STATE",
+        phases=tuple(phases),
+        full_local_campaign_limit=1,
+        scratch_budget_ref="registries/h_validation_and_scratch_budget.json",
+        tracked_side_effect_policy="EXACT_ALLOWLIST_ONLY",
+        final_custody_requirement="CLEAN_EXCEPT_INTENTIONAL_AUTHORIZED_DELTA",
+        repository_copy_count=0,
+        copied_git_index_count=0,
+    )
+
+
+def _validate_st12h_incident_containment_v1(
+    plan: ST12HBackupRestorePlanV1,
+    evidence: Mapping[str, object],
+) -> None:
+    if (
+        type(plan) is not ST12HBackupRestorePlanV1
+        or evidence.get("classification") != "VALIDATION_CONTAINMENT"
+        or evidence.get("containment_action")
+        != "STOP_NO_RETRY_AND_RETAIN_EVIDENCE"
+        or not evidence.get("owner_notification_ref")
+        or plan.repository_copy_allowed
+        or plan.copied_git_index_allowed
+    ):
+        raise ContractValidationError(
+            ReasonCode.RUNTIME_EFFECT_FORBIDDEN,
+            "incident containment must stop, retain evidence, notify the owner, and remain no-effect",
+        )
+
+
+def _validate_st12h_campaign_receipt_chain_v1(
+    plan: ST12HValidationCampaignPlanV1,
+    observed_phase_ids: tuple[str, ...],
+) -> None:
+    validate_st12h_campaign_plan_v1(plan)
+    if observed_phase_ids != tuple(phase.phase_id for phase in plan.phases):
+        raise ContractValidationError(
+            ReasonCode.DEPENDENCY_CLOSURE_FAILED,
+            "ST12-H campaign predecessor receipt chain is noncontiguous",
+        )
+
+
+def _validate_st12h_final_operational_packet_v1(
+    handoff: ST12HStep12FinalHandoffV1,
+) -> None:
+    if (
+        type(handoff) is not ST12HStep12FinalHandoffV1
+        or handoff.final_control_refs
+        != tuple(control.control_id for control in ST12H_FINALIZATION_CONTROLS)
+        or handoff.terminal_state
+        not in {"INDEPENDENT_CODE_AUDIT_FAILED", "FINAL_CONTROLS_INCOMPLETE", "MERGE_HELD"}
+        or not handoff.validation_campaign_receipt_ref.startswith("ST12H-RECEIPT::")
+        or not handoff.publication_receipt_ref.startswith("ST12H-RECEIPT::")
+        or handoff.no_effect_flags is not NO_EFFECTS_V1
+    ):
+        raise ContractValidationError(
+            ReasonCode.VALIDATION_FAILED,
+            "final operational packet must retain all controls, dynamic receipt requirements, and held authority",
+        )
+
+
+def _validate_st12h_exception_expiry_v1(
+    decision: object,
+    *,
+    expires_at: datetime,
+    evaluated_at: datetime,
+) -> None:
+    if (
+        not hasattr(decision, "decision_state")
+        or expires_at <= evaluated_at
+        or getattr(decision, "runtime_effect_authorized", None) is not False
+    ):
+        raise ContractValidationError(
+            ReasonCode.CAPABILITY_DENIED,
+            "validation-only exception evidence must be scoped, current, and no-effect",
+        )
+
+
+def _validate_st12h_no_cryptographic_authority_v1(
+    semantic_authority_fields: tuple[str, ...],
+) -> None:
+    forbidden = tuple(
+        name
+        for name in semantic_authority_fields
+        if any(token in name.casefold() for token in ("digest", "hash", "object_identifier", "object_id"))
+    )
+    if forbidden:
+        raise ContractValidationError(
+            ReasonCode.INVALID_CONTRACT,
+            "digest or repository object identity cannot become H semantic authority",
+        )
+
+
+def _validate_st12h_validator_isolation_v1(
+    plan: ST12HValidationCampaignPlanV1,
+    backup_plan: ST12HBackupRestorePlanV1,
+    *,
+    repository_copy_count: int,
+    copied_git_index_count: int,
+) -> None:
+    validate_st12h_campaign_plan_v1(plan)
+    if (
+        repository_copy_count != 0
+        or copied_git_index_count != 0
+        or backup_plan.repository_copy_allowed
+        or backup_plan.copied_git_index_allowed
+        or plan.repository_copy_count != 0
+        or plan.copied_git_index_count != 0
+    ):
+        raise ContractValidationError(
+            ReasonCode.RESOURCE_BOUND_EXCEEDED,
+            "validator isolation forbids repository and Git-index copies",
+        )
+
+
+def _validate_st12h_source_binding_coverage_v1(
+    bindings: tuple[ST12HSourceBindingV1, ...],
+) -> None:
+    if (
+        len(bindings) != 9
+        or len({binding.source_id for binding in bindings}) != 9
+        or any(
+            not binding.recheck_trigger
+            or not binding.rights_state
+            or not _st12h_source_evidence_ref(binding)
+            for binding in bindings
+        )
+    ):
+        raise ContractValidationError(
+            ReasonCode.SOURCE_EPOCH_MISSING,
+            "source claim/field binding roster is incomplete",
+        )
+
+
+def _validate_st12h_source_numeric_owner_separation_v1(
+    source_identity_ref: str,
+    numeric_authority_ref: str,
+) -> None:
+    if source_identity_ref == numeric_authority_ref:
+        raise ContractValidationError(
+            ReasonCode.SOURCE_CONFLICT,
+            "source semantics cannot authenticate a runtime numeric value",
+        )
+
+
+def _st12h_validate_and_observe_source_binding_v1(
+    binding: ST12HSourceBindingV1,
+    *,
+    evaluated_at: date,
+) -> _ST12HSourceCurrentnessReceiptV1:
+    validate_st12h_source_binding_v1(binding, evaluated_at=evaluated_at)
+    return _observe_st12h_source_binding_v1(
+        binding,
+        evaluated_at=evaluated_at,
+    )
+
+
+def _validate_st12h_final_source_packet_v1(
+    receipts: tuple[_ST12HSourceCurrentnessReceiptV1, ...],
+    *,
+    rights: SourceRightsV1,
+    numeric_authority_ref: str,
+) -> None:
+    _validate_st12h_source_binding_coverage_v1(ST12H_SOURCE_BINDINGS)
+    if len(receipts) != 9 or rights.redistribution_authorized:
+        raise ContractValidationError(
+            ReasonCode.VALIDATION_FAILED,
+            "final source packet requires nine current receipts and default-deny rights",
+        )
+    for binding, receipt in zip(ST12H_SOURCE_BINDINGS, receipts, strict=True):
+        _validate_st12h_source_currentness_receipt_v1(
+            receipt,
+            evaluated_at=datetime.now(UTC).date(),
+        )
+        _validate_st12h_source_numeric_owner_separation_v1(
+            _st12h_source_evidence_ref(binding),
+            numeric_authority_ref,
+        )
+
+
+def _execute_st12h_kill_rollback_drill_v1(
+) -> tuple[object, tuple[ST12HBackupRestoreReceiptV1, ...]]:
+    gate_result = _st12h_submit_disabled_result()
+    if gate_result is None:
+        raise ContractValidationError(
+            ReasonCode.VALIDATION_FAILED,
+            "kill/rollback drill did not execute its safety owner",
+        )
+    from tools.independent_validate_qku_computation_control_plane import (
+        execute_st12h_backup_restore_portability_v1,
+    )
+
+    backup_receipts = execute_st12h_backup_restore_portability_v1()
+    if len(backup_receipts) != 12:
+        raise ContractValidationError(
+            ReasonCode.VALIDATION_FAILED,
+            "kill/rollback drill did not execute all backup/restore stages",
+        )
+    return gate_result, backup_receipts
+
+
+def _invoke_st12h_operations_control(
+    fixture: _ST12HExecutableControlFixtureV1,
+) -> _ST12HObservedControlOutcomeV1:
+    suffix = fixture.case_id.rsplit("::", 1)[-1]
+    if suffix == "DEPENDENCY_FAILURE":
+        plan = _st12h_campaign_plan_fixture()
+        observed = (
+            _ST12H_CAMPAIGN_PHASE_IDS[:-1]
+            if fixture.attack_enabled
+            else _ST12H_CAMPAIGN_PHASE_IDS
+        )
+        try:
+            _validate_st12h_campaign_receipt_chain_v1(plan, observed)
+        except ComputationControlPlaneError as exc:
+            return _st12h_outcome(
+                fixture, terminal_state="REJECTED_DEPENDENCY_CHAIN", result=exc,
+                reason_code_or_none=exc.reason_code,
+                owner_call_refs=(
+                    "validate_st12h_campaign_plan_v1",
+                    "_validate_st12h_campaign_receipt_chain_v1",
+                ),
+                evidence={
+                    "campaign_id": plan.campaign_id,
+                    "phase_id": "PUBLICATION_AND_POST_RUN_CUSTODY",
+                    "predecessor_phase_ids": observed, "terminal_state": "BLOCKED",
+                    "receipt_refs": tuple(f"ST12H-PHASE-RECEIPT::{row}" for row in observed),
+                },
+            )
+        return _st12h_outcome(
+            fixture, terminal_state="PASS_DEPENDENCY_FAIL_CLOSED", result=plan,
+            reason_code_or_none=None,
+            owner_call_refs=(
+                "validate_st12h_campaign_plan_v1",
+                "_validate_st12h_campaign_receipt_chain_v1",
+            ),
+            evidence={
+                "campaign_id": plan.campaign_id, "phase_id": observed[-1],
+                "predecessor_phase_ids": observed[:-1], "terminal_state": "VALIDATED",
+                "receipt_refs": tuple(f"ST12H-PHASE-RECEIPT::{row}" for row in observed),
+            },
+        )
+    if suffix == "DEPLOYMENT_PARITY":
+        try:
+            environment = _st12h_validation_environment(valid=not fixture.attack_enabled)
+        except ComputationControlPlaneError as exc:
+            return _st12h_outcome(
+                fixture, terminal_state="REJECTED_DEPLOYMENT_DRIFT", result=exc,
+                reason_code_or_none=exc.reason_code,
+                owner_call_refs=("ST12HValidationEnvironmentV1",),
+                evidence={
+                    "python_version": "latest", "pytest_version": "9.1.1",
+                    "workflow_shard_count": 13, "workflow_aggregate_count": 1,
+                },
+            )
+        return _st12h_outcome(
+            fixture, terminal_state="PASS_LOCAL_CI_PARITY", result=environment,
+            reason_code_or_none=None,
+            owner_call_refs=("ST12HValidationEnvironmentV1",),
+            evidence={
+                "python_version": environment.python_requirement,
+                "pytest_version": environment.pytest_requirement_or_explicit_absence,
+                "workflow_shard_count": 13, "workflow_aggregate_count": 1,
+            },
+        )
+    if suffix == "INCIDENT_RESPONSE":
+        plan = ST12H_BACKUP_RESTORE_PLANS[0]
+        evidence = {
+            "incident_id": "ST12H-INCIDENT::VALIDATION_ONLY",
+            "classification": "VALIDATION_CONTAINMENT",
+            "containment_action": "STOP_NO_RETRY_AND_RETAIN_EVIDENCE",
+            "owner_notification_ref": (
+                "" if fixture.attack_enabled else "OWNER-NOTIFICATION::REQUIRED"
+            ),
+        }
+        try:
+            _validate_st12h_incident_containment_v1(plan, evidence)
+        except ComputationControlPlaneError as exc:
+            return _st12h_outcome(
+                fixture, terminal_state="REJECTED_INCIDENT_PACKET", result=exc,
+                reason_code_or_none=exc.reason_code,
+                owner_call_refs=("ST12HBackupRestorePlanV1", "_validate_st12h_incident_containment_v1"),
+                evidence=evidence,
+            )
+        return _st12h_outcome(
+            fixture, terminal_state="PASS_INCIDENT_CONTAINMENT_CONTRACT", result=plan,
+            reason_code_or_none=None,
+            owner_call_refs=("ST12HBackupRestorePlanV1", "_validate_st12h_incident_containment_v1"),
+            evidence=evidence,
+        )
+    if suffix == "KILL_ROLLBACK_DRILL":
+        gate_result, backup_receipts = _execute_st12h_kill_rollback_drill_v1()
+        reason = gate_result.mode_snapshot_decision.reason_codes[0]
+        return _st12h_outcome(
+            fixture,
+            terminal_state=(
+                "REJECTED_ROLLBACK_WRITE" if fixture.attack_enabled else "PASS_NO_WRITE_ROLLBACK_DRILL"
+            ),
+            result=gate_result,
+            reason_code_or_none=(reason if fixture.attack_enabled else None),
+            owner_call_refs=(
+                "_execute_st12h_kill_rollback_drill_v1",
+            ),
+            evidence={
+                "drill_id": "ST12H-DRILL::ROLLBACK",
+                "rollback_target_ref": _ST12H_GENERATED_REPORT_PATHS,
+                "submit_disabled": True, "runtime_effect_count": 0,
+                "backup_restore_receipt_refs": tuple(
+                    receipt.receipt_id for receipt in backup_receipts
+                ),
+            },
+        )
+    if suffix == "READINESS_HONESTY":
+        try:
+            proposed = (
+                ST12HFinalizationStateV1.DRAFT_PR_OPEN
+                if fixture.attack_enabled
+                else ST12HFinalizationStateV1.DRAFT_PR_OPEN
+            )
+            current = (
+                ST12HFinalizationStateV1.MERGE_HELD
+                if fixture.attack_enabled
+                else ST12HFinalizationStateV1.CORRECTED_IMPLEMENTATION_VALIDATED
+            )
+            result = validate_st12h_finalization_transition_v1(
+                current,
+                proposed,
+                ("ST12H-RECEIPT::READINESS::CURRENT",),
+            )
+        except ComputationControlPlaneError as exc:
+            return _st12h_outcome(
+                fixture, terminal_state="REJECTED_READINESS_PROMOTION", result=exc,
+                reason_code_or_none=exc.reason_code,
+                owner_call_refs=("validate_st12h_finalization_transition_v1",),
+                evidence={
+                    "implementation_state": current.value, "validation_state": "HELD",
+                    "evidence_state": "INDEPENDENT_REAUDIT_REQUIRED",
+                    "mode_state": "HELD", "order_release_state": "HELD",
+                },
+            )
+        return _st12h_outcome(
+            fixture, terminal_state="PASS_ORTHOGONAL_READINESS", result=result,
+            reason_code_or_none=None,
+            owner_call_refs=("validate_st12h_finalization_transition_v1",),
+            evidence={
+                "implementation_state": current.value, "validation_state": proposed.value,
+                "evidence_state": "INDEPENDENT_REAUDIT_REQUIRED",
+                "mode_state": "HELD", "order_release_state": "HELD",
+            },
+        )
+    handoff = _st12h_handoff()
+    candidate_handoff = (
+        replace(handoff, final_control_refs=handoff.final_control_refs[:-1])
+        if fixture.attack_enabled
+        else handoff
+    )
+    try:
+        _validate_st12h_final_operational_packet_v1(candidate_handoff)
+    except ComputationControlPlaneError as exc:
+        return _st12h_outcome(
+            fixture, terminal_state="REJECTED_FINAL_OPERATIONAL_PACKET", result=exc,
+            reason_code_or_none=exc.reason_code,
+            owner_call_refs=("ST12HStep12FinalHandoffV1", "_validate_st12h_final_operational_packet_v1"),
+            evidence={
+                "handoff_id": handoff.handoff_id,
+                "final_control_refs": handoff.final_control_refs[:-1],
+                "publication_receipt_ref": handoff.publication_receipt_ref,
+                "stale_receipt_count": handoff.stale_receipt_count,
+                "next_owner_action": handoff.next_owner_action,
+            },
+        )
+    return _st12h_outcome(
+        fixture, terminal_state="PASS_HELD_STEP12_HANDOFF_CONTRACT", result=handoff,
+        reason_code_or_none=None,
+            owner_call_refs=("ST12HStep12FinalHandoffV1", "_validate_st12h_final_operational_packet_v1"),
+        evidence={},
+    )
+
+
+def _invoke_st12h_security_control(
+    fixture: _ST12HExecutableControlFixtureV1,
+) -> _ST12HObservedControlOutcomeV1:
+    suffix = fixture.case_id.rsplit("::", 1)[-1]
+    if suffix == "EXCEPTION_GOVERNANCE":
+        resolver = _st12h_agent_resolver()
+        result = resolver.resolve(
+            request_id="REQUEST::ST12H::EXCEPTION",
+            principal_id="parameter_selector_agent",
+            capability_bundle_id="ST12H_TEST_BUNDLE",
+            operation_id="resolve_identity",
+            context_ref="CTX::ST12H::VENUE-A",
+            request_idempotency_key="ST12H-IDEMPOTENCY::AGENT",
+        )
+        expires_at = (
+            _ST12H_CONTROL_NOW - timedelta(seconds=1)
+            if fixture.attack_enabled
+            else _ST12H_CONTROL_NOW + timedelta(minutes=5)
+        )
+        try:
+            _validate_st12h_exception_expiry_v1(
+                result,
+                expires_at=expires_at,
+                evaluated_at=_ST12H_CONTROL_NOW,
+            )
+        except ComputationControlPlaneError as exc:
+            return _st12h_outcome(
+                fixture, terminal_state="REJECTED_UNAUTHORIZED_EXCEPTION", result=exc,
+                reason_code_or_none=exc.reason_code,
+                owner_call_refs=("AgentCapabilityResolverV1.resolve", "_validate_st12h_exception_expiry_v1"),
+                evidence={
+                    "exception_id": "ST12H-EXCEPTION::DENIED",
+                    "scope": "VALIDATION_ONLY", "expires_at": expires_at,
+                    "owner_decision_ref": result.decision_id,
+                    "terminal_state": "DENIED",
+                },
+            )
+        return _st12h_outcome(
+            fixture, terminal_state="PASS_EXCEPTION_DEFAULT_DENY", result=result,
+            reason_code_or_none=None,
+            owner_call_refs=("AgentCapabilityResolverV1.resolve", "_validate_st12h_exception_expiry_v1"),
+            evidence={
+                "exception_id": "ST12H-EXCEPTION::NONE",
+                "scope": "VALIDATION_ONLY", "expires_at": expires_at,
+                "owner_decision_ref": result.decision_id,
+                "terminal_state": result.decision_state.value,
+            },
+        )
+    if suffix == "NO_CRYPTOGRAPHIC_AUTHORITY":
+        governed_types = (
+            ST12HPublicationManifestV1,
+            ST12HStep12FinalHandoffV1,
+            ST12HValidationCurrentizationOperationsPublicationReportV1,
+        )
+        semantic_authorities = (
+            ("repository_object_identifier",)
+            if fixture.attack_enabled
+            else tuple(
+                field.name
+                for governed_type in governed_types
+                for field in fields(governed_type)
+            )
+        )
+        try:
+            _validate_st12h_no_cryptographic_authority_v1(semantic_authorities)
+        except ComputationControlPlaneError as exc:
+            return _st12h_outcome(
+                fixture, terminal_state="REJECTED_CRYPTOGRAPHIC_AUTHORITY", result=exc,
+                reason_code_or_none=exc.reason_code,
+                owner_call_refs=("_validate_st12h_no_cryptographic_authority_v1",),
+                evidence={
+                    "publication_id": "ST12H-PUBLICATION::HELD",
+                    "inventory_refs": _ST12H_GENERATED_REPORT_PATHS,
+                    "object_identifier_authority_count": 1,
+                },
+            )
+        return _st12h_outcome(
+            fixture, terminal_state="PASS_NO_DIGEST_AUTHORITY", result=governed_types,
+            reason_code_or_none=None,
+            owner_call_refs=("_validate_st12h_no_cryptographic_authority_v1",),
+            evidence={
+                "publication_id": "ST12H-PUBLICATION::HELD",
+                "inventory_refs": _ST12H_GENERATED_REPORT_PATHS,
+                "object_identifier_authority_count": 0,
+            },
+        )
+    if suffix == "OWNER_SURFACE_SAFETY":
+        result = _st12h_agent_decision(
+            context_ref="CTX::ST12H::VENUE-A",
+            effect_attempt_flag=(
+                "order_release_requested" if fixture.attack_enabled else None
+            ),
+        )
+        if not result.eligible:
+            if not result.reason_codes:
+                raise ContractValidationError(
+                    ReasonCode.VALIDATION_FAILED,
+                    "owner-surface capability denial omitted its reason",
+                )
+            return _st12h_outcome(
+                fixture, terminal_state="REJECTED_OWNER_WRITE_SURFACE", result=result,
+                reason_code_or_none=result.reason_codes[0],
+                owner_call_refs=("AgentCapabilityResolverV1.resolve",),
+                evidence={
+                    "owner_action_refs": ("OWNER_REVIEW_REQUIRED",), "request_only": True,
+                    "direct_write_count": 0,
+                },
+            )
+        return _st12h_outcome(
+            fixture, terminal_state="PASS_OWNER_SURFACE_REQUEST_ONLY", result=result,
+            reason_code_or_none=None,
+            owner_call_refs=("AgentCapabilityResolverV1.resolve",),
+            evidence={
+                "owner_action_refs": (result.decision_id,), "request_only": True,
+                "direct_write_count": 0,
+            },
+        )
+    plan = ST12H_BACKUP_RESTORE_PLANS[0]
+    campaign_plan = _st12h_campaign_plan_fixture()
+    try:
+        _validate_st12h_validator_isolation_v1(
+            campaign_plan,
+            plan,
+            repository_copy_count=(1 if fixture.attack_enabled else 0),
+            copied_git_index_count=0,
+        )
+    except ComputationControlPlaneError as exc:
+        return _st12h_outcome(
+            fixture, terminal_state="REJECTED_VALIDATOR_ISOLATION", result=exc,
+            reason_code_or_none=exc.reason_code,
+            owner_call_refs=("_validate_st12h_validator_isolation_v1",),
+            evidence={
+                "environment_ref": "LOCAL_FOCUSED_COMPATIBILITY",
+                "scratch_root_class": plan.external_scratch_root_policy,
+                "repository_copy_count": 1, "copied_index_count": 0,
+            },
+        )
+    return _st12h_outcome(
+        fixture, terminal_state="PASS_VALIDATOR_ISOLATION", result=campaign_plan,
+        reason_code_or_none=None,
+        owner_call_refs=("_validate_st12h_validator_isolation_v1",),
+        evidence={
+            "environment_ref": "LOCAL_FOCUSED_COMPATIBILITY",
+            "scratch_root_class": plan.external_scratch_root_policy,
+            "repository_copy_count": 0, "copied_index_count": 0,
+        },
+    )
+
+
+def _invoke_st12h_source_control(
+    fixture: _ST12HExecutableControlFixtureV1,
+) -> _ST12HObservedControlOutcomeV1:
+    suffix = fixture.case_id.rsplit("::", 1)[-1]
+    binding = ST12H_SOURCE_BINDINGS[4]
+    if suffix == "RIGHTS_USE":
+        try:
+            rights = SourceRightsV1(
+                source_state_id="ST12H-SOURCE-RIGHTS::PUBLIC",
+                rights_and_use_state="PUBLIC_DOCUMENTATION_REFERENCE_ONLY",
+                permitted_use_class="VALIDATION_REFERENCE_ONLY",
+                public_documentation_reference_only=True,
+                redistribution_authorized=fixture.attack_enabled,
+            )
+        except ComputationControlPlaneError as exc:
+            return _st12h_outcome(
+                fixture, terminal_state="REJECTED_SOURCE_RIGHTS", result=exc,
+                reason_code_or_none=exc.reason_code,
+                owner_call_refs=("SourceRightsV1",),
+                evidence={
+                    "source_state_id": "ST12H-SOURCE-RIGHTS::PUBLIC",
+                    "rights_and_use_state": "BLOCKED",
+                    "permitted_use_class": "VALIDATION_REFERENCE_ONLY",
+                    "redistribution_authorized": False,
+                },
+            )
+        return _st12h_outcome(
+            fixture, terminal_state="PASS_RIGHTS_DEFAULT_DENY", result=rights,
+            reason_code_or_none=None, owner_call_refs=("SourceRightsV1",), evidence={},
+        )
+    if suffix in {"FRESHNESS", "STATISTICAL_CURRENTNESS"}:
+        try:
+            receipt = _st12h_validate_and_observe_source_binding_v1(
+                binding,
+                evaluated_at=(
+                    date(2026, 1, 1)
+                    if fixture.attack_enabled
+                    else datetime.now(UTC).date()
+                ),
+            )
+        except ComputationControlPlaneError as exc:
+            return _st12h_outcome(
+                fixture, terminal_state="REJECTED_STALE_SOURCE", result=exc,
+                reason_code_or_none=exc.reason_code,
+                owner_call_refs=("validate_st12h_source_binding_v1",),
+                evidence={
+                    "source_id": binding.source_id,
+                    "source_epoch_ref": _st12h_source_evidence_ref(binding),
+                    "observed_at": binding.observed_at.isoformat(), "valid_until": "EXPIRED",
+                    "currentness_state": "STALE",
+                    "method_id": binding.source_id,
+                    "publication_or_version": binding.publication_or_version,
+                    "recheck_trigger": binding.recheck_trigger,
+                },
+            )
+        terminal = (
+            "PASS_SOURCE_CURRENTNESS"
+            if suffix == "FRESHNESS"
+            else "PASS_METHOD_CURRENTNESS"
+        )
+        return _st12h_outcome(
+            fixture, terminal_state=terminal, result=receipt,
+            reason_code_or_none=None,
+            owner_call_refs=("validate_st12h_source_binding_v1",),
+            evidence={
+                "source_id": binding.source_id,
+                "source_epoch_ref": _st12h_source_evidence_ref(binding),
+                "observed_at": binding.observed_at.isoformat(),
+                "valid_until": (
+                    receipt.valid_until.isoformat() if receipt.valid_until else "STABLE_VERSION"
+                ),
+                "currentness_state": receipt.terminal_state,
+                "method_id": binding.source_id,
+                "publication_or_version": binding.publication_or_version,
+                "recheck_trigger": binding.recheck_trigger,
+            },
+            source_receipt_refs=receipt.evidence_refs,
+        )
+    if suffix == "BINDING_COVERAGE":
+        observed_bindings = (
+            ST12H_SOURCE_BINDINGS[:-1]
+            if fixture.attack_enabled
+            else ST12H_SOURCE_BINDINGS
+        )
+        observed = tuple(row.source_id for row in observed_bindings)
+        try:
+            _validate_st12h_source_binding_coverage_v1(observed_bindings)
+        except ComputationControlPlaneError as exc:
+            return _st12h_outcome(
+                fixture, terminal_state="REJECTED_SOURCE_BINDING_COVERAGE", result=exc,
+                reason_code_or_none=exc.reason_code,
+                owner_call_refs=("_validate_st12h_source_binding_coverage_v1",),
+                evidence={
+                    "source_id": binding.source_id,
+                    "claim_binding_refs": observed, "field_binding_refs": observed,
+                    "terminal_state": "INCOMPLETE",
+                },
+            )
+        return _st12h_outcome(
+            fixture, terminal_state="PASS_SOURCE_BINDING_COVERAGE", result=observed,
+            reason_code_or_none=None,
+            owner_call_refs=("_validate_st12h_source_binding_coverage_v1",),
+            evidence={
+                "source_id": binding.source_id,
+                "claim_binding_refs": observed, "field_binding_refs": observed,
+                "terminal_state": "COMPLETE",
+            },
+        )
+    if suffix == "OWNER_SEPARATION":
+        source_ref = _st12h_source_evidence_ref(binding)
+        numeric_ref = source_ref if fixture.attack_enabled else "PARAM_AUTH::ST12H::NUMERIC"
+        try:
+            _validate_st12h_source_numeric_owner_separation_v1(
+                source_ref,
+                numeric_ref,
+            )
+        except ComputationControlPlaneError as exc:
+            return _st12h_outcome(
+                fixture, terminal_state="REJECTED_SOURCE_NUMERIC_OWNER_COLLISION", result=exc,
+                reason_code_or_none=exc.reason_code,
+                owner_call_refs=("_validate_st12h_source_numeric_owner_separation_v1",),
+                evidence={
+                    "source_identity_ref": source_ref, "numeric_authority_ref": numeric_ref,
+                    "separation_state": "CONFLICT",
+                },
+            )
+        return _st12h_outcome(
+            fixture, terminal_state="PASS_SOURCE_NUMERIC_AUTHORITY_SEPARATION", result=binding,
+            reason_code_or_none=None,
+            owner_call_refs=("_validate_st12h_source_numeric_owner_separation_v1",),
+            evidence={
+                "source_identity_ref": source_ref, "numeric_authority_ref": numeric_ref,
+                "separation_state": "SEPARATE",
+            },
+        )
+    receipts = tuple(
+        _st12h_validate_and_observe_source_binding_v1(
+            row,
+            evaluated_at=datetime.now(UTC).date(),
+        )
+        for row in ST12H_SOURCE_BINDINGS
+    )
+    observed = receipts[:-1] if fixture.attack_enabled else receipts
+    rights = SourceRightsV1(
+        source_state_id="ST12H-SOURCE-RIGHTS::PUBLIC",
+        rights_and_use_state="PUBLIC_DOCUMENTATION_REFERENCE_ONLY",
+        permitted_use_class="VALIDATION_REFERENCE_ONLY",
+        public_documentation_reference_only=True,
+        redistribution_authorized=False,
+    )
+    try:
+        _validate_st12h_final_source_packet_v1(
+            observed,
+            rights=rights,
+            numeric_authority_ref="PARAM_AUTH::ST12H::NUMERIC",
+        )
+    except ComputationControlPlaneError as exc:
+        return _st12h_outcome(
+            fixture, terminal_state="REJECTED_FINAL_SOURCE_PACKET", result=exc,
+            reason_code_or_none=exc.reason_code,
+            owner_call_refs=("_validate_st12h_final_source_packet_v1",),
+            evidence={
+                "source_binding_refs": tuple(row.source_id for row in ST12H_SOURCE_BINDINGS),
+                "currentization_refs": tuple(row.source_id for row in observed),
+                "rights_refs": ("SourceRightsV1",),
+                "owner_separation_refs": ("PARAM_AUTH::ST12H::NUMERIC",),
+                "terminal_state": "INCOMPLETE",
+            },
+        )
+    return _st12h_outcome(
+        fixture, terminal_state="PASS_COMPLETE_SOURCE_PACKET", result=observed,
+        reason_code_or_none=None,
+        owner_call_refs=("_validate_st12h_final_source_packet_v1",),
+        evidence={
+            "source_binding_refs": tuple(row.source_id for row in ST12H_SOURCE_BINDINGS),
+            "currentization_refs": tuple(row.source_id for row in observed),
+            "rights_refs": ("SourceRightsV1",),
+            "owner_separation_refs": ("PARAM_AUTH::ST12H::NUMERIC",),
+            "terminal_state": "CURRENT_VALIDATED",
+        },
+        source_receipt_refs=tuple(ref for receipt in receipts for ref in receipt.evidence_refs),
+    )
+
+
+def _st12h_owner_callables(case: ST12HControlCaseV1) -> tuple[object, ...]:
+    suffix = case.case_id.rsplit("::", 1)[-1]
+    exact: Mapping[str, tuple[object, ...]] = {
+        "IDEMPOTENT_POSTING": (TrancheCUnitOfWorkV1.execute,),
+        "TRANSACTION_ATOMICITY": (TrancheCUnitOfWorkV1.execute,),
+        "DATABASE_INTEGRITY": (SQLiteReferenceAdapterV1, TrancheCUnitOfWorkV1.execute),
+        "NO_PROFIT_FABRICATION": (CashStateProjectionV1, AccountingAndTCAServiceV1.deployable_capital),
+        "COST_FILL_MODEL_USE": (TCADecompositionV1, FillQuantityDistributionArtifactV1),
+        "NO_TRADE_RELEASE": (FallbackDispositionV1,),
+        "DETERMINISTIC_FALLBACK": (PublicFallbackBoundaryV1.translate,),
+        "MARKET_ACCESS_BOUNDARY": (AgentCapabilityResolverV1.resolve,),
+        "SUBMIT_DISABLED_DRY_RUN": (evaluate_mode_snapshot_preconstruction_gate,),
+        "PER_VENUE_AUTHORIZATION": (AgentCapabilityResolverV1.resolve,),
+        "RESOURCE_LIMITS": (PreexistingAnnotationPacketV1,),
+        "GROUNDING_CITATIONS": (GroundedLLMGatewayV1.validate_and_normalize,),
+        "SCHEMA_OUTPUT": (AnnotationClaimV1.from_canonical_mapping, GroundedLLMGatewayV1.validate_and_normalize),
+        "DETERMINISTIC_RECHECK": (GroundedLLMGatewayV1.validate_and_normalize,),
+        "ABSTENTION": (GroundedLLMGatewayV1.validate_and_normalize,),
+        "NO_HIDDEN_REASONING_STORAGE": (GroundedLLMGatewayV1.validate_and_normalize, deterministic_json),
+        "VERSION_PINNING": (ST12HValidationEnvironmentV1,),
+        "ERROR_CONTAGION": (GroundedLLMGatewayV1.validate_and_normalize,),
+        "EVALUATION": (_validate_st12h_llm_control_receipt_aggregate_v1, _st12f_llm_checks),
+        "CODEX_BOUNDARY": (validate_st12h_campaign_plan_v1, _validate_st12h_codex_boundary_v1),
+        "DEPENDENCY_FAILURE": (validate_st12h_campaign_plan_v1, _validate_st12h_campaign_receipt_chain_v1),
+        "DEPLOYMENT_PARITY": (ST12HValidationEnvironmentV1,),
+        "INCIDENT_RESPONSE": (ST12HBackupRestorePlanV1, _validate_st12h_incident_containment_v1),
+        "KILL_ROLLBACK_DRILL": (_execute_st12h_kill_rollback_drill_v1,),
+        "READINESS_HONESTY": (validate_st12h_finalization_transition_v1,),
+        "FINAL_OPERATIONAL_PACKET": (ST12HStep12FinalHandoffV1, _validate_st12h_final_operational_packet_v1),
+        "EXCEPTION_GOVERNANCE": (AgentCapabilityResolverV1.resolve, _validate_st12h_exception_expiry_v1),
+        "NO_CRYPTOGRAPHIC_AUTHORITY": (_validate_st12h_no_cryptographic_authority_v1,),
+        "OWNER_SURFACE_SAFETY": (AgentCapabilityResolverV1.resolve,),
+        "VALIDATOR_ISOLATION": (_validate_st12h_validator_isolation_v1,),
+        "BINDING_COVERAGE": (_validate_st12h_source_binding_coverage_v1,),
+        "FRESHNESS": (validate_st12h_source_binding_v1,),
+        "RIGHTS_USE": (SourceRightsV1,),
+        "OWNER_SEPARATION": (_validate_st12h_source_numeric_owner_separation_v1,),
+        "STATISTICAL_CURRENTNESS": (validate_st12h_source_binding_v1,),
+        "FINAL_SOURCE_PACKET": (_validate_st12h_final_source_packet_v1,),
+    }
+    return exact[suffix]
+
+
+def _st12h_domain_invoker(case: ST12HControlCaseV1) -> Callable[
+    [_ST12HExecutableControlFixtureV1], _ST12HObservedControlOutcomeV1
+]:
+    return {
+        "accounting": _invoke_st12h_accounting_control,
+        "execution": _invoke_st12h_execution_control,
+        "llm": _invoke_st12h_llm_control,
+        "operations": _invoke_st12h_operations_control,
+        "security": _invoke_st12h_security_control,
+        "source": _invoke_st12h_source_control,
+    }[case.domain]
+
+
+def _st12h_control_receipt_fields(
+    outcome: _ST12HObservedControlOutcomeV1,
+) -> tuple[str, ...]:
+    return tuple(outcome.receipt_fields)
+
+
+def _st12h_control_no_effect(outcome: _ST12HObservedControlOutcomeV1) -> bool:
+    return outcome.no_effect_flags is NO_EFFECTS_V1 and all(
+        getattr(outcome.no_effect_flags, field.name) is False
+        for field in fields(NoEffectFlagsV1)
+    )
+
+
+def _st12h_registered_owner_call_observed(
+    adapter: _ST12HExecutableControlAdapterV1,
+    outcome: _ST12HObservedControlOutcomeV1,
+    *,
+    require_all_registered: bool,
+) -> bool:
+    callable_names = tuple(
+        getattr(owner, "__name__", type(owner).__name__)
+        for owner in adapter.owner_callables
+    )
+    exact_refs_observed = bool(callable_names) and bool(outcome.owner_call_refs) and all(
+        any(name in ref for name in callable_names)
+        for ref in outcome.owner_call_refs
+    )
+    if not exact_refs_observed:
+        return False
+    return not require_all_registered or all(
+        any(name in ref for ref in outcome.owner_call_refs)
+        for name in callable_names
+    )
+
+
+ST12H_EXECUTABLE_CONTROL_ADAPTERS: Mapping[
+    str, _ST12HExecutableControlAdapterV1
+] = MappingProxyType(
+    {
+        case.case_id: _ST12HExecutableControlAdapterV1(
+            case_id=case.case_id,
+            owner_module=case.owner_path,
+            owner_symbol=case.owner_symbol,
+            owner_callables=_st12h_owner_callables(case),
+            valid_fixture_factory=(lambda case_id=case.case_id: _st12h_control_fixture(case_id)),
+            semantic_mutation_factory=_st12h_control_mutation,
+            owner_invocation_function=_st12h_domain_invoker(case),
+            valid_result_observer=lambda outcome: outcome.terminal_state,
+            mutation_result_observer=lambda outcome: outcome.reason_code_or_none,
+            required_receipt_field_extractor=_st12h_control_receipt_fields,
+            no_effect_assertion=_st12h_control_no_effect,
+            source_dependency_receipt_extractor=lambda outcome: outcome.source_receipt_refs,
+        )
+        for case in ST12H_CONTROL_CASES
+    }
+)
+
+
+def _st12h_integer_value(name: str, value: int) -> TypedValueV1:
+    return TypedValueV1(
+        name=name,
+        kind=TypedValueKindV1.INTEGER,
+        value=value,
+        unit="count",
+        basis="observed executable owner invocation",
+    )
+
+
+def _st12h_boolean_value(name: str, value: bool) -> TypedValueV1:
+    return TypedValueV1(
+        name=name,
+        kind=TypedValueKindV1.BOOLEAN,
+        value=value,
+        unit="boolean",
+        basis="observed executable owner invocation",
+    )
+
+
+def validate_st12h_control_case_v1(
+    case: ST12HControlCaseV1,
+) -> ST12HControlReceiptV1:
+    if type(case) is not ST12HControlCaseV1:
+        raise ContractValidationError(
+            ReasonCode.INVALID_CONTRACT,
+            "case must be an exact ST12HControlCaseV1",
+        )
+    canonical = _ST12H_CASE_BY_ID.get(case.case_id)
+    if canonical is None or case != canonical:
+        raise ContractValidationError(
+            ReasonCode.VALIDATION_FAILED,
+            f"ST12-H control expectation differs from its frozen row: {case.case_id}",
+        )
+    adapter = ST12H_EXECUTABLE_CONTROL_ADAPTERS[case.case_id]
+    fixture = adapter.valid_fixture_factory()
+    valid_outcome = adapter.owner_invocation_function(fixture)
+    mutated_fixture = adapter.semantic_mutation_factory(fixture)
+    mutation_outcome = adapter.owner_invocation_function(mutated_fixture)
+    observed_valid_terminal = adapter.valid_result_observer(valid_outcome)
+    mutation_reason = adapter.mutation_result_observer(mutation_outcome)
+    actual_fields = adapter.required_receipt_field_extractor(valid_outcome)
+    valid_owner_invocation_observed = _st12h_registered_owner_call_observed(
+        adapter,
+        valid_outcome,
+        require_all_registered=True,
+    )
+    mutation_owner_invocation_observed = _st12h_registered_owner_call_observed(
+        adapter,
+        mutation_outcome,
+        require_all_registered=False,
+    )
+    if (
+        valid_outcome.reason_code_or_none is not None
+        or observed_valid_terminal != case.expected_terminal_state
+        or mutation_reason is not case.expected_reason_code
+        or mutation_outcome.terminal_state == valid_outcome.terminal_state
+        or actual_fields != case.required_receipt_fields
+        or not adapter.no_effect_assertion(valid_outcome)
+        or not adapter.no_effect_assertion(mutation_outcome)
+        or not valid_owner_invocation_observed
+        or not mutation_owner_invocation_observed
+    ):
+        raise ContractValidationError(
+            ReasonCode.VALIDATION_FAILED,
+            f"observed ST12-H owner outcome differs from frozen expectation: {case.case_id}",
+        )
+    evaluated_at = datetime.now(UTC)
+    receipt = ST12HControlReceiptV1(
+        schema_version="ST12H_CONTROL_RECEIPT_V2_EXECUTABLE",
+        terminal_state=observed_valid_terminal,
+        reason_code_or_none=mutation_reason,
+        required_reference_ids=(
+            _ST12H_SEMANTIC_VALIDATOR_REVISION,
+            case.closure_id,
+            case.case_id,
+        ),
+        evaluated_at=evaluated_at,
+        valid_until=evaluated_at + timedelta(hours=1),
+        custody_state="CURRENT_EXECUTED_VALIDATED",
+        no_effect_flags=NO_EFFECTS_V1,
+        receipt_id=f"ST12H-CONTROL-RECEIPT::{case.case_id}",
+        closure_id=case.closure_id,
+        control_id=case.control_slug,
+        case_id=case.case_id,
+        domain=case.domain,
+        owner_path=adapter.owner_module,
+        owner_symbol=adapter.owner_symbol,
+        input_fixture_ref=case.fixture_ref,
+        mutation_operation=(
+            f"{case.mutation_operation}; semantic_attack={mutated_fixture.semantic_attack}"
+        ),
+        control_payload=TypedValueRecordV1(
+            fields=(
+                _st12h_text_value("case_id", case.case_id),
+                _st12h_text_value("fixture_type", type(fixture).__name__),
+                _st12h_text_value(
+                    "required_receipt_fields", ",".join(actual_fields)
+                ),
+                _st12h_text_value(
+                    "semantic_mutation",
+                    str(mutated_fixture.semantic_attack),
+                ),
+                _st12h_text_value(
+                    "owner_callable_ref",
+                    f"{adapter.owner_module}::{adapter.owner_symbol}",
+                ),
+            )
+        ),
+        assertion_results=TypedValueRecordV1(
+            fields=(
+                _st12h_text_value(
+                    "observed_valid_terminal_state",
+                    observed_valid_terminal,
+                ),
+                _st12h_text_value(
+                    "observed_mutation_terminal_state",
+                    mutation_outcome.terminal_state,
+                ),
+                _st12h_text_value(
+                    "observed_mutation_reason_code",
+                    (
+                        mutation_reason.value
+                        if mutation_reason is not None
+                        else "EXPLICIT_ABSENCE_UNREGISTERED_EXCEPTION"
+                    ),
+                ),
+                _st12h_integer_value(
+                    "owner_valid_call_count",
+                    int(valid_owner_invocation_observed),
+                ),
+                _st12h_integer_value(
+                    "owner_mutation_call_count",
+                    int(mutation_owner_invocation_observed),
+                ),
+                _st12h_boolean_value("required_fields_extracted", True),
+                _st12h_boolean_value("no_effect_assertion_passed", True),
+                _st12h_boolean_value(
+                    "owner_callable_invocation_observed",
+                    valid_owner_invocation_observed
+                    and mutation_owner_invocation_observed,
+                ),
+            )
+        ),
+        source_receipt_refs=tuple(
+            dict.fromkeys(
+                (
+                    *adapter.source_dependency_receipt_extractor(valid_outcome),
+                    *adapter.source_dependency_receipt_extractor(mutation_outcome),
+                )
+            )
+        ),
+    )
+    _validate_st12h_receipt_currentness_v1(
+        receipt,
+        evaluated_at=evaluated_at,
+        required_reference_ids=(case.case_id,),
+    )
+    return receipt
+
+
+def validate_st12h_domain_v1(
+    domain: str,
+) -> tuple[ST12HControlReceiptV1, ...]:
+    if not isinstance(domain, str) or domain not in _ST12H_DOMAIN_COUNTS:
+        raise ContractValidationError(
+            ReasonCode.INVALID_CONTRACT,
+            "domain must be one exact ST12-H grouped domain",
+        )
+    cases = tuple(case for case in ST12H_CONTROL_CASES if case.domain == domain)
+    if len(cases) != _ST12H_DOMAIN_COUNTS[domain]:
+        raise _st12h_validation_failure(
+            f"ST12-H grouped domain count drifted: {domain}"
+        )
+    return tuple(validate_st12h_control_case_v1(case) for case in cases)
+
+
+def _st12h_checks() -> tuple[ValidationCheckV1, ...]:
+    validate_st12h_backup_restore_plans_v1()
+    validate_st12h_complete_math_coverage_v1()
+    validate_st12h_current_path_owner_reconciliation_v1()
+    validate_st12h_parameter_consumption_v1()
+    receipts = tuple(
+        validate_st12h_control_case_v1(case)
+        for case in ST12H_CONTROL_CASES
+    )
+    return tuple(
+        _check(
+            case.case_id,
+            receipt.case_id == case.case_id
+            and receipt.terminal_state == case.expected_terminal_state
+            and receipt.reason_code_or_none is case.expected_reason_code
+            and receipt.no_effect_flags is NO_EFFECTS_V1,
+            f"certified ST12-H {case.domain} control receipt",
+        )
+        for case, receipt in zip(ST12H_CONTROL_CASES, receipts, strict=True)
+    )
+
+
+_DOMAIN_CHECKS["h"] = _st12h_checks

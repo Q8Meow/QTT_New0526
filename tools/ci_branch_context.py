@@ -202,6 +202,9 @@ VALIDATION_EXECUTION_BRANCHES = frozenset(
         PR152_HELPER_CLI_TEMP_REPO_GIT_STATUS_REPAIR_BRANCH,
     }
 )
+ST12H_IMPLEMENTATION_BRANCH = (
+    "agent/st12h-validation-currentization-operations-publication"
+)
 OWNER_AUTHORIZED_VALIDATION_BRANCHES = frozenset(
     {
         "agent/st12a-contract-envelope",
@@ -211,6 +214,7 @@ OWNER_AUTHORIZED_VALIDATION_BRANCHES = frozenset(
         "agent/st12d-mode-snapshot-boundary",
         "agent/st12f-evidence-model-risk-v1",
         "agent/st12g-existing-owner-projections-v2",
+        ST12H_IMPLEMENTATION_BRANCH,
         ST12_ARCHITECTURE_ORACLE_PREREQUISITE_REPAIR_BRANCH,
         ST12_INHERITED_MATH_ROW_RECEIPT_REPAIR_BRANCH,
     }
