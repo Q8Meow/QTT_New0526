@@ -79,6 +79,7 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.receipts im
     ST12HReceiptCustodyV1,
     ST12HValidationCampaignReceiptV1,
     ST12HValidationCommandReceiptV1,
+    _ST12H_SEMANTIC_REVISION_PREFIX,
     _ST12H_SEMANTIC_VALIDATOR_REVISION,
     _validate_st12h_receipt_currentness_v1,
     serialize_st12h_contract_v1,
@@ -2524,7 +2525,7 @@ def execute_st12h_backup_restore_portability_v1(
 
 def _validate_st12h_backup_execution_receipts_v1(
     receipts: Sequence[ST12HBackupRestoreReceiptV1],
-) -> None:
+) -> datetime:
     rows = tuple(receipts)
     if (
         len(rows) != 12
@@ -2535,10 +2536,11 @@ def _validate_st12h_backup_execution_receipts_v1(
         raise AssertionError(
             "backup/restore execution receipt roster is incomplete"
         )
+    evaluated_at = datetime.now(UTC)
     for plan, receipt in zip(ST12H_BACKUP_RESTORE_PLANS, rows, strict=True):
         _validate_st12h_receipt_currentness_v1(
             receipt,
-            evaluated_at=receipt.evaluated_at,
+            evaluated_at=evaluated_at,
             required_reference_ids=(receipt.stage_id,),
         )
         if (
@@ -2559,6 +2561,7 @@ def _validate_st12h_backup_execution_receipts_v1(
             raise AssertionError(
                 f"backup/restore stage evidence is not observed: {plan.plan_id}"
             )
+    return evaluated_at
 
 
 
@@ -3143,6 +3146,7 @@ def _execute_finalization_owner(
     *,
     math_crosswalk: Sequence[ST12HMathEvidenceCrosswalkV1],
     backup_receipts: Sequence[ST12HBackupRestoreReceiptV1],
+    backup_evaluated_at: datetime,
 ) -> tuple[tuple[str, ...], str]:
     from src.qtt.stage1_prediction_markets.qku_computation_control_plane.source_policy import (
         ST12H_SOURCE_BINDINGS,
@@ -3300,7 +3304,7 @@ def _execute_finalization_owner(
             )
         _validate_st12h_receipt_currentness_v1(
             stage_receipt,
-            evaluated_at=stage_receipt.evaluated_at,
+            evaluated_at=backup_evaluated_at,
             required_reference_ids=(stage_id,),
         )
         return (
@@ -3330,58 +3334,124 @@ def _execute_finalization_owner(
         )
     if control_id == "ST12H-FINAL::19":
         current = backup_by_stage["ST12H-BR::01"]
-        stale_rejected = mismatched_rejected = superseded_rejected = False
-        semantic_revision_rejected = False
-        try:
-            _validate_st12h_receipt_currentness_v1(
-                current,
-                evaluated_at=current.valid_until + timedelta(seconds=1),
-                required_reference_ids=(current.stage_id,),
-            )
-        except ComputationControlPlaneError:
-            stale_rejected = True
-        try:
-            _validate_st12h_receipt_currentness_v1(
-                current,
-                evaluated_at=current.evaluated_at,
-                required_reference_ids=("MISSING::REFERENCE",),
-            )
-        except ComputationControlPlaneError:
-            mismatched_rejected = True
-        try:
-            _validate_st12h_receipt_currentness_v1(
-                replace(current, custody_state="SUPERSEDED"),
-                evaluated_at=current.evaluated_at,
-            )
-        except ComputationControlPlaneError:
-            superseded_rejected = True
-        try:
-            _validate_st12h_receipt_currentness_v1(
-                replace(
+        old_revision = (
+            f"{_ST12H_SEMANTIC_REVISION_PREFIX}"
+            "PR286-POST-PR287-INHERITED-ROW-RECEIPT-CURRENTIZATION-V2"
+        )
+        unknown_revision = f"{_ST12H_SEMANTIC_REVISION_PREFIX}UNKNOWN"
+        _validate_st12h_receipt_currentness_v1(
+            current,
+            evaluated_at=backup_evaluated_at,
+            required_reference_ids=(current.stage_id,),
+        )
+        _validate_st12h_receipt_currentness_v1(
+            replace(current, custody_state="CURRENT_EXECUTED_HELD"),
+            evaluated_at=backup_evaluated_at,
+            required_reference_ids=(current.stage_id,),
+        )
+        rejection_cases = (
+            (
+                "EXPIRED_RECEIPT_REJECTED",
+                lambda: _validate_st12h_receipt_currentness_v1(
                     current,
+                    evaluated_at=current.valid_until + timedelta(seconds=1),
                     required_reference_ids=(current.stage_id,),
                 ),
-                evaluated_at=current.evaluated_at,
-            )
-        except ComputationControlPlaneError:
-            semantic_revision_rejected = True
-        if not all(
+                ReasonCode.SOURCE_EPOCH_STALE,
+            ),
             (
-                stale_rejected,
-                mismatched_rejected,
-                superseded_rejected,
-                semantic_revision_rejected,
-            )
-        ):
-            raise AssertionError(
-                "stale/mismatched/superseded/pre-revision receipt was accepted"
+                "MISMATCHED_RECEIPT_REJECTED",
+                lambda: _validate_st12h_receipt_currentness_v1(
+                    current,
+                    evaluated_at=backup_evaluated_at,
+                    required_reference_ids=("MISSING::REFERENCE",),
+                ),
+                ReasonCode.RECONCILIATION_REQUIRED,
+            ),
+            (
+                "SUPERSEDED_RECEIPT_REJECTED",
+                lambda: _validate_st12h_receipt_currentness_v1(
+                    replace(current, custody_state="SUPERSEDED"),
+                    evaluated_at=backup_evaluated_at,
+                ),
+                ReasonCode.SOURCE_EPOCH_STALE,
+            ),
+            (
+                "V2_ONLY_SEMANTIC_REVISION_REJECTED",
+                lambda: _validate_st12h_receipt_currentness_v1(
+                    replace(
+                        current,
+                        required_reference_ids=(old_revision, current.stage_id),
+                    ),
+                    evaluated_at=backup_evaluated_at,
+                ),
+                ReasonCode.SOURCE_EPOCH_STALE,
+            ),
+            (
+                "MIXED_V2_V3_SEMANTIC_REVISIONS_REJECTED",
+                lambda: _validate_st12h_receipt_currentness_v1(
+                    replace(
+                        current,
+                        required_reference_ids=(
+                            _ST12H_SEMANTIC_VALIDATOR_REVISION,
+                            old_revision,
+                            current.stage_id,
+                        ),
+                    ),
+                    evaluated_at=backup_evaluated_at,
+                ),
+                ReasonCode.SOURCE_EPOCH_STALE,
+            ),
+            (
+                "UNKNOWN_SEMANTIC_REVISION_REJECTED",
+                lambda: _validate_st12h_receipt_currentness_v1(
+                    replace(
+                        current,
+                        required_reference_ids=(
+                            unknown_revision,
+                            current.stage_id,
+                        ),
+                    ),
+                    evaluated_at=backup_evaluated_at,
+                ),
+                ReasonCode.SOURCE_EPOCH_STALE,
+            ),
+            (
+                "MULTIPLE_SEMANTIC_REVISIONS_REJECTED",
+                lambda: _validate_st12h_receipt_currentness_v1(
+                    replace(
+                        current,
+                        required_reference_ids=(
+                            _ST12H_SEMANTIC_VALIDATOR_REVISION,
+                            old_revision,
+                            unknown_revision,
+                            current.stage_id,
+                        ),
+                    ),
+                    evaluated_at=backup_evaluated_at,
+                ),
+                ReasonCode.SOURCE_EPOCH_STALE,
+            ),
+            (
+                "UNKNOWN_CUSTODY_REJECTED",
+                lambda: _validate_st12h_receipt_currentness_v1(
+                    replace(current, custody_state="CURRENT_EXECUTED_FORGED"),
+                    evaluated_at=backup_evaluated_at,
+                ),
+                ReasonCode.SOURCE_EPOCH_STALE,
+            ),
+        )
+        for _, operation, expected_reason in rejection_cases:
+            _observe_st12h_expected_qtt_rejection_v1(
+                operation,
+                expected_reason=expected_reason,
             )
         return (
             (
-                "EXPIRED_RECEIPT_REJECTED",
-                "MISMATCHED_RECEIPT_REJECTED",
-                "SUPERSEDED_RECEIPT_REJECTED",
-                "PRE_SEMANTIC_REVISION_RECEIPT_REJECTED",
+                "V3_ONLY_SEMANTIC_REVISION_ACCEPTED",
+                "CURRENT_EXECUTED_VALIDATED_ACCEPTED",
+                "CURRENT_EXECUTED_HELD_ACCEPTED",
+                *(name for name, _, _ in rejection_cases),
             ),
             "PASS_EXECUTED_CONTROL",
         )
@@ -3445,6 +3515,9 @@ def execute_st12h_finalization_controls_v1(
         if backup_receipts is not None
         else execute_st12h_backup_restore_portability_v1()
     )
+    backup_evaluated_at = _validate_st12h_backup_execution_receipts_v1(
+        executed_backup
+    )
     dispositions: list[ST12HFinalizationDispositionV1] = []
     terminal_by_id: dict[str, str] = {}
     receipt_by_id: dict[str, ST12HFinalizationReceiptV1] = {}
@@ -3453,6 +3526,7 @@ def execute_st12h_finalization_controls_v1(
             control.control_id,
             math_crosswalk=math_crosswalk,
             backup_receipts=executed_backup,
+            backup_evaluated_at=backup_evaluated_at,
         )
         predecessor_held = tuple(
             predecessor
@@ -3542,7 +3616,6 @@ def _reconstruct_st12h_final_acceptance_evidence_v1(
     serialized_rows: Sequence[ST12HSerializedPayloadEvidenceV1],
 ) -> tuple[ST12HFinalizationDispositionV1, ...]:
     reconstruct_st12h_authority_boundary_v1()
-    _validate_st12h_backup_execution_receipts_v1(backup_receipts)
     finalization = execute_st12h_finalization_controls_v1(
         math_crosswalk=math_crosswalk,
         backup_receipts=backup_receipts,
@@ -3744,11 +3817,13 @@ def _exercise_st12h_grouped_defect_injections_v1() -> Mapping[str, bool]:
     )
 
     backup_receipts = execute_st12h_backup_restore_portability_v1()
+    expired_backup = replace(
+        backup_receipts[0],
+        valid_until=backup_receipts[0].evaluated_at + timedelta(microseconds=1),
+    )
     try:
-        _validate_st12h_receipt_currentness_v1(
-            backup_receipts[0],
-            evaluated_at=backup_receipts[0].valid_until
-            + timedelta(microseconds=1),
+        execute_st12h_finalization_controls_v1(
+            backup_receipts=(expired_backup, *backup_receipts[1:]),
         )
     except ComputationControlPlaneError:
         results["expired_receipt_accepted"] = True

@@ -1451,9 +1451,16 @@ class ST12HValidationCampaignReceiptV1(ST12HReceiptCustodyV1):
             )
 
 
+_ST12H_SEMANTIC_REVISION_PREFIX = "ST12H-SEMANTIC-REVISION::"
 _ST12H_SEMANTIC_VALIDATOR_REVISION = (
-    "ST12H-SEMANTIC-REVISION::"
-    "PR286-POST-PR287-INHERITED-ROW-RECEIPT-CURRENTIZATION-V3"
+    _ST12H_SEMANTIC_REVISION_PREFIX
+    + "PR286-POST-PR287-INHERITED-ROW-RECEIPT-CURRENTIZATION-V3"
+)
+_ST12H_CURRENT_CUSTODY_STATES = frozenset(
+    {
+        "CURRENT_EXECUTED_VALIDATED",
+        "CURRENT_EXECUTED_HELD",
+    }
 )
 
 
@@ -1481,10 +1488,15 @@ def _validate_st12h_receipt_currentness_v1(
             ReasonCode.SOURCE_EPOCH_STALE,
             "ST12-H receipt validity expired before evaluation",
         )
-    if _ST12H_SEMANTIC_VALIDATOR_REVISION not in receipt.required_reference_ids:
+    semantic_revisions = tuple(
+        reference
+        for reference in receipt.required_reference_ids
+        if reference.startswith(_ST12H_SEMANTIC_REVISION_PREFIX)
+    )
+    if semantic_revisions != (_ST12H_SEMANTIC_VALIDATOR_REVISION,):
         raise ContractValidationError(
             ReasonCode.SOURCE_EPOCH_STALE,
-            "ST12-H receipt predates the current semantic validator revision",
+            "ST12-H receipt semantic validator revision is not exact-current V3",
         )
     missing = tuple(
         reference
@@ -1496,12 +1508,7 @@ def _validate_st12h_receipt_currentness_v1(
             ReasonCode.RECONCILIATION_REQUIRED,
             "ST12-H receipt required-reference set is mismatched",
         )
-    if receipt.custody_state in {
-        "SUPERSEDED",
-        "INCOMPLETE",
-        "MISMATCHED",
-        "STALE",
-    }:
+    if receipt.custody_state not in _ST12H_CURRENT_CUSTODY_STATES:
         raise ContractValidationError(
             ReasonCode.SOURCE_EPOCH_STALE,
             f"ST12-H receipt custody is not current: {receipt.custody_state}",
