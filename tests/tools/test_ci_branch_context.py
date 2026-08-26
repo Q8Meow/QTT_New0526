@@ -4085,6 +4085,13 @@ def test_validation_infrastructure_changed_path_scope_is_exact():
             branch,
             "tools/run_validation_gates.py",
         )
+        for path in (
+            ".gitattributes",
+            "tools/validation_reliability.py",
+            "tools/run_pytest_fresh_basetemp.py",
+            "tests/fail_closed/test_pytest_fresh_basetemp_helper.py",
+        ):
+            assert context.is_validation_infrastructure_changed_path(branch, path)
         assert context.is_validation_infrastructure_changed_path(
             branch,
             "tools/validate_no_runtime_artifacts.py",
@@ -4487,3 +4494,69 @@ def test_st12g_owner_authorized_branch_match_is_exact() -> None:
     ):
         assert near_name not in context.OWNER_AUTHORIZED_VALIDATION_BRANCHES
         assert not context.is_owner_authorized_validation_branch(near_name)
+
+    engvr_branch = context.ENGVR_IMPLEMENTATION_BRANCH
+    conditional_report = (
+        "docs/master_plan/generated/"
+        "PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json"
+    )
+    assert engvr_branch in context.OWNER_AUTHORIZED_VALIDATION_BRANCHES
+    assert context.is_owner_authorized_validation_branch(engvr_branch)
+    assert len(context.ENGVR_NORMAL_CHANGED_PATHS) == 16
+    assert context.ENGVR_TRIGGERED_CONDITIONAL_CHANGED_PATHS == frozenset(
+        {conditional_report}
+    )
+    assert len(context.ENGVR_TRIGGERED_CONDITIONAL_CHANGED_PATHS) == 1
+    assert len(context.ENGVR_CHANGED_PATHS) == 17
+    assert context.ENGVR_CHANGED_PATHS == (
+        context.ENGVR_NORMAL_CHANGED_PATHS
+        | context.ENGVR_TRIGGERED_CONDITIONAL_CHANGED_PATHS
+    )
+    assert context.EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_CHANGED_PATHS[engvr_branch] == (
+        context.ENGVR_CHANGED_PATHS
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        engvr_branch,
+        conditional_report,
+    )
+    for path in context.ENGVR_CHANGED_PATHS:
+        assert context.is_explicit_downstream_repair_changed_path(engvr_branch, path)
+        assert "*" not in path and "?" not in path and "[" not in path
+        assert not context.is_explicit_downstream_repair_changed_path(
+            engvr_branch,
+            f"{path}.near",
+        )
+    for near_name in (
+        engvr_branch.upper(),
+        f"{engvr_branch}-copy",
+        engvr_branch.removeprefix("hardening/"),
+        f"{engvr_branch}/",
+    ):
+        assert not context.is_owner_authorized_validation_branch(near_name)
+        assert not context.is_explicit_downstream_repair_changed_path(
+            near_name,
+            "tools/validation_reliability.py",
+        )
+    for protected in (
+        ".github/workflows/qtt_validation.yml",
+        "src/qtt/stage1_prediction_markets/example.py",
+        "docs/master_plan/QTT_MasterPlan_Current.md",
+        "tools/changed_area_validation_router.py",
+    ):
+        assert protected not in context.ENGVR_CHANGED_PATHS
+        assert not context.is_explicit_downstream_repair_changed_path(
+            engvr_branch,
+            protected,
+        )
+    for near_conditional_report in (
+        conditional_report.upper(),
+        conditional_report.removesuffix(".json"),
+        f"{conditional_report}.near",
+        f"near/{conditional_report}",
+        "docs/master_plan/generated/",
+    ):
+        assert near_conditional_report not in context.ENGVR_CHANGED_PATHS
+        assert not context.is_explicit_downstream_repair_changed_path(
+            engvr_branch,
+            near_conditional_report,
+        )

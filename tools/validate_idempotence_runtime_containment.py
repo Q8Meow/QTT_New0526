@@ -16,6 +16,12 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from tools.validation_scope_registry import is_pr_scoped_changed_path_allowed  # noqa: E402
+from tools.validation_reliability import (  # noqa: E402
+    GitPathIntegrityV1,
+    classify_repository_changes,
+    semantic_candidate_paths,
+    text_integrity_failure_codes,
+)
 
 SUCCESS_MARKER = "QTT_IDEMPOTENCE_RUNTIME_CONTAINMENT_OK"
 FAIL_PREFIX = "QTT_IDEMPOTENCE_RUNTIME_CONTAINMENT_FAIL"
@@ -175,17 +181,40 @@ def _status_paths(repo_root: Path) -> tuple[str, ...]:
     return tuple(sorted(dict.fromkeys(paths)))
 
 
+def _changed_path_integrity(repo_root: Path) -> tuple[GitPathIntegrityV1, ...]:
+    return classify_repository_changes(repo_root)
+
+
+def _semantic_integrity_paths(
+    records: Sequence[GitPathIntegrityV1],
+) -> tuple[str, ...]:
+    return semantic_candidate_paths(records)
+
+
 def _changed_paths(repo_root: Path) -> tuple[str, ...]:
-    candidates: list[str] = []
-    for args in (
-        ("diff", "--name-only", "main..HEAD"),
-        ("diff", "--name-only", "origin/main...HEAD"),
-        ("diff", "--name-only", "--cached"),
-        ("diff", "--name-only"),
-    ):
-        candidates.extend(_git_lines(repo_root, args))
-    candidates.extend(_status_paths(repo_root))
-    return tuple(sorted(dict.fromkeys(path for path in candidates if path)))
+    return _semantic_integrity_paths(_changed_path_integrity(repo_root))
+
+
+_DEFAULT_CHANGED_PATHS_DISCOVERY = _changed_paths
+
+
+def _validate_changed_path_integrity(
+    records: Sequence[GitPathIntegrityV1],
+) -> list[Failure]:
+    failures: list[Failure] = []
+    for record in records:
+        failures.extend(
+            _failure(
+                code,
+                path=record.path,
+                change_class=record.change_class,
+                cleanliness=record.publication_cleanliness_state,
+            )
+            for code in text_integrity_failure_codes(
+                (record,), include_authority_boundary=False
+            )
+        )
+    return failures
 
 
 def _current_branch(repo_root: Path) -> str:
@@ -604,6 +633,17 @@ def is_runtime_artifact_path(path: str, inventory: Mapping[str, Any]) -> bool:
     return any(_matches(normalized, pattern) for pattern, _ in _runtime_patterns(inventory))
 
 
+def _semantic_nonruntime_integrity_paths(
+    records: Sequence[GitPathIntegrityV1],
+    inventory: Mapping[str, Any],
+) -> tuple[str, ...]:
+    return tuple(
+        path
+        for path in semantic_candidate_paths(records)
+        if not is_runtime_artifact_path(path, inventory)
+    )
+
+
 def _validate_runtime_artifacts(
     inventory: Mapping[str, Any],
     tracked_paths: Sequence[str],
@@ -625,7 +665,12 @@ def _validate_runtime_artifacts(
     tracked_or_staged.update({normalize_path(path): "staged" for path in staged_paths})
     for path, source in sorted(tracked_or_staged.items()):
         if any(_matches(path, pattern) for pattern, _ in patterns):
-            failures.append(_failure("RUNTIME_ARTIFACT_TRACKED", path=path, source=source))
+            code = (
+                "RUNTIME_ARTIFACT_STAGED"
+                if source == "staged"
+                else "RUNTIME_ARTIFACT_TRACKED"
+            )
+            failures.append(_failure(code, path=path, source=source))
     return failures
 
 
@@ -639,7 +684,15 @@ def _validate_changed_files(
 ) -> list[Failure]:
     failures: list[Failure] = []
     forbidden = tuple(_active_inventory_entries(inventory.get("forbidden_touch_patterns", ())))
+    from tools.ci_branch_context import ENGVR_IMPLEMENTATION_BRANCH, normalize_branch_context
+
+    normalized_branch = normalize_branch_context(current_branch)
     for path in sorted(dict.fromkeys(normalize_path(path) for path in changed_paths)):
+        if (
+            normalized_branch == ENGVR_IMPLEMENTATION_BRANCH
+            and not is_pr_scoped_changed_path_allowed(normalized_branch, path)
+        ):
+            failures.append(_failure("SEMANTIC_CHANGED_PATH_OUTSIDE_SCOPE", path=path))
         if _allowed_explicit_roadmap_feature_touch(
             current_branch,
             path,
@@ -738,6 +791,28 @@ def validate(
     payload = dict(inventory) if inventory is not None else load_inventory(root / (inventory_path or INVENTORY_PATH))
     workflow = _workflow_text(root) if workflow_text is None else workflow_text
     auto_discovered_changed_paths = changed_paths is None
+    integrity_records: tuple[GitPathIntegrityV1, ...] = ()
+    integrity_discovery_failures: list[Failure] = []
+    if auto_discovered_changed_paths:
+        try:
+            integrity_records = _changed_path_integrity(root)
+        except RuntimeError as exc:
+            integrity_discovery_failures.append(
+                _failure(
+                    "ENGVR_PREPUBLICATION_CUSTODY_FAILED",
+                    path="<git-text-integrity>",
+                    detail=exc,
+                )
+            )
+    if changed_paths is not None:
+        selected_changed_paths = tuple(changed_paths)
+    elif _changed_paths is _DEFAULT_CHANGED_PATHS_DISCOVERY:
+        selected_changed_paths = _semantic_nonruntime_integrity_paths(
+            integrity_records,
+            payload,
+        )
+    else:
+        selected_changed_paths = _changed_paths(root)
     branch = _current_branch(root)
     discovered = (
         discover_idempotence_tests(root)
@@ -746,6 +821,8 @@ def validate(
     )
     membership = _pytest_membership(root) if pytest_membership is None else pytest_membership
     failures: list[Failure] = []
+    failures.extend(integrity_discovery_failures)
+    failures.extend(_validate_changed_path_integrity(integrity_records))
     failures.extend(_validate_top_level(payload))
     failures.extend(_validate_classifications(payload))
     failures.extend(_validate_inventory_paths(root, payload))
@@ -763,7 +840,7 @@ def validate(
     failures.extend(
         _validate_changed_files(
             payload,
-            _changed_paths(root) if changed_paths is None else changed_paths,
+            selected_changed_paths,
             workflow_text=workflow,
             current_branch=branch,
             auto_discovered_changed_paths=auto_discovered_changed_paths,

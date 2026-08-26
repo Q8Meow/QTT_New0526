@@ -1,3 +1,20 @@
 # AtomicRows bundle artifacts require LF-stable bytes for future SHA/freeze authority.
 docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl text eol=lf
 docs/master_plan/atomic_rows/AtomicRows.bundle.sha256 text eol=lf
+
+# QTT cross-platform source, configuration, and structured-text formats.
+*.py text eol=lf
+*.pyi text eol=lf
+*.md text eol=lf
+*.json text eol=lf
+*.jsonl text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.toml text eol=lf
+*.ini text eol=lf
+*.cfg text eol=lf
+*.txt text eol=lf
+*.sh text eol=lf
+*.ps1 text eol=lf
+.gitattributes text eol=lf
+.gitignore text eol=lf

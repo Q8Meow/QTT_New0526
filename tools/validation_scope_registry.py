@@ -2419,6 +2419,26 @@ def explain_pr_scope_decision(branch: str, path: str) -> dict[str, object]:
 
     normalized = normalize_changed_path(path)
     branch_name = str(branch).strip()
+    from tools.ci_branch_context import ENGVR_CHANGED_PATHS, ENGVR_IMPLEMENTATION_BRANCH
+
+    if branch_name == ENGVR_IMPLEMENTATION_BRANCH:
+        allowed = normalized in ENGVR_CHANGED_PATHS
+        return {
+            "allowed": allowed,
+            "branch": branch_name,
+            "normalized_path": normalized,
+            "pr_id": "ENG-VALIDATION-RELIABILITY-01",
+            "matched_rule": (
+                f"exact:{normalized}"
+                if allowed
+                else "no_engvr_scope_rule"
+            ),
+            "reason": (
+                "registered_exact_path"
+                if allowed
+                else "path_not_registered_for_pr_scope"
+            ),
+        }
     if branch_name == ST12H_BRANCH:
         if normalized in ST12H_ALLOWED_EXACT_PATHS:
             return {

@@ -94,6 +94,7 @@ VALIDATION_INFRASTRUCTURE_BRANCHES = frozenset(
 )
 VALIDATION_INFRASTRUCTURE_CHANGED_PATHS = frozenset(
     {
+        ".gitattributes",
         ".github/workflows/qtt_validation.yml",
         "docs/master_plan/generated/PR208_ChangedAreaRoutingPolicy.report.json",
         "docs/master_plan/generated/PR208_CIRuntimeRationalizationSummary.report.json",
@@ -146,6 +147,7 @@ VALIDATION_INFRASTRUCTURE_CHANGED_PATHS = frozenset(
         "tests/atomicrows/"
         "test_atomicrows_semantic_value_materialization_owner_authorization_gate.py",
         "tests/fail_closed/test_run_validation_gates.py",
+        "tests/fail_closed/test_pytest_fresh_basetemp_helper.py",
         "tests/fail_closed/test_no_runtime_artifacts_strict.py",
         "tests/stage1_prediction_markets/"
         "pr163_c_pretrade_infrastructure_rejection_remediation/"
@@ -168,6 +170,7 @@ VALIDATION_INFRASTRUCTURE_CHANGED_PATHS = frozenset(
         "tools/changed_area_validation_router.py",
         "tools/cross_platform_path_invariant.py",
         "tools/repo_path_refs.py",
+        "tools/run_pytest_fresh_basetemp.py",
         "tools/run_validation_gates.py",
         "tools/validate_atomicrows_sha_freeze_final_readiness_state_contract.py",
         "tools/validate_no_runtime_artifacts.py",
@@ -177,6 +180,7 @@ VALIDATION_INFRASTRUCTURE_CHANGED_PATHS = frozenset(
         "tools/validate_nested_validator_contracts.py",
         "tools/validate_repair_pr_changed_file_scope.py",
         "tools/validation_inventory.py",
+        "tools/validation_reliability.py",
     }
 )
 PR163_C_MAIN_BRANCH_CONTEXT_REPAIR_BRANCH = (
@@ -205,6 +209,38 @@ VALIDATION_EXECUTION_BRANCHES = frozenset(
 ST12H_IMPLEMENTATION_BRANCH = (
     "agent/st12h-validation-currentization-operations-publication"
 )
+ENGVR_IMPLEMENTATION_BRANCH = (
+    "hardening/eng-validation-reliability-windows-text-integrity"
+)
+ENGVR_NORMAL_CHANGED_PATHS = frozenset(
+    {
+        ".gitattributes",
+        "tools/validation_reliability.py",
+        "tools/run_validation_gates.py",
+        "tools/run_pytest_fresh_basetemp.py",
+        "tools/validate_idempotence_runtime_containment.py",
+        "tools/ci_branch_context.py",
+        "tools/validation_inventory.py",
+        "tools/validation_scope_registry.py",
+        "tests/fail_closed/test_run_validation_gates.py",
+        "tests/fail_closed/test_pytest_fresh_basetemp_helper.py",
+        "tests/tools/test_validate_idempotence_runtime_containment.py",
+        "tests/tools/test_ci_branch_context.py",
+        "tests/tools/test_validation_inventory.py",
+        "tests/tools/test_validation_scope_registry.py",
+        "tests/tools/test_changed_area_validation_router.py",
+        "tests/tools/test_validate_repair_pr_changed_file_scope.py",
+    }
+)
+ENGVR_TRIGGERED_CONDITIONAL_CHANGED_PATHS = frozenset(
+    {
+        "docs/master_plan/generated/"
+        "PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+    }
+)
+ENGVR_CHANGED_PATHS = frozenset(
+    (*ENGVR_NORMAL_CHANGED_PATHS, *ENGVR_TRIGGERED_CONDITIONAL_CHANGED_PATHS)
+)
 OWNER_AUTHORIZED_VALIDATION_BRANCHES = frozenset(
     {
         "agent/st12a-contract-envelope",
@@ -215,6 +251,7 @@ OWNER_AUTHORIZED_VALIDATION_BRANCHES = frozenset(
         "agent/st12f-evidence-model-risk-v1",
         "agent/st12g-existing-owner-projections-v2",
         ST12H_IMPLEMENTATION_BRANCH,
+        ENGVR_IMPLEMENTATION_BRANCH,
         ST12_ARCHITECTURE_ORACLE_PREREQUISITE_REPAIR_BRANCH,
         ST12_INHERITED_MATH_ROW_RECEIPT_REPAIR_BRANCH,
     }
@@ -1945,6 +1982,7 @@ PR159S_ALLOWED_CHANGED_PATHS = frozenset(
     }
 )
 EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_CHANGED_PATHS = {
+    ENGVR_IMPLEMENTATION_BRANCH: ENGVR_CHANGED_PATHS,
     ST12_ARCHITECTURE_ORACLE_PREREQUISITE_REPAIR_BRANCH: (
         ST12_ARCHITECTURE_ORACLE_PREREQUISITE_REPAIR_CHANGED_PATHS
     ),
@@ -3048,6 +3086,8 @@ def is_explicit_downstream_repair_branch_context_allowed(
 def is_explicit_downstream_repair_changed_path(branch: str, path: str) -> bool:
     branch = normalize_branch_context(branch)
     normalized = path.replace("\\", "/")
+    if branch == ENGVR_IMPLEMENTATION_BRANCH:
+        return normalized in ENGVR_CHANGED_PATHS
     exact_repair_scope = EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_CHANGED_PATHS.get(branch)
     if is_repair_branch(branch) and exact_repair_scope is not None:
         return normalized in exact_repair_scope
