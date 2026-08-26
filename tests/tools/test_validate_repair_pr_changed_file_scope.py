@@ -341,6 +341,40 @@ def test_exact_mapped_repair_scopes_precede_generic_pr152_allowances():
         for path in generic_pr152_paths
     )
 
+    engvr_branch = context.ENGVR_IMPLEMENTATION_BRANCH
+    conditional_report = next(
+        iter(context.ENGVR_TRIGGERED_CONDITIONAL_CHANGED_PATHS)
+    )
+    assert not context.is_repair_branch(engvr_branch)
+    assert context.EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_CHANGED_PATHS[engvr_branch] == (
+        context.ENGVR_CHANGED_PATHS
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        engvr_branch,
+        conditional_report,
+    )
+    assert all(
+        context.is_explicit_downstream_repair_changed_path(engvr_branch, path)
+        for path in context.ENGVR_CHANGED_PATHS
+    )
+    assert all(
+        not context.is_explicit_downstream_repair_changed_path(engvr_branch, path)
+        for path in generic_pr152_paths - context.ENGVR_CHANGED_PATHS
+    )
+    for protected_path in (
+        "tools/changed_area_validation_router.py",
+        ".github/workflows/qtt_validation.yml",
+        "src/qtt/stage1_prediction_markets/example.py",
+        "docs/master_plan/QTT_MasterPlan_Current.md",
+        "docs/master_plan/generated/qtt_roadmap_execution_state_controller.json",
+        "docs/master_plan/generated/UnrelatedPR152Report.report.json",
+    ):
+        assert protected_path not in context.ENGVR_CHANGED_PATHS
+        assert not context.is_explicit_downstream_repair_changed_path(
+            engvr_branch,
+            protected_path,
+        )
+
 
 def test_repair_branch_exact_changed_path_scope_still_fails_closed(monkeypatch):
     _force_pr166_sm2_repair_branch(monkeypatch)

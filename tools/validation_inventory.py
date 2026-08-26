@@ -50,8 +50,11 @@ VALIDATOR_CLASSES = frozenset(
 COST_TIERS = frozenset({"FAST", "MEDIUM", "SLOW", "DEEP"})
 
 VALIDATION_INFRASTRUCTURE_GLOBS = (
+    ".gitattributes",
     ".github/workflows/**",
+    "tools/validation_reliability.py",
     "tools/run_validation_gates.py",
+    "tools/run_pytest_fresh_basetemp.py",
     "tools/validate_no_runtime_artifacts.py",
     "tools/ci_branch_context.py",
     "tools/validation_scope_registry.py",
@@ -74,8 +77,10 @@ VALIDATION_INFRASTRUCTURE_GLOBS = (
     "tests/tools/test_cross_platform_path_invariant.py",
     "tests/tools/test_ci_branch_context.py",
     "tests/tools/test_validation_scope_registry.py",
+    "tests/tools/test_validate_repair_pr_changed_file_scope.py",
     "tests/tools/test_qtt_authority_reason_code_registry.py",
     "tests/fail_closed/test_run_validation_gates.py",
+    "tests/fail_closed/test_pytest_fresh_basetemp_helper.py",
     "tests/fail_closed/test_no_runtime_artifacts_strict.py",
     "docs/master_plan/generated/PR208_*.report.json",
 )

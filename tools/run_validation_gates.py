@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import contextlib
 from copy import deepcopy
 from dataclasses import dataclass
 from datetime import UTC, datetime
@@ -28,6 +29,31 @@ from tools.validation_scope_registry import (  # noqa: E402
     build_st12h_validation_commands,
     build_st12g_architecture_validation_command,
 )
+from tools.validation_reliability import (  # noqa: E402
+    EVIDENCE_ROOT_ENV,
+    PYTEST_BASETEMP_DIR_NAME,
+    RUN_ID_ENV,
+    VALIDATION_OUTPUT_DIR_NAME,
+    CommandEvidencePlanEntry,
+    CommandExecutionReceiptV1,
+    FilesystemProbeReceiptV1,
+    ValidationCompletionReceiptV1,
+    ValidationReliabilityError,
+    ValidationRunPathsV1,
+    atomic_write_json,
+    build_command_evidence_plan,
+    classify_repository_changes,
+    cleanup_validation_run,
+    command_attempt_accounting,
+    refresh_exact_stat_cache_paths,
+    resolve_validation_run_paths,
+    semantic_candidate_paths,
+    supervise_command,
+    text_integrity_failure_codes,
+    validate_complete_run_evidence,
+    validate_published_completion_receipt,
+    write_run_provenance,
+)
 
 SUCCESS_MARKER = "QTT_VALIDATION_GATES_OK"
 PYTEST_FRESH_BASETEMP_SCRIPT = "run_pytest_fresh_basetemp.py"
@@ -53,6 +79,18 @@ NO_RUNTIME_ARTIFACT_SCAN_CACHE_SCHEMA_VERSION = 1
 PR152_BUILD_REPORT_CACHE_ENV = "QTT_PR152_BUILD_REPORT_CACHE"
 PR152_BUILD_REPORT_CACHE_KIND = "qtt_pr152_build_report"
 PR152_BUILD_REPORT_CACHE_SCHEMA_VERSION = 1
+_RUN_COMMANDS_ACTIVE_PATHS: ValidationRunPathsV1 | None = None
+_LAST_COMMAND_RECEIPTS: tuple[CommandExecutionReceiptV1, ...] = ()
+_LAST_PLANNED_COMMAND_COUNT: int | None = None
+_LAST_EXPECTED_COMMAND_PLAN: tuple[CommandEvidencePlanEntry, ...] = ()
+_ACTIVE_SEMANTIC_CHANGED_PATHS: tuple[str, ...] | None = None
+_ACTIVE_CLASSIFIED_CHANGED_PATHS: tuple[str, ...] | None = None
+_ACTIVE_TEXT_INTEGRITY_FAILURES: tuple[str, ...] = ()
+_ACTIVE_TEXT_INTEGRITY_STATE = "NOT_RUN"
+_ACTIVE_FILESYSTEM_PROBE: FilesystemProbeReceiptV1 | None = None
+_RUN_PROVENANCE_WRITTEN = False
+_RUN_PROVENANCE_ATTEMPTED = False
+_execute_supervised_command = supervise_command
 FAST_PREFLIGHT_PHASE = "fast-preflight"
 DETERMINISTIC_VALIDATORS_PHASE = "deterministic-validators"
 DETERMINISTIC_VALIDATOR_SHARD_PHASES = (
@@ -232,6 +270,15 @@ class TimingEntry:
     command: list[str]
     elapsed_seconds: float
     returncode: int
+
+
+@dataclass(frozen=True)
+class ExecutionPlanEntry:
+    registered_argv: tuple[str, ...]
+    timing_identity_argv: tuple[str, ...]
+    execution_argv: tuple[str, ...]
+    st12g_adapter_applied: bool
+    qku_root_import_adapter_applied: bool
 
 
 PR166_SM2_TEST_ROOT = (
@@ -1569,9 +1616,42 @@ def _st12h_command_contract(
             domain = command[command.index("--domain") + 1]
         except (ValueError, IndexError):
             return None
-        markers = (f"QKU_COMPUTATION_CONTROL_PLANE_VALIDATED domain={domain}",)
+        domain_markers = {
+            "accounting": (
+                "QKU_COMPUTATION_CONTROL_PLANE_VALIDATED domain=accounting "
+                "contract_checks=16 golden_vectors=11"
+            ),
+            "execution": (
+                "QKU_COMPUTATION_CONTROL_PLANE_VALIDATED domain=execution "
+                "contract_checks=14 golden_vectors=2"
+            ),
+            "llm": (
+                "QKU_COMPUTATION_CONTROL_PLANE_VALIDATED domain=llm "
+                "contract_checks=15 golden_vectors=0"
+            ),
+            "operations": (
+                "QKU_COMPUTATION_CONTROL_PLANE_VALIDATED domain=operations "
+                "contract_checks=15 golden_vectors=0"
+            ),
+            "security": (
+                "QKU_COMPUTATION_CONTROL_PLANE_VALIDATED domain=security "
+                "contract_checks=9 golden_vectors=0"
+            ),
+            "source": (
+                "QKU_COMPUTATION_CONTROL_PLANE_VALIDATED domain=source "
+                "contract_checks=7 golden_vectors=0"
+            ),
+        }
+        markers = (
+            domain_markers.get(
+                domain,
+                f"QKU_COMPUTATION_CONTROL_PLANE_VALIDATED domain={domain}",
+            ),
+        )
         if domain == "h":
-            markers += (
+            markers = (
+                "QKU_COMPUTATION_CONTROL_PLANE_VALIDATED domain=h "
+                "contract_checks=36 golden_vectors=0",
                 "ST12H_GROUPED_MATRIX_VALIDATED functions=6 control_cases=36 "
                 "semantic_identities=42 custom_case_labels=0",
             )
@@ -1580,31 +1660,43 @@ def _st12h_command_contract(
         return None
     independent_markers = {
         "independent_validate_qku_computation_control_plane_accounting.py": (
-            "QKU_ACCOUNTING_INDEPENDENTLY_VALIDATED",
+            "QKU_ACCOUNTING_INDEPENDENTLY_VALIDATED controls=16 policies=80 "
+            "bindings=80 math=13 oracles=13 vectors=13 effects=0",
         ),
         "independent_validate_qku_computation_control_plane_execution.py": (
-            "QKU_EXECUTION_INDEPENDENTLY_VALIDATED",
+            "QKU_EXECUTION_INDEPENDENTLY_VALIDATED controls=9 identities=8 "
+            "gates=13 lifecycle=NO_WRITE effects=0 blockers=9",
         ),
         "independent_validate_qku_computation_control_plane_llm.py": (
-            "QKU_LLM_INDEPENDENTLY_VALIDATED",
+            "QKU_LLM_INDEPENDENTLY_VALIDATED checks=8 rejection_cases=9 "
+            "inference_calls=0 numeric_authority=0",
         ),
         "independent_validate_qku_computation_control_plane_operations.py": (
-            "QKU_OPERATIONS_INDEPENDENTLY_VALIDATED",
+            "QKU_OPERATIONS_INDEPENDENTLY_VALIDATED operation_contracts=15 "
+            "executable_op14_checks=21 bundle_fields=30 lifecycle_transitions=6 "
+            "prohibited_transition_rejections=58 v18_integration_rows=16 "
+            "real_review_truths_reconstructed=1 canonical_math01_partition=39+9 "
+            "metric_durable_values_consumed_and_validated=38/38 "
+            "metric_values_produced_by_st12f=0",
         ),
         "independent_validate_qku_computation_control_plane_security.py": (
-            "QKU_SECURITY_INDEPENDENTLY_VALIDATED",
+            "QKU_SECURITY_INDEPENDENTLY_VALIDATED "
+            "certified_importlib_resource_import_count=2 "
+            "other_importlib_import_count=0 dynamic_import_call_count=0",
         ),
         "independent_validate_qku_computation_control_plane_source.py": (
-            "QKU_SOURCE_INDEPENDENTLY_VALIDATED",
+            "QKU_SOURCE_INDEPENDENTLY_VALIDATED source_rows=29 overlays=7 "
+            "binding_rules=1 v34_primary_sources=55 v34_numeric_authorities=621",
         ),
     }
     if script_name in independent_markers:
         return 1200, independent_markers[script_name]
     if script_name == "independent_validate_qku_computation_control_plane.py":
         return 1800, (
-            "QKU_COMPUTATION_CONTROL_PLANE_INDEPENDENTLY_VALIDATED",
-            "ST12H_MATH_40_44_INDEPENDENTLY_RECONSTRUCTED",
-            "ST12H_MATH_01_52_COVERAGE_RECONSTRUCTED",
+            "QKU_COMPUTATION_CONTROL_PLANE_INDEPENDENTLY_VALIDATED domains=13",
+            "ST12H_MATH_40_44_INDEPENDENTLY_RECONSTRUCTED count=5",
+            "ST12H_MATH_01_52_COVERAGE_RECONSTRUCTED count=52 h_direct=5 "
+            "inherited=47 identity_only=0 unexecuted=0",
         )
     if (
         script_name == PYTEST_FRESH_BASETEMP_SCRIPT
@@ -6330,21 +6422,79 @@ def _write_timing_report(
     )
 
 
+def _prepare_execution_plan(
+    commands: Sequence[Sequence[str]],
+) -> tuple[ExecutionPlanEntry, ...]:
+    plan: list[ExecutionPlanEntry] = []
+    for command in commands:
+        registered = tuple(str(part) for part in command)
+        st12g_adapted = tuple(
+            _execution_command_with_st12g_architecture_roster(list(registered))
+        )
+        execution = tuple(
+            _execution_command_with_qku_root_importlib(list(st12g_adapted))
+        )
+        plan.append(
+            ExecutionPlanEntry(
+                registered_argv=registered,
+                timing_identity_argv=st12g_adapted,
+                execution_argv=execution,
+                st12g_adapter_applied=st12g_adapted != registered,
+                qku_root_import_adapter_applied=execution != st12g_adapted,
+            )
+        )
+    return tuple(plan)
+
+
 def run_commands(
     commands: Sequence[Sequence[str]],
     repo_root: pathlib.Path | None = None,
     *,
     phase: str = ALL_PHASE,
     timing_report_path: pathlib.Path | None = None,
+    run_paths: ValidationRunPathsV1 | None = None,
+    defer_success_markers: bool = False,
     scratch_roots: Sequence[pathlib.Path] = (),
+    execution_plan: Sequence[ExecutionPlanEntry] | None = None,
 ) -> int:
+    prepared_plan = (
+        _prepare_execution_plan(commands)
+        if execution_plan is None
+        else tuple(execution_plan)
+    )
+    registered_commands = tuple(
+        tuple(str(part) for part in command) for command in commands
+    )
+    if tuple(entry.registered_argv for entry in prepared_plan) != registered_commands:
+        raise ValueError("execution plan does not match the registered command plan")
+    global _LAST_PLANNED_COMMAND_COUNT
+    global _LAST_EXPECTED_COMMAND_PLAN
+    _LAST_PLANNED_COMMAND_COUNT = len(prepared_plan)
+    active_run_paths = run_paths or _RUN_COMMANDS_ACTIVE_PATHS
+    if active_run_paths is None:
+        print(
+            "ENGVR_SHORT_PROCESS_ROOT_UNAVAILABLE: supervised execution has no run custody",
+            file=sys.stderr,
+            flush=True,
+        )
+        return 2
     cleanup_repo_root = (
         _RUN_COMMANDS_CLEANUP_REPO_ROOT if repo_root is None else repo_root
     )
+    execution_cwd = (cleanup_repo_root or _repo_root()).resolve()
+    _LAST_EXPECTED_COMMAND_PLAN = build_command_evidence_plan(
+        run_id=active_run_paths.run_id,
+        phase=phase,
+        commands=tuple(entry.execution_argv for entry in prepared_plan),
+        cwd=execution_cwd,
+    )
     timing_entries: list[TimingEntry] = []
+    command_receipts: list[CommandExecutionReceiptV1] = []
     total_started = time.perf_counter()
 
     def finish(returncode: int) -> int:
+        global _LAST_COMMAND_RECEIPTS
+        _LAST_COMMAND_RECEIPTS = tuple(command_receipts)
         scratch_failures = _st12h_scratch_budget_failures(scratch_roots)
         if scratch_failures:
             for failure in scratch_failures:
@@ -6373,7 +6523,7 @@ def run_commands(
             except ValueError as exc:
                 print(str(exc), file=sys.stderr, flush=True)
                 return 2
-        if returncode == 0:
+        if returncode == 0 and not defer_success_markers:
             print(f"{PHASE_SUCCESS_MARKER_PREFIX} phase={phase}", flush=True)
             print(SUCCESS_MARKER, flush=True)
         return returncode
@@ -6406,8 +6556,8 @@ def run_commands(
         )
 
     active_validation_processes = 0
-    for command_index, command in enumerate(commands, start=1):
-        command_list = list(command)
+    for command_index, plan_entry in enumerate(prepared_plan, start=1):
+        command_list = list(plan_entry.registered_argv)
         if cleanup_repo_root is not None and (
             _is_pr142_handoff_readiness_validator_command(command_list)
             or _is_pr143_owner_override_currentization_validator_command(command_list)
@@ -6418,29 +6568,22 @@ def run_commands(
             except RuntimeError as exc:
                 print(str(exc), file=sys.stderr, flush=True)
                 return finish(1)
-        execution_command = _execution_command_with_st12g_architecture_roster(
-            command_list
-        )
-        if execution_command != command_list:
+        if plan_entry.st12g_adapter_applied:
             print(
                 "QTT_ST12G_INDEPENDENT_ARCHITECTURE_ADDITIVE_ROSTER "
                 f"modules={','.join(ST12G_ARCHITECTURE_ADDITIVE_MODULES)}",
                 flush=True,
             )
-        timing_identity_command = list(execution_command)
-        qku_root_execution_command = _execution_command_with_qku_root_importlib(
-            execution_command
-        )
-        if qku_root_execution_command != execution_command:
+        if plan_entry.qku_root_import_adapter_applied:
             print(
                 "QTT_QKU_ROOT_PYTEST_IMPORT_MODE_APPLIED "
                 "mode=importlib "
                 f"selected_root={ST12A_TEST_ROOT}",
                 flush=True,
             )
-        execution_command = qku_root_execution_command
+        timing_identity_command = list(plan_entry.timing_identity_argv)
+        execution_command = list(plan_entry.execution_argv)
         print(subprocess.list2cmdline(execution_command), flush=True)
-        command_started = time.perf_counter()
         st12h_contract = _st12h_command_contract(execution_command)
         process_failures = _st12h_execution_budget_failures(
             concurrent_validation_processes=active_validation_processes + 1,
@@ -6451,55 +6594,64 @@ def run_commands(
             return finish(1)
         active_validation_processes += 1
         try:
-            if st12h_contract is None:
-                completed = subprocess.run(execution_command)
-            else:
-                hard_timeout_seconds, _expected_markers = st12h_contract
-                completed = subprocess.run(
-                    execution_command,
-                    capture_output=True,
-                    text=True,
-                    timeout=hard_timeout_seconds,
-                )
-                if getattr(completed, "stdout", ""):
-                    print(completed.stdout, end="", flush=True)
-                if getattr(completed, "stderr", ""):
-                    print(completed.stderr, end="", file=sys.stderr, flush=True)
-        except subprocess.TimeoutExpired:
-            elapsed_seconds = time.perf_counter() - command_started
-            timing_entries.append(
-                TimingEntry(
-                    phase=phase,
-                    command_index=command_index,
-                    command=timing_identity_command,
-                    elapsed_seconds=elapsed_seconds,
-                    returncode=124,
-                )
+            timeout_seconds = None
+            expected_markers: tuple[str, ...] = ()
+            if st12h_contract is not None:
+                timeout_seconds, expected_markers = st12h_contract
+            command_environment = os.environ.copy()
+            command_environment[RUN_ID_ENV] = active_run_paths.run_id
+            command_environment[EVIDENCE_ROOT_ENV] = str(active_run_paths.evidence_root)
+            receipt = _execute_supervised_command(
+                execution_command,
+                cwd=execution_cwd,
+                run_id=active_run_paths.run_id,
+                phase=phase,
+                command_index=command_index,
+                evidence_root=active_run_paths.evidence_root,
+                required_markers=expected_markers,
+                timeout_seconds=timeout_seconds,
+                environment=command_environment,
             )
+            command_receipts.append(receipt)
+        except ValidationReliabilityError as exc:
+            print(str(exc), file=sys.stderr, flush=True)
+            return finish(1)
+        except OSError as exc:
             print(
-                "ST12H_VALIDATION_COMMAND_TIMEOUT "
-                f"command={subprocess.list2cmdline(execution_command)}",
+                f"ENGVR_ATOMIC_RECEIPT_WRITE_FAILED: {type(exc).__name__}: {exc}",
+                file=sys.stderr,
+                flush=True,
+            )
+            return finish(1)
+        except (RuntimeError, ValueError) as exc:
+            print(
+                f"ENGVR_PROCESS_START_FAILED: {type(exc).__name__}: {exc}",
                 file=sys.stderr,
                 flush=True,
             )
             return finish(1)
         finally:
             active_validation_processes -= 1
-        elapsed_seconds = time.perf_counter() - command_started
+        elapsed_seconds = receipt.elapsed_monotonic_seconds
+        native_returncode = (
+            int(receipt.native_exit_code)
+            if receipt.native_exit_code is not None
+            else 1
+        )
         timing_entries.append(
             TimingEntry(
                 phase=phase,
                 command_index=command_index,
                 command=timing_identity_command,
                 elapsed_seconds=elapsed_seconds,
-                returncode=completed.returncode,
+                returncode=native_returncode,
             )
         )
         print(
             "QTT_VALIDATION_TIMING_COMMAND "
             f"phase={phase} command_index={command_index} "
             f"elapsed_seconds={elapsed_seconds:.3f} "
-            f"returncode={completed.returncode}",
+            f"returncode={native_returncode}",
             flush=True,
         )
         scratch_failures = _st12h_scratch_budget_failures(scratch_roots)
@@ -6507,7 +6659,29 @@ def run_commands(
             for failure in scratch_failures:
                 print(failure, file=sys.stderr, flush=True)
             return finish(1)
-        if completed.returncode != 0:
+        if receipt.failure_class is not None:
+            if receipt.failure_class == "ENGVR_PROCESS_TIMEOUT":
+                print(
+                    "ST12H_VALIDATION_COMMAND_TIMEOUT "
+                    f"command={subprocess.list2cmdline(execution_command)}",
+                    file=sys.stderr,
+                    flush=True,
+                )
+            elif receipt.failure_class == "ENGVR_REQUIRED_MARKER_MISSING":
+                print(
+                    "ST12H_VALIDATION_TERMINAL_MARKER_MISSING "
+                    f"state={receipt.stdout_marker_state}",
+                    file=sys.stderr,
+                    flush=True,
+                )
+            else:
+                print(
+                    f"{receipt.failure_class} "
+                    f"command_index={command_index} pid={receipt.pid} "
+                    f"native_exit_code={receipt.native_exit_code}",
+                    file=sys.stderr,
+                    flush=True,
+                )
             if cleanup_repo_root is not None and _is_final_pytest_command(
                 command_list
             ):
@@ -6515,27 +6689,12 @@ def run_commands(
                     restore_gate_side_effects()
                 except RuntimeError as exc:
                     print(str(exc), file=sys.stderr, flush=True)
-            return finish(completed.returncode)
-        if st12h_contract is not None:
-            _hard_timeout_seconds, expected_markers = st12h_contract
-            combined_output = "\n".join(
-                (
-                    str(getattr(completed, "stdout", "")),
-                    str(getattr(completed, "stderr", "")),
-                )
+            return finish(
+                native_returncode
+                if receipt.failure_class == "ENGVR_NATIVE_EXIT_NONZERO"
+                and native_returncode != 0
+                else 1
             )
-            missing_markers = _st12h_missing_terminal_markers(
-                combined_output,
-                expected_markers,
-            )
-            if missing_markers:
-                print(
-                    "ST12H_VALIDATION_TERMINAL_MARKER_MISSING "
-                    f"markers={','.join(missing_markers)}",
-                    file=sys.stderr,
-                    flush=True,
-                )
-                return finish(1)
         try:
             _record_no_runtime_scan_success(command_list, cleanup_repo_root)
         except RuntimeError as exc:
@@ -6560,6 +6719,9 @@ def run_commands(
     return finish(0)
 
 
+_PRODUCTION_RUN_COMMANDS = run_commands
+
+
 def _run_commands_accepts_repo_root() -> bool:
     try:
         signature = inspect.signature(run_commands)
@@ -6570,6 +6732,13 @@ def _run_commands_accepts_repo_root() -> bool:
         parameter.kind is inspect.Parameter.VAR_KEYWORD
         or parameter.name == "repo_root"
         for parameter in parameters
+    )
+
+
+def _legacy_run_commands_test_adapter_active() -> bool:
+    return (
+        run_commands is not _PRODUCTION_RUN_COMMANDS
+        and not _run_commands_accepts_repo_root()
     )
 
 
@@ -7192,7 +7361,110 @@ def _filter_commands_for_router_result(
     return kept
 
 
-def main(argv: Sequence[str] | None = None) -> int:
+def _validation_text_integrity_preflight(
+    repo_root: pathlib.Path,
+) -> tuple[tuple[object, ...], tuple[str, ...], tuple[str, ...]]:
+    records = classify_repository_changes(repo_root)
+    if any(record.change_class == "STAT_CACHE_ONLY_CHANGE" for record in records):
+        try:
+            records = refresh_exact_stat_cache_paths(repo_root, records)
+        except ValidationReliabilityError as exc:
+            return (
+                tuple(records),
+                (f"{exc.code} path=<exact-stat-cache-refresh> {exc.detail}",),
+                (),
+            )
+    failures: list[str] = []
+    for record in records:
+        failures.extend(
+            f"{code} path={record.path} class={record.change_class}"
+            for code in text_integrity_failure_codes(
+                (record,),
+                include_authority_boundary=False,
+            )
+        )
+    semantic_paths = semantic_candidate_paths(records)
+    return tuple(records), tuple(dict.fromkeys(failures)), semantic_paths
+
+
+def _projected_validation_relative_paths(phase: str) -> tuple[str, ...]:
+    placeholder_validation = pathlib.Path("validation-output")
+    placeholder_pytest = pathlib.Path("pytest-basetemp")
+    commands = build_phase_commands(
+        phase,
+        placeholder_validation,
+        placeholder_pytest,
+    )
+    values: list[str] = []
+    output_prefixes = ("validation-output/", "pytest-basetemp/")
+    for command in commands:
+        for argument in command:
+            text = str(argument)
+            normalized = _normal_path_text(text)
+            if normalized.startswith(output_prefixes):
+                values.append(normalized)
+                continue
+            candidate = pathlib.Path(text)
+            if candidate.is_absolute() or normalized in {"", ".", ".."}:
+                continue
+            try:
+                resolved = (REPO_ROOT / candidate).resolve(strict=False)
+                is_registered_repo_path = (
+                    _path_is_relative_to(resolved, REPO_ROOT.resolve())
+                    and resolved.exists()
+                )
+            except OSError:
+                is_registered_repo_path = False
+            if is_registered_repo_path:
+                values.append(normalized)
+    values.extend(discover_pytest_files(REPO_ROOT))
+    values.extend(
+        (
+            "validation-output/command-generated-output/sentinel.bin",
+            "pytest-basetemp/pytest-current/test-validation-output/sentinel.bin",
+            "command-9999.stdout.bin",
+            "command-9999.stderr.bin",
+            "command-9999.json",
+            "completion.json",
+            "cleanup.json",
+        )
+    )
+    return tuple(values)
+
+
+def _publish_active_plan_provenance(
+    phase: str,
+    execution_plan: Sequence[ExecutionPlanEntry],
+) -> None:
+    active_run_paths = _RUN_COMMANDS_ACTIVE_PATHS
+    if active_run_paths is None or _ACTIVE_FILESYSTEM_PROBE is None:
+        raise ValidationReliabilityError(
+            "ENGVR_ATOMIC_RECEIPT_WRITE_FAILED",
+            "final command plan lacks active path/probe custody",
+        )
+    global _LAST_PLANNED_COMMAND_COUNT
+    global _LAST_EXPECTED_COMMAND_PLAN
+    global _RUN_PROVENANCE_WRITTEN
+    global _RUN_PROVENANCE_ATTEMPTED
+    _LAST_PLANNED_COMMAND_COUNT = len(execution_plan)
+    _LAST_EXPECTED_COMMAND_PLAN = build_command_evidence_plan(
+        run_id=active_run_paths.run_id,
+        phase=phase,
+        commands=tuple(entry.execution_argv for entry in execution_plan),
+        cwd=active_run_paths.repo_root,
+    )
+    _RUN_PROVENANCE_ATTEMPTED = True
+    write_run_provenance(
+        active_run_paths,
+        _ACTIVE_FILESYSTEM_PROBE,
+        phase=phase,
+        command_count=len(execution_plan),
+        text_integrity_preflight_state=_ACTIVE_TEXT_INTEGRITY_STATE,
+    )
+    _RUN_PROVENANCE_WRITTEN = True
+
+
+def _main_impl(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--phase",
@@ -7220,12 +7492,29 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--force-full", action="store_true")
     parser.add_argument("--manual-mode", default="")
     parser.add_argument(
+        "--process-root",
+        type=pathlib.Path,
+        help="Optional absolute external parent for the unique validation run root.",
+    )
+    parser.add_argument(
         "--router-report",
         type=pathlib.Path,
         help="Optional untracked JSON changed-area router report path.",
     )
     args = parser.parse_args(sys.argv[1:] if argv is None else list(argv))
-    repo_root = _repo_root()
+    active_run_paths = _RUN_COMMANDS_ACTIVE_PATHS
+    legacy_test_adapter = _legacy_run_commands_test_adapter_active()
+    if active_run_paths is None and not legacy_test_adapter:
+        print(
+            "ENGVR_SHORT_PROCESS_ROOT_UNAVAILABLE: central run paths were not allocated",
+            file=sys.stderr,
+        )
+        return 2
+    repo_root = (
+        REPO_ROOT
+        if active_run_paths is None
+        else active_run_paths.repo_root
+    )
     timing_report_path = args.timing_report
     if timing_report_path is not None and not timing_report_path.is_absolute():
         timing_report_path = repo_root / timing_report_path
@@ -7239,8 +7528,6 @@ def main(argv: Sequence[str] | None = None) -> int:
             file=sys.stderr,
         )
         return 2
-    tmp_parent = repo_root / ".tmp"
-    tmp_parent.mkdir(parents=True, exist_ok=True)
     global _RUN_COMMANDS_CLEANUP_REPO_ROOT
     previous_cleanup_repo_root = _RUN_COMMANDS_CLEANUP_REPO_ROOT
     _RUN_COMMANDS_CLEANUP_REPO_ROOT = repo_root
@@ -7249,7 +7536,14 @@ def main(argv: Sequence[str] | None = None) -> int:
     previous_pr152_cache_env = os.environ.get(PR152_BUILD_REPORT_CACHE_ENV)
     installed_pr152_cache_env = False
     try:
-        with tempfile.TemporaryDirectory(prefix="qtt_validation_gates_") as temp_dir:
+        validation_temp_context = (
+            tempfile.TemporaryDirectory(prefix="qtt_validation_gates_")
+            if active_run_paths is None
+            else contextlib.nullcontext(
+                str(active_run_paths.validation_output_root)
+            )
+        )
+        with validation_temp_context as temp_dir:
             if previous_scan_cache_env is None:
                 os.environ[NO_RUNTIME_ARTIFACT_SCAN_CACHE_ENV] = str(
                     pathlib.Path(temp_dir) / "NoRuntimeArtifactScanCache.json"
@@ -7260,9 +7554,16 @@ def main(argv: Sequence[str] | None = None) -> int:
                     pathlib.Path(temp_dir) / "PR152BuildReportCache.json"
                 )
                 installed_pr152_cache_env = True
-            with tempfile.TemporaryDirectory(
-                prefix="run_validation_gates_pytest_",
-            ) as pytest_temp_dir:
+            pytest_temp_context = (
+                tempfile.TemporaryDirectory(
+                    prefix="run_validation_gates_pytest_"
+                )
+                if active_run_paths is None
+                else contextlib.nullcontext(
+                    str(active_run_paths.pytest_basetemp_root)
+                )
+            )
+            with pytest_temp_context as pytest_temp_dir:
                 commands = build_phase_commands(
                     args.phase,
                     pathlib.Path(temp_dir),
@@ -7313,12 +7614,31 @@ def main(argv: Sequence[str] | None = None) -> int:
                         branch=branch_context.branch,
                     )
                 )
+                if _ACTIVE_SEMANTIC_CHANGED_PATHS is None:
+                    effective_changed_files = tuple(args.changed_file)
+                elif args.changed_file:
+                    semantic_set = {
+                        _normal_path_text(path)
+                        for path in _ACTIVE_SEMANTIC_CHANGED_PATHS
+                    }
+                    classified_set = {
+                        _normal_path_text(path)
+                        for path in (_ACTIVE_CLASSIFIED_CHANGED_PATHS or ())
+                    }
+                    effective_changed_files = tuple(
+                        path
+                        for path in args.changed_file
+                        if _normal_path_text(path) in semantic_set
+                        or _normal_path_text(path) not in classified_set
+                    )
+                else:
+                    effective_changed_files = _ACTIVE_SEMANTIC_CHANGED_PATHS
                 router_result = None
                 if _rp5d_r1_local_branch_scope_active(
                     repo_root=repo_root,
                     phase=args.phase,
                     validation_mode=args.validation_mode,
-                    changed_files=args.changed_file,
+                    changed_files=effective_changed_files,
                     force_full=args.force_full,
                     manual_mode=args.manual_mode,
                 ):
@@ -7337,7 +7657,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                     repo_root=repo_root,
                     phase=args.phase,
                     validation_mode=args.validation_mode,
-                    changed_files=args.changed_file,
+                    changed_files=effective_changed_files,
                     force_full=args.force_full,
                     manual_mode=args.manual_mode,
                 ):
@@ -7356,7 +7676,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                     repo_root=repo_root,
                     phase=args.phase,
                     validation_mode=args.validation_mode,
-                    changed_files=args.changed_file,
+                    changed_files=effective_changed_files,
                     force_full=args.force_full,
                     manual_mode=args.manual_mode,
                 ):
@@ -7375,7 +7695,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                     repo_root=repo_root,
                     phase=args.phase,
                     validation_mode=args.validation_mode,
-                    changed_files=args.changed_file,
+                    changed_files=effective_changed_files,
                     force_full=args.force_full,
                     manual_mode=args.manual_mode,
                 ):
@@ -7396,7 +7716,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                     repo_root=repo_root,
                     phase=args.phase,
                     validation_mode=args.validation_mode,
-                    changed_files=args.changed_file,
+                    changed_files=effective_changed_files,
                     force_full=args.force_full,
                     manual_mode=args.manual_mode,
                 ):
@@ -7417,7 +7737,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                     repo_root=repo_root,
                     phase=args.phase,
                     validation_mode=args.validation_mode,
-                    changed_files=args.changed_file,
+                    changed_files=effective_changed_files,
                     force_full=args.force_full,
                     manual_mode=args.manual_mode,
                 ):
@@ -7436,11 +7756,11 @@ def main(argv: Sequence[str] | None = None) -> int:
                     )
                 elif _changed_area_routing_active(
                     validation_mode=args.validation_mode,
-                    changed_files=args.changed_file,
+                    changed_files=effective_changed_files,
                 ):
                     router_result = _router_result_for_current_context(
                         repo_root,
-                        changed_files=args.changed_file,
+                        changed_files=effective_changed_files,
                         base_ref=args.base_ref,
                         head_ref=args.head_ref,
                         force_full=args.force_full,
@@ -7484,6 +7804,10 @@ def main(argv: Sequence[str] | None = None) -> int:
                         phase=args.phase,
                         commands=commands,
                     )
+                if _ACTIVE_TEXT_INTEGRITY_FAILURES:
+                    for failure in _ACTIVE_TEXT_INTEGRITY_FAILURES:
+                        print(failure, file=sys.stderr, flush=True)
+                    return 2
                 if branch_context.branch == ST12H_IMPLEMENTATION_BRANCH:
                     selected_command_failures = _st12h_selected_command_failures(
                         commands,
@@ -7493,16 +7817,22 @@ def main(argv: Sequence[str] | None = None) -> int:
                         for failure in selected_command_failures:
                             print(failure, file=sys.stderr, flush=True)
                         return 2
+                execution_plan = _prepare_execution_plan(commands)
+                if active_run_paths is not None:
+                    _publish_active_plan_provenance(args.phase, execution_plan)
                 if _run_commands_accepts_repo_root():
                     return run_commands(
                         commands,
                         repo_root=repo_root,
                         phase=args.phase,
                         timing_report_path=timing_report_path,
+                        run_paths=active_run_paths,
+                        defer_success_markers=True,
                         scratch_roots=(
                             pathlib.Path(temp_dir),
                             pathlib.Path(pytest_temp_dir),
                         ),
+                        execution_plan=execution_plan,
                     )
                 return run_commands(commands)
     finally:
@@ -7511,6 +7841,265 @@ def main(argv: Sequence[str] | None = None) -> int:
         if installed_pr152_cache_env:
             os.environ.pop(PR152_BUILD_REPORT_CACHE_ENV, None)
         _RUN_COMMANDS_CLEANUP_REPO_ROOT = previous_cleanup_repo_root
+
+
+def _finalize_validation_run(
+    *,
+    run_paths: ValidationRunPathsV1,
+    probe: FilesystemProbeReceiptV1,
+    phase: str,
+    planned_count: int,
+    expected_plan: Sequence[CommandEvidencePlanEntry],
+    receipts: Sequence[CommandExecutionReceiptV1],
+    result: int,
+    text_state: str,
+) -> tuple[int, str, ValidationCompletionReceiptV1]:
+    """Publish cleanup and terminal custody for one already-planned run."""
+
+    cleanup_state = "NOT_RUN"
+    termination_unproven = any(
+        receipt.failure_class == "ENGVR_PROCESS_TERMINATION_FAILED"
+        for receipt in receipts
+    )
+    if termination_unproven:
+        cleanup_state = "SKIPPED_PROCESS_TERMINATION_UNPROVEN"
+        try:
+            atomic_write_json(
+                run_paths.evidence_root / "cleanup.json",
+                {
+                    "schema_version": 1,
+                    "run_id": run_paths.run_id,
+                    "cleanup_target": str(run_paths.cleanup_target),
+                    "cleanup_state": cleanup_state,
+                    "parent_preserved": True,
+                },
+            )
+        except RuntimeError as exc:
+            print(str(exc), file=sys.stderr, flush=True)
+        result = 1
+    else:
+        try:
+            cleanup_state = cleanup_validation_run(run_paths)
+        except RuntimeError as exc:
+            cleanup_state = "FAIL"
+            print(str(exc), file=sys.stderr, flush=True)
+            result = 1
+
+    started_count, completed_count, first_failed, terminal_native_exit = (
+        command_attempt_accounting(receipts)
+    )
+    if result == 0 and not (
+        planned_count > 0
+        and len(receipts) == planned_count
+        and started_count == planned_count
+        and completed_count == planned_count
+        and all(receipt.native_exit_code == 0 for receipt in receipts)
+        and all(receipt.failure_class is None for receipt in receipts)
+    ):
+        print(
+            "ENGVR_ATOMIC_RECEIPT_WRITE_FAILED: "
+            "passing command result lacks complete native receipt custody",
+            file=sys.stderr,
+            flush=True,
+        )
+        result = 1
+    marker_state = (
+        "NOT_RUN"
+        if not receipts
+        else "FAIL"
+        if any(
+            receipt.stdout_marker_state not in {"PASS", "NOT_REQUIRED"}
+            for receipt in receipts
+        )
+        else "PASS"
+    )
+    custody_error: ValidationReliabilityError | None = None
+    try:
+        validate_complete_run_evidence(
+            run_paths,
+            probe,
+            phase=phase,
+            command_count_planned=planned_count,
+            expected_plan=expected_plan,
+            receipts=receipts,
+            cleanup_state=cleanup_state,
+            text_integrity_preflight_state=text_state,
+        )
+    except ValidationReliabilityError as exc:
+        custody_error = exc
+        print(str(exc), file=sys.stderr, flush=True)
+        result = 1
+    completion = ValidationCompletionReceiptV1(
+        run_id=run_paths.run_id,
+        phase=phase,
+        command_count_planned=planned_count,
+        command_count_started=started_count,
+        command_count_completed=completed_count,
+        first_failed_command_index_or_null=first_failed,
+        terminal_native_exit_code=(
+            terminal_native_exit
+        ),
+        required_marker_state=marker_state,
+        process_root_cleanup_state=cleanup_state,
+        evidence_root_state=(
+            "PRESENT" if run_paths.evidence_root.is_dir() else "MISSING"
+        ),
+        text_integrity_preflight_state=text_state,
+        final_state=(
+            "PASS"
+            if result == 0
+            and cleanup_state.startswith("PASS")
+            and text_state == "PASS"
+            and custody_error is None
+            else "FAIL"
+        ),
+    )
+    try:
+        atomic_write_json(run_paths.evidence_root / "completion.json", completion)
+        validate_published_completion_receipt(
+            run_paths.evidence_root,
+            completion,
+        )
+    except RuntimeError as exc:
+        print(str(exc), file=sys.stderr, flush=True)
+        result = 1
+    return result, cleanup_state, completion
+
+
+def main(argv: Sequence[str] | None = None) -> int:
+    raw_argv = list(sys.argv[1:] if argv is None else argv)
+    if any(argument in {"-h", "--help"} for argument in raw_argv):
+        return _main_impl(raw_argv)
+    if _legacy_run_commands_test_adapter_active():
+        return _main_impl(raw_argv)
+    pre_parser = argparse.ArgumentParser(add_help=False)
+    pre_parser.add_argument("--phase", choices=VALIDATION_PHASES, default=ALL_PHASE)
+    pre_parser.add_argument("--process-root", type=pathlib.Path)
+    pre_parser.add_argument(
+        "--validation-mode",
+        choices=("auto", "full", "reduced"),
+        default="auto",
+    )
+    pre_parser.add_argument("--changed-file", action="append", default=[])
+    pre_args, _unknown = pre_parser.parse_known_args(raw_argv)
+    repo_root = _repo_root()
+    try:
+        run_paths, probe = resolve_validation_run_paths(
+            repo_root,
+            explicit_process_root=pre_args.process_root,
+            projected_relative_paths=_projected_validation_relative_paths(
+                pre_args.phase
+            ),
+        )
+    except (OSError, RuntimeError, ValueError) as exc:
+        print(str(exc), file=sys.stderr, flush=True)
+        return 2
+
+    result = 2
+    text_state = "NOT_RUN"
+    cleanup_state = "NOT_RUN"
+    global _RUN_COMMANDS_ACTIVE_PATHS
+    global _LAST_COMMAND_RECEIPTS
+    global _LAST_PLANNED_COMMAND_COUNT
+    global _LAST_EXPECTED_COMMAND_PLAN
+    global _ACTIVE_SEMANTIC_CHANGED_PATHS
+    global _ACTIVE_CLASSIFIED_CHANGED_PATHS
+    global _ACTIVE_TEXT_INTEGRITY_FAILURES
+    global _ACTIVE_TEXT_INTEGRITY_STATE
+    global _ACTIVE_FILESYSTEM_PROBE
+    global _RUN_PROVENANCE_WRITTEN
+    global _RUN_PROVENANCE_ATTEMPTED
+    previous_paths = _RUN_COMMANDS_ACTIVE_PATHS
+    previous_semantic_paths = _ACTIVE_SEMANTIC_CHANGED_PATHS
+    previous_classified_paths = _ACTIVE_CLASSIFIED_CHANGED_PATHS
+    previous_text_failures = _ACTIVE_TEXT_INTEGRITY_FAILURES
+    previous_text_state = _ACTIVE_TEXT_INTEGRITY_STATE
+    previous_probe = _ACTIVE_FILESYSTEM_PROBE
+    previous_provenance_state = _RUN_PROVENANCE_WRITTEN
+    previous_provenance_attempted = _RUN_PROVENANCE_ATTEMPTED
+    previous_expected_plan = _LAST_EXPECTED_COMMAND_PLAN
+    _RUN_COMMANDS_ACTIVE_PATHS = run_paths
+    _ACTIVE_SEMANTIC_CHANGED_PATHS = None
+    _ACTIVE_CLASSIFIED_CHANGED_PATHS = None
+    _ACTIVE_TEXT_INTEGRITY_FAILURES = ()
+    _ACTIVE_TEXT_INTEGRITY_STATE = "NOT_RUN"
+    _ACTIVE_FILESYSTEM_PROBE = probe
+    _RUN_PROVENANCE_WRITTEN = False
+    _RUN_PROVENANCE_ATTEMPTED = False
+    _LAST_COMMAND_RECEIPTS = ()
+    _LAST_PLANNED_COMMAND_COUNT = None
+    _LAST_EXPECTED_COMMAND_PLAN = ()
+    try:
+        records, text_failures, semantic_paths = (
+            _validation_text_integrity_preflight(repo_root)
+        )
+        text_state = "FAIL" if text_failures else "PASS"
+        _ACTIVE_TEXT_INTEGRITY_STATE = text_state
+        _ACTIVE_TEXT_INTEGRITY_FAILURES = text_failures
+        _ACTIVE_SEMANTIC_CHANGED_PATHS = semantic_paths
+        _ACTIVE_CLASSIFIED_CHANGED_PATHS = tuple(record.path for record in records)
+        defer_text_gate_for_explicit_reduced_routing = (
+            pre_args.phase == FAST_PREFLIGHT_PHASE
+            and pre_args.validation_mode == "reduced"
+            and bool(pre_args.changed_file)
+        )
+        if text_failures and not defer_text_gate_for_explicit_reduced_routing:
+            for failure in text_failures:
+                print(failure, file=sys.stderr, flush=True)
+            result = 2
+        else:
+            if not text_failures:
+                print(
+                    "QTT_VALIDATION_TEXT_INTEGRITY_PREFLIGHT_OK "
+                    f"semantic_path_count={len(semantic_paths or ())}",
+                    flush=True,
+                )
+            result = _main_impl(raw_argv)
+    except (OSError, RuntimeError, ValueError) as exc:
+        print(str(exc), file=sys.stderr, flush=True)
+        result = 1
+    finally:
+        if not _RUN_PROVENANCE_ATTEMPTED:
+            try:
+                _RUN_PROVENANCE_ATTEMPTED = True
+                write_run_provenance(
+                    run_paths,
+                    probe,
+                    phase=pre_args.phase,
+                    command_count=0,
+                    text_integrity_preflight_state=text_state,
+                )
+                _RUN_PROVENANCE_WRITTEN = True
+                _LAST_PLANNED_COMMAND_COUNT = 0
+                _LAST_EXPECTED_COMMAND_PLAN = ()
+            except (RuntimeError, ValueError) as exc:
+                print(str(exc), file=sys.stderr, flush=True)
+                result = 1
+        receipts = _LAST_COMMAND_RECEIPTS
+        planned_count = 0 if _LAST_PLANNED_COMMAND_COUNT is None else _LAST_PLANNED_COMMAND_COUNT
+        result, cleanup_state, _completion = _finalize_validation_run(
+            run_paths=run_paths,
+            probe=probe,
+            phase=pre_args.phase,
+            planned_count=planned_count,
+            expected_plan=_LAST_EXPECTED_COMMAND_PLAN,
+            receipts=receipts,
+            result=result,
+            text_state=text_state,
+        )
+        _RUN_COMMANDS_ACTIVE_PATHS = previous_paths
+        _ACTIVE_SEMANTIC_CHANGED_PATHS = previous_semantic_paths
+        _ACTIVE_CLASSIFIED_CHANGED_PATHS = previous_classified_paths
+        _ACTIVE_TEXT_INTEGRITY_FAILURES = previous_text_failures
+        _ACTIVE_TEXT_INTEGRITY_STATE = previous_text_state
+        _ACTIVE_FILESYSTEM_PROBE = previous_probe
+        _RUN_PROVENANCE_WRITTEN = previous_provenance_state
+        _RUN_PROVENANCE_ATTEMPTED = previous_provenance_attempted
+        _LAST_EXPECTED_COMMAND_PLAN = previous_expected_plan
+    if result == 0:
+        print(f"{PHASE_SUCCESS_MARKER_PREFIX} phase={pre_args.phase}", flush=True)
+        print(SUCCESS_MARKER, flush=True)
+    return result
 
 
 if __name__ == "__main__":

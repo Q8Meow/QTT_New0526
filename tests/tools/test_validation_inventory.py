@@ -3,6 +3,7 @@ from pathlib import Path
 
 from tools import changed_area_validation_router as router
 from tools import run_validation_gates as runner
+from tools import validation_reliability as reliability
 from tools import validation_inventory as inventory
 from tools import validation_scope_registry as scope_registry
 
@@ -907,3 +908,101 @@ def test_st12h_inventory_is_exact_and_uses_central_command_authority() -> None:
     }
     for path in inventory.ST12H_ACTIVE_PATHS:
         assert inventory.entries_matching_path(path)
+
+    from tools import ci_branch_context as context
+
+    assert len(context.ENGVR_NORMAL_CHANGED_PATHS) == 16
+    assert len(context.ENGVR_TRIGGERED_CONDITIONAL_CHANGED_PATHS) == 1
+    assert len(context.ENGVR_CHANGED_PATHS) == 17
+    assert context.ENGVR_CHANGED_PATHS == (
+        context.ENGVR_NORMAL_CHANGED_PATHS
+        | context.ENGVR_TRIGGERED_CONDITIONAL_CHANGED_PATHS
+    )
+    assert {
+        ".gitattributes",
+        "tools/validation_reliability.py",
+        "tools/run_pytest_fresh_basetemp.py",
+        "tests/fail_closed/test_pytest_fresh_basetemp_helper.py",
+        "tests/tools/test_validate_repair_pr_changed_file_scope.py",
+    } <= set(inventory.VALIDATION_INFRASTRUCTURE_GLOBS)
+    for path in context.ENGVR_CHANGED_PATHS:
+        assert inventory.entries_matching_path(path), path
+    assert len(inventory.validation_inventory()) == len(entries) == 450
+    assert len(runner.ORDERED_PHASES) == 13
+    assert len(runner.DETERMINISTIC_VALIDATOR_SHARD_PHASES) == 3
+    assert len(runner.PYTEST_SHARD_PHASES) == 8
+
+    repo_root = Path(__file__).resolve().parents[2]
+    attributes_path = repo_root / ".gitattributes"
+    attributes_bytes = attributes_path.read_bytes()
+    expected_lines = [
+        "# AtomicRows bundle artifacts require LF-stable bytes for future SHA/freeze authority.",
+        "docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl text eol=lf",
+        "docs/master_plan/atomic_rows/AtomicRows.bundle.sha256 text eol=lf",
+        "",
+        "# QTT cross-platform source, configuration, and structured-text formats.",
+        "*.py text eol=lf",
+        "*.pyi text eol=lf",
+        "*.md text eol=lf",
+        "*.json text eol=lf",
+        "*.jsonl text eol=lf",
+        "*.yaml text eol=lf",
+        "*.yml text eol=lf",
+        "*.toml text eol=lf",
+        "*.ini text eol=lf",
+        "*.cfg text eol=lf",
+        "*.txt text eol=lf",
+        "*.sh text eol=lf",
+        "*.ps1 text eol=lf",
+        ".gitattributes text eol=lf",
+        ".gitignore text eol=lf",
+    ]
+    assert attributes_bytes == ("\n".join(expected_lines) + "\n").encode("utf-8")
+    assert b"\xef\xbb\xbf" not in attributes_bytes
+    assert b"* text=auto" not in attributes_bytes
+    assert reliability.profile_bytes(attributes_bytes).terminal_newline_kind == "LF"
+    assert reliability.MANAGED_TEXT_SUFFIXES == frozenset(
+        {
+            ".py",
+            ".pyi",
+            ".md",
+            ".json",
+            ".jsonl",
+            ".yaml",
+            ".yml",
+            ".toml",
+            ".ini",
+            ".cfg",
+            ".txt",
+            ".sh",
+            ".ps1",
+        }
+    )
+    assert reliability.MANAGED_TEXT_EXACT_FILES == frozenset(
+        {".gitattributes", ".gitignore"}
+    )
+    for outside in (
+        "data.csv",
+        "data.tsv",
+        "page.xml",
+        "page.html",
+        "style.css",
+        "script.js",
+        "script.ts",
+        "notebook.ipynb",
+        "lock.lock",
+    ):
+        assert not reliability.is_managed_text_path(outside)
+    config_before = reliability.observe_git_text_config(repo_root)
+    controlled_sources = "\n".join(
+        (repo_root / path).read_text(encoding="utf-8")
+        for path in (
+            "tools/validation_reliability.py",
+            "tools/run_validation_gates.py",
+            "tools/run_pytest_fresh_basetemp.py",
+        )
+    )
+    assert "--renormalize" not in controlled_sources
+    assert "config --set" not in controlled_sources
+    assert "config --unset" not in controlled_sources
+    assert reliability.observe_git_text_config(repo_root) == config_before

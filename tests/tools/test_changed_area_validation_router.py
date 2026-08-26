@@ -3,6 +3,7 @@ from pathlib import Path
 from tools import run_validation_gates as runner
 from tools import validation_inventory as inventory
 from tools import changed_area_validation_router as router
+from tools import ci_branch_context as context
 from tools.changed_area_validation_router import (
     RouterInput,
     build_router_result,
@@ -527,3 +528,19 @@ def test_st12h_exact_paths_route_required_validators_and_protect_predecessors() 
     assert protected.fail_closed_reasons == (
         f"ST12H_READ_ONLY_PREDECESSOR_CHANGED: {protected_path}",
     )
+
+    engvr = build_router_result(
+        RouterInput(
+            repo_root=REPO_ROOT,
+            changed_files=tuple(sorted(context.ENGVR_CHANGED_PATHS)),
+            workflow_event_name="pull_request",
+            is_pull_request=True,
+            current_branch=context.ENGVR_IMPLEMENTATION_BRANCH,
+        )
+    )
+    assert engvr.full_validation_required is True
+    assert engvr.unknown_files == ()
+    assert engvr.skipped_validators == ()
+    assert engvr.fail_closed_reasons == ()
+    assert set(engvr.classified_files) == set(context.ENGVR_CHANGED_PATHS)
+    assert all(engvr.classified_files[path] for path in context.ENGVR_CHANGED_PATHS)

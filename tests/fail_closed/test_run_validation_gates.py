@@ -1,10 +1,14 @@
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
 import tempfile
+import time
+from dataclasses import replace
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -165,6 +169,7 @@ from tools import (
     validate_pr137_launch_readiness_dependency_controller as pr137_dependency_controller_gate,
 )
 from tools import run_validation_gates as runner
+from tools import validation_reliability as reliability
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -180,11 +185,129 @@ BRANCH_CONTEXT_ENV = (
     "GITHUB_REF_NAME",
     "GITHUB_HEAD_REF",
 )
+_PRODUCTION_TEXT_INTEGRITY_PREFLIGHT = (
+    runner._validation_text_integrity_preflight
+)
 
 
 def _clear_branch_context_env(monkeypatch):
     for env_name in BRANCH_CONTEXT_ENV:
         monkeypatch.delenv(env_name, raising=False)
+
+
+@pytest.fixture(autouse=True)
+def _central_supervision_test_adapter(monkeypatch, tmp_path):
+    def make_paths(label: str):
+        process_root = tmp_path / f"process-root-{label}"
+        validation_root = process_root / reliability.VALIDATION_OUTPUT_DIR_NAME
+        pytest_root = process_root / reliability.PYTEST_BASETEMP_DIR_NAME
+        evidence_root = tmp_path / f"evidence-{label}"
+        validation_root.mkdir(parents=True, exist_ok=True)
+        pytest_root.mkdir(parents=True, exist_ok=True)
+        evidence_root.mkdir(parents=True, exist_ok=True)
+        return SimpleNamespace(
+            run_id=f"run_test_supervision_{label}",
+            repo_root=runner.REPO_ROOT,
+            process_root=process_root,
+            validation_output_root=validation_root,
+            pytest_basetemp_root=pytest_root,
+            evidence_root=evidence_root,
+            cleanup_target=process_root,
+        )
+
+    paths = make_paths("active")
+    resolve_count = 0
+
+    def fake_resolve(repo_root, **_kwargs):
+        nonlocal resolve_count
+        resolve_count += 1
+        resolved_paths = make_paths(str(resolve_count))
+        resolved_paths.repo_root = Path(repo_root)
+        return resolved_paths, SimpleNamespace(failure_operation=None)
+
+    def fake_supervise(command, **kwargs):
+        started = runner.time.perf_counter()
+        timeout_seconds = kwargs.get("timeout_seconds")
+        required_markers = tuple(kwargs.get("required_markers", ()))
+        try:
+            if timeout_seconds is None:
+                completed = runner.subprocess.run(list(command))
+            else:
+                completed = runner.subprocess.run(
+                    list(command),
+                    capture_output=True,
+                    text=True,
+                    timeout=timeout_seconds,
+                )
+        except subprocess.TimeoutExpired:
+            return SimpleNamespace(
+                command_index=kwargs["command_index"],
+                elapsed_monotonic_seconds=runner.time.perf_counter() - started,
+                native_exit_code=124,
+                failure_class="ENGVR_PROCESS_TIMEOUT",
+                stdout_marker_state="NOT_EVALUATED_TIMEOUT",
+                pid=4321,
+            )
+        stdout = str(getattr(completed, "stdout", "") or "")
+        stderr = str(getattr(completed, "stderr", "") or "")
+        if stdout:
+            print(stdout, end="", flush=True)
+        if stderr:
+            print(stderr, end="", file=sys.stderr, flush=True)
+        missing = runner._st12h_missing_terminal_markers(
+            stdout,
+            required_markers,
+        )
+        native_exit = int(completed.returncode)
+        failure_class = (
+            "ENGVR_NATIVE_EXIT_NONZERO"
+            if native_exit != 0
+            else "ENGVR_REQUIRED_MARKER_MISSING"
+            if missing
+            else None
+        )
+        return SimpleNamespace(
+            command_index=kwargs["command_index"],
+            elapsed_monotonic_seconds=runner.time.perf_counter() - started,
+            native_exit_code=native_exit,
+            failure_class=failure_class,
+            stdout_marker_state=(
+                "NOT_REQUIRED"
+                if not required_markers
+                else "PASS"
+                if not missing
+                else "MISSING:" + ",".join(missing)
+            ),
+            pid=4321,
+        )
+
+    monkeypatch.setattr(runner, "resolve_validation_run_paths", fake_resolve)
+    monkeypatch.setattr(runner, "_RUN_COMMANDS_ACTIVE_PATHS", paths)
+    monkeypatch.setattr(runner, "_ACTIVE_SEMANTIC_CHANGED_PATHS", None)
+    monkeypatch.setattr(runner, "_ACTIVE_CLASSIFIED_CHANGED_PATHS", None)
+    monkeypatch.setattr(runner, "write_run_provenance", lambda *args, **kwargs: None)
+    monkeypatch.setattr(
+        runner,
+        "_validation_text_integrity_preflight",
+        lambda _repo_root: ((), (), None),
+    )
+    monkeypatch.setattr(
+        runner,
+        "cleanup_validation_run",
+        lambda _paths: "PASS_REMOVED_EXACT_RUN_ROOT",
+    )
+    monkeypatch.setattr(runner, "atomic_write_json", lambda *args, **kwargs: None)
+    monkeypatch.setattr(
+        runner,
+        "validate_complete_run_evidence",
+        lambda *args, **kwargs: None,
+    )
+    monkeypatch.setattr(
+        runner,
+        "validate_published_completion_receipt",
+        lambda *args, **kwargs: None,
+    )
+    monkeypatch.setattr(runner, "_execute_supervised_command", fake_supervise)
 
 
 def _st12h_mock_terminal_output(command: list[str]) -> str:
@@ -193,6 +316,332 @@ def _st12h_mock_terminal_output(command: list[str]) -> str:
         return ""
     _timeout, markers = contract
     return "" if not markers else "\n".join(markers) + "\n"
+
+
+def _record_fake_aggregate_success_receipts(commands) -> None:
+    runner._LAST_PLANNED_COMMAND_COUNT = len(commands)
+    runner._LAST_COMMAND_RECEIPTS = tuple(
+        SimpleNamespace(
+            command_index=index,
+            pid=4321,
+            native_exit_code=0,
+            failure_class=None,
+            stdout_marker_state="PASS",
+        )
+        for index, _command in enumerate(commands, start=1)
+    )
+
+
+def _assert_generic_text_preflight_and_scope_matrix(monkeypatch) -> None:
+    from tools import changed_area_validation_router as router
+    from tools import validation_scope_registry as scope_registry
+
+    registered_path = (
+        "src/qtt/stage1_prediction_markets/"
+        "pr168_gfp_real_computation/pnl.py"
+    )
+    semantic_record = reliability.classify_byte_surfaces(
+        path=registered_path,
+        baseline_bytes=b"old\n",
+        index_bytes=b"new\n",
+        worktree_bytes=b"new\n",
+        authorized=False,
+    )
+    representation_record = reliability.classify_byte_surfaces(
+        path="representation.py",
+        baseline_bytes=b"same\n",
+        index_bytes=b"same\n",
+        worktree_bytes=b"same\r\n",
+        authorized=False,
+    )
+    with monkeypatch.context() as preflight_patch:
+        preflight_patch.setattr(
+            runner,
+            "classify_repository_changes",
+            lambda _root: (semantic_record,),
+        )
+        records, failures, candidates = _PRODUCTION_TEXT_INTEGRITY_PREFLIGHT(
+            REPO_ROOT
+        )
+    assert records == (semantic_record,)
+    assert failures == ()
+    assert candidates == (registered_path,)
+    assert semantic_record.semantic_scope_member is False
+
+    with monkeypatch.context() as representation_patch:
+        representation_patch.setattr(
+            runner,
+            "classify_repository_changes",
+            lambda _root: (representation_record,),
+        )
+        _records, representation_failures, representation_candidates = (
+            _PRODUCTION_TEXT_INTEGRITY_PREFLIGHT(REPO_ROOT)
+        )
+    assert representation_candidates == ()
+    assert any(
+        failure.startswith("ENGVR_UNRELATED_TEXT_REPRESENTATION_DRIFT")
+        for failure in representation_failures
+    )
+
+    assert registered_path not in ci_branch_context.ENGVR_CHANGED_PATHS
+    assert scope_registry.is_pr_scoped_changed_path_allowed(
+        scope_registry.PR168_GFP_BRANCH,
+        registered_path,
+    )
+    registered_route = router.build_router_result(
+        router.RouterInput(
+            repo_root=REPO_ROOT,
+            changed_files=(registered_path,),
+            current_branch=scope_registry.PR168_GFP_BRANCH,
+            workflow_event_name="pull_request",
+            is_pull_request=True,
+        )
+    )
+    assert registered_route.unknown_files == ()
+    assert registered_route.fail_closed_reasons == ()
+
+    unregistered_path = "unregistered/semantic.py"
+    assert not scope_registry.is_pr_scoped_changed_path_allowed(
+        "feature/unregistered",
+        unregistered_path,
+    )
+    unregistered_route = router.build_router_result(
+        router.RouterInput(
+            repo_root=REPO_ROOT,
+            changed_files=(unregistered_path,),
+            current_branch="feature/unregistered",
+            workflow_event_name="pull_request",
+            is_pull_request=True,
+        )
+    )
+    assert unregistered_route.unknown_files == (unregistered_path,)
+    assert unregistered_route.full_validation_required is True
+
+    assert all(
+        scope_registry.is_pr_scoped_changed_path_allowed(
+            ci_branch_context.ENGVR_IMPLEMENTATION_BRANCH,
+            path,
+        )
+        for path in ci_branch_context.ENGVR_CHANGED_PATHS
+    )
+    assert not scope_registry.is_pr_scoped_changed_path_allowed(
+        ci_branch_context.ENGVR_IMPLEMENTATION_BRANCH,
+        registered_path,
+    )
+    runner_source = Path(runner.__file__).read_text(encoding="utf-8")
+    assert "ENGVR_CHANGED_PATHS as ENGVR_AUTHORIZED_PATHS" not in runner_source
+    assert "ENGVR_AUTHORIZED_PATHS" not in runner_source
+    assert "semantic_candidate_paths(records)" in runner_source
+    assert "include_authority_boundary=False" in runner_source
+
+
+def _assert_actual_runner_receipt_integration(
+    external_parent: Path,
+    monkeypatch,
+) -> None:
+    marker = "ENGVR_ACTUAL_RECEIPT_INTEGRATION_OK"
+    command = (sys.executable, "-c", f'print("{marker}")')
+    before_evidence = set(external_parent.glob("*.evidence"))
+    started = time.monotonic()
+    with monkeypatch.context() as production_path:
+        production_path.setattr(
+            runner,
+            "resolve_validation_run_paths",
+            reliability.resolve_validation_run_paths,
+        )
+        production_path.setattr(
+            runner,
+            "write_run_provenance",
+            reliability.write_run_provenance,
+        )
+        production_path.setattr(
+            runner,
+            "_execute_supervised_command",
+            reliability.supervise_command,
+        )
+        production_path.setattr(
+            runner,
+            "cleanup_validation_run",
+            reliability.cleanup_validation_run,
+        )
+        production_path.setattr(
+            runner,
+            "atomic_write_json",
+            reliability.atomic_write_json,
+        )
+        production_path.setattr(
+            runner,
+            "validate_complete_run_evidence",
+            reliability.validate_complete_run_evidence,
+        )
+        production_path.setattr(
+            runner,
+            "validate_published_completion_receipt",
+            reliability.validate_published_completion_receipt,
+        )
+        assert runner.resolve_validation_run_paths is (
+            reliability.resolve_validation_run_paths
+        )
+        assert runner.write_run_provenance is reliability.write_run_provenance
+        assert runner._execute_supervised_command is reliability.supervise_command
+        assert runner.cleanup_validation_run is reliability.cleanup_validation_run
+        assert runner.atomic_write_json is reliability.atomic_write_json
+        assert runner.validate_complete_run_evidence is (
+            reliability.validate_complete_run_evidence
+        )
+        assert runner.validate_published_completion_receipt is (
+            reliability.validate_published_completion_receipt
+        )
+        run_paths, probe = runner.resolve_validation_run_paths(
+            REPO_ROOT,
+            explicit_process_root=external_parent,
+            projected_relative_paths=("command-1.stdout.bin",),
+        )
+        runner.write_run_provenance(
+            run_paths,
+            probe,
+            phase=runner.FAST_PREFLIGHT_PHASE,
+            command_count=1,
+            text_integrity_preflight_state="PASS",
+        )
+        receipt = runner._execute_supervised_command(
+            command,
+            cwd=REPO_ROOT,
+            run_id=run_paths.run_id,
+            phase=runner.FAST_PREFLIGHT_PHASE,
+            command_index=1,
+            evidence_root=run_paths.evidence_root,
+            required_markers=(marker,),
+            timeout_seconds=180,
+            environment=os.environ,
+        )
+        result, cleanup_state, completion = runner._finalize_validation_run(
+            run_paths=run_paths,
+            probe=probe,
+            phase=runner.FAST_PREFLIGHT_PHASE,
+            planned_count=1,
+            expected_plan=reliability.build_command_evidence_plan(
+                run_id=run_paths.run_id,
+                phase=runner.FAST_PREFLIGHT_PHASE,
+                commands=(command,),
+                cwd=REPO_ROOT,
+            ),
+            receipts=(receipt,),
+            result=0,
+            text_state="PASS",
+        )
+    elapsed = time.monotonic() - started
+    assert result == 0
+    assert elapsed < 180
+    print(f"ENGVR_ACTUAL_RECEIPT_INTEGRATION_ELAPSED_SECONDS={elapsed:.6f}")
+    created_evidence = set(external_parent.glob("*.evidence")) - before_evidence
+    assert len(created_evidence) == 1
+    evidence_root = created_evidence.pop()
+    run_payload = json.loads(
+        (evidence_root / "run.json").read_text(encoding="utf-8")
+    )
+    completion_payload = json.loads(
+        (evidence_root / "completion.json").read_text(encoding="utf-8")
+    )
+    cleanup_payload = json.loads(
+        (evidence_root / "cleanup.json").read_text(encoding="utf-8")
+    )
+    command_payload = json.loads(
+        (evidence_root / "command-1.json").read_text(encoding="utf-8")
+    )
+    assert run_payload["command_count"] == 1
+    assert run_payload["filesystem_probe"]["failure_operation"] is None
+    assert completion_payload["command_count_planned"] == 1
+    assert completion_payload["command_count_started"] == 1
+    assert completion_payload["command_count_completed"] == 1
+    assert completion_payload["required_marker_state"] == "PASS"
+    assert completion_payload["evidence_root_state"] == "PRESENT"
+    assert command_payload["argv"] == list(command)
+    assert command_payload["pid"] == receipt.pid
+    assert command_payload["pid"] > 0
+    assert command_payload["native_exit_code"] == 0
+    assert command_payload["stdout_required_markers"] == [marker]
+    assert command_payload["stdout_marker_state"] == "PASS"
+    assert marker.encode("utf-8") in (
+        evidence_root / "command-1.stdout.bin"
+    ).read_bytes()
+    assert completion_payload["final_state"] == "PASS"
+    assert completion_payload["text_integrity_preflight_state"] == "PASS"
+    assert cleanup_payload["cleanup_state"].startswith("PASS")
+    assert cleanup_state.startswith("PASS")
+    assert completion.final_state == "PASS"
+    assert not Path(cleanup_payload["cleanup_target"]).exists()
+    assert run_paths.evidence_root.is_dir()
+    assert reliability.command_receipt_file_indexes(evidence_root) == (1,)
+    assert len(list(evidence_root.glob("command-*.stdout.bin"))) == 1
+    assert len(list(evidence_root.glob("command-*.stderr.bin"))) == 1
+    assert {
+        path.name for path in evidence_root.iterdir() if path.is_file()
+    } == {
+        "run.json",
+        "command-1.stdout.bin",
+        "command-1.stderr.bin",
+        "command-1.json",
+        "cleanup.json",
+        "completion.json",
+    }
+
+
+def _assert_exact_stat_command_boundary(monkeypatch, tmp_path: Path) -> None:
+    stat_only = reliability.classify_byte_surfaces(
+        path="exact-stat.py",
+        baseline_bytes=b"same\n",
+        index_bytes=b"same\n",
+        worktree_bytes=b"same\n",
+        git_status_state="DIRTY",
+        authorized=True,
+    )
+    semantic = reliability.classify_byte_surfaces(
+        path="semantic.py",
+        baseline_bytes=b"old\n",
+        index_bytes=b"new\n",
+        worktree_bytes=b"new\n",
+        git_status_state="DIRTY",
+        authorized=True,
+    )
+    exact_paths = tuple(
+        record.path
+        for record in (stat_only, semantic)
+        if record.change_class == "STAT_CACHE_ONLY_CHANGE"
+    )
+    assert exact_paths == ("exact-stat.py",)
+    refresh_calls = []
+    with monkeypatch.context() as refresh_patch:
+        refresh_patch.setattr(
+            reliability.subprocess,
+            "run",
+            lambda command, **kwargs: refresh_calls.append((tuple(command), kwargs))
+            or subprocess.CompletedProcess(command, 0),
+        )
+        assert reliability._run_exact_stat_refresh(
+            tmp_path.resolve(),
+            exact_paths,
+            stronger=False,
+        ) == 0
+        assert reliability._run_exact_stat_refresh(
+            tmp_path.resolve(),
+            exact_paths,
+            stronger=True,
+        ) == 0
+    assert refresh_calls[0][0] == (
+        "git",
+        "update-index",
+        "--refresh",
+        "--",
+        "exact-stat.py",
+    )
+    assert refresh_calls[1][0] == (
+        "git",
+        "update-index",
+        "--really-refresh",
+        "--",
+        "exact-stat.py",
+    )
 
 
 def _env_without_pythonpath() -> dict[str, str]:
@@ -474,7 +923,17 @@ def test_owner_authorized_validation_phase_omits_no_validator(tmp_path):
         assert "validate_pr169_readiness1.py" in kept_name_set
 
 
-def test_run_validation_gates_direct_script_imports_router_without_pythonpath():
+def test_run_validation_gates_direct_script_imports_router_without_pythonpath(
+    monkeypatch,
+    tmp_path,
+):
+    external_parent = (tmp_path / "actual-runner-process-parent").resolve()
+    environment = _env_without_pythonpath()
+    environment[reliability.PROCESS_ROOT_ENV] = str(external_parent)
+    environment.pop(reliability.RUN_ID_ENV, None)
+    environment.pop(reliability.EVIDENCE_ROOT_ENV, None)
+    for env_name in BRANCH_CONTEXT_ENV:
+        environment.pop(env_name, None)
     completed = subprocess.run(
         [
             sys.executable,
@@ -488,7 +947,7 @@ def test_run_validation_gates_direct_script_imports_router_without_pythonpath():
             "docs/master_plan/generated/UnownedGeneratedReport.report.json",
         ],
         cwd=REPO_ROOT,
-        env=_env_without_pythonpath(),
+        env=environment,
         capture_output=True,
         text=True,
         timeout=60,
@@ -499,6 +958,8 @@ def test_run_validation_gates_direct_script_imports_router_without_pythonpath():
     assert "GENERATED_REPORT_OWNER_MISSING" in combined_output
     assert "ModuleNotFoundError" not in combined_output
     assert "No module named 'tools'" not in combined_output
+    _assert_generic_text_preflight_and_scope_matrix(monkeypatch)
+    _assert_actual_runner_receipt_integration(external_parent, monkeypatch)
 
 
 def test_validate_validation_inventory_direct_script_imports_pr208_modules_without_pythonpath():
@@ -5631,6 +6092,7 @@ def test_validation_workspace_output_path_uses_exact_cross_platform_boundary():
 def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_pytest(
     monkeypatch,
     capsys,
+    tmp_path,
 ):
     class Completed:
         def __init__(
@@ -5696,7 +6158,12 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
         lambda command, repo_root: [],
     )
 
-    exit_code = runner.run_commands(commands, repo_root=Path("repo-root"))
+    repo_root = tmp_path / "repo-root"
+    repo_root.mkdir()
+    assert repo_root.is_absolute()
+    assert repo_root.is_dir()
+    assert not (repo_root / ".git").exists()
+    exit_code = runner.run_commands(commands, repo_root=repo_root)
 
     ls_files_event = ("git", ["ls-files", "-m"])
     restore_event = (
@@ -11698,6 +12165,8 @@ def test_runner_returns_zero_when_all_mocked_commands_pass(monkeypatch, capsys):
             self.stderr = stderr
 
     seen: list[list[str]] = []
+    provenance_counts: list[int] = []
+    completion_receipts = []
 
     def fake_run(command: list[str], **kwargs) -> Completed:
         if command[0] == "git":
@@ -11706,6 +12175,20 @@ def test_runner_returns_zero_when_all_mocked_commands_pass(monkeypatch, capsys):
         return Completed(stdout=_st12h_mock_terminal_output(command))
 
     monkeypatch.setattr(runner.subprocess, "run", fake_run)
+    monkeypatch.setattr(
+        runner,
+        "write_run_provenance",
+        lambda _paths, _probe, **kwargs: provenance_counts.append(
+            kwargs["command_count"]
+        ),
+    )
+    monkeypatch.setattr(
+        runner,
+        "atomic_write_json",
+        lambda path, payload: completion_receipts.append(payload)
+        if Path(path).name == "completion.json"
+        else None,
+    )
     monkeypatch.setattr(
         runner,
         "_routed_generated_output_currentness_failures",
@@ -11717,7 +12200,7 @@ def test_runner_returns_zero_when_all_mocked_commands_pass(monkeypatch, capsys):
     assert exit_code == 0
     validation_dir = _validation_dir_from_commands(seen)
     pytest_basetemp = _pytest_basetemp_from_commands(seen)
-    assert pytest_basetemp.name.startswith("run_validation_gates_pytest_")
+    assert pytest_basetemp.name == reliability.PYTEST_BASETEMP_DIR_NAME
     expected = [
         runner._execution_command_with_qku_root_importlib(
             runner._execution_command_with_st12g_architecture_roster(command)
@@ -11742,6 +12225,9 @@ def test_runner_returns_zero_when_all_mocked_commands_pass(monkeypatch, capsys):
     )
     assert architecture_command in seen
     assert subprocess.list2cmdline(architecture_command) in output
+    assert provenance_counts == [completion_receipts[-1].command_count_planned]
+    assert completion_receipts[-1].command_count_started == provenance_counts[0]
+    assert completion_receipts[-1].command_count_completed == provenance_counts[0]
 
 
 def test_runner_sets_run_local_no_runtime_scan_cache_env(monkeypatch):
@@ -11764,14 +12250,15 @@ def test_runner_sets_run_local_no_runtime_scan_cache_env(monkeypatch):
         assert cache_text is not None
         cache_path = Path(cache_text)
         assert cache_path.name == "NoRuntimeArtifactScanCache.json"
-        assert cache_path.parent.name.startswith("qtt_validation_gates_")
+        assert cache_path.parent.name == reliability.VALIDATION_OUTPUT_DIR_NAME
         cache_paths.append(cache_path)
         pr152_cache_text = os.environ.get(runner.PR152_BUILD_REPORT_CACHE_ENV)
         assert pr152_cache_text is not None
         pr152_cache_path = Path(pr152_cache_text)
         assert pr152_cache_path.name == "PR152BuildReportCache.json"
-        assert pr152_cache_path.parent.name.startswith("qtt_validation_gates_")
+        assert pr152_cache_path.parent.name == reliability.VALIDATION_OUTPUT_DIR_NAME
         pr152_cache_paths.append(pr152_cache_path)
+        _record_fake_aggregate_success_receipts(commands)
         return 0
 
     monkeypatch.setattr(runner, "_repo_root", lambda: repo_root)
@@ -11804,6 +12291,7 @@ def test_runner_preserves_explicit_no_runtime_scan_cache_env(monkeypatch):
         **kwargs,
     ) -> int:
         seen.append(os.environ[runner.NO_RUNTIME_ARTIFACT_SCAN_CACHE_ENV])
+        _record_fake_aggregate_success_receipts(commands)
         return 0
 
     monkeypatch.setattr(runner, "_repo_root", lambda: repo_root)
@@ -11835,6 +12323,7 @@ def test_runner_preserves_explicit_pr152_build_report_cache_env(monkeypatch):
         **kwargs,
     ) -> int:
         seen.append(os.environ[runner.PR152_BUILD_REPORT_CACHE_ENV])
+        _record_fake_aggregate_success_receipts(commands)
         return 0
 
     monkeypatch.setattr(runner, "_repo_root", lambda: repo_root)
@@ -12119,7 +12608,7 @@ def test_runner_pr152_build_report_cache_rejects_repo_root_path(
         runner.build_pr152_report_with_run_cache(repo_root, lambda root: {})
 
 
-def test_runner_creates_tmp_parent_before_running_commands(monkeypatch, capsys):
+def test_runner_keeps_process_roots_external_to_repo(monkeypatch, capsys):
     _clear_branch_context_env(monkeypatch)
 
     class Completed:
@@ -12135,7 +12624,8 @@ def test_runner_creates_tmp_parent_before_running_commands(monkeypatch, capsys):
     seen: list[list[str]] = []
 
     def fake_run(command: list[str], **kwargs) -> Completed:
-        assert tmp_parent.is_dir()
+        assert not tmp_parent.exists()
+        assert runner._RUN_COMMANDS_ACTIVE_PATHS.process_root.is_dir()
         if command[0] == "git":
             return Completed()
         seen.append(command)
@@ -12157,9 +12647,9 @@ def test_runner_creates_tmp_parent_before_running_commands(monkeypatch, capsys):
         assert exit_code == 0
         assert seen
         pytest_basetemp = _pytest_basetemp_from_commands(seen)
-        assert tmp_parent.is_dir()
+        assert not tmp_parent.exists()
         assert not pytest_basetemp.is_relative_to(repo_root)
-        assert pytest_basetemp.name.startswith("run_validation_gates_pytest_")
+        assert pytest_basetemp.name == reliability.PYTEST_BASETEMP_DIR_NAME
         assert capsys.readouterr().out.splitlines()[-1] == runner.SUCCESS_MARKER
     finally:
         shutil.rmtree(repo_root, ignore_errors=True)
@@ -12180,9 +12670,10 @@ def test_runner_uses_unique_pytest_basetemp_for_each_main_run(monkeypatch):
     ) -> int:
         pytest_basetemp = _pytest_basetemp_from_commands(commands)
         assert not pytest_basetemp.is_relative_to(repo_root)
-        assert pytest_basetemp.name.startswith("run_validation_gates_pytest_")
+        assert pytest_basetemp.name == reliability.PYTEST_BASETEMP_DIR_NAME
         assert pytest_basetemp.is_dir()
         pytest_basetemps.append(pytest_basetemp)
+        _record_fake_aggregate_success_receipts(commands)
         return 0
 
     monkeypatch.setattr(runner, "_repo_root", lambda: repo_root)
@@ -12217,10 +12708,11 @@ def test_runner_does_not_touch_stale_fixed_pytest_basetemp(monkeypatch):
     ) -> int:
         pytest_basetemp = _pytest_basetemp_from_commands(commands)
         assert pytest_basetemp != stale_basetemp
-        assert pytest_basetemp.name.startswith("run_validation_gates_pytest_")
+        assert pytest_basetemp.name == reliability.PYTEST_BASETEMP_DIR_NAME
         assert stale_basetemp.is_dir()
         assert sentinel.read_text(encoding="utf-8") == "do-not-touch"
         pytest_basetemps.append(pytest_basetemp)
+        _record_fake_aggregate_success_receipts(commands)
         return 0
 
     original_cwd = Path.cwd()
@@ -12437,7 +12929,7 @@ def test_st12h_commands_use_only_existing_phases_and_one_existing_pytest_shard()
     assert workflow.count("  validation:\n") == 1
 
 
-def test_st12h_runner_enforces_exact_timeouts_one_process_and_zero_retry() -> None:
+def _assert_path_projection_contract(monkeypatch, tmp_path: Path) -> None:
     commands = runner.build_phase_commands(
         runner.ALL_PHASE,
         Path(".tmp/st12h-timeout-contract"),
@@ -12455,6 +12947,1608 @@ def test_st12h_runner_enforces_exact_timeouts_one_process_and_zero_retry() -> No
     assert runner.ST12H_MAX_CONCURRENT_VALIDATION_PROCESSES == 1
     assert runner.ST12H_AUTOMATIC_FULL_CAMPAIGN_RETRIES == 0
     assert runner.ST12H_MAX_FULL_LOCAL_CAMPAIGNS_PER_TRACKED_STATE == 1
+
+    projected_paths = runner._projected_validation_relative_paths(runner.ALL_PHASE)
+    inline_programs = {
+        str(command[index + 1])
+        for command in commands
+        for index, argument in enumerate(command[:-1])
+        if argument == "-c"
+    }
+    assert inline_programs
+    assert inline_programs.isdisjoint(projected_paths)
+    assert "command-9999.stdout.bin" in projected_paths
+    assert any(path.startswith("validation-output/") for path in projected_paths)
+    projected_run_root = tmp_path / "short-root" / "run_projection_matrix"
+    test_component, fixture_suffixes = reliability._pytest_tmp_path_budget(
+        REPO_ROOT,
+        projected_paths,
+    )
+    deepest = reliability._deepest_projection(
+        projected_run_root,
+        projected_paths,
+        repo_root=REPO_ROOT,
+    )
+    assert deepest.is_relative_to(projected_run_root)
+    deepest_relative = deepest.relative_to(projected_run_root)
+    assert deepest_relative.parts[0] == reliability.PYTEST_BASETEMP_DIR_NAME
+    assert deepest_relative.parts[1] == test_component
+    assert Path(*deepest_relative.parts[2:]) in {
+        reliability._safe_relative_projection(path) for path in fixture_suffixes
+    }
+    assert len(test_component) <= reliability.PYTEST_TMP_PATH_NAME_LIMIT + 1
+    assert max(map(len, fixture_suffixes)) >= 135
+
+    _assert_exact_stat_command_boundary(monkeypatch, tmp_path)
+
+    synthetic_repo = tmp_path / "class-projection-repo"
+    synthetic_test = synthetic_repo / "tests" / "test_class_projection.py"
+    synthetic_test.parent.mkdir(parents=True)
+    synthetic_test.write_text(
+        "class TestClassBasedProjection:\n"
+        "    def test_deep_class_fixture(self, tmp_path):\n"
+        "        target = (\n"
+        "            tmp_path\n"
+        "            / 'deep'\n"
+        "            / 'class'\n"
+        "            / 'fixture'\n"
+        "            / 'very_long_current_fixture_name.json'\n"
+        "        )\n",
+        encoding="utf-8",
+    )
+    class_component, class_suffixes = reliability._pytest_tmp_path_budget(
+        synthetic_repo,
+        ("tests/test_class_projection.py",),
+    )
+    class_suffix = "deep/class/fixture/very_long_current_fixture_name.json"
+    assert class_component == "test_deep_class_fixture0"
+    assert class_suffix in class_suffixes
+    class_process_root = tmp_path / "class-projection-root" / "r1"
+    class_process_root.mkdir(parents=True)
+    class_deepest = reliability._deepest_projection(
+        class_process_root,
+        ("tests/test_class_projection.py",),
+        repo_root=synthetic_repo,
+    )
+    assert class_deepest == (
+        class_process_root
+        / reliability.PYTEST_BASETEMP_DIR_NAME
+        / class_component
+        / reliability._safe_relative_projection(class_suffix)
+    )
+    class_probe = reliability.probe_run_filesystem(
+        class_process_root,
+        deepest_projected_path=class_deepest,
+    )
+    assert class_probe.write_path == class_deepest
+    assert class_probe.created_directory is True
+    assert class_probe.written_bytes == len(reliability.FILESYSTEM_PROBE_BYTES)
+    assert class_probe.readback_equal is True
+    assert class_probe.rename_equal is True
+    assert class_probe.unlink_success is True
+    assert class_probe.directory_cleanup_success is True
+    assert class_probe.failure_operation is None
+    assert class_probe.native_error_class is None
+    assert not any(class_process_root.iterdir())
+    class_process_root.rmdir()
+
+
+def _assert_process_supervision_contract(monkeypatch, tmp_path: Path) -> None:
+    class WindowsStartupInfo:
+        def __init__(self):
+            self.dwFlags = 0
+            self.wShowWindow = 0
+
+    with monkeypatch.context() as windows_patch:
+        windows_patch.setattr(reliability.subprocess, "CREATE_NO_WINDOW", 0x08000000, raising=False)
+        windows_patch.setattr(reliability.subprocess, "CREATE_NEW_PROCESS_GROUP", 0x00000200, raising=False)
+        windows_patch.setattr(reliability.subprocess, "STARTF_USESHOWWINDOW", 0x00000001, raising=False)
+        windows_patch.setattr(reliability.subprocess, "SW_HIDE", 0, raising=False)
+        windows_patch.setattr(reliability.subprocess, "STARTUPINFO", WindowsStartupInfo, raising=False)
+        windows_kwargs = reliability.hidden_subprocess_kwargs(platform_name="nt")
+    assert windows_kwargs["creationflags"] & 0x08000000
+    assert windows_kwargs["creationflags"] & 0x00000200
+    assert windows_kwargs["startupinfo"].dwFlags & 0x00000001
+    assert windows_kwargs["startupinfo"].wShowWindow == 0
+    posix_kwargs = reliability.hidden_subprocess_kwargs(platform_name="posix")
+    assert posix_kwargs == {"start_new_session": True}
+
+    evidence = tmp_path / "supervised-evidence"
+    pass_receipt = reliability.supervise_command(
+        (
+            sys.executable,
+            "-c",
+            "import sys;"
+            "sys.stdout.buffer.write(b'O'*200000+b'\\nREQUIRED_OK\\n');"
+            "sys.stderr.buffer.write(b'warning-only\\n'+b'E'*200000)",
+        ),
+        cwd=REPO_ROOT,
+        run_id="run_supervision_matrix",
+        phase="unit-supervision",
+        command_index=1,
+        evidence_root=evidence,
+        required_markers=("REQUIRED_OK",),
+        timeout_seconds=30,
+        mirror_stdout=False,
+        mirror_stderr=False,
+    )
+    assert isinstance(pass_receipt.pid, int) and pass_receipt.pid > 0
+    assert pass_receipt.native_exit_code == 0
+    assert pass_receipt.failure_class is None
+    assert pass_receipt.stderr_was_nonempty is True
+    assert pass_receipt.stdout_marker_state == "PASS"
+    assert pass_receipt.stdout_byte_count > 200_000
+    assert pass_receipt.stderr_byte_count > 200_000
+    assert Path(pass_receipt.stdout_path).read_bytes().endswith(b"REQUIRED_OK\n")
+
+    nonzero_receipt = reliability.supervise_command(
+        (sys.executable, "-c", "raise SystemExit(7)"),
+        cwd=REPO_ROOT,
+        run_id="run_supervision_matrix",
+        phase="unit-supervision",
+        command_index=2,
+        evidence_root=evidence,
+        mirror_stdout=False,
+        mirror_stderr=False,
+    )
+    assert nonzero_receipt.native_exit_code == 7
+    assert nonzero_receipt.failure_class == "ENGVR_NATIVE_EXIT_NONZERO"
+
+    marker_receipt = reliability.supervise_command(
+        (sys.executable, "-c", "print('ordinary output')"),
+        cwd=REPO_ROOT,
+        run_id="run_supervision_matrix",
+        phase="unit-supervision",
+        command_index=3,
+        evidence_root=evidence,
+        required_markers=("MISSING_REQUIRED",),
+        mirror_stdout=False,
+        mirror_stderr=False,
+    )
+    assert marker_receipt.native_exit_code == 0
+    assert marker_receipt.failure_class == "ENGVR_REQUIRED_MARKER_MISSING"
+
+    stderr_marker_receipt = reliability.supervise_command(
+        (sys.executable, "-c", "import sys;print('STDOUT_ONLY_OK', file=sys.stderr)"),
+        cwd=REPO_ROOT,
+        run_id="run_supervision_matrix",
+        phase="unit-supervision",
+        command_index=6,
+        evidence_root=evidence,
+        required_markers=("STDOUT_ONLY_OK",),
+        mirror_stdout=False,
+        mirror_stderr=False,
+    )
+    embedded_marker_receipt = reliability.supervise_command(
+        (sys.executable, "-c", "print('prefix EMBEDDED_MARKER suffix')"),
+        cwd=REPO_ROOT,
+        run_id="run_supervision_matrix",
+        phase="unit-supervision",
+        command_index=7,
+        evidence_root=evidence,
+        required_markers=("EMBEDDED_MARKER",),
+        mirror_stdout=False,
+        mirror_stderr=False,
+    )
+    assert stderr_marker_receipt.failure_class == "ENGVR_REQUIRED_MARKER_MISSING"
+    assert embedded_marker_receipt.failure_class == "ENGVR_REQUIRED_MARKER_MISSING"
+
+    start_receipt = reliability.supervise_command(
+        (str(tmp_path / "definitely-missing-command.exe"),),
+        cwd=REPO_ROOT,
+        run_id="run_supervision_matrix",
+        phase="unit-supervision",
+        command_index=4,
+        evidence_root=evidence,
+        mirror_stdout=False,
+        mirror_stderr=False,
+    )
+    assert start_receipt.pid is None
+    assert start_receipt.native_exit_code is None
+    assert start_receipt.start_failure_class
+    assert start_receipt.failure_class == "ENGVR_PROCESS_START_FAILED"
+
+    escalation_calls = []
+
+    class EscalationProcess:
+        pid = 24680
+        returncode = 1
+        waits = 0
+
+        def wait(self, timeout=None):
+            self.waits += 1
+            if self.waits == 1:
+                raise subprocess.TimeoutExpired("owned", timeout)
+            return self.returncode
+
+    with monkeypatch.context() as escalation_patch:
+        escalation_patch.setattr(
+            reliability,
+            "_hidden_taskkill",
+            lambda argv: escalation_calls.append(tuple(argv)) or 0,
+        )
+        termination_state, terminal = reliability._terminate_owned_process_tree(
+            EscalationProcess(),
+            platform_name="nt",
+            grace_seconds=0.01,
+        )
+    assert terminal is True
+    assert termination_state.endswith("TERMINAL:PROVEN")
+    assert escalation_calls == [
+        ("taskkill.exe", "/PID", "24680", "/T"),
+        ("taskkill.exe", "/PID", "24680", "/T", "/F"),
+    ]
+
+    pid_file = tmp_path / "owned-tree-pids.txt"
+    tree_script = (
+        "import os,pathlib,subprocess,sys,time;"
+        "child=subprocess.Popen([sys.executable,'-c','import time;time.sleep(60)']);"
+        f"pathlib.Path({str(pid_file)!r}).write_text(str(os.getpid())+','+str(child.pid));"
+        "time.sleep(60)"
+    )
+    sibling = subprocess.Popen(
+        (sys.executable, "-c", "import time;time.sleep(60)"),
+        shell=False,
+        stdin=subprocess.DEVNULL,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        **reliability.hidden_subprocess_kwargs(platform_name=os.name),
+    )
+    try:
+        timeout_receipt = reliability.supervise_command(
+            (sys.executable, "-c", tree_script),
+            cwd=REPO_ROOT,
+            run_id="run_supervision_matrix",
+            phase="unit-supervision",
+            command_index=5,
+            evidence_root=evidence,
+            timeout_seconds=1,
+            termination_grace_seconds=2,
+            mirror_stdout=False,
+            mirror_stderr=False,
+        )
+        assert timeout_receipt.failure_class == "ENGVR_PROCESS_TIMEOUT"
+        assert timeout_receipt.timeout_state == "TRIGGERED"
+        assert "TERMINAL:PROVEN" in timeout_receipt.termination_state
+        assert sibling.poll() is None
+        root_pid, descendant_pid = (
+            int(value) for value in pid_file.read_text(encoding="utf-8").split(",")
+        )
+        for owned_pid in (root_pid, descendant_pid):
+            terminal = False
+            for _attempt in range(100):
+                if os.name == "nt":
+                    tasklist = subprocess.run(
+                        ("tasklist.exe", "/FI", f"PID eq {owned_pid}", "/FO", "CSV", "/NH"),
+                        capture_output=True,
+                        text=True,
+                        check=False,
+                    )
+                    terminal = f'"{owned_pid}"' not in tasklist.stdout
+                else:
+                    proc_stat = Path(f"/proc/{owned_pid}/stat")
+                    if not proc_stat.exists():
+                        terminal = True
+                    else:
+                        fields = proc_stat.read_text(encoding="utf-8").split()
+                        terminal = len(fields) > 2 and fields[2] == "Z"
+                if terminal:
+                    break
+                time.sleep(0.05)
+            assert terminal
+    finally:
+        if sibling.poll() is None:
+            sibling.terminate()
+        sibling.wait(timeout=10)
+
+def _assert_mirror_isolation_contract(monkeypatch, tmp_path: Path) -> None:
+    marker = "MIRROR_OK"
+    intended_bytes = 300_000 + 1 + len(marker.encode("utf-8")) + 1
+    mirror_calls = []
+
+    def broken_mirror(_data, _target):
+        mirror_calls.append("write")
+        raise BrokenPipeError("synthetic broken console mirror")
+
+    mirror_evidence = tmp_path / "mirror-isolation-evidence"
+    with monkeypatch.context() as mirror_patch:
+        mirror_patch.setattr(reliability, "_mirror_bytes", broken_mirror)
+        receipt = reliability.supervise_command(
+            (
+                sys.executable,
+                "-c",
+                "import sys;"
+                "sys.stdout.buffer.write(b'M'*300000+b'\\nMIRROR_OK\\n');"
+                "sys.stdout.buffer.flush()",
+            ),
+            cwd=REPO_ROOT,
+            run_id="run_mirror_isolation",
+            phase="unit-supervision",
+            command_index=1,
+            evidence_root=mirror_evidence,
+            required_markers=(marker,),
+            timeout_seconds=30,
+            mirror_stdout=True,
+            mirror_stderr=False,
+        )
+    assert mirror_calls == ["write"]
+    assert receipt.native_exit_code == 0
+    assert receipt.stdout_byte_count == intended_bytes
+    assert Path(receipt.stdout_path).stat().st_size == intended_bytes
+    assert receipt.stdout_marker_state == "PASS"
+    assert receipt.failure_class is None
+
+
+def _assert_descriptor_ownership_and_drain_contract(monkeypatch, tmp_path: Path) -> None:
+    evidence_root = tmp_path / "descriptor-ownership-evidence"
+    writer_entered = reliability.threading.Event()
+    writer_release = reliability.threading.Event()
+    result: dict[str, object] = {}
+    real_write_chunk = reliability._write_evidence_chunk
+
+    def blocked_writer(stream, data):
+        if (
+            Path(stream.name).name == "command-1.stdout.bin"
+            and not writer_entered.is_set()
+        ):
+            writer_entered.set()
+            assert writer_release.wait(timeout=30)
+        return real_write_chunk(stream, data)
+
+    def run_supervisor():
+        result["receipt"] = reliability.supervise_command(
+            (
+                sys.executable,
+                "-c",
+                "import sys;"
+                "sys.stdout.buffer.write(b'D'*50000);"
+                "sys.stdout.buffer.flush()",
+            ),
+            cwd=REPO_ROOT,
+            run_id="run_descriptor_ownership",
+            phase="unit-supervision",
+            command_index=1,
+            evidence_root=evidence_root,
+            timeout_seconds=30,
+            mirror_stdout=False,
+            mirror_stderr=False,
+        )
+
+    with monkeypatch.context() as descriptor_patch:
+        descriptor_patch.setattr(
+            reliability,
+            "_write_evidence_chunk",
+            blocked_writer,
+        )
+        supervisor = reliability.threading.Thread(
+            target=run_supervisor,
+            name="engvr-descriptor-ownership-supervisor",
+        )
+        supervisor.start()
+        assert writer_entered.wait(timeout=10)
+        assert not (evidence_root / "command-1.json").exists()
+        sentinel_paths = tuple(
+            tmp_path / f"descriptor-sentinel-{index}.bin" for index in range(3)
+        )
+        sentinel_descriptors = tuple(
+            os.open(
+                path,
+                os.O_RDWR | os.O_CREAT | os.O_EXCL | int(getattr(os, "O_BINARY", 0)),
+            )
+            for path in sentinel_paths
+        )
+        for descriptor in sentinel_descriptors:
+            os.write(descriptor, b"before-release\n")
+        time.sleep(reliability.OUTPUT_DRAIN_INITIAL_WAIT_SECONDS + 0.2)
+        assert supervisor.is_alive()
+        assert not (evidence_root / "command-1.json").exists()
+        writer_release.set()
+        supervisor.join(timeout=30)
+        assert not supervisor.is_alive()
+    for descriptor in sentinel_descriptors:
+        os.write(descriptor, b"after-release\n")
+        os.fsync(descriptor)
+        os.close(descriptor)
+    for path in sentinel_paths:
+        assert path.read_bytes() == b"before-release\nafter-release\n"
+    descriptor_receipt = result["receipt"]
+    assert isinstance(descriptor_receipt, reliability.CommandExecutionReceiptV1)
+    assert descriptor_receipt.native_exit_code == 0
+    assert descriptor_receipt.failure_class is None
+    assert descriptor_receipt.stdout_byte_count == 50_000
+    assert not any(
+        worker.is_alive()
+        and worker.name.startswith(
+            ("qtt-validation-stdout-", "qtt-validation-stderr-")
+        )
+        for worker in reliability.threading.enumerate()
+    )
+    reliability_source = Path(reliability.__file__).read_text(encoding="utf-8")
+    assert "_close_owned_pipe_read_handle" not in reliability_source
+    assert "os.close(pipe.fileno())" not in reliability_source
+
+
+def _assert_output_drain_terminality_contract(monkeypatch, tmp_path: Path) -> None:
+    def matching_drain_workers(pid: int):
+        names = {
+            f"qtt-validation-stdout-{pid}",
+            f"qtt-validation-stderr-{pid}",
+        }
+        return tuple(
+            worker
+            for worker in reliability.threading.enumerate()
+            if worker.is_alive() and worker.name in names
+        )
+
+    slow_evidence = tmp_path / "slow-output-drain"
+    slow_intended_bytes = 50_000
+    real_write_chunk = reliability._write_evidence_chunk
+    delayed_writes = []
+
+    def delayed_stdout_write(stream, data):
+        if (
+            Path(stream.name).name == "command-1.stdout.bin"
+            and not delayed_writes
+        ):
+            delayed_writes.append(len(data))
+            time.sleep(2.0)
+        return real_write_chunk(stream, data)
+
+    assert reliability.OUTPUT_DRAIN_INITIAL_WAIT_SECONDS < 2.0
+    started = time.monotonic()
+    with monkeypatch.context() as slow_patch:
+        slow_patch.setattr(
+            reliability,
+            "_write_evidence_chunk",
+            delayed_stdout_write,
+        )
+        slow_receipt = reliability.supervise_command(
+            (
+                sys.executable,
+                "-c",
+                "import sys;"
+                "sys.stdout.buffer.write(b'S'*50000);"
+                "sys.stdout.buffer.flush()",
+            ),
+            cwd=REPO_ROOT,
+            run_id="run_slow_output_drain",
+            phase="unit-supervision",
+            command_index=1,
+            evidence_root=slow_evidence,
+            timeout_seconds=30,
+            mirror_stdout=False,
+            mirror_stderr=False,
+        )
+    slow_elapsed = time.monotonic() - started
+    slow_stdout_path = Path(slow_receipt.stdout_path)
+    slow_stderr_path = Path(slow_receipt.stderr_path)
+    slow_command_path = slow_evidence / "command-1.json"
+    slow_stable_bytes = {
+        path: path.read_bytes()
+        for path in (slow_stdout_path, slow_stderr_path, slow_command_path)
+    }
+    assert delayed_writes
+    assert slow_elapsed >= 1.8
+    assert slow_receipt.pid is not None
+    assert slow_receipt.native_exit_code == 0
+    assert slow_receipt.failure_class is None
+    assert "OUTPUT_DRAIN" not in slow_receipt.termination_state
+    assert slow_receipt.stdout_byte_count == slow_intended_bytes
+    assert slow_stdout_path.stat().st_size == slow_intended_bytes
+    assert matching_drain_workers(slow_receipt.pid) == ()
+    time.sleep(0.2)
+    assert {
+        path: path.read_bytes()
+        for path in (slow_stdout_path, slow_stderr_path, slow_command_path)
+    } == slow_stable_bytes
+    assert matching_drain_workers(slow_receipt.pid) == ()
+
+    raw_failure_evidence = tmp_path / "raw-evidence-failure"
+    raw_marker = "RAW_EVIDENCE_OK"
+    raw_intended_bytes = 350_000 + 1 + len(raw_marker.encode("utf-8")) + 1
+    failed_writes = []
+
+    def fail_stdout_evidence(stream, data):
+        if Path(stream.name).name == "command-1.stdout.bin":
+            failed_writes.append(len(data))
+            raise OSError("synthetic raw evidence write failure")
+        return real_write_chunk(stream, data)
+
+    with monkeypatch.context() as evidence_patch:
+        evidence_patch.setattr(
+            reliability,
+            "_write_evidence_chunk",
+            fail_stdout_evidence,
+        )
+        raw_failure_receipt = reliability.supervise_command(
+            (
+                sys.executable,
+                "-c",
+                "import sys;"
+                "sys.stdout.buffer.write(b'R'*350000+b'\\nRAW_EVIDENCE_OK\\n');"
+                "sys.stdout.buffer.flush()",
+            ),
+            cwd=REPO_ROOT,
+            run_id="run_raw_evidence_failure",
+            phase="unit-supervision",
+            command_index=1,
+            evidence_root=raw_failure_evidence,
+            required_markers=(raw_marker,),
+            timeout_seconds=30,
+            mirror_stdout=False,
+            mirror_stderr=False,
+        )
+    assert failed_writes
+    assert raw_intended_bytes > 64 * 1024
+    assert raw_failure_receipt.pid is not None
+    assert raw_failure_receipt.native_exit_code == 0
+    raw_stdout_path = Path(raw_failure_receipt.stdout_path)
+    raw_stderr_path = Path(raw_failure_receipt.stderr_path)
+    raw_command_path = raw_failure_evidence / "command-1.json"
+    assert raw_failure_receipt.stdout_byte_count == raw_stdout_path.stat().st_size
+    assert raw_failure_receipt.failure_class == "ENGVR_ATOMIC_RECEIPT_WRITE_FAILED"
+    assert raw_failure_receipt.failure_class != "ENGVR_PROCESS_TERMINATION_FAILED"
+    assert raw_failure_receipt.stdout_marker_state == "EVIDENCE_UNAVAILABLE"
+    assert raw_failure_receipt.stdout_marker_state != "PASS"
+    assert matching_drain_workers(raw_failure_receipt.pid) == ()
+    raw_stable_bytes = {
+        path: path.read_bytes()
+        for path in (raw_stdout_path, raw_stderr_path, raw_command_path)
+    }
+    time.sleep(0.2)
+    assert {
+        path: path.read_bytes()
+        for path in (raw_stdout_path, raw_stderr_path, raw_command_path)
+    } == raw_stable_bytes
+    assert matching_drain_workers(raw_failure_receipt.pid) == ()
+
+
+def _assert_exact_marker_line_contract(tmp_path: Path) -> None:
+    marker = "REQUIRED_OK"
+    chunk_size = 64 * 1024
+    h_command = [
+        sys.executable,
+        "tools/validate_qku_computation_control_plane.py",
+        "--domain",
+        "h",
+    ]
+    assert runner._st12h_command_contract(h_command) == (
+        1200,
+        (
+            "QKU_COMPUTATION_CONTROL_PLANE_VALIDATED domain=h "
+            "contract_checks=36 golden_vectors=0",
+            "ST12H_GROUPED_MATRIX_VALIDATED functions=6 control_cases=36 "
+            "semantic_identities=42 custom_case_labels=0",
+        ),
+    )
+    domain_contracts = (
+        ("accounting", "contract_checks=16 golden_vectors=11"),
+        ("execution", "contract_checks=14 golden_vectors=2"),
+        ("llm", "contract_checks=15 golden_vectors=0"),
+        ("operations", "contract_checks=15 golden_vectors=0"),
+        ("security", "contract_checks=9 golden_vectors=0"),
+        ("source", "contract_checks=7 golden_vectors=0"),
+    )
+    for domain, contract_counts in domain_contracts:
+        command = [
+            sys.executable,
+            "tools/validate_qku_computation_control_plane.py",
+            "--domain",
+            domain,
+        ]
+        assert runner._st12h_command_contract(command) == (
+            1200,
+            (
+                "QKU_COMPUTATION_CONTROL_PLANE_VALIDATED "
+                f"domain={domain} {contract_counts}",
+            ),
+        )
+    independent_command = [
+        sys.executable,
+        "tools/independent_validate_qku_computation_control_plane.py",
+    ]
+    assert runner._st12h_command_contract(independent_command) == (
+        1800,
+        (
+            "QKU_COMPUTATION_CONTROL_PLANE_INDEPENDENTLY_VALIDATED domains=13",
+            "ST12H_MATH_40_44_INDEPENDENTLY_RECONSTRUCTED count=5",
+            "ST12H_MATH_01_52_COVERAGE_RECONSTRUCTED count=52 h_direct=5 "
+            "inherited=47 identity_only=0 unexecuted=0",
+        ),
+    )
+    accounting_command = [
+        sys.executable,
+        "tools/independent_validate_qku_computation_control_plane_accounting.py",
+    ]
+    assert runner._st12h_command_contract(accounting_command) == (
+        1200,
+        (
+            "QKU_ACCOUNTING_INDEPENDENTLY_VALIDATED controls=16 policies=80 "
+            "bindings=80 math=13 oracles=13 vectors=13 effects=0",
+        ),
+    )
+    execution_command = [
+        sys.executable,
+        "tools/independent_validate_qku_computation_control_plane_execution.py",
+    ]
+    assert runner._st12h_command_contract(execution_command) == (
+        1200,
+        (
+            "QKU_EXECUTION_INDEPENDENTLY_VALIDATED controls=9 identities=8 "
+            "gates=13 lifecycle=NO_WRITE effects=0 blockers=9",
+        ),
+    )
+    remaining_independent_contracts = (
+        (
+            "independent_validate_qku_computation_control_plane_llm.py",
+            "QKU_LLM_INDEPENDENTLY_VALIDATED checks=8 rejection_cases=9 "
+            "inference_calls=0 numeric_authority=0",
+        ),
+        (
+            "independent_validate_qku_computation_control_plane_operations.py",
+            "QKU_OPERATIONS_INDEPENDENTLY_VALIDATED operation_contracts=15 "
+            "executable_op14_checks=21 bundle_fields=30 lifecycle_transitions=6 "
+            "prohibited_transition_rejections=58 v18_integration_rows=16 "
+            "real_review_truths_reconstructed=1 canonical_math01_partition=39+9 "
+            "metric_durable_values_consumed_and_validated=38/38 "
+            "metric_values_produced_by_st12f=0",
+        ),
+        (
+            "independent_validate_qku_computation_control_plane_security.py",
+            "QKU_SECURITY_INDEPENDENTLY_VALIDATED "
+            "certified_importlib_resource_import_count=2 "
+            "other_importlib_import_count=0 dynamic_import_call_count=0",
+        ),
+        (
+            "independent_validate_qku_computation_control_plane_source.py",
+            "QKU_SOURCE_INDEPENDENTLY_VALIDATED source_rows=29 overlays=7 "
+            "binding_rules=1 v34_primary_sources=55 v34_numeric_authorities=621",
+        ),
+    )
+    for script_name, expected_marker in remaining_independent_contracts:
+        assert runner._st12h_command_contract([sys.executable, f"tools/{script_name}"]) == (
+            1200,
+            (expected_marker,),
+        )
+    positive_lines = (
+        b"REQUIRED_OK\n",
+        b"   REQUIRED_OK\n",
+        b"REQUIRED_OK   \n",
+        b"\tREQUIRED_OK\t\n",
+        b"\vREQUIRED_OK\f\r\n",
+        b"REQUIRED_OK",
+        b"REQUIRED_OK\r\n",
+        b" " * (chunk_size - 4) + b"REQUIRED_OK\n",
+    )
+    negative_lines = (
+        b"REQUIRED_OK trailing-garbage\n",
+        b"REQUIRED_OK:detail\n",
+        b"REQUIRED_OK_suffix\n",
+        b"prefix REQUIRED_OK\n",
+        b"xREQUIRED_OK\n",
+        b"REQUIRED_OK\ttrailing-garbage\n",
+        b"prefix EMBEDDED REQUIRED_OK suffix\n",
+    )
+    marker_root = tmp_path / "exact-marker-lines"
+    marker_root.mkdir()
+    for index, content in enumerate(positive_lines, start=1):
+        path = marker_root / f"positive-{index}.bin"
+        path.write_bytes(content)
+        assert reliability._file_marker_states((path,), (marker,)) == (), content
+    for index, content in enumerate(negative_lines, start=1):
+        path = marker_root / f"negative-{index}.bin"
+        path.write_bytes(content)
+        assert reliability._file_marker_states((path,), (marker,)) == (marker,), content
+
+
+def _assert_prestart_failure_custody_contract(
+    monkeypatch,
+    tmp_path: Path,
+) -> None:
+    evidence_root = tmp_path / "prestart-failure-evidence"
+    missing_cwd = (tmp_path / "missing-cwd").resolve()
+    missing_executable = str((tmp_path / "missing-executable.exe").resolve())
+    cases = (
+        ((sys.executable, "embedded\0nul"), REPO_ROOT, None, "ValueError"),
+        ((sys.executable, "-c", "pass"), REPO_ROOT, {1: "value"}, "TypeError"),
+        ((sys.executable, "-c", "pass"), REPO_ROOT, {"KEY": 1}, "TypeError"),
+        ((missing_executable,), REPO_ROOT, None, "FileNotFoundError"),
+        ((sys.executable, "-c", "pass"), missing_cwd, None, "FileNotFoundError"),
+    )
+    real_popen = reliability.subprocess.Popen
+    actual_child_starts = []
+
+    def track_successful_start(*args, **kwargs):
+        process = real_popen(*args, **kwargs)
+        actual_child_starts.append(process.pid)
+        return process
+
+    with monkeypatch.context() as start_patch:
+        start_patch.setattr(
+            reliability.subprocess,
+            "Popen",
+            track_successful_start,
+        )
+        receipts = tuple(
+            reliability.supervise_command(
+                command,
+                cwd=cwd,
+                run_id="run_prestart_failure_matrix",
+                phase="unit-prestart",
+                command_index=index,
+                evidence_root=evidence_root,
+                required_markers=("MUST_NOT_PASS",),
+                environment=environment,
+                mirror_stdout=False,
+                mirror_stderr=False,
+            )
+            for index, (command, cwd, environment, _expected_start) in enumerate(
+                cases,
+                start=1,
+            )
+        )
+    assert actual_child_starts == []
+    for receipt, (_command, _cwd, _environment, expected_start) in zip(
+        receipts,
+        cases,
+        strict=True,
+    ):
+        assert receipt.pid is None
+        assert receipt.native_exit_code is None
+        assert receipt.start_failure_class == expected_start
+        assert receipt.failure_class == "ENGVR_PROCESS_START_FAILED"
+        assert receipt.timeout_state == "NOT_CONFIGURED"
+        assert receipt.termination_state == "NOT_REQUIRED"
+        assert receipt.stdout_marker_state != "PASS"
+        assert Path(receipt.stdout_path).stat().st_size == 0
+        assert Path(receipt.stderr_path).stat().st_size == 0
+        assert json.loads(
+            (evidence_root / f"command-{receipt.command_index}.json").read_text(
+                encoding="utf-8"
+            )
+        ) == reliability._json_compatible(receipt)
+        assert reliability.command_attempt_accounting((receipt,)) == (
+            0,
+            0,
+            receipt.command_index,
+            None,
+        )
+    assert not list(evidence_root.glob(".command-*.reserve"))
+    assert not list(evidence_root.glob(".*.tmp"))
+
+    aggregate_parent = (tmp_path / "prestart-aggregate-parent").resolve()
+    aggregate_paths, aggregate_probe = reliability.resolve_validation_run_paths(
+        REPO_ROOT,
+        explicit_process_root=aggregate_parent,
+        run_id="run_prestart_aggregate",
+        projected_relative_paths=("command-1.json",),
+    )
+    aggregate_commands = (
+        (sys.executable, "embedded\0nul"),
+        (sys.executable, "-c", "print('MUST_NOT_START')"),
+    )
+    reliability.write_run_provenance(
+        aggregate_paths,
+        aggregate_probe,
+        phase=runner.FAST_PREFLIGHT_PHASE,
+        command_count=2,
+        text_integrity_preflight_state="PASS",
+    )
+    aggregate_starts = []
+
+    def track_aggregate_start(*args, **kwargs):
+        process = real_popen(*args, **kwargs)
+        aggregate_starts.append(process.pid)
+        return process
+
+    with monkeypatch.context() as aggregate_patch:
+        aggregate_patch.setattr(
+            runner,
+            "_execute_supervised_command",
+            reliability.supervise_command,
+        )
+        aggregate_patch.setattr(
+            reliability.subprocess,
+            "Popen",
+            track_aggregate_start,
+        )
+        aggregate_patch.setattr(runner, "_RUN_COMMANDS_CLEANUP_REPO_ROOT", None)
+        aggregate_result = runner.run_commands(
+            aggregate_commands,
+            phase=runner.FAST_PREFLIGHT_PHASE,
+            run_paths=aggregate_paths,
+            defer_success_markers=True,
+            execution_plan=runner._prepare_execution_plan(aggregate_commands),
+        )
+        aggregate_receipts = runner._LAST_COMMAND_RECEIPTS
+        final_result, cleanup_state, completion = runner._finalize_validation_run(
+            run_paths=aggregate_paths,
+            probe=aggregate_probe,
+            phase=runner.FAST_PREFLIGHT_PHASE,
+            planned_count=2,
+            expected_plan=runner._LAST_EXPECTED_COMMAND_PLAN,
+            receipts=aggregate_receipts,
+            result=aggregate_result,
+            text_state="PASS",
+        )
+    assert aggregate_starts == []
+    assert len(aggregate_receipts) == 1
+    assert aggregate_receipts[0].failure_class == "ENGVR_PROCESS_START_FAILED"
+    assert not (aggregate_paths.evidence_root / "command-2.json").exists()
+    assert final_result != 0
+    assert cleanup_state.startswith("PASS")
+    assert completion.command_count_started == 0
+    assert completion.command_count_completed == 0
+    assert completion.first_failed_command_index_or_null == 1
+    assert completion.final_state == "FAIL"
+
+
+def _assert_write_once_command_evidence_contract(monkeypatch, tmp_path: Path) -> None:
+    evidence_root = tmp_path / "write-once-command-evidence"
+    first_receipt = reliability.supervise_command(
+        (
+            sys.executable,
+            "-c",
+            "import sys;print('FIRST');print('FIRST-ERR', file=sys.stderr)",
+        ),
+        cwd=REPO_ROOT,
+        run_id="run_write_once_command",
+        phase="unit-supervision",
+        command_index=1,
+        evidence_root=evidence_root,
+        mirror_stdout=False,
+        mirror_stderr=False,
+    )
+    assert first_receipt.native_exit_code == 0
+    evidence_paths = tuple(
+        evidence_root / name
+        for name in (
+            "command-1.stdout.bin",
+            "command-1.stderr.bin",
+            "command-1.json",
+        )
+    )
+    first_bytes = {path: path.read_bytes() for path in evidence_paths}
+    real_popen = reliability.subprocess.Popen
+    second_starts = []
+
+    def track_second_start(*args, **kwargs):
+        second_starts.append((args, kwargs))
+        return real_popen(*args, **kwargs)
+
+    with monkeypatch.context() as duplicate_patch:
+        duplicate_patch.setattr(reliability.subprocess, "Popen", track_second_start)
+        with pytest.raises(
+            reliability.ValidationReliabilityError,
+            match="ENGVR_ATOMIC_RECEIPT_WRITE_FAILED",
+        ) as raised:
+            reliability.supervise_command(
+                (sys.executable, "-c", "print('SECOND')"),
+                cwd=REPO_ROOT,
+                run_id="run_write_once_command",
+                phase="unit-supervision",
+                command_index=1,
+                evidence_root=evidence_root,
+                mirror_stdout=False,
+                mirror_stderr=False,
+            )
+    assert raised.value.code == "ENGVR_ATOMIC_RECEIPT_WRITE_FAILED"
+    assert second_starts == []
+    assert {path: path.read_bytes() for path in evidence_paths} == first_bytes
+    assert not list(evidence_root.glob(".command-*.reserve"))
+    run_path = evidence_root / "run.json"
+    reliability.atomic_write_json(run_path, {"run": "FIRST"})
+    run_bytes = run_path.read_bytes()
+    with pytest.raises(
+        reliability.ValidationReliabilityError,
+        match="ENGVR_ATOMIC_RECEIPT_WRITE_FAILED",
+    ):
+        reliability.atomic_write_json(run_path, {"run": "SECOND"})
+    assert run_path.read_bytes() == run_bytes
+
+
+def _assert_receipt_accounting_contract(tmp_path: Path) -> None:
+    count_evidence = tmp_path / "count-evidence"
+    reliability.atomic_write_json(count_evidence / "command-1.json", {"index": 1})
+    reliability.atomic_write_json(count_evidence / "command-2.json", {"index": 2})
+    completion_path = count_evidence / "completion.json"
+    reliability.atomic_write_json(
+        completion_path,
+        reliability.ValidationCompletionReceiptV1(
+            run_id="run_supervision_matrix",
+            phase="unit-supervision",
+            command_count_planned=7,
+            command_count_started=2,
+            command_count_completed=2,
+            first_failed_command_index_or_null=2,
+            terminal_native_exit_code=7,
+            required_marker_state="FAIL",
+            process_root_cleanup_state="PENDING",
+            evidence_root_state="PRESENT",
+            text_integrity_preflight_state="PASS",
+            final_state="FAIL",
+        ),
+    )
+    assert json.loads(completion_path.read_text(encoding="utf-8"))["run_id"] == (
+        "run_supervision_matrix"
+    )
+    completion_payload = json.loads(completion_path.read_text(encoding="utf-8"))
+    assert completion_payload["command_count_started"] == 2
+    assert completion_payload["command_count_completed"] == 2
+    assert completion_payload["first_failed_command_index_or_null"] == 2
+    assert reliability.command_receipt_file_indexes(count_evidence) == (1, 2)
+    assert not list(count_evidence.glob(".completion.json.*.tmp"))
+
+def _assert_complete_terminal_evidence_contract(monkeypatch, tmp_path: Path) -> None:
+    phase = runner.FAST_PREFLIGHT_PHASE
+    marker = "COMPLETE_EVIDENCE_OK"
+    external_parent = (tmp_path / "complete-evidence-parent").resolve()
+    probes = {}
+
+    def build_case(label: str, tamper: str | None):
+        run_paths, probe = reliability.resolve_validation_run_paths(
+            REPO_ROOT,
+            explicit_process_root=external_parent,
+            run_id=f"run_complete_evidence_{label}",
+            projected_relative_paths=("command-1.stdout.bin",),
+        )
+        probes[label] = probe
+        reliability.write_run_provenance(
+            run_paths,
+            probe,
+            phase=phase,
+            command_count=1,
+            text_integrity_preflight_state="PASS",
+        )
+        command = (
+            sys.executable,
+            "-c",
+            "import sys;print('COMPLETE_EVIDENCE_OK');"
+            "print('retained-stderr', file=sys.stderr)",
+        )
+        receipt = reliability.supervise_command(
+            command,
+            cwd=REPO_ROOT,
+            run_id=run_paths.run_id,
+            phase=phase,
+            command_index=1,
+            evidence_root=run_paths.evidence_root,
+            required_markers=(marker,),
+            timeout_seconds=30,
+            mirror_stdout=False,
+            mirror_stderr=False,
+        )
+        stdout_path = run_paths.evidence_root / "command-1.stdout.bin"
+        stderr_path = run_paths.evidence_root / "command-1.stderr.bin"
+        command_path = run_paths.evidence_root / "command-1.json"
+        if tamper == "missing-run":
+            (run_paths.evidence_root / "run.json").unlink()
+        elif tamper == "missing-stdout":
+            stdout_path.unlink()
+        elif tamper == "truncated-stderr":
+            stderr_path.write_bytes(b"")
+        elif tamper == "modified-command-json":
+            payload = json.loads(command_path.read_text(encoding="utf-8"))
+            payload["phase"] = "tampered-phase"
+            command_path.write_text(
+                json.dumps(payload, sort_keys=True) + "\n",
+                encoding="utf-8",
+            )
+        elif tamper == "extra-command-artifact":
+            (run_paths.evidence_root / "command-2.json").write_text(
+                "{}\n",
+                encoding="utf-8",
+            )
+        elif tamper == "linked-stdout":
+            link_source = run_paths.evidence_root / "linked-stdout-source.bin"
+            stdout_path.replace(link_source)
+            os.link(link_source, stdout_path)
+        elif tamper == "outside-receipt-path":
+            outside_path = tmp_path / "outside-command-stdout.bin"
+            outside_path.write_bytes(stdout_path.read_bytes())
+            receipt = replace(receipt, stdout_path=str(outside_path.resolve()))
+
+        expected_plan = reliability.build_command_evidence_plan(
+            run_id=run_paths.run_id,
+            phase=phase,
+            commands=(command,),
+            cwd=REPO_ROOT,
+        )
+        if tamper in {
+            "plan-wrong-run",
+            "plan-wrong-phase",
+            "plan-wrong-argv",
+            "plan-wrong-cwd",
+        }:
+            receipt = replace(
+                receipt,
+                run_id=(
+                    "wrong_run_id"
+                    if tamper == "plan-wrong-run"
+                    else receipt.run_id
+                ),
+                phase=(
+                    "wrong-phase"
+                    if tamper == "plan-wrong-phase"
+                    else receipt.phase
+                ),
+                argv=(
+                    (sys.executable, "-c", "print('wrong argv')")
+                    if tamper == "plan-wrong-argv"
+                    else receipt.argv
+                ),
+                cwd=(
+                    str(tmp_path.resolve())
+                    if tamper == "plan-wrong-cwd"
+                    else receipt.cwd
+                ),
+            )
+            command_path.write_text(
+                json.dumps(
+                    reliability._json_compatible(receipt),
+                    sort_keys=True,
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+        elif tamper == "missing-plan-entry":
+            expected_plan = ()
+        elif tamper == "duplicate-plan-entry":
+            expected_plan = (expected_plan[0], expected_plan[0])
+
+        result, cleanup_state, completion = runner._finalize_validation_run(
+            run_paths=run_paths,
+            probe=probe,
+            phase=phase,
+            planned_count=1,
+            expected_plan=expected_plan,
+            receipts=(receipt,),
+            result=0,
+            text_state="PASS",
+        )
+        return result, cleanup_state, completion, run_paths
+
+    with monkeypatch.context() as production_patch:
+        production_patch.setattr(
+            runner,
+            "cleanup_validation_run",
+            reliability.cleanup_validation_run,
+        )
+        production_patch.setattr(
+            runner,
+            "atomic_write_json",
+            reliability.atomic_write_json,
+        )
+        production_patch.setattr(
+            runner,
+            "validate_complete_run_evidence",
+            reliability.validate_complete_run_evidence,
+        )
+        production_patch.setattr(
+            runner,
+            "validate_published_completion_receipt",
+            reliability.validate_published_completion_receipt,
+        )
+        valid_result, valid_cleanup, valid_completion, valid_paths = build_case(
+            "valid",
+            None,
+        )
+        assert valid_result == 0
+        assert valid_cleanup.startswith("PASS")
+        assert valid_completion.final_state == "PASS"
+        assert {
+            path.name for path in valid_paths.evidence_root.iterdir() if path.is_file()
+        } == {
+            "run.json",
+            "command-1.stdout.bin",
+            "command-1.stderr.bin",
+            "command-1.json",
+            "cleanup.json",
+            "completion.json",
+        }
+        completion_before = (
+            valid_paths.evidence_root / "completion.json"
+        ).read_bytes()
+        cleanup_before = (valid_paths.evidence_root / "cleanup.json").read_bytes()
+        second_result, _second_cleanup, second_completion = (
+            runner._finalize_validation_run(
+                run_paths=valid_paths,
+                probe=probes["valid"],
+                phase=phase,
+                planned_count=1,
+                expected_plan=reliability.build_command_evidence_plan(
+                    run_id=valid_paths.run_id,
+                    phase=phase,
+                    commands=((sys.executable, "-c", "unused"),),
+                    cwd=REPO_ROOT,
+                ),
+                receipts=(),
+                result=1,
+                text_state="PASS",
+            )
+        )
+        assert second_result != 0
+        assert second_completion.final_state == "FAIL"
+        assert (valid_paths.evidence_root / "completion.json").read_bytes() == (
+            completion_before
+        )
+        assert (valid_paths.evidence_root / "cleanup.json").read_bytes() == cleanup_before
+
+        for label, tamper in (
+            ("missing_run", "missing-run"),
+            ("missing_stdout", "missing-stdout"),
+            ("truncated_stderr", "truncated-stderr"),
+            ("modified_command", "modified-command-json"),
+            ("extra_command", "extra-command-artifact"),
+            ("linked_stdout", "linked-stdout"),
+            ("outside_path", "outside-receipt-path"),
+            ("wrong_run", "plan-wrong-run"),
+            ("wrong_phase", "plan-wrong-phase"),
+            ("wrong_argv", "plan-wrong-argv"),
+            ("wrong_cwd", "plan-wrong-cwd"),
+            ("missing_plan", "missing-plan-entry"),
+            ("duplicate_plan", "duplicate-plan-entry"),
+        ):
+            failed_result, failed_cleanup, failed_completion, _failed_paths = (
+                build_case(label, tamper)
+            )
+            assert failed_result != 0
+            assert failed_cleanup.startswith("PASS")
+            assert failed_completion.final_state == "FAIL"
+
+        reordered_paths, reordered_probe = reliability.resolve_validation_run_paths(
+            REPO_ROOT,
+            explicit_process_root=external_parent,
+            run_id="run_complete_evidence_reordered",
+            projected_relative_paths=("command-2.stdout.bin",),
+        )
+        reordered_commands = (
+            (sys.executable, "-c", "print('ONE')"),
+            (sys.executable, "-c", "print('TWO')"),
+        )
+        reliability.write_run_provenance(
+            reordered_paths,
+            reordered_probe,
+            phase=phase,
+            command_count=2,
+            text_integrity_preflight_state="PASS",
+        )
+        reordered_receipts = tuple(
+            reliability.supervise_command(
+                command,
+                cwd=REPO_ROOT,
+                run_id=reordered_paths.run_id,
+                phase=phase,
+                command_index=index,
+                evidence_root=reordered_paths.evidence_root,
+                mirror_stdout=False,
+                mirror_stderr=False,
+            )
+            for index, command in enumerate(reordered_commands, start=1)
+        )
+        reordered_result, reordered_cleanup, reordered_completion = (
+            runner._finalize_validation_run(
+                run_paths=reordered_paths,
+                probe=reordered_probe,
+                phase=phase,
+                planned_count=2,
+                expected_plan=reliability.build_command_evidence_plan(
+                    run_id=reordered_paths.run_id,
+                    phase=phase,
+                    commands=reordered_commands,
+                    cwd=REPO_ROOT,
+                ),
+                receipts=tuple(reversed(reordered_receipts)),
+                result=0,
+                text_state="PASS",
+            )
+        )
+        assert reordered_result != 0
+        assert reordered_cleanup.startswith("PASS")
+        assert reordered_completion.final_state == "FAIL"
+
+
+def _assert_receipt_publication_failure_accounting(
+    monkeypatch,
+    tmp_path: Path,
+    capsys,
+) -> None:
+    capsys.readouterr()
+    external_parent = (tmp_path / "publication-failure-parent").resolve()
+    run_paths, probe = reliability.resolve_validation_run_paths(
+        REPO_ROOT,
+        explicit_process_root=external_parent,
+        run_id="run_receipt_publication_failure",
+        projected_relative_paths=("command-1.stdout.bin",),
+    )
+    commands = (
+        (sys.executable, "-c", "print('ATTEMPT_ONE')"),
+        (sys.executable, "-c", "print('MUST_NOT_START')"),
+    )
+    reliability.write_run_provenance(
+        run_paths,
+        probe,
+        phase=runner.FAST_PREFLIGHT_PHASE,
+        command_count=len(commands),
+        text_integrity_preflight_state="PASS",
+    )
+    real_atomic_write = reliability.atomic_write_json
+    real_popen = reliability.subprocess.Popen
+    child_starts = []
+
+    def fail_command_receipt(path, payload):
+        if Path(path).name == "command-1.json":
+            raise reliability.ValidationReliabilityError(
+                "ENGVR_ATOMIC_RECEIPT_WRITE_FAILED",
+                "synthetic command receipt publication failure",
+            )
+        return real_atomic_write(path, payload)
+
+    def track_child_start(*args, **kwargs):
+        child_starts.append((args, kwargs))
+        return real_popen(*args, **kwargs)
+
+    with monkeypatch.context() as production_patch:
+        production_patch.setattr(
+            runner,
+            "_execute_supervised_command",
+            reliability.supervise_command,
+        )
+        production_patch.setattr(
+            runner,
+            "cleanup_validation_run",
+            reliability.cleanup_validation_run,
+        )
+        production_patch.setattr(
+            runner,
+            "atomic_write_json",
+            reliability.atomic_write_json,
+        )
+        production_patch.setattr(
+            runner,
+            "validate_complete_run_evidence",
+            reliability.validate_complete_run_evidence,
+        )
+        production_patch.setattr(
+            runner,
+            "validate_published_completion_receipt",
+            reliability.validate_published_completion_receipt,
+        )
+        production_patch.setattr(runner, "_RUN_COMMANDS_CLEANUP_REPO_ROOT", None)
+        with monkeypatch.context() as publication_patch:
+            publication_patch.setattr(
+                reliability,
+                "atomic_write_json",
+                fail_command_receipt,
+            )
+            publication_patch.setattr(
+                reliability.subprocess,
+                "Popen",
+                track_child_start,
+            )
+            run_result = runner.run_commands(
+                commands,
+                phase=runner.FAST_PREFLIGHT_PHASE,
+                run_paths=run_paths,
+                defer_success_markers=True,
+                execution_plan=runner._prepare_execution_plan(commands),
+            )
+        receipts = runner._LAST_COMMAND_RECEIPTS
+        assert run_result != 0
+        assert len(child_starts) == 1
+        assert len(receipts) == 1
+        assert receipts[0].native_exit_code == 0
+        assert receipts[0].failure_class == "ENGVR_ATOMIC_RECEIPT_WRITE_FAILED"
+        result, cleanup_state, completion = runner._finalize_validation_run(
+            run_paths=run_paths,
+            probe=probe,
+            phase=runner.FAST_PREFLIGHT_PHASE,
+            planned_count=len(commands),
+            expected_plan=runner._LAST_EXPECTED_COMMAND_PLAN,
+            receipts=receipts,
+            result=run_result,
+            text_state="PASS",
+        )
+    output = capsys.readouterr()
+    assert result != 0
+    assert cleanup_state.startswith("PASS")
+    assert completion.command_count_started == 1
+    assert completion.command_count_completed == 1
+    assert completion.first_failed_command_index_or_null == 1
+    assert completion.terminal_native_exit_code == 0
+    assert completion.final_state == "FAIL"
+    assert not (run_paths.evidence_root / "command-1.json").exists()
+    assert json.loads(
+        (run_paths.evidence_root / "completion.json").read_text(encoding="utf-8")
+    )["final_state"] == "FAIL"
+    assert output.out.count(runner.SUCCESS_MARKER) == 0
+    assert output.out.count(runner.PHASE_SUCCESS_MARKER_PREFIX) == 0
+
+
+def _assert_exact_cleanup_contract(monkeypatch) -> None:
+    with tempfile.TemporaryDirectory(prefix="qtt-supervision-cleanup-") as temp_root:
+        external_parent = Path(temp_root) / "qttv"
+        historical = external_parent / "historical-unrelated"
+        historical.mkdir(parents=True)
+        historical_sentinel = historical / "owner.txt"
+        historical_sentinel.write_text("preserve\n", encoding="utf-8")
+        historical_mode = historical_sentinel.stat().st_mode
+        retained_evidence = external_parent / "owner-retained.evidence"
+        retained_evidence.mkdir()
+        retained_evidence_sentinel = retained_evidence / "owner.txt"
+        retained_evidence_sentinel.write_text("preserve\n", encoding="utf-8")
+        retained_evidence_mode = retained_evidence_sentinel.stat().st_mode
+        run_paths, _probe = reliability.resolve_validation_run_paths(
+            REPO_ROOT,
+            explicit_process_root=external_parent.resolve(),
+            run_id="run_cleanup_matrix",
+        )
+        assert run_paths.process_root.name == run_paths.process_child_name
+        assert re.fullmatch(r"r\d{12}_\d+_\d+(?:_\d+)?", run_paths.process_child_name)
+        assert run_paths.process_child_name != run_paths.run_id
+        assert run_paths.evidence_root.name == f"{run_paths.run_id}.evidence"
+        run_evidence_sentinel = run_paths.evidence_root / "owner.txt"
+        run_evidence_sentinel.write_text("preserve\n", encoding="utf-8")
+        read_only_path = run_paths.process_root / "git-like" / "objects" / "aa" / "object"
+        read_only_path.parent.mkdir(parents=True)
+        read_only_path.write_bytes(b"read-only object\n")
+        if os.name == "nt":
+            os.chmod(read_only_path, reliability.stat.S_IREAD)
+        real_chmod = reliability.os.chmod
+        chmod_paths = []
+
+        def tracked_chmod(path, mode, **kwargs):
+            chmod_paths.append(Path(path).resolve(strict=False))
+            return real_chmod(path, mode, **kwargs)
+
+        with monkeypatch.context() as cleanup_patch:
+            cleanup_patch.setattr(reliability.os, "chmod", tracked_chmod)
+            assert reliability.cleanup_validation_run(run_paths).startswith("PASS")
+        cleanup_payload = json.loads(
+            (run_paths.evidence_root / "cleanup.json").read_text(encoding="utf-8")
+        )
+        expected_retry_count = 1 if os.name == "nt" else 0
+        assert cleanup_payload["read_only_retry_count"] == expected_retry_count
+        assert chmod_paths == (
+            [read_only_path.resolve(strict=False)] if os.name == "nt" else []
+        )
+        assert not run_paths.process_root.exists()
+        assert external_parent.is_dir()
+        assert historical_sentinel.read_text(encoding="utf-8") == "preserve\n"
+        assert historical_sentinel.stat().st_mode == historical_mode
+        assert retained_evidence_sentinel.read_text(encoding="utf-8") == "preserve\n"
+        assert retained_evidence_sentinel.stat().st_mode == retained_evidence_mode
+        assert run_evidence_sentinel.read_text(encoding="utf-8") == "preserve\n"
+
+        real_rmtree = reliability.shutil.rmtree
+        nonpermission_root = external_parent / "nonpermission-owned-root"
+        nonpermission_path = nonpermission_root / "object"
+        nonpermission_root.mkdir()
+        nonpermission_path.write_bytes(b"object\n")
+        nonpermission_chmod_calls = []
+
+        def invoke_nonpermission(_target, *, onexc):
+            onexc(
+                os.unlink,
+                nonpermission_path,
+                FileNotFoundError("synthetic non-permission failure"),
+            )
+
+        with monkeypatch.context() as nonpermission_patch:
+            nonpermission_patch.setattr(
+                reliability.shutil,
+                "rmtree",
+                invoke_nonpermission,
+            )
+            nonpermission_patch.setattr(
+                reliability.os,
+                "chmod",
+                lambda *args, **kwargs: nonpermission_chmod_calls.append(
+                    (args, kwargs)
+                ),
+            )
+            with pytest.raises(
+                FileNotFoundError,
+                match="synthetic non-permission failure",
+            ):
+                reliability.remove_exact_run_owned_process_tree(
+                    nonpermission_root,
+                    expected_run_root=nonpermission_root,
+                    repo_root=REPO_ROOT,
+                    evidence_root=retained_evidence,
+                )
+        assert nonpermission_chmod_calls == []
+        assert nonpermission_path.read_bytes() == b"object\n"
+        real_rmtree(nonpermission_root)
+
+        second_failure_root = external_parent / "second-failure-owned-root"
+        second_failure_path = second_failure_root / "object"
+        second_failure_root.mkdir()
+        second_failure_path.write_bytes(b"object\n")
+        second_failure_chmod_paths = []
+
+        def fail_second_removal(_path):
+            raise PermissionError("synthetic second removal failure")
+
+        def invoke_permission_failure(_target, *, onexc):
+            onexc(
+                fail_second_removal,
+                second_failure_path,
+                PermissionError("synthetic first removal failure"),
+            )
+
+        with monkeypatch.context() as second_failure_patch:
+            second_failure_patch.setattr(
+                reliability.shutil,
+                "rmtree",
+                invoke_permission_failure,
+            )
+            second_failure_patch.setattr(
+                reliability.os,
+                "chmod",
+                lambda path, _mode, **_kwargs: second_failure_chmod_paths.append(
+                    Path(path).resolve(strict=False)
+                ),
+            )
+            expected_second_failure_type = (
+                reliability.ValidationReliabilityError
+                if os.name == "nt"
+                else PermissionError
+            )
+            with pytest.raises(
+                expected_second_failure_type,
+                match=(
+                    "ENGVR_RUN_SCOPED_CLEANUP_FAILED.*synthetic second removal failure"
+                    if os.name == "nt"
+                    else "synthetic first removal failure"
+                ),
+            ):
+                reliability.remove_exact_run_owned_process_tree(
+                    second_failure_root,
+                    expected_run_root=second_failure_root,
+                    repo_root=REPO_ROOT,
+                    evidence_root=retained_evidence,
+                )
+        assert second_failure_chmod_paths == (
+            [second_failure_path.resolve(strict=False)] if os.name == "nt" else []
+        )
+        assert second_failure_path.read_bytes() == b"object\n"
+        real_rmtree(second_failure_root)
+
+        exact_owned_root = external_parent / "exact-owned-root"
+        outside_root = external_parent / "outside-root"
+        exact_owned_root.mkdir()
+        outside_root.mkdir()
+        outside_sentinel = outside_root / "owner.txt"
+        outside_sentinel.write_text("preserve\n", encoding="utf-8")
+        rejected_delete_calls = []
+        rejected_chmod_calls = []
+        with monkeypatch.context() as outside_patch:
+            outside_patch.setattr(
+                reliability.shutil,
+                "rmtree",
+                lambda *args, **kwargs: rejected_delete_calls.append((args, kwargs)),
+            )
+            outside_patch.setattr(
+                reliability.os,
+                "chmod",
+                lambda *args, **kwargs: rejected_chmod_calls.append((args, kwargs)),
+            )
+            with pytest.raises(
+                reliability.ValidationReliabilityError,
+                match="exact current run-owned root",
+            ):
+                reliability.remove_exact_run_owned_process_tree(
+                    outside_root,
+                    expected_run_root=exact_owned_root,
+                    repo_root=REPO_ROOT,
+                    evidence_root=retained_evidence,
+                )
+        assert rejected_delete_calls == []
+        assert rejected_chmod_calls == []
+        assert outside_sentinel.read_text(encoding="utf-8") == "preserve\n"
+
+        callback_root = external_parent / "callback-owned-root"
+        callback_root.mkdir()
+        callback_path = callback_root / "object"
+        callback_path.write_bytes(b"object\n")
+        callback_chmod_calls = []
+
+        def invoke_outside_failure(_target, *, onexc):
+            onexc(os.unlink, outside_sentinel, PermissionError("outside failure"))
+
+        with monkeypatch.context() as callback_patch:
+            callback_patch.setattr(
+                reliability.shutil,
+                "rmtree",
+                invoke_outside_failure,
+            )
+            callback_patch.setattr(
+                reliability.os,
+                "chmod",
+                lambda *args, **kwargs: callback_chmod_calls.append((args, kwargs)),
+            )
+            with pytest.raises(PermissionError, match="outside failure"):
+                reliability.remove_exact_run_owned_process_tree(
+                    callback_root,
+                    expected_run_root=callback_root,
+                    repo_root=REPO_ROOT,
+                    evidence_root=retained_evidence,
+                )
+        assert callback_chmod_calls == []
+        assert callback_path.read_bytes() == b"object\n"
+        assert outside_sentinel.read_text(encoding="utf-8") == "preserve\n"
+
+        junction_root = external_parent / "junction-owned-root"
+        junction_root.mkdir()
+        junction_delete_calls = []
+        with monkeypatch.context() as junction_patch:
+            junction_patch.setattr(
+                reliability,
+                "_path_is_junction",
+                lambda path: Path(path) == junction_root,
+            )
+            junction_patch.setattr(
+                reliability.shutil,
+                "rmtree",
+                lambda *args, **kwargs: junction_delete_calls.append((args, kwargs)),
+            )
+            with pytest.raises(
+                reliability.ValidationReliabilityError,
+                match="symlink or junction",
+            ):
+                reliability.remove_exact_run_owned_process_tree(
+                    junction_root,
+                    expected_run_root=junction_root,
+                    repo_root=REPO_ROOT,
+                    evidence_root=retained_evidence,
+                )
+        assert junction_delete_calls == []
+        assert junction_root.is_dir()
+        real_rmtree(junction_root)
+        real_rmtree(callback_root)
+        real_rmtree(exact_owned_root)
+        real_rmtree(outside_root)
+
+        failed_paths, _probe = reliability.resolve_validation_run_paths(
+            REPO_ROOT,
+            explicit_process_root=external_parent.resolve(),
+            run_id="run_cleanup_failure_matrix",
+        )
+        with monkeypatch.context() as cleanup_patch:
+            cleanup_patch.setattr(
+                reliability.shutil,
+                "rmtree",
+                lambda _target, *, onexc: (_ for _ in ()).throw(
+                    PermissionError("owned failure")
+                ),
+            )
+            with pytest.raises(
+                reliability.ValidationReliabilityError,
+                match="ENGVR_RUN_SCOPED_CLEANUP_FAILED",
+            ):
+                reliability.cleanup_validation_run(failed_paths)
+        real_rmtree(failed_paths.process_root)
+        assert historical.is_dir()
+
+
+def test_st12h_runner_enforces_exact_timeouts_one_process_and_zero_retry(
+    monkeypatch,
+    tmp_path,
+    capsys,
+) -> None:
+    _assert_path_projection_contract(monkeypatch, tmp_path)
+    _assert_process_supervision_contract(monkeypatch, tmp_path)
+    _assert_mirror_isolation_contract(monkeypatch, tmp_path)
+    _assert_descriptor_ownership_and_drain_contract(monkeypatch, tmp_path)
+    _assert_output_drain_terminality_contract(monkeypatch, tmp_path)
+    _assert_exact_marker_line_contract(tmp_path)
+    _assert_prestart_failure_custody_contract(monkeypatch, tmp_path)
+    _assert_write_once_command_evidence_contract(monkeypatch, tmp_path)
+    _assert_receipt_accounting_contract(tmp_path)
+    _assert_complete_terminal_evidence_contract(monkeypatch, tmp_path)
+    _assert_receipt_publication_failure_accounting(monkeypatch, tmp_path, capsys)
+    _assert_exact_cleanup_contract(monkeypatch)
 
 
 def test_st12h_pr152_guidance_follows_stable_outputs_before_one_full_route() -> None:

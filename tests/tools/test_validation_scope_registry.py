@@ -2441,3 +2441,38 @@ def test_registered_exact_repair_scope_reaches_atomicrows_owners(monkeypatch) ->
         assert decision["allowed"] is False
         assert decision["reason"] == "path_not_registered_for_exact_repair_scope"
         assert not registry.is_pr_scoped_changed_path_allowed(branch, denied_path)
+
+    engvr_branch = context.ENGVR_IMPLEMENTATION_BRANCH
+    for path in context.ENGVR_CHANGED_PATHS:
+        decision = registry.explain_pr_scope_decision(engvr_branch, path)
+        assert decision == {
+            "allowed": True,
+            "branch": engvr_branch,
+            "normalized_path": path,
+            "pr_id": "ENG-VALIDATION-RELIABILITY-01",
+            "matched_rule": f"exact:{path}",
+            "reason": "registered_exact_path",
+        }
+        assert registry.is_pr_scoped_changed_path_allowed(engvr_branch, path)
+        assert not registry.is_pr_scoped_changed_path_allowed(
+            engvr_branch,
+            f"{path}.near",
+        )
+    for near_branch in (
+        engvr_branch.upper(),
+        f"{engvr_branch}-copy",
+        engvr_branch.removeprefix("hardening/"),
+    ):
+        assert not registry.is_pr_scoped_changed_path_allowed(
+            near_branch,
+            "tools/validation_reliability.py",
+        )
+    for denied_path in (
+        ".github/workflows/qtt_validation.yml",
+        "tools/changed_area_validation_router.py",
+        "src/qtt/stage1_prediction_markets/example.py",
+        "docs/master_plan/QTT_MasterPlan_Current.md",
+    ):
+        decision = registry.explain_pr_scope_decision(engvr_branch, denied_path)
+        assert decision["allowed"] is False
+        assert decision["reason"] == "path_not_registered_for_pr_scope"
