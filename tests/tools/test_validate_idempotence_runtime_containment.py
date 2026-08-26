@@ -993,18 +993,26 @@ def _assert_runtime_artifact_semantic_scope_contract(
     assert integration_failures == ()
     assert captured_changed_paths == [(authorized_path,)]
 
-    explicit_failures = validator.validate(
-        REPO_ROOT,
-        inventory=inventory,
-        workflow_text=WORKFLOW_TEXT,
-        changed_paths=(router_path,),
-        tracked_paths=(),
-        staged_paths=(),
-    )
+    original_current_branch = validator._current_branch
+    with monkeypatch.context() as explicit_scope_patch:
+        explicit_scope_patch.setattr(
+            validator,
+            "_current_branch",
+            lambda _root: context.ENGVR_IMPLEMENTATION_BRANCH,
+        )
+        explicit_failures = validator.validate(
+            REPO_ROOT,
+            inventory=inventory,
+            workflow_text=WORKFLOW_TEXT,
+            changed_paths=(router_path,),
+            tracked_paths=(),
+            staged_paths=(),
+        )
     assert validator.Failure(
         "SEMANTIC_CHANGED_PATH_OUTSIDE_SCOPE",
         (("path", router_path),),
     ) in explicit_failures
+    assert validator._current_branch is original_current_branch
 
 
 def test_current_inventory_passes_and_classifies_runtime_containment(
