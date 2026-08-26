@@ -633,6 +633,17 @@ def is_runtime_artifact_path(path: str, inventory: Mapping[str, Any]) -> bool:
     return any(_matches(normalized, pattern) for pattern, _ in _runtime_patterns(inventory))
 
 
+def _semantic_nonruntime_integrity_paths(
+    records: Sequence[GitPathIntegrityV1],
+    inventory: Mapping[str, Any],
+) -> tuple[str, ...]:
+    return tuple(
+        path
+        for path in semantic_candidate_paths(records)
+        if not is_runtime_artifact_path(path, inventory)
+    )
+
+
 def _validate_runtime_artifacts(
     inventory: Mapping[str, Any],
     tracked_paths: Sequence[str],
@@ -654,7 +665,12 @@ def _validate_runtime_artifacts(
     tracked_or_staged.update({normalize_path(path): "staged" for path in staged_paths})
     for path, source in sorted(tracked_or_staged.items()):
         if any(_matches(path, pattern) for pattern, _ in patterns):
-            failures.append(_failure("RUNTIME_ARTIFACT_TRACKED", path=path, source=source))
+            code = (
+                "RUNTIME_ARTIFACT_STAGED"
+                if source == "staged"
+                else "RUNTIME_ARTIFACT_TRACKED"
+            )
+            failures.append(_failure(code, path=path, source=source))
     return failures
 
 
@@ -791,7 +807,10 @@ def validate(
     if changed_paths is not None:
         selected_changed_paths = tuple(changed_paths)
     elif _changed_paths is _DEFAULT_CHANGED_PATHS_DISCOVERY:
-        selected_changed_paths = _semantic_integrity_paths(integrity_records)
+        selected_changed_paths = _semantic_nonruntime_integrity_paths(
+            integrity_records,
+            payload,
+        )
     else:
         selected_changed_paths = _changed_paths(root)
     branch = _current_branch(root)

@@ -855,6 +855,158 @@ def _assert_no_follow_worktree_surface_contract(monkeypatch, tmp_path: Path) -> 
     assert not any(temporary_parent.iterdir())
 
 
+def _assert_runtime_artifact_semantic_scope_contract(
+    monkeypatch,
+    inventory: dict[str, object],
+) -> None:
+    router_path = (
+        ".tmp/qtt-validation-router/deterministic-validators-a.json"
+    )
+    timing_path = (
+        ".tmp/qtt-validation-timing/deterministic-validators-a.json"
+    )
+    authorized_path = "tools/validate_idempotence_runtime_containment.py"
+    near_name_path = (
+        ".tmp/qtt-validation-router-extra/deterministic-validators-a.json"
+    )
+    wrong_extension_path = (
+        ".tmp/qtt-validation-router/deterministic-validators-a.txt"
+    )
+
+    runtime_records = tuple(
+        reliability.classify_byte_surfaces(
+            path=path,
+            baseline_bytes=None,
+            index_bytes=None,
+            worktree_bytes=b'{"value":1}\n',
+            path_state="NEW",
+            git_status_state="DIRTY",
+            authorized=False,
+        )
+        for path in (router_path, timing_path)
+    )
+    authorized_record = reliability.classify_byte_surfaces(
+        path=authorized_path,
+        baseline_bytes=b"old\n",
+        index_bytes=b"new\n",
+        worktree_bytes=b"new\n",
+        git_status_state="DIRTY",
+        authorized=True,
+    )
+    near_name_record = reliability.classify_byte_surfaces(
+        path=near_name_path,
+        baseline_bytes=None,
+        index_bytes=None,
+        worktree_bytes=b'{"value":1}\n',
+        path_state="NEW",
+        git_status_state="DIRTY",
+        authorized=False,
+    )
+    wrong_extension_record = reliability.classify_byte_surfaces(
+        path=wrong_extension_path,
+        baseline_bytes=None,
+        index_bytes=None,
+        worktree_bytes=b'{"value":1}\n',
+        path_state="NEW",
+        git_status_state="DIRTY",
+        authorized=False,
+    )
+    records = (
+        *runtime_records,
+        authorized_record,
+        near_name_record,
+        wrong_extension_record,
+    )
+    generic_paths = reliability.semantic_candidate_paths(records)
+    assert router_path in generic_paths
+    assert timing_path in generic_paths
+
+    selected_paths = validator._semantic_nonruntime_integrity_paths(
+        records,
+        inventory,
+    )
+    assert selected_paths == tuple(
+        path
+        for path in generic_paths
+        if path not in {router_path, timing_path}
+    )
+    assert router_path not in selected_paths
+    assert timing_path not in selected_paths
+    assert authorized_path in selected_paths
+    assert not validator.is_runtime_artifact_path(near_name_path, inventory)
+    assert near_name_path in selected_paths
+    assert not validator.is_runtime_artifact_path(wrong_extension_path, inventory)
+    assert wrong_extension_path in selected_paths
+
+    invalid_runtime_record = reliability.classify_byte_surfaces(
+        path=router_path,
+        baseline_bytes=None,
+        index_bytes=None,
+        worktree_bytes=b'{"value":1}',
+        path_state="NEW",
+        git_status_state="DIRTY",
+        authorized=False,
+    )
+    assert "ENGVR_EOF_POLICY_FAILURE" in _codes(
+        validator._validate_changed_path_integrity((invalid_runtime_record,))
+    )
+
+    captured_changed_paths: list[tuple[str, ...]] = []
+    real_validate_changed_files = validator._validate_changed_files
+
+    def record_validate_changed_files(
+        candidate_inventory,
+        changed_paths,
+        **kwargs,
+    ):
+        captured_changed_paths.append(tuple(changed_paths))
+        return real_validate_changed_files(
+            candidate_inventory,
+            changed_paths,
+            **kwargs,
+        )
+
+    with monkeypatch.context() as integration_patch:
+        integration_patch.setattr(
+            validator,
+            "_changed_path_integrity",
+            lambda _root: (*runtime_records, authorized_record),
+        )
+        integration_patch.setattr(
+            validator,
+            "_current_branch",
+            lambda _root: context.ENGVR_IMPLEMENTATION_BRANCH,
+        )
+        integration_patch.setattr(
+            validator,
+            "_validate_changed_files",
+            record_validate_changed_files,
+        )
+        integration_failures = validator.validate(
+            REPO_ROOT,
+            inventory=inventory,
+            workflow_text=WORKFLOW_TEXT,
+            changed_paths=None,
+            tracked_paths=(),
+            staged_paths=(),
+        )
+    assert integration_failures == ()
+    assert captured_changed_paths == [(authorized_path,)]
+
+    explicit_failures = validator.validate(
+        REPO_ROOT,
+        inventory=inventory,
+        workflow_text=WORKFLOW_TEXT,
+        changed_paths=(router_path,),
+        tracked_paths=(),
+        staged_paths=(),
+    )
+    assert validator.Failure(
+        "SEMANTIC_CHANGED_PATH_OUTSIDE_SCOPE",
+        (("path", router_path),),
+    ) in explicit_failures
+
+
 def test_current_inventory_passes_and_classifies_runtime_containment(
     monkeypatch,
     tmp_path,
@@ -1161,6 +1313,7 @@ def test_current_inventory_passes_and_classifies_runtime_containment(
     _assert_repository_stream_classifier_matrix(monkeypatch, tmp_path)
     _assert_exact_stat_refresh_matrix(monkeypatch, tmp_path)
     _assert_no_follow_worktree_surface_contract(monkeypatch, tmp_path)
+    _assert_runtime_artifact_semantic_scope_contract(monkeypatch, inventory)
 
 
 def test_missing_idempotence_test_classification_fails():
@@ -1253,7 +1406,7 @@ def test_staged_timing_runtime_artifact_fails():
         staged_paths=(".tmp/qtt-validation-timing/fast-preflight.json",),
     )
 
-    assert "RUNTIME_ARTIFACT_TRACKED" in _codes(failures)
+    assert "RUNTIME_ARTIFACT_STAGED" in _codes(failures)
 
 
 def test_real_source_test_and_generated_files_are_not_runtime_artifacts():
