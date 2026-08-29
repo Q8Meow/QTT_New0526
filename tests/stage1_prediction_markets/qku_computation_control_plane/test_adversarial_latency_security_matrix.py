@@ -12,6 +12,7 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors impo
     ContractValidationError,
     NumericDomainError,
     ReasonCode,
+    SerializationSafetyError,
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.implementation_registry import (
     compute_math_39_queue_position_estimate,
@@ -41,6 +42,10 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.models impo
     LatencyBudgetProfileV1,
     LatencyMeasurementLabelsV1,
     ResourceBoundsProfileV1,
+)
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.stage1_launch_graph import (
+    build_stage1_launch_graph_v2,
+    validate_stage1_launch_graph_v2,
 )
 from tests.stage1_prediction_markets.qku_computation_control_plane.test_policy_state_matrix import (
     _inputs,
@@ -213,6 +218,99 @@ def test_hotpath_dependency_trace_and_input_adversaries_fail_closed() -> None:
             alert_threshold_ns=1,
             policy_version="1",
         )
+
+    graph = build_stage1_launch_graph_v2()
+    forecast_selected_ids = (
+        *graph.scope.selected_profile_ids[:2],
+        graph.scope.excluded_profile_ids[0],
+    )
+    forecast_selected_scope = replace(
+        graph.scope,
+        selected_profile_ids=forecast_selected_ids,
+        serialization=forecast_selected_ids,
+    )
+    duplicate_profile_scope = replace(
+        graph.scope,
+        profiles=(*graph.scope.profiles, graph.scope.profiles[0]),
+    )
+    duplicate_role_graph = replace(graph, roles=(*graph.roles, graph.roles[0]))
+    missing_edge_graph = replace(
+        graph,
+        dependency_edges=graph.dependency_edges[:-1],
+    )
+    extra_edge_graph = replace(
+        graph,
+        dependency_edges=(*graph.dependency_edges, graph.dependency_edges[0]),
+    )
+    cycle_roles = tuple(
+        replace(role, direct_prerequisite_role_ids=("ROLE-25",))
+        if role.role_id == "ROLE-01"
+        else role
+        for role in graph.roles
+    )
+    orphan_operations = tuple(
+        replace(
+            operation,
+            required_role_ids=tuple(
+                role_id
+                for role_id in operation.required_role_ids
+                if role_id != "ROLE-27"
+            ),
+            optional_role_ids=tuple(
+                role_id
+                for role_id in operation.optional_role_ids
+                if role_id != "ROLE-27"
+            ),
+        )
+        for operation in graph.operation_profiles
+    )
+    writer_latency_class = next(
+        role.latency_class for role in graph.roles if role.role_id == "ROLE-25"
+    )
+    second_writer_roles = tuple(
+        replace(role, latency_class=writer_latency_class)
+        if role.role_id == "ROLE-24"
+        else role
+        for role in graph.roles
+    )
+    nonempty_live_scope = replace(
+        graph.scope,
+        active_live_profile_ids=(graph.scope.selected_profile_ids[0],),
+    )
+    mutated_graphs = (
+        replace(graph, scope=forecast_selected_scope),
+        replace(graph, scope=duplicate_profile_scope),
+        duplicate_role_graph,
+        missing_edge_graph,
+        extra_edge_graph,
+        replace(graph, roles=cycle_roles),
+        replace(graph, operation_profiles=orphan_operations),
+        replace(graph, roles=second_writer_roles),
+        replace(graph, scope=nonempty_live_scope),
+    )
+    for mutated_graph in mutated_graphs:
+        rejection = validate_stage1_launch_graph_v2(mutated_graph)
+        assert rejection.terminal_state.value == "REJECTED_INVALID"
+        assert rejection.reason_codes
+
+    with pytest.raises(ContractValidationError):
+        replace(graph.scope.profiles[1], profile_id="POLYMARKET")
+    with pytest.raises(SerializationSafetyError):
+        replace(graph.roles[0].path_refs[0], path="../execution_router.py")
+    future_path_ref = next(
+        path_ref
+        for role in graph.roles
+        for path_ref in role.path_refs
+        if path_ref.disposition.value
+        == "FUTURE_AUTHORIZED_OWNER_NOT_YET_IMPLEMENTED"
+    )
+    with pytest.raises(ContractValidationError):
+        replace(
+            graph.roles[0].path_refs[0],
+            disposition=future_path_ref.disposition,
+        )
+    with pytest.raises(ContractValidationError):
+        replace(graph.no_effects, provider_connection_allowed=True)
 
 
 def test_bounded_concurrency_is_deterministic_and_never_mutates_a_pointer() -> None:

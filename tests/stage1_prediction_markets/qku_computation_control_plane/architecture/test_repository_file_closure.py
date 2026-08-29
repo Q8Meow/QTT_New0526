@@ -52,6 +52,7 @@ EXPECTED_PRODUCTION_FILES = {
     "quantum_benchmark.py",
     "llm_gateway.py",
     "existing_owner_projection.py",
+    "stage1_launch_graph.py",
 }
 EXPECTED_DATA_FILES = {
     "st12f_parameter_resources_manifest.json",
@@ -70,7 +71,7 @@ EXPECTED_DATA_FILES = {
 }
 
 
-def test_production_package_is_exactly_the_collapsed_48_files_and_certified_data() -> None:
+def test_production_package_is_exactly_the_collapsed_49_files_and_certified_data() -> None:
     root = Path(__file__).resolve().parents[4]
     package = (
         root

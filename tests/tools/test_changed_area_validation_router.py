@@ -248,10 +248,21 @@ def test_qku_shared_integration_paths_use_the_exact_allowlists() -> None:
                 *inventory.ST12F_ALLOWED_EXACT_PATHS,
                 *inventory.ST12G_ALLOWED_EXACT_PATHS,
                 *inventory.ST12H_ALLOWED_EXACT_PATHS,
+                *inventory.S1_LAUNCH_GRAPH_ALLOWED_EXACT_PATHS,
             )
         )
     for path in inventory.QKU_ALLOWED_EXACT_PATHS:
         assert router.QKU_VALIDATOR_IDS <= set(result.classified_files[path])
+    launch_path = (
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/"
+        "stage1_launch_graph.py"
+    )
+    assert {
+        "validate_qku_computation_control_plane_architecture",
+        "independent_validate_qku_computation_control_plane_architecture",
+        "pytest_shard_8_qku_computation_control_plane_pytest",
+    } <= set(result.classified_files[launch_path])
+    assert launch_path not in result.unknown_files
     assert result.unknown_files == ()
     assert result.fail_closed_reasons == ()
 

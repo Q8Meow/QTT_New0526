@@ -9,6 +9,16 @@ from types import MappingProxyType
 
 import pytest
 
+import src.qtt.stage1_prediction_markets.qku_computation_control_plane as qku_control_plane
+from src.qtt.source_evidence.cross_venue_execution_normalization.taxonomy import (
+    ACTIVE_STAGE1_VENUES as SOURCE_EVIDENCE_ACTIVE_STAGE1_VENUES,
+)
+from src.qtt.stage1_prediction_markets.capital_risk.field_map_constants import (
+    ACTIVE_STAGE1_VENUES as CAPITAL_RISK_ACTIVE_STAGE1_VENUES,
+)
+from src.qtt.stage1_prediction_markets.credential_readiness.policy import (
+    STAGE1_VENUE_IDS as CREDENTIAL_READINESS_STAGE1_VENUE_IDS,
+)
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import (
     ComputationControlPlaneError,
     ContractValidationError,
@@ -130,6 +140,7 @@ from tests.stage1_prediction_markets.qku_computation_control_plane.tranche_e imp
     make_resolver,
     resolve_decision,
 )
+from tools.build_qku_computation_control_plane import build_payload
 
 
 def _repo_root() -> Path:
@@ -1458,3 +1469,44 @@ def test_generated_d_universe_and_connectivity_are_terminal_reference_only() -> 
             "provider_private_replay_paper_llm_qpu_counts"
         ].values()
     )
+
+    launch_exports = (
+        "STAGE1_LAUNCH_DEPENDENCY_EDGES_V1",
+        "STAGE1_LAUNCH_ROLES_V2",
+        "STAGE1_OPERATION_DEPENDENCY_PROFILES_V1",
+        "STAGE1_SELECTED_PROFILE_IDS_V2",
+        "STAGE1_SELECTED_SCOPE_V2",
+        "build_stage1_launch_graph_v2",
+        "stage1_launch_graph_projection_v2",
+        "validate_stage1_launch_graph_v2",
+    )
+    assert len(launch_exports) == 8
+    assert tuple(qku_control_plane.__all__[-8:]) == launch_exports
+    assert all(qku_control_plane.__all__.count(name) == 1 for name in launch_exports)
+    assert all(hasattr(qku_control_plane, name) for name in launch_exports)
+    assert not {
+        "Stage1VenueProfileV1",
+        "Stage1SelectedScopeV2",
+        "SelectedLaunchGraphV2",
+        "_STAGE1_VENUE_PROFILE_ROWS_JSON",
+    }.intersection(qku_control_plane.__all__)
+    first_payload = build_payload()
+    second_payload = build_payload()
+    assert tuple(first_payload).count("stage1_launch_graph_v2") == 1
+    assert set(first_payload["stage1_launch_graph_v2"]) == {
+        "package_ref",
+        "graph",
+        "validation",
+    }
+    assert (
+        first_payload["stage1_launch_graph_v2"]
+        == second_payload["stage1_launch_graph_v2"]
+        == qku_control_plane.stage1_launch_graph_projection_v2()
+    )
+    historical_fixture_scope = ("KALSHI", "POLYMARKET", "FORECASTEX_IBKR")
+    assert CAPITAL_RISK_ACTIVE_STAGE1_VENUES == historical_fixture_scope
+    assert CREDENTIAL_READINESS_STAGE1_VENUE_IDS == historical_fixture_scope
+    assert SOURCE_EVIDENCE_ACTIVE_STAGE1_VENUES == historical_fixture_scope
+    assert not (
+        root / "docs/master_plan/generated/qku_control_plane/stage1_launch_graph"
+    ).exists()

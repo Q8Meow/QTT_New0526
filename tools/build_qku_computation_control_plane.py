@@ -41,6 +41,7 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane import (  #
     ST12GProjectionCoreV2,
     ST12GReadinessEvidenceProjectionV2,
     ST12GServiceEvidenceViewV2,
+    stage1_launch_graph_projection_v2,
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.mode_snapshot_policy import (  # noqa: E402
     D_MODE_STATE_REGISTRY,
@@ -2356,6 +2357,7 @@ def build_payload(
             "agent_consumer_route_count": len(ST12B_AGENT_CONSUMER_DAG),
             "manifest_passed": tranche_b_manifest.passed,
         },
+        "stage1_launch_graph_v2": stage1_launch_graph_projection_v2(),
     }
 
 

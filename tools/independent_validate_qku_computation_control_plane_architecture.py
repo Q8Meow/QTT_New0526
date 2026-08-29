@@ -79,6 +79,8 @@ PRODUCTION_NAMES = (
     "model_risk.py",
     "quantum_benchmark.py",
     "llm_gateway.py",
+    "existing_owner_projection.py",
+    "stage1_launch_graph.py",
 )
 EXPECTED_MATH_IDS = tuple(f"MATH-{value:02d}" for value in range(1, 16))
 ARCHITECTURE_MATH_IDS = (
@@ -218,6 +220,1018 @@ EVIDENCE_MARKER = "ST12_ARCHITECTURE_MATH_EVIDENCE_V1"
 CURRENT_FULL_CONTRACT_EVIDENCE_MARKER = (
     "ST12_ARCHITECTURE_CURRENT_FULL_CONTRACT_EVIDENCE_V1"
 )
+STAGE1_LAUNCH_GRAPH_MARKER = "STAGE1_LAUNCH_GRAPH_V2_INDEPENDENTLY_VALIDATED"
+_EXPECTED_STAGE1_SELECTED_PROFILE_IDS = (
+    "GEMINI_TITAN_DIRECT",
+    "POLYMARKET_US_RETAIL_DIRECT",
+    "KALSHI_US_DCM_DIRECT",
+)
+_EXPECTED_STAGE1_EXCLUDED_PROFILE_IDS = (
+    "FORECASTEX_IBKR",
+    "FORECASTEX_DIRECT_MEMBER",
+)
+_EXPECTED_STAGE1_TOPOLOGICAL_ORDER = (
+    "ROLE-01",
+    "ROLE-02",
+    "ROLE-03",
+    "ROLE-04",
+    "ROLE-05",
+    "ROLE-06",
+    "ROLE-07",
+    "ROLE-08",
+    "ROLE-09",
+    "ROLE-10",
+    "ROLE-12",
+    "ROLE-11",
+    "ROLE-13",
+    "ROLE-14",
+    "ROLE-15",
+    "ROLE-16",
+    "ROLE-17",
+    "ROLE-18",
+    "ROLE-19",
+    "ROLE-20",
+    "ROLE-26",
+    "ROLE-22",
+    "ROLE-27",
+    "ROLE-28",
+    "ROLE-21",
+    "ROLE-23",
+    "ROLE-24",
+    "ROLE-25",
+)
+_EXPECTED_STAGE1_OPERATION_CLASSES = (
+    "NEW_OR_INCREASED_EXPOSURE",
+    "CANCEL_QUERY_RECONCILE",
+    "RISK_REDUCING_POSITION_ACTION",
+    "REPLAY_PAPER_EVIDENCE",
+    "QUANTUM_CHALLENGER_RESEARCH",
+)
+_EXPECTED_STAGE1_VENUE_PROFILE_ROWS_JSON = r"""[
+  {
+    "profile_id": "GEMINI_TITAN_DIRECT",
+    "scope_state": "SELECTED_CORE",
+    "serialization_ordinal_or_none": 1,
+    "operating_legal_entity": "Gemini Titan, LLC",
+    "clearing_or_access_route": "Gemini Olympus, LLC",
+    "product_family": "GEMINI_PREDICTION_MARKETS_EVENT_CONTRACTS",
+    "api_profile": "DIRECT_ACCOUNT_SCOPED_REST_WEBSOCKET",
+    "jurisdiction": "UNITED_STATES_CFTC_DCM_DCO",
+    "authority_ref": "S1-SCOPE-DECISION-01::LaunchScopeDecisionV1",
+    "research_state": "COMPLETE_NO_CODEX_MATERIAL_DECISION_RESEARCH_REQUIRED"
+  },
+  {
+    "profile_id": "POLYMARKET_US_RETAIL_DIRECT",
+    "scope_state": "SELECTED_CORE",
+    "serialization_ordinal_or_none": 2,
+    "operating_legal_entity": "QCX LLC d/b/a Polymarket US",
+    "clearing_or_access_route": "QC Clearing LLC d/b/a Polymarket Clearing",
+    "product_family": "POLYMARKET_US_RETAIL_EVENT_CONTRACTS",
+    "api_profile": "RETAIL_APP_USER_REST_MARKET_PRIVATE_WEBSOCKET",
+    "jurisdiction": "UNITED_STATES_CFTC_DCM_DCO",
+    "authority_ref": "S1-SCOPE-DECISION-01::LaunchScopeDecisionV1",
+    "research_state": "COMPLETE_NO_CODEX_MATERIAL_DECISION_RESEARCH_REQUIRED"
+  },
+  {
+    "profile_id": "KALSHI_US_DCM_DIRECT",
+    "scope_state": "SELECTED_CORE",
+    "serialization_ordinal_or_none": 3,
+    "operating_legal_entity": "KalshiEX LLC",
+    "clearing_or_access_route": "Kalshi Klear LLC",
+    "product_family": "KALSHI_EVENT_CONTRACTS",
+    "api_profile": "DIRECT_REST_WEBSOCKET_FIX_IF_ENTITLED",
+    "jurisdiction": "UNITED_STATES_CFTC_DCM_DCO",
+    "authority_ref": "S1-SCOPE-DECISION-01::LaunchScopeDecisionV1",
+    "research_state": "COMPLETE_NO_CODEX_MATERIAL_DECISION_RESEARCH_REQUIRED"
+  },
+  {
+    "profile_id": "FORECASTEX_IBKR",
+    "scope_state": "OWNER_EXCLUDED_STAGE1_NO_IMPLEMENTATION",
+    "serialization_ordinal_or_none": null,
+    "operating_legal_entity": "ForecastEx LLC",
+    "clearing_or_access_route": "Interactive Brokers access route",
+    "product_family": "FORECASTEX_EVENT_CONTRACTS",
+    "api_profile": "INTERMEDIATED_IBKR",
+    "jurisdiction": "UNITED_STATES_CFTC_DCM",
+    "authority_ref": "CURRENT_OWNER_EXCLUSION",
+    "research_state": "NOT_APPLICABLE_WITH_PROOF"
+  },
+  {
+    "profile_id": "FORECASTEX_DIRECT_MEMBER",
+    "scope_state": "OWNER_EXCLUDED_STAGE1_NO_IMPLEMENTATION",
+    "serialization_ordinal_or_none": null,
+    "operating_legal_entity": "ForecastEx LLC",
+    "clearing_or_access_route": "Direct member route",
+    "product_family": "FORECASTEX_EVENT_CONTRACTS",
+    "api_profile": "DIRECT_MEMBER",
+    "jurisdiction": "UNITED_STATES_CFTC_DCM",
+    "authority_ref": "CURRENT_OWNER_EXCLUSION",
+    "research_state": "NOT_APPLICABLE_WITH_PROOF"
+  }
+]"""
+_EXPECTED_STAGE1_LAUNCH_ROLE_ROWS_JSON = r"""[
+  {
+    "role_id": "ROLE-01",
+    "responsibility": "Canonical venue/product/account/API-profile identity",
+    "disposition": "BINDING_ONLY_GAP",
+    "semantic_owner": "Identity/specification owner",
+    "path_refs": [
+      {
+        "path": "src/qtt/stage1_prediction_markets/qku_computation_control_plane/stage1_launch_graph.py",
+        "disposition": "EXISTING_CANONICAL_OWNER"
+      },
+      {
+        "path": "src/qtt/stage1_prediction_markets/qku_computation_control_plane/identity_adapter.py",
+        "disposition": "EXISTING_CANONICAL_OWNER"
+      },
+      {
+        "path": "src/qtt/stage1_prediction_markets/qku_computation_control_plane/specification.py",
+        "disposition": "EXISTING_CANONICAL_OWNER"
+      }
+    ],
+    "frozen_output": "Stage1SelectedScopeV2 plus exact compound profile identities and authority lineage",
+    "direct_prerequisite_role_ids": [],
+    "default_failure_route": "UNAVAILABLE",
+    "latency_class": "IMMUTABLE_PRECOMPUTED_SNAPSHOT_LOOKUP",
+    "research_state": "COMPLETE_NO_CODEX_MATERIAL_DECISION_RESEARCH_REQUIRED"
+  },
+  {
+    "role_id": "ROLE-02",
+    "responsibility": "Market/event/contract discovery",
+    "disposition": "TRUE_MISSING_DEPENDENCY",
+    "semantic_owner": "Source/PIT owner",
+    "path_refs": [
+      {
+        "path": "src/qtt/stage1_prediction_markets/qku_computation_control_plane/input_resolver.py",
+        "disposition": "EXISTING_CANONICAL_OWNER"
+      },
+      {
+        "path": "src/qtt/stage1_prediction_markets/qku_computation_control_plane/point_in_time.py",
+        "disposition": "EXISTING_CANONICAL_OWNER"
+      },
+      {
+        "path": "src/qtt/stage1_prediction_markets/selected_venues/market_data.py",
+        "disposition": "FUTURE_AUTHORIZED_OWNER_NOT_YET_IMPLEMENTED"
+      }
+    ],
+    "frozen_output": "Current contract inventory with lifecycle and resolution binding",
+    "direct_prerequisite_role_ids": [
+      "ROLE-01"
+    ],
+    "default_failure_route": "UNAVAILABLE",
+    "latency_class": "IMMUTABLE_PRECOMPUTED_SNAPSHOT_LOOKUP",
+    "research_state": "COMPLETE_NO_CODEX_MATERIAL_DECISION_RESEARCH_REQUIRED"
+  },
+  {
+    "role_id": "ROLE-03",
+    "responsibility": "Point-in-time source acceptance",
+    "disposition": "BINDING_ONLY_GAP",
+    "semantic_owner": "Source/rights/PIT owner",
+    "path_refs": [
+      {
+        "path": "src/qtt/stage1_prediction_markets/qku_computation_control_plane/source_policy.py",
+        "disposition": "EXISTING_CANONICAL_OWNER"
+      },
+      {
+        "path": "src/qtt/stage1_prediction_markets/qku_computation_control_plane/source_rights.py",
+        "disposition": "EXISTING_CANONICAL_OWNER"
+      },
+      {
+        "path": "src/qtt/stage1_prediction_markets/qku_computation_control_plane/freshness.py",
+        "disposition": "EXISTING_CANONICAL_OWNER"
+      },
+      {
+        "path": "src/qtt/stage1_prediction_markets/qku_computation_control_plane/point_in_time.py",
+        "disposition": "EXISTING_CANONICAL_OWNER"
+      }
+    ],
+    "frozen_output": "Observed/effective/available/received/processed clocks and rights",
+    "direct_prerequisite_role_ids": [
+      "ROLE-01",
+      "ROLE-02"
+    ],
+    "default_failure_route": "UNAVAILABLE",
+    "latency_class": "HARD_CONTROL_HOTPATH",
+    "research_state": "COMPLETE_NO_CODEX_MATERIAL_DECISION_RESEARCH_REQUIRED"
+  },
+  {
+    "role_id": "ROLE-04",
+    "responsibility": "Local order-book reconstruction",
+    "disposition": "TRUE_MISSING_DEPENDENCY",
+    "semantic_owner": "Selected venue public-state owner",
+    "path_refs": [
+      {
+        "path": "src/qtt/stage1_prediction_markets/selected_venues/market_data.py",
+        "disposition": "FUTURE_AUTHORIZED_OWNER_NOT_YET_IMPLEMENTED"
+      }
+    ],
+    "frozen_output": "Snapshot + contiguous deltas + gap/reconnect receipt",
+    "direct_prerequisite_role_ids": [
+      "ROLE-01",
+      "ROLE-02",
+      "ROLE-03"
+    ],
+    "default_failure_route": "NO_TRADE",
+    "latency_class": "BOUNDED_HOTPATH_COMPUTE",
+    "research_state": "COMPLETE_NO_CODEX_MATERIAL_DECISION_RESEARCH_REQUIRED"
+  },
+  {
+    "role_id": "ROLE-05",
+    "responsibility": "Trade-flow and microstructure features",
+    "disposition": "BINDING_ONLY_GAP",
+    "semantic_owner": "QKU computation owner",
+    "path_refs": [
+      {
+        "path": "src/qtt/stage1_prediction_markets/qku_computation_control_plane/implementation_registry.py",
+        "disposition": "EXISTING_CANONICAL_OWNER"
+      },
+      {
+        "path": "src/qtt/stage1_prediction_markets/qku_computation_control_plane/economic_math.py",
+        "disposition": "EXISTING_CANONICAL_OWNER"
+      }
+    ],
+    "frozen_output": "Point-in-time feature vector with own-action lineage",
+    "direct_prerequisite_role_ids": [
+      "ROLE-03",
+      "ROLE-04"
+    ],
+    "default_failure_route": "UNAVAILABLE",
+    "latency_class": "BOUNDED_HOTPATH_COMPUTE",
+    "research_state": "COMPLETE_NO_CODEX_MATERIAL_DECISION_RESEARCH_REQUIRED"
+  },
+  {
+    "role_id": "ROLE-06",
+    "responsibility": "Market-implied probability/fair value",
+    "disposition": "BINDING_ONLY_GAP",
+    "semantic_owner": "QKU computation owner",
+    "path_refs": [
+      {
+        "path": "src/qtt/stage1_prediction_markets/qku_computation_control_plane/implementation_registry.py",
+        "disposition": "EXISTING_CANONICAL_OWNER"
+      },
+      {
+        "path": "src/qtt/stage1_prediction_markets/qku_computation_control_plane/economic_math.py",
+        "disposition": "EXISTING_CANONICAL_OWNER"
+      }
+    ],
+    "frozen_output": "Executable-side probability/fair value under exact scale",
+    "direct_prerequisite_role_ids": [
+      "ROLE-04"
+    ],
+    "default_failure_route": "UNAVAILABLE",
+    "latency_class": "BOUNDED_HOTPATH_COMPUTE",
+    "research_state": "COMPLETE_NO_CODEX_MATERIAL_DECISION_RESEARCH_REQUIRED"
+  },
+  {
+    "role_id": "ROLE-07",
+    "responsibility": "Source/model probability and calibration",
+    "disposition": "EVIDENCE_ONLY_GAP",
+    "semantic_owner": "Evidence/model-risk owner",
+    "path_refs": [
+      {
+        "path": "src/qtt/stage1_prediction_markets/qku_computation_control_plane/evidence.py",
+        "disposition": "EXISTING_CANONICAL_OWNER"
+      },
+      {
+        "path": "src/qtt/stage1_prediction_markets/qku_computation_control_plane/model_risk.py",
+        "disposition": "EXISTING_CANONICAL_OWNER"
+      }
+    ],
+    "frozen_output": "Versioned probability distribution and calibration artifact",
+    "direct_prerequisite_role_ids": [
+      "ROLE-03",
+      "ROLE-05",
+      "ROLE-06"
+    ],
+    "default_failure_route": "EVIDENCE_INSUFFICIENT_FAIL_CLOSED",
+    "latency_class": "PRECOMPUTED_ARTIFACT_PLUS_BOUNDED_HOTPATH",
+    "research_state": "COMPLETE_NO_CODEX_MATERIAL_DECISION_RESEARCH_REQUIRED"
+  },
+  {
+    "role_id": "ROLE-08",
+    "responsibility": "Uncertainty decomposition",
+    "disposition": "TRUE_MISSING_DEPENDENCY",
+    "semantic_owner": "Evidence/model-risk owner",
+    "path_refs": [
+      {
+        "path": "src/qtt/stage1_prediction_markets/qku_computation_control_plane/evidence.py",
+        "disposition": "EXISTING_CANONICAL_OWNER"
+      },
+      {
+        "path": "src/qtt/stage1_prediction_markets/qku_computation_control_plane/model_risk.py",
+        "disposition": "EXISTING_CANONICAL_OWNER"
+      }
+    ],
+    "frozen_output": "Typed source/model/parameter/regime/execution/latency/settlement vector",
+    "direct_prerequisite_role_ids": [
+      "ROLE-03",
+      "ROLE-07"
+    ],
+    "default_failure_route": "EVIDENCE_INSUFFICIENT_FAIL_CLOSED",
+    "latency_class": "PRECOMPUTED_ARTIFACT_PLUS_BOUNDED_HOTPATH",
+    "research_state": "COMPLETE_NO_CODEX_MATERIAL_DECISION_RESEARCH_REQUIRED"
+  },
+  {
+    "role_id": "ROLE-09",
+    "responsibility": "Fee/rebate/reward computation",
+    "disposition": "TRUE_MISSING_DEPENDENCY",
+    "semantic_owner": "Binding plus economic-math owner",
+    "path_refs": [
+      {
+        "path": "src/qtt/stage1_prediction_markets/qku_computation_control_plane/bindings.py",
+        "disposition": "EXISTING_CANONICAL_OWNER"
+      },
+      {
+        "path": "src/qtt/stage1_prediction_markets/qku_computation_control_plane/economic_math.py",
+        "disposition": "EXISTING_CANONICAL_OWNER"
+      },
+      {
+        "path": "src/qtt/stage1_prediction_markets/selected_venues/profiles.py",
+        "disposition": "FUTURE_AUTHORIZED_OWNER_NOT_YET_IMPLEMENTED"
+      }
+    ],
+    "frozen_output": "Exact effective-time/eligibility/rounding/embedding result",
+    "direct_prerequisite_role_ids": [
+      "ROLE-01",
+      "ROLE-02",
+      "ROLE-03"
+    ],
+    "default_failure_route": "UNAVAILABLE",
+    "latency_class": "BOUNDED_HOTPATH_COMPUTE",
+    "research_state": "COMPLETE_NO_CODEX_MATERIAL_DECISION_RESEARCH_REQUIRED"
+  },
+  {
+    "role_id": "ROLE-10",
+    "responsibility": "Executable depth/slippage/impact",
+    "disposition": "BINDING_ONLY_GAP",
+    "semantic_owner": "QKU economic-math owner",
+    "path_refs": [
+      {
+        "path": "src/qtt/stage1_prediction_markets/qku_computation_control_plane/economic_math.py",
+        "disposition": "EXISTING_CANONICAL_OWNER"
+      },
+      {
+        "path": "src/qtt/stage1_prediction_markets/qku_computation_control_plane/implementation_registry.py",
+        "disposition": "EXISTING_CANONICAL_OWNER"
+      }
+    ],
+    "frozen_output": "Exact book walk plus residual impact and embedding ledger",
+    "direct_prerequisite_role_ids": [
+      "ROLE-04",
+      "ROLE-09"
+    ],
+    "default_failure_route": "UNAVAILABLE",
+    "latency_class": "BOUNDED_HOTPATH_COMPUTE",
+    "research_state": "COMPLETE_NO_CODEX_MATERIAL_DECISION_RESEARCH_REQUIRED"
+  },
+  {
+    "role_id": "ROLE-11",
+    "responsibility": "Fill and partial-fill distribution",
+    "disposition": "EVIDENCE_ONLY_GAP",
+    "semantic_owner": "Evidence/model owner",
+    "path_refs": [
+      {
+        "path": "src/qtt/stage1_prediction_markets/qku_computation_control_plane/economic_math.py",
+        "disposition": "EXISTING_CANONICAL_OWNER"
+      },
+      {
+        "path": "src/qtt/stage1_prediction_markets/qku_computation_control_plane/evidence.py",
+        "disposition": "EXISTING_CANONICAL_OWNER"
+      }
+    ],
+    "frozen_output": "Contextual fill probability and quantity distribution",
+    "direct_prerequisite_role_ids": [
+      "ROLE-04",
+      "ROLE-05",
+      "ROLE-10",
+      "ROLE-12"
+    ],
+    "default_failure_route": "EVIDENCE_INSUFFICIENT_FAIL_CLOSED",
+    "latency_class": "PRECOMPUTED_ARTIFACT_PLUS_BOUNDED_HOTPATH",
+    "research_state": "COMPLETE_NO_CODEX_MATERIAL_DECISION_RESEARCH_REQUIRED"
+  },
+  {
+    "role_id": "ROLE-12",
+    "responsibility": "Queue position and survival",
+    "disposition": "TRUE_MISSING_DEPENDENCY",
+    "semantic_owner": "Execution-science owner",
+    "path_refs": [
+      {
+        "path": "src/qtt/stage1_prediction_markets/qku_computation_control_plane/economic_math.py",
+        "disposition": "EXISTING_CANONICAL_OWNER"
+      },
+      {
+        "path": "src/qtt/stage1_prediction_markets/qku_computation_control_plane/implementation_registry.py",
+        "disposition": "EXISTING_CANONICAL_OWNER"
+      }
+    ],
+    "frozen_output": "Native queue state or independently validated proxy",
+    "direct_prerequisite_role_ids": [
+      "ROLE-04",
+      "ROLE-05"
+    ],
+    "default_failure_route": "UNAVAILABLE",
+    "latency_class": "PRECOMPUTED_ARTIFACT_PLUS_BOUNDED_HOTPATH",
+    "research_state": "COMPLETE_NO_CODEX_MATERIAL_DECISION_RESEARCH_REQUIRED"
+  },
+  {
+    "role_id": "ROLE-13",
+    "responsibility": "Adverse selection and markout",
+    "disposition": "EVIDENCE_ONLY_GAP",
+    "semantic_owner": "TCA/evidence owner",
+    "path_refs": [
+      {
+        "path": "src/qtt/stage1_prediction_markets/qku_computation_control_plane/economic_math.py",
+        "disposition": "EXISTING_CANONICAL_OWNER"
+      },
+      {
+        "path": "src/qtt/stage1_prediction_markets/qku_computation_control_plane/evidence.py",
+        "disposition": "EXISTING_CANONICAL_OWNER"
+      }
+    ],
+    "frozen_output": "Conditional signed markout distribution by horizon/context",
+    "direct_prerequisite_role_ids": [
+      "ROLE-05",
+      "ROLE-11"
+    ],
+    "default_failure_route": "EVIDENCE_INSUFFICIENT_FAIL_CLOSED",
+    "latency_class": "PRECOMPUTED_ARTIFACT_PLUS_BOUNDED_HOTPATH",
+    "research_state": "COMPLETE_NO_CODEX_MATERIAL_DECISION_RESEARCH_REQUIRED"
+  },
+  {
+    "role_id": "ROLE-14",
+    "responsibility": "Latency-decay curve and economic-TTL inputs",
+    "disposition": "TRUE_MISSING_DEPENDENCY",
+    "semantic_owner": "Latency/economic owner",
+    "path_refs": [
+      {
+        "path": "src/qtt/stage1_prediction_markets/qku_computation_control_plane/latency_policy.py",
+        "disposition": "EXISTING_CANONICAL_OWNER"
+      },
+      {
+        "path": "src/qtt/stage1_prediction_markets/qku_computation_control_plane/economic_math.py",
+        "disposition": "EXISTING_CANONICAL_OWNER"
+      }
+    ],
+    "frozen_output": "Versioned net-cash decay function, current opportunity age, joint latency safety margin, and deterministic TTL resolver",
+    "direct_prerequisite_role_ids": [
+      "ROLE-03",
+      "ROLE-04",
+      "ROLE-05"
+    ],
+    "default_failure_route": "NO_TRADE",
+    "latency_class": "PRECOMPUTED_ARTIFACT_PLUS_BOUNDED_HOTPATH",
+    "research_state": "COMPLETE_NO_CODEX_MATERIAL_DECISION_RESEARCH_REQUIRED"
+  },
+  {
+    "role_id": "ROLE-15",
+    "responsibility": "Expected executable net cash",
+    "disposition": "BINDING_ONLY_GAP",
+    "semantic_owner": "Economic/accounting owner",
+    "path_refs": [
+      {
+        "path": "src/qtt/stage1_prediction_markets/qku_computation_control_plane/economic_math.py",
+        "disposition": "EXISTING_CANONICAL_OWNER"
+      },
+      {
+        "path": "src/qtt/stage1_prediction_markets/qku_computation_control_plane/accounting.py",
+        "disposition": "EXISTING_CANONICAL_OWNER"
+      }
+    ],
+    "frozen_output": "Complete projected executable cash once, with embedding flags",
+    "direct_prerequisite_role_ids": [
+      "ROLE-06",
+      "ROLE-07",
+      "ROLE-08",
+      "ROLE-09",
+      "ROLE-10",
+      "ROLE-11",
+      "ROLE-13",
+      "ROLE-14"
+    ],
+    "default_failure_route": "UNAVAILABLE",
+    "latency_class": "BOUNDED_HOTPATH_COMPUTE",
+    "research_state": "COMPLETE_NO_CODEX_MATERIAL_DECISION_RESEARCH_REQUIRED"
+  },
+  {
+    "role_id": "ROLE-16",
+    "responsibility": "Joint robust net-cash LCB and final economic TTL",
+    "disposition": "TRUE_MISSING_DEPENDENCY",
+    "semantic_owner": "Evidence/model-risk/QKU owner",
+    "path_refs": [
+      {
+        "path": "src/qtt/stage1_prediction_markets/qku_computation_control_plane/evidence.py",
+        "disposition": "EXISTING_CANONICAL_OWNER"
+      },
+      {
+        "path": "src/qtt/stage1_prediction_markets/qku_computation_control_plane/model_risk.py",
+        "disposition": "EXISTING_CANONICAL_OWNER"
+      },
+      {
+        "path": "src/qtt/stage1_prediction_markets/qku_computation_control_plane/implementation_registry.py",
+        "disposition": "EXISTING_CANONICAL_OWNER"
+      }
+    ],
+    "frozen_output": "Dependent lower bound versus NO_TRADE/best alternative plus final positive-TTL decision",
+    "direct_prerequisite_role_ids": [
+      "ROLE-08",
+      "ROLE-15"
+    ],
+    "default_failure_route": "NO_TRADE",
+    "latency_class": "PRECOMPUTED_ARTIFACT_PLUS_BOUNDED_HOTPATH",
+    "research_state": "COMPLETE_NO_CODEX_MATERIAL_DECISION_RESEARCH_REQUIRED"
+  },
+  {
+    "role_id": "ROLE-17",
+    "responsibility": "Cash/reservation/order-custody truth",
+    "disposition": "TRUE_MISSING_DEPENDENCY",
+    "semantic_owner": "Accounting/capital-risk/private-state owner",
+    "path_refs": [
+      {
+        "path": "src/qtt/stage1_prediction_markets/qku_computation_control_plane/accounting.py",
+        "disposition": "EXISTING_CANONICAL_OWNER"
+      },
+      {
+        "path": "src/qtt/stage1_prediction_markets/qku_computation_control_plane/transaction.py",
+        "disposition": "EXISTING_CANONICAL_OWNER"
+      },
+      {
+        "path": "src/qtt/stage1_prediction_markets/qku_computation_control_plane/persistence.py",
+        "disposition": "EXISTING_CANONICAL_OWNER"
+      },
+      {
+        "path": "src/qtt/stage1_prediction_markets/selected_venues/private_state.py",
+        "disposition": "FUTURE_AUTHORIZED_OWNER_NOT_YET_IMPLEMENTED"
+      },
+      {
+        "path": "src/qtt/stage1_prediction_markets/selected_venues/reconciliation.py",
+        "disposition": "FUTURE_AUTHORIZED_OWNER_NOT_YET_IMPLEMENTED"
+      }
+    ],
+    "frozen_output": "OrderCustodyStateV2 and conservative reservations",
+    "direct_prerequisite_role_ids": [
+      "ROLE-01",
+      "ROLE-03"
+    ],
+    "default_failure_route": "SUBMIT_DISABLED",
+    "latency_class": "HARD_CONTROL_HOTPATH",
+    "research_state": "COMPLETE_NO_CODEX_MATERIAL_DECISION_RESEARCH_REQUIRED"
+  },
+  {
+    "role_id": "ROLE-18",
+    "responsibility": "Hard risk and exposure",
+    "disposition": "BINDING_ONLY_GAP",
+    "semantic_owner": "Capital-risk owner",
+    "path_refs": [
+      {
+        "path": "src/qtt/stage1_prediction_markets/qku_computation_control_plane/authority.py",
+        "disposition": "EXISTING_CANONICAL_OWNER"
+      },
+      {
+        "path": "src/qtt/stage1_prediction_markets/capital_risk/stage1_risk_policy.py",
+        "disposition": "FUTURE_AUTHORIZED_OWNER_NOT_YET_IMPLEMENTED"
+      }
+    ],
+    "frozen_output": "Exact selected scope and cash/event/venue/concentration/drawdown gates",
+    "direct_prerequisite_role_ids": [
+      "ROLE-01",
+      "ROLE-03",
+      "ROLE-17"
+    ],
+    "default_failure_route": "SUBMIT_DISABLED",
+    "latency_class": "HARD_CONTROL_HOTPATH",
+    "research_state": "COMPLETE_NO_CODEX_MATERIAL_DECISION_RESEARCH_REQUIRED"
+  },
+  {
+    "role_id": "ROLE-19",
+    "responsibility": "Position sizing",
+    "disposition": "BINDING_ONLY_GAP",
+    "semantic_owner": "QKU/capital-risk owner",
+    "path_refs": [
+      {
+        "path": "src/qtt/stage1_prediction_markets/qku_computation_control_plane/economic_math.py",
+        "disposition": "EXISTING_CANONICAL_OWNER"
+      },
+      {
+        "path": "src/qtt/stage1_prediction_markets/capital_risk/stage1_risk_policy.py",
+        "disposition": "FUTURE_AUTHORIZED_OWNER_NOT_YET_IMPLEMENTED"
+      }
+    ],
+    "frozen_output": "Micro-only cash size under robust edge/capacity/loss caps",
+    "direct_prerequisite_role_ids": [
+      "ROLE-16",
+      "ROLE-17",
+      "ROLE-18"
+    ],
+    "default_failure_route": "NO_TRADE",
+    "latency_class": "BOUNDED_HOTPATH_COMPUTE",
+    "research_state": "COMPLETE_NO_CODEX_MATERIAL_DECISION_RESEARCH_REQUIRED"
+  },
+  {
+    "role_id": "ROLE-20",
+    "responsibility": "Portfolio and capital-time allocation",
+    "disposition": "TRUE_MISSING_DEPENDENCY",
+    "semantic_owner": "Portfolio/QKU/quantum owner",
+    "path_refs": [
+      {
+        "path": "src/qtt/stage1_prediction_markets/qku_computation_control_plane/implementation_registry.py",
+        "disposition": "EXISTING_CANONICAL_OWNER"
+      },
+      {
+        "path": "src/qtt/stage1_prediction_markets/qku_computation_control_plane/economic_math.py",
+        "disposition": "EXISTING_CANONICAL_OWNER"
+      },
+      {
+        "path": "src/qtt/stage1_prediction_markets/qku_computation_control_plane/quantum_adapter.py",
+        "disposition": "EXISTING_CANONICAL_OWNER"
+      },
+      {
+        "path": "src/qtt/stage1_prediction_markets/qku_computation_control_plane/quantum_benchmark.py",
+        "disposition": "EXISTING_CANONICAL_OWNER"
+      }
+    ],
+    "frozen_output": "Deterministic classical constrained allocation plus optional challenger",
+    "direct_prerequisite_role_ids": [
+      "ROLE-16",
+      "ROLE-17",
+      "ROLE-18",
+      "ROLE-19"
+    ],
+    "default_failure_route": "NO_TRADE",
+    "latency_class": "IMMUTABLE_PRECOMPUTED_SNAPSHOT_LOOKUP",
+    "research_state": "COMPLETE_NO_CODEX_MATERIAL_DECISION_RESEARCH_REQUIRED"
+  },
+  {
+    "role_id": "ROLE-21",
+    "responsibility": "Entry/execution action policy",
+    "disposition": "TRUE_MISSING_DEPENDENCY",
+    "semantic_owner": "Execution-policy owner",
+    "path_refs": [
+      {
+        "path": "src/qtt/stage1_prediction_markets/qku_computation_control_plane/lifecycle.py",
+        "disposition": "EXISTING_CANONICAL_OWNER"
+      },
+      {
+        "path": "src/qtt/stage1_prediction_markets/selected_venues/execution_policy.py",
+        "disposition": "FUTURE_AUTHORIZED_OWNER_NOT_YET_IMPLEMENTED"
+      }
+    ],
+    "frozen_output": "MAKE/TAKE/SPLIT/WAIT/CANCEL/NO_TRADE state machine",
+    "direct_prerequisite_role_ids": [
+      "ROLE-14",
+      "ROLE-16",
+      "ROLE-17",
+      "ROLE-18",
+      "ROLE-19",
+      "ROLE-20",
+      "ROLE-26",
+      "ROLE-28"
+    ],
+    "default_failure_route": "NO_TRADE",
+    "latency_class": "BOUNDED_HOTPATH_COMPUTE",
+    "research_state": "COMPLETE_NO_CODEX_MATERIAL_DECISION_RESEARCH_REQUIRED"
+  },
+  {
+    "role_id": "ROLE-22",
+    "responsibility": "Exit/hold/reduce/hedge/reverse policy",
+    "disposition": "TRUE_MISSING_DEPENDENCY",
+    "semantic_owner": "Execution-policy/lifecycle/risk owner",
+    "path_refs": [
+      {
+        "path": "src/qtt/stage1_prediction_markets/qku_computation_control_plane/lifecycle.py",
+        "disposition": "EXISTING_CANONICAL_OWNER"
+      },
+      {
+        "path": "src/qtt/stage1_prediction_markets/selected_venues/execution_policy.py",
+        "disposition": "FUTURE_AUTHORIZED_OWNER_NOT_YET_IMPLEMENTED"
+      },
+      {
+        "path": "src/qtt/stage1_prediction_markets/capital_risk/stage1_risk_policy.py",
+        "disposition": "FUTURE_AUTHORIZED_OWNER_NOT_YET_IMPLEMENTED"
+      }
+    ],
+    "frozen_output": "Bounded current-state lifecycle policy",
+    "direct_prerequisite_role_ids": [
+      "ROLE-14",
+      "ROLE-15",
+      "ROLE-17",
+      "ROLE-18",
+      "ROLE-26"
+    ],
+    "default_failure_route": "SAFE_HOLD",
+    "latency_class": "HARD_CONTROL_HOTPATH",
+    "research_state": "COMPLETE_NO_CODEX_MATERIAL_DECISION_RESEARCH_REQUIRED"
+  },
+  {
+    "role_id": "ROLE-23",
+    "responsibility": "TCA and realized attribution",
+    "disposition": "EVIDENCE_ONLY_GAP",
+    "semantic_owner": "TCA/evidence/accounting owner",
+    "path_refs": [
+      {
+        "path": "src/qtt/stage1_prediction_markets/qku_computation_control_plane/economic_math.py",
+        "disposition": "EXISTING_CANONICAL_OWNER"
+      },
+      {
+        "path": "src/qtt/stage1_prediction_markets/qku_computation_control_plane/evidence.py",
+        "disposition": "EXISTING_CANONICAL_OWNER"
+      },
+      {
+        "path": "src/qtt/stage1_prediction_markets/qku_computation_control_plane/accounting.py",
+        "disposition": "EXISTING_CANONICAL_OWNER"
+      }
+    ],
+    "frozen_output": "Attempt-level source/model/execution/cost attribution",
+    "direct_prerequisite_role_ids": [
+      "ROLE-03",
+      "ROLE-09",
+      "ROLE-10",
+      "ROLE-11",
+      "ROLE-13",
+      "ROLE-14",
+      "ROLE-17",
+      "ROLE-21",
+      "ROLE-22"
+    ],
+    "default_failure_route": "EVIDENCE_INSUFFICIENT_FAIL_CLOSED",
+    "latency_class": "OFFLINE_EVIDENCE_ONLY",
+    "research_state": "COMPLETE_NO_CODEX_MATERIAL_DECISION_RESEARCH_REQUIRED"
+  },
+  {
+    "role_id": "ROLE-24",
+    "responsibility": "Mode/ALLOW/snapshot eligibility",
+    "disposition": "BINDING_ONLY_GAP",
+    "semantic_owner": "Mode/snapshot owner",
+    "path_refs": [
+      {
+        "path": "src/qtt/stage1_prediction_markets/qku_computation_control_plane/mode_snapshot_policy.py",
+        "disposition": "EXISTING_CANONICAL_OWNER"
+      },
+      {
+        "path": "src/qtt/stage1_prediction_markets/qku_computation_control_plane/authority.py",
+        "disposition": "EXISTING_CANONICAL_OWNER"
+      }
+    ],
+    "frozen_output": "Pinned graph/source/evidence/security/risk/owner envelope",
+    "direct_prerequisite_role_ids": [
+      "ROLE-03",
+      "ROLE-08",
+      "ROLE-16",
+      "ROLE-17",
+      "ROLE-18",
+      "ROLE-21",
+      "ROLE-22",
+      "ROLE-23",
+      "ROLE-26",
+      "ROLE-28"
+    ],
+    "default_failure_route": "SUBMIT_DISABLED",
+    "latency_class": "HARD_CONTROL_HOTPATH",
+    "research_state": "COMPLETE_NO_CODEX_MATERIAL_DECISION_RESEARCH_REQUIRED"
+  },
+  {
+    "role_id": "ROLE-25",
+    "responsibility": "Sole venue-write release",
+    "disposition": "TRUE_MISSING_DEPENDENCY",
+    "semantic_owner": "ExecutionRouterV1 owner",
+    "path_refs": [
+      {
+        "path": "src/qtt/stage1_prediction_markets/selected_venues/execution_router.py",
+        "disposition": "FUTURE_AUTHORIZED_OWNER_NOT_YET_IMPLEMENTED"
+      }
+    ],
+    "frozen_output": "Idempotent stale-checked fenced custody-aware dispatch",
+    "direct_prerequisite_role_ids": [
+      "ROLE-01",
+      "ROLE-03",
+      "ROLE-14",
+      "ROLE-17",
+      "ROLE-18",
+      "ROLE-21",
+      "ROLE-22",
+      "ROLE-24",
+      "ROLE-26",
+      "ROLE-28"
+    ],
+    "default_failure_route": "SUBMIT_DISABLED",
+    "latency_class": "SOLE_WRITE_HOTPATH",
+    "research_state": "COMPLETE_NO_CODEX_MATERIAL_DECISION_RESEARCH_REQUIRED"
+  },
+  {
+    "role_id": "ROLE-26",
+    "responsibility": "Deterministic classical fallback",
+    "disposition": "BINDING_ONLY_GAP",
+    "semantic_owner": "Dependency/fallback owner",
+    "path_refs": [
+      {
+        "path": "src/qtt/stage1_prediction_markets/qku_computation_control_plane/dependency_graph.py",
+        "disposition": "EXISTING_CANONICAL_OWNER"
+      },
+      {
+        "path": "src/qtt/stage1_prediction_markets/qku_computation_control_plane/fallback.py",
+        "disposition": "EXISTING_CANONICAL_OWNER"
+      }
+    ],
+    "frozen_output": "Same-input admissible fallback for every selected path",
+    "direct_prerequisite_role_ids": [
+      "ROLE-01",
+      "ROLE-03"
+    ],
+    "default_failure_route": "NO_TRADE",
+    "latency_class": "IMMUTABLE_PRECOMPUTED_SNAPSHOT_LOOKUP",
+    "research_state": "COMPLETE_NO_CODEX_MATERIAL_DECISION_RESEARCH_REQUIRED"
+  },
+  {
+    "role_id": "ROLE-27",
+    "responsibility": "Quantum challenger artifact",
+    "disposition": "EVIDENCE_ONLY_GAP",
+    "semantic_owner": "Quantum mapper/benchmark owner",
+    "path_refs": [
+      {
+        "path": "src/qtt/stage1_prediction_markets/qku_computation_control_plane/quantum_adapter.py",
+        "disposition": "EXISTING_CANONICAL_OWNER"
+      },
+      {
+        "path": "src/qtt/stage1_prediction_markets/qku_computation_control_plane/quantum_benchmark.py",
+        "disposition": "EXISTING_CANONICAL_OWNER"
+      },
+      {
+        "path": "src/qtt/stage1_prediction_markets/qku_computation_control_plane/plugin_adapter.py",
+        "disposition": "EXISTING_CANONICAL_OWNER"
+      }
+    ],
+    "frozen_output": "Same-formulation challenger with feasibility/economic interpret-back",
+    "direct_prerequisite_role_ids": [
+      "ROLE-16",
+      "ROLE-20",
+      "ROLE-26"
+    ],
+    "default_failure_route": "CLASSICAL_ONLY",
+    "latency_class": "ASYNC_CHALLENGER_ONLY",
+    "research_state": "COMPLETE_NO_CODEX_MATERIAL_DECISION_RESEARCH_REQUIRED"
+  },
+  {
+    "role_id": "ROLE-28",
+    "responsibility": "Agent capability and duty enforcement",
+    "disposition": "BINDING_ONLY_GAP",
+    "semantic_owner": "Agent/LLM policy owner",
+    "path_refs": [
+      {
+        "path": "src/qtt/stage1_prediction_markets/qku_computation_control_plane/agent_policy.py",
+        "disposition": "EXISTING_CANONICAL_OWNER"
+      },
+      {
+        "path": "src/qtt/stage1_prediction_markets/qku_computation_control_plane/llm_gateway.py",
+        "disposition": "EXISTING_CANONICAL_OWNER"
+      }
+    ],
+    "frozen_output": "Typed tasks, duties, budgets, abstention, quarantine",
+    "direct_prerequisite_role_ids": [
+      "ROLE-01",
+      "ROLE-03",
+      "ROLE-26"
+    ],
+    "default_failure_route": "SUBMIT_DISABLED",
+    "latency_class": "HARD_CONTROL_HOTPATH",
+    "research_state": "COMPLETE_NO_CODEX_MATERIAL_DECISION_RESEARCH_REQUIRED"
+  }
+]"""
+_EXPECTED_STAGE1_OPERATION_PROFILE_ROWS_JSON = r"""[
+  {
+    "operation_class": "NEW_OR_INCREASED_EXPOSURE",
+    "required_role_ids": [
+      "ROLE-01",
+      "ROLE-02",
+      "ROLE-03",
+      "ROLE-04",
+      "ROLE-05",
+      "ROLE-06",
+      "ROLE-07",
+      "ROLE-08",
+      "ROLE-09",
+      "ROLE-10",
+      "ROLE-11",
+      "ROLE-12",
+      "ROLE-13",
+      "ROLE-14",
+      "ROLE-15",
+      "ROLE-16",
+      "ROLE-17",
+      "ROLE-18",
+      "ROLE-19",
+      "ROLE-20",
+      "ROLE-21",
+      "ROLE-22",
+      "ROLE-23",
+      "ROLE-24",
+      "ROLE-25",
+      "ROLE-26",
+      "ROLE-28"
+    ],
+    "optional_role_ids": [
+      "ROLE-27"
+    ],
+    "terminal_failure_route": "NO_TRADE_AND_SUBMIT_DISABLED",
+    "purpose": "Full release-critical lifecycle closure for any new or increased exposure.",
+    "consumption_law": "EXECUTE_ONLY_HOTPATH_CLASS_ROLES_AND_READ_VERSION_PINNED_CURRENT_OUTPUTS_FOR_PRECOMPUTED_OFFLINE_OR_ASYNC_ROLES",
+    "research_state": "COMPLETE_NO_CODEX_MATERIAL_DECISION_RESEARCH_REQUIRED"
+  },
+  {
+    "operation_class": "CANCEL_QUERY_RECONCILE",
+    "required_role_ids": [
+      "ROLE-01",
+      "ROLE-17",
+      "ROLE-24",
+      "ROLE-25",
+      "ROLE-28"
+    ],
+    "optional_role_ids": [],
+    "terminal_failure_route": "QUERY_RECONCILE_REQUIRED_OR_SAFE_HOLD",
+    "purpose": "Narrow emergency/control path independent of public-source, market-discovery, alpha, hard-risk computation, portfolio, and quantum availability.",
+    "consumption_law": "EXECUTE_ONLY_HOTPATH_CLASS_ROLES_AND_READ_VERSION_PINNED_CURRENT_OUTPUTS_FOR_PRECOMPUTED_OFFLINE_OR_ASYNC_ROLES",
+    "research_state": "COMPLETE_NO_CODEX_MATERIAL_DECISION_RESEARCH_REQUIRED"
+  },
+  {
+    "operation_class": "RISK_REDUCING_POSITION_ACTION",
+    "required_role_ids": [
+      "ROLE-01",
+      "ROLE-02",
+      "ROLE-03",
+      "ROLE-04",
+      "ROLE-09",
+      "ROLE-10",
+      "ROLE-14",
+      "ROLE-15",
+      "ROLE-17",
+      "ROLE-18",
+      "ROLE-22",
+      "ROLE-24",
+      "ROLE-25",
+      "ROLE-26",
+      "ROLE-28"
+    ],
+    "optional_role_ids": [],
+    "terminal_failure_route": "SAFE_HOLD",
+    "purpose": "Bounded hold, cancel-only, reduce-only, close-only, offset, or exact reverse using current authoritative state.",
+    "consumption_law": "EXECUTE_ONLY_HOTPATH_CLASS_ROLES_AND_READ_VERSION_PINNED_CURRENT_OUTPUTS_FOR_PRECOMPUTED_OFFLINE_OR_ASYNC_ROLES",
+    "research_state": "COMPLETE_NO_CODEX_MATERIAL_DECISION_RESEARCH_REQUIRED"
+  },
+  {
+    "operation_class": "REPLAY_PAPER_EVIDENCE",
+    "required_role_ids": [
+      "ROLE-01",
+      "ROLE-02",
+      "ROLE-03",
+      "ROLE-04",
+      "ROLE-05",
+      "ROLE-06",
+      "ROLE-07",
+      "ROLE-08",
+      "ROLE-09",
+      "ROLE-10",
+      "ROLE-11",
+      "ROLE-12",
+      "ROLE-13",
+      "ROLE-14",
+      "ROLE-15",
+      "ROLE-16",
+      "ROLE-17",
+      "ROLE-18",
+      "ROLE-23",
+      "ROLE-26",
+      "ROLE-28"
+    ],
+    "optional_role_ids": [
+      "ROLE-27"
+    ],
+    "terminal_failure_route": "EVIDENCE_INSUFFICIENT_FAIL_CLOSED",
+    "purpose": "Immutable-input replay and distinct PAPER evidence without order authority.",
+    "consumption_law": "EXECUTE_ONLY_HOTPATH_CLASS_ROLES_AND_READ_VERSION_PINNED_CURRENT_OUTPUTS_FOR_PRECOMPUTED_OFFLINE_OR_ASYNC_ROLES",
+    "research_state": "COMPLETE_NO_CODEX_MATERIAL_DECISION_RESEARCH_REQUIRED"
+  },
+  {
+    "operation_class": "QUANTUM_CHALLENGER_RESEARCH",
+    "required_role_ids": [
+      "ROLE-01",
+      "ROLE-03",
+      "ROLE-08",
+      "ROLE-15",
+      "ROLE-16",
+      "ROLE-17",
+      "ROLE-18",
+      "ROLE-19",
+      "ROLE-20",
+      "ROLE-26",
+      "ROLE-27"
+    ],
+    "optional_role_ids": [],
+    "terminal_failure_route": "CLASSICAL_ONLY",
+    "purpose": "Same-formulation true-quantum challenger evidence with deterministic classical fallback.",
+    "consumption_law": "EXECUTE_ONLY_HOTPATH_CLASS_ROLES_AND_READ_VERSION_PINNED_CURRENT_OUTPUTS_FOR_PRECOMPUTED_OFFLINE_OR_ASYNC_ROLES",
+    "research_state": "COMPLETE_NO_CODEX_MATERIAL_DECISION_RESEARCH_REQUIRED"
+  }
+]"""
+
 DECIMAL_CONTEXT = Context(prec=34, rounding=ROUND_HALF_EVEN)
 
 
@@ -305,6 +1319,501 @@ def _json_rows(tree: ast.Module, name: str) -> list[dict[str, object]]:
     ):
         raise ValueError(f"{name} must be a JSON array of objects")
     return value
+
+
+def _stage1_launch_graph_failures() -> list[str]:
+    """Independently reconstruct the frozen launch graph from source literals."""
+
+    failures: list[str] = []
+    source_path = PACKAGE / "stage1_launch_graph.py"
+    try:
+        source_text = source_path.read_text(encoding="utf-8")
+        tree = ast.parse(source_text, filename=str(source_path))
+        profile_rows = _json_rows(tree, "_STAGE1_VENUE_PROFILE_ROWS_JSON")
+        role_rows = _json_rows(tree, "_STAGE1_LAUNCH_ROLE_ROWS_JSON")
+        operation_rows = _json_rows(
+            tree,
+            "_STAGE1_OPERATION_PROFILE_ROWS_JSON",
+        )
+    except (OSError, SyntaxError, ValueError, json.JSONDecodeError) as exc:
+        return [f"Stage-1 launch graph literals could not be reconstructed: {exc}"]
+
+    expected_profile_rows = json.loads(
+        _EXPECTED_STAGE1_VENUE_PROFILE_ROWS_JSON
+    )
+    expected_role_rows = json.loads(_EXPECTED_STAGE1_LAUNCH_ROLE_ROWS_JSON)
+    expected_operation_rows = json.loads(
+        _EXPECTED_STAGE1_OPERATION_PROFILE_ROWS_JSON
+    )
+    if profile_rows != expected_profile_rows:
+        failures.append("Stage-1 venue-profile rows differ from independent rows")
+    if role_rows != expected_role_rows:
+        failures.append("Stage-1 launch-role rows differ from independent rows")
+    if operation_rows != expected_operation_rows:
+        failures.append("Stage-1 operation rows differ from independent rows")
+
+    expected_profile_fields = (
+        "profile_id",
+        "scope_state",
+        "serialization_ordinal_or_none",
+        "operating_legal_entity",
+        "clearing_or_access_route",
+        "product_family",
+        "api_profile",
+        "jurisdiction",
+        "authority_ref",
+        "research_state",
+    )
+    expected_role_fields = (
+        "role_id",
+        "responsibility",
+        "disposition",
+        "semantic_owner",
+        "path_refs",
+        "frozen_output",
+        "direct_prerequisite_role_ids",
+        "default_failure_route",
+        "latency_class",
+        "research_state",
+    )
+    expected_path_fields = ("path", "disposition")
+    expected_operation_fields = (
+        "operation_class",
+        "required_role_ids",
+        "optional_role_ids",
+        "terminal_failure_route",
+        "purpose",
+        "consumption_law",
+        "research_state",
+    )
+    if len(profile_rows) != 5 or any(
+        tuple(row) != expected_profile_fields for row in profile_rows
+    ):
+        failures.append("Stage-1 profile count or schema differs")
+    if len(role_rows) != 28 or any(
+        tuple(row) != expected_role_fields for row in role_rows
+    ):
+        failures.append("Stage-1 role count or schema differs")
+    if len(operation_rows) != 5 or any(
+        tuple(row) != expected_operation_fields for row in operation_rows
+    ):
+        failures.append("Stage-1 operation count or schema differs")
+
+    selected_rows = tuple(
+        row for row in profile_rows if row.get("scope_state") == "SELECTED_CORE"
+    )
+    excluded_rows = tuple(
+        row
+        for row in profile_rows
+        if row.get("scope_state") == "OWNER_EXCLUDED_STAGE1_NO_IMPLEMENTATION"
+    )
+    try:
+        selected_serialization = tuple(
+            str(row["profile_id"])
+            for row in sorted(
+                selected_rows,
+                key=lambda row: int(row["serialization_ordinal_or_none"]),
+            )
+        )
+    except (KeyError, TypeError, ValueError):
+        selected_serialization = ()
+    excluded_profile_ids = tuple(
+        str(row.get("profile_id")) for row in excluded_rows
+    )
+    all_profile_ids = tuple(str(row.get("profile_id")) for row in profile_rows)
+    if (
+        len(selected_rows) != 3
+        or selected_serialization != _EXPECTED_STAGE1_SELECTED_PROFILE_IDS
+        or any(
+            row.get("serialization_ordinal_or_none") != ordinal
+            for ordinal, row in enumerate(
+                sorted(
+                    selected_rows,
+                    key=lambda row: (
+                        row.get("serialization_ordinal_or_none")
+                        if isinstance(
+                            row.get("serialization_ordinal_or_none"), int
+                        )
+                        else 99
+                    ),
+                ),
+                start=1,
+            )
+        )
+    ):
+        failures.append("Stage-1 selected profile serialization differs")
+    if (
+        len(excluded_rows) != 2
+        or excluded_profile_ids != _EXPECTED_STAGE1_EXCLUDED_PROFILE_IDS
+        or any(
+            row.get("serialization_ordinal_or_none") is not None
+            for row in excluded_rows
+        )
+    ):
+        failures.append("Stage-1 owner-excluded profile set differs")
+    if "POLYMARKET" in all_profile_ids:
+        failures.append("generic POLYMARKET profile identity is forbidden")
+    if any(
+        str(row.get("profile_id", "")).startswith("FORECASTEX")
+        for row in selected_rows
+    ):
+        failures.append("ForecastEx is active in the selected profile set")
+
+    expected_role_ids = tuple(f"ROLE-{value:02d}" for value in range(1, 29))
+    role_ids = tuple(str(row.get("role_id")) for row in role_rows)
+    role_id_counts = Counter(role_ids)
+    if role_ids != expected_role_ids or any(
+        count != 1 for count in role_id_counts.values()
+    ):
+        failures.append("Stage-1 role identity closure differs")
+    disposition_counts = Counter(str(row.get("disposition")) for row in role_rows)
+    if disposition_counts != Counter(
+        {
+            "BINDING_ONLY_GAP": 11,
+            "EVIDENCE_ONLY_GAP": 5,
+            "TRUE_MISSING_DEPENDENCY": 12,
+        }
+    ):
+        failures.append("Stage-1 11/5/12 role disposition closure differs")
+
+    path_references: list[tuple[str, str, str]] = []
+    for role in role_rows:
+        role_id = str(role.get("role_id"))
+        refs = role.get("path_refs")
+        if not isinstance(refs, list):
+            failures.append(f"{role_id}: path_refs is not a JSON list")
+            continue
+        for ref in refs:
+            if not isinstance(ref, dict) or tuple(ref) != expected_path_fields:
+                failures.append(f"{role_id}: path-reference schema differs")
+                continue
+            path_references.append(
+                (role_id, str(ref.get("path")), str(ref.get("disposition")))
+            )
+
+    def safe_relative_path(value: str) -> bool:
+        if (
+            not value
+            or value != value.strip()
+            or "\\" in value
+            or ":" in value
+            or value.startswith(("/", "./", "../"))
+            or any(token in value for token in ("*", "?", "[", "]"))
+            or any(ord(character) < 0x20 for character in value)
+        ):
+            return False
+        segments = value.split("/")
+        return bool(segments) and all(segment not in {"", ".", ".."} for segment in segments)
+
+    if len(path_references) != 68:
+        failures.append("Stage-1 role path-reference denominator differs")
+    if len({path for _role, path, _disposition in path_references}) != 34:
+        failures.append("Stage-1 distinct role-path denominator differs")
+    if any(not safe_relative_path(path) for _role, path, _disp in path_references):
+        failures.append("Stage-1 role path is not a safe exact relative path")
+    final_dispositions = Counter(
+        disposition for _role, _path, disposition in path_references
+    )
+    if final_dispositions != Counter(
+        {
+            "EXISTING_CANONICAL_OWNER": 57,
+            "FUTURE_AUTHORIZED_OWNER_NOT_YET_IMPLEMENTED": 11,
+        }
+    ):
+        failures.append("Stage-1 57/11 path-disposition closure differs")
+    for _role, path, disposition in path_references:
+        resolved = REPO_ROOT / path
+        if disposition == "EXISTING_CANONICAL_OWNER" and not resolved.is_file():
+            failures.append(f"Stage-1 existing owner path is missing: {path}")
+        if (
+            disposition == "FUTURE_AUTHORIZED_OWNER_NOT_YET_IMPLEMENTED"
+            and resolved.exists()
+        ):
+            failures.append(f"Stage-1 future owner path already exists: {path}")
+
+    role_set = set(role_ids)
+    role_by_id = {str(row.get("role_id")): row for row in role_rows}
+    edges: list[tuple[str, str]] = []
+    for role in role_rows:
+        consumer = str(role.get("role_id"))
+        prerequisites = role.get("direct_prerequisite_role_ids")
+        if not isinstance(prerequisites, list):
+            failures.append(f"{consumer}: prerequisites are not a JSON list")
+            continue
+        if len(prerequisites) != len(set(map(str, prerequisites))):
+            failures.append(f"{consumer}: duplicate direct prerequisite")
+        edges.extend((str(producer), consumer) for producer in prerequisites)
+    unknown_role_ids = {
+        role_id
+        for edge in edges
+        for role_id in edge
+        if role_id not in role_set
+    }
+    if unknown_role_ids:
+        failures.append(
+            f"Stage-1 dependency edges contain unknown roles: {sorted(unknown_role_ids)!r}"
+        )
+    if len(edges) != 102 or len(set(edges)) != 102:
+        failures.append("Stage-1 102-edge closure differs")
+    if any(producer == consumer for producer, consumer in edges):
+        failures.append("Stage-1 dependency graph contains a self-edge")
+    if "ROLE-12" not in role_by_id.get("ROLE-11", {}).get(
+        "direct_prerequisite_role_ids", []
+    ):
+        failures.append("ROLE-12 must be a direct prerequisite of ROLE-11")
+    if "ROLE-16" in role_by_id.get("ROLE-18", {}).get(
+        "direct_prerequisite_role_ids", []
+    ):
+        failures.append("ROLE-18 must remain independent of ROLE-16")
+    if "ROLE-21" in role_by_id.get("ROLE-22", {}).get(
+        "direct_prerequisite_role_ids", []
+    ):
+        failures.append("ROLE-22 must remain independent of ROLE-21")
+
+    indegree = {role_id: 0 for role_id in role_ids}
+    adjacency = {role_id: [] for role_id in role_ids}
+    for producer, consumer in edges:
+        if producer in adjacency and consumer in indegree:
+            adjacency[producer].append(consumer)
+            indegree[consumer] += 1
+    ready = sorted(role_id for role_id, degree in indegree.items() if degree == 0)
+    topological_order: list[str] = []
+    while ready:
+        producer = ready.pop(0)
+        topological_order.append(producer)
+        for consumer in sorted(adjacency[producer]):
+            indegree[consumer] -= 1
+            if indegree[consumer] == 0:
+                ready.append(consumer)
+                ready.sort()
+    if len(topological_order) != len(role_ids):
+        failures.append("Stage-1 dependency graph contains a cycle")
+    if tuple(topological_order) != _EXPECTED_STAGE1_TOPOLOGICAL_ORDER:
+        failures.append("Stage-1 lexicographic Kahn order differs")
+
+    operation_classes = tuple(
+        str(row.get("operation_class")) for row in operation_rows
+    )
+    if operation_classes != _EXPECTED_STAGE1_OPERATION_CLASSES:
+        failures.append("Stage-1 operation profile identities differ")
+    operation_role_ids: set[str] = set()
+    for row in operation_rows:
+        operation_class = str(row.get("operation_class"))
+        required = row.get("required_role_ids")
+        optional = row.get("optional_role_ids")
+        if not isinstance(required, list) or not isinstance(optional, list):
+            failures.append(f"{operation_class}: role closure is not a JSON list")
+            continue
+        required_ids = tuple(map(str, required))
+        optional_ids = tuple(map(str, optional))
+        operation_role_ids.update(required_ids)
+        operation_role_ids.update(optional_ids)
+        if (
+            len(required_ids) != len(set(required_ids))
+            or len(optional_ids) != len(set(optional_ids))
+            or set(required_ids).intersection(optional_ids)
+            or not set(required_ids + optional_ids).issubset(role_set)
+        ):
+            failures.append(f"{operation_class}: operation role closure differs")
+    orphan_role_ids = role_set - operation_role_ids
+    if orphan_role_ids:
+        failures.append(f"Stage-1 orphan roles exist: {sorted(orphan_role_ids)!r}")
+    operation_by_class = {
+        str(row.get("operation_class")): row for row in operation_rows
+    }
+    emergency = operation_by_class.get("CANCEL_QUERY_RECONCILE", {})
+    if (
+        tuple(emergency.get("required_role_ids", ()))
+        != ("ROLE-01", "ROLE-17", "ROLE-24", "ROLE-25", "ROLE-28")
+        or tuple(emergency.get("optional_role_ids", ()))
+        or emergency.get("terminal_failure_route")
+        != "QUERY_RECONCILE_REQUIRED_OR_SAFE_HOLD"
+    ):
+        failures.append("CANCEL_QUERY_RECONCILE emergency closure differs")
+    risk_reducing = operation_by_class.get("RISK_REDUCING_POSITION_ACTION", {})
+    if {"ROLE-16", "ROLE-21"}.intersection(
+        map(str, risk_reducing.get("required_role_ids", ()))
+    ):
+        failures.append("risk-reducing operation depends on economic/new-entry passage")
+
+    writer_roles = tuple(
+        str(row.get("role_id"))
+        for row in role_rows
+        if row.get("latency_class") == "SOLE_WRITE_HOTPATH"
+    )
+    execution_router_refs = tuple(
+        (role_id, path, disposition)
+        for role_id, path, disposition in path_references
+        if path.endswith("/execution_router.py")
+    )
+    if (
+        writer_roles != ("ROLE-25",)
+        or len(execution_router_refs) != 1
+        or execution_router_refs[0][0] != "ROLE-25"
+        or execution_router_refs[0][2]
+        != "FUTURE_AUTHORIZED_OWNER_NOT_YET_IMPLEMENTED"
+    ):
+        failures.append("ROLE-25 sole future execution-writer closure differs")
+
+    import_rows: list[
+        tuple[str, int, str, tuple[tuple[str, str | None], ...]]
+    ] = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            import_rows.append(
+                (
+                    "import",
+                    0,
+                    "",
+                    tuple((alias.name, alias.asname) for alias in node.names),
+                )
+            )
+        elif isinstance(node, ast.ImportFrom):
+            import_rows.append(
+                (
+                    "from",
+                    node.level,
+                    node.module or "",
+                    tuple((alias.name, alias.asname) for alias in node.names),
+                )
+            )
+    expected_import_rows = [
+        ("from", 0, "__future__", (("annotations", None),)),
+        ("from", 0, "collections.abc", (("Mapping", None),)),
+        ("from", 0, "dataclasses", (("dataclass", None),)),
+        ("from", 0, "enum", (("StrEnum", None),)),
+        ("import", 0, "", (("heapq", None),)),
+        ("import", 0, "", (("json", None),)),
+        ("import", 0, "", (("re", None),)),
+        (
+            "from",
+            1,
+            "errors",
+            (("ContractValidationError", None), ("ReasonCode", None)),
+        ),
+        (
+            "from",
+            1,
+            "models",
+            (("NO_EFFECTS_V1", None), ("NoEffectFlagsV1", None)),
+        ),
+        (
+            "from",
+            1,
+            "serialization",
+            (
+                ("deterministic_json", None),
+                ("safe_json_loads", None),
+                ("validate_relative_path", None),
+            ),
+        ),
+    ]
+    if import_rows != expected_import_rows:
+        failures.append("Stage-1 launch graph import surface differs")
+
+    forbidden_call_names = {
+        "__import__",
+        "compile",
+        "eval",
+        "exec",
+        "input",
+        "open",
+    }
+    forbidden_call_attributes = {
+        "Popen",
+        "connect",
+        "fromtimestamp",
+        "getenv",
+        "mkdir",
+        "now",
+        "popen",
+        "request",
+        "run",
+        "sleep",
+        "system",
+        "time",
+        "today",
+        "unlink",
+        "urlopen",
+        "utcnow",
+        "write",
+        "write_bytes",
+        "write_text",
+    }
+    if any(
+        isinstance(node, ast.Call)
+        and (
+            isinstance(node.func, ast.Name)
+            and node.func.id in forbidden_call_names
+            or isinstance(node.func, ast.Attribute)
+            and node.func.attr in forbidden_call_attributes
+        )
+        for node in ast.walk(tree)
+    ):
+        failures.append("Stage-1 launch graph contains a forbidden effect call")
+
+    def assigned_call(name: str) -> ast.Call | None:
+        values = tuple(
+            node.value
+            for node in tree.body
+            if isinstance(node, ast.Assign)
+            and any(
+                isinstance(target, ast.Name) and target.id == name
+                for target in node.targets
+            )
+            and isinstance(node.value, ast.Call)
+        )
+        return values[0] if len(values) == 1 else None
+
+    def exact_no_effect_keyword(call: ast.Call | None) -> bool:
+        if call is None:
+            return False
+        keyword = next(
+            (row.value for row in call.keywords if row.arg == "no_effects"),
+            None,
+        )
+        return isinstance(keyword, ast.Name) and keyword.id == "NO_EFFECTS_V1"
+
+    scope_call = assigned_call("STAGE1_SELECTED_SCOPE_V2")
+    active_live_value = (
+        next(
+            (
+                row.value
+                for row in scope_call.keywords
+                if row.arg == "active_live_profile_ids"
+            ),
+            None,
+        )
+        if scope_call is not None
+        else None
+    )
+    operation_calls = tuple(
+        node
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id == "Stage1OperationDependencyProfileV1"
+    )
+    graph_calls = tuple(
+        node
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id == "SelectedLaunchGraphV2"
+    )
+    if (
+        scope_call is None
+        or not isinstance(active_live_value, ast.Tuple)
+        or active_live_value.elts
+        or not exact_no_effect_keyword(scope_call)
+        or len(operation_calls) != 1
+        or not all(exact_no_effect_keyword(call) for call in operation_calls)
+        or len(graph_calls) != 1
+        or not all(exact_no_effect_keyword(call) for call in graph_calls)
+    ):
+        failures.append("Stage-1 active-live/no-effect AST closure differs")
+
+    return failures
 
 
 def _tracked_architecture_material() -> dict[str, dict[str, object]]:
@@ -5403,7 +6912,7 @@ def independently_reconstruct() -> dict[str, bool]:
     return values
 
 
-def main() -> int:
+def main(*, emit_stage1_launch_graph_marker: bool = True) -> int:
     failures: list[str] = []
     expected_names = frozenset(PRODUCTION_NAMES)
     actual_names = frozenset(path.name for path in PACKAGE.glob("*.py"))
@@ -5431,6 +6940,10 @@ def main() -> int:
             ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
         except (OSError, SyntaxError) as exc:
             failures.append(f"{name}: {exc}")
+    try:
+        failures.extend(_stage1_launch_graph_failures())
+    except Exception as exc:
+        failures.append(f"Stage-1 independent reconstruction failed closed: {exc}")
     for file_name, class_name, expected_count in (
         ("input_lock.py", "ImmutableReplayPaperInputLockV1", 33),
         ("evidence.py", "ReplayResultContractV1", 26),
@@ -5692,6 +7205,8 @@ def main() -> int:
             sort_keys=True,
         )
     )
+    if emit_stage1_launch_graph_marker:
+        print(STAGE1_LAUNCH_GRAPH_MARKER)
     print(
         f"{SUCCESS_MARKER} "
         f"architecture_identity_order_rows={evidence_denominators['architecture_identity_order_rows']} "

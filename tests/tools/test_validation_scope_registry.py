@@ -2476,3 +2476,103 @@ def test_registered_exact_repair_scope_reaches_atomicrows_owners(monkeypatch) ->
         decision = registry.explain_pr_scope_decision(engvr_branch, denied_path)
         assert decision["allowed"] is False
         assert decision["reason"] == "path_not_registered_for_pr_scope"
+
+
+def test_s1_launch_graph_scope_is_exactly_owned_and_fail_closed() -> None:
+    branch = registry.S1_LAUNCH_GRAPH_IMPLEMENTATION_BRANCH
+    conditional = (
+        "docs/master_plan/generated/"
+        "PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json"
+    )
+    normal_paths = frozenset(
+        {
+            "src/qtt/stage1_prediction_markets/qku_computation_control_plane/stage1_launch_graph.py",
+            "src/qtt/stage1_prediction_markets/qku_computation_control_plane/__init__.py",
+            "tools/build_qku_computation_control_plane.py",
+            "tools/independent_validate_qku_computation_control_plane_architecture.py",
+            "tools/ci_branch_context.py",
+            "tools/validation_scope_registry.py",
+            "tools/validation_inventory.py",
+            "tools/changed_area_validation_router.py",
+            "tests/stage1_prediction_markets/qku_computation_control_plane/test_policy_state_matrix.py",
+            "tests/stage1_prediction_markets/qku_computation_control_plane/test_integration_snapshot_matrix.py",
+            "tests/stage1_prediction_markets/qku_computation_control_plane/test_adversarial_latency_security_matrix.py",
+            "tests/stage1_prediction_markets/qku_computation_control_plane/architecture/test_repository_file_closure.py",
+            "tests/tools/test_ci_branch_context.py",
+            "tests/tools/test_validation_scope_registry.py",
+            "tests/tools/test_validation_inventory.py",
+            "tests/tools/test_changed_area_validation_router.py",
+        }
+    )
+    expected_paths = normal_paths | {conditional}
+    assert len(normal_paths) == 16
+    assert expected_paths - normal_paths == {conditional}
+    assert len(expected_paths) == 17
+    assert registry.S1_LAUNCH_GRAPH_ALLOWED_EXACT_PATHS == expected_paths
+    for path in expected_paths:
+        expected_decision = {
+            "allowed": True,
+            "branch": branch,
+            "normalized_path": path,
+            "pr_id": "S1-LAUNCH-GRAPH-MATERIALIZATION-01",
+            "matched_rule": f"exact:{path}",
+            "reason": "registered_exact_path",
+        }
+        assert registry.explain_pr_scope_decision(branch, path) == expected_decision
+        assert registry.explain_pr_scope_decision(
+            branch,
+            path.replace("/", "\\"),
+        ) == expected_decision
+        assert registry.is_pr_scoped_changed_path_allowed(branch, path)
+
+    launch_path = (
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/"
+        "stage1_launch_graph.py"
+    )
+    assert registry.explain_pr_scope_decision(FIXTURE_BRANCH, launch_path) == {
+        "allowed": True,
+        "branch": FIXTURE_BRANCH,
+        "normalized_path": launch_path,
+        "pr_id": "S1-LAUNCH-GRAPH-MATERIALIZATION-01",
+        "matched_rule": f"validation_context_exact:{launch_path}",
+        "reason": "registered_validation_context_exact_path",
+    }
+    for near_branch in (
+        branch.upper(),
+        f"{branch}-copy",
+        f"{branch}/",
+        branch.replace("launch", "*"),
+        branch.removesuffix("-01"),
+    ):
+        assert not registry.is_pr_scoped_changed_path_allowed(
+            near_branch,
+            launch_path,
+        )
+    for near_path in (
+        launch_path.upper(),
+        f"{launch_path}.near",
+        launch_path.replace("stage1_launch_graph.py", "stage1_launch_graph_v2.py"),
+    ):
+        assert not registry.is_pr_scoped_changed_path_allowed(
+            FIXTURE_BRANCH,
+            near_path,
+        )
+    for denied_path in (
+        launch_path.upper(),
+        f"{launch_path}.near",
+        launch_path.replace("stage1_launch_graph.py", "stage1_launch_graph_v2.py"),
+        launch_path.replace("stage1_launch_graph.py", "*.py"),
+        f"../{launch_path}",
+        f"C:/repository/{launch_path}",
+    ):
+        assert not registry.is_pr_scoped_changed_path_allowed(branch, denied_path)
+    historical_fixture_paths = {
+        "src/qtt/stage1_prediction_markets/capital_risk/field_map_constants.py",
+        "src/qtt/stage1_prediction_markets/credential_readiness/policy.py",
+        "src/qtt/source_evidence/cross_venue_execution_normalization/taxonomy.py",
+    }
+    assert expected_paths.isdisjoint(historical_fixture_paths)
+    assert all(
+        not registry.is_pr_scoped_changed_path_allowed(branch, path)
+        for path in historical_fixture_paths
+    )

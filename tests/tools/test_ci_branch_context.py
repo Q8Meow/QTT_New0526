@@ -4353,6 +4353,31 @@ def test_pull_request_detached_head_simulation_prefers_head_ref(monkeypatch):
         "PR160",
     )
 
+    s1_branch = context.S1_LAUNCH_GRAPH_IMPLEMENTATION_BRANCH
+    assert s1_branch == "s1-launch-graph-materialization-01"
+    assert s1_branch in context.OWNER_AUTHORIZED_VALIDATION_BRANCHES
+    assert context.is_owner_authorized_validation_branch(s1_branch)
+    assert not context.is_repair_branch(s1_branch)
+    assert not context.is_main_cumulative_branch(s1_branch)
+    assert context.roadmap_pr_number(s1_branch) is None
+    for near_name in (
+        s1_branch.upper(),
+        f"{s1_branch}-copy",
+        f"{s1_branch}/",
+        s1_branch.replace("materialization", "*"),
+        s1_branch.removesuffix("-01"),
+    ):
+        assert near_name not in context.OWNER_AUTHORIZED_VALIDATION_BRANCHES
+        assert not context.is_owner_authorized_validation_branch(near_name)
+
+    monkeypatch.setenv("GITHUB_HEAD_REF", s1_branch)
+    s1_branch_context = context.current_branch_context(
+        REPO_ROOT,
+        git_stdout=fake_git_stdout,
+    )
+    assert s1_branch_context.branch == s1_branch
+    assert s1_branch_context.source == "GITHUB_HEAD_REF"
+
 
 def test_pr152_helper_cli_repair_branch_allows_validation_execution_gates_only():
     branch = context.PR152_HELPER_CLI_TEMP_REPO_GIT_STATUS_REPAIR_BRANCH
