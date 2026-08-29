@@ -179,6 +179,7 @@ def test_inventory_has_centralized_qku_validation_entries():
             *inventory.ST12F_ALLOWED_EXACT_PATHS,
             *inventory.ST12G_ALLOWED_EXACT_PATHS,
             *inventory.ST12H_ALLOWED_EXACT_PATHS,
+            *inventory.S1_LAUNCH_GRAPH_ALLOWED_EXACT_PATHS,
         )
     )
     assert expected <= set(entries)
@@ -208,6 +209,20 @@ def test_inventory_has_centralized_qku_validation_entries():
         assert not any(
             "*" in path for path in entry.required_when_files_match
         )
+
+    launch_path = (
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/"
+        "stage1_launch_graph.py"
+    )
+    launch_validator_ids = {
+        entry.validator_id for entry in inventory.entries_matching_path(launch_path)
+    }
+    assert {
+        "validate_qku_computation_control_plane_architecture",
+        "independent_validate_qku_computation_control_plane_architecture",
+        "pytest_shard_8_qku_computation_control_plane_pytest",
+    } <= launch_validator_ids
+    assert len(inventory.validation_inventory()) == 450
 
 
 def test_shared_validator_support_tool_ownership_is_exact_and_routes():

@@ -209,6 +209,9 @@ VALIDATION_EXECUTION_BRANCHES = frozenset(
 ST12H_IMPLEMENTATION_BRANCH = (
     "agent/st12h-validation-currentization-operations-publication"
 )
+S1_LAUNCH_GRAPH_IMPLEMENTATION_BRANCH = (
+    "s1-launch-graph-materialization-01"
+)
 ENGVR_IMPLEMENTATION_BRANCH = (
     "hardening/eng-validation-reliability-windows-text-integrity"
 )
@@ -251,6 +254,7 @@ OWNER_AUTHORIZED_VALIDATION_BRANCHES = frozenset(
         "agent/st12f-evidence-model-risk-v1",
         "agent/st12g-existing-owner-projections-v2",
         ST12H_IMPLEMENTATION_BRANCH,
+        S1_LAUNCH_GRAPH_IMPLEMENTATION_BRANCH,
         ENGVR_IMPLEMENTATION_BRANCH,
         ST12_ARCHITECTURE_ORACLE_PREREQUISITE_REPAIR_BRANCH,
         ST12_INHERITED_MATH_ROW_RECEIPT_REPAIR_BRANCH,

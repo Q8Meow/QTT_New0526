@@ -7,6 +7,15 @@ from pathlib import Path
 
 import pytest
 
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane import (
+    STAGE1_LAUNCH_DEPENDENCY_EDGES_V1,
+    STAGE1_LAUNCH_ROLES_V2,
+    STAGE1_OPERATION_DEPENDENCY_PROFILES_V1,
+    STAGE1_SELECTED_PROFILE_IDS_V2,
+    STAGE1_SELECTED_SCOPE_V2,
+    build_stage1_launch_graph_v2,
+    validate_stage1_launch_graph_v2,
+)
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.agent_policy import (
     AgentCapabilityDecisionStateV1,
 )
@@ -43,6 +52,7 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.models impo
     KillStateV1,
     LatencyBudgetProfileV1,
     ModeEligibilityState,
+    NO_EFFECTS_V1,
     OwnerActionConfirmationReceiptV1,
     OwnerActionConfirmationStateV1,
     OperationStatusV1,
@@ -593,6 +603,146 @@ def test_exact_orthogonal_registry_and_transition_matrix() -> None:
                         mutated_predecessor,
                     ),
                 )
+
+    graph = build_stage1_launch_graph_v2()
+    validation = validate_stage1_launch_graph_v2(graph)
+    assert validation.terminal_state.value == "VALIDATED_NO_EFFECT"
+    assert validation.reason_codes == ()
+    assert tuple(row.profile_id.value for row in graph.scope.profiles) == (
+        "GEMINI_TITAN_DIRECT",
+        "POLYMARKET_US_RETAIL_DIRECT",
+        "KALSHI_US_DCM_DIRECT",
+        "FORECASTEX_IBKR",
+        "FORECASTEX_DIRECT_MEMBER",
+    )
+    assert tuple(value.value for value in STAGE1_SELECTED_PROFILE_IDS_V2) == (
+        "GEMINI_TITAN_DIRECT",
+        "POLYMARKET_US_RETAIL_DIRECT",
+        "KALSHI_US_DCM_DIRECT",
+    )
+    assert graph.scope.serialization == STAGE1_SELECTED_PROFILE_IDS_V2
+    assert tuple(value.value for value in graph.scope.excluded_profile_ids) == (
+        "FORECASTEX_IBKR",
+        "FORECASTEX_DIRECT_MEMBER",
+    )
+    assert graph.scope.active_live_profile_ids == ()
+    assert "POLYMARKET" not in {
+        row.profile_id.value for row in STAGE1_SELECTED_SCOPE_V2.profiles
+    }
+    assert len(STAGE1_LAUNCH_ROLES_V2) == 28
+    assert {
+        disposition: sum(
+            role.disposition.value == disposition for role in STAGE1_LAUNCH_ROLES_V2
+        )
+        for disposition in (
+            "BINDING_ONLY_GAP",
+            "EVIDENCE_ONLY_GAP",
+            "TRUE_MISSING_DEPENDENCY",
+        )
+    } == {
+        "BINDING_ONLY_GAP": 11,
+        "EVIDENCE_ONLY_GAP": 5,
+        "TRUE_MISSING_DEPENDENCY": 12,
+    }
+    assert len(STAGE1_LAUNCH_DEPENDENCY_EDGES_V1) == 102
+    assert len(
+        {
+            (edge.producer_role_id, edge.consumer_role_id)
+            for edge in STAGE1_LAUNCH_DEPENDENCY_EDGES_V1
+        }
+    ) == 102
+    assert graph.topological_order == (
+        "ROLE-01",
+        "ROLE-02",
+        "ROLE-03",
+        "ROLE-04",
+        "ROLE-05",
+        "ROLE-06",
+        "ROLE-07",
+        "ROLE-08",
+        "ROLE-09",
+        "ROLE-10",
+        "ROLE-12",
+        "ROLE-11",
+        "ROLE-13",
+        "ROLE-14",
+        "ROLE-15",
+        "ROLE-16",
+        "ROLE-17",
+        "ROLE-18",
+        "ROLE-19",
+        "ROLE-20",
+        "ROLE-26",
+        "ROLE-22",
+        "ROLE-27",
+        "ROLE-28",
+        "ROLE-21",
+        "ROLE-23",
+        "ROLE-24",
+        "ROLE-25",
+    )
+    topological_position = {
+        role_id: position for position, role_id in enumerate(graph.topological_order)
+    }
+    assert all(
+        topological_position[edge.producer_role_id]
+        < topological_position[edge.consumer_role_id]
+        for edge in graph.dependency_edges
+    )
+    role_ids = {role.role_id for role in graph.roles}
+    assert {
+        role_id
+        for edge in graph.dependency_edges
+        for role_id in (edge.producer_role_id, edge.consumer_role_id)
+    } <= role_ids
+    operation_role_ids = {
+        role_id
+        for operation in graph.operation_profiles
+        for role_id in (*operation.required_role_ids, *operation.optional_role_ids)
+    }
+    assert operation_role_ids == role_ids
+    assert len(STAGE1_OPERATION_DEPENDENCY_PROFILES_V1) == 5
+    operations = {
+        row.operation_class.value: row
+        for row in STAGE1_OPERATION_DEPENDENCY_PROFILES_V1
+    }
+    assert operations["CANCEL_QUERY_RECONCILE"].required_role_ids == (
+        "ROLE-01",
+        "ROLE-17",
+        "ROLE-24",
+        "ROLE-25",
+        "ROLE-28",
+    )
+    assert operations["CANCEL_QUERY_RECONCILE"].optional_role_ids == ()
+    role_by_id = {role.role_id: role for role in graph.roles}
+    assert "ROLE-12" in role_by_id["ROLE-11"].direct_prerequisite_role_ids
+    assert "ROLE-16" not in role_by_id["ROLE-18"].direct_prerequisite_role_ids
+    assert "ROLE-21" not in role_by_id["ROLE-22"].direct_prerequisite_role_ids
+    role_path_refs = tuple(
+        path_ref for role in graph.roles for path_ref in role.path_refs
+    )
+    assert len(role_path_refs) == 68
+    assert len({path_ref.path for path_ref in role_path_refs}) == 34
+    assert sum(
+        path_ref.disposition.value == "EXISTING_CANONICAL_OWNER"
+        for path_ref in role_path_refs
+    ) == 57
+    assert sum(
+        path_ref.disposition.value
+        == "FUTURE_AUTHORIZED_OWNER_NOT_YET_IMPLEMENTED"
+        for path_ref in role_path_refs
+    ) == 11
+    assert graph.future_sole_write_role_id == "ROLE-25"
+    assert tuple(
+        role.role_id
+        for role in graph.roles
+        if role.latency_class.value == "SOLE_WRITE_HOTPATH"
+    ) == ("ROLE-25",)
+    assert graph.no_effects == graph.scope.no_effects == NO_EFFECTS_V1
+    assert all(
+        operation.no_effects == NO_EFFECTS_V1
+        for operation in graph.operation_profiles
+    )
 
 
 def test_policy_outcomes_are_typed_fail_closed_and_never_activate() -> None:

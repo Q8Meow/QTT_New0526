@@ -5,6 +5,8 @@ from __future__ import annotations
 
 from fnmatch import fnmatchcase
 
+from tools.ci_branch_context import S1_LAUNCH_GRAPH_IMPLEMENTATION_BRANCH
+
 
 PR168_GFP_BRANCH = "pr168-gfp-global-formula-discovery-real-computation"
 PR168_RP_BRANCH = "pr168-rp-formula-based-replay-paper-recompute"
@@ -77,8 +79,10 @@ def build_st12g_architecture_validation_command(
             "independent_validate_qku_computation_control_plane_architecture "
             "as validator; "
             "validator.PRODUCTION_NAMES = "
-            f"(*validator.PRODUCTION_NAMES, *{additive_modules}); "
-            "raise SystemExit(validator.main())"
+            "tuple(dict.fromkeys((*validator.PRODUCTION_NAMES, "
+            f"*{additive_modules}))); "
+            "raise SystemExit(validator.main("
+            "emit_stage1_launch_graph_marker=False))"
         ),
     )
 
@@ -742,6 +746,28 @@ ST12H_READ_ONLY_PREDECESSOR_PATHS = frozenset(
         "tools/validate_ci_branch_context_matrix.py",
         "tools/currentize_pr152_after_generated_artifacts.py",
         "tools/validate_grand_global_debug_logical_consistency_audit.py",
+    }
+)
+
+S1_LAUNCH_GRAPH_ALLOWED_EXACT_PATHS = frozenset(
+    {
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/stage1_launch_graph.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/__init__.py",
+        "tools/build_qku_computation_control_plane.py",
+        "tools/independent_validate_qku_computation_control_plane_architecture.py",
+        "tools/ci_branch_context.py",
+        "tools/validation_scope_registry.py",
+        "tools/validation_inventory.py",
+        "tools/changed_area_validation_router.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/test_policy_state_matrix.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/test_integration_snapshot_matrix.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/test_adversarial_latency_security_matrix.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/architecture/test_repository_file_closure.py",
+        "tests/tools/test_ci_branch_context.py",
+        "tests/tools/test_validation_scope_registry.py",
+        "tests/tools/test_validation_inventory.py",
+        "tests/tools/test_changed_area_validation_router.py",
+        "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
     }
 )
 
@@ -2419,6 +2445,18 @@ def explain_pr_scope_decision(branch: str, path: str) -> dict[str, object]:
 
     normalized = normalize_changed_path(path)
     branch_name = str(branch).strip()
+    if (
+        branch_name == S1_LAUNCH_GRAPH_IMPLEMENTATION_BRANCH
+        and normalized in S1_LAUNCH_GRAPH_ALLOWED_EXACT_PATHS
+    ):
+        return {
+            "allowed": True,
+            "branch": branch_name,
+            "normalized_path": normalized,
+            "pr_id": "S1-LAUNCH-GRAPH-MATERIALIZATION-01",
+            "matched_rule": f"exact:{normalized}",
+            "reason": "registered_exact_path",
+        }
     from tools.ci_branch_context import ENGVR_CHANGED_PATHS, ENGVR_IMPLEMENTATION_BRANCH
 
     if branch_name == ENGVR_IMPLEMENTATION_BRANCH:
@@ -2659,6 +2697,18 @@ def explain_pr_scope_decision(branch: str, path: str) -> dict[str, object]:
             "matched_rule": f"validation_context_exact:{normalized}",
             "reason": "registered_validation_context_exact_path",
         }
+    if (
+        is_validation_context_branch(branch_name)
+        and normalized in S1_LAUNCH_GRAPH_ALLOWED_EXACT_PATHS
+    ):
+        return {
+            "allowed": True,
+            "branch": branch_name,
+            "normalized_path": normalized,
+            "pr_id": "S1-LAUNCH-GRAPH-MATERIALIZATION-01",
+            "matched_rule": f"validation_context_exact:{normalized}",
+            "reason": "registered_validation_context_exact_path",
+        }
     forbidden_reason = _forbidden_reason(normalized)
     if forbidden_reason:
         return {
@@ -2668,6 +2718,15 @@ def explain_pr_scope_decision(branch: str, path: str) -> dict[str, object]:
             "pr_id": None,
             "matched_rule": forbidden_reason,
             "reason": "forbidden_path",
+        }
+    if branch_name == S1_LAUNCH_GRAPH_IMPLEMENTATION_BRANCH:
+        return {
+            "allowed": False,
+            "branch": branch_name,
+            "normalized_path": normalized,
+            "pr_id": "S1-LAUNCH-GRAPH-MATERIALIZATION-01",
+            "matched_rule": "no_s1_launch_graph_exact_scope_rule",
+            "reason": "path_not_registered_for_pr_scope",
         }
     if branch_name == ST12A_BRANCH:
         return {
