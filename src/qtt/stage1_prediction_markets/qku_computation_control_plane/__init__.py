@@ -1450,3 +1450,17 @@ __all__ += [
     "stage1_launch_graph_projection_v2",
     "validate_stage1_launch_graph_v2",
 ]
+
+from .plugin_adapter import (
+    SelectedComponentOperationViewV1,
+    SelectedComponentPackageAdapterV1,
+    SelectedComponentPackageEntryViewV1,
+    SelectedComponentPackageViewV1,
+)
+
+__all__ += [
+    "SelectedComponentPackageEntryViewV1",
+    "SelectedComponentOperationViewV1",
+    "SelectedComponentPackageViewV1",
+    "SelectedComponentPackageAdapterV1",
+]

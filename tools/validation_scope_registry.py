@@ -5,7 +5,10 @@ from __future__ import annotations
 
 from fnmatch import fnmatchcase
 
-from tools.ci_branch_context import S1_LAUNCH_GRAPH_IMPLEMENTATION_BRANCH
+from tools.ci_branch_context import (
+    S1_LAUNCH_GRAPH_IMPLEMENTATION_BRANCH,
+    S1_PLUGIN_PACKAGE_CURRENTIZATION_BRANCH,
+)
 
 
 PR168_GFP_BRANCH = "pr168-gfp-global-formula-discovery-real-computation"
@@ -763,6 +766,32 @@ S1_LAUNCH_GRAPH_ALLOWED_EXACT_PATHS = frozenset(
         "tests/stage1_prediction_markets/qku_computation_control_plane/test_integration_snapshot_matrix.py",
         "tests/stage1_prediction_markets/qku_computation_control_plane/test_adversarial_latency_security_matrix.py",
         "tests/stage1_prediction_markets/qku_computation_control_plane/architecture/test_repository_file_closure.py",
+        "tests/tools/test_ci_branch_context.py",
+        "tests/tools/test_validation_scope_registry.py",
+        "tests/tools/test_validation_inventory.py",
+        "tests/tools/test_changed_area_validation_router.py",
+        "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+    }
+)
+
+S1_PLUGIN_PACKAGE_CURRENTIZATION_ALLOWED_EXACT_PATHS = frozenset(
+    {
+        "src/qtt/plugins/contracts.py",
+        "src/qtt/stage1_prediction_markets/pr162e_plugin_framework/constants.py",
+        "src/qtt/plugins/dag.py",
+        "src/qtt/plugins/registry.py",
+        "src/qtt/plugins/__init__.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/plugin_adapter.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/__init__.py",
+        "tools/build_qku_computation_control_plane.py",
+        "tools/independent_validate_qku_computation_control_plane_architecture.py",
+        "tools/ci_branch_context.py",
+        "tools/validation_scope_registry.py",
+        "tools/validation_inventory.py",
+        "tools/changed_area_validation_router.py",
+        "tests/pr162e/test_pr162e_plugin_abi.py",
+        "tests/pr162e/test_pr162e_dependency_dag.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/test_integration_snapshot_matrix.py",
         "tests/tools/test_ci_branch_context.py",
         "tests/tools/test_validation_scope_registry.py",
         "tests/tools/test_validation_inventory.py",
@@ -2445,6 +2474,27 @@ def explain_pr_scope_decision(branch: str, path: str) -> dict[str, object]:
 
     normalized = normalize_changed_path(path)
     branch_name = str(branch).strip()
+    if branch_name == S1_PLUGIN_PACKAGE_CURRENTIZATION_BRANCH:
+        allowed = (
+            normalized
+            in S1_PLUGIN_PACKAGE_CURRENTIZATION_ALLOWED_EXACT_PATHS
+        )
+        return {
+            "allowed": allowed,
+            "branch": branch_name,
+            "normalized_path": normalized,
+            "pr_id": "S1-PLUGIN-PACKAGE-CURRENTIZATION-01",
+            "matched_rule": (
+                f"exact:{normalized}"
+                if allowed
+                else "no_s1_plugin_package_exact_scope_rule"
+            ),
+            "reason": (
+                "registered_exact_path"
+                if allowed
+                else "path_not_registered_for_pr_scope"
+            ),
+        }
     if (
         branch_name == S1_LAUNCH_GRAPH_IMPLEMENTATION_BRANCH
         and normalized in S1_LAUNCH_GRAPH_ALLOWED_EXACT_PATHS

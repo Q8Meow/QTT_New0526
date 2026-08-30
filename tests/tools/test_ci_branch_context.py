@@ -4378,6 +4378,32 @@ def test_pull_request_detached_head_simulation_prefers_head_ref(monkeypatch):
     assert s1_branch_context.branch == s1_branch
     assert s1_branch_context.source == "GITHUB_HEAD_REF"
 
+    package_branch = context.S1_PLUGIN_PACKAGE_CURRENTIZATION_BRANCH
+    assert package_branch == "s1-plugin-package-currentization-01"
+    assert package_branch in context.OWNER_AUTHORIZED_VALIDATION_BRANCHES
+    assert context.is_owner_authorized_validation_branch(package_branch)
+    assert not context.is_repair_branch(package_branch)
+    assert not context.is_main_cumulative_branch(package_branch)
+    assert context.roadmap_pr_number(package_branch) is None
+    for near_name in (
+        package_branch.upper(),
+        f"{package_branch}-copy",
+        f"{package_branch}/",
+        package_branch.replace("package", "*"),
+        package_branch.removesuffix("-01"),
+        package_branch.replace("currentization", "materialization"),
+    ):
+        assert near_name not in context.OWNER_AUTHORIZED_VALIDATION_BRANCHES
+        assert not context.is_owner_authorized_validation_branch(near_name)
+
+    monkeypatch.setenv("GITHUB_HEAD_REF", package_branch)
+    package_branch_context = context.current_branch_context(
+        REPO_ROOT,
+        git_stdout=fake_git_stdout,
+    )
+    assert package_branch_context.branch == package_branch
+    assert package_branch_context.source == "GITHUB_HEAD_REF"
+
 
 def test_pr152_helper_cli_repair_branch_allows_validation_execution_gates_only():
     branch = context.PR152_HELPER_CLI_TEMP_REPO_GIT_STATUS_REPAIR_BRANCH

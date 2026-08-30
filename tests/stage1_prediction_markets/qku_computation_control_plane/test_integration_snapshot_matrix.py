@@ -9,6 +9,7 @@ from types import MappingProxyType
 
 import pytest
 
+import src.qtt.plugins as generic_plugins
 import src.qtt.stage1_prediction_markets.qku_computation_control_plane as qku_control_plane
 from src.qtt.source_evidence.cross_venue_execution_normalization.taxonomy import (
     ACTIVE_STAGE1_VENUES as SOURCE_EVIDENCE_ACTIVE_STAGE1_VENUES,
@@ -60,6 +61,7 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.models impo
     LatencyBudgetProfileV1,
     ModeEligibilityState,
     ModeSnapshotCandidateProposalResultV1,
+    NO_EFFECTS_V1,
     OperationStatusV1,
     ResourceBoundsProfileV1,
     SnapshotCandidateStateV1,
@@ -1481,7 +1483,7 @@ def test_generated_d_universe_and_connectivity_are_terminal_reference_only() -> 
         "validate_stage1_launch_graph_v2",
     )
     assert len(launch_exports) == 8
-    assert tuple(qku_control_plane.__all__[-8:]) == launch_exports
+    assert tuple(qku_control_plane.__all__[-12:-4]) == launch_exports
     assert all(qku_control_plane.__all__.count(name) == 1 for name in launch_exports)
     assert all(hasattr(qku_control_plane, name) for name in launch_exports)
     assert not {
@@ -1493,6 +1495,10 @@ def test_generated_d_universe_and_connectivity_are_terminal_reference_only() -> 
     first_payload = build_payload()
     second_payload = build_payload()
     assert tuple(first_payload).count("stage1_launch_graph_v2") == 1
+    assert tuple(first_payload).count("selected_component_package_v1") == 1
+    payload_keys = tuple(first_payload)
+    launch_key_index = payload_keys.index("stage1_launch_graph_v2")
+    assert payload_keys[launch_key_index + 1] == "selected_component_package_v1"
     assert set(first_payload["stage1_launch_graph_v2"]) == {
         "package_ref",
         "graph",
@@ -1502,6 +1508,95 @@ def test_generated_d_universe_and_connectivity_are_terminal_reference_only() -> 
         first_payload["stage1_launch_graph_v2"]
         == second_payload["stage1_launch_graph_v2"]
         == qku_control_plane.stage1_launch_graph_projection_v2()
+    )
+    package_projection = first_payload["selected_component_package_v1"]
+    assert tuple(package_projection) == (
+        "manifest",
+        "compatibility_and_dependency",
+        "rollback_and_supersession",
+        "reproducibility",
+    )
+    assert package_projection == second_payload["selected_component_package_v1"]
+    assert package_projection == (
+        qku_control_plane.SelectedComponentPackageAdapterV1.build_projection(
+            first_payload["stage1_launch_graph_v2"]
+        )
+    )
+    view = qku_control_plane.SelectedComponentPackageAdapterV1.build_view(
+        first_payload["stage1_launch_graph_v2"]
+    )
+    repeated_view = qku_control_plane.SelectedComponentPackageAdapterV1.build_view(
+        first_payload["stage1_launch_graph_v2"]
+    )
+    assert view == repeated_view
+    assert view.package_id == "S1-PLUGIN-PACKAGE-CURRENTIZATION-01"
+    assert view.package_version == "1.0.0"
+    assert (
+        view.entry_count,
+        view.admitted_count,
+        view.evidence_held_count,
+        view.implementation_held_count,
+        view.edge_count,
+        view.operation_count,
+    ) == (28, 11, 5, 12, 102, 5)
+    assert view.selected_profile_ids == (
+        "GEMINI_TITAN_DIRECT",
+        "POLYMARKET_US_RETAIL_DIRECT",
+        "KALSHI_US_DCM_DIRECT",
+    )
+    assert view.excluded_profile_ids == (
+        "FORECASTEX_IBKR",
+        "FORECASTEX_DIRECT_MEMBER",
+    )
+    assert view.active_live_profile_ids == ()
+    assert tuple(len(row.blocking_component_ids) for row in view.operations) == (
+        16,
+        2,
+        7,
+        12,
+        5,
+    )
+    assert view.no_effects is NO_EFFECTS_V1
+    qku_exports = (
+        "SelectedComponentPackageEntryViewV1",
+        "SelectedComponentOperationViewV1",
+        "SelectedComponentPackageViewV1",
+        "SelectedComponentPackageAdapterV1",
+    )
+    assert tuple(qku_control_plane.__all__[-4:]) == qku_exports
+    assert all(qku_control_plane.__all__.count(name) == 1 for name in qku_exports)
+    generic_exports = (
+        "PluginPackageReasonCodeV1",
+        "PluginPackageContractError",
+        "PackageVersionV1",
+        "PackageAdmissionStateV1",
+        "PackageCompatibilityStateV1",
+        "PackageRollbackTargetKindV1",
+        "PackageOperationEligibilityStateV1",
+        "PackageValidationTerminalStateV1",
+        "PackageSupersessionStateV1",
+        "PackageOperationEligibilityV1",
+        "SelectedComponentPackageEntryV1",
+        "SelectedComponentPackageManifestV1",
+        "CompatibilityAndDependencyReceiptV1",
+        "RollbackAndSupersessionReceiptV1",
+        "PackageReproducibilityReceiptV1",
+        "compile_selected_package_dependency_order_v1",
+        "build_selected_component_package_manifest_v1",
+        "validate_selected_component_package_v1",
+        "derive_rollback_and_supersession_receipt_v1",
+        "validate_package_supersession_v1",
+        "rebuild_selected_component_package_v1",
+        "selected_component_package_projection_v1",
+    )
+    assert tuple(generic_plugins.__all__[-22:]) == generic_exports
+    historical_families = qku_control_plane.PR162EPluginAdapterV1(
+        root
+    ).load_families()
+    assert len(historical_families) == 95
+    assert all(
+        isinstance(row, qku_control_plane.PluginFamilyViewV1)
+        for row in historical_families
     )
     historical_fixture_scope = ("KALSHI", "POLYMARKET", "FORECASTEX_IBKR")
     assert CAPITAL_RISK_ACTIVE_STAGE1_VENUES == historical_fixture_scope

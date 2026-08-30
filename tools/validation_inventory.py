@@ -17,6 +17,7 @@ from tools import run_validation_gates as runner
 from tools.repo_path_refs import normalize_repo_ref
 from tools.validation_scope_registry import (
     S1_LAUNCH_GRAPH_ALLOWED_EXACT_PATHS,
+    S1_PLUGIN_PACKAGE_CURRENTIZATION_ALLOWED_EXACT_PATHS,
     ST12A_ALLOWED_EXACT_PATHS,
     ST12B_ALLOWED_EXACT_PATHS,
     ST12C_ALLOWED_EXACT_PATHS,
@@ -111,6 +112,7 @@ QKU_ALLOWED_EXACT_PATHS = frozenset(
         *ST12G_ALLOWED_EXACT_PATHS,
         *ST12H_ALLOWED_EXACT_PATHS,
         *S1_LAUNCH_GRAPH_ALLOWED_EXACT_PATHS,
+        *S1_PLUGIN_PACKAGE_CURRENTIZATION_ALLOWED_EXACT_PATHS,
     )
 )
 SHARED_VALIDATOR_SUPPORT_TOOL_OWNERS: Mapping[str, frozenset[str]] = MappingProxyType(
