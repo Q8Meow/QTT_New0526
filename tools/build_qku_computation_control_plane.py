@@ -34,6 +34,7 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane import (  #
     SOURCE_CURRENTIZATION_OVERLAYS,
     build_tranche_a_coverage_manifest,
     deterministic_json,
+    safe_json_loads,
     validate_relative_path,
     ST12GAgentEvidenceHandoffV2,
     ST12GOwnerDashboardEvidenceViewV2,
@@ -41,6 +42,7 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane import (  #
     ST12GProjectionCoreV2,
     ST12GReadinessEvidenceProjectionV2,
     ST12GServiceEvidenceViewV2,
+    SelectedComponentPackageAdapterV1,
     stage1_launch_graph_projection_v2,
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.mode_snapshot_policy import (  # noqa: E402
@@ -162,6 +164,9 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.validation 
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.implementation_registry import (  # noqa: E402
     ST12D_MATH_IMPLEMENTATION_REGISTRY,
+)
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.plugin_adapter import (  # noqa: E402
+    _qku_projection_serialization_value,
 )
 from src.qtt.agents.pr169_agent_orch1_resolvers import AgentOrchService  # noqa: E402
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.agent_policy import (  # noqa: E402
@@ -2200,6 +2205,7 @@ def build_payload(
     st12d_projection_set = st12d_projections or build_st12d_projections()
     st12d_manifest = st12d_projection_set[0]
     st12f_projection_set = st12f_projections or build_st12f_projections()
+    launch_graph_projection = stage1_launch_graph_projection_v2()
     return {
         "schema": "QKUComputationControlPlaneBuildV1",
         "contract_only": True,
@@ -2357,7 +2363,12 @@ def build_payload(
             "agent_consumer_route_count": len(ST12B_AGENT_CONSUMER_DAG),
             "manifest_passed": tranche_b_manifest.passed,
         },
-        "stage1_launch_graph_v2": stage1_launch_graph_projection_v2(),
+        "stage1_launch_graph_v2": launch_graph_projection,
+        "selected_component_package_v1": (
+            SelectedComponentPackageAdapterV1.build_projection(
+                launch_graph_projection
+            )
+        ),
     }
 
 
@@ -2608,9 +2619,20 @@ def main() -> int:
     st12e_projections = build_st12e_projections()
     st12d_projections = build_st12d_projections()
     st12f_projections = build_st12f_projections()
-    text = deterministic_json(
-        build_payload(st12e_projections, st12d_projections, st12f_projections)
-    ) + "\n"
+    payload = build_payload(
+        st12e_projections,
+        st12d_projections,
+        st12f_projections,
+    )
+    serializable_payload = dict(payload)
+    serializable_payload["selected_component_package_v1"] = (
+        _qku_projection_serialization_value(
+            payload["selected_component_package_v1"]
+        )
+    )
+    encoded_payload = deterministic_json(serializable_payload)
+    safe_json_loads(encoded_payload)
+    text = encoded_payload + "\n"
     if args.output:
         try:
             output = resolve_output_path(args.output)
@@ -2625,6 +2647,8 @@ def main() -> int:
         materialize_st12f_projections(st12f_projections)
     else:
         print(text, end="")
+    print("S1_SELECTED_COMPONENT_PACKAGE_V1_VALIDATED")
+    print("S1_SELECTED_COMPONENT_PACKAGE_V1_REPRODUCIBLE")
     print(SUCCESS_MARKER)
     return 0
 

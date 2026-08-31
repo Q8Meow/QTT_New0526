@@ -249,6 +249,7 @@ def test_qku_shared_integration_paths_use_the_exact_allowlists() -> None:
                 *inventory.ST12G_ALLOWED_EXACT_PATHS,
                 *inventory.ST12H_ALLOWED_EXACT_PATHS,
                 *inventory.S1_LAUNCH_GRAPH_ALLOWED_EXACT_PATHS,
+                *inventory.S1_PLUGIN_PACKAGE_CURRENTIZATION_ALLOWED_EXACT_PATHS,
             )
         )
     for path in inventory.QKU_ALLOWED_EXACT_PATHS:
@@ -263,6 +264,25 @@ def test_qku_shared_integration_paths_use_the_exact_allowlists() -> None:
         "pytest_shard_8_qku_computation_control_plane_pytest",
     } <= set(result.classified_files[launch_path])
     assert launch_path not in result.unknown_files
+    conditional_package_path = (
+        "docs/master_plan/generated/"
+        "PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json"
+    )
+    package_normal_paths = (
+        inventory.S1_PLUGIN_PACKAGE_CURRENTIZATION_ALLOWED_EXACT_PATHS
+        - {conditional_package_path}
+    )
+    assert len(package_normal_paths) == 23
+    assert (
+        router.S1_PLUGIN_PACKAGE_CURRENTIZATION_ALLOWED_EXACT_PATHS
+        == inventory.S1_PLUGIN_PACKAGE_CURRENTIZATION_ALLOWED_EXACT_PATHS
+    )
+    assert all(path in result.classified_files for path in package_normal_paths)
+    assert all(
+        router.QKU_VALIDATOR_IDS <= set(result.classified_files[path])
+        for path in package_normal_paths
+    )
+    assert result.full_validation_required is True
     assert result.unknown_files == ()
     assert result.fail_closed_reasons == ()
 

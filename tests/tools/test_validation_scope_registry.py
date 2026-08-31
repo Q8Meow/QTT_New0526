@@ -2576,3 +2576,95 @@ def test_s1_launch_graph_scope_is_exactly_owned_and_fail_closed() -> None:
         not registry.is_pr_scoped_changed_path_allowed(branch, path)
         for path in historical_fixture_paths
     )
+
+    package_branch = registry.S1_PLUGIN_PACKAGE_CURRENTIZATION_BRANCH
+    package_normal_paths = frozenset(
+        {
+            "src/qtt/plugins/contracts.py",
+            "src/qtt/stage1_prediction_markets/pr162e_plugin_framework/constants.py",
+            "src/qtt/plugins/dag.py",
+            "src/qtt/plugins/registry.py",
+            "src/qtt/plugins/__init__.py",
+            "src/qtt/stage1_prediction_markets/qku_computation_control_plane/plugin_adapter.py",
+            "src/qtt/stage1_prediction_markets/qku_computation_control_plane/serialization.py",
+            "src/qtt/stage1_prediction_markets/qku_computation_control_plane/agent_policy.py",
+            "src/qtt/stage1_prediction_markets/qku_computation_control_plane/__init__.py",
+            "tools/build_qku_computation_control_plane.py",
+            "tools/independent_validate_qku_computation_control_plane_architecture.py",
+            "tools/ci_branch_context.py",
+            "tools/validation_scope_registry.py",
+            "tools/validation_inventory.py",
+            "tools/changed_area_validation_router.py",
+            "tests/pr162e/test_pr162e_plugin_abi.py",
+            "tests/pr162e/test_pr162e_dependency_dag.py",
+            "tests/stage1_prediction_markets/qku_computation_control_plane/test_integration_snapshot_matrix.py",
+            "tests/tools/test_ci_branch_context.py",
+            "tests/tools/test_validation_scope_registry.py",
+            "tests/tools/test_validation_inventory.py",
+            "tests/tools/test_changed_area_validation_router.py",
+            "docs/master_plan/generated/qku_control_plane/agent_capability/manifest.json",
+        }
+    )
+    package_paths = package_normal_paths | {conditional}
+    assert len(package_normal_paths) == 23
+    assert package_paths - package_normal_paths == {conditional}
+    assert len(package_paths) == 24
+    assert (
+        registry.S1_PLUGIN_PACKAGE_CURRENTIZATION_ALLOWED_EXACT_PATHS
+        == package_paths
+    )
+    for path in package_paths:
+        package_decision = {
+            "allowed": True,
+            "branch": package_branch,
+            "normalized_path": path,
+            "pr_id": "S1-PLUGIN-PACKAGE-CURRENTIZATION-01",
+            "matched_rule": f"exact:{path}",
+            "reason": "registered_exact_path",
+        }
+        assert (
+            registry.explain_pr_scope_decision(package_branch, path)
+            == package_decision
+        )
+        assert (
+            registry.explain_pr_scope_decision(
+                package_branch,
+                path.replace("/", "\\"),
+            )
+            == package_decision
+        )
+        assert registry.is_pr_scoped_changed_path_allowed(package_branch, path)
+
+    package_probe = "src/qtt/plugins/registry.py"
+    for near_branch in (
+        package_branch.upper(),
+        f"{package_branch}-copy",
+        f"{package_branch}/",
+        package_branch.replace("package", "*"),
+        package_branch.removesuffix("-01"),
+    ):
+        assert not registry.is_pr_scoped_changed_path_allowed(
+            near_branch,
+            package_probe,
+        )
+    for denied_path in (
+        package_probe.upper(),
+        f"{package_probe}.near",
+        package_probe.replace("registry.py", "registry_v1.py"),
+        package_probe.replace("registry.py", "*.py"),
+        f"../{package_probe}",
+        f"C:/repository/{package_probe}",
+        "src/qtt/plugins/registry.py/extra",
+        "src/qtt/plugins//registry.py",
+    ):
+        decision = registry.explain_pr_scope_decision(
+            package_branch,
+            denied_path,
+        )
+        assert decision["allowed"] is False
+        assert decision["pr_id"] == "S1-PLUGIN-PACKAGE-CURRENTIZATION-01"
+        assert decision["reason"] == "path_not_registered_for_pr_scope"
+        assert not registry.is_pr_scoped_changed_path_allowed(
+            package_branch,
+            denied_path,
+        )

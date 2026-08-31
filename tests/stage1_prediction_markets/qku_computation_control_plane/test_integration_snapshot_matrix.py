@@ -1,15 +1,23 @@
 from __future__ import annotations
 
-from dataclasses import FrozenInstanceError, replace
+from copy import deepcopy
+from dataclasses import FrozenInstanceError, fields, replace
 from datetime import timedelta
 from decimal import Decimal
 import json
 from pathlib import Path
 from types import MappingProxyType
+from unittest.mock import patch
 
 import pytest
 
+import src.qtt.plugins as generic_plugins
 import src.qtt.stage1_prediction_markets.qku_computation_control_plane as qku_control_plane
+from src.qtt.plugins.contracts import (
+    PluginPackageContractError,
+    _canonical_package_json,
+    _normalize_package_serialization_value,
+)
 from src.qtt.source_evidence.cross_venue_execution_normalization.taxonomy import (
     ACTIVE_STAGE1_VENUES as SOURCE_EVIDENCE_ACTIVE_STAGE1_VENUES,
 )
@@ -26,6 +34,7 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors impo
     NumericDomainError,
     OwnerAdapterError,
     ReasonCode,
+    SerializationSafetyError,
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.implementation_registry import (
     IMPLEMENTATION_REGISTRY,
@@ -60,6 +69,7 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.models impo
     LatencyBudgetProfileV1,
     ModeEligibilityState,
     ModeSnapshotCandidateProposalResultV1,
+    NO_EFFECTS_V1,
     OperationStatusV1,
     ResourceBoundsProfileV1,
     SnapshotCandidateStateV1,
@@ -119,6 +129,10 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.stack_resol
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.serialization import (
     deterministic_json,
+    safe_json_loads,
+)
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.plugin_adapter import (
+    _qku_projection_serialization_value,
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.validation import (
     ST12D_ACTUAL_CONTROL_MUTATION_CASES,
@@ -141,6 +155,10 @@ from tests.stage1_prediction_markets.qku_computation_control_plane.tranche_e imp
     resolve_decision,
 )
 from tools.build_qku_computation_control_plane import build_payload
+from tools.independent_validate_qku_computation_control_plane_architecture import (
+    _independent_selected_component_package_core_v1,
+    _selected_component_package_failures,
+)
 
 
 def _repo_root() -> Path:
@@ -1481,7 +1499,7 @@ def test_generated_d_universe_and_connectivity_are_terminal_reference_only() -> 
         "validate_stage1_launch_graph_v2",
     )
     assert len(launch_exports) == 8
-    assert tuple(qku_control_plane.__all__[-8:]) == launch_exports
+    assert tuple(qku_control_plane.__all__[-12:-4]) == launch_exports
     assert all(qku_control_plane.__all__.count(name) == 1 for name in launch_exports)
     assert all(hasattr(qku_control_plane, name) for name in launch_exports)
     assert not {
@@ -1493,6 +1511,10 @@ def test_generated_d_universe_and_connectivity_are_terminal_reference_only() -> 
     first_payload = build_payload()
     second_payload = build_payload()
     assert tuple(first_payload).count("stage1_launch_graph_v2") == 1
+    assert tuple(first_payload).count("selected_component_package_v1") == 1
+    payload_keys = tuple(first_payload)
+    launch_key_index = payload_keys.index("stage1_launch_graph_v2")
+    assert payload_keys[launch_key_index + 1] == "selected_component_package_v1"
     assert set(first_payload["stage1_launch_graph_v2"]) == {
         "package_ref",
         "graph",
@@ -1502,6 +1524,423 @@ def test_generated_d_universe_and_connectivity_are_terminal_reference_only() -> 
         first_payload["stage1_launch_graph_v2"]
         == second_payload["stage1_launch_graph_v2"]
         == qku_control_plane.stage1_launch_graph_projection_v2()
+    )
+    package_projection = first_payload["selected_component_package_v1"]
+    assert tuple(package_projection) == (
+        "manifest",
+        "compatibility_and_dependency",
+        "rollback_and_supersession",
+        "reproducibility",
+    )
+    assert package_projection == second_payload["selected_component_package_v1"]
+    assert package_projection == (
+        qku_control_plane.SelectedComponentPackageAdapterV1.build_projection(
+            first_payload["stage1_launch_graph_v2"]
+        )
+    )
+    view = qku_control_plane.SelectedComponentPackageAdapterV1.build_view(
+        first_payload["stage1_launch_graph_v2"]
+    )
+    repeated_view = qku_control_plane.SelectedComponentPackageAdapterV1.build_view(
+        first_payload["stage1_launch_graph_v2"]
+    )
+    assert view == repeated_view
+    assert view.package_id == "S1-PLUGIN-PACKAGE-CURRENTIZATION-01"
+    assert view.package_version == "1.0.0"
+    assert (
+        view.entry_count,
+        view.admitted_count,
+        view.evidence_held_count,
+        view.implementation_held_count,
+        view.edge_count,
+        view.operation_count,
+    ) == (28, 11, 5, 12, 102, 5)
+    assert view.selected_profile_ids == (
+        "GEMINI_TITAN_DIRECT",
+        "POLYMARKET_US_RETAIL_DIRECT",
+        "KALSHI_US_DCM_DIRECT",
+    )
+    assert view.excluded_profile_ids == (
+        "FORECASTEX_IBKR",
+        "FORECASTEX_DIRECT_MEMBER",
+    )
+    assert view.active_live_profile_ids == ()
+    assert tuple(len(row.blocking_component_ids) for row in view.operations) == (
+        16,
+        2,
+        7,
+        12,
+        5,
+    )
+    assert view.no_effects is NO_EFFECTS_V1
+
+    normalized_projection = _qku_projection_serialization_value(
+        package_projection
+    )
+    assert safe_json_loads(view.canonical_projection_json) == (
+        normalized_projection
+    )
+    serializable_payload = dict(first_payload)
+    serializable_payload["selected_component_package_v1"] = (
+        normalized_projection
+    )
+    complete_payload_json = deterministic_json(serializable_payload)
+    assert safe_json_loads(complete_payload_json) == json.loads(
+        complete_payload_json
+    )
+
+    accepted_path_payloads = (
+        {"path": "docs/master_plan/generated/example.json"},
+        {"optional_path": None},
+        {
+            "manifest": {
+                "entries": [
+                    {
+                        "existing_owner_paths": [],
+                        "future_owner_paths": [],
+                    }
+                ]
+            }
+        },
+        {"manifest": {"authority_envelope": {"no_llm_hot_path": True}}},
+        {"manifest": {"authority_envelope": {"no_llm_hot_path": False}}},
+    )
+    for accepted_path_payload in accepted_path_payloads:
+        encoded_path_payload = deterministic_json(accepted_path_payload)
+        assert safe_json_loads(encoded_path_payload) == accepted_path_payload
+
+    class PathTextSubclass(str):
+        pass
+
+    class PathListSubclass(list):
+        pass
+
+    class PathKeySubclass(str):
+        pass
+
+    rejected_path_payloads = (
+        {"numeric_path": 1},
+        {"boolean_path": True},
+        {"unknown_paths": []},
+        {"manifest": {"no_llm_hot_path": True}},
+        {"manifest": {"authority_envelope": {"No_Llm_Hot_Path": True}}},
+        {"manifest": {"entries": [{"existing_owner_paths": None}]}},
+        {"existing_owner_paths": []},
+        {"absolute_path": "C:/owner/private.json"},
+        {"reserved_path": "CON"},
+        {"subclass_path": PathTextSubclass("docs/example.json")},
+        {"subclass_paths": PathListSubclass(["docs/example.json"])},
+        {PathKeySubclass("path"): "docs/example.json"},
+        {"api_key": "secret-material"},
+    )
+    for rejected_path_payload in rejected_path_payloads:
+        with pytest.raises(SerializationSafetyError):
+            deterministic_json(rejected_path_payload)
+    with pytest.raises(SerializationSafetyError) as normalized_numeric_path:
+        deterministic_json(
+            _qku_projection_serialization_value({"numeric_path": 1})
+        )
+    assert normalized_numeric_path.value.reason_code is ReasonCode.PATH_UNSAFE
+    with pytest.raises(SerializationSafetyError) as duplicate_key:
+        safe_json_loads('{"path":"docs/a.json","path":"docs/b.json"}')
+    assert duplicate_key.value.reason_code is ReasonCode.SERIALIZATION_UNSAFE
+    with pytest.raises(SerializationSafetyError) as reader_secret:
+        safe_json_loads('{"api_key":"secret-material"}')
+    assert reader_secret.value.reason_code is ReasonCode.SECRET_MATERIAL_REJECTED
+
+    altered_launch_projection = deepcopy(
+        first_payload["stage1_launch_graph_v2"]
+    )
+    altered_launch_projection["graph"]["roles"][26]["latency_class"] = (
+        "WRONG_NONEMPTY_LATENCY_CLASS"
+    )
+    with pytest.raises(OwnerAdapterError) as altered_launch_error:
+        qku_control_plane.SelectedComponentPackageAdapterV1.build_projection(
+            altered_launch_projection
+        )
+    assert altered_launch_error.value.reason_code is (
+        ReasonCode.OWNER_DATA_CONTRADICTORY
+    )
+    assert isinstance(
+        altered_launch_error.value.__cause__,
+        PluginPackageContractError,
+    )
+
+    independent_core = _independent_selected_component_package_core_v1()
+    actual_core = MappingProxyType(
+        {
+            "manifest": package_projection["manifest"],
+            "compatibility_and_dependency": package_projection[
+                "compatibility_and_dependency"
+            ],
+            "rollback_and_supersession": package_projection[
+                "rollback_and_supersession"
+            ],
+        }
+    )
+    oracle_json = json.dumps(
+        independent_core,
+        ensure_ascii=True,
+        allow_nan=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    )
+    production_json = _canonical_package_json(actual_core)
+    assert production_json.encode("utf-8") == oracle_json.encode("utf-8")
+    normalized_actual_core = _normalize_package_serialization_value(actual_core)
+    assert normalized_actual_core == independent_core
+    assert len(independent_core["manifest"]) == 17
+    assert len(independent_core["manifest"]["entries"]) == 28
+    assert all(
+        len(entry) == 21 for entry in independent_core["manifest"]["entries"]
+    )
+    assert len(independent_core["compatibility_and_dependency"]) == 10
+    assert len(independent_core["rollback_and_supersession"]) == 11
+    assert all(
+        len(operation) == 6
+        for operation in independent_core["manifest"][
+            "operation_eligibility_rows"
+        ]
+    )
+    assert len(independent_core["manifest"]["authority_envelope"]) == 16
+
+    reproducibility = package_projection["reproducibility"]
+    normalized_reproducibility = _normalize_package_serialization_value(
+        reproducibility
+    )
+    assert set(normalized_reproducibility) == {
+        field.name for field in fields(generic_plugins.PackageReproducibilityReceiptV1)
+    }
+    assert len(normalized_reproducibility) == 12
+    assert normalized_reproducibility == {
+        "package_id": independent_core["manifest"]["package_id"],
+        "package_version": independent_core["manifest"]["package_version"],
+        "canonical_input_refs": [
+            "S1-LAUNCH-GRAPH-MATERIALIZATION-01",
+            "SELECTED_LAUNCH_GRAPH_V2",
+            "STAGE1_SELECTED_SCOPE_V2",
+        ],
+        "builder_runtime_implementation": "CPython",
+        "builder_runtime_version": "3.14.6",
+        "canonical_serialization_policy": independent_core["manifest"][
+            "canonical_serialization_policy"
+        ],
+        "canonical_core_projection_json": oracle_json,
+        "second_build_byte_equal": True,
+        "pure_build_effect_count": 0,
+        "terminal_state": "VALIDATED_NO_EFFECT_WITH_HELD_DEPENDENCIES",
+        "reason_codes": [],
+        "authority_envelope": independent_core["manifest"][
+            "authority_envelope"
+        ],
+    }
+
+    omitted_entry_field_mutations = {
+        "compatibility_state": "WRONG_COMPATIBILITY_STATE",
+        "compatibility_reason_codes": ["IMPLEMENTATION_MISSING"],
+        "existing_owner_paths": list(
+            reversed(
+                independent_core["manifest"]["entries"][0][
+                    "existing_owner_paths"
+                ]
+            )
+        ),
+        "future_owner_paths": ["src/wrong/future_owner.py"],
+        "canonical_output_contract": "WRONG_NONEMPTY_OUTPUT_CONTRACT",
+        "default_failure_route": "WRONG_NONEMPTY_FAILURE_ROUTE",
+        "latency_class": "WRONG_NONEMPTY_LATENCY_CLASS",
+        "authority_envelope_id": "WRONG_AUTHORITY_ENVELOPE",
+    }
+    assert len(omitted_entry_field_mutations) == 8
+    for field_name, mutation_value in omitted_entry_field_mutations.items():
+        mutated_core = deepcopy(normalized_actual_core)
+        mutated_core["manifest"]["entries"][0][field_name] = mutation_value
+        assert json.dumps(
+            mutated_core,
+            ensure_ascii=True,
+            allow_nan=False,
+            sort_keys=True,
+            separators=(",", ":"),
+        ) != oracle_json
+
+    assert _selected_component_package_failures() == []
+    registry_path = root / "src/qtt/plugins/registry.py"
+    registry_text = registry_path.read_text(encoding="utf-8")
+    output_anchor = 'canonical_output_contract=role["frozen_output"],'
+    assert registry_text.count(output_anchor) == 1
+    mutated_registry_text = registry_text.replace(
+        output_anchor,
+        'canonical_output_contract="WRONG_NONEMPTY_OUTPUT_CONTRACT",',
+        1,
+    )
+    original_read_text = Path.read_text
+
+    def in_memory_registry_read(
+        path: Path,
+        *args: object,
+        **kwargs: object,
+    ) -> str:
+        if path.resolve() == registry_path.resolve():
+            return mutated_registry_text
+        return original_read_text(path, *args, **kwargs)
+
+    with patch.object(Path, "read_text", in_memory_registry_read):
+        mutation_failures = _selected_component_package_failures()
+    assert mutation_failures
+    assert any("entry constructor binding" in failure for failure in mutation_failures)
+
+    # Append inside the existing grouped integration function. These deliberately
+    # unique local aliases do not rebind any existing module-level serializer name.
+    import json as _pr292_json
+    import pathlib as _pr292_pathlib
+    from unittest import mock as _pr292_mock
+    import tools.build_qku_computation_control_plane as _pr292_builder
+    import src.qtt.stage1_prediction_markets.qku_computation_control_plane.agent_policy as _pr292_policy
+    import src.qtt.stage1_prediction_markets.qku_computation_control_plane.serialization as _pr292_serialization
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import (
+        AuthorityDeniedError as _pr292_denied,
+        ReasonCode as _pr292_reason,
+    )
+
+    _pr292_manifest_path = (
+        _pr292_builder.REPO_ROOT
+        / 'docs/master_plan/generated/qku_control_plane/agent_capability/manifest.json'
+    )
+    _pr292_persisted_bytes = _pr292_manifest_path.read_bytes()
+    _pr292_generated = _pr292_builder.build_st12e_projections()[0]
+    assert _pr292_persisted_bytes == (
+        _pr292_serialization.deterministic_json(_pr292_generated) + '\n'
+    ).encode('utf-8')
+    assert type(_pr292_generated['implemented_operation_ids']) is list
+    assert type(_pr292_generated['held_operation_ids']) is list
+    assert tuple(_pr292_generated['implemented_operation_ids']) == _pr292_policy.IMPLEMENTED_OPERATION_IDS
+    assert tuple(_pr292_generated['held_operation_ids']) == _pr292_policy.HELD_OPERATION_IDS == ()
+    assert len(_pr292_policy.IMPLEMENTED_OPERATION_IDS) == len(set(_pr292_policy.IMPLEMENTED_OPERATION_IDS)) == 15
+    assert _pr292_generated['activation_state'] == 'NO_EFFECT_CONTRACT_ONLY'
+    assert _pr292_generated['runtime_effect_authorized'] is False
+    assert _pr292_generated['manual_edit_allowed'] is False
+    assert _pr292_generated['llm_inference_allowed'] is False
+    assert _pr292_generated['quantum_mapping_or_execution_allowed'] is False
+    assert _pr292_generated['qku_formula_mutation_authorized'] is False
+    assert _pr292_generated['no_effect_authority_closed'] is True
+    assert _pr292_generated['final_release_owner'] == 'ExecutionRouterV1'
+    assert _pr292_generated['no_effect_authority_flags']
+    assert all(type(flag) is bool and flag is False for flag in _pr292_generated['no_effect_authority_flags'].values())
+
+    # Use the actual persisted reader. Do not mock the loader or its authority gates.
+    _pr292_store = _pr292_policy.AgentCapabilityPolicyStoreV1.from_generated(_pr292_builder.REPO_ROOT)
+    assert type(_pr292_store) is _pr292_policy.AgentCapabilityPolicyStoreV1
+    assert type(_pr292_store.snapshot) is _pr292_policy.AgentCapabilityPolicySnapshotV1
+    assert _pr292_store.snapshot.policy_version == _pr292_policy.POLICY_VERSION
+
+    # Only the exact manifest text is substituted in memory. All source, policy,
+    # parameter and orchestration reads still delegate to the original file reader.
+    _pr292_original_read = _pr292_pathlib.Path.read_text
+    _pr292_missing = object()
+    _pr292_bad_rosters = (
+        {'implemented_operation_ids': list(_pr292_policy._PRE_ST12F_IMPLEMENTED_OPERATION_IDS),
+         'held_operation_ids': list(_pr292_policy._PRE_ST12F_HELD_OPERATION_IDS)},
+        {'implemented_operation_ids': _pr292_missing},
+        {'held_operation_ids': _pr292_missing},
+        {'implemented_operation_ids': None},
+        {'held_operation_ids': None},
+        {'implemented_operation_ids': list(reversed(_pr292_policy.IMPLEMENTED_OPERATION_IDS))},
+        {'implemented_operation_ids': list(_pr292_policy.IMPLEMENTED_OPERATION_IDS) + [_pr292_policy.IMPLEMENTED_OPERATION_IDS[0]]},
+        {'implemented_operation_ids': [True, *_pr292_policy.IMPLEMENTED_OPERATION_IDS[1:]]},
+        {'implemented_operation_ids': {'unexpected': 'mapping'}},
+        {'held_operation_ids': ''},
+        {'held_operation_ids': ['submit_order']},
+        {'runtime_effect_authorized': True},
+        {'llm_inference_allowed': True},
+    )
+    for _pr292_change in _pr292_bad_rosters:
+        _pr292_mutated = _pr292_json.loads(_pr292_persisted_bytes.decode('utf-8'))
+        for _pr292_key, _pr292_value in _pr292_change.items():
+            if _pr292_value is _pr292_missing:
+                del _pr292_mutated[_pr292_key]
+            else:
+                _pr292_mutated[_pr292_key] = _pr292_value
+        _pr292_mutated_text = _pr292_json.dumps(_pr292_mutated, allow_nan=False)
+        with _pr292_mock.patch.object(
+            _pr292_pathlib.Path,
+            'read_text',
+            autospec=True,
+            side_effect=lambda path, *args, **kwargs: (
+                _pr292_mutated_text
+                if path.resolve() == _pr292_manifest_path.resolve()
+                else _pr292_original_read(path, *args, **kwargs)
+            ),
+        ):
+            with pytest.raises(_pr292_denied) as _pr292_error:
+                _pr292_policy.AgentCapabilityPolicyStoreV1.from_generated(_pr292_builder.REPO_ROOT)
+            assert _pr292_error.value.reason_code is _pr292_reason.TASK_ENVELOPE_STALE
+    assert _pr292_pathlib.Path.read_text is _pr292_original_read
+    assert _pr292_manifest_path.read_bytes() == _pr292_persisted_bytes
+    # A negative test must not poison the real reader or rewrite the fixture.
+    assert _pr292_policy.AgentCapabilityPolicyStoreV1.from_generated(
+        _pr292_builder.REPO_ROOT
+    ).snapshot.policy_version == _pr292_policy.POLICY_VERSION
+
+    regression_intentions = (
+        "canonical_manifest_positive_control",
+        "canonical_view_reader_round_trip",
+        "ordinary_safe_path_positive_control",
+        "ordinary_numeric_path_negative_control",
+        "numeric_path_through_adapter_workaround",
+        "manifest_output_contract_replacement",
+        "manifest_quantum_latency_class_replacement",
+        "manifest_writer_failure_route_replacement",
+        "manifest_future_owner_promoted_to_existing",
+        "manifest_numeric_authority_flag",
+        "launch_quantum_latency_replacement_at_qku_boundary",
+        "launch_boolean_profile_ordinal",
+        "launch_float_validation_count",
+        "mutable_dataclass_normalization",
+        "float_enum_normalization",
+        "list_enum_normalization",
+        "plain_float_normalization_negative_control",
+    )
+    assert len(regression_intentions) == len(set(regression_intentions)) == 17
+    qku_exports = (
+        "SelectedComponentPackageEntryViewV1",
+        "SelectedComponentOperationViewV1",
+        "SelectedComponentPackageViewV1",
+        "SelectedComponentPackageAdapterV1",
+    )
+    assert tuple(qku_control_plane.__all__[-4:]) == qku_exports
+    assert all(qku_control_plane.__all__.count(name) == 1 for name in qku_exports)
+    generic_exports = (
+        "PluginPackageReasonCodeV1",
+        "PluginPackageContractError",
+        "PackageVersionV1",
+        "PackageAdmissionStateV1",
+        "PackageCompatibilityStateV1",
+        "PackageRollbackTargetKindV1",
+        "PackageOperationEligibilityStateV1",
+        "PackageValidationTerminalStateV1",
+        "PackageSupersessionStateV1",
+        "PackageOperationEligibilityV1",
+        "SelectedComponentPackageEntryV1",
+        "SelectedComponentPackageManifestV1",
+        "CompatibilityAndDependencyReceiptV1",
+        "RollbackAndSupersessionReceiptV1",
+        "PackageReproducibilityReceiptV1",
+        "compile_selected_package_dependency_order_v1",
+        "build_selected_component_package_manifest_v1",
+        "validate_selected_component_package_v1",
+        "derive_rollback_and_supersession_receipt_v1",
+        "validate_package_supersession_v1",
+        "rebuild_selected_component_package_v1",
+        "selected_component_package_projection_v1",
+    )
+    assert tuple(generic_plugins.__all__[-22:]) == generic_exports
+    historical_families = qku_control_plane.PR162EPluginAdapterV1(
+        root
+    ).load_families()
+    assert len(historical_families) == 95
+    assert all(
+        isinstance(row, qku_control_plane.PluginFamilyViewV1)
+        for row in historical_families
     )
     historical_fixture_scope = ("KALSHI", "POLYMARKET", "FORECASTEX_IBKR")
     assert CAPITAL_RISK_ACTIVE_STAGE1_VENUES == historical_fixture_scope

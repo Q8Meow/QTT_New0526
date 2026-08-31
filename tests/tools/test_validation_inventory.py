@@ -180,6 +180,7 @@ def test_inventory_has_centralized_qku_validation_entries():
             *inventory.ST12G_ALLOWED_EXACT_PATHS,
             *inventory.ST12H_ALLOWED_EXACT_PATHS,
             *inventory.S1_LAUNCH_GRAPH_ALLOWED_EXACT_PATHS,
+            *inventory.S1_PLUGIN_PACKAGE_CURRENTIZATION_ALLOWED_EXACT_PATHS,
         )
     )
     assert expected <= set(entries)
@@ -222,6 +223,36 @@ def test_inventory_has_centralized_qku_validation_entries():
         "independent_validate_qku_computation_control_plane_architecture",
         "pytest_shard_8_qku_computation_control_plane_pytest",
     } <= launch_validator_ids
+    assert (
+        inventory.S1_PLUGIN_PACKAGE_CURRENTIZATION_ALLOWED_EXACT_PATHS
+        == scope_registry.S1_PLUGIN_PACKAGE_CURRENTIZATION_ALLOWED_EXACT_PATHS
+    )
+    package_owner_ids = {
+        "validate_qku_computation_control_plane_architecture",
+        "independent_validate_qku_computation_control_plane_architecture",
+        "pytest_shard_8_qku_computation_control_plane_pytest",
+    }
+    for package_path in (
+        "src/qtt/plugins/contracts.py",
+        "src/qtt/plugins/dag.py",
+        "src/qtt/plugins/registry.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/plugin_adapter.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/serialization.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/agent_policy.py",
+        "docs/master_plan/generated/qku_control_plane/agent_capability/manifest.json",
+        "tools/build_qku_computation_control_plane.py",
+        "tools/independent_validate_qku_computation_control_plane_architecture.py",
+        "tests/pr162e/test_pr162e_plugin_abi.py",
+        "tests/pr162e/test_pr162e_dependency_dag.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/test_integration_snapshot_matrix.py",
+    ):
+        assert package_path in (
+            inventory.S1_PLUGIN_PACKAGE_CURRENTIZATION_ALLOWED_EXACT_PATHS
+        )
+        assert package_owner_ids <= {
+            entry.validator_id
+            for entry in inventory.entries_matching_path(package_path)
+        }
     assert len(inventory.validation_inventory()) == 450
 
 

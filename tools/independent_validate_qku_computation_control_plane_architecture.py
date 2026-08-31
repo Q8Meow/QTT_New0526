@@ -221,6 +221,9 @@ CURRENT_FULL_CONTRACT_EVIDENCE_MARKER = (
     "ST12_ARCHITECTURE_CURRENT_FULL_CONTRACT_EVIDENCE_V1"
 )
 STAGE1_LAUNCH_GRAPH_MARKER = "STAGE1_LAUNCH_GRAPH_V2_INDEPENDENTLY_VALIDATED"
+S1_SELECTED_COMPONENT_PACKAGE_MARKER = (
+    "S1_SELECTED_COMPONENT_PACKAGE_V1_INDEPENDENTLY_VALIDATED"
+)
 _EXPECTED_STAGE1_SELECTED_PROFILE_IDS = (
     "GEMINI_TITAN_DIRECT",
     "POLYMARKET_US_RETAIL_DIRECT",
@@ -1232,6 +1235,37 @@ _EXPECTED_STAGE1_OPERATION_PROFILE_ROWS_JSON = r"""[
   }
 ]"""
 
+_EXPECTED_S1_SELECTED_ROLE_FAMILY_ROWS_JSON = r"""[
+  {"role_id":"ROLE-01","primary_plugin_family_or_none":null,"supporting_plugin_families":[],"rollback_target_kind":"DISABLE_TO_NO_EFFECT","fallback_role_id_or_none":null},
+  {"role_id":"ROLE-02","primary_plugin_family_or_none":null,"supporting_plugin_families":[],"rollback_target_kind":"UNAVAILABLE_OWNER_REVIEW_REQUIRED","fallback_role_id_or_none":null},
+  {"role_id":"ROLE-03","primary_plugin_family_or_none":null,"supporting_plugin_families":[],"rollback_target_kind":"DISABLE_TO_NO_EFFECT","fallback_role_id_or_none":null},
+  {"role_id":"ROLE-04","primary_plugin_family_or_none":"ORDERBOOK_STATE_PLUGIN","supporting_plugin_families":["STALE_BOOK_DIAGNOSTIC_PLUGIN","STALE_BOOK_REPAIR_PLUGIN"],"rollback_target_kind":"NO_TRADE","fallback_role_id_or_none":null},
+  {"role_id":"ROLE-05","primary_plugin_family_or_none":"FEATURE_TRANSFORM_PLUGIN","supporting_plugin_families":["SIGNAL_SCORING_PLUGIN"],"rollback_target_kind":"DISABLE_TO_NO_EFFECT","fallback_role_id_or_none":null},
+  {"role_id":"ROLE-06","primary_plugin_family_or_none":"FORMULA_PLUGIN","supporting_plugin_families":[],"rollback_target_kind":"DISABLE_TO_NO_EFFECT","fallback_role_id_or_none":null},
+  {"role_id":"ROLE-07","primary_plugin_family_or_none":"PROBABILITY_CALIBRATION_PLUGIN","supporting_plugin_families":["CALIBRATION_ERROR_PLUGIN"],"rollback_target_kind":"NO_TRADE","fallback_role_id_or_none":null},
+  {"role_id":"ROLE-08","primary_plugin_family_or_none":"PARAMETER_STACK_PLUGIN","supporting_plugin_families":["HOLDOUT_CONFIDENCE_PLUGIN","LOWER_CONFIDENCE_BOUND_PLUGIN"],"rollback_target_kind":"NO_TRADE","fallback_role_id_or_none":null},
+  {"role_id":"ROLE-09","primary_plugin_family_or_none":"EXECUTION_COST_PLUGIN","supporting_plugin_families":[],"rollback_target_kind":"UNAVAILABLE_OWNER_REVIEW_REQUIRED","fallback_role_id_or_none":null},
+  {"role_id":"ROLE-10","primary_plugin_family_or_none":"SLIPPAGE_IMPACT_PLUGIN","supporting_plugin_families":["IMPL_SHORTFALL_PLUGIN"],"rollback_target_kind":"DISABLE_TO_NO_EFFECT","fallback_role_id_or_none":null},
+  {"role_id":"ROLE-11","primary_plugin_family_or_none":"FILL_MODEL_PLUGIN","supporting_plugin_families":["PARTIAL_FILL_PLUGIN","NO_FILL_PLUGIN"],"rollback_target_kind":"NO_TRADE","fallback_role_id_or_none":null},
+  {"role_id":"ROLE-12","primary_plugin_family_or_none":"QUEUE_RISK_PLUGIN","supporting_plugin_families":["QUEUE_SURVIVAL_PLUGIN"],"rollback_target_kind":"UNAVAILABLE_OWNER_REVIEW_REQUIRED","fallback_role_id_or_none":null},
+  {"role_id":"ROLE-13","primary_plugin_family_or_none":"ADVERSE_SELECTION_PLUGIN","supporting_plugin_families":[],"rollback_target_kind":"NO_TRADE","fallback_role_id_or_none":null},
+  {"role_id":"ROLE-14","primary_plugin_family_or_none":"LATENCY_DECAY_PLUGIN","supporting_plugin_families":[],"rollback_target_kind":"NO_TRADE","fallback_role_id_or_none":null},
+  {"role_id":"ROLE-15","primary_plugin_family_or_none":"EXPECTED_VALUE_PLUGIN","supporting_plugin_families":["EXECUTION_COST_PLUGIN"],"rollback_target_kind":"DISABLE_TO_NO_EFFECT","fallback_role_id_or_none":null},
+  {"role_id":"ROLE-16","primary_plugin_family_or_none":"LOWER_CONFIDENCE_BOUND_PLUGIN","supporting_plugin_families":["NO_TRADE_REASON_PLUGIN","DECISION_RULE_PLUGIN"],"rollback_target_kind":"NO_TRADE","fallback_role_id_or_none":null},
+  {"role_id":"ROLE-17","primary_plugin_family_or_none":null,"supporting_plugin_families":[],"rollback_target_kind":"UNAVAILABLE_OWNER_REVIEW_REQUIRED","fallback_role_id_or_none":null},
+  {"role_id":"ROLE-18","primary_plugin_family_or_none":"RISK_BUDGET_PLUGIN","supporting_plugin_families":[],"rollback_target_kind":"DISABLE_TO_NO_EFFECT","fallback_role_id_or_none":null},
+  {"role_id":"ROLE-19","primary_plugin_family_or_none":"THRESHOLD_POLICY_PLUGIN","supporting_plugin_families":["DECISION_RULE_PLUGIN"],"rollback_target_kind":"DISABLE_TO_NO_EFFECT","fallback_role_id_or_none":null},
+  {"role_id":"ROLE-20","primary_plugin_family_or_none":"PORTFOLIO_UTILITY_PLUGIN","supporting_plugin_families":["MARGINAL_UTILITY_PLUGIN","DIVERSIFICATION_PLUGIN","CORRELATION_CLUSTER_PLUGIN","COMMON_DRIVER_EXPOSURE_PLUGIN","RISK_BUDGET_PLUGIN"],"rollback_target_kind":"NO_TRADE","fallback_role_id_or_none":null},
+  {"role_id":"ROLE-21","primary_plugin_family_or_none":"AGGRESSION_LADDER_PLUGIN","supporting_plugin_families":["CANCEL_REPLACE_PLUGIN","DECISION_RULE_PLUGIN"],"rollback_target_kind":"NO_TRADE","fallback_role_id_or_none":null},
+  {"role_id":"ROLE-22","primary_plugin_family_or_none":"DECISION_RULE_PLUGIN","supporting_plugin_families":["THRESHOLD_POLICY_PLUGIN"],"rollback_target_kind":"UNAVAILABLE_OWNER_REVIEW_REQUIRED","fallback_role_id_or_none":null},
+  {"role_id":"ROLE-23","primary_plugin_family_or_none":"TCA_PLUGIN","supporting_plugin_families":["EDGE_ATTRIBUTION_PLUGIN","IMPL_SHORTFALL_PLUGIN"],"rollback_target_kind":"NO_TRADE","fallback_role_id_or_none":null},
+  {"role_id":"ROLE-24","primary_plugin_family_or_none":null,"supporting_plugin_families":[],"rollback_target_kind":"DISABLE_TO_NO_EFFECT","fallback_role_id_or_none":null},
+  {"role_id":"ROLE-25","primary_plugin_family_or_none":null,"supporting_plugin_families":[],"rollback_target_kind":"UNAVAILABLE_OWNER_REVIEW_REQUIRED","fallback_role_id_or_none":null},
+  {"role_id":"ROLE-26","primary_plugin_family_or_none":"CLASSICAL_FALLBACK_PLUGIN","supporting_plugin_families":[],"rollback_target_kind":"DISABLE_TO_NO_EFFECT","fallback_role_id_or_none":null},
+  {"role_id":"ROLE-27","primary_plugin_family_or_none":"QUANTUM_RECIPE_PLUGIN","supporting_plugin_families":["QUBO_ADAPTER_PLUGIN","BQM_ADAPTER_PLUGIN","ISING_ADAPTER_PLUGIN","CQM_ADAPTER_PLUGIN","DQM_ADAPTER_PLUGIN","QUAD_PROGRAM_ADAPTER_PLUGIN","HYBRID_ROUTE_PLUGIN","INTERPRET_BACK_VALIDATOR_PLUGIN","PROOF_VECTOR_VALIDATOR_PLUGIN","FEASIBILITY_VALIDATOR_PLUGIN","COEFFICIENT_SCALING_PLUGIN","UNIT_NORMALIZATION_PLUGIN","PRECISION_BINNING_PLUGIN","PENALTY_TUNING_PLUGIN","QUBIT_COST_ESTIMATOR_PLUGIN","EMBEDDING_READINESS_PLUGIN","QUANTUM_SHOT_BUDGET_STRUCTURAL_PLUGIN","ANNEAL_SCHEDULE_STRUCTURAL_PLUGIN"],"rollback_target_kind":"DETERMINISTIC_CLASSICAL_FALLBACK","fallback_role_id_or_none":"ROLE-26"},
+  {"role_id":"ROLE-28","primary_plugin_family_or_none":"AGENT_WORK_ORDER_ROUTE","supporting_plugin_families":["GOVERNANCE_REVIEW_ROUTE","COMMANDER_DAG_ROUTE"],"rollback_target_kind":"DISABLE_TO_NO_EFFECT","fallback_role_id_or_none":null}
+]"""
+
 DECIMAL_CONTEXT = Context(prec=34, rounding=ROUND_HALF_EVEN)
 
 
@@ -1813,6 +1847,1628 @@ def _stage1_launch_graph_failures() -> list[str]:
     ):
         failures.append("Stage-1 active-live/no-effect AST closure differs")
 
+    return failures
+
+
+def _assigned_literal(tree: ast.Module, name: str) -> object:
+    for node in tree.body:
+        value: ast.expr | None = None
+        if isinstance(node, ast.Assign) and any(
+            isinstance(target, ast.Name) and target.id == name
+            for target in node.targets
+        ):
+            value = node.value
+        elif (
+            isinstance(node, ast.AnnAssign)
+            and isinstance(node.target, ast.Name)
+            and node.target.id == name
+        ):
+            value = node.value
+        if value is not None:
+            return ast.literal_eval(value)
+    raise ValueError(f"missing literal assignment: {name}")
+
+
+def _class_fields(tree: ast.Module, class_name: str) -> tuple[str, ...]:
+    classes = tuple(
+        node
+        for node in tree.body
+        if isinstance(node, ast.ClassDef) and node.name == class_name
+    )
+    if len(classes) != 1:
+        return ()
+    return tuple(
+        node.target.id
+        for node in classes[0].body
+        if isinstance(node, ast.AnnAssign)
+        and isinstance(node.target, ast.Name)
+    )
+
+
+def _frozen_slotted_dataclass(tree: ast.Module, class_name: str) -> bool:
+    classes = tuple(
+        node
+        for node in tree.body
+        if isinstance(node, ast.ClassDef) and node.name == class_name
+    )
+    if len(classes) != 1:
+        return False
+    decorators = tuple(
+        decorator
+        for decorator in classes[0].decorator_list
+        if isinstance(decorator, ast.Call)
+        and isinstance(decorator.func, ast.Name)
+        and decorator.func.id == "dataclass"
+    )
+    if len(decorators) != 1:
+        return False
+    keyword_values = {
+        keyword.arg: ast.literal_eval(keyword.value)
+        for keyword in decorators[0].keywords
+        if keyword.arg is not None
+    }
+    return keyword_values.get("frozen") is True and keyword_values.get("slots") is True
+
+
+def _declared_exports(tree: ast.Module) -> tuple[str, ...]:
+    exports: list[str] = []
+    for node in tree.body:
+        value: ast.expr | None = None
+        if isinstance(node, ast.Assign) and any(
+            isinstance(target, ast.Name) and target.id == "__all__"
+            for target in node.targets
+        ):
+            exports = []
+            value = node.value
+        elif (
+            isinstance(node, ast.AugAssign)
+            and isinstance(node.target, ast.Name)
+            and node.target.id == "__all__"
+            and isinstance(node.op, ast.Add)
+        ):
+            value = node.value
+        if value is None:
+            continue
+        batch = ast.literal_eval(value)
+        if not isinstance(batch, list) or any(
+            not isinstance(item, str) for item in batch
+        ):
+            raise ValueError("__all__ batches must be literal text lists")
+        exports.extend(batch)
+    return tuple(exports)
+
+
+def _lexicographic_kahn(
+    node_ids: Sequence[str],
+    edges: Sequence[tuple[str, str]],
+) -> tuple[str, ...]:
+    indegree = {node_id: 0 for node_id in node_ids}
+    successors = {node_id: [] for node_id in node_ids}
+    for producer, consumer in edges:
+        if producer not in successors or consumer not in indegree:
+            return ()
+        indegree[consumer] += 1
+        successors[producer].append(consumer)
+    ready = sorted(node_id for node_id, degree in indegree.items() if degree == 0)
+    emitted: list[str] = []
+    while ready:
+        producer = ready.pop(0)
+        emitted.append(producer)
+        for consumer in sorted(successors[producer]):
+            indegree[consumer] -= 1
+            if indegree[consumer] == 0:
+                ready.append(consumer)
+                ready.sort()
+    return tuple(emitted) if len(emitted) == len(node_ids) else ()
+
+
+def _independent_selected_component_package_core_v1() -> dict[str, object]:
+    """Reconstruct the complete selected-package core from source AST literals."""
+
+    launch_path = PACKAGE / "stage1_launch_graph.py"
+    contracts_path = REPO_ROOT / "src" / "qtt" / "plugins" / "contracts.py"
+    authority_path = REPO_ROOT / "src" / "qtt" / "plugins" / "authority.py"
+    launch_tree = ast.parse(
+        launch_path.read_text(encoding="utf-8"),
+        filename=str(launch_path),
+    )
+    contracts_tree = ast.parse(
+        contracts_path.read_text(encoding="utf-8"),
+        filename=str(contracts_path),
+    )
+    authority_tree = ast.parse(
+        authority_path.read_text(encoding="utf-8"),
+        filename=str(authority_path),
+    )
+
+    role_rows = _json_rows(launch_tree, "_STAGE1_LAUNCH_ROLE_ROWS_JSON")
+    operation_rows = _json_rows(
+        launch_tree,
+        "_STAGE1_OPERATION_PROFILE_ROWS_JSON",
+    )
+    family_rows = json.loads(_EXPECTED_S1_SELECTED_ROLE_FAMILY_ROWS_JSON)
+    if type(family_rows) is not list:
+        raise ValueError("independent role-family rows must be a literal list")
+
+    role_keys = {
+        "role_id",
+        "responsibility",
+        "disposition",
+        "semantic_owner",
+        "path_refs",
+        "frozen_output",
+        "default_failure_route",
+        "latency_class",
+        "research_state",
+        "direct_prerequisite_role_ids",
+    }
+    path_keys = {"path", "disposition"}
+    operation_keys = {
+        "operation_class",
+        "purpose",
+        "required_role_ids",
+        "optional_role_ids",
+        "consumption_law",
+        "terminal_failure_route",
+        "research_state",
+    }
+    family_keys = {
+        "role_id",
+        "primary_plugin_family_or_none",
+        "supporting_plugin_families",
+        "rollback_target_kind",
+        "fallback_role_id_or_none",
+    }
+    role_ids = tuple(f"ROLE-{index:02d}" for index in range(1, 29))
+    if (
+        len(role_rows) != 28
+        or len(family_rows) != 28
+        or tuple(row.get("role_id") for row in role_rows) != role_ids
+        or tuple(row.get("role_id") for row in family_rows) != role_ids
+        or any(type(row) is not dict or set(row) != role_keys for row in role_rows)
+        or any(type(row) is not dict or set(row) != family_keys for row in family_rows)
+    ):
+        raise ValueError("independent 28-role source shape differs")
+    if (
+        len(operation_rows) != 5
+        or any(
+            type(row) is not dict or set(row) != operation_keys
+            for row in operation_rows
+        )
+        or tuple(row.get("operation_class") for row in operation_rows)
+        != _EXPECTED_STAGE1_OPERATION_CLASSES
+    ):
+        raise ValueError("independent operation source shape differs")
+
+    disposition_contracts = {
+        "BINDING_ONLY_GAP": (
+            "ADMITTED_CONTRACT_ONLY_NO_EFFECT",
+            "PASS_CONTRACT_ONLY_NO_EFFECT",
+            [],
+        ),
+        "EVIDENCE_ONLY_GAP": (
+            "HELD_EVIDENCE_INSUFFICIENT_NO_ADMISSION",
+            "BLOCKED_EVIDENCE_INSUFFICIENT",
+            ["EVIDENCE_INSUFFICIENT"],
+        ),
+        "TRUE_MISSING_DEPENDENCY": (
+            "HELD_IMPLEMENTATION_MISSING_NO_ADMISSION",
+            "BLOCKED_MISSING_IMPLEMENTATION",
+            ["IMPLEMENTATION_MISSING"],
+        ),
+    }
+    disposition_counts = Counter(row.get("disposition") for row in role_rows)
+    if disposition_counts != Counter(
+        {
+            "BINDING_ONLY_GAP": 11,
+            "EVIDENCE_ONLY_GAP": 5,
+            "TRUE_MISSING_DEPENDENCY": 12,
+        }
+    ):
+        raise ValueError("independent admission partition differs")
+
+    path_rows: list[Mapping[str, object]] = []
+    edges: list[tuple[str, str]] = []
+    for role in role_rows:
+        prerequisites = role.get("direct_prerequisite_role_ids")
+        paths = role.get("path_refs")
+        if (
+            type(prerequisites) is not list
+            or any(type(value) is not str for value in prerequisites)
+            or len(prerequisites) != len(set(prerequisites))
+            or type(paths) is not list
+            or not paths
+        ):
+            raise ValueError("independent role dependency or path shape differs")
+        for path_row in paths:
+            if type(path_row) is not dict or set(path_row) != path_keys:
+                raise ValueError("independent owner-path row shape differs")
+            path_rows.append(path_row)
+        edges.extend(
+            (prerequisite, str(role["role_id"]))
+            for prerequisite in prerequisites
+        )
+    path_dispositions = Counter(row.get("disposition") for row in path_rows)
+    path_values = tuple(row.get("path") for row in path_rows)
+    if (
+        len(path_rows) != 68
+        or path_dispositions
+        != Counter(
+            {
+                "EXISTING_CANONICAL_OWNER": 57,
+                "FUTURE_AUTHORIZED_OWNER_NOT_YET_IMPLEMENTED": 11,
+            }
+        )
+        or len(set(path_values)) != 34
+    ):
+        raise ValueError("independent owner-path denominators differ")
+    if (
+        len(edges) != 102
+        or len(edges) != len(set(edges))
+        or any(
+            producer not in role_ids
+            or consumer not in role_ids
+            or producer == consumer
+            for producer, consumer in edges
+        )
+    ):
+        raise ValueError("independent dependency edge closure differs")
+    topological_order = _lexicographic_kahn(role_ids, edges)
+    if (
+        topological_order != _EXPECTED_STAGE1_TOPOLOGICAL_ORDER
+        or ("ROLE-12", "ROLE-11") not in edges
+    ):
+        raise ValueError("independent topological order differs")
+
+    authority_classes = tuple(
+        node
+        for node in contracts_tree.body
+        if isinstance(node, ast.ClassDef)
+        and node.name == "PluginAuthorityEnvelope"
+    )
+    if len(authority_classes) != 1:
+        raise ValueError("PluginAuthorityEnvelope declaration is ambiguous")
+    authority_fields: list[str] = []
+    authority_defaults: dict[str, bool] = {}
+    for statement in authority_classes[0].body:
+        if not (
+            isinstance(statement, ast.AnnAssign)
+            and isinstance(statement.target, ast.Name)
+        ):
+            continue
+        field_name = statement.target.id
+        authority_fields.append(field_name)
+        if field_name == "authority_envelope_id":
+            if statement.value is not None:
+                raise ValueError("authority identity must not have a class default")
+            continue
+        if statement.value is None:
+            raise ValueError(f"authority boolean default missing: {field_name}")
+        default = ast.literal_eval(statement.value)
+        if type(default) is not bool:
+            raise ValueError(f"authority boolean default is not exact: {field_name}")
+        authority_defaults[field_name] = default
+    default_assignments = tuple(
+        node
+        for node in authority_tree.body
+        if isinstance(node, ast.Assign)
+        and any(
+            isinstance(target, ast.Name)
+            and target.id == "DEFAULT_AUTHORITY_ENVELOPE"
+            for target in node.targets
+        )
+    )
+    if len(default_assignments) != 1 or not isinstance(
+        default_assignments[0].value,
+        ast.Call,
+    ):
+        raise ValueError("default authority constructor is ambiguous")
+    default_call = default_assignments[0].value
+    default_keywords = {
+        keyword.arg: ast.literal_eval(keyword.value)
+        for keyword in default_call.keywords
+        if keyword.arg is not None
+    }
+    if set(default_keywords) != {"authority_envelope_id"} or type(
+        default_keywords["authority_envelope_id"]
+    ) is not str:
+        raise ValueError("default authority identity constructor differs")
+    authority_envelope: dict[str, object] = {
+        field_name: (
+            default_keywords["authority_envelope_id"]
+            if field_name == "authority_envelope_id"
+            else authority_defaults[field_name]
+        )
+        for field_name in authority_fields
+    }
+    if len(authority_envelope) != 16:
+        raise ValueError("default authority envelope field closure differs")
+
+    launch_schema = _assigned_literal(
+        launch_tree,
+        "SELECTED_LAUNCH_GRAPH_SCHEMA_VERSION",
+    )
+    scope_schema = _assigned_literal(
+        launch_tree,
+        "STAGE1_SELECTED_SCOPE_SCHEMA_VERSION",
+    )
+    launch_package_ref = _assigned_literal(
+        launch_tree,
+        "S1_LAUNCH_GRAPH_PACKAGE_REF",
+    )
+    if (
+        launch_schema != "SELECTED_LAUNCH_GRAPH_V2"
+        or scope_schema != "STAGE1_SELECTED_SCOPE_V2"
+        or launch_package_ref != "S1-LAUNCH-GRAPH-MATERIALIZATION-01"
+    ):
+        raise ValueError("independent launch identity differs")
+
+    disposition_by_role = {
+        str(role["role_id"]): str(role["disposition"]) for role in role_rows
+    }
+    operation_projection: list[dict[str, object]] = []
+    for operation in operation_rows:
+        required_role_ids = operation.get("required_role_ids")
+        optional_role_ids = operation.get("optional_role_ids")
+        if (
+            type(required_role_ids) is not list
+            or type(optional_role_ids) is not list
+            or any(type(value) is not str for value in required_role_ids)
+            or any(type(value) is not str for value in optional_role_ids)
+            or set(required_role_ids).intersection(optional_role_ids)
+            or not set((*required_role_ids, *optional_role_ids)).issubset(role_ids)
+        ):
+            raise ValueError("independent operation membership differs")
+        blockers = [
+            role_id
+            for role_id in required_role_ids
+            if disposition_by_role[role_id] != "BINDING_ONLY_GAP"
+        ]
+        operation_projection.append(
+            {
+                "operation_class": operation["operation_class"],
+                "required_component_ids": [
+                    f"S1PKG::{role_id}" for role_id in required_role_ids
+                ],
+                "optional_component_ids": [
+                    f"S1PKG::{role_id}" for role_id in optional_role_ids
+                ],
+                "blocking_component_ids": [
+                    f"S1PKG::{role_id}" for role_id in blockers
+                ],
+                "state": "BLOCKED_CURRENT_PACKAGE_NO_EFFECT",
+                "terminal_failure_route": operation["terminal_failure_route"],
+            }
+        )
+    if tuple(
+        len(row["blocking_component_ids"]) for row in operation_projection
+    ) != (16, 2, 7, 12, 5):
+        raise ValueError("independent operation blocker denominators differ")
+
+    entries: list[dict[str, object]] = []
+    for role, family_row in zip(role_rows, family_rows, strict=True):
+        role_id = str(role["role_id"])
+        disposition = str(role["disposition"])
+        admission, compatibility, compatibility_reasons = disposition_contracts[
+            disposition
+        ]
+        existing_owner_paths = [
+            path_row["path"]
+            for path_row in role["path_refs"]
+            if path_row["disposition"] == "EXISTING_CANONICAL_OWNER"
+        ]
+        future_owner_paths = [
+            path_row["path"]
+            for path_row in role["path_refs"]
+            if path_row["disposition"]
+            == "FUTURE_AUTHORIZED_OWNER_NOT_YET_IMPLEMENTED"
+        ]
+        entries.append(
+            {
+                "package_component_id": f"S1PKG::{role_id}",
+                "package_version": "1.0.0",
+                "launch_role_id": role_id,
+                "role_disposition": disposition,
+                "admission_state": admission,
+                "compatibility_state": compatibility,
+                "compatibility_reason_codes": list(compatibility_reasons),
+                "selected_profile_ids": list(
+                    _EXPECTED_STAGE1_SELECTED_PROFILE_IDS
+                ),
+                "required_operation_classes": [
+                    operation["operation_class"]
+                    for operation in operation_rows
+                    if role_id in operation["required_role_ids"]
+                ],
+                "optional_operation_classes": [
+                    operation["operation_class"]
+                    for operation in operation_rows
+                    if role_id in operation["optional_role_ids"]
+                ],
+                "primary_plugin_family_or_none": family_row[
+                    "primary_plugin_family_or_none"
+                ],
+                "supporting_plugin_families": list(
+                    family_row["supporting_plugin_families"]
+                ),
+                "existing_owner_paths": existing_owner_paths,
+                "future_owner_paths": future_owner_paths,
+                "canonical_output_contract": role["frozen_output"],
+                "direct_dependency_component_ids": sorted(
+                    f"S1PKG::{dependency}"
+                    for dependency in role["direct_prerequisite_role_ids"]
+                ),
+                "default_failure_route": role["default_failure_route"],
+                "latency_class": role["latency_class"],
+                "rollback_target_kind": family_row["rollback_target_kind"],
+                "fallback_component_id_or_none": (
+                    f"S1PKG::{family_row['fallback_role_id_or_none']}"
+                    if family_row["fallback_role_id_or_none"] is not None
+                    else None
+                ),
+                "authority_envelope_id": authority_envelope[
+                    "authority_envelope_id"
+                ],
+            }
+        )
+
+    component_topological_order = [
+        f"S1PKG::{role_id}" for role_id in topological_order
+    ]
+    component_edges = sorted(
+        [f"S1PKG::{producer}", f"S1PKG::{consumer}"]
+        for producer, consumer in edges
+    )
+    manifest: dict[str, object] = {
+        "schema_version": "SELECTED_COMPONENT_PACKAGE_MANIFEST_V1",
+        "package_id": "S1-PLUGIN-PACKAGE-CURRENTIZATION-01",
+        "package_version": "1.0.0",
+        "launch_graph_package_ref": launch_package_ref,
+        "launch_graph_schema_version": launch_schema,
+        "selected_scope_schema_version": scope_schema,
+        "selected_profile_ids": list(_EXPECTED_STAGE1_SELECTED_PROFILE_IDS),
+        "excluded_profile_ids": list(_EXPECTED_STAGE1_EXCLUDED_PROFILE_IDS),
+        "entries": entries,
+        "dependency_edges": component_edges,
+        "topological_order": component_topological_order,
+        "operation_eligibility_rows": operation_projection,
+        "builder_runtime_implementation": "CPython",
+        "builder_runtime_version": "3.14.6",
+        "canonical_serialization_policy": (
+            "json.dumps(ensure_ascii=True,allow_nan=False,sort_keys=True,"
+            "separators=(',',':'))"
+        ),
+        "authority_envelope": authority_envelope,
+        "active_live_profile_ids": [],
+    }
+    compatibility: dict[str, object] = {
+        "package_id": manifest["package_id"],
+        "package_version": manifest["package_version"],
+        "checked_entry_count": len(entries),
+        "checked_edge_count": len(component_edges),
+        "checked_operation_count": len(operation_projection),
+        "topological_order": component_topological_order,
+        "operation_eligibility_rows": operation_projection,
+        "terminal_state": "VALIDATED_NO_EFFECT_WITH_HELD_DEPENDENCIES",
+        "reason_codes": [],
+        "authority_envelope": authority_envelope,
+    }
+    rollback: dict[str, object] = {
+        "package_id": manifest["package_id"],
+        "package_version": manifest["package_version"],
+        "predecessor_package_version_or_none": None,
+        "superseded_package_versions": [],
+        "retained_predecessor_versions": [],
+        "disabled_component_ids": [],
+        "operation_eligibility_rows": operation_projection,
+        "supersession_state": "INITIAL_CURRENT_NO_PREDECESSOR",
+        "terminal_state": "VALIDATED_NO_EFFECT_WITH_HELD_DEPENDENCIES",
+        "reason_codes": [],
+        "authority_envelope": authority_envelope,
+    }
+    return {
+        "manifest": manifest,
+        "compatibility_and_dependency": compatibility,
+        "rollback_and_supersession": rollback,
+    }
+
+
+def _selected_component_package_failures() -> list[str]:
+    """Rebuild selected-package semantics without production imports or calls."""
+
+    failures: list[str] = []
+    plugin_root = REPO_ROOT / "src" / "qtt" / "plugins"
+    stage_constants_path = (
+        REPO_ROOT
+        / "src"
+        / "qtt"
+        / "stage1_prediction_markets"
+        / "pr162e_plugin_framework"
+        / "constants.py"
+    )
+    builder_path = REPO_ROOT / "tools" / "build_qku_computation_control_plane.py"
+    paths = {
+        "contracts": plugin_root / "contracts.py",
+        "authority": plugin_root / "authority.py",
+        "stage_constants": stage_constants_path,
+        "dag": plugin_root / "dag.py",
+        "registry": plugin_root / "registry.py",
+        "plugin_init": plugin_root / "__init__.py",
+        "adapter": PACKAGE / "plugin_adapter.py",
+        "qku_init": PACKAGE / "__init__.py",
+        "builder": builder_path,
+        "launch": PACKAGE / "stage1_launch_graph.py",
+    }
+    try:
+        texts = {
+            name: path.read_text(encoding="utf-8") for name, path in paths.items()
+        }
+        trees = {
+            name: ast.parse(texts[name], filename=str(path))
+            for name, path in paths.items()
+        }
+    except (OSError, SyntaxError) as exc:
+        return [f"selected package AST owners could not be read: {exc}"]
+
+    ordered_tuple_names = (
+        "MATERIALIZATION_STATUSES",
+        "ALLOWED_RUNTIME_LANE_VALUES",
+        "FORBIDDEN_RUNTIME_LANE_VALUES",
+        "PLUGIN_FAMILIES",
+    )
+    try:
+        ordered_tuples = {
+            name: _assigned_literal(trees["contracts"], name)
+            for name in ordered_tuple_names
+        }
+    except (ValueError, TypeError) as exc:
+        failures.append(f"generic ordered tuple authority could not be read: {exc}")
+        ordered_tuples = {}
+    if (
+        len(ordered_tuples) != 4
+        or any(type(value) is not tuple for value in ordered_tuples.values())
+        or len(ordered_tuples.get("PLUGIN_FAMILIES", ())) != 95
+        or any(
+            len(value) != len(set(value))
+            for value in ordered_tuples.values()
+            if isinstance(value, tuple)
+        )
+    ):
+        failures.append("generic four-tuple authority or 95-family closure differs")
+    expected_frozenset_sources = {
+        "ALLOWED_MATERIALIZATION_STATUSES": "MATERIALIZATION_STATUSES",
+        "ALLOWED_RUNTIME_LANES": "ALLOWED_RUNTIME_LANE_VALUES",
+        "FORBIDDEN_RUNTIME_LANES": "FORBIDDEN_RUNTIME_LANE_VALUES",
+    }
+    frozenset_sources: dict[str, str] = {}
+    for node in trees["contracts"].body:
+        targets: tuple[ast.expr, ...] = ()
+        if isinstance(node, ast.Assign):
+            targets = tuple(node.targets)
+        if (
+            len(targets) == 1
+            and isinstance(targets[0], ast.Name)
+            and targets[0].id in expected_frozenset_sources
+            and isinstance(node.value, ast.Call)
+            and isinstance(node.value.func, ast.Name)
+            and node.value.func.id == "frozenset"
+            and len(node.value.args) == 1
+            and isinstance(node.value.args[0], ast.Name)
+        ):
+            frozenset_sources[targets[0].id] = node.value.args[0].id
+    if frozenset_sources != expected_frozenset_sources:
+        failures.append("generic frozenset ABI views do not derive from tuple owners")
+
+    stage_aliases = tuple(
+        (alias.name, alias.asname)
+        for node in trees["stage_constants"].body
+        if isinstance(node, ast.ImportFrom)
+        and node.module == "src.qtt.plugins.contracts"
+        for alias in node.names
+    )
+    if stage_aliases != (
+        ("ALLOWED_RUNTIME_LANE_VALUES", "ALLOWED_RUNTIME_LANES"),
+        ("FORBIDDEN_RUNTIME_LANE_VALUES", "FORBIDDEN_RUNTIME_LANES"),
+        ("MATERIALIZATION_STATUSES", None),
+        ("PLUGIN_FAMILIES", None),
+    ):
+        failures.append("stage PR162E tuple aliases differ from generic authority")
+    stage_assignment_names = {
+        target.id
+        for node in trees["stage_constants"].body
+        for target in (
+            tuple(node.targets)
+            if isinstance(node, ast.Assign)
+            else (node.target,)
+            if isinstance(node, ast.AnnAssign)
+            else ()
+        )
+        if isinstance(target, ast.Name)
+    }
+    if stage_assignment_names.intersection(
+        {
+            "MATERIALIZATION_STATUSES",
+            "ALLOWED_RUNTIME_LANES",
+            "FORBIDDEN_RUNTIME_LANES",
+            "PLUGIN_FAMILIES",
+        }
+    ):
+        failures.append("stage PR162E retains a duplicate local tuple authority")
+
+    package_record_fields = {
+        "PackageOperationEligibilityV1": (
+            "operation_class",
+            "required_component_ids",
+            "optional_component_ids",
+            "blocking_component_ids",
+            "state",
+            "terminal_failure_route",
+        ),
+        "SelectedComponentPackageEntryV1": (
+            "package_component_id",
+            "package_version",
+            "launch_role_id",
+            "role_disposition",
+            "admission_state",
+            "compatibility_state",
+            "compatibility_reason_codes",
+            "selected_profile_ids",
+            "required_operation_classes",
+            "optional_operation_classes",
+            "primary_plugin_family_or_none",
+            "supporting_plugin_families",
+            "existing_owner_paths",
+            "future_owner_paths",
+            "canonical_output_contract",
+            "direct_dependency_component_ids",
+            "default_failure_route",
+            "latency_class",
+            "rollback_target_kind",
+            "fallback_component_id_or_none",
+            "authority_envelope_id",
+        ),
+        "SelectedComponentPackageManifestV1": (
+            "schema_version",
+            "package_id",
+            "package_version",
+            "launch_graph_package_ref",
+            "launch_graph_schema_version",
+            "selected_scope_schema_version",
+            "selected_profile_ids",
+            "excluded_profile_ids",
+            "entries",
+            "dependency_edges",
+            "topological_order",
+            "operation_eligibility_rows",
+            "builder_runtime_implementation",
+            "builder_runtime_version",
+            "canonical_serialization_policy",
+            "authority_envelope",
+            "active_live_profile_ids",
+        ),
+        "CompatibilityAndDependencyReceiptV1": (
+            "package_id",
+            "package_version",
+            "checked_entry_count",
+            "checked_edge_count",
+            "checked_operation_count",
+            "topological_order",
+            "operation_eligibility_rows",
+            "terminal_state",
+            "reason_codes",
+            "authority_envelope",
+        ),
+        "RollbackAndSupersessionReceiptV1": (
+            "package_id",
+            "package_version",
+            "predecessor_package_version_or_none",
+            "superseded_package_versions",
+            "retained_predecessor_versions",
+            "disabled_component_ids",
+            "operation_eligibility_rows",
+            "supersession_state",
+            "terminal_state",
+            "reason_codes",
+            "authority_envelope",
+        ),
+        "PackageReproducibilityReceiptV1": (
+            "package_id",
+            "package_version",
+            "canonical_input_refs",
+            "builder_runtime_implementation",
+            "builder_runtime_version",
+            "canonical_serialization_policy",
+            "canonical_core_projection_json",
+            "second_build_byte_equal",
+            "pure_build_effect_count",
+            "terminal_state",
+            "reason_codes",
+            "authority_envelope",
+        ),
+    }
+    for class_name, expected_fields in package_record_fields.items():
+        if (
+            _class_fields(trees["contracts"], class_name) != expected_fields
+            or not _frozen_slotted_dataclass(trees["contracts"], class_name)
+        ):
+            failures.append(f"{class_name}: frozen/slotted field contract differs")
+    if not _frozen_slotted_dataclass(trees["contracts"], "PackageVersionV1"):
+        failures.append("PackageVersionV1 is not frozen and slotted")
+    authority_field_names = (
+        "authority_envelope_id",
+        "no_live_order_authority",
+        "no_live_promotion_claim",
+        "no_source_truth_acceptance",
+        "no_connector_semantic_binding",
+        "no_private_state_fetch",
+        "no_runtime_cash_receipt",
+        "no_profit_evidence",
+        "no_quantum_backend_execution",
+        "no_quantum_advantage_claim",
+        "no_llm_hot_path",
+        "no_llm_order_release",
+        "no_llm_source_acceptance",
+        "no_llm_result_rewrite",
+        "no_qtt_sha_freeze_checksum_global_digest_authority",
+        "no_atomicrows_bundle_sha_hash_checksum_authority",
+    )
+    authority_class = next(
+        (
+            node
+            for node in trees["contracts"].body
+            if isinstance(node, ast.ClassDef)
+            and node.name == "PluginAuthorityEnvelope"
+        ),
+        None,
+    )
+    authority_dataclass_decorators = tuple(
+        decorator
+        for decorator in (authority_class.decorator_list if authority_class else ())
+        if isinstance(decorator, ast.Call)
+        and isinstance(decorator.func, ast.Name)
+        and decorator.func.id == "dataclass"
+    )
+    authority_dataclass_keywords = {
+        keyword.arg: ast.literal_eval(keyword.value)
+        for keyword in (
+            authority_dataclass_decorators[0].keywords
+            if len(authority_dataclass_decorators) == 1
+            else ()
+        )
+        if keyword.arg is not None
+    }
+    if (
+        _class_fields(trees["contracts"], "PluginAuthorityEnvelope")
+        != authority_field_names
+        or authority_dataclass_keywords != {"frozen": True}
+    ):
+        failures.append("PluginAuthorityEnvelope frozen non-slotted contract differs")
+    try:
+        closed_record_types = _assigned_literal(
+            trees["contracts"],
+            "_PACKAGE_SERIALIZATION_RECORD_TYPES",
+        )
+    except (ValueError, TypeError):
+        closed_record_types = None
+    if closed_record_types is not None:
+        failures.append("closed package record types must remain symbolic")
+    closed_type_assignments = tuple(
+        node
+        for node in trees["contracts"].body
+        if isinstance(node, ast.AnnAssign)
+        and isinstance(node.target, ast.Name)
+        and node.target.id == "_PACKAGE_SERIALIZATION_RECORD_TYPES"
+    )
+    expected_closed_type_names = (
+        "PluginAuthorityEnvelope",
+        "PackageOperationEligibilityV1",
+        "SelectedComponentPackageEntryV1",
+        "SelectedComponentPackageManifestV1",
+        "CompatibilityAndDependencyReceiptV1",
+        "RollbackAndSupersessionReceiptV1",
+        "PackageReproducibilityReceiptV1",
+    )
+    if len(closed_type_assignments) != 1 or not isinstance(
+        closed_type_assignments[0].value,
+        ast.Tuple,
+    ) or len(closed_type_assignments[0].value.elts) != 7 or tuple(
+        element.id
+        for element in closed_type_assignments[0].value.elts
+        if isinstance(element, ast.Name)
+    ) != expected_closed_type_names:
+        failures.append("closed package serialization record domain differs")
+    if (
+        'r"(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)"'
+        not in texts["contracts"]
+        or "allow_nan=False" not in texts["contracts"]
+        or 'separators=(",", ":")' not in texts["contracts"]
+    ):
+        failures.append("version grammar or canonical serializer differs")
+
+    plugin_export_suffix = (
+        "PluginPackageReasonCodeV1",
+        "PluginPackageContractError",
+        "PackageVersionV1",
+        "PackageAdmissionStateV1",
+        "PackageCompatibilityStateV1",
+        "PackageRollbackTargetKindV1",
+        "PackageOperationEligibilityStateV1",
+        "PackageValidationTerminalStateV1",
+        "PackageSupersessionStateV1",
+        "PackageOperationEligibilityV1",
+        "SelectedComponentPackageEntryV1",
+        "SelectedComponentPackageManifestV1",
+        "CompatibilityAndDependencyReceiptV1",
+        "RollbackAndSupersessionReceiptV1",
+        "PackageReproducibilityReceiptV1",
+        "compile_selected_package_dependency_order_v1",
+        "build_selected_component_package_manifest_v1",
+        "validate_selected_component_package_v1",
+        "derive_rollback_and_supersession_receipt_v1",
+        "validate_package_supersession_v1",
+        "rebuild_selected_component_package_v1",
+        "selected_component_package_projection_v1",
+    )
+    qku_export_suffix = (
+        "SelectedComponentPackageEntryViewV1",
+        "SelectedComponentOperationViewV1",
+        "SelectedComponentPackageViewV1",
+        "SelectedComponentPackageAdapterV1",
+    )
+    try:
+        plugin_exports = _declared_exports(trees["plugin_init"])
+        qku_exports = _declared_exports(trees["qku_init"])
+    except (ValueError, TypeError) as exc:
+        failures.append(f"public export literals could not be read: {exc}")
+        plugin_exports = ()
+        qku_exports = ()
+    if plugin_exports[-22:] != plugin_export_suffix:
+        failures.append("generic plugin exact 22-export suffix differs")
+    if qku_exports[-4:] != qku_export_suffix:
+        failures.append("QKU exact four-export suffix differs")
+
+    try:
+        family_rows = _json_rows(
+            trees["registry"],
+            "_S1_SELECTED_ROLE_FAMILY_ROWS_JSON",
+        )
+        expected_family_rows = json.loads(
+            _EXPECTED_S1_SELECTED_ROLE_FAMILY_ROWS_JSON
+        )
+        role_rows = _json_rows(trees["launch"], "_STAGE1_LAUNCH_ROLE_ROWS_JSON")
+        operation_rows = _json_rows(
+            trees["launch"],
+            "_STAGE1_OPERATION_PROFILE_ROWS_JSON",
+        )
+    except (ValueError, TypeError, json.JSONDecodeError) as exc:
+        failures.append(f"selected package literals could not be rebuilt: {exc}")
+        family_rows = []
+        expected_family_rows = []
+        role_rows = []
+        operation_rows = []
+    if family_rows != expected_family_rows:
+        failures.append("selected role-family rows differ from independent freeze")
+    expected_role_ids = tuple(f"ROLE-{value:02d}" for value in range(1, 29))
+    if (
+        len(family_rows) != 28
+        or tuple(row.get("role_id") for row in family_rows) != expected_role_ids
+        or len(role_rows) != 28
+        or tuple(row.get("role_id") for row in role_rows) != expected_role_ids
+    ):
+        failures.append("selected package 28-slot identity closure differs")
+    families = tuple(ordered_tuples.get("PLUGIN_FAMILIES", ()))
+    family_refs = tuple(
+        family
+        for row in family_rows
+        for family in (
+            *((row.get("primary_plugin_family_or_none"),)
+              if row.get("primary_plugin_family_or_none") is not None
+              else ()),
+            *(row.get("supporting_plugin_families", ())
+              if isinstance(row.get("supporting_plugin_families"), list)
+              else ()),
+        )
+    )
+    no_family_role_ids = tuple(
+        str(row.get("role_id"))
+        for row in family_rows
+        if row.get("primary_plugin_family_or_none") is None
+        and row.get("supporting_plugin_families") == []
+    )
+    if (
+        len(family_refs) != 66
+        or len(set(family_refs)) != 58
+        or no_family_role_ids
+        != ("ROLE-01", "ROLE-02", "ROLE-03", "ROLE-17", "ROLE-24", "ROLE-25")
+        or not set(family_refs).issubset(families)
+    ):
+        failures.append("selected package 66/58/6 family closure differs")
+
+    disposition_counts = Counter(row.get("disposition") for row in role_rows)
+    admission_by_disposition = {
+        "BINDING_ONLY_GAP": "ADMITTED_CONTRACT_ONLY_NO_EFFECT",
+        "EVIDENCE_ONLY_GAP": "HELD_EVIDENCE_INSUFFICIENT_NO_ADMISSION",
+        "TRUE_MISSING_DEPENDENCY": "HELD_IMPLEMENTATION_MISSING_NO_ADMISSION",
+    }
+    if disposition_counts != Counter(
+        {
+            "BINDING_ONLY_GAP": 11,
+            "EVIDENCE_ONLY_GAP": 5,
+            "TRUE_MISSING_DEPENDENCY": 12,
+        }
+    ) or any(
+        row.get("disposition") not in admission_by_disposition for row in role_rows
+    ):
+        failures.append("selected package 11/5/12 admission closure differs")
+
+    role_set = set(expected_role_ids)
+    edges = tuple(
+        (str(producer), str(row.get("role_id")))
+        for row in role_rows
+        for producer in (
+            row.get("direct_prerequisite_role_ids", ())
+            if isinstance(row.get("direct_prerequisite_role_ids"), list)
+            else ()
+        )
+    )
+    unknown_endpoints = tuple(
+        endpoint
+        for edge in edges
+        for endpoint in edge
+        if endpoint not in role_set
+    )
+    topological_order = _lexicographic_kahn(expected_role_ids, edges)
+    if (
+        len(edges) != 102
+        or len(set(edges)) != 102
+        or unknown_endpoints
+        or any(producer == consumer for producer, consumer in edges)
+        or topological_order != _EXPECTED_STAGE1_TOPOLOGICAL_ORDER
+        or ("ROLE-12", "ROLE-11") not in edges
+    ):
+        failures.append("selected package 28-node/102-edge dependency closure differs")
+    blocker_role_ids = tuple(
+        tuple(
+            str(role_id)
+            for role_id in row.get("required_role_ids", ())
+            if next(
+                (
+                    role.get("disposition")
+                    for role in role_rows
+                    if role.get("role_id") == role_id
+                ),
+                None,
+            )
+            != "BINDING_ONLY_GAP"
+        )
+        for row in operation_rows
+    )
+    expected_blockers = (
+        (
+            "ROLE-02", "ROLE-04", "ROLE-07", "ROLE-08", "ROLE-09",
+            "ROLE-11", "ROLE-12", "ROLE-13", "ROLE-14", "ROLE-16",
+            "ROLE-17", "ROLE-20", "ROLE-21", "ROLE-22", "ROLE-23",
+            "ROLE-25",
+        ),
+        ("ROLE-17", "ROLE-25"),
+        (
+            "ROLE-02", "ROLE-04", "ROLE-09", "ROLE-14", "ROLE-17",
+            "ROLE-22", "ROLE-25",
+        ),
+        (
+            "ROLE-02", "ROLE-04", "ROLE-07", "ROLE-08", "ROLE-09",
+            "ROLE-11", "ROLE-12", "ROLE-13", "ROLE-14", "ROLE-16",
+            "ROLE-17", "ROLE-23",
+        ),
+        ("ROLE-08", "ROLE-16", "ROLE-17", "ROLE-20", "ROLE-27"),
+    )
+    if (
+        len(operation_rows) != 5
+        or blocker_role_ids != expected_blockers
+        or tuple(map(len, blocker_role_ids)) != (16, 2, 7, 12, 5)
+        or operation_rows[0].get("optional_role_ids") != ["ROLE-27"]
+        or operation_rows[3].get("optional_role_ids") != ["ROLE-27"]
+        or any(
+            "ROLE-27" in blockers
+            for blockers in (blocker_role_ids[0], blocker_role_ids[3])
+        )
+    ):
+        failures.append("selected package five-operation blocker closure differs")
+    rollback_rows = tuple(
+        (row.get("role_id"), row.get("rollback_target_kind"), row.get("fallback_role_id_or_none"))
+        for row in family_rows
+    )
+    if (
+        len(rollback_rows) != 28
+        or rollback_rows[26]
+        != ("ROLE-27", "DETERMINISTIC_CLASSICAL_FALLBACK", "ROLE-26")
+        or any(row[2] is not None for row in (*rollback_rows[:26], rollback_rows[27]))
+    ):
+        failures.append("selected package rollback/fallback closure differs")
+
+    try:
+        first_core = _independent_selected_component_package_core_v1()
+        second_core = _independent_selected_component_package_core_v1()
+        first_bytes = json.dumps(
+            first_core,
+            ensure_ascii=True,
+            allow_nan=False,
+            sort_keys=True,
+            separators=(",", ":"),
+        ).encode("utf-8")
+        second_bytes = json.dumps(
+            second_core,
+            ensure_ascii=True,
+            allow_nan=False,
+            sort_keys=True,
+            separators=(",", ":"),
+        ).encode("utf-8")
+    except (KeyError, TypeError, ValueError) as exc:
+        failures.append(f"independent selected-package core build failed: {exc}")
+        first_core = {}
+        second_core = {}
+        first_bytes = b""
+        second_bytes = b"x"
+    if first_bytes != second_bytes:
+        failures.append("independent selected-package core builds differ by bytes")
+
+    manifest_projection = first_core.get("manifest", {})
+    compatibility_projection = first_core.get(
+        "compatibility_and_dependency",
+        {},
+    )
+    rollback_projection = first_core.get("rollback_and_supersession", {})
+    entry_projections = (
+        manifest_projection.get("entries", [])
+        if isinstance(manifest_projection, dict)
+        else []
+    )
+    operation_projections = (
+        manifest_projection.get("operation_eligibility_rows", [])
+        if isinstance(manifest_projection, dict)
+        else []
+    )
+    if (
+        tuple(first_core)
+        != (
+            "manifest",
+            "compatibility_and_dependency",
+            "rollback_and_supersession",
+        )
+        or set(manifest_projection)
+        != set(package_record_fields["SelectedComponentPackageManifestV1"])
+        or len(entry_projections) != 28
+        or any(
+            set(entry)
+            != set(package_record_fields["SelectedComponentPackageEntryV1"])
+            for entry in entry_projections
+        )
+        or set(compatibility_projection)
+        != set(package_record_fields["CompatibilityAndDependencyReceiptV1"])
+        or set(rollback_projection)
+        != set(package_record_fields["RollbackAndSupersessionReceiptV1"])
+        or len(operation_projections) != 5
+        or any(
+            set(operation)
+            != set(package_record_fields["PackageOperationEligibilityV1"])
+            for operation in operation_projections
+        )
+        or set(manifest_projection.get("authority_envelope", {}))
+        != set(authority_field_names)
+    ):
+        failures.append("independent selected-package complete field coverage differs")
+
+    manifest_builder = next(
+        (
+            node
+            for node in trees["registry"].body
+            if isinstance(node, ast.FunctionDef)
+            and node.name == "build_selected_component_package_manifest_v1"
+        ),
+        None,
+    )
+    entry_constructor_calls = tuple(
+        node
+        for node in (ast.walk(manifest_builder) if manifest_builder else ())
+        if isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id == "SelectedComponentPackageEntryV1"
+    )
+    expected_entry_expressions = {
+        "package_component_id": "_component_id(role_id)",
+        "package_version": "_INITIAL_VERSION",
+        "launch_role_id": "role_id",
+        "role_disposition": 'role["disposition"]',
+        "admission_state": "admission",
+        "compatibility_state": "compatibility",
+        "compatibility_reason_codes": "compatibility_reasons",
+        "selected_profile_ids": "_SELECTED_PROFILE_IDS",
+        "required_operation_classes": "required_operations",
+        "optional_operation_classes": "optional_operations",
+        "primary_plugin_family_or_none": (
+            'family_row["primary_plugin_family_or_none"]'
+        ),
+        "supporting_plugin_families": (
+            'tuple(family_row["supporting_plugin_families"])'
+        ),
+        "existing_owner_paths": "existing_paths",
+        "future_owner_paths": "future_paths",
+        "canonical_output_contract": 'role["frozen_output"]',
+        "direct_dependency_component_ids": (
+            "tuple(sorted(_component_id(dependency) for dependency in "
+            'role["direct_prerequisite_role_ids"]))'
+        ),
+        "default_failure_route": 'role["default_failure_route"]',
+        "latency_class": 'role["latency_class"]',
+        "rollback_target_kind": (
+            'PackageRollbackTargetKindV1(family_row["rollback_target_kind"])'
+        ),
+        "fallback_component_id_or_none": (
+            "_component_id(fallback_role_id) if fallback_role_id is not None "
+            "else None"
+        ),
+        "authority_envelope_id": (
+            "DEFAULT_AUTHORITY_ENVELOPE.authority_envelope_id"
+        ),
+    }
+    expected_builder_assignments = {
+        "role_id": 'role["role_id"]',
+        "admission,compatibility,compatibility_reasons": (
+            '_admission_contract(role["disposition"])'
+        ),
+        "existing_paths": (
+            'tuple(path_row["path"] for path_row in role["path_refs"] if '
+            'path_row["disposition"] == "EXISTING_CANONICAL_OWNER")'
+        ),
+        "future_paths": (
+            'tuple(path_row["path"] for path_row in role["path_refs"] if '
+            'path_row["disposition"] == '
+            '"FUTURE_AUTHORIZED_OWNER_NOT_YET_IMPLEMENTED")'
+        ),
+        "required_operations": (
+            'tuple(operation["operation_class"] for operation in operations if '
+            'role_id in operation["required_role_ids"])'
+        ),
+        "optional_operations": (
+            'tuple(operation["operation_class"] for operation in operations if '
+            'role_id in operation["optional_role_ids"])'
+        ),
+        "fallback_role_id": 'family_row["fallback_role_id_or_none"]',
+    }
+    observed_builder_assignments: dict[str, list[str]] = {}
+    for assignment in (
+        node
+        for node in (ast.walk(manifest_builder) if manifest_builder else ())
+        if isinstance(node, ast.Assign) and len(node.targets) == 1
+    ):
+        target = assignment.targets[0]
+        if isinstance(target, ast.Name):
+            target_key = target.id
+        elif isinstance(target, ast.Tuple) and all(
+            isinstance(element, ast.Name) for element in target.elts
+        ):
+            target_key = ",".join(element.id for element in target.elts)
+        else:
+            continue
+        observed_builder_assignments.setdefault(target_key, []).append(
+            ast.dump(assignment.value, include_attributes=False)
+        )
+    expected_builder_assignment_dumps = {
+        target_key: ast.dump(
+            ast.parse(expression, mode="eval").body,
+            include_attributes=False,
+        )
+        for target_key, expression in expected_builder_assignments.items()
+    }
+    builder_assignment_matches = all(
+        observed_builder_assignments.get(target_key) == [expected_dump]
+        for target_key, expected_dump in expected_builder_assignment_dumps.items()
+    )
+    if len(entry_constructor_calls) == 1:
+        constructor_keywords = tuple(
+            keyword.arg for keyword in entry_constructor_calls[0].keywords
+        )
+        constructor_expressions = {
+            keyword.arg: ast.dump(keyword.value, include_attributes=False)
+            for keyword in entry_constructor_calls[0].keywords
+            if keyword.arg is not None
+        }
+        expected_expression_dumps = {
+            field_name: ast.dump(
+                ast.parse(expression, mode="eval").body,
+                include_attributes=False,
+            )
+            for field_name, expression in expected_entry_expressions.items()
+        }
+        constructor_binding_matches = (
+            constructor_keywords
+            == package_record_fields["SelectedComponentPackageEntryV1"]
+            and constructor_expressions == expected_expression_dumps
+            and builder_assignment_matches
+        )
+    else:
+        constructor_binding_matches = False
+    if (
+        not constructor_binding_matches
+        or texts["registry"].count(
+            'canonical_output_contract=role["frozen_output"],'
+        )
+        != 1
+    ):
+        failures.append("operative selected-package entry constructor binding differs")
+
+    required_registry_functions = {
+        "build_selected_component_package_manifest_v1",
+        "validate_selected_component_package_v1",
+        "derive_rollback_and_supersession_receipt_v1",
+        "validate_package_supersession_v1",
+        "rebuild_selected_component_package_v1",
+        "selected_component_package_projection_v1",
+    }
+    registry_functions = {
+        node.name
+        for node in trees["registry"].body
+        if isinstance(node, ast.FunctionDef)
+    }
+    if not required_registry_functions.issubset(registry_functions):
+        failures.append("selected package public resolver surface is incomplete")
+    duplicate_runtime_authorities = {
+        "_BINDING_ONLY_ROLE_IDS",
+        "_EVIDENCE_ONLY_ROLE_IDS",
+        "_TRUE_MISSING_ROLE_IDS",
+        "_DIRECT_PREREQUISITE_ROLE_IDS",
+        "_EXPECTED_DEPENDENCY_EDGES",
+        "_EXPECTED_TOPOLOGICAL_ORDER",
+        "_OPERATION_REQUIRED_ROLE_IDS",
+        "_OPERATION_OPTIONAL_ROLE_IDS",
+        "_OPERATION_TERMINAL_ROUTES",
+        "_EXPECTED_OPERATION_BLOCKERS",
+    }
+    registry_assignment_names = {
+        target.id
+        for node in trees["registry"].body
+        for target in (
+            tuple(node.targets)
+            if isinstance(node, ast.Assign)
+            else (node.target,)
+            if isinstance(node, ast.AnnAssign)
+            else ()
+        )
+        if isinstance(target, ast.Name)
+    }
+    if registry_assignment_names.intersection(duplicate_runtime_authorities):
+        failures.append("registry retains duplicate runtime graph authority")
+    exact_signatures = {
+        "build_selected_component_package_manifest_v1": (
+            ("launch_graph_projection",),
+            ("canonical_launch_graph_projection",),
+        ),
+        "validate_selected_component_package_v1": (
+            ("manifest",),
+            ("canonical_launch_graph_projection",),
+        ),
+        "derive_rollback_and_supersession_receipt_v1": (
+            ("manifest",),
+            (
+                "canonical_launch_graph_projection",
+                "predecessor_manifest",
+                "disabled_component_ids",
+            ),
+        ),
+        "validate_package_supersession_v1": (
+            ("previous", "candidate"),
+            ("canonical_launch_graph_projection",),
+        ),
+        "rebuild_selected_component_package_v1": (
+            ("launch_graph_projection",),
+            ("canonical_launch_graph_projection",),
+        ),
+        "selected_component_package_projection_v1": (
+            ("launch_graph_projection",),
+            ("canonical_launch_graph_projection",),
+        ),
+    }
+    registry_function_nodes = {
+        node.name: node
+        for node in trees["registry"].body
+        if isinstance(node, ast.FunctionDef)
+    }
+    for function_name, (positional_names, keyword_names) in exact_signatures.items():
+        function = registry_function_nodes.get(function_name)
+        if function is None or (
+            tuple(argument.arg for argument in function.args.args)
+            != positional_names
+            or tuple(argument.arg for argument in function.args.kwonlyargs)
+            != keyword_names
+            or function.args.vararg is not None
+            or function.args.kwarg is not None
+        ):
+            failures.append(f"{function_name}: canonical-reference signature differs")
+    registry_classes = tuple(
+        node.name
+        for node in trees["registry"].body
+        if isinstance(node, ast.ClassDef)
+    )
+    if registry_classes.count("PluginRegistry") != 1:
+        failures.append("mutable historical PluginRegistry count differs from one")
+
+    dag_functions = {
+        node.name: node
+        for node in trees["dag"].body
+        if isinstance(node, ast.FunctionDef)
+    }
+    if not {
+        "compile_selected_package_dependency_order_v1",
+        "topological_order",
+        "has_cycle",
+    }.issubset(dag_functions) or "heapq.heappop" not in texts["dag"]:
+        failures.append("generic lexicographic dependency compiler surface differs")
+    for wrapper_name in ("topological_order", "has_cycle"):
+        wrapper = dag_functions.get(wrapper_name)
+        if wrapper is None or not any(
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Name)
+            and node.func.id == "compile_selected_package_dependency_order_v1"
+            for node in ast.walk(wrapper)
+        ):
+            failures.append(f"legacy DAG wrapper {wrapper_name} bypasses compiler")
+
+    adapter_classes = {
+        node.name: node
+        for node in trees["adapter"].body
+        if isinstance(node, ast.ClassDef)
+    }
+    selected_adapter = adapter_classes.get("SelectedComponentPackageAdapterV1")
+    adapter_methods = tuple(
+        node
+        for node in (selected_adapter.body if selected_adapter else ())
+        if isinstance(node, ast.FunctionDef)
+    )
+    if (
+        tuple(node.name for node in adapter_methods)
+        != ("build_projection", "build_view")
+        or any(
+            not any(
+                isinstance(decorator, ast.Name)
+                and decorator.id == "staticmethod"
+                for decorator in node.decorator_list
+            )
+            for node in adapter_methods
+        )
+    ):
+        failures.append("QKU selected-package adapter form differs")
+    adapter_functions = {
+        node.name: node
+        for node in trees["adapter"].body
+        if isinstance(node, ast.FunctionDef)
+    }
+    serialization_helper = adapter_functions.get(
+        "_qku_projection_serialization_value"
+    )
+    helper_returns = tuple(
+        node
+        for node in (
+            serialization_helper.body if serialization_helper is not None else ()
+        )
+        if isinstance(node, ast.Return)
+    )
+    thin_helper = (
+        len(helper_returns) == 1
+        and isinstance(helper_returns[0].value, ast.Call)
+        and isinstance(helper_returns[0].value.func, ast.Name)
+        and helper_returns[0].value.func.id
+        == "_normalize_package_serialization_value"
+        and len(helper_returns[0].value.args) == 1
+        and isinstance(helper_returns[0].value.args[0], ast.Name)
+        and helper_returns[0].value.args[0].id == "value"
+        and not helper_returns[0].value.keywords
+    )
+    if (
+        not thin_helper
+        or {
+            "_DeterministicEmptyPathTuple",
+            "_DeterministicNonPathKey",
+            "_qku_projection_serialization_key",
+        }.intersection({*adapter_functions, *adapter_classes})
+    ):
+        failures.append("QKU package serialization delegation differs")
+    build_projection_method = next(
+        (method for method in adapter_methods if method.name == "build_projection"),
+        None,
+    )
+    build_projection_calls = tuple(
+        node
+        for node in (
+            ast.walk(build_projection_method)
+            if build_projection_method is not None
+            else ()
+        )
+        if isinstance(node, ast.Call)
+    )
+    canonical_owner_calls = tuple(
+        node
+        for node in build_projection_calls
+        if isinstance(node.func, ast.Name)
+        and node.func.id == "stage1_launch_graph_projection_v2"
+    )
+    generic_projection_calls = tuple(
+        node
+        for node in build_projection_calls
+        if isinstance(node.func, ast.Name)
+        and node.func.id == "selected_component_package_projection_v1"
+    )
+    if (
+        len(canonical_owner_calls) != 1
+        or len(generic_projection_calls) != 1
+        or tuple(
+            keyword.arg for keyword in generic_projection_calls[0].keywords
+        )
+        != ("canonical_launch_graph_projection",)
+    ):
+        failures.append("QKU adapter canonical launch-owner binding differs")
+    build_view_method = next(
+        (method for method in adapter_methods if method.name == "build_view"),
+        None,
+    )
+    if not any(
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id == "safe_json_loads"
+        for node in (
+            ast.walk(build_view_method) if build_view_method is not None else ()
+        )
+    ):
+        failures.append("QKU package view bypasses the shared safe reader")
+    expected_view_fields = {
+        "SelectedComponentPackageEntryViewV1": (
+            "package_component_id", "launch_role_id", "admission_state",
+            "compatibility_state", "compatibility_reason_codes",
+            "plugin_family_refs", "required_operation_classes",
+            "optional_operation_classes", "default_failure_route",
+            "latency_class", "rollback_target_kind",
+            "fallback_component_id_or_none",
+        ),
+        "SelectedComponentOperationViewV1": (
+            "operation_class", "required_component_ids", "optional_component_ids",
+            "blocking_component_ids", "state", "terminal_failure_route",
+        ),
+        "SelectedComponentPackageViewV1": (
+            "package_id", "package_version", "entry_count", "admitted_count",
+            "evidence_held_count", "implementation_held_count", "edge_count",
+            "operation_count", "selected_profile_ids", "excluded_profile_ids",
+            "active_live_profile_ids", "entries", "operations", "source_owner",
+            "source_package_ref", "canonical_projection_json", "no_effects",
+        ),
+    }
+    for class_name, expected_fields in expected_view_fields.items():
+        if (
+            _class_fields(trees["adapter"], class_name) != expected_fields
+            or not _frozen_slotted_dataclass(trees["adapter"], class_name)
+        ):
+            failures.append(f"{class_name}: QKU read-only field contract differs")
+    if (
+        "selected_component_package_projection_v1" not in texts["adapter"]
+        or "no_effects=NO_EFFECTS_V1" not in texts["adapter"]
+    ):
+        failures.append("QKU adapter delegation or shared no-effect binding differs")
+
+    for generic_owner in ("contracts", "dag", "registry", "plugin_init"):
+        for node in ast.walk(trees[generic_owner]):
+            module = ""
+            if isinstance(node, ast.ImportFrom):
+                module = node.module or ""
+            elif isinstance(node, ast.Import):
+                module = " ".join(alias.name for alias in node.names)
+            if "qku_computation_control_plane" in module:
+                failures.append("generic plugin authority imports QKU")
+                break
+    forbidden_import_roots = {
+        "importlib", "os", "requests", "socket", "subprocess", "urllib"
+    }
+    for owner_name in ("contracts", "dag", "registry"):
+        imported_roots = {
+            (node.module or "").split(".")[0]
+            for node in ast.walk(trees[owner_name])
+            if isinstance(node, ast.ImportFrom) and node.level == 0
+        } | {
+            alias.name.split(".")[0]
+            for node in ast.walk(trees[owner_name])
+            if isinstance(node, ast.Import)
+            for alias in node.names
+        }
+        if imported_roots.intersection(forbidden_import_roots):
+            failures.append(f"{owner_name}: selected package imports effect authority")
+
+    build_payload = next(
+        (
+            node
+            for node in trees["builder"].body
+            if isinstance(node, ast.FunctionDef) and node.name == "build_payload"
+        ),
+        None,
+    )
+    launch_calls = tuple(
+        node
+        for node in ast.walk(build_payload) if build_payload is not None
+        if isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id == "stage1_launch_graph_projection_v2"
+    )
+    payload_dicts = tuple(
+        node
+        for node in ast.walk(build_payload) if build_payload is not None
+        if isinstance(node, ast.Dict)
+        and any(
+            isinstance(key, ast.Constant)
+            and key.value == "stage1_launch_graph_v2"
+            for key in node.keys
+        )
+    )
+    payload_keys = tuple(
+        key.value
+        for key in (payload_dicts[0].keys if len(payload_dicts) == 1 else ())
+        if isinstance(key, ast.Constant) and isinstance(key.value, str)
+    )
+    try:
+        launch_index = payload_keys.index("stage1_launch_graph_v2")
+    except ValueError:
+        launch_index = -2
+    if (
+        len(launch_calls) != 1
+        or payload_keys.count("selected_component_package_v1") != 1
+        or launch_index < 0
+        or payload_keys[launch_index + 1 : launch_index + 2]
+        != ("selected_component_package_v1",)
+        or texts["builder"].count("S1_SELECTED_COMPONENT_PACKAGE_V1_VALIDATED")
+        != 1
+        or texts["builder"].count("S1_SELECTED_COMPONENT_PACKAGE_V1_REPRODUCIBLE")
+        != 1
+    ):
+        failures.append("canonical builder selected-package projection differs")
+    builder_main = next(
+        (
+            node
+            for node in trees["builder"].body
+            if isinstance(node, ast.FunctionDef) and node.name == "main"
+        ),
+        None,
+    )
+    if not any(
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id == "safe_json_loads"
+        for node in (ast.walk(builder_main) if builder_main is not None else ())
+    ):
+        failures.append("canonical builder bypasses the shared safe reader")
+
+    projection_function = next(
+        (
+            node
+            for node in trees["registry"].body
+            if isinstance(node, ast.FunctionDef)
+            and node.name == "selected_component_package_projection_v1"
+        ),
+        None,
+    )
+    projection_key_sets = tuple(
+        tuple(
+            key.value
+            for key in node.keys
+            if isinstance(key, ast.Constant) and isinstance(key.value, str)
+        )
+        for node in ast.walk(projection_function)
+        if projection_function is not None and isinstance(node, ast.Dict)
+    )
+    if (
+        (
+            "manifest",
+            "compatibility_and_dependency",
+            "rollback_and_supersession",
+            "reproducibility",
+        )
+        not in projection_key_sets
+    ):
+        failures.append("selected package projection does not have exact four keys")
     return failures
 
 
@@ -6944,6 +8600,12 @@ def main(*, emit_stage1_launch_graph_marker: bool = True) -> int:
         failures.extend(_stage1_launch_graph_failures())
     except Exception as exc:
         failures.append(f"Stage-1 independent reconstruction failed closed: {exc}")
+    try:
+        failures.extend(_selected_component_package_failures())
+    except Exception as exc:
+        failures.append(
+            f"selected package independent reconstruction failed closed: {exc}"
+        )
     for file_name, class_name, expected_count in (
         ("input_lock.py", "ImmutableReplayPaperInputLockV1", 33),
         ("evidence.py", "ReplayResultContractV1", 26),
@@ -7206,6 +8868,7 @@ def main(*, emit_stage1_launch_graph_marker: bool = True) -> int:
         )
     )
     if emit_stage1_launch_graph_marker:
+        print(S1_SELECTED_COMPONENT_PACKAGE_MARKER)
         print(STAGE1_LAUNCH_GRAPH_MARKER)
     print(
         f"{SUCCESS_MARKER} "
